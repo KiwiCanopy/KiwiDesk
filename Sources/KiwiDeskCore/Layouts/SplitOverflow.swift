@@ -9,11 +9,8 @@ import CoreGraphics
 /// edge. Scrolling re-packs and monocle centre on their own
 /// (#677), and grid keeps the slot.
 /// It runs on the frames the retile ISSUES
-/// (`TilingEngine.placedFrames`), never on the slots
-/// `calculatedFrames` hands a reader that classifies them: an
-/// inward frame overlaps its neighbour by construction, and
-/// `BspSplit.sides`, the drag pipeline or geometric navigation
-/// would read that overlap as a pile.
+/// (`TilingEngine.placedFrames`), never on the slots — the two
+/// sets and who reads which are state-and-layout.md's (#934).
 public enum SplitOverflow {
     /// The frames a pass issues for `mode`: bsp and stack take
     /// the inward post-pass, every other layout its slots as

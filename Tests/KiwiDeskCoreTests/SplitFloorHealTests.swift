@@ -101,6 +101,23 @@ struct SplitFloorHealTests {
         )
     }
 
+    @Test("An unlearned side never sinks beside a learned one")
+    func unlearnedSideNeverSinks() {
+        // The low side draws 585 under an unlearned 700 while the
+        // learned high side holds its 301: nothing to heal — the
+        // per-side term, which the entry guard alone cannot see.
+        #expect(
+            SplitDomain.healedRatio(
+                current: 0.5,
+                available: 1170,
+                globalFloor: 300,
+                low: .init(size: 700, learned: false),
+                high: .init(size: 301, learned: true),
+                margin: 0.25
+            ) == nil
+        )
+    }
+
     @Test("The stored ratio is judged where the render pins it")
     func drawnReadingIsTheRenderClamp() {
         // 0.05 cannot be drawn: the render pins the low side at

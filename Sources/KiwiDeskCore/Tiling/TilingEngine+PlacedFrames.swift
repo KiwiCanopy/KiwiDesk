@@ -9,12 +9,10 @@ import CoreGraphics
 extension TilingEngine {
     /// The frames the retile issues: `calculatedFrames` with the
     /// split layouts' floor residue placed by the one
-    /// `SplitOverflow.placed` post-pass. Read by the retile and
-    /// by what acts on where a window IS — the on-window cues,
-    /// the unsolicited-resize check — never by a reader that
-    /// CLASSIFIES slots (`BspSplit.sides`, the drag pipeline,
-    /// geometric navigation): an inward frame overlaps its
-    /// neighbour by construction, which those read as a pile.
+    /// `SplitOverflow.placed` post-pass. A reader that acts on
+    /// where a window IS takes this; one that CLASSIFIES slots
+    /// keeps `calculatedFrames` — `FrameSetReaderCensusTests` is
+    /// the register, state-and-layout.md the argument (#934).
     func placedFrames(
         state: StateCoordinator
     ) -> [WindowID: CGRect] {

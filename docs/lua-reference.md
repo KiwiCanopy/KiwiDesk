@@ -4177,6 +4177,15 @@ What the
   never saved to a profile, and reset when a window leaves the
   space or KiwiDesk restarts. If the focused window is alone in
   its column, `"y"` reports an error.
+
+  :::unreleased
+  A bsp ratio or the master ratio that presses moved past an
+  app's minimum before that minimum was learned heals back at the
+  next layout pass, and a window arriving into a region narrower
+  than its minimum gets the same move — the split-layout row of
+  [accepted limitations](accepted-limitations.md) has what
+  remains.
+  :::
 - **scrolling** — it adjusts the slot size in real points along
   the layout's own scroll axis (columns for horizontal, rows for
   vertical), regardless of which `axis` you pass — the `x`/`y`

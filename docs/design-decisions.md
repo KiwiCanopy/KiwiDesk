@@ -3306,23 +3306,34 @@ exists. The write goes through the capped writers with no focus,
 so a neighbour yields only down to its own floor and nothing
 cues — a stored-parameter change, visible, undoable by a press,
 travelling with the Space like any interactive resize, which is
-also what keeps the layouts pure: no bound is read inside a
-layout algorithm. The stack zone's per-window shares stay out,
+also what keeps the bsp and stack algorithms bound-blind: the
+post-pass reads the bounds from the context, as Scrolling and
+Monocle do, and the algorithms read none. The stack zone's per-window shares stay out,
 per the #944 ruling; Track needs nothing, since #1355 re-shares
 its weights at retile already. Where the yield cannot fit — a
 same-axis neighbour already at its own floor — the engine says
-so ONCE per episode, at the corroboration edge, with the
-neighbour-minimum pill on the window that overhangs and the
-neighbour marked, re-armed when the window fits again or its
-bound is forgotten; and the overhang lands INWARD (owner ruling
-2026-08-31): the frames the retile ISSUES take one post-pass that
-emits a floor-bound slot at the floor and pulls it back inside
-the layout region, so a window that cannot fit overflows toward
-the screen's centre and never past its edge, where part of it
-was unreachable — while the slots every reader classifies
-against stay the layout's own regions, because an inward frame
-overlaps its neighbour and a slot reader would call that a pile.
-What the heal reaches is what a resize reaches:
+so ONCE per episode, at the first retile that finds it and shows
+the space, with the neighbour-minimum pill on the window that
+overhangs and the neighbour marked, drawn by the retile without a
+press's glide note or bump — and without its sound unless a press
+is in flight, the speaker's own gate — re-armed when the window fits again or
+its bound is forgotten; and the overhang lands INWARD (owner
+ruling 2026-08-31): the frames the retile ISSUES take one
+post-pass that emits a floor-bound slot at the floor and pulls it
+back inside the layout region, so a window that cannot fit
+overflows toward the screen's centre rather than past its edge,
+where part of it was unreachable — a floor wider than the region
+itself keeps its leading edge, the one carrying the window's
+controls — while the slots every reader classifies against stay
+the layout's own regions, because an inward frame overlaps its
+neighbour and a slot reader would call that a pile. Which of the
+two overlapping windows is on top is the focus order, as for any
+overlap; no z-order restore is armed for a residue the layout
+constructs on purpose. The write lands where a press lands — in a
+declared per-Space ratio where one exists — so an arrival can mark
+the profile dirty and a Keep persists the healed number; accepted
+with the ruling, since the number is the one a press would have
+written. What the heal reaches is what a resize reaches:
 the first split of each orientation in bsp, the master/stack
 split in stack. A floor inside a deeper bsp split is the
 flat-array trade's residue and stays in the limitations row.

@@ -18,23 +18,37 @@ import Foundation
 /// stands down on a forced pass like every corroborated-bound
 /// consumer (#1055). A mid-pass confirmation's residue pass takes
 /// no heal, the one-retile latency #1355 accepts. Stack zone
-/// shares stay out (#944).
+/// shares stay out (#944). Residue: the writer caps on the
+/// EFFECTIVE members, so a visiting traveler's larger floor can
+/// hold a proposal at its base — silent, and gone with the
+/// traveler (the #944 horn).
 extension KiwiCore {
     /// One "cannot fit" cue the heal has drawn: keyed per axis
     /// and overhanging window, so a retile storm says it once.
+    /// Re-keyed with the other id-keyed ledgers on a native tab
+    /// switch (`handleWindowRekeyed`).
     struct SplitFloorCue: Hashable {
         let axis: String
         let window: WindowID
     }
 
     func healSplitFloors() {
+        // The cue draws on a window: only a space shown this pass
+        // may say it, or the pill lands on a stashed frame and the
+        // memo files an episode nobody saw.
+        let shown = Set(
+            tiler.visiblePlacements(state: state).map(\.space.id)
+        )
         for space in state.workspaces.allSpaces
         where space.mode == .bsp || space.mode == .stack {
-            healSpaceSplitFloors(of: space)
+            healSpaceSplitFloors(
+                of: space,
+                shown: shown.contains(space.id)
+            )
         }
     }
 
-    private func healSpaceSplitFloors(of space: Space) {
+    private func healSpaceSplitFloors(of space: Space, shown: Bool) {
         guard
             let screen = TilingEngine.screen(
                 for: space.id,
@@ -79,6 +93,7 @@ extension KiwiCore {
                     low: sides.first,
                     high: sides.second,
                     space: space,
+                    shown: shown,
                     bounds: bounds,
                     context: context,
                     cues: &cues,
@@ -112,6 +127,7 @@ extension KiwiCore {
                 low: Array(master),
                 high: Array(stackZone),
                 space: space,
+                shown: shown,
                 bounds: bounds,
                 context: context,
                 cues: &cues,
@@ -147,6 +163,7 @@ extension KiwiCore {
         low: [WindowID],
         high: [WindowID],
         space: Space,
+        shown: Bool,
         bounds: CGRect,
         context: LayoutContext,
         cues: inout Set<SplitFloorCue>,
@@ -183,11 +200,19 @@ extension KiwiCore {
         case .healed(let ratio):
             write(ratio, Double(horizontal ? bounds.width : bounds.height))
             let after = (state.workspaces[space.id]).map(current) ?? before
+            // A store clamp or the writer's cap can land short of
+            // the proposal: said once, when the store moved.
             guard after != before else { return }
+            let landed = abs(after - ratio) < 0.000_001
             onLog(
                 "split ratio healed for space \(space.id) (\(axis)): "
                     + String(format: "%.3f to %.3f", before, after)
-                    + " to draw a learned floor"
+                    + (landed
+                        ? " to draw a learned floor"
+                        : String(
+                            format: ", short of the %.3f the floor needs",
+                            ratio
+                        ))
             )
         case .unfit(let bindingLow):
             let binding = bindingLow ? lowMin : highMin
@@ -197,13 +222,19 @@ extension KiwiCore {
                     ?? (bindingLow ? low : high).first
             else { return }
             let cue = SplitFloorCue(axis: axis, window: overhanging)
+            let said = splitFloorCues[space.id]?.contains(cue) ?? false
+            // A hidden space carries an episode already said and
+            // never opens one: the cue waits for the space to show.
+            guard shown else {
+                if said { cues.insert(cue) }
+                return
+            }
             cues.insert(cue)
-            guard !(splitFloorCues[space.id]?.contains(cue) ?? false)
-            else { return }
+            guard !said else { return }
             // The yield cannot fit: said once, on the window that
             // overhangs, the neighbour that binds marking itself —
             // and the frame lands inward (`SplitOverflow`).
-            refuseGrowAtNeighborMinimum(
+            refuseFloorUnfitAtRetile(
                 overhanging,
                 anchor: anchor,
                 axis: axis

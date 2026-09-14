@@ -72,11 +72,24 @@ extension KiwiCore {
     /// production caller of `borders.onResizeRefusal`, which is
     /// what makes "a cue stops the run" structural rather than a
     /// line to remember.
-    private func cueResizeRefusal(_ refusal: ResizeRefusal) {
-        keys.noteResizeRefusal()
+    ///
+    /// `fromPress` is false for the one refusal a RETILE draws
+    /// (#934, the split heal's unfit floor): the pills and the
+    /// border report, without the glide note (no hold to end)
+    /// or the bump (no trier); the sound keeps its own gate,
+    /// which already requires a press in flight.
+    private func cueResizeRefusal(
+        _ refusal: ResizeRefusal,
+        fromPress: Bool = true
+    ) {
+        if fromPress {
+            keys.noteResizeRefusal()
+        }
         borders.onResizeRefusal(refusal)
         if let direction = refusal.bumpDirection {
-            flashDeadEnd(refusal.window, direction: direction)
+            if fromPress {
+                flashDeadEnd(refusal.window, direction: direction)
+            }
         }
         soundIfDrawn(
             flashSizeLimitPill(
@@ -185,6 +198,25 @@ extension KiwiCore {
                 focused: focused,
                 axis: axis
             )
+        )
+    }
+
+    /// The split heal's unfit floor (#934): `overhanging` cannot
+    /// be made room for because `anchor` already sits at its own
+    /// floor — the neighbour-minimum pair, drawn by a retile
+    /// rather than a press.
+    func refuseFloorUnfitAtRetile(
+        _ overhanging: WindowID,
+        anchor: WindowID,
+        axis: String
+    ) {
+        cueResizeRefusal(
+            .neighborMinimum(
+                anchor: anchor,
+                focused: overhanging,
+                axis: axis
+            ),
+            fromPress: false
         )
     }
 }

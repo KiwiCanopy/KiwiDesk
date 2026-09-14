@@ -60,49 +60,58 @@ struct SplitFloorHealNeedleTests {
         #expect(!source.contains("writeSplitRatioH("))
         #expect(!source.contains("writeSplitRatioV("))
         #expect(!source.contains("writeMasterRatio("))
-        // No focus, so the writer clamps and cues nothing.
-        #expect(!source.contains("focused: space.focused"))
+        // No focus, so the writer clamps and cues nothing — the
+        // POSITIVE shape, since a negative spelling pin is
+        // fail-open (tests.md): one `focused: nil` per writer. A
+        // shape pin only: a healed ratio sits inside the writer's
+        // cap by construction, so no fixture reaches the path a
+        // focus would cue on (guard-prover, 2026-09-14).
+        #expect(
+            source.components(separatedBy: "focused: nil").count - 1
+                == 2
+        )
     }
 
-    @Test("The retile issues the placed frames; readers keep the slots")
-    func retileIssuesPlacedFrames() throws {
-        let retile = try SourceScan.functionBody(
-            of: "retile",
-            in: "TilingEngine.swift",
-            under: "Tiling"
+    @Test("The retile's cue takes the funnel without a press's channels")
+    func retileCueSkipsThePressChannels() throws {
+        let door = try SourceScan.functionBody(
+            of: "refuseFloorUnfitAtRetile",
+            in: "KiwiCore+SizeLimitPill.swift",
+            under: "App"
         )
-        #expect(retile.contains("placedFrames(state: state)"))
-        #expect(!retile.contains("calculatedFrames(state: state)"))
-        let slots = try SourceScan.functionBody(
-            of: "calculatedFrames",
-            in: "TilingEngine+Layout.swift",
-            under: "Tiling"
+        #expect(door.contains("cueResizeRefusal("))
+        #expect(door.contains("fromPress: false"))
+        let heal = try healSource()
+        #expect(heal.contains("refuseFloorUnfitAtRetile("))
+        #expect(!heal.contains("refuseGrowAtNeighborMinimum("))
+        let funnel = try SourceScan.functionBody(
+            of: "cueResizeRefusal",
+            in: "KiwiCore+SizeLimitPill.swift",
+            under: "App"
         )
-        #expect(slots.contains("placed: false"))
-        let issued = try SourceScan.functionBody(
-            of: "placedFrames",
-            in: "TilingEngine+PlacedFrames.swift",
-            under: "Tiling"
+        // The glide note and the bump sit behind the press flag;
+        // the border report and the drawing do not. The sound
+        // needs no clause: `soundRefusal` already requires a
+        // press in flight (`keys.isFiring`), which
+        // `RefusalCueSeamTests` holds in shape.
+        #expect(
+            !SourceScan.allMatches(
+                in: funnel,
+                pattern: "(if fromPress \\{\\s*keys\\.noteResizeRefusal\\(\\))"
+            ).isEmpty
         )
-        #expect(issued.contains("placed: true"))
-        let placed = try SourceScan.functionBody(
-            of: "placed",
-            in: "SplitOverflow.swift",
-            under: "Layouts"
+        #expect(
+            !SourceScan.allMatches(
+                in: funnel,
+                pattern: "(if fromPress \\{\\s*flashDeadEnd\\()"
+            ).isEmpty
         )
-        #expect(placed.contains("case .bsp, .stack:"))
-        #expect(placed.contains("inward("))
-        // One mechanism per store (owner ruling 2026-09-14): the
-        // math has one consumer, the post-pass one caller, and
-        // the layout dispatcher stays pure.
-        #expect(try coreWideCount(of: "SplitDomain.healedRatio(") == 1)
-        #expect(try coreWideCount(of: "SplitOverflow.placed(") == 1)
-        let calculate = try SourceScan.functionBody(
-            of: "calculate",
-            in: "LayoutEngine.swift",
-            under: "Layouts"
+        #expect(
+            SourceScan.allMatches(
+                in: funnel,
+                pattern: "(if fromPress[^\\n]*onResizeRefusal)"
+            ).isEmpty
         )
-        #expect(!calculate.contains("SplitOverflow"))
     }
 
     private func healSource(

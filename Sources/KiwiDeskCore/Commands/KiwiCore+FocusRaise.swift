@@ -302,7 +302,7 @@ extension KiwiCore {
     ) -> Bool {
         guard let previous, previous != target,
             let window = state.windows[target],
-            let frame = tiler.calculatedFrames(
+            let frame = tiler.placedFrames(
                 state: state
             )[target]
         else { return false }

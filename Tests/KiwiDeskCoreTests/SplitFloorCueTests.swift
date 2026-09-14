@@ -104,15 +104,39 @@ struct SplitFloorCueTests {
             for: core.state.workspaces[space]!
         ).splitRatioH
         #expect(abs(healed * 1170 - 700.25) < 0.01)
-        // Re-learned: a new episode, a new cue — this time the
-        // healed low side holds its floor and binds.
+        // Re-learned at the old ratio: the SAME episode key
+        // (w1 overhanging on x) opens again and is said again —
+        // a memo that never clears would swallow it. The
+        // explicit write forces its retile, which the heal
+        // stands down on, so the un-forced pass below decides.
+        core.execute("bsp.set_ratio_h", args: [.number(0.5)])
         seed(core, window: w2, minWidth: 700)
         core.retile()
         #expect(refusals.count == 2)
         #expect(
             refusals.last
-                == .neighborMinimum(anchor: w1, focused: w2, axis: "x")
+                == .neighborMinimum(anchor: w2, focused: w1, axis: "x")
         )
+    }
+
+    @Test("The retile issues the inward frame")
+    func retileIssuesTheInwardFrame() throws {
+        guard NSScreen.main != nil else { return }
+        let (core, _) = makeCore(mode: "bsp")
+        let w2 = WindowID(2)
+        seed(core, window: WindowID(1), minWidth: 700)
+        seed(core, window: w2, minWidth: 700)
+        // The applier seam records what the pass hands it; the
+        // animated branch applies at once with the engine off.
+        core.tiler.animation.isEnabled = false
+        var issued: [WindowID: CGRect] = [:]
+        core.tiler.animation.apply = { id, frame, _ in
+            issued[id] = frame
+        }
+        core.retile(animated: true)
+        let right = try #require(issued[w2])
+        #expect(right.width == 700)
+        #expect(abs(right.maxX - 1190) < 0.01)
     }
 
     @Test("An unfit bsp floor lands inward, never past the edge")
@@ -164,5 +188,52 @@ struct SplitFloorCueTests {
         )
         #expect(frame.width == 700)
         #expect(abs(frame.maxX - 1190) < 0.01)
+    }
+
+    @Test("A space nobody shows says nothing until it is shown")
+    func hiddenSpaceWaitsToCue() {
+        guard NSScreen.main != nil else { return }
+        let (core, space) = makeCore(mode: "bsp")
+        seed(core, window: WindowID(1), minWidth: 700)
+        seed(core, window: WindowID(2), minWidth: 700)
+        // Look away: a second space becomes active, the unfit
+        // pair's space is no longer placed.
+        core.execute("focus_space", args: [.string("2")])
+        #expect(core.state.workspaces.activeSpace != space)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.retile()
+        #expect(refusals.isEmpty)
+        // Coming back shows it, once — the hidden pass filed no
+        // episode.
+        core.execute("focus_space", args: [.string(space.raw)])
+        core.retile()
+        #expect(refusals.count == 1)
+        // Hidden again with the episode said: nothing, and
+        // nothing again on the return either.
+        core.execute("focus_space", args: [.string("2")])
+        core.retile()
+        core.execute("focus_space", args: [.string(space.raw)])
+        core.retile()
+        #expect(refusals.count == 1)
+    }
+
+    @Test("A native-tab re-key keeps the episode said")
+    func rekeyKeepsTheEpisode() {
+        guard NSScreen.main != nil else { return }
+        let (core, _) = makeCore(mode: "bsp")
+        let w1 = WindowID(1)
+        seed(core, window: w1, minWidth: 700)
+        seed(core, window: WindowID(2), minWidth: 700)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        core.retile()
+        #expect(refusals.count == 1)
+        // The overhanging window switches tab: same slot, fresh
+        // id, same learned bound (#308/#677).
+        let fresh = WindowID(11)
+        core.handle(.windowRekeyed(w1, fresh))
+        core.retile()
+        #expect(refusals.count == 1)
     }
 }

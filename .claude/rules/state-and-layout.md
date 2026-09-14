@@ -1131,12 +1131,24 @@ editing here:
   the window fits again or its bound is forgotten, and the
   frame lands INWARD through the one `SplitOverflow.placed`
   post-pass on the frames the retile ISSUES
-  (`TilingEngine.placedFrames`) — never on the slots
-  `calculatedFrames` hands every reader, since an inward frame
-  overlaps its neighbour by construction and `BspSplit.sides`,
-  the drag pipeline and geometric navigation would read that as
-  a pile; and never inside the layout algorithms, which stay
-  pure. The stack zone's own shares
+  (`TilingEngine.placedFrames`), never inside the layout
+  algorithms, which stay pure — and that cue takes the pill
+  funnel's retile door (`refuseFloorUnfitAtRetile`, `fromPress:
+  false`): the pills and the border report without a press's
+  glide note or bump (the sound keeps the speaker's own
+  press-in-flight gate), and only for a space shown this pass,
+  since a pill draws on a window. **A pass now produces
+  TWO frame sets, and a new reader says which it takes**: a
+  reader that CLASSIFIES slots — a side, a drop target, a
+  neighbour, a cascade order — keeps `calculatedFrames`, and one
+  that acts on where a window IS — a cue drawn on it, the
+  unsolicited-resize check — takes `placedFrames`, because an
+  inward frame overlaps its neighbour by construction and a
+  classifier handed it reads a pile (`BspSplit.sides` dropped
+  both windows of the first unfit pair that way), while a cue
+  handed the slot draws beside the window.
+  `FrameSetReaderCensusTests`' `allowed` map is the one copy of
+  who reads which and why. The stack zone's own shares
   stay out (#944). `SplitFloorHealTests` holds the math,
   `SplitOverflowTests` the post-pass, `SplitFloorHealWiringTests`
   the retile wiring and the traveler stand-down,
