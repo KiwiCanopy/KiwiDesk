@@ -1262,16 +1262,24 @@ editing here:
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the
   last layout's frames — scrolled-out columns, a parked
-  monocle pile. `KiwiCore.gatherIntoFloating` seeds every
-  member partly or fully outside the space's region a
-  `QuitGridLayout` target through the stash seed; a fully
-  visible member is untouched, and no previous-mode list may
-  enter the decision (`FloatGather` is pure and holds the
-  algebra). The region is `floatGrowBounds(on:)` — the ring
-  reserved on every edge — so the clamp has no push left to
-  make on a cell flush with a strip; an UNSHOWN space paints no
-  strips, so its grid meets the bar at the activation's clamp,
-  which is the stated residue. The seed lands AHEAD of
+  monocle pile. `KiwiCore.gatherIntoFloating` seeds EVERY
+  member a `QuitGridLayout` target — the exit gather's own
+  function and depth, never a second grid — through the stash
+  seed once any member is partly or fully outside
+  `floatBounds(on:)`, and nothing where all are inside (owner
+  ruling 2026-09-14: the visible members staying put laid the
+  gathered ones behind them); no previous-mode list may enter
+  the decision (`FloatGather` is pure and holds the algebra).
+  The JUDGMENT takes that correctness bound — a float flush
+  with a bare screen edge, where no clamp pushes, is inside —
+  while the GRID is laid in `floatGrowBounds(on:)`, the ring
+  reserved on every edge, so the clamp has no push left to
+  make on a cell flush with a strip (`FloatGatherRegionTests`);
+  an UNSHOWN space paints no strips, so its grid meets the bar
+  at the activation's clamp, which is the stated residue.
+  `SpaceForwardingSeamTests` holds forwarding to one home by
+  the Space DROP's spelling, so a copy that moves windows and
+  leaves the Space alive is review's. The seed lands AHEAD of
   `recoverStrandedFloats`, which defers to a pending capture,
   so a shown corner pile takes the grid and never a second
   centring (`FloatGatherEntryTests` ▸
