@@ -56,7 +56,16 @@ struct SettingsSearchField: View {
         .textFieldStyle(.plain)
         .font(.body)
         .focused(focus)
-        .onExitCommand { text = "" }
+        // Escape clears a query; on an EMPTY field it resigns
+        // focus instead, or the offer panel that opens on focus
+        // could not be closed from the keyboard (#1030).
+        .onExitCommand {
+            if text.isEmpty {
+                focus.wrappedValue = false
+            } else {
+                text = ""
+            }
+        }
         // `onKeyPress`, not `onMoveCommand`: the latter has no
         // pass-through and would swallow ←/→, and the
         // `KeyEquivalent` overload matches whatever the modifiers

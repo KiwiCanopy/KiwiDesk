@@ -231,6 +231,16 @@ struct HomeSurfacingTests {
             ".id(destination)",
         ],
         "Settings/HeaderSearch.swift": [
+            // The keys move over the offer (#1030); a bare
+            // Return commits a first hit only for a TYPED query.
+            "varhits:[SettingsSearchResult]{"
+                + "searching?results.flat:offer}",
+            "??(searching?hits.first:nil)",
+            // The narrow entry collapses on idle, not on blur —
+            // a blur alone raced the panel's hover-keepalive.
+            ".onChange(of:focused){_,_incollapseIfIdle()}"
+                + ".onChange(of:panelHovered){_,_incollapseIfIdle()}",
+            "if!focused,!panelHovered,!searching{expanded=false}",
             // The collapsed entry is a BRANCH in the body, and
             // the only thing standing between a 720 pt window
             // and a clipped control — needle through both
@@ -247,6 +257,21 @@ struct HomeSurfacingTests {
             "expanded=trueTask{@MainActorinfocused=true}",
             "Button(\"\",action:open)"
                 + ".keyboardShortcut(\"k\",modifiers:.command)",
+        ],
+        "Settings/HeaderSearch+Results.swift": [
+            // The offer (#1030) OPENS the panel on focus and is
+            // DRAWN through the result row — condition and
+            // branch body both, the Monitors lesson.
+            "ifsearching||!offer.isEmpty,focused||panelHovered{"
+                + "resultCard}",
+            "if!searching{LazyVStack(alignment:.leading,"
+                + "spacing:2){ForEach(offer){resultinrow(result)}}}",
+        ],
+        "Settings/SettingsSearchField.swift": [
+            // Escape on an EMPTY field resigns focus (#1030),
+            // or the on-focus panel is uncloseable by keyboard.
+            ".onExitCommand{iftext.isEmpty{focus.wrappedValue=false}"
+                + "else{text=\"\"}}"
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.

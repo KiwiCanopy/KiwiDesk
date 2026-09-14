@@ -32,6 +32,12 @@ struct HeaderSearch: View {
 
     var searching: Bool { !query.trimmed.isEmpty }
 
+    /// The rows the keys move over: the results once a query is
+    /// typed, the offer before one (#1030).
+    var hits: [SettingsSearchResult] {
+        searching ? results.flat : offer
+    }
+
     private var collapsed: Bool {
         width.collapsesChrome && !expanded
     }
@@ -56,9 +62,16 @@ struct HeaderSearch: View {
         .overlay(alignment: .topLeading) { resultPanel }
         .background { focusShortcut }
         .onChange(of: query) { _, _ in highlighted = nil }
-        .onChange(of: focused) { _, now in
-            if !now, !searching { expanded = false }
-        }
+        // The narrow entry collapses once neither focus nor the
+        // pointer holds the panel — a blur alone raced the
+        // hover-keepalive the moment the panel had rows before
+        // a query (#1030).
+        .onChange(of: focused) { _, _ in collapseIfIdle() }
+        .onChange(of: panelHovered) { _, _ in collapseIfIdle() }
+    }
+
+    private func collapseIfIdle() {
+        if !focused, !panelHovered, !searching { expanded = false }
     }
 
     /// Collapsed magnifying glass button entry.
@@ -112,7 +125,7 @@ struct HeaderSearch: View {
 
     /// Moves highlight up or down in result list.
     private func move(_ direction: MoveCommandDirection) {
-        let hits = results.flat
+        let hits = hits
         guard !hits.isEmpty else { return }
         let current = hits.firstIndex { $0.id == highlighted }
         let next: Int
@@ -130,12 +143,15 @@ struct HeaderSearch: View {
         highlighted = hits[next].id
     }
 
-    /// Commits highlighted or first matching result.
+    /// Commits the highlighted result, or the first match of a
+    /// TYPED query — never the offer: a bare Return in an
+    /// untouched field must not navigate somewhere the user did
+    /// not name (#1030).
     private func commitHighlighted() {
-        let hits = results.flat
+        let hits = hits
         let hit =
             hits.first { $0.id == highlighted }
-            ?? hits.first
+            ?? (searching ? hits.first : nil)
         guard let hit else { return }
         pick(hit)
     }

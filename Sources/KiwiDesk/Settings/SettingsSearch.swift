@@ -106,6 +106,34 @@ enum SettingsSearch {
         )
     }
 
+    /// What the panel shows before a query is typed (#1030):
+    /// exactly one row, the Guide, landing on General ▸ About —
+    /// the `.accessory` app has no Help menu, and this is the
+    /// one permanent route to the guide. A SEPARATE producer,
+    /// never `results("")`: an empty query with hits would let a
+    /// bare Return navigate somewhere the user never named. It
+    /// passes the one offer predicate, so nothing drawn before
+    /// a query can reconfigure the window — a typed result may
+    /// flip the mode because the user named the thing; an offer
+    /// the app volunteered may not.
+    static func offer(
+        context: SettingsSearchContext
+    ) -> [SettingsSearchResult] {
+        let guide = SettingsCatalog.general.guideLink.id
+        guard
+            HomeCardOrder.isOffered(
+                .general,
+                mode: context.mode,
+                displayCount: context.displayCount,
+                editingStoredProfile: context.editingStoredProfile
+            ),
+            let row = SettingsSearchIndex.rows().first(where: {
+                $0.anchor.anchor == guide
+            })
+        else { return [] }
+        return [.setting(row)]
+    }
+
     /// Whether selecting result triggers Power User mode promotion
     /// (`HomeCardOrder.isOffered`, `ensureModeAdmits`).
     static func switchesMode(

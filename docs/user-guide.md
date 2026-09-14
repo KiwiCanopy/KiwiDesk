@@ -28,7 +28,8 @@ Opening an area from the keyboard puts focus on the page, so the
 next Tab reaches its first control; opening it with the mouse
 takes no focus, as anywhere on macOS. Shift-Tab reaches the
 **← Home** chip; **⌘[** or Escape goes back. **⌘K** puts the
-cursor in the search field from anywhere in the window.
+cursor in the search field from anywhere in the window; before
+you type, it offers the Guide.
 
 With keyboard navigation off, a control that cannot hold focus
 hands it to the search field instead. VoiceOver is unaffected,

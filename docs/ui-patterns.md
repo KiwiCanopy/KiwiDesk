@@ -1231,7 +1231,9 @@ is removed and nothing shrinks — that is the point of trading
 the axis instead. Home's card grid steps
 4 · 3 · 2 on the same thresholds, and below 820 the header's
 search field collapses to its glyph, opening in place when
-clicked or with ⌘K.
+clicked or with ⌘K. A focused field with nothing typed offers
+one row, the Guide (`docs/design-decisions.md` ▸ the search
+panel offers one row before you type).
 
 **A revealed target gets a transient wash, never a ring.** When
 search (or any later cross-reference) sends the user to a
