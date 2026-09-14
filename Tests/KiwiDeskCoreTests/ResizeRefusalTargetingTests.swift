@@ -247,9 +247,10 @@ struct ResizeRefusalTargetingTests {
         // and cues `windowIsFullscreen` first
         // (`FullscreenResizeTiledTests`) — and the mouse
         // `.masterRatio` drag hands it the DRAGGED window, which
-        // cannot be. So the WRITER's arm is driven directly; the
-        // live focus it still serves is the elsewhere-rendering
-        // sticky (#445), reaching the same guard.
+        // cannot be. So the WRITER's arm is driven directly: the
+        // guard is a construction net with no production reacher
+        // — an ACTIVE home never drops its own sticky (#1301,
+        // `ActiveHomeStickyMembershipTests`).
         let core = makeCore()
         for id: UInt32 in 1...3 {
             core.state.apply(

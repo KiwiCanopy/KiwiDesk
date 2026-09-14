@@ -83,15 +83,15 @@ struct ResizeRefusalCensusTests {
             + "on. This arm's silence is its own — the sibling "
             + "default: arm DOES cue",
         "no focused tiled window":
-            "no focus at all — nothing to draw on — or a focus "
-            + "that takes no part in this layout: an "
-            + "elsewhere-rendering sticky (#445) window, which "
-            + "effectiveTiledMembers drops. That one HAS a frame "
-            + "to draw on; what it lacks is a partition to be "
-            + "refused from. A native-fullscreen focus is kept "
-            + "out by resize()'s guard on the keyboard side and "
-            + "the drag pipeline's slot gate on the mouse side "
-            + "(#1298, FullscreenResizeTiledTests)",
+            "no focus at all — nothing to draw on. No live focus "
+            + "takes no part in this layout: a native-fullscreen "
+            + "one is kept out by resize()'s guard on the "
+            + "keyboard side and the drag pipeline's slot gate "
+            + "on the mouse side (#1298, "
+            + "FullscreenResizeTiledTests), and an active home "
+            + "never drops its own sticky (#1301, "
+            + "ActiveHomeStickyMembershipTests) — a construction "
+            + "net",
         "unknown window":
             "the id is gone; nothing to draw on",
         "track has no local window":
