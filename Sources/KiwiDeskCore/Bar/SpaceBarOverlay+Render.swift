@@ -17,14 +17,20 @@ extension SpaceBarOverlay {
         let depth = horizontal ? strip.height : strip.width
         let axis = horizontal ? strip.width : strip.height
         let gap = style.itemGap
-        let lengths = items.map { item in
-            style.itemSize > 0
+        let leadsWithLayer = Self.leadsWithLayer(items)
+        let lengths = items.enumerated().map { index, item in
+            let length =
+                style.itemSize > 0
                 ? style.itemSize
                 : SpaceBarItemView.autoLength(
                     appCount: item.apps.count,
                     overflow: item.overflow,
                     depth: depth
                 )
+            // The layer item's slot carries its section rule.
+            return index == 0 && leadsWithLayer
+                ? length + Self.layerDividerExtent(gap: gap)
+                : length
         }
         let front = frontExtent(
             frontApp,
@@ -116,16 +122,24 @@ extension SpaceBarOverlay {
             viewport: viewportRect,
             pinnedFront: pinFront
         )
+        let itemFrames = layoutLayerDivider(
+            frames: metrics.itemFrames,
+            leads: leadsWithLayer,
+            gap: gap,
+            strip: strip,
+            horizontal: horizontal,
+            style: style
+        )
         recordHitFrames(
             items: items,
-            frames: metrics.itemFrames,
+            frames: itemFrames,
             strip: strip
         )
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
-            view.frame = metrics.itemFrames[index]
+            view.frame = itemFrames[index]
             view.configure(
-                space: item.space,
+                identity: item.identity,
                 spaceGlyph: item.spaceGlyph,
                 apps: item.apps,
                 active: item.active,
@@ -153,7 +167,7 @@ extension SpaceBarOverlay {
         installGlassHosting(
             hosting,
             panel: panel,
-            frames: metrics.itemFrames,
+            frames: itemFrames,
             viewport: viewportRect,
             plateFrame: plateFrame,
             pinnedFront: pinFront,

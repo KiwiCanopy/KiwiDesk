@@ -68,14 +68,16 @@ struct SizeBoundLearner {
 
     /// Distinct asks remembered per axis. Sized WELL past the
     /// real producers — one ask per layout mode a window meets,
-    /// and a window rarely tiles under more than three or
-    /// four — because eviction is only a leak bound: evicting a
+    /// and a window rarely tiles under more than three or four,
+    /// plus since #1439 one corroboration probe per anchor that
+    /// stays uncorroborated, which for a grid app is every one —
+    /// because eviction is only a leak bound: evicting a
     /// candidate before its confirming re-encounter re-opens
     /// the starvation the per-ask shape exists to close
     /// (review, 2026-08-18), so the cap must never bind in
     /// ordinary use. Recurring past it costs a re-probe, not
     /// correctness.
-    static let maxEntriesPerAxis = 8
+    static let maxEntriesPerAxis = 16
 
     /// One recorded ask: the size issued, and — when the issue
     /// happened from an echo-quiet, settled state — the size the
@@ -108,6 +110,7 @@ struct SizeBoundLearner {
     /// `SizeBoundLearner+Invalidation.swift`.
     struct Tombstone {
         var bounds: Ledger
+        var probes: ProbeLedger?
         var pid: pid_t
         var at: Date
     }
@@ -116,6 +119,20 @@ struct SizeBoundLearner {
     var candidates: [WindowID: Ledger] = [:]
     var bounds: [WindowID: Ledger] = [:]
     var tombstones: [WindowID: Tombstone] = [:]
+    /// The corroboration probes (#1439), one per axis; the
+    /// contract is `SizeBoundLearner+Probe`'s.
+    var probes: [WindowID: ProbeLedger] = [:]
+
+    /// One observation's verdict: a confirmation edge, and
+    /// whether the window PERFORMED its corroboration probe's
+    /// ask (#1439) — it then holds a size no layout drew, and
+    /// the compliance sweep's "nothing to place" is wrong for
+    /// it. Either owes the caller an immediate placement.
+    struct Answer: Equatable {
+        var confirmed = false
+        var performedProbe = false
+        var owesPlacement: Bool { confirmed || performedProbe }
+    }
 
     /// The size `retile` just issued for a window. Only the
     /// layout loop records — a stash park or float restore is
@@ -135,6 +152,7 @@ struct SizeBoundLearner {
         settledFrom: CGSize? = nil
     ) {
         lastAsks[id] = Ask(size: size, settledFrom: settledFrom)
+        distrustProbeBaselines(id)
     }
 
     /// The app's answer to the last recorded ask: the window's
@@ -166,7 +184,20 @@ struct SizeBoundLearner {
         currentSize: CGSize,
         settledRead: Bool
     ) -> Bool {
-        guard let ask = lastAsks[id] else { return false }
+        observeAnswer(
+            id,
+            currentSize: currentSize,
+            settledRead: settledRead
+        ).confirmed
+    }
+
+    /// `observe` with the whole verdict — the engine's reading.
+    mutating func observeAnswer(
+        _ id: WindowID,
+        currentSize: CGSize,
+        settledRead: Bool
+    ) -> Answer {
+        guard let ask = lastAsks[id] else { return Answer() }
         let asked = ask.size
         // A non-positive span cannot be a real on-screen
         // window — it is a state frame no echo ever wrote (a
@@ -174,8 +205,8 @@ struct SizeBoundLearner {
         // answer. Learning it would confirm a 0 pt "bound" and
         // collapse the slot.
         guard currentSize.width > 0, currentSize.height > 0
-        else { return false }
-        let widthConfirmed = observeAxis(
+        else { return Answer() }
+        let width = observeAxis(
             id,
             asked: asked.width,
             current: currentSize.width,
@@ -184,7 +215,7 @@ struct SizeBoundLearner {
             axis: \.width,
             echoComplied: \.echoCompliedWidth
         )
-        let heightConfirmed = observeAxis(
+        let height = observeAxis(
             id,
             asked: asked.height,
             current: currentSize.height,
@@ -193,7 +224,11 @@ struct SizeBoundLearner {
             axis: \.height,
             echoComplied: \.echoCompliedHeight
         )
-        return widthConfirmed || heightConfirmed
+        return Answer(
+            confirmed: width.confirmed || height.confirmed,
+            performedProbe: width.performedProbe
+                || height.performedProbe
+        )
     }
 
     /// Promotes a candidate to a believed bound, returning
@@ -205,12 +240,16 @@ struct SizeBoundLearner {
     /// Internal rather than private since #1083 split the
     /// observation ladder into `SizeBoundLearner+Observe`;
     /// still module-internal, and no caller outside the two
-    /// learner files may reach it.
+    /// learner files may reach it. `settledRead` is the
+    /// promoting read's channel verdict, which decides whether
+    /// the probe this edge arms may trust the pre-ask frame
+    /// (#1439, `SizeBoundLearner+Probe`).
     mutating func promote(
         _ id: WindowID,
         asked: CGFloat,
         answered: CGFloat,
-        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
+        axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>,
+        settledRead: Bool
     ) -> Bool {
         var entries = bounds[id]?[keyPath: axis] ?? []
         let entry = EffectiveSizeBound.Axis(
@@ -234,6 +273,17 @@ struct SizeBoundLearner {
             }
         }
         writeBounds(id, entries: entries, axis: axis)
+        // #1439: a confirmation edge is when the second ask is
+        // owed. Retire ahead of arm — the probe's own ask joins
+        // the probed list, which is what refuses the chain.
+        retireCorroborationProbe(id, answering: asked, axis: axis)
+        armCorroborationProbe(
+            id,
+            entry: entry,
+            entries: entries,
+            axis: axis,
+            settledRead: settledRead
+        )
         return true
     }
 

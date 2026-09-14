@@ -1111,6 +1111,7 @@
   "space_bar.icon_source.help": "앱 글리프를 그리는 방식입니다. ‘%1$@’은(는) 바의 항목 색상으로 착색된 단색 심볼을 표시하며, 그 색상은 %2$@에서 설정합니다. 심볼이 없는 앱은 원래 앱 아이콘을 유지합니다.",
   "space_bar.icon_source.label": "앱 심볼 스타일",
   "space_bar.item.ax.current": "%1$@, 현재 위치",
+  "space_bar.item.ax.layer": "단축키 레이어 %1$@",
   "space_bar.item.ax.not_current": "%1$@, 선택 안 됨",
   "space_bar.item.ax.space": "공간 %1$@, %2$d 개의 앱",
   "space_bar.item_gap": "항목 간격",

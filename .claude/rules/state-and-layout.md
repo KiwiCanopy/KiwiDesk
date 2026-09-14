@@ -826,7 +826,46 @@ editing here:
   apart (a coarse snap's row height beats the entry-keying
   tolerance), and a corroborated ceiling corroborates the
   single floor entry at the same span — the fixed-span lend,
-  paired values only. The cap consequence softens: an evicted
+  paired values only. **The corroborating second ask is SENT,
+  never awaited (#1439)** — the argument is
+  `docs/design-decisions.md`'s entry of that name; what binds
+  here: a confirmation arms its probe from `promote`, and a
+  second arm site owes the same guards (`promote` is its one
+  caller today, unscanned); the retile loop issues it
+  only in place of an ask the anchor already answers, never a
+  new one and never on a forced pass; it is re-issued once and
+  only once its first answer seeded a candidate; a probe's own
+  confirmation arms none, and an ask that has had its probe
+  stays probed for the ledger's lifetime, since the compliance
+  sweep re-confirms an anchor a grid app answers inside the
+  tolerance; a PERFORMED probe is decided by the SETTLED read
+  alone — `wantsProbe` keeps the settle probe wanted for a
+  compliance at a pending probe's ask, `complied` is the one
+  site that retires a probe on one, and `observe`'s verdict
+  raises the placement the sweep would not send, while the raw
+  echo retires nothing, so the emulator's snap-back still
+  pair-promotes (`SizeBoundCorroborationProbeLifecycleTests` ▸
+  `performedProbeIsDecidedSettled`); and a further baseline
+  producer beside the retile
+  gate's verdict owes the probe's four terms — a settled
+  confirming read, consumed by one issue, killed by any ordinary
+  `recordAsk`, checked against the anchor's answer at take
+  (`SizeBoundCorroborationProbeTests` ▸ `rawPairArmsUntrusted`,
+  `ordinaryAskDistrusts`; the rest of the ladder in that suite,
+  its lifetime in `SizeBoundCorroborationProbeLifecycleTests`).
+  A new per-window store on the learner joins its lifecycle
+  hooks — `forget` and `rekey` discovered by reflection
+  (`SizeBoundLearnerLifecycleParityTests`), the tombstone's park
+  and revive still by hand. The loop's
+  substitution through the explained skip (the `close` half is
+  `SizeBoundResiduePlacementTests`'), the forced pass, the
+  performed probe's retile on both channels, the pin and the
+  placement pass —
+  bounded to two, since an echo-quiet pass can confirm the
+  answer it issued, and its flag clear afterwards — are
+  `SizeBoundCorroborationProbeEngineTests`'; the drain after
+  that loop is belt, unguarded. The cap
+  consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself
   silently revokes the generalization until it re-learns. The

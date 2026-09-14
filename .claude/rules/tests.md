@@ -302,6 +302,38 @@ bite large test PRs:
   the seam class generally — spawns, the production status-bar
   touch), and `StatusItemSeamGuardTests` pins the menu-bar
   seam's construction routes and its sealed wrapper.
+- **A test that reads an age-bounded ledger pins the clock it is
+  measured on, never the wall clock.** Three CI rounds have gone
+  to this class, each a green-locally test whose stamp aged out
+  on a starved runner: the mouse-warp click stamps (#1371, fixed
+  by stamping AHEAD), the Desktop settle's departure (#1364,
+  backdated against the EVENT), and the frame applier's 1 s echo
+  grace, which `TravelerRehomeConsumerTests` read after a retile
+  that a 210 s suite had put more than a second behind it
+  (#1456). The tell in a test body is a read whose answer
+  depends on how long the runner took to reach it —
+  `recentInstantTarget`, `didRecentlySetFrame`, any `isRecent(…,
+  within:)` — with nothing pinning `now`. The seam rule above
+  covers it, in one of Core's two clock shapes: a `now:`
+  PARAMETER threaded from the handler where the write and the
+  read share the call chain the test drives (`selfRaiseStamp`,
+  `PlacementLedger.record(at:)` — #1371's stamp-ahead, #1364's
+  backdate), or a CLOSURE on the type where a stamp lands off
+  another chain — the applier's post-set stamps on the AX queue
+  (#1254) — as `FrameApplier.clock`, `ZOrderDrain.now` and
+  `TeardownRestack.now` do. `makeTestCore` freezes the applier's
+  (a stamp read in the same test cannot age) and
+  `EchoClockSeamTests` holds the host uptime to those seams'
+  defaults and the freeze to both twins. A test that wants the
+  EXPIRY moves the clock ahead rather than sleeping past the
+  bound — `TilingEngine.echoGraceOverride` is the door for a
+  fixture that replaces `animation.apply` and so writes NO
+  stamp, never a substitute for moving the clock on one that
+  exists. No suite relied on the grace expiring when the freeze
+  landed — every `nil` read was "never recorded" or "cleared by
+  the echo" — which is what made it safe to pin for everyone
+  rather than per test; a new ledger with its own bound owes the
+  same seam, the same pin and a row in that census.
 - **One seam runs the OTHER way, and it is named here rather
   than left in a doc comment.** The rule above keeps a live
   production default and injects a fake; the updater seam (#874)

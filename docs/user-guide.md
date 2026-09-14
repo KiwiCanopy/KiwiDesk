@@ -436,6 +436,12 @@ One bar per display, listing that display's Spaces in profile
 order. Click a Space to switch to it; the glyphs are
 informational.
 
+:::unreleased
+While a shortcut layer other than `default` is active, its icon
+— or two letters of its name when it has none — leads the bar,
+ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
+:::
+
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty
 Spaces* hides a Space holding only those. *Open or Focus* still
@@ -795,7 +801,7 @@ settings and keeps your custom Lua live.
 ### Shortcut Layers
 
 The **+** beside the layer chips defines a layer: a name, an
-optional menu bar icon, and bindings that shadow the base
+optional icon, and bindings that shadow the base
 shortcuts while it is active. Every layer gets its own `⌃⌥K`
 row. Switch layers with `KiwiDesk.switch_layer` ([Lua
 reference](lua-reference.md)). Editing a stored profile puts

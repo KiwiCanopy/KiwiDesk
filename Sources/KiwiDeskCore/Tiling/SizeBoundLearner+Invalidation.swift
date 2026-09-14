@@ -16,6 +16,7 @@ extension SizeBoundLearner {
         lastAsks[id] = nil
         candidates[id] = nil
         bounds[id] = nil
+        probes[id] = nil
     }
 
     /// How long a gone window's parked ledger may wait for the
@@ -49,6 +50,7 @@ extension SizeBoundLearner {
         if let ledger = bounds[id] {
             tombstones[id] = Tombstone(
                 bounds: ledger,
+                probes: probes[id],
                 pid: pid,
                 at: now
             )
@@ -73,6 +75,7 @@ extension SizeBoundLearner {
                 < Self.reviveGraceSeconds
         else { return false }
         bounds[id] = tomb.bounds
+        probes[id] = tomb.probes
         return true
     }
 
@@ -88,6 +91,9 @@ extension SizeBoundLearner {
         }
         if let bound = bounds.removeValue(forKey: old) {
             bounds[new] = bound
+        }
+        if let probe = probes.removeValue(forKey: old) {
+            probes[new] = probe
         }
     }
 
@@ -149,11 +155,21 @@ extension SizeBoundLearner {
     /// contradicts, risks pinning a window at a size its app
     /// stopped insisting on, which is the stale-skip failure
     /// this ledger must never ship (review, 2026-08-18).
+    /// Returns whether the performed ask was a pending
+    /// corroboration probe's (#1439), the one site that retires
+    /// a probe on a compliance — the caller then owes the
+    /// placement the sweep alone would not send.
+    @discardableResult
     mutating func complied(
         _ id: WindowID,
         asked: CGFloat,
         axis: WritableKeyPath<Ledger, [EffectiveSizeBound.Axis]>
-    ) {
+    ) -> Bool {
+        let performedProbe = retireCorroborationProbe(
+            id,
+            answering: asked,
+            axis: axis
+        )
         if var candidateEntries = candidates[id]?[
             keyPath: axis
         ] {
@@ -167,15 +183,15 @@ extension SizeBoundLearner {
             )
         }
         guard var entries = bounds[id]?[keyPath: axis]
-        else { return }
+        else { return performedProbe }
         let tolerance = EffectiveSizeBound.matchTolerance
         entries.removeAll { entry in
-            let ceiling = entry.answered < entry.asked
-            return ceiling
-                ? asked > entry.answered + tolerance
-                : asked < entry.answered - tolerance
+            entry.isFloor
+                ? asked < entry.answered - tolerance
+                : asked > entry.answered + tolerance
         }
         writeBounds(id, entries: entries, axis: axis)
+        return performedProbe
     }
 
     mutating func writeCandidates(

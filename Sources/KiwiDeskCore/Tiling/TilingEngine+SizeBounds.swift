@@ -54,11 +54,14 @@ extension TilingEngine {
         guard !animation.isAnimating(window: id),
             !askEchoLikely(id)
         else { return false }
-        if boundLearner.observe(
+        // A performed probe raises the same flag (#1439): the
+        // pass computed its frames before the sweep, so the
+        // placement recomputes them.
+        if boundLearner.observeAnswer(
             id,
             currentSize: current.size,
             settledRead: true
-        ) {
+        ).owesPlacement {
             pendingBoundPlacement = true
         }
         return true
@@ -93,10 +96,10 @@ extension TilingEngine {
         _ id: WindowID,
         size: CGSize,
         settledRead: Bool
-    ) -> Bool {
+    ) -> SizeBoundLearner.Answer {
         guard !animation.isAnimating(window: id)
-        else { return false }
-        return boundLearner.observe(
+        else { return SizeBoundLearner.Answer() }
+        return boundLearner.observeAnswer(
             id,
             currentSize: size,
             settledRead: settledRead
@@ -208,8 +211,10 @@ extension TilingEngine {
     /// cosmetic and self-corrects at settle, so the ring may
     /// trust a single refusal — the visible ride-out then
     /// happens once, on the first encounter, instead of on
-    /// every probe. Geometry never takes this fallback
-    /// (`sizeBounds(for:)` above is confirmed-only).
+    /// every probe. A corroboration probe in flight (#1439)
+    /// pins the same way, at its anchor's answer. Geometry never
+    /// takes either fallback (`sizeBounds(for:)` above is
+    /// confirmed-only).
     func animationSizePin(
         for id: WindowID
     ) -> SizePin? {
@@ -221,11 +226,21 @@ extension TilingEngine {
             width: confirmed?
                 .consumedWidth(asking: target.width)
                 ?? candidate?
-                .consumedWidth(asking: target.width),
+                .consumedWidth(asking: target.width)
+                ?? boundLearner.probeExpectation(
+                    for: id,
+                    asking: target.width,
+                    axis: \.width
+                ),
             height: confirmed?
                 .consumedHeight(asking: target.height)
                 ?? candidate?
                 .consumedHeight(asking: target.height)
+                ?? boundLearner.probeExpectation(
+                    for: id,
+                    asking: target.height,
+                    axis: \.height
+                )
         )
         return pin.isEmpty ? nil : pin
     }
@@ -267,5 +282,27 @@ extension TilingEngine {
         newID: WindowID
     ) {
         boundLearner.rekey(old: oldID, new: newID)
+    }
+}
+
+/// The "already there" quantum, homed beside the bound machinery
+/// it derives from; `retile` and the stash restore read it.
+extension TilingEngine {
+    /// Frames within this distance per edge count as "already
+    /// there". Covers rounding and small app-side clamping.
+    /// Derived from the bound machinery's quantum (#677): both
+    /// answer "does the frame the app holds count as the frame
+    /// we named", so one constant owns the number.
+    static let retileTolerance: CGFloat =
+        EffectiveSizeBound.matchTolerance
+
+    static func close(
+        _ a: CGRect,
+        to b: CGRect
+    ) -> Bool {
+        abs(a.minX - b.minX) <= retileTolerance
+            && abs(a.minY - b.minY) <= retileTolerance
+            && abs(a.width - b.width) <= retileTolerance
+            && abs(a.height - b.height) <= retileTolerance
     }
 }

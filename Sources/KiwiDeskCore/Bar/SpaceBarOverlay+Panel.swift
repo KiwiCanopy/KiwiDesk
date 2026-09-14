@@ -184,6 +184,7 @@ extension SpaceBarOverlay {
         // (#385).
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
+        itemContainer.addSubview(layerDivider)
         view.addSubview(itemContainer)
         view.addSubview(backArrow)
         view.addSubview(forwardArrow)

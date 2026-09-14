@@ -39,6 +39,9 @@ final class NoopHotkeyRegistrar: HotkeyRegistrar {
 ///   host's exported `KIWIDESK_NO_WS_TRACKING` QA lever (#596).
 /// - `allScreenBounds` — pinned `[]` (the single-screen
 ///   verdict), not the host's real screen arrangement (#878).
+/// - `applier.clock` — frozen, not the host's `systemUptime`,
+///   so the echo grace cannot age out under a starved runner
+///   (#1456).
 @MainActor
 func makeTestCore(
     configDirectory: URL? = nil,
@@ -118,5 +121,9 @@ func makeTestCore(
     // next drag test that forgets its own pin, which the two
     // pinning it per file are the precedent for.
     core.drag.cursorLocation = { .zero }
+    // The host's CLOCK, not its state: frozen, so the applier's
+    // echo grace cannot age a stamp out under a starved runner
+    // (#1456, tests.md ▸ age-bounded ledgers).
+    core.tiler.applier.clock = { 0 }
     return core
 }

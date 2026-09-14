@@ -3,9 +3,10 @@ import AppKit
 /// Space Bar overlay panel for one display in AX coordinates (#293, #385).
 @MainActor
 public final class SpaceBarOverlay {
-    /// One Space's resolved content.
+    /// One Space's resolved content — or the active shortcut
+    /// layer's, ahead of the Spaces (#1169).
     public struct Item {
-        let space: SpaceID
+        let identity: SpaceBarItemView.Identity
         let spaceGlyph: SpaceBarItemView.Identifier
         let apps: [SpaceBarItemView.App]
         let active: Bool
@@ -13,6 +14,37 @@ public final class SpaceBarOverlay {
         let overflow: Int
         /// Focused window is hidden past the cap (#376).
         let focusInOverflow: Bool
+
+        init(
+            space: SpaceID,
+            spaceGlyph: SpaceBarItemView.Identifier,
+            apps: [SpaceBarItemView.App],
+            active: Bool,
+            overflow: Int,
+            focusInOverflow: Bool
+        ) {
+            identity = .space(space)
+            self.spaceGlyph = spaceGlyph
+            self.apps = apps
+            self.active = active
+            self.overflow = overflow
+            self.focusInOverflow = focusInOverflow
+        }
+
+        /// The layer item: one glyph, no apps, never active.
+        init(
+            layer: String,
+            glyph: SpaceBarItemView.Identifier
+        ) {
+            identity = .layer(layer)
+            spaceGlyph = glyph
+            apps = []
+            active = false
+            overflow = 0
+            focusInOverflow = false
+        }
+
+        var space: SpaceID? { identity.space }
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
@@ -61,6 +93,13 @@ public final class SpaceBarOverlay {
     /// arrow zone or a scrolled-off item is never a drop target.
     var hitStrip: CGRect = .zero
     var hitFrames: [(space: SpaceID, frame: CGRect)] = []
+    /// Section rule after the layer item (#1169).
+    let layerDivider: NSView = {
+        let view = NSView()
+        view.wantsLayer = true
+        view.isHidden = true
+        return view
+    }()
     // Optional trailing front-app segment (#293).
     let frontBox = NSView()
     let frontDivider = NSView()

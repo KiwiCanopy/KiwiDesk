@@ -183,21 +183,7 @@ extension KiwiCore {
         if let icon = tiler.settings.spaceIcons[id],
             !icon.isEmpty
         {
-            if NSImage(
-                systemSymbolName: icon,
-                accessibilityDescription: nil
-            ) != nil {
-                return .symbol(icon)
-            }
-            // Emoji render untinted (they take no template
-            // tint); plain characters follow the state color.
-            // U+FE0F covers text-default scalars forced into
-            // emoji presentation ("❤️", "☀️").
-            let emoji = icon.unicodeScalars.contains {
-                $0.properties.isEmojiPresentation
-                    || $0.value == 0xFE0F
-            }
-            return .text(icon, tinted: !emoji)
+            return Self.iconGlyph(icon)
         }
         // Numeric ids render as plain digits (QA 2026-07-19):
         // the old `N.square` symbol is self-bordered, and with
@@ -215,9 +201,53 @@ extension KiwiCore {
                 tinted: true
             )
         }
-        return .text(
-            String(id.raw.prefix(2)).uppercased(),
-            tinted: true
+        return Self.monogram(id.raw)
+    }
+
+    /// The two-character uppercase cut a named Space and an
+    /// icon-less layer share (#1169).
+    static func monogram(
+        _ name: String
+    ) -> SpaceBarItemView.Identifier {
+        .text(String(name.prefix(2)).uppercased(), tinted: true)
+    }
+
+    /// A configured icon as a bar glyph — a Space's or a layer's
+    /// (`define_layer`'s third argument), one ladder for both.
+    static func iconGlyph(
+        _ icon: String
+    ) -> SpaceBarItemView.Identifier {
+        if NSImage(
+            systemSymbolName: icon,
+            accessibilityDescription: nil
+        ) != nil {
+            return .symbol(icon)
+        }
+        // Emoji render untinted (they take no template
+        // tint); plain characters follow the state color.
+        // U+FE0F covers text-default scalars forced into
+        // emoji presentation ("❤️", "☀️").
+        let emoji = icon.unicodeScalars.contains {
+            $0.properties.isEmojiPresentation
+                || $0.value == 0xFE0F
+        }
+        return .text(icon, tinted: !emoji)
+    }
+
+    /// The active shortcut layer's item, ahead of the Spaces
+    /// (#1169) — nil on `default`, which has no icon and is the
+    /// bar's resting shape. Read at build time; the rebuild on a
+    /// switch is the `layer_change` sink in `KiwiCore+SpaceBar`.
+    func spaceBarLayerItem() -> SpaceBarOverlay.Item? {
+        let layer = keys.currentLayer
+        guard layer != KeybindingManager.defaultLayer else {
+            return nil
+        }
+        let icon = keys.icon(for: layer) ?? ""
+        return SpaceBarOverlay.Item(
+            layer: layer,
+            glyph: icon.isEmpty
+                ? Self.monogram(layer) : Self.iconGlyph(icon)
         )
     }
 }

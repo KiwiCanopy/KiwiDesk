@@ -3178,6 +3178,52 @@ other. (`SizeBoundGeneralizationTests`,
 `ScrollingFixedSpanCueTests`)
 
 :::unreleased
+**[Trade-off]**
+
+**The corroborating ask is sent, never awaited (#1439).** An
+entry confirms about a second after a window arrives, but
+everything that needs a CORROBORATED bound — the size-limit
+pill, Scrolling's re-pack past the entry's own ask, Track's
+count and floor re-share — waited for the layout to happen to
+ask a second size a step away, which on a quiet screen it never
+does (the owner measured 8–18 s before and under a second after;
+both tables are on the issue). So the moment an entry confirms
+on an axis nothing corroborates yet, the learner arms one probe
+a step past the refused ask in the refusing direction, and the
+retile loop sends it in place of the ask the entry already
+answers — never a new one, and never on a forced pass, whose
+contract is the layout's own ask. Its first observation may
+trust the pre-ask frame, which #1083 otherwise forbids inside
+the echo grace, on four terms: the anchor's confirming read was
+settled and so outranks the set the grace protects, the trust is
+consumed by one issue, killed by any ordinary ask, and checked
+against the anchor's answer at issue. What this trades: a
+grid-snapping app pays one extra ask per anchor, answered a few
+points off and corroborating nothing, exactly as the #1055 bar
+intends — and where that answer lands inside the match
+tolerance, or the app simply performs the probe, the window
+holds a size no layout drew, so a performed probe — decided by
+the settled read alone, since a raw compliance can be the
+transient half of a snap-back — is answered with the retile the
+compliance sweep would not send, the sweep
+re-learns the entry once, and every ask that has had its probe
+stays probed for the ledger's lifetime rather than re-arming
+on that re-confirmation. A second anchor confirming while a
+probe is pending waits for the layout, as before, and an entry
+already sitting within the match tolerance of the probe's span
+absorbs its confirmation, so that pair stays a hair inside the
+bar until the probe runs out of issues — a hand-drifted ask one
+step off the layout's, accepted as rare. It is not the
+timer re-probe the limitations table rules out: one probe per
+anchor, re-issued once and only once answered, never chained off
+its own confirmation, and ring-invisible, since the overlay pins
+it at the anchor's answer as it pins the second probe at the
+candidate's. (`SizeBoundCorroborationProbeTests`,
+`SizeBoundCorroborationProbeLifecycleTests`,
+`SizeBoundCorroborationProbeEngineTests`)
+:::
+
+:::unreleased
 **[Principle]**
 
 **Track's automatic count reads learned minimums; a fixed limit
@@ -7029,6 +7075,33 @@ Desktop bindings follow, like Delete and make default.
 **Shortcut layers are the layering mechanism**: a layer switch
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
+
+:::unreleased
+**The active layer is shown, and showing it is not a
+preference** (#1169, owner ruling 2026-09-14). A press on the
+wrong layer does something surprising, so both surfaces that
+can say which layer is live say it: the menu bar's status item
+swaps to the layer's icon (#68 §6.4), and the Space Bar leads
+its run with the layer's glyph — one item ahead of the Spaces,
+drawn and announced like any other, that is no click, drag or
+drop target and never the active slot. `default` takes no icon
+(Lua reference ▸ Layer Icons) and is the bar's resting shape,
+so the item exists only while another layer is active: the bar
+grows by one item on the switch and shrinks back on the return,
+with the same 2 pt full-depth rule between it and the first
+Space that stands between the last Space and the front-app
+segment. There is no "show layer in Space Bar" switch: with it
+off, the bar's resting shape would read as `default` while
+another layer is live — the truthfulness argument that keeps
+the menu bar always-on — and a setting owes a census row, a
+Settings row, a locale round and, on any later default flip, a
+migration.
+A layer with no icon draws the same two-letter monogram a Space
+with a non-numeric name does, so a layer never disappears from
+the bar for lack of one. Both surfaces read the one
+`layer_change` bus event (#1168): the bar takes no hook on the
+manager, which keeps one seam.
+:::
 
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed

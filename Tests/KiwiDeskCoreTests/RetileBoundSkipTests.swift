@@ -127,10 +127,15 @@ struct RetileBoundSkipTests {
         _ = try learnBound(core, applied: applied)
 
         // The display narrows, so the monocle slot moves and
-        // resizes: the skip must not swallow real motion.
+        // resizes: the skip must not swallow real motion. Below
+        // the learned answer, so the new ask is unlearned range
+        // (#1055), and echo-pinned so this fixture's unchanged
+        // frame — a fixed-width signature — learns nothing more
+        // mid-pass (#1439).
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 100, y: 0, width: 800, height: 800)
+            CGRect(x: 100, y: 0, width: 600, height: 800)
         }
+        core.tiler.echoGraceOverride = { _ in true }
         // Computed BEFORE the retile: the ledger may advance
         // during the pass (the baseline shortcut can believe
         // the new ask's refusal immediately), so a post-hoc
