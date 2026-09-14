@@ -154,6 +154,11 @@ struct ShortcutsTrackOfferTests {
             ) ?? ""
         #expect(!body.isEmpty)
         #expect(!body.contains("else"))
+        // …and `bound` reaches the body ONLY as the seed: a bare
+        // `if bound { … }` around the container hides the door
+        // when unbound with every count above intact
+        // (guard-prover, 2026-09-14).
+        #expect(body.occurrences(of: "bound") == 1)
         #expect(body.occurrences(of: "families") == 1)
         // `families` WALKS the keys, headings suppressed under
         // the drawer's own title.
