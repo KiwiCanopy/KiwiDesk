@@ -103,6 +103,12 @@ final class SettingsModel: ObservableObject {
     /// Un-decodable profiles shown greyed with reveal and delete
     /// (#171, #246, #678).
     @Published var brokenProfiles: [BrokenProfile] = []
+    /// The user palettes, the ONE in-memory copy of
+    /// `palettes.json` (#805): the shelf draws it and search
+    /// matches its names, so neither reads the store — a disk
+    /// read per keystroke — and `refreshPalettes` is its one
+    /// writer.
+    @Published var userPalettes: [ColorPalette] = []
     /// Screen counts where multiple profiles claim default flag.
     @Published var duplicateDefaultCounts: [Int] = []
     /// Confirmation text after search flipped mode

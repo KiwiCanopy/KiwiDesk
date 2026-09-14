@@ -4,8 +4,7 @@ import KiwiDeskCore
 extension SettingsHeaderBar {
     /// Constructs SettingsSearchContext from state already in
     /// memory — nothing on the search path touches AX, the
-    /// session or the filesystem (spec 11a). Palettes are absent
-    /// by type; the argument lives on the Kind enum.
+    /// session or the filesystem (spec 11a, #805).
     var searchContext: SettingsSearchContext {
         SettingsSearchContext(
             editingStoredProfile: model.editingStoredProfile,
@@ -13,7 +12,8 @@ extension SettingsHeaderBar {
             displayCount: model.displays.count,
             spaces: model.config.spaces.map(\.raw),
             profiles: model.profileSummaries.map(\.name),
-            appRules: model.config.appRules.keys.sorted()
+            appRules: model.config.appRules.keys.sorted(),
+            palettes: model.userPalettes.map(\.name)
         )
     }
 }

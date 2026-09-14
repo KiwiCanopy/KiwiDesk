@@ -9,4 +9,9 @@ extension SettingsModel {
     func applyPalette(_ palette: ColorPalette) {
         palette.apply(to: &config.settings)
     }
+
+    /// Re-reads the user palettes from the store (#805).
+    func refreshPalettes() {
+        userPalettes = paletteStore.userPalettes()
+    }
 }

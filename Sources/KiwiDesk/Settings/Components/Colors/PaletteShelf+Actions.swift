@@ -5,8 +5,9 @@ import UniformTypeIdentifiers
 
 /// Palette shelf mutation and file action handlers (#375, `PaletteStore`).
 extension PaletteShelf {
+    /// The one re-read after a shelf mutation (#805).
     func reload() {
-        userPalettes = store.userPalettes()
+        model.refreshPalettes()
     }
 
     func trimmed(_ text: String) -> String {

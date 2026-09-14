@@ -983,6 +983,7 @@
   "search.mode_switched": "Power User mode on — %1$@ is now on Home.",
   "search.no_results": "No results",
   "search.place.app_rule": "App rule",
+  "search.place.palette": "Palette",
   "search.place.profile": "Profile",
   "search.place.space": "Space",
   "search.placeholder": "Search",

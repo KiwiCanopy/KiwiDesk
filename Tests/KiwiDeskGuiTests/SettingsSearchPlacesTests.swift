@@ -48,6 +48,7 @@ struct SettingsSearchPlacesTests {
             case .space: context.spaces = ["mail"]
             case .profile: context.profiles = ["mail-desk"]
             case .appRule: context.appRules = ["Mail"]
+            case .palette: context.palettes = ["Mail tones"]
             }
         }
         let hits = places("mail", context: context)
@@ -70,9 +71,26 @@ struct SettingsSearchPlacesTests {
             case .space: expected = .spaces
             case .profile: expected = .profiles
             case .appRule: expected = .appRules
+            case .palette: expected = .colors
             }
             #expect(
                 byKind[kind]?.anchor.destination == expected,
+                Comment(rawValue: kind.rawValue)
+            )
+        }
+    }
+
+    /// `placeResults` applies no reachability filter on the
+    /// stated premise that every place kind lands on a
+    /// destination #18 never hides — held as a shape clause, so
+    /// a kind landing on General owes the filter back.
+    @Test("every place kind lands where a stored-profile edit reaches")
+    func kindsStayReachable() {
+        for kind in SettingsSearchPlace.Kind.allCases {
+            #expect(
+                kind.destination.isReachable(
+                    editingStoredProfile: true
+                ),
                 Comment(rawValue: kind.rawValue)
             )
         }

@@ -983,6 +983,7 @@
   "search.mode_switched": "已开启高级模式，%1$@ 现已显示在首页。",
   "search.no_results": "无结果",
   "search.place.app_rule": "App 规则",
+  "search.place.palette": "调色板",
   "search.place.profile": "描述文件",
   "search.place.space": "空间",
   "search.placeholder": "搜索",

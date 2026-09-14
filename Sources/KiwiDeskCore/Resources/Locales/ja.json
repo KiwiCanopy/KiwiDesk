@@ -983,6 +983,7 @@
   "search.mode_switched": "高度モードがオンになりました。%1$@ はホームに表示されます。",
   "search.no_results": "結果なし",
   "search.place.app_rule": "アプリルール",
+  "search.place.palette": "パレット",
   "search.place.profile": "プロファイル",
   "search.place.space": "スペース",
   "search.placeholder": "検索",
