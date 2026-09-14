@@ -1,10 +1,12 @@
 import CoreGraphics
 
 /// The gather a space owes its members on ENTERING floating mode
-/// (#1177), as one pure decision: a member partly or fully
-/// outside `region` takes the quit grid (`QuitGridLayout`) over
-/// it, one fully inside stays. Visibility is the whole scope —
-/// no previous-mode list — and the argument is
+/// (#1177), as one pure decision: where any member is partly or
+/// fully outside `region`, EVERY member takes the quit grid
+/// (`QuitGridLayout`, the exit gather's own function and depth,
+/// so a retune of the exit retunes this) laid in `grid`; where
+/// all are inside, nothing moves. Visibility is the whole
+/// trigger — no previous-mode list — and the argument is
 /// docs/design-decisions.md's. `region` is the caller's
 /// `floatBounds` and `grid` its `floatGrowBounds`, both carving
 /// the strips a SHOWN space paints; an unshown space's grid
@@ -23,14 +25,17 @@ public enum FloatGather {
         ).contains(frame)
     }
 
-    /// A target for every member of `members` whose frame is
-    /// outside `region`, in member order; nothing for the rest.
-    /// The grid is laid in `grid`, which is `region` unless the
-    /// caller reserves the ring: the JUDGMENT takes the
-    /// correctness bound, or a float flush with a bare screen
-    /// edge — where no clamp ever pushes — would count as
-    /// outside. `minSize` and `targetDepth` are the quit grid's
-    /// own knobs, read from the same settings.
+    /// A target for every member of `members` with a frame, in
+    /// member order, where at least one frame is outside `region`
+    /// — the whole space takes the grid, as at the exit (owner
+    /// ruling 2026-09-14, on the device: a gathered few beside
+    /// untouched columns laid exactly behind each other); nothing
+    /// where all are inside. The grid is laid in `grid`, which is
+    /// `region` unless the caller reserves the ring: the JUDGMENT
+    /// takes the correctness bound, or a float flush with a bare
+    /// screen edge — where no clamp ever pushes — would trip it.
+    /// `minSize` and `targetDepth` are the quit grid's own knobs,
+    /// read from the same settings.
     public static func targets(
         members: [WindowID],
         frames: [WindowID: CGRect],
@@ -39,13 +44,12 @@ public enum FloatGather {
         minSize: CGFloat,
         targetDepth: Int
     ) -> [WindowID: CGRect] {
-        let outside = members.filter { id in
-            guard let frame = frames[id] else { return false }
-            return isOutside(frame, of: region)
-        }
-        guard !outside.isEmpty else { return [:] }
+        let framed = members.filter { frames[$0] != nil }
+        guard
+            framed.contains(where: { isOutside(frames[$0]!, of: region) })
+        else { return [:] }
         return QuitGridLayout.frames(
-            for: outside,
+            for: framed,
             in: grid ?? region,
             minSize: minSize,
             targetDepth: targetDepth

@@ -6,8 +6,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The gather through the retile (#1177): a space whose live
-/// mode is floating and whose DRAWN mode was not owes its
-/// out-of-bounds members a seed, delivered by the pass's own
+/// mode is floating and whose DRAWN mode was not, with a member
+/// out of bounds, owes every member a seed, delivered by the pass's own
 /// restore on a shown space and kept by the park on an unshown
 /// one. `FloatGatherTests` holds the decision's algebra; this
 /// suite is the consumer and the entry ledger, which that one
@@ -90,8 +90,10 @@ struct FloatGatherEntryTests {
         core.setSpaceMode(Self.space, .floating)
         core.retile(force: true)
         let expected = Self.expected
-        #expect(expected.count == 2)
-        #expect(core.tiler.stashOriginal(Self.inside) == nil)
+        #expect(expected.count == 3)
+        #expect(
+            core.tiler.stashOriginal(Self.inside) == expected[Self.inside]
+        )
         #expect(
             core.tiler.stashOriginal(Self.scrolledOut)
                 == expected[Self.scrolledOut]
@@ -214,20 +216,24 @@ struct FloatGatherEntryTests {
     func pendingCaptureIsTheFrameJudged() throws {
         let core = try #require(makeCore(mode: .scrolling))
         core.settleDrawnSpaceModes()
-        // A parked flag float whose capture is visible: the
-        // corner it sits at is not where it is going.
+        // Every member a parked flag float whose capture is
+        // visible: the corner they sit at is not where they are
+        // going, so nothing trips.
         let parked = TilingEngine.stashFrame(
             CGRect(origin: .zero, size: Self.size),
             in: Self.bounds,
             corner: .bottomRight
         )
-        core.state.setFloating(Self.inside, true)
-        core.state.windows.updateFrame(Self.inside, frame: parked)
         let capture = Self.frames[Self.inside]!
-        core.tiler.seedStash(Self.inside, frame: capture)
+        for id in [Self.inside, Self.scrolledOut, Self.partly] {
+            core.state.setFloating(id, true)
+            core.state.windows.updateFrame(id, frame: parked)
+            core.tiler.seedStash(id, frame: capture)
+        }
         core.setSpaceMode(Self.space, .floating)
         core.retile(force: true)
         #expect(core.tiler.stashOriginal(Self.inside) == capture)
+        #expect(core.tiler.stashOriginal(Self.partly) == capture)
     }
 
     @Test(
@@ -242,6 +248,7 @@ struct FloatGatherEntryTests {
         core.retile(force: true)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
         #expect(core.tiler.stashOriginal(Self.partly) != nil)
+        #expect(core.tiler.stashOriginal(Self.inside) != nil)
     }
 
     @Test(

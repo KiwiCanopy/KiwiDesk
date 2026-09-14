@@ -20,7 +20,6 @@ struct FloatGatherRegionTests {
         width: 1920,
         height: 1055
     )
-    private static let size = CGSize(width: 800, height: 600)
     private static let inside = WindowID(1)
     private static let scrolledOut = WindowID(2)
     private static let partly = WindowID(3)
@@ -31,16 +30,6 @@ struct FloatGatherRegionTests {
         scrolledOut: CGRect(x: 2100, y: 100, width: 800, height: 600),
         partly: CGRect(x: 1500, y: 100, width: 800, height: 600),
     ]
-
-    private static var expected: [WindowID: CGRect] {
-        FloatGather.targets(
-            members: [inside, scrolledOut, partly],
-            frames: frames,
-            region: bounds,
-            minSize: TilingSettings().minWindowSize,
-            targetDepth: TilingSettings().quitGridTargetDepth
-        )
-    }
 
     /// A core with one shown space in `mode`, holding the three
     /// members at `frames`. Nil where the host has no screen.
@@ -78,9 +67,9 @@ struct FloatGatherRegionTests {
         return core
     }
 
-    /// The region is `floatGrowBounds`: the painted strip carved
-    /// off and the ring's reach reserved before the grid is laid
-    /// (#1091/#242), so the clamp has no push left to make.
+    /// The grid is laid in `floatGrowBounds`: the painted strip
+    /// carved off and the ring's reach reserved (#1091/#242), so
+    /// the clamp has no push left to make.
     @Test(
         "The gathered frames clear the painted strip and the ring",
         .enabled(if: NSScreen.main != nil)
@@ -137,26 +126,32 @@ struct FloatGatherRegionTests {
 
     /// The JUDGMENT takes the correctness bound: a member flush
     /// with a bare screen edge, where no clamp pushes, is inside
-    /// even with the ring's reserve on.
+    /// even with the ring's reserve on, so a space of such
+    /// members trips nothing.
     @Test(
-        "A member flush with a screen edge stays, ring on",
+        "Members flush with a screen edge trip nothing, ring on",
         .enabled(if: NSScreen.main != nil)
     )
-    func flushEdgeMemberStaysWithRingOn() throws {
+    func flushEdgeMembersTripNothingWithRingOn() throws {
         let core = try #require(makeCore(mode: .scrolling))
         core.settleDrawnSpaceModes()
+        // The reserve must exceed the judge's tolerance or the
+        // two bounds cannot be told apart (#660).
         core.tiler.settings.borderStyle.enabled = true
-        #expect(core.floatRingInset > 0)
+        #expect(core.floatRingInset > AppBarGeometry.clampTolerance)
         let flush = CGRect(
             x: Self.bounds.maxX - 800,
             y: Self.bounds.maxY - 600,
             width: 800,
             height: 600
         )
-        core.state.windows.updateFrame(Self.inside, frame: flush)
+        for id in [Self.inside, Self.scrolledOut, Self.partly] {
+            core.state.windows.updateFrame(id, frame: flush)
+        }
         core.setSpaceMode(Self.space, .floating)
         core.retile(force: true)
-        #expect(core.tiler.stashOriginal(Self.inside) == nil)
-        #expect(core.tiler.stashOriginal(Self.scrolledOut) != nil)
+        for id in [Self.inside, Self.scrolledOut, Self.partly] {
+            #expect(core.tiler.stashOriginal(id) == nil)
+        }
     }
 }

@@ -253,11 +253,11 @@ track shortcut bound.
 :::
 
 :::unreleased
-- **Floating** — switching a space to Floating brings in any
-  window the previous layout left partly or fully off the
-  screen (a scrolled-out column, a parked Monocle window),
-  arranged in the grid **Behavior ▸ On quit** uses; windows
-  already fully on screen stay where they are.
+- **Floating** — switching a space to Floating with any window
+  partly or fully off the screen (a scrolled-out column, a
+  parked Monocle window) arranges the space's windows in the
+  grid **Behavior ▸ On quit** uses; with everything already on
+  screen, nothing moves.
 :::
 
 > **A few resize behaviors are accepted limitations, not bugs** —

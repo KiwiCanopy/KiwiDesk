@@ -71,10 +71,13 @@ extension KiwiCore {
             tiler.seedStash(id, frame: target)
         }
         if !targets.isEmpty {
+            let outside = frames.filter {
+                FloatGather.isOutside($0.value, of: region)
+            }.count
             onLog(
-                "space \(space.id) entered floating: gathered "
-                    + "\(targets.count) of \(space.windows.count) "
-                    + "window(s) from outside its bounds"
+                "space \(space.id) entered floating: \(outside) of "
+                    + "\(targets.count) window(s) outside its bounds "
+                    + "— gathered all into the grid"
             )
         }
     }

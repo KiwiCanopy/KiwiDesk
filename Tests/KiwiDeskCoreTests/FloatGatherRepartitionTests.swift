@@ -73,16 +73,14 @@ struct FloatGatherRepartitionTests {
         return core
     }
 
-    /// The parked member is seeded a grid cell and the shown one
-    /// nothing — the visibility scope, applied to a re-file. A
-    /// receiving space left unshown parks the shown member and
-    /// captures its own state frame, which is not a gather.
+    /// The parked member trips the gather and both take a grid
+    /// cell — never the park's own capture of a state frame (an
+    /// unshown receiver parks its members too) nor the strand
+    /// net's centre.
     private func expectGathered(_ core: KiwiCore) {
-        let shownCapture = core.tiler.stashOriginal(Self.shown)
-        #expect(
-            shownCapture == nil
-                || shownCapture == core.state.windows[Self.shown]?.frame
-        )
+        let shownSeed = core.tiler.stashOriginal(Self.shown)
+        #expect(shownSeed != nil)
+        #expect(shownSeed != core.state.windows[Self.shown]?.frame)
         let seeded = core.tiler.stashOriginal(Self.parked)
         #expect(seeded != nil)
         // Neither the park's own capture of the state frame (an

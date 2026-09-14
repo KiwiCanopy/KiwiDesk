@@ -3478,16 +3478,22 @@ scrolling's scrolled-out columns and monocle's parked pile are
 drawn out of reach on purpose. Switching to floating therefore
 lost windows behind the visible ones or off the screen, which
 the owner ruled crucial and frequent (2026-09-09). The rule is
-scoped by what is VISIBLE, never by which layout came before:
-every member partly or fully outside the space's float region
-is gathered, and one fully inside stays exactly where it is. A
-plain tiled→floating switch then never trips it, monocle and
-scrolling are covered without a mode matrix, and partly-outside
-counts (owner ruling 2026-08-31) because a sliver on screen is
-not a reachable window. The gathered take the quit gather's grid
-([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)),
-which is what keeps a pile of columns findable rather than
-stacked at one edge, and the grid is laid inside the grow bound
+TRIGGERED by what is VISIBLE, never by which layout came before:
+a member partly or fully outside the space's float region trips
+it, and with every member inside nothing moves. A plain
+tiled→floating switch then never trips it, monocle and scrolling
+are covered without a mode matrix, and partly-outside counts
+(owner ruling 2026-08-31) because a sliver on screen is not a
+reachable window. Once tripped, EVERY member takes the quit
+gather's grid
+([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)) —
+the exit's own function and depth, so a retune of the exit
+retunes this. The issue had the visible members staying put; the
+device showed why not (owner ruling 2026-09-14): two untouched
+columns beside a grid of the rest read as a mess, and the
+gathered windows laid exactly behind one another. The whole-space
+grid is what keeps a pile of columns findable rather than stacked
+at one edge, and it is laid inside the grow bound
 — the painted strips carved off and the focus ring's reach
 reserved on every edge — so no gathered frame lands under a bar
 and the clamp has nothing left to push; the judgment itself

@@ -5,9 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The gather decision's algebra (#1177): visibility is the
-/// scope, partly-outside counts, a corner counts, a fully
-/// visible member is untouched, and the gathered take the quit
-/// grid over the region.
+/// TRIGGER — partly-outside counts, a corner counts — and once
+/// tripped every framed member takes the quit grid over the
+/// region, as at the exit; with nothing outside, nothing moves.
 @Suite("Float gather decision (#1177)")
 struct FloatGatherTests {
     private static let region = CGRect(
@@ -57,8 +57,8 @@ struct FloatGatherTests {
         #expect(FloatGather.isOutside(above, of: Self.region))
     }
 
-    @Test("Only the outside members are gathered, in member order")
-    func gathersOutsideOnly() {
+    @Test("One outside member gathers the whole space, in member order")
+    func gathersAllOnceAnyIsOutside() {
         let a = WindowID(1)
         let b = WindowID(2)
         let c = WindowID(3)
@@ -80,11 +80,11 @@ struct FloatGatherTests {
             minSize: 100,
             targetDepth: 5
         )
-        #expect(targets[a] == nil)
+        #expect(targets[a] != nil)
         #expect(
             targets
                 == QuitGridLayout.frames(
-                    for: [b, c],
+                    for: [a, b, c],
                     in: Self.region,
                     minSize: 100,
                     targetDepth: 5
@@ -96,8 +96,8 @@ struct FloatGatherTests {
     }
 
     /// The judgment takes `region`; the grid may take a smaller
-    /// one, so a member flush with a screen edge stays while a
-    /// gathered one lands inside the ring's reserve.
+    /// one, so a member flush with a screen edge trips nothing
+    /// while a gathered space lands inside the ring's reserve.
     @Test("The grid region is where a target lands, never the judge")
     func gridRegionLaysButNeverJudges() {
         let a = WindowID(1)
@@ -110,7 +110,16 @@ struct FloatGatherTests {
         )
         let out = CGRect(x: 2100, y: 100, width: 800, height: 600)
         let grid = Self.region.insetBy(dx: 5, dy: 5)
-        let targets = FloatGather.targets(
+        let untripped = FloatGather.targets(
+            members: [a],
+            frames: [a: flush],
+            region: Self.region,
+            grid: grid,
+            minSize: 100,
+            targetDepth: 5
+        )
+        #expect(untripped.isEmpty)
+        let tripped = FloatGather.targets(
             members: [a, b],
             frames: [a: flush, b: out],
             region: Self.region,
@@ -118,11 +127,10 @@ struct FloatGatherTests {
             minSize: 100,
             targetDepth: 5
         )
-        #expect(targets[a] == nil)
         #expect(
-            targets
+            tripped
                 == QuitGridLayout.frames(
-                    for: [b],
+                    for: [a, b],
                     in: grid,
                     minSize: 100,
                     targetDepth: 5
