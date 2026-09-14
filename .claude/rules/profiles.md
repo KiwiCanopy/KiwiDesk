@@ -503,7 +503,9 @@ space is healed*. The obligations:
 - **A relocation ends in the heal.** The total resolve carries
   it at its tail, before relocation is judged for the float
   re-anchor, so a reused seed the precedence sent to main and
-  the heal sent back has not moved; `move_space_to_display`,
+  the heal sent back has not moved (`EmptyDisplayHealSeamTests`
+  ▸ `healPrecedesTheReanchor` holds the order, since no unit
+  fixture can observe the re-anchor); `move_space_to_display`,
   the one verb that relocates beside the resolve on purpose,
   calls it itself. A new relocation path routes through the
   resolve or calls the heal — `EmptyDisplayHealSeamTests` ▸
@@ -531,7 +533,9 @@ space is healed*. The obligations:
   standing pin limitation (`docs/accepted-limitations.md`); the
   heal mints once for the pair and refuses to mint again for the
   twin the pin cannot reach (`EmptyDisplayHealTests` ▸
-  `twinsMintOnce`).
+  `twinsMintOnce`) — while a seed that keeps its screen's pin
+  but was moved off by hand is the user's, and that screen owes
+  a fresh one (`EmptyDisplayHealTests` ▸ `movedSeedIsTheUsers`).
 - **A fixture that connects two screens and gives one no space
   is asserting on a state the heal removes** — a whole-map
   emptiness assertion downstream of the resolve reads the seed

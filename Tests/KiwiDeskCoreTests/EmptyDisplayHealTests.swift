@@ -234,11 +234,34 @@ struct EmptyDisplayHealTests {
         core.state.workspaces.upsertDisplay(Self.displayA)
         core.state.workspaces.upsertDisplay(twinB)
         core.state.workspaces.ensureSpace("work")
+        // BOTH spaces pinned to the shared fingerprint, so they
+        // follow the pin onto one twin whichever the display
+        // map enumerates first (guard-prover, 2026-09-14 — an
+        // unpinned `1` landed on main in one order and left no
+        // screen empty).
+        core.spacePins["1"] = Self.displayA.fingerprint
         core.spacePins["work"] = Self.displayA.fingerprint
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
         let once = core.state.workspaces.allSpaces.map(\.id)
+        // Non-vacuity: the heal DID fire once for the pair.
+        #expect(core.healedSpaces[Self.displayA.fingerprint] == "2")
+        #expect(once == ["1", "work", "2"])
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
         core.resolveSpaceDisplays(mainID: Self.displayA.id)
         #expect(core.state.workspaces.allSpaces.map(\.id) == once)
+    }
+
+    @Test("A seed moved off by hand leaves its screen a fresh one")
+    func movedSeedIsTheUsers() {
+        // The seed keeps B's pin while it sits on A, which is not
+        // a twin holding it: B owes `3`, and the ledger follows.
+        let core = soloCore()
+        core.execute("load_profile", args: [.string("Solo")])
+        core.execute(
+            "move_space_to_display",
+            args: [.string("2"), .string("A")]
+        )
+        #expect(spaces(core, on: Self.displayB) == ["3"])
+        #expect(core.healedSpaces[Self.displayB.fingerprint] == "3")
     }
 }

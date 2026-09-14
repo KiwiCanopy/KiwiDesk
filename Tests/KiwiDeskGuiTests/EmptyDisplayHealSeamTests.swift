@@ -84,6 +84,29 @@ struct EmptyDisplayHealSeamTests {
         pin(found, against: callers, subject: "spells the heal")
     }
 
+    /// The resolve heals BEFORE it judges relocation for the
+    /// float re-anchor: a reused seed the precedence sent to main
+    /// and the heal sent back has not moved, and no unit fixture
+    /// can observe the re-anchor (it resolves real `NSScreen`s).
+    /// Held by ORDER in the stripped source; fails open on a
+    /// rename of the re-anchor spelling, so its presence is
+    /// asserted first.
+    @Test("The resolve heals before it re-anchors")
+    func healPrecedesTheReanchor() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/Profiles/KiwiCore+SpaceDisplays.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let heal = source.range(of: "healEmptyDisplays(mainID: mainID)")
+        let reanchor = source.range(of: "reanchorFloats(of:")
+        #expect(heal != nil)
+        #expect(reanchor != nil)
+        if let heal, let reanchor {
+            #expect(heal.lowerBound < reanchor.lowerBound)
+        }
+    }
+
     @Test("The ledger is written by the heal and the reset alone")
     func ledgerHasTwoWriterFiles() throws {
         let found = try counts(Self.writes)
