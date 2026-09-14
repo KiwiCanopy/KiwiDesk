@@ -10,6 +10,9 @@ extension StateCoordinator {
         effects.appearedWasMinimized = forgetMinimized(window.id)
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
+        // Once: the restore's frame is the FIRST arrival's (#1362).
+        effects.restoredFrame =
+            restoredFrames.removeValue(forKey: window.id)
         // Back on a shown Desktop: the away ledger's entry ends
         // (#1146).
         awayWindows[window.id] = nil

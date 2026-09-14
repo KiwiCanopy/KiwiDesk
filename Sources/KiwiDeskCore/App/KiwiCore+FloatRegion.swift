@@ -149,7 +149,16 @@ extension KiwiCore {
     /// out-reach a small display would otherwise invert the rect
     /// and read as enormous free space.
     func floatGrowBounds(of id: WindowID) -> CGRect? {
-        guard var region = floatBounds(of: id) else { return nil }
+        guard let space = state.workspaces.space(of: id)
+        else { return nil }
+        return floatGrowBounds(on: space)
+    }
+
+    /// The grow bound on `space` — where a PLACEMENT nothing else
+    /// will correct lays a frame (the #1177 gather), so the clamp
+    /// has no ring push left to make.
+    func floatGrowBounds(on space: SpaceID) -> CGRect? {
+        guard var region = floatBounds(on: space) else { return nil }
         let inset = floatRingInset
         region.size.width = max(0, region.width - inset * 2)
         region.size.height = max(0, region.height - inset * 2)

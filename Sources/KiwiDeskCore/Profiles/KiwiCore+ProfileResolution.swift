@@ -187,16 +187,7 @@ extension KiwiCore {
         guard let fallback else { return }
         for space in state.workspaces.allSpaces
         where !survivors.contains(space.id) {
-            for window in space.windows {
-                state.workspaces.add(window, to: fallback)
-                // A rehome is a cross-space move: a float whose
-                // fallback lives on another display re-anchors
-                // (#444). A later `resolveSpaceDisplays` moving
-                // the fallback re-translates from the seeded
-                // capture, so the order composes.
-                reanchorFloat(window, to: fallback)
-            }
-            state.workspaces.removeSpace(space.id)
+            forwardWindows(of: space.id, to: fallback)
         }
     }
 

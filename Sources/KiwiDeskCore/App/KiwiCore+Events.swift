@@ -108,6 +108,10 @@ extension KiwiCore {
             // returns without stealing focus; the command it was
             // owed runs now.
             payOwnShowFocus(arrived: window.id)
+            // #1362: the snapshot frame the restore could not set
+            // on an untracked window, seeded before the arrival
+            // retile below delivers it.
+            payRestoredFrame(arrived: window.id, effects: effects)
         case .windowMoved(let id, let frame):
             // Keep the ring glued to a window being moved. `follow`
             // self-suppresses when the WindowServer stream already

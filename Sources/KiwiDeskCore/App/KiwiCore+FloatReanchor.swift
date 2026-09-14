@@ -78,9 +78,9 @@ extension KiwiCore {
         // park/restore cycle to ride: apply directly, dropping
         // any stale capture so a restore can't fight the frame.
         // A non-flagged window bound for a floating-MODE space
-        // (#498) also applies directly: the stash machinery only
-        // captures frames for float-FLAGGED windows, so a seeded
-        // capture would never be delivered for it.
+        // (#498) also applies directly — the direct write predates
+        // the restore pass delivering such a member's seed
+        // (#1178), and stands.
         if window.isSticky || !window.isFloating {
             tiler.forgetStash(id)
             tiler.applyFrame(

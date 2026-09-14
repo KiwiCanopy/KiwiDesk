@@ -252,6 +252,14 @@ layout", open from the start once you have a Track Space or a
 track shortcut bound.
 :::
 
+:::unreleased
+- **Floating** — switching a space to Floating with any window
+  partly or fully off the screen (a scrolled-out column, a
+  parked Monocle window) arranges the space's windows in the
+  grid **Behavior ▸ On quit** uses; with everything already on
+  screen, nothing moves.
+:::
+
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or a stack
 > window's mouse height-drag snapping back. See

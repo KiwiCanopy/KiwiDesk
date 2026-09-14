@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// Computed side-effect facts returned by `StateCoordinator.apply`
@@ -17,6 +18,10 @@ public struct AppliedEffects: Sendable {
 
     /// Whether window returned to a remembered space assignment.
     var hadRememberedSpace = false
+
+    /// The snapshot frame a late-restored window is owed (#1362),
+    /// consumed from `restoredFrames` by this create.
+    var restoredFrame: CGRect?
 
     /// Destination space if window was rehomed to active screen
     /// (`ArrivalScreenHomeTests`, #1010).
