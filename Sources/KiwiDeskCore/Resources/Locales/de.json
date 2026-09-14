@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "Systemeinstellungen ▸ Schreibtisch & Dock",
   "mac_checklist.progress": "Erledigt: %1$d von %2$d",
   "mac_checklist.progress.all": "Alles erledigt",
-  "mac_checklist.provenance": "Wird von macOS gelesen, sobald dieses Fenster in den Vordergrund kommt; KiwiDesk ändert keine dieser Einstellungen.",
   "mac_checklist.rearrange_spaces": "„Spaces automatisch anhand der letzten Verwendung ausrichten“ ausschalten",
   "mac_checklist.rearrange_spaces.caption": "macOS sortiert deine Schreibtische nach Verwendung um, sodass der Schreibtisch, mit dem ein Profil verknüpft ist, nie dort ist, wo du ihn gelassen hast. %1$@",
   "mac_checklist.stage_manager": "Stage Manager ausschalten",

@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "Системные настройки ▸ Рабочий стол и Dock",
   "mac_checklist.progress": "Готово: %1$d из %2$d",
   "mac_checklist.progress.all": "Всё готово",
-  "mac_checklist.provenance": "Считывается из macOS всякий раз, когда это окно выходит на передний план; KiwiDesk ничего из этого не меняет.",
   "mac_checklist.rearrange_spaces": "Выключи «Менять расположение рабочих пространств Spaces в зависимости от недавнего использования»",
   "mac_checklist.rearrange_spaces.caption": "macOS переставляет твои рабочие столы по частоте использования, поэтому рабочий стол, к которому привязан профиль, никогда не остаётся там, где ты его оставил. %1$@",
   "mac_checklist.stage_manager": "Выключи Постановщик",

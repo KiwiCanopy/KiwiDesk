@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "システム設定 ▸ デスクトップとDock",
   "mac_checklist.progress": "完了: %2$d個中%1$d個",
   "mac_checklist.progress.all": "すべて完了",
-  "mac_checklist.provenance": "このウインドウが前面に出るたびにmacOSから読み取ります。KiwiDeskがこれらを変更することはありません。",
   "mac_checklist.rearrange_spaces": "「最新の使用状況に基づいて操作スペースを自動的に並べ替える」をオフにする",
   "mac_checklist.rearrange_spaces.caption": "macOSがデスクトップを使用状況に応じて並べ替えるため、プロファイルを割り当てたデスクトップが置いた場所にあるとは限りません。%1$@",
   "mac_checklist.stage_manager": "ステージマネージャをオフにする",

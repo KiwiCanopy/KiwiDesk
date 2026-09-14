@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "系统设置 ▸ 桌面与程序坞",
   "mac_checklist.progress": "已完成：%2$d 项中的 %1$d 项",
   "mac_checklist.progress.all": "全部完成",
-  "mac_checklist.provenance": "每次此窗口来到前台时都会从 macOS 重新读取；KiwiDesk 不会更改其中任何一项。",
   "mac_checklist.rearrange_spaces": "关闭“根据最近使用情况自动重新排列空间”",
   "mac_checklist.rearrange_spaces.caption": "macOS 会按使用情况重新排列你的桌面，所以描述文件绑定的那个桌面从来不在你离开时的位置。%1$@",
   "mac_checklist.stage_manager": "关闭台前调度",

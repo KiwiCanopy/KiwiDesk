@@ -18,14 +18,6 @@ enum MacChecklistText {
         )
     }
 
-    static var provenance: String {
-        L(
-            "mac_checklist.provenance",
-            "Read from macOS whenever this window comes forward; "
-                + "KiwiDesk changes none of them."
-        )
-    }
-
     /// Caption for a settings row, the path at the slot.
     static func caption(for key: MacChecklistKey) -> String {
         let slot = CrossReferenceRow.linkSlot

@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "Réglages Système ▸ Bureau et Dock",
   "mac_checklist.progress": "Faits : %1$d sur %2$d",
   "mac_checklist.progress.all": "Tout est fait",
-  "mac_checklist.provenance": "Lu depuis macOS chaque fois que cette fenêtre passe au premier plan ; KiwiDesk n'en modifie aucun.",
   "mac_checklist.rearrange_spaces": "Désactiver « Réarranger automatiquement les Spaces en fonction de votre utilisation la plus récente »",
   "mac_checklist.rearrange_spaces.caption": "macOS réordonne vos Bureaux selon leur utilisation, si bien que le Bureau auquel un profil est associé n'est jamais là où vous l'aviez laissé. %1$@",
   "mac_checklist.stage_manager": "Désactiver Stage Manager",

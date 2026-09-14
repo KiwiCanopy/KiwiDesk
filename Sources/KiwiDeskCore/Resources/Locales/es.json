@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "Ajustes del Sistema ▸ Escritorio y Dock",
   "mac_checklist.progress": "Hechos: %1$d de %2$d",
   "mac_checklist.progress.all": "Todo hecho",
-  "mac_checklist.provenance": "Se leen de macOS cada vez que esta ventana pasa al frente; KiwiDesk no cambia ninguno de ellos.",
   "mac_checklist.rearrange_spaces": "Desactivar «Reordenar Spaces automáticamente en función del uso más reciente»",
   "mac_checklist.rearrange_spaces.caption": "macOS reordena tus Escritorios según el uso, así que el Escritorio al que está asociado un perfil nunca está donde lo dejaste. %1$@",
   "mac_checklist.stage_manager": "Desactivar el Organizador visual",

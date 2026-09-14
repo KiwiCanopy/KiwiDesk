@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "시스템 설정 ▸ 데스크탑 및 Dock",
   "mac_checklist.progress": "완료: %2$d개 중 %1$d개",
   "mac_checklist.progress.all": "모두 완료",
-  "mac_checklist.provenance": "이 윈도우가 앞으로 나올 때마다 macOS에서 읽어 옵니다. KiwiDesk는 아무것도 바꾸지 않습니다.",
   "mac_checklist.rearrange_spaces": "‘Spaces를 최근 사용 내역에 따라 자동으로 재정렬’ 끄기",
   "mac_checklist.rearrange_spaces.caption": "macOS가 데스크탑을 사용 순서대로 재배열하므로, 프로필이 지정된 데스크탑이 늘 두고 온 자리에 있지 않게 됩니다. %1$@",
   "mac_checklist.stage_manager": "스테이지 매니저 끄기",

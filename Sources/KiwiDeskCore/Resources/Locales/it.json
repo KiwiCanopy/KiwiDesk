@@ -706,7 +706,6 @@
   "mac_checklist.path.desktop_dock": "Impostazioni di Sistema ▸ Scrivania e Dock",
   "mac_checklist.progress": "Fatti: %1$d di %2$d",
   "mac_checklist.progress.all": "Tutto fatto",
-  "mac_checklist.provenance": "Letto da macOS ogni volta che questa finestra passa in primo piano; KiwiDesk non ne modifica nessuna.",
   "mac_checklist.rearrange_spaces": "Disattiva «Riorganizza automaticamente gli spazi sulla base dell’utilizzo più recente»",
   "mac_checklist.rearrange_spaces.caption": "macOS riordina le tue Scrivanie in base all'uso, quindi la Scrivania a cui è associato un profilo non è mai dove l'avevi lasciata. %1$@",
   "mac_checklist.stage_manager": "Disattiva Stage Manager",
