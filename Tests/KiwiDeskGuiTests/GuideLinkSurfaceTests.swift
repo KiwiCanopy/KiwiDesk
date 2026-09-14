@@ -46,13 +46,51 @@ struct GuideLinkSurfaceTests {
         // The permanent route, and the one search reaches: the
         // mount AND its catalog anchor, since a `GuideLink()`
         // without the anchor is a pointer nobody can find by
-        // typing "guide".
+        // typing "guide". The trade: the anchor is pinned as the
+        // FIRST modifier on the mount, so a modifier inserted
+        // between them reds this — move the anchor back to the
+        // front rather than widening the needle, which is what
+        // keeps the pair contiguous (tests.md).
         (
             "Settings/Sections/MacChecklistSection.swift",
             "GuideLink().searchAnchored("
                 + "SettingsCatalog.macChecklist.guideLink)"
         ),
     ]
+
+    /// The register bounds the TOTAL too: a third `GuideLink()`
+    /// mount — About re-adding its own, a new section's foot —
+    /// reads no `SupportLinks.guide` and trips no per-site
+    /// needle, which is exactly the two-permanent-pointers drift
+    /// the ruling exists to stop (architect-reviewer,
+    /// 2026-09-15). `GuideLink(` with the paren is the MOUNT
+    /// spelling; `GuideLink.` (the static members) is not
+    /// counted.
+    @Test("nothing else mounts the guide link")
+    func noThirdMount() throws {
+        var mounts: [String] = []
+        for file in try SourceScan.swiftSources(under: tree)
+        where file.lastPathComponent != "GuideLink.swift" {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let count =
+                text.components(separatedBy: "GuideLink(").count - 1
+            if count > 0 {
+                mounts.append(
+                    "\(file.lastPathComponent)×\(count)"
+                )
+            }
+        }
+        #expect(
+            mounts.sorted() == [
+                "HomeFirstRunBanner.swift×1",
+                "MacChecklistSection.swift×1",
+            ],
+            Comment(rawValue: "guide link mounts: \(mounts)")
+        )
+        #expect(mounts.count == Self.surfaces.count)
+    }
 
     /// **The checklist's foot is the one that still works on
     /// day 30.** The banner is one-shot — `HomeFirstRunState
@@ -155,7 +193,7 @@ struct GuideLinkSurfaceTests {
                 Comment(
                     rawValue:
                         "\(file.lastPathComponent) calls the "
-                        + "guide \(row) in About and \(inline) "
+                        + "guide \(row) in the search row and \(inline) "
                         + "in the sentence — two words for one "
                         + "destination"
                 )

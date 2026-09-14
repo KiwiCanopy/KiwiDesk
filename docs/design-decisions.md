@@ -5107,7 +5107,13 @@ it also stated: `results("")` returns nothing, so a bare Return
 in an untouched field cannot navigate somewhere the user never
 named (`SettingsSearchTests` ▸ `emptyQuery`), and any list
 volunteered under the field would be a second navigator, which
-"Home is the only navigator" rules against.
+"Home is the only navigator" rules against. The narrower fix —
+keep the row, show it only on a focus the USER gave — was
+refused too: telling a click or ⌘K from the window's arrival
+focus means reading focus provenance at the field, which is the
+#991 trap (`currentEvent` is the last event retrieved, and a
+VoiceOver press has none), and `SettingsInputSourceSeamTests`
+bounds who may read the input source at all.
 
 Two settled behaviours from that pass stay: Escape on an EMPTY
 field resigns focus (clearing an already-empty query would leave
@@ -5653,8 +5659,14 @@ the checklist, one line above its own copy of the sentence, and
 two permanent pointers to one page is the drift a one-pointer
 entry exists to stop. The search declaration moved with it, so
 "guide" typed into the field still lands on the pointer
-(`GuideLinkSurfaceTests` is the register of the two sites and
-the one URL reader).
+(`GuideLinkSurfaceTests` is the register of the two sites, the
+one URL reader, and the mount count). The pointer is permanent
+only where the checklist is OFFERED — in Simple, on every
+display count, withheld only while a stored profile is edited,
+exactly as About was (`HomeCardOrderTests` ▸ `modeCounts`,
+`DestinationParityTests` ▸ `profileContextExcludesOnlyProfileless`)
+— so a change that withholds the checklist further owes the
+pointer a new home in the same change.
 :::
 
 The two surfaces share ONE frame and one label, because the same

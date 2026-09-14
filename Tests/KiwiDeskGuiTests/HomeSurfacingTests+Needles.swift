@@ -222,10 +222,14 @@ extension HomeSurfacingTests {
             ".id(destination)",
         ],
         "Settings/HeaderSearch.swift": [
-            // The keys move over a TYPED query's hits and nothing
-            // before one (#1470); a bare Return commits a first
-            // hit only for a typed query.
-            "searching?results.flat:[]",
+            // The predicate the query-only panel rests on: a
+            // `{ true }` here re-opens #1468 with every use-site
+            // needle green (guard-prover, 2026-09-15).
+            "varsearching:Bool{!query.trimmed.isEmpty}",
+            // A bare Return commits a first hit only for a TYPED
+            // query; "nothing before a query" is
+            // `SettingsSearch.results`' (`SettingsSearchTests` ▸
+            // `emptyQuery`), not re-derived here (#1470).
             "lethits=hitsguard!hits.isEmpty",
             "??(searching?hits.first:nil)",
             "if!now{highlighted=nil}collapseIfIdle()",

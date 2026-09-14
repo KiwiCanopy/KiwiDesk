@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// General ▸ About section displaying brand, version, notes, license,
-/// guide, and support links (#68, #570, #1019, #1407).
+/// General ▸ About section displaying brand, version, notes,
+/// license and support links (#68, #570, #1407).
 extension GeneralSection {
     var aboutSection: some View {
         SettingsSection(SettingsCatalog.general.aboutCard) {

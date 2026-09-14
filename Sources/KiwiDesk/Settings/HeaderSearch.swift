@@ -32,11 +32,9 @@ struct HeaderSearch: View {
 
     var searching: Bool { !query.trimmed.isEmpty }
 
-    /// The rows the keys move over — the results of a typed
-    /// query, nothing before one (#1470).
-    var hits: [SettingsSearchResult] {
-        searching ? results.flat : []
-    }
+    /// The rows the keys move over; `SettingsSearch.results` is
+    /// the one home of "nothing before a query" (#1470).
+    var hits: [SettingsSearchResult] { results.flat }
 
     private var collapsed: Bool {
         width.collapsesChrome && !expanded
@@ -63,9 +61,9 @@ struct HeaderSearch: View {
         .background { focusShortcut }
         .onChange(of: query) { _, _ in highlighted = nil }
         // The narrow entry collapses once neither focus nor the
-        // pointer holds the panel — a blur alone raced the
-        // hover-keepalive the moment the panel had rows before
-        // a query (#1030).
+        // pointer holds the panel — a typed query's rows can be
+        // hovered after the field blurs, and a blur alone raced
+        // that hover-keepalive (#1030).
         .onChange(of: focused) { _, now in
             // A highlight does not outlive the focus that made
             // it, or the next focus re-opens with a row armed
