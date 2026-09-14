@@ -114,6 +114,53 @@ struct SplitFloorHealNeedleTests {
         )
     }
 
+    @Test("The retile issues the placed frames; readers keep the slots")
+    func retileIssuesPlacedFrames() throws {
+        let retile = try SourceScan.functionBody(
+            of: "retile",
+            in: "TilingEngine.swift",
+            under: "Tiling"
+        )
+        #expect(
+            retile.components(separatedBy: "placedFrames(").count - 1
+                == 1
+        )
+        #expect(
+            retile.components(separatedBy: "calculatedFrames(").count
+                - 1 == 0
+        )
+        let slots = try SourceScan.functionBody(
+            of: "calculatedFrames",
+            in: "TilingEngine+Layout.swift",
+            under: "Tiling"
+        )
+        #expect(slots.contains("placed: false"))
+        let issued = try SourceScan.functionBody(
+            of: "placedFrames",
+            in: "TilingEngine+PlacedFrames.swift",
+            under: "Tiling"
+        )
+        #expect(issued.contains("placed: true"))
+        let placed = try SourceScan.functionBody(
+            of: "placed",
+            in: "SplitOverflow.swift",
+            under: "Layouts"
+        )
+        #expect(placed.contains("case .bsp, .stack:"))
+        #expect(placed.contains("inward("))
+        // One mechanism per store (owner ruling 2026-09-14): the
+        // math has one consumer, the post-pass one caller, and
+        // the layout dispatcher stays bound-blind.
+        #expect(try coreWideCount(of: "SplitDomain.healedRatio(") == 1)
+        #expect(try coreWideCount(of: "SplitOverflow.placed(") == 1)
+        let calculate = try SourceScan.functionBody(
+            of: "calculate",
+            in: "LayoutEngine.swift",
+            under: "Layouts"
+        )
+        #expect(!calculate.contains("SplitOverflow"))
+    }
+
     private func healSource(
         _ path: StaticString = #filePath
     ) throws -> String {
