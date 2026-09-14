@@ -511,9 +511,9 @@ space is healed*. The obligations:
   resolve or calls the heal — `EmptyDisplayHealSeamTests` ▸
   `healHasTwoCallers` is the census of who may spell it.
 - **The ledger names the heal's seed, and a declaration retires
-  it.** `healedSpaces` is keyed by monitor fingerprint and
-  written by the heal file alone (the seam suite ▸
-  `ledgerHasTwoWriterFiles`; the #634 reset clears it). A pin
+  it.** `healedSpaces` is keyed by monitor fingerprint, written
+  by the heal file and cleared by the #634 reset
+  (`EmptyDisplayHealSeamTests` ▸ `ledgerHasTwoWriterFiles`). A pin
   reset that did not prune — a re-dock onto the live profile's
   own set, which rewrites `spacePins` with no apply; a config
   reload, which re-applies the live profile un-pruned — re-pins
@@ -523,12 +523,18 @@ space is healed*. The obligations:
   CHANGE, a Desktop binding included — drops the seed with every
   other undeclared space and the heal seeds afresh
   (`EmptyDisplayHealTests` ▸ `profileDoorSeeds`). And every
-  apply door calls `retireHealedSpaces(declared:)` with the set
-  it makes authoritative, because a Keep or a Settings Save
-  captures the seed like any live space: once declared it is
-  the user's, and the heal seeds BESIDE it rather than pulling
-  it back over their placement
-  (`EmptyDisplayHealTests` ▸ `declaredSeedRetires`).
+  apply door — the profile, the composed Standard, the GUI draft
+  — calls `retireHealedSpaces(declared:)` with the set it makes
+  authoritative (`EmptyDisplayHealSeamTests` ▸
+  `retireHasThreeCallers` is the census), because a Keep or a
+  Settings Save captures the seed like any live space: once
+  declared it is the user's, and the heal seeds BESIDE it rather
+  than pulling it back over their placement
+  (`EmptyDisplayHealTests` ▸ `declaredSeedRetires`). The one
+  door where the seed fares worse than a peer is the re-dock
+  onto the live profile's own set, which resets pins with no
+  apply: the reuse re-asserts the lead, so a `set_mode` on the
+  seed is lost there — accepted.
 - **Twins stand down.** Two screens with one fingerprint are the
   standing pin limitation (`docs/accepted-limitations.md`); the
   heal mints once for the pair and refuses to mint again for the

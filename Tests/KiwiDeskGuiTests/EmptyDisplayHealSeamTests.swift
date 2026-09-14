@@ -24,6 +24,17 @@ struct EmptyDisplayHealSeamTests {
         "Commands/KiwiCore+SpaceDisplayCommands.swift": 1,
     ]
 
+    /// Every file that may spell `retireHealedSpaces(` — the
+    /// declaration, and the three apply doors: the profile, the
+    /// composed Standard and the GUI draft. A fourth apply door
+    /// that makes a space set authoritative owes a call and an
+    /// entry here, or the seed it declares stays the ledger's.
+    private let retirers: [String: Int] = [
+        "Profiles/KiwiCore+EmptyDisplayHeal.swift": 1,
+        "Profiles/KiwiCore+ProfileResolution.swift": 2,
+        "App/KiwiCore+GuiConfig.swift": 1,
+    ]
+
     /// Every file that may WRITE `healedSpaces`: the mint, the
     /// gone-seed drop and the retire filter in the heal file; the
     /// first-launch reset.
@@ -82,6 +93,15 @@ struct EmptyDisplayHealSeamTests {
         let found = try counts { $0.occurrences(of: "healEmptyDisplays(") }
         #expect(!found.isEmpty)
         pin(found, against: callers, subject: "spells the heal")
+    }
+
+    @Test("Every apply door retires the seeds it declares")
+    func retireHasThreeCallers() throws {
+        let found = try counts {
+            $0.occurrences(of: "retireHealedSpaces(")
+        }
+        #expect(!found.isEmpty)
+        pin(found, against: retirers, subject: "spells the retire")
     }
 
     /// The resolve heals BEFORE it judges relocation for the

@@ -10251,6 +10251,10 @@ ends, because a heal on one door leaves the other empty. The
 seed is a live space like any other: no file learns it until you
 save — a Keep or a Settings Save captures it — and an explicit
 reload prunes it with every space the profile does not declare.
+One residue, accepted: a re-dock onto the live profile's own
+screen set re-seats the seed in its opening layout, so a layout
+you set on it by hand does not survive that re-dock, where a
+declared space's would.
 :::
 
 ### Monitors

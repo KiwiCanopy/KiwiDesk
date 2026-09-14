@@ -16,11 +16,13 @@ extension KiwiCore {
     /// that did not prune (a re-dock onto the live profile's own
     /// set, a config reload) re-pins the earlier seed, lead mode
     /// re-asserted since the apply reset it, rather than minting
-    /// another. Twins — two screens with one fingerprint, which a
-    /// pin cannot tell apart (`docs/accepted-limitations.md`) —
-    /// stand down once the seed is pinned to that fingerprint,
-    /// or every resolve would mint for the twin the pin cannot
-    /// reach.
+    /// another. The re-dock is the one door where a `set_mode`
+    /// on the seed is lost while a peer space keeps its own —
+    /// accepted (#1175). Twins — two screens with one
+    /// fingerprint, which a pin cannot tell apart
+    /// (`docs/accepted-limitations.md`) — stand down once the
+    /// seed is pinned to that fingerprint, or every resolve would
+    /// mint for the twin the pin cannot reach.
     func healEmptyDisplays(mainID: DisplayID?) {
         let displays = state.workspaces.allDisplays
         let ordered = PositionalDisplays.ordered(
