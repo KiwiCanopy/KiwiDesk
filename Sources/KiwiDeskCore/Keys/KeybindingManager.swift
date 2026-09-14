@@ -142,6 +142,8 @@ public final class KeybindingManager {
         announce(from: previous, to: name)
     }
 
+    /// The one gate on "did the layer change" — the switch sites
+    /// call it unconditionally.
     private func announce(from: String, to: String) {
         if from != to { onLayerChange(from, to) }
     }
@@ -160,9 +162,7 @@ public final class KeybindingManager {
         layerIcons = [:]
         let previous = currentLayer
         currentLayer = Self.defaultLayer
-        if previous != Self.defaultLayer {
-            announce(from: previous, to: Self.defaultLayer)
-        }
+        announce(from: previous, to: Self.defaultLayer)
     }
 
     /// Atomically replaces layers from structured config.
@@ -197,9 +197,7 @@ public final class KeybindingManager {
             }
         }
         activate(currentLayer)
-        if currentLayer != oldCurrent {
-            announce(from: oldCurrent, to: currentLayer)
-        }
+        announce(from: oldCurrent, to: currentLayer)
     }
 
     /// True while hotkeys are suspended by Settings shortcut recorder (#213).
