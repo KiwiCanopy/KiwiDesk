@@ -4746,8 +4746,7 @@ unbounded — and indexing *values* ("0.70" finding the space that
 overrides to it) is the same mistake through the back door. The
 things a user NAMES — spaces, profiles, palettes, app rules —
 belong in the **Made by you** group: findable by name, capped at
-five, one entry per object. (Palettes sit the group out today —
-the purity line below is why.)
+five, one entry per object.
 
 **That group is named by ownership, not by location.** It holds
 a space, a profile and an app rule, and none of them is a
@@ -4779,9 +4778,19 @@ list paints, from the draft in memory. Nothing on either path
 touches AX, the filesystem or the running session
 (`SettingsSearchIndexTests` scans the match-path files for the
 violation; enrichment reads only the draft the shell hands it).
-That line is why palette names are absent from the group today:
-`PaletteStore` is stateless and file-backed by design, so
-listing them would put a disk read on every keystroke.
+
+:::unreleased
+That line is why palette names joined the group last (#805):
+`PaletteStore` is stateless and file-backed by design — a
+palette saved anywhere is seen everywhere with no cache to
+invalidate — so listing them from the store would put a disk
+read on every keystroke. The names live in a cache on the
+model instead (`SettingsModel.paletteNames`), written at the
+store's own mutation points and at the window's reload and
+never lazily from the search path; the store keeps its
+contract, and `PaletteNameCacheTests` holds the writers and
+the one reader.
+:::
 
 **The pill is the only place the mode is mentioned.** Search
 indexes both modes, always. A result whose area the current

@@ -48,6 +48,7 @@ struct SettingsSearchPlacesTests {
             case .space: context.spaces = ["mail"]
             case .profile: context.profiles = ["mail-desk"]
             case .appRule: context.appRules = ["Mail"]
+            case .palette: context.palettes = ["Mail tones"]
             }
         }
         let hits = places("mail", context: context)
@@ -70,6 +71,7 @@ struct SettingsSearchPlacesTests {
             case .space: expected = .spaces
             case .profile: expected = .profiles
             case .appRule: expected = .appRules
+            case .palette: expected = .colors
             }
             #expect(
                 byKind[kind]?.anchor.destination == expected,

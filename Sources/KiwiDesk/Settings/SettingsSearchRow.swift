@@ -121,6 +121,8 @@ struct SettingsSearchRow: View {
             return L("search.place.profile", "Profile")
         case .appRule:
             return L("search.place.app_rule", "App rule")
+        case .palette:
+            return L("search.place.palette", "Palette")
         }
     }
 

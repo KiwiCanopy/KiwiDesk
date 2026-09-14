@@ -31,14 +31,14 @@ enum SettingsSearchResult: Identifiable, Equatable {
     }
 }
 
-/// User-named settings search target (spec 11a, `PaletteStore`).
+/// User-named settings search target (spec 11a).
 struct SettingsSearchPlace: Identifiable, Equatable {
-    /// No `.palette` case, deliberately: `PaletteStore` is
-    /// stateless and file-backed, so palette names have no
-    /// in-memory production source yet — a kind nothing can feed
-    /// is a seam without a consumer. It joins WITH the cache seam.
+    /// `.palette` is fed by `SettingsModel.paletteNames` (#805),
+    /// an in-memory name cache — `PaletteStore` itself stays
+    /// stateless and file-backed, and the match path never
+    /// reads it.
     enum Kind: String, CaseIterable {
-        case space, profile, appRule
+        case space, profile, appRule, palette
     }
 
     let kind: Kind
@@ -55,6 +55,7 @@ struct SettingsSearchContext {
     var spaces: [String] = []
     var profiles: [String] = []
     var appRules: [String] = []
+    var palettes: [String] = []
 
     /// Exhaustive by construction: a new `Kind` fails to compile
     /// here (and in `Kind.destination`) before it can ship as a
@@ -64,6 +65,7 @@ struct SettingsSearchContext {
         case .space: return spaces
         case .profile: return profiles
         case .appRule: return appRules
+        case .palette: return palettes
         }
     }
 }
@@ -74,6 +76,7 @@ extension SettingsSearchPlace.Kind {
         case .space: return .spaces
         case .profile: return .profiles
         case .appRule: return .appRules
+        case .palette: return .colors
         }
     }
 }
