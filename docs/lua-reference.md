@@ -524,9 +524,10 @@ defaults to `bsp`.
 :::unreleased
 Switching to `floating` while any window sits partly or fully
 outside the screen's visible bounds less any bar strips on that
-space lays the space's windows out in the quit grid
-(`quit.set_layout`, sized by `quit.set_grid_target_depth`); with
-every window already inside, nothing moves.
+space, or entirely inside another window's frame (a monocle
+stack), lays the space's windows out in the quit grid
+(`quit.set_layout`, sized by `quit.set_grid_target_depth`);
+otherwise nothing moves.
 :::
 
 **Example:**

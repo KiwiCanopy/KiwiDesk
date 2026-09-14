@@ -109,6 +109,37 @@ struct FloatGatherEntryTests {
         )
     }
 
+    /// A monocle STACK — every member full-size, all on screen —
+    /// is a pile and trips the gather (owner ruling 2026-09-14).
+    @Test(
+        "A shown monocle stack takes the grid",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func shownMonocleStackTakesTheGrid() throws {
+        let core = try #require(makeCore(mode: .monocle))
+        core.settleDrawnSpaceModes()
+        let full = Self.bounds.insetBy(dx: 10, dy: 10)
+        let members = [Self.inside, Self.scrolledOut, Self.partly]
+        for id in members {
+            core.state.windows.updateFrame(id, frame: full)
+        }
+        core.setSpaceMode(Self.space, .floating)
+        core.retile(force: true)
+        let grid = FloatGather.targets(
+            members: members,
+            frames: Dictionary(
+                uniqueKeysWithValues: members.map { ($0, full) }
+            ),
+            region: Self.bounds,
+            minSize: core.tiler.settings.minWindowSize,
+            targetDepth: core.tiler.settings.quitGridTargetDepth
+        )
+        #expect(grid.count == 3)
+        for id in members {
+            #expect(core.tiler.stashOriginal(id) == grid[id])
+        }
+    }
+
     /// The seed lands AHEAD of `recoverStrandedFloats`: a shown
     /// pile at the corner — monocle's park — takes the grid, never
     /// the strand net's one centre.
@@ -224,16 +255,28 @@ struct FloatGatherEntryTests {
             in: Self.bounds,
             corner: .bottomRight
         )
-        let capture = Self.frames[Self.inside]!
-        for id in [Self.inside, Self.scrolledOut, Self.partly] {
+        // Captures staggered so none contains another (a pile
+        // would trip the gather on its own).
+        var captures: [WindowID: CGRect] = [:]
+        for (index, id) in [Self.inside, Self.scrolledOut, Self.partly]
+            .enumerated()
+        {
+            let capture = CGRect(
+                x: 100 + CGFloat(index) * 300,
+                y: 100 + CGFloat(index) * 150,
+                width: 800,
+                height: 600
+            )
+            captures[id] = capture
             core.state.setFloating(id, true)
             core.state.windows.updateFrame(id, frame: parked)
             core.tiler.seedStash(id, frame: capture)
         }
         core.setSpaceMode(Self.space, .floating)
         core.retile(force: true)
-        #expect(core.tiler.stashOriginal(Self.inside) == capture)
-        #expect(core.tiler.stashOriginal(Self.partly) == capture)
+        for (id, capture) in captures {
+            #expect(core.tiler.stashOriginal(id) == capture)
+        }
     }
 
     @Test(

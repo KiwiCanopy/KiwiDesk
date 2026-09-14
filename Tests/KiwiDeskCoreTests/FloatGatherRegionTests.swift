@@ -139,13 +139,16 @@ struct FloatGatherRegionTests {
         // two bounds cannot be told apart (#660).
         core.tiler.settings.borderStyle.enabled = true
         #expect(core.floatRingInset > AppBarGeometry.clampTolerance)
-        let flush = CGRect(
-            x: Self.bounds.maxX - 800,
-            y: Self.bounds.maxY - 600,
-            width: 800,
-            height: 600
-        )
-        for id in [Self.inside, Self.scrolledOut, Self.partly] {
+        // Three flush frames, staggered so none contains
+        // another (a pile would trip the gather on its own).
+        let members = [Self.inside, Self.scrolledOut, Self.partly]
+        for (index, id) in members.enumerated() {
+            let flush = CGRect(
+                x: Self.bounds.maxX - 800,
+                y: Self.bounds.maxY - 600 - CGFloat(index) * 200,
+                width: 800,
+                height: 600
+            )
             core.state.windows.updateFrame(id, frame: flush)
         }
         core.setSpaceMode(Self.space, .floating)

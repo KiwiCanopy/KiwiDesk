@@ -76,8 +76,9 @@ extension KiwiCore {
             }.count
             onLog(
                 "space \(space.id) entered floating: \(outside) of "
-                    + "\(targets.count) window(s) outside its bounds "
-                    + "— gathered all into the grid"
+                    + "\(targets.count) window(s) outside its bounds"
+                    + (outside == 0 ? ", the rest piled" : "")
+                    + " — gathered all into the grid"
             )
         }
     }

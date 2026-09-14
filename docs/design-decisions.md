@@ -3524,13 +3524,20 @@ scrolling's scrolled-out columns and monocle's parked pile are
 drawn out of reach on purpose. Switching to floating therefore
 lost windows behind the visible ones or off the screen, which
 the owner ruled crucial and frequent (2026-09-09). The rule is
-TRIGGERED by what is VISIBLE, never by which layout came before:
-a member partly or fully outside the space's float region trips
-it, and with every member inside nothing moves. A plain
-tiled→floating switch then never trips it, monocle and scrolling
-are covered without a mode matrix, and partly-outside counts
-(owner ruling 2026-08-31) because a sliver on screen is not a
-reachable window. Once tripped, EVERY member takes the quit
+TRIGGERED by what is REACHABLE, never by which layout came
+before: a member partly or fully outside the space's float
+region trips it, and so does a member whose frame sits entirely
+inside another member's — a pile, one of the two behind the other
+whatever the z-order, which is what a monocle STACK is (owner
+ruling 2026-09-14, the second of the day: "stack should pile the
+same"). With every member inside and none piled, nothing moves.
+A plain tiled→floating switch then never trips it — tiles never
+contain each other — monocle and scrolling are covered without a
+mode matrix, and partly-outside counts (owner ruling 2026-08-31)
+because a sliver on screen is not a reachable window. The pile
+test is containment, not overlap: two columns that merely cross
+are both grabbable, and a flag float parked inside a tile by hand
+is the one case the test reads as a pile — the priced trade. Once tripped, EVERY member takes the quit
 gather's grid
 ([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)) —
 the exit's own function and depth, so a retune of the exit
