@@ -1253,8 +1253,9 @@ editing here:
   one or the app's — and derives that ONCE** (#1261). The
   remedy differs (a setting can be lowered, an app's own
   minimum cannot), so `.ownMinimum` and `.neighborMinimum`
-  carry `appBound`, read only by `ResizeRefusal+Rendering`; the
-  builders in `KiwiCore+SizeLimitPill` answer it through the one
+  carry `appBound`, carried for the SENTENCE — a consumer that
+  ACTS on it owes a ruling here first; the builders in
+  `KiwiCore+SizeLimitPill` answer it through the one
   `minimumIsAppBound`, from the same `effectiveMinSize` every
   clamp measured against — a floor a clamp adds beside the
   setting (the scrolling slot's `ScrollSize.minPoints`) rides
@@ -1263,7 +1264,12 @@ editing here:
   every call site answering by hand is the #1258 shape one
   level down. The anchor's floor is the pair's verdict, since
   the anchor is the window whose floor bound; the learned
-  maximum needs none, being only ever the app's.
+  maximum needs none, being only ever the app's. Accepted
+  residue: the scrolling writer raises the verdict by the slot
+  floor on BOTH domain arms, so a window drawn UNDER 100 pt
+  (a `%` slot that small, `min_window_size` under 100) refused
+  at an app floor under 100 reads the setting's sentence —
+  wrong by name, right by remedy, and not worth a domain case.
   `ResizeRefusalAppBoundTests` builds the fixtures where the two
   terms disagree; the config-floor suites stamp the flag their
   fixtures earn.
