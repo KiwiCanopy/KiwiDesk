@@ -86,13 +86,11 @@ struct LayerChangeSeamTests {
         let driver = try squashed(
             "Sources/KiwiDeskCore/App/KiwiCore+SpaceBar.swift"
         )
-        #expect(
-            driver.contains(
-                "bus.addSink{[weakself]event,_in"
-                    + "guardevent==.layerChangeelse{return}"
-                    + "self?.updateSpaceBar()}"
-            )
-        )
+        // The SHAPE, not the bytes (tests.md ▸ #1021): a sink on
+        // the bus, keyed on the event, calling the one refresh.
+        #expect(driver.occurrences(of: "bus.addSink{") == 1)
+        #expect(driver.contains(".layerChange"))
+        #expect(driver.contains("self?.updateSpaceBar()"))
         #expect(!driver.contains("onLayerChange"))
         let bootstrap = try squashed(
             "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
