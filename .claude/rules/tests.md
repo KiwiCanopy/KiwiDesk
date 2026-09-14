@@ -314,15 +314,26 @@ bite large test PRs:
   depends on how long the runner took to reach it —
   `recentInstantTarget`, `didRecentlySetFrame`, any `isRecent(…,
   within:)` — with nothing pinning `now`. The seam rule above
-  covers it: the ledger takes its clock from an injectable
-  reader (`FrameApplier.clock`), `makeTestCore` freezes it (a
-  stamp read in the same test cannot age), and a test that wants
-  the EXPIRY sets the clock ahead rather than sleeping past the
-  bound. No suite relied on the grace expiring when the freeze
+  covers it, in one of Core's two clock shapes: a `now:`
+  PARAMETER threaded from the handler where the write and the
+  read share the call chain the test drives (`selfRaiseStamp`,
+  `PlacementLedger.record(at:)` — #1371's stamp-ahead, #1364's
+  backdate), or a CLOSURE on the type where a stamp lands off
+  another chain — the applier's post-set stamps on the AX queue
+  (#1254) — as `FrameApplier.clock`, `ZOrderDrain.now` and
+  `TeardownRestack.now` do. `makeTestCore` freezes the applier's
+  (a stamp read in the same test cannot age) and
+  `EchoClockSeamTests` holds the host uptime to those seams'
+  defaults and the freeze to both twins. A test that wants the
+  EXPIRY moves the clock ahead rather than sleeping past the
+  bound — `TilingEngine.echoGraceOverride` is the door for a
+  fixture that replaces `animation.apply` and so writes NO
+  stamp, never a substitute for moving the clock on one that
+  exists. No suite relied on the grace expiring when the freeze
   landed — every `nil` read was "never recorded" or "cleared by
   the echo" — which is what made it safe to pin for everyone
   rather than per test; a new ledger with its own bound owes the
-  same seam and the same pin.
+  same seam, the same pin and a row in that census.
 - **One seam runs the OTHER way, and it is named here rather
   than left in a doc comment.** The rule above keeps a live
   production default and injects a fake; the updater seam (#874)

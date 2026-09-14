@@ -21,8 +21,8 @@ final class FrameApplier {
 
     /// The clock the echo grace is measured on. Live by default;
     /// `makeTestCore` freezes it, since a starved runner can let
-    /// a whole second pass between a retile's stamp and the read
-    /// that asks for it (#1456, tests.md ▸ age-bounded ledgers).
+    /// the grace pass between a retile's stamp and the read that
+    /// asks for it (#1456, tests.md ▸ age-bounded ledgers).
     var clock: @Sendable () -> TimeInterval = {
         ProcessInfo.processInfo.systemUptime
     }

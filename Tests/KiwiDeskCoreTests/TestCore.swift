@@ -141,14 +141,9 @@ func makeTestCore(
     // next drag test that forgets its own pin, which the two
     // pinning it per file are the precedent for.
     core.drag.cursorLocation = { .zero }
-    // A different class (#1456): not host STATE but the host's
-    // CLOCK. The frame applier's echo grace is one second on
-    // `systemUptime`, and a starved runner lets more than that
-    // pass between a retile's stamp and the read that asks for
-    // it — `TravelerRehomeConsumerTests` redded on CI that way.
-    // No suite relies on the grace expiring (every nil read is
-    // "never recorded" or "cleared by the echo"), so freeze the
-    // clock: a stamp read in the same test can never age out.
+    // The host's CLOCK, not its state: frozen, so the applier's
+    // echo grace cannot age a stamp out under a starved runner
+    // (#1456, tests.md ▸ age-bounded ledgers).
     core.tiler.applier.clock = { 0 }
     return core
 }
