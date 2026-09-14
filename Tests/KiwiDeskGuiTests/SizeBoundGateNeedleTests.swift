@@ -62,7 +62,7 @@ struct SizeBoundGateNeedleTests {
             )
             let stamps =
                 source.components(
-                    separatedBy: "recent.record(id)"
+                    separatedBy: "recent.record(id, now: clock())"
                 ).count - 1
             #expect(stamps == 2, "\(function) stamps \(stamps)×")
         }

@@ -68,7 +68,13 @@ Read two files before you start:
   another test left behind is outside anything you can observe.
   When a guard you prove touches process-global state, put it
   under `blind to:` and route the caller to `tests.md`, which
-  owns what that test then owes.
+  owns what that test then owes. The same routing for a test
+  whose answer depends on how long the runner took to reach it
+  — a stamp read within an age bound with nothing pinning the
+  clock: your `--filter` run is the fast path such a test
+  passes in, so say it under `blind to:` and point at
+  `tests.md`'s age-bounded-ledger bullet (#1456) rather than
+  reading the green as proof it holds under a full run.
 - Do not widen scope. You prove the guards you were handed; you do
   not review the feature, refactor the suite, or add tests.
 
