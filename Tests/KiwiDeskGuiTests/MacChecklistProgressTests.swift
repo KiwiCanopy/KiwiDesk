@@ -145,8 +145,7 @@ struct MacChecklistProgressTests {
                 == MacChecklistProgress.done(states: states, ticks: ticks)
         )
         #expect(verdicts.filter(\.done).count == 2)
-        // A wrong-kind read is unreadable, and the one reading of
-        // an unread row is "not set".
+        // The one reading of an unread row is "not set".
         #expect(
             MacChecklistProgress.state(of: first, in: [:]) == .notSet
         )

@@ -43,7 +43,13 @@ struct MacChecklistSection: View {
     }
 
     private var habits: some View {
-        SettingsSection(SettingsCatalog.macChecklist.habitsCard) {
+        // One live-layer read per render, not one per row.
+        let panelChord = ShortcutsOpenBinding.comboGlyphs(
+            core: model.core
+        )
+        return SettingsSection(
+            SettingsCatalog.macChecklist.habitsCard
+        ) {
             ForEach(
                 Array(MacChecklistRowOrder.habits.enumerated()),
                 id: \.element.id
@@ -55,9 +61,7 @@ struct MacChecklistSection: View {
                     MacHabitRow(
                         key: key,
                         control: control,
-                        panelChord: ShortcutsOpenBinding.comboGlyphs(
-                            core: model.core
-                        )
+                        panelChord: panelChord
                     )
                 }
             }

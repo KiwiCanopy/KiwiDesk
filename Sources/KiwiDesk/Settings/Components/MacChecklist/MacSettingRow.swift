@@ -74,7 +74,7 @@ struct MacSettingRow: View {
     /// (`LoginItemCard`'s applied mark); not yet: an empty ring
     /// in the tertiary ink. Both carry their word.
     private var chip: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: Self.chipSpacing) {
             Image(
                 systemName: state == .set
                     ? "checkmark.circle.fill" : "circle"
@@ -121,10 +121,14 @@ struct MacSettingRow: View {
     /// The chip column: the tree's readout width, or the wider of
     /// the two words plus the glyph where a locale outgrows it —
     /// a `Text` in a fixed frame truncates, and a truncated state
-    /// word is the row saying nothing. Measured once per section
-    /// render, never per row.
+    /// word is the row saying nothing. Measured at the WEIGHT the
+    /// chip draws, once per container render, never per row.
     @MainActor static var chipWidth: CGFloat {
-        let font = NSFont.preferredFont(forTextStyle: .caption1)
+        let caption = NSFont.preferredFont(forTextStyle: .caption1)
+        let font = NSFont.systemFont(
+            ofSize: caption.pointSize,
+            weight: .medium
+        )
         let widest =
             [
                 L("mac_checklist.state.set", "Set"),
@@ -132,7 +136,14 @@ struct MacSettingRow: View {
             ]
             .map { ($0 as NSString).size(withAttributes: [.font: font]).width }
             .max() ?? 0
-        return max(SettingsMetrics.readoutColumn, ceil(widest) + 20)
+        return max(
+            SettingsMetrics.readoutColumn,
+            ceil(widest) + glyphWidth + chipSpacing
+        )
     }
+    /// The chip's glyph at the caption size, generously.
+    private static let glyphWidth: CGFloat = 16
+    /// The gap between the glyph and the word.
+    static let chipSpacing: CGFloat = 3
     static let rowSpacing: CGFloat = 10
 }
