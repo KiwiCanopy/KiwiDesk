@@ -177,14 +177,22 @@ struct SizeBoundCorroborationProbeEngineTests {
             size: CGSize(width: 715, height: target.height)
         )
         core.state.apply(.windowResized(w, refused))
-        for _ in 0..<3 { core.retile() }
-        // Corroborated within the third retile: the probe was
-        // issued and answered by the placement passes.
+        core.retile()
+        captured.frames = [:]
+        captured.log = []
+        core.retile()
+        // Corroborated within this retile: the pass confirmed the
+        // anchor, placement one issued the probe and confirmed
+        // it, placement two placed the residue — the centred
+        // answer, not the probe's frame — and the flag is clear.
         #expect(core.tiler.sizeBound(for: w)?.maxWidth == 715)
         let placements = captured.log.filter {
             $0.contains("confirmed during retile")
         }
-        #expect(placements.count <= 2)
+        #expect(placements.count == 2)
+        let residue = try #require(captured.frames[w])
+        #expect(residue.width == 715)
+        #expect(abs(residue.midX - target.midX) < 0.01)
         #expect(!core.tiler.takePendingBoundPlacement())
     }
 

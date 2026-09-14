@@ -105,13 +105,27 @@ struct SizeBoundCorroborationProbeLifecycleTests {
         // Two layouts alternate their asks on one axis (the
         // per-ask ladder's own case): each anchor's probe, once
         // retired, stays retired through the other's — the
-        // probed list is per anchor, not one record per axis.
+        // probed list is per anchor, not one record per axis,
+        // which the second anchor's probe would have replaced.
+        // The first anchor's probe answers a few points off, so
+        // its axis stays uncorroborated and only the list can
+        // refuse the re-arm.
         var learner = believedFloor()
         let first = try #require(take(&learner))
+        let off = CGSize(width: 705, height: 800)
         learner.recordAsk(w, size: first.size, settledFrom: first.baseline)
-        learner.observe(w, currentSize: held, settledRead: true)
-        #expect(learner.bound(for: w)?.minWidth == 720)
-        // The second anchor: a ceiling at 900 answered 800.
+        learner.observe(w, currentSize: off, settledRead: true)
+        let reissued = try #require(take(&learner))
+        learner.recordAsk(w, size: reissued.size)
+        learner.observe(w, currentSize: off, settledRead: true)
+        #expect(learner.bound(for: w)?.minWidth == nil)
+        // A settled compliance below the floor sweeps the anchor.
+        let performed = CGSize(width: 480, height: 800)
+        learner.recordAsk(w, size: performed)
+        learner.observe(w, currentSize: performed, settledRead: true)
+        #expect(learner.bound(for: w) == nil)
+        // The second anchor: a ceiling at 900 answered 800, probed
+        // and corroborated.
         let wider = CGSize(width: 900, height: 800)
         let capped = CGSize(width: 800, height: 800)
         for _ in 0..<2 {
@@ -122,12 +136,15 @@ struct SizeBoundCorroborationProbeLifecycleTests {
             take(&learner, current: capped, target: wider)
         )
         #expect(second.size.width == 900 + bar + 1)
-        learner.recordAsk(w, size: second.size)
+        learner.recordAsk(w, size: second.size, settledFrom: second.baseline)
         learner.observe(w, currentSize: capped, settledRead: true)
+        #expect(learner.bound(for: w)?.maxWidth == 800)
         // Back to the first anchor, re-confirmed after its sweep:
-        // no third probe for it.
+        // no second probe for it.
         learner.recordAsk(w, size: ask, settledFrom: held)
         learner.observe(w, currentSize: held, settledRead: true)
+        let entries = learner.bound(for: w)?.width ?? []
+        #expect(entries.contains { $0.asked == 500 })
         let third = take(&learner)
         #expect(third == nil)
     }

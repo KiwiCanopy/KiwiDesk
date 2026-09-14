@@ -27,13 +27,10 @@ extension SizeBoundLearner {
         /// Times the engine has issued it.
         var issues = 0
         /// Whether the pre-ask frame may serve as the probe's
-        /// first observation. A third baseline producer beside
-        /// the retile gate's verdict, legal on four terms
-        /// (state-and-layout.md ▸ #1439): the anchor's confirming
-        /// read was SETTLED, so it outranks the set the applier's
-        /// echo grace still protects; consumed by the first
-        /// issue; killed by any ordinary `recordAsk`; and checked
-        /// against the anchor's answer at take.
+        /// first observation — a baseline producer beside the
+        /// retile gate's verdict, held to the four terms
+        /// state-and-layout.md ▸ #1439 states. Consumed by the
+        /// first issue.
         var baselineTrusted: Bool
 
         var expected: CGFloat { anchor.answered }
@@ -143,26 +140,26 @@ extension SizeBoundLearner {
         guard let probe = probes[id]?[keyPath: slot].pending,
             EffectiveSizeBound.matches(probe.asked, asked)
         else { return false }
-        retire(id, slot: slot)
+        guard var axis = probes[id]?[keyPath: slot] else {
+            return false
+        }
+        Self.retire(&axis)
+        probes[id]?[keyPath: slot] = axis
         return true
     }
 
-    private mutating func retire(
-        _ id: WindowID,
-        slot: WritableKeyPath<ProbeLedger, AxisProbes>
-    ) {
-        guard var axis = probes[id]?[keyPath: slot],
-            let probe = axis.pending
-        else { return }
+    /// Closes the pending probe: its anchor's ask and its own
+    /// join the probed list, trimmed to the cap.
+    private static func retire(_ axis: inout AxisProbes) {
+        guard let probe = axis.pending else { return }
         axis.pending = nil
         axis.probed.append(probe.anchor.asked)
         axis.probed.append(probe.asked)
-        if axis.probed.count > Self.maxProbedPerAxis {
+        if axis.probed.count > maxProbedPerAxis {
             axis.probed.removeFirst(
-                axis.probed.count - Self.maxProbedPerAxis
+                axis.probed.count - maxProbedPerAxis
             )
         }
-        probes[id]?[keyPath: slot] = axis
     }
 
     /// The engine's door: what to issue in place of the layout's
@@ -235,11 +232,7 @@ extension SizeBoundLearner {
             !Self.corroborates(entries, floor: probe.isFloor),
             probe.issues < Self.maxProbeIssues
         else {
-            var axis = ledger[keyPath: slot]
-            axis.pending = nil
-            axis.probed.append(probe.anchor.asked)
-            axis.probed.append(probe.asked)
-            ledger[keyPath: slot] = axis
+            Self.retire(&ledger[keyPath: slot])
             return nil
         }
         guard

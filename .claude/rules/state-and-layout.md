@@ -830,8 +830,8 @@ editing here:
   never awaited (#1439)** — the argument is
   `docs/design-decisions.md`'s entry of that name; what binds
   here: a confirmation arms its probe from `promote`, and a
-  second arm site owes the same guards (`armCorroborationProbe`
-  is the one caller today, unscanned); the retile loop issues it
+  second arm site owes the same guards (`promote` is its one
+  caller today, unscanned); the retile loop issues it
   only in place of an ask the anchor already answers, never a
   new one and never on a forced pass; it is re-issued once and
   only once its first answer seeded a candidate; a probe's own
@@ -846,9 +846,10 @@ editing here:
   (`SizeBoundCorroborationProbeTests` ▸ `rawPairArmsUntrusted`,
   `ordinaryAskDistrusts`; the rest of the ladder in that suite,
   its lifetime in `SizeBoundCorroborationProbeLifecycleTests`).
-  A new per-window store on the learner joins its four lifecycle
-  hooks, discovered by reflection
-  (`SizeBoundLearnerLifecycleParityTests`). The loop's
+  A new per-window store on the learner joins its lifecycle
+  hooks — `forget` and `rekey` discovered by reflection
+  (`SizeBoundLearnerLifecycleParityTests`), the tombstone's park
+  and revive still by hand. The loop's
   substitution through the explained skip, the forced pass, the
   performed probe's retile, the pin and the placement pass —
   bounded to two, since an echo-quiet pass can confirm the

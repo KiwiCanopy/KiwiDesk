@@ -3207,7 +3207,11 @@ with the retile the compliance sweep would not send, the sweep
 re-learns the entry once, and every ask that has had its probe
 stays probed for the ledger's lifetime rather than re-arming
 on that re-confirmation. A second anchor confirming while a
-probe is pending waits for the layout, as before. It is not the
+probe is pending waits for the layout, as before, and an entry
+already sitting within the match tolerance of the probe's span
+absorbs its confirmation, so that pair stays a hair inside the
+bar until the probe runs out of issues — a hand-drifted ask one
+step off the layout's, accepted as rare. It is not the
 timer re-probe the limitations table rules out: one probe per
 anchor, re-issued once and only once answered, never chained off
 its own confirmation, and ring-invisible, since the overlay pins
