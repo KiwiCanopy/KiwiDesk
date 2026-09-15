@@ -59,8 +59,9 @@ struct GateReasonPlacementTests {
                 .general(.startAtLogin),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
-                // one that greys now — init.lua owning the table
-                // — is visible nowhere on this page.
+                // one that greys now — a stored Save with no
+                // sidecar to file into — is visible nowhere on
+                // this page.
                 .profiles(.profileBindings),
                 // Found BY the derivation: the copy action sits
                 // on the App Bar card while the switch that

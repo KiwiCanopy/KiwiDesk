@@ -146,6 +146,42 @@ struct StoredProfileBindingSaveTests {
         )
     }
 
+    /// The reachable un-seeded state (#354's class): a `set_*`-only
+    /// `init.lua` and no sidecar. The model reads both facts the
+    /// resolver greys on, the door refuses by name, and Live —
+    /// whose Save mints the sidecar — is never greyed.
+    @Test("a set_*-only init.lua, no sidecar: stored target greys")
+    func unseededConfigGreysStoredOnly() throws {
+        let core = makeTestCore()
+        try FileManager.default.createDirectory(
+            at: core.configURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try "KiwiDesk.set_gap(8)\n".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        let model = makeTestModel(core: core)
+        model.reload()
+        #expect(!model.guiManaged)
+        #expect(!model.sidecarExists)
+        func reason(editing: Bool) -> ProfilesGates.InertReason? {
+            ProfilesGates(
+                editingStoredProfile: editing,
+                connectedScreens: 1,
+                guiManaged: model.guiManaged,
+                sidecarExists: model.sidecarExists
+            ).inertReason(for: .profiles(.profileBindings))
+        }
+        #expect(reason(editing: false) == nil)
+        #expect(reason(editing: true) == .noSidecar)
+        #expect(throws: SidecarError.missing) {
+            try core.rewriteSidecarBindings { _ in }
+        }
+        #expect(!core.guiConfigStore.exists)
+    }
+
     @Test("an unreadable sidecar is refused, never overwritten")
     func unreadableSidecarRefused() throws {
         let garbage = Data("{ not json".utf8)

@@ -305,6 +305,7 @@ struct ProfilesGateWiringTests {
             ]
         for key in [
             "profiles.desktops.lua_owned",
+            "profiles.desktops.no_sidecar",
             "presets.editing_stored",
             "presets.needs_screens",
         ] {

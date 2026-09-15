@@ -4,9 +4,10 @@ import SwiftUI
 /// Settings group for binding profiles to macOS Desktops (#7,
 /// #678, #768, #888). The rows are live under every edit target
 /// — bindings are a global table, filed by a stored-profile Save
-/// too — and inert only where init.lua owns that table, the one
-/// gate the resolver answers (#1392). Its cause is off this
-/// surface, so the reason draws INLINE, outside the dim (#815).
+/// too — and inert only where that Save has no sidecar to file
+/// one, the one gate the resolver answers (#1392). Its cause is
+/// off this surface, so the reason draws INLINE, outside the
+/// dim (#815).
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = true
@@ -15,7 +16,8 @@ struct DesktopsGroup: View {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
             connectedScreens: model.displays.count,
-            guiManaged: model.guiManaged
+            guiManaged: model.guiManaged,
+            sidecarExists: model.sidecarExists
         )
     }
 

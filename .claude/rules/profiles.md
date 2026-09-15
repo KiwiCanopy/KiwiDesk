@@ -596,11 +596,14 @@ the Desktop binding table leaves that draft through
 entry onto the store's own map, never `loadGuiConfig()`'s
 overlay; `renameProfile`'s value follow takes the same door, and
 `reconcileDesktopBindings` stays apart on its stated no-reload
-reason. The door stands down with no sidecar and throws where one
-no longer decodes, which is why the rows grey under
-`!isGuiManaged` rather than offering a write that lands nowhere
+reason. The door names its refusal — no sidecar, or one that no
+longer decodes — rather than minting or overwriting a file, and
+the sidecar's bindings are read only while `isGuiManaged`, so the
+rows grey under a STORED target of a config the GUI does not
+manage, by cause, rather than offering a write that lands nowhere
+— never under Live, whose Save mints the sidecar
 (`StoredProfileBindingSaveTests`, `ProfilesGateTests` ▸
-`bindingsLuaOwned`). A second global leaf made editable under the
+`bindingsNoStore`). A second global leaf made editable under the
 stored target takes the same shape: its own write, its own
 "no store" gate.
 

@@ -10633,11 +10633,13 @@ row there dropped its edit on Save. That was a missing write,
 not a reason to withhold the row — a stored-profile Save files
 an edited binding table into `gui.json` through one Core door
 (`rewriteSidecarBindings`), and only for the rows that changed.
-The one state that still greys them is a config `init.lua` owns:
-there is no sidecar for the write to land in, and a live row
-there would offer an edit that goes nowhere, so the rows dim
-with that reason — the one case the retired sentence was right
-about. Moving the binding *into* the profile was refused on the
+The one state that still greys them is a stored profile of a
+config the GUI does not manage: that Save has no sidecar to file
+into, or one nothing reads, so a live row there would offer an
+edit that goes nowhere, and the rows dim with the cause — the
+one case the retired sentence was right about. Live is never
+greyed, since its Save creates the sidecar. Moving the binding
+*into* the profile was refused on the
 standing rule: a profile owns tiling plus sparse overrides,
 never anything that routes or selects the profile itself.
 

@@ -57,6 +57,9 @@ extension SettingsModel {
         guard !edits.isEmpty else { return }
         do {
             try core.rewriteSidecarBindings { edits.apply(to: &$0) }
+        } catch let error as SidecarError {
+            profileWarning = Self.sidecarRefusal(error)
+            core.onLog("desktop bindings save refused: \(error)")
         } catch {
             profileWarning = L(
                 "settings.globals_save_failed",
@@ -64,6 +67,24 @@ extension SettingsModel {
                 "\(error)"
             )
             core.onLog("desktop bindings save failed: \(error)")
+        }
+    }
+
+    /// Core names the refusal; the GUI narrates it (#96).
+    private static func sidecarRefusal(_ error: SidecarError) -> String {
+        switch error {
+        case .missing:
+            return L(
+                "settings.bindings_save.no_sidecar",
+                "Desktop bindings were not saved: gui.json does "
+                    + "not exist yet."
+            )
+        case .unreadable:
+            return L(
+                "settings.bindings_save.unreadable",
+                "Desktop bindings were not saved: gui.json could "
+                    + "not be read."
+            )
         }
     }
 

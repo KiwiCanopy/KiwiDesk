@@ -94,8 +94,8 @@ struct GreyOutParityTests {
         //
         // The Desktop bindings grey is the resolver's (pinned by
         // `ProfilesGateWiringTests`); this pins that its one
-        // reason — init.lua owning the table, since #1392 —
-        // actually dims the rows, and only the rows: the header,
+        // gate — a stored Save with no binding store, since
+        // #1392 — actually dims the rows, and only the rows: the header,
         // its `?` and the inline reason stay live (#527/#815).
         (
             "DesktopsGroup.swift",

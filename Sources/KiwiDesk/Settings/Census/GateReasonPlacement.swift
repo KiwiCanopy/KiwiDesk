@@ -79,7 +79,7 @@ extension SettingRuntimeGate {
         case .perEdgeValuesDiffer, .editingStoredProfile,
             .screenCountMismatch,
             .loginItemServiceStatus, .autoStartServiceLoaded,
-            .spaceHasNoOverrides, .reduceMotion, .notGuiManaged:
+            .spaceHasNoOverrides, .reduceMotion, .noBindingStore:
             return true
         case .orphanPinsExist, .monitorsDisconnected,
             .paletteGlowPairing, .luaImportAvailable,
@@ -99,7 +99,7 @@ extension SettingRuntimeGate {
         case .spaceHasNoOverrides:
             return true
         case .reduceMotion, .loginItemServiceStatus,
-            .autoStartServiceLoaded, .notGuiManaged:
+            .autoStartServiceLoaded, .noBindingStore:
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true

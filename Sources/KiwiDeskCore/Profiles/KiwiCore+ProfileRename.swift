@@ -51,6 +51,8 @@ extension KiwiCore {
                     bindings[key]?.profile = new
                 }
             }
+        } catch SidecarError.missing {
+            // A hand-written config: nothing to follow.
         } catch {
             onLog("rename: sidecar follow failed: \(error)")
         }

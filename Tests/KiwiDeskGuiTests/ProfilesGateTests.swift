@@ -25,12 +25,14 @@ struct ProfilesGateTests {
         editing: Bool = false,
         screens: Int = 3,
         guiManaged: Bool = true,
+        sidecar: Bool = true,
         preset: Int? = nil
     ) -> ProfilesGates {
         ProfilesGates(
             editingStoredProfile: editing,
             connectedScreens: screens,
             guiManaged: guiManaged,
+            sidecarExists: sidecar,
             presetScreens: preset
         )
     }
@@ -147,16 +149,31 @@ struct ProfilesGateTests {
         }
     }
 
-    /// The one state that greys them: init.lua owns the config,
-    /// so there is no sidecar for a row's write to land in —
-    /// whatever the edit target.
-    @Test("bindings are inert where init.lua owns the config")
-    func bindingsLuaOwned() {
-        for editing in [false, true] {
+    /// The one state that greys them: a STORED profile's Save has
+    /// no sidecar the structured loader reads — Live's Save
+    /// creates one, so the live target never greys, whatever the
+    /// config's ownership.
+    @Test("only a stored target with no binding store greys")
+    func bindingsNoStore() {
+        #expect(
+            gates(editing: true, guiManaged: false, sidecar: true)
+                .inertReason(for: .profiles(.profileBindings))
+                == .bindingsOwnedByLua
+        )
+        #expect(
+            gates(editing: true, guiManaged: false, sidecar: false)
+                .inertReason(for: .profiles(.profileBindings))
+                == .noSidecar
+        )
+        for sidecar in [false, true] {
+            let live = gates(
+                editing: false,
+                guiManaged: false,
+                sidecar: sidecar
+            )
             #expect(
-                gates(editing: editing, guiManaged: false)
-                    .inertReason(for: .profiles(.profileBindings))
-                    == .bindingsOwnedByLua
+                live.inertReason(for: .profiles(.profileBindings))
+                    == nil
             )
         }
     }

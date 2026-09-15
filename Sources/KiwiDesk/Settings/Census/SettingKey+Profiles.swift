@@ -16,13 +16,13 @@ extension ProfilesKey {
         switch self {
         case .profileBindings:
             // Live under every edit target — bindings are a
-            // global table — and inert only where init.lua owns
-            // that table (#1392).
+            // global table — and inert only where the stored
+            // profile's Save has no sidecar to file one (#1392).
             return .row(
                 .profiles,
                 .profilesPerMacOSSpace,
                 .showMore,
-                gate: .runtime(.notGuiManaged)
+                gate: .runtime(.noBindingStore)
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)

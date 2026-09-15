@@ -8,9 +8,12 @@ struct ProfilesGates {
     let editingStoredProfile: Bool
     /// Current count of connected physical displays.
     let connectedScreens: Int
-    /// `KiwiCore.isGuiManaged`: false where init.lua owns the
-    /// config, so there is no sidecar to file a binding into.
+    /// `KiwiCore.isGuiManaged` and whether `gui.json` exists:
+    /// a stored profile's Save files a binding only into a
+    /// sidecar the structured loader reads (#1392). Live's Save
+    /// creates one, so only the stored target greys.
     let guiManaged: Bool
+    let sidecarExists: Bool
     /// Preset row's OWN screen count; nil on every other row — a
     /// `presetsApply` resolve with nil is a caller that forgot to
     /// pass it, which asserts rather than silently (not) greying.
@@ -19,6 +22,7 @@ struct ProfilesGates {
     /// Reason why a setting control is currently disabled/inert.
     enum InertReason: Hashable {
         case bindingsOwnedByLua
+        case noSidecar
         case presetSwitchesLiveLayout
         case screenCountMismatch(screens: Int)
     }
@@ -32,7 +36,10 @@ struct ProfilesGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .profiles(.profileBindings):
-            return guiManaged ? nil : .bindingsOwnedByLua
+            guard editingStoredProfile, !guiManaged else {
+                return nil
+            }
+            return sidecarExists ? .bindingsOwnedByLua : .noSidecar
         case .profiles(.presetsApply):
             if editingStoredProfile {
                 return .presetSwitchesLiveLayout
@@ -81,6 +88,13 @@ enum ProfilesGateHelp {
                 "Your init.lua owns the Desktop bindings — "
                     + "edit its %1$@ lines there.",
                 "bind_profile_to_desktop"
+            )
+        case .noSidecar:
+            return L(
+                "profiles.desktops.no_sidecar",
+                "Desktop bindings are kept in gui.json, which "
+                    + "doesn't exist yet — switch to Live and "
+                    + "save once to create it."
             )
         case .presetSwitchesLiveLayout:
             return L(

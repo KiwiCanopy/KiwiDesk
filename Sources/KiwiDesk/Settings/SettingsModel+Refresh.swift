@@ -6,6 +6,7 @@ extension SettingsModel {
     func refreshProfiles() {
         profiles = core.profiles.list()
         guiManaged = core.isGuiManaged
+        sidecarExists = core.guiConfigStore.exists
         activeProfile = core.profiles.currentName
         activeStandard = core.profiles.currentStandard
         profileDirty = core.profiles.isDirty
