@@ -162,6 +162,10 @@ struct StoredProfileBindingSaveTests {
             atomically: true,
             encoding: .utf8
         )
+        // The boot seed is what declines here (#354): a config
+        // declaring managed settings gets no minted sidecar.
+        core.loadConfig()
+        #expect(!core.guiConfigStore.exists)
         let model = makeTestModel(core: core)
         model.reload()
         #expect(!model.guiManaged)
