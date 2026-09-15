@@ -31,7 +31,9 @@ extension Space {
 
     /// Drops a break the window only held (#1387's ruling): a
     /// handed break is never handed on, so nothing reaches
-    /// `handTrackBreakToSuccessor`. The weight goes with it.
+    /// `handTrackBreakToSuccessor`. The weight goes with it — a
+    /// session value the head's return does not recover when the
+    /// holder left while a member stayed.
     mutating func dropTrackBreak(of window: WindowID) {
         trackBreaks.remove(window)
         trackWeights[window] = nil

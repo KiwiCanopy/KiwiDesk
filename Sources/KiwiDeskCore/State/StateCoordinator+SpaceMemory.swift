@@ -24,11 +24,10 @@ extension StateCoordinator {
     struct DepartedSlot: Sendable, Equatable {
         var rank: Int
         /// Re-derived at each departure of the Space: a handed
-        /// break stays handed while it is held and ends when it is
-        /// not; a holder that loses it and regains one of its own
-        /// between two departures reads as handed until the next
-        /// (residue, not an age bound — the next departure is the
-        /// bound).
+        /// break stays handed while a break is held and ends when
+        /// none is. Residue: a holder given a break of its OWN
+        /// while its head is away reads as handed until that head
+        /// returns and takes it, or it departs and drops it.
         var trackBreak: Space.BreakProvenance
         /// The member `handTrackBreakToSuccessor` gave this
         /// window's break to at its departure — the one holder a
@@ -90,10 +89,9 @@ extension StateCoordinator {
         }
         // The removal about to follow hands `id`'s OWN break on;
         // the record names the holder and marks it before a later
-        // departure re-reads it. A handed break is dropped instead
-        // (ruling, #1387): its head takes it back on return.
+        // departure re-reads it.
         guard departedSlots[id]?.trackBreak == .head else {
-            workspaces.withSpace(space) { $0.dropTrackBreak(of: id) }
+            dropHandedBreak(of: id)
             return
         }
         if let successor = workspaces[space]?.handOffTarget(of: id) {
@@ -162,6 +160,19 @@ extension StateCoordinator {
         }
         departedSlots[id] = nil
         return true
+    }
+
+    /// A handed break is never handed on (ruling, #1387): a window
+    /// leaving the row while recorded as holding one drops it, so
+    /// `Space.remove` finds nothing to pass. Every removal of a
+    /// live window that is not a hand-off of its own calls this
+    /// ahead of `workspaces.remove` — the destroy fold and the
+    /// app-exit fold.
+    mutating func dropHandedBreak(of id: WindowID) {
+        guard departedSlots[id]?.trackBreak == .handed,
+            let space = workspaces.space(of: id)
+        else { return }
+        workspaces.withSpace(space) { $0.dropTrackBreak(of: id) }
     }
 
     /// A head gone for good makes its hand-off permanent (#1387):

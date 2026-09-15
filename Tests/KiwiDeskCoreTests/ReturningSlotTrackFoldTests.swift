@@ -238,29 +238,56 @@ struct ReturningSlotTrackFoldTests {
         #expect(state.workspaces[home]?.trackBreaks == [b])
     }
 
-    /// The other enders of a head's record promote too: a
-    /// redirect (#1150), a profile re-file (#1248), the app's exit.
-    @Test("every ender of a head's record promotes its holder")
-    func everyEnderPromotes() {
+    /// The enders of a head's record, each promoting its holder
+    /// through its own door.
+    enum Ender: CaseIterable {
+        case redirect, refile, appExit, close
+    }
+
+    @Test(
+        "every ender of a head's record promotes its holder",
+        arguments: Ender.allCases
+    )
+    func everyEnderPromotes(ender: Ender) {
         var state = makeTrackRow()
-        state.workspaces.withSpace(home) { $0.trackBreaks = [a, b, c] }
-        depart(&state, [a, b, c])
-        state.redirectDeparture(of: a, to: SpaceID("2"))
-        #expect(state.departedSlots[b]?.trackBreak == .head)
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [a])
+        #expect(state.departedSlots[a]?.handedTo == b)
+        #expect(state.departedSlots[b]?.trackBreak == .handed)
         state.workspaces.ensureSpace(SpaceID("2"))
-        state.refileAway(of: b, to: SpaceID("2"))
-        #expect(state.departedSlots[c]?.trackBreak == .head)
-        state.awayWindows[c] = AwayWindow(
-            id: c,
-            pid: pid_t(c.raw),
-            appName: "App",
-            appBundleID: nil,
-            nativeSpace: SkyLight.SpaceID(9),
-            isUp: true
-        )
-        state.apply(.appTerminated(pid: pid_t(c.raw)))
-        #expect(state.departedSlots[d]?.trackBreak == .head)
-        #expect(state.departedSlots[c] == nil)
+        switch ender {
+        case .redirect:
+            state.redirectDeparture(of: a, to: SpaceID("2"))
+        case .refile:
+            state.refileAway(of: a, to: SpaceID("2"))
+        case .appExit:
+            state.awayWindows[a] = AwayWindow(
+                id: a,
+                pid: pid_t(a.raw),
+                appName: "App",
+                appBundleID: nil,
+                nativeSpace: SkyLight.SpaceID(9),
+                isUp: true
+            )
+            state.apply(.appTerminated(pid: pid_t(a.raw)))
+            #expect(state.departedSlots[a] == nil)
+        case .close:
+            state.forgetAway(a)
+        }
+        #expect(state.departedSlots[b]?.trackBreak == .head)
+    }
+
+    /// The app-exit fold removes LIVE windows too, and a holder
+    /// among them drops the break rather than handing it on.
+    @Test("an app exit drops a live holder's handed break")
+    func appExitDropsALiveHoldersBreak() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [a])
+        #expect(state.workspaces[home]?.trackBreaks == [b])
+        state.apply(.appTerminated(pid: pid_t(b.raw)))
+        #expect(state.workspaces[home]?.windows == [c, d])
+        #expect(state.workspaces[home]?.trackBreaks == [])
     }
 
     @Test("a re-key carries the provenance with the slot")
