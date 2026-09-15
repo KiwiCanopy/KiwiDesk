@@ -48,7 +48,7 @@ public struct ScrollingLayout: LayoutSystem {
         let offset = Self.offset(
             anchor: context.scrolling.anchor,
             previous: context.scrollRest,
-            focus: context.focused,
+            focus: metrics.subject,
             along: metrics.along,
             size: metrics.focusedSpan,
             rowLength: metrics.rowLength,

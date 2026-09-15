@@ -31,7 +31,7 @@ extension ScrollingLayout {
         let value = offset(
             anchor: context.scrolling.anchor,
             previous: context.scrollRest,
-            focus: context.focused,
+            focus: metrics.subject,
             along: metrics.along,
             size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
@@ -102,7 +102,7 @@ extension ScrollingLayout {
         let value = offset(
             anchor: context.scrolling.anchor,
             previous: context.scrollRest,
-            focus: context.focused,
+            focus: m.subject,
             along: m.along,
             size: m.focusedSpan,
             rowLength: m.rowLength,

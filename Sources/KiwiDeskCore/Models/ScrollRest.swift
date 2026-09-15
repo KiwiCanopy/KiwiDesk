@@ -6,7 +6,10 @@ public struct ScrollRest: Sendable, Equatable {
     /// Focus slot measurement provenance for viewport anchor calculations
     /// (#966).
     public struct Slot: Sendable, Equatable {
-        /// Focused window ID when offset was measured.
+        /// The window the anchor placed when the offset was
+        /// measured — the tiled focus, or under a fixed anchor
+        /// the remembered stand-in while a float holds focus
+        /// (`ScrollingLayout.subject`, #1388).
         public var window: WindowID
         /// Window position along scroll axis in the row.
         public var position: CGFloat
