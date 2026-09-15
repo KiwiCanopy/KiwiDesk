@@ -16,8 +16,10 @@ import Foundation
 /// composited plate, `ModeGatedFrameSeparationTests` for the
 /// Settings mode-gated frame against its two border
 /// neighbours, `AccentStateSeparationTests` for the accent
-/// seal's disabled fill against the two live ones — and a
-/// hand-copied transform that
+/// seal's disabled fill against the two live ones,
+/// `BorderRingSeparationTests` for the focused ring against
+/// the composited unfocused one — and a hand-copied transform
+/// that
 /// drifted in one of them would silently move the number a guard
 /// is asserting on — a guard passing for the wrong reason, which
 /// is precisely what these guards exist to prevent. The numbers
