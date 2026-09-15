@@ -1234,8 +1234,14 @@ editing here:
   every corroborated-bound consumer, and a FIXED limit stays the
   user's number (`TrackLearnedCapTests`) — while the count is
   only feasibility, so the heal's second pass re-shares the
-  track weights until each track draws its floor
-  (`TrackLayout.flooredWeights`, `TrackFloorHealTests`), and a
+  track weights until each track draws its floor and no wider
+  than its members' corroborated ceiling, read through
+  `learnedCeiling(of:in:)`, the floor reading's mirror
+  (`TrackLayout.flooredWeights`, `TrackFloorHealTests`,
+  `TrackCeilingHealTests`, #1488) — and the resize clamp folds
+  on that same `foldedPartition` over the geometric cap, never
+  the per-marker one, so a refusal names a share the screen
+  draws (`TrackResizeFoldTests`) — and a
   consumer of the LEARNED cap takes the render's own input
   through `layoutInput`, never a context built beside it, and
   runs inside `KiwiCore.retile`'s `withForcedPass` scope — the
@@ -1578,7 +1584,15 @@ editing here:
   `set_min_window_size`, `set_mode`, the whole `layoutCommand`
   dispatch. Event-driven retiles stay un-forced so echo lag can't
   wobble windows. Profile applies classify themselves: see
-  [profiles.md](profiles.md).
+  [profiles.md](profiles.md). **A Space switch takes
+  `retile(reissue: true)`, never `force`** (#1488): `force` is
+  also the probe past corroborated bounds (#1055), under which
+  the automatic track count and every heal stand down, so a
+  switch that forced redrew the count's overlap on every return.
+  `reissue` re-issues every frame and probes nothing; a new
+  caller that activates a Space and is not an explicit apply
+  takes it (`SpaceSwitchReissueTests`, `RetileBoundSkipTests` ▸
+  `reissueIssuesTheBound`).
 - **A resize nobody asked for is corrected on its own event
   (#1358)** — the `.windowResized` arm's outcomes are four and a
   new arm keeps them so: our ask's ECHO goes to the #677 answer

@@ -3388,6 +3388,40 @@ carry its floor into the heal's count and not the render's —
 one track fewer in the heal than on screen, the away twin of
 the visitor horn below, transient in the same way.
 
+:::unreleased
+**The heal honours a learned ceiling too, the clamp folds like
+the render, and a Space switch re-issues without probing
+(#1488).** Three sightings on one device, two mechanisms. The
+re-share above water-filled floors only, so a fixed-size window
+(System Settings, 825 pt, refused in both directions) was the
+UNpinned track and took the whole remainder — 1106 pt of slot
+for 825 pt of window, the rest empty screen — while the column
+beside it sat pinned at its floor. `flooredWeights` now clamps
+every share between its floor and its members' corroborated
+ceiling (`maxWidth`/`maxHeight`, #1055's, read through
+`learnedFloor`'s mirror; a track is ceilinged only where every
+member is) at the one water level that fills the span — the same
+answer the floor-only pinning computed, which is why no earlier
+expectation moved — and stands down where the ceilings together
+cannot fill it, the one honest gap. The second sighting was the
+resize clamp refusing to grow that column because "System
+Settings cannot shrink": true of the per-marker partition the
+clamp folded on, false of the two-track fold the render drew.
+The clamp takes `foldedPartition` over the geometric cap now,
+the way #944 ruled the heal must, so a refusal names a share the
+screen shows and a folded column divides along its axis. The
+third was every return to the Space redrawing the overlap the
+heal had removed: `force` meant both "re-issue every frame" and
+"probe past corroborated bounds", the switch needed the first
+(its echoes lag) and inherited the second, under which the cap
+and the heal stand down. `reissue` carries the first half alone;
+the switch, its settle and the two drag activations take it, and
+an explicit `set_*` apply keeps both, since re-asking is what
+the user asked for. (`TrackCeilingHealTests`,
+`TrackResizeFoldTests`, `SpaceSwitchReissueTests`,
+`RetileBoundSkipTests` ▸ `reissueIssuesTheBound`)
+:::
+
 **[Principle]**
 
 **A split store heals to a learned floor at retile, and the
