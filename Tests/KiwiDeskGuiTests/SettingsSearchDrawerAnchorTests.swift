@@ -100,6 +100,52 @@ struct SettingsSearchDrawerAnchorTests {
         }
     }
 
+    /// Gaps & Borders' `.showMore` rows sit at REST in their
+    /// cards (no drawer draws them), so an anchor there buys the
+    /// scroll and the wash rather than an expansion — the hit
+    /// still lands on the row, breadcrumb the destination alone.
+    /// Read with the bridge present so the sticky reach row is
+    /// indexed. The drag ghost / drop zone `Border` and `Fill`
+    /// rows are the stated residue: two census rows share one
+    /// label key per column, and the label-key join cannot tell
+    /// them apart, so they stay anchor-less by ruling rather than
+    /// resolving onto the first column declared.
+    @Test("a Gaps & Borders row lands on its own control")
+    func gapsAndBordersRowsCarryAnchors() {
+        pinEnglish()
+        defer { reset() }
+        let before = SettingsSearchIndex.canDriveDesktops
+        defer { SettingsSearchIndex.canDriveDesktops = before }
+        SettingsSearchIndex.canDriveDesktops = true
+        let rows = SettingsSearchIndex.rows()
+        for container in [
+            SettingsContainer.focusBorder, .stickyWindows,
+        ] {
+            let hidden = showMoreRows(in: .gapsAndBorders, container)
+            #expect(!hidden.isEmpty, Comment(rawValue: "\(container)"))
+            for key in hidden {
+                let row = rows.first { $0.key == key }
+                #expect(
+                    row?.anchor.anchor != nil,
+                    Comment(rawValue: key.id)
+                )
+                #expect(
+                    row?.path == ["Gaps & Borders"],
+                    Comment(rawValue: key.id)
+                )
+            }
+        }
+        let drag = showMoreRows(in: .gapsAndBorders, .dragAndDrop)
+        #expect(drag.count == 4)
+        for key in drag {
+            let row = rows.first { $0.key == key }
+            #expect(
+                row?.anchor.anchor == nil,
+                Comment(rawValue: key.id)
+            )
+        }
+    }
+
     /// The two bars' Style drawers share one label key and are
     /// told apart by instance; their rows carry the bar's OWN
     /// keys, so the join lands each census row on its own bar's

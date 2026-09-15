@@ -178,7 +178,10 @@ struct SettingsCatalogArgumentTests {
         // anchors through the indirect parameter above.
         // 91 since #277: the two bars' Style drawers' 27 rows
         // self-anchor as the drawers' children, each once.
-        #expect(direct.values.reduce(0, +) == 91)
+        // 98 since #277: Gaps & Borders' seven at-rest rows —
+        // the glow group, the unfocused toggle, the fit-gaps
+        // spacing and the two sticky toggles.
+        #expect(direct.values.reduce(0, +) == 98)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

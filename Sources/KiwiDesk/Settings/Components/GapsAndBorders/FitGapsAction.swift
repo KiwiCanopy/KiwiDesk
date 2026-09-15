@@ -23,6 +23,7 @@ struct FitGapsAction: View {
                 suffix: L("border.fit_gaps.unit", "pt"),
                 liveCommit: true
             )
+            .searchAnchored(SettingsCatalog.gapsAndBorders.fitGapsSpacing)
             result
             Button(
                 L(

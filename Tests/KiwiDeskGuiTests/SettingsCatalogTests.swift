@@ -86,7 +86,9 @@ struct SettingsCatalogTests {
         // eleven rows.
         // 121 since #277: the two bars' Style drawers' 27 rows,
         // the drawers' children, so a hit opens the drawer.
-        #expect(allEntries.count == 121)
+        // 128 since #277: Gaps & Borders' seven at-rest rows,
+        // so a hit scrolls to and washes the row.
+        #expect(allEntries.count == 128)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

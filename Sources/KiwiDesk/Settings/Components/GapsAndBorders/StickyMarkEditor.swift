@@ -29,6 +29,7 @@ struct StickyMarkEditor: View {
                 isOn: $model.config.settings.stickyStyle.mark,
                 help: Self.markHelp
             )
+            .searchAnchored(SettingsCatalog.gapsAndBorders.stickyMarkRow)
             // #1145: HIDDEN without the bridge — the
             // liquid-glass shape; `canDriveDesktops`' docstring
             // owns why this is never a grey.
@@ -42,6 +43,7 @@ struct StickyMarkEditor: View {
                         .desktopReach,
                     help: Self.reachHelp
                 )
+                .searchAnchored(SettingsCatalog.gapsAndBorders.stickyReachRow)
             }
         }
     }

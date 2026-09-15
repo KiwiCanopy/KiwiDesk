@@ -67,7 +67,8 @@ struct SettingsCatalogSiteTests {
         // 88 since #1365: the Mac Checklist's three cards and
         // eleven rows, each row keyed on its census label key.
         // 115 since #277: the two bars' Style drawers' 27 rows.
-        #expect(names.count == 115)
+        // 122 since #277: Gaps & Borders' seven at-rest rows.
+        #expect(names.count == 122)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
