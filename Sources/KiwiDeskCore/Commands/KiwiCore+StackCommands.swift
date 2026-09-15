@@ -211,7 +211,7 @@ extension KiwiCore {
         }
         if activeSpace?.windows != space.windows {
             // Deferred, not armed here: this reorder's retile is
-            // the dispatcher's trailing `retile(force:)`, so an
+            // the dispatcher's trailing `retile(pass: .apply)`, so an
             // arm now could fire mid-retile off pre-reorder
             // frames (#153). `layoutCommand` fires it after.
             requestZOrderRestoreAfterDispatch()
