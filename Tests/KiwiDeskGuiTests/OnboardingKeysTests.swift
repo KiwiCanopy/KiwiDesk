@@ -222,6 +222,38 @@ struct OnboardingKeysTests {
         #expect(families.contains { $0.id == "shortcuts" })
     }
 
+    /// Open Settings is taught where a new user meets it — before
+    /// Settings has ever been opened (#1381, owner 2026-09-15) —
+    /// and, like every family, draws no row when unbound.
+    @Test("a bound Open Settings chord is taught, an unbound one is not")
+    func openSettingsIsTaughtWhenBound() {
+        let unbound = OnboardingKeys.families(
+            layer: layer(arrows),
+            spaces: spaces(1)
+        )
+        #expect(!unbound.contains { $0.id == "settings" })
+        let families = OnboardingKeys.families(
+            layer: layer(
+                arrows + [
+                    (
+                        "control+option+comma",
+                        KeybindingCatalog.openSettings.lua
+                    )
+                ]
+            ),
+            spaces: spaces(1)
+        )
+        let settings = families.first { $0.id == "settings" }
+        #expect(
+            settings?.chord == .shared([.control, .option], keys: ",")
+        )
+        #expect(
+            settings?.label
+                == KeybindingCatalog.openSettings.resolvedLabel
+        )
+        #expect(settings?.isGateway == false)
+    }
+
     /// The move/follow PAIR ships together (owner, 2026-08-16).
     ///
     /// The tour taught `move_to_space` alone while the seeded

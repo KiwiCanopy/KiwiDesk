@@ -141,7 +141,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Reads bound open-combo live for quick menu.
         statusItem.shortcutsComboProvider = { [weak self] in
             guard let self else { return nil }
-            return ShortcutsOpenBinding.combo(core: self.core)
+            return ShortcutsOpenBinding.combo(
+                core: self.core,
+                lua: ShortcutsOpenBinding.lua
+            )
         }
         statusItem.settingsComboProvider = { [weak self] in
             guard let self else { return nil }

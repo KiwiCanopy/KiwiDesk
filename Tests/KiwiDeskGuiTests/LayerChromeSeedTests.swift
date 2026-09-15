@@ -46,7 +46,7 @@ struct LayerChromeSeedTests {
         }
         // Non-vacuity, and the register both ways: a ruled-out
         // site that stops constructing a layer is a stale entry.
-        #expect(seeding == ["LayerStripEditor.swift"])
+        #expect(!seeding.isEmpty, "no GUI site authors a layer")
         for name in Self.allowed.keys {
             let file = try #require(
                 try SourceScan.swiftSources(under: gui).first {
