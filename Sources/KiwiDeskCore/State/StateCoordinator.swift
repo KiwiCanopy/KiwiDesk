@@ -48,7 +48,15 @@ public struct StateCoordinator: Sendable {
     /// by this rank, so a Desktop's row comes back in the order it
     /// left rather than in re-track order. Kept after the return so
     /// later arrivals rank against it; rewritten at each departure.
-    var departedSlots: [WindowID: Int] = [:]
+    /// ONE value with the track head-ness the return re-applies
+    /// (#1387), so every ender and the re-key carry both or neither.
+    var departedSlots: [WindowID: DepartedSlot] = [:]
+
+    /// The ranks alone, the shape `Space.insert(_:rank:ranks:)`
+    /// takes.
+    var departedRanks: [WindowID: Int] {
+        departedSlots.mapValues(\.rank)
+    }
 
     /// Windows the compositor hosts on a Desktop nobody shows
     /// (#1146) — the away LEDGER, beside the visible-only state:

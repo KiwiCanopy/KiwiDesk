@@ -314,8 +314,21 @@ editing here:
   departed window carries its slot in `departedSlots`, and the
   fold re-inserts a `.departed` return by RANK against the
   members already back — never at the index, which a later slot
-  already back would overtake (`ReturningSlotFoldTests`). The
-  secondary-display arm owes nothing — not because it activates
+  already back would overtake (`ReturningSlotFoldTests`) — and
+  AHEAD of the track spawn rule, which placed a return as a new
+  window, at index 0 in re-track order under `own_track`/`first`
+  (#1387). The return takes back the BREAK it had too:
+  `Space.remove` hands a departing head's break to its successor,
+  so the record carries the break's provenance
+  (`DepartedSlot.trackBreak` — member, head, or handed — the
+  hand-off's target marked ahead of the removal through the one
+  `handOffTarget`), a handed break is never re-recorded as a head
+  of its own, since the live set cannot tell them apart, and a
+  returning head takes its break back from the first holder
+  recorded handed, walking a chain of departures
+  (`ReturningSlotTrackFoldTests`). The rank and the provenance are
+  ONE value, so every ender and the re-key carry both or neither.
+  The secondary-display arm owes nothing — not because it activates
   no Space, which stopped being true in #1230, but because the
   debt is recorded per SPACE at the focus report and paid by the
   create fold, while that arm moves a DISPLAY

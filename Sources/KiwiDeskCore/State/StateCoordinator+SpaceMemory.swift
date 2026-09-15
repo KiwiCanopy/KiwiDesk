@@ -18,6 +18,34 @@ extension StateCoordinator {
         }
     }
 
+    /// What a departed window takes back on its return (#1207,
+    /// #1387): the slot it held and the break it had. `Space.remove`
+    /// hands a departing head's break to its successor, so a return
+    /// by rank alone re-joined the successor's track — and a
+    /// successor re-recorded after that hand-off read as a head of
+    /// its own, which is why the break's provenance is the record
+    /// and never the live set alone.
+    struct DepartedSlot: Sendable, Equatable {
+        enum TrackBreak: Sendable, Equatable {
+            /// No break: a member of some head's track.
+            case member
+            /// Headed a track by its own break: the return
+            /// re-inserts it and takes a handed one back.
+            case head
+            /// Holds a break `handTrackBreakToSuccessor` gave it;
+            /// ends when the break does, or when the head returns.
+            case handed
+        }
+
+        var rank: Int
+        var trackBreak: TrackBreak
+
+        init(rank: Int, trackBreak: TrackBreak = .member) {
+            self.rank = rank
+            self.trackBreak = trackBreak
+        }
+    }
+
     /// Records restored space association for untracked window
     /// (`rememberedSpaces`, #1010).
     mutating func remember(_ id: WindowID, in space: SpaceID) {
@@ -38,16 +66,30 @@ extension StateCoordinator {
         guard let members = workspaces[space]?.windows,
             members.contains(id)
         else { return }
+        let heads = workspaces[space]?.trackBreaks ?? []
         let departed = departedSlots.filter { entry in
             windows[entry.key] == nil
                 && rememberedSpaces[entry.key] == .departed(space)
-        }.values.sorted()
+        }.values.map(\.rank).sorted()
         for (index, member) in members.enumerated() {
             var rank = index
             for sibling in departed where sibling <= rank {
                 rank += 1
             }
-            departedSlots[member] = rank
+            // A handed break stays handed while it is held; a
+            // break gone from the live set ends the mark.
+            let held = heads.contains(member)
+            let handed =
+                held && departedSlots[member]?.trackBreak == .handed
+            departedSlots[member] = DepartedSlot(
+                rank: rank,
+                trackBreak: !held ? .member : handed ? .handed : .head
+            )
+        }
+        // The removal about to follow hands `id`'s break on; mark
+        // the successor before a later departure re-reads it.
+        if let successor = workspaces[space]?.handOffTarget(of: id) {
+            departedSlots[successor]?.trackBreak = .handed
         }
     }
 

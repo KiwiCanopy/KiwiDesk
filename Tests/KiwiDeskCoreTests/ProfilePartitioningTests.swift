@@ -120,6 +120,46 @@ struct ProfilePartitioningTests {
         #expect(members(core, "2") == [WindowID(2)])
     }
 
+    /// The device row of #1387 (2026-09-15): on a bound-Desktop
+    /// switch this restore runs while the departing Desktop's
+    /// windows are still live in a same-named Space, and
+    /// re-appending them re-ordered the row the settle sweep then
+    /// filed the #1207 ranks against, `Space.remove` handing each
+    /// track break away on the way. A member already in its
+    /// remembered Space is left where it sits, break and all.
+    @Test("A window already in its remembered Space is left in place")
+    func sameSpaceMemberIsLeftInPlace() {
+        let core = makeCore()
+        live(core, [1, 2, 3, 4])
+        var a = profile("A", spaces: ["1"])
+        a.spaceModes["1"] = .track
+        var b = profile("B", spaces: ["1", "2"])
+        b.spaceModes["1"] = .track
+        core.apply(profile: a, forceRetile: false)
+        for id in [1, 2, 3] {
+            core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
+        }
+        core.state.workspaces.withSpace("1") {
+            $0.trackBreaks = [WindowID(1), WindowID(2), WindowID(3)]
+        }
+
+        core.apply(profile: b, forceRetile: false)
+        // Opened while B is up: A has never seen it.
+        core.state.workspaces.withSpace("1") {
+            $0.insert(WindowID(4), placement: .last)
+        }
+
+        core.apply(profile: a, forceRetile: false)
+        #expect(
+            members(core, "1")
+                == [1, 2, 3, 4].map { WindowID(UInt32($0)) }
+        )
+        #expect(
+            core.state.workspaces["1"]?.trackBreaks
+                == [WindowID(1), WindowID(2), WindowID(3)]
+        )
+    }
+
     // MARK: - The landing rule
 
     /// A window the incoming profile has never seen stays where

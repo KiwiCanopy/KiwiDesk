@@ -38,7 +38,7 @@ struct ReturningSlotFoldTests {
     @Test("the departure records each window's slot")
     func departureRecordsSlots() {
         let state = makeDepartedRow()
-        #expect(state.departedSlots == [a: 0, b: 1, c: 2, d: 3])
+        #expect(state.departedRanks == [a: 0, b: 1, c: 2, d: 3])
     }
 
     @Test("a scrambled re-track rebuilds the order it left")
@@ -84,7 +84,7 @@ struct ReturningSlotFoldTests {
             state.apply(.windowFocused(id))
         }
         // A stale rank from some earlier departure.
-        state.departedSlots[stayer] = 5
+        state.departedSlots[stayer] = .init(rank: 5)
         for id in [a, b] {
             state.apply(.windowDestroyed(id, wasMinimized: false))
         }
@@ -127,7 +127,7 @@ struct ReturningSlotFoldTests {
     func rekeyCarriesTheSlot() {
         var state = makeDepartedRow()
         state.apply(.windowRekeyed(c, WindowID(9)))
-        #expect(state.departedSlots[WindowID(9)] == 2)
+        #expect(state.departedSlots[WindowID(9)]?.rank == 2)
         #expect(state.departedSlots[c] == nil)
     }
 }

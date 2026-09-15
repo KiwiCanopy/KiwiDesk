@@ -440,6 +440,20 @@ Three further obligations, and they bind this directory:
   one home, the resolver-anchored gate clause, the judgement's
   two callers by count, and the read-free bodies.
 
+- **A restore leaves a member already in its remembered Space
+  where it sits (#1387).** `restorePartitioning`'s record is a
+  MEMBERSHIP; the live row is the order authority. On a
+  bound-Desktop switch the restore runs while the departing
+  Desktop's windows are still live in a same-named Space — the
+  settle sweep folds them afterwards — and re-appending them
+  re-ordered the row those folds then filed #1207's ranks
+  against, `Space.remove` handing each track break away on the
+  way (device, 2026-09-15: four own-track columns came back in
+  re-track order and one column fewer; a bsp row scrambles the
+  same way, through the ranks alone).
+  `ProfilePartitioningTests` ▸ `sameSpaceMemberIsLeftInPlace`
+  holds it; a cross-Space move keeps the append.
+
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their
 file.

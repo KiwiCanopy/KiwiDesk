@@ -44,7 +44,31 @@ extension StateCoordinator {
                 ?? TrackOverride())
                 .resolved(onto: trackParams)
             : nil
-        if let track, !window.isFloating {
+        if case .departed(target)? = remembered,
+            let slot = departedSlots[window.id]
+        {
+            // A return takes the slot it left, ranked against the
+            // members already back (#1207) — ahead of the track
+            // spawn rule, which placed it as a new window (#1387).
+            workspaces.add(
+                window.id,
+                to: target,
+                rank: slot.rank,
+                ranks: departedRanks
+            )
+            if mode == .track {
+                let slots = departedSlots
+                var stripped: WindowID?
+                workspaces.withSpace(target) {
+                    stripped = $0.takeTrackBreakBack(for: window.id) {
+                        slots[$0]?.trackBreak
+                    }
+                }
+                if let stripped {
+                    departedSlots[stripped]?.trackBreak = .member
+                }
+            }
+        } else if let track, !window.isFloating {
             workspaces.add(
                 window.id,
                 to: target,
@@ -60,17 +84,6 @@ extension StateCoordinator {
                     return !window.isFloating
                         && !window.isFullscreen
                 }
-            )
-        } else if case .departed(target)? = remembered,
-            let slot = departedSlots[window.id]
-        {
-            // A return takes the slot it left, ranked against the
-            // members already back (#1207).
-            workspaces.add(
-                window.id,
-                to: target,
-                rank: slot,
-                ranks: departedSlots
             )
         } else {
             workspaces.add(

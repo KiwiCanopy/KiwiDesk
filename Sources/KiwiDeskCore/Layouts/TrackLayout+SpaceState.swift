@@ -3,23 +3,61 @@ import Foundation
 
 /// Track state mutations for `Space` (#128, `TrackLayout+Domain`).
 extension Space {
+    /// The member `handTrackBreakToSuccessor(of:)` hands `window`'s
+    /// break to: its array successor, when `window` has a break and
+    /// the successor has none. The one copy of that decision — the
+    /// departure record reads it ahead of the removal (#1387).
+    func handOffTarget(of window: WindowID) -> WindowID? {
+        guard trackBreaks.contains(window),
+            let index = windows.firstIndex(of: window),
+            index + 1 < windows.count
+        else { return nil }
+        let successor = windows[index + 1]
+        return trackBreaks.contains(successor) ? nil : successor
+    }
+
     /// Hands window's break marker and weight to its array successor (#128).
     mutating func handTrackBreakToSuccessor(
         of window: WindowID
     ) {
+        let successor = handOffTarget(of: window)
         guard trackBreaks.remove(window) != nil else { return }
         // Clear the departing head's weight FIRST, so a head at
         // the array's end (no successor) cannot leave a stale
         // weight a later edge-open would resurrect (review).
         let weight = trackWeights.removeValue(forKey: window)
-        guard let index = windows.firstIndex(of: window),
-            index + 1 < windows.count
-        else { return }
-        let successor = windows[index + 1]
-        if !trackBreaks.contains(successor) {
-            trackBreaks.insert(successor)
-            trackWeights[successor] = weight
+        guard let successor else { return }
+        trackBreaks.insert(successor)
+        trackWeights[successor] = weight
+    }
+
+    /// The inverse of `handTrackBreakToSuccessor` for a returning
+    /// window (#1387): a recorded HEAD takes its break back, and
+    /// with it the weight the hand-off moved, from the first
+    /// successor holding a HANDED one — a chain of departures hands
+    /// one break along, so members recorded handed that hold none
+    /// any more are walked past. Returned so the caller can end
+    /// that record. A member the record never saw, or a head of
+    /// its own, stops the walk and keeps its break.
+    @discardableResult
+    mutating func takeTrackBreakBack(
+        for window: WindowID,
+        recorded: (WindowID) -> StateCoordinator.DepartedSlot.TrackBreak?
+    ) -> WindowID? {
+        guard recorded(window) == .head else { return nil }
+        trackBreaks.insert(window)
+        guard let index = windows.firstIndex(of: window) else {
+            return nil
         }
+        for successor in windows[(index + 1)...] {
+            guard recorded(successor) == .handed else { return nil }
+            guard trackBreaks.remove(successor) != nil else { continue }
+            if let weight = trackWeights.removeValue(forKey: successor) {
+                trackWeights[window] = weight
+            }
+            return successor
+        }
+        return nil
     }
 
     /// Moves a window into the adjacent track or opens a new edge track

@@ -159,7 +159,7 @@ struct OpenOrFocusReachTests {
             nativeSpace: space
         )
         core.state.rememberedSpaces[WindowID(id)] = .departed("1")
-        core.state.departedSlots[WindowID(id)] = rank
+        core.state.departedSlots[WindowID(id)] = .init(rank: rank)
         touches.hosts[WindowID(id)] = DesktopCensus.Host(
             space: space,
             pid: pid,
@@ -260,8 +260,8 @@ struct OpenOrFocusReachTests {
             )
             core.state.workspaces.add(WindowID(id), to: "1")
         }
-        core.state.departedSlots[WindowID(1)] = 0
-        core.state.departedSlots[WindowID(3)] = 2
+        core.state.departedSlots[WindowID(1)] = .init(rank: 0)
+        core.state.departedSlots[WindowID(3)] = .init(rank: 2)
         core.state.workspaces.focus(WindowID(1), in: "1")
         core.frontmostPIDProvider = { self.pid }
     }

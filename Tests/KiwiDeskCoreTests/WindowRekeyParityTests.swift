@@ -64,7 +64,7 @@ private func trackedFixture() -> StateCoordinator {
         height: 4
     )
     state.stickyReachOverrides[old] = true
-    state.departedSlots[old] = 0
+    state.departedSlots[old] = .init(rank: 0)
     state.awayWindows[old] = AwayWindow(
         id: old,
         pid: 1,
