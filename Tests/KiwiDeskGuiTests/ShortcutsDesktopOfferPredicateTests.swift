@@ -158,9 +158,14 @@ struct ShortcutsDesktopOfferSearchTests {
             )
         )
         // The register is what the filter reads, so an emptied
-        // one is the same defect wearing a different shape.
+        // one is the same defect wearing a different shape. The
+        // sticky reach control rides it for its own reason
+        // (#277; `SettingsSearchDrawerAnchorTests` holds it).
         #expect(
-            SettingsSearchIndex.bridgeGatedControls == doorIDs()
+            SettingsSearchIndex.bridgeGatedControls
+                == doorIDs().union([
+                    SettingsCatalog.gapsAndBorders.stickyReachRow.id
+                ])
         )
     }
 }

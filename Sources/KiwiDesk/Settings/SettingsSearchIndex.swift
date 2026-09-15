@@ -112,12 +112,18 @@ enum SettingsSearchIndex {
     /// The two Desktop offers are the ONLY search-reachable name
     /// their families have (the rows are `.dynamic`), so an
     /// unfiltered entry is not a stray hit: it is the door to a
-    /// capability, offered on a Mac that has none.
+    /// capability, offered on a Mac that has none. The sticky
+    /// reach row's control is here for the other reason: its
+    /// census row is refused without the bridge, so nothing
+    /// would claim the control and it would surface as a
+    /// catalog-only row for a toggle `StickyMarkEditor` does
+    /// not draw (#277).
     static var bridgeGatedControls: Set<String> {
         [
             SettingsCatalog.shortcuts.focusDesktops.control.id,
             SettingsCatalog.shortcuts.moveWindowsDesktops.control
                 .id,
+            SettingsCatalog.gapsAndBorders.stickyReachRow.id,
         ]
     }
 

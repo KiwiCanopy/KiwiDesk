@@ -265,12 +265,11 @@ struct SettingsCatalogArgumentTests {
     /// A top-level declaration, or a drawer's child through its
     /// `.children` (#1250) — a child is a catalog declaration
     /// too, so a double mount of one trips the count the same
-    /// way. Whitespace is squeezed first: the formatter wraps a
-    /// long child path at its dots, and `firstArgument` keeps
-    /// the break as one space.
+    /// way. A child path the formatter wrapped at its dot arrives
+    /// joined: `firstArgument` normalizes ` .` away.
     private func catalogPath(_ argument: String) -> String? {
         SourceScan.firstMatch(
-            in: argument.filter { !$0.isWhitespace },
+            in: argument,
             pattern:
                 #"^SettingsCatalog\.(\w+\.\w+(?:\.children\.\w+)?)$"#
         )

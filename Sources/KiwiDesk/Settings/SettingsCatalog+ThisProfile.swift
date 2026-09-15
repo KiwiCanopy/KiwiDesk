@@ -85,9 +85,7 @@ struct ColorsControls: Sendable {
 
 /// Animations ▸ Per-event and duration rows, keyed on their
 /// census label keys and declared in `ColorsRowOrder.motionMore`'s
-/// order. The palette shelf's Rename / Export / Delete are
-/// context-menu items with no rendered row to anchor, so they
-/// stay uncataloged (`SettingsSearchIndexTests` pins the count).
+/// order.
 struct MotionMoreControls: Sendable {
     let animateSpaceSwitches = SettingsControl(
         "behavior.animations.space_change",

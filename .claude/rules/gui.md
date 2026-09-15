@@ -667,21 +667,28 @@ unrendered (#1250).** A census hit resolves to the catalog
 control carrying its label key (`SettingsSearchIndex.row(for:)`),
 and the drawer expands only for its own `childIDs`; an
 anchor-less row lands on the destination root, which for a
-drawer's interior is a page showing nothing it named.
-`SettingsSearchDrawerAnchorTests` ▸ `drawerHitsOpenTheirDrawer`
-holds every FILLED drawer from its register — each `.showMore`
-census row in the drawer's container, read live, must resolve
-to a child the drawer expands for — so a new row landing in one
-of those containers reds without a count; a drawer declared
-childless is a ruling recorded in `SettingsCatalogDrawerTests`'
-register with its reason, and a NEW drawer with children joins
-the first register in the same change, which is the one step
-review still owns. `GeneralAdvancedControls`, the two bars'
-Style children and the Gaps drawers' `GapEdgeControls` are the
-shape; the census↔catalog join is by label key ALONE, so two
-census rows sharing one label key (the drag columns' `Border`
-and `Fill`) cannot both be anchored, and stay anchor-less by
-ruling rather than resolving onto the first declared (#277).
+drawer's interior is a page showing nothing it named. A drawer
+declared WITH children joins the register in
+`SettingsSearchDrawerAnchorTests` — whose
+`drawerHitsOpenTheirDrawer` reads each registered container's
+indexed `.showMore` census rows live and requires each to resolve
+to a child exactly one of its drawers expands for — and a
+drawer declared CHILDLESS joins `SettingsCatalogDrawerTests`'
+register with the reason it carries none; each register is
+pinned against the catalog by reflection
+(`filledRegisterIsComplete`, `childlessDrawersArePinned`), so
+a drawer in neither reds. `GeneralAdvancedControls`, the two
+bars' Style children and the Gaps drawers' `GapEdgeControls`
+are the shape. The census↔catalog join reads the label key and
+no instance (`SettingsSearchJoinTests` holds that no two
+catalog entries in one destination carry one census row's
+key), so two census rows sharing a label key — the drag
+columns' `Border` and `Fill` — stay anchor-less until the
+census row carries an instance the join can read, never
+resolved onto the first declared (`SettingsSearchDrawerAnchorTests`
+▸ `gapsAndBordersRowsCarryAnchors`); which rows the fill takes at
+all is `docs/design-decisions.md` ▸ *A search hit lands on the
+control only where the section hides it* (#277).
 
 ## Home, the shell (#678 turn 9)
 

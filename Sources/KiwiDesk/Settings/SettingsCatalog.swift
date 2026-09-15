@@ -4,7 +4,7 @@ import KiwiDeskCore
 ///
 /// Declarations are grouped in the `SettingsCatalog+*.swift`
 /// slices — `+ThisProfile`, `+Bars`, `+WholeApp`, `+MacChecklist`
-/// (`SettingsCatalogFiles`, `docs/accepted-limitations.md`).
+/// — which `SourceScan+CatalogFiles.swift` names for the guards.
 /// Property names are the tokens the site guards scan for
 /// (`SettingsCatalogSiteTests`): unique
 /// across the catalog, and distinctive enough not to collide with

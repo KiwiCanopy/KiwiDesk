@@ -5088,6 +5088,49 @@ match path and every keystroke pays a disk or AX round-trip the
 moment someone adds "just one" richer column; rank by mode and
 the same query answers differently before and after one click.
 
+### A search hit lands on the control only where the section hides it (#277)
+
+**[Rationale]**
+
+A result navigates to a destination and then reveals a target
+inside it, and the catalog is what makes a target a CONTROL
+rather than the section around it. It could carry every census
+row; it carries the rows a section landing would leave unseen,
+and the line is drawn where the harm is:
+
+- A row the census places behind a disclosure (`.showMore`)
+  takes an anchor, because without one the hit lands on the
+  destination root with the drawer shut — a page showing
+  nothing the result named. That is the one case where the
+  section landing fails outright.
+- A row visible at rest (`.atRest`) takes none. The section
+  landing already shows it; an anchor would add a wash and, as
+  the reveal is shaped, scroll the row to the top edge with its
+  heading off (`docs/ui-patterns.md` ▸ a revealed target). A
+  wash on a control already in view is coverage for its own
+  sake, and it costs the heading.
+- Advanced Colours' rows take none whatever their tier. Colour
+  selection is a browse, not a name search: nobody types
+  "group badge text colour", they open the page and look.
+
+The split is keyed on the census TIER, so a row moves across it
+by correcting the census, never by an anchor added beside it —
+and a tier the census states wrongly (a `.showMore` row a card
+draws at rest) carries an anchor until the census is corrected,
+which is where the drift shows rather than in the reveal.
+
+Two rows stay outside the split for a mechanism reason rather
+than a product one, and are recorded there rather than here: a
+census row whose label key another census row shares cannot be
+told apart by a join that reads the key alone, and a context-menu
+item has no rendered row to anchor (`.claude/rules/gui.md`).
+
+:::unreleased
+A hit inside a filled drawer opens the drawer and washes the
+row; `SettingsSearchDrawerAnchorTests` holds every filled drawer
+and `SettingsCatalogDrawerTests` the ones ruled childless.
+:::
+
 ### The search panel shows nothing before you type
 
 **[Principle]** (#1030 tried the opposite; #1470 retired it, owner

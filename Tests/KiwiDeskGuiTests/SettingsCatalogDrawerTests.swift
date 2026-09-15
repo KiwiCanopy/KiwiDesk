@@ -3,8 +3,7 @@ import Testing
 @testable import KiwiDesk
 
 /// Which catalog drawers stand childless, and why (#277 fill,
-/// #1250). Split from `SettingsCatalogTests` at the file
-/// ceiling. A drawer declared without children hides whatever
+/// #1250). A drawer declared without children hides whatever
 /// the census places behind it from a search hit — the hit
 /// lands on the destination root with the drawer shut — so a
 /// childless declaration is a conscious ruling recorded here,
