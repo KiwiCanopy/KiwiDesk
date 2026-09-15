@@ -1037,7 +1037,11 @@ editing here:
   which a bar toggle or a gap edit is enough to change.
   `ScrollingResizeAnchorTests` pins the discrimination itself —
   same focus, different focus, no slot, fixed anchor — and the
-  row-end clamp that outranks it, that last on a NON-last focus
+  row-end clamp that outranks it (a clamp that is `follow`'s
+  ALONE since #1388: `center`, `start` and `end` rest the focus
+  where they say whatever the row's extent, and a held rest
+  under them is bounded only to keep the row on screen —
+  `ScrollingAbsoluteAnchorTests`), that last on a NON-last focus
   deliberately, since a last slot at a legal offset is
   flush-trailing by construction and would let the border arm
   answer in the clamp's place. `ScrollingBorderAnchorTests` is

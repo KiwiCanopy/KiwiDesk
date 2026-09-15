@@ -24,8 +24,10 @@ extension KiwiCore {
     /// rest's recorded slot answers. Reads the same
     /// `layoutInput` the retile's frames came from, so the
     /// stored rest always matches what was materialized. An
-    /// emptied space keeps its last rest — harmless, every
-    /// consumer re-clamps against the live row.
+    /// emptied space keeps its last rest — harmless: `follow`
+    /// re-clamps against the live row, and a fixed anchor holds
+    /// it only as far as the row stays on screen until the next
+    /// tiled focus recomputes it (#1388).
     func persistScrollRest() {
         guard let input = tiler.layoutInput(state: state),
             input.space.mode == .scrolling,

@@ -2313,8 +2313,10 @@ ultrawide a lone or end-of-row window sat wherever the row
 ended rather than where the user had pointed — a long way from
 "in front of me". The clamp is `follow`'s promise: that anchor
 exists to keep the screen filled and the side you came from in
-view, and dropping it there would reintroduce the #66 freeze.
-`center`, `start` and `end` promise a position instead, and a
+view, and without it a scrolled row that shrinks — a window
+closing, a resize — would leave empty margin past its trailing
+end where nothing asked for one. `center`, `start` and `end`
+promise a position instead, and a
 position honoured only when the row happens to be long enough
 is not the setting's name. So they compute their rest and use
 it — a lone window under `start` sits at the edge with the

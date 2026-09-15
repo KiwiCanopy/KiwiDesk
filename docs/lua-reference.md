@@ -1209,14 +1209,15 @@ to place.
 
 :::unreleased
 The three fixed anchors are **absolute**: the focused window
-rests where the anchor says even when nothing sits beside it.
-On a wide screen a short row under `center` is centred with
-empty screen either side; under `start` the focused window
-takes the left (or top) edge and the rest of the axis stays
-empty, and `end` mirrors it. Only `follow` keeps the row's
-extent on screen — it is the anchor that promises a filled
-screen, and a row shorter than the axis sits flush at the
-leading edge under it.
+rests where the anchor says, whatever the row's extent. Under
+`center` it is centred on the screen with its neighbours
+beside it; under `start` it takes the left (or top) edge — so
+the windows before it in the row leave the screen on that
+side — and `end` mirrors it. With nothing beside the focused
+window (a lone one kept at its slot,
+`scroll.set_fill_when_alone`) the rest of the screen stays
+empty. Only `follow` keeps the row's extent on screen: a row
+shorter than the axis sits flush at the leading edge under it.
 :::
 
 `follow` remembers where the *focused window* rested, not how far
@@ -1320,7 +1321,8 @@ before the setting existed), a single window in a scrolling
 space takes the whole width or height and starts sharing only
 when a second window opens. When `false`, a lone window keeps
 the slot size (`scroll.set_slot_size`) it would have beside a
-neighbour, and the rest of the axis stays empty. The Settings
+neighbour, and the rest of the axis stays empty — where along
+the axis it rests is `scroll.set_anchor`'s. The Settings
 row is
 **If one window, fill the screen**; Stack has the same toggle
 (`stack.set_fill_when_alone`).

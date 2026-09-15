@@ -63,15 +63,14 @@ private func offsets(
 /// freeze the viewport and let the focused slot merely slide
 /// within it (the overlay symptom). Scroll-into-view is *weakly*
 /// symmetric: both directions pan monotonically and keep the
-/// focused window fully visible, but a window is revealed at the
-/// trailing edge going down and the leading edge going up, so the
-/// two offset sequences are not identical reverses — asserting
-/// that would pin behavior no edge anchor can satisfy without
-/// reintroducing the freeze. Pinned for all four anchors (#239):
-/// `follow` is the direct #66 minimal-pan case, and the fixed
-/// anchors — recomputed every focus — traverse the range
-/// monotonically too, so the anchor-pin/boundary-clamp
-/// interaction that caused the freeze stays covered.
+/// focused window fully visible, but under `follow` a window is
+/// revealed at the trailing edge going down and the leading edge
+/// going up, so its two offset sequences are not identical
+/// reverses — asserting that would pin behavior it cannot satisfy
+/// without reintroducing the freeze. Pinned for all four anchors
+/// (#239): `follow` is the direct #66 minimal-pan case, and the
+/// fixed anchors — recomputed every focus, absolute since #1388 —
+/// traverse monotonically and DO reverse exactly.
 @Suite("Scrolling focus up/down symmetry (#66)")
 struct ScrollingFocusSymmetryTests {
     @Test(

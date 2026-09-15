@@ -22,30 +22,20 @@ extension ScrollingLayout {
         focusedPos: CGFloat?
     ) -> CGFloat {
         guard let focusedPos else {
-            // No slot to place (a floating focus, #141): hold.
+            // No slot to place (a floating focus, #141): hold the
+            // previous rest. A fixed anchor reaches here only once
+            // the slot the rest remembers has left the row
+            // (`ScrollingLayout.subject`), so the held number is
+            // bounded to keep what remains on screen rather than
+            // forced to the leading edge.
             let held = previous?.offset ?? 0
-            return anchor == .follow
+            return anchor.keepsRowOnScreen
                 ? clampedToRow(held, along: along, rowLength: rowLength)
-                : held
+                : heldOnScreen(held, along: along, rowLength: rowLength)
         }
         let visibleMin = -focusedPos
         let visibleMax = along - size - focusedPos
-        switch anchor {
-        case .follow:
-            let base =
-                heldBase(
-                    previous: previous,
-                    focus: focus,
-                    focusedPos: focusedPos,
-                    focusedSpan: size,
-                    along: along
-                ) ?? visibleMin
-            return clampedToRow(
-                min(max(base, visibleMin), visibleMax),
-                along: along,
-                rowLength: rowLength
-            )
-        case .center, .start, .end:
+        guard anchor.keepsRowOnScreen else {
             return anchorOffset(
                 anchor: anchor,
                 along: along,
@@ -53,6 +43,19 @@ extension ScrollingLayout {
                 focusedPos: focusedPos
             )
         }
+        let base =
+            heldBase(
+                previous: previous,
+                focus: focus,
+                focusedPos: focusedPos,
+                focusedSpan: size,
+                along: along
+            ) ?? visibleMin
+        return clampedToRow(
+            min(max(base, visibleMin), visibleMax),
+            along: along,
+            rowLength: rowLength
+        )
     }
 
     /// `follow`'s boundary: a row shorter than the axis sits at
@@ -65,6 +68,20 @@ extension ScrollingLayout {
     ) -> CGFloat {
         guard rowLength > along else { return 0 }
         return min(max(target, along - rowLength), 0)
+    }
+
+    /// A held fixed-anchor rest, bounded so the row stays within
+    /// the screen: a shorter row keeps its place anywhere inside
+    /// the axis, a longer one shows no margin past either end.
+    private static func heldOnScreen(
+        _ held: CGFloat,
+        along: CGFloat,
+        rowLength: CGFloat
+    ) -> CGFloat {
+        guard rowLength > along else {
+            return min(max(held, 0), along - rowLength)
+        }
+        return min(max(held, along - rowLength), 0)
     }
 
     /// Offset from which `follow` pans — nil for a never-scrolled

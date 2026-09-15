@@ -66,13 +66,17 @@ public struct ScrollingLayout: LayoutSystem {
     }
 
     /// Row geometry shared between layout calculation and viewport rest
-    /// (#141, #677).
+    /// (#141, #677). `subject` is the slot the anchor places: the
+    /// tiled focus, or — under a fixed anchor while a float holds
+    /// focus — the last tiled focus the rest remembers, still in
+    /// the row (#1388); `focusedPos` / `focusedSpan` are its.
     struct Metrics {
         let along: CGFloat
         let size: CGFloat
         let spans: [CGFloat]
         let positions: [CGFloat]
         let rowLength: CGFloat
+        let subject: WindowID?
         let focusedPos: CGFloat?
         let focusedSpan: CGFloat
     }
@@ -119,7 +123,8 @@ public struct ScrollingLayout: LayoutSystem {
             cursor += span + gap
         }
         let rowLength = max(cursor - gap, 0)
-        let focusedIndex = context.focused.flatMap {
+        let subject = Self.subject(of: windows, context: context)
+        let focusedIndex = subject.flatMap {
             windows.firstIndex(of: $0)
         }
         return Metrics(
@@ -128,10 +133,31 @@ public struct ScrollingLayout: LayoutSystem {
             spans: spans,
             positions: positions,
             rowLength: rowLength,
+            subject: subject,
             focusedPos: focusedIndex.map { positions[$0] },
             focusedSpan: focusedIndex.map { spans[$0] }
                 ?? size
         )
+    }
+
+    /// The slot the anchor places. A fixed anchor keeps anchoring
+    /// the last tiled focus while a float holds focus (#1388):
+    /// the rest remembers it (#966), and re-deriving its place
+    /// from the live row is what keeps a closed neighbour from
+    /// leaving a stale offset behind. `follow` holds its offset
+    /// instead (#141), so it names no stand-in.
+    static func subject(
+        of windows: [WindowID],
+        context: LayoutContext
+    ) -> WindowID? {
+        if let focused = context.focused, windows.contains(focused) {
+            return focused
+        }
+        guard !context.scrolling.anchor.keepsRowOnScreen,
+            let remembered = context.scrollRest?.slot?.window,
+            windows.contains(remembered)
+        else { return nil }
+        return remembered
     }
 
     private func frames(
@@ -163,9 +189,10 @@ public struct ScrollingLayout: LayoutSystem {
             // (#142): an unreachable target makes every retile
             // re-issue the frame past the ±2 pt tolerance. The
             // peek caps at the slot's own span so a tiny
-            // `.fraction` slot pins fully visible; the focused
-            // slot is provably never touched — the offset clamps
-            // already bound its lead with the same span.
+            // `.fraction` slot pins fully visible; the anchored
+            // slot is never touched — `follow`'s visibility clamp
+            // and a fixed anchor's own arithmetic both keep its
+            // lead inside the axis for a slot the axis can hold.
             let peek = min(Self.edgePeek, span)
             lead = min(
                 lead,
