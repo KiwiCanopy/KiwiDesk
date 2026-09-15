@@ -190,7 +190,11 @@ struct SettingsSearchIndexTests {
                 .layoutDefaults: 35,
                 .monitors: 3,
                 .gapsAndBorders: 18,
-                .bars: 36,
+                // 9 since #277: the 27 rows behind the two
+                // Style drawers gained their catalog anchors so
+                // a hit opens the drawer; the at-rest rows stay
+                // anchor-less by ruling (the issue's tier split).
+                .bars: 9,
                 .colors: 12,
                 .advancedColors: 25,
                 // 4 since #1255: the refusal sound moved here

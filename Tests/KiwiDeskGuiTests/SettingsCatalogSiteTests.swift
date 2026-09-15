@@ -66,7 +66,8 @@ struct SettingsCatalogSiteTests {
         // 74 since #1440: the Track drawer.
         // 88 since #1365: the Mac Checklist's three cards and
         // eleven rows, each row keyed on its census label key.
-        #expect(names.count == 88)
+        // 115 since #277: the two bars' Style drawers' 27 rows.
+        #expect(names.count == 115)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

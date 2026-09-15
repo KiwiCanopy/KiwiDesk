@@ -148,36 +148,6 @@ struct GapsAndBordersControls: Sendable {
     )
 }
 
-/// Bars catalog controls (#293, #277).
-struct BarsControls: Sendable {
-    let spaceBarCard = SettingsControl(
-        "bars.switch.space_bar",
-        "Space Bar"
-    )
-    let spaceBarStyle = SettingsDrawer(
-        "bars.style",
-        "Style",
-        instance: "space_bar"
-    )
-    let appBarCard = SettingsControl(
-        "bars.switch.app_bar",
-        "App Bar"
-    )
-    let appBarStyle = SettingsDrawer(
-        "bars.style",
-        "Style",
-        instance: "app_bar"
-    )
-    let monocleShowIn = SettingsControl(
-        "layout.monocle.name",
-        "Monocle"
-    )
-    let scrollingShowIn = SettingsControl(
-        "layout.scrolling.name",
-        "Scrolling"
-    )
-}
-
 struct BehaviorControls: Sendable {
     let mouseCard = SettingsControl(
         "behavior.mouse.title",

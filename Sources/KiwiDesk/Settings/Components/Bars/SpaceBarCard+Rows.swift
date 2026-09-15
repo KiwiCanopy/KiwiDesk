@@ -59,11 +59,19 @@ extension SpaceBarCard {
                 options: AppBarOptions.backgroundStyle
                     .map { ($0.1, $0.0) }
             )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleBackground
+            )
         case .spaceBarLiquidGlass:
             // Lua-only since #1307 (see `AppBarCard+Rows`).
             EmptyView()
         case .spaceBarBackgroundFit:
             backgroundFitRow
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarStyle.children
+                        .spaceBarStyleBackgroundFit
+                )
         case .spaceBarAlignment:
             SegmentedPicker(
                 L("space_bar.alignment.label", "Alignment"),
@@ -83,6 +91,10 @@ extension SpaceBarCard {
                     L("app_bar.alignment.end", "End")
                 )
             )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleAlignment
+            )
         case .spaceBarActiveIndicator:
             SegmentedPicker(
                 L(
@@ -94,8 +106,16 @@ extension SpaceBarCard {
                     .filter { $0.0 != .gap }
                     .map { ($0.1, $0.0) }
             )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleActiveIndicator
+            )
         case .spaceBarIconSource:
             iconSourceRow
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarStyle.children
+                        .spaceBarStyleIconSource
+                )
         case .spaceBarCornerRoundness:
             PtSlider(
                 label: L(
@@ -105,6 +125,10 @@ extension SpaceBarCard {
                 value: style.cornerRoundness,
                 range: 0...100,
                 unit: "%"
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleCornerRoundness
             )
         case .spaceBarItemSizeAuto:
             AutoGatedGroup(
@@ -123,12 +147,24 @@ extension SpaceBarCard {
                     range: 1...200,
                     autoAtZero: true
                 )
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarStyle.children
+                        .spaceBarStyleItemSize
+                )
             }
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleItemSizeAuto
+            )
         case .spaceBarItemGap:
             PtSlider(
                 label: L("space_bar.item_gap", "Item gap"),
                 value: style.itemGap,
                 range: 0...40
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleItemGap
             )
         case .spaceBarFontSizeAuto:
             AutoGatedGroup(
@@ -147,11 +183,23 @@ extension SpaceBarCard {
                     range: 1...32,
                     autoAtZero: true
                 )
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarStyle.children
+                        .spaceBarStyleFontSize
+                )
             }
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleFontSizeAuto
+            )
         case .spaceBarGlyphCap:
             glyphCapRow
         case .spaceBarTitleCap:
             titleCapRow
+                .searchAnchored(
+                    SettingsCatalog.bars.spaceBarStyle.children
+                        .spaceBarStyleTitleCap
+                )
         case .spaceBarSpringDelay:
             SecondsRow(
                 label: L("space_bar.spring_delay", "Spring delay"),
@@ -165,6 +213,10 @@ extension SpaceBarCard {
                         + "its layout. A quicker drop moves the "
                         + "window there without switching."
                 )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleSpringDelay
             )
         case .spaceBarItemSize, .spaceBarFontSize:
             EmptyView()
