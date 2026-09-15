@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Les deux barres et le panneau des raccourcis sont actuellement réglés différemment. Activer cette option l'applique aux trois.",
   "colors.liquid_glass.help": "Applique le matériau translucide de macOS sur la Space Bar, l'App Bar et le panneau des raccourcis. Chaque barre teinte son propre matériau avec sa couleur de %1$@ ; le panneau des raccourcis reste sans teinte.",
+  "colors.liquid_glass.reduce_transparency.help": "Réglages Système ▸ Accessibilité ▸ Affichage ▸ Réduire la transparence est activé, l'effet de verre reste donc désactivé quel que soit ce réglage.",
   "colors.more": "Plus de couleurs",
   "colors.more.app_bar.summary": "Élément, élément actif, survol, badges",
   "colors.more.space_bar.summary": "Plaque, surlignage, survol, badges",

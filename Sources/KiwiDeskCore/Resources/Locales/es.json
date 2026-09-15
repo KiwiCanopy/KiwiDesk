@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Ahora mismo las dos barras y el panel de atajos están configurados de forma distinta. Al activarlo, se aplica a los tres.",
   "colors.liquid_glass.help": "Superpone el material translúcido de macOS sobre la Space Bar, la App Bar y el panel de atajos. Cada barra tinta su propio material con su color de %1$@; el panel de atajos no se tinta.",
+  "colors.liquid_glass.reduce_transparency.help": "Ajustes del Sistema ▸ Accesibilidad ▸ Pantalla ▸ Reducir transparencia está activado, por lo que el efecto de cristal permanece desactivado independientemente de este ajuste.",
   "colors.more": "Más colores",
   "colors.more.app_bar.summary": "Elemento, elemento activo, al pasar el cursor, distintivos",
   "colors.more.space_bar.summary": "Placa, resaltado, al pasar el puntero, insignias",

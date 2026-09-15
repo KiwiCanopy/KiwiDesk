@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "目前兩個列和快速鍵面板的設定各不相同。開啟後會同時套用於三者。",
   "colors.liquid_glass.help": "在 Space Bar、App Bar 和快速鍵面板上鋪一層 macOS 的半透明材質。每個列會用自己的「%1$@」顏色為各自的材質上色；快速鍵面板則不會上色。",
+  "colors.liquid_glass.reduce_transparency.help": "系統設定 ▸ 輔助使用 ▸ 顯示器 ▸ 減少透明度已開啟，因此無論此設定為何，玻璃效果都將保持關閉。",
   "colors.more": "更多顏色",
   "colors.more.app_bar.summary": "項目、作用中項目、指標懸停、徽章",
   "colors.more.space_bar.summary": "底板、高亮、指標懸停、徽章",

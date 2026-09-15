@@ -437,7 +437,20 @@ The rule that needs no guessing:
 - **which declared gates the resolver cannot answer is data**
   (`ShortcutsGates.resolved` / `.resolvedElsewhere`), so
   the gap stays deliberate and a new gate landing in neither
-  set reds.
+  set reds;
+- **a CONTAINER `.runtime` gate whose condition is an OS
+  accessibility flag is read from `@Environment` at the card**
+  — the Motion card under Reduce Motion, the Liquid Glass card
+  under Reduce transparency (#1418) — never through a resolver
+  or a shared accessor, for the reason "The Reduce Motion gate"
+  below gives: an indirection the seam scan cannot follow hides
+  readers. What pins it instead of a `resolved` register is the
+  pair of needles such a card owes in the same change —
+  `GreyOutParityTests` for the dim and `GreyOutAnchorTests` for
+  the reason on the header `?` — and `ColorsCensusRenderTests`
+  ▸ `accessibilityGreysAreContainerGates` derives which
+  containers carry one, so a third joins both needles and that
+  derivation.
 
 The census gate resolvers share ONE shape (convergence
 2026-08-03): a struct keyed on a row's own `SettingKey` — and,
@@ -1374,11 +1387,13 @@ Obligations:
   same `.regularMaterial` the switch's off state and the pre-26
   branch draw — measured opaque under the setting, 2026-09-13 —
   and the stored `liquid_glass` value is untouched. The glass
-  BRANCH has that one gate; a further reader of
-  `accessibilityReduceTransparency` — a row greying with its
-  reason (#1418) — joins `ReduceTransparencySeamTests`' allowed
-  map with its reason, and a second gate on the branch cannot.
-  The bars' half is bars.md's, at `LiquidGlassGate`.
+  BRANCH has that one gate; the Liquid Glass row reads the same
+  value only to grey with its reason (#1418,
+  `GreyOutParityTests`, `GreyOutAnchorTests`), a further reader
+  of `accessibilityReduceTransparency` joins
+  `ReduceTransparencySeamTests`' allowed map with its reason,
+  and a second gate on the branch cannot. The bars' half is
+  bars.md's, at `LiquidGlassGate`.
 
 ## The Reduce Motion gate
 

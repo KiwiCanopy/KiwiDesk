@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "현재 두 바와 단축키 패널의 설정이 서로 다릅니다. 켜면 세 가지 모두에 적용됩니다.",
   "colors.liquid_glass.help": "macOS의 반투명 소재를 Space Bar, App Bar, 단축키 패널 위에 입힙니다. 각 바는 자신의 ‘%1$@’ 색상으로 자기 소재에 색조를 더하며, 단축키 패널에는 색조가 적용되지 않습니다.",
+  "colors.liquid_glass.reduce_transparency.help": "시스템 설정 ▸ 손쉬운 사용 ▸ 디스플레이 ▸ 투명도 줄이기가 켜져 있으므로 이 설정과 관계없이 유리 효과는 꺼진 상태로 유지됩니다.",
   "colors.more": "추가 색상",
   "colors.more.app_bar.summary": "항목, 활성 항목, 호버, 배지",
   "colors.more.space_bar.summary": "판, 하이라이트, 호버, 배지",

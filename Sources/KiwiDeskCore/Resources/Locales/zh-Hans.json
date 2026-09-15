@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "目前两个栏和快捷键面板的设置各不相同。开启后将同时应用于三者。",
   "colors.liquid_glass.help": "在 Space Bar、App Bar 和快捷键面板上覆盖 macOS 的半透明材质。每个栏会用自己的“%1$@”颜色为各自的材质着色；快捷键面板不会着色。",
+  "colors.liquid_glass.reduce_transparency.help": "系统设置 ▸ 辅助功能 ▸ 显示 ▸ 降低透明度已开启，因此无论此设置如何，玻璃效果都将保持关闭。",
   "colors.more": "更多颜色",
   "colors.more.app_bar.summary": "项目、活动项目、悬停、徽标",
   "colors.more.space_bar.summary": "底板、高亮、悬停、徽标",
