@@ -208,7 +208,7 @@
   "download_versioned": "KiwiDesk {v} herunterladen",
   "feat_10_body": "Schick ein Fenster auf Schreibtisch 3, wechsle dorthin, oder binde ein Profil an einen Schreibtisch, sodass er seine eigenen Spaces mitbringt.",
   "feat_10_title": "Native macOS-Schreibtische",
-  "feat_11_body": "Private OS-Symbole werden zur Laufzeit aufgelöst, jeder Tiling-Pfad hat einen Fallback auf die öffentliche Bedienungshilfen-API — ein Update kann bremsen, das Tiling hört nie auf.",
+  "feat_11_body": "Private OS-Symbole werden zur Laufzeit aufgelöst, jeder Tiling-Pfad hat einen Fallback auf die öffentliche Bedienungshilfen-API — ein Update kann einen schnellen Pfad ausbremsen, das Tiling hört nie auf.",
   "feat_11_title": "Übersteht macOS-Updates",
   "feat_1_body": "Jeder Space ist eine flache Fensterliste. Layouts sind reine Funktionen über dieses Array — niemals Baum-Chirurgie.",
   "feat_1_title": "Flache Arrays, keine Bäume",
