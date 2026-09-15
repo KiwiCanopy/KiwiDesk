@@ -48,9 +48,10 @@ enum SettingsContainer: CaseIterable, Hashable {
     var gate: SettingGate? {
         switch self {
         case .glass:
-            // The row states its own runtime gate; the card has
-            // no second condition to add.
-            return nil
+            // The row's own gate HIDES (pre-26); the card greys
+            // as a unit under Reduce transparency (#1418), the
+            // Motion card's shape.
+            return .runtime(.reduceTransparency)
         case .appBar:
             return .anyOf([
                 .layoutAppBar(.monocleAppBarEnabled),

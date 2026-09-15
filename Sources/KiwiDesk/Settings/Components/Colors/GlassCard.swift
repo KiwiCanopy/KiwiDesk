@@ -5,6 +5,11 @@ import SwiftUI
 /// shortcuts panel (#1307).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
+    /// The same OS value the glass surfaces read live (#1374);
+    /// here it greys the switch with its reason (#1418) and
+    /// moves no stored value.
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
 
     private var agreement: LiquidGlassAgreement {
         LiquidGlassAgreement(settings: model.config.settings)
@@ -15,23 +20,43 @@ struct GlassCard: View {
         // gate is an absence (#390), and the census records it
         // in the HIDES group.
         if AppBarStyle.glassAvailable {
+            // The header `?` carries the gate's reason so it
+            // survives the dim (#527) — the `.glass` container's
+            // `.runtime` census gate.
             SettingsSection(
                 SettingsCatalog.colors.glassCard,
-                caption: caption
+                caption: caption,
+                help: reduceTransparency ? reduceTransparencyHelp : nil
             ) {
-                ForEach(
-                    ColorsRowOrder.glassAtRest,
-                    id: \.id
-                ) { _ in
-                    ToggleRow(
-                        label: Self.title,
-                        isOn: model.liquidGlassMaster,
-                        help: agreement.differ
-                            ? differHelp : baseHelp
-                    )
+                // One view, not a bare `ForEach`: the grey is
+                // applied to the run, never per child (gui.md).
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(
+                        ColorsRowOrder.glassAtRest,
+                        id: \.id
+                    ) { _ in
+                        ToggleRow(
+                            label: Self.title,
+                            isOn: model.liquidGlassMaster,
+                            help: agreement.differ
+                                ? differHelp : baseHelp
+                        )
+                    }
                 }
+                .modifier(GreyOut(active: reduceTransparency))
             }
         }
+    }
+
+    /// Quotes Apple's own control (config-vocabulary.md) so the
+    /// user can find the row.
+    private var reduceTransparencyHelp: String {
+        L(
+            "colors.liquid_glass.reduce_transparency.help",
+            "System Settings ▸ Accessibility ▸ Display ▸ Reduce "
+                + "transparency is on, so the glass stays off "
+                + "regardless of this setting."
+        )
     }
 
     /// ONE key for the card and its only row: the product name

@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "The two bars and the panel are set differently right now. Turning this on switches it on for all three.",
   "colors.liquid_glass.help": "Lays macOS's translucent material over the Space Bar, the App Bar and the shortcuts panel. Each bar's %1$@ color tints its own material; the shortcuts panel stays untinted.",
+  "colors.liquid_glass.reduce_transparency.help": "System Settings ▸ Accessibility ▸ Display ▸ Reduce transparency is on, so the glass stays off regardless of this setting.",
   "colors.more": "More colors",
   "colors.more.app_bar.summary": "Item, active item, hover, badges",
   "colors.more.space_bar.summary": "Plate, highlight, hover, badges",

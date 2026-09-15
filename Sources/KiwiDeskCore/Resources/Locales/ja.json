@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "現在、2つのバーとショートカットパネルの設定が異なっています。オンにすると、3つすべてに適用されます。",
   "colors.liquid_glass.help": "macOSの半透明素材をSpace Bar、App Bar、ショートカットパネルに重ねます。各バーは「%1$@」カラーで自身の素材に色味を付けます。ショートカットパネルには色味は付きません。",
+  "colors.liquid_glass.reduce_transparency.help": "システム設定 ▸ アクセシビリティ ▸ ディスプレイ ▸ 透明度を下げるがオンになっているため、この設定に関わらずガラス効果はオフのままになります。",
   "colors.more": "その他のカラー",
   "colors.more.app_bar.summary": "項目、アクティブ項目、ホバー、バッジ",
   "colors.more.space_bar.summary": "プレート、ハイライト、ホバー、バッジ",

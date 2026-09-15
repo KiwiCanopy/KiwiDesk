@@ -17,6 +17,9 @@ enum SettingRuntimeGate: Hashable {
     case spaceHasNoOverrides
     /// macOS Reduce Motion greys animations card.
     case reduceMotion
+    /// macOS Reduce transparency greys the Liquid Glass card
+    /// (#1418) — the stored value is untouched (#1374).
+    case reduceTransparency
     /// Space pinned to a disconnected monitor.
     case orphanPinsExist
     /// Stored profile edited while monitors are disconnected.

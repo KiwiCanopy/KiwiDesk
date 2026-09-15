@@ -105,6 +105,32 @@ struct ColorsCensusRenderTests {
         )
     }
 
+    /// The area's greying container gates are exactly the two OS
+    /// accessibility flags — the Motion card under Reduce Motion,
+    /// the Liquid Glass card under Reduce transparency (#1418) —
+    /// each read from `@Environment` at its card and pinned by
+    /// its dim and anchor needles (gui.md). DERIVED over the
+    /// area's containers, so a third gated container reds here
+    /// until it joins both needles. The glass row's own gate
+    /// stays the pre-26 HIDE, which greys nothing.
+    @Test("the accessibility greys are the area's only container gates")
+    func accessibilityGreysAreContainerGates() {
+        let gated = Dictionary(
+            uniqueKeysWithValues: containers(of: .coloursAndMotion)
+                .compactMap { container in
+                    container.gate.map { (container, $0) }
+                }
+        )
+        #expect(
+            gated == [
+                .motion: .runtime(.reduceMotion),
+                .glass: .runtime(.reduceTransparency),
+            ]
+        )
+        #expect(SettingRuntimeGate.reduceTransparency.greys)
+        #expect(!SettingRuntimeGate.liquidGlassUnavailable.greys)
+    }
+
     /// The area's render knows exactly two containers; a third
     /// would mount nowhere, so it must fail loud here rather than
     /// ship an unreachable row.

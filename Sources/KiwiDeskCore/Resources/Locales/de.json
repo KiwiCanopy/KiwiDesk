@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Die beiden Leisten und die Tastenkürzel-Übersicht sind gerade unterschiedlich eingestellt. Wenn du diese Option einschaltest, gilt sie für alle drei.",
   "colors.liquid_glass.help": "Legt das transluzente Material von macOS über die Space Bar, die App Bar und die Tastenkürzel-Übersicht. Jede Leiste tönt ihr eigenes Material mit ihrer Farbe „%1$@“; die Tastenkürzel-Übersicht bleibt ungetönt.",
+  "colors.liquid_glass.reduce_transparency.help": "Systemeinstellungen ▸ Bedienungshilfen ▸ Anzeige ▸ Transparenz reduzieren ist aktiviert, daher bleibt der Glaseffekt unabhängig von dieser Einstellung aus.",
   "colors.more": "Weitere Farben",
   "colors.more.app_bar.summary": "Element, aktives Element, Hover, Badges",
   "colors.more.space_bar.summary": "Fläche, Hervorhebung, Hover, Badges",

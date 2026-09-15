@@ -110,6 +110,14 @@ struct GreyOutAnchorTests {
             "help: reduceMotion ? reduceMotionHelp : nil",
             1
         ),
+        // Reduce transparency greys the Liquid Glass card the
+        // same way (#1418): the `.glass` container's `.runtime`
+        // gate, its reason on the header `?`.
+        (
+            "GlassCard.swift",
+            "help: reduceTransparency ? reduceTransparencyHelp : nil",
+            1
+        ),
     ]
 
     @Test("every block gate keeps a live help anchor")

@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "Al momento le due barre e il pannello delle scorciatoie sono impostati in modo diverso. Attivando questa opzione, viene applicata a tutti e tre.",
   "colors.liquid_glass.help": "Applica il materiale traslucido di macOS sulla Space Bar, sulla App Bar e sul pannello delle scorciatoie. Ogni barra tinge il proprio materiale con il suo colore di %1$@; il pannello delle scorciatoie resta senza tinta.",
+  "colors.liquid_glass.reduce_transparency.help": "Impostazioni di Sistema ▸ Accessibilità ▸ Schermo ▸ Riduci la trasparenza è attivo, quindi l'effetto vetro resta disattivato indipendentemente da questa impostazione.",
   "colors.more": "Altri colori",
   "colors.more.app_bar.summary": "Elemento, elemento attivo, passaggio mouse, badge",
   "colors.more.space_bar.summary": "Piastra, evidenziazione, passaggio mouse, badge",

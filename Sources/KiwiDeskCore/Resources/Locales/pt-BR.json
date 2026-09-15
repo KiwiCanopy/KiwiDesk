@@ -193,6 +193,7 @@
   "colors.liquid_glass": "Liquid Glass",
   "colors.liquid_glass.differ.help": "As duas barras e o painel de atalhos estão configurados de formas diferentes agora. Ao ativar, a opção passa a valer para os três.",
   "colors.liquid_glass.help": "Aplica o material translúcido do macOS sobre a Space Bar, a App Bar e o painel de atalhos. Cada barra tinge o próprio material com a sua cor de %1$@; o painel de atalhos fica sem tonalidade.",
+  "colors.liquid_glass.reduce_transparency.help": "Ajustes do Sistema ▸ Acessibilidade ▸ Tela ▸ Reduzir transparência está ativado, então o efeito de vidro permanece desativado independentemente desta configuração.",
   "colors.more": "Mais cores",
   "colors.more.app_bar.summary": "Item, item ativo, ao passar o mouse, selos",
   "colors.more.space_bar.summary": "Placa, destaque, ao passar o mouse, selos",
