@@ -38,8 +38,6 @@ struct SettingsCatalogDrawerTests {
         // audit, 2026-08-27).
         "space_bar/colors.more",
         "app_bar/colors.more",
-        // Pending #277 batches.
-        "shortcuts.section.general",
     ]
 
     /// The declared set matches the register above — derived

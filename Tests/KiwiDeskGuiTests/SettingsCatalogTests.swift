@@ -89,7 +89,8 @@ struct SettingsCatalogTests {
         // 128 since #277: Gaps & Borders' seven at-rest rows,
         // so a hit scrolls to and washes the row.
         // 133 since #277: the Animations drawer's five rows.
-        #expect(allEntries.count == 133)
+        // 135 since #277: Shortcuts ▸ General's two rows.
+        #expect(allEntries.count == 135)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

@@ -158,9 +158,10 @@ struct SettingsSearchAnchorTests {
     /// its label key: surface, scroll id and drawer expansion
     /// all come from the one declaration the render site
     /// mounts. (A census key whose label key no control carries
-    /// lands destination-only — most census rows today, until
-    /// the #277 catalog fills; `SettingsSearchIndexTests` pins
-    /// the per-destination counts.)
+    /// lands destination-only — the at-rest rows #277 ruled out
+    /// of the fill, and the residue its suites state;
+    /// `SettingsSearchIndexTests` pins the per-destination
+    /// counts.)
     @Test("a census hit lands on its catalog control")
     func censusHitCarriesCatalogAnchor() {
         pinEnglish()
@@ -178,7 +179,8 @@ struct SettingsSearchAnchorTests {
     /// row lands on the Grid tab instead of whatever tab
     /// renders first — the owner hit exactly this with a
     /// German "Spalten" query landing on BSP (2026-08-10). No
-    /// scroll id until the #277 catalog carries the control.
+    /// scroll id: the layout rows are at rest on their tab, and
+    /// #277 ruled the at-rest rows out of the catalog fill.
     @Test("an anchor-less layout hit opens its mode tab")
     func layoutFallbackSurface() {
         pinEnglish()

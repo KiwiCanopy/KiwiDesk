@@ -156,10 +156,12 @@ struct SettingsSearchIndexTests {
     /// strips a census row's scroll anchor — the hit still
     /// opens the destination, the control resurfaces as a
     /// duplicate extras row, and nothing else here can see it
-    /// (architect review 2026-08-10). The counts are large on
-    /// purpose: the #277 catalog covers a fraction of the
-    /// census, and each count FALLS as it fills — update with
-    /// the reason stated, never with a floor. Stated residue: a
+    /// (architect review 2026-08-10). What remains anchor-less
+    /// is ruled rather than pending: #277 filled every drawer
+    /// and stated its residue (the at-rest rows, Advanced
+    /// Colours, the shared-key drag rows, the palette menu), so
+    /// a count moves with the reason stated, never with a
+    /// floor. Stated residue: a
     /// count cannot see MEMBERSHIP, so an equal-count swap
     /// inside one destination (row A loses its anchor in the
     /// change that gives row B one) passes — granularity, not
@@ -227,7 +229,9 @@ struct SettingsSearchIndexTests {
                 // way in #1116 — a new census row landing,
                 // not an anchor going missing.
                 // 12 since #1255 — the same row leaving.
-                .shortcuts: 12,
+                // 10 since #277: the two General drawer rows
+                // gained anchors so a hit opens the drawer.
+                .shortcuts: 10,
                 .appRules: 3,
                 // 3 since #1250: the eight Advanced rows gained
                 // their catalog anchors so a hit opens the

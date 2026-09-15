@@ -69,7 +69,8 @@ struct SettingsCatalogSiteTests {
         // 115 since #277: the two bars' Style drawers' 27 rows.
         // 122 since #277: Gaps & Borders' seven at-rest rows.
         // 127 since #277: the Animations drawer's five rows.
-        #expect(names.count == 127)
+        // 129 since #277: Shortcuts ▸ General's two rows.
+        #expect(names.count == 129)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
