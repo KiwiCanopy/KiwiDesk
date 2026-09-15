@@ -117,6 +117,7 @@ public enum APIReference {
             "set_master_orientation",
             "set_stack_position",
             "set_new_window_placement",
+            "set_fill_when_alone",
             "set_master_count_override",
             "set_master_ratio_override",
             "set_overflow_style_override",
@@ -132,7 +133,7 @@ public enum APIReference {
         "scroll": [
             "set_slot_size", "set_anchor",
             "set_orientation", "set_new_window_placement",
-            "set_wrap_focus",
+            "set_wrap_focus", "set_fill_when_alone",
             "set_slot_size_override", "set_anchor_override",
             "set_orientation_override",
             "set_app_bar_enabled", "set_app_bar_edge", "set_app_bar_alignment",

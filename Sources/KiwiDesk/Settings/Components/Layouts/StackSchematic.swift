@@ -9,6 +9,9 @@ struct StackSchematic: View {
     let masterOrientation: StackParams.Orientation
     let stackPosition: StackParams.StackPosition
     let placement: SpawnPlacement
+    /// "If one window, fill the screen" (#1389,
+    /// `StackSchematic+Alone`).
+    var fillWhenAlone = true
     /// Total windows drawn including incoming tile.
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
@@ -99,6 +102,7 @@ struct StackSchematic: View {
             .animation(damping, value: masterOrientation)
             .animation(damping, value: stackPosition)
             .animation(damping, value: placement)
+            .animation(damping, value: fillWhenAlone)
         }
     }
 
@@ -106,6 +110,18 @@ struct StackSchematic: View {
     /// mirroring `StackLayout.regions`.
     @ViewBuilder
     private func zones(in size: CGSize) -> some View {
+        if lone {
+            let frame = loneFrame(in: size)
+            SchematicTile(active: true)
+                .frame(width: frame.width, height: frame.height)
+                .position(x: frame.midX, y: frame.midY)
+        } else {
+            split(in: size)
+        }
+    }
+
+    @ViewBuilder
+    private func split(in size: CGSize) -> some View {
         switch stackPosition {
         case .right:
             HStack(spacing: 3) {
@@ -130,7 +146,7 @@ struct StackSchematic: View {
         }
     }
 
-    private func masterSpan(_ total: CGFloat) -> CGFloat {
+    func masterSpan(_ total: CGFloat) -> CGFloat {
         max(6, (total - 3) * CGFloat(masterRatio))
     }
 
@@ -218,6 +234,7 @@ struct StackSchematic: View {
     }
 
     private var caption: String {
+        if lone { return loneCaption }
         switch overflowStyle {
         case .cascadeOverflow:
             return L(
@@ -240,7 +257,8 @@ struct StackSchematic: View {
     /// setting aloud would claim ten masters over a frame
     /// drawing one.
     private var axLabel: String {
-        L(
+        if lone { return loneAxLabel }
+        return L(
             "layout.schematic.stack.ax",
             "Stack preview: %1$d master windows, master ratio "
                 + "%2$d percent; the plus tile is where the next "

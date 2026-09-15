@@ -69,6 +69,11 @@ extension APIReference {
             "Sets how the stack zone cascades when overflowing.",
             .choice("style", StackParams.OverflowStyle.self)
         ),
+        "set_fill_when_alone": APIRecord(
+            "A lone window takes the whole screen instead of "
+                + "the master zone; off keeps the zone's share.",
+            .boolean("enabled")
+        ),
         "set_master_orientation": APIRecord(
             "Sets how windows line up within the master zone.",
             .choice("orientation", StackParams.Orientation.self)

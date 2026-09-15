@@ -41,6 +41,12 @@ extension KiwiCore {
                 return .fail("expected a boolean")
             }
             tiler.settings.scrolling.wrapFocus = on
+        case "scroll.set_fill_when_alone":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected a boolean")
+            }
+            tiler.settings.scrolling.fillWhenAlone = on
+            promiseAllWindowsSpringSized()
         default:
             return scrollFallback(command, args)
         }

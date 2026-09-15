@@ -86,6 +86,27 @@ enum LayoutHelp {
         )
     }
 
+    /// "If one window, fill the screen" (#1389), one label and one
+    /// help for the scrolling and stack rows: the sentence names
+    /// no slot or zone, so it holds for both.
+    @MainActor static var fillWhenAloneLabel: String {
+        L(
+            "layout_params.fill_when_alone",
+            "If one window, fill the screen"
+        )
+    }
+
+    @MainActor static var fillWhenAlone: String {
+        L(
+            "layout_params.fill_when_alone.help",
+            "When on, a lone window takes the whole screen and "
+                + "starts sharing when a second one opens. When "
+                + "off, it keeps the size it would have beside "
+                + "a neighbour, so the second window moves "
+                + "nothing already open."
+        )
+    }
+
     /// Monocle hide style help text (#881, #818).
     @MainActor static var monocleHideStyle: String {
         L(

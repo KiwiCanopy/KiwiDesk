@@ -32,6 +32,11 @@ extension APIReference {
                 + "end.",
             .boolean("enabled")
         ),
+        "set_fill_when_alone": APIRecord(
+            "A lone window takes the whole screen instead of "
+                + "one slot; off keeps the slot size.",
+            .boolean("enabled")
+        ),
         "set_slot_size_override": APIRecord(
             "Overrides the slot size for one Space; same value "
                 + "shape as the global setter.",

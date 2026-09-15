@@ -47,6 +47,7 @@ struct LayoutSchematicView: View {
                 masterOrientation: settings.stack.masterOrientation,
                 stackPosition: settings.stack.stackPosition,
                 placement: settings.stack.newWindowPlacement,
+                fillWhenAlone: settings.stack.fillWhenAlone,
                 windows: windows,
                 scale: scale
             )
@@ -56,6 +57,7 @@ struct LayoutSchematicView: View {
                 anchor: settings.scrolling.anchor,
                 slotSize: settings.scrolling.slotSize,
                 placement: settings.scrolling.newWindowPlacement,
+                fillWhenAlone: settings.scrolling.fillWhenAlone,
                 windows: windows,
                 scale: scale
             )

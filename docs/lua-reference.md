@@ -1020,6 +1020,30 @@ master).
 stack.set_new_window_placement("last")
 ```
 
+### stack.set_fill_when_alone
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** when `true` (the default, and how every profile drew
+before the setting existed), a single window takes the whole
+usable area and starts sharing only when a second window opens.
+When `false`, a lone window keeps the master zone it would have
+beside a stack zone — the master ratio's share, on the master's
+side of the split — so the second window's arrival moves
+nothing already open; the stack zone stays empty. The toggle is
+about ONE window: a full master zone with nothing stacked still
+takes the whole area. The Settings row is **If one window, fill
+the screen**; Scrolling has the same toggle
+(`scroll.set_fill_when_alone`).
+:::
+
+**Example:**
+
+```lua
+stack.set_fill_when_alone(false)
+```
+
 ### stack.set_master_count_override
 
 **Expects:**
@@ -1112,6 +1136,11 @@ leaves the rest of the axis empty. A lone window fills the
 available width or height (unless its app refuses that size —
 [Accepted limitations](accepted-limitations.md)).
 Accepted values: `%` clamps to 5–100%, points to ≥100.
+
+:::unreleased
+Whether a lone window fills is `scroll.set_fill_when_alone`'s
+(on by default); off, it keeps this slot size alone.
+:::
 
 **Example:**
 
@@ -1262,6 +1291,30 @@ across the whole row). Monocle has the same toggle
 
 ```lua
 scroll.set_wrap_focus(true)
+```
+
+### scroll.set_fill_when_alone
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** when `true` (the default, and how every profile drew
+before the setting existed), a single window in a scrolling
+space takes the whole width or height and starts sharing only
+when a second window opens. When `false`, a lone window keeps
+the slot size (`scroll.set_slot_size`) it would have beside a
+neighbour, so the second window's arrival moves nothing already
+open; the rest of the axis stays empty. Made for wide screens,
+where a lone window at 95% of the width is not what a lone
+window wants. The Settings row is **If one window, fill the
+screen**; Stack has the same toggle
+(`stack.set_fill_when_alone`).
+:::
+
+**Example:**
+
+```lua
+scroll.set_fill_when_alone(false)
 ```
 
 ### scroll.set_slot_size_override

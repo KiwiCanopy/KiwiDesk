@@ -121,6 +121,9 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     public var newWindowPlacement: SpawnPlacement = .afterFocused
     /// Whether focus wraps past row ends (#168).
     public var wrapFocus = false
+    /// A lone window takes the whole area rather than one slot
+    /// (#1389). Off keeps the slot size even alone.
+    public var fillWhenAlone = true
     public var appBar = LayoutAppBar()
     /// Per-space overrides resolved via
     /// `TilingSettings.resolvedScrolling(for:)`.
@@ -139,6 +142,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         case orientation
         case newWindowPlacement = "new_window_placement"
         case wrapFocus = "wrap_focus"
+        case fillWhenAlone = "fill_when_alone"
         case appBar = "app_bar"
         case override
     }
@@ -172,6 +176,11 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
                 Bool.self,
                 forKey: .wrapFocus
             ) ?? false
+        fillWhenAlone =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .fillWhenAlone
+            ) ?? true
         appBar =
             try container.decodeIfPresent(
                 LayoutAppBar.self,
@@ -194,6 +203,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
             forKey: .newWindowPlacement
         )
         try container.encode(wrapFocus, forKey: .wrapFocus)
+        try container.encode(fillWhenAlone, forKey: .fillWhenAlone)
         try container.encode(appBar, forKey: .appBar)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)

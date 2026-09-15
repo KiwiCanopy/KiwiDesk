@@ -139,6 +139,20 @@ extension SettingsValueReadout {
                 n.scrolling.wrapFocus,
                 onOff
             )
+        case .scrollingFillWhenAlone:
+            return layoutRow(
+                census,
+                o.scrolling.fillWhenAlone,
+                n.scrolling.fillWhenAlone,
+                onOff
+            )
+        case .stackFillWhenAlone:
+            return layoutRow(
+                census,
+                o.stack.fillWhenAlone,
+                n.stack.fillWhenAlone,
+                onOff
+            )
         case .gridType:
             return layoutRow(
                 census,

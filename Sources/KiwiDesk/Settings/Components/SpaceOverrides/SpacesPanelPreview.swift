@@ -120,7 +120,7 @@ struct SpacesPanelPreview: View {
                     for: space,
                     activeMode: mode
                 ),
-                windows: windows,
+                windows: shownWindows,
                 scale: .panel
             )
         } else {
@@ -173,9 +173,22 @@ struct SpacesPanelPreview: View {
 
     // MARK: - The window count
 
+    /// The band of the shown space's layout (#1389); with no
+    /// space to show, the shared band.
+    private var shownMode: LayoutMode? { space.map(mode(of:)) }
+
     private var countRange: ClosedRange<Double> {
-        let band = LayoutSchematic.windowCountRange
+        let band =
+            shownMode.map(LayoutSchematic.windowCountRange(for:))
+            ?? LayoutSchematic.windowCountRange
         return Double(band.lowerBound)...Double(band.upperBound)
+    }
+
+    /// The count inside that band — the slider's state outlives a
+    /// change of space.
+    private var shownWindows: Int {
+        shownMode.map { LayoutSchematic.windowCount(windows, for: $0) }
+            ?? windows
     }
 
     /// Preview window count slider.
@@ -189,7 +202,7 @@ struct SpacesPanelPreview: View {
             .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
-                    get: { Double(windows) },
+                    get: { Double(shownWindows) },
                     set: { windows = Int($0.rounded()) }
                 ),
                 range: countRange,
@@ -198,7 +211,7 @@ struct SpacesPanelPreview: View {
                     "layout_defaults.preview_windows",
                     "Window count"
                 ),
-                spokenValue: "\(windows)"
+                spokenValue: "\(shownWindows)"
             )
             .accessibilityHint(
                 L(
@@ -206,7 +219,7 @@ struct SpacesPanelPreview: View {
                     "Changes this preview only; it is not saved."
                 )
             )
-            Text("\(windows)")
+            Text("\(shownWindows)")
                 .frame(width: 24, alignment: .trailing)
                 .foregroundStyle(.secondary)
                 .font(.caption.monospacedDigit())

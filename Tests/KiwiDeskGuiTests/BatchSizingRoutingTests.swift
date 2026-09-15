@@ -165,10 +165,14 @@ struct BatchSizingRoutingTests {
         // `bsp.set_ratio_h` raised and `_override` not.
         "KiwiDeskCore/Commands/KiwiCore+BspCommands.swift":
             Site(names: 4, promises: 4),
+        // Three since #1389: the lone-window fill toggle grows
+        // or shrinks one already-placed window the way its
+        // ratio / slot-size write does, so it raises the same
+        // promise.
         "KiwiDeskCore/Commands/KiwiCore+StackCommands.swift":
-            Site(names: 2, promises: 2),
+            Site(names: 3, promises: 3),
         "KiwiDeskCore/Commands/KiwiCore+ScrollCommands.swift":
-            Site(names: 2, promises: 2),
+            Site(names: 3, promises: 3),
     ]
 
     /// Any spelling of the type — the argument label, the stored

@@ -21,11 +21,14 @@ public struct ScrollingLayout: LayoutSystem {
         )
         let horizontal = context.scrolling.axisIsHorizontal
 
-        // A single window fills the whole area — unless its app
-        // refuses that size (#677): with no neighbors to re-pack
-        // against, the answered size is CENTERED (the monocle
-        // treatment; a symmetric gap reads deliberate).
-        if windows.count == 1, let only = windows.first {
+        // A single window fills the whole area (#1389 lets the
+        // user keep the slot instead) — unless its app refuses
+        // that size (#677): with no neighbors to re-pack against,
+        // the answered size is CENTERED (the monocle treatment; a
+        // symmetric gap reads deliberate).
+        if windows.count == 1, context.scrolling.fillWhenAlone,
+            let only = windows.first
+        {
             return [
                 only: context.sizeBounds[only]?
                     .centered(

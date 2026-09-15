@@ -12,12 +12,14 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case stackStackPosition = "settings.stack.stackPosition"
     case stackOverflowStyle = "settings.stack.overflowStyle"
     case stackNewWindowPlacement = "settings.stack.newWindowPlacement"
+    case stackFillWhenAlone = "settings.stack.fillWhenAlone"
     case scrollingOrientation = "settings.scrolling.orientation"
     case scrollingAnchor = "settings.scrolling.anchor"
     case scrollingSlotSizeUnit = "settings.scrolling.slotSize (unit)"
     case scrollingSlotSizeValue = "settings.scrolling.slotSize (value)"
     case scrollingNewWindowPlacement = "settings.scrolling.newWindowPlacement"
     case scrollingWrapFocus = "settings.scrolling.wrapFocus"
+    case scrollingFillWhenAlone = "settings.scrolling.fillWhenAlone"
     case gridType = "settings.grid.type"
     case gridSplitDirection = "settings.grid.splitDirection"
     case gridFillEmptyCells = "settings.grid.fillEmptyCells"
@@ -78,7 +80,8 @@ extension LayoutKey {
             .bspNewWindowPlacement:
             return .row(.layoutDefaults, .bsp, .atRest)
         case .stackMasterCount, .stackMasterRatio, .stackStackPosition,
-            .stackOverflowStyle, .stackNewWindowPlacement:
+            .stackOverflowStyle, .stackNewWindowPlacement,
+            .stackFillWhenAlone:
             return .row(.layoutDefaults, .stack, .atRest)
         case .stackMasterOrientation:
             // Orientation applies only with multiple masters (#406).
@@ -93,7 +96,7 @@ extension LayoutKey {
             )
         case .scrollingOrientation, .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue, .scrollingNewWindowPlacement,
-            .scrollingWrapFocus:
+            .scrollingWrapFocus, .scrollingFillWhenAlone:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .gridType, .gridSplitDirection, .gridAutoSize,
             .gridNewWindowPlacement:

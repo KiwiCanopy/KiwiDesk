@@ -11,6 +11,7 @@ extension LayoutCard {
         case .bspSplitRatioV: bspRatioVRow
         case .stackMasterCount: masterCountRow
         case .stackMasterRatio: masterRatioRow
+        case .stackFillWhenAlone: stackFillWhenAloneRow
         case .stackMasterOrientation: masterOrientationRow
         case .stackStackPosition: stackPositionRow
         case .stackOverflowStyle: stackOverflowRow
@@ -19,6 +20,7 @@ extension LayoutCard {
         case .scrollingSlotSizeUnit: slotSizeUnitRow
         case .scrollingSlotSizeValue: slotSizeValueRow
         case .scrollingWrapFocus: scrollWrapFocusRow
+        case .scrollingFillWhenAlone: scrollFillWhenAloneRow
         case .gridType: gridTypeRow
         case .gridSplitDirection: gridArrangeRow
         case .gridFillEmptyCells: gridFillEmptyRow
@@ -142,6 +144,16 @@ extension LayoutCard {
         RatioRow(
             label: L("layout_params.master_ratio", "Master ratio"),
             value: stack.masterRatio
+        )
+    }
+
+    /// The lone-window fill toggle (#1389); the scrolling twin is
+    /// `scrollFillWhenAloneRow`.
+    var stackFillWhenAloneRow: some View {
+        ToggleRow(
+            label: LayoutHelp.fillWhenAloneLabel,
+            isOn: stack.fillWhenAlone,
+            help: LayoutHelp.fillWhenAlone
         )
     }
 

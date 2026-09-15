@@ -340,6 +340,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `stack.set_stack_position` | `top\|right\|bottom\|left` (default `right`; derives the stack's lineup) |
 | | `stack.set_master_orientation` | `vertical\|horizontal` (default `horizontal`) |
 | | `stack.set_new_window_placement` | placement¹ (default `first`) |
+| | `stack.set_fill_when_alone` | true\|false (default true; off keeps the master zone alone) |
 | BSP | `bsp.set_strategy` | `longest_side\|alternating` (default `alternating`) |
 | | `bsp.set_ratio_h` | 0.1–0.9 (side-by-side splits) |
 | | `bsp.set_ratio_v` | 0.1–0.9 (stacked splits) |
@@ -349,6 +350,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `scroll.set_orientation` | `horizontal\|vertical` |
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
 | | `scroll.set_wrap_focus` | true\|false (default false) |
+| | `scroll.set_fill_when_alone` | true\|false (default true; off keeps the slot size alone) |
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_cells` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |

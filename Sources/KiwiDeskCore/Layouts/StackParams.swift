@@ -46,6 +46,9 @@ public struct StackParams: Sendable, Equatable, Codable {
     public var stackPosition: StackPosition = .right
     /// Spawn placement rule for incoming windows.
     public var newWindowPlacement: SpawnPlacement = .first
+    /// A lone window takes the whole area rather than the master
+    /// zone (#1389). Off keeps the master zone's share even alone.
+    public var fillWhenAlone = true
     /// Per-space overrides (`TilingSettings.resolvedStack(for:)`).
     public var override: [SpaceID: StackOverride] = [:]
 
@@ -58,6 +61,7 @@ public struct StackParams: Sendable, Equatable, Codable {
         case masterOrientation = "master_orientation"
         case stackPosition = "stack_position"
         case newWindowPlacement = "new_window_placement"
+        case fillWhenAlone = "fill_when_alone"
         case override
     }
 
@@ -97,6 +101,11 @@ public struct StackParams: Sendable, Equatable, Codable {
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .first
+        fillWhenAlone =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .fillWhenAlone
+            ) ?? true
         override =
             try container.decodeIfPresent(
                 [SpaceID: StackOverride].self,
@@ -125,6 +134,7 @@ public struct StackParams: Sendable, Equatable, Codable {
             newWindowPlacement,
             forKey: .newWindowPlacement
         )
+        try container.encode(fillWhenAlone, forKey: .fillWhenAlone)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)
         }

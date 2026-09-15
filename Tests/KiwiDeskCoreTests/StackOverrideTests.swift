@@ -12,6 +12,9 @@ struct StackOverrideTests {
     private static let notOverridable: Set<String> = [
         // Already per-space via new_window_placement_override.
         "newWindowPlacement",
+        // A per-layout behaviour toggle (#1389), the scrolling
+        // `wrapFocus` precedent: it shapes the whole layout.
+        "fillWhenAlone",
         // The override map itself.
         "override",
     ]

@@ -8,6 +8,8 @@ struct ScrollingSchematic: View {
     let anchor: ScrollingParams.Anchor
     let slotSize: ScrollSize
     let placement: SpawnPlacement
+    /// "If one window, fill the screen" (#1389).
+    var fillWhenAlone = true
     /// Windows in row including incoming window.
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
@@ -33,9 +35,14 @@ struct ScrollingSchematic: View {
 
     private var horizontal: Bool { orientation == .horizontal }
 
+    /// The lone-window frame (#1389): one slot, no incoming
+    /// window, and no insertion mark to point at.
+    var lone: Bool { windows == 1 }
+
     /// Row slot bounds and incoming window offset relative to focus (#702,
     /// `LayoutSchematicCountTests`, `LayoutSchematicScrollingTests`).
     var row: (slots: ClosedRange<Int>, incoming: Int) {
+        guard !lone else { return (0...0, 0) }
         let total = max(2, windows)
         let established = total - 1
         let placed = SchematicPlacement.splice(
@@ -49,7 +56,13 @@ struct ScrollingSchematic: View {
         )
     }
 
-    /// Slot thickness as fraction of screen axis.
+    /// Slot thickness as fraction of screen axis: the whole axis
+    /// for a lone window that fills (#1389), else the slot's
+    /// (`LayoutSchematicCountTests`).
+    var slotFraction: CGFloat {
+        lone && fillWhenAlone ? 1 : thickness
+    }
+
     private var thickness: CGFloat {
         switch slotSize {
         case .auto:
@@ -76,6 +89,7 @@ struct ScrollingSchematic: View {
             .animation(damping, value: orientation)
             .animation(damping, value: slotSize)
             .animation(damping, value: placement)
+            .animation(damping, value: fillWhenAlone)
             .animation(damping, value: windows)
         }
     }
@@ -95,7 +109,7 @@ struct ScrollingSchematic: View {
     func metrics(along: CGFloat) -> Metrics {
         let screenLen = along * screenFraction
         let screenStart = (along - screenLen) / 2
-        let slot = max(14, screenLen * thickness)
+        let slot = max(14, screenLen * slotFraction)
         let gap: CGFloat = 3
         let step = slot + gap
         let placed = row
@@ -168,7 +182,7 @@ struct ScrollingSchematic: View {
     ) -> some View {
         if !onCanvas(i, m, along: along) {
             EmptyView()
-        } else if i == m.newIdx {
+        } else if i == m.newIdx, !lone {
             SchematicNewWindow(badgeAlignment: badgeAlignment(i))
         } else if onScreen(i, m) {
             SchematicTile(active: i == 0)
