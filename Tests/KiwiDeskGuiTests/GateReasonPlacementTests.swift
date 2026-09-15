@@ -56,13 +56,13 @@ struct GateReasonPlacementTests {
             Set(owed) == [
                 // Shipped inline before #815, and the reason the
                 // derivation is checkable at all.
-                // (`.profiles(.profileBindings)` left the set
-                // with #888: its off-surface separate-Spaces arm
-                // retired, and the arm that remains —
-                // `editingStoredProfile` — has its cause on the
-                // surface, so the row owes nothing inline and
-                // its view stopped drawing the note.)
                 .general(.startAtLogin),
+                // Back in the set with #1392: the stored-profile
+                // arm (cause on the surface) retired, and the
+                // one that greys now — a stored Save with no
+                // sidecar to file into — is visible nowhere on
+                // this page.
+                .profiles(.profileBindings),
                 // Found BY the derivation: the copy action sits
                 // on the App Bar card while the switch that
                 // kills it is on the Space Bar card, so nothing

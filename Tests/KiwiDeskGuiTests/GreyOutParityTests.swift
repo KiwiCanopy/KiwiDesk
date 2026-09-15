@@ -92,16 +92,11 @@ struct GreyOutParityTests {
         // The opposite invariant — that no gate returns — is
         // `StickyMarkUngatedTests`.
         //
-        // The Desktop bindings grey is the card's OWN since #678
-        // turn 13a — the predicate came from the caller before,
-        // and a resolver the caller feeds is a resolver two
-        // files can disagree about. One needle now, on the
-        // dimmed subtree: the reason is the resolver's (pinned
-        // by `ProfilesGateWiringTests`) and this pins that the
-        // reason actually dims the rows. The gate still stops
-        // short of the card header and the inline note, so both
-        // the disclosure label and the "Open Desktop & Dock"
-        // button stay live under it (#527).
+        // The Desktop bindings grey is the resolver's (pinned by
+        // `ProfilesGateWiringTests`); this pins that its one
+        // gate — a stored Save with no binding store, since
+        // #1392 — actually dims the rows, and only the rows: the header,
+        // its `?` and the inline reason stay live (#527/#815).
         (
             "DesktopsGroup.swift",
             "GreyOut(active: reason != nil",

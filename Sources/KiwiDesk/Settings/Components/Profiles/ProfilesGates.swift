@@ -8,6 +8,12 @@ struct ProfilesGates {
     let editingStoredProfile: Bool
     /// Current count of connected physical displays.
     let connectedScreens: Int
+    /// `KiwiCore.isGuiManaged` and whether `gui.json` exists:
+    /// a stored profile's Save files a binding only into a
+    /// sidecar the structured loader reads (#1392). Live's Save
+    /// creates one, so only the stored target greys.
+    let guiManaged: Bool
+    let sidecarExists: Bool
     /// Preset row's OWN screen count; nil on every other row — a
     /// `presetsApply` resolve with nil is a caller that forgot to
     /// pass it, which asserts rather than silently (not) greying.
@@ -15,7 +21,8 @@ struct ProfilesGates {
 
     /// Reason why a setting control is currently disabled/inert.
     enum InertReason: Hashable {
-        case bindingsAreGlobal
+        case bindingsOwnedByLua
+        case noSidecar
         case presetSwitchesLiveLayout
         case screenCountMismatch(screens: Int)
     }
@@ -29,8 +36,10 @@ struct ProfilesGates {
         guard key.placement.gate != nil else { return nil }
         switch key {
         case .profiles(.profileBindings):
-            return editingStoredProfile
-                ? .bindingsAreGlobal : nil
+            guard editingStoredProfile, !guiManaged else {
+                return nil
+            }
+            return sidecarExists ? .bindingsOwnedByLua : .noSidecar
         case .profiles(.presetsApply):
             if editingStoredProfile {
                 return .presetSwitchesLiveLayout
@@ -70,11 +79,22 @@ enum ProfilesGateHelp {
         for reason: ProfilesGates.InertReason
     ) -> String {
         switch reason {
-        case .bindingsAreGlobal:
+        case .bindingsOwnedByLua:
+            // The reader is a Lua author by construction (the
+            // gate), so the verb is named — interpolated, never
+            // in the frame (gui.md).
             return L(
-                "profiles.desktops.live_only",
-                "Desktop bindings are global — switch to "
-                    + "Live to change them."
+                "profiles.desktops.lua_owned",
+                "Your init.lua owns the Desktop bindings — "
+                    + "edit its %1$@ lines there.",
+                "bind_profile_to_desktop"
+            )
+        case .noSidecar:
+            return L(
+                "profiles.desktops.no_sidecar",
+                "Desktop bindings are kept in gui.json, which "
+                    + "doesn't exist yet — switch to Live and "
+                    + "save once to create it."
             )
         case .presetSwitchesLiveLayout:
             return L(

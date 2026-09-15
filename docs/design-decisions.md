@@ -10559,7 +10559,8 @@ That grey was correct *for as long as its premise held* — and
 trigger a definition (the main screen's Desktop) that holds in
 every display mode. The rows are live in every display state now, so the
 grey, its inline warning and its Desktop & Dock button retired
-together (the stored-profile grey, a different premise, stands). What survives, because it never depended on the
+together; the stored-profile grey, a different premise, fell to
+#1392 below. What survives, because it never depended on the
 instance: a control the OS genuinely makes meaningless is still
 greyed rather than left live, and existing config stays visible
 under any such grey — hiding a user's own configuration to
@@ -10616,6 +10617,31 @@ runs before the loop publishes displays, and a paused engine
 discovers none — the gate cannot judge and the binding waits
 too, rather than loading a profile that the boot scan's monitor
 change would then replace; that first monitor change fires it.
+
+**[Rationale]**
+
+**The Desktop binding rows are live under every edit target
+([#1392](https://github.com/KiwiCanopy/KiwiDesk/issues/1392)).**
+A binding says which profile a Desktop loads, which is a fact
+about no one profile — the table is global — so the profile the
+Settings window happens to be editing does not change what a
+row means, and greying the rows behind *switch to Live* said
+nothing a user could act on except a detour. The grey was not
+protecting a ruling: it arrived with the stored-profile edit
+target, whose Save wrote only the profile's own file, so a live
+row there dropped its edit on Save. That was a missing write,
+not a reason to withhold the row — a stored-profile Save files
+an edited binding table into `gui.json` through one Core door
+(`rewriteSidecarBindings`), and only for the rows that changed.
+The one state that still greys them is a stored profile of a
+config the GUI does not manage: that Save has no sidecar to file
+into, or one nothing reads, so a live row there would offer an
+edit that goes nowhere, and the rows dim with the cause — the
+one case the retired sentence was right about. Live is never
+greyed, since its Save creates the sidecar. Moving the binding
+*into* the profile was refused on the
+standing rule: a profile owns tiling plus sparse overrides,
+never anything that routes or selects the profile itself.
 
 **[Principle]**
 

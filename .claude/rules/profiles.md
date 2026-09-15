@@ -588,6 +588,25 @@ means, not about #1179's defect, and it is open on that thread:
 scope this claim to the live target rather than reading it as
 covering all three.
 
+**A global leaf a stored-profile draft keeps LIVE owes its own
+write on that Save (#1392).** `overwriteProfile` writes the
+profile file alone, and a profile may not carry a binding — so
+the Desktop binding table leaves that draft through
+`saveEditedProfile` ▸ `KiwiCore.rewriteSidecarBindings`, per
+entry onto the store's own map, never `loadGuiConfig()`'s
+overlay; `renameProfile`'s value follow takes the same door, and
+`reconcileDesktopBindings` stays apart on its stated no-reload
+reason. The door names its refusal — no sidecar, or one that no
+longer decodes — rather than minting or overwriting a file, and
+the sidecar's bindings are read only while `isGuiManaged`, so the
+rows grey under a STORED target of a config the GUI does not
+manage, by cause, rather than offering a write that lands nowhere
+— never under Live, whose Save mints the sidecar
+(`StoredProfileBindingSaveTests`, `ProfilesGateTests` ▸
+`bindingsNoStore`). A second global leaf made editable under the
+stored target takes the same shape: its own write, its own
+"no store" gate.
+
 **Neither half may be dropped, because each is the other's
 mirror.** A Save that re-asserts the draft's modes wholesale
 destroys a standing temporary layout the save pill never counted

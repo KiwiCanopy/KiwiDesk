@@ -1,5 +1,14 @@
 import Foundation
 
+/// Why a sidecar rewrite wrote nothing — a case, never a
+/// sentence (core-boundaries.md): a missing sidecar is never
+/// minted, and one that no longer decodes is never overwritten
+/// (`KiwiCore+ProfileEdit`'s rule).
+public enum SidecarError: Error {
+    case missing
+    case unreadable
+}
+
 /// The two crossings a Desktop binding owes, both of which END
 /// (#1147, AGENTS.md §5).
 ///
@@ -41,6 +50,29 @@ extension KiwiCore {
             .lazy
             .compactMap { self.desktopBindings[$0] }
             .first
+    }
+
+    /// The one sidecar rewrite of the binding table (#1392):
+    /// `edit` runs over the store's OWN map and the result goes
+    /// through `saveGuiConfig` — or the bare store on a paused
+    /// cold boot, where a reload would be the session's first
+    /// (#516). Throws `SidecarError` rather than minting or
+    /// overwriting a file.
+    public func rewriteSidecarBindings(
+        _ edit: (inout [DesktopKey: DesktopBinding]) -> Void
+    ) throws {
+        guard guiConfigStore.exists else {
+            throw SidecarError.missing
+        }
+        guard var live = guiConfigStore.load() else {
+            throw SidecarError.unreadable
+        }
+        edit(&live.profileBindings)
+        if lua == nil {
+            try guiConfigStore.save(live)
+        } else {
+            try saveGuiConfig(live)
+        }
     }
 
     /// Re-keys and re-projects every binding this topology can

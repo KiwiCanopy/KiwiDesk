@@ -24,11 +24,15 @@ struct ProfilesGateTests {
     private func gates(
         editing: Bool = false,
         screens: Int = 3,
+        guiManaged: Bool = true,
+        sidecar: Bool = true,
         preset: Int? = nil
     ) -> ProfilesGates {
         ProfilesGates(
             editingStoredProfile: editing,
             connectedScreens: screens,
+            guiManaged: guiManaged,
+            sidecarExists: sidecar,
             presetScreens: preset
         )
     }
@@ -131,28 +135,48 @@ struct ProfilesGateTests {
 
     // MARK: - Desktop bindings
 
-    @Test("bindings are live while editing the live config")
+    /// Bindings are a global table, so the edit target does not
+    /// change what a row means (#1392); #888 retired the
+    /// separate-Spaces arm before it.
+    @Test("bindings are live under every edit target")
     func bindingsLive() {
-        #expect(
-            gates().inertReason(
-                for: .profiles(.profileBindings)
-            ) == nil
-        )
+        for editing in [false, true] {
+            #expect(
+                gates(editing: editing).inertReason(
+                    for: .profiles(.profileBindings)
+                ) == nil
+            )
+        }
     }
 
-    @Test("editing a stored profile kills the bindings")
-    func bindingsEditingStored() {
+    /// The one state that greys them: a STORED profile's Save has
+    /// no sidecar the structured loader reads — Live's Save
+    /// creates one, so the live target never greys, whatever the
+    /// config's ownership.
+    @Test("only a stored target with no binding store greys")
+    func bindingsNoStore() {
         #expect(
-            gates(editing: true).inertReason(
-                for: .profiles(.profileBindings)
-            ) == .bindingsAreGlobal
+            gates(editing: true, guiManaged: false, sidecar: true)
+                .inertReason(for: .profiles(.profileBindings))
+                == .bindingsOwnedByLua
         )
+        #expect(
+            gates(editing: true, guiManaged: false, sidecar: false)
+                .inertReason(for: .profiles(.profileBindings))
+                == .noSidecar
+        )
+        for sidecar in [false, true] {
+            let live = gates(
+                editing: false,
+                guiManaged: false,
+                sidecar: sidecar
+            )
+            #expect(
+                live.inertReason(for: .profiles(.profileBindings))
+                    == nil
+            )
+        }
     }
-
-    // #888 retired the separate-Spaces arm: a binding names one
-    // event in every display mode (the main display's Desktop),
-    // so no display state greys these rows any more —
-    // `bindingsLive` above is what holds them live.
 
     // MARK: - Preset apply
 

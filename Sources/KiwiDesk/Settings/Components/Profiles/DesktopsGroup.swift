@@ -2,12 +2,12 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Settings group for binding profiles to macOS Desktops (#7,
-/// #678, #768, #888). The remaining grey is the resolver's and is
-/// scoped to the ROWS, not the whole card (#527: the drawer keeps
-/// its header and `?` anchor clickable). By the #815 derivation
-/// (`GateReasonPlacement`) these rows owe no inline sentence —
-/// the `bindingsAreGlobal` cause is on the surface, exactly like
-/// `presetsApply` under the same reason.
+/// #678, #768, #888). The rows are live under every edit target
+/// — bindings are a global table, filed by a stored-profile Save
+/// too — and inert only where that Save has no sidecar to file
+/// one, the one gate the resolver answers (#1392). Its cause is
+/// off this surface, so the reason draws INLINE, outside the
+/// dim (#815).
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = true
@@ -15,7 +15,9 @@ struct DesktopsGroup: View {
     private var gates: ProfilesGates {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
-            connectedScreens: model.displays.count
+            connectedScreens: model.displays.count,
+            guiManaged: model.guiManaged,
+            sidecarExists: model.sidecarExists
         )
     }
 
@@ -33,7 +35,16 @@ struct DesktopsGroup: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                rows(inert: reason)
+                rows.modifier(GreyOut(active: reason != nil))
+                if let reason {
+                    Text(ProfilesGateHelp.sentence(for: reason))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+                }
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,23 +91,14 @@ struct DesktopsGroup: View {
         )
     }
 
-    @ViewBuilder private func rows(
-        inert reason: ProfilesGates.InertReason?
-    ) -> some View {
-        let help =
-            reason.map(ProfilesGateHelp.sentence) ?? ""
-        Group {
-            if desktopRows.isEmpty {
-                emptyHint
-            } else {
-                ForEach(desktopRows, id: \.key) { row in
-                    spaceRow(row)
-                }
+    @ViewBuilder private var rows: some View {
+        if desktopRows.isEmpty {
+            emptyHint
+        } else {
+            ForEach(desktopRows, id: \.key) { row in
+                spaceRow(row)
             }
         }
-        .modifier(
-            GreyOut(active: reason != nil, help: help)
-        )
     }
 
     private var emptyHint: some View {

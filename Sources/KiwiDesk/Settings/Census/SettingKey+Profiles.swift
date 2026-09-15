@@ -15,12 +15,14 @@ extension ProfilesKey {
     var placement: SettingPlacement {
         switch self {
         case .profileBindings:
-            // Inactive while editing a stored profile (#888).
+            // Live under every edit target — bindings are a
+            // global table — and inert only where the stored
+            // profile's Save has no sidecar to file one (#1392).
             return .row(
                 .profiles,
                 .profilesPerMacOSSpace,
                 .showMore,
-                gate: .runtime(.editingStoredProfile)
+                gate: .runtime(.noBindingStore)
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)

@@ -14,10 +14,10 @@ import Testing
 /// wiring half — the behaviour half is `ProfilesGateTests`.
 ///
 /// SCOPE: by explicit path, one entry per GATE rather than per
-/// file. `DesktopsGroup` resolves one gate that has two
-/// reasons, and a file-level "touches the resolver somewhere"
-/// check would pass while one of them went hand-rolled — the very
-/// drift this guard exists to catch. A future gated row in this
+/// file. `PresetCard` resolves one gate that has two reasons,
+/// and a file-level "touches the resolver somewhere" check would
+/// pass while one of them went hand-rolled — the very drift
+/// this guard exists to catch. A future gated row in this
 /// area owes both its resolver consult AND a `consults` entry
 /// naming the file that draws it, in the same change;
 /// `everyGatedRowIsResolved` forces the resolver half, and
@@ -304,7 +304,8 @@ struct ProfilesGateWiringTests {
                 "Sections/ProfilesSection+Subtitle.swift",
             ]
         for key in [
-            "profiles.desktops.live_only",
+            "profiles.desktops.lua_owned",
+            "profiles.desktops.no_sidecar",
             "presets.editing_stored",
             "presets.needs_screens",
         ] {

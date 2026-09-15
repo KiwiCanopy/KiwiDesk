@@ -5,6 +5,8 @@ import KiwiDeskCore
 extension SettingsModel {
     func refreshProfiles() {
         profiles = core.profiles.list()
+        guiManaged = core.isGuiManaged
+        sidecarExists = core.guiConfigStore.exists
         activeProfile = core.profiles.currentName
         activeStandard = core.profiles.currentStandard
         profileDirty = core.profiles.isDirty
@@ -76,15 +78,8 @@ extension SettingsModel {
         // its old number key — the wrong-Desktop this closes,
         // re-entering through the GUI (architect review,
         // 2026-09-04).
-        let edited = config.profileBindings.filter {
-            cleanConfig.profileBindings[$0.key] != $0.value
-        }
-        let dropped = cleanConfig.profileBindings.keys.filter {
-            config.profileBindings[$0] == nil
-        }
         var adopted = saved.profileBindings
-        for (key, value) in edited { adopted[key] = value }
-        for key in dropped { adopted[key] = nil }
+        bindingEdits.apply(to: &adopted)
         let wasSuppressed = suppressDirty
         suppressDirty = true
         config.profileBindings = adopted
@@ -105,5 +100,35 @@ extension SettingsModel {
             recoverResizeStep: true
         )
         config = updated
+    }
+}
+
+/// The binding rows the user touched in the draft — per ENTRY,
+/// since ownership is per binding (#1147).
+struct BindingEdits {
+    var edited: [DesktopKey: DesktopBinding]
+    var dropped: [DesktopKey]
+
+    var isEmpty: Bool { edited.isEmpty && dropped.isEmpty }
+
+    func apply(to bindings: inout [DesktopKey: DesktopBinding]) {
+        for (key, value) in edited { bindings[key] = value }
+        for key in dropped { bindings[key] = nil }
+    }
+}
+
+extension SettingsModel {
+    /// The draft's binding edits against the clean baseline —
+    /// the one derivation the re-key adopt and the
+    /// stored-profile Save both read.
+    var bindingEdits: BindingEdits {
+        BindingEdits(
+            edited: config.profileBindings.filter {
+                cleanConfig.profileBindings[$0.key] != $0.value
+            },
+            dropped: cleanConfig.profileBindings.keys.filter {
+                config.profileBindings[$0] == nil
+            }
+        )
     }
 }

@@ -43,8 +43,49 @@ extension SettingsModel {
             core.onLog("profile edit save failed: \(error)")
             return
         }
+        persistBindingsIfEdited()
         core.reapplyIfInEffect(name)
         reload()
+    }
+
+    /// The one global leaf a stored-profile draft keeps live —
+    /// the Desktop binding table — leaves it by its own write,
+    /// per ENTRY onto the store's map (#1392): the user owns the
+    /// rows they touched, Core owns the rest (#1147).
+    private func persistBindingsIfEdited() {
+        let edits = bindingEdits
+        guard !edits.isEmpty else { return }
+        do {
+            try core.rewriteSidecarBindings { edits.apply(to: &$0) }
+        } catch let error as SidecarError {
+            profileWarning = Self.sidecarRefusal(error)
+            core.onLog("desktop bindings save refused: \(error)")
+        } catch {
+            profileWarning = L(
+                "settings.globals_save_failed",
+                "Saving settings failed: %1$@",
+                "\(error)"
+            )
+            core.onLog("desktop bindings save failed: \(error)")
+        }
+    }
+
+    /// Core names the refusal; the GUI narrates it (#96).
+    private static func sidecarRefusal(_ error: SidecarError) -> String {
+        switch error {
+        case .missing:
+            return L(
+                "settings.bindings_save.no_sidecar",
+                "Desktop bindings were not saved: gui.json does "
+                    + "not exist yet."
+            )
+        case .unreadable:
+            return L(
+                "settings.bindings_save.unreadable",
+                "Desktop bindings were not saved: gui.json could "
+                    + "not be read."
+            )
+        }
     }
 
     /// Base keybinding rows for Shortcuts override affordance (#55).

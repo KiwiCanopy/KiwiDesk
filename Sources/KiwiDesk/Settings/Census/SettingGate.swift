@@ -37,6 +37,10 @@ enum SettingRuntimeGate: Hashable {
     case trackInUse
     /// Liquid Glass unavailable on pre-macOS 26 (#390).
     case liquidGlassUnavailable
+    /// A stored profile of a config the GUI does not manage is
+    /// being edited: that Save has no sidecar to file a Desktop
+    /// binding in, or one nothing reads (#1392).
+    case noBindingStore
     /// The window-management bridge is absent on this macOS
     /// (#1145) — the row HIDES, per `canDriveDesktops`' ruling:
     /// no setting or mode reaches the capability, so a grey
