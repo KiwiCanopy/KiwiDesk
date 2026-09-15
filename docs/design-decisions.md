@@ -8849,34 +8849,9 @@ don't assume from tone.
   plate at both wallpaper extremes**, because a translucent fill
   sweeps the whole grey range as the wallpaper changes and a hue
   can clear one end while failing the other.
-- **`border.unfocused_color` is a near-neutral, low-chroma grey
-  at 85–90 % alpha, its LIGHTNESS set per palette** so that the
-  ring sits below the focused ring's composited contrast on the
-  palette's home backdrop — dark for eight, light for Clean
-  Light — and never competes with it. The old guide read "~35–60
-  % alpha" and produced the vanish #1384 reported: six dark
-  palettes shipped a dark grey at that alpha over dark
-  wallpaper, which recedes twice, and below ~85 % the ring's
-  colour is the wallpaper's, which on a busy one is no ring at
-  all. Alpha is not the lever for receding; lightness is. Two
-  palettes fix their number so the argument is not re-run:
-  **Sunset's grey stays dark** (`#6A665EE6`, ~25 L* below the
-  pink) because `#FF8099` simulates to a neutral grey under
-  protanopia, so only lightness separates the pair and a lighter
-  grey walks into the collapse — the weakest ring of the set on
-  dark, accepted; if the pair reads too quiet, lighten the
-  accent one step with hue held, never the grey. **Ultraviolet's
-  grey sits level with its indigo** (`#7E7E96E6`, blue-grey cast
-  kept) rather than below it: the device pick `#BFBFBFE6`
-  composited to 7.8:1 against the indigo's 3.4:1 and inverted
-  dominance, and a grey clearly under 3.4:1 is the vanish again,
-  so contrast parity with the indigo's chroma carrying the order
-  is the compromise. The derived default keeps `#8E8E93CC`.
-  `BorderRingSeparationTests` measures both halves — the pair's
-  CVD separation composited at both wallpaper extremes, and the
-  home-backdrop dominance with Ultraviolet's parity band the one
-  exemption — and its docstring records that Sunset's light
-  extreme clears the floor by construction, not by margin.
+- **`border.unfocused_color` is a near-neutral, low-chroma
+  grey** that must never compete with the focused ring; its
+  lightness and alpha are argued after this list (#1384).
 - **`fill_color` sets the light/dark base; `item_color`
   inverts against it** (`hover_item_color` mirrors the item
   family, doesn't flip it). **A bundled palette does not pick a
@@ -8955,6 +8930,43 @@ don't assume from tone.
   Origin is a green darkened for stroke duty, but *not*
   necessarily the ring's green: see the overlay note below for
   why the shipped ghost had to leave the hue family.
+
+:::unreleased
+**The unfocused ring's grey sits at 85–90 % alpha with its
+LIGHTNESS set per palette** (#1384), so that the ring composites
+to less contrast than the focused ring on the palette's home
+backdrop — dark for every palette but Clean Light — and never
+competes with it. The guide used to read "~35–60 % alpha" and
+produced the vanish #1384 reported: six dark palettes shipped a
+dark grey at that alpha over dark wallpaper, which recedes
+twice, and below ~85 % the ring's colour is the wallpaper's,
+which on a busy one is no ring at all. Alpha is not the lever
+for receding; lightness is — and "receding" is measured as
+composited contrast, not lightness order, since on a light
+backdrop a ring recedes by approaching it. Two palettes fix their
+number so the argument is not re-run. **Sunset's grey stays
+dark** (`#6A665EE6`, ~25 L* below the pink) because `#FF8099`
+simulates to a neutral grey under protanopia, so only lightness
+separates the pair and a lighter grey walks into the collapse —
+`BorderRingSeparationTests` ▸ `aLiftedSunsetGreyCollapses` pins
+that the shared system grey the other dark palettes take fails
+Sunset outright. It is the weakest ring of the set on dark and
+accepted; if the pair reads too quiet, lighten the accent one
+step with hue held, never the grey. **Ultraviolet's grey sits
+level with its indigo** (`#7E7E96E6`, blue-grey cast kept)
+rather than below it: a grey clearly under the indigo's
+composited contrast is the vanish again, and the device pick
+`#BFBFBFE6` composited to more than twice the indigo's, inverting
+dominance — `BorderRingSeparationTests` ▸
+`theRefusedUltravioletPickInvertsDominance` measures it — so
+contrast parity with the indigo's chroma carrying the order is
+the compromise. The derived default keeps `#8E8E93CC`, the one
+value under the authored band. `BorderRingSeparationTests`
+holds the rest: the pair's CVD separation composited at both
+wallpaper extremes, the alpha band, opaque focused rings, and
+the home-backdrop dominance derived from each palette's own
+fill.
+:::
 
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
