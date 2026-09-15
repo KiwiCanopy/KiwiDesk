@@ -64,6 +64,21 @@ struct GreyOutParityTests {
             "GreyOut(active: blockReason != nil",
             1
         ),
+        // The glow-size rows (#1377): the auto toggle's wrap and
+        // the slider's `gatedIsInert` are the two USE sites of
+        // the resolver's `.glowOff` answer — the consult needle
+        // is satisfied by the computed property's declaration,
+        // so deleting either wrap left every suite green.
+        (
+            "FocusBorderEditor.swift",
+            "active: glowAutoReason != nil",
+            1
+        ),
+        (
+            "FocusBorderEditor.swift",
+            "gatedIsInert: glowSizeReason != nil ? true : nil",
+            1
+        ),
         // The two census-rendered bar cards (#678 Phase 2)
         // carry their container gates per row, resolved from
         // the census — the needle is the per-row wrap that

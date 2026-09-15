@@ -1385,6 +1385,13 @@ was written down:
   configures — the Space Bar's own toggle, "no layout shows an
   App Bar", a drag visual's Enabled — dim the whole block.
   `FocusBorderEditor` is the reference shape.
+- **An auto toggle greys with the slider it governs.** Where
+  an `AutoGatedGroup`'s slider carries a row gate, the toggle
+  has no effect under that gate either, so it takes the same
+  reason: the group is wrapped in the gate's `GreyOut` and the
+  toggle's row declares the gate in the census. Auto Glow Size
+  shipped live over a greyed slider (#1377); the two rows are
+  the class's only member today.
 - **Ask the value that is actually read, never the global.** A
   gate keyed on a global while a per-layout or per-space
   override is what renders will grey the only editor for a value
