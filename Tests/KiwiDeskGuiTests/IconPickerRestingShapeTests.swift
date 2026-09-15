@@ -36,12 +36,19 @@ struct IconPickerRestingShapeTests {
     }
 
     /// Every GUI file presenting a popover over a per-open
-    /// `search` state.
-    private func searchPopovers() throws -> [URL] {
-        try SourceScan.swiftSources(under: guiRoot).filter {
+    /// `search` state, with the presentation binding's NAME read
+    /// off the `.popover` call — a member spelling it otherwise
+    /// cannot slip out of the census.
+    private func searchPopovers() throws -> [(URL, binding: String)] {
+        try SourceScan.swiftSources(under: guiRoot).compactMap {
             let s = try squashed($0)
-            return s.contains(".popover(isPresented:$showing)")
-                && s.contains("@Stateprivatevarsearch=")
+            guard s.contains("@Stateprivatevarsearch="),
+                let call = s.range(of: ".popover(isPresented:$")
+            else { return nil }
+            let name = s[call.upperBound...].prefix {
+                $0.isLetter || $0.isNumber || $0 == "_"
+            }
+            return ($0, String(name))
         }
     }
 
@@ -116,9 +123,9 @@ struct IconPickerRestingShapeTests {
     func everySearchPopoverResets() throws {
         let members = try searchPopovers()
         #expect(members.count >= 2)
-        for url in members {
+        for (url, binding) in members {
             let hook = body(
-                after: ".onChange(of:showing)",
+                after: ".onChange(of:\(binding))",
                 in: try squashed(url)
             )
             #expect(
