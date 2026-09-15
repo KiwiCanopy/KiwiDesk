@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "Tudo em cascata",
   "layout_params.cascade_overflow": "Excedente em cascata",
   "layout_params.fill_when_alone": "Com uma só janela, preencher a tela",
-  "layout_params.fill_when_alone.help": "Quando ativado, uma janela sozinha ocupa a tela inteira e passa a compartilhá-la quando uma segunda se abre. Quando desativado, ela mantém o tamanho que teria ao lado de uma vizinha, então a segunda janela não move nada que já esteja aberto.",
+  "layout_params.fill_when_alone.help": "Quando ativado, uma janela sozinha ocupa a tela inteira e passa a compartilhá-la quando uma segunda se abre. Quando desativado, ela mantém o tamanho que teria ao lado de uma vizinha, e o resto da tela fica vazio.",
   "layout_params.longest_side": "Lado mais longo",
   "layout_params.master_count": "Quantidade principal",
   "layout_params.master_orientation": "Orientação principal",

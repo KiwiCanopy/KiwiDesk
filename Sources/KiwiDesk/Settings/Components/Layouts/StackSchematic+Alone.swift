@@ -7,48 +7,27 @@ import SwiftUI
 extension StackSchematic {
     var lone: Bool { windows == 1 }
 
-    /// Where the lone window sits, mirroring `StackLayout`'s
-    /// lone-master branch (`LayoutSchematicCountTests`).
+    /// Where the lone window sits: the master region the ENGINE's
+    /// own split gives it (`StackLayout.regions`, #702), or the
+    /// whole canvas (`LayoutSchematicAloneTests`).
     func loneFrame(in size: CGSize) -> CGRect {
         guard !fillWhenAlone else {
             return CGRect(origin: .zero, size: size)
         }
-        switch stackPosition {
-        case .right:
-            return CGRect(
-                x: 0,
-                y: 0,
-                width: masterSpan(size.width),
-                height: size.height
-            )
-        case .left:
-            let span = masterSpan(size.width)
-            return CGRect(
-                x: size.width - span,
-                y: 0,
-                width: span,
-                height: size.height
-            )
-        case .bottom:
-            return CGRect(
-                x: 0,
-                y: 0,
-                width: size.width,
-                height: masterSpan(size.height)
-            )
-        case .top:
-            let span = masterSpan(size.height)
-            return CGRect(
-                x: 0,
-                y: size.height - span,
-                width: size.width,
-                height: span
-            )
-        }
+        let total =
+            stackPosition.splitsHorizontally ? size.width : size.height
+        let span = masterSpan(total)
+        return StackLayout.regions(
+            usable: CGRect(origin: .zero, size: size),
+            position: stackPosition,
+            masterSpan: span,
+            stackSpan: total - Self.zoneGap - span,
+            gap: Self.zoneGap
+        ).master
     }
 
     /// The lone-window sentence switches with the fill toggle
-    /// (`LayoutSchematicCaptionTests`).
+    /// (`LayoutSchematicAloneTests`).
     var loneCaption: String {
         if fillWhenAlone {
             return L(

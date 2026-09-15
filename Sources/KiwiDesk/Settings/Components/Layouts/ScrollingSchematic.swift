@@ -58,7 +58,7 @@ struct ScrollingSchematic: View {
 
     /// Slot thickness as fraction of screen axis: the whole axis
     /// for a lone window that fills (#1389), else the slot's
-    /// (`LayoutSchematicCountTests`).
+    /// (`LayoutSchematicAloneTests`).
     var slotFraction: CGFloat {
         lone && fillWhenAlone ? 1 : thickness
     }

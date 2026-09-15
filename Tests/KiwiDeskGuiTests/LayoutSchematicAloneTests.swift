@@ -18,15 +18,36 @@ import Testing
 @Suite("Layout preview lone window (#1389)")
 @MainActor
 struct LayoutSchematicAloneTests {
+    /// Derived, not restated: a layout's band reaches 1 exactly
+    /// when its params carry `fillWhenAlone`, read off
+    /// `TilingSettings` by reflection so a third layout gaining
+    /// the flag reds here until its band moves.
     @Test("the band reaches 1 exactly where a lone window differs")
     func bandFloorPerMode() {
         let shared = LayoutSchematic.windowCountRange
+        let params = Dictionary(
+            uniqueKeysWithValues: Mirror(reflecting: TilingSettings())
+                .children.compactMap { child in
+                    child.label.map { ($0, child.value) }
+                }
+        )
+        var flagged = 0
         for mode in LayoutMode.allCases {
             let band = LayoutSchematic.windowCountRange(for: mode)
-            let differs = mode == .scrolling || mode == .stack
-            #expect(band.lowerBound == (differs ? 1 : 2))
+            let differs =
+                params[mode.rawValue].map { value in
+                    Mirror(reflecting: value).children
+                        .contains { $0.label == "fillWhenAlone" }
+                } ?? false
+            flagged += differs ? 1 : 0
+            #expect(
+                band.lowerBound == (differs ? 1 : 2),
+                Comment(rawValue: "\(mode)")
+            )
             #expect(band.upperBound == shared.upperBound)
         }
+        // The derivation is reading a populated surface.
+        #expect(flagged == 2)
     }
 
     @Test("a count outside a mode's band is held inside it")
@@ -82,19 +103,19 @@ struct LayoutSchematicAloneTests {
             let schematic = stack(fill: false, position: position)
             let frame = schematic.loneFrame(in: size)
             let horizontal = position.splitsHorizontally
-            let span = schematic.masterSpan(
-                horizontal ? size.width : size.height
+            let total = horizontal ? size.width : size.height
+            let span = schematic.masterSpan(total)
+            // The engine's own two-zone split is the authority
+            // (#702): the lone frame IS its master region.
+            let engine = StackLayout.regions(
+                usable: CGRect(origin: .zero, size: size),
+                position: position,
+                masterSpan: span,
+                stackSpan: total - StackSchematic.zoneGap - span,
+                gap: StackSchematic.zoneGap
             )
-            let drawn = horizontal ? frame.width : frame.height
-            #expect(abs(drawn - span) < 0.01)
-            // The zone sits where a second window would leave
-            // it: away from the stack's edge.
-            switch position {
-            case .right: #expect(frame.minX == 0)
-            case .left: #expect(abs(frame.maxX - size.width) < 0.01)
-            case .bottom: #expect(frame.minY == 0)
-            case .top: #expect(abs(frame.maxY - size.height) < 0.01)
-            }
+            #expect(frame == engine.master)
+            #expect(frame != engine.stack)
         }
     }
 

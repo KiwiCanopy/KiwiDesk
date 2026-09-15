@@ -13,6 +13,30 @@ import Foundation
 /// sees both input paths, and a verdict placed in the keyboard
 /// verb left the same drag silent.
 extension KiwiCore {
+    /// `StackLayout.loneMasterKeepsZone` asked from a command:
+    /// the range is the SPLIT axis's on the space's own layout
+    /// region (#449/#537), whichever axis the press came on.
+    func loneMasterKeepsZone(
+        _ tiled: [WindowID],
+        _ stack: StackParams,
+        in space: Space
+    ) -> Bool {
+        let bounds = TilingEngine.screen(for: space.id, in: state)
+            .map { tiler.layoutBounds(on: $0) }
+        let available =
+            stack.stackPosition.splitsHorizontally
+            ? Double(bounds?.width ?? 1920)
+            : Double(bounds?.height ?? 1080)
+        return StackLayout.loneMasterKeepsZone(
+            tiled,
+            params: stack,
+            range: SplitDomain.effectiveRatioRange(
+                available: available,
+                minSize: Double(tiler.settings.minWindowSize)
+            )
+        )
+    }
+
     /// Two-sided capped master-ratio write plus refusal cues —
     /// the one authority both the keyboard split-axis resize
     /// and the mouse `.masterRatio` adjustment call. `proposed`
@@ -67,8 +91,12 @@ extension KiwiCore {
         guard tiled.contains(focused) else { return }
         // One term, not two: `partition` returns a nil zone
         // whenever the members fit in master, so an empty
-        // master implies an empty `tiled` and is covered.
-        if stackZone?.isEmpty ?? true {
+        // master implies an empty `tiled` and is covered — and a
+        // lone member kept at its zone (#1389) renders the ratio,
+        // so the split DOES divide for it.
+        if stackZone?.isEmpty ?? true,
+            !loneMasterKeepsZone(tiled, stack, in: space)
+        {
             // The focused window's own zone may still divide on
             // the other axis, and that is the press to send it
             // to — but only where that zone's own orientation

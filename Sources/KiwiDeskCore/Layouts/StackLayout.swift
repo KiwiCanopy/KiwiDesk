@@ -37,12 +37,14 @@ public struct StackLayout: LayoutSystem {
 
         guard let stack else {
             // Master only: the full usable region — unless the one
-            // window is told to keep its zone (#1389), which is the
-            // region a second window would leave it, so its
-            // arrival moves nothing.
-            let keepsZone =
-                windows.count == 1 && !params.fillWhenAlone
-            if keepsZone, let range {
+            // window keeps its zone (#1389).
+            if let range,
+                Self.loneMasterKeepsZone(
+                    windows,
+                    params: params,
+                    range: range
+                )
+            {
                 let masterSpan = Self.masterSpan(
                     available: available,
                     ratio: params.masterRatio,
@@ -121,6 +123,22 @@ public struct StackLayout: LayoutSystem {
         return params.masterOrientation == parallel
     }
 
+    /// Whether the split RENDERS its ratio for a lone member: with
+    /// `fill_when_alone` off the one window keeps the master zone
+    /// the two-window split gives it (#1389). The one home of that
+    /// verdict — the engine draws by it and the resize cues judge
+    /// "nothing to divide" by it (#1258), never by a member count.
+    /// `range` is `SplitDomain.effectiveRatioRange`'s answer for
+    /// the region: nil means no two zones fit, and the window
+    /// fills.
+    public static func loneMasterKeepsZone(
+        _ windows: some Collection<WindowID>,
+        params: StackParams,
+        range: ClosedRange<Double>?
+    ) -> Bool {
+        windows.count == 1 && !params.fillWhenAlone && range != nil
+    }
+
     /// The master zone's span: the stored ratio clamped into the
     /// range both zones can keep `minWindowSize` in (#44).
     static func masterSpan(
@@ -134,8 +152,9 @@ public struct StackLayout: LayoutSystem {
             )
     }
 
-    /// Master and stack regions for split of usable area (#222).
-    static func regions(
+    /// Master and stack regions for split of usable area (#222);
+    /// public for the schematic's lone frame (#1389).
+    public static func regions(
         usable: CGRect,
         position: StackParams.StackPosition,
         masterSpan: CGFloat,

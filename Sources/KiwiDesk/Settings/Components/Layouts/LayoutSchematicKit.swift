@@ -18,10 +18,10 @@ enum LayoutSchematic {
     static let windowCountRange = 2...12
 
     /// The band a layout's preview slider spans. The shared floor
-    /// is 2 because at one window every layout drew one
-    /// full-screen rectangle; scrolling and stack no longer do
-    /// (#1389 — the lone window fills or keeps its slot), so
-    /// their band reaches 1 (`LayoutSchematicCountTests`).
+    /// is 2 because at one window a layout draws one full-screen
+    /// rectangle; a layout whose params carry `fillWhenAlone`
+    /// (#1389) draws two, so it joins the `1...` case here AND
+    /// `LayoutSchematicAloneTests` in the same change.
     static func windowCountRange(
         for mode: LayoutMode
     ) -> ClosedRange<Int> {

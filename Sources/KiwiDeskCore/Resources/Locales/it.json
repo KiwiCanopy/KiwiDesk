@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "Tutto a cascata",
   "layout_params.cascade_overflow": "Eccedenza a cascata",
   "layout_params.fill_when_alone": "Se c'è una sola finestra, riempi lo schermo",
-  "layout_params.fill_when_alone.help": "Quando è attivo, una finestra da sola occupa tutto lo schermo e inizia a condividerlo quando se ne apre una seconda. Quando è disattivato, mantiene la dimensione che avrebbe accanto a una vicina, quindi la seconda finestra non sposta nulla di già aperto.",
+  "layout_params.fill_when_alone.help": "Quando è attivo, una finestra da sola occupa tutto lo schermo e inizia a condividerlo quando se ne apre una seconda. Quando è disattivato, mantiene la dimensione che avrebbe accanto a una vicina, e il resto dello schermo resta vuoto.",
   "layout_params.longest_side": "Lato più lungo",
   "layout_params.master_count": "Numero di master",
   "layout_params.master_orientation": "Orientamento principale",

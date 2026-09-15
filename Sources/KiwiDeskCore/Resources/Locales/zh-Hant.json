@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "全部層疊",
   "layout_params.cascade_overflow": "層疊溢出部分",
   "layout_params.fill_when_alone": "只有一個視窗時填滿螢幕",
-  "layout_params.fill_when_alone.help": "開啟後，只有一個視窗時它會佔滿整個螢幕，第二個視窗開啟時才開始分享。關閉後，它會保持有相鄰視窗時的尺寸，因此第二個視窗開啟時不會移動任何已開啟的視窗。",
+  "layout_params.fill_when_alone.help": "開啟後，只有一個視窗時它會佔滿整個螢幕，第二個視窗開啟時才開始共用螢幕。關閉後，它會保持有相鄰視窗時的尺寸，螢幕其餘部分保持為空。",
   "layout_params.longest_side": "最長邊",
   "layout_params.master_count": "主區視窗數",
   "layout_params.master_orientation": "主區方向",

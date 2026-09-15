@@ -102,8 +102,8 @@ enum LayoutHelp {
             "When on, a lone window takes the whole screen and "
                 + "starts sharing when a second one opens. When "
                 + "off, it keeps the size it would have beside "
-                + "a neighbour, so the second window moves "
-                + "nothing already open."
+                + "a neighbour, and the rest of the screen stays "
+                + "empty."
         )
     }
 

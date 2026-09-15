@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "Alle kaskadieren",
   "layout_params.cascade_overflow": "Überlauf kaskadieren",
   "layout_params.fill_when_alone": "Bei nur einem Fenster den Bildschirm füllen",
-  "layout_params.fill_when_alone.help": "Wenn aktiv, nimmt ein einzelnes Fenster den ganzen Bildschirm ein und beginnt zu teilen, sobald sich ein zweites öffnet. Wenn deaktiviert, behält es die Größe, die es neben einem Nachbarn hätte, sodass das zweite Fenster nichts bereits Geöffnetes verschiebt.",
+  "layout_params.fill_when_alone.help": "Wenn aktiv, nimmt ein einzelnes Fenster den ganzen Bildschirm ein und beginnt zu teilen, sobald sich ein zweites öffnet. Wenn deaktiviert, behält es die Größe, die es neben einem Nachbarn hätte, und der Rest des Bildschirms bleibt leer.",
   "layout_params.longest_side": "Längste Seite",
   "layout_params.master_count": "Anzahl Master",
   "layout_params.master_orientation": "Hauptbereichs-Ausrichtung",

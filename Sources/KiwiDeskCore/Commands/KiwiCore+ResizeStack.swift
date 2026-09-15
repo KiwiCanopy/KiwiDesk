@@ -100,7 +100,9 @@ extension KiwiCore {
             // "nothing divides" (review, 2026-09-05).
             let weightsDivide =
                 weightAxis != splitAxis && column.count > 1
-            let splitDivides = !(stackZone?.isEmpty ?? true)
+            let splitDivides =
+                !(stackZone?.isEmpty ?? true)
+                || loneMasterKeepsZone(tiled, stack, in: space)
             if !weightsDivide, !splitDivides {
                 refuseNothingToDivide(
                     focused,
@@ -128,6 +130,7 @@ extension KiwiCore {
             refuseNothingToDivide(
                 focused,
                 otherAxisDivides: !(zone?.isEmpty ?? true)
+                    || loneMasterKeepsZone(tiled, stack, in: space)
             )
             return .fail("focused window is alone in its column")
         }

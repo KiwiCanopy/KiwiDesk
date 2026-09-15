@@ -1030,12 +1030,17 @@ before the setting existed), a single window takes the whole
 usable area and starts sharing only when a second window opens.
 When `false`, a lone window keeps the master zone it would have
 beside a stack zone — the master ratio's share, on the master's
-side of the split — so the second window's arrival moves
-nothing already open; the stack zone stays empty. The toggle is
-about ONE window: a full master zone with nothing stacked still
-takes the whole area. The Settings row is **If one window, fill
-the screen**; Scrolling has the same toggle
-(`scroll.set_fill_when_alone`).
+side of the split — and the stack zone stays empty. Which
+window holds that zone once a second opens is
+`stack.set_new_window_placement`'s call. On a screen
+too small to hold two zones at `min_window_size` the lone window
+fills instead, as the split itself would cascade. The toggle is
+about ONE window: two or more windows with no stack zone (every
+one a master) still take the whole area — so with a master count
+of two or more, the kept zone widens to the full area when the
+second window opens. The Settings row is
+**If one window, fill the screen**; Scrolling has the same
+toggle (`scroll.set_fill_when_alone`).
 :::
 
 **Example:**
@@ -1303,11 +1308,9 @@ before the setting existed), a single window in a scrolling
 space takes the whole width or height and starts sharing only
 when a second window opens. When `false`, a lone window keeps
 the slot size (`scroll.set_slot_size`) it would have beside a
-neighbour, so the second window's arrival moves nothing already
-open; the rest of the axis stays empty. Made for wide screens,
-where a lone window at 95% of the width is not what a lone
-window wants. The Settings row is **If one window, fill the
-screen**; Stack has the same toggle
+neighbour, and the rest of the axis stays empty. The Settings
+row is
+**If one window, fill the screen**; Stack has the same toggle
 (`stack.set_fill_when_alone`).
 :::
 

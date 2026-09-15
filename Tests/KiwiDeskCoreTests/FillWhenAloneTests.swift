@@ -123,8 +123,8 @@ struct FillWhenAloneTests {
 
     @Test("Stack off: two masters with no stack still fill")
     func stackOffTwoMastersFill() throws {
-        // The toggle is about ONE window; a full master zone
-        // with nothing stacked keeps the whole area.
+        // The toggle is about ONE window; two windows with no
+        // stack zone keep the whole area.
         var context = makeContext()
         context.stack.fillWhenAlone = false
         context.stack.masterCount = 2

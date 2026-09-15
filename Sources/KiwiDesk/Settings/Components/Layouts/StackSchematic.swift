@@ -146,8 +146,11 @@ struct StackSchematic: View {
         }
     }
 
+    /// The canvas's inner gap, the engine's `gap` on this canvas.
+    static let zoneGap: CGFloat = 3
+
     func masterSpan(_ total: CGFloat) -> CGFloat {
-        max(6, (total - 3) * CGFloat(masterRatio))
+        max(6, (total - Self.zoneGap) * CGFloat(masterRatio))
     }
 
     // MARK: - Master zone

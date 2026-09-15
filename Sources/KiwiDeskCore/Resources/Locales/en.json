@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "Cascade all",
   "layout_params.cascade_overflow": "Cascade overflow",
   "layout_params.fill_when_alone": "If one window, fill the screen",
-  "layout_params.fill_when_alone.help": "When on, a lone window takes the whole screen and starts sharing when a second one opens. When off, it keeps the size it would have beside a neighbour, so the second window moves nothing already open.",
+  "layout_params.fill_when_alone.help": "When on, a lone window takes the whole screen and starts sharing when a second one opens. When off, it keeps the size it would have beside a neighbour, and the rest of the screen stays empty.",
   "layout_params.longest_side": "Longest side",
   "layout_params.master_count": "Master count",
   "layout_params.master_orientation": "Master orientation",

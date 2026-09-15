@@ -78,12 +78,11 @@ enum SettingsSearchSynonyms {
             return ["focus follows mouse", "hover focus"]
         case .behaviour(.minWindowSize):
             return ["minimum size"]
-        // The label says "one window"; the screen it was asked
-        // for is the ultrawide, and "single"/"alone" are how the
-        // request was worded (#1389).
+        // The label says "one window"; "single" is the other
+        // word for it, and "alone" is the wire's (#1389).
         case .layout(.scrollingFillWhenAlone),
             .layout(.stackFillWhenAlone):
-            return ["single window", "alone", "ultrawide"]
+            return ["single window", "alone"]
         // The checklist rows quote Apple's labels; these are the
         // words a user types before they know the label (#1365).
         case .macChecklist(.rearrangeSpaces):

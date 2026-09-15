@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "전체 겹치기",
   "layout_params.cascade_overflow": "넘치는 만큼 겹치기",
   "layout_params.fill_when_alone": "윈도우가 하나면 화면 채우기",
-  "layout_params.fill_when_alone.help": "켜면 윈도우가 하나뿐일 때 화면 전체를 차지하고, 두 번째 윈도우가 열리면 나누어 씁니다. 끄면 이웃 윈도우가 있을 때와 같은 크기를 유지하므로, 두 번째 윈도우가 열려도 이미 열린 윈도우는 움직이지 않습니다.",
+  "layout_params.fill_when_alone.help": "켜면 윈도우가 하나뿐일 때 화면 전체를 차지하고, 두 번째 윈도우가 열리면 나누어 씁니다. 끄면 이웃 윈도우가 있을 때와 같은 크기를 유지하고, 화면의 나머지는 비어 있습니다.",
   "layout_params.longest_side": "긴 쪽",
   "layout_params.master_count": "마스터 윈도우 개수",
   "layout_params.master_orientation": "마스터 방향",

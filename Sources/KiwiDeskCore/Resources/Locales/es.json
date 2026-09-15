@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "Escalonar todo",
   "layout_params.cascade_overflow": "Escalonar el excedente",
   "layout_params.fill_when_alone": "Con una sola ventana, llenar la pantalla",
-  "layout_params.fill_when_alone.help": "Cuando está activado, una ventana sola ocupa toda la pantalla y empieza a compartirla cuando se abre una segunda. Cuando está desactivado, conserva el tamaño que tendría junto a una vecina, así que la segunda ventana no mueve nada que ya esté abierto.",
+  "layout_params.fill_when_alone.help": "Cuando está activado, una ventana sola ocupa toda la pantalla y empieza a compartirla cuando se abre una segunda. Cuando está desactivado, conserva el tamaño que tendría junto a una vecina, y el resto de la pantalla queda vacío.",
   "layout_params.longest_side": "Lado más largo",
   "layout_params.master_count": "Cantidad de ventanas principales",
   "layout_params.master_orientation": "Orientación principal",

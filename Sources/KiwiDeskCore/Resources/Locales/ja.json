@@ -661,7 +661,7 @@
   "layout_params.cascade_all": "すべて重ねる",
   "layout_params.cascade_overflow": "あふれた分を重ねる",
   "layout_params.fill_when_alone": "ウインドウが1つなら画面全体を覆う",
-  "layout_params.fill_when_alone.help": "オンにすると、ウインドウが1つだけのときは画面全体を覆い、2つ目が開いたときに分け合い始めます。オフの場合は、隣にウインドウがあるときと同じサイズを保つため、2つ目のウインドウが開いても、すでに開いているものは動きません。",
+  "layout_params.fill_when_alone.help": "オンにすると、ウインドウが1つだけのときは画面全体を覆い、2つ目が開いたときに分け合い始めます。オフの場合は、隣にウインドウがあるときと同じサイズを保ち、画面の残りは空のままです。",
   "layout_params.longest_side": "長い辺",
   "layout_params.master_count": "マスターウインドウの数",
   "layout_params.master_orientation": "マスターの向き",

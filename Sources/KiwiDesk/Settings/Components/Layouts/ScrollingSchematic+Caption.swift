@@ -70,7 +70,7 @@ extension ScrollingSchematic {
     }
 
     /// The lone-window sentence switches with the fill toggle
-    /// (#1389, `LayoutSchematicCaptionTests`); the slot noun is a
+    /// (#1389, `LayoutSchematicAloneTests`); the slot noun is a
     /// key per sentence, since a possessive agrees with it.
     private var loneCaption: String {
         if fillWhenAlone {
