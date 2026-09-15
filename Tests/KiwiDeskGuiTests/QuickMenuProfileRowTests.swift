@@ -102,6 +102,34 @@ struct QuickMenuProfileRowTests {
         #expect(item?.keyEquivalentModifierMask == [.control, .option])
     }
 
+    /// The action behind that row drops AppKit's duplicate keyDown
+    /// only where a Carbon chord already fired — with `⌘,` alone
+    /// the keyDown IS the row's path.
+    @Test("settings action drops the keyDown twin of a bound chord")
+    func settingsActionDropsCarbonTwin() {
+        reset()
+        let controller = controller(active: nil, all: [])
+        var opened = 0
+        controller.onOpenDashboard = { opened += 1 }
+        func fire() {
+            let menu = NSMenu()
+            controller.menuNeedsUpdate(menu)
+            let item = menu.items.first { $0.title == "Settings…" }
+            _ = item?.target?.perform(item?.action, with: item)
+        }
+        controller.menuActionIsKeyDown = { true }
+        fire()
+        #expect(opened == 1, "⌘, keyDown is the only path")
+        controller.settingsComboProvider = {
+            KeyCombo(keyCode: 43, modifiers: [.control, .option])
+        }
+        fire()
+        #expect(opened == 1, "Carbon already fired the bound chord")
+        controller.menuActionIsKeyDown = { false }
+        fire()
+        #expect(opened == 2, "a click still opens")
+    }
+
     @Test("native column covers every special-key glyph")
     func shortcutsSpecialEquivalents() {
         reset()
