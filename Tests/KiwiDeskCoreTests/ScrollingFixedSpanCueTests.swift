@@ -150,7 +150,8 @@ struct ScrollingFixedSpanCueTests {
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: 1200, horizontal: true)
+            // A points store: the pitch gap is inert (#1382).
+            .editablePoints(along: 1200, gap: 0, horizontal: true)
         #expect(stored == 300)
     }
 
@@ -219,7 +220,8 @@ struct ScrollingFixedSpanCueTests {
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: 1200, horizontal: true)
+            // A points store: the pitch gap is inert (#1382).
+            .editablePoints(along: 1200, gap: 0, horizontal: true)
         #expect(stored == 300)
         #expect(
             refusals == [
@@ -300,7 +302,8 @@ struct ScrollingFixedSpanCueTests {
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: 1200, horizontal: true)
+            // A points store: the pitch gap is inert (#1382).
+            .editablePoints(along: 1200, gap: 0, horizontal: true)
         #expect(stored == 850)
     }
 }

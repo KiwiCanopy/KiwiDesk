@@ -57,9 +57,11 @@ extension KiwiCore {
             tiler.settings.resolvedScrolling(for: space)
         let horizontal = scrolling.axisIsHorizontal
         let along = horizontal ? bounds.width : bounds.height
+        let inner = tiler.settings.gaps(for: space.id).inner
         let current = scrolling.slotSize
             .editablePoints(
                 along: along,
+                gap: horizontal ? inner.horizontal : inner.vertical,
                 horizontal: horizontal
             )
         let axis = horizontal ? "x" : "y"

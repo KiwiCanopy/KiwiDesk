@@ -94,6 +94,7 @@ public struct ScrollingLayout: LayoutSystem {
         let along = horizontal ? area.width : area.height
         let resolved = context.scrolling.slotSize.resolved(
             along: along,
+            gap: gap,
             horizontal: horizontal
         )
         // BSP/Stack/Grid use minWindowSize as a TRIGGER to spill

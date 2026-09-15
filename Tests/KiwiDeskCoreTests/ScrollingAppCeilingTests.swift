@@ -110,7 +110,7 @@ struct ScrollingAppCeilingTests {
         let live = try #require(core.state.workspaces[space])
         return core.tiler.settings.resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: 1200, horizontal: true)
+            .editablePoints(along: 1200, gap: 0, horizontal: true)
     }
 
     @Test("A grow refuses at the learned maximum and cues")

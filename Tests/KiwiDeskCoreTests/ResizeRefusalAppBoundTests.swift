@@ -166,7 +166,8 @@ struct ResizeRefusalAppBoundTests {
         let stored = core.tiler.settings
             .resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: 1200, horizontal: true)
+            // A points store: the pitch gap is inert (#1382).
+            .editablePoints(along: 1200, gap: 0, horizontal: true)
         #expect(stored == 100)
         #expect(
             refusals == [

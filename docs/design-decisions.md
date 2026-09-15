@@ -2328,6 +2328,27 @@ on (#1389) the lone case never arises; the anchors matter for
 the rows fill leaves alone.
 :::
 
+:::unreleased
+**A scrolling share is a share of the pitch (#1382).** A slot
+of "50%" was half the bare axis, so two of them plus the gap
+between never fitted the screen — the second column always
+hung one gap past the edge, and "33%" three columns was a
+puzzle nobody could type. On a wide screen the value a user
+holds is the effect, not the share: three columns, not 33.3%.
+So a fraction resolves as `f·(along + gap) − gap` — the share
+of one window plus one inner gap, less that gap — and n slots
+of 1/n tile the axis exactly at any gap on any screen. The
+focus ring paints inside the gap and takes no layout width;
+with Fit layout gaps on, the gap is the ring's reach (and the
+glow's, after #1378), so the count holds with rings clear.
+Points stay the absolute channel. No migration is owed: the
+drawn shift is under one gap and the old reading was the
+defect, stated so profiles.md's "meaning changes under the same
+key" clause (#1354) is answered rather than triggered. The
+Settings half — a "Columns on screen" stepper writing 1/n into
+this one stored fraction — is the same issue's second half.
+:::
+
 **`follow` holds a place, not a number: a resize re-anchors the
 viewport (#966).** A scrolling row has one slot size for every
 slot, so resizing one moves every slot's *position* along the

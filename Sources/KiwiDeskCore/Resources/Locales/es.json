@@ -1203,7 +1203,7 @@
   "space_override.reset_all_confirm.action": "Restablecer todo",
   "space_override.reset_all_confirm.message": "Esto borra las anulaciones guardadas de cada diseño para este espacio, no solo el actual. Esta acción no se puede deshacer.",
   "space_override.reset_all_confirm.title": "¿Restablecer todas las anulaciones de diseño?",
-  "space_override.slot_size.help": "Establece el tamaño de cada ventana en desplazamiento a lo largo de la dirección de desplazamiento: la anchura de columna cuando la orientación es %1$@ y la altura de fila cuando es %2$@. Como unidad, %3$@ se escala con esa anchura o esa altura (95%% de fábrica) y %4$@ fijan un tamaño exacto.",
+  "space_override.slot_size.help": "Establece el tamaño de cada ventana en desplazamiento a lo largo de la dirección de desplazamiento: la anchura de columna cuando la orientación es %1$@ y la altura de fila cuando es %2$@. Como unidad, %3$@ es una fracción de una ventana más un espaciado, así que el 50%% equivale a dos ventanas una junto a otra, espaciados incluidos (95%% de fábrica); %4$@ fijan un tamaño exacto.",
   "space_override.title": "%1$@ — anulaciones de %2$@",
   "spaces.add.help": "Añadir espacio",
   "spaces.add.placeholder": "Nombre del nuevo espacio",

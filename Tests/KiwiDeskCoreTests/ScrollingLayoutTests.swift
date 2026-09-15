@@ -152,7 +152,8 @@ struct ScrollingLayoutTests {
 
     @Test("Auto slot size resolves to the orientation standard")
     func autoSlotSize() throws {
-        // Auto → 95% of the *available* along-axis on both
+        // Auto → 95% of the PITCH — the available along-axis
+        // plus one inner gap, less that gap (#1382) — on both
         // orientations (width here, height below).
         var horizontal = makeContext(focused: w1)
         horizontal.scrolling.appBar.enabled = false
@@ -163,7 +164,7 @@ struct ScrollingLayoutTests {
         )
         #expect(
             try #require(hFrames[w1]).width
-                == horizontal.usable.width * 0.95
+                == (horizontal.usable.width + 10) * 0.95 - 10
         )
 
         var vertical = makeContext(focused: w1)
@@ -174,7 +175,7 @@ struct ScrollingLayoutTests {
             for: [w1, w2, w3],
             in: vertical
         )
-        let expected = vertical.usable.height * 0.95
+        let expected = (vertical.usable.height + 10) * 0.95 - 10
         #expect(
             abs(try #require(vFrames[w1]).height - expected) < 0.01
         )

@@ -40,39 +40,58 @@ public enum ScrollSize: Sendable, Equatable {
     /// Standard fraction of available height for automatic vertical scrolling.
     public static let autoVerticalFraction: Double = 0.95
 
-    /// Resolves point extent along scroll axis clamped to available length.
+    /// Resolves point extent along scroll axis clamped to available
+    /// length. A fraction is a share of the PITCH — window plus
+    /// one inner `gap` — so n slots of 1/n tile the axis exactly,
+    /// gaps included (#1382).
     public func resolved(
         along: CGFloat,
+        gap: CGFloat,
         horizontal: Bool
     ) -> CGFloat {
         let raw: CGFloat
         switch self {
         case .auto:
-            raw =
-                along
-                * CGFloat(
-                    horizontal
-                        ? Self.autoHorizontalFraction
-                        : Self.autoVerticalFraction
-                )
+            raw = Self.pitched(
+                horizontal
+                    ? Self.autoHorizontalFraction
+                    : Self.autoVerticalFraction,
+                along: along,
+                gap: gap
+            )
         case .points(let points):
             raw = points
         case .fraction(let fraction):
-            raw = CGFloat(fraction) * along
+            raw = Self.pitched(fraction, along: along, gap: gap)
         }
         return min(max(raw, 0), along)
     }
 
-    /// Starting magnitude for interactive resize calculations.
+    /// `fraction` of the pitch, less the gap the pitch carries.
+    private static func pitched(
+        _ fraction: Double,
+        along: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        CGFloat(fraction) * (along + gap) - gap
+    }
+
+    /// Starting magnitude for interactive resize calculations —
+    /// the drawn slot for a share (#1382), the number for points.
     public func editablePoints(
         along: CGFloat,
+        gap: CGFloat,
         horizontal: Bool
     ) -> CGFloat {
         switch self {
         case .points(let points):
             return points
         case .auto, .fraction:
-            return resolved(along: along, horizontal: horizontal)
+            return resolved(
+                along: along,
+                gap: gap,
+                horizontal: horizontal
+            )
         }
     }
 

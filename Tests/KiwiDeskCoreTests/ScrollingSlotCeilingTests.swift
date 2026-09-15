@@ -74,6 +74,7 @@ struct ScrollingSlotCeilingTests {
             .slotSize
             .editablePoints(
                 along: along,
+                gap: 0,
                 horizontal: horizontal
             )
     }

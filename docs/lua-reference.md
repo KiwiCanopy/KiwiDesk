@@ -1126,16 +1126,25 @@ stack.set_master_orientation_override("3", "vertical")
 
 ### scroll.set_slot_size
 
-**Expects:** a number (macOS points), `"NN%"` (fraction of
-available axis), or `0` (auto, default).
+**Expects:** a number (macOS points), `"NN%"` (a share of the
+axis), or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows (vertical)
-in scrolling layouts. Auto is 95% of the available width
-(horizontal) or height (vertical). Any resolved size is floored
+in scrolling layouts. Auto is 95% (horizontal and vertical
+alike). Any resolved size is floored
 at the global
 minimum window size (`set_min_window_size`) and capped at the
 axis length — so a small percentage on a narrow display falls
 back to the minimum rather than tiling windows smaller than it.
+
+:::unreleased
+A percentage is a share of the **pitch** — one window plus one
+inner gap — so `"50%"` is exactly two windows side by side,
+gaps included, and `"33.33%"` three, at any gap on any screen.
+(Before, it was a share of the bare axis, so 50% and a gap
+never quite fitted twice.) A focus ring paints in the gap and
+takes no width. Points stay the absolute channel.
+:::
 A row shorter than the axis keeps each slot at its size and
 leaves the rest of the axis empty. A lone window fills the
 available width or height (unless its app refuses that size —
