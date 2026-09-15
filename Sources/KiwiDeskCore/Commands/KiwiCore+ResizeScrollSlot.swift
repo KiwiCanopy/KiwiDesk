@@ -57,20 +57,6 @@ extension KiwiCore {
             tiler.settings.resolvedScrolling(for: space)
         let horizontal = scrolling.axisIsHorizontal
         let along = horizontal ? bounds.width : bounds.height
-        let inner = tiler.settings.gaps(for: space.id).inner
-        let current = scrolling.slotSize
-            .editablePoints(
-                along: along,
-                gap: horizontal ? inner.horizontal : inner.vertical,
-                horizontal: horizontal
-            )
-        let axis = horizontal ? "x" : "y"
-        let effectiveMin = max(
-            Double(ScrollSize.minPoints),
-            space.focused.map {
-                effectiveMinSize(of: $0, axis: axis)
-            } ?? 0
-        )
         // Built through the same resolver `layoutInput` uses,
         // so the viewport CARVE — `usable` (bounds less the
         // outer gaps) and the bar strip — cannot drift from
@@ -83,6 +69,20 @@ extension KiwiCore {
             bounds: bounds,
             space: space,
             sticky: []
+        )
+        let inner = context.gaps.inner
+        let current = scrolling.slotSize
+            .editablePoints(
+                along: along,
+                gap: horizontal ? inner.horizontal : inner.vertical,
+                horizontal: horizontal
+            )
+        let axis = horizontal ? "x" : "y"
+        let effectiveMin = max(
+            Double(ScrollSize.minPoints),
+            space.focused.map {
+                effectiveMinSize(of: $0, axis: axis)
+            } ?? 0
         )
         let drawn = context.scrolling.windowFrame(
             in: context.usable,

@@ -1203,7 +1203,7 @@
   "space_override.reset_all_confirm.action": "Ripristina tutto",
   "space_override.reset_all_confirm.message": "Questa azione cancella le personalizzazioni salvate di ogni layout per questo spazio, non solo quelle del layout attuale. Non può essere annullata.",
   "space_override.reset_all_confirm.title": "Ripristinare tutte le personalizzazioni dei layout?",
-  "space_override.slot_size.help": "Imposta la dimensione di ogni finestra a scorrimento lungo la direzione di scorrimento: la larghezza della colonna quando l'orientamento è %1$@, l'altezza della riga quando è %2$@. Come unità, %3$@ è una quota di una finestra più una spaziatura, quindi il 50%% equivale a due finestre affiancate, spaziature comprese (95%% di serie); %4$@ fissano una dimensione esatta.",
+  "space_override.slot_size.help": "Imposta la dimensione di ogni finestra a scorrimento lungo la direzione di scorrimento: la larghezza della colonna quando l'orientamento è %1$@, l'altezza della riga quando è %2$@. Come unità, %3$@ è una quota di una finestra più una spaziatura, quindi il 50%% equivale esattamente a due finestre, spaziature comprese (95%% di serie); %4$@ fissano una dimensione esatta.",
   "space_override.title": "%1$@ — Personalizzazioni di %2$@",
   "spaces.add.help": "Aggiungi spazio",
   "spaces.add.placeholder": "Nome nuovo spazio",

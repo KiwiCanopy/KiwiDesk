@@ -359,6 +359,13 @@ holds the secondary-switch decision including its nil case.
   script spelling the old number: `ConfigMigration`'s charter
   keeps `init.lua` out, and a re-scale fails there SILENTLY where
   a rename fails loudly — record that trade in the design entry.
+  **The one exemption is bounded, and the design entry states
+  both bounds:** a re-scale whose every stored value moves by
+  less than one inner gap AND whose old reading was the defect
+  owes no step — the drawn shift is what a user cannot see and
+  the old number was never what they meant. The scrolling pitch
+  share is the precedent (#1382, `ScrollingPitchTests`); a
+  re-scale that fails either bound takes the crossing above.
 
 ## Whose arrangement is live (#1249)
 

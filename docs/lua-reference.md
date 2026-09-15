@@ -1126,8 +1126,8 @@ stack.set_master_orientation_override("3", "vertical")
 
 ### scroll.set_slot_size
 
-**Expects:** a number (macOS points), `"NN%"` (a share of the
-axis), or `0` (auto, default).
+**Expects:** a number (macOS points), `"NN%"` (a percentage),
+or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows (vertical)
 in scrolling layouts. Auto is 95% (horizontal and vertical
@@ -1139,12 +1139,11 @@ back to the minimum rather than tiling windows smaller than it.
 
 :::unreleased
 A percentage is a share of the **pitch** — one window plus one
-inner gap — so `"50%"` is exactly two windows side by side,
-gaps included, and `"33.33%"` three, at any gap on any screen.
-(Before, it was a share of the bare axis, so 50% and a gap
-never quite fitted twice.) A focus ring paints in the gap and
-takes no width. Points stay the absolute channel.
+inner gap — so `"50%"` is exactly two windows, gaps included,
+and `"33.33%"` three, whatever the gap. Points stay the
+absolute channel.
 :::
+
 A row shorter than the axis keeps each slot at its size and
 leaves the rest of the axis empty. A lone window fills the
 available width or height (unless its app refuses that size —
@@ -1161,7 +1160,7 @@ Whether a lone window fills is `scroll.set_fill_when_alone`'s
 ```lua
 scroll.set_slot_size(0)            -- auto
 scroll.set_slot_size(400)          -- 400 pt
-scroll.set_slot_size("50%")        -- half of available
+scroll.set_slot_size("50%")        -- two windows, gaps included
 ```
 
 An interactive `resize` stops at both ends: it will not take the

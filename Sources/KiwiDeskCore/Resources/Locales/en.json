@@ -1204,7 +1204,7 @@
   "space_override.reset_all_confirm.action": "Reset All",
   "space_override.reset_all_confirm.message": "This clears every layout's saved overrides for this Space, not just the current one. This can't be undone.",
   "space_override.reset_all_confirm.title": "Reset all layout overrides?",
-  "space_override.slot_size.help": "Sets each scrolling window's size along the scroll direction — the column width when the orientation is %1$@, the row height when it is %2$@. As a unit, %3$@ is a share of one window plus one gap, so 50%% is two windows side by side, gaps included (95%% out of the box); %4$@ fixes an exact size.",
+  "space_override.slot_size.help": "Sets each scrolling window's size along the scroll direction — the column width when the orientation is %1$@, the row height when it is %2$@. As a unit, %3$@ is a share of one window plus one gap, so 50%% is exactly two windows, gaps included (95%% out of the box); %4$@ fixes an exact size.",
   "space_override.title": "%1$@ — %2$@ overrides",
   "spaces.add.help": "Add Space",
   "spaces.add.placeholder": "New Space name",

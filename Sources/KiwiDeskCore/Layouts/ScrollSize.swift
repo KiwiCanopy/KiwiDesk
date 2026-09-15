@@ -11,7 +11,8 @@ public enum ScrollSize: Sendable, Equatable {
     case auto
     /// Absolute points along scroll axis.
     case points(CGFloat)
-    /// Fraction (0...1) of along-axis length.
+    /// Share (0...1) of the pitch — one slot plus one inner gap
+    /// (#1382, `resolved`).
     case fraction(Double)
 
     /// Minimum usable slot size in points.
@@ -37,7 +38,7 @@ public enum ScrollSize: Sendable, Equatable {
     /// the 5% sliver of neighbour peeking in is what tells the
     /// user the space scrolls at all.
     public static let autoHorizontalFraction: Double = 0.95
-    /// Standard fraction of available height for automatic vertical scrolling.
+    /// The vertical twin: a share of the pitch along the height.
     public static let autoVerticalFraction: Double = 0.95
 
     /// Resolves point extent along scroll axis clamped to available
@@ -77,7 +78,8 @@ public enum ScrollSize: Sendable, Equatable {
     }
 
     /// Starting magnitude for interactive resize calculations —
-    /// the drawn slot for a share (#1382), the number for points.
+    /// the pitch share of the `along` it is handed (#1382), the
+    /// number for points.
     public func editablePoints(
         along: CGFloat,
         gap: CGFloat,

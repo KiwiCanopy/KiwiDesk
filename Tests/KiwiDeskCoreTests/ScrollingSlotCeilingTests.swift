@@ -63,6 +63,10 @@ struct ScrollingSlotCeilingTests {
         return (core, space)
     }
 
+    /// Reads the store as a NUMBER: `gap: 0` is the points-store
+    /// reading, and on an `auto`/`%` store it is the bare-axis
+    /// share, NOT the writer's press base (#1382) — the
+    /// comparisons here are `>` / unchanged, never a landing.
     private func slotPoints(
         _ core: KiwiCore,
         _ space: SpaceID,
