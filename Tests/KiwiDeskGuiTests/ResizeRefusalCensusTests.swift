@@ -94,6 +94,10 @@ struct ResizeRefusalCensusTests {
             + "net",
         "unknown window":
             "the id is gone; nothing to draw on",
+        "the space has no display":
+            "the clamp folds on the render's partition (#1488), "
+            + "which needs the screen the space lays out on; a "
+            + "space shown on none has nothing to draw on",
         "track has no local window":
             "every member is a visiting traveler; #414's rule",
         "the focused window is visiting from ":
