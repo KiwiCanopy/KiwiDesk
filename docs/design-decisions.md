@@ -8948,24 +8948,26 @@ number so the argument is not re-run. **Sunset's grey stays
 dark** (`#6A665EE6`, ~25 L* below the pink) because `#FF8099`
 simulates to a neutral grey under protanopia, so only lightness
 separates the pair and a lighter grey walks into the collapse —
-`BorderRingSeparationTests` ▸ `aLiftedSunsetGreyCollapses` pins
-that the shared system grey the other dark palettes take fails
-Sunset outright. It is the weakest ring of the set on dark and
+`BorderRingSeparationControlTests` ▸ `aLiftedSunsetGreyCollapses`
+pins that the shared system grey the other dark palettes take
+fails Sunset outright. It is the weakest ring of the set on dark and
 accepted; if the pair reads too quiet, lighten the accent one
 step with hue held, never the grey. **Ultraviolet's grey sits
 level with its indigo** (`#7E7E96E6`, blue-grey cast kept)
 rather than below it: a grey clearly under the indigo's
 composited contrast is the vanish again, and the device pick
 `#BFBFBFE6` composited to more than twice the indigo's, inverting
-dominance — `BorderRingSeparationTests` ▸
+dominance — `BorderRingSeparationControlTests` ▸
 `theRefusedUltravioletPickInvertsDominance` measures it — so
 contrast parity with the indigo's chroma carrying the order is
 the compromise. The derived default keeps `#8E8E93CC`, the one
 value under the authored band. `BorderRingSeparationTests`
 holds the rest: the pair's CVD separation composited at both
-wallpaper extremes, the alpha band, opaque focused rings, and
-the home-backdrop dominance derived from each palette's own
-fill.
+wallpaper extremes, the alpha band, opaque focused rings, the
+home-backdrop dominance derived from each palette's own fill,
+and a floor on the grey's own home contrast — the lightness
+half of the vanish, which a near-black grey at in-band alpha
+would otherwise clear on every pair clause.
 :::
 
 **The logo's mark holds one hue across themes; only the wordmark
