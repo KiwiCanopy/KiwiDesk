@@ -54,7 +54,7 @@ extension KiwiCore {
             tiler.settings.animations.onSpaceChange
         retile(
             animated: animated,
-            force: true,
+            reissue: true,
             stashAnimated: animated
         )
     }

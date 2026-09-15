@@ -21,11 +21,29 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         guard let index = tiled.firstIndex(of: window)
         else { return .fail("no focused tiled window") }
-        let counts = TrackLayout.counts(
+        // The RENDER's partition (#1488): under the geometric
+        // fold the per-marker one puts a share the screen does
+        // not draw under its floor and refuses a legal grow.
+        guard
+            let screen = TilingEngine.screen(
+                for: space.id,
+                in: state
+            )
+        else { return .fail("the space has no display") }
+        let context = tiler.layoutInput(
+            state: state,
+            space: space,
+            screen: screen
+        ).context
+        let counts = TrackLayout.foldedPartition(
             of: tiled,
             breaks: space.trackBreaks,
-            cap: params.trackCap
-        )
+            normalCap: params.normalCap,
+            geoCap: TrackLayout.geometricCap(
+                for: context,
+                of: tiled
+            )
+        ).counts
         guard
             let track = TrackLayout.trackIndex(
                 ofWindowIndex: index,
@@ -126,16 +144,10 @@ extension KiwiCore {
         // lets the stored weight cross the layout's cascade
         // check by exactly the gaps, which is how #925's clamp
         // still collapsed the space into an overflow pile
-        // (#933). Exact for the unfolded case; under an active
-        // overflow fold the layout merges surplus tracks
-        // (`overflowCap`) while this clamp reasons over the
-        // per-marker `ranges`, so it subtracts more gaps than
-        // the layout — tighter, in the safe direction: it can
-        // cue a refusal early, never admit a pile. (The #944
-        // heal deliberately answers the fold the other way —
-        // its doc owns why.) Per-track minimums: a track spans
-        // all its members across the axis, so its tightest
-        // member binds it.
+        // (#933). `ranges` is the render's own fold (#1488), so
+        // the gaps match the layout's exactly. Per-track
+        // minimums: a track spans all its members across the
+        // axis, so its tightest member binds it.
         let effectiveSpan = TrackLayout.acrossSpan(
             region: span,
             gaps: tiler.settings.gaps(for: space.id),

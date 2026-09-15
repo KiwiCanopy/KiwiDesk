@@ -199,11 +199,12 @@ public final class TilingEngine {
     /// one frame-set each (Space switches).
     ///
     /// `force` skips the "already there" tolerance check and
-    /// (re)issues every frame. Space switches need it: the
-    /// check reads state frames, which are updated by the AX
-    /// echoes of our own frame-sets — during rapid
-    /// back-and-forth switching those echoes lag, and skipping
-    /// based on them leaves windows stranded mid-transition.
+    /// (re)issues every frame, and probes past corroborated
+    /// bounds once (#1055) — an explicit apply. `reissue` is the
+    /// re-issue alone: a Space switch needs it (the check reads
+    /// state frames, whose AX echoes lag during rapid switching
+    /// and strand windows mid-transition) but not the probe,
+    /// under which the learned-bound consumers stand down (#1488).
     ///
     /// `stashAnimated` makes the park of newly-inactive
     /// windows a visible slide to the corner instead of an
@@ -222,6 +223,7 @@ public final class TilingEngine {
         state: StateCoordinator,
         animated: Bool = true,
         force: Bool = false,
+        reissue: Bool = false,
         newlyCreatedWindow: WindowID? = nil,
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
@@ -230,6 +232,7 @@ public final class TilingEngine {
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else { return }
+        let reissues = force || reissue
         // A forced pass probes past corroborated bounds once
         // (#1055); `withForcedPass` is the one door.
         withForcedPass(force) {
@@ -280,7 +283,7 @@ public final class TilingEngine {
                 // grids, minimum sizes), so the reported frame is
                 // often a hair off the target. Re-applying an
                 // unchanged target just wobbles the window.
-                if probe == nil, !force,
+                if probe == nil, !reissues,
                     Self.close(current, to: target)
                 {
                     animation.cancel(window: id)
@@ -289,7 +292,7 @@ public final class TilingEngine {
                 // #677: a target the app has twice refused is
                 // "already there" too — re-issuing it restarts an
                 // animation the window can never perform, forever.
-                if probe == nil, !force,
+                if probe == nil, !reissues,
                     sizeBoundExplains(
                         id,
                         current: current,
@@ -318,16 +321,11 @@ public final class TilingEngine {
             stashInactive(
                 state: state,
                 fallback: screen,
-                force: force,
+                force: reissues,
                 animated: stashAnimated
             )
             restoreStashed(state: state, frames: frames)
         }
-    }
-
-    /// Forwards display topology changes to the animator.
-    public func displaysChanged() {
-        animation.displaysChanged()
     }
 
     /// Whether we set this window's frame moments ago. Move
