@@ -8849,9 +8849,34 @@ don't assume from tone.
   plate at both wallpaper extremes**, because a translucent fill
   sweeps the whole grey range as the wallpaper changes and a hue
   can clear one end while failing the other.
-- **`border.unfocused_color` is always near-neutral grey**,
-  low saturation, ~35–60 % alpha — it must never compete with
-  the focused ring.
+- **`border.unfocused_color` is a near-neutral, low-chroma grey
+  at 85–90 % alpha, its LIGHTNESS set per palette** so that the
+  ring sits below the focused ring's composited contrast on the
+  palette's home backdrop — dark for eight, light for Clean
+  Light — and never competes with it. The old guide read "~35–60
+  % alpha" and produced the vanish #1384 reported: six dark
+  palettes shipped a dark grey at that alpha over dark
+  wallpaper, which recedes twice, and below ~85 % the ring's
+  colour is the wallpaper's, which on a busy one is no ring at
+  all. Alpha is not the lever for receding; lightness is. Two
+  palettes fix their number so the argument is not re-run:
+  **Sunset's grey stays dark** (`#6A665EE6`, ~25 L* below the
+  pink) because `#FF8099` simulates to a neutral grey under
+  protanopia, so only lightness separates the pair and a lighter
+  grey walks into the collapse — the weakest ring of the set on
+  dark, accepted; if the pair reads too quiet, lighten the
+  accent one step with hue held, never the grey. **Ultraviolet's
+  grey sits level with its indigo** (`#7E7E96E6`, blue-grey cast
+  kept) rather than below it: the device pick `#BFBFBFE6`
+  composited to 7.8:1 against the indigo's 3.4:1 and inverted
+  dominance, and a grey clearly under 3.4:1 is the vanish again,
+  so contrast parity with the indigo's chroma carrying the order
+  is the compromise. The derived default keeps `#8E8E93CC`.
+  `BorderRingSeparationTests` measures both halves — the pair's
+  CVD separation composited at both wallpaper extremes, and the
+  home-backdrop dominance with Ultraviolet's parity band the one
+  exemption — and its docstring records that Sunset's light
+  extreme clears the floor by construction, not by margin.
 - **`fill_color` sets the light/dark base; `item_color`
   inverts against it** (`hover_item_color` mirrors the item
   family, doesn't flip it). **A bundled palette does not pick a
