@@ -131,12 +131,14 @@ struct SettingsSearchDrawerAnchorTests {
     /// The #1250 defect, held for every filled drawer: a
     /// disclosure is collapsed by default, and a census hit
     /// inside it used to land on the destination root, drawer
-    /// shut, row unrendered. Every indexed `.showMore` row the
-    /// census places in a registered container carries a
-    /// catalog anchor that EXACTLY ONE of its drawers expands
-    /// for, and its breadcrumb names that drawer. Rows the
-    /// container draws at rest (the gap masters) are outside
-    /// the drawers and land on the destination alone.
+    /// shut, row unrendered. Over every indexed row of a
+    /// registered container, the anchor follows the census
+    /// tier: a `.showMore` row carries one that EXACTLY ONE of
+    /// the container's drawers expands for, its breadcrumb
+    /// naming that drawer, and an `.atRest` row (the gap
+    /// masters, a bar's edge, the Show-it-in toggles that
+    /// self-anchor at rest) is inside NO drawer, so its
+    /// breadcrumb is the destination alone.
     @Test("a hit inside a filled drawer opens it")
     func drawerHitsOpenTheirDrawer() {
         pinEnglish()
@@ -145,19 +147,31 @@ struct SettingsSearchDrawerAnchorTests {
         for (destination, title, container, drawers)
             in filledDrawers
         {
-            let hidden = indexedRows(in: destination, container)
-                .filter { $0.placement.tier == .showMore }
+            let held = indexedRows(in: destination, container)
+            let hidden = held.filter {
+                $0.placement.tier == .showMore
+            }
             // Non-vacuity only — each membership is its own
             // census-render suite's, never a count pinned here.
             #expect(!hidden.isEmpty, Comment(rawValue: "\(container)"))
-            for key in hidden {
+            for key in held {
                 let row = rows.first { $0.key == key }
                 let anchor = row?.anchor.anchor
-                #expect(anchor != nil, Comment(rawValue: key.id))
                 let opening = drawers.filter {
                     $0.shouldExpand(revealing: anchor)
                 }
-                #expect(opening.count == 1, Comment(rawValue: key.id))
+                if key.placement.tier == .showMore {
+                    #expect(anchor != nil, Comment(rawValue: key.id))
+                    #expect(
+                        opening.count == 1,
+                        Comment(rawValue: key.id)
+                    )
+                } else {
+                    #expect(
+                        opening.isEmpty,
+                        Comment(rawValue: key.id)
+                    )
+                }
                 #expect(
                     row?.path == [title] + opening.map(\.control.text),
                     Comment(rawValue: key.id)
@@ -166,31 +180,19 @@ struct SettingsSearchDrawerAnchorTests {
         }
     }
 
-    /// The Focus border and Sticky rows the issue's tier audit
-    /// ruled OUT of the fill — visible at rest when the section
-    /// lands, so an anchor there would be a wash alone (#277).
-    /// Every other indexed row of those two cards is held below,
-    /// selected by container rather than by tier: the tier says
-    /// what the census BELIEVES about the rendering, and a guard
-    /// keyed on it reds when the census is corrected rather than
-    /// when the join breaks.
-    private let atRestByRuling: Set<SettingKey> = [
-        .borders(.borderEnabled),
-        .borders(.borderFitGaps),
-    ]
-
-    /// The Focus border and Sticky rows sit at REST in their
-    /// cards (no drawer draws them), so an anchor there buys the
-    /// scroll and the wash rather than an expansion: the hit
-    /// lands on the row, breadcrumb the destination alone. Read
-    /// with the bridge present so the sticky reach row is
-    /// indexed. The drag ghost / drop zone `Border` and `Fill`
-    /// rows are the stated residue: two census rows share one
-    /// label key per column, and the label-key join reads no
-    /// instance, so they stay anchor-less until the census row
-    /// carries one — never resolved onto the first column
-    /// declared. The premise is asserted rather than the count:
-    /// every anchor-less drag row shares its label key.
+    /// The Focus border and Sticky rows: an anchor follows the
+    /// census TIER, both ways (`docs/design-decisions.md` ▸ a
+    /// search hit lands on the control only where the section
+    /// hides it) — a `.showMore` row lands on its own control,
+    /// breadcrumb the destination alone, and an `.atRest` row
+    /// carries none. Read with the bridge present so the sticky
+    /// reach row is indexed. The drag ghost / drop zone `Border`
+    /// and `Fill` rows are the stated residue: two census rows
+    /// share one label key per column, and the label-key join
+    /// reads no instance, so they stay anchor-less until the
+    /// census row carries one — never resolved onto the first
+    /// column declared. The premise is asserted rather than the
+    /// count: every anchor-less drag row shares its label key.
     @Test("a Gaps & Borders row lands on its own control")
     func gapsAndBordersRowsCarryAnchors() {
         pinEnglish()
@@ -203,12 +205,12 @@ struct SettingsSearchDrawerAnchorTests {
             SettingsContainer.focusBorder, .stickyWindows,
         ] {
             let held = indexedRows(in: .gapsAndBorders, container)
-                .filter { !atRestByRuling.contains($0) }
             #expect(!held.isEmpty, Comment(rawValue: "\(container)"))
             for key in held {
                 let row = rows.first { $0.key == key }
+                let hidden = key.placement.tier == .showMore
                 #expect(
-                    row?.anchor.anchor != nil,
+                    (row?.anchor.anchor != nil) == hidden,
                     Comment(rawValue: key.id)
                 )
                 #expect(
@@ -232,28 +234,40 @@ struct SettingsSearchDrawerAnchorTests {
         }
     }
 
-    /// Without the bridge the sticky reach toggle is not drawn
-    /// and its census row is refused, so its catalog control
-    /// must not surface as a catalog-only row either — it rides
-    /// `bridgeGatedControls` (#277).
-    @Test("the sticky reach control hides with its row")
-    func stickyReachControlFollowsTheBridge() {
+    /// A control a census row names is refused WITH that row:
+    /// without the bridge the sticky reach toggle is not drawn
+    /// and its census row is unindexed, and below macOS 26 the
+    /// glass card is the same shape — so neither control may
+    /// surface as a catalog-only row (`SettingsSearchIndex.build`
+    /// claims it off every labelled census row, indexed or not).
+    /// The glass half is stated through the availability flag,
+    /// so it asserts on every macOS.
+    @Test("a refused census row takes its control with it")
+    func refusedRowsKeepTheirControls() {
         pinEnglish()
         defer { reset() }
         let before = SettingsSearchIndex.canDriveDesktops
         defer { SettingsSearchIndex.canDriveDesktops = before }
-        let id = SettingsCatalog.gapsAndBorders.stickyReachRow.id
+        let reach = SettingsCatalog.gapsAndBorders.stickyReachRow.id
         SettingsSearchIndex.canDriveDesktops = false
         #expect(
             !SettingsSearchIndex.rows().contains {
-                $0.anchor.anchor == id
+                $0.anchor.anchor == reach
             }
         )
         SettingsSearchIndex.canDriveDesktops = true
         let row = SettingsSearchIndex.rows().first {
-            $0.anchor.anchor == id
+            $0.anchor.anchor == reach
         }
         #expect(row?.key == .borders(.stickyDesktopReach))
+        let glass = SettingsCatalog.colors.glassCard.id
+        let glassRow = SettingsSearchIndex.rows().first {
+            $0.anchor.anchor == glass
+        }
+        #expect(
+            (glassRow != nil) == AppBarStyle.glassAvailable
+        )
+        #expect(glassRow?.key != nil || glassRow == nil)
     }
 
     /// The two bars' Style drawers share one label key and are

@@ -5108,7 +5108,8 @@ and the line is drawn where the harm is:
   the reveal is shaped, scroll the row to the top edge with its
   heading off (`docs/ui-patterns.md` ▸ a revealed target). A
   wash on a control already in view is coverage for its own
-  sake, and it costs the heading.
+  sake, and it costs the heading. (The App Bar's two Show-it-in
+  toggles predate the ruling and stay as shipped.)
 - Advanced Colours' rows take none whatever their tier. Colour
   selection is a browse, not a name search: nobody types
   "group badge text colour", they open the page and look.
