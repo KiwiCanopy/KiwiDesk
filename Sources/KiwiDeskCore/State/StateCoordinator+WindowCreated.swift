@@ -56,16 +56,17 @@ extension StateCoordinator {
                 rank: slot.rank,
                 ranks: departedRanks
             )
-            if mode == .track {
-                let slots = departedSlots
-                var stripped: WindowID?
+            if mode == .track, slot.trackBreak == .head {
+                let holder = handedHolder(of: window.id, in: target)
+                var stripped = false
                 workspaces.withSpace(target) {
-                    stripped = $0.takeTrackBreakBack(for: window.id) {
-                        slots[$0]?.trackBreak
-                    }
+                    stripped = $0.takeTrackBreakBack(
+                        for: window.id,
+                        from: holder
+                    )
                 }
-                if let stripped {
-                    departedSlots[stripped]?.trackBreak = .member
+                if stripped, let holder {
+                    departedSlots[holder]?.trackBreak = .member
                 }
             }
         } else if let track, !window.isFloating {

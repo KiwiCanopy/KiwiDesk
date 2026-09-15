@@ -56,9 +56,9 @@ struct ReturningSlotTrackFoldTests {
         depart(&state, [b, c, d])
         #expect(
             state.departedSlots == [
-                a: Slot(rank: 0, trackBreak: .head),
+                a: Slot(rank: 0, trackBreak: .head, handedTo: b),
                 b: Slot(rank: 1, trackBreak: .handed),
-                c: Slot(rank: 2, trackBreak: .head),
+                c: Slot(rank: 2, trackBreak: .head, handedTo: d),
                 d: Slot(rank: 3, trackBreak: .handed),
             ]
         )
@@ -123,28 +123,27 @@ struct ReturningSlotTrackFoldTests {
         #expect(state.departedSlots[stayer]?.trackBreak == .member)
     }
 
-    /// A chain of departures hands one break along: `a`'s sits on
-    /// `c` after `b` leaves too. `b` comes back without one, and
-    /// `a`'s return walks past `b` to take it back from `c`.
-    @Test("a break handed along a chain is taken back from its holder")
-    func handedChainIsUnwound() {
+    /// The ruling (owner, 2026-09-15): a handed break is never
+    /// handed on. `b` departs holding `a`'s and drops it; `c` is
+    /// never marked; `a`'s return re-inserts its own, whichever
+    /// of the two is back first.
+    @Test("a handed break is dropped at its holder's departure")
+    func handedBreakIsDroppedNotHandedOn() {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a, b])
-        #expect(state.workspaces[home]?.trackBreaks == [c])
+        #expect(state.workspaces[home]?.trackBreaks == [])
+        #expect(state.departedSlots[b]?.handedTo == nil)
+        #expect(state.departedSlots[c]?.trackBreak == .member)
         state.apply(.windowCreated(makeWindow(b)))
-        #expect(state.workspaces[home]?.windows == [b, c, d])
-        #expect(state.workspaces[home]?.trackBreaks == [c])
+        #expect(state.workspaces[home]?.trackBreaks == [])
         state.apply(.windowCreated(makeWindow(a)))
         #expect(state.workspaces[home]?.windows == [a, b, c, d])
         #expect(state.workspaces[home]?.trackBreaks == [a])
-        #expect(state.departedSlots[c]?.trackBreak == .member)
     }
 
-    /// The other order: the head returns before the member that
-    /// handed its break on, and takes it back from the same holder.
     @Test("the head returning first takes the break back too")
-    func headFirstUnwindsTheChain() {
+    func headFirstTakesItBack() {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a, b])
@@ -165,14 +164,15 @@ struct ReturningSlotTrackFoldTests {
         depart(&state, [a, b])
         #expect(state.workspaces[home]?.trackBreaks == [c])
         #expect(state.departedSlots[c]?.trackBreak == .head)
+        #expect(state.departedSlots[a]?.handedTo == b)
         state.apply(.windowCreated(makeWindow(a)))
         #expect(state.workspaces[home]?.trackBreaks == [a, c])
     }
 
     /// A member that departed before its head and returned before
-    /// it sits between the head and the holder: the walk passes
-    /// any member holding no break, whatever its record.
-    @Test("a member back ahead of its head does not stop the walk")
+    /// it sits between the head and the holder; the record names
+    /// the holder, so the member's row position is nothing.
+    @Test("a member back ahead of its head does not hide the holder")
     func memberBetweenHeadAndHolderIsWalkedPast() {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
@@ -202,14 +202,79 @@ struct ReturningSlotTrackFoldTests {
         #expect(state.workspaces[home]?.trackBreaks == [a, c])
     }
 
+    /// The promotion goes to the holder the record NAMES, never to
+    /// the nearest handed record: a head whose successor already
+    /// held a break handed nothing, and its close promotes nobody
+    /// (review, 2026-09-15).
+    @Test("a closed head that handed nothing promotes nobody")
+    func headThatHandedNothingPromotesNobody() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a, b] }
+        depart(&state, [b, a, c, d])
+        #expect(state.departedSlots[a]?.handedTo == nil)
+        #expect(state.departedSlots[c]?.trackBreak == .handed)
+        state.forgetAway(a)
+        #expect(state.departedSlots[c]?.trackBreak == .handed)
+        for id in [b, c, d] {
+            state.apply(.windowCreated(makeWindow(id)))
+        }
+        #expect(state.workspaces[home]?.trackBreaks == [b])
+    }
+
+    /// A holder that dropped the break at its own departure is
+    /// still the one promoted: it heads the track by right now, and
+    /// re-inserts a break of its own on return.
+    @Test("a closed head promotes a holder that is away too")
+    func closedHeadPromotesAnAwayHolder() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [a, b, c])
+        state.forgetAway(a)
+        #expect(state.departedSlots[b]?.trackBreak == .head)
+        #expect(state.departedSlots[c]?.trackBreak == .member)
+        state.apply(.windowCreated(makeWindow(c)))
+        state.apply(.windowCreated(makeWindow(b)))
+        #expect(state.workspaces[home]?.windows == [b, c, d])
+        #expect(state.workspaces[home]?.trackBreaks == [b])
+    }
+
+    /// The other enders of a head's record promote too: a
+    /// redirect (#1150), a profile re-file (#1248), the app's exit.
+    @Test("every ender of a head's record promotes its holder")
+    func everyEnderPromotes() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a, b, c] }
+        depart(&state, [a, b, c])
+        state.redirectDeparture(of: a, to: SpaceID("2"))
+        #expect(state.departedSlots[b]?.trackBreak == .head)
+        state.workspaces.ensureSpace(SpaceID("2"))
+        state.refileAway(of: b, to: SpaceID("2"))
+        #expect(state.departedSlots[c]?.trackBreak == .head)
+        state.awayWindows[c] = AwayWindow(
+            id: c,
+            pid: pid_t(c.raw),
+            appName: "App",
+            appBundleID: nil,
+            nativeSpace: SkyLight.SpaceID(9),
+            isUp: true
+        )
+        state.apply(.appTerminated(pid: pid_t(c.raw)))
+        #expect(state.departedSlots[d]?.trackBreak == .head)
+        #expect(state.departedSlots[c] == nil)
+    }
+
     @Test("a re-key carries the provenance with the slot")
     func rekeyCarriesTheProvenance() {
         var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a, c] }
         depart(&state, [a, b, c, d])
         state.apply(.windowRekeyed(c, WindowID(9)))
         #expect(
             state.departedSlots[WindowID(9)]
-                == Slot(rank: 2, trackBreak: .head)
+                == Slot(rank: 2, trackBreak: .head, handedTo: d)
         )
+        // A link naming the old id follows it too.
+        state.apply(.windowRekeyed(b, WindowID(8)))
+        #expect(state.departedSlots[a]?.handedTo == WindowID(8))
     }
 }

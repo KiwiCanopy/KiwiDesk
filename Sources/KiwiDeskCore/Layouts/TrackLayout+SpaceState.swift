@@ -29,6 +29,14 @@ extension Space {
         return trackBreaks.contains(successor) ? nil : successor
     }
 
+    /// Drops a break the window only held (#1387's ruling): a
+    /// handed break is never handed on, so nothing reaches
+    /// `handTrackBreakToSuccessor`. The weight goes with it.
+    mutating func dropTrackBreak(of window: WindowID) {
+        trackBreaks.remove(window)
+        trackWeights[window] = nil
+    }
+
     /// Hands window's break marker and weight to its array successor (#128).
     mutating func handTrackBreakToSuccessor(
         of window: WindowID
@@ -45,35 +53,23 @@ extension Space {
     }
 
     /// The inverse of `handTrackBreakToSuccessor` for a returning
-    /// window (#1387): a recorded HEAD takes its break back, and
-    /// with it the weight the hand-off moved, from the first
-    /// successor HOLDING a break — taken only where the record says
-    /// handed, and returned so the caller can end that record. A
-    /// holder recorded otherwise, or never recorded, is a head of
-    /// its own and stops the walk. Members holding none are walked
-    /// past whatever their record: a chain of departures hands one
-    /// break along, and a member back ahead of its head sits
-    /// between the two.
+    /// head (#1387): re-inserts its break and takes it back, weight
+    /// and all, from `holder` — the member the departure record
+    /// resolved, never a positional guess — where that member is
+    /// in the row and still holds one. Returns whether it did.
     @discardableResult
     mutating func takeTrackBreakBack(
         for window: WindowID,
-        recorded: (WindowID) -> BreakProvenance?
-    ) -> WindowID? {
-        guard recorded(window) == .head else { return nil }
+        from holder: WindowID?
+    ) -> Bool {
         trackBreaks.insert(window)
-        guard let index = windows.firstIndex(of: window) else {
-            return nil
+        guard let holder, windows.contains(holder),
+            trackBreaks.remove(holder) != nil
+        else { return false }
+        if let weight = trackWeights.removeValue(forKey: holder) {
+            trackWeights[window] = weight
         }
-        for successor in windows[(index + 1)...]
-        where trackBreaks.contains(successor) {
-            guard recorded(successor) == .handed else { return nil }
-            trackBreaks.remove(successor)
-            if let weight = trackWeights.removeValue(forKey: successor) {
-                trackWeights[window] = weight
-            }
-            return successor
-        }
-        return nil
+        return true
     }
 
     /// Moves a window into the adjacent track or opens a new edge track

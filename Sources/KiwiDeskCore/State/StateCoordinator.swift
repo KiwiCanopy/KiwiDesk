@@ -128,6 +128,9 @@ public struct StateCoordinator: Sendable {
         if let slot = departedSlots.removeValue(forKey: old) {
             departedSlots[new] = slot
         }
+        for (id, slot) in departedSlots where slot.handedTo == old {
+            departedSlots[id]?.handedTo = new
+        }
         if let away = awayWindows.removeValue(forKey: old) {
             awayWindows[new] = away.withID(new)
         }
@@ -168,7 +171,11 @@ public struct StateCoordinator: Sendable {
                 stickyReachOverrides[id] = nil
             }
             forgetMinimized(pid: pid)
-            awayWindows = awayWindows.filter { $0.value.pid != pid }
+            // The app's exit ends its away entries for good
+            // (#1146), and a head's hand-off with them (#1387).
+            for entry in awayWindows.values where entry.pid == pid {
+                forgetAway(entry.id)
+            }
 
         case .windowCreated(let window):
             applyWindowCreated(window, effects: &effects)

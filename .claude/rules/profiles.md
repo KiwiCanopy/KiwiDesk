@@ -450,15 +450,15 @@ The obligations below bind this directory:
   against, `Space.remove` handing each track break away on the
   way (device, 2026-09-15: four own-track columns came back in
   re-track order and one column fewer).
-  `ProfilePartitioningTests` ▸ `sameSpaceMemberIsLeftInPlace`
+  `ProfileRestoreOrderTests` ▸ `sameSpaceMemberIsLeftInPlace`
   holds it in track and in bsp, whose row takes the same door
   through the ranks alone; a cross-Space move keeps the append. The cost, stated:
   a same-Desktop profile round trip keeps the order the other
   profile left for members of a same-named Space — it used to put
   the recorded order back, scrambling the breaks as it did — and
-  the #1230 promise is the MEMBERSHIP, argued in
-  `docs/design-decisions.md` ▸ *A profile switch restores that
-  profile's partitioning*.
+  the #1230 promise is the MEMBERSHIP (`ProfileRestoreOrderTests`
+  ▸ `reorderUnderBIsKept`), argued in `docs/design-decisions.md`
+  ▸ *A profile switch restores that profile's partitioning*.
 
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their
