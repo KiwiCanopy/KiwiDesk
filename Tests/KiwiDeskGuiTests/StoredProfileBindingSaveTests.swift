@@ -188,6 +188,7 @@ struct StoredProfileBindingSaveTests {
 
     @Test("an unreadable sidecar is refused, never overwritten")
     func unreadableSidecarRefused() throws {
+        LocalizationManager.shared.select("en")
         let garbage = Data("{ not json".utf8)
         let model = try makeModel(sidecarBytes: garbage)
         model.config.profileBindings[.number(2)] = DesktopBinding(
@@ -201,6 +202,14 @@ struct StoredProfileBindingSaveTests {
             try Data(contentsOf: model.core.guiConfigStore.url)
                 == garbage
         )
-        #expect(model.profileWarning != nil)
+        // Narrated by CASE, not the generic failure sentence.
+        #expect(
+            model.profileWarning
+                == L(
+                    "settings.bindings_save.unreadable",
+                    "Desktop bindings were not saved: gui.json "
+                        + "could not be read."
+                )
+        )
     }
 }
