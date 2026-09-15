@@ -868,7 +868,7 @@ editing here:
   per-ask entry outranks the generalization for any ask it
   matches, a FORCED (explicit-apply) pass probes past
   corroborated bounds via `LayoutContext.probesBeyondBounds`
-  (never widen its producers past `retile(force:)`),
+  (never widen its producers past `retile(pass: .apply)`),
   corroboration requires asks `corroborationDistinctness`
   apart (a coarse snap's row height beats the entry-keying
   tolerance), and a corroborated ceiling corroborates the
