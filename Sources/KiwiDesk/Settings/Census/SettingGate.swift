@@ -3,8 +3,6 @@
 /// Runtime condition gating row availability or presence (#342, #390, #578,
 /// #1071).
 enum SettingRuntimeGate: Hashable {
-    /// The gaps master slider reads "mixed" while the per-edge values differ.
-    case perEdgeValuesDiffer
     /// A stored profile is being edited, so global settings are locked.
     case editingStoredProfile
     /// Presets apply only when connected screen count matches.

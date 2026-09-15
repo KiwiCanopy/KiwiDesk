@@ -1458,11 +1458,7 @@ was written down:
   config can already have set three ways, so while they
   disagree it carries a `?` saying so ("The three strokes are
   set differently right now; choosing here sets all three")
-  and stays live. Greying is the gap masters' answer to the
-  same state and is only available to them because a per-edge
-  drawer sits directly below to repair from; grey a master with
-  no such drawer and the page names a problem it then offers no
-  way to fix. Where the control can also show *no answer* — a
+  and stays live. Where the control can also show *no answer* — a
   segmented picker whose pill hides for an unmatched value —
   it does that too, rather than assert one of the values.
   A *remote* control-scoped gate
@@ -1502,6 +1498,18 @@ same reason: the group is wrapped in the gate's `GreyOut` and
 the toggle's row declares the gate in the census. Auto Glow
 Size shipped live over a greyed slider; the two rows are the
 class's only member today.
+:::
+
+:::unreleased
+The gap masters take that same acknowledging shape over a
+"mixed" readout (#1383): a grey would name a problem and
+withhold the one gesture that fixes it, and a dimmed control
+that still wrote on a drag would be a live control drawn dead —
+the per-edge drawer under them pre-expands so the values about
+to be overwritten are in view, and that is all it is for. A
+master whose followers disagree acknowledges through the
+resolver's `followersDiffer` and the label's `?`, and never
+takes a census gate.
 :::
 
 Which of the two remote shapes a row takes follows from what is

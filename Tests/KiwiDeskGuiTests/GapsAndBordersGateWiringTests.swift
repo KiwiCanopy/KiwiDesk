@@ -46,8 +46,8 @@ struct GapsAndBordersGateWiringTests {
     func rowsConsultTheResolver() throws {
         let consults: [String: [String]] = [
             "GapsEditor.swift": [
-                "gates.inertReason(for:.gaps(.outer))",
-                "gates.inertReason(for:.gaps(.inner))",
+                "gates.followersDiffer(for:.gaps(.outer))",
+                "gates.followersDiffer(for:.gaps(.inner))",
             ],
             "FocusBorderEditor.swift": [
                 "gates.containerReason(for:.focusBorder)",
@@ -77,12 +77,20 @@ struct GapsAndBordersGateWiringTests {
                     )
                 )
             }
+            // `.sentence(for:)` for a gate, or the named
+            // acknowledgement a live master carries (#1383) —
+            // keyed per file so a gated editor cannot satisfy
+            // this with any other static.
+            let caption =
+                name == "GapsEditor.swift"
+                ? "GapsBordersGateHelp.edgesDiffer"
+                : "GapsBordersGateHelp.sentence"
             #expect(
-                source.contains("GapsBordersGateHelp.sentence"),
+                source.contains(caption),
                 Comment(
                     rawValue:
-                        "\(name) does not read GapsBordersGateHelp "
-                        + "for its inert caption"
+                        "\(name) does not read `\(caption)` "
+                        + "for its caption"
                 )
             )
         }
@@ -97,11 +105,11 @@ struct GapsAndBordersGateWiringTests {
             "border.controls.disabled",
             "border.glow_size.disabled",
             "drag.disabled.help",
-            "gaps.mixed.help",
-            // Not an InertReason, same authoring rule: the
-            // masters' mixed-strokes `?` is one sentence, in
-            // the help enum, never re-typed beside the card.
+            // Not InertReasons, same authoring rule: a master's
+            // mixed-followers `?` is one sentence, in the help
+            // enum, never re-typed beside the card.
             "border.shared.differ.help",
+            "gaps.master.differ.help",
         ] {
             #expect(
                 help.contains(key),
@@ -141,9 +149,9 @@ struct GapsAndBordersGateWiringTests {
         for needle in [
             "value:model.borderWidthMaster,",
             "selection:model.borderCornersMaster,",
-            "gates.strokesDiffer("
+            "gates.followersDiffer("
                 + "for:.borders(.borderWidthMaster))",
-            "gates.strokesDiffer("
+            "gates.followersDiffer("
                 + "for:.borders(.borderCornerMaster))",
             "help:widthHelp",
             "help:cornersHelp",
@@ -159,6 +167,36 @@ struct GapsAndBordersGateWiringTests {
                 )
             )
         }
+    }
+
+    /// The gap masters take the strokes' shape (#1383): LIVE while
+    /// the edges differ, the acknowledgement on the label's `?`
+    /// and nothing on the slider's `.disabled`. The resolver
+    /// suite pins `followersDiffer`; this pins that its answer
+    /// reaches the `?` and that no `.disabled(mixed)` came back —
+    /// a greyed-but-draggable slider is the one shape worse than
+    /// a wrong grey, and only the source shows it.
+    @Test("the gap masters stay live and acknowledge at the label")
+    func gapMastersAcknowledgeAtTheLabel() throws {
+        let source = squashed(try read("GapsEditor.swift"))
+        #expect(
+            source.contains(
+                "help:mixed?GapsBordersGateHelp.edgesDiffer:nil"
+            ),
+            Comment(
+                rawValue:
+                    "GapsEditor no longer hands the mixed-edges "
+                    + "sentence to the label's `?`"
+            )
+        )
+        #expect(
+            !source.contains(".disabled("),
+            Comment(
+                rawValue:
+                    "GapsEditor greys a master again — dimmed means "
+                    + "no input on every channel (#1383)"
+            )
+        )
     }
 
     /// Each editor is MOUNTED, not merely declared. Every guard

@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Gaps & Borders' gate resolver (#678 Phase 3). The area carries
-/// all three gate flavours, so this pins each: the Focus-border
+/// Gaps & Borders' gate resolver (#678 Phase 3): the Focus-border
 /// CONTAINER gate, the row gates (glow size, drag sub-rows), and
-/// the two `.runtime` gap-master gates.
+/// the gap masters, which carry NO gate and acknowledge instead
+/// (#1383).
 @Suite("Gaps & Borders gates")
 struct GapsAndBordersGateTests {
     private func settings(
@@ -217,24 +217,55 @@ struct GapsAndBordersGateTests {
         )
     }
 
-    @Test("a gap master greys while its edges or axes differ")
-    func gapMastersGateOnDiffer() {
-        #expect(
-            GapsBordersGates(
-                settings: settings(outerEdgesDiffer: true)
-            ).inertReason(for: .gaps(.outer)) == .gapsDiffer
+    /// A gap master is never gated: it stays live while its
+    /// edges differ and ACKNOWLEDGES through `followersDiffer`
+    /// (#1383 reversed the grey — dimmed means no input on every
+    /// channel, and the drag is the one gesture that converges).
+    @Test("a gap master acknowledges, never greys, while its edges differ")
+    func gapMastersAcknowledgeOnDiffer() {
+        let outer = GapsBordersGates(
+            settings: settings(outerEdgesDiffer: true)
         )
-        #expect(
-            gates().inertReason(for: .gaps(.outer)) == nil
+        #expect(outer.followersDiffer(for: .gaps(.outer)))
+        #expect(!gates().followersDiffer(for: .gaps(.outer)))
+        let inner = GapsBordersGates(
+            settings: settings(innerAxesDiffer: true)
         )
-        #expect(
-            GapsBordersGates(
-                settings: settings(innerAxesDiffer: true)
-            ).inertReason(for: .gaps(.inner)) == .gapsDiffer
-        )
-        #expect(
-            gates().inertReason(for: .gaps(.inner)) == nil
-        )
+        #expect(inner.followersDiffer(for: .gaps(.inner)))
+        #expect(!gates().followersDiffer(for: .gaps(.inner)))
+        // Ungated in the census, so the resolver's first guard
+        // answers nil whatever the edges say.
+        for key in [SettingKey.gaps(.outer), .gaps(.inner)] {
+            #expect(key.placement.gate == nil)
+            #expect(outer.inertReason(for: key) == nil)
+            #expect(inner.inertReason(for: key) == nil)
+        }
+    }
+
+    /// Each follower ALONE diverges its master — an arm that
+    /// compared top against bottom only would pass a fixture
+    /// that moves every edge at once (guard-prover, #1383).
+    @Test(
+        "each gap edge or axis alone diverges its master",
+        arguments: [
+            "outer.top", "outer.bottom", "outer.left", "outer.right",
+            "inner.horizontal", "inner.vertical",
+        ]
+    )
+    func eachFollowerDivergesAlone(follower: String) {
+        var s = settings()
+        switch follower {
+        case "outer.top": s.gapsGlobal.outer.top += 3
+        case "outer.bottom": s.gapsGlobal.outer.bottom += 3
+        case "outer.left": s.gapsGlobal.outer.left += 3
+        case "outer.right": s.gapsGlobal.outer.right += 3
+        case "inner.horizontal": s.gapsGlobal.inner.horizontal += 3
+        default: s.gapsGlobal.inner.vertical += 3
+        }
+        let gates = GapsBordersGates(settings: s)
+        let outer = follower.hasPrefix("outer")
+        #expect(gates.followersDiffer(for: .gaps(.outer)) == outer)
+        #expect(gates.followersDiffer(for: .gaps(.inner)) == !outer)
     }
 
     /// Every reason renders a distinct, non-empty sentence: a
@@ -243,7 +274,7 @@ struct GapsAndBordersGateTests {
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [GapsBordersGates.InertReason] = [
-            .borderOff, .glowOff, .visualOff, .gapsDiffer,
+            .borderOff, .glowOff, .visualOff,
         ]
         let sentences = all.map(GapsBordersGateHelp.sentence)
         for sentence in sentences {

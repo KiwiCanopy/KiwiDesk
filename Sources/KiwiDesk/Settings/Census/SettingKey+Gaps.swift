@@ -19,12 +19,9 @@ extension GapsKey {
             .innerHorizontal, .innerVertical:
             return .row(.gapsAndBorders, .gaps, .showMore)
         case .outer, .inner:
-            return .row(
-                .gapsAndBorders,
-                .gaps,
-                .atRest,
-                gate: .runtime(.perEdgeValuesDiffer)
-            )
+            // Live while the edges differ (#1383): the readout
+            // says "mixed" and the `?` acknowledges, never a grey.
+            return .row(.gapsAndBorders, .gaps, .atRest)
         case .perSpaceOverride:
             return .luaOnly
         }

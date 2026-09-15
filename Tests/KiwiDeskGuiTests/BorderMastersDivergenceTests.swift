@@ -136,31 +136,31 @@ struct BorderMastersDivergenceTests {
         let model = model()
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderCornerMaster))
+                .followersDiffer(for: .borders(.borderCornerMaster))
         )
         model.config.settings.dragGhost.borderWidth = 2
         #expect(
             gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderCornerMaster))
+                .followersDiffer(for: .borders(.borderCornerMaster))
         )
         model.config.settings.dragGhost.borderWidth =
             model.config.settings.borderStyle.width
         model.config.settings.borderStyle.cornerStyle = .square
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
         #expect(
             gates(model)
-                .strokesDiffer(for: .borders(.borderCornerMaster))
+                .followersDiffer(for: .borders(.borderCornerMaster))
         )
     }
 
@@ -173,21 +173,44 @@ struct BorderMastersDivergenceTests {
         model.config.settings.dragDropZone.borderWidth = 2
         #expect(
             gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
     }
 
-    /// A row that is not a master gets no sentence — the
-    /// default arm must stay silent rather than answering for
-    /// every key in the census.
-    @Test("only the masters answer the ? predicate")
-    func nonMastersNeverDiffer() {
+    /// Every master's followers disagreeing at once — the fixture
+    /// both halves of the register clause read.
+    private func allDiverging() -> SettingsModel {
         let model = model()
         model.config.settings.dragGhost.borderWidth = 2
         model.config.settings.borderStyle.cornerStyle = .square
+        model.config.settings.gapsGlobal.outer.bottom += 3
+        model.config.settings.gapsGlobal.inner.vertical += 3
+        return model
+    }
+
+    /// `acknowledged` is the one register of who answers the `?`
+    /// predicate, read both ways on a fixture where every
+    /// member's followers disagree: each member answers, and the
+    /// default arm stays silent for every other key rather than
+    /// answering for the census. `masterWrites` is a different
+    /// question (the draft-diff fan-out) and is not read here —
+    /// the gap masters answer without a row of their own in it.
+    @Test("the acknowledged register is exactly who answers the ?")
+    func acknowledgedRegisterIsExact() {
+        let gates = gates(allDiverging())
+        for key in GapsBordersGates.acknowledged {
+            #expect(
+                gates.followersDiffer(for: key),
+                Comment(rawValue: "\(key.id) is registered but silent")
+            )
+            #expect(key.placement.gate == nil)
+        }
         for key in SettingKey.allCases
-        where !SettingKey.masterWrites.keys.contains(key) {
-            #expect(!gates(model).strokesDiffer(for: key))
+        where !GapsBordersGates.acknowledged.contains(key) {
+            #expect(
+                !gates.followersDiffer(for: key),
+                Comment(rawValue: "\(key.id) answers unregistered")
+            )
         }
     }
 }
