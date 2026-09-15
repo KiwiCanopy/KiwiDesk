@@ -4,6 +4,7 @@ import SwiftUI
 /// Caption and accessibility text for Scrolling schematic preview (#753).
 extension ScrollingSchematic {
     var caption: String {
+        if lone { return loneCaption }
         switch anchor {
         case .follow:
             return oneLine(
@@ -30,6 +31,7 @@ extension ScrollingSchematic {
     }
 
     var axLabel: String {
+        if lone { return loneAxLabel }
         switch anchor {
         case .follow:
             return L(
@@ -64,7 +66,53 @@ extension ScrollingSchematic {
     /// Whether next-window insertion '+' marker is on canvas
     /// (`LayoutSchematicCaptionTests`).
     var drawsInsertionMark: Bool {
-        hasMargin && abs(row.incoming) <= 1
+        hasMargin && !lone && abs(row.incoming) <= 1
+    }
+
+    /// The lone-window sentence switches with the fill toggle
+    /// (#1389, `LayoutSchematicAloneTests`); the slot noun is a
+    /// key per sentence, since a possessive agrees with it.
+    private var loneCaption: String {
+        if fillWhenAlone {
+            return L(
+                "layout.schematic.scrolling.caption_alone_fill",
+                "One window fills the whole screen."
+            )
+        }
+        if orientation == .vertical {
+            return L(
+                "layout.schematic.scrolling.caption_alone_row",
+                "One window keeps its row height and leaves the "
+                    + "rest of the screen empty."
+            )
+        }
+        return L(
+            "layout.schematic.scrolling.caption_alone_column",
+            "One window keeps its column width and leaves the "
+                + "rest of the screen empty."
+        )
+    }
+
+    private var loneAxLabel: String {
+        if fillWhenAlone {
+            return L(
+                "layout.schematic.scrolling.ax_alone_fill",
+                "Scrolling preview: one window filling the whole "
+                    + "screen."
+            )
+        }
+        if orientation == .vertical {
+            return L(
+                "layout.schematic.scrolling.ax_alone_row",
+                "Scrolling preview: one window at its row height, "
+                    + "the rest of the screen empty."
+            )
+        }
+        return L(
+            "layout.schematic.scrolling.ax_alone_column",
+            "Scrolling preview: one window at its column width, "
+                + "the rest of the screen empty."
+        )
     }
 
     private var followName: String {

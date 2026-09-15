@@ -49,6 +49,12 @@ extension KiwiCore {
                 return placementError
             }
             tiler.settings.stack.newWindowPlacement = placement
+        case "stack.set_fill_when_alone":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected a boolean")
+            }
+            tiler.settings.stack.fillWhenAlone = on
+            promiseAllWindowsSpringSized()
         default:
             return stackFallback(command, args)
         }

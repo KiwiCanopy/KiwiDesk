@@ -52,6 +52,11 @@ extension LayoutKey {
             return .dynamic
         case .scrollingWrapFocus, .monocleWrapFocus:
             return .text("scroll_grid.wrap_focus")
+        case .scrollingFillWhenAlone, .stackFillWhenAlone:
+            return .text(
+                "layout_params.fill_when_alone",
+                help: "layout_params.fill_when_alone.help"
+            )
         case .gridType, .gridOverrideType:
             return .text("scroll_grid.grid_type")
         case .gridSplitDirection, .trackAxis, .gridOverrideSplitDirection,

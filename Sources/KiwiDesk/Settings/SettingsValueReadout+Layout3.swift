@@ -183,6 +183,7 @@ extension SettingsValueReadout {
             .scrollingAnchor, .scrollingSlotSizeUnit,
             .scrollingSlotSizeValue,
             .scrollingNewWindowPlacement, .scrollingWrapFocus,
+            .scrollingFillWhenAlone, .stackFillWhenAlone,
             .gridType, .gridSplitDirection, .gridFillEmptyCells,
             .gridAutoSize, .gridColumns, .gridRows,
             .gridNewWindowPlacement, .monocleOrientation,

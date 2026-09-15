@@ -19,6 +19,7 @@ enum LayoutDefaultsRowOrder {
     static let stack: [SettingKey] = [
         .layout(.stackMasterCount),
         .layout(.stackMasterRatio),
+        .layout(.stackFillWhenAlone),
         .layout(.stackMasterOrientation),
         .layout(.stackStackPosition),
         .layout(.stackOverflowStyle),
@@ -31,6 +32,7 @@ enum LayoutDefaultsRowOrder {
         .layout(.scrollingAnchor),
         .layout(.scrollingSlotSizeUnit),
         .layout(.scrollingSlotSizeValue),
+        .layout(.scrollingFillWhenAlone),
         .layout(.scrollingNewWindowPlacement),
         .layout(.scrollingWrapFocus),
         .colours(.animationsOnScrolling),

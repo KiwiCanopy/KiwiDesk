@@ -147,14 +147,7 @@ extension KiwiCore {
         // not the raw frame (#537): a delta divided by a span the
         // Space Bar's strip inflates understates every ratio it
         // writes, and the caps below share the same span.
-        let bounds = TilingEngine.screen(
-            for: space.id,
-            in: state
-        ).map { tiler.layoutBounds(on: $0) }
-        let span =
-            axis == "x"
-            ? Double(bounds?.width ?? 1920)
-            : Double(bounds?.height ?? 1080)
+        let span = layoutSpan(of: space, horizontal: axis == "x")
         let response: CommandResponse
         switch space.mode {
         case .bsp:

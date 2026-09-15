@@ -80,6 +80,37 @@ struct NothingToDivideCueTests {
         return seen
     }
 
+    /// The fill-OFF control (#1389): with the lone master kept
+    /// at its zone the layout RENDERS the ratio, so the split
+    /// divides and the split-axis press writes it wordlessly;
+    /// the cross-axis press then names the axis, since the
+    /// other one does divide. Judged through the one
+    /// `StackLayout.loneMasterKeepsZone`, never a member count.
+    @Test("A lone stack window kept at its zone divides")
+    func stackLoneKeptZoneDivides() {
+        let core = makeCore()
+        core.tiler.settings.stack.fillWhenAlone = false
+        let sp = space(core, windows: 1, mode: "stack")
+        let seen = refusals(core) {
+            core.execute(
+                "resize",
+                args: [.string("x"), .number(-300)]
+            )
+        }
+        #expect(seen == [])
+        // The write lands in the space's session ratio (#458).
+        let written =
+            core.state.workspaces[sp.id]?.sessionRatios.masterRatio
+        #expect(written != nil && written! < 0.6)
+        let cross = refusals(core) {
+            core.execute(
+                "resize",
+                args: [.string("y"), .number(-300)]
+            )
+        }
+        #expect(cross == [.noAxisHere(WindowID(1), axis: "y")])
+    }
+
     @Test("A stack window alone in its column says so")
     func stackAloneInColumn() {
         // Two windows: w2 is the stack zone's only member, so

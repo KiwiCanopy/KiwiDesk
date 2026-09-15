@@ -17,6 +17,33 @@ enum LayoutSchematic {
     static let defaultWindowCount = 5
     static let windowCountRange = 2...12
 
+    /// The band a layout's preview slider spans. The shared floor
+    /// is 2 because at one window a layout draws one full-screen
+    /// rectangle; a layout whose params carry `fillWhenAlone`
+    /// (#1389) draws two, so it joins the `1...` case here AND
+    /// `LayoutSchematicAloneTests` in the same change.
+    static func windowCountRange(
+        for mode: LayoutMode
+    ) -> ClosedRange<Int> {
+        switch mode {
+        case .scrolling, .stack:
+            return 1...windowCountRange.upperBound
+        case .bsp, .grid, .monocle, .track, .floating:
+            return windowCountRange
+        }
+    }
+
+    /// `count` held inside the band `mode` draws — the slider's
+    /// state outlives a mode switch, and a lone-window count means
+    /// nothing to a layout whose band starts at 2.
+    static func windowCount(
+        _ count: Int,
+        for mode: LayoutMode
+    ) -> Int {
+        let band = windowCountRange(for: mode)
+        return min(max(count, band.lowerBound), band.upperBound)
+    }
+
     /// Overlap cascade offset scaled for schematic canvas (#712).
     static let cascadeOffset: CGFloat = 9
 }

@@ -2271,6 +2271,39 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
+:::unreleased
+**A lone window fills the screen, or keeps the room a
+neighbour would leave it — never a third size (#1389).** On a
+wide screen a scrolling slot of 95% or a 60% master ratio
+leaves one window narrow with the rest empty, so the default
+is that one window takes everything and sharing starts with
+the second. The toggle's OFF arm had two candidates: a lone
+window at its slot or master share, or a centred one at some
+third size. The ruling is the first, because the setting is
+about SIZE: OFF draws the exact region the two-window layout
+gives its master or its slot (the same clamped ratio, the
+same side of the split), so the one window is already the
+size a neighbour would leave it. Which window keeps that
+region when the second opens is `new_window_placement`'s
+question — Stack's default `first` makes the newcomer the
+master — and where a slot sits along the row is the anchor's
+(#1388); this setting answers neither. The toggle is about ONE
+window: two or more windows with no stack zone — every one a
+master — still fill, since no second-window region exists for
+them to keep; so under `master_count` 2 or more the lone
+window's kept zone widens to the shared full area when the
+second arrives, a consequence stated rather than a case the
+setting carves out. It is per LAYOUT and not per Space, the
+`wrap_focus` shape rather than `slot_size`'s: what a lone
+window does is a taste about the layout, the same on every
+screen, and an override map is additive if a per-Space wish
+ever arrives. Default ON is a behaviour change to nothing —
+every profile drew that way before the key existed — so the
+flag is sparse-decoded with no migration, and the release
+notes name the switch so the user who wants one window kept at
+its slot knows there is one.
+:::
+
 **`follow` holds a place, not a number: a resize re-anchors the
 viewport (#966).** A scrolling row has one slot size for every
 slot, so resizing one moves every slot's *position* along the
@@ -5968,6 +6001,23 @@ count does **not** buy is a render of the user's actual
 windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
+
+:::unreleased
+**The count's floor is per layout, and it reaches 1 only where
+one window draws two ways.** The slider began at 2 because at
+one window every layout drew the same full-screen rectangle —
+a frame that teaches nothing — and several schematics have no
+second zone to partition below it. "If one window, fill the
+screen" (#1389) ends that for Scrolling and Stack: their lone
+window fills or keeps its slot or master zone, which is exactly
+the fact a preview exists to show, so their band reaches 1 and
+draws it,
+with the caption switching on the toggle. The other layouts
+keep the shared floor rather than growing a lone frame nobody
+can learn from, and a count the slider's state carries across
+a layout switch is clamped into the layout's own band rather
+than drawn by a schematic that never modelled it.
+:::
 
 **Where the engine's rule needs a display, the preview stands a
 number in for the display — never a simpler rule.** (#708,

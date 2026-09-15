@@ -96,6 +96,7 @@ struct LayoutParamsCodingParityTests {
         params.masterOrientation = .vertical
         params.stackPosition = .top
         params.newWindowPlacement = .last
+        params.fillWhenAlone = false
         var over = StackOverride()
         over.masterCount = 2
         params.override[space] = over
@@ -124,6 +125,7 @@ struct LayoutParamsCodingParityTests {
         params.orientation = .vertical
         params.newWindowPlacement = .first
         params.wrapFocus = true
+        params.fillWhenAlone = false
         params.appBar.enabled = false
         var over = ScrollingOverride()
         over.anchor = .end

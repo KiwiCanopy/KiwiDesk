@@ -15,7 +15,7 @@ struct LayoutPreviewPanel: View {
                 LayoutSchematicView(
                     mode: mode,
                     settings: model.config.settings,
-                    windows: windows,
+                    windows: shownWindows,
                     scale: .panel
                 )
                 countRow
@@ -26,8 +26,13 @@ struct LayoutPreviewPanel: View {
 
     /// Hoisted slider range (`LayoutSchematic.windowCountRange`, `gui.md`).
     private var countRange: ClosedRange<Double> {
-        let band = LayoutSchematic.windowCountRange
+        let band = LayoutSchematic.windowCountRange(for: mode)
         return Double(band.lowerBound)...Double(band.upperBound)
+    }
+
+    /// The count inside this mode's band (#1389).
+    private var shownWindows: Int {
+        LayoutSchematic.windowCount(windows, for: mode)
     }
 
     private var countRow: some View {
@@ -46,7 +51,7 @@ struct LayoutPreviewPanel: View {
             .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
-                    get: { Double(windows) },
+                    get: { Double(shownWindows) },
                     set: { windows = Int($0.rounded()) }
                 ),
                 range: countRange,
@@ -60,10 +65,10 @@ struct LayoutPreviewPanel: View {
                     "layout_defaults.preview_windows",
                     "Window count"
                 ),
-                spokenValue: "\(windows)"
+                spokenValue: "\(shownWindows)"
             )
             .frame(maxWidth: .infinity)
-            Text("\(windows)")
+            Text("\(shownWindows)")
                 .frame(minWidth: 24, alignment: .trailing)
                 .foregroundStyle(SettingsTheme.ink2)
                 .font(.body.monospacedDigit())

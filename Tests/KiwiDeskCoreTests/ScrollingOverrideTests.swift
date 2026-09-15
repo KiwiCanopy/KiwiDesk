@@ -17,6 +17,9 @@ struct ScrollingOverrideTests {
         // A per-layout behavior toggle (#168), not per-space —
         // like newWindowPlacement, it shapes the whole layout.
         "wrapFocus",
+        // Same class (#1389): what a lone window does is the
+        // layout's shape, not a space's.
+        "fillWhenAlone",
         // The override map itself.
         "override",
     ]

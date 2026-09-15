@@ -173,6 +173,9 @@ struct SettingsCodingTests {
         // `scroll.set_wrap_focus` → `layout.scroll.wrap_focus`,
         // off by default (#168).
         #expect(scroll["wrap_focus"] as? Bool == false)
+        // `scroll.set_fill_when_alone` →
+        // `layout.scroll.fill_when_alone`, on by default (#1389).
+        #expect(scroll["fill_when_alone"] as? Bool == true)
         // `grid.set_auto_size` → `layout.grid.auto_size` (#171),
         // off by default.
         let grid = try object(layout["grid"])
@@ -195,6 +198,7 @@ struct SettingsCodingTests {
         )
         #expect(stack["stack_position"] as? String == "right")
         #expect(stack["stack_orientation"] == nil)
+        #expect(stack["fill_when_alone"] as? Bool == true)
         // `track.set_axis` → `layout.track.axis` (#128);
         // wrap toggle per the #168 vocabulary.
         let track = try object(layout["track"])

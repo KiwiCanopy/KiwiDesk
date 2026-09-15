@@ -22,16 +22,6 @@ public struct StackLayout: LayoutSystem {
             ? ArraySlice(master.reversed())
             : master
 
-        guard let stack else {
-            // Master only: full usable region.
-            return zone(
-                masterOrdered,
-                in: usable,
-                vertical: params.masterOrientation == .vertical,
-                context: context
-            )
-        }
-
         let horizontal = params.stackPosition.splitsHorizontally
         let gap =
             horizontal
@@ -40,28 +30,59 @@ public struct StackLayout: LayoutSystem {
         let available =
             (horizontal ? usable.width : usable.height) - gap
         // Cascades if min-size zones cannot coexist (#44).
-        guard
-            let range = SplitDomain.effectiveRatioRange(
-                available: Double(available),
-                minSize: Double(context.minWindowSize)
+        let range = SplitDomain.effectiveRatioRange(
+            available: Double(available),
+            minSize: Double(context.minWindowSize)
+        )
+
+        guard let stack else {
+            // Master only: the full usable region — unless the one
+            // window keeps its zone (#1389).
+            if let range,
+                Self.loneMasterKeepsZone(
+                    windows,
+                    params: params,
+                    range: range
+                )
+            {
+                let masterSpan = Self.masterSpan(
+                    available: available,
+                    ratio: params.masterRatio,
+                    in: range
+                )
+                return zone(
+                    masterOrdered,
+                    in: Self.regions(
+                        usable: usable,
+                        position: params.stackPosition,
+                        masterSpan: masterSpan,
+                        stackSpan: available - masterSpan,
+                        gap: gap
+                    ).master,
+                    vertical: params.masterOrientation == .vertical,
+                    context: context
+                )
+            }
+            return zone(
+                masterOrdered,
+                in: usable,
+                vertical: params.masterOrientation == .vertical,
+                context: context
             )
-        else {
+        }
+
+        guard let range else {
             return OverlapStack.frames(
                 for: windows,
                 in: usable,
                 minSize: context.minWindowSize
             )
         }
-        let ratio = CGFloat(
-            min(
-                max(
-                    params.masterRatio,
-                    range.lowerBound
-                ),
-                range.upperBound
-            )
+        let masterSpan = Self.masterSpan(
+            available: available,
+            ratio: params.masterRatio,
+            in: range
         )
-        let masterSpan = available * ratio
         let (masterRegion, stackRegion) = Self.regions(
             usable: usable,
             position: params.stackPosition,
@@ -102,8 +123,38 @@ public struct StackLayout: LayoutSystem {
         return params.masterOrientation == parallel
     }
 
-    /// Master and stack regions for split of usable area (#222).
-    static func regions(
+    /// Whether the split RENDERS its ratio for a lone member: with
+    /// `fill_when_alone` off the one window keeps the master zone
+    /// the two-window split gives it (#1389). The one home of that
+    /// verdict — the engine draws by it and the resize cues judge
+    /// "nothing to divide" by it (#1258), never by a member count.
+    /// `range` is `SplitDomain.effectiveRatioRange`'s answer for
+    /// the region: nil means no two zones fit, and the window
+    /// fills.
+    public static func loneMasterKeepsZone(
+        _ windows: some Collection<WindowID>,
+        params: StackParams,
+        range: ClosedRange<Double>?
+    ) -> Bool {
+        windows.count == 1 && !params.fillWhenAlone && range != nil
+    }
+
+    /// The master zone's span: the stored ratio clamped into the
+    /// range both zones can keep `minWindowSize` in (#44).
+    static func masterSpan(
+        available: CGFloat,
+        ratio: Double,
+        in range: ClosedRange<Double>
+    ) -> CGFloat {
+        available
+            * CGFloat(
+                min(max(ratio, range.lowerBound), range.upperBound)
+            )
+    }
+
+    /// Master and stack regions for split of usable area (#222);
+    /// public for the schematic's lone frame (#1389).
+    public static func regions(
         usable: CGRect,
         position: StackParams.StackPosition,
         masterSpan: CGFloat,

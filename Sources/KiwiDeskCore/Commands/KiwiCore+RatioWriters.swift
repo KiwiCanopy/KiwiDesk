@@ -13,6 +13,45 @@ import Foundation
 /// sees both input paths, and a verdict placed in the keyboard
 /// verb left the same drag silent.
 extension KiwiCore {
+    /// `StackLayout.loneMasterKeepsZone` asked from a command:
+    /// the range is the SPLIT axis's on the space's own layout
+    /// region (#449/#537), whichever axis the press came on.
+    /// Traded: the raw region, where the engine judges the gapped
+    /// one — the two answers differ only in a band under
+    /// 2 × `min_window_size` plus the gaps, below any real
+    /// display at the default floor, and `cappedRatioWrite`
+    /// already clamps on the same raw span.
+    func loneMasterKeepsZone(
+        _ tiled: [WindowID],
+        _ stack: StackParams,
+        in space: Space
+    ) -> Bool {
+        StackLayout.loneMasterKeepsZone(
+            tiled,
+            params: stack,
+            range: SplitDomain.effectiveRatioRange(
+                available: layoutSpan(
+                    of: space,
+                    horizontal: stack.stackPosition.splitsHorizontally
+                ),
+                minSize: Double(tiler.settings.minWindowSize)
+            )
+        )
+    }
+
+    /// The space's layout-region span along one axis — its OWN
+    /// screen (#449) and the layout region, not the raw frame
+    /// (#537) — the one span every resize write and cue divides
+    /// by; the raw region, as `SplitDomain.cappedRatioWrite`
+    /// already takes it.
+    func layoutSpan(of space: Space, horizontal: Bool) -> Double {
+        let bounds = TilingEngine.screen(for: space.id, in: state)
+            .map { tiler.layoutBounds(on: $0) }
+        return horizontal
+            ? Double(bounds?.width ?? 1920)
+            : Double(bounds?.height ?? 1080)
+    }
+
     /// Two-sided capped master-ratio write plus refusal cues —
     /// the one authority both the keyboard split-axis resize
     /// and the mouse `.masterRatio` adjustment call. `proposed`
@@ -67,8 +106,12 @@ extension KiwiCore {
         guard tiled.contains(focused) else { return }
         // One term, not two: `partition` returns a nil zone
         // whenever the members fit in master, so an empty
-        // master implies an empty `tiled` and is covered.
-        if stackZone?.isEmpty ?? true {
+        // master implies an empty `tiled` and is covered — and a
+        // lone member kept at its zone (#1389) renders the ratio,
+        // so the split DOES divide for it.
+        if stackZone?.isEmpty ?? true,
+            !loneMasterKeepsZone(tiled, stack, in: space)
+        {
             // The focused window's own zone may still divide on
             // the other axis, and that is the press to send it
             // to — but only where that zone's own orientation

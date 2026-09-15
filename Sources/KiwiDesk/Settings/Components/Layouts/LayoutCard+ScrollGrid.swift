@@ -65,6 +65,16 @@ extension LayoutCard {
         )
     }
 
+    /// The lone-window fill toggle (#1389), the scrolling twin of
+    /// `stackFillWhenAloneRow` — one label key for both.
+    var scrollFillWhenAloneRow: some View {
+        ToggleRow(
+            label: LayoutHelp.fillWhenAloneLabel,
+            isOn: scrolling.fillWhenAlone,
+            help: LayoutHelp.fillWhenAlone
+        )
+    }
+
     var scrollWrapFocusRow: some View {
         ToggleRow(
             label: L("scroll_grid.wrap_focus", "Wrap focus"),

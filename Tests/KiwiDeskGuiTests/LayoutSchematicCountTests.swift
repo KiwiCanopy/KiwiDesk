@@ -27,10 +27,12 @@ import Testing
 @Suite("Layout preview window count")
 @MainActor
 struct LayoutSchematicCountTests {
-    /// The floor is 2, not 1: at one window every layout draws
-    /// the same full-screen rectangle, and several schematics
-    /// have no second zone to partition. A change lowering it
-    /// reds here, where the reason is written down.
+    /// The shared floor is 2, not 1: at one window a layout draws
+    /// one full-screen rectangle, and several schematics have no
+    /// second zone to partition. Scrolling and Stack left that
+    /// set with #1389 — their per-mode band reaches 1, held by
+    /// `LayoutSchematicAloneTests` — so a change lowering THIS
+    /// floor reds here, where the reason is written down.
     @Test("the count band starts where a layout differs")
     func countBand() {
         #expect(LayoutSchematic.windowCountRange.lowerBound == 2)

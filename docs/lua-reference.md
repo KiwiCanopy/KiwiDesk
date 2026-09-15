@@ -1020,6 +1020,35 @@ master).
 stack.set_new_window_placement("last")
 ```
 
+### stack.set_fill_when_alone
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** when `true` (the default, and how every profile drew
+before the setting existed), a single window takes the whole
+usable area and starts sharing only when a second window opens.
+When `false`, a lone window keeps the master zone it would have
+beside a stack zone — the master ratio's share, on the master's
+side of the split — and the stack zone stays empty. Which
+window holds that zone once a second opens is
+`stack.set_new_window_placement`'s call. On a screen
+too small to hold two zones at `min_window_size` the lone window
+fills instead, as the split itself would cascade. The toggle is
+about ONE window: two or more windows with no stack zone (every
+one a master) still take the whole area — so with a master count
+of two or more, the kept zone widens to the full area when the
+second window opens. The Settings row is
+**If one window, fill the screen**; Scrolling has the same
+toggle (`scroll.set_fill_when_alone`).
+:::
+
+**Example:**
+
+```lua
+stack.set_fill_when_alone(false)
+```
+
 ### stack.set_master_count_override
 
 **Expects:**
@@ -1112,6 +1141,11 @@ leaves the rest of the axis empty. A lone window fills the
 available width or height (unless its app refuses that size —
 [Accepted limitations](accepted-limitations.md)).
 Accepted values: `%` clamps to 5–100%, points to ≥100.
+
+:::unreleased
+Whether a lone window fills is `scroll.set_fill_when_alone`'s
+(on by default); off, it keeps this slot size alone.
+:::
 
 **Example:**
 
@@ -1262,6 +1296,28 @@ across the whole row). Monocle has the same toggle
 
 ```lua
 scroll.set_wrap_focus(true)
+```
+
+### scroll.set_fill_when_alone
+
+:::unreleased
+**Expects:** a boolean.
+
+**Does:** when `true` (the default, and how every profile drew
+before the setting existed), a single window in a scrolling
+space takes the whole width or height and starts sharing only
+when a second window opens. When `false`, a lone window keeps
+the slot size (`scroll.set_slot_size`) it would have beside a
+neighbour, and the rest of the axis stays empty. The Settings
+row is
+**If one window, fill the screen**; Stack has the same toggle
+(`stack.set_fill_when_alone`).
+:::
+
+**Example:**
+
+```lua
+scroll.set_fill_when_alone(false)
 ```
 
 ### scroll.set_slot_size_override
