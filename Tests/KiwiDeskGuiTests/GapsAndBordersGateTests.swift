@@ -242,6 +242,32 @@ struct GapsAndBordersGateTests {
         }
     }
 
+    /// Each follower ALONE diverges its master — an arm that
+    /// compared top against bottom only would pass a fixture
+    /// that moves every edge at once (guard-prover, #1383).
+    @Test(
+        "each gap edge or axis alone diverges its master",
+        arguments: [
+            "outer.top", "outer.bottom", "outer.left", "outer.right",
+            "inner.horizontal", "inner.vertical",
+        ]
+    )
+    func eachFollowerDivergesAlone(follower: String) {
+        var s = settings()
+        switch follower {
+        case "outer.top": s.gapsGlobal.outer.top += 3
+        case "outer.bottom": s.gapsGlobal.outer.bottom += 3
+        case "outer.left": s.gapsGlobal.outer.left += 3
+        case "outer.right": s.gapsGlobal.outer.right += 3
+        case "inner.horizontal": s.gapsGlobal.inner.horizontal += 3
+        default: s.gapsGlobal.inner.vertical += 3
+        }
+        let gates = GapsBordersGates(settings: s)
+        let outer = follower.hasPrefix("outer")
+        #expect(gates.followersDiffer(for: .gaps(.outer)) == outer)
+        #expect(gates.followersDiffer(for: .gaps(.inner)) == !outer)
+    }
+
     /// Every reason renders a distinct, non-empty sentence: a
     /// collapsed pair would send the reader to the wrong fix.
     @MainActor
