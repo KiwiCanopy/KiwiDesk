@@ -134,7 +134,7 @@ extension KiwiCore {
             profileIgnoreRules: profile.ignoreRules
         )
         resolveSpaceDisplays()
-        retile(force: forceRetile)
+        retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()
         // #1145: a profile may override `desktop_reach` — after
         // the pins and the space→display resolve the carry's
@@ -235,7 +235,7 @@ extension KiwiCore {
             profileIgnoreRules: nil
         )
         resolveSpaceDisplays()
-        retile(force: forceRetile)
+        retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()

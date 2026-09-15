@@ -20,9 +20,15 @@ extension KiwiCore {
     /// allow-listed — `BatchSizingRoutingTests` names every call
     /// site that may promise, and `BatchSizing` argues why
     /// guessing is the one mistake that reintroduces #45.
+    ///
+    /// `pass` is the caller's classification of the pass (#1488):
+    /// `.apply` for an explicit `set_*` apply (§5), `.reissue` for
+    /// a switch that must re-issue frames the lagging echoes
+    /// still report in place, `.event` for everything else —
+    /// `RetilePass` owns why the two halves are spelled apart.
     public func retile(
         animated: Bool? = nil,
-        force: Bool = false,
+        pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
@@ -40,7 +46,7 @@ extension KiwiCore {
         // The split stores ride the same heal (#934/#1430): a
         // bsp ratio or the master ratio is moved so a side
         // draws its members' learned floor.
-        tiler.withForcedPass(force) {
+        tiler.withForcedPass(pass.probes) {
             healTrackSessionWeights()
             healSplitFloors()
         }
@@ -58,7 +64,7 @@ extension KiwiCore {
             state: state,
             animated: animated
                 ?? tiler.settings.animations.onRelayout,
-            force: force,
+            pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
             stashAnimated: stashAnimated,
             sizing: sizing
@@ -81,7 +87,7 @@ extension KiwiCore {
                 state: state,
                 animated: animated
                     ?? tiler.settings.animations.onRelayout,
-                force: false,
+                pass: .event,
                 stashAnimated: stashAnimated,
                 sizing: sizing
             )

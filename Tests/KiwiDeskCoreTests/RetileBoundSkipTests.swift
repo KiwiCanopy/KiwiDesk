@@ -113,10 +113,35 @@ struct RetileBoundSkipTests {
         _ = try learnBound(core, applied: applied)
 
         applied.frames = [:]
-        core.retile(force: true)
+        core.retile(pass: .apply)
         // An explicit apply keeps its contract (#42 tolerance
         // rule): everything re-issues, bound or no bound.
         #expect(applied.frames[w] != nil)
+    }
+
+    @Test("A reissue pass issues a frame the skips would drop")
+    func reissueIssuesTheBound() throws {
+        // The switch's half of an apply (#1488): every frame goes
+        // out again, at the answer the app gave — the exact
+        // refused ask consumes on either pass (#1055); the half a
+        // reissue lacks, the probe, is `SpaceSwitchReissueTests`'.
+        // The window sits at its placed frame first, so an event
+        // pass has nothing to issue and only the re-issue does.
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        _ = try learnBound(core, applied: applied)
+        applied.frames = [:]
+        core.retile()
+        let placed = try #require(applied.frames[w])
+        core.state.apply(.windowResized(w, placed))
+        applied.frames = [:]
+        core.retile()
+        #expect(applied.frames[w] == nil)
+
+        core.retile(pass: .reissue)
+        let issued = try #require(applied.frames[w])
+        #expect(issued == placed)
     }
 
     @Test("A moved slot still issues")

@@ -19,7 +19,7 @@ struct SplitFloorHealNeedleTests {
             under: "App"
         )
         let characters = Array(retile)
-        let opener = Array("withForcedPass(force) {")
+        let opener = Array("withForcedPass(pass.probes) {")
         let start = try #require(
             (0...(characters.count - opener.count)).first {
                 Array(characters[$0..<($0 + opener.count)])

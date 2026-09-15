@@ -29,7 +29,7 @@ extension KiwiCore {
         // same windows in the same slots, every one of them
         // spring-sized from one clock — so the shared edges may
         // slide.
-        retile(force: true, sizing: .allSpringSized)
+        retile(pass: .apply, sizing: .allSpringSized)
         return .ok()
     }
 
@@ -77,7 +77,7 @@ extension KiwiCore {
         // windows overlap by design — but that pile is
         // spring-sized like everything else in the pass, so no
         // #45 instant sizing enters it.
-        retile(force: true, sizing: .allSpringSized)
+        retile(pass: .apply, sizing: .allSpringSized)
         return .ok()
     }
 

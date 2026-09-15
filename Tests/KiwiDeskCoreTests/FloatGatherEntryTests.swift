@@ -88,7 +88,7 @@ struct FloatGatherEntryTests {
         let core = try #require(makeCore(mode: .scrolling))
         core.settleDrawnSpaceModes()
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let expected = Self.expected
         #expect(expected.count == 3)
         #expect(
@@ -124,7 +124,7 @@ struct FloatGatherEntryTests {
             core.state.windows.updateFrame(id, frame: full)
         }
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let grid = FloatGather.targets(
             members: members,
             frames: Dictionary(
@@ -160,7 +160,7 @@ struct FloatGatherEntryTests {
             core.state.windows.updateFrame(id, frame: parked)
         }
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let grid = FloatGather.targets(
             members: members,
             frames: Dictionary(
@@ -208,7 +208,7 @@ struct FloatGatherEntryTests {
         core.retile()
         core.setSpaceMode(Self.space, .bsp)
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
     }
 
@@ -236,7 +236,7 @@ struct FloatGatherEntryTests {
             )
         )
         #expect(core.state.workspaces[Self.space]?.mode == .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
     }
 
@@ -273,7 +273,7 @@ struct FloatGatherEntryTests {
             core.tiler.seedStash(id, frame: capture)
         }
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         for (id, capture) in captures {
             #expect(core.tiler.stashOriginal(id) == capture)
         }
@@ -288,7 +288,7 @@ struct FloatGatherEntryTests {
         core.settleDrawnSpaceModes()
         core.state.windows.setFullscreen(Self.scrolledOut, true)
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
         #expect(core.tiler.stashOriginal(Self.partly) != nil)
         #expect(core.tiler.stashOriginal(Self.inside) != nil)
@@ -305,7 +305,7 @@ struct FloatGatherEntryTests {
         core.state.workspaces.ensureSpace(other)
         core.resolveSpaceDisplays(mainID: NSScreen.main!.kiwiDisplay!.id)
         core.state.workspaces.activate(other)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         // Parked, uncaptured: the corner is all the state holds.
         let parked = TilingEngine.stashFrame(
             CGRect(origin: .zero, size: Self.size),
@@ -316,7 +316,7 @@ struct FloatGatherEntryTests {
             core.state.windows.updateFrame(id, frame: parked)
         }
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let seeded = core.tiler.stashOriginal(Self.inside)
         let target = try #require(seeded)
         #expect(Self.bounds.contains(target))
@@ -324,7 +324,7 @@ struct FloatGatherEntryTests {
         #expect(core.tiler.recentInstantTarget(Self.inside) != target)
         // … and delivered by the activation's pass.
         core.state.workspaces.activate(Self.space)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.recentInstantTarget(Self.inside) == target)
     }
 }

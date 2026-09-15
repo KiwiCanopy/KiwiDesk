@@ -120,12 +120,14 @@ extension KiwiCore {
         dragCrossing.markCrossed(id)
         // Both displays reflow; the slide IS the feature, so
         // animate with the swap animation. The dragged window is
-        // exempt and never re-framed. Forced, like the spring: a
-        // membership mutation must apply exactly, not be
-        // swallowed by the ±2 pt echo tolerance.
+        // exempt and never re-framed. Re-issued, like the
+        // spring: a membership mutation must apply exactly, not
+        // be swallowed by the ±2 pt echo tolerance — and it is a
+        // Space activation, not an apply, so it probes nothing
+        // (#1488).
         retile(
             animated: tiler.settings.animations.onWindowSwap,
-            force: true
+            pass: .reissue
         )
         // Inserting into an overflowing stack / track / scrolling
         // pile scrambles its stacking — the same §5 obligation
@@ -166,7 +168,7 @@ extension KiwiCore {
             from: current,
             to: origin.space
         )
-        retile(animated: false, force: true)
+        retile(animated: false, pass: .reissue)
         // The revert re-inserts into a possibly-overflowing
         // stack / track / pile — the same §5 obligation the
         // crossing itself honors (review).

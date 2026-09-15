@@ -215,7 +215,7 @@ struct RestoredFrameDebtTests {
         #expect(parked != Self.owed)
         #expect(parked.size == Self.tile.size)
         core.state.workspaces.activate("2")
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.recentInstantTarget(Self.late) == Self.owed)
     }
 

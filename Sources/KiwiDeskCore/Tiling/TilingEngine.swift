@@ -198,12 +198,12 @@ public final class TilingEngine {
     /// `animated: false` snaps windows to their targets in
     /// one frame-set each (Space switches).
     ///
-    /// `force` skips the "already there" tolerance check and
-    /// (re)issues every frame. Space switches need it: the
-    /// check reads state frames, which are updated by the AX
-    /// echoes of our own frame-sets — during rapid
-    /// back-and-forth switching those echoes lag, and skipping
-    /// based on them leaves windows stranded mid-transition.
+    /// `pass` (#1488): `.reissue` and `.apply` skip the "already
+    /// there" tolerance check and (re)issue every frame — a
+    /// Space switch needs that, since the check reads state
+    /// frames whose AX echoes lag during rapid switching and
+    /// strand windows mid-transition — and `.apply` alone probes
+    /// past corroborated bounds once (#1055).
     ///
     /// `stashAnimated` makes the park of newly-inactive
     /// windows a visible slide to the corner instead of an
@@ -221,7 +221,7 @@ public final class TilingEngine {
     public func retile(
         state: StateCoordinator,
         animated: Bool = true,
-        force: Bool = false,
+        pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
@@ -230,9 +230,8 @@ public final class TilingEngine {
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else { return }
-        // A forced pass probes past corroborated bounds once
-        // (#1055); `withForcedPass` is the one door.
-        withForcedPass(force) {
+        // An apply probes past bounds once; the one door (#1055).
+        withForcedPass(pass.probes) {
             // The issued set, not the slots (#934).
             let frames = placedFrames(state: state)
             // The #45 invariant, enforced rather than trusted: a
@@ -269,7 +268,7 @@ public final class TilingEngine {
                 // to be issued, so neither skip below applies. A
                 // forced pass keeps its own ask (#1055).
                 let probe =
-                    force
+                    pass.probes
                     ? nil
                     : takeCorroborationProbe(
                         id,
@@ -280,7 +279,7 @@ public final class TilingEngine {
                 // grids, minimum sizes), so the reported frame is
                 // often a hair off the target. Re-applying an
                 // unchanged target just wobbles the window.
-                if probe == nil, !force,
+                if probe == nil, !pass.reissues,
                     Self.close(current, to: target)
                 {
                     animation.cancel(window: id)
@@ -289,7 +288,7 @@ public final class TilingEngine {
                 // #677: a target the app has twice refused is
                 // "already there" too — re-issuing it restarts an
                 // animation the window can never perform, forever.
-                if probe == nil, !force,
+                if probe == nil, !pass.reissues,
                     sizeBoundExplains(
                         id,
                         current: current,
@@ -318,7 +317,7 @@ public final class TilingEngine {
             stashInactive(
                 state: state,
                 fallback: screen,
-                force: force,
+                force: pass.reissues,
                 animated: stashAnimated
             )
             restoreStashed(state: state, frames: frames)

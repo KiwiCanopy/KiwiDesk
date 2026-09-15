@@ -22,7 +22,7 @@ extension TilingEngine {
     /// bound consumer that runs inside the pass — the render's
     /// frames, the heal ahead of them (#1355) — must read one
     /// verdict, so `KiwiCore.retile` wraps both in this scope and
-    /// `retile(force:)` re-enters it. Restores the previous value,
+    /// `retile(pass: .apply)` re-enters it. Restores the previous value,
     /// so a nested scope of the same pass changes nothing.
     func withForcedPass(_ force: Bool, _ body: () -> Void) {
         let previous = probeBeyondBoundsPass

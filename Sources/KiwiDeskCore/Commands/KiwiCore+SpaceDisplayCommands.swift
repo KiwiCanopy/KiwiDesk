@@ -107,7 +107,7 @@ extension KiwiCore {
         // space it relocates (#444) — including another space
         // this pin displaces off the target display.
         resolveSpaceDisplays()
-        retile(force: true)
+        retile(pass: .apply)
         emitSpaceChange()
         return .ok()
     }
