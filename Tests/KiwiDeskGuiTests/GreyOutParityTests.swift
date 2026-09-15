@@ -78,6 +78,14 @@ struct GreyOutParityTests {
             "active: !allows",
             1
         ),
+        // Reduce transparency dims the Liquid Glass card's one
+        // row (#1418) — the `.glass` container gate, read live
+        // from the environment, never a stored value.
+        (
+            "GlassCard.swift",
+            "GreyOut(active: reduceTransparency)",
+            1
+        ),
         // Each drag column's outer gate resolves through
         // `GapsBordersGates` (#678 Phase 3) — the enabled reason
         // wraps border, width, alignment and fill.

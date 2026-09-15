@@ -10221,10 +10221,10 @@ user set them, because the setting is the machine's and the
 profile travels: writing the leaf off would flip the user's
 choice on every Mac the profile reaches and leave it flipped when
 the setting goes back off. It is read at render time instead.
-What this does NOT do, and knowingly: the Settings row keeps
-reading On while the setting holds glass down — a greyed row
-with its reason is the honest shape and needs a runtime gate of
-its own (#1418).
+The Settings row reads the same OS value and greys with its
+reason while the setting holds glass down (#1418) — *grey, don't
+hide*: the value is still the user's to set, and the stored leaf
+stays exactly as the paragraph above rules.
 
 **The per-layout override is deliberately outside the switch's
 reading.** `monocle.set_app_bar_liquid_glass` and
