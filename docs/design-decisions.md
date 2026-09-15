@@ -5346,12 +5346,14 @@ one, but an own borderless `NSPanel` is ignored by
 enumeration to be excluded from. A written exclusion would have
 been dead code asserting a fact the type system already holds.
 
-The companion affordance: **"Open Settings" is bindable and
-unbound by default** (`KiwiDesk.open_settings()`, offered under
-Shortcuts ▸ General). Settings is not a prerequisite — the app
-works untouched out of the box — so no default chord is spent
-on it; but a window that now lives among the user's tiled
-windows earns a keyboard road back. It opens or raises, never
+The companion affordance: **"Open Settings" is bindable**
+(`KiwiDesk.open_settings()`, offered under Shortcuts ▸
+General). It shipped unbound on the reasoning that Settings is
+not a prerequisite — the app works untouched out of the box —
+and a window that lives among the user's tiled windows earns a
+keyboard road back; #1381 (the seeded ladder, below) then found
+the road was needed *before* Settings had ever been opened, and
+seeded it. It opens or raises, never
 toggles: a close bound to the same key would discard the draft
 the save pill narrates. The key spelling follows the verb rather
 than the label — `open_settings`, matching
@@ -7632,6 +7634,23 @@ window verb at all.
 Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
+
+:::unreleased
+**Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
+2026-09-13). A menu-bar app with no Dock tile is almost never
+the active app, so `⌘,` — the one route the guide used to name —
+reaches a new user only once they have found Settings some other
+way. The chord is app chrome, so it rides the pressed base beside
+`⌃⌥K`, and it takes the punctuation `⌘,` already trained rather
+than a letter that does not say Settings (`⌃⌥O`, `⌃⌥G` were
+free and set aside). `⌃⌥Space` is macOS's input-source switch and
+`⌃⌥S` is Toggle sticky, whose move would owe a migration. Measured
+before seeding, since `SystemShortcuts.map` is necessary and not
+sufficient: twelve running apps' menus put comma only on `⌘,`
+and `⇧⌘,` (2026-09-15, `plan/probes`' comma sweep), and comma is
+key code 43 on every layout. Both chrome rows come from one
+`appChromeRows`, which the base seed and every new layer take.
+:::
 
 **Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner
 ruling 2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on
