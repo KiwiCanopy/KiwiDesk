@@ -63,8 +63,10 @@ extension StateCoordinator {
                         from: slot.handedTo
                     )
                 }
-                departedSlots[window.id]?.handedTo = nil
             }
+            // Spent on every return: a link that outlived a mode
+            // flip would mark a live own head at a later minimize.
+            departedSlots[window.id]?.handedTo = nil
         } else if let track, !window.isFloating {
             workspaces.add(
                 window.id,

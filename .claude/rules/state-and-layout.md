@@ -329,14 +329,19 @@ editing here:
   handed on (owner ruling, 2026-09-15) — the door drops it
   instead, so the hand-off is one hop, its head re-inserts its
   own on return, and a stray break lives at most one Desktop
-  stay. The door hands as an OWN break; only the departure fold
-  MARKS one handed (`markHandedBreak`), beside the record that
-  names its holder (`DepartedSlot.handedTo`, read through the one
-  `handOffTarget` ahead of the removal) — a head minimized, quit
-  or moved hands for good, since no record could reclaim it
-  (`HandedBreakEnderTests` ▸ `unrecordedHandOffIsOwn`). The
-  link is consumed by the return's take-back and by the
-  promotion, which both refuse a holder that dropped the break —
+  stay. The door hands as an OWN break; a writer that MARKS one
+  handed (`markHandedBreak`) records its holder on the departure
+  record first, in the same fold, and marks from THAT record —
+  never from a link an earlier departure left (`DepartedSlot.
+  handedTo`, read through the one `handOffTarget` ahead of the
+  removal, and spent on EVERY departed return whatever the mode,
+  since a mode flip while the head was away is where a stale
+  link came from) — so a head minimized, quit or moved hands for
+  good, no record being able to reclaim it
+  (`HandedBreakEnderTests` ▸ `unrecordedHandOffIsOwn`,
+  `staleLinkNeverMarks`). The link is consumed by the return's
+  take-back and by the promotion, which both refuse a holder
+  that dropped the break —
   never a positional guess, since a member back ahead of its
   head sits between the two and a head whose successor already
   held a break handed nothing. A head gone for good makes its hand-off permanent: a

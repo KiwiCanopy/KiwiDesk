@@ -18,10 +18,10 @@ struct DepartedSlotRetireSeamTests {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDeskCore")
         let prefix = root.path + "/"
-        // Both drop spellings on a dictionary.
+        // Every drop spelling on a dictionary.
         let pattern = try NSRegularExpression(
             pattern: #"departedSlots\[[^\]]+\]\s*=\s*nil"#
-                + #"|departedSlots\.removeValue\("#
+                + #"|departedSlots\.remove(Value|All)\("#
         )
         var hits: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: root) {

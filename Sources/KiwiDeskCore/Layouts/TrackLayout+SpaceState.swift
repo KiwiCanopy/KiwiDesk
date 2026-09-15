@@ -40,9 +40,7 @@ extension Space {
     /// drops them where the break was only handed (#1387), so
     /// every writer that removes a member honours the ruling
     /// through this one door. A dropped weight is session state
-    /// the head's return does not recover. Only a removal that
-    /// RECORDS the hand-off marks it (`markHandedBreak`); a head
-    /// minimized, quit or moved leaves a break nothing reclaims.
+    /// the head's return does not recover.
     mutating func handTrackBreakToSuccessor(
         of window: WindowID
     ) {

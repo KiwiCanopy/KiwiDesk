@@ -166,6 +166,28 @@ struct HandedBreakEnderTests {
         #expect(state.workspaces[home]?.trackBreaks == [])
     }
 
+    /// A link the head's return could not spend in a non-track
+    /// mode must not mark a live own head at a later minimize
+    /// (review, 2026-09-15): the mark comes from the record the
+    /// departure writes, and the link is spent on every return.
+    @Test("a link that outlived a mode flip never marks")
+    func staleLinkNeverMarks() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [a])
+        #expect(state.departedSlots[a]?.handedTo == b)
+        state.workspaces.setMode(home, .bsp)
+        state.apply(.windowCreated(makeWindow(a)))
+        #expect(state.departedSlots[a]?.handedTo == nil)
+        state.workspaces.setMode(home, .track)
+        #expect(state.workspaces[home]?.trackBreaks == [a, b, c, d])
+        state.apply(.windowDestroyed(a, wasMinimized: true))
+        #expect(state.workspaces[home]?.handedBreaks == [])
+        depart(&state, [b])
+        state.apply(.windowCreated(makeWindow(b)))
+        #expect(state.workspaces[home]?.trackBreaks == [b, c, d])
+    }
+
     /// A head removed by anything but a Desktop departure — its
     /// app quitting, a move to another Space, a minimize — hands
     /// its break for good: no record could reclaim it, so the
