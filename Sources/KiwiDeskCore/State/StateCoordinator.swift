@@ -167,7 +167,6 @@ public struct StateCoordinator: Sendable {
                 rememberStickyIntent(of: window)
             }
             for id in windows.removeAll(pid: pid) {
-                dropHandedBreak(of: id)
                 workspaces.remove(id)
                 stickyReachOverrides[id] = nil
             }

@@ -43,7 +43,7 @@ struct ClosePromotesHandedBreakTests {
             wasMinimized: false,
             effects: &effects
         )
-        #expect(core.state.departedSlots[holder]?.trackBreak == .handed)
+        #expect(core.state.workspaces[space]?.handedBreaks == [holder])
         // A window the compositor hosts nowhere: closed.
         let reason = core.handleWindowGone(
             head,
@@ -51,6 +51,8 @@ struct ClosePromotesHandedBreakTests {
             effects: effects
         )
         #expect(reason == .closed)
-        #expect(core.state.departedSlots[holder]?.trackBreak == .head)
+        #expect(core.state.workspaces[space]?.handedBreaks == [])
+        #expect(core.state.workspaces[space]?.trackBreaks == [holder])
+        #expect(core.state.departedSlots[head]?.handedTo == nil)
     }
 }

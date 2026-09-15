@@ -3,25 +3,31 @@ import Foundation
 
 /// Track state mutations for `Space` (#128, `TrackLayout+Domain`).
 extension Space {
-    /// What a departing window's break was (#1387): the live set
-    /// cannot tell a break `handTrackBreakToSuccessor` gave from
-    /// one of the window's own, and the return must.
+    /// What a member's break is (#1387): the departure record
+    /// keeps it for a window no longer in the row.
     public enum BreakProvenance: Sendable, Equatable {
         /// No break: a member of some head's track.
         case member
-        /// Headed a track by its own break: the return re-inserts
-        /// it and takes a handed one back.
+        /// Heads a track by a break of its own.
         case head
-        /// Holds a break `handTrackBreakToSuccessor` gave it.
+        /// Holds a break a departing head handed it.
         case handed
     }
 
+    public func breakProvenance(of window: WindowID) -> BreakProvenance {
+        handedBreaks.contains(window)
+            ? .handed
+            : trackBreaks.contains(window) ? .head : .member
+    }
+
     /// The member `handTrackBreakToSuccessor(of:)` hands `window`'s
-    /// break to: its array successor, when `window` has a break and
-    /// the successor has none. The one copy of that decision — the
-    /// departure record reads it ahead of the removal (#1387).
+    /// break to: its array successor, when `window` heads by a
+    /// break of its OWN and the successor has none. A handed break
+    /// is never handed on (owner ruling, #1387). The one copy of
+    /// that decision — the departure record reads it ahead of the
+    /// removal.
     func handOffTarget(of window: WindowID) -> WindowID? {
-        guard trackBreaks.contains(window),
+        guard breakProvenance(of: window) == .head,
             let index = windows.firstIndex(of: window),
             index + 1 < windows.count
         else { return nil }
@@ -29,21 +35,16 @@ extension Space {
         return trackBreaks.contains(successor) ? nil : successor
     }
 
-    /// Drops a break the window only held (#1387's ruling): a
-    /// handed break is never handed on, so nothing reaches
-    /// `handTrackBreakToSuccessor`. The weight goes with it — a
-    /// session value the head's return does not recover when the
-    /// holder left while a member stayed.
-    mutating func dropTrackBreak(of window: WindowID) {
-        trackBreaks.remove(window)
-        trackWeights[window] = nil
-    }
-
-    /// Hands window's break marker and weight to its array successor (#128).
+    /// Hands window's break marker and weight to its array
+    /// successor (#128) — or drops them where the break was only
+    /// handed (#1387), so every writer that removes a member
+    /// honours the ruling through this one door. A dropped weight
+    /// is session state the head's return does not recover.
     mutating func handTrackBreakToSuccessor(
         of window: WindowID
     ) {
         let successor = handOffTarget(of: window)
+        handedBreaks.remove(window)
         guard trackBreaks.remove(window) != nil else { return }
         // Clear the departing head's weight FIRST, so a head at
         // the array's end (no successor) cannot leave a stale
@@ -51,27 +52,35 @@ extension Space {
         let weight = trackWeights.removeValue(forKey: window)
         guard let successor else { return }
         trackBreaks.insert(successor)
+        handedBreaks.insert(successor)
         trackWeights[successor] = weight
     }
 
     /// The inverse of `handTrackBreakToSuccessor` for a returning
     /// head (#1387): re-inserts its break and takes it back, weight
     /// and all, from `holder` — the member the departure record
-    /// resolved, never a positional guess — where that member is
-    /// in the row and still holds one. Returns whether it did.
+    /// named, never a positional guess — where that member still
+    /// holds a HANDED one. Returns whether it did.
     @discardableResult
     mutating func takeTrackBreakBack(
         for window: WindowID,
         from holder: WindowID?
     ) -> Bool {
         trackBreaks.insert(window)
-        guard let holder, windows.contains(holder),
-            trackBreaks.remove(holder) != nil
-        else { return false }
+        guard let holder, handedBreaks.remove(holder) != nil else {
+            return false
+        }
+        trackBreaks.remove(holder)
         if let weight = trackWeights.removeValue(forKey: holder) {
             trackWeights[window] = weight
         }
         return true
+    }
+
+    /// A holder whose head is gone for good keeps the break by
+    /// right (#1387).
+    mutating func promoteHandedBreak(of window: WindowID) {
+        handedBreaks.remove(window)
     }
 
     /// Moves a window into the adjacent track or opens a new edge track

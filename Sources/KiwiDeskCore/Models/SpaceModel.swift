@@ -126,6 +126,10 @@ public struct Space: Sendable, Equatable {
     public var scrollRest: ScrollRest?
     /// Track layout track boundary markers (#128, `TrackLayout.counts`).
     public var trackBreaks: Set<WindowID>
+    /// The members of `trackBreaks` holding a break a departing
+    /// head handed them (#1387) — never handed on again, and
+    /// taken back by that head's return. Session-only.
+    public var handedBreaks: Set<WindowID>
     /// Per-track weight keyed by head window (#128).
     public var trackWeights: [WindowID: Double]
     /// Session-only interactive resize ratio overrides
@@ -140,6 +144,7 @@ public struct Space: Sendable, Equatable {
         stackWeights: [WindowID: Double] = [:],
         scrollRest: ScrollRest? = nil,
         trackBreaks: Set<WindowID> = [],
+        handedBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
         sessionRatios: SessionRatios = SessionRatios()
     ) {
@@ -150,6 +155,7 @@ public struct Space: Sendable, Equatable {
         self.stackWeights = stackWeights
         self.scrollRest = scrollRest
         self.trackBreaks = trackBreaks
+        self.handedBreaks = handedBreaks
         self.trackWeights = trackWeights
         self.sessionRatios = sessionRatios
     }

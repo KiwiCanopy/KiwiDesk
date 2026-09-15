@@ -320,32 +320,36 @@ editing here:
   (#1387). The return takes back the BREAK it had too:
   `Space.remove` hands a departing head's break to its successor,
   so the record carries the break's provenance
-  (`Space.BreakProvenance` — member, head, or handed) and NAMES
-  the holder (`DepartedSlot.handedTo`), read ahead of the removal
-  through `handOffTarget`, the one copy of the hand-off decision
-  `handTrackBreakToSuccessor` takes too — review's, since nothing
-  counts its callers — so a handed break is never re-recorded as
-  a head of its own, which the live set cannot tell apart. A
-  handed break is NEVER handed on (owner ruling, 2026-09-15): a
-  holder departing drops it through `Space.dropTrackBreak`, so the
-  hand-off is one hop, its head re-inserts its own on return, and
-  a stray break lives at most one Desktop stay. A returning head
-  takes its break back from THAT holder, never from a positional
-  guess — a member back ahead of its head sits between the two,
-  and a head whose successor already held a break handed nothing.
-  A head gone for good makes its hand-off permanent: EVERY ender
-  of a `.head` record promotes the holder it names ahead of
-  dropping the record — `forgetAway`, the gone handler's `.closed`
-  arm, `redirectDeparture`, `refileAway` and the `.appTerminated`
-  fold are the census, `ReturningSlotTrackFoldTests` ▸
-  `everyEnderPromotes` and `ClosePromotesHandedBreakTests` hold
-  them, and a new ender joins both — while a hide or a Desktop
-  departure keeps it revocable (`ReturningSlotTrackFoldTests`).
-  The residue the ruling accepts: a departing window of ANOTHER
-  Desktop, live in the same-named Space for the settle's beat,
-  hands its break into this row the same way, and the stray
-  column lasts until that holder's next departure
-  (`docs/accepted-limitations.md`). Keep the rank and the provenance
+  (`Space.BreakProvenance` — member, head, or handed), read off
+  the Space's own `handedBreaks` set, which is the LIVE truth for
+  a member still in the row — the record is the copy for a window
+  no longer in it. The hand-off has ONE door, `Space.
+  handTrackBreakToSuccessor`, which every membership writer
+  reaches through `Space.remove`: it marks what it hands, and a
+  handed break is NEVER handed on (owner ruling, 2026-09-15) — the
+  door drops it instead, so the hand-off is one hop, its head
+  re-inserts its own on return, and a stray break lives at most
+  one Desktop stay. The head's record NAMES its holder
+  (`DepartedSlot.handedTo`, read through the one `handOffTarget`
+  ahead of the removal) and the link is SINGLE-USE: the return's
+  take-back and the promotion each consume it, so a standing link
+  always names a member that still holds — never a positional
+  guess, since a member back ahead of its head sits between the
+  two and a head whose successor already held a break handed
+  nothing. A head gone for good makes its hand-off permanent: a
+  departure record ends only through `retireDepartureRecord`,
+  which promotes the named holder — live, in the Space; away, on
+  its record — ahead of dropping it, `DepartedSlotRetireSeamTests`
+  refusing a bare `departedSlots[id] = nil` anywhere else, the
+  gone handler's `.closed` arm being the one promote-without-retire
+  since the rank is kept for later arrivals
+  (`ReturningSlotTrackFoldTests` ▸ `everyEnderPromotes`,
+  `ClosePromotesHandedBreakTests`) — while a hide or a Desktop
+  departure keeps it revocable. The residue the ruling accepts: a
+  departing window of ANOTHER Desktop, live in the same-named
+  Space for the settle's beat, hands its break into this row the
+  same way, and the stray column lasts until that holder's next
+  departure (`docs/accepted-limitations.md`). Keep the rank and the provenance
   ONE value, so every ender and the re-key carry both or neither
   (`ReturningSlotTrackFoldTests` ▸ `rekeyCarriesTheProvenance`).
   The secondary-display arm owes nothing — not because it activates

@@ -114,13 +114,16 @@ struct ReturningSlotTrackFoldTests {
         }
         depart(&state, [a])
         #expect(state.workspaces[home]?.trackBreaks == [stayer])
+        #expect(state.workspaces[home]?.handedBreaks == [stayer])
         #expect(state.workspaces[home]?.trackWeights == [stayer: 1.5])
-        #expect(state.departedSlots[stayer]?.trackBreak == .handed)
+        #expect(state.departedSlots[a]?.handedTo == stayer)
         state.apply(.windowCreated(makeWindow(a)))
         #expect(state.workspaces[home]?.windows == [a, stayer])
         #expect(state.workspaces[home]?.trackBreaks == [a])
+        #expect(state.workspaces[home]?.handedBreaks == [])
         #expect(state.workspaces[home]?.trackWeights == [a: 1.5])
-        #expect(state.departedSlots[stayer]?.trackBreak == .member)
+        // The link is spent.
+        #expect(state.departedSlots[a]?.handedTo == nil)
     }
 
     /// The ruling (owner, 2026-09-15): a handed break is never
@@ -193,10 +196,12 @@ struct ReturningSlotTrackFoldTests {
         var state = makeTrackRow()
         state.workspaces.withSpace(home) { $0.trackBreaks = [a, b] }
         depart(&state, [b])
-        #expect(state.departedSlots[c]?.trackBreak == .handed)
+        #expect(state.workspaces[home]?.handedBreaks == [c])
         state.forgetAway(b)
-        #expect(state.departedSlots[c]?.trackBreak == .head)
+        #expect(state.workspaces[home]?.handedBreaks == [])
+        #expect(state.workspaces[home]?.trackBreaks == [a, c])
         depart(&state, [c])
+        #expect(state.departedSlots[c]?.trackBreak == .head)
         state.apply(.windowCreated(makeWindow(c)))
         #expect(state.workspaces[home]?.windows == [a, c, d])
         #expect(state.workspaces[home]?.trackBreaks == [a, c])
@@ -253,7 +258,7 @@ struct ReturningSlotTrackFoldTests {
         state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
         depart(&state, [a])
         #expect(state.departedSlots[a]?.handedTo == b)
-        #expect(state.departedSlots[b]?.trackBreak == .handed)
+        #expect(state.workspaces[home]?.handedBreaks == [b])
         state.workspaces.ensureSpace(SpaceID("2"))
         switch ender {
         case .redirect:
@@ -274,7 +279,21 @@ struct ReturningSlotTrackFoldTests {
         case .close:
             state.forgetAway(a)
         }
+        #expect(state.workspaces[home]?.handedBreaks == [])
+        #expect(state.workspaces[home]?.trackBreaks == [b])
+    }
+
+    /// The same enders promote a holder that is AWAY, on its
+    /// record.
+    @Test("an ender promotes an away holder on its record")
+    func enderPromotesAnAwayHolder() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [a, b])
+        #expect(state.departedSlots[b]?.trackBreak == .handed)
+        state.redirectDeparture(of: a, to: home)
         #expect(state.departedSlots[b]?.trackBreak == .head)
+        #expect(state.departedSlots[a] == nil)
     }
 
     /// The app-exit fold removes LIVE windows too, and a holder

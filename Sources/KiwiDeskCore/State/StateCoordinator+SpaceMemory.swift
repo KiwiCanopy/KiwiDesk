@@ -23,17 +23,14 @@ extension StateCoordinator {
     /// so every ender and the re-key carry both or neither.
     struct DepartedSlot: Sendable, Equatable {
         var rank: Int
-        /// Re-derived at each departure of the Space: a handed
-        /// break stays handed while a break is held and ends when
-        /// none is. Residue: a holder given a break of its OWN
-        /// while its head is away reads as handed until that head
-        /// returns and takes it, or it departs and drops it.
+        /// Read off `Space.breakProvenance` at each departure of
+        /// the Space; for a window no longer in the row, the one
+        /// copy.
         var trackBreak: Space.BreakProvenance
-        /// The member `handTrackBreakToSuccessor` gave this
-        /// window's break to at its departure — the one holder a
-        /// promotion or a return may take it from. Set on a head
-        /// alone: a handed break is never handed on (ruling,
-        /// #1387).
+        /// The member `handTrackBreakToSuccessor` gave this head's
+        /// break to at its departure. SINGLE-USE: the return's
+        /// take-back and the promotion each consume it, so a
+        /// standing link always names a holder that still holds.
         var handedTo: WindowID?
 
         init(
@@ -67,7 +64,6 @@ extension StateCoordinator {
         guard let members = workspaces[space]?.windows,
             members.contains(id)
         else { return }
-        let heads = workspaces[space]?.trackBreaks ?? []
         let departed = departedSlots.filter { entry in
             windows[entry.key] == nil
                 && rememberedSpaces[entry.key] == .departed(space)
@@ -77,27 +73,16 @@ extension StateCoordinator {
             for sibling in departed where sibling <= rank {
                 rank += 1
             }
-            // A handed break stays handed while it is held; a
-            // break gone from the live set ends the mark.
-            let held = heads.contains(member)
-            let handed =
-                held && departedSlots[member]?.trackBreak == .handed
             departedSlots[member] = DepartedSlot(
                 rank: rank,
-                trackBreak: !held ? .member : handed ? .handed : .head
+                trackBreak: workspaces[space]?
+                    .breakProvenance(of: member) ?? .member
             )
         }
-        // The removal about to follow hands `id`'s OWN break on;
-        // the record names the holder and marks it before a later
-        // departure re-reads it.
-        guard departedSlots[id]?.trackBreak == .head else {
-            dropHandedBreak(of: id)
-            return
-        }
-        if let successor = workspaces[space]?.handOffTarget(of: id) {
-            departedSlots[id]?.handedTo = successor
-            departedSlots[successor]?.trackBreak = .handed
-        }
+        // The removal about to follow hands `id`'s own break on;
+        // the record names the holder ahead of it.
+        departedSlots[id]?.handedTo =
+            workspaces[space]?.handOffTarget(of: id)
     }
 
     /// Re-files a departure the destroy fold just recorded under
@@ -122,9 +107,8 @@ extension StateCoordinator {
         guard case .departed? = rememberedSpaces[id] else {
             return false
         }
-        promoteHandedSuccessor(of: id)
         rememberedSpaces[id] = .departed(space)
-        departedSlots[id] = nil
+        retireDepartureRecord(of: id)
         return true
     }
 
@@ -153,62 +137,52 @@ extension StateCoordinator {
         guard let current = rememberedSpaces[id],
             current.space != space
         else { return false }
-        promoteHandedSuccessor(of: id)
         switch current {
         case .departed: rememberedSpaces[id] = .departed(space)
         case .restored: rememberedSpaces[id] = .restored(space)
         }
-        departedSlots[id] = nil
+        retireDepartureRecord(of: id)
         return true
     }
 
-    /// A handed break is never handed on (ruling, #1387): a window
-    /// leaving the row while recorded as holding one drops it, so
-    /// `Space.remove` finds nothing to pass. Every removal of a
-    /// live window that is not a hand-off of its own calls this
-    /// ahead of `workspaces.remove` — the destroy fold and the
-    /// app-exit fold.
-    mutating func dropHandedBreak(of id: WindowID) {
-        guard departedSlots[id]?.trackBreak == .handed,
-            let space = workspaces.space(of: id)
-        else { return }
-        workspaces.withSpace(space) { $0.dropTrackBreak(of: id) }
-    }
-
     /// A head gone for good makes its hand-off permanent (#1387):
-    /// the holder its record names, while still recorded handed,
-    /// becomes a head of its own — or that holder's next return
-    /// would leave the break on the member behind it. Every ender
-    /// of a `.head` record calls this ahead of dropping it
-    /// (state-and-layout.md's census); a hide or a Desktop
-    /// departure keeps the hand-off revocable.
+    /// the holder its link names keeps the break by right — live,
+    /// in the Space (`Space.promoteHandedBreak`); away, on its
+    /// record — or its next return would leave the break on the
+    /// member behind it. Consumes the link. The gone handler's
+    /// `.closed` arm promotes without retiring, since the rank is
+    /// kept for later arrivals; every other ender takes
+    /// `retireDepartureRecord`.
     mutating func promoteHandedSuccessor(of id: WindowID) {
-        guard let slot = departedSlots[id], slot.trackBreak == .head,
-            let holder = slot.handedTo,
-            departedSlots[holder]?.trackBreak == .handed
-        else { return }
-        departedSlots[holder]?.trackBreak = .head
+        guard let holder = departedSlots[id]?.handedTo else { return }
+        departedSlots[id]?.handedTo = nil
+        if windows[holder] != nil,
+            let space = workspaces.space(of: holder)
+        {
+            workspaces.withSpace(space) {
+                $0.promoteHandedBreak(of: holder)
+            }
+        } else if departedSlots[holder]?.trackBreak == .handed {
+            departedSlots[holder]?.trackBreak = .head
+        }
     }
 
-    /// The member of `space` holding `id`'s handed break now —
-    /// nil where the holder was promoted, is not back yet, or
-    /// dropped it at its own departure.
-    func handedHolder(of id: WindowID, in space: SpaceID) -> WindowID? {
-        guard let holder = departedSlots[id]?.handedTo,
-            departedSlots[holder]?.trackBreak == .handed,
-            workspaces[space]?.trackBreaks.contains(holder) == true
-        else { return nil }
-        return holder
+    /// The ONE ender of a departure record (#1387): promotes the
+    /// holder the record names, then drops it. A bare
+    /// `departedSlots[id] = nil` beside a call site is how an
+    /// ender skipped the promotion (`DepartedSlotRetireSeamTests`).
+    mutating func retireDepartureRecord(of id: WindowID) {
+        promoteHandedSuccessor(of: id)
+        departedSlots[id] = nil
     }
 
     /// Retires a window closed while away (#1146): the ledger
     /// entry and the two #1207 records it was read with.
     mutating func forgetAway(_ id: WindowID) {
-        promoteHandedSuccessor(of: id)
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
         restoredFrames[id] = nil
-        departedSlots[id] = nil
+        retireDepartureRecord(of: id)
     }
 
     /// Clears all remembered space associations (`CGWindowID`, #634).
