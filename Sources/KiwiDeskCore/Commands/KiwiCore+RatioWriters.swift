@@ -21,20 +21,30 @@ extension KiwiCore {
         _ stack: StackParams,
         in space: Space
     ) -> Bool {
-        let bounds = TilingEngine.screen(for: space.id, in: state)
-            .map { tiler.layoutBounds(on: $0) }
-        let available =
-            stack.stackPosition.splitsHorizontally
-            ? Double(bounds?.width ?? 1920)
-            : Double(bounds?.height ?? 1080)
-        return StackLayout.loneMasterKeepsZone(
+        StackLayout.loneMasterKeepsZone(
             tiled,
             params: stack,
             range: SplitDomain.effectiveRatioRange(
-                available: available,
+                available: layoutSpan(
+                    of: space,
+                    horizontal: stack.stackPosition.splitsHorizontally
+                ),
                 minSize: Double(tiler.settings.minWindowSize)
             )
         )
+    }
+
+    /// The space's layout-region span along one axis — its OWN
+    /// screen (#449) and the layout region, not the raw frame
+    /// (#537) — the one span every resize write and cue divides
+    /// by; the raw region, as `SplitDomain.cappedRatioWrite`
+    /// already takes it.
+    func layoutSpan(of space: Space, horizontal: Bool) -> Double {
+        let bounds = TilingEngine.screen(for: space.id, in: state)
+            .map { tiler.layoutBounds(on: $0) }
+        return horizontal
+            ? Double(bounds?.width ?? 1920)
+            : Double(bounds?.height ?? 1080)
     }
 
     /// Two-sided capped master-ratio write plus refusal cues —
