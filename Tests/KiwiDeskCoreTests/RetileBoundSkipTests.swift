@@ -122,8 +122,9 @@ struct RetileBoundSkipTests {
     @Test("Reissue re-issues the believed bound without probing")
     func reissueIssuesTheBound() throws {
         // The Space switch's half of `force` (#1488): every frame
-        // goes out again, but the ask is the answer the app gave
-        // — an explicit apply above issues the raw slot instead.
+        // goes out again, at the answer the app gave — the exact
+        // refused ask consumes on either pass (#1055); the half a
+        // reissue lacks, the probe, is `SpaceSwitchReissueTests`'.
         guard NSScreen.main != nil else { return }
         let applied = Applied()
         let core = makeCore(applied: applied)
