@@ -170,7 +170,7 @@ struct SplitFloorHealWiringTests {
         seed(core, window: WindowID(2), minWidth: 700)
         var log: [String] = []
         core.onLog = { log.append($0) }
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(ratioH(core, space) == 0.5)
         #expect(!log.contains { $0.contains("split ratio healed") })
         // The next ordinary pass heals.

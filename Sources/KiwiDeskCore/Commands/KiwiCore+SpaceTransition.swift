@@ -29,10 +29,11 @@ extension KiwiCore {
     /// The retile behind an explicit virtual-space switch —
     /// the authority for the switch's animation policy.
     /// Instant (both directions) when `on_space_change` is off;
-    /// the coordinated concurrent out+in when it is on. Always
-    /// forces (§5): switches must push past the "already there"
-    /// tolerance, whose state frames lag behind AX echoes
-    /// during rapid switching.
+    /// the coordinated concurrent out+in when it is on. Always a
+    /// `.reissue` pass (#1488): a switch must push past the
+    /// "already there" tolerance, whose state frames lag behind
+    /// AX echoes during rapid switching, and probes nothing —
+    /// it is not an apply.
     ///
     /// Three switch-shaped retiles deliberately do NOT route
     /// here — do not "unify" them onto this policy:
@@ -54,7 +55,7 @@ extension KiwiCore {
             tiler.settings.animations.onSpaceChange
         retile(
             animated: animated,
-            reissue: true,
+            pass: .reissue,
             stashAnimated: animated
         )
     }

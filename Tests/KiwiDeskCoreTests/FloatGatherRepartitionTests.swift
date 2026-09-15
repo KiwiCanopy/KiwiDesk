@@ -154,13 +154,13 @@ struct FloatGatherRepartitionTests {
         for id in Self.members {
             core.state.workspaces.add(id, to: "1")
         }
-        core.retile(force: true)
+        core.retile(pass: .apply)
         // In B they live in monocle `2`, drawn there.
         core.apply(profile: b, forceRetile: true)
         for id in Self.members {
             core.state.workspaces.add(id, to: "2")
         }
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
         // Back to A: its record puts them in `1`, which was drawn
         // floating all along.
@@ -178,11 +178,11 @@ struct FloatGatherRepartitionTests {
     func barePruneIsAnEntry() throws {
         let core = try #require(makeCore())
         core.state.workspaces.setMode("1", .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.drawnSpaceModes["1"] == .floating)
         core.pruneSpaces(keeping: ["1"], orderedBy: ["1"])
         #expect(core.refiledWindows == Set(Self.members))
-        core.retile(force: true)
+        core.retile(pass: .apply)
         expectGathered(core)
         #expect(core.refiledWindows.isEmpty)
     }
@@ -197,7 +197,7 @@ struct FloatGatherRepartitionTests {
         let core = try #require(makeCore())
         core.state.workspaces.setMode("1", .floating)
         core.fallbackSpace = "1"
-        core.retile(force: true)
+        core.retile(pass: .apply)
         core.execute("delete_space", args: [.string("2")])
         #expect(core.state.workspaces["2"] == nil)
         #expect(core.state.workspaces.space(of: Self.parked) == "1")
@@ -227,10 +227,10 @@ struct FloatGatherRepartitionTests {
         core.state.workspaces.setMode("1", .floating)
         core.state.workspaces.ensureSpace("3")
         core.state.workspaces.setMode("3", .bsp)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         core.pruneSpaces(keeping: ["1", "3"], orderedBy: ["3", "1"])
         #expect(core.refiledWindows == Set(Self.members))
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
         #expect(core.tiler.stashOriginal(bystander) == nil)
     }
@@ -269,13 +269,13 @@ struct FloatGatherRepartitionTests {
         // A: the pair in monocle `2`, the bystander in floating `1`.
         core.apply(profile: a, forceRetile: true)
         core.state.workspaces.add(bystander, to: "1")
-        core.retile(force: true)
+        core.retile(pass: .apply)
         // B: the pair moved by hand into its bsp `3`.
         core.apply(profile: b, forceRetile: true)
         for id in Self.members {
             core.state.workspaces.add(id, to: "3")
         }
-        core.retile(force: true)
+        core.retile(pass: .apply)
         // Back to A: `3` is pruned into the fallback `1`, and A's
         // own record then moves the pair on to `2` — `1` was only
         // passed through.

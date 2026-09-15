@@ -16,11 +16,9 @@ public struct TrackLayout: LayoutSystem {
             vertical
             ? context.gaps.inner.horizontal
             : context.gaps.inner.vertical
-        let (counts, _, _, overflowTrack) = Self.foldedPartition(
+        let (counts, _, _, overflowTrack) = Self.renderPartition(
             of: windows,
-            breaks: context.trackBreaks,
-            normalCap: params.normalCap,
-            geoCap: Self.geometricCap(for: context, of: windows)
+            in: context
         )
         let weights = Self.ranges(of: counts).map {
             Self.weight(

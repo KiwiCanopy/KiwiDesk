@@ -1235,31 +1235,41 @@ editing here:
   user's number (`TrackLearnedCapTests`) — while the count is
   only feasibility, so the heal's second pass re-shares the
   track weights until each track draws its floor and no wider
-  than its members' corroborated ceiling, read through
-  `learnedCeiling(of:in:)`, the floor reading's mirror
+  than its members' corroborated ceiling, read through the one
+  `trackCeiling(of:in:)` over `learnedCeiling(of:in:)` — the
+  floor reading's mirror, and the pure twin of the clamps'
+  `KiwiCore.effectiveMaxSize` the same way, two homes until a
+  pure static both can route through
   (`TrackLayout.flooredWeights`, `TrackFloorHealTests`,
-  `TrackCeilingHealTests`, #1488) — and the resize clamp folds
-  on that same `foldedPartition` over the geometric cap, never
-  the per-marker one, so a refusal names a share the screen
-  draws (`TrackResizeFoldTests`) — and a
+  `TrackCeilingHealTests`, #1488) — and the resize clamp reads
+  that ceiling too, refusing a grow AT it with the own-maximum
+  pill rather than landing a write the heal un-writes
+  (`TrackCeilingHealTests` ▸ `growAtCeilingIsRefused`). A
   consumer of the LEARNED cap takes the render's own input
-  through `layoutInput`, never a context built beside it, and
-  runs inside `KiwiCore.retile`'s `withForcedPass` scope — the
-  one writer of the pass flag, so a forced render and its heal
-  fold alike — over the LOCAL list, since a traveler's floor
-  must not rewrite stored weights (#944)
+  through `layoutInput`, never a context built beside it, over
+  the LOCAL list where it WRITES stored weights, since a
+  traveler's floor must not rewrite them (#944) — and a
+  retile-time writer runs inside `KiwiCore.retile`'s
+  `withForcedPass` scope, the one writer of the pass flag, so
+  an apply's render and its heal fold alike, while a press-time
+  READER (the resize clamp) takes the unforced verdict, which is
+  what the next event pass draws
   (`TrackCapPlumbingNeedleTests`); the ruling is in
   `docs/design-decisions.md`.
-  And a track fold consumer — any site needing the folded
-  track partition: the render, the `track.swap` guard, the
-  heal — takes `TrackLayout.foldedPartition`, never a hand
-  assembly of `counts` → `overflowCap` beside it. The hand
-  copy shipped at three sites and drifted before the #944
-  rounds extracted the one assembly; nothing scans for a new
-  hand copy, so each new consumer owes the routing
-  deliberately — a fold-rule change that updates the render
-  and misses a hand copy re-opens the exact divergence the
-  extraction closed.
+  And a track fold consumer holding a `LayoutContext` — the
+  render, the heal, the resize clamp — takes
+  `TrackLayout.renderPartition(of:in:)`, the one assembly of the
+  cap and the fold over one list, so a refusal names a share
+  the screen draws (#1488, `TrackResizeFoldTests`); a consumer
+  without one (the `track.swap` guard) takes
+  `TrackLayout.foldedPartition`, never a hand assembly of
+  `counts` → `overflowCap` beside it. The hand copy shipped at
+  three sites and drifted before the #944 rounds extracted the
+  one assembly, and a fourth grew before #1488 extracted the
+  cap beside it; nothing scans for a new hand copy, so each new
+  consumer owes the routing deliberately — a fold-rule change
+  that updates the render and misses a hand copy re-opens the
+  exact divergence the extraction closed.
   And **a refusal names a window the write could have MOVED**
   (#1259). The own-minimum wording is owed only to a focused
   window ON the side that could not shrink, so a writer STATES
@@ -1575,24 +1585,27 @@ editing here:
   the reversibility table, the both-pinned refusal and the
   accepted contact residue at half a step; the product argument
   is `docs/design-decisions.md`'s.
-- An **explicit settings apply must `retile(force: true)`**. The
+- An **explicit settings apply must `retile(pass: .apply)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a
   small config edit entirely (a 1 pt gap edit visibly did
   nothing). Every retile triggered by an explicit `set_*` from
-  Lua/CLI forces — `applyProfileScopedState`, `set_gap_*`,
+  Lua/CLI applies — `applyProfileScopedState`, `set_gap_*`,
   `set_min_window_size`, `set_mode`, the whole `layoutCommand`
-  dispatch. Event-driven retiles stay un-forced so echo lag can't
-  wobble windows. Profile applies classify themselves: see
-  [profiles.md](profiles.md). **A Space switch takes
-  `retile(reissue: true)`, never `force`** (#1488): `force` is
-  also the probe past corroborated bounds (#1055), under which
-  the automatic track count and every heal stand down, so a
-  switch that forced redrew the count's overlap on every return.
-  `reissue` re-issues every frame and probes nothing; a new
-  caller that activates a Space and is not an explicit apply
-  takes it (`SpaceSwitchReissueTests`, `RetileBoundSkipTests` ▸
-  `reissueIssuesTheBound`).
+  dispatch. Event-driven retiles stay on the `.event` default so
+  echo lag can't wobble windows. Profile applies classify
+  themselves: see [profiles.md](profiles.md). **A Space or
+  Desktop activation takes `retile(pass: .reissue)`, never
+  `.apply`** (#1488): an apply is also the probe past
+  corroborated bounds (#1055), under which the automatic track
+  count and every heal stand down, so a switch that forced
+  redrew the count's overlap on every return. `.reissue`
+  re-issues every frame and probes nothing; a new caller that
+  activates a Space and is not an explicit apply takes it, and
+  every site that spells either case is pinned with its reason
+  in `RetilePassRoutingTests`' `allowed` map — the one copy of
+  who chooses what (`SpaceSwitchReissueTests`,
+  `RetileBoundSkipTests` ▸ `reissueIssuesTheBound`).
 - **A resize nobody asked for is corrected on its own event
   (#1358)** — the `.windowResized` arm's outcomes are four and a
   new arm keeps them so: our ask's ECHO goes to the #677 answer

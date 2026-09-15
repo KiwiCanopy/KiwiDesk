@@ -3389,37 +3389,50 @@ one track fewer in the heal than on screen, the away twin of
 the visitor horn below, transient in the same way.
 
 :::unreleased
-**The heal honours a learned ceiling too, the clamp folds like
-the render, and a Space switch re-issues without probing
-(#1488).** Three sightings on one device, two mechanisms. The
-re-share above water-filled floors only, so a fixed-size window
-(System Settings, 825 pt, refused in both directions) was the
-UNpinned track and took the whole remainder — 1106 pt of slot
-for 825 pt of window, the rest empty screen — while the column
-beside it sat pinned at its floor. `flooredWeights` now clamps
-every share between its floor and its members' corroborated
-ceiling (`maxWidth`/`maxHeight`, #1055's, read through
-`learnedFloor`'s mirror; a track is ceilinged only where every
-member is) at the one water level that fills the span — the same
-answer the floor-only pinning computed, which is why no earlier
-expectation moved — and stands down where the ceilings together
-cannot fill it, the one honest gap. The second sighting was the
-resize clamp refusing to grow that column because "System
-Settings cannot shrink": true of the per-marker partition the
-clamp folded on, false of the two-track fold the render drew.
-The clamp takes `foldedPartition` over the geometric cap now,
-the way #944 ruled the heal must, so a refusal names a share the
-screen shows and a folded column divides along its axis. The
-third was every return to the Space redrawing the overlap the
-heal had removed: `force` meant both "re-issue every frame" and
-"probe past corroborated bounds", the switch needed the first
-(its echoes lag) and inherited the second, under which the cap
-and the heal stand down. `reissue` carries the first half alone;
-the switch, its settle and the two drag activations take it, and
-an explicit `set_*` apply keeps both, since re-asking is what
-the user asked for. (`TrackCeilingHealTests`,
-`TrackResizeFoldTests`, `SpaceSwitchReissueTests`,
-`RetileBoundSkipTests` ▸ `reissueIssuesTheBound`)
+**[Principle]**
+
+**A track draws no wider than its learned ceiling, a refusal
+names a share the screen draws, and a switch re-issues without
+probing (#1488).** A share a track's members cannot draw is
+empty screen: the re-share above water-filled floors only, so a
+fixed-size window's track was the unpinned one and took the
+whole remainder while the column beside it sat at its floor.
+`flooredWeights` therefore clamps every share between its floor
+and its members' corroborated ceiling (`maxWidth`/`maxHeight`,
+#1055's, read through `learnedFloor`'s mirror and the one
+`trackCeiling`; a track is ceilinged only where every member is)
+at the one water level that fills the span — the answer the
+floor-only pinning already computed, so no earlier expectation
+moved. Two edges are ruled: a ceiling-pinned share keeps the
+shave's margin, since the render's cascade check reads
+`min_window_size` exactly and a fixed-size window narrower than
+it would otherwise pin its track AT the floor; and ceilings that
+together cannot fill the span bind nothing, because the render
+fills the span whatever the weights say — the gap lands inside
+the slots and the floors still heal, rather than the overlap
+standing for want of a fill. The clamp owes the same ceiling
+ahead of the write: a grow at it is refused with the own-maximum
+pill, scrolling's rule, since an admitted write would land and
+the next retile's heal un-write it, wordless — while a step that
+crosses the ceiling lands and the heal is its clamp. Second,
+a refusal must name a share the screen draws: the clamp folded
+on the per-marker partition while the render folds on the
+geometric cap, so "the neighbour cannot shrink" was true of a
+partition nobody saw. The render, the heal and the clamp now
+take the one `renderPartition` — the #944 rule, with the list
+the cap reads and the list the fold reads assembled once. Third,
+re-issue and probe are two intents and a switch asks only one:
+`force` carried both, a switch needed the re-issue (its echoes
+lag and strand windows) and inherited the probe, under which the
+count and every heal stand down. `RetilePass` spells the choice
+at each site — `.apply` for an explicit `set_*` apply, where
+re-asking is what the user asked for; `.reissue` for a Space or
+Desktop activation, its settle, and a drag that activates a
+Space — and `RetilePassRoutingTests` is the one census of who
+chooses what, since a wrong choice compiles and draws.
+(`TrackCeilingHealTests`, `TrackResizeFoldTests`,
+`SpaceSwitchReissueTests`, `RetileBoundSkipTests` ▸
+`reissueIssuesTheBound`)
 :::
 
 **[Principle]**

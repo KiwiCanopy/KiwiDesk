@@ -59,7 +59,7 @@ extension KiwiCore {
             // ±2 pt tolerance would swallow a small ratio
             // nudge exactly like the 1 pt gap edit that
             // motivated the guardrail.
-            retile(force: true, sizing: commandSizing)
+            retile(pass: .apply, sizing: commandSizing)
             // Now that the reorder's animations are in flight,
             // arm the deferred z-order restore (#153) — it rides
             // their settle instead of the pre-retile frames.

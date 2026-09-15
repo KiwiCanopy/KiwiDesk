@@ -152,6 +152,23 @@ extension TrackLayout {
             ? bound?.maxWidth : bound?.maxHeight
     }
 
+    /// One TRACK's ceiling on the cross span (#1488): the widest
+    /// of its members' learned ceilings, and nil where any member
+    /// has none — that member draws the whole track. The one
+    /// reading the heal and the resize clamp share.
+    public static func trackCeiling(
+        of members: ArraySlice<WindowID>,
+        in context: LayoutContext
+    ) -> CGFloat? {
+        var widest: CGFloat = 0
+        for member in members {
+            guard let ceiling = learnedCeiling(of: member, in: context)
+            else { return nil }
+            widest = max(widest, ceiling)
+        }
+        return members.isEmpty ? nil : widest
+    }
+
     /// In-track capacity for windows stacked in one track (#437).
     public static func trackCapacity(
         for context: LayoutContext

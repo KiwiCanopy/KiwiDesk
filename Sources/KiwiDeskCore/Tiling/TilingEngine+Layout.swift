@@ -308,9 +308,4 @@ extension TilingEngine {
     ) -> [WindowID: CGRect] {
         visibleFrames(state: state, placed: false)
     }
-
-    /// Forwards display topology changes to the animator.
-    public func displaysChanged() {
-        animation.displaysChanged()
-    }
 }

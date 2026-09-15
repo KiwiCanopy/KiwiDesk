@@ -24,25 +24,22 @@ extension KiwiCore {
         // The RENDER's partition (#1488): under the geometric
         // fold the per-marker one puts a share the screen does
         // not draw under its floor and refuses a legal grow.
+        // `screen(for:in:)` falls back to the main screen, so
+        // nil means no screen at all.
         guard
             let screen = TilingEngine.screen(
                 for: space.id,
                 in: state
             )
-        else { return .fail("the space has no display") }
+        else { return .fail("no screen to lay the space out on") }
         let context = tiler.layoutInput(
             state: state,
             space: space,
             screen: screen
         ).context
-        let counts = TrackLayout.foldedPartition(
+        let counts = TrackLayout.renderPartition(
             of: tiled,
-            breaks: space.trackBreaks,
-            normalCap: params.normalCap,
-            geoCap: TrackLayout.geometricCap(
-                for: context,
-                of: tiled
-            )
+            in: context
         ).counts
         guard
             let track = TrackLayout.trackIndex(
@@ -61,7 +58,8 @@ extension KiwiCore {
                 window: window,
                 tiled: tiled,
                 ranges: ranges,
-                track: track
+                track: track,
+                context: context
             )
         }
         return resizeTrackShare(
@@ -109,7 +107,8 @@ extension KiwiCore {
         window: WindowID,
         tiled: [WindowID],
         ranges: [Range<Int>],
-        track: Int
+        track: Int,
+        context: LayoutContext
     ) -> CommandResponse {
         guard ranges.count > 1 else {
             // One track spans the axis, so its weight divides
@@ -159,6 +158,26 @@ extension KiwiCore {
                 of: tiled[$0],
                 axis: acrossAxis
             )
+        }
+        // A track whose members all stop at a learned ceiling
+        // refuses a grow AT it, cued (#1488) — scrolling's rule
+        // (#1055): admitted, the write lands and the next
+        // retile's heal un-writes it, wordless. A step that
+        // CROSSES the ceiling still lands; the heal is its clamp.
+        if delta > 0,
+            let ceiling = TrackLayout.trackCeiling(
+                of: tiled[ranges[track]],
+                in: context
+            )
+        {
+            let drawn =
+                effectiveSpan * weights[track]
+                / weights.reduce(0, +)
+            let tolerance = Double(EffectiveSizeBound.matchTolerance)
+            if drawn >= Double(ceiling) - tolerance {
+                refuseGrowAtMaximum(window, axis: acrossAxis)
+                return .fail("the track is at its app's maximum")
+            }
         }
         let outcome = StackLayout.weightStep(
             weights: weights,

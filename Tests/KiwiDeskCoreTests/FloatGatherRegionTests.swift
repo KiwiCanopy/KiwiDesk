@@ -91,7 +91,7 @@ struct FloatGatherRegionTests {
             "no bar painted — the clause would pass vacuously"
         )
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let seeded = try #require(
             core.tiler.stashOriginal(Self.scrolledOut)
         )
@@ -152,7 +152,7 @@ struct FloatGatherRegionTests {
             core.state.windows.updateFrame(id, frame: flush)
         }
         core.setSpaceMode(Self.space, .floating)
-        core.retile(force: true)
+        core.retile(pass: .apply)
         for id in [Self.inside, Self.scrolledOut, Self.partly] {
             #expect(core.tiler.stashOriginal(id) == nil)
         }

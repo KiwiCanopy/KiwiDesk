@@ -214,7 +214,7 @@ struct PlacementBounceTests {
         let core = makeCore()
         let (target, other) = makeFixture(core)
         #expect(core.tiler.placements.recent(target) == nil)
-        core.retile(animated: false, force: true)
+        core.retile(animated: false, pass: .apply)
         #expect(core.tiler.placements.recent(target) != nil)
         #expect(core.tiler.placements.recent(other) != nil)
     }

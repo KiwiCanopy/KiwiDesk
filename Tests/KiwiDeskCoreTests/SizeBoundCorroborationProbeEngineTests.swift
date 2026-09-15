@@ -227,7 +227,7 @@ struct SizeBoundCorroborationProbeEngineTests {
         )
         core.tiler.echoGraceOverride = { _ in true }
         captured.frames = [:]
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let forced = try #require(captured.frames[w])
         #expect(forced.width == 715)
         captured.frames = [:]
