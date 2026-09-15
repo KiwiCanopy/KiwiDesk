@@ -11,13 +11,20 @@ struct IconPicker: View {
 
     @State private var showing = false
     @State private var search = ""
-    @State private var tab: IconTab = .emoji
+    @State private var tab: IconTab = .resting
 
-    /// Browse tabs for curated emoji and symbol collections (#68 §6.4).
+    /// Browse tabs for curated symbol and emoji collections (#68
+    /// §6.4). Symbols lead for every caller (#1379): a symbol
+    /// takes the bar's item tints while an emoji is untinted
+    /// content the bar dims like an app image, and Recents is
+    /// one shared list — so no per-caller default.
     enum IconTab: String, CaseIterable, Identifiable {
-        case emoji = "Emoji"
         case symbols = "Symbols"
+        case emoji = "Emoji"
         var id: String { rawValue }
+
+        /// The tab every open starts on.
+        static let resting: IconTab = .symbols
 
         @MainActor var title: String {
             switch self {
@@ -70,6 +77,15 @@ struct IconPicker: View {
         // A glyph-only label names nothing (#812).
         .accessibilityLabel(chooseHelp)
         .popover(isPresented: $showing) { popover }
+        // Every open starts in one resting shape (#1357, #1379):
+        // the search cleared and the tab back on Symbols, on a
+        // choice, the clear button and a dismissal alike.
+        .onChange(of: showing) { _, isShowing in
+            if !isShowing {
+                search = ""
+                tab = .resting
+            }
+        }
     }
 
     private var chooseHelp: String {
@@ -118,19 +134,20 @@ struct IconPicker: View {
                         )
                     } else {
                         // Search is global: both
-                        // vocabularies, emoji first, the
-                        // tabs stand back.
+                        // vocabularies, symbols first for
+                        // the tab's reason, the tabs stand
+                        // back.
                         specialResults
-                        gridSection(
-                            L("icon_picker.emoji", "Emoji"),
-                            choices: filtered(
-                                IconCatalog.emoji
-                            )
-                        )
                         gridSection(
                             L("icon_picker.symbols", "Symbols"),
                             choices: filtered(
                                 IconCatalog.symbols
+                            )
+                        )
+                        gridSection(
+                            L("icon_picker.emoji", "Emoji"),
+                            choices: filtered(
+                                IconCatalog.emoji
                             )
                         )
                     }
