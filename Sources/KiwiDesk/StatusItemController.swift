@@ -13,6 +13,16 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// The combo bound to open the shortcuts panel (#330), read
     /// fresh on each menu open so AppKit renders the live binding.
     var shortcutsComboProvider: () -> KeyCombo? = { nil }
+    /// The combo bound to Open Settings (#1381), read the same way;
+    /// nil keeps the app menu's `⌘,`.
+    var settingsComboProvider: () -> KeyCombo? = { nil }
+    /// Whether the menu action firing now was AppKit's keyDown
+    /// for a chord Carbon already answered — the one reading
+    /// both chrome actions drop their duplicate on; injected so
+    /// a test can hold it either way.
+    var menuActionIsKeyDown: () -> Bool = {
+        NSApp.currentEvent?.type == .keyDown
+    }
 
     /// Drives "Check for Updates…" (#874). Inert by default —
     /// `AppUpdater.swift` owns why. Wires the pending reminder's

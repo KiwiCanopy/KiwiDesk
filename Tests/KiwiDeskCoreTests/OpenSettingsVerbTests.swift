@@ -8,8 +8,8 @@ import Testing
 /// `show_shortcuts` — a Lua action raising a Core hook the GUI
 /// wires to the Settings window. It carries no dispatcher
 /// response, so it lives in `luaOnly`, not
-/// `APIReference.commands`; and it is deliberately UNBOUND by
-/// default, so no `DefaultKeybindings` row may carry it.
+/// `APIReference.commands`. Seeded on `⌃⌥,` since #1381
+/// (`DefaultKeybindingsTests` ▸ `seedsOpenSettings`).
 @Suite("open_settings Lua verb", .serialized)
 @MainActor
 struct OpenSettingsVerbTests {
@@ -45,21 +45,5 @@ struct OpenSettingsVerbTests {
     @Test("Listed as a Lua-only verb so help() covers it")
     func listedLuaOnly() {
         #expect(APIReference.luaOnly.contains("open_settings"))
-    }
-
-    @Test("Unbound by default — no seeded row carries the verb")
-    func unboundByDefault() {
-        let rows = DefaultKeybindings.bindings(
-            spaces: ["1", "2", "3"],
-            resizeStep: 40
-        )
-        // A negative assertion over an empty seed would pass for
-        // having found nothing.
-        #expect(!rows.isEmpty)
-        #expect(
-            !rows.contains {
-                $0.lua.contains("open_settings")
-            }
-        )
     }
 }

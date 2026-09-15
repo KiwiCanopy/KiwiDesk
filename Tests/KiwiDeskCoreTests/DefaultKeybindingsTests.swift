@@ -163,6 +163,18 @@ struct DefaultKeybindingsTests {
         #expect(row.label == "Show shortcuts panel")
     }
 
+    /// The one thing the generic nets above cannot see: that the
+    /// row is seeded at all (#1381). Its combo, label and chord
+    /// hygiene are theirs.
+    @Test("seeds the ⌃⌥, open-settings row (#1381)")
+    func seedsOpenSettings() {
+        let rows = DefaultKeybindings.bindings(
+            spaces: [],
+            resizeStep: 50
+        )
+        #expect(rows.contains(DefaultKeybindings.openSettingsRow()))
+    }
+
     // MARK: - Additive digit top-up (#485)
 
     /// Rows the top-up authors for `digits`: one per tier.

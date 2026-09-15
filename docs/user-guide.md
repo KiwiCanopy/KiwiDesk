@@ -13,9 +13,15 @@ setting lives, why a move was refused, and the files behind it.
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
 **⌘,** while a KiwiDesk window is key. **Shortcuts ▸ General**
-offers a bindable **Open Settings** row for a global key; it
-ships unbound. The Settings window tiles into your layout like
-any other window and answers the window shortcuts (float it with
+offers a rebindable **Open Settings** row for a global key.
+
+:::unreleased
+That row ships on **`⌃⌥,`**, a [default
+shortcut](#default-shortcuts), so Settings opens from anywhere.
+:::
+
+The Settings window tiles into your layout like any other window
+and answers the window shortcuts (float it with
 `toggle_floating`, move it between spaces).
 
 ## Using Settings from the Keyboard
@@ -680,6 +686,10 @@ new spaces (up to ten). It is saved as an ordinary profile named
 | Toggle sticky on this screen | `⌃⌥P` |
 | Show shortcuts panel | `⌃⌥K` |
 
+:::unreleased
+**Open Settings** ships on `⌃⌥,` as well.
+:::
+
 `⌃⌥` moves your focus, `⇧` sends the window to a space, `⌘`
 swaps it or sends it and follows; resizing has its own layer,
 `⌥⌘`. Each space digit is bound *by name* and follows a rename;
@@ -800,6 +810,10 @@ reference](lua-reference.md)). Editing a stored profile puts
 Shortcuts in override mode: dimmed rows are inherited, an edited
 row overrides for that profile only, and only those rows are
 stored in its JSON.
+
+:::unreleased
+A new layer also carries the `⌃⌥,` Open Settings row.
+:::
 
 ## macOS Desktops (Mission Control)
 

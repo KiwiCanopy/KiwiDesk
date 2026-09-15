@@ -44,10 +44,12 @@ struct DefaultSeedCatalogParityTests {
         ) {
             map[command.lua] = command.label
         }
-        // The General "Show shortcuts panel" row (#602): seeded but
-        // authored in its own section, not a navigation group.
-        let general = KeybindingCatalog.showShortcuts
-        map[general.lua] = general.label
+        // The step-free commands carry the General rows (#602,
+        // #1381), which are seeded but authored in their own
+        // section rather than a navigation group.
+        for command in KeybindingCatalog.stepFreeCommands {
+            map[command.lua] = command.label
+        }
         return map
     }
 

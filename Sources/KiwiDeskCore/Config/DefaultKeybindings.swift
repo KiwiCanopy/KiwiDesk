@@ -75,20 +75,33 @@ public enum DefaultKeybindings {
                 label: "Toggle display sticky"
             )
         )
-        rows.append(showShortcutsRow())
+        rows.append(contentsOf: appChromeRows())
         return rows
     }
 
-    /// ⌃⌥K row that opens the Shortcuts panel (#602). Seeded into
-    /// the base mode here AND into every GUI-created mode
-    /// (`ShortcutsHeader.addMode`), so the cheat-sheet stays
-    /// keyboard-reachable in any mode.
+    /// The app-chrome rows on the `⌃⌥` base — ⌃⌥K opens the
+    /// Shortcuts panel (#602), ⌃⌥, opens Settings (#1381) —
+    /// seeded into the base layer here and into every
+    /// GUI-created layer (`LayerChromeSeedTests`).
+    public static func appChromeRows() -> [KeyBinding] {
+        [showShortcutsRow(), openSettingsRow()]
+    }
+
     public static func showShortcutsRow() -> KeyBinding {
         KeyBinding(
             combo: "control+option+k",
             lua: "KiwiDesk.show_shortcuts()",
             kind: .navigation,
             label: "Show shortcuts panel"
+        )
+    }
+
+    public static func openSettingsRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+comma",
+            lua: "KiwiDesk.open_settings()",
+            kind: .navigation,
+            label: "Open Settings"
         )
     }
 

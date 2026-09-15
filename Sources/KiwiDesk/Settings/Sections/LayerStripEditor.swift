@@ -218,11 +218,11 @@ struct LayerStripEditor: View {
     private func addLayer() {
         let name = newLayer.trimmed
         guard canAddLayer else { return }
-        // Seed default shortcuts panel keybinding for new layer (#602).
+        // Every layer carries the app-chrome rows (#602, #1381).
         model.config.layers.append(
             KeyLayer(
                 name: name,
-                bindings: [DefaultKeybindings.showShortcutsRow()]
+                bindings: DefaultKeybindings.appChromeRows()
             )
         )
         selected = name

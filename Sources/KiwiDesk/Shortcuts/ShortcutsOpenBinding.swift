@@ -12,7 +12,9 @@ enum ShortcutsOpenBinding {
     /// `gui.json` — the displayed combo must match what Carbon
     /// actually has installed.
     @MainActor static func comboGlyphs(core: KiwiCore) -> String? {
-        guard let parsed = combo(core: core) else { return nil }
+        guard let parsed = combo(core: core, lua: lua) else {
+            return nil
+        }
         return ComboSymbols.render(
             parsed,
             layoutChar: LayoutKeyGlyph.char
@@ -22,7 +24,10 @@ enum ShortcutsOpenBinding {
     /// Structured equivalent for AppKit menu rendering. Keeping the
     /// physical key code avoids lossy reverse-parsing of display
     /// glyphs such as F-keys and Home/Page Up.
-    @MainActor static func combo(core: KiwiCore) -> KeyCombo? {
+    @MainActor static func combo(
+        core: KiwiCore,
+        lua verb: String
+    ) -> KeyCombo? {
         guard let snapshot = core.liveKeybindingSnapshot() else {
             return nil
         }
@@ -32,7 +37,7 @@ enum ShortcutsOpenBinding {
             } ?? snapshot.keyLayers.first
         guard
             let combo = layer?.bindings.first(where: {
-                $0.lua == lua && !$0.combo.isEmpty
+                $0.lua == verb && !$0.combo.isEmpty
             })?.combo,
             let parsed = KeyCombo.parse(combo)
         else { return nil }

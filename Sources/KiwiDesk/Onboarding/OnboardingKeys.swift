@@ -89,6 +89,22 @@ enum OnboardingKeys {
                 )
             )
         }
+        // Taught before Settings has ever been opened, which is
+        // the road #1381 seeded the chord for; the label is the
+        // row's own, so the two cannot drift apart.
+        if let settings = single(
+            combo: layer.bindings.first {
+                $0.lua == KeybindingCatalog.openSettings.lua
+            }?.combo
+        ) {
+            families.append(
+                OnboardingKeyFamily(
+                    id: "settings",
+                    label: KeybindingCatalog.openSettings.resolvedLabel,
+                    chord: settings
+                )
+            )
+        }
         if let panel = single(
             combo: layer.bindings.first {
                 $0.lua == ShortcutsOpenBinding.lua

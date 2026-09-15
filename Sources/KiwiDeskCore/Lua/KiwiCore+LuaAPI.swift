@@ -212,7 +212,7 @@ public struct UIBridgeHooks {
     public var onShowShortcuts: @MainActor () -> Void = {}
 
     /// `KiwiDesk.open_settings()` (#678 item 18): the bindable
-    /// "Open Settings" action, unbound by default. Opens or
+    /// "Open Settings" action, seeded on ⌃⌥, (#1381). Opens or
     /// raises, never toggles — a key that closed Settings
     /// would discard the draft state the save pill narrates.
     public var onOpenSettings: @MainActor () -> Void = {}

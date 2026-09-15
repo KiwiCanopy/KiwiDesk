@@ -5346,12 +5346,12 @@ one, but an own borderless `NSPanel` is ignored by
 enumeration to be excluded from. A written exclusion would have
 been dead code asserting a fact the type system already holds.
 
-The companion affordance: **"Open Settings" is bindable and
-unbound by default** (`KiwiDesk.open_settings()`, offered under
-Shortcuts ▸ General). Settings is not a prerequisite — the app
-works untouched out of the box — so no default chord is spent
-on it; but a window that now lives among the user's tiled
-windows earns a keyboard road back. It opens or raises, never
+The companion affordance: **"Open Settings" is bindable**
+(`KiwiDesk.open_settings()`, offered under Shortcuts ▸
+General) — a window that lives among the user's tiled windows
+earns a keyboard road back. Which chord it ships on is the
+seeded ladder's ruling ([Shortcuts](#shortcuts), #1381). It
+opens or raises, never
 toggles: a close bound to the same key would discard the draft
 the save pill narrates. The key spelling follows the verb rather
 than the label — `open_settings`, matching
@@ -7633,6 +7633,29 @@ Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
+:::unreleased
+**Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
+2026-09-13). A menu-bar app with no Dock tile is almost never
+the active app, so `⌘,` reaches a new user only once they have
+found Settings some other way. The chord is app chrome, so it
+rides the pressed base beside `⌃⌥K`, and it takes the punctuation
+`⌘,` already trained rather than a letter that does not say
+Settings (`⌃⌥O`, `⌃⌥G` were free and set aside). `⌃⌥Space` is
+macOS's input-source switch and `⌃⌥S` is Toggle sticky, whose
+move would owe a migration. Measured before seeding, since
+`SystemShortcuts.map` is necessary and not sufficient: over the
+AX menu-bar tree of twelve running apps (2026-09-15, macOS
+26.6.2 — the same sweep #1176 below describes), comma sat only
+on `⌘,` and `⇧⌘,`. The row binds the key CODE (43, the ANSI
+comma position), so it is reachable on every board; where that
+key prints another character the board shows that character,
+the trade every lettered default already makes. Which
+population has it follows the seed's own rule below: a new
+setup, or an existing one through Shortcuts ▸ Restore
+Defaults…, which lands it in the default layer; a layer made
+before this carries it only by hand.
+:::
+
 **Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner
 ruling 2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on
 one hand; `⌃⌥⌘`+arrows is markedly easier, and it was free of
@@ -7650,8 +7673,8 @@ out loud.
 nearly shipped.** `SystemShortcuts.map` carries no `⌃⌥⌘`+arrow
 entry, and it is necessary and not sufficient (#1098), so the
 app menus were enumerated over the AX menu-bar tree of every
-running application (the probe is in `plan/`). Measured
-2026-09-04, macOS 26.6, ten running apps: neither `⌃⌥⌘`+arrows
+running application. Measured 2026-09-04, macOS 26.6, ten
+running apps: neither `⌃⌥⌘`+arrows
 nor the `⌃⌥⇧`+arrows it retires is claimed by any app's SHIPPED
 menu defaults. So the retune neither buys nor costs an app-menu
 collision, and rests on the ergonomics alone.
@@ -7841,9 +7864,9 @@ blocks it and `digitTopUp` is strictly additive. Nobody is moved:
 an existing install keeps `⌃⌥⌘`+arrows for as long as it lives,
 and `ShortcutsReferenceBuilder` renders the live layer rather
 than the defaults, so its Shortcuts panel stays accurate. The
-cost, accepted rather than discovered: there is no
-restore-to-defaults affordance in the Keybindings editor, so an
-existing user who WANTS the new map hand-edits four rows, and
+cost, accepted rather than discovered: an existing user who
+WANTS the new map takes Shortcuts ▸ Restore Defaults… (#1096,
+the one road a later default has into an existing install), and
 prose that names a chord has to say which population it means —
 which is why the resize workaround in
 [Accepted limitations](accepted-limitations.md) points at the

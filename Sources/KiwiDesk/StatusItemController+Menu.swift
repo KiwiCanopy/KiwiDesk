@@ -113,6 +113,12 @@ extension StatusItemController {
         )
         settings.target = self
         settings.image = symbol("gearshape")
+        // The live global chord where one is bound (#1381); the
+        // `⌘,` above is the app menu's, which fires only while a
+        // KiwiDesk window is key.
+        if let combo = settingsComboProvider() {
+            Self.applyMenuEquivalent(combo, to: settings)
+        }
         menu.addItem(settings)
 
         menu.addItem(.separator())
@@ -240,13 +246,19 @@ extension StatusItemController {
     }
 
     @objc private func openDashboard() {
+        // Carbon owns a bound chord globally; AppKit's duplicate
+        // keyDown is dropped — but `⌘,` has no Carbon twin, so its
+        // keyDown is the row's only path (#1381).
+        if menuActionIsKeyDown(), settingsComboProvider() != nil {
+            return
+        }
         onOpenDashboard()
     }
 
     @objc private func showShortcuts(_ sender: NSMenuItem) {
         // Carbon owns shortcut globally; ignore AppKit's duplicate keyDown
         // event.
-        if NSApp.currentEvent?.type == .keyDown { return }
+        if menuActionIsKeyDown() { return }
         onShowShortcuts()
     }
 
