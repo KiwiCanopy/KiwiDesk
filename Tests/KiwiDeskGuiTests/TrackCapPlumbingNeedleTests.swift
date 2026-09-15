@@ -56,7 +56,7 @@ struct TrackCapPlumbingNeedleTests {
         // Inside the door's own block, not merely somewhere in
         // the body — one line above the brace is the regression.
         let characters = Array(retile)
-        let opener = Array("withForcedPass(force) {")
+        let opener = Array("withForcedPass(pass.probes) {")
         let start = try #require(
             (0...(characters.count - opener.count)).first {
                 Array(characters[$0..<($0 + opener.count)])

@@ -51,6 +51,27 @@ extension TrackLayout {
         )
     }
 
+    /// The partition the RENDER draws for `tiled` in `context`
+    /// (#1488): the fold over the geometric cap, assembled once
+    /// for the render, the weight heal and the resize clamp, so
+    /// the list the cap reads and the list the fold reads cannot
+    /// drift apart — the swap guard folds through
+    /// `foldedPartition` on its own cap reading.
+    public static func renderPartition(
+        of tiled: [WindowID],
+        in context: LayoutContext
+    ) -> (
+        counts: [Int], cap: Int, markers: Int,
+        overflowTrack: Int?
+    ) {
+        foldedPartition(
+            of: tiled,
+            breaks: context.trackBreaks,
+            normalCap: context.track.normalCap,
+            geoCap: geometricCap(for: context, of: tiled)
+        )
+    }
+
     /// Assembles folded track partition for geometry, the swap
     /// guard and the heal — ONE assembly (#944). At a SECOND
     /// consumer of the merge question ("does the fold merge ≥2

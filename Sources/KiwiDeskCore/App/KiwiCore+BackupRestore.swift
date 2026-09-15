@@ -173,7 +173,7 @@ extension KiwiCore {
         // inside the adoption path would be swallowed by the
         // engine's ±2 pt "already there" tolerance for the small
         // moves a settings change makes.
-        retile(force: true)
+        retile(pass: .apply)
         onLog(
             outcome.isClean
                 ? "setup restored from backup"

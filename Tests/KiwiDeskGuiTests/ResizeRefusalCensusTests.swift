@@ -64,6 +64,9 @@ struct ResizeRefusalCensusTests {
             "nothingToDivide — the track set has one member (#1258)",
         "the focused window fills its track along ":
             "nothingToDivide — the track has one member (#1258)",
+        "the track is at its app's maximum":
+            "ownMaximum — every member of the track stops at a "
+            + "learned ceiling and the track draws it (#1488)",
         "the focused window is fullscreen":
             "windowIsFullscreen — it fills a macOS Space of its "
             + "own (#670), refused ONCE in resize() ahead of every "
@@ -94,10 +97,11 @@ struct ResizeRefusalCensusTests {
             + "net",
         "unknown window":
             "the id is gone; nothing to draw on",
-        "the space has no display":
+        "no screen to lay the space out on":
             "the clamp folds on the render's partition (#1488), "
-            + "which needs the screen the space lays out on; a "
-            + "space shown on none has nothing to draw on",
+            + "which needs a screen; `screen(for:in:)` falls "
+            + "back to the main one, so this is no screen at "
+            + "all — nothing to draw on",
         "track has no local window":
             "every member is a visiting traveler; #414's rule",
         "the focused window is visiting from ":

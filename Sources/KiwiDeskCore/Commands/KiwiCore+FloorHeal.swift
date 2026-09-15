@@ -12,9 +12,8 @@ import Foundation
 extension KiwiCore {
     /// The across-axis store against each track's LEARNED floor
     /// and ceiling; the floor reading is the cap's own
-    /// (`learnedFloor`), the ceiling its mirror. A track is
-    /// ceilinged only where EVERY member is — a member with no
-    /// ceiling draws the whole track.
+    /// (`learnedFloor`), the ceiling the one `trackCeiling` the
+    /// resize clamp reads too.
     func healTrackFloors(
         of space: Space,
         tiled: [WindowID],
@@ -43,13 +42,8 @@ extension KiwiCore {
             )
         }
         let ceilings = ranges.map { range -> Double in
-            let members = tiled[range].map {
-                TrackLayout.learnedCeiling(of: $0, in: context)
-            }
-            guard members.allSatisfy({ $0 != nil }),
-                let widest = members.compactMap({ $0 }).max()
-            else { return .infinity }
-            return Double(widest)
+            TrackLayout.trackCeiling(of: tiled[range], in: context)
+                .map(Double.init) ?? .infinity
         }
         let span = TrackLayout.acrossSpan(
             region: Double(

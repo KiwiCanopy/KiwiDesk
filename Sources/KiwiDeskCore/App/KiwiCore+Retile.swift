@@ -21,18 +21,14 @@ extension KiwiCore {
     /// site that may promise, and `BatchSizing` argues why
     /// guessing is the one mistake that reintroduces #45.
     ///
-    /// `force` is an explicit apply (§5): every frame is
-    /// re-issued AND the pass probes past corroborated bounds
-    /// (#1055). `reissue` is the first half alone — a Space
-    /// switch must re-issue frames the lagging echoes still
-    /// report in place, but it is not an ask to re-probe, and
-    /// under the probe verdict the learned-floor consumers
-    /// (`geometricCap`, the heals) stand down, which redrew the
-    /// count's overlap on every switch (#1488).
+    /// `pass` is the caller's classification of the pass (#1488):
+    /// `.apply` for an explicit `set_*` apply (§5), `.reissue` for
+    /// a switch that must re-issue frames the lagging echoes
+    /// still report in place, `.event` for everything else —
+    /// `RetilePass` owns why the two halves are spelled apart.
     public func retile(
         animated: Bool? = nil,
-        force: Bool = false,
-        reissue: Bool = false,
+        pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
@@ -50,7 +46,7 @@ extension KiwiCore {
         // The split stores ride the same heal (#934/#1430): a
         // bsp ratio or the master ratio is moved so a side
         // draws its members' learned floor.
-        tiler.withForcedPass(force) {
+        tiler.withForcedPass(pass.probes) {
             healTrackSessionWeights()
             healSplitFloors()
         }
@@ -68,8 +64,7 @@ extension KiwiCore {
             state: state,
             animated: animated
                 ?? tiler.settings.animations.onRelayout,
-            force: force,
-            reissue: reissue,
+            pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
             stashAnimated: stashAnimated,
             sizing: sizing
@@ -92,7 +87,7 @@ extension KiwiCore {
                 state: state,
                 animated: animated
                     ?? tiler.settings.animations.onRelayout,
-                force: false,
+                pass: .event,
                 stashAnimated: stashAnimated,
                 sizing: sizing
             )

@@ -80,6 +80,10 @@ struct SpaceSwitchReissueTests {
         let core = makeCore()
         core.execute("focus_space", args: [.string("2")])
         core.execute("focus_space", args: [.string("1")])
+        // The ledger is age-bounded on the wall clock and has no
+        // clock seam (tests.md, #1456); the stamp and this read
+        // share one synchronous chain, so the bound cannot pass
+        // between them.
         let issued = { (id: WindowID) in
             core.tiler.placements.recent(id, at: Date())
         }
@@ -89,13 +93,39 @@ struct SpaceSwitchReissueTests {
         #expect(issued(w2)?.minX == issued(w3)?.minX)
     }
 
+    @Test("Coming back re-issues frames the echoes already report")
+    func returnReissuesSettledFrames() throws {
+        // The re-issue half: with every state frame already at
+        // its slot an event pass has nothing to issue, so the
+        // return's frames reach the ledger only because the
+        // switch re-issues past the "already there" check —
+        // the park's corner stamp would otherwise stand.
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        for (id, frame) in core.tiler.calculatedFrames(
+            state: core.state
+        ) {
+            core.state.apply(.windowResized(id, frame))
+        }
+        core.execute("focus_space", args: [.string("2")])
+        let parked = try #require(
+            core.tiler.placements.recent(w1, at: Date())
+        )
+        core.execute("focus_space", args: [.string("1")])
+        let returned = try #require(
+            core.tiler.placements.recent(w1, at: Date())
+        )
+        #expect(returned != parked)
+        #expect(returned.width >= 700 - 0.5)
+    }
+
     @Test("An explicit apply still probes past the bounds")
     func explicitApplyProbes() throws {
         // The half the switch gave up, kept for the apply that
         // asked for it (#1055): the plain count, three tracks.
         guard NSScreen.main != nil else { return }
         let core = makeCore()
-        core.retile(force: true)
+        core.retile(pass: .apply)
         let x2 = try #require(
             core.tiler.placements.recent(w2, at: Date())?.minX
         )

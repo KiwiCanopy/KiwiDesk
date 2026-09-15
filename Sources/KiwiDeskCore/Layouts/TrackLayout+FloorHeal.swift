@@ -22,18 +22,23 @@ extension TrackLayout {
     /// member has a corroborated one, and empty means none.
     /// A floor-bound track lands `margin` above its floor (the
     /// shave's own `minSizeMargin`, so the two passes agree on
-    /// where a share meets its floor) — or AT its ceiling where
-    /// that is nearer, the fixed-size case; a ceiling-bound
-    /// track lands at the ceiling. Nil when nothing sinks or
-    /// overflows, nil when the margined floors do not fit — the
-    /// boundary is never written, the count's own overlap
-    /// stands — and nil when every ceiling together leaves the
-    /// span unfilled, the one honest gap. Between those the
-    /// shares are `clamp(λ·weight, low, high)` at the one water
-    /// level λ that fills the span: the level rises until a
-    /// track's ceiling holds it and sinks until a floor catches
-    /// it, which is what pinning the sinkers and re-sharing the
-    /// rest computed before ceilings joined.
+    /// where a share meets its floor — and the render's exact
+    /// cascade check, #925, never reads a share AT the global
+    /// floor, which a ceiling under it would otherwise pin);
+    /// a ceiling-bound track lands at the ceiling, or at that
+    /// margined floor where the ceiling sits under it, the
+    /// fixed-size case. Ceilings that together cannot fill the
+    /// span bind nothing — the render fills the span whatever
+    /// the weights say, so the honest gap lands inside the slots
+    /// and only the floors are healed. Nil when nothing sinks or
+    /// overflows, and nil when the margined floors do not fit —
+    /// the boundary is never written, the count's own overlap
+    /// stands. Between those the shares are `clamp(λ·weight,
+    /// low, high)` at the one water level λ that fills the span:
+    /// the level rises until a track's ceiling holds it and
+    /// sinks until a floor catches it, which is what pinning the
+    /// sinkers and re-sharing the rest computed before ceilings
+    /// joined.
     public static func flooredWeights(
         weights: [Double],
         span: Double,
@@ -47,18 +52,19 @@ extension TrackLayout {
             span > 0
         else { return nil }
         let total = weights.reduce(0, +)
-        // A ceiling under its floor is bound noise; the floor
-        // wins, since the count already fitted it.
-        let highs = weights.indices.map { index -> Double in
+        let lows = floors.map { $0 + margin }
+        // A ceiling under its margined floor is bound noise or
+        // the fixed-size case; the floor wins, since the count
+        // already fitted it and the render pins nothing under it.
+        var highs = weights.indices.map { index -> Double in
             ceilings.isEmpty
-                ? .infinity : max(ceilings[index], floors[index])
+                ? .infinity : max(ceilings[index], lows[index])
         }
-        let lows = weights.indices.map {
-            min(floors[$0] + margin, highs[$0])
+        if highs.reduce(0, +) < span {
+            highs = highs.map { _ in .infinity }
         }
         guard total > 0, weights.min() ?? 0 > 0,
-            lows.reduce(0, +) <= span,
-            highs.reduce(0, +) >= span
+            lows.reduce(0, +) <= span
         else { return nil }
         let tolerance = Double(EffectiveSizeBound.matchTolerance)
         let shares = weights.map { span * $0 / total }

@@ -68,7 +68,7 @@ extension KiwiCore {
             updateSpaceBar()
             return
         }
-        retile(animated: false, force: true)
+        retile(animated: false, pass: .reissue)
         // The switch rebuilt this desktop's windows with
         // arbitrary stacking; put the overlapping
         // layouts' z-order back before handing focus over.

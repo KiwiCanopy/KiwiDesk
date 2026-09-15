@@ -93,7 +93,7 @@ struct SpaceBarDropMoveTests {
         // yanked it to a slot mid-drag and tripped the echo guard.
         core.tiler.dragExemptWindow = WindowID(1)
         applied = []
-        core.retile(force: true)
+        core.retile(pass: .apply)
         #expect(!applied.contains(WindowID(1)))
         #expect(applied.contains(WindowID(2)))
     }

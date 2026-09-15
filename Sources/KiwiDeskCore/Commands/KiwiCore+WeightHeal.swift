@@ -78,14 +78,9 @@ extension KiwiCore {
             space: space,
             screen: screen
         ).context
-        let counts = TrackLayout.foldedPartition(
+        let counts = TrackLayout.renderPartition(
             of: tiled,
-            breaks: space.trackBreaks,
-            normalCap: params.normalCap,
-            geoCap: TrackLayout.geometricCap(
-                for: context,
-                of: tiled
-            )
+            in: context
         ).counts
         let ranges = TrackLayout.ranges(of: counts)
         let vertical = params.axis == .vertical

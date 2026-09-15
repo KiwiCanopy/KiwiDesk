@@ -71,6 +71,47 @@ struct TrackCeilingHealTests {
         )
     }
 
+    @Test("Unfillable ceilings still let a floor heal")
+    func unfillableCeilingsStillHealFloors() throws {
+        // Two fixed-size 825 pt windows on 1706 at 0.887 : 0.482 —
+        // 1105/601 — cannot fill the span between them, but the
+        // second SINKS under its floor: the ceilings stop binding
+        // and the floors are healed, 880.75 / 825.25, the gap
+        // landing inside the slots rather than as the overlap.
+        let healed = try #require(
+            TrackLayout.flooredWeights(
+                weights: [0.887, 0.482],
+                span: 1706,
+                floors: [825, 825],
+                ceilings: [825, 825],
+                globalFloor: 300,
+                margin: 0.25
+            )
+        )
+        let total = healed.reduce(0, +)
+        #expect(abs(1706 * healed[1] / total - 825.25) < 0.01)
+    }
+
+    @Test("A ceiling-pinned track keeps the shave's margin")
+    func ceilingPinKeepsTheMargin() throws {
+        // A fixed-size window narrower than `min_window_size`
+        // (ceiling 230, floor 300): its track lands at 300.25,
+        // never AT the global floor the render's cascade check
+        // reads exactly (#925) — one ulp under piles the space.
+        let healed = try #require(
+            TrackLayout.flooredWeights(
+                weights: [1, 1],
+                span: 1000,
+                floors: [300, 300],
+                ceilings: [230, .infinity],
+                globalFloor: 300,
+                margin: 0.25
+            )
+        )
+        let total = healed.reduce(0, +)
+        #expect(abs(1000 * healed[0] / total - 300.25) < 0.01)
+    }
+
     @Test("A share within the tolerance over its ceiling is not re-shared")
     func toleranceOverTheCeiling() {
         // 401 against a 400 learned ceiling is the same span
@@ -137,16 +178,11 @@ struct TrackCeilingHealTests {
         return (core, space)
     }
 
-    @Test("A retile hands a fixed-size window's surplus to its neighbour")
-    func retileHealsToLearnedCeiling() throws {
-        guard NSScreen.main != nil else { return }
-        let (core, space) = makeCore()
-        let w1 = WindowID(1)
-        let w2 = WindowID(2)
-        // Teach a fixed 500 pt width on w1 — the System Settings
-        // signature: asks on both sides answered with one span,
-        // two distinct asks each (the ladder itself is
-        // `SizeBoundLearnerTests`; this is the wire).
+    /// Teaches a fixed 500 pt width on `w1` — the System Settings
+    /// signature: asks on both sides answered with one span, two
+    /// distinct asks each (the ladder itself is
+    /// `SizeBoundLearnerTests`; this is the wire).
+    private func teachFixedWidth(_ core: KiwiCore, _ w1: WindowID) {
         for asked in [CGFloat(400), 450, 700, 800] {
             for _ in 0..<2 {
                 core.tiler.boundLearner.recordAsk(
@@ -161,6 +197,15 @@ struct TrackCeilingHealTests {
             }
         }
         #expect(core.tiler.sizeBound(for: w1)?.maxWidth == 500)
+    }
+
+    @Test("A retile hands a fixed-size window's surplus to its neighbour")
+    func retileHealsToLearnedCeiling() throws {
+        guard NSScreen.main != nil else { return }
+        let (core, space) = makeCore()
+        let w1 = WindowID(1)
+        let w2 = WindowID(2)
+        teachFixedWidth(core, w1)
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.retile()
@@ -185,5 +230,32 @@ struct TrackCeilingHealTests {
             core.state.workspaces[space]?.trackWeights == before
         )
         #expect(!log.contains { $0.contains("re-shared") })
+    }
+
+    @Test("A grow of a track at its ceiling is refused and cued")
+    func growAtCeilingIsRefused() throws {
+        // Scrolling's rule (#1055) one layout over: admitted, the
+        // write would land and the next retile's heal un-write
+        // it, wordless.
+        guard NSScreen.main != nil else { return }
+        let (core, space) = makeCore()
+        let w1 = WindowID(1)
+        teachFixedWidth(core, w1)
+        core.retile()
+        let before = core.state.workspaces[space]?.trackWeights
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        #expect(
+            !core.execute(
+                "resize",
+                args: [.string("x"), .number(100)]
+            ).isSuccess
+        )
+        #expect(
+            refusals == [
+                .ownMaximum(w1, axis: "x", atBoundary: false)
+            ]
+        )
+        #expect(core.state.workspaces[space]?.trackWeights == before)
     }
 }

@@ -103,7 +103,7 @@ struct TravelerRehomeGuardTests {
             )
         )
         f.core.state.workspaces.add(member, to: SpaceID("2"))
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         #expect(f.core.tiler.recentInstantTarget(member) == nil)
         #expect(f.core.tiler.recentInstantTarget(Self.traveler) != nil)
     }
@@ -119,7 +119,7 @@ struct TravelerRehomeGuardTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.animations.onRelayout = true
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         #expect(f.core.tiler.recentInstantTarget(Self.traveler) != nil)
     }
 
@@ -134,8 +134,8 @@ struct TravelerRehomeGuardTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         var lines: [String] = []
         f.core.onLog = { lines.append($0) }
-        f.core.retile(animated: false, force: true)
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
+        f.core.retile(animated: false, pass: .apply)
         #expect(
             lines.filter { $0.contains("traveler re-home") }.count == 1
         )
@@ -159,13 +159,13 @@ struct TravelerRehomeGuardTests {
         f.core.tiler.echoGraceOverride = { _ in true }
         // The previous tiled space asks the traveler for a frame.
         f.core.state.workspaces.activate(SpaceID("1"))
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         // The app echoes that frame (clearing the instant
         // target), then the user drags it onto the other screen.
         f.core.handle(.windowResized(Self.traveler, f.frame))
         f.core.state.workspaces.activate(SpaceID("2"))
         f.core.state.apply(.windowMoved(Self.traveler, f.frame))
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         let commanded = try #require(
             f.core.tiler.recentInstantTarget(Self.traveler)
         )
