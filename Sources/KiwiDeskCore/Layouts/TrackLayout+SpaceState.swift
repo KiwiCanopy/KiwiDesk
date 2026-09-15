@@ -36,10 +36,13 @@ extension Space {
     }
 
     /// Hands window's break marker and weight to its array
-    /// successor (#128) — or drops them where the break was only
-    /// handed (#1387), so every writer that removes a member
-    /// honours the ruling through this one door. A dropped weight
-    /// is session state the head's return does not recover.
+    /// successor (#128) as a break of the successor's OWN — or
+    /// drops them where the break was only handed (#1387), so
+    /// every writer that removes a member honours the ruling
+    /// through this one door. A dropped weight is session state
+    /// the head's return does not recover. Only a removal that
+    /// RECORDS the hand-off marks it (`markHandedBreak`); a head
+    /// minimized, quit or moved leaves a break nothing reclaims.
     mutating func handTrackBreakToSuccessor(
         of window: WindowID
     ) {
@@ -52,8 +55,15 @@ extension Space {
         let weight = trackWeights.removeValue(forKey: window)
         guard let successor else { return }
         trackBreaks.insert(successor)
-        handedBreaks.insert(successor)
         trackWeights[successor] = weight
+    }
+
+    /// Marks a break the departure fold recorded as handed
+    /// (#1387), beside the record that names its holder; refused
+    /// where the member holds none.
+    mutating func markHandedBreak(of window: WindowID) {
+        guard trackBreaks.contains(window) else { return }
+        handedBreaks.insert(window)
     }
 
     /// The inverse of `handTrackBreakToSuccessor` for a returning

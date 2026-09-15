@@ -28,6 +28,11 @@ extension StateCoordinator {
         }
         windows.remove(id)
         workspaces.remove(id)
+        // The hand-off the departure recorded is marked beside its
+        // record, after the door performed it (#1387).
+        if let home, let holder = departedSlots[id]?.handedTo {
+            workspaces.withSpace(home) { $0.markHandedBreak(of: holder) }
+        }
         // Close-return focus restore for non-fullscreen/transient windows
         // (`Space.remove`, `docs/design-decisions.md`, #637, #670, #671).
         if heldFocus, let home,

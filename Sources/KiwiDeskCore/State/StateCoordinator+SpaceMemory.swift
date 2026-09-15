@@ -28,9 +28,9 @@ extension StateCoordinator {
         /// copy.
         var trackBreak: Space.BreakProvenance
         /// The member `handTrackBreakToSuccessor` gave this head's
-        /// break to at its departure. SINGLE-USE: the return's
-        /// take-back and the promotion each consume it, so a
-        /// standing link always names a holder that still holds.
+        /// break to at its departure. Consumed by the return's
+        /// take-back and by the promotion, both of which refuse a
+        /// holder that dropped the break meanwhile.
         var handedTo: WindowID?
 
         init(

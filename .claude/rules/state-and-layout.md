@@ -323,27 +323,30 @@ editing here:
   (`Space.BreakProvenance` — member, head, or handed), read off
   the Space's own `handedBreaks` set, which is the LIVE truth for
   a member still in the row — the record is the copy for a window
-  no longer in it. The hand-off has ONE door, `Space.
-  handTrackBreakToSuccessor`, which every membership writer
-  reaches through `Space.remove`: it marks what it hands, and a
-  handed break is NEVER handed on (owner ruling, 2026-09-15) — the
-  door drops it instead, so the hand-off is one hop, its head
-  re-inserts its own on return, and a stray break lives at most
-  one Desktop stay. The head's record NAMES its holder
-  (`DepartedSlot.handedTo`, read through the one `handOffTarget`
-  ahead of the removal) and the link is SINGLE-USE: the return's
-  take-back and the promotion each consume it, so a standing link
-  always names a member that still holds — never a positional
-  guess, since a member back ahead of its head sits between the
-  two and a head whose successor already held a break handed
-  nothing. A head gone for good makes its hand-off permanent: a
+  no longer in it. The hand-off has ONE door,
+  `handTrackBreakToSuccessor`, which every membership writer
+  reaches through `Space.remove`, and a handed break is NEVER
+  handed on (owner ruling, 2026-09-15) — the door drops it
+  instead, so the hand-off is one hop, its head re-inserts its
+  own on return, and a stray break lives at most one Desktop
+  stay. The door hands as an OWN break; only the departure fold
+  MARKS one handed (`markHandedBreak`), beside the record that
+  names its holder (`DepartedSlot.handedTo`, read through the one
+  `handOffTarget` ahead of the removal) — a head minimized, quit
+  or moved hands for good, since no record could reclaim it
+  (`HandedBreakEnderTests` ▸ `unrecordedHandOffIsOwn`). The
+  link is consumed by the return's take-back and by the
+  promotion, which both refuse a holder that dropped the break —
+  never a positional guess, since a member back ahead of its
+  head sits between the two and a head whose successor already
+  held a break handed nothing. A head gone for good makes its hand-off permanent: a
   departure record ends only through `retireDepartureRecord`,
   which promotes the named holder — live, in the Space; away, on
   its record — ahead of dropping it, `DepartedSlotRetireSeamTests`
   refusing a bare `departedSlots[id] = nil` anywhere else, the
   gone handler's `.closed` arm being the one promote-without-retire
   since the rank is kept for later arrivals
-  (`ReturningSlotTrackFoldTests` ▸ `everyEnderPromotes`,
+  (`HandedBreakEnderTests` ▸ `everyEnderPromotes`,
   `ClosePromotesHandedBreakTests`) — while a hide or a Desktop
   departure keeps it revocable. The residue the ruling accepts: a
   departing window of ANOTHER Desktop, live in the same-named
