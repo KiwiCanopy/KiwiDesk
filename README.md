@@ -118,6 +118,12 @@ nothing to bend it with.
   overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
 - **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations,
   zero SIP modifications, and localized out of the box.
+- **Update-proof**: Every private OS symbol is resolved at runtime,
+  and every tiling path has a public Accessibility fallback — a
+  macOS update can slow a fast path, never crash KiwiDesk or stop
+  it tiling. The two things only the OS's own bridge can do (move
+  a window to another Desktop, switch Desktops) switch themselves
+  off until KiwiDesk catches up, instead of failing.
 - **Accessible**: Settings is fully keyboard-driven and narrates
   itself under VoiceOver — every control announces its name *and* its
   value. See the
