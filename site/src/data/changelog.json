@@ -2,6 +2,51 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "1.3.0",
+      "tag": "v1.3.0",
+      "date": "2026-09-15",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v1.3.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v1.3.0/KiwiDesk-1.3.0.dmg",
+      "summary": "KiwiDesk 1.3.0 is the first release under the Business Source License 1.1 — free to use for everyone, business included; only offering it as a product or service is reserved, and each version becomes MIT after four years. Beyond that: Liquid Glass on by default, a Mac Checklist in Settings, windows that respect an app's own minimum size, a swipe that stays where you sent it, and a Settings window that comes to the front when asked.",
+      "sections": [
+        {
+          "title": "Liquid Glass and the bars",
+          "items": [
+            "**Liquid Glass is on by default on macOS 26**, and it honours Reduce transparency the moment you switch that on. A setup that had it off keeps it off.",
+            "**Both bars start at 40 pt thick** on a new setup, on every screen size, and the Thickness sliders now go down to 20 pt.",
+            "**The Space Bar shows which shortcut layer is active**, leading with the layer's icon while one other than the default is on — and scripts can hear the switch as a `layer_change` event."
+          ]
+        },
+        {
+          "title": "Windows and layouts",
+          "items": [
+            "**An app's own minimum size is respected, and the resize pill says whose limit you hit.** A split makes room for a window that won't go narrower instead of letting it overlap its neighbour, Track opens only as many tracks as fit, and *This app won't go smaller* names the app where *Minimum window size reached* still means the setting you can lower.",
+            "**A double-clicked title bar or edge no longer knocks a tiled window out of its slot**, nor does an app resizing itself — the window goes straight back, and a floating window that zooms is kept clear of the bars.",
+            "**Switching a Space to Floating no longer leaves windows off screen or piled on top of each other** — anything you couldn't reach is laid out in a grid.",
+            "**The Track limit is the number of tracks you see.** A limit of 3 used to show four; the default is now 3, and saved configs are adjusted on first load so nothing moves on screen.",
+            "**Floating windows get the unfocused border too**, and clicking around a Floating Space no longer lifts a sticky window over the others."
+          ]
+        },
+        {
+          "title": "Desktops and profiles",
+          "items": [
+            "**A swipe to another Desktop no longer gets pulled back** a second later.",
+            "**A Desktop binding fires only when its profile fits the screens connected.** Bound to a one-screen profile with two screens plugged in, the Desktop takes the profile for that screen count instead, and the Desktops row says which count the binding is for."
+          ]
+        },
+        {
+          "title": "Settings",
+          "items": [
+            "**Settings opened from the menu bar comes to the front again**, including after you closed it once in a Scrolling Space.",
+            "**A Mac Checklist card** lists the macOS settings a tiling window manager fights — Stage Manager, rearranging Spaces by use, edge tiling — read live from your Mac, with the habits that make tiling stick. The guide link now lives at its foot, and the tour ends there.",
+            "**Search opens the drawer a setting hides in**, and finds your palettes by name.",
+            "**The Track shortcuts sit behind their own drawer** — *Move windows in the track layout*, below the Desktop one — instead of beside shortcuts every layout uses."
+          ]
+        }
+      ]
+    },
+    {
       "version": "1.2.2",
       "tag": "v1.2.2",
       "date": "2026-09-09",

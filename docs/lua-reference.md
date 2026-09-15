@@ -414,10 +414,8 @@ persistent owner of pins, so a pin set from Lua is a session
 override there; under a Lua-managed config the pin persists
 because `init.lua` re-runs on launch.
 
-:::unreleased
 A screen this pin leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).
-:::
 
 **Example:**
 
@@ -455,10 +453,8 @@ role, and per-space settings. Refuses to delete the only space.
 Runtime only — a space still declared in `init.lua` or the GUI
 config reappears on the next config load.
 
-:::unreleased
 A screen this leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).
-:::
 
 **Example:**
 
@@ -521,14 +517,12 @@ KiwiDesk.move_to_track("next")
 **Does:** sets the layout mode for the space. Every space
 defaults to `bsp`.
 
-:::unreleased
 Switching to `floating` while any window sits partly or fully
 outside the screen's visible bounds less any bar strips on that
 space, or entirely inside another window's frame (a monocle
 stack), lays the space's windows out in the quit grid
 (`quit.set_layout`, sized by `quit.set_grid_target_depth`);
 otherwise nothing moves.
-:::
 
 **Example:**
 
@@ -728,9 +722,7 @@ KiwiDesk.set_refusal_sound(true)
 
 ### set_shortcut_panel_liquid_glass
 
-:::unreleased
 **Expects:** `true` or `false` (default `true`).
-:::
 
 **Does:** lays a macOS&nbsp;26 Liquid Glass material over the
 shortcuts panel — the one ⌃⌥K opens (#1307). Off, the panel
@@ -743,11 +735,9 @@ Stored as `shortcut_panel.liquid_glass`, in the profile beside
 the two bars — so the panel follows the profile that is active,
 and a profile switch can change its material.
 
-:::unreleased
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
 ([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
-:::
 
 The GUI twin is the single **Liquid Glass** switch on
 Colours &amp; Animations, which writes this leaf together with
@@ -1140,11 +1130,9 @@ anything. Nor past a *maximum* the focused window's app itself
 enforces, once KiwiDesk has learned it (#1055): that refusal
 bounces and pills, where the fits-on-screen stop stays wordless.
 
-:::unreleased
 The pill names the app ("This app won't go bigger", #1261): no
 setting caps a window's maximum, so lowering `min_window_size`
 never moves it.
-:::
 
 Setting a size *here* is not clamped that way: a config value
 travels with you between screens, so if you set a slot wider
@@ -1194,12 +1182,10 @@ holds when a window opens or closes ahead of the focus. A
 *focus change* pans the viewport minimally, which is what makes
 the pan above read as scroll-into-view.
 
-:::unreleased
 A reorder — `swap`, a window dropped onto another, or a drag on
 the App Bar — is not a rearrangement around the focus: the two
 windows visibly trade places, and the view pans only when the
 moved window's new slot would fall outside it.
-:::
 
 Near a row end the boundary wins, as always: the row never
 reveals empty margin past its ends, so there the focus
@@ -1608,7 +1594,6 @@ track.set_axis("vertical")
 
 ### track.set_limit
 
-:::unreleased
 **Expects:** `0`, or an integer ≥ 2 (default `3`).
 
 **Does:** sets how many tracks a space shows, the **overflow
@@ -1627,7 +1612,6 @@ display-agnostic — if a monitor can't fit the columns at
 last positive value is remembered, so flipping automatic back
 off restores it. A limit of 1 is refused: one track would be the
 overflow alone (#1354).
-:::
 
 **Example:**
 
@@ -1643,12 +1627,10 @@ track.set_limit(3)
 (the default), tracks open and collapse as windows come and go —
 no cap. Off pins the cap to the value set by `track.set_limit`.
 
-:::unreleased
 The automatic count also honours the minimum sizes the windows'
 own apps enforce once KiwiDesk has learned them, so tracks stop
 multiplying past what their windows will hold; a limit you set
 stays your number.
-:::
 
 The track twin of `grid.set_auto_size`. `track.set_limit(0)` is
 the shorthand for turning this on; `track.set_limit(n)` for
@@ -1779,10 +1761,8 @@ track.set_axis_override("code", "horizontal")
 - A space identifier.
 - `0`, or an integer ≥ 2.
 
-:::unreleased
 The overflow track is counted, as in `track.set_limit`, and 1 is
 refused.
-:::
 
 **Does:** overrides the global track cap for one space. Like the
 global setter, a positive value also turns automatic off for that
@@ -1913,10 +1893,8 @@ app_bar.set_alignment("start")
 
 ### app_bar.set_thickness
 
-:::unreleased
 **Expects:** thickness in points (default `40`; anything below
 `20` is raised to it).
-:::
 
 **Does:** sets the bar's thickness, carved out of the layout.
 
@@ -1948,9 +1926,7 @@ app_bar.set_background_style("plain")
 
 ### app_bar.set_liquid_glass
 
-:::unreleased
 **Expects:** a boolean (default `true`).
-:::
 
 **Does:** lays a macOS 26 Liquid Glass material over the item
 backgrounds (the boxes or the plate) — an orthogonal finish, so
@@ -1977,13 +1953,11 @@ portable. Per-layout override:
 `monocle.set_app_bar_liquid_glass` /
 `scroll.set_app_bar_liquid_glass`.
 
-:::unreleased
 Also stood down, live, while macOS's Reduce transparency is on:
 every glass surface draws its Boxed or Plain shape with the
 `fill_color` at full alpha (the panel its plain material), and
 the stored values are untouched, so the glass and the alpha
 return the moment the setting goes off (#1374).
-:::
 
 Settings has no per-bar row for this any more (#1307): one
 **Liquid Glass** switch on Colours &amp; Animations writes this
@@ -2225,11 +2199,9 @@ stays visible: a fill below it renders exactly as you picked it,
 and only a more opaque one is capped. The stored value is
 unchanged either way (Boxed/Plain use it in full).
 
-:::unreleased
 While macOS's Reduce transparency is on, Boxed/Plain draw it at
 full alpha instead
 ([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
-:::
 
 **Example:**
 
@@ -2412,10 +2384,8 @@ space_bar.set_alignment("center")
 
 ### space_bar.set_thickness
 
-:::unreleased
 **Expects:** thickness in points (default `40`; anything below
 `20` is raised to it).
-:::
 
 **Does:** sets the bar's thickness, carved out of the layout.
 
@@ -2512,9 +2482,7 @@ space_bar.set_background_style("boxed")
 
 ### space_bar.set_liquid_glass
 
-:::unreleased
 **Expects:** a boolean (default `true`).
-:::
 
 **Does:** lays the macOS 26 Liquid Glass finish over the Space
 items — see `app_bar.set_liquid_glass` for the full behavior
@@ -3079,10 +3047,8 @@ border.set_focused_color("#4A9816")
 windows (default `false`). Ignored in monocle, where only the
 focused window shows.
 
-:::unreleased
 Floating windows — one you floated, or any window in a space set
 to the floating layout — get the unfocused border too.
-:::
 
 **Example:**
 
@@ -4087,13 +4053,11 @@ window additionally names the reason while the blocking
 neighbor marks itself at its minimum. Keyboard
 and mouse resizes share these clamps and cues.
 
-:::unreleased
 The pill also says *whose* minimum it was (#1261): "Minimum
 window size reached" and "Neighboring window at its minimum
 size" mean `min_window_size` bound, and lowering it helps; "This
 app won't go smaller" and "Neighboring app won't go smaller" mean
 the app's own learned floor bound, which no setting moves.
-:::
 
 In **bsp**, the window that cannot shrink is often not the one
 you are resizing (#1259). A window holding the whole height —
@@ -4200,14 +4164,12 @@ What the
   space or KiwiDesk restarts. If the focused window is alone in
   its column, `"y"` reports an error.
 
-  :::unreleased
   A bsp ratio or the master ratio that presses moved past an
   app's minimum before that minimum was learned heals back at the
   next layout pass, and a window arriving into a region narrower
   than its minimum gets the same move — the split-layout row of
   [accepted limitations](accepted-limitations.md) has what
   remains.
-  :::
 - **scrolling** — it adjusts the slot size in real points along
   the layout's own scroll axis (columns for horizontal, rows for
   vertical), regardless of which `axis` you pass — the `x`/`y`
@@ -4258,7 +4220,6 @@ KiwiDesk.resize("x", -50)
 KiwiDesk.resize("y", 50)
 ```
 
-:::unreleased
 A layer switch is also an event: `KiwiDesk.on("layer_change",
 function(from, to) … end)` hears every change of the active
 layer — `switch_layer`, or a profile switch returning you to
@@ -4266,11 +4227,9 @@ layer — `switch_layer`, or a profile switch returning you to
 active ([Events](#events)). A config reload returns you to
 `default` too, but it also replaces every Lua callback, so only
 the CLI event stream hears that one.
-:::
 
 #### Layer Icons
 
-:::unreleased
 An optional third argument to `define_layer` sets the layer's
 icon — an SF Symbol name or a flat emoji. While the layer is
 active, the KiwiDesk status item swaps to it, and the Space Bar
@@ -4279,7 +4238,6 @@ icon shows the first two characters of its name there,
 uppercased. The default layer (`KiwiDesk.bind`) never takes an
 icon — the status item always shows the standard KiwiDesk
 glyph.
-:::
 
 **Example:**
 
@@ -4767,14 +4725,12 @@ wins, then the **Main** role (the space follows whatever display is
 currently main — dock and undock without stale fingerprints), then
 the built-in positional default.
 
-:::unreleased
 And every screen keeps at least one space: whatever leaves a
 screen empty — a pin, a moved or deleted space, a profile loaded
 onto screens it was not saved for — KiwiDesk seeds one numbered
 space there, in the layout the starter setup would open that
 screen in. No file learns the seed until you save; `init.lua`
 never does.
-:::
 
 Explicitly loading a profile whose stored sets don't cover the
 connected monitors works, but the state loads *dirty* until you

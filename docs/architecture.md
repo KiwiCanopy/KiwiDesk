@@ -104,7 +104,6 @@ revoked it (#1049) — is learned as that window's **effective bound**
 Scrolling/Monocle consume the learned answer to place the residue
 (re-pack / center).
 
-:::unreleased
 One deliberate second ask, sent the moment the first entry
 confirms, corroborates the bound so its consumers need not wait
 for the layout to change (#1439). BSP and Stack move their stored
@@ -112,7 +111,6 @@ split ratio at retile to draw a corroborated floor, and where the
 floors cannot share the span the frame the retile issues lands
 inward of the slot (#934) — the slots every reader classifies
 against stay the layout's own.
-:::
 
 **Tab reconciliation** (the subtle case in step 2). A native-tab
 switch is temporal — one window disappears as another appears at the
