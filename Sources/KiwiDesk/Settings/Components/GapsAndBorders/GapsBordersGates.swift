@@ -83,8 +83,10 @@ struct GapsBordersGates {
     /// Deliberately NOT an `InertReason`: dimmed means "takes no
     /// input" on every channel, so a master stays live and
     /// acknowledges through its `?` — the first edit converges
-    /// its followers (#1383).
+    /// its followers (#1383). Routed through `acknowledged` so an
+    /// arm added without joining the register is dead, not live.
     func followersDiffer(for key: SettingKey) -> Bool {
+        guard Self.acknowledged.contains(key) else { return false }
         switch key {
         case .gaps(.outer):
             return outerGapsDiffer
