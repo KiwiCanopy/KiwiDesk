@@ -7083,8 +7083,8 @@ global; every open starts in one resting shape.** The
 picker's popover splits Symbols and Emoji into segmented
 tabs, and a typed query searches both vocabularies at once
 (the tabs stand back, like Character Viewer). Symbols lead
-(#1379, owner ruling 2026-09-15 via `ui-designer`,
-superseding #68 §6.4's "Emoji first"): that reason — space
+(#1379, owner ruling 2026-09-15, superseding #68 §6.4's
+"Emoji first"): that reason — space
 icons are the picker's most frequent use — said which
 destination to optimise for, not what that destination
 renders best, and the bar answers that itself. An SF Symbol
@@ -7102,14 +7102,17 @@ lists Symbol results above Emoji for the same reason, the two
 special results staying first. Search AND tab reset when the
 popover closes — a choice, the clear button or a click-away
 alike (#1357) — so no picker reopens on a filtered view the
-user did not ask for (`IconPickerRestingShapeTests`). The
-button shows a glyph-sized placeholder when no icon is set,
-never a "Choose…" label: the text made unset pickers wider
-than set ones, so rows wouldn't line up. Clearing is a
-control, not a choice: the remove button sits beside the
-tabs (disabled when nothing is set) instead of posing as a
-grid cell under Recents.
+user did not ask for (`IconPickerRestingShapeTests`), and
+every popover holding a per-open search takes that same
+dismissal-edge hook — the app picker was the second member.
 :::
+
+**The picker button and its clear control.** The button shows
+a glyph-sized placeholder when no icon is set, never a
+"Choose…" label: the text made unset pickers wider than set
+ones, so rows wouldn't line up. Clearing is a control, not a
+choice: the remove button sits beside the tabs (disabled when
+nothing is set) instead of posing as a grid cell under Recents.
 
 ### Shortcuts
 
