@@ -15,7 +15,7 @@ struct DesktopsGroup: View {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
             connectedScreens: model.displays.count,
-            guiManaged: model.core.isGuiManaged
+            guiManaged: model.guiManaged
         )
     }
 

@@ -83,6 +83,30 @@ struct StoredProfileBindingSaveTests {
         )
     }
 
+    /// Per ENTRY: a row the store gained under the open draft
+    /// survives the Save — the user owns the rows they touched
+    /// and nothing else (#1147).
+    @Test("a row the store gained meanwhile survives the save")
+    func storeRowSurvives() throws {
+        let model = try makeModel()
+        var moved = try #require(model.core.guiConfigStore.load())
+        moved.profileBindings[.number(3)] = DesktopBinding(
+            profile: "Late",
+            desktop: 3
+        )
+        try model.core.guiConfigStore.save(moved)
+        model.config.profileBindings[.number(2)] = DesktopBinding(
+            profile: "Away",
+            desktop: 2
+        )
+
+        model.saveEditedProfile()
+
+        let sidecar = try #require(model.core.guiConfigStore.load())
+        #expect(sidecar.profileBindings[.number(3)]?.profile == "Late")
+        #expect(sidecar.profileBindings[.number(2)]?.profile == "Away")
+    }
+
     /// With a VM up the write reloads, so the runtime map follows
     /// without a restart; the cold-boot branch above writes the
     /// store alone and `start()` picks it up.

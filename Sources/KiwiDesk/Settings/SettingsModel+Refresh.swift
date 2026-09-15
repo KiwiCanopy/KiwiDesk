@@ -5,6 +5,7 @@ import KiwiDeskCore
 extension SettingsModel {
     func refreshProfiles() {
         profiles = core.profiles.list()
+        guiManaged = core.isGuiManaged
         activeProfile = core.profiles.currentName
         activeStandard = core.profiles.currentStandard
         profileDirty = core.profiles.isDirty

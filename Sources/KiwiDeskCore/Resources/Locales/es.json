@@ -941,6 +941,7 @@
   "profiles.copy_failed": "Error al copiar: %1$@",
   "profiles.current_setup_note": "Tu configuración actual se guarda en %1$@. Para conservarla por separado, usa «%2$@» en la barra inferior.",
   "profiles.delete.help": "Eliminar perfil",
+  "profiles.desktops.lua_owned": "Tu init.lua controla las asignaciones de Escritorio — edita allí sus líneas de %1$@.",
   "profiles.duplicate_default.help": "Varios perfiles tienen esta cantidad marcada por defecto; el primero alfabéticamente tiene prioridad.",
   "profiles.load": "Cargar",
   "profiles.make_default": "establecer por defecto",

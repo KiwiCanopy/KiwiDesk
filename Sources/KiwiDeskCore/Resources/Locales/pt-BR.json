@@ -941,6 +941,7 @@
   "profiles.copy_failed": "Falha ao copiar: %1$@",
   "profiles.current_setup_note": "Sua configuração atual é salva em %1$@. Para mantê-la separadamente, use “%2$@” na barra abaixo.",
   "profiles.delete.help": "Excluir perfil",
+  "profiles.desktops.lua_owned": "Seu init.lua define os vínculos de Mesa — edite as linhas de %1$@ nele.",
   "profiles.duplicate_default.help": "Vários perfis com essa quantidade estão marcados como padrão; vence o primeiro em ordem alfabética.",
   "profiles.load": "Carregar",
   "profiles.make_default": "tornar padrão",

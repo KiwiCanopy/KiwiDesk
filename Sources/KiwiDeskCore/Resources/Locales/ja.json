@@ -941,6 +941,7 @@
   "profiles.copy_failed": "コピーに失敗しました: %1$@",
   "profiles.current_setup_note": "現在の構成は%1$@に保存されます。別個に保持するには、下のバーにある「%2$@」を使用してください。",
   "profiles.delete.help": "プロファイルを削除",
+  "profiles.desktops.lua_owned": "デスクトップの割り当てはinit.luaが管理しています。変更するには、そのファイル内の%1$@の行を編集してください。",
   "profiles.duplicate_default.help": "この台数のプロファイルが複数デフォルトに設定されています。アルファベット順で最初のものが使われます。",
   "profiles.load": "読み込み",
   "profiles.make_default": "デフォルトにする",

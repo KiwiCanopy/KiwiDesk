@@ -6,9 +6,7 @@ extension KiwiCore {
     /// the runtime native-Space bindings, and — when a
     /// readable `gui.json` sidecar exists — the sidecar's
     /// binding lines through `rewriteSidecarBindings`, which
-    /// would otherwise go stale:
-    /// `loadGuiConfig` composes bindings from the RUNTIME map
-    /// only on the no-sidecar seed path. The follow-up save
+    /// would otherwise go stale. The follow-up save
     /// lives here, not in the GUI, so every rename entry
     /// point (CLI/Lua later) inherits it. Bounds:
     /// - Never creates a sidecar (that would flip a

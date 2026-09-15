@@ -941,6 +941,7 @@
   "profiles.copy_failed": "복사 실패: %1$@",
   "profiles.current_setup_note": "현재 구성은 %1$@에 저장됩니다. 따로 보관하려면 아래 바에 있는 ‘%2$@’ 버튼을 사용하십시오.",
   "profiles.delete.help": "프로필 삭제",
+  "profiles.desktops.lua_owned": "데스크탑 바인딩은 init.lua가 관리합니다. 변경하려면 그 파일의 %1$@ 줄을 편집하십시오.",
   "profiles.duplicate_default.help": "이 화면 수의 프로필 여러 개가 기본값으로 표시되어 있습니다. 알파벳순으로 첫 번째 항목이 사용됩니다.",
   "profiles.load": "로드",
   "profiles.make_default": "기본값으로 설정",
