@@ -121,13 +121,11 @@ Desktop your main screen's.
 With a single screen there is no distinction to make — the main
 screen's Desktop is simply *the* Desktop.
 
-:::unreleased
 **A binding fires only for its profile's screen count.** A
 profile is saved for one number of screens, so a Desktop bound
 to a one-screen profile stands aside on two and KiwiDesk picks
 by your screens ([Which Profile
 Loads](user-guide.md#which-profile-loads)).
-:::
 
 ## A binding follows its Desktop, not its number
 

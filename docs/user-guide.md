@@ -242,20 +242,16 @@ What the fields' own notes do not say:
   whichever way the axis runs.
   Track sizes and in-track shares are session-only.
 
-:::unreleased
 The track shortcuts sit behind "Move windows in the track
 layout", open from the start once you have a Track Space or a
 track shortcut bound.
-:::
 
-:::unreleased
 - **Floating** — switching a space to Floating with any window
   partly or fully off the screen (a scrolled-out column, a
   parked Monocle window) or piled behind another (a Monocle
   stack) arranges the space's windows in the grid **Behavior ▸
   On quit** uses; with everything already reachable, nothing
   moves.
-:::
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or a stack
@@ -334,21 +330,17 @@ bounces and shows a frosted pill:
   where a neighbour would drop below its minimum; the neighbour
   marks itself.
 
-  :::unreleased
   It also shows once, without a press, when a window arriving in
   a split cannot fit beside a neighbour already at its minimum.
-  :::
 
 - On a scrolling space, growing stops at a maximum the app
   enforces (System Settings will not grow past its own width).
 
-:::unreleased
 Where the limit is the **app's own** — a minimum or maximum the
 app enforces, which KiwiDesk learns — the pill says so instead:
 *This app won't go smaller*, *Neighboring app won't go smaller*,
 *This app won't go bigger*. Lowering the configured minimum does
 not move those.
-:::
 
 Running out of screen is a silent stop. Under a held resize
 shortcut, a refusal shows its pill once and ends the glide.
@@ -413,12 +405,10 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 
 ## Bars
 
-:::unreleased
 **Thickness** runs 20–80 pt in both cards; Lua
 ([`app_bar.set_thickness`](lua-reference.md#app_barset_thickness),
 [`space_bar.set_thickness`](lua-reference.md#space_barset_thickness))
 takes any value from 20 up.
-:::
 
 ### App Bar
 
@@ -433,12 +423,10 @@ App Bar overrides](lua-reference.md#per-layout-app-bar-overrides)).
 panel (**Colours & Animations**), tinted by each bar's Fill; on
 macOS before 26 the Boxed or Plain shape draws underneath.
 
-:::unreleased
 On by default, on all three surfaces. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
 the Boxed or Plain shape draws instead, with its Fill fully
 opaque, and the switch stays as you set it.
-:::
 
 ### Space Bar
 
@@ -446,11 +434,9 @@ One bar per display, listing that display's Spaces in profile
 order. Click a Space to switch to it; the glyphs are
 informational.
 
-:::unreleased
 While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
 ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
-:::
 
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty
@@ -504,10 +490,8 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ### Which Profile Loads
 
-:::unreleased
 A Desktop binding fires only when the bound profile is saved for
 the connected screen count (rung 1 below).
-:::
 
 The card answers for your machine now — *"Right now: 2 screens →
 Desk (these exact monitors)"* — naming which rung resolved it.
@@ -669,12 +653,10 @@ each screen's share proportional to its width. "Smallest" is
 read from width alone, so a 27" beside an ultrawide opens in
 monocle.
 
-:::unreleased
 The tuning follows the main screen: a laptop main gets 6 pt
 gaps, an ultrawide two stack masters and a larger minimum window
 size, a pivoted one the stack at the bottom and scrolling
 vertical.
-:::
 
 While you are still on the Starter layout, connecting or removing
 a monitor re-derives it and the `⌃⌥N` space shortcuts extend to
@@ -833,7 +815,6 @@ Desktop you gave it when Mission Control renumbers — [A binding
 follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
-:::unreleased
 **A binding fires when its Desktop becomes current on your main
 screen** (the one with the menu bar) and its profile fits your
 screen count ([Which Profile Loads](#which-profile-loads)). With
@@ -849,7 +830,6 @@ flowchart TD
     B -->|"No binding, or<br/>another screen count"| K["The current profile<br/>stays active"]
     P["You pick a profile<br/>by shortcut or menu"] --> A
 ```
-:::
 
 A hand-written config declares bindings in `init.lua` with
 `bind_profile_to_desktop`. Each Desktop remembers which space it

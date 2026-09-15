@@ -404,14 +404,12 @@ it would add and remove a line on every toggle, in the space
 the drawer's own contents occupy. The ruling is in
 `docs/design-decisions.md`.
 
-:::unreleased
 **A section header's trailing readout is words only.** A
 `SettingsSection` takes `trailing:` — a short value at the
 title's far edge, drawn in `ink2` at `.subheadline`, the Mac
 Checklist's "Done: 2 of 4" — and never a control: an accessory
 that acts needs a name and a value of its own, which is the
 drawer accessory's job above.
-:::
 
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row
@@ -1268,11 +1266,9 @@ the third shape: the row is both the scroll unit and the wash,
 so it lands at the top edge without the heading above it — the
 gap edges and General ▸ Advanced's rows land this way.
 
-:::unreleased
 Where such a row sits behind a `SettingsDisclosure`, the drawer
 opens first — it expands only for its own catalog children — and
 the result's breadcrumb names the drawer (#277, #1250).
-:::
 
 Three things this must not become. **Not a ring or halo** — that
 is this app's vocabulary for "this input is armed"
@@ -1498,7 +1494,6 @@ was written down:
   print matters once the block is live again, and the anchor
   covers the meantime. Guarded by `GreyOutAnchorTests`.
 
-:::unreleased
 Which of the two remote shapes a row takes follows from what is
 dimmed, not only from whether a live label exists (#1310, owner
 ruling 2026-09-14): a header `?` scopes the CARD, so it answers
@@ -1512,7 +1507,6 @@ colours card's *Unfocused windows* row draws
 linking the destination in the sentence; the Borders header `?`
 answers only for the ring being off. The argument is
 `docs/design-decisions.md` ▸ *a dim is not a sentence*.
-:::
 
 And one exemption worth stating: a control whose *only* consumer
 is off may still have a second one. The App Bar's "App symbol

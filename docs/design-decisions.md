@@ -139,7 +139,6 @@ any trademark grant, so nothing else does it. The boundary is a
 tagged version rather than a date, so it is the same fact in the
 release notes, in `LICENSE` and in a `git tag`.
 
-:::unreleased
 The `.app` is itself a copy of the Licensed Work, so it carries
 the license text and the Lua and Sparkle notices and opens both
 from Settings ▸ About — BSL 1.1 wants the License displayed on
@@ -147,7 +146,6 @@ every copy, and the two MIT notices want theirs in every copy —
 and a trim of About's link card or of the bundle keeps them
 (#1407; how the bundle carries them and derives its copyright
 line is `.claude/rules/packaging-and-release.md`'s).
-:::
 
 ### Accepted limitations
 
@@ -1354,11 +1352,9 @@ monocle — where only the focused window is visible — borders stay
 focused-only. The focused window is ringed whether tiled or
 floating.
 
-:::unreleased
 Floating windows are in the unfocused set too, flag-floats and
 floating-mode members alike — the #1286 entry below carries the
 argument; they were excluded here without one.
-:::
 
 A **transient overlay** — a window that floats for a *structural*
 reason (accessory activation policy, a non-standard panel subrole,
@@ -1564,7 +1560,6 @@ caption" — since #678 turn 10 every layout card does — but that
 Track's own says what the others' do not: that this layout is
 the harder one. Reword it and the guidance goes with it.
 
-:::unreleased
 *Amended 2026-09-14 (#1440):* the shortcut half of that copy
 moved from a subheader caption ("only relevant if you're using
 the track layout") to the rows' own drawer — Shortcuts ▸ Move
@@ -1576,7 +1571,6 @@ shut, and a user with a Track space or a Track binding meets it
 open. What changed is where the sentence lives; the title now
 carries it, so a caption restating it inside the drawer was
 struck (owner ruling 2026-09-14).
-:::
 
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
 when there are more tracks than the space's normal capacity, the
@@ -1605,7 +1599,6 @@ would make spawn outcomes monitor-dependent and
 non-deterministic). **This was deliberately revisited for the
 `focused_track` default — see the next entry.**
 
-:::unreleased
 **The Track limit counts the overflow track (#1354, owner ruling
 2026-09-09).** [Principle] The number a user types is the number
 of tracks they see: a limit of 3 shows three tracks, the last of
@@ -1633,7 +1626,6 @@ follows the engine's. The trade accepted: a Lua script spelling
 where a renamed verb fails loudly a re-scaled number runs and
 draws one track fewer, with only the refused `1` to say
 anything.
-:::
 
 **BSP alternates by default (#1181, 2026-08-31).** `alternating`
 — horizontal then vertical by depth — rather than
@@ -1910,7 +1902,6 @@ how it is reached. It is wider than the arm by the mode on
 purpose: the command is the right raise on any shown Space, so
 an arm that widens later is covered already.
 
-:::unreleased
 The door owes a CLOSED own window the same command (#1380). An
 `NSWindow` keeps its number across a close and a re-show, so the
 Settings window a user closed and reopened comes back to Core as
@@ -1931,7 +1922,6 @@ where the fold or a sibling debt already set the focus. Only a
 scrolling Space shows the defect: anywhere else the bounce needs
 an origin the window refused, which a compliant own window never
 gives.
-:::
 
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The
@@ -2054,7 +2044,6 @@ arrival raises through the same gate: on the owner's round trips
 refusal, so the AX create that pays it arrives after the draw
 list lists the window.
 
-:::unreleased
 **The settle's refocus is the third arm, and the gate cannot
 stand in for it (#1364).** A swipe to an EMPTY Desktop made macOS
 activate Finder — the desktop itself — and Finder's window on the
@@ -2092,9 +2081,7 @@ half of the issue — a swipe on one display removing a window on
 a display whose Desktop did not change — did not reproduce on
 2026-09-13 with two displays and an event-stream trace of every
 removal; what remains open lives on #1364, not here.
-:::
 
-:::unreleased
 **The gate asks two compositor reads, and either refuses
 (#1410).** The flag alone had a blind spot the probe measured on
 2026-09-13, every gesture of the sitting: from a three-finger
@@ -2125,7 +2112,6 @@ refused; and the read costs ~0.15 ms per raise (the topology copy
 0.11 ms, the per-window list 0.03 ms, measured 2026-09-13), so it
 is live rather than cached from the switch handler, whose stamp is
 the notification's timing and not the compositor's.
-:::
 
 ### A focus report is only as good as the activation behind it (#1322)
 
@@ -2316,7 +2302,6 @@ moved underneath the window the user is looking at — and a rule
 naming only the resize would be a special case the next cause
 re-opens.
 
-:::unreleased
 **A reorder is the one member of that set where the premise is
 false, and it is ruled OUT at the model (#1353).** There the
 row did not move: the focus moved within a static row, by the
@@ -2348,7 +2333,6 @@ model and nowhere else (`ScrollSlotReleaseSeamTests`);
 `ScrollSlotReleaseTests` holds each primitive, and
 `ScrollingResizeAnchorEndToEndTests` the keyboard swap and the
 bar drop on screen.
-:::
 
 **A slot resting ON a border keeps the border, not its leading
 edge.** The rule above says "hold the slot's place", and place
@@ -2878,7 +2862,6 @@ reachable refusal in the feature — a warning on the commonest
 path becomes chrome, and spends an alarm vocabulary reserved for
 a real conflict.
 
-:::unreleased
 **A refusal names the app where the app is the limit
 (#1261).** [Principle] A pill tells the user a limit was
 reached; what they do next depends on *whose*. KiwiDesk's own
@@ -2912,7 +2895,6 @@ true — the #1083 bet the maximum clamp was already making
 silently. And every sentence is written to hold with no press
 behind it, because the neighbour pair is also drawn by a retile
 (#934).
-:::
 
 It lives in Behaviour rather than General, and that is a
 STORAGE decision wearing a placement question: every row in
@@ -3213,7 +3195,6 @@ never a lent one, so two single entries cannot bootstrap each
 other. (`SizeBoundGeneralizationTests`,
 `ScrollingFixedSpanCueTests`)
 
-:::unreleased
 **[Trade-off]**
 
 **The corroborating ask is sent, never awaited (#1439).** An
@@ -3257,9 +3238,7 @@ it at the anchor's answer as it pins the second probe at the
 candidate's. (`SizeBoundCorroborationProbeTests`,
 `SizeBoundCorroborationProbeLifecycleTests`,
 `SizeBoundCorroborationProbeEngineTests`)
-:::
 
-:::unreleased
 **[Principle]**
 
 **Track's automatic count reads learned minimums; a fixed limit
@@ -3308,9 +3287,7 @@ the effective list, so a home sticky rendering elsewhere can
 carry its floor into the heal's count and not the render's —
 one track fewer in the heal than on screen, the away twin of
 the visitor horn below, transient in the same way.
-:::
 
-:::unreleased
 **[Principle]**
 
 **A split store heals to a learned floor at retile, and the
@@ -3376,7 +3353,6 @@ flat-array trade's residue and stays in the limitations row.
 (`SplitFloorHealTests`, `SplitOverflowTests`,
 `SplitFloorHealWiringTests`, `SplitFloorCueTests`,
 `SplitFloorHealNeedleTests`)
-:::
 
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
@@ -3534,7 +3510,6 @@ ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
 
-:::unreleased
 **A resize nobody asked for is corrected on its own event
 (#1358).** [Principle] macOS's title-bar double-click zoom, its
 double-click on a window edge or corner (expand to that screen
@@ -3578,7 +3553,6 @@ grace would be corrected forever — each correction wipes the
 memo of the same shape ends it: two consecutive corrections and
 the window is left standing until it is seen on its frame again
 or the memo ages out (`UnsolicitedResizeTests`).
-:::
 
 **A corner is never a float's original, and a stranded float is
 re-centred (#1352).** [Principle] The stash restores a parked
@@ -3619,7 +3593,6 @@ now spares every id the away ledger knows — the id is the same
 window when it returns — so the centring stays what it is meant
 to be, the net beneath a memory that is genuinely gone.
 
-:::unreleased
 **A space entering floating mode gathers what the previous
 layout left off-screen, scoped by visibility (#1177).**
 [Principle] A floating layout assigns nothing, so a space
@@ -3717,7 +3690,6 @@ re-file rewrites. So a floating-mode member follows the screen
 by ruling — standing down would keep a home whose layout
 assigns no frame on a display the window is not on, which is
 this issue's strand by another door.
-:::
 
 **The tiled→floating toggle nudges the window, and the nudge is
 a fixed magnitude, not proportional.** A window keeps its exact
@@ -3774,7 +3746,6 @@ frame of its own to change; whether the z-order raise, the Space
 Bar's float badge and the focus ring should follow is a question
 about what each of those *means*, not a consequence of this one.
 
-:::unreleased
 **The ring and the float-tier raise follow; the badge stays on
 the flag ([#1286](https://github.com/KiwiCanopy/KiwiDesk/issues/1286)).**
 [Rationale] Of the flag's readers, most are the flag's own
@@ -3809,7 +3780,6 @@ the flag, and the same-app grouping it breaks keeps it with it
 "disagree" by this: one is a mark drawn, the other a ring
 withheld, and neither claims the space is anything but what the
 user set it to.
-:::
 
 ### Spaces, profiles & config ownership
 
@@ -4738,7 +4708,6 @@ one more thing to forget: `GateReasonPlacement` answers it, and
 it reproduces every site that already drew one, which is what
 makes it checkable.
 
-:::unreleased
 *Amended 2026-09-14 (#1310, owner ruling on the device):* channel
 3 has two shapes, and which one a row takes follows from what is
 dimmed, not from whether a live label exists. A header `?` scopes
@@ -4759,7 +4728,6 @@ while the ring is on, its reason on the heading — and took the
 same link (`unfocusedReference`); its header `?` now answers only
 for the ring being off, when every row is grey. The header `?`
 stays the shape for a greyed block.
-:::
 
 The temptation to answer all of this with `.accessibilityHint`
 is why the ladder is written down. A hint on a **leaf** control
@@ -5054,7 +5022,6 @@ touches AX, the filesystem or the running session
 (`SettingsSearchIndexTests` scans the match-path files for the
 violation; enrichment reads only the draft the shell hands it).
 
-:::unreleased
 That line is why palette names joined the group last (#805):
 `PaletteStore` is stateless and file-backed by design — a
 palette saved anywhere is seen everywhere with no cache to
@@ -5066,7 +5033,6 @@ written at the shelf's mutations and at the window's reload and
 never lazily from the search path; the store keeps its
 contract, and `PaletteCacheTests` holds the reader by
 construction and the writers.
-:::
 
 **The pill is the only place the mode is mentioned.** Search
 indexes both modes, always. A result whose area the current
@@ -5126,18 +5092,15 @@ census row whose label key another census row shares cannot be
 told apart by a join that reads the key alone, and a context-menu
 item has no rendered row to anchor (`.claude/rules/gui.md`).
 
-:::unreleased
 A hit inside a filled drawer opens the drawer and washes the
 row; `SettingsSearchDrawerAnchorTests` holds every filled drawer
 and `SettingsCatalogDrawerTests` the ones ruled childless.
-:::
 
 ### The search panel shows nothing before you type
 
 **[Principle]** (#1030 tried the opposite; #1470 retired it, owner
 ruling 2026-09-15)
 
-:::unreleased
 **A focused search field with nothing typed shows no panel.** The
 field is the window's first text field, so macOS hands it the
 arrival focus on every open — and a panel with rows before a
@@ -5172,7 +5135,6 @@ sending focus into the page instead would move it somewhere the
 user was not looking (owner eyeball 2026-09-14, keyboard
 navigation on, wide and narrow). `HomeSurfacingTests` needles
 the query-only panel and the collapse.
-:::
 
 ### Hover help appears sooner than AppKit's default
 
@@ -5553,7 +5515,6 @@ rebound keymap behind it teaches someone else's keyboard.
 
 **[Principle]**
 
-:::unreleased
 **A checklist row is a change made ONCE that can be found DONE —
 by macOS, read live, or only where macOS would not answer, by
 the user's own tick. A habit is kept, never found done, so it
@@ -5632,7 +5593,6 @@ switch — the Dock — links the pane the way the settings rows do,
 and the keyboard habit names the shortcuts panel's LIVE chord,
 read from the resolved layer like the tour's keys, with a second
 frame for a Mac where nothing is bound.
-:::
 
 ### The app links the guide, in a language the site actually serves
 
@@ -5679,11 +5639,9 @@ they will still be using on day 30, against a one-time button in
 a window that never returns — the tour reopens FROM Settings, and
 `KiwiDesk.open_settings()` is bindable.
 
-:::unreleased
 Since #1365 the default action lands on the Mac Checklist card;
 ▸ *The Mac Checklist counts what macOS can confirm* argues why
 that is not the Open Settings link coming back.
-:::
 
 **The banner is one-shot, so only a permanent pointer closes the
 gap.** Home's first-run banner reaches someone who closed the
@@ -5694,7 +5652,6 @@ one change, had no route to the guide anywhere in the app. That
 is the gap this entry is about, not a nicety on top of it, and
 only a permanent pointer closes it.
 
-:::unreleased
 That permanent pointer is the Mac Checklist's foot (#1365,
 #1470). It was General ▸ About's bare "Guide" link, and the
 tour's closing card carried the sentence too; both went with
@@ -5711,7 +5668,6 @@ exactly as About was (`HomeCardOrderTests` ▸ `modeCounts`,
 `DestinationParityTests` ▸ `profileContextExcludesOnlyProfileless`)
 — so a change that withholds the checklist further owes the
 pointer a new home in the same change.
-:::
 
 The two surfaces share ONE frame and one label, because the same
 English names the same action at both; the search row draws the
@@ -7241,7 +7197,6 @@ nothing, so the two declarations are refused by the search index
 on that same capability, the way a bridge-gated census row
 already is.
 
-:::unreleased
 The second instance (#1440, owner ruling 2026-09-14) is the
 Track shortcut families, one drawer below the Desktop one in
 Move windows, and it settles two things the first did not have
@@ -7258,7 +7213,6 @@ and a Desktop row is the escape into macOS's — was argued by
 design review and is defensible; the owner ruled audience size,
 and the reason is stated so the order is a decision rather than
 an accident.)
-:::
 
 **Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a profile's
@@ -7333,7 +7287,6 @@ Desktop bindings follow, like Delete and make default.
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
-:::unreleased
 **The active layer is shown, and showing it is not a
 preference** (#1169, owner ruling 2026-09-14). A press on the
 wrong layer does something surprising, so both surfaces that
@@ -7358,7 +7311,6 @@ with a non-numeric name does, so a layer never disappears from
 the bar for lack of one. Both surfaces read the one
 `layer_change` bus event (#1168): the bar takes no hook on the
 manager, which keeps one seam.
-:::
 
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed
@@ -10004,7 +9956,6 @@ palette the user applied on purpose, the same category of
 surprise the palette entry below bans in the other direction.
 (Owner ruling 2026-08-02, during Phase 2 device review.)
 
-:::unreleased
 **The bars ship one thickness, 40 pt, on every screen, and the
 slider's floor is the Core floor by derivation.** (#1359, owner
 ruling 2026-09-13.) Two numbers used to answer "how thick": a
@@ -10028,7 +9979,6 @@ encoded), so every file the app ever wrote carries its own
 number and only a fresh seed takes the new one — a leaf younger
 than a shipped release, or one a group elides, owes the #1369
 crossing instead (`BarSliderBandTests`, `BarThicknessDefaultTests`).
-:::
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is
@@ -10251,7 +10201,6 @@ surface keeps its own colour rule: the bars tint their glass from
 their Fill, the panel stays untinted (#1295). The switch changes
 only WHETHER, never WHICH.
 
-:::unreleased
 **Reduce transparency stands every glass surface down, live, and
 moves no stored value.** (#1374, owner ruling 2026-09-13.) The
 platform does not do this for us: `NSGlassEffectView` draws its
@@ -10276,7 +10225,6 @@ What this does NOT do, and knowingly: the Settings row keeps
 reading On while the setting holds glass down — a greyed row
 with its reason is the honest shape and needs a runtime gate of
 its own (#1418).
-:::
 
 **The per-layout override is deliberately outside the switch's
 reading.** `monocle.set_app_bar_liquid_glass` and
@@ -10340,7 +10288,6 @@ a hue for it to sample — never a replacement for the content. A
 fully transparent `fill_color` leaves the glass clear. One seam
 owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
 
-:::unreleased
 The finish is ON by default on every surface (owner ruling
 2026-09-10, reversing the launch-day no-glass default: the bars
 are the app's face, and a fresh install or a Reset All Settings
@@ -10364,7 +10311,6 @@ An existing setup keeps the look it had, and only a fresh seed
 takes the new default. Below macOS 26 the toggle is absent, so a
 setup authored there carries the stored value wherever it is
 imported, the finish included.
-:::
 
 The finish stays OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
@@ -10631,7 +10577,6 @@ last affordance that can undo the thing being greyed, the grey
 owes an escape hatch, or it is a trap wearing the costume of a
 safeguard.
 
-:::unreleased
 **[Principle]**
 
 **A Desktop binding fires only for its profile's screen count
@@ -10671,9 +10616,7 @@ runs before the loop publishes displays, and a paused engine
 discovers none — the gate cannot judge and the binding waits
 too, rather than loading a profile that the boot scan's monitor
 change would then replace; that first monitor change fires it.
-:::
 
-:::unreleased
 **[Principle]**
 
 **A screen left with no space is healed, never refused
@@ -10699,7 +10642,6 @@ One residue, accepted: a re-dock onto the live profile's own
 screen set re-seats the seed in its opening layout, so a layout
 you set on it by hand does not survive that re-dock, where a
 declared space's would.
-:::
 
 ### Monitors
 

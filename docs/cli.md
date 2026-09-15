@@ -585,7 +585,6 @@ show — which emits `space_change` too when that screen is the
 one holding the active Space. With the
 option off, or with a single screen, `monitor` is always 1.
 
-:::unreleased
 `layer_change` fires when the active keyboard layer changes —
 a `switch_layer` call, a config reload returning you to
 `default`, a profile switch — and never when a switch names the
@@ -597,7 +596,6 @@ layer without polling:
 {"event": "layer_change",
  "data": {"from_layer": "default", "to_layer": "resize"}}
 ```
-:::
 
 ## Raw IPC Protocol
 
