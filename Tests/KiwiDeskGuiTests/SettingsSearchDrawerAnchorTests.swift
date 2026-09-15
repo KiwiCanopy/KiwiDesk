@@ -185,8 +185,10 @@ struct SettingsSearchDrawerAnchorTests {
     /// search hit lands on the control only where the section
     /// hides it) — a `.showMore` row lands on its own control,
     /// breadcrumb the destination alone, and an `.atRest` row
-    /// carries none. Read with the bridge present so the sticky
-    /// reach row is indexed. The drag ghost / drop zone `Border`
+    /// carries none; since #1473 every row of both cards is at
+    /// rest, so the clause holds the second arm alone until a
+    /// disclosure returns. Read with the bridge present so the
+    /// sticky reach row is indexed. The drag ghost / drop zone `Border`
     /// and `Fill` rows are the stated residue: two census rows
     /// share one label key per column, and the label-key join
     /// reads no instance, so they stay anchor-less until the
@@ -235,39 +237,57 @@ struct SettingsSearchDrawerAnchorTests {
     }
 
     /// A control a census row names is refused WITH that row:
-    /// without the bridge the sticky reach toggle is not drawn
-    /// and its census row is unindexed, and below macOS 26 the
-    /// glass card is the same shape — so neither control may
-    /// surface as a catalog-only row (`SettingsSearchIndex.build`
-    /// claims it off every labelled census row, indexed or not).
-    /// The glass half is stated through the availability flag,
-    /// so it asserts on every macOS.
+    /// `SettingsSearchIndex.build` claims it off every labelled
+    /// census row of the area, indexed or not, so a row `indexes`
+    /// refuses on this machine — the glass card below macOS 26
+    /// — never resurfaces its control as a catalog-only row for
+    /// something nothing draws. Held generally: no catalog-only
+    /// row's control carries a label key any census row of its
+    /// area does. Stated residue: on a host where nothing is
+    /// refused (macOS 26+, the bridge present) every such
+    /// control is claimed by its indexed row and the clause
+    /// cannot see the construction it names; only a pre-26
+    /// runner exercises it.
     @Test("a refused census row takes its control with it")
     func refusedRowsKeepTheirControls() {
         pinEnglish()
         defer { reset() }
         let before = SettingsSearchIndex.canDriveDesktops
         defer { SettingsSearchIndex.canDriveDesktops = before }
-        let reach = SettingsCatalog.gapsAndBorders.stickyReachRow.id
-        SettingsSearchIndex.canDriveDesktops = false
-        #expect(
-            !SettingsSearchIndex.rows().contains {
-                $0.anchor.anchor == reach
+        for bridge in [false, true] {
+            SettingsSearchIndex.canDriveDesktops = bridge
+            let rows = SettingsSearchIndex.rows()
+            let extras = rows.filter { $0.key == nil }
+            #expect(!extras.isEmpty)
+            for extra in extras {
+                let labelled = Set(
+                    SettingKey.allCases
+                        .filter {
+                            $0.placement.area
+                                == extra.destination.area
+                        }
+                        .compactMap { key -> String? in
+                            guard case .key(let k) = key.text.label
+                            else { return nil }
+                            return k
+                        }
+                )
+                let entry = SettingsCatalog.entries(
+                    of: extra.destination
+                )
+                .first { $0.control.id == extra.anchor.anchor }
+                #expect(
+                    entry?.control.key.map(labelled.contains)
+                        != true,
+                    Comment(rawValue: extra.id)
+                )
             }
-        )
-        SettingsSearchIndex.canDriveDesktops = true
-        let row = SettingsSearchIndex.rows().first {
-            $0.anchor.anchor == reach
         }
-        #expect(row?.key == .borders(.stickyDesktopReach))
         let glass = SettingsCatalog.colors.glassCard.id
         let glassRow = SettingsSearchIndex.rows().first {
             $0.anchor.anchor == glass
         }
-        #expect(
-            (glassRow != nil) == AppBarStyle.glassAvailable
-        )
-        #expect(glassRow?.key != nil || glassRow == nil)
+        #expect((glassRow != nil) == AppBarStyle.glassAvailable)
     }
 
     /// The two bars' Style drawers share one label key and are

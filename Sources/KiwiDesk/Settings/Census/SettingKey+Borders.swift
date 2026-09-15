@@ -50,7 +50,7 @@ extension BordersKey {
         case .borderWidthMaster, .borderCornerMaster:
             return .row(.gapsAndBorders, .borders, .atRest)
         case .borderFitGapsExtraSpacing:
-            return .row(.gapsAndBorders, .focusBorder, .showMore)
+            return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .borderFocusedColor:
             return .row(
                 .advancedColours,
@@ -60,7 +60,7 @@ extension BordersKey {
             )
         case .borderUnfocusedEnabled, .borderGlow,
             .borderGlowSizeAuto:
-            return .row(.gapsAndBorders, .focusBorder, .showMore)
+            return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .borderUnfocusedColor:
             return .row(
                 .advancedColours,
@@ -77,7 +77,7 @@ extension BordersKey {
             return .row(
                 .gapsAndBorders,
                 .focusBorder,
-                .showMore,
+                .atRest,
                 gate: .anyOf([
                     .borders(.borderGlow),
                     .borders(.borderGlowSizeAuto),
@@ -92,7 +92,7 @@ extension BordersKey {
             return .row(
                 .gapsAndBorders,
                 .stickyWindows,
-                .showMore
+                .atRest
             )
         case .stickyDesktopReach:
             // HIDDEN without the bridge (#1145) — the
@@ -100,7 +100,7 @@ extension BordersKey {
             return .row(
                 .gapsAndBorders,
                 .stickyWindows,
-                .showMore,
+                .atRest,
                 gate: .runtime(.desktopBridgeAbsent)
             )
         case .dragGhostEnabled, .dragDropZoneEnabled:

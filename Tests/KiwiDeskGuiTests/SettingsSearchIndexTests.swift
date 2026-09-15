@@ -191,14 +191,15 @@ struct SettingsSearchIndexTests {
                 .spaces: 2,
                 .layoutDefaults: 35,
                 .monitors: 3,
-                // 12 since #277: the focus border's four rows,
-                // the fit-gaps spacing and the sticky mark gained
-                // anchors (the sticky reach row is bridge-gated
-                // and unindexed here); the four drag Border/Fill
-                // rows stay anchor-less by ruling — two census
-                // rows per label key, which the join cannot
-                // split — beside the at-rest gap rows.
-                .gapsAndBorders: 12,
+                // 18 since #1473: the focus border's four rows,
+                // the fit-gaps spacing and the sticky mark are
+                // `.atRest` in the census, as they render, so
+                // the #277 anchors they carried for a day are
+                // gone (the sticky reach row is bridge-gated and
+                // unindexed here); the four drag Border/Fill rows
+                // stay anchor-less by ruling — two census rows
+                // per label key, which the join cannot split.
+                .gapsAndBorders: 18,
                 // 9 since #277: the 27 rows behind the two
                 // Style drawers gained their catalog anchors so
                 // a hit opens the drawer; the at-rest rows stay

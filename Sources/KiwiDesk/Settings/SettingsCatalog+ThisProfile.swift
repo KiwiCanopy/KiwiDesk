@@ -171,37 +171,9 @@ struct GapsAndBordersControls: Sendable {
         "border.title",
         "Focus border"
     )
-    // The Focus border and Sticky rows below sit at rest in their
-    // cards, so an anchor buys the scroll and the wash rather than
-    // a drawer opening (#277); keyed on their census label keys.
-    let unfocusedBorders = SettingsControl(
-        "border.unfocused_enabled",
-        "Show border on unfocused windows"
-    )
-    let glowEffect = SettingsControl("border.glow", "Glow effect")
-    let autoGlowSize = SettingsControl(
-        "border.glow_size.auto",
-        "Auto glow size"
-    )
-    let glowSizeSlider = SettingsControl(
-        "border.glow_size",
-        "Glow size"
-    )
-    let fitGapsSpacing = SettingsControl(
-        "border.fit_gaps.extra_spacing",
-        "Extra spacing"
-    )
     let stickyWindows = SettingsControl(
         "sticky.title",
         "Sticky windows"
-    )
-    let stickyMarkRow = SettingsControl(
-        "sticky.mark",
-        "Show mark on sticky windows"
-    )
-    let stickyReachRow = SettingsControl(
-        "sticky.desktop_reach",
-        "Stay visible across Desktops"
     )
 }
 
