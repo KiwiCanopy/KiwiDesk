@@ -22,12 +22,9 @@ extension ScrollingLayout {
         focusedPos: CGFloat?
     ) -> CGFloat {
         guard let focusedPos else {
-            // No slot to place (a floating focus, #141): hold the
-            // previous rest. A fixed anchor reaches here only once
-            // the slot the rest remembers has left the row
-            // (`ScrollingLayout.subject`), so the held number is
-            // bounded to keep what remains on screen rather than
-            // forced to the leading edge.
+            // No slot to place (#141): hold. A fixed anchor gets
+            // here once its remembered slot left the row
+            // (`subject`) — bound, never lead-edge (#1388).
             let held = previous?.offset ?? 0
             return anchor.keepsRowOnScreen
                 ? clampedToRow(held, along: along, rowLength: rowLength)

@@ -11,11 +11,9 @@ extension ScrollingLayout {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> ScrollRest {
-        // A lone window that fills has no rest to measure and
-        // keeps the history for a second arrival (#141); one kept
-        // at its slot (#1389) rests like any row.
-        guard windows.count > 1 || !context.scrolling.fillWhenAlone
-        else {
+        // A lone window that fills keeps the history for a second
+        // arrival (#141); one kept at its slot rests like any row.
+        guard !fillsAlone(windows, context: context) else {
             return context.scrollRest ?? ScrollRest(offset: 0)
         }
         let area = context.scrolling.windowFrame(
@@ -82,11 +80,8 @@ extension ScrollingLayout {
     static let edgeTolerance: CGFloat = 0.5
 
     /// Whether the row reaches past the viewport along the scroll
-    /// axis (#150) — so an edge pin piles a slot behind or over a
-    /// neighbour. Judged on the DRAWN offset, not the row length
-    /// alone: a fixed anchor rests the focus where it says and a
-    /// row shorter than the axis can still hang off an edge
-    /// (#1388); `follow`'s clamp makes the two readings agree.
+    /// axis (#150), judged on the DRAWN offset: a short row under
+    /// a fixed anchor can still hang off an edge (#1388).
     static func rowOverflows(
         for windows: [WindowID],
         in context: LayoutContext

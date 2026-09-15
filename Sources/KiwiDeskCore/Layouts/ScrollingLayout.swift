@@ -26,7 +26,7 @@ public struct ScrollingLayout: LayoutSystem {
         // that size (#677): with no neighbors to re-pack against,
         // the answered size is CENTERED (the monocle treatment; a
         // symmetric gap reads deliberate).
-        if windows.count == 1, context.scrolling.fillWhenAlone,
+        if Self.fillsAlone(windows, context: context),
             let only = windows.first
         {
             return [
@@ -140,12 +140,21 @@ public struct ScrollingLayout: LayoutSystem {
         )
     }
 
-    /// The slot the anchor places. A fixed anchor keeps anchoring
-    /// the last tiled focus while a float holds focus (#1388):
-    /// the rest remembers it (#966), and re-deriving its place
-    /// from the live row is what keeps a closed neighbour from
-    /// leaving a stale offset behind. `follow` holds its offset
-    /// instead (#141), so it names no stand-in.
+    /// Whether the one window takes the whole area (#1389) — the
+    /// one reading `calculateGeometry` and `viewportRest` share.
+    static func fillsAlone(
+        _ windows: [WindowID],
+        context: LayoutContext
+    ) -> Bool {
+        windows.count == 1 && context.scrolling.fillWhenAlone
+    }
+
+    /// The slot the anchor places: the tiled focus, or under a
+    /// fixed anchor the last one the rest remembers while a float
+    /// holds focus (#1388, `ScrollingAbsoluteAnchorTests`). A
+    /// reorder releases that slot (#1353) and the stand-in with
+    /// it until the next tiled focus; `follow` holds its offset
+    /// instead (#141) and names none.
     static func subject(
         of windows: [WindowID],
         context: LayoutContext
