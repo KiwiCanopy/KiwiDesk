@@ -7077,17 +7077,42 @@ SF Symbol name typed into the search appears as a result, and
 any single character (incl. emoji) works via "Use as text".
 One `IconPicker` serves layer icons and space icons. (#68 §6.4)
 
-**Browsing is tabbed (Emoji first); search is global.** The
-picker's popover splits Emoji and Symbols into segmented
-tabs — emoji lead because space icons are the picker's most
-frequent use — but a typed query searches both vocabularies
-at once (the tabs stand back, like Character Viewer). The
-button shows a glyph-sized smiley when no icon is set,
-never a "Choose…" label: the text made unset pickers wider
-than set ones, so rows wouldn't line up. Clearing is a
-control, not a choice: the remove button sits beside the
-tabs (disabled when nothing is set) instead of posing as a
-grid cell under Recents.
+:::unreleased
+**Browsing is tabbed (Symbols first, every caller); search is
+global; every open starts in one resting shape.** The
+picker's popover splits Symbols and Emoji into segmented
+tabs, and a typed query searches both vocabularies at once
+(the tabs stand back, like Character Viewer). Symbols lead
+(#1379, owner ruling 2026-09-15, superseding #68 §6.4's
+"Emoji first"): that reason — space
+icons are the picker's most frequent use — said which
+destination to optimise for, not what that destination
+renders best, and the bar answers that itself. An SF Symbol
+identifier takes `item_color` / `active_item_color` /
+`focused_item_color`, while an emoji is untinted content the
+bar dims exactly as it dims a native app image (`iconGlyph`),
+so a space labelled with an emoji sits in the app-icon class
+and carries none of the bar's state encoding. The layer icon
+rides the same ladder into the menu bar as a template image,
+so it wants symbols at least as much, and Recents is one
+shared list, so a per-caller default would leak through it
+anyway — hence no per-caller switch. Emoji stay one segment
+away, a user's recent emoji sit above either tab, and search
+lists Symbol results above Emoji for the same reason, the two
+special results staying first. Search AND tab reset when the
+popover closes — a choice, the clear button or a click-away
+alike (#1357) — so no picker reopens on a filtered view the
+user did not ask for (`IconPickerRestingShapeTests`), and
+every popover holding a per-open search takes that same
+dismissal-edge hook — the app picker was the second member.
+:::
+
+**The picker button and its clear control.** The button shows
+a glyph-sized placeholder when no icon is set, never a
+"Choose…" label: the text made unset pickers wider than set
+ones, so rows wouldn't line up. Clearing is a control, not a
+choice: the remove button sits beside the tabs (disabled when
+nothing is set) instead of posing as a grid cell under Recents.
 
 ### Shortcuts
 

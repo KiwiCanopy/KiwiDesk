@@ -205,7 +205,7 @@ struct SettingsRawColorTests {
         "ColorField.swift":
             "the Automatic split-dot IS a white/black glyph, "
             + "and the sRGB conversion fallback never renders",
-        "IconPicker.swift":
+        "IconPicker+Preview.swift":
             "a side-by-side preview of the menu bar in EACH "
             + "appearance — the scheme is a parameter, not a "
             + "branch, and both swatches are always drawn",

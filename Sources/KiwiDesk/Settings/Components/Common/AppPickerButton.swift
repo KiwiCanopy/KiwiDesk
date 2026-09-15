@@ -42,6 +42,11 @@ struct AppPickerButton: View {
             }
         }
         .popover(isPresented: $showing) { popover }
+        // Every open starts with an empty search (#1357): the
+        // reset rides the popover's own dismissal edge.
+        .onChange(of: showing) { _, isShowing in
+            if !isShowing { search = "" }
+        }
     }
 
     // MARK: - Popover

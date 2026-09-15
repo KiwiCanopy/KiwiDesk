@@ -11,33 +11,7 @@ struct IconPicker: View {
 
     @State private var showing = false
     @State private var search = ""
-    @State private var tab: IconTab = .emoji
-
-    /// Browse tabs for curated emoji and symbol collections (#68 §6.4).
-    enum IconTab: String, CaseIterable, Identifiable {
-        case emoji = "Emoji"
-        case symbols = "Symbols"
-        var id: String { rawValue }
-
-        @MainActor var title: String {
-            switch self {
-            case .emoji: L("icon_picker.emoji", "Emoji")
-            case .symbols: L("icon_picker.symbols", "Symbols")
-            }
-        }
-
-        var choices: [IconChoice] {
-            switch self {
-            case .emoji: IconCatalog.emoji
-            case .symbols: IconCatalog.symbols
-            }
-        }
-    }
-
-    enum IconPreview {
-        case menuBar
-        case chip
-    }
+    @State private var tab: IconTab = .resting
 
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: 6),
@@ -70,6 +44,15 @@ struct IconPicker: View {
         // A glyph-only label names nothing (#812).
         .accessibilityLabel(chooseHelp)
         .popover(isPresented: $showing) { popover }
+        // Every open starts in one resting shape (#1357, #1379):
+        // the search cleared and the tab back on Symbols, on a
+        // choice, the clear button and a dismissal alike.
+        .onChange(of: showing) { _, isShowing in
+            if !isShowing {
+                search = ""
+                tab = .resting
+            }
+        }
     }
 
     private var chooseHelp: String {
@@ -118,19 +101,20 @@ struct IconPicker: View {
                         )
                     } else {
                         // Search is global: both
-                        // vocabularies, emoji first, the
-                        // tabs stand back.
+                        // vocabularies, symbols first for
+                        // the tab's reason, the tabs stand
+                        // back.
                         specialResults
-                        gridSection(
-                            L("icon_picker.emoji", "Emoji"),
-                            choices: filtered(
-                                IconCatalog.emoji
-                            )
-                        )
                         gridSection(
                             L("icon_picker.symbols", "Symbols"),
                             choices: filtered(
                                 IconCatalog.symbols
+                            )
+                        )
+                        gridSection(
+                            L("icon_picker.emoji", "Emoji"),
+                            choices: filtered(
+                                IconCatalog.emoji
                             )
                         )
                     }
@@ -140,65 +124,6 @@ struct IconPicker: View {
         }
         .padding(12)
         .frame(width: 340, height: 400)
-    }
-
-    /// The selection at its destination size — for the menu
-    /// bar, a light and a dark swatch side by side.
-    @ViewBuilder private var previewHeader: some View {
-        switch preview {
-        case .menuBar:
-            HStack(spacing: 8) {
-                menuBarSwatch(scheme: .light)
-                menuBarSwatch(scheme: .dark)
-                Text(
-                    L(
-                        "icon_picker.preview.menu_bar",
-                        "Menu bar preview"
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                Spacer()
-            }
-        case .chip:
-            HStack(spacing: 8) {
-                IconGlyphLabel(icon: icon)
-                    .font(.caption)
-                Text(
-                    L(
-                        "icon_picker.preview.row",
-                        "Row preview"
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                Spacer()
-            }
-        }
-    }
-
-    private func menuBarSwatch(
-        scheme: ColorScheme
-    ) -> some View {
-        RoundedRectangle(cornerRadius: 5)
-            .fill(scheme == .light ? Color.white : .black)
-            .frame(width: 34, height: 26)
-            .overlay {
-                IconGlyphLabel(
-                    icon: icon,
-                    placeholder: "rectangle.3.group"
-                )
-                .font(.system(size: 15))
-                .foregroundStyle(
-                    scheme == .light ? .black : .white
-                )
-            }
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .strokeBorder(
-                        Color.secondary.opacity(0.4)
-                    )
-            )
     }
 
     // MARK: - Result sections
