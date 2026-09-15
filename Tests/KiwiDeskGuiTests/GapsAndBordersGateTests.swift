@@ -126,18 +126,27 @@ struct GapsAndBordersGateTests {
         }
     }
 
-    @Test("glow size greys with the glow effect off")
-    func glowSizeNeedsGlow() {
+    /// The slider AND the auto toggle above it: neither has an
+    /// effect while the glow is off, so both take the one reason
+    /// (#1377 found the toggle live while the slider greyed).
+    @Test(
+        "glow size and its auto toggle grey with the glow effect off",
+        arguments: [
+            SettingKey.borders(.borderGlowSize),
+            .borders(.borderGlowSizeAuto),
+        ]
+    )
+    func glowSizeNeedsGlow(key: SettingKey) {
         // Border on, glow off → the row is inert.
         #expect(
             gates { $0.borderStyle.glow = false }
-                .inertReason(for: .borders(.borderGlowSize))
-                == .glowOff
+                .inertReason(for: key) == .glowOff
         )
-        // Glow on → live (the auto sentinel greys it separately).
+        // Glow on → live (the auto sentinel greys the slider
+        // separately).
         #expect(
             gates { $0.borderStyle.glow = true }
-                .inertReason(for: .borders(.borderGlowSize)) == nil
+                .inertReason(for: key) == nil
         )
         // Border off → the block owns the grey; the row reason
         // stands down so its hover cannot shadow the block's.
@@ -146,7 +155,7 @@ struct GapsAndBordersGateTests {
                 $0.borderStyle.enabled = false
                 $0.borderStyle.glow = false
             }
-            .inertReason(for: .borders(.borderGlowSize)) == nil
+            .inertReason(for: key) == nil
         )
     }
 

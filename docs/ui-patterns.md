@@ -1494,6 +1494,16 @@ was written down:
   print matters once the block is live again, and the anchor
   covers the meantime. Guarded by `GreyOutAnchorTests`.
 
+:::unreleased
+**An auto toggle greys with the slider it governs** (#1377).
+Where an `AutoGatedGroup`'s slider carries a row gate, the
+toggle has no effect under that gate either, so it takes the
+same reason: the group is wrapped in the gate's `GreyOut` and
+the toggle's row declares the gate in the census. Auto Glow
+Size shipped live over a greyed slider; the two rows are the
+class's only member today.
+:::
+
 Which of the two remote shapes a row takes follows from what is
 dimmed, not only from whether a live label exists (#1310, owner
 ruling 2026-09-14): a header `?` scopes the CARD, so it answers
