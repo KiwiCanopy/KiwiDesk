@@ -52,6 +52,11 @@ struct SettingsSearchDrawerAnchorTests {
                 SettingsCatalog.bars.appBarStyle,
                 ["Bars", "Style"]
             ),
+            (
+                .colors, .motion,
+                SettingsCatalog.colors.motionMore,
+                ["Colors & Animations", "Per-event and duration"]
+            ),
         ]
     }
 

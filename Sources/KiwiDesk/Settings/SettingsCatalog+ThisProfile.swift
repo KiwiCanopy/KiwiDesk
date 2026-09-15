@@ -74,9 +74,40 @@ struct ColorsControls: Sendable {
         "behavior.animations.title",
         "Animations"
     )
+    /// Declared with its children so a hit on a per-event
+    /// toggle opens the drawer (#1250, #277).
     let motionMore = SettingsDrawer(
         "motion.more",
-        "Per-event and duration"
+        "Per-event and duration",
+        children: MotionMoreControls()
+    )
+}
+
+/// Animations ▸ Per-event and duration rows, keyed on their
+/// census label keys and declared in `ColorsRowOrder.motionMore`'s
+/// order. The palette shelf's Rename / Export / Delete are
+/// context-menu items with no rendered row to anchor, so they
+/// stay uncataloged (`SettingsSearchIndexTests` pins the count).
+struct MotionMoreControls: Sendable {
+    let animateSpaceSwitches = SettingsControl(
+        "behavior.animations.space_change",
+        "Animate Space switches"
+    )
+    let animateWindowResizes = SettingsControl(
+        "behavior.animations.window_resize",
+        "Animate window resizes"
+    )
+    let animateWindowSwaps = SettingsControl(
+        "behavior.animations.window_swap",
+        "Animate window swaps"
+    )
+    let animateLayoutReflows = SettingsControl(
+        "behavior.animations.relayout",
+        "Animate layout reflows"
+    )
+    let animationDuration = SettingsControl(
+        "behavior.animations.duration",
+        "Duration"
     )
 }
 

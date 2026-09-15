@@ -39,7 +39,6 @@ struct SettingsCatalogDrawerTests {
         "space_bar/colors.more",
         "app_bar/colors.more",
         // Pending #277 batches.
-        "motion.more",
         "shortcuts.section.general",
     ]
 

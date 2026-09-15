@@ -29,6 +29,9 @@ extension MotionCard {
                 ),
                 isOn: animations.onSpaceChange
             )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animateSpaceSwitches
+            )
             // Coordinated out+in transition caption (#207).
             Text(
                 L(
@@ -48,6 +51,9 @@ extension MotionCard {
                 ),
                 isOn: animations.onWindowResize
             )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animateWindowResizes
+            )
         case .animationsOnWindowSwap:
             Toggle(
                 L(
@@ -56,6 +62,9 @@ extension MotionCard {
                 ),
                 isOn: animations.onWindowSwap
             )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animateWindowSwaps
+            )
         case .animationsOnRelayout:
             Toggle(
                 L(
@@ -63,6 +72,9 @@ extension MotionCard {
                     "Animate layout reflows"
                 ),
                 isOn: animations.onRelayout
+            )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animateLayoutReflows
             )
         case .animationsDurationMS:
             Divider()
@@ -73,6 +85,9 @@ extension MotionCard {
                 in: 50...1000,
                 step: 10,
                 suffix: "ms"
+            )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animationDuration
             )
         default:
             let _ = assertionFailure(

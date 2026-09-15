@@ -202,7 +202,11 @@ struct SettingsSearchIndexTests {
                 // a hit opens the drawer; the at-rest rows stay
                 // anchor-less by ruling (the issue's tier split).
                 .bars: 9,
-                .colors: 12,
+                // 7 since #277: the Animations drawer's five
+                // rows gained anchors; the palette shelf's three
+                // context-menu actions have no rendered row to
+                // anchor and stay anchor-less by ruling.
+                .colors: 7,
                 .advancedColors: 25,
                 // 4 since #1255: the refusal sound moved here
                 // from Shortcuts ▸ Size & float, the cue having

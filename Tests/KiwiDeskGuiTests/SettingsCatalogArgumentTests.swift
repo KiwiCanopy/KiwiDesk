@@ -181,7 +181,8 @@ struct SettingsCatalogArgumentTests {
         // 98 since #277: Gaps & Borders' seven at-rest rows —
         // the glow group, the unfocused toggle, the fit-gaps
         // spacing and the two sticky toggles.
-        #expect(direct.values.reduce(0, +) == 98)
+        // 103 since #277: the Animations drawer's five rows.
+        #expect(direct.values.reduce(0, +) == 103)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

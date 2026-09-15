@@ -68,7 +68,8 @@ struct SettingsCatalogSiteTests {
         // eleven rows, each row keyed on its census label key.
         // 115 since #277: the two bars' Style drawers' 27 rows.
         // 122 since #277: Gaps & Borders' seven at-rest rows.
-        #expect(names.count == 122)
+        // 127 since #277: the Animations drawer's five rows.
+        #expect(names.count == 127)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
