@@ -188,6 +188,30 @@ struct HandedBreakEnderTests {
         #expect(state.workspaces[home]?.trackBreaks == [b, c, d])
     }
 
+    /// A restore re-files an away window `.restored`, so its
+    /// return takes the spawn route and the departed branch never
+    /// runs: the link is spent on the ARRIVAL, and the fold marks
+    /// only from the record it writes (review, 2026-09-15).
+    @Test("a restored return never marks either")
+    func restoredReturnNeverMarks() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [a])
+        state.remember(a, in: home)
+        state.apply(.windowCreated(makeWindow(a)))
+        #expect(state.departedSlots[a]?.handedTo == nil)
+        state.workspaces.setMode(home, .bsp)
+        state.workspaces.setMode(home, .track)
+        state.apply(.windowDestroyed(a, wasMinimized: true))
+        #expect(state.workspaces[home]?.handedBreaks == [])
+        depart(&state, [b])
+        state.apply(.windowCreated(makeWindow(b)))
+        #expect(
+            state.workspaces[home]?.trackBreaks
+                == Set(state.workspaces[home]?.windows ?? [])
+        )
+    }
+
     /// A head removed by anything but a Desktop departure — its
     /// app quitting, a move to another Space, a minimize — hands
     /// its break for good: no record could reclaim it, so the

@@ -332,14 +332,16 @@ editing here:
   stay. The door hands as an OWN break; a writer that MARKS one
   handed (`markHandedBreak`) records its holder on the departure
   record first, in the same fold, and marks from THAT record —
-  never from a link an earlier departure left (`DepartedSlot.
-  handedTo`, read through the one `handOffTarget` ahead of the
-  removal, and spent on EVERY departed return whatever the mode,
-  since a mode flip while the head was away is where a stale
-  link came from) — so a head minimized, quit or moved hands for
-  good, no record being able to reclaim it
+  never from a link an earlier departure left
+  (`DepartedSlot.handedTo`, read through the one `handOffTarget`
+  ahead of the removal, and spent on EVERY arrival whatever the
+  route, since a restore or a re-home returns a window outside
+  the departed branch and a mode flip while the head was away
+  is where a stale link came from) — so a head minimized, quit
+  or moved hands for good, no record being able to reclaim it
   (`HandedBreakEnderTests` ▸ `unrecordedHandOffIsOwn`,
-  `staleLinkNeverMarks`). The link is consumed by the return's
+  `staleLinkNeverMarks`, `restoredReturnNeverMarks`). The link
+  is consumed by the return's
   take-back and by the promotion, which both refuse a holder
   that dropped the break —
   never a positional guess, since a member back ahead of its

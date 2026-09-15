@@ -16,6 +16,11 @@ extension StateCoordinator {
         // Back on a shown Desktop: the away ledger's entry ends
         // (#1146).
         awayWindows[window.id] = nil
+        // A live window's hand-off link means nothing (#1387):
+        // read once for the departed return below, then spent on
+        // every arrival, since a restore or a re-home returns a
+        // window outside that branch.
+        defer { departedSlots[window.id]?.handedTo = nil }
         windows.upsert(window)
         restoreFloatOverride(of: window)
         restoreStickyIntent(of: window)
@@ -64,9 +69,6 @@ extension StateCoordinator {
                     )
                 }
             }
-            // Spent on every return: a link that outlived a mode
-            // flip would mark a live own head at a later minimize.
-            departedSlots[window.id]?.handedTo = nil
         } else if let track, !window.isFloating {
             workspaces.add(
                 window.id,
