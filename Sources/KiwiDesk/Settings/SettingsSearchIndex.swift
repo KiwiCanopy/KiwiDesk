@@ -42,6 +42,20 @@ enum SettingsSearchIndex {
         }
     }
 
+    #if DEBUG
+        /// Census rows `indexes` refuses on top of its own
+        /// predicate — a test's door for refusing a labelled row
+        /// whose catalog control is live on this host, since the
+        /// real refusals (glass below macOS 26) cannot be reached
+        /// from a 26+ runner. Never read by production; the
+        /// `#if` is what keeps it so.
+        static var refusedOverride: Set<SettingKey> = [] {
+            didSet {
+                if oldValue != refusedOverride { cache = [:] }
+            }
+        }
+    #endif
+
     static func rows() -> [SettingsSearchIndexRow] {
         let locale =
             LocalizationManager.shared.effectiveLocale
@@ -58,6 +72,9 @@ enum SettingsSearchIndex {
     /// predicate (#390), and a `[space]` key is an INSTANCE —
     /// reachable as a link, never a result (spec item 11).
     static func indexes(_ key: SettingKey) -> Bool {
+        #if DEBUG
+            if refusedOverride.contains(key) { return false }
+        #endif
         let placement = key.placement
         guard placement.area != nil,
             indexedTiers.contains(placement.tier),
@@ -82,8 +99,7 @@ enum SettingsSearchIndex {
     /// catalog-only anchors. A control whose key a census row in
     /// the area carries is that row's — refused with it when
     /// `indexes` refuses the row on this machine (the glass card
-    /// below macOS 26, the sticky reach toggle without the
-    /// bridge) — so `claimed` is read off EVERY labelled census
+    /// below macOS 26) — so `claimed` is read off EVERY labelled census
     /// row of the area, never the indexed subset, or the refusal
     /// resurfaces the control as an extra for a row nothing draws.
     private static func build() -> [SettingsSearchIndexRow] {

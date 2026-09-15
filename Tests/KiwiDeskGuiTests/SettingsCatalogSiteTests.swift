@@ -70,7 +70,9 @@ struct SettingsCatalogSiteTests {
         // 122 since #277: Gaps & Borders' seven at-rest rows.
         // 127 since #277: the Animations drawer's five rows.
         // 129 since #277: Shortcuts ▸ General's two rows.
-        #expect(names.count == 129)
+        // 122 since #1473: Gaps & Borders' seven at-rest rows
+        // leave with their corrected tier.
+        #expect(names.count == 122)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

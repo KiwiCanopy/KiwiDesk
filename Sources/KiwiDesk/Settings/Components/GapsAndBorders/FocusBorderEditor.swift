@@ -58,7 +58,6 @@ struct FocusBorderEditor: View {
             ),
             isOn: style.unfocusedEnabled
         )
-        .searchAnchored(SettingsCatalog.gapsAndBorders.unfocusedBorders)
         Divider()
         // A noun phrase like its true siblings (Width, Corners),
         // NOT the "Show X" family — that family gates an element,
@@ -75,7 +74,6 @@ struct FocusBorderEditor: View {
                 "Soft glow around the focus border"
             )
         )
-        .searchAnchored(SettingsCatalog.gapsAndBorders.glowEffect)
         AutoGatedGroup(
             title: L("border.glow_size.auto", "Auto glow size"),
             isOn: AutoSentinel.binding(
@@ -99,9 +97,7 @@ struct FocusBorderEditor: View {
                 range: 1...20,
                 autoAtZero: true
             )
-            .searchAnchored(SettingsCatalog.gapsAndBorders.glowSizeSlider)
         }
-        .searchAnchored(SettingsCatalog.gapsAndBorders.autoGlowSize)
         Divider()
         FitGapsAction(model: model)
     }

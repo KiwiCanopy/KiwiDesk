@@ -183,7 +183,9 @@ struct SettingsCatalogArgumentTests {
         // spacing and the two sticky toggles.
         // 103 since #277: the Animations drawer's five rows.
         // 105 since #277: Shortcuts ▸ General's two rows.
-        #expect(direct.values.reduce(0, +) == 105)
+        // 98 since #1473: Gaps & Borders' seven rows are at rest
+        // in the census too, so their anchors go.
+        #expect(direct.values.reduce(0, +) == 98)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from
