@@ -56,13 +56,12 @@ struct GateReasonPlacementTests {
             Set(owed) == [
                 // Shipped inline before #815, and the reason the
                 // derivation is checkable at all.
-                // (`.profiles(.profileBindings)` left the set
-                // with #888: its off-surface separate-Spaces arm
-                // retired, and the `editingStoredProfile` arm
-                // that remained had its cause on the surface —
-                // until #1392 retired that one too, so the row
-                // now carries no gate at all.)
                 .general(.startAtLogin),
+                // Back in the set with #1392: the stored-profile
+                // arm (cause on the surface) retired, and the
+                // one that greys now — init.lua owning the table
+                // — is visible nowhere on this page.
+                .profiles(.profileBindings),
                 // Found BY the derivation: the copy action sits
                 // on the App Bar card while the switch that
                 // kills it is on the Space Bar card, so nothing

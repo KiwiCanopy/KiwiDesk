@@ -48,14 +48,15 @@ extension SettingsModel {
         reload()
     }
 
-    /// Desktop bindings are a global table, so their rows stay
-    /// live under a stored-profile target and this save is the
-    /// one path an edit there leaves the draft by (#1392).
+    /// The one global leaf a stored-profile draft keeps live —
+    /// the Desktop binding table — leaves it by its own write,
+    /// per ENTRY onto the store's map (#1392): the user owns the
+    /// rows they touched, Core owns the rest (#1147).
     private func persistBindingsIfEdited() {
-        guard config.profileBindings != cleanConfig.profileBindings
-        else { return }
+        let edits = bindingEdits
+        guard !edits.isEmpty else { return }
         do {
-            try core.saveDesktopBindings(config.profileBindings)
+            try core.rewriteSidecarBindings { edits.apply(to: &$0) }
         } catch {
             profileWarning = L(
                 "settings.globals_save_failed",

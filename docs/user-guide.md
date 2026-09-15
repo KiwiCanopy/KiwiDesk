@@ -823,9 +823,7 @@ switches on its own: a swipe on the main screen switches
 profiles, a swipe on a secondary never does.
 
 :::unreleased
-Bindings are global, so the rows work whichever profile you are
-editing — a Save while editing a stored profile keeps a binding
-change too.
+A Save while editing a stored profile keeps a binding change too.
 :::
 
 ```mermaid

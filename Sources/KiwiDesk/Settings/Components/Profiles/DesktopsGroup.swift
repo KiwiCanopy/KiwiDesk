@@ -2,14 +2,27 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Settings group for binding profiles to macOS Desktops (#7,
-/// #678, #768, #888). The rows are live under every edit target:
-/// bindings are a global table, and a stored-profile Save files
-/// them through `saveEditedProfile` (#1392).
+/// #678, #768, #888). The rows are live under every edit target
+/// — bindings are a global table, filed by a stored-profile Save
+/// too — and inert only where init.lua owns that table, the one
+/// gate the resolver answers (#1392). Its cause is off this
+/// surface, so the reason draws INLINE, outside the dim (#815).
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = true
 
+    private var gates: ProfilesGates {
+        ProfilesGates(
+            editingStoredProfile: model.editingStoredProfile,
+            connectedScreens: model.displays.count,
+            guiManaged: model.core.isGuiManaged
+        )
+    }
+
     var body: some View {
+        let reason = gates.inertReason(
+            for: .profiles(.profileBindings)
+        )
         SettingsDisclosure(
             SettingsCatalog.profiles.desktops,
             chrome: .card,
@@ -20,7 +33,16 @@ struct DesktopsGroup: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                rows
+                rows.modifier(GreyOut(active: reason != nil))
+                if let reason {
+                    Text(ProfilesGateHelp.sentence(for: reason))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+                }
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)

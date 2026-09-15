@@ -941,6 +941,7 @@
   "profiles.copy_failed": "Copying failed: %1$@",
   "profiles.current_setup_note": "Your current setup is saved into %1$@. To keep it separately, use “%2$@” in the bar below.",
   "profiles.delete.help": "Delete profile",
+  "profiles.desktops.lua_owned": "Your init.lua owns the Desktop bindings — edit its %1$@ lines there.",
   "profiles.duplicate_default.help": "Several profiles of this count are marked default; the alphabetically first wins.",
   "profiles.load": "Load",
   "profiles.make_default": "make default",

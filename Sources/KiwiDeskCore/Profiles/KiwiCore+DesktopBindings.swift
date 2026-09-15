@@ -1,5 +1,15 @@
 import Foundation
 
+/// A sidecar that exists but no longer decodes is never
+/// overwritten (`KiwiCore+ProfileEdit`'s rule).
+public enum SidecarError: Error, CustomStringConvertible {
+    case unreadable
+
+    public var description: String {
+        "gui.json unreadable — nothing written"
+    }
+}
+
 /// The two crossings a Desktop binding owes, both of which END
 /// (#1147, AGENTS.md §5).
 ///
@@ -43,20 +53,27 @@ extension KiwiCore {
             .first
     }
 
-    /// Files a Settings draft's whole binding table into the
-    /// sidecar's OWN map (#1392) — the one door a save under a
-    /// stored-profile target reaches the global table by, since
-    /// that draft never writes `gui.json` otherwise. Never
-    /// `loadGuiConfig()`'s overlay, which would materialize the
-    /// running layout into the file on a save that never touched
-    /// it; a missing sidecar seeds exactly as the draft's own
-    /// base did. Reloads, like every `saveGuiConfig`.
-    public func saveDesktopBindings(
-        _ bindings: [DesktopKey: DesktopBinding]
-    ) throws {
-        var live = guiConfigStore.load() ?? guiConfigSeed()
-        live.profileBindings = bindings
-        try saveGuiConfig(live)
+    /// The one sidecar rewrite of the binding table (#1392):
+    /// `edit` runs over the store's OWN map and the result is
+    /// persisted — through `saveGuiConfig`, or the bare store on
+    /// a paused cold boot, where a reload would be the session's
+    /// first. Returns false with no sidecar; throws where one
+    /// exists and no longer decodes, so a caller can say so.
+    @discardableResult
+    public func rewriteSidecarBindings(
+        _ edit: (inout [DesktopKey: DesktopBinding]) -> Void
+    ) throws -> Bool {
+        guard guiConfigStore.exists else { return false }
+        guard var live = guiConfigStore.load() else {
+            throw SidecarError.unreadable
+        }
+        edit(&live.profileBindings)
+        if lua == nil {
+            try guiConfigStore.save(live)
+        } else {
+            try saveGuiConfig(live)
+        }
+        return true
     }
 
     /// Re-keys and re-projects every binding this topology can

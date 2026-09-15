@@ -10559,7 +10559,8 @@ That grey was correct *for as long as its premise held* — and
 trigger a definition (the main screen's Desktop) that holds in
 every display mode. The rows are live in every display state now, so the
 grey, its inline warning and its Desktop & Dock button retired
-together (the stored-profile grey, a different premise, stands). What survives, because it never depended on the
+together; the stored-profile grey, a different premise, fell to
+#1392 below. What survives, because it never depended on the
 instance: a control the OS genuinely makes meaningless is still
 greyed rather than left live, and existing config stays visible
 under any such grey — hiding a user's own configuration to
@@ -10627,16 +10628,18 @@ Settings window happens to be editing does not change what a
 row means, and greying the rows behind *switch to Live* said
 nothing a user could act on except a detour. The grey was not
 protecting a ruling: it arrived with the stored-profile edit
-target, whose Save writes only the profile's own file, and a
-live row there would have dropped its edit on Save. That is a
-missing write, not a reason to withhold the row — so a
-stored-profile Save now files an edited binding table into
-`gui.json` through one Core door (`saveDesktopBindings`), onto
-the sidecar's own map rather than the draft's overlay, and only
-when the table changed. Moving the binding *into* the profile
-was refused on the standing rule: a profile owns tiling plus
-sparse overrides, never anything that routes or selects the
-profile itself.
+target, whose Save wrote only the profile's own file, so a live
+row there dropped its edit on Save. That was a missing write,
+not a reason to withhold the row — a stored-profile Save files
+an edited binding table into `gui.json` through one Core door
+(`rewriteSidecarBindings`), and only for the rows that changed.
+The one state that still greys them is a config `init.lua` owns:
+there is no sidecar for the write to land in, and a live row
+there would offer an edit that goes nowhere, so the rows dim
+with that reason — the one case the retired sentence was right
+about. Moving the binding *into* the profile was refused on the
+standing rule: a profile owns tiling plus sparse overrides,
+never anything that routes or selects the profile itself.
 
 **[Principle]**
 

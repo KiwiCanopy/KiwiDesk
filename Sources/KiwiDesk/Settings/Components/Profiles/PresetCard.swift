@@ -106,6 +106,7 @@ struct PresetCard: View {
         ProfilesGates(
             editingStoredProfile: model.editingStoredProfile,
             connectedScreens: connectedScreens,
+            guiManaged: model.core.isGuiManaged,
             presetScreens: layout.screenCount
         )
     }

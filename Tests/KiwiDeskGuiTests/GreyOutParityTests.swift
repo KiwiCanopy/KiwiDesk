@@ -92,11 +92,16 @@ struct GreyOutParityTests {
         // The opposite invariant — that no gate returns — is
         // `StickyMarkUngatedTests`.
         //
-        // `DesktopsGroup` is deliberately absent since #1392:
-        // the Desktop bindings grey retired with its gate — the
-        // rows are live under every edit target — so there is no
-        // wrap to pin. `ProfilesGateTests` ▸ `bindingsLive`
-        // holds the opposite invariant.
+        // The Desktop bindings grey is the resolver's (pinned by
+        // `ProfilesGateWiringTests`); this pins that its one
+        // reason — init.lua owning the table, since #1392 —
+        // actually dims the rows, and only the rows: the header,
+        // its `?` and the inline reason stay live (#527/#815).
+        (
+            "DesktopsGroup.swift",
+            "GreyOut(active: reason != nil",
+            1
+        ),
         // The per-space grid and track override greys now resolve
         // through `SpacesGates` (#678 Phase 3, turn 8): all three
         // GreyOut blocks (fill-empty, the Columns/Rows pair, the

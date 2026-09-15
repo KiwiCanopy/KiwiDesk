@@ -24,11 +24,13 @@ struct ProfilesGateTests {
     private func gates(
         editing: Bool = false,
         screens: Int = 3,
+        guiManaged: Bool = true,
         preset: Int? = nil
     ) -> ProfilesGates {
         ProfilesGates(
             editingStoredProfile: editing,
             connectedScreens: screens,
+            guiManaged: guiManaged,
             presetScreens: preset
         )
     }
@@ -132,11 +134,8 @@ struct ProfilesGateTests {
     // MARK: - Desktop bindings
 
     /// Bindings are a global table, so the edit target does not
-    /// change what a row means (#1392) — and #888 retired the
-    /// separate-Spaces arm before it, so no state greys these
-    /// rows at all. The stored-profile half is the case to pin:
-    /// that gate shipped from PR #730 to 1.3.0 with no recorded
-    /// argument.
+    /// change what a row means (#1392); #888 retired the
+    /// separate-Spaces arm before it.
     @Test("bindings are live under every edit target")
     func bindingsLive() {
         for editing in [false, true] {
@@ -144,6 +143,20 @@ struct ProfilesGateTests {
                 gates(editing: editing).inertReason(
                     for: .profiles(.profileBindings)
                 ) == nil
+            )
+        }
+    }
+
+    /// The one state that greys them: init.lua owns the config,
+    /// so there is no sidecar for a row's write to land in —
+    /// whatever the edit target.
+    @Test("bindings are inert where init.lua owns the config")
+    func bindingsLuaOwned() {
+        for editing in [false, true] {
+            #expect(
+                gates(editing: editing, guiManaged: false)
+                    .inertReason(for: .profiles(.profileBindings))
+                    == .bindingsOwnedByLua
             )
         }
     }

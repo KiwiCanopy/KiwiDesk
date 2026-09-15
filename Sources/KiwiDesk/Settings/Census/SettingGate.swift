@@ -37,6 +37,9 @@ enum SettingRuntimeGate: Hashable {
     case trackInUse
     /// Liquid Glass unavailable on pre-macOS 26 (#390).
     case liquidGlassUnavailable
+    /// init.lua owns the config, so the GUI has no sidecar to
+    /// file a Desktop binding into (#1392).
+    case notGuiManaged
     /// The window-management bridge is absent on this macOS
     /// (#1145) — the row HIDES, per `canDriveDesktops`' ruling:
     /// no setting or mode reaches the capability, so a grey

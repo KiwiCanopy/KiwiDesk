@@ -15,12 +15,14 @@ extension ProfilesKey {
     var placement: SettingPlacement {
         switch self {
         case .profileBindings:
-            // Ungated: bindings are a global table, so the edit
-            // target does not change what a row means (#1392).
+            // Live under every edit target — bindings are a
+            // global table — and inert only where init.lua owns
+            // that table (#1392).
             return .row(
                 .profiles,
                 .profilesPerMacOSSpace,
-                .showMore
+                .showMore,
+                gate: .runtime(.notGuiManaged)
             )
         case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
             return .row(.profiles, .savedProfiles, .atRest)

@@ -15,9 +15,9 @@ import Testing
 ///
 /// SCOPE: by explicit path, one entry per GATE rather than per
 /// file. `PresetCard` resolves one gate that has two reasons,
-/// and a file-level "touches the resolver somewhere" check
-/// would pass while one of them went hand-rolled — the very
-/// drift this guard exists to catch. A future gated row in this
+/// and a file-level "touches the resolver somewhere" check would
+/// pass while one of them went hand-rolled — the very drift
+/// this guard exists to catch. A future gated row in this
 /// area owes both its resolver consult AND a `consults` entry
 /// naming the file that draws it, in the same change;
 /// `everyGatedRowIsResolved` forces the resolver half, and
@@ -50,11 +50,9 @@ struct ProfilesGateWiringTests {
                 .joined()
         }
         let consults: [String: [String]] = [
-            // The Desktop bindings row left this map with #1392:
-            // its rows are live under every edit target, so
-            // `DesktopsGroup` consults no gate and sits in the
-            // non-author list below instead.
-            //
+            "Components/Profiles/DesktopsGroup.swift": [
+                "inertReason(for:.profiles(.profileBindings))"
+            ],
             // Apply's gate moved to the card widget in #859,
             // when the section outgrew the 350-line ceiling and
             // the drawing went to `Components/Profiles/` where
@@ -65,7 +63,7 @@ struct ProfilesGateWiringTests {
             // gate itself went hand-rolled one file over.
             "Components/Profiles/PresetCard.swift": [
                 "inertReason(for:.profiles(.presetsApply))"
-            ]
+            ],
         ]
         for (name, needles) in consults {
             let source = try squashed(name)
@@ -291,7 +289,6 @@ struct ProfilesGateWiringTests {
         )
         let nonAuthors =
             consulting + [
-                "Components/Profiles/DesktopsGroup.swift",
                 "Sections/ProfilesSection.swift",
                 "Sections/ProfilesSection+WhichLoads.swift",
                 "Sections/ProfilesSection+RowActions.swift",
@@ -307,6 +304,7 @@ struct ProfilesGateWiringTests {
                 "Sections/ProfilesSection+Subtitle.swift",
             ]
         for key in [
+            "profiles.desktops.lua_owned",
             "presets.editing_stored",
             "presets.needs_screens",
         ] {

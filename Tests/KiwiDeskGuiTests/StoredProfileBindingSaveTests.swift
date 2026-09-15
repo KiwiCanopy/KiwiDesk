@@ -5,26 +5,43 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A stored-profile Save files the draft's Desktop bindings into
-/// `gui.json` (#1392).
-///
-/// The rows are live under every edit target because bindings
-/// are a global table — but that target's Save wrote only the
-/// profile file, so un-greying the rows alone would have dropped
-/// an edit there on Save with every gate test green. This suite
-/// holds the write the ruling depends on, and its shape: the
-/// sidecar's OWN map, never the draft's overlay, so the stored
-/// profile's Spaces do not materialize into the global file.
+/// `gui.json` (#1392) — that target's Save otherwise writes only
+/// the profile file, so a live row there would drop its edit.
+/// Held here: the write lands per entry on the STORE's own map,
+/// is skipped when no row was touched, and refuses a sidecar
+/// that no longer decodes.
 @MainActor
 @Suite("Stored-profile Save files Desktop bindings (#1392)")
 struct StoredProfileBindingSaveTests {
+    /// A Space list neither the live engine (boot default `1`)
+    /// nor the edited profile (`work`) has, so a write that took
+    /// either overlay instead of the store's own value shows in
+    /// the file.
+    private static var sidecar: GuiConfig {
+        var config = GuiConfig()
+        config.spaces = [SpaceID("side")]
+        config.profileBindings = [
+            .number(1): DesktopBinding(profile: "Kept", desktop: 1)
+        ]
+        return config
+    }
+
     /// A GUI-managed core with one stored profile that is NOT
     /// the active one (`write`, never `save`), and a model
-    /// editing it. The profile declares a Space the sidecar
-    /// does not, so an overlay leaking into `gui.json` is
-    /// visible.
-    private func makeModel() -> SettingsModel {
+    /// editing it.
+    private func makeModel(
+        sidecarBytes: Data? = nil
+    ) throws -> SettingsModel {
         let core = makeTestCore()
-        try? core.guiConfigStore.save(GuiConfig())
+        if let sidecarBytes {
+            try FileManager.default.createDirectory(
+                at: core.guiConfigStore.url.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try sidecarBytes.write(to: core.guiConfigStore.url)
+        } else {
+            try core.guiConfigStore.save(Self.sidecar)
+        }
         let profile = Profile(
             name: "Away",
             monitorSets: [MonitorSet(monitors: ["Away:100x100"])],
@@ -32,17 +49,17 @@ struct StoredProfileBindingSaveTests {
             spaceModes: [SpaceID("work"): .bsp],
             settings: TilingSettings()
         )
-        try? core.profiles.write(profile)
+        try core.profiles.write(profile)
         let model = makeTestModel(core: core)
         model.reload()
         model.selectEditTarget("Away")
+        #expect(model.editingStoredProfile)
         return model
     }
 
-    @Test("an edited binding lands in the sidecar's own map")
+    @Test("an edited binding lands on the sidecar's own map")
     func editedBindingLands() throws {
-        let model = makeModel()
-        #expect(model.editingStoredProfile)
+        let model = try makeModel()
         model.config.profileBindings[.number(2)] = DesktopBinding(
             profile: "Away",
             desktop: 2
@@ -53,14 +70,11 @@ struct StoredProfileBindingSaveTests {
 
         let sidecar = try #require(model.core.guiConfigStore.load())
         #expect(sidecar.profileBindings[.number(2)]?.profile == "Away")
-        // The stored profile's own Space stays out of the global
-        // file: the door writes the store's value, not the draft.
-        #expect(!sidecar.spaces.contains(SpaceID("work")))
-        // The runtime map followed the write, so the binding
-        // fires at the next switch without a restart.
-        #expect(
-            model.core.desktopBindings[.number(2)]?.profile == "Away"
-        )
+        // The untouched entry and the store's own non-binding
+        // value both survive: neither the draft's table nor the
+        // live overlay was written wholesale.
+        #expect(sidecar.profileBindings[.number(1)]?.profile == "Kept")
+        #expect(sidecar.spaces == [SpaceID("side")])
         // The draft re-seeded clean from the file it just wrote.
         #expect(!model.isDirty)
         #expect(
@@ -69,20 +83,60 @@ struct StoredProfileBindingSaveTests {
         )
     }
 
-    /// A save that touched no binding leaves the sidecar's bytes
-    /// alone — the door is taken on a DIFF, never per save, so a
-    /// tiling-only edit to a stored profile does not rewrite the
-    /// global file (and reload the config) for nothing.
+    /// With a VM up the write reloads, so the runtime map follows
+    /// without a restart; the cold-boot branch above writes the
+    /// store alone and `start()` picks it up.
+    @Test("with a running VM the runtime map follows the write")
+    func runtimeMapFollows() throws {
+        let model = try makeModel()
+        model.core.loadConfig()
+        let generation = model.core.keybindingRuntimeGeneration
+        model.config.profileBindings[.number(2)] = DesktopBinding(
+            profile: "Away",
+            desktop: 2
+        )
+
+        model.saveEditedProfile()
+
+        #expect(
+            model.core.desktopBindings[.number(2)]?.profile == "Away"
+        )
+        #expect(model.core.keybindingRuntimeGeneration > generation)
+    }
+
+    /// Seeded with COMPACT JSON, which the store's pretty-printed
+    /// save can never reproduce — so any write, even of an
+    /// unchanged table, changes the bytes.
     @Test("an untouched table writes nothing")
     func untouchedTableWritesNothing() throws {
-        let model = makeModel()
-        let url = model.core.guiConfigStore.url
-        let before = try Data(contentsOf: url)
+        let compact = try JSONEncoder().encode(Self.sidecar)
+        let model = try makeModel(sidecarBytes: compact)
         model.config.settings.resizeStep += 1
         #expect(model.isDirty)
 
         model.saveEditedProfile()
 
-        #expect(try Data(contentsOf: url) == before)
+        #expect(
+            try Data(contentsOf: model.core.guiConfigStore.url)
+                == compact
+        )
+    }
+
+    @Test("an unreadable sidecar is refused, never overwritten")
+    func unreadableSidecarRefused() throws {
+        let garbage = Data("{ not json".utf8)
+        let model = try makeModel(sidecarBytes: garbage)
+        model.config.profileBindings[.number(2)] = DesktopBinding(
+            profile: "Away",
+            desktop: 2
+        )
+
+        model.saveEditedProfile()
+
+        #expect(
+            try Data(contentsOf: model.core.guiConfigStore.url)
+                == garbage
+        )
+        #expect(model.profileWarning != nil)
     }
 }

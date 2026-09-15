@@ -8,6 +8,9 @@ struct ProfilesGates {
     let editingStoredProfile: Bool
     /// Current count of connected physical displays.
     let connectedScreens: Int
+    /// `KiwiCore.isGuiManaged`: false where init.lua owns the
+    /// config, so there is no sidecar to file a binding into.
+    let guiManaged: Bool
     /// Preset row's OWN screen count; nil on every other row — a
     /// `presetsApply` resolve with nil is a caller that forgot to
     /// pass it, which asserts rather than silently (not) greying.
@@ -15,6 +18,7 @@ struct ProfilesGates {
 
     /// Reason why a setting control is currently disabled/inert.
     enum InertReason: Hashable {
+        case bindingsOwnedByLua
         case presetSwitchesLiveLayout
         case screenCountMismatch(screens: Int)
     }
@@ -27,6 +31,8 @@ struct ProfilesGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
+        case .profiles(.profileBindings):
+            return guiManaged ? nil : .bindingsOwnedByLua
         case .profiles(.presetsApply):
             if editingStoredProfile {
                 return .presetSwitchesLiveLayout
@@ -50,7 +56,8 @@ struct ProfilesGates {
 
     /// Gated setting keys resolved by this type (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
-        .profiles(.presetsApply)
+        .profiles(.profileBindings),
+        .profiles(.presetsApply),
     ]
 
     /// Gated setting keys resolved outside this type.
@@ -65,6 +72,16 @@ enum ProfilesGateHelp {
         for reason: ProfilesGates.InertReason
     ) -> String {
         switch reason {
+        case .bindingsOwnedByLua:
+            // The reader is a Lua author by construction (the
+            // gate), so the verb is named — interpolated, never
+            // in the frame (gui.md).
+            return L(
+                "profiles.desktops.lua_owned",
+                "Your init.lua owns the Desktop bindings — "
+                    + "edit its %1$@ lines there.",
+                "bind_profile_to_desktop"
+            )
         case .presetSwitchesLiveLayout:
             return L(
                 "presets.editing_stored",

@@ -5,7 +5,8 @@ extension KiwiCore {
     /// core owns: the file + adopted name (`ProfileManager`),
     /// the runtime native-Space bindings, and — when a
     /// readable `gui.json` sidecar exists — the sidecar's
-    /// binding lines, which would otherwise go stale:
+    /// binding lines through `rewriteSidecarBindings`, which
+    /// would otherwise go stale:
     /// `loadGuiConfig` composes bindings from the RUNTIME map
     /// only on the no-sidecar seed path. The follow-up save
     /// lives here, not in the GUI, so every rename entry
@@ -40,21 +41,18 @@ extension KiwiCore {
             desktopBindings[key]?.profile = new
             chased = true
         }
-        guard chased, guiConfigStore.load() != nil else {
-            return
-        }
-        // Rewrite matching values in the sidecar's own map —
-        // never adopt the runtime map wholesale: in a hybrid
-        // config it also holds init.lua-registered bindings,
-        // which must not materialize into gui.json (deleting
-        // the Lua line would then resurrect the binding).
-        var live = loadGuiConfig()
-        for (key, binding) in live.profileBindings
-        where binding.profile == old {
-            live.profileBindings[key]?.profile = new
-        }
+        guard chased else { return }
+        // Matching VALUES in the sidecar's own map — never the
+        // runtime map, which in a hybrid config also holds
+        // init.lua's bindings (deleting the Lua line would then
+        // resurrect the binding).
         do {
-            try saveGuiConfig(live)
+            try rewriteSidecarBindings { bindings in
+                for (key, binding) in bindings
+                where binding.profile == old {
+                    bindings[key]?.profile = new
+                }
+            }
         } catch {
             onLog("rename: sidecar follow failed: \(error)")
         }
