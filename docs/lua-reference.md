@@ -3890,16 +3890,18 @@ already open returns it to **Home** rather than dismissing it,
 the same as opening Settings from the menu bar. Unsaved edits
 survive that; only the place you were reading resets.
 
-It is deliberately **not bound to any key by default** — see
-`docs/design-decisions.md` ▸ *Settings tiles* for why. It is
-offered as a bindable preset in the Settings app under
-**Shortcuts ▸ General** ("Open Settings"), where you can bind it
-per layer without hand-writing Lua.
+:::unreleased
+It is seeded on **`⌃⌥,`**, in the base layer and in every layer
+you create in Settings, and offered under **Shortcuts ▸ General**
+("Open Settings"), where you can rebind it per layer without
+hand-writing Lua.
+:::
 
 **Example:**
 
 ```lua
-KiwiDesk.bind("ctrl+alt+comma", function()
+-- A second chord beside the seeded one.
+KiwiDesk.bind("ctrl+alt+shift+comma", function()
     KiwiDesk.open_settings()
 end)
 ```

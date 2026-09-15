@@ -22,7 +22,10 @@ enum ShortcutsOpenBinding {
     /// Structured equivalent for AppKit menu rendering. Keeping the
     /// physical key code avoids lossy reverse-parsing of display
     /// glyphs such as F-keys and Home/Page Up.
-    @MainActor static func combo(core: KiwiCore) -> KeyCombo? {
+    @MainActor static func combo(
+        core: KiwiCore,
+        lua verb: String = lua
+    ) -> KeyCombo? {
         guard let snapshot = core.liveKeybindingSnapshot() else {
             return nil
         }
@@ -32,7 +35,7 @@ enum ShortcutsOpenBinding {
             } ?? snapshot.keyLayers.first
         guard
             let combo = layer?.bindings.first(where: {
-                $0.lua == lua && !$0.combo.isEmpty
+                $0.lua == verb && !$0.combo.isEmpty
             })?.combo,
             let parsed = KeyCombo.parse(combo)
         else { return nil }

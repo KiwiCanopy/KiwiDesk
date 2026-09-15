@@ -80,11 +80,9 @@ public enum DefaultKeybindings {
     }
 
     /// The app-chrome rows on the `⌃⌥` base — ⌃⌥K opens the
-    /// Shortcuts panel (#602), ⌃⌥, opens Settings (#1381, the
-    /// `⌘,` convention on KiwiDesk's own pair; comma is key code
-    /// 43 on every layout). Seeded into the base layer here AND
-    /// into every GUI-created layer (`LayerStripEditor.addLayer`),
-    /// so both stay keyboard-reachable in any layer.
+    /// Shortcuts panel (#602), ⌃⌥, opens Settings (#1381) —
+    /// seeded into the base layer here and into every
+    /// GUI-created layer (`LayerChromeSeedTests`).
     public static func appChromeRows() -> [KeyBinding] {
         [showShortcutsRow(), openSettingsRow()]
     }

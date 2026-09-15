@@ -37,14 +37,30 @@ struct ShortcutsSelfRowTests {
     @Test("a mode holding only the seeded opener reports empty")
     func seededOpenerOnlyIsEmpty() {
         reset()
-        // The exact row `ShortcutsHeader.addMode` seeds a fresh
-        // mode with — pre-fix, the whole panel was one raw-Lua
-        // Custom row. The honest render is the "nothing bound"
-        // placeholder; the footer still shows the combo.
+        // Pre-fix, the whole panel was one raw-Lua Custom row.
+        // The honest render is the "nothing bound" placeholder;
+        // the footer still shows the combo.
         let reference = build([
             DefaultKeybindings.showShortcutsRow()
         ])
         #expect(reference.isEmpty)
+    }
+
+    /// The rows `LayerStripEditor.addLayer` seeds a fresh layer
+    /// with (#1381): the opener is dropped, the Settings row
+    /// stays — so a fresh layer's panel is no longer empty.
+    @Test("a fresh layer shows Open Settings and not the opener")
+    func freshLayerShowsSettingsOnly() {
+        reset()
+        let reference = build(DefaultKeybindings.appChromeRows())
+        #expect(!reference.isEmpty)
+        let rows = reference.controls.flatMap(\.rows)
+        #expect(rows.count == 1)
+        #expect(reference.custom.isEmpty)
+        #expect(
+            rows.first?.label
+                == KeybindingCatalog.openSettings.resolvedLabel
+        )
     }
 
     @Test("a second combo for the opener can't leak to Custom")

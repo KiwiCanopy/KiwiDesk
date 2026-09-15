@@ -143,6 +143,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             guard let self else { return nil }
             return ShortcutsOpenBinding.combo(core: self.core)
         }
+        statusItem.settingsComboProvider = { [weak self] in
+            guard let self else { return nil }
+            return ShortcutsOpenBinding.combo(
+                core: self.core,
+                lua: KeybindingCatalog.openSettings.lua
+            )
+        }
         // Propagate boot readiness to status item and onboarding (#802).
         core.onBootPhaseChange = { [weak self] phase in
             self?.statusItem?.setBootPhase(phase)

@@ -11,11 +11,13 @@ caption, and on some rows a `?` with a longer note. This guide
 covers what those cannot say — how things interact, where a
 setting lives, why a move was refused, and the files behind it.
 
+Open Settings from the KiwiDesk menu in the menu bar, or press
+**⌘,** while a KiwiDesk window is key. **Shortcuts ▸ General**
+offers a rebindable **Open Settings** row for a global key.
+
 :::unreleased
-Press **`⌃⌥,`** from anywhere to open Settings, or use the
-KiwiDesk menu in the menu bar; **⌘,** works too once a KiwiDesk
-window is already key. The chord is the **Open Settings** row
-under **Shortcuts ▸ General**, rebindable like any other.
+That row ships on **`⌃⌥,`**, a [default
+shortcut](#default-shortcuts), so Settings opens from anywhere.
 :::
 
 The Settings window tiles into your layout like any other window
@@ -683,8 +685,9 @@ new spaces (up to ten). It is saved as an ordinary profile named
 | Toggle sticky everywhere | `⌃⌥S` |
 | Toggle sticky on this screen | `⌃⌥P` |
 | Show shortcuts panel | `⌃⌥K` |
+
 :::unreleased
-| Open Settings | `⌃⌥,` |
+**Open Settings** ships on `⌃⌥,` as well.
 :::
 
 `⌃⌥` moves your focus, `⇧` sends the window to a space, `⌘`
@@ -802,11 +805,15 @@ settings and keeps your custom Lua live.
 The **+** beside the layer chips defines a layer: a name, an
 optional icon, and bindings that shadow the base
 shortcuts while it is active. Every layer gets its own `⌃⌥K`
-and `⌃⌥,` rows. Switch layers with `KiwiDesk.switch_layer` ([Lua
+row. Switch layers with `KiwiDesk.switch_layer` ([Lua
 reference](lua-reference.md)). Editing a stored profile puts
 Shortcuts in override mode: dimmed rows are inherited, an edited
 row overrides for that profile only, and only those rows are
 stored in its JSON.
+
+:::unreleased
+A new layer also carries the `⌃⌥,` Open Settings row.
+:::
 
 ## macOS Desktops (Mission Control)
 

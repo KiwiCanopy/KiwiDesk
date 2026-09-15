@@ -49,9 +49,19 @@ because two real clients now remove drift — see
   a user holds, so it is the only thing on `⌥⌘`; `⌘` on the
   ladder means exactly one thing, "and follow", and giving it a
   second sense is what the split removed. The toggles (`⌃⌥F`,
-  `⌃⌥S`, `⌃⌥P`) and app chrome (`⌃⌥K`) are pressed, so they
-  stay on the base tier as mnemonic letters
+  `⌃⌥S`, `⌃⌥P`) and app chrome (`⌃⌥K`, `⌃⌥,`) are pressed, so
+  they stay on the base tier as mnemonic keys
   (`SizeLayerSeedTests`, `DefaultKeybindingsTests`).
+- **App chrome is seeded from the ONE `appChromeRows`, and
+  every site that authors a layer takes it (#602/#1381).** The
+  base seed and a GUI-created layer are two authoring sites, and
+  a hand-listed chrome row beside either is how the second
+  chrome row landed in the base layer alone. A GUI site
+  constructing a `KeyLayer(` either takes the seam or is ruled
+  out with its reason in `LayerChromeSeedTests`' `allowed` map,
+  which is the one copy of who may; the seed reaches an
+  EXISTING install only through Shortcuts ▸ Restore Defaults…
+  (#1096), and prose naming a chrome chord says so.
 - **Never spend `⇧` on anything but "act on the window".** It
   qualifies a positional row, so a lettered toggle never carries
   it: `⌃⌥⇧S` did, and it was the one chord in the seed a user

@@ -113,6 +113,12 @@ extension StatusItemController {
         )
         settings.target = self
         settings.image = symbol("gearshape")
+        // The live global chord where one is bound (#1381); the
+        // `⌘,` above is the app menu's, which fires only while a
+        // KiwiDesk window is key.
+        if let combo = settingsComboProvider() {
+            Self.applyMenuEquivalent(combo, to: settings)
+        }
         menu.addItem(settings)
 
         menu.addItem(.separator())

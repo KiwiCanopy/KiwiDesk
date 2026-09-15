@@ -16,7 +16,9 @@ extension SettingsModel {
     /// Resets default-layer shortcuts to what a fresh install
     /// would seed for THIS config (#1096) — derived from the live
     /// `spaces` and `resizeStep`, never a snapshot. Scoped to the
-    /// default layer: it is the only one the seed ever authored.
+    /// default layer — the one the seed authors; a GUI-created
+    /// layer's chrome rows (`appChromeRows`) are seeded at its
+    /// creation and are the user's after that.
     func resetShortcutsToDefaults() {
         guard
             let index = config.layers.firstIndex(where: {
