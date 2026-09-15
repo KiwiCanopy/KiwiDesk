@@ -19,12 +19,12 @@ struct BordersCard: View {
     }
 
     private var widthHelp: String? {
-        gates.strokesDiffer(for: .borders(.borderWidthMaster))
+        gates.followersDiffer(for: .borders(.borderWidthMaster))
             ? GapsBordersGateHelp.strokesDiffer : nil
     }
 
     private var cornersHelp: String? {
-        gates.strokesDiffer(for: .borders(.borderCornerMaster))
+        gates.followersDiffer(for: .borders(.borderCornerMaster))
             ? GapsBordersGateHelp.strokesDiffer : nil
     }
 

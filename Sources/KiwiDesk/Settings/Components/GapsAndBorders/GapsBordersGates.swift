@@ -9,7 +9,6 @@ struct GapsBordersGates {
         case borderOff
         case glowOff
         case visualOff
-        case gapsDiffer
     }
 
     /// Container-level gate reason.
@@ -28,10 +27,6 @@ struct GapsBordersGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
-        case .gaps(.outer):
-            return outerGapsDiffer ? .gapsDiffer : nil
-        case .gaps(.inner):
-            return innerGapsDiffer ? .gapsDiffer : nil
         case .borders(.borderGlowSize),
             .borders(.borderGlowSizeAuto):
             guard settings.borderStyle.enabled else { return nil }
@@ -57,8 +52,6 @@ struct GapsBordersGates {
 
     /// Gated rows answered by this resolver (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
-        .gaps(.outer),
-        .gaps(.inner),
         .borders(.borderGlowSize),
         .borders(.borderGlowSizeAuto),
         .borders(.dragGhostBorder),
@@ -76,14 +69,18 @@ struct GapsBordersGates {
         .borders(.stickyDesktopReach)
     ]
 
-    /// True if the strokes a shared MASTER row writes currently
-    /// disagree. Deliberately NOT an `InertReason`: the gap
-    /// masters grey because a per-edge drawer sits under them to
-    /// repair from; these two have none, so greying them would
-    /// state the disagreement and withhold the only control that
-    /// ends it — they stay live and acknowledge through the `?`.
-    func strokesDiffer(for key: SettingKey) -> Bool {
+    /// True if the values a MASTER row writes currently disagree.
+    /// Deliberately NOT an `InertReason`: dimmed means "takes no
+    /// input" on every channel, so a master stays live and
+    /// acknowledges through its `?` — the first edit converges
+    /// its followers. The gap masters took the greyed shape until
+    /// #1383 ruled it the same way as the strokes.
+    func followersDiffer(for key: SettingKey) -> Bool {
         switch key {
+        case .gaps(.outer):
+            return outerGapsDiffer
+        case .gaps(.inner):
+            return innerGapsDiffer
         case .borders(.borderWidthMaster):
             return widthsDiffer
         case .borders(.borderCornerMaster):
@@ -95,7 +92,7 @@ struct GapsBordersGates {
 
     /// Agreed corner shape across ring style and drag radius —
     /// the ONE copy of that comparison: the master binding reads
-    /// it as its displayed value and `strokesDiffer` as the `?`
+    /// it as its displayed value and `followersDiffer` as the `?`
     /// predicate, so the blank picker and its explanation cannot
     /// contradict.
     var agreedCornerStyle: BorderStyle.CornerStyle? {
@@ -116,8 +113,8 @@ struct GapsBordersGates {
             || width != settings.dragDropZone.borderWidth
     }
 
-    /// The outer master is inert while its four edges disagree —
-    /// there is no single value for it to show or write.
+    /// The outer master acknowledges while its four edges
+    /// disagree — it shows the top edge and writes all four.
     private var outerGapsDiffer: Bool {
         let o = settings.gapsGlobal.outer
         return
@@ -126,7 +123,7 @@ struct GapsBordersGates {
             && o.top == o.right)
     }
 
-    /// The inner master is inert while its two axes disagree.
+    /// The inner master acknowledges while its two axes disagree.
     private var innerGapsDiffer: Bool {
         let i = settings.gapsGlobal.inner
         return i.horizontal != i.vertical

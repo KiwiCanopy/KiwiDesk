@@ -217,24 +217,29 @@ struct GapsAndBordersGateTests {
         )
     }
 
-    @Test("a gap master greys while its edges or axes differ")
-    func gapMastersGateOnDiffer() {
-        #expect(
-            GapsBordersGates(
-                settings: settings(outerEdgesDiffer: true)
-            ).inertReason(for: .gaps(.outer)) == .gapsDiffer
+    /// A gap master is never gated: it stays live while its
+    /// edges differ and ACKNOWLEDGES through `followersDiffer`
+    /// (#1383 reversed the grey — dimmed means no input on every
+    /// channel, and the drag is the one gesture that converges).
+    @Test("a gap master acknowledges, never greys, while its edges differ")
+    func gapMastersAcknowledgeOnDiffer() {
+        let outer = GapsBordersGates(
+            settings: settings(outerEdgesDiffer: true)
         )
-        #expect(
-            gates().inertReason(for: .gaps(.outer)) == nil
+        #expect(outer.followersDiffer(for: .gaps(.outer)))
+        #expect(!gates().followersDiffer(for: .gaps(.outer)))
+        let inner = GapsBordersGates(
+            settings: settings(innerAxesDiffer: true)
         )
-        #expect(
-            GapsBordersGates(
-                settings: settings(innerAxesDiffer: true)
-            ).inertReason(for: .gaps(.inner)) == .gapsDiffer
-        )
-        #expect(
-            gates().inertReason(for: .gaps(.inner)) == nil
-        )
+        #expect(inner.followersDiffer(for: .gaps(.inner)))
+        #expect(!gates().followersDiffer(for: .gaps(.inner)))
+        // Ungated in the census, so the resolver's first guard
+        // answers nil whatever the edges say.
+        for key in [SettingKey.gaps(.outer), .gaps(.inner)] {
+            #expect(key.placement.gate == nil)
+            #expect(outer.inertReason(for: key) == nil)
+            #expect(inner.inertReason(for: key) == nil)
+        }
     }
 
     /// Every reason renders a distinct, non-empty sentence: a
@@ -243,7 +248,7 @@ struct GapsAndBordersGateTests {
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [GapsBordersGates.InertReason] = [
-            .borderOff, .glowOff, .visualOff, .gapsDiffer,
+            .borderOff, .glowOff, .visualOff,
         ]
         let sentences = all.map(GapsBordersGateHelp.sentence)
         for sentence in sentences {

@@ -76,8 +76,7 @@ extension SettingRuntimeGate {
     /// Whether this condition greys a row or gates drawing entirely.
     var greys: Bool {
         switch self {
-        case .perEdgeValuesDiffer, .editingStoredProfile,
-            .screenCountMismatch,
+        case .editingStoredProfile, .screenCountMismatch,
             .loginItemServiceStatus, .autoStartServiceLoaded,
             .spaceHasNoOverrides, .reduceMotion, .reduceTransparency,
             .noBindingStore:
@@ -95,8 +94,6 @@ extension SettingRuntimeGate {
     /// (GateReasonPlacementTests).
     var causeIsOnSurface: Bool {
         switch self {
-        case .perEdgeValuesDiffer:
-            return true
         case .spaceHasNoOverrides:
             return true
         case .reduceMotion, .reduceTransparency,

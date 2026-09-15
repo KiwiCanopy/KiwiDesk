@@ -136,31 +136,31 @@ struct BorderMastersDivergenceTests {
         let model = model()
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderCornerMaster))
+                .followersDiffer(for: .borders(.borderCornerMaster))
         )
         model.config.settings.dragGhost.borderWidth = 2
         #expect(
             gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderCornerMaster))
+                .followersDiffer(for: .borders(.borderCornerMaster))
         )
         model.config.settings.dragGhost.borderWidth =
             model.config.settings.borderStyle.width
         model.config.settings.borderStyle.cornerStyle = .square
         #expect(
             !gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
         #expect(
             gates(model)
-                .strokesDiffer(for: .borders(.borderCornerMaster))
+                .followersDiffer(for: .borders(.borderCornerMaster))
         )
     }
 
@@ -173,7 +173,7 @@ struct BorderMastersDivergenceTests {
         model.config.settings.dragDropZone.borderWidth = 2
         #expect(
             gates(model)
-                .strokesDiffer(for: .borders(.borderWidthMaster))
+                .followersDiffer(for: .borders(.borderWidthMaster))
         )
     }
 
@@ -187,7 +187,7 @@ struct BorderMastersDivergenceTests {
         model.config.settings.borderStyle.cornerStyle = .square
         for key in SettingKey.allCases
         where !SettingKey.masterWrites.keys.contains(key) {
-            #expect(!gates(model).strokesDiffer(for: key))
+            #expect(!gates(model).followersDiffer(for: key))
         }
     }
 }

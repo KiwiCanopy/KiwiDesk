@@ -8688,8 +8688,34 @@ owner ruling 2026-08-04; #678 8a)
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge
 sliders behind a disclosure. When stored edges differ, the
-disclosure pre-expands and the master slider disables itself
-— asymmetric setups can't be blindly flattened. (#68 §3.14)
+disclosure pre-expands so the values about to be overwritten
+are in view. (#68 §3.14) The master used to disable itself
+there as well; the next entry argues why it no longer does.
+
+:::unreleased
+**A master whose followers disagree stays live and
+acknowledges; it never greys** (#1383, owner ruling
+2026-09-15 adopting the `ui-designer` verdict, reversing the
+issue's own "greyed but draggable"). Dimmed means "does not
+accept input" on every channel — mouse, keyboard, VoiceOver —
+and `SettingsSlider` refuses the drag, the arrow nudge and
+focus on the same bit that dims it, so a control that greys
+and still writes on a drag would be a second axis invented for
+one row, and a live control drawn dead is the one failure
+worse than a wrong grey. The gap masters therefore take the
+shape the Borders card's width master already had: the slider
+is live, the readout says "mixed" and speaks it, the label's
+`?` carries *the edges are set differently right now; a value
+here sets all of them*, and the first edit converges every
+edge — how a macOS inspector treats a mixed selection. This
+retires the reading that greying was the gap masters' special
+answer because a per-edge drawer sat under them to repair
+from: the drawer still pre-expands while mixed, but repair is
+one gesture on the master and never needed a grey to protect
+it. A "Sync" button was rejected as a second control for a
+one-gesture job. `GapsAndBordersGateWiringTests` ▸
+`gapMastersAcknowledgeAtTheLabel` holds the shape.
+:::
 
 **The gap preview is a live 2×2 grid, not a layout
 preview.** It teaches the outer/inner vocabulary: a uniform
@@ -9504,15 +9530,15 @@ halves. The width row cannot do the same — a slider has no
 blank thumb — so it keeps showing the ring's width.
 
 **Both rows acknowledge a disagreement rather than greying
-on it.** The gap masters, one card up, grey when their edges
-differ, because there is no single value to show and a per-edge
-drawer sits right under them to repair from. These two have no
-per-stroke row anywhere on the page: greying them would name
-the problem and withhold the only control that ends it. So the
-acknowledgement is a `?` beside a live control — *the three
-strokes are set differently right now; choosing here sets all
-three* — which is what a master owes when it is about to
-overwrite an answer it did not show.
+on it.** These two have no per-stroke row anywhere on the
+page, so greying them would name the problem and withhold the
+only control that ends it. The acknowledgement is a `?` beside
+a live control — *the three strokes are set differently right
+now; choosing here sets all three* — which is what a master
+owes when it is about to overwrite an answer it did not show.
+The gap masters, one card up, once took a grey instead on the
+strength of their per-edge drawer; #1383 ruled them onto this
+same shape (Gaps are uniform-first, the entry that follows it).
 
 **[Rationale]**
 

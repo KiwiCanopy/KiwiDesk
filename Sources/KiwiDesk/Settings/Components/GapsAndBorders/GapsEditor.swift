@@ -99,8 +99,13 @@ struct GapsEditor: View {
         unified: Binding<CGFloat>,
         mixed: Bool
     ) -> some View {
+        // Live while mixed (#1383): the `?` on the label says what
+        // a drag will do, and the first one converges every edge.
         SettingsRowShape {
-            SettingsRowLabel(label: label)
+            SettingsRowLabel(
+                label: label,
+                help: mixed ? GapsBordersGateHelp.edgesDiffer : nil
+            )
         } control: {
             HStack {
                 SettingsSlider(
@@ -115,7 +120,6 @@ struct GapsEditor: View {
                     label: label,
                     spokenValue: masterReadout(unified, mixed)
                 )
-                .disabled(mixed)
                 Text(masterReadout(unified, mixed))
                     .settingsReadout()
                     .frame(
@@ -126,13 +130,6 @@ struct GapsEditor: View {
                     .font(.body.monospacedDigit())
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
-                    .help(
-                        mixed
-                            ? GapsBordersGateHelp.sentence(
-                                for: .gapsDiffer
-                            )
-                            : ""
-                    )
             }
         }
     }
@@ -146,11 +143,11 @@ struct GapsEditor: View {
     }
 
     private var outerMixed: Bool {
-        gates.inertReason(for: .gaps(.outer)) != nil
+        gates.followersDiffer(for: .gaps(.outer))
     }
 
     private var innerMixed: Bool {
-        gates.inertReason(for: .gaps(.inner)) != nil
+        gates.followersDiffer(for: .gaps(.inner))
     }
 
     /// Master slider binding updating all outer edges simultaneously.

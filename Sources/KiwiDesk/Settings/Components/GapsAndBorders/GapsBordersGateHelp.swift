@@ -27,26 +27,30 @@ enum GapsBordersGateHelp {
                 "Turn on %1$@ to edit this visual.",
                 L("drag.enabled", "Enabled")
             )
-        case .gapsDiffer:
-            return L(
-                "gaps.mixed.help",
-                "Edges differ — edit them "
-                    + "individually below."
-            )
         }
     }
 
     /// The shared masters' acknowledgement — not an
-    /// `InertReason`, because those two rows stay live: with no
-    /// per-stroke row anywhere on the page, greying them would
-    /// name a disagreement and withhold the fix. It is a `?`
-    /// beside a working control, so it says what a pick will do
-    /// rather than what is stopping one.
+    /// `InertReason`, because those two rows stay live: a `?`
+    /// beside a working control says what a pick will do rather
+    /// than what is stopping one.
     static var strokesDiffer: String {
         L(
             "border.shared.differ.help",
             "The three strokes are set differently right now; "
                 + "choosing here sets all three."
+        )
+    }
+
+    /// The gap masters' acknowledgement, the strokes' shape
+    /// (#1383): the slider stays live over a "mixed" readout and
+    /// the first drag converges every edge, the way an inspector
+    /// treats a mixed selection.
+    static var edgesDiffer: String {
+        L(
+            "gaps.master.differ.help",
+            "The edges are set differently right now; "
+                + "a value here sets all of them."
         )
     }
 }
