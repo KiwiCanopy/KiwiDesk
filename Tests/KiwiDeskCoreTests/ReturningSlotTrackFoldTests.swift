@@ -3,13 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-// The track half of a Desktop return (#1387): in a track Space
-// the #1207 rank return used to lose to the spawn rule, which
-// placed each returning window as a NEW one — own_track/first
-// put every return at index 0, in re-track order — and the break
-// `Space.remove` handed to the successor never came back, so the
-// columns re-joined. The departure record carries the break's
-// provenance beside the rank, and the return takes both back.
+// The track half of a Desktop return (#1387): a return takes
+// its rank ahead of the spawn rule, and the break it had — the
+// record carries the break's provenance, since `Space.remove`
+// hands a departing head's break to its successor.
 
 private let a = WindowID(1)
 private let b = WindowID(2)
@@ -169,6 +166,39 @@ struct ReturningSlotTrackFoldTests {
         #expect(state.workspaces[home]?.trackBreaks == [c])
         #expect(state.departedSlots[c]?.trackBreak == .head)
         state.apply(.windowCreated(makeWindow(a)))
+        #expect(state.workspaces[home]?.trackBreaks == [a, c])
+    }
+
+    /// A member that departed before its head and returned before
+    /// it sits between the head and the holder: the walk passes
+    /// any member holding no break, whatever its record.
+    @Test("a member back ahead of its head does not stop the walk")
+    func memberBetweenHeadAndHolderIsWalkedPast() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a] }
+        depart(&state, [b, a])
+        #expect(state.workspaces[home]?.trackBreaks == [c])
+        state.apply(.windowCreated(makeWindow(b)))
+        state.apply(.windowCreated(makeWindow(a)))
+        #expect(state.workspaces[home]?.windows == [a, b, c, d])
+        #expect(state.workspaces[home]?.trackBreaks == [a])
+    }
+
+    /// A head closed while away makes its hand-off permanent: the
+    /// holder becomes a head of its own, so its own round trip
+    /// brings the break back with it rather than leaving it on
+    /// the member behind.
+    @Test("a head gone for good promotes its holder")
+    func retiredHeadPromotesItsHolder() {
+        var state = makeTrackRow()
+        state.workspaces.withSpace(home) { $0.trackBreaks = [a, b] }
+        depart(&state, [b])
+        #expect(state.departedSlots[c]?.trackBreak == .handed)
+        state.forgetAway(b)
+        #expect(state.departedSlots[c]?.trackBreak == .head)
+        depart(&state, [c])
+        state.apply(.windowCreated(makeWindow(c)))
+        #expect(state.workspaces[home]?.windows == [a, c, d])
         #expect(state.workspaces[home]?.trackBreaks == [a, c])
     }
 

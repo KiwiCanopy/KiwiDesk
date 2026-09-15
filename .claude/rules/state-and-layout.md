@@ -320,14 +320,22 @@ editing here:
   (#1387). The return takes back the BREAK it had too:
   `Space.remove` hands a departing head's break to its successor,
   so the record carries the break's provenance
-  (`DepartedSlot.trackBreak` — member, head, or handed — the
-  hand-off's target marked ahead of the removal through the one
-  `handOffTarget`), a handed break is never re-recorded as a head
-  of its own, since the live set cannot tell them apart, and a
-  returning head takes its break back from the first holder
-  recorded handed, walking a chain of departures
-  (`ReturningSlotTrackFoldTests`). The rank and the provenance are
-  ONE value, so every ender and the re-key carry both or neither.
+  (`Space.BreakProvenance` — member, head, or handed); mark the
+  hand-off's target ahead of the removal through `handOffTarget`,
+  the one copy of the hand-off decision `handTrackBreakToSuccessor`
+  takes too — review's, since nothing counts its callers — so a
+  handed break is never re-recorded as a head of its own, which
+  the live set cannot tell apart; and a returning head takes its
+  break back from the first HOLDER, only where recorded handed,
+  walking past members holding none — a chain of departures hands
+  one break along, and a member back ahead of its head sits
+  between the two (`ReturningSlotTrackFoldTests`). A departing
+  window of ANOTHER Desktop, live in the same-named Space for the
+  settle's beat, hands its break into this row the same way and
+  nothing here takes it back — unmeasured residue, ruling owed on
+  #1387. Keep the rank and the provenance
+  ONE value, so every ender and the re-key carry both or neither
+  (`ReturningSlotTrackFoldTests` ▸ `rekeyCarriesTheProvenance`).
   The secondary-display arm owes nothing — not because it activates
   no Space, which stopped being true in #1230, but because the
   debt is recorded per SPACE at the focus report and paid by the

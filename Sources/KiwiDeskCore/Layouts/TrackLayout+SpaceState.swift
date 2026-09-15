@@ -3,6 +3,19 @@ import Foundation
 
 /// Track state mutations for `Space` (#128, `TrackLayout+Domain`).
 extension Space {
+    /// What a departing window's break was (#1387): the live set
+    /// cannot tell a break `handTrackBreakToSuccessor` gave from
+    /// one of the window's own, and the return must.
+    public enum BreakProvenance: Sendable, Equatable {
+        /// No break: a member of some head's track.
+        case member
+        /// Headed a track by its own break: the return re-inserts
+        /// it and takes a handed one back.
+        case head
+        /// Holds a break `handTrackBreakToSuccessor` gave it.
+        case handed
+    }
+
     /// The member `handTrackBreakToSuccessor(of:)` hands `window`'s
     /// break to: its array successor, when `window` has a break and
     /// the successor has none. The one copy of that decision — the
@@ -34,24 +47,27 @@ extension Space {
     /// The inverse of `handTrackBreakToSuccessor` for a returning
     /// window (#1387): a recorded HEAD takes its break back, and
     /// with it the weight the hand-off moved, from the first
-    /// successor holding a HANDED one — a chain of departures hands
-    /// one break along, so members recorded handed that hold none
-    /// any more are walked past. Returned so the caller can end
-    /// that record. A member the record never saw, or a head of
-    /// its own, stops the walk and keeps its break.
+    /// successor HOLDING a break — taken only where the record says
+    /// handed, and returned so the caller can end that record. A
+    /// holder recorded otherwise, or never recorded, is a head of
+    /// its own and stops the walk. Members holding none are walked
+    /// past whatever their record: a chain of departures hands one
+    /// break along, and a member back ahead of its head sits
+    /// between the two.
     @discardableResult
     mutating func takeTrackBreakBack(
         for window: WindowID,
-        recorded: (WindowID) -> StateCoordinator.DepartedSlot.TrackBreak?
+        recorded: (WindowID) -> BreakProvenance?
     ) -> WindowID? {
         guard recorded(window) == .head else { return nil }
         trackBreaks.insert(window)
         guard let index = windows.firstIndex(of: window) else {
             return nil
         }
-        for successor in windows[(index + 1)...] {
+        for successor in windows[(index + 1)...]
+        where trackBreaks.contains(successor) {
             guard recorded(successor) == .handed else { return nil }
-            guard trackBreaks.remove(successor) != nil else { continue }
+            trackBreaks.remove(successor)
             if let weight = trackWeights.removeValue(forKey: successor) {
                 trackWeights[window] = weight
             }

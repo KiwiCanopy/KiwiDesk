@@ -47,6 +47,11 @@ extension KiwiCore {
                     + "\(space) — closed"
             )
         }
+        // A close makes the departure fold's break hand-off
+        // permanent (#1387); a vanish or a hide keeps it revocable.
+        if reason == .closed {
+            state.promoteHandedSuccessor(of: id)
+        }
         if reason == .vanished,
             case .hosted(let space, _) = presence
         {

@@ -107,12 +107,8 @@ extension KiwiCore {
     /// back into a set the profile is authoritative over.
     ///
     /// A window ALREADY in its remembered Space is left where it
-    /// sits (#1387): the record is a membership, and the live row
-    /// is the order authority. On a bound-Desktop switch this runs
-    /// while the departing Desktop's windows are still live in a
-    /// same-named Space, and re-appending them re-ordered the row
-    /// the settle sweep then filed #1207's ranks against — and
-    /// `Space.remove` handed each track break away on the way.
+    /// sits: the record is a membership, the live row the order
+    /// authority (#1387, profiles.md).
     func restorePartitioning(of profile: Profile) {
         guard
             let remembered = state.profilePartitioning.remembered(

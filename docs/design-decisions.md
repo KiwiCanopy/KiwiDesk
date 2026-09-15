@@ -3820,7 +3820,12 @@ eight in space 1 and space 3 empty.
 Each profile now carries its own record of which windows its
 spaces held, filed when you switch away and restored when you
 return. Window ids only, never window state — about sixty
-integers across three profiles, written once per switch.
+integers across three profiles, written once per switch. The
+record is a membership, never an order: a window already in its
+remembered space stays where the live row has it, because on a
+Desktop switch between bound profiles the restore runs while the
+departing Desktop's windows are still on screen, and re-placing
+them re-ordered the row the return then rebuilt (#1387).
 
 Its counterpart is deliberately NOT stored, and the reason is
 WHEN each record is authoritative rather than who owns the fact.

@@ -19,28 +19,22 @@ extension StateCoordinator {
     }
 
     /// What a departed window takes back on its return (#1207,
-    /// #1387): the slot it held and the break it had. `Space.remove`
-    /// hands a departing head's break to its successor, so a return
-    /// by rank alone re-joined the successor's track — and a
-    /// successor re-recorded after that hand-off read as a head of
-    /// its own, which is why the break's provenance is the record
-    /// and never the live set alone.
+    /// #1387): the slot it held and the break it had — one value,
+    /// so every ender and the re-key carry both or neither.
     struct DepartedSlot: Sendable, Equatable {
-        enum TrackBreak: Sendable, Equatable {
-            /// No break: a member of some head's track.
-            case member
-            /// Headed a track by its own break: the return
-            /// re-inserts it and takes a handed one back.
-            case head
-            /// Holds a break `handTrackBreakToSuccessor` gave it;
-            /// ends when the break does, or when the head returns.
-            case handed
-        }
-
         var rank: Int
-        var trackBreak: TrackBreak
+        /// Re-derived at each departure of the Space: a handed
+        /// break stays handed while it is held and ends when it is
+        /// not; a holder that loses it and regains one of its own
+        /// between two departures reads as handed until the next
+        /// (residue, not an age bound — the next departure is the
+        /// bound).
+        var trackBreak: Space.BreakProvenance
 
-        init(rank: Int, trackBreak: TrackBreak = .member) {
+        init(
+            rank: Int,
+            trackBreak: Space.BreakProvenance = .member
+        ) {
             self.rank = rank
             self.trackBreak = trackBreak
         }
@@ -153,9 +147,37 @@ extension StateCoordinator {
         return true
     }
 
+    /// A head gone for good makes its hand-off permanent (#1387):
+    /// the first record after it in its Space that says handed
+    /// becomes a head of its own, or that holder's next return
+    /// would leave the break on the member behind it. Called at
+    /// the plain close and at `forgetAway`; a hide or a Desktop
+    /// departure keeps the hand-off revocable.
+    mutating func promoteHandedSuccessor(of id: WindowID) {
+        guard let slot = departedSlots[id], slot.trackBreak == .head,
+            let space = rememberedSpaces[id]?.space
+        else { return }
+        let next = departedSlots.filter { entry in
+            entry.value.trackBreak == .handed
+                && entry.value.rank > slot.rank
+                && recordedSpace(of: entry.key) == space
+        }.min { $0.value.rank < $1.value.rank }
+        guard let next else { return }
+        departedSlots[next.key]?.trackBreak = .head
+    }
+
+    /// The Space a record is read against: a live member's, else
+    /// the remembered one.
+    private func recordedSpace(of id: WindowID) -> SpaceID? {
+        windows[id] != nil
+            ? workspaces.space(of: id)
+            : rememberedSpaces[id]?.space
+    }
+
     /// Retires a window closed while away (#1146): the ledger
     /// entry and the two #1207 records it was read with.
     mutating func forgetAway(_ id: WindowID) {
+        promoteHandedSuccessor(of: id)
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
         restoredFrames[id] = nil

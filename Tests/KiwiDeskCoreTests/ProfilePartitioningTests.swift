@@ -71,8 +71,10 @@ struct ProfilePartitioningTests {
 
     // MARK: - The measurement
 
-    /// A → B → A returns A's Spaces exactly as they were. This is
-    /// the 2026-09-04 device round; reverting the restore reds it.
+    /// A → B → A returns A's Spaces' MEMBERSHIP exactly as it was.
+    /// This is the 2026-09-04 device round; reverting the restore
+    /// reds it. The order of a same-named Space's members is the
+    /// live row's (#1387, the test below).
     @Test("A profile round trip restores its own partitioning")
     func roundTripIsLossless() {
         let core = makeCore()
@@ -120,28 +122,26 @@ struct ProfilePartitioningTests {
         #expect(members(core, "2") == [WindowID(2)])
     }
 
-    /// The device row of #1387 (2026-09-15): on a bound-Desktop
-    /// switch this restore runs while the departing Desktop's
-    /// windows are still live in a same-named Space, and
-    /// re-appending them re-ordered the row the settle sweep then
-    /// filed the #1207 ranks against, `Space.remove` handing each
-    /// track break away on the way. A member already in its
-    /// remembered Space is left where it sits, break and all.
-    @Test("A window already in its remembered Space is left in place")
-    func sameSpaceMemberIsLeftInPlace() {
+    /// The device row of #1387 (2026-09-15): a member already in
+    /// its remembered Space is left where it sits, break and all.
+    @Test(
+        "A window already in its remembered Space is left in place",
+        arguments: [LayoutMode.track, .bsp]
+    )
+    func sameSpaceMemberIsLeftInPlace(mode: LayoutMode) {
         let core = makeCore()
         live(core, [1, 2, 3, 4])
         var a = profile("A", spaces: ["1"])
-        a.spaceModes["1"] = .track
+        a.spaceModes["1"] = mode
         var b = profile("B", spaces: ["1", "2"])
-        b.spaceModes["1"] = .track
+        b.spaceModes["1"] = mode
         core.apply(profile: a, forceRetile: false)
         for id in [1, 2, 3] {
             core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
         }
-        core.state.workspaces.withSpace("1") {
-            $0.trackBreaks = [WindowID(1), WindowID(2), WindowID(3)]
-        }
+        let breaks: Set<WindowID> =
+            mode == .track ? [WindowID(1), WindowID(2), WindowID(3)] : []
+        core.state.workspaces.withSpace("1") { $0.trackBreaks = breaks }
 
         core.apply(profile: b, forceRetile: false)
         // Opened while B is up: A has never seen it.
@@ -154,9 +154,28 @@ struct ProfilePartitioningTests {
             members(core, "1")
                 == [1, 2, 3, 4].map { WindowID(UInt32($0)) }
         )
+        #expect(core.state.workspaces["1"]?.trackBreaks == breaks)
+    }
+
+    /// The trade the skip makes, pinned: a row re-ordered under B
+    /// comes back to A in B's order. The record is a membership.
+    @Test("A reorder under B survives into A")
+    func reorderUnderBIsKept() {
+        let core = makeCore()
+        live(core, [1, 2, 3])
+        let a = profile("A", spaces: ["1"])
+        let b = profile("B", spaces: ["1"])
+        core.apply(profile: a, forceRetile: false)
+        for id in [1, 2, 3] {
+            core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
+        }
+        core.apply(profile: b, forceRetile: false)
+        core.state.workspaces.withSpace("1") {
+            $0.windows = [WindowID(3), WindowID(1), WindowID(2)]
+        }
+        core.apply(profile: a, forceRetile: false)
         #expect(
-            core.state.workspaces["1"]?.trackBreaks
-                == [WindowID(1), WindowID(2), WindowID(3)]
+            members(core, "1") == [WindowID(3), WindowID(1), WindowID(2)]
         )
     }
 
