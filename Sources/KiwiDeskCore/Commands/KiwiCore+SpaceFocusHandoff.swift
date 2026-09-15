@@ -107,7 +107,7 @@ extension KiwiCore {
             self.retile(
                 animated: self.tiler.settings
                     .animations.onSpaceChange,
-                force: true
+                reissue: true
             )
             self.reassertSwitchFocus(
                 priorFrontmost: priorFrontmost,

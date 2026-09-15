@@ -20,9 +20,19 @@ extension KiwiCore {
     /// allow-listed — `BatchSizingRoutingTests` names every call
     /// site that may promise, and `BatchSizing` argues why
     /// guessing is the one mistake that reintroduces #45.
+    ///
+    /// `force` is an explicit apply (§5): every frame is
+    /// re-issued AND the pass probes past corroborated bounds
+    /// (#1055). `reissue` is the first half alone — a Space
+    /// switch must re-issue frames the lagging echoes still
+    /// report in place, but it is not an ask to re-probe, and
+    /// under the probe verdict the learned-floor consumers
+    /// (`geometricCap`, the heals) stand down, which redrew the
+    /// count's overlap on every switch (#1488).
     public func retile(
         animated: Bool? = nil,
         force: Bool = false,
+        reissue: Bool = false,
         newlyCreatedWindow: WindowID? = nil,
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
@@ -59,6 +69,7 @@ extension KiwiCore {
             animated: animated
                 ?? tiler.settings.animations.onRelayout,
             force: force,
+            reissue: reissue,
             newlyCreatedWindow: newlyCreatedWindow,
             stashAnimated: stashAnimated,
             sizing: sizing

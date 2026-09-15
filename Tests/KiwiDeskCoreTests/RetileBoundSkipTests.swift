@@ -119,6 +119,25 @@ struct RetileBoundSkipTests {
         #expect(applied.frames[w] != nil)
     }
 
+    @Test("Reissue re-issues the believed bound without probing")
+    func reissueIssuesTheBound() throws {
+        // The Space switch's half of `force` (#1488): every frame
+        // goes out again, but the ask is the answer the app gave
+        // — an explicit apply above issues the raw slot instead.
+        guard NSScreen.main != nil else { return }
+        let applied = Applied()
+        let core = makeCore(applied: applied)
+        let (target, _) = try learnBound(core, applied: applied)
+        core.retile()
+        #expect(core.tiler.sizeBound(for: w) != nil)
+
+        applied.frames = [:]
+        core.retile(reissue: true)
+        let issued = try #require(applied.frames[w])
+        #expect(issued.width == 715)
+        #expect(issued.width < target.width)
+    }
+
     @Test("A moved slot still issues")
     func movedSlotStillIssues() throws {
         guard NSScreen.main != nil else { return }

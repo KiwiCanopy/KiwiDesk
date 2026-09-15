@@ -166,7 +166,7 @@ extension KiwiCore {
             from: current,
             to: origin.space
         )
-        retile(animated: false, force: true)
+        retile(animated: false, reissue: true)
         // The revert re-inserts into a possibly-overflowing
         // stack / track / pile — the same §5 obligation the
         // crossing itself honors (review).

@@ -108,7 +108,7 @@ extension KiwiCore {
             fileMembership(window, into: target, from: from)
         }
         state.workspaces.activate(target)
-        retile(animated: false, force: true)
+        retile(animated: false, reissue: true)
         emitSpaceChange()
         return true
     }

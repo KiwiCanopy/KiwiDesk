@@ -139,6 +139,19 @@ extension TrackLayout {
         return max(context.minWindowSize, learned ?? 0)
     }
 
+    /// `learnedFloor`'s mirror (#1488): one window's corroborated
+    /// learned MAXIMUM on the cross span, nil where none — no
+    /// configured ceiling stands in the way `min_window_size`
+    /// does for the floor.
+    public static func learnedCeiling(
+        of id: WindowID,
+        in context: LayoutContext
+    ) -> CGFloat? {
+        let bound = context.sizeBounds[id]
+        return context.track.axis == .vertical
+            ? bound?.maxWidth : bound?.maxHeight
+    }
+
     /// In-track capacity for windows stacked in one track (#437).
     public static func trackCapacity(
         for context: LayoutContext
