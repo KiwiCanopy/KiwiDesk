@@ -4,7 +4,14 @@ import CoreGraphics
 /// (#776).
 extension ScrollingLayout {
     /// Computes viewport offset for `focus` at `focusedPos`
-    /// (#239, #66, #141, #966).
+    /// (#239, #66, #141, #966, #1388).
+    ///
+    /// `center`, `start` and `end` are ABSOLUTE: the focused slot
+    /// rests where the anchor says even with nothing beside it,
+    /// so a lone window under `start` sits at the edge with the
+    /// rest of the axis empty. Only `follow` keeps the row's
+    /// extent on screen — it is the anchor that promises a filled
+    /// screen, and the clamp is that promise (#1388).
     public static func offset(
         anchor: ScrollingParams.Anchor,
         previous: ScrollRest?,
@@ -14,34 +21,48 @@ extension ScrollingLayout {
         rowLength: CGFloat,
         focusedPos: CGFloat?
     ) -> CGFloat {
-        var target: CGFloat
-        if let focusedPos {
-            let visibleMin = -focusedPos
-            let visibleMax = along - size - focusedPos
-            switch anchor {
-            case .follow:
-                let base =
-                    heldBase(
-                        previous: previous,
-                        focus: focus,
-                        focusedPos: focusedPos,
-                        focusedSpan: size,
-                        along: along
-                    ) ?? visibleMin
-                target = min(max(base, visibleMin), visibleMax)
-            case .center, .start, .end:
-                let resting = anchorOffset(
-                    anchor: anchor,
-                    along: along,
-                    size: size,
-                    focusedPos: focusedPos
-                )
-                target = min(max(resting, visibleMin), visibleMax)
-            }
-        } else {
-            target = previous?.offset ?? 0
+        guard let focusedPos else {
+            // No slot to place (a floating focus, #141): hold.
+            let held = previous?.offset ?? 0
+            return anchor == .follow
+                ? clampedToRow(held, along: along, rowLength: rowLength)
+                : held
         }
+        let visibleMin = -focusedPos
+        let visibleMax = along - size - focusedPos
+        switch anchor {
+        case .follow:
+            let base =
+                heldBase(
+                    previous: previous,
+                    focus: focus,
+                    focusedPos: focusedPos,
+                    focusedSpan: size,
+                    along: along
+                ) ?? visibleMin
+            return clampedToRow(
+                min(max(base, visibleMin), visibleMax),
+                along: along,
+                rowLength: rowLength
+            )
+        case .center, .start, .end:
+            return anchorOffset(
+                anchor: anchor,
+                along: along,
+                size: size,
+                focusedPos: focusedPos
+            )
+        }
+    }
 
+    /// `follow`'s boundary: a row shorter than the axis sits at
+    /// the leading edge, a longer one never shows empty margin
+    /// past either end.
+    private static func clampedToRow(
+        _ target: CGFloat,
+        along: CGFloat,
+        rowLength: CGFloat
+    ) -> CGFloat {
         guard rowLength > along else { return 0 }
         return min(max(target, along - rowLength), 0)
     }

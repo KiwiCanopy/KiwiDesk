@@ -1207,6 +1207,18 @@ only `follow` remembers the prior scroll position. Focusing a
 — a floating window has no slot in the row, so there is nothing
 to place.
 
+:::unreleased
+The three fixed anchors are **absolute**: the focused window
+rests where the anchor says even when nothing sits beside it.
+On a wide screen a short row under `center` is centred with
+empty screen either side; under `start` the focused window
+takes the left (or top) edge and the rest of the axis stays
+empty, and `end` mirrors it. Only `follow` keeps the row's
+extent on screen — it is the anchor that promises a filled
+screen, and a row shorter than the axis sits flush at the
+leading edge under it.
+:::
+
 `follow` remembers where the *focused window* rested, not how far
 the row was pushed. One slot size serves every slot, so resizing
 one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
@@ -1221,7 +1233,7 @@ the App Bar — is not a rearrangement around the focus: the two
 windows visibly trade places, and the view pans only when the
 moved window's new slot would fall outside it.
 
-Near a row end the boundary wins, as always: the row never
+Near a row end the boundary wins under `follow`: the row never
 reveals empty margin past its ends, so there the focus
 re-anchors only as far as it can.
 
