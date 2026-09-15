@@ -27,6 +27,11 @@ struct FocusBorderEditor: View {
         gates.inertReason(for: .borders(.borderGlowSize))
     }
 
+    /// The auto toggle greys with the slider it governs (#1377).
+    private var glowAutoReason: GapsBordersGates.InertReason? {
+        gates.inertReason(for: .borders(.borderGlowSizeAuto))
+    }
+
     var body: some View {
         // The header `?` is the gate's live anchor (#527): every
         // help affordance inside the greyed block is dead, so the
@@ -98,6 +103,14 @@ struct FocusBorderEditor: View {
                 autoAtZero: true
             )
         }
+        .modifier(
+            GreyOut(
+                active: glowAutoReason != nil,
+                help:
+                    glowAutoReason
+                    .map(GapsBordersGateHelp.sentence) ?? ""
+            )
+        )
         Divider()
         FitGapsAction(model: model)
     }

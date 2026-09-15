@@ -58,9 +58,17 @@ extension BordersKey {
                 .atRest,
                 gate: .setting(.borders(.borderEnabled))
             )
-        case .borderUnfocusedEnabled, .borderGlow,
-            .borderGlowSizeAuto:
+        case .borderUnfocusedEnabled, .borderGlow:
             return .row(.gapsAndBorders, .focusBorder, .atRest)
+        case .borderGlowSizeAuto:
+            // Greys with the slider it governs: neither has an
+            // effect while the glow is off (#1377).
+            return .row(
+                .gapsAndBorders,
+                .focusBorder,
+                .atRest,
+                gate: .setting(.borders(.borderGlow))
+            )
         case .borderUnfocusedColor:
             return .row(
                 .advancedColours,

@@ -32,7 +32,8 @@ struct GapsBordersGates {
             return outerGapsDiffer ? .gapsDiffer : nil
         case .gaps(.inner):
             return innerGapsDiffer ? .gapsDiffer : nil
-        case .borders(.borderGlowSize):
+        case .borders(.borderGlowSize),
+            .borders(.borderGlowSizeAuto):
             guard settings.borderStyle.enabled else { return nil }
             return settings.borderStyle.glow ? nil : .glowOff
         case .borders(.dragGhostBorder),
@@ -59,6 +60,7 @@ struct GapsBordersGates {
         .gaps(.outer),
         .gaps(.inner),
         .borders(.borderGlowSize),
+        .borders(.borderGlowSizeAuto),
         .borders(.dragGhostBorder),
         .borders(.dragGhostFill),
         .borders(.dragDropZoneBorder),

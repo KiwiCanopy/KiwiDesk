@@ -52,6 +52,8 @@ struct GapsAndBordersGateWiringTests {
             "FocusBorderEditor.swift": [
                 "gates.containerReason(for:.focusBorder)",
                 "gates.inertReason(for:.borders(.borderGlowSize))",
+                "gates.inertReason("
+                    + "for:.borders(.borderGlowSizeAuto))",
             ],
             "DragVisualsEditor.swift": [
                 "gates.inertReason(for:.borders(.dragGhostBorder))",
