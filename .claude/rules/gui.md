@@ -677,7 +677,12 @@ drawer declared CHILDLESS joins `SettingsCatalogDrawerTests`'
 register with the reason it carries none; each register is
 pinned against the catalog by reflection
 (`filledRegisterIsComplete`, `childlessDrawersArePinned`), so
-a drawer in neither reds. `GeneralAdvancedControls`, the two
+a drawer in neither reds. Those suites read the CATALOG and
+never the view: the `.searchAnchored` half is
+`SettingsCatalogSiteTests`' (a declaration no view references)
+and `SettingsCatalogArgumentTests`' (a mount counted once), and
+neither register sees a mount deleted while its declaration
+stays. `GeneralAdvancedControls`, the two
 bars' Style children and the Gaps drawers' `GapEdgeControls`
 are the shape. The census↔catalog join reads the label key and
 no instance (`SettingsSearchJoinTests` holds that no two
