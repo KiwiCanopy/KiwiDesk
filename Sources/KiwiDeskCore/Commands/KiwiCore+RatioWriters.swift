@@ -16,6 +16,11 @@ extension KiwiCore {
     /// `StackLayout.loneMasterKeepsZone` asked from a command:
     /// the range is the SPLIT axis's on the space's own layout
     /// region (#449/#537), whichever axis the press came on.
+    /// Traded: the raw region, where the engine judges the gapped
+    /// one — the two answers differ only in a band under
+    /// 2 × `min_window_size` plus the gaps, below any real
+    /// display at the default floor, and `cappedRatioWrite`
+    /// already clamps on the same raw span.
     func loneMasterKeepsZone(
         _ tiled: [WindowID],
         _ stack: StackParams,
