@@ -158,9 +158,10 @@ struct SettingsSearchAnchorTests {
     /// its label key: surface, scroll id and drawer expansion
     /// all come from the one declaration the render site
     /// mounts. (A census key whose label key no control carries
-    /// lands destination-only — most census rows today, until
-    /// the #277 catalog fills; `SettingsSearchIndexTests` pins
-    /// the per-destination counts.)
+    /// lands destination-only — the at-rest rows #277 ruled out
+    /// of the fill, and the residue its suites state;
+    /// `SettingsSearchIndexTests` pins the per-destination
+    /// counts.)
     @Test("a census hit lands on its catalog control")
     func censusHitCarriesCatalogAnchor() {
         pinEnglish()
@@ -173,48 +174,13 @@ struct SettingsSearchAnchorTests {
         #expect(row?.anchor.anchor == "gaps.top")
     }
 
-    /// The #1250 defect: General ▸ Advanced is collapsed by
-    /// default, and a census hit inside it landed on the
-    /// destination root, drawer shut, row unrendered. Every
-    /// indexed census row the census places in that container
-    /// now carries a catalog anchor the drawer EXPANDS for —
-    /// derived from the census rather than a hand list, so a
-    /// ninth Advanced row landing anchor-less reds here.
-    @Test("a hit inside General ▸ Advanced opens the drawer")
-    func advancedHitOpensDrawer() {
-        pinEnglish()
-        defer { reset() }
-        let drawer = SettingsCatalog.general.generalAdvanced
-        let advanced = GeneralKey.allCases.map(SettingKey.general)
-            .filter {
-                $0.placement.container == .advanced
-                    && SettingsSearchIndex.indexes($0)
-            }
-        // Non-vacuity only — the membership is
-        // `GeneralCensusRenderTests`', never a count pinned here.
-        #expect(!advanced.isEmpty)
-        let rows = SettingsSearchIndex.rows()
-        for key in advanced {
-            let row = rows.first { $0.key == key }
-            let anchor = row?.anchor.anchor
-            #expect(anchor != nil, Comment(rawValue: key.id))
-            #expect(
-                drawer.shouldExpand(revealing: anchor),
-                Comment(rawValue: key.id)
-            )
-            #expect(
-                row?.path == ["General", "Advanced"],
-                Comment(rawValue: key.id)
-            )
-        }
-    }
-
     /// An anchor-less LAYOUT hit still opens ITS tab: the
     /// census id (`settings.<mode>.…`) names the mode, so the
     /// row lands on the Grid tab instead of whatever tab
     /// renders first — the owner hit exactly this with a
     /// German "Spalten" query landing on BSP (2026-08-10). No
-    /// scroll id until the #277 catalog carries the control.
+    /// scroll id: the layout rows are at rest on their tab, and
+    /// #277 ruled the at-rest rows out of the catalog fill.
     @Test("an anchor-less layout hit opens its mode tab")
     func layoutFallbackSurface() {
         pinEnglish()

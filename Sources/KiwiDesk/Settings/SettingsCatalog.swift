@@ -2,10 +2,11 @@ import KiwiDeskCore
 
 /// Settings control catalog and search index definitions (#277).
 ///
-/// Declarations are grouped in `SettingsCatalog+ThisProfile.swift`
-/// and `SettingsCatalog+WholeApp.swift` (`SettingsCatalogFiles`,
-/// `docs/accepted-limitations.md`). Property names are the tokens
-/// the site guards scan for (`SettingsCatalogSiteTests`): unique
+/// Declarations are grouped in the `SettingsCatalog+*.swift`
+/// slices — `+ThisProfile`, `+Bars`, `+WholeApp`, `+MacChecklist`
+/// — which `SourceScan+CatalogFiles.swift` names for the guards.
+/// Property names are the tokens the site guards scan for
+/// (`SettingsCatalogSiteTests`): unique
 /// across the catalog, and distinctive enough not to collide with
 /// unrelated identifiers. `Mirror` yields declaration order, so
 /// keeping it matching the view's visual order is a discipline,

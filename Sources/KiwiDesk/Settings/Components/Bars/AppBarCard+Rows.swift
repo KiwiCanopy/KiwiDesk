@@ -41,6 +41,9 @@ extension AppBarCard {
                 options: AppBarOptions.backgroundStyle
                     .map { ($0.1, $0.0) }
             )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children.appBarStyleBackground
+            )
         case .appBarLiquidGlass:
             // Lua-only since #1307: the one Liquid Glass switch
             // lives on Colours & Animations and writes this leaf
@@ -48,6 +51,10 @@ extension AppBarCard {
             EmptyView()
         case .appBarBackgroundFit:
             backgroundFitRow
+                .searchAnchored(
+                    SettingsCatalog.bars.appBarStyle.children
+                        .appBarStyleBackgroundFit
+                )
         case .appBarAlignment:
             SegmentedPicker(
                 L("app_bar.alignment.label", "Alignment"),
@@ -66,6 +73,9 @@ extension AppBarCard {
                     L("app_bar.alignment.end", "End")
                 )
             )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children.appBarStyleAlignment
+            )
         case .appBarActiveIndicator:
             SegmentedPicker(
                 L(
@@ -76,12 +86,28 @@ extension AppBarCard {
                 options: AppBarOptions.activeIndicator
                     .map { ($0.1, $0.0) }
             )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children
+                    .appBarStyleActiveIndicator
+            )
         case .appBarContent:
             contentRow
+                .searchAnchored(
+                    SettingsCatalog.bars.appBarStyle.children
+                        .appBarStyleContent
+                )
         case .appBarTitleCap:
             titleCapRow
+                .searchAnchored(
+                    SettingsCatalog.bars.appBarStyle.children
+                        .appBarStyleTitleCap
+                )
         case .appBarIconSource:
             iconSourceRow
+                .searchAnchored(
+                    SettingsCatalog.bars.appBarStyle.children
+                        .appBarStyleIconSource
+                )
         case .appBarCornerRoundness:
             PtSlider(
                 label: L(
@@ -91,6 +117,10 @@ extension AppBarCard {
                 value: style.cornerRoundness,
                 range: 0...100,
                 unit: "%"
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children
+                    .appBarStyleCornerRoundness
             )
         case .appBarItemSizeAuto:
             AutoGatedGroup(
@@ -106,12 +136,23 @@ extension AppBarCard {
                     range: 1...200,
                     autoAtZero: true
                 )
+                .searchAnchored(
+                    SettingsCatalog.bars.appBarStyle.children
+                        .appBarStyleItemSize
+                )
             }
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children
+                    .appBarStyleItemSizeAuto
+            )
         case .appBarItemGap:
             PtSlider(
                 label: L("app_bar.item_gap", "Item gap"),
                 value: style.itemGap,
                 range: 0...40
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children.appBarStyleItemGap
             )
         case .appBarFontSizeAuto:
             AutoGatedGroup(
@@ -127,7 +168,15 @@ extension AppBarCard {
                     range: 1...32,
                     autoAtZero: true
                 )
+                .searchAnchored(
+                    SettingsCatalog.bars.appBarStyle.children
+                        .appBarStyleFontSize
+                )
             }
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children
+                    .appBarStyleFontSizeAuto
+            )
         case .appBarItemSize, .appBarFontSize:
             EmptyView()
         case .appBarDimFactor, .appBarFillColor,

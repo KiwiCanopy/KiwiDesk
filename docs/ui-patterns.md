@@ -1263,6 +1263,17 @@ own label below it, rather than scrolling the bare disclosure to
 the top and the heading off (#610). The wash stays precise (the
 searched label alone); only the scroll unit moves up a level.
 
+A control anchored at its own render site (`.searchAnchored`) is
+the third shape: the row is both the scroll unit and the wash,
+so it lands at the top edge without the heading above it — the
+gap edges and General ▸ Advanced's rows land this way.
+
+:::unreleased
+Where such a row sits behind a `SettingsDisclosure`, the drawer
+opens first — it expands only for its own catalog children — and
+the result's breadcrumb names the drawer (#277, #1250).
+:::
+
 Three things this must not become. **Not a ring or halo** — that
 is this app's vocabulary for "this input is armed"
 (`RecorderButtonChrome`, the search field's focus stroke), and

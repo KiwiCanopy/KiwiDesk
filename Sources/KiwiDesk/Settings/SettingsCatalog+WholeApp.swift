@@ -74,10 +74,12 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.open_applications",
         "Open applications"
     )
-    /// General application shortcuts drawer.
+    /// General application shortcuts drawer, declared with its
+    /// children so a hit on either row opens it (#1250, #277).
     let generalKeys = SettingsDrawer(
         "shortcuts.section.general",
-        "General"
+        "General",
+        children: GeneralKeysControls()
     )
     let inactiveShortcuts = SettingsControl(
         "shortcuts.section.inactive",
@@ -90,6 +92,19 @@ struct ShortcutsControls: Sendable {
     let luaBindings = SettingsDrawer(
         "shortcuts.advanced.title",
         "Lua bindings"
+    )
+}
+
+/// Shortcuts ▸ General rows, keyed on their census label keys
+/// (the `L()` sites are `KeybindingCatalog`'s).
+struct GeneralKeysControls: Sendable {
+    let showShortcutsBinding = SettingsControl(
+        "keybinding.show_shortcuts",
+        "Show shortcuts panel"
+    )
+    let openSettingsBinding = SettingsControl(
+        "keybinding.open_settings",
+        "Open Settings"
     )
 }
 

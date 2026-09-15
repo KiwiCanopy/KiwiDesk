@@ -176,7 +176,14 @@ struct SettingsCatalogArgumentTests {
         // 64 since #1365: the Mac Checklist's three section
         // cards, each mounted once; its eleven rows reach their
         // anchors through the indirect parameter above.
-        #expect(direct.values.reduce(0, +) == 64)
+        // 91 since #277: the two bars' Style drawers' 27 rows
+        // self-anchor as the drawers' children, each once.
+        // 98 since #277: Gaps & Borders' seven at-rest rows —
+        // the glow group, the unfocused toggle, the fit-gaps
+        // spacing and the two sticky toggles.
+        // 103 since #277: the Animations drawer's five rows.
+        // 105 since #277: Shortcuts ▸ General's two rows.
+        #expect(direct.values.reduce(0, +) == 105)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from
@@ -258,7 +265,8 @@ struct SettingsCatalogArgumentTests {
     /// A top-level declaration, or a drawer's child through its
     /// `.children` (#1250) — a child is a catalog declaration
     /// too, so a double mount of one trips the count the same
-    /// way.
+    /// way. A child path the formatter wrapped at its dot arrives
+    /// joined: `firstArgument` normalizes ` .` away.
     private func catalogPath(_ argument: String) -> String? {
         SourceScan.firstMatch(
             in: argument,

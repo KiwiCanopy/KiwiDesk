@@ -79,7 +79,13 @@ enum SettingsSearchIndex {
     }
 
     /// Builds index in destination order: census settings followed by
-    /// catalog-only anchors.
+    /// catalog-only anchors. A control whose key a census row in
+    /// the area carries is that row's — refused with it when
+    /// `indexes` refuses the row on this machine (the glass card
+    /// below macOS 26, the sticky reach toggle without the
+    /// bridge) — so `claimed` is read off EVERY labelled census
+    /// row of the area, never the indexed subset, or the refusal
+    /// resurfaces the control as an extra for a row nothing draws.
     private static func build() -> [SettingsSearchIndexRow] {
         let all = SettingKey.allCases.filter(indexes)
         let ordered =
@@ -87,6 +93,11 @@ enum SettingsSearchIndex {
             + SettingsDestination.wholeApp
         return ordered.flatMap { destination in
             let entries = SettingsCatalog.entries(of: destination)
+            let labelled = Set(
+                SettingKey.allCases
+                    .filter { $0.placement.area == destination.area }
+                    .compactMap(labelKey)
+            )
             let census = all.filter {
                 $0.placement.area == destination.area
             }
@@ -96,10 +107,19 @@ enum SettingsSearchIndex {
                     in: destination,
                     entries,
                     claimed: Set(
-                        census.compactMap(\.anchor.anchor)
+                        entries.filter {
+                            $0.control.key.map(labelled.contains)
+                                ?? false
+                        }
+                        .map(\.control.id)
                     )
                 )
         }
+    }
+
+    private static func labelKey(of key: SettingKey) -> String? {
+        guard case .key(let k) = key.text.label else { return nil }
+        return k
     }
 
     /// Catalog declarations whose SURFACE is bridge-gated
@@ -112,7 +132,9 @@ enum SettingsSearchIndex {
     /// The two Desktop offers are the ONLY search-reachable name
     /// their families have (the rows are `.dynamic`), so an
     /// unfiltered entry is not a stray hit: it is the door to a
-    /// capability, offered on a Mac that has none.
+    /// capability, offered on a Mac that has none. A control a
+    /// census row NAMES needs no entry here: `build()` claims it
+    /// for that row whether or not the row is indexed.
     static var bridgeGatedControls: Set<String> {
         [
             SettingsCatalog.shortcuts.focusDesktops.control.id,
@@ -170,12 +192,7 @@ enum SettingsSearchIndex {
         in destination: SettingsDestination,
         _ entries: [SettingsIndexEntry]
     ) -> SettingsSearchIndexRow {
-        let labelKey: String? = {
-            guard case .key(let k) = key.text.label else {
-                return nil
-            }
-            return k
-        }()
+        let labelKey = labelKey(of: key)
         let hit = entries.first { $0.control.key == labelKey }
         let surface =
             hit?.control.surface ?? fallbackSurface(for: key)

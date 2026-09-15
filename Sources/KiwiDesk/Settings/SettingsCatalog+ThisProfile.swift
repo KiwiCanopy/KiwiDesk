@@ -74,9 +74,38 @@ struct ColorsControls: Sendable {
         "behavior.animations.title",
         "Animations"
     )
+    /// Declared with its children so a hit on a per-event
+    /// toggle opens the drawer (#1250, #277).
     let motionMore = SettingsDrawer(
         "motion.more",
-        "Per-event and duration"
+        "Per-event and duration",
+        children: MotionMoreControls()
+    )
+}
+
+/// Animations ▸ Per-event and duration rows, keyed on their
+/// census label keys and declared in `ColorsRowOrder.motionMore`'s
+/// order.
+struct MotionMoreControls: Sendable {
+    let animateSpaceSwitches = SettingsControl(
+        "behavior.animations.space_change",
+        "Animate Space switches"
+    )
+    let animateWindowResizes = SettingsControl(
+        "behavior.animations.window_resize",
+        "Animate window resizes"
+    )
+    let animateWindowSwaps = SettingsControl(
+        "behavior.animations.window_swap",
+        "Animate window swaps"
+    )
+    let animateLayoutReflows = SettingsControl(
+        "behavior.animations.relayout",
+        "Animate layout reflows"
+    )
+    let animationDuration = SettingsControl(
+        "behavior.animations.duration",
+        "Duration"
     )
 }
 
@@ -142,39 +171,37 @@ struct GapsAndBordersControls: Sendable {
         "border.title",
         "Focus border"
     )
+    // The Focus border and Sticky rows below sit at rest in their
+    // cards, so an anchor buys the scroll and the wash rather than
+    // a drawer opening (#277); keyed on their census label keys.
+    let unfocusedBorders = SettingsControl(
+        "border.unfocused_enabled",
+        "Show border on unfocused windows"
+    )
+    let glowEffect = SettingsControl("border.glow", "Glow effect")
+    let autoGlowSize = SettingsControl(
+        "border.glow_size.auto",
+        "Auto glow size"
+    )
+    let glowSizeSlider = SettingsControl(
+        "border.glow_size",
+        "Glow size"
+    )
+    let fitGapsSpacing = SettingsControl(
+        "border.fit_gaps.extra_spacing",
+        "Extra spacing"
+    )
     let stickyWindows = SettingsControl(
         "sticky.title",
         "Sticky windows"
     )
-}
-
-/// Bars catalog controls (#293, #277).
-struct BarsControls: Sendable {
-    let spaceBarCard = SettingsControl(
-        "bars.switch.space_bar",
-        "Space Bar"
+    let stickyMarkRow = SettingsControl(
+        "sticky.mark",
+        "Show mark on sticky windows"
     )
-    let spaceBarStyle = SettingsDrawer(
-        "bars.style",
-        "Style",
-        instance: "space_bar"
-    )
-    let appBarCard = SettingsControl(
-        "bars.switch.app_bar",
-        "App Bar"
-    )
-    let appBarStyle = SettingsDrawer(
-        "bars.style",
-        "Style",
-        instance: "app_bar"
-    )
-    let monocleShowIn = SettingsControl(
-        "layout.monocle.name",
-        "Monocle"
-    )
-    let scrollingShowIn = SettingsControl(
-        "layout.scrolling.name",
-        "Scrolling"
+    let stickyReachRow = SettingsControl(
+        "sticky.desktop_reach",
+        "Stay visible across Desktops"
     )
 }
 

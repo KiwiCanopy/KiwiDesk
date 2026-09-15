@@ -156,10 +156,12 @@ struct SettingsSearchIndexTests {
     /// strips a census row's scroll anchor — the hit still
     /// opens the destination, the control resurfaces as a
     /// duplicate extras row, and nothing else here can see it
-    /// (architect review 2026-08-10). The counts are large on
-    /// purpose: the #277 catalog covers a fraction of the
-    /// census, and each count FALLS as it fills — update with
-    /// the reason stated, never with a floor. Stated residue: a
+    /// (architect review 2026-08-10). What remains anchor-less
+    /// is ruled rather than pending: #277 filled every drawer
+    /// and stated its residue (the at-rest rows, Advanced
+    /// Colours, the shared-key drag rows, the palette menu), so
+    /// a count moves with the reason stated, never with a
+    /// floor. Stated residue: a
     /// count cannot see MEMBERSHIP, so an equal-count swap
     /// inside one destination (row A loses its anchor in the
     /// change that gives row B one) passes — granularity, not
@@ -189,9 +191,24 @@ struct SettingsSearchIndexTests {
                 .spaces: 2,
                 .layoutDefaults: 35,
                 .monitors: 3,
-                .gapsAndBorders: 18,
-                .bars: 36,
-                .colors: 12,
+                // 12 since #277: the focus border's four rows,
+                // the fit-gaps spacing and the sticky mark gained
+                // anchors (the sticky reach row is bridge-gated
+                // and unindexed here); the four drag Border/Fill
+                // rows stay anchor-less by ruling — two census
+                // rows per label key, which the join cannot
+                // split — beside the at-rest gap rows.
+                .gapsAndBorders: 12,
+                // 9 since #277: the 27 rows behind the two
+                // Style drawers gained their catalog anchors so
+                // a hit opens the drawer; the at-rest rows stay
+                // anchor-less by ruling (the issue's tier split).
+                .bars: 9,
+                // 7 since #277: the Animations drawer's five
+                // rows gained anchors; the palette shelf's three
+                // context-menu actions have no rendered row to
+                // anchor and stay anchor-less by ruling.
+                .colors: 7,
                 .advancedColors: 25,
                 // 4 since #1255: the refusal sound moved here
                 // from Shortcuts ▸ Size & float, the cue having
@@ -212,7 +229,9 @@ struct SettingsSearchIndexTests {
                 // way in #1116 — a new census row landing,
                 // not an anchor going missing.
                 // 12 since #1255 — the same row leaving.
-                .shortcuts: 12,
+                // 10 since #277: the two General drawer rows
+                // gained anchors so a hit opens the drawer.
+                .shortcuts: 10,
                 .appRules: 3,
                 // 3 since #1250: the eight Advanced rows gained
                 // their catalog anchors so a hit opens the

@@ -84,7 +84,13 @@ struct SettingsCatalogTests {
         // Track families' one search-reachable name.
         // 94 since #1365: the Mac Checklist's three cards and
         // eleven rows.
-        #expect(allEntries.count == 94)
+        // 121 since #277: the two bars' Style drawers' 27 rows,
+        // the drawers' children, so a hit opens the drawer.
+        // 128 since #277: Gaps & Borders' seven at-rest rows,
+        // so a hit scrolls to and washes the row.
+        // 133 since #277: the Animations drawer's five rows.
+        // 135 since #277: Shortcuts ▸ General's two rows.
+        #expect(allEntries.count == 135)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

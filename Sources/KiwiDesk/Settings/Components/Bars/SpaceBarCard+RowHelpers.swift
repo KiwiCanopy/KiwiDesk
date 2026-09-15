@@ -133,7 +133,9 @@ extension SpaceBarCard {
         )
     }
 
-    /// Glyphs per Space stepper and live summary (#94).
+    /// Glyphs per Space stepper and live summary (#94). The
+    /// anchor sits on the stepper alone: the row is two views,
+    /// and an anchor on the pair would mount one id twice.
     @ViewBuilder var glyphCapRow: some View {
         StepperRow(
             label: L("space_bar.glyph_cap", "Glyphs per Space"),
@@ -145,6 +147,9 @@ extension SpaceBarCard {
                     + "rest collapse into a +n badge. Adjacent "
                     + "windows of the same app count as one glyph."
             )
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.spaceBarStyle.children.spaceBarStyleGlyphCap
         )
         Text(
             L(
