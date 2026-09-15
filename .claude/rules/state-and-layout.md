@@ -1257,13 +1257,13 @@ editing here:
   (`TrackCapPlumbingNeedleTests`); the ruling is in
   `docs/design-decisions.md`.
   And a track fold consumer holding a `LayoutContext` — the
-  render, the heal, the resize clamp — takes
-  `TrackLayout.renderPartition(of:in:)`, the one assembly of the
-  cap and the fold over one list, so a refusal names a share
-  the screen draws (#1488, `TrackResizeFoldTests`); a consumer
-  without one (the `track.swap` guard) takes
-  `TrackLayout.foldedPartition`, never a hand assembly of
-  `counts` → `overflowCap` beside it. The hand copy shipped at
+  render, the heal, the resize clamp, the `track.swap` gauge —
+  takes `TrackLayout.renderPartition(of:in:)`, the one assembly
+  of the cap and the fold over one list, so a refusal names a
+  share the screen draws (#1488, `TrackResizeFoldTests`); a
+  consumer with no context in hand at that moment (the swap's
+  headless fall-through) takes `TrackLayout.foldedPartition`,
+  never a hand assembly of `counts` → `overflowCap` beside it. The hand copy shipped at
   three sites and drifted before the #944 rounds extracted the
   one assembly, and a fourth grew before #1488 extracted the
   cap beside it; nothing scans for a new hand copy, so each new
