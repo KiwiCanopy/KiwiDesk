@@ -208,6 +208,8 @@
   "download_versioned": "Download KiwiDesk {v}",
   "feat_10_body": "Send a window to Desktop 3, switch to it, or bind a profile so a Desktop brings its own Spaces with it.",
   "feat_10_title": "Native Desktops",
+  "feat_11_body": "Private OS symbols resolve at runtime and every tiling path has a public Accessibility fallback — an update can slow a fast path, never break the tiling.",
+  "feat_11_title": "Survives macOS updates",
   "feat_1_body": "Every Space is a flat window list. Layouts are pure functions over that array — no tree surgery, ever.",
   "feat_1_title": "Flat arrays, not trees",
   "feat_2_body": "bsp, stack, scrolling (PaperWM), monocle, grid, track, and floating. Switch between them instantly.",
