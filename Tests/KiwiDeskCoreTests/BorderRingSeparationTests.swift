@@ -45,7 +45,8 @@ struct BorderRingSeparationTests {
     /// vanish #1384 named, and fully opaque it stops reading as
     /// the receding tier. The derived default's `CC` (80 %) is
     /// kept by the same ruling — the one exemption, named rather
-    /// than folded into the floor.
+    /// than folded into the floor, and exempt from the BAND only:
+    /// the default still owes its own home contrast below.
     private static let alphaFloor = 0.85
     private static let bandExempt: Set<String> = [
         PaletteCatalog.defaultName
@@ -59,21 +60,21 @@ struct BorderRingSeparationTests {
     /// refused device pick `#BFBFBFE6` at 2.23×
     /// (`theRefusedUltravioletPickInvertsDominance`).
     private static let parityByRuling: Set<String> = ["Ultraviolet"]
-    static let parityBand = 1.25
+    private static let parityBand = 1.25
 
     /// The LIGHTNESS half of the vanish, which none of the pair
     /// clauses can see: a near-black grey at in-band alpha
     /// separates from every accent and recedes below every
     /// focused ring, and is still no ring (guard-prover, `#202020E6`
     /// on black at 1.25:1). So the unfocused ring owes a contrast
-    /// of its own against its home. Derived, not picked: under
-    /// the weakest shipped ring, Clean Light at 2.64:1 on white,
-    /// and above the retired dark grey lifted in alpha alone —
-    /// `#48484AE6` on black at 2.06:1, the exact retune the ruling
-    /// says is the wrong lever (`aGreyLiftedInAlphaAloneIsNoRing`).
-    /// Clean Light clears it by 0.14 — a retune of its grey moves
-    /// this floor with it, or lands under it on purpose.
-    static let ownContrastFloor = 2.5
+    /// of its own against its home. A floor, not a target, placed
+    /// by the REFUSED side: just above the retired dark grey
+    /// lifted in alpha alone — `#48484AE6` on black at 2.06:1, the
+    /// exact retune the ruling says is the wrong lever
+    /// (`aGreyLiftedInAlphaAloneIsNoRing`) — so the weakest shipped
+    /// ring, Clean Light at 2.64:1 on white, keeps a step of
+    /// headroom to move without billing a prover run.
+    private static let ownContrastFloor = 2.2
 
     /// The palette's home backdrop, DERIVED from its own fill the
     /// way design-decisions says the base is set (`fill_color`
@@ -90,7 +91,7 @@ struct BorderRingSeparationTests {
 
     /// A ring's WCAG contrast against the wallpaper it is
     /// composited over — nil for an unparseable hex.
-    static func compositedContrast(
+    private static func compositedContrast(
         _ ring: String,
         on wallpaper: String
     ) -> Double? {
@@ -263,5 +264,52 @@ struct BorderRingSeparationTests {
             measured += 1
         }
         #expect(measured == palettes.count)
+    }
+
+    /// The negative control for Sunset's "not lifted" ruling: the
+    /// shared system grey the other dark palettes take, over a
+    /// white wallpaper, lands on the pink's protan grey. A
+    /// literal well under the floor rather than a fraction of it —
+    /// this measures a hex Sunset must never ship and cannot move
+    /// with a floor retune.
+    @Test("A lifted Sunset grey collapses against the pink")
+    func aLiftedSunsetGreyCollapses() throws {
+        let focused = try #require(
+            ColorVision.composite("#FF8099", over: "#FFFFFF")
+        )
+        let lifted = try #require(
+            ColorVision.composite("#8E8E93E6", over: "#FFFFFF")
+        )
+        let gap = try #require(ColorVision.separation(focused, lifted))
+        #expect(gap < ColorVision.separationFloor)
+        #expect(gap < 12)
+    }
+
+    /// The negative control for the own-contrast floor: Slate's
+    /// retired grey at the NEW alpha. Proves the floor tells
+    /// lightness from alpha — this hex clears the band and both
+    /// pair clauses.
+    @Test("A grey lifted in alpha alone is no ring")
+    func aGreyLiftedInAlphaAloneIsNoRing() throws {
+        let own = try #require(
+            Self.compositedContrast("#48484AE6", on: "#000000")
+        )
+        #expect(own < Self.ownContrastFloor)
+    }
+
+    /// The negative control for the parity band: the device pick
+    /// #1384 refused. Proves the band reachable — a grey more
+    /// than twice the indigo's contrast is dominance inverted,
+    /// not parity.
+    @Test("The refused Ultraviolet pick inverts dominance")
+    func theRefusedUltravioletPickInvertsDominance() throws {
+        let indigo = try #require(
+            Self.compositedContrast("#5E5CE6", on: "#000000")
+        )
+        let pick = try #require(
+            Self.compositedContrast("#BFBFBFE6", on: "#000000")
+        )
+        #expect(pick > indigo * Self.parityBand)
+        #expect(pick > indigo * 2)
     }
 }

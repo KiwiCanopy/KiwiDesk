@@ -8948,16 +8948,16 @@ number so the argument is not re-run. **Sunset's grey stays
 dark** (`#6A665EE6`, ~25 L* below the pink) because `#FF8099`
 simulates to a neutral grey under protanopia, so only lightness
 separates the pair and a lighter grey walks into the collapse —
-`BorderRingSeparationControlTests` ▸ `aLiftedSunsetGreyCollapses`
-pins that the shared system grey the other dark palettes take
-fails Sunset outright. It is the weakest ring of the set on dark and
+`BorderRingSeparationTests` ▸ `aLiftedSunsetGreyCollapses` pins
+that the shared system grey the other dark palettes take fails
+Sunset outright. It is the weakest ring of the set on dark and
 accepted; if the pair reads too quiet, lighten the accent one
 step with hue held, never the grey. **Ultraviolet's grey sits
 level with its indigo** (`#7E7E96E6`, blue-grey cast kept)
 rather than below it: a grey clearly under the indigo's
 composited contrast is the vanish again, and the device pick
 `#BFBFBFE6` composited to more than twice the indigo's, inverting
-dominance — `BorderRingSeparationControlTests` ▸
+dominance — `BorderRingSeparationTests` ▸
 `theRefusedUltravioletPickInvertsDominance` measures it — so
 contrast parity with the indigo's chroma carrying the order is
 the compromise. The derived default keeps `#8E8E93CC`, the one
