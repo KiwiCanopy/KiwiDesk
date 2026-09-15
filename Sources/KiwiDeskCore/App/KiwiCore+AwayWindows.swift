@@ -194,8 +194,8 @@ extension KiwiCore {
             .filter { $0.isUp && state.rememberedSpace(of: $0.id) == space }
             .map(\.id)
             .sorted {
-                (state.departedSlots[$0] ?? .max, $0.raw)
-                    < (state.departedSlots[$1] ?? .max, $1.raw)
+                (state.departedSlots[$0]?.rank ?? .max, $0.raw)
+                    < (state.departedSlots[$1]?.rank ?? .max, $1.raw)
             }
     }
 
@@ -242,7 +242,7 @@ extension KiwiCore {
         guard !away.isEmpty else { return base }
         var members = base
         for id in away where !members.contains(id) {
-            guard let rank = state.departedSlots[id] else {
+            guard let rank = state.departedSlots[id]?.rank else {
                 members.append(id)
                 continue
             }
@@ -251,7 +251,7 @@ extension KiwiCore {
                 at: Space.rankedInsertionIndex(
                     rank: rank,
                     in: members,
-                    ranks: state.departedSlots
+                    ranks: state.departedRanks
                 )
             )
         }

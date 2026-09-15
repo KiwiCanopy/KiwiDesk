@@ -8,12 +8,17 @@ extension StateCoordinator {
         effects: inout AppliedEffects
     ) {
         effects.removedWindow = removalFacts(id)
+        // The holder THIS departure records, marked below once
+        // the door has handed to it (#1387); a minimize records
+        // nothing and marks nothing.
+        var handedTo: WindowID?
         if wasMinimized {
             rememberedSpaces[id] = nil
             rememberMinimized(id)
         } else if let space = workspaces.space(of: id) {
             rememberedSpaces[id] = .departed(space)
             rememberDepartedSlot(of: id, in: space)
+            handedTo = departedSlots[id]?.handedTo
         }
         if let window = windows[id] {
             rememberFloatOverride(of: window)
@@ -28,6 +33,11 @@ extension StateCoordinator {
         }
         windows.remove(id)
         workspaces.remove(id)
+        if let home, let handedTo {
+            workspaces.withSpace(home) {
+                $0.markHandedBreak(of: handedTo)
+            }
+        }
         // Close-return focus restore for non-fullscreen/transient windows
         // (`Space.remove`, `docs/design-decisions.md`, #637, #670, #671).
         if heldFocus, let home,

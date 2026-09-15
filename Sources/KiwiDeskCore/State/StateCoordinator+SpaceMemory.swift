@@ -18,6 +18,32 @@ extension StateCoordinator {
         }
     }
 
+    /// What a departed window takes back on its return (#1207,
+    /// #1387): the slot it held and the break it had — one value,
+    /// so every ender and the re-key carry both or neither.
+    struct DepartedSlot: Sendable, Equatable {
+        var rank: Int
+        /// Read off `Space.breakProvenance` at each departure of
+        /// the Space; for a window no longer in the row, the one
+        /// copy.
+        var trackBreak: Space.BreakProvenance
+        /// The member `handTrackBreakToSuccessor` gave this head's
+        /// break to at its departure. Consumed by the return's
+        /// take-back and by the promotion, both of which refuse a
+        /// holder that dropped the break meanwhile.
+        var handedTo: WindowID?
+
+        init(
+            rank: Int,
+            trackBreak: Space.BreakProvenance = .member,
+            handedTo: WindowID? = nil
+        ) {
+            self.rank = rank
+            self.trackBreak = trackBreak
+            self.handedTo = handedTo
+        }
+    }
+
     /// Records restored space association for untracked window
     /// (`rememberedSpaces`, #1010).
     mutating func remember(_ id: WindowID, in space: SpaceID) {
@@ -41,14 +67,22 @@ extension StateCoordinator {
         let departed = departedSlots.filter { entry in
             windows[entry.key] == nil
                 && rememberedSpaces[entry.key] == .departed(space)
-        }.values.sorted()
+        }.values.map(\.rank).sorted()
         for (index, member) in members.enumerated() {
             var rank = index
             for sibling in departed where sibling <= rank {
                 rank += 1
             }
-            departedSlots[member] = rank
+            departedSlots[member] = DepartedSlot(
+                rank: rank,
+                trackBreak: workspaces[space]?
+                    .breakProvenance(of: member) ?? .member
+            )
         }
+        // The removal about to follow hands `id`'s own break on;
+        // the record names the holder ahead of it.
+        departedSlots[id]?.handedTo =
+            workspaces[space]?.handOffTarget(of: id)
     }
 
     /// Re-files a departure the destroy fold just recorded under
@@ -74,7 +108,7 @@ extension StateCoordinator {
             return false
         }
         rememberedSpaces[id] = .departed(space)
-        departedSlots[id] = nil
+        retireDepartureRecord(of: id)
         return true
     }
 
@@ -107,8 +141,39 @@ extension StateCoordinator {
         case .departed: rememberedSpaces[id] = .departed(space)
         case .restored: rememberedSpaces[id] = .restored(space)
         }
-        departedSlots[id] = nil
+        retireDepartureRecord(of: id)
         return true
+    }
+
+    /// A head gone for good makes its hand-off permanent (#1387):
+    /// the holder its link names keeps the break by right — live,
+    /// in the Space (`Space.promoteHandedBreak`); away, on its
+    /// record — or its next return would leave the break on the
+    /// member behind it. Consumes the link. The gone handler's
+    /// `.closed` arm promotes without retiring, since the rank is
+    /// kept for later arrivals; every other ender takes
+    /// `retireDepartureRecord`.
+    mutating func promoteHandedSuccessor(of id: WindowID) {
+        guard let holder = departedSlots[id]?.handedTo else { return }
+        departedSlots[id]?.handedTo = nil
+        if windows[holder] != nil,
+            let space = workspaces.space(of: holder)
+        {
+            workspaces.withSpace(space) {
+                $0.promoteHandedBreak(of: holder)
+            }
+        } else if departedSlots[holder]?.trackBreak == .handed {
+            departedSlots[holder]?.trackBreak = .head
+        }
+    }
+
+    /// The ONE ender of a departure record (#1387): promotes the
+    /// holder the record names, then drops it. A bare
+    /// `departedSlots[id] = nil` beside a call site is how an
+    /// ender skipped the promotion (`DepartedSlotRetireSeamTests`).
+    mutating func retireDepartureRecord(of id: WindowID) {
+        promoteHandedSuccessor(of: id)
+        departedSlots[id] = nil
     }
 
     /// Retires a window closed while away (#1146): the ledger
@@ -117,7 +182,7 @@ extension StateCoordinator {
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
         restoredFrames[id] = nil
-        departedSlots[id] = nil
+        retireDepartureRecord(of: id)
     }
 
     /// Clears all remembered space associations (`CGWindowID`, #634).

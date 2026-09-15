@@ -16,6 +16,11 @@ extension StateCoordinator {
         // Back on a shown Desktop: the away ledger's entry ends
         // (#1146).
         awayWindows[window.id] = nil
+        // A live window's hand-off link means nothing (#1387):
+        // read once for the departed return below, then spent on
+        // every arrival, since a restore or a re-home returns a
+        // window outside that branch.
+        defer { departedSlots[window.id]?.handedTo = nil }
         windows.upsert(window)
         restoreFloatOverride(of: window)
         restoreStickyIntent(of: window)
@@ -44,7 +49,27 @@ extension StateCoordinator {
                 ?? TrackOverride())
                 .resolved(onto: trackParams)
             : nil
-        if let track, !window.isFloating {
+        if case .departed(target)? = remembered,
+            let slot = departedSlots[window.id]
+        {
+            // A return takes the slot it left, ranked against the
+            // members already back (#1207) — ahead of the track
+            // spawn rule, which placed it as a new window (#1387).
+            workspaces.add(
+                window.id,
+                to: target,
+                rank: slot.rank,
+                ranks: departedRanks
+            )
+            if mode == .track, slot.trackBreak == .head {
+                workspaces.withSpace(target) {
+                    $0.takeTrackBreakBack(
+                        for: window.id,
+                        from: slot.handedTo
+                    )
+                }
+            }
+        } else if let track, !window.isFloating {
             workspaces.add(
                 window.id,
                 to: target,
@@ -60,17 +85,6 @@ extension StateCoordinator {
                     return !window.isFloating
                         && !window.isFullscreen
                 }
-            )
-        } else if case .departed(target)? = remembered,
-            let slot = departedSlots[window.id]
-        {
-            // A return takes the slot it left, ranked against the
-            // members already back (#1207).
-            workspaces.add(
-                window.id,
-                to: target,
-                rank: slot,
-                ranks: departedSlots
             )
         } else {
             workspaces.add(

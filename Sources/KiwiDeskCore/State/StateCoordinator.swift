@@ -48,7 +48,15 @@ public struct StateCoordinator: Sendable {
     /// by this rank, so a Desktop's row comes back in the order it
     /// left rather than in re-track order. Kept after the return so
     /// later arrivals rank against it; rewritten at each departure.
-    var departedSlots: [WindowID: Int] = [:]
+    /// ONE value with the track head-ness the return re-applies
+    /// (#1387), so every ender and the re-key carry both or neither.
+    var departedSlots: [WindowID: DepartedSlot] = [:]
+
+    /// The ranks alone, the shape `Space.insert(_:rank:ranks:)`
+    /// takes.
+    var departedRanks: [WindowID: Int] {
+        departedSlots.mapValues(\.rank)
+    }
 
     /// Windows the compositor hosts on a Desktop nobody shows
     /// (#1146) — the away LEDGER, beside the visible-only state:
@@ -120,6 +128,9 @@ public struct StateCoordinator: Sendable {
         if let slot = departedSlots.removeValue(forKey: old) {
             departedSlots[new] = slot
         }
+        for (id, slot) in departedSlots where slot.handedTo == old {
+            departedSlots[id]?.handedTo = new
+        }
         if let away = awayWindows.removeValue(forKey: old) {
             awayWindows[new] = away.withID(new)
         }
@@ -160,7 +171,11 @@ public struct StateCoordinator: Sendable {
                 stickyReachOverrides[id] = nil
             }
             forgetMinimized(pid: pid)
-            awayWindows = awayWindows.filter { $0.value.pid != pid }
+            // The app's exit ends its away entries for good
+            // (#1146), and a head's hand-off with them (#1387).
+            for entry in awayWindows.values where entry.pid == pid {
+                forgetAway(entry.id)
+            }
 
         case .windowCreated(let window):
             applyWindowCreated(window, effects: &effects)

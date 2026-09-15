@@ -374,7 +374,7 @@ each miss silently lost a profile's saved arrangement with nothing
 to red. Nothing scans for a returning mirror, so it is refused
 here rather than guarded.
 
-Three further obligations, and they bind this directory:
+The obligations below bind this directory:
 
 - **File the outgoing arrangement before the name moves, and do
   it in one place.** An activating write goes through
@@ -439,6 +439,26 @@ Three further obligations, and they bind this directory:
   verdict and the query; `DesktopBindingFitSeamTests` holds the
   one home, the resolver-anchored gate clause, the judgement's
   two callers by count, and the read-free bodies.
+
+- **A restore leaves a member already in its remembered Space
+  where it sits (#1387).** `restorePartitioning`'s record is a
+  MEMBERSHIP; the live row is the order authority. On a
+  bound-Desktop switch the restore runs while the departing
+  Desktop's windows are still live in a same-named Space — the
+  settle sweep folds them afterwards — and re-appending them
+  re-ordered the row those folds then filed #1207's ranks
+  against, `Space.remove` handing each track break away on the
+  way (device, 2026-09-15: four own-track columns came back in
+  re-track order and one column fewer).
+  `ProfileRestoreOrderTests` ▸ `sameSpaceMemberIsLeftInPlace`
+  holds it in track and in bsp, whose row takes the same door
+  through the ranks alone; a cross-Space move keeps the append. The cost, stated:
+  a same-Desktop profile round trip keeps the order the other
+  profile left for members of a same-named Space — it used to put
+  the recorded order back, scrambling the breaks as it did — and
+  the #1230 promise is the MEMBERSHIP (`ProfileRestoreOrderTests`
+  ▸ `reorderUnderBIsKept`), argued in `docs/design-decisions.md`
+  ▸ *A profile switch restores that profile's partitioning*.
 
 `ProfileAuthoritySeamTests` holds the first two as one-home
 clauses, scoped to the doors' own bodies rather than to their

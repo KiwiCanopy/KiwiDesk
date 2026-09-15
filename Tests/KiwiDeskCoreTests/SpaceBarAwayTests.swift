@@ -58,7 +58,7 @@ struct SpaceBarAwayTests {
             nativeSpace: 4
         )
         core.state.rememberedSpaces[WindowID(id)] = .departed(space)
-        core.state.departedSlots[WindowID(id)] = rank
+        core.state.departedSlots[WindowID(id)] = .init(rank: rank)
     }
 
     @Test("an away window is absent, its sibling draws")
@@ -85,8 +85,8 @@ struct SpaceBarAwayTests {
         // The present pair must carry ranks too, or the merge
         // APPENDS and the split this case is named for cannot
         // happen (guard-prover, 2026-09-03).
-        core.state.departedSlots[WindowID(1)] = 0
-        core.state.departedSlots[WindowID(3)] = 2
+        core.state.departedSlots[WindowID(1)] = .init(rank: 0)
+        core.state.departedSlots[WindowID(3)] = .init(rank: 2)
         // Ranked BETWEEN the two, so a merge breaks the run into
         // Safari · Mail · Safari.
         park(core, 2, app: "Mail", in: "2", rank: 1)

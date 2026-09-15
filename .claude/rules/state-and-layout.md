@@ -314,8 +314,55 @@ editing here:
   departed window carries its slot in `departedSlots`, and the
   fold re-inserts a `.departed` return by RANK against the
   members already back — never at the index, which a later slot
-  already back would overtake (`ReturningSlotFoldTests`). The
-  secondary-display arm owes nothing — not because it activates
+  already back would overtake (`ReturningSlotFoldTests`) — and
+  AHEAD of the track spawn rule, which placed a return as a new
+  window, at index 0 in re-track order under `own_track`/`first`
+  (#1387). The return takes back the BREAK it had too:
+  `Space.remove` hands a departing head's break to its successor,
+  so the record carries the break's provenance
+  (`Space.BreakProvenance` — member, head, or handed), read off
+  the Space's own `handedBreaks` set, which is the LIVE truth for
+  a member still in the row — the record is the copy for a window
+  no longer in it. The hand-off has ONE door,
+  `handTrackBreakToSuccessor`, which every membership writer
+  reaches through `Space.remove`, and a handed break is NEVER
+  handed on (owner ruling, 2026-09-15) — the door drops it
+  instead, so the hand-off is one hop, its head re-inserts its
+  own on return, and a stray break lives at most one Desktop
+  stay. The door hands as an OWN break; a writer that MARKS one
+  handed (`markHandedBreak`) records its holder on the departure
+  record first, in the same fold, and marks from THAT record —
+  never from a link an earlier departure left
+  (`DepartedSlot.handedTo`, read through the one `handOffTarget`
+  ahead of the removal, and spent on EVERY arrival whatever the
+  route, since a restore or a re-home returns a window outside
+  the departed branch and a mode flip while the head was away
+  is where a stale link came from) — so a head minimized, quit
+  or moved hands for good, no record being able to reclaim it
+  (`HandedBreakEnderTests` ▸ `unrecordedHandOffIsOwn`,
+  `staleLinkNeverMarks`, `restoredReturnNeverMarks`). The link
+  is consumed by the return's
+  take-back and by the promotion, which both refuse a holder
+  that dropped the break —
+  never a positional guess, since a member back ahead of its
+  head sits between the two and a head whose successor already
+  held a break handed nothing. A head gone for good makes its hand-off permanent: a
+  departure record ends only through `retireDepartureRecord`,
+  which promotes the named holder — live, in the Space; away, on
+  its record — ahead of dropping it, `DepartedSlotRetireSeamTests`
+  refusing a bare `departedSlots[id] = nil` anywhere else, the
+  gone handler's `.closed` arm being the one promote-without-retire
+  since the rank is kept for later arrivals
+  (`HandedBreakEnderTests` ▸ `everyEnderPromotes`,
+  `ClosePromotesHandedBreakTests`) — while a hide or a Desktop
+  departure keeps it revocable. The residue the ruling accepts: a
+  departing window of ANOTHER Desktop, live in the same-named
+  Space for the settle's beat, hands its break into this row the
+  same way, and the stray column lasts until that holder's next
+  departure (`docs/accepted-limitations.md`). Keep the rank and the provenance
+  ONE value, so every ender and the re-key carry both or neither
+  (`ReturningSlotTrackFoldTests` ▸ `rekeyCarriesTheProvenance`).
+  The secondary-display arm owes nothing — not because it activates
   no Space, which stopped being true in #1230, but because the
   debt is recorded per SPACE at the focus report and paid by the
   create fold, while that arm moves a DISPLAY

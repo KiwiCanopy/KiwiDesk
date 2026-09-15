@@ -71,6 +71,7 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.scrollRest = nil
         spaces[id]?.sessionRatios = SessionRatios()
         spaces[id]?.trackWeights = [:]
+        spaces[id]?.handedBreaks = []
         let seed: Set<WindowID> =
             mode == .track
             ? (trackSeed ?? Set(spaces[id]?.windows ?? []))

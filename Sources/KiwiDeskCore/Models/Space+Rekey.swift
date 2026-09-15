@@ -21,6 +21,9 @@ extension Space {
         if trackBreaks.remove(old) != nil {
             trackBreaks.insert(new)
         }
+        if handedBreaks.remove(old) != nil {
+            handedBreaks.insert(new)
+        }
         if let weight = trackWeights.removeValue(forKey: old) {
             trackWeights[new] = weight
         }

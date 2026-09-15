@@ -105,6 +105,10 @@ extension KiwiCore {
     /// skipped rather than re-created: the prune just dropped it,
     /// and `WorkspaceManager.add` would silently `ensureSpace` it
     /// back into a set the profile is authoritative over.
+    ///
+    /// A window ALREADY in its remembered Space is left where it
+    /// sits: the record is a membership, the live row the order
+    /// authority (#1387, profiles.md).
     func restorePartitioning(of profile: Profile) {
         guard
             let remembered = state.profilePartitioning.remembered(
@@ -147,18 +151,16 @@ extension KiwiCore {
                     continue
                 }
                 let from = state.workspaces.space(of: window)
+                guard from != space else { continue }
                 state.workspaces.add(window, to: space)
                 // A float crossing displays must re-anchor
                 // (#444): membership alone never moves it, since
                 // no layout frame is computed for a float. The
                 // same pairing `pruneSpaces` makes twenty lines
                 // away, and every other cross-space move site.
-                if from != space {
-                    reanchorFloat(window, to: space)
-                    // Its frame is the other Space's layout's
-                    // (#1177).
-                    refiledWindows.insert(window)
-                }
+                reanchorFloat(window, to: space)
+                // Its frame is the other Space's layout's (#1177).
+                refiledWindows.insert(window)
                 moved += 1
             }
         }

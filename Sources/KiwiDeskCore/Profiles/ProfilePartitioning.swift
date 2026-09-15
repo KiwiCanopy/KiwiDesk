@@ -64,8 +64,10 @@ struct ProfilePartitioning: Sendable {
         byProfile[profile] != nil
     }
 
-    /// Files the live Spaces under the profile they belong to.
-    /// Order IS the rank: the restore re-adds in this order.
+    /// Files the live Spaces under the profile they belong to. The
+    /// lists are MEMBERSHIPS, not an order: the restore moves a
+    /// window only when it sits elsewhere, appending the movers in
+    /// this order after the members already in place (#1387).
     ///
     /// A nil `live` files nothing rather than being a caller's
     /// choice: boot and a built-in Standard have no profile whose

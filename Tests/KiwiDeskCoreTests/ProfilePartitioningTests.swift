@@ -71,8 +71,10 @@ struct ProfilePartitioningTests {
 
     // MARK: - The measurement
 
-    /// A → B → A returns A's Spaces exactly as they were. This is
-    /// the 2026-09-04 device round; reverting the restore reds it.
+    /// A → B → A returns A's Spaces' MEMBERSHIP exactly as it was.
+    /// This is the 2026-09-04 device round; reverting the restore
+    /// reds it. The order of a same-named Space's members is the
+    /// live row's (#1387, the test below).
     @Test("A profile round trip restores its own partitioning")
     func roundTripIsLossless() {
         let core = makeCore()

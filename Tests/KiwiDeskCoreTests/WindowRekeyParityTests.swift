@@ -20,10 +20,11 @@ import Testing
 // a container whose element WRAPS the id in a struct
 // (`minimizeOrder`, #673) never reaches the count pin — nor does a
 // bare id sitting in a struct rather than in any container at all
-// (`scrollRest.slot.window`, #966). Only the `String(describing:)`
-// scan sees those, because it renders the nested `WindowID` — so
-// `rekeyMigratesMinimized` and the fixture's `scrollRest` are their
-// net here, and the count is not.
+// (`scrollRest.slot.window`, #966; `DepartedSlot.handedTo`,
+// #1387). Only the `String(describing:)` scan sees those, because
+// it renders the nested `WindowID` — so `rekeyMigratesMinimized`
+// and the fixture's `scrollRest` and linked record are their net
+// here, and the count is not.
 
 private let old = WindowID(9001)
 private let new = WindowID(9002)
@@ -44,6 +45,7 @@ private func trackedFixture() -> StateCoordinator {
     state.workspaces.withSpace(SpaceID(1)) { space in
         space.stackWeights[old] = 2.0
         space.trackBreaks.insert(old)
+        space.handedBreaks.insert(old)
         space.trackWeights[old] = 1.5
         // Not a container — a bare id inside a struct (#966), so
         // the count pin below cannot see it and the
@@ -64,7 +66,10 @@ private func trackedFixture() -> StateCoordinator {
         height: 4
     )
     state.stickyReachOverrides[old] = true
-    state.departedSlots[old] = 0
+    state.departedSlots[old] = .init(rank: 0)
+    // A bare id inside a record VALUE (#1387) — the scan's net,
+    // not the count's, like `scrollRest`.
+    state.departedSlots[WindowID(1)] = .init(rank: 1, handedTo: old)
     state.awayWindows[old] = AwayWindow(
         id: old,
         pid: 1,
@@ -81,12 +86,13 @@ private func trackedFixture() -> StateCoordinator {
 /// `stickyReachOverrides` (#1145), `departedSlots` (#1207),
 /// `awayWindows` (#1146), plus
 /// each space's `windows`, `stackWeights`, `trackBreaks`,
-/// `trackWeights`. Bumping the fixture with a new id-keyed map
+/// `handedBreaks` (#1387), `trackWeights`. Bumping the fixture
+/// with a new id-keyed map
 /// must bump this — and then the scan test forces the re-key to
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 11
+private let expectedContainerCount = 12
 
 /// `String(describing:)` of every non-empty dictionary, set, or
 /// array whose keys/elements are `WindowID`, reachable by recursing
