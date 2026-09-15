@@ -58,10 +58,10 @@ struct GateReasonPlacementTests {
                 // derivation is checkable at all.
                 // (`.profiles(.profileBindings)` left the set
                 // with #888: its off-surface separate-Spaces arm
-                // retired, and the arm that remains —
-                // `editingStoredProfile` — has its cause on the
-                // surface, so the row owes nothing inline and
-                // its view stopped drawing the note.)
+                // retired, and the `editingStoredProfile` arm
+                // that remained had its cause on the surface —
+                // until #1392 retired that one too, so the row
+                // now carries no gate at all.)
                 .general(.startAtLogin),
                 // Found BY the derivation: the copy action sits
                 // on the App Bar card while the switch that

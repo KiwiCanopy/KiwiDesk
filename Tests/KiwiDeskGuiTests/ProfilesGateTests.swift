@@ -131,28 +131,22 @@ struct ProfilesGateTests {
 
     // MARK: - Desktop bindings
 
-    @Test("bindings are live while editing the live config")
+    /// Bindings are a global table, so the edit target does not
+    /// change what a row means (#1392) — and #888 retired the
+    /// separate-Spaces arm before it, so no state greys these
+    /// rows at all. The stored-profile half is the case to pin:
+    /// that gate shipped from PR #730 to 1.3.0 with no recorded
+    /// argument.
+    @Test("bindings are live under every edit target")
     func bindingsLive() {
-        #expect(
-            gates().inertReason(
-                for: .profiles(.profileBindings)
-            ) == nil
-        )
+        for editing in [false, true] {
+            #expect(
+                gates(editing: editing).inertReason(
+                    for: .profiles(.profileBindings)
+                ) == nil
+            )
+        }
     }
-
-    @Test("editing a stored profile kills the bindings")
-    func bindingsEditingStored() {
-        #expect(
-            gates(editing: true).inertReason(
-                for: .profiles(.profileBindings)
-            ) == .bindingsAreGlobal
-        )
-    }
-
-    // #888 retired the separate-Spaces arm: a binding names one
-    // event in every display mode (the main display's Desktop),
-    // so no display state greys these rows any more —
-    // `bindingsLive` above is what holds them live.
 
     // MARK: - Preset apply
 

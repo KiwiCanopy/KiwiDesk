@@ -820,8 +820,13 @@ screen** (the one with the menu bar) and its profile fits your
 screen count ([Which Profile Loads](#which-profile-loads)). With
 "Displays have separate Spaces" on, macOS's default, each screen
 switches on its own: a swipe on the main screen switches
-profiles, a swipe on a secondary never does. The rows are greyed
-while you edit a stored profile: bindings are global.
+profiles, a swipe on a secondary never does.
+
+:::unreleased
+Bindings are global, so the rows work whichever profile you are
+editing — a Save while editing a stored profile keeps a binding
+change too.
+:::
 
 ```mermaid
 flowchart TD

@@ -941,7 +941,6 @@
   "profiles.copy_failed": "复制失败：%1$@",
   "profiles.current_setup_note": "你当前的设置会保存到 %1$@。如需单独保留，请使用下方栏中的“%2$@”。",
   "profiles.delete.help": "删除描述文件",
-  "profiles.desktops.live_only": "桌面关联为全局设置 — 请切换到“运行中”进行更改。",
   "profiles.duplicate_default.help": "该显示器数量下有多个描述文件被标为默认，将采用字母顺序中的第一个。",
   "profiles.load": "加载",
   "profiles.make_default": "设为默认",

@@ -15,7 +15,6 @@ struct ProfilesGates {
 
     /// Reason why a setting control is currently disabled/inert.
     enum InertReason: Hashable {
-        case bindingsAreGlobal
         case presetSwitchesLiveLayout
         case screenCountMismatch(screens: Int)
     }
@@ -28,9 +27,6 @@ struct ProfilesGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
-        case .profiles(.profileBindings):
-            return editingStoredProfile
-                ? .bindingsAreGlobal : nil
         case .profiles(.presetsApply):
             if editingStoredProfile {
                 return .presetSwitchesLiveLayout
@@ -54,8 +50,7 @@ struct ProfilesGates {
 
     /// Gated setting keys resolved by this type (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
-        .profiles(.profileBindings),
-        .profiles(.presetsApply),
+        .profiles(.presetsApply)
     ]
 
     /// Gated setting keys resolved outside this type.
@@ -70,12 +65,6 @@ enum ProfilesGateHelp {
         for reason: ProfilesGates.InertReason
     ) -> String {
         switch reason {
-        case .bindingsAreGlobal:
-            return L(
-                "profiles.desktops.live_only",
-                "Desktop bindings are global — switch to "
-                    + "Live to change them."
-            )
         case .presetSwitchesLiveLayout:
             return L(
                 "presets.editing_stored",

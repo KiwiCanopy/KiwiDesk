@@ -941,7 +941,6 @@
   "profiles.copy_failed": "La copie a échoué : %1$@",
   "profiles.current_setup_note": "Votre configuration actuelle est enregistrée dans %1$@. Pour la conserver séparément, utilisez « %2$@ » dans la barre ci-dessous.",
   "profiles.delete.help": "Supprimer le profil",
-  "profiles.desktops.live_only": "Les liaisons de bureau sont globales — basculez en direct pour les modifier.",
   "profiles.duplicate_default.help": "Plusieurs profils de ce nombre sont marqués par défaut ; le premier dans l'ordre alphabétique l'emporte.",
   "profiles.load": "Charger",
   "profiles.make_default": "définir par défaut",

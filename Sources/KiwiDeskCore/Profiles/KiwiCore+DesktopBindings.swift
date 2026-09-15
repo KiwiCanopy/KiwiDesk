@@ -43,6 +43,22 @@ extension KiwiCore {
             .first
     }
 
+    /// Files a Settings draft's whole binding table into the
+    /// sidecar's OWN map (#1392) — the one door a save under a
+    /// stored-profile target reaches the global table by, since
+    /// that draft never writes `gui.json` otherwise. Never
+    /// `loadGuiConfig()`'s overlay, which would materialize the
+    /// running layout into the file on a save that never touched
+    /// it; a missing sidecar seeds exactly as the draft's own
+    /// base did. Reloads, like every `saveGuiConfig`.
+    public func saveDesktopBindings(
+        _ bindings: [DesktopKey: DesktopBinding]
+    ) throws {
+        var live = guiConfigStore.load() ?? guiConfigSeed()
+        live.profileBindings = bindings
+        try saveGuiConfig(live)
+    }
+
     /// Re-keys and re-projects every binding this topology can
     /// name, rewriting the sidecar exactly when something moved.
     func reconcileDesktopBindings(in snapshot: DesktopSnapshot) {

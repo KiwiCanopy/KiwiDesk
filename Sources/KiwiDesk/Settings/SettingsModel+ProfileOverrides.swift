@@ -43,8 +43,27 @@ extension SettingsModel {
             core.onLog("profile edit save failed: \(error)")
             return
         }
+        persistBindingsIfEdited()
         core.reapplyIfInEffect(name)
         reload()
+    }
+
+    /// Desktop bindings are a global table, so their rows stay
+    /// live under a stored-profile target and this save is the
+    /// one path an edit there leaves the draft by (#1392).
+    private func persistBindingsIfEdited() {
+        guard config.profileBindings != cleanConfig.profileBindings
+        else { return }
+        do {
+            try core.saveDesktopBindings(config.profileBindings)
+        } catch {
+            profileWarning = L(
+                "settings.globals_save_failed",
+                "Saving settings failed: %1$@",
+                "\(error)"
+            )
+            core.onLog("desktop bindings save failed: \(error)")
+        }
     }
 
     /// Base keybinding rows for Shortcuts override affordance (#55).

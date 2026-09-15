@@ -2,27 +2,14 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Settings group for binding profiles to macOS Desktops (#7,
-/// #678, #768, #888). The remaining grey is the resolver's and is
-/// scoped to the ROWS, not the whole card (#527: the drawer keeps
-/// its header and `?` anchor clickable). By the #815 derivation
-/// (`GateReasonPlacement`) these rows owe no inline sentence —
-/// the `bindingsAreGlobal` cause is on the surface, exactly like
-/// `presetsApply` under the same reason.
+/// #678, #768, #888). The rows are live under every edit target:
+/// bindings are a global table, and a stored-profile Save files
+/// them through `saveEditedProfile` (#1392).
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = true
 
-    private var gates: ProfilesGates {
-        ProfilesGates(
-            editingStoredProfile: model.editingStoredProfile,
-            connectedScreens: model.displays.count
-        )
-    }
-
     var body: some View {
-        let reason = gates.inertReason(
-            for: .profiles(.profileBindings)
-        )
         SettingsDisclosure(
             SettingsCatalog.profiles.desktops,
             chrome: .card,
@@ -33,7 +20,7 @@ struct DesktopsGroup: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                rows(inert: reason)
+                rows
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,23 +67,14 @@ struct DesktopsGroup: View {
         )
     }
 
-    @ViewBuilder private func rows(
-        inert reason: ProfilesGates.InertReason?
-    ) -> some View {
-        let help =
-            reason.map(ProfilesGateHelp.sentence) ?? ""
-        Group {
-            if desktopRows.isEmpty {
-                emptyHint
-            } else {
-                ForEach(desktopRows, id: \.key) { row in
-                    spaceRow(row)
-                }
+    @ViewBuilder private var rows: some View {
+        if desktopRows.isEmpty {
+            emptyHint
+        } else {
+            ForEach(desktopRows, id: \.key) { row in
+                spaceRow(row)
             }
         }
-        .modifier(
-            GreyOut(active: reason != nil, help: help)
-        )
     }
 
     private var emptyHint: some View {

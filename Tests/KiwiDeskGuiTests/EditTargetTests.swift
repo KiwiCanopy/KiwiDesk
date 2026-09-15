@@ -64,7 +64,8 @@ struct EditTargetTests {
         #expect(!model.forcedLuaEditor)
         #expect(!model.hasCustomLua)
         // No sidecar baseline: stored edits never write the
-        // global files.
+        // global files — bar the Desktop bindings, which take
+        // their own door (#1392, `StoredProfileBindingSaveTests`).
         #expect(model.savedSidecar == nil)
         // The profile's monitors aren't attached.
         #expect(!model.placementEditable)

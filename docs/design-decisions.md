@@ -10617,6 +10617,27 @@ discovers none — the gate cannot judge and the binding waits
 too, rather than loading a profile that the boot scan's monitor
 change would then replace; that first monitor change fires it.
 
+**[Rationale]**
+
+**The Desktop binding rows are live under every edit target
+([#1392](https://github.com/KiwiCanopy/KiwiDesk/issues/1392)).**
+A binding says which profile a Desktop loads, which is a fact
+about no one profile — the table is global — so the profile the
+Settings window happens to be editing does not change what a
+row means, and greying the rows behind *switch to Live* said
+nothing a user could act on except a detour. The grey was not
+protecting a ruling: it arrived with the stored-profile edit
+target, whose Save writes only the profile's own file, and a
+live row there would have dropped its edit on Save. That is a
+missing write, not a reason to withhold the row — so a
+stored-profile Save now files an edited binding table into
+`gui.json` through one Core door (`saveDesktopBindings`), onto
+the sidecar's own map rather than the draft's overlay, and only
+when the table changed. Moving the binding *into* the profile
+was refused on the standing rule: a profile owns tiling plus
+sparse overrides, never anything that routes or selects the
+profile itself.
+
 **[Principle]**
 
 **A screen left with no space is healed, never refused
