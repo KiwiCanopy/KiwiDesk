@@ -241,48 +241,26 @@ struct SettingsSearchDrawerAnchorTests {
     /// census row of the area, indexed or not, so a row `indexes`
     /// refuses on this machine — the glass card below macOS 26
     /// — never resurfaces its control as a catalog-only row for
-    /// something nothing draws. Held generally: no catalog-only
-    /// row's control carries a label key any census row of its
-    /// area does. Stated residue: on a host where nothing is
-    /// refused (macOS 26+, the bridge present) every such
-    /// control is claimed by its indexed row and the clause
-    /// cannot see the construction it names; only a pre-26
-    /// runner exercises it.
+    /// something nothing draws. The live refusal is unreachable
+    /// from a 26+ runner, so the clause refuses a row of its own
+    /// through the DEBUG door: with the outer-top gap refused,
+    /// no row at all lands on `gaps.top`.
     @Test("a refused census row takes its control with it")
     func refusedRowsKeepTheirControls() {
         pinEnglish()
         defer { reset() }
-        let before = SettingsSearchIndex.canDriveDesktops
-        defer { SettingsSearchIndex.canDriveDesktops = before }
-        for bridge in [false, true] {
-            SettingsSearchIndex.canDriveDesktops = bridge
-            let rows = SettingsSearchIndex.rows()
-            let extras = rows.filter { $0.key == nil }
-            #expect(!extras.isEmpty)
-            for extra in extras {
-                let labelled = Set(
-                    SettingKey.allCases
-                        .filter {
-                            $0.placement.area
-                                == extra.destination.area
-                        }
-                        .compactMap { key -> String? in
-                            guard case .key(let k) = key.text.label
-                            else { return nil }
-                            return k
-                        }
-                )
-                let entry = SettingsCatalog.entries(
-                    of: extra.destination
-                )
-                .first { $0.control.id == extra.anchor.anchor }
-                #expect(
-                    entry?.control.key.map(labelled.contains)
-                        != true,
-                    Comment(rawValue: extra.id)
-                )
-            }
+        defer { SettingsSearchIndex.refusedOverride = [] }
+        let top = SettingsCatalog.gapsAndBorders.gapsPerEdge
+            .children.edgeTop.id
+        let before = SettingsSearchIndex.rows().first {
+            $0.anchor.anchor == top
         }
+        #expect(before?.key == .gaps(.outerTop))
+        SettingsSearchIndex.refusedOverride = [.gaps(.outerTop)]
+        let after = SettingsSearchIndex.rows().filter {
+            $0.anchor.anchor == top
+        }
+        #expect(after.isEmpty, Comment(rawValue: "\(after.map(\.id))"))
         let glass = SettingsCatalog.colors.glassCard.id
         let glassRow = SettingsSearchIndex.rows().first {
             $0.anchor.anchor == glass
