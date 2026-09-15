@@ -4,10 +4,10 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Gaps & Borders' gate resolver (#678 Phase 3). The area carries
-/// all three gate flavours, so this pins each: the Focus-border
+/// Gaps & Borders' gate resolver (#678 Phase 3): the Focus-border
 /// CONTAINER gate, the row gates (glow size, drag sub-rows), and
-/// the two `.runtime` gap-master gates.
+/// the gap masters, which carry NO gate and acknowledge instead
+/// (#1383).
 @Suite("Gaps & Borders gates")
 struct GapsAndBordersGateTests {
     private func settings(

@@ -8689,8 +8689,7 @@ owner ruling 2026-08-04; #678 8a)
 for the everyday "more breathing room" action, per-edge
 sliders behind a disclosure. When stored edges differ, the
 disclosure pre-expands so the values about to be overwritten
-are in view. (#68 §3.14) The master used to disable itself
-there as well; the next entry argues why it no longer does.
+are in view. (#68 §3.14)
 
 :::unreleased
 **A master whose followers disagree stays live and
@@ -9536,9 +9535,6 @@ only control that ends it. The acknowledgement is a `?` beside
 a live control — *the three strokes are set differently right
 now; choosing here sets all three* — which is what a master
 owes when it is about to overwrite an answer it did not show.
-The gap masters, one card up, once took a grey instead on the
-strength of their per-edge drawer; #1383 ruled them onto this
-same shape (Gaps are uniform-first, the entry that follows it).
 
 **[Rationale]**
 

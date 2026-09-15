@@ -78,12 +78,18 @@ struct GapsAndBordersGateWiringTests {
                 )
             }
             // `.sentence(for:)` for a gate, or the named
-            // acknowledgement a live master carries (#1383).
+            // acknowledgement a live master carries (#1383) —
+            // keyed per file so a gated editor cannot satisfy
+            // this with any other static.
+            let caption =
+                name == "GapsEditor.swift"
+                ? "GapsBordersGateHelp.edgesDiffer"
+                : "GapsBordersGateHelp.sentence"
             #expect(
-                source.contains("GapsBordersGateHelp."),
+                source.contains(caption),
                 Comment(
                     rawValue:
-                        "\(name) does not read GapsBordersGateHelp "
+                        "\(name) does not read `\(caption)` "
                         + "for its caption"
                 )
             )

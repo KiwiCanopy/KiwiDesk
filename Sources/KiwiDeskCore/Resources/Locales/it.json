@@ -357,7 +357,7 @@
   "gaps.inner_meaning": "tra finestre vicine",
   "gaps.inner_term": "Interna",
   "gaps.left": "A sinistra",
-  "gaps.master.differ.help": "I bordi sono impostati in modo diverso al momento; un valore qui vale per tutti.",
+  "gaps.master.differ.help": "I bordi di questa spaziatura sono impostati in modo diverso al momento; un valore qui vale per tutti.",
   "gaps.mixed": "variabili",
   "gaps.outer": "Spaziatura esterna",
   "gaps.outer_meaning": "tra le finestre e il bordo dello schermo",

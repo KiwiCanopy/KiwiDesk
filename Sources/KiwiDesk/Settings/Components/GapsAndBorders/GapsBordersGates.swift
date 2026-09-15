@@ -50,6 +50,16 @@ struct GapsBordersGates {
         }
     }
 
+    /// Masters that answer `followersDiffer` — the census of who
+    /// acknowledges (`BorderMastersDivergenceTests`); a master
+    /// here carries no census gate.
+    static let acknowledged: Set<SettingKey> = [
+        .gaps(.outer),
+        .gaps(.inner),
+        .borders(.borderWidthMaster),
+        .borders(.borderCornerMaster),
+    ]
+
     /// Gated rows answered by this resolver (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
         .borders(.borderGlowSize),
@@ -73,8 +83,7 @@ struct GapsBordersGates {
     /// Deliberately NOT an `InertReason`: dimmed means "takes no
     /// input" on every channel, so a master stays live and
     /// acknowledges through its `?` — the first edit converges
-    /// its followers. The gap masters took the greyed shape until
-    /// #1383 ruled it the same way as the strokes.
+    /// its followers (#1383).
     func followersDiffer(for key: SettingKey) -> Bool {
         switch key {
         case .gaps(.outer):

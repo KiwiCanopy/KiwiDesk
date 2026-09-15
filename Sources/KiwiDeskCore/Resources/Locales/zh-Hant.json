@@ -357,7 +357,7 @@
   "gaps.inner_meaning": "相鄰視窗之間",
   "gaps.inner_term": "內側",
   "gaps.left": "左側",
-  "gaps.master.differ.help": "目前各邊的設定各不相同；在此處設定的值會套用於所有邊。",
+  "gaps.master.differ.help": "目前各邊緣的設定各不相同；在此處設定的值會套用於所有邊緣。",
   "gaps.mixed": "混合",
   "gaps.outer": "外側間距",
   "gaps.outer_meaning": "視窗與螢幕邊緣之間",

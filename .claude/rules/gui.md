@@ -461,8 +461,8 @@ grey the user reads, and the answered / answered-elsewhere split
 held as `resolved` / `resolvedElsewhere: Set<SettingKey>`. The
 shape carries every flavour a census gate can be: a container
 block gate (`BarsGates`, `GapsBordersGates`), a saved-config
-`.runtime` GREYING gate (`GapsBordersGates`' gap masters), and a
-`.runtime` SURFACING gate (`ShortcutsGates.onlyDefaultLayer`,
+`.runtime` GREYING gate (`SpacesGates`' `.spaceHasNoOverrides`),
+and a `.runtime` SURFACING gate (`ShortcutsGates.onlyDefaultLayer`,
 whose non-nil reason WITHHOLDS a row behind its offer rather than
 greying it — so that one resolver carries no `GateHelp`, there
 being no inline sentence to render). **A census-rendered area
@@ -479,6 +479,18 @@ so a file resolving two gates reds if EITHER goes hand-rolled.
 (`.luaImportAvailable`) because that is a live-editor-state
 predicate the saved config cannot answer — not because of any
 shape split, which no longer exists.
+
+**A master whose followers disagree acknowledges; it never takes
+a census gate** (#1383). Dimmed means "takes no input" on every
+channel, and `SettingsSlider` refuses the drag, the nudge and
+focus on the bit that dims it, so a greyed-but-writable master
+would be a live control drawn dead. The master stays live over
+a "mixed" readout, answers the resolver's `followersDiffer` —
+`GapsBordersGates.acknowledged` is the one register of who does
+— and hands that answer to its label's `?`, the first edit
+converging every follower (`BorderMastersDivergenceTests` ▸
+`acknowledgedRegisterIsExact`, `GapsAndBordersGateWiringTests`
+▸ `gapMastersAcknowledgeAtTheLabel`).
 
 **Consulting a resolver is not drawing what it answered, and a
 SURFACING gate leaves nothing behind to prove the difference.**
