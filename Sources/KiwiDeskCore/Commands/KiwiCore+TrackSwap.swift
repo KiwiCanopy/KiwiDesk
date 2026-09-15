@@ -60,20 +60,23 @@ extension KiwiCore {
         // (windows leak across tracks; #182 review H1). The
         // merge fires under BOTH a fixed limit and geometric
         // pressure (auto tracks on, small display), so gauge it
-        // against the render's own cap — geometry included, read
-        // from the live layout context (#198). No context (no
-        // screen, headless) degrades to the fixed-limit cap.
-        let geoCap =
+        // against the render's own partition — geometry included,
+        // read from the live layout context (#198, #1488). No
+        // context (no screen, headless) degrades to the
+        // fixed-limit cap.
+        let partition =
             (tiler.layoutInput(state: state)?.context)
-            .map { TrackLayout.geometricCap(for: $0, of: tiled) }
-            ?? .max
+            .map { TrackLayout.renderPartition(of: tiled, in: $0) }
+            ?? TrackLayout.foldedPartition(
+                of: tiled,
+                breaks: space.trackBreaks,
+                normalCap: params.normalCap,
+                geoCap: .max
+            )
         if TrackLayout.overflowSwapBlocked(
-            tiled: tiled,
-            breaks: space.trackBreaks,
+            partition: partition,
             windowIndex: index,
-            delta: delta,
-            normalCap: params.normalCap,
-            geoCap: geoCap
+            delta: delta
         ) {
             return .fail(
                 "track.swap can't reorder the folded overflow "
@@ -84,12 +87,7 @@ extension KiwiCore {
         // Swap on the render's effective partition so what moves
         // matches what the user sees (identical to `trackCap`
         // absent geometric pressure).
-        let effectiveCap = TrackLayout.foldedPartition(
-            of: tiled,
-            breaks: space.trackBreaks,
-            normalCap: params.normalCap,
-            geoCap: geoCap
-        ).cap
+        let effectiveCap = partition.cap
         var swapped = false
         state.workspaces.withSpace(space.id) {
             swapped = $0.swapTracks(

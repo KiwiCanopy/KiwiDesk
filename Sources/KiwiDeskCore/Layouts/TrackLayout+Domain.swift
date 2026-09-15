@@ -245,12 +245,28 @@ extension TrackLayout {
         normalCap: Int,
         geoCap: Int
     ) -> Bool {
-        let partition = foldedPartition(
-            of: tiled,
-            breaks: breaks,
-            normalCap: normalCap,
-            geoCap: geoCap
+        overflowSwapBlocked(
+            partition: foldedPartition(
+                of: tiled,
+                breaks: breaks,
+                normalCap: normalCap,
+                geoCap: geoCap
+            ),
+            windowIndex: windowIndex,
+            delta: delta
         )
+    }
+
+    /// `overflowSwapBlocked` over a partition already assembled
+    /// — the render's, from `renderPartition` (#1488).
+    public static func overflowSwapBlocked(
+        partition: (
+            counts: [Int], cap: Int, markers: Int,
+            overflowTrack: Int?
+        ),
+        windowIndex: Int,
+        delta: Int
+    ) -> Bool {
         guard let folded = partition.overflowTrack,
             partition.markers > partition.cap
         else { return false }
