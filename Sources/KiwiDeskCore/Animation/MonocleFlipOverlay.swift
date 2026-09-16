@@ -72,14 +72,20 @@ final class MonocleFlipOverlay {
         }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
+        // Blur and card share one morphing rounded cover: the
+        // plate's near edge bulges under perspective, and
+        // unclipped it draws a hard-edged slab past the window.
+        let coverMask = { () -> CALayer in
+            MonocleFlipPlate.cover(
+                plan,
+                fromRect: local(plan.from),
+                toRect: local(plan.to),
+                cornerRadii: cornerRadii,
+                reduceMotion: reduceMotion
+            )
+        }
         let blur = Self.makeBlur(frame: root.bounds)
-        blur.layer?.mask = MonocleFlipPlate.cover(
-            plan,
-            fromRect: local(plan.from),
-            toRect: local(plan.to),
-            cornerRadii: cornerRadii,
-            reduceMotion: reduceMotion
-        )
+        blur.layer?.mask = coverMask()
         root.addSubview(blur)
         blur.layer?.add(
             BarMotion.flipFade(
@@ -93,6 +99,7 @@ final class MonocleFlipOverlay {
         )
         let host = NSView(frame: root.bounds)
         host.wantsLayer = true
+        host.layer?.mask = coverMask()
         root.addSubview(host)
         let card = MonocleFlipPlate.card(
             plan,

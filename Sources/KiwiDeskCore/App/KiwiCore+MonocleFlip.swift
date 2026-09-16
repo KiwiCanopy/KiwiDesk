@@ -60,7 +60,10 @@ extension KiwiCore {
     func runPendingMonocleFocus() {
         guard let pending = pendingMonocleFocus else { return }
         pendingMonocleFocus = nil
-        guard state.windows[pending.to] != nil,
+        // The Space term carries the gone case too: a destroy
+        // drops membership, so a gone target has no Space to
+        // match (guard-prover, 2026-09-16).
+        guard
             state.workspaces.space(of: pending.to)
                 == state.workspaces.activeSpace
         else { return }

@@ -54,7 +54,9 @@ enum MonocleFlipPlate {
         var perspective = CATransform3DIdentity
         let extent =
             plan.axis == .vertical ? fromRect.width : fromRect.height
-        perspective.m34 = -1 / max(extent * 2, 700)
+        // A far eye: a near one widens the edge-on plate past
+        // the cover it is clipped to and reads as a cut.
+        perspective.m34 = -1 / max(extent * 4, 1400)
         card.sublayerTransform = perspective
         let centre = CGPoint(
             x: fromRect.width / 2,
@@ -148,7 +150,11 @@ enum MonocleFlipPlate {
                 NSValue(point: CGPoint(x: fromRect.midX, y: fromRect.midY)),
                 NSValue(point: CGPoint(x: toRect.midX, y: toRect.midY))
             ),
-            ("cornerRadius", cornerRadii.from, cornerRadii.to),
+            (
+                "cornerRadius",
+                NSNumber(value: Double(cornerRadii.from)),
+                NSNumber(value: Double(cornerRadii.to))
+            ),
         ]
         for (keyPath, from, to) in morphs {
             mask.add(

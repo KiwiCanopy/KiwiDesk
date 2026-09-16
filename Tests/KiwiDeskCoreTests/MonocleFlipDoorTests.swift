@@ -174,8 +174,12 @@ struct MonocleFlipDoorTests {
         stale.runPendingMonocleFocus()
         #expect(stale.pendingMonocleFocus == nil)
         #expect(stale.activeSpace?.id == SpaceID(2))
+        // The refusal is read on the Space the debt was minted
+        // for: its focus never moved to w2. (The displacement
+        // ledger cannot see this — `focusWindow` notes the
+        // ACTIVE Space's anchor, nil in an empty Space 2.)
         #expect(
-            !stale.tiler.placements.recentDisplacement(w1)
+            stale.state.workspaces[SpaceID(1)]?.focused == w1
         )
     }
 
