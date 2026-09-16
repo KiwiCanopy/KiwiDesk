@@ -211,7 +211,8 @@ restated `20...80` satisfies on the day it is written.
     from the drawn geometry (`cutsWindow`) at the length the
     strip LAID OUT AT — the tile speaks the same label, and a
     length no scale draws over-claimed a cut there — with the
-    words held to the frame at every length by
+    words held to the predicate at every length and the
+    predicate to the drawing by
     `LayoutSchematicCenterCaptionTests`.
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by

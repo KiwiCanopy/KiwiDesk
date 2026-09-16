@@ -50,8 +50,11 @@ extension LayoutKey {
             return .text("slot_size.unit")
         case .scrollingSlotSizeValue, .scrollingOverrideSlotSize:
             return .dynamic
+        // Drawn under the Percent unit only, so a hit of its own
+        // would land on nothing under Points; its words ride the
+        // unit row's synonyms instead (#1382).
         case .scrollingSlotSizeCount:
-            return .text("slot_count.label", help: "slot_count.help")
+            return .dynamic
         case .scrollingWrapFocus, .monocleWrapFocus:
             return .text("scroll_grid.wrap_focus")
         case .scrollingFillWhenAlone, .stackFillWhenAlone:

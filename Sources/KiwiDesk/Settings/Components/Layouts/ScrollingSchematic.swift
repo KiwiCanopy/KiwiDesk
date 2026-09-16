@@ -243,14 +243,14 @@ struct ScrollingSchematic: View {
     static let cutQuantum: CGFloat = 0.5
 
     /// Whether the frame drawn at `along` has a window the screen
-    /// edge cuts: one on canvas showing more than the quantum and
-    /// less than its whole.
+    /// edge cuts: one showing more than the quantum and less than
+    /// its whole (the screen lies inside the canvas at both
+    /// scales, so on screen is on canvas).
     func cutsWindow(along: CGFloat) -> Bool {
         let m = metrics(along: along)
         return (m.low...m.high).contains { i in
             let shown = overlap(i, m)
-            return onCanvas(i, m, along: along)
-                && shown > Self.cutQuantum
+            return shown > Self.cutQuantum
                 && shown < m.slot - Self.cutQuantum
         }
     }
@@ -271,7 +271,10 @@ struct ScrollingSchematic: View {
 
     /// The scale's own along-axis length where it has one — the
     /// canvas less the inset band on both ends — the panel's
-    /// height standing in for its pane width until it is drawn.
+    /// height standing in for its pane width until it is drawn:
+    /// one frame on which a horizontal panel's caption may be the
+    /// other sentence, re-flowing once on appear — the trade for
+    /// reading no host width here.
     var fixedAlong: CGFloat {
         let canvas =
             horizontal

@@ -8,20 +8,25 @@ import Testing
 /// screen edges, so the caption and the spoken label carry the
 /// cut-windows clause exactly where the frame drawn at the length
 /// the strip laid out at cuts a window — never at a length no
-/// scale draws, since the tile speaks the same label. Split from
-/// `LayoutSchematicCaptionTests` at that file's ceiling; the same
-/// locale caveat holds — every claim compares two rendered strings
-/// from one catalog.
+/// scale draws, since the tile speaks the same label. Two claims,
+/// held apart: the sweep holds the WORDS to the predicate at
+/// every length (a fixed-length judgement re-introduced anywhere
+/// on the way reds), and `parity` is the one oracle holding the
+/// predicate to the DRAWING, at the panel's length; that the view
+/// judges on the length it laid out at rests on the needles in
+/// `judgedLength`. Split from `LayoutSchematicCaptionTests` at
+/// that file's ceiling; the same locale caveat holds — every claim
+/// compares two rendered strings from one catalog.
 ///
 /// `@MainActor`: the prose producers are `View` members.
 @Suite("Layout preview captions ▸ Center")
 @MainActor
 struct LayoutSchematicCenterCaptionTests {
-    /// The words at any length are the sentence the drawing at
+    /// The words at any length are the sentence the predicate at
     /// that length picks — over both scales, both orientations,
     /// every slot size and count, at every length a pane can lay
     /// the strip out at, the drawn ones included.
-    @Test("the words follow the frame at every drawn length")
+    @Test("the words follow the predicate at every drawn length")
     func theWordsFollowTheFrame() {
         var cut = 0
         var whole = 0

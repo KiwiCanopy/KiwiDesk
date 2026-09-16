@@ -189,11 +189,8 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                // 37 since #1389: the two lone-window fill rows;
-                // 38 since #1382's noun ruling: the count stepper
-                // is indexed by its one label, at rest under the
-                // Percent slider like every Layout Defaults row.
-                .layoutDefaults: 38,
+                // 37 since #1389: the two lone-window fill rows.
+                .layoutDefaults: 37,
                 .monitors: 3,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are

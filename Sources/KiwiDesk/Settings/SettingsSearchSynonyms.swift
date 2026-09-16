@@ -83,10 +83,12 @@ enum SettingsSearchSynonyms {
         case .layout(.scrollingFillWhenAlone),
             .layout(.stackFillWhenAlone):
             return ["single window", "alone"]
-        // The tiler nouns a user brings for the count stepper
-        // beneath this row, which no label says any more (#1382).
+        // The count stepper beneath this row is drawn under
+        // Percent only, so it is not a hit of its own: its label
+        // and the tiler nouns a user brings for it ride this row
+        // (#1382).
         case .layout(.scrollingSlotSizeUnit):
-            return ["columns", "rows", "thirds"]
+            return ["columns", "rows", "windows on screen", "thirds"]
         // The checklist rows quote Apple's labels; these are the
         // words a user types before they know the label (#1365).
         case .macChecklist(.rearrangeSpaces):
