@@ -318,6 +318,8 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
+| | `animations.set_on_monocle_focus` | true\|false (default true); the Monocle focus card flip, persisted per-profile |
+| | `animations.set_monocle_flip_duration` | ms (100–1000, default 450); the flip's turn, persisted per-profile |
 | | `animations.set_size_policy` | smooth (default)\|mid_slide; size policy (#47, #593), Lua-only, not persisted |
 | | `animations.set_size_rate` | Hz (1–120; 0 = per-tick default); throttles `smooth` size-sets both directions, Lua-only, not persisted |
 | Sleep/Wake | `enable_wake_restore` | true\|false |

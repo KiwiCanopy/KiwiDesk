@@ -173,6 +173,21 @@ enum LayoutHelp {
         )
     }
 
+    /// Monocle flip help (#1391).
+    @MainActor static var monocleFlip: String {
+        L(
+            "monocle.flip.help",
+            "Blurs the window and turns a card from one app's "
+                + "icon to the next when focus changes in a "
+                + "Monocle Space, so you can see which window "
+                + "came in. Turn this off to switch at once. %1$@ "
+                + "sets how long the turn takes and has no effect "
+                + "while the flip is off. macOS's Reduce Motion "
+                + "also keeps it off.",
+            L("monocle.flip_duration", "Flip duration")
+        )
+    }
+
     /// Default new window placement help text (`PlacementPicker`,
     /// §5 type-checker budget).
     @MainActor static var newWindowPlacement: String {

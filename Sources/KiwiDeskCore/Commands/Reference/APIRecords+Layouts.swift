@@ -39,6 +39,15 @@ extension APIReference {
             "Enables or disables animation on layout reflows.",
             .boolean("enabled")
         ),
+        "set_on_monocle_focus": APIRecord(
+            "Enables or disables the card flip when focus moves "
+                + "between Monocle windows.",
+            .boolean("enabled")
+        ),
+        "set_monocle_flip_duration": APIRecord(
+            "Sets the Monocle card flip's turn in milliseconds.",
+            .integer("milliseconds")
+        ),
         "set_size_policy": APIRecord(
             "Sets how window sizes animate.",
             .choice("policy", SizePolicy.self)

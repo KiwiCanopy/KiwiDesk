@@ -30,9 +30,38 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         }
     }
 
-    /// Clamps duration within supported range (50–1000 ms).
+    /// The Monocle focus-change card flip (#1391): a blurred
+    /// plate turns from the outgoing window's app icon to the
+    /// incoming one's while the focus swaps beneath it. Not
+    /// under the `anyEnabled` master, like `onScrolling`.
+    public var onMonocleFocus = true
+
+    /// The flip's turn in milliseconds (100–1000 ms, #1391); the
+    /// blur fades around it on fixed times.
+    public var monocleFlipDurationMS = 450 {
+        didSet {
+            monocleFlipDurationMS = Self.clampFlipMS(
+                monocleFlipDurationMS
+            )
+        }
+    }
+
+    /// The band every spring duration clamps to, and the one a
+    /// control's edges derive from (gui.md, #1359).
+    public static let durationBand = 50...1000
+    /// The flip's band: below 100 ms the plate is a flash, not a
+    /// turn.
+    public static let flipDurationBand = 100...1000
+
     static func clampMS(_ ms: Int) -> Int {
-        min(max(ms, 50), 1000)
+        min(max(ms, durationBand.lowerBound), durationBand.upperBound)
+    }
+
+    static func clampFlipMS(_ ms: Int) -> Int {
+        min(
+            max(ms, flipDurationBand.lowerBound),
+            flipDurationBand.upperBound
+        )
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -43,6 +72,8 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onRelayout = "on_relayout"
         case durationMS = "duration"
         case scrollDurationMS = "scroll_duration"
+        case onMonocleFocus = "on_monocle_focus"
+        case monocleFlipDurationMS = "monocle_flip_duration"
     }
 
     public init() {}
@@ -89,6 +120,17 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Int.self,
                 forKey: .scrollDurationMS
             ) ?? 150
+        )
+        onMonocleFocus =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .onMonocleFocus
+            ) ?? true
+        monocleFlipDurationMS = Self.clampFlipMS(
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .monocleFlipDurationMS
+            ) ?? 450
         )
     }
 }

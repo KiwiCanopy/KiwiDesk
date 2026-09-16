@@ -82,7 +82,7 @@ extension MotionCard {
             StepperRow(
                 label: L("behavior.animations.duration", "Duration"),
                 value: animations.durationMS,
-                in: 50...1000,
+                in: AnimationSettings.durationBand,
                 step: 10,
                 suffix: "ms"
             )

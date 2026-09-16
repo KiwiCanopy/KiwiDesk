@@ -259,6 +259,12 @@ extension KiwiCore {
         // the user reached, and a stale raise firing after the
         // pan would steal focus back.
         pendingFocusRaise = nil
+        // A flip's owed focus is dropped the same way (#1391) —
+        // for any window but the one it is leaving, whose own
+        // duplicate echo (#887) is not the user going elsewhere.
+        if let pending = pendingMonocleFocus, id != pending.from {
+            pendingMonocleFocus = nil
+        }
         // State and the OS agree again (#1130).
         disarmWakeFocusHeal()
         let honoredApp: String =

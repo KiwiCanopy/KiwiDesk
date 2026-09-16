@@ -503,6 +503,45 @@ editing here:
   [accessibility.md](accessibility.md)'s, because it constrains
   a file under `AX/` that this rule's `paths:` do not reach.
 
+- **The Monocle focus flip is a drawn card over a behind-window
+  blur, never a transform or a capture of the real window
+  (#1391).** The measurement that closed the live-image tier
+  (2026-09-16 — the #884 performed-not-applied shape on
+  `SLSSetWindowTransform`/`SLSSetWindowAlpha`, and no pixels
+  without Screen Recording) and the no-new-permission ruling
+  are argued once, in `docs/design-decisions.md` ▸ "A Monocle
+  focus change flips a drawn card"; do not re-probe them. Four
+  obligations. A focus KiwiDesk COMMANDS in a Monocle Space
+  takes the one `focusWithMonocleFlip` door, which records the
+  owed focus as `pendingMonocleFocus` — a ledger on the core
+  with its sibling `pendingFocusRaise`'s hooks, never a closure
+  holding a `WindowID` — and lands `focusWindow` once the blur
+  covers the surface, never later (the latency argument is the
+  design entry's), a press during a play landing at once and
+  retargeting the card rather than restarting it; an
+  OS-reported focus never takes the door, since
+  its swap already happened (`MonocleFlipSeamTests` pins the
+  three commanded sites, the door as the one payer, and the
+  wiring below). A focused-window command lands the owed focus
+  ahead of its dispatch (`KiwiCore.execute` over
+  `FocusedCommandPolicy`), the door ends a play and lands its
+  focus BEFORE it plans (the App Bar click passes no
+  dispatcher), an honored report for any other window drops it,
+  a rekey carries it, a gone target lands nothing, and a Space
+  switch drops it with the play through the one
+  `dropMonocleFlip` in `spaceSwitchRetile`
+  (`MonocleFlipDoorTests`). The decision is pure
+  (`MonocleFlipPlan.decide`, `MonocleFlipPlanTests`) and takes
+  Reduce Motion as an argument, read through the overlay's own
+  seam, which `makeTestCore` pins ON (the engine's is pinned
+  OFF) because a playing flip defers the focus every navigation
+  suite reads at once — a flip suite states the read itself,
+  and a further seam that defers a commanded focus is pinned
+  the same way in both `makeTestCore` twins with its reason
+  beside it (`MonocleFlipSeamTests` ▸ `bothTwinsPinTheRead`).
+  And the overlay starts no motion of its own: its turn and
+  fades are `BarMotion`'s censused members
+  (`BarMotionSeamTests`), so Core's motion keeps one home.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

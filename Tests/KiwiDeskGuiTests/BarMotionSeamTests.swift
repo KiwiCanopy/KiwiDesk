@@ -116,6 +116,9 @@ struct BarMotionSeamTests {
         "travels": [],
         "springSweep": ["springAnimation(", "isReduced"],
         "springAnimation": ["reduceMotion"],
+        "flipTurn": ["reduceMotion"],
+        "flipMorph": ["reduceMotion"],
+        "flipFade": ["reduceMotion"],
     ]
 
     private static var coreRoot: URL {

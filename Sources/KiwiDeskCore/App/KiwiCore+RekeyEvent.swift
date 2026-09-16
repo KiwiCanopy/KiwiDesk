@@ -30,6 +30,12 @@ extension KiwiCore {
         if pendingFocusRaise == old {
             pendingFocusRaise = new
         }
+        if let pending = pendingMonocleFocus {
+            pendingMonocleFocus = (
+                from: pending.from == old ? new : pending.from,
+                to: pending.to == old ? new : pending.to
+            )
+        }
         // The split heal's said-cue memo (#934) is id-keyed too.
         for (spaceID, cues) in splitFloorCues {
             splitFloorCues[spaceID] = Set(

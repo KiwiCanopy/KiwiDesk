@@ -51,6 +51,10 @@ extension KiwiCore {
     /// - `delete_space` of the shown space retiles under the
     ///   relayout policy: a structural edit, not navigation.
     func spaceSwitchRetile() {
+        // A Monocle flip owed on the Space being left is DROPPED
+        // with its play (#1391): the switch's own raise picks the
+        // focus, and the plate must not linger over the arrival.
+        dropMonocleFlip()
         let animated =
             tiler.settings.animations.onSpaceChange
         retile(

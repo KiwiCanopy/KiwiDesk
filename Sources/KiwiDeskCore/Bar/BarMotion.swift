@@ -1,14 +1,16 @@
 import AppKit
 import QuartzCore
 
-/// The bars' one Reduce Motion gate (#1078).
+/// Core's one Reduce Motion gate for AppKit and Core Animation
+/// motion (#1078) — the bars', and since #1391 the Monocle
+/// flip's.
 ///
-/// Every motion-starting AppKit and Core Animation call under
-/// `Bar/` lives here, in one shape: a `@MainActor` wrapper reads
-/// the setting and hands it to a pure decision that takes it as
-/// an argument, so the decision is assertable and the read is
-/// the one expression a test cannot reach. The argument, and
-/// what the gate costs the drop ring, are in
+/// Every motion-starting AppKit and Core Animation call in Core
+/// lives here, in one shape: a `@MainActor` wrapper reads the
+/// setting and hands it to a pure decision that takes it as an
+/// argument, so the decision is assertable and the read is the
+/// one expression a test cannot reach. The argument, and what
+/// the gate costs the drop ring, are in
 /// `.claude/rules/bars.md` ▸ the bars start motion in one file.
 enum BarMotion {
     /// Whether the user asked the system for less motion.
@@ -125,5 +127,89 @@ enum BarMotion {
         sweep.fillMode = .both
         sweep.isRemovedOnCompletion = false
         return sweep
+    }
+
+    /// The Monocle flip plate's turn (#1391): `transform.rotation`
+    /// about `axis` (`"x"` or `"y"`) from `from` to `to` radians
+    /// across `duration`, starting `delay` after it is added and
+    /// holding `from` until then, eased both ends. Under Reduce
+    /// Motion the flip never plays — `MonocleFlipPlan.decide`
+    /// stands the whole transition down — so the reduced shape
+    /// here is a zero-travel step, the net `springAnimation`
+    /// keeps.
+    static func flipTurn(
+        axis: String,
+        from: Double,
+        to: Double,
+        duration: TimeInterval,
+        delay: TimeInterval,
+        reduceMotion: Bool
+    ) -> CAAnimation {
+        let turn = CABasicAnimation(
+            keyPath: "transform.rotation.\(axis)"
+        )
+        turn.fromValue = reduceMotion ? to : from
+        turn.toValue = to
+        turn.duration = duration
+        turn.beginTime = CACurrentMediaTime() + delay
+        turn.timingFunction = CAMediaTimingFunction(
+            name: .easeInEaseOut
+        )
+        turn.fillMode = .both
+        turn.isRemovedOnCompletion = false
+        return turn
+    }
+
+    /// The flip blur's morph (#1391): one layer property —
+    /// `bounds`, `position` or `cornerRadius` of the blur's mask —
+    /// from `from` to `to` across the turn, so the blurred cover
+    /// shrinks or grows with the plate. Reduced: the zero-travel
+    /// step.
+    static func flipMorph(
+        keyPath: String,
+        from: Any,
+        to: Any,
+        duration: TimeInterval,
+        delay: TimeInterval,
+        reduceMotion: Bool
+    ) -> CAAnimation {
+        let morph = CABasicAnimation(keyPath: keyPath)
+        morph.fromValue = reduceMotion ? to : from
+        morph.toValue = to
+        morph.duration = duration
+        morph.beginTime = CACurrentMediaTime() + delay
+        morph.timingFunction = CAMediaTimingFunction(
+            name: .easeInEaseOut
+        )
+        morph.fillMode = .both
+        morph.isRemovedOnCompletion = false
+        return morph
+    }
+
+    /// A layer `opacity` fade for the flip's blur and plate
+    /// (#1391), from `from` to `to` across `duration`, starting
+    /// `delay` after it is added; the reduced shape is the same
+    /// zero-travel step as `flipTurn`'s.
+    static func flipFade(
+        from: Float,
+        to: Float,
+        duration: TimeInterval,
+        delay: TimeInterval,
+        reduceMotion: Bool
+    ) -> CAAnimation {
+        let fade = CABasicAnimation(keyPath: "opacity")
+        fade.fromValue = reduceMotion ? to : from
+        fade.toValue = to
+        fade.duration = duration
+        fade.beginTime = CACurrentMediaTime() + delay
+        fade.timingFunction = CAMediaTimingFunction(
+            name: delay > 0 ? .easeIn : .easeOut
+        )
+        // Forwards only: a delayed fade with a backwards fill
+        // would override the fade before it on the same key
+        // path from the start.
+        fade.fillMode = .forwards
+        fade.isRemovedOnCompletion = false
+        return fade
     }
 }

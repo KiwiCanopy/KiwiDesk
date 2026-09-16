@@ -167,7 +167,7 @@ extension KiwiCore {
                 animated: tiler.settings.animations.onWindowSwap
             )
         } else {
-            focusWindow(target, warp: true)
+            focusWithMonocleFlip(target, step: step)
         }
         return .ok()
     }

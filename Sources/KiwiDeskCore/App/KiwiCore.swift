@@ -28,6 +28,11 @@ public final class KiwiCore {
     /// `retile()` (`updateBorders()`, `updateStickyMarks()`).
     public let borders = BorderManager()
     public let stickyMarks = StickyMarkManager()
+    /// The Monocle focus flip (#1391), `focusWithMonocleFlip`'s.
+    let monocleFlip = MonocleFlipOverlay()
+    /// The focus a playing flip owes at its landing (#1391) —
+    /// landed, dropped and carried in `KiwiCore+MonocleFlip`.
+    var pendingMonocleFocus: (from: WindowID, to: WindowID)?
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
@@ -66,13 +71,10 @@ public final class KiwiCore {
     /// argued at its one reader, `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
 
-    /// The boot scan and the startup sweep surface N windows in
-    /// one burst, and each `.windowCreated` would run a full
-    /// retile + bars + borders + clamp — N passes for one
-    /// arrangement (#672). While raised, `handle` skips its
-    /// structural retile; the raiser runs one `retile()` after
-    /// lowering it. The `defersWindowRuleReconcile` shape, for
-    /// the same reason.
+    /// Boot and the startup sweep surface N windows in one burst,
+    /// each `.windowCreated` a full pass (#672). While raised,
+    /// `handle` skips its structural retile; the raiser runs one
+    /// `retile()` after lowering it.
     var defersEventRetiles = false
 
     /// A z-order restore is waiting for the current animations
@@ -80,10 +82,8 @@ public final class KiwiCore {
     var pendingZOrderRestore = false
 
     /// A command reordered windows but its paired retile is the
-    /// dispatcher's own trailing `retile(pass: .apply)`, not one it
-    /// issued itself (#153) — `layoutCommand` arms the z-order
-    /// restore *after* that retile so it can't fire mid-retile
-    /// from pre-retile frames. Set via
+    /// dispatcher's trailing `retile(pass: .apply)` (#153), so
+    /// `layoutCommand` arms the z-order restore after it. Set via
     /// `requestZOrderRestoreAfterDispatch`; reset each dispatch.
     var deferredCommandZOrderRestore = false
 

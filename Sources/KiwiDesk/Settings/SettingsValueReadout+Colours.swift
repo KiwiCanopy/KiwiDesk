@@ -79,6 +79,18 @@ extension SettingsValueReadout {
                 milliseconds(Double(o.scrollDurationMS)),
                 milliseconds(Double(n.scrollDurationMS))
             )
+        case .animationsOnMonocleFocus:
+            return coloursOnOffRow(
+                census,
+                o.onMonocleFocus,
+                n.onMonocleFocus
+            )
+        case .animationsMonocleFlipDurationMS:
+            return coloursRow(
+                census,
+                milliseconds(Double(o.monocleFlipDurationMS)),
+                milliseconds(Double(n.monocleFlipDurationMS))
+            )
         case .paletteApply, .paletteSave, .paletteRename,
             .paletteExport, .paletteDelete, .paletteImport,
             .paletteNeonGlowHint:

@@ -71,6 +71,12 @@ func makeTestCore(
     // silently turn a KiwiCore test's animations into instant
     // snaps (same host-state-leak class as the hotkey registrar).
     core.tiler.animation.reduceMotion = { false }
+    // The Monocle flip's own read (#1391), pinned the OTHER way:
+    // the flip defers a commanded `focusWindow` to its midpoint,
+    // so with it playing every suite that navigates a Monocle
+    // Space would read the focus before it landed. A flip suite
+    // states the read itself.
+    core.monocleFlip.reduceMotion = { true }
     // Same class again (#596): bootstrap reads the
     // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process
     // environment, so a developer who has it exported would get a

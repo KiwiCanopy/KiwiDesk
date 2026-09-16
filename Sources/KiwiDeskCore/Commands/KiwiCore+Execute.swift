@@ -9,6 +9,11 @@ extension KiwiCore {
         _ command: String,
         args: [JSONValue] = []
     ) -> CommandResponse {
+        // A focused-window command lands the flip's owed focus
+        // first; a query does not (#1391).
+        if FocusedCommandPolicy.isFocused(command) {
+            runPendingMonocleFocus()
+        }
         let response = dispatchCommand(command, args: args)
         // Every command run inside a hotkey fire is tallied so
         // the hold-to-glide engine can decide eligibility from

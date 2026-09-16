@@ -5162,6 +5162,57 @@ changes.
 animations.set_on_relayout(true)
 ```
 
+### animations.set_on_monocle_focus
+
+:::unreleased
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** enables or disables the card flip when focus moves
+between the windows of a Monocle Space. The window blurs and a
+plate turns from the outgoing app's icon to the incoming one's
+while the focus swaps beneath it — as soon as the blur covers
+it, so the keyboard reaches the new window at once; further
+presses during the turn land instantly, the card showing the
+newest window's icon and the blur lifting a quarter second after
+you pause — so
+you can see which window
+came in and which way it came from: the plate turns forward for
+the next window in the Space's order and back for the previous
+one — the way the key pointed, on a `focus` step — about the
+vertical axis in a horizontal Monocle and the horizontal one in
+a vertical Monocle. It plays only for a focus change KiwiDesk
+itself commands — a `focus` step, an App
+Bar click, `pull_or_spawn` — never for one macOS made (⌘Tab,
+the Dock), and never onto a floating window. A plate whose next
+window is smaller (an app that refuses the full slot) lands on
+that window's own frame. macOS's Reduce Motion keeps the flip
+off regardless.
+
+**Example:**
+
+```lua
+animations.set_on_monocle_focus(false)
+```
+:::
+
+### animations.set_monocle_flip_duration
+
+:::unreleased
+**Expects:** a number (milliseconds, clamped 100–1000; default
+`450`).
+
+**Does:** sets how long the Monocle flip's turn takes. It is a
+duration, so a larger value makes the turn take longer; the blur
+fades in and out around it on fixed times. It has no effect
+while `set_on_monocle_focus` is off.
+
+**Example:**
+
+```lua
+animations.set_monocle_flip_duration(300)
+```
+:::
+
 ### enable_wake_restore, set_wake_restore_delay
 
 **Expects:**
