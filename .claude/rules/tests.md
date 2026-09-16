@@ -760,11 +760,17 @@ which is why every suite spawning real shell children is
 *named* under the `ExecTests` prefix (`MachineTouchTests` pins
 that partition).
 
-**Device QA launches the app direct**, not via `service start`:
-`.build/release/KiwiDesk` in a terminal (Ctrl-C to stop). Its
-diagnostics — the #292 preflight-denial and settle lines
-included — do NOT appear in that terminal: they are unified-log
-lines (the run-log paragraph above), so capture them with
+**A device eyeball takes the bundle `build-app.sh` verified,
+never the bare release binary** (owner ruling 2026-09-08, and
+the #1499 premise: the bare `.build/release/KiwiDesk` is the one
+binary no stamp check reaches, and under Xcode 27 it draws
+pre-macOS-26 controls). Package with `scripts/build-app.sh`
+(`--output <scratch>`) and `open` that `.app` from where it was
+written — not via `service start`, not from `/Applications`,
+whose deep writes the sandbox refuses. Its diagnostics — the
+#292 preflight-denial and settle lines included — are
+unified-log lines (the run-log paragraph above), so capture
+them with
 `/usr/bin/log stream --predicate 'eventMessage CONTAINS[c]
 "KiwiDesk"'`, or `log show --last 5m` with the same predicate
 after the fact (`subsystem == "com.kiwicanopy.kiwidesk"`

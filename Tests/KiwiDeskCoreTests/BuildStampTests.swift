@@ -61,13 +61,9 @@ struct BuildStampTests {
             text.contains("SDK_VERSION=$(xcrun --show-sdk-version)"),
             "the SDK version is read off the toolchain"
         )
-        // The SCRIPT's sed really extracts the target the manifest
-        // declares: cut the expression out of the script text and
-        // run it over the real Package.swift, compared with an
-        // independent read — a hand copy here would stay green
-        // while the script's replacement went wrong (measured by
-        // the prover). Shape, not value — a target bump moves
-        // both sides together.
+        // The SCRIPT's own sed, cut out of its text, over the real
+        // Package.swift — never a copy of the expression (#1499).
+        // Shape, not value: a target bump moves both sides.
         let root = scriptFixtureRepoRoot()
         let manifest = try String(
             contentsOf: root.appendingPathComponent("Package.swift"),
@@ -93,6 +89,15 @@ struct BuildStampTests {
             run.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
                 == "\(declared).0"
         )
+        // The plist's floor is the one copy the script still TYPES
+        // — `read-plist-key` reads the literal raw for the appcast
+        // and the site, so it cannot be templated — pinned equal
+        // to the manifest's target so the two cannot drift.
+        #expect(
+            try buildAppPlistValue("LSMinimumSystemVersion")
+                == "\(declared).0",
+            "LSMinimumSystemVersion no longer matches Package.swift"
+        )
     }
 
     // MARK: - The verification
@@ -117,9 +122,7 @@ struct BuildStampTests {
         )
         // After the gate, so a reused binary is verified too;
         // before the bundle is first touched, so nothing is staged
-        // from a binary that will be refused — the Sparkle copy is
-        // three steps later and let a staged binary through
-        // (measured by the prover).
+        // from a binary that will be refused.
         #expect(skipGate < verify)
         #expect(verify < staging)
     }
@@ -137,7 +140,7 @@ struct BuildStampTests {
             "the otool stamp read is gone"
         )
         let end = try index(
-            #"echo "    stamp: minos"#,
+            #"echo "    stamp: sdk"#,
             in: text,
             "the success echo is gone"
         )
@@ -171,19 +174,37 @@ struct BuildStampTests {
 
     /// The stamp `/bin/ls` really carries, read the way the
     /// script reads it, so the matching clause asserts against
-    /// the machine rather than a guessed number.
+    /// the machine rather than a guessed number. The fixture's
+    /// `minos` must differ from its `sdk`, or a script reading
+    /// the wrong field would pass — asserted, since the OS
+    /// supplies the binary.
     private func stampOfBinLs() throws -> String {
-        let run = try spawn(
-            "/bin/bash",
-            [
-                "-c",
-                "otool -l /bin/ls | awk '/LC_BUILD_VERSION/ {v=1}"
-                    + " v && $1 == \"sdk\" {print $2; exit}'",
-            ]
+        func field(_ name: String) throws -> String {
+            let run = try spawn(
+                "/bin/bash",
+                [
+                    "-c",
+                    "otool -l /bin/ls | awk '/LC_BUILD_VERSION/ {v=1}"
+                        + " v && $1 == \"\(name)\" {print $2; exit}'",
+                ]
+            )
+            let value = run.stdout
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            try #require(
+                !value.isEmpty,
+                "otool read no \(name) off /bin/ls"
+            )
+            return value
+        }
+        let stamp = try field("sdk")
+        let minos = try field("minos")
+        try #require(
+            stamp != minos,
+            Comment(
+                rawValue: "/bin/ls carries minos == sdk, so a script "
+                    + "reading the wrong field could not be told apart"
+            )
         )
-        let stamp = run.stdout
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        try #require(!stamp.isEmpty, "otool read no stamp off /bin/ls")
         return stamp
     }
 

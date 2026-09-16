@@ -204,12 +204,13 @@ major_minor() { printf '%s' "$1" | cut -d. -f1,2; }
 if [ "$(major_minor "$STAMPED_SDK")" \
     != "$(major_minor "$SDK_VERSION")" ]; then
     echo "error: $BUILT/KiwiDesk is stamped sdk ${STAMPED_SDK:-?}," \
-         "the toolchain's SDK is $SDK_VERSION. A binary linked" \
-         "below SDK 26 draws pre-macOS-26 controls (#1499)." \
-         "Rebuild without --skip-build." >&2
+         "the toolchain's SDK is $SDK_VERSION — the binary was" \
+         "not linked by this toolchain's ask (#1499; below SDK" \
+         "26 it draws pre-macOS-26 controls). Rebuild without" \
+         "--skip-build." >&2
     exit 1
 fi
-echo "    stamp: minos $MIN_OS, sdk $STAMPED_SDK"
+echo "    stamp: sdk $STAMPED_SDK (target $MIN_OS)"
 
 # ---------------------------------------------------------------
 # 2. Skeleton
@@ -301,7 +302,7 @@ if ACTOOL="$(xcrun -f actool 2>/dev/null)" \
     # Invoke the resolved path: /usr/bin/actool is a shim that
     # exists without Xcode, so probing and invoking must agree.
     "$ACTOOL" "$ICON_SRC" --compile "$RES" --platform macosx \
-        --minimum-deployment-target 14.0 --app-icon AppIcon \
+        --minimum-deployment-target "$MIN_OS" --app-icon AppIcon \
         --output-partial-info-plist "$ICON_PLIST" >/dev/null
 elif [ -n "$NOTARY_PROFILE" ] || [ "$ALLOW_NO_ICON" -eq 0 ]; then
     echo "error: actool (Xcode, not just Command Line Tools) or" \

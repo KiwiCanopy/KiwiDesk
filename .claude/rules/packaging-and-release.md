@@ -52,17 +52,21 @@ this assembles one from the release build, compiles
 
 Nothing it writes is a second copy: the version is read from
 `KiwiDeskVersion.swift` and the two icon keys come from actool's
-own partial plist — though the **deployment target is still typed
-in three places** (`Package.swift`, the plist, actool's flag), so
-a raise to macOS 15 touches all three, and `Package.swift` is the
-one a build actually enforces. The two in the script fail
-silently, but only the plist's does so dangerously (an app
-declaring a lower minimum than it runs on, versus a wrong
-rendition set).
+own partial plist. The **deployment target is typed in two
+places** — `Package.swift`, the one a build enforces, and the
+plist's `LSMinimumSystemVersion`, which stays a literal because
+`scripts/read-plist-key` reads it raw for the appcast, the site
+and `release.yml` — with actool's flag and the linker's platform
+version DERIVED from `Package.swift` (#1499), and
+`BuildStampTests` pins the plist's floor equal to the manifest's
+target, so a raise to macOS 15 that touches one and not the
+other reds rather than shipping an app declaring a lower minimum
+than it runs on.
 
 **The release build's SDK stamp is asked for and then verified
-(#1499).** SwiftPM under Xcode 27 stamps the deployment target as
-the SDK — `LC_BUILD_VERSION` reads `sdk 14.0` — and AppKit applies
+(#1499).** SwiftPM under Xcode 27 (observed on 27.0 `27A266a`,
+2026-09-16) stamps the deployment target as the SDK —
+`LC_BUILD_VERSION` reads `sdk 14.0` — and AppKit applies
 the macOS 26 control design only to a binary linked against SDK
 >= 26, so the bundle draws pre-26 pop-ups and buttons and the
 defect reads as a Settings regression on the device, never as a
@@ -80,8 +84,12 @@ premise is that the build machine is where a failure is
 invisible. `BuildStampTests` pins the override on the build line,
 the two derivation homes and the verification's order, and RUNS
 the verification block against a real Mach-O for both verdicts.
-CI's pinned Xcode is unaffected either way — #1500 owns moving
-it to 27.
+`build-app.sh` is the ONE home of the ask and its re-read: the
+other two `swift build -c release` sites — `scripts/release.sh`'s
+gate and `ci.yml`'s release job — are compile gates whose binary
+nothing ships, so they take no override (an override with no
+re-read behind it guards nothing). CI pinned Xcode 26.6 when
+this landed; #1500 moves it.
 
 **The plist must declare `CFBundleLocalizations`, derived from
 `Sources/KiwiDeskCore/Resources/Locales`.** A bundle that names
@@ -439,9 +447,11 @@ silently reads empty.
 
 **The release body has a form, and a parser enforces it (#873).**
 The body OPENS with the sponsor paragraph — copied verbatim from
-the previous release's body, owner practice since v1.3.0 — then
-the curated `## Highlights` block, then `--generate-notes`' list
-unedited. The paragraph reaches the release page alone: the
+the previous release's body; it is a mechanism with no design
+entry behind it, since it rules nothing about content beyond
+what the license copy already does (copy states the license,
+never a price) — then the curated `## Highlights` block, then
+`--generate-notes`' list unedited. The paragraph reaches the release page alone: the
 parser reads from `## Highlights`, and the site and Sparkle
 render the parsed block, so it is never put in front of a user
 who only asked to update; the curator's draft carries it so the
