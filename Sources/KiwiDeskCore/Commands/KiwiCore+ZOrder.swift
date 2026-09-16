@@ -59,7 +59,7 @@ extension KiwiCore {
     }
 
     /// Requests a z-order restore whose paired retile is the
-    /// command dispatcher's own trailing `retile(force:)`, not
+    /// command dispatcher's own trailing `retile(pass: .apply)`, not
     /// one issued at the call site (#153). Recorded, not armed:
     /// `layoutCommand` fires `scheduleZOrderRestore` *after* that
     /// retile, so the restore can't run mid-retile off pre-retile

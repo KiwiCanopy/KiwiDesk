@@ -199,7 +199,7 @@ extension KiwiCore {
         // "already there" tolerance (±2 pt/edge) swallows
         // small edits — a 1 pt gap change moved every window
         // by ≤2 pt and visibly did nothing (#68).
-        retile(force: true)
+        retile(pass: .apply)
         emitSpaceChange()
         // #1145: the incoming settings carry `desktop_reach`,
         // and this IS the Settings toggle's apply path — AFTER

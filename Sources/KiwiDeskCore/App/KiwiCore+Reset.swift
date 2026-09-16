@@ -121,7 +121,7 @@ extension KiwiCore {
         // sidecar, no profiles left).
         loadConfig()
         resolveSpaceDisplays()
-        retile(force: true)
+        retile(pass: .apply)
         emitSpaceChange()
         // #1145: default settings restore `desktop_reach` ON —
         // carry after the topology above settles.

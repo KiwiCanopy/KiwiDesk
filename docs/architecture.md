@@ -184,9 +184,11 @@ flowchart TD
    pipeline 1.
 
 Key difference from pipeline 1: every retile triggered by an explicit
-`set_*` **forces** (`retile(force: true)`), bypassing the ±2 pt
-tolerance so a 1 pt gap edit actually moves windows (§5). Explicit =
-forced; event-driven = un-forced.
+`set_*` is an **apply** (`retile(pass: .apply)`), bypassing the ±2 pt
+tolerance so a 1 pt gap edit actually moves windows (§5) and probing
+past the learned app size bounds once. A Space or Desktop switch is a
+**reissue** — past the tolerance, no probe — and everything
+event-driven is the default `.event` pass (`RetilePass`).
 
 Lua safety seam: the watchdog is an instruction-count hook — it
 **cannot** interrupt a blocking C call. Anything that blocks in C

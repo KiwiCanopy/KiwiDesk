@@ -92,7 +92,7 @@ struct TravelerRehomeConsumerTests {
     func movedOntoTheFloatingSpacesScreen() throws {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         let commanded = try #require(
             f.core.tiler.recentInstantTarget(Self.traveler),
             "the retile never wrote a frame — the traveler stayed"
@@ -129,7 +129,7 @@ struct TravelerRehomeConsumerTests {
             height: 300
         )
         f.core.state.apply(.windowMoved(Self.traveler, top))
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         let commanded = try #require(
             f.core.tiler.recentInstantTarget(Self.traveler)
         )
@@ -160,7 +160,7 @@ struct TravelerRehomeConsumerTests {
             height: f.other.height + 400
         )
         f.core.state.apply(.windowMoved(Self.traveler, tall))
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         let commanded = try #require(
             f.core.tiler.recentInstantTarget(Self.traveler)
         )
@@ -182,7 +182,7 @@ struct TravelerRehomeConsumerTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.animations.onRelayout = true
-        f.core.retile(animated: true, force: true)
+        f.core.retile(animated: true, pass: .apply)
         let first = try #require(
             f.core.tiler.animation.commandedFrame(
                 window: Self.traveler,
@@ -201,7 +201,7 @@ struct TravelerRehomeConsumerTests {
                 + (first.height - f.frame.height) / 10
         )
         f.core.state.apply(.windowMoved(Self.traveler, early))
-        f.core.retile(animated: true, force: true)
+        f.core.retile(animated: true, pass: .apply)
         #expect(
             f.core.tiler.animation.commandedFrame(
                 window: Self.traveler,
@@ -224,7 +224,7 @@ struct TravelerRehomeConsumerTests {
             height: 300
         )
         f.core.state.apply(.windowMoved(Self.traveler, here))
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         #expect(f.core.tiler.recentInstantTarget(Self.traveler) == nil)
     }
 
@@ -235,7 +235,7 @@ struct TravelerRehomeConsumerTests {
     func tiledTargetKeepsTheLayout() throws {
         let f = try #require(makeFixture(mode: .bsp))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         let commanded = try #require(
             f.core.tiler.recentInstantTarget(Self.traveler)
         )
@@ -251,7 +251,7 @@ struct TravelerRehomeConsumerTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.dragExemptWindow = Self.traveler
-        f.core.retile(animated: false, force: true)
+        f.core.retile(animated: false, pass: .apply)
         #expect(f.core.tiler.recentInstantTarget(Self.traveler) == nil)
     }
 }

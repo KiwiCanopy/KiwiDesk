@@ -4,12 +4,16 @@ import Foundation
 
 /// The retile-time heal's second pass (#1355): `geometricCap`
 /// made the tracks' learned floors fit, this makes the tracks
-/// draw them. Called from `healSessionWeights` in
-/// `KiwiCore+WeightHeal.swift` after its shave, on the same
-/// partition and span.
+/// draw them — and no wider than their learned ceilings (#1488),
+/// so a fixed-size window's surplus goes to its neighbours
+/// instead of standing empty beside it. Called from
+/// `healSessionWeights` in `KiwiCore+WeightHeal.swift` after its
+/// shave, on the same partition and span.
 extension KiwiCore {
-    /// The across-axis store against each track's LEARNED floor;
-    /// the floor reading is the cap's own (`learnedFloor`).
+    /// The across-axis store against each track's LEARNED floor
+    /// and ceiling; the floor reading is the cap's own
+    /// (`learnedFloor`), the ceiling the one `trackCeiling` the
+    /// resize clamp reads too.
     func healTrackFloors(
         of space: Space,
         tiled: [WindowID],
@@ -37,6 +41,10 @@ extension KiwiCore {
                 }.max() ?? 0
             )
         }
+        let ceilings = ranges.map { range -> Double in
+            TrackLayout.trackCeiling(of: tiled[range], in: context)
+                .map(Double.init) ?? .infinity
+        }
         let span = TrackLayout.acrossSpan(
             region: Double(
                 vertical ? bounds.width : bounds.height
@@ -50,6 +58,7 @@ extension KiwiCore {
                 weights: weights,
                 span: span,
                 floors: floors,
+                ceilings: ceilings,
                 globalFloor: Double(context.minWindowSize),
                 margin: StackLayout.minSizeMargin
             )
@@ -73,7 +82,7 @@ extension KiwiCore {
             onLog(
                 "track weights re-shared for space \(space.id): "
                     + "\(raised) track(s) moved to draw a learned "
-                    + "floor"
+                    + "bound"
             )
         }
     }

@@ -80,7 +80,7 @@ public final class KiwiCore {
     var pendingZOrderRestore = false
 
     /// A command reordered windows but its paired retile is the
-    /// dispatcher's own trailing `retile(force:)`, not one it
+    /// dispatcher's own trailing `retile(pass: .apply)`, not one it
     /// issued itself (#153) — `layoutCommand` arms the z-order
     /// restore *after* that retile so it can't fire mid-retile
     /// from pre-retile frames. Set via

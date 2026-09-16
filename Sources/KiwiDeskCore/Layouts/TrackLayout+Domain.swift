@@ -139,6 +139,36 @@ extension TrackLayout {
         return max(context.minWindowSize, learned ?? 0)
     }
 
+    /// `learnedFloor`'s mirror (#1488): one window's corroborated
+    /// learned MAXIMUM on the cross span, nil where none — no
+    /// configured ceiling stands in the way `min_window_size`
+    /// does for the floor.
+    public static func learnedCeiling(
+        of id: WindowID,
+        in context: LayoutContext
+    ) -> CGFloat? {
+        let bound = context.sizeBounds[id]
+        return context.track.axis == .vertical
+            ? bound?.maxWidth : bound?.maxHeight
+    }
+
+    /// One TRACK's ceiling on the cross span (#1488): the widest
+    /// of its members' learned ceilings, and nil where any member
+    /// has none — that member draws the whole track. The one
+    /// reading the heal and the resize clamp share.
+    public static func trackCeiling(
+        of members: ArraySlice<WindowID>,
+        in context: LayoutContext
+    ) -> CGFloat? {
+        var widest: CGFloat = 0
+        for member in members {
+            guard let ceiling = learnedCeiling(of: member, in: context)
+            else { return nil }
+            widest = max(widest, ceiling)
+        }
+        return members.isEmpty ? nil : widest
+    }
+
     /// In-track capacity for windows stacked in one track (#437).
     public static func trackCapacity(
         for context: LayoutContext
@@ -215,12 +245,28 @@ extension TrackLayout {
         normalCap: Int,
         geoCap: Int
     ) -> Bool {
-        let partition = foldedPartition(
-            of: tiled,
-            breaks: breaks,
-            normalCap: normalCap,
-            geoCap: geoCap
+        overflowSwapBlocked(
+            partition: foldedPartition(
+                of: tiled,
+                breaks: breaks,
+                normalCap: normalCap,
+                geoCap: geoCap
+            ),
+            windowIndex: windowIndex,
+            delta: delta
         )
+    }
+
+    /// `overflowSwapBlocked` over a partition already assembled
+    /// — the render's, from `renderPartition` (#1488).
+    public static func overflowSwapBlocked(
+        partition: (
+            counts: [Int], cap: Int, markers: Int,
+            overflowTrack: Int?
+        ),
+        windowIndex: Int,
+        delta: Int
+    ) -> Bool {
         guard let folded = partition.overflowTrack,
             partition.markers > partition.cap
         else { return false }

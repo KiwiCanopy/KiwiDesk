@@ -10,8 +10,8 @@ import CoreGraphics
 extension TilingEngine {
     /// Restores the active space's stashed floating windows to
     /// their captured frames. Runs on every retile after the
-    /// layout frames apply; every space switch retiles with
-    /// `force: true`, which bypasses the ±2 pt tolerance — the
+    /// layout frames apply; every space switch retiles as a
+    /// `.reissue` pass, which bypasses the ±2 pt tolerance — the
     /// restore itself is deliberately NOT gated behind that
     /// tolerance, so it cannot be swallowed by echo lag.
     ///

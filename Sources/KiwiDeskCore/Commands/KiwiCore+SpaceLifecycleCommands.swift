@@ -25,7 +25,7 @@ extension KiwiCore {
         // Give the new space a display (auto / main) so it can be
         // shown, then apply.
         resolveSpaceDisplays()
-        retile(force: true)
+        retile(pass: .apply)
         emitSpaceChange()
         return .ok()
     }
@@ -67,7 +67,7 @@ extension KiwiCore {
         // space's display re-anchor; `target`'s own floats
         // no-op (#444).
         reanchorFloats(of: target)
-        retile(force: true)
+        retile(pass: .apply)
         emitSpaceChange()
         return .ok()
     }

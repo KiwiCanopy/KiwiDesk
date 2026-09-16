@@ -104,7 +104,7 @@ extension TilingEngine {
         // A FORCED (explicit-apply) pass probes past the
         // corroborated bounds once (#1055, owner ruling
         // 2026-08-28) — the flag is pass-scoped, set and
-        // cleared by `retile(force:)` around its frame
+        // cleared by `retile(pass: .apply)` around its frame
         // computation, so every other `calculatedFrames`
         // caller keeps the generalized consume.
         context.probesBeyondBounds = probeBeyondBoundsPass
