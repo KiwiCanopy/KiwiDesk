@@ -78,9 +78,11 @@ extension KiwiCore {
     /// Re-keys and re-projects every binding this topology can
     /// name, rewriting the sidecar exactly when something moved.
     func reconcileDesktopBindings(in snapshot: DesktopSnapshot) {
+        let screens = screenNamesByUUID()
         let result = Self.bindingMoves(
             in: desktopBindings,
-            snapshot: snapshot
+            snapshot: snapshot,
+            screens: screens
         )
         guard !result.moves.isEmpty || !result.drops.isEmpty else {
             return
@@ -103,7 +105,8 @@ extension KiwiCore {
         }
         let sidecar = Self.bindingMoves(
             in: live.profileBindings,
-            snapshot: snapshot
+            snapshot: snapshot,
+            screens: screens
         )
         guard !sidecar.moves.isEmpty || !sidecar.drops.isEmpty
         else { return }
@@ -168,11 +171,15 @@ extension KiwiCore {
     }
 
     /// The key moves above, plus the binding-specific projection
-    /// refresh — the Mission Control number a row is labelled
-    /// with, which only this map carries.
+    /// refresh — the Mission Control number and the screen name
+    /// a row is labelled with, which only this map carries.
+    /// `screens` is the attached displays by UUID
+    /// (`screenNamesByUUID`); a display it cannot name leaves the
+    /// remembered screen as it was rather than blanking it.
     static func bindingMoves(
         in bindings: [DesktopKey: DesktopBinding],
-        snapshot: DesktopSnapshot
+        snapshot: DesktopSnapshot,
+        screens: [String: String]
     ) -> (moves: [DesktopKey: BindingMove], drops: Set<DesktopKey>) {
         let keys = keyMoves(in: bindings, snapshot: snapshot)
         var moves: [DesktopKey: BindingMove] = [:]
@@ -183,6 +190,9 @@ extension KiwiCore {
             else { continue }
             var updated = binding
             updated.desktop = number
+            if let name = screens[space.displayUUID] {
+                updated.screen = name
+            }
             guard now != key || updated != binding else { continue }
             moves[key] = BindingMove(key: now, binding: updated)
         }

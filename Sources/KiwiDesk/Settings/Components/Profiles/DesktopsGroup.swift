@@ -121,14 +121,25 @@ struct DesktopsGroup: View {
         return HStack {
             Image(systemName: DesktopGlyph.symbol)
                 .foregroundStyle(.secondary)
-            Text(
-                L(
-                    "desktops.desktop",
-                    "Desktop %1$d",
-                    number
+            VStack(alignment: .leading, spacing: 2) {
+                Text(
+                    L(
+                        "desktops.desktop",
+                        "Desktop %1$d",
+                        number
+                    )
                 )
-            )
-            .fontWeight(.medium)
+                .fontWeight(.medium)
+                // The screen under the number (#1438): with
+                // "Displays have separate Spaces" on, every
+                // screen has a Desktop 1, and the number alone
+                // cannot say which row is the unplugged one.
+                if let screen = row.screen {
+                    Text(screen)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             // By the DESKTOP, never its number: a dormant record
             // and a live Desktop can share one, and both rows
             // then claim to be current (owner device QA).
@@ -247,6 +258,7 @@ struct DesktopsGroup: View {
             onMain: model.mainDesktops,
             keys: model.desktopKeys,
             present: model.presentDesktopKeys,
+            screens: model.desktopScreens,
             bindings: model.config.profileBindings
         )
     }
@@ -312,15 +324,18 @@ struct DesktopsGroup: View {
                     model.config.profileBindings[key] = nil
                     return
                 }
-                // The projection is refreshed from the reading
+                // The projections are refreshed from the reading
                 // this row was built from, never invented.
+                let row = desktopRows.first { $0.key == key }
                 let number =
-                    desktopRows.first { $0.key == key }?.number
+                    row?.number
                     ?? model.config.profileBindings[key]?.desktop
                     ?? key.number ?? 0
                 model.config.profileBindings[key] = DesktopBinding(
                     profile: profile,
-                    desktop: number
+                    desktop: number,
+                    screen: row?.screen
+                        ?? model.config.profileBindings[key]?.screen
                 )
             }
         )

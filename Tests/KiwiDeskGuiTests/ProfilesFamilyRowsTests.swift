@@ -158,6 +158,7 @@ struct ProfilesFamilyRowsTests {
             onMain: onMain,
             keys: keys,
             present: present(keys),
+            screens: [:],
             bindings: bindings
         )
         .map(\.number)
@@ -210,6 +211,7 @@ struct ProfilesFamilyRowsTests {
             onMain: [1, 2, 3],
             keys: keys,
             present: present(keys),
+            screens: [:],
             bindings: [
                 gone: DesktopBinding(profile: "P", desktop: 3)
             ]

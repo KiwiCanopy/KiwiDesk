@@ -43,7 +43,10 @@ extension KiwiCore {
                 ?? .number(number)
         ] = DesktopBinding(
             profile: profile,
-            desktop: number
+            desktop: number,
+            screen: desktop.flatMap {
+                screenNamesByUUID()[$0.displayUUID]
+            }
         )
         if !profiles.list().contains(profile) {
             onLog(

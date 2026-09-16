@@ -157,6 +157,11 @@ final class SettingsModel: ObservableObject {
     /// re-derives dormancy per key shape.
     @Published var presentDesktopKeys: Set<DesktopKey> = []
 
+    /// Each present Desktop's screen name by key (#1438) — the
+    /// line under a Desktops-card row, from the same snapshot
+    /// as `desktopKeys`. A dormant row reads its record instead.
+    @Published var desktopScreens: [DesktopKey: String] = [:]
+
     /// Whether this macOS drives native Desktops (#1145) — read
     /// once from the core (process-constant, so not published);
     /// gates the sticky-reach row's SURFACING (hide, never grey

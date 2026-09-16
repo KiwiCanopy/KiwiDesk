@@ -40,6 +40,7 @@ extension SettingsModel {
         // join rather than a second copy of it.
         desktopKeys = desktops.keysByNumber
         presentDesktopKeys = desktops.presentKeys
+        desktopScreens = core.desktopScreens(in: desktops)
         currentDesktop = desktops.authority
         currentDesktopKey = desktops.mainCurrentKey
         let resolved = core.profileVerdict(

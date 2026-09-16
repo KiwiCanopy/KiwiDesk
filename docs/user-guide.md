@@ -835,6 +835,14 @@ Desktop you gave it when Mission Control renumbers — [A binding
 follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
+:::unreleased
+Under each row, the screen that Desktop lives on. With "Displays
+have separate Spaces" on, every screen has a Desktop 1, so two
+rows can share a number — the screen line is what tells them
+apart, and a *not present* row names the screen it was last
+seen on.
+:::
+
 **A binding fires when its Desktop becomes current on your main
 screen** (the one with the menu bar) and its profile fits your
 screen count ([Which Profile Loads](#which-profile-loads)). With
