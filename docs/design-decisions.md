@@ -2631,7 +2631,8 @@ what the eye follows across the swap, not what hides it.
 blur.* A press that arrives while a flip is playing lands at
 once, repaints the incoming face with the newest target's icon
 and pushes the fade-out back; the blur lifts only once the
-presses have been quiet for `MonocleFlipPlan.hold` (200 ms).
+presses have been quiet for `MonocleFlipPlan.hold` (250 ms —
+200 read as lifting under the hand, owner, device).
 Restarting the play per press was tried and read as the show
 fighting the user; cutting the play per press read as a jump.
 One motion, retargeted — the spring engine's own idiom for a

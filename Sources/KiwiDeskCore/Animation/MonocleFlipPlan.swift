@@ -37,7 +37,7 @@ public struct MonocleFlipPlan: Equatable, Sendable {
     /// How long a burst must be quiet before the blur fades: a
     /// press during a play retargets the card and holds the
     /// blur, which lifts this long after the last press.
-    public static let hold: TimeInterval = 0.2
+    public static let hold: TimeInterval = 0.25
 
     /// Decides the flip for a commanded focus change from
     /// `current` to `target`.
