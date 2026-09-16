@@ -17,19 +17,33 @@ import Foundation
 struct ActiveProfile {
     let name: String
     let declaredSpaces: Set<SpaceID>
+    /// The screen count the profile is saved for — what the
+    /// binding door asks about the profile ALREADY live (#1436),
+    /// so it never re-reads the file to learn it (#1245).
+    let monitorCount: Int
 
     init(_ profile: Profile) {
         name = profile.name
         declaredSpaces = profile.declaredSpaces
+        monitorCount = profile.monitorCount
     }
 
-    private init(name: String, declaredSpaces: Set<SpaceID>) {
+    private init(
+        name: String,
+        declaredSpaces: Set<SpaceID>,
+        monitorCount: Int
+    ) {
         self.name = name
         self.declaredSpaces = declaredSpaces
+        self.monitorCount = monitorCount
     }
 
     /// A rename moves the name; the Spaces are unchanged by it.
     func renamed(to new: String) -> ActiveProfile {
-        ActiveProfile(name: new, declaredSpaces: declaredSpaces)
+        ActiveProfile(
+            name: new,
+            declaredSpaces: declaredSpaces,
+            monitorCount: monitorCount
+        )
     }
 }

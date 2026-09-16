@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Profiles-area diff readout generators.
@@ -23,8 +24,9 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-bound Desktop, valued by profile name with
-    /// the unset dash for a binding that appeared or was cleared.
+    /// One row per re-bound Desktop, valued by its profile names
+    /// — one per screen count, listed (#1436) — with the unset
+    /// dash for a binding that appeared or was cleared.
     ///
     /// Diffed by KEY and NARRATED by the number each record was
     /// last seen at (#1147) — a key is not a name any reader has.
@@ -40,8 +42,14 @@ extension SettingsValueReadout {
             "diff.label.profile_binding",
             "Profile binding"
         )
+        func names(_ binding: DesktopBinding?) -> String {
+            guard let binding, !binding.profiles.isEmpty else {
+                return unset
+            }
+            return LocalizedList.join(binding.profiles)
+        }
         let touched = Set(old.keys).union(new.keys)
-            .filter { old[$0]?.profile != new[$0]?.profile }
+            .filter { old[$0]?.profiles != new[$0]?.profiles }
             .map { key in
                 (key, new[key]?.desktop ?? old[key]?.desktop ?? 0)
             }
@@ -59,8 +67,8 @@ extension SettingsValueReadout {
                 census,
                 instance: key.stored,
                 label: instanceLabel(base, desktop),
-                old: old[key]?.profile ?? unset,
-                new: new[key]?.profile ?? unset
+                old: names(old[key]),
+                new: names(new[key])
             )
         }
     }

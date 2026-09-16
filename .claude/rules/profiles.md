@@ -237,6 +237,42 @@ The obligations that fall on a change here:
   the write is one macOS persists
   (`DesktopStampSeamTests`, tests.md ▸ machine touch).
 
+## A Desktop binding is a per-count LIST, judged at the gate (#1436)
+
+`DesktopBinding.profiles` lists the profiles and never a count
+beside them — a count is each profile's own `monitorCount`, and a
+writer that wants one stored re-argues the design entry rather
+than adding a field. It is read by `boundProfile(of:)`, the one
+gate, which picks the LIVE profile where it is listed and saved
+for the connected screens, else the first entry that is — the
+one rank `DesktopBinding.ordered(preferring:)` gives, which the
+card's picker reads too — and stands the whole record aside
+where none is (`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
+`gatePrefersTheLiveProfile`, `noFitStandsAside`;
+`DesktopBindingGroupTests` ▸ `pickerPrefersTheLiveEntry`). The obligations: a reader of a binding's
+profile takes the PICKED profile off the gate's `.success` and
+never a listed name (`readersFollowThePick`); a writer files
+through `DesktopBinding.bind(_:countOf:)` — same count replaces,
+another adds, an unsaved name replaces an unsaved name
+(`recordAlgebra`, `verbAddsAndReplaces`) — the list is never
+edited by hand beside a call site (`DesktopBindingWriterSeamTests`),
+and the GUI's slot write files through that same algebra so every
+entry of one count goes with a pick and a record left empty is
+removed (`DesktopBindingGroupTests` ▸ `pickEditsOneSlot`,
+`pickReplacesEveryEntryOfItsCount`); the binding door stands down
+for the profile ALREADY live from adoption state and never by
+re-reading its file on a swipe (#1245, `ActiveProfile.monitorCount`,
+`DesktopBindingPerCountTests` ▸ `liveProfileIsNotReread`); which
+profiles a count group OFFERS, and which count LEADS, is the
+bind-fit question asked of `DesktopBindingRefusal.of` against the
+group's count, never a hand `==` (`DesktopBindingFitSeamTests` ▸
+`judgementCallersAreCounted`); and the stored `profile`→`profiles`
+crossing is `migratingProfileBindingLists`, which bumped
+`GuiConfig.currentFormat` and `SetupBundle.currentFormat`
+(`ProfileBindingListMigrationTests`).
+The card's shape — count groups, no count control — is
+`docs/design-decisions.md` ▸ Profiles' ruling, not restated here.
+
 ## The active Desktop is the MAIN display's (#888)
 
 A binding, profile-selection or Desktop-memory path reads the

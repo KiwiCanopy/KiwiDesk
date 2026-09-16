@@ -373,6 +373,12 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
+:::unreleased
+`bind_profile_to_desktop` files one profile per screen count on a
+Desktop: a second profile of another count adds beside the first,
+the same count replaces it.
+:::
+
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
 The table lists each layout global once. Every layout global

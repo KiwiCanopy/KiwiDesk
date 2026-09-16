@@ -1,77 +1,123 @@
 import Foundation
 
-/// Why the profile a Desktop binding names does not load, and
-/// the ONE judgement of whether a profile's screen count fits the
-/// connected one (#1394): Core decides it, the Desktops row only
-/// narrates it (`DesktopBindingFitSeamTests`).
+/// Why a Desktop binding loads no profile, and the ONE judgement
+/// of whether a profile's screen count fits the connected one
+/// (#1394): Core decides it, the Desktops rows only narrate it
+/// (`DesktopBindingFitSeamTests`).
 public enum DesktopBindingRefusal: Error {
-    /// The profile's file could not be read.
+    /// No bound profile's file could be read.
     case unreadable(Error)
-    /// The profile is saved for another screen count.
-    case screenCount(profile: Int, connected: Int)
+    /// No bound profile is saved for the connected count;
+    /// `saved` is each READABLE one with its count, in binding
+    /// order (#1436) — an unreadable sibling is not among them.
+    case screenCount(saved: [SavedCount], connected: Int)
+
+    /// One readable bound profile and the count it is saved for.
+    public struct SavedCount: Equatable, Sendable {
+        public let name: String
+        public let count: Int
+    }
     /// No display reading yet: the first config load runs before
     /// the loop publishes displays, and a paused engine discovers
     /// none. The first monitor change re-judges.
     case displaysUnknown
 
     /// The count verdict alone, pure; nil where `profileCount`
-    /// fits `connected`.
+    /// fits `connected`. A `.screenCount` from here carries no
+    /// census — `saved` is empty, since one count names no
+    /// profile; the gate fills it over the binding.
     public static func of(
         profileCount: Int,
         connected: Int
     ) -> DesktopBindingRefusal? {
         if connected == 0 { return .displaysUnknown }
         guard profileCount == connected else {
-            return .screenCount(
-                profile: profileCount,
-                connected: connected
-            )
+            return .screenCount(saved: [], connected: connected)
         }
         return nil
     }
 
     /// The log line's tail, after the door names itself.
-    func narrative(profile name: String) -> String {
+    func narrative(binding: DesktopBinding) -> String {
+        let names = binding.profiles.map { "'\($0)'" }
+            .joined(separator: ", ")
+        let plural = binding.profiles.count > 1
         switch self {
         case .unreadable(let error):
-            return "cannot load profile '\(name)': \(error)"
-        case .screenCount(let profile, let connected):
+            return "cannot load profile\(plural ? "s" : "") "
+                + "\(names): \(error)"
+        case .screenCount(let saved, let connected):
+            let counted =
+                saved.count == 1
+                ? "profile '\(saved[0].name)' is for \(saved[0].count)"
+                : "profiles "
+                    + saved.map { "'\($0.name)' for \($0.count)" }
+                    .joined(separator: ", ")
             return
-                "profile '\(name)' is for \(profile) screen(s), "
-                + "\(connected) connected; the binding stands aside"
+                "\(counted) screen(s), \(connected) connected; "
+                + "the binding stands aside"
         case .displaysUnknown:
             return
-                "profile '\(name)' waits for the first display "
+                "profile\(plural ? "s" : "") \(names) "
+                + "wait\(plural ? "" : "s") for the first display "
                 + "reading; the binding stands aside"
         }
     }
 }
+
+/// A binding whose list is empty — a shape no writer produces,
+/// named so the gate can refuse it rather than crash.
+struct EmptyDesktopBinding: Error {}
 
 extension KiwiCore {
     /// The profile a Desktop binding loads, or why it does not —
     /// the ONE gate every reader of a binding's profile takes
     /// (#1394, `DesktopBindingFitTests`).
     ///
-    /// A binding fires only where its profile is saved for the
-    /// connected screen count; for any other count, and before
-    /// the first display reading, it stands aside and the rungs
-    /// below it answer. A bound load therefore always fits by
-    /// count.
+    /// A binding fires only through a bound profile saved for
+    /// the connected screen count (#1436) — the LIVE one where it
+    /// is listed and fits, else the first in binding order that
+    /// does, so the door's stand-down for the live profile is this
+    /// gate's own pick; with none, and before the first display
+    /// reading, it stands aside and the rungs below it answer. A
+    /// bound load therefore always fits by count.
     func boundProfile(
         of binding: DesktopBinding
     ) -> Result<Profile, DesktopBindingRefusal> {
-        let profile: Profile
-        do {
-            profile = try profiles.read(name: binding.profile)
-        } catch {
-            return .failure(.unreadable(error))
+        let connected = state.workspaces.allDisplays.count
+        var saved: [DesktopBindingRefusal.SavedCount] = []
+        var unreadable: Error = EmptyDesktopBinding()
+        var waiting = false
+        for name in binding.ordered(preferring: profiles.currentName) {
+            let profile: Profile
+            do {
+                profile = try profiles.read(name: name)
+            } catch {
+                unreadable = error
+                continue
+            }
+            switch DesktopBindingRefusal.of(
+                profileCount: profile.monitorCount,
+                connected: connected
+            ) {
+            case nil:
+                return .success(profile)
+            case .displaysUnknown?:
+                waiting = true
+            case .screenCount?:
+                saved.append(
+                    .init(name: name, count: profile.monitorCount)
+                )
+            case .unreadable?:
+                break
+            }
         }
-        if let refusal = DesktopBindingRefusal.of(
-            profileCount: profile.monitorCount,
-            connected: state.workspaces.allDisplays.count
-        ) {
-            return .failure(refusal)
+        if waiting { return .failure(.displaysUnknown) }
+        guard saved.isEmpty else {
+            return .failure(
+                .screenCount(saved: saved, connected: connected)
+            )
         }
-        return .success(profile)
+        return .failure(.unreadable(unreadable))
     }
 }

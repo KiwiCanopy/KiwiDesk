@@ -175,6 +175,7 @@ struct ProfilesCensusRenderTests {
             presentKeys: [.number(1), .number(2), .number(3)],
             desktopScreens: [:],
             bindings: [:],
+            connectedScreens: 1,
             presets: StandardProfiles.all(sizes: censusSizes)
         )
         let placed = SettingKey.allCases.filter {
@@ -230,6 +231,7 @@ struct ProfilesCensusRenderTests {
                 .identity(DesktopIdentity(raw: "GONE")):
                     DesktopBinding(profile: "Desk", desktop: 7)
             ],
+            connectedScreens: 1,
             presets: StandardProfiles.layouts(
                 for: 1,
                 sizes: censusSizes
@@ -244,12 +246,18 @@ struct ProfilesCensusRenderTests {
         // last seen at, which is the only way it can be read or
         // cleared. Keyed by its identity, so it keeps a row of
         // its own even when a live Desktop later holds 7.
+        // …and each row once per count group (#1436): the
+        // fixture's profiles are all one-screen, so one group.
         #expect(
             expander.rows(for: .profiles(.profileBindings))
                 == [
-                    .desktop(.number(1)), .desktop(.number(2)),
-                    .desktop(.number(3)),
-                    .desktop(.identity(DesktopIdentity(raw: "GONE"))),
+                    .binding(.number(1), .count(1)),
+                    .binding(.number(2), .count(1)),
+                    .binding(.number(3), .count(1)),
+                    .binding(
+                        .identity(DesktopIdentity(raw: "GONE")),
+                        .count(1)
+                    ),
                 ]
         )
         // BOTH of the card's actions expand per preset (#859).
@@ -296,6 +304,7 @@ struct ProfilesCensusRenderTests {
             presentKeys: [.number(1)],
             desktopScreens: [:],
             bindings: [:],
+            connectedScreens: 1,
             presets: []
         )
         #expect(

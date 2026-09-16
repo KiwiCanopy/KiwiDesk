@@ -33,6 +33,9 @@ public final class ProfileManager {
     /// holding the name already treat `markClean()` as a whole
     /// re-adopt.
     public var currentName: String? { active?.name }
+    /// The live profile's screen count, from adoption state
+    /// (#1436, #1245).
+    public var currentMonitorCount: Int? { active?.monitorCount }
 
     /// The active profile as one value — what `currentName` reads
     /// from, and what a Desktop switch asks for the declared

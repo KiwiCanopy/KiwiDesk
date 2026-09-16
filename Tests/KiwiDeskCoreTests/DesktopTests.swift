@@ -247,7 +247,7 @@ struct DesktopBindingTests {
         )
         #expect(response.isSuccess)
         #expect(
-            core.desktopBindings[.number(3)]?.profile == "Studio"
+            core.desktopBindings[.number(3)]?.profiles == ["Studio"]
         )
     }
 

@@ -82,8 +82,8 @@ struct DesktopBindingDraftTests {
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.identity(stamp)]?.profile
-                == "Work"
+            model.config.profileBindings[.identity(stamp)]?.profiles
+                == ["Work"]
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
         // The BASELINE moved with the draft, compared as state
@@ -187,13 +187,13 @@ struct DesktopBindingDraftTests {
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.identity(stamp)]?.profile
-                == "Work"
+            model.config.profileBindings[.identity(stamp)]?.profiles
+                == ["Work"]
         )
         #expect(model.config.profileBindings[.number(1)] == nil)
         #expect(
-            model.config.profileBindings[.number(2)]?.profile
-                == "Edited"
+            model.config.profileBindings[.number(2)]?.profiles
+                == ["Edited"]
         )
     }
 
@@ -225,8 +225,8 @@ struct DesktopBindingDraftTests {
 
         model.refreshProfiles()
         #expect(
-            model.config.profileBindings[.number(1)]?.profile
-                == "Play"
+            model.config.profileBindings[.number(1)]?.profiles
+                == ["Play"]
         )
     }
 }

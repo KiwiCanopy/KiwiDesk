@@ -211,13 +211,44 @@ struct KeyboardBoardSpokenTests {
             )
         )
         // The joiner reads the APP's locale, never the class
-        // method's `Locale.current`.
-        #expect(source.contains("formatter.locale = Locale("))
+        // method's `Locale.current` — through the one shared
+        // door (#1436), which is where the seam lives now.
+        #expect(source.contains("LocalizedList.join("))
+        let door = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Common/LocalizedList.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(door.contains("formatter.locale = Locale("))
         #expect(
-            source.contains(
+            door.contains(
                 "LocalizationManager.shared.effectiveLocale"
             )
         )
+        // …and the door is the one place the tree spells the
+        // formatter at all, so no second site can regress to the
+        // class method.
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        for file in try SourceScan.swiftSources(under: tree)
+        where !file.path.hasSuffix("Common/LocalizedList.swift") {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                !text.contains("ListFormatter"),
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) spells ListFormatter "
+                        + "beside LocalizedList.join"
+                )
+            )
+        }
         #expect(
             !source.contains("ListFormatter.localizedString")
         )

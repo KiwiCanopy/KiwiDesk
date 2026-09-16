@@ -41,9 +41,10 @@ extension ProfilesSection {
     private var ladderHelp: String {
         L(
             "profiles.which_loads.help",
-            "A profile bound to the Desktop your main screen is "
-                + "on wins outright when it is saved for this "
-                + "many screens; set those bindings in %1$@, "
+            "A Desktop can hold one profile per screen count. "
+                + "The one bound to the Desktop your main screen "
+                + "is on, saved for this many screens, wins "
+                + "outright; set those bindings in %1$@, "
                 + "just below. With no such binding, "
                 + "KiwiDesk takes a profile saved for exactly "
                 + "these screens, then the one marked default "
@@ -65,13 +66,25 @@ extension ProfilesSection {
         let screens = screensPhrase(resolution.screens)
         switch resolution.verdict {
         case .boundToDesktop(let name, let desktop):
-            return L(
-                "profiles.which_loads.bound",
-                "Right now: Desktop %1$d → %2$@ (bound below "
-                    + "and saved for this many screens).",
-                desktop,
-                name
-            )
+            // The count the binding resolved on (#1436): with
+            // one profile per count, it is the discriminator
+            // the user set.
+            return resolution.screens == 1
+                ? L(
+                    "profiles.which_loads.bound.one",
+                    "Right now: Desktop %1$d → %2$@ (bound below "
+                        + "for 1 screen).",
+                    desktop,
+                    name
+                )
+                : L(
+                    "profiles.which_loads.bound.many",
+                    "Right now: Desktop %1$d → %2$@ (bound below "
+                        + "for %3$d screens).",
+                    desktop,
+                    name,
+                    resolution.screens
+                )
         case .exactMonitors(let name):
             return L(
                 "profiles.which_loads.exact",

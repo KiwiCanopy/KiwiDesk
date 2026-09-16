@@ -4749,6 +4749,20 @@ as before. In a hand-written config the call lives in
 in `gui.json` (`profile_bindings`) and edited in the Profiles
 section instead.
 
+:::unreleased
+A Desktop holds one profile per screen count: a second call
+with a profile saved for another count adds beside the first,
+and the one saved for as many screens as are connected loads;
+a call with a profile of the same count replaces it. A profile
+not saved yet replaces any other not saved yet.
+
+```lua
+-- Desktop 3 docked and undocked: one profile per screen count.
+KiwiDesk.bind_profile_to_desktop(3, "Laptop")
+KiwiDesk.bind_profile_to_desktop(3, "Dual")
+```
+:::
+
 **The number names the Desktop; it does not key the binding.**
 Mission Control renumbers on every add, delete, reorder and
 display change, so KiwiDesk resolves the number you pass to the

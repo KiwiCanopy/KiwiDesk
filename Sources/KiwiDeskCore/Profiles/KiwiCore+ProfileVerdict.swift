@@ -97,12 +97,12 @@ extension KiwiCore {
         // caller — through `mainDesktopBinding`, which asks under
         // both of a Desktop's keys — so this stays a pure query
         // over injected state.
-        if let bound = activeBinding,
-            case .success = boundProfile(of: bound)
+        if let binding = activeBinding,
+            case .success(let bound) = boundProfile(of: binding)
         {
             return .boundToDesktop(
-                name: bound.profile,
-                desktop: bound.desktop
+                name: bound.name,
+                desktop: binding.desktop
             )
         }
         switch profiles.match(

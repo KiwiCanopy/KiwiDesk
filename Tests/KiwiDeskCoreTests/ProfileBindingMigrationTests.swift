@@ -3,7 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The `profile_bindings` string→object crossing (#1147).
+/// The `profile_bindings` string→object crossing (#1147). A
+/// format-1 file crosses #1436's list step in the same pass, so
+/// the migrated record reads `profiles` (`ProfileBindingListMigrationTests`).
 ///
 /// The failure it guards is TOTAL, not silent: the decoder is
 /// strict (AGENTS.md §5), so a `gui.json` from any earlier build
@@ -37,7 +39,7 @@ struct ProfileBindingMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         let map = try bindings(out)
         let entry = try #require(map["2"] as? [String: Any])
-        #expect(entry["profile"] as? String == "Work")
+        #expect(entry["profiles"] as? [String] == ["Work"])
         #expect(entry["desktop"] as? Int == 2)
     }
 
@@ -79,7 +81,7 @@ struct ProfileBindingMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         let map = try bindings(out, at: ["config"])
         let entry = try #require(map["1"] as? [String: Any])
-        #expect(entry["profile"] as? String == "Desk")
+        #expect(entry["profiles"] as? [String] == ["Desk"])
     }
 
     /// The STEP's own idempotence, called directly.
@@ -116,7 +118,7 @@ struct ProfileBindingMigrationTests {
             """
             {"format":\(GuiConfig.currentFormat),\
             "profile_bindings":\
-            {"2":{"profile":"Work","desktop":2}}}
+            {"2":{"profiles":["Work"],"desktop":2}}}
             """
         )
         #expect(ConfigMigration.migrated(data) == nil)

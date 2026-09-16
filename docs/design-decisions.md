@@ -11062,18 +11062,55 @@ binding is already filed under the Desktop's own stamp, and a
 Desktop lives on one screen, so the external's Desktop 2 and the
 built-in's Desktop 2 are different bindings by construction. The
 count is the dimension that was missing, and it needs no stored
-field, since the bound profile carries it. What this does not
+field, since the bound profile carries it. What this did not
 give — one Desktop loading a different profile per screen count
-— needs several bindings per Desktop and a `gui.json` format
-crossing, and is its own feature. The Desktops row keeps a
-standing-aside binding and badges it *for N screen(s)*, in
-keeping with *don't hide*: the binding is not broken, it is
-waiting, and the badge narrates Core's verdict rather than
-re-deriving it. With no displays known — the first config load
+— is the next entry (#1436). The Desktops row keeps a
+standing-aside binding visible, in keeping with *don't hide*:
+the binding is not broken, it is waiting, and the row narrates
+Core's verdict rather than re-deriving it — until #1436 as a
+*for N screen(s)* badge, since then as the count group's
+header. With no displays known — the first config load
 runs before the loop publishes displays, and a paused engine
 discovers none — the gate cannot judge and the binding waits
 too, rather than loading a profile that the boot scan's monitor
 change would then replace; that first monitor change fires it.
+
+**[Principle]**
+
+**A Desktop holds one profile per screen count, and the card
+groups by count rather than offering a count control
+([#1436](https://github.com/KiwiCanopy/KiwiDesk/issues/1436)).**
+The feature the #1394 ruling named as its own: a laptop that is
+sometimes docked wants Desktop 2 to load *Laptop* alone and
+*Dual* when the external is connected. The record lists its
+profiles and stores no count beside them — each profile carries
+its own for life, and `upsert` refuses a set of another count —
+so the gate's one judgement picks the entry saved for the
+connected screens, and a second `bind_profile_to_desktop` with a
+profile of another count adds beside the first while one of the
+same count replaces it. A profile not saved yet is a class of its
+own there: two unsaved names cannot be told apart, so the newer
+replaces the older. The Settings surface was proposed as a
+screen-count control with one picker per Desktop for the chosen
+count, and the `ui-designer` ruled against it (2026-09-16): a
+control adds a mode whose selection can disagree with what is
+firing, hides the rest of the table, and — the count set being
+user-generated — would have to be a menu, the worse control for
+"which counts do I have profiles for". The Presets card on the
+same pane had already answered the same question without one:
+the connected count leads under *For your N screens*, the other
+counts follow under their own headers, and a single-count user
+sees the card exactly as before, headerless. Two consequences
+follow. The *for N screen(s)* badge is retired — its fact is the
+group header now, and the card's `?` states the one-per-count
+rule in one clause (the owner struck its "the others wait"
+tail, 2026-09-16) — and a bound name whose profile no reading can count sits in
+a last *Couldn't load* group, offering only None, since it
+belongs to no count and a picker that cannot say which count it
+edits must not pretend to. A connected count no profile is saved
+for draws no rows: a None-only picker is a dead control, the
+affordance-for-a-channel-that-does-not-exist case, so a caption
+takes its place and the other counts follow with headers.
 
 **[Rationale]**
 

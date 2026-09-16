@@ -34,13 +34,6 @@ extension ProfilesSection {
             .joined(separator: "\n")
     }
 
-    /// Localized screen count phrase.
-    func screensPhrase(_ count: Int) -> String {
-        count == 1
-            ? L("profiles.screens.one", "1 screen")
-            : L("profiles.screens.many", "%1$d screens", count)
-    }
-
     /// Localized Space count phrase (`PresetScreenCard.spaceCountPhrase`).
     private func spacesPhrase(_ count: Int) -> String {
         count == 1

@@ -37,38 +37,15 @@ extension ConfigMigration {
         )
     }
 
-    /// Tree walker expanding a string-valued `profile_bindings`
-    /// map at any depth — a `SetupBundle` carries `config`
-    /// inline, so the node is nested there.
+    /// Every string-valued `profile_bindings` map expanded, at
+    /// any depth — a `SetupBundle` carries `config` inline, so
+    /// the node is nested there.
     static func bindingsExpanded(_ node: Any) -> (Any, Bool) {
-        if let dict = node as? [String: Any] {
-            var out: [String: Any] = [:]
-            var changed = false
-            for (key, value) in dict {
-                if key == profileBindingsKey,
-                    let expanded = expandedBindings(value)
-                {
-                    out[key] = expanded
-                    changed = true
-                    continue
-                }
-                let (child, childChanged) = bindingsExpanded(value)
-                out[key] = child
-                changed = changed || childChanged
-            }
-            return (out, changed)
-        }
-        if let array = node as? [Any] {
-            var out: [Any] = []
-            var changed = false
-            for value in array {
-                let (child, childChanged) = bindingsExpanded(value)
-                out.append(child)
-                changed = changed || childChanged
-            }
-            return (out, changed)
-        }
-        return (node, false)
+        rewritingValues(
+            of: node,
+            at: profileBindingsKey,
+            expandedBindings
+        )
     }
 
     /// The map's own expansion, or nil when nothing in it is a
