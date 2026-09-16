@@ -243,9 +243,9 @@ The obligations that fall on a change here:
 beside them — a count is each profile's own `monitorCount`, and a
 writer that wants one stored re-argues the design entry rather
 than adding a field. It is read by `boundProfile(of:)`, the one
-gate, which
-picks the first entry saved for the connected screens and stands
-the whole record aside where none is
+gate, which picks the LIVE profile where it is listed and saved
+for the connected screens, else the first entry that is, and
+stands the whole record aside where none is
 (`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
 `noFitStandsAside`). The obligations: a reader of a binding's
 profile takes the PICKED profile off the gate's `.success` and

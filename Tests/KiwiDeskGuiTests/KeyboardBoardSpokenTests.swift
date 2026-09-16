@@ -230,6 +230,25 @@ struct KeyboardBoardSpokenTests {
                 "LocalizationManager.shared.effectiveLocale"
             )
         )
+        // …and the door is the one place the tree spells the
+        // formatter at all, so no second site can regress to the
+        // class method.
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        for file in try SourceScan.swiftSources(under: tree)
+        where !file.path.hasSuffix("Common/LocalizedList.swift") {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                !text.contains("ListFormatter"),
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) spells ListFormatter "
+                        + "beside LocalizedList.join"
+                )
+            )
+        }
         #expect(
             !source.contains("ListFormatter.localizedString")
         )

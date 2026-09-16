@@ -86,18 +86,18 @@ extension DesktopsGroup {
                 )
             }
             Spacer()
-            profileMenu(row.key, slot: slot)
+            profileMenu(row, slot: slot)
         }
     }
 
     private func profileMenu(
-        _ key: DesktopKey,
+        _ row: DesktopRow,
         slot: BindingSlot
     ) -> some View {
-        Picker("", selection: binding(key, slot: slot)) {
+        Picker("", selection: binding(row, slot: slot)) {
             Text(L("desktops.none", "None"))
                 .tag(String?.none)
-            ForEach(options(key, slot: slot), id: \.self) { name in
+            ForEach(options(slot), id: \.self) { name in
                 Text(name).tag(String?.some(name))
             }
         }
@@ -110,7 +110,7 @@ extension DesktopsGroup {
         // selection back as the value (#812).
         .accessibilityLabel(pickerLabel(slot))
         .accessibilityValue(
-            binding(key, slot: slot).wrappedValue
+            binding(row, slot: slot).wrappedValue
                 ?? L("desktops.none", "None")
         )
     }
@@ -139,10 +139,7 @@ extension DesktopsGroup {
     /// A count group offers the profiles saved for that count —
     /// the bind-fit question, asked of Core's one judgement
     /// (#1394) — and an orphan row only the name it clears.
-    private func options(
-        _ key: DesktopKey,
-        slot: BindingSlot
-    ) -> [String] {
+    private func options(_ slot: BindingSlot) -> [String] {
         switch slot {
         case .count(let count):
             return model.profileSummaries.filter {
@@ -157,10 +154,11 @@ extension DesktopsGroup {
         }
     }
 
-    /// The slot's bound name: for a count, the record's entry
-    /// saved for it; for an orphan, the name itself while bound.
-    private func bound(_ key: DesktopKey, slot: BindingSlot) -> String? {
-        guard let record = record(for: key) else { return nil }
+    /// The slot's bound name off the row's own record: for a
+    /// count, the entry saved for it; for an orphan, the name
+    /// itself while bound.
+    private func bound(_ row: DesktopRow, slot: BindingSlot) -> String? {
+        guard let record = row.binding else { return nil }
         switch slot {
         case .count(let count):
             return record.profiles.first { profileCounts[$0] == count }
@@ -170,12 +168,12 @@ extension DesktopsGroup {
     }
 
     private func binding(
-        _ key: DesktopKey,
+        _ row: DesktopRow,
         slot: BindingSlot
     ) -> Binding<String?> {
         Binding(
-            get: { bound(key, slot: slot) },
-            set: { write($0, key: key, slot: slot) }
+            get: { bound(row, slot: slot) },
+            set: { write($0, key: row.key, slot: slot) }
         )
     }
 

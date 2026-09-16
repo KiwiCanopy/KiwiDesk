@@ -15,15 +15,22 @@ struct DesktopBindingWriterSeamTests {
     /// The one file that may mutate the list.
     private let home = "Sources/KiwiDeskCore/Models/DesktopBinding.swift"
 
-    /// Every spelling of a list edit outside the algebra.
+    /// Every spelling of a list edit outside the algebra — the
+    /// mutators by name, and any subscript or assignment on the
+    /// member, whatever the receiver is called. `self.profiles =`
+    /// is another type's own init (a manager, a bundle).
     private let needles = [
         ".profiles.append(",
         ".profiles.insert(",
         ".profiles.remove",
-        "?.profiles = ",
-        "binding.profiles = ",
-        "record.profiles = ",
+        ".profiles.swapAt(",
+        ".profiles.replaceSubrange(",
+        ".profiles += ",
+        ".profiles -= ",
+        ".profiles[",
+        ".profiles = ",
     ]
+    private let exempt = ["self.profiles = "]
 
     @Test("the list is edited only through the record's algebra")
     func listHasOneWriter() throws {
@@ -44,7 +51,14 @@ struct DesktopBindingWriterSeamTests {
                         + source.occurrences(of: "profiles = ")
                     continue
                 }
-                let hits = needles.map { source.occurrences(of: $0) }
+                var scrubbed = source
+                for spelling in exempt {
+                    scrubbed = scrubbed.replacingOccurrences(
+                        of: spelling,
+                        with: ""
+                    )
+                }
+                let hits = needles.map { scrubbed.occurrences(of: $0) }
                     .reduce(0, +)
                 if hits > 0 { strays.append(file.lastPathComponent) }
             }

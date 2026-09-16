@@ -184,6 +184,33 @@ struct DesktopBindingPerCountTests {
         #expect(core.profiles.currentName == "Other")
     }
 
+    /// Two entries of one count — a profile re-saved at a
+    /// sibling's count — and the LIVE one is the pick, so the
+    /// door's stand-down, the verdict and in-effect agree.
+    @Test("the gate prefers the live profile among fitting entries")
+    func gatePrefersTheLiveProfile() throws {
+        defer { reset() }
+        pinTopology()
+        let core = try seeded(screens: 1)
+        core.desktopBindings[.identity(stamp)] = DesktopBinding(
+            profiles: ["Laptop", "Solo"],
+            desktop: 1
+        )
+        core.execute("load_profile", args: [.string("Solo")])
+        let binding = try #require(
+            core.desktopBindings[.identity(stamp)]
+        )
+        #expect(
+            try core.boundProfile(of: binding).get().name == "Solo"
+        )
+        #expect(core.isProfileInEffect("Solo"))
+        #expect(!core.isProfileInEffect("Laptop"))
+        core.execute("load_profile", args: [.string("Other")])
+        #expect(
+            try core.boundProfile(of: binding).get().name == "Laptop"
+        )
+    }
+
     /// A list whose files are all gone is unreadable; one whose
     /// screens are unknown waits.
     @Test("an unreadable list and an unknown display reading")

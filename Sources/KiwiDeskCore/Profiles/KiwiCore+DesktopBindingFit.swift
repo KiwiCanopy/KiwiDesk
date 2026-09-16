@@ -23,17 +23,16 @@ public enum DesktopBindingRefusal: Error {
     case displaysUnknown
 
     /// The count verdict alone, pure; nil where `profileCount`
-    /// fits `connected`.
+    /// fits `connected`. A `.screenCount` from here carries no
+    /// census — `saved` is empty, since one count names no
+    /// profile; the gate fills it over the binding.
     public static func of(
         profileCount: Int,
         connected: Int
     ) -> DesktopBindingRefusal? {
         if connected == 0 { return .displaysUnknown }
         guard profileCount == connected else {
-            return .screenCount(
-                saved: [SavedCount(name: "", count: profileCount)],
-                connected: connected
-            )
+            return .screenCount(saved: [], connected: connected)
         }
         return nil
     }
@@ -76,8 +75,10 @@ extension KiwiCore {
     /// (#1394, `DesktopBindingFitTests`).
     ///
     /// A binding fires only through a bound profile saved for
-    /// the connected screen count (#1436: the first in binding
-    /// order that is); with none, and before the first display
+    /// the connected screen count (#1436) — the LIVE one where it
+    /// is listed and fits, else the first in binding order that
+    /// does, so the door's stand-down for the live profile is this
+    /// gate's own pick; with none, and before the first display
     /// reading, it stands aside and the rungs below it answer. A
     /// bound load therefore always fits by count.
     func boundProfile(
@@ -87,7 +88,13 @@ extension KiwiCore {
         var saved: [DesktopBindingRefusal.SavedCount] = []
         var unreadable: Error = EmptyDesktopBinding()
         var waiting = false
-        for name in binding.profiles {
+        let live = profiles.currentName.flatMap { name in
+            binding.profiles.contains(name) ? name : nil
+        }
+        let order =
+            (live.map { [$0] } ?? [])
+            + binding.profiles.filter { $0 != live }
+        for name in order {
             let profile: Profile
             do {
                 profile = try profiles.read(name: name)

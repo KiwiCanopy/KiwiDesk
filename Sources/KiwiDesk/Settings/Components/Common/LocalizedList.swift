@@ -3,8 +3,9 @@ import KiwiDeskCore
 
 /// A list joined in the APP's locale (#812 session 3, #1436).
 /// `ListFormatter`'s class method joins in `Locale.current`, which
-/// put a German "und" inside an English sentence on a German Mac;
-/// every joined list in this tree takes this one door.
+/// put a German "und" inside an English sentence on a German Mac
+/// — so this tree spells `ListFormatter` here alone
+/// (`KeyboardBoardSpokenTests` ▸ `localeSeamsAreWired`).
 enum LocalizedList {
     @MainActor
     static func join(_ names: [String]) -> String {

@@ -154,7 +154,7 @@ struct DesktopRowScreenTests {
         #expect(card.contains("screens:model.desktopScreens,"))
         let row = try squashed("DesktopsGroup+Row.swift")
         #expect(row.contains("record.screen=row.screen??record.screen"))
-        #expect(row.contains("set:{write($0,key:key,slot:slot)}"))
+        #expect(row.contains("set:{write($0,key:row.key,slot:slot)}"))
         #expect(row.contains("ifletscreen=row.screen{Text(screen)"))
     }
 }
