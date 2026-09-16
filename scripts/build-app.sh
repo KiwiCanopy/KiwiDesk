@@ -169,13 +169,48 @@ BUILT="$ROOT/.build/release"
 # ---------------------------------------------------------------
 # 1. Build
 
+# The platform version is passed explicitly and verified after
+# the build: SwiftPM under Xcode 27 stamps the deployment target
+# as the SDK (`sdk 14.0`), and AppKit draws the macOS 26 control
+# design only for a binary linked against SDK >= 26 (#1499).
+# Both numbers have one home — the deployment target is read off
+# Package.swift, the SDK off the selected toolchain.
+MIN_OS=$(sed -n 's/.*\.macOS(\.v\([0-9][0-9]*\)).*/\1.0/p' \
+    "$ROOT/Package.swift" | head -1)
+SDK_VERSION=$(xcrun --show-sdk-version)
+if [ -z "$MIN_OS" ] || [ -z "$SDK_VERSION" ]; then
+    echo "error: could not read the deployment target" \
+         "(Package.swift) or the SDK version (xcrun)" >&2
+    exit 1
+fi
+
 if [ "$SKIP_BUILD" -eq 0 ]; then
-    echo "==> swift build -c release"
-    (cd "$ROOT" && swift build -c release)
+    echo "==> swift build -c release (macos $MIN_OS, sdk $SDK_VERSION)"
+    (cd "$ROOT" && swift build -c release \
+        -Xlinker -platform_version -Xlinker macos \
+        -Xlinker "$MIN_OS" -Xlinker "$SDK_VERSION")
 fi
 [ -x "$BUILT/KiwiDesk" ] || {
     echo "error: $BUILT/KiwiDesk missing" >&2; exit 1
 }
+
+# Verified on the reused binary too (--skip-build): a stale build
+# from before the override is exactly what a packaging run picks
+# up. Major.minor only — otool prints the encoded version, which
+# may carry a patch component the SDK query does not.
+STAMPED_SDK=$(otool -l "$BUILT/KiwiDesk" | awk \
+    '/LC_BUILD_VERSION/ {v=1} v && $1 == "sdk" {print $2; exit}')
+major_minor() { printf '%s' "$1" | cut -d. -f1,2; }
+if [ "$(major_minor "$STAMPED_SDK")" \
+    != "$(major_minor "$SDK_VERSION")" ]; then
+    echo "error: $BUILT/KiwiDesk is stamped sdk ${STAMPED_SDK:-?}," \
+         "the toolchain's SDK is $SDK_VERSION — the binary was" \
+         "not linked by this toolchain's ask (#1499; below SDK" \
+         "26 it draws pre-macOS-26 controls). Rebuild without" \
+         "--skip-build." >&2
+    exit 1
+fi
+echo "    stamp: sdk $STAMPED_SDK (target $MIN_OS)"
 
 # ---------------------------------------------------------------
 # 2. Skeleton
@@ -267,7 +302,7 @@ if ACTOOL="$(xcrun -f actool 2>/dev/null)" \
     # Invoke the resolved path: /usr/bin/actool is a shim that
     # exists without Xcode, so probing and invoking must agree.
     "$ACTOOL" "$ICON_SRC" --compile "$RES" --platform macosx \
-        --minimum-deployment-target 14.0 --app-icon AppIcon \
+        --minimum-deployment-target "$MIN_OS" --app-icon AppIcon \
         --output-partial-info-plist "$ICON_PLIST" >/dev/null
 elif [ -n "$NOTARY_PROFILE" ] || [ "$ALLOW_NO_ICON" -eq 0 ]; then
     echo "error: actool (Xcode, not just Command Line Tools) or" \
