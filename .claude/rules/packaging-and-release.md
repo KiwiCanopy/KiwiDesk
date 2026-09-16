@@ -60,6 +60,29 @@ silently, but only the plist's does so dangerously (an app
 declaring a lower minimum than it runs on, versus a wrong
 rendition set).
 
+**The release build's SDK stamp is asked for and then verified
+(#1499).** SwiftPM under Xcode 27 stamps the deployment target as
+the SDK — `LC_BUILD_VERSION` reads `sdk 14.0` — and AppKit applies
+the macOS 26 control design only to a binary linked against SDK
+>= 26, so the bundle draws pre-26 pop-ups and buttons and the
+defect reads as a Settings regression on the device, never as a
+build failure (the owner read it as one during the #1436 eyeball
+before the stamps were compared). `build-app.sh` therefore passes
+`-platform_version macos <target> <sdk>` on its `swift build`,
+the target DERIVED from `Package.swift` (the one enforced copy of
+the three above) and the SDK from `xcrun --show-sdk-version`, and
+then reads the stamp back with `otool -l` and refuses a
+major.minor mismatch — on the reused binary of `--skip-build`
+too, since a stale build is exactly what a packaging run picks
+up. The re-read is the point, not the flag: passing an override
+guards nothing if a toolchain ignores it, and this rule file's
+premise is that the build machine is where a failure is
+invisible. `BuildStampTests` pins the override on the build line,
+the two derivation homes and the verification's order, and RUNS
+the verification block against a real Mach-O for both verdicts.
+CI's pinned Xcode is unaffected either way — #1500 owns moving
+it to 27.
+
 **The plist must declare `CFBundleLocalizations`, derived from
 `Sources/KiwiDeskCore/Resources/Locales`.** A bundle that names
 one localization gets that one back: macOS resolves the process
