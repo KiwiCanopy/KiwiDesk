@@ -4754,10 +4754,10 @@ is last on the card whose values it transforms.
 **[Principle]**
 
 :::unreleased
-The Scrolling slot's Percent row carries a **Columns on
-screen** stepper (**Rows on screen** when vertical) beneath the
-slider (#1382), because on a wide screen the value a user holds
-is the effect, not the share: three columns, not 33.3%. It is a
+The Scrolling slot's Percent row carries a **Columns on screen**
+stepper (**Rows on screen** when vertical) beneath the slider
+(#1382), because on a wide screen the value a user holds is the
+effect, not the share: three columns, not 33.33%. It is a
 stepper by the numeric rule (a count is a number), typeable like
 every stepper — an integer only, fraction parsing refused — and
 it writes `1/n` into the one stored fraction Lua and profiles
@@ -4784,11 +4784,11 @@ diff pill, so nothing on the card shows a number the count row
 or a chip would refuse; a schematic caption still rounds to a
 whole, being a label on a picture rather than a value to copy.
 The row is its own census key drawing no diff row: the leaf
-narrates once through the value row. The split rows — the stack master ratio, the bsp
-ratios — keep **fraction chips** `¼ ⅓ ½ ⅔ ¾` instead: a share is
-not a count. A text field accepting `1/3` was rejected: a closed
-set is a chooser, not a parser, and anything outside it is
-Lua's.
+narrates once through the value row. The split rows — the stack
+master ratio, the bsp ratios — keep **fraction chips** `¼ ⅓ ½ ⅔
+¾` instead: a share is not a count. A text field accepting `1/3`
+was rejected: a closed set is a chooser, not a parser, and
+anything outside it is Lua's.
 :::
 
 ### The Settings window paints its own colours, and its accent is kiwi
