@@ -104,12 +104,12 @@ extension DesktopsGroup {
         .labelsHidden()
         .pickerStyle(.menu)
         .controlSize(.large)
-        // A pop-up draws at the width of its widest option,
-        // centred in whatever frame it is given, so two groups
-        // offering different profiles drew two widths (owner,
-        // 2026-09-16); asked to fill, it takes the frame.
-        .frame(maxWidth: .infinity)
-        .frame(width: 180)
+        // A pop-up draws at the width of its widest option
+        // whatever frame it is given — asked to fill, it still
+        // does not (measured 2026-09-16) — so two groups offering
+        // different profiles draw two widths. Trailing-aligned,
+        // the column keeps one edge, as System Settings' does.
+        .frame(width: 180, alignment: .trailing)
         // An empty title names nothing, so the picker is named
         // here — a count group's by its count, since one Desktop
         // draws a picker per group — and named, it owes its
