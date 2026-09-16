@@ -4749,6 +4749,43 @@ is the placement ladder in `docs/ui-patterns.md`: an escape hatch
 is last on the card whose values it transforms.
 :::
 
+### A repeating slot is offered as a count; a split as a share
+
+**[Principle]**
+
+:::unreleased
+The Scrolling slot's Percent row carries a **Columns on
+screen** stepper (**Rows on screen** when vertical) beneath the
+slider (#1382), because on a wide screen the value a user holds
+is the effect, not the share: three columns, not 33.3%. It is a
+stepper by the numeric rule (a count is a number), typeable like
+every stepper — an integer only, fraction parsing refused — and
+it writes `1/n` into the one stored fraction Lua and profiles
+already hold; the slider stays for feel. The field shows "—"
+(spoken "not a whole count") whenever the stored share is not
+`1/n` at the wire's own precision — `percentString` equality,
+never a hand-typed tolerance. ▲ from "—" lands on `ceil(1/f)`
+and ▼ on `floor(1/f)`, never "nearest", which reverses direction
+at the shipped 95%. ▲ greys where one more column would fall
+under the minimum window size on the widest connected screen
+(the space's own screen in the override editor) — a cap Core
+computes from the terms `ScrollingLayout.metrics` draws with,
+through `TilingSettings.scrollingColumnCap`, never GUI
+arithmetic over a screen frame; with no screen known the edge is
+the slider's own 5% floor. That is the first live-machine read
+in Layout Defaults, and a bound that greys differently on
+different Macs for one profile — the stated cost. One percent
+formatter — whole numbers whole, otherwise one decimal — is
+shared by the readout, the spoken value, `RatioRow` and the diff
+pill, so card and pill agree on "33.3%". The row is its own
+census key drawing no diff row: the leaf narrates once through
+the value row. The split rows — the stack master ratio, the bsp
+ratios — keep **fraction chips** `¼ ⅓ ½ ⅔ ¾` instead: a share is
+not a count. A text field accepting `1/3` was rejected: a closed
+set is a chooser, not a parser, and anything outside it is
+Lua's.
+:::
+
 ### The Settings window paints its own colours, and its accent is kiwi
 
 **[Principle]**

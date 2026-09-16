@@ -68,6 +68,34 @@ public enum ScrollSize: Sendable, Equatable {
         return min(max(raw, 0), along)
     }
 
+    /// The whole count a share IS — `n` where the share is `1/n`
+    /// at the wire's own precision (`percentString`), else nil:
+    /// the Settings stepper's "—" (#1382). No hand-typed
+    /// tolerance: the catalog spelling is the one equality.
+    public static func count(of fraction: Double) -> Int? {
+        guard fraction > 0 else { return nil }
+        let n = Int((1 / fraction).rounded())
+        guard n >= 1,
+            percentString(1 / Double(n)) == percentString(fraction)
+        else { return nil }
+        return n
+    }
+
+    /// How many slots of the pitch fit `along` with each at least
+    /// `minimum` — the stepper's ▲ bound, from the terms `metrics`
+    /// draws with (#1382): `n·minimum + (n − 1)·gap ≤ along`.
+    public static func maxCount(
+        along: CGFloat,
+        gap: CGFloat,
+        minimum: CGFloat
+    ) -> Int {
+        guard minimum + gap > 0 else { return fallbackMaxCount }
+        return max(1, Int(((along + gap) / (minimum + gap)).rounded(.down)))
+    }
+
+    /// The ▲ bound with no screen known: the slider's own floor.
+    public static let fallbackMaxCount = Int((1 / minFraction).rounded())
+
     /// `fraction` of the pitch, less the gap the pitch carries.
     private static func pitched(
         _ fraction: Double,

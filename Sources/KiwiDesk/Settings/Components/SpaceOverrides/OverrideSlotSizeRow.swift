@@ -7,6 +7,9 @@ struct OverrideSlotSizeRow: View {
     /// Resolved scroll orientation, so the value row reads
     /// "Column width" / "Row height" off the effective axis (#239).
     let isVertical: Bool
+    /// The count stepper's ▲ bound on this space's own screen
+    /// (#1382).
+    let columnCap: Int
     @Binding var value: ScrollSize?
     /// Resolved value shown while unchecked and seeded on check,
     /// so checking never jumps.
@@ -32,6 +35,7 @@ struct OverrideSlotSizeRow: View {
                     size: overrideValue($value, global: global),
                     isVertical: isVertical,
                     part: .both,
+                    columnCap: columnCap,
                     // Dropdown, not segments: matches the popover's
                     // other override rows on this narrow surface
                     // (#291 compact-surface exception).

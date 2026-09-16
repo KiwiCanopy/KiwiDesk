@@ -102,6 +102,9 @@ struct SecondsRow: View {
 }
 
 /// Ratio slider row formatted in percentage (0.1–0.9) (#94).
+/// A split's share of its span, with the fraction chips a share
+/// takes rather than a count (#1382): ¼ ⅓ ½ ⅔ ¾ snap the slider
+/// (`FractionChipsTests`).
 struct RatioRow: View {
     let label: String
     @Binding var value: Double
@@ -111,30 +114,33 @@ struct RatioRow: View {
         SettingsRowShape {
             SettingsRowLabel(label: label, help: help)
         } control: {
-            HStack {
-                SettingsSlider(
-                    value: $value,
-                    range: 0.1...0.9,
-                    step: 0.01,
-                    label: label,
-                    spokenValue: readoutText
-                )
-                Text(readoutText)
-                    .settingsReadout()
-                    .frame(
-                        width: SettingsMetrics.readoutColumn,
-                        alignment: .trailing
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    SettingsSlider(
+                        value: $value,
+                        range: 0.1...0.9,
+                        step: 0.01,
+                        label: label,
+                        spokenValue: readoutText
                     )
-                    .foregroundStyle(.secondary)
-                    .font(.body.monospacedDigit())
+                    Text(readoutText)
+                        .settingsReadout()
+                        .frame(
+                            width: SettingsMetrics.readoutColumn,
+                            alignment: .trailing
+                        )
+                        .foregroundStyle(.secondary)
+                        .font(.body.monospacedDigit())
+                }
+                FractionChips(value: $value, label: label)
             }
         }
     }
 
-    /// Rounded, not truncated: a stored exact 0.29 must read
-    /// "29%", never "28%".
+    /// One formatter with the pill (#1382): a stored exact 0.29
+    /// reads "29%", a third "33.3%".
     private var readoutText: String {
-        "\(Int((value * 100).rounded()))%"
+        SettingsValueReadout.percent(value)
     }
 }
 

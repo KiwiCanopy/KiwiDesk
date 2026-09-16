@@ -54,7 +54,11 @@ enum SettingsValueReadout {
     }
 
     /// Census keys exempt from diff narration (`SettingsValueReadoutTests`).
-    static let noReadout: Set<SettingKey> = []
+    static let noReadout: Set<SettingKey> = [
+        // The count stepper writes the slot leaf the value row
+        // narrates once (#1382, ruled: no diff row).
+        .layout(.scrollingSlotSizeCount)
+    ]
 }
 
 // MARK: - Shared value formatting
@@ -70,13 +74,23 @@ extension SettingsValueReadout {
         L("diff.value.milliseconds", "%1$@ ms", trimmed(value))
     }
 
-    /// Formats percentage string (e.g. "50%").
+    /// Formats a percentage — the ONE percent formatter (#1382):
+    /// whole numbers whole, otherwise one decimal, so the card's
+    /// readout, the spoken value, `RatioRow` and the diff pill
+    /// agree on "33.3%".
     static func percent(_ fraction: Double) -> String {
-        L(
-            "diff.value.percent",
-            "%1$@%%",
-            trimmed((fraction * 100).rounded())
-        )
+        L("diff.value.percent", "%1$@%%", percentDigits(fraction))
+    }
+
+    /// The digits of `percent`, for a caller that carries its own
+    /// unit frame.
+    static func percentDigits(_ fraction: Double) -> String {
+        let value = fraction * 100
+        let tenths = (value * 10).rounded() / 10
+        if tenths.rounded() == tenths {
+            return String(Int(tenths))
+        }
+        return String(format: "%.1f", tenths)
     }
 
     /// Formats hex color string with leading `#`.

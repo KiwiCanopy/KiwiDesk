@@ -17,6 +17,7 @@ enum LayoutKey: String, CaseIterable, Hashable {
     case scrollingAnchor = "settings.scrolling.anchor"
     case scrollingSlotSizeUnit = "settings.scrolling.slotSize (unit)"
     case scrollingSlotSizeValue = "settings.scrolling.slotSize (value)"
+    case scrollingSlotSizeCount = "settings.scrolling.slotSize (count)"
     case scrollingNewWindowPlacement = "settings.scrolling.newWindowPlacement"
     case scrollingWrapFocus = "settings.scrolling.wrapFocus"
     case scrollingFillWhenAlone = "settings.scrolling.fillWhenAlone"
@@ -95,8 +96,9 @@ extension LayoutKey {
                 ])
             )
         case .scrollingOrientation, .scrollingAnchor, .scrollingSlotSizeUnit,
-            .scrollingSlotSizeValue, .scrollingNewWindowPlacement,
-            .scrollingWrapFocus, .scrollingFillWhenAlone:
+            .scrollingSlotSizeValue, .scrollingSlotSizeCount,
+            .scrollingNewWindowPlacement, .scrollingWrapFocus,
+            .scrollingFillWhenAlone:
             return .row(.layoutDefaults, .scrolling, .atRest)
         case .gridType, .gridSplitDirection, .gridAutoSize,
             .gridNewWindowPlacement:

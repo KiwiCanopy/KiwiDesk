@@ -125,6 +125,10 @@ extension SettingsValueReadout {
                     )
                 )
             ]
+        case .scrollingSlotSizeCount:
+            // No diff row (#1382): the count writes the same leaf
+            // the value row narrates once.
+            return []
         case .scrollingNewWindowPlacement:
             return layoutRow(
                 census,

@@ -190,6 +190,43 @@ extension TilingSettings {
         )
     }
 
+    /// The most scrolling slots that fit a screen whose usable
+    /// area is `visible`, for `space` (its resolved gaps, bars and
+    /// orientation) — the Settings stepper's ▲ bound (#1382),
+    /// derived from the terms `ScrollingLayout.metrics` draws
+    /// with and never from GUI arithmetic over a screen frame
+    /// (`ScrollingColumnCapTests`).
+    public func scrollingColumnCap(
+        visible: CGRect,
+        space: SpaceID?
+    ) -> Int {
+        // The one context builder, on a bare Space: the carve
+        // (`usable`, the bar strip) is then the layout's own. No
+        // space — the Layout Defaults card — resolves the globals,
+        // which is what an id nothing overrides resolves to.
+        let context = context(
+            bounds: layoutBounds(from: visible),
+            space: Space(
+                id: space ?? SpaceID("layout-defaults"),
+                windows: [],
+                focused: nil
+            ),
+            sticky: []
+        )
+        let area = context.scrolling.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner,
+            global: context.appBarStyle
+        )
+        let horizontal = context.scrolling.axisIsHorizontal
+        let inner = context.gaps.inner
+        return ScrollSize.maxCount(
+            along: horizontal ? area.width : area.height,
+            gap: horizontal ? inner.horizontal : inner.vertical,
+            minimum: context.minWindowSize
+        )
+    }
+
     /// Builds a LayoutContext. `sticky` (#414 v2) is REQUIRED so every call
     /// site chooses (the `forceRetile` pattern, §5): a
     /// frame-producing build that silently omitted it would

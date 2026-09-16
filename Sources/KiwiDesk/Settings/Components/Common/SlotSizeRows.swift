@@ -11,6 +11,10 @@ struct SlotSizeRows: View {
     let isVertical: Bool
     /// Part of control to render (#68).
     var part: Part = .both
+    /// The count stepper's ▲ bound (#1382), Core's count of what
+    /// the screen fits — the widest connected one on the Layout
+    /// Defaults card, the space's own in the override editor.
+    var columnCap: Int = ScrollSize.fallbackMaxCount
 
     /// Unit picker presentation style (#291).
     var unitStyle: UnitStyle = .segmented
@@ -195,6 +199,13 @@ struct SlotSizeRows: View {
                     readout(percentReadout)
                 }
             }
+            // The share's count, beneath the slider (#1382) — on
+            // Percent only, as the slider it explains is.
+            SlotCountRow(
+                size: $size,
+                isVertical: isVertical,
+                cap: columnCap
+            )
         }
     }
 
@@ -203,7 +214,7 @@ struct SlotSizeRows: View {
     }
 
     private var percentReadout: String {
-        "\(Int(currentFraction * 100)) %"
+        SettingsValueReadout.percent(currentFraction)
     }
 
     private func readout(_ text: String) -> some View {

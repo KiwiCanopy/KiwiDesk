@@ -61,7 +61,8 @@ extension LayoutCard {
             model: model,
             size: scrolling.slotSize,
             isVertical: isVertical,
-            part: .control
+            part: .control,
+            columnCap: model.scrollingColumnCap(for: nil)
         )
     }
 
