@@ -16,6 +16,30 @@ struct DesktopRow: Hashable {
     let screen: String?
 }
 
+/// Which binding a Desktops-card row edits (#1436): the profile
+/// for one screen count, or one bound name no saved profile
+/// carries a count for.
+enum BindingSlot: Hashable {
+    case count(Int)
+    case orphan(String)
+}
+
+/// One group of the Desktops card (#1436, ui-designer ruling):
+/// every Desktop row once per screen count a saved profile
+/// exists for, the connected count first, and a last group of
+/// the bound names whose profile file no reading can count.
+enum BindingGroup: Hashable {
+    case count(Int, rows: [DesktopRow])
+    case orphans([OrphanBinding])
+}
+
+/// A bound name whose profile is gone or unreadable, on the
+/// Desktop it is bound to.
+struct OrphanBinding: Hashable {
+    let row: DesktopRow
+    let profile: String
+}
+
 /// Instance representing expanded row in Profiles census (#678).
 enum ProfilesRowInstance: Hashable {
     case profile(String)
@@ -23,8 +47,9 @@ enum ProfilesRowInstance: Hashable {
     /// a dormant record and a live Desktop can carry the same
     /// number, and identifying a row by it makes the dormant one
     /// unreachable — the exact post-renumber case this lane is
-    /// about (architect review, 2026-09-04).
-    case desktop(DesktopKey)
+    /// about (architect review, 2026-09-04). And by the SLOT
+    /// (#1436): one Desktop draws a picker per count group.
+    case binding(DesktopKey, BindingSlot)
     /// By the stable English `StandardLayout.name` — identity must
     /// not move with the GUI language.
     case preset(String)
@@ -44,6 +69,8 @@ struct ProfilesFamilyRows {
     let desktopScreens: [DesktopKey: String]
     /// The bindings as the draft currently holds them.
     let bindings: [DesktopKey: DesktopBinding]
+    /// Screens connected right now — which count group leads.
+    let connectedScreens: Int
     let presets: [StandardLayout]
 
     func rows(for key: SettingKey) -> [ProfilesRowInstance]? {
@@ -131,6 +158,45 @@ struct ProfilesFamilyRows {
         }
     }
 
+    /// The screen counts the Desktops card groups by (#1436):
+    /// every count at least one readable saved profile is saved
+    /// for, the connected count first, then ascending. The
+    /// leading verdict is Core's fit judgement, so an unknown
+    /// display reading leads with nothing.
+    static func bindingCounts(
+        profiles: [ProfileSummary],
+        connected: Int
+    ) -> [Int] {
+        let counts = Set(profiles.map(\.count)).sorted()
+        let leading = counts.filter {
+            DesktopBindingRefusal.of(
+                profileCount: $0,
+                connected: connected
+            ) == nil
+        }
+        return leading + counts.filter { !leading.contains($0) }
+    }
+
+    /// The card's groups over its Desktop rows: `rows` once per
+    /// count, then the orphans — each bound name whose profile
+    /// `profileCounts` cannot count, on the row it is bound to.
+    /// `binding(of:)` resolves a row's record, both keys included.
+    static func bindingGroups(
+        rows: [DesktopRow],
+        counts: [Int],
+        profileCounts: [String: Int],
+        binding: (DesktopRow) -> DesktopBinding?
+    ) -> [BindingGroup] {
+        var groups = counts.map { BindingGroup.count($0, rows: rows) }
+        let orphans = rows.flatMap { row in
+            (binding(row)?.profiles ?? [])
+                .filter { profileCounts[$0] == nil }
+                .map { OrphanBinding(row: row, profile: $0) }
+        }
+        if !orphans.isEmpty { groups.append(.orphans(orphans)) }
+        return groups
+    }
+
     /// Presets matching screen count, including starter derivation (#678).
     static func presets(
         forScreens screens: Int,
@@ -161,14 +227,36 @@ struct ProfilesFamilyRows {
             return Self.orderedProfiles(profiles)
                 .map { ProfilesRowInstance.profile($0.name) }
         case .profileBindings:
-            return Self.desktops(
+            let rows = Self.desktops(
                 onMain: mainDesktops,
                 keys: desktopKeys,
                 present: presentKeys,
                 screens: desktopScreens,
                 bindings: bindings
             )
-            .map { ProfilesRowInstance.desktop($0.key) }
+            let counts = Dictionary(
+                profiles.map { ($0.name, $0.count) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            return Self.bindingGroups(
+                rows: rows,
+                counts: Self.bindingCounts(
+                    profiles: profiles,
+                    connected: connectedScreens
+                ),
+                profileCounts: counts,
+                binding: { bindings[$0.key] }
+            )
+            .flatMap { group -> [ProfilesRowInstance] in
+                switch group {
+                case .count(let count, let rows):
+                    return rows.map { .binding($0.key, .count(count)) }
+                case .orphans(let orphans):
+                    return orphans.map {
+                        .binding($0.row.key, .orphan($0.profile))
+                    }
+                }
+            }
         case .presetsApply, .presetsLayouts:
             return presets.map {
                 ProfilesRowInstance.preset($0.name)

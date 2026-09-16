@@ -35,8 +35,10 @@ extension KiwiCore {
         state.profilePartitioning.rename(old, to: new)
         var chased = false
         for (key, binding) in desktopBindings
-        where binding.profile == old {
-            desktopBindings[key]?.profile = new
+        where binding.profiles.contains(old) {
+            desktopBindings[key]?.profiles = binding.profiles.map {
+                $0 == old ? new : $0
+            }
             chased = true
         }
         guard chased else { return }
@@ -47,8 +49,10 @@ extension KiwiCore {
         do {
             try rewriteSidecarBindings { bindings in
                 for (key, binding) in bindings
-                where binding.profile == old {
-                    bindings[key]?.profile = new
+                where binding.profiles.contains(old) {
+                    bindings[key]?.profiles = binding.profiles.map {
+                        $0 == old ? new : $0
+                    }
                 }
             }
         } catch SidecarError.missing {

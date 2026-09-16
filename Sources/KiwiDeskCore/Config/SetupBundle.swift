@@ -25,8 +25,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 6 = the absent Liquid Glass leaves filled (#1369), on
     /// `[Profile]` alone once more;
     /// 7 = the track limit lifted to count the overflow track
-    /// (#1354), on `[Profile]` alone again.
-    public static let currentFormat = 7
+    /// (#1354), on `[Profile]` alone again;
+    /// 8 = a Desktop binding's per-count profile list (#1436),
+    /// which reaches a bundle the way 4 did.
+    public static let currentFormat = 8
 
     public let format: Int
 

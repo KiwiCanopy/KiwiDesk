@@ -129,7 +129,7 @@ struct ConfigWriteTests {
         )
         #expect(core.state.appRules["spotify"] == SpaceID("music"))
         #expect(
-            core.desktopBindings[.number(2)]?.profile == "Studio"
+            core.desktopBindings[.number(2)]?.profiles == ["Studio"]
         )
         #expect(core.keys.icon(for: "resize") == "📐")
         let combo = KeyCombo.parse("alt+h")

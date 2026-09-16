@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// One row of the Desktops card: the Desktop's number, the
-/// screen it lives on (#1438), its badges and its picker.
+/// screen it lives on (#1438), its badges and its picker for one
+/// binding slot (#1436).
 extension DesktopsGroup {
-    func spaceRow(_ row: DesktopRow) -> some View {
+    func spaceRow(_ row: DesktopRow, slot: BindingSlot) -> some View {
         let number = row.number
         return HStack {
             Image(systemName: DesktopGlyph.symbol)
@@ -84,30 +85,133 @@ extension DesktopsGroup {
                     )
                 )
             }
-            if let count = otherScreenCount(row.key) {
-                BadgeChip(
-                    label: L(
-                        "desktops.other_count",
-                        "for %1$d screen(s)",
-                        count
-                    )
-                )
-                .help(
-                    L(
-                        "desktops.other_count.help",
-                        "This profile is saved for %1$d "
-                            + "screen(s); %2$d connected. Until "
-                            + "that many are, the binding stands "
-                            + "aside and KiwiDesk picks a profile "
-                            + "by your screens instead.",
-                        count,
-                        model.displays.count
-                    )
-                )
-            }
             Spacer()
-            profileMenu(row.key)
+            profileMenu(row.key, slot: slot)
         }
     }
 
+    private func profileMenu(
+        _ key: DesktopKey,
+        slot: BindingSlot
+    ) -> some View {
+        Picker("", selection: binding(key, slot: slot)) {
+            Text(L("desktops.none", "None"))
+                .tag(String?.none)
+            ForEach(options(key, slot: slot), id: \.self) { name in
+                Text(name).tag(String?.some(name))
+            }
+        }
+        .labelsHidden()
+        .controlSize(.large)
+        .frame(width: 180)
+        // An empty title names nothing, so the picker is named
+        // here — a count group's by its count, since one Desktop
+        // draws a picker per group — and named, it owes its
+        // selection back as the value (#812).
+        .accessibilityLabel(pickerLabel(slot))
+        .accessibilityValue(
+            binding(key, slot: slot).wrappedValue
+                ?? L("desktops.none", "None")
+        )
+    }
+
+    private func pickerLabel(_ slot: BindingSlot) -> String {
+        switch slot {
+        case .count(let count):
+            return L(
+                "desktops.profile_ax.count",
+                "Profile for this Desktop on %1$@",
+                screensPhrase(count)
+            )
+        case .orphan:
+            return L(
+                "desktops.profile_ax",
+                "Profile for this Desktop"
+            )
+        }
+    }
+
+    /// A count group offers the profiles saved for that count —
+    /// the bind-fit question, asked of Core's one judgement
+    /// (#1394) — and an orphan row only the name it clears.
+    private func options(
+        _ key: DesktopKey,
+        slot: BindingSlot
+    ) -> [String] {
+        switch slot {
+        case .count(let count):
+            return model.profileSummaries.filter {
+                DesktopBindingRefusal.of(
+                    profileCount: $0.count,
+                    connected: count
+                ) == nil
+            }
+            .map(\.name)
+        case .orphan(let name):
+            return [name]
+        }
+    }
+
+    /// The slot's bound name: for a count, the record's entry
+    /// saved for it; for an orphan, the name itself while bound.
+    private func bound(_ key: DesktopKey, slot: BindingSlot) -> String? {
+        guard let record = record(for: key) else { return nil }
+        switch slot {
+        case .count(let count):
+            return record.profiles.first { profileCounts[$0] == count }
+        case .orphan(let name):
+            return record.profiles.contains(name) ? name : nil
+        }
+    }
+
+    private func binding(
+        _ key: DesktopKey,
+        slot: BindingSlot
+    ) -> Binding<String?> {
+        Binding(
+            get: { bound(key, slot: slot) },
+            set: { write($0, key: key, slot: slot) }
+        )
+    }
+
+    /// One slot's pick, filed on the Desktop's record: the slot's
+    /// previous entry goes whatever comes in, the other slots'
+    /// entries stay, and a record left empty is removed (#1436,
+    /// `DesktopBindingGroupTests`).
+    func write(_ profile: String?, key: DesktopKey, slot: BindingSlot) {
+        // The row BEFORE the twin drop below: a Desktop bound
+        // only under its twin leaves the rows the moment that
+        // record goes, and its projections would fall to their
+        // nil arms.
+        let row = desktopRows.first { $0.key == key }
+        var record =
+            record(for: key)
+            ?? DesktopBinding(
+                profiles: [],
+                desktop: row?.number ?? key.number ?? 0
+            )
+        // Writing settles the ambiguity rather than leaving two
+        // records for one Desktop, which Core's drop rule would
+        // later resolve by deleting the edit.
+        if let twin = twin(key) {
+            model.config.profileBindings[twin] = nil
+        }
+        if let previous = bound(key, slot: slot) {
+            record.unbind(previous)
+        }
+        if let profile {
+            record.profiles.append(profile)
+        }
+        guard !record.profiles.isEmpty else {
+            model.config.profileBindings[key] = nil
+            return
+        }
+        // The projections are refreshed from the reading this
+        // row was built from, never invented.
+        if let row {
+            record.desktop = row.number
+            record.screen = row.screen ?? record.screen
+        }
+        model.config.profileBindings[key] = record
+    }
 }

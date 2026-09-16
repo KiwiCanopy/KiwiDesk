@@ -76,7 +76,10 @@ struct DesktopsGroup: View {
                 + "of them able to select one, at the cost of "
                 + "each screen's own menu bar, its own Dock, and "
                 + "fullscreen windows that no longer blank the "
-                + "others."
+                + "others. A Desktop can hold one profile per "
+                + "screen count: the one saved for as many "
+                + "screens as are connected loads, and the "
+                + "others wait until that many are."
         )
     }
 
@@ -91,18 +94,83 @@ struct DesktopsGroup: View {
         )
     }
 
+    /// The count groups, then the orphans (#1436). A group
+    /// whose count has no saved profile is not drawn — a
+    /// None-only picker is a dead control — so a connected count
+    /// with none takes the caption in its place.
     @ViewBuilder private var rows: some View {
         if desktopRows.isEmpty {
             emptyHint
         } else {
-            ForEach(desktopRows, id: \.key) { row in
-                spaceRow(row)
+            if !groups.contains(where: {
+                if case .count(model.displays.count, _) = $0 {
+                    return true
+                }
+                return false
+            }) {
+                caption(noProfileForCount)
+            }
+            ForEach(groups, id: \.self) { group in
+                groupView(group)
             }
         }
     }
 
+    @ViewBuilder private func groupView(
+        _ group: BindingGroup
+    ) -> some View {
+        switch group {
+        case .count(let count, let rows):
+            if drawsHeaders { header(forCount: count) }
+            ForEach(rows, id: \.key) { row in
+                spaceRow(row, slot: .count(count))
+            }
+        case .orphans(let orphans):
+            SettingsGroupHeader(
+                L("profiles.broken.title", "Couldn't load")
+            )
+            ForEach(orphans, id: \.self) { orphan in
+                spaceRow(orphan.row, slot: .orphan(orphan.profile))
+            }
+        }
+    }
+
+    /// Headers only where there is more than one group to tell
+    /// apart, or where the one drawn is not the connected
+    /// count's — a single-count user sees the card unchanged.
+    private var drawsHeaders: Bool {
+        guard groups.count == 1, case .count(let count, _) = groups[0]
+        else { return true }
+        return count != model.displays.count
+    }
+
+    private func header(forCount count: Int) -> some View {
+        let leads =
+            DesktopBindingRefusal.of(
+                profileCount: count,
+                connected: model.displays.count
+            ) == nil
+        let title: String
+        if leads {
+            title =
+                count == 1
+                ? L("presets.for_your.one", "For your 1 screen")
+                : L(
+                    "presets.for_your.many",
+                    "For your %1$d screens",
+                    count
+                )
+        } else {
+            title =
+                count == 1
+                ? L("desktops.for_count.one", "For 1 screen")
+                : L("desktops.for_count.many", "For %1$d screens", count)
+        }
+        return SettingsGroupHeader(title).padding(.top, 4)
+    }
+
     private var emptyHint: some View {
-        Text(
+        caption(
             L(
                 "desktops.empty",
                 "No native macOS Desktops detected. Add "
@@ -110,41 +178,29 @@ struct DesktopsGroup: View {
                     + "profiles."
             )
         )
-        .font(.caption)
-        .foregroundStyle(.secondary)
     }
 
-    func profileMenu(_ key: DesktopKey) -> some View {
-        Picker("", selection: binding(key)) {
-            Text(L("desktops.none", "None"))
-                .tag(String?.none)
-            ForEach(options(key), id: \.self) { name in
-                Text(name).tag(String?.some(name))
-            }
-        }
-        .labelsHidden()
-        .controlSize(.large)
-        .frame(width: 180)
-        // An empty title names nothing, so the picker is named
-        // here — and named, it owes its selection back as the
-        // value (#812).
-        .accessibilityLabel(
-            L(
-                "desktops.profile_ax",
-                "Profile for this Desktop"
-            )
+    private var noProfileForCount: String {
+        L(
+            "desktops.no_profile_for_count",
+            "No profile is saved for your %1$@ yet, so no "
+                + "Desktop binding applies right now.",
+            screensPhrase(model.displays.count)
         )
-        .accessibilityValue(
-            binding(key).wrappedValue
-                ?? L("desktops.none", "None")
-        )
+    }
+
+    private func caption(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     /// Rows from the one derivation the census shares
     /// (`ProfilesFamilyRows.desktops`), which gives a dormant
     /// record a row of its OWN even where a live Desktop holds
     /// the number it was last seen at.
-    private var desktopRows: [DesktopRow] {
+    var desktopRows: [DesktopRow] {
         ProfilesFamilyRows.desktops(
             onMain: model.mainDesktops,
             keys: model.desktopKeys,
@@ -154,40 +210,33 @@ struct DesktopsGroup: View {
         )
     }
 
-    /// The bound profile's screen count where Core's gate
-    /// refuses it on the count — the binding stands aside then
-    /// (#1394). Narrated, never re-decided: the verdict is
-    /// `DesktopBindingRefusal.of`'s.
-    func otherScreenCount(_ key: DesktopKey) -> Int? {
-        guard let name = binding(key).wrappedValue,
-            let count = model.profileSummaries.first(where: {
-                $0.name == name
-            })?.count,
-            case .screenCount = DesktopBindingRefusal.of(
-                profileCount: count,
+    /// The groups from the same derivation the census expands
+    /// (`ProfilesFamilyRows.bindingGroups`).
+    private var groups: [BindingGroup] {
+        ProfilesFamilyRows.bindingGroups(
+            rows: desktopRows,
+            counts: ProfilesFamilyRows.bindingCounts(
+                profiles: model.profileSummaries,
                 connected: model.displays.count
-            )
-        else { return nil }
-        return count
+            ),
+            profileCounts: profileCounts,
+            binding: { record(for: $0.key) }
+        )
     }
 
-    /// Available profiles for the dropdown, always including the
-    /// current binding even if its file has since been deleted.
-    private func options(_ key: DesktopKey) -> [String] {
-        var names = model.profiles
-        if let bound = model.config.profileBindings[key]?.profile,
-            !names.contains(bound)
-        {
-            names.append(bound)
-        }
-        return names
+    /// Each readable saved profile's screen count by name.
+    var profileCounts: [String: Int] {
+        Dictionary(
+            model.profileSummaries.map { ($0.name, $0.count) },
+            uniquingKeysWith: { first, _ in first }
+        )
     }
 
     /// A live Desktop's record may still sit under the number it
     /// was filed at before Core re-keyed it, so a row looks under
     /// both of its keys — otherwise the picker reads empty for a
     /// binding the user can see on the row above.
-    private func twin(_ key: DesktopKey) -> DesktopKey? {
+    func twin(_ key: DesktopKey) -> DesktopKey? {
         guard case .identity = key,
             let number = desktopRows.first(where: { $0.key == key })?
                 .number
@@ -195,44 +244,9 @@ struct DesktopsGroup: View {
         return .number(number)
     }
 
-    private func binding(_ key: DesktopKey) -> Binding<String?> {
-        Binding(
-            get: {
-                model.config.profileBindings[key]?.profile
-                    ?? twin(key).flatMap {
-                        model.config.profileBindings[$0]?.profile
-                    }
-            },
-            set: { profile in
-                // The row BEFORE the twin drop below: a Desktop
-                // bound only under its twin leaves the rows the
-                // moment that record goes, and its projections
-                // would fall to their nil arms.
-                let row = desktopRows.first { $0.key == key }
-                // Writing settles the ambiguity rather than
-                // leaving two records for one Desktop, which
-                // Core's drop rule would later resolve by
-                // deleting the edit.
-                if let twin = twin(key) {
-                    model.config.profileBindings[twin] = nil
-                }
-                guard let profile else {
-                    model.config.profileBindings[key] = nil
-                    return
-                }
-                // The projections are refreshed from the reading
-                // this row was built from, never invented.
-                let number =
-                    row?.number
-                    ?? model.config.profileBindings[key]?.desktop
-                    ?? key.number ?? 0
-                model.config.profileBindings[key] = DesktopBinding(
-                    profile: profile,
-                    desktop: number,
-                    screen: row?.screen
-                        ?? model.config.profileBindings[key]?.screen
-                )
-            }
-        )
+    /// The record a row edits, under either of its keys.
+    func record(for key: DesktopKey) -> DesktopBinding? {
+        model.config.profileBindings[key]
+            ?? twin(key).flatMap { model.config.profileBindings[$0] }
     }
 }

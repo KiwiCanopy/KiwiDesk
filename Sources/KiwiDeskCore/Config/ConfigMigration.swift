@@ -42,6 +42,7 @@ public enum ConfigMigration {
         migratingRetiredResizeFeedback,
         migratingAbsentGlassLeaves,
         migratingTrackLimitCount,
+        migratingProfileBindingLists,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).

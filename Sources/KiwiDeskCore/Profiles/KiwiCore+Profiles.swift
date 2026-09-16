@@ -252,10 +252,10 @@ extension KiwiCore {
         guard
             let binding = mainDesktopBinding(
                 in: NativeSpaces.desktopSnapshot()
-            ), binding.profile == name,
-            case .success = boundProfile(of: binding)
+            ), binding.profiles.contains(name),
+            case .success(let bound) = boundProfile(of: binding)
         else { return false }
-        return true
+        return bound.name == name
     }
 
     /// Re-applies `name` to the live layout after an in-effect

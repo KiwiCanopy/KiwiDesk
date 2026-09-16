@@ -1,14 +1,16 @@
 import Foundation
 
-/// Why the profile a Desktop binding names does not load, and
-/// the ONE judgement of whether a profile's screen count fits the
-/// connected one (#1394): Core decides it, the Desktops row only
-/// narrates it (`DesktopBindingFitSeamTests`).
+/// Why a Desktop binding loads no profile, and the ONE judgement
+/// of whether a profile's screen count fits the connected one
+/// (#1394): Core decides it, the Desktops rows only narrate it
+/// (`DesktopBindingFitSeamTests`).
 public enum DesktopBindingRefusal: Error {
-    /// The profile's file could not be read.
+    /// No bound profile's file could be read.
     case unreadable(Error)
-    /// The profile is saved for another screen count.
-    case screenCount(profile: Int, connected: Int)
+    /// No bound profile is saved for the connected count;
+    /// `saved` is the count of each readable one, in binding
+    /// order (#1436).
+    case screenCount(saved: [Int], connected: Int)
     /// No display reading yet: the first config load runs before
     /// the loop publishes displays, and a paused engine discovers
     /// none. The first monitor change re-judges.
@@ -23,7 +25,7 @@ public enum DesktopBindingRefusal: Error {
         if connected == 0 { return .displaysUnknown }
         guard profileCount == connected else {
             return .screenCount(
-                profile: profileCount,
+                saved: [profileCount],
                 connected: connected
             )
         }
@@ -31,47 +33,78 @@ public enum DesktopBindingRefusal: Error {
     }
 
     /// The log line's tail, after the door names itself.
-    func narrative(profile name: String) -> String {
+    func narrative(binding: DesktopBinding) -> String {
+        let names = binding.profiles.map { "'\($0)'" }
+            .joined(separator: ", ")
+        let plural = binding.profiles.count > 1
         switch self {
         case .unreadable(let error):
-            return "cannot load profile '\(name)': \(error)"
-        case .screenCount(let profile, let connected):
+            return "cannot load profile\(plural ? "s" : "") "
+                + "\(names): \(error)"
+        case .screenCount(let saved, let connected):
+            let counts = saved.map(String.init).joined(separator: ", ")
             return
-                "profile '\(name)' is for \(profile) screen(s), "
+                "profile\(plural ? "s" : "") \(names) "
+                + "\(plural ? "are" : "is") for \(counts) screen(s), "
                 + "\(connected) connected; the binding stands aside"
         case .displaysUnknown:
             return
-                "profile '\(name)' waits for the first display "
+                "profile\(plural ? "s" : "") \(names) "
+                + "wait\(plural ? "" : "s") for the first display "
                 + "reading; the binding stands aside"
         }
     }
 }
+
+/// A binding whose list is empty — a shape no writer produces,
+/// named so the gate can refuse it rather than crash.
+struct EmptyDesktopBinding: Error {}
 
 extension KiwiCore {
     /// The profile a Desktop binding loads, or why it does not —
     /// the ONE gate every reader of a binding's profile takes
     /// (#1394, `DesktopBindingFitTests`).
     ///
-    /// A binding fires only where its profile is saved for the
-    /// connected screen count; for any other count, and before
-    /// the first display reading, it stands aside and the rungs
-    /// below it answer. A bound load therefore always fits by
-    /// count.
+    /// A binding fires only through a bound profile saved for
+    /// the connected screen count (#1436: the first in binding
+    /// order that is); with none, and before the first display
+    /// reading, it stands aside and the rungs below it answer. A
+    /// bound load therefore always fits by count.
     func boundProfile(
         of binding: DesktopBinding
     ) -> Result<Profile, DesktopBindingRefusal> {
-        let profile: Profile
-        do {
-            profile = try profiles.read(name: binding.profile)
-        } catch {
-            return .failure(.unreadable(error))
+        let connected = state.workspaces.allDisplays.count
+        var saved: [Int] = []
+        var unreadable: Error = EmptyDesktopBinding()
+        var waiting = false
+        for name in binding.profiles {
+            let profile: Profile
+            do {
+                profile = try profiles.read(name: name)
+            } catch {
+                unreadable = error
+                continue
+            }
+            switch DesktopBindingRefusal.of(
+                profileCount: profile.monitorCount,
+                connected: connected
+            ) {
+            case nil:
+                return .success(profile)
+            case .displaysUnknown?:
+                waiting = true
+            case .screenCount(let counts, _)?:
+                saved += counts
+            case .unreadable?:
+                break
+            }
         }
-        if let refusal = DesktopBindingRefusal.of(
-            profileCount: profile.monitorCount,
-            connected: state.workspaces.allDisplays.count
-        ) {
-            return .failure(refusal)
+        if waiting { return .failure(.displaysUnknown) }
+        guard saved.isEmpty else {
+            return .failure(
+                .screenCount(saved: saved, connected: connected)
+            )
         }
-        return .success(profile)
+        return .failure(.unreadable(unreadable))
     }
 }

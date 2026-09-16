@@ -11075,6 +11075,42 @@ discovers none — the gate cannot judge and the binding waits
 too, rather than loading a profile that the boot scan's monitor
 change would then replace; that first monitor change fires it.
 
+**[Principle]**
+
+**A Desktop holds one profile per screen count, and the card
+groups by count rather than offering a count control
+([#1436](https://github.com/KiwiCanopy/KiwiDesk/issues/1436)).**
+The feature the #1394 ruling named as its own: a laptop that is
+sometimes docked wants Desktop 2 to load *Laptop* alone and
+*Dual* when the external is connected. The record lists its
+profiles and stores no count beside them — each profile carries
+its own for life, and `upsert` refuses a set of another count —
+so the gate's one judgement picks the entry saved for the
+connected screens, and a second `bind_profile_to_desktop` with a
+profile of another count adds beside the first while one of the
+same count replaces it. A profile not saved yet is a class of its
+own there: two unsaved names cannot be told apart, so the newer
+replaces the older. The Settings surface was proposed as a
+screen-count control with one picker per Desktop for the chosen
+count, and the `ui-designer` ruled against it (2026-09-16): a
+control adds a mode whose selection can disagree with what is
+firing, hides the rest of the table, and — the count set being
+user-generated — would have to be a menu, the worse control for
+"which counts do I have profiles for". The Presets card two
+cards up had already answered the same question without one:
+the connected count leads under *For your N screens*, the other
+counts follow under their own headers, and a single-count user
+sees the card exactly as before, headerless. Two consequences
+follow. The *for N screen(s)* badge is retired — its fact is the
+group header now, and its timeless half moved into the card's
+`?` — and a bound name whose profile no reading can count sits in
+a last *Couldn't load* group, offering only None, since it
+belongs to no count and a picker that cannot say which count it
+edits must not pretend to. A connected count no profile is saved
+for draws no rows: a None-only picker is a dead control, the
+affordance-for-a-channel-that-does-not-exist case, so a caption
+takes its place and the other counts follow with headers.
+
 **[Rationale]**
 
 **The Desktop binding rows are live under every edit target

@@ -9,7 +9,9 @@ extension KiwiCore {
     /// `bind_profile_to_desktop(desktop, profile)`.
     /// The binding applies immediately when the bound space is
     /// the current one, and on every future switch to it — where
-    /// the profile fits the connected screen count (#1394).
+    /// the profile fits the connected screen count (#1394). A
+    /// second call with a profile of another count ADDS beside
+    /// the first; one of the same count replaces it (#1436).
     func bindProfileToDesktop(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -38,16 +40,22 @@ extension KiwiCore {
         // is the "takes effect when it next activates" this verb
         // always had.
         let desktop = snapshot.space(numbered: number)
-        desktopBindings[
+        let key =
             desktop.flatMap { snapshot.key(of: $0.id) }
-                ?? .number(number)
-        ] = DesktopBinding(
-            profile: profile,
-            desktop: number,
-            screen: desktop.flatMap {
-                screenNamesByUUID()[$0.displayUUID]
-            }
-        )
+            ?? .number(number)
+        var binding =
+            desktopBindings[key]
+            ?? DesktopBinding(profiles: [], desktop: number)
+        binding.desktop = number
+        if let screen = desktop.flatMap({
+            screenNamesByUUID()[$0.displayUUID]
+        }) {
+            binding.screen = screen
+        }
+        binding.bind(profile) { name in
+            (try? profiles.read(name: name))?.monitorCount
+        }
+        desktopBindings[key] = binding
         if !profiles.list().contains(profile) {
             onLog(
                 "bind_profile_to_desktop: profile "
@@ -265,22 +273,24 @@ extension KiwiCore {
     /// the live read belongs to the no-argument convenience
     /// alone.
     func applyDesktopBinding(in snapshot: DesktopSnapshot) {
-        guard let binding = mainDesktopBinding(in: snapshot),
-            binding.profile != profiles.currentName
+        guard let binding = mainDesktopBinding(in: snapshot)
         else { return }
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
         switch boundProfile(of: binding) {
         case .success(let profile):
+            guard profile.name != profiles.currentName else {
+                return
+            }
             apply(profile: profile, forceRetile: false)
             onLog(
                 "Desktop \(binding.desktop): loaded profile "
-                    + "'\(binding.profile)'"
+                    + "'\(profile.name)'"
             )
         case .failure(let refusal):
             onLog(
                 "Desktop \(binding.desktop): "
-                    + refusal.narrative(profile: binding.profile)
+                    + refusal.narrative(binding: binding)
             )
         }
     }

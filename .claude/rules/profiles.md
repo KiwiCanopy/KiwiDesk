@@ -237,6 +237,31 @@ The obligations that fall on a change here:
   the write is one macOS persists
   (`DesktopStampSeamTests`, tests.md ▸ machine touch).
 
+## A Desktop binding is a per-count LIST, judged at the gate (#1436)
+
+`DesktopBinding.profiles` lists one profile per screen count and
+stores no count beside them — the count is each profile's own
+`monitorCount`, read by `boundProfile(of:)`, the one gate, which
+picks the first entry saved for the connected screens and stands
+the whole record aside where none is
+(`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
+`noFitStandsAside`). The obligations: a reader of a binding's
+profile takes the PICKED profile off the gate's `.success` and
+never a listed name (`readersFollowThePick`); a writer files
+through `DesktopBinding.bind(_:countOf:)` — same count replaces,
+another adds, an unsaved name replaces an unsaved name
+(`recordAlgebra`, `verbAddsAndReplaces`) — and the GUI's slot
+write edits ONE count's entry and removes a record left empty
+(`DesktopBindingGroupTests` ▸ `pickEditsOneSlot`); which profiles
+a count group OFFERS is the bind-fit question asked of
+`DesktopBindingRefusal.of` against the group's count, never a
+hand `==` (`DesktopBindingFitSeamTests` ▸
+`judgementCallersAreCounted`); and the stored `profile`→`profiles`
+crossing is `migratingProfileBindingLists`, format 3 of
+`gui.json` and 8 of a bundle (`ProfileBindingListMigrationTests`).
+The card's shape — count groups, no count control — is
+`docs/design-decisions.md` ▸ Profiles' ruling, not restated here.
+
 ## The active Desktop is the MAIN display's (#888)
 
 A binding, profile-selection or Desktop-memory path reads the

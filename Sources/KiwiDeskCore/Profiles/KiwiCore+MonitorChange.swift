@@ -39,19 +39,18 @@ extension KiwiCore {
         // stamped here before the binding resolves against them.
         let desktops = stampedDesktopSnapshot()
         if let binding = mainDesktopBinding(in: desktops) {
-            let boundName = binding.profile
             switch boundProfile(of: binding) {
             case .success(let bound):
                 apply(profile: bound, forceRetile: false)
                 onLog(
                     "monitor change: loaded bound profile "
-                        + "'\(boundName)'"
+                        + "'\(bound.name)'"
                 )
                 return
             case .failure(let refusal):
                 onLog(
                     "monitor change: "
-                        + refusal.narrative(profile: boundName)
+                        + refusal.narrative(binding: binding)
                 )
             }
         }

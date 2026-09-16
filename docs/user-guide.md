@@ -181,8 +181,10 @@ hand-written setup, the first time you Save in Settings.
   "application", or "custom") and **`label`**.
 
 :::unreleased
-A `profile_bindings` entry may also carry `screen`, the name of
-the screen its Desktop was last seen on.
+A `profile_bindings` entry names its profiles as a list,
+`profiles`, one per screen count — a file with the older single
+`profile` is rewritten once on load — and may also carry
+`screen`, the name of the screen its Desktop was last seen on.
 :::
 
 A hand-edited `layers` list is normalized on load: empty names
@@ -515,9 +517,8 @@ The rungs, in order:
 
 1. A **Desktop binding** on the Desktop your main screen is on
    ([macOS Desktops](#macos-desktops-mission-control)), when
-   the bound profile is saved for this many screens. For any
-   other count the binding stands aside and the rungs below
-   decide.
+   a bound profile is saved for this many screens. With none
+   the binding stands aside and the rungs below decide.
 2. An **exact monitor match** — these exact displays. It stops
    matching the moment you swap one out, unless you saved a set
    for the new hardware too.
@@ -842,6 +843,14 @@ number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 :::unreleased
 Under a row, the screen its Desktop is on — for a *not present*
 row, the screen it was last seen on.
+
+A Desktop can hold one profile per screen count. Where you have
+profiles saved for more than one count, the card groups its rows
+by count — *For your 2 screens* first, the other counts after it
+— and a Desktop picks a profile in each group; the one saved for
+as many screens as are connected loads, and the others wait
+until that many are. A bound profile whose file is gone sits in a
+last *Couldn't load* group, where None clears it.
 :::
 
 **A binding fires when its Desktop becomes current on your main
