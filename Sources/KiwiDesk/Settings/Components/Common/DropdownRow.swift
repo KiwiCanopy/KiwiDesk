@@ -22,6 +22,7 @@ struct DropdownRow<P: View>: View {
                     picker
                         .labelsHidden()
                         .pickerStyle(.menu)
+                        .neutralMenuLabel()
                         .controlSize(.large)
                 )
                 Spacer()

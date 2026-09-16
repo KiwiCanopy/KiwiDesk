@@ -30,6 +30,7 @@ extension GeneralSection {
                 }
                 .labelsHidden()
                 .pickerStyle(.menu)
+                .neutralMenuLabel()
                 .fixedSize()
                 .accessibilityLabel(
                     L("general.advanced.log.range", "Time range")
