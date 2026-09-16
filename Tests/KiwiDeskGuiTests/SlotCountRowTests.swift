@@ -5,7 +5,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The "Columns on screen" stepper's arithmetic (#1382), read off
+/// The "Windows on screen" stepper's arithmetic (#1382), read off
 /// the row rather than scanned: what it shows, where ▲ and ▼
 /// land, and where ▲ greys. `@MainActor` — the quantities are
 /// `View` properties.

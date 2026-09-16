@@ -335,6 +335,8 @@ _TAG = re.compile(r"[(（]\s*([A-Za-z][A-Za-z\-]{0,7})\s*[)）]")
 # frame).
 WITHHELD_ARGUMENTS = {
     "layout.schematic.scrolling.caption_anchored": "%1$@",
+    "layout.schematic.scrolling.caption_center": "%1$@",
+    "layout.schematic.scrolling.caption_center_cut": "%1$@",
     "layout.schematic.scrolling.caption_follow": "%2$@",
 }
 

@@ -167,7 +167,7 @@ restated `20...80` satisfies on the day it is written.
   Where a preview models part of an engine's rule, say which part
   and file the rest (#708 for the unmodelled spill).
 - **A control's BOUND that claims what the engine fits is Core's
-  the same way (#1382).** The Columns on screen stepper greys ▲
+  the same way (#1382).** The Windows on screen stepper greys ▲
   where one more slot would fall under the minimum window size;
   that count is `KiwiCore.scrollingColumnCap`, which picks the
   screen, reads its size through the one bounds hook and hands
@@ -205,7 +205,15 @@ restated `20...80` satisfies on the day it is written.
     the drawing by `LayoutSchematicCaptionTests`) — and that
     condition owes the SCALE as well as the row, since a
     thumbnail whose monitor fills its canvas has no margin for
-    the neighbouring slot to reach into.
+    the neighbouring slot to reach into. A clause about what
+    the screen EDGE cuts takes a stricter shape (#1382), since
+    it is geometric where the `+` is index arithmetic: derived
+    from the drawn geometry (`cutsWindow`) at the length the
+    strip LAID OUT AT — the tile speaks the same label, and a
+    length no scale draws over-claimed a cut there — with the
+    words held to the predicate at every length and the
+    predicate to the drawing by
+    `LayoutSchematicCenterCaptionTests`.
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by
   skipping the drawing rather than leaving it to the frame's

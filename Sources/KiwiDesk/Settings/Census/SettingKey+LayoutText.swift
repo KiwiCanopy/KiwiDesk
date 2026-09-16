@@ -48,8 +48,12 @@ extension LayoutKey {
             return .text("scroll_grid.focus_anchor")
         case .scrollingSlotSizeUnit:
             return .text("slot_size.unit")
-        case .scrollingSlotSizeValue, .scrollingOverrideSlotSize,
-            .scrollingSlotSizeCount:
+        case .scrollingSlotSizeValue, .scrollingOverrideSlotSize:
+            return .dynamic
+        // Drawn under the Percent unit only, so a hit of its own
+        // would land on nothing under Points; its words ride the
+        // unit row's synonyms instead (#1382).
+        case .scrollingSlotSizeCount:
             return .dynamic
         case .scrollingWrapFocus, .monocleWrapFocus:
             return .text("scroll_grid.wrap_focus")

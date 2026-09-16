@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// "Columns on screen" / "Rows on screen" — the count a scrolling
-/// share IS, beneath the Percent slider (#1382). Typeable like
+/// "Windows on screen" — the count a scrolling share IS, beneath
+/// the Percent slider (#1382). Typeable like
 /// every stepper (an integer only), writing the count's share
 /// into the one stored fraction; "—" (spoken "not a whole
 /// count") when the share is not `1/n`. Every count↔share step
@@ -21,9 +21,7 @@ struct SlotCountRow: View {
     @FocusState private var focused: Bool
 
     private var label: String {
-        isVertical
-            ? L("slot_count.rows", "Rows on screen")
-            : L("slot_count.columns", "Columns on screen")
+        L("slot_count.label", "Windows on screen")
     }
 
     /// The stored share, `auto` resolving to its orientation's.
@@ -63,7 +61,7 @@ struct SlotCountRow: View {
                 label: label,
                 help: L(
                     "slot_count.help",
-                    "Sets the size so this many fit exactly, gaps "
+                    "Sizes windows so exactly this many fit, gaps "
                         + "included; stops where one more would fall "
                         + "under the minimum window size."
                 )

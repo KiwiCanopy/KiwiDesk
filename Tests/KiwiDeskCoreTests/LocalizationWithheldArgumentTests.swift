@@ -24,7 +24,7 @@ import Testing
 /// value is read.
 @Suite("extract-keys withheld-argument guard")
 struct LocalizationWithheldArgumentTests {
-    /// Both registered keys, each with the specifier its own
+    /// Every registered key, each with the specifier its own
     /// frame withholds. Listed rather than read from the script,
     /// so a key quietly dropped from `WITHHELD_ARGUMENTS` leaves
     /// this red instead of vacuously green.
@@ -32,6 +32,8 @@ struct LocalizationWithheldArgumentTests {
         "a mid-sentence withheld argument fails",
         arguments: [
             ("layout.schematic.scrolling.caption_anchored", "%1$@"),
+            ("layout.schematic.scrolling.caption_center", "%1$@"),
+            ("layout.schematic.scrolling.caption_center_cut", "%1$@"),
             ("layout.schematic.scrolling.caption_follow", "%2$@"),
         ]
     )
