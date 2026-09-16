@@ -11102,8 +11102,9 @@ the connected count leads under *For your N screens*, the other
 counts follow under their own headers, and a single-count user
 sees the card exactly as before, headerless. Two consequences
 follow. The *for N screen(s)* badge is retired — its fact is the
-group header now, and its timeless half moved into the card's
-`?` — and a bound name whose profile no reading can count sits in
+group header now, and the card's `?` states the one-per-count
+rule in one clause (the owner struck its "the others wait"
+tail, 2026-09-16) — and a bound name whose profile no reading can count sits in
 a last *Couldn't load* group, offering only None, since it
 belongs to no count and a picker that cannot say which count it
 edits must not pretend to. A connected count no profile is saved

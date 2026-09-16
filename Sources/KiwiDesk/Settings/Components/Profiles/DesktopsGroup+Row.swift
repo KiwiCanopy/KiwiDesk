@@ -102,7 +102,13 @@ extension DesktopsGroup {
             }
         }
         .labelsHidden()
+        .pickerStyle(.menu)
         .controlSize(.large)
+        // A pop-up draws at the width of its widest option,
+        // centred in whatever frame it is given, so two groups
+        // offering different profiles drew two widths (owner,
+        // 2026-09-16); asked to fill, it takes the frame.
+        .frame(maxWidth: .infinity)
         .frame(width: 180)
         // An empty title names nothing, so the picker is named
         // here — a count group's by its count, since one Desktop

@@ -78,8 +78,7 @@ struct DesktopsGroup: View {
                 + "fullscreen windows that no longer blank the "
                 + "others. A Desktop can hold one profile per "
                 + "screen count: the one saved for as many "
-                + "screens as are connected loads, and the "
-                + "others wait until that many are."
+                + "screens as are connected loads."
         )
     }
 
@@ -87,10 +86,12 @@ struct DesktopsGroup: View {
         L(
             "desktops.intro",
             "These are your Mac's own Desktops, from Mission "
-                + "Control — not KiwiDesk's Spaces. Pick a "
-                + "profile to load automatically when a "
-                + "Desktop activates on your main screen "
-                + "(the one with the menu bar)."
+                + "Control — not KiwiDesk's Spaces; under each "
+                + "is the screen it is on, or was last seen on "
+                + "while it isn't present. Pick a profile to "
+                + "load automatically when a Desktop activates "
+                + "on your main screen (the one with the menu "
+                + "bar)."
         )
     }
 
