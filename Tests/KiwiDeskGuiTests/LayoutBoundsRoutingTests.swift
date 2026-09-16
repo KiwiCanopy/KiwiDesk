@@ -120,6 +120,13 @@ struct LayoutBoundsRoutingTests {
         // (`allScreenBounds`), equal in production; a fixture
         // pinning one must pin the other in step.
         "App/KiwiCore+TravelerRehome.swift": 1,
+        // The count stepper's cap (#1382) measures a span for the
+        // Settings DRAFT, whose Space Bar may differ from the
+        // live one `layoutBounds(on:)` reserves — so it takes the
+        // raw size and reserves the draft's own strip through
+        // `TilingSettings.layoutBounds(from:)`, the same seam one
+        // level down (`ScrollingColumnCapDoorTests`).
+        "App/KiwiCore+ScrollingColumnCap.swift": 1,
     ]
 
     @Test("Only the allowlisted files read raw display bounds")

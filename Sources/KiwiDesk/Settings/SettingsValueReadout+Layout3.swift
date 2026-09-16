@@ -181,7 +181,7 @@ extension SettingsValueReadout {
             .stackStackPosition, .stackOverflowStyle,
             .stackNewWindowPlacement, .scrollingOrientation,
             .scrollingAnchor, .scrollingSlotSizeUnit,
-            .scrollingSlotSizeValue,
+            .scrollingSlotSizeValue, .scrollingSlotSizeCount,
             .scrollingNewWindowPlacement, .scrollingWrapFocus,
             .scrollingFillWhenAlone, .stackFillWhenAlone,
             .gridType, .gridSplitDirection, .gridFillEmptyCells,

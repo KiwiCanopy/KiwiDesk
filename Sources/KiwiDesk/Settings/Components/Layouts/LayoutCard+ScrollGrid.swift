@@ -52,7 +52,8 @@ extension LayoutCard {
             model: model,
             size: scrolling.slotSize,
             isVertical: isVertical,
-            part: .unit
+            part: .unit,
+            space: nil
         )
     }
 
@@ -61,7 +62,8 @@ extension LayoutCard {
             model: model,
             size: scrolling.slotSize,
             isVertical: isVertical,
-            part: .control
+            part: .control,
+            space: nil
         )
     }
 

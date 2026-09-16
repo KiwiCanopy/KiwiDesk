@@ -108,6 +108,7 @@ struct SettingKeyModelParityTests {
             guard id.hasPrefix("settings.") else { continue }
             for suffix in [
                 " (auto)", " (unit)", " (value)", " (master)",
+                " (count)",
             ] where id.hasSuffix(suffix) {
                 id.removeLast(suffix.count)
             }

@@ -190,6 +190,32 @@ extension TilingSettings {
         )
     }
 
+    /// The most scrolling slots that fit `bounds` — the layout
+    /// region `KiwiCore.scrollingColumnCap` hands in — for
+    /// `space` (its resolved gaps, bars and orientation; nil
+    /// resolves the globals, the Layout Defaults card). The
+    /// Settings stepper's ▲ bound (#1382), derived from the terms
+    /// `ScrollingLayout.metrics` draws with and never from GUI
+    /// arithmetic over a screen frame (`ScrollingColumnCapTests`).
+    func scrollingColumnCap(
+        bounds: CGRect,
+        space: SpaceID?
+    ) -> Int {
+        let gaps = space.map(gaps(for:)) ?? gapsGlobal
+        let params = space.map(resolvedScrolling(for:)) ?? scrolling
+        let area = params.windowFrame(
+            in: LayoutContext.usable(bounds, outer: gaps.outer),
+            inner: gaps.inner,
+            global: appBarStyle
+        )
+        let horizontal = params.axisIsHorizontal
+        return ScrollSize.maxCount(
+            along: horizontal ? area.width : area.height,
+            gap: horizontal ? gaps.inner.horizontal : gaps.inner.vertical,
+            minimum: minWindowSize
+        )
+    }
+
     /// Builds a LayoutContext. `sticky` (#414 v2) is REQUIRED so every call
     /// site chooses (the `forceRetile` pattern, §5): a
     /// frame-producing build that silently omitted it would

@@ -51,6 +51,10 @@ extension LayoutCard {
         case .gridColumns, .gridRows, .trackLimit:
             // Drawn by their Auto toggles' `AutoGatedGroup` above.
             EmptyView()
+        case .scrollingSlotSizeCount:
+            // Drawn beneath the Percent slider by `SlotSizeRows`
+            // (#1382) — the slot's own control, on Percent only.
+            EmptyView()
         case .bspOverrideStrategy, .bspOverrideSplitRatioH,
             .bspOverrideSplitRatioV, .stackOverrideMasterCount,
             .stackOverrideMasterRatio,

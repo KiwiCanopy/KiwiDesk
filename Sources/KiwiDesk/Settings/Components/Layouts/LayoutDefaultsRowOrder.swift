@@ -32,6 +32,7 @@ enum LayoutDefaultsRowOrder {
         .layout(.scrollingAnchor),
         .layout(.scrollingSlotSizeUnit),
         .layout(.scrollingSlotSizeValue),
+        .layout(.scrollingSlotSizeCount),
         .layout(.scrollingFillWhenAlone),
         .layout(.scrollingNewWindowPlacement),
         .layout(.scrollingWrapFocus),

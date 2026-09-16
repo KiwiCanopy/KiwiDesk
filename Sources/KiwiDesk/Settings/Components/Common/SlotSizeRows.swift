@@ -11,6 +11,11 @@ struct SlotSizeRows: View {
     let isVertical: Bool
     /// Part of control to render (#68).
     var part: Part = .both
+    /// Whose screen bounds the count stepper's ▲ (#1382): the
+    /// space's own in the override editor, nil for the Layout
+    /// Defaults card. No default — a host that forgets it would
+    /// read a cap for the wrong screen and never grey.
+    let space: SpaceID?
 
     /// Unit picker presentation style (#291).
     var unitStyle: UnitStyle = .segmented
@@ -195,6 +200,13 @@ struct SlotSizeRows: View {
                     readout(percentReadout)
                 }
             }
+            // The share's count, beneath the slider (#1382) — on
+            // Percent only, as the slider it explains is.
+            SlotCountRow(
+                size: $size,
+                isVertical: isVertical,
+                cap: model.scrollingColumnCap(for: space)
+            )
         }
     }
 
@@ -203,7 +215,7 @@ struct SlotSizeRows: View {
     }
 
     private var percentReadout: String {
-        "\(Int(currentFraction * 100)) %"
+        SettingsValueReadout.percent(currentFraction)
     }
 
     private func readout(_ text: String) -> some View {

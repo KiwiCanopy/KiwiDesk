@@ -166,6 +166,21 @@ restated `20...80` satisfies on the day it is written.
   only because `LayoutSchematicTrackEngineTests` now requires it.
   Where a preview models part of an engine's rule, say which part
   and file the rest (#708 for the unmodelled spill).
+- **A control's BOUND that claims what the engine fits is Core's
+  the same way (#1382).** The Columns on screen stepper greys ▲
+  where one more slot would fall under the minimum window size;
+  that count is `KiwiCore.scrollingColumnCap`, which picks the
+  screen, reads its size through the one bounds hook and hands
+  the draft's own carve — outer gaps, the bar strip, the resolved
+  gaps and orientation — to `TilingSettings.scrollingColumnCap`,
+  because a GUI division of `visibleFrame.width` by the minimum
+  drifts from the layout on the first gap or bar the card cannot
+  see, and a raw `NSScreen` frame is the bounds source neither
+  routing guard can see. Every count↔share step the row takes is
+  `ScrollSize`'s too, so the GUI carries no rounding policy of
+  its own. A new bound of this shape takes a Core door beside
+  it, pinned like `ScrollingColumnCapTests` and
+  `ScrollingColumnCapDoorTests`; the row names only the space.
 - **A schematic draws ONE frame, and a fact about motion goes in
   the caption.** Never add a second mini-screen, an arrow between
   panes, or a sub-caption under one: a pair denotes two *states*
