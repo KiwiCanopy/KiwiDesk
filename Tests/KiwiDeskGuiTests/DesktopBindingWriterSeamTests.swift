@@ -66,6 +66,36 @@ struct DesktopBindingWriterSeamTests {
         // Vacuity: the algebra itself must be seen, or the
         // needles no longer match how the list is spelled.
         #expect(homeEdits >= 3)
+        // A fresh record built around a hand-made list bypasses
+        // the algebra unseen by the needles, so its construction
+        // sites are counted: the two empty seeds a bind then
+        // fills (the model's own convenience init spells
+        // `self.init`).
+        var constructions: [String: Int] = [:]
+        for tree in ["Sources/KiwiDeskCore", "Sources/KiwiDesk"] {
+            let dir = root.appendingPathComponent(tree)
+            for file in try SourceScan.swiftSources(under: dir) {
+                // Squashed, since the formatter wraps the init.
+                let source = SourceScan.stripComments(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                .split(whereSeparator: \.isWhitespace)
+                .joined()
+                let hits = source.occurrences(of: "DesktopBinding(profiles:")
+                if hits > 0 { constructions[file.lastPathComponent] = hits }
+            }
+        }
+        #expect(
+            constructions == [
+                "KiwiCore+Desktops.swift": 1,
+                "DesktopsGroup+Row.swift": 1,
+            ],
+            Comment(
+                rawValue:
+                    "\(constructions): a new DesktopBinding(profiles:) "
+                    + "site seeds a list by hand; go through bind"
+            )
+        )
         #expect(
             strays.isEmpty,
             Comment(

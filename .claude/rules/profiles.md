@@ -244,10 +244,12 @@ beside them — a count is each profile's own `monitorCount`, and a
 writer that wants one stored re-argues the design entry rather
 than adding a field. It is read by `boundProfile(of:)`, the one
 gate, which picks the LIVE profile where it is listed and saved
-for the connected screens, else the first entry that is, and
-stands the whole record aside where none is
-(`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
-`noFitStandsAside`). The obligations: a reader of a binding's
+for the connected screens, else the first entry that is — the
+one rank `DesktopBinding.ordered(preferring:)` gives, which the
+card's picker reads too — and stands the whole record aside
+where none is (`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
+`gatePrefersTheLiveProfile`, `noFitStandsAside`;
+`DesktopBindingGroupTests` ▸ `pickerPrefersTheLiveEntry`). The obligations: a reader of a binding's
 profile takes the PICKED profile off the gate's `.success` and
 never a listed name (`readersFollowThePick`); a writer files
 through `DesktopBinding.bind(_:countOf:)` — same count replaces,

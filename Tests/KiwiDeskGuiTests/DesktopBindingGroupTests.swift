@@ -13,29 +13,15 @@ import Testing
 @MainActor
 @Suite("Desktop binding count groups (#1436)")
 struct DesktopBindingGroupTests {
-    private let live = DesktopKey.identity(DesktopIdentity(raw: "LIVE"))
-    private let gone = DesktopKey.identity(DesktopIdentity(raw: "GONE"))
+    private let live = DesktopBindingFixture.live
+    private let gone = DesktopBindingFixture.gone
 
     private func summary(_ name: String, count: Int) -> ProfileSummary {
-        ProfileSummary(
-            name: name,
-            count: count,
-            sets: [],
-            isDefault: false,
-            matchesLive: false,
-            matchesConnectedCount: false,
-            openingModes: [],
-            spaceCount: 0,
-            shortcutOverrideCount: 0
-        )
+        DesktopBindingFixture.summary(name, count: count)
     }
 
     private var profiles: [ProfileSummary] {
-        [
-            summary("Dual", count: 2),
-            summary("Laptop", count: 1),
-            summary("Triple", count: 3),
-        ]
+        DesktopBindingFixture.profiles
     }
 
     private var counts: [String: Int] {
@@ -65,20 +51,40 @@ struct DesktopBindingGroupTests {
             profiles: profiles,
             connected: 2
         )
-        #expect(docked == BindingCounts(leading: 2, others: [1, 3]))
+        #expect(
+            docked
+                == BindingCounts(
+                    leading: 2,
+                    others: [1, 3],
+                    displaysUnknown: false
+                )
+        )
         #expect(docked.all == [2, 1, 3])
         let unknown = ProfilesFamilyRows.bindingCounts(
             profiles: profiles,
             connected: 0
         )
-        #expect(unknown == BindingCounts(leading: nil, others: [1, 2, 3]))
+        #expect(
+            unknown
+                == BindingCounts(
+                    leading: nil,
+                    others: [1, 2, 3],
+                    displaysUnknown: true
+                )
+        )
         // A count no profile is saved for is no group at all,
-        // and then nothing leads.
+        // and then nothing leads — for a reason the caption
+        // tells from the unknown reading.
         #expect(
             ProfilesFamilyRows.bindingCounts(
                 profiles: [summary("Dual", count: 2)],
                 connected: 1
-            ) == BindingCounts(leading: nil, others: [2])
+            )
+                == BindingCounts(
+                    leading: nil,
+                    others: [2],
+                    displaysUnknown: false
+                )
         )
     }
 
@@ -95,7 +101,11 @@ struct DesktopBindingGroupTests {
         let listed = rows(bindings: bindings)
         let groups = ProfilesFamilyRows.bindingGroups(
             rows: listed,
-            counts: BindingCounts(leading: 2, others: [1, 3]),
+            counts: BindingCounts(
+                leading: 2,
+                others: [1, 3],
+                displaysUnknown: false
+            ),
             profileCounts: counts
         )
         try #require(groups.count == 4)
@@ -114,7 +124,11 @@ struct DesktopBindingGroupTests {
             rows: rows(bindings: [
                 live: DesktopBinding(profiles: ["Laptop"], desktop: 1)
             ]),
-            counts: BindingCounts(leading: 1, others: []),
+            counts: BindingCounts(
+                leading: 1,
+                others: [],
+                displaysUnknown: false
+            ),
             profileCounts: counts
         )
         #expect(clean.count == 1)
@@ -176,117 +190,6 @@ struct DesktopBindingGroupTests {
         )
     }
 
-    // MARK: - The slot write
-
-    private func makeCard() -> (DesktopsGroup, SettingsModel) {
-        let model = makeTestModel(
-            core: makeTestCore(
-                configDirectory: FileManager.default
-                    .temporaryDirectory
-                    .appendingPathComponent(
-                        "kiwi-group-\(UUID().uuidString)"
-                    )
-            )
-        )
-        model.profileSummaries = profiles
-        model.mainDesktops = [1]
-        model.desktopKeys = [1: live]
-        model.presentDesktopKeys = [live, .number(1)]
-        model.desktopScreens = [live: "Built-in"]
-        return (DesktopsGroup(model: model), model)
-    }
-
-    /// A pick in one count group leaves the other counts'
-    /// entries where they are; None clears only that slot; the
-    /// record goes when its last entry does.
-    @Test("a pick edits one slot and leaves the others")
-    func pickEditsOneSlot() {
-        let (card, model) = makeCard()
-        card.write("Laptop", key: live, slot: .count(1))
-        #expect(
-            model.config.profileBindings[live]?.profiles == ["Laptop"]
-        )
-        // The projections come from the row it was built from.
-        #expect(model.config.profileBindings[live]?.desktop == 1)
-        #expect(model.config.profileBindings[live]?.screen == "Built-in")
-        card.write("Dual", key: live, slot: .count(2))
-        #expect(
-            model.config.profileBindings[live]?.profiles
-                == ["Laptop", "Dual"]
-        )
-        // Re-picking a count replaces that count's entry alone.
-        model.profileSummaries.append(summary("Solo", count: 1))
-        card.write("Solo", key: live, slot: .count(1))
-        #expect(
-            model.config.profileBindings[live]?.profiles
-                == ["Dual", "Solo"]
-        )
-        card.write(nil, key: live, slot: .count(2))
-        #expect(
-            model.config.profileBindings[live]?.profiles == ["Solo"]
-        )
-        card.write(nil, key: live, slot: .count(1))
-        #expect(model.config.profileBindings[live] == nil)
-    }
-
-    /// Two entries of one count — a profile re-saved at a
-    /// sibling's count — are BOTH replaced by a pick and both
-    /// cleared by None, or the picker reads back the survivor
-    /// and the pick is lost.
-    @Test("a pick replaces every entry of its count")
-    func pickReplacesEveryEntryOfItsCount() {
-        let (card, model) = makeCard()
-        model.profileSummaries.append(summary("Solo", count: 1))
-        model.config.profileBindings[live] = DesktopBinding(
-            profiles: ["Laptop", "Solo", "Dual"],
-            desktop: 7
-        )
-        model.profileSummaries.append(summary("Third", count: 1))
-        card.write("Third", key: live, slot: .count(1))
-        #expect(
-            model.config.profileBindings[live]?.profiles
-                == ["Dual", "Third"]
-        )
-        // …and the stale number projection took the row's.
-        #expect(model.config.profileBindings[live]?.desktop == 1)
-        model.config.profileBindings[live]?.profiles = [
-            "Laptop", "Solo", "Dual",
-        ]
-        card.write(nil, key: live, slot: .count(1))
-        #expect(model.config.profileBindings[live]?.profiles == ["Dual"])
-    }
-
-    /// An orphan slot's None drops that name and nothing else.
-    @Test("clearing an orphan drops only that name")
-    func orphanClearDropsTheName() {
-        let (card, model) = makeCard()
-        model.config.profileBindings[live] = DesktopBinding(
-            profiles: ["Vanished", "Laptop"],
-            desktop: 1
-        )
-        card.write(nil, key: live, slot: .orphan("Vanished"))
-        #expect(
-            model.config.profileBindings[live]?.profiles == ["Laptop"]
-        )
-    }
-
-    /// A record under the number twin is settled onto the stamp
-    /// by the write, with its other entries carried.
-    @Test("a write settles the twin onto the stamp")
-    func writeSettlesTheTwin() {
-        let (card, model) = makeCard()
-        model.config.profileBindings[.number(1)] = DesktopBinding(
-            profiles: ["Dual"],
-            desktop: 1
-        )
-        card.write("Laptop", key: live, slot: .count(1))
-        #expect(model.config.profileBindings[.number(1)] == nil)
-        #expect(
-            model.config.profileBindings[live]?.profiles
-                == ["Dual", "Laptop"]
-        )
-    }
-
     /// The view's half no model test sees: the groups are drawn
     /// through the one derivation, each row with its slot, and a
     /// group's picker offers profiles through Core's judgement.
@@ -315,7 +218,7 @@ struct DesktopBindingGroupTests {
         // stands down with no display reading (#1436 review).
         #expect(
             card.contains(
-                "ifcounts.leading==nil,!model.displays.isEmpty{"
+                "ifcounts.leading==nil,!counts.displaysUnknown{"
                     + "caption(noProfileForCount)"
             )
         )

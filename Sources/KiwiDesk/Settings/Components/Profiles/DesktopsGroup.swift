@@ -103,7 +103,7 @@ struct DesktopsGroup: View {
         if desktopRows.isEmpty {
             emptyHint
         } else {
-            if counts.leading == nil, !model.displays.isEmpty {
+            if counts.leading == nil, !counts.displaysUnknown {
                 caption(noProfileForCount)
             }
             ForEach(groups, id: \.self) { group in
@@ -233,17 +233,15 @@ struct DesktopsGroup: View {
     /// was filed at before Core re-keyed it, so a row looks under
     /// both of its keys — otherwise the picker reads empty for a
     /// binding the user can see on the row above.
+    ///
+    /// A DORMANT identity row has no twin: its number is where
+    /// it was last seen, which a live Desktop may hold now, and
+    /// that Desktop's own record is not this row's to drop.
     func twin(_ key: DesktopKey) -> DesktopKey? {
         guard case .identity = key,
-            let number = desktopRows.first(where: { $0.key == key })?
-                .number
+            let row = desktopRows.first(where: { $0.key == key }),
+            !row.isDormant
         else { return nil }
-        return .number(number)
-    }
-
-    /// The record a row edits, under either of its keys.
-    func record(for key: DesktopKey) -> DesktopBinding? {
-        model.config.profileBindings[key]
-            ?? twin(key).flatMap { model.config.profileBindings[$0] }
+        return .number(row.number)
     }
 }

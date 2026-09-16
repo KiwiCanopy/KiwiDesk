@@ -155,16 +155,23 @@ extension DesktopsGroup {
     }
 
     /// The slot's bound name off the row's own record: for a
-    /// count, the entry saved for it; for an orphan, the name
+    /// count, the entry saved for it in the gate's own rank, so
+    /// the picker names what fires; for an orphan, the name
     /// itself while bound.
     private func bound(_ row: DesktopRow, slot: BindingSlot) -> String? {
         guard let record = row.binding else { return nil }
         switch slot {
         case .count(let count):
-            return record.profiles.first { profileCounts[$0] == count }
+            return record.ordered(preferring: model.activeProfile)
+                .first { profileCounts[$0] == count }
         case .orphan(let name):
             return record.profiles.contains(name) ? name : nil
         }
+    }
+
+    /// `bound` by key, for a test that holds no row.
+    func boundName(key: DesktopKey, slot: BindingSlot) -> String? {
+        desktopRows.first { $0.key == key }.flatMap { bound($0, slot: slot) }
     }
 
     private func binding(
@@ -189,7 +196,8 @@ extension DesktopsGroup {
         // nil arms.
         let row = desktopRows.first { $0.key == key }
         var record =
-            record(for: key)
+            row?.binding
+            ?? model.config.profileBindings[key]
             ?? DesktopBinding(
                 profiles: [],
                 desktop: row?.number ?? key.number ?? 0

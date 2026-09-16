@@ -85,6 +85,15 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         profiles = profiles.map { $0 == old ? new : $0 }
     }
 
+    /// The list in the ONE rank every reader picks by: `live`
+    /// first where it is listed, then binding order — so the
+    /// gate's pick, the door's stand-down and a picker's answer
+    /// for one count cannot name different entries (#1436).
+    public func ordered(preferring live: String?) -> [String] {
+        guard let live, profiles.contains(live) else { return profiles }
+        return [live] + profiles.filter { $0 != live }
+    }
+
     private enum CodingKeys: String, CodingKey {
         case profiles
         case desktop

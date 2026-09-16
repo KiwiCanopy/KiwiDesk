@@ -45,6 +45,10 @@ enum BindingGroup: Hashable {
 struct BindingCounts: Hashable {
     let leading: Int?
     let others: [Int]
+    /// Nothing leads because there is no display reading yet —
+    /// Core's `.displaysUnknown` — rather than because no
+    /// profile is saved for the connected count.
+    let displaysUnknown: Bool
     var all: [Int] { (leading.map { [$0] } ?? []) + others }
 }
 
@@ -185,15 +189,22 @@ struct ProfilesFamilyRows {
         connected: Int
     ) -> BindingCounts {
         let counts = Set(profiles.map(\.count)).sorted()
-        let leading = counts.first {
-            DesktopBindingRefusal.of(
-                profileCount: $0,
+        var leading: Int?
+        var unknown = false
+        for count in counts where leading == nil {
+            switch DesktopBindingRefusal.of(
+                profileCount: count,
                 connected: connected
-            ) == nil
+            ) {
+            case nil: leading = count
+            case .displaysUnknown?: unknown = true
+            case .screenCount?, .unreadable?: break
+            }
         }
         return BindingCounts(
             leading: leading,
-            others: counts.filter { $0 != leading }
+            others: counts.filter { $0 != leading },
+            displaysUnknown: unknown
         )
     }
 

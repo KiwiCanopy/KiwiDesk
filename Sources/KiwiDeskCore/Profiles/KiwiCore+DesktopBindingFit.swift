@@ -88,13 +88,7 @@ extension KiwiCore {
         var saved: [DesktopBindingRefusal.SavedCount] = []
         var unreadable: Error = EmptyDesktopBinding()
         var waiting = false
-        let live = profiles.currentName.flatMap { name in
-            binding.profiles.contains(name) ? name : nil
-        }
-        let order =
-            (live.map { [$0] } ?? [])
-            + binding.profiles.filter { $0 != live }
-        for name in order {
+        for name in binding.ordered(preferring: profiles.currentName) {
             let profile: Profile
             do {
                 profile = try profiles.read(name: name)
