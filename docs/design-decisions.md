@@ -2304,6 +2304,30 @@ notes name the switch so the user who wants one window kept at
 its slot knows there is one.
 :::
 
+:::unreleased
+**The fixed anchors are absolute; `follow` alone keeps the
+screen filled (#1388).** Every anchor once shared one clamp:
+the row's extent stayed on screen, so a short row was pulled
+flush to the leading edge whatever the anchor said, and on an
+ultrawide a lone or end-of-row window sat wherever the row
+ended rather than where the user had pointed — a long way from
+"in front of me". The clamp is `follow`'s promise: that anchor
+exists to keep the screen filled and the side you came from in
+view, and without it a scrolled row that shrinks — a window
+closing, a resize — would leave empty margin past its trailing
+end where nothing asked for one. `center`, `start` and `end`
+promise a position instead, and a
+position honoured only when the row happens to be long enough
+is not the setting's name. So they compute their rest and use
+it — a lone window under `start` sits at the edge with the
+rest of the screen empty, by design. A "don't clamp" toggle
+beside the picker was rejected: the anchor's name already says
+what the user wants, and a second switch to make it true is
+one control too many. With "If one window, fill the screen"
+on (#1389) the lone case never arises; the anchors matter for
+the rows fill leaves alone.
+:::
+
 **`follow` holds a place, not a number: a resize re-anchors the
 viewport (#966).** A scrolling row has one slot size for every
 slot, so resizing one moves every slot's *position* along the

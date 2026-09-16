@@ -105,6 +105,18 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         /// Keep prior viewport offset and pan minimum needed to reveal focus
         /// (#66).
         case follow
+
+        /// Whether the anchor keeps the row's extent on screen —
+        /// `follow`'s promise alone; the three fixed anchors are
+        /// absolute (#1388, `ScrollingAbsoluteAnchorTests`). The
+        /// one home of that class: the offset's two arms and the
+        /// preview read it here.
+        public var keepsRowOnScreen: Bool {
+            switch self {
+            case .follow: return true
+            case .center, .start, .end: return false
+            }
+        }
     }
 
     /// Axis along which columns/rows scroll.

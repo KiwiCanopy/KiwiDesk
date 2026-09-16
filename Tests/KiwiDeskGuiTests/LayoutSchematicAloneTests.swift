@@ -84,11 +84,13 @@ struct LayoutSchematicAloneTests {
 
     @Test("Scrolling: the lone slot is drawn where the engine rests it")
     func scrollingLoneRest() {
-        let kept = scrolling(fill: false)
+        let kept = scrolling(fill: false, anchor: .follow)
         let m = kept.metrics(along: 400)
-        // The engine leaves a row shorter than the axis at the
-        // leading edge, so the one slot starts where the screen
-        // starts; a fill spans the whole screen.
+        // Under `follow` the engine leaves a row shorter than the
+        // axis at the leading edge, so the one slot starts where
+        // the screen starts (a fixed anchor rests it absolutely,
+        // #1388 — `keptLoneNamesTheAnchor`); a fill spans the
+        // whole screen.
         #expect(abs(m.focusCenter - m.slot / 2 - m.screenStart) < 0.01)
         let full = scrolling(fill: true).metrics(along: 400)
         #expect(abs(full.slot - full.screenLen) < 0.01)
@@ -147,15 +149,55 @@ struct LayoutSchematicAloneTests {
         #expect(stackFilled.loneAxLabel != stackKept.loneAxLabel)
     }
 
+    /// A kept lone window under a fixed anchor rests where the
+    /// anchor says (#1388), and its words say so — under `follow`
+    /// it sits where the row starts and the sentence stays
+    /// place-free. The drawn rest is the engine's: the fixed
+    /// anchors centre / edge the one slot, `follow` leads it.
+    @Test("a kept lone window names its anchor, and rests there")
+    func keptLoneNamesTheAnchor() {
+        let follow = scrolling(fill: false, anchor: .follow)
+        for anchor in [ScrollingParams.Anchor.center, .start, .end] {
+            let fixed = scrolling(fill: false, anchor: anchor)
+            #expect(fixed.caption != follow.caption)
+            #expect(fixed.axLabel != follow.axLabel)
+            // Filled, the anchor is moot and the words say so.
+            let filled = scrolling(fill: true, anchor: anchor)
+            #expect(filled.caption == scrolling(fill: true).caption)
+        }
+        let m = { (a: ScrollingParams.Anchor) in
+            scrolling(fill: false, anchor: a).metrics(along: 400)
+        }
+        let centre = m(.center)
+        #expect(
+            abs(
+                centre.focusCenter
+                    - (centre.screenStart + centre.screenLen / 2)
+            ) < 0.01
+        )
+        let end = m(.end)
+        #expect(
+            abs(
+                end.focusCenter + end.slot / 2
+                    - (end.screenStart + end.screenLen)
+            ) < 0.01
+        )
+        let lead = m(.follow)
+        #expect(
+            abs(lead.focusCenter - lead.slot / 2 - lead.screenStart) < 0.01
+        )
+    }
+
     // MARK: - Fixtures
 
     private func scrolling(
         fill: Bool,
-        windows: Int = 1
+        windows: Int = 1,
+        anchor: ScrollingParams.Anchor = .center
     ) -> ScrollingSchematic {
         ScrollingSchematic(
             orientation: .horizontal,
-            anchor: .center,
+            anchor: anchor,
             slotSize: .auto,
             placement: .last,
             fillWhenAlone: fill,

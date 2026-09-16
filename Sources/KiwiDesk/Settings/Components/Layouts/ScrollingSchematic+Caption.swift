@@ -70,8 +70,12 @@ extension ScrollingSchematic {
     }
 
     /// The lone-window sentence switches with the fill toggle
-    /// (#1389, `LayoutSchematicAloneTests`); the slot noun is a
-    /// key per sentence, since a possessive agrees with it.
+    /// (#1389) and, kept, with the anchor: a fixed anchor rests
+    /// the one window where it says — at the edge, or centred,
+    /// with the rest empty by design (#1388) — while `follow`
+    /// leaves it where the row starts (`LayoutSchematicAloneTests`).
+    /// The slot noun is a key per sentence, since a possessive
+    /// agrees with it.
     private var loneCaption: String {
         if fillWhenAlone {
             return L(
@@ -79,18 +83,34 @@ extension ScrollingSchematic {
                 "One window fills the whole screen."
             )
         }
-        if orientation == .vertical {
+        switch (orientation, anchor) {
+        case (.vertical, .follow):
             return L(
                 "layout.schematic.scrolling.caption_alone_row",
                 "One window keeps its row height and leaves the "
                     + "rest of the screen empty."
             )
+        case (.vertical, _):
+            return L(
+                "layout.schematic.scrolling.caption_alone_row_at",
+                "One window keeps its row height and rests at "
+                    + "the anchor; the rest of the screen stays "
+                    + "empty."
+            )
+        case (.horizontal, .follow):
+            return L(
+                "layout.schematic.scrolling.caption_alone_column",
+                "One window keeps its column width and leaves the "
+                    + "rest of the screen empty."
+            )
+        case (.horizontal, _):
+            return L(
+                "layout.schematic.scrolling.caption_alone_column_at",
+                "One window keeps its column width and rests at "
+                    + "the anchor; the rest of the screen stays "
+                    + "empty."
+            )
         }
-        return L(
-            "layout.schematic.scrolling.caption_alone_column",
-            "One window keeps its column width and leaves the "
-                + "rest of the screen empty."
-        )
     }
 
     private var loneAxLabel: String {
@@ -101,18 +121,34 @@ extension ScrollingSchematic {
                     + "screen."
             )
         }
-        if orientation == .vertical {
+        switch (orientation, anchor) {
+        case (.vertical, .follow):
             return L(
                 "layout.schematic.scrolling.ax_alone_row",
                 "Scrolling preview: one window at its row height, "
                     + "the rest of the screen empty."
             )
+        case (.vertical, _):
+            return L(
+                "layout.schematic.scrolling.ax_alone_row_at",
+                "Scrolling preview: one window at its row height "
+                    + "resting at the anchor, the rest of the "
+                    + "screen empty."
+            )
+        case (.horizontal, .follow):
+            return L(
+                "layout.schematic.scrolling.ax_alone_column",
+                "Scrolling preview: one window at its column width, "
+                    + "the rest of the screen empty."
+            )
+        case (.horizontal, _):
+            return L(
+                "layout.schematic.scrolling.ax_alone_column_at",
+                "Scrolling preview: one window at its column "
+                    + "width resting at the anchor, the rest of "
+                    + "the screen empty."
+            )
         }
-        return L(
-            "layout.schematic.scrolling.ax_alone_column",
-            "Scrolling preview: one window at its column width, "
-                + "the rest of the screen empty."
-        )
     }
 
     private var followName: String {

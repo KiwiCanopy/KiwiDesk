@@ -116,15 +116,15 @@ struct ScrollingSchematic: View {
         let low = placed.slots.lowerBound
         let high = placed.slots.upperBound
         let newIdx = placed.incoming
-        // Where the row rests is the ENGINE's answer (#776): local
-        // anchor math once drew a leading margin no real space can
-        // reach. `.follow` resolves as `.center` — a static preview
-        // has no pan history (#753).
+        // Where the row rests is the ENGINE's answer (#776). A
+        // static preview has no pan history, so `follow` is asked
+        // from a centred one — the engine's own `.center` rest
+        // (#753, #1388).
         let count = high - low + 1
         let rowLength = CGFloat(count) * step - gap
         let focusedPos = CGFloat(-low) * step
-        let viewport = ScrollingLayout.offset(
-            anchor: anchor == .follow ? .center : anchor,
+        let resting = ScrollingLayout.offset(
+            anchor: anchor.keepsRowOnScreen ? .center : anchor,
             previous: nil,
             focus: nil,
             along: screenLen,
@@ -132,6 +132,18 @@ struct ScrollingSchematic: View {
             rowLength: rowLength,
             focusedPos: focusedPos
         )
+        let viewport =
+            anchor.keepsRowOnScreen
+            ? ScrollingLayout.offset(
+                anchor: .follow,
+                previous: ScrollRest(offset: resting),
+                focus: nil,
+                along: screenLen,
+                size: slot,
+                rowLength: rowLength,
+                focusedPos: focusedPos
+            )
+            : resting
         let focusCenter =
             screenStart + viewport + focusedPos + slot / 2
         return Metrics(

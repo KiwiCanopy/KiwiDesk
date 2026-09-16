@@ -11,7 +11,9 @@ extension ScrollingLayout {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> ScrollRest {
-        guard windows.count > 1 else {
+        // A lone window that fills keeps the history for a second
+        // arrival (#141); one kept at its slot rests like any row.
+        guard !fillsAlone(windows, context: context) else {
             return context.scrollRest ?? ScrollRest(offset: 0)
         }
         let area = context.scrolling.windowFrame(
@@ -29,13 +31,13 @@ extension ScrollingLayout {
         let value = offset(
             anchor: context.scrolling.anchor,
             previous: context.scrollRest,
-            focus: context.focused,
+            focus: metrics.subject,
             along: metrics.along,
             size: metrics.focusedSpan,
             rowLength: metrics.rowLength,
             focusedPos: metrics.focusedPos
         )
-        guard let focus = context.focused,
+        guard let focus = metrics.subject,
             let position = metrics.focusedPos
         else {
             return ScrollRest(
@@ -77,8 +79,9 @@ extension ScrollingLayout {
     /// the edge must not read as flush.
     static let edgeTolerance: CGFloat = 0.5
 
-    /// Checks if total row length exceeds viewport along the scrolling axis
-    /// (#150).
+    /// Whether the row reaches past the viewport along the scroll
+    /// axis (#150), judged on the DRAWN offset: a short row under
+    /// a fixed anchor can still hang off an edge (#1388).
     static func rowOverflows(
         for windows: [WindowID],
         in context: LayoutContext
@@ -96,6 +99,16 @@ extension ScrollingLayout {
             area: area,
             horizontal: horizontal
         )
-        return m.rowLength > m.along
+        let value = offset(
+            anchor: context.scrolling.anchor,
+            previous: context.scrollRest,
+            focus: m.subject,
+            along: m.along,
+            size: m.focusedSpan,
+            rowLength: m.rowLength,
+            focusedPos: m.focusedPos
+        )
+        return value < -edgeTolerance
+            || value + m.rowLength > m.along + edgeTolerance
     }
 }

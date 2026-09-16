@@ -1207,6 +1207,19 @@ only `follow` remembers the prior scroll position. Focusing a
 — a floating window has no slot in the row, so there is nothing
 to place.
 
+:::unreleased
+The three fixed anchors are **absolute**: the focused window
+rests where the anchor says, whatever the row's extent. Under
+`center` it is centred on the screen with its neighbours
+beside it; under `start` it takes the left (or top) edge — so
+the windows before it in the row leave the screen on that
+side — and `end` mirrors it. With nothing beside the focused
+window (a lone one kept at its slot,
+`scroll.set_fill_when_alone`) the rest of the screen stays
+empty. Only `follow` keeps the row's extent on screen: a row
+shorter than the axis sits flush at the leading edge under it.
+:::
+
 `follow` remembers where the *focused window* rested, not how far
 the row was pushed. One slot size serves every slot, so resizing
 one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
@@ -1221,7 +1234,7 @@ the App Bar — is not a rearrangement around the focus: the two
 windows visibly trade places, and the view pans only when the
 moved window's new slot would fall outside it.
 
-Near a row end the boundary wins, as always: the row never
+Near a row end the boundary wins under `follow`: the row never
 reveals empty margin past its ends, so there the focus
 re-anchors only as far as it can.
 
@@ -1308,7 +1321,8 @@ before the setting existed), a single window in a scrolling
 space takes the whole width or height and starts sharing only
 when a second window opens. When `false`, a lone window keeps
 the slot size (`scroll.set_slot_size`) it would have beside a
-neighbour, and the rest of the axis stays empty. The Settings
+neighbour, and the rest of the axis stays empty — where along
+the axis it rests is `scroll.set_anchor`'s. The Settings
 row is
 **If one window, fill the screen**; Stack has the same toggle
 (`stack.set_fill_when_alone`).

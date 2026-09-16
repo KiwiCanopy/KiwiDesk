@@ -21,6 +21,9 @@ private func makeContext(
     )
     context.scrollRest = offset.map { ScrollRest(offset: $0) }
     context.scrolling.slotSize = .points(800)
+    // Pinned (#660): the boundary clamp these tests reason from
+    // is `follow`'s alone since #1388.
+    context.scrolling.anchor = .follow
     return context
 }
 

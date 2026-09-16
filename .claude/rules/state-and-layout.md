@@ -1037,7 +1037,17 @@ editing here:
   which a bar toggle or a gap edit is enough to change.
   `ScrollingResizeAnchorTests` pins the discrimination itself —
   same focus, different focus, no slot, fixed anchor — and the
-  row-end clamp that outranks it, that last on a NON-last focus
+  row-end clamp that outranks it (a clamp that is `follow`'s
+  ALONE since #1388: `center`, `start` and `end` rest the focus
+  where they say whatever the row's extent, and under them the
+  slot the anchor places is the one `ScrollingLayout.subject` —
+  the tiled focus, or while a float holds focus the window the
+  rest remembers — so a scrolling metrics consumer reads
+  `subject` and never `context.focused`; a held rest is bounded
+  only once that window has left the row —
+  `ScrollingAbsoluteAnchorTests` ▸
+  `floatFocusAnchorsTheRememberedWindow`), that last on a
+  NON-last focus
   deliberately, since a last slot at a legal offset is
   flush-trailing by construction and would let the border arm
   answer in the clamp's place. `ScrollingBorderAnchorTests` is

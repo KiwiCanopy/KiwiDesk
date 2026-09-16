@@ -63,15 +63,14 @@ private func offsets(
 /// freeze the viewport and let the focused slot merely slide
 /// within it (the overlay symptom). Scroll-into-view is *weakly*
 /// symmetric: both directions pan monotonically and keep the
-/// focused window fully visible, but a window is revealed at the
-/// trailing edge going down and the leading edge going up, so the
-/// two offset sequences are not identical reverses — asserting
-/// that would pin behavior no edge anchor can satisfy without
-/// reintroducing the freeze. Pinned for all four anchors (#239):
-/// `follow` is the direct #66 minimal-pan case, and the fixed
-/// anchors — recomputed every focus — traverse the range
-/// monotonically too, so the anchor-pin/boundary-clamp
-/// interaction that caused the freeze stays covered.
+/// focused window fully visible, but under `follow` a window is
+/// revealed at the trailing edge going down and the leading edge
+/// going up, so its two offset sequences are not identical
+/// reverses — asserting that would pin behavior it cannot satisfy
+/// without reintroducing the freeze. Pinned for all four anchors
+/// (#239): `follow` is the direct #66 minimal-pan case, and the
+/// fixed anchors — recomputed every focus, absolute since #1388 —
+/// traverse monotonically and DO reverse exactly.
 @Suite("Scrolling focus up/down symmetry (#66)")
 struct ScrollingFocusSymmetryTests {
     @Test(
@@ -97,10 +96,33 @@ struct ScrollingFocusSymmetryTests {
         // Down never scrolls backward; up never scrolls forward.
         #expect(zip(down, down.dropFirst()).allSatisfy { $0 >= $1 })
         #expect(zip(up, up.dropFirst()).allSatisfy { $0 <= $1 })
-        // Both traverse the full range — focus-up is not frozen at
-        // the far end (the bug); it pans all the way back to start.
-        #expect(down.first == 0 && down.last == -1000)
-        #expect(up.first == -1000 && up.last == 0)
+        switch anchor {
+        case .follow:
+            // Both traverse the full range — focus-up is not
+            // frozen at the far end (the bug); it pans all the
+            // way back to start, and the row's extent bounds it.
+            #expect(down.first == 0 && down.last == -1000)
+            #expect(up.first == -1000 && up.last == 0)
+        case .center, .start, .end:
+            // A fixed anchor is absolute (#1388): each rest is
+            // recomputed from the anchor alone, so up is down's
+            // exact reverse, and the range is the anchor's own —
+            // `start` keeps the row's leading edge in reach,
+            // `end` its trailing one, `center` neither.
+            #expect(up == Array(down.reversed()))
+            // 1000 pt viewport, 400 pt slots: the first slot
+            // rests at 0 / 300 / 600 and the fifth at -1600 /
+            // -1300 / -1000, the anchor reaching past the row's
+            // ends wherever the row does not fill the screen.
+            let ends: (first: CGFloat, last: CGFloat) =
+                switch anchor {
+                case .start: (0, -1600)
+                case .center: (300, -1300)
+                default: (600, -1000)
+                }
+            #expect(down.first == ends.first)
+            #expect(down.last == ends.last)
+        }
     }
 
     @Test(
