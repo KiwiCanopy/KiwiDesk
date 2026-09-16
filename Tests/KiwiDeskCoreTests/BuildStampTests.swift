@@ -61,9 +61,12 @@ struct BuildStampTests {
             text.contains("SDK_VERSION=$(xcrun --show-sdk-version)"),
             "the SDK version is read off the toolchain"
         )
-        // The sed really extracts the target the manifest declares:
-        // run it over the real Package.swift and compare with an
-        // independent read. Shape, not value — a target bump moves
+        // The SCRIPT's sed really extracts the target the manifest
+        // declares: cut the expression out of the script text and
+        // run it over the real Package.swift, compared with an
+        // independent read — a hand copy here would stay green
+        // while the script's replacement went wrong (measured by
+        // the prover). Shape, not value — a target bump moves
         // both sides together.
         let root = scriptFixtureRepoRoot()
         let manifest = try String(
@@ -74,12 +77,15 @@ struct BuildStampTests {
             manifest.firstMatch(of: /\.macOS\(\.v(\d+)\)/)?.1,
             "Package.swift declares no macOS deployment target"
         )
+        let expression = try #require(
+            text.firstMatch(of: /MIN_OS=\$\((sed -n '[^']*')/)?.1,
+            "the MIN_OS derivation no longer reads as `sed -n '…'`"
+        )
         let run = try spawn(
             "/bin/bash",
             [
                 "-c",
-                #"sed -n 's/.*\.macOS(\.v\([0-9][0-9]*\)).*/\1.0/p' "#
-                    + "\"$1\" | head -1", "_",
+                String(expression) + " \"$1\" | head -1", "_",
                 root.appendingPathComponent("Package.swift").path,
             ]
         )
@@ -104,16 +110,18 @@ struct BuildStampTests {
             in: text,
             "the otool stamp read is gone"
         )
-        let copy = try index(
-            #"ditto "$SPARKLE_SRC""#,
+        let staging = try index(
+            #"rm -rf "$APP""#,
             in: text,
-            "the framework copy is gone"
+            "the bundle staging step is gone"
         )
         // After the gate, so a reused binary is verified too;
-        // before the first packaging step, so nothing is staged
-        // from a binary that will be refused.
+        // before the bundle is first touched, so nothing is staged
+        // from a binary that will be refused — the Sparkle copy is
+        // three steps later and let a staged binary through
+        // (measured by the prover).
         #expect(skipGate < verify)
-        #expect(verify < copy)
+        #expect(verify < staging)
     }
 
     /// The block between the otool read and the success echo,
