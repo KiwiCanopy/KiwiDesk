@@ -1133,7 +1133,7 @@
   "shortcuts.tracks.move": "Mover ventanas en el diseño Track",
   "slot_count.columns": "Columnas en pantalla",
   "slot_count.help": "Fija el tamaño para que quepan exactamente tantas, espaciado incluido; se detiene donde una más quedaría por debajo del tamaño mínimo de ventana.",
-  "slot_count.none": "no es un número entero",
+  "slot_count.none": "número no entero",
   "slot_count.none_glyph": "—",
   "slot_count.rows": "Filas en pantalla",
   "slot_size.column_width": "Anchura de columna",

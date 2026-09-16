@@ -65,21 +65,169 @@ struct SlotCountRowTests {
         #expect(row(.points(400)).up == nil)
         #expect(row(.points(400)).down == nil)
     }
+
+    @Test("the write lands the count's share in the binding")
+    func writeLands() {
+        var stored = ScrollSize.fraction(0.95)
+        let bound = SlotCountRow(
+            size: Binding(get: { stored }, set: { stored = $0 }),
+            isVertical: false,
+            cap: 6
+        )
+        bound.write(3)
+        #expect(stored == .fraction(ScrollSize.share(of: 3)))
+        #expect(ScrollSize.count(of: ScrollSize.share(of: 3)) == 3)
+        bound.write(1)
+        #expect(stored == .fraction(1))
+    }
+
+    @Test("a typed entry is an integer clamped to the cap")
+    func typedEntry() {
+        #expect(SlotCountRow.typed("3", cap: 6) == 3)
+        #expect(SlotCountRow.typed("99", cap: 6) == 6)
+        #expect(SlotCountRow.typed("0", cap: 6) == 1)
+        #expect(SlotCountRow.typed("1/3", cap: 6) == nil)
+        #expect(SlotCountRow.typed("", cap: 6) == nil)
+    }
+
+    @Test("the arrows step up and down; a blur commits only an edit")
+    func arrowsAndCommitWiring() throws {
+        let source = try SourceScan.stripComments(
+            String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/Common/"
+                            + "SlotCountRow.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(source.occurrences(of: "onIncrement: up.map") == 1)
+        #expect(source.occurrences(of: "onDecrement: down.map") == 1)
+        // Only the user's own keystrokes reach the store on a blur.
+        #expect(source.occurrences(of: "if edited, let n = Self.typed(") == 1)
+        #expect(source.occurrences(of: "if focused { edited = true }") == 1)
+    }
+
+    @Test("the hosts hand the row the space whose screen bounds ▲")
+    func hostsNameTheirSpace() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        let grid = try SourceScan.stripComments(
+            String(
+                contentsOf: root.appendingPathComponent(
+                    "Components/Layouts/LayoutCard+ScrollGrid.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        // Both Layout Defaults mounts: no space, the widest screen.
+        #expect(grid.occurrences(of: "space: nil") == 2)
+        let override = try SourceScan.stripComments(
+            String(
+                contentsOf: root.appendingPathComponent(
+                    "Components/SpaceOverrides/OverrideSlotSizeRow.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(override.occurrences(of: "space: space,") == 1)
+        // The row asks the model itself, once, with that space.
+        let rows = try SourceScan.stripComments(
+            String(
+                contentsOf: root.appendingPathComponent(
+                    "Components/Common/SlotSizeRows.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(
+            rows.occurrences(of: "model.scrollingColumnCap(for: space)")
+                == 1
+        )
+        // The count row is mounted, once, handed that cap.
+        #expect(rows.occurrences(of: "SlotCountRow(") == 1)
+        #expect(
+            rows.occurrences(of: "cap: model.scrollingColumnCap(for: space)")
+                == 1
+        )
+        // No host spells the no-screen edge for itself.
+        for file in try SourceScan.swiftSources(under: root) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                text.occurrences(of: "cap: ScrollSize.countCeiling") == 0,
+                "\(file.lastPathComponent)"
+            )
+        }
+    }
 }
 
-/// One percent formatter (#1382): whole numbers whole, otherwise
-/// one decimal, shared by the readouts and the pill.
+/// One percent formatter (#1382): the wire's spelling, shared by
+/// the readouts, the pill and the inherited-value pill — so the
+/// card never shows a number the count row or a chip refuses.
 @Suite("Percent formatter (#1382)")
 @MainActor
 struct PercentFormatterTests {
-    @Test("whole numbers whole, otherwise one decimal")
+    @Test("the readout is the wire spelling")
     func format() {
         #expect(SettingsValueReadout.percentDigits(0.5) == "50")
-        #expect(SettingsValueReadout.percentDigits(1.0 / 3) == "33.3")
+        #expect(SettingsValueReadout.percentDigits(1.0 / 3) == "33.33")
         #expect(SettingsValueReadout.percentDigits(0.29) == "29")
         #expect(SettingsValueReadout.percentDigits(0.95) == "95")
-        #expect(SettingsValueReadout.percentDigits(2.0 / 3) == "66.7")
+        #expect(SettingsValueReadout.percentDigits(2.0 / 3) == "66.67")
         #expect(SettingsValueReadout.percentDigits(1) == "100")
+        for fraction in [0.5, 1.0 / 3, 0.29, 1.0 / 7] {
+            #expect(
+                SettingsValueReadout.percentDigits(fraction) + "%"
+                    == ScrollSize.percentString(fraction)
+            )
+        }
+    }
+
+    @Test("the readouts route through the one formatter")
+    func routed() throws {
+        LocalizationManager.shared.select("en")
+        #expect(SettingsValueReadout.percent(1.0 / 3) == "33.33%")
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings/Components")
+        for name in [
+            "Common/SettingsRows.swift", "Common/SlotSizeRows.swift",
+            "SpaceOverrides/OverrideControls.swift",
+        ] {
+            let text = try SourceScan.stripComments(
+                String(
+                    contentsOf: root.appendingPathComponent(name),
+                    encoding: .utf8
+                )
+            )
+            #expect(
+                text.occurrences(of: "SettingsValueReadout.percent(") >= 1,
+                "\(name)"
+            )
+            // No hand-spelled percent string beside it.
+            #expect(text.occurrences(of: ")%\"") == 0, "\(name)")
+        }
+        // And the split rows mount the chips, once.
+        let rows = try SourceScan.stripComments(
+            String(
+                contentsOf: root.appendingPathComponent(
+                    "Common/SettingsRows.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        #expect(rows.occurrences(of: "FractionChips(") == 1)
+    }
+
+    @Test("what the readout shows, the count row reads back")
+    func readoutRoundTrips() {
+        for n in 1...20 {
+            let shown = SettingsValueReadout.percentDigits(1 / Double(n))
+            let typed = (Double(shown) ?? 0) / 100
+            #expect(ScrollSize.count(of: typed) == n)
+        }
     }
 }
 

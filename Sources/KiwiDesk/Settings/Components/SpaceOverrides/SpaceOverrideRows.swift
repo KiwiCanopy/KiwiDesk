@@ -130,7 +130,7 @@ struct SpaceOverrideRows: View {
         OverrideSlotSizeRow(
             model: model,
             isVertical: scrollingIsVertical,
-            columnCap: model.scrollingColumnCap(for: space),
+            space: space,
             value: binding(\.scrolling.override, space, \.slotSize),
             // The inherited value is the global slot size (the
             // per-space override is the only layer above it), so

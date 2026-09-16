@@ -1,0 +1,78 @@
+import AppKit
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// `KiwiCore.scrollingColumnCap(for:settings:)` (#1382): the
+/// screen's size comes through the one bounds hook (#531) and
+/// the strip reserved on it is the DRAFT's, not the live bar's.
+/// A host with no screen answers nil, which the GUI reads as
+/// the share's own floor; the suite skips there rather than
+/// asserting the host.
+@Suite("Scrolling column cap door (#1382)")
+@MainActor
+struct ScrollingColumnCapDoorTests {
+    private func draft() -> TilingSettings {
+        var settings = TilingSettings()
+        settings.minWindowSize = 300
+        settings.gapsGlobal = Gaps(
+            outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
+            inner: Gaps.Inner(horizontal: 10, vertical: 10)
+        )
+        settings.scrolling.appBar.enabled = false
+        settings.spaceBarStyle.enabled = false
+        return settings
+    }
+
+    @Test("the size is the hook's, the strip the draft's")
+    func hookAndDraft() {
+        let core = makeTestCore()
+        let pinned = CGRect(x: 0, y: 0, width: 1920, height: 1080)
+        core.tiler.visibleBounds = { _ in pinned }
+        // The live bar is wide and on the left; the draft has none.
+        core.tiler.settings.spaceBarStyle.enabled = true
+        core.tiler.settings.spaceBarStyle.edge = .left
+        core.tiler.settings.spaceBarStyle.thickness = 700
+        guard !NSScreen.screens.isEmpty else {
+            #expect(
+                core.scrollingColumnCap(for: nil, settings: draft()) == nil
+            )
+            return
+        }
+        // 1920 across at 300 + 10: six — the live bar's 700 pt
+        // strip would leave three.
+        #expect(core.scrollingColumnCap(for: nil, settings: draft()) == 6)
+        // And the draft's own strip is reserved.
+        var barred = draft()
+        barred.spaceBarStyle.enabled = true
+        barred.spaceBarStyle.edge = .left
+        barred.spaceBarStyle.thickness = 700
+        #expect(core.scrollingColumnCap(for: nil, settings: barred) == 3)
+        // A space is answered on ITS resolution: an override gap
+        // widens the pitch.
+        var overridden = draft()
+        overridden.gapsOverride[SpaceID("1")] = Gaps(
+            outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
+            inner: Gaps.Inner(horizontal: 100, vertical: 100)
+        )
+        #expect(
+            core.scrollingColumnCap(for: SpaceID("1"), settings: overridden)
+                == 5
+        )
+    }
+
+    @Test("the widest screen wins, ties broken by position")
+    func widest() {
+        // No `NSScreen` can be built in a test, so the ranking is
+        // held over the host's: whichever it names is at least as
+        // wide as every other.
+        let screens = NSScreen.screens
+        guard let pick = KiwiCore.widestScreen(screens) else { return }
+        for screen in screens {
+            #expect(pick.frame.width >= screen.frame.width)
+        }
+        #expect(KiwiCore.widestScreen([]) == nil)
+    }
+}

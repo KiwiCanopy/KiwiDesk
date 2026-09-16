@@ -3,19 +3,20 @@ import SwiftUI
 
 /// "Columns on screen" / "Rows on screen" — the count a scrolling
 /// share IS, beneath the Percent slider (#1382). Typeable like
-/// every stepper (an integer only), writing `1/n` into the one
-/// stored fraction; "—" (spoken "not a whole count") when the
-/// share is not `1/n` at the wire's precision. ▲ from "—" lands
-/// on `ceil(1/f)`, ▼ on `floor(1/f)` — never "nearest", which
-/// reverses direction at the shipped 95% — and ▲ greys at `cap`,
-/// Core's count of what the widest screen fits
-/// (`SlotCountRowTests`).
+/// every stepper (an integer only), writing the count's share
+/// into the one stored fraction; "—" (spoken "not a whole
+/// count") when the share is not `1/n`. Every count↔share step
+/// is `ScrollSize`'s, and ▲ greys at `cap`, Core's count of what
+/// the screen fits (`SlotCountRowTests`).
 struct SlotCountRow: View {
     @Binding var size: ScrollSize
     let isVertical: Bool
-    /// ▲'s bound (`TilingSettings.scrollingColumnCap`).
+    /// ▲'s bound (`KiwiCore.scrollingColumnCap`).
     let cap: Int
     @State private var text = ""
+    /// Whether the field holds the user's own keystrokes: a blur
+    /// commits only those, so tabbing through writes nothing.
+    @State private var edited = false
     @FocusState private var focused: Bool
 
     private var label: String {
@@ -43,7 +44,7 @@ struct SlotCountRow: View {
     /// above an off-count share.
     var up: Int? {
         guard let f = fraction else { return nil }
-        let next = count.map { $0 + 1 } ?? Int((1 / f).rounded(.up))
+        let next = count.map { $0 + 1 } ?? ScrollSize.countAbove(f)
         return next <= cap ? next : nil
     }
 
@@ -51,7 +52,7 @@ struct SlotCountRow: View {
     /// count below an off-count share.
     var down: Int? {
         guard let f = fraction else { return nil }
-        let next = count.map { $0 - 1 } ?? Int((1 / f).rounded(.down))
+        let next = count.map { $0 - 1 } ?? ScrollSize.countBelow(f)
         return next >= 1 ? next : nil
     }
 
@@ -80,9 +81,9 @@ struct SlotCountRow: View {
             }
         }
         .onChange(of: size) { _, _ in
-            if !focused { text = count.map(String.init) ?? "" }
+            if !focused { seed() }
         }
-        .onAppear { text = count.map(String.init) ?? "" }
+        .onAppear(perform: seed)
     }
 
     private var field: some View {
@@ -92,7 +93,11 @@ struct SlotCountRow: View {
         )
         .labelsHidden()
         .accessibilityLabel(label)
-        .accessibilityValue(spokenValue)
+        // The field's value is its text (#812); only the empty
+        // state needs words.
+        .accessibilityValue(
+            text.isEmpty ? L("slot_count.none", "not a whole count") : text
+        )
         .frame(width: 48)
         .multilineTextAlignment(.trailing)
         .monospacedDigit()
@@ -102,6 +107,9 @@ struct SlotCountRow: View {
         .onChange(of: focused) { _, now in
             if !now { commit() }
         }
+        .onChange(of: text) { _, _ in
+            if focused { edited = true }
+        }
     }
 
     private var spokenValue: String {
@@ -110,14 +118,23 @@ struct SlotCountRow: View {
     }
 
     private func commit() {
-        if let typed = Int(text) {
-            write(min(max(typed, 1), cap))
-        }
-        text = count.map(String.init) ?? ""
+        if edited, let n = Self.typed(text, cap: cap) { write(n) }
+        seed()
     }
 
-    /// Writes `1/n` into the one stored fraction.
-    private func write(_ n: Int) {
-        size = .fraction(clamping: 1 / Double(n))
+    /// What a typed entry lands on: an integer clamped to 1…`cap`,
+    /// nothing else — a fraction is the slider's, not this field's.
+    static func typed(_ text: String, cap: Int) -> Int? {
+        Int(text).map { min(max($0, 1), cap) }
+    }
+
+    private func seed() {
+        text = count.map(String.init) ?? ""
+        edited = false
+    }
+
+    /// Writes the count's share into the one stored fraction.
+    func write(_ n: Int) {
+        size = .fraction(clamping: ScrollSize.share(of: n))
     }
 }

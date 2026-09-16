@@ -1133,7 +1133,7 @@
   "shortcuts.tracks.move": "Sposta finestre nel layout Track",
   "slot_count.columns": "Colonne sullo schermo",
   "slot_count.help": "Imposta la dimensione in modo che ne entrino esattamente tante, spaziature incluse; si ferma dove una in più scenderebbe sotto la dimensione minima della finestra.",
-  "slot_count.none": "non è un numero intero",
+  "slot_count.none": "numero non intero",
   "slot_count.none_glyph": "—",
   "slot_count.rows": "Righe sullo schermo",
   "slot_size.column_width": "Larghezza colonna",

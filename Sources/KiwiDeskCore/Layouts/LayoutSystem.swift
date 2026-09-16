@@ -159,9 +159,15 @@ public struct LayoutContext: Sendable {
     }
 
     /// Screen bounds inset by the per-edge outer gaps.
-    public var usable: CGRect {
-        let outer = gaps.outer
-        return CGRect(
+    public var usable: CGRect { Self.usable(bounds, outer: gaps.outer) }
+
+    /// `bounds` inset by `outer` — the one carve, shared with a
+    /// reader that has no context to build (#1382).
+    public static func usable(
+        _ bounds: CGRect,
+        outer: Gaps.Outer
+    ) -> CGRect {
+        CGRect(
             x: bounds.minX + outer.left,
             y: bounds.minY + outer.top,
             width: bounds.width - outer.left - outer.right,

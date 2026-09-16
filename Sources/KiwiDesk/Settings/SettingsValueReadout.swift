@@ -74,10 +74,10 @@ extension SettingsValueReadout {
         L("diff.value.milliseconds", "%1$@ ms", trimmed(value))
     }
 
-    /// Formats a percentage — the ONE percent formatter (#1382):
-    /// whole numbers whole, otherwise one decimal, so the card's
-    /// readout, the spoken value, `RatioRow` and the diff pill
-    /// agree on "33.3%".
+    /// Formats a percentage — the ONE percent formatter (#1382),
+    /// the wire's own spelling (`ScrollSize.percentString`), so
+    /// the card's readout, the spoken value, `RatioRow`, the diff
+    /// pill and a value typed into Lua agree on "33.33%".
     static func percent(_ fraction: Double) -> String {
         L("diff.value.percent", "%1$@%%", percentDigits(fraction))
     }
@@ -85,12 +85,7 @@ extension SettingsValueReadout {
     /// The digits of `percent`, for a caller that carries its own
     /// unit frame.
     static func percentDigits(_ fraction: Double) -> String {
-        let value = fraction * 100
-        let tenths = (value * 10).rounded() / 10
-        if tenths.rounded() == tenths {
-            return String(Int(tenths))
-        }
-        return String(format: "%.1f", tenths)
+        String(ScrollSize.percentString(fraction).dropLast())
     }
 
     /// Formats hex color string with leading `#`.

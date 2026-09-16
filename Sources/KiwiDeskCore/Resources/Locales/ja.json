@@ -1134,7 +1134,7 @@
   "shortcuts.tracks.move": "トラックレイアウトでウインドウを移動",
   "slot_count.columns": "画面内の列数",
   "slot_count.help": "この数がちょうど収まるようにサイズを決めます（ギャップを含む）。もう1つ増やすと最小ウインドウサイズを下回るところで止まります。",
-  "slot_count.none": "整数ではありません",
+  "slot_count.none": "整数以外",
   "slot_count.none_glyph": "—",
   "slot_count.rows": "画面内の行数",
   "slot_size.column_width": "列の幅",

@@ -225,10 +225,7 @@ struct OverrideFractionRow: View {
     var body: some View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
-            inherited: (
-                label,
-                "\(Int((global * 100).rounded()))%"
-            ),
+            inherited: (label, SettingsValueReadout.percent(global)),
             help: help,
             subject: label
         ) {

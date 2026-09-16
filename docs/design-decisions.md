@@ -4770,16 +4770,21 @@ at the shipped 95%. ▲ greys where one more column would fall
 under the minimum window size on the widest connected screen
 (the space's own screen in the override editor) — a cap Core
 computes from the terms `ScrollingLayout.metrics` draws with,
-through `TilingSettings.scrollingColumnCap`, never GUI
-arithmetic over a screen frame; with no screen known the edge is
-the slider's own 5% floor. That is the first live-machine read
-in Layout Defaults, and a bound that greys differently on
-different Macs for one profile — the stated cost. One percent
-formatter — whole numbers whole, otherwise one decimal — is
-shared by the readout, the spoken value, `RatioRow` and the diff
-pill, so card and pill agree on "33.3%". The row is its own
-census key drawing no diff row: the leaf narrates once through
-the value row. The split rows — the stack master ratio, the bsp
+through `KiwiCore.scrollingColumnCap`, which picks the screen
+and reads its size through the one bounds hook, never GUI
+arithmetic over a screen frame — and never past the share's own
+5% floor, which is the whole edge where no screen is known. That
+is the first live-machine read in Layout Defaults, and a bound
+that greys differently on different Macs for one profile — the
+stated cost. The count writes the share the wire decodes, so a
+stored third re-read from disk is not a change, and one percent
+formatter — the wire's own spelling — is shared by the readout,
+the spoken value, `RatioRow`, the inherited-value pill and the
+diff pill, so nothing on the card shows a number the count row
+or a chip would refuse; a schematic caption still rounds to a
+whole, being a label on a picture rather than a value to copy.
+The row is its own census key drawing no diff row: the leaf
+narrates once through the value row. The split rows — the stack master ratio, the bsp
 ratios — keep **fraction chips** `¼ ⅓ ½ ⅔ ¾` instead: a share is
 not a count. A text field accepting `1/3` was rejected: a closed
 set is a chooser, not a parser, and anything outside it is

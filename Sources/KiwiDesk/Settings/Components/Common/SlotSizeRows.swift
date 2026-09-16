@@ -11,10 +11,11 @@ struct SlotSizeRows: View {
     let isVertical: Bool
     /// Part of control to render (#68).
     var part: Part = .both
-    /// The count stepper's ▲ bound (#1382), Core's count of what
-    /// the screen fits — the widest connected one on the Layout
-    /// Defaults card, the space's own in the override editor.
-    var columnCap: Int = ScrollSize.fallbackMaxCount
+    /// Whose screen bounds the count stepper's ▲ (#1382): the
+    /// space's own in the override editor, nil for the Layout
+    /// Defaults card. No default — a host that forgets it would
+    /// read a cap for the wrong screen and never grey.
+    let space: SpaceID?
 
     /// Unit picker presentation style (#291).
     var unitStyle: UnitStyle = .segmented
@@ -204,7 +205,7 @@ struct SlotSizeRows: View {
             SlotCountRow(
                 size: $size,
                 isVertical: isVertical,
-                cap: columnCap
+                cap: model.scrollingColumnCap(for: space)
             )
         }
     }

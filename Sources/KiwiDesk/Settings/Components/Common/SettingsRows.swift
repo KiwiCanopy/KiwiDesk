@@ -138,7 +138,7 @@ struct RatioRow: View {
     }
 
     /// One formatter with the pill (#1382): a stored exact 0.29
-    /// reads "29%", a third "33.3%".
+    /// reads "29%", a third "33.33%".
     private var readoutText: String {
         SettingsValueReadout.percent(value)
     }
