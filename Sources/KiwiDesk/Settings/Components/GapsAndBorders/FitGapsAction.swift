@@ -2,7 +2,7 @@ import Accessibility
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus Border gap transformation action controls (#295). The
+/// The Gaps card's fit-to-border action controls (#295, #1360). The
 /// extra spacing is a transient action parameter; only the
 /// calculated gap values join the staged profile.
 struct FitGapsAction: View {
