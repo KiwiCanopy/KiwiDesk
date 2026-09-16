@@ -58,6 +58,12 @@ func makeTestCore(
         hotkeyRegistrar: hotkeyRegistrar
     )
     core.tiler.animation.reduceMotion = { false }
+    // The Monocle flip's own read (#1391), pinned the OTHER way:
+    // the flip defers a commanded `focusWindow` to its midpoint,
+    // so with it playing every suite that navigates a Monocle
+    // Space would read the focus before it landed. A flip suite
+    // states the read itself.
+    core.monocleFlip.reduceMotion = { true }
     core.borders.windowServerTrackingDisabled = false
     // Same class, third time (#673): `openOrFocus`'s four seams
     // default LIVE, and unlike the two above their touch fires on

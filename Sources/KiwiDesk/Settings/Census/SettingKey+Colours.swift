@@ -14,6 +14,10 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnScrolling = "settings.animations.onScrolling"
     case animationsScrollDurationMS =
         "settings.animations.scrollDurationMS"
+    case animationsOnMonocleFocus =
+        "settings.animations.onMonocleFocus"
+    case animationsMonocleFlipDurationMS =
+        "settings.animations.monocleFlipDurationMS"
     case paletteApply = "(action) palette.apply"
     case paletteSave = "(action) palette.save"
     case paletteRename = "(action) palette.rename"
@@ -56,6 +60,15 @@ extension ColoursKey {
                 .scrolling,
                 .atRest,
                 gate: .setting(.colours(.animationsOnScrolling))
+            )
+        case .animationsOnMonocleFocus:
+            return .row(.layoutDefaults, .monocle, .atRest)
+        case .animationsMonocleFlipDurationMS:
+            return .row(
+                .layoutDefaults,
+                .monocle,
+                .atRest,
+                gate: .setting(.colours(.animationsOnMonocleFocus))
             )
         case .paletteApply, .paletteSave, .paletteImport:
             return .row(.coloursAndMotion, .palettes, .atRest)
@@ -108,6 +121,13 @@ extension ColoursKey {
             )
         case .animationsScrollDurationMS:
             return .text("scroll_grid.scroll_duration")
+        case .animationsOnMonocleFocus:
+            return .text(
+                "monocle.flip",
+                help: "monocle.flip.help"
+            )
+        case .animationsMonocleFlipDurationMS:
+            return .text("monocle.flip_duration")
         case .paletteApply:
             return .dynamic
         case .paletteSave:

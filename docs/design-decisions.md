@@ -2572,6 +2572,75 @@ Space is the SIP list above; ordering lower in z changes
 nothing — they are already behind, and a transparent body
 shows whatever is behind it).
 
+:::unreleased
+**A Monocle focus change flips a drawn card over a blur, and
+never the window's own pixels (#1391).** A focus change in
+Monocle is a jump cut — the whole surface swaps at once — and
+the transition that says *which* window came in, and from
+which side, is a card flip: the surface blurs, a plate turns
+from the outgoing app's icon to the incoming one's, and the
+focus swaps beneath it at the moment the plate is edge-on. Both
+halves are public API with no permission: the compositor blurs
+what lies behind the panel (`NSVisualEffectView`, behind-window
+blending), and the plate is a layer KiwiDesk draws. Measured
+before it was built: from an ordinary SkyLight connection,
+`SLSSetWindowTransform` and `SLSSetWindowAlpha` on another
+app's window return success and apply nothing (the read-back
+unchanged, the before-and-during captures byte-identical) —
+the #884 shape, performed but not applied — and the window's
+live pixels, which a flip of the real window would need,
+reach no process without Screen Recording through any API,
+public or private. The owner ruled no new permission prompt,
+so the drawn plate is the base and the only tier; a live-image
+flip is closed, not deferred.
+
+*The plate is a wash, not a colour, and it lies on the
+window.* An untinted achromatic wash — white on a light
+appearance, black on a dark one, since a white wash over a dark
+blurred ground reads as a grey slab — because a palette Fill
+becomes a colour on glass only through `GlassTint.apply`
+(#1297) and this plate is a `CALayer` with no ink to floor; a
+rotated effect view was refused as undefined compositor
+territory. It takes the window's own corner radius, read
+through the same seam the focus ring uses, because it lies
+coincident with the window during the fades, and it lands on
+the incoming window's ISSUED frame — a size-bound window's
+centred one (#677) — so no real window is resized for the
+effect. Icons only, no app name: the turn is below reading
+time, and the Space Bar is icon-only by ruling.
+
+*The turn conveys direction, which a cross-fade could not.*
+The axis follows `monocle.orientation` — a horizontal Monocle
+turns about the vertical axis, like a page; a vertical one
+about the horizontal — and the sign follows the step: next one
+way, previous the other, a target named outright by array
+order, a wrapped step keeping the pressed direction. No setting
+is added for it. The eye distance scales with the extent that
+rotates, or a window-sized plate's edges fly off screen.
+
+*It plays only for a focus KiwiDesk COMMANDS.* A `focus` step,
+an App Bar click, `pull_or_spawn` — the door is
+`focusWithMonocleFlip`, which defers the ordinary
+`focusWindow` to the midpoint, and every OS-reported focus
+(⌘Tab, the Dock) takes no door, since its swap already
+happened. A command issued during a flip lands the pending
+focus first — `KiwiCore.execute` settles the flip ahead of its
+dispatch — because a second `focus` press read the anchor the
+first had not yet moved and targeted the same window. Reduce
+Motion stands the whole transition down, read at the site and
+handed to the pure decision; Reduce Transparency takes the
+OS's own flat rendering of the effect view. `MonocleFlipPlan`
+is the decision, `MonocleFlipOverlay` the drawing, and
+`BarMotion` builds every animation, so Core's motion still has
+one home. The two `animations` leaves — `on_monocle_focus`,
+default on, and `monocle_flip_duration`, default 450 ms — are
+the scrolling pair's shape one layout over, and stay outside
+the animations master like it. The #881 sentence above,
+"monocle's promise is the raise-only flip", stands: the raise
+is still the swap, and the card is what the eye follows across
+it.
+:::
+
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
 compares a slot against a midpoint — reads

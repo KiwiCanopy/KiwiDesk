@@ -53,7 +53,7 @@ extension KiwiCore {
         wireHoldGlide()
         wireSpaceBarLayerRefresh()
         appBars.onSelect = { [weak self] id in
-            self?.focusWindow(id, warp: true)
+            self?.focusWithMonocleFlip(id, step: nil)
         }
         spaceBars.onSelectSpace = { [weak self] id in
             _ = self?.focusSpace([.string(id.raw)])

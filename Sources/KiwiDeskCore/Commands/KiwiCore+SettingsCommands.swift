@@ -111,6 +111,14 @@ extension KiwiCore {
             }
             tiler.settings.animations.scrollDurationMS = ms
             return .ok()
+        case "animations.set_monocle_flip_duration":
+            // The Monocle flip's turn (#1391), its own knob
+            // like `set_scroll_duration`.
+            guard let ms = args.first?.intValue else {
+                return .fail("expected milliseconds")
+            }
+            tiler.settings.animations.monocleFlipDurationMS = ms
+            return .ok()
         case "animations.set_size_policy":
             // Experimental (#47), engine-only — not persisted to a
             // profile. Flip live to compare the throttled-smooth
@@ -146,6 +154,8 @@ extension KiwiCore {
             tiler.settings.animations.onWindowSwap = enabled
         case "animations.set_on_relayout":
             tiler.settings.animations.onRelayout = enabled
+        case "animations.set_on_monocle_focus":
+            tiler.settings.animations.onMonocleFocus = enabled
         default:
             return .fail("unknown command: \(command)")
         }

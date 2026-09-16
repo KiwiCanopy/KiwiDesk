@@ -30,9 +30,31 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         }
     }
 
+    /// The Monocle focus-change card flip (#1391): a blurred
+    /// plate turns from the outgoing window's app icon to the
+    /// incoming one's while the focus swaps beneath it. Not
+    /// under the `anyEnabled` master, like `onScrolling`.
+    public var onMonocleFocus = true
+
+    /// The flip's turn in milliseconds (100–1000 ms, #1391); the
+    /// blur fades around it on fixed times.
+    public var monocleFlipDurationMS = 450 {
+        didSet {
+            monocleFlipDurationMS = Self.clampFlipMS(
+                monocleFlipDurationMS
+            )
+        }
+    }
+
     /// Clamps duration within supported range (50–1000 ms).
     static func clampMS(_ ms: Int) -> Int {
         min(max(ms, 50), 1000)
+    }
+
+    /// Clamps the flip's turn (100–1000 ms): below 100 ms the
+    /// plate is a flash, not a turn.
+    static func clampFlipMS(_ ms: Int) -> Int {
+        min(max(ms, 100), 1000)
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -43,6 +65,8 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onRelayout = "on_relayout"
         case durationMS = "duration"
         case scrollDurationMS = "scroll_duration"
+        case onMonocleFocus = "on_monocle_focus"
+        case monocleFlipDurationMS = "monocle_flip_duration"
     }
 
     public init() {}
@@ -89,6 +113,17 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
                 Int.self,
                 forKey: .scrollDurationMS
             ) ?? 150
+        )
+        onMonocleFocus =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .onMonocleFocus
+            ) ?? true
+        monocleFlipDurationMS = Self.clampFlipMS(
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .monocleFlipDurationMS
+            ) ?? 450
         )
     }
 }

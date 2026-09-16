@@ -503,6 +503,32 @@ editing here:
   [accessibility.md](accessibility.md)'s, because it constrains
   a file under `AX/` that this rule's `paths:` do not reach.
 
+- **The Monocle focus flip is a drawn card over a behind-window
+  blur, never a transform or a capture of the real window
+  (#1391).** Measured 2026-09-16: from an ordinary SkyLight
+  connection `SLSSetWindowTransform` and `SLSSetWindowAlpha` on
+  another app's window return success and apply nothing, and
+  the window's pixels reach no process without Screen Recording
+  through any API — the owner ruled no new permission prompt,
+  so the plate is the one tier (the argument is
+  `docs/design-decisions.md` ▸ "A Monocle focus change flips a
+  drawn card"). Four obligations. A focus KiwiDesk COMMANDS in
+  a Monocle Space takes the one `focusWithMonocleFlip` door,
+  which defers `focusWindow` to the turn's midpoint; an
+  OS-reported focus never does, since its swap already
+  happened — `MonocleFlipSeamTests` pins the three commanded
+  sites and the door as the one payer. Every command settles a
+  flip ahead of its dispatch (`KiwiCore.execute`), or a second
+  press reads the anchor the first has not moved
+  (`MonocleFlipDoorTests`). The decision is pure
+  (`MonocleFlipPlan.decide`, `MonocleFlipPlanTests`) and takes
+  Reduce Motion as an argument, read through the overlay's own
+  seam that `makeTestCore` pins ON — the one seam pinned the
+  other way from the engine's, because a playing flip defers
+  the focus every navigation suite reads at once. And the
+  overlay starts no motion of its own: its turn and fades are
+  `BarMotion`'s censused members (`BarMotionSeamTests`), so
+  Core's motion keeps one home.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

@@ -28,6 +28,8 @@ public final class KiwiCore {
     /// `retile()` (`updateBorders()`, `updateStickyMarks()`).
     public let borders = BorderManager()
     public let stickyMarks = StickyMarkManager()
+    /// The Monocle focus flip (#1391), `focusWithMonocleFlip`'s.
+    let monocleFlip = MonocleFlipOverlay()
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
@@ -66,13 +68,10 @@ public final class KiwiCore {
     /// argued at its one reader, `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
 
-    /// The boot scan and the startup sweep surface N windows in
-    /// one burst, and each `.windowCreated` would run a full
-    /// retile + bars + borders + clamp — N passes for one
-    /// arrangement (#672). While raised, `handle` skips its
-    /// structural retile; the raiser runs one `retile()` after
-    /// lowering it. The `defersWindowRuleReconcile` shape, for
-    /// the same reason.
+    /// Boot and the startup sweep surface N windows in one burst,
+    /// each `.windowCreated` a full pass (#672). While raised,
+    /// `handle` skips its structural retile; the raiser runs one
+    /// `retile()` after lowering it.
     var defersEventRetiles = false
 
     /// A z-order restore is waiting for the current animations

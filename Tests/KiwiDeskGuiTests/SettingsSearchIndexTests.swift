@@ -189,8 +189,9 @@ struct SettingsSearchIndexTests {
         #expect(
             counts == [
                 .spaces: 2,
-                // 37 since #1389: the two lone-window fill rows.
-                .layoutDefaults: 37,
+                // 37 since #1389: the two lone-window fill rows;
+                // 39 since #1391: the Monocle flip's pair.
+                .layoutDefaults: 39,
                 .monitors: 3,
                 // 18 since #1473: the focus border's four rows,
                 // the fit-gaps spacing and the sticky mark are
