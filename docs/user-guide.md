@@ -259,6 +259,12 @@ track shortcut bound.
   On quit** uses; with everything already reachable, nothing
   moves.
 
+:::unreleased
+**Monocle** — a focus change flips a card from one app's icon
+to the next over a blur; the flip and its duration live here
+too, not in Colors & Animations.
+:::
+
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or a stack
 > window's mouse height-drag snapping back. See
