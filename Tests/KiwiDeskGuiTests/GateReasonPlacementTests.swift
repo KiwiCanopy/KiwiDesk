@@ -280,6 +280,15 @@ struct GateReasonPlacementTests {
         let dim = try #require(
             source.range(of: "GreyOut(active:inertReason!=nil")
         )
+        // The dim's RECEIVER is `controls`, adjacent to the
+        // title: a stack wrapping both under one GreyOut keeps
+        // the title textually first and dims it all the same
+        // (#1360, guard-prover).
+        #expect(
+            source.contains(
+                "titlecontrols.modifier(GreyOut(active:inertReason!=nil"
+            )
+        )
         let sentence = try #require(
             source.range(
                 of: "ifletinertReason,owesInlineReason{"
