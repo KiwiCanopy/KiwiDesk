@@ -5170,7 +5170,11 @@ animations.set_on_relayout(true)
 **Does:** enables or disables the card flip when focus moves
 between the windows of a Monocle Space. The window blurs and a
 plate turns from the outgoing app's icon to the incoming one's
-while the focus swaps beneath it, so you can see which window
+while the focus swaps beneath it — as soon as the blur covers
+it, so the keyboard reaches the new window at once; further
+presses during the turn land instantly, the card showing the
+newest window's icon and the blur lifting once you pause — so
+you can see which window
 came in and which way it came from: the plate turns forward for
 the next window in the Space's order and back for the previous
 one — the way the key pointed, on a `focus` step — about the

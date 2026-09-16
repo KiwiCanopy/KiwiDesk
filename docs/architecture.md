@@ -194,7 +194,8 @@ event-driven is the default `.event` pass (`RetilePass`).
 One verb's effect is deferred: a commanded focus in a Monocle
 Space goes through the flip door (`App/KiwiCore+MonocleFlip`),
 which plays the card flip from `Animation/` and lands the
-ordinary `focusWindow` at the turn's midpoint. A later command
+ordinary `focusWindow` once the blur covers the surface. A
+later command
 that reads the focused window lands that focus ahead of its own
 dispatch, so no verb reads a focus the previous one has not yet
 landed (#1391).

@@ -2579,7 +2579,8 @@ Monocle is a jump cut — the whole surface swaps at once — and
 the transition that says *which* window came in, and from
 which side, is a card flip: the surface blurs, a plate turns
 from the outgoing app's icon to the incoming one's, and the
-focus swaps beneath it at the moment the plate is edge-on. Both
+focus swaps beneath it the moment the blur has covered the
+surface. Both
 halves are public API with no permission: the compositor blurs
 what lies behind the panel (`NSVisualEffectView`, behind-window
 blending), and the plate is a layer KiwiDesk draws. Measured
@@ -2618,22 +2619,42 @@ order, a wrapped step keeping the pressed direction. No setting
 is added for it. The eye distance scales with the extent that
 rotates, or a window-sized plate's edges fly off screen.
 
+*The swap lands when the blur covers it, not when the card is
+edge-on.* The first cut landed the focus at the turn's midpoint,
+345 ms after the press, and the owner felt it: every hop of an
+all-day verb paid a third of a second of keyboard-focus latency
+for an illusion the blur was already providing. The landing is
+the end of the fade-in, 120 ms; the card's edge-on moment is
+what the eye follows across the swap, not what hides it.
+
+*A burst is navigation: it retargets the card and holds the
+blur.* A press that arrives while a flip is playing lands at
+once, repaints the incoming face with the newest target's icon
+and pushes the fade-out back; the blur lifts only once the
+presses have been quiet for `MonocleFlipPlan.hold` (200 ms).
+Restarting the play per press was tried and read as the show
+fighting the user; cutting the play per press read as a jump.
+One motion, retargeted — the spring engine's own idiom for a
+window whose target moves mid-flight — is what stayed.
+
 *It plays only for a focus KiwiDesk COMMANDS, and the focus it
 owes is a ledger, not a closure.* A `focus` step, an App Bar
 click, `pull_or_spawn` — the door is `focusWithMonocleFlip`,
 which records `pendingMonocleFocus` and lands the ordinary
-`focusWindow` at the midpoint; every OS-reported focus (⌘Tab,
+`focusWindow` at the landing; every OS-reported focus (⌘Tab,
 the Dock) takes no door, since its swap already happened. The
 owed focus takes the hooks its sibling `pendingFocusRaise`
 earned: a command that reads the focused window lands it ahead
 of its own dispatch, because a second `focus` press read the
 anchor the first had not yet moved and targeted the same window
 (a query lands nothing — the play continues over it); the door
-itself ends a play and lands its focus before it plans, since
-the App Bar click never passes the dispatcher; an honored report
-for any OTHER window drops it, the user having gone elsewhere,
-while the leaving window's own duplicate echo (#887) keeps it;
-a rekey carries it and a gone target lands nothing. Reduce
+itself lands a play's focus before it acts, since the App Bar
+click never passes the dispatcher; an honored report for any
+OTHER window drops it, the user having gone elsewhere, while
+the leaving window's own duplicate echo (#887) keeps it; a
+rekey carries it, a gone target lands nothing, and a Space
+switch drops the debt with the play, its own raise picking the
+focus on arrival. Reduce
 Motion stands the whole transition down, read at the site and
 handed to the pure decision; Reduce Transparency takes the
 OS's own flat rendering of the effect view. `MonocleFlipPlan`

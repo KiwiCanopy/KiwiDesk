@@ -9,11 +9,8 @@ extension KiwiCore {
         _ command: String,
         args: [JSONValue] = []
     ) -> CommandResponse {
-        // A command reading the focused window lands a playing
-        // flip's focus FIRST (#1391): the plate defers
-        // `focusWindow` to its midpoint, so a second `focus`
-        // press read the anchor the first had not moved yet. A
-        // query lands nothing — the play continues over it.
+        // A focused-window command lands the flip's owed focus
+        // first; a query does not (#1391).
         if FocusedCommandPolicy.isFocused(command) {
             runPendingMonocleFocus()
         }

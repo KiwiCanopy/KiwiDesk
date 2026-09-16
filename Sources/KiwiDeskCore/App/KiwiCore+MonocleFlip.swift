@@ -4,18 +4,27 @@ import Foundation
 /// The one door a KiwiDesk-COMMANDED Monocle focus change takes
 /// (#1391): `navigate`'s cycle, the App Bar click and
 /// `pull_or_spawn`'s focus. It decides the flip, plays it, and
-/// runs the ordinary `focusWindow` at the turn's midpoint — or
-/// at once where no flip plays. An OS-reported focus never
-/// comes here: its swap already happened.
+/// runs the ordinary `focusWindow` once the blur covers the
+/// surface — or at once where no flip plays. A press during a
+/// play lands at once too and RETARGETS the running card rather
+/// than restarting it: a burst is navigation, and the motion
+/// stays one motion. An OS-reported focus never comes here: its
+/// swap already happened.
 extension KiwiCore {
     /// `step` is the pressed direction for a directional step
     /// (`+1`/`-1`, a wrap included) and nil for a target named
     /// outright, whose sign is array order.
     func focusWithMonocleFlip(_ target: WindowID, step: Int?) {
-        // A flip in flight ends here, its focus landed, BEFORE
-        // the plan reads the anchor: the App Bar click reaches
-        // this door without passing `execute`.
-        endMonocleFlip()
+        // A play in flight: its focus lands here, ahead of the
+        // anchor read — the App Bar click reaches this door
+        // without passing `execute` — then the press lands at
+        // once and the running card retargets.
+        if monocleFlip.isPlaying {
+            runPendingMonocleFocus()
+            focusWindow(target, warp: true)
+            monocleFlip.retarget(to: face(of: target))
+            return
+        }
         guard
             let (plan, current) = monocleFlipPlan(
                 to: target,
@@ -25,7 +34,6 @@ extension KiwiCore {
             focusWindow(target, warp: true)
             return
         }
-        pendingMonocleFocus = (from: current, to: target)
         monocleFlip.play(
             plan,
             from: face(of: current),
@@ -37,17 +45,25 @@ extension KiwiCore {
         ) { [weak self] in
             self?.runPendingMonocleFocus()
         }
+        // Written AFTER `play`, whose opening `end()` fires any
+        // earlier landing — a debt recorded first would be
+        // landed by it.
+        pendingMonocleFocus = (from: current, to: target)
     }
 
     /// Lands the focus a playing flip owes, once: the ordinary
-    /// `focusWindow`, unless the window is gone or an honored
-    /// report already dropped the debt. Called at the turn's
-    /// midpoint, by the door ending a play, and ahead of every
-    /// command that reads the focused window.
+    /// `focusWindow`, unless the window is gone, its Space is no
+    /// longer the active one, or an honored report already
+    /// dropped the debt. Called at the landing, by the door
+    /// ending a play, and ahead of every command that reads the
+    /// focused window.
     func runPendingMonocleFocus() {
         guard let pending = pendingMonocleFocus else { return }
         pendingMonocleFocus = nil
-        guard state.windows[pending.to] != nil else { return }
+        guard state.windows[pending.to] != nil,
+            state.workspaces.space(of: pending.to)
+                == state.workspaces.activeSpace
+        else { return }
         focusWindow(pending.to, warp: true)
     }
 
@@ -56,6 +72,13 @@ extension KiwiCore {
     func endMonocleFlip() {
         monocleFlip.end()
         runPendingMonocleFocus()
+    }
+
+    /// Ends a play in flight and forgets its focus — the Space
+    /// switch's, whose own raise picks the focus on arrival.
+    func dropMonocleFlip() {
+        pendingMonocleFocus = nil
+        monocleFlip.end()
     }
 
     /// The flip for a commanded change onto `target` with the

@@ -160,6 +160,32 @@ enum BarMotion {
         return turn
     }
 
+    /// The flip blur's morph (#1391): one layer property —
+    /// `bounds`, `position` or `cornerRadius` of the blur's mask —
+    /// from `from` to `to` across the turn, so the blurred cover
+    /// shrinks or grows with the plate. Reduced: the zero-travel
+    /// step.
+    static func flipMorph(
+        keyPath: String,
+        from: Any,
+        to: Any,
+        duration: TimeInterval,
+        delay: TimeInterval,
+        reduceMotion: Bool
+    ) -> CAAnimation {
+        let morph = CABasicAnimation(keyPath: keyPath)
+        morph.fromValue = reduceMotion ? to : from
+        morph.toValue = to
+        morph.duration = duration
+        morph.beginTime = CACurrentMediaTime() + delay
+        morph.timingFunction = CAMediaTimingFunction(
+            name: .easeInEaseOut
+        )
+        morph.fillMode = .both
+        morph.isRemovedOnCompletion = false
+        return morph
+    }
+
     /// A layer `opacity` fade for the flip's blur and plate
     /// (#1391), from `from` to `to` across `duration`, starting
     /// `delay` after it is added; the reduced shape is the same

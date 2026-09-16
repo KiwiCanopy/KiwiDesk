@@ -11,11 +11,11 @@ private let w3 = WindowID(3)
 
 /// The commanded-focus door through a real core (#1391): a
 /// Monocle `focus` step owes its `focusWindow` to the flip's
-/// midpoint as `pendingMonocleFocus`, a focused-window command
+/// landing as `pendingMonocleFocus`, a focused-window command
 /// lands it first, a query leaves it, an honored report for
 /// another window drops it, and every stand-down focuses at
 /// once. Every read follows a synchronous land or end, so no
-/// assertion waits on the scheduled midpoint.
+/// assertion waits on the scheduled landing.
 @Suite("Monocle flip door (#1391)", .serialized)
 @MainActor
 struct MonocleFlipDoorTests {
@@ -49,7 +49,7 @@ struct MonocleFlipDoorTests {
         return core
     }
 
-    @Test("A Monocle step owes the focus to the midpoint")
+    @Test("A Monocle step owes the focus to the landing")
     func stepOwesTheFocus() {
         let core = makeMonocleCore()
         #expect(
@@ -75,6 +75,19 @@ struct MonocleFlipDoorTests {
         #expect(core.activeSpace?.focused == w3)
     }
 
+    @Test("A press during a play lands at once and retargets it")
+    func burstIsInstant() {
+        let core = makeMonocleCore()
+        core.execute("focus", args: [.string("right")])
+        #expect(core.monocleFlip.isPlaying)
+        core.execute("focus", args: [.string("right")])
+        // The second press is navigation: its focus is on w3
+        // now, no debt behind it, and the one play goes on.
+        #expect(core.activeSpace?.focused == w3)
+        #expect(core.monocleFlip.isPlaying)
+        #expect(core.pendingMonocleFocus == nil)
+    }
+
     @Test("A query lands nothing and the play continues")
     func queryLeavesThePlay() {
         let core = makeMonocleCore()
@@ -85,17 +98,18 @@ struct MonocleFlipDoorTests {
         #expect(core.activeSpace?.focused == w1)
     }
 
-    @Test("The door ends a play and lands its focus before it plans")
-    func doorEndsThePlayFirst() throws {
+    @Test("The door lands a play's focus before it acts")
+    func doorLandsFirst() throws {
         let core = makeMonocleCore()
         core.focusWithMonocleFlip(w2, step: 1)
         // The App Bar's route, which passes no `execute`: the
-        // second plan reads w2 as the front, not w1.
+        // first press's focus lands, then the click's, in order.
         core.focusWithMonocleFlip(w3, step: nil)
-        #expect(core.pendingMonocleFocus?.from == w2)
-        #expect(core.pendingMonocleFocus?.to == w3)
-        core.endMonocleFlip()
+        #expect(core.pendingMonocleFocus == nil)
         #expect(core.activeSpace?.focused == w3)
+        #expect(
+            core.tiler.placements.recentDisplacement(w2)
+        )
     }
 
     @Test("An honored report for another window drops the debt")
@@ -124,7 +138,15 @@ struct MonocleFlipDoorTests {
         gone.execute("focus", args: [.string("right")])
         gone.handle(.windowDestroyed(w2, wasMinimized: false))
         gone.runPendingMonocleFocus()
-        #expect(gone.activeSpace?.focused != w2)
+        // `focusWindow` was never reached: it notes the window
+        // it moves focus OFF in the placement ledger (#1161),
+        // and the anchor carries no such note.
+        #expect(gone.pendingMonocleFocus == nil)
+        #expect(
+            !gone.tiler.placements.recentDisplacement(
+                gone.activeSpace?.focused ?? w1
+            )
+        )
 
         let rekeyed = makeMonocleCore()
         rekeyed.execute("focus", args: [.string("right")])
@@ -133,6 +155,28 @@ struct MonocleFlipDoorTests {
         #expect(rekeyed.pendingMonocleFocus?.to == w9)
         rekeyed.endMonocleFlip()
         #expect(rekeyed.activeSpace?.focused == w9)
+    }
+
+    @Test("A Space switch drops the debt and the play")
+    func spaceSwitchDrops() {
+        let core = makeMonocleCore()
+        core.execute("focus", args: [.string("right")])
+        #expect(core.execute("focus_space", args: [.string("2")]).isSuccess)
+        #expect(core.pendingMonocleFocus == nil)
+        #expect(!core.monocleFlip.isPlaying)
+        core.runPendingMonocleFocus()
+        #expect(core.activeSpace?.id == SpaceID(2))
+        // And a debt whose Space is no longer active is dropped
+        // at the landing, never raised across Spaces.
+        let stale = makeMonocleCore()
+        stale.execute("focus", args: [.string("right")])
+        stale.state.workspaces.activate(SpaceID(2))
+        stale.runPendingMonocleFocus()
+        #expect(stale.pendingMonocleFocus == nil)
+        #expect(stale.activeSpace?.id == SpaceID(2))
+        #expect(
+            !stale.tiler.placements.recentDisplacement(w1)
+        )
     }
 
     @Test("Off, or under Reduce Motion, the focus lands at once")

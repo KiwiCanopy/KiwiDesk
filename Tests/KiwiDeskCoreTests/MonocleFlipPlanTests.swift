@@ -87,7 +87,9 @@ struct MonocleFlipPlanTests {
     func timing() {
         let plan = Self.decide(durationMS: 450)
         #expect(plan?.duration == 0.45)
-        #expect(plan?.midpoint == MonocleFlipPlan.fadeIn + 0.225)
+        // The focus lands once the blur covers the surface, at
+        // the end of the fade-in — never later.
+        #expect(plan?.landing == MonocleFlipPlan.fadeIn)
         #expect(
             plan?.total
                 == MonocleFlipPlan.fadeIn + 0.45 + MonocleFlipPlan.fadeOut

@@ -25,13 +25,19 @@ enum MonocleFlipPlate {
         min(0.30 * min(size.width, size.height), 256)
     }
 
+    /// A built card and the incoming face's icon layer, which a
+    /// retarget repaints while the turn goes on.
+    struct Card {
+        let layer: CALayer
+        let incomingGlyph: CALayer
+    }
+
     /// The card: both faces centred on the outgoing frame — the
     /// incoming one lands on its own issued size, which shares
     /// that centre (#677) — turning about the plan's axis with
-    /// the plan's sign, the turn beginning after the blur-in so
-    /// the midpoint is edge-on. Perspective scales with the
-    /// extent that rotates, or a window-sized plate's edges fly
-    /// off screen.
+    /// the plan's sign, the turn beginning after the blur-in.
+    /// Perspective scales with the extent that rotates, or a
+    /// window-sized plate's edges fly off screen.
     static func card(
         _ plan: MonocleFlipPlan,
         from: MonocleFlipOverlay.Face,
@@ -42,7 +48,7 @@ enum MonocleFlipPlate {
         dark: Bool,
         scale: CGFloat,
         reduceMotion: Bool
-    ) -> CALayer {
+    ) -> Card {
         let card = CALayer()
         card.frame = fromRect
         var perspective = CATransform3DIdentity
@@ -68,12 +74,15 @@ enum MonocleFlipPlate {
             dark: dark,
             scale: scale
         )
-        front.position = centre
-        back.position = centre
+        front.plate.position = centre
+        back.plate.position = centre
         let sign = Double(plan.sign)
-        back.transform = rotation(axis: plan.axis, radians: -sign * .pi)
+        back.plate.transform = rotation(
+            axis: plan.axis,
+            radians: -sign * .pi
+        )
         let axis = plan.axis == .vertical ? "y" : "x"
-        front.add(
+        front.plate.add(
             BarMotion.flipTurn(
                 axis: axis,
                 from: 0,
@@ -84,7 +93,7 @@ enum MonocleFlipPlate {
             ),
             forKey: "turn"
         )
-        back.add(
+        back.plate.add(
             BarMotion.flipTurn(
                 axis: axis,
                 from: -sign * .pi,
@@ -95,20 +104,78 @@ enum MonocleFlipPlate {
             ),
             forKey: "turn"
         )
-        card.addSublayer(front)
-        card.addSublayer(back)
-        return card
+        card.addSublayer(front.plate)
+        card.addSublayer(back.plate)
+        return Card(layer: card, incomingGlyph: back.glyph)
+    }
+
+    /// Repaints a face's icon at the layer's own size.
+    static func repaint(
+        _ glyph: CALayer,
+        icon: NSImage?,
+        scale: CGFloat
+    ) {
+        glyph.contents = rasterised(
+            icon,
+            side: glyph.bounds.width,
+            scale: scale
+        )
+    }
+
+    /// The blur's mask: the outgoing window's rounded frame,
+    /// morphing to the incoming one's across the turn — bounds,
+    /// position and radius alike — so the cover shrinks or grows
+    /// with the plate rather than blurring the union throughout.
+    static func cover(
+        _ plan: MonocleFlipPlan,
+        fromRect: CGRect,
+        toRect: CGRect,
+        cornerRadii: (from: CGFloat, to: CGFloat),
+        reduceMotion: Bool
+    ) -> CALayer {
+        let mask = CALayer()
+        mask.backgroundColor = NSColor.black.cgColor
+        mask.frame = fromRect
+        mask.cornerRadius = cornerRadii.from
+        let morphs: [(String, Any, Any)] = [
+            (
+                "bounds",
+                NSValue(rect: CGRect(origin: .zero, size: fromRect.size)),
+                NSValue(rect: CGRect(origin: .zero, size: toRect.size))
+            ),
+            (
+                "position",
+                NSValue(point: CGPoint(x: fromRect.midX, y: fromRect.midY)),
+                NSValue(point: CGPoint(x: toRect.midX, y: toRect.midY))
+            ),
+            ("cornerRadius", cornerRadii.from, cornerRadii.to),
+        ]
+        for (keyPath, from, to) in morphs {
+            mask.add(
+                BarMotion.flipMorph(
+                    keyPath: keyPath,
+                    from: from,
+                    to: to,
+                    duration: plan.duration,
+                    delay: MonocleFlipPlan.fadeIn,
+                    reduceMotion: reduceMotion
+                ),
+                forKey: keyPath
+            )
+        }
+        return mask
     }
 
     /// One face: a plate of `size` anchored at its centre,
-    /// single-sided so the turn hides it past edge-on.
+    /// single-sided so the turn hides it past edge-on, with its
+    /// icon layer beside it.
     static func face(
         icon: NSImage?,
         size: CGSize,
         cornerRadius: CGFloat,
         dark: Bool,
         scale: CGFloat
-    ) -> CALayer {
+    ) -> (plate: CALayer, glyph: CALayer) {
         let plate = CALayer()
         plate.bounds = CGRect(origin: .zero, size: size)
         plate.contentsScale = scale
@@ -134,7 +201,7 @@ enum MonocleFlipPlate {
         glyph.contents = rasterised(icon, side: side, scale: scale)
         glyph.contentsGravity = .resizeAspect
         plate.addSublayer(glyph)
-        return plate
+        return (plate, glyph)
     }
 
     /// The icon at the layer's PIXEL size, or the 1× rep is

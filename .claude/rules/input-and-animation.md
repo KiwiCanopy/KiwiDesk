@@ -515,8 +515,11 @@ editing here:
   takes the one `focusWithMonocleFlip` door, which records the
   owed focus as `pendingMonocleFocus` — a ledger on the core
   with its sibling `pendingFocusRaise`'s hooks, never a closure
-  holding a `WindowID` — and lands `focusWindow` at the turn's
-  midpoint; an OS-reported focus never takes the door, since
+  holding a `WindowID` — and lands `focusWindow` once the blur
+  covers the surface, never later (the latency argument is the
+  design entry's), a press during a play landing at once and
+  retargeting the card rather than restarting it; an
+  OS-reported focus never takes the door, since
   its swap already happened (`MonocleFlipSeamTests` pins the
   three commanded sites, the door as the one payer, and the
   wiring below). A focused-window command lands the owed focus
@@ -524,7 +527,9 @@ editing here:
   `FocusedCommandPolicy`), the door ends a play and lands its
   focus BEFORE it plans (the App Bar click passes no
   dispatcher), an honored report for any other window drops it,
-  a rekey carries it, and a gone target lands nothing
+  a rekey carries it, a gone target lands nothing, and a Space
+  switch drops it with the play through the one
+  `dropMonocleFlip` in `spaceSwitchRetile`
   (`MonocleFlipDoorTests`). The decision is pure
   (`MonocleFlipPlan.decide`, `MonocleFlipPlanTests`) and takes
   Reduce Motion as an argument, read through the overlay's own

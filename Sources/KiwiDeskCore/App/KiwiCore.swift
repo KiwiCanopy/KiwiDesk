@@ -30,7 +30,7 @@ public final class KiwiCore {
     public let stickyMarks = StickyMarkManager()
     /// The Monocle focus flip (#1391), `focusWithMonocleFlip`'s.
     let monocleFlip = MonocleFlipOverlay()
-    /// The focus a playing flip owes at its midpoint (#1391) —
+    /// The focus a playing flip owes at its landing (#1391) —
     /// landed, dropped and carried in `KiwiCore+MonocleFlip`.
     var pendingMonocleFocus: (from: WindowID, to: WindowID)?
     let strandDetector = StrandDetector()

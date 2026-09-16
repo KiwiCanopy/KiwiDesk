@@ -39,15 +39,16 @@ public final class AnimationEngine {
     /// General animation duration in ms (50–1000).
     public var durationMS: Int {
         get { storedDurationMS }
-        set { storedDurationMS = min(max(newValue, 50), 1000) }
+        set { storedDurationMS = AnimationSettings.clampMS(newValue) }
     }
 
     /// Scrolling layout focus shift duration in ms (50–1000).
     public var scrollDurationMS: Int {
         get { storedScrollDurationMS }
         set {
-            storedScrollDurationMS =
-                min(max(newValue, 50), 1000)
+            storedScrollDurationMS = AnimationSettings.clampMS(
+                newValue
+            )
         }
     }
 

@@ -39,9 +39,9 @@ struct MonocleFlipSeamTests {
         )
     }
 
-    /// The door lands the owed focus through `focusWindow` and
-    /// falls through to it where no flip plays: two spellings,
-    /// both in the door.
+    /// The door lands the owed focus through `focusWindow`,
+    /// falls through to it where no flip plays, and lands a
+    /// burst's press at once: three spellings, all in the door.
     @Test("The door is the one file that pays the focus")
     func doorPaysTheFocus() throws {
         let file = Self.core.appendingPathComponent("App/\(Self.door)")
@@ -50,13 +50,14 @@ struct MonocleFlipSeamTests {
             in: Array(source),
             for: "focusWindow"
         )
-        #expect(calls.count == 2, "found \(calls.count)")
+        #expect(calls.count == 3, "found \(calls.count)")
     }
 
     /// A focused-window command lands the pending focus ahead
     /// of its dispatch — one site, in the execute wrapper that
     /// is `dispatchCommand`'s one caller, beside the door's own
-    /// landings — and only the door ends a play.
+    /// landings — only the door ends a play (its settle and its
+    /// drop), and the Space switch takes the drop.
     @Test("The landing and the ending are wired where ruled")
     func landingAndEndingAreWired() throws {
         let landings = try SourceScan.identifierSites(
@@ -74,10 +75,21 @@ struct MonocleFlipSeamTests {
             under: Self.core
         )
         #expect(
-            endings.count == 1
-                && endings.first?.file.lastPathComponent
-                    == Self.door,
+            endings.count == 2
+                && endings.allSatisfy {
+                    $0.file.lastPathComponent == Self.door
+                },
             "ending sites: \(endings.map(\.site))"
+        )
+        let drops = try SourceScan.identifierSites(
+            of: "dropMonocleFlip()",
+            under: Self.core
+        ).filter { $0.file.lastPathComponent != Self.door }
+        #expect(
+            drops.count == 1
+                && drops.first?.file.lastPathComponent
+                    == "KiwiCore+SpaceTransition.swift",
+            "drop sites: \(drops.map(\.site))"
         )
     }
 

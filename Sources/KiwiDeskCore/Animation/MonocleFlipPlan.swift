@@ -34,6 +34,10 @@ public struct MonocleFlipPlan: Equatable, Sendable {
     /// the swap covered at both ends.
     public static let fadeIn: TimeInterval = 0.12
     public static let fadeOut: TimeInterval = 0.18
+    /// How long a burst must be quiet before the blur fades: a
+    /// press during a play retargets the card and holds the
+    /// blur, which lifts this long after the last press.
+    public static let hold: TimeInterval = 0.2
 
     /// Decides the flip for a commanded focus change from
     /// `current` to `target`.
@@ -85,10 +89,14 @@ public struct MonocleFlipPlan: Equatable, Sendable {
         )
     }
 
-    /// When, from the start of the play, the focus swaps: the
-    /// turn's midpoint, where the plate is edge-on.
-    public var midpoint: TimeInterval {
-        Self.fadeIn + duration / 2
+    /// When, from the start of the play, the focus swaps: once
+    /// the blur has covered the surface — the end of the
+    /// fade-in, never later, since every millisecond here is
+    /// keyboard-focus latency on an all-day verb. The card's
+    /// edge-on moment is what the eye follows, not what hides
+    /// the swap.
+    public var landing: TimeInterval {
+        Self.fadeIn
     }
 
     /// The whole play, fades included.
