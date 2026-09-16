@@ -273,9 +273,10 @@ struct GapsAndBordersGateTests {
     @MainActor
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
-        let all: [GapsBordersGates.InertReason] = [
-            .borderOff, .glowOff, .visualOff,
-        ]
+        // Reflected, not listed: a reason added for a sentence
+        // that misreferred (#1360's `.fitBorderOff`) is exactly
+        // the one a hand list would miss.
+        let all = GapsBordersGates.InertReason.allCases
         let sentences = all.map(GapsBordersGateHelp.sentence)
         for sentence in sentences {
             #expect(!sentence.isEmpty)

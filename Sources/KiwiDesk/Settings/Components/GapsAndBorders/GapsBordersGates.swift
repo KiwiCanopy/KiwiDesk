@@ -5,7 +5,7 @@ struct GapsBordersGates {
     let settings: TilingSettings
 
     /// Why a row or container is inert (`GapsBordersGateHelp`).
-    enum InertReason: Hashable {
+    enum InertReason: Hashable, CaseIterable {
         case borderOff
         /// The Fit rows on the Gaps card read a border that is
         /// off — its own sentence, since "these settings" names

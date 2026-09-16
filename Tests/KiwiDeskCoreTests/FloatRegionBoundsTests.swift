@@ -76,11 +76,7 @@ struct FloatRegionBoundsTests {
         // owner's to retune, so a literal here would red on
         // every retune and catch no regression (#1021).
         let core = makeFloatCore()
-        let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width,
-            glowBlur: core.tiler.settings.borderStyle
-                .resolvedGlowBlur
-        )
+        let reach = core.floatRingInset
         #expect(reach > 0)
         let region = try #require(
             core.floatGrowBounds(of: WindowID(1))
@@ -104,11 +100,7 @@ struct FloatRegionBoundsTests {
         // float the user resized flush by hand, which is the fit
         // fighting the hand that the rule forbids.
         let core = makeFloatCore()
-        let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width,
-            glowBlur: core.tiler.settings.borderStyle
-                .resolvedGlowBlur
-        )
+        let reach = core.floatRingInset
         #expect(reach > 0)
         let fit = try #require(core.floatBounds(of: WindowID(1)))
         let grow = try #require(
@@ -135,11 +127,7 @@ struct FloatRegionBoundsTests {
         core.appBars.sync([
             paintedAppBar(items: [appBarItem(1, text: "A")])
         ])
-        let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width,
-            glowBlur: core.tiler.settings.borderStyle
-                .resolvedGlowBlur
-        )
+        let reach = core.floatRingInset
         #expect(reach > 0)
 
         let fit = try #require(core.floatBounds(of: WindowID(1)))
@@ -174,11 +162,7 @@ struct FloatRegionBoundsTests {
         core.appBars.sync([
             paintedAppBar(items: [appBarItem(1, text: "A")])
         ])
-        let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width,
-            glowBlur: core.tiler.settings.borderStyle
-                .resolvedGlowBlur
-        )
+        let reach = core.floatRingInset
         let under = CGRect(x: 100, y: 0, width: 400, height: 300)
         let clamped = core.floatFrameClampedClearOfBars(
             WindowID(1),
