@@ -1248,7 +1248,14 @@ Every surface, border and ink in the Settings tree comes from
   **A control style that colours its label from the tint owes a
   neutralisation a guard can count** — the menus pair it per
   call site, `.menuStyle(.borderlessButton)` →
-  `neutralMenuLabel()` (`SettingsLabelNeutralityTests`), and a
+  `neutralMenuLabel()`, and the menu-style pickers pair the
+  same modifier, `.pickerStyle(.menu)` → `neutralMenuLabel()`,
+  because macOS 27 draws a picker's label from the tint while
+  the window is key where macOS 26 did not — a style the census
+  does not count is one the next OS can turn green, and a
+  `Picker` with NO style is the pop-up on macOS and counted
+  nowhere, so a pop-up picker names `.pickerStyle(.menu)`
+  explicitly (#1502, `SettingsLabelNeutralityTests`) — and a
   `.bordered` action button takes `settingsActionButton()`,
   which seals the style to `neutralButtonLabel()` by
   construction (#771) after per-call-site pairing shipped the

@@ -103,6 +103,7 @@ extension DesktopsGroup {
         }
         .labelsHidden()
         .pickerStyle(.menu)
+        .neutralMenuLabel()
         .controlSize(.large)
         // A pop-up draws at the width of its widest option
         // whatever frame it is given — asked to fill, it still

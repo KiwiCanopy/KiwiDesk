@@ -9,7 +9,8 @@ import Testing
 /// green words in this window, since #678 turn 16b tinted it
 /// kiwi — so each such style owes a neutralising modifier and a
 /// guard. This suite holds `.menuStyle(.borderlessButton)`
-/// (found and fixed 2026-08-04) and enumerates the direct
+/// (found and fixed 2026-08-04) and `.pickerStyle(.menu)` in
+/// both spellings (#1502), and enumerates the direct
 /// `.neutralButtonLabel()` uses; the bordered half — sealed to
 /// its neutralisation by `settingsActionButton()` since #771 —
 /// is `SettingsBorderedSealTests`', split out of this file at
@@ -80,46 +81,62 @@ struct SettingsLabelNeutralityTests {
         )
     }
 
-    /// Every borderless menu neutralises its label.
+    /// Every borderless menu and every menu-style picker
+    /// neutralises its label.
     ///
-    /// The style paints its label in the accent, so with the
-    /// window tinted kiwi each of these renders green text —
-    /// several of them on the green-washed chips the same tint
-    /// produces. Counted as a PAIR rather than allow-listed:
-    /// there is no menu in this tree whose title should be the
+    /// Both styles paint their label in the accent — the picker
+    /// since macOS 27 (#1502; `gui.md` carries the argument) —
+    /// so with the window tinted kiwi each of these renders green
+    /// text. Counted as a PAIR rather than allow-listed: there is
+    /// no menu or picker in this tree whose title should be the
     /// accent, because the accent marks control fills and these
     /// labels name a current value.
     ///
     /// Paired per FILE, not globally, so two menus in one file
-    /// and none in another cannot cancel out.
-    @Test("every borderless menu neutralises its label")
-    func borderlessMenusAreNeutral() throws {
+    /// and none in another cannot cancel out; the two styles are
+    /// tallied separately only for the vacuity check, so a tree
+    /// with no pickers cannot pass the picker half having looked
+    /// at nothing.
+    @Test("every borderless menu and menu picker neutralises its label")
+    func borderlessMenusAndMenuPickersAreNeutral() throws {
         var menus = 0
+        var pickers = 0
         for file in try scannedSources() {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let styled = source.occurrences(
+            let styledMenus = source.occurrences(
                 of: ".menuStyle(.borderlessButton)"
             )
-            guard styled > 0 else { continue }
-            menus += styled
+            // Both spellings of the one style, as
+            // `SegmentedPickerCoverageTests` counts the segmented.
+            let styledPickers =
+                source.occurrences(of: ".pickerStyle(.menu)")
+                + source.occurrences(of: ".pickerStyle(MenuPickerStyle())")
+            guard styledMenus + styledPickers > 0 else { continue }
+            menus += styledMenus
+            pickers += styledPickers
             #expect(
                 source.occurrences(of: ".neutralMenuLabel()")
-                    == styled,
+                    == styledMenus + styledPickers,
                 Comment(
                     rawValue:
-                        "\(file.lastPathComponent) has \(styled) "
-                        + "borderless menu(s) but not as many "
+                        "\(file.lastPathComponent) has \(styledMenus) "
+                        + "borderless menu(s) and \(styledPickers) "
+                        + "menu picker(s) but not as many "
                         + "`.neutralMenuLabel()` — an accent-"
-                        + "coloured menu title reads as an action "
-                        + "and goes green-on-green on a chip."
+                        + "coloured title reads as an action, goes "
+                        + "green-on-green on a chip, and a picker's "
+                        + "goes green whenever the window is key "
+                        + "on macOS 27."
                 )
             )
         }
-        // A scan that found no menus would pass having looked at
-        // nothing (#635).
+        // A scan that found no menus or no pickers would pass
+        // having looked at nothing (#635) — both halves, since
+        // the picker half is what #1502 added.
         #expect(menus > 0)
+        #expect(pickers > 0)
     }
 
     /// Direct `.neutralButtonLabel()` uses — on styles OTHER
