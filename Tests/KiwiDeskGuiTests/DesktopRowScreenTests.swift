@@ -138,18 +138,22 @@ struct DesktopRowScreenTests {
     /// files the row's screen on the record it writes.
     @Test("the card threads the screens and files them on a pick")
     func cardThreadsTheScreens() throws {
-        let path = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Profiles/"
-                    + "DesktopsGroup.swift"
+        func squashed(_ name: String) throws -> String {
+            let path = SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Profiles/"
+                        + name
+                )
+            return SourceScan.stripComments(
+                try String(contentsOf: path, encoding: .utf8)
             )
-        let squashed = SourceScan.stripComments(
-            try String(contentsOf: path, encoding: .utf8)
-        )
-        .split(whereSeparator: \.isWhitespace)
-        .joined()
-        #expect(squashed.contains("screens:model.desktopScreens,"))
-        #expect(squashed.contains("screen:row?.screen"))
-        #expect(squashed.contains("ifletscreen=row.screen{Text(screen)"))
+            .split(whereSeparator: \.isWhitespace)
+            .joined()
+        }
+        let card = try squashed("DesktopsGroup.swift")
+        #expect(card.contains("screens:model.desktopScreens,"))
+        #expect(card.contains("screen:row?.screen"))
+        let row = try squashed("DesktopsGroup+Row.swift")
+        #expect(row.contains("ifletscreen=row.screen{Text(screen)"))
     }
 }

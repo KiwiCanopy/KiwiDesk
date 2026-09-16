@@ -5,21 +5,14 @@ import Foundation
 /// titled "Desktop 1" (each screen's own, under "Displays have
 /// separate Spaces") can be told apart.
 ///
-/// The join is the topology's `displayUUID` against the attached
-/// displays through `NativeSpaces.displayUUID(for:)` — the seam
-/// `display(forUUID:)` already takes, and the one a fixture pins.
+/// The join is `displaysByUUID()`'s — the topology's
+/// `displayUUID` against the attached displays.
 extension KiwiCore {
     /// Each attached display's name by the UUID a topology
     /// reading names it with. A display the UUID symbol cannot
     /// name is absent, never blank.
     func screenNamesByUUID() -> [String: String] {
-        var names: [String: String] = [:]
-        for display in state.workspaces.allDisplays {
-            guard let uuid = NativeSpaces.displayUUID(for: display.id)
-            else { continue }
-            names[uuid] = display.name
-        }
-        return names
+        displaysByUUID().mapValues(\.name)
     }
 
     /// The screen each present user Desktop lives on, under

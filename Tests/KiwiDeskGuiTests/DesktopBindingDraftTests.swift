@@ -145,7 +145,7 @@ struct DesktopBindingDraftTests {
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(
                     "Sources/KiwiDesk/Settings/Components/"
-                        + "Profiles/DesktopsGroup.swift"
+                        + "Profiles/DesktopsGroup+Row.swift"
                 )
         )
         #expect(

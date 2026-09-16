@@ -168,11 +168,10 @@ hand-written setup, the first time you Save in Settings.
 - **`profile_bindings`**: Desktop identifier → the profile that
   Desktop selects on your main screen. The key is the identifier
   KiwiDesk stamps into the Desktop itself, not its Mission
-  Control number; the number sits in `desktop` as a label, and an
-  optional `display` records the screen the Desktop was last seen
-  on. On a Mac where the stamp cannot be written, the key is the
-  number. A file in the older `{ "1": "Developer" }` shape is
-  rewritten once on load. See [A binding follows its Desktop, not
+  Control number; the number sits in `desktop` as a label. On a
+  Mac where the stamp cannot be written, the key is the number. A
+  file in the older `{ "1": "Developer" }` shape is rewritten once
+  on load. See [A binding follows its Desktop, not
   its number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 - **`layers`**: keybinding layers, only one active at a time.
   Each has a **`name`** ("default" for the main set), an optional
@@ -180,6 +179,11 @@ hand-written setup, the first time you Save in Settings.
   of **`combo`** (e.g. `"cmd+alt+left"`), **`lua`** (the body
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
+
+:::unreleased
+A `profile_bindings` entry may also carry `screen`, the name of
+the screen its Desktop was last seen on.
+:::
 
 A hand-edited `layers` list is normalized on load: empty names
 are dropped, a duplicated name keeps its first entry, `default`
@@ -836,11 +840,8 @@ follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
 :::unreleased
-Under each row, the screen that Desktop lives on. With "Displays
-have separate Spaces" on, every screen has a Desktop 1, so two
-rows can share a number — the screen line is what tells them
-apart, and a *not present* row names the screen it was last
-seen on.
+Under a row, the screen its Desktop is on — for a *not present*
+row, the screen it was last seen on.
 :::
 
 **A binding fires when its Desktop becomes current on your main

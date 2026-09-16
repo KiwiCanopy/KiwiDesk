@@ -96,20 +96,26 @@ extension KiwiCore {
         canDriveDesktops ? snapshot.userDesktops : []
     }
 
+    /// Every attached display by the SkyLight UUID a topology
+    /// reading names it with, through `NativeSpaces
+    /// .displayUUID(for:)` — the seam a topology fixture pins.
+    /// A display the UUID symbol cannot name is absent.
+    func displaysByUUID() -> [String: Display] {
+        var out: [String: Display] = [:]
+        for display in state.workspaces.allDisplays {
+            guard let uuid = NativeSpaces.displayUUID(for: display.id)
+            else { continue }
+            out[uuid] = display
+        }
+        return out
+    }
+
     /// The KiwiDesk display a SkyLight display UUID names, or
     /// nil when no attached display matches (the topology moved
     /// under a snapshot, or the UUID symbol is unavailable).
-    ///
-    /// One copy of the match: the Desktop verbs name a screen by
-    /// the UUID a `DesktopSnapshot` carries, and the switch
-    /// emit's monitor numbering resolves main the same way.
-    /// Both go through `NativeSpaces.displayUUID(for:)`, which
-    /// is the seam a topology fixture pins.
     func display(forUUID uuid: String?) -> DisplayID? {
         guard let uuid else { return nil }
-        return state.workspaces.allDisplays.first {
-            NativeSpaces.displayUUID(for: $0.id) == uuid
-        }?.id
+        return displaysByUUID()[uuid]?.id
     }
 
     public var focusedWindow: ManagedWindow? {
