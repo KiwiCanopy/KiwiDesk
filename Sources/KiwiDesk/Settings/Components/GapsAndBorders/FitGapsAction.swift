@@ -53,9 +53,10 @@ struct FitGapsAction: View {
                 explanation: L(
                     "border.fit_gaps.help",
                     "Calculates global outer and inner gaps "
-                        + "from the border width. Inner gaps "
-                        + "allow for both borders when borders "
-                        + "on unfocused windows are shown."
+                        + "from the border width, plus the glow "
+                        + "when it is on. Inner gaps allow for "
+                        + "both borders when borders on "
+                        + "unfocused windows are shown."
                 ),
                 subject: L(
                     "border.fit_gaps.title",

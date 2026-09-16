@@ -77,7 +77,9 @@ struct FloatRegionBoundsTests {
         // every retune and catch no regression (#1021).
         let core = makeFloatCore()
         let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width
+            width: core.tiler.settings.borderStyle.width,
+            glowBlur: core.tiler.settings.borderStyle
+                .resolvedGlowBlur
         )
         #expect(reach > 0)
         let region = try #require(
@@ -103,7 +105,9 @@ struct FloatRegionBoundsTests {
         // fighting the hand that the rule forbids.
         let core = makeFloatCore()
         let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width
+            width: core.tiler.settings.borderStyle.width,
+            glowBlur: core.tiler.settings.borderStyle
+                .resolvedGlowBlur
         )
         #expect(reach > 0)
         let fit = try #require(core.floatBounds(of: WindowID(1)))
@@ -132,7 +136,9 @@ struct FloatRegionBoundsTests {
             paintedAppBar(items: [appBarItem(1, text: "A")])
         ])
         let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width
+            width: core.tiler.settings.borderStyle.width,
+            glowBlur: core.tiler.settings.borderStyle
+                .resolvedGlowBlur
         )
         #expect(reach > 0)
 
@@ -169,7 +175,9 @@ struct FloatRegionBoundsTests {
             paintedAppBar(items: [appBarItem(1, text: "A")])
         ])
         let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width
+            width: core.tiler.settings.borderStyle.width,
+            glowBlur: core.tiler.settings.borderStyle
+                .resolvedGlowBlur
         )
         let under = CGRect(x: 100, y: 0, width: 400, height: 300)
         let clamped = core.floatFrameClampedClearOfBars(

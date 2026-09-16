@@ -15,10 +15,9 @@ struct BorderGeometry: Equatable {
     /// Corner radius of stroke centerline path.
     let cornerRadius: CGFloat
     /// Outward margin for glow bloom expansion (#358); 0 when
-    /// glow is off. Deliberately kept OUT of `outwardReach`: the
-    /// soft bloom may bleed into the layout gap, so
-    /// `border.fit_gaps` stays sized to the crisp stroke (#358
-    /// ui-designer decision).
+    /// glow is off. Part of `outwardReach` since #1378: Fit
+    /// layout gaps and the float inset clear the bloom on the
+    /// focused side, while a hand-set gap may still let it bleed.
     let glowMargin: CGFloat
 
     /// Below-order cushion to close the squircle corner seam
@@ -82,11 +81,17 @@ struct BorderGeometry: Equatable {
         )
     }
 
-    /// How far the stroke reaches *outward* past the window edge
-    /// (pt). `border.fit_gaps` sizes gaps from this so the gap math
-    /// matches what the renderer actually draws.
-    static func outwardReach(width: CGFloat) -> CGFloat {
-        clamp(width)
+    /// How far the ring reaches *outward* past the window edge
+    /// (pt): the stroke plus the glow's bloom (#1378), `glowBlur`
+    /// arriving RESOLVED like `compute`'s — 0 for the unfocused
+    /// ring, which has none. `border.fit_gaps` and the float inset
+    /// size from this so the gap math matches what the renderer
+    /// draws (`BorderGeometryTests ▸ outwardReachMatchesCompute`).
+    static func outwardReach(
+        width: CGFloat,
+        glowBlur: CGFloat
+    ) -> CGFloat {
+        clamp(width) + max(0, glowBlur)
     }
 
     /// The stroke depth beyond the visible width. `below`-order tucks

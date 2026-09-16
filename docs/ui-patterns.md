@@ -664,7 +664,9 @@ in it**. The tiers, top to bottom:
    captions (auto-derivation, wrap-focus), each still
    gate-above-gated internally.
 5. **Escape-hatch buttons / actions** ("Fit layout gaps")
-   — always last.
+   — always last, and on the card whose VALUES they write:
+   Fit lives in the Gaps card, greyed with its reason while
+   the border it reads is off.
 
 An escape hatch that transforms other staged settings must expose
 the transaction locally: label transient inputs as action parameters,

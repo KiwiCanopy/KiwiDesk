@@ -82,7 +82,39 @@ struct GapsEditor: View {
                 }
                 .padding(.top, 4)
             }
+            Divider()
+            // Fit writes the gaps, so it lives here (#1360),
+            // greyed with its reason while the border is off.
+            FitGapsAction(model: model)
+                .modifier(
+                    GreyOut(
+                        active: fitReason != nil,
+                        help:
+                            fitReason
+                            .map(GapsBordersGateHelp.sentence) ?? ""
+                    )
+                )
+            // Inline gate reason outside the dimmed subtree: the
+            // switch it reads is on another card (#815,
+            // GateReasonPlacement).
+            if let fitReason, owesInlineFitReason {
+                Text(GapsBordersGateHelp.sentence(for: fitReason))
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
         }
+    }
+
+    /// The Fit rows' one gate reason, resolved rather than
+    /// re-derived (`GapsAndBordersGateWiringTests`).
+    private var fitReason: GapsBordersGates.InertReason? {
+        gates.inertReason(for: .borders(.borderFitGaps))
+    }
+
+    private var owesInlineFitReason: Bool {
+        GateReasonPlacement.owesInlineReason(
+            .borders(.borderFitGaps)
+        )
     }
 
     private func masterReadout(

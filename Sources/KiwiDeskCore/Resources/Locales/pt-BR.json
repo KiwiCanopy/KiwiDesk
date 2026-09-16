@@ -143,7 +143,7 @@
   "border.fit_gaps.action_hint": "Atualiza os valores de espaçamento do rascunho. Ainda é necessário usar “%1$@”.",
   "border.fit_gaps.already_matches": "Os espaçamentos do rascunho já coincidem.",
   "border.fit_gaps.extra_spacing": "Espaçamento adicional",
-  "border.fit_gaps.help": "Calcula os espaçamentos externos e internos globais a partir da espessura da borda. Os espaçamentos internos consideram as duas bordas quando as bordas das janelas fora de foco são exibidas.",
+  "border.fit_gaps.help": "Calcula os espaçamentos externos e internos globais a partir da espessura da borda, mais o brilho quando ele está ativado. Os espaçamentos internos consideram as duas bordas quando as bordas das janelas fora de foco são exibidas.",
   "border.fit_gaps.preview": "Definirá Externo como %1$d pt e Interno como %2$d pt.",
   "border.fit_gaps.replaces_edges": "Substitui os valores de espaçamento por borda.",
   "border.fit_gaps.title": "Ajustar aos espaçamentos do layout",

@@ -3185,11 +3185,18 @@ the darkened border, in its own hue) — set only `focused_color`
 and the glow follows. Its reach **scales with the border width**
 (clamped to a legible band), so a hairline border gets a subtle
 rim and a thick one a proportional aura — override it with
-`set_glow_size` below. The soft edge is allowed to bleed into
-the layout gap, so `fit_gaps` is unaffected. One interaction: a
+`set_glow_size` below. One interaction: a
 glowing ring renders on the behind-order fallback renderer, so
 `draw_order("front")` is inert while glow is on (see
 [Accepted limitations](accepted-limitations.md)).
+
+:::unreleased
+The bloom counts as part of the ring's reach: `fit_gaps` grows
+the gaps by the glow's resolved blur once, on the focused side,
+and a floating window keeps that much off bars and screen edges
+too. A hand-set gap smaller than that lets the bloom bleed onto
+the neighbour, which is yours to choose.
+:::
 
 **Example:**
 
@@ -3259,7 +3266,7 @@ past the border's reach. Every outer edge becomes
 `reach + remaining`; each inner axis becomes `reach + remaining`,
 or `2 × reach + remaining` when `unfocused_enabled` is on (both
 neighbouring borders need clearance; the whitespace sits between
-them once). The reach is simply the configured border width; the
+them once). The reach is the configured border width; the
 renderer’s hidden overlap is behind the window and does not count.
 The action deliberately
 normalizes asymmetric global gaps. A one-shot convenience that
@@ -3268,6 +3275,14 @@ persisted setting, and the layout math itself stays free of any
 border coupling, so this never runs automatically. The GUI's
 **Fit layout gaps → Set Gap Values** action previews and stages the
 same calculation.
+
+:::unreleased
+With `glow` on, the focused ring's reach is the width plus the
+glow's resolved blur, added once: every outer edge and each
+inner axis grow by the blur, and an unfocused ring adds its
+width alone (it has no bloom). At the default width the
+automatic glow takes a Fit from 5/5 to 9/9.
+:::
 
 **Example:**
 

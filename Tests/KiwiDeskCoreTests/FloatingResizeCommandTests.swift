@@ -99,7 +99,9 @@ struct FloatingResizeCommandTests {
         // rather than pinned at 5 — `border.width` is feel and
         // the owner's to retune (#1021).
         let reach = BorderGeometry.outwardReach(
-            width: core.tiler.settings.borderStyle.width
+            width: core.tiler.settings.borderStyle.width,
+            glowBlur: core.tiler.settings.borderStyle
+                .resolvedGlowBlur
         )
         #expect(frames[WindowID(2)]?.origin.x == reach)
         #expect(

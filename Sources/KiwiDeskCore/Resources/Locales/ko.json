@@ -143,7 +143,7 @@
   "border.fit_gaps.action_hint": "초안의 간격 값을 업데이트합니다. ‘%1$@’은(는) 별도로 필요합니다.",
   "border.fit_gaps.already_matches": "초안의 간격이 이미 일치합니다.",
   "border.fit_gaps.extra_spacing": "추가 간격",
-  "border.fit_gaps.help": "테두리 두께를 기준으로 전역 바깥쪽 및 안쪽 간격을 계산합니다. 포커스되지 않은 윈도우의 테두리를 표시하는 경우, 안쪽 간격은 두 테두리를 모두 고려합니다.",
+  "border.fit_gaps.help": "테두리 두께에, 글로우 효과가 켜져 있으면 글로우를 더한 값을 기준으로 전역 바깥쪽 및 안쪽 간격을 계산합니다. 포커스되지 않은 윈도우의 테두리를 표시하는 경우, 안쪽 간격은 두 테두리를 모두 고려합니다.",
   "border.fit_gaps.preview": "바깥쪽을 %1$d pt, 안쪽을 %2$d pt로 설정합니다.",
   "border.fit_gaps.replaces_edges": "가장자리별 간격 값을 대체합니다.",
   "border.fit_gaps.title": "레이아웃 간격에 맞추기",

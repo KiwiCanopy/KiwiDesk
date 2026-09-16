@@ -11,6 +11,10 @@ enum GapsBordersRowOrder {
         .gaps(.inner),
         .gaps(.innerHorizontal),
         .gaps(.innerVertical),
+        // Fit layout gaps writes the gaps, so it lives here
+        // (#1360), last after its own divider.
+        .borders(.borderFitGapsExtraSpacing),
+        .borders(.borderFitGaps),
     ]
 
     /// Border width and corner master setting keys (#754).
@@ -26,8 +30,6 @@ enum GapsBordersRowOrder {
         .borders(.borderGlow),
         .borders(.borderGlowSizeAuto),
         .borders(.borderGlowSize),
-        .borders(.borderFitGapsExtraSpacing),
-        .borders(.borderFitGaps),
     ]
 
     static let stickyWindows: [SettingKey] = [

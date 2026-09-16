@@ -38,6 +38,10 @@ struct GapsBordersGates {
             .borders(.dragDropZoneFill):
             return settings.dragDropZone.enabled
                 ? nil : .visualOff
+        case .borders(.borderFitGaps),
+            .borders(.borderFitGapsExtraSpacing):
+            // Fit reads the border it sizes for (#1360).
+            return settings.borderStyle.enabled ? nil : .borderOff
         default:
             // A gated key with no arm is a bug — fail loud in
             // debug, fail-OPEN in release so a shipped Settings
@@ -64,6 +68,8 @@ struct GapsBordersGates {
     static let resolved: Set<SettingKey> = [
         .borders(.borderGlowSize),
         .borders(.borderGlowSizeAuto),
+        .borders(.borderFitGaps),
+        .borders(.borderFitGapsExtraSpacing),
         .borders(.dragGhostBorder),
         .borders(.dragGhostFill),
         .borders(.dragDropZoneBorder),

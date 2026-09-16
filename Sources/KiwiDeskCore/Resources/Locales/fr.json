@@ -143,7 +143,7 @@
   "border.fit_gaps.action_hint": "Met à jour les valeurs d'écart du brouillon. « %1$@ » reste nécessaire.",
   "border.fit_gaps.already_matches": "Les écarts du brouillon correspondent déjà.",
   "border.fit_gaps.extra_spacing": "Écart supplémentaire",
-  "border.fit_gaps.help": "Calcule les écarts externes et internes globaux à partir de l'épaisseur de la bordure. Les écarts internes tiennent compte des deux bordures lorsque celles des fenêtres inactives sont affichées.",
+  "border.fit_gaps.help": "Calcule les écarts externes et internes globaux à partir de l'épaisseur de la bordure, plus le halo lorsqu'il est activé. Les écarts internes tiennent compte des deux bordures lorsque celles des fenêtres inactives sont affichées.",
   "border.fit_gaps.preview": "Réglera l'extérieur sur %1$d pt et l'intérieur sur %2$d pt.",
   "border.fit_gaps.replaces_edges": "Remplace les valeurs d'écart par bord.",
   "border.fit_gaps.title": "Ajuster les écarts de la disposition",

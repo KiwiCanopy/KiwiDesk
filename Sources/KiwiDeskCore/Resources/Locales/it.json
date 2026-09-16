@@ -143,7 +143,7 @@
   "border.fit_gaps.action_hint": "Aggiorna i valori di spaziatura della bozza. «%1$@» è comunque necessario.",
   "border.fit_gaps.already_matches": "Le spaziature della bozza corrispondono già.",
   "border.fit_gaps.extra_spacing": "Spaziatura aggiuntiva",
-  "border.fit_gaps.help": "Calcola le spaziature esterne e interne globali a partire dallo spessore del bordo. Le spaziature interne tengono conto di entrambi i bordi quando sono mostrati anche quelli delle finestre senza focus.",
+  "border.fit_gaps.help": "Calcola le spaziature esterne e interne globali a partire dallo spessore del bordo, più l'alone quando è attivo. Le spaziature interne tengono conto di entrambi i bordi quando sono mostrati anche quelli delle finestre senza focus.",
   "border.fit_gaps.preview": "Imposterà Esterno a %1$d pt e Interno a %2$d pt.",
   "border.fit_gaps.replaces_edges": "Sostituisce i valori di spaziatura per bordo.",
   "border.fit_gaps.title": "Adatta alle spaziature del layout",

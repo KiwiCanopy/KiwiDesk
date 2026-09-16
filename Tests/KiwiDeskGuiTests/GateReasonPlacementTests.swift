@@ -68,6 +68,11 @@ struct GateReasonPlacementTests {
                 // kills it is on the Space Bar card, so nothing
                 // beside it says why it is dead.
                 .spaceBar(.copyAppearance),
+                // The same shape since #1360: Fit layout gaps
+                // sits on the Gaps card and reads the focus
+                // border switch on the Focus Border card.
+                .borders(.borderFitGaps),
+                .borders(.borderFitGapsExtraSpacing),
             ]
         )
     }
