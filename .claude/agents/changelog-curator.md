@@ -46,10 +46,15 @@ reaches people who did not ask to read anything.
    `python3 scripts/changelog-sync --body <file>`. It refuses
    rather than half-rendering, so a green run is the floor, not
    the goal.
-5. **Keep the Sources table current** — outside the block, since
+5. **Carry the sponsor paragraph above the block**, verbatim
+   from the previous release's body (`gh release view <tag>`),
+   so the whole draft pastes as the release body. It is outside
+   the parser's reach — the site and Sparkle render the block
+   alone — and `packaging-and-release.md` owns the body's shape.
+6. **Keep the Sources table current** — outside the block, since
    the parser refuses issue numbers inside it. It is how the
    next reader traces a bullet back.
-6. **Move the Coverage marker last**, naming the commit you read
+7. **Move the Coverage marker last**, naming the commit you read
    to, so the next curation appends.
 
 ## What not to write

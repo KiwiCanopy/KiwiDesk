@@ -415,8 +415,14 @@ step rather than reaching for `secrets` in a condition that
 silently reads empty.
 
 **The release body has a form, and a parser enforces it (#873).**
-A curated `## Highlights` block sits on top, `--generate-notes`'
-list underneath unedited. Under `## Highlights`: one or two
+The body OPENS with the sponsor paragraph — copied verbatim from
+the previous release's body, owner practice since v1.3.0 — then
+the curated `## Highlights` block, then `--generate-notes`' list
+unedited. The paragraph reaches the release page alone: the
+parser reads from `## Highlights`, and the site and Sparkle
+render the parsed block, so it is never put in front of a user
+who only asked to update; the curator's draft carries it so the
+whole draft pastes as the body. Under `## Highlights`: one or two
 sentences of summary, then `###` sections whose titles the author
 chooses, each carrying at least one entry. **Curate the draft,
 then publish** — `release.yml` drafts, and
