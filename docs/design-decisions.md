@@ -2328,6 +2328,32 @@ on (#1389) the lone case never arises; the anchors matter for
 the rows fill leaves alone.
 :::
 
+:::unreleased
+**A scrolling share is a share of the pitch (#1382).** A slot
+of "50%" was half the bare axis, so two of them plus the gap
+between never fitted the screen — the second column always
+hung one gap past the edge, and "33%" three columns was a
+puzzle nobody could type. On a wide screen the value a user
+holds is the effect, not the share: three columns, not 33.3%.
+So a fraction resolves as `f·(along + gap) − gap` — the share
+of one window plus one inner gap, less that gap — and n slots
+of 1/n tile the axis exactly at any gap on any screen. The
+focus ring paints inside the gap and takes no layout width, and
+after Fit layout gaps the gap is at least the ring's reach, so
+the count holds with rings clear. Points stay the absolute
+channel. No migration is owed, and not only because the shift
+is small: no file-local crossing EXISTS — the fraction that
+would redraw the old picture is `(f·along + gap) / (along +
+gap)`, a function of the screen's length a profile does not
+know — so the trade is a shift of at most `(1 − f)·gap` on
+every screen, stated here so profiles.md's "meaning changes
+under the same key" clause (#1354) is answered on both of its
+bounds: every stored value moves by under one inner gap, and
+the old reading was the defect. One representation stays:
+a count the Settings window offers writes 1/n into this same
+stored fraction, never a second number.
+:::
+
 **`follow` holds a place, not a number: a resize re-anchors the
 viewport (#966).** A scrolling row has one slot size for every
 slot, so resizing one moves every slot's *position* along the
@@ -9498,7 +9524,7 @@ two-way picker already solves. (ui-designer, 2026-07-29.)
 
 **[Trade-off]**
 
-**A scrolling slot ships at 95% of its axis — near-full, not
+**A scrolling slot ships at 95% of its pitch — near-full, not
 full.** The sliver the last 5% leaves is not spare room: it is
 the neighbouring window peeking in, and it is the only thing on
 screen that says the space scrolls at all. A full-axis slot
@@ -9515,7 +9541,7 @@ working in. The cost is the counterpart of the ultrawide trade
 above — on a very wide display 95% is a very wide column, and
 the answer there is still an explicit pt or % slot size. The
 percent slider steps by 1% rather than the coarser step its pt
-sibling takes, since a percent of a scroll axis is tens of
+sibling takes, since a percent of a scroll pitch is tens of
 points on any display this app targets;
 `SlotSizePercentRangeTests` holds the slider to the model's own
 bounds and to a step the standard lands on.

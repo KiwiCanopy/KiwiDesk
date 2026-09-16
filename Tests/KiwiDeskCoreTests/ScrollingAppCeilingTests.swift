@@ -103,6 +103,10 @@ struct ScrollingAppCeilingTests {
         }
     }
 
+    /// Reads the store as a NUMBER: `gap: 0` is the points-store
+    /// reading, and on an `auto`/`%` store it is the bare-axis
+    /// share, NOT the writer's press base (#1382) — the
+    /// comparisons here are `>` / unchanged, never a landing.
     private func slotPoints(
         _ core: KiwiCore,
         _ space: SpaceID
@@ -110,7 +114,7 @@ struct ScrollingAppCeilingTests {
         let live = try #require(core.state.workspaces[space])
         return core.tiler.settings.resolvedScrolling(for: live)
             .slotSize
-            .editablePoints(along: 1200, horizontal: true)
+            .editablePoints(along: 1200, gap: 0, horizontal: true)
     }
 
     @Test("A grow refuses at the learned maximum and cues")

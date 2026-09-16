@@ -156,8 +156,14 @@ struct MouseResizeApplyTests {
         // saying anything about the seed, which is this test's
         // subject; `scrollWidthGrowStopsAtTheAxis` below owns
         // the other end.
+        let gap = core.tiler.settings.gaps(for: space.id)
+            .inner.horizontal
         let before = core.tiler.settings.scrolling.slotSize
-            .editablePoints(along: bounds.width, horizontal: true)
+            .editablePoints(
+                along: bounds.width,
+                gap: gap,
+                horizontal: true
+            )
         core.applyResizeAdjustment(
             .scrollWidth(-100),
             for: nil,
@@ -167,7 +173,11 @@ struct MouseResizeApplyTests {
         let after = core.tiler.settings.resolvedScrolling(
             for: core.state.workspaces[SpaceID("1")]!
         ).slotSize
-            .editablePoints(along: bounds.width, horizontal: true)
+            .editablePoints(
+                along: bounds.width,
+                gap: gap,
+                horizontal: true
+            )
         #expect(abs(after - before + 100) < 0.5)
     }
 
@@ -184,7 +194,9 @@ struct MouseResizeApplyTests {
         // holds that value. Unclamped, these two presses land
         // 400pt apart.
         let core = makeCore()
-        _ = space(core, mode: "scrolling")
+        let sp = space(core, mode: "scrolling")
+        let gap = core.tiler.settings.gaps(for: sp.id)
+            .inner.horizontal
         func grow() -> CGFloat {
             // Re-read the space each press: a no-override write
             // lands in the live session layer, and
@@ -204,12 +216,14 @@ struct MouseResizeApplyTests {
             ).slotSize
                 .editablePoints(
                     along: bounds.width,
+                    gap: gap,
                     horizontal: true
                 )
         }
         let seed = core.tiler.settings.scrolling.slotSize
             .editablePoints(
                 along: bounds.width,
+                gap: gap,
                 horizontal: true
             )
         let first = grow()

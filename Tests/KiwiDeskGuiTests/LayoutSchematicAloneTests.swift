@@ -64,21 +64,23 @@ struct LayoutSchematicAloneTests {
         let filled = scrolling(fill: true)
         let kept = scrolling(fill: false)
         #expect(filled.lone && kept.lone)
-        #expect(filled.slotFraction == 1)
+        #expect(filled.slot(screenLen: 400) == 400)
         // The kept slot is the one the row draws at any count.
         #expect(
-            kept.slotFraction
-                == scrolling(fill: false, windows: 3).slotFraction
+            kept.slot(screenLen: 400)
+                == scrolling(fill: false, windows: 3)
+                .slot(screenLen: 400)
         )
-        #expect(kept.slotFraction < 1)
+        #expect(kept.slot(screenLen: 400) < 400)
         // One slot, the focus, and no incoming window to mark.
         #expect(filled.row.slots == 0...0)
         #expect(!filled.drawsInsertionMark)
         #expect(!kept.drawsInsertionMark)
         // The toggle is inert above one window.
         #expect(
-            scrolling(fill: true, windows: 2).slotFraction
-                == scrolling(fill: false, windows: 2).slotFraction
+            scrolling(fill: true, windows: 2).slot(screenLen: 400)
+                == scrolling(fill: false, windows: 2)
+                .slot(screenLen: 400)
         )
     }
 

@@ -56,21 +56,29 @@ struct ScrollingSchematic: View {
         )
     }
 
-    /// Slot thickness as fraction of screen axis: the whole axis
-    /// for a lone window that fills (#1389), else the slot's
-    /// (`LayoutSchematicAloneTests`).
-    var slotFraction: CGFloat {
-        lone && fillWhenAlone ? 1 : thickness
-    }
+    /// The canvas's inner gap between slots.
+    static let slotGap: CGFloat = 3
 
-    private var thickness: CGFloat {
+    /// The slot's span on a `screenLen` screen: the whole screen
+    /// for a lone window that fills (#1389,
+    /// `LayoutSchematicAloneTests`); a share is the ENGINE's
+    /// pitch share (`ScrollSize.resolved`, #1382), so 50% draws
+    /// two windows side by side, gaps included; auto and points
+    /// are stylised for the mini canvas.
+    func slot(screenLen: CGFloat) -> CGFloat {
+        guard !(lone && fillWhenAlone) else { return screenLen }
         switch slotSize {
         case .auto:
-            return horizontal ? 0.46 : 0.5
+            return screenLen * (horizontal ? 0.46 : 0.5)
         case .points(let points):
-            return SchematicMath.slotFraction(points: points)
+            return screenLen * SchematicMath.slotFraction(points: points)
         case .fraction(let fraction):
-            return CGFloat(min(max(fraction, 0.12), 0.92))
+            return ScrollSize.fraction(min(max(fraction, 0.12), 0.92))
+                .resolved(
+                    along: screenLen,
+                    gap: Self.slotGap,
+                    horizontal: horizontal
+                )
         }
     }
 
@@ -109,8 +117,8 @@ struct ScrollingSchematic: View {
     func metrics(along: CGFloat) -> Metrics {
         let screenLen = along * screenFraction
         let screenStart = (along - screenLen) / 2
-        let slot = max(14, screenLen * slotFraction)
-        let gap: CGFloat = 3
+        let slot = max(14, slot(screenLen: screenLen))
+        let gap = Self.slotGap
         let step = slot + gap
         let placed = row
         let low = placed.slots.lowerBound

@@ -149,8 +149,9 @@ enum LayoutHelp {
             "Sets each scrolling window's size along the scroll "
                 + "direction — the column width when the "
                 + "orientation is %1$@, the row height when it "
-                + "is %2$@. As a unit, %3$@ scales with that "
-                + "width or height (95%% out of the box) and "
+                + "is %2$@. As a unit, %3$@ is a share of one "
+                + "window plus one gap, so 50%% is exactly two "
+                + "windows, gaps included (95%% out of the box); "
                 + "%4$@ fixes an exact size.",
             L("scroll_grid.horizontal", "Horizontal"),
             L("scroll_grid.vertical", "Vertical"),

@@ -1056,6 +1056,17 @@ editing here:
   `ScrollRestPlumbingTests` pins the carrier. The product
   ruling — including why a reorder is ruled OUT at the model
   rather than in the layout — is `docs/design-decisions.md`'s.
+- **A scrolling share is a share of the PITCH, resolved in ONE
+  place (#1382).** `ScrollSize.resolved` — and `editablePoints`,
+  the press base — take the inner gap of the axis they resolve
+  on as a REQUIRED argument, so `f·(along + gap) − gap` tiles n
+  slots of 1/n exactly; a consumer hands the resolver that axis's
+  inner gap and never `0`, which reinstates the bare-axis
+  reading the compiler cannot see (`ScrollingPitchTests`, and
+  `LayoutSchematicPitchTests` for the preview, which calls the
+  resolver rather than copying it). A count↔fraction inverse
+  or a "how many fit" door is Core's, homed beside `pitched`,
+  never GUI arithmetic over a screen frame.
 - **A resize store holding an absolute LENGTH owes a ceiling,
   and since #1057 the whole press DECISION lives in ONE pure
   type (#966/#1057).** `ScrollSlotDomain.decide` — reached only

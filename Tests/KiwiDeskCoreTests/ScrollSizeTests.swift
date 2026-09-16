@@ -69,26 +69,30 @@ struct ScrollSizeTests {
     @Test("resolved clamps to the along-axis")
     func resolvedClamps() {
         // Auto is 95% of the available along-axis on both
-        // orientations.
+        // orientations (with no gap the pitch is the axis).
         #expect(
-            ScrollSize.auto.resolved(along: 2000, horizontal: true)
+            ScrollSize.auto
+                .resolved(along: 2000, gap: 0, horizontal: true)
                 == 1900
         )
         #expect(
-            ScrollSize.auto.resolved(along: 1000, horizontal: true)
+            ScrollSize.auto
+                .resolved(along: 1000, gap: 0, horizontal: true)
                 == 950
         )
         #expect(
-            ScrollSize.auto.resolved(along: 1000, horizontal: false)
+            ScrollSize.auto
+                .resolved(along: 1000, gap: 0, horizontal: false)
                 == 950
         )
         #expect(
             ScrollSize.fraction(0.5)
-                .resolved(along: 1000, horizontal: false) == 500
+                .resolved(along: 1000, gap: 0, horizontal: false)
+                == 500
         )
         #expect(
             ScrollSize.points(3000)
-                .resolved(along: 1000, horizontal: true) == 1000
+                .resolved(along: 1000, gap: 0, horizontal: true) == 1000
         )
     }
 
@@ -98,18 +102,18 @@ struct ScrollSizeTests {
         // is what stops resize from silently shrinking a big slot.
         #expect(
             ScrollSize.points(3000)
-                .editablePoints(along: 1000, horizontal: true)
+                .editablePoints(along: 1000, gap: 0, horizontal: true)
                 == 3000
         )
         // auto / fraction still seed against the axis.
         #expect(
             ScrollSize.auto
-                .editablePoints(along: 2000, horizontal: true)
+                .editablePoints(along: 2000, gap: 0, horizontal: true)
                 == 1900
         )
         #expect(
             ScrollSize.fraction(0.5)
-                .editablePoints(along: 1000, horizontal: false)
+                .editablePoints(along: 1000, gap: 0, horizontal: false)
                 == 500
         )
     }
