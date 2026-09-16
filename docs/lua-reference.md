@@ -1022,7 +1022,6 @@ stack.set_new_window_placement("last")
 
 ### stack.set_fill_when_alone
 
-:::unreleased
 **Expects:** a boolean.
 
 **Does:** when `true` (the default, and how every profile drew
@@ -1041,7 +1040,6 @@ of two or more, the kept zone widens to the full area when the
 second window opens. The Settings row is
 **If one window, fill the screen**; Scrolling has the same
 toggle (`scroll.set_fill_when_alone`).
-:::
 
 **Example:**
 
@@ -1137,12 +1135,10 @@ minimum window size (`set_min_window_size`) and capped at the
 axis length — so a small percentage on a narrow display falls
 back to the minimum rather than tiling windows smaller than it.
 
-:::unreleased
 A percentage is a share of the **pitch** — one window plus one
 inner gap — so `"50%"` is exactly two windows, gaps included,
 and `"33.33%"` three, whatever the gap. Points stay the
 absolute channel.
-:::
 
 A row shorter than the axis keeps each slot at its size and
 leaves the rest of the axis empty. A lone window fills the
@@ -1150,10 +1146,8 @@ available width or height (unless its app refuses that size —
 [Accepted limitations](accepted-limitations.md)).
 Accepted values: `%` clamps to 5–100%, points to ≥100.
 
-:::unreleased
 Whether a lone window fills is `scroll.set_fill_when_alone`'s
 (on by default); off, it keeps this slot size alone.
-:::
 
 **Example:**
 
@@ -1215,7 +1209,6 @@ only `follow` remembers the prior scroll position. Focusing a
 — a floating window has no slot in the row, so there is nothing
 to place.
 
-:::unreleased
 The three fixed anchors are **absolute**: the focused window
 rests where the anchor says, whatever the row's extent. Under
 `center` it is centred on the screen with its neighbours
@@ -1226,7 +1219,6 @@ window (a lone one kept at its slot,
 `scroll.set_fill_when_alone`) the rest of the screen stays
 empty. Only `follow` keeps the row's extent on screen: a row
 shorter than the axis sits flush at the leading edge under it.
-:::
 
 `follow` remembers where the *focused window* rested, not how far
 the row was pushed. One slot size serves every slot, so resizing
@@ -1321,7 +1313,6 @@ scroll.set_wrap_focus(true)
 
 ### scroll.set_fill_when_alone
 
-:::unreleased
 **Expects:** a boolean.
 
 **Does:** when `true` (the default, and how every profile drew
@@ -1334,7 +1325,6 @@ the axis it rests is `scroll.set_anchor`'s. The Settings
 row is
 **If one window, fill the screen**; Stack has the same toggle
 (`stack.set_fill_when_alone`).
-:::
 
 **Example:**
 
@@ -3191,13 +3181,11 @@ glowing ring renders on the behind-order fallback renderer, so
 `draw_order("front")` is inert while glow is on (see
 [Accepted limitations](accepted-limitations.md)).
 
-:::unreleased
 The bloom counts as part of the ring's reach: `border.fit_gaps`
 sizes for it, and a floating window keeps that much off bars and
 screen edges as well as the stroke. A hand-set gap smaller than
 that lets the bloom bleed onto the neighbour, which is yours to
 choose.
-:::
 
 **Example:**
 
@@ -3278,14 +3266,12 @@ border coupling, so this never runs automatically. The GUI's
 **Fit layout gaps → Set Gap Values** action previews and stages the
 same calculation.
 
-:::unreleased
 With `glow` on, the focused ring's reach is the width plus the
 glow's resolved blur, rounded up to whole points and added once:
 every outer edge and each inner axis grow by it, and an
 unfocused ring adds its width alone (it has no bloom). The
 Settings action's preview line shows the values before the
 press.
-:::
 
 **Example:**
 
@@ -3986,12 +3972,10 @@ already open returns it to **Home** rather than dismissing it,
 the same as opening Settings from the menu bar. Unsaved edits
 survive that; only the place you were reading resets.
 
-:::unreleased
 It is seeded on **`⌃⌥,`**, in the base layer and in every layer
 you create in Settings, and offered under **Shortcuts ▸ General**
 ("Open Settings"), where you can rebind it per layer without
 hand-writing Lua.
-:::
 
 **Example:**
 
@@ -4749,7 +4733,6 @@ as before. In a hand-written config the call lives in
 in `gui.json` (`profile_bindings`) and edited in the Profiles
 section instead.
 
-:::unreleased
 A Desktop holds one profile per screen count: a second call
 with a profile saved for another count adds beside the first,
 and the one saved for as many screens as are connected loads;
@@ -4761,7 +4744,6 @@ not saved yet replaces any other not saved yet.
 KiwiDesk.bind_profile_to_desktop(3, "Laptop")
 KiwiDesk.bind_profile_to_desktop(3, "Dual")
 ```
-:::
 
 **The number names the Desktop; it does not key the binding.**
 Mission Control renumbers on every add, delete, reorder and
@@ -5178,7 +5160,6 @@ animations.set_on_relayout(true)
 
 ### animations.set_on_monocle_focus
 
-:::unreleased
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** enables or disables the card flip when focus moves
@@ -5207,11 +5188,9 @@ off regardless.
 ```lua
 animations.set_on_monocle_focus(false)
 ```
-:::
 
 ### animations.set_monocle_flip_duration
 
-:::unreleased
 **Expects:** a number (milliseconds, clamped 100–1000; default
 `450`).
 
@@ -5225,7 +5204,6 @@ while `set_on_monocle_focus` is off.
 ```lua
 animations.set_monocle_flip_duration(300)
 ```
-:::
 
 ### enable_wake_restore, set_wake_restore_delay
 

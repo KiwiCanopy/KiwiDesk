@@ -15,10 +15,8 @@ Open Settings from the KiwiDesk menu in the menu bar, or press
 **⌘,** while a KiwiDesk window is key. **Shortcuts ▸ General**
 offers a rebindable **Open Settings** row for a global key.
 
-:::unreleased
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.
-:::
 
 The Settings window tiles into your layout like any other window
 and answers the window shortcuts (float it with
@@ -180,12 +178,10 @@ hand-written setup, the first time you Save in Settings.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
-:::unreleased
 A `profile_bindings` entry names its profiles as a list,
 `profiles`, one per screen count — a file with the older single
 `profile` is rewritten once on load — and may also carry
 `screen`, the name of the screen its Desktop was last seen on.
-:::
 
 A hand-edited `layers` list is normalized on load: empty names
 are dropped, a duplicated name keeps its first entry, `default`
@@ -265,11 +261,9 @@ track shortcut bound.
   On quit** uses; with everything already reachable, nothing
   moves.
 
-:::unreleased
 **Monocle** — a focus change flips a card from one app's icon
 to the next over a blur; the flip and its duration live here
 too, not in Colors & Animations.
-:::
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or a stack
@@ -694,9 +688,7 @@ new spaces (up to ten). It is saved as an ordinary profile named
 | Toggle sticky on this screen | `⌃⌥P` |
 | Show shortcuts panel | `⌃⌥K` |
 
-:::unreleased
 **Open Settings** ships on `⌃⌥,` as well.
-:::
 
 `⌃⌥` moves your focus, `⇧` sends the window to a space, `⌘`
 swaps it or sends it and follows; resizing has its own layer,
@@ -819,9 +811,7 @@ Shortcuts in override mode: dimmed rows are inherited, an edited
 row overrides for that profile only, and only those rows are
 stored in its JSON.
 
-:::unreleased
 A new layer also carries the `⌃⌥,` Open Settings row.
-:::
 
 ## macOS Desktops (Mission Control)
 
@@ -837,7 +827,6 @@ Desktop you gave it when Mission Control renumbers — [A binding
 follows its Desktop, not its
 number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 
-:::unreleased
 Under a row, the screen its Desktop is on — for a *not present*
 row, the screen it was last seen on.
 
@@ -847,7 +836,6 @@ group ([one profile per screen
 count](spaces-and-desktops.md#a-binding-gives-a-desktop-a-different-set-of-spaces)).
 A bound name no saved profile carries sits in a last *Couldn't
 load* group; None clears it.
-:::
 
 **A binding fires when its Desktop becomes current on your main
 screen** (the one with the menu bar) and it holds a profile saved
@@ -856,9 +844,7 @@ for your screen count ([Which Profile Loads](#which-profile-loads)). With
 switches on its own: a swipe on the main screen switches
 profiles, a swipe on a secondary never does.
 
-:::unreleased
 A Save while editing a stored profile keeps a binding change too.
-:::
 
 ```mermaid
 flowchart TD
