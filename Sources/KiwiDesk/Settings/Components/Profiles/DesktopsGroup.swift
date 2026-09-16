@@ -97,17 +97,13 @@ struct DesktopsGroup: View {
     /// The count groups, then the orphans (#1436). A group
     /// whose count has no saved profile is not drawn — a
     /// None-only picker is a dead control — so a connected count
-    /// with none takes the caption in its place.
+    /// with none takes the caption in its place; with no display
+    /// reading at all there is no connected count to speak of.
     @ViewBuilder private var rows: some View {
         if desktopRows.isEmpty {
             emptyHint
         } else {
-            if !groups.contains(where: {
-                if case .count(model.displays.count, _) = $0 {
-                    return true
-                }
-                return false
-            }) {
+            if counts.leading == nil, !model.displays.isEmpty {
                 caption(noProfileForCount)
             }
             ForEach(groups, id: \.self) { group in
@@ -120,8 +116,8 @@ struct DesktopsGroup: View {
         _ group: BindingGroup
     ) -> some View {
         switch group {
-        case .count(let count, let rows):
-            if drawsHeaders { header(forCount: count) }
+        case .count(let count, let leads, let rows):
+            if drawsHeaders { header(forCount: count, leads: leads) }
             ForEach(rows, id: \.key) { row in
                 spaceRow(row, slot: .count(count))
             }
@@ -136,20 +132,15 @@ struct DesktopsGroup: View {
     }
 
     /// Headers only where there is more than one group to tell
-    /// apart, or where the one drawn is not the connected
-    /// count's — a single-count user sees the card unchanged.
+    /// apart, or where the one drawn is not the leading one — a
+    /// single-count user sees the card unchanged.
     private var drawsHeaders: Bool {
-        guard groups.count == 1, case .count(let count, _) = groups[0]
+        guard groups.count == 1, case .count(_, let leads, _) = groups[0]
         else { return true }
-        return count != model.displays.count
+        return !leads
     }
 
-    private func header(forCount count: Int) -> some View {
-        let leads =
-            DesktopBindingRefusal.of(
-                profileCount: count,
-                connected: model.displays.count
-            ) == nil
+    private func header(forCount count: Int, leads: Bool) -> some View {
         let title: String
         if leads {
             title =
@@ -181,12 +172,19 @@ struct DesktopsGroup: View {
     }
 
     private var noProfileForCount: String {
-        L(
-            "desktops.no_profile_for_count",
-            "No profile is saved for your %1$@ yet, so no "
-                + "Desktop binding applies right now.",
-            screensPhrase(model.displays.count)
-        )
+        let connected = model.displays.count
+        return connected == 1
+            ? L(
+                "desktops.no_profile_for_count.one",
+                "No profile is saved for 1 screen yet, so no "
+                    + "Desktop binding applies right now."
+            )
+            : L(
+                "desktops.no_profile_for_count.many",
+                "No profile is saved for %1$d screens yet, so no "
+                    + "Desktop binding applies right now.",
+                connected
+            )
     }
 
     private func caption(_ text: String) -> some View {
@@ -215,21 +213,20 @@ struct DesktopsGroup: View {
     private var groups: [BindingGroup] {
         ProfilesFamilyRows.bindingGroups(
             rows: desktopRows,
-            counts: ProfilesFamilyRows.bindingCounts(
-                profiles: model.profileSummaries,
-                connected: model.displays.count
-            ),
-            profileCounts: profileCounts,
-            binding: { record(for: $0.key) }
+            counts: counts,
+            profileCounts: profileCounts
         )
     }
 
-    /// Each readable saved profile's screen count by name.
-    var profileCounts: [String: Int] {
-        Dictionary(
-            model.profileSummaries.map { ($0.name, $0.count) },
-            uniquingKeysWith: { first, _ in first }
+    private var counts: BindingCounts {
+        ProfilesFamilyRows.bindingCounts(
+            profiles: model.profileSummaries,
+            connected: model.displays.count
         )
+    }
+
+    var profileCounts: [String: Int] {
+        ProfilesFamilyRows.profileCounts(model.profileSummaries)
     }
 
     /// A live Desktop's record may still sit under the number it

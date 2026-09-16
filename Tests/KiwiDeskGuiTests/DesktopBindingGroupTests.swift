@@ -61,30 +61,30 @@ struct DesktopBindingGroupTests {
     /// display reading nothing leads and the counts ascend.
     @Test("the connected count leads, the rest ascend")
     func connectedCountLeads() {
-        #expect(
-            ProfilesFamilyRows.bindingCounts(
-                profiles: profiles,
-                connected: 2
-            ) == [2, 1, 3]
+        let docked = ProfilesFamilyRows.bindingCounts(
+            profiles: profiles,
+            connected: 2
         )
-        #expect(
-            ProfilesFamilyRows.bindingCounts(
-                profiles: profiles,
-                connected: 0
-            ) == [1, 2, 3]
+        #expect(docked == BindingCounts(leading: 2, others: [1, 3]))
+        #expect(docked.all == [2, 1, 3])
+        let unknown = ProfilesFamilyRows.bindingCounts(
+            profiles: profiles,
+            connected: 0
         )
-        // A count no profile is saved for is no group at all.
+        #expect(unknown == BindingCounts(leading: nil, others: [1, 2, 3]))
+        // A count no profile is saved for is no group at all,
+        // and then nothing leads.
         #expect(
             ProfilesFamilyRows.bindingCounts(
                 profiles: [summary("Dual", count: 2)],
                 connected: 1
-            ) == [2]
+            ) == BindingCounts(leading: nil, others: [2])
         )
     }
 
     /// Every row once per count, and the orphans last.
     @Test("groups repeat the rows per count and list orphans last")
-    func groupsRepeatRowsAndListOrphans() {
+    func groupsRepeatRowsAndListOrphans() throws {
         let bindings: [DesktopKey: DesktopBinding] = [
             live: DesktopBinding(
                 profiles: ["Laptop", "Vanished"],
@@ -95,31 +95,55 @@ struct DesktopBindingGroupTests {
         let listed = rows(bindings: bindings)
         let groups = ProfilesFamilyRows.bindingGroups(
             rows: listed,
-            counts: [2, 1, 3],
-            profileCounts: counts,
-            binding: { bindings[$0.key] }
+            counts: BindingCounts(leading: 2, others: [1, 3]),
+            profileCounts: counts
         )
-        #expect(groups.count == 4)
-        #expect(groups[0] == .count(2, rows: listed))
-        #expect(groups[1] == .count(1, rows: listed))
-        #expect(groups[2] == .count(3, rows: listed))
-        let liveRow = try? #require(listed.first { $0.key == live })
+        try #require(groups.count == 4)
+        #expect(groups[0] == .count(2, leads: true, rows: listed))
+        #expect(groups[1] == .count(1, leads: false, rows: listed))
+        #expect(groups[2] == .count(3, leads: false, rows: listed))
+        let liveRow = try #require(listed.first { $0.key == live })
         #expect(
             groups[3]
                 == .orphans([
-                    OrphanBinding(row: liveRow!, profile: "Vanished")
+                    OrphanBinding(row: liveRow, profile: "Vanished")
                 ])
         )
         // No orphan group where every bound name has a count.
         let clean = ProfilesFamilyRows.bindingGroups(
-            rows: listed,
-            counts: [1],
-            profileCounts: counts,
-            binding: { _ in
-                DesktopBinding(profiles: ["Laptop"], desktop: 1)
-            }
+            rows: rows(bindings: [
+                live: DesktopBinding(profiles: ["Laptop"], desktop: 1)
+            ]),
+            counts: BindingCounts(leading: 1, others: []),
+            profileCounts: counts
         )
         #expect(clean.count == 1)
+    }
+
+    /// The row carries its record under EITHER key, so the
+    /// census sees the orphan the card draws for a record still
+    /// filed under the number twin.
+    @Test("a twin-keyed record's orphan reaches the census")
+    func twinKeyedOrphanReachesTheCensus() {
+        let expander = ProfilesFamilyRows(
+            profiles: profiles,
+            mainDesktops: [1],
+            desktopKeys: [1: live],
+            presentKeys: [live, .number(1)],
+            desktopScreens: [:],
+            bindings: [
+                .number(1): DesktopBinding(
+                    profiles: ["Vanished"],
+                    desktop: 1
+                )
+            ],
+            connectedScreens: 1,
+            presets: []
+        )
+        #expect(
+            expander.rows(for: .profiles(.profileBindings))?.last
+                == .binding(live, .orphan("Vanished"))
+        )
     }
 
     /// The census expands one instance per (Desktop, slot), so a
@@ -205,6 +229,33 @@ struct DesktopBindingGroupTests {
         #expect(model.config.profileBindings[live] == nil)
     }
 
+    /// Two entries of one count — a profile re-saved at a
+    /// sibling's count — are BOTH replaced by a pick and both
+    /// cleared by None, or the picker reads back the survivor
+    /// and the pick is lost.
+    @Test("a pick replaces every entry of its count")
+    func pickReplacesEveryEntryOfItsCount() {
+        let (card, model) = makeCard()
+        model.profileSummaries.append(summary("Solo", count: 1))
+        model.config.profileBindings[live] = DesktopBinding(
+            profiles: ["Laptop", "Solo", "Dual"],
+            desktop: 7
+        )
+        model.profileSummaries.append(summary("Third", count: 1))
+        card.write("Third", key: live, slot: .count(1))
+        #expect(
+            model.config.profileBindings[live]?.profiles
+                == ["Dual", "Third"]
+        )
+        // …and the stale number projection took the row's.
+        #expect(model.config.profileBindings[live]?.desktop == 1)
+        model.config.profileBindings[live]?.profiles = [
+            "Laptop", "Solo", "Dual",
+        ]
+        card.write(nil, key: live, slot: .count(1))
+        #expect(model.config.profileBindings[live]?.profiles == ["Dual"])
+    }
+
     /// An orphan slot's None drops that name and nothing else.
     @Test("clearing an orphan drops only that name")
     func orphanClearDropsTheName() {
@@ -260,7 +311,14 @@ struct DesktopBindingGroupTests {
         #expect(
             card.contains("spaceRow(orphan.row,slot:.orphan(orphan.profile))")
         )
-        #expect(card.contains("caption(noProfileForCount)"))
+        // The caption asks the ONE leading derivation, and
+        // stands down with no display reading (#1436 review).
+        #expect(
+            card.contains(
+                "ifcounts.leading==nil,!model.displays.isEmpty{"
+                    + "caption(noProfileForCount)"
+            )
+        )
         let row = try squashed("DesktopsGroup+Row.swift")
         #expect(
             row.contains(

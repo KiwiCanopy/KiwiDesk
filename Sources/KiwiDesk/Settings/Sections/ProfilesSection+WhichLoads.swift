@@ -69,14 +69,22 @@ extension ProfilesSection {
             // The count the binding resolved on (#1436): with
             // one profile per count, it is the discriminator
             // the user set.
-            return L(
-                "profiles.which_loads.bound",
-                "Right now: Desktop %1$d → %2$@ (bound below "
-                    + "for %3$@).",
-                desktop,
-                name,
-                screens
-            )
+            return resolution.screens == 1
+                ? L(
+                    "profiles.which_loads.bound.one",
+                    "Right now: Desktop %1$d → %2$@ (bound below "
+                        + "for 1 screen).",
+                    desktop,
+                    name
+                )
+                : L(
+                    "profiles.which_loads.bound.many",
+                    "Right now: Desktop %1$d → %2$@ (bound below "
+                        + "for %3$d screens).",
+                    desktop,
+                    name,
+                    resolution.screens
+                )
         case .exactMonitors(let name):
             return L(
                 "profiles.which_loads.exact",

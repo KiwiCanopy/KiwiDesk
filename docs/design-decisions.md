@@ -11062,14 +11062,14 @@ binding is already filed under the Desktop's own stamp, and a
 Desktop lives on one screen, so the external's Desktop 2 and the
 built-in's Desktop 2 are different bindings by construction. The
 count is the dimension that was missing, and it needs no stored
-field, since the bound profile carries it. What this does not
+field, since the bound profile carries it. What this did not
 give — one Desktop loading a different profile per screen count
-— needs several bindings per Desktop and a `gui.json` format
-crossing, and is its own feature. The Desktops row keeps a
-standing-aside binding and badges it *for N screen(s)*, in
-keeping with *don't hide*: the binding is not broken, it is
-waiting, and the badge narrates Core's verdict rather than
-re-deriving it. With no displays known — the first config load
+— is the next entry (#1436). The Desktops row keeps a
+standing-aside binding visible, in keeping with *don't hide*:
+the binding is not broken, it is waiting, and the row narrates
+Core's verdict rather than re-deriving it — until #1436 as a
+*for N screen(s)* badge, since then as the count group's
+header. With no displays known — the first config load
 runs before the loop publishes displays, and a paused engine
 discovers none — the gate cannot judge and the binding waits
 too, rather than loading a profile that the boot scan's monitor
@@ -11096,8 +11096,8 @@ count, and the `ui-designer` ruled against it (2026-09-16): a
 control adds a mode whose selection can disagree with what is
 firing, hides the rest of the table, and — the count set being
 user-generated — would have to be a menu, the worse control for
-"which counts do I have profiles for". The Presets card two
-cards up had already answered the same question without one:
+"which counts do I have profiles for". The Presets card on the
+same pane had already answered the same question without one:
 the connected count leads under *For your N screens*, the other
 counts follow under their own headers, and a single-count user
 sees the card exactly as before, headerless. Two consequences

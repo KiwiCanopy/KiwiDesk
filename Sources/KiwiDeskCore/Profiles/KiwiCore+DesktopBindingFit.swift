@@ -8,9 +8,15 @@ public enum DesktopBindingRefusal: Error {
     /// No bound profile's file could be read.
     case unreadable(Error)
     /// No bound profile is saved for the connected count;
-    /// `saved` is the count of each readable one, in binding
-    /// order (#1436).
-    case screenCount(saved: [Int], connected: Int)
+    /// `saved` is each READABLE one with its count, in binding
+    /// order (#1436) — an unreadable sibling is not among them.
+    case screenCount(saved: [SavedCount], connected: Int)
+
+    /// One readable bound profile and the count it is saved for.
+    public struct SavedCount: Equatable, Sendable {
+        public let name: String
+        public let count: Int
+    }
     /// No display reading yet: the first config load runs before
     /// the loop publishes displays, and a paused engine discovers
     /// none. The first monitor change re-judges.
@@ -25,7 +31,7 @@ public enum DesktopBindingRefusal: Error {
         if connected == 0 { return .displaysUnknown }
         guard profileCount == connected else {
             return .screenCount(
-                saved: [profileCount],
+                saved: [SavedCount(name: "", count: profileCount)],
                 connected: connected
             )
         }
@@ -42,11 +48,15 @@ public enum DesktopBindingRefusal: Error {
             return "cannot load profile\(plural ? "s" : "") "
                 + "\(names): \(error)"
         case .screenCount(let saved, let connected):
-            let counts = saved.map(String.init).joined(separator: ", ")
+            let counted =
+                saved.count == 1
+                ? "profile '\(saved[0].name)' is for \(saved[0].count)"
+                : "profiles "
+                    + saved.map { "'\($0.name)' for \($0.count)" }
+                    .joined(separator: ", ")
             return
-                "profile\(plural ? "s" : "") \(names) "
-                + "\(plural ? "are" : "is") for \(counts) screen(s), "
-                + "\(connected) connected; the binding stands aside"
+                "\(counted) screen(s), \(connected) connected; "
+                + "the binding stands aside"
         case .displaysUnknown:
             return
                 "profile\(plural ? "s" : "") \(names) "
@@ -74,7 +84,7 @@ extension KiwiCore {
         of binding: DesktopBinding
     ) -> Result<Profile, DesktopBindingRefusal> {
         let connected = state.workspaces.allDisplays.count
-        var saved: [Int] = []
+        var saved: [DesktopBindingRefusal.SavedCount] = []
         var unreadable: Error = EmptyDesktopBinding()
         var waiting = false
         for name in binding.profiles {
@@ -93,8 +103,10 @@ extension KiwiCore {
                 return .success(profile)
             case .displaysUnknown?:
                 waiting = true
-            case .screenCount(let counts, _)?:
-                saved += counts
+            case .screenCount?:
+                saved.append(
+                    .init(name: name, count: profile.monitorCount)
+                )
             case .unreadable?:
                 break
             }

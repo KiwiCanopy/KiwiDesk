@@ -124,7 +124,7 @@ extension APIReference {
         ),
         "bind_profile_to_desktop": APIRecord(
             "Binds a profile to a macOS Desktop on the main "
-                + "screen.",
+                + "screen, one per screen count.",
             .desktop("desktop"),
             .text("profile")
         ),

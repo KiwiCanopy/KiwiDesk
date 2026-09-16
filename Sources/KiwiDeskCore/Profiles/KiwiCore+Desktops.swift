@@ -275,6 +275,20 @@ extension KiwiCore {
     func applyDesktopBinding(in snapshot: DesktopSnapshot) {
         guard let binding = mainDesktopBinding(in: snapshot)
         else { return }
+        // A Desktop bound to the profile ALREADY live stands down
+        // before the gate: what is live is answered from adoption
+        // state, never by re-reading its file on a swipe (#1245,
+        // `DesktopBindingPerCountTests` ▸ `liveProfileIsNotReread`).
+        if let live = profiles.currentName,
+            binding.profiles.contains(live),
+            let count = profiles.currentMonitorCount,
+            DesktopBindingRefusal.of(
+                profileCount: count,
+                connected: state.workspaces.allDisplays.count
+            ) == nil
+        {
+            return
+        }
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
         switch boundProfile(of: binding) {

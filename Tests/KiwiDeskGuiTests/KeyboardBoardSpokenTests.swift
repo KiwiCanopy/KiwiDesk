@@ -211,10 +211,22 @@ struct KeyboardBoardSpokenTests {
             )
         )
         // The joiner reads the APP's locale, never the class
-        // method's `Locale.current`.
-        #expect(source.contains("formatter.locale = Locale("))
+        // method's `Locale.current` — through the one shared
+        // door (#1436), which is where the seam lives now.
+        #expect(source.contains("LocalizedList.join("))
+        let door = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Common/LocalizedList.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(door.contains("formatter.locale = Locale("))
         #expect(
-            source.contains(
+            door.contains(
                 "LocalizationManager.shared.effectiveLocale"
             )
         )

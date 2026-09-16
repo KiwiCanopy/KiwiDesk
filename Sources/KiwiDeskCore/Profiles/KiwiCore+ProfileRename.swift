@@ -36,9 +36,7 @@ extension KiwiCore {
         var chased = false
         for (key, binding) in desktopBindings
         where binding.profiles.contains(old) {
-            desktopBindings[key]?.profiles = binding.profiles.map {
-                $0 == old ? new : $0
-            }
+            desktopBindings[key]?.rename(old, to: new)
             chased = true
         }
         guard chased else { return }
@@ -50,9 +48,7 @@ extension KiwiCore {
             try rewriteSidecarBindings { bindings in
                 for (key, binding) in bindings
                 where binding.profiles.contains(old) {
-                    bindings[key]?.profiles = binding.profiles.map {
-                        $0 == old ? new : $0
-                    }
+                    bindings[key]?.rename(old, to: new)
                 }
             }
         } catch SidecarError.missing {

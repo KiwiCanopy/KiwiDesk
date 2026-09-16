@@ -33,37 +33,14 @@ extension ConfigMigration {
         )
     }
 
-    /// Tree walker listing every `profile_bindings` map's values
-    /// at any depth — a `SetupBundle` carries `config` inline.
+    /// Every `profile_bindings` map's values listed, at any
+    /// depth — a `SetupBundle` carries `config` inline.
     static func bindingsListed(_ node: Any) -> (Any, Bool) {
-        if let dict = node as? [String: Any] {
-            var out: [String: Any] = [:]
-            var changed = false
-            for (key, value) in dict {
-                if key == profileBindingsKey,
-                    let listed = listedBindings(value)
-                {
-                    out[key] = listed
-                    changed = true
-                    continue
-                }
-                let (child, childChanged) = bindingsListed(value)
-                out[key] = child
-                changed = changed || childChanged
-            }
-            return (out, changed)
-        }
-        if let array = node as? [Any] {
-            var out: [Any] = []
-            var changed = false
-            for value in array {
-                let (child, childChanged) = bindingsListed(value)
-                out.append(child)
-                changed = changed || childChanged
-            }
-            return (out, changed)
-        }
-        return (node, false)
+        rewritingValues(
+            of: node,
+            at: profileBindingsKey,
+            listedBindings
+        )
     }
 
     /// The map's own rewrite, or nil when no record still carries

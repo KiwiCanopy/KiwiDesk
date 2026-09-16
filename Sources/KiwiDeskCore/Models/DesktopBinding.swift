@@ -44,20 +44,21 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         self.init(profiles: [profile], desktop: desktop, screen: screen)
     }
 
-    /// Files `name` on this Desktop: replacing the entry saved
-    /// for the same screen count, sitting beside the others
-    /// (#1436). `countOf` reads a profile's count — nil for one
-    /// not saved yet, which is a class of its own: two unsaved
-    /// names cannot be told apart, so the newer replaces the
-    /// older, and each is judged once its file exists.
+    /// Files `name` on this Desktop: every entry saved for the
+    /// same screen count goes, the others stay (#1436). `countOf`
+    /// reads a profile's count — nil for one not saved yet, which
+    /// is a class of its own: two unsaved names cannot be told
+    /// apart, so the newer replaces the older, and each is
+    /// judged once its file exists. A listed name keeps its
+    /// place and still evicts a same-count sibling, since a
+    /// profile re-saved at another count can put two on one.
     public mutating func bind(
         _ name: String,
         countOf: (String) -> Int?
     ) {
-        guard !profiles.contains(name) else { return }
         let count = countOf(name)
-        profiles.removeAll { countOf($0) == count }
-        profiles.append(name)
+        profiles.removeAll { $0 != name && countOf($0) == count }
+        if !profiles.contains(name) { profiles.append(name) }
     }
 
     /// Drops `name`; true when the list is now empty and the
@@ -66,6 +67,22 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
     public mutating func unbind(_ name: String) -> Bool {
         profiles.removeAll { $0 == name }
         return profiles.isEmpty
+    }
+
+    /// Drops every entry saved for `count`; true when the list
+    /// is now empty and the record with it.
+    @discardableResult
+    public mutating func unbind(
+        count: Int,
+        countOf: (String) -> Int?
+    ) -> Bool {
+        profiles.removeAll { countOf($0) == count }
+        return profiles.isEmpty
+    }
+
+    /// A profile rename, followed into the list in place.
+    public mutating func rename(_ old: String, to new: String) {
+        profiles = profiles.map { $0 == old ? new : $0 }
     }
 
     private enum CodingKeys: String, CodingKey {

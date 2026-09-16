@@ -34,12 +34,6 @@ extension ProfilesSection {
             .joined(separator: "\n")
     }
 
-    /// Localized screen count phrase — the one copy the Desktops
-    /// card shares (#1436).
-    func screensPhrase(_ count: Int) -> String {
-        KiwiDesk.screensPhrase(count)
-    }
-
     /// Localized Space count phrase (`PresetScreenCard.spaceCountPhrase`).
     private func spacesPhrase(_ count: Int) -> String {
         count == 1

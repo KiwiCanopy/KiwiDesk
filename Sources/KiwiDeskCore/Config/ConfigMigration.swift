@@ -124,19 +124,35 @@ public enum ConfigMigration {
 
     /// Recursively replaces retired `content` values in JSON tree.
     private static func rewritten(_ node: Any) -> (Any, Bool) {
+        rewritingValues(of: node, at: "content") { value in
+            (value as? String).flatMap { retiredBarContent[$0] }
+        }
+    }
+
+    /// The one keyed tree walk the steps share: every value
+    /// under `key`, at any depth, replaced by what `rewrite`
+    /// returns for it — nil leaves it and descends. A dict or an
+    /// array is walked; anything else is a leaf.
+    static func rewritingValues(
+        of node: Any,
+        at key: String,
+        _ rewrite: (Any) -> Any?
+    ) -> (Any, Bool) {
         if let dict = node as? [String: Any] {
             var out: [String: Any] = [:]
             var changed = false
-            for (key, value) in dict {
-                if key == "content", let raw = value as? String,
-                    let mapped = retiredBarContent[raw]
-                {
-                    out[key] = mapped
+            for (name, value) in dict {
+                if name == key, let replaced = rewrite(value) {
+                    out[name] = replaced
                     changed = true
                     continue
                 }
-                let (child, childChanged) = rewritten(value)
-                out[key] = child
+                let (child, childChanged) = rewritingValues(
+                    of: value,
+                    at: key,
+                    rewrite
+                )
+                out[name] = child
                 changed = changed || childChanged
             }
             return (out, changed)
@@ -145,7 +161,11 @@ public enum ConfigMigration {
             var out: [Any] = []
             var changed = false
             for value in array {
-                let (child, childChanged) = rewritten(value)
+                let (child, childChanged) = rewritingValues(
+                    of: value,
+                    at: key,
+                    rewrite
+                )
                 out.append(child)
                 changed = changed || childChanged
             }

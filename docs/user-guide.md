@@ -165,8 +165,8 @@ hand-written setup, the first time you Save in Settings.
   `bundle-id:title`) whose windows never tile.
 - **`ignore_rules`**: bundle identifiers never tracked. No
   Settings control; Settings preserves it on save.
-- **`profile_bindings`**: Desktop identifier → the profile that
-  Desktop selects on your main screen. The key is the identifier
+- **`profile_bindings`**: Desktop identifier → what that Desktop
+  selects on your main screen. The key is the identifier
   KiwiDesk stamps into the Desktop itself, not its Mission
   Control number; the number sits in `desktop` as a label. On a
   Mac where the stamp cannot be written, the key is the number. A
@@ -508,9 +508,6 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ### Which Profile Loads
 
-A Desktop binding fires only when the bound profile is saved for
-the connected screen count (rung 1 below).
-
 The card answers for your machine now — *"Right now: 2 screens →
 Desk (these exact monitors)"* — naming which rung resolved it.
 The rungs, in order:
@@ -844,18 +841,17 @@ number](spaces-and-desktops.md#a-binding-follows-its-desktop-not-its-number).
 Under a row, the screen its Desktop is on — for a *not present*
 row, the screen it was last seen on.
 
-A Desktop can hold one profile per screen count. Where you have
-profiles saved for more than one count, the card groups its rows
-by count — *For your 2 screens* first, the other counts after it
-— and a Desktop picks a profile in each group; the one saved for
-as many screens as are connected loads, and the others wait
-until that many are. A bound profile whose file is gone sits in a
-last *Couldn't load* group, where None clears it.
+With profiles saved for more than one screen count, the card
+groups its rows by count and a Desktop holds one profile per
+group ([one profile per screen
+count](spaces-and-desktops.md#a-binding-gives-a-desktop-a-different-set-of-spaces)).
+A bound name no saved profile carries sits in a last *Couldn't
+load* group; None clears it.
 :::
 
 **A binding fires when its Desktop becomes current on your main
-screen** (the one with the menu bar) and its profile fits your
-screen count ([Which Profile Loads](#which-profile-loads)). With
+screen** (the one with the menu bar) and it holds a profile saved
+for your screen count ([Which Profile Loads](#which-profile-loads)). With
 "Displays have separate Spaces" on, macOS's default, each screen
 switches on its own: a swipe on the main screen switches
 profiles, a swipe on a secondary never does.

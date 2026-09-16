@@ -175,11 +175,12 @@ struct DesktopBindingPerCountTests {
             Issue.record("expected .screenCount, got \(refusal)")
             return
         }
-        #expect(saved == [1, 2])
+        #expect(saved.map(\.name) == ["Laptop", "Dual"])
+        #expect(saved.map(\.count) == [1, 2])
         #expect(connected == 3)
         let line = refusal.narrative(binding: binding)
-        #expect(line.contains("'Laptop', 'Dual'"))
-        #expect(line.contains("1, 2 screen(s), 3 connected"))
+        #expect(line.contains("'Laptop' for 1, 'Dual' for 2 screen(s)"))
+        #expect(line.contains("3 connected"))
         #expect(core.profiles.currentName == "Other")
     }
 
@@ -257,10 +258,13 @@ struct DesktopBindingPerCountTests {
     }
 
     /// The record's own algebra, pure: an unsaved name is a
-    /// class of its own, and unbinding the last entry empties it.
-    @Test("bind and unbind on the record")
+    /// class of its own, a listed name keeps its place and still
+    /// evicts a same-count sibling, a count clears as one, a
+    /// rename lands in place, and unbinding the last entry
+    /// empties it.
+    @Test("bind, unbind and rename on the record")
     func recordAlgebra() {
-        let counts = ["A1": 1, "B1": 1, "C2": 2]
+        var counts = ["A1": 1, "B1": 1, "C2": 2]
         var record = DesktopBinding(profiles: [], desktop: 1)
         record.bind("A1") { counts[$0] }
         record.bind("C2") { counts[$0] }
@@ -269,12 +273,46 @@ struct DesktopBindingPerCountTests {
         record.bind("Unsaved") { counts[$0] }
         record.bind("Unsaved too") { counts[$0] }
         #expect(record.profiles == ["C2", "B1", "Unsaved too"])
-        let stillBound = record.unbind("B1")
+        // "Unsaved too" is saved at 1 screen: two on one count
+        // until the next bind of either evicts the other.
+        counts["Unsaved too"] = 1
+        record.bind("B1") { counts[$0] }
+        #expect(record.profiles == ["C2", "B1"])
+        record.rename("C2", to: "Docked")
+        #expect(record.profiles == ["Docked", "B1"])
+        counts["Docked"] = 2
+        let stillBound = record.unbind(count: 2) { counts[$0] }
         #expect(!stillBound)
-        let stillOne = record.unbind("C2")
-        #expect(!stillOne)
-        let emptied = record.unbind("Unsaved too")
+        #expect(record.profiles == ["B1"])
+        let emptied = record.unbind("B1")
         #expect(emptied)
         #expect(record.profiles.isEmpty)
+    }
+
+    /// A Desktop bound to the profile ALREADY live is answered
+    /// from adoption state, never by re-reading its file on the
+    /// swipe (#1245): with the file gone, the door neither
+    /// reads nor logs.
+    @Test("the live profile is not re-read at the binding door")
+    func liveProfileIsNotReread() throws {
+        defer { reset() }
+        pinTopology()
+        let core = try seeded(screens: 1)
+        bind(core, "Laptop")
+        #expect(core.profiles.currentName == "Laptop")
+        try FileManager.default.removeItem(
+            at: core.profiles.directory
+                .appendingPathComponent("Laptop.json")
+        )
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
+        #expect(core.profiles.currentName == "Laptop")
+        #expect(!log.contains { $0.contains("cannot load") })
+        // The stand-down is for a live profile that FITS: with
+        // the screens changed under it, the gate re-judges.
+        connect(core, 2)
+        core.applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
+        #expect(log.contains { $0.contains("cannot load") })
     }
 }

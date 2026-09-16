@@ -14,6 +14,10 @@ struct DesktopRow: Hashable {
     /// topology's for a live row, the record's remembered one
     /// for a dormant row; nil where neither has named it.
     let screen: String?
+    /// The record this Desktop's binding sits in, under either
+    /// of its keys (#1436) — resolved ONCE here, so the card and
+    /// the census read one answer.
+    let binding: DesktopBinding?
 }
 
 /// Which binding a Desktops-card row edits (#1436): the profile
@@ -29,8 +33,19 @@ enum BindingSlot: Hashable {
 /// exists for, the connected count first, and a last group of
 /// the bound names whose profile file no reading can count.
 enum BindingGroup: Hashable {
-    case count(Int, rows: [DesktopRow])
+    /// `leads`: this count is the connected one, so its
+    /// bindings are the ones that fire.
+    case count(Int, leads: Bool, rows: [DesktopRow])
     case orphans([OrphanBinding])
+}
+
+/// The screen counts the Desktops card groups by (#1436): the
+/// connected count where a saved profile exists for it, then
+/// every other count a saved profile exists for, ascending.
+struct BindingCounts: Hashable {
+    let leading: Int?
+    let others: [Int]
+    var all: [Int] { (leading.map { [$0] } ?? []) + others }
 }
 
 /// A bound name whose profile is gone or unreadable, on the
@@ -130,11 +145,14 @@ struct ProfilesFamilyRows {
         )
         var rows = live.compactMap { number in
             keys[number].map { key in
-                DesktopRow(
+                let record =
+                    bindings[key] ?? bindings[.number(number)]
+                return DesktopRow(
                     key: key,
                     number: number,
                     isDormant: false,
-                    screen: screens[key] ?? bindings[key]?.screen
+                    screen: screens[key] ?? record?.screen,
+                    binding: record
                 )
             }
         }
@@ -149,7 +167,8 @@ struct ProfilesFamilyRows {
                     key: $0.key,
                     number: $0.value.desktop,
                     isDormant: true,
-                    screen: $0.value.screen
+                    screen: $0.value.screen,
+                    binding: $0.value
                 )
             }
         return rows.sorted {
@@ -158,38 +177,50 @@ struct ProfilesFamilyRows {
         }
     }
 
-    /// The screen counts the Desktops card groups by (#1436):
-    /// every count at least one readable saved profile is saved
-    /// for, the connected count first, then ascending. The
-    /// leading verdict is Core's fit judgement, so an unknown
-    /// display reading leads with nothing.
+    /// Which count leads is Core's fit judgement, so an unknown
+    /// display reading leads with nothing — the ONE derivation
+    /// the card's caption and headers read.
     static func bindingCounts(
         profiles: [ProfileSummary],
         connected: Int
-    ) -> [Int] {
+    ) -> BindingCounts {
         let counts = Set(profiles.map(\.count)).sorted()
-        let leading = counts.filter {
+        let leading = counts.first {
             DesktopBindingRefusal.of(
                 profileCount: $0,
                 connected: connected
             ) == nil
         }
-        return leading + counts.filter { !leading.contains($0) }
+        return BindingCounts(
+            leading: leading,
+            others: counts.filter { $0 != leading }
+        )
+    }
+
+    /// Each readable saved profile's screen count by name — the
+    /// one map the groups and the card's pickers read.
+    static func profileCounts(
+        _ profiles: [ProfileSummary]
+    ) -> [String: Int] {
+        Dictionary(
+            profiles.map { ($0.name, $0.count) },
+            uniquingKeysWith: { first, _ in first }
+        )
     }
 
     /// The card's groups over its Desktop rows: `rows` once per
     /// count, then the orphans — each bound name whose profile
     /// `profileCounts` cannot count, on the row it is bound to.
-    /// `binding(of:)` resolves a row's record, both keys included.
     static func bindingGroups(
         rows: [DesktopRow],
-        counts: [Int],
-        profileCounts: [String: Int],
-        binding: (DesktopRow) -> DesktopBinding?
+        counts: BindingCounts,
+        profileCounts: [String: Int]
     ) -> [BindingGroup] {
-        var groups = counts.map { BindingGroup.count($0, rows: rows) }
+        var groups = counts.all.map {
+            BindingGroup.count($0, leads: $0 == counts.leading, rows: rows)
+        }
         let orphans = rows.flatMap { row in
-            (binding(row)?.profiles ?? [])
+            (row.binding?.profiles ?? [])
                 .filter { profileCounts[$0] == nil }
                 .map { OrphanBinding(row: row, profile: $0) }
         }
@@ -234,22 +265,17 @@ struct ProfilesFamilyRows {
                 screens: desktopScreens,
                 bindings: bindings
             )
-            let counts = Dictionary(
-                profiles.map { ($0.name, $0.count) },
-                uniquingKeysWith: { first, _ in first }
-            )
             return Self.bindingGroups(
                 rows: rows,
                 counts: Self.bindingCounts(
                     profiles: profiles,
                     connected: connectedScreens
                 ),
-                profileCounts: counts,
-                binding: { bindings[$0.key] }
+                profileCounts: Self.profileCounts(profiles)
             )
             .flatMap { group -> [ProfilesRowInstance] in
                 switch group {
-                case .count(let count, let rows):
+                case .count(let count, _, let rows):
                     return rows.map { .binding($0.key, .count(count)) }
                 case .orphans(let orphans):
                     return orphans.map {

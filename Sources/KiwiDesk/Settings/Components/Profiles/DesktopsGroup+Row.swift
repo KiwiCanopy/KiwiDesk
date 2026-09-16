@@ -117,11 +117,16 @@ extension DesktopsGroup {
 
     private func pickerLabel(_ slot: BindingSlot) -> String {
         switch slot {
+        case .count(1):
+            return L(
+                "desktops.profile_ax.count.one",
+                "Profile for this Desktop on 1 screen"
+            )
         case .count(let count):
             return L(
-                "desktops.profile_ax.count",
-                "Profile for this Desktop on %1$@",
-                screensPhrase(count)
+                "desktops.profile_ax.count.many",
+                "Profile for this Desktop on %1$d screens",
+                count
             )
         case .orphan:
             return L(
@@ -174,9 +179,10 @@ extension DesktopsGroup {
         )
     }
 
-    /// One slot's pick, filed on the Desktop's record: the slot's
-    /// previous entry goes whatever comes in, the other slots'
-    /// entries stay, and a record left empty is removed (#1436,
+    /// One slot's pick, filed on the Desktop's record through the
+    /// record's own algebra: every entry of the slot's count goes
+    /// whatever comes in, the other slots' entries stay, and a
+    /// record left empty is removed (#1436,
     /// `DesktopBindingGroupTests`).
     func write(_ profile: String?, key: DesktopKey, slot: BindingSlot) {
         // The row BEFORE the twin drop below: a Desktop bound
@@ -196,11 +202,14 @@ extension DesktopsGroup {
         if let twin = twin(key) {
             model.config.profileBindings[twin] = nil
         }
-        if let previous = bound(key, slot: slot) {
-            record.unbind(previous)
-        }
-        if let profile {
-            record.profiles.append(profile)
+        let counts = profileCounts
+        switch (slot, profile) {
+        case (.count, let profile?):
+            record.bind(profile) { counts[$0] }
+        case (.count(let count), nil):
+            record.unbind(count: count) { counts[$0] }
+        case (.orphan(let name), _):
+            record.unbind(name)
         }
         guard !record.profiles.isEmpty else {
             model.config.profileBindings[key] = nil

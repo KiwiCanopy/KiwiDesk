@@ -46,9 +46,7 @@ extension SettingsValueReadout {
             guard let binding, !binding.profiles.isEmpty else {
                 return unset
             }
-            return ListFormatter.localizedString(
-                byJoining: binding.profiles
-            )
+            return LocalizedList.join(binding.profiles)
         }
         let touched = Set(old.keys).union(new.keys)
             .filter { old[$0]?.profiles != new[$0]?.profiles }
