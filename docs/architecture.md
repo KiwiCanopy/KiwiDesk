@@ -190,7 +190,6 @@ past the learned app size bounds once. A Space or Desktop switch is a
 **reissue** — past the tolerance, no probe — and everything
 event-driven is the default `.event` pass (`RetilePass`).
 
-:::unreleased
 One verb's effect is deferred: a commanded focus in a Monocle
 Space goes through the flip door (`App/KiwiCore+MonocleFlip`),
 which plays the card flip from `Animation/` and lands the
@@ -199,7 +198,6 @@ later command
 that reads the focused window lands that focus ahead of its own
 dispatch, so no verb reads a focus the previous one has not yet
 landed (#1391).
-:::
 
 Lua safety seam: the watchdog is an instruction-count hook — it
 **cannot** interrupt a blocking C call. Anything that blocks in C

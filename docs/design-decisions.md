@@ -1427,7 +1427,6 @@ on every dim ring would undercut the one it exists to make pop, and
 `unfocused_color` is tuned to be present-without-competing, the
 opposite intent.
 
-:::unreleased
 And its outward extent is part of **`outwardReach`** — amended
 by #1378 from "kept out of it": a hand-set gap may still let the
 bloom bleed, but Fit is the one action that leaves no gap beyond
@@ -1445,7 +1444,6 @@ it would need its own gate arm. Glow off leaves Fit
 byte-identical; a float keeps the same reach off bars and screen
 edges, a bloom clipped by a bar being the same blemish as a
 clipped ring (`FitGapsGlowTests`).
-:::
 
 The blur **scales with the ring width** (clamped; `BorderGeometryTests` pins the formula's calibration
 points — cite the test, don't restate the numbers): #533 device
@@ -2288,7 +2286,6 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
-:::unreleased
 **A lone window fills the screen, or keeps the room a
 neighbour would leave it — never a third size (#1389).** On a
 wide screen a scrolling slot of 95% or a 60% master ratio
@@ -2319,9 +2316,7 @@ every profile drew that way before the key existed — so the
 flag is sparse-decoded with no migration, and the release
 notes name the switch so the user who wants one window kept at
 its slot knows there is one.
-:::
 
-:::unreleased
 **The fixed anchors are absolute; `follow` alone keeps the
 screen filled (#1388).** Every anchor once shared one clamp:
 the row's extent stayed on screen, so a short row was pulled
@@ -2343,9 +2338,7 @@ what the user wants, and a second switch to make it true is
 one control too many. With "If one window, fill the screen"
 on (#1389) the lone case never arises; the anchors matter for
 the rows fill leaves alone.
-:::
 
-:::unreleased
 **A scrolling share is a share of the pitch (#1382).** A slot
 of "50%" was half the bare axis, so two of them plus the gap
 between never fitted the screen — the second column always
@@ -2369,7 +2362,6 @@ bounds: every stored value moves by under one inner gap, and
 the old reading was the defect. One representation stays:
 a count the Settings window offers writes 1/n into this same
 stored fraction, never a second number.
-:::
 
 **`follow` holds a place, not a number: a resize re-anchors the
 viewport (#966).** A scrolling row has one slot size for every
@@ -2572,7 +2564,6 @@ Space is the SIP list above; ordering lower in z changes
 nothing — they are already behind, and a transparent body
 shows whatever is behind it).
 
-:::unreleased
 **A Monocle focus change flips a drawn card over a blur, and
 never the window's own pixels (#1391).** A focus change in
 Monocle is a jump cut — the whole surface swaps at once — and
@@ -2668,7 +2659,6 @@ the animations master like it. The #881 sentence above,
 "monocle's promise is the raise-only flip", stands: the raise
 is still the swap, and the card is what the eye follows across
 it.
-:::
 
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
@@ -3486,7 +3476,6 @@ carry its floor into the heal's count and not the render's —
 one track fewer in the heal than on screen, the away twin of
 the visitor horn below, transient in the same way.
 
-:::unreleased
 **[Principle]**
 
 **A track draws no wider than its learned ceiling, a refusal
@@ -3531,7 +3520,6 @@ chooses what, since a wrong choice compiles and draws.
 (`TrackCeilingHealTests`, `TrackResizeFoldTests`,
 `SpaceSwitchReissueTests`, `RetileBoundSkipTests` ▸
 `reissueIssuesTheBound`)
-:::
 
 **[Principle]**
 
@@ -4878,7 +4866,6 @@ Bars area.)
 
 **[Principle]**
 
-:::unreleased
 Fit layout gaps writes the GAP values, so it sits last in the
 Gaps card (#1360) — not in the Focus border card that holds the
 width it reads. A user looking for the thing that changes their
@@ -4892,13 +4879,11 @@ card, which is the one channel `GateReasonPlacement` routes to
 words rather than a `?` or a pointer (#815). The general rule
 is the placement ladder in `docs/ui-patterns.md`: an escape hatch
 is last on the card whose values it transforms.
-:::
 
 ### A repeating slot is offered as a count; a split as a share
 
 **[Principle]**
 
-:::unreleased
 The Scrolling slot's Percent row carries a **Windows on screen**
 stepper beneath the slider (#1382), because on a wide screen the
 value a user holds is the effect, not the share: three windows,
@@ -4947,7 +4932,6 @@ rows — the stack master ratio, the bsp ratios — keep **fraction
 chips** `¼ ⅓ ½ ⅔ ¾` instead: a share is not a count. A text
 field accepting `1/3` was rejected: a closed set is a chooser,
 not a parser, and anything outside it is Lua's.
-:::
 
 ### The Settings window paints its own colours, and its accent is kiwi
 
@@ -6289,7 +6273,6 @@ windows: that needs live window state, which is exactly the
 live-apply coupling #123 rejects (see
 [accepted limitations](accepted-limitations.md)).
 
-:::unreleased
 **The count's floor is per layout, and it reaches 1 only where
 one window draws two ways.** The slider began at 2 because at
 one window every layout drew the same full-screen rectangle —
@@ -6304,7 +6287,6 @@ keep the shared floor rather than growing a lone frame nobody
 can learn from, and a count the slider's state carries across
 a layout switch is clamped into the layout's own band rather
 than drawn by a schematic that never modelled it.
-:::
 
 **Where the engine's rule needs a display, the preview stands a
 number in for the display — never a simpler rule.** (#708,
@@ -7414,7 +7396,6 @@ SF Symbol name typed into the search appears as a result, and
 any single character (incl. emoji) works via "Use as text".
 One `IconPicker` serves layer icons and space icons. (#68 §6.4)
 
-:::unreleased
 **Browsing is tabbed (Symbols first, every caller); search is
 global; every open starts in one resting shape.** The
 picker's popover splits Symbols and Emoji into segmented
@@ -7442,7 +7423,6 @@ alike (#1357) — so no picker reopens on a filtered view the
 user did not ask for (`IconPickerRestingShapeTests`), and
 every popover holding a per-open search takes that same
 dismissal-edge hook — the app picker was the second member.
-:::
 
 **The picker button and its clear control.** The button shows
 a glyph-sized placeholder when no icon is set, never a
@@ -8000,7 +7980,6 @@ Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
 anything you tap stays on `⌃⌥`.
 
-:::unreleased
 **Open Settings is seeded on `⌃⌥,`** (#1381, owner ruling
 2026-09-13). A menu-bar app with no Dock tile is almost never
 the active app, so `⌘,` reaches a new user only once they have
@@ -8021,7 +8000,6 @@ population has it follows the seed's own rule below: a new
 setup, or an existing one through Shortcuts ▸ Restore
 Defaults…, which lands it in the default layer; a layer made
 before this carries it only by hand.
-:::
 
 **Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner
 ruling 2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on
@@ -9053,7 +9031,6 @@ sliders behind a disclosure. When stored edges differ, the
 disclosure pre-expands so the values about to be overwritten
 are in view. (#68 §3.14)
 
-:::unreleased
 **A master whose followers disagree stays live and
 acknowledges; it never greys** (#1383, owner ruling
 2026-09-15 adopting the `ui-designer` verdict, reversing the
@@ -9076,7 +9053,6 @@ one gesture on the master and never needed a grey to protect
 it. A "Sync" button was rejected as a second control for a
 one-gesture job. `GapsAndBordersGateWiringTests` ▸
 `gapMastersAcknowledgeAtTheLabel` holds the shape.
-:::
 
 **The gap preview is a live 2×2 grid, not a layout
 preview.** It teaches the outer/inner vocabulary: a uniform
@@ -9318,7 +9294,6 @@ don't assume from tone.
   necessarily the ring's green: see the overlay note below for
   why the shipped ghost had to leave the hue family.
 
-:::unreleased
 **The unfocused ring's grey sits at 85–90 % alpha with its
 LIGHTNESS set per palette** (#1384), so that the ring composites
 to less contrast than the focused ring on the palette's home
@@ -9355,7 +9330,6 @@ home-backdrop dominance derived from each palette's own fill,
 and a floor on the grey's own home contrast — the lightness
 half of the vanish, which a near-black grey at in-band alpha
 would otherwise clear on every pair clause.
-:::
 
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
@@ -10673,7 +10647,6 @@ profile travels: writing the leaf off would flip the user's
 choice on every Mac the profile reaches and leave it flipped when
 the setting goes back off. It is read at render time instead.
 
-:::unreleased
 The Settings row reads the same OS value and greys with its
 reason while the setting holds glass down (#1418), so the row
 and the surfaces cannot disagree — *grey, don't hide*: the
@@ -10681,7 +10654,6 @@ stored leaf is still the user's and stays exactly as ruled
 above, and a row reading On over glass the machine is not
 drawing leaves a flip that changes nothing on screen with no
 in-app word why.
-:::
 
 **The per-layout override is deliberately outside the switch's
 reading.** `monocle.set_app_bar_liquid_glass` and

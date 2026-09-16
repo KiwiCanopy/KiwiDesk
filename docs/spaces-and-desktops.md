@@ -127,12 +127,10 @@ to a one-screen profile stands aside on two and KiwiDesk picks
 by your screens ([Which Profile
 Loads](user-guide.md#which-profile-loads)).
 
-:::unreleased
 A Desktop holds one profile per screen count, so the same
 Desktop can load a one-screen profile undocked and a two-screen
 one docked: the profile saved for as many screens as are
 connected fires, and the others wait until that many are.
-:::
 
 ## A binding follows its Desktop, not its number
 

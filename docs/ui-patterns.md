@@ -232,7 +232,6 @@ loud?* — not by which pane it lives in:
 Minimum window size migrated slider → `StepperRow` on this
 rule (#204): it is a precise pt threshold, not a feel knob.
 
-:::unreleased
 A stored SHARE keeps its slider and gains an exact chooser
 beneath it where the share has a second reading a user names
 (#1382): the scrolling slot's Percent slider carries a
@@ -245,7 +244,6 @@ second reading; its `?` states the size rule alone, and what
 the anchor makes of the count is the preview caption's, which
 knows the anchor. The argument is in
 [design decisions](design-decisions.md#a-repeating-slot-is-offered-as-a-count-a-split-as-a-share).
-:::
 
 **Layout Defaults picks one layout at a time, and picks it by
 its picture (#204, #678 turn 10).** The layout modes are a
@@ -1505,7 +1503,6 @@ was written down:
   print matters once the block is live again, and the anchor
   covers the meantime. Guarded by `GreyOutAnchorTests`.
 
-:::unreleased
 **An auto toggle greys with the slider it governs** (#1377).
 Where an `AutoGatedGroup`'s slider carries a row gate, the
 toggle has no effect under that gate either, so it takes the
@@ -1513,9 +1510,7 @@ same reason: the group is wrapped in the gate's `GreyOut` and
 the toggle's row declares the gate in the census. Auto Glow
 Size shipped live over a greyed slider; the two rows are the
 class's only member today.
-:::
 
-:::unreleased
 The gap masters take that same acknowledging shape over a
 "mixed" readout (#1383): a grey would name a problem and
 withhold the one gesture that fixes it, and a dimmed control
@@ -1525,7 +1520,6 @@ to be overwritten are in view, and that is all it is for. A
 master whose followers disagree acknowledges through the
 resolver's `followersDiffer` and the label's `?`, and never
 takes a census gate.
-:::
 
 Which of the two remote shapes a row takes follows from what is
 dimmed, not only from whether a live label exists (#1310, owner
