@@ -41,7 +41,7 @@ struct ScrollingPitchTests {
         // Outer gaps at zero so the region the writer seeds from
         // IS the carve the layout draws into — the #537 residue is
         // not this guard's subject, the inner-gap term is.
-        core.tiler.settings.gapsGlobal = Gaps(
+        let gaps = Gaps(
             outer: Gaps.Outer(top: 0, bottom: 0, left: 0, right: 0),
             inner: Gaps.Inner(horizontal: 37, vertical: 37)
         )
@@ -61,6 +61,14 @@ struct ScrollingPitchTests {
             )
         }
         let space = core.state.workspaces.space(of: WindowID(1))!
+        // The gap is the SPACE's, set as an override over a
+        // different global, so a writer reading the global gap
+        // lands wrong too.
+        core.tiler.settings.gapsGlobal = Gaps(
+            outer: gaps.outer,
+            inner: Gaps.Inner(horizontal: 10, vertical: 10)
+        )
+        core.tiler.settings.gapsOverride[space] = gaps
         core.execute(
             "set_mode",
             args: [.string(space.raw), .string("scrolling")]
