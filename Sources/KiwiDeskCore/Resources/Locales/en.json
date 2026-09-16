@@ -142,6 +142,7 @@
   "border.fit_gaps.action": "Set Gap Values",
   "border.fit_gaps.action_hint": "Updates the draft gap values. %1$@ is still required.",
   "border.fit_gaps.already_matches": "Draft gaps already match.",
+  "border.fit_gaps.disabled": "Turn on %1$@ to fit the gaps to it.",
   "border.fit_gaps.extra_spacing": "Extra spacing",
   "border.fit_gaps.help": "Calculates global outer and inner gaps from the border width, plus the glow when it is on. Inner gaps allow for both borders when borders on unfocused windows are shown.",
   "border.fit_gaps.preview": "Will set Outer to %1$d pt and Inner to %2$d pt.",

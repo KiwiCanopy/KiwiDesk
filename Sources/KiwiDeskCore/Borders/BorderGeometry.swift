@@ -70,10 +70,11 @@ struct BorderGeometry: Equatable {
             cornerStyle == .square
             ? 0 : max(0, systemRadius + visible - stroke / 2)
         let margin = max(0, glowBlur)
+        let reach = outwardReach(width: width, glowBlur: glowBlur)
         return BorderGeometry(
             overlayFrame: windowFrame.insetBy(
-                dx: -(visible + margin),
-                dy: -(visible + margin)
+                dx: -reach,
+                dy: -reach
             ),
             lineWidth: stroke,
             cornerRadius: radius,

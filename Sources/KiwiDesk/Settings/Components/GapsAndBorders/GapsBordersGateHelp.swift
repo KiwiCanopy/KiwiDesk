@@ -15,6 +15,12 @@ enum GapsBordersGateHelp {
                 "Turn on %1$@ to edit these settings.",
                 L("border.enabled", "Show focus border")
             )
+        case .fitBorderOff:
+            return L(
+                "border.fit_gaps.disabled",
+                "Turn on %1$@ to fit the gaps to it.",
+                L("border.enabled", "Show focus border")
+            )
         case .glowOff:
             return L(
                 "border.glow_size.disabled",

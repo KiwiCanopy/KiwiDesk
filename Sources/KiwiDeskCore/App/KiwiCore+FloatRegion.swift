@@ -34,16 +34,12 @@ extension KiwiCore {
     var floatRingInset: CGFloat {
         let style = tiler.settings.borderStyle
         guard style.enabled else { return 0 }
-        // `BorderGeometry.outwardReach` is the named authority
-        // for how far the ring reaches PAST the window edge —
-        // glow included since #1378, a bloom clipped by a bar
-        // being the same blemish as a clipped ring — and
-        // `BorderStyle.fittingGaps` routes through it too
-        // (architect + code review, 2026-08-29).
+        // The ring's reach past the edge, glow included and
+        // rounded up as `fittingGaps` rounds it (#1378).
         return BorderGeometry.outwardReach(
             width: style.width,
-            glowBlur: style.resolvedGlowBlur
-        )
+            glowBlur: style.glowBlur(focused: true)
+        ).rounded(.up)
     }
 
     /// **The one derivation of the region**, and the CORRECTNESS

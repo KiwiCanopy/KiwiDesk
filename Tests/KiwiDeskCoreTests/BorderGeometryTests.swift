@@ -68,9 +68,16 @@ struct BorderGeometryTests {
         #expect(BorderStyle.glowBlur(for: 20) == 12)
         #expect(glowing.lineWidth == plain.lineWidth)
         #expect(glowing.cornerRadius == plain.cornerRadius)
-        // Outward reach (fit-gaps) must NOT count the bloom — it
-        // bleeds into the gap by design.
+        // The outward reach counts the bloom (#1378): with the
+        // glow at 0 it is the stroke alone, with the glow on it
+        // is the stroke plus the resolved blur — what Fit clears.
         #expect(BorderGeometry.outwardReach(width: 2, glowBlur: 0) == 2)
+        #expect(
+            BorderGeometry.outwardReach(
+                width: 2,
+                glowBlur: glowing.glowMargin
+            ) == 2 + BorderStyle.glowBlur(for: 2)
+        )
     }
 
     @Test("Explicit glow size overrides the formula, capped")

@@ -142,6 +142,7 @@
   "border.fit_gaps.action": "ギャップの値を設定",
   "border.fit_gaps.action_hint": "下書きのギャップの値を更新します。「%1$@」は別途必要です。",
   "border.fit_gaps.already_matches": "下書きのギャップはすでに一致しています。",
+  "border.fit_gaps.disabled": "ギャップをボーダーに合わせるには「%1$@」をオンにしてください。",
   "border.fit_gaps.extra_spacing": "追加の間隔",
   "border.fit_gaps.help": "境界線の太さに、グロー効果がオンの場合はグローを加えた値から、全体の外側と内側のギャップを計算します。フォーカスされていないウインドウの境界線を表示している場合、内側のギャップは両方の境界線を考慮します。",
   "border.fit_gaps.preview": "外側を%1$d pt、内側を%2$d ptに設定します。",

@@ -7,6 +7,10 @@ struct GapsBordersGates {
     /// Why a row or container is inert (`GapsBordersGateHelp`).
     enum InertReason: Hashable {
         case borderOff
+        /// The Fit rows on the Gaps card read a border that is
+        /// off — its own sentence, since "these settings" names
+        /// the Focus Border card's rows (#1360).
+        case fitBorderOff
         case glowOff
         case visualOff
     }
@@ -41,7 +45,8 @@ struct GapsBordersGates {
         case .borders(.borderFitGaps),
             .borders(.borderFitGapsExtraSpacing):
             // Fit reads the border it sizes for (#1360).
-            return settings.borderStyle.enabled ? nil : .borderOff
+            return settings.borderStyle.enabled
+                ? nil : .fitBorderOff
         default:
             // A gated key with no arm is a bug — fail loud in
             // debug, fail-OPEN in release so a shipped Settings

@@ -142,6 +142,7 @@
   "border.fit_gaps.action": "Aplicar los valores",
   "border.fit_gaps.action_hint": "Actualiza los valores del borrador. Aún hay que pulsar «%1$@».",
   "border.fit_gaps.already_matches": "El borrador ya coincide.",
+  "border.fit_gaps.disabled": "Activa «%1$@» para ajustar el espaciado al borde.",
   "border.fit_gaps.extra_spacing": "Espaciado adicional",
   "border.fit_gaps.help": "Calcula el espaciado global externo e interno a partir del grosor del borde, más el resplandor cuando está activado. El espaciado interno tiene en cuenta los dos bordes cuando se muestran los bordes de las ventanas sin foco.",
   "border.fit_gaps.preview": "Establecerá el externo en %1$d pt y el interno en %2$d pt.",

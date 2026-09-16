@@ -59,6 +59,14 @@ public struct BorderStyle: Sendable, Equatable {
             : Self.glowBlur(for: clampedWidth)
     }
 
+    /// The blur a ring carries — the ONE home of "which ring
+    /// blooms" (#358): the focused ring's resolved blur, the
+    /// unfocused ring's none, read by the renderer's specs and
+    /// by `fittingGaps` alike (#1378, `FitGapsGlowTests`).
+    public func glowBlur(focused: Bool) -> CGFloat {
+        focused ? resolvedGlowBlur : 0
+    }
+
     /// Width clamped to valid range.
     public var clampedWidth: CGFloat {
         min(Self.maxWidth, max(Self.minWidth, width))
@@ -73,11 +81,11 @@ public struct BorderStyle: Sendable, Equatable {
     public func fittingGaps(remaining: CGFloat = 0) -> Gaps {
         let focused = BorderGeometry.outwardReach(
             width: clampedWidth,
-            glowBlur: resolvedGlowBlur
+            glowBlur: glowBlur(focused: true)
         ).rounded(.up)
         let unfocused = BorderGeometry.outwardReach(
             width: clampedWidth,
-            glowBlur: 0
+            glowBlur: glowBlur(focused: false)
         ).rounded(.up)
         let extra = max(0, remaining)
         let outer = focused + extra

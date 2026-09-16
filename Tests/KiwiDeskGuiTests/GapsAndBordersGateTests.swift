@@ -282,4 +282,26 @@ struct GapsAndBordersGateTests {
         }
         #expect(Set(sentences).count == all.count)
     }
+
+    /// The Fit rows on the Gaps card read the border they size
+    /// for (#1360): inert with its own reason while it is off —
+    /// their own, since the Focus Border block's sentence names
+    /// that card's rows — live with it on.
+    @Test(
+        "the Fit rows grey with the focus border off",
+        arguments: [
+            SettingKey.borders(.borderFitGaps),
+            .borders(.borderFitGapsExtraSpacing),
+        ]
+    )
+    func fitRowsNeedTheBorder(key: SettingKey) {
+        #expect(
+            gates { $0.borderStyle.enabled = false }
+                .inertReason(for: key) == .fitBorderOff
+        )
+        #expect(
+            gates { $0.borderStyle.enabled = true }
+                .inertReason(for: key) == nil
+        )
+    }
 }

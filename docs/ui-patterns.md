@@ -664,18 +664,15 @@ in it**. The tiers, top to bottom:
    captions (auto-derivation, wrap-focus), each still
    gate-above-gated internally.
 5. **Escape-hatch buttons / actions** ("Fit layout gaps")
-   — always last, and on the card whose VALUES they write:
-   Fit lives in the Gaps card, greyed with its reason while
-   the border it reads is off.
+   — always last, and on the card whose VALUES they write.
 
 An escape hatch that transforms other staged settings must expose
 the transaction locally: label transient inputs as action parameters,
 preview the resulting values before activation, warn when structure
 will be flattened, and confirm that the draft changed while the
-save pill's Save is still required. Focus Border's **Fit layout
-gaps** group is
-the reference pattern; its action remains opt-in and one-shot rather
-than introducing automatic border-to-gap coupling.
+save pill's Save is still required. The **Fit layout gaps** group
+is the reference pattern; its action remains opt-in and one-shot
+rather than introducing automatic border-to-gap coupling.
 
 Dividers mark tier boundaries, not just breathing room, so a
 new field's tier decides which divider-bounded cluster it

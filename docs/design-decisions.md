@@ -1425,25 +1425,29 @@ bool (`border.glow`, default OFF) with two deliberate scope choices.
 It rides the **focused ring only**, never the unfocused set: a bloom
 on every dim ring would undercut the one it exists to make pop, and
 `unfocused_color` is tuned to be present-without-competing, the
-opposite intent. And its outward extent is part of
-**`outwardReach`** — amended by #1378 from "kept out of it": a
-hand-set gap may still let the bloom bleed, but Fit is the one
-action that leaves no gap beyond the stroke, so under Fit the
-bloom landed entirely on the neighbour's content and its
-unfocused ring. Fit grows by the **full** resolved blur, **once,
-on the focused side** (`inner = reach + blur + unfocused reach +
-extra`) — full rather than half because the boost layer's radius
-is half the margin, so at half the neighbour's edge sits inside
-the bright part, and the overlay frame already clips the halo one
-blur past the stroke, a distance #533's device QA accepted; once
-because only one side of an inner gap is focused. No third fit
-choice: a decision the arithmetic can make is not moved onto the
-user, and it would need its own gate arm. Glow off leaves Fit
+opposite intent.
+
+:::unreleased
+And its outward extent is part of **`outwardReach`** — amended
+by #1378 from "kept out of it": a hand-set gap may still let the
+bloom bleed, but Fit is the one action that leaves no gap beyond
+the stroke, so under Fit the bloom landed entirely on the
+neighbour's content and its unfocused ring. Fit grows by the
+**full** resolved blur, **once, on the focused side** (`inner =
+reach + blur + (unfocused ? reach : 0) + extra`) — full rather
+than half because the boost layer's radius is half the margin,
+so at half the neighbour's edge sits inside the bright part, and
+the overlay frame already clips the halo one blur past the
+stroke, a distance #533's device QA accepted; once because only
+one side of an inner gap is focused. No third fit choice: a
+decision the arithmetic can make is not moved onto the user, and
+it would need its own gate arm. Glow off leaves Fit
 byte-identical; a float keeps the same reach off bars and screen
 edges, a bloom clipped by a bar being the same blemish as a
-clipped ring (`FitGapsGlowTests`). The blur **scales with the ring
-width**
-(clamped; `BorderGeometryTests` pins the formula's calibration
+clipped ring (`FitGapsGlowTests`).
+:::
+
+The blur **scales with the ring width** (clamped; `BorderGeometryTests` pins the formula's calibration
 points — cite the test, don't restate the numbers): #533 device
 QA showed a fixed blur swamps a hairline ring and vanishes
 against a thick one. The formula is the `0 = automatic` default

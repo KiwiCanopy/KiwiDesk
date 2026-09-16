@@ -142,6 +142,7 @@
   "border.fit_gaps.action": "设置间距值",
   "border.fit_gaps.action_hint": "更新草稿中的间距值，仍需要“%1$@”。",
   "border.fit_gaps.already_matches": "草稿中的间距已经一致。",
+  "border.fit_gaps.disabled": "若要使间距与边框匹配，请打开“%1$@”。",
   "border.fit_gaps.extra_spacing": "额外间距",
   "border.fit_gaps.help": "根据边框粗细（发光效果开启时还会加上发光）计算全局的外部和内部间距。显示非焦点窗口的边框时，内部间距会同时考虑两条边框。",
   "border.fit_gaps.preview": "将把外部设为 %1$d pt，内部设为 %2$d pt。",

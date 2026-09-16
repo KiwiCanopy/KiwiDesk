@@ -302,9 +302,7 @@ extension KiwiCore {
                     colorHex: style.focusedColor,
                     width: width,
                     cornerStyle: style.cornerStyle,
-                    // Focused ring only — a bloom on every unfocused
-                    // ring undercuts the one it should make pop.
-                    glowBlur: style.resolvedGlowBlur
+                    glowBlur: style.glowBlur(focused: true)
                 )
             )
         }
@@ -322,7 +320,8 @@ extension KiwiCore {
                     frame: slot.frame,
                     colorHex: style.unfocusedColor,
                     width: width,
-                    cornerStyle: style.cornerStyle
+                    cornerStyle: style.cornerStyle,
+                    glowBlur: style.glowBlur(focused: false)
                 )
             )
         }

@@ -23,17 +23,18 @@ struct FitGapsGlowTests {
         #expect(off.inner.horizontal == 13)
     }
 
-    @Test("auto glow at the default width takes Fit 5/5 to 9/9")
+    @Test("auto glow grows Fit by the resolved blur at the default")
     func defaultWidthAutoGlow() {
         var style = BorderStyle()
-        #expect(style.fittingGaps().outer.top == 5)
-        #expect(style.fittingGaps().inner.horizontal == 5)
+        let plain = style.fittingGaps()
+        #expect(plain.outer.top == style.clampedWidth)
         style.glow = true
         let fitted = style.fittingGaps()
-        // Derived, not pinned: the width is the owner's number.
+        // Derived, not pinned: the width and the blur calibration
+        // are the owner's numbers (`BorderGeometryTests`).
         let expected = (style.clampedWidth + style.resolvedGlowBlur)
             .rounded(.up)
-        #expect(expected == 9)
+        #expect(expected > plain.outer.top)
         #expect(fitted.outer.top == expected)
         #expect(fitted.inner.horizontal == expected)
         #expect(fitted.inner.vertical == expected)
@@ -66,5 +67,27 @@ struct FitGapsGlowTests {
         core.tiler.settings.borderStyle.glow = true
         core.tiler.settings.borderStyle.glowSize = 5
         #expect(core.floatRingInset == 12)
+        // The automatic blur is fractional for most widths; the
+        // inset rounds up as Fit does, so the two agree.
+        core.tiler.settings.borderStyle.glowSize = 0
+        let style = core.tiler.settings.borderStyle
+        #expect(
+            core.floatRingInset
+                == style.fittingGaps().outer.top
+        )
+        #expect(
+            core.floatRingInset == (7 + style.resolvedGlowBlur).rounded(.up)
+        )
+    }
+
+    @Test("which ring blooms is one reading")
+    func oneGlowHome() {
+        var style = BorderStyle()
+        style.glow = true
+        style.glowSize = 6
+        #expect(style.glowBlur(focused: true) == 6)
+        #expect(style.glowBlur(focused: false) == 0)
+        style.glow = false
+        #expect(style.glowBlur(focused: true) == 0)
     }
 }

@@ -142,6 +142,7 @@
   "border.fit_gaps.action": "設定間距數值",
   "border.fit_gaps.action_hint": "會更新草稿的間距數值，仍需「%1$@」。",
   "border.fit_gaps.already_matches": "草稿的間距已相符。",
+  "border.fit_gaps.disabled": "請開啟「%1$@」以讓間距貼合邊框。",
   "border.fit_gaps.extra_spacing": "額外留白",
   "border.fit_gaps.help": "依邊框寬度（發光效果開啟時還會加上發光）計算全域的外側與內側間距。顯示非焦點視窗的邊框時，內側間距會同時容納兩道邊框。",
   "border.fit_gaps.preview": "將把外側設為 %1$d pt、內側設為 %2$d pt。",

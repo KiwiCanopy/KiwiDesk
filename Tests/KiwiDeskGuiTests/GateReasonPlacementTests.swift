@@ -261,6 +261,44 @@ struct GateReasonPlacementTests {
         )
     }
 
+    /// The second found row (#1360): the Fit action draws its
+    /// reason as a sibling AFTER its dimmed controls, off the
+    /// derivation, and keeps its title's `?` outside the dim.
+    @Test("the Fit action draws its reason outside the dim")
+    func theFitActionDrawsItsReason() throws {
+        let path = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/"
+                    + "GapsAndBorders/FitGapsAction.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: path, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        let title = try #require(source.range(of: "title"))
+        let dim = try #require(
+            source.range(of: "GreyOut(active:inertReason!=nil")
+        )
+        let sentence = try #require(
+            source.range(
+                of: "ifletinertReason,owesInlineReason{"
+                    + "Text(GapsBordersGateHelp.sentence("
+            )
+        )
+        #expect(title.upperBound < dim.lowerBound)
+        #expect(
+            dim.upperBound < sentence.lowerBound,
+            "the reason must be a sibling of the dimmed controls"
+        )
+        #expect(
+            source.contains(
+                "GateReasonPlacement.owesInlineReason("
+                    + ".borders(.borderFitGaps))"
+            )
+        )
+    }
+
     /// A surfacing condition dims nothing, so it carries no
     /// channel at all — the distinction that keeps
     /// `causeIsOnSurface` from answering two questions with one

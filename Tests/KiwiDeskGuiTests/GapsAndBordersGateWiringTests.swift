@@ -48,6 +48,9 @@ struct GapsAndBordersGateWiringTests {
             "GapsEditor.swift": [
                 "gates.followersDiffer(for:.gaps(.outer))",
                 "gates.followersDiffer(for:.gaps(.inner))",
+                // The Fit rows' gate (#1360), resolved here and
+                // handed to the action it dims.
+                "gates.inertReason(for:.borders(.borderFitGaps))",
             ],
             "FocusBorderEditor.swift": [
                 "gates.containerReason(for:.focusBorder)",
@@ -100,9 +103,13 @@ struct GapsAndBordersGateWiringTests {
         let help = try read("GapsBordersGateHelp.swift")
         let allEditors =
             Array(consults.keys)
-            + ["StickyMarkEditor.swift", "BordersCard.swift"]
+            + [
+                "StickyMarkEditor.swift", "BordersCard.swift",
+                "FitGapsAction.swift",
+            ]
         for key in [
             "border.controls.disabled",
+            "border.fit_gaps.disabled",
             "border.glow_size.disabled",
             "drag.disabled.help",
             // Not InertReasons, same authoring rule: a master's

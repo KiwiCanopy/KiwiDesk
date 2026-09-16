@@ -3056,7 +3056,8 @@ too.
 
 The border is a pure overlay: it never changes where windows tile
 (no gap coupling). The configured width is the thickness drawn
-outward into the gap — the value `border.fit_gaps` sizes gaps from.
+outward into the gap — with the glow off, the value
+`border.fit_gaps` sizes gaps from.
 By default the border is stacked **behind** its window: a flicker-free
 placement that holds steady even when a window redraws rapidly (some
 browsers repaint on every keystroke) and hugs each window's real
@@ -3191,11 +3192,11 @@ glowing ring renders on the behind-order fallback renderer, so
 [Accepted limitations](accepted-limitations.md)).
 
 :::unreleased
-The bloom counts as part of the ring's reach: `fit_gaps` grows
-the gaps by the glow's resolved blur once, on the focused side,
-and a floating window keeps that much off bars and screen edges
-too. A hand-set gap smaller than that lets the bloom bleed onto
-the neighbour, which is yours to choose.
+The bloom counts as part of the ring's reach: `border.fit_gaps`
+sizes for it, and a floating window keeps that much off bars and
+screen edges as well as the stroke. A hand-set gap smaller than
+that lets the bloom bleed onto the neighbour, which is yours to
+choose.
 :::
 
 **Example:**
@@ -3266,8 +3267,9 @@ past the border's reach. Every outer edge becomes
 `reach + remaining`; each inner axis becomes `reach + remaining`,
 or `2 × reach + remaining` when `unfocused_enabled` is on (both
 neighbouring borders need clearance; the whitespace sits between
-them once). The reach is the configured border width; the
-renderer’s hidden overlap is behind the window and does not count.
+them once). With the glow off, the reach is the configured
+border width; the renderer’s hidden overlap is behind the window
+and does not count.
 The action deliberately
 normalizes asymmetric global gaps. A one-shot convenience that
 writes `gap.global` — the remaining gap is command input, never a
@@ -3278,10 +3280,11 @@ same calculation.
 
 :::unreleased
 With `glow` on, the focused ring's reach is the width plus the
-glow's resolved blur, added once: every outer edge and each
-inner axis grow by the blur, and an unfocused ring adds its
-width alone (it has no bloom). At the default width the
-automatic glow takes a Fit from 5/5 to 9/9.
+glow's resolved blur, rounded up to whole points and added once:
+every outer edge and each inner axis grow by it, and an
+unfocused ring adds its width alone (it has no bloom). The
+Settings action's preview line shows the values before the
+press.
 :::
 
 **Example:**
