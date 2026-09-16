@@ -35,9 +35,10 @@ struct FractionChips: View {
         )
     }
 
-    /// Whether the stored share IS the chip's, judged by the one
-    /// wire spelling (`ScrollSize.percentString`), never a
-    /// hand-typed tolerance.
+    /// Whether the stored share IS the chip's. The split ratios'
+    /// wire is a raw Double; this borrows `ScrollSize.percentString`
+    /// as the one tolerance the count row already judges by, never
+    /// a hand-typed one.
     static func matches(_ stored: Double, _ share: Double) -> Bool {
         ScrollSize.percentString(stored)
             == ScrollSize.percentString(share)

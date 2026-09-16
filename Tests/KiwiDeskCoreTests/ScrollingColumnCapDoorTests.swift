@@ -9,9 +9,13 @@ import Testing
 /// screen's size comes through the one bounds hook (#531) and
 /// the strip reserved on it is the DRAFT's, not the live bar's.
 /// A host with no screen answers nil, which the GUI reads as
-/// the share's own floor; the suite skips there rather than
-/// asserting the host.
-@Suite("Scrolling column cap door (#1382)")
+/// the share's own floor — and the hook-vs-draft clauses are
+/// vacuous there, so the suite is gated on a screen rather than
+/// passing by absence.
+@Suite(
+    "Scrolling column cap door (#1382)",
+    .enabled(if: !NSScreen.screens.isEmpty, "needs a screen")
+)
 @MainActor
 struct ScrollingColumnCapDoorTests {
     private func draft() -> TilingSettings {
@@ -35,12 +39,6 @@ struct ScrollingColumnCapDoorTests {
         core.tiler.settings.spaceBarStyle.enabled = true
         core.tiler.settings.spaceBarStyle.edge = .left
         core.tiler.settings.spaceBarStyle.thickness = 700
-        guard !NSScreen.screens.isEmpty else {
-            #expect(
-                core.scrollingColumnCap(for: nil, settings: draft()) == nil
-            )
-            return
-        }
         // 1920 across at 300 + 10: six — the live bar's 700 pt
         // strip would leave three.
         #expect(core.scrollingColumnCap(for: nil, settings: draft()) == 6)
