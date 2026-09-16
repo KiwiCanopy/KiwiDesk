@@ -140,7 +140,7 @@ enum LayoutDefaultsGateHelp {
     static var monocleFlipOff: String {
         L(
             "monocle.flip_duration.flip_off",
-            "Focus changes swap the window at once while "
+            "Focus changes show the new window at once while "
                 + "%1$@ is off.",
             L("monocle.flip", "Flip between windows")
         )

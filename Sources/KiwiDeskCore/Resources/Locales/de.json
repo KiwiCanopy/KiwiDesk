@@ -817,7 +817,7 @@
   "monitors.space_placement": "Space-Verteilung",
   "monocle.app_bar_xref_state": "Die App Bar für Monocle (aktuell %1$@) wird unter %2$@ konfiguriert.",
   "monocle.flip": "Zwischen Fenstern umblättern",
-  "monocle.flip.help": "Zeichnet das Fenster unscharf und blättert eine Karte vom Symbol der einen App zum Symbol der nächsten um, wenn sich der Fokus in einem Monocle-Space ändert — so siehst du, welches Fenster hereingekommen ist. Deaktiviere dies, um sofort zu wechseln. „%1$@“ legt fest, wie lange das Umblättern dauert, und hat keine Wirkung, solange es aus ist. Auch „Bewegung reduzieren“ in macOS hält es aus.",
+  "monocle.flip.help": "Zeichnet das Fenster unscharf und blättert eine Karte vom Symbol der einen App zum Symbol der nächsten um, wenn sich der Fokus in einem Monocle-Space ändert — so siehst du, welches Fenster hereingekommen ist. Deaktiviere dies, um sofort zu wechseln. „%1$@“ legt fest, wie lange das Umblättern dauert, und hat keine Wirkung, solange es aus ist. Bei aktiviertem „Bewegung reduzieren“ in macOS bleibt es ebenfalls aus.",
   "monocle.flip_duration": "Umblätter-Dauer",
   "monocle.flip_duration.flip_off": "Solange „%1$@“ aus ist, wechselt das Fenster bei einem Fokuswechsel sofort.",
   "monocle.focus_orientation": "Fokus-Ausrichtung",

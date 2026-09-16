@@ -9,11 +9,14 @@ extension KiwiCore {
         _ command: String,
         args: [JSONValue] = []
     ) -> CommandResponse {
-        // A command during a Monocle flip lands the flip's focus
-        // FIRST (#1391): the plate defers `focusWindow` to its
-        // midpoint, so a second `focus` press read the anchor the
-        // first had not moved yet and targeted the same window.
-        monocleFlip.settle()
+        // A command reading the focused window lands a playing
+        // flip's focus FIRST (#1391): the plate defers
+        // `focusWindow` to its midpoint, so a second `focus`
+        // press read the anchor the first had not moved yet. A
+        // query lands nothing — the play continues over it.
+        if FocusedCommandPolicy.isFocused(command) {
+            runPendingMonocleFocus()
+        }
         let response = dispatchCommand(command, args: args)
         // Every command run inside a hotkey fire is tallied so
         // the hold-to-glide engine can decide eligibility from

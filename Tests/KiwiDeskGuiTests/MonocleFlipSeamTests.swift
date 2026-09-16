@@ -39,9 +39,9 @@ struct MonocleFlipSeamTests {
         )
     }
 
-    /// The door defers `focusWindow` to the midpoint and falls
-    /// through to it where no flip plays: two spellings, both in
-    /// the door.
+    /// The door lands the owed focus through `focusWindow` and
+    /// falls through to it where no flip plays: two spellings,
+    /// both in the door.
     @Test("The door is the one file that pays the focus")
     func doorPaysTheFocus() throws {
         let file = Self.core.appendingPathComponent("App/\(Self.door)")
@@ -53,20 +53,52 @@ struct MonocleFlipSeamTests {
         #expect(calls.count == 2, "found \(calls.count)")
     }
 
-    /// A command during a flip lands the pending focus first —
-    /// the one settle ahead of dispatch, in the execute wrapper
-    /// that is `dispatchCommand`'s one caller.
-    @Test("Every command settles a flip ahead of its dispatch")
-    func commandsSettleFirst() throws {
-        let sites = try SourceScan.identifierSites(
-            of: "monocleFlip.settle()",
+    /// A focused-window command lands the pending focus ahead
+    /// of its dispatch — one site, in the execute wrapper that
+    /// is `dispatchCommand`'s one caller, beside the door's own
+    /// landings — and only the door ends a play.
+    @Test("The landing and the ending are wired where ruled")
+    func landingAndEndingAreWired() throws {
+        let landings = try SourceScan.identifierSites(
+            of: "runPendingMonocleFocus()",
+            under: Self.core
+        ).filter { $0.file.lastPathComponent != Self.door }
+        #expect(
+            landings.count == 1
+                && landings.first?.file.lastPathComponent
+                    == "KiwiCore+Execute.swift",
+            "landing sites: \(landings.map(\.site))"
+        )
+        let endings = try SourceScan.identifierSites(
+            of: "monocleFlip.end()",
             under: Self.core
         )
         #expect(
-            sites.count == 1
-                && sites.first?.file.lastPathComponent
-                    == "KiwiCore+Execute.swift",
-            "settle sites: \(sites.map(\.site))"
+            endings.count == 1
+                && endings.first?.file.lastPathComponent
+                    == Self.door,
+            "ending sites: \(endings.map(\.site))"
         )
+    }
+
+    /// The flip's Reduce Motion read is pinned ON in both
+    /// `makeTestCore` twins — a playing flip defers the focus
+    /// every navigation suite reads at once — and the pin is
+    /// the both-twins scan every `makeTestCore` pin owes.
+    @Test("Both test-core twins pin the flip's read on")
+    func bothTwinsPinTheRead() throws {
+        let tests = Self.root.appendingPathComponent("Tests")
+        for twin in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
+            let file = tests.appendingPathComponent(
+                "\(twin)/TestCore.swift"
+            )
+            let source = try SourceScan.strippedSource(at: file)
+            #expect(
+                source.contains(
+                    "core.monocleFlip.reduceMotion = { true }"
+                ),
+                "\(twin) misses the pin"
+            )
+        }
     }
 }

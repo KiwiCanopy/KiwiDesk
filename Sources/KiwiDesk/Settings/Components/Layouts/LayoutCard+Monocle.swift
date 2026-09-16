@@ -18,7 +18,7 @@ extension LayoutCard {
             label: L("monocle.flip_duration", "Flip duration"),
             value: $model.config.settings.animations
                 .monocleFlipDurationMS,
-            in: 100...1000,
+            in: AnimationSettings.flipDurationBand,
             step: 10,
             suffix: "ms"
         )

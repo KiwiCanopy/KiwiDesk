@@ -180,7 +180,7 @@ enum LayoutHelp {
             "Blurs the window and turns a card from one app's "
                 + "icon to the next when focus changes in a "
                 + "Monocle Space, so you can see which window "
-                + "came in. Turn this off to swap at once. %1$@ "
+                + "came in. Turn this off to switch at once. %1$@ "
                 + "sets how long the turn takes and has no effect "
                 + "while the flip is off. macOS's Reduce Motion "
                 + "also keeps it off.",

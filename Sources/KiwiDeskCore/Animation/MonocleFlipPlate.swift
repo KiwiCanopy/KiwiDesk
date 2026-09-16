@@ -1,11 +1,10 @@
 import AppKit
 import QuartzCore
 
-/// The flip plate's faces (#1391): an untinted achromatic wash
-/// with a hairline, the window's own corner radius and a
-/// constant shadow, the app icon centred. No palette colour by
-/// ruling — a Fill becomes a colour on glass only through
-/// `GlassTint.apply` (#1297), and this is a `CALayer`.
+/// The flip plate (#1391): an untinted achromatic wash with a
+/// hairline, each window's own corner radius and a constant
+/// shadow, the app icon centred — no palette colour, no text
+/// (the design entry has the ruling).
 enum MonocleFlipPlate {
     /// The wash per appearance: a white wash over a dark blurred
     /// ground reads as a grey slab, a black one as the Dock.
@@ -16,8 +15,7 @@ enum MonocleFlipPlate {
     }
 
     static func hairline(dark: Bool) -> CGColor {
-        NSColor(white: dark ? 1 : 1, alpha: dark ? 0.18 : 0.35)
-            .cgColor
+        NSColor(white: 1, alpha: dark ? 0.18 : 0.35).cgColor
     }
 
     /// The icon's side: 30 % of the plate's SHORTER side, capped,
@@ -25,6 +23,81 @@ enum MonocleFlipPlate {
     /// plate.
     static func iconSide(for size: CGSize) -> CGFloat {
         min(0.30 * min(size.width, size.height), 256)
+    }
+
+    /// The card: both faces centred on the outgoing frame — the
+    /// incoming one lands on its own issued size, which shares
+    /// that centre (#677) — turning about the plan's axis with
+    /// the plan's sign, the turn beginning after the blur-in so
+    /// the midpoint is edge-on. Perspective scales with the
+    /// extent that rotates, or a window-sized plate's edges fly
+    /// off screen.
+    static func card(
+        _ plan: MonocleFlipPlan,
+        from: MonocleFlipOverlay.Face,
+        to: MonocleFlipOverlay.Face,
+        fromRect: CGRect,
+        toRect: CGRect,
+        cornerRadii: (from: CGFloat, to: CGFloat),
+        dark: Bool,
+        scale: CGFloat,
+        reduceMotion: Bool
+    ) -> CALayer {
+        let card = CALayer()
+        card.frame = fromRect
+        var perspective = CATransform3DIdentity
+        let extent =
+            plan.axis == .vertical ? fromRect.width : fromRect.height
+        perspective.m34 = -1 / max(extent * 2, 700)
+        card.sublayerTransform = perspective
+        let centre = CGPoint(
+            x: fromRect.width / 2,
+            y: fromRect.height / 2
+        )
+        let front = face(
+            icon: from.icon,
+            size: fromRect.size,
+            cornerRadius: cornerRadii.from,
+            dark: dark,
+            scale: scale
+        )
+        let back = face(
+            icon: to.icon,
+            size: toRect.size,
+            cornerRadius: cornerRadii.to,
+            dark: dark,
+            scale: scale
+        )
+        front.position = centre
+        back.position = centre
+        let sign = Double(plan.sign)
+        back.transform = rotation(axis: plan.axis, radians: -sign * .pi)
+        let axis = plan.axis == .vertical ? "y" : "x"
+        front.add(
+            BarMotion.flipTurn(
+                axis: axis,
+                from: 0,
+                to: sign * .pi,
+                duration: plan.duration,
+                delay: MonocleFlipPlan.fadeIn,
+                reduceMotion: reduceMotion
+            ),
+            forKey: "turn"
+        )
+        back.add(
+            BarMotion.flipTurn(
+                axis: axis,
+                from: -sign * .pi,
+                to: 0,
+                duration: plan.duration,
+                delay: MonocleFlipPlan.fadeIn,
+                reduceMotion: reduceMotion
+            ),
+            forKey: "turn"
+        )
+        card.addSublayer(front)
+        card.addSublayer(back)
+        return card
     }
 
     /// One face: a plate of `size` anchored at its centre,

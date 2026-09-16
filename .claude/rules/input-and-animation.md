@@ -505,30 +505,38 @@ editing here:
 
 - **The Monocle focus flip is a drawn card over a behind-window
   blur, never a transform or a capture of the real window
-  (#1391).** Measured 2026-09-16: from an ordinary SkyLight
-  connection `SLSSetWindowTransform` and `SLSSetWindowAlpha` on
-  another app's window return success and apply nothing, and
-  the window's pixels reach no process without Screen Recording
-  through any API — the owner ruled no new permission prompt,
-  so the plate is the one tier (the argument is
-  `docs/design-decisions.md` ▸ "A Monocle focus change flips a
-  drawn card"). Four obligations. A focus KiwiDesk COMMANDS in
-  a Monocle Space takes the one `focusWithMonocleFlip` door,
-  which defers `focusWindow` to the turn's midpoint; an
-  OS-reported focus never does, since its swap already
-  happened — `MonocleFlipSeamTests` pins the three commanded
-  sites and the door as the one payer. Every command settles a
-  flip ahead of its dispatch (`KiwiCore.execute`), or a second
-  press reads the anchor the first has not moved
+  (#1391).** The measurement that closed the live-image tier
+  (2026-09-16 — the #884 performed-not-applied shape on
+  `SLSSetWindowTransform`/`SLSSetWindowAlpha`, and no pixels
+  without Screen Recording) and the no-new-permission ruling
+  are argued once, in `docs/design-decisions.md` ▸ "A Monocle
+  focus change flips a drawn card"; do not re-probe them. Four
+  obligations. A focus KiwiDesk COMMANDS in a Monocle Space
+  takes the one `focusWithMonocleFlip` door, which records the
+  owed focus as `pendingMonocleFocus` — a ledger on the core
+  with its sibling `pendingFocusRaise`'s hooks, never a closure
+  holding a `WindowID` — and lands `focusWindow` at the turn's
+  midpoint; an OS-reported focus never takes the door, since
+  its swap already happened (`MonocleFlipSeamTests` pins the
+  three commanded sites, the door as the one payer, and the
+  wiring below). A focused-window command lands the owed focus
+  ahead of its dispatch (`KiwiCore.execute` over
+  `FocusedCommandPolicy`), the door ends a play and lands its
+  focus BEFORE it plans (the App Bar click passes no
+  dispatcher), an honored report for any other window drops it,
+  a rekey carries it, and a gone target lands nothing
   (`MonocleFlipDoorTests`). The decision is pure
   (`MonocleFlipPlan.decide`, `MonocleFlipPlanTests`) and takes
   Reduce Motion as an argument, read through the overlay's own
-  seam that `makeTestCore` pins ON — the one seam pinned the
-  other way from the engine's, because a playing flip defers
-  the focus every navigation suite reads at once. And the
-  overlay starts no motion of its own: its turn and fades are
-  `BarMotion`'s censused members (`BarMotionSeamTests`), so
-  Core's motion keeps one home.
+  seam, which `makeTestCore` pins ON (the engine's is pinned
+  OFF) because a playing flip defers the focus every navigation
+  suite reads at once — a flip suite states the read itself,
+  and a further seam that defers a commanded focus is pinned
+  the same way in both `makeTestCore` twins with its reason
+  beside it (`MonocleFlipSeamTests` ▸ `bothTwinsPinTheRead`).
+  And the overlay starts no motion of its own: its turn and
+  fades are `BarMotion`'s censused members
+  (`BarMotionSeamTests`), so Core's motion keeps one home.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

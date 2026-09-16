@@ -202,4 +202,17 @@ struct LayoutDefaultsGateTests {
                 .inertReason(for: key) == nil
         )
     }
+
+    @Test("flip duration follows the flip toggle (#1391)")
+    func monocleFlipDuration() {
+        let key = SettingKey.colours(.animationsMonocleFlipDurationMS)
+        #expect(
+            gates { $0.animations.onMonocleFocus = false }
+                .inertReason(for: key) == .monocleFlipOff
+        )
+        #expect(
+            gates { $0.animations.onMonocleFocus = true }
+                .inertReason(for: key) == nil
+        )
+    }
 }

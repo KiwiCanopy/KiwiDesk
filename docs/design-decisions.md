@@ -2618,21 +2618,28 @@ order, a wrapped step keeping the pressed direction. No setting
 is added for it. The eye distance scales with the extent that
 rotates, or a window-sized plate's edges fly off screen.
 
-*It plays only for a focus KiwiDesk COMMANDS.* A `focus` step,
-an App Bar click, `pull_or_spawn` — the door is
-`focusWithMonocleFlip`, which defers the ordinary
-`focusWindow` to the midpoint, and every OS-reported focus
-(⌘Tab, the Dock) takes no door, since its swap already
-happened. A command issued during a flip lands the pending
-focus first — `KiwiCore.execute` settles the flip ahead of its
-dispatch — because a second `focus` press read the anchor the
-first had not yet moved and targeted the same window. Reduce
+*It plays only for a focus KiwiDesk COMMANDS, and the focus it
+owes is a ledger, not a closure.* A `focus` step, an App Bar
+click, `pull_or_spawn` — the door is `focusWithMonocleFlip`,
+which records `pendingMonocleFocus` and lands the ordinary
+`focusWindow` at the midpoint; every OS-reported focus (⌘Tab,
+the Dock) takes no door, since its swap already happened. The
+owed focus takes the hooks its sibling `pendingFocusRaise`
+earned: a command that reads the focused window lands it ahead
+of its own dispatch, because a second `focus` press read the
+anchor the first had not yet moved and targeted the same window
+(a query lands nothing — the play continues over it); the door
+itself ends a play and lands its focus before it plans, since
+the App Bar click never passes the dispatcher; an honored report
+for any OTHER window drops it, the user having gone elsewhere,
+while the leaving window's own duplicate echo (#887) keeps it;
+a rekey carries it and a gone target lands nothing. Reduce
 Motion stands the whole transition down, read at the site and
 handed to the pure decision; Reduce Transparency takes the
 OS's own flat rendering of the effect view. `MonocleFlipPlan`
-is the decision, `MonocleFlipOverlay` the drawing, and
-`BarMotion` builds every animation, so Core's motion still has
-one home. The two `animations` leaves — `on_monocle_focus`,
+is the decision, `MonocleFlipOverlay` the drawing — one panel,
+reused across plays — and `BarMotion` builds every animation,
+so Core's motion still has one home. The two `animations` leaves — `on_monocle_focus`,
 default on, and `monocle_flip_duration`, default 450 ms — are
 the scrolling pair's shape one layout over, and stay outside
 the animations master like it. The #881 sentence above,

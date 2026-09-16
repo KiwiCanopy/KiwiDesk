@@ -1,26 +1,28 @@
 import AppKit
 import QuartzCore
 
-/// The Monocle flip's overlay (#1391): one non-activating panel
-/// over the Monocle surface — never the screen — carrying a
+/// The Monocle flip's overlay (#1391): one non-activating panel,
+/// reused, over the Monocle surface — never the screen — with a
 /// behind-window blur of the real windows and a whole-surface
-/// plate that turns from the outgoing app's icon to the incoming
-/// one's, the focus swapping beneath it at the turn's midpoint.
-///
-/// Public API, no permission: the compositor blurs what is
-/// behind the panel, and the plate is drawn — the window's own
-/// pixels would need Screen Recording, ruled out on the issue.
-/// Every motion here is built by `BarMotion`, Core's one gate.
+/// plate turning from the outgoing app's icon to the incoming
+/// one's. It holds no focus of its own: the midpoint callback
+/// lands `KiwiCore.pendingMonocleFocus`. Every motion is
+/// `BarMotion`'s.
 @MainActor
 final class MonocleFlipOverlay {
     private var panel: NSPanel?
     private var pending: DispatchWorkItem?
-    private var midpoint: (() -> Void)?
+    private var teardown: DispatchWorkItem?
+    private var onMidpoint: (() -> Void)?
+
+    /// A window's icon; nil where the app has none.
+    struct Face {
+        let icon: NSImage?
+    }
 
     /// The Reduce Motion read the decision takes — live by
     /// default; `makeTestCore` pins it ON so a suite's commanded
-    /// focus lands at once rather than at a midpoint, and a flip
-    /// suite states the read itself.
+    /// focus lands at once rather than at a midpoint.
     var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
     /// Puts the panel on screen — live by default; a flip suite
     /// pins it inert so no panel flashes on the runner.
@@ -28,41 +30,45 @@ final class MonocleFlipOverlay {
         $0.orderFrontRegardless()
     }
 
-    /// A window's icon, sized for the plate; nil where the app
-    /// has none.
-    struct Face {
-        let icon: NSImage?
-    }
-
-    var isPlaying: Bool { panel != nil }
+    var isPlaying: Bool { onMidpoint != nil || teardown != nil }
 
     /// Plays `plan`, calling `midpoint` once when the plate is
-    /// edge-on — the moment the focus command runs — and tearing
-    /// down after the fade-out. A play in flight is settled
-    /// first, its midpoint performed if it had not fired.
+    /// edge-on and tearing the panel down after the fade-out. A
+    /// play in flight is ended first, its midpoint performed if
+    /// it had not fired. `cornerRadii` are the outgoing and the
+    /// incoming window's own.
     func play(
         _ plan: MonocleFlipPlan,
         from: Face,
         to: Face,
-        cornerRadius: CGFloat,
+        cornerRadii: (from: CGFloat, to: CGFloat),
         midpoint: @escaping () -> Void
     ) {
-        settle()
+        end()
         let primaryHeight = GeometryUtils.primaryHeight
         let cover = GeometryUtils.flip(
             plan.cover,
             primaryHeight: primaryHeight
         )
-        let panel = makePanel(frame: cover)
-        let root = panel.contentView!
+        let panel = self.panel ?? Self.makePanel()
+        self.panel = panel
+        panel.setFrame(cover, display: false)
+        let root = NSView(
+            frame: CGRect(origin: .zero, size: cover.size)
+        )
+        root.wantsLayer = true
+        panel.contentView = root
         let reduceMotion = self.reduceMotion()
-        let dark = isDarkAppearance
         let scale =
             NSScreen.screens.first { $0.frame.intersects(cover) }?
             .backingScaleFactor ?? 2
+        let local = { (rect: CGRect) -> CGRect in
+            GeometryUtils.flip(rect, primaryHeight: primaryHeight)
+                .offsetBy(dx: -cover.minX, dy: -cover.minY)
+        }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        let blur = makeBlur(frame: root.bounds)
+        let blur = Self.makeBlur(frame: root.bounds)
         root.addSubview(blur)
         blur.layer?.add(
             BarMotion.flipFade(
@@ -77,80 +83,18 @@ final class MonocleFlipOverlay {
         let host = NSView(frame: root.bounds)
         host.wantsLayer = true
         root.addSubview(host)
-        let local = { (rect: CGRect) -> CGRect in
-            let flipped = GeometryUtils.flip(
-                rect,
-                primaryHeight: primaryHeight
-            )
-            return flipped.offsetBy(
-                dx: -cover.minX,
-                dy: -cover.minY
-            )
-        }
-        let fromRect = local(plan.from)
-        let toRect = local(plan.to)
-        let card = CALayer()
-        card.frame = fromRect
-        // Eye distance scales with the extent that rotates, or a
-        // window-sized plate's edges fly off screen mid-turn.
-        var perspective = CATransform3DIdentity
-        let extent =
-            plan.axis == .vertical ? fromRect.width : fromRect.height
-        perspective.m34 = -1 / max(extent * 2, 700)
-        card.sublayerTransform = perspective
+        let card = MonocleFlipPlate.card(
+            plan,
+            from: from,
+            to: to,
+            fromRect: local(plan.from),
+            toRect: local(plan.to),
+            cornerRadii: cornerRadii,
+            dark: Self.isDarkAppearance,
+            scale: scale,
+            reduceMotion: reduceMotion
+        )
         host.layer?.addSublayer(card)
-        let front = MonocleFlipPlate.face(
-            icon: from.icon,
-            size: fromRect.size,
-            cornerRadius: cornerRadius,
-            dark: dark,
-            scale: scale
-        )
-        let back = MonocleFlipPlate.face(
-            icon: to.icon,
-            size: toRect.size,
-            cornerRadius: cornerRadius,
-            dark: dark,
-            scale: scale
-        )
-        // Both faces centred in the card: the plate lands on the
-        // incoming window's issued frame, which shares the
-        // outgoing one's centre (#677).
-        front.position = CGPoint(
-            x: fromRect.width / 2,
-            y: fromRect.height / 2
-        )
-        back.position = front.position
-        card.addSublayer(front)
-        card.addSublayer(back)
-        let axis = plan.axis == .vertical ? "y" : "x"
-        let sign = Double(plan.sign)
-        // The back face starts turned away and arrives at zero;
-        // the front turns away in the same sense.
-        back.transform = MonocleFlipPlate.rotation(
-            axis: plan.axis,
-            radians: -sign * .pi
-        )
-        front.add(
-            BarMotion.flipTurn(
-                axis: axis,
-                from: 0,
-                to: sign * .pi,
-                duration: plan.duration,
-                reduceMotion: reduceMotion
-            ),
-            forKey: "turn"
-        )
-        back.add(
-            BarMotion.flipTurn(
-                axis: axis,
-                from: -sign * .pi,
-                to: 0,
-                duration: plan.duration,
-                reduceMotion: reduceMotion
-            ),
-            forKey: "turn"
-        )
         for layer in [blur.layer, host.layer] {
             layer?.add(
                 BarMotion.flipFade(
@@ -164,79 +108,61 @@ final class MonocleFlipOverlay {
             )
         }
         CATransaction.commit()
-        self.panel = panel
         present(panel)
-        self.midpoint = midpoint
-        schedule(after: plan.midpoint) { [weak self] in
+        onMidpoint = midpoint
+        pending = schedule(after: plan.midpoint) { [weak self] in
             self?.fireMidpoint()
         }
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + plan.total
-        ) { [weak self] in
-            guard let self, self.panel === panel else { return }
-            self.settle()
+        teardown = schedule(after: plan.total) { [weak self] in
+            self?.end()
         }
     }
 
-    /// Ends a play in flight: performs an unfired midpoint, so
-    /// the focus the user commanded still lands, and drops the
-    /// panel at once. A no-op with nothing playing, so every
-    /// command may call it ahead of its dispatch.
-    func settle() {
+    /// Ends a play in flight: performs an unfired midpoint and
+    /// drops the panel at once. A no-op with nothing playing.
+    func end() {
         pending?.cancel()
+        teardown?.cancel()
         pending = nil
+        teardown = nil
         fireMidpoint()
         panel?.orderOut(nil)
-        panel = nil
+        panel?.contentView = nil
     }
 
     private func fireMidpoint() {
-        guard let midpoint else { return }
-        self.midpoint = nil
-        midpoint()
+        guard let onMidpoint else { return }
+        self.onMidpoint = nil
+        onMidpoint()
     }
 
     private func schedule(
         after delay: TimeInterval,
         _ body: @escaping () -> Void
-    ) {
+    ) -> DispatchWorkItem {
         let item = DispatchWorkItem(block: body)
-        pending = item
         DispatchQueue.main.asyncAfter(
             deadline: .now() + delay,
             execute: item
         )
+        return item
     }
 
-    private var isDarkAppearance: Bool {
+    private static var isDarkAppearance: Bool {
         NSApplication.shared.effectiveAppearance.bestMatch(
             from: [.darkAqua, .aqua]
         ) == .darkAqua
     }
 
-    private func makePanel(frame: CGRect) -> NSPanel {
-        let panel = NSPanel(
-            contentRect: frame,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
+    private static func makePanel() -> NSPanel {
+        let panel = BarPanel.makeNonActivating()
         panel.ignoresMouseEvents = true
-        panel.level = BarPanel.level
-        panel.collectionBehavior = [
-            .canJoinAllSpaces, .fullScreenAuxiliary, .transient,
-        ]
-        panel.animationBehavior = .none
-        let root = NSView(frame: CGRect(origin: .zero, size: frame.size))
-        root.wantsLayer = true
-        panel.contentView = root
         return panel
     }
 
-    private func makeBlur(frame: CGRect) -> NSVisualEffectView {
+    private static func makeBlur(
+        frame: CGRect
+    ) -> NSVisualEffectView {
         let blur = NSVisualEffectView(frame: frame)
         blur.blendingMode = .behindWindow
         blur.material = .hudWindow

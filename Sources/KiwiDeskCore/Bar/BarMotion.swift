@@ -131,15 +131,18 @@ enum BarMotion {
 
     /// The Monocle flip plate's turn (#1391): `transform.rotation`
     /// about `axis` (`"x"` or `"y"`) from `from` to `to` radians
-    /// across `duration`, eased both ends. Under Reduce Motion
-    /// the flip never plays — `MonocleFlipPlan.decide` stands the
-    /// whole transition down — so the reduced shape here is a
-    /// zero-travel step, the same net `springAnimation` keeps.
+    /// across `duration`, starting `delay` after it is added and
+    /// holding `from` until then, eased both ends. Under Reduce
+    /// Motion the flip never plays — `MonocleFlipPlan.decide`
+    /// stands the whole transition down — so the reduced shape
+    /// here is a zero-travel step, the net `springAnimation`
+    /// keeps.
     static func flipTurn(
         axis: String,
         from: Double,
         to: Double,
         duration: TimeInterval,
+        delay: TimeInterval,
         reduceMotion: Bool
     ) -> CAAnimation {
         let turn = CABasicAnimation(
@@ -148,6 +151,7 @@ enum BarMotion {
         turn.fromValue = reduceMotion ? to : from
         turn.toValue = to
         turn.duration = duration
+        turn.beginTime = CACurrentMediaTime() + delay
         turn.timingFunction = CAMediaTimingFunction(
             name: .easeInEaseOut
         )

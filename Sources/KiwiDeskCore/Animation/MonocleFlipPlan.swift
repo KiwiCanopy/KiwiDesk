@@ -42,8 +42,9 @@ public struct MonocleFlipPlan: Equatable, Sendable {
     ///   direction on a wrap included; nil for a non-directional
     ///   target, whose sign is array order (target after current
     ///   = forward).
-    /// - `sizes`: each member's issued size, from the layout's
-    ///   frame set — the parked frame's size is the window's own.
+    /// - `targetSize`: the target's issued size, from the
+    ///   layout's frame set — a parked frame's size is the
+    ///   window's own.
     /// - Stands down on a disabled setting, Reduce Motion, a
     ///   target that is the current window, or either window not
     ///   a tiled member: a float never flips.

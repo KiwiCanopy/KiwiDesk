@@ -30,6 +30,9 @@ public final class KiwiCore {
     public let stickyMarks = StickyMarkManager()
     /// The Monocle focus flip (#1391), `focusWithMonocleFlip`'s.
     let monocleFlip = MonocleFlipOverlay()
+    /// The focus a playing flip owes at its midpoint (#1391) —
+    /// landed, dropped and carried in `KiwiCore+MonocleFlip`.
+    var pendingMonocleFocus: (from: WindowID, to: WindowID)?
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
@@ -79,10 +82,8 @@ public final class KiwiCore {
     var pendingZOrderRestore = false
 
     /// A command reordered windows but its paired retile is the
-    /// dispatcher's own trailing `retile(pass: .apply)`, not one it
-    /// issued itself (#153) — `layoutCommand` arms the z-order
-    /// restore *after* that retile so it can't fire mid-retile
-    /// from pre-retile frames. Set via
+    /// dispatcher's trailing `retile(pass: .apply)` (#153), so
+    /// `layoutCommand` arms the z-order restore after it. Set via
     /// `requestZOrderRestoreAfterDispatch`; reset each dispatch.
     var deferredCommandZOrderRestore = false
 

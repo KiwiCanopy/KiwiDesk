@@ -5171,10 +5171,12 @@ animations.set_on_relayout(true)
 between the windows of a Monocle Space. The window blurs and a
 plate turns from the outgoing app's icon to the incoming one's
 while the focus swaps beneath it, so you can see which window
-came in and which way it came from: the plate turns the way the
-key pointed, about the vertical axis in a horizontal Monocle and
-the horizontal one in a vertical Monocle. It plays only for a
-focus change KiwiDesk itself commands — a `focus` step, an App
+came in and which way it came from: the plate turns forward for
+the next window in the Space's order and back for the previous
+one — the way the key pointed, on a `focus` step — about the
+vertical axis in a horizontal Monocle and the horizontal one in
+a vertical Monocle. It plays only for a focus change KiwiDesk
+itself commands — a `focus` step, an App
 Bar click, `pull_or_spawn` — never for one macOS made (⌘Tab,
 the Dock), and never onto a floating window. A plate whose next
 window is smaller (an app that refuses the full slot) lands on

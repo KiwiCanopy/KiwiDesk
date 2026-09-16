@@ -46,15 +46,22 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         }
     }
 
-    /// Clamps duration within supported range (50–1000 ms).
+    /// The band every spring duration clamps to, and the one a
+    /// control's edges derive from (gui.md, #1359).
+    public static let durationBand = 50...1000
+    /// The flip's band: below 100 ms the plate is a flash, not a
+    /// turn.
+    public static let flipDurationBand = 100...1000
+
     static func clampMS(_ ms: Int) -> Int {
-        min(max(ms, 50), 1000)
+        min(max(ms, durationBand.lowerBound), durationBand.upperBound)
     }
 
-    /// Clamps the flip's turn (100–1000 ms): below 100 ms the
-    /// plate is a flash, not a turn.
     static func clampFlipMS(_ ms: Int) -> Int {
-        min(max(ms, 100), 1000)
+        min(
+            max(ms, flipDurationBand.lowerBound),
+            flipDurationBand.upperBound
+        )
     }
 
     private enum CodingKeys: String, CodingKey {

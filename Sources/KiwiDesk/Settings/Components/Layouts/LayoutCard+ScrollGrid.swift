@@ -105,7 +105,7 @@ extension LayoutCard {
             ),
             value: $model.config.settings.animations
                 .scrollDurationMS,
-            in: 50...1000,
+            in: AnimationSettings.durationBand,
             step: 10,
             suffix: "ms"
         )
