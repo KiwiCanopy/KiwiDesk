@@ -62,6 +62,8 @@ struct ScrollingColumnCapTests {
         #expect(ScrollSize.countBelow(0.95) == 1)
         #expect(ScrollSize.countAbove(0.3) == 4)
         #expect(ScrollSize.countBelow(0.3) == 3)
+        // 1/0.15 = 6.67: ▼ floors to 6, never rounds to 7.
+        #expect(ScrollSize.countBelow(0.15) == 6)
         // A whole share is its own count both ways.
         #expect(ScrollSize.countAbove(0.25) == 4)
         #expect(ScrollSize.countBelow(0.25) == 4)
@@ -131,6 +133,22 @@ struct ScrollingColumnCapTests {
             left: 40,
             right: 40
         )
+        settings.scrolling.orientation = .vertical
+        // A space's own scrolling override — vertical here, over a
+        // horizontal global — is the axis its count is read on.
+        settings.scrolling.orientation = .horizontal
+        var vertical = ScrollingOverride()
+        vertical.orientation = .vertical
+        settings.scrolling.override[SpaceID("2")] = vertical
+        #expect(
+            settings.scrollingColumnCap(bounds: visible, space: SpaceID("2"))
+                == 3
+        )
+        #expect(
+            settings.scrollingColumnCap(bounds: visible, space: SpaceID("1"))
+                == 5
+        )
+        settings.scrolling.override[SpaceID("2")] = nil
         settings.scrolling.orientation = .vertical
         // No space resolves the globals — the 40 pt outer gaps —
         // and never any space's override.

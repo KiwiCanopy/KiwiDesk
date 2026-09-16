@@ -87,6 +87,7 @@ struct SlotCountRowTests {
         #expect(SlotCountRow.typed("99", cap: 6) == 6)
         #expect(SlotCountRow.typed("0", cap: 6) == 1)
         #expect(SlotCountRow.typed("1/3", cap: 6) == nil)
+        #expect(SlotCountRow.typed("2.5", cap: 6) == nil)
         #expect(SlotCountRow.typed("", cap: 6) == nil)
     }
 
