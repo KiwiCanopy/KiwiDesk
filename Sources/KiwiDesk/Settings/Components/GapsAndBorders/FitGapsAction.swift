@@ -2,17 +2,46 @@ import Accessibility
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus Border gap transformation action controls (#295). The
+/// The Gaps card's fit-to-border action controls (#295, #1360). The
 /// extra spacing is a transient action parameter; only the
 /// calculated gap values join the staged profile.
 struct FitGapsAction: View {
     @ObservedObject var model: SettingsModel
+    /// Why the action is inert, resolved by the card that mounts
+    /// it (#1360); the title's `?` stays live outside the dim and
+    /// the reason is drawn beneath it (#815).
+    let inertReason: GapsBordersGates.InertReason?
     @State private var extraSpacing = 0
     @State private var appliedSignature: Signature?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             title
+            controls
+                .modifier(
+                    GreyOut(
+                        active: inertReason != nil,
+                        help:
+                            inertReason
+                            .map(GapsBordersGateHelp.sentence) ?? ""
+                    )
+                )
+            if let inertReason, owesInlineReason {
+                Text(GapsBordersGateHelp.sentence(for: inertReason))
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
+        }
+    }
+
+    private var owesInlineReason: Bool {
+        GateReasonPlacement.owesInlineReason(
+            .borders(.borderFitGaps)
+        )
+    }
+
+    @ViewBuilder private var controls: some View {
+        VStack(alignment: .leading, spacing: 6) {
             StepperRow(
                 label: L(
                     "border.fit_gaps.extra_spacing",
@@ -53,9 +82,10 @@ struct FitGapsAction: View {
                 explanation: L(
                     "border.fit_gaps.help",
                     "Calculates global outer and inner gaps "
-                        + "from the border width. Inner gaps "
-                        + "allow for both borders when borders "
-                        + "on unfocused windows are shown."
+                        + "from the border width, plus the glow "
+                        + "when it is on. Inner gaps allow for "
+                        + "both borders when borders on "
+                        + "unfocused windows are shown."
                 ),
                 subject: L(
                     "border.fit_gaps.title",

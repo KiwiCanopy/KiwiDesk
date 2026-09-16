@@ -69,6 +69,13 @@ struct GreyOutParityTests {
         // the resolver's `.glowOff` answer — the consult needle
         // is satisfied by the computed property's declaration,
         // so deleting either wrap left every suite green.
+        // The Fit action (#1360): the resolver's reason arrives
+        // as a parameter, and this wrap is the one USE of it.
+        (
+            "FitGapsAction.swift",
+            "active: inertReason != nil",
+            1
+        ),
         (
             "FocusBorderEditor.swift",
             "active: glowAutoReason != nil",

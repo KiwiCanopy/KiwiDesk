@@ -68,9 +68,16 @@ struct BorderGeometryTests {
         #expect(BorderStyle.glowBlur(for: 20) == 12)
         #expect(glowing.lineWidth == plain.lineWidth)
         #expect(glowing.cornerRadius == plain.cornerRadius)
-        // Outward reach (fit-gaps) must NOT count the bloom — it
-        // bleeds into the gap by design.
-        #expect(BorderGeometry.outwardReach(width: 2) == 2)
+        // The outward reach counts the bloom (#1378): with the
+        // glow at 0 it is the stroke alone, with the glow on it
+        // is the stroke plus the resolved blur — what Fit clears.
+        #expect(BorderGeometry.outwardReach(width: 2, glowBlur: 0) == 2)
+        #expect(
+            BorderGeometry.outwardReach(
+                width: 2,
+                glowBlur: glowing.glowMargin
+            ) == 2 + BorderStyle.glowBlur(for: 2)
+        )
     }
 
     @Test("Explicit glow size overrides the formula, capped")
@@ -252,33 +259,37 @@ struct BorderGeometryTests {
         )
     }
 
-    /// Seam guard + `border.fit_gaps` invariant (#295/#357):
+    /// Seam guard + `border.fit_gaps` invariant (#295/#357/#1378):
     /// `outwardReach` must equal `compute`'s outward growth for every
-    /// style **and both order modes**. The overlap (hidden below,
-    /// on-window above) must never leak into this public reach, or
-    /// the fit-gaps math would drift when the ring flips order.
-    /// Glow is deliberately excluded here — its bloom bleeds into the
-    /// gap on purpose, so `glow: true` grows the frame *past* the
-    /// reach (covered by `glowGrowsFrame`), not a violation of this.
+    /// style, **both order modes and every glow** — the overlap
+    /// (hidden below, on-window above) must never leak into this
+    /// public reach, and since #1378 the glow's bloom is IN it, so a
+    /// reach that ignored the blur would let Fit land the bloom on
+    /// the neighbour.
     @Test("outwardReach matches compute's outward offset")
     func outwardReachMatchesCompute() {
         let widths: [CGFloat] = [BorderStyle.minWidth, 2, 10, 20]
         let orders: [BorderGeometry.Order] = [.below, .above]
+        let blurs: [CGFloat] = [0, BorderStyle.glowBlur(for: 2), 12]
         for order in orders {
             for style in [BorderStyle.CornerStyle.rounded, .square] {
                 for width in widths {
-                    let g = BorderGeometry.compute(
-                        windowFrame: window,
-                        width: width,
-                        cornerStyle: style,
-                        order: order,
-                        systemRadius: 16
-                    )
-                    let offset = window.minX - g.overlayFrame.minX
-                    let reach = BorderGeometry.outwardReach(
-                        width: width
-                    )
-                    #expect(abs(reach - offset) < 0.0001)
+                    for blur in blurs {
+                        let g = BorderGeometry.compute(
+                            windowFrame: window,
+                            width: width,
+                            cornerStyle: style,
+                            order: order,
+                            systemRadius: 16,
+                            glowBlur: blur
+                        )
+                        let offset = window.minX - g.overlayFrame.minX
+                        let reach = BorderGeometry.outwardReach(
+                            width: width,
+                            glowBlur: blur
+                        )
+                        #expect(abs(reach - offset) < 0.0001)
+                    }
                 }
             }
         }

@@ -111,7 +111,5 @@ struct FocusBorderEditor: View {
                     .map(GapsBordersGateHelp.sentence) ?? ""
             )
         )
-        Divider()
-        FitGapsAction(model: model)
     }
 }

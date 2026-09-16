@@ -82,6 +82,15 @@ struct GapsEditor: View {
                 }
                 .padding(.top, 4)
             }
+            Divider()
+            // Fit writes the gaps, so it lives here (#1360),
+            // greyed with its reason while the border is off.
+            FitGapsAction(
+                model: model,
+                inertReason: gates.inertReason(
+                    for: .borders(.borderFitGaps)
+                )
+            )
         }
     }
 

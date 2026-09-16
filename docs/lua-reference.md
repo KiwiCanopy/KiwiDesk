@@ -3056,7 +3056,8 @@ too.
 
 The border is a pure overlay: it never changes where windows tile
 (no gap coupling). The configured width is the thickness drawn
-outward into the gap — the value `border.fit_gaps` sizes gaps from.
+outward into the gap — with the glow off, the value
+`border.fit_gaps` sizes gaps from.
 By default the border is stacked **behind** its window: a flicker-free
 placement that holds steady even when a window redraws rapidly (some
 browsers repaint on every keystroke) and hugs each window's real
@@ -3185,11 +3186,18 @@ the darkened border, in its own hue) — set only `focused_color`
 and the glow follows. Its reach **scales with the border width**
 (clamped to a legible band), so a hairline border gets a subtle
 rim and a thick one a proportional aura — override it with
-`set_glow_size` below. The soft edge is allowed to bleed into
-the layout gap, so `fit_gaps` is unaffected. One interaction: a
+`set_glow_size` below. One interaction: a
 glowing ring renders on the behind-order fallback renderer, so
 `draw_order("front")` is inert while glow is on (see
 [Accepted limitations](accepted-limitations.md)).
+
+:::unreleased
+The bloom counts as part of the ring's reach: `border.fit_gaps`
+sizes for it, and a floating window keeps that much off bars and
+screen edges as well as the stroke. A hand-set gap smaller than
+that lets the bloom bleed onto the neighbour, which is yours to
+choose.
+:::
 
 **Example:**
 
@@ -3259,8 +3267,9 @@ past the border's reach. Every outer edge becomes
 `reach + remaining`; each inner axis becomes `reach + remaining`,
 or `2 × reach + remaining` when `unfocused_enabled` is on (both
 neighbouring borders need clearance; the whitespace sits between
-them once). The reach is simply the configured border width; the
-renderer’s hidden overlap is behind the window and does not count.
+them once). With the glow off, the reach is the configured
+border width; the renderer’s hidden overlap is behind the window
+and does not count.
 The action deliberately
 normalizes asymmetric global gaps. A one-shot convenience that
 writes `gap.global` — the remaining gap is command input, never a
@@ -3268,6 +3277,15 @@ persisted setting, and the layout math itself stays free of any
 border coupling, so this never runs automatically. The GUI's
 **Fit layout gaps → Set Gap Values** action previews and stages the
 same calculation.
+
+:::unreleased
+With `glow` on, the focused ring's reach is the width plus the
+glow's resolved blur, rounded up to whole points and added once:
+every outer edge and each inner axis grow by it, and an
+unfocused ring adds its width alone (it has no bloom). The
+Settings action's preview line shows the values before the
+press.
+:::
 
 **Example:**
 

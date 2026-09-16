@@ -49,8 +49,16 @@ extension BordersKey {
             )
         case .borderWidthMaster, .borderCornerMaster:
             return .row(.gapsAndBorders, .borders, .atRest)
-        case .borderFitGapsExtraSpacing:
-            return .row(.gapsAndBorders, .focusBorder, .atRest)
+        case .borderFitGapsExtraSpacing, .borderFitGaps:
+            // In the Gaps card since #1360 — it writes the GAPS —
+            // greyed with its reason while the border it reads
+            // is off.
+            return .row(
+                .gapsAndBorders,
+                .gaps,
+                .atRest,
+                gate: .setting(.borders(.borderEnabled))
+            )
         case .borderFocusedColor:
             return .row(
                 .advancedColours,
@@ -93,8 +101,6 @@ extension BordersKey {
             )
         case .borderDrawOrder:
             return .luaOnly
-        case .borderFitGaps:
-            return .row(.gapsAndBorders, .focusBorder, .atRest)
         case .stickyMark:
             // Ungated (StickyMarkUngatedTests).
             return .row(

@@ -273,13 +273,36 @@ struct GapsAndBordersGateTests {
     @MainActor
     @Test("each inert reason renders its own sentence")
     func eachReasonHasItsOwnSentence() {
-        let all: [GapsBordersGates.InertReason] = [
-            .borderOff, .glowOff, .visualOff,
-        ]
+        // Reflected, not listed: a reason added for a sentence
+        // that misreferred (#1360's `.fitBorderOff`) is exactly
+        // the one a hand list would miss.
+        let all = GapsBordersGates.InertReason.allCases
         let sentences = all.map(GapsBordersGateHelp.sentence)
         for sentence in sentences {
             #expect(!sentence.isEmpty)
         }
         #expect(Set(sentences).count == all.count)
+    }
+
+    /// The Fit rows on the Gaps card read the border they size
+    /// for (#1360): inert with its own reason while it is off —
+    /// their own, since the Focus Border block's sentence names
+    /// that card's rows — live with it on.
+    @Test(
+        "the Fit rows grey with the focus border off",
+        arguments: [
+            SettingKey.borders(.borderFitGaps),
+            .borders(.borderFitGapsExtraSpacing),
+        ]
+    )
+    func fitRowsNeedTheBorder(key: SettingKey) {
+        #expect(
+            gates { $0.borderStyle.enabled = false }
+                .inertReason(for: key) == .fitBorderOff
+        )
+        #expect(
+            gates { $0.borderStyle.enabled = true }
+                .inertReason(for: key) == nil
+        )
     }
 }

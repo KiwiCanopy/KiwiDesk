@@ -155,6 +155,8 @@ extension InterpolatedLabelTests {
         //    already converted by the re-review that filed it, so
         //    it is read as a starting set rather than a register.
         "border.controls.disabled": 1,
+        // The Fit rows' own reason on the Gaps card (#1360).
+        "border.fit_gaps.disabled": 1,
         "space_bar.disabled.help": 1,
         "scroll_grid.scroll_duration.animation_off": 1,
         "track.auto_tracks.limit_inert": 1,
