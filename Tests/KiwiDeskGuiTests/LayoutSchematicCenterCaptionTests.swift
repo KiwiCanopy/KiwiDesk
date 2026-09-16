@@ -89,6 +89,9 @@ struct LayoutSchematicCenterCaptionTests {
         #expect(tileV.fixedAlong == SchematicScale.tile.height - inset)
         let panelV = scrolling(orientation: .vertical)
         #expect(panelV.fixedAlong == SchematicScale.panel.height - inset)
+        // A horizontal panel has no fixed width: the height stands
+        // in until the strip has drawn.
+        #expect(scrolling().fixedAlong == panelV.fixedAlong)
         #expect(tileH.judgedAlong == tileH.fixedAlong)
         #expect(tileH.caption == tileH.caption(along: tileH.fixedAlong))
         #expect(tileH.axLabel == tileH.axLabel(along: tileH.fixedAlong))
@@ -126,7 +129,11 @@ struct LayoutSchematicCenterCaptionTests {
     /// The engine's arithmetic, drawn at the panel's length: a
     /// third tiles the screen with the focused window in the
     /// middle and one whole neighbour each side, so nothing is
-    /// cut; a half puts the neighbours across the edges.
+    /// cut; a half puts the neighbours across the edges. The
+    /// quantum is held by this band — zero reds on the tiling
+    /// cases, twenty on the quarter's sliver — not by its value;
+    /// the lone case holds by geometry, no slot exceeding the
+    /// screen.
     @Test("an odd count tiles whole, an even count cuts")
     func parity() {
         let along = scrolling(orientation: .vertical).fixedAlong
@@ -166,6 +173,10 @@ struct LayoutSchematicCenterCaptionTests {
         let left = scrolling(anchor: .start, slotSize: .fraction(0.5))
         let trimmed = whole.trimmingCharacters(in: .whitespaces)
         #expect(!left.caption.contains(trimmed))
+        // And Center is routed to its own sentence, not Left's.
+        let center = scrolling(slotSize: .fraction(0.5))
+        #expect(center.caption != left.caption)
+        #expect(center.axLabel != left.axLabel)
         let beside = scrolling(
             placement: .afterFocused,
             slotSize: .fraction(0.5)

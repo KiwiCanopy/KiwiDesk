@@ -256,9 +256,11 @@ struct ScrollingSchematic: View {
         }
     }
 
-    /// The Center caption's clause at `along`.
+    /// The Center caption's clause at `along`. A lone window is
+    /// never cut by geometry — no slot exceeds the screen — and
+    /// the lone sentences are picked before this is asked.
     func drawsCutWindows(along: CGFloat) -> Bool {
-        !lone && cutsWindow(along: along)
+        cutsWindow(along: along)
     }
 
     /// The clause as the view speaks it: judged on the length the
