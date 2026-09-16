@@ -4,120 +4,182 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Center anchor's caption (#1382): a centred row meets both
-/// screen edges, so its words carry the cut-windows clause exactly
-/// where the frame draws a window the edge cuts — one key per
-/// sentence, the clause never pointing past the drawing. Split
-/// from `LayoutSchematicCaptionTests` at that file's ceiling; the
-/// same locale caveat holds — every claim compares two rendered
-/// strings from one catalog.
+/// The Center anchor's words (#1382): a centred row meets both
+/// screen edges, so the caption and the spoken label carry the
+/// cut-windows clause exactly where the frame drawn at the length
+/// the strip laid out at cuts a window — never at a length no
+/// scale draws, since the tile speaks the same label. Split from
+/// `LayoutSchematicCaptionTests` at that file's ceiling; the same
+/// locale caveat holds — every claim compares two rendered strings
+/// from one catalog.
 ///
 /// `@MainActor`: the prose producers are `View` members.
 @Suite("Layout preview captions ▸ Center")
 @MainActor
 struct LayoutSchematicCenterCaptionTests {
-    /// The clause's predicate is width-free (judged at the
-    /// panel's one fixed length) while the pane is not, so it is
-    /// held to the drawing at every length a pane can take — the
-    /// panel is `SettingsTheme.panelWidth` wide, so the band
-    /// starts where the 14 pt slot floor stops biting; below it a
-    /// floored slot is a frame no pane draws.
-    @Test("the cut clause is claimed only where the frame cuts")
-    func theCutClauseMatchesTheDrawing() {
-        var claimed = 0
-        var withheld = 0
-        #expect(SettingsTheme.panelWidth >= widths[0])
-        for orientation in ScrollingParams.Orientation.allCases {
-            for size in slotSizes {
-                for count in LayoutSchematic.windowCountRange {
-                    let s = scrolling(
-                        orientation: orientation,
-                        slotSize: size,
-                        windows: count
-                    )
-                    if s.drawsCutWindows {
-                        claimed += 1
-                    } else {
-                        withheld += 1
-                    }
-                    for along in widths {
-                        #expect(
-                            s.cutsWindow(along: along)
-                                == s.drawsCutWindows,
-                            Comment(
-                                rawValue:
-                                    "\(orientation)/\(size) at "
-                                    + "\(count), \(along) pt"
-                            )
+    /// The words at any length are the sentence the drawing at
+    /// that length picks — over both scales, both orientations,
+    /// every slot size and count, at every length a pane can lay
+    /// the strip out at, the drawn ones included.
+    @Test("the words follow the frame at every drawn length")
+    func theWordsFollowTheFrame() {
+        var cut = 0
+        var whole = 0
+        for scale in SchematicScale.allCases {
+            for orientation in ScrollingParams.Orientation.allCases {
+                for size in slotSizes {
+                    for count in LayoutSchematic.windowCountRange {
+                        let s = scrolling(
+                            orientation: orientation,
+                            slotSize: size,
+                            windows: count,
+                            scale: scale
                         )
+                        for along in lengths + [s.fixedAlong] {
+                            let cuts = s.cutsWindow(along: along)
+                            if cuts { cut += 1 } else { whole += 1 }
+                            expectWords(s, along: along, cut: cuts)
+                        }
                     }
                 }
             }
         }
-        #expect(claimed > 0)
-        #expect(withheld > 0)
+        #expect(cut > 0)
+        #expect(whole > 0)
     }
 
-    /// The engine's arithmetic, drawn: a third tiles the screen
-    /// with the focused window in the middle and one whole
-    /// neighbour each side, so nothing is cut; a half puts the
-    /// neighbours across the edges.
+    private func expectWords(
+        _ s: ScrollingSchematic,
+        along: CGFloat,
+        cut: Bool
+    ) {
+        let what = Comment(rawValue: "\(s.scale) at \(along) pt")
+        #expect(
+            s.caption(along: along)
+                == ScrollingSchematic.centerSentence(
+                    cut: cut,
+                    insertion: s.insertionClause
+                )
+                .trimmingCharacters(in: .whitespaces),
+            what
+        )
+        #expect(
+            s.axLabel(along: along)
+                == ScrollingSchematic.centerAxLabel(cut: cut),
+            what
+        )
+    }
+
+    /// The view speaks the length it drew; before it has drawn,
+    /// its scale's own fixed length — the canvas less the inset
+    /// band, which is what the tile is and what the panel is on
+    /// its fixed axis.
+    @Test("the view is judged on the drawn length, else its own")
+    func judgedLength() throws {
+        let tileH = scrolling(scale: .tile)
+        let tileV = scrolling(orientation: .vertical, scale: .tile)
+        let inset = 2 * LayoutSchematic.inset
+        let tileWidth = try #require(SchematicScale.tile.width)
+        #expect(tileH.fixedAlong == tileWidth - inset)
+        #expect(tileV.fixedAlong == SchematicScale.tile.height - inset)
+        let panelV = scrolling(orientation: .vertical)
+        #expect(panelV.fixedAlong == SchematicScale.panel.height - inset)
+        #expect(tileH.judgedAlong == tileH.fixedAlong)
+        #expect(tileH.caption == tileH.caption(along: tileH.fixedAlong))
+        #expect(tileH.axLabel == tileH.axLabel(along: tileH.fixedAlong))
+        // The strip records what it laid out at, once per layout.
+        let source = try SourceScan.stripComments(
+            String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/Layouts/"
+                            + "ScrollingSchematic.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(source.occurrences(of: "drawnAlong = along") == 1)
+        #expect(source.occurrences(of: "drawnAlong = now") == 1)
+        #expect(source.occurrences(of: "drawnAlong ?? fixedAlong") == 1)
+    }
+
+    /// The engine's arithmetic, drawn at the panel's length: a
+    /// third tiles the screen with the focused window in the
+    /// middle and one whole neighbour each side, so nothing is
+    /// cut; a half puts the neighbours across the edges.
     @Test("an odd count tiles whole, an even count cuts")
     func parity() {
-        #expect(!scrolling(slotSize: .fraction(1.0 / 3)).drawsCutWindows)
-        #expect(scrolling(slotSize: .fraction(0.5)).drawsCutWindows)
-        #expect(scrolling(slotSize: .fraction(0.25)).drawsCutWindows)
-        #expect(!scrolling(slotSize: .fraction(0.2)).drawsCutWindows)
+        let along = scrolling(orientation: .vertical).fixedAlong
+        func cuts(_ size: ScrollSize, windows: Int = 5) -> Bool {
+            scrolling(orientation: .vertical, slotSize: size, windows: windows)
+                .drawsCutWindows(along: along)
+        }
+        #expect(!cuts(.fraction(1.0 / 3)))
+        #expect(cuts(.fraction(0.5)))
+        #expect(cuts(.fraction(0.25)))
+        #expect(!cuts(.fraction(0.2)))
         // The shipped default peeks a sliver of each neighbour.
-        #expect(scrolling(slotSize: .auto).drawsCutWindows)
+        #expect(cuts(.auto))
         // A lone window is never cut.
-        #expect(!scrolling(slotSize: .auto, windows: 1).drawsCutWindows)
+        #expect(!cuts(.auto, windows: 1))
     }
 
-    /// The words follow the predicate: the two Center sentences
-    /// differ exactly by the clause, and neither is the anchored
-    /// sentence Left and Right keep.
-    @Test("the caption and the spoken label carry the clause")
-    func theClauseIsRendered() {
-        let cut = scrolling(slotSize: .fraction(0.5))
-        let whole = scrolling(slotSize: .fraction(1.0 / 3))
-        #expect(cut.drawsCutWindows)
-        #expect(!whole.drawsCutWindows)
-        #expect(cut.caption != whole.caption)
-        #expect(cut.axLabel != whole.axLabel)
-        #expect(cut.caption.count > whole.caption.count)
-        #expect(cut.axLabel.count > whole.axLabel.count)
+    /// The two Center sentences differ exactly by the clause, and
+    /// neither is the anchored sentence Left and Right keep; the
+    /// insertion clause still lands last, or not at all.
+    @Test("the sentences are distinct and end cleanly")
+    func sentences() {
+        let cut = ScrollingSchematic.centerSentence(
+            cut: true,
+            insertion: ""
+        )
+        let whole = ScrollingSchematic.centerSentence(
+            cut: false,
+            insertion: ""
+        )
+        #expect(cut != whole)
+        #expect(cut.count > whole.count)
+        #expect(
+            ScrollingSchematic.centerAxLabel(cut: true).count
+                > ScrollingSchematic.centerAxLabel(cut: false).count
+        )
         let left = scrolling(anchor: .start, slotSize: .fraction(0.5))
-        #expect(left.caption != cut.caption)
-        #expect(left.caption != whole.caption)
-        // The insertion clause still lands last, or not at all.
+        let trimmed = whole.trimmingCharacters(in: .whitespaces)
+        #expect(!left.caption.contains(trimmed))
         let beside = scrolling(
             placement: .afterFocused,
             slotSize: .fraction(0.5)
         )
         #expect(beside.drawsInsertionMark)
         #expect(beside.caption.hasSuffix(beside.insertionClause))
-        #expect(cut.insertionClause.isEmpty)
-        #expect(!cut.caption.hasSuffix(" "))
-        #expect(!whole.caption.hasSuffix(" "))
+        let plain = scrolling(slotSize: .fraction(0.5))
+        #expect(!plain.caption.hasSuffix(" "))
     }
 
     // MARK: - Fixtures
 
     private let slotSizes: [ScrollSize] = [
-        .auto, .points(300), .points(900),
-        .fraction(0.2), .fraction(0.25), .fraction(1.0 / 3),
-        .fraction(0.5), .fraction(0.6), .fraction(0.95),
+        .auto, .points(300), .points(500), .points(900),
+        .fraction(0.15), .fraction(0.2), .fraction(0.25),
+        .fraction(0.32), .fraction(1.0 / 3), .fraction(0.5),
+        .fraction(0.6), .fraction(0.95),
     ]
 
-    private let widths: [CGFloat] = [228, 240, 360, 400, 900, 1600]
+    /// Lengths the strip has been laid out at: the tile's two,
+    /// the panel's vertical, the panel's drawn horizontal
+    /// (`SettingsTheme.panelWidth` less its chrome, host-dependent
+    /// by a few points, so a band around it), and wider panes.
+    private let lengths: [CGFloat] = [
+        72, 120, 228, 300, 312, 336, 348, 360, 900, 1600,
+    ]
 
     private func scrolling(
         orientation: ScrollingParams.Orientation = .horizontal,
         anchor: ScrollingParams.Anchor = .center,
         placement: SpawnPlacement = .last,
         slotSize: ScrollSize = .auto,
-        windows: Int = LayoutSchematic.defaultWindowCount
+        windows: Int = LayoutSchematic.defaultWindowCount,
+        scale: SchematicScale = .panel
     ) -> ScrollingSchematic {
         ScrollingSchematic(
             orientation: orientation,
@@ -125,7 +187,7 @@ struct LayoutSchematicCenterCaptionTests {
             slotSize: slotSize,
             placement: placement,
             windows: windows,
-            scale: .panel
+            scale: scale
         )
     }
 }

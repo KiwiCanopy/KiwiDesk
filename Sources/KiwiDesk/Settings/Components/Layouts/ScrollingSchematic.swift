@@ -16,6 +16,10 @@ struct ScrollingSchematic: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    /// The along-axis length the strip last laid out at — what the
+    /// words are judged on, since the pane's width is the host's
+    /// (`LayoutSchematicCenterCaptionTests`).
+    @State private var drawnAlong: CGFloat?
 
     /// Restage animation damping gated by Reduce Motion (#1069).
     private var damping: Animation? {
@@ -172,6 +176,9 @@ struct ScrollingSchematic: View {
         let cross = horizontal ? size.height : size.width
         let m = metrics(along: along)
         ZStack {
+            Color.clear
+                .onAppear { drawnAlong = along }
+                .onChange(of: along) { _, now in drawnAlong = now }
             ForEach(m.low...m.high, id: \.self) { i in
                 slotView(i, m, along: along)
                     .frame(
@@ -219,38 +226,58 @@ struct ScrollingSchematic: View {
     }
 
     /// Whether window `i` overlaps the screen frame.
-    func onScreen(_ i: Int, _ m: Metrics) -> Bool {
-        let c = center(i, m)
-        return c + m.slot / 2 > m.screenStart
-            && c - m.slot / 2 < m.screenStart + m.screenLen
+    private func onScreen(_ i: Int, _ m: Metrics) -> Bool {
+        overlap(i, m) > 0
     }
 
-    /// Whether window `i` lies wholly inside the screen frame —
-    /// half a point of slack, since a row that tiles the screen
-    /// exactly lands on the edge in floating point.
-    func wholeOnScreen(_ i: Int, _ m: Metrics) -> Bool {
+    /// How much of window `i` lies inside the screen frame.
+    private func overlap(_ i: Int, _ m: Metrics) -> CGFloat {
         let c = center(i, m)
-        return c - m.slot / 2 >= m.screenStart - 0.5
-            && c + m.slot / 2 <= m.screenStart + m.screenLen + 0.5
+        let lead = max(c - m.slot / 2, m.screenStart)
+        let trail = min(c + m.slot / 2, m.screenStart + m.screenLen)
+        return max(0, trail - lead)
     }
+
+    /// Under half a point — the drawing's own quantum — is
+    /// neither a drawn cut nor a drawn sliver, on either edge.
+    static let cutQuantum: CGFloat = 0.5
 
     /// Whether the frame drawn at `along` has a window the screen
-    /// edge cuts.
+    /// edge cuts: one on canvas showing more than the quantum and
+    /// less than its whole.
     func cutsWindow(along: CGFloat) -> Bool {
         let m = metrics(along: along)
         return (m.low...m.high).contains { i in
-            onCanvas(i, m, along: along) && onScreen(i, m)
-                && !wholeOnScreen(i, m)
+            let shown = overlap(i, m)
+            return onCanvas(i, m, along: along)
+                && shown > Self.cutQuantum
+                && shown < m.slot - Self.cutQuantum
         }
     }
 
-    /// The Center caption's clause — width-free like
-    /// `drawsInsertionMark`, judged at the panel's one fixed
-    /// length, and held to the drawing at every pane width by
-    /// `LayoutSchematicCenterCaptionTests`, so the words never
-    /// point past the frame.
-    var drawsCutWindows: Bool {
-        !lone && cutsWindow(along: SchematicScale.panel.height)
+    /// The Center caption's clause at `along`.
+    func drawsCutWindows(along: CGFloat) -> Bool {
+        !lone && cutsWindow(along: along)
+    }
+
+    /// The clause as the view speaks it: judged on the length the
+    /// strip DREW, spoken at `.tile` too — never on a length no
+    /// scale draws; before the first layout pass, and in a test,
+    /// on the scale's own fixed length.
+    var drawsCutWindows: Bool { drawsCutWindows(along: judgedAlong) }
+
+    /// The along-axis length the words are judged at.
+    var judgedAlong: CGFloat { drawnAlong ?? fixedAlong }
+
+    /// The scale's own along-axis length where it has one — the
+    /// canvas less the inset band on both ends — the panel's
+    /// height standing in for its pane width until it is drawn.
+    var fixedAlong: CGFloat {
+        let canvas =
+            horizontal
+            ? scale.width ?? SchematicScale.panel.height
+            : scale.height
+        return canvas - 2 * LayoutSchematic.inset
     }
 
     /// Whether window `i` reaches canvas (`LayoutSchematicCaptionTests`,

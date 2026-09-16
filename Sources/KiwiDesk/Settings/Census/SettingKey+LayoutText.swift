@@ -48,9 +48,10 @@ extension LayoutKey {
             return .text("scroll_grid.focus_anchor")
         case .scrollingSlotSizeUnit:
             return .text("slot_size.unit")
-        case .scrollingSlotSizeValue, .scrollingOverrideSlotSize,
-            .scrollingSlotSizeCount:
+        case .scrollingSlotSizeValue, .scrollingOverrideSlotSize:
             return .dynamic
+        case .scrollingSlotSizeCount:
+            return .text("slot_count.label", help: "slot_count.help")
         case .scrollingWrapFocus, .monocleWrapFocus:
             return .text("scroll_grid.wrap_focus")
         case .scrollingFillWhenAlone, .stackFillWhenAlone:

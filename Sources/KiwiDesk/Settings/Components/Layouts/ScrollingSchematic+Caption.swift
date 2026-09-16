@@ -3,7 +3,10 @@ import SwiftUI
 
 /// Caption and accessibility text for Scrolling schematic preview (#753).
 extension ScrollingSchematic {
-    var caption: String {
+    var caption: String { caption(along: judgedAlong) }
+
+    /// The caption for the frame drawn at `along`.
+    func caption(along: CGFloat) -> String {
         if lone { return loneCaption }
         switch anchor {
         case .follow:
@@ -19,7 +22,7 @@ extension ScrollingSchematic {
                 )
             )
         case .center:
-            return oneLine(centerCaption)
+            return oneLine(centerCaption(along: along))
         case .start, .end:
             return oneLine(
                 L(
@@ -32,30 +35,43 @@ extension ScrollingSchematic {
         }
     }
 
-    /// Center is the one anchor whose frame differs from the other
-    /// two: a centred row meets both screen edges, and where the
-    /// frame draws a window cut by one the caption says so — a key
-    /// per sentence, the clause never pointing past the drawing
-    /// (`LayoutSchematicCenterCaptionTests`).
-    private var centerCaption: String {
-        if drawsCutWindows {
+    /// Center is the anchor whose frame meets both screen edges,
+    /// and where it draws a window cut by one the caption says so
+    /// — a key per sentence, the clause never pointing past the
+    /// drawing (`LayoutSchematicCenterCaptionTests`). The static
+    /// Follow frame is seeded from the same rest and stays silent
+    /// on the cut by ruling: its sentence is about panning.
+    private func centerCaption(along: CGFloat) -> String {
+        Self.centerSentence(
+            cut: drawsCutWindows(along: along),
+            insertion: insertionClause
+        )
+    }
+
+    /// The Center sentence the predicate picks — the one shape the
+    /// caption and its guard both read.
+    static func centerSentence(cut: Bool, insertion: String) -> String {
+        if cut {
             return L(
                 "layout.schematic.scrolling.caption_center_cut",
-                "The focused window rests in the middle and the "
+                "The focused window rests in the center and the "
                     + "row scrolls past it; the windows at the "
                     + "edges show only in part. %1$@",
-                insertionClause
+                insertion
             )
         }
         return L(
             "layout.schematic.scrolling.caption_center",
-            "The focused window rests in the middle and the row "
+            "The focused window rests in the center and the row "
                 + "scrolls past it. %1$@",
-            insertionClause
+            insertion
         )
     }
 
-    var axLabel: String {
+    var axLabel: String { axLabel(along: judgedAlong) }
+
+    /// The spoken description of the frame drawn at `along`.
+    func axLabel(along: CGFloat) -> String {
         if lone { return loneAxLabel }
         switch anchor {
         case .follow:
@@ -69,22 +85,7 @@ extension ScrollingSchematic {
                 followName
             )
         case .center:
-            return drawsCutWindows
-                ? L(
-                    "layout.schematic.scrolling.ax_center_cut",
-                    "Scrolling preview: a row of windows moving "
-                        + "through the screen frame; the focused "
-                        + "window rests in the middle, the row "
-                        + "scrolls past it, and the windows at the "
-                        + "edges show only in part."
-                )
-                : L(
-                    "layout.schematic.scrolling.ax_center",
-                    "Scrolling preview: a row of windows moving "
-                        + "through the screen frame; the focused "
-                        + "window rests in the middle and the row "
-                        + "scrolls past it."
-                )
+            return Self.centerAxLabel(cut: drawsCutWindows(along: along))
         case .start, .end:
             return L(
                 "layout.schematic.scrolling.ax_anchored",
@@ -191,6 +192,26 @@ extension ScrollingSchematic {
                     + "the screen empty."
             )
         }
+    }
+
+    /// The Center description the predicate picks.
+    static func centerAxLabel(cut: Bool) -> String {
+        cut
+            ? L(
+                "layout.schematic.scrolling.ax_center_cut",
+                "Scrolling preview: a row of windows moving "
+                    + "through the screen frame; the focused "
+                    + "window rests in the center, the row "
+                    + "scrolls past it, and the windows at the "
+                    + "edges show only in part."
+            )
+            : L(
+                "layout.schematic.scrolling.ax_center",
+                "Scrolling preview: a row of windows moving "
+                    + "through the screen frame; the focused "
+                    + "window rests in the center and the row "
+                    + "scrolls past it."
+            )
     }
 
     private var followName: String {

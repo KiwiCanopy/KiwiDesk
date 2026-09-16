@@ -2,9 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// "Windows on screen" — the count a scrolling share IS, beneath
-/// the Percent slider (#1382); the noun is the user's, a column
-/// being tiler vocabulary, and the anchor's caption owns what a
-/// centred row cuts at the edges. Typeable like
+/// the Percent slider (#1382). Typeable like
 /// every stepper (an integer only), writing the count's share
 /// into the one stored fraction; "—" (spoken "not a whole
 /// count") when the share is not `1/n`. Every count↔share step

@@ -205,7 +205,14 @@ restated `20...80` satisfies on the day it is written.
     the drawing by `LayoutSchematicCaptionTests`) — and that
     condition owes the SCALE as well as the row, since a
     thumbnail whose monitor fills its canvas has no margin for
-    the neighbouring slot to reach into.
+    the neighbouring slot to reach into. A clause about what
+    the screen EDGE cuts takes a stricter shape (#1382), since
+    it is geometric where the `+` is index arithmetic: derived
+    from the drawn geometry (`cutsWindow`) at the length the
+    strip LAID OUT AT — the tile speaks the same label, and a
+    length no scale draws over-claimed a cut there — with the
+    words held to the frame at every length by
+    `LayoutSchematicCenterCaptionTests`.
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by
   skipping the drawing rather than leaving it to the frame's
