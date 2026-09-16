@@ -219,10 +219,38 @@ struct ScrollingSchematic: View {
     }
 
     /// Whether window `i` overlaps the screen frame.
-    private func onScreen(_ i: Int, _ m: Metrics) -> Bool {
+    func onScreen(_ i: Int, _ m: Metrics) -> Bool {
         let c = center(i, m)
         return c + m.slot / 2 > m.screenStart
             && c - m.slot / 2 < m.screenStart + m.screenLen
+    }
+
+    /// Whether window `i` lies wholly inside the screen frame —
+    /// half a point of slack, since a row that tiles the screen
+    /// exactly lands on the edge in floating point.
+    func wholeOnScreen(_ i: Int, _ m: Metrics) -> Bool {
+        let c = center(i, m)
+        return c - m.slot / 2 >= m.screenStart - 0.5
+            && c + m.slot / 2 <= m.screenStart + m.screenLen + 0.5
+    }
+
+    /// Whether the frame drawn at `along` has a window the screen
+    /// edge cuts.
+    func cutsWindow(along: CGFloat) -> Bool {
+        let m = metrics(along: along)
+        return (m.low...m.high).contains { i in
+            onCanvas(i, m, along: along) && onScreen(i, m)
+                && !wholeOnScreen(i, m)
+        }
+    }
+
+    /// The Center caption's clause — width-free like
+    /// `drawsInsertionMark`, judged at the panel's one fixed
+    /// length, and held to the drawing at every pane width by
+    /// `LayoutSchematicCenterCaptionTests`, so the words never
+    /// point past the frame.
+    var drawsCutWindows: Bool {
+        !lone && cutsWindow(along: SchematicScale.panel.height)
     }
 
     /// Whether window `i` reaches canvas (`LayoutSchematicCaptionTests`,

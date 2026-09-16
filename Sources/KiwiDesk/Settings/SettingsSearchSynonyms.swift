@@ -83,11 +83,11 @@ enum SettingsSearchSynonyms {
         case .layout(.scrollingFillWhenAlone),
             .layout(.stackFillWhenAlone):
             return ["single window", "alone"]
-        // The count stepper's label switches with the orientation
-        // and is not indexed, so the words a user brings for it
-        // ride the unit row it sits under (#1382).
+        // The count stepper's label is dynamic and not indexed, so
+        // the words a user brings for it ride the unit row it sits
+        // under (#1382) — the tiler nouns included.
         case .layout(.scrollingSlotSizeUnit):
-            return ["columns", "windows on screen", "thirds"]
+            return ["columns", "rows", "windows on screen", "thirds"]
         // The checklist rows quote Apple's labels; these are the
         // words a user types before they know the label (#1365).
         case .macChecklist(.rearrangeSpaces):

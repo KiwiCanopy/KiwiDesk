@@ -236,12 +236,14 @@ rule (#204): it is a precise pt threshold, not a feel knob.
 A stored SHARE keeps its slider and gains an exact chooser
 beneath it where the share has a second reading a user names
 (#1382): the scrolling slot's Percent slider carries a
-**Columns on screen** / **Rows on screen** stepper (the share
-is a count), and a split ratio's slider carries fraction chips
-¼ ⅓ ½ ⅔ ¾ (a share is a share). Both write the one stored
-value; the slider stays for feel. That stepper sits on the
-slider's control axis rather than trailing, so the count reads
-as the slider's own second reading. The argument is in
+**Windows on screen** stepper (the share is a count), and a
+split ratio's slider carries fraction chips ¼ ⅓ ½ ⅔ ¾ (a
+share is a share). Both write the one stored value; the slider
+stays for feel. That stepper sits on the slider's control axis
+rather than trailing, so the count reads as the slider's own
+second reading; its `?` states the size rule alone, and what
+the anchor makes of the count is the preview caption's, which
+knows the anchor. The argument is in
 [design decisions](design-decisions.md#a-repeating-slot-is-offered-as-a-count-a-split-as-a-share).
 :::
 

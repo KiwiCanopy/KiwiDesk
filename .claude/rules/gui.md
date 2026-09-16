@@ -167,7 +167,7 @@ restated `20...80` satisfies on the day it is written.
   Where a preview models part of an engine's rule, say which part
   and file the rest (#708 for the unmodelled spill).
 - **A control's BOUND that claims what the engine fits is Core's
-  the same way (#1382).** The Columns on screen stepper greys ▲
+  the same way (#1382).** The Windows on screen stepper greys ▲
   where one more slot would fall under the minimum window size;
   that count is `KiwiCore.scrollingColumnCap`, which picks the
   screen, reads its size through the one bounds hook and hands
