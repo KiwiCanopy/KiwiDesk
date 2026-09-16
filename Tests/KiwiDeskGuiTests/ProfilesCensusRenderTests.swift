@@ -173,6 +173,7 @@ struct ProfilesCensusRenderTests {
             mainDesktops: [1, 2, 3],
             desktopKeys: [1: .number(1), 2: .number(2), 3: .number(3)],
             presentKeys: [.number(1), .number(2), .number(3)],
+            desktopScreens: [:],
             bindings: [:],
             presets: StandardProfiles.all(sizes: censusSizes)
         )
@@ -224,6 +225,7 @@ struct ProfilesCensusRenderTests {
             mainDesktops: [1, 2, 3],
             desktopKeys: [1: .number(1), 2: .number(2), 3: .number(3)],
             presentKeys: [.number(1), .number(2), .number(3)],
+            desktopScreens: [:],
             bindings: [
                 .identity(DesktopIdentity(raw: "GONE")):
                     DesktopBinding(profile: "Desk", desktop: 7)
@@ -292,6 +294,7 @@ struct ProfilesCensusRenderTests {
             mainDesktops: [1],
             desktopKeys: [1: .number(1)],
             presentKeys: [.number(1)],
+            desktopScreens: [:],
             bindings: [:],
             presets: []
         )

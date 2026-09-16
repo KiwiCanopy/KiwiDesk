@@ -124,6 +124,7 @@ struct DesktopBindingDraftTests {
             onMain: model.mainDesktops,
             keys: model.desktopKeys,
             present: model.presentDesktopKeys,
+            screens: model.desktopScreens,
             bindings: model.config.profileBindings
         )
         // Two rows, one number, and exactly one of them current.
@@ -144,7 +145,7 @@ struct DesktopBindingDraftTests {
             at: SourceScan.repoRoot(from: #filePath)
                 .appendingPathComponent(
                     "Sources/KiwiDesk/Settings/Components/"
-                        + "Profiles/DesktopsGroup.swift"
+                        + "Profiles/DesktopsGroup+Row.swift"
                 )
         )
         #expect(

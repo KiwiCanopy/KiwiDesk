@@ -162,8 +162,15 @@ memory today, a whole Space set under #1230 — is filed under
 WindowServer record where it carries one, its Mission Control
 number where it does not. **The number is a projection**, kept on
 `DesktopBinding.desktop` so a row can be labelled and a dormant
-record can say where it was last seen. **Never resolve a binding
-through it** — a lookup by number answers for whichever Desktop
+record can say where it was last seen — and so is the screen name
+beside it (`DesktopBinding.screen`, #1438), refreshed by the same
+reconcile and never blanked by a reading that cannot name the
+display (`DesktopBindingScreenTests` ▸
+`reconcileRefreshesTheScreen`, ▸ `unnamedDisplayKeepsTheScreen`).
+A remembered screen lives on the BINDING, never in a Desktop-keyed
+map of its own: a dormant row exists only because a binding does,
+and a map would remember screens for Desktops nothing lists and
+owe its own re-key. **Never resolve a binding through it** — a lookup by number answers for whichever Desktop
 holds that number now, which is the defect this section exists to
 close (`DesktopBindingIdentityTests` ▸
 `theNumberDoesNotCarryTheBinding`). Why the number cannot be the

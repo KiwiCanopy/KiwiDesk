@@ -114,105 +114,7 @@ struct DesktopsGroup: View {
         .foregroundStyle(.secondary)
     }
 
-    // MARK: - Rows
-
-    private func spaceRow(_ row: DesktopRow) -> some View {
-        let number = row.number
-        return HStack {
-            Image(systemName: DesktopGlyph.symbol)
-                .foregroundStyle(.secondary)
-            Text(
-                L(
-                    "desktops.desktop",
-                    "Desktop %1$d",
-                    number
-                )
-            )
-            .fontWeight(.medium)
-            // By the DESKTOP, never its number: a dormant record
-            // and a live Desktop can share one, and both rows
-            // then claim to be current (owner device QA).
-            if row.key == model.currentDesktopKey {
-                BadgeChip(
-                    label: L("desktops.current", "current")
-                )
-            }
-            // A Desktop that is bound but does NOT live on the
-            // main screen: listed because it carries the user's
-            // own configuration, badged because a binding there
-            // cannot fire in this arrangement — it waits for a
-            // display change that makes that Desktop the main
-            // screen's.
-            //
-            // A badge, never a grey: this row's picker is the
-            // only way to change or clear that binding, so
-            // dimming it would be the trap
-            // `docs/design-decisions.md` bans — and the store is
-            // valid and already effective, which "grey, don't
-            // hide" does not describe (ui-designer, 2026-08-18).
-            //
-            // A Desktop that is not there AT ALL — its screen
-            // unplugged, or the Desktop deleted — is the same
-            // ruling one step further: the record is kept
-            // (absence is never proof it is gone), the row is
-            // labelled with the number it was last seen at, and
-            // the badge says why nothing will fire.
-            if row.isDormant {
-                BadgeChip(
-                    label: L(
-                        "desktops.absent",
-                        "not present"
-                    )
-                )
-                // The badge alone can read as "your binding is
-                // lost", which is the one thing this must not
-                // mean — the sibling pin badge pairs a help for
-                // the same reason.
-                .help(
-                    L(
-                        "desktops.absent.help",
-                        "This Desktop isn't in Mission Control "
-                            + "right now — its screen is "
-                            + "unplugged, or it was removed. The "
-                            + "profile stays here and loads "
-                            + "again if that Desktop comes back."
-                    )
-                )
-            } else if !model.mainDesktops.contains(number) {
-                BadgeChip(
-                    label: L(
-                        "desktops.not_on_main",
-                        "not on main screen"
-                    )
-                )
-            }
-            if let count = otherScreenCount(row.key) {
-                BadgeChip(
-                    label: L(
-                        "desktops.other_count",
-                        "for %1$d screen(s)",
-                        count
-                    )
-                )
-                .help(
-                    L(
-                        "desktops.other_count.help",
-                        "This profile is saved for %1$d "
-                            + "screen(s); %2$d connected. Until "
-                            + "that many are, the binding stands "
-                            + "aside and KiwiDesk picks a profile "
-                            + "by your screens instead.",
-                        count,
-                        model.displays.count
-                    )
-                )
-            }
-            Spacer()
-            profileMenu(row.key)
-        }
-    }
-
-    private func profileMenu(_ key: DesktopKey) -> some View {
+    func profileMenu(_ key: DesktopKey) -> some View {
         Picker("", selection: binding(key)) {
             Text(L("desktops.none", "None"))
                 .tag(String?.none)
@@ -247,6 +149,7 @@ struct DesktopsGroup: View {
             onMain: model.mainDesktops,
             keys: model.desktopKeys,
             present: model.presentDesktopKeys,
+            screens: model.desktopScreens,
             bindings: model.config.profileBindings
         )
     }
@@ -255,7 +158,7 @@ struct DesktopsGroup: View {
     /// refuses it on the count — the binding stands aside then
     /// (#1394). Narrated, never re-decided: the verdict is
     /// `DesktopBindingRefusal.of`'s.
-    private func otherScreenCount(_ key: DesktopKey) -> Int? {
+    func otherScreenCount(_ key: DesktopKey) -> Int? {
         guard let name = binding(key).wrappedValue,
             let count = model.profileSummaries.first(where: {
                 $0.name == name
@@ -301,6 +204,11 @@ struct DesktopsGroup: View {
                     }
             },
             set: { profile in
+                // The row BEFORE the twin drop below: a Desktop
+                // bound only under its twin leaves the rows the
+                // moment that record goes, and its projections
+                // would fall to their nil arms.
+                let row = desktopRows.first { $0.key == key }
                 // Writing settles the ambiguity rather than
                 // leaving two records for one Desktop, which
                 // Core's drop rule would later resolve by
@@ -312,15 +220,17 @@ struct DesktopsGroup: View {
                     model.config.profileBindings[key] = nil
                     return
                 }
-                // The projection is refreshed from the reading
+                // The projections are refreshed from the reading
                 // this row was built from, never invented.
                 let number =
-                    desktopRows.first { $0.key == key }?.number
+                    row?.number
                     ?? model.config.profileBindings[key]?.desktop
                     ?? key.number ?? 0
                 model.config.profileBindings[key] = DesktopBinding(
                     profile: profile,
-                    desktop: number
+                    desktop: number,
+                    screen: row?.screen
+                        ?? model.config.profileBindings[key]?.screen
                 )
             }
         )

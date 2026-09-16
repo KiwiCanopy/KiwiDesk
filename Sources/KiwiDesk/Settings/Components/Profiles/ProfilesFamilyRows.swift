@@ -10,6 +10,10 @@ struct DesktopRow: Hashable {
     /// No reading names this Desktop — its screen is unplugged,
     /// or it was deleted. The record is kept either way.
     let isDormant: Bool
+    /// The screen this Desktop lives on, by name (#1438): the
+    /// topology's for a live row, the record's remembered one
+    /// for a dormant row; nil where neither has named it.
+    let screen: String?
 }
 
 /// Instance representing expanded row in Profiles census (#678).
@@ -36,6 +40,8 @@ struct ProfilesFamilyRows {
     let desktopKeys: [Int: DesktopKey]
     /// Every key the topology answers to (`DesktopSnapshot`).
     let presentKeys: Set<DesktopKey>
+    /// Each present Desktop's screen name by key (#1438).
+    let desktopScreens: [DesktopKey: String]
     /// The bindings as the draft currently holds them.
     let bindings: [DesktopKey: DesktopBinding]
     let presets: [StandardLayout]
@@ -74,10 +80,15 @@ struct ProfilesFamilyRows {
     /// of its own even where a live Desktop already holds the
     /// number it was last seen at, because otherwise the two
     /// collapse and the record is unreachable.
+    ///
+    /// `screens` is the topology's screen per present key
+    /// (`KiwiCore.desktopScreens`): a live row is named by it, a
+    /// dormant row by what its record remembers (#1438).
     static func desktops(
         onMain: some Collection<Int>,
         keys: [Int: DesktopKey],
         present: Set<DesktopKey>,
+        screens: [DesktopKey: String],
         bindings: [DesktopKey: DesktopBinding]
     ) -> [DesktopRow] {
         // A Desktop is BOUND under either of its keys — its
@@ -91,8 +102,13 @@ struct ProfilesFamilyRows {
             .keys
         )
         var rows = live.compactMap { number in
-            keys[number].map {
-                DesktopRow(key: $0, number: number, isDormant: false)
+            keys[number].map { key in
+                DesktopRow(
+                    key: key,
+                    number: number,
+                    isDormant: false,
+                    screen: screens[key] ?? bindings[key]?.screen
+                )
             }
         }
         // DORMANT is Core's own verdict, handed in — never a
@@ -105,7 +121,8 @@ struct ProfilesFamilyRows {
                 DesktopRow(
                     key: $0.key,
                     number: $0.value.desktop,
-                    isDormant: true
+                    isDormant: true,
+                    screen: $0.value.screen
                 )
             }
         return rows.sorted {
@@ -148,6 +165,7 @@ struct ProfilesFamilyRows {
                 onMain: mainDesktops,
                 keys: desktopKeys,
                 present: presentKeys,
+                screens: desktopScreens,
                 bindings: bindings
             )
             .map { ProfilesRowInstance.desktop($0.key) }

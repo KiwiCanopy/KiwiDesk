@@ -148,6 +148,11 @@ struct ProfileSpacesSeamTests {
                 (1, "the cursor's write-time stamp"),
             "Profiles/KiwiCore+DesktopBindings.swift":
                 (2, "the shared re-key's moves and drops"),
+            // A query's accumulator (#1438): the screen name per
+            // present key, built and returned in one call, held
+            // nowhere — the GUI reads it per refresh.
+            "Profiles/KiwiCore+DesktopScreens.swift":
+                (1, "the live screen NAME per key, unstored"),
         ]
         let root = coreRoot
         let prefix = root.path + "/"
