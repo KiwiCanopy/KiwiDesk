@@ -19,6 +19,10 @@ extension SpacesSection {
             }
         }
         .labelsHidden()
+        // Explicit: the automatic style IS the pop-up on macOS and
+        // takes the tint the same way, uncounted (#1502).
+        .pickerStyle(.menu)
+        .neutralMenuLabel()
         .controlSize(.large)
         .frame(width: 150)
         .help(modeHint)
