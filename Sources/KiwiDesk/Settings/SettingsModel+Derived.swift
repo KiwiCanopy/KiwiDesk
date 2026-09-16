@@ -13,8 +13,6 @@ extension SettingsModel {
     /// scrolling slots the DRAFT fits on `space`'s screen — the
     /// widest connected one with no space, the Layout Defaults
     /// card — and the share's own floor with no screen known.
-    /// The first live-machine read in Layout Defaults, stated on
-    /// the issue as the cost.
     func scrollingColumnCap(for space: SpaceID?) -> Int {
         core.scrollingColumnCap(for: space, settings: config.settings)
             ?? ScrollSize.countCeiling

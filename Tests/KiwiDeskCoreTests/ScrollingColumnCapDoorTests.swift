@@ -65,14 +65,14 @@ struct ScrollingColumnCapDoorTests {
 
     @Test("the widest screen wins, ties broken by position")
     func widest() {
-        // No `NSScreen` can be built in a test, so the ranking is
-        // held over the host's: whichever it names is at least as
-        // wide as every other.
-        let screens = NSScreen.screens
-        guard let pick = KiwiCore.widestScreen(screens) else { return }
-        for screen in screens {
-            #expect(pick.frame.width >= screen.frame.width)
-        }
-        #expect(KiwiCore.widestScreen([]) == nil)
+        let narrow = CGRect(x: 0, y: 0, width: 1440, height: 900)
+        let wide = CGRect(x: 1440, y: 0, width: 2560, height: 1440)
+        let twin = CGRect(x: -2560, y: 100, width: 2560, height: 1080)
+        #expect(KiwiCore.widest(of: [narrow, wide]) == 1)
+        #expect(KiwiCore.widest(of: [wide, narrow]) == 0)
+        // Equal widths: the leftmost, whatever order they arrive in.
+        #expect(KiwiCore.widest(of: [narrow, wide, twin]) == 2)
+        #expect(KiwiCore.widest(of: [twin, wide, narrow]) == 0)
+        #expect(KiwiCore.widest(of: []) == nil)
     }
 }

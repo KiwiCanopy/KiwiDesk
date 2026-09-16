@@ -23,20 +23,23 @@ extension ScrollSize {
     /// precision — what the stepper writes, so a stored third
     /// re-read from disk is not a change.
     public static func share(of n: Int) -> Double {
-        let percent = String(format: "%.2f", 100 / Double(n))
-        return (Double(percent) ?? 100 / Double(n)) / 100
+        let raw = 1 / Double(max(n, 1))
+        let digits = percentString(raw).dropLast()
+        return (Double(digits) ?? raw * 100) / 100
     }
 
     /// The first whole count at or above an off-count share —
     /// where ▲ lands from "—" (`ceil(1/f)`).
     public static func countAbove(_ fraction: Double) -> Int {
-        max(1, Int((1 / fraction).rounded(.up)))
+        guard fraction > 0 else { return countCeiling }
+        return max(1, Int((1 / fraction).rounded(.up)))
     }
 
     /// The first whole count at or below an off-count share —
     /// where ▼ lands from "—" (`floor(1/f)`).
     public static func countBelow(_ fraction: Double) -> Int {
-        max(1, Int((1 / fraction).rounded(.down)))
+        guard fraction > 0 else { return 1 }
+        return max(1, Int((1 / fraction).rounded(.down)))
     }
 
     /// How many slots of the pitch fit `along` with each at least

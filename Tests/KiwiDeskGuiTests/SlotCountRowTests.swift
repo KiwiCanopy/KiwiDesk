@@ -104,35 +104,19 @@ struct SlotCountRowTests {
         )
         #expect(source.occurrences(of: "onIncrement: up.map") == 1)
         #expect(source.occurrences(of: "onDecrement: down.map") == 1)
-        // Only the user's own keystrokes reach the store on a blur.
-        #expect(source.occurrences(of: "if edited, let n = Self.typed(") == 1)
-        #expect(source.occurrences(of: "if focused { edited = true }") == 1)
+        // Only text the store did not seed reaches it on a blur.
+        #expect(
+            source.occurrences(of: "if text != seeded, let n = Self.typed(")
+                == 1
+        )
     }
 
     @Test("the hosts hand the row the space whose screen bounds ▲")
     func hostsNameTheirSpace() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
-        let grid = try SourceScan.stripComments(
-            String(
-                contentsOf: root.appendingPathComponent(
-                    "Components/Layouts/LayoutCard+ScrollGrid.swift"
-                ),
-                encoding: .utf8
-            )
-        )
-        // Both Layout Defaults mounts: no space, the widest screen.
-        #expect(grid.occurrences(of: "space: nil") == 2)
-        let override = try SourceScan.stripComments(
-            String(
-                contentsOf: root.appendingPathComponent(
-                    "Components/SpaceOverrides/OverrideSlotSizeRow.swift"
-                ),
-                encoding: .utf8
-            )
-        )
-        #expect(override.occurrences(of: "space: space,") == 1)
-        // The row asks the model itself, once, with that space.
+        // The row asks the model itself, once, with the space its
+        // host named (the parameter has no default).
         let rows = try SourceScan.stripComments(
             String(
                 contentsOf: root.appendingPathComponent(

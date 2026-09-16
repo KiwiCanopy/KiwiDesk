@@ -14,9 +14,10 @@ struct SlotCountRow: View {
     /// ▲'s bound (`KiwiCore.scrollingColumnCap`).
     let cap: Int
     @State private var text = ""
-    /// Whether the field holds the user's own keystrokes: a blur
-    /// commits only those, so tabbing through writes nothing.
-    @State private var edited = false
+    /// What the store last seeded into the field; a blur commits
+    /// only text that differs from it, so tabbing through writes
+    /// nothing and a seed never re-arms an edit.
+    @State private var seeded = ""
     @FocusState private var focused: Bool
 
     private var label: String {
@@ -107,9 +108,6 @@ struct SlotCountRow: View {
         .onChange(of: focused) { _, now in
             if !now { commit() }
         }
-        .onChange(of: text) { _, _ in
-            if focused { edited = true }
-        }
     }
 
     private var spokenValue: String {
@@ -118,7 +116,9 @@ struct SlotCountRow: View {
     }
 
     private func commit() {
-        if edited, let n = Self.typed(text, cap: cap) { write(n) }
+        if text != seeded, let n = Self.typed(text, cap: cap) {
+            write(n)
+        }
         seed()
     }
 
@@ -129,8 +129,8 @@ struct SlotCountRow: View {
     }
 
     private func seed() {
-        text = count.map(String.init) ?? ""
-        edited = false
+        seeded = count.map(String.init) ?? ""
+        text = seeded
     }
 
     /// Writes the count's share into the one stored fraction.

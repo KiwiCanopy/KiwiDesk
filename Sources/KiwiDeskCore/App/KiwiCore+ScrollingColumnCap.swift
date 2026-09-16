@@ -15,27 +15,25 @@ extension KiwiCore {
         for space: SpaceID?,
         settings: TilingSettings
     ) -> Int? {
-        let screen =
-            space.flatMap { TilingEngine.screen(for: $0, in: state) }
-            ?? Self.widestScreen(NSScreen.screens)
-        guard let screen else { return nil }
+        let screens = NSScreen.screens
+        let own = space.flatMap { TilingEngine.screen(for: $0, in: state) }
+        let widest = Self.widest(of: screens.map(\.frame)).map { screens[$0] }
+        guard let screen = own ?? widest else { return nil }
         return settings.scrollingColumnCap(
             bounds: settings.layoutBounds(from: tiler.visibleBounds(screen)),
             space: space
         )
     }
 
-    /// The widest of `screens`, ties broken by position so two
-    /// equal screens answer the same way every render.
-    static func widestScreen(_ screens: [NSScreen]) -> NSScreen? {
-        screens.min { lhs, rhs in
-            if lhs.frame.width != rhs.frame.width {
-                return lhs.frame.width > rhs.frame.width
-            }
-            if lhs.frame.minX != rhs.frame.minX {
-                return lhs.frame.minX < rhs.frame.minX
-            }
-            return lhs.frame.minY < rhs.frame.minY
+    /// The index of the widest of `frames`, ties broken by position
+    /// so two equal screens answer the same way every render
+    /// (`ScrollingColumnCapDoorTests`).
+    static func widest(of frames: [CGRect]) -> Int? {
+        frames.indices.min { lhs, rhs in
+            let (l, r) = (frames[lhs], frames[rhs])
+            if l.width != r.width { return l.width > r.width }
+            if l.minX != r.minX { return l.minX < r.minX }
+            return l.minY < r.minY
         }
     }
 }
