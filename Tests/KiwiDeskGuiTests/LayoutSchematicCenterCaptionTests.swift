@@ -106,6 +106,21 @@ struct LayoutSchematicCenterCaptionTests {
         #expect(source.occurrences(of: "drawnAlong = along") == 1)
         #expect(source.occurrences(of: "drawnAlong = now") == 1)
         #expect(source.occurrences(of: "drawnAlong ?? fixedAlong") == 1)
+        // And the canvas reads the words at that length, both
+        // channels — a fixture never draws, so only a needle sees
+        // the read.
+        let words = try SourceScan.stripComments(
+            String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/Layouts/"
+                            + "ScrollingSchematic+Caption.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        #expect(words.occurrences(of: "caption(along: judgedAlong)") == 1)
+        #expect(words.occurrences(of: "axLabel(along: judgedAlong)") == 1)
     }
 
     /// The engine's arithmetic, drawn at the panel's length: a

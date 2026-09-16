@@ -27,7 +27,9 @@ struct ScrollingSchematic: View {
     }
 
     /// Monitor share of canvas along scroll axis (`LayoutSchematicScaleTests`,
-    /// #753).
+    /// #753). Never above 1: `cutsWindow` reads on-screen as
+    /// on-canvas, so a screen wider than its canvas would announce
+    /// canvas-clipped windows as edge cuts.
     var screenFraction: CGFloat { scale == .panel ? 0.6 : 1 }
 
     /// Whether canvas leaves margins beside monitor for overflow ghosts.
@@ -244,8 +246,7 @@ struct ScrollingSchematic: View {
 
     /// Whether the frame drawn at `along` has a window the screen
     /// edge cuts: one showing more than the quantum and less than
-    /// its whole (the screen lies inside the canvas at both
-    /// scales, so on screen is on canvas).
+    /// its whole (on screen is on canvas, `screenFraction`).
     func cutsWindow(along: CGFloat) -> Bool {
         let m = metrics(along: along)
         return (m.low...m.high).contains { i in
@@ -272,9 +273,9 @@ struct ScrollingSchematic: View {
     /// The scale's own along-axis length where it has one — the
     /// canvas less the inset band on both ends — the panel's
     /// height standing in for its pane width until it is drawn:
-    /// one frame on which a horizontal panel's caption may be the
-    /// other sentence, re-flowing once on appear — the trade for
-    /// reading no host width here.
+    /// one frame on which a horizontal panel at a 32% share may
+    /// read the other sentence, re-flowing once on appear — the
+    /// trade for reading no host width here.
     var fixedAlong: CGFloat {
         let canvas =
             horizontal
