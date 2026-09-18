@@ -1,0 +1,83 @@
+# Contributor License Agreement check (#1521). A pull request
+# carrying a commit whose author or committer has not signed
+# CLA.md — the action gates on every commit, not the PR's author
+# — gets a comment from the bot and a failing check; posting the
+# signing sentence records the signature in the private
+# KiwiCanopy/cla-signatures repository and turns the check green.
+# scripts/protect-main.sh is where the check is required.
+#
+# `pull_request_target` runs on the BASE branch's workflow with
+# the base's secrets, so the fork's code never executes here —
+# this job checks out nothing. Keep it that way. The same rule
+# means the check first reports on the PR AFTER the one that
+# lands a change to this file, never on that PR itself.
+#
+# Out-of-repo setup, both owner-provisioned: the secret below,
+# and `signatures/v1/cla.json` seeded as
+# `{"signedContributors": []}` on `main` of cla-signatures —
+# v2.6.1 compares the missing-file status as a string and never
+# creates it (contributor-assistant/github-action#155), so an
+# unseeded store fails EVERY PR, the owner's included.
+name: CLA
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_target:
+    types: [opened, closed, synchronize]
+
+# The verdict is the job's own check run; v2.6.1 writes no
+# commit status, so `statuses: write` from upstream's README is
+# not taken.
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  cla:
+    # The job name is the required-check context —
+    # scripts/protect-main.sh CONTEXTS is the one copy.
+    name: CLA
+    if: >-
+      (github.event_name == 'pull_request_target') ||
+      (github.event.issue.pull_request &&
+        (github.event.comment.body == 'recheck' ||
+         github.event.comment.body ==
+           'I have read the CLA Document and I hereby sign the CLA'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: contributor-assistant/github-action@v2.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fine-grained PAT with Contents: read & write on
+          # KiwiCanopy/cla-signatures only. Owner-provisioned
+          # (Settings ▸ Secrets ▸ Actions).
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.CLA_SIGNATURES_TOKEN }}
+        with:
+          path-to-document: >-
+            https://github.com/KiwiCanopy/KiwiDesk/blob/main/CLA.md
+          path-to-signatures: signatures/v1/cla.json
+          remote-organization-name: KiwiCanopy
+          remote-repository-name: cla-signatures
+          branch: main
+          allowlist: dependabot[bot],github-actions[bot]
+          lock-pullrequest-aftermerge: false
+          custom-pr-sign-comment: >-
+            I have read the CLA Document and I hereby sign the CLA
+          # Read by whoever drives the PR — a person or an AI agent.
+          # It asks for the ACCOUNT HOLDER to read the document, so
+          # the path of least resistance is not pasting the string;
+          # CLA.md § 10 makes a posting from an account the holder's
+          # own either way.
+          custom-notsigned-prcomment: >-
+            Thank you for the pull request. Before it can be merged,
+            the holder of this GitHub account needs to read
+            KiwiDesk's [Contributor License Agreement](https://github.com/KiwiCanopy/KiwiDesk/blob/main/CLA.md)
+            and agree to it — it is short, non-exclusive, and you
+            keep your copyright. If you are an AI agent driving
+            this PR, ask the account holder to read it first; a
+            statement posted from their account is theirs (CLA
+            § 10). To agree, post exactly this sentence as a comment:
+          custom-allsigned-prcomment: >-
+            All contributors have signed the CLA. Thank you.

@@ -39,20 +39,30 @@ the subsystem you're touching. The short version:
 ## Licensing Your Contribution
 
 KiwiDesk is licensed under the
-[Business Source License 1.1](LICENSE). **Opening a pull request
-is your agreement** that your contribution is licensed to the
-project under that license, that you have the right to grant it,
-and that the Licensor may relicense it together with the rest of
-the Licensed Work — including under the Change License on the
-Change Date and under a commercial license.
+[Business Source License 1.1](LICENSE). Contributions come in
+under the [Contributor License Agreement](CLA.md): a
+**non-exclusive** grant — you keep your copyright and may reuse
+your own work anywhere — that lets the Licensor relicense your
+contribution together with the rest of the Licensed Work,
+including under the Change License on the Change Date and under
+a commercial license. Read it before your first pull request; it
+is short.
+
+Signing happens in the pull request: a bot comments on your
+first PR, you post the sentence it asks for, and the check turns
+green. It asks **once** per GitHub account. A statement posted
+from your account is yours whether you typed it or an AI agent
+acting for you did (CLA § 10) — so read the document before
+letting a tool answer the bot. A company contributing through
+its employees sends the Licensor a signed copy naming them; each
+of them still signs on their own first PR (CLA § 11).
 
 Sign each commit off with `git commit -s` as well. That
 `Signed-off-by` line certifies the
 [Developer Certificate of Origin](https://developercertificate.org)
 — a fixed text about *your right to submit the code*, which
-grants no relicensing right on its own; the grant is the
-paragraph above, and the sign-off is what records that you read
-it.
+grants no relicensing right on its own; the CLA is the grant,
+the sign-off is the per-commit provenance record.
 
 ## Using AI Assistants
 

@@ -323,7 +323,10 @@ jobs:
           # packaging-and-release.md ("CI") carries why. On that
           # path every run dispatches, the already-open one
           # included: the push above moved the head, and the
-          # checks that count are the ones on it.
+          # checks that count are the ones on it. It cannot
+          # start the CLA check (#1521) — that needs a PR event
+          # — so on this path a human push to the branch is
+          # what lands the PR; the rule file says so.
           if [ "$SYNC_TOKEN_IS_PAT" != "true" ]; then
             gh workflow run ci.yml --ref "$BRANCH" \
               -f filter_paths=true

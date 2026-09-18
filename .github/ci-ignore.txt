@@ -29,6 +29,7 @@
 site/**
 README.md
 CONTRIBUTING.md
+CLA.md
 SECURITY.md
 CLAUDE.md
 .github/ISSUE_TEMPLATE/**

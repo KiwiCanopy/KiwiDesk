@@ -20,6 +20,22 @@
 #   0. Flip to 1 the day a second collaborator with Write access
 #   exists.
 #
+#   require_code_owner_reviews = FALSE for the same reason: a code
+#   owner's review is required whenever an owned path changes, the
+#   owner cannot approve their own PR, and enforce_admins is true —
+#   so on a solo repo the gate deadlocks every owner PR that touches
+#   any path .github/CODEOWNERS owns. CODEOWNERS still does its
+#   other job with this false: it auto-requests the owner on
+#   outside PRs to those paths, and what stops an outsider from
+#   rewording the licence chain is that only the owner can merge
+#   (#1521). Flip this together with the approval count.
+#
+#   ORDER: the "CLA" context below is reported by a workflow that
+#   `pull_request_target` runs from MAIN's copy, so re-running this
+#   script before .github/workflows/cla.yml is on main blocks every
+#   open PR on a context that cannot report. Merge it, see the job
+#   green on one PR, then re-run.
+#
 #   enforce_admins = TRUE, and this reverses #487's original line
 #   ("leave do-not-allow-bypassing OFF so an emergency fix is
 #   possible"). That advice is sound on a TEAM repo, where the rules
@@ -56,17 +72,22 @@
 # saved (owner ruling); do not bring it back without that ruling
 # being reversed, and keep strict true while it is gone.
 #
-# Status checks are listed by JOB NAME and must match
-# .github/workflows/ci.yml. This is the setting that finally makes
-# CI block rather than report (#532).
+# Status checks are listed by JOB NAME and must match the
+# workflows that report them — .github/workflows/ci.yml for the two
+# macOS jobs, cla.yml for the CLA check. This is the setting that
+# finally makes CI block rather than report (#532).
 #
-# Both named jobs are gated on ci.yml's `changes` job rather than
+# ci.yml's two jobs are gated on its `changes` job rather than
 # on a trigger filter, which is what makes requiring them safe: a
 # PR touching only ignored paths leaves them *skipped*, and GitHub
 # counts a skipped job as satisfying a required check. Filtering at
 # the trigger instead would leave the workflow unreported and every
 # such PR stuck on "Expected". CiPathFilterTests keeps that shape;
-# packaging-and-release.md ("CI") carries the argument.
+# packaging-and-release.md ("CI") carries the argument. The CLA
+# check is safe to require for a different reason: it runs on
+# every pull_request_target with no path filter, so it always
+# reports — except on a PR opened with GITHUB_TOKEN, which fires
+# no PR event at all (the same rule file, the fallback paragraph).
 
 set -euo pipefail
 
@@ -82,17 +103,21 @@ fi
 
 # A required context is the job's DISPLAY name (`name:`) when it has
 # one, not the job id — get this wrong and every merge blocks forever
-# on a check that can never report. Both CI jobs set `name:`, so the
-# contexts are those, not `build-lint-test` / `release-build`.
+# on a check that can never report. Every required job sets
+# `name:`, so the contexts are those, not `build-lint-test` /
+# `release-build` / `cla`.
 #
 # Echoed from the workflow rather than trusted, because a rename in
 # CI would silently invalidate the list.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-echo "Job display names in .github/workflows/ci.yml:"
+echo "Job display names in .github/workflows/ci.yml and cla.yml:"
 awk '/^jobs:/{j=1; next} j && /^  [a-zA-Z0-9_-]+:$/{id=$1}
      j && /^    name:/{sub(/^    name: */, ""); print "  " id " -> " $0}' \
-    "$ROOT/.github/workflows/ci.yml"
-CONTEXTS='["Build, Lint & Test", "Release Build"]'
+    "$ROOT/.github/workflows/ci.yml" "$ROOT/.github/workflows/cla.yml"
+# "CLA" is .github/workflows/cla.yml's job (#1521): an unsigned
+# commit author cannot merge; the owner is not exempt and passes
+# after signing once.
+CONTEXTS='["Build, Lint & Test", "Release Build", "CLA"]'
 echo "Requiring: $CONTEXTS"
 echo "If the names above disagree, fix CONTEXTS and re-run."
 
