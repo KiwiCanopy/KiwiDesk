@@ -90,8 +90,8 @@ enum MacChecklistText {
                 "Hiding (⌘H, ⌘M, the yellow light) takes "
                     + "a window out of the tiling and out of macOS\u{2019}s "
                     + "own bookkeeping. Keep what you\u{2019}ll reuse open "
-                    + "on another Space — switch there, or pull it "
-                    + "over with %1$@ — and close only what "
+                    + "on another Space — %1$@ takes you to it — "
+                    + "and close only what "
                     + "you\u{2019}re done with: ⌘W closes the "
                     + "window, ⌘Q quits the app (the red light and "
                     + "Dock ▸ right-click ▸ Quit do the same).",
