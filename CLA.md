@@ -1,12 +1,12 @@
 # KiwiDesk Contributor License Agreement
 
-*Adapted from the Apache Software Foundation's Individual and
-Corporate Contributor License Agreements (v2.2), which the ASF
-makes available for reuse. Changes from that text: the Licensor,
-the explicit relicensing clause (§2, last sentence), the clause on
-types of use unknown today (§2, and §3 for patents), governing
-law (§9), and the signing mechanism (§10). Draft 2026-09-18 — not
-yet reviewed by counsel.*
+*Version 1 (2026-09-18). Adapted from the Apache Software
+Foundation's Individual and Corporate Contributor License
+Agreements (v2.2), which the ASF makes available for reuse.
+Changes from that text: the Licensor, the explicit relicensing
+clause (§2, last paragraph), the clause on types of use unknown
+today (§2), governing law (§9), the signing mechanism (§10) and
+the corporate section (§11). Not yet reviewed by counsel.*
 
 Thank you for your interest in KiwiDesk (the "Project"), whose
 Licensor is **Maikel Hajiabadi** (the "Licensor"). In order to
@@ -154,11 +154,13 @@ as an author remain unaffected.
 You agree to this CLA by posting the sentence *"I have read the
 CLA Document and I hereby sign the CLA"* on a pull request to the
 Project's repository, as prompted by the CLA assistant. The
-assistant records Your account name, the date and the version of
-this CLA. This is the signing mechanism for individuals; it is
-also sufficient for a legal entity whose authorized
-representative posts it, and the Licensor will accept a signed
-copy of this document by other means on request.
+assistant records Your GitHub account name and id, the comment,
+its date and the pull request, in the signature store kept for
+this version of the CLA. Signing is per GitHub account: the
+assistant asks each account once. Where a signature cannot be
+posted that way, the Licensor will accept a signed copy of this
+document by other means and enter it into the same store by
+hand.
 
 A statement posted from Your account is Your statement, whether
 You typed it or software acting under Your credentials did — an
@@ -170,13 +172,16 @@ where the holder is a legal entity.
 
 ## 11. Corporate Contributors
 
-A legal entity agrees to this CLA on behalf of its designated
-employees. By agreeing, the entity confirms that it is the
-copyright owner of Contributions made by those employees, grants
-the licenses in §§ 2 and 3 for them, and names the employees
-authorized to submit Contributions on its behalf (by GitHub
-account name) in its agreement message or in a signed copy of
-this document. It is the entity's responsibility to notify the
-Licensor of any changes to that list; Contributions submitted by
+A legal entity agrees to this CLA for Contributions its employees
+make on its behalf by sending the Licensor a signed copy of this
+document that names those employees by GitHub account name. By
+doing so the entity confirms that it is the copyright owner of
+those Contributions and grants the licenses in §§ 2 and 3 for
+them. Each named employee still posts the sentence in § 10 on
+their own first pull request — the assistant records signatures
+per account and has no notion of a company — and that posting
+is then made under the entity's agreement rather than as the
+employee's own. It is the entity's responsibility to notify the
+Licensor of any changes to the list; Contributions submitted by
 an employee who is not on it are treated as the employee's own
 until the list is updated.

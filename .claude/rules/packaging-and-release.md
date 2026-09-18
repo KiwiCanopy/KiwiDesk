@@ -618,9 +618,10 @@ run log is the only proof the drop was ever built.
 **A workflow-opened PR gets its CI started for it, and one it
 expects to merge itself gets armed too.** Running the gate before
 the PR exists proves the change; it does not get the PR merged.
-Branch protection requires `ci.yml`'s two macOS contexts, and a
-PR opened with `GITHUB_TOKEN` fires no `pull_request`, so neither
-ever reports and the PR sits BLOCKED — the release path hit that
+Branch protection requires `ci.yml`'s two macOS contexts (and
+`cla.yml`'s since #1521), and a PR opened with `GITHUB_TOKEN`
+fires no `pull_request`, so none of them ever reports and the PR
+sits BLOCKED — the release path hit that
 at v1.1.1, and every release before #1154 needed a human between
 publishing and the feed going live. So the workflow starts
 `ci.yml` itself, through `workflow_dispatch`, which is the one
@@ -649,7 +650,14 @@ still open the PR it opens today — and on that path the
 dispatch is what makes the PR reportable, so the dispatch
 **stands down when the token is the PAT**: left unconditional it
 would put two suites reporting the same required contexts on
-one head, a race over which verdict lands.
+one head, a race over which verdict lands. **The fallback
+delivers less since the CLA check (#1521):** a `github.token` PR
+fires no `pull_request_target` either, and `cla.yml` cannot be
+dispatched — the action needs a PR event — so on that path the
+sync PR sits blocked on "CLA" until a human pushes any commit to
+its branch, `app-font.yml`'s standing remedy. The PAT path is
+untouched: the PR's author is the owner, signed once, and the
+`github-actions[bot]` commit author is on the allowlist.
 
 **The dispatch and the arming are owed to a PR nobody is
 watching land, and that is the scope.** The release path is unwatched by

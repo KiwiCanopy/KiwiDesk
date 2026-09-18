@@ -18,8 +18,9 @@ Closes #... (if applicable)
 - [ ] User-facing changes are documented in `docs/`
 - [ ] No contradictions between code and docs
 - [ ] PR is focused; refactors separated from features
-- [ ] I have signed the [CLA](../CLA.md) (the bot asks on
-  your first PR)
+- [ ] I have signed the
+  [CLA](https://github.com/KiwiCanopy/KiwiDesk/blob/main/CLA.md)
+  (the bot asks on your first PR)
 
 ## How I verified
 

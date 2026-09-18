@@ -212,8 +212,9 @@ Use the GitHub [issue templates](.github/ISSUE_TEMPLATE/) and
 [PR template](.github/pull_request_template.md). Reference issues
 with `fixes #123`. A first pull request from an account also
 signs the [CLA](CLA.md) — the bot asks, CONTRIBUTING.md ▸
-*Licensing Your Contribution* says how, and the check is required
-on `main` (#1521).
+*Licensing Your Contribution* says how, and
+`scripts/protect-main.sh` is where the check is required on
+`main` (#1521).
 
 **Merge only from an up-to-date branch** (owner ruling
 2026-09-14, retiring the 2026-08-30 merge queue: it cost more

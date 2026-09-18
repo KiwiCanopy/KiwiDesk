@@ -54,7 +54,8 @@ green. It asks **once** per GitHub account. A statement posted
 from your account is yours whether you typed it or an AI agent
 acting for you did (CLA § 10) — so read the document before
 letting a tool answer the bot. A company contributing through
-its employees agrees once for them (CLA § 11).
+its employees sends the Licensor a signed copy naming them; each
+of them still signs on their own first PR (CLA § 11).
 
 Sign each commit off with `git commit -s` as well. That
 `Signed-off-by` line certifies the

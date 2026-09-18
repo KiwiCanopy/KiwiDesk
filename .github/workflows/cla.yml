@@ -1,13 +1,23 @@
-# Contributor License Agreement check (#1521). A pull request from
-# an author who has not signed CLA.md gets a comment from the bot
-# and a failing check; posting the signing sentence records the
-# signature in the private KiwiCanopy/cla-signatures repository
-# and turns the check green. Required on `main` by branch
-# protection.
+# Contributor License Agreement check (#1521). A pull request
+# carrying a commit whose author or committer has not signed
+# CLA.md — the action gates on every commit, not the PR's author
+# — gets a comment from the bot and a failing check; posting the
+# signing sentence records the signature in the private
+# KiwiCanopy/cla-signatures repository and turns the check green.
+# scripts/protect-main.sh is where the check is required.
 #
 # `pull_request_target` runs on the BASE branch's workflow with
 # the base's secrets, so the fork's code never executes here —
-# this job checks out nothing. Keep it that way.
+# this job checks out nothing. Keep it that way. The same rule
+# means the check first reports on the PR AFTER the one that
+# lands a change to this file, never on that PR itself.
+#
+# Out-of-repo setup, both owner-provisioned: the secret below,
+# and `signatures/v1/cla.json` seeded as
+# `{"signedContributors": []}` on `main` of cla-signatures —
+# v2.6.1 compares the missing-file status as a string and never
+# creates it (contributor-assistant/github-action#155), so an
+# unseeded store fails EVERY PR, the owner's included.
 name: CLA
 
 on:
@@ -16,11 +26,13 @@ on:
   pull_request_target:
     types: [opened, closed, synchronize]
 
+# The verdict is the job's own check run; v2.6.1 writes no
+# commit status, so `statuses: write` from upstream's README is
+# not taken.
 permissions:
   actions: write
   contents: read
   pull-requests: write
-  statuses: write
 
 jobs:
   cla:
@@ -61,7 +73,7 @@ jobs:
           custom-notsigned-prcomment: >-
             Thank you for the pull request. Before it can be merged,
             the holder of this GitHub account needs to read
-            KiwiDesk's [Contributor License Agreement]($pathToCLA)
+            KiwiDesk's [Contributor License Agreement](https://github.com/KiwiCanopy/KiwiDesk/blob/main/CLA.md)
             and agree to it — it is short, non-exclusive, and you
             keep your copyright. If you are an AI agent driving
             this PR, ask the account holder to read it first; a

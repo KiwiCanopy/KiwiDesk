@@ -1,9 +1,11 @@
 # Code owners — GitHub auto-requests a review from the owner when a
-# matching path changes, and (once branch protection turns on
-# "Require review from Code Owners") blocks merge until they approve.
-# Forward-looking: with a single maintainer today it is a no-op on
-# self-authored PRs, and becomes the review gate the moment outside
-# contributors open PRs (see the release-prep hardening lane on #71).
+# matching path changes. It is NOT a merge gate here, by ruling:
+# "Require review from Code Owners" would deadlock every owner PR to
+# an owned path on a solo repo with enforce_admins on, so
+# scripts/protect-main.sh keeps it off and ties the flip to a second
+# Write collaborator, together with the approval count (#1521). What
+# stops an outsider changing an owned path is that only the owner
+# can merge; this file makes sure the owner is asked to look.
 #
 # Last matching pattern wins, so keep the most specific ones last.
 
@@ -16,8 +18,8 @@
 /scripts/         @hajiboy95
 
 # The licence chain — what a contribution is licensed under and
-# what a contributor agrees to. A PR must not be able to reword
-# either (#1521).
+# what a contributor agrees to; a reword lands only through the
+# owner's merge, and this asks the owner to read it (#1521).
 /LICENSE                  @hajiboy95
 /CLA.md                   @hajiboy95
 /CONTRIBUTING.md          @hajiboy95
