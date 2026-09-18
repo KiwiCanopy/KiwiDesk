@@ -20,6 +20,16 @@
 #   0. Flip to 1 the day a second collaborator with Write access
 #   exists.
 #
+#   require_code_owner_reviews = FALSE for the same reason: a code
+#   owner's review is required whenever an owned path changes, the
+#   owner cannot approve their own PR, and enforce_admins is true —
+#   so on a solo repo the gate deadlocks every owner PR that touches
+#   /site/, /.github/, LICENSE or CLA.md. .github/CODEOWNERS still
+#   does its other job with this false: it auto-requests the owner
+#   on outside PRs to those paths, and what stops an outsider from
+#   rewording the licence chain is that only the owner can merge
+#   (#1521). Flip this together with the approval count.
+#
 #   enforce_admins = TRUE, and this reverses #487's original line
 #   ("leave do-not-allow-bypassing OFF so an emergency fix is
 #   possible"). That advice is sound on a TEAM repo, where the rules
@@ -92,7 +102,9 @@ echo "Job display names in .github/workflows/ci.yml:"
 awk '/^jobs:/{j=1; next} j && /^  [a-zA-Z0-9_-]+:$/{id=$1}
      j && /^    name:/{sub(/^    name: */, ""); print "  " id " -> " $0}' \
     "$ROOT/.github/workflows/ci.yml"
-CONTEXTS='["Build, Lint & Test", "Release Build"]'
+# "CLA" is .github/workflows/cla.yml's job (#1521): an unsigned
+# outside author cannot merge, and the owner's own PRs pass it green.
+CONTEXTS='["Build, Lint & Test", "Release Build", "CLA"]'
 echo "Requiring: $CONTEXTS"
 echo "If the names above disagree, fix CONTEXTS and re-run."
 

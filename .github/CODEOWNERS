@@ -15,6 +15,13 @@
 /.github/         @hajiboy95
 /scripts/         @hajiboy95
 
+# The licence chain — what a contribution is licensed under and
+# what a contributor agrees to. A PR must not be able to reword
+# either (#1521).
+/LICENSE                  @hajiboy95
+/CLA.md                   @hajiboy95
+/CONTRIBUTING.md          @hajiboy95
+
 # Dependencies / lockfile — the sneakiest supply-chain vector; a
 # lockfile bump is easy to rubber-stamp, so pin an explicit owner.
 /site/package.json        @hajiboy95
