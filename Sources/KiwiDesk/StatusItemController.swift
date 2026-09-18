@@ -66,6 +66,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// only via `setConfigError`, the same rule as `warning`.
     private(set) var configError = false
     private var modeIcon: String?
+    /// The active Space, shown while the Space Bar is off
+    /// (#1413); nil keeps the brand or layer icon.
+    private(set) var spaceMark: StatusSpaceMark?
     /// ONE stored value (#802), read by the icon AND the menu
     /// builder — two reads of one fact showed half the signal
     /// (architect review, 2026-08-12).
@@ -112,6 +115,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Sets custom icon for active keybinding mode.
     func setModeIcon(_ icon: String?) {
         modeIcon = icon
+        render()
+    }
+
+    /// Sets the Space Bar's stand-in (#1413).
+    func setSpaceMark(_ mark: StatusSpaceMark?) {
+        spaceMark = mark
         render()
     }
 
@@ -170,7 +179,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             return
         }
         button.toolTip = L("menu.status.tooltip", "KiwiDesk")
-        if let modeIcon, !modeIcon.isEmpty {
+        if let spaceMark {
+            applySpaceMark(spaceMark, to: button)
+        } else if let modeIcon, !modeIcon.isEmpty {
             applyModeIcon(modeIcon, to: button)
         } else {
             applyBrandIcon(
@@ -213,8 +224,9 @@ private final class SystemStatusItem: StatusItemHandle {
     private let item: NSStatusItem
 
     init() {
+        // Variable: the #1413 composite is as wide as it needs.
         item = NSStatusBar.system.statusItem(
-            withLength: NSStatusItem.squareLength
+            withLength: NSStatusItem.variableLength
         )
     }
 

@@ -20,6 +20,8 @@ extension KiwiCore {
     }
 
     func updateSpaceBar() {
+        // The menu bar's stand-in rides the same refresh (#1413).
+        defer { publishStatusSpaceMark() }
         let style = tiler.settings.spaceBarStyle
         guard style.enabled else {
             spaceBars.sync([])

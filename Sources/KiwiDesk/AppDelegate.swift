@@ -204,6 +204,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.statusItem?.setModeIcon(icon)
             self?.shortcutsPanel?.closeIfOpen()
         }
+        // While the Space Bar is off, the status item shows the
+        // active Space instead (#1413) — off the bar's own
+        // refresh, so every trigger the bar has reaches it.
+        core.spaceBars.onStatusMarkChange = { [weak self] mark in
+            self?.statusItem?.setSpaceMark(mark)
+        }
 
         // Redirect SIGTERM from launchctl into AppKit termination flow.
         signal(SIGTERM, SIG_IGN)

@@ -49,7 +49,7 @@ extension KiwiCore {
                     "sticky.home.pill",
                     "Can only be moved in its home Space %1$@"
                 ),
-                mark: homeSpaceMark(home),
+                mark: spaceMark(for: home),
                 delay: snapBackSettleDelay
             )
         )
@@ -215,12 +215,12 @@ extension KiwiCore {
             + 0.08
     }
 
-    /// The pill's home-space mark: the space's configured Space Bar
-    /// icon (SF Symbol or emoji/character) so the pill matches the
-    /// bar tile, else the bare id/name. Mirrors `spaceIdentifier`'s
-    /// icon lookup but falls back to the FULL id — the pill has room
-    /// for a real name, unlike the bar's 2-char monogram.
-    private func homeSpaceMark(_ id: SpaceID) -> SpaceMark {
+    /// A Space's mark where there is room for a name: its
+    /// configured Space Bar icon (SF Symbol or emoji/character),
+    /// else the FULL id — the pill and the menu bar item (#1413)
+    /// share it, unlike the bar's 2-char monogram
+    /// (`spaceIdentifier`).
+    func spaceMark(for id: SpaceID) -> SpaceMark {
         if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
             let isSymbol =
                 NSImage(

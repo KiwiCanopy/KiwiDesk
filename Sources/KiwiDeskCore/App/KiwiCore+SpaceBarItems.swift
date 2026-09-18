@@ -225,13 +225,16 @@ extension KiwiCore {
         }
         // Emoji render untinted (they take no template
         // tint); plain characters follow the state color.
-        // U+FE0F covers text-default scalars forced into
-        // emoji presentation ("❤️", "☀️").
-        let emoji = icon.unicodeScalars.contains {
+        return .text(icon, tinted: !isEmoji(icon))
+    }
+
+    /// U+FE0F covers text-default scalars forced into emoji
+    /// presentation ("❤️", "☀️").
+    nonisolated static func isEmoji(_ icon: String) -> Bool {
+        icon.unicodeScalars.contains {
             $0.properties.isEmojiPresentation
                 || $0.value == 0xFE0F
         }
-        return .text(icon, tinted: !emoji)
     }
 
     /// The active shortcut layer's item, ahead of the Spaces

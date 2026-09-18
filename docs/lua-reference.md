@@ -4321,6 +4321,13 @@ uppercased. The default layer (`KiwiDesk.bind`) never takes an
 icon — the status item always shows the standard KiwiDesk
 glyph.
 
+:::unreleased
+With the Space Bar off, the status item shows the layer's icon
+— or the two-character cut of its name — ahead of the current
+Space instead, the way the bar does ([User Guide ▸ Space
+Bar](user-guide.md#space-bar)).
+:::
+
 **Example:**
 
 ```lua
