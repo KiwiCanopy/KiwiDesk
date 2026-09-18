@@ -67,8 +67,8 @@ extension ApplicationsGroup {
     private var behaviorHelp: String {
         L(
             "shortcuts.app_behavior.help",
-            "**%1$@** brings the app's existing window to "
-                + "the current Space, or launches it if the app "
+            "**%1$@** takes you to the app's existing window, "
+                + "wherever it is, or launches the app if it "
                 + "isn't running. Pressing again while that window "
                 + "is focused cycles through the app's other "
                 + "windows. If the app has nothing on screen, "
