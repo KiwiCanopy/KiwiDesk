@@ -850,8 +850,9 @@ request — which is not a sheet rule at all but the rule for
 any presentation whose content is built from one row, and is
 stated as that in `.claude/rules/gui.md`. Its **one
 dismissal answers Return and Escape both**: a `Button` carries
-only one shortcut, so `.defaultAction` rides the button and the
-content view takes `.onExitCommand`.
+only one shortcut, so `.defaultAction` rides the visible Done
+and Escape is a second, hidden button carrying `.cancelAction`
+(the preset preview and About both).
 `SheetPresentationSeamTests` is the register of which files may
 host a sheet, and holds all three.
 

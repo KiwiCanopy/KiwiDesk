@@ -140,12 +140,13 @@ tagged version rather than a date, so it is the same fact in the
 release notes, in `LICENSE` and in a `git tag`.
 
 The `.app` is itself a copy of the Licensed Work, so it carries
-the license text and the Lua and Sparkle notices and opens both
-from Settings ▸ About — BSL 1.1 wants the License displayed on
-every copy, and the two MIT notices want theirs in every copy —
-and a trim of About's link card or of the bundle keeps them
-(#1407; how the bundle carries them and derives its copyright
-line is `.claude/rules/packaging-and-release.md`'s).
+the license text and the third-party notices
+(`ACKNOWLEDGEMENTS`) and opens both from About — BSL 1.1 wants
+the License displayed on every copy, and each MIT notice wants
+itself in every copy — and a trim of About's links or of the
+bundle keeps them (#1407; how the bundle carries them and
+derives its copyright line is
+`.claude/rules/packaging-and-release.md`'s).
 
 ### Accepted limitations
 
@@ -11403,7 +11404,7 @@ chrome above the thing you came for); a permanent
 **Accessibility Settings…** deep link (a standing nag for the
 99% granted case — the paused warning row covers the untrusted
 case, and onboarding's own "Open System Settings" is the fix
-path); and a **Support** row (it lives in Settings ▸ About as a
+path); and a **Support** row (it lives in Settings as a
 discreet link — a menu opened daily for Layout is no place for a
 recurring support ask). Trimmed from thirteen possible rows to
 ~six, each of which either does something you came for or is app
@@ -11593,58 +11594,74 @@ of it, rather than separate rulings:
 
 **[Principle]**
 
-**The page that welcomes also points outward.** Everything
-*about* KiwiDesk — version, release notes, license, the links
-to GitHub and Ko-fi — used to sit on a General card one
-navigation away, and the update state showed nowhere but the
-menu bar. Home now ends in a quiet strip: a small-caps
-*Community & Support* heading over three underlined links with
-the services' own marks (Telegram, GitHub, Ko-fi), then one
-footer line — mark, name, version, update state, *About
-KiwiDesk*. It is the last thing on the page and competes with
-nothing above it: no container, no rule, no glass, no motion,
-and the marks are template images in secondary ink, because on
-this page colour means "this control is on" and a brand blue or
-orange would say that about a link.
+:::unreleased
+**The page that welcomes also points outward.** The three
+things a user asks about the app itself — where to talk about
+it, which version this is, whether an update is waiting — are
+answered where they arrive: on Home, below the cards, as a
+community strip (Telegram, GitHub, Ko-fi) and one footer line
+(mark, name, version, update state, *About KiwiDesk*). A fact
+one navigation away is a fact most users never meet, and an
+update state that showed only in the menu bar was one. The
+strip stays quiet because the cards are the page's object and
+nothing below them may compete: no container, no rule, no
+glass, no motion, and the services' marks are template images
+in secondary ink. On this page colour means "this control is
+on", and a brand blue or orange would say that about a link.
 
-**The update state is one component.** Sparkle's cycle outcome
-lands in one store (`UpdateStateStore`, written by the updater
-delegate) and one view draws it — up to date with the last
-check, checking with the arrow dimmed in place, a found version
-with the accent dot the menu-bar icon already uses and the
-menu-bar row's own *Update Available…*, a failed check with a
-*Try again* that stays enabled since that failure is retryable.
-Home and About draw that same view, so the two cannot say
-different things. `updatePending` (#1013) is a different fact —
-a scheduled update waiting behind the gentle reminder — and
-stays where it was.
+**The update state is one component.** What the channel last
+said lands in one store (`UpdateStateStore`, written by the
+updater and its Sparkle delegate) and one view draws it, on
+Home and in About alike, so the two cannot say different
+things; a surface that needs the state takes that view rather
+than a sentence of its own. Its states follow conventions the
+window already pays for: *checking* dims the arrow in place
+(grey, don't hide); a found version wears a dot — the menu-bar
+mark's idiom (#1013), in the Settings accent because this tree
+is one tint — and takes the menu-bar row's own *Update
+Available…* action, since that is Sparkle's door for bringing
+the waiting offer forward; a failed check keeps its *Try again*
+enabled because that failure is retryable. `updatePending`
+(#1013) is a different fact — a scheduled update waiting behind
+the gentle reminder — and stays on the prompt policy; so after
+a found update is put off with *Later*, Home still says a
+version is available while the menu-bar row no longer says one
+waits, and both are true.
 
 **About is a sheet over Settings, hosted by the shell.** A body
-of content that asks no question and writes nothing is what the
-repo reserves a sheet for (#859): Return and Escape both put it
-away. A separate window would tile itself and could be left
-open behind Settings showing a stale sentence; a Home
-destination would enter the back-chip navigation and promise
-settings About does not hold. The shell hosts it because the
-footer that opens it sits in Home, which reflows under it, and a
-host must outlive its opener (`SheetPresentationSeamTests`).
+of content that asks no question and writes nothing is what a
+sheet is for (#859): one dismissal, Return and Escape alike. A
+separate window is one more own window for the tiler to
+classify (`OwnWindowTiling`'s census) and could be left open
+behind Settings showing a stale sentence; a Home destination
+would enter the back-chip navigation and promise settings About
+does not hold. The shell hosts it because the footer that opens
+it sits in Home, which reflows under it, and a host must
+outlive its opener (`SheetPresentationSeamTests`).
 
 **[Trade-off]**
 
-**Link placement is exclusive.** Home carries Telegram, GitHub
-and Ko-fi only; About carries version, update state, Release
-Notes, License, Acknowledgements and the website only. A link in
-both places makes the reader ask whether they differ. The
-General card is gone with it; language, appearance and
-open-at-login stay on General, and the reset ladder, log export
-and backup stay under General ▸ Advanced, which is already the
-recovery shelf.
+**Link placement is exclusive.** Home carries the community
+links only; About carries the version, the update state,
+Release Notes, License, Acknowledgements and the website only.
+A link in both places makes the reader ask whether they differ,
+and a General ▸ About card is the same doubt one level up — so
+nothing *about* KiwiDesk returns to General, and Settings search
+does not reach the sheet either: About is one click from Home,
+not a setting (owner, 2026-09-20). Language,
+appearance and start-at-login are General's, and the reset
+ladder, log export and backup stay under General ▸ Advanced,
+the recovery shelf.
 
-**A "checking" state is only ever our own check.** Sparkle
-reports no "check started" for its scheduled background checks,
-so those show as their result — the dated up-to-date sentence
-moves, or the found version appears — never as a spinner the
-footer would have to guess at.
+**A "checking" state is only ever our own check.** A scheduled
+background check is not narrated: nobody started it, so a
+spinner appearing on Home unbidden is motion the user did not
+ask for, and Sparkle's delegate hears such a check by its
+outcome — `SPUUpdaterDelegate` asks permission before a check
+and reports nothing beginning (Sparkle 2.9.6). It shows as its
+result: the dated up-to-date sentence moves, or the found
+version appears.
+:::
 
 ### Out of scope, on purpose
 

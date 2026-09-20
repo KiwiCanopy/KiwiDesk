@@ -11,7 +11,10 @@ struct AboutRequest: Identifiable {
 /// footer does not: the wordmark, the version, the update state
 /// once more, Release Notes, License, Acknowledgements, the website.
 struct AboutSheet: View {
-    @ObservedObject var model: SettingsModel
+    /// The one update store and the check door, handed in by the
+    /// shell — the sheet takes no `SettingsModel` (#859).
+    @ObservedObject var store: UpdateStateStore
+    let check: () -> Void
     let onDone: () -> Void
     @Environment(\.colorScheme) private var colorScheme
 
@@ -19,21 +22,18 @@ struct AboutSheet: View {
         VStack(spacing: 12) {
             brand
             versionLine
-            UpdateStateRow(
-                store: model.updater.updates,
-                check: { model.updater.checkForUpdates() }
-            )
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .padding(.horizontal, 12)
-            .background(
-                RoundedRectangle(cornerRadius: SettingsTheme.chipRadius)
-                    .fill(SettingsTheme.sunken)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: SettingsTheme.chipRadius)
-                    .strokeBorder(SettingsTheme.hairline, lineWidth: 1)
-            )
+            UpdateStateRow(store: store, check: check)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: SettingsTheme.chipRadius)
+                        .fill(SettingsTheme.sunken)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: SettingsTheme.chipRadius)
+                        .strokeBorder(SettingsTheme.hairline, lineWidth: 1)
+                )
             links
             if let copyright = LicenseDocuments.copyright {
                 Text(copyright)
@@ -55,7 +55,7 @@ struct AboutSheet: View {
         .background(SettingsTheme.card)
         .background(escapeRoute)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(L("about.title", "About KiwiDesk"))
+        .accessibilityLabel(L("home.footer.about", "About KiwiDesk"))
     }
 
     @ViewBuilder private var brand: some View {
@@ -79,15 +79,11 @@ struct AboutSheet: View {
     }
 
     private var versionLine: some View {
-        HStack(spacing: 6) {
-            Text(L("general.version", "v%1$@", KiwiDeskVersion.semantic))
-            if KiwiDeskVersion.commit != "unknown" {
-                Text("(\(KiwiDeskVersion.commit))")
-            }
-        }
-        .font(.system(size: 11))
-        .foregroundStyle(SettingsTheme.ink2)
-        .textSelection(.enabled)
+        // The version alone; the commit stamp is the CLI's (#1174).
+        Text(L("general.version", "v%1$@", KiwiDeskVersion.semantic))
+            .font(.system(size: 11))
+            .foregroundStyle(SettingsTheme.ink2)
+            .textSelection(.enabled)
     }
 
     private var links: some View {
@@ -117,7 +113,7 @@ struct AboutSheet: View {
     }
 
     private var doneLabel: String {
-        L("presets.layouts.done", "Done")
+        L("common.done", "Done")
     }
 
     /// Escape as a hidden `.cancelAction` button (#859): the sheet

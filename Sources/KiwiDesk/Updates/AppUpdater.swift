@@ -63,10 +63,10 @@ final class SparkleUpdater: AppUpdating {
         )
         do {
             try updater.start()
-            // The previous session's check dates the footer until
-            // this session's first check answers (#1536).
+            // Until this session's first answer only the DATE of
+            // the last check is known, never its verdict (#1536).
             updates.set(
-                .upToDate(lastChecked: updater.lastUpdateCheckDate)
+                .notChecked(lastChecked: updater.lastUpdateCheckDate)
             )
         } catch {
             logUpdater(
@@ -81,13 +81,8 @@ final class SparkleUpdater: AppUpdating {
     }
 
     func checkForUpdates() {
-        // A found update keeps its sentence: the same door brings
-        // the pending prompt forward rather than checking again.
-        if updater.canCheckForUpdates,
-            case .available = updates.state
-        {
-        } else if updater.canCheckForUpdates {
-            updates.set(.checking)
+        if updater.canCheckForUpdates {
+            updates.set(updates.state.onOwnCheck)
         }
         updater.checkForUpdates()
     }

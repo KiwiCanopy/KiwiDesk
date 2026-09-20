@@ -13,8 +13,10 @@ extension HomeSurfacingTests {
         "Settings/SettingsView.swift": [
             // Home mounts exactly when no area is pushed.
             "ifselection==nil{HomeScreen(model:model)",
-            // About is a sheet the shell hosts (#1536).
+            // About is a sheet the shell hosts, opened through the
+            // action the shell hands Home (#1536).
             ".sheet(item:$aboutRequest)",
+            ".environment(\\.openAbout){aboutRequest=AboutRequest()}",
             // Escape pops an area back to Home.
             ".onExitCommand{ifselection!=nil{selection=nil}}",
             // A link into a Power-User-only area switches the mode
@@ -266,6 +268,14 @@ extension HomeSurfacingTests {
             // Escape on an EMPTY field resigns focus (#1030).
             ".onExitCommand{iftext.isEmpty{focus.wrappedValue=false}"
                 + "else{text=\"\"}}"
+        ],
+        "Settings/Home/HomeSupportStrip.swift": [
+            // The footer draws the ONE update-state view (#1536).
+            "UpdateStateRow(store:model.updater.updates"
+        ],
+        "Settings/Home/AboutSheet.swift": [
+            // …and so does About, so the two cannot drift.
+            "UpdateStateRow(store:store,check:check)"
         ],
         "Settings/HomeScreen.swift": [
             // The 14c banner is drawn, not merely computed.

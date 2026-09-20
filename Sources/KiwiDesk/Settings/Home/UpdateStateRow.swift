@@ -21,8 +21,11 @@ struct UpdateStateRow: View {
                     ),
                     ink: SettingsTheme.ink3
                 )
+            case .notChecked(let lastChecked):
+                sentence(Self.notCheckedSentence(lastChecked, now: Date()))
+                checkAgain(enabled: true)
             case .upToDate(let lastChecked):
-                sentence(upToDateSentence(lastChecked))
+                sentence(Self.upToDateSentence(lastChecked, now: Date()))
                 checkAgain(enabled: true)
             case .checking:
                 sentence(
@@ -97,12 +100,7 @@ struct UpdateStateRow: View {
         )
     }
 
-    private func upToDateSentence(_ lastChecked: Date?) -> String {
-        Self.upToDateSentence(lastChecked, now: Date())
-    }
-
-    /// "Up to date", dated by the last check where one is known —
-    /// relative, in the GUI's own locale rather than the system's.
+    /// "Up to date", dated by the last check where one is known.
     static func upToDateSentence(
         _ lastChecked: Date?,
         now: Date
@@ -110,23 +108,42 @@ struct UpdateStateRow: View {
         guard let lastChecked else {
             return L("updates.state.up_to_date", "Up to date")
         }
-        // Sparkle stamps the check a beat after the footer's "now",
-        // and a formatter reads that as "in 0 seconds".
-        if now.timeIntervalSince(lastChecked) < 60 {
-            return L(
-                "updates.state.up_to_date_just_now",
-                "Up to date · checked just now"
-            )
+        return L(
+            "updates.state.up_to_date_checked",
+            "Up to date · last checked %1$@",
+            lastCheckedPhrase(lastChecked, now: now)
+        )
+    }
+
+    /// Before this session's first answer: only WHEN the channel
+    /// last checked is known, so no verdict is claimed.
+    static func notCheckedSentence(
+        _ lastChecked: Date?,
+        now: Date
+    ) -> String {
+        guard let lastChecked else {
+            return L("updates.state.not_checked", "Not checked yet")
+        }
+        return L(
+            "updates.state.last_checked",
+            "Last checked %1$@",
+            lastCheckedPhrase(lastChecked, now: now)
+        )
+    }
+
+    /// Relative, in the GUI's own locale rather than the system's.
+    /// Sparkle stamps a check a beat after the footer's "now", and
+    /// a formatter reads that as "in 0 seconds" — so anything
+    /// under a minute is "just now".
+    static func lastCheckedPhrase(_ date: Date, now: Date) -> String {
+        if now.timeIntervalSince(date) < 60 {
+            return L("updates.relative.just_now", "just now")
         }
         let formatter = RelativeDateTimeFormatter()
         formatter.locale = Locale(
             identifier: LocalizationManager.shared.effectiveLocale ?? "en"
         )
         formatter.unitsStyle = .full
-        return L(
-            "updates.state.up_to_date_checked",
-            "Up to date · last checked %1$@",
-            formatter.localizedString(for: lastChecked, relativeTo: now)
-        )
+        return formatter.localizedString(for: date, relativeTo: now)
     }
 }

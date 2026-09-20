@@ -13,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let core = KiwiCore()
     let permissions = PermissionMonitor()
     var statusItem: StatusItemController?
+    /// The one update channel (#874), handed to the status item and
+    /// the dashboard alike (#1536, `UpdaterSeamGuardTests`).
+    private lazy var updater: any AppUpdating = AppUpdaterFactory.make()
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
@@ -30,9 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         created.setShowTour { [weak self] in
             self?.replayOnboardingTour()
         }
-        if let updater = statusItem?.updater {
-            created.setUpdater(updater)
-        }
+        created.setUpdater(updater)
         created.setPermissionPaused(!permissions.isTrusted)
         dashboardIfCreated = created
         return created
@@ -73,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
 
         let statusItem = StatusItemController()
         // Single construction of updater (#874, UpdaterSeamGuardTests).
-        statusItem.updater = AppUpdaterFactory.make()
+        statusItem.updater = updater
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }

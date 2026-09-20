@@ -18,37 +18,56 @@ struct HomeSupportStrip: View {
                 FlowLayout(spacing: 12) {
                     SupportLinkRow(
                         mark: BrandAssets.markTelegram,
-                        title: L("home.support.telegram", "Join on Telegram"),
-                        caption: L(
-                            "home.support.telegram.caption",
-                            "Questions, ideas and polls — the "
-                                + "discussions that shape KiwiDesk."
+                        title: L(
+                            "home.support.telegram",
+                            "Join the Telegram group"
                         ),
+                        caption: telegramCaption,
                         url: SupportLinks.telegram
                     )
                     SupportLinkRow(
                         mark: BrandAssets.markGitHub,
                         title: L("home.support.github", "View on GitHub"),
-                        caption: L(
-                            "home.support.github.caption",
-                            "Feature requests, bug reports, source code."
-                        ),
+                        caption: gitHubCaption,
                         url: SupportLinks.gitHub
                     )
                     SupportLinkRow(
                         mark: BrandAssets.markKofi,
                         title: L("home.support.kofi", "Support KiwiDesk"),
-                        caption: L(
-                            "home.support.kofi.caption",
-                            "A one-time tip or monthly support, via Ko-fi."
-                        ),
+                        caption: koFiCaption,
                         url: SupportLinks.koFi
                     )
                 }
             }
+            // The links follow the last group at the group spacing;
+            // only the footer line takes the leftover height.
+            Spacer(minLength: 20)
             footer
         }
-        .padding(.top, 8)
+    }
+
+    // Hoisted out of `body`: a `+`-joined literal inside a builder
+    // is the type-checker shape gui.md warns about.
+    private var telegramCaption: String {
+        L(
+            "home.support.telegram.caption",
+            "Questions, ideas and polls — the discussions that "
+                + "shape KiwiDesk."
+        )
+    }
+
+    private var gitHubCaption: String {
+        L(
+            "home.support.github.caption",
+            "Feature requests, bug reports, source code."
+        )
+    }
+
+    private var koFiCaption: String {
+        L(
+            "home.support.kofi.caption",
+            "A one-time tip or monthly support, via Ko-fi."
+        )
     }
 
     private var footer: some View {
@@ -79,46 +98,10 @@ struct HomeSupportStrip: View {
             Button(action: openAbout) {
                 Text(L("home.footer.about", "About KiwiDesk")).underline()
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.plain)
             .font(.system(size: 12))
             .linkHover()
         }
-    }
-}
-
-/// One link of the strip: the service's mark in secondary ink, an
-/// underlined title that opens the URL, one line of what it is.
-private struct SupportLinkRow: View {
-    let mark: NSImage?
-    let title: String
-    let caption: String
-    let url: URL
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 7) {
-            if let mark {
-                Image(nsImage: mark)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 16, height: 16)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .padding(.top, 2)
-                    .accessibilityHidden(true)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Link(destination: url) {
-                    Text(title).underline()
-                }
-                .buttonStyle(.plain)
-                .font(.system(size: 13))
-                .linkHover()
-                Text(caption)
-                    .font(.system(size: 11))
-                    .foregroundStyle(SettingsTheme.ink3)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .frame(maxWidth: 320, alignment: .leading)
     }
 }
 

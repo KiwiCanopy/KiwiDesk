@@ -77,7 +77,6 @@ struct HomeScreen: View {
                 // The strip sits at the window's bottom edge when
                 // the cards leave room, and scrolls after them when
                 // they do not (#1536).
-                Spacer(minLength: 12)
                 HomeSupportStrip(model: model)
             }
             .frame(minHeight: height - 24, alignment: .top)

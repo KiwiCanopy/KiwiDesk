@@ -82,11 +82,11 @@ extension SettingsButtonStyleConventionTests {
             // `Button` and cannot take the seal (#1407). Since
             // #1536 they live on Home's support strip and in the
             // About sheet, not on a General card.
-            "HomeSupportStrip.swift": (
+            "SupportLinkRow.swift": (
                 1, ".buttonStyle(.plain)",
-                "One Link row taking plain style — drawn three "
-                    + "times for the Telegram, GitHub and Ko-fi "
-                    + "pointers of the support strip"
+                "One Link taking plain style — the row Home's "
+                    + "support strip draws for Telegram, GitHub "
+                    + "and Ko-fi"
             ),
             "AboutSheet.swift": (
                 1, ".buttonStyle(.plain)",

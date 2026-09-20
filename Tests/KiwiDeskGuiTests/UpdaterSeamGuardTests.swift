@@ -116,6 +116,20 @@ struct UpdaterSeamGuardTests {
             }
         )
 
+        // The dashboard's share of the ONE updater (#1536): a
+        // deletable wiring line with an inert default behind it
+        // would narrate "checks are off" on a live build.
+        let handed = try Self.sites(
+            of: "created.setUpdater(updater)",
+            under: Self.productionTrees
+        )
+        #expect(handed.count == 1)
+        #expect(
+            handed.allSatisfy {
+                $0.file.lastPathComponent == "AppDelegate.swift"
+            }
+        )
+
         // The wiring: `AppUpdaterFactory.make()` is called once,
         // from AppDelegate. Zero means the app ships without an
         // update channel and greys one menu row to say so.

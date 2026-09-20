@@ -230,6 +230,12 @@ struct SettingsThemeContrastTests {
             SettingsTheme.warningInk,
             on: SettingsTheme.page
         ),
+        // The update row's failed state inside About's box (#1536).
+        Pairing(
+            "warningInk on sunken",
+            SettingsTheme.warningInk,
+            on: SettingsTheme.sunken
+        ),
         Pairing(
             "danger on card",
             SettingsTheme.danger,

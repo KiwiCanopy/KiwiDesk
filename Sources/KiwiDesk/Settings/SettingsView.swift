@@ -60,7 +60,10 @@ struct SettingsView: View {
         // outlives Home's reflow (`SheetPresentationSeamTests`).
         .environment(\.openAbout) { aboutRequest = AboutRequest() }
         .sheet(item: $aboutRequest) { _ in
-            AboutSheet(model: model) { aboutRequest = nil }
+            AboutSheet(
+                store: model.updater.updates,
+                check: { model.updater.checkForUpdates() }
+            ) { aboutRequest = nil }
         }
         // The one discard dialog (#515), hosted above the
         // `editingLua` branch: `chrome` is instantiated per arm
