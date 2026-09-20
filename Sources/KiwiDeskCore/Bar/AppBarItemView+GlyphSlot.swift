@@ -32,8 +32,7 @@ extension AppBarItemView {
                 height: square.height + pad * 2
             )
             : square.insetBy(dx: 0, dy: -pad)
-        // 0.9: full box height read a touch heavy in manual QA.
-        var size = box.height * 0.9
+        var size = box.height * AppBarStyle.glyphSlotRatio
         glyphLabel.font =
             AppFont.font(size: size)
             ?? .systemFont(ofSize: size)

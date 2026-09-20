@@ -7,7 +7,7 @@ public final class SpaceBarOverlay {
     /// layer's, ahead of the Spaces (#1169).
     public struct Item {
         let identity: SpaceBarItemView.Identity
-        let spaceGlyph: SpaceBarItemView.Identifier
+        let spaceGlyph: SpaceGlyph
         let apps: [SpaceBarItemView.App]
         let active: Bool
         /// Windows hidden past the glyph cap ("+n" badge).
@@ -17,7 +17,7 @@ public final class SpaceBarOverlay {
 
         init(
             space: SpaceID,
-            spaceGlyph: SpaceBarItemView.Identifier,
+            spaceGlyph: SpaceGlyph,
             apps: [SpaceBarItemView.App],
             active: Bool,
             overflow: Int,
@@ -34,7 +34,7 @@ public final class SpaceBarOverlay {
         /// The layer item: one glyph, no apps, never active.
         init(
             layer: String,
-            glyph: SpaceBarItemView.Identifier
+            glyph: SpaceGlyph
         ) {
             identity = .layer(layer)
             spaceGlyph = glyph

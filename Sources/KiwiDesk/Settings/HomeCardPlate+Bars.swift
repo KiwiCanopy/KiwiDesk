@@ -10,8 +10,10 @@ struct HomeCardBarsTile: View {
     var spaceCount: Int = 3
     /// Scale factor (1 on home plate, larger in detail panel).
     var scale: CGFloat = 1
-    /// Space identifiers for panel scale rendering.
-    var spaceLabels: [String] = []
+    /// Space identifiers for panel scale rendering — Core's own
+    /// verdict per Space (#1538); the tint flag is not modelled,
+    /// a schematic dims nothing.
+    var spaceLabels: [SpaceGlyph] = []
     @Environment(\.schematicPalette) private var palette
 
     struct BarItem {
@@ -19,6 +21,10 @@ struct HomeCardBarsTile: View {
         var length: CGFloat
         var label: String?
         var glyph: String?
+        /// The glyph's size against `BarSpec.fontSize`: the App
+        /// Bar's icon steps down by Core's slot ratio, a Space's
+        /// symbol identifier draws at the identifier size.
+        var glyphRatio: CGFloat = AppBarStyle.glyphSlotRatio
         var active = false
     }
 
@@ -146,7 +152,7 @@ struct HomeCardBarsTile: View {
         }
     }
 
-    private func spaceItems(
+    func spaceItems(
         _ style: SpaceBarStyle
     ) -> [BarItem] {
         let count = min(max(spaceCount, 1), 8)
@@ -160,7 +166,13 @@ struct HomeCardBarsTile: View {
                 length: 12 * scale
             )
             if spaceLabels.indices.contains(index) {
-                item.label = spaceLabels[index]
+                switch spaceLabels[index] {
+                case .symbol(let name):
+                    item.glyph = name
+                    item.glyphRatio = 1
+                case .text(let text, _):
+                    item.label = text
+                }
             }
             item.active = active
             items.append(item)

@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 import SwiftUI
 
 /// Renders SF Symbol or text glyph for an icon string with placeholder
@@ -38,10 +39,6 @@ struct IconGlyphLabel: View {
     }
 
     private var isSymbol: Bool {
-        !icon.isEmpty
-            && NSImage(
-                systemSymbolName: icon,
-                accessibilityDescription: nil
-            ) != nil
+        !icon.isEmpty && KiwiCore.iconIsSymbol(icon)
     }
 }

@@ -241,10 +241,7 @@ struct IconPicker: View {
     }
 
     private func isSymbolName(_ name: String) -> Bool {
-        NSImage(
-            systemSymbolName: name,
-            accessibilityDescription: nil
-        ) != nil
+        KiwiCore.iconIsSymbol(name)
     }
 
     private func choose(_ value: String) {

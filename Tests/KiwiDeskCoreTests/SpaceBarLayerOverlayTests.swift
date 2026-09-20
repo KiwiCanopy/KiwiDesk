@@ -16,7 +16,7 @@ struct SpaceBarLayerOverlayTests {
     /// A layer item ahead of two Spaces.
     private static func shown(
         withLayer: Bool = true,
-        glyph: SpaceBarItemView.Identifier = .text("RE", tinted: true),
+        glyph: SpaceGlyph = .text("RE", tinted: true),
         edge: AppBarEdge = .top
     ) throws -> SpaceBarOverlay {
         LiquidGlassGate.override = { false }

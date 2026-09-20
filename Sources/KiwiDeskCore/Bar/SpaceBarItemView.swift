@@ -2,12 +2,6 @@ import AppKit
 
 /// Space item view in Space Bar with identifier and app glyphs (#293).
 final class SpaceBarItemView: NSView {
-    /// Space identifier glyph representation.
-    enum Identifier: Equatable {
-        case symbol(String)
-        case text(String, tinted: Bool)
-    }
-
     /// What an item stands for (#1169). A layer item shows
     /// the active shortcut layer: never a click, drag or drop
     /// target, and never the active slot.
@@ -58,7 +52,7 @@ final class SpaceBarItemView: NSView {
 
     private(set) var identity = Identity.space(SpaceID("1"))
     var space: SpaceID? { identity.space }
-    private(set) var spaceGlyph = Identifier.text(
+    private(set) var spaceGlyph = SpaceGlyph.text(
         "?",
         tinted: true
     )
@@ -153,7 +147,7 @@ final class SpaceBarItemView: NSView {
 
     func configure(
         identity: Identity,
-        spaceGlyph: Identifier,
+        spaceGlyph: SpaceGlyph,
         apps: [App],
         active: Bool,
         horizontal: Bool,

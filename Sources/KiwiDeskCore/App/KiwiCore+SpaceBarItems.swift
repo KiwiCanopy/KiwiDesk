@@ -179,52 +179,65 @@ extension KiwiCore {
     /// uppercase monogram.
     func spaceIdentifier(
         for id: SpaceID
-    ) -> SpaceBarItemView.Identifier {
-        if let icon = tiler.settings.spaceIcons[id],
-            !icon.isEmpty
-        {
-            return Self.iconGlyph(icon)
+    ) -> SpaceGlyph {
+        Self.spaceIdentifier(
+            id: id,
+            icon: tiler.settings.spaceIcons[id]
+        )
+    }
+
+    /// The identifier ladder, pure — the bar and the Bars preview
+    /// both take it, so the preview cannot read an icon its own
+    /// way (#1538, #702).
+    public static func spaceIdentifier(
+        id: SpaceID,
+        icon: String?
+    ) -> SpaceGlyph {
+        if let icon, !icon.isEmpty {
+            return iconGlyph(icon)
         }
         // Numeric ids render as plain digits (QA 2026-07-19):
-        // the old `N.square` symbol is self-bordered, and with
-        // the default boxed background wrapping the item it
-        // read as a box-in-a-box. Plain text also drops the
-        // symbol's 0–50 range limit. Digits skip the monogram's
-        // uppercase-prefix (they are already their own short
-        // string).
+        // the `N.square` symbol read as a box-in-a-box under the
+        // boxed background and stops at 50. Three digits fit the
+        // square cell; longer ids truncate like the monogram.
         if Int(id.raw) != nil {
-            // Three digits still fit the square cell; longer
-            // ids truncate like the monogram rather than clip
-            // under the item's masksToBounds.
-            return Self.textGlyph(String(id.raw.prefix(3)))
+            return textGlyph(String(id.raw.prefix(3)))
         }
-        return Self.monogram(id.raw)
+        return monogram(id.raw)
     }
 
     /// The two-character uppercase cut a named Space and an
     /// icon-less layer share (#1169).
     static func monogram(
         _ name: String
-    ) -> SpaceBarItemView.Identifier {
+    ) -> SpaceGlyph {
         textGlyph(String(name.prefix(2)).uppercased())
     }
 
     /// Text as a bar glyph: tinted unless it is an emoji, which
     /// takes no template tint — where the bit is set for every
     /// glyph Core builds.
-    static func textGlyph(_ text: String) -> SpaceBarItemView.Identifier {
+    static func textGlyph(_ text: String) -> SpaceGlyph {
         .text(text, tinted: !isEmoji(text))
+    }
+
+    /// Whether a configured icon names an SF Symbol. The one
+    /// nil-compared symbol lookup in either tree —
+    /// `SymbolClassifierSeamTests` holds that — so no surface can
+    /// draw a symbol's NAME as text (#1538, #702).
+    public static func iconIsSymbol(_ icon: String) -> Bool {
+        NSImage(
+            systemSymbolName: icon,
+            accessibilityDescription: nil
+        ) != nil
     }
 
     /// A configured icon as a bar glyph — a Space's or a layer's
     /// (`define_layer`'s third argument), one ladder for both.
     static func iconGlyph(
         _ icon: String
-    ) -> SpaceBarItemView.Identifier {
-        if NSImage(
-            systemSymbolName: icon,
-            accessibilityDescription: nil
-        ) != nil {
+    ) -> SpaceGlyph {
+        if iconIsSymbol(icon) {
             return .symbol(icon)
         }
         return textGlyph(icon)
@@ -242,7 +255,7 @@ extension KiwiCore {
     /// A Space's glyph where there is room for a name: its icon,
     /// else the FULL id — the sticky pill and the menu bar item
     /// (#1413) share it, unlike the bar's monogram above.
-    func spaceGlyph(for id: SpaceID) -> SpaceBarItemView.Identifier {
+    func spaceGlyph(for id: SpaceID) -> SpaceGlyph {
         if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
             return Self.iconGlyph(icon)
         }
@@ -253,7 +266,7 @@ extension KiwiCore {
     /// which has no icon and is the bar's resting shape — the
     /// one reading the bar item and the menu bar item share.
     func activeLayerGlyph() -> (
-        name: String, glyph: SpaceBarItemView.Identifier,
+        name: String, glyph: SpaceGlyph,
         hasIcon: Bool
     )? {
         let layer = keys.currentLayer

@@ -44,13 +44,19 @@ struct BarsPanelPreview: View {
         }
     }
 
-    /// Space label identifiers (icon or ordinal).
-    private var spaceLabels: [String] {
-        let icons = model.config.settings.spaceIcons
-        return model.config.spaces.enumerated().map {
-            index,
-            space in
-            icons[space] ?? String(index + 1)
-        }
+    private var spaceLabels: [SpaceGlyph] {
+        Self.spaceLabels(
+            spaces: model.config.spaces,
+            icons: model.config.settings.spaceIcons
+        )
+    }
+
+    /// Each Space's identifier as the bar draws it — Core's own
+    /// ladder, never a reading of the preview's own (#1538).
+    static func spaceLabels(
+        spaces: [SpaceID],
+        icons: [SpaceID: String]
+    ) -> [SpaceGlyph] {
+        spaces.map { KiwiCore.spaceIdentifier(id: $0, icon: icons[$0]) }
     }
 }

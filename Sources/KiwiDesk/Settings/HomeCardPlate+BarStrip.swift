@@ -161,7 +161,9 @@ struct BarStripView: View {
                 if let glyph = item.glyph {
                     Image(systemName: glyph)
                         .font(
-                            .system(size: spec.fontSize * 0.9)
+                            .system(
+                                size: spec.fontSize * item.glyphRatio
+                            )
                         )
                 }
                 if let text = item.label {
