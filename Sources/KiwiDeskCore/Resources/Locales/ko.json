@@ -759,6 +759,8 @@
   "menu.edit.select_all": "전체 선택",
   "menu.edit.title": "편집",
   "menu.edit.undo": "실행 취소",
+  "menu.file.close": "닫기",
+  "menu.file.title": "파일",
   "menu.layout": "레이아웃",
   "menu.layout.all_screens": "모든 화면",
   "menu.layout.keep": "레이아웃을 프로필 ‘%1$@’에 유지",

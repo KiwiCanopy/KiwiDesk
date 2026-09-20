@@ -759,6 +759,8 @@
   "menu.edit.select_all": "Выбрать все",
   "menu.edit.title": "Правка",
   "menu.edit.undo": "Отменить",
+  "menu.file.close": "Закрыть",
+  "menu.file.title": "Файл",
   "menu.layout": "Раскладка",
   "menu.layout.all_screens": "Все экраны",
   "menu.layout.keep": "Оставить раскладку в профиле «%1$@»",

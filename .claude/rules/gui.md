@@ -253,6 +253,22 @@ argument, and why the rule is phrased as an obligation on
 controllers rather than as a claim about the process, is
 "Permanent accessory mode" in `docs/design-decisions.md`.
 
+## A key window without `.closable` answers Close itself (#1533)
+
+The hidden main menu carries the standard File ▸ Close on ⌘W
+with no target, so the key window answers it — which is the
+only way the chord reaches any own window. AppKit's own
+validation greys that item for a window whose style mask lacks
+`.closable` (measured: a borderless `NSPanel` fails
+`validateUserInterfaceItem` for `performClose(_:)`), so a
+key-capable window built without it must validate and perform
+the item itself, routing to the close its keyboard already has,
+or ⌘W beeps at it while closing everything else. `ShortcutsPanel`
+is the instance, and `MainMenuTests` holds the item and the
+panel's verdict. Adding `.closable` instead is the wrong door: it
+routes through AppKit's `close()` and past the #952 activation
+hand-back.
+
 ## The Settings raise tells Core first (#1281)
 
 **The marked own window's raise goes through

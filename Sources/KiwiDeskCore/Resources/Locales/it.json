@@ -759,6 +759,8 @@
   "menu.edit.select_all": "Seleziona tutto",
   "menu.edit.title": "Modifica",
   "menu.edit.undo": "Annulla",
+  "menu.file.close": "Chiudi",
+  "menu.file.title": "File",
   "menu.layout": "Layout",
   "menu.layout.all_screens": "Tutti gli schermi",
   "menu.layout.keep": "Conserva il layout nel profilo «%1$@»",

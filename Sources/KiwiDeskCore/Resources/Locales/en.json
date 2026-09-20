@@ -759,6 +759,8 @@
   "menu.edit.select_all": "Select All",
   "menu.edit.title": "Edit",
   "menu.edit.undo": "Undo",
+  "menu.file.close": "Close",
+  "menu.file.title": "File",
   "menu.layout": "Layout",
   "menu.layout.all_screens": "All Screens",
   "menu.layout.keep": "Keep Layout in Profile “%1$@”",
