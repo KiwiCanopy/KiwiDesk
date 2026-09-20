@@ -177,8 +177,11 @@ enum SourceScan {
     /// the scanned trees use — `"…"` with escapes, `"""…"""`, and
     /// the raw `#"…"#` — because each of them can legally carry a
     /// `/*` that is not a comment, and it is the ONE literal
-    /// walker in this file: `balanced` and `stripped` both route
-    /// here.
+    /// walker of the family: `balanced`, `stripped` and
+    /// `blankingCommentsAndLiterals` all route here. The blanker
+    /// once toggled on plain `"` alone and went dark for the rest
+    /// of any file whose `"""` block held an odd number of them
+    /// (#1320); a second walker is that defect waiting to recur.
     ///
     /// Residue, stated because it fails OPEN: an interpolation
     /// carrying a nested literal (`"\(dict["k"])"`) desyncs the
@@ -192,13 +195,23 @@ enum SourceScan {
         _ text: [Character],
         from i: Int
     ) -> Int? {
+        literalSpan(text, from: i)?.end
+    }
+
+    /// `literalEnd` plus the width of the literal's delimiter —
+    /// what a caller that must KEEP the delimiters and blank
+    /// only the interior needs, so position and line stay aligned.
+    static func literalSpan(
+        _ text: [Character],
+        from i: Int
+    ) -> (end: Int, delimiter: Int)? {
         if matches(text, at: i, rawQuote) {
             return close(
                 text,
                 from: i + 2,
                 on: rawEnd,
                 escaped: false
-            )
+            ).map { ($0, 2) }
         }
         if matches(text, at: i, tripleQuote) {
             return close(
@@ -206,10 +219,11 @@ enum SourceScan {
                 from: i + 3,
                 on: tripleQuote,
                 escaped: true
-            )
+            ).map { ($0, 3) }
         }
         if text[i] == "\"" {
             return close(text, from: i + 1, on: quote, escaped: true)
+                .map { ($0, 1) }
         }
         return nil
     }
@@ -250,7 +264,7 @@ enum SourceScan {
     /// this runs up to twice per character of every file every
     /// scan guard reads, and an `Array(needle)` inside it cost
     /// millions of small allocations per suite.
-    private static func matches(
+    static func matches(
         _ text: [Character],
         at i: Int,
         _ needle: [Character]
@@ -263,9 +277,9 @@ enum SourceScan {
         return true
     }
 
-    private static let lineComment: [Character] = ["/", "/"]
-    private static let openSpan: [Character] = ["/", "*"]
-    private static let closeSpan: [Character] = ["*", "/"]
+    static let lineComment: [Character] = ["/", "/"]
+    static let openSpan: [Character] = ["/", "*"]
+    static let closeSpan: [Character] = ["*", "/"]
     private static let rawQuote: [Character] = ["#", "\""]
     private static let rawEnd: [Character] = ["\"", "#"]
     private static let tripleQuote: [Character] = ["\"", "\"", "\""]

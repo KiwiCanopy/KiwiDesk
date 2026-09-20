@@ -7,8 +7,8 @@ import Foundation
 /// The hardened pieces are REUSED, never copied — `balanced`,
 /// `blankingCommentsAndLiterals`, `memberBodies`,
 /// `isIdentifier` — which is the drift that family exists to
-/// prevent, and `blankingCommentsAndLiterals`' own residue is
-/// therefore inherited too (#1320).
+/// prevent, and why the blanker's #1320 hardening reached this
+/// suite without a line changing here.
 ///
 /// What is genuinely new here, and so stays the suite's own at
 /// the family's FIRST-consumer line: the `=`-initialiser bounds
