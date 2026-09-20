@@ -72,7 +72,8 @@ struct SettingsCatalogSiteTests {
         // 129 since #277: Shortcuts ▸ General's two rows.
         // 122 since #1473: Gaps & Borders' seven at-rest rows
         // leave with their corrected tier.
-        #expect(names.count == 122)
+        // 121 since #1536: the General ▸ About card left.
+        #expect(names.count == 121)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

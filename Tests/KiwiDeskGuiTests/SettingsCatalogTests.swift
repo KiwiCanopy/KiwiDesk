@@ -92,7 +92,9 @@ struct SettingsCatalogTests {
         // 135 since #277: Shortcuts ▸ General's two rows.
         // 128 since #1473: Gaps & Borders' seven at-rest rows
         // leave with their corrected tier.
-        #expect(allEntries.count == 128)
+        // 127 since #1536: the General ▸ About card left for
+        // Home's footer and the About sheet.
+        #expect(allEntries.count == 127)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

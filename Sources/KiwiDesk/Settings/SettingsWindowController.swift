@@ -62,6 +62,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.onShowTour = handler
     }
 
+    /// The one update channel, shared with the status item so the
+    /// footer, About and the menu-bar mark read one store (#1536).
+    func setUpdater(_ updater: any AppUpdating) {
+        model.updater = updater
+    }
+
     /// A quick-menu keep just wrote the live layout into the
     /// profile: move the draft's saved baseline onto it without
     /// discarding staged edits (#1179).

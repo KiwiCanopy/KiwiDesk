@@ -204,6 +204,9 @@ final class SettingsModel: ObservableObject {
     var onRevealProfile: (String) -> Void = { _ in }
     /// Routes banner button to voluntary welcome tour replay.
     var onShowTour: () -> Void = {}
+    /// The update channel the Home footer and About read (#1536);
+    /// inert until `AppDelegate` hands over the status item's.
+    var updater: any AppUpdating = NoUpdater()
 
     let core: KiwiCore
     /// Recorder live session delta and rollback point (#123).

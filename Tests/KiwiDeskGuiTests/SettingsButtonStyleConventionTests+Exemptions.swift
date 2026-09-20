@@ -63,6 +63,12 @@ extension SettingsButtonStyleConventionTests {
                 "Invisible zero-size shortcut sink — Escape, "
                     + "focus-independently"
             ),
+            // The same carrier on the About sheet (#1536).
+            "AboutSheet.swift": (
+                1, "escapeRoute",
+                "Invisible zero-size shortcut sink — Escape, "
+                    + "focus-independently"
+            ),
         ]
     }
 
@@ -72,29 +78,21 @@ extension SettingsButtonStyleConventionTests {
 
     var stylesOnNonButtons: [String: StyleNote] {
         [
-            // Four since the ask widened to a pair for the 1.1
-            // launch (owner, 2026-08-26): the star Link joined
-            // the Ko-fi one, beside the Guide route #1019 gave a
-            // PERMANENT home here and the Release Notes link
-            // #570 added; six since #1407 put the License and
-            // Acknowledgements texts beside them; five since
-            // #1470 moved the Guide route out. All five are
-            // `Link`s, which is why they
-            // are exempt at all rather than owing
-            // `settingsActionButton()`: a `Link` is not a
-            // `Button` and cannot take the seal. They are
-            // deliberately NOT styled alike beyond this — the ask
-            // pair keeps its symbols and `.callout`, the two
-            // informational pointers take the plainer caption
-            // treatment, so the card's ask stays distinguishable
-            // from a pointer.
-            "GeneralSection+About.swift": (
-                5, ".buttonStyle(.plain)",
-                "Five Links taking plain style — the Release "
-                    + "Notes, License and Acknowledgements pointers "
-                    + "(#1407) and the star + support ask pair; the "
-                    + "Guide pointer moved to the Mac Checklist's "
-                    + "foot in #1470"
+            // `Link`s taking plain style: a `Link` is not a
+            // `Button` and cannot take the seal (#1407). Since
+            // #1536 they live on Home's support strip and in the
+            // About sheet, not on a General card.
+            "HomeSupportStrip.swift": (
+                1, ".buttonStyle(.plain)",
+                "One Link row taking plain style — drawn three "
+                    + "times for the Telegram, GitHub and Ko-fi "
+                    + "pointers of the support strip"
+            ),
+            "AboutSheet.swift": (
+                1, ".buttonStyle(.plain)",
+                "One Link helper taking plain style — drawn four "
+                    + "times: Release Notes, License, "
+                    + "Acknowledgements and Website"
             ),
             "ContextShortcut.swift": (
                 1, ".buttonStyle(.plain)",

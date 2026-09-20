@@ -1,6 +1,5 @@
 /// Titled card or group within an area. Spans multiple areas where relevant.
 enum SettingsContainer: CaseIterable, Hashable {
-    case about
     case advanced
     case appBar
     case borders
@@ -63,7 +62,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
-        case .about, .advanced, .borders, .bsp, .cues,
+        case .advanced, .borders, .bsp, .cues,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .generalKeys, .grid,
             .habits, .appliesImmediately, .layers, .luaBindings,

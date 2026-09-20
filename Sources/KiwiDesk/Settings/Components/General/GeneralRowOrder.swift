@@ -8,10 +8,6 @@ enum GeneralRowOrder {
         .general(.startAtLogin),
     ]
 
-    static let about: [SettingKey] = [
-        .general(.about)
-    ]
-
     /// Advanced configuration and reset rows in ascending severity
     /// (`GeneralSection+Reset`, #606).
     static let advanced: [SettingKey] = [
@@ -28,7 +24,6 @@ enum GeneralRowOrder {
     /// All rows grouped by container.
     static let byContainer: [SettingsContainer: [SettingKey]] = [
         .appliesImmediately: appliesImmediately,
-        .about: about,
         .advanced: advanced,
     ]
 
@@ -36,7 +31,6 @@ enum GeneralRowOrder {
     /// iteration (`gui.md`).
     static let bespokeContainers: Set<SettingsContainer> = [
         .appliesImmediately,
-        .about,
         .advanced,
     ]
 }

@@ -8,7 +8,7 @@ extension SettingsValueReadout {
         new: GuiConfig
     ) -> [SettingsDiffRow] {
         switch key {
-        case .language, .appearance, .startAtLogin, .about,
+        case .language, .appearance, .startAtLogin,
             .advancedConfigFile,
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,

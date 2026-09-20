@@ -17,6 +17,7 @@ private final class FakeStatusItem: StatusItemHandle {
 /// whether it was actually asked to check.
 @MainActor
 private final class FakeUpdater: AppUpdating {
+    let updates = UpdateStateStore()
     var canCheckForUpdates: Bool
     private(set) var checks = 0
     var updatePending = false { didSet { onUpdatePendingChanged() } }

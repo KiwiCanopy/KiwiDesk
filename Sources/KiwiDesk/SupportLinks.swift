@@ -13,6 +13,14 @@ enum SupportLinks {
         string: "https://github.com/KiwiCanopy/KiwiDesk"
     )!
 
+    /// The Telegram group — questions, ideas and polls (#1536).
+    static let telegram = URL(
+        string: "https://t.me/+Jsty97sOACozMmUy"
+    )!
+
+    /// The website, for About (#1536).
+    static var website: URL { site }
+
     /// GitHub Releases — KiwiDesk's changelog (#570). Linked for
     /// the NOTES, not as a download: `docs/design-decisions.md` ▸
     /// "No distribution channel without an update path" governs

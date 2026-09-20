@@ -11589,6 +11589,63 @@ of it, rather than separate rulings:
   the reporter for a number they cannot know, and the next-larger
   preset is a superset the maintainer trims for free.
 
+### Home's lower half holds the community; About is a sheet (#1536)
+
+**[Principle]**
+
+**The page that welcomes also points outward.** Everything
+*about* KiwiDesk — version, release notes, license, the links
+to GitHub and Ko-fi — used to sit on a General card one
+navigation away, and the update state showed nowhere but the
+menu bar. Home now ends in a quiet strip: a small-caps
+*Community & Support* heading over three underlined links with
+the services' own marks (Telegram, GitHub, Ko-fi), then one
+footer line — mark, name, version, update state, *About
+KiwiDesk*. It is the last thing on the page and competes with
+nothing above it: no container, no rule, no glass, no motion,
+and the marks are template images in secondary ink, because on
+this page colour means "this control is on" and a brand blue or
+orange would say that about a link.
+
+**The update state is one component.** Sparkle's cycle outcome
+lands in one store (`UpdateStateStore`, written by the updater
+delegate) and one view draws it — up to date with the last
+check, checking with the arrow dimmed in place, a found version
+with the accent dot the menu-bar icon already uses and the
+menu-bar row's own *Update Available…*, a failed check with a
+*Try again* that stays enabled since that failure is retryable.
+Home and About draw that same view, so the two cannot say
+different things. `updatePending` (#1013) is a different fact —
+a scheduled update waiting behind the gentle reminder — and
+stays where it was.
+
+**About is a sheet over Settings, hosted by the shell.** A body
+of content that asks no question and writes nothing is what the
+repo reserves a sheet for (#859): Return and Escape both put it
+away. A separate window would tile itself and could be left
+open behind Settings showing a stale sentence; a Home
+destination would enter the back-chip navigation and promise
+settings About does not hold. The shell hosts it because the
+footer that opens it sits in Home, which reflows under it, and a
+host must outlive its opener (`SheetPresentationSeamTests`).
+
+**[Trade-off]**
+
+**Link placement is exclusive.** Home carries Telegram, GitHub
+and Ko-fi only; About carries version, update state, Release
+Notes, License, Acknowledgements and the website only. A link in
+both places makes the reader ask whether they differ. The
+General card is gone with it; language, appearance and
+open-at-login stay on General, and the reset ladder, log export
+and backup stay under General ▸ Advanced, which is already the
+recovery shelf.
+
+**A "checking" state is only ever our own check.** Sparkle
+reports no "check started" for its scheduled background checks,
+so those show as their result — the dated up-to-date sentence
+moves, or the found version appears — never as a spinner the
+footer would have to guess at.
+
 ### Out of scope, on purpose
 
 **[Trade-off]**

@@ -5,6 +5,8 @@ import SwiftUI
 /// Settings dashboard shell hosting Home grid or pushed section screen (#678).
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
+    /// One open of About per request (#1536, #843).
+    @State private var aboutRequest: AboutRequest?
     /// Scroll and flash task for pending reveal, held so a second
     /// search click supersedes the first instead of overlapping.
     @State var revealTask: Task<Void, Never>?
@@ -54,6 +56,12 @@ struct SettingsView: View {
         // ruled full kiwi, 2026-08-04); above the `editingLua`
         // branch so both arms carry it.
         .tint(SettingsTheme.accent)
+        // About (#1536) is hosted by the shell, whose identity
+        // outlives Home's reflow (`SheetPresentationSeamTests`).
+        .environment(\.openAbout) { aboutRequest = AboutRequest() }
+        .sheet(item: $aboutRequest) { _ in
+            AboutSheet(model: model) { aboutRequest = nil }
+        }
         // The one discard dialog (#515), hosted above the
         // `editingLua` branch: `chrome` is instantiated per arm
         // and two gated actions flip `editingLua`, so a dialog

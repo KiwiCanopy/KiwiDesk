@@ -71,6 +71,7 @@ struct HomeScreen: View {
                     cards: offered(HomeCardOrder.wholeApp),
                     columns: columns(for: width, band: band)
                 )
+                HomeSupportStrip(model: model)
             }
             .padding(
                 [.horizontal, .bottom],
@@ -138,18 +139,7 @@ struct HomeScreen: View {
         columns: [GridItem]
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(
-                    .system(
-                        size: 10,
-                        weight: .semibold,
-                        design: .monospaced
-                    )
-                )
-                .tracking(1.3)
-                .foregroundStyle(SettingsTheme.groupHeading)
-                .textCase(.uppercase)
-                .accessibilityAddTraits(.isHeader)
+            HomeGroupHeading(title)
             LazyVGrid(
                 columns: columns,
                 alignment: .leading,
@@ -173,5 +163,30 @@ struct HomeScreen: View {
     private func push(_ destination: SettingsDestination) {
         model.nav.homeReturnFocus = destination
         model.destination = destination
+    }
+}
+
+/// The small-caps heading over a Home group — and over the
+/// support strip (#1536), so the page has one heading voice.
+struct HomeGroupHeading: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .font(
+                .system(
+                    size: 10,
+                    weight: .semibold,
+                    design: .monospaced
+                )
+            )
+            .tracking(1.3)
+            .foregroundStyle(SettingsTheme.groupHeading)
+            .textCase(.uppercase)
+            .accessibilityAddTraits(.isHeader)
     }
 }

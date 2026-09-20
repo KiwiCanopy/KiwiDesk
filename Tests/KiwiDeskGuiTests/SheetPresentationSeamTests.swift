@@ -32,7 +32,10 @@ struct SheetPresentationSeamTests {
     /// dialog, hosted above the `editingLua` branch its own confirm
     /// button flips.
     private static let allowed: [String: String] = [
-        "PresetsSection.swift": "$previewRequest"
+        "PresetsSection.swift": "$previewRequest",
+        // About (#1536) is the shell's: its footer opener sits in
+        // Home, which reflows under it, and the shell outlives both.
+        "SettingsView.swift": "$aboutRequest",
     ]
 
     private var trees: [URL] {

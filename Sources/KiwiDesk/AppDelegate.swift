@@ -30,6 +30,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         created.setShowTour { [weak self] in
             self?.replayOnboardingTour()
         }
+        if let updater = statusItem?.updater {
+            created.setUpdater(updater)
+        }
         created.setPermissionPaused(!permissions.isTrusted)
         dashboardIfCreated = created
         return created

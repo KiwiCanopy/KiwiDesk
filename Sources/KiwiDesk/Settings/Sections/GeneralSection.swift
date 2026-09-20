@@ -27,7 +27,6 @@ struct GeneralSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 appliesImmediatelySection
-                aboutSection
                 advancedSection
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
