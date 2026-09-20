@@ -203,11 +203,10 @@ enum SourceScan {
     /// the scanned trees use — `"…"` with escapes, `"""…"""`, and
     /// the raw `#"…"#` — because each of them can legally carry a
     /// `/*` that is not a comment. `balanced` and `stripped` (and
-    /// through it the blanker, #1320) route here. Three siblings
-    /// still carry a plain-quote toggle of their own —
-    /// `+InterpolatedLabels.literal`, `+Arguments.firstArgument`,
-    /// `+Types` — each stating its residue; route one here the
-    /// day it bites, never copy this.
+    /// through it the blanker, #1320) route here. A sibling that
+    /// still carries a plain-quote toggle of its own states its
+    /// residue where it lives, and is routed here the day it
+    /// bites — never copied.
     ///
     /// Residue, stated because it fails OPEN: an interpolation
     /// carrying a nested literal (`"\(dict["k"])"`) desyncs the
