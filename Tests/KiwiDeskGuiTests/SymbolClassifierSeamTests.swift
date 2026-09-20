@@ -80,4 +80,48 @@ struct SymbolClassifierSeamTests {
             #expect(!reason.isEmpty, Comment(rawValue: path))
         }
     }
+
+    /// The other spelling of a classifier: binding the lookup with
+    /// `if let` / `guard let` and drawing the NAME on the else arm
+    /// — the status item's mode-icon arm did until #1538. One
+    /// render-time net may bind: `StickyMarkPlate` draws a name
+    /// `homeSpaceMark` already classified.
+    private let bindingAllowed: [String: String] = [
+        "Sources/KiwiDeskCore/Borders/StickyMarkPlate.swift":
+            "render-time net on a name `homeSpaceMark` classified"
+    ]
+
+    @Test("No lookup is classified by binding it outside the one net")
+    func classifyByBindingHasOneHome() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let binding = try Regex(
+            #"(if|guard)\s+let\s+\w+\s*=\s*NSImage\(\s*systemSymbolName:"#
+        )
+        var found: Set<String> = []
+        var scanned = 0
+        for tree in ["Sources", "Tests"] {
+            let files = try SourceScan.swiftSources(
+                under: root.appendingPathComponent(tree)
+            )
+            for file in files {
+                scanned += 1
+                let source = SourceScan.blankingCommentsAndLiterals(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                if source.contains(binding) {
+                    found.insert(
+                        file.path.replacingOccurrences(
+                            of: root.path + "/",
+                            with: ""
+                        )
+                    )
+                }
+            }
+        }
+        #expect(scanned > 300)
+        #expect(
+            found == Set(bindingAllowed.keys),
+            Comment(rawValue: found.sorted().joined(separator: ", "))
+        )
+    }
 }
