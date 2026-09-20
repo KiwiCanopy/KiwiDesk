@@ -873,6 +873,7 @@
   "onboarding.starter_spaces.body": "Utilisez-les comme vous utilisiez les Bureaux de votre Mac — à une touche de distance, mais chacun agence ses fenêtres pour vous. Chacun a sa propre disposition, choisie pour votre configuration.",
   "onboarding.starter_spaces.footer": "Renommez ou modifiez n'importe lequel de ces espaces dans les Réglages, quand vous le souhaitez. Les Bureaux natifs de votre Mac existent toujours en dessous — l'un d'eux peut contenir tout un ensemble de ces espaces, même si vous n'en aurez pas besoin avant longtemps.",
   "onboarding.starter_spaces.hint": "Plus d'espaces ou d'autres dispositions ? Dans les Réglages, quand vous voulez.",
+  "onboarding.starter_spaces.layouts_differ": "Chaque disposition se comporte différemment — l'une divise l'écran, l'autre défile sur le côté — et vous pourrez changer la disposition d'un espace plus tard dans Réglages ▸ %1$@.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Espace %1$@",
   "onboarding.starter_spaces.tile.axlabel": "Espace %1$@, %2$@, sur %3$@",

@@ -873,6 +873,7 @@
   "onboarding.starter_spaces.body": "macOS의 데스크탑을 쓰시던 것처럼 사용하십시오. 키 하나로 전환되지만, 각 공간이 자기 윈도우를 알아서 배치해 줍니다. 각 공간마다 레이아웃이 설정되어 있으며, 사용자의 환경에 맞게 선택되었습니다.",
   "onboarding.starter_spaces.footer": "설정에서 언제든지 이러한 공간의 이름을 변경하거나 수정할 수 있습니다. macOS 자체 데스크탑도 아래에 그대로 유지되며, 그중 하나가 이러한 공간 한 벌을 통째로 담을 수 있습니다. 다만 한동안은 그럴 일이 없습니다.",
   "onboarding.starter_spaces.hint": "공간을 더 늘리거나 다른 레이아웃을 쓰고 싶다면, 언제든 설정에서.",
+  "onboarding.starter_spaces.layouts_differ": "레이아웃마다 동작이 다릅니다. 화면을 분할하는 것도 있고, 옆으로 스크롤되는 것도 있습니다. 공간의 레이아웃은 나중에 설정 ▸ %1$@에서 변경할 수 있습니다.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "공간 %1$@",
   "onboarding.starter_spaces.tile.axlabel": "공간 %1$@, %2$@, %3$@에 있음",

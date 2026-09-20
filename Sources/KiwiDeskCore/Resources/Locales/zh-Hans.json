@@ -873,6 +873,7 @@
   "onboarding.starter_spaces.body": "把它们当作你以前用的 macOS 桌面来用 — 一个按键即可切换，而且每个空间都会替你排列自己的窗口。每个空间都有各自的布局，已针对你的配置进行选择。",
   "onboarding.starter_spaces.footer": "你可以随时在“设置”中重命名或修改其中任何一个空间。macOS 自带的桌面仍保留在下方 — 其中一个桌面就能容纳整整一组这样的空间，不过你在很长一段时间内都不会需要这样做。",
   "onboarding.starter_spaces.hint": "想要更多空间或别的布局？随时在“设置”中。",
+  "onboarding.starter_spaces.layouts_differ": "每种布局的行为都不同 — 有的把屏幕一分为二，有的横向滚动 — 空间的布局以后可以在“设置 ▸ %1$@”中更改。",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "空间 %1$@",
   "onboarding.starter_spaces.tile.axlabel": "空间 %1$@，%2$@，位于 %3$@",

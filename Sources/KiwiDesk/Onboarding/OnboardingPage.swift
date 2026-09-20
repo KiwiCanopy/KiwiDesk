@@ -6,6 +6,8 @@ struct OnboardingPage<Content: View, Action: View>: View {
     let title: String
     /// Primary body text tier.
     let body1: String
+    /// A second body paragraph, same tier, drawn when non-nil.
+    var body2: String?
     /// Secondary text tier drawn when non-nil.
     var footnote: String?
     /// Whether the footnote renders below content instead of below the body.
@@ -23,14 +25,10 @@ struct OnboardingPage<Content: View, Action: View>: View {
                 Text(title)
                     .font(.system(size: 22, weight: .bold))
                     .fixedSize(horizontal: false, vertical: true)
-                Text(onboardingEmphasis(body1))
-                    .font(.system(size: 14))
-                    .foregroundStyle(SettingsTheme.ink2)
-                    // Every copy tier wraps rather than truncates:
-                    // a fixed window plus German is how the grant
-                    // step shipped a clipped sentence (owner, on
-                    // device, 2026-08-12).
-                    .fixedSize(horizontal: false, vertical: true)
+                bodyText(body1)
+                if let body2 {
+                    bodyText(body2)
+                }
                 if let footnote, !footnoteAtBottom {
                     footnoteText(footnote)
                 }
@@ -60,6 +58,17 @@ struct OnboardingPage<Content: View, Action: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .multilineTextAlignment(.leading)
+    }
+
+    private func bodyText(_ text: String) -> some View {
+        Text(onboardingEmphasis(text))
+            .font(.system(size: 14))
+            .foregroundStyle(SettingsTheme.ink2)
+            // Every copy tier wraps rather than truncates: a
+            // fixed window plus German is how the grant step
+            // shipped a clipped sentence (owner, on device,
+            // 2026-08-12).
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func footnoteText(_ text: String) -> some View {
