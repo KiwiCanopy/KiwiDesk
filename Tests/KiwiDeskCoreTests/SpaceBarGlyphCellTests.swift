@@ -7,25 +7,38 @@ import Testing
 /// A text glyph stays whole and centred in a thin bar's cell
 /// (#1529).
 ///
-/// At thickness 20 the glyph cell is 12 pt and a label's
+/// At the thickness floor the glyph cell is 12 pt and a label's
 /// `cellSize` — advance plus ~8 pt of cell padding — exceeds it,
 /// so `NSTextFieldCell` drew the string left-aligned and the
 /// field clipped its trailing quarter. The width clauses pin the
 /// one framing (`BarTextGlyph.frame`) on both call sites; the
 /// render clauses pin the mechanism — the field's own render is
-/// what clipped — and that the INK is centred, since centring
-/// the advance drew a ligature a sixth of the cell to the left.
+/// what clipped, so the ink's edges sit inside it — and that the
+/// INK is centred, since centring the advance drew a ligature a
+/// sixth of the cell to the left. The fixture takes an explicit
+/// font size, which the ladder clamps to the cell: that is the
+/// size at which the clip is widest.
 ///
-/// The display is the fixture's: every geometry here is the
-/// strip handed to `sync` (#531), and the App Font is the
-/// bundled one (`AppFontResourceTests`).
+/// `@MainActor` for the views it renders to bitmaps, walked
+/// pixel by pixel, and for one real `SpaceBarManager.sync`. The
+/// display is the fixture's: every geometry here is the strip
+/// handed to `sync` (#531), the thickness is the slider's floor
+/// read from `AppBarStyle.minThickness` (#1359), and the font is
+/// the bundled App Font, required per test rather than assumed.
 @Suite("Space Bar glyph cell at the thickness floor (#1529)")
 @MainActor
 struct SpaceBarGlyphCellTests {
-    /// `AppBarStyle.minThickness`, the slider's floor (#1359).
-    private static let depth: CGFloat = 20
-    private static let cell: CGFloat = 12
+    private static let depth = AppBarStyle.minThickness
+    private static let cell = max(depth - SpaceBarItemView.pad * 2, 8)
     private static let glyph = ":safari:"
+
+    /// Explicit, above the cell: `identifierFontSize` clamps it
+    /// to the cell and the glyph ladder takes 0.9 of that.
+    private static var style: SpaceBarStyle {
+        var style = SpaceBarStyle()
+        style.fontSize = 14
+        return style
+    }
 
     init() { LiquidGlassGate.override = { false } }
 
@@ -69,7 +82,7 @@ struct SpaceBarGlyphCellTests {
             apps: apps,
             active: true,
             horizontal: horizontal,
-            style: SpaceBarStyle(),
+            style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
                 floating: "#ffffff"
@@ -103,30 +116,36 @@ struct SpaceBarGlyphCellTests {
         return (CGFloat(first) / scale)...(CGFloat(last + 1) / scale)
     }
 
-    /// The glyph's ink width as the text system measures it.
-    private static func inkWidth(of field: NSTextField) -> CGFloat {
-        let line = CTLineCreateWithAttributedString(
-            NSAttributedString(
-                string: field.stringValue,
-                attributes: [.font: field.font as Any]
-            )
+    private static func requireAppFont(
+        _ field: NSTextField
+    ) throws -> NSFont {
+        let font = try #require(field.font)
+        try #require(
+            font.fontName == AppFont.fontName,
+            "the fixture fell back to the system font"
         )
-        return CTLineGetImageBounds(line, nil).width
+        return font
     }
 
-    /// Whole: the rendered ink is as wide as the glyph; centred:
-    /// its middle sits on the cell's, to the point the frame is
-    /// rounded to.
+    /// Whole: both edges of the rendered ink sit inside the
+    /// field, and it is as wide as the glyph; centred: its
+    /// middle sits on the cell's, within the point the site
+    /// rounds to.
     private static func expectWholeAndCentred(
         _ field: NSTextField,
         cellMid: CGFloat,
         axis: String
     ) throws {
+        let font = try requireAppFont(field)
         let span = try #require(Self.inkSpan(of: field))
-        let ink = Self.inkWidth(of: field)
+        let ink = BarTextGlyph.inkBounds(field.stringValue, font: font)
         #expect(
-            span.upperBound - span.lowerBound >= ink - 1,
-            "\(axis): \(span) of \(ink) pt drawn"
+            span.lowerBound > 0 && span.upperBound < field.bounds.width,
+            "\(axis): ink \(span) touches the field's edge"
+        )
+        #expect(
+            span.upperBound - span.lowerBound >= ink.width - 1,
+            "\(axis): \(span) of \(ink.width) pt drawn"
         )
         let mid = field.frame.minX + (span.lowerBound + span.upperBound) / 2
         #expect(
@@ -172,9 +191,34 @@ struct SpaceBarGlyphCellTests {
         #expect(image.frame.midX == Self.depth / 2)
     }
 
+    /// A ligature that overshoots its em is scaled to the cell,
+    /// so along the bar no glyph reaches its neighbour's cell.
+    @Test("every bundled ligature's ink fits the floor's cell")
+    func everyLigatureFitsTheCell() throws {
+        let map = try #require(AppFontGlyphMap.loadBundled())
+        let ligatures = Set(map.values)
+        try #require(ligatures.count > 100)
+        let size = Self.style.glyphFontSize(forDepth: Self.depth)
+        let cell = CGRect(x: 0, y: 0, width: Self.cell, height: Self.cell)
+        var scaled = 0
+        for ligature in ligatures {
+            let field = NSTextField(labelWithString: ligature)
+            field.alignment = .center
+            field.font = try #require(AppFont.font(size: size))
+            field.frame = BarTextGlyph.frame(for: field, in: cell)
+            let font = try Self.requireAppFont(field)
+            let ink = BarTextGlyph.inkBounds(ligature, font: font)
+            #expect(ink.width <= Self.cell + 0.01, "\(ligature)")
+            if font.pointSize < size { scaled += 1 }
+        }
+        // The clause is live: the bundled font has ligatures the
+        // fit had to scale.
+        #expect(scaled > 0)
+    }
+
     @Test("the front-app glyph takes the same framing")
     func frontAppGlyphIsWholeAndCentred() throws {
-        var style = SpaceBarStyle()
+        var style = Self.style
         style.thickness = Self.depth
         style.showFrontApp = true
         let bar = SpaceBarManager.Bar(
@@ -211,13 +255,18 @@ struct SpaceBarGlyphCellTests {
         )
         let field = overlay.frontGlyph
         try #require(!field.isHidden, "the segment drew no glyph")
+        let font = try Self.requireAppFont(field)
         let width = ceil(field.cell?.cellSize.width ?? 0)
         #expect(width > Self.cell, "the fixture no longer overflows")
         #expect(field.frame.width >= width)
         let span = try #require(Self.inkSpan(of: field))
+        let ink = BarTextGlyph.inkBounds(field.stringValue, font: font)
         #expect(
-            span.upperBound - span.lowerBound
-                >= Self.inkWidth(of: field) - 1,
+            span.lowerBound > 0 && span.upperBound < field.bounds.width,
+            "ink \(span) touches the field's edge"
+        )
+        #expect(
+            span.upperBound - span.lowerBound >= ink.width - 1,
             "\(span) drawn"
         )
         // The cell is centred across the strip's depth; the ink's

@@ -197,9 +197,9 @@ extension SpaceBarOverlay {
                 AppFont.font(size: size)
                 ?? .systemFont(ofSize: size)
             frontGlyph.textColor = accent
-            frontGlyph.frame = BarTextGlyph.frame(
-                for: frontGlyph,
-                in: frame
+            frontGlyph.frame = itemContainer.backingAlignedRect(
+                BarTextGlyph.frame(for: frontGlyph, in: frame),
+                options: .alignAllEdgesNearest
             )
             frontGlyph.setAccessibilityElement(true)
             frontGlyph.setAccessibilityLabel(axLabel)
