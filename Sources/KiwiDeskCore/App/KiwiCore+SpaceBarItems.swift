@@ -209,7 +209,13 @@ extension KiwiCore {
     static func monogram(
         _ name: String
     ) -> SpaceBarItemView.Identifier {
-        .text(String(name.prefix(2)).uppercased(), tinted: true)
+        textGlyph(String(name.prefix(2)).uppercased())
+    }
+
+    /// Text as a bar glyph: tinted unless it is an emoji, which
+    /// takes no template tint — the one place the bit is set.
+    static func textGlyph(_ text: String) -> SpaceBarItemView.Identifier {
+        .text(text, tinted: !isEmoji(text))
     }
 
     /// A configured icon as a bar glyph — a Space's or a layer's
@@ -223,9 +229,7 @@ extension KiwiCore {
         ) != nil {
             return .symbol(icon)
         }
-        // Emoji render untinted (they take no template
-        // tint); plain characters follow the state color.
-        return .text(icon, tinted: !isEmoji(icon))
+        return textGlyph(icon)
     }
 
     /// U+FE0F covers text-default scalars forced into emoji
@@ -244,7 +248,7 @@ extension KiwiCore {
         if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
             return Self.iconGlyph(icon)
         }
-        return .text(id.raw, tinted: true)
+        return Self.textGlyph(id.raw)
     }
 
     /// The active shortcut layer's glyph — nil on `default`,

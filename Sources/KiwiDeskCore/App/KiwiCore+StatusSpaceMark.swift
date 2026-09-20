@@ -2,10 +2,9 @@ import AppKit
 
 /// What the menu bar item draws for the active layer and, while
 /// the Space Bar is off, for the Space each screen shows (#1413).
-/// The one derivation of the layer's menu-bar glyph — the bus
-/// sink that used to hand the GUI a raw icon string is retired,
-/// so the switch cannot draw one layer two ways. Core hands
-/// structure; the GUI draws and names it (#96).
+/// The layer's menu-bar glyph has this one derivation, over
+/// `activeLayerGlyph`. Core hands structure; the GUI draws and
+/// names it (#96).
 public struct StatusSpaceMark: Equatable {
     /// The bar's own identifier ladder, carried across with its
     /// tint bit: an untinted text glyph is an emoji, which takes

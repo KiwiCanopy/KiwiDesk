@@ -10,8 +10,9 @@ import AppKit
 /// calls in bar building.
 extension KiwiCore {
     /// The bar follows the active layer off the `layer_change`
-    /// bus event, like the menu bar's icon — never a hook on the
-    /// manager, which keeps one seam (#1169, #1168).
+    /// bus event — never a hook on the manager, which keeps one
+    /// seam (#1169, #1168) — and its refresh carries the menu
+    /// bar's mark with it (#1413).
     func wireSpaceBarLayerRefresh() {
         bus.addSink { [weak self] event, _ in
             guard event == .layerChange else { return }
