@@ -5511,11 +5511,18 @@ strand anything.
 The menu bar this policy hides is still built (`MainMenu`) —
 AppKit routes key equivalents through `NSApp.mainMenu` whatever
 the policy, and it is what gives the Settings text fields
-Cut/Copy/Paste/Undo and every key window its Close (⌘W —
-[#1533](https://github.com/KiwiCanopy/KiwiDesk/issues/1533)
-found the item missing, so nothing answered the chord; a
-borderless panel, which AppKit greys Close for, validates the
-item itself).
+Cut/Copy/Paste/Undo.
+
+:::unreleased
+The same routing is why Close lives there: ⌘W reaches a window
+only as a key equivalent of a menu item, so without a File ▸
+Close item nothing answers the chord in any own window
+([#1533](https://github.com/KiwiCanopy/KiwiDesk/issues/1533)).
+The item carries no target and the key window answers it — and a
+key window built without `.closable`, which AppKit greys Close
+for, validates and performs the item itself so the chord means
+the same thing at the Shortcuts panel as at Settings.
+:::
 
 **Corollary: nothing arrives in front for free, and that reaches
 windows KiwiDesk did not open.** A `.regular` app has a Dock tile

@@ -203,7 +203,10 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     // MARK: - Panel construction
 
-    private func makePanel() -> ShortcutsPanel {
+    /// Internal so `MainMenuTests` takes the production panel —
+    /// its class and style mask are what the Close verdict is
+    /// about (#1533).
+    func makePanel() -> ShortcutsPanel {
         let panel = ShortcutsPanel(
             contentRect: .zero,
             styleMask: [.borderless, .fullSizeContentView],

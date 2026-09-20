@@ -73,16 +73,17 @@ struct MainMenuTests {
 
     /// A borderless window fails AppKit's own Close validation,
     /// so the Shortcuts panel validates the item itself and
-    /// answers it with the keyboard-commanded cancel.
+    /// answers it with the keyboard-commanded cancel. The panel
+    /// is the controller's own build, so a change to its class
+    /// or style mask is what this clause reads.
     @Test("the borderless Shortcuts panel validates and answers Close")
     func shortcutsPanelHonoursClose() {
-        let panel = ShortcutsPanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .fullSizeContentView],
-            backing: .buffered,
-            defer: true
+        let controller = ShortcutsPanelController(
+            core: makeTestCore(),
+            onEdit: {}
         )
-        panel.isReleasedWhenClosed = false
+        let panel = controller.makePanel()
+        #expect(!panel.styleMask.contains(.closable))
         var cancelled = 0
         panel.onCancel = { cancelled += 1 }
         let close = NSMenuItem(
