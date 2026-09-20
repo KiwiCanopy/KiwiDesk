@@ -145,7 +145,13 @@ bite large test PRs:
     named harm is identical: narrow the predicate in one copy
     and not the other and the wider copy silently exempts a
     file from a fail-open guard (#573 proved that exact bug
-    with a one-file probe that passed every check).
+    with a one-file probe that passed every check). A primitive
+    that decides what a scan SEES owes a whole-tree canary
+    measured from OUTSIDE its walker — `SourceScanCommentTests`
+    ▸ `nothingGoesDark` for the stripper, `SourceScanBlankerTests`
+    ▸ `nothingGoesDark` for the blanker — because a scan handed
+    less source than it thinks cannot red on its own (#1320
+    found 264 dark lines under a green family that way).
   - *the schematic placement promise* in
     `SchematicPlacementPromise.swift` — the four-arm statement of
     where a preview's `+` lands, read by

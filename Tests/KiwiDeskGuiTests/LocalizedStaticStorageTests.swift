@@ -73,8 +73,7 @@ struct LocalizedStaticStorageTests {
     /// One more is inherited rather than introduced here: helper
     /// reach stops at the FILE, so a stored value fed by another
     /// file's localized helper is invisible. (The blanker's own
-    /// residue — a `"""` block with an odd number of quotes
-    /// darkening the rest of its file — closed with #1320.)
+    /// residue closed with #1320.)
     ///
     /// Survivors, keyed by the string a failure prints, each
     /// naming what makes it safe.

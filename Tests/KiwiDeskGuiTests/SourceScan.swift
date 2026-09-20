@@ -88,22 +88,18 @@ enum SourceScan {
     /// first would open a comment there and swallow source until
     /// the next `*/`.
     ///
-    /// The block half skips string literals; the LINE half does
-    /// not, and that residue predates this and stays: a `//`
-    /// inside a literal cuts the rest of that one line. It is
-    /// not hypothetical — `ServiceManager.swift` carries two (a
-    /// plist DOCTYPE and a URL) — and it is harmless to every
-    /// current consumer only because no needle follows them on
-    /// the same line, which is luck rather than design. Weigh it
-    /// when adding a needle. What that residue must NOT do is
-    /// widen: an unbalanced quote it leaves behind used to send
-    /// the block walk to EOF, which is why `close` refuses an
-    /// unterminated literal.
+    /// Both halves skip string literals, since `stripped` asks
+    /// `literalEnd` before either marker — a `//` inside a
+    /// literal is never a comment. An unbalanced quote must
+    /// still not send the walk to EOF, which is why `close`
+    /// refuses an unterminated literal.
     ///
     /// `SourceScanCommentTests` holds the whole-file property
     /// this once broke — every line carrying no comment marker
     /// survives verbatim — because a scan handed less source
     /// than it thinks cannot red on its own.
+    /// `blankingCommentsAndLiterals` is the same walk with the
+    /// other emit policy (`SourceScan+Literals.swift`).
     static func stripComments(_ source: String) -> String {
         stripped(Array(source))
     }
@@ -140,33 +136,63 @@ enum SourceScan {
     /// aligned with the source — `SourceScanCommentTests`
     /// compares the two by index, which is only exact because of
     /// that.
-    private static func stripped(_ text: [Character]) -> String {
+    ///
+    /// `blanking` is the one other emit policy: what the drop
+    /// policy removes becomes a space, position for position,
+    /// and a literal keeps its delimiters and loses its interior
+    /// — the blanker's contract. One walk, two policies, so a
+    /// hardening here (nesting, marker order, the literal skip)
+    /// cannot land in one and not the other (#1320).
+    static func stripped(
+        _ text: [Character],
+        blanking: Bool = false
+    ) -> String {
         var out = ""
         var depth = 0
         var i = 0
+        func drop(_ character: Character) {
+            if blanking {
+                out.append(character == "\n" ? "\n" : " ")
+            } else if character == "\n" {
+                out.append("\n")
+            }
+        }
         while i < text.count {
-            if depth == 0, let end = literalEnd(text, from: i) {
-                out += String(text[i..<end])
-                i = end
+            if depth == 0, let literal = literalSpan(text, from: i) {
+                if blanking {
+                    let open = i + literal.delimiter
+                    let close = literal.end - literal.delimiter
+                    out += String(text[i..<open])
+                    for j in open..<close { drop(text[j]) }
+                    out += String(text[close..<literal.end])
+                } else {
+                    out += String(text[i..<literal.end])
+                }
+                i = literal.end
                 continue
             }
             if matches(text, at: i, openSpan) {
                 depth += 1
+                drop("/")
+                drop("*")
                 i += 2
                 continue
             }
             if depth > 0, matches(text, at: i, closeSpan) {
                 depth -= 1
+                drop("*")
+                drop("/")
                 i += 2
                 continue
             }
             if depth == 0, matches(text, at: i, lineComment) {
-                while i < text.count, text[i] != "\n" { i += 1 }
+                while i < text.count, text[i] != "\n" {
+                    drop(text[i])
+                    i += 1
+                }
                 continue
             }
-            if depth == 0 || text[i] == "\n" {
-                out.append(text[i])
-            }
+            if depth == 0 { out.append(text[i]) } else { drop(text[i]) }
             i += 1
         }
         return out
@@ -176,12 +202,12 @@ enum SourceScan {
     /// nil when nothing starts there. Handles the three shapes
     /// the scanned trees use — `"…"` with escapes, `"""…"""`, and
     /// the raw `#"…"#` — because each of them can legally carry a
-    /// `/*` that is not a comment, and it is the ONE literal
-    /// walker of the family: `balanced`, `stripped` and
-    /// `blankingCommentsAndLiterals` all route here. The blanker
-    /// once toggled on plain `"` alone and went dark for the rest
-    /// of any file whose `"""` block held an odd number of them
-    /// (#1320); a second walker is that defect waiting to recur.
+    /// `/*` that is not a comment. `balanced` and `stripped` (and
+    /// through it the blanker, #1320) route here. Three siblings
+    /// still carry a plain-quote toggle of their own —
+    /// `+InterpolatedLabels.literal`, `+Arguments.firstArgument`,
+    /// `+Types` — each stating its residue; route one here the
+    /// day it bites, never copy this.
     ///
     /// Residue, stated because it fails OPEN: an interpolation
     /// carrying a nested literal (`"\(dict["k"])"`) desyncs the
@@ -199,9 +225,9 @@ enum SourceScan {
     }
 
     /// `literalEnd` plus the width of the literal's delimiter —
-    /// what a caller that must KEEP the delimiters and blank
-    /// only the interior needs, so position and line stay aligned.
-    static func literalSpan(
+    /// what the blanking policy needs to keep the delimiters and
+    /// blank only the interior, position for position.
+    private static func literalSpan(
         _ text: [Character],
         from i: Int
     ) -> (end: Int, delimiter: Int)? {
@@ -233,13 +259,10 @@ enum SourceScan {
     /// caller treats the quote as an ordinary character and keeps
     /// stripping.
     ///
-    /// That arm is not defensive coding, it is the fix for a
-    /// defect this file's own line half creates: the line pass
-    /// cuts `"https://…"` at the `//` and leaves the opening
-    /// quote unbalanced, so a literal walk that ran to EOF would
-    /// copy the rest of the file verbatim and strip no comments
-    /// in it at all. Seven files in `Sources/` are in exactly
-    /// that state, two of them in trees the Settings guards scan.
+    /// That arm is not defensive coding: a literal walk that ran
+    /// to EOF on an unbalanced quote would copy the rest of the
+    /// file verbatim and strip no comments in it at all — the
+    /// fail-open shape the whole family exists to refuse.
     private static func close(
         _ text: [Character],
         from start: Int,
@@ -264,7 +287,7 @@ enum SourceScan {
     /// this runs up to twice per character of every file every
     /// scan guard reads, and an `Array(needle)` inside it cost
     /// millions of small allocations per suite.
-    static func matches(
+    private static func matches(
         _ text: [Character],
         at i: Int,
         _ needle: [Character]
@@ -277,36 +300,11 @@ enum SourceScan {
         return true
     }
 
-    static let lineComment: [Character] = ["/", "/"]
-    static let openSpan: [Character] = ["/", "*"]
-    static let closeSpan: [Character] = ["*", "/"]
+    private static let lineComment: [Character] = ["/", "/"]
+    private static let openSpan: [Character] = ["/", "*"]
+    private static let closeSpan: [Character] = ["*", "/"]
     private static let rawQuote: [Character] = ["#", "\""]
     private static let rawEnd: [Character] = ["\"", "#"]
     private static let tripleQuote: [Character] = ["\"", "\"", "\""]
     private static let quote: [Character] = ["\""]
-
-    /// The repo root, derived from a test file's own path.
-    static func repoRoot(from filePath: String) -> URL {
-        URL(fileURLWithPath: filePath)
-            .deletingLastPathComponent()  // KiwiDeskGuiTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
-    }
-}
-
-extension String {
-    /// Non-overlapping occurrences of `needle`.
-    func occurrences(of needle: String) -> Int {
-        guard !needle.isEmpty else { return 0 }
-        var total = 0
-        var cursor = startIndex
-        while let found = range(
-            of: needle,
-            range: cursor..<endIndex
-        ) {
-            total += 1
-            cursor = found.upperBound
-        }
-        return total
-    }
 }

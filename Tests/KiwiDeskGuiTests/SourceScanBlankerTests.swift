@@ -9,15 +9,18 @@ import Testing
 ///
 /// Its failure mode is the stripper's: a scan handed less source
 /// than it thinks cannot go red on its own. The blanker used to
-/// toggle on plain `"` and knew neither `"""` nor `#"…"#`, so
-/// `ServiceManager.swift`'s plist heredoc — an odd number of
-/// quotes, a `\`-continued line — walked it out `inString` and
-/// blanked the 264 lines after it, with every consumer green
-/// (#1320, found by guard-prover while red-proofing #1311).
+/// toggle on every plain `"`, so a `"""` block flipped it three
+/// times at each end and every inner quote once, and a `//`
+/// inside the block was read as a comment that ate the quote
+/// balancing it — `ServiceManager.swift`'s plist heredoc did
+/// both, and 264 of its 283 lines were dark to every consumer
+/// (#1320, found by guard-prover while red-proofing #1311). The
+/// two fixtures below take the two mechanisms one at a time.
 @Suite("Source scan blanker")
 struct SourceScanBlankerTests {
-    /// The #1320 shape: a multiline literal with an odd number of
-    /// inner quotes and a `\`-continued line, then a needle.
+    /// The `ServiceManager` shape: a `//` inside a `"""` block, on
+    /// a `\`-continued line, then a needle. The old toggle read
+    /// that `//` as a comment and lost the block's balance there.
     private let heredocThenNeedle = """
         let plist = \"\"\"
         <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" \\
@@ -27,7 +30,17 @@ struct SourceScanBlankerTests {
         static let frozen = L("k", "v")
         """
 
-    @Test("A needle after an odd-quoted heredoc is still visible")
+    /// The parity shape: a `"""` block holding ONE inner quote and
+    /// no `//`. The old toggle came out of the block `inString`
+    /// on the count alone.
+    private let oddQuotedBlock = """
+        let sql = \"\"\"
+        SELECT "name
+        \"\"\"
+        static let frozen = L("k", "v")
+        """
+
+    @Test("A needle after a heredoc with a // in it is still visible")
     func heredocDoesNotDarkenTheRest() {
         let blanked = SourceScan.blankingCommentsAndLiterals(
             heredocThenNeedle
@@ -36,6 +49,15 @@ struct SourceScanBlankerTests {
         #expect(!blanked.contains("DOCTYPE"))
         #expect(!blanked.contains("PropertyList"))
         #expect(!blanked.contains("\"k\""))
+    }
+
+    @Test("A needle after an odd-quoted block is still visible")
+    func oddQuotedBlockDoesNotDarkenTheRest() {
+        let blanked = SourceScan.blankingCommentsAndLiterals(
+            oddQuotedBlock
+        )
+        #expect(blanked.contains("static let frozen = L("))
+        #expect(!blanked.contains("SELECT"))
     }
 
     @Test("A raw literal's interior goes, its quotes stay paired")
@@ -101,15 +123,20 @@ struct SourceScanBlankerTests {
     /// shape later.
     ///
     /// The oracle for "inside a block" is line-level parity on
-    /// `"""` outside a `//` tail — deliberately coarser than the
-    /// walker under test, so it cannot share its mistakes. A
-    /// quoteless line inside such a block is SUPPOSED to go, and
-    /// every line that opens or closes one carries a quote, so
-    /// the toggle is exact.
+    /// `"""` — after a `//` tail and any `#"…"#` on the line are
+    /// dropped, since a raw literal ending in `""` spells one
+    /// with its own closer (`#"KEEP_SIG="""#`) — deliberately
+    /// coarser than the walker under test, so it cannot share its
+    /// mistakes. A quoteless line inside such a block is SUPPOSED
+    /// to go, and every line that opens or closes one carries a
+    /// quote. The oracle must be CLOSED at each file's end and
+    /// must have judged something, or a desync of its own would
+    /// skip the rest of a file with this suite green.
     @Test("No quoteless, markerless line is ever blanked")
     func nothingGoesDark() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         var scanned = 0
+        var judged = 0
         for tree in ["Sources", "Tests"] {
             let files = try SourceScan.swiftSources(
                 under: root.appendingPathComponent(tree)
@@ -131,12 +158,7 @@ struct SourceScanBlankerTests {
                 var insideBlock = false
                 for (index, line) in original.enumerated() {
                     let wasInside = insideBlock
-                    // A `"""` named in a comment is not one; count
-                    // the code before the marker only.
-                    let code =
-                        line.range(of: "//")
-                        .map { line[..<$0.lowerBound] } ?? line[...]
-                    if String(code).occurrences(of: "\"\"\"") % 2 == 1 {
+                    if Self.tripleQuotes(in: String(line)) % 2 == 1 {
                         insideBlock.toggle()
                     }
                     guard index < kept.count, !wasInside else {
@@ -149,6 +171,7 @@ struct SourceScanBlankerTests {
                         !line.trimmingCharacters(in: .whitespaces)
                             .isEmpty
                     else { continue }
+                    judged += 1
                     #expect(
                         kept[index] == line,
                         Comment(
@@ -160,11 +183,38 @@ struct SourceScanBlankerTests {
                         )
                     )
                 }
+                #expect(
+                    !insideBlock,
+                    Comment(
+                        rawValue:
+                            "\(file.lastPathComponent): the oracle "
+                            + "ended inside a block, so it judged "
+                            + "nothing after the desync"
+                    )
+                )
                 scanned += 1
             }
         }
         // An empty enumerator over a moved directory would pass
-        // every check above for having looked at nothing (#635).
+        // every check above for having looked at nothing (#635),
+        // and so would an oracle that skipped every line.
         #expect(scanned > 300)
+        #expect(judged > 10_000)
+    }
+
+    /// `"""` occurrences that open or close a block on this line:
+    /// a `//` tail and every `#"…"#` raw literal are dropped first.
+    private static func tripleQuotes(in line: String) -> Int {
+        var code =
+            line.range(of: "//").map { String(line[..<$0.lowerBound]) } ?? line
+        while let open = code.range(of: "#\""),
+            let close = code.range(
+                of: "\"#",
+                range: open.upperBound..<code.endIndex
+            )
+        {
+            code.removeSubrange(open.lowerBound..<close.upperBound)
+        }
+        return code.occurrences(of: "\"\"\"")
     }
 }
