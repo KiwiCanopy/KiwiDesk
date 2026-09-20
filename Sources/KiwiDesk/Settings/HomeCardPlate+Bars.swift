@@ -22,9 +22,9 @@ struct HomeCardBarsTile: View {
         var label: String?
         var glyph: String?
         /// The glyph's size against `BarSpec.fontSize`: the App
-        /// Bar's icon steps down by its slot ratio, a Space's
+        /// Bar's icon steps down by Core's slot ratio, a Space's
         /// symbol identifier draws at the identifier size.
-        var glyphRatio: CGFloat = 0.9
+        var glyphRatio: CGFloat = AppBarStyle.glyphSlotRatio
         var active = false
     }
 

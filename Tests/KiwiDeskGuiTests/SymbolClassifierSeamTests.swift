@@ -8,8 +8,10 @@ import Testing
 /// how the Bars preview came to show a symbol's name as text
 /// (#1538). The subject is the LOOKUP: every `systemSymbolName:`
 /// in either tree is listed with what it does, so a new one reds
-/// until a reader classifies it — a needle on the nil-compare
-/// shape missed the `if let` arm that drew a layer icon's name.
+/// until a reader classifies it; two shape needles beside it
+/// refuse a classifier inside a listed file — the nil-compare
+/// the round-1 copies had, and the `if let` arm that drew a
+/// layer icon's name and which the nil needle alone missed.
 @Suite("Symbol classifier seam")
 struct SymbolClassifierSeamTests {
     /// Repo-relative path → what its lookup does. Exact both
@@ -90,6 +92,51 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDeskCore/Borders/StickyMarkPlate.swift":
             "render-time net on a name `homeSpaceMark` classified"
     ]
+
+    /// The nil-compared lookup, the shape every hand copy had —
+    /// the lookup's own result against nil, not a bound variable
+    /// later (the status item's ⚠︎ fallback). One assertion may
+    /// spell it.
+    private let nilCompareAllowed: [String: String] = [
+        "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift":
+            "the one classifier, `KiwiCore.iconIsSymbol`",
+        "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
+            "asserts every pill symbol resolves",
+    ]
+
+    @Test("A nil-compared lookup lives in the classifier alone")
+    func nilComparedLookupHasOneHome() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let compare = try Regex(
+            #"systemSymbolName:[^;{}]{0,160}?\)\s*[!=]= nil"#
+        )
+        var found: Set<String> = []
+        var scanned = 0
+        for tree in ["Sources", "Tests"] {
+            let files = try SourceScan.swiftSources(
+                under: root.appendingPathComponent(tree)
+            )
+            for file in files {
+                scanned += 1
+                let source = SourceScan.blankingCommentsAndLiterals(
+                    try String(contentsOf: file, encoding: .utf8)
+                )
+                if source.contains(compare) {
+                    found.insert(
+                        file.path.replacingOccurrences(
+                            of: root.path + "/",
+                            with: ""
+                        )
+                    )
+                }
+            }
+        }
+        #expect(scanned > 300)
+        #expect(
+            found == Set(nilCompareAllowed.keys),
+            Comment(rawValue: found.sorted().joined(separator: ", "))
+        )
+    }
 
     @Test("No lookup is classified by binding it outside the one net")
     func classifyByBindingHasOneHome() throws {

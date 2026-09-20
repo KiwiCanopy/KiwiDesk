@@ -25,6 +25,11 @@ extension AppBarStyle {
     /// differently per screen.
     public static let titleCapRange = 8...80
 
+    /// The glyph's size against its slot's height: the full height
+    /// read a touch heavy in manual QA. The Bars preview draws the
+    /// same ratio (#1538), so it is one number.
+    public static let glyphSlotRatio: CGFloat = 0.9
+
     /// Title cap clamped to `titleCapRange`.
     public var resolvedTitleCap: Int {
         min(
