@@ -24,6 +24,8 @@ struct SymbolClassifierSeamTests {
             "builds the status image; ⚠︎ when a fixed name fails",
         "Sources/KiwiDesk/StatusItemController.swift":
             "builds a template image from a fixed name",
+        "Sources/KiwiDesk/StatusItemController+SpaceMark.swift":
+            "builds the Space mark's image from a `.symbol` verdict",
         "Sources/KiwiDesk/StatusItemController+Updates.swift":
             "builds the updates row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Style.swift":
