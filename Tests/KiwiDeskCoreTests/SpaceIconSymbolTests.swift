@@ -3,9 +3,12 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `KiwiCore.iconIsSymbol` is the one reading of "does this icon
-/// name an SF Symbol" — the bar's own `iconGlyph` ladder takes its
-/// symbol arm from it, and the Bars preview asks the same
-/// predicate (#1538), so the two cannot disagree on an icon.
+/// name an SF Symbol"; the bar's `iconGlyph` ladder takes its
+/// symbol arm from it and the Bars preview asks the same predicate
+/// (#1538). `SymbolClassifierSeamTests` holds that no copy exists.
+///
+/// `@MainActor` because `KiwiCore` is, and that is all this suite
+/// spends there: six `NSImage(systemSymbolName:)` lookups.
 @Suite("Space icon symbol reading")
 @MainActor
 struct SpaceIconSymbolTests {
@@ -21,5 +24,25 @@ struct SpaceIconSymbolTests {
         }
         #expect(KiwiCore.iconIsSymbol("book"))
         #expect(!KiwiCore.iconIsSymbol("⭐"))
+    }
+
+    @Test("The public ladder is the instance's: icon, digits, monogram")
+    func staticLadderMatchesTheBar() {
+        #expect(
+            KiwiCore.spaceIdentifier(id: SpaceID("2"), icon: "book")
+                == .symbol("book")
+        )
+        #expect(
+            KiwiCore.spaceIdentifier(id: SpaceID("2"), icon: "")
+                == .text("2", tinted: true)
+        )
+        #expect(
+            KiwiCore.spaceIdentifier(id: SpaceID("2026"), icon: nil)
+                == .text("202", tinted: true)
+        )
+        #expect(
+            KiwiCore.spaceIdentifier(id: SpaceID("mail"), icon: nil)
+                == .text("MA", tinted: true)
+        )
     }
 }

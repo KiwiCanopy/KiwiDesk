@@ -44,26 +44,19 @@ struct BarsPanelPreview: View {
         }
     }
 
-    private var spaceLabels: [HomeCardBarsTile.SpaceLabel] {
+    private var spaceLabels: [SpaceGlyph] {
         Self.spaceLabels(
             spaces: model.config.spaces,
             icons: model.config.settings.spaceIcons
         )
     }
 
-    /// Space label identifiers: the configured icon as Core
-    /// classifies it — a symbol name draws as the symbol, an
-    /// emoji or any other text as itself — else the ordinal.
+    /// Each Space's identifier as the bar draws it — Core's own
+    /// ladder, never a reading of the preview's own (#1538).
     static func spaceLabels(
         spaces: [SpaceID],
         icons: [SpaceID: String]
-    ) -> [HomeCardBarsTile.SpaceLabel] {
-        spaces.enumerated().map { index, space in
-            guard let icon = icons[space] else {
-                return .text(String(index + 1))
-            }
-            return KiwiCore.iconIsSymbol(icon)
-                ? .symbol(icon) : .text(icon)
-        }
+    ) -> [SpaceGlyph] {
+        spaces.map { KiwiCore.spaceIdentifier(id: $0, icon: icons[$0]) }
     }
 }

@@ -2,11 +2,9 @@ import AppKit
 
 /// Space item view in Space Bar with identifier and app glyphs (#293).
 final class SpaceBarItemView: NSView {
-    /// Space identifier glyph representation.
-    enum Identifier: Equatable {
-        case symbol(String)
-        case text(String, tinted: Bool)
-    }
+    /// Space identifier glyph representation — `SpaceGlyph`, public
+    /// so a preview draws Core's verdict (#1538).
+    typealias Identifier = SpaceGlyph
 
     /// What an item stands for (#1169). A layer item shows
     /// the active shortcut layer: never a click, drag or drop
