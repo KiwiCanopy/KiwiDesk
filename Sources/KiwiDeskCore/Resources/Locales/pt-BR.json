@@ -873,6 +873,7 @@
   "onboarding.starter_spaces.body": "Use-os como você usava as Mesas do seu Mac — a uma tecla de distância, mas cada um organiza as suas janelas para você. Cada um tem seu próprio layout, escolhido para sua configuração.",
   "onboarding.starter_spaces.footer": "Renomeie ou altere qualquer um desses espaços em Ajustes sempre que quiser. As Mesas nativas do seu Mac continuam existindo por baixo — uma delas pode conter um conjunto inteiro desses espaços, embora você vá demorar muito para precisar disso.",
   "onboarding.starter_spaces.hint": "Mais espaços ou outros layouts? Em Ajustes, quando quiser.",
+  "onboarding.starter_spaces.layouts_differ": "Cada layout se comporta de um jeito diferente — um divide a tela, outro rola para o lado — e você pode mudar o layout de um espaço depois em %1$@ ▸ %2$@.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Espaço %1$@",
   "onboarding.starter_spaces.tile.axlabel": "Espaço %1$@, %2$@, em %3$@",

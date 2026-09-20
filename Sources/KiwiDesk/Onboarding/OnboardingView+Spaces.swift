@@ -7,6 +7,7 @@ extension OnboardingView {
         OnboardingPage(
             title: spacesTitle,
             body1: spacesBody,
+            body2: spacesLayoutsDiffer,
             footnote: spacesFooter,
             footnoteAtBottom: true,
             hint: L(
@@ -148,6 +149,20 @@ extension OnboardingView {
                 + "one keystroke away, but each one arranges its "
                 + "windows for you. Each has its own layout, "
                 + "chosen for your setup."
+        )
+    }
+
+    /// A layout is a behaviour, not a look, and each Space's can
+    /// be changed (#1534); the breadcrumb's segments are the
+    /// window's and the pane's own labels (#818).
+    private var spacesLayoutsDiffer: String {
+        L(
+            "onboarding.starter_spaces.layouts_differ",
+            "Each layout behaves differently — one splits the "
+                + "screen, one scrolls sideways — and you can "
+                + "change a Space's layout later under %1$@ ▸ %2$@.",
+            L("home.title", "Settings"),
+            SettingsDestination.spaces.title
         )
     }
 
