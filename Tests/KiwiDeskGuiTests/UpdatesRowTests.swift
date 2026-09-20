@@ -38,7 +38,7 @@ private final class FakeUpdater: AppUpdating {
 ///
 /// `.serialized` because `LocalizationManager` is process-wide
 /// and the row is matched by its English title.
-@Suite("Check for Updates row (#874)", .serialized)
+@Suite("Update Available row (#874, #1536)", .serialized)
 @MainActor
 struct UpdatesRowTests {
     private typealias Row = (
@@ -47,6 +47,7 @@ struct UpdatesRowTests {
         updater: FakeUpdater
     )
 
+    /// A found update, so the row exists (#1536).
     private func row(canCheck: Bool) -> Row {
         // The click action reads `NSApp`, nil until something
         // touched the shared application: this suite must prove
@@ -57,8 +58,34 @@ struct UpdatesRowTests {
             item: FakeStatusItem()
         )
         let updater = FakeUpdater(canCheck: canCheck)
+        updater.updates.set(.available(version: "9.9.9"))
         controller.updater = updater
-        return (controller.makeUpdatesItem(), controller, updater)
+        return (controller.makeUpdatesItem()!, controller, updater)
+    }
+
+    /// The row says something only when there is something to
+    /// say: no found update, no row — asking for a check is the
+    /// Settings footer's (#1536).
+    @Test("no row while nothing was found")
+    func noRowWithoutAFind() {
+        _ = NSApplication.shared
+        LocalizationManager.shared.select("en")
+        let controller = StatusItemController(
+            item: FakeStatusItem()
+        )
+        let updater = FakeUpdater(canCheck: true)
+        controller.updater = updater
+        for state in [
+            UpdateState.unavailable, .notChecked(lastChecked: nil),
+            .upToDate(lastChecked: nil), .checking, .failed,
+        ] {
+            updater.updates.set(state)
+            #expect(controller.makeUpdatesItem() == nil)
+        }
+        let menu = NSMenu()
+        controller.menuNeedsUpdate(menu)
+        #expect(!menu.items.contains { $0.title == "Update Available…" })
+        #expect(!menu.items.contains { $0.title == "Check for Updates…" })
     }
 
     /// The click tests below drive the action directly rather
@@ -90,7 +117,7 @@ struct UpdatesRowTests {
     func disabledIsStatedNotInherited() {
         let (item, _, _) = row(canCheck: false)
         #expect(!item.isEnabled)
-        #expect(item.title == "Check for Updates…")
+        #expect(item.title == "Update Available…")
     }
 
     @Test("clicking an enabled row asks the updater once")
@@ -113,23 +140,19 @@ struct UpdatesRowTests {
     }
 
     /// Nothing else pins that the row is actually ADDED. Delete
-    /// the `menu.addItem(makeUpdatesItem())` line and every other
-    /// test here still passes — the item is still constructible —
-    /// while "Check for Updates…" is gone from the app.
+    /// the `menu.addItem(updates)` line and every other test here
+    /// still passes — the item is still constructible — while
+    /// "Update Available…" is gone from the app.
     @Test("the row is in the menu the app builds")
     func rowIsInTheMenu() {
-        LocalizationManager.shared.select("en")
-        let controller = StatusItemController(
-            item: FakeStatusItem()
-        )
-        controller.updater = FakeUpdater(canCheck: true)
+        let (_, controller, _) = row(canCheck: true)
         let menu = NSMenu()
         controller.menuNeedsUpdate(menu)
         #expect(
             menu.items.contains {
-                $0.title == "Check for Updates…"
+                $0.title == "Update Available…"
             },
-            "the quick menu has no Check for Updates row"
+            "the quick menu has no Update Available row"
         )
     }
 

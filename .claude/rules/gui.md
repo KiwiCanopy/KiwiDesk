@@ -337,9 +337,12 @@ bar's label colour at draw time; it is composited in `render()`
 alone, AFTER the states that outrank an offer — a permission
 warning, the starting phase, a config error — and on both
 channels whether or not an image exists, since a mode icon that
-is no SF Symbol takes the title fallback; the updates row
-retitles in place because `checkForUpdates` is the one door that
-brings the waiting alert forward (`UpdateReminderTests`).
+is no SF Symbol takes the title fallback; the updates row EXISTS
+only while an update was found — the pending reminder or the
+channel's own answer (#1536) — and reads "Update Available…",
+because `checkForUpdates` is the one door that brings the waiting
+alert forward, and asking for a check is the Settings footer's
+(`UpdateReminderTests`, `UpdatesRowTests`).
 
 ## A window that must clear the bars derives its level
 

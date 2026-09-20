@@ -11648,7 +11648,11 @@ A link in both places makes the reader ask whether they differ,
 and a General ▸ About card is the same doubt one level up — so
 nothing *about* KiwiDesk returns to General, and Settings search
 does not reach the sheet either: About is one click from Home,
-not a setting (owner, 2026-09-20). Language,
+not a setting (owner, 2026-09-20). The quick menu's *Check for
+Updates…* row goes the same way: the footer asks, and the menu
+carries an *Update Available…* row only while there is one to
+install — a menu row that is usually a no-op is noise beside
+Quit. Language,
 appearance and start-at-login are General's, and the reset
 ladder, log export and backup stay under General ▸ Advanced,
 the recovery shelf.

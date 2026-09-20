@@ -62,10 +62,10 @@ struct UpdateReminderTests {
     }
 
     @Test("while pending the row reads Update Available… and stays wired")
-    func pendingRowReadsUpdateAvailable() {
+    func pendingRowReadsUpdateAvailable() throws {
         let (controller, updater) = controller()
         updater.updatePending = true
-        let item = controller.makeUpdatesItem()
+        let item = try #require(controller.makeUpdatesItem())
         #expect(item.title == "Update Available…")
         #expect(item.isEnabled)
         #expect(item.target === controller)
@@ -73,8 +73,9 @@ struct UpdateReminderTests {
             item.action
                 == #selector(StatusItemController.checkForUpdates(_:))
         )
+        // No longer pending, nothing found: no row at all (#1536).
         updater.updatePending = false
-        #expect(controller.makeUpdatesItem().title == "Check for Updates…")
+        #expect(controller.makeUpdatesItem() == nil)
     }
 
     /// The row still states its enablement from the updater
@@ -84,7 +85,7 @@ struct UpdateReminderTests {
         let (controller, updater) = controller()
         updater.canCheckForUpdates = false
         updater.updatePending = true
-        #expect(!controller.makeUpdatesItem().isEnabled)
+        #expect(controller.makeUpdatesItem()?.isEnabled == false)
     }
 
     /// The pending row is the same row, so it is in the menu the
