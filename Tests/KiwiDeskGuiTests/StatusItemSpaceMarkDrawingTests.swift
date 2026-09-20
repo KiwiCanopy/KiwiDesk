@@ -170,8 +170,15 @@ struct StatusItemSpaceMarkDrawingTests {
                 ]
             )
         )
-        let badged = StatusItemController.badged(emoji)
-        #expect(hues(try #require(bitmap(badged, under: .aqua))).count > 1)
+        let badged = try #require(
+            bitmap(StatusItemController.badged(emoji), under: .aqua)
+        )
+        // A label tint that lands on the emoji dims it by alpha
+        // rather than replacing its hue, so the hue count alone
+        // stays green through it (guard-prover, 2026-09-20):
+        // the brightness is the axis the defect moves.
+        #expect(hues(badged).count > 1)
+        #expect(brightness(badged, in: 0..<badged.pixelsWide) > 0.6)
         // The control: a template composite under the mark shows
         // the dot's hue and nothing else.
         let template = StatusItemController.spaceMarkImage(

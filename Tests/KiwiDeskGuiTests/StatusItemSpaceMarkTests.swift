@@ -105,6 +105,16 @@ struct StatusItemSpaceMarkTests {
         LocalizationManager.shared.select("en")
         let (controller, _) = controller()
         let button = try #require(controller.anchorButton)
+        // A screened mark first, so the label the layer path
+        // owes is asserted against a stale composite name rather
+        // than the init render's (guard-prover, 2026-09-20).
+        controller.setSpaceMark(
+            StatusSpaceMark(
+                layer: nil,
+                screens: [screen(1, x: 0, space: "mail")]
+            )
+        )
+        #expect(button.accessibilityLabel() == "KiwiDesk (Space mail)")
         controller.setSpaceMark(
             StatusSpaceMark(
                 layer: layer("resize", glyph: .symbol("star.fill")),
