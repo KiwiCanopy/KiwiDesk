@@ -78,6 +78,25 @@ struct LayerChangeSeamTests {
         #expect(!app.contains("onLayerChange"))
     }
 
+    /// The active layer's GLYPH is derived once (#1413): the
+    /// manager's icon is read by `activeLayerGlyph` alone, which
+    /// the bar item and the menu bar mark both map — a second
+    /// reading that agrees is invisible to a behaviour test, and
+    /// a second reading is how the delegate's copy came to exist.
+    @Test("the layer glyph has one derivation")
+    func oneGlyphDerivation() throws {
+        // The manager's spelling; `NSWorkspace.icon(for:)` is
+        // another type's.
+        #expect(
+            try writers(of: "keys.icon(for:", under: "Sources") == 1
+        )
+        let items = try squashed(
+            "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
+        )
+        #expect(items.contains("funcactiveLayerGlyph()"))
+        #expect(items.contains("keys.icon(for:layer)"))
+    }
+
     /// The Space Bar's layer item (#1169) follows the same bus
     /// event: its refresh is a sink keyed on `.layerChange`,
     /// wired at bootstrap, and no bar file takes the manager's

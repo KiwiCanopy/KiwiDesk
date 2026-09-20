@@ -42,12 +42,13 @@ public final class SpaceBarManager {
     }
 
     /// The menu bar item's layer and Space mark (#1413), fired
-    /// on change only since the bar refreshes on every retile;
-    /// reached through `KiwiCore.onStatusSpaceMarkChange`.
-    public var onStatusMarkChange: @MainActor (StatusSpaceMark) -> Void = {
+    /// on change only since the bar refreshes on every retile.
+    /// Internal: `KiwiCore.onStatusSpaceMarkChange` is the one
+    /// door the GUI has, by visibility.
+    var onStatusMarkChange: @MainActor (StatusSpaceMark) -> Void = {
         _ in
     }
-    public private(set) var statusMark: StatusSpaceMark?
+    private(set) var statusMark: StatusSpaceMark?
 
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]
     /// Active visible bars painted on screen.

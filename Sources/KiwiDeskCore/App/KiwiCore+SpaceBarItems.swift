@@ -196,10 +196,7 @@ extension KiwiCore {
             // Three digits still fit the square cell; longer
             // ids truncate like the monogram rather than clip
             // under the item's masksToBounds.
-            return .text(
-                String(id.raw.prefix(3)),
-                tinted: true
-            )
+            return Self.textGlyph(String(id.raw.prefix(3)))
         }
         return Self.monogram(id.raw)
     }
@@ -213,7 +210,8 @@ extension KiwiCore {
     }
 
     /// Text as a bar glyph: tinted unless it is an emoji, which
-    /// takes no template tint — the one place the bit is set.
+    /// takes no template tint — where the bit is set for every
+    /// glyph Core builds.
     static func textGlyph(_ text: String) -> SpaceBarItemView.Identifier {
         .text(text, tinted: !isEmoji(text))
     }
