@@ -873,7 +873,7 @@
   "onboarding.starter_spaces.body": "macOSのデスクトップと同じ感覚で使えます — キー1つで切り替えられ、しかもそれぞれがウインドウを自動で配置します。スペースごとにレイアウトが設定されており、お使いの環境に合わせて選ばれています。",
   "onboarding.starter_spaces.footer": "これらのスペースは、設定からいつでも名前を変更したり編集したりできます。macOS本来のデスクトップも下にそのまま存在し、その1つがこれらのスペースひとそろいを丸ごと収められます。当分は意識する必要はありません。",
   "onboarding.starter_spaces.hint": "スペースを増やしたいときや別のレイアウトを使いたいときは、いつでも設定から。",
-  "onboarding.starter_spaces.layouts_differ": "レイアウトごとに動きが異なります — 画面を分割するものもあれば、横にスクロールするものもあります。スペースのレイアウトは、あとから「設定 ▸ %1$@」で変更できます。",
+  "onboarding.starter_spaces.layouts_differ": "レイアウトごとに動きが異なります — 画面を分割するものもあれば、横にスクロールするものもあります。スペースのレイアウトは、あとから「%1$@ ▸ %2$@」で変更できます。",
   "onboarding.starter_spaces.row.detail": "%1$@、%2$@",
   "onboarding.starter_spaces.row.name": "スペース%1$@",
   "onboarding.starter_spaces.tile.axlabel": "%3$@のスペース%1$@、%2$@",

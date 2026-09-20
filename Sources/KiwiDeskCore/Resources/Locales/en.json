@@ -877,7 +877,7 @@
   "onboarding.starter_spaces.body": "Use these the way you used your Mac's Desktops — one keystroke away, but each one arranges its windows for you. Each has its own layout, chosen for your setup.",
   "onboarding.starter_spaces.footer": "Rename or change any of these Spaces in Settings, whenever you want to. Your Mac's own Desktops still exist underneath — one of them can hold a whole set of these, though you will not need that for a long time.",
   "onboarding.starter_spaces.hint": "More Spaces or other layouts? Settings, whenever you want them.",
-  "onboarding.starter_spaces.layouts_differ": "Each layout behaves differently — one splits the screen, one scrolls sideways — and you can change a Space's layout later under Settings ▸ %1$@.",
+  "onboarding.starter_spaces.layouts_differ": "Each layout behaves differently — one splits the screen, one scrolls sideways — and you can change a Space's layout later under %1$@ ▸ %2$@.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Space %1$@",
   "onboarding.starter_spaces.tile.axlabel": "Space %1$@, %2$@, on %3$@",

@@ -873,7 +873,7 @@
   "onboarding.starter_spaces.body": "Nutze sie so, wie du die Schreibtische deines Macs genutzt hast — einen Tastendruck entfernt, aber jeder ordnet seine Fenster für dich an. Jeder hat sein eigenes Layout, ausgewählt für dein Setup.",
   "onboarding.starter_spaces.footer": "Du kannst jeden dieser Spaces jederzeit in den Einstellungen umbenennen oder ändern. Die eigenen Schreibtische deines Macs bestehen darunter weiter — einer von ihnen kann einen ganzen Satz dieser Spaces aufnehmen, auch wenn du das noch lange nicht brauchen wirst.",
   "onboarding.starter_spaces.hint": "Mehr Spaces oder andere Layouts? Jederzeit in den Einstellungen.",
-  "onboarding.starter_spaces.layouts_differ": "Jedes Layout verhält sich anders — eines teilt den Bildschirm, eines scrollt seitwärts — und das Layout eines Space kannst du später unter Einstellungen ▸ %1$@ ändern.",
+  "onboarding.starter_spaces.layouts_differ": "Jedes Layout verhält sich anders — eines teilt den Bildschirm, eines scrollt seitwärts — und das Layout eines Space kannst du später unter %1$@ ▸ %2$@ ändern.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Space %1$@",
   "onboarding.starter_spaces.tile.axlabel": "Space %1$@, %2$@, auf %3$@",

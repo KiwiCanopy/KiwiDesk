@@ -873,7 +873,7 @@
   "onboarding.starter_spaces.body": "Úsalos como usabas los Escritorios de tu Mac: a una tecla de distancia, pero cada uno organiza sus ventanas por ti. Cada uno tiene su propio diseño, elegido para tu configuración.",
   "onboarding.starter_spaces.footer": "Renombra o modifica cualquiera de estos espacios en Ajustes cuando quieras. Los Escritorios nativos de tu Mac siguen estando debajo: uno de ellos puede contener un conjunto entero de estos espacios, aunque tardarás mucho en necesitarlo.",
   "onboarding.starter_spaces.hint": "¿Más espacios u otros diseños? En Ajustes, cuando quieras.",
-  "onboarding.starter_spaces.layouts_differ": "Cada diseño se comporta de forma distinta: uno divide la pantalla, otro se desplaza de lado. Más adelante puedes cambiar el diseño de un espacio en Ajustes ▸ %1$@.",
+  "onboarding.starter_spaces.layouts_differ": "Cada diseño se comporta de forma distinta: uno divide la pantalla, otro se desplaza de lado. Más adelante puedes cambiar el diseño de un espacio en %1$@ ▸ %2$@.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Espacio %1$@",
   "onboarding.starter_spaces.tile.axlabel": "Espacio %1$@, %2$@, en %3$@",

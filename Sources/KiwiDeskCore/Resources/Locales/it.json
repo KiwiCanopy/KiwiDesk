@@ -873,7 +873,7 @@
   "onboarding.starter_spaces.body": "Usali come usavi le Scrivanie del tuo Mac — a un tasto di distanza, ma ciascuno dispone le sue finestre per te. Ciascuno ha il proprio layout, scelto per la tua configurazione.",
   "onboarding.starter_spaces.footer": "Rinomina o modifica uno qualsiasi di questi spazi in Impostazioni ogni volta che vuoi. Le Scrivanie native del tuo Mac esistono ancora sotto: una di esse può contenere un intero gruppo di questi spazi, anche se non ti servirà per molto tempo.",
   "onboarding.starter_spaces.hint": "Più spazi o altri layout? In Impostazioni, quando vuoi.",
-  "onboarding.starter_spaces.layouts_differ": "Ogni layout si comporta in modo diverso — uno divide lo schermo, uno scorre di lato — e più avanti puoi cambiare il layout di uno spazio in Impostazioni ▸ %1$@.",
+  "onboarding.starter_spaces.layouts_differ": "Ogni layout si comporta in modo diverso — uno divide lo schermo, uno scorre di lato — e più avanti puoi cambiare il layout di uno spazio in %1$@ ▸ %2$@.",
   "onboarding.starter_spaces.row.detail": "%1$@ · %2$@",
   "onboarding.starter_spaces.row.name": "Spazio %1$@",
   "onboarding.starter_spaces.tile.axlabel": "Spazio %1$@, %2$@, su %3$@",

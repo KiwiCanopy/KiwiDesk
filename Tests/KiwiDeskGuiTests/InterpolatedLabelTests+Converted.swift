@@ -246,8 +246,8 @@ extension InterpolatedLabelTests {
         "mac_checklist.habit.big_windows.caption": 2,
         "mac_checklist.habit.dock.caption": 2,
         "onboarding.ready.checklist_footnote": 2,
-        // The tour's Spaces step names the pane a layout is
-        // changed in (#1534).
-        "onboarding.starter_spaces.layouts_differ": 1,
+        // The tour's Spaces step names the window and the pane a
+        // layout is changed in, as a breadcrumb (#1534).
+        "onboarding.starter_spaces.layouts_differ": 2,
     ]
 }
