@@ -1317,6 +1317,7 @@
   "track.new_window_position": "Position",
   "track.new_window_position.help": "Mit „%1$@“ legst du fest, wo der neue Track zwischen den Tracks landet; mit „%2$@“, wo das Fenster innerhalb seines Tracks landet: %3$@, %4$@ oder direkt vor bzw. nach dem fokussierten Fenster.",
   "track.wrap_focus": "Fokus umlaufen lassen",
+  "updates.check": "Nach Updates suchen",
   "updates.check_again": "Erneut nach Updates suchen",
   "updates.relative.just_now": "gerade eben",
   "updates.state.available": "Version %1$@ ist verfügbar.",

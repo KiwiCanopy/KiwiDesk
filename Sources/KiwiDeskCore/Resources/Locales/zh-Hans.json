@@ -1317,6 +1317,7 @@
   "track.new_window_position": "位置",
   "track.new_window_position.help": "选用“%1$@”时，决定新轨道落在众多轨道中的哪个位置；选用“%2$@”时，决定窗口落在所属轨道内的哪个位置：%3$@、%4$@，或紧邻当前聚焦窗口之前或之后。",
   "track.wrap_focus": "焦点循环",
+  "updates.check": "检查更新",
   "updates.check_again": "再次检查更新",
   "updates.relative.just_now": "刚刚",
   "updates.state.available": "版本 %1$@ 已可用。",

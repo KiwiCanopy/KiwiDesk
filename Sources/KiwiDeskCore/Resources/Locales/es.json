@@ -1317,6 +1317,7 @@
   "track.new_window_position": "Posición",
   "track.new_window_position.help": "Con «%1$@», dónde se ubica el nuevo Track entre los demás; con «%2$@», dónde se ubica la ventana dentro de su Track: %3$@, %4$@, o justo antes o después de la ventana enfocada.",
   "track.wrap_focus": "Envolver foco",
+  "updates.check": "Buscar actualizaciones",
   "updates.check_again": "Volver a buscar actualizaciones",
   "updates.relative.just_now": "hace un momento",
   "updates.state.available": "La versión %1$@ está disponible.",

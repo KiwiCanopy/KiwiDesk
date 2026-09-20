@@ -1317,6 +1317,7 @@
   "track.new_window_position": "Положение",
   "track.new_window_position.help": "При варианте «%1$@» — где новый Track встанет среди остальных; при варианте «%2$@» — где окно встанет внутри своего Track: %3$@, %4$@ либо непосредственно перед или после окна в фокусе.",
   "track.wrap_focus": "Замыкать фокус по кругу",
+  "updates.check": "Проверить обновления",
   "updates.check_again": "Проверить обновления ещё раз",
   "updates.relative.just_now": "только что",
   "updates.state.available": "Доступна версия %1$@.",

@@ -1317,6 +1317,7 @@
   "track.new_window_position": "Posição",
   "track.new_window_position.help": "Com “%1$@”, onde o novo Track entra entre os Tracks; com “%2$@”, onde a janela entra dentro do seu Track: %3$@, %4$@, ou logo antes ou depois da janela em foco.",
   "track.wrap_focus": "Rolagem circular de foco",
+  "updates.check": "Verificar atualizações",
   "updates.check_again": "Verificar atualizações novamente",
   "updates.relative.just_now": "agora mesmo",
   "updates.state.available": "A versão %1$@ está disponível.",

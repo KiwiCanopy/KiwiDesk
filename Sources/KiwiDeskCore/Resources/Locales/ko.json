@@ -1317,6 +1317,7 @@
   "track.new_window_position": "위치",
   "track.new_window_position.help": "‘%1$@’ 옵션에서는 새 트랙이 트랙들 사이 어디에 놓일지, ‘%2$@’ 옵션에서는 윈도우가 그 트랙 안 어디에 놓일지 정합니다. %3$@, %4$@, 또는 포커스된 윈도우의 바로 앞이나 뒤입니다.",
   "track.wrap_focus": "포커스 루프",
+  "updates.check": "업데이트 확인",
   "updates.check_again": "업데이트 다시 확인",
   "updates.relative.just_now": "방금 전",
   "updates.state.available": "버전 %1$@을(를) 사용할 수 있습니다.",

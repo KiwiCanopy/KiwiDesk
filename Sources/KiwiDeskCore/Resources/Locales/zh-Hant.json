@@ -1317,6 +1317,7 @@
   "track.new_window_position": "位置",
   "track.new_window_position.help": "選用「%1$@」時，決定新的 Track 落在眾多 Track 中的哪個位置；選用「%2$@」時，則決定視窗落在所屬 Track 內的哪個位置：%3$@、%4$@，或緊接在焦點視窗之前或之後。",
   "track.wrap_focus": "焦點循環",
+  "updates.check": "檢查更新",
   "updates.check_again": "再次檢查更新",
   "updates.relative.just_now": "剛剛",
   "updates.state.available": "版本 %1$@ 已可用。",
