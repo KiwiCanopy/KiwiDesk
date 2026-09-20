@@ -44,13 +44,26 @@ struct BarsPanelPreview: View {
         }
     }
 
-    /// Space label identifiers (icon or ordinal).
-    private var spaceLabels: [String] {
-        let icons = model.config.settings.spaceIcons
-        return model.config.spaces.enumerated().map {
-            index,
-            space in
-            icons[space] ?? String(index + 1)
+    private var spaceLabels: [HomeCardBarsTile.SpaceLabel] {
+        Self.spaceLabels(
+            spaces: model.config.spaces,
+            icons: model.config.settings.spaceIcons
+        )
+    }
+
+    /// Space label identifiers: the configured icon as Core
+    /// classifies it — a symbol name draws as the symbol, an
+    /// emoji or any other text as itself — else the ordinal.
+    static func spaceLabels(
+        spaces: [SpaceID],
+        icons: [SpaceID: String]
+    ) -> [HomeCardBarsTile.SpaceLabel] {
+        spaces.enumerated().map { index, space in
+            guard let icon = icons[space] else {
+                return .text(String(index + 1))
+            }
+            return KiwiCore.iconIsSymbol(icon)
+                ? .symbol(icon) : .text(icon)
         }
     }
 }

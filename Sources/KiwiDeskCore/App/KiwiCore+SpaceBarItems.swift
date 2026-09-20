@@ -216,15 +216,22 @@ extension KiwiCore {
         .text(text, tinted: !isEmoji(text))
     }
 
+    /// Whether a configured icon names an SF Symbol — the one
+    /// reading the bar and the Bars preview share, so the preview
+    /// cannot draw a symbol's NAME as text (#1538, #702).
+    public static func iconIsSymbol(_ icon: String) -> Bool {
+        NSImage(
+            systemSymbolName: icon,
+            accessibilityDescription: nil
+        ) != nil
+    }
+
     /// A configured icon as a bar glyph — a Space's or a layer's
     /// (`define_layer`'s third argument), one ladder for both.
     static func iconGlyph(
         _ icon: String
     ) -> SpaceBarItemView.Identifier {
-        if NSImage(
-            systemSymbolName: icon,
-            accessibilityDescription: nil
-        ) != nil {
+        if iconIsSymbol(icon) {
             return .symbol(icon)
         }
         return textGlyph(icon)

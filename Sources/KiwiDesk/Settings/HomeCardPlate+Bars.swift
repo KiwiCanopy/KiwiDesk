@@ -11,8 +11,17 @@ struct HomeCardBarsTile: View {
     /// Scale factor (1 on home plate, larger in detail panel).
     var scale: CGFloat = 1
     /// Space identifiers for panel scale rendering.
-    var spaceLabels: [String] = []
+    var spaceLabels: [SpaceLabel] = []
     @Environment(\.schematicPalette) private var palette
+
+    /// What a Space's chip shows — an SF Symbol drawn as a
+    /// glyph, or text (an emoji, a name's cut, a number). Which
+    /// one is Core's verdict (`KiwiCore.iconIsSymbol`), never the
+    /// preview's own reading (#1538).
+    enum SpaceLabel: Equatable {
+        case symbol(String)
+        case text(String)
+    }
 
     struct BarItem {
         var color: String
@@ -160,7 +169,10 @@ struct HomeCardBarsTile: View {
                 length: 12 * scale
             )
             if spaceLabels.indices.contains(index) {
-                item.label = spaceLabels[index]
+                switch spaceLabels[index] {
+                case .symbol(let name): item.glyph = name
+                case .text(let text): item.label = text
+                }
             }
             item.active = active
             items.append(item)
