@@ -27,7 +27,8 @@ private final class FakeUpdater: AppUpdating {
     func checkForUpdates() { checks += 1 }
 }
 
-/// The "Check for Updates…" row (#874).
+/// The "Update Available…" row (#874, #1536), drawn only while an
+/// update was found.
 ///
 /// The seam exists so no suite starts Sparkle's scheduled checks
 /// or its XPC services, and a seam nothing injects is a seam

@@ -24,7 +24,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         NSApp.currentEvent?.type == .keyDown
     }
 
-    /// Drives "Check for Updates…" (#874). Inert by default —
+    /// Drives the found-only "Update Available…" row and the
+    /// pending mark (#874, #1536). Inert by default —
     /// `AppUpdater.swift` owns why. Wires the pending reminder's
     /// nudge HERE, so the one consumer is the one that sets the
     /// closure (#1013); the fact itself stays the updater's.

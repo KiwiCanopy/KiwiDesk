@@ -11623,10 +11623,12 @@ Available…* action, since that is Sparkle's door for bringing
 the waiting offer forward; a failed check keeps its *Try again*
 enabled because that failure is retryable. `updatePending`
 (#1013) is a different fact — a scheduled update waiting behind
-the gentle reminder — and stays on the prompt policy; so after
-a found update is put off with *Later*, Home still says a
-version is available while the menu-bar row no longer says one
-waits, and both are true.
+the gentle reminder — and stays on the prompt policy. The split that follows is the
+icon's against the row's: the menu-bar DOT is #1013's reminder
+and lights only while a scheduled offer waits, while the menu
+row, Home and About draw the channel's answer — so after a
+found update is put off with *Later* the dot goes and the row
+stays, and both are true.
 
 **About is a sheet over Settings, hosted by the shell.** A body
 of content that asks no question and writes nothing is what a

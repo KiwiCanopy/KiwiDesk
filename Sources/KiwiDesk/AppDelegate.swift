@@ -13,9 +13,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let core = KiwiCore()
     let permissions = PermissionMonitor()
     var statusItem: StatusItemController?
-    /// The one update channel (#874), handed to the status item and
-    /// the dashboard alike (#1536, `UpdaterSeamGuardTests`).
-    private lazy var updater: any AppUpdating = AppUpdaterFactory.make()
+    /// The one update channel (#874), built with the delegate so
+    /// no reader decides whether it starts, and handed to the
+    /// status item and the dashboard alike (#1536,
+    /// `UpdaterSeamGuardTests` pins both hand-overs).
+    private let updater: any AppUpdating = AppUpdaterFactory.make()
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
