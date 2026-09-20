@@ -109,7 +109,6 @@ struct VersionDisplayTests {
         #expect(
             framed.sorted() == [
                 "AboutSheet.swift",
-                "HomeCardPreview.swift",
                 "HomeSupportStrip.swift",
             ]
         )

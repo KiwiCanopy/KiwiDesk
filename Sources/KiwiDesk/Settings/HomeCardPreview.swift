@@ -16,13 +16,13 @@ enum HomeCardPreview {
             return AnyView(profileChips(model))
         case .appRules:
             return AnyView(ruleIcons(model))
-        case .general:
-            return AnyView(versionLine)
         case .macChecklist:
             return AnyView(checklistTicks(model))
+        // General's version moved to Home's footer (#1536); its
+        // subtitle already says the language and start at login.
         case .spaces, .bars, .layoutDefaults, .monitors,
             .gapsAndBorders, .colors, .advancedColors,
-            .behavior:
+            .behavior, .general:
             return nil
         }
     }
@@ -157,20 +157,6 @@ enum HomeCardPreview {
             .fill(SettingsTheme.sunken)
             .frame(width: 22, height: 22)
             .overlay(content())
-    }
-
-    /// Version label, the same frame the About pane renders.
-    private static var versionLine: some View {
-        Text(
-            L(
-                "general.version",
-                "v%1$@",
-                KiwiDeskVersion.semantic
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(SettingsTheme.ink3)
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Key cap chips for default layer keybindings (owner ruling 2026-08-09).
