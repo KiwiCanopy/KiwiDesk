@@ -73,7 +73,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             .sink { [weak self] _ in self?.installMainMenu() }
 
         let statusItem = StatusItemController()
-        // Single construction of updater (#874, UpdaterSeamGuardTests).
         statusItem.updater = updater
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()

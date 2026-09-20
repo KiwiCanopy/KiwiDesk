@@ -1321,6 +1321,7 @@
   "track.new_window_position": "Position",
   "track.new_window_position.help": "With “%1$@”, where the new track lands among the tracks; with “%2$@”, where the window lands inside that track: %3$@, %4$@, or right before or after the focused window.",
   "track.wrap_focus": "Wrap focus",
+  "updates.check": "Check for updates",
   "updates.check_again": "Check for updates again",
   "updates.relative.just_now": "just now",
   "updates.state.available": "Version %1$@ is available.",

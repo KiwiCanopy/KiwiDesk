@@ -91,6 +91,9 @@ struct UpdateStateTests {
     @Test("A scheduled check that was never narrated does not fail Home")
     func unnarratedCycleEndLeavesTheStateAlone() {
         let dated = UpdateState.notChecked(lastChecked: checked)
+        // Sparkle aborts a failed scheduled check FIRST, then
+        // finishes the cycle: neither may narrate on Home.
+        #expect(dated.after(.aborted(offline), lastChecked: checked) == dated)
         #expect(dated.after(.finished(offline), lastChecked: checked) == dated)
         #expect(
             dated.after(.notFound, lastChecked: checked)

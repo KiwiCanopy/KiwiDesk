@@ -36,6 +36,10 @@ struct HomeScreen: View {
         )
     }
 
+    /// The one top gutter, shared with the height the content must
+    /// fill (#1536).
+    private static let topGutter: CGFloat = 24
+
     /// Maximum container width for saturated grid (code review 2026-08-11).
     private var gridCap: CGFloat {
         let columns = CGFloat(SettingsWidthClass.wide.homeColumnCap)
@@ -79,7 +83,15 @@ struct HomeScreen: View {
                 // they do not (#1536).
                 HomeSupportStrip(model: model)
             }
-            .frame(minHeight: height - 24, alignment: .top)
+            // The strip's footer reaches the window's bottom inset
+            // exactly: the viewport less the gutters this content
+            // already carries, or a short page scrolls by the
+            // difference (code review, 2026-09-21).
+            .frame(
+                minHeight: height - Self.topGutter
+                    - SettingsMetrics.paneInset,
+                alignment: .top
+            )
             .padding(
                 [.horizontal, .bottom],
                 SettingsMetrics.paneInset
@@ -94,7 +106,7 @@ struct HomeScreen: View {
             // Larger than the panes' inset on purpose — a
             // small-caps heading needs air above it to read as a
             // heading rather than as a caption on the bar.
-            .padding(.top, 24)
+            .padding(.top, Self.topGutter)
             // The flip's reflow (#760): Simple's order is a
             // subsequence of Power User's, so the motion is pure
             // insertion (in) or removal (out) — legible either

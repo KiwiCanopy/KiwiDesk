@@ -38,6 +38,9 @@ enum UpdateState: Equatable {
         case .notFound:
             return .upToDate(lastChecked: lastChecked)
         case .aborted(let error):
+            // Sparkle aborts a scheduled check too; only our own
+            // is narrated, so only `.checking` may turn `.failed`.
+            guard self == .checking else { return self }
             return UpdateCycleObserver.isFetchFailure(error)
                 ? .failed : self
         case .finished(let error):

@@ -23,15 +23,16 @@ struct UpdateStateRow: View {
                 )
             case .notChecked(let lastChecked):
                 sentence(Self.notCheckedSentence(lastChecked, now: Date()))
-                checkAgain(enabled: true)
+                // Nothing ran yet, so not "again".
+                checkAgain(enabled: true, label: checkLabel)
             case .upToDate(let lastChecked):
                 sentence(Self.upToDateSentence(lastChecked, now: Date()))
-                checkAgain(enabled: true)
+                checkAgain(enabled: true, label: checkAgainLabel)
             case .checking:
                 sentence(
                     L("updates.state.checking", "Checking for updates…")
                 )
-                checkAgain(enabled: false)
+                checkAgain(enabled: false, label: checkAgainLabel)
             case .available(let version):
                 Circle()
                     .fill(SettingsTheme.accent)
@@ -82,7 +83,15 @@ struct UpdateStateRow: View {
         )
     }
 
-    private func checkAgain(enabled: Bool) -> some View {
+    private var checkLabel: String {
+        L("updates.check", "Check for updates")
+    }
+
+    private var checkAgainLabel: String {
+        L("updates.check_again", "Check for updates again")
+    }
+
+    private func checkAgain(enabled: Bool, label: String) -> some View {
         Button(action: check) {
             Image(systemName: "arrow.clockwise")
                 .font(.system(size: 11, weight: .medium))
@@ -92,12 +101,10 @@ struct UpdateStateRow: View {
         .disabled(!enabled)
         .help(
             enabled
-                ? L("updates.check_again", "Check for updates again")
+                ? label
                 : L("updates.state.checking", "Checking for updates…")
         )
-        .accessibilityLabel(
-            L("updates.check_again", "Check for updates again")
-        )
+        .accessibilityLabel(label)
     }
 
     /// "Up to date", dated by the last check where one is known.
