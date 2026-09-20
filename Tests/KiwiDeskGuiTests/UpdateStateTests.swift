@@ -69,5 +69,15 @@ struct UpdateStateTests {
         #expect(dated.hasPrefix("Up to date · last checked "))
         #expect(dated.contains("2 hours ago"))
         #expect(UpdateStateRow.upToDateSentence(nil, now: now) == "Up to date")
+        // A check a beat AHEAD of the read never says "in 0 seconds".
+        for delta in [-2.0, 0.0, 30.0] {
+            #expect(
+                UpdateStateRow.upToDateSentence(
+                    now.addingTimeInterval(-delta),
+                    now: now
+                ) == "Up to date · checked just now",
+                Comment(rawValue: "\(delta)")
+            )
+        }
     }
 }

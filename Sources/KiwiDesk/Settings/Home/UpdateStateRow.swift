@@ -66,7 +66,7 @@ struct UpdateStateRow: View {
                     .settingsActionButton()
             }
         }
-        .font(.system(size: 11))
+        .font(.system(size: 12))
     }
 
     private func sentence(
@@ -109,6 +109,14 @@ struct UpdateStateRow: View {
     ) -> String {
         guard let lastChecked else {
             return L("updates.state.up_to_date", "Up to date")
+        }
+        // Sparkle stamps the check a beat after the footer's "now",
+        // and a formatter reads that as "in 0 seconds".
+        if now.timeIntervalSince(lastChecked) < 60 {
+            return L(
+                "updates.state.up_to_date_just_now",
+                "Up to date · checked just now"
+            )
         }
         let formatter = RelativeDateTimeFormatter()
         formatter.locale = Locale(

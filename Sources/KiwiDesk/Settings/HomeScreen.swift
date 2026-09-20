@@ -45,11 +45,14 @@ struct HomeScreen: View {
 
     var body: some View {
         GeometryReader { geo in
-            grid(width: geo.size.width)
+            grid(width: geo.size.width, height: geo.size.height)
         }
     }
 
-    private func grid(width: CGFloat) -> some View {
+    private func grid(
+        width: CGFloat,
+        height: CGFloat
+    ) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if firstRunVisible {
@@ -71,8 +74,13 @@ struct HomeScreen: View {
                     cards: offered(HomeCardOrder.wholeApp),
                     columns: columns(for: width, band: band)
                 )
+                // The strip sits at the window's bottom edge when
+                // the cards leave room, and scrolls after them when
+                // they do not (#1536).
+                Spacer(minLength: 12)
                 HomeSupportStrip(model: model)
             }
+            .frame(minHeight: height - 24, alignment: .top)
             .padding(
                 [.horizontal, .bottom],
                 SettingsMetrics.paneInset

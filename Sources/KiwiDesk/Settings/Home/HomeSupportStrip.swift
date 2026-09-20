@@ -57,18 +57,18 @@ struct HomeSupportStrip: View {
                 Image(nsImage: mark)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 16, height: 16)
+                    .frame(width: 18, height: 18)
                     .accessibilityHidden(true)
             }
             Text(L("general.about.app_name", "KiwiDesk"))
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(SettingsTheme.ink)
             Text(L("general.version", "v%1$@", KiwiDeskVersion.semantic))
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundStyle(SettingsTheme.ink3)
                 .textSelection(.enabled)
             Text("·")
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundStyle(SettingsTheme.ink3)
                 .accessibilityHidden(true)
             UpdateStateRow(
@@ -80,7 +80,7 @@ struct HomeSupportStrip: View {
                 Text(L("home.footer.about", "About KiwiDesk")).underline()
             }
             .buttonStyle(.borderless)
-            .font(.system(size: 11))
+            .font(.system(size: 12))
             .linkHover()
         }
     }
@@ -100,7 +100,7 @@ private struct SupportLinkRow: View {
                 Image(nsImage: mark)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 14, height: 14)
+                    .frame(width: 16, height: 16)
                     .foregroundStyle(SettingsTheme.ink2)
                     .padding(.top, 2)
                     .accessibilityHidden(true)
@@ -110,15 +110,15 @@ private struct SupportLinkRow: View {
                     Text(title).underline()
                 }
                 .buttonStyle(.plain)
-                .font(.system(size: 12))
+                .font(.system(size: 13))
                 .linkHover()
                 Text(caption)
-                    .font(.system(size: 10))
+                    .font(.system(size: 11))
                     .foregroundStyle(SettingsTheme.ink3)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .frame(maxWidth: 300, alignment: .leading)
+        .frame(maxWidth: 320, alignment: .leading)
     }
 }
 

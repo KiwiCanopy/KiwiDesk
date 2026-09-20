@@ -1330,5 +1330,6 @@
   "updates.state.unavailable": "Update checks are off in this build.",
   "updates.state.up_to_date": "Up to date",
   "updates.state.up_to_date_checked": "Up to date · last checked %1$@",
+  "updates.state.up_to_date_just_now": "Up to date · checked just now",
   "updates.try_again": "Try again"
 }
