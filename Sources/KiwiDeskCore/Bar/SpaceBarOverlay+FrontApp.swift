@@ -197,7 +197,8 @@ extension SpaceBarOverlay {
                 AppFont.font(size: size)
                 ?? .systemFont(ofSize: size)
             frontGlyph.textColor = accent
-            frontGlyph.frame = itemContainer.backingAlignedRect(
+            let host = frontGlyph.superview ?? itemContainer
+            frontGlyph.frame = host.backingAlignedRect(
                 BarTextGlyph.frame(for: frontGlyph, in: frame),
                 options: .alignAllEdgesNearest
             )

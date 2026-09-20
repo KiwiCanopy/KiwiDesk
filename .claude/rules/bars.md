@@ -299,10 +299,14 @@ sites clipped alike.
   the label's own width, centred on the cell so the alignment
   holds, shifted so the INK is centred rather than the advance
   (the neighbours are image cells, whose pixels centre; a
-  ligature's slack sits on its trailing side), and a ligature
-  wider than the cell is scaled to fit rather than left to reach
-  its neighbour. The helper returns unaligned geometry and the
-  site rounds ONCE to its backing. A new site owes
+  ligature's slack sits on its trailing side), and a glyph whose
+  ink would reach past the cell by more than the SLACK its site
+  states is scaled to fit — an app cell states none, since its
+  neighbour abuts; the identifier states the item's pad, so a
+  three-digit id or a monogram keeps the ladder's size and
+  reaches into the pad rather than shrinking beside a one-digit
+  neighbour. The helper returns unaligned geometry and the site
+  rounds ONCE to its backing. A new site owes
   `SpaceBarGlyphCellTests` a clause of its own — the suite pins
   the item's and the front-app segment's fields by rendering
   them, and reads no site list, so a third site that framed by

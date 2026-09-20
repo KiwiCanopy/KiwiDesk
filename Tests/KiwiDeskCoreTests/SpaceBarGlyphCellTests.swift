@@ -216,6 +216,38 @@ struct SpaceBarGlyphCellTests {
         #expect(scaled > 0)
     }
 
+    /// The identifier states the item's pad as its slack: a
+    /// three-digit id keeps the ladder's size beside a one-digit
+    /// neighbour and reaches into the pad, never past it.
+    @Test("a three-digit identifier keeps its size and stays in the pad")
+    func identifierKeepsTheLadderSize() throws {
+        let view = Self.item(horizontal: true)
+        view.configure(
+            identity: .space(SpaceID("100")),
+            spaceGlyph: .text("100", tinted: true),
+            apps: [],
+            active: true,
+            horizontal: true,
+            style: Self.style,
+            stateMarkColors: StateMarkColors(
+                sticky: "#ffffff",
+                floating: "#ffffff"
+            )
+        )
+        view.layout()
+        let field = view.identifierLabel
+        let font = try #require(field.font)
+        #expect(font.pointSize == view.identifierFont)
+        let ink = BarTextGlyph.inkBounds("100", font: font)
+        try #require(ink.width > Self.cell, "the fixture fits the cell")
+        #expect(ink.width <= Self.cell + SpaceBarItemView.pad * 2)
+        let span = try #require(Self.inkSpan(of: field))
+        #expect(
+            span.lowerBound > 0 && span.upperBound < field.bounds.width,
+            "ink \(span) touches the field's edge"
+        )
+    }
+
     @Test("the front-app glyph takes the same framing")
     func frontAppGlyphIsWholeAndCentred() throws {
         var style = Self.style

@@ -7,9 +7,12 @@ import CoreText
 /// take it; the App Bar's slot frames its own (`AppBarItemView+
 /// GlyphSlot`, converging under #1543).
 enum BarTextGlyph {
-    /// The frame for `field` whose ink is centred on `cell`, and
-    /// whose font fits the cell's width. Unaligned: the site
-    /// rounds once, to its backing.
+    /// The frame for `field` whose ink is centred on `cell`, its
+    /// font scaled down where the ink would reach past the cell
+    /// by more than `slack` on a side — 0 for an app glyph, whose
+    /// neighbour abuts; the item's pad for the identifier, which
+    /// keeps the ladder's size at the cost of reaching into it.
+    /// Unaligned: the site rounds once, to its backing.
     ///
     /// The frame takes the label's own `cellSize` width, because
     /// `NSTextFieldCell` draws a string wider than its frame
@@ -21,9 +24,10 @@ enum BarTextGlyph {
     /// on its trailing side.
     static func frame(
         for field: NSTextField,
-        in cell: CGRect
+        in cell: CGRect,
+        slack: CGFloat = 0
     ) -> CGRect {
-        fit(field, toWidth: cell.width)
+        fit(field, toWidth: cell.width + slack * 2)
         let size = field.cell?.cellSize ?? .zero
         var rect = cell
         let width = ceil(size.width)
@@ -42,15 +46,25 @@ enum BarTextGlyph {
 
     /// Scales the font down until the ink fits `width`: a few of
     /// the bundled ligatures overshoot their em, and along the
-    /// bar a cell abuts its neighbour.
-    private static func fit(_ field: NSTextField, toWidth width: CGFloat) {
-        guard let font = field.font else { return }
-        let ink = inkBounds(field.stringValue, font: font)
-        guard ink.width > width, width > 0 else { return }
-        field.font = NSFont(
-            descriptor: font.fontDescriptor,
-            size: font.pointSize * width / ink.width
-        )
+    /// bar an app cell abuts its neighbour. Converted rather than
+    /// re-minted, so the system font stays the system font, and
+    /// re-measured once, since its tracking is not linear in size.
+    private static func fit(
+        _ field: NSTextField,
+        toWidth width: CGFloat
+    ) {
+        guard let font = field.font, width > 0 else { return }
+        var fitted = font
+        var ink = inkBounds(field.stringValue, font: fitted).width
+        guard ink > width else { return }
+        for _ in 0..<2 where ink > width {
+            fitted = NSFontManager.shared.convert(
+                fitted,
+                toSize: fitted.pointSize * width / ink
+            )
+            ink = inkBounds(field.stringValue, font: fitted).width
+        }
+        field.font = fitted
     }
 
     /// How far the ink's centre sits from the advance's, which is
