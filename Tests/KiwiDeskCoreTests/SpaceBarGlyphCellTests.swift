@@ -28,13 +28,13 @@ import Testing
 @Suite("Space Bar glyph cell at the thickness floor (#1529)")
 @MainActor
 struct SpaceBarGlyphCellTests {
-    private static let depth = AppBarStyle.minThickness
-    private static let cell = max(depth - SpaceBarItemView.pad * 2, 8)
-    private static let glyph = ":safari:"
+    static let depth = AppBarStyle.minThickness
+    static let cell = max(depth - SpaceBarItemView.pad * 2, 8)
+    static let glyph = ":safari:"
 
     /// Explicit, above the cell: `identifierFontSize` clamps it
     /// to the cell and the glyph ladder takes 0.9 of that.
-    private static var style: SpaceBarStyle {
+    static var style: SpaceBarStyle {
         var style = SpaceBarStyle()
         style.fontSize = 14
         return style
@@ -50,7 +50,7 @@ struct SpaceBarGlyphCellTests {
         }
     }
 
-    private static func item(horizontal: Bool) -> SpaceBarItemView {
+    static func item(horizontal: Bool) -> SpaceBarItemView {
         let apps = [
             SpaceBarItemView.App(
                 name: "Safari",
@@ -63,6 +63,15 @@ struct SpaceBarGlyphCellTests {
                 name: "Finder",
                 icon: icon(),
                 glyph: nil,
+                focused: false,
+                count: 1
+            ),
+            // A ligature that overshoots its em, so the app
+            // site's slack of zero is what keeps it in its cell.
+            SpaceBarItemView.App(
+                name: "Dropover",
+                icon: nil,
+                glyph: ":dropover:",
                 focused: false,
                 count: 1
             ),
@@ -95,7 +104,7 @@ struct SpaceBarGlyphCellTests {
     /// The columns of `field`'s own render that carry ink, in
     /// points from its frame's leading edge — the field clips to
     /// its frame, which is the mechanism under test.
-    private static func inkSpan(
+    static func inkSpan(
         of field: NSTextField
     ) -> ClosedRange<CGFloat>? {
         guard
@@ -116,7 +125,7 @@ struct SpaceBarGlyphCellTests {
         return (CGFloat(first) / scale)...(CGFloat(last + 1) / scale)
     }
 
-    private static func requireAppFont(
+    static func requireAppFont(
         _ field: NSTextField
     ) throws -> NSFont {
         let font = try #require(field.font)
@@ -189,63 +198,6 @@ struct SpaceBarGlyphCellTests {
             image.frame.size == CGSize(width: Self.cell, height: Self.cell)
         )
         #expect(image.frame.midX == Self.depth / 2)
-    }
-
-    /// A ligature that overshoots its em is scaled to the cell,
-    /// so along the bar no glyph reaches its neighbour's cell.
-    @Test("every bundled ligature's ink fits the floor's cell")
-    func everyLigatureFitsTheCell() throws {
-        let map = try #require(AppFontGlyphMap.loadBundled())
-        let ligatures = Set(map.values)
-        try #require(ligatures.count > 100)
-        let size = Self.style.glyphFontSize(forDepth: Self.depth)
-        let cell = CGRect(x: 0, y: 0, width: Self.cell, height: Self.cell)
-        var scaled = 0
-        for ligature in ligatures {
-            let field = NSTextField(labelWithString: ligature)
-            field.alignment = .center
-            field.font = try #require(AppFont.font(size: size))
-            field.frame = BarTextGlyph.frame(for: field, in: cell)
-            let font = try Self.requireAppFont(field)
-            let ink = BarTextGlyph.inkBounds(ligature, font: font)
-            #expect(ink.width <= Self.cell + 0.01, "\(ligature)")
-            if font.pointSize < size { scaled += 1 }
-        }
-        // The clause is live: the bundled font has ligatures the
-        // fit had to scale.
-        #expect(scaled > 0)
-    }
-
-    /// The identifier states the item's pad as its slack: a
-    /// three-digit id keeps the ladder's size beside a one-digit
-    /// neighbour and reaches into the pad, never past it.
-    @Test("a three-digit identifier keeps its size and stays in the pad")
-    func identifierKeepsTheLadderSize() throws {
-        let view = Self.item(horizontal: true)
-        view.configure(
-            identity: .space(SpaceID("100")),
-            spaceGlyph: .text("100", tinted: true),
-            apps: [],
-            active: true,
-            horizontal: true,
-            style: Self.style,
-            stateMarkColors: StateMarkColors(
-                sticky: "#ffffff",
-                floating: "#ffffff"
-            )
-        )
-        view.layout()
-        let field = view.identifierLabel
-        let font = try #require(field.font)
-        #expect(font.pointSize == view.identifierFont)
-        let ink = BarTextGlyph.inkBounds("100", font: font)
-        try #require(ink.width > Self.cell, "the fixture fits the cell")
-        #expect(ink.width <= Self.cell + SpaceBarItemView.pad * 2)
-        let span = try #require(Self.inkSpan(of: field))
-        #expect(
-            span.lowerBound > 0 && span.upperBound < field.bounds.width,
-            "ink \(span) touches the field's edge"
-        )
     }
 
     @Test("the front-app glyph takes the same framing")

@@ -46,9 +46,9 @@ enum BarTextGlyph {
 
     /// Scales the font down until the ink fits `width`: a few of
     /// the bundled ligatures overshoot their em, and along the
-    /// bar an app cell abuts its neighbour. Converted rather than
-    /// re-minted, so the system font stays the system font, and
-    /// re-measured once, since its tracking is not linear in size.
+    /// bar an app cell abuts its neighbour. Converted through the
+    /// font manager, which keeps the face, and re-measured once,
+    /// since the system font's tracking is not linear in size.
     private static func fit(
         _ field: NSTextField,
         toWidth width: CGFloat
