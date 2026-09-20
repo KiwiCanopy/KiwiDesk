@@ -255,7 +255,7 @@ extension KiwiCore {
     /// A Space's glyph where there is room for a name: its icon,
     /// else the FULL id — the sticky pill and the menu bar item
     /// (#1413) share it, unlike the bar's monogram above.
-    func spaceGlyph(for id: SpaceID) -> SpaceBarItemView.Identifier {
+    func spaceGlyph(for id: SpaceID) -> SpaceGlyph {
         if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
             return Self.iconGlyph(icon)
         }
@@ -266,7 +266,7 @@ extension KiwiCore {
     /// which has no icon and is the bar's resting shape — the
     /// one reading the bar item and the menu bar item share.
     func activeLayerGlyph() -> (
-        name: String, glyph: SpaceBarItemView.Identifier,
+        name: String, glyph: SpaceGlyph,
         hasIcon: Bool
     )? {
         let layer = keys.currentLayer

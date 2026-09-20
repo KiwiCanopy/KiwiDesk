@@ -21,8 +21,7 @@ struct SymbolClassifierSeamTests {
         "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift":
             "the one classifier, `KiwiCore.iconIsSymbol`",
         "Sources/KiwiDesk/StatusItemController+Icon.swift":
-            "builds the status image; ⚠︎ when a fixed name fails, and "
-            + "the mode-icon arm asks `iconIsSymbol` first",
+            "builds the status image; ⚠︎ when a fixed name fails",
         "Sources/KiwiDesk/StatusItemController.swift":
             "builds a template image from a fixed name",
         "Sources/KiwiDesk/StatusItemController+Updates.swift":
@@ -85,7 +84,7 @@ struct SymbolClassifierSeamTests {
 
     /// The other spelling of a classifier: binding the lookup with
     /// `if let` / `guard let` and drawing the NAME on the else arm
-    /// — the status item's mode-icon arm did until #1538. One
+    /// — the status item's mode-icon arm once did (#1538). One
     /// render-time net may bind: `StickyMarkPlate` draws a name
     /// `homeSpaceMark` already classified.
     private let bindingAllowed: [String: String] = [

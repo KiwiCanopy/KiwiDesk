@@ -18,7 +18,7 @@ public struct StatusSpaceMark: Equatable {
             return false
         }
 
-        init(_ identifier: SpaceBarItemView.Identifier) {
+        init(_ identifier: SpaceGlyph) {
             switch identifier {
             case .symbol(let name): self = .symbol(name)
             case .text(let text, let tinted):
