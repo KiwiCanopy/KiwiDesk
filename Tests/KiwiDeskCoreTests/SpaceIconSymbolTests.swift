@@ -26,8 +26,10 @@ struct SpaceIconSymbolTests {
         #expect(!KiwiCore.iconIsSymbol("⭐"))
     }
 
-    @Test("The public ladder is the instance's: icon, digits, monogram")
-    func staticLadderMatchesTheBar() {
+    /// The instance reading that delegates here is pinned by
+    /// `SpaceBarDriverTests` on a live core.
+    @Test("The public ladder: icon, empty icon, digits, monogram")
+    func staticLadderCoversEveryArm() {
         #expect(
             KiwiCore.spaceIdentifier(id: SpaceID("2"), icon: "book")
                 == .symbol("book")
