@@ -4318,8 +4318,14 @@ active, the KiwiDesk status item swaps to it, and the Space Bar
 shows it as one item ahead of the Spaces; a layer without an
 icon shows the first two characters of its name there,
 uppercased. The default layer (`KiwiDesk.bind`) never takes an
-icon — the status item always shows the standard KiwiDesk
-glyph.
+icon — the status item shows the standard KiwiDesk glyph.
+
+:::unreleased
+With the Space Bar off, the status item shows the Space each
+screen is showing instead ([User Guide ▸ Space
+Bar](user-guide.md#space-bar)), led by the layer's icon — or
+the two-character cut of its name — the way the bar is.
+:::
 
 **Example:**
 

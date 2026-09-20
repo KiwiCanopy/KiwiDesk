@@ -196,10 +196,7 @@ extension KiwiCore {
             // Three digits still fit the square cell; longer
             // ids truncate like the monogram rather than clip
             // under the item's masksToBounds.
-            return .text(
-                String(id.raw.prefix(3)),
-                tinted: true
-            )
+            return Self.textGlyph(String(id.raw.prefix(3)))
         }
         return Self.monogram(id.raw)
     }
@@ -209,7 +206,14 @@ extension KiwiCore {
     static func monogram(
         _ name: String
     ) -> SpaceBarItemView.Identifier {
-        .text(String(name.prefix(2)).uppercased(), tinted: true)
+        textGlyph(String(name.prefix(2)).uppercased())
+    }
+
+    /// Text as a bar glyph: tinted unless it is an emoji, which
+    /// takes no template tint — where the bit is set for every
+    /// glyph Core builds.
+    static func textGlyph(_ text: String) -> SpaceBarItemView.Identifier {
+        .text(text, tinted: !isEmoji(text))
     }
 
     /// A configured icon as a bar glyph — a Space's or a layer's
@@ -223,31 +227,53 @@ extension KiwiCore {
         ) != nil {
             return .symbol(icon)
         }
-        // Emoji render untinted (they take no template
-        // tint); plain characters follow the state color.
-        // U+FE0F covers text-default scalars forced into
-        // emoji presentation ("❤️", "☀️").
-        let emoji = icon.unicodeScalars.contains {
+        return textGlyph(icon)
+    }
+
+    /// U+FE0F covers text-default scalars forced into emoji
+    /// presentation ("❤️", "☀️").
+    nonisolated static func isEmoji(_ icon: String) -> Bool {
+        icon.unicodeScalars.contains {
             $0.properties.isEmojiPresentation
                 || $0.value == 0xFE0F
         }
-        return .text(icon, tinted: !emoji)
     }
 
-    /// The active shortcut layer's item, ahead of the Spaces
-    /// (#1169) — nil on `default`, which has no icon and is the
-    /// bar's resting shape. Read at build time; the rebuild on a
-    /// switch is the `layer_change` sink in `KiwiCore+SpaceBar`.
-    func spaceBarLayerItem() -> SpaceBarOverlay.Item? {
+    /// A Space's glyph where there is room for a name: its icon,
+    /// else the FULL id — the sticky pill and the menu bar item
+    /// (#1413) share it, unlike the bar's monogram above.
+    func spaceGlyph(for id: SpaceID) -> SpaceBarItemView.Identifier {
+        if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
+            return Self.iconGlyph(icon)
+        }
+        return Self.textGlyph(id.raw)
+    }
+
+    /// The active shortcut layer's glyph — nil on `default`,
+    /// which has no icon and is the bar's resting shape — the
+    /// one reading the bar item and the menu bar item share.
+    func activeLayerGlyph() -> (
+        name: String, glyph: SpaceBarItemView.Identifier,
+        hasIcon: Bool
+    )? {
         let layer = keys.currentLayer
         guard layer != KeybindingManager.defaultLayer else {
             return nil
         }
         let icon = keys.icon(for: layer) ?? ""
-        return SpaceBarOverlay.Item(
-            layer: layer,
-            glyph: icon.isEmpty
-                ? Self.monogram(layer) : Self.iconGlyph(icon)
+        return (
+            layer,
+            icon.isEmpty ? Self.monogram(layer) : Self.iconGlyph(icon),
+            !icon.isEmpty
         )
+    }
+
+    /// The active shortcut layer's item, ahead of the Spaces
+    /// (#1169). Read at build time; the rebuild on a switch is
+    /// the `layer_change` sink in `KiwiCore+SpaceBar`.
+    func spaceBarLayerItem() -> SpaceBarOverlay.Item? {
+        activeLayerGlyph().map {
+            SpaceBarOverlay.Item(layer: $0.name, glyph: $0.glyph)
+        }
     }
 }

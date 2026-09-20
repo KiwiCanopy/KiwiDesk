@@ -7659,6 +7659,42 @@ the bar for lack of one. Both surfaces read the one
 `layer_change` bus event (#1168): the bar takes no hook on the
 manager, which keeps one seam.
 
+:::unreleased
+**With the Space Bar off, the menu bar item is the Space Bar's
+stand-in** (#1413, owner ruling 2026-09-16). A user who turns
+the bar off to keep the screen loses the one place that says
+which Space they are on, and the request was for the menu bar
+to say it instead — the way AeroSpace names its workspace in
+the menu bar. Three rulings shape it. It is composed the way
+the bar composes, `<layer> | <space>`, rather than replacing
+the logo with the Space's icon: the layer's glyph already
+lives there (the entry above), so the two facts share the item
+as they share the bar, the layer's glyph leading only while a
+layer other than `default` is active. The Space shows its icon
+where it has one and its full name where it has none — no
+brand-logo fallback, since a Space always has a name, and no
+two-letter monogram, since the menu bar has room for a real
+name the bar's square cell lacks. And it is not a setting: the
+bar being off is the condition, and with the bar on the item
+keeps its brand or layer icon exactly as before — a switch
+would cost what the entry above prices, for a choice nobody
+has asked to make the other way.
+One item lists EVERY screen. A macOS status item is one item
+mirrored into every screen's menu bar, so it cannot show each
+screen its own Space; it lists the Space each screen is
+showing instead, in desk reading order, one divider between
+each — the same reading the Space Bar's per-screen strips give
+side by side. The drawing is ONE image so the #1013 update
+mark composites on it as it does on the brand icon, a
+template unless an emoji is in it — an emoji keeps its colour
+at the cost the mark already pays, no highlight inversion
+while the menu is open. Core hands the structure
+(`StatusSpaceMark`, published off the bar's own refresh so
+every trigger the bar has reaches the item) and the GUI draws
+and names it; the name says the layer and each screen's Space,
+so VoiceOver reads what the eye does.
+:::
+
 **The recorder snaps in on key-down.** (#212, replacing the
 #68 lock-on-full-release machine.) Modifiers can be pressed
 and released freely — the preview mirrors what is held — and

@@ -41,6 +41,15 @@ public final class SpaceBarManager {
         _ in
     }
 
+    /// The menu bar item's layer and Space mark (#1413), fired
+    /// on change only since the bar refreshes on every retile.
+    /// Internal: `KiwiCore.onStatusSpaceMarkChange` is the one
+    /// door the GUI has, by visibility.
+    var onStatusMarkChange: @MainActor (StatusSpaceMark) -> Void = {
+        _ in
+    }
+    private(set) var statusMark: StatusSpaceMark?
+
     private var overlays: [DisplayID: SpaceBarOverlay] = [:]
     /// Active visible bars painted on screen.
     private var shownBars: [Bar] = []
@@ -74,6 +83,12 @@ public final class SpaceBarManager {
     /// drawn stale (review 2026-08-20, #937).
     public func showsTitle(of id: WindowID) -> Bool {
         shownBars.contains { $0.frontWindow == id }
+    }
+
+    func publishStatusMark(_ mark: StatusSpaceMark) {
+        guard mark != statusMark else { return }
+        statusMark = mark
+        onStatusMarkChange(mark)
     }
 
     /// Synchronizes visible bar overlays across displays. The

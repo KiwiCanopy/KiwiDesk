@@ -215,20 +215,12 @@ extension KiwiCore {
             + 0.08
     }
 
-    /// The pill's home-space mark: the space's configured Space Bar
-    /// icon (SF Symbol or emoji/character) so the pill matches the
-    /// bar tile, else the bare id/name. Mirrors `spaceIdentifier`'s
-    /// icon lookup but falls back to the FULL id — the pill has room
-    /// for a real name, unlike the bar's 2-char monogram.
+    /// The pill's home-space mark, over the one `spaceGlyph`
+    /// reader (icon, else the full id); the pill tints itself.
     private func homeSpaceMark(_ id: SpaceID) -> SpaceMark {
-        if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
-            let isSymbol =
-                NSImage(
-                    systemSymbolName: icon,
-                    accessibilityDescription: nil
-                ) != nil
-            return isSymbol ? .symbol(icon) : .text(icon)
+        switch spaceGlyph(for: id) {
+        case .symbol(let name): return .symbol(name)
+        case .text(let text, _): return .text(text)
         }
-        return .text(id.raw)
     }
 }
