@@ -759,6 +759,8 @@
   "menu.edit.select_all": "全選",
   "menu.edit.title": "編輯",
   "menu.edit.undo": "還原",
+  "menu.file.close": "關閉",
+  "menu.file.title": "檔案",
   "menu.layout": "佈局",
   "menu.layout.all_screens": "所有螢幕",
   "menu.layout.keep": "將佈局保留在描述檔「%1$@」中",

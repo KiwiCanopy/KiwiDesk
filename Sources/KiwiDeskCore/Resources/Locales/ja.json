@@ -759,6 +759,8 @@
   "menu.edit.select_all": "すべてを選択",
   "menu.edit.title": "編集",
   "menu.edit.undo": "取り消す",
+  "menu.file.close": "閉じる",
+  "menu.file.title": "ファイル",
   "menu.layout": "レイアウト",
   "menu.layout.all_screens": "すべての画面",
   "menu.layout.keep": "レイアウトをプロファイル「%1$@」に保持",

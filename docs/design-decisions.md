@@ -5511,7 +5511,11 @@ strand anything.
 The menu bar this policy hides is still built (`MainMenu`) —
 AppKit routes key equivalents through `NSApp.mainMenu` whatever
 the policy, and it is what gives the Settings text fields
-Cut/Copy/Paste/Undo.
+Cut/Copy/Paste/Undo and every key window its Close (⌘W —
+[#1533](https://github.com/KiwiCanopy/KiwiDesk/issues/1533)
+found the item missing, so nothing answered the chord; a
+borderless panel, which AppKit greys Close for, validates the
+item itself).
 
 **Corollary: nothing arrives in front for free, and that reaches
 windows KiwiDesk did not open.** A `.regular` app has a Dock tile

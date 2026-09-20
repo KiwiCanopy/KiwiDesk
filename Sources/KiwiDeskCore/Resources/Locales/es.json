@@ -759,6 +759,8 @@
   "menu.edit.select_all": "Seleccionar todo",
   "menu.edit.title": "Editar",
   "menu.edit.undo": "Deshacer",
+  "menu.file.close": "Cerrar",
+  "menu.file.title": "Archivo",
   "menu.layout": "Diseño",
   "menu.layout.all_screens": "Todas las pantallas",
   "menu.layout.keep": "Conservar el diseño en el perfil «%1$@»",

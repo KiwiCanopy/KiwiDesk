@@ -26,6 +26,23 @@ final class ShortcutsPanel: NSPanel {
         onCancel()
     }
 
+    /// The File menu's Close (⌘W) is a keyboard-commanded close,
+    /// so it yields like Esc. AppKit greys Close for a window
+    /// without `.closable`, which a borderless panel is, so the
+    /// item is validated here (#1533).
+    override func performClose(_ sender: Any?) {
+        onCancel()
+    }
+
+    override func validateUserInterfaceItem(
+        _ item: any NSValidatedUserInterfaceItem
+    ) -> Bool {
+        if item.action == #selector(NSWindow.performClose(_:)) {
+            return true
+        }
+        return super.validateUserInterfaceItem(item)
+    }
+
     /// Esc explicitly as well as `cancelOperation` — a borderless
     /// panel hosting SwiftUI doesn't always route Esc through the
     /// cancel action (53 = Escape).

@@ -1,8 +1,8 @@
 import AppKit
 import KiwiDeskCore
 
-/// Builds the application menu bar to provide standard Edit and Window
-/// key equivalents (#9, #329).
+/// Builds the application menu bar to provide standard File, Edit
+/// and Window key equivalents (#9, #329, #1533).
 @MainActor
 enum MainMenu {
     /// The App menu's "Settings…" item routes here; the delegate
@@ -15,6 +15,7 @@ enum MainMenu {
         bar.addItem(
             appMenu(target: settingsTarget, action: settingsAction)
         )
+        bar.addItem(fileMenu())
         bar.addItem(editMenu())
         bar.addItem(windowMenu())
         return bar
@@ -79,6 +80,20 @@ enum MainMenu {
             withTitle: L("menu.quit", "Quit KiwiDesk"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
+        )
+        return item
+    }
+
+    /// Close answers for whichever window is key (#1533); a
+    /// borderless panel earns it by validating `performClose(_:)`
+    /// itself, as `ShortcutsPanel` does.
+    private static func fileMenu() -> NSMenuItem {
+        let item = submenu(L("menu.file.title", "File"))
+        let menu = item.submenu!
+        menu.addItem(
+            withTitle: L("menu.file.close", "Close"),
+            action: #selector(NSWindow.performClose(_:)),
+            keyEquivalent: "w"
         )
         return item
     }
