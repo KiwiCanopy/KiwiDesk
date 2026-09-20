@@ -56,7 +56,9 @@ struct LayerChangeSeamTests {
     }
 
     /// One writer in production, and it is the emitter's; the
-    /// GUI's indicator is a bus sink keyed on the event.
+    /// GUI reads the event off the bus — its one remaining sink
+    /// closes the shortcuts panel, the menu bar's layer glyph
+    /// having moved onto the Space Bar's refresh (#1413).
     @Test("Core wires the seam to the emitter, and nothing else")
     func oneWriter() throws {
         let bootstrap = try squashed(
@@ -72,7 +74,7 @@ struct LayerChangeSeamTests {
             try writers(of: "onLayerChange=", under: "Sources") == 1
         )
         let app = try squashed("Sources/KiwiDesk/AppDelegate.swift")
-        #expect(app.contains("guardevent==.layerChange,"))
+        #expect(app.contains("guardevent==.layerChangeelse"))
         #expect(!app.contains("onLayerChange"))
     }
 

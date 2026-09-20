@@ -55,8 +55,13 @@ extension StatusItemController {
         )
         let image = UpdateMarkImage(size: size, flipped: false) { rect in
             base.draw(in: rect)
-            NSColor.labelColor.set()
-            rect.fill(using: .sourceAtop)
+            // A template base carries no hue and takes the label
+            // tint; a coloured one (an emoji in the #1413
+            // composite) keeps its own.
+            if base.isTemplate {
+                NSColor.labelColor.set()
+                rect.fill(using: .sourceAtop)
+            }
             let context = NSGraphicsContext.current
             context?.compositingOperation = .destinationOut
             NSBezierPath(
@@ -103,30 +108,5 @@ extension StatusItemController {
         button.title = image == nil ? "⚠︎" : ""
         button.toolTip = tooltip
         button.setAccessibilityLabel(a11y)
-    }
-
-    /// Renders custom layer or mode icon. Naming the button is
-    /// load-bearing: an accessibility label on an `NSView`
-    /// PERSISTS until replaced, so the one path that set none
-    /// announced "starting up" on a healthy app indefinitely
-    /// (localization audit 2026-08-12) — once one path names the
-    /// button, every path owes a name. The name is the app's, not
-    /// the icon string's: announcing `star.fill` would be worse
-    /// than nothing.
-    func applyModeIcon(
-        _ icon: String,
-        to button: NSStatusBarButton
-    ) {
-        button.setAccessibilityLabel(L("menu.status.a11y", "KiwiDesk"))
-        if let image = NSImage(
-            systemSymbolName: icon,
-            accessibilityDescription: icon
-        ) {
-            button.image = image
-            button.title = ""
-        } else {
-            button.image = nil
-            button.title = icon
-        }
     }
 }

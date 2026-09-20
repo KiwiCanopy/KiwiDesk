@@ -65,9 +65,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Distinct badge so the two causes never blur (§3.7); mutated
     /// only via `setConfigError`, the same rule as `warning`.
     private(set) var configError = false
-    private var modeIcon: String?
-    /// The active Space, shown while the Space Bar is off
-    /// (#1413); nil keeps the brand or layer icon.
+    /// The active layer and, while the Space Bar is off, the
+    /// Space each screen shows (#1413); nil until Core publishes.
     private(set) var spaceMark: StatusSpaceMark?
     /// ONE stored value (#802), read by the icon AND the menu
     /// builder — two reads of one fact showed half the signal
@@ -112,13 +111,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Whether startup initialization is in progress (#802).
     var starting: Bool { bootPhase.isStarting }
 
-    /// Sets custom icon for active keybinding mode.
-    func setModeIcon(_ icon: String?) {
-        modeIcon = icon
-        render()
-    }
-
-    /// Sets the Space Bar's stand-in (#1413).
+    /// Sets the layer and Space mark (#1413).
     func setSpaceMark(_ mark: StatusSpaceMark?) {
         spaceMark = mark
         render()
@@ -179,10 +172,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             return
         }
         button.toolTip = L("menu.status.tooltip", "KiwiDesk")
-        if let spaceMark {
+        if let spaceMark, !spaceMark.screens.isEmpty {
             applySpaceMark(spaceMark, to: button)
-        } else if let modeIcon, !modeIcon.isEmpty {
-            applyModeIcon(modeIcon, to: button)
+        } else if let layer = spaceMark?.layer, layer.hasIcon {
+            applyLayerIcon(layer.glyph, to: button)
         } else {
             applyBrandIcon(
                 to: button,

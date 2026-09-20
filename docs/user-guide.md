@@ -454,7 +454,8 @@ ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
 With the bar off, the menu bar icon takes its place: the Space
 each screen is showing — its icon, or its name where it has
 none — with the active layer's icon ahead of them, and the
-KiwiDesk logo back as soon as the bar is on again.
+KiwiDesk logo, or the layer's icon, back as soon as the bar is
+on again.
 :::
 
 The bar shows the Desktop you are looking at: a window on a macOS

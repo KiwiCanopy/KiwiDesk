@@ -41,10 +41,10 @@ public final class SpaceBarManager {
         _ in
     }
 
-    /// The menu bar's stand-in while the bar is off (#1413):
-    /// fired on change only, since the bar refreshes on every
-    /// retile and the status item re-draws on each call.
-    public var onStatusMarkChange: @MainActor (StatusSpaceMark?) -> Void = {
+    /// The menu bar item's layer and Space mark (#1413), fired
+    /// on change only since the bar refreshes on every retile;
+    /// reached through `KiwiCore.onStatusSpaceMarkChange`.
+    public var onStatusMarkChange: @MainActor (StatusSpaceMark) -> Void = {
         _ in
     }
     public private(set) var statusMark: StatusSpaceMark?
@@ -84,7 +84,7 @@ public final class SpaceBarManager {
         shownBars.contains { $0.frontWindow == id }
     }
 
-    func publishStatusMark(_ mark: StatusSpaceMark?) {
+    func publishStatusMark(_ mark: StatusSpaceMark) {
         guard mark != statusMark else { return }
         statusMark = mark
         onStatusMarkChange(mark)

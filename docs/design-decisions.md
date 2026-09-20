@@ -7677,8 +7677,8 @@ two-letter monogram, since the menu bar has room for a real
 name the bar's square cell lacks. And it is not a setting: the
 bar being off is the condition, and with the bar on the item
 keeps its brand or layer icon exactly as before — a switch
-would owe a census row, a Settings row, a locale round and a
-migration for a choice nobody has asked to make the other way.
+would cost what the entry above prices, for a choice nobody
+has asked to make the other way.
 One item lists EVERY screen. A macOS status item is one item
 mirrored into every screen's menu bar, so it cannot show each
 screen its own Space; it lists the Space each screen is

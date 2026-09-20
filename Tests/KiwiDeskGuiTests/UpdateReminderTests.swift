@@ -175,7 +175,7 @@ struct UpdateReminderTests {
         #expect(brand.isTemplate)
     }
 
-    /// A mode icon that is no SF Symbol takes the title fallback
+    /// A layer icon that is no SF Symbol takes the title fallback
     /// and has no image to badge: the announced channels still
     /// carry the reminder (#937's shape — a stand-down asks whether
     /// either channel is reached, never one alone).
@@ -183,7 +183,16 @@ struct UpdateReminderTests {
     func announcedWithoutAnImage() throws {
         let (controller, updater) = controller()
         let button = try #require(controller.anchorButton)
-        controller.setModeIcon("no.such.symbol.kiwidesk")
+        controller.setSpaceMark(
+            StatusSpaceMark(
+                layer: .init(
+                    name: "service",
+                    glyph: .text("⚙", tinted: true),
+                    hasIcon: true
+                ),
+                screens: []
+            )
+        )
         updater.updatePending = true
         #expect(button.image == nil)
         #expect(

@@ -22,13 +22,17 @@ private final class FakeUpdater: AppUpdating {
     func checkForUpdates() {}
 }
 
-/// The menu bar's Space Bar stand-in (#1413), the GUI half: the
-/// item draws the mark as ONE image — a template unless an emoji
-/// is in it — names it for VoiceOver with the layer and every
-/// screen's Space in desk order, lets the broken and starting
-/// states outrank it and carries the #1013 mark on top like the
-/// brand icon does. `.serialized`: names are matched in English
-/// through the process-wide `LocalizationManager`.
+/// The menu bar's layer and Space mark (#1413), the GUI half:
+/// with screens the item draws ONE image — a template unless an
+/// emoji is in it — named for VoiceOver with the layer and every
+/// screen's Space in desk order; without screens (the bar on) it
+/// draws the layer's icon alone, or the brand glyph for an
+/// icon-less layer, as before; the broken and starting states
+/// outrank both, and the #1013 mark rides on top; the pixels are
+/// `StatusItemSpaceMarkDrawingTests`'. `.serialized`:
+/// names are matched in English through the process-wide
+/// `LocalizationManager`. `@MainActor` for the AppKit button and
+/// the image draws; the wiring needle spends one file read on it.
 @Suite("Status item Space mark (#1413)", .serialized)
 @MainActor
 struct StatusItemSpaceMarkTests {
@@ -44,17 +48,24 @@ struct StatusItemSpaceMarkTests {
         _ id: UInt32,
         x: CGFloat,
         space: String,
-        glyph: SpaceMark? = nil
+        glyph: StatusSpaceMark.Glyph? = nil
     ) -> StatusSpaceMark.Screen {
         StatusSpaceMark.Screen(
             display: display(id, x: x),
             space: SpaceID(space),
-            glyph: glyph ?? .text(space)
+            glyph: glyph ?? .text(space, tinted: true)
         )
     }
 
+    private func layer(
+        _ name: String,
+        glyph: StatusSpaceMark.Glyph,
+        hasIcon: Bool = true
+    ) -> StatusSpaceMark.Layer {
+        .init(name: name, glyph: glyph, hasIcon: hasIcon)
+    }
+
     private func controller() -> (StatusItemController, FakeUpdater) {
-        LocalizationManager.shared.select("en")
         let controller = StatusItemController(item: FakeStatusItem())
         let updater = FakeUpdater()
         controller.updater = updater
@@ -63,6 +74,7 @@ struct StatusItemSpaceMarkTests {
 
     @Test("the mark is drawn as one template image and named")
     func drawnAndNamed() throws {
+        LocalizationManager.shared.select("en")
         let (controller, _) = controller()
         let button = try #require(controller.anchorButton)
         controller.setSpaceMark(
@@ -86,27 +98,54 @@ struct StatusItemSpaceMarkTests {
         #expect(button.accessibilityLabel() == "KiwiDesk")
     }
 
-    @Test("an emoji keeps its colour: the image is no template")
-    func emojiIsNoTemplate() throws {
+    /// The bar-on shape is the old one: the layer's icon alone,
+    /// named as the app; an icon-less layer keeps the brand glyph.
+    @Test("without screens the layer icon draws alone, or the brand")
+    func layerAloneWithoutScreens() throws {
+        LocalizationManager.shared.select("en")
         let (controller, _) = controller()
         let button = try #require(controller.anchorButton)
         controller.setSpaceMark(
             StatusSpaceMark(
-                layer: nil,
-                screens: [screen(1, x: 0, space: "web", glyph: .text("🌐"))]
+                layer: layer("resize", glyph: .symbol("star.fill")),
+                screens: []
             )
         )
-        #expect(try #require(button.image).isTemplate == false)
+        let icon = try #require(button.image)
+        #expect(!(icon is StatusItemController.SpaceMarkImage))
+        #expect(icon.accessibilityDescription == "star.fill")
+        #expect(button.accessibilityLabel() == "KiwiDesk")
+        controller.setSpaceMark(
+            StatusSpaceMark(
+                layer: layer("svc", glyph: .text("⚙", tinted: true)),
+                screens: []
+            )
+        )
+        #expect(button.image == nil)
+        #expect(button.title == "⚙")
+        controller.setSpaceMark(
+            StatusSpaceMark(
+                layer: layer(
+                    "svc",
+                    glyph: .text("SV", tinted: true),
+                    hasIcon: false
+                ),
+                screens: []
+            )
+        )
+        #expect(button.title.isEmpty)
+        #expect(
+            try #require(button.image).accessibilityDescription
+                == "KiwiDesk"
+        )
     }
 
     @Test("the layer leads and the screens follow in desk order")
     func layerLeadsScreensInDeskOrder() {
         LocalizationManager.shared.select("en")
+        let resize = layer("resize", glyph: .symbol("arrow.left.and.right"))
         let mark = StatusSpaceMark(
-            layer: .init(
-                name: "resize",
-                glyph: .symbol("arrow.left.and.right")
-            ),
+            layer: resize,
             screens: [
                 screen(8, x: 1000, space: "side"),
                 screen(7, x: 0, space: "main", glyph: .symbol("envelope")),
@@ -116,20 +155,20 @@ struct StatusItemSpaceMarkTests {
             StatusItemController.spaceMarkGlyphs(mark) == [
                 .symbol("arrow.left.and.right"),
                 .symbol("envelope"),
-                .text("side"),
+                .text("side", tinted: true),
             ]
         )
         #expect(
             StatusItemController.spaceMarkName(mark)
-                == "KiwiDesk (resize layer, Spaces main and side)"
+                == "KiwiDesk (“resize” layer, Spaces main and side)"
         )
         #expect(
             StatusItemController.spaceMarkName(
                 StatusSpaceMark(
-                    layer: mark.layer,
+                    layer: resize,
                     screens: [screen(7, x: 0, space: "main")]
                 )
-            ) == "KiwiDesk (resize layer, Space main)"
+            ) == "KiwiDesk (“resize” layer, Space main)"
         )
         #expect(
             StatusItemController.spaceMarkName(
@@ -144,34 +183,14 @@ struct StatusItemSpaceMarkTests {
         )
     }
 
-    /// A one-glyph mark and a two-glyph mark differ by a divider
-    /// and the second glyph: the composite grows with its runs.
-    @Test("a second glyph widens the image")
-    func widthGrowsWithRuns() {
-        let one = StatusItemController.spaceMarkImage(
-            StatusSpaceMark(
-                layer: nil,
-                screens: [screen(1, x: 0, space: "main")]
-            )
-        )
-        let two = StatusItemController.spaceMarkImage(
-            StatusSpaceMark(
-                layer: .init(name: "resize", glyph: .text("RE")),
-                screens: [screen(1, x: 0, space: "main")]
-            )
-        )
-        #expect(two.size.width > one.size.width + 10)
-        #expect(one.size.height == two.size.height)
-    }
-
-    @Test("the mark outranks the layer icon and the update mark rides it")
+    @Test("the update mark rides the composite and lifts off again")
     func precedence() throws {
+        LocalizationManager.shared.select("en")
         let (controller, updater) = controller()
         let button = try #require(controller.anchorButton)
-        controller.setModeIcon("star.fill")
         controller.setSpaceMark(
             StatusSpaceMark(
-                layer: .init(name: "resize", glyph: .text("RE")),
+                layer: layer("resize", glyph: .text("RE", tinted: true)),
                 screens: [screen(1, x: 0, space: "main")]
             )
         )
@@ -185,17 +204,16 @@ struct StatusItemSpaceMarkTests {
         #expect(button.image is StatusItemController.SpaceMarkImage)
         #expect(
             button.accessibilityLabel()
-                == "KiwiDesk (resize layer, Space main)"
+                == "KiwiDesk (“resize” layer, Space main)"
         )
     }
 
     /// The wiring no behaviour test can red on: `AppDelegate`
     /// cannot be instantiated here, so the assignment that hands
-    /// the manager's change to the controller is pinned by
-    /// needle, whole — the seam AND its consumer in one
-    /// statement, since a closure wired to nothing matches a
-    /// looser one.
-    @Test("the delegate wires the manager's change to the controller")
+    /// Core's change to the controller is pinned by needle,
+    /// whole — the seam AND its consumer in one statement, since
+    /// a closure wired to nothing matches a looser one.
+    @Test("the delegate wires Core's change to the controller")
     func delegateWiresTheSeam() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/AppDelegate.swift")
@@ -205,7 +223,7 @@ struct StatusItemSpaceMarkTests {
             .replacingOccurrences(of: "\n", with: "")
         #expect(
             source.contains(
-                "core.spaceBars.onStatusMarkChange={[weakself]markin"
+                "core.onStatusSpaceMarkChange={[weakself]markin"
                     + "self?.statusItem?.setSpaceMark(mark)}"
             )
         )
@@ -213,6 +231,7 @@ struct StatusItemSpaceMarkTests {
 
     @Test("the broken and starting states outrank the mark")
     func brokenStatesOutrankTheMark() throws {
+        LocalizationManager.shared.select("en")
         let (controller, _) = controller()
         let button = try #require(controller.anchorButton)
         controller.setSpaceMark(

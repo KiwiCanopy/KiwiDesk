@@ -237,20 +237,41 @@ extension KiwiCore {
         }
     }
 
-    /// The active shortcut layer's item, ahead of the Spaces
-    /// (#1169) — nil on `default`, which has no icon and is the
-    /// bar's resting shape. Read at build time; the rebuild on a
-    /// switch is the `layer_change` sink in `KiwiCore+SpaceBar`.
-    func spaceBarLayerItem() -> SpaceBarOverlay.Item? {
+    /// A Space's glyph where there is room for a name: its icon,
+    /// else the FULL id — the sticky pill and the menu bar item
+    /// (#1413) share it, unlike the bar's monogram above.
+    func spaceGlyph(for id: SpaceID) -> SpaceBarItemView.Identifier {
+        if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
+            return Self.iconGlyph(icon)
+        }
+        return .text(id.raw, tinted: true)
+    }
+
+    /// The active shortcut layer's glyph — nil on `default`,
+    /// which has no icon and is the bar's resting shape — the
+    /// one reading the bar item and the menu bar item share.
+    func activeLayerGlyph() -> (
+        name: String, glyph: SpaceBarItemView.Identifier,
+        hasIcon: Bool
+    )? {
         let layer = keys.currentLayer
         guard layer != KeybindingManager.defaultLayer else {
             return nil
         }
         let icon = keys.icon(for: layer) ?? ""
-        return SpaceBarOverlay.Item(
-            layer: layer,
-            glyph: icon.isEmpty
-                ? Self.monogram(layer) : Self.iconGlyph(icon)
+        return (
+            layer,
+            icon.isEmpty ? Self.monogram(layer) : Self.iconGlyph(icon),
+            !icon.isEmpty
         )
+    }
+
+    /// The active shortcut layer's item, ahead of the Spaces
+    /// (#1169). Read at build time; the rebuild on a switch is
+    /// the `layer_change` sink in `KiwiCore+SpaceBar`.
+    func spaceBarLayerItem() -> SpaceBarOverlay.Item? {
+        activeLayerGlyph().map {
+            SpaceBarOverlay.Item(layer: $0.name, glyph: $0.glyph)
+        }
     }
 }

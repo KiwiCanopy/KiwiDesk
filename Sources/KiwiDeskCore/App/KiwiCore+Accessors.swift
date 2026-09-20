@@ -18,6 +18,16 @@ extension KiwiCore {
         set { boot.onPhaseChange = newValue }
     }
 
+    /// The menu bar item's layer and Space mark (#1413), pushed
+    /// off the Space Bar's refresh; stored on the manager since
+    /// `KiwiCore.swift` sits at the ceiling, forwarded so every
+    /// Core→GUI seam keeps one shape.
+    public var onStatusSpaceMarkChange: @MainActor (StatusSpaceMark) -> Void
+    {
+        get { spaceBars.onStatusMarkChange }
+        set { spaceBars.onStatusMarkChange = newValue }
+    }
+
     public var activeSpace: Space? {
         state.workspaces.activeSpace.flatMap {
             state.workspaces[$0]

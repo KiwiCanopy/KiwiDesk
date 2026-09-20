@@ -189,25 +189,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.configIssues.model.issues = issues
         }
 
-        // Update menu bar icon and close stale shortcuts panel on
-        // layer change (#603) — read off the `layer_change` event
-        // like any other consumer (#1168), so Core keeps one seam.
-        core.bus.addSink { [weak self] event, data in
-            guard event == .layerChange,
-                case .object(let payload) = data,
-                case .string(let mode) = payload["to_layer"]
-            else { return }
-            let icon =
-                mode == KeybindingManager.defaultLayer
-                ? nil
-                : self?.core.keys.icon(for: mode)
-            self?.statusItem?.setModeIcon(icon)
+        // Close a stale shortcuts panel on layer change (#603) —
+        // read off the `layer_change` event like any other
+        // consumer (#1168), so Core keeps one seam.
+        core.bus.addSink { [weak self] event, _ in
+            guard event == .layerChange else { return }
             self?.shortcutsPanel?.closeIfOpen()
         }
-        // While the Space Bar is off, the status item shows the
-        // active Space instead (#1413) — off the bar's own
+        // The menu bar's layer icon and, while the Space Bar is
+        // off, the active Space (#1413) — off the bar's own
         // refresh, so every trigger the bar has reaches it.
-        core.spaceBars.onStatusMarkChange = { [weak self] mark in
+        core.onStatusSpaceMarkChange = { [weak self] mark in
             self?.statusItem?.setSpaceMark(mark)
         }
 
