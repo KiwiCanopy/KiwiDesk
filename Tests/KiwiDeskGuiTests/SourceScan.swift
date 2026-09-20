@@ -89,7 +89,7 @@ enum SourceScan {
     /// the next `*/`.
     ///
     /// Both halves skip string literals, since `stripped` asks
-    /// `literalEnd` before either marker — a `//` inside a
+    /// `literalSpan` before either marker — a `//` inside a
     /// literal is never a comment. An unbalanced quote must
     /// still not send the walk to EOF, which is why `close`
     /// refuses an unterminated literal.

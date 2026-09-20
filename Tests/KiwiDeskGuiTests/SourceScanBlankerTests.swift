@@ -128,10 +128,11 @@ struct SourceScanBlankerTests {
     /// The canary, measured from outside as the stripper's is:
     /// every line of both trees that carries neither a quote nor
     /// a comment marker, and does not sit inside a `"""` block,
-    /// survives the blanker verbatim. The #1320 defect fails this
-    /// on `ServiceManager.swift` at the first quoteless line after
-    /// the heredoc, and on every file that acquires the same
-    /// shape later.
+    /// survives the blanker verbatim. A regression that keeps
+    /// newlines reds on the per-line clause at the first quoteless
+    /// line it darkens; the pre-fix walker, which also ate
+    /// newlines, reds on the line-count clause instead — measured,
+    /// `ServiceManager.swift` came back 43 lines for 284.
     ///
     /// The oracle for "inside a block" is line-level parity on
     /// `"""` — after a `//` tail and any `#"…"#` on the line are
