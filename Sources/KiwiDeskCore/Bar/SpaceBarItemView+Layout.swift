@@ -206,16 +206,8 @@ extension SpaceBarItemView {
                 width: cell,
                 height: cell
             )
-        // Center text glyph vertically (`AppBarItemView+GlyphSlot`).
         if let field = view as? NSTextField {
-            let height = ceil(
-                field.cell?.cellSize.height ?? 0
-            )
-            if height > 0, height < rect.height {
-                rect.origin.y +=
-                    ((rect.height - height) / 2).rounded()
-                rect.size.height = height
-            }
+            rect = BarTextGlyph.frame(for: field, in: rect)
         }
         view.frame = backingAlignedRect(
             rect,
