@@ -284,6 +284,9 @@ extension SourceScan {
         return max(0, commas - 1)
     }
 
+    /// Plain-quote walk: knows neither `"""` nor `#"…"#`, and is
+    /// routed through `SourceScan.literalSpan` the day that bites
+    /// (#1320), never widened here.
     private static func literal(
         _ text: [Character],
         from start: Int

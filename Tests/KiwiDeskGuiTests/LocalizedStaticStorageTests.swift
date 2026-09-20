@@ -70,16 +70,10 @@ struct LocalizedStaticStorageTests {
     /// dictionary KEY) is excluded with the argument labels
     /// `references` exists to skip.
     ///
-    /// Two more are inherited rather than introduced here:
-    /// helper reach stops at the FILE, so a stored value fed by
-    /// another file's localized helper is invisible; and
-    /// `SourceScan.blankingCommentsAndLiterals` toggles on plain
-    /// `"` alone, so a literal carrying an odd number of them
-    /// blanks the rest of its file — measured today in
-    /// `ServiceManager.swift`, whose plist heredoc hides 264 of
-    /// its 283 lines from every guard in that family. The
-    /// blanker is shared, so hardening it is its own change
-    /// (#1320).
+    /// One more is inherited rather than introduced here: helper
+    /// reach stops at the FILE, so a stored value fed by another
+    /// file's localized helper is invisible. (The blanker's own
+    /// residue closed with #1320.)
     ///
     /// Survivors, keyed by the string a failure prints, each
     /// naming what makes it safe.

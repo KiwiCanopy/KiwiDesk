@@ -6,22 +6,14 @@ import Foundation
 /// These live in the `SourceScan` family rather than beside their
 /// caller for the reason that family exists: a second copy of a
 /// walker that drifts silently changes what a guard observes.
-/// `blankingCommentsAndLiterals` in particular is a HARDENED
-/// `stripComments` — the two must not be chained, and a divergent
-/// copy of it would reintroduce exactly the fail-open the comment
-/// on it describes.
 extension SourceScan {
-    /// Blanks comments AND string literals in one pass, keeping
-    /// every character position so offsets stay usable.
-    ///
-    /// Neither half may be delegated to `stripComments`, which
-    /// cuts at the first `//` with no idea whether it sits inside
-    /// a literal. Chaining the two fails OPEN, and guard-prover
-    /// proved it against the App Rules row: a
-    /// `"https://kiwidesk.app"` leaves an unterminated quote on
-    /// its line, after which a literal-blanker erases everything
-    /// to the next `"` — swallowing a real `HStack(spacing: 6)`
-    /// and leaving the suite green.
+    /// Blanks comments AND string literals, keeping every
+    /// character position and every newline so offsets and line
+    /// numbers stay usable; a literal keeps its delimiters and
+    /// loses its interior. It is `stripped`'s walk under the
+    /// blanking policy, never a walk of its own: the toggle it
+    /// used to carry knew neither `"""` nor `#"…"#` and darkened
+    /// the rest of a file (#1320, `SourceScanBlankerTests`).
     ///
     /// The literal half matters on its own: a needle must not be
     /// satisfiable by a string that merely spells it, which is
@@ -29,46 +21,7 @@ extension SourceScan {
     static func blankingCommentsAndLiterals(
         _ source: String
     ) -> String {
-        var out = ""
-        var inString = false
-        var escaped = false
-        var index = source.startIndex
-        while index < source.endIndex {
-            let character = source[index]
-            if escaped {
-                escaped = false
-                out.append(" ")
-                index = source.index(after: index)
-                continue
-            }
-            if inString, character == "\\" {
-                escaped = true
-                out.append(" ")
-                index = source.index(after: index)
-                continue
-            }
-            if character == "\"" {
-                inString.toggle()
-                out.append(character)
-                index = source.index(after: index)
-                continue
-            }
-            // A comment only starts outside a literal — the whole
-            // point of doing both in one pass.
-            if !inString, character == "/",
-                source.index(after: index) < source.endIndex,
-                source[source.index(after: index)] == "/"
-            {
-                while index < source.endIndex, source[index] != "\n" {
-                    out.append(" ")
-                    index = source.index(after: index)
-                }
-                continue
-            }
-            out.append(inString ? " " : character)
-            index = source.index(after: index)
-        }
-        return out
+        stripped(Array(source), blanking: true)
     }
 
     /// Every member kind that can hold a view.

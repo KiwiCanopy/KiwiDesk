@@ -93,3 +93,30 @@ extension SourceScan {
         return files
     }
 }
+
+extension SourceScan {
+    /// The repo root, derived from a test file's own path.
+    static func repoRoot(from filePath: String) -> URL {
+        URL(fileURLWithPath: filePath)
+            .deletingLastPathComponent()  // KiwiDeskGuiTests
+            .deletingLastPathComponent()  // Tests
+            .deletingLastPathComponent()  // repo root
+    }
+}
+
+extension String {
+    /// Non-overlapping occurrences of `needle`.
+    func occurrences(of needle: String) -> Int {
+        guard !needle.isEmpty else { return 0 }
+        var total = 0
+        var cursor = startIndex
+        while let found = range(
+            of: needle,
+            range: cursor..<endIndex
+        ) {
+            total += 1
+            cursor = found.upperBound
+        }
+        return total
+    }
+}
