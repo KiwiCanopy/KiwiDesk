@@ -49,6 +49,44 @@ struct MouseButtonSeamGuardTests {
         "MouseTracker.swift",
     ]
 
+    /// The pointer read's homes (#1532, the same class one read
+    /// over): the drag pipeline's cursor seam (#1103), the
+    /// reveal-strip seam beside `pressedButtons`, and the GUI's
+    /// shortcuts panel placing itself under the pointer at open —
+    /// a one-shot position no suite measures.
+    private static let pointerHomes = [
+        "KiwiCore+Drag.swift",
+        "MouseTracker.swift",
+        "ShortcutsPanelController.swift",
+    ]
+
+    @Test("the live pointer read stays in its seam homes")
+    func pointerReadHomes() throws {
+        let sites = try Self.productionTrees.flatMap {
+            try SourceScan.identifierSites(
+                of: "NSEvent.mouseLocation",
+                under: $0
+            )
+        }
+        for home in Self.pointerHomes {
+            let reads = sites.filter {
+                $0.file.lastPathComponent == home
+            }
+            #expect(
+                reads.count == 1,
+                "\(home) reads the pointer \(reads.count) times"
+            )
+        }
+        let strays = sites.filter {
+            !Self.pointerHomes.contains($0.file.lastPathComponent)
+        }
+        let listed = strays.map(\.site).joined(separator: ", ")
+        #expect(
+            strays.isEmpty,
+            "live pointer read outside a seam: \(listed)"
+        )
+    }
+
     @Test("the button mask is read in exactly its two homes")
     func buttonsReadOnlyBehindTheSeam() throws {
         let sites = try Self.productionTrees.flatMap {
@@ -82,8 +120,9 @@ struct MouseButtonSeamGuardTests {
         )
     }
 
-    /// The two live host reads `wireDrag` and the seam default
-    /// leave on every core a suite builds. Deleting a pin from
+    /// The live host reads `wireDrag` and the seam defaults
+    /// leave on every core a suite builds — the button mask, the
+    /// cursor, and since #1532 the reveal-strip read. Deleting a pin from
     /// BOTH twins is otherwise silent: the twins-identical scan
     /// sees only a one-sided deletion, and a behavioural read
     /// answers 0 on a quiet host either way — which is exactly
@@ -94,8 +133,8 @@ struct MouseButtonSeamGuardTests {
     /// are one spelling each, so a pin re-written equivalently
     /// (`{ CGPoint.zero }`) reads as missing. Fail-closed, and
     /// the message names the target it is missing from.
-    @Test("makeTestCore pins both live mouse reads")
-    func testCorePinsBothMouseReads() throws {
+    @Test("makeTestCore pins every live mouse read")
+    func testCorePinsEveryMouseRead() throws {
         let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"]
             .map {
                 Self.root.appendingPathComponent(
@@ -114,6 +153,9 @@ struct MouseButtonSeamGuardTests {
                 )
                     && source.contains(
                         "drag.cursorLocation = { .zero }"
+                    )
+                    && source.contains(
+                        "mouse.pointerInMenuBarStrip = { false }"
                     ),
                 .init(rawValue: "\(target) misses a pin")
             )

@@ -473,18 +473,25 @@ editing here:
   stored state beside a call site. The #1532 menu-bar reveal
   return is the third of the family and takes the same one-home
   shape: `KiwiCore+MenuBarRevealReturn.swift` owns the arm and
-  its one-shot stamp, decides at the report from the readable
-  facts — the anchor an own window, a foreign report, no left
-  press inside the echo window, the pointer in the reveal strip
-  — and re-asserts through the focus COMMAND, never a bare
-  raise, so the report that follows is intended (#1281) and the
-  scrolling placement distrust does not bounce it (#1414's
-  class). The strip read lives behind `mouse.pointerInMenuBarStrip`
-  and every `makeTestCore` twin pins it false, since a live
-  default reading the developer's pointer would return foreign
-  reports in every focus suite (`MenuBarRevealReturnTests` the
-  verdicts, `MenuBarRevealSeamTests` the homes, the pins and
-  the arm's place between #1161 and #958).
+  its one-shot stamp, decides at the report — its docstring is
+  the roster of what it reads there, and a new stand-down joins
+  that roster rather than a call site — and re-asserts with the
+  STAMPED raise, `raiseWindow`, so the report that follows is our
+  own echo (#1281) and the scrolling placement distrust does not
+  bounce it (#1414's class): never a bare `AXHelper.raise(`, and
+  never the focus command, whose displacement note would arm
+  that bounce against every later report. The
+  live strip read stays behind `mouse.pointerInMenuBarStrip`,
+  and a `makeTestCore` twin pins it false, since a live default
+  reading the developer's pointer would return foreign reports
+  in every focus suite. A fourth member of the family takes the
+  same one-home shape with its own consulting site in
+  `handleWindowFocused`, and a new live host read on any arm
+  takes a `MouseTracker` seam pinned in both twins
+  (`MenuBarRevealReturnTests` the verdicts,
+  `MenuBarRevealSeamTests` the stamped raise and the arm's place
+  between #1161 and #958, `MouseButtonSeamGuardTests` the read's
+  home and the pins).
   `IgnoredPanelGraceTests` pins the machine's transitions (the
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
@@ -666,8 +673,10 @@ editing here:
   itself; every raise MINTS its stamp through the one
   `stampSelfRaise(_:now:)` — `PlacementBounceSeamTests` ▸ the
   write-site census holds the minter, the gone clear and the
-  rekey as the only writers — while the two click readers borrow
-  the constant as a click window, which is not a stamp read;
+  rekey as the only writers — while the click readers
+  (`recentClickReached`, `recentClickInside`, `recentLeftPress`)
+  borrow the constant as a click window, which is not a stamp
+  read;
   nothing scans for a new reading, so a new reader owes the
   routing deliberately. `SelfRaiseDuplicateEchoTests`,
   `RaiseEchoClickTests` and `ActivationReReportTests` hold the
@@ -750,7 +759,7 @@ editing here:
   the VERB whole on it, ahead of the state write, the warp and
   the pan — a state-only move would split state from key focus
   (#952) — `raiseWindow` re-asks for the deferred raise, and the
-  three distrust re-asserts (#1161, #465, #958) stand down
+  distrust re-asserts (#1161, #465, #958, #1532) stand down
   through the one `reassertCrossesDesktops` and HONOR the report
   instead. Unknown to the server passes: a close in flight raises
   nothing, and a host without the read keeps every raise. A verb

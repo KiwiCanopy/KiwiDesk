@@ -95,13 +95,7 @@ extension KiwiCore {
             // user's hand put it. The trade: keyboard nav
             // within ~1 s of a press, mid-drain, loses its
             // warp too — pre-#689 every such warp was lost.
-            let now = Date()
-            let mouseMade =
-                lastLeftClick.map {
-                    now.timeIntervalSince($0.at)
-                        < Self.selfRaiseEchoWindow
-                } == true
-            if !mouseMade {
+            if !recentLeftPress(now: Date()) {
                 pendingMouseWarp = id
             }
             return
