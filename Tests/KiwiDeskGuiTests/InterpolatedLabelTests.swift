@@ -145,11 +145,27 @@ struct InterpolatedLabelTests {
     /// the counts' specifiers still satisfy the floor. So the
     /// count is of label-bearing ARGUMENTS and the specifier
     /// counted is `%N$@` alone, `>=` because a link slot or a
-    /// name is a `%N$@` that is not a label.
+    /// name is a `%N$@` that is not a label — which is also the
+    /// residue: beside such a slot, one label's missing `%N$@`
+    /// is masked, and the floor register is what sees it.
     @Test("each named label has a specifier to land in")
     func labelsHaveSpecifiers() throws {
         let en = try Self.english()
         for frame in try SourceScan.interpolatingFrames() {
+            // The feed, pinned by construction: a frame is
+            // discovered only through a label, so it has at
+            // least one label slot and no more than it has
+            // labels. `guard-prover` set `carriesLabel` to
+            // `false` and every floor below read 0 while the
+            // suite stayed green; this is what reds that.
+            #expect(
+                (1...frame.labels.count).contains(frame.labelSlots),
+                Comment(
+                    rawValue: "\(frame.key): \(frame.labelSlots) "
+                        + "label slot(s) for \(frame.labels.count) "
+                        + "label(s)"
+                )
+            )
             guard let value = en[frame.key] else { continue }
             let found = (1...9).filter {
                 value.contains("%\($0)$@")

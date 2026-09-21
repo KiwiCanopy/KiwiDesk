@@ -121,35 +121,27 @@ extension SourceScan {
     /// The `L(` key literal of the body and of each nested `L(`,
     /// in source order. A key is the FIRST string literal after
     /// an `L(`, which is what `scripts/extract-keys` parses too.
-    ///
-    /// A `SettingsDestination.<case>.title` argument counts as a
-    /// nested label too — see `destinationTitleKeys`.
+    /// Literals are skipped between labels, so an `L(` spelled
+    /// inside an English string cannot register.
     private static func keyLiterals(
         in body: String,
         destinations: [String: String]
     ) -> [String] {
-        var found: [String] = []
         let text = Array(body)
-        var index = 0
-        var wantKey = true  // the outer call's own key comes first
+        // The outer call's own key comes first.
+        guard let opening = text.firstIndex(of: "\""),
+            let key = literal(text, from: opening)
+        else { return [] }
+        var found = [key.value]
+        var index = key.end
         while index < text.count {
-            if wantKey, text[index] == "\"" {
-                if let literal = literal(text, from: index) {
-                    found.append(literal.value)
-                    index = literal.end
-                    wantKey = false
-                    continue
-                }
-            }
-            if text[index] == "L", index + 1 < text.count,
-                text[index + 1] == "(",
-                isCallStart(text, at: index)
+            if text[index] == "\"",
+                let literal = literal(text, from: index)
             {
-                wantKey = true
-                index += 2
+                index = literal.end
                 continue
             }
-            if let hit = destinationTitle(
+            if let hit = labelHit(
                 text,
                 at: index,
                 destinations: destinations
@@ -161,6 +153,40 @@ extension SourceScan {
             index += 1
         }
         return found
+    }
+
+    /// A label at `index`, by the two shapes the scan knows: a
+    /// nested `L(` whose first argument is its key literal, or a
+    /// `SettingsDestination.<case>.title`. The ONE recogniser
+    /// `keyLiterals` and `labelSlotCount` both walk with, so the
+    /// derived labels and the label-slot count cannot disagree
+    /// about what a label is (#1117) — a third shape lands in
+    /// both or in neither. A nested `L(` whose key is not a
+    /// literal (a variable) is not a label to either: its key
+    /// cannot be read from source.
+    private static func labelHit(
+        _ text: [Character],
+        at index: Int,
+        destinations: [String: String]
+    ) -> (key: String, end: Int)? {
+        if text[index] == "L", index + 1 < text.count,
+            text[index + 1] == "(",
+            isCallStart(text, at: index)
+        {
+            var cursor = index + 2
+            while cursor < text.count, text[cursor].isWhitespace {
+                cursor += 1
+            }
+            guard cursor < text.count, text[cursor] == "\"",
+                let key = literal(text, from: cursor)
+            else { return nil }
+            return (key.value, key.end)
+        }
+        return destinationTitle(
+            text,
+            at: index,
+            destinations: destinations
+        )
     }
 
     /// A `SettingsDestination.<case>.title` occurrence at
@@ -195,10 +221,8 @@ extension SourceScan {
     /// The arguments after the key and the English that pass a
     /// label. Split at top-level commas so a ternary, a nested
     /// call or a `+`-concatenated English read as one argument
-    /// each; an argument counts when it contains a nested `L(`
-    /// or a `SettingsDestination.<case>.title` — the two shapes
-    /// `keyLiterals` reads labels from, so the two derivations
-    /// cannot disagree about what a label is.
+    /// each; an argument counts when `labelHit` finds a label in
+    /// it — the one recogniser `keyLiterals` reads with too.
     private static func labelSlotCount(
         in body: String,
         destinations: [String: String]
@@ -234,9 +258,9 @@ extension SourceScan {
         }.count
     }
 
-    /// Whether one argument passes a label, by the same two
-    /// shapes `keyLiterals` collects. Literals are skipped so an
-    /// English `"L("` inside one cannot count.
+    /// Whether one argument passes a label — `labelHit`'s
+    /// verdict, literals skipped exactly as `keyLiterals` skips
+    /// them.
     private static func carriesLabel(
         _ argument: [Character],
         destinations: [String: String]
@@ -249,13 +273,7 @@ extension SourceScan {
                 index = literal.end
                 continue
             }
-            if argument[index] == "L", index + 1 < argument.count,
-                argument[index + 1] == "(",
-                isCallStart(argument, at: index)
-            {
-                return true
-            }
-            if destinationTitle(
+            if labelHit(
                 argument,
                 at: index,
                 destinations: destinations
