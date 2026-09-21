@@ -121,15 +121,11 @@ extension EventLoop {
         carriedWindows().contains(id)
     }
 
-    /// The reach-departure arm (#1215): on a GESTURE switch a
-    /// native app's element dies 30–130 ms BEFORE the switch
-    /// handler that would carry the window, and the on-screen
-    /// census is a coin flip at that instant (measured
-    /// 2026-09-21: dropped 70 ms before TextEdit's destroy, 12 ms
-    /// after Claude's). The compositor's per-window host is not:
-    /// it still hosts the window on the Desktop it left with, and
-    /// that Desktop is no longer shown. Read through the one
-    /// `reachAwaitsCarry` seam, which may only ever REFUSE.
+    /// The reach-departure arm (#1215): the carry OWES this
+    /// window a move it has not made yet — its element died on a
+    /// gesture switch ahead of the handler — read through the one
+    /// `reachAwaitsCarry` seam, which may only ever REFUSE
+    /// (accessibility.md).
     func reachDepartureArmIsOpen(for id: WindowID) -> Bool {
         reachAwaitsCarry(id)
     }

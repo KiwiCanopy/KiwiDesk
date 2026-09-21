@@ -204,7 +204,9 @@ struct CarriedRemovalTests {
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [pid: [WindowID(12)]]
-        loop.lastDesktopChange = Date()
+        // Stamped AHEAD of the clock: "inside the grace" must not
+        // depend on the runner's pace (#1456's class).
+        loop.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(box.censusReads == 0)

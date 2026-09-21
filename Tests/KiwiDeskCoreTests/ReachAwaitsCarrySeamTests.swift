@@ -32,23 +32,27 @@ private let bridgeClasses: [String: AnyClass] = [
 /// `stickyReachAwaitsCarry`, which answers "the carry owes this
 /// window a move" from the carry's own enabled set and the gone
 /// classifier's compositor door (`gonePresence`, #1146): hosted
-/// on a user Desktop nobody shows. A default left in place keeps
-/// every gesture departure a close with every other suite green,
-/// which is why the wiring is pinned here and not the predicate
-/// alone. Process-global topology and resolver overrides, so
-/// serialized. The bridge fake is `StickyReachCarryVerdictTests`'
-/// per-file copy (tests.md).
+/// on the user Space the switch handler last filed for its
+/// display while that display now shows another — a switch the
+/// handler has not run for. A default left in place keeps every
+/// gesture departure a close with every other suite green, which
+/// is why the wiring is pinned here and not the predicate alone.
+/// Process-global topology and resolver overrides, so serialized.
+/// The bridge fake is `StickyReachCarryVerdictTests`' per-file
+/// copy (tests.md).
 @MainActor
 @Suite("Reach-awaits-carry seam (#1215)", .serialized)
 struct ReachAwaitsCarrySeamTests {
     private let window = WindowID(748_805)
 
-    /// Desktop 1 (space 1) shown, Desktop 2 (space 2) not, a
-    /// fullscreen Space beside them; the window sticky and tiled.
+    /// Mid-switch: the display now shows Desktop 2 (space 2)
+    /// while the handler last filed Desktop 1 (space 1) — the
+    /// beat in which a gesture's destroys land; a fullscreen
+    /// Space beside them; the window sticky and tiled.
     private func makeCore(bridge: Bool = true) -> KiwiCore {
         NativeSpaces.spacesOverride = [
-            authoritySpace(1, display: "UUID-A", current: true),
-            authoritySpace(2, display: "UUID-A"),
+            authoritySpace(1, display: "UUID-A"),
+            authoritySpace(2, display: "UUID-A", current: true),
             authoritySpace(1716, display: "UUID-A", isUser: false),
         ]
         WMBridge.classResolverOverride = { name in
@@ -61,6 +65,7 @@ struct ReachAwaitsCarrySeamTests {
             )
         )
         core.state.setSticky(window, .global)
+        core.desktopMemory.lastDisplaySpaces = ["UUID-A": 1]
         return core
     }
 
@@ -69,20 +74,50 @@ struct ReachAwaitsCarrySeamTests {
         NativeSpaces.spacesOverride = nil
     }
 
-    @Test("a reach-enabled sticky on an unshown Desktop opens the arm")
-    func unshownDesktopHostOpensTheArm() {
+    @Test("a sticky left on the Space of an unfiled switch opens the arm")
+    func pendingSwitchOpensTheArm() {
         let core = makeCore()
         defer { teardown() }
         #expect(core.stickyReachCarried().contains(window))
-        core.desktopMemory.readWindowSpace = { _ in .hosted(2) }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(1) }
         #expect(core.eventLoop.reachAwaitsCarry(window))
+    }
+
+    @Test("once the handler filed the switch the arm is closed")
+    func filedSwitchClosesTheArm() {
+        let core = makeCore()
+        defer { teardown() }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(1) }
+        // The handler ran: what it filed is what the display shows.
+        core.desktopMemory.lastDisplaySpaces = ["UUID-A": 2]
+        #expect(!core.eventLoop.reachAwaitsCarry(window))
+        // A display never filed opens nothing either.
+        core.desktopMemory.lastDisplaySpaces = [:]
+        #expect(!core.eventLoop.reachAwaitsCarry(window))
+    }
+
+    @Test("an unshown host with no switch pending opens nothing")
+    func unshownHostWithoutASwitchDoesNotOpenTheArm() {
+        let core = makeCore()
+        defer { teardown() }
+        // A move verb's hand-off or a Mission Control drag: the
+        // window sits on an unshown Desktop while the display
+        // still shows what the handler last filed (review,
+        // 2026-09-21) — "unshown" alone would refuse the verb's
+        // own reap and re-tile the departed window.
+        NativeSpaces.spacesOverride = [
+            authoritySpace(1, display: "UUID-A", current: true),
+            authoritySpace(2, display: "UUID-A"),
+        ]
+        core.desktopMemory.readWindowSpace = { _ in .hosted(2) }
+        #expect(!core.eventLoop.reachAwaitsCarry(window))
     }
 
     @Test("a shown-Desktop host does not — a closed one lingers there")
     func shownDesktopHostDoesNotOpenTheArm() {
         let core = makeCore()
         defer { teardown() }
-        core.desktopMemory.readWindowSpace = { _ in .hosted(1) }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(2) }
         #expect(!core.eventLoop.reachAwaitsCarry(window))
     }
 
@@ -95,7 +130,7 @@ struct ReachAwaitsCarrySeamTests {
         #expect(core.eventLoop.fullscreenSpaceHosts(window))
     }
 
-    @Test("gone and unavailable never refuse; an unlisted host does, bounded")
+    @Test("gone, unavailable and an unlisted host never refuse")
     func unreadableHostsNeverRefuse() {
         let core = makeCore()
         defer { teardown() }
@@ -103,18 +138,17 @@ struct ReachAwaitsCarrySeamTests {
         #expect(!core.eventLoop.reachAwaitsCarry(window))
         core.desktopMemory.readWindowSpace = { _ in .unavailable }
         #expect(!core.eventLoop.reachAwaitsCarry(window))
-        // A Space the topology does not list reads as unshown and
-        // user (the classifier's own `vanished`): a refusal, which
-        // the recheck budget bounds — never a wrong close.
+        // A Space the topology does not list names no display to
+        // read a pending switch off.
         core.desktopMemory.readWindowSpace = { _ in .hosted(9_999) }
-        #expect(core.eventLoop.reachAwaitsCarry(window))
+        #expect(!core.eventLoop.reachAwaitsCarry(window))
     }
 
     @Test("a window the carry does not follow never opens the arm")
     func uncarriedWindowDoesNotOpenTheArm() {
         let core = makeCore()
         defer { teardown() }
-        core.desktopMemory.readWindowSpace = { _ in .hosted(2) }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(1) }
         // The pin against the toggle.
         core.state.stickyReachOverrides[window] = false
         #expect(!core.eventLoop.reachAwaitsCarry(window))
@@ -128,7 +162,7 @@ struct ReachAwaitsCarrySeamTests {
     func absentBridgeOpensNoArm() {
         let core = makeCore(bridge: false)
         defer { teardown() }
-        core.desktopMemory.readWindowSpace = { _ in .hosted(2) }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(1) }
         #expect(core.stickyReachCarried().isEmpty)
         #expect(!core.eventLoop.reachAwaitsCarry(window))
     }

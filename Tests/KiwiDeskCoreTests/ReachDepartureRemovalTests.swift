@@ -166,16 +166,18 @@ struct ReachDepartureRemovalTests {
 
     @Test("the arm never reads the switch grace, and joins it closed")
     func armIgnoresTheSwitchGrace() {
-        // Open inside the grace: refused on the seam alone.
+        // Open inside the grace: refused on the seam alone. The
+        // stamp sits AHEAD of the clock so a starved runner cannot
+        // age it out of the 0.75 s grace (#1456's class).
         let (open, openBox) = makeLoop(awaits: true)
-        open.lastDesktopChange = Date()
+        open.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         open.reconcile(pid: pid, app: ref)
         #expect(openBox.destroyed.isEmpty)
         #expect(open.removalDistrusted[window] == 1)
         // Closed inside the grace: the census clause stands down
         // and no arm refuses — a vanish nothing expects is removed.
         let (closed, closedBox) = makeLoop(awaits: false)
-        closed.lastDesktopChange = Date()
+        closed.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         closedBox.census = [pid: [window]]
         closed.reconcile(pid: pid, app: ref)
         #expect(closedBox.destroyed.map(\.id) == [window])
