@@ -65,7 +65,7 @@ itself when a sixth is added.
   again in the probe, which reads the sink before any lifecycle
   runs.
 - **The API surface describes itself, and an enum's values are
-  READ rather than typed (#1033).** Three obligations, all on
+  READ rather than typed (#1033).** Four obligations, all on
   `Commands/`:
   - **A new command owes a record** in the matching
     `Commands/Reference/APIRecords+*` table — group, arguments,
@@ -89,13 +89,46 @@ itself when a sixth is added.
     naming two or more cases of a decoder enum — its vocabularies
     are derived from the records, so its reach is the records
     that are filled, which that suite states.
+  - **A catalogued command is one `execute` RECOGNISES** (#1009,
+    `CommandDispatchReachTests`). Every other guard here checks
+    the catalogue against itself — `dispatchable` is derived
+    from it — so a `case` arm deleted with its record left
+    standing was a verb registered into Lua, offered by `help`,
+    suggested by the did-you-mean and answering `unknown
+    command: focus_desktop — did you mean 'focus_desktop'?`.
+    The probe passes each verb its RECORD's arguments, never
+    none: `mouse.set_*` reads its Bool and every `_override` its
+    Space before switching on the field, so a bare call answers
+    the parse whether or not the arm exists. Two obligations fall
+    out. **A dispatcher names first and parses inside the arm**
+    — the `animations.*` toggles shared one Bool guard ahead of
+    their switch, and a deleted knob arm hid behind it as
+    `expected boolean`, an argument refusal the probe reads as
+    the arm answering; `setBool` is the shape. And **a new "no
+    arm" refusal spelling is classified in that suite's census**
+    — `noArm` is held against every `"unknown <words>: ` literal
+    in Core, with the argument refusals (`unknown space:`) filed
+    beside it with their reason, so a fifth spelling of THAT
+    grammar reds until it is filed. The grammar is the bound: a
+    refusal spelled otherwise (`no such setting:`, a
+    concatenated string) is outside the census and blinds the
+    probe to its namespace, so a no-arm refusal is spelled
+    `unknown <words>: ` by convention and one spelled otherwise
+    is review's.
+    Recognition is the whole claim — a refused placeholder is the
+    arm answering, a gutted arm returning `.ok()` passes — and
+    the socket-only `subscribe` is the one exemption, its route
+    pinned beside it.
 
   **A record's argument list and its summary are REVIEW's.** No
   guard can read them: the census pins command names, `APIChoice`
   pins an enum's values, and `APIRecordShapeTests` pins the shape
   a summary has — none of them can see a list that disagrees with
   the decoder it mirrors, because a decoder reads `args[0]`
-  positionally with no signature to reflect over. So a record is
+  positionally with no signature to reflect over. A wrong list
+  now also costs reach: the dispatch probe above shapes its call
+  from it, so a record that misstates the arguments leaves that
+  verb's arm behind an argument parse unprobed. So a record is
   written against the parser rather than the docs, and a value
   shape none of the argument kinds covers takes the closest kind
   and **explains itself in the summary** — the escape `subscribe`

@@ -90,8 +90,9 @@ extension KiwiCore {
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        // Duration knobs take Int, not Bool; handle before the
-        // Bool guard below.
+        // Name first, parse inside the arm: a shared Bool guard
+        // ahead of the toggles answered `expected boolean` for a
+        // knob whose arm was gone (#1009, `CommandDispatchReachTests`).
         switch command {
         case "animations.set_duration":
             // Persisted per-profile (issue #51). Writes both
@@ -137,29 +138,33 @@ extension KiwiCore {
             }
             tiler.animation.sizeRateHz = hz > 0 ? hz : nil
             return .ok()
-        default:
-            break
-        }
-        guard let enabled = args.first?.boolValue else {
-            return .fail("expected boolean")
-        }
-        switch command {
         case "animations.set_on_space_change":
-            tiler.settings.animations.onSpaceChange = enabled
+            return setBool(args) {
+                tiler.settings.animations.onSpaceChange = $0
+            }
         case "animations.set_on_scrolling":
-            tiler.settings.animations.onScrolling = enabled
+            return setBool(args) {
+                tiler.settings.animations.onScrolling = $0
+            }
         case "animations.set_on_window_resize":
-            tiler.settings.animations.onWindowResize = enabled
+            return setBool(args) {
+                tiler.settings.animations.onWindowResize = $0
+            }
         case "animations.set_on_window_swap":
-            tiler.settings.animations.onWindowSwap = enabled
+            return setBool(args) {
+                tiler.settings.animations.onWindowSwap = $0
+            }
         case "animations.set_on_relayout":
-            tiler.settings.animations.onRelayout = enabled
+            return setBool(args) {
+                tiler.settings.animations.onRelayout = $0
+            }
         case "animations.set_on_monocle_focus":
-            tiler.settings.animations.onMonocleFocus = enabled
+            return setBool(args) {
+                tiler.settings.animations.onMonocleFocus = $0
+            }
         default:
             return .fail("unknown command: \(command)")
         }
-        return .ok()
     }
 
     /// `mouse.*` pointer-behaviour toggles (#186). Persist in
