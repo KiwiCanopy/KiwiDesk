@@ -1992,9 +1992,8 @@ outside the range are clamped.
 longer titles are cut at the end and marked with an ellipsis. A
 title is also cut where it does not fit its slot; with
 `icon_and_title` only the title shrinks, never the icon. With
-`item_size` left at `0` the slot is measured from the widest
-item, so the cap also bounds how wide one title makes every
-slot.
+`item_size` left at `0` the cap also bounds the slot (see
+`app_bar.set_item_size`).
 
 **Example:**
 
@@ -2103,8 +2102,8 @@ dark moss at 70% opacity; every bundled palette's bar fill
 carries that same alpha. With the `liquid_glass` finish on, it
 also tints the glass, and a dark fill selects the dark glass
 variant (see `app_bar.set_liquid_glass`). Under glass the
-backdrop's opacity is held under a ceiling so the blur stays
-visible: a fill below it renders as you picked it, a more opaque
+backdrop's opacity is held under a ceiling: a fill below it
+renders as you picked it, a more opaque
 one is capped, and the stored value is unchanged either way
 (Boxed/Plain use it in full).
 
@@ -2473,8 +2472,10 @@ space_bar.set_corner_roundness(50)
 
 **Expects:** a number 0.05–1 (default 0.4).
 
-**Does:** sets the opacity of everything on an **inactive** Space —
-the outer dim tier. Lua-only (no GUI), clamped to a legible range.
+**Does:** sets the opacity of untinted content on an **inactive**
+Space — an emoji identifier, a native app image; tinted content
+takes `item_color` instead — the outer dim tier. Lua-only (no
+GUI), clamped to a legible range.
 
 **Example:**
 
