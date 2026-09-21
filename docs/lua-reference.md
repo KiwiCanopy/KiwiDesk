@@ -18,38 +18,35 @@ interpreter is **Lua 5.5** with the full standard library.
 
 Three safety rails apply to all Lua code:
 
-- Any single call into the VM is aborted after **500 ms** —
-  an accidental `while true do end` cannot freeze KiwiDesk.
+- Any single call into the VM is aborted after **500 ms**, so an
+  accidental `while true do end` cannot freeze KiwiDesk.
 - A callback (event handler or keybinding) that errors or
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
 - A typo'd function name on `KiwiDesk` or a layout table
-  (`scroll.set_width(…)` instead of
-  `scroll.set_slot_size(…)`) does **not** abort the config:
-  the call becomes a no-op that logs a did-you-mean hint,
-  and everything below it still runs. During a config load
-  the typo is also reported in the menu bar's **Config
-  Issues** window, so it cannot pass silently.
+  (`scroll.set_width(…)` for `scroll.set_slot_size(…)`) does
+  **not** abort the config: the call becomes a no-op that logs
+  a did-you-mean hint, and everything below it still runs.
+  During a config load the typo is also reported in the menu
+  bar's **Config Issues** window.
 
 ## Settings app vs init.lua
 
-The Settings window lets you edit layouts, gaps, and keybindings
-visually. The app stores its own settings in
-`~/.config/KiwiDesk/gui.json` plus profile JSON files and applies
-them directly. **Saving never rewrites `init.lua`**: the file is
-yours alone, for event hooks and custom Lua. For the full GUI
-workflow, see the [user guide](user-guide.md).
+The Settings app stores its settings in
+`~/.config/KiwiDesk/gui.json` plus profile JSON files.
+**Saving never rewrites `init.lua`**: the file is yours, for
+event hooks and custom Lua. For the GUI workflow, see the
+[user guide](user-guide.md).
 
 ### What coexists with the Settings app, and what doesn't
 
 Whether the Settings app or `init.lua` owns your configuration
-depends on **what your `init.lua` declares** — not merely on
-whether the file exists.
+depends on **what your `init.lua` declares**, not on whether the
+file exists.
 
-**Coexists — stays GUI-managed.** Anything that isn't a setting
-runs happily alongside `gui.json`. On first launch KiwiDesk still
-seeds the default profile, spaces, and shortcuts, and your code
-still runs:
+**Coexists — stays GUI-managed.** Anything that is not a setting
+runs alongside `gui.json`: on first launch KiwiDesk seeds the
+default profile, spaces and shortcuts, and your code runs too:
 
 ```lua
 -- Event hooks, control flow, helpers, print, locals — all fine.
@@ -61,9 +58,9 @@ end
 ```
 
 **Makes `init.lua` the owner — Lua-managed.** Declaring any
-*setting* hands ownership to the file: KiwiDesk will **not** seed a
-`gui.json` over it (that would silently override your Lua), and the
-Settings app offers **Adopt into the GUI** instead. Settings are:
+*setting* hands ownership to the file: KiwiDesk does **not** seed
+a `gui.json` over it, and the Settings app offers **Adopt into
+the GUI** instead. Settings are:
 
 - Any `set_*` verb on the `KiwiDesk` table — `set_mode`,
   `set_gap_global`, `set_min_window_size`, …
@@ -83,9 +80,8 @@ bsp.set_ratio_h(0.6)
 float_rules = { "com.apple.calculator" }
 ```
 
-To keep the GUI in charge, put settings like these in the Settings
-app (or **Adopt** an existing file), and reserve `init.lua` for
-hooks and custom Lua.
+To keep the GUI in charge, put settings like these in the
+Settings app, or **Adopt** an existing file.
 
 ## Navigation & Movement
 
@@ -102,33 +98,27 @@ or `"down"`.
 that direction, following the active layout's geometry. In
 monocle and scrolling layouts, directions on the layout's
 orientation axis follow the window order instead: monocle
-cycles (wrapping at the ends), scrolling steps to the
-previous/next window and stops at the row's ends — unless
-`scroll.set_wrap_focus(true)` is set, which wraps scrolling
-focus at the ends too. Cross-axis directions keep the
+cycles, wrapping at the ends; scrolling steps to the
+previous/next window and stops at the row's ends unless
+`scroll.set_wrap_focus` is on. Cross-axis directions keep the
 geometric search. The track layout steps in window order on
 both axes: along the axis within the focused track, across it
 to the neighboring track (same relative position); both stop
-at the ends unless `track.set_wrap_focus(true)` is set, which
-wraps within the track along the axis and last ↔ first track
-across it.
+at the ends unless `track.set_wrap_focus` is on.
 
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
 space's *floating* windows (including floating sticky windows
-shown on the space) considered, by their live frames — so a
-float parked beside the layout is reachable at the edge, while
-tile-to-tile navigation never detours through a hovering
-float. On an axis with `wrap_focus` on, the wrap wins over the
-float tier — a float past that edge is reachable on the cross
-axis only (with a single tiled window there is nothing to wrap
-among, so the float is reachable on both axes). Transient
-panels (Spotlight-style launchers) and
+shown on the space) considered, by their live frames. On an
+axis with `wrap_focus` on, the wrap wins over the float tier: a
+float past that edge is reachable on the cross axis only,
+except with a single tiled window, when it is reachable on both
+axes. Transient panels (Spotlight-style launchers) and
 fullscreen windows are never focus targets. A float parked
-*exactly* on a tiled slot shares that tile's center, so no
-direction points at it — see Accepted Limitations; click it or
-cycle to it instead. `swap` stays tiled-only: a floating
-window has no slot to trade.
+*exactly* on a tiled slot is reached by no direction — click it
+or cycle to it instead
+([Accepted limitations](accepted-limitations.md)). `swap` is
+tiled-only.
 
 **Example:**
 
@@ -142,13 +132,12 @@ KiwiDesk.focus("left")
 `"down"`).
 
 **Does:** swaps the focused window with its neighbor in that
-direction, reordering the flat window array — the two windows
-trade slots in the layout. The neighbor is found the same way
-`focus` finds it, including the window-order stepping on a
-monocle or scrolling orientation axis and in track spaces
-(where a cross-axis swap trades the two windows between their
-tracks — the track boundaries stay put). `swap` never wraps at
-the ends, even with a wrap-focus toggle on.
+direction; the two trade slots in the layout. The neighbor is
+found the way `focus` finds it, including the window-order
+stepping on a monocle or scrolling orientation axis and in
+track spaces, where a cross-axis swap trades the two windows
+between their tracks and the track boundaries stay put. `swap`
+never wraps at the ends, even with a wrap-focus toggle on.
 
 **Example:**
 
@@ -160,15 +149,13 @@ KiwiDesk.swap("right")
 
 **Expects:** a space identifier (number or string).
 
-**Does:** switches to that space, hiding the current
-space's tiled windows and revealing the target's. Keyboard
-focus follows: the target's focused window (or its first
-window when none is stamped) is raised and its app activated;
-switching to an **empty** space hands focus to Finder
-instead, so keystrokes never keep flowing into a now-hidden
-window. If macOS drops the activation, the post-switch settle
-(~300 ms) detects the unchanged frontmost app and re-raises
-once.
+**Does:** switches to that space, hiding the current space's
+tiled windows and revealing the target's. Keyboard focus
+follows: the target's focused window (or its first window when
+none is stamped) is raised and its app activated; switching to
+an **empty** space hands focus to Finder. If macOS drops the
+activation, the post-switch settle (~300 ms) detects the
+unchanged frontmost app and re-raises once.
 
 **Example:**
 
@@ -187,20 +174,17 @@ window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
 If the target space is shown on **another monitor**, a floating
-window is re-anchored onto that display — it keeps its
-*proportional* position (a bottom-right float stays bottom-right
-on a differently-sized screen), clamped inside the target's
-usable area. Tiled windows arrive through the layout — except
-into a **floating-mode space**, whose layout assigns no frames:
-any window moved there is re-anchored the same proportional
-way, so it physically arrives on that monitor too.
+window is re-anchored onto that display: it keeps its
+*proportional* position (a bottom-right float stays
+bottom-right), clamped inside the target's usable area. Tiled
+windows arrive through the layout; into a **floating-mode
+space** every window is re-anchored the same proportional way.
 
-A quick drag-and-drop of a window onto a Space item in the Space
-Bar performs this same move (see the user guide), re-anchoring a
-float the same way — the pointer released over the *bar item*,
-not at a chosen position. Only when the drag dwells long enough
-to **spring** the space open and you place the window yourself
-does it stay exactly where you released it.
+A drop of a window onto a Space item in the Space Bar performs
+the same move, re-anchoring a float the same way. Only a drag
+that dwells long enough to **spring** the space open, where you
+place the window yourself, keeps it where you released it (see
+the user guide).
 
 **Example:**
 
@@ -229,26 +213,21 @@ KiwiDesk.move_to_space_and_follow(3)
 shows, the same one `bind_profile_to_desktop` keys on.
 
 **Does:** switches to that Desktop — the *macOS* Desktop, not a
-KiwiDesk Space — exactly as a swipe would: the screen that
-Desktop belongs to switches, and the bound profile, the
-remembered Space and the `desktop_change` event all follow as
-they do for a swipe (macOS reports the switch to KiwiDesk the
-same way either way — device-checked 2026-08-25).
+KiwiDesk Space — as a swipe would: the screen that Desktop
+belongs to switches, and the bound profile, the remembered
+Space and the `desktop_change` event all follow as they do for
+a swipe.
 
 **Returns** a table with `switched` — `true` when the screen
 moved, `false` when that Desktop was already the one it showed,
-with a `note` saying so. Either way the command SUCCEEDS, so a
-script that only wants the Desktop shown still works; read
-`switched` rather than the return's presence to tell the two
-apart.
+with a `note` saying so. Either way the command succeeds; read
+`switched` to tell the two apart.
 
-Needs macOS's own window-management bridge, which KiwiDesk looks
-up at runtime: present on macOS 26.6.1 (observed 2026-08-18); no
-earlier build has been checked, so no version is promised here —
-the lookup itself is the gate. It rides stock settings with SIP
-on. Where the bridge is absent the command does nothing and logs
-why; run from the CLI it prints the error instead. KiwiDesk never
-asks you to disable SIP.
+Needs macOS's own window-management bridge, looked up at
+runtime: present on macOS 26.6.1, and no earlier build has been
+checked. It works on stock settings with SIP on. Where the
+bridge is absent the command does nothing and logs why; from
+the CLI it prints the error instead.
 
 **Example:**
 
@@ -263,67 +242,51 @@ identifier — the KiwiDesk Space the window should join when it
 gets there.
 
 **Does:** moves the focused window to that Desktop **without
-following** it — you stay where you are. macOS shows another
-Desktop's windows to nobody, so the window also leaves KiwiDesk's
-view: a moment later the Desktop you stayed on re-tiles without
-it, and the window is reported gone with `reason: vanished`, the
-same value a Desktop swipe produces — it was not closed. When
-that Desktop is next shown the window rejoins the **KiwiDesk
-Space it was in**, which KiwiDesk remembered as it left.
+following** it. The window leaves KiwiDesk's view: the Desktop
+you stayed on re-tiles without it, and the window is reported
+gone with `reason: vanished`, the value a Desktop swipe
+produces. When that Desktop is next shown the window rejoins
+the **KiwiDesk Space it was in**.
 
-With more than one screen there is one exception, and it is the
-Desktop you chose winning: when that Desktop lives on **another
-screen**, the window also joins the KiwiDesk Space that screen
-is showing — the one it shows when the window actually lands
-there, which for a hidden Desktop is decided at the moment you
-reveal it. It has to. A window still filed under a Space that
-lays out on the screen it just left is laid out *there* on the
-next retile, and macOS then re-assigns it to a Desktop of that
-monitor — so without this the move undoes itself about a second
-later, whether the Desktop was hidden or already on screen
+When that Desktop lives on **another screen**, the window
+instead joins the KiwiDesk Space that screen is showing when
+the window lands there — for a hidden Desktop, the Space shown
+at the moment you reveal it
 ([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
 
 **Given only a Desktop number**, a Desktop on the same screen
-changes nothing: the Space you left is the Space you come back
-to. Neither does a **floating** or a **sticky** window change
-Space — a float has no layout to
-carry it anywhere, and a sticky window's home is deliberately
-left where it is (`move_to_space` guards it the same way). And
-with **Stay visible across Desktops** on (the default), the move
-holds only until your screen next switches Desktop — a sticky
-window follows you, so at that switch it is carried back onto
-its own screen's current Desktop. Pin it out with
-`override_sticky_reach("off")` first if you mean it to stay. Same requirement as `focus_desktop`.
+leaves the window's Space unchanged, and a **floating** or
+**sticky** window keeps its Space on any screen
+(`move_to_space` guards a sticky window the same way). With
+**Stay visible across Desktops** on (the default), a sticky
+window's move holds only until your screen next switches
+Desktop, when it is carried back onto its own screen's current
+Desktop; `override_sticky_reach("off")` first if you mean it to
+stay. Same requirement as `focus_desktop`.
 
-**Naming the Space** finishes the verb: `move_to_desktop(3,
-"mail")` sends the window to Desktop 3 *and* files it into the
-`mail` Space, created if it does not exist yet. When Desktop 3
-is hidden, the filing happens as the window leaves — it rejoins
-`mail` when that Desktop is next shown, instead of the Space it
-was in; it is *in* `mail` then, which need not be the Space that
-screen is showing, so it may sit parked until you switch to it.
-When Desktop 3 is already on screen, the window joins `mail` at
-once, exactly as `move_to_space("mail")` would. A **floating**
-window is filed too — unlike a bare Desktop move, which leaves a
-float's Space alone — and on a Desktop already on screen it is
-re-anchored onto that screen the way `move_to_space` re-anchors
-one. A Space **assigned to another screen** than that Desktop's
-is refused up front: the layout would carry the window back to
-that screen, and macOS would then move it to a Desktop there,
-undoing the move
+**Naming the Space**: `move_to_desktop(3, "mail")` sends the
+window to Desktop 3 and files it into the `mail` Space, created
+if it does not exist. When Desktop 3 is hidden, the window
+rejoins `mail` when that Desktop is next shown; `mail` need not
+be the Space that screen is showing, so the window may sit
+parked until you switch to it. When Desktop 3 is already on
+screen, the window joins `mail` at once, as
+`move_to_space("mail")` would. A **floating** window is filed
+too, and on a Desktop already on screen it is re-anchored onto
+that screen the way `move_to_space` re-anchors one. A Space
+**assigned to another screen** than that Desktop's is refused
 ([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
-A Space that is on **no screen yet** can only be named while
-one screen is connected; with more, which screen it would lay
-out on is not settled, so name a Space that lays out on that
-Desktop's screen, or `pin_space_to_display` one there first. A **sticky**
-window takes the same guard `move_to_space` does: a window sticky
-*everywhere* refuses any Space, and one sticky *to a screen*
-refuses a Space on that screen while a Space on another screen
-re-homes it
-([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445)) —
-where it refuses, the whole command is refused, and the window
-does not change Desktop either. The second argument is Lua's and
-the CLI's; the Shortcuts editor's Desktop rows bind the
+A Space on **no screen yet** can be named only while one screen
+is connected; with more, name a Space that lays out on that
+Desktop's screen, or `pin_space_to_display` one there first. A
+**sticky** window takes the guard `move_to_space` does: a
+window sticky *everywhere* refuses any Space, and one sticky
+*to a screen* refuses a Space on that screen while a Space on
+another screen re-homes it
+([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445));
+where it refuses, the whole command is refused and the window
+does not change Desktop. The second argument is Lua's and the
+CLI's; the Shortcuts editor's Desktop rows bind the
 one-argument form.
 
 **Example:**
@@ -341,34 +304,22 @@ identifier, as `move_to_desktop` takes.
 **Does:** moves the focused window to that Desktop **and**
 switches you there with it.
 
-"There" means **on the window**, not merely looking at it:
-keyboard focus ends on the window you sent, so you can carry on
-typing into it. Your pointer only moves if you have turned
-*mouse follows focus* on, which governs this the way it governs
-every other focus change.
+Keyboard focus ends on the window you sent. The pointer moves
+only with *mouse follows focus* on.
 
-If the target Desktop is **hidden**, KiwiDesk hands focus over
-the moment the window reappears there — a beat after the switch,
-because macOS attaches focus to a *window*, never to a screen,
-and a window on an unshown Desktop is not one Accessibility will
-list
-([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)). If
-it is already **shown**, focus simply stays with the window and
-there is nothing to hand over.
+If the target Desktop is **hidden**, focus lands a beat after
+the switch, when the window reappears there
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)).
+If it is already **shown**, focus stays with the window.
 
-With more than one screen, "there" is that Desktop's own screen,
-and a Desktop that screen already shows switches nothing — the
-window still moves, and focus still goes with it. The return
-table's `switched` is `false` there, and it describes the
-SWITCH alone: the move happened regardless, so `false` is not
-"nothing happened".
+With more than one screen, a Desktop its own screen already
+shows switches nothing; the window still moves, focus goes with
+it, and the return table's `switched` is `false`, describing
+the switch alone.
 
-The window itself is placed by the cross-screen rule above — on
-another screen it joins the Space that screen shows — unless you
-name a Space, which wins the same way it does for
-`move_to_desktop` — filed as the window leaves, or at once when
-that Desktop is already on screen — and the focus you are handed
-is in that Space. Same requirement as `focus_desktop`.
+The window is placed as `move_to_desktop` places it, a named
+Space included, and the focus you are handed is in that Space.
+Same requirement as `focus_desktop`.
 
 **Example:**
 
@@ -384,13 +335,12 @@ KiwiDesk.move_to_desktop_and_follow(3, "mail")
 `2` the next left-to-right) or a **string** matching a connected
 monitor's fingerprint (as printed by `list_monitors`) or name.
 
-**Does:** moves the whole space to that monitor **now** and shows
-it there (each monitor shows one space at a time). This is a
-runtime move: a later monitor change (dock/undock) re-resolves
-placement from the pins, so use `pin_space_to_display` to make it
-stick. Creates the space if it does not exist yet. Floating
-members travel too: each is re-anchored onto the new monitor,
-keeping its relative position.
+**Does:** moves the whole space to that monitor **now** and
+shows it there (each monitor shows one space at a time). A
+later monitor change (dock/undock) re-resolves placement from
+the pins; `pin_space_to_display` makes it stick. Creates the
+space if it does not exist. Floating members are re-anchored
+onto the new monitor, keeping their relative position.
 
 **Example:**
 
@@ -405,14 +355,13 @@ KiwiDesk.move_space_to_display(3, "DELL U2723QE:3840x2160")
 forms as `move_space_to_display`).
 
 **Does:** pins the space to that monitor by the monitor's
-fingerprint, so the assignment survives dock/undock — and, when
-declared in `init.lua`, a relaunch. Overrides any Main-role
-assignment for the space. Creates the space if new.
+fingerprint, so the assignment survives dock/undock. Overrides
+any Main-role assignment for the space. Creates the space if
+new.
 
-Under a GUI-managed config the Settings **Canvas** stays the
-persistent owner of pins, so a pin set from Lua is a session
-override there; under a Lua-managed config the pin persists
-because `init.lua` re-runs on launch.
+Under a GUI-managed config the Settings **Canvas** owns pins,
+and a pin set from Lua is a session override; under a
+Lua-managed config the pin persists across a relaunch.
 
 A screen this pin leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).
@@ -429,12 +378,11 @@ KiwiDesk.pin_space_to_display("mail", 2)
 (`"bsp"`, `"stack"`, `"scrolling"`, `"grid"`, `"monocle"`,
 `"track"`, `"floating"`).
 
-**Does:** brings a space into existence and resolves it onto a
-display. Spaces otherwise appear implicitly the first time you
-reference one (`focus_space`, `move_to_space`, a keybinding), so
-this is mainly for declaring a space — and its mode — up front in
-`init.lua`. A no-op beyond the mode set if the space already
-exists.
+**Does:** creates the space and resolves it onto a display.
+Spaces also appear the first time you reference one
+(`focus_space`, `move_to_space`, a keybinding); this verb
+declares one, and its mode, up front. If the space already
+exists, only the mode is set.
 
 **Example:**
 
@@ -447,11 +395,11 @@ KiwiDesk.create_space("scratch", "monocle")
 **Expects:** a space identifier.
 
 **Does:** removes the space after moving its windows to the
-fallback space (or the first surviving space), so nothing is
-orphaned, and clears the space from the placement pins, Main
-role, and per-space settings. Refuses to delete the only space.
-Runtime only — a space still declared in `init.lua` or the
-active profile reappears on the next config load.
+fallback space (or the first surviving space), and clears the
+space from the placement pins, Main role, and per-space
+settings. Refuses to delete the only space. Runtime only: a
+space still declared in `init.lua` or the active profile
+reappears on the next config load.
 
 :::unreleased
 **Returns** `nil` for a space nothing declares (and for a refused
@@ -473,12 +421,9 @@ A screen this leaves with no space is seeded one — see
 KiwiDesk.delete_space("scratch")
 ```
 
-> **Renaming a space** has no Lua verb by design. Rename in the
-> Settings app (which also rewrites every keybinding that targets
-> the space and persists the change), or — with a Lua config —
-> change the id in `init.lua` and reload. A runtime rename could
-> only do a partial, non-persistent remap, so it is deliberately
-> omitted.
+> **Renaming a space** has no Lua verb. Rename in the Settings
+> app ([Space Identity](#space-identity)), or — with a Lua
+> config — change the id in `init.lua` and reload.
 
 ### move_to_track
 
@@ -486,28 +431,22 @@ KiwiDesk.delete_space("scratch")
 `previous` alias).
 
 **Does:** in a track-layout space, moves the focused window
-into the adjacent track in the sequence (joining it at its
-end). The track verbs speak **prev/next**, not compass
-directions: tracks form a one-dimensional sequence, and the
-same binding keeps working when the axis flips. What that
-means on screen:
+into the adjacent track in the sequence, joining it at its end.
+The track verbs take **prev/next**, so the same binding keeps
+working when the axis flips. On screen:
 
 | Axis | `"prev"` | `"next"` |
 |---|---|---|
 | `vertical` (columns, default) | the column to the **left** | the column to the **right** |
 | `horizontal` (rows) | the row **above** | the row **below** |
 
-Formally: prev = the lower array index (toward the sequence
-start), next = the higher. Past the first or last track it
-opens a **new** track at that edge — the keyboard way to open
-tracks, matching what `own_track` spawning does. Refused when
-the space is not in track mode, when `track.set_limit` already
-caps the tracks, or when the window already forms the edge
-track alone (nothing would change). Never wraps. Focus and
-window `swap` keep their
-spatial left/right/up/down vocabulary — only the two track
-sequence verbs (this and [`track.swap`](#trackswap)) use
-prev/next.
+`prev` is the lower array index, `next` the higher. Past the
+first or last track it opens a **new** track at that edge, as
+`own_track` spawning does. Refused when the space is not in
+track mode, when `track.set_limit` already caps the tracks, or
+when the window already forms the edge track alone. Never
+wraps. `focus` and `swap` keep left/right/up/down; only this
+verb and [`track.swap`](#trackswap) take prev/next.
 
 **Example:**
 
@@ -550,10 +489,10 @@ KiwiDesk.set_mode("music", "floating")
   `left`, `right`, `inner_horizontal`, `inner_vertical` (all
   optional; missing keys default to 10).
 
-**Does:** sets gaps for all spaces. The gaps are carved out of
-the layout, so the bar and windows never overlap. If the menu bar
-is set to auto-hide, its strip is reclaimed automatically. On
-MacBooks with a notch, the camera housing stays reserved.
+**Does:** sets gaps for all spaces, carved out of the layout;
+bars and windows never overlap. An auto-hiding menu bar's strip
+is reclaimed. On MacBooks with a notch, the camera housing
+stays reserved.
 
 **Example:**
 
@@ -605,13 +544,13 @@ KiwiDesk.set_min_window_size(300)
 
 **Expects:** a number (points).
 
-**Does:** sets the global magnitude the **Grow** / **Shrink**
+**Does:** sets the magnitude the **Grow** / **Shrink**
 keybindings nudge the layout by (default 50). The Shortcuts
-catalog authors all four per-axis bindings as
-`resize("x"|"y", ±step)` from this value, and importing a config
-reads a recovered magnitude back into it. Does not move any window on its own — it only sizes the
-Grow/Shrink presets — so it takes effect the next time such a
-binding fires.
+catalog authors the four per-axis bindings as
+`resize("x"|"y", ±step)` from this value, and importing a
+config reads a recovered magnitude back into it. Moves no
+window on its own; it takes effect the next time such a binding
+fires.
 
 **Example:**
 
@@ -627,26 +566,22 @@ the active space.
 
 **Does:** returns the space's **sizing** — what `resize` and
 mouse resizes accumulate — to what your profile (or `init.lua`)
-set, in one action; `"all"` does it on every space at once,
-for the week where you no longer know which ones drifted.
-Cleared: the BSP split
-ratios, the stack master ratio and the scrolling slot size (the
-session layer described under [resize](#resize)), the stack
-column's per-window weights and the track weights. Kept:
-everything you configured — a per-space override's ratio or
-slot size (`bsp.set_ratio_h_override`, the Settings override
+set; `"all"` does it on every space at once. Cleared: the BSP
+split ratios, the stack master ratio and the scrolling slot
+size (the session layer described under [resize](#resize)),
+the stack column's per-window weights and the track weights.
+Kept: everything you configured — a per-space override's ratio
+or slot size (`bsp.set_ratio_h_override`, the Settings override
 editor) is what the space returns to, and a space with no
-override lands on the global; and everything that is structure
-rather than size — the layout mode, the BSP strategy, the
-master count, orientation and stack position, the overflow
-style, the scrolling anchor and orientation, the track axis and
-limit, a grid's columns and rows, new-window placement. Never
-the shipped default: a space lands on *your* `bsp.set_ratio_h`.
-Where a window's own minimum binds, the next retile's floor
-heal moves the ratio back off that value by as much. Retiles
-at once.
-Unbound by default; bind it from init.lua or the Shortcuts ▸
-Lua bindings drawer.
+override lands on the global — and everything that is
+structure: the layout mode, the BSP strategy, the master count,
+orientation and stack position, the overflow style, the
+scrolling anchor and orientation, the track axis and limit, a
+grid's columns and rows, new-window placement. Where a window's
+own minimum binds, the next retile's floor heal moves the ratio
+back off that value by as much. Retiles at once. Unbound by
+default; bind it from `init.lua` or the Shortcuts ▸ Lua
+bindings drawer.
 
 **Example:**
 
@@ -663,17 +598,14 @@ KiwiDesk.reset_layout_sizing("all")
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** a power-user toggle for how a directional `swap`
-behaves when the focused window sits in an overflow
-[cascade](#when-windows-no-longer-fit). When `true` (the
-default), the swap skips the other windows piled with it and
-trades with the tiled neighbor *outside* the pile in that
-direction — doing nothing when there is none — instead of
-reordering the cascade. Set `false` to restore the raw
-behavior, where a swap trades with whichever piled window lies
-that way. Global (per profile, all spaces); `focus` is never
-affected. There is no Settings toggle — a pile is a corner
-case, so this lives in config only.
+**Does:** how a directional `swap` behaves when the focused
+window sits in an overflow
+[cascade](#when-windows-no-longer-fit). `true`: the swap skips
+the windows piled with it and trades with the tiled neighbor
+*outside* the pile in that direction, doing nothing when there
+is none. `false`: the swap trades with whichever piled window
+lies that way. Global (per profile, all spaces); `focus` is not
+affected. No Settings toggle.
 
 **Example:**
 
@@ -685,20 +617,14 @@ KiwiDesk.set_swap_skips_cascade(true)
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** whether toggling a window from tiled to floating gives
-it a small nudge toward the screen center. A window keeps its
-exact frame when it floats, so without the nudge the toggle looks
-like it did nothing; a fixed shove (up to 24 pt, tapering to zero
-for a window already near the center) acknowledges the state
-change. Fires on the float direction only — `make_floating` and a
-`toggle_floating` that lands on floating — never on `make_tiled`,
-which already animates a real move back into the layout. The
-magnitude is fixed, not scaled by window size, so a maximized
-window does not leap across the screen and a tiny one still
-moves; the target is always kept fully on screen and clear of the
-menu bar and any App/Space Bar. Global (per profile, all spaces);
-a niche polish toggle, so it lives in config only, with no
-Settings toggle.
+**Does:** whether toggling a window from tiled to floating
+nudges it toward the screen center: up to 24 pt, tapering to
+zero for a window already near the center, the same for every
+window size. A window keeps its exact frame when it floats.
+Fires on `make_floating` and a `toggle_floating` that lands on
+floating, never on `make_tiled`. The target stays fully on
+screen and clear of the menu bar and any App/Space Bar. Global
+(per profile, all spaces); no Settings toggle.
 
 **Example:**
 
@@ -711,27 +637,20 @@ KiwiDesk.set_float_nudge(true)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** whether a floating window re-anchored across displays
-also scales its **size** to keep the same relative footprint. By
-default (`true`) a float that crosses to a differently sized
-display is scaled by the per-axis ratio of the two displays — a
-window that filled half of a 4K screen fills half of a 1080p one
-— as well as re-anchored to the same relative spot (bottom-right
-stays bottom-right). This keeps an oversized float from arriving
-half off-screen: when the target display is smaller, macOS clamps
-a too-tall window's height but lets its width overflow the edge,
-so keeping the exact size lands the window partly off the screen.
-Applies wherever a float crosses displays (move-to-space, moving
-a space to another display, a display-change sweep) and to
-windows that are floating only because their space is in floating
-mode, not just explicitly floated ones. The result is still
-confined fully on screen and clear of any App/Space Bar. Set
-`false` to keep the exact pixel size across displays instead — a
-deliberate multi-monitor choice (screen recording, pixel-matched
-capture windows) that accepts the overflow and avoids the slight
-aspect-ratio change the per-axis scale introduces between
-displays of different aspect ratios (e.g. 16:9 → 16:10). Global
-(per profile, all spaces); a power-user knob, so it lives in
-config only, with no Settings toggle.
+also scales its **size**. `true`: a float that crosses to a
+differently sized display is scaled by the per-axis ratio of
+the two displays — half of a 4K screen becomes half of a 1080p
+one — as well as re-anchored to the same relative spot. Applies
+wherever a float crosses displays (`move_to_space`, moving a
+space to another display, a display-change sweep), and to
+windows floating only because their space is in floating mode.
+The result stays fully on screen and clear of any App/Space
+Bar. `false` keeps the exact pixel size across displays: a
+too-wide window then overflows the edge of a smaller display
+(macOS clamps a window's height but not its width), and the
+window keeps its aspect ratio between displays of different
+aspect ratios (16:9 → 16:10). Global (per profile, all spaces);
+no Settings toggle.
 
 **Example:**
 
@@ -745,25 +664,19 @@ KiwiDesk.set_float_scale_on_display_change(false)
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** whether a blocked action's on-window message also
-plays the system alert sound (#184, widened #1255). Every
-refusal draws — a size limit reached, a layout with nothing to
-resize, a zone with no such axis, a sticky window that cannot be
-swapped — and this adds sound to the drawing. It cannot sound
-without drawing: each refusal sounds on what its drawing
-REPORTED, so one that could not draw — a sticky mark switched
-off, a window with no overlay — stays silent rather than
-becoming audible-but-invisible.
+plays the system alert sound (#184, #1255). Every refusal draws
+— a size limit reached, a layout with nothing to resize, a zone
+with no such axis, a sticky window that cannot be swapped. A
+refusal that could not draw — a sticky mark switched off, a
+window with no overlay — stays silent.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
-silent (scripted callers branch on the error JSON), and a held
-chord sounds once per hold rather than once per frame. The GUI
-twin lives under Behaviour ▸ When an action can't apply.
+silent, and a held chord sounds once per hold. The GUI twin is
+Behaviour ▸ When an action can't apply.
 
-Stored as `refusal.sound`. A config written before #1255 carries
-the retired `resize.feedback`, which the one-shot migration
-drops — the value is not carried across, since the old default
-was written into every saved file and records what a save did
-rather than what anyone chose.
+Stored as `refusal.sound`; the retired `resize.feedback` key is
+dropped by the one-shot migration, its value not carried
+across.
 
 **Example:**
 
@@ -776,25 +689,23 @@ KiwiDesk.set_refusal_sound(true)
 **Expects:** `true` or `false` (default `true`).
 
 **Does:** lays a macOS&nbsp;26 Liquid Glass material over the
-shortcuts panel — the one ⌃⌥K opens (#1307). Off, the panel
-draws `.regularMaterial`, the same material it falls back to
-below macOS&nbsp;26. Unlike the bars, the panel's glass is
-untinted: it carries dense text, so it draws `.regular` where
-the bars draw `.clear`, and no Fill reaches it (#1295).
+shortcuts panel, the one ⌃⌥K opens (#1307). Off, or below
+macOS&nbsp;26, the panel draws `.regularMaterial`. The panel's
+glass is untinted: it draws `.regular` where the bars draw
+`.clear`, and no Fill reaches it (#1295).
 
-Stored as `shortcut_panel.liquid_glass`, in the profile beside
-the two bars — so the panel follows the profile that is active,
-and a profile switch can change its material.
+Stored as `shortcut_panel.liquid_glass` in the profile, so a
+profile switch can change the panel's material.
 
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
 ([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
 
-The GUI twin is the single **Liquid Glass** switch on
-Colours &amp; Animations, which writes this leaf together with
+The GUI twin is the **Liquid Glass** switch on Colours &amp;
+Animations, which writes this leaf together with
 `app_bar.liquid_glass` and `space_bar.liquid_glass` and shows on
-only when all three are on. Setting one and not the others is a
-Lua-only state; the switch then reads off and says so in its `?`.
+only when all three are on; with one set and not the others,
+the switch reads off and says so in its `?`.
 
 **Example:**
 
@@ -805,57 +716,37 @@ KiwiDesk.set_shortcut_panel_liquid_glass(true)
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
-are the same space, `"code"` and `"Code"` are not. Monitors never
-carry a layout themselves; windows live in spaces, and spaces are
-mapped to monitors (see *Profiles & Monitors* below). You can
-rename a space in place from the Settings app's **Spaces**
-section; the rename follows the id everywhere it is used — its
-layout mode, app rules, monitor pins, and any keybindings.
+are the same space, `"code"` and `"Code"` are not. Monitors
+carry no layout; windows live in spaces, and spaces are mapped
+to monitors (see *Profiles & Monitors* below). A space is
+renamed in place from the Settings app's **Spaces** section; the
+rename is persisted and follows the id everywhere it is used —
+its layout mode, app rules, monitor pins, and any keybindings.
 
 ### How inactive spaces hide their windows
 
-Switching spaces hides the other spaces' tiled windows the
-same way [AeroSpace
-does](https://nikitabobko.github.io/AeroSpace/guide#emulation-of-virtual-workspaces):
-they are parked in the bottom-right corner of their screen with
-only a few pixels peeking in (macOS refuses fully offscreen
-windows). They return to their tiles when their space becomes
-active — instantly by default; with
-`animations.set_on_space_change` the whole switch animates as a
-coordinated slide, out to the corner and in from it (see
-Animations). Focusing a hidden window (cmd+tab) pulls its
-space forward automatically. Floating windows — including
-picture-in-picture — are never stashed and stay visible across all
-spaces.
+Switching spaces parks the other spaces' tiled windows in a
+corner of their screen — [Parking is not a Desktop
+move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
+owns the model. The switch is instant by default; with
+`animations.set_on_space_change` it animates as a coordinated
+slide, out to the corner and in from it (see Animations).
+Focusing a hidden window (cmd+tab) pulls its space forward, and
+a window sent ahead with [`move_to_space`](#move_to_space) is
+the one you land on there. Floating windows, picture-in-picture
+included, are never parked and stay visible across all spaces.
 
-Sending a window elsewhere with
-[`move_to_space`](#move_to_space) makes it that
-space's focused window, so the first time you switch there it is
-the window you land on — even without `_and_follow`.
-
-**Minimizing** a window removes it from its space entirely.
-Restoring it — from the Dock, or via
-[`pull_or_spawn`](#pull_or_spawn) when the app has nothing left on
-screen — opens it in the space you are
-on at that moment (an `app_rules` entry for its app still wins),
-just like a new window — it does not pull you back to the space it
-was minimized from.
-
-**Hiding** an app (cmd+H) releases the tiles of every window it
-had on screen, and unhiding takes them back — into the space they
-came from, unlike a restore from the Dock. Some apps hide
-themselves rather than close when you click the red X: Discord
-does, and it is how an app that keeps running in the background
-stays out of the way. KiwiDesk treats that the same way, so the
-layout closes over the gap rather than holding a slot for a
-window you can no longer see.
+**Minimizing** a window removes it from its space. Restoring it
+— from the Dock, or via [`pull_or_spawn`](#pull_or_spawn) when
+the app has nothing left on screen — opens it in the space you
+are on at that moment, as a new window (an `app_rules` entry
+for its app still wins). **Hiding** an app (cmd+H, or an app
+that hides itself on the red X) releases its tiles, and
+unhiding returns its windows to the space they came from.
 
 With **multiple monitors**, arrange your displays so no monitor
-sits directly right of or below another one's bottom-right corner,
-or the parked windows peek onto the neighbor. This is the same
-constraint AeroSpace documents — see their [proper monitor
-arrangement guide](https://nikitabobko.github.io/AeroSpace/guide#proper-monitor-arrangement);
-KiwiDesk solves hiding similarly, so the same arrangements work.
+sits directly right of or below another one's bottom-right
+corner, or the parked windows peek onto the neighbor.
 
 ## Per-Layout Tuning
 
@@ -865,9 +756,8 @@ KiwiDesk solves hiding similarly, so the same arrangements work.
 `alternating`).
 
 **Does:** sets the BSP split strategy. `alternating` alternates
-horizontal then vertical by depth — the classic BSP behaviour,
-and the default; `longest_side` cuts the longer side of each
-region instead, which keeps windows square-ish.
+horizontal then vertical by depth; `longest_side` cuts the
+longer side of each region, which keeps windows square-ish.
 
 **Example:**
 
@@ -1024,17 +914,16 @@ stack.set_overflow_style("cascade_overflow")
 **Expects:** `"top"`, `"right"` (default), `"bottom"`, or
 `"left"`.
 
-**Does:** sets which side of the space the stack zone takes; the
-master zone gets the rest. `left`/`right` split the width,
+**Does:** sets which side of the space the stack zone takes;
+the master zone gets the rest. `left`/`right` split the width,
 `top`/`bottom` the height. The stack zone's lineup derives from
 the position — a left/right zone stacks its windows vertically,
-a top/bottom zone lines them up side by side (there is no
-separate stack orientation knob). Overflow piles always cascade
-downward regardless. When the stack leads (`left`/`top`) and the
-masters line up along the split axis, the master zone fills from
-the stack seam instead of the screen edge, so a promoted window
-appears beside the stack it just left rather than teleporting to
-the far edge.
+a top/bottom zone lines them up side by side; there is no
+separate stack orientation knob. Overflow piles always cascade
+downward. When the stack leads (`left`/`top`) and the masters
+line up along the split axis, the master zone fills from the
+stack seam, so a promoted window appears beside the stack it
+left.
 
 **Example:**
 
@@ -1061,9 +950,8 @@ stack.set_master_orientation("vertical")
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or
 `"after_focused"`.
 
-**Does:** sets where new windows enter the stack's order. For
-stack, the default is `"first"` (dwm-style: new window becomes
-master).
+**Does:** sets where new windows enter the stack's order.
+Default `"first"`: a new window becomes master.
 
 **Example:**
 
@@ -1075,22 +963,19 @@ stack.set_new_window_placement("last")
 
 **Expects:** a boolean.
 
-**Does:** when `true` (the default, and how every profile drew
-before the setting existed), a single window takes the whole
-usable area and starts sharing only when a second window opens.
-When `false`, a lone window keeps the master zone it would have
+**Does:** `true` (the default): a single window takes the whole
+usable area and starts sharing when a second window opens.
+`false`: a lone window keeps the master zone it would have
 beside a stack zone — the master ratio's share, on the master's
-side of the split — and the stack zone stays empty. Which
+side of the split — and the stack zone stays empty; which
 window holds that zone once a second opens is
-`stack.set_new_window_placement`'s call. On a screen
-too small to hold two zones at `min_window_size` the lone window
-fills instead, as the split itself would cascade. The toggle is
-about ONE window: two or more windows with no stack zone (every
-one a master) still take the whole area — so with a master count
-of two or more, the kept zone widens to the full area when the
-second window opens. The Settings row is
-**If one window, fill the screen**; Scrolling has the same
-toggle (`scroll.set_fill_when_alone`).
+`stack.set_new_window_placement`'s. On a screen too small to
+hold two zones at `min_window_size` the lone window fills. Two
+or more windows with no stack zone (every one a master) take
+the whole area, so with a master count of two or more the kept
+zone widens to the full area when the second window opens. The
+Settings row is **If one window, fill the screen**; Scrolling
+has the same toggle (`scroll.set_fill_when_alone`).
 
 **Example:**
 
@@ -1178,27 +1063,22 @@ stack.set_master_orientation_override("3", "vertical")
 **Expects:** a number (macOS points), `"NN%"` (a percentage),
 or `0` (auto, default).
 
-**Does:** sets the size of columns (horizontal) or rows (vertical)
-in scrolling layouts. Auto is 95% (horizontal and vertical
-alike). Any resolved size is floored
-at the global
+**Does:** sets the size of columns (horizontal) or rows
+(vertical) in scrolling layouts. Auto is 95%, horizontal and
+vertical alike. Any resolved size is floored at the global
 minimum window size (`set_min_window_size`) and capped at the
-axis length — so a small percentage on a narrow display falls
-back to the minimum rather than tiling windows smaller than it.
+axis length.
 
-A percentage is a share of the **pitch** — one window plus one
-inner gap — so `"50%"` is exactly two windows, gaps included,
-and `"33.33%"` three, whatever the gap. Points stay the
-absolute channel.
+A percentage is a share of the **pitch**, one window plus one
+inner gap: `"50%"` is two windows, gaps included, `"33.33%"`
+three. Points are absolute.
 
 A row shorter than the axis keeps each slot at its size and
 leaves the rest of the axis empty. A lone window fills the
-available width or height (unless its app refuses that size —
-[Accepted limitations](accepted-limitations.md)).
-Accepted values: `%` clamps to 5–100%, points to ≥100.
-
-Whether a lone window fills is `scroll.set_fill_when_alone`'s
-(on by default); off, it keeps this slot size alone.
+available width or height unless its app refuses that size
+([Accepted limitations](accepted-limitations.md)) or
+`scroll.set_fill_when_alone` is off, when it keeps this slot
+size. Accepted values: `%` clamps to 5–100%, points to ≥100.
 
 **Example:**
 
@@ -1208,30 +1088,22 @@ scroll.set_slot_size(400)          -- 400 pt
 scroll.set_slot_size("50%")        -- two windows, gaps included
 ```
 
-An interactive `resize` stops at both ends: it will not take the
-slot below `min_window_size` (or an app's own learned minimum),
-and it will not grow it past what fits on screen — growing
-further would otherwise bank size you cannot see, and every
-press of it would have to be undone before shrinking did
-anything. Nor past a *maximum* the focused window's app itself
-enforces, once KiwiDesk has learned it (#1055): that refusal
-bounces and pills, where the fits-on-screen stop stays wordless.
+An interactive `resize` stops at both ends: it will not take
+the slot below `min_window_size` (or an app's own learned
+minimum), nor grow it past what fits on screen, nor past a
+*maximum* the focused window's app enforces once KiwiDesk has
+learned it (#1055). The app-maximum refusal bounces and pills;
+the fits-on-screen stop stays wordless. The pill names the app
+("This app won't go bigger", #1261); no setting caps a window's
+maximum, and lowering `min_window_size` does not move it.
 
-The pill names the app ("This app won't go bigger", #1261): no
-setting caps a window's maximum, so lowering `min_window_size`
-never moves it.
-
-Setting a size *here* is not clamped that way: a config value
-travels with you between screens, so if you set a slot wider
-than the screen you are on, it keeps that width and the layout
-simply draws what fits. A grow press then does nothing rather
-than trimming it; a shrink counts from what is *drawn*, not
-from the stored number (#1057) — the first press has visible
-effect, and only that deliberate resize rewrites the stored
-value. And when the focused window's app pins its size, a
-press its bound blocks outright refuses in place with the pill
-— it never resizes the rest of the row from a window that
-cannot follow.
+A size set *here* is not clamped: a slot wider than the screen
+keeps that width and the layout draws what fits. A grow press
+then does nothing; a shrink counts from what is *drawn*, not
+from the stored number (#1057), and that resize rewrites the
+stored value. When the focused window's app pins its size, a
+press its bound blocks refuses in place with the pill and does
+not resize the rest of the row.
 
 ### scroll.set_anchor
 
@@ -1254,46 +1126,33 @@ applied on *every* focus change.
   down scroll symmetrically, an already-visible window does not
   move the viewport at all, and the side you came from stays open.
 
-The three fixed anchors re-seat the focus on every focus change;
-only `follow` remembers the prior scroll position. Focusing a
-*floating* window leaves the viewport where it is under any anchor
-— a floating window has no slot in the row, so there is nothing
-to place.
+Focusing a *floating* window leaves the viewport where it is
+under any anchor.
 
 The three fixed anchors are **absolute**: the focused window
-rests where the anchor says, whatever the row's extent. Under
-`center` it is centred on the screen with its neighbours
-beside it; under `start` it takes the left (or top) edge — so
-the windows before it in the row leave the screen on that
-side — and `end` mirrors it. With nothing beside the focused
-window (a lone one kept at its slot,
-`scroll.set_fill_when_alone`) the rest of the screen stays
+rests where the anchor says, whatever the row's extent, so under
+`start` the windows before it in the row leave the screen on
+that side, and a lone window kept at its slot
+(`scroll.set_fill_when_alone`) leaves the rest of the screen
 empty. Only `follow` keeps the row's extent on screen: a row
 shorter than the axis sits flush at the leading edge under it.
 
-`follow` remembers where the *focused window* rested, not how far
-the row was pushed. One slot size serves every slot, so resizing
-one (`resize`, `scroll.set_slot_size`, a mouse edge drag) moves
-every window along the row — and the focused window then keeps
-its place on screen while the row rearranges around it. The same
-holds when a window opens or closes ahead of the focus. A
-*focus change* pans the viewport minimally, which is what makes
-the pan above read as scroll-into-view.
+`follow` remembers where the *focused window* rested, not how
+far the row was pushed. One slot size serves every slot, so
+resizing one (`resize`, `scroll.set_slot_size`, a mouse edge
+drag) moves every window along the row, and the focused window
+keeps its place on screen while the row rearranges around it;
+the same holds when a window opens or closes ahead of the focus.
+On a reorder — `swap`, a window dropped onto another, a drag on
+the App Bar — the two windows trade places, and the view pans
+only when the moved window's new slot would fall outside it.
+Under `follow` the row never reveals empty margin past its
+ends; near a row end the focus re-anchors only as far as it can.
 
-A reorder — `swap`, a window dropped onto another, or a drag on
-the App Bar — is not a rearrangement around the focus: the two
-windows visibly trade places, and the view pans only when the
-moved window's new slot would fall outside it.
-
-Near a row end the boundary wins under `follow`: the row never
-reveals empty margin past its ends, so there the focus
-re-anchors only as far as it can.
-
-One refinement to "keeps its place": a window resting flush
-against the **trailing** edge of the viewport keeps that edge
-rather than its leading one, so the space it gives up comes off
-the open side and reveals more of the window behind it. A window
-filling the whole viewport keeps its leading edge, as usual.
+A window resting flush against the **trailing** edge of the
+viewport keeps that edge on a resize, and the space it gives up
+reveals more of the window behind it; a window filling the
+whole viewport keeps its leading edge.
 
 **Example:**
 
@@ -1308,22 +1167,17 @@ scroll.set_anchor("follow")
 **Does:** sets the scroll direction. Horizontal: columns scroll
 left/right. Vertical: rows scroll up/down.
 
-Vertical rows overflow only at the bottom: macOS refuses to place
-any window above the top screen border, so a row scrolled past the
-top stays pinned at the border with its upper strip peeking behind
-the focused row, instead of tucking above the screen. See
-[Blocked by macOS (SIP)](design-decisions.md#blocked-by-macos-sip)
-in the design decisions. On an edge with no screen beyond it, a
-slot scrolled far
-offscreen keeps a small fixed sliver visible — macOS refuses
-fully offscreen placement, so KiwiDesk pins at a deterministic
-sliver instead of letting the OS clamp unpredictably. An edge
-with another screen beyond it is a wall instead: a scrolled-out
-slot stops flush at the border, fully on its own screen, stacked
-behind the visible ones — never resized, and never rendered on
-the neighbor screen. Which edges are walls follows your screen
-arrangement, and a screen plugged in or out updates it
-immediately.
+Vertical rows overflow only at the bottom: a row scrolled past
+the top stays pinned at the border with its upper strip peeking
+behind the focused row
+([Blocked by macOS (SIP)](design-decisions.md#blocked-by-macos-sip)).
+On an edge with no screen beyond it, a slot scrolled far
+offscreen keeps a small fixed sliver visible. An edge with
+another screen beyond it is a wall: a scrolled-out slot stops
+flush at the border, fully on its own screen, stacked behind
+the visible ones, never resized and never rendered on the
+neighbor screen. Which edges are walls follows your screen
+arrangement, updated as a screen is plugged in or out.
 
 **Example:**
 
@@ -1335,8 +1189,8 @@ scroll.set_orientation("horizontal")
 
 **Expects:** a placement string (same values as `bsp` above).
 
-**Does:** sets where new windows land. Default is `"after_focused"`
-(PaperWM behavior).
+**Does:** sets where new windows land. Default
+`"after_focused"`.
 
 **Example:**
 
@@ -1346,15 +1200,12 @@ scroll.set_new_window_placement("after_focused")
 
 ### scroll.set_wrap_focus
 
-**Expects:** a boolean.
+**Expects:** a boolean (default `false`).
 
-**Does:** when `true`, stepping `focus` past either end of the
-row wraps to the far end (right off the last window lands on the
-first, and vice versa). Default is `false` — focus stops at the
-ends, matching the physical-strip feel of the layout. Applies to
-`focus` only; `swap` never wraps (it would teleport a window
-across the whole row). Monocle has the same toggle
-(`monocle.set_wrap_focus`), with the same **off** default.
+**Does:** `true`: stepping `focus` past either end of the row
+wraps to the far end. `false`: focus stops at the ends. Applies
+to `focus` only; `swap` never wraps. Monocle has the same
+toggle (`monocle.set_wrap_focus`), default off.
 
 **Example:**
 
@@ -1364,17 +1215,15 @@ scroll.set_wrap_focus(true)
 
 ### scroll.set_fill_when_alone
 
-**Expects:** a boolean.
+**Expects:** a boolean (default `true`).
 
-**Does:** when `true` (the default, and how every profile drew
-before the setting existed), a single window in a scrolling
-space takes the whole width or height and starts sharing only
-when a second window opens. When `false`, a lone window keeps
-the slot size (`scroll.set_slot_size`) it would have beside a
-neighbour, and the rest of the axis stays empty — where along
-the axis it rests is `scroll.set_anchor`'s. The Settings
-row is
-**If one window, fill the screen**; Stack has the same toggle
+**Does:** `true`: a single window in a scrolling space takes
+the whole width or height and starts sharing when a second
+window opens. `false`: a lone window keeps the slot size
+(`scroll.set_slot_size`) it would have beside a neighbour, and
+the rest of the axis stays empty; where along the axis it rests
+is `scroll.set_anchor`'s. The Settings row is **If one window,
+fill the screen**; Stack has the same toggle
 (`stack.set_fill_when_alone`).
 
 **Example:**
@@ -1391,10 +1240,9 @@ scroll.set_fill_when_alone(false)
 - A slot size in macOS points (same shape as
   `scroll.set_slot_size`).
 
-**Does:** overrides the global slot size for one space. Editable
-in the GUI from the space's **Customize…** override editor (check
-the slot-size **Override** box to customize it; leave it unchecked
-to inherit the Layout Defaults value).
+**Does:** overrides the global slot size for one space. In the
+GUI: the space's **Customize…** override editor, slot-size
+**Override** box (unchecked inherits the Layout Defaults value).
 
 **Example:**
 
@@ -1489,11 +1337,10 @@ grid.set_dimensions(3, 2)
 
 **Does:** when true, derives the grid's dimensions from the
 display — as many columns and rows as fit at `min_window_size`
-(`floor(usable / (min_window_size + gap))` per axis, at least 1)
-— instead of the typed `columns`/`rows`. Orthogonal to the grid
-type: it caps a dynamic grid and fixes a rigid one alike. On a
-landscape monitor this yields more columns than rows. Windows
-past the resulting capacity cascade in the last cell.
+(`floor(usable / (min_window_size + gap))` per axis, at least
+1) — over the typed `columns`/`rows`. It caps a dynamic grid
+and fixes a rigid one alike. Windows past the resulting
+capacity cascade in the last cell.
 
 **Example:**
 
@@ -1611,18 +1458,16 @@ monocle.set_orientation_override("3", "vertical")
 
 **Does:** sets how the unfocused monocle windows are hidden.
 `"stack"` keeps them all at the full monocle frame behind the
-focused one — the illusion is z-order. `"park"` moves them to
-the corner of the screen the space stash already uses (a
-~1 pt sliver stays visible per parked window), and the focus
-switch snaps instantly instead of animating.
+focused one. `"park"` moves them to the corner of the screen
+the space stash uses (a ~1 pt sliver stays visible per parked
+window), and the focus switch snaps without animating.
 
-Pick `"park"` when the stack shows where it shouldn't: through
-a window with a transparent or blurred background, or through
-the side gaps around a window that cannot fill the monocle
-frame and centers instead (see
-[Accepted limitations](accepted-limitations.md) on
+Pick `"park"` when the stack shows through a window with a
+transparent or blurred background, or through the side gaps
+around a window that cannot fill the monocle frame
+([Accepted limitations](accepted-limitations.md) on
 app-enforced sizes). Mission Control shows the parked windows
-at the corner, like a stashed Space.
+at the corner.
 
 **Example:**
 
@@ -1634,11 +1479,10 @@ monocle.set_hide_style("park")
 
 **Expects:** `true` or `false` (default `false`).
 
-**Does:** whether the focus cycle wraps past the ends. Defaults
-**off**, matching the scrolling and track wraps — the same default
-across all three array-order layouts. Turn it on and `focus` past
-the last window returns to the first, and vice versa; off, focus
-stops at the first/last window. `swap` never wraps.
+**Does:** whether the focus cycle wraps past the ends. On,
+`focus` past the last window returns to the first, and vice
+versa; off, focus stops at the first/last window. `swap` never
+wraps.
 
 **Example:**
 
@@ -1651,11 +1495,9 @@ monocle.set_wrap_focus(false)
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or
 `"after_focused"`.
 
-**Does:** sets where a new window lands in the monocle cycle.
-Since monocle shows one window at a time, this is also where the
-window appears in the focus order. Defaults to `"first"` so a new
-window comes to the front of the carousel rather than being
-buried at the back.
+**Does:** sets where a new window lands in the monocle cycle,
+which is also its place in the focus order. Default `"first"`:
+a new window comes to the front of the carousel.
 
 **Example:**
 
@@ -1670,24 +1512,16 @@ monocle.set_new_window_placement("first")
 its table for what prev/next means per axis: left/right for
 columns, above/below for rows).
 
-**Does:** swaps the focused window's **entire track** — the
-contiguous slice, with its windows, sizes, and in-track shares —
-with the adjacent track in the sequence. The whole-structure
-companion to the window-level `swap` (which is untouched and
-stays spatial), following the
-`stack.promote`/`stack.demote` precedent for layout-specific
-verbs. Never wraps; refused when the space is not in
-track mode, no tiled window is focused, or no track lies that
-way (a single track has no neighbor). Also refused when the
-swap would touch the **overflow track** while it is folding two
-or more tracks together — the merged slices are a read-time
-view with no marker identity to exchange, so the swap would
-scramble which windows land in which track. This covers the
-fold under a fixed limit (`track.set_limit` with automatic
-tracks off) *and* the geometric fold on a display too narrow to
-fit the tracks at `min_window_size`. Swapping two normal tracks
-is unaffected — only a swap into the folded slot is refused, so
-raise the limit or widen the display to reorder the overflow.
+**Does:** swaps the focused window's **entire track** — its
+windows, sizes and in-track shares — with the adjacent track in
+the sequence; the window-level `swap` stays spatial. Never
+wraps; refused when the space is not in track mode, no tiled
+window is focused, or no track lies that way. Also refused when
+the swap would touch the **overflow track** while it is folding
+two or more tracks together — under a fixed limit
+(`track.set_limit` with automatic tracks off) or on a display
+too narrow to fit the tracks at `min_window_size`; raise the
+limit or widen the display to reorder the overflow.
 
 **Example:**
 
@@ -1716,21 +1550,17 @@ track.set_axis("vertical")
 **Expects:** `0`, or an integer ≥ 2 (default `3`).
 
 **Does:** sets how many tracks a space shows, the **overflow
-track** counted — a limit of 3 is three tracks on screen. `0`
-restores the **automatic** track limit (the default — tracks open and
-collapse as windows come and go; see `track.set_auto_tracks`).
-A positive value pins the limit *and turns automatic off*, so
-`set_limit(3)` takes effect on its own. The last track is the
-overflow track at the far edge, which collects the surplus
-(#192): a new `own_track` window past the normal tracks opens
-it, and further windows fold into it (rendered per
-`track.set_overflow_style`). `move_to_track` can open the
-overflow track but refuses to go past it. The limit is
-display-agnostic — if a monitor can't fit the columns at
-`min_window_size`, the layout shows fewer at render time. The
-last positive value is remembered, so flipping automatic back
-off restores it. A limit of 1 is refused: one track would be the
-overflow alone (#1354).
+track** counted. `0` restores the **automatic** track limit
+(`track.set_auto_tracks`); a positive value pins the limit and
+turns automatic off. The last track is the overflow track at
+the far edge, which collects the surplus (#192): a new
+`own_track` window past the normal tracks opens it, and further
+windows fold into it, rendered per `track.set_overflow_style`.
+`move_to_track` can open the overflow track but not go past it.
+A monitor that cannot fit the tracks at `min_window_size` shows
+fewer at render time. The last positive value is remembered and
+restored when automatic is turned off again. A limit of 1 is
+refused (#1354).
 
 **Example:**
 
@@ -1742,18 +1572,15 @@ track.set_limit(3)
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** whether the track limit is managed automatically. On
-(the default), tracks open and collapse as windows come and go —
-no cap. Off pins the cap to the value set by `track.set_limit`.
+**Does:** whether the track limit is managed automatically. On,
+tracks open and collapse as windows come and go, with no cap;
+off pins the cap to `track.set_limit`'s value. The automatic
+count honours the minimum sizes the windows' apps enforce once
+KiwiDesk has learned them; a limit you set stays your number.
 
-The automatic count also honours the minimum sizes the windows'
-own apps enforce once KiwiDesk has learned them, so tracks stop
-multiplying past what their windows will hold; a limit you set
-stays your number.
-
-The track twin of `grid.set_auto_size`. `track.set_limit(0)` is
-the shorthand for turning this on; `track.set_limit(n)` for
-turning it off with a cap of `n`.
+The track twin of `grid.set_auto_size`. `track.set_limit(0)`
+turns this on; `track.set_limit(n)` turns it off with a cap of
+`n`.
 
 **Example:**
 
@@ -1768,28 +1595,22 @@ track.set_auto_tracks(false)
 **Does:** decides where a new window lands in a track space.
 
 - `focused_track` (**fill-then-spill**, the default): the window
-  **joins** the focused window's track — placed among its windows
-  by [`track.set_new_window_position`](#trackset_new_window_position)
-  — until that track can't fit another window at
-  `min_window_size`, when the window instead **spills into a new
-  track** immediately beside the focused one. Focus follows the
-  new window, so the next one fills that track and spills again.
-  With no other track to spill to it piles in the focused track
-  instead: under a fixed [`track.set_limit`](#trackset_limit) cap
-  with no room for another track, or for a window an explicit
-  `move_to_space` drops onto a full track (an explicit placement,
-  never relocated).
+  **joins** the focused window's track, placed among its windows
+  by [`track.set_new_window_position`](#trackset_new_window_position),
+  until that track cannot fit another window at
+  `min_window_size`, when it **spills into a new track** beside
+  the focused one. Focus follows the new window. With no room
+  for another track under a fixed
+  [`track.set_limit`](#trackset_limit) cap, or for a window
+  `move_to_space` drops onto a full track, it piles in the
+  focused track.
 - `own_track`: each new window opens its **own** new track,
   positioned among the others by
-  [`track.set_new_window_position`](#trackset_new_window_position)
-  — the "one full-width app per column" (ultrawide) choice. Falls
-  back to joining once `track.set_limit` is reached.
+  [`track.set_new_window_position`](#trackset_new_window_position).
+  Falls back to joining once `track.set_limit` is reached.
 
-Track spaces use this pair instead of the flat
-`new_window_placement` vocabulary — a flat index cannot say "own
-track". The fill-then-spill boundary is display-dependent (how
-many windows fit at `min_window_size`), so the same window count
-spills sooner on a smaller display.
+The fill-then-spill boundary is how many windows fit at
+`min_window_size`, so a smaller display spills sooner.
 
 **Example:**
 
@@ -1803,15 +1624,14 @@ track.set_new_window("own_track")
 or `"after_focused"`.
 
 **Does:** places the new window within the
-[`track.set_new_window`](#trackset_new_window) choice, reusing
-the shared placement vocabulary. For `own_track` it positions the
-**new track** among the others (`first` = leftmost column /
-topmost row, `last` = the far edge, `before`/`after_focused` =
-beside the focused track). For `focused_track` it positions the
-window among that **track's windows** (`first`/`last` = the
-track's ends, `before`/`after_focused` = around the focused
-window). Defaults to `first` so a new window lands at the visible
-front, never buried in the overflow.
+[`track.set_new_window`](#trackset_new_window) choice. For
+`own_track` it positions the **new track** among the others
+(`first` = leftmost column / topmost row, `last` = the far edge,
+`before`/`after_focused` = beside the focused track). For
+`focused_track` it positions the window among that **track's
+windows** (`first`/`last` = the track's ends,
+`before`/`after_focused` = around the focused window). Default
+`first`: a new window lands at the visible front.
 
 **Example:**
 
@@ -1823,17 +1643,13 @@ track.set_new_window_position("after_focused")
 
 **Expects:** `"cascade_all"` (default) or `"cascade_overflow"`.
 
-**Does:** shapes only the **overflow track** — the single
-far-edge track that collects the surplus when more tracks exist
-than fit side by side at `min_window_size`. `cascade_all` (the
-default) piles all its windows from the top as a title-bar
-cascade; `cascade_overflow` keeps as many full windows as fit
-and cascades only the rest. Reuses stack's overflow vocabulary.
-
-Every **normal** track (one that fits) always uses
-`cascade_overflow` for its own internal overflow — this setting
-does not change that. And the fitting tracks always stay tiled;
-only the merged surplus in the overflow track is affected.
+**Does:** shapes the **overflow track** only — the far-edge
+track that collects the surplus when more tracks exist than fit
+side by side at `min_window_size`. `cascade_all` piles all its
+windows from the top as a title-bar cascade; `cascade_overflow`
+keeps as many full windows as fit and cascades the rest. Every
+**normal** track uses `cascade_overflow` for its own internal
+overflow and stays tiled.
 
 **Example:**
 
@@ -1845,12 +1661,11 @@ track.set_overflow_style("cascade_overflow")
 
 **Expects:** a boolean (default `false`).
 
-**Does:** the track twin of `scroll.set_wrap_focus` (#168):
-with it on, stepping `focus` past an end wraps — within the
-focused track along the axis, last ↔ first track across it.
-Off, focus stops at the ends. `swap` and `move_to_track` never
-wrap. Each layout owns its toggle; this one only affects track
-spaces.
+**Does:** the track twin of `scroll.set_wrap_focus` (#168): on,
+stepping `focus` past an end wraps — within the focused track
+along the axis, last ↔ first track across it; off, focus stops
+at the ends. `swap` and `move_to_track` never wrap. Affects
+track spaces only.
 
 **Example:**
 
