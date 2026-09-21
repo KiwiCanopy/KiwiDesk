@@ -4431,6 +4431,25 @@ loses the sentences that named its rungs for the same reason: a
 list of modes would be a different sentence on every Mac, so it
 states the rule and the thumbnails show the modes.
 
+:::unreleased
+**A runtime `delete_space` stays a success, and names what brings
+the space back** (#1509, owner ruling 2026-09-18). `init.lua`
+running at every launch and re-creating what it declares is
+intended, so the delete of a declared space is not an error and
+a warning on every delete would be noise — but automation that
+reads `success` as durable is surprised at the next load. The
+fact rides `data.declared_in`, only when it applies, and it names
+EVERY re-creator — the active profile, the script, the GUI's
+space list — because a hint naming one and silent on another is
+a half-truth a script will trust. A distinct status was refused:
+it breaks every consumer that pattern-matches `success` for a
+delete that did succeed. The script's half is a run ledger of
+what `init.lua` ASKED for, never a before/after diff of the space
+set: a reload's `create_space` of a space already live changes
+nothing a diff can see, which is exactly the path the hint exists
+for.
+:::
+
 ### Sticky reach spans macOS Desktops (#1145)
 
 **[Principle]**

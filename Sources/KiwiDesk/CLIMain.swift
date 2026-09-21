@@ -117,6 +117,11 @@ private func runSocketCommand(
             )
         {
             print(text)
+            for note in CLIOutput.declaredInNotes(data) {
+                FileHandle.standardError.write(
+                    Data("\(note)\n".utf8)
+                )
+            }
         }
         if let error = response.error {
             FileHandle.standardError.write(

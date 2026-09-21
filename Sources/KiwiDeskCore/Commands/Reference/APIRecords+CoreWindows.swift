@@ -67,7 +67,8 @@ extension APIReference {
             .choice("mode", LayoutMode.self, optional: true)
         ),
         "delete_space": APIRecord(
-            "Removes a Space after rehoming its windows.",
+            "Removes a Space after rehoming its windows; "
+                + "`declared_in` names what re-creates it on reload.",
             .space("space")
         ),
         "make_floating": APIRecord(

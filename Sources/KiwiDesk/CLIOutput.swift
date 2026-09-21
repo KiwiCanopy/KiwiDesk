@@ -21,4 +21,32 @@ enum CLIOutput {
     static var stdoutIsTerminal: Bool {
         isatty(FileHandle.standardOutput.fileDescriptor) == 1
     }
+
+    /// One human line per `declared_in` source a payload carries
+    /// (#1509), for stderr — stdout stays the JSON a script
+    /// parses. Empty for a payload without the key.
+    static func declaredInNotes(_ data: JSONValue) -> [String] {
+        guard case .object(let fields) = data,
+            case .array(let sources)? = fields["declared_in"]
+        else { return [] }
+        return sources.compactMap(\.stringValue).map(note)
+    }
+
+    private static func note(for source: String) -> String {
+        let profile = "profile:"
+        if source.hasPrefix(profile) {
+            let name = source.dropFirst(profile.count)
+            return "still declared in profile \"\(name)\" — "
+                + "save the profile to make this durable"
+        }
+        switch source {
+        case "init.lua":
+            return "still created by init.lua — "
+                + "remove the create_space there"
+        case "gui.json":
+            return "still listed in gui.json — remove it in Settings"
+        default:
+            return "still declared in \(source)"
+        }
+    }
 }

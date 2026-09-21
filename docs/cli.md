@@ -417,6 +417,30 @@ sound when `set_refusal_sound` is on (default off) and a hotkey
 was what fired: a CLI or IPC caller reads the error reply and
 never hears one.
 
+### Deleting a Space
+
+`delete_space` succeeds whether or not the removal lasts. When
+the space is still declared somewhere, the response says where:
+
+:::unreleased
+```json
+{"status": "success",
+ "data": {"declared_in": ["profile:Work", "init.lua", "gui.json"]}}
+```
+
+`declared_in` lists every source that re-creates the space on the
+next config load — the active profile, a verb in `init.lua`, the
+GUI's space list — and is absent when none does. The JSON goes to
+stdout as always; the CLI adds one line per source on stderr, so
+a script parsing stdout sees nothing new:
+
+```
+still declared in profile "Work" — save the profile to make this durable
+still created by init.lua — remove the create_space there
+still listed in gui.json — remove it in Settings
+```
+:::
+
 ### Applying Ignore Rules
 
 `ignore_rules` is declarative config, not a session command. Edit

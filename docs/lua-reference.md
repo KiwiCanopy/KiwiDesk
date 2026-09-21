@@ -453,6 +453,17 @@ role, and per-space settings. Refuses to delete the only space.
 Runtime only — a space still declared in `init.lua` or the GUI
 config reappears on the next config load.
 
+:::unreleased
+**Returns** nothing for a space nothing declares. When the space
+comes back on the next config load, `data.declared_in` lists
+every source that re-creates it: `profile:<name>` (the active
+profile — save it to make the removal last), `init.lua` (a verb
+there creates it — remove the call), `gui.json` (the GUI's space
+list — remove the space in Settings). The status is `success`
+either way; read the list rather than the status to tell the two
+apart (#1509).
+:::
+
 A screen this leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).
 
