@@ -42,10 +42,8 @@ extension APIReference {
             .integer("points")
         ),
         "reset_layout_sizing": APIRecord(
-            "Returns a Space's ratios, slot size and weights to "
-                + "what its profile set; structure stays. The "
-                + "active Space by default, one by id, or every "
-                + "Space for `all`.",
+            "Undoes manual resizes back to the profile: the active "
+                + "Space, one by id, or every one with `all`.",
             .space("space", optional: true)
         ),
         "set_refusal_sound": APIRecord(
