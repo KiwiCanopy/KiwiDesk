@@ -8,9 +8,6 @@
 
 ### Tiling that feels like it shipped with macOS.
 
-Flat arrays instead of i3 trees · configured in Lua · seven
-layouts · never disables SIP.
-
 **Start simple. Grow without limits.** KiwiDesk tiles your windows
 the moment you install it — no config required. When you want more,
 go deeper: custom Lua, profiles, advanced layouts, per-space rules.
@@ -24,121 +21,37 @@ Powerful when you reach for it, never in your way.
 [![License BSL 1.1](https://img.shields.io/badge/License-BSL_1.1-8DB354)](LICENSE)
 [![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
 [![Release](https://img.shields.io/github/v/release/KiwiCanopy/KiwiDesk?color=8DB354&label=Release)](https://github.com/KiwiCanopy/KiwiDesk/releases/latest)
-[![Direct download](https://img.shields.io/badge/Direct_download-.dmg-8DB354)](https://kiwidesk.kiwicanopy.com/)
+
+[Website](https://kiwidesk.kiwicanopy.com/) ·
+[Docs](https://kiwidesk.kiwicanopy.com/docs/) ·
+[Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/) ·
+[Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) ·
+[Changelog](https://kiwidesk.kiwicanopy.com/changelog/) ·
+[Sponsor](https://github.com/sponsors/KiwiCanopy)
 
 <br>
-
-[![Documentation](https://img.shields.io/badge/📖_Documentation-8DB354?style=for-the-badge)](https://kiwidesk.kiwicanopy.com/docs/)
-[![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-627D3A?style=for-the-badge)](https://kiwidesk.kiwicanopy.com/docs/user-guide/)
-[![Recipes](https://img.shields.io/badge/🧩_Recipes-AACB5D?style=for-the-badge)](https://kiwidesk.kiwicanopy.com/docs/recipes/)
-[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/KiwiCanopy)
-[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/kiwicanopy)
-
-</div>
-
-<div align="center">
-
-<picture>
-  <source media="(prefers-color-scheme: dark)"
-    srcset="assets/screenshot-settings-dark.png">
-  <img src="assets/screenshot-settings.png" width="800"
-    alt="KiwiDesk Settings: spaces, gaps and borders, bars, layout defaults, shortcuts and profiles in a native macOS app">
-</picture>
-
-<br><br>
 
 <img src="assets/demo-scrolling.gif" width="800"
   alt="Windows gliding sideways through the scrolling layout as focus moves between them">
 
 </div>
 
-<!-- Add a short demo video here once one is recorded. -->
-
-KiwiDesk is written in Swift and configured in Lua. It pairs robust
-window tracking with smooth, spring-based animations, runs as an
-ordinary app with no kernel extension, and **never requires
-disabling System Integrity Protection**.
-
 ## Why KiwiDesk?
 
-**It feels like it shipped with macOS.** Most tiling window managers
-on the Mac are a Linux idea carried over — a config file, a reload,
-a terminal, and for some of them SIP switched off. KiwiDesk is a Mac
-app first: a real Settings window with sliders and live previews,
-shortcuts that don't fight macOS's own, a mouse that still works,
-your native Desktops left exactly as they are, and the Accessibility
-permission and nothing else. Same tiling power — the platform's own
-feel.
+I love tiling window managers, but I could never recommend one to a
+friend who doesn't live in a terminal. On the Mac they all want a
+config file first; they feel like a nerd's toy. KiwiDesk is the one I
+can hand over: it tiles your windows the moment it starts, everything
+is a slider or a switch in a real Settings window, and going deeper
+feels like learning a feature rather than hacking a file. When you do
+want the file, it is there: Lua config, a CLI and a socket, the whole
+nerd's toy underneath.
 
-**Flat arrays instead of i3 trees.** Classic tiling window managers
-organize windows in split-container trees — powerful, but hard to
-predict and hard to script. KiwiDesk keeps every space as a flat,
-one-dimensional list of windows. Layouts are pure functions over
-that list:
+It is also built to survive macOS updates. Every private Apple API
+has a public fallback, and the two things only Apple's own bridge can
+do switch themselves off after an update instead of breaking.
 
-| Layout | Behavior |
-|---|---|
-| `bsp` | Binary space partitioning (each new window halves a pane) |
-| `stack` | Master zone + stack column (`master_count`) |
-| `scrolling` | Niri/PaperWM-style scrolling columns or rows |
-| `monocle` | Focused window maximized, rest behind it |
-| `grid` | Dynamic (auto-balanced) or rigid rows × columns |
-| `track` | Resizable columns (or rows) with per-track control |
-| `floating` | macOS default behavior, untouched |
-
-Switching layouts instantly rearranges the same window list with a
-different formula — no tree surgery, no lost state.
-
-**Every layout is fully reconfigurable.** Each one carries its own
-optional parameters — `bsp`'s split ratios and strategy, `stack`'s
-master count, ratio and side, `scrolling`'s column width and
-direction, `grid`'s dimensions and fill, `track`'s per-track sizes
-— so the shape a layout opens in is yours to set, once, as the
-default. Tune them in the Settings app or in Lua, globally or per
-space; most tiling window managers give you a layout's formula and
-nothing to bend it with.
-
-## Key Features
-
-- **Spaces**: Instant per-space window hiding on top of macOS's own
-  Desktops.
-- **Native Desktops**: Send a window to a Mission Control Desktop,
-  switch to one, or bind a profile to one. Your Desktops keep
-  working; KiwiDesk arranges the windows on them.
-- **GUI, CLI & Lua**: SwiftUI Settings app for simple tweaks; CLI &
-  sandboxed Lua 5.5 VM for advanced workflows.
-- **Modal Layers & Hotkeys**: Vim-style hotkey layers (`define_layer`)
-  and smart app switching (`pull_or_spawn`) via Carbon — zero Input
-  Monitoring needed.
-- **Cascading Profiles**: Display- or Desktop-bound profiles with
-  inherited defaults and sparse overrides.
-- **Sticky Windows**: Pin a window so it follows you across Desktops,
-  or just across one screen — with a real tile, not a floating pile.
-- **Visual Overlays & IPC**: Customizable focus rings, App/Space Bar
-  overlays, and UNIX socket JSON event streams (`kiwidesk subscribe`).
-- **Smooth & Lightweight**: 60/120 Hz DisplayLink spring animations,
-  zero SIP modifications, and localized out of the box.
-- **Update-proof**: Every private OS symbol is resolved at runtime,
-  and every tiling path has a public Accessibility fallback — a
-  macOS update can slow a fast path, never crash KiwiDesk or stop
-  it tiling. The two things only the OS's own bridge can do (move
-  a window to another Desktop, switch Desktops) switch themselves
-  off until KiwiDesk catches up, instead of failing.
-- **Accessible**: Settings is fully keyboard-driven and narrates
-  itself under VoiceOver — every control announces its name *and* its
-  value. See the
-  [user guide](https://kiwidesk.kiwicanopy.com/docs/user-guide/#using-settings-from-the-keyboard).
-
-## Solving macOS Papercuts
-
-- **No green-button exile**: `monocle` maximizes a window on the
-  *current* space instead of throwing it onto a far-right Desktop.
-- **No `⌘Tab` black holes**: `pull_or_spawn` opens the app, pulls its
-  windows front-and-center, then cycles them on repeated presses.
-- **Zero layout amnesia**: windows moved between spaces tile
-  themselves into the target layout — no manual micro-resizing.
-- **Predictable spatial memory**: spaces stay in fixed slots rather
-  than macOS reshuffling your Desktops.
+[How it compares with yabai, AeroSpace and the rest →](https://kiwidesk.kiwicanopy.com/compare/)
 
 ## Installation
 
@@ -169,57 +82,20 @@ swift build -c release
 .build/release/KiwiDesk           # run the app
 ```
 
-## Documentation
-
-Full docs live at
-**[kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/docs/)**
-(searchable, light/dark):
-
-- [User guide](https://kiwidesk.kiwicanopy.com/docs/user-guide/) —
-  the Settings app, profiles, and the visual editor
-- [Lua reference](https://kiwidesk.kiwicanopy.com/docs/lua-reference/) —
-  the full init.lua API
-- [CLI & IPC reference](https://kiwidesk.kiwicanopy.com/docs/cli/) —
-  every command, event stream, socket protocol
-- [Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) —
-  SketchyBar, JankyBorders, and more
-- [Design decisions](https://kiwidesk.kiwicanopy.com/docs/design-decisions/) —
-  the why behind settled behavior
-
 ## Contributing
 
-KiwiDesk is built to be contributor-friendly (including for AI
-coding agents — small files, strict lint, exhaustive tests).
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
-
-```sh
-./scripts/install-hooks.sh   # once after cloning
-swift test                   # the full suite
-```
-
-## Security
-
-KiwiDesk needs only the Accessibility permission. It never asks
-you to disable SIP and never requests Input Monitoring. To report
-a vulnerability, see [SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) —
+small files, strict lint, exhaustive tests, AI coding agents welcome.
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
 [Business Source License 1.1](LICENSE): the source is public, and
 using KiwiDesk is free — at home and at work. Offering, selling,
-bundling or hosting KiwiDesk or a derivative as a product or
-service needs a commercial license. Each version converts to
-the [MIT License](https://opensource.org/license/mit) four years
-after it is first published. Versions published before 1.3.0 were
-released under MIT and stay MIT. Bundles Lua 5.5
-([MIT](Vendor/CLua/LICENSE)), Sparkle (MIT) and the GitHub mark
-from Primer Octicons (MIT); their notices are in
-[ACKNOWLEDGEMENTS](ACKNOWLEDGEMENTS), which the app carries
-beside its license text and opens from **About KiwiDesk**, on
-the Settings Home.
-
-"KiwiDesk" and the KiwiDesk logo are trademarks of Maikel
-Hajiabadi; the license grants no right to them.
+bundling or hosting it as a product or service needs a commercial
+license. Each version converts to the
+[MIT License](https://opensource.org/license/mit) four years after it
+is first published.
 
 ---
 
