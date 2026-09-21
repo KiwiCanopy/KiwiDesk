@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -55,16 +56,25 @@ struct ShortcutsBespokeContainerTests {
             // (#1440).
             ("moveWindowsTrackFamilies", .moveWindows),
         ]
-        // Vacuity: the scan must have read something, and every
-        // list named must exist in the source it read.
+        // The table above is a CENSUS of the order lists, held
+        // both ways against the declarations themselves (#1121):
+        // a list added to `ShortcutsRowOrder` and left out of the
+        // table was invisible — its container could be walked
+        // while `bespokeContainers` still named it and this suite
+        // read green. The compiler closes the rename case; this
+        // closes the addition.
         #expect(!rendered.isEmpty)
-        for (name, _) in lists {
-            #expect(
-                rendered.contains("ShortcutsRowOrder.\(name)")
-                    || rendered.contains("static let \(name)"),
-                Comment(rawValue: "unknown order list \(name)")
+        let declared = try Self.declaredOrderLists(under: root)
+        #expect(!declared.isEmpty)
+        #expect(
+            declared == Set(lists.map(\.0)),
+            Comment(
+                rawValue: "order lists not in the census: "
+                    + "\(declared.subtracting(lists.map(\.0)).sorted())"
+                    + "; census rows with no list: "
+                    + "\(Set(lists.map(\.0)).subtracting(declared).sorted())"
             )
-        }
+        )
         // Squeezed once: a parameter mount is wrapped across
         // lines by the formatter, so the needle for it cannot
         // be matched against the source as written.
@@ -90,6 +100,32 @@ struct ShortcutsBespokeContainerTests {
                             of: .shortcuts
                         )
                 )
+        )
+    }
+
+    /// Every `static let <name>: [SettingKey]` declared in
+    /// `ShortcutsRowOrder.swift` — the order lists, read off the
+    /// one file that declares them. `[[SettingKey]]`
+    /// (`interleavedRuns`) is a re-ordering hint over rows the
+    /// lists already place, not a list serving a container, and
+    /// the type pattern leaves it out.
+    private static func declaredOrderLists(
+        under root: URL
+    ) throws -> Set<String> {
+        let file =
+            root
+            .appendingPathComponent("Settings")
+            .appendingPathComponent("Components")
+            .appendingPathComponent("Keybindings")
+            .appendingPathComponent("ShortcutsRowOrder.swift")
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        return Set(
+            SourceScan.allMatches(
+                in: source,
+                pattern: #"static let (\w+): \[SettingKey\]"#
+            )
         )
     }
 

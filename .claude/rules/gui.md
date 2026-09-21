@@ -398,15 +398,18 @@ so an added area joins it here in the same change that ships its
 `*RowOrder` (General was silently dropped from it once).
 
 That promise has a stated edge in Shortcuts, and reading it as
-unqualified will waste your afternoon: three containers there
+unqualified will waste your afternoon: some containers there
 are BESPOKE views, not `ForEach`es over an order list — the
-layer strip, the app list and the raw-Lua drawer. Their order
-lists exist so the census still records those rows for the
-placement table and for search, and the guard holds their
-MEMBERSHIP, but editing one moves nothing on screen. Which
-three is data — `ShortcutsRowOrder.bespokeContainers`, asserted
-by `ShortcutsBespokeContainerTests` — so a fourth going bespoke has
-to edit that set; check it before assuming an edit will show up.
+layer strip, the app list, the raw-Lua drawer, the restore
+header. Their order lists exist so the census still records
+those rows for the placement table and for search, and the
+guard holds their MEMBERSHIP, but editing one moves nothing on
+screen. Which ones is data — `ShortcutsRowOrder.bespokeContainers`,
+asserted by `ShortcutsBespokeContainerTests`, whose table of
+order lists is a census held against the file's declarations
+(#1121), so an order list added without a row reds — and
+another going bespoke has to edit that set; check it before
+assuming an edit will show up.
 
 General, Gaps & Borders, Spaces & Layouts, Profiles, Monitors
 and Behaviour push that edge wider: EVERY container in them is
