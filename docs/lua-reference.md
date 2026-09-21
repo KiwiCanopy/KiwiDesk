@@ -1742,53 +1742,18 @@ track.set_overflow_style_override("code", "cascade_overflow")
 
 ## App Bar
 
-The **app bar** lists every window in the current space — for
-layouts where windows can hide each other (**monocle**) or scroll
-off-screen (**scrolling**) — so you always see what's there. Click
-an item to focus its window; drag to reorder. A window in native
-fullscreen has no item until it returns.
+The **App Bar** lists the windows of the current space in the two
+layouts that can hide one — **monocle** and **scrolling**. Click
+an item to focus its window, drag it to reorder; a window in
+native fullscreen has no item until it returns. With several
+monitors each display shows its own bar, on that display, for the
+space it is showing, and dragging an item reorders that display's
+space.
 
-With **multiple monitors** each display shows its own bar for the
-space currently on it, all at once — a bar-hosting space on a
-secondary display draws its bar there, not on the main screen.
-Dragging an item reorders that display's own space.
-
-Its look is **global**: set it once with `app_bar.set_*` and every
-layout's bar shares it. Each layout then decides only whether it
-shows a bar and, if it wants, **overrides** any individual field
-just for itself.
-
-**Orientation** decides which focus axis cycles through the
-windows, and with it which edges the bar may sit on. Position is
-resolved per layout from `start`/`end` values — `start` resolves
-to the top edge on horizontal-axis layouts or the left edge on
-vertical-axis layouts; `end` resolves to the bottom or right. The
-bar always renders on the edge the position names, so no clamp or
-mismatch can occur.
-
-Items appear in window order and are always **equal-sized**: `item_size`
-pt along the bar (width on horizontal bars, height on vertical
-ones). Left at `0` (the default), the slot is measured from the
-**widest** item actually on the bar, so one long title widens
-every slot. The size is clamped: at least the icon square
-(icons never clip), at most a quarter of the bar.
-
-Items that don't fit the strip **scroll** instead of shrinking: the
-bar follows the focused window as you cycle, and clickable arrows
-appear over the ends that hide more items. Titles truncate when they
-pass `title_cap` or genuinely don't fit their slot; with
-`icon_and_title`, only the title shrinks, the icon always
-survives. Clicking an item focuses
-its window; hovering swaps the item's background to the hover color
-— the already-active item ignores clicks and shows no hover.
-
-Adjacent windows of the same app collapse into **one item** wearing
-a count badge (`group_adjacent_windows`, on by default); same-app
-windows that are not adjacent stay separate. Clicking a grouped item
-focuses its first window and the group **expands** — its members
-widen out into individual items, so any member can be picked
-directly. Focus leaving the group collapses it again. Items can also
-be **dragged** along the bar to reorder the windows.
+Its look is **global**: `app_bar.set_*` styles every layout's
+bar. Each layout decides whether it shows one and may override
+any field for itself ([Per-Layout App Bar
+Overrides](#per-layout-app-bar-overrides)).
 
 ### app_bar.set_edge
 
@@ -1796,9 +1761,8 @@ be **dragged** along the bar to reorder the windows.
 (default `"bottom"`).
 
 **Does:** sets the screen edge the bar occupies, for every layout
-that shows a bar. The edge is absolute — it no longer follows the
-layout's orientation (#293) — so one value places the bar on the
-same edge everywhere. Per-layout overrides can change it.
+that shows a bar. The edge is absolute — it does not follow the
+layout's orientation (#293). Per-layout overrides can change it.
 
 **Example:**
 
@@ -1812,11 +1776,9 @@ app_bar.set_edge("top")
 (default `"center"`).
 
 **Does:** places the item group along the bar while it fits.
-Values are edge-relative, so they stay correct on every edge —
-a left bar's `start` is its top, a top bar's `start` is its
-left. Once the items overflow and scroll, all three values
-behave the same (the group follows the scroll offset).
-Per-layout overrides can change it
+Values are edge-relative: a left bar's `start` is its top, a top
+bar's `start` its left. Once the items overflow and scroll, all
+three values behave the same. Per-layout overrides can change it
 (`monocle.set_app_bar_alignment`, `scroll.set_app_bar_alignment`).
 
 **Example:**
@@ -1844,9 +1806,8 @@ app_bar.set_thickness(32)
 **Expects:** points (default `0`; a negative value is raised to
 it).
 
-**Does:** sets the bar's distance from the screen border. Nothing
-else lives on that side, so the value *is* the distance and `0`
-is flush. Both bars follow one rule — outer margin, strip, inner
+**Does:** sets the bar's distance from the screen border; `0` is
+flush. Both bars follow one rule — outer margin, strip, inner
 margin, then the windows' own outer gap — and on a shared edge
 each bar owns its margins, so between the two they add.
 
@@ -1864,7 +1825,7 @@ app_bar.set_outer_margin(10)
 it).
 
 **Does:** adds room on the bar's window side, on top of the
-windows' outer gap — which alone keeps the focus ring's
+windows' outer gap. The outer gap alone keeps the focus ring's
 clearance, so `0` means the gap governs.
 
 **Example:**
@@ -1884,9 +1845,8 @@ app_bar.set_inner_margin(4)
 - **plain** — no per-item box; names sit on one shared
   translucent strip that spans the whole bar.
 
-Liquid Glass is no longer an option here — it is a separate
-finish toggle, `set_liquid_glass` (below), that lays over
-either style.
+Liquid Glass is a separate finish toggle, `set_liquid_glass`
+(below), that lays over either style.
 
 **Example:**
 
@@ -1899,42 +1859,33 @@ app_bar.set_background_style("plain")
 **Expects:** a boolean (default `true`).
 
 **Does:** lays a macOS 26 Liquid Glass material over the item
-backgrounds (the boxes or the plate) — an orthogonal finish, so
-it combines with either shape. `fill_color` tints the glass: a
-solid colored layer sits behind the glass and the glass refracts
-it (an `NSGlassEffectView`'s own tint carries no hue at all —
-measured on macOS 26.6.2, it only darkens — so the color is
-supplied behind it, the way the Dock tints its glass). The
-material's light or dark variant follows the fill too: a dark
-`fill_color` pins the dark glass on both bars, where macOS left
-to itself decides the variant per bar from what lies behind it
-and lets two bars with one fill drift apart. A light
-`fill_color` pins nothing — only the dark variant can be pinned
-— and the glass follows KiwiDesk's Appearance setting instead:
-dark glass under Dark, and under Light or System macOS's own
-choice, which the bright tint normally holds at light. So the
-fill decides where the glass is dark, and the Appearance setting
-decides only the rest. A fully transparent `fill_color` leaves
-the glass clear. Ignored below
-macOS 26, where
-the Settings toggle is hidden (an OS-capability gate, absent not
-greyed); the stored value still round-trips so a profile stays
-portable. Per-layout override:
+backgrounds (the boxes or the plate); it combines with either
+shape. `fill_color` tints the glass: a solid colored layer sits
+behind the glass and the glass refracts it. The material's light
+or dark variant follows the fill too: a dark `fill_color` pins
+the dark glass on both bars. A light `fill_color` pins nothing —
+only the dark variant can be pinned — and the glass follows
+KiwiDesk's Appearance setting instead: dark glass under Dark,
+and under Light or System macOS's own choice, which the bright
+tint normally holds at light. A fully transparent `fill_color`
+leaves the glass clear. Ignored below macOS 26, where the
+Settings toggle is hidden; the stored value still round-trips so
+a profile stays portable. Per-layout override:
 `monocle.set_app_bar_liquid_glass` /
 `scroll.set_app_bar_liquid_glass`.
 
-Also stood down, live, while macOS's Reduce transparency is on:
-every glass surface draws its Boxed or Plain shape with the
-`fill_color` at full alpha (the panel its plain material), and
-the stored values are untouched, so the glass and the alpha
-return the moment the setting goes off (#1374).
+Stood down, live, while macOS's Reduce transparency is on: every
+glass surface draws its Boxed or Plain shape with the
+`fill_color` at full alpha (the panel its plain material). The
+stored values are untouched, so the glass and the alpha return
+the moment the setting goes off (#1374).
 
-Settings has no per-bar row for this any more (#1307): one
-**Liquid Glass** switch on Colours &amp; Animations writes this
-leaf, the Space Bar's and the shortcuts panel's together, and
-shows on only when all three are on. This verb still sets this
-bar alone — setting one and not the others is a Lua-only state,
-and the Settings switch then reads off and says so in its `?`.
+Settings has no per-bar row for this (#1307): one **Liquid
+Glass** switch on Colours &amp; Animations writes this leaf, the
+Space Bar's and the shortcuts panel's together, and shows on
+only when all three are on. This verb sets this bar alone;
+setting one and not the others is a Lua-only state, and the
+Settings switch then reads off and says so in its `?`.
 
 **Example:**
 
@@ -1948,12 +1899,10 @@ app_bar.set_liquid_glass(true)
 
 **Does:** sets how far the shared background plate reaches
 under `plain` (and the Liquid Glass finish over it): `hug` wraps
-the item run plus one item gap of breathing room per end (the
-Dock's read), `full` spans the whole strip. Hug falls back to
-full while the items overflow and scroll. Inert under `boxed`,
-which draws a box per item instead of a shared plate (the
-Settings control greys there). Per-layout override:
-`monocle.set_app_bar_background_fit` /
+the item run plus one item gap per end, `full` spans the whole
+strip. Hug falls back to full while the items overflow and
+scroll. Inert under `boxed` (the Settings control greys there).
+Per-layout override: `monocle.set_app_bar_background_fit` /
 `scroll.set_app_bar_background_fit`.
 
 **Example:**
@@ -1966,8 +1915,8 @@ app_bar.set_background_fit("full")
 
 **Expects:** `"outline"`, `"edge_mark"`, or `"gap"`.
 
-**Does:** how the focused window is marked. This is orthogonal to
-`background_style` — the two combine freely:
+**Does:** how the focused window is marked. It combines freely
+with `background_style`:
 - **outline** — an outlined border around the active item.
 - **edge_mark** — an accent bar on the active item's
   window-facing edge.
@@ -1984,9 +1933,12 @@ app_bar.set_active_indicator("outline")
 **Expects:** a number (points); `0` means auto (default).
 
 **Does:** sets the width (horizontal) or height (vertical) of each
-item. Auto measures each item's rendered width (icon + name at the
-effective font) and sizes the uniform slot to fit the widest, so
-long names don't truncate and short ones don't waste room.
+item; every item is the same size. Auto measures each item's
+rendered width (icon + name at the effective font) and sizes the
+slot to the widest, so one long title widens every slot. The
+slot is clamped to at least the icon square (icons never clip)
+and at most a quarter of the bar; items that then do not fit the
+strip scroll instead of shrinking.
 
 **Example:**
 
@@ -2012,24 +1964,17 @@ app_bar.set_item_gap(6)
 (default `icon_and_title`).
 
 **Does:** sets what each item displays. The text is the
-window's own **title**, not its app name — five Finder windows
-all reading "Finder" name nothing the icon did not already say,
-while "Downloads" / "Projects" tells them apart.
+window's own **title**, not its app name. The app name appears,
+never shortened, in two places:
 
-The app name still appears in the two places a title cannot
-speak, and there it is never shortened:
-
-- a **grouped** item, whose windows have several titles and no
-  one of them is true of the group (focus the group and it
-  expands into its members, which do show titles);
+- a **grouped** item (its members show titles once it expands);
 - a window whose title is **empty** — some apps (Electron and
   WebKit ones especially) report no title until well after the
   window opens.
 
-Vertical bars (edge `left`/`right`) always render icon-only —
-titles would need stacked or rotated text; the stored
-preference returns when the bar moves back to a horizontal
-edge.
+Vertical bars (edge `left`/`right`) always render icon-only; the
+stored preference returns when the bar moves back to a
+horizontal edge.
 
 **Example:**
 
@@ -2043,19 +1988,12 @@ app_bar.set_content("icon_and_title")
 outside the range are clamped.
 
 **Does:** sets how much of a window's title an item shows;
-longer titles are cut at the end and marked with an ellipsis.
-
-This is not only cosmetic. Every item on a bar is the same
-size, and with `item_size` left at `0` that size is measured
-from the **widest** item — so one long title widens every slot
-until the quarter-of-the-bar clamp bites and the rest of the
-bar has to scroll. Titles also change as you work (an editor
-retitles on every keystroke), so an uncapped bar re-measures
-and shifts while you type.
-
-Cutting at the end is deliberate: the apps that repeat their
-own name in a title append it (`"ToDo — Second_Brain — Obsidian
-1.13.7"`), so the tail is the part worth losing first.
+longer titles are cut at the end and marked with an ellipsis. A
+title is also cut where it does not fit its slot; with
+`icon_and_title` only the title shrinks, never the icon. With
+`item_size` left at `0` the slot is measured from the widest
+item, so the cap also bounds how wide one title makes every
+slot.
 
 **Example:**
 
@@ -2065,17 +2003,18 @@ app_bar.set_title_cap(25)
 
 ### app_bar.set_icon_source
 
-**Expects:** `"app_image"` or `"app_font"`.
+**Expects:** `"app_image"` or `"app_font"` (default
+`"app_image"`).
 
-**Does:** sets how app icons are drawn. `app_image` (default)
-shows the app's icon as macOS provides it — including whatever
+**Does:** sets how app icons are drawn. `app_image` shows the
+app's icon as macOS provides it — including whatever
 system-wide Icon & widget style the user picked. `app_font`
 shows a monochrome glyph from the bundled [SketchyBar App
 Font](https://github.com/kvndrsslr/sketchybar-app-font)
 instead, colored by the bar's item colors (Item / Active item /
 Hover item); apps without a glyph keep their icon. Styled icon
 variants (the system's Dark/Clear/Tinted renderings) cannot be
-fetched by apps — no public API hands them out.
+fetched by apps.
 
 **Example:**
 
@@ -2102,8 +2041,8 @@ app_bar.set_font_size(0)
 
 **Does:** sets the corner rounding of boxed items as a percentage,
 where 0 = square and 100 = a full capsule (radius = thickness/2).
-It only affects `boxed` items (ignored for `plain`). The percentage
-cannot exceed the maximum, so items never render as pointed.
+It only affects `boxed` items (ignored for `plain`). Values above
+`100` clamp.
 
 **Example:**
 
@@ -2115,10 +2054,8 @@ app_bar.set_corner_roundness(50)
 
 **Expects:** a number 0.05–1 (default 0.4).
 
-**Does:** sets the opacity of an inactive item's untinted icon — the
-dim that carries "not focused" for content that takes no state color.
-Lua-only (no GUI); values are clamped to a legible range. Lower = a
-stronger inactive cue.
+**Does:** sets the opacity of an inactive item's untinted icon.
+Lua-only (no GUI); out-of-range values clamp.
 
 **Example:**
 
@@ -2128,10 +2065,13 @@ app_bar.set_dim_factor(0.4)
 
 ### app_bar.set_group_adjacent_windows
 
-**Expects:** `true` or `false`.
+**Expects:** `true` or `false` (default `true`).
 
 **Does:** if true, collapses adjacent same-app windows into one
-item with a count badge.
+item with a count badge; same-app windows that are not adjacent
+stay separate. Clicking a grouped item focuses its first window
+and expands the group into its members; focus leaving the group
+collapses it again.
 
 **Example:**
 
@@ -2158,16 +2098,14 @@ app_bar.set_item_color("#EAF3EE")
 
 **Does:** sets the fill under the items — a box per item
 (`boxed`) or one shared plate (`plain`). Default `#14201CB3`,
-dark moss at 70% opacity — the alpha every bundled palette's bar
-fill also carries, so switching theme changes the hue and not how
-readable the bars are. With the `liquid_glass` finish on, it
-also tints the glass: the color sits behind the glass, which
-refracts it into its hue, and a dark fill selects the dark glass
-variant (see `app_bar.set_liquid_glass`). Under
-glass the backdrop's opacity is held under a ceiling so the blur
-stays visible: a fill below it renders exactly as you picked it,
-and only a more opaque one is capped. The stored value is
-unchanged either way (Boxed/Plain use it in full).
+dark moss at 70% opacity; every bundled palette's bar fill
+carries that same alpha. With the `liquid_glass` finish on, it
+also tints the glass, and a dark fill selects the dark glass
+variant (see `app_bar.set_liquid_glass`). Under glass the
+backdrop's opacity is held under a ceiling so the blur stays
+visible: a fill below it renders as you picked it, a more opaque
+one is capped, and the stored value is unchanged either way
+(Boxed/Plain use it in full).
 
 While macOS's Reduce transparency is on, Boxed/Plain draw it at
 full alpha instead
@@ -2210,7 +2148,8 @@ app_bar.set_highlight_color("#8DB354")
 **Expects:** a hex color.
 
 **Does:** sets the hover feedback on clickable items (default
-`#AACB5D80`, light translucent green).
+`#AACB5D80`, light translucent green). The active item shows no
+hover and ignores clicks.
 
 **Example:**
 
@@ -2279,37 +2218,26 @@ scroll.set_app_bar_background_style("plain")  -- override for scrolling
 
 ## Space Bar
 
-The Space Bar (#293) is an overview of your
-Spaces: one bar per display, listing that display's Spaces in
-profile order — each item shows the Space's identifier
-(configured icon, else the plain digits for numeric ids or a
-two-letter monogram for named ones), a thin divider, then a
-compact glyph per window in that Space. Adjacent windows of
-the same app collapse
-into one glyph wearing a count badge (non-adjacent duplicates
-stay separate); past the configured glyph cap
-(`space_bar.set_glyph_cap`, default 5, range 1–12) the rest fold
-into a `+n` badge counting the hidden windows. Badges use the
-configured badge colors on the active Space and render muted on
-inactive ones. Clicking a Space switches to it. App glyphs are
-informational — not click targets, and a group holding the
-focused window stays collapsed (it just takes the focused
-accent).
+The Space Bar (#293) lists, per display, that display's Spaces
+in profile order: each item shows the Space's identifier (its
+configured icon, else the plain digits of a numeric id or a
+two-letter monogram of a named one), a divider, then a glyph per
+window. Adjacent windows of the same app share one glyph with a
+count badge (non-adjacent duplicates stay separate); past the
+glyph cap (`space_bar.set_glyph_cap`, default 5, range 1–12) the
+rest fold into a `+n` badge counting the hidden windows. Clicking
+a Space switches to it; glyphs are not click targets, and a group
+holding the focused window stays collapsed and takes the focused
+accent. The user guide's [Space Bar](user-guide.md#space-bar)
+section covers the badges and the drag-onto-a-Space gesture.
 
-The bar is **layout-independent** and reserves real screen area
-on its edge before any layout runs. It may share an edge with
-the App Bar: the Space Bar is carved first, on the screen side,
-the App Bar inside it on the window side, and the two
-reservations add. All settings
-are global — there are no per-layout overrides. While a
-native-fullscreen app holds the screen the bar hides; it
-returns with the Desktop.
-
-Two accents distinguish states: `item_color` paints inactive
-Spaces, `active_item_color` the active Space, and
-`focused_item_color` the focused window's glyph inside the
-active Space. Untinted content — emoji identifiers and native
-app images — dims to half strength on inactive Spaces instead.
+The bar is layout-independent and reserves its area on its edge
+before any layout runs; every setting is global, with no
+per-layout override. On an edge shared with the App Bar the Space
+Bar is carved first, on the screen side, the App Bar inside it on
+the window side, and the two reservations add. While a
+native-fullscreen app holds the screen the bar hides; it returns
+with the Desktop.
 
 ### space_bar.set_enabled
 
@@ -2445,9 +2373,8 @@ values clamp.
 **Does:** sets how many app-group glyphs a Space item shows before
 the rest collapse into the trailing `+n` badge. Grouping runs
 first, so the cap counts app *groups* (adjacent same-app windows
-share one glyph), while `+n` counts the hidden *windows*. This is
-the per-Space glyph limit only — it does not change how many
-Spaces the whole bar shows.
+share one glyph), while `+n` counts the hidden *windows*. It
+limits glyphs per Space only, not how many Spaces the bar shows.
 
 **Example:**
 
@@ -2490,9 +2417,8 @@ space_bar.set_background_style("boxed")
 
 **Does:** lays the macOS 26 Liquid Glass finish over the Space
 items — see `app_bar.set_liquid_glass` for the full behavior
-(orthogonal to the background style, `fill_color` tints the
-glass via a
-colored backdrop behind it, hidden and inert below macOS 26).
+(orthogonal to the background style, tinted by `fill_color`,
+hidden and inert below macOS 26).
 
 **Example:**
 
@@ -2520,8 +2446,8 @@ space_bar.set_background_fit("hug")
 `"outline"`).
 
 **Does:** how the active Space is marked. `gap` draws no shape
-marker (colors alone carry the state) — unlike the App Bar, the
-active Space's item is never hidden.
+marker (colors alone carry the state); the active Space's item
+is never hidden.
 
 **Example:**
 
@@ -2560,11 +2486,10 @@ space_bar.set_dim_factor(0.4)
 **Expects:** a number 0.05–1 (default 0.6).
 
 **Does:** sets the opacity of an **unfocused window's glyph on the
-active Space** — the middle dim tier, between the focused window (1.0)
-and inactive Spaces (`set_dim_factor`). Lua-only, clamped. Independent
-of `set_dim_factor`: no ordering is enforced, so setting it below the
-outer tier will invert the ladder — the GUI is the curated gate, Lua
-the open one.
+active Space** — the middle dim tier, between the focused window
+(1.0) and inactive Spaces (`set_dim_factor`). Lua-only, clamped.
+Independent of `set_dim_factor`: no ordering is enforced, so a
+value below the outer tier inverts the ladder.
 
 **Example:**
 
@@ -2579,12 +2504,10 @@ space_bar.set_active_dim_factor(0.6)
 **Does:** shows a trailing front-app segment after the last
 Space item — a divider, then the glyph and the **title** of the
 focused window of the Space **this display currently shows**
-(per display, not the globally frontmost app — one bar per
-display, per-display content). The segment is that window, so
-it names the window rather than repeating the app the glyph
-beside it already shows; a window with no title yet falls back
-to its app's name. On vertical (left/right) bars the segment is
-icon-only; the divider flips to a horizontal rule.
+(per display, not the globally frontmost app). A window with no
+title yet falls back to its app's name. On vertical (left/right)
+bars the segment is icon-only and the divider flips to a
+horizontal rule.
 
 **Example:**
 
@@ -2599,13 +2522,11 @@ outside the range are clamped.
 
 **Does:** sets how much of the focused window's title the
 front-app segment shows. The segment always ellipsizes at the
-bar's edge, so this is not about clipping: the segment's length
-feeds the bar's alignment, so under `center` or `end` an
-uncapped title slides the whole run of Space items sideways
-every time the title changes.
-
-Inert while `show_front_app` is off — nothing else on the Space
-Bar draws a title.
+bar's edge; its length feeds the bar's alignment, so under
+`center` or `end` an uncapped title slides the run of Space
+items sideways every time the title changes. Inert while
+`show_front_app` is off — nothing else on the Space Bar draws a
+title.
 
 **Example:**
 
@@ -2617,10 +2538,9 @@ space_bar.set_title_cap(25)
 
 **Expects:** boolean (default `false`).
 
-**Does:** hides Spaces with no windows from the bar — except
-the Space you are currently on, which always stays (so a cold
-start never collapses the strip). Hidden Spaces remain
-reachable by shortcut.
+**Does:** hides Spaces with no windows from the bar, except the
+Space you are currently on, which always stays. Hidden Spaces
+remain reachable by shortcut.
 
 **Example:**
 
@@ -2652,9 +2572,10 @@ space_bar.set_sticky_badge(false)
 
 **Does:** sets how long a window dragged onto a Space item must
 hover before the view springs to that Space (the "hold to place"
-half of the drag-drop gesture — see the user guide). A quicker
-drop, before this delay, moves the window without switching. The
-ring sweep around the item fills over the same duration.
+half of the gesture — [Space Bar](user-guide.md#space-bar) in
+the user guide). A quicker drop, before this delay, moves the
+window without switching. The ring sweep around the item fills
+over the same duration.
 
 **Example:**
 
@@ -2673,13 +2594,10 @@ setting. The three-state ladder is the bar's signature:
   identifier and glyphs (default `#8DB354`).
 - `space_bar.set_focused_item_color` — the focused window
   wherever it shows: its glyph inside the active Space and the
-  front-app segment (default `#C2790A`, a deliberately different
-  hue **and a step darker**, so "focused window" never washes
-  into the active-Space green — including for a red-green
-  colour-blind reader, for whom hue alone would not separate the
-  two). If you retune it, keep a lightness gap from
-  `active_item_color`; a lighter amber loses the distinction
-  again.
+  front-app segment (default `#C2790A`, a different hue **and a
+  step darker** than the active-Space green). If you retune it,
+  keep a lightness gap from `active_item_color`; a lighter amber
+  loses the distinction.
 - `space_bar.set_hover_fill_color` / `space_bar.set_hover_item_color`
   — hover tint on non-active items.
 - `space_bar.set_fill_color` / `space_bar.set_highlight_color` —
@@ -2734,36 +2652,19 @@ The **track** layout is the exception: it follows
 `track.set_new_window` (`own_track` / `focused_track`) plus
 `track.set_new_window_position` (`first` default / `last` /
 `before_focused` / `after_focused`) instead, and this per-space
-placement override does not apply to track spaces — a flat index
-cannot express "opens its own track".
+placement override does not apply to track spaces.
 
 ## Drag & Drop Rearranging
 
 Dragging a tiled window over another window's slot and releasing
-swaps the two; dropping anywhere else snaps the window back. While
-you drag, KiwiDesk shows two visuals:
+swaps the two; dropping anywhere else snaps the window back.
+While you drag, KiwiDesk draws two visuals:
 
-- **Ghost**: the dragged window's slot — where it snaps back, and
-  where the displaced window would move.
-- **Drop zone**: the slot under the window's center, i.e. the
-  window a drop would swap with.
-
-Each visual has an on/off switch plus an independently toggle-able
-border and fill with configurable colors and width.
-
-**Per stroke, these are Lua-only.** The Settings app asks the
-width and the corner shape once, for the focus ring and both
-drag visuals together, so it offers no per-visual width, no
-per-visual alignment and no numeric radius — see
-[design decisions](design-decisions.md) for why the decision is
-removed rather than switched off. Everything below stays
-settable per stroke and is never clamped against its twin;
-what it costs is that touching the shared **Width** or
-**Corners** control overwrites all three at once.
-
-Alignment defaults to `inside` for both, so each marker's outer
-edge is the slot boundary itself. The focus ring outsets instead,
-because it wraps a real window whose pixels it must not cover.
+- **Ghost** (`drag.set_ghost_*`): the dragged window's slot —
+  where it snaps back, and where the displaced window would
+  move.
+- **Drop zone** (`drag.set_drop_zone_*`): the slot under the
+  window's center, the window a drop would swap with.
 
 ### drag.set_ghost_enabled
 
@@ -2795,7 +2696,8 @@ drag.set_ghost_border(true)
 
 **Does:** sets the border width of the ghost. Lua-only per
 stroke: the Settings app's shared **Width** writes this, the
-drop zone's and the focus ring's together.
+drop zone's and the focus ring's together, and the three are
+never clamped against each other.
 
 **Example:**
 
@@ -2808,9 +2710,9 @@ drag.set_ghost_border_width(5)
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
 
 **Does:** positions the border inside or outside the slot
-boundary. Lua-only — the Settings app offers no control for it
-at all, the focus ring having no alignment concept to share
-(see [design decisions](design-decisions.md)).
+boundary; at `inside` the marker's outer edge is the slot
+boundary itself. Lua-only — the Settings app offers no control
+for it (see [design decisions](design-decisions.md)).
 
 **Example:**
 
@@ -2822,10 +2724,8 @@ drag.set_ghost_border_alignment("outside")
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost border color (default `#347957`,
-deep emerald — the ghost, drag's origin, is all-green; a
-bluer green than the focus ring since #511, so it separates
-from the drop zone's amber under red-green vision loss).
+**Does:** sets the ghost border color (default `#347957`, deep
+emerald).
 
 **Example:**
 
@@ -2915,8 +2815,7 @@ drag.set_drop_zone_border_alignment("outside")
 **Expects:** a hex color.
 
 **Does:** sets the drop zone border color (default `#C2790A`,
-amber — the drop zone, drag's target, is all-amber so it reads
-apart from the green ghost).
+amber).
 
 **Example:**
 
@@ -2956,15 +2855,13 @@ drag.set_drop_zone_fill_color("#C2790A40")
 **Does:** sets the corner rounding of both visuals (default 16,
 the system window radius). The full range is Lua-only: the
 Settings app offers **Square** / **Rounded**, which writes this
-and the focus ring's corner style together.
-
-It READS any value above zero as Rounded, so a radius set here
-is displayed rather than overwritten, and **re-picking Rounded
-leaves it alone** — that segment writes the system radius only
-from 0, where there is no rounding to keep. Square writes 0,
-being the one shape with a single radius. Set this to disagree
-with `border.set_corner_style` and the picker shows no segment
-selected until you choose one.
+and the focus ring's corner style together. It reads any value
+above zero as Rounded, so a radius set here is displayed rather
+than overwritten, and re-picking Rounded leaves it alone — that
+segment writes the system radius only from 0. Square writes 0.
+Set this to disagree with `border.set_corner_style` and the
+picker shows no segment selected until you choose one; either
+segment then sets both.
 
 **Example:**
 
@@ -2974,33 +2871,16 @@ drag.set_corner_radius(16)
 
 ## Focus Border
 
-KiwiDesk can draw a thin border around the focused window so it is
-unmistakable in a gapped layout — the feedback keyboard-driven
-focus otherwise lacks. It is **on by default** and marks only the
-focused window; it can optionally show one on every other window
-too.
-
-The border is a pure overlay: it never changes where windows tile
-(no gap coupling). The configured width is the thickness drawn
-outward into the gap — with the glow off, the value
-`border.fit_gaps` sizes gaps from.
-By default the border is stacked **behind** its window: a flicker-free
-placement that holds steady even when a window redraws rapidly (some
-browsers repaint on every keystroke) and hugs each window's real
-corner radius. The trade is that the window's drop-shadow falls
-across the border's lower reach and the corner meets the window with a
-filled seam rather than a floating hairline.
-`border.set_draw_order("front")` switches to an in-front placement
-that is crisper and shadowless but can flicker on those browsers —
-a power-user opt-in (see below). Rounded corners match the real
-macOS window radius (queried per window); square draws sharp
-corners. The border is pinned to its window's stacking level, so
-popovers, sheets, and other windows the system places above the
-target still stay above its border.
-
-Overflow piles and monocle show a border only on the visible
-top window; set gaps at least as wide as the border to avoid
-neighbouring borders touching.
+KiwiDesk draws a thin border around the focused window. It is
+**on by default** and marks only the focused window;
+`border.set_unfocused_enabled` adds one on every other window.
+The border is a pure overlay: it never changes where windows
+tile (no gap coupling), and the configured width is the
+thickness drawn outward into the gap. It is pinned to its
+window's stacking level, so popovers, sheets, and other windows
+the system places above the target stay above its border.
+Overflow piles and monocle show a border only on the visible top
+window.
 
 ### border.set_enabled
 
@@ -3019,10 +2899,11 @@ border.set_enabled(true)
 **Expects:** a number (points). Out-of-range values are clamped
 to `0.5`–`20`.
 
-**Does:** sets the border width (default `5`). 5 pt is the widest
-that still tiles cleanly when unfocused borders are on — each border
-reaches its width into the 10 pt gap, so two of them exactly fill
-it without overlapping.
+**Does:** sets the border width (default `5`). Keep gaps at
+least as wide as the border so neighbouring borders do not
+touch: each border reaches its width into the gap, so with
+unfocused borders on, 5 pt is the widest width at which two of
+them fill the 10 pt gap without overlapping.
 
 **Example:**
 
@@ -3032,8 +2913,7 @@ border.set_width(5)
 
 ### border.set_focused_color
 
-**Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`) —
-the same format as every other KiwiDesk color.
+**Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`).
 
 **Does:** sets the focused window's border color (default
 `"#4A9816"`, the Kiwi theme's bright-green focus accent).
@@ -3050,10 +2930,9 @@ border.set_focused_color("#4A9816")
 
 **Does:** when `true`, also draws a border on the unfocused
 windows (default `false`). Ignored in monocle, where only the
-focused window shows.
-
-Floating windows — one you floated, or any window in a space set
-to the floating layout — get the unfocused border too.
+focused window shows. Floating windows — one you floated, or any
+window in a space set to the floating layout — get the unfocused
+border too.
 
 **Example:**
 
@@ -3078,17 +2957,11 @@ border.set_unfocused_color("#8E8E93CC")
 
 **Expects:** `"rounded"` or `"square"`.
 
-**Does:** `rounded` (default) matches the real window corner
-radius; `square` draws sharp corners — seamless on windows that
-are already square (some Electron/utility windows), an intentional
-squared frame on rounded ones.
-
+**Does:** `rounded` (default) matches the real macOS window
+corner radius, queried per window; `square` draws sharp corners.
 The Settings app's shared **Corners** control writes this and
-`drag.set_corner_radius` together, and reads both back. Set one
-here that disagrees with the radius — a square ring over a
-rounded drag pair, or the reverse — and the picker shows **no
-segment selected** rather than picking a side; either segment
-then sets both. Nothing rewrites the pair until you do.
+`drag.set_corner_radius` together and reads both back; see that
+verb for how the picker treats a pair that disagrees.
 
 **Example:**
 
@@ -3100,28 +2973,22 @@ border.set_corner_style("rounded")
 
 **Expects:** a boolean.
 
-**Does:** when `true`, wraps the **focused** border in a soft colored
-bloom — a zero-offset blurred halo, the JankyBorders "glow" look
-(default `false`). A render trait like width and corners: it adds no
-color choice and never touches the unfocused windows (a bloom on
-every dim border would undo the point of making the focused one
-stand out).
-The bloom is a **brightened** derivative of `focused_color` (a halo
-is a fill, not a legibility-bound stroke, so it reads more vivid than
-the darkened border, in its own hue) — set only `focused_color`
-and the glow follows. Its reach **scales with the border width**
-(clamped to a legible band), so a hairline border gets a subtle
-rim and a thick one a proportional aura — override it with
-`set_glow_size` below. One interaction: a
-glowing ring renders on the behind-order fallback renderer, so
+**Does:** when `true`, wraps the **focused** border in a soft
+colored bloom — a zero-offset blurred halo (default `false`). It
+adds no color choice and never touches the unfocused windows:
+the bloom is a **brightened** derivative of `focused_color`, so
+set only `focused_color` and the glow follows. Its reach
+**scales with the border width**, clamped to a legible band, so
+a hairline border gets a subtle rim and a thick one a
+proportional aura — override it with `set_glow_size` below. A
+glowing ring renders on the behind-order renderer, so
 `draw_order("front")` is inert while glow is on (see
 [Accepted limitations](accepted-limitations.md)).
 
 The bloom counts as part of the ring's reach: `border.fit_gaps`
 sizes for it, and a floating window keeps that much off bars and
 screen edges as well as the stroke. A hand-set gap smaller than
-that lets the bloom bleed onto the neighbour, which is yours to
-choose.
+that lets the bloom bleed onto the neighbour.
 
 **Example:**
 
@@ -3138,12 +3005,10 @@ non-numeric argument fails — switching back to automatic takes
 an explicit `0`, never a clamp.
 
 **Does:** sets the glow bloom's blur radius. `0` keeps the
-automatic behavior — the width-scaled formula that gives a
-hairline border a subtle rim and a thick one a proportional
-aura — while an explicit size pins the reach regardless of the
-border width. The GUI slider offers 1–20 pt behind an **Auto
-glow size** toggle; larger values up to 40 stay a Lua
-fine-tune. No effect while `glow` is off.
+width-scaled automatic reach; an explicit size pins the reach
+regardless of the border width. The GUI slider offers 1–20 pt
+behind an **Auto glow size** toggle; larger values up to 40 stay
+a Lua fine-tune. No effect while `glow` is off.
 
 **Example:**
 
@@ -3158,15 +3023,14 @@ border.set_glow_size(0)   -- back to automatic
 **Expects:** `"behind"` or `"front"`.
 
 **Does:** chooses where the border stacks relative to windows.
-`behind` (default) draws it below the window — flicker-free, hugs
-the real corner radius, but carries the window's drop-shadow on its
-lower reach and a filled corner seam. `front` draws it above the
-window — a crisp, shadowless hairline — but can flicker on windows
-that repaint rapidly (Firefox/Zen and other Gecko browsers emit a
-compositor reorder on every keystroke). There is no GUI control for
-this: `behind` is the right default for everyone, and `front` is a
-niche preference exposed to Lua only. Changing it re-draws every
-border immediately.
+`behind` (default) draws it below the window — flicker-free and
+hugging the real corner radius, but the window's drop-shadow
+falls across its lower reach and the corner meets the window
+with a filled seam. `front` draws it above the window — a crisp,
+shadowless hairline — but can flicker on windows that repaint
+rapidly (Firefox/Zen and other Gecko browsers emit a compositor
+reorder on every keystroke). Lua-only, with no GUI control.
+Changing it re-draws every border immediately.
 
 While `border.glow` is on, the focused ring renders on the
 behind-order renderer regardless of this setting — `"front"`
@@ -3186,21 +3050,17 @@ border.set_draw_order("front")
 the other border magnitudes); a non-numeric argument fails.
 
 **Does:** sizes the global layout gaps so borders never touch a
-neighbour, keeping `remaining` points of deliberate whitespace
-past the border's reach. Every outer edge becomes
-`reach + remaining`; each inner axis becomes `reach + remaining`,
-or `2 × reach + remaining` when `unfocused_enabled` is on (both
-neighbouring borders need clearance; the whitespace sits between
-them once). With the glow off, the reach is the configured
-border width; the renderer’s hidden overlap is behind the window
-and does not count.
-The action deliberately
-normalizes asymmetric global gaps. A one-shot convenience that
-writes `gap.global` — the remaining gap is command input, never a
-persisted setting, and the layout math itself stays free of any
-border coupling, so this never runs automatically. The GUI's
-**Fit layout gaps → Set Gap Values** action previews and stages the
-same calculation.
+neighbour, keeping `remaining` points of whitespace past the
+border's reach. Every outer edge becomes `reach + remaining`;
+each inner axis becomes `reach + remaining`, or
+`2 × reach + remaining` when `unfocused_enabled` is on. With the
+glow off, the reach is the configured border width; the
+renderer's hidden overlap is behind the window and does not
+count. The action normalizes asymmetric global gaps. It is a
+one-shot that writes `gap.global` — the remaining gap is command
+input, never a persisted setting — and it never runs
+automatically. The GUI's **Fit layout gaps → Set Gap Values**
+action previews and stages the same calculation.
 
 With `glow` on, the focused ring's reach is the width plus the
 glow's resolved blur, rounded up to whole points and added once:
@@ -3234,7 +3094,7 @@ window's outer, screen-side edge has nobody to trade with and
 snaps back.
 
 The layout follows the size the window actually reached when you
-release. If you flick faster than a (slow) app resizes its window
+release. If you flick faster than a slow app resizes its window
 and release mid-motion, only the distance the window managed to
 follow is applied.
 
@@ -3255,24 +3115,18 @@ KiwiDesk.set_mouse_resize("snap_back")
 
 ### mouse.set_follows_focus
 
-**Expects:** a boolean.
+**Expects:** a boolean (default `false`).
 
 **Does:** when `true`, a focus change warps the mouse pointer to
-the center of the newly-focused window, so the next click,
-scroll, or hover lands on the window the keyboard is working in —
-the standard companion behaviour in i3/sway/yabai. Default is
-**`false`** (off), matching those WMs. The pointer never moves
+the center of the newly-focused window. The pointer never moves
 while a mouse button is held down or when it is already inside
 the focused window. While KiwiDesk performs its own z-order
 maintenance raises the warp is held, and it fires once they
-settle — for the window focus finally landed on, so the
-maintenance churn never drags the pointer around but a focus
-change made during it still gets its warp. When focus lands on a window in an inactive
-space (cmd+tab into a stashed window), the warp waits until
-KiwiDesk follows focus and pulls that space forward. Clicking
-an app-bar item warps too — the click targets the bar, not
-the window it focuses. Also togglable in the Settings app
-under **Behavior ▸ Mouse**.
+settle, for the window focus finally landed on. When focus lands
+on a window in an inactive space (cmd+tab into a stashed window),
+the warp waits until KiwiDesk follows focus and pulls that space
+forward. Clicking an app-bar item warps too. Also togglable in
+the Settings app under **Behavior ▸ Mouse**.
 
 **Example:**
 
@@ -3300,9 +3154,9 @@ This is built into the layout, not a setting.
 For a cascade to read correctly, upper windows must sit *behind*
 lower ones. KiwiDesk restores this z-order whenever a window
 crosses the master/stack boundary (drag swap, directional `swap`,
-`stack.promote` / `stack.demote`). Focusing a window still raises it
-to the front — that override is deliberate and lasts until the next
-boundary crossing re-stacks the zone.
+`stack.promote` / `stack.demote`). Focusing a window still raises
+it to the front, and it stays there until the next boundary
+crossing re-stacks the zone.
 
 ## Window Rules
 
@@ -3313,19 +3167,18 @@ bundle-id:title matchers).
 
 **Does:** windows matching any entry always float. An app is
 named by its **bundle identifier** (e.g. `com.apple.finder`),
-not its display name — the identifier is stable across system
-language and app renames. `"id"` matches every window of the
-app; `"id:Title"` matches when the title contains the fragment.
-The bundle id is matched case-insensitively; the title fragment
-is case-sensitive. See [Finding a bundle
+not its display name. `"id"` matches every window of the app;
+`"id:Title"` matches when the title contains the fragment. The
+bundle id is matched case-insensitively; the title fragment is
+case-sensitive. See [Finding a bundle
 identifier](#finding-a-bundle-identifier). Dialogs, sheets, and
-picture-in-picture
-windows float automatically. Detection is re-checked as windows
-come and go — and when a title changes, so an "App:Title" rule
-catches windows whose titles load late (Electron/WebKit apps) or
-change into a match later. A window that reported wrong metadata
-while launching corrects itself the same way. A manual
-`make_floating` override is never reverted by these re-checks.
+picture-in-picture windows float automatically. Detection is
+re-checked as windows come and go and when a title changes, so
+an "App:Title" rule catches windows whose titles load late
+(Electron/WebKit apps) or change into a match later, and a
+window that reported wrong metadata while launching corrects
+itself the same way. A manual `make_floating` override is never
+reverted by these re-checks.
 
 Panels and overlays that live above the normal window layer also
 float automatically, no rule needed. Windows belonging to apps that
@@ -3339,13 +3192,13 @@ inherited ones with its sparse `float_rules` object (`true` adds,
 owned by `gui.json` or this hand-written `init.lua`.
 
 **Ghostty's quick terminal** is not managed at all — no space
-assignment, no window events. KiwiDesk simply pretends it does not
-exist.
+assignment, no window events.
 
-Transient macOS input-source menus and switcher overlays are likewise
-ignored, so pressing the Globe key never creates a managed window or
-KiwiDesk focus border. Auxiliary AX proxy windows with no matching
-WindowServer window are ignored by the same policy.
+Transient macOS input-source menus and switcher overlays are
+likewise ignored, so pressing the Globe key never creates a
+managed window or KiwiDesk focus border. Auxiliary AX proxy
+windows with no matching WindowServer window are ignored by the
+same policy.
 
 **KiwiDesk's Settings window** is tracked and **tiled like any
 other window** — it takes a layout slot, appears in the App Bar,
@@ -3353,11 +3206,10 @@ and answers `make_floating` / `toggle_floating` and the other
 window verbs. Its float rules work the same way yours do, so a
 `float_rules` entry can keep it out of the layout permanently.
 KiwiDesk's *other* windows are not managed: the setup tour and
-the Config Issues window are tracked but always floating (each
-one ends, so neither takes a slot), and its panels — the ⌃⌥K
-shortcuts panel, drag/drop overlays, App Bar overlays and
-focus borders — remain fully ignored, which is why they appear
-in no bar and no window list KiwiDesk publishes.
+the Config Issues window are tracked but always floating, and its
+panels — the ⌃⌥K shortcuts panel, drag/drop overlays, App Bar
+overlays and focus borders — are ignored outright and appear in
+no bar and no window list KiwiDesk publishes.
 
 **Example:**
 
@@ -3382,9 +3234,8 @@ Matching is case-insensitive and app-wide; title fragments are not
 supported. This table is the global base. In `gui.json` it lives at
 the root as `ignore_rules`. A profile may add rules or tombstone
 inherited ones through its sparse `ignore_rules` object. There is
-deliberately no Settings control and no session-only
-`make_unmanaged` command; GUI profile saves preserve that hidden
-override unchanged.
+no Settings control and no session-only `make_unmanaged` command;
+GUI profile saves preserve the override unchanged.
 
 **Example:**
 
@@ -3397,9 +3248,8 @@ ignore_rules = {
 
 After editing `init.lua`, run `kiwidesk reload_config`. Newly ignored
 apps leave KiwiDesk state, and apps removed from the list are
-discovered again. Ghostty's quick terminal remains a built-in
-layer-specific exception because only its panel — not normal Ghostty
-windows — must be ignored.
+discovered again. Ghostty's quick terminal is a built-in exception:
+only its panel, not normal Ghostty windows, is ignored.
 
 **Command bars are ignored automatically.** A Spotlight/Raycast-style
 launcher is a menu-bar (accessory) app whose bar is a raised-layer
@@ -3409,15 +3259,13 @@ generic — accessory app **and** raised window layer — so any
 launcher or HUD qualifies without a rule; the app's normal windows
 (settings, pickers) stay managed as floats. Raycast's command bar is
 additionally recognized by bundle id for setups where Raycast shows
-a dock icon and loses the accessory policy. `ignore_rules` remains
-the whole-app escape hatch for anything the heuristic misses.
+a dock icon and loses the accessory policy.
 
 Invisible helper windows are ignored automatically: a raised-layer
 window that is fully transparent or sits entirely off-screen (the
-lifecycle keepalive some menu-bar apps create) is never tracked,
-so the app doesn't read as an open app with a Space assignment and
-an App Bar slot. No rule needed — `ignore_rules` remains the
-whole-app escape hatch for anything the heuristic misses.
+lifecycle keepalive some menu-bar apps create) is never tracked.
+`ignore_rules` remains the whole-app escape hatch for anything
+either heuristic misses.
 
 ### app_rules
 
@@ -3425,8 +3273,8 @@ whole-app escape hatch for anything the heuristic misses.
 space identifiers.
 
 **Does:** new windows of listed apps go to their assigned space.
-As with `float_rules`, an app is named by its bundle identifier
-(case-insensitive), not its display name. See [Finding a bundle
+An app is named by its bundle identifier (case-insensitive), not
+its display name. See [Finding a bundle
 identifier](#finding-a-bundle-identifier).
 
 **Example:**
@@ -3450,9 +3298,8 @@ Profile overrides resolve the same way over a Lua-owned base.
 ### Finding a bundle identifier
 
 App rules and `pull_or_spawn` identify an app by its bundle
-identifier. The Settings app's pickers handle this for you —
-they list installed apps by name and store the identifier
-behind the scenes. To find one by hand:
+identifier. The Settings app's pickers list installed apps by
+name and store the identifier for you. To find one by hand:
 
 - Run `kiwidesk get_state` (or the `get_state` command over
   IPC): every window carries a `bundle_id` field alongside its
@@ -3461,9 +3308,9 @@ behind the scenes. To find one by hand:
   `osascript -e 'id of app "Safari"'` →  `com.apple.Safari`.
 - Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
 
-Identifiers are matched case-insensitively, so the case you
-write does not matter. An app with no bundle identifier (a rare
-unbundled helper process) cannot be targeted by a rule.
+Identifiers are matched case-insensitively. An app with no bundle
+identifier (a rare unbundled helper process) cannot be targeted
+by a rule.
 
 ## Making Windows Floating or Tiled
 
@@ -3472,21 +3319,20 @@ unbundled helper process) cannot be targeted by a rule.
 **Expects:** nothing.
 
 **Does:** marks the focused window as floating. It is no longer
-tiled: it keeps whatever frame you give it, on the
-space it belongs to — like a tiled window, it hides with its
-space and reappears where you left it when you switch back. (A
-window that should stay visible on *every* space is a [sticky
-window](#sticky-windows), not a floating one.) A floating
-window is always kept **above** the tiled plane: focusing or
-cmd-tabbing to a tiled window no longer buries the float behind
-it, and two overlapping floats stack most-recently-focused on
-top. (To exclude a window from tiling *without* pinning it
-above others, use `ignore_rules` — KiwiDesk then leaves its
-z-order untouched.) The override
-survives the window closing and reopening (matched by app name
-and title; a window that closes while untitled has no identity
-to match and loses it) and applies only to that window — use
-`float_rules` to float every window of an app.
+tiled: it keeps whatever frame you give it, on the space it
+belongs to — it hides with its space and reappears where you
+left it when you switch back. (A window that should stay visible
+on *every* space is a [sticky window](#sticky-windows), not a
+floating one.) A floating window is always kept **above** the
+tiled plane: focusing or cmd-tabbing to a tiled window never
+buries the float behind it, and two overlapping floats stack
+most-recently-focused on top. (To exclude a window from tiling
+*without* pinning it above others, use `ignore_rules` — KiwiDesk
+then leaves its z-order untouched.) The override survives the
+window closing and reopening (matched by app name and title; a
+window that closes while untitled has no identity to match and
+loses it) and applies only to that window — use `float_rules` to
+float every window of an app.
 
 **Example:**
 
@@ -3516,13 +3362,13 @@ KiwiDesk.make_tiled()
 third state of the float tri-state (floating-manual /
 tiled-manual / auto). The window returns to detection control:
 `float_rules` and the built-in dialog/panel detection apply
-again, including future rule edits, and the close/reopen
-memory of the window's current identity is forgotten. (A
-remembered intent stored under an *older* title can still
-resurface after a reopen — run `make_auto` again once the
-window shows the wrong state and it is purged for good.) Use
-it when a window "sticks" floating or tiled after a
-`make_floating`/`make_tiled` you no longer want.
+again, including future rule edits, and the close/reopen memory
+of the window's current identity is forgotten. (A remembered
+intent stored under an *older* title can still resurface after a
+reopen — run `make_auto` again once the window shows the wrong
+state and it is purged for good.) Use it when a window "sticks"
+floating or tiled after a `make_floating`/`make_tiled` you no
+longer want.
 
 **Example:**
 
@@ -3539,10 +3385,10 @@ one verb — if it is effectively floating it becomes tiled, and
 vice versa. Like `make_floating`/`make_tiled`, it writes an
 explicit manual override (which survives close/reopen); it never
 produces the `auto` state, so `make_auto` stays the way back to
-detection control. This is the everyday float shortcut (bound to
-`control+option+f` by default and the only float verb offered in the
-Settings shortcut list); the explicit `make_*` verbs remain for
-scripts that need a specific direction.
+detection control. It is bound to `control+option+f` by default
+and is the only float verb offered in the Settings shortcut
+list; the explicit `make_*` verbs remain for scripts that need a
+specific direction.
 
 **Example:**
 
