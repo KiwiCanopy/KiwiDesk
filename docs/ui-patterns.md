@@ -785,7 +785,7 @@ label changes — churning the documented verb widens the blast
 radius (override commands, existing configs, testers' mental
 model) for no gain. New option labels are new keys; what a
 relabel does to the label's own key is `docs/translating.md`
-▸ *Rename vs. drop*'s.
+▸ *Maintaining the key set* ▸ *Rename vs. drop vs. deprecate*'s.
 
 **Geometric wire, presentational label — the rule for every
 two-axis layout.** The **Track** picker has the same collision
