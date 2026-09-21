@@ -124,11 +124,40 @@ struct ClosedReturnFocusTests {
         #expect(core.activeSpace?.focused == other)
     }
 
+    /// A construction net for the CALL site: `classify` answers
+    /// `.minimized` before presence is read, so the gone handler
+    /// never marks a minimize. The writer's own guard is the
+    /// clause below.
     @Test("A minimize carries no close mark")
     func minimizeCarriesNoMark() {
         let (core, target, _) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: true))
         #expect(!core.state.closedDepartures.contains(target))
+    }
+
+    /// The writer marks only a DEPARTED window: a `.restored`
+    /// session filing that never arrived, or an id no fold ever
+    /// filed, is not a return and takes no mark (guard-prover,
+    /// 2026-09-21: the minimize net above cannot reach this).
+    @Test("Only a departed window can carry the mark")
+    func onlyADepartedWindowIsMarked() {
+        var state = StateCoordinator()
+        let restored = WindowID(21)
+        state.remember(restored, in: SpaceID("1"))
+        state.rememberClosedDeparture(restored)
+        #expect(!state.closedDepartures.contains(restored))
+        let unfiled = WindowID(22)
+        state.rememberClosedDeparture(unfiled)
+        #expect(!state.closedDepartures.contains(unfiled))
+        // The positive control: a departed window is marked.
+        state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(23), pid: 1, appName: "App")
+            )
+        )
+        state.apply(.windowDestroyed(WindowID(23), wasMinimized: false))
+        state.rememberClosedDeparture(WindowID(23))
+        #expect(state.closedDepartures.contains(WindowID(23)))
     }
 
     @Test("A return off the active Space steals nothing")
