@@ -50,7 +50,7 @@ Or download the signed, notarized `.dmg` from
 drag KiwiDesk into your Applications folder. It is the same app;
 the cask additionally puts the `kiwidesk` CLI on your `PATH`,
 which [the CLI page](cli.md) shows how to link after a `.dmg`
-install. Either way KiwiDesk keeps itself up to date.
+install. Either way KiwiDesk checks for updates itself.
 
 The [User Guide](user-guide.md) covers the Starter setup,
 **Start at login**, and the Accessibility permission under
