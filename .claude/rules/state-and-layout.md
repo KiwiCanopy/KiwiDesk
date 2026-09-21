@@ -316,11 +316,17 @@ editing here:
   `rememberClosedDeparture`, inside its `closed` arm and nowhere
   else — a Desktop `vanished` keeps #636's rule, a hide #913's —
   the fold consumes the mark on EVERY arrival and grants only in
-  the active Space, the mark rides the re-key and the away retire
-  with the departed memory, and the report that follows is
-  intended, never an exemption in the #1161 predicate
-  (`ClosedReturnFocusTests`, `ClosedReturnSeamTests` the one
-  writer inside the arm). The ROW comes back too: a
+  the active Space, AHEAD of a Desktop return's vacancy hold —
+  the user's own act outranks it, and the honored report that
+  follows retires that debt as any honored focus does
+  (`ClosedReturnFocusTests` ▸ `closeReturnOutranksTheVacancyHold`);
+  the mark rides the re-key with the departed memory
+  (`ClosedReturnFocusTests` ▸ `markFollowsRekey`, and
+  `WindowRekeyParityTests`' count) and a path retiring that
+  memory retires the mark beside it; and the report
+  that follows is intended, never an exemption in the #1161
+  predicate (`ClosedReturnFocusTests`, `ClosedReturnSeamTests`
+  the one writer inside the arm). The ROW comes back too: a
   departed window carries its slot in `departedSlots`, and the
   fold re-inserts a `.departed` return by RANK against the
   members already back — never at the index, which a later slot

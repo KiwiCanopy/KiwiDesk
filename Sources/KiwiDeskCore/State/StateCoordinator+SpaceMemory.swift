@@ -179,12 +179,9 @@ extension StateCoordinator {
     /// Marks a departure as a CLOSE (#1414), on the gone handler's
     /// classification; only a departed window can carry it, so a
     /// minimize or an unfiled removal marks nothing.
-    mutating func rememberClosedDeparture(
-        _ id: WindowID,
-        at now: Date
-    ) {
+    mutating func rememberClosedDeparture(_ id: WindowID) {
         guard case .departed? = rememberedSpaces[id] else { return }
-        closedDepartures[id] = now
+        closedDepartures.insert(id)
     }
 
     /// Retires a window closed while away (#1146): the ledger
@@ -192,7 +189,7 @@ extension StateCoordinator {
     mutating func forgetAway(_ id: WindowID) {
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
-        closedDepartures[id] = nil
+        closedDepartures.remove(id)
         restoredFrames[id] = nil
         retireDepartureRecord(of: id)
     }
@@ -200,7 +197,7 @@ extension StateCoordinator {
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
-        closedDepartures = [:]
+        closedDepartures = []
         restoredFrames = [:]
         departedSlots = [:]
         awayWindows = [:]

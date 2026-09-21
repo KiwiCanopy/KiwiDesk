@@ -40,8 +40,9 @@ public struct StateCoordinator: Sendable {
     /// The departed windows whose departure was a CLOSE (#1414):
     /// written by `rememberClosedDeparture` from the gone
     /// handler's own classification, consumed by the create fold,
-    /// which grants such a return the focus a new window gets.
-    var closedDepartures: [WindowID: Date] = [:]
+    /// which grants such a return the focus a new window gets. A
+    /// set, not a clock: its lifetime is `rememberedSpaces`'s.
+    var closedDepartures: Set<WindowID> = []
 
     /// The snapshot frame of a restored window not yet tracked
     /// (#1362), beside its `.restored` Space above — the arrival
@@ -128,8 +129,8 @@ public struct StateCoordinator: Sendable {
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
         }
-        if let closed = closedDepartures.removeValue(forKey: old) {
-            closedDepartures[new] = closed
+        if closedDepartures.remove(old) != nil {
+            closedDepartures.insert(new)
         }
         if let frame = restoredFrames.removeValue(forKey: old) {
             restoredFrames[new] = frame

@@ -53,7 +53,7 @@ extension KiwiCore {
             state.promoteHandedSuccessor(of: id)
             // The departure's provenance, read at the return
             // (#1414): a re-shown window takes the focus.
-            state.rememberClosedDeparture(id, at: Date())
+            state.rememberClosedDeparture(id)
         }
         if reason == .vanished,
             case .hosted(let space, _) = presence

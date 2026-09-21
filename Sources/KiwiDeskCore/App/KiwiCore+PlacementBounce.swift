@@ -53,8 +53,10 @@ extension KiwiCore {
     /// with that rule). The caller vouches the number is its own —
     /// the door's `allowed` map is that census. Bypasses the #292
     /// preflight on purpose; the caller fronts the window
-    /// regardless. Returns whether Core took it; the caller's
-    /// `forceFront` follows either way.
+    /// regardless. Returns whether Core answered the raise — true
+    /// for the untracked number too, since the caller fronts it
+    /// and the arrival does the rest; the caller's `forceFront`
+    /// follows either way.
     @discardableResult
     public func focusOwnWindow(number: Int) -> Bool {
         guard let id = EventLoop.ownWindowID(number: number) else {

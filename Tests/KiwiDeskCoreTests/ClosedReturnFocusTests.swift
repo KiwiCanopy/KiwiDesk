@@ -84,7 +84,7 @@ struct ClosedReturnFocusTests {
         core.handle(.windowDestroyed(target, wasMinimized: false))
         // The gone handler classified a close and marked it —
         // fail-open guard for every clause below.
-        #expect(core.state.closedDepartures[target] != nil)
+        #expect(core.state.closedDepartures.contains(target))
         #expect(core.activeSpace?.focused == other)
         let log = Log()
         core.onLog = { log.lines.append($0) }
@@ -96,7 +96,7 @@ struct ClosedReturnFocusTests {
             }
         )
         // Consumed by the arrival.
-        #expect(core.state.closedDepartures[target] == nil)
+        #expect(!core.state.closedDepartures.contains(target))
         // The arrival's retile stamped it; the report still
         // lands intended — asserted on the log, since with
         // `intended == id` the bounce's re-assert would put the
@@ -119,7 +119,7 @@ struct ClosedReturnFocusTests {
         // fixture) — the Desktop-departure class.
         core.lastDesktopSwitch = Date()
         core.handle(.windowDestroyed(target, wasMinimized: false))
-        #expect(core.state.closedDepartures[target] == nil)
+        #expect(!core.state.closedDepartures.contains(target))
         core.handle(.windowCreated(reshown(target)))
         #expect(core.activeSpace?.focused == other)
     }
@@ -128,14 +128,14 @@ struct ClosedReturnFocusTests {
     func minimizeCarriesNoMark() {
         let (core, target, _) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: true))
-        #expect(core.state.closedDepartures[target] == nil)
+        #expect(!core.state.closedDepartures.contains(target))
     }
 
     @Test("A return off the active Space steals nothing")
     func inactiveSpaceReturnStealsNothing() {
         let (core, target, other) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: false))
-        #expect(core.state.closedDepartures[target] != nil)
+        #expect(core.state.closedDepartures.contains(target))
         // The user is elsewhere when the window comes back to
         // its remembered Space: the grant is the active Space's
         // only, like a new window's.
@@ -147,17 +147,51 @@ struct ClosedReturnFocusTests {
         #expect(core.state.workspaces.space(of: target) == SpaceID("1"))
         #expect(core.state.workspaces[SpaceID("1")]?.focused == other)
         // Consumed all the same.
-        #expect(core.state.closedDepartures[target] == nil)
+        #expect(!core.state.closedDepartures.contains(target))
+    }
+
+    /// A Desktop return's vacancy hold (#1207) keeps other
+    /// RETURNING windows off the focus while the owed window is
+    /// still departed; a close return is the user's own act and
+    /// outranks it — the honored report that follows retires the
+    /// debt the way any honored focus does.
+    @Test("A close return outranks a Desktop return's vacancy hold")
+    func closeReturnOutranksTheVacancyHold() {
+        let (core, target, _) = makeFixture()
+        // Window 3 leaves with its Desktop (the #40 timer reads
+        // the departure inside the settle) and is owed the focus
+        // at its return.
+        let owed = WindowID(3)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: owed,
+                    pid: 3,
+                    appName: "App3",
+                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+                )
+            )
+        )
+        core.state.workspaces.focus(target, in: SpaceID("1"))
+        core.lastDesktopSwitch = Date()
+        core.handle(.windowDestroyed(owed, wasMinimized: false))
+        core.lastDesktopSwitch = .distantPast
+        core.desktopMemory.returnFocus.record(owed)
+        #expect(core.desktopMemory.returnFocus.owed() == owed)
+        core.handle(.windowDestroyed(target, wasMinimized: false))
+        #expect(core.state.closedDepartures.contains(target))
+        core.handle(.windowCreated(reshown(target)))
+        #expect(core.activeSpace?.focused == target)
     }
 
     @Test("The mark rides a re-key with the departed memory")
     func markFollowsRekey() {
         let (core, target, _) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: false))
-        #expect(core.state.closedDepartures[target] != nil)
+        #expect(core.state.closedDepartures.contains(target))
         let new = WindowID(9)
         core.state.rekey(target, to: new)
-        #expect(core.state.closedDepartures[target] == nil)
-        #expect(core.state.closedDepartures[new] != nil)
+        #expect(!core.state.closedDepartures.contains(target))
+        #expect(core.state.closedDepartures.contains(new))
     }
 }
