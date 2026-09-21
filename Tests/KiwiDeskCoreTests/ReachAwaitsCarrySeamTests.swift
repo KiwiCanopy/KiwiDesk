@@ -117,6 +117,11 @@ struct ReachAwaitsCarrySeamTests {
     func shownDesktopHostDoesNotOpenTheArm() {
         let core = makeCore()
         defer { teardown() }
+        // Steady state: the handler filed the Space the display
+        // shows, and the window is hosted right there — ⌘W of a
+        // reach-enabled sticky window. Only the `shown` clause
+        // closes the arm here (review round 2).
+        core.desktopMemory.lastDisplaySpaces = ["UUID-A": 2]
         core.desktopMemory.readWindowSpace = { _ in .hosted(2) }
         #expect(!core.eventLoop.reachAwaitsCarry(window))
     }
