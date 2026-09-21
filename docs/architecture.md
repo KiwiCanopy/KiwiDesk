@@ -81,9 +81,9 @@ flowchart TD
    `dlsym`, and every private call **falls back** to the public
    Accessibility API when the lookup returns nil — never link
    private symbols, never disable SIP (§5). SkyLight's ObjC
-   window-management operation classes resolve the same way
-   through one wrapper, `WMBridge`: a class that does not resolve
-   reads as the capability absent.
+   window-management operation classes resolve by name at runtime
+   under the same discipline, through one wrapper, `WMBridge`: a
+   class that does not resolve reads as the capability absent.
 
 Event-driven retiles run **un-forced**: the engine's ±2 pt
 "already there" tolerance absorbs AX-echo lag (contrast pipeline
