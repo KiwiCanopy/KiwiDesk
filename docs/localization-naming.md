@@ -127,8 +127,8 @@ There is no exemption file. The escape hatches, in order:
    does.
 2. **If the name is redundant under its section header, delete it
    from the English.** That lifts the obligation in every locale
-   at once; the GUI already works this way (`SpaceBarGroups`'
-   caption omits the name its header supplies), so the obligation
+   at once; the GUI already works this way (`bars.space_bar.caption`
+   omits the name its header supplies), so the obligation
    is *authored*, not imposed.
 3. **`scripts/drop-key --locale <locale> <key>`** retires one
    locale's value to the English fallback — a loud escape.
@@ -275,7 +275,8 @@ apply your answer everywhere in your file, not only in the key
 you were editing.
 
 1. **A word that already names another KiwiDesk concept in your
-   catalog loses, whatever its count.** A label that reuses
+   catalog loses, whatever its count — the rung nothing
+   outranks.** A label that reuses
    another feature's noun reads as *true about the wrong thing*:
    `zh-Hans` labelling a Profile 配置文件, which is what
    `general.advanced.config_file` renders, made a profile's
@@ -426,8 +427,8 @@ by making them unwritable rather than by scanning for them:
   holds the anchor in every locale. The shape it closes: `it`
   drifting to «sezione Abbreviazioni» while the pane reads
   "Scorciatoie", or `spaces.delete_confirm.message` quoting a
-  "Main" role that has no label key, so that three locales invent
-  one each.
+  "Main" role that had no label key, so that three locales
+  invented one each.
 
 What is left — one language's two ordinary words for one idea —
 stays with review. The ladder makes that review cheap: once the
@@ -487,9 +488,9 @@ obligation automatically (`keybinding.make_unsticky` "Make
 unsticky" already demands verbatim "Sticky", which every locale
 honors). The two bar names are two-word coinages that only ever
 occur referentially, so the question never arises for them.
-**Sticky** is the single word where it had to be asked: all 17
-keys (21 occurrences) in `en.json` carrying `sticky`/`Sticky`
-name *this* feature, none a different one — unlike
+**Sticky** is the single word where it had to be asked: every
+key in `en.json` carrying `sticky`/`Sticky` names *this*
+feature, none a different one — unlike
 `app`/`space`/`bar`, common words that needed the per-token
 glossary carve-outs. The collision to keep re-checking is macOS's
 own **Sticky Keys** accessibility feature: if a
