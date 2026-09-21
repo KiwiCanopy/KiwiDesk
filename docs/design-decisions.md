@@ -698,8 +698,8 @@ were already there. It does **not** live only in
 
 The pull toward prose is real: with the names in a Swift table
 that "can never drift from the real API" and the *signatures* in
-4,800 lines of hand-written Markdown that could, `list_commands`
-answered "what can I call" with 262 bare names on one line — no
+4,800 lines of hand-written Markdown that could, and did.
+`list_commands` answered "what can I call" with 262 bare names on one line — no
 groups, no arguments, no summaries — and `list_commands focus`
 answered the same 6.9 KB, because the argument was read and
 dropped (#1033). The doc could not fix that: a running binary
@@ -1725,11 +1725,13 @@ window a second time hundreds of ms after the first echo, and
 a consumed stamp let that duplicate through as deliberate
 focus (ring, pan and pointer snapped back to the pile-mate —
 the [#689](https://github.com/KiwiCanopy/KiwiDesk/issues/689)
-device trace). The deliberate-refocus case that consumption
+device trace, 2026-08-31). The deliberate-refocus case that
+consumption
 would protect has real discriminators: clicks escape on
 provenance, commands route through the self-raise path, and
 only a clickless app-driven or cmd-tab focus inside the ~1 s
-window is eaten.
+window is eaten — bounded, where an un-aged ledger poisoned the
+window permanently.
 
 Three corollaries (#687, #887 device QA). **Every echo ledger
 is age-bounded, the focus raise's `selfRaiseStamps` included**:
@@ -2024,7 +2026,8 @@ the echo of a step off it is the residue, priced below the
 emulator's measured 0.8–1.5 s and recorded in
 [Accepted limitations](accepted-limitations.md).
 
-Which compositor read matters, measured: a gate reading the
+Which compositor read matters, measured 2026-09-08 on the gated
+build: a gate reading the
 managed display's "current Space" loses the race. While a
 swipe's departures fold, the on-screen window list (the probe
 beside the log) has already dropped every Desktop 1 window and
@@ -3024,7 +3027,7 @@ by sound alone — a resize press in a layout with no resizing
 (monocle, grid, and the floating layout until
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184) gave
 its members a resize of their own), and one on a zone axis that
-does not exist. Both are invisible with the toggle off, and
+does not exist. Both were invisible with the toggle off, and
 invisible to anyone who does not hear it; the first is the most
 reachable refusal in the feature, not an edge, since any resize
 press in a layout that has none arrives there. Meanwhile the
@@ -3163,8 +3166,9 @@ under load. Being wrong permissively costs a window that does
 not fill its region (the accepted split-layout residue,
 self-correcting on the next retile); being wrong restrictively
 costs the user the feature and states a falsehood. On frequency
-alone that argues for permissive. The owner ruled the other
-way, measured: with the learner fixed, the bounds it produces
+alone that argues for permissive. Implemented and measured, the
+owner ruled the other way: with the learner fixed, the bounds it
+produces
 are real — device capture showed the same eight minutes of use
 going from sixteen false confirmations to zero, with subsequent
 confirmations landing on plausible app minimums (500, 400, 825)
@@ -4082,7 +4086,8 @@ does not merge by name.** With `ensureSpace` matching the
 incoming profile's spaces onto the live ones by name and
 `pruneSpaces` forwarding the rest to the fallback, switching
 profiles and back merges an arrangement away permanently —
-measured: a profile holding five windows in space 1 and three
+measured 2026-09-04: a profile holding five windows in space 1
+and three
 in space 3 came back with all eight in space 1 and space 3
 empty (#1230).
 
