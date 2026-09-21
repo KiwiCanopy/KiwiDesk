@@ -9,8 +9,9 @@ import Testing
 /// below (#764). Discovered by reflection over a fixture that
 /// sets every property away from its default, so a store added
 /// tomorrow reds until it is classified. `WorkspaceManager
-/// .setMode` clears a DIFFERENT set on purpose — a mode reseed,
-/// under which the track shares survive by ruling
+/// .setMode` clears a DIFFERENT set on purpose — a mode reseed
+/// drops the track weights while the in-track shares
+/// (`stackWeights`) survive by ruling
 /// (`docs/accepted-limitations.md`) — and is not held here.
 @Suite("Space sizing census (#764)")
 struct SpaceSizingCensusTests {

@@ -6,13 +6,14 @@ import Testing
 /// restore is RECORDED for that retile through
 /// `requestZOrderRestoreAfterDispatch`, gated on the one
 /// `activeTrackOverflows` predicate — never armed on the spot,
-/// which a headless schedule runs immediately off the pre-reset
-/// frames and drains to nothing. No behaviour suite can red on
-/// the difference for exactly that reason
-/// (`CloseReturnStandDownWiringTests` states the same limit), so
-/// the body is pinned by needle. Here, not beside the Core
-/// suites, because `SourceScan` lives in this target (AGENTS.md
-/// §1).
+/// which runs the restore off the pre-reset frames. The
+/// BEHAVIOUR is `ResetLayoutSizingZOrderTests`' (the restore
+/// still pending after the dispatcher's retile animates); what
+/// needs needles is the negative half — an immediate arm ADDED
+/// beside the recorded one drains nothing that suite reads — and
+/// that the two arms share one predicate. Here, not beside the
+/// Core suites, because `SourceScan` lives in this target
+/// (AGENTS.md §1).
 @Suite("reset_layout_sizing z-order wiring (#764)")
 struct ResetLayoutSizingWiringTests {
     private func body() throws -> String {
