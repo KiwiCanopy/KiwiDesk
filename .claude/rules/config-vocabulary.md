@@ -219,6 +219,16 @@ synonym:
   right now. `stack.set_master_count` is a retained exception —
   the user names how many windows are masters, and it shipped
   that way.
+- **sizing** — the collective of a layout's size adjustments:
+  the BSP and stack ratios, the scrolling slot size and the
+  stack/track weights — what `resize` writes and
+  `reset_layout_sizing` clears (#764, `ResetLayoutSizingTests`).
+  A single extent stays a *size* (`slot_size`, `item_size`,
+  `min_window_size`), and a *count* (`master_count`,
+  `track.set_limit`, grid `columns`/`rows`) is structure rather
+  than sizing; the ruling is `docs/design-decisions.md` ▸ A
+  reset of layout sizing. Do not coin *dimensions*,
+  *proportions* or *geometry* for the set.
 - **zone** — three ruled senses, and no fourth without an
   argument: the stack layout's master/stack **zones**
   (`layout_params.stack_position.help`), the drag **drop zone**

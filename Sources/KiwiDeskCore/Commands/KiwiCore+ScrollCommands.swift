@@ -102,6 +102,9 @@ extension KiwiCore {
             }
             over.slotSize = size
             promiseAllWindowsSpringSized()
+            clearSessionRatios(for: SpaceID(space)) {
+                $0.slotSize = nil
+            }
         case "anchor":
             guard
                 let anchor = Self.parseAnchor(rest.first?.stringValue)

@@ -1197,6 +1197,46 @@ editing here:
   rule, and the floor outranking the ceiling. That the ceiling
   is not in the value type is review's: no suite can see a
   maximum nobody wrote.
+- **What counts as SIZING is stated where the store lives, and
+  a resize never writes the authored override (#764).**
+  `Space.resetSizing` clears the per-Space sizes (the session
+  ratios, the stack and track weights); `reset_layout_sizing`
+  is a loop over it — the active Space, one by id, or `all`
+  (`ResetLayoutSizingScopeTests`) — lists nothing itself, and
+  touches
+  `TilingSettings` not at all. A resize path writes through
+  `KiwiCore+SessionRatioWrite`'s `write*` and never an
+  override's size field, and the overlay in
+  `TilingSettings+Resolution` reads the layer AHEAD of the
+  override — `SessionRatioOverrideTests` ▸
+  `resizeLeavesTheOverrideAuthored` and
+  `everyOverlayLineReadsSessionFirst` pin the precedence, the
+  #933 bullet below the writers' route — so the override is the
+  authored value the reset returns to by dropping the layer;
+  the argument, and the rejected snapshot, are
+  `docs/design-decisions.md` ▸ *A reset of layout sizing*. An
+  explicit per-space `_override` setter clears that space's
+  session field through the one `clearSessionRatios(for:)`
+  door, or the write visibly does nothing (#383's trap one
+  layer down): `SessionRatioOverrideTests` ▸
+  `overrideSetterClearsShadow` and
+  `allOverrideSettersClearTheirField` hold the four setters,
+  and `SessionRatioSeamTests` holds every `sessionRatios` write
+  outside the seam file to the model's own reseeds. A stored
+  property added to `Space` is classified by
+  `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
+  structure with its reason — or it reds; a new resize knob
+  owes a `SessionRatios` field, its overlay line and its two
+  setters' clears BY HAND, since `SessionRatioTests` ▸
+  `fieldCountPinsTheMirrors` counts the fields alone. A
+  cleared weight can change
+  which windows overlap, so the verb records the track restore
+  through `requestZOrderRestoreAfterDispatch` gated on the one
+  `activeTrackOverflows` predicate — never `scheduleZOrderRestore`
+  or the immediate arm, since its retile is the dispatcher's
+  trailer and an arm ahead of it runs off the pre-reset frames
+  (#153, `ResetLayoutSizingZOrderTests` the pending restore,
+  `ResetLayoutSizingWiringTests` the absent immediate arm).
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers — the

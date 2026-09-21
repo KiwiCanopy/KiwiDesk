@@ -29,9 +29,9 @@ extension KiwiCore {
     /// states. Read the threshold as SPENT: the next
     /// classification folds these into one apply-intent value
     /// (.userExplicit / .hardwareEvent) rather than joining
-    /// them. The session
-    /// ratio-layer clear (#458) rides this same classification;
-    /// an eventual fold carries it along.
+    /// them. The session ratio-layer clear rides both — an
+    /// explicit apply OR a profile change (#458, #764) — so an
+    /// eventual fold carries two causes.
     func apply(
         profile: Profile,
         pruneStaleSpaces: Bool = false,
@@ -40,19 +40,17 @@ extension KiwiCore {
         // #1230: file the OUTGOING profile's partitioning before
         // anything rebuilds the space set, and learn in one
         // answer whether this apply is a profile CHANGE — which
-        // gates both the prune below and the restore after it.
+        // gates the session clear, the prune below and the
+        // restore after it.
         let switching = recordOutgoingPartitioning(before: profile)
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
-        // An EXPLICIT apply reseeds the session resize layer
-        // (#458): the incoming settings are the new truth, and
-        // a session shadow would make the profile's ratios
-        // visibly do nothing (§5 forced-retile rationale).
-        // Event-driven applies (monitor change, native-space
-        // binding) keep it — a display reconnect must not eat
-        // the user's interactive resizes.
-        if forceRetile {
+        // The session layer reseeds on an explicit apply, and on
+        // any apply that CHANGES the profile — it outranks the
+        // incoming authored overrides (#458, #764). A same-
+        // profile event apply keeps it.
+        if forceRetile || switching {
             clearSessionRatios { $0 = SessionRatios() }
         }
         let declared = profile.declaredSpaces

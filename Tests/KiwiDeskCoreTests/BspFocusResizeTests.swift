@@ -166,8 +166,8 @@ struct BspFocusResizeTests {
         #expect(resolvedBsp(core).splitRatioH == before)
     }
 
-    @Test("right focus writes the space's own override (#17)")
-    func focusSignHitsOverride() {
+    @Test("right focus moves the space's own value (#17)")
+    func focusSignMovesTheResolvedValue() {
         let core = makeCore()
         bspSpace(core)
         core.execute(
@@ -179,9 +179,11 @@ struct BspFocusResizeTests {
         core.execute("resize", args: [.string("x"), .number(200)])
         let over =
             core.tiler.settings.bsp.override[SpaceID("1")]
-        // The flipped sign still lands on the override, and
-        // the shared global stays put.
-        #expect((over?.splitRatioH ?? 1) < 0.5)
+        // The flipped sign lands on the space's resolved value
+        // (the session layer, #764), the authored override keeps
+        // its number and the shared global stays put.
+        #expect(over?.splitRatioH == 0.5)
+        #expect(resolvedBsp(core).splitRatioH < 0.5)
         #expect(
             core.tiler.settings.bsp.splitRatioH == globalBefore
         )

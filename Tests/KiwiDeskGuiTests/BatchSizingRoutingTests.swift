@@ -173,6 +173,12 @@ struct BatchSizingRoutingTests {
             Site(names: 3, promises: 3),
         "KiwiDeskCore/Commands/KiwiCore+ScrollCommands.swift":
             Site(names: 3, promises: 3),
+        // `reset_layout_sizing` (#764) clears a Space's ratios, slot
+        // size and weights at once — the same re-division of room
+        // among already-placed windows the setters above make,
+        // in one dispatch. Slots and membership never move.
+        "KiwiDeskCore/Commands/KiwiCore+ResetLayoutSizing.swift":
+            Site(names: 1, promises: 1),
     ]
 
     /// Any spelling of the type — the argument label, the stored

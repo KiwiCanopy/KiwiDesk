@@ -54,6 +54,7 @@ public enum APIReference {
                 "set_float_scale_on_display_change"
             ),
             ("set_resize_step", "set_resize_step"),
+            ("reset_layout_sizing", "reset_layout_sizing"),
             (
                 "set_refusal_sound",
                 "set_refusal_sound"

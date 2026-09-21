@@ -160,6 +160,18 @@ public struct Space: Sendable, Equatable {
         self.sessionRatios = sessionRatios
     }
 
+    /// Clears this Space's SIZING — what `resize` accumulates:
+    /// the session ratios and the stack and track weights — and
+    /// nothing structural (#764). The one statement of which
+    /// stored properties are sizes: `SpaceSizingCensusTests`
+    /// classifies every property as cleared here or named
+    /// structure, so a new store cannot join unclassified.
+    public mutating func resetSizing() {
+        sessionRatios = SessionRatios()
+        stackWeights = [:]
+        trackWeights = [:]
+    }
+
     /// Appends window if not already present.
     public mutating func append(_ window: WindowID) {
         guard !windows.contains(window) else { return }

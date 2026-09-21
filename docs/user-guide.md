@@ -51,7 +51,9 @@ A layout switched from the menu bar's **Layout** submenu is
 **session-only**: it does not rewrite the profile, and the menu
 shows a "not saved to profile" subtitle while it drifts. **Keep
 Layout in Profile "‹name›"** writes what is on screen, every
-screen at once, into the active profile. A Settings Save does not
+screen at once, into the active profile — the layouts, not a
+keyboard or mouse resize, which is session-only. A Settings
+Save does not
 touch a temporary layout, which stays on screen through it; the
 one exception is a Space whose layout you changed in **Settings
 → Spaces**, which wins on Save.

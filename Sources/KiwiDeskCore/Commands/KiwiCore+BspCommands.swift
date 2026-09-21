@@ -84,11 +84,17 @@ extension KiwiCore {
             else { return Self.ratioError }
             over.splitRatioH = ratio
             promiseAllWindowsSpringSized()
+            clearSessionRatios(for: SpaceID(space)) {
+                $0.splitRatioH = nil
+            }
         case "ratio_v":
             guard let ratio = Self.parseSplitRatio(rest.first)
             else { return Self.ratioError }
             over.splitRatioV = ratio
             promiseAllWindowsSpringSized()
+            clearSessionRatios(for: SpaceID(space)) {
+                $0.splitRatioV = nil
+            }
         default:
             return .fail(
                 "unknown command: bsp.set_\(field)_override"

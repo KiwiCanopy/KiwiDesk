@@ -64,8 +64,8 @@ extension KiwiCore {
     /// `layoutCommand` fires `scheduleZOrderRestore` *after* that
     /// retile, so the restore can't run mid-retile off pre-retile
     /// frames and be consumed before the new animations begin.
-    /// `promoteDemote` is the one such site (its reorder's retile
-    /// belongs to the dispatcher).
+    /// `promoteDemote` and `resetLayoutSizing` take it — both
+    /// retile through the dispatcher.
     func requestZOrderRestoreAfterDispatch() {
         deferredCommandZOrderRestore = true
     }
@@ -185,16 +185,24 @@ extension KiwiCore {
     /// reorder scrambles no stacking and a needless re-raise
     /// would flicker focus. Call *after* the reorder's retile.
     func scheduleTrackZOrderRestoreIfOverflowing() {
-        guard let input = tiler.layoutInput(state: state),
-            input.space.mode == .track,
-            Self.framesCascade(
-                TrackLayout().calculateGeometry(
-                    for: input.tiled,
-                    in: input.context
-                )
-            )
-        else { return }
+        guard activeTrackOverflows else { return }
         scheduleZOrderRestore()
+    }
+
+    /// Whether the active track Space's layout piles — the one
+    /// gate the immediate arm above and a dispatcher-deferred arm
+    /// share (#674, #764), read off the frames the layout would
+    /// draw NOW.
+    var activeTrackOverflows: Bool {
+        guard let input = tiler.layoutInput(state: state),
+            input.space.mode == .track
+        else { return false }
+        return Self.framesCascade(
+            TrackLayout().calculateGeometry(
+                for: input.tiled,
+                in: input.context
+            )
+        )
     }
 
     /// Re-raises the stack zone top to bottom, so upper

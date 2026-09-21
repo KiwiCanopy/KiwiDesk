@@ -1,43 +1,31 @@
 import Foundation
 
-/// The interactive-resize ratio write seam (#458): an authored
-/// config override of the field takes the write (pre-#458
-/// behavior — the #290 editor's value stays live); otherwise
-/// the value lands in the space's session layer, never the
-/// global. Both the keyboard `resize` verb and the mouse-drag
-/// drop (`applyResizeAdjustment`) route here.
+/// The interactive-resize ratio write seam (#458, #764): the
+/// value lands in the space's session layer — never the global,
+/// never the authored override, which keeps the number the
+/// profile or `init.lua` wrote so `reset_layout_sizing` can
+/// return to it. Both the keyboard `resize` verb and the
+/// mouse-drag drop (`applyResizeAdjustment`) route here.
 extension KiwiCore {
     func writeSplitRatioH(_ value: Double, for space: SpaceID) {
-        if tiler.settings.setSplitRatioH(value, for: space) {
-            return
-        }
         state.workspaces.withSpace(space) {
             $0.sessionRatios.splitRatioH = value
         }
     }
 
     func writeSplitRatioV(_ value: Double, for space: SpaceID) {
-        if tiler.settings.setSplitRatioV(value, for: space) {
-            return
-        }
         state.workspaces.withSpace(space) {
             $0.sessionRatios.splitRatioV = value
         }
     }
 
     func writeMasterRatio(_ value: Double, for space: SpaceID) {
-        if tiler.settings.setMasterRatio(value, for: space) {
-            return
-        }
         state.workspaces.withSpace(space) {
             $0.sessionRatios.masterRatio = value
         }
     }
 
     func writeSlotSize(_ value: ScrollSize, for space: SpaceID) {
-        if tiler.settings.setSlotSize(value, for: space) {
-            return
-        }
         state.workspaces.withSpace(space) {
             $0.sessionRatios.slotSize = value
         }
@@ -56,6 +44,20 @@ extension KiwiCore {
             state.workspaces.withSpace(space.id) {
                 clear(&$0.sessionRatios)
             }
+        }
+    }
+
+    /// The per-space `_override` setters' sibling: the layer
+    /// outranks the override, so an explicit write on one Space
+    /// drops that Space's shadow (#764). `SessionRatioSeamTests`
+    /// holds every `sessionRatios` write outside this file to
+    /// the model's own reseeds.
+    func clearSessionRatios(
+        for space: SpaceID,
+        _ clear: (inout SessionRatios) -> Void
+    ) {
+        state.workspaces.withSpace(space) {
+            clear(&$0.sessionRatios)
         }
     }
 }

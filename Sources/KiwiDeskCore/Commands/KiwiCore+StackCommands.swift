@@ -100,6 +100,9 @@ extension KiwiCore {
             else { return Self.masterRatioError }
             over.masterRatio = ratio
             promiseAllWindowsSpringSized()
+            clearSessionRatios(for: SpaceID(space)) {
+                $0.masterRatio = nil
+            }
         case "overflow_style":
             guard
                 let style = Self.parseOverflowStyle(

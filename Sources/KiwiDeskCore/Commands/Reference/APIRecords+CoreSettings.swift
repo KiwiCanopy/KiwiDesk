@@ -41,6 +41,11 @@ extension APIReference {
                 + "points.",
             .integer("points")
         ),
+        "reset_layout_sizing": APIRecord(
+            "Undoes manual resizes back to the profile: the active "
+                + "Space, one by id, or every one with `all`.",
+            .space("space", optional: true)
+        ),
         "set_refusal_sound": APIRecord(
             "Also plays an alert sound whenever a blocked "
                 + "keyboard action draws its refusal pill.",
