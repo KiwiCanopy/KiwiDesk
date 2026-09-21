@@ -4405,7 +4405,9 @@ stays the number you wrote and
 Session values behave like the stack's per-window weights:
 never saved to a profile, gone on restart, reseeded from config
 on a real mode change, `reload_config`, `load_profile` (or any
-other explicit profile/preset/GUI apply), and dropped for a
+other explicit profile/preset/GUI apply), a Desktop switch or
+monitor change that loads a *different* profile, and dropped
+for a
 field the moment you set it explicitly — its global
 (`bsp.set_ratio_h`, `stack.set_master_ratio`,
 `scroll.set_slot_size`) drops it on every space, its `_override`

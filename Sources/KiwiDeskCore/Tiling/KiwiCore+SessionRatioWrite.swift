@@ -50,7 +50,8 @@ extension KiwiCore {
     /// The per-space `_override` setters' sibling: the layer
     /// outranks the override, so an explicit write on one Space
     /// drops that Space's shadow (#764). `SessionRatioSeamTests`
-    /// holds every `sessionRatios` write to this file.
+    /// holds every `sessionRatios` write outside this file to
+    /// the model's own reseeds.
     func clearSessionRatios(
         for space: SpaceID,
         _ clear: (inout SessionRatios) -> Void

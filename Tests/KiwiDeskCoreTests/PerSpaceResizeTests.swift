@@ -51,7 +51,7 @@ struct PerSpaceResizeTests {
     }
 
     @Test("Resize in an overridden space moves what it displays")
-    func resizeMovesTheResolvedValue() {
+    func resizeMovesTheResolvedValue() throws {
         let core = makeCore()
         stackSpace(core)
         core.execute(
@@ -67,13 +67,11 @@ struct PerSpaceResizeTests {
         // authored number and the shared global stays put, so
         // other spaces are untouched.
         #expect(over?.masterRatio == 0.7)
-        let space = core.state.workspaces[SpaceID("1")]
-        if let space {
-            #expect(
-                core.tiler.settings.resolvedStack(for: space)
-                    .masterRatio > 0.7
-            )
-        }
+        let space = try #require(core.state.workspaces[SpaceID("1")])
+        #expect(
+            core.tiler.settings.resolvedStack(for: space)
+                .masterRatio > 0.7
+        )
         #expect(core.tiler.settings.stack.masterRatio == globalBefore)
     }
 
@@ -123,7 +121,7 @@ struct PerSpaceResizeTests {
     }
 
     @Test("bsp resize moves what the space displays, not its override")
-    func bspResizeMovesTheResolvedValue() {
+    func bspResizeMovesTheResolvedValue() throws {
         let core = makeCore()
         core.execute(
             "set_mode",
@@ -137,12 +135,11 @@ struct PerSpaceResizeTests {
         core.execute("resize", args: [.string("x"), .number(500)])
         let over = core.tiler.settings.bsp.override[SpaceID("1")]
         #expect(over?.splitRatioH == 0.7)
-        if let space = core.state.workspaces[SpaceID("1")] {
-            #expect(
-                core.tiler.settings.resolvedBsp(for: space)
-                    .splitRatioH > 0.7
-            )
-        }
+        let space = try #require(core.state.workspaces[SpaceID("1")])
+        #expect(
+            core.tiler.settings.resolvedBsp(for: space)
+                .splitRatioH > 0.7
+        )
         #expect(
             core.tiler.settings.bsp.splitRatioH == globalBefore
         )

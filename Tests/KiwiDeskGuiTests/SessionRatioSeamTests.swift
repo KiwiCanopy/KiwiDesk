@@ -10,16 +10,23 @@ import Testing
 /// nothing red. The scan counts the spellings that reach the
 /// store under `Sources/KiwiDeskCore` and pins each file outside
 /// the seam to its count, so a new site reds on arrival and a
-/// vanished one reds too. Fails OPEN for a write through a local
-/// copy of a `Space` assigned back whole, which review carries.
+/// vanished one reds too. Fails OPEN for a store reached through
+/// a name the needles do not spell — a `Space` copied out under
+/// another name and mutated there, an `inout` hand-off of a
+/// field rather than the store — and for a member chain broken
+/// BEFORE the field (`$0.sessionRatios` alone on a line), which
+/// the formatter does not produce; review carries both.
 @Suite("Session ratio write seam (#764)")
 struct SessionRatioSeamTests {
-    /// The spellings that write or hand out the store for
-    /// writing: a member assignment, a whole-value assignment,
-    /// and an `inout` hand-off.
-    private static let needles = [
-        "sessionRatios.", "sessionRatios = ", "&$0.sessionRatios",
-    ]
+    /// A write: `sessionRatios`, optionally one member or a
+    /// key path away, assigned on this line or at its end (the
+    /// formatter breaks after `=`), or handed out `inout`
+    /// through whatever path reaches it.
+    private static let write = try! NSRegularExpression(
+        pattern:
+            #"sessionRatios(\.\w+|\[[^\]]*\])?\s*=(\s|$)"#
+            + #"|&[\w$\[\]!?.]*sessionRatios\b"#
+    )
 
     /// Files that may spell a write, with today's count and why.
     private let allowed: [String: Int] = [
@@ -31,26 +38,18 @@ struct SessionRatioSeamTests {
         "State/WorkspaceManager.swift": 1,
     ]
 
-    /// Occurrences that are writes: a `.` member read — `space.
-    /// sessionRatios.splitRatioH` on the right of `let`, the
-    /// overlay's `if let value =` — is skipped by requiring an
-    /// assignment on the same line or the `&` hand-off.
+    /// Writes per line; a read (`space.sessionRatios.splitRatioH`
+    /// on the right of `let`, the overlay's `if let value =`) has
+    /// no `=` after the store and is not matched. `let
+    /// sessionRatios = …` would match and is fail-closed.
     private static func writes(in source: String) -> Int {
-        var count = 0
-        for line in source.split(separator: "\n") {
+        source.split(separator: "\n").reduce(0) { count, line in
             let text = String(line)
-            guard needles.contains(where: { text.contains($0) })
-            else { continue }
-            if text.contains("&$0.sessionRatios")
-                || text.range(
-                    of: #"sessionRatios(\.\w+)? = "#,
-                    options: .regularExpression
-                ) != nil
-            {
-                count += 1
-            }
+            let range = NSRange(text.startIndex..., in: text)
+            return count
+                + (write.firstMatch(in: text, range: range) == nil
+                    ? 0 : 1)
         }
-        return count
     }
 
     @Test("sessionRatios writes outside the seam stay pinned")

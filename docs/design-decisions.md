@@ -2761,7 +2761,10 @@ CHANGES the profile — a bound-Desktop switch — reseeds the
 layer after all, since the values in it are the outgoing
 arrangement's and would now outrank the incoming profile's
 authored ratios; the same-profile monitor-change apply keeps
-it as before. What the Settings override editor and the quick
+it as before, and so does the monitor-change apply that hands
+the slot to a built-in Standard — a Standard authors globals
+only, which the layer has outranked since #458, so nothing of
+its own is shadowed. What the Settings override editor and the quick
 menu's Keep show and write is the authored number, not the
 resized one — a resize is session-only on every space alike,
 which #1179's "Settings narrates the profile" ruling already
