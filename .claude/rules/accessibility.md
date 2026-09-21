@@ -385,9 +385,11 @@ editing AX code:
   sweep, so `ReachFilingOrderSeamTests` pins the order and the
   store's one writer beside the boot seed. Residue, recorded in
   `docs/accepted-limitations.md`: a reach-enabled sticky window
-  closed in the beat before the handler files a switch, or one
-  that switch cannot carry, takes its removal at the sweep that
-  follows the switch rather than at once.
+  closed in the beat before the handler files a switch is carried
+  and stamped like a live one, so it takes its removal one
+  recheck budget late; one the switch cannot carry (its screen on
+  a fullscreen Space, a refused bridge move) is dropped at the
+  sweep that follows the filing.
   `ReachDepartureRemovalTests` pins both halves — the sweep's
   clauses and the notification's deferral.
 
