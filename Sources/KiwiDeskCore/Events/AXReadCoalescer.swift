@@ -23,10 +23,8 @@ final class AXReadCoalescer {
     }
 
     /// One serial queue per app per lane, so a focus report is
-    /// never parked behind that app's frame storm (#1088): its
-    /// consumers read wall-clock ledgers, and a storm's queue
-    /// depth times a stalled app's messaging timeout would age
-    /// the report past them.
+    /// never parked behind that app's frame storm (#1088,
+    /// input-and-animation.md).
     private enum Lane: Hashable {
         case frames
         case focus
@@ -35,11 +33,9 @@ final class AXReadCoalescer {
 
     private enum Key: Hashable, Sendable {
         case frame(WindowID, Kind)
-        /// One per APP, never per window (#1088):
-        /// `kAXFocusedWindowChanged` is a single-valued stream,
-        /// so newest-wins must collapse ACROSS windows — keyed
-        /// per window, a re-report of X queued behind X's own
-        /// read dispatches behind Y's and delivers X last.
+        /// One per APP, never per window: the focus stream is
+        /// single-valued, so newest-wins collapses ACROSS
+        /// windows (#1088, input-and-animation.md).
         case focus(pid_t)
         case title(WindowID)
 

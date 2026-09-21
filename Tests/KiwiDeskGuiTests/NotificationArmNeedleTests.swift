@@ -117,10 +117,7 @@ struct NotificationArmNeedleTests {
                 "\(name) spells \(Self.idRead) \(ids)×, allowed \(expected)"
             )
             if ids > 0 { seen.insert(name) }
-            // The seam's declaration is not a call; skip its file.
-            let seam =
-                name == "EventLoop.swift"
-                ? 0 : Self.count(Self.seamRead, in: source)
+            let seam = Self.count(Self.seamRead, in: source)
             let expectedSeam = Self.allowedSeam[name] ?? 0
             let seamNote: Comment =
                 "\(name) calls the seam \(seam)×, allowed \(expectedSeam)"

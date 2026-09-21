@@ -280,14 +280,16 @@ editing here:
     rare; it is not what makes the lookup safe.
 
   What the hop changes, each held by the suite that drives it.
-  **An arm whose notification only ever names a window the map
-  once held drops a MISS rather than asking** — the title arm,
-  registered per window at `track`, and the destroy/minimize
-  arm, whose window the focus-change reconcile has usually
-  swept — through the one `trackedWindowID`; a consumer of
-  `.windowTitleChanged` that comes to need an untracked id owes
-  the title arm its ask back (`TitleArmRouteTests`,
-  `NotificationWindowIDTests`). The focus arm keeps the ask for
+  **An arm that acts only on a TRACKED window drops a MISS
+  rather than asking**, through the one `trackedWindowID` — the
+  title arm, registered per window at `track`, so a miss is a
+  released window; and the destroy/minimize arm, whose own
+  tracked gate an asked id could pass only under a non-equal
+  element the map never holds, and whose miss is the COMMON
+  case since the focus-change reconcile sweeps a closing window
+  first. A consumer of `.windowTitleChanged` that comes to need
+  an untracked id owes the title arm its ask back
+  (`TitleArmRouteTests`, `NotificationWindowIDTests`). The focus arm keeps the ask for
   a miss, because #21's classification needs the panel's id.
   **The focus read is keyed per APP and rides its own per-app
   lane** (`AXReadCoalescerFocusTests`): `kAXFocusedWindowChanged`
@@ -309,9 +311,12 @@ editing here:
   float recheck rides the title delivery, pinned by
   `NotificationArmNeedleTests` because its next read is a
   direct AX call no fixture can answer; that suite also holds
-  the whole `Events/` tree to the seam, its `allowed` map the
-  one copy of who may spell `AXHelper.windowID(` and pins the
-  `focusWindow` stamp, which no behavior suite can see.
+  the whole `Events/` tree to the resolver — its `allowed` map
+  the one copy of who may spell `AXHelper.windowID(`, its
+  `allowedSeam` map of who may call `resolveWindowID(` directly,
+  the blind spot the route suites' log-line channel has — and
+  pins the `focusWindow` stamp, which no behavior suite can
+  see.
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **Every `.windowFocused` the loop emits comes from the app

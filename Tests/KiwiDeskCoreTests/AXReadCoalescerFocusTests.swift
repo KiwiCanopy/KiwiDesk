@@ -67,12 +67,19 @@ struct AXReadCoalescerFocusTests {
         #expect(pump.work.isEmpty)
     }
 
+    /// The lane suite's hang guard (tests.md): generous, since a
+    /// passing run exits the instant the focus read lands, and
+    /// only a merged lane — or a starved runner — reaches it.
+    private static let laneHangGuard = Duration.seconds(30)
+
     @Test("A focus read is not parked behind a frame storm")
     func focusReadRidesItsOwnLane() async {
         // A frame read held open on the app's frame lane; the
         // focus read must still land. On one shared serial queue
         // it would wait behind the held read, and the guard
-        // below would time out.
+        // below would trip. Both requests are enqueued
+        // synchronously, in this order, so the frame read is
+        // dispatched first whatever the tasks below do.
         let coalescer = AXReadCoalescer()
         let gate = DispatchSemaphore(value: 0)
         nonisolated(unsafe) let held = elementA
@@ -80,30 +87,24 @@ struct AXReadCoalescerFocusTests {
             if CFEqual(element, held) { gate.wait() }
             return CGRect(x: 0, y: 0, width: 1, height: 1)
         }
-        let frameLanded = Task { @MainActor in
-            await withCheckedContinuation { cont in
-                coalescer.request(
-                    .moved,
-                    window: WindowID(1),
-                    element: elementA,
-                    pid: pid
-                ) { _ in cont.resume() }
-            }
-        }
-        let focusLanded = Task { @MainActor in
-            await withCheckedContinuation { cont in
-                coalescer.requestFocus(element: elementB, pid: pid) {
-                    _ in cont.resume()
-                }
-            }
+        let (frameLanded, frameCont) = AsyncStream<Void>.makeStream()
+        let (focusLanded, focusCont) = AsyncStream<Void>.makeStream()
+        coalescer.request(
+            .moved,
+            window: WindowID(1),
+            element: elementA,
+            pid: pid
+        ) { _ in frameCont.finish() }
+        coalescer.requestFocus(element: elementB, pid: pid) { _ in
+            focusCont.finish()
         }
         let landed = await withTaskGroup(of: Bool.self) { group in
             group.addTask {
-                await focusLanded.value
+                for await _ in focusLanded {}
                 return true
             }
             group.addTask {
-                try? await Task.sleep(for: .seconds(30))
+                try? await Task.sleep(for: Self.laneHangGuard)
                 return false
             }
             let first = await group.next() ?? false
@@ -112,6 +113,6 @@ struct AXReadCoalescerFocusTests {
         }
         #expect(landed, "the focus read waited behind the frame read")
         gate.signal()
-        await frameLanded.value
+        for await _ in frameLanded {}
     }
 }

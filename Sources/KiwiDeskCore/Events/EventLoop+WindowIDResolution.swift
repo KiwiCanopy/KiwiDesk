@@ -109,12 +109,13 @@ extension EventLoop {
         }
     }
 
-    /// The map's answer for an arm whose notification only ever
-    /// names a window the map once held, so a MISS is a released
-    /// window and drops rather than asks — the title arm, whose
-    /// notification is registered per window at `track`, and the
-    /// destroy/minimize arm, whose window the focus-change
-    /// reconcile has usually swept already (#1088). An ambiguous
+    /// The map's answer for an arm that acts only on a TRACKED
+    /// window, so a MISS drops rather than asks (#1088): the
+    /// title arm, registered per window at `track`, so a miss is
+    /// a released window; and the destroy/minimize arm, whose
+    /// own `elements[pid]?[id] != nil` gate an asked id could
+    /// pass only if the map held it under a non-equal element,
+    /// which the map's invariant above rules out. An ambiguous
     /// match still asks: both its ids are tracked.
     func trackedWindowID(
         of element: AXUIElement,
