@@ -22,14 +22,7 @@ Powerful when you reach for it, never in your way.
 [![Homebrew](https://img.shields.io/badge/Homebrew-cask-8DB354)](https://github.com/KiwiCanopy/homebrew-tap)
 [![Release](https://img.shields.io/github/v/release/KiwiCanopy/KiwiDesk?color=8DB354&label=Release)](https://github.com/KiwiCanopy/KiwiDesk/releases/latest)
 
-[Website](https://kiwidesk.kiwicanopy.com/) ·
-[Docs](https://kiwidesk.kiwicanopy.com/docs/) ·
-[Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/) ·
-[Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) ·
-[Changelog](https://kiwidesk.kiwicanopy.com/changelog/) ·
-[Sponsor](https://github.com/sponsors/KiwiCanopy)
-
-<br>
+[Website](https://kiwidesk.kiwicanopy.com/) · [Docs](https://kiwidesk.kiwicanopy.com/docs/) · [Quick Start](https://kiwidesk.kiwicanopy.com/docs/user-guide/) · [Recipes](https://kiwidesk.kiwicanopy.com/docs/recipes/) · [Changelog](https://kiwidesk.kiwicanopy.com/changelog/) · [Sponsor](https://github.com/sponsors/KiwiCanopy)
 
 <img src="assets/demo-scrolling.gif" width="800"
   alt="Windows gliding sideways through the scrolling layout as focus moves between them">
@@ -84,18 +77,15 @@ swift build -c release
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) —
-small files, strict lint, exhaustive tests, AI coding agents welcome.
-To report a vulnerability, see [SECURITY.md](SECURITY.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md); AI coding
+agents are welcome. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[Business Source License 1.1](LICENSE): the source is public, and
-using KiwiDesk is free — at home and at work. Offering, selling,
-bundling or hosting it as a product or service needs a commercial
-license. Each version converts to the
-[MIT License](https://opensource.org/license/mit) four years after it
-is first published.
+[Business Source License 1.1](LICENSE): the source is public and using
+KiwiDesk is free, at home and at work; offering, selling, bundling or
+hosting it as a product or service needs a commercial license. Each
+version becomes [MIT](https://opensource.org/license/mit) four years after publication.
 
 ---
 
