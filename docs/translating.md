@@ -41,10 +41,11 @@ presets. Core returns the **structure** (a `Conflict` naming a
 `name`) and the GUI renders the sentence, so a translator sees
 ordinary keys (`system_shortcut.*`, `keybinding.conflict.*`,
 `config_issues.*`, `presets.*`). If you add such a string in
-Core, name a case rather than writing English prose — a literal
-there never reaches `extract-keys`, so no locale can translate
-it. `.claude/rules/localization.md` ▸ *Core names, the GUI
-narrates* carries the argument (#96, #601).
+Core, name a case rather than writing English prose — a
+hardcoded English literal there, one outside `L(...)`, never
+reaches `extract-keys`, so no locale can translate it.
+`.claude/rules/localization.md` ▸ *Core names, the GUI narrates*
+carries the argument (#96, #601).
 
 **The `system_shortcut.*` keys are Apple's own feature names** —
 Spotlight, Mission Control, Force Quit, App Windows — and macOS
@@ -153,7 +154,7 @@ in its own name, whatever the active UI language (a German UI
 still shows "English", "Français", "日本語", not "Englisch"),
 the convention macOS System Settings uses. They come from macOS
 (`Locale.localizedString(forIdentifier:)`), are **not**
-translation keys, and never appear in the locale JSON files.
+translation keys, and must not be added to a locale file.
 
 ## Adding a new language
 
@@ -194,7 +195,9 @@ translation keys, and never appear in the locale JSON files.
    well](#translating-well)) — and is not yours to edit. Fill in
    `"translation"` and leave the key untouched. A template with
    `%1$@`/`%1$d` placeholders keeps them, repositioned wherever
-   your grammar wants them. Leave `"translation"` empty (`""`)
+   your grammar wants them (see [Interpolating a value into a
+   sentence](#interpolating-a-value-into-a-sentence)). Leave
+   `"translation"` empty (`""`)
    for a key you want to skip; it reappears the next time you run
    `extract-keys fr`.
 
@@ -605,8 +608,9 @@ the catalogs ship rather than by script:
   languages sharing too many byte-identical values — a whole
   file pasted into the wrong locale. The threshold is 5% of the
   keys they share, floored at 20: sibling languages coincide on
-  short labels (`es` and `pt-BR` sit at 11 with the corpus
-  clean), while a pasted file lands near 45%. Pairs of the same
+  short labels (`es` and `pt-BR` sit well under the floor with
+  the corpus clean), while a pasted file lands near 45%. Pairs of
+  the same
   base language are skipped — `zh-Hans` and `zh-Hant` are one
   language in two scripts.
 
