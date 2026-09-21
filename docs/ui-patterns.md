@@ -106,8 +106,7 @@ enters `SidebarCrossReferenceTests`. A pointer whose sentence
 names the **feature itself** — a sentence turning on whether
 the Space Bar is on, say — links that mention and stays one
 segment, since a breadcrumb there would be a second mention.
-All three shipped `CrossReferenceRow` call sites name a
-location.
+Every shipped `CrossReferenceRow` call site names a location.
 
 ## Choosing a control
 
@@ -378,7 +377,9 @@ resize, icon picker tabs) uses `SegmentedPicker` instead of
 the native segmented picker: a capsule track where the
 selection is a solid **accent** pill carrying the on-accent
 ink — the accent-marks-control-fills convention — with no
-shadow. The selected state never rides colour alone: the
+shadow (a white pill needs the thumb's shadow to lift off a
+same-luminance track, which dies in dark mode). The selected
+state never rides colour alone: the
 selected label is larger and semibold, a real font-size step,
 because `scaleEffect` rasterizes the text and reads as blur.
 Liquid Glass is not used on the pill: bare glass over the flat
@@ -782,9 +783,9 @@ real-world conventions (divider-axis vs stack-axis); the
 row/column labels are unambiguous under both. Only the display
 label changes — churning the documented verb widens the blast
 radius (override commands, existing configs, testers' mental
-model) for no gain. A relabel moves the label's locale key with
-`scripts/rename-key`, so its translations survive; new option
-labels are new keys.
+model) for no gain. New option labels are new keys; what a
+relabel does to the label's own key is `docs/translating.md`
+▸ *Rename vs. drop*'s.
 
 **Geometric wire, presentational label — the rule for every
 two-axis layout.** The **Track** picker has the same collision
