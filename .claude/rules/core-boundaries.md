@@ -99,10 +99,21 @@ itself when a sixth is added.
     The probe passes each verb its RECORD's arguments, never
     none: `mouse.set_*` reads its Bool and every `_override` its
     Space before switching on the field, so a bare call answers
-    the parse whether or not the arm exists. Recognition is the
-    whole claim — a refused placeholder is the arm answering —
-    and the socket-only `subscribe` is the one exemption, its
-    route pinned beside it.
+    the parse whether or not the arm exists. Two obligations fall
+    out. **A dispatcher names first and parses inside the arm**
+    — the `animations.*` toggles shared one Bool guard ahead of
+    their switch, and a deleted knob arm hid behind it as
+    `expected boolean`, an argument refusal the probe reads as
+    the arm answering; `setBool` is the shape. And **a new "no
+    arm" refusal spelling is classified in that suite's census**
+    — `noArm` is held against every `"unknown …:` literal in
+    Core, with the argument refusals (`unknown space:`) filed
+    beside it with their reason, so a fifth spelling reds until
+    it is filed rather than blinding the probe to its namespace.
+    Recognition is the whole claim — a refused placeholder is the
+    arm answering, a gutted arm returning `.ok()` passes — and
+    the socket-only `subscribe` is the one exemption, its route
+    pinned beside it.
 
   **A record's argument list and its summary are REVIEW's.** No
   guard can read them: the census pins command names, `APIChoice`

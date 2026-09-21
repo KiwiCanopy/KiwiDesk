@@ -125,7 +125,9 @@ extension KiwiCore {
         }
     }
 
-    private func setBool(
+    /// One Bool argument written by `write`, or the type
+    /// refusal. Shared with `animationsCommand`.
+    func setBool(
         _ args: [JSONValue],
         _ write: (Bool) -> Void
     ) -> CommandResponse {
