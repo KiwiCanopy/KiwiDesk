@@ -6,12 +6,18 @@ import ApplicationServices
 /// activated last (#1322).
 extension EventLoop {
     /// The `kAXFocusedWindowChanged` branch, on its own so a test
-    /// can drive it past the handler's process-policy guard. It
-    /// still ASKS for the id (`resolveWindowID`, #1088): a
-    /// destroyed element answers nothing, which filters a dead
-    /// window for free. Unguarded — `windowID(of:pid:)`'s privacy
-    /// is the tripwire, and `deadElementIsNotReported` is not the
-    /// pin.
+    /// can drive it past the handler's process-policy guard.
+    ///
+    /// The id comes from the tracked map (#1084/#1088); a
+    /// tracked window's report then rides one off-main frame
+    /// read (#618's shape) and is delivered by
+    /// `deliverFocusReport`, which drops a dead element on its
+    /// `.zero` frame — the liveness the ask used to give for
+    /// free. An untracked id still asks: the #21 classification
+    /// needs the panel's id, and the ask is the one reader that
+    /// has it. The reconcile ahead of both is the #21 destroy
+    /// net and stays a main-actor list read; it is not this
+    /// route's subject.
     func handleFocusedWindowChanged(
         _ element: AXUIElement,
         pid: pid_t,
@@ -20,7 +26,13 @@ extension EventLoop {
         // Closing a window nearly always moves focus;
         // reconciling here catches missed destroy events.
         reconcile(pid: pid, app: app)
-        guard let id = resolveWindowID(element) else { return }
+        guard
+            let id = windowID(
+                of: element,
+                pid: pid,
+                arm: kAXFocusedWindowChangedNotification
+            )
+        else { return }
         // Focus events carry only managed windows: the
         // reconcile above just settled tracking, so an
         // absent id is an ignored panel (issue #21) —
@@ -38,6 +50,45 @@ extension EventLoop {
             )
             return
         }
+        let requested = ContinuousClock.now
+        axReads.request(
+            .focused,
+            window: id,
+            element: element,
+            pid: pid
+        ) { [weak self] frame in
+            self?.deliverFocusReport(
+                id,
+                pid: pid,
+                frame: frame,
+                requested: requested
+            )
+        }
+    }
+
+    /// The report's delivery, one run-loop hop after the
+    /// notification. Every gate is judged HERE rather than at
+    /// receipt: the observer and the registration because a
+    /// detach or a release can land inside the read's flight,
+    /// and the #1322 provenance because two apps' reads ride
+    /// two queues — a slow app's report landing after a fast
+    /// app's activation is the reorder that would otherwise
+    /// park the focus on the wrong app.
+    private func deliverFocusReport(
+        _ id: WindowID,
+        pid: pid_t,
+        frame: CGRect,
+        requested: ContinuousClock.Instant
+    ) {
+        guard observers[pid] != nil, elements[pid]?[id] != nil
+        else { return }
+        // A dead element reads as `.zero` (#1084 review), and a
+        // real on-screen window never has that frame.
+        guard frame != .zero else {
+            onLog("focus: w\(id.raw) dead at delivery, dropped")
+            return
+        }
+        trackedFrames[id] = frame
         // A focus report from an app macOS did not activate is
         // app-internal; dropped, never held (#1322).
         guard reportsFromActiveApp(pid) else {
@@ -47,6 +98,11 @@ extension EventLoop {
             )
             return
         }
+        let waited = requested.duration(to: .now).components
+        let ms =
+            waited.seconds * 1000
+            + waited.attoseconds / 1_000_000_000_000_000
+        onLog("focus: w\(id.raw) liveness read \(ms)ms off main")
         onEvent(.windowFocused(id))
     }
 

@@ -13,7 +13,7 @@ import Testing
 /// waits on a real queue (tests.md: no tight deadlines).
 @Suite("Frame read coalescer (#618)")
 @MainActor
-struct FrameReadCoalescerTests {
+struct AXReadCoalescerTests {
     /// Captured read work, pumped manually to model an app
     /// answering late.
     @MainActor
@@ -29,8 +29,8 @@ struct FrameReadCoalescerTests {
     private func makeCoalescer(
         pump: Pump,
         frames: @escaping @Sendable () -> CGRect
-    ) -> FrameReadCoalescer {
-        let coalescer = FrameReadCoalescer()
+    ) -> AXReadCoalescer {
+        let coalescer = AXReadCoalescer()
         coalescer.reader = { _ in frames() }
         // Immediate main hop: the pump already runs on the
         // main actor, so delivery is synchronous and ordered.
@@ -144,11 +144,11 @@ struct FrameReadCoalescerTests {
         let id = WindowID(42)
         let answer = CGRect(x: 5, y: 6, width: 700, height: 500)
         loop.resolveWindowID = { _ in id }
-        loop.frameReads.reader = { _ in answer }
-        loop.frameReads.deliver = { work in
+        loop.axReads.reader = { _ in answer }
+        loop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        loop.frameReads.dispatchOverride = { pid, work in
+        loop.axReads.dispatchOverride = { pid, work in
             pump.work.append((pid: pid, run: work))
         }
         let pid = pid_t(getpid())
@@ -188,11 +188,11 @@ struct FrameReadCoalescerTests {
         let pump = Pump()
         let id = WindowID(42)
         loop.resolveWindowID = { _ in id }
-        loop.frameReads.reader = { _ in .zero }
-        loop.frameReads.deliver = { work in
+        loop.axReads.reader = { _ in .zero }
+        loop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        loop.frameReads.dispatchOverride = { pid, work in
+        loop.axReads.dispatchOverride = { pid, work in
             pump.work.append((pid: pid, run: work))
         }
         let pid = pid_t(getpid())

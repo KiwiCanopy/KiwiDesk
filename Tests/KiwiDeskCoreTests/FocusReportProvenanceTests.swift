@@ -70,9 +70,18 @@ struct FocusReportProvenanceTests {
         loop.frontmostPID = { nil }
         let dummy = element
         loop.axWindows = { _ in box.listed.map { _ in dummy } }
-        // One tracked window, so every ask — the reconcile's and
-        // the focus arm's own (#1088) — answers it.
+        // One tracked window, so the reconcile's ask answers it;
+        // the arm itself resolves from the map (#1088) and reads
+        // the frame through the coalescer, pumped synchronously
+        // here so the report lands inside the call.
         loop.resolveWindowID = { _ in box.listed.first }
+        loop.axReads.reader = { _ in
+            CGRect(x: 0, y: 0, width: 640, height: 480)
+        }
+        loop.axReads.deliver = { work in
+            MainActor.assumeIsolated { work() }
+        }
+        loop.axReads.dispatchOverride = { _, work in work() }
         loop.onEvent = { event in
             if case .windowFocused(let id) = event {
                 box.focused.append(id)
@@ -173,11 +182,12 @@ struct FocusReportProvenanceTests {
         #expect(box.focused == [WindowID(11)], "reported \(box.focused)")
     }
 
-    /// An element that answers no id is not reported. Stated
-    /// because it is NOT the #1088 route pin: the reconcile that
-    /// precedes the ask drops the window from the map too, so the
-    /// map route answers nil here as well (guard-prover); the ask
-    /// itself is held by the arm's docstring and the rule.
+    /// An element that answers no id is not reported. The
+    /// reconcile that precedes the arm drops a window the app no
+    /// longer lists from the map, so the map misses, the fallback
+    /// ask answers nil and nothing is read. The route itself —
+    /// map first, the dead-element drop at delivery — is
+    /// `FocusArmRouteTests`' (#1088).
     @Test("An element that no longer answers is not reported")
     func deadElementIsNotReported() {
         let (loop, box) = makeLoop()

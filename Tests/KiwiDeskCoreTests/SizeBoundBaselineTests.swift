@@ -78,11 +78,11 @@ struct SizeBoundBaselineTests {
         // `settleProbeAnswersSilentRefusal` needs — but the
         // read that takes it must be the one that waited out
         // the grace.
-        core.eventLoop.frameReads.reader = { _ in refused }
-        core.eventLoop.frameReads.deliver = { work in
+        core.eventLoop.axReads.reader = { _ in refused }
+        core.eventLoop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        core.eventLoop.frameReads.dispatchOverride = {
+        core.eventLoop.axReads.dispatchOverride = {
             _,
             work in
             work()
@@ -197,11 +197,11 @@ struct SizeBoundBaselineTests {
         // the test pins the discrimination rather than mere
         // silence: a learner that never promotes would pass the
         // assertions above and fail this one.
-        core.eventLoop.frameReads.reader = { _ in refused }
-        core.eventLoop.frameReads.deliver = { work in
+        core.eventLoop.axReads.reader = { _ in refused }
+        core.eventLoop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        core.eventLoop.frameReads.dispatchOverride = {
+        core.eventLoop.axReads.dispatchOverride = {
             _,
             work in
             work()

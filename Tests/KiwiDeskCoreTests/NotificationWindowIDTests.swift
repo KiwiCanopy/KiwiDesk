@@ -53,11 +53,11 @@ struct NotificationWindowIDTests {
             asks()
             return id
         }
-        loop.frameReads.reader = { _ in .zero }
-        loop.frameReads.deliver = { work in
+        loop.axReads.reader = { _ in .zero }
+        loop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        loop.frameReads.dispatchOverride = { _, _ in }
+        loop.axReads.dispatchOverride = { _, _ in }
         loop.observers[pid] = FakeObserver()
         return loop
     }
@@ -103,11 +103,11 @@ struct NotificationWindowIDTests {
         let pid = pid_t(getpid())
         let loop = makeLoop(id: id, pid: pid) {}
         loop.elements[pid] = [id: element]
-        loop.frameReads.reader = { _ in .zero }
+        loop.axReads.reader = { _ in .zero }
         // The read must actually RUN, or this test passes for
         // the wrong reason — the shared fixture discards the
         // work, which made a first draft of this vacuous.
-        loop.frameReads.dispatchOverride = { _, work in work() }
+        loop.axReads.dispatchOverride = { _, work in work() }
         var events: [KiwiEvent] = []
         loop.onEvent = { events.append($0) }
         loop.handle(

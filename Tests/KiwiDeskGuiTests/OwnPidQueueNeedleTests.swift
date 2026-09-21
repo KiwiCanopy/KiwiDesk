@@ -22,7 +22,7 @@ struct OwnPidQueueNeedleTests {
     func frameReadQueueKeepsOwnPidArm() throws {
         let source = try SourceScan.functionBody(
             of: "queue",
-            in: "FrameReadCoalescer.swift",
+            in: "AXReadCoalescer.swift",
             under: "Events"
         )
         #expect(source.contains("pid == getpid()"))
