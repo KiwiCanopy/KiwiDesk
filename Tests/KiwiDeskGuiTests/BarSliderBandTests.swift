@@ -114,27 +114,33 @@ struct BarSliderBandTests {
                             ?? rest.range(of: "\n        default")?
                             .lowerBound
                             ?? rest.endIndex
-                        let body = String(rest[..<end])
-                        guard
-                            let args = SourceScan.callArguments(
-                                of: "PtSlider(",
-                                in: body
+                        // Every slider the arm draws, not the
+                        // first: a second one beside the routed
+                        // one is the restatement the count exists
+                        // to catch (guard-prover, 2026-09-21).
+                        var body = String(rest[..<end])
+                        while let args = SourceScan.callArguments(
+                            of: "PtSlider(",
+                            in: body
+                        ) {
+                            rendered[key, default: 0] += 1
+                            #expect(
+                                args.contains(
+                                    "range: BarSliderBands.\(band)"
+                                ),
+                                "\(file.lastPathComponent) ▸ \(key) restates"
                             )
-                        else { continue }
-                        rendered[key, default: 0] += 1
-                        #expect(
-                            args.contains(
-                                "range: BarSliderBands.\(band)"
-                            ),
-                            "\(file.lastPathComponent) ▸ \(key) restates"
-                        )
+                            guard let made = body.range(of: "PtSlider(")
+                            else { break }
+                            body = String(body[made.upperBound...])
+                        }
                     }
                 }
             }
             for key in keys {
                 #expect(
                     rendered[key] == 1,
-                    "\(key) drawn \(rendered[key] ?? 0)×"
+                    "\(key) draws \(rendered[key] ?? 0) slider(s)"
                 )
             }
         }
