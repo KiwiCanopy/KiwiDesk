@@ -311,11 +311,16 @@ sites clipped alike.
   the item's and the front-app segment's fields by rendering
   them, and reads no site list, so a third site that framed by
   hand would stay green there.
-- The App Bar's icon slot (`AppBarItemView+GlyphSlot`) keeps its
-  own font-scaling and `snugToName` rulings, but its two anchors
-  place the INK through the one `BarTextGlyph.metrics` — centring
-  the advance drew the glyph a sixth of the slot to the left and
-  the snug left the slack between glyph and name (#1543,
-  `AppBarGlyphInkTests`, which renders both anchors). A bar
-  surface that anchors a text glyph by the advance is that
-  defect again.
+- **Anchor a bar text glyph by its INK, through
+  `BarTextGlyph.Metrics`' placements, never by its advance or its
+  frame** (#1543): centring the advance drew an App Bar glyph a
+  sixth of the slot to the left, and snugging the frame's
+  trailing edge to the name left the slack between glyph and
+  name. The App Bar's icon slot (`AppBarItemView+GlyphSlot`)
+  keeps its own font-scaling and `snugToName` rulings and takes
+  `originX(centringInkOn:)` / `originX(inkTrailingAt:)`; a badge
+  hangs on `glyphInkFrame`, not the label's frame, which carries
+  the cell's padding. `AppBarGlyphInkTests` renders both anchors
+  and holds their OUTPUT — a hand-copied CoreText read that
+  anchored the ink correctly would stay green there, so the
+  routing is review's.

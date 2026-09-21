@@ -47,36 +47,43 @@ extension AppBarItemView {
         // With a name, a narrow glyph snugs toward the text so
         // its slack doesn't widen the gap; icon-only items center.
         let snugToName = horizontal && !label.isHidden
-        // The frame takes the cell's own width, so the alignment
-        // holds — a narrower frame draws the string left-aligned
-        // (#1529) — and the INK is what centres and snugs, never
-        // the advance: a ligature's slack sits on its trailing
-        // side, so the advance's centre drew the glyph a sixth of
-        // the slot to the left and the snug left the slack between
-        // glyph and name (#1543). The frame's padding may cross
-        // the box; the ink, scaled with the cell above, does not.
+        // The frame takes the cell's own width so the alignment
+        // holds, and the INK is what centres and snugs, never the
+        // advance (#1529, #1543). The frame's padding may cross
+        // the box; the ink stays inside it while the cell's
+        // padding exceeds a ligature's overshoot of its advance.
         let width = ceil(cell.width)
-        let x: CGFloat
-        if let metrics = BarTextGlyph.metrics(of: glyphLabel) {
-            let lead = metrics.inkLead(inFrameOfWidth: width)
-            x =
-                snugToName
-                ? max(
-                    square.maxX - lead - metrics.ink.width,
-                    box.minX - lead
-                )
-                : box.midX - lead - metrics.ink.width / 2
-        } else {
-            x =
-                snugToName
-                ? max(square.maxX - width, box.minX)
-                : box.midX - width / 2
-        }
+        let metrics = BarTextGlyph.metrics(of: glyphLabel)
+        let x =
+            snugToName
+            ? max(
+                metrics.originX(
+                    inkTrailingAt: square.maxX,
+                    frameWidth: width
+                ),
+                box.minX - metrics.inkLead(inFrameOfWidth: width)
+            )
+            : metrics.originX(
+                centringInkOn: box.midX,
+                frameWidth: width
+            )
         glyphLabel.frame = CGRect(
             x: x.rounded(),
             y: (box.midY - cell.height / 2).rounded(),
             width: width,
             height: cell.height
+        )
+    }
+
+    /// The glyph's ink along the bar — what a badge hangs on.
+    var glyphInkFrame: CGRect {
+        let frame = glyphLabel.frame
+        let span = BarTextGlyph.metrics(of: glyphLabel).inkSpan(in: frame)
+        return CGRect(
+            x: span.lowerBound,
+            y: frame.minY,
+            width: span.upperBound - span.lowerBound,
+            height: frame.height
         )
     }
 }

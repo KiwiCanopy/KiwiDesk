@@ -17,7 +17,7 @@ extension SpaceBarGlyphCellTests {
         let field = try #require(view.appViews[2] as? NSTextField)
         let font = try Self.requireAppFont(field)
         #expect(font.pointSize < view.glyphSize)
-        let ink = BarTextGlyph.inkBounds(field.stringValue, font: font)
+        let ink = BarTextGlyph.metrics(field.stringValue, font: font).ink
         #expect(ink.width <= Self.cell + 0.01)
     }
 
@@ -46,13 +46,13 @@ extension SpaceBarGlyphCellTests {
         let ladder = NSFont.systemFont(ofSize: view.identifierFont)
         let slack = SpaceBarItemView.pad * 2
         try #require(
-            BarTextGlyph.inkBounds("WW", font: ladder).width
+            BarTextGlyph.metrics("WW", font: ladder).ink.width
                 > Self.cell + slack,
             "the fixture fits the pad"
         )
         #expect(font.pointSize < view.identifierFont)
         #expect(font.familyName == ladder.familyName)
-        let ink = BarTextGlyph.inkBounds("WW", font: font)
+        let ink = BarTextGlyph.metrics("WW", font: font).ink
         #expect(ink.width <= Self.cell + slack + 0.01)
     }
 
@@ -72,7 +72,7 @@ extension SpaceBarGlyphCellTests {
             field.font = try #require(AppFont.font(size: size))
             field.frame = BarTextGlyph.frame(for: field, in: cell)
             let font = try Self.requireAppFont(field)
-            let ink = BarTextGlyph.inkBounds(ligature, font: font)
+            let ink = BarTextGlyph.metrics(ligature, font: font).ink
             #expect(ink.width <= Self.cell + 0.01, "\(ligature)")
             if font.pointSize < size { scaled += 1 }
         }
@@ -103,7 +103,7 @@ extension SpaceBarGlyphCellTests {
         let field = view.identifierLabel
         let font = try #require(field.font)
         #expect(font.pointSize == view.identifierFont)
-        let ink = BarTextGlyph.inkBounds("100", font: font)
+        let ink = BarTextGlyph.metrics("100", font: font).ink
         try #require(ink.width > Self.cell, "the fixture fits the cell")
         #expect(ink.width <= Self.cell + SpaceBarItemView.pad * 2)
         let span = try #require(Self.inkSpan(of: field))

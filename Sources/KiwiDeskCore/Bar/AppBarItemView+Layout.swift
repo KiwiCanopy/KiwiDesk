@@ -36,9 +36,11 @@ extension AppBarItemView {
             x = label.frame.maxX + 2
             y = label.frame.minY - diameter / 3
         } else {
+            // The glyph's frame carries the cell's padding; the
+            // badge hangs on the ink (#1543).
             let box =
                 !glyphLabel.isHidden
-                ? glyphLabel.frame
+                ? glyphInkFrame
                 : (!iconView.isHidden ? iconView.frame : bounds)
             x = box.maxX - diameter / 2
             y = box.minY - diameter / 2

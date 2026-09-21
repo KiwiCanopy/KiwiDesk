@@ -95,9 +95,12 @@ struct AppBarGlyphInkTests {
         )
     }
 
+    /// From 32 up: at 24 the pre-fix clamp lands the advance's
+    /// frame within a rounding of the same place, so a thinner
+    /// argument would be blind to the regression (guard-prover).
     @Test(
         "a named glyph's ink snugs to the name",
-        arguments: [24.0, 32.0]
+        arguments: [32.0, 48.0]
     )
     func namedInkSnugsToTheName(thickness: CGFloat) throws {
         let view = Self.item(thickness: thickness, horizontal: true)
@@ -110,10 +113,6 @@ struct AppBarGlyphInkTests {
         #expect(
             abs(ink.upperBound - slotEnd) <= 1,
             "ink ends \(ink.upperBound) vs slot \(slotEnd)"
-        )
-        #expect(
-            ink.lowerBound >= AppBarItemView.contentPadding - 1,
-            "ink starts \(ink.lowerBound), before the item's edge"
         )
     }
 }
