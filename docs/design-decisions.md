@@ -4539,8 +4539,17 @@ The rulings:
   `.claude/rules/accessibility.md`'s). A switch KiwiDesk itself
   dispatches promises that flight at dispatch, before the OS says
   a word ([#1213](https://github.com/KiwiCanopy/KiwiDesk/issues/1213));
-  a gesture switch has no dispatch of ours to promise from, and
-  the trade is an [accepted limitation](accepted-limitations.md),
+  a gesture switch has no dispatch of ours to promise from, so its
+  vanish is read off the WindowServer instead: a sticky window it
+  still hosts on the Desktop the user just left is one the carry
+  owes a move, and the sweep refuses that vanish for the same
+  budget until the switch handler carries it
+  ([#1215](https://github.com/KiwiCanopy/KiwiDesk/issues/1215)).
+  The measurement that chose that reading over the on-screen
+  census — which drops the departing windows within tens of
+  milliseconds of the app's destroy, on either side of it — is on
+  the issue. What remains is a bounded wait for a sticky window
+  closed mid-switch, an [accepted limitation](accepted-limitations.md),
   stated there.
 
 

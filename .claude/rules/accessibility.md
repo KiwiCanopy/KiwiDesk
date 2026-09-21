@@ -284,11 +284,11 @@ editing AX code:
   hosts on a SHOWN Desktop was a close in teardown or the
   under-report the gate already refused.
 
-  **The gate has two expected-absence arms — carried (#1145)
-  and fullscreen (#1272) — which never read the switch grace;
-  inside it only the census clause stands down, and a new arm
-  joins `CarriedRemovalTests`' grace clause CLOSED**, so a vanish
-  no arm expects is still removed there. A sticky window the
+  **The gate has three expected-absence arms — carried (#1145),
+  reach-departure (#1215) and fullscreen (#1272) — which never
+  read the switch grace; inside it only the census clause stands
+  down, and a new arm joins `CarriedRemovalTests`' grace clause
+  CLOSED**, so a vanish no arm expects is still removed there. A sticky window the
   Desktop reach carries is EXPECTED present after a switch —
   the bridge MOVE puts it on the arriving Desktop — but for the
   transition's beat it is on no reading at all: its AX element
@@ -325,9 +325,43 @@ editing AX code:
   accepted set, and only there (`StickyReachDispatchStampTests`,
   `StickyReachDispatchSeamTests`).
   A GESTURE switch promises nothing — no dispatch of ours precedes
-  it — so a window whose element dies before the handler carried
-  it was never in flight and takes the ordinary departure — the
-  residue `docs/accepted-limitations.md` records. The refusal keeps the
+  it — and its destroys land 30–130 ms BEFORE the handler that
+  would carry the window (owner's swipe, TextEdit and Claude,
+  2026-09-21, 2 of 2), so a window whose element dies there was
+  never in flight and the pre-#1215 fold removed it from state:
+  the carry found nothing to move and the window stayed behind.
+  **The reach-departure arm (#1215) refuses that vanish on the
+  compositor's per-window host, never the on-screen census**,
+  which is a coin flip at that instant — measured dropping 70 ms
+  BEFORE TextEdit's destroy and 12 ms AFTER Claude's, so the
+  candidate that deferred to the census alone would have failed
+  on the app it was measured on. The reading is "the carry OWES
+  this window a move": the enabled set (`stickyReachCarried`, the
+  core's verdict — toggle, pin, bridge, fullscreen) AND the
+  compositor still hosting the window on a USER Desktop nobody
+  shows, which is the gone classifier's own `vanished` door
+  (`gonePresence`, #1146) read a moment earlier. A window hosted
+  on a SHOWN Desktop is a close in teardown — it lingers there
+  (#1272's finding) — and opens nothing; `gone` and an unreadable
+  host never refuse. The obligations are the carried arm's
+  exactly: one closed-by-default seam (`EventLoop.reachAwaitsCarry`,
+  wired once in `KiwiCore+Bootstrap` to
+  `KiwiCore.stickyReachAwaitsCarry`, pinned by
+  `ReachAwaitsCarrySeamTests` because the false default keeps every
+  gesture departure a close with every other suite green), refuse
+  only, census-blind on the SAME episode ledger and cap, the
+  destroy notification deferring through the one `expectedAbsence`
+  reading, state and registration kept so the switch handler —
+  running on the next turn — finds the window in state, MOVES it
+  and stamps it in flight, and the recheck's reconcile re-elements
+  the same id once the app re-lists it on the arriving Desktop.
+  Residue, recorded in `docs/accepted-limitations.md`: a
+  reach-enabled sticky window CLOSED while its Desktop is
+  mid-switch, or one the carry cannot move (its screen on a
+  fullscreen Space, a refused bridge move), takes its removal one
+  recheck budget late. `ReachDepartureRemovalTests` pins both
+  halves — the sweep's clauses and the notification's deferral.
+  The refusal keeps the
   STATE AND THE
   REGISTRATION — the dead element stays in `elements` — and the
   destroyed notification for a carried window defers to the

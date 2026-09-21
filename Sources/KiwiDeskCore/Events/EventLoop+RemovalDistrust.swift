@@ -11,20 +11,24 @@ extension EventLoop {
     /// already-armed one-shot queues without spending — and past
     /// the cap the episode goes quiet rather than polling a
     /// permanently mismatched app (#1157). The expected-absence
-    /// arms (#1145, #1272) spend the SAME arms census-blind, so
-    /// their budget is two `KiwiCore.transientRetrackDelay`
-    /// passes: ~1.5 s, past the ~1 s switch transition measured
-    /// on device (2026-09-01, macOS 26.6.2) in which a carried
-    /// window is on no reading, and past the ~0.5 s a fullscreen
-    /// transition orders a window out (Zen, 2026-09-05).
+    /// arms (#1145, #1215, #1272) spend the SAME arms
+    /// census-blind, so their budget is two
+    /// `KiwiCore.transientRetrackDelay` passes: ~1.5 s, past the
+    /// ~1 s switch transition measured on device (2026-09-01,
+    /// macOS 26.6.2) in which a carried window is on no reading,
+    /// past the ~0.5 s a fullscreen transition orders a window
+    /// out (Zen, 2026-09-05), and past the 30–130 ms by which a
+    /// gesture switch's destroys precede its handler (2026-09-21).
     static let removalRecheckCap = 2
 
     /// Why a vanished window is EXPECTED absent for a beat: the
-    /// sticky carry has it in flight (#1145), or a native
-    /// fullscreen transition has it ordered out (#1272). Both
-    /// spend the one episode ledger; the case names the log line.
+    /// sticky carry has it in flight (#1145), the carry OWES it a
+    /// move it has not made yet (#1215), or a native fullscreen
+    /// transition has it ordered out (#1272). All three spend the
+    /// one episode ledger; the case names the log line.
     enum ExpectedAbsence {
         case carried
+        case awaitingCarry
         case fullscreen
     }
 
@@ -47,6 +51,8 @@ extension EventLoop {
             switch blind {
             case .carried:
                 cause = "carried across Desktops (#1145)"
+            case .awaitingCarry:
+                cause = "awaiting the Desktop-reach carry (#1215)"
             case .fullscreen:
                 cause = "in a native fullscreen transition (#1272)"
             case nil:
@@ -69,7 +75,7 @@ extension EventLoop {
         }
     }
 
-    /// The expected-absence arms (#1145, #1272). A window an arm
+    /// The expected-absence arms (#1145, #1215, #1272). A window an arm
     /// expects present is refused outright while the census shows
     /// it (#1157's own rule), and census-blind while the ONE
     /// episode ledger still has arms (`removalRecheckCap`), so
@@ -103,6 +109,7 @@ extension EventLoop {
     /// about a window nobody moved.
     func expectedAbsence(of id: WindowID) -> ExpectedAbsence? {
         if carriedRemovalArmIsOpen(for: id) { return .carried }
+        if reachDepartureArmIsOpen(for: id) { return .awaitingCarry }
         if fullscreenRemovalArmIsOpen(for: id) { return .fullscreen }
         return nil
     }
@@ -112,6 +119,19 @@ extension EventLoop {
     /// own reading.
     func carriedRemovalArmIsOpen(for id: WindowID) -> Bool {
         carriedWindows().contains(id)
+    }
+
+    /// The reach-departure arm (#1215): on a GESTURE switch a
+    /// native app's element dies 30–130 ms BEFORE the switch
+    /// handler that would carry the window, and the on-screen
+    /// census is a coin flip at that instant (measured
+    /// 2026-09-21: dropped 70 ms before TextEdit's destroy, 12 ms
+    /// after Claude's). The compositor's per-window host is not:
+    /// it still hosts the window on the Desktop it left with, and
+    /// that Desktop is no longer shown. Read through the one
+    /// `reachAwaitsCarry` seam, which may only ever REFUSE.
+    func reachDepartureArmIsOpen(for id: WindowID) -> Bool {
+        reachAwaitsCarry(id)
     }
 
     /// The fullscreen arm (#1272, accessibility.md): EXIT is read

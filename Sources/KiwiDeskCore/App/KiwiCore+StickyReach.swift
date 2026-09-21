@@ -61,6 +61,30 @@ extension KiwiCore {
             .intersection(stickyReachCarried())
     }
 
+    /// The carry OWES `id` a move (#1215): reach-enabled, and the
+    /// compositor hosts it on a user Desktop nobody shows — it
+    /// left with its Desktop on a gesture switch whose handler has
+    /// not run yet. The event loop's removal gate reads this
+    /// through `EventLoop.reachAwaitsCarry`, so the destroy that
+    /// precedes the handler defers to the sweep and the handler
+    /// finds the window in state to carry. Answered from the gone
+    /// classifier's own compositor door (`gonePresence`) against
+    /// ONE topology reading: a window hosted on a SHOWN Desktop is
+    /// a close in teardown (it lingers there, #1272), one hosted
+    /// nowhere is a close, an unreadable host never refuses, and a
+    /// fullscreen Space is the fullscreen arm's. Priced per
+    /// vanished reach-enabled window: the reads `handleWindowGone`
+    /// pays a moment later anyway.
+    func stickyReachAwaitsCarry(_ id: WindowID) -> Bool {
+        guard stickyReachCarried().contains(id) else { return false }
+        let spaces = NativeSpaces.allSpaces()
+        let presence = gonePresence(of: id, spaces: spaces)
+        guard case .hosted(let space, false) = presence else {
+            return false
+        }
+        return NativeSpaces.isUserSpace(space, in: spaces)
+    }
+
     /// Stamps every window the carry WILL move on `displayUUID`
     /// as in flight at our own switch dispatch, before any
     /// notification (#1213, the argument on `inFlightWindow`).
