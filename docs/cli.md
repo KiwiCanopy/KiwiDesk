@@ -439,7 +439,7 @@ one line per source on stderr, so a script parsing stdout sees
 nothing new:
 
 ```
-still declared in profile "Work" — save the profile to make this durable
+still declared in profile "Work" — save the profile to drop it there
 still composed by the built-in "Developer" standard — save a profile to make this durable
 still created by init.lua — remove the call that creates it
 still listed in gui.json — remove it in Settings

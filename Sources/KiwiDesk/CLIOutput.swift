@@ -37,7 +37,7 @@ enum CLIOutput {
         if source.hasPrefix(profile) {
             let name = source.dropFirst(profile.count)
             return "still declared in profile \"\(name)\" — "
-                + "save the profile to make this durable"
+                + "save the profile to drop it there"
         }
         let standard = "standard:"
         if source.hasPrefix(standard) {

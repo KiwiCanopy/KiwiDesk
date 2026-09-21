@@ -26,7 +26,7 @@ struct CLIDeclaredInNoteTests {
         #expect(
             notes == [
                 "still declared in profile \"Work\" — "
-                    + "save the profile to make this durable",
+                    + "save the profile to drop it there",
                 "still composed by the built-in \"Developer\" "
                     + "standard — save a profile to make this durable",
                 "still created by init.lua — "
