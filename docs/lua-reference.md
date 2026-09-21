@@ -3400,26 +3400,25 @@ end)
 
 ## Sticky Windows
 
-A **sticky** window stays present on every space
-instead of hiding with its home space when you switch — the
-macOS-native analog is Mission Control's "Assign To → All
-Desktops". Stickiness is a per-window flag, flipped on a
-specific live window after it spawns; there is no app-matcher
-rule list. It is orthogonal to floating: a floating sticky
-window keeps its own frame everywhere, while a tiled sticky
-window tiles into every space's layout — on whichever space is
-active it joins the tiled members at a position derived from
-its position among its home space's tiles (clamped to the
-target space's count; nothing is stored). The flag survives
-the window closing and reopening (matched by app name and
-title, like the float override), and the window remains a real
-member of exactly one space — its home; presence everywhere is
-derived. Reordering the window on its home space therefore
-moves its derived slot on every space, while reordering it on
-a foreign space is not supported: a swap or bar drag targeting
-it there does nothing. On a crowded space a tiled sticky
-window keeps a fully visible slot instead of falling into the
-overflow cascade — a non-sticky window overflows in its place.
+A **sticky** window stays present on every space instead of
+hiding with its home space — KiwiDesk's own analog of Mission
+Control's "Assign To → All Desktops". The user guide's [Sticky
+Windows](user-guide.md#sticky-windows) section covers the
+everyday behavior; what follows is the Lua-facing model.
+
+Stickiness is a per-window flag on a live window; there is no
+app-matcher rule list. The flag survives the window closing and
+reopening, matched by app name and title like the float
+override. It is orthogonal to floating: a floating sticky
+window keeps its own frame everywhere, and a tiled sticky
+window tiles into every space's layout at a slot derived from
+its rank among its home space's tiles, clamped to the target
+space's count — nothing is stored. The window is a member of
+exactly one space, its home; reordering it there moves its
+derived slot on every space, while a swap or bar drag targeting
+it on a foreign space does nothing. On a crowded space a tiled
+sticky window keeps a fully visible slot and a non-sticky window
+overflows in its place.
 
 Sticky comes in two scopes:
 
@@ -3434,47 +3433,39 @@ Sticky comes in two scopes:
 Both share one off-switch (`make_unsticky`), and each verb sets
 its own scope outright — `make_sticky` on a display-sticky window
 turns it global, and vice versa. On a single monitor the two
-scopes coincide (one monitor is every monitor).
+scopes coincide.
 
-Moving a sticky window with `move_to_space` is guarded, since its
-whole point is to stay put: a **global** sticky refuses any
-target (it is already everywhere); a **display** sticky refuses a
-target on the *same* monitor but accepts one on *another* monitor,
-which re-homes it to that display. A refused move surfaces a brief
-pill on the window rather than silently doing nothing.
+`move_to_space` is guarded: a **global** sticky refuses any
+target; a **display** sticky refuses a target on the *same*
+monitor and accepts one on *another* monitor, which re-homes it
+to that display. A refused move shows a brief pill on the
+window.
 
-Because a sticky window can look identical to a normal one,
-KiwiDesk marks it: a mark in the window's top-right corner
-(toggleable — see `sticky.set_mark`; `infinity` for global,
-`pin.fill` for display) and the same per-scope badge on its Space
-Bar glyph — which travels with you, listed under whichever space
-is current (see `space_bar.set_sticky_badge`).
+A sticky window is marked in its top-right corner
+(`sticky.set_mark`; `infinity` for global, `pin.fill` for
+display), and the same per-scope badge rides its Space Bar
+glyph, listed under whichever space is current
+(`space_bar.set_sticky_badge`).
 
 Prefer sticky over an `ignore_rules` entry for "keep this
 visible everywhere": an ignored window loses tracking, focus
 navigation, borders, and its bar tile; a sticky window stays
 fully managed.
 
-On macOS that exposes the window-management bridge, the same
-promise follows you across **macOS Desktops**
-(`sticky.set_desktop_reach`, default on): switch Desktops and
-your sticky windows are carried along — each follows the Desktop
-switches of the screen it is on, whichever scope it has — and
-they are already there when you arrive. Without the bridge the
-setting is inert and sticky stays scoped to KiwiDesk's own
-Spaces within the current Desktop. A single window can opt out
-(or in) against the toggle with `override_sticky_reach`. Mission
-Control shows a carried window on one Desktop at a time: the one
-you are on.
+Where macOS exposes the window-management bridge, sticky also
+reaches across **macOS Desktops** (`sticky.set_desktop_reach`,
+default on; `override_sticky_reach` pins one window against it).
+Mission Control shows a carried window on one Desktop at a
+time: the one you are on.
 
 ### make_sticky
 
 **Expects:** nothing.
 
-**Does:** marks the focused window **globally** sticky — it stays
-visible on every space of every monitor. No mode
-argument: the window keeps its existing floating or tiled state.
-Overrides display sticky if the window already had it.
+**Does:** marks the focused window **globally** sticky — visible
+on every space of every monitor. No mode argument: the window
+keeps its existing floating or tiled state. Overrides display
+sticky if the window already had it.
 
 **Example:**
 
@@ -3487,10 +3478,9 @@ KiwiDesk.make_sticky()
 **Expects:** nothing.
 
 **Does:** marks the focused window sticky to its **current
-monitor** — it stays visible on every space of that one display,
-but not on other monitors. Moving it to a space on another
-monitor re-homes it there. Overrides global sticky if the window
-already had it.
+monitor** — visible on every space of that one display, not on
+other monitors. Moving it to a space on another monitor re-homes
+it there. Overrides global sticky if the window already had it.
 
 **Example:**
 
@@ -3516,10 +3506,9 @@ KiwiDesk.make_unsticky()
 **Expects:** nothing.
 
 **Does:** flips the focused window between **global** sticky and
-off in one verb. This is an everyday sticky command, offered as a
-bindable row in the Settings shortcut list; the explicit `make_*`
-verbs remain for scripts that need a specific direction. Toggling
-global on a display-sticky window switches it to global.
+off. Offered as a bindable row in the Settings shortcut list;
+the `make_*` verbs set a specific direction. Toggling global on
+a display-sticky window switches it to global.
 
 **Example:**
 
@@ -3533,11 +3522,10 @@ end)
 
 **Expects:** nothing.
 
-**Does:** flips the focused window between **display** sticky (its
-current monitor only) and off in one verb. The coarse-to-fine
-peer of `toggle_sticky`, also offered in the Settings shortcut
-list. Toggling display on a global-sticky window switches it to
-display.
+**Does:** flips the focused window between **display** sticky
+(its current monitor only) and off. Also offered in the Settings
+shortcut list. Toggling display on a global-sticky window
+switches it to display.
 
 **Example:**
 
@@ -3555,10 +3543,10 @@ end)
 global `sticky.set_desktop_reach` toggle — `on` keeps this
 window following you across macOS Desktops even with the toggle
 off, `off` leaves it on the Desktop it lives on even with the
-toggle on, and `auto` clears the pin so the toggle rules again. Session state:
-the pin does not survive the window closing. Without the
-window-management bridge the pin is recorded but nothing is
-carried.
+toggle on, and `auto` clears the pin so the toggle rules again.
+Session state: the pin does not survive the window closing.
+Without the window-management bridge the pin is recorded but
+nothing is carried.
 
 **Example:**
 
@@ -3574,11 +3562,9 @@ KiwiDesk.override_sticky_reach("on")
 **Does:** shows or hides the on-window sticky mark — the small
 glyph at a sticky window's top-right corner, and the carrier
 for sticky's refusal pills (home-space, can't-pile,
-move-blocked), which go silent with it. Applies exactly what
-you set, as does the Settings app's own toggle: turning it off
-while the Space Bar is also off leaves sticky state with no
-mark at all, which is a valid choice and neither surface
-argues with it.
+move-blocked), which go silent with it. Off while the Space Bar
+is also off leaves sticky state with no mark at all; neither
+this setting nor the Settings app's toggle refuses that.
 
 **Example:**
 
@@ -3591,13 +3577,13 @@ sticky.set_mark(false)
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the sticky mark — both the on-window mark and the
-Space Bar sticky badge read this one value, so the mark is the
-same color everywhere. The mark becomes a filled disc in the
-color with a legible auto-contrast glyph. `""` is Automatic: the
-badge keeps the count-badge fill and the mark is a neutral glyph
-on glass that flips black/white with light and dark mode (the
-shipped look). Any non-empty value must parse as a hex color.
+**Does:** tints the sticky mark — the on-window mark and the
+Space Bar sticky badge read this one value. The mark becomes a
+filled disc in the color with a legible auto-contrast glyph.
+`""` is Automatic: the badge keeps the count-badge fill and the
+mark is a neutral glyph on glass that flips black/white with
+light and dark mode. Any non-empty value must parse as a hex
+color.
 
 **Example:**
 
@@ -3611,13 +3597,12 @@ sticky.set_color("")          -- back to Automatic
 **Expects:** boolean (default `true`).
 
 **Does:** extends the sticky promise across **macOS Desktops**:
-with it on, every sticky window is carried along when its screen
-switches Desktop — switch however you like and the window is
-already there. One toggle covers both scopes; a single window
-can be pinned the other way with `override_sticky_reach`. Off, a
-sticky window stays on the Desktop it lives on and follows only
-KiwiDesk's own Spaces there. Inert on a macOS without the
-window-management bridge.
+on, every sticky window of either scope is carried along when
+its screen switches Desktop, and is already there when you
+arrive. A single window can be pinned the other way with
+`override_sticky_reach`. Off, a sticky window stays on the
+Desktop it lives on and follows only KiwiDesk's own Spaces
+there. Inert on a macOS without the window-management bridge.
 
 **Example:**
 
@@ -3632,10 +3617,9 @@ empty string `""` for **Automatic** (default `""`).
 
 **Does:** tints the Space Bar floating badge — a filled disc in
 the color with an auto-contrast glyph. Floating windows have no
-on-window mark (they float above the tiles, so they are
-self-evident), so this affects the Space Bar mark only. `""` is
-Automatic (the badge keeps the count-badge fill); any non-empty
-value must parse as a hex color.
+on-window mark, so this affects the Space Bar badge only. `""`
+is Automatic (the badge keeps the count-badge fill); any
+non-empty value must parse as a hex color.
 
 **Example:**
 
@@ -3650,39 +3634,33 @@ floating.set_color("#8E5DE0")
 **Expects:** an app bundle identifier (e.g. `com.apple.safari`).
 See [Finding a bundle identifier](#finding-a-bundle-identifier).
 
-**Does:** if the app is already running, focuses its window. If it
-is not running, launches a new instance. Matching and launching
-are keyed on the bundle id, so it finds apps anywhere on disk
-(including Finder and apps outside `/Applications`) regardless of
-system language.
+**Does:** if the app is already running, focuses its window; if
+not, launches a new instance. Matching and launching are keyed
+on the bundle id, so it finds apps anywhere on disk (Finder,
+apps outside `/Applications`) regardless of system language.
 
-Pressing again while one of the app's windows is focused advances
-to the app's **next** window — space order (the order spaces were
-created, the same order the Space Bar lists them), then slot
-order within a space, wrapping around — so repeat presses cycle
-through all of the app's windows. With a single window a repeat
-press changes nothing. The ring includes the app's windows that
-are up on other macOS Desktops, each at the rank it holds in its
-Space's row; cycling onto one switches to that Desktop and
+Pressing again while one of the app's windows is focused
+advances to the app's **next** window — space order (the order
+spaces were created, as the Space Bar lists them), then slot
+order within a space, wrapping around. With a single window a
+repeat press changes nothing. The ring includes the app's
+windows on other macOS Desktops, each at the rank it holds in
+its Space's row; cycling onto one switches to that Desktop and
 focuses it. That switch needs the Desktop bridge — without it
 the ring is the windows KiwiDesk currently tracks, see
 [Accepted limitations](accepted-limitations.md).
 
-If the app has **nothing on screen** — typically every one of its
-windows minimized — the shortcut restores exactly one and brings
-the app forward. It picks the window you minimized most recently;
-when KiwiDesk was not running to see the minimize (the windows
-were already parked before it launched, say) there is no such
-record and the app's own window order decides. While any window
-is still visible, minimized windows are left alone: the shortcut
-focuses and cycles the visible ones and never pulls a window back
-out of the Dock. A window up on another macOS Desktop counts: when nothing of
-the app is up on the Desktop you are looking at but a window is
-up on another one, the shortcut switches to that Desktop and
-focuses it instead of un-parking anything, and the restore runs
-only when nothing is up anywhere. On a Mac without the Desktop
-bridge, or where the per-Desktop window list cannot be read, the
-old behaviour stands — see
+If the app has **nothing on screen** — typically every window
+minimized — the shortcut restores exactly one and brings the app
+forward: the window you minimized most recently; when KiwiDesk
+was not running to see the minimize there is no such record and
+the app's own window order decides. While any window is still
+visible, minimized windows are left alone. A window up on
+another macOS Desktop counts: the shortcut switches to that
+Desktop and focuses it instead of un-parking anything, and the
+restore runs only when nothing is up anywhere. Without the
+Desktop bridge, or where the per-Desktop window list cannot be
+read, other Desktops are not consulted — see
 [Accepted limitations](accepted-limitations.md).
 
 **Example:**
@@ -3698,8 +3676,8 @@ end)
 **Expects:** an app bundle identifier (e.g. `com.apple.Terminal`).
 See [Finding a bundle identifier](#finding-a-bundle-identifier).
 
-**Does:** always launches a new instance of the app, even if one is
-already running. Matching is keyed on the bundle id, exactly like
+**Does:** always launches a new instance of the app, even if one
+is already running. Matching is keyed on the bundle id, like
 `pull_or_spawn`.
 
 **Example:**
@@ -3710,10 +3688,10 @@ KiwiDesk.bind("ctrl+alt+return", function()
 end)
 ```
 
-Both launch verbs are also reachable from the Settings app: an Open
-applications shortcut carries a per-row **Launch behavior** menu —
-*Open or Focus* (`pull_or_spawn`, the default) or *Open New*
-(`spawn_new`).
+Both launch verbs are also reachable from the Settings app: an
+Open applications shortcut carries a per-row **Launch behavior**
+menu — *Open or Focus* (`pull_or_spawn`, the default) or *Open
+New* (`spawn_new`).
 
 ## User Interface
 
@@ -3721,19 +3699,14 @@ applications shortcut carries a per-row **Launch behavior** menu —
 
 **Expects:** nothing.
 
-**Does:** opens the read-only **shortcuts panel** — a
-live glance at the active layer's bindings — or closes it if it is
-already open (the verb toggles). Bind it to a hotkey to summon the
-panel from anywhere. This is the same panel reached from the
-menu bar's *View Shortcuts…* row; the bound combo also shows beside
-the menu row and in the panel's own close hint. It is seeded to
-**⌃⌥K** by default, in the base layer and in every layer you
-create,
-so the reference is reachable from the keyboard out of the box.
-
-It is also offered as a bindable preset in the Settings app under
-**Shortcuts ▸ General** ("Show shortcuts panel"), where you can
-rebind or clear it per layer without hand-writing Lua.
+**Does:** opens the read-only **shortcuts panel** — a live glance
+at the active layer's bindings — or closes it if it is already
+open. It is the panel behind the menu bar's *View Shortcuts…*
+row; the bound combo shows beside that row and in the panel's
+close hint. Seeded to **⌃⌥K** in the base layer and in every
+layer you create, and offered under **Shortcuts ▸ General**
+("Show shortcuts panel"), where you can rebind or clear it per
+layer.
 
 **Example:**
 
@@ -3748,16 +3721,14 @@ end)
 **Expects:** nothing.
 
 **Does:** opens the **Settings** window and brings it to the
-front. It never closes the window — a toggle would discard
-unsaved draft edits — so pressing the key again with Settings
-already open returns it to **Home** rather than dismissing it,
-the same as opening Settings from the menu bar. Unsaved edits
-survive that; only the place you were reading resets.
+front. It never closes the window: pressing the key with
+Settings already open returns it to **Home**, the same as
+opening Settings from the menu bar. Unsaved edits survive that;
+only the place you were reading resets.
 
-It is seeded on **`⌃⌥,`**, in the base layer and in every layer
-you create in Settings, and offered under **Shortcuts ▸ General**
-("Open Settings"), where you can rebind it per layer without
-hand-writing Lua.
+Seeded on **`⌃⌥,`** in the base layer and in every layer you
+create in Settings, and offered under **Shortcuts ▸ General**
+("Open Settings"), where you can rebind it per layer.
 
 **Example:**
 
@@ -3806,28 +3777,28 @@ punctuation.
 - `escape`/`esc`
 
 **The numeric keypad.** Its ten digits are the **same key** as
-their number-row twin — a binding written `control+option+4` fires
-from either, and the two cannot be bound apart. Every other keypad
-key is its own key, bindable on its own: `keypadplus`,
-`keypadminus`, `keypadmultiply`, `keypaddivide`, `keypaddecimal`,
-`keypadequals`, `keypadenter`, `keypadclear`. `keypad0`–`keypad9`
-are accepted as spellings of the plain digits and resolve to them,
-so the recorder writes `4` whichever of the two keys you press.
+their number-row twin — a binding written `control+option+4`
+fires from either, and the two cannot be bound apart. Every
+other keypad key is its own key: `keypadplus`, `keypadminus`,
+`keypadmultiply`, `keypaddivide`, `keypaddecimal`,
+`keypadequals`, `keypadenter`, `keypadclear`.
+`keypad0`–`keypad9` are accepted as spellings of the plain
+digits and resolve to them, so the recorder writes `4` whichever
+of the two keys you press.
 
-Keypad digits work whenever the keypad sends digits. Apple keypads
-always do — a Clear key sits where PC keyboards put Num Lock — but
-a third-party PC keyboard with Num Lock **off** sends navigation
-keys from the keypad instead, and no keypad shortcut fires.
+Keypad digits work whenever the keypad sends digits. Apple
+keypads always do (a Clear key sits where PC keyboards put Num
+Lock); a third-party PC keyboard with Num Lock **off** sends
+navigation keys from the keypad instead, and no keypad shortcut
+fires.
 
 The Settings app's shortcut recorder writes the long forms
-(`command`, `option`, `semicolon`, …) for readability; every alias
-round-trips.
+(`command`, `option`, `semicolon`, …); every alias round-trips.
 
-A combo is any set of modifiers plus **exactly one key**. Multi-key
-chords (`cmd+j+k`) are not expressible — Carbon registers modifiers
-plus a single key code — so a hand-written combo that doesn't parse
-is never registered and the Shortcuts section flags the row with ⚠
-*"isn't a recognized shortcut"*.
+A combo is any set of modifiers plus **exactly one key**.
+Multi-key chords (`cmd+j+k`) are not expressible; a hand-written
+combo that doesn't parse is never registered, and the Shortcuts
+section flags the row with ⚠ *"isn't a recognized shortcut"*.
 
 ### Shortcut Layers
 
@@ -3859,206 +3830,171 @@ end)
 focused window resizes itself directly, in every layout mode:
 `"x"` changes its width by the delta, `"y"` its height, floored
 at its **effective minimum** — `min_window_size`, raised by a
-larger minimum the app itself enforces, once KiwiDesk has
-learned it (#677). A window already smaller than that just
-shrinks no further.
+larger minimum the app itself enforces once KiwiDesk has learned
+it (#677). A window already smaller than that shrinks no
+further.
 
 "Floating" here is the window's *effective* float (#1184): its
-own float flag — however it got one, whether you toggled it,
-`make_floating` set it, or a `float_rules` entry or KiwiDesk's
-own detection did — **or** any window in a space set to the
-floating layout, which places nothing and so leaves its members
-free-floating in exactly the same way.
+own float flag — set by a toggle, `make_floating`, a
+`float_rules` entry or KiwiDesk's own detection — **or**
+membership of a space set to the floating layout.
 
-The delta is split between **both** edges (#1091): a chord has
-no grabbed edge to anchor on, so a float grows and shrinks
-around its own centre rather than from its top-left corner. An
-edge already against the boundary is *pinned* and the whole
-delta goes to the other side, so a window parked against a
-screen edge grows into the space it actually has instead of
-stopping dead. The boundary is the screen's visible bounds less
-any bar strips on that space, so a float can no longer be grown
-underneath a bar; when both edges are against it, a grow refuses
-and flashes a pill. Shrinking pins the same way, which is what
-keeps grow and shrink reversible at an edge. Tiled windows
-only resize in bsp, stack, scrolling, and track layouts —
-monocle and grid report "not supported", and that failure
-flashes a pill on the focused window saying the layout has no
-resizing (#1255) — the no-op is correct, but a
-silent one at the keyboard reads as "KiwiDesk ignored me". Add
-the system alert sound to it with `set_refusal_sound(true)`;
-only a hotkey fire sounds, so CLI and IPC callers see the pill
-and read the error JSON without hearing anything.
+The delta is split between **both** edges (#1091), so a float
+grows and shrinks around its own centre. An edge already against
+the boundary is *pinned* and the whole delta goes to the other
+side; the boundary is the screen's visible bounds less any bar
+strips on that space, so a float cannot be grown underneath a
+bar, and when both edges are against it a grow refuses and
+flashes a pill. Shrinking pins the same way.
+
+Tiled windows resize only in bsp, stack, scrolling, and track
+layouts; monocle and grid report "not supported" and flash a
+pill on the focused window saying the layout has no resizing
+(#1255). `set_refusal_sound(true)` adds the system alert sound
+to that pill; only a hotkey fire sounds, so CLI and IPC callers
+see the pill and read the error JSON without hearing anything.
 
 A focused window in **native full screen** — floating or tiled,
-whatever the space's layout — is refused before either route,
-the float's or the layout's (#1298): it fills a macOS Space of
-its own, so there is no frame to write and no layout that places
-it. The press writes nothing, moves no other window, and flashes
-a pill on the full-screen window saying full-screen windows
-can't be resized; CLI and IPC callers read `the focused window
-is fullscreen`.
+whatever the space's layout — is refused ahead of both routes
+(#1298): the press writes nothing, moves no other window, and
+flashes a pill on the full-screen window saying full-screen
+windows can't be resized; CLI and IPC callers read `the focused
+window is fullscreen`.
 
-Distinct from the monocle/grid alert (#933): a resize a size
-limit **truncates** — a shrink reaching the focused window's
-effective minimum, a grow stopped where a neighbor would
-drop below its own, or a grow reaching the focused window's
-own learned app maximum (scrolling, #1055; cued on the
-resized window alone) — still applies the part that fits, and
-cues the refusal visually on the first truncated attempt —
-and on a scrolling space, a press the focused window's own
-learned bound blocks outright (grow at its maximum, shrink at
-its minimum) instead refuses in place: nothing applied, no
-neighbor moved, same bounce and pill (#1057). The
-focus ring gives the same rubber-band bounce as a dead-end
-focus move (#436), and a pill names the reason on the window
-that cannot shrink — and on a refused grow the resized
-window additionally names the reason while the blocking
-neighbor marks itself at its minimum. Keyboard
-and mouse resizes share these clamps and cues.
+A resize a size limit **truncates** (#933) — a shrink reaching
+the focused window's effective minimum, a grow stopped where a
+neighbor would drop below its own, or a grow reaching the
+focused window's learned app maximum (scrolling, #1055; cued on
+the resized window alone) — still applies the part that fits and
+cues the refusal on the first truncated attempt. On a scrolling
+space, a press the focused window's own learned bound blocks
+outright (grow at its maximum, shrink at its minimum) refuses in
+place: nothing applied, no neighbor moved, same bounce and pill
+(#1057). The focus ring gives the rubber-band bounce of a
+dead-end focus move (#436), and a pill names the reason on the
+window that cannot shrink; on a refused grow the resized window
+also names the reason while the blocking neighbor marks itself
+at its minimum. Keyboard and mouse resizes share these clamps
+and cues.
 
-The pill also says *whose* minimum it was (#1261): "Minimum
-window size reached" and "Neighboring window at its minimum
-size" mean `min_window_size` bound, and lowering it helps; "This
-app won't go smaller" and "Neighboring app won't go smaller" mean
-the app's own learned floor bound, which no setting moves.
+The pill says *whose* minimum it was (#1261): "Minimum window
+size reached" and "Neighboring window at its minimum size" mean
+the `min_window_size` bound, and lowering it helps; "This app
+won't go smaller" and "Neighboring app won't go smaller" mean
+the app's own learned floor, which no setting moves.
 
 In **bsp**, the window that cannot shrink is often not the one
 you are resizing (#1259). A window holding the whole height —
 the first window, when the layout splits side by side — cannot
-change height at all; that press moves the split *between its
-neighbours* instead, and when one of them reaches its minimum
-the pill goes on that neighbour, while the focused window reads
-"Neighboring window at its minimum size" like any other blocked
-grow. Where the arrangement has no split on that axis at all —
-two windows side by side, asked for height — the press says so
-on the first try ("This zone divides widths, not heights"),
-since nothing is being reached there; the stored ratio still
-records what a later split on that axis will open at. Where the group an axis divides holds only ONE member, the
-press says so instead (#1258) — "Nothing to divide here — try
-the other axis" where the other one does divide, and "This zone
-has nothing to divide" where neither does. That covers a stack
-window alone in its column, a stack space with an empty stack
-zone, a space whose windows share one track, a window that
-fills its own track, and a bsp space of one. Where the press
-still returns an error — the stack and track cases — CLI and IPC
-callers get the longer, layout-specific text, since a machine
-contract can spend words a transient pill cannot; the two ratio
-cases report success, because the ratio is stored either way and
-only the cue reads how many windows are there to divide.
+change height; that press moves the split *between its
+neighbours*, and when one of them reaches its minimum the pill
+goes on that neighbour while the focused window reads
+"Neighboring window at its minimum size". Where the arrangement
+has no split on that axis — two windows side by side, asked for
+height — the press says so on the first try ("This zone divides
+widths, not heights"); the stored ratio still records what a
+later split on that axis will open at. Where the group an axis
+divides holds only ONE member, the press says so instead
+(#1258): "Nothing to divide here — try the other axis" where
+the other axis does divide, and "This zone has nothing to
+divide" where neither does. That covers a stack window alone in
+its column, a stack space with an empty stack zone, a space
+whose windows share one track, a window that fills its own
+track, and a bsp space of one. In the stack and track cases the
+press returns an error and CLI and IPC callers get the longer,
+layout-specific text; the two ratio cases report success, since
+the ratio is stored either way.
 
-**Held, the chord glides (#1056, retimed #1082).** A hotkey
-whose press ran exactly one command — a successful `resize` —
-keeps applying while you hold it: one precise step on the press,
-then, after your Mac's own key-repeat delay, a continuous
-**glide** on the display's own frame clock rather than a repeat
-on a timer. The glide moves a fraction of *that binding's own
-delta* each frame, at a speed measured in steps per second: it
-starts gently, so a short hold is still fine adjustment, and
-ramps up over a second or two, so a large adjustment stops
-costing a drum roll. Because the amount moved is the frame's
-elapsed time × that speed, the same hold travels the same
+**Held, the chord glides (#1056, #1082).** A hotkey whose press
+ran exactly one command — a successful `resize` — keeps applying
+while you hold it: one step on the press, then, after your Mac's
+own key-repeat delay, a continuous **glide** on the display's
+frame clock. Each frame moves a fraction of *that binding's own
+delta*, at a speed in steps per second that starts gently and
+ramps up over a second or two. The amount moved is the frame's
+elapsed time × that speed, so the same hold travels the same
 distance on a 60 Hz display, a 120 Hz one, and a ProMotion panel
-changing rate mid-hold — a faster panel buys smoother motion,
-not more speed.
+changing rate mid-hold.
 
-What the glide re-issues is the **`resize` command your press
-ran**, with a scaled delta — not the binding's Lua body, which
-runs exactly once, on the press. Whether a binding glides at all
-is decided by what its press actually **did**, not by how it is
-written: a body that runs two commands, or a different verb,
-fires once per press exactly as before — and `focus`/`swap`
-deliberately never glide, because overshooting focus is worse
-than pressing again. A body that rebuilds its own bindings
-(`bind` inside the body) also arms nothing: the registration the
-press arrived on is gone, so no key-release could ever arrive to
-stop the glide.
+The glide re-issues the **`resize` command your press ran**,
+with a scaled delta — never the binding's Lua body, which runs
+exactly once, on the press. Whether a binding glides is decided
+by what its press **did**: a body that runs two commands, or a
+different verb, fires once per press, and `focus`/`swap` never
+glide. A body that rebuilds its own bindings (`bind` inside the
+body) arms nothing.
 
 A refusal that cues (#933/#1055) ends the run, so a held shrink
-parked on a minimum flashes its pill once rather than
-continuously, while scrolling's wordless out-of-screen stop
-keeps gliding harmlessly until release, matching its silence.
+parked on a minimum flashes its pill once; scrolling's wordless
+out-of-screen stop keeps gliding harmlessly until release.
 Releasing the chord, switching layers, or arming a Settings
 shortcut recorder ends the run immediately.
 
 A glide writes each frame instantly, on every layout and on a
-floating window alike — the glide is itself the motion, so there
-is nothing left for an animation to smooth, and a hold therefore
-feels the same whatever `animations.set_on_window_resize` says
-and under system **Reduce Motion** (#1082/#1090).
+floating window alike, whatever `animations.set_on_window_resize`
+says and under system **Reduce Motion** (#1082/#1090).
 
-A floating resize measures from the window's own frame, so it
-accumulates against what was last *commanded* rather than
-against the lagging AX echo — the in-flight animation's target
-where one exists (#129), and the glide's own record where none
-does. That record is readable only by a glide frame and is
-retired at the start of the next press, so nothing it commanded
-can carry into a later one. A fast run of separate **presses** still
-re-reads the echo between them and can come up short; see
+A floating resize accumulates against what was last
+*commanded* — the in-flight animation's target where one exists
+(#129), and the glide's own record where none does — rather than
+the lagging AX echo. That record is readable only by a glide
+frame and is retired at the start of the next press. A fast run
+of separate **presses** still re-reads the echo between them and
+can come up short; see
 [accepted limitations](accepted-limitations.md).
 
-What the
-`delta` actually adjusts depends on the layout:
+What the `delta` adjusts depends on the layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one
-  (`bsp.set_ratio_v`) — genuinely independent width and height.
-  Focus-aware in direction (#122): a positive delta grows the
-  *focused* window's region, so with a right/bottom window
-  focused it lowers the shared ratio — the same side rule a
-  mouse drag of that window's edge uses. All same-orientation
-  splits still share the one ratio; with no focused window the
-  delta moves the left/top region, as before. Like the stack,
-  the write stops at the bound that keeps both regions at
-  their effective minimums (per-side since #933) within the
-  area the layout fills (#383) —
-  the display minus any Space Bar strip — so a resize no longer
-  suddenly collapses the split into an overlap pile.
+  (`bsp.set_ratio_v`). Focus-aware in direction (#122): a
+  positive delta grows the *focused* window's region, so with a
+  right/bottom window focused it lowers the shared ratio — the
+  same side rule a mouse drag of that window's edge uses. All
+  same-orientation splits share the one ratio; with no focused
+  window the delta moves the left/top region. The write stops
+  at the bound that keeps both regions at their effective
+  minimums (per side, #933) within the area the layout fills
+  (#383) — the display minus any Space Bar strip.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
-  with a stack window focused, it lowers the ratio (the column
-  grows). The write stops at the bound that keeps both zones
-  at their effective minimums (per-zone since #933) within the
-  area the layout fills (#44).
-  `"y"`
-  grows or shrinks the focused window's vertical
+  with a stack window focused, it lowers the ratio. The write
+  stops at the bound that keeps both zones at their effective
+  minimums (per zone, #933) within the area the layout fills
+  (#44). `"y"` grows or shrinks the focused window's vertical
   share of its column via per-window weights — session-scoped,
   never saved to a profile, and reset when a window leaves the
   space or KiwiDesk restarts. If the focused window is alone in
   its column, `"y"` reports an error.
 
   A bsp ratio or the master ratio that presses moved past an
-  app's minimum before that minimum was learned heals back at the
-  next layout pass, and a window arriving into a region narrower
-  than its minimum gets the same move — the split-layout row of
+  app's minimum before that minimum was learned heals back at
+  the next layout pass, and a window arriving into a region
+  narrower than its minimum gets the same move — the
+  split-layout row of
   [accepted limitations](accepted-limitations.md) has what
   remains.
-- **scrolling** — it adjusts the slot size in real points along
+- **scrolling** — adjusts the slot size in real points along
   the layout's own scroll axis (columns for horizontal, rows for
-  vertical), regardless of which `axis` you pass — the `x`/`y`
-  argument does not steer it.
-- **track** — every resize has one true target (#128, the
-  point of the layout). The axis **across** the tracks (`"x"`
-  for columns, `"y"` for rows) grows or shrinks the focused
-  window's whole *track*; the axis **along** them grows the
-  focused window's *share within its track* — the same
-  per-window weights as the stack's `"y"` path, with the same
-  session-scoped lifetime and effective-minimum cap (#933). A
-  single
-  track cannot trade cross-axis area, and a window alone in
-  its track has no share to grow; both report an error.
-  In the track layout — and only there — session weights are
-  also **healed** whenever the arrangement changes around them
-  (#944): a weight that was legal when you resized can stop
-  fitting once another track opens or a member joins a track —
-  the layout would answer by collapsing the space into an
-  overlap pile — so the next layout pass shaves the largest
-  weights just enough that every track and share can still
-  hold `min_window_size`. Weights you set that still fit are
+  vertical), whichever `axis` you pass — the `x`/`y` argument
+  does not steer it.
+- **track** — every resize has one target (#128). The axis
+  **across** the tracks (`"x"` for columns, `"y"` for rows)
+  grows or shrinks the focused window's whole *track*; the axis
+  **along** them grows the focused window's *share within its
+  track* — the same per-window weights as the stack's `"y"`
+  path, with the same session-scoped lifetime and
+  effective-minimum cap (#933). A single track cannot trade
+  cross-axis area, and a window alone in its track has no share
+  to grow; both report an error. In the track layout — and only
+  there — session weights are also **healed** whenever the
+  arrangement changes around them (#944): once another track
+  opens or a member joins a track, the next layout pass shaves
+  the largest weights just enough that every track and share
+  can still hold `min_window_size`. Weights that still fit are
   never touched. A stack column's per-window weights keep only
-  the write-time clamp; that asymmetry is deliberate (see the
-  accepted limitations).
+  the write-time clamp (see the accepted limitations).
 
 :::unreleased
 **Where the ratio write lands (#458):** in a **session layer
@@ -4126,8 +4062,8 @@ KiwiDesk.define_layer("service", { --[[ bindings ]] },
 
 ### Config Cascade (Per-Profile Keybindings)
 
-Keybindings resolve through a two-level cascade, mirroring
-how tiling resolves (global settings ← profile):
+Keybindings resolve through a two-level cascade, like tiling
+(global settings ← profile):
 
 > **The base config is the seed; the profile wins.** The base
 > shortcuts (the app's `gui.json`, or your Lua-declared binds
@@ -4138,21 +4074,20 @@ how tiling resolves (global settings ← profile):
 > Event hooks fire on their event — they are never a cascade
 > layer.
 
-The override is **sparse and soft by design**:
+The override is **sparse and soft**:
 
 - A profile stores only the layers and rows that diverge; a
   profile without a `"layers"` key inherits the base shortcuts
   completely.
-- Every base binding the profile doesn't rebind survives — in
-  particular your profile-switch shortcut, so a profile can
-  never trap you by *omission*. Rebinding the same combo
-  differently per profile stays possible.
+- Every base binding the profile doesn't rebind survives — your
+  profile-switch shortcut included, so a profile can never trap
+  you by *omission*. Rebinding the same combo differently per
+  profile stays possible.
 - Removing a base binding per profile is not expressible:
-  deleting an inherited row in the editor just resets it. To
-  disable a combo in one profile, rebind it to a no-op action.
-  The same applies to a base layer's icon — a profile
-  can *change* it, but clearing it just reverts to the base
-  icon.
+  deleting an inherited row in the editor resets it. To disable
+  a combo in one profile, rebind it to a no-op action. The same
+  applies to a base layer's icon — a profile can *change* it,
+  but clearing it reverts to the base icon.
 - Keybindings live in ONE home: the structured config (gui.json +
   profiles) when GUI-managed, or your `init.lua` otherwise —
   never merged. Hand-written binds that evade the managed-
@@ -4188,34 +4123,32 @@ end)
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 | `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
 
-The window lifecycle events fire even when focus does not change (a
-background window opening or closing), so status bars stay current
-without polling. `space` is always the space the window lives in —
-for `window_destroyed`, the one it disappeared from, even when that
-space is not active. In the CLI event stream the key is `space_id`
-(matching `space_change`) and an unknown space is JSON `null`; the
-Lua callback receives `""` instead, since a positional `nil` would
-truncate the argument list.
+The window lifecycle events fire even when focus does not change
+(a background window opening or closing). `space` is always the
+space the window lives in — for `window_destroyed`, the one it
+disappeared from, even when that space is not active. In the
+CLI event stream the key is `space_id` (matching `space_change`)
+and an unknown space is JSON `null`; the Lua callback receives
+`""` instead.
 
-Every window event also carries the owning app's `bundle_id` — the
-stable identity key that app rules (`float_rules`, `app_rules`) and
-`pull_or_spawn` match on, unlike the locale-dependent display `app`
-name. It is the trailing Lua argument (skip it if you don't need
-it), `""` for unbundled processes; in the CLI event stream the key
-is `bundle_id`, JSON `null` when unknown.
+Every window event also carries the owning app's `bundle_id` —
+the identity key that app rules (`float_rules`, `app_rules`) and
+`pull_or_spawn` match on; the display `app` name is
+locale-dependent. It is the trailing Lua argument (skip it if
+you don't need it), `""` for unbundled processes; in the CLI
+event stream the key is `bundle_id`, JSON `null` when unknown.
 
 `window_moved_to_space` fires on an explicit `move_to_space`
-(with or without follow) when the target differs from the window's
-current space. Bulk reassignments — profile loads, session restore —
-stay silent. JSON keys: `from_space_id` (null if unknown) and
-`to_space_id`.
+(with or without follow) when the target differs from the
+window's current space. Bulk reassignments — profile loads,
+session restore — stay silent. JSON keys: `from_space_id` (null
+if unknown) and `to_space_id`.
 
 The lifecycle events track the *visible window set*, not app
-lifecycle — windows also *appear to* come and go: deminiaturizing
-surfaces as `window_created`, and switching macOS Desktops
-makes every managed window on the old Desktop vanish from the
-accessibility tree and reappear on return. The `reason` argument
-says which kind of change fired:
+lifecycle: deminiaturizing surfaces as `window_created`, and
+switching macOS Desktops makes every managed window on the old
+Desktop vanish from the accessibility tree and reappear on
+return. The `reason` argument says which kind of change fired:
 
 - `window_created` — `"new"` (a genuinely new window),
   `"returned"` (back from another macOS Desktop, from an app that
@@ -4230,7 +4163,7 @@ says which kind of change fired:
   sixth argument, `desktop`, names the Desktop holding it where
   the Desktop can be read — `nil` on a Mac without SkyLight).
 
-So a bar callback that only cares about real lifecycle filters in
+A bar callback that only cares about real lifecycle filters in
 one line:
 
 ```lua
@@ -4243,22 +4176,19 @@ KiwiDesk.on("window_destroyed",
     end)
 ```
 
-The reason is read off the WindowServer rather than a timer,
-so a fast app folding its windows before the switch is noticed
+A fast app that folds its windows before the switch is noticed
 still reports `"vanished"`. A window closed *while its macOS
 Desktop is off-screen* is reported `"closed"` when KiwiDesk next
 reads the Desktops — at the next Desktop switch, or within about
 five seconds while any window is away — so such a window fires
-two destroys, `"vanished"` then `"closed"`. Refreshing on
-`desktop_change` — the re-query pattern in the sketchybar recipe —
-remains the safe shape for a consumer that keeps its own list.
+two destroys, `"vanished"` then `"closed"`. A consumer that
+keeps its own list re-queries on `desktop_change` (the pattern
+in the sketchybar recipe).
 
 ## External Commands
 
-Config callbacks run on KiwiDesk's main thread — a shell command that
-waits synchronously there would freeze window management, animations,
-and the menu bar. External commands therefore always run in the
-background.
+Config callbacks run on KiwiDesk's main thread, so external
+commands always run in the background.
 
 ### KiwiDesk.exec
 
@@ -4278,47 +4208,39 @@ background.
 - `timeout` — an optional number of seconds. If the command has
   not exited by then, it receives SIGTERM and the callback is
   still invoked with the termination code. **Defaults to 30 s**
-  when omitted, so a wedged hook command can never accumulate
-  without bound — hook commands finish in milliseconds, so the
-  deadline only bites a genuine hang. Pass `0` (or a negative
-  number) for *no* limit, for a deliberately long-running command.
+  when omitted. Pass `0` (or a negative number) for *no* limit.
 - `dedup` — an optional boolean, **default `true`**. While an
   identical `command` string is already running, a second `exec`
-  of it is skipped (returns `nil`) rather than spawning again. For
-  trigger-style pokes — `sketchybar --trigger …`, where the
-  handler re-reads full state anyway — this is the correct
-  semantics: a second poke while one is pending adds nothing, and
-  it caps a wedged receiver at one stuck child per command instead
-  of a per-event pile-up. Pass `false` for commands you genuinely
-  want to run in parallel with an identical copy of themselves.
-  Note a skipped call **does not invoke its callback** — no child
-  ran — so don't rely on a callback firing for a command that may
-  still be in flight.
+  of it is skipped (returns `nil`) rather than spawning again —
+  the shape a trigger-style poke such as `sketchybar --trigger …`
+  wants. Pass `false` for commands that may run in parallel with
+  an identical copy of themselves. A skipped call **does not
+  invoke its callback** — no child ran.
 
 **Does:** starts the command in the background and returns
-immediately — KiwiDesk never waits for it. Returns the child's pid
-(a number), or `nil` when the command could not be started **or was
-skipped as a duplicate** (see `dedup`). If the config reloads before
-the command finishes, the callback is dropped silently.
+immediately. Returns the child's pid (a number), or `nil` when
+the command could not be started **or was skipped as a
+duplicate** (see `dedup`). If the config reloads before the
+command finishes, the callback is dropped silently.
 
-**Output cap:** stdout and stderr are each capped at ~1 MB. Output
-beyond the cap is still read (so the child never blocks writing), but
-the string delivered to the callback is truncated and ends with
-`[output truncated at 1 MB]`.
+**Output cap:** stdout and stderr are each capped at ~1 MB.
+Output beyond the cap is still read (so the child never blocks
+writing), but the string delivered to the callback is truncated
+and ends with `[output truncated at 1 MB]`.
 
-**Quit policy:** exec children are fire-and-forget. When KiwiDesk
-exits, running children are re-parented to launchd and finish
-naturally — a `sketchybar --notify` hook will complete even if
-KiwiDesk quits first. The 30 s default `timeout` still bounds each
-one; pass `timeout = 0` for a command that must be allowed to run
+**Quit policy:** exec children are fire-and-forget. When
+KiwiDesk exits, running children are re-parented to launchd and
+finish naturally — a `sketchybar --notify` hook completes even
+if KiwiDesk quits first. The 30 s default `timeout` still bounds
+each one; pass `timeout = 0` for a command that must run
 indefinitely.
 
-**Hanging hooks:** when the number of outstanding children crosses
-20, KiwiDesk logs a warning (`N exec children outstanding — a hook
-command may be hanging`). The live count is also on
-`get_state().exec_running`. With the default `timeout` and `dedup`,
-even a permanently wedged receiver leaves at most one stuck child
-per distinct command, reaped every 30 s.
+**Hanging hooks:** when the number of outstanding children
+crosses 20, KiwiDesk logs a warning (`N exec children
+outstanding — a hook command may be hanging`). The live count is
+on `get_state().exec_running`. With the default `timeout` and
+`dedup`, a permanently wedged receiver leaves at most one stuck
+child per distinct command, reaped every 30 s.
 
 The child's `PATH` gets `/opt/homebrew/bin` and `/usr/local/bin`
 appended, so Homebrew tools (`sketchybar`, `borders`, …) resolve
@@ -4348,19 +4270,19 @@ KiwiDesk.exec("long-running-tool", nil, 0, false)
 
 ### os.execute
 
-**Expects:** a command string, like standard Lua. Calling it with no
-argument keeps its stdlib meaning ("is a shell available?") and
-returns `true`.
+**Expects:** a command string, like standard Lua. Calling it with
+no argument keeps its stdlib meaning ("is a shell available?")
+and returns `true`.
 
-**Does:** forwards the command to `KiwiDesk.exec` and returns `true`
-**immediately** — it does *not* wait, and the return value says
-nothing about whether the command succeeded. When you need the exit
-code or output, use `KiwiDesk.exec` with a callback instead.
+**Does:** forwards the command to `KiwiDesk.exec` and returns
+`true` **immediately** — it does *not* wait, and the return value
+says nothing about whether the command succeeded. For the exit
+code or output, use `KiwiDesk.exec` with a callback.
 
-Because it routes through `KiwiDesk.exec`, `os.execute` inherits its
-defaults: a 30 s timeout and identical-command dedup. A genuinely
-long-running `os.execute` is killed at 30 s — call `KiwiDesk.exec`
-directly with `timeout = 0` for one that must run unbounded.
+It inherits `KiwiDesk.exec`'s defaults: a 30 s timeout and
+identical-command dedup. A long-running `os.execute` is killed
+at 30 s — call `KiwiDesk.exec` directly with `timeout = 0` for
+one that must run unbounded.
 
 **Example:**
 
@@ -4377,9 +4299,8 @@ os.execute("touch /tmp/marker")
 
 **Expects:** n/a — any call is rejected.
 
-**Does:** returns `nil` plus an explanatory message instead of a file
-handle. Reading a child's output synchronously cannot be done without
-blocking the app; `KiwiDesk.exec` with a callback delivers the same
+**Does:** returns `nil` plus an explanatory message instead of a
+file handle. `KiwiDesk.exec` with a callback delivers the same
 output asynchronously.
 
 **Example:**
@@ -4395,21 +4316,21 @@ end)
 
 **Expects:** n/a — any call is a no-op with a log message.
 
-**Does:** calling `os.exit()` from a config file would kill the
-KiwiDesk process immediately, including your window layout. It is
-stubbed out to prevent accidental or malicious instant app
-termination. If you want to restart KiwiDesk use `kiwidesk service restart` from a terminal or a keybinding via `KiwiDesk.exec`.
+**Does:** nothing — the real `os.exit()` would kill the KiwiDesk
+process immediately, window layout included, so it is stubbed
+out. To restart KiwiDesk use `kiwidesk service restart` from a
+terminal or a keybinding via `KiwiDesk.exec`.
 
-Note that, unlike real `os.exit`, the stub **returns** — code after
-the call keeps running. Don't rely on `os.exit()` to halt a script;
-use an explicit `return` or `if/else`.
+Unlike the real `os.exit`, the stub **returns** — code after the
+call keeps running. Halt a script with an explicit `return` or
+`if/else`, never `os.exit()`.
 
 ## Startup Scripts
 
-Commands at `init.lua` top level run on load and on reload. See the
-External Commands section above for `KiwiDesk.exec` semantics (e.g.,
-commands are async, a callback is optional). Any tiling commands at
-top level are applied before profiles load, serving as base state.
+Commands at `init.lua` top level run on load and on reload; see
+[External Commands](#external-commands) for `KiwiDesk.exec`
+semantics. Any tiling commands at top level are applied before
+profiles load, as base state.
 
 **Example:**
 
@@ -4462,12 +4383,13 @@ KiwiDesk.set_default_profile("Developer Rig")
 **Profiles are the single source of truth for tiling.** A profile
 owns the gaps, per-space layout modes, layout parameters,
 animations, mouse-resize behavior, and the space→monitor
-assignments — plus, optionally, **sparse keybinding and window-rule
-overrides** that shadow the base only while the profile is active.
-The global declarations live in `gui.json` when GUI-managed, or in
-your hand-written `init.lua` otherwise. `app_rules`, `float_rules`,
-and `ignore_rules` all have a per-profile tier; profile bindings do
-not, because they select the profile itself.
+assignments — plus, optionally, **sparse keybinding and
+window-rule overrides** that shadow the base only while the
+profile is active. The global declarations live in `gui.json`
+when GUI-managed, or in your hand-written `init.lua` otherwise.
+`app_rules`, `float_rules`, and `ignore_rules` all have a
+per-profile tier; profile bindings do not, since they select the
+profile itself.
 
 ### set_fallback_space
 
@@ -4521,11 +4443,10 @@ screen change picks by the connected screens instead. Desktops
 without a binding keep whatever profile is active. A binding
 takes effect when that Desktop next activates. With "Displays
 have separate Spaces" off, or with a single screen, the main
-display's Desktop is simply *the* Desktop, so the trigger reads
-as before. In a hand-written config the call lives in
-`init.lua`; when the config is GUI-managed, bindings are stored
-in `gui.json` (`profile_bindings`) and edited in the Profiles
-section instead.
+display's Desktop is *the* Desktop. In a hand-written config
+the call lives in `init.lua`; when the config is GUI-managed,
+bindings are stored in `gui.json` (`profile_bindings`) and
+edited in the Profiles section instead.
 
 A Desktop holds one profile per screen count: a second call
 with a profile saved for another count adds beside the first,
@@ -4540,15 +4461,14 @@ KiwiDesk.bind_profile_to_desktop(3, "Dual")
 ```
 
 **The number names the Desktop; it does not key the binding.**
-Mission Control renumbers on every add, delete, reorder and
-display change, so KiwiDesk resolves the number you pass to the
-Desktop it currently names and files the binding against that
-Desktop instead — see
-[Spaces and Desktops](spaces-and-desktops.md). A number naming
-no Desktop yet is remembered as a number and attaches when that
-Desktop appears. Because `init.lua` is re-read on every load,
-a call there is re-resolved each time: if the Desktop you meant
-has moved, edit the number to match what Mission Control shows.
+KiwiDesk resolves the number you pass to the Desktop it
+currently names and files the binding against that Desktop —
+[Spaces and Desktops](spaces-and-desktops.md) has how a binding
+survives Mission Control's renumbering. A number naming no
+Desktop yet is remembered as a number and attaches when that
+Desktop appears. A call in `init.lua` is re-resolved on every
+load: if the Desktop you meant has moved, edit the number to
+match what Mission Control shows.
 
 **Example:**
 
@@ -4559,32 +4479,29 @@ KiwiDesk.bind_profile_to_desktop(2, "Creator Studio")
 
 ### Space Reconciliation
 
-**Every profile owns its own spaces.** Two profiles can each define
-a space called `1` — or `Work` — and they are different spaces, each
-with its own windows. The name is still how you address a space
-(`focus_space 1` means "space 1 of the profile I'm in"); the profile
-is simply the scope that name resolves in.
+**Every profile owns its own spaces.** Two profiles can each
+define a space called `1` — or `Work` — and they are different
+spaces, each with its own windows. The name is still how you
+address a space (`focus_space 1` means "space 1 of the profile
+I'm in"); the profile is the scope that name resolves in.
 
-**Switching profiles remembers where your windows were.** When you
-switch away, KiwiDesk files which space each window was in under the
-profile you are leaving; when you switch back, it puts them back.
-Switch to another profile and return, and your arrangement returns
-with you.
+**Switching profiles remembers where your windows were.** When
+you switch away, KiwiDesk files which space each window was in
+under the profile you are leaving; when you switch back, it puts
+them back.
 
 A window the incoming profile has never seen — opened while
 another profile was up — stays where it is when that profile
 declares the space it is sitting in, and lands in the profile's
-**fallback space** when it does not: the same setting that has
-always answered "where does a window go when its space is gone".
+**fallback space** (`set_fallback_space`) when it does not.
 
-This happens on any profile CHANGE — an explicit `load_profile`, a
-Desktop binding swapping profiles under you, or a monitor change
-that resolves a different profile. Re-applying the profile that is
-*already* live changes nothing, so a reconnect that lands on the
-same profile leaves your layout alone.
+This happens on any profile CHANGE — an explicit `load_profile`,
+a Desktop binding swapping profiles under you, or a monitor
+change that resolves a different profile. Re-applying the
+profile that is *already* live changes nothing, so a reconnect
+that lands on the same profile leaves your layout alone.
 
-The record is per session: it is what makes switching away and
-back lossless while KiwiDesk runs, and it is not written to disk.
+The record is per session and is not written to disk.
 
 ### Profile Monitor Sets
 
@@ -4718,51 +4635,23 @@ stripped, grouped by namespace — `set_gap_override` becomes
 
 ### macOS Desktops (Mission Control)
 
-KiwiDesk's spaces above are its own, independent of
-Mission Control. On top of that, each macOS Desktop — what
-Mission Control labels "Desktop 1", "Desktop 2", … —
-can carry its own profile via `bind_profile_to_desktop` (see
-above).
+KiwiDesk's spaces are its own, independent of Mission Control's
+Desktops; how the two nest, which screen chooses the profile,
+what a Desktop remembers and how a binding survives renumbering
+are in [Spaces and Desktops](spaces-and-desktops.md). The Lua
+verbs: `bind_profile_to_desktop` (above) gives a Desktop its
+own profile, and a switch by `focus_desktop` or
+`move_to_desktop_and_follow` loads a bound profile like a swipe
+does; `move_to_desktop` and `move_to_desktop_and_follow` are the
+only KiwiDesk verbs that move a window between Desktops.
 
-When the visible Desktop changes — a swipe, Ctrl+arrow, Mission Control, or a `focus_desktop` / `move_to_desktop_and_follow` command, KiwiDesk
-loads the bound profile — its spaces, layouts, and
-settings. Unsure which number you're on? Check
-`kiwidesk get_state` (field `desktop`), or subscribe to the
-`desktop_change` event.
-
-KiwiDesk resolves one active profile across the whole display
-setup, so one screen holds the binding authority: **"Desktop N
-activates" means Desktop N became current on the main screen**
-(the screen with the menu bar). With macOS's "Displays have
-separate Spaces" on, each screen switches Desktops on its own —
-a swipe on a secondary screen retiles that screen's arrived
-windows, moves that screen onto its own Desktop's space, and
-reports itself on `desktop_change` (`monitor` ≥ 2) — but never
-selects a profile. A Desktop that
-lives on a secondary screen can carry a binding, and it fires
-if a display change ever makes that Desktop the main screen's.
-With the option off, or with one screen, the main screen's
-Desktop is the global one and everything reads as before.
-
-KiwiDesk moves a window between Desktops only when you ask it to,
-with `move_to_desktop` or `move_to_desktop_and_follow` above.
-Nothing else does: a window stays on its Desktop, and KiwiDesk
-arranges the ones on the Desktop you're looking at.
-
-Each Desktop remembers which KiwiDesk space it was showing —
-every screen's, not only the main one's: switch away and back,
-and you land on the same space with the same windows hidden. A
-Desktop is remembered by an identity KiwiDesk gives it rather
-than by its Mission Control number, so the memory survives
-display changes and renumbering, and those identity-keyed
-entries are written to `gui.json` and survive a restart — which
-means a config KiwiDesk owns. A hand-written `init.lua` setup has
-no sidecar to write, so the memory is session-only there.
-
-A Desktop you haven't visited yet takes a space no other Desktop
-is showing or remembers, falling back to the first when they are
-all spoken for. A remembered space the (possibly just-swapped)
-profile no longer has takes that same exit.
+The Desktop you are on is `kiwidesk get_state`'s `desktop`
+field, and every switch reports on the `desktop_change` event; a
+secondary screen's own switch reports with `monitor` ≥ 2 and
+never selects a profile. A remembered space the (possibly just
+swapped) profile no longer has takes the exit of a Desktop
+never visited ([Every Desktop keeps its own
+Space](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-windows)).
 
 ## Animations, Sleep & Wake
 
@@ -4770,8 +4659,8 @@ profile no longer has takes that same exit.
 
 **Expects:** a number (milliseconds, clamped 50–1000).
 
-**Does:** sets the general animation duration for window moves and
-layout reflowing. **Persisted per-profile** since issue #51.
+**Does:** sets the general animation duration for window moves
+and layout reflowing. Persisted per profile.
 
 **Example:**
 
@@ -4783,9 +4672,8 @@ animations.set_duration(150)
 
 **Expects:** a number (milliseconds, clamped 50–1000).
 
-**Does:** sets the scrolling-layout focus-shift duration
-(independent knob, also persisted per-profile). It is a
-duration, so a larger value makes the shift take longer.
+**Does:** sets the scrolling-layout focus-shift duration, an
+independent knob, also persisted per profile.
 
 **Example:**
 
@@ -4798,39 +4686,37 @@ animations.set_scroll_duration(150)
 **Expects:** `"smooth"` (default) or `"mid_slide"`.
 
 **Does:** picks how a window's size is applied while it animates
-(issues #47, #593). Engine-only and **not persisted** to a profile
-— an expert knob (like the bars' `dim_factor`), Lua-only and absent
+(#47, #593). Engine-only and **not persisted** to a profile — an
+expert knob like the bars' `dim_factor`, Lua-only and absent
 from Settings. Set it from `init.lua` to make an override stick
 across launches.
 
 - `"smooth"` (default) — a growing axis follows the animation
-  continuously. By default the size updates **per display tick**
-  (matching the position channel, on any refresh rate), so slow-AX
-  apps (Electron/WebKit: VS Code, Slack, Discord, Chrome) reflow
-  once per frame. `animations.set_size_rate` can throttle that.
-- `"mid_slide"` — the legacy fallback: a growing axis holds its
-  start size, then grows in a single frame at halfway, where the
-  ongoing slide masks the jump. Slow-AX apps reflow exactly once.
-  Drop to this for an app that can't keep pace with `"smooth"`.
+  continuously. By default the size updates **per display
+  tick** (matching the position channel, on any refresh rate),
+  so slow-AX apps (Electron/WebKit: VS Code, Slack, Discord,
+  Chrome) reflow once per frame; `animations.set_size_rate` can
+  throttle that.
+- `"mid_slide"` — a growing axis holds its start size, then
+  grows in a single frame at halfway, where the ongoing slide
+  masks the jump. Slow-AX apps reflow exactly once. Drop to this
+  for an app that can't keep pace with `"smooth"`.
 
 Shrinking splits by *what else is moving*, and only under
 `"smooth"`:
 
-- When every window in the change is being animated — a `resize`
-  press, a ratio, gap or `min_window_size` edit — a shrinking axis
-  follows the animation too, so the edge two panes share slides
-  instead of jumping. Both panes travel on the same clock, so
-  there is nothing for a gradual shrink to expose.
-- When something is placed at its final size in one frame, it
-  still takes its target on the first frame. A window that just
-  opened is full size immediately, so a sibling that gave up its
-  room gradually would sit *underneath* it for the length of the
-  animation. This covers window open and close, mode and space
-  changes — and a **mouse resize**, where the window you dragged
-  is already where you left it when the rest catches up.
+- When every window in the change is being animated — a
+  `resize` press, a ratio, gap or `min_window_size` edit — a
+  shrinking axis follows the animation too, so the edge two
+  panes share slides instead of jumping.
+- When something is placed at its final size in one frame, a
+  shrinking axis takes its target on the first frame. This
+  covers window open and close, mode and space changes, and a
+  **mouse resize**, where the window you dragged is already
+  where you left it when the rest catches up.
 
-Under `"mid_slide"` a shrinking axis always takes the first frame.
-Either way the exact target lands on the settle frame.
+Under `"mid_slide"` a shrinking axis always takes the first
+frame. Either way the exact target lands on the settle frame.
 
 **Example:**
 
@@ -4845,11 +4731,10 @@ animations.set_size_policy("mid_slide")
 restores the default **per-tick** behavior (no throttle).
 
 **Does:** caps how often the `"smooth"` policy emits a size-set,
-bounding a slow-AX app's reflow load. By default the size follows
-the display refresh (per-tick); set a lower rate only if a heavy app
-falls behind. It caps both directions — a plain resize that shrinks
-one pane while growing another is where the load is highest. No
-effect under `"mid_slide"`. Engine-only, not persisted (#47, #593).
+bounding a slow-AX app's reflow load. By default the size
+follows the display refresh (per-tick); set a lower rate only if
+a heavy app falls behind. It caps both directions. No effect
+under `"mid_slide"`. Engine-only, not persisted (#47, #593).
 
 **Example:**
 
@@ -4863,17 +4748,16 @@ animations.set_size_rate(0)    -- back to per-tick default
 **Expects:** `true` or `false` (default `false`).
 
 **Does:** enables or disables the coordinated animation when
-switching spaces: the outgoing windows slide out to the
-hiding corner while the incoming ones slide in from it — one
-toggle drives both directions. Off (the default) is faster: a
+switching spaces: the outgoing windows slide out to the hiding
+corner while the incoming ones slide in from it — one toggle
+drives both directions. Off (the default) is faster: a
 coordinated switch animates *both* spaces' windows at once, and
 slow-responding apps (Electron/WebKit) can fall behind on the
-extra per-frame window moves and stutter. Opt in if you like
-the effect anyway.
+extra per-frame window moves and stutter.
 
-macOS Desktop switches are never animated in either
-direction — macOS stops reporting an inactive Desktop's windows
-to Accessibility, so there is nothing to fly around (see
+macOS Desktop switches are never animated in either direction —
+macOS stops reporting an inactive Desktop's windows to
+Accessibility (see
 [Accepted limitations](accepted-limitations.md)).
 
 **Example:**
@@ -4886,26 +4770,22 @@ animations.set_on_space_change(false)
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** enables or disables the layout slide as focus moves within a
-Scrolling space.
+**Does:** enables or disables the layout slide as focus moves
+within a Scrolling space.
 
 While the slide runs, a window the pan merely *reveals* — one
 already sitting at its final frame, pinned at the top screen
-border or at an edge walled by a neighboring screen — is
-brought to the front only when the pan settles: raising it
-first would pop it over the whole screen and hide the very
-motion the scroll is. A window whose own frame moves — sliding
-in from an open edge's void, or traveling to its resting
-position under a `start`/`center`/`end` anchor — and the focus
-handoff after closing a window raise immediately, riding in on
-top. The trade: during a stationary reveal (one animation
+border or at an edge walled by a neighboring screen — is brought
+to the front only when the pan settles. A window whose own frame
+moves — sliding in from an open edge's void, or traveling to its
+resting position under a `start`/`center`/`end` anchor — and the
+focus handoff after closing a window raise immediately, riding
+in on top. The trade: during a stationary reveal (one animation
 length, 50–1000 ms) keystrokes still reach the previously
-focused app, as in other scroll-style window managers. Global
-hotkeys are unaffected (they reach KiwiDesk regardless of the
-key app), and with the slide disabled focus transfers
-instantly. See the
-[accepted limitations](accepted-limitations.md)
-table.
+focused app. Global hotkeys are unaffected (they reach KiwiDesk
+regardless of the key app), and with the slide disabled focus
+transfers instantly. See the
+[accepted limitations](accepted-limitations.md) table.
 
 **Example:**
 
@@ -4958,21 +4838,18 @@ animations.set_on_relayout(true)
 
 **Does:** enables or disables the card flip when focus moves
 between the windows of a Monocle Space. The window blurs and a
-plate turns from the outgoing app's icon to the incoming one's
-while the focus swaps beneath it — as soon as the blur covers
-it, so the keyboard reaches the new window at once; further
-presses during the turn land instantly, the card showing the
-newest window's icon and the blur lifting a quarter second after
-you pause — so
-you can see which window
-came in and which way it came from: the plate turns forward for
-the next window in the Space's order and back for the previous
-one — the way the key pointed, on a `focus` step — about the
-vertical axis in a horizontal Monocle and the horizontal one in
-a vertical Monocle. It plays only for a focus change KiwiDesk
-itself commands — a `focus` step, an App
-Bar click, `pull_or_spawn` — never for one macOS made (⌘Tab,
-the Dock), and never onto a floating window. A plate whose next
+plate turns from the outgoing app's icon to the incoming one's;
+the focus swaps beneath it as soon as the blur covers it, so the
+keyboard reaches the new window at once. Further presses during
+the turn land instantly, the card showing the newest window's
+icon and the blur lifting a quarter second after you pause. The
+plate turns forward for the next window in the Space's order
+and back for the previous one — the way the key pointed, on a
+`focus` step — about the vertical axis in a horizontal Monocle
+and the horizontal one in a vertical Monocle. It plays only for
+a focus change KiwiDesk itself commands — a `focus` step, an App
+Bar click, `pull_or_spawn` — never for one macOS made (⌘Tab, the
+Dock), and never onto a floating window. A plate whose next
 window is smaller (an app that refuses the full slot) lands on
 that window's own frame. macOS's Reduce Motion keeps the flip
 off regardless.
@@ -4988,8 +4865,7 @@ animations.set_on_monocle_focus(false)
 **Expects:** a number (milliseconds, clamped 100–1000; default
 `450`).
 
-**Does:** sets how long the Monocle flip's turn takes. It is a
-duration, so a larger value makes the turn take longer; the blur
+**Does:** sets how long the Monocle flip's turn takes; the blur
 fades in and out around it on fixed times. It has no effect
 while `set_on_monocle_focus` is off.
 
@@ -5006,16 +4882,16 @@ animations.set_monocle_flip_duration(300)
 - `enable_wake_restore(bool)` — `true` or `false`.
 - `set_wake_restore_delay(ms)` — a number (milliseconds).
 
-**Does:** when `true`, restores window positions and focus after the
-machine wakes from sleep or the screen unlocks, after the specified
-delay (default 1500 ms). The restore is skipped when the display set
-changed while the machine was away (undock, monitor power-off): the
-captured frames belong to the old displays, so the monitor-change
-profile resolution wins instead. A restore that does run finishes
-with a full retile, like any space switch, and actually focuses the
-remembered window — raises it and activates its app — so shortcuts
-act on it immediately. If that window is gone, focus follows
-whatever macOS brought to the front at unlock.
+**Does:** when `true`, restores window positions and focus after
+the machine wakes from sleep or the screen unlocks, after the
+specified delay (default 1500 ms). The restore is skipped when
+the display set changed while the machine was away (undock,
+monitor power-off); the monitor-change profile resolution wins
+instead. A restore that does run finishes with a full retile,
+like any space switch, and focuses the remembered window —
+raises it and activates its app — so shortcuts act on it
+immediately. If that window is gone, focus follows whatever
+macOS brought to the front at unlock.
 
 **Example:**
 
@@ -5027,35 +4903,35 @@ KiwiDesk.set_wake_restore_delay(1500)
 ### Animation Cascade
 
 **Profiles own all animation settings.** Like every other tiling
-setting, `animations.*` — including the duration knobs — is saved in a
-profile. When a profile is bound to a macOS Desktop
+setting, `animations.*` — the duration knobs included — is saved
+in a profile. When a profile is bound to a macOS Desktop
 (`bind_profile_to_desktop`), switching to that Desktop loads the
-profile and **replaces** the live settings — so `animations.*` calls in
-`init.lua` apply only until a bound profile activates. To make a value
-stick on a bound Desktop, set it and re-save that profile (or edit the
-profile JSON).
+profile and **replaces** the live settings, so `animations.*`
+calls in `init.lua` apply only until a bound profile activates.
+To make a value stick on a bound Desktop, set it and re-save
+that profile (or edit the profile JSON).
 
 ### Quit & Restart
 
-Quitting KiwiDesk saves the current arrangement — window order per
-space, focus, and the active space — and restores it on the
-next launch, so tiles do not shuffle across restarts. After the
-restore, KiwiDesk lands on the space of the window that has
-focus *right now*, falling back to the space that was active at quit.
-This works within one login session (macOS window ids reset on
-logout/reboot; after that, windows are re-tiled fresh). Crashes
-restore from the last autosave (30 s interval) instead.
+Quitting KiwiDesk saves the current arrangement — window order
+per space, focus, and the active space — and restores it on the
+next launch. After the restore, KiwiDesk lands on the space of
+the window that has focus *right now*, falling back to the space
+that was active at quit. This works within one login session
+(macOS window ids reset on logout/reboot; after that, windows
+are re-tiled fresh). Crashes restore from the last autosave
+(30 s interval) instead.
 
-On quit or restart, KiwiDesk moves each managed tiled window back onto
-the monitor its space is assigned to and arranges them per
-`quit.layout` (see `quit.set_layout` below), so your screen is usable
-the moment KiwiDesk exits. Floating windows are left wherever they are.
-Because KiwiDesk keeps all managed windows on the single visible macOS
-Desktop (inactive spaces are parked off-screen at the peek
-corner — not on a different Desktop), every reachable window
-lands there together. Windows on a display's background Desktops
-cannot be repositioned without disabling SIP, which KiwiDesk never
-does — the visible Desktop per display is the arranged scope.
+On quit or restart, KiwiDesk moves each managed tiled window
+back onto the monitor its space is assigned to and arranges them
+per `quit.layout` (see `quit.set_layout` below). Floating
+windows are left wherever they are. KiwiDesk keeps all managed
+windows on the single visible macOS Desktop (inactive spaces are
+parked off-screen at the peek corner, not on a different
+Desktop), so every reachable window lands there together.
+Windows on a display's background Desktops cannot be
+repositioned without disabling SIP, which KiwiDesk never does —
+the visible Desktop per display is the arranged scope.
 
 ### quit.set_layout
 
@@ -5063,56 +4939,44 @@ does — the visible Desktop per display is the arranged scope.
 strategies will accept more values).
 
 **Does:** picks how remaining managed windows are spread on quit.
-`grid` builds a per-display grid and round-robin fills it — window 1
-into cell 1, window 2 into cell 2, wrapping back to cell 1 and
-stacking. Windows sharing a cell cascade vertically like
-`overflow_all`, in **every** cell, so each title bar stays reachable.
-After placing, KiwiDesk raises every window in a fixed circle —
-cell 1 through the last cell, each pile top slot first and deepest
-slot last — so within a pile every title bar stays visible and
-later cells sit above earlier ones (one window is exempt; see
-below). It waits for each raise to actually land before issuing
-the next, because macOS reports a raise as accepted well before
-the app performs it, and a circle fired off in one go settles in
-whatever order the apps get to it.
+`grid` builds a per-display grid and round-robin fills it —
+window 1 into cell 1, window 2 into cell 2, wrapping back to
+cell 1 and stacking. Windows sharing a cell cascade vertically
+like `overflow_all`, in **every** cell, so each title bar stays
+reachable. After placing, KiwiDesk raises every window in a
+fixed circle — cell 1 through the last cell, each pile top slot
+first and deepest slot last — so within a pile every title bar
+stays visible and later cells sit above earlier ones (one window
+is exempt; see below). It waits for each raise to land before
+issuing the next.
 
-The whole restack is capped at one second across every display, so
-a wedged app cannot delay your quit past that. The cap is a hard
-stop rather than a slow lane: once it is reached, the restack
-stops after at most one more raise — it does not carry on through
-the rest of the display it was on, and it does not start a display
-it had not reached. Those windows keep whatever
-stacking the moves left them in. Quitting promptly is worth more
-here than a perfect arrangement, because nothing runs afterwards
-that could fix either one.
+The whole restack is capped at one second across every display.
+The cap is a hard stop: once reached, the restack stops after at
+most one more raise — it does not carry on through the rest of
+the display it was on, and it does not start a display it had
+not reached. Those windows keep whatever stacking the moves left
+them in.
 
-**The window you were last working in gets a slot chosen for it**
-— the last one in its cell, so it sits in front of that cell's
-pile. No quiet raise can lift another window above the frontmost
-app's key window (measured on device, not inferred), so that
-window is going to be in front whatever the circle does. Rather
-than spend the budget failing to move it, KiwiDesk places it where
-being in front is what the arrangement wanted anyway, and leaves
-it out of the raise circle.
+**The window you were last working in gets a slot chosen for
+it** — the last one in its cell, so it sits in front of that
+cell's pile — and is left out of the raise circle: no quiet
+raise can lift another window above the frontmost app's key
+window, so it is in front whatever the circle does. Every other
+window lands where the circle puts it regardless of the z-order
+at quit. If the frontmost app has no window in the grid, the
+circle is followed exactly. KiwiDesk's own Settings window
+tiles, so quitting with it frontmost places it last like any
+other window.
 
-So the window you quit from stays visible and on top of its own
-pile, and nothing it covers is a window the grid meant to show
-above it. Every other window lands where the circle puts it
-regardless of the z-order at quit. If the frontmost app has no
-window in the grid, none of this applies and the circle is
-followed exactly. KiwiDesk's own Settings window is no longer an
-exception here: it tiles, so quitting with it frontmost places
-it last exactly like any other window.
-
-A pile's windows also shrink so the cascade ends at its own cell's
-bottom edge (floored at `min_window_size`), keeping piles from
-spilling into the row below.
-Each display sizes its own grid from its window count `N` and the
-density target `T` (see `quit.set_grid_target_depth` below):
-`ceil(sqrt(N / T))`, clamped between 2×2 and 4×4 — at the standard
-target 5, up to 20 windows get 2×2, up to 45 get 3×3, beyond that
-4×4. One-shot teardown placement: windows stay on their own display,
-and nothing is managed afterwards. Profile JSON key: `quit.layout`.
+A pile's windows also shrink so the cascade ends at its own
+cell's bottom edge (floored at `min_window_size`), keeping piles
+from spilling into the row below. Each display sizes its own
+grid from its window count `N` and the density target `T` (see
+`quit.set_grid_target_depth` below): `ceil(sqrt(N / T))`,
+clamped between 2×2 and 4×4 — at the standard target 5, up to 20
+windows get 2×2, up to 45 get 3×3, beyond that 4×4. One-shot
+teardown placement: windows stay on their own display, and
+nothing is managed afterwards. Profile JSON key: `quit.layout`.
 Default: `grid`.
 
 **Example:**
@@ -5128,11 +4992,11 @@ quit.set_layout("grid")
 **Does:** sets the quit grid's density target — the stack depth a
 cell aims for before the grid grows a row and a column. Grid
 dimensions stay automatic, calculated per display from that
-display's window count, and stay hard-clamped between 2×2 and 4×4;
-the target only moves the growth thresholds (2×2 through `4×T`
-windows, 3×3 through `9×T`, 4×4 above). It is not a hard maximum:
-past 4×4, additional windows keep cascading in its cells. Profile
-JSON key: `quit.grid_target_depth`. Default: `5`.
+display's window count, and stay hard-clamped between 2×2 and
+4×4; the target only moves the growth thresholds (2×2 through
+`4×T` windows, 3×3 through `9×T`, 4×4 above). It is not a hard
+maximum: past 4×4, additional windows keep cascading in its
+cells. Profile JSON key: `quit.grid_target_depth`. Default: `5`.
 
 **Example:**
 
@@ -5142,9 +5006,9 @@ quit.set_grid_target_depth(10)  -- denser piles, later growth
 
 When AX permission is revoked mid-session, KiwiDesk pauses window
 management but cannot gather windows — `setFrame` calls return
-`kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever the
-WM left them; re-enabling Accessibility in System Settings resumes
-management.
+`kAXErrorAPIDisabled` and are silent no-ops. Windows stay wherever
+the WM left them; re-enabling Accessibility in System Settings
+resumes management.
 
 ## Debugging
 
@@ -5225,8 +5089,7 @@ Naming one command returns just its record — `name`,
 `qualified_name`, `group`, `command`, `channel`, `summary`,
 `aliases`, and an `arguments` list. An enum-valued argument also
 carries `values` (its legal spellings) and `value_type` (the
-Swift type they are read from), so the answer cannot drift from
-what the command will actually accept.
+Swift type they are read from).
 
 An unknown name is an error carrying a did-you-mean suggestion.
 
