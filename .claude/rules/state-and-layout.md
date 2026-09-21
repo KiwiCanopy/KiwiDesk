@@ -1197,6 +1197,20 @@ editing here:
   rule, and the floor outranking the ceiling. That the ceiling
   is not in the value type is review's: no suite can see a
   maximum nobody wrote.
+- **What counts as SIZING is stated where the stores live, and
+  a new size store joins the reset (#764).** `Space.resetSizing`
+  clears the per-Space sizes (the session ratios, the stack and
+  track weights) and `TilingSettings.clearSizingOverrides` the
+  size fields of the authored overrides; `reset_layout_sizing`
+  is a loop over the two and lists nothing itself. A stored
+  property added to `Space` is classified by
+  `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
+  structure with its reason — or it reds; an override type's
+  new size field owes the settings-side clear by hand, since
+  `SessionRatioTests` ▸ `fieldCountPinsTheMirrors` counts the
+  #458 mirror and not that one. The verb arms the track z-order
+  restore like `resize` (#674): a cleared weight can change
+  which windows overlap.
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers — the

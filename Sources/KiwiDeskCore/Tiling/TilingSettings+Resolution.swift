@@ -144,6 +144,26 @@ extension TilingSettings {
         return true
     }
 
+    /// Clears the SIZE fields of `space`'s authored overrides —
+    /// the four the writers above route into — and prunes an
+    /// entry left empty, so the Space lands on the global (#764).
+    /// Structure (`strategy`, `masterCount`, `anchor`, …) stays.
+    public mutating func clearSizingOverrides(for space: SpaceID) {
+        if var over = bsp.override[space] {
+            over.splitRatioH = nil
+            over.splitRatioV = nil
+            bsp.override[space] = over.isEmpty ? nil : over
+        }
+        if var over = stack.override[space] {
+            over.masterRatio = nil
+            stack.override[space] = over.isEmpty ? nil : over
+        }
+        if var over = scrolling.override[space] {
+            over.slotSize = nil
+            scrolling.override[space] = over.isEmpty ? nil : over
+        }
+    }
+
     /// True if Space Bar and an enabled layout App Bar share an edge (#293).
     public var spaceBarSharesEdgeWithAppBar: Bool {
         guard spaceBarStyle.enabled else { return false }

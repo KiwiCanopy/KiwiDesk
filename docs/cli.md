@@ -291,7 +291,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `set_gap_override` | space, size |
 | | `set_min_window_size` | pt (default 300) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
-| | `reset_layout_sizing` | — clears every space's ratios, slot size and weights back to the configured values; structure stays |
+| | `reset_layout_sizing` | — clears every space's ratios, slot size and weights back to the globals; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_nudge` | true\|false (default `true`) — shove a window toward center when it toggles to floating |
@@ -382,12 +382,11 @@ the same count replaces it.
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
 :::unreleased
-`reset_layout_sizing` is new: it clears the session resize layer,
-the size fields of every authored `_override` (`ratio_h`,
-`ratio_v`, `master_ratio`, `slot_size`) and the stack and track
-weights on every space, keeps every structural field, and
-retiles. It never touches a global, so a space returns to the
-value you configured rather than to the shipped default (#764).
+`reset_layout_sizing` clears what `resize` accumulated on every
+space — the session layer, an authored override's size fields
+and the stack and track weights — and leaves structure and the
+globals alone
+([Lua reference](lua-reference.md#reset_layout_sizing)).
 :::
 
 The table lists each layout global once. Every layout global

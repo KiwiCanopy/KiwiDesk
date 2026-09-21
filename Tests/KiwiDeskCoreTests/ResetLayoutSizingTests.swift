@@ -8,8 +8,14 @@ import Testing
 /// `reset_layout_sizing` (#764) clears every Space's SIZING —
 /// the session layer, the size fields of the authored overrides
 /// and the stack/track weights — and keeps structure and the
-/// configured globals. Display pinned (#531).
-@Suite("reset_layout_sizing (#764)", .serialized)
+/// globals. Display pinned (#531); a headless host reads as a
+/// SKIP, the `ScrollingResizeAnchorEndToEndTests` shape, since
+/// the retile the verb rides needs a screen.
+@Suite(
+    "reset_layout_sizing (#764)",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct ResetLayoutSizingTests {
     private let w1 = WindowID(1)
@@ -40,7 +46,7 @@ struct ResetLayoutSizingTests {
                 )
             )
         }
-        for id in 2...5 {
+        for id in 2...7 {
             core.state.workspaces.ensureSpace(SpaceID(id))
         }
         #expect(
@@ -80,10 +86,19 @@ struct ResetLayoutSizingTests {
             "track.set_limit_override",
             args: [.string("4"), .number(3)]
         )
-        // A size-only override entry, to be pruned whole.
+        // Size-only override entries, one per store, to be
+        // pruned whole.
         core.execute(
             "bsp.set_ratio_h_override",
             args: [.string("5"), .number(0.2)]
+        )
+        core.execute(
+            "stack.set_master_ratio_override",
+            args: [.string("6"), .number(0.8)]
+        )
+        core.execute(
+            "scroll.set_slot_size_override",
+            args: [.string("7"), .number(300)]
         )
         core.state.workspaces.withSpace(SpaceID("2")) {
             $0.stackWeights[w1] = 2
@@ -98,7 +113,6 @@ struct ResetLayoutSizingTests {
 
     @Test("Every size store is cleared and every structure kept")
     func clearsSizesKeepsStructure() throws {
-        guard NSScreen.main != nil else { return }
         let core = makeCore()
         seed(core)
         // An interactive resize lands in Space 1's session layer.
@@ -133,11 +147,12 @@ struct ResetLayoutSizingTests {
             core.state.workspaces[SpaceID("4")]?.trackBreaks == [w1]
         )
         #expect(settings.bsp.override[SpaceID("5")] == nil)
+        #expect(settings.stack.override[SpaceID("6")] == nil)
+        #expect(settings.scrolling.override[SpaceID("7")] == nil)
     }
 
-    @Test("The reset lands on the configured value and retiles")
+    @Test("The reset lands on the global and retiles")
     func returnsToTheConfiguredFrames() throws {
-        guard NSScreen.main != nil else { return }
         let core = makeCore()
         core.retile()
         let configured = core.tiler.calculatedFrames(
