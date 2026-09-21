@@ -13,7 +13,7 @@ import Testing
 /// macOS re-assigned its Desktop to match the frame. A `vanished`
 /// or hidden return: the destroy→create here runs no gone
 /// handler, so no close mark exists, and a CLOSE return lands as
-/// a new window instead (#1561, `ClosedReturnFocusTests`).
+/// a new window instead (#1561, `ClosedReturnPlacementTests`).
 ///
 /// Pure `StateCoordinator` state: the frame→screen resolution is
 /// KiwiCore's (it needs `NSScreen` and the AX/AppKit y-flip),

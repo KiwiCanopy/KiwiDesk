@@ -315,8 +315,12 @@ editing here:
   departure through the one `rememberClosedDeparture`, inside its
   `closed` arm and nowhere else — a Desktop `vanished` keeps
   #636's rule, a hide #913's — and the fold, consuming the mark
-  on EVERY arrival, drops the departed memory and the slot record
-  and takes the new-window path: the app rule, else the active
+  on EVERY arrival, drops the departed memory, the slot record
+  and any restore filed over them since — frame included, the
+  close outranking a snapshot adopted after it
+  (`ClosedReturnPlacementTests` ▸
+  `restoreFiledAfterTheCloseDoesNotOutrank`) — and takes the
+  new-window path: the app rule, else the active
   Space, the focus a new window gets there, its old slot and
   break given up (`ClosedReturnPlacementTests` ▸
   `closedReturnLandsWhereYouAre`, `closedReturnFollowsTheAppRule`,

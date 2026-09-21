@@ -1939,7 +1939,10 @@ departure and a hide, it marks the departure, and the fold reads
 the mark at the return and treats the window as NEW: placed by
 its app rule, else in the Space the user is on — never the Space
 it left, whose slot and break it gives up — with the focus a new
-window gets, the mark consumed on every arrival. That placement
+window gets, the mark consumed on every arrival. The close
+outranks a session restore filed over it: a snapshot adopted
+between the close and the re-show names a Space and a frame the
+user has since closed, and the re-show discards both. That placement
 is the owner's ruling (#1561): a window you bring back is wanted
 where you are, so you can move it somewhere else if you want,
 and a window manager opens windows where you are rather than
