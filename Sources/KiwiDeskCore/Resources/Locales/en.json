@@ -499,7 +499,7 @@
   "icon_picker.clear.help": "Remove icon (use the default)",
   "icon_picker.emoji": "Emoji",
   "icon_picker.preview.menu_bar": "Menu bar preview",
-  "icon_picker.preview.row": "Row preview",
+  "icon_picker.preview.space_bar": "Space Bar preview",
   "icon_picker.recents": "Recents",
   "icon_picker.search.placeholder": "Search icons (or an SF Symbol name)",
   "icon_picker.symbols": "Symbols",

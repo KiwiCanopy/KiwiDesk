@@ -499,7 +499,7 @@
   "icon_picker.clear.help": "移除圖像（使用預設）",
   "icon_picker.emoji": "表情符號",
   "icon_picker.preview.menu_bar": "選單列預覽",
-  "icon_picker.preview.row": "列預覽",
+  "icon_picker.preview.space_bar": "Space Bar 預覽",
   "icon_picker.recents": "最近使用",
   "icon_picker.search.placeholder": "搜尋圖像（或 SF Symbol 名稱）",
   "icon_picker.symbols": "符號",

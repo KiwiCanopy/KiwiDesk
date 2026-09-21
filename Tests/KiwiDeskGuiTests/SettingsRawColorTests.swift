@@ -206,9 +206,11 @@ struct SettingsRawColorTests {
             "the Automatic split-dot IS a white/black glyph, "
             + "and the sRGB conversion fallback never renders",
         "IconPicker+Preview.swift":
-            "a side-by-side preview of the menu bar in EACH "
-            + "appearance — the scheme is a parameter, not a "
-            + "branch, and both swatches are always drawn",
+            "a side-by-side preview of the destination — the "
+            + "menu bar, or the bar plate over a wallpaper "
+            + "(#1485) — in EACH appearance: the scheme is a "
+            + "parameter, not a branch, and both swatches are "
+            + "always drawn",
         "SettingsSlider.swift":
             "the thumb is ruled white in both modes (its "
             + "docstring rejects onAccentKnob); the black rim "

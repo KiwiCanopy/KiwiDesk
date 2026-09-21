@@ -499,7 +499,7 @@
   "icon_picker.clear.help": "Symbol entfernen (Standard verwenden)",
   "icon_picker.emoji": "Emoji",
   "icon_picker.preview.menu_bar": "Menüleisten-Vorschau",
-  "icon_picker.preview.row": "Zeilenvorschau",
+  "icon_picker.preview.space_bar": "Space-Bar-Vorschau",
   "icon_picker.recents": "Zuletzt verwendet",
   "icon_picker.search.placeholder": "Symbole suchen (oder einen SF-Symbol-Namen)",
   "icon_picker.symbols": "Symbole",

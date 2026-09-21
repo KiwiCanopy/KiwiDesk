@@ -124,7 +124,10 @@ struct SpacesSection: View {
                 dragHandle(space)
                 IconPicker(
                     icon: iconBinding(space),
-                    preview: .chip
+                    preview: .spaceBar(
+                        model.config.settings.spaceBarStyle,
+                        space: space
+                    )
                 )
                 SpaceNameField(
                     space: space,

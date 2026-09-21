@@ -499,7 +499,7 @@
   "icon_picker.clear.help": "アイコンを削除（デフォルトを使用）",
   "icon_picker.emoji": "絵文字",
   "icon_picker.preview.menu_bar": "メニューバーのプレビュー",
-  "icon_picker.preview.row": "行のプレビュー",
+  "icon_picker.preview.space_bar": "Space Barのプレビュー",
   "icon_picker.recents": "最近使った項目",
   "icon_picker.search.placeholder": "アイコンを検索（またはSF Symbolの名前）",
   "icon_picker.symbols": "シンボル",

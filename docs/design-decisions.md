@@ -7436,6 +7436,28 @@ user did not ask for (`IconPickerRestingShapeTests`), and
 every popover holding a per-open search takes that same
 dismissal-edge hook — the app picker was the second member.
 
+:::unreleased
+**The space picker previews on the bar plate, not the Settings
+ground.** The popover's header shows the selection where it
+lands: the Space Bar's `fill_color` composited over a light and
+a dark wallpaper swatch, the glyph tinted through `item_color`
+when it is a symbol and untinted when it is an emoji — Core's
+own classification, since a preview claiming the bar's
+behaviour calls the bar's ladder rather than re-implementing
+it beside the drawing. The old header drew the glyph on the
+pane's own surface, which the glyph is never seen on: a symbol
+that reads well there can vanish on a dark plate, and that
+difference is exactly what the Symbols-first ruling above
+rests on. Two swatches, not one, because the fill's alpha
+sweeps the whole grey range with the wallpaper, so one extreme
+can pass while the other fails. With no icon chosen the header
+previews the identifier the bar falls back to — the number, or
+the name's two-letter cut — rather than a placeholder. The
+layer picker keeps its menu-bar pair: that is where a layer
+icon lands
+([#1485](https://github.com/KiwiCanopy/KiwiDesk/issues/1485)).
+:::
+
 **The picker button and its clear control.** The button shows
 a glyph-sized placeholder when no icon is set, never a
 "Choose…" label: the text made unset pickers wider than set

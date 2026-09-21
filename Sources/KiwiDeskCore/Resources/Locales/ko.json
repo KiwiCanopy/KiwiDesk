@@ -499,7 +499,7 @@
   "icon_picker.clear.help": "아이콘 제거(기본값 사용)",
   "icon_picker.emoji": "이모티콘",
   "icon_picker.preview.menu_bar": "메뉴 막대 미리보기",
-  "icon_picker.preview.row": "행 미리보기",
+  "icon_picker.preview.space_bar": "Space Bar 미리보기",
   "icon_picker.recents": "최근 항목",
   "icon_picker.search.placeholder": "아이콘 검색(또는 SF Symbol 이름)",
   "icon_picker.symbols": "심볼",

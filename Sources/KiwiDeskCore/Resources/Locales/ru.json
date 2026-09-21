@@ -499,7 +499,7 @@
   "icon_picker.clear.help": "Убрать значок (использовать стандартный)",
   "icon_picker.emoji": "Эмодзи",
   "icon_picker.preview.menu_bar": "Предпросмотр строки меню",
-  "icon_picker.preview.row": "Предпросмотр строки",
+  "icon_picker.preview.space_bar": "Предпросмотр Space Bar",
   "icon_picker.recents": "Недавние",
   "icon_picker.search.placeholder": "Поиск значков (или имени SF Symbol)",
   "icon_picker.symbols": "Символы",
