@@ -187,10 +187,13 @@ struct DesktopFirstVisitTests {
     func everyEnderEndsTheDeclaredSpaces() throws {
         let enders: [(String, (ProfileManager) -> Void)] = [
             (
-                "adoptStandard",
-                { $0.adoptStandard(named: "Std", spaces: []) }
+                "standardIsLive",
+                {
+                    $0.standardIsLive(
+                        ActiveStandard(name: "Std", spaces: [])
+                    )
+                }
             ),
-            ("noProfileIsLive", { $0.noProfileIsLive() }),
             ("resetAdoption", { $0.resetAdoption() }),
         ]
         for (name, end) in enders {

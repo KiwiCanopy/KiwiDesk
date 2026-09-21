@@ -61,7 +61,9 @@ struct MonitorChangeTests {
             args: [.string("desk")]
         )
         core.execute("load_profile", args: [.string("desk")])
-        core.profiles.adoptStandard(named: "x", spaces: [])
+        core.profiles.standardIsLive(
+            ActiveStandard(name: "x", spaces: [])
+        )
 
         core.handleMonitorChange()
         #expect(core.profiles.currentName == "desk")

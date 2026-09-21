@@ -259,33 +259,15 @@ public final class ProfileManager {
         isDirty = !fits
     }
 
-    /// Records that no profile is live — `apply(composed:)`'s, and
-    /// `becameLive`'s mirror.
-    ///
-    /// Leaves `currentStandard` alone: a post-reload recompose
-    /// re-applies the Standard it is already on and must not
-    /// forget which (`StarterRescaleTests` ▸ `reloadKeepsLadder`).
-    /// Dirtiness is the caller's here, having no profile to judge.
-    func noProfileIsLive() {
+    /// Records that a built-in Standard is live — `apply(composed:)`'s
+    /// door, and `becameLive`'s mirror: the name and the Spaces the
+    /// apply composed as ONE value, filed by the apply itself so no
+    /// caller can forget them (#1509, #1246). A Standard is never a
+    /// saved profile, so the state is dirty.
+    func standardIsLive(_ standard: ActiveStandard) {
         active = nil
-    }
-
-    /// Records that a built-in Standard is resolving (dirty state),
-    /// with the Spaces it composed (#1509).
-    func adoptStandard(named name: String, spaces: Set<SpaceID>) {
-        active = nil
-        standard = ActiveStandard(name: name, spaces: spaces)
+        self.standard = standard
         isDirty = true
-    }
-
-    /// A reload's recompose refreshes the Standard's Spaces; the
-    /// name and the dirtiness stay (#1509).
-    func recomposedStandard(spaces: Set<SpaceID>) {
-        guard let standard else { return }
-        self.standard = ActiveStandard(
-            name: standard.name,
-            spaces: spaces
-        )
     }
 
     /// Resets adoption state for Reset All Settings (#634).

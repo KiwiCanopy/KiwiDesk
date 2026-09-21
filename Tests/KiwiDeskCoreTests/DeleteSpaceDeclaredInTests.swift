@@ -111,14 +111,26 @@ struct DeleteSpaceDeclaredInTests {
             )
         )
         core.apply(composed: composed, forceRetile: false)
-        // Adoption state, never a recompose: a Space the record
-        // omits is not named, though a recompose would list it.
-        let last = try #require(composed.spaces.last)
-        core.profiles.adoptStandard(
-            named: composed.sourceName,
-            spaces: Set(composed.spaces).subtracting([last])
+        // Adoption state, never a recompose: a second screen
+        // changes what a fresh composition would list, and the
+        // record still answers for the Spaces the apply composed.
+        let second = Display(
+            id: DisplayID(2),
+            name: "B",
+            frame: CGRect(x: 100, y: 0, width: 100, height: 100)
         )
-        #expect(declaredIn(deleting: last.raw, on: core) == nil)
+        core.state.workspaces.upsertDisplay(second)
+        let recomposed = try #require(
+            ProfileComposition.compose(
+                displays: [display, second],
+                mainID: DisplayID(1)
+            )
+        )
+        let added = Set(recomposed.spaces)
+            .subtracting(composed.spaces)
+        let extra = try #require(added.first)
+        core.state.workspaces.ensureSpace(extra)
+        #expect(declaredIn(deleting: extra.raw, on: core) == nil)
         let first = try #require(composed.spaces.first)
         #expect(
             declaredIn(deleting: first.raw, on: core)
@@ -145,15 +157,25 @@ struct DeleteSpaceDeclaredInTests {
             )
         )
         core.apply(composed: composed, forceRetile: false)
-        core.profiles.adoptStandard(
-            named: composed.sourceName,
-            spaces: [SpaceID("phantom")]
+        let second = Display(
+            id: DisplayID(2),
+            name: "B",
+            frame: CGRect(x: 100, y: 0, width: 100, height: 100)
         )
+        core.state.workspaces.upsertDisplay(second)
+        let recomposed = try #require(
+            ProfileComposition.compose(
+                displays: [display, second],
+                mainID: DisplayID(1)
+            )
+        )
+        let added = Set(recomposed.spaces)
+            .subtracting(composed.spaces)
+        let extra = try #require(added.first)
         core.reapplyActiveProfileState()
-        let first = try #require(composed.spaces.first)
         #expect(
-            declaredIn(deleting: first.raw, on: core)
-                == ["standard:\(composed.sourceName)"]
+            declaredIn(deleting: extra.raw, on: core)
+                == ["standard:\(recomposed.sourceName)"]
         )
     }
 
