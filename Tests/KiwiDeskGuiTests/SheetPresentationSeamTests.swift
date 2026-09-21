@@ -32,7 +32,10 @@ struct SheetPresentationSeamTests {
     /// dialog, hosted above the `editingLua` branch its own confirm
     /// button flips.
     private static let allowed: [String: String] = [
-        "PresetsSection.swift": "$previewRequest"
+        "PresetsSection.swift": "$previewRequest",
+        // About (#1536) is the shell's: its footer opener sits in
+        // Home, which reflows under it, and the shell outlives both.
+        "SettingsView.swift": "$aboutRequest",
     ]
 
     private var trees: [URL] {
@@ -202,6 +205,32 @@ struct SheetPresentationSeamTests {
                             + "`.onExitCommand` is not a substitute, "
                             + "it needs focus this sheet may not hold"
                     )
+                )
+                checked += 1
+            }
+        }
+        #expect(checked == Self.allowed.count)
+    }
+
+    /// A read-only sheet takes no `SettingsModel` (#859): reaching
+    /// the draft must be a new stored property, never a one-token
+    /// edit. Held over every content type the hosts present, since
+    /// `PresetPreviewSheetTests` reads its own sheet alone.
+    @Test("no sheet's content reaches the draft")
+    func sheetContentTakesNoModel() throws {
+        var checked = 0
+        for (host, _) in Self.allowed {
+            for type in try Self.contentTypes(
+                presentedBy: host,
+                in: trees
+            ) {
+                let source = try Self.squashedSource(
+                    of: "\(type).swift",
+                    in: trees
+                )
+                #expect(
+                    !source.contains("SettingsModel"),
+                    Comment(rawValue: "\(type) reaches the draft")
                 )
                 checked += 1
             }

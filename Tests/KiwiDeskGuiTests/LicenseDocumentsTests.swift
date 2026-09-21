@@ -117,16 +117,16 @@ struct LicenseDocumentsTests {
         let about = SourceScan.stripComments(
             try String(
                 contentsOf: tree.appendingPathComponent(
-                    "Settings/Sections/GeneralSection+About.swift"
+                    "Settings/Home/AboutSheet.swift"
                 ),
                 encoding: .utf8
             )
         )
         #expect(
             about.split(separator: "\n").contains {
-                $0.trimmingCharacters(in: .whitespaces) == "licenseRow"
+                $0.trimmingCharacters(in: .whitespaces) == "links"
             },
-            "About no longer mounts the license row"
+            "About no longer mounts its links row"
         )
         // One link per document, derived: a case joining
         // `Document` and the script keeps the roster guard green
@@ -147,7 +147,7 @@ struct LicenseDocumentsTests {
                 }
                 .map { $0.lastPathComponent }
             #expect(
-                readers == ["GeneralSection+About.swift"],
+                readers == ["AboutSheet.swift"],
                 Comment(
                     rawValue:
                         "\(needle) is read in \(readers); About is "

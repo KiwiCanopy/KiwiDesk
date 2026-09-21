@@ -9,9 +9,12 @@ an asset catalog — `swift build` on CI does not run actool).
 |---|---|---|
 | `logo_mono.svg` | `MenuBarIcon.tiff` (18/36 px) | Menu-bar template icon + quick-menu header |
 | `og-banner.svg` (+ `.de`, `.ja`) | `og-banner.jpg` (1200×630) | Social link-preview card, one per site locale; embeds `logo.svg` by relative href — run `./generate-og.sh` |
-| `logo_wordmark.svg` | `Wordmark.png` (512 px) | Settings ▸ General ▸ About (light mode) |
-| `logo_wordmark_dark.svg` | `WordmarkDark.png` (512 px) | Settings ▸ General ▸ About (dark mode) |
-| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances). No longer a runtime Dock icon — the app never leaves `.accessory`, so there is no tile to paint |
+| `logo_wordmark.svg` | `Wordmark.png` (512 px) | The About KiwiDesk sheet (light mode) |
+| `logo_wordmark_dark.svg` | `WordmarkDark.png` (512 px) | The About KiwiDesk sheet (dark mode) |
+| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances) and the Settings Home footer. No longer a runtime Dock icon — the app never leaves `.accessory`, so there is no tile to paint |
+| `mark-telegram-mono.svg` | `MarkTelegram.png` (64 px) | The Telegram link on Settings Home ▸ Community & Support (#1536), as a template image. A black knockout of `telegram.svg`, Telegram's own logo |
+| `mark-github-mono.svg` | `MarkGitHub.png` (64 px) | The GitHub link there, the same way. A black fill of `mark-github.svg` — Primer Octicons' `mark-github-24`, MIT, notice in `ACKNOWLEDGEMENTS` |
+| `mark-kofi-mono.svg` | `MarkKofi.png` (64 px) | The Ko-fi link there, the same way. A black knockout of `kofi_symbol.svg` |
 | `logo.svg` | `AppIcon.icon/Assets/*.svg` | App icon — see [App icon](#app-icon-appiconicon) below (#89) |
 
 ## Website-only assets
@@ -124,7 +127,14 @@ sips -s format png --resampleHeightWidthMax 900 \
 Constraints on the masters (see `BrandAssets.swift`):
 
 - `logo_mono.svg` must stay **pure black on transparency** —
-  it ships as a template image that macOS tints. It is a
+  it ships as a template image that macOS tints. So must the
+  three `mark-*-mono.svg` masters, for the same reason: the
+  Home strip draws their rasters as template images in the
+  window's secondary ink, and a colour in the master would be
+  discarded, not shown. The colour originals they are cut from
+  (`telegram.svg`, `mark-github.svg`, `kofi_symbol.svg`) are
+  kept beside them so a shape change can be re-derived.
+  It is a
   hand-traced single-path *simplification* of the mark with its
   own viewBox, not a derivative — so a change to the mark's
   **shape** has to be reapplied here by hand, or the menu bar
@@ -160,7 +170,7 @@ Constraints on the masters (see `BrandAssets.swift`):
   `class="ink"` paths ever differ between the two masters.
 - The two wordmark masters ship the **same geometry**, differing
   only in the text paths' colour: `#12251a` (forest ink) for
-  light, `#E1EEDB` (mist-green) for dark. The About view swaps
+  light, `#E1EEDB` (mist-green) for dark. The About sheet swaps
   by `colorScheme`. Both keep a **transparent background** so
   the mark melts into the pane. If you edit one, mirror the
   edit in the other.

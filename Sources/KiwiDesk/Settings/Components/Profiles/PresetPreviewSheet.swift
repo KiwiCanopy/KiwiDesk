@@ -166,7 +166,7 @@ struct PresetPreviewSheet: View {
     }
 
     private var doneLabel: String {
-        L("presets.layouts.done", "Done")
+        L("common.done", "Done")
     }
 
     /// Invisible Escape key route carrying `.cancelAction`.

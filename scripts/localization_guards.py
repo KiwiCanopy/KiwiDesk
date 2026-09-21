@@ -198,13 +198,19 @@ GLOSSARY = {
     # The product, and the technologies it wraps or names.
     "bsp",
     # The forge the project lives on, named in the
-    # star-affordance keys (`general.about.star`,
+    # star-affordance keys (`home.support.github`,
     # `onboarding.ready.star_*`). A proper noun no locale
     # translates, exactly like `kiwidesk` and `lua` below — and
     # without it the residue guard rejects the only CORRECT
     # rendering a non-Latin locale has, which is what keeps
     # those keys English in ja/ko/ru/zh-Hans/zh-Hant.
     "github",
+    # The two other services Home's support strip links (#1536),
+    # the same class as `github`. `_WORD` splits "Ko-fi" on its
+    # hyphen, so the brand is carried as its two halves.
+    "telegram",
+    "ko",
+    "fi",
     "ide",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",

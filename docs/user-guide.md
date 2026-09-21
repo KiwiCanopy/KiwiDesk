@@ -61,9 +61,16 @@ first, then a row per screen in desk order. A layout belongs to
 a Space, so a screen's row sets the layout of whatever Space is
 showing there.
 
-**Check for Updates…** asks now; KiwiDesk also checks on its own
-in the background, and a found update shows as a dot on the
-menu-bar icon and an **Update Available…** row, never a pop-up.
+KiwiDesk checks for updates on its own in the background, and a
+found update shows as a dot on the menu-bar icon and an
+**Update Available…** row, never a pop-up.
+
+:::unreleased
+The quick menu has no check row of its own: ask for a check
+from the foot of Settings Home, which also says when KiwiDesk
+last checked.
+:::
+
 **If you installed with Homebrew**, KiwiDesk keeps itself up to
 date and `brew upgrade` steps aside; to move an older copy onto a
 version that can do this, run `brew upgrade --cask kiwidesk`

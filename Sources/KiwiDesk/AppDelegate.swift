@@ -13,6 +13,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     let core = KiwiCore()
     let permissions = PermissionMonitor()
     var statusItem: StatusItemController?
+    /// The one update channel (#874), built with the delegate so
+    /// no reader decides whether it starts, and handed to the
+    /// status item and the dashboard alike (#1536,
+    /// `UpdaterSeamGuardTests` pins both hand-overs).
+    private let updater: any AppUpdating = AppUpdaterFactory.make()
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
@@ -30,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         created.setShowTour { [weak self] in
             self?.replayOnboardingTour()
         }
+        created.setUpdater(updater)
         created.setPermissionPaused(!permissions.isTrusted)
         dashboardIfCreated = created
         return created
@@ -69,8 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             .sink { [weak self] _ in self?.installMainMenu() }
 
         let statusItem = StatusItemController()
-        // Single construction of updater (#874, UpdaterSeamGuardTests).
-        statusItem.updater = AppUpdaterFactory.make()
+        statusItem.updater = updater
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }

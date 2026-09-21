@@ -41,4 +41,16 @@ enum BrandAssets {
     /// Full-colour app mark for Settings sidebar identity (#89, #439, #479).
     static let appMark: NSImage? =
         Bundle.kiwiDeskGui.image(forResource: "AppMark")
+
+    /// The services' marks on Home's support strip (#1536), as
+    /// template images: the strip draws them in secondary ink.
+    static let markTelegram: NSImage? = templateMark("MarkTelegram")
+    static let markGitHub: NSImage? = templateMark("MarkGitHub")
+    static let markKofi: NSImage? = templateMark("MarkKofi")
+
+    private static func templateMark(_ name: String) -> NSImage? {
+        let image = Bundle.kiwiDeskGui.image(forResource: name)
+        image?.isTemplate = true
+        return image
+    }
 }

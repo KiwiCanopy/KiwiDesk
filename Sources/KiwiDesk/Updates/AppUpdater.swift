@@ -32,6 +32,10 @@ protocol AppUpdating: AnyObject {
     /// Set by the consumer; nudged on the main actor whenever
     /// `updatePending` changes (#1013). Inert updaters never nudge.
     var onUpdatePendingChanged: () -> Void { get set }
+
+    /// What the channel last said (#1536) — an inert updater's
+    /// store stays `unavailable`.
+    var updates: UpdateStateStore { get }
 }
 
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
@@ -40,6 +44,8 @@ final class SparkleUpdater: AppUpdating {
     private let policy: UpdatePromptPolicy
     private let driver: UpdatePromptDriver
     private let updater: SPUUpdater
+    let updates = UpdateStateStore()
+    private let observer: UpdateCycleObserver
 
     init() {
         let host = Bundle.main
@@ -48,14 +54,20 @@ final class SparkleUpdater: AppUpdating {
             hostBundle: host,
             delegate: policy
         )
+        observer = UpdateCycleObserver(store: updates)
         updater = SPUUpdater(
             hostBundle: host,
             applicationBundle: host,
             userDriver: driver,
-            delegate: nil
+            delegate: observer
         )
         do {
             try updater.start()
+            // Until this session's first answer only the DATE of
+            // the last check is known, never its verdict (#1536).
+            updates.set(
+                .notChecked(lastChecked: updater.lastUpdateCheckDate)
+            )
         } catch {
             logUpdater(
                 "updater failed to start: "
@@ -69,6 +81,9 @@ final class SparkleUpdater: AppUpdating {
     }
 
     func checkForUpdates() {
+        if updater.canCheckForUpdates {
+            updates.set(updates.state.onOwnCheck)
+        }
         updater.checkForUpdates()
     }
 
@@ -95,6 +110,7 @@ final class NoUpdater: AppUpdating {
     func checkForUpdates() {}
     var updatePending: Bool { false }
     var onUpdatePendingChanged: () -> Void = {}
+    let updates = UpdateStateStore()
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

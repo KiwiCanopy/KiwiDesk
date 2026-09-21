@@ -124,10 +124,6 @@ struct GeneralControls: Sendable {
         "general.applies_immediately.title",
         "Applies immediately"
     )
-    let aboutCard = SettingsControl(
-        "general.about.title",
-        "About"
-    )
     /// Declared with its children so a search hit on any of
     /// them opens the drawer it lands in (#1250).
     let generalAdvanced = SettingsDrawer(

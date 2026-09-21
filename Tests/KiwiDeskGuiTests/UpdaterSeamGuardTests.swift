@@ -116,6 +116,29 @@ struct UpdaterSeamGuardTests {
             }
         )
 
+        // Both hand-overs of the ONE updater (#1536): each is a
+        // free-standing line with an inert default behind it, so
+        // deleting either leaves every construction count at one
+        // while a consumer runs on `NoUpdater` — the status item's
+        // mark and row dead, or Home narrating "checks are off".
+        // The START is the `let`'s: the delegate builds the
+        // channel unconditionally, so no reader decides it.
+        for wiring in [
+            "statusItem.updater = updater",
+            "created.setUpdater(updater)",
+        ] {
+            let handed = try Self.sites(
+                of: wiring,
+                under: Self.productionTrees
+            )
+            #expect(handed.count == 1, Comment(rawValue: wiring))
+            #expect(
+                handed.allSatisfy {
+                    $0.file.lastPathComponent == "AppDelegate.swift"
+                }
+            )
+        }
+
         // The wiring: `AppUpdaterFactory.make()` is called once,
         // from AppDelegate. Zero means the app ships without an
         // update channel and greys one menu row to say so.

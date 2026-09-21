@@ -36,6 +36,10 @@ struct HomeScreen: View {
         )
     }
 
+    /// The one top gutter, shared with the height the content must
+    /// fill (#1536).
+    private static let topGutter: CGFloat = 24
+
     /// Maximum container width for saturated grid (code review 2026-08-11).
     private var gridCap: CGFloat {
         let columns = CGFloat(SettingsWidthClass.wide.homeColumnCap)
@@ -45,11 +49,14 @@ struct HomeScreen: View {
 
     var body: some View {
         GeometryReader { geo in
-            grid(width: geo.size.width)
+            grid(width: geo.size.width, height: geo.size.height)
         }
     }
 
-    private func grid(width: CGFloat) -> some View {
+    private func grid(
+        width: CGFloat,
+        height: CGFloat
+    ) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 if firstRunVisible {
@@ -71,7 +78,20 @@ struct HomeScreen: View {
                     cards: offered(HomeCardOrder.wholeApp),
                     columns: columns(for: width, band: band)
                 )
+                // The strip sits at the window's bottom edge when
+                // the cards leave room, and scrolls after them when
+                // they do not (#1536).
+                HomeSupportStrip(model: model)
             }
+            // The strip's footer reaches the window's bottom inset
+            // exactly: the viewport less the gutters this content
+            // already carries, or a short page scrolls by the
+            // difference (code review, 2026-09-21).
+            .frame(
+                minHeight: height - Self.topGutter
+                    - SettingsMetrics.paneInset,
+                alignment: .top
+            )
             .padding(
                 [.horizontal, .bottom],
                 SettingsMetrics.paneInset
@@ -86,7 +106,7 @@ struct HomeScreen: View {
             // Larger than the panes' inset on purpose — a
             // small-caps heading needs air above it to read as a
             // heading rather than as a caption on the bar.
-            .padding(.top, 24)
+            .padding(.top, Self.topGutter)
             // The flip's reflow (#760): Simple's order is a
             // subsequence of Power User's, so the motion is pure
             // insertion (in) or removal (out) — legible either
@@ -138,18 +158,7 @@ struct HomeScreen: View {
         columns: [GridItem]
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(
-                    .system(
-                        size: 10,
-                        weight: .semibold,
-                        design: .monospaced
-                    )
-                )
-                .tracking(1.3)
-                .foregroundStyle(SettingsTheme.groupHeading)
-                .textCase(.uppercase)
-                .accessibilityAddTraits(.isHeader)
+            HomeGroupHeading(title)
             LazyVGrid(
                 columns: columns,
                 alignment: .leading,
@@ -173,5 +182,30 @@ struct HomeScreen: View {
     private func push(_ destination: SettingsDestination) {
         model.nav.homeReturnFocus = destination
         model.destination = destination
+    }
+}
+
+/// The small-caps heading over a Home group — and over the
+/// support strip (#1536), so the page has one heading voice.
+struct HomeGroupHeading: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .font(
+                .system(
+                    size: 10,
+                    weight: .semibold,
+                    design: .monospaced
+                )
+            )
+            .tracking(1.3)
+            .foregroundStyle(SettingsTheme.groupHeading)
+            .textCase(.uppercase)
+            .accessibilityAddTraits(.isHeader)
     }
 }

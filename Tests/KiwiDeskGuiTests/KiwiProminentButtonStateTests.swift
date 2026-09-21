@@ -32,6 +32,8 @@ struct KiwiProminentButtonStateTests {
         ("savePill", SettingsTheme.savePill),
         ("page", SettingsTheme.page),
         ("card", SettingsTheme.card),
+        // About's update box carries "Update Available…" (#1536).
+        ("sunken", SettingsTheme.sunken),
     ]
 
     /// rest > pressed > disabled, in both appearances.

@@ -88,6 +88,9 @@ let package = Package(
                 .copy("Resources/Wordmark.png"),
                 .copy("Resources/WordmarkDark.png"),
                 .copy("Resources/AppMark.png"),
+                .copy("Resources/MarkTelegram.png"),
+                .copy("Resources/MarkGitHub.png"),
+                .copy("Resources/MarkKofi.png"),
             ]
         ),
         .testTarget(
