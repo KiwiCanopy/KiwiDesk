@@ -61,8 +61,9 @@ struct ShortcutsBespokeContainerTests {
         // a list added to `ShortcutsRowOrder` and left out of the
         // table was invisible — its container could be walked
         // while `bespokeContainers` still named it and this suite
-        // read green. The compiler closes the rename case; this
-        // closes the addition.
+        // read green. The names here are string literals the
+        // compiler never checks, so the set equality is what
+        // closes the rename AND the addition.
         #expect(!rendered.isEmpty)
         let declared = try Self.declaredOrderLists(under: root)
         #expect(!declared.isEmpty)
@@ -103,30 +104,82 @@ struct ShortcutsBespokeContainerTests {
         )
     }
 
-    /// Every `static let <name>: [SettingKey]` declared in
-    /// `ShortcutsRowOrder.swift` — the order lists, read off the
-    /// one file that declares them. `[[SettingKey]]`
-    /// (`interleavedRuns`) is a re-ordering hint over rows the
-    /// lists already place, not a list serving a container, and
-    /// the type pattern leaves it out.
+    /// Every `static let|var <name>: [SettingKey]` declared in a
+    /// `ShortcutsRowOrder` body — the `enum` and every
+    /// `extension` of it, wherever under `Sources/KiwiDesk` a
+    /// §2.1 split puts one — read off the declarations
+    /// themselves. `[[SettingKey]]` (`interleavedRuns`) is a
+    /// re-ordering hint over rows the lists already place, not a
+    /// list serving a container, and the type pattern leaves it
+    /// out. What the scan cannot see, stated: a list whose type
+    /// is INFERRED (`static let x = focusAtRest + …`) has no
+    /// `: [SettingKey]` to match and is not counted.
     private static func declaredOrderLists(
         under root: URL
     ) throws -> Set<String> {
-        let file =
-            root
-            .appendingPathComponent("Settings")
-            .appendingPathComponent("Components")
-            .appendingPathComponent("Keybindings")
-            .appendingPathComponent("ShortcutsRowOrder.swift")
-        let source = SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        return Set(
-            SourceScan.allMatches(
-                in: source,
-                pattern: #"static let (\w+): \[SettingKey\]"#
+        var declared: Set<String> = []
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
             )
-        )
+            for opener in [
+                "enum ShortcutsRowOrder",
+                "extension ShortcutsRowOrder",
+            ] {
+                for body in Self.bodies(after: opener, in: source) {
+                    declared.formUnion(
+                        SourceScan.allMatches(
+                            in: body,
+                            pattern:
+                                #"static (?:let|var) (\w+): \[SettingKey\]"#
+                        )
+                    )
+                }
+            }
+        }
+        return declared
+    }
+
+    /// Every balanced `{ … }` following an occurrence of
+    /// `declaration` in `text` — all of them, where
+    /// `SourceScan.declarationBody` takes the first, because one
+    /// file may hold the enum and an extension of it.
+    private static func bodies(
+        after declaration: String,
+        in text: String
+    ) -> [String] {
+        let characters = Array(text)
+        let needle = Array(declaration)
+        var found: [String] = []
+        var index = 0
+        while index + needle.count <= characters.count {
+            guard
+                Array(characters[index..<index + needle.count])
+                    == needle,
+                index + needle.count < characters.count,
+                !SourceScan.isIdentifier(
+                    characters[index + needle.count],
+                    orDot: false
+                ),
+                var cursor = characters[(index + needle.count)...]
+                    .firstIndex(of: "{")
+            else {
+                index += 1
+                continue
+            }
+            if let body = SourceScan.balanced(
+                characters,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ) {
+                found.append(body)
+                index = cursor
+            } else {
+                index += needle.count
+            }
+        }
+        return found
     }
 
     /// Whether a `ForEach(` anywhere in `source` walks the named
