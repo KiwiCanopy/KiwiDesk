@@ -84,6 +84,12 @@ extension KiwiCore {
                 hadRememberedSpace: effects.hadRememberedSpace
             )
             if reason == .returned { recentReturns[window.id] = Date() }
+            if effects.closedReturnTookFocus {
+                onLog(
+                    "close return: w\(window.id.raw) re-shown — "
+                        + "focus taken (#1414)"
+                )
+            }
             emitWindowCreated(window, reason: reason)
             // #1010: narrate the cross-screen arrival, the
             // one resolution a device trace cannot read off
@@ -104,10 +110,6 @@ extension KiwiCore {
             // #1207: the Desktop return's owed focus, paid where
             // the fold said it returned.
             payReturningFocus(arrived: window.id, effects: effects)
-            // #1380: a closed own window the door was told about
-            // returns without stealing focus; the command it was
-            // owed runs now.
-            payOwnShowFocus(arrived: window.id)
             // #1362: the snapshot frame the restore could not set
             // on an untracked window, seeded before the arrival
             // retile below delivers it.

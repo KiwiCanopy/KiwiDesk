@@ -120,6 +120,10 @@ extension StateCoordinator {
                     && rememberedSpaces[$0] == .departed(target)
                     && windows[$0] == nil
             } ?? false
+        // Consumed on EVERY arrival, taken or not: a mark that
+        // outlived its return would fire on a later, unrelated
+        // one (#1414).
+        let closedReturn = closedDepartures.remove(window.id) != nil
         guard windows[window.id]?.isTransientOverlay != true
         else { return }
         if effects.hadRememberedSpace, owed == window.id,
@@ -131,6 +135,16 @@ extension StateCoordinator {
             || (workspaces[target]?.focused == nil && !owedHere)
         {
             workspaces.focus(window.id, in: target)
+        } else if closedReturn, target == workspaces.activeSpace {
+            // A window returning from a CLOSE is the user
+            // re-showing it (#1414): it takes the focus a new
+            // window gets, so its own report arrives intended
+            // and the placement distrust never reads it — and it
+            // outranks a Desktop return's vacancy hold, the way
+            // the honored report that follows retires that debt.
+            // A Desktop return itself keeps #636's rule above.
+            workspaces.focus(window.id, in: target)
+            effects.closedReturnTookFocus = true
         }
     }
 

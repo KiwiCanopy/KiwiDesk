@@ -232,12 +232,11 @@ public final class KiwiCore {
     var adoptionHealInterval: Duration = .seconds(5)
     var transientRetrackDelay: Duration = .milliseconds(750)
 
-    /// Four intent ledgers, each type doc carrying its argument:
-    /// the move latch (#482/#483), the follow (#1007) and own-window
-    /// (#1380) focus debts, and a hidden-Desktop move's Space (#1150).
+    /// Three intent ledgers, each type doc carrying its argument:
+    /// the move latch (#482/#483), the follow focus debt (#1007),
+    /// and a hidden-Desktop move's Space (#1150).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
-    let ownShowFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
 
     /// The MAIN display's current native Desktop (#888) — the

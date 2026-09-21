@@ -31,6 +31,11 @@ public struct AppliedEffects: Sendable {
     /// (`ReturningFocusFoldTests`, #1207).
     var paidReturningFocus = false
 
+    /// Whether the create gave a window returning from a CLOSE
+    /// the focus, the way a new window gets it (#1414,
+    /// `ClosedReturnFocusTests`).
+    var closedReturnTookFocus = false
+
     /// Snapshot of facts erased when destroying a tracked window (#674).
     struct RemovedWindow: Sendable {
         let app: String?

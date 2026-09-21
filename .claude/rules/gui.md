@@ -284,12 +284,13 @@ this tree never spells the focus VERB or a copy of either;
 `SettingsOpenFocusSeamTests` pins the branch ORDER and carries
 the `allowed` map of who may call the door, which is the one
 copy, and `PlacementIntentTests` holds what the door does. The
-call is owed for a CLOSED window too (#1380): re-shown, an
-`NSWindow` keeps its number, so the door is handed a number Core
-no longer tracks and owes it the command rather than refusing it
-— state-and-layout.md owns the debt and where it is paid; this
-tree only makes the call, and never skips it because the window
-looks untracked, which it cannot tell anyway. The
+call is made for a CLOSED window too: re-shown, an `NSWindow`
+keeps its number, so the door is handed a number Core no longer
+tracks and answers it rather than refusing — the return takes
+the focus in the fold (#1414; #1380's debt retired with that
+rule), and state-and-layout.md owns where; this tree only makes
+the call, and never skips it because the window looks untracked,
+which it cannot tell anyway. The
 argument is *An own act is never a bounce* under "A placement
 bounce is the app's answer, not the user's (#1161)" in
 `docs/design-decisions.md`.
