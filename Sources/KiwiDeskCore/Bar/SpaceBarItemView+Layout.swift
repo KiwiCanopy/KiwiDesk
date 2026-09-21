@@ -37,7 +37,12 @@ extension SpaceBarItemView {
         restyle()
         var cursor = Self.pad
         place(identifierImage, at: cursor, cell: cell)
-        place(identifierLabel, at: cursor, cell: cell)
+        place(
+            identifierLabel,
+            at: cursor,
+            cell: cell,
+            slack: Self.pad
+        )
         cursor += cell
         if !identifierDivider.isHidden {
             cursor += Self.pad
@@ -187,10 +192,13 @@ extension SpaceBarItemView {
         }
     }
 
+    /// `slack` is how far a text glyph's ink may reach past the
+    /// cell on a side before its font is scaled (`BarTextGlyph`).
     private func place(
         _ view: NSView,
         at offset: CGFloat,
-        cell: CGFloat
+        cell: CGFloat,
+        slack: CGFloat = 0
     ) {
         var rect =
             horizontal
@@ -206,16 +214,12 @@ extension SpaceBarItemView {
                 width: cell,
                 height: cell
             )
-        // Center text glyph vertically (`AppBarItemView+GlyphSlot`).
         if let field = view as? NSTextField {
-            let height = ceil(
-                field.cell?.cellSize.height ?? 0
+            rect = BarTextGlyph.frame(
+                for: field,
+                in: rect,
+                slack: slack
             )
-            if height > 0, height < rect.height {
-                rect.origin.y +=
-                    ((rect.height - height) / 2).rounded()
-                rect.size.height = height
-            }
         }
         view.frame = backingAlignedRect(
             rect,

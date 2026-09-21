@@ -281,3 +281,37 @@ Obligations:
   behaviour and the observer's delivery). Why the OFF shape rather
   than an opaque glass is `docs/design-decisions.md` ▸ Reduce
   transparency.
+
+## A Space Bar text glyph is framed through the one `BarTextGlyph.frame`
+
+A label's `cellSize` carries ~8 pt of cell padding around the
+advance, so at a thin bar it exceeds the square glyph cell for
+every App Font ligature — and `NSTextFieldCell` then draws the
+string LEFT-aligned whatever `alignment` says, so a frame the
+size of the cell clipped the trailing quarter of the ink at the
+thickness floor (#1529). The vertical-centring block that came
+with that frame had already been hand-copied once, from the
+item's `place` into the front-app segment, which is how both
+sites clipped alike.
+
+- **Place a text glyph in a Space Bar cell through
+  `BarTextGlyph.frame` and nowhere beside it**: the frame takes
+  the label's own width, centred on the cell so the alignment
+  holds, shifted so the INK is centred rather than the advance
+  (the neighbours are image cells, whose pixels centre; a
+  ligature's slack sits on its trailing side), and a glyph whose
+  ink would reach past the cell by more than the SLACK its site
+  states is scaled to fit — an app cell states none, since its
+  neighbour abuts; the identifier states the item's pad, so a
+  three-digit id or a monogram keeps the ladder's size and
+  reaches into the pad rather than shrinking beside a one-digit
+  neighbour. The helper returns unaligned geometry and the site
+  rounds ONCE to its backing. A new site owes
+  `SpaceBarGlyphCellTests` a clause of its own — the suite pins
+  the item's and the front-app segment's fields by rendering
+  them, and reads no site list, so a third site that framed by
+  hand would stay green there.
+- The App Bar's icon slot (`AppBarItemView+GlyphSlot`) frames
+  its own glyph by its own ruling — font-scaling and
+  `snugToName` — and centres the advance; #1543 converges it on
+  the ink offset.
