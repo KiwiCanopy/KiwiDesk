@@ -619,6 +619,36 @@ binding fires.
 KiwiDesk.set_resize_step(75)
 ```
 
+### reset_layout_sizing
+
+:::unreleased
+**Expects:** nothing.
+
+**Does:** returns every space's **sizing** — what `resize` and
+mouse resizes accumulate — to the configured value, in one
+action. Cleared on every space: the BSP split ratios, the stack
+master ratio, the scrolling slot size (the session layer
+described under [resize](#resize), and the same fields of an
+authored per-space override), the stack column's per-window
+weights and the track weights. Kept: everything that is
+structure rather than size — the layout mode, the BSP strategy,
+the master count, orientation and stack position, the overflow
+style, the scrolling anchor and orientation, the track axis and
+limit, a grid's columns and rows, new-window placement — and the
+globals themselves, so a space lands on *your* `bsp.set_ratio_h`
+rather than on the shipped default. Retiles at once. Unbound by
+default; bind it from init.lua or the Shortcuts ▸ Lua bindings
+drawer.
+:::
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+0", function()
+    KiwiDesk.reset_layout_sizing()
+end)
+```
+
 ### set_swap_skips_cascade
 
 **Expects:** `true` or `false` (default `true`).

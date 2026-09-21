@@ -38,6 +38,8 @@ struct BatchSizingCommandTests {
             "scroll.set_slot_size_override",
             [.string("1"), .number(700)]
         ),
+        // Clears every ratio-like store at once (#764).
+        ("reset_layout_sizing", []),
     ]
 
     /// Members of the same dispatch that reassign slots wholesale

@@ -40,6 +40,9 @@ struct FocusedCommandPolicyTests {
         "get_profile_status",
         "bind_profile_to_desktop",
         "enable_wake_restore",
+        // Acts on every Space's stored sizing, never the focused
+        // window (#764).
+        "reset_layout_sizing",
         "subscribe",
         "border.fit_gaps",
     ]

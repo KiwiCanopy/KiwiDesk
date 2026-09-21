@@ -2750,6 +2750,35 @@ for all three, per the #458 scope note. Accepted edge: removing
 an override field mid-session can resurface an older session
 value until the next reseed.
 
+:::unreleased
+**A reset of layout sizing returns to the configured value and
+touches size alone, never structure
+([#764](https://github.com/KiwiCanopy/KiwiDesk/issues/764)).**
+Interactive resizes accumulate per space and across weeks, and
+the two routes back before `reset_layout_sizing` — nudging each
+ratio in the opposite direction, or `load_profile`, which also
+discards every non-sizing change since — were not answers. The
+verb clears the three stores a resize writes (the #458 session
+layer, the size fields of an authored `_override`, and the stack
+and track weights) on every space at once, because the problem
+is precisely not knowing which spaces drifted; a per-space
+sibling may exist but is not the deliverable. Two rulings hold
+the shape. It resets to the *configured* value: the override
+maps are a diff over the profile's globals, so clearing an
+override lands on the user's own ratio, while resetting to the
+shipped default would destroy configuration the user never
+touched in the session, which is not what "reset my adjustments"
+means to anybody. And it stops at size: `masterCount` looks like
+a size and is a count of which windows are masters; the strategy,
+orientations, positions, overflow style, placement, anchor, axis,
+limit, grid dimensions and the track breaks are choices the user
+made, not drift, and a verb that cleared them would be a second
+`load_profile`. The noun is **sizing** — the collective of a
+layout's size adjustments — which the config vocabulary glossary
+now carries so the next verb over ratios, a slot size and weights
+does not coin a synonym.
+:::
+
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
 ratios are rejected.** `resize("x")` and `resize("y")` used to
 write the *same* scalar (one `splitRatio` for every BSP split, one

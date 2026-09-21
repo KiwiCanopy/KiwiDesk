@@ -41,6 +41,10 @@ extension APIReference {
                 + "points.",
             .integer("points")
         ),
+        "reset_layout_sizing": APIRecord(
+            "Returns every Space's ratios, slot size and weights "
+                + "to the configured values; structure stays."
+        ),
         "set_refusal_sound": APIRecord(
             "Also plays an alert sound whenever a blocked "
                 + "keyboard action draws its refusal pill.",
