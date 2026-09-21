@@ -8,7 +8,8 @@ extension TilingSettings {
         gapsOverride[space] ?? gapsGlobal
     }
 
-    /// Resolved scrolling parameters for space (#17).
+    /// Resolved scrolling parameters for space (#17) — config
+    /// only, like `resolvedBsp(for: SpaceID)`.
     public func resolvedScrolling(
         for space: SpaceID
     ) -> ScrollingParams {
@@ -16,12 +17,14 @@ extension TilingSettings {
             .resolved(onto: scrolling)
     }
 
-    /// Resolved BSP parameters for space (#17).
+    /// Resolved BSP parameters for space (#17) — config only: a
+    /// size a resize moves is read through the `Space` overload.
     public func resolvedBsp(for space: SpaceID) -> BspParams {
         (bsp.override[space] ?? BspOverride()).resolved(onto: bsp)
     }
 
-    /// Resolved stack parameters for space (#17).
+    /// Resolved stack parameters for space (#17) — config only,
+    /// like `resolvedBsp(for: SpaceID)`.
     public func resolvedStack(for space: SpaceID) -> StackParams {
         (stack.override[space] ?? StackOverride())
             .resolved(onto: stack)
@@ -47,11 +50,8 @@ extension TilingSettings {
             .resolved(onto: track)
     }
 
-    /// BSP parameters under the Space's session resize layer,
-    /// which outranks the authored override (#458, #764): a
-    /// resize never writes the override, so the override stays
-    /// the authored value and `reset_layout_sizing` lands there
-    /// by dropping the layer.
+    /// BSP parameters under the session layer, which outranks the
+    /// authored override (#458, #764).
     public func resolvedBsp(for space: Space) -> BspParams {
         var params = resolvedBsp(for: space.id)
         if let value = space.sessionRatios.splitRatioH {

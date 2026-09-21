@@ -1201,22 +1201,27 @@ editing here:
   a resize never writes the authored override (#764).**
   `Space.resetSizing` clears the per-Space sizes (the session
   ratios, the stack and track weights); `reset_layout_sizing`
-  is a loop over it and lists nothing itself, and it touches
-  `TilingSettings` not at all, because the interactive write
-  seam (`KiwiCore+SessionRatioWrite`) lands EVERY resize in the
-  session layer — which the overlay in
-  `TilingSettings+Resolution` reads AHEAD of the override — so
-  the override is the authored value by construction and the
-  reset returns to it by dropping the layer (owner ruling
-  2026-09-21; the rejected alternative, a snapshot of the
-  authored sizes at every apply, is a register of writers that
-  goes stale silently). The price is that an explicit
-  per-space `_override` setter must clear that space's session
-  field or it visibly does nothing (#383's trap one layer
-  down), which `SessionRatioOverrideTests` ▸
-  `allOverrideSettersClearTheirField` holds and
-  `resizeLeavesTheOverrideAuthored` pins the precedence. A
-  stored property added to `Space` is classified by
+  is a loop over it and lists nothing itself, and touches
+  `TilingSettings` not at all. A resize path writes through
+  `KiwiCore+SessionRatioWrite`'s `write*` and never an
+  override's size field, and the overlay in
+  `TilingSettings+Resolution` reads the layer AHEAD of the
+  override — `SessionRatioOverrideTests` ▸
+  `resizeLeavesTheOverrideAuthored` and
+  `everyOverlayLineReadsSessionFirst` pin the precedence, the
+  #933 bullet below the writers' route — so the override is the
+  authored value the reset returns to by dropping the layer;
+  the argument, and the rejected snapshot, are
+  `docs/design-decisions.md` ▸ *A reset of layout sizing*. An
+  explicit per-space `_override` setter clears that space's
+  session field through the one `clearSessionRatios(for:)`
+  door, or the write visibly does nothing (#383's trap one
+  layer down): `SessionRatioOverrideTests` ▸
+  `overrideSetterClearsShadow` and
+  `allOverrideSettersClearTheirField` hold the four setters,
+  and `SessionRatioSeamTests` holds every `sessionRatios` write
+  outside the seam file to the model's own reseeds. A stored
+  property added to `Space` is classified by
   `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
   structure with its reason — or it reds; a new resize knob
   owes a `SessionRatios` field, its overlay line and its two

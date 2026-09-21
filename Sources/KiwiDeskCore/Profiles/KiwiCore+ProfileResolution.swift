@@ -51,8 +51,11 @@ extension KiwiCore {
         // visibly do nothing (§5 forced-retile rationale).
         // Event-driven applies (monitor change, native-space
         // binding) keep it — a display reconnect must not eat
-        // the user's interactive resizes.
-        if forceRetile {
+        // the user's interactive resizes — unless they change
+        // the PROFILE: the layer outranks the incoming profile's
+        // authored overrides, and its values are the outgoing
+        // arrangement's (#764).
+        if forceRetile || switching {
             clearSessionRatios { $0 = SessionRatios() }
         }
         let declared = profile.declaredSpaces

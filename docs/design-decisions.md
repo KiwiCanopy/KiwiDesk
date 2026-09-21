@@ -2731,29 +2731,42 @@ materializing a per-space override on first resize (silently
 pins the space, decouples it from Layout Defaults, and fills
 the #290 override editor with overrides the user never
 authored). Chosen: a **session ratio layer** on the `Space`
-(`SessionRatios`), the `stackWeights` precedent — every
-interactive write lands there, config stays untouched, and the
-layer reseeds on a real mode change or `reload_config`. Read
-precedence is session > authored override > global — it was
-authored override > session until #764, when a resize on an
-authored space still edited the override in place and so
-destroyed the number the profile had written; now the override
-is the authored value by construction, which is what lets a
-reset return to it — and every **explicit config write** drops
-the session shadow so it always visibly applies (the #383
-"visibly did nothing" rationale): a global setter
-(`bsp.set_ratio_h`, `stack.set_master_ratio`,
-`scroll.set_slot_size`) clears its own field everywhere, a
-per-space `_override` setter clears it on its one space, and an
-explicit apply — `load_profile`, a preset, a GUI save — clears
-the whole layer, riding the same `forceRetile` classification
-those applies already carry (§5); event-driven applies (monitor
-change, Desktop binding) keep it, so a display reconnect
-never eats an interactive resize. Covers the BSP split ratios,
-stack master ratio, and scrolling slot size — the same shape
-for all three, per the #458 scope note. Accepted edge: removing
-an override field mid-session can resurface an older session
-value until the next reseed.
+(`SessionRatios`), the `stackWeights` precedent — config stays
+untouched, and the layer reseeds on a real mode change or
+`reload_config`. Every **explicit config write** drops the
+session shadow so it always visibly applies (the #383 "visibly
+did nothing" rationale): a global setter (`bsp.set_ratio_h`,
+`stack.set_master_ratio`, `scroll.set_slot_size`) clears its
+own field everywhere, and an explicit apply — `load_profile`, a
+preset, a GUI save — clears the whole layer, riding the same
+`forceRetile` classification those applies already carry (§5);
+event-driven applies (monitor change, Desktop binding) keep it,
+so a display reconnect never eats an interactive resize. Covers
+the BSP split ratios, stack master ratio, and scrolling slot
+size — the same shape for all three, per the #458 scope note.
+
+:::unreleased
+**The session layer outranks the authored override, and a
+resize never writes an override (#458 as amended by #764).**
+Read precedence is session > authored override > global, and
+every interactive write lands in the layer — on a space with
+an authored `_override` too, where it used to edit the override
+in place and so destroy the number the profile wrote. The
+override is then the authored value by construction, which is
+what lets `reset_layout_sizing` return to it. Two costs follow
+and are accepted: a per-space `_override` setter must clear
+its field on that space, or the explicit write is shadowed
+(#383's trap one layer down); and an event-driven apply that
+CHANGES the profile — a bound-Desktop switch — reseeds the
+layer after all, since the values in it are the outgoing
+arrangement's and would now outrank the incoming profile's
+authored ratios; the same-profile monitor-change apply keeps
+it as before. What the Settings override editor and the quick
+menu's Keep show and write is the authored number, not the
+resized one — a resize is session-only on every space alike,
+which #1179's "Settings narrates the profile" ruling already
+holds for the no-override case.
+:::
 
 :::unreleased
 **A reset of layout sizing returns to what the profile authored
@@ -2772,15 +2785,15 @@ what its profile or `init.lua` **authored** — a per-space
 authored does the space land on the global — never past either
 to the shipped default, which would destroy configuration the
 user never touched in the session; none of that is what "reset
-my adjustments" means to anybody (owner ruling 2026-09-21). The
-first draft cleared the override's size field too, because #458
-then routed a resize on an authored space into the override
-itself, so nothing distinguished the authored number from the
-drift; rather than snapshot the authored values at every apply
-— a register of writers that goes stale silently — the
-precedence was flipped so a resize never writes the override at
-all, and the reset restores the authored value by dropping the
-layer in front of it. And it stops at size: `masterCount`
+my adjustments" means to anybody (owner ruling 2026-09-21).
+Restoring the authored value by remembering it — a snapshot of
+the four size fields at every profile, config and Standard
+apply, refreshed by every `_override` verb — is rejected: it is
+a register of writers, and the one that forgets makes the reset
+restore a stale number with nothing going red. Instead a resize
+never writes the override at all (the #458 amendment above), so
+the reset restores the authored value by dropping the layer in
+front of it. And it stops at size: `masterCount`
 looks like a size and is a count of which windows are masters;
 the strategy, orientations, positions, overflow style,
 placement, anchor, axis, limit, grid dimensions and the track

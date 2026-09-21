@@ -9,7 +9,6 @@ import Testing
 /// so the override stays the number the profile wrote and
 /// `reset_layout_sizing` can return to it; the price is that an
 /// explicit per-space `_override` write must drop its shadow.
-/// Split from `SessionRatioTests` at the §2.1 ceiling.
 @Suite("Session resize layer — authored overrides (#764)", .serialized)
 @MainActor
 struct SessionRatioOverrideTests {
@@ -73,6 +72,37 @@ struct SessionRatioOverrideTests {
                     .splitRatioH == session
             )
         }
+    }
+
+    /// The other three overlay lines, each pinned on its own
+    /// field: a resolver that flips one back to override-first
+    /// stays green on the H clause above.
+    @Test("Every overlay line reads the session layer first")
+    func everyOverlayLineReadsSessionFirst() {
+        var over = TilingSettings()
+        var bsp = BspOverride()
+        bsp.splitRatioH = 0.3
+        bsp.splitRatioV = 0.3
+        over.bsp.override[SpaceID("1")] = bsp
+        var stack = StackOverride()
+        stack.masterRatio = 0.3
+        over.stack.override[SpaceID("1")] = stack
+        var scrolling = ScrollingOverride()
+        scrolling.slotSize = .points(300)
+        over.scrolling.override[SpaceID("1")] = scrolling
+        var session = SessionRatios()
+        session.splitRatioH = 0.8
+        session.splitRatioV = 0.7
+        session.masterRatio = 0.6
+        session.slotSize = .points(500)
+        let space = Space(id: SpaceID("1"), sessionRatios: session)
+        #expect(over.resolvedBsp(for: space).splitRatioH == 0.8)
+        #expect(over.resolvedBsp(for: space).splitRatioV == 0.7)
+        #expect(over.resolvedStack(for: space).masterRatio == 0.6)
+        #expect(
+            over.resolvedScrolling(for: space).slotSize
+                == .points(500)
+        )
     }
 
     @Test("Every per-space override setter drops its own shadow")

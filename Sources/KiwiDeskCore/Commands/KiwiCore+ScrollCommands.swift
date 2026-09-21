@@ -102,10 +102,8 @@ extension KiwiCore {
             }
             over.slotSize = size
             promiseAllWindowsSpringSized()
-            // The session layer outranks the override, so an
-            // explicit write drops its shadow (#458, #764).
-            state.workspaces.withSpace(SpaceID(space)) {
-                $0.sessionRatios.slotSize = nil
+            clearSessionRatios(for: SpaceID(space)) {
+                $0.slotSize = nil
             }
         case "anchor":
             guard

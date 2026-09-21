@@ -4394,6 +4394,7 @@ What the
   the write-time clamp; that asymmetry is deliberate (see the
   accepted limitations).
 
+:::unreleased
 **Where the ratio write lands (#458):** in a **session layer
 scoped to that space** — never the shared global, so resizing
 one space does not visibly resize every other space, and never
@@ -4412,6 +4413,7 @@ twin on that space — so an explicit write always shows. This
 covers the BSP split ratios, the stack master ratio, and the
 scrolling slot size — the three interactive-resize knobs —
 consistently.
+:::
 
 **Example:**
 

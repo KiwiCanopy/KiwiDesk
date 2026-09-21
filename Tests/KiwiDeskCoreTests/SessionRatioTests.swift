@@ -193,6 +193,35 @@ struct SessionRatioTests {
         )
     }
 
+    /// The layer outranks the incoming profile's authored
+    /// overrides (#764), so a bound-Desktop switch — event-driven
+    /// — reseeds it when the PROFILE changes, never when the same
+    /// one re-applies on a monitor change.
+    @Test("An event-driven apply that CHANGES the profile reseeds")
+    func profileChangeReseeds() throws {
+        let core = makeCore()
+        #expect(
+            core.execute("save_profile", args: [.string("A")])
+                .isSuccess
+        )
+        core.execute("resize", args: [.string("x"), .number(500)])
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioH != nil
+        )
+        let other = Profile(
+            name: "B",
+            monitorSets: [MonitorSet(monitors: ["A:1x1"])],
+            spaceModes: ["1": .bsp],
+            settings: core.tiler.settings
+        )
+        core.apply(profile: other, forceRetile: false)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios == SessionRatios()
+        )
+    }
+
     @Test("A composed (preset) apply follows the same rule")
     func composedApplyReseeds() {
         let core = makeCore()

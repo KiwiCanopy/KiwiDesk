@@ -36,9 +36,7 @@ extension KiwiCore {
     /// ratio`, `scroll.set_slot_size`) call this so an explicit
     /// config write visibly applies everywhere instead of being
     /// shadowed by earlier interactive resizes (the #383
-    /// "visibly did nothing" trap, session-layer edition). The
-    /// per-space `_override` setters clear the same field on
-    /// their one Space for the same reason (#764).
+    /// "visibly did nothing" trap, session-layer edition).
     func clearSessionRatios(
         _ clear: (inout SessionRatios) -> Void
     ) {
@@ -46,6 +44,19 @@ extension KiwiCore {
             state.workspaces.withSpace(space.id) {
                 clear(&$0.sessionRatios)
             }
+        }
+    }
+
+    /// The per-space `_override` setters' sibling: the layer
+    /// outranks the override, so an explicit write on one Space
+    /// drops that Space's shadow (#764). `SessionRatioSeamTests`
+    /// holds every `sessionRatios` write to this file.
+    func clearSessionRatios(
+        for space: SpaceID,
+        _ clear: (inout SessionRatios) -> Void
+    ) {
+        state.workspaces.withSpace(space) {
+            clear(&$0.sessionRatios)
         }
     }
 }
