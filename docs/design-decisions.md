@@ -8669,6 +8669,41 @@ never fought. The accepted trade is the one clickless
 cross-app focus inside that window being returned once.
 (`AccessibilityReturnTests`)
 
+:::unreleased
+**A menu-bar reveal's activation is returned, once (#1532).**
+With the menu bar set to auto-hide, macOS 27 answers the
+pointer reaching the top edge by activating the last *regular*
+app, so there is a bar to reveal — KiwiDesk is an accessory app
+and owns none (the #329 row in accepted limitations) — and a
+clickless focus report for that app's window lands ~190 ms
+later, ahead of the bar itself (device measurement 2026-09-21,
+bsp and scrolling alike). The user asked to see the menu bar,
+not to change windows. The #952 boundary binds as it does for
+#958: the activation is a genuine OS focus event, so Core keeps
+state focus on the own window and re-asserts it — and measured
+on the device, re-activating KiwiDesk while the pointer stays at
+the edge HOLDS: macOS does not steal it back, the previous app's
+bar stays revealed above the key own window, and it hides when
+the pointer leaves. The re-assert is the focus COMMAND rather
+than #958's direct raise, because in a scrolling Space the pan
+that honored the activation has just placed the own window, and
+a bare raise's report is exactly the clickless focus the
+placement distrust bounces (#1414's class); through the command
+the report arrives intended (#1281). Decided at the report from
+readable facts rather than armed ahead, since nothing precedes
+the reveal: a report from another app while the anchor is a
+window of our own pid, the bar auto-hides and the pointer is in
+the reveal strip. Stood down by any left press inside the echo
+window — a click into the revealed bar's menus reaches no
+managed window, so the click-reached escape cannot see it —
+never when the re-assert would switch Desktops (#1345), and
+bounded to one return per echo window so an activation KiwiDesk
+cannot hold is never fought twice. The accepted trade: a
+deliberate cmd-tab away from an own window with the pointer
+parked at the top edge is returned once; the next goes through.
+(`MenuBarRevealReturnTests`, `MenuBarRevealSeamTests`)
+:::
+
 **Open-or-Focus cycles in canonical order, never
 most-recently-used.** A repeat press of the shortcut walks the
 app's tracked windows in space-creation order, then flat-array

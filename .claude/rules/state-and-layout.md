@@ -470,7 +470,21 @@ editing here:
   own debt the same one-machine way
   (`AccessibilityReturnTests`), and a new consumer of either
   latch routes through the owning file rather than reading the
-  stored state beside a call site.
+  stored state beside a call site. The #1532 menu-bar reveal
+  return is the third of the family and takes the same one-home
+  shape: `KiwiCore+MenuBarRevealReturn.swift` owns the arm and
+  its one-shot stamp, decides at the report from the readable
+  facts — the anchor an own window, a foreign report, no left
+  press inside the echo window, the pointer in the reveal strip
+  — and re-asserts through the focus COMMAND, never a bare
+  raise, so the report that follows is intended (#1281) and the
+  scrolling placement distrust does not bounce it (#1414's
+  class). The strip read lives behind `mouse.pointerInMenuBarStrip`
+  and every `makeTestCore` twin pins it false, since a live
+  default reading the developer's pointer would return foreign
+  reports in every focus suite (`MenuBarRevealReturnTests` the
+  verdicts, `MenuBarRevealSeamTests` the homes, the pins and
+  the arm's place between #1161 and #958).
   `IgnoredPanelGraceTests` pins the machine's transitions (the
   dismissal grace, the click-provenance escape, expiry, the
   re-arm reset); the trade the grace accepts is argued in
