@@ -190,9 +190,6 @@ they are different Spaces holding different windows; the profile
 is the scope a Space name resolves in. Switching profiles never
 merges them: KiwiDesk files which Space each window was in under
 the profile you are leaving and puts them back when you return.
-A window the incoming profile has never seen stays where it is
-when that profile declares the Space it is sitting in, and lands
-in the profile's **fallback Space** when it does not.
 
 The full rules are in the [Lua reference](lua-reference.md)
 ▸ *Space Reconciliation*.
