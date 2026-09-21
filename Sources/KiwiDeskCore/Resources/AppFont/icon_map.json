@@ -1417,7 +1417,8 @@
         "iconName": ":homebrew:",
         "appNames": [
             "brew-browser",
-            "WailBrew| TapHouse",
+            "WailBrew",
+            "TapHouse",
             "Cork",
             "Homebrew",
             "Brewer X",
@@ -1959,7 +1960,8 @@
         "iconName": ":matlab:",
         "appNames": [
             "Matlab",
-            "MATLAB |MATLABWindow",
+            "MATLAB",
+            "MATLABWindow",
             "MATLAB_R2024b",
             "MATLAB_R2024a",
             "MATLAB_R2023b",
@@ -3111,7 +3113,7 @@
             "SF Symbols",
             "SF Symbole",
             "SF-Symbole",
-            " SF Symbols Beta"
+            "SF Symbols Beta"
         ]
     },
     {
@@ -3180,6 +3182,12 @@
         "iconName": ":smartgit:",
         "appNames": [
             "SmartGit"
+        ]
+    },
+    {
+        "iconName": ":smoothcsv:",
+        "appNames": [
+            "SmoothCSV"
         ]
     },
     {
@@ -3821,7 +3829,7 @@
     {
         "iconName": ":yandex_browser:",
         "appNames": [
-            "Yandex Browser ",
+            "Yandex Browser",
             "Yandex Browser",
             "Yandex"
         ]
