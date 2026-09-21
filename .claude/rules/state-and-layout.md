@@ -564,7 +564,14 @@ editing here:
   `ledgerHasOneWriterFile`): per dispatched move, and from
   `switchDesktop` for every window a switch WE dispatch will carry,
   before any notification (#1213, `StickyReachDispatchStampTests`;
-  why the stamp must precede the notification is the carried arm's).
+  why the stamp must precede the notification is the carried arm's)
+  — and, for a GESTURE switch nothing of ours dispatched, the
+  `stickyReachAwaitsCarry` verdict the gate's third arm reads: the
+  enabled set AND the compositor hosting the window on the Space
+  the handler last filed for a display that now shows another, so
+  the destroy that precedes the handler defers and the handler
+  finds the window to carry (#1215, `ReachAwaitsCarrySeamTests`;
+  the arm itself is accessibility.md's).
   `StickyReachCarryTests` drives the handler, the settle and the
   verdicts through the fake bridge; `StickyReachOverrideTests` the pin.
 - A **native-fullscreen window keeps its `space.windows` slot

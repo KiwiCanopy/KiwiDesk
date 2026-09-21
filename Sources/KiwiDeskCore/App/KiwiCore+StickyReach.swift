@@ -61,6 +61,31 @@ extension KiwiCore {
             .intersection(stickyReachCarried())
     }
 
+    /// The carry OWES `id` a move (#1215): reach-enabled, and the
+    /// compositor hosts it on the user Space the switch handler
+    /// LAST FILED for its display (`lastDisplaySpaces`) while that
+    /// display now shows another — a switch the handler has not
+    /// run for yet. The removal gate reads it through
+    /// `EventLoop.reachAwaitsCarry`. "Unshown" alone is not the
+    /// reading: a move verb's hand-off and a Mission Control drag
+    /// park a window on an unshown Desktop with no switch pending
+    /// (review, 2026-09-21). Answered from the gone classifier's
+    /// own door (`gonePresence`) against ONE topology reading; a
+    /// shown host, a fullscreen Space (the #1272 arm's), `gone`,
+    /// an unreadable or unlisted host and a display never filed
+    /// all answer false. Priced per vanished reach-enabled
+    /// window, the read `handleWindowGone` pays a moment later.
+    func stickyReachAwaitsCarry(_ id: WindowID) -> Bool {
+        guard stickyReachCarried().contains(id) else { return false }
+        let spaces = NativeSpaces.allSpaces()
+        let presence = gonePresence(of: id, spaces: spaces)
+        guard case .hosted(let space, false) = presence,
+            let host = spaces.first(where: { $0.id == space }),
+            host.isUser
+        else { return false }
+        return desktopMemory.lastDisplaySpaces[host.displayUUID] == space
+    }
+
     /// Stamps every window the carry WILL move on `displayUUID`
     /// as in flight at our own switch dispatch, before any
     /// notification (#1213, the argument on `inFlightWindow`).

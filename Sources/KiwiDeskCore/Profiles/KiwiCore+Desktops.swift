@@ -203,8 +203,21 @@ extension KiwiCore {
         // space and the carry follows the render. Threaded from
         // the ONE snapshot (profiles.md); the settle is the net.
         refreshStickyReach(spaces: snapshot.spaces)
+        // Filed AFTER the carry (#1215): a bound Desktop's apply
+        // runs a full reconcile above, and the reach-departure arm
+        // stays open only while this switch is unfiled — the carry
+        // stamps the window in flight before the file closes it.
+        fileDisplaySpaces(in: snapshot)
         emitDesktopChange(snapshot, changed: changed)
         settleAfterDesktopSwitch(snapshot.mainCurrentSpace)
+    }
+
+    /// Files the snapshot's current Space per display as the last
+    /// reading `switchedDisplays` diffs against — the one writer
+    /// beside the boot seed, called at the handler's tail
+    /// (`ReachFilingOrderSeamTests`).
+    func fileDisplaySpaces(in snapshot: DesktopSnapshot) {
+        desktopMemory.lastDisplaySpaces = snapshot.currentSpaces
     }
 
     /// Whether this switch belongs to a secondary display: the
@@ -239,17 +252,14 @@ extension KiwiCore {
     }
 
     /// The display UUIDs whose current Space differs from the
-    /// last reading, re-stamping the memory as it goes.
-    ///
-    /// Called ONCE per switch, and its answer threaded to the
-    /// emit: the switch arm and the event must not name different
-    /// displays, and a second call would diff against the stamp
-    /// the first one just wrote (review, 2026-08-18).
+    /// last FILED reading. Taken once per switch and threaded to
+    /// the emit, so the switch arm and the event name the same
+    /// displays; the filing itself is `fileDisplaySpaces`, at the
+    /// handler's tail.
     func switchedDisplays(
         in snapshot: DesktopSnapshot
     ) -> DisplaySwitch {
         let previous = desktopMemory.lastDisplaySpaces
-        desktopMemory.lastDisplaySpaces = snapshot.currentSpaces
         return DisplaySwitch(
             changed: snapshot.currentSpaces
                 .filter { $0.value != previous[$0.key] }

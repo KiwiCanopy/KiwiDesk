@@ -164,6 +164,9 @@ extension KiwiCore {
         eventLoop.fullscreenSpaceHosts = { [weak self] id in
             self?.windowIsOnFullscreenSpace(id) ?? false
         }
+        eventLoop.reachAwaitsCarry = { [weak self] id in
+            self?.stickyReachAwaitsCarry(id) ?? false
+        }
         sleepWake.captureState = { [weak self] in
             self?.sessionSnapshot()
         }

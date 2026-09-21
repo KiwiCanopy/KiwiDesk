@@ -135,6 +135,14 @@ public final class EventLoop {
     /// Wired in `KiwiCore+Bootstrap`; the false default keeps
     /// every harness inert.
     var fullscreenSpaceHosts: (WindowID) -> Bool = { _ in false }
+    /// The Desktop-reach carry OWES this window a move: reach
+    /// enabled, and the compositor hosts it on a user Desktop
+    /// nobody shows — it left with its Desktop on a gesture and
+    /// the switch handler has not run yet (#1215). The gate's
+    /// third arm. Wired in `KiwiCore+Bootstrap` to
+    /// `KiwiCore.stickyReachAwaitsCarry`; the false default keeps
+    /// every harness inert.
+    var reachAwaitsCarry: (WindowID) -> Bool = { _ in false }
     /// When the user last switched native Spaces. Tab coalescing is
     /// suppressed for a short window afterward: a space switch shows
     /// the departed space's windows as vanished and the arrived

@@ -194,16 +194,19 @@ struct CarriedRemovalTests {
     @Test("an uncarried vanish inside the grace keeps the old gate")
     func uncarriedVanishInsideGraceIsRemoved() {
         let (loop, box) = makeLoop()
-        // Both expected-absence arms closed (#1145, #1272): inside
-        // the grace the census clause stands down and nothing
-        // else refuses.
+        // Every expected-absence arm closed (#1145, #1215, #1272):
+        // inside the grace the census clause stands down and
+        // nothing else refuses.
         loop.carriedWindows = { [] }
+        loop.reachAwaitsCarry = { _ in false }
         loop.detectedFullscreen[WindowID(12)] = false
         loop.fullscreenSpaceHosts = { _ in false }
         loop.elements[pid] = [WindowID(12): dummyElement]
         box.listed = []
         box.census = [pid: [WindowID(12)]]
-        loop.lastDesktopChange = Date()
+        // Stamped AHEAD of the clock: "inside the grace" must not
+        // depend on the runner's pace (#1456's class).
+        loop.lastDesktopChange = Date(timeIntervalSinceNow: 60)
         loop.reconcile(pid: pid, app: ref)
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
         #expect(box.censusReads == 0)
