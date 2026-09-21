@@ -56,7 +56,7 @@ brew install --cask kiwicanopy/tap/kiwidesk
 
 Or **[download the `.dmg`](https://kiwidesk.kiwicanopy.com/)** — the
 same signed, notarized app; the cask additionally puts the `kiwidesk`
-CLI on your `PATH`. Either way KiwiDesk keeps itself up to date.
+CLI on your `PATH`. Either way KiwiDesk checks for updates itself.
 
 On first launch a wizard walks you through the Accessibility
 permission, then tiles your windows straight away. Everything past
@@ -82,10 +82,10 @@ agents are welcome. To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[Business Source License 1.1](LICENSE): the source is public and using
-KiwiDesk is free, at home and at work; offering, selling, bundling or
-hosting it as a product or service needs a commercial license. Each
-version becomes [MIT](https://opensource.org/license/mit) four years after publication.
+[Business Source License 1.1](LICENSE): using KiwiDesk is free, at home
+and at work; offering, selling, bundling or hosting it or a derivative
+as a product or service needs a commercial license. Each version
+becomes [MIT](https://opensource.org/license/mit) four years after publication.
 
 ---
 
