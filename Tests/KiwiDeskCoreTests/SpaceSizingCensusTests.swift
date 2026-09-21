@@ -8,9 +8,10 @@ import Testing
 /// `Space.resetSizing()` — or STRUCTURE, named in the register
 /// below (#764). Discovered by reflection over a fixture that
 /// sets every property away from its default, so a store added
-/// tomorrow reds until it is classified; the `setMode` clear in
-/// `WorkspaceManager` is a second reader of the same split, and
-/// this is the one statement both are held to.
+/// tomorrow reds until it is classified. `WorkspaceManager
+/// .setMode` clears a DIFFERENT set on purpose — a mode reseed,
+/// under which the track shares survive by ruling
+/// (`docs/accepted-limitations.md`) — and is not held here.
 @Suite("Space sizing census (#764)")
 struct SpaceSizingCensusTests {
     private let w1 = WindowID(1)

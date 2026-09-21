@@ -15,9 +15,14 @@ extension KiwiCore {
             tiler.settings.clearSizingOverrides(for: space.id)
         }
         // Only room is re-divided among windows already placed
-        // (#593) — and a cleared track weight can change which
-        // windows overlap, so the arm `resize` takes (#674).
+        // (#593). A cleared track weight can change which windows
+        // overlap, and the retile is the dispatcher's trailer, so
+        // the restore is RECORDED for it rather than armed here —
+        // armed now it would run off the pre-reset frames (#153,
+        // #674).
         promiseAllWindowsSpringSized()
-        scheduleTrackZOrderRestoreIfOverflowing()
+        if activeTrackOverflows {
+            requestZOrderRestoreAfterDispatch()
+        }
     }
 }

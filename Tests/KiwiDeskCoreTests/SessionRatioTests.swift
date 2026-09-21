@@ -269,11 +269,13 @@ struct SessionRatioTests {
     }
 
     /// The #458 mirror net (§5 parity rule): the SessionRatios
-    /// field list is hand-mirrored at the overlay funcs
-    /// (`TilingSettings+Resolution`), the write wrappers and
-    /// clears (`KiwiCore+SessionRatioWrite`, the three command
-    /// files), and this suite. Adding a field must fail here
-    /// until every site — and a behavioral test — is updated.
+    /// field list is hand-mirrored at the overlay funcs and the
+    /// override clear (`TilingSettings+Resolution`, whose
+    /// `clearSizingOverrides` nils the same four, #764), the
+    /// write wrappers and clears (`KiwiCore+SessionRatioWrite`,
+    /// the three command files), and this suite. Adding a field
+    /// must fail here until every site — and a behavioral test —
+    /// is updated.
     @Test("SessionRatios carries exactly the mirrored fields")
     func fieldCountPinsTheMirrors() {
         let mirror = Mirror(reflecting: SessionRatios())

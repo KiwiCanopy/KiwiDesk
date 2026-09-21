@@ -1206,11 +1206,15 @@ editing here:
   property added to `Space` is classified by
   `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
   structure with its reason — or it reds; an override type's
-  new size field owes the settings-side clear by hand, since
-  `SessionRatioTests` ▸ `fieldCountPinsTheMirrors` counts the
-  #458 mirror and not that one. The verb arms the track z-order
-  restore like `resize` (#674): a cleared weight can change
-  which windows overlap.
+  new size field is one more of the #458 mirror, which
+  `SessionRatioTests` ▸ `fieldCountPinsTheMirrors` counts and
+  whose docstring names the clear. A cleared weight can change
+  which windows overlap, so the verb records the track restore
+  through `requestZOrderRestoreAfterDispatch` gated on the one
+  `activeTrackOverflows` predicate — never `scheduleZOrderRestore`
+  or the immediate arm, since its retile is the dispatcher's
+  trailer and an arm ahead of it runs off the pre-reset frames
+  (#153, `ResetLayoutSizingWiringTests`).
 - **An interactive resize write goes through the shared capped
   writers (#933).** The keyboard `resize` verb and the mouse
   resize end call the one set of clamped writers — the
