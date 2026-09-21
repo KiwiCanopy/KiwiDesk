@@ -55,6 +55,61 @@ struct IconPickerBarPlateTests {
         }
     }
 
+    /// The bar's own item ROUTES through the door too — the
+    /// values it paints are the pre-#1485 ones, so
+    /// `SpaceGlyphInkTests` cannot see a hand copy restored
+    /// beside the door; only the spelling can.
+    @Test("The bar item paints through the door, not a copy")
+    func barItemRoutesThroughTheDoor() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Style.swift"
+            )
+        let style = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        #expect(count(".identifierInk(", in: style) == 1)
+        #expect(count(".itemColor(for:", in: style) == 1)
+        // Located by its brace-balanced body, which a retune
+        // cannot lose (tests.md ▸ a negative clause); the app
+        // glyphs keep their own dim ladder outside it.
+        let body = try #require(
+            balancedBody(after: "funcstyleIdentifier(){", in: style)
+        )
+        #expect(body.contains(".identifierInk("))
+        for copy in [
+            "dimFactor", "activeItemColor", "hoverItemColor",
+            "stateColor", "untintedAlpha",
+        ] {
+            #expect(
+                !body.contains(copy),
+                Comment(rawValue: "styleIdentifier spells \(copy)")
+            )
+        }
+    }
+
+    private func balancedBody(
+        after opener: String,
+        in s: String
+    ) -> String? {
+        guard let start = s.range(of: opener) else { return nil }
+        var depth = 1
+        var i = start.upperBound
+        while i < s.endIndex {
+            if s[i] == "{" { depth += 1 }
+            if s[i] == "}" {
+                depth -= 1
+                if depth == 0 {
+                    return String(s[start.upperBound..<i])
+                }
+            }
+            i = s.index(after: i)
+        }
+        return nil
+    }
+
     /// The Spaces row hands the picker the DRAFT's style, so the
     /// preview follows the palette being edited rather than a
     /// saved one.

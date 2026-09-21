@@ -63,7 +63,8 @@ struct SpaceGlyphInkTests {
     /// The bar's item PAINTS the verdict — the consumer, not
     /// only the type (the #1485 review's ask): a resting Space
     /// item, an active one, and the layer item, which is active
-    /// by ruling (#1169).
+    /// by ruling (#1169). Main-actor spend: four `NSView`
+    /// constructions and their `restyle`, no layout pass.
     @Test("The item view paints the door's verdict")
     @MainActor
     func itemViewPaintsTheVerdict() throws {

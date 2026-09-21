@@ -26,23 +26,28 @@ public enum SpaceItemState: Equatable {
 }
 
 extension SpaceBarStyle {
+    /// The item colour a state takes — the one state→colour map
+    /// the ink ladder and the item view's app glyphs share.
+    public func itemColor(for state: SpaceItemState) -> String {
+        switch state {
+        case .active: return activeItemColor
+        case .hovered: return hoverItemColor
+        case .resting: return itemColor
+        }
+    }
+
     /// The ONE ink rule for a Space item's identifier (#1485,
     /// #702): a tinted glyph takes the state's item colour at
     /// full strength; an untinted one keeps its colours and is
     /// dimmed at rest, since the tint is the only other channel
     /// that could recede. `SpaceBarItemView` draws it and the
-    /// icon picker's plate preview reads it, so the two cannot
-    /// disagree.
+    /// icon picker's plate preview reads it; that both route
+    /// here is `IconPickerBarPlateTests`' seam clause.
     public func identifierInk(
         of glyph: SpaceGlyph,
         state: SpaceItemState
     ) -> SpaceGlyphInk {
-        let tint: String
-        switch state {
-        case .active: tint = activeItemColor
-        case .hovered: tint = hoverItemColor
-        case .resting: tint = itemColor
-        }
+        let tint = itemColor(for: state)
         switch glyph {
         case .symbol, .text(_, tinted: true):
             return SpaceGlyphInk(hex: tint, alpha: 1)
