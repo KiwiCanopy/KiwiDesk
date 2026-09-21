@@ -731,10 +731,9 @@ move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model. The switch is instant by default; with
 `animations.set_on_space_change` it animates as a coordinated
 slide, out to the corner and in from it (see Animations).
-Focusing a hidden window (cmd+tab) pulls its space forward, and
-a window sent ahead with [`move_to_space`](#move_to_space) is
-the one you land on there. Floating windows, picture-in-picture
-included, are never parked and stay visible across all spaces.
+Focusing a hidden window (cmd+tab) pulls its space forward.
+Floating windows, picture-in-picture included, are never parked
+and stay visible across all spaces.
 
 **Minimizing** a window removes it from its space. Restoring it
 — from the Dock, or via [`pull_or_spawn`](#pull_or_spawn) when
@@ -746,7 +745,9 @@ unhiding returns its windows to the space they came from.
 
 With **multiple monitors**, arrange your displays so no monitor
 sits directly right of or below another one's bottom-right
-corner, or the parked windows peek onto the neighbor.
+corner, or the parked windows peek onto the neighbor
+(illustrated in AeroSpace's [proper monitor arrangement
+guide](https://nikitabobko.github.io/AeroSpace/guide#proper-monitor-arrangement)).
 
 ## Per-Layout Tuning
 
@@ -1150,9 +1151,9 @@ Under `follow` the row never reveals empty margin past its
 ends; near a row end the focus re-anchors only as far as it can.
 
 A window resting flush against the **trailing** edge of the
-viewport keeps that edge on a resize, and the space it gives up
-reveals more of the window behind it; a window filling the
-whole viewport keeps its leading edge.
+viewport keeps that edge when the row rearranges around it, and
+the space it gives up reveals more of the window behind it; a
+window filling the whole viewport keeps its leading edge.
 
 **Example:**
 
@@ -1204,7 +1205,7 @@ scroll.set_new_window_placement("after_focused")
 
 **Does:** `true`: stepping `focus` past either end of the row
 wraps to the far end. `false`: focus stops at the ends. Applies
-to `focus` only; `swap` never wraps. Monocle has the same
+to `focus` only. Monocle has the same
 toggle (`monocle.set_wrap_focus`), default off.
 
 **Example:**
@@ -4316,9 +4317,7 @@ end)
 
 **Expects:** n/a — any call is a no-op with a log message.
 
-**Does:** nothing — the real `os.exit()` would kill the KiwiDesk
-process immediately, window layout included, so it is stubbed
-out. To restart KiwiDesk use `kiwidesk service restart` from a
+**Does:** nothing. To restart KiwiDesk use `kiwidesk service restart` from a
 terminal or a keybinding via `KiwiDesk.exec`.
 
 Unlike the real `os.exit`, the stub **returns** — code after the
@@ -4646,7 +4645,7 @@ does; `move_to_desktop` and `move_to_desktop_and_follow` are the
 only KiwiDesk verbs that move a window between Desktops.
 
 The Desktop you are on is `kiwidesk get_state`'s `desktop`
-field, and every switch reports on the `desktop_change` event; a
+field, and a switch reports on the `desktop_change` event; a
 secondary screen's own switch reports with `monitor` ≥ 2 and
 never selects a profile. A remembered space the (possibly just
 swapped) profile no longer has takes the exit of a Desktop
@@ -4935,8 +4934,7 @@ the visible Desktop per display is the arranged scope.
 
 ### quit.set_layout
 
-**Expects:** the string `"grid"` (the only strategy today; future
-strategies will accept more values).
+**Expects:** the string `"grid"`.
 
 **Does:** picks how remaining managed windows are spread on quit.
 `grid` builds a per-display grid and round-robin fills it —
