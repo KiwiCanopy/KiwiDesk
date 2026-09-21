@@ -450,8 +450,19 @@ KiwiDesk.create_space("scratch", "monocle")
 fallback space (or the first surviving space), so nothing is
 orphaned, and clears the space from the placement pins, Main
 role, and per-space settings. Refuses to delete the only space.
-Runtime only — a space still declared in `init.lua` or the GUI
-config reappears on the next config load.
+Runtime only — a space still declared in `init.lua` or the
+active profile reappears on the next config load.
+
+:::unreleased
+**Returns** `nil` for a space nothing declares (and for a refused
+delete, which is logged). When the space comes back on the next
+config load, it returns a table whose `declared_in` array names
+every source that re-creates it: `profile:<name>` (the active
+profile — save it to make the removal last), `standard:<name>`
+(the built-in layout resolving while no saved profile fits —
+save a profile), `init.lua` (a verb there references it — remove
+the call). Test the return, not the status (#1509).
+:::
 
 A screen this leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).
@@ -1972,6 +1983,42 @@ app_bar.set_alignment("start")
 app_bar.set_thickness(32)
 ```
 
+### app_bar.set_outer_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** sets the bar's distance from the screen border. Nothing
+else lives on that side, so the value *is* the distance and `0`
+is flush. Both bars follow one rule — outer margin, strip, inner
+margin, then the windows' own outer gap — and on a shared edge
+each bar owns its margins, so between the two they add.
+
+**Example:**
+
+```lua
+app_bar.set_outer_margin(10)
+```
+:::
+
+### app_bar.set_inner_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** adds room on the bar's window side, on top of the
+windows' outer gap — which alone keeps the focus ring's
+clearance, so `0` means the gap governs.
+
+**Example:**
+
+```lua
+app_bar.set_inner_margin(4)
+```
+:::
+
 ### app_bar.set_background_style
 
 **Expects:** `"boxed"` or `"plain"` (default `"plain"`).
@@ -2361,7 +2408,8 @@ the global value. The available overrides are the same setters
 prefixed with the layout name:
 
 - `monocle.set_app_bar_enabled`, `monocle.set_app_bar_edge`,
-  `monocle.set_app_bar_thickness`, etc.
+  `monocle.set_app_bar_thickness`,
+  `monocle.set_app_bar_outer_margin`, etc.
 - `scroll.set_app_bar_enabled`, `scroll.set_app_bar_background_style`,
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_corner_roundness`, etc.
@@ -2395,8 +2443,9 @@ accent).
 
 The bar is **layout-independent** and reserves real screen area
 on its edge before any layout runs. It may share an edge with
-the App Bar: the Space Bar always sits at the screen edge, the
-App Bar next to the windows, and the insets add. All settings
+the App Bar: the Space Bar is carved first, on the screen side,
+the App Bar inside it on the window side, and the two
+reservations add. All settings
 are global — there are no per-layout overrides. While a
 native-fullscreen app holds the screen the bar hides; it
 returns with the Desktop.
@@ -2462,6 +2511,38 @@ space_bar.set_alignment("center")
 ```lua
 space_bar.set_thickness(28)
 ```
+
+### space_bar.set_outer_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** sets the bar's distance from the screen border; `0` is
+flush. The rule is `app_bar.set_outer_margin`'s, one bar over.
+
+**Example:**
+
+```lua
+space_bar.set_outer_margin(6)
+```
+:::
+
+### space_bar.set_inner_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** adds room on the bar's window side, on top of the
+windows' outer gap — `app_bar.set_inner_margin`'s rule.
+
+**Example:**
+
+```lua
+space_bar.set_inner_margin(4)
+```
+:::
 
 ### space_bar.set_item_size
 

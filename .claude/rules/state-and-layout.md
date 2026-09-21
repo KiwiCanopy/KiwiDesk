@@ -310,7 +310,31 @@ editing here:
   the first-in-row jump — and an unpaid debt expires at the
   follow's bound, macOS's own restored focus standing (the
   accepted-limitations row); the #634 arrangement reset forgets
-  the memory with `rememberedSpaces`. The ROW comes back too: a
+  the memory with `rememberedSpaces`. A window returning from a
+  CLOSE is a NEW window (#1414/#1561): the gone handler marks the
+  departure through the one `rememberClosedDeparture`, inside its
+  `closed` arm and nowhere else — a Desktop `vanished` keeps
+  #636's rule, a hide #913's — and the fold, consuming the mark
+  on EVERY arrival, drops the departed memory, the slot record
+  and any restore filed over them since — frame included, the
+  close outranking a snapshot adopted after it
+  (`ClosedReturnPlacementTests` ▸
+  `restoreFiledAfterTheCloseDoesNotOutrank`) — and takes the
+  new-window path: the app rule, else the active
+  Space, the focus a new window gets there, its old slot and
+  break given up (`ClosedReturnPlacementTests` ▸
+  `closedReturnLandsWhereYouAre`, `closedReturnFollowsTheAppRule`,
+  `closedReturnGivesUpItsSlot`); the departed memory and the
+  slot record are read at a return only where no mark was filed
+  — a Desktop `vanished`, a hide — and a placement path that
+  reads them for a marked return re-opens #1561. The mark rides
+  the re-key with the departed memory
+  (`ClosedReturnFocusTests` ▸ `markFollowsRekey`, and
+  `WindowRekeyParityTests`' count) and a path retiring that
+  memory retires the mark beside it; and the report
+  that follows is intended, never an exemption in the #1161
+  predicate (`ClosedReturnFocusTests`, `ClosedReturnSeamTests`
+  the one writer inside the arm). The ROW comes back too: a
   departed window carries its slot in `departedSlots`, and the
   fold re-inserts a `.departed` return by RANK against the
   members already back — never at the index, which a later slot
@@ -721,17 +745,12 @@ editing here:
   — and `focusOwnWindow(number:)`, beside the arm, is the door a
   GUI raise of an own window takes so its report arrives that way
   (#1281, `PlacementIntentTests`): the command for a tracked
-  window, and for a CLOSED one — re-shown under the number it
-  kept, so the fold files it as a RETURN that steals no focus
-  (#636) — a debt in `ownShowFocus`, the third `FollowFocusIntent`
-  instance, paid with that command by `payOwnShowFocus` on the
-  `.windowCreated` arm the other two drain on, without the
-  refocus retile that arm's own retile makes redundant, judged
-  there on the Space the arrival landed in and stood down where
-  state already holds the focus (#1380, `OwnShowFocusSeamTests`
-  pins the recorder, the drain and the retire by count and the
-  payer to that arm). A fourth ledger joins this bullet rather
-  than earning its own consume.
+  window; a CLOSED one — re-shown under the number it kept —
+  arrives as a return from a close, which the fold grants the
+  focus a new window gets, so the report is intended before it
+  lands (#1414, the returning-window bullet; #1380's own-window
+  debt retired with that rule). A further ledger joins this
+  bullet rather than earning its own consume.
 - **A raise of a window the compositor is not drawing IS a Desktop
   switch, and no implicit raise performs one (#1345).** macOS
   switches Desktops to show whatever is raised, and the window

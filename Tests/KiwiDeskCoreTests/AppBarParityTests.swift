@@ -85,6 +85,7 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.right), .alignment(.end), .thickness(50),
+        .outerMargin(7), .innerMargin(8),
         .backgroundStyle(.boxed), .liquidGlass(false),
         .backgroundFit(.full),
         .activeIndicator(.gap),
@@ -157,8 +158,8 @@ struct AppBarCommandParityTests {
         case .activeIndicator: return [.string("gap")]
         case .content: return [.string("icon")]
         case .titleCap: return [.number(40)]
-        case .thickness, .itemSize, .itemGap, .fontSize,
-            .cornerRoundness, .dimFactor:
+        case .thickness, .outerMargin, .innerMargin, .itemSize,
+            .itemGap, .fontSize, .cornerRoundness, .dimFactor:
             return [.number(10)]
         default:
             return [.string("#123456")]

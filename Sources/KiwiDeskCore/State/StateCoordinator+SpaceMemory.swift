@@ -150,9 +150,9 @@ extension StateCoordinator {
     /// in the Space (`Space.promoteHandedBreak`); away, on its
     /// record — or its next return would leave the break on the
     /// member behind it. Consumes the link. The gone handler's
-    /// `.closed` arm promotes without retiring, since the rank is
-    /// kept for later arrivals; every other ender takes
-    /// `retireDepartureRecord`.
+    /// `.closed` arm promotes without retiring — the record then
+    /// ends at the return, which drops it unread (#1561), or at a
+    /// later ender; every other ender takes `retireDepartureRecord`.
     mutating func promoteHandedSuccessor(of id: WindowID) {
         guard let holder = departedSlots[id]?.handedTo else { return }
         departedSlots[id]?.handedTo = nil
@@ -176,11 +176,20 @@ extension StateCoordinator {
         departedSlots[id] = nil
     }
 
+    /// Marks a departure as a CLOSE (#1414), on the gone handler's
+    /// classification; only a departed window can carry it, so a
+    /// minimize or an unfiled removal marks nothing.
+    mutating func rememberClosedDeparture(_ id: WindowID) {
+        guard case .departed? = rememberedSpaces[id] else { return }
+        closedDepartures.insert(id)
+    }
+
     /// Retires a window closed while away (#1146): the ledger
     /// entry and the two #1207 records it was read with.
     mutating func forgetAway(_ id: WindowID) {
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
+        closedDepartures.remove(id)
         restoredFrames[id] = nil
         retireDepartureRecord(of: id)
     }
@@ -188,6 +197,7 @@ extension StateCoordinator {
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
+        closedDepartures = []
         restoredFrames = [:]
         departedSlots = [:]
         awayWindows = [:]

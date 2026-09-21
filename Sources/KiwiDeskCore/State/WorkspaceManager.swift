@@ -20,6 +20,11 @@ public struct WorkspaceManager: Sendable {
     /// Window holding system-wide focus (#414).
     public private(set) var lastFocused: WindowID?
 
+    /// Every id `ensureSpace` was handed since `loadConfig` last
+    /// cleared it, existing or not — so a reload's `create_space`
+    /// of a space already live is still on record (#1509).
+    var referenced: Set<SpaceID> = []
+
     /// The window focused immediately before `lastFocused` — a
     /// one-deep history, deliberately never a deeper walk-back:
     /// invisible self-reordering history is what the
@@ -44,6 +49,7 @@ public struct WorkspaceManager: Sendable {
         _ id: SpaceID,
         mode: LayoutMode = .bsp
     ) -> Space {
+        referenced.insert(id)
         if let existing = spaces[id] {
             return existing
         }

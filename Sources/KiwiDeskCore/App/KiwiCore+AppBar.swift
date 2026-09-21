@@ -105,21 +105,13 @@ extension KiwiCore {
         // REAL screen: this is one of the deliberate
         // `visibleBounds` exemptions, and the reason lives in
         // `VisibleBoundsRoutingTests.allowed` (#537 review).
-        // Empty sticky set: this context only carves the bar
-        // strip (`usable` + `barFrame`), it never produces
-        // per-window frames, so pile exemption cannot apply.
-        let context = settings.context(
-            bounds: settings.layoutBounds(from: bounds),
-            space: space,
-            sticky: []
-        )
         let groups = barGroups(
             in: space,
             grouping: style.groupAdjacentWindows
         )
         guard !groups.isEmpty,
             let strip = host.barFrame(
-                in: context.usable,
+                in: settings.layoutBounds(from: bounds),
                 global: settings.appBarStyle
             )
         else { return nil }

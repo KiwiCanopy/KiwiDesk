@@ -13,6 +13,8 @@ extension AppBarStyle {
         case edge
         case alignment
         case thickness
+        case outerMargin = "outer_margin"
+        case innerMargin = "inner_margin"
         case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
         case backgroundFit = "background_fit"
@@ -58,6 +60,20 @@ extension AppBarStyle {
                 CGFloat.self,
                 forKey: .thickness
             ) ?? defaults.thickness
+        )
+        outerMargin = max(
+            Self.minMargin,
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .outerMargin
+            ) ?? defaults.outerMargin
+        )
+        innerMargin = max(
+            Self.minMargin,
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .innerMargin
+            ) ?? defaults.innerMargin
         )
         backgroundStyle =
             try container.decodeIfPresent(

@@ -8,9 +8,9 @@ import Testing
 /// the door a GUI raise of an own window takes, and it issues
 /// the focus command FIRST, so the report that follows is one
 /// the distrust never reads (`intended == id`). A CLOSED own
-/// window keeps its number and returns without stealing focus
-/// (#636), so the door owes it the command and the arrival pays
-/// (#1380). The negative controls — the same reports with no
+/// window keeps its number and returns from a close, which the
+/// fold grants the focus (#1414; #1380's debt retired with that
+/// rule). The negative controls — the same reports with no
 /// intent — are the last cases here and `PlacementBounceTests`'
 /// first. The GUI half, the branch that calls the door before
 /// `forceFront`, is `SettingsOpenFocusSeamTests`.
@@ -103,7 +103,8 @@ struct PlacementIntentTests {
     /// The door refuses what the distrust's arm would not meet:
     /// a tracked window on another Space (reached by its report)
     /// and the `<= 0` AppKit reports for a window without a
-    /// device. An untracked number is owed, never refused (#1380).
+    /// device. An untracked number is answered true, never refused:
+    /// its return takes the focus in the fold (#1414).
     @Test(
         "The door refuses another Space and no device, and owes the untracked"
     )
@@ -114,47 +115,45 @@ struct PlacementIntentTests {
         _ = core.execute("move_to_space", args: [.string("2")])
         #expect(core.state.workspaces.space(of: other) != active)
         #expect(!core.focusOwnWindow(number: Int(other.raw)))
-        #expect(core.ownShowFocus.owed() == nil)
         #expect(!core.focusOwnWindow(number: 0))
         #expect(!core.focusOwnWindow(number: -1))
-        #expect(core.ownShowFocus.owed() == nil)
         // The bridge's own answer, since through the door an
         // untracked id rescues the sign guard (guard-prover).
         #expect(EventLoop.ownWindowID(number: 0) == nil)
         #expect(EventLoop.ownWindowID(number: -1) == nil)
         #expect(EventLoop.ownWindowID(number: 5) == WindowID(5))
+        let log = Log()
+        core.onLog = { log.lines.append($0) }
         #expect(core.focusOwnWindow(number: 7))
-        #expect(core.ownShowFocus.owed() == WindowID(7))
+        #expect(
+            log.lines.contains { $0.contains("w7 is closed — its return") }
+        )
     }
 
     /// The device shape (#1380): Settings closed, then reopened
     /// from the menu bar in the active scrolling Space. The
     /// re-shown `NSWindow` keeps its number, so the arrival is a
-    /// RETURN into a space whose focus stands — nothing sets
-    /// intent, and the report is bounced. The door, told before
-    /// the order-front, owes the command; the arrival pays it,
-    /// and the report lands with `intended == id`. Asserted on
-    /// the log for the reason `doorReportIsHonored` states.
-    @Test("A closed window the door was told about is honored at its arrival")
-    func closedWindowIsOwedAtArrival() {
+    /// return from a CLOSE — which the fold grants the focus a new
+    /// window gets (#1414), so the report lands with
+    /// `intended == id` whether or not the door was told. The door
+    /// still answers true for the untracked number, since the
+    /// caller fronts the window either way.
+    @Test("A closed window re-shown is honored at its arrival")
+    func closedWindowIsHonoredAtArrival() {
         let (core, target, other) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.state.windows[target] == nil)
         #expect(core.activeSpace?.focused == other)
         #expect(core.focusOwnWindow(number: Int(target.raw)))
-        #expect(core.ownShowFocus.owed() == target)
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.ownShowFocus.owed() == nil)
         #expect(
-            log.lines.contains { $0.contains("own show: focus paid to w1") }
+            log.lines.contains {
+                $0.contains("close return: w1 re-shown — placed as new")
+            }
         )
         #expect(core.activeSpace?.focused == target)
-        // The COMMAND, not a state write: only `focusWindow`
-        // notes the focus it stepped off (guard-prover — the
-        // bounce arm reads state, so the log alone cannot tell).
-        #expect(core.tiler.placements.recentDisplacement(other))
         // The arrival's retile stamped it: the ledger is LIVE
         // when the report lands.
         core.tiler.placements.stamp(target, target: offscreen)
@@ -168,77 +167,27 @@ struct PlacementIntentTests {
         )
     }
 
-    /// A debt the fold already answered — the return took a
-    /// vacant focus (#636's other arm) — is claimed and stood
-    /// down, not commanded twice; the report still arrives
-    /// intended, since state holds the focus either way.
-    @Test("An arrival the fold focused stands the payment down")
-    func arrivalAlreadyFocusedStandsDown() {
-        let (core, target, other) = makeFixture()
-        core.handle(.windowDestroyed(target, wasMinimized: false))
-        core.handle(.windowDestroyed(other, wasMinimized: false))
-        #expect(core.activeSpace?.focused == nil)
-        #expect(core.focusOwnWindow(number: Int(target.raw)))
-        let log = Log()
-        core.onLog = { log.lines.append($0) }
-        core.handle(.windowCreated(reshown(target)))
-        #expect(core.ownShowFocus.owed() == nil)
-        #expect(core.activeSpace?.focused == target)
-        #expect(
-            log.lines.contains { $0.contains("w1 already the focus") }
-        )
-        #expect(
-            !log.lines.contains { $0.contains("focus paid to w1") }
-        )
-        core.tiler.placements.stamp(target, target: offscreen)
-        core.handle(.windowFocused(target))
-        #expect(log.lines.contains { $0.contains("w1 (App1) honored") })
-    }
-
-    /// The debt is paid only where the tracked arm would have
-    /// taken the window: an arrival off the active Space drops
-    /// it, and the report stays the window's own to reach it by.
-    @Test("An arrival off the active Space drops the debt")
-    func arrivalOffTheActiveSpaceDropsTheDebt() {
+    /// A re-shown window is a NEW window (#1561): it lands where
+    /// you are, not where it left, with the focus a new window
+    /// gets, so its report is intended wherever it was closed.
+    @Test("A re-shown window lands where you are")
+    func reshownWindowLandsWhereYouAre() {
         let (core, target, other) = makeFixture()
         let home = core.state.workspaces.space(of: target)!
         core.state.workspaces.focus(target, in: home)
         _ = core.execute("move_to_space", args: [.string("2")])
-        // A neighbour keeps Space 2's focus, so the fold grants
-        // the return no vacancy and a mis-pay would COMMAND —
-        // stepping off `other` (guard-prover).
-        let neighbour = WindowID(3)
-        core.handle(
-            .windowCreated(
-                ManagedWindow(
-                    id: neighbour,
-                    pid: 3,
-                    appName: "App3",
-                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
-                )
-            )
-        )
-        core.state.workspaces.focus(neighbour, in: home)
-        _ = core.execute("move_to_space", args: [.string("2")])
+        #expect(core.state.workspaces.space(of: target) != home)
         core.state.workspaces.focus(other, in: home)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.focusOwnWindow(number: Int(target.raw)))
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.ownShowFocus.owed() == nil)
-        #expect(core.state.workspaces.space(of: target) != home)
+        #expect(core.state.workspaces.space(of: target) == home)
+        #expect(core.activeSpace?.focused == target)
         #expect(
-            core.state.workspaces.space(of: target)
-                == core.state.workspaces.space(of: neighbour)
+            log.lines.contains { $0.contains("placed as new") }
         )
-        #expect(core.activeSpace?.focused == other)
-        #expect(
-            log.lines.contains { $0.contains("focus debt dropped") }
-        )
-        // A mis-pay would step the command off `other`; the
-        // fold's own grant in the empty Space notes nothing.
-        #expect(!core.tiler.placements.recentDisplacement(other))
     }
 
     @Test("Without the intent the same report is bounced")
@@ -249,18 +198,19 @@ struct PlacementIntentTests {
         #expect(core.activeSpace?.focused == other)
     }
 
-    /// The #1380 defect itself, kept as the negative control of
-    /// `closedWindowIsOwedAtArrival`: the same re-show with the
-    /// door never told.
-    @Test("Without the door a re-shown window's report is bounced")
-    func untoldReshowIsBounced() {
-        let (core, target, other) = makeFixture()
+    /// The #1380 defect's shape, now honored by construction: the
+    /// same re-show with the door never told takes the focus in
+    /// the fold (#1414), so the report cannot be bounced. The
+    /// third-party twin is `ClosedReturnFocusTests`.
+    @Test("Without the door a re-shown window is honored all the same")
+    func untoldReshowIsHonored() {
+        let (core, target, _) = makeFixture()
         core.handle(.windowDestroyed(target, wasMinimized: false))
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.activeSpace?.focused == other)
+        #expect(core.activeSpace?.focused == target)
         core.tiler.placements.stamp(target, target: offscreen)
         core.handle(.windowFocused(target))
-        #expect(core.activeSpace?.focused == other)
+        #expect(core.activeSpace?.focused == target)
     }
 
     /// The closed window coming back under its old number, as a

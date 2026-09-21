@@ -166,6 +166,36 @@ extension SpaceBarCard {
                 SettingsCatalog.bars.spaceBarStyle.children
                     .spaceBarStyleItemGap
             )
+        case .spaceBarOuterMargin:
+            PtSlider(
+                label: L("space_bar.outer_margin", "Outer margin"),
+                value: style.outerMargin,
+                range: BarSliderBands.margin,
+                help: L(
+                    "space_bar.outer_margin.help",
+                    "Distance from the screen edge; 0 is flush."
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleOuterMargin
+            )
+        case .spaceBarInnerMargin:
+            PtSlider(
+                label: L("space_bar.inner_margin", "Inner margin"),
+                value: style.innerMargin,
+                range: BarSliderBands.margin,
+                help: L(
+                    "space_bar.inner_margin.help",
+                    "Extra room on the side facing the windows, on "
+                        + "top of whatever gap already sits there; "
+                        + "0 lets that gap govern."
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.spaceBarStyle.children
+                    .spaceBarStyleInnerMargin
+            )
         case .spaceBarFontSizeAuto:
             AutoGatedGroup(
                 title: L(

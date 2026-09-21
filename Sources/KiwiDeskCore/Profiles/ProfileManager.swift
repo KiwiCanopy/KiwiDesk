@@ -43,7 +43,10 @@ public final class ProfileManager {
     private(set) var active: ActiveProfile?
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
-    public private(set) var currentStandard: String?
+    public var currentStandard: String? { standard?.name }
+    /// The resolving Standard as one value, `currentStandard`'s
+    /// source (#1509).
+    private(set) var standard: ActiveStandard?
     /// True when live state diverged from saved profile.
     public private(set) var isDirty = false
 
@@ -111,7 +114,7 @@ public final class ProfileManager {
         }
         try write(profile)
         active = ActiveProfile(profile)
-        currentStandard = nil
+        standard = nil
         isDirty = false
     }
 
@@ -252,32 +255,25 @@ public final class ProfileManager {
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
         active = ActiveProfile(profile)
-        currentStandard = nil
+        standard = nil
         isDirty = !fits
     }
 
-    /// Records that no profile is live — `apply(composed:)`'s, and
-    /// `becameLive`'s mirror.
-    ///
-    /// Leaves `currentStandard` alone: a post-reload recompose
-    /// re-applies the Standard it is already on and must not
-    /// forget which (`StarterRescaleTests` ▸ `reloadKeepsLadder`).
-    /// Dirtiness is the caller's here, having no profile to judge.
-    func noProfileIsLive() {
+    /// Records that a built-in Standard is live — `apply(composed:)`'s
+    /// door, and `becameLive`'s mirror: the name and the Spaces the
+    /// apply composed as ONE value, filed by the apply itself so no
+    /// caller can forget them (#1509, #1246). A Standard is never a
+    /// saved profile, so the state is dirty.
+    func standardIsLive(_ standard: ActiveStandard) {
         active = nil
-    }
-
-    /// Records that a built-in Standard is resolving (dirty state).
-    func adoptStandard(named name: String) {
-        active = nil
-        currentStandard = name
+        self.standard = standard
         isDirty = true
     }
 
     /// Resets adoption state for Reset All Settings (#634).
     func resetAdoption() {
         active = nil
-        currentStandard = nil
+        standard = nil
         isDirty = false
     }
 

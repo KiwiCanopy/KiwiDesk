@@ -9,6 +9,10 @@ extension SpaceBarStyle {
     /// not), and every `*_color` key (colours are Advanced
     /// Colours' concern, owner ruling 2026-08-02 — derived by
     /// suffix so a new shared colour stays out automatically).
+    /// The margins COPY (#1516): they are sizes the bar owns,
+    /// like its thickness, and copying them is how two bars on
+    /// opposite corners come to sit alike — which edge each
+    /// takes stays its own.
     public static let copyAppearanceExclusions: Set<String> = [
         "enabled", "edge",
     ]
@@ -52,6 +56,8 @@ extension SpaceBarStyle {
         switch key {
         case "alignment": alignment = appBar.alignment
         case "thickness": thickness = appBar.thickness
+        case "outer_margin": outerMargin = appBar.outerMargin
+        case "inner_margin": innerMargin = appBar.innerMargin
         case "item_size": itemSize = appBar.itemSize
         case "item_gap": itemGap = appBar.itemGap
         case "font_size": fontSize = appBar.fontSize

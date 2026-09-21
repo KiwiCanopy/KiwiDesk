@@ -80,7 +80,6 @@ extension KiwiCore {
         retireDesktopFocus(of: id)
         desktopMemory.returnFocus.retire(id)
         followFocus.retire(id)
-        ownShowFocus.retire(id)
     }
 
     /// The app's exit ends its entries (the state fold) and

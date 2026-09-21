@@ -75,6 +75,14 @@ struct SpaceBarStyleControls: Sendable {
         "space_bar.item_gap",
         "Item gap"
     )
+    let spaceBarStyleOuterMargin = SettingsControl(
+        "space_bar.outer_margin",
+        "Outer margin"
+    )
+    let spaceBarStyleInnerMargin = SettingsControl(
+        "space_bar.inner_margin",
+        "Inner margin"
+    )
     let spaceBarStyleFontSizeAuto = SettingsControl(
         "space_bar.font_size.auto",
         "Auto font size"
@@ -143,6 +151,14 @@ struct AppBarStyleControls: Sendable {
     let appBarStyleItemGap = SettingsControl(
         "app_bar.item_gap",
         "Item gap"
+    )
+    let appBarStyleOuterMargin = SettingsControl(
+        "app_bar.outer_margin",
+        "Outer margin"
+    )
+    let appBarStyleInnerMargin = SettingsControl(
+        "app_bar.inner_margin",
+        "Inner margin"
     )
     let appBarStyleFontSizeAuto = SettingsControl(
         "app_bar.font_size.auto",

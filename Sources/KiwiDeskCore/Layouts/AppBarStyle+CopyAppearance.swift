@@ -24,6 +24,8 @@ extension AppBarStyle {
         switch key {
         case "alignment": alignment = spaceBar.alignment
         case "thickness": thickness = spaceBar.thickness
+        case "outer_margin": outerMargin = spaceBar.outerMargin
+        case "inner_margin": innerMargin = spaceBar.innerMargin
         case "item_size": itemSize = spaceBar.itemSize
         case "item_gap": itemGap = spaceBar.itemGap
         case "font_size": fontSize = spaceBar.fontSize

@@ -67,6 +67,7 @@ private func trackedFixture() -> StateCoordinator {
     )
     state.stickyReachOverrides[old] = true
     state.departedSlots[old] = .init(rank: 0)
+    state.closedDepartures.insert(old)
     // A bare id inside a record VALUE (#1387) — the scan's net,
     // not the count's, like `scrollRest`.
     state.departedSlots[WindowID(1)] = .init(rank: 1, handedTo: old)
@@ -84,7 +85,7 @@ private func trackedFixture() -> StateCoordinator {
 /// populates: `WindowManager.windows`, `rememberedSpaces`,
 /// `restoredFrames` (#1362), `manualFloatOverrides`,
 /// `stickyReachOverrides` (#1145), `departedSlots` (#1207),
-/// `awayWindows` (#1146), plus
+/// `awayWindows` (#1146), `closedDepartures` (#1414), plus
 /// each space's `windows`, `stackWeights`, `trackBreaks`,
 /// `handedBreaks` (#1387), `trackWeights`. Bumping the fixture
 /// with a new id-keyed map
@@ -92,7 +93,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 12
+private let expectedContainerCount = 13
 
 /// `String(describing:)` of every non-empty dictionary, set, or
 /// array whose keys/elements are `WindowID`, reachable by recursing

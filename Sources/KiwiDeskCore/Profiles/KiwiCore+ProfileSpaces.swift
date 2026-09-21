@@ -56,7 +56,7 @@ extension KiwiCore {
     ///
     /// Unconditional rather than a caller's choice: on the preset
     /// path `apply(composed:)` has already filed and stood the
-    /// name down through `noProfileIsLive`, so the record here is
+    /// name down through `standardIsLive`, so the record here is
     /// a no-op — which is what leaves no exit anything to decide.
     func saveProfile(_ profile: Profile) throws {
         recordLivePartitioning()
@@ -140,8 +140,10 @@ extension KiwiCore {
             for window in remembered[space] ?? [] {
                 guard state.windows[window] != nil else {
                     // Not in state: away on another Desktop, or
-                    // closed and still remembered. Its remembered
-                    // Space is what places it if it comes back,
+                    // closed and still remembered (a close return
+                    // discards the memory, #1561, so this serves
+                    // the away case). Its remembered Space is what
+                    // places it if it comes back,
                     // and that memory answers once across every
                     // profile — so re-point it, or the profile's
                     // record loses to it (#1248).

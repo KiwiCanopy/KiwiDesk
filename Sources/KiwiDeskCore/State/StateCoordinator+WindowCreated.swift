@@ -8,6 +8,15 @@ extension StateCoordinator {
     ) {
         // Forget record to test if window was minimized (#40, #673).
         effects.appearedWasMinimized = forgetMinimized(window.id)
+        // A close return is placed as NEW (#1414/#1561): memory,
+        // slot and any restore filed over it dropped FIRST, so
+        // every reader below sees one fact; consumed on every arrival.
+        if closedDepartures.remove(window.id) != nil {
+            rememberedSpaces[window.id] = nil
+            restoredFrames[window.id] = nil
+            retireDepartureRecord(of: window.id)
+            effects.closedReturnPlacedAsNew = true
+        }
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
         // Once: the restore's frame is the FIRST arrival's (#1362).
@@ -130,6 +139,9 @@ extension StateCoordinator {
         } else if !effects.hadRememberedSpace
             || (workspaces[target]?.focused == nil && !owedHere)
         {
+            // A new window — a close return among them (#1414):
+            // its own report then arrives intended, and the
+            // placement distrust never reads it.
             workspaces.focus(window.id, in: target)
         }
     }

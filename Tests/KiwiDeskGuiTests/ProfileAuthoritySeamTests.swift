@@ -86,7 +86,7 @@ struct ProfileAuthoritySeamTests {
         ),
         (
             "func apply(\n        composed:",
-            "profiles.noProfileIsLive("
+            "profiles.standardIsLive("
         ),
     ]
 

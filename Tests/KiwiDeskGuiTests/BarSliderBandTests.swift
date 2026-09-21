@@ -58,16 +58,33 @@ struct BarSliderBandTests {
         #expect(declared.contains("SpaceBarStyle.springDelayRange"))
     }
 
-    /// The census keys whose model path is a bar style's
-    /// thickness — the register the consumer count derives from.
-    private var thicknessKeys: [String] {
+    @Test("the margin floor is Core's, by derivation")
+    func marginFloorIsDerived() throws {
+        let band = BarSliderBands.margin
+        #expect(band.lowerBound == Double(AppBarStyle.minMargin))
+        #expect(band.contains(Double(AppBarStyle().outerMargin)))
+        #expect(band.contains(Double(SpaceBarStyle().innerMargin)))
+        let declared = try declaration(of: "margin")
+        #expect(declared.contains("AppBarStyle.minMargin"))
+    }
+
+    /// Which band each Core-clamped bar row reads, keyed by the
+    /// suffix of its census model path — a third band joins by
+    /// data (#1516).
+    private static let bands: [(suffix: String, band: String)] = [
+        ("Style.thickness", "thickness"),
+        ("Style.outerMargin", "margin"),
+        ("Style.innerMargin", "margin"),
+    ]
+
+    /// The census keys whose model path ends in `suffix` — the
+    /// register the consumer count derives from.
+    private func keys(withSuffix suffix: String) -> [String] {
         SettingKey.allCases.compactMap { key in
             switch key {
-            case .appBar(let k)
-            where k.rawValue.hasSuffix("Style.thickness"):
+            case .appBar(let k) where k.rawValue.hasSuffix(suffix):
                 return String(describing: k)
-            case .spaceBar(let k)
-            where k.rawValue.hasSuffix("Style.thickness"):
+            case .spaceBar(let k) where k.rawValue.hasSuffix(suffix):
                 return String(describing: k)
             default:
                 return nil
@@ -75,42 +92,57 @@ struct BarSliderBandTests {
         }
     }
 
-    @Test("every thickness row's arm takes the one band")
-    func everyThicknessArmTakesTheBand() throws {
-        let keys = thicknessKeys
-        #expect(keys.count == 2, "\(keys)")
+    @Test("every clamped row's arm takes its one band")
+    func everyClampedArmTakesItsBand() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(Self.bars)
-        var rendered: [String: Int] = [:]
-        for file in try SourceScan.swiftSources(under: root) {
-            let text = try SourceScan.strippedSource(at: file)
-            for key in keys {
-                var rest = text
-                while let arm = rest.range(of: "case .\(key):") {
-                    rest = String(rest[arm.upperBound...])
-                    // The arm runs to the next `case` label.
-                    let end =
-                        rest.range(of: "\n        case ")?.lowerBound
-                        ?? rest.range(of: "\n        default")?
-                        .lowerBound
-                        ?? rest.endIndex
-                    let body = String(rest[..<end])
-                    guard
-                        let args = SourceScan.callArguments(
+        let sources = try SourceScan.swiftSources(under: root)
+        for (suffix, band) in Self.bands {
+            let keys = keys(withSuffix: suffix)
+            #expect(keys.count == 2, "\(suffix): \(keys)")
+            var rendered: [String: Int] = [:]
+            for file in sources {
+                let text = try SourceScan.strippedSource(at: file)
+                for key in keys {
+                    var rest = text
+                    while let arm = rest.range(of: "case .\(key):") {
+                        rest = String(rest[arm.upperBound...])
+                        // The arm runs to the next `case` label.
+                        let end =
+                            rest.range(of: "\n        case ")?
+                            .lowerBound
+                            ?? rest.range(of: "\n        default")?
+                            .lowerBound
+                            ?? rest.endIndex
+                        // Every slider the arm draws, not the
+                        // first: a second one beside the routed
+                        // one is the restatement the count exists
+                        // to catch (guard-prover, 2026-09-21).
+                        var body = String(rest[..<end])
+                        while let args = SourceScan.callArguments(
                             of: "PtSlider(",
                             in: body
-                        )
-                    else { continue }
-                    rendered[key, default: 0] += 1
-                    #expect(
-                        args.contains("range: BarSliderBands.thickness"),
-                        "\(file.lastPathComponent) ▸ \(key) restates"
-                    )
+                        ) {
+                            rendered[key, default: 0] += 1
+                            #expect(
+                                args.contains(
+                                    "range: BarSliderBands.\(band)"
+                                ),
+                                "\(file.lastPathComponent) ▸ \(key) restates"
+                            )
+                            guard let made = body.range(of: "PtSlider(")
+                            else { break }
+                            body = String(body[made.upperBound...])
+                        }
+                    }
                 }
             }
-        }
-        for key in keys {
-            #expect(rendered[key] == 1, "\(key) drawn \(rendered[key] ?? 0)×")
+            for key in keys {
+                #expect(
+                    rendered[key] == 1,
+                    "\(key) draws \(rendered[key] ?? 0) slider(s)"
+                )
+            }
         }
     }
 }

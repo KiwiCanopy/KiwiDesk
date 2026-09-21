@@ -54,7 +54,8 @@ adding first.
 
 Commands are sent over a UNIX domain socket at
 `~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on
-success, 1 on error (message on stderr, data on stdout).
+success, 1 on error (error message — and, on some successes, a
+note — on stderr, data on stdout).
 
 Data on stdout is JSON with its object keys **sorted**, so two
 captures of the same response can be diffed. It is indented when
@@ -268,7 +269,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |
-| | `delete_space` | space id |
+| | `delete_space` | space id — see [Deleting a Space](#deleting-a-space) |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `make_auto` | — |
@@ -417,6 +418,33 @@ sound when `set_refusal_sound` is on (default off) and a hotkey
 was what fired: a CLI or IPC caller reads the error reply and
 never hears one.
 
+### Deleting a Space
+
+`delete_space` succeeds whether or not the removal lasts.
+
+:::unreleased
+When the space is still declared somewhere, the response says
+where:
+
+```json
+{"status": "success",
+ "data": {"declared_in": ["profile:Work", "init.lua"]}}
+```
+
+`declared_in` names every source that re-creates the space on the
+next config load — what each means is under
+[`delete_space`](lua-reference.md#delete_space) — and is absent
+when none does. The JSON goes to stdout as always; the CLI adds
+one line per source on stderr, so a script parsing stdout sees
+nothing new:
+
+```
+removed from the live layout but still in saved profile "Work" — save the profile to make this durable
+still composed by the built-in "Developer" standard — save a profile to make this durable
+still created by init.lua — remove the call that creates it
+```
+:::
+
 ### Applying Ignore Rules
 
 `ignore_rules` is declarative config, not a session command. Edit
@@ -531,6 +559,13 @@ lifecycle; the `reason` field says why the set changed:
   the Mission Control number of the Desktop holding the
   window, where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
+
+:::unreleased
+A window re-shown after a `closed` destroy — an app whose close
+hides the window and shows the same one again — comes back as
+`new` and is placed like one; `returned` is a Desktop return, an
+unhide or a session restore.
+:::
 
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on

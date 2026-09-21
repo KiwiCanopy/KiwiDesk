@@ -1918,26 +1918,61 @@ how it is reached. It is wider than the arm by the mode on
 purpose: the command is the right raise on any shown Space, so
 an arm that widens later is covered already.
 
-The door owes a CLOSED own window the same command (#1380). An
-`NSWindow` keeps its number across a close and a re-show, so the
-Settings window a user closed and reopened comes back to Core as
-a RETURN — `rememberedSpaces` still names its Space — and a
-returning window never steals the focus that stands (#636): the
-fold sets no intent, and the report reaches the predicate
-clickless inside the placement window of the arrival's own
-retile, which in the active scrolling Space is the whole
-verdict. Refusing the untracked number, as the door first did,
-left that report with nothing on it a foreign one would lack. So
-the door records the number as a debt — the third
-`FollowFocusIntent` instance beside the follow's (#1007) and the
-return's (#1207) — drained on the same `.windowCreated` arm and
-paid with the same focus command the tracked arm issues once the
-arrival has given the window an id, judged there on the Space it
-landed in, the one thing the door could not read, and stood down
-where the fold or a sibling debt already set the focus. Only a
-scrolling Space shows the defect: anywhere else the bounce needs
-an origin the window refused, which a compliant own window never
-gives.
+:::unreleased
+**A window returning from a close is a new window: it takes the
+focus at its arrival and lands where the user is (#1414,
+#1561).** An `NSWindow` keeps its number across a close
+and a re-show, so a window the user closed and reopened comes
+back to Core as a RETURN — `rememberedSpaces` still names its
+Space — and a returning window never steals the focus that
+stands (#636): the fold set no intent, and the report reached
+the predicate clickless inside the placement window of the
+arrival's own retile, which in the active scrolling Space is the
+whole verdict. #1380 first closed that for KiwiDesk's own
+Settings window with a debt the door recorded and the arrival
+paid; measured 2026-09-21 with Telegram's main window (3 of 3
+bounced in scrolling, 0 in bsp), the class is every app whose
+close hides the window, and a third-party window has no door to
+be told through. So the provenance moves to where it is known:
+the gone handler already classifies a close apart from a Desktop
+departure and a hide, it marks the departure, and the fold reads
+the mark at the return and treats the window as NEW: placed by
+its app rule, else in the Space the user is on — never the Space
+it left, whose slot and break it gives up — with the focus a new
+window gets, the mark consumed on every arrival. The close
+outranks a session restore filed over it: a snapshot adopted
+between the close and the re-show names a Space and a frame the
+user has since closed, and the re-show discards both. That placement
+is the owner's ruling (#1561): a window you bring back is wanted
+where you are, so you can move it somewhere else if you want,
+and a window manager opens windows where you are rather than
+sending them back to where they once were — on two screens,
+"where you are" is the active Space, so a window closed on the
+other screen and re-shown there lands as a new window would and
+the retile carries it across (#1010's screen-home reads the
+memory the mark dropped); it also ends the
+asymmetry with a minimize, whose restore already landed as new.
+The report then lands intended, which the predicate never reads:
+no exemption in it, the provenance the report was owed. #636's
+rule stands for a Desktop return, whose windows come back as a
+burst in arbitrary order and where only the remembered focus is
+macOS's (#1345), and #913's for a hide, whose windows come back
+the same way — both to the Spaces they left, at their slots: the
+OS bringing a burst back, not the user bringing one window back.
+The #1380 debt is retired by this — the fold grants what it
+paid. Three trades, stated: an app that re-shows a closed window
+on its own, with no user act behind it, takes the focus once,
+where the user is; a closed window no longer takes back its slot
+and track break; and the two readings `gonePresence` already
+calls a wrong `closed` it never corrects — a host without the
+compositor read past the switch settle, a fast app's destroy
+landing before the topology flips — now cost, on top of the
+close-return raise, a focus grant at the Desktop return and the
+window's re-placement as a newcomer where the user is, its slot
+in the Space it left given up, priced at the same rarity.
+(`ClosedReturnFocusTests`, `ClosedReturnPlacementTests`,
+`ClosedReturnSeamTests`)
+:::
 
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The
@@ -4413,6 +4448,33 @@ loses the sentences that named its rungs for the same reason: a
 list of modes would be a different sentence on every Mac, so it
 states the rule and the thumbnails show the modes.
 
+:::unreleased
+**A runtime `delete_space` stays a success, and names what brings
+the space back** (#1509, owner ruling). `init.lua` running at
+every launch and re-creating what it declares is intended, so
+the delete of a declared space is not an error and a warning on
+every delete would be noise — but automation that reads
+`success` as durable is surprised at the next load. The fact
+rides `data.declared_in`, absent rather than empty so a
+runtime-only delete's output is byte-identical and the key's
+presence is itself the signal, and it names EVERY re-creator —
+the active profile, the built-in Standard a reload recomposes
+while no saved profile fits, the script — because a hint naming
+one and silent on another is a half-truth a script will trust.
+`gui.json` is not a fourth: its space list is a mirror of live
+(#77), which the delete now rewrites like every other
+authoritative prune, so nothing there re-creates the space and
+a line telling the user to "remove it in Settings" would have
+named a file they never declared anything in. A distinct status was refused: it breaks
+every consumer that pattern-matches `success` for a delete that
+did succeed. The profile and Standard halves are the last
+apply's set, read from adoption state like every question about
+the live profile; the script's half is a run ledger of what
+`init.lua` ASKED for, never a before/after diff of the space set:
+a reload's `create_space` of a space already live changes nothing
+a diff can see, which is exactly the path the hint exists for.
+:::
+
 ### Sticky reach spans macOS Desktops (#1145)
 
 **[Principle]**
@@ -4496,6 +4558,9 @@ return the first window to re-list took the empty slot: focus
 jumped to first-in-row, and a scrolling layout panned to it, at
 the moment macOS had just restored the window you actually left
 ([#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)).
+A window returning from a CLOSE is the other case: it is a new
+window, placed where the user is and taking the focus itself
+(the #1414/#1561 entry under the placement bounce).
 
 The ruling is that the departure is **not** a close and the
 return owes the user the window they left, the way a follow owes
@@ -10201,6 +10266,47 @@ same-edge stacking (Space Bar screen-facing, App Bar
 window-facing, insets add) and perpendicular corners that
 cannot overlap (the App Bar strip spans the already-inset
 frame).
+
+:::unreleased
+**Both bars are placed by ONE rule, and each owns two margins.**
+([#1516](https://github.com/KiwiCanopy/KiwiDesk/issues/1516),
+owner ruling 2026-09-18.) From the screen edge inwards: the
+bar's **outer margin**, the strip, the bar's **inner margin**,
+then the windows' own outer gap, then the windows. The outer
+margin is absolute — nothing else lives on that side, so the
+value *is* the distance and 0 is flush. The inner margin is
+*added* to the windows' outer gap, which alone keeps the focus
+ring's clearance, so 0 means "the gap governs" and no floor is
+needed. Both default to 0, both bars on one edge stack
+outermost-first with the Space Bar carved first, and between
+the two the Space Bar's inner and the App Bar's outer both
+count — each bar owns its margins, so they add, and at the
+defaults the bars touch. Before this the two bars answered to
+different rules: the Space Bar sat flush and the windows' outer
+gap followed it, while the App Bar was carved *inside* that
+outer gap and the windows' *inner* gap separated it from the
+windows — so raising the outer gap moved one bar away from the
+border and the other's window side, and two bars on opposite
+corners could never be aligned. The alternatives refused: a set
+margin that *replaces* the derivation (an inner margin under
+the ring width would clip the ring, forcing a floor, and "not
+set" would keep both old rules alive), a single "distance to
+border" (leaves the window side differing per bar), and a 1 pt
+inner default (invisible on top of 10; the value means
+"extra"). The one visible change at update is accepted and
+owed a line in the release's Highlights: on the App Bar's edge
+the bar moves from inside the outer gap to flush with the
+screen edge and the tiled windows follow it by the same
+distance — 10 pt at the defaults, the window side now being the
+outer gap alone where it was the outer gap plus the inner — and
+the strip spans the whole edge rather than stopping at the side
+gaps. A user who wants the old look sets the App Bar's outer
+margin to the outer gap, which restores both. The Bars preview
+does not model the margins: at a
+thumbnail's scale a few points draw as nothing, and a caption
+that names a fact the frame does not draw is the schematic
+rule's own defect (`LayoutSchematicCaptionTests`).
+:::
 
 **Same-edge bar stacking is a supported layout, not an error.**
 (#293.) Both bars on one edge is a reversible, deliberate

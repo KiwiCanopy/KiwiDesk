@@ -157,7 +157,7 @@ struct MonocleParkLayoutTests {
         context.focused = w1
         let strip = try #require(
             context.monocle.barFrame(
-                in: context.usable,
+                in: context.bounds,
                 global: context.appBarStyle
             )
         )

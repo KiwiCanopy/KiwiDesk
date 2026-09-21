@@ -94,7 +94,9 @@ struct SettingsCatalogTests {
         // leave with their corrected tier.
         // 127 since #1536: the General ▸ About card left for
         // Home's footer and the About sheet.
-        #expect(allEntries.count == 127)
+        // 131 since #1516: the two margin rows in each bar's
+        // Style drawer.
+        #expect(allEntries.count == 131)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

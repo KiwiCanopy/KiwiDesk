@@ -101,8 +101,17 @@ struct DesktopFocusPaymentTests {
         destroysFirst: Bool = true
     ) {
         if destroysFirst {
+            // The WindowServer has already switched when the
+            // app's destroys land (#1207's trace) — only the
+            // notification trails — so the departures classify
+            // as `vanished`, never as closes (#1414's mark).
+            NativeSpaces.spacesOverride = authorityTopology(
+                mainCurrent: 11,
+                secondaryCurrent: 20
+            )
+            NativeSpaces.activeSpaceIDOverride = 11
             destroyAll(core)
-            switchMain(core, to: 11)
+            core.handle(.desktopChanged)
         } else {
             switchMain(core, to: 11)
             destroyAll(core)

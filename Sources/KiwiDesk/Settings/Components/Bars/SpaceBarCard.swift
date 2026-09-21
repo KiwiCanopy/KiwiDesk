@@ -84,8 +84,8 @@ struct SpaceBarCard: View {
     private var styleSummary: String {
         L(
             "bars.style.space_bar.summary",
-            "Background, alignment, indicator, sizes, glyph "
-                + "cap, spring delay"
+            "Background, alignment, indicator, sizes, margins, "
+                + "glyph cap, spring delay"
         )
     }
 }

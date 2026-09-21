@@ -73,6 +73,16 @@ extension APIReference {
             "Overrides the App Bar's thickness for this layout.",
             .number("thickness")
         ),
+        "set_app_bar_outer_margin": APIRecord(
+            "Overrides the App Bar's distance from the screen "
+                + "border for this layout.",
+            .number("margin")
+        ),
+        "set_app_bar_inner_margin": APIRecord(
+            "Overrides the App Bar's extra window-side room for "
+                + "this layout.",
+            .number("margin")
+        ),
         "set_app_bar_background_style": APIRecord(
             "Overrides where the App Bar's background is drawn "
                 + "for this layout.",

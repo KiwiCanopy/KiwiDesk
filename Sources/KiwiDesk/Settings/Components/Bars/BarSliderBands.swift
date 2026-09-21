@@ -10,6 +10,12 @@ enum BarSliderBands {
     static let thickness: ClosedRange<Double> =
         Double(AppBarStyle.minThickness)...80
 
+    /// Both bars' margin rows (#1516): the Core floor up to a
+    /// curated 60 pt — past the default outer gap by a wide
+    /// margin, since the value is extra room.
+    static let margin: ClosedRange<Double> =
+        Double(AppBarStyle.minMargin)...60
+
     /// The Space Bar's Spring delay row, in the seconds the row
     /// shows; `springDelayRange` is the milliseconds it stores.
     static let springDelaySeconds: ClosedRange<Double> = {

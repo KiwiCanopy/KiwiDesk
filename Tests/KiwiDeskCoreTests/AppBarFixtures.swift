@@ -17,6 +17,8 @@ enum AppBarFixtures {
         style.edge = .left
         style.alignment = .end
         style.thickness = 44
+        style.outerMargin = 4
+        style.innerMargin = 6
         style.backgroundStyle = .boxed
         style.liquidGlass = false
         style.backgroundFit = .full
@@ -47,6 +49,8 @@ enum AppBarFixtures {
         bar.edge = .right
         bar.alignment = .start
         bar.thickness = 50
+        bar.outerMargin = 7
+        bar.innerMargin = 8
         bar.backgroundStyle = .plain
         // Differs from the global fixture (false) so resolve parity
         // sees the override write.

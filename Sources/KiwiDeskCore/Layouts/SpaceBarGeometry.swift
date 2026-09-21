@@ -5,7 +5,9 @@ public enum SpaceBarGeometry {
     // Layout span flows must route via TilingSettings.layoutBounds(from:)
     // (#537, LayoutBoundsRoutingTests).
 
-    /// The strip the bar occupies on visible bounds, or nil when disabled.
+    /// The strip the bar occupies on visible bounds — its outer
+    /// margin in from the screen edge (#1516) — or nil when
+    /// disabled.
     public static func strip(
         in visible: CGRect,
         style: SpaceBarStyle
@@ -14,34 +16,23 @@ public enum SpaceBarGeometry {
         return AppBarGeometry.barFrame(
             in: visible,
             edge: style.edge,
-            thickness: style.thickness
+            thickness: style.thickness,
+            outer: style.outerMargin
         )
     }
 
-    /// Visible bounds minus Space Bar strip handed to layout context.
+    /// Visible bounds minus the bar's whole reservation — outer
+    /// margin, strip and inner margin — handed to layout context;
+    /// the windows' own outer gap applies to what remains.
     public static func remainingFrame(
         in visible: CGRect,
         style: SpaceBarStyle
     ) -> CGRect {
-        guard let strip = strip(in: visible, style: style)
-        else { return visible }
-        var frame = visible
-        switch style.edge {
-        case .top:
-            frame.origin.y += strip.height
-            frame.size.height =
-                max(visible.height - strip.height, 0)
-        case .bottom:
-            frame.size.height =
-                max(visible.height - strip.height, 0)
-        case .left:
-            frame.origin.x += strip.width
-            frame.size.width =
-                max(visible.width - strip.width, 0)
-        case .right:
-            frame.size.width =
-                max(visible.width - strip.width, 0)
-        }
-        return frame
+        guard style.enabled else { return visible }
+        return AppBarGeometry.remaining(
+            visible,
+            edge: style.edge,
+            reserving: style.reservation
+        )
     }
 }
