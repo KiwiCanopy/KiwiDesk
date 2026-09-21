@@ -100,6 +100,11 @@ extension KiwiCore {
             else { return Self.masterRatioError }
             over.masterRatio = ratio
             promiseAllWindowsSpringSized()
+            // The session layer outranks the override, so an
+            // explicit write drops its shadow (#458, #764).
+            state.workspaces.withSpace(SpaceID(space)) {
+                $0.sessionRatios.masterRatio = nil
+            }
         case "overflow_style":
             guard
                 let style = Self.parseOverflowStyle(

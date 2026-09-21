@@ -2731,15 +2731,20 @@ materializing a per-space override on first resize (silently
 pins the space, decouples it from Layout Defaults, and fills
 the #290 override editor with overrides the user never
 authored). Chosen: a **session ratio layer** on the `Space`
-(`SessionRatios`), the `stackWeights` precedent — interactive
-writes land there when no authored override carries the field,
-config stays untouched, and the layer reseeds on a real mode
-change or `reload_config`. Read precedence is authored override
-> session > global, and every **explicit config write** drops
+(`SessionRatios`), the `stackWeights` precedent — every
+interactive write lands there, config stays untouched, and the
+layer reseeds on a real mode change or `reload_config`. Read
+precedence is session > authored override > global — it was
+authored override > session until #764, when a resize on an
+authored space still edited the override in place and so
+destroyed the number the profile had written; now the override
+is the authored value by construction, which is what lets a
+reset return to it — and every **explicit config write** drops
 the session shadow so it always visibly applies (the #383
 "visibly did nothing" rationale): a global setter
 (`bsp.set_ratio_h`, `stack.set_master_ratio`,
-`scroll.set_slot_size`) clears its own field everywhere, and an
+`scroll.set_slot_size`) clears its own field everywhere, a
+per-space `_override` setter clears it on its one space, and an
 explicit apply — `load_profile`, a preset, a GUI save — clears
 the whole layer, riding the same `forceRetile` classification
 those applies already carry (§5); event-driven applies (monitor
@@ -2751,33 +2756,39 @@ an override field mid-session can resurface an older session
 value until the next reseed.
 
 :::unreleased
-**A reset of layout sizing returns to the global value and
-touches size alone, never structure
+**A reset of layout sizing returns to what the profile authored
+and touches size alone, never structure
 ([#764](https://github.com/KiwiCanopy/KiwiDesk/issues/764)).**
 Interactive resizes accumulate per space and across weeks, and
 the two routes back before `reset_layout_sizing` — nudging each
 ratio in the opposite direction, or `load_profile`, which also
 discards every non-sizing change since — were not answers. The
-verb clears the three stores a resize writes (the #458 session
-layer, the size fields of an authored `_override`, and the stack
-and track weights) on every space at once, because the problem
-is precisely not knowing which spaces drifted. Two rulings hold
-the shape. It resets to the *global*, never to the shipped
-default, which would destroy configuration the user never
-touched in the session — not what "reset my adjustments" means
-to anybody. An authored override's size field goes with it,
-because #458 routes a resize on that space into the override
-itself, so nothing distinguishes the authored number from the
-drift; the authored value returns at the next config apply,
-which is the accepted cost. And it stops at size: `masterCount`
+verb clears the two stores a resize writes (the #458 session
+layer and the stack and track weights) on every space at once,
+because the problem is precisely not knowing which spaces
+drifted. Two rulings hold the shape. It resets each space to
+what its profile or `init.lua` **authored** — a per-space
+`_override` size field survives, and only where nothing was
+authored does the space land on the global — never past either
+to the shipped default, which would destroy configuration the
+user never touched in the session; none of that is what "reset
+my adjustments" means to anybody (owner ruling 2026-09-21). The
+first draft cleared the override's size field too, because #458
+then routed a resize on an authored space into the override
+itself, so nothing distinguished the authored number from the
+drift; rather than snapshot the authored values at every apply
+— a register of writers that goes stale silently — the
+precedence was flipped so a resize never writes the override at
+all, and the reset restores the authored value by dropping the
+layer in front of it. And it stops at size: `masterCount`
 looks like a size and is a count of which windows are masters;
 the strategy, orientations, positions, overflow style,
 placement, anchor, axis, limit, grid dimensions and the track
 breaks are choices the user made, not drift, and a verb that
 cleared them would be a second `load_profile`. What the verb
-lands on is the global where the members' learned floors allow
-it: the retile it triggers runs the split-floor heal, which is
-the standing exception. The noun is **sizing** — the collective
+lands on is the authored value where the members' learned
+floors allow it: the retile it triggers runs the split-floor
+heal, which is the standing exception. The noun is **sizing** — the collective
 of a layout's size adjustments (`.claude/rules/config-vocabulary.md`
 ▸ noun glossary).
 :::

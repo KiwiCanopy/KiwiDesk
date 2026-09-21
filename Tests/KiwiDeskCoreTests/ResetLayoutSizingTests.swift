@@ -6,9 +6,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `reset_layout_sizing` (#764) clears every Space's SIZING —
-/// the session layer, the size fields of the authored overrides
-/// and the stack/track weights — and keeps structure and the
-/// globals. Display pinned (#531); a headless host reads as a
+/// the session layer and the stack/track weights — and keeps
+/// structure, the authored overrides (size fields included, the
+/// owner's 2026-09-21 ruling) and the globals. Display pinned
+/// (#531); a headless host reads as a
 /// SKIP, the `ScrollingResizeAnchorEndToEndTests` shape, since
 /// the retile the verb rides needs a screen.
 @Suite(
@@ -86,8 +87,8 @@ struct ResetLayoutSizingTests {
             "track.set_limit_override",
             args: [.string("4"), .number(3)]
         )
-        // Size-only override entries, one per store, to be
-        // pruned whole.
+        // Size-only override entries, one per store: authored,
+        // so they survive.
         core.execute(
             "bsp.set_ratio_h_override",
             args: [.string("5"), .number(0.2)]
@@ -111,8 +112,8 @@ struct ResetLayoutSizingTests {
         }
     }
 
-    @Test("Every size store is cleared and every structure kept")
-    func clearsSizesKeepsStructure() throws {
+    @Test("Every Space size store is cleared, every override kept")
+    func clearsSizesKeepsOverrides() throws {
         let core = makeCore()
         seed(core)
         // An interactive resize lands in Space 1's session layer.
@@ -130,25 +131,67 @@ struct ResetLayoutSizingTests {
         let settings = core.tiler.settings
         let bsp = try #require(settings.bsp.override[SpaceID("1")])
         #expect(bsp.strategy == .longestSide)
-        #expect(bsp.splitRatioH == nil)
-        #expect(bsp.splitRatioV == nil)
+        #expect(bsp.splitRatioV == 0.3)
         let stack = try #require(
             settings.stack.override[SpaceID("2")]
         )
         #expect(stack.masterCount == 2)
-        #expect(stack.masterRatio == nil)
+        #expect(stack.masterRatio == 0.7)
         let scrolling = try #require(
             settings.scrolling.override[SpaceID("3")]
         )
         #expect(scrolling.anchor == .start)
-        #expect(scrolling.slotSize == nil)
+        #expect(scrolling.slotSize == .points(400))
         #expect(settings.track.override[SpaceID("4")]?.limit == 3)
         #expect(
             core.state.workspaces[SpaceID("4")]?.trackBreaks == [w1]
         )
-        #expect(settings.bsp.override[SpaceID("5")] == nil)
-        #expect(settings.stack.override[SpaceID("6")] == nil)
-        #expect(settings.scrolling.override[SpaceID("7")] == nil)
+        #expect(
+            settings.bsp.override[SpaceID("5")]?.splitRatioH == 0.2
+        )
+        #expect(
+            settings.stack.override[SpaceID("6")]?.masterRatio == 0.8
+        )
+        #expect(
+            settings.scrolling.override[SpaceID("7")]?.slotSize
+                == .points(300)
+        )
+    }
+
+    /// The ruling's case: a Space whose ratio the profile authored
+    /// is reset TO that ratio, never past it to the global. The
+    /// resize must have moved the frames first, or a reset that
+    /// landed on the override by never leaving it would pass.
+    @Test("The reset lands on the authored override, not the global")
+    func returnsToTheAuthoredOverride() throws {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "bsp.set_ratio_h_override",
+                args: [.string("1"), .number(0.3)]
+            ).isSuccess
+        )
+        core.retile()
+        let authored = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        core.execute("resize", args: [.string("x"), .number(200)])
+        let resized = core.tiler.calculatedFrames(state: core.state)
+        #expect(resized[w1]?.width != authored[w1]?.width)
+        #expect(core.execute("reset_layout_sizing").isSuccess)
+        #expect(
+            core.tiler.settings.bsp.override[SpaceID("1")]?
+                .splitRatioH == 0.3
+        )
+        let space = try #require(core.state.workspaces[SpaceID("1")])
+        #expect(
+            core.tiler.settings.resolvedBsp(for: space).splitRatioH
+                == 0.3
+        )
+        let reset = core.tiler.calculatedFrames(state: core.state)
+        #expect(reset[w1] == authored[w1])
+        #expect(reset[w2] == authored[w2])
+        core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
     @Test("The reset lands on the global and retiles")

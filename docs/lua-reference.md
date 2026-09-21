@@ -625,21 +625,23 @@ KiwiDesk.set_resize_step(75)
 **Expects:** nothing.
 
 **Does:** returns every space's **sizing** — what `resize` and
-mouse resizes accumulate — to the global value, in one action.
-Cleared on every space: the BSP split ratios, the stack master
-ratio, the scrolling slot size (the session layer described
-under [resize](#resize), and the same fields of an authored
-per-space override, which come back with the next
-`reload_config` or `load_profile`), the stack column's
-per-window weights and the track weights. Kept: everything that
-is structure rather than size — the layout mode, the BSP
-strategy, the master count, orientation and stack position, the
-overflow style, the scrolling anchor and orientation, the track
-axis and limit, a grid's columns and rows, new-window placement
-— and the globals themselves, so a space lands on *your*
-`bsp.set_ratio_h` rather than on the shipped default. Where a
-window's own minimum binds, the next retile's floor heal moves
-the ratio back off the global by that much. Retiles at once.
+mouse resizes accumulate — to what your profile (or `init.lua`)
+set, in one action. Cleared on every space: the BSP split
+ratios, the stack master ratio and the scrolling slot size (the
+session layer described under [resize](#resize)), the stack
+column's per-window weights and the track weights. Kept:
+everything you configured — a per-space override's ratio or
+slot size (`bsp.set_ratio_h_override`, the Settings override
+editor) is what the space returns to, and a space with no
+override lands on the global; and everything that is structure
+rather than size — the layout mode, the BSP strategy, the
+master count, orientation and stack position, the overflow
+style, the scrolling anchor and orientation, the track axis and
+limit, a grid's columns and rows, new-window placement. Never
+the shipped default: a space lands on *your* `bsp.set_ratio_h`.
+Where a window's own minimum binds, the next retile's floor
+heal moves the ratio back off that value by as much. Retiles
+at once.
 Unbound by default; bind it from init.lua or the Shortcuts ▸
 Lua bindings drawer.
 
@@ -4392,22 +4394,24 @@ What the
   the write-time clamp; that asymmetry is deliberate (see the
   accepted limitations).
 
-**Where the ratio write lands (#458):** a space with an authored
-per-space override of the field (`bsp.set_ratio_h_override`, the
-Settings override editor) keeps editing that override. A space
-*without* one stores the value in a **session layer scoped to
-that space** — the shared global never moves, so resizing one
-space no longer visibly resizes every other no-override space,
-and no override is silently authored on your behalf. Session
-values behave like the stack's per-window weights: never saved
-to a profile, gone on restart, reseeded from config on a real
-mode change, `reload_config`, `load_profile` (or any other
-explicit profile/preset/GUI apply), and dropped for a field the
-moment you set its global explicitly (`bsp.set_ratio_h`,
-`stack.set_master_ratio`, `scroll.set_slot_size` — an explicit
-write always shows everywhere). This covers the BSP split
-ratios, the stack master ratio, and the scrolling slot size —
-the three interactive-resize knobs — consistently.
+**Where the ratio write lands (#458):** in a **session layer
+scoped to that space** — never the shared global, so resizing
+one space does not visibly resize every other space, and never
+a per-space override, authored or not, so what
+`bsp.set_ratio_h_override` or the Settings override editor set
+stays the number you wrote and
+[`reset_layout_sizing`](#reset_layout_sizing) can return to it.
+Session values behave like the stack's per-window weights:
+never saved to a profile, gone on restart, reseeded from config
+on a real mode change, `reload_config`, `load_profile` (or any
+other explicit profile/preset/GUI apply), and dropped for a
+field the moment you set it explicitly — its global
+(`bsp.set_ratio_h`, `stack.set_master_ratio`,
+`scroll.set_slot_size`) drops it on every space, its `_override`
+twin on that space — so an explicit write always shows. This
+covers the BSP split ratios, the stack master ratio, and the
+scrolling slot size — the three interactive-resize knobs —
+consistently.
 
 **Example:**
 

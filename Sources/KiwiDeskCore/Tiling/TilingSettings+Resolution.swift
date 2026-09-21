@@ -1,8 +1,8 @@
 import CoreGraphics
 import Foundation
 
-/// Per-space resolution and interactive-resize write helpers
-/// (#17, #128, #458).
+/// Per-space resolution (#17, #128) and the session-layer overlay
+/// an interactive resize reads through (#458, #764).
 extension TilingSettings {
     public func gaps(for space: SpaceID) -> Gaps {
         gapsOverride[space] ?? gapsGlobal
@@ -47,121 +47,40 @@ extension TilingSettings {
             .resolved(onto: track)
     }
 
-    /// BSP parameters with space session resize ratio layer (#458).
+    /// BSP parameters under the Space's session resize layer,
+    /// which outranks the authored override (#458, #764): a
+    /// resize never writes the override, so the override stays
+    /// the authored value and `reset_layout_sizing` lands there
+    /// by dropping the layer.
     public func resolvedBsp(for space: Space) -> BspParams {
         var params = resolvedBsp(for: space.id)
-        let override = bsp.override[space.id]
-        if override?.splitRatioH == nil,
-            let value = space.sessionRatios.splitRatioH
-        {
+        if let value = space.sessionRatios.splitRatioH {
             params.splitRatioH = value
         }
-        if override?.splitRatioV == nil,
-            let value = space.sessionRatios.splitRatioV
-        {
+        if let value = space.sessionRatios.splitRatioV {
             params.splitRatioV = value
         }
         return params
     }
 
-    /// Stack parameters with space session resize ratio layer (#458).
+    /// Stack parameters under the session layer (#458, #764).
     public func resolvedStack(for space: Space) -> StackParams {
         var params = resolvedStack(for: space.id)
-        if stack.override[space.id]?.masterRatio == nil,
-            let value = space.sessionRatios.masterRatio
-        {
+        if let value = space.sessionRatios.masterRatio {
             params.masterRatio = value
         }
         return params
     }
 
-    /// Scrolling parameters with space session resize ratio layer (#458).
+    /// Scrolling parameters under the session layer (#458, #764).
     public func resolvedScrolling(
         for space: Space
     ) -> ScrollingParams {
         var params = resolvedScrolling(for: space.id)
-        if scrolling.override[space.id]?.slotSize == nil,
-            let value = space.sessionRatios.slotSize
-        {
+        if let value = space.sessionRatios.slotSize {
             params.slotSize = value
         }
         return params
-    }
-
-    /// Writes splitRatioH into the authored override if present
-    /// (#458). Only the interactive-resize path routes into these
-    /// setters: on `false` the caller stores the value in the
-    /// space's SESSION layer instead — never the global, which
-    /// would visibly resize every other no-override space.
-    @discardableResult
-    public mutating func setSplitRatioH(
-        _ value: Double,
-        for space: SpaceID
-    ) -> Bool {
-        guard bsp.override[space]?.splitRatioH != nil else {
-            return false
-        }
-        bsp.override[space]?.splitRatioH = value
-        return true
-    }
-
-    /// Writes splitRatioV into authored override if present (#458).
-    @discardableResult
-    public mutating func setSplitRatioV(
-        _ value: Double,
-        for space: SpaceID
-    ) -> Bool {
-        guard bsp.override[space]?.splitRatioV != nil else {
-            return false
-        }
-        bsp.override[space]?.splitRatioV = value
-        return true
-    }
-
-    /// Writes masterRatio into authored override if present (#458).
-    @discardableResult
-    public mutating func setMasterRatio(
-        _ value: Double,
-        for space: SpaceID
-    ) -> Bool {
-        guard stack.override[space]?.masterRatio != nil else {
-            return false
-        }
-        stack.override[space]?.masterRatio = value
-        return true
-    }
-
-    /// Writes slotSize into authored override if present (#458).
-    @discardableResult
-    public mutating func setSlotSize(
-        _ value: ScrollSize,
-        for space: SpaceID
-    ) -> Bool {
-        guard scrolling.override[space]?.slotSize != nil else {
-            return false
-        }
-        scrolling.override[space]?.slotSize = value
-        return true
-    }
-
-    /// Clears the SIZE fields of `space`'s authored overrides —
-    /// the four the writers above route into — and prunes an
-    /// entry left empty, so the Space lands on the global (#764).
-    /// Structure (`strategy`, `masterCount`, `anchor`, …) stays.
-    public mutating func clearSizingOverrides(for space: SpaceID) {
-        if var over = bsp.override[space] {
-            over.splitRatioH = nil
-            over.splitRatioV = nil
-            bsp.override[space] = over.isEmpty ? nil : over
-        }
-        if var over = stack.override[space] {
-            over.masterRatio = nil
-            stack.override[space] = over.isEmpty ? nil : over
-        }
-        if var over = scrolling.override[space] {
-            over.slotSize = nil
-            scrolling.override[space] = over.isEmpty ? nil : over
-        }
     }
 
     /// True if Space Bar and an enabled layout App Bar share an edge (#293).

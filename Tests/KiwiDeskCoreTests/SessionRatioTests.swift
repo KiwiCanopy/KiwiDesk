@@ -4,11 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The session resize layer (#458): interactive resizes on a
-/// space with no authored override live in per-space runtime
-/// state — config layers untouched, other spaces unmoved —
-/// with authored override > session > global precedence, and
-/// reseeding on mode change and explicit global writes.
+/// The session resize layer (#458, #764): every interactive
+/// resize lives in per-space runtime state — config layers
+/// untouched, the authored override included, other spaces
+/// unmoved — with session > authored override > global
+/// precedence, and reseeding on mode change and explicit
+/// writes, global and per-space alike.
 @Suite("Session resize layer (#458)", .serialized)
 @MainActor
 struct SessionRatioTests {
@@ -46,26 +47,6 @@ struct SessionRatioTests {
             )
         }
         #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
-    }
-
-    @Test("An authored override wins over a stale session value")
-    func overrideBeatsSession() {
-        let core = makeCore()
-        core.execute("resize", args: [.string("x"), .number(500)])
-        #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
-        )
-        core.execute(
-            "bsp.set_ratio_h_override",
-            args: [.string("1"), .number(0.3)]
-        )
-        if let space = core.state.workspaces[SpaceID("1")] {
-            #expect(
-                core.tiler.settings.resolvedBsp(for: space)
-                    .splitRatioH == 0.3
-            )
-        }
     }
 
     @Test("A real mode change reseeds; a same-mode set keeps")
@@ -269,13 +250,12 @@ struct SessionRatioTests {
     }
 
     /// The #458 mirror net (§5 parity rule): the SessionRatios
-    /// field list is hand-mirrored at the overlay funcs and the
-    /// override clear (`TilingSettings+Resolution`, whose
-    /// `clearSizingOverrides` nils the same four, #764), the
-    /// write wrappers and clears (`KiwiCore+SessionRatioWrite`,
-    /// the three command files), and this suite. Adding a field
-    /// must fail here until every site — and a behavioral test —
-    /// is updated.
+    /// field list is hand-mirrored at the overlay funcs
+    /// (`TilingSettings+Resolution`), the write wrappers and
+    /// clears (`KiwiCore+SessionRatioWrite`, the three command
+    /// files' global AND per-space setters, #764), and this
+    /// suite. Adding a field must fail here until every site —
+    /// and a behavioral test — is updated.
     @Test("SessionRatios carries exactly the mirrored fields")
     func fieldCountPinsTheMirrors() {
         let mirror = Mirror(reflecting: SessionRatios())

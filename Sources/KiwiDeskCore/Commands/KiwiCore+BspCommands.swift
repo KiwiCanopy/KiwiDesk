@@ -84,11 +84,19 @@ extension KiwiCore {
             else { return Self.ratioError }
             over.splitRatioH = ratio
             promiseAllWindowsSpringSized()
+            // The session layer outranks the override, so an
+            // explicit write drops its shadow (#458, #764).
+            state.workspaces.withSpace(SpaceID(space)) {
+                $0.sessionRatios.splitRatioH = nil
+            }
         case "ratio_v":
             guard let ratio = Self.parseSplitRatio(rest.first)
             else { return Self.ratioError }
             over.splitRatioV = ratio
             promiseAllWindowsSpringSized()
+            state.workspaces.withSpace(SpaceID(space)) {
+                $0.sessionRatios.splitRatioV = nil
+            }
         default:
             return .fail(
                 "unknown command: bsp.set_\(field)_override"

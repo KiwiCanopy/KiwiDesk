@@ -1197,19 +1197,32 @@ editing here:
   rule, and the floor outranking the ceiling. That the ceiling
   is not in the value type is review's: no suite can see a
   maximum nobody wrote.
-- **What counts as SIZING is stated where the stores live, and
-  a new size store joins the reset (#764).** `Space.resetSizing`
-  clears the per-Space sizes (the session ratios, the stack and
-  track weights) and `TilingSettings.clearSizingOverrides` the
-  size fields of the authored overrides; `reset_layout_sizing`
-  is a loop over the two and lists nothing itself. A stored
-  property added to `Space` is classified by
+- **What counts as SIZING is stated where the store lives, and
+  a resize never writes the authored override (#764).**
+  `Space.resetSizing` clears the per-Space sizes (the session
+  ratios, the stack and track weights); `reset_layout_sizing`
+  is a loop over it and lists nothing itself, and it touches
+  `TilingSettings` not at all, because the interactive write
+  seam (`KiwiCore+SessionRatioWrite`) lands EVERY resize in the
+  session layer — which the overlay in
+  `TilingSettings+Resolution` reads AHEAD of the override — so
+  the override is the authored value by construction and the
+  reset returns to it by dropping the layer (owner ruling
+  2026-09-21; the rejected alternative, a snapshot of the
+  authored sizes at every apply, is a register of writers that
+  goes stale silently). The price is that an explicit
+  per-space `_override` setter must clear that space's session
+  field or it visibly does nothing (#383's trap one layer
+  down), which `SessionRatioOverrideTests` ▸
+  `allOverrideSettersClearTheirField` holds and
+  `resizeLeavesTheOverrideAuthored` pins the precedence. A
+  stored property added to `Space` is classified by
   `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
-  structure with its reason — or it reds; an override type's
-  new size field owes the settings-side clear BY HAND, since
-  `SessionRatioTests` ▸ `fieldCountPinsTheMirrors` counts the
-  `SessionRatios` fields alone and a size field with no session
-  twin moves nothing it reads. A cleared weight can change
+  structure with its reason — or it reds; a new resize knob
+  owes a `SessionRatios` field, its overlay line and its two
+  setters' clears BY HAND, since `SessionRatioTests` ▸
+  `fieldCountPinsTheMirrors` counts the fields alone. A
+  cleared weight can change
   which windows overlap, so the verb records the track restore
   through `requestZOrderRestoreAfterDispatch` gated on the one
   `activeTrackOverflows` predicate — never `scheduleZOrderRestore`
