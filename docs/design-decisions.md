@@ -84,8 +84,7 @@ how the Change Date is computed — so argue what the license
 *means* here and link to it for what it *says*, rather than
 carrying a third copy of the numbers. Versions published before
 1.3.0 were released under MIT and remain so: a license governs
-what is released under it and nothing before. (Owner ruling
-2026-09-13.)
+what is released under it and nothing before. (Owner ruling.)
 
 **Why a source-available license, and why before any launch
 rather than after.** Under MIT anyone may take the published
@@ -96,25 +95,24 @@ stays public and use stays free, which is the shape the
 project wants: readable, forkable, usable anywhere, and not
 someone else's product. The grant's line falls at the offering
 and not at business use for the same reason: the lever exists to
-keep KiwiDesk from becoming someone else's product, not to
-charge the people who use it, and reserving use inside a
-business would charge users — the one thing the lever is not
-for. The timing follows from goodwill. A
-switch made after a launch spends what the launch earned — people
-remember the relicense, not the reason — and lands at the moment
-of maximum attention, on the largest possible free snapshot.
-Switching before any launch pays the cost once and early, and
-leaves nothing to walk back: the terms a launch-day reader
-sees are the terms that stay. BSL 1.1 was chosen over the plainer
-non-commercial licenses because its terms are the ones developers
-already know from other source-available projects, and because it
-commits to a Change Date, which a plain non-commercial license
-does not.
+keep KiwiDesk from becoming someone else's product, and
+reserving use inside a business would charge the people who use
+it — the one thing the lever is not for. The timing follows from
+goodwill. A switch made after a launch spends what the launch
+earned — people remember the relicense, not the reason — and
+lands at the moment of maximum attention, on the largest possible
+free snapshot. Switching before any launch pays the cost once and
+early, and leaves nothing to walk back: the terms a launch-day
+reader sees are the terms that stay. BSL 1.1 was chosen over the
+plainer non-commercial licenses because its terms are the ones
+developers already know from other source-available projects, and
+because it commits to a Change Date, which a plain non-commercial
+license does not.
 
 **What the switch does not do.** It changes nothing for anyone
 who just uses KiwiDesk: the Additional Use Grant keeps use free
-wherever it happens, and the license
-itself asks for no key, account or payment. It does not touch the vendored Lua or
+wherever it happens, and the license itself asks for no key,
+account or payment. It does not touch the vendored Lua or
 Sparkle, which keep their MIT licenses. And it does not stop a
 fork of the last MIT version; that risk was accepted the day
 0.9.7 shipped under MIT and is the reason the switch is sooner
@@ -122,14 +120,13 @@ rather than later.
 
 **What travels with it.** Copy about KiwiDesk states the license
 rather than promising a price, because a price is a promise and a
-license is a fact: the bare "free" that described the product was
-retired the same week (#1375), while "free to use" stays, since
-that is the grant's own reach and not a pricing claim. And a
-line naming the license has to be true of the build
-the reader can actually download — the site deploys from `main`
-while the newest release is whatever was last tagged, so copy
-beside a download either names the version the terms start at or
-links to `LICENSE`, which carries that boundary itself.
+license is a fact: the bare "free" is retired (#1375), while
+"free to use" stays, since that is the grant's own reach and not
+a pricing claim. A line naming the license has to be true of the
+build the reader can actually download — the site deploys from
+`main` while the newest release is whatever was last tagged, so
+copy beside a download either names the version the terms start
+at or links to `LICENSE`, which carries that boundary itself.
 Contributions are accepted under a relicensing grant stated in
 CONTRIBUTING.md ▸ Licensing Your Contribution, since a later
 Change Date or commercial license needs every contributor's
@@ -218,9 +215,9 @@ counts as one. What remains here is tracked, not abandoned:
   owned by the *connection* that issues it, so KiwiDesk can level
   its own overlays but not another app's floats. yabai reaches
   foreign windows by injecting into `Dock.app` via a scripting
-  addition (SIP disabled); the own-connection fast path was built
-  and removed once confirmed useless for foreign floats (reference
-  commit `347231e`). `#418` ships the AX re-raise instead — kept
+  addition (SIP disabled); an own-connection fast path was
+  measured useless for foreign floats (reference commit
+  `347231e`). `#418` ships the AX re-raise instead — kept
   above on focus, with the transient-activation limitation on the
   [Accepted limitations](accepted-limitations.md) page
   ([#424](https://github.com/KiwiCanopy/KiwiDesk/issues/424)).
@@ -234,12 +231,11 @@ is the list to keep in step with this one.
 **[Rationale]**
 
 Moving a window to another Desktop and switching the visible
-Desktop sat in *Blocked by macOS (SIP)* above for KiwiDesk's whole
-pre-1.0 life. They are shipped now, and the rule that let them
-ship is worth stating, because the next private surface will ask
-for the same exemption.
+Desktop once sat in *Blocked by macOS (SIP)* above; the rule that
+let them ship binds the next private surface that asks for the
+same exemption.
 
-The C symbol that moved a window between Desktops was SIP-gated
+The C symbol that moved a window between Desktops is SIP-gated
 from macOS 15 on; reaching it needs an injected scripting
 addition, which needs SIP off, which KiwiDesk will not ask for.
 What changed is not that rule but the OS: macOS now registers a
@@ -275,8 +271,8 @@ Onto a hidden Desktop that focus cannot be handed over at the
 moment of the move — the window is not addressable until the
 reveal lists it — so the follow records the debt and pays it the
 moment the revealed Desktop lists the window again, bounded so a
-follow macOS declined cannot fire minutes later. The departure itself is the eager fold the
-transition fix introduced, and it stands KiwiDesk's own
+follow macOS declined cannot fire minutes later. The departure
+itself is an eager fold, and it stands KiwiDesk's own
 close-return raise down through the one stand-down predicate —
 handing focus to a sibling of the space being LEFT is the exact
 opposite of what the verb was asked for
@@ -306,12 +302,8 @@ Homebrew cask. **The Mac App Store is not a later step, it is
 out of scope** — so a roadmap, badge or landing page should
 never promise it again.
 
-It sits next to the SIP entry because a reader who accepts that
-one asks about the App Store next, and both are doors that stay
-shut. The shared root is only the private symbols, though — the
-second reason below is economics, unrelated to SIP.
-
-Two reasons, of different kinds — one technical, one economic:
+Two reasons, of different kinds — one technical, sharing the
+SIP entry's root, one economic and unrelated to SIP:
 
 - **Private API.** The SkyLight/CGS symbols the section above
   discusses put Desktop management squarely against review
@@ -324,7 +316,7 @@ Two reasons, of different kinds — one technical, one economic:
   scans the binary's string table, so a compliant build has
   to compile the resolver out, not disable it.
 - **The economics.** A store edition is buildable — the
-  2026-08-18 feasibility pass
+  feasibility pass
   ([#882](https://github.com/KiwiCanopy/KiwiDesk/issues/882),
   the full inventory) found most of the app survives the
   sandbox: KiwiDesk's own spaces and the default focus ring
@@ -383,10 +375,10 @@ publishing rather than on remembering to fix it afterwards.
 `brew upgrade` is a real update path, so a Sparkle-less build
 may ship as a cask. The cask's public GitHub Release ZIP is its
 backing artifact, not a standalone channel KiwiDesk promotes:
-while Sparkle had not landed, that ZIP was not to be linked from
-the product site nor advertised as a direct download. Someone who deliberately
-installs from the repository instead of Homebrew has chosen a
-manual update path.
+without Sparkle in the build, that ZIP is neither linked from the
+product site nor advertised as a direct download. Someone who
+deliberately installs from the repository instead of Homebrew has
+chosen a manual update path.
 
 The Release must be published before Homebrew can fetch its ZIP,
 so publication and the tap update cannot be atomic. The accepted
@@ -403,11 +395,6 @@ bumps the tap — if the cask goes stale the exception lapses and
 the cask users are the stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
-
-Until Sparkle landed, the two together meant: a Homebrew cask
-backed by one public Release ZIP yes; a promoted standalone ZIP
-or `.dmg` download no. It has landed — the gate below records
-when, and what that spends.
 
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first
@@ -430,18 +417,16 @@ has exercised none of that. A test appcast rehearses the feed
 parse, the version compare and the install-on-quit; it cannot
 rehearse signed, notarized, stapled bytes fetched over the
 network from the production URL, or the cask and the in-app
-updater not fighting over one install. Which release this binds
-is whichever one opens the channel, and the obligation holds
-wherever that lands.
+updater not fighting over one install.
 
 **Corollary: the gate is Sparkle-in-the-build, never a version
-number.** The rule above says "until Sparkle lands" and names no
-version deliberately: what it asks is whether the build a person
-installs can update itself, and a version number answers that in
-neither direction. So the question is never "have we reached
-1.0". A release shipped without an updater keeps the channel shut
-however large its number, and a release carrying one satisfies
-**this** condition whatever number it lands at.
+number.** The rule names no version deliberately: what it asks
+is whether the build a person installs can update itself, and a
+version number answers that in neither direction. So the question
+is never "have we reached 1.0". A release shipped without an
+updater keeps the channel shut however large its number, and a
+release carrying one satisfies **this** condition whatever number
+it lands at.
 
 It satisfies this one, not the gate. The gate is two conditions
 and both are properties of builds rather than of a version:
@@ -452,14 +437,11 @@ cannot meet the second, which is why a promoted download opens on
 the one after it and not on a number.
 
 **Both conditions have been met, and what the gate guards is
-spent.** A Sparkle-carrying release was published, and a real
-update from the one before it installed on a physical machine.
-That is a past-tense fact and cannot come untrue, so nothing
-above is still a question — read the paragraphs before this one
-as the argument for the gate, never as a description of a shut
-channel.
-[#904](https://github.com/KiwiCanopy/KiwiDesk/issues/904) is
-where the confirmation is recorded; it does not belong here.
+spent** — a Sparkle-carrying release was published and a real
+update from the one before it installed on a physical machine
+([#904](https://github.com/KiwiCanopy/KiwiDesk/issues/904)
+records the confirmation). Read the paragraphs above as the
+argument for the gate, never as a description of a shut channel.
 
 **What that licenses is the channel, not a free pass on the
 artifact.** The release page and the site link are one channel,
@@ -509,11 +491,10 @@ the missing switch a preference question rather than a privacy
 one. If it were sending a profile, this ruling would go the
 other way.
 
-**What would reopen it:** a Settings row is the answer whenever
-someone builds one, and this entry is not an argument against
-it. It is the answer to "why is there none *yet*", so a future
-row supersedes this without contradicting it. What must not
-happen is unsetting the key and letting Sparkle ask again.
+**What would reopen it:** a Settings row, whenever someone
+builds one — this entry answers "why is there none *yet*", so a
+future row supersedes it without contradicting it. What must
+not happen is unsetting the key and letting Sparkle ask again.
 
 ### Scheduled update reminders are a mark, not a notification (#1013)
 
@@ -537,8 +518,8 @@ item carries a dot until the update gets attention or the session
 ends. The dot is composited into a fresh image with a knockout
 ring, the SF Symbols `.badge` idiom, top-trailing and Ø5 at the
 18 pt master, and it is **orange** — the owner ruled colour over
-the monochrome template the design pass proposed (2026-09-08).
-What that costs, stated: a template carries no hue, so the
+a monochrome template. What that costs: a template carries no
+hue, so the
 composite is not one, and the bar's highlight inversion while the
 menu is open no longer reaches it; what it keeps: the drawing
 handler resolves the bar's label colour and `systemOrange` at
@@ -587,11 +568,10 @@ Both halves matter, because two different mistakes follow from
 dropping either:
 
 - Read the rule as reaching any link at all, and the app can
-  never tell a user what changed — not until Sparkle ships, which
-  is indefinite. The alternative someone reaches for next is an
-  in-app notes reader, which is a new surface duplicating
-  rendering GitHub already does better, built to satisfy a rule
-  that was never about reading.
+  never tell a user what changed. The alternative someone reaches
+  for next is an in-app notes reader, which is a new surface
+  duplicating rendering GitHub already does better, built to
+  satisfy a rule that was never about reading.
 - Read "the label decides" as licence, and the row drifts toward
   the download it must not become. So the obligation is on the
   words: a surface pointing at the releases page stays named for
@@ -607,8 +587,8 @@ the asset is at worst redundant to them, and the alternative
 costs every user the ability to see what changed in order to hide
 an artifact from the people least likely to need it.
 
-When Sparkle lands it will show the current version's notes on
-update. That does not retire this link: Sparkle answers "what is
+Sparkle shows the current version's notes on update. That does
+not retire this link: Sparkle answers "what is
 in the update in front of me", and this answers "what changed
 across every version, whenever I ask" — including for a user who
 skipped four of them.
@@ -648,25 +628,22 @@ Two consequences fall out, both structural rather than stylistic:
   bullet is ONE line: the thing you would notice, and that it
   is fixed. A second sentence is earned only when one line
   cannot say it — a default that changed, a control to go and
-  find — and never by the diagnosis, which is the PR's (ruling
-  2026-09-08). The whole block should read in one screen of the
+  find — and never by the diagnosis, which is the PR's (owner
+  ruling). The whole block should read in one screen of the
   update sheet Sparkle shows.
 - **A site change is news only when a visitor would come for
   it.** A new page, a new language, a changed download earns a
   line. A heading that now fits its column, a corrected term, a
   font bump and release plumbing earn none — not even a closing
-  "on the site" line, which 1.2.1's first draft carried and the
-  owner struck (ruling 2026-09-08): a reader installing an
+  "on the site" line (owner ruling): a reader installing an
   update has no reason to care that the website was tidied. The
   generated list still carries each of them for whoever wants
   that.
 
-This binds whichever surface carries the notes, not the surface
-it happens to be today. That surface is currently the GitHub
-release body — the entry above rules it *is* this project's
-changelog — and when the curated changelog page lands (#873) for
-Sparkle to render (#874), the page inherits this rather than
-restating it.
+This binds whichever surface carries the notes: the GitHub
+release body today — this project's changelog — and the curated
+changelog page (#873) that Sparkle renders (#874) inherits it
+rather than restating it.
 
 No guard is proposed, and that is a ruling rather than an
 omission: nothing mechanical separates "the focus outline keeps
@@ -677,41 +654,37 @@ on the same nouns used legitimately elsewhere. This is a
 review-time rule, and this entry is where the reviewer is sent.
 
 **A highlight describes what shipped, not what comes next.**
-0.9.7's draft opened "The last beta before 1.0" and it was struck
-before publishing. That line broke no rule above — it names
-nothing internal and a reader understands it perfectly — which is
-why it is worth its own clause: the defect is that it is a
-**forecast**. A description of what shipped can only be wrong on
-the day it is written, and review catches that. A forecast is
-falsified later, by events somewhere else entirely, and nothing
-notices — the same failure `.claude/rules/rule-authoring.md`
-names when it asks for an obligation instead of a state claim.
-A release body is also the surface least able to absorb it,
-being immutable in practice once people have read it and
-mirrored by every tap and feed that carries it.
-
-So no roadmap position, no "next up", no promise about the
-following release. Whether 0.9.7 turned out to be the last beta
-was not knowable on the day it shipped, and the notes did not
-need to answer it.
+"The last beta before 1.0" (struck from 0.9.7's draft) breaks no
+rule above — it names nothing internal and a reader understands
+it perfectly — which is why it is worth its own clause: the
+defect is that it is a **forecast**. A description of what
+shipped can only be wrong on the day it is written, and review
+catches that. A forecast is falsified later, by events somewhere
+else entirely, and nothing notices — the same failure
+`.claude/rules/rule-authoring.md` names when it asks for an
+obligation instead of a state claim. A release body is also the
+surface least able to absorb it, being immutable in practice once
+people have read it and mirrored by every tap and feed that
+carries it. So no roadmap position, no "next up", no promise
+about the following release: whether 0.9.7 turned out to be the
+last beta was not knowable on the day it shipped, and the notes
+did not need to answer it.
 
 **A fix to something that has not shipped is not news; it is
 part of the thing it fixes.** 1.2.0 brought Liquid Glass to
-every surface, and four commits between then and the cut
-corrected its tint channel, its light/dark variant and two of
-its rendering paths. Listing those reads as a feature that
-arrived broken — and no reader ever met the broken version,
-because none of it had shipped. They belong inside the feature's
-own bullet, or nowhere. The test is the same one this entry
-already asks, applied to a version rather than a person: **was
-the defect reachable from the last release?** If it was not,
-the reader has nothing to recognise.
-
-The same reasoning retires a whole class of entry that keeps
-appearing in a first draft: work whose subject is this release's
-own making. Translating sentences this release introduced,
-re-vendoring a font, wiring the release pipeline — each is real
-work and none of it is a change the reader experiences.
+every surface, and commits between then and the cut corrected
+its tint channel, its light/dark variant and two of its
+rendering paths. Listing those reads as a feature that arrived
+broken — and no reader ever met the broken version, because none
+of it had shipped. They belong inside the feature's own bullet,
+or nowhere. The test is the same one this entry already asks,
+applied to a version rather than a person: **was the defect
+reachable from the last release?** If it was not, the reader has
+nothing to recognise. The same reasoning retires work whose
+subject is this release's own making — translating sentences this
+release introduced, re-vendoring a font, wiring the release
+pipeline: real work, and none of it a change the reader
+experiences.
 
 ### The API describes itself, and its enums are read not typed
 
@@ -723,15 +696,15 @@ summary — lives in `APIReference` as data, beside the names that
 were already there. It does **not** live only in
 `docs/lua-reference.md`.
 
-The pull toward prose is real, and it is what shipped first: the
-names were a Swift table that "can never drift from the real
-API", while the *signatures* were 4,800 lines of hand-written
-Markdown that could, and did. `list_commands` therefore answered
-"what can I call" with 262 bare names on one line — no groups, no
-arguments, no summaries — and `list_commands focus` answered the
-same 6.9 KB, because the argument was read and dropped (#1033).
-The doc could not fix that: a running binary cannot consult a
-Markdown file, and a user in a terminal should not have to.
+The pull toward prose is real: with the names in a Swift table
+that "can never drift from the real API" and the *signatures* in
+4,800 lines of hand-written Markdown that could, `list_commands`
+answered "what can I call" with 262 bare names on one line — no
+groups, no arguments, no summaries — and `list_commands focus`
+answered the same 6.9 KB, because the argument was read and
+dropped (#1033). The doc could not fix that: a running binary
+cannot consult a Markdown file, and a user in a terminal should
+not have to.
 
 Two rules fall out, and both are guarded.
 
@@ -793,21 +766,20 @@ untidy — they go looking because something cost them time today.
 Four constraints fall out, and they are the durable part:
 
 - **The papercut has to be one KiwiDesk actually solves.** This
-  is the trap, and the first draft fell straight into it: the
-  green button is a real grievance and KiwiDesk does *not* fix
-  it — `docs/user-guide.md` ▸ native fullscreen says it stands
-  down around such a window entirely, and macOS still gives it a
-  Mission Control slot of its own. Arranging windows by hand IS
-  solved, by default, for everyone, which is why the section
-  argues that instead. Check the relief before writing the
-  grievance.
+  is the trap: the green button is a real grievance and KiwiDesk
+  does *not* fix it — `docs/user-guide.md` ▸ native fullscreen
+  says it stands down around such a window entirely, and macOS
+  still gives it a Mission Control slot of its own. Arranging
+  windows by hand IS solved, by default, for everyone, which is
+  why the section argues that instead. Check the relief before
+  writing the grievance.
 
-- **The picture argues too.** The before/after art carried the
-  retired claim as scattered rectangles, and re-lettering the
-  cards while that stayed would have shipped the ruling half
-  applied — a reader believes the picture first. Both frames now
-  draw the same windows; what differs is only how well they fit.
-  `site/src/styles/landing-modes.css` owns how many and where.
+- **The picture argues too** — a reader believes it first, so
+  before/after art drawing the "before" as scattered rectangles
+  ships the retired claim however the cards are lettered. Both
+  frames draw the same windows; what differs is only how well
+  they fit. `site/src/styles/landing-modes.css` owns how many
+  and where.
 - **The honest before is not chaos.** It is *doing it by hand
   and not realising there was another way*. Copy that tells
   readers their desk is a mess describes someone else.
@@ -815,13 +787,13 @@ Four constraints fall out, and they are the durable part:
   *Solving macOS Papercuts* writes them for people who already
   know "monocle", "spaces" and `pull_or_spawn`. Simple mode gets
   the symptom and the relief, never the mechanism — and never a
-  claim the app does not make. Two the first draft got wrong:
-  KiwiDesk does not change what ⌘Tab does, and nothing seeds a
-  keystroke that makes a window big — so anything reached through
-  a binding is written as an offer, never as behavior.
+  claim the app does not make: KiwiDesk does not change what
+  ⌘Tab does, and nothing seeds a keystroke that makes a window
+  big — so anything reached through a binding is written as an
+  offer, never as behavior.
 
 Not every papercut survives the translation. macOS reshuffling
-your Desktops was dropped rather than reworded: the honest
+your Desktops is dropped rather than reworded: the honest
 version needs a qualification the section cannot carry, since
 what KiwiDesk offers is *its own* spaces in fixed slots and no
 doc claims it stops macOS reordering anything.
@@ -972,28 +944,28 @@ protect. A ban would fire on hundreds of good values, and
 so it would be reverted or given a baseline within a week.
 
 The mistake worth not repeating is generalising from that to
-*no guard at all*, which this ruling did on its first draft. The
-sub-class where the collision is **byte-identity** needs no
-vocabulary: compare two strings the same catalog ships, the way
-the breadcrumb guard already does. `DestinationNameCollisionTests`
-does exactly that for destination titles, and it fires on the
-`zh-Hans` Profile defect this work was chartered to fix. It lives
-in `Tests/` rather than in the guards script because a Swift
-suite may carry a reasoned exemption map — the standing idiom
-here — so the one legitimate pair is excused in writing rather
-than switching the guard off. Partial cover of the worst
-sub-class is not a consolation prize; it is the sub-class.
+*no guard at all*. The sub-class where the collision is
+**byte-identity** needs no vocabulary: compare two strings the
+same catalog ships, the way the breadcrumb guard already does.
+`DestinationNameCollisionTests` does exactly that for
+destination titles, and it fires on the `zh-Hans` Profile
+defect. It lives in `Tests/` rather than in the guards script
+because a Swift suite may carry a reasoned exemption map — the
+standing idiom here — so the one legitimate pair is excused in
+writing rather than switching the guard off. Partial cover of
+the worst sub-class is not a consolation prize; it is the
+sub-class.
 
-What was done instead is worth more than the guard would have
-been: the two *adjacent* classes were made unwritable rather than
-scanned for. A `▸` breadcrumb is held against what each segment's
-own key renders, and English prose that names a pane or a role
-now interpolates that label's key instead of quoting it (#818),
-which puts the anchor under `placeholder_drift` — an exact
-contract that already runs — in every locale forever. The
-residue, one language's two ordinary words for one idea, stays
-with review, and the ladder is what makes that review cheap: a
-reviewer who does not speak the language can still check a grep.
+Worth more than the guard would have been: the two *adjacent*
+classes are made unwritable rather than scanned for. A `▸`
+breadcrumb is held against what each segment's own key renders,
+and English prose that names a pane or a role interpolates that
+label's key instead of quoting it (#818), which puts the anchor
+under `placeholder_drift` — an exact contract that already runs
+— in every locale forever. The residue, one language's two
+ordinary words for one idea, stays with review, and the ladder
+is what makes that review cheap: a reviewer who does not speak
+the language can still check a grep.
 
 **Rule 1 takes a word away and has to say what replaces it.**
 Left unanswered, the obvious move is a second ordinary noun,
@@ -1049,24 +1021,23 @@ JSON key, no Swift type, no event name naming KiwiDesk's spaces
 stay; the Space Bar keeps its name, being KiwiDesk's own bar
 showing KiwiDesk's own spaces.
 
-**macOS's side of the wire moved once, after 1.0.** The ruling
-above originally froze it too — `bind_profile_to_native_space`
-kept its name "since *native* already disambiguates it" — as a
-cost call made pre-release, when no migration and no broken
-`init.lua` was the whole argument. It was lifted on 2026-08-25,
-before the native Desktop verbs (#884) landed beside it: a wire
-reading `…native_space` in three places and `…desktop` in the
-new verbs would have carried the one-word-two-senses defect
-this ruling exists to remove, and the cheapest day to unify it
-was the day before it hardened under a userbase. So the verb is
-`bind_profile_to_desktop`, the event `desktop_change`, the
-`get_state` field `desktop`, and the Settings copy keys
-`desktops.*` — with no alias (`AGENTS.md` §5: a renamed verb
-gets no compatibility layer; the 1.1.0 notes say what changed).
-What did NOT move, deliberately: Core's `NativeSpace` /
-`NativeSpaces` types, which model WindowServer spaces —
-fullscreen and system spaces included — of which a Desktop is
-only the user-type kind.
+**macOS's side of the wire moved once.** Freezing it too —
+`bind_profile_to_native_space` keeping its name "since *native*
+already disambiguates it" — was a pre-release cost call, when no
+migration and no broken `init.lua` was the whole argument. It
+was lifted before the native Desktop verbs (#884) landed beside
+it: a wire reading `…native_space` in three places and
+`…desktop` in the new verbs would have carried the
+one-word-two-senses defect this ruling exists to remove, and the
+cheapest day to unify it was the day before it hardened under a
+userbase. So the verb is `bind_profile_to_desktop`, the event
+`desktop_change`, the `get_state` field `desktop`, and the
+Settings copy keys `desktops.*` — with no alias (`AGENTS.md` §5:
+a renamed verb gets no compatibility layer; the 1.1.0 notes say
+what changed). What did NOT move, deliberately: Core's
+`NativeSpace` / `NativeSpaces` types, which model WindowServer
+spaces — fullscreen and system spaces included — of which a
+Desktop is only the user-type kind.
 
 **Why the macOS sense is the one that moves — and what does NOT
 decide it.** It is tempting to say "Desktop is Apple's word", and
@@ -1083,10 +1054,10 @@ right; they should read the next paragraph rather than this one.
 What the instance label does buy is that "Desktop n" is the word
 on screen at the moment a user is *looking* at the things, which
 is what a binding row names. KiwiDesk's own copy had already
-reached for it: `desktops.intro` (then `native_spaces.intro`) read "Each Desktop is a
-native macOS Space from Mission Control." until #768 — one
-sentence stating as an identity the very thing this ruling
-splits.
+reached for it: `desktops.intro` (then `native_spaces.intro`)
+read "Each Desktop is a native macOS Space from Mission Control."
+until #768 — one sentence stating as an identity the very thing
+this ruling splits.
 
 **Cost is what actually decides it.** The conflict is
 irreducible: two systems, one word, and one of them has to move.
@@ -1094,9 +1065,9 @@ irreducible: two systems, one word, and one of them has to move.
 macOS's, each carried by ten non-English catalogs, so renaming
 ours would have billed ~1,190 translated values; renaming
 macOS's side billed the 3 of those 6 whose meaning actually
-changed, at 30 (measured for the ruling, 2026-08-07; #765 carries
-the count for the alternative and is closed). A forty-to-one cost
-ratio decides a question that terminology alone leaves open.
+changed, at 30 (#765 carries the count for the alternative). A
+forty-to-one cost ratio decides a question that terminology
+alone leaves open.
 
 This is also why the Apple-verbatim carve-out is not an
 inconsistency but the same rule applied: where copy NAMES one of
@@ -1143,9 +1114,9 @@ The counts are as measured when the ruling was taken
 
 **[Principle]**
 
-The same shape as the ruling above, one noun over, and it went
-unruled for longer because no single word was obviously wrong.
-English shipped three for one thing — *screen*, *display*,
+The same shape as the ruling above, one noun over, and harder
+to see because no single word was obviously wrong. English
+shipped three for one thing — *screen*, *display*,
 *monitor* — interleaved across adjacent surfaces rather than
 separated by area. Profiles is the whole defect in one pane: its
 caption says a profile is "remembered per **display**
@@ -1191,21 +1162,21 @@ and was swept to it rather than the other way round. A pane whose
 every sentence says *screen* while its card says *Monitors* is
 the split, not a mitigation of it.
 
-**The ruling and the sweep are two decisions, and only the first
-was taken here.** Deciding the winner costs a paragraph and makes
-every string authored afterwards correct; sweeping the existing
-ones reaches the settings census, a component directory, the site
-corpus and `docs/`, and it touches the wire wherever a Lua verb,
-an event name or a profile key spells one of the two words —
-which is its own ruling, and a set this entry derives rather than
-lists (`grep -E 'display|monitor' docs/lua-reference.md
-docs/cli.md` answers it, and answers it again after the next verb
-lands). Taking the ruling without the sweep leaves
-the corpus knowingly inconsistent rather than accidentally so,
-which is the cheaper of the two states and the only one that
-converges. The sweep is #865, off 1.0; the English-side
-obligation is `.claude/rules/config-vocabulary.md` ▸ noun
-glossary.
+**The ruling and the sweep are two decisions, and this entry
+takes only the first.** Deciding the winner costs a paragraph and
+makes every string authored afterwards correct; sweeping the
+existing ones reaches the settings census, a component directory,
+the site corpus and `docs/`, and it touches the wire wherever a
+Lua verb, an event name or a profile key spells one of the two
+words — which is its own ruling, and a set this entry derives
+rather than lists (`grep -E 'display|monitor'
+docs/lua-reference.md docs/cli.md` answers it, and answers it
+again after the next verb lands). Taking the ruling without the
+sweep leaves the corpus knowingly inconsistent rather than
+accidentally so, which is the cheaper of the two states and the
+only one that converges. The sweep is #865, off 1.0; the
+English-side obligation is `.claude/rules/config-vocabulary.md` ▸
+noun glossary.
 
 **What this does NOT decide: any catalog's own word.** Ruling the
 English winner tells `zh-Hans` nothing about 屏幕 versus 显示器 —
@@ -1264,8 +1235,8 @@ live frames (`StateCoordinator.floatingFocusCandidates`:
 float-flagged members plus floating sticky windows rendering on
 the space; transient overlays and fullscreen windows never).
 Tiled-first keeps tile-to-tile navigation untouched while
-removing the directional black hole a visible float used to be —
-dropped from `effectiveTiledMembers`, it could navigate out (the
+removing the directional black hole a visible float otherwise is
+— dropped from `effectiveTiledMembers`, it can navigate out (the
 anchor falls back to a geometric search from its live frame) but
 nothing could navigate back in. Array-order layouts reach the
 float tier through their existing edge fall-through to the
@@ -1305,8 +1276,8 @@ its own (it fires no focus event). Directional focus/swap and the
 other implicit-focused verbs (`toggle_floating`/`make_*`,
 `move_to_space`) resolve their target *through* this anchor too —
 the #431 rewire and the #292 foreground guard both read
-`focusedWindowID` — so a frontmost traveler is the origin/target,
-not the stale local slot it can never occupy. A keyboard reorder
+`focusedWindowID` — so a frontmost traveler is the
+origin/target. A keyboard reorder
 that cannot apply to a non-member (`swap`, `track.swap`,
 `stack.promote`/`demote`, `move_to_track`) refuses with the
 home-space pill ([#435](https://github.com/KiwiCanopy/KiwiDesk/issues/435))
@@ -1317,9 +1288,10 @@ root and the same shape (#431): its focused item and group
 expansion read `KiwiCore.appBarFocused`, which on the active space
 prefers the system frontmost (`lastFocused`) so a traveler's item
 lights up, while every inactive-display space keeps its own
-remembered `focused`; the Space Bar already carried this fix
-(#414, it reads raw `lastFocused` because its items are spaces). What *does* differ per layout is the
-overflow pile: a sticky window keeps a fully-tiled slot, so the
+remembered `focused`; the Space Bar reads raw `lastFocused`
+because its items are spaces (#414). What *does* differ per
+layout is the overflow pile: a sticky window keeps a
+fully-tiled slot, so the
 partial tile-then-pile overflows — Stack zones, track columns
 (`cascade_overflow`), and the grid's last-cell pile — clamp it
 below the boundary via the shared `OverlapStack.stickyExempt`
@@ -1355,7 +1327,7 @@ floating.
 
 Floating windows are in the unfocused set too, flag-floats and
 floating-mode members alike — the #1286 entry below carries the
-argument; they were excluded here without one.
+argument.
 
 A **transient overlay** — a window that floats for a *structural*
 reason (accessory activation policy, a non-standard panel subrole,
@@ -1373,10 +1345,10 @@ self-heals a window back to tiled — the flag can never outlive the
 float state it depends on (overlay ⟹ floating).
 
 The same class is also never **granted** a space's focus when it
-appears (#671). KiwiDesk used to hand the focused slot to every
-window it saw created, so a popup that surfaces as an AX window —
-a Telegram context menu — became `space.focused` on arrival, and
-its dismissal therefore read as the focused window closing: the
+appears (#671). Handing the focused slot to every window created
+makes a popup that surfaces as an AX window — a Telegram context
+menu — `space.focused` on arrival, and its dismissal then reads
+as the focused window closing: the
 fallback handoff fired a `kAXRaiseAction` that re-activates an
 app and, under mouse-follows-focus, warped the pointer off what
 had just been clicked. In a focus-driven layout the grant also
@@ -1409,16 +1381,16 @@ builds from the tiled members, which a structural float has
 already left.
 
 The *launcher* subset of that class — an accessory app's
-raised-layer command bar (Spotlight, Raycast, Alfred) — graduated
-from draw-time suppression to the **built-in ignore gate** (#448):
+raised-layer command bar (Spotlight, Raycast, Alfred) — takes the
+**built-in ignore gate** (#448) rather than draw-time suppression:
 #300 kept those bars managed because only the ring was wrong, but
-multi-monitor QA (#446) showed a managed bar is also space-pinned —
-tiled, stashed, and dragged across space switches. They are now
-never tracked at all (accessory policy **and** raised layer, plus a
-layer-scoped bundle belt for a dock-icon Raycast, alongside
-Ghostty's quick terminal #21). The draw-time heuristic remains for
-the structural floats that stay managed: panel-subrole windows of
-regular apps and accessory apps' layer-0 windows.
+a managed bar is also space-pinned — tiled, stashed, and dragged
+across space switches (#446). They are never tracked at all
+(accessory policy **and** raised layer, plus a layer-scoped
+bundle belt for a dock-icon Raycast, alongside Ghostty's quick
+terminal #21). The draw-time heuristic remains for the structural
+floats that stay managed: panel-subrole windows of regular apps
+and accessory apps' layer-0 windows.
 
 The optional **glow** (#358) — a soft blurred colored bloom around
 the ring, the JankyBorders `COLOR_STYLE_GLOW` look — is a global
@@ -1428,11 +1400,11 @@ on every dim ring would undercut the one it exists to make pop, and
 `unfocused_color` is tuned to be present-without-competing, the
 opposite intent.
 
-And its outward extent is part of **`outwardReach`** — amended
-by #1378 from "kept out of it": a hand-set gap may still let the
-bloom bleed, but Fit is the one action that leaves no gap beyond
-the stroke, so under Fit the bloom landed entirely on the
-neighbour's content and its unfocused ring. Fit grows by the
+And its outward extent is part of **`outwardReach`** (#1378): a
+hand-set gap may still let the bloom bleed, but Fit is the one
+action that leaves no gap beyond the stroke, so under Fit a
+bloom outside the reach lands entirely on the neighbour's
+content and its unfocused ring. Fit grows by the
 **full** resolved blur, **once, on the focused side** (`inner =
 reach + blur + (unfocused ? reach : 0) + extra`) — full rather
 than half because the boost layer's radius is half the margin,
@@ -1462,9 +1434,9 @@ context drops any `CGContextSetShadowWithColor` hue to the
 default black-at-low-alpha — a grey smear with a clipped hard
 edge (#533, device-confirmed with the colour rebuilt in sRGB and
 GenericRGB both, and with the bloom pre-rendered to a bitmap and
-blitted) — and painted-falloff substitutes banded on device (the
-same contour lines as the shelved first attempt, which shadowed
-the thin stroke directly). The `CAShapeLayer` double shadow (a
+blitted) — and painted-falloff substitutes band on device, the
+same contour lines as shadowing the thin stroke directly. The
+`CAShapeLayer` double shadow (a
 full-radius pass plus a half-radius boost, summing toward the
 full glow colour at the ring edge) is the one renderer that
 blooms correctly; the cost is that a glow ring under
@@ -1544,7 +1516,7 @@ the ring and target together. No private symbol is linked at launch,
 and the optimization never changes SIP requirements or the layout/state
 model.
 
-**Two vocabularies, one split (#185 review, 2026-07-12):**
+**Two vocabularies, one split (#185):**
 *navigation* (`focus`, window `swap`) is spatial and
 layout-agnostic — left/right/up/down everywhere, per the table
 above — while the two *track sequence verbs* (`move_to_track`,
@@ -1557,38 +1529,33 @@ a binding survives an axis flip. Do not extend prev/next to
 `focus` — that would fork the navigation model for one layout —
 and do not add compass aliases to the sequence verbs.
 
-**Track is guided by copy, not gated (#188, 2026-07-12):** an
-earlier design put the track layout's multi-window surfaces
-(the cap, `new_window`, `move_to_track` / `track.swap` and their
-shortcuts) behind a global `set_track_advanced` switch, default
-off, with the shortcut rows inert and hidden until it flipped
-(#181). That was reversed: every track surface is always
-visible and always works. Newcomers are oriented with copy
-instead — the header caption on Layout Defaults ▸ Track marks
-it a more advanced layout, and the shortcut rows say which
-layout they belong to. A blocking flag bought guidance at the
-cost of a whole machinery — inert-but-stored keybindings, a
+**Track is guided by copy, not gated (#188):** every track
+surface — the cap, `new_window`, `move_to_track` / `track.swap`
+and their shortcuts — is always visible and always works.
+Putting them behind a global `set_track_advanced` switch,
+default off, with the shortcut rows inert and hidden until it
+flipped (#181) was rejected: a blocking flag bought guidance at
+the cost of a whole machinery — inert-but-stored keybindings, a
 resolution clamp, silent-steal conflict handling — and made
 unbound track rows in another layout read as broken rather than
 simply irrelevant. Copy carries the same message with none of
-that. The obligation the copy carries is not "Track has a
-caption" — since #678 turn 10 every layout card does — but that
+that: the header caption on Layout Defaults ▸ Track marks it a
+more advanced layout, and the shortcut rows say which layout
+they belong to. The obligation the copy carries is not "Track
+has a caption" — every layout card has one (#678) — but that
 Track's own says what the others' do not: that this layout is
 the harder one. Reword it and the guidance goes with it.
 
-*Amended 2026-09-14 (#1440):* the shortcut half of that copy
-moved from a subheader caption ("only relevant if you're using
-the track layout") to the rows' own drawer — Shortcuts ▸ Move
-windows ▸ **Move windows in the track layout**, the #1125 door
-shape, with a `?` saying what previous and next mean in a
-track. The substance of this ruling holds: nothing is gated,
-no flag is stored, the rows work whether the drawer is open or
-shut, and a user with a Track space or a Track binding meets it
-open. What changed is where the sentence lives; the title now
-carries it, so a caption restating it inside the drawer was
-struck (owner ruling 2026-09-14).
+The shortcut half of that copy lives in the rows' own drawer —
+Shortcuts ▸ Move windows ▸ **Move windows in the track layout**,
+the #1125 door shape, with a `?` saying what previous and next
+mean in a track (#1440). Nothing is gated, no flag is stored,
+the rows work whether the drawer is open or shut, and a user
+with a Track space or a Track binding meets it open. The title
+carries the sentence, so no caption restates it inside the
+drawer (owner ruling).
 
-**The overflow track is read-time, not stored (#192, 2026-07-12):**
+**The overflow track is read-time, not stored (#192):**
 when there are more tracks than the space's normal capacity, the
 fitting prefix tiles and the surplus merges into one far-edge
 overflow track. Normal capacity is one below the **Track limit**
@@ -1608,23 +1575,22 @@ geometry-free (the flat-array / pure-layout invariant, AGENTS.md
 and simply falls into the overflow track's slice at render time.
 `overflow_style` shapes only that overflow track (default
 `cascade_all`); every normal track's own overflow is always
-`cascade_overflow`. An earlier "overflow-aware spawn" idea —
-shifting windows into a new track at spawn based on available
-space — was rejected here for putting geometry into state (it
-would make spawn outcomes monitor-dependent and
-non-deterministic). **This was deliberately revisited for the
-`focused_track` default — see the next entry.**
+`cascade_overflow`. An "overflow-aware spawn" — shifting windows
+into a new track at spawn based on available space — is rejected
+for putting geometry into state (it would make spawn outcomes
+monitor-dependent and non-deterministic). **The `focused_track`
+default relaxes that deliberately — see below.**
 
-**The Track limit counts the overflow track (#1354, owner ruling
-2026-09-09).** [Principle] The number a user types is the number
-of tracks they see: a limit of 3 shows three tracks, the last of
-them the overflow. The value used to count NORMAL tracks with
-the overflow beside them, so a typed 3 drew four columns — and
-the user counts what is on screen, not what the layout calls
-normal; a control whose number is one off from the picture reads
-as a control that does not work. Renaming the setting to
-"normal tracks" was rejected for the same reason: it would have
-made the label agree with the arithmetic instead of the eye. The
+**The Track limit counts the overflow track (#1354, owner
+ruling).** [Principle] The number a user types is the number of
+tracks they see: a limit of 3 shows three tracks, the last of
+them the overflow. Counting NORMAL tracks with the overflow
+beside them draws four columns for a typed 3 — and the user
+counts what is on screen, not what the layout calls normal; a
+control whose number is one off from the picture reads as a
+control that does not work. Renaming the setting to "normal
+tracks" is rejected for the same reason: it would make the label
+agree with the arithmetic instead of the eye. The
 floor is 2, because a limit of 1 would be the overflow track
 alone with everything folded into it — no track layout at all —
 so the setters refuse below it, the steppers start at it, and a
@@ -1643,29 +1609,27 @@ where a renamed verb fails loudly a re-scaled number runs and
 draws one track fewer, with only the refused `1` to say
 anything.
 
-**BSP alternates by default (#1181, 2026-08-31).** `alternating`
-— horizontal then vertical by depth — rather than
-`longest_side`, which cuts each region's longer side and keeps
-windows square-ish. The alternation *is* the mental model the
-word "BSP" carries for the people who reach for a BSP layout, so
-a new user meeting longest-side placement reads it as the layout
+**BSP alternates by default (#1181).** `alternating` —
+horizontal then vertical by depth — rather than `longest_side`,
+which cuts each region's longer side and keeps windows
+square-ish. The alternation *is* the mental model the word "BSP"
+carries for the people who reach for a BSP layout, so a new user
+meeting longest-side placement reads it as the layout
 misbehaving rather than as a policy choice. A default is the
-product's opinion, and this one was reading as wrong to the
-audience the layout is for. Both strategies stay available and
-only the default moved; `bsp.set_strategy` and the per-space
-override are unchanged.
-
-The change reaches existing users, deliberately.
+product's opinion, and this one read as wrong to the audience
+the layout is for. Both strategies stay available and only the
+default moved; `bsp.set_strategy` and the per-space override are
+unchanged. The change reaches existing users, deliberately:
 `BspParams.encode` writes `strategy` unconditionally, so every
-GUI-saved config and profile already pins its own value and is
-untouched — what moves is fresh installs and any config that
-never set the key. That is a behaviour change on update and it
-earns its own release-notes line rather than arriving silently.
+GUI-saved config and profile pins its own value and is untouched
+— what moves is fresh installs and any config that never set the
+key. That is a behaviour change on update and it earns its own
+release-notes line rather than arriving silently.
 
 **Fill-then-spill is the track default; the spawn-geometry ban is
-relaxed for it (#437, 2026-07-23):** `focused_track` — now the
-default (`own_track` demoted to the ultrawide "one app per column"
-opt-in) — fills the focused track and, when it can't fit another
+relaxed for it (#437):** `focused_track` — the default
+(`own_track` is the ultrawide "one app per column" opt-in) —
+fills the focused track and, when it can't fit another
 window at `min_window_size`, spills the next window into a new
 track beside it (focus follows, so the recursion needs no
 special-casing). The unbounded within-track pile the old
@@ -1761,30 +1725,28 @@ window a second time hundreds of ms after the first echo, and
 a consumed stamp let that duplicate through as deliberate
 focus (ring, pan and pointer snapped back to the pile-mate —
 the [#689](https://github.com/KiwiCanopy/KiwiDesk/issues/689)
-device trace). The deliberate-refocus case consumption used to
-protect has real discriminators now: clicks escape on
+device trace). The deliberate-refocus case that consumption
+would protect has real discriminators: clicks escape on
 provenance, commands route through the self-raise path, and
 only a clickless app-driven or cmd-tab focus inside the ~1 s
-window is eaten — strictly better than the pre-#418 permanent
-poisoning.
+window is eaten.
 
-Three corollaries, the first and third from the #687 device QA,
-the second from #887's. **Every echo ledger is age-bounded, the
-focus raise's `selfRaiseStamps` included**: raising an
-already-key window — the restore's closing re-assert does
-exactly that — emits no echo at all, so an unbounded entry sat
-unconsumed forever and classified the user's *next* click on
-that window as KiwiDesk's own raise echo; a stamp counts as an
-echo only while it is recent, and even a fresh one stands down
-for click provenance. **A self-raise stamp is never consumed by
-its echo** — the scrolling snap-back
+Three corollaries (#687, #887 device QA). **Every echo ledger
+is age-bounded, the focus raise's `selfRaiseStamps` included**:
+raising an already-key window — the restore's closing re-assert
+does exactly that — emits no echo at all, so an unbounded entry
+sits unconsumed forever and classifies the user's *next* click
+on that window as KiwiDesk's own raise echo; a stamp counts as
+an echo only while it is recent, and even a fresh one stands
+down for click provenance. **A self-raise stamp is never
+consumed by its echo** — the scrolling snap-back
 ([#887](https://github.com/KiwiCanopy/KiwiDesk/issues/887),
-device trace 2026-08-31): every fast navigate step made the
-departed app report its window's focus twice, the duplicate
-~150 ms after the first and after the user's next step, and a
-stamp consumed by the first echo left that duplicate honored as
-deliberate focus — ring, pan and pointer snapping back to the
-window just left. The stamp expires by age, exactly as the
+device trace): every fast navigate step made the departed app
+report its window's focus twice, the duplicate ~150 ms after the
+first and after the user's next step, and a stamp consumed by
+the first echo left that duplicate honored as deliberate focus —
+ring, pan and pointer snapping back to the window just left.
+The stamp expires by age, exactly as the
 z-order ledger's does, and with nothing consumed, "raised by
 us?" is a question of **order** rather than presence: a
 same-app sibling raised *after* the reported window distrusts
@@ -1797,7 +1759,7 @@ earlier — because an older self-raise beside a fresh z-order
 stamp is the restore's own echo, and a freshness veto let that
 restore steal the user's next step back. **A press a bar
 absorbed resolves no window**: the bar is KiwiDesk's own
-overlay, absent from state, and resolving through it handed the
+overlay, absent from state, and resolving through it hands the
 window beneath a provenance it never earned — which would also
 let a bar click forge the escape for a stamped window under the
 strip. The painted strips (`shownStrips`, the #242 authority)
@@ -1835,34 +1797,32 @@ ordering of stamps — there is no second placement stamp to rank
 against — and the verdict is a clickless focus report within the
 placement window, arriving after focus moved on, for a window in
 the ledger. In the **active scrolling Space** the live entry is
-the whole verdict, and that took four device sittings to accept:
-the emulator complied within 9 pt of a pan into the void and
-bounced regardless, so "the window is not where we put it"
-discriminated nothing; it bounced after a pan that left it
+the whole verdict, because every narrower discriminator failed on
+the device: the emulator complied within 9 pt of a pan into the
+void and bounced regardless, so "the window is not where we put
+it" discriminated nothing; it bounced after a pan that left it
 on-screen, so "past the edge" discriminated nothing; it bounced
 after a focus command stepped off it with its size bound learned
 and no frame asked of it, so "the app refused the size it was
 asked" discriminated nothing and read as a bare mismatch it also
 matched every window whose resize echo had not landed (the #1049
 lesson, one subsystem over); and it bounced after a click onto a
-neighbour panned the row. Every discriminator narrower than "we
-moved it, or stepped off it, inside the window" honored a bounce
-on the device, and each honored bounce cost more than a pan back:
-it left KiwiDesk's focus anchor on a window the OS did not front,
-the split in which the foreground preflight refuses every focus
-shortcut until the app reports again. So the row prices one trade
-instead of four: a cmd-tab onto a scrolling window a pan just
-moved is bounced for the window. The focus command records the
-window it left in the same ledger — an entry a later pan's
-placement carries rather than erases — so the displacement shares
-the ledger's prune, renewal bound, forget and rekey instead of
-earning a ledger of its own. Anywhere else — the corner a hidden
-Space's windows are parked in, monocle's park, a scrolling Space
-that is not the active one — a clickless focus is how a user
-*reaches* an off-screen window, so the placement must lie past
-the edge and the window must have **refused** it by position,
-which the emulator does at the stash corner and a window that
-went where it was parked does not.
+neighbour panned the row. Each honored bounce cost more than a
+pan back: it left KiwiDesk's focus anchor on a window the OS did
+not front, the split in which the foreground preflight refuses
+every focus shortcut until the app reports again. So the row
+prices one trade instead of four: a cmd-tab onto a scrolling
+window a pan just moved is bounced for the window. The focus
+command records the window it left in the same ledger — an entry
+a later pan's placement carries rather than erases — so the
+displacement shares the ledger's prune, renewal bound, forget and
+rekey instead of earning a ledger of its own. Anywhere else — the
+corner a hidden Space's windows are parked in, monocle's park, a
+scrolling Space that is not the active one — a clickless focus is
+how a user *reaches* an off-screen window, so the placement must
+lie past the edge and the window must have **refused** it by
+position, which the emulator does at the stash corner and a
+window that went where it was parked does not.
 
 The discriminator is forgeable by construction: a cmd-tab onto a
 scrolling window a pan moved inside the placement window, or back
@@ -1890,17 +1850,16 @@ priced because the predicate cannot tell the emulator's
 self-focus from a cmd-tab: both are foreign reports of unknown
 provenance. KiwiDesk's own Settings window is never of unknown
 provenance, in either of the two ways it comes to the front, and
-both were bounced inside the placement window for the same
-reason — the report reached the predicate with nothing on it
-that a foreign report would lack. A CLICK on it: a click is the
-provenance no re-report can forge, which is what makes "a click
-is always honored" a rule rather than a hope, and it had held
-for every window but one, because the stamp that carries it was
-written only from the global monitor's fan-out and a global
-monitor never sees a press routed to our own windows. The
-press fan-out now hears both arms and carries the press's
-origin, so a consumer decides its own stand-down
-(`input-and-animation.md` owns how). A RAISE the GUI
+both are bounced inside the placement window if the report
+reaches the predicate with nothing on it that a foreign report
+would lack. A CLICK on it: a click is the provenance no
+re-report can forge, which is what makes "a click is always
+honored" a rule rather than a hope — but a global monitor never
+sees a press routed to our own windows, so a stamp written only
+from its fan-out misses exactly this window. The press fan-out
+hears both arms and carries the press's origin, so a consumer
+decides its own stand-down (`input-and-animation.md` owns how).
+A RAISE the GUI
 starts — the menu bar, the App menu (⌘,), the `open_settings`
 chord — is our own deliberate act, so it takes the construction
 the keyboard verbs already have: the GUI's raise branch calls
@@ -1928,45 +1887,44 @@ Space — and a returning window never steals the focus that
 stands (#636): the fold set no intent, and the report reached
 the predicate clickless inside the placement window of the
 arrival's own retile, which in the active scrolling Space is the
-whole verdict. #1380 first closed that for KiwiDesk's own
-Settings window with a debt the door recorded and the arrival
-paid; measured 2026-09-21 with Telegram's main window (3 of 3
-bounced in scrolling, 0 in bsp), the class is every app whose
-close hides the window, and a third-party window has no door to
-be told through. So the provenance moves to where it is known:
-the gone handler already classifies a close apart from a Desktop
-departure and a hide, it marks the departure, and the fold reads
-the mark at the return and treats the window as NEW: placed by
-its app rule, else in the Space the user is on — never the Space
-it left, whose slot and break it gives up — with the focus a new
-window gets, the mark consumed on every arrival. The close
-outranks a session restore filed over it: a snapshot adopted
-between the close and the re-show names a Space and a frame the
-user has since closed, and the re-show discards both. That placement
-is the owner's ruling (#1561): a window you bring back is wanted
-where you are, so you can move it somewhere else if you want,
-and a window manager opens windows where you are rather than
-sending them back to where they once were — on two screens,
-"where you are" is the active Space, so a window closed on the
-other screen and re-shown there lands as a new window would and
-the retile carries it across (#1010's screen-home reads the
-memory the mark dropped); it also ends the
-asymmetry with a minimize, whose restore already landed as new.
-The report then lands intended, which the predicate never reads:
-no exemption in it, the provenance the report was owed. #636's
-rule stands for a Desktop return, whose windows come back as a
-burst in arbitrary order and where only the remembered focus is
-macOS's (#1345), and #913's for a hide, whose windows come back
-the same way — both to the Spaces they left, at their slots: the
-OS bringing a burst back, not the user bringing one window back.
-The #1380 debt is retired by this — the fold grants what it
-paid. Three trades, stated: an app that re-shows a closed window
-on its own, with no user act behind it, takes the focus once,
-where the user is; a closed window no longer takes back its slot
-and track break; and the two readings `gonePresence` already
-calls a wrong `closed` it never corrects — a host without the
-compositor read past the switch settle, a fast app's destroy
-landing before the topology flips — now cost, on top of the
+whole verdict. The class is every app whose close hides the
+window (measured 2026-09-21 with Telegram's main window: 3 of 3
+bounced in scrolling, 0 in bsp), and a third-party window has no
+door to be told through — the per-window debt #1380 recorded for
+KiwiDesk's own Settings window cannot reach it. So the
+provenance moves to where it is known: the gone handler already
+classifies a close apart from a Desktop departure and a hide, it
+marks the departure, and the fold reads the mark at the return
+and treats the window as NEW: placed by its app rule, else in
+the Space the user is on — never the Space it left, whose slot
+and break it gives up — with the focus a new window gets, the
+mark consumed on every arrival. The close outranks a session
+restore filed over it: a snapshot adopted between the close and
+the re-show names a Space and a frame the user has since closed,
+and the re-show discards both. That placement is the owner's
+ruling (#1561): a window you bring back is wanted where you are,
+so you can move it somewhere else if you want, and a window
+manager opens windows where you are rather than sending them
+back to where they once were — on two screens, "where you are"
+is the active Space, so a window closed on the other screen and
+re-shown there lands as a new window would and the retile
+carries it across (#1010's screen-home reads the memory the mark
+dropped); it also ends the asymmetry with a minimize, whose
+restore lands as new. The report then lands intended, which the
+predicate never reads: no exemption in it, the provenance the
+report was owed. #636's rule stands for a Desktop return, whose
+windows come back as a burst in arbitrary order and where only
+the remembered focus is macOS's (#1345), and #913's for a hide,
+whose windows come back the same way — both to the Spaces they
+left, at their slots: the OS bringing a burst back, not the user
+bringing one window back. The #1380 debt is retired — the fold
+grants what it paid. Three trades, stated: an app that re-shows
+a closed window on its own, with no user act behind it, takes
+the focus once, where the user is; a closed window does not take
+back its slot and track break; and the two readings
+`gonePresence` calls a wrong `closed` it never corrects — a host
+without the compositor read past the switch settle, a fast app's
+destroy landing before the topology flips — cost, on top of the
 close-return raise, a focus grant at the Desktop return and the
 window's re-placement as a newcomer where the user is, its slot
 in the Space it left given up, priced at the same rarity.
@@ -2014,10 +1972,10 @@ re-asserted the previous focus, a Claude window on the Desktop
 the user had just left. Raising it activated Claude, and macOS
 switched Desktops to show it. The close-return raise then kept
 the ping-pong going the same way: each of its successor picks
-sat on the other Desktop, and its `isListed` guard (the older AX
-net, retired by this change) passed
-because Finder lists both Desktops' windows for a beat after a
-switch, which is exactly when the pick lands.
+sat on the other Desktop, and its `isListed` guard (an AX net,
+since retired) passed because Finder lists both Desktops'
+windows for a beat after a switch, which is exactly when the
+pick lands.
 
 Why the departed window was still there to be re-asserted: the
 Desktop switch is not a close, and an Electron app's destroy
@@ -2042,8 +2000,8 @@ next report — which is the Desktop the user is looking at, so
 the next report is the right one.
 
 The gate is not the whole rule, because the return swipe
-bounces without any raise crossing Desktops (measured
-2026-09-08 on the gated build): swiping back, the Desktop 2
+bounces without any raise crossing Desktops (measured with the
+gate in place): swiping back, the Desktop 2
 Finder window's departure read as a close, the close-return
 picked the same app's Downloads window on the Desktop being
 shown and raised it — legally, it was shown — stealing the
@@ -2066,25 +2024,24 @@ the echo of a step off it is the residue, priced below the
 emulator's measured 0.8–1.5 s and recorded in
 [Accepted limitations](accepted-limitations.md).
 
-Which compositor read matters, measured the same afternoon on
-the first build of the gate: it read the managed display's
-"current Space" and lost the race. At 13:56:57.46 the swipe's
-departures were folding, the on-screen window list (the probe
-beside the log) had already dropped every Desktop 1 window, and
-the current-Space reading still named Desktop 1 — so a Zen window
-on the Desktop being left read as shown, the placement distrust
-re-asserted it, and the user bounced. That is the #1023 finding
-one level down: the current-Space reading tracks the pointer and
-the draw list is the ground truth. The gate therefore reads
-CGWindowList's own `kCGWindowIsOnscreen` for the one window, and
-nothing that could lag it. The same measurement moved the gate
-from the AX call to the verb: `focusWindow` had already written
-state focus, noted the displacement and warped the pointer before
-`raiseWindow` refused, which is a state/key split of its own —
-so the verb is refused whole, ahead of all of it.
+Which compositor read matters, measured: a gate reading the
+managed display's "current Space" loses the race. While a
+swipe's departures fold, the on-screen window list (the probe
+beside the log) has already dropped every Desktop 1 window and
+the current-Space reading still names Desktop 1 — so a Zen
+window on the Desktop being left reads as shown, the placement
+distrust re-asserts it, and the user bounces. That is the #1023
+finding one level down: the current-Space reading tracks the
+pointer and the draw list is the ground truth. The gate
+therefore reads CGWindowList's own `kCGWindowIsOnscreen` for the
+one window, and nothing that could lag it. The same measurement
+puts the gate at the verb rather than the AX call: `focusWindow`
+writes state focus, notes the displacement and warps the pointer
+before `raiseWindow` could refuse, which is a state/key split of
+its own — so the verb is refused whole, ahead of all of it.
 
-Two reads the draw list had to survive, both measured on the
-final build. A window KiwiDesk stashes off-bounds on the SAME
+Two reads the draw list has to survive, both measured. A window
+KiwiDesk stashes off-bounds on the SAME
 Desktop — the peek corner, a hidden Space's park — still reads
 on screen (an Antigravity window parked at x = 1727 on a
 1728-wide screen read `kCGWindowIsOnscreen = true`, and the Space
@@ -2129,30 +2086,29 @@ that stayed through the switch is re-asserted exactly as before,
 and a Desktop return's remembered focus is #1207's payment, which
 stands this refocus down before the new arm is reached. The other
 half of the issue — a swipe on one display removing a window on
-a display whose Desktop did not change — did not reproduce on
-2026-09-13 with two displays and an event-stream trace of every
-removal; what remains open lives on #1364, not here.
+a display whose Desktop did not change — did not reproduce
+(2026-09-13, two displays, an event-stream trace of every
+removal); what remains open lives on #1364.
 
 **The gate asks two compositor reads, and either refuses
-(#1410).** The flag alone had a blind spot the probe measured on
-2026-09-13, every gesture of the sitting: from a three-finger
-swipe's first movement until the switch registered, 1.0–1.5 s
-later, `kCGWindowIsOnscreen` read true for every window of the
-swiped display's neighbouring Desktops — the ones being composited
-for the gesture, on no display's current Space — and read false
-for the Desktop just left the moment the switch landed. A raise
-gated on the flag inside that second passes for a window on a
-Desktop nobody shows, and macOS then switches to show it; the
-Sept 10 settle refocus (`crosses=false` at +1.2 s) is the measured
-instance, and the #1364 arm was cut to read no flag for exactly
-this reason. The current-Space reading fails the other way, as the
-paragraph above records: through a switch it names the new Desktop
-while the draw list still composites the old one (#1023). Neither
-read lies in both directions, so the gate takes both — the flag,
-and whether the Space the compositor hosts the window on is one
-some display currently shows — and refuses when either says
-unshown, while a read that cannot answer abstains: without
-SkyLight the flag decides alone, as it did. The trade is a raise
+(#1410).** The flag alone has a blind spot (measured 2026-09-13,
+every gesture of the sitting): from a three-finger swipe's first
+movement until the switch registers, 1.0–1.5 s later,
+`kCGWindowIsOnscreen` reads true for every window of the swiped
+display's neighbouring Desktops — the ones being composited for
+the gesture, on no display's current Space — and reads false for
+the Desktop just left the moment the switch lands. A raise gated
+on the flag inside that second passes for a window on a Desktop
+nobody shows, and macOS then switches to show it; the #1364
+settle refocus (`crosses=false` at +1.2 s) is the measured
+instance, which is why that arm reads no flag. The current-Space
+reading fails the other way: through a switch it names the new
+Desktop while the draw list still composites the old one
+(#1023). Neither read lies in both directions, so the gate takes
+both — the flag, and whether the Space the compositor hosts the
+window on is one some display currently shows — and refuses when
+either says unshown, while a read that cannot answer abstains:
+without SkyLight the flag decides alone. The trade is a raise
 refused where one read lags into "unshown" for a window that is in
 fact shown, at the switch itself; focus then stays where macOS put
 it until the next report, the price #1345 already set. Two clauses
@@ -2170,17 +2126,17 @@ the notification's timing and not the compositor's.
 
 `kAXFocusedWindowChanged` is an app-level
 notification: it says which of ITS windows an app now calls
-focused, not that the app holds the system focus. KiwiDesk read it
-as the latter, and a non-activating panel showed the difference.
-The Claude desktop app's overlay is an `AXSystemDialog` that takes
-key without activating its app; while it is up the app's focused
+focused, not that the app holds the system focus. Read as the
+latter, a non-activating panel shows the difference. The Claude
+desktop app's overlay is an `AXSystemDialog` that takes key
+without activating its app; while it is up the app's focused
 window is empty, and on close it flips back to the main window —
 with `NSWorkspace.frontmostApplication` staying on Zen or Telegram
-through every cycle (measured 2026-09-07). KiwiDesk honored the
-flip, moved its anchor onto Claude's window, and the command
-preflight (#292) then refused every focus chord as "frontmost pid
-is another app" until a click re-synced the two — the preflight
-was right, three seconds after the report should have been.
+through every cycle (measured 2026-09-07). Honoring the flip
+moves the anchor onto Claude's window, and the command preflight
+(#292) then refuses every focus chord as "frontmost pid is
+another app" until a click re-syncs the two — the preflight
+right, three seconds after the report should have been.
 
 **The ruling: the accessibility channel reports a focus only from
 the app macOS activated last.** The activation channel keeps
@@ -2221,23 +2177,22 @@ distrust (#21/#244) exists to consume it: honoring it moves
 focus, ring, warp and the scrolling pan onto a window nobody
 chose, possibly on another space.
 
-The distrust originally disarmed on the first focus report for
-any OTHER app, reading it as "the panel's app resigned
-frontmost". That treats arrival ORDER as ground truth, and the
-order is a race KiwiDesk does not control: the user's click on
-window B and the panel app's stale re-report come from two
-apps' AX streams, and live capture (#951) measured the stale
-re-report landing 125–200 ms AFTER the click that should have
-settled the question — so disarm-then-honor handed focus back
-to the panel's app at the exact moment the user clicked away
-from it.
+Disarming the distrust on the first focus report for any OTHER
+app — reading it as "the panel's app resigned frontmost" —
+treats arrival ORDER as ground truth, and the order is a race
+KiwiDesk does not control: the user's click on window B and the
+panel app's stale re-report come from two apps' AX streams, and
+live capture (#951) measured the stale re-report landing
+125–200 ms AFTER the click that should have settled the
+question — so disarm-then-honor hands focus back to the panel's
+app at the exact moment the user clicked away from it.
 
 So the flags survive a short dismissal grace instead, and what
 ends the distrust early is provenance, never order: a report
 carrying click provenance (#687's press-time resolution) is
 the user's own choice — it escapes and clears every flag —
 while a clickless same-app re-report inside the grace is
-consumed exactly as before. The accepted trade has its
+consumed. The accepted trade has its
 [accepted-limitations](accepted-limitations.md) row: a genuine
 clickless focus of the panel app's main window (cmd-tab)
 inside the grace, right after focusing elsewhere, is eaten
@@ -2263,11 +2218,10 @@ compares the two before any implicit-focused shortcut runs
 ([#292](https://github.com/KiwiCanopy/KiwiDesk/issues/292)). A
 restore that stamps state and performs nothing leaves them
 diverged, so every shortcut fails "no managed window is
-currently focused" until the first click — which is exactly what
-the wake/unlock restore did
-([#1130](https://github.com/KiwiCanopy/KiwiDesk/issues/1130)):
-the arrangement came back, and the window the user went to rest
-in did not.
+currently focused" until the first click
+([#1130](https://github.com/KiwiCanopy/KiwiDesk/issues/1130):
+the arrangement comes back, and the window the user went to
+rest in does not).
 
 So the wake leg **performs** the focus it adopted — raise plus
 app activation, the same act a focus command pays. It is
@@ -2354,12 +2308,12 @@ notes name the switch so the user who wants one window kept at
 its slot knows there is one.
 
 **The fixed anchors are absolute; `follow` alone keeps the
-screen filled (#1388).** Every anchor once shared one clamp:
-the row's extent stayed on screen, so a short row was pulled
-flush to the leading edge whatever the anchor said, and on an
-ultrawide a lone or end-of-row window sat wherever the row
-ended rather than where the user had pointed — a long way from
-"in front of me". The clamp is `follow`'s promise: that anchor
+screen filled (#1388).** One clamp shared by every anchor —
+the row's extent stays on screen — pulls a short row flush to
+the leading edge whatever the anchor says, and on an ultrawide
+a lone or end-of-row window sits wherever the row ends rather
+than where the user pointed — a long way from "in front of
+me". The clamp is `follow`'s promise: that anchor
 exists to keep the screen filled and the side you came from in
 view, and without it a scrolled row that shrinks — a window
 closing, a resize — would leave empty margin past its trailing
@@ -2431,22 +2385,21 @@ naming only the resize would be a special case the next cause
 re-opens.
 
 **A reorder is the one member of that set where the premise is
-false, and it is ruled OUT at the model (#1353).** There the
-row did not move: the focus moved within a static row, by the
-user's own act. The genre's idiom — PaperWM and niri scroll the
-row under a moved column — argues that the frame of reference
-changes but the outcome does not, the pair trading places
-either way, and #966 had ruled the swap in on that argument.
+false, and it is ruled OUT at the model (#1353).** There the row
+did not move: the focus moved within a static row, by the user's
+own act. The genre's idiom — PaperWM and niri scroll the row
+under a moved column — argues that the frame of reference changes
+but the outcome does not, the pair trading places either way.
 KiwiDesk does not follow it, because the eye is on the window
 being moved and expects IT to move: a window that holds still
 under `swap` while its neighbour jumps reads as "nothing was
-reordered" (device, 2026-09-09). So a reorder holds the
-viewport and lets the pair visibly trade places, panning only
-where the moved window's new slot would leave the view — the
-focus-change arm, whose clamp is exactly that minimal pan.
+reordered" (device, 2026-09-09). So a reorder holds the viewport
+and lets the pair visibly trade places, panning only where the
+moved window's new slot would leave the view — the focus-change
+arm, whose clamp is exactly that minimal pan.
 
-The discriminator does not live in the layout, which the #966
-entry had already established: "same window, different
+The discriminator does not live in the layout, as the #966
+paragraph above says: "same window, different
 position" is also what a neighbour closing ahead of the focus
 produces, and that case must keep re-anchoring. It lives in
 the model, the one place that knows a reorder happened: every
@@ -2482,11 +2435,9 @@ leading edge, the ordinary rule. That is the one place the
 reading anchor is the deciding argument: the trailing rule has
 a claim, and it loses because holding the right edge would shift
 every line of text under the reader for no reason they asked
-for. (A slot filling the viewport has always been reachable —
-the layout draws `min(along, …)`, so any over-grown slot
-rendered flush at both borders long before the ceiling below
-made the store stop there too. The both-borders arm is a case
-this rule had to answer regardless.)
+for. (A slot filling the viewport is reachable — the layout
+draws `min(along, …)` — so the both-borders arm is a case this
+rule has to answer regardless of the ceiling below.)
 
 Which border a slot rested on is decided where the offset is
 MEASURED, and carried with it. Deciding it later means comparing
@@ -2575,9 +2526,9 @@ bodies the stack shows through (#881).** The default `stack`
 hides the unfocused members entirely behind the focused window
 — perfect concealment until the focused body is itself
 see-through: a transparent or blurred app shows the stack
-through its own pixels, and since #880 a width-bound window
-centers with symmetric gaps the stack shows through with no
-transparency involved. `park` moves the unfocused members to
+through its own pixels, and a width-bound window centers with
+symmetric gaps the stack shows through with no transparency
+involved (#880). `park` moves the unfocused members to
 the stash's #410 corner instead — the same geometry, so the
 sliver trade rides its precedent: with windows on several
 Spaces, `stashInactive` piles the same slivers in that corner
@@ -2619,8 +2570,8 @@ the #884 shape, performed but not applied — and the window's
 live pixels, which a flip of the real window would need,
 reach no process without Screen Recording through any API,
 public or private. The owner ruled no new permission prompt,
-so the drawn plate is the base and the only tier; a live-image
-flip is closed, not deferred.
+so the drawn plate is the only tier; a live-image flip is
+closed, not deferred.
 
 *The plate is a wash, not a colour, and it lies on the
 window.* An untinted achromatic wash — white on a light
@@ -2647,23 +2598,23 @@ is added for it. The eye distance scales with the extent that
 rotates, or a window-sized plate's edges fly off screen.
 
 *The swap lands when the blur covers it, not when the card is
-edge-on.* The first cut landed the focus at the turn's midpoint,
-345 ms after the press, and the owner felt it: every hop of an
-all-day verb paid a third of a second of keyboard-focus latency
-for an illusion the blur was already providing. The landing is
-the end of the fade-in, 120 ms; the card's edge-on moment is
-what the eye follows across the swap, not what hides it.
+edge-on.* Landing the focus at the turn's midpoint, 345 ms
+after the press, makes every hop of an all-day verb pay a third
+of a second of keyboard-focus latency for an illusion the blur
+already provides (owner, device). The landing is the end of the
+fade-in, 120 ms; the card's edge-on moment is what the eye
+follows across the swap, not what hides it.
 
 *A burst is navigation: it retargets the card and holds the
 blur.* A press that arrives while a flip is playing lands at
 once, repaints the incoming face with the newest target's icon
 and pushes the fade-out back; the blur lifts only once the
 presses have been quiet for `MonocleFlipPlan.hold` (250 ms —
-200 read as lifting under the hand, owner, device).
-Restarting the play per press was tried and read as the show
-fighting the user; cutting the play per press read as a jump.
-One motion, retargeted — the spring engine's own idiom for a
-window whose target moves mid-flight — is what stayed.
+200 read as lifting under the hand, owner, device). Restarting
+the play per press reads as the show fighting the user; cutting
+it per press reads as a jump. One motion, retargeted — the
+spring engine's own idiom for a window whose target moves
+mid-flight — is the shape.
 
 *It plays only for a focus KiwiDesk COMMANDS, and the focus it
 owes is a ledger, not a closure.* A `focus` step, an App Bar
@@ -2701,11 +2652,11 @@ it.
 compares a slot against a midpoint — reads
 `TilingEngine.layoutBounds(on:)`: the visible frame with the
 Space Bar's strip already reserved (#293), which is the region
-the layout actually filled. Four resize paths read the raw
+the layout actually filled. A resize path reading the raw
 display instead (the keyboard span, the BSP focus sign, the
-finished mouse resize, and the scrolling slot's seed), so with
-the bar on — the default — every ratio nudge was understated
-by the strip, and the scrolling slot *stored* points measured
+finished mouse resize and the scrolling slot's seed all did)
+understates every ratio nudge by the strip with the bar on —
+the default — and the scrolling slot *stores* points measured
 against a length no layout ever used. The distinction is not a
 second display hook: size still enters through
 `visibleBounds` alone (#531), and this reserves the strip on
@@ -2721,12 +2672,12 @@ covers, and why each qualifies, is the allowlist in
 copy of it.
 
 **Interactive resizes are session-scoped per space; the config
-layers never move underneath them (#458).** Before, a resize on
-a space with no authored override wrote the *global* ratio —
+layers never move underneath them (#458).** A resize on a
+space with no authored override writing the *global* ratio is
 coherent under the #17 layered model ("you resized the
 default") but visibly wrong the moment two monitors show two
-no-override spaces: resizing one resized both. The two rejected
-alternatives: keeping as-is (documented confusion), and
+no-override spaces: resizing one resizes both. The two rejected
+alternatives: keeping that (documented confusion), and
 materializing a per-space override on first resize (silently
 pins the space, decouples it from Layout Defaults, and fills
 the #290 override editor with overrides the user never
@@ -2815,34 +2766,32 @@ of a layout's size adjustments (`.claude/rules/config-vocabulary.md`
 :::
 
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
-ratios are rejected.** `resize("x")` and `resize("y")` used to
-write the *same* scalar (one `splitRatio` for every BSP split, one
-`masterRatio` for stack) — the axis only scaled the step, so a
-"resize vertically" key visibly changed column widths. #56 gives
-BSP two ratios per space — `ratio_h` for side-by-side splits,
+ratios are rejected.** With `resize("x")` and `resize("y")`
+writing the *same* scalar (one `splitRatio` for every BSP split,
+one `masterRatio` for stack) the axis only scales the step, so a
+"resize vertically" key visibly changes column widths. BSP has
+two ratios per space — `ratio_h` for side-by-side splits,
 `ratio_v` for stacked splits — so each axis moves its own knob,
 in commands and in mouse resize (a width-dominant drag edits H, a
-height-dominant one V). **Per-node ratios were deliberately
+height-dominant one V). **Per-node ratios are deliberately
 rejected**: they require stable per-split identity, i.e. a
 container tree, which the flat-`[WindowID]`-array model forbids
 (AGENTS.md §5) — two global ratios per space is the design that
-fits the architecture. The Size & float catalog grows from 3 rows
-to 5 (Grow/Shrink × width/height + Make floating), all authored
-from the one shared `resize.step`; scrolling still resizes its
-slot along its own scroll axis whichever axis is passed, and
+fits the architecture. The Size & float catalog has 5 rows
+(Grow/Shrink × width/height + Make floating), all authored from
+the one shared `resize.step`; scrolling still resizes its slot
+along its own scroll axis whichever axis is passed, and
 monocle/grid stay explicit no-ops (floating did too until
-[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)). No back-compat alias
-for the old `bsp.set_ratio` / `layout.bsp.ratio` name
-(pre-release, single user). (#56)
+[#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)). No
+back-compat alias for the old `bsp.set_ratio` /
+`layout.bsp.ratio` name (pre-release, single user). (#56)
 
 **Stack resize is focus-aware, and its zone weights are
-ephemeral by design.** The stack layout's resize used to always
-move the master/stack split toward the master, whichever window
-was focused. #67 makes both axes act on the *focused* window:
+ephemeral by design.** Both axes act on the *focused* window:
 the split axis (`x` for a left/right stack zone, `y` for
 top/bottom — #222) moves the split in the direction that grows
-the focused window's zone (flipping the old always-grow-master
-behavior when a stack window is focused — intended), and the
+the focused window's zone (so a focused stack window grows its
+zone rather than the master — intended), and the
 focused zone's own axis grows the focused window's share of its
 zone via **per-window weights** — a `[WindowID: Double]` map
 in `Space`, parallel to the flat window array (a map, not a
@@ -2863,8 +2812,8 @@ still snaps back (the mouse seam is windowless); only the
 keyboard/CLI `resize` moves weights. (#67)
 
 **The stack zone's lineup derives from its position — no
-`stack_orientation` knob; piles always cascade downward.** #222
-made the stack arrangement configurable: `stack_position`
+`stack_orientation` knob; piles always cascade downward.** The
+stack arrangement is configurable (#222): `stack_position`
 (top/right/bottom/left) picks the split axis, and
 `master_orientation` lines up multiple masters. The stack zone
 deliberately has no orientation setting of its own — a
@@ -2875,7 +2824,7 @@ other combination degenerates into slivers, and deriving keeps
 the resize axes orthogonal: the split ratio always moves on the
 split axis, the stack's weights on the other. Overflow piles
 keep cascading downward in every arrangement (ui-designer
-consult, 2026-07-15): the title bar is the affordance unit
+consult): the title bar is the affordance unit
 (identify + drag + raise) and one pile vocabulary spans the app
 — a sideways pile would expose blank side slivers and read as a
 glitch. A wide zone's `cascade_all` pile may spill over the
@@ -2906,7 +2855,7 @@ geometric navigation follows the frames; `StackSchematic`
 mirrors via the same `StackLayout.mirrorsMasterZone` predicate
 so the preview cannot lie. Perpendicular lineups stay in
 natural reading order — every master already touches the seam.
-Boundary crossings now read identically to the trailing-stack
+Boundary crossings read identically to the trailing-stack
 (default) arrangement: the crossing window moves locally,
 survivors shift one slot. Accepted side effect: when a mirrored
 master zone uses `cascade_overflow`, its trailing pile contains
@@ -2915,9 +2864,9 @@ the same screen position and downward cascade either way.
 
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
-An out-of-range `master_ratio` used to collapse the whole space
+An out-of-range `master_ratio` would collapse the whole space
 into the OverlapStack cascade the moment a second window opened
-(#44). Now the layout clamps the *effective* ratio to the widest
+(#44), so the layout clamps the *effective* ratio to the widest
 value keeping both zones ≥ `min_window_size`
 (`SplitDomain.effectiveRatioRange`, the single authority), and
 cascades only when two min-size zones cannot coexist at any
@@ -2928,25 +2877,25 @@ cap their writes at the current display's effective bound
 (`SplitDomain.cappedRatioWrite`): past it the layout clamps
 anyway, so a wider write would only ratchet invisibly — the same
 rule as the #67 vertical weight cap, and the same
-config-wide/interaction-capped split. **#383 migrated the same
-principle to BSP.** An extreme BSP split ratio no longer collapses
-the subtree into the overlap pile: the layout clamps the effective
-ratio *per region* at every recursion depth
+config-wide/interaction-capped split. **The same principle holds
+for BSP (#383).** An extreme BSP split ratio does not collapse
+the subtree into the overlap pile: the layout clamps the
+effective ratio *per region* at every recursion depth
 (`SplitDomain.effectiveRatioRange`), so a value too extreme for a
 deep sub-region pins that region's neighbor to `min_window_size`
 rather than piling — the shared per-space scalar ratio needs no
 per-node tree for this, because the clamp runs against each
-region's own span. Both BSP interactive paths (keyboard
-`resize`, mouse drag) cap their writes too
-(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for a
-region genuinely too narrow for two min-size windows at any ratio.
-(#44, #383)
+region's own span. Both BSP interactive paths (keyboard `resize`,
+mouse drag) cap their writes too
+(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for
+a region genuinely too narrow for two min-size windows at any
+ratio. (#44, #383)
 
 **BSP keyboard resize is focus-aware in *direction* only — and
 some nested windows cannot grow. Accepted, by architecture.**
-Since #122, `resize` infers its sign from the focused window's
-slot (the same screen-midpoint side rule a mouse drag uses,
-shared as one authority — `BspSplit.side`), so "grow"
+`resize` infers its sign from the focused window's slot (#122;
+the same screen-midpoint side rule a mouse drag uses, shared as
+one authority — `BspSplit.side`), so "grow"
 grows the focused window's side instead of always the left/top
 region. What it deliberately does **not** do is give every
 window a growable boundary: all same-orientation splits still
@@ -2959,10 +2908,10 @@ the visible effect of a grow press is its outer neighbor
 widening instead. The same is true when dragging that window's
 edge with the mouse; keyboard and mouse stay in lockstep,
 warts included. This is an **accepted limitation, not a bug to
-fix within BSP**: a smarter sign (derivative-based) was
-considered and rejected — it cannot help the pinned case and
-would split the just-unified mouse/keyboard rule. The real
-answer is the `track` layout (#128, shipped), where every
+fix within BSP**: a smarter sign (derivative-based) is
+rejected — it cannot help the pinned case and would split the
+unified mouse/keyboard rule. The real answer is the `track`
+layout (#128), where every
 window sits in exactly one track and every resize has one true
 target. A **floating** focused window is exempt from all of
 this: it resizes itself directly, in every mode (width for x,
@@ -2993,8 +2942,8 @@ Four rulings sharpen that:
 
 - **The cue fires on the first truncated attempt.** A shrink that
   lands ON the floor already refused part of the request; waiting
-  for a second press once at the floor read as "nothing happened"
-  the first time (the original #933 defect).
+  for a second press once at the floor reads as "nothing happened"
+  the first time (#933).
 - **The two directions read different windows' minimums.** A
   shrink clamps at the resized window's own floor; a grow caps
   where a NEIGHBOR would drop below *its* floor — per-window
@@ -3025,9 +2974,9 @@ Four rulings sharpen that:
 - **A mouse gesture is measured from the pre-event frame.** AX
   throttles move/resize notifications, so a fast drag's first
   event already sits mid-flight and its last can lag the drop;
-  the drop end re-reads the live frame (#245) and the START now
+  the drop end re-reads the live frame (#245) and the START
   anchors on the frame state held before the gesture's first
-  event — measuring first-event → last-event resized only part
+  event — measuring first-event → last-event resizes only part
   of the way.
 
 **The maximum direction clamps and cues too, where a learned
@@ -3056,19 +3005,18 @@ names none, so the press is a silent stop.
 
 **A bound may refuse a press only if it was learned from a read
 that could tell a refusal from latency (#1083).** [Principle]
-The clamp above rests entirely on the bound being true. It was
-not: the learner was confirming bounds from redraw latency, and
-the pill was then asserting limits that did not exist.
-
-Measured on the owner's Mac at load average 9.7 (2026-08-28,
-macOS 26.6.2): sixteen bound confirmations in eight minutes of
-ordinary use, at least fourteen false. Each sat at the window's
-own pre-press width, one resize step apart (984, 954, 924, 894),
-with heights all equal to the slot's — the layout's own geometry
-recorded as the app's limit. Two different windows confirmed an
-identical bound 44 ms apart. Resizing stopped, the pill named a
-limit the window was nowhere near, and dragging the edge by hand
-worked, which is what proved the app imposed nothing.
+The clamp above rests entirely on the bound being true. A
+learner confirming bounds from redraw latency makes the pill
+assert limits that do not exist — measured on the owner's Mac
+at load average 9.7 (2026-08-28, macOS 26.6.2): sixteen bound
+confirmations in eight minutes of ordinary use, at least
+fourteen false. Each sat at the window's own pre-press width,
+one resize step apart (984, 954, 924, 894), with heights all
+equal to the slot's — the layout's own geometry recorded as the
+app's limit. Two different windows confirmed an identical bound
+44 ms apart. Resizing stopped, the pill named a limit the window
+was nowhere near, and dragging the edge by hand worked, which is
+what proved the app imposed nothing.
 
 **A refusal DRAWS; the sound is an addition to the drawing, and
 cannot fire without one (#1255).** [Principle] Two refusals cued
@@ -3076,18 +3024,18 @@ by sound alone — a resize press in a layout with no resizing
 (monocle, grid, and the floating layout until
 [#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184) gave
 its members a resize of their own), and one on a zone axis that
-does not exist. Both were invisible with the toggle off, and
+does not exist. Both are invisible with the toggle off, and
 invisible to anyone who does not hear it; the first is the most
 reachable refusal in the feature, not an edge, since any resize
-press in a layout that has none arrives there. Meanwhile the size-limit and
-sticky families drew pills and said nothing. One idea, four
-shapes.
+press in a layout that has none arrives there. Meanwhile the
+size-limit and sticky families drew pills and said nothing. One
+idea, four shapes.
 
 So: every refusal draws, and `refusal.sound` adds the system
 alert to the drawing. The sound is gated on what the drawing
 REPORTED, not on the drawing having been asked for, and that is
 the invariant rather than a detail — a sound that cannot fire
-without a pill can never re-create the defect this removed.
+without a pill can never re-create that defect.
 Asking is not appearing: both primitives decline silently, the
 size pill without the private runtime and the sticky mark
 without an overlay, so each returns whether it drew and one gate
@@ -3098,7 +3046,7 @@ sound placed one level up — on the refusal funnel, or beside the
 drawing call — would have made them audible-but-invisible.
 
 **The setting is OFF by default, and the DECODER is what
-delivers that** — the retired `resize.feedback` is no longer
+delivers that** — the retired `resize.feedback` is not
 declared, so a stored `true` is an unknown key and every config
 lands on the new default whether or not the migration has run.
 The migration is hygiene: it ends the file in the new shape,
@@ -3138,7 +3086,7 @@ deployment target — a symbol added later resolves on a modern
 dev host and renders nil on the target, leaving an empty gutter
 and no error anywhere.
 
-Colour was refused, and in principle rather than in practice.
+Colour is refused, in principle rather than in practice.
 `ColorVision.separation` measures a pair against a KNOWN ground,
 and this pill is a `.hudWindow` blur over whatever third-party
 window sits behind it — there is no pair to measure, which is
@@ -3201,60 +3149,58 @@ yet, and under load the second is ordinary for ANY app — this
 reproduced on Ghostty, the fast one. So the ladder's two votes —
 seeding a candidate and confirming it — are only meaningful from
 a read that waited out the app's chance to answer. Only the
-settle probe does. Raw echoes still seed, refresh and clear;
-they no longer promote. A genuine limit is learned one probe
+settle probe does. Raw echoes seed, refresh and clear; they
+do not promote. A genuine limit is learned one probe
 grace (~0.6 s) after its animation settles rather than at echo
 time, which is the whole cost.
 
-**The permissive alternative was ruled on and rejected, and the
-reasoning is worth keeping.** The obvious durable fix is to stop
-a learned bound refusing a press at all — three separate paths
-can mistake latency for a refusal, each guarded by its own
-heuristic about whether the app has answered, and they degrade
-together under load. Being wrong permissively costs a window
-that does not fill its region (the accepted split-layout
-residue, self-correcting on the next retile); being wrong
-restrictively costs the user the feature and states a falsehood.
-On frequency alone that argues for permissive.
-
-It was implemented, measured, and then reverted on the owner's
-ruling (2026-08-28): with the learner fixed, the bounds it now
-produces are real — device capture showed the same eight minutes
-of use going from sixteen false confirmations to zero, with
-subsequent confirmations landing on plausible app minimums (500,
-400, 825) — and a window resizing past what its app will follow,
-leaving a neighbour overlapped, is worse than a stop that is
-almost always correct. The permissive rule is the right answer
-when bounds are guesses; it is the wrong trade once they are
-facts. Should a fourth latency path ever be found, this entry is
-the argument for reaching for it again.
+**The permissive alternative is rejected, and the reasoning is
+worth keeping.** The obvious durable fix is to stop a learned
+bound refusing a press at all — three separate paths can
+mistake latency for a refusal, each guarded by its own heuristic
+about whether the app has answered, and they degrade together
+under load. Being wrong permissively costs a window that does
+not fill its region (the accepted split-layout residue,
+self-correcting on the next retile); being wrong restrictively
+costs the user the feature and states a falsehood. On frequency
+alone that argues for permissive. The owner ruled the other
+way, measured: with the learner fixed, the bounds it produces
+are real — device capture showed the same eight minutes of use
+going from sixteen false confirmations to zero, with subsequent
+confirmations landing on plausible app minimums (500, 400, 825)
+— and a window resizing past what its app will follow, leaving
+a neighbour overlapped, is worse than a stop that is almost
+always correct. The permissive rule is the right answer when
+bounds are guesses; it is the wrong trade once they are facts.
+Should a fourth latency path ever be found, this entry is the
+argument for reaching for it again.
 
 **A press writes forward, never across the store (#1083).** The
 layout draws a bound-pinned window at its learned limit, and a
 press measures from that DRAWN span (#1057). Where the drawn
-span sits on the far side of the store, that base made the press
-write across it: a grow from a pinned 715pt window inside a
-1160pt auto slot wrote 765 and trimmed the row for every
-neighbour, and the shrink mirror raised a 300pt store to 775.
+span sits on the far side of the store, that base makes the
+press write across it: a grow from a pinned 715pt window inside
+a 1160pt auto slot writes 765 and trims the row for every
+neighbour, and the shrink mirror raises a 300pt store to 775.
 The base is therefore whichever of the drawn span and the store
 lies FORWARD of the press — `max` for a grow, `min` for a shrink
 — which keeps both of #1057's cases and makes crossing the store
-impossible by construction rather than by a guard. A guard was
-tried first and was worse: it swallowed the press with no write
-AND no cue, which is a refusal that cannot explain itself. A
-press that does nothing always says why.
+impossible by construction rather than by a guard. A guard is
+worse: it swallows the press with no write AND no cue, which is
+a refusal that cannot explain itself. A press that does nothing
+always says why.
 
 **A resize press is measured against what the focused window
 DRAWS, and refuses in place where its bound blocks it
 (#1057).** [Principle] The scrolling slot is a shared store,
-and two symptoms came from resizing it by the stored number: an
+and resizing it by the stored number has two symptoms: an
 oversize configured slot (set at the desk, applied on the
-laptop) made shrink presses move an invisible number for
-several clicks before anything responded, and a window pinned
-by its learned bound let presses silently resize every
-NEIGHBOR — grow walked the store up through the row until it
-caught the pinned span and only then said "maximum reached"
-(owner device QA, 2026-08-28). The rule that fixes both: the
+laptop) makes shrink presses move an invisible number for
+several clicks before anything responds, and a window pinned
+by its learned bound lets presses silently resize every
+NEIGHBOR — grow walks the store up through the row until it
+catches the pinned span and only then says "maximum reached"
+(owner device QA). The rule that fixes both: the
 press acts on the focused window, so it is measured from the
 span that window actually renders. Where its bound blocks the
 direction outright — grow at its maximum, shrink at its
@@ -3286,17 +3232,17 @@ out — overshooting focus is worse than pressing again — and
 widening the set (`HoldGlide.glidableCommands`) is a per-verb
 ruling, never an inference.
 
-*A hold GLIDES rather than repeating* (owner ruling, 2026-08-29,
-replacing #1056's interval acceleration). #1056 re-fired the
-binding on a shrinking timer, which felt chunky on device for a
-reason no constant could fix: the repeat engine decided only
-*when* to fire, never *how much*, because the amount lives inside
-opaque Lua — so acceleration shortened the gaps and left the
-jumps identical. And speed and smoothness are ONE dial, not two:
-what the eye judges is displacement per *rendered* frame, and the
-display draws when it draws, so ticking faster than the refresh
-produces no extra frames, only more accumulated movement in each.
-So the hold now runs as a continuous session on the monitor's own
+*A hold GLIDES rather than repeating* (owner ruling, replacing
+#1056's interval acceleration). Re-firing the binding on a
+shrinking timer feels chunky on device for a reason no constant
+can fix: the repeat engine decides only *when* to fire, never
+*how much*, because the amount lives inside opaque Lua — so
+acceleration shortens the gaps and leaves the jumps identical.
+And speed and smoothness are ONE dial, not two: what the eye
+judges is displacement per *rendered* frame, and the display
+draws when it draws, so ticking faster than the refresh produces
+no extra frames, only more accumulated movement in each. So the
+hold runs as a continuous session on the monitor's own
 `DisplayLink`, moving `velocity × dt` per frame. Riding `dt`
 rather than a fixed per-frame delta is what makes it
 refresh-rate independent — 60 Hz, 120 Hz and a ProMotion panel
@@ -3312,8 +3258,8 @@ the user's" ruling — the repeat INTERVAL is gone, since the glide
 has no interval.
 
 *Velocity is counted in steps per second, not points per second.*
-The issue proposed absolute points; the ruling went the other
-way, because `resize`'s delta is in points at every call site and
+Absolute points (the issue's proposal) are rejected because
+`resize`'s delta is in points at every call site and
 `resize.step` spans four decades (the decoder clamps it to
 1…10000), so one absolute speed is discontinuous with the tap at
 both ends: a 10 pt precision step would be overridden by an
@@ -3326,11 +3272,11 @@ tap at every setting. The feel constants live beside
 *The glide re-issues the COMMAND, never the binding.* The press's
 `resize` arguments are captured from the tally and re-issued
 through `execute` with a scaled delta, so the Lua body runs once,
-on the press. This is a deliberate semantic change from #1056,
-where a tick re-ran the whole body: at frame rate that would
-repeat whatever else the body does, and the single-command tally
-already refuses to arm on such a body — so re-issuing the command
-is what makes the arming rule and the run agree. It follows that
+on the press. Re-running the whole body per tick (#1056's shape)
+would at frame rate repeat whatever else the body does, and the
+single-command tally already refuses to arm on such a body — so
+re-issuing the command is what makes the arming rule and the run
+agree. It follows that
 a body which *rebinds mid-fire* arms nothing: a rebind mints
 fresh ids, so no release for the pressed id could ever arrive to
 stop the hold. Where that question is asked, and why the
@@ -3345,44 +3291,43 @@ changed target every frame is exactly what the settle watchdog
 cannot tell from a long drag. Writing instantly creates no
 animation, so there is nothing to defer.
 
-That was true of the *tiled* paths from the first build, and of
-the floating one only after #1090, because of what each measures
-from. A tiled path writes a stored ratio, weight or length and
-re-derives geometry from it, so an instant write leaves the next
-frame's base exact. `resizeFloating` measures from a **frame**,
-and the only commanded base it trusted was the in-flight
-animation's target (#129/#1056) — which an instant write does
-not create, and which `AnimationEngine.animate` never creates at
-all under Reduce Motion, with animations off, or with the engine
-disabled: it opens `guard isEnabled, !reduceMotion()`. So that
-path fell back to the echo-fed frame, and at glide rate most
-frames re-based on the *same* stale echo. Measured on device,
-100 asks at ~102 Hz travelled 29% of what they asked for: the
-window crawled while the key was held, and Reduce Motion was the
-configuration that got it.
+The tiled paths have that by construction; the floating one
+needed #1090, because of what each measures from. A tiled path
+writes a stored ratio, weight or length and re-derives geometry
+from it, so an instant write leaves the next frame's base exact.
+`resizeFloating` measures from a **frame**, and the only
+commanded base it can trust without a record of its own is the
+in-flight animation's target (#129/#1056) — which an instant
+write does not create, and which `AnimationEngine.animate` never
+creates at all under Reduce Motion, with animations off, or with
+the engine disabled: it opens `guard isEnabled, !reduceMotion()`.
+So that path falls back to the echo-fed frame, and at glide rate
+most frames re-base on the *same* stale echo. Measured on
+device, 100 asks at ~102 Hz travelled 29% of what they asked
+for: the window crawled while the key was held, and Reduce
+Motion was the configuration that got it.
 
-*So the floating path was given a commanded base of its own,
-bounded by the hold.* It records what each write commanded, in
+*So the floating path has a commanded base of its own, bounded
+by the hold.* It records what each write commanded, in
 `GlideCommandedBase` on the animation engine — deliberately
 beside the animation target it stands in for, so a caller asks
 one accessor rather than branching on which store happens to
-hold the answer. The hard part was never the record; it was the
-**bound**. #1056 had already tried the #881 instant stamp here
-and rejected it, because a commanded record every press can read
-is re-armed by every press, so an app that silently refuses
-every ask banks growth with no ceiling (the #1057 class) — and
-at glide rate a 30 s hold at the ramp's top speed is many
-screens of banked travel, not one press's worth. This record is
-bounded at both ends of its life instead. **Only a glide step may
-read it**, so no press can ever measure from another press's
-record — that is the bound the #1057 objection asked for. And it
-is retired at the start of every physical press, which is a
-different job: it stops a record left by an unrelated earlier
-press being read by a later hold that reaches the same window.
-The second bound has to hang off the PRESS rather than off the
-glide's end, and both review lanes caught that independently —
-the end-of-run seam fires only for a run that actually glided, so
-a tap's record would stand forever, and on the refusal path it
+hold the answer. The hard part is not the record but the
+**bound**: the #881 instant stamp is rejected here (#1056)
+because a commanded record every press can read is re-armed by
+every press, so an app that silently refuses every ask banks
+growth with no ceiling (the #1057 class) — and at glide rate a
+30 s hold at the ramp's top speed is many screens of banked
+travel, not one press's worth. This record is bounded at both
+ends of its life instead. **Only a glide step may read it**, so
+no press can ever measure from another press's record — that is
+the bound the #1057 objection asked for. And it is retired at
+the start of every physical press, which is a different job: it
+stops a record left by an unrelated earlier press being read by
+a later hold that reaches the same window. The second bound has
+to hang off the PRESS rather than off the glide's end — the
+end-of-run seam fires only for a run that actually glided, so a
+tap's record would stand forever, and on the refusal path it
 fires from inside the very command that then records. A refusing
 app therefore moves nothing, banks nothing past the release, and
 the next press measures from reality. What stays accepted is the
@@ -3398,12 +3343,10 @@ configuration, so the record is the single base on all of them —
 there is nothing to keep in sync. A held chord therefore glides
 under Reduce Motion rather than being suppressed: a held-key
 resize is the keyboard's direct manipulation, which Reduce Motion
-does not suppress for the mouse either. An earlier version of
-this entry claimed the instant *tiled* writes were already the
-whole of that answer. They were the tiled half only, and the
-floating half was where Reduce Motion did the damage — an
-accessibility setting quietly degrading a headline behaviour,
-which is what moved #1090 from deferred polish to release work.
+does not suppress for the mouse either. The instant *tiled*
+writes are only the tiled half of that answer; the floating half
+is where Reduce Motion did the damage — an accessibility setting
+quietly degrading a headline behaviour (#1090).
 
 *A refusal ends the run:* the #933/#1055 size-limit cues stop the
 glide, so a held shrink parked on a floor pills once per hold
@@ -3425,20 +3368,11 @@ delivered, so a starved main queue cannot age a hold it never
 ticked — with a wall-clock backstop of the same length beneath
 it, because the frame clock is bound to one screen and display
 sleep or a disconnect mid-hold stops it, and a net must not
-depend on the thing that died. A floating resize also stopped
-under-accumulating (#129/#1090): a write accumulates against
-what was last *commanded* rather than against the lagging AX
-echo — the in-flight animation's target where one exists, and
-`GlideCommandedBase` where none can. **What a commanded record
-stored here has to have is a BOUND**, and each of the two has
-its own: the animation target dies at settle, and the glide
-record is readable only by a glide step and retired at the start
-of the next press. Neither can be re-armed by an ordinary press,
-which is what a stored commanded frame does otherwise — banking
-growth without ceiling on an app that silently refuses every ask
-(the #1057 class). The per-press paths that still re-read the
-echo are recorded in
-[accepted-limitations.md](accepted-limitations.md).
+depend on the thing that died. The two commanded bases a
+floating write accumulates against (#129/#1090) each carry
+their own bound: the animation target dies at settle, and the
+glide record is readable only by a glide step and retired at
+the start of the next press.
 (`HoldGlideTests`, `HoldGlideRunTests`, `HoldGlideRampTests`,
 `HoldGlideWiringTests`, `HoldGlideRefusalWiringTests`,
 `HoldGlideSeamTests`, `HoldGlideEligibilitySeamTests`,
@@ -3532,29 +3466,29 @@ candidate's. (`SizeBoundCorroborationProbeTests`,
 **Track's automatic count reads learned minimums; a fixed limit
 does not.** With `auto_tracks` on there is no stored count: the
 number of tracks is derived on every retile as the geometric
-fit, and until #1355 that fit divided the span by the one global
-`min_window_size`, so a row of Xcode, System Settings and an
-Electron app with a `minWidth` opened as many tracks as 300 pt
-windows would and overlapped. The derivation now takes the
-largest prefix whose tracks — each at the larger of the global
+fit. A fit dividing the span by the one global `min_window_size`
+opens as many tracks for a row of Xcode, System Settings and an
+Electron app with a `minWidth` as 300 pt windows would, and they
+overlap (#1355). The derivation takes the largest prefix whose
+tracks — each at the larger of the global
 minimum and its members' corroborated floor on the cross axis
 (#677, the same ledger Scrolling and Monocle consume, read as
 the raw corroborated floor the #933 clamp reads rather than the
 chained span the consume emits) — fit the
 span with their gaps, in the one `TrackLayout.geometricCap`,
 which the render, the swap guard and the weight heal all read.
-Two consequences were designed for rather than discovered: the
-learned minimum arrives lazily, so a fresh space may settle one
-retile later than before, the latency Scrolling already accepts;
-and a window with no learned bound still counts at
-`min_window_size`, so the cap can never be lower than the old
-answer before learning and only tightens as bounds arrive. A
+Two consequences, designed for: the learned minimum arrives
+lazily, so a fresh space may settle one retile later, the
+latency Scrolling already accepts; and a window with no learned
+bound still counts at `min_window_size`, so the cap can never be
+lower than the unlearned answer and only tightens as bounds
+arrive. A
 hand-set limit is deliberately untouched: it is the user's
 number, and a limit that quietly shrank under a learned floor
 would contradict the setting the user can see. The count is only
 the feasibility condition, though: equal weights split a 980 pt
 span 490/490, and a 600 pt floor overlaps its neighbour with the
-count already right. So the retile-time heal (below) gained a
+count already right. So the retile-time heal (below) has a
 second pass that re-shares the track weights until every track
 draws at least its own floor — pinning a sinking track there and
 handing the rest to the others by weight — rather than the count
@@ -3580,18 +3514,17 @@ the visitor horn below, transient in the same way.
 
 **A track draws no wider than its learned ceiling, a refusal
 names a share the screen draws, and a switch re-issues without
-probing (#1488).** A share a track's members cannot draw is
-empty screen: the re-share above water-filled floors only, so a
-fixed-size window's track was the unpinned one and took the
-whole remainder while the column beside it sat at its floor.
-`flooredWeights` therefore clamps every share between its floor
-and its members' corroborated ceiling (`maxWidth`/`maxHeight`,
-#1055's, read through `learnedFloor`'s mirror and the one
-`trackCeiling`; a track is ceilinged only where every member is)
-at the one water level that fills the span — the answer the
-floor-only pinning already computed, so no earlier expectation
-moved. Two edges are ruled: a ceiling-pinned share keeps the
-shave's margin, since the render's cascade check reads
+probing (#1488).** A share a track's members cannot draw is empty
+screen: a re-share that water-fills floors only leaves a
+fixed-size window's track unpinned, taking the whole remainder
+while the column beside it sits at its floor. `flooredWeights`
+therefore clamps every share between its floor and its members'
+corroborated ceiling (`maxWidth`/`maxHeight`, #1055's, read
+through `learnedFloor`'s mirror and the one `trackCeiling`; a
+track is ceilinged only where every member is) at the one water
+level that fills the span — the answer the floor-only pinning
+already computes. Two edges are ruled: a ceiling-pinned share
+keeps the shave's margin, since the render's cascade check reads
 `min_window_size` exactly and a fixed-size window narrower than
 it would otherwise pin its track AT the floor; and ceilings that
 together cannot fill the span bind nothing, because the render
@@ -3601,23 +3534,23 @@ standing for want of a fill. The clamp owes the same ceiling
 ahead of the write: a grow at it is refused with the own-maximum
 pill, scrolling's rule, since an admitted write would land and
 the next retile's heal un-write it, wordless — while a step that
-crosses the ceiling lands and the heal is its clamp. Second,
-a refusal must name a share the screen draws: the clamp folded
-on the per-marker partition while the render folds on the
-geometric cap, so "the neighbour cannot shrink" was true of a
-partition nobody saw. The render, the heal and the clamp now
-take the one `renderPartition` — the #944 rule, with the list
-the cap reads and the list the fold reads assembled once. Third,
-re-issue and probe are two intents and a switch asks only one:
-`force` carried both, a switch needed the re-issue (its echoes
-lag and strand windows) and inherited the probe, under which the
-count and every heal stand down. `RetilePass` spells the choice
-at each site — `.apply` for an explicit `set_*` apply, where
-re-asking is what the user asked for; `.reissue` for a Space or
-Desktop activation, its settle, and a drag that activates a
-Space — and `RetilePassRoutingTests` is the one census of who
-chooses what, since a wrong choice compiles and draws.
-(`TrackCeilingHealTests`, `TrackResizeFoldTests`,
+crosses the ceiling lands and the heal is its clamp. Second, a
+refusal must name a share the screen draws: a clamp folding on
+the per-marker partition while the render folds on the geometric
+cap says "the neighbour cannot shrink" of a partition nobody
+sees. The render, the heal and the clamp take the one
+`renderPartition` — the #944 rule, with the list the cap reads
+and the list the fold reads assembled once. Third, re-issue and
+probe are two intents and a switch asks only one: a single
+`force` carrying both hands a switch — which needs the re-issue,
+since its echoes lag and strand windows — the probe as well,
+under which the count and every heal stand down. `RetilePass`
+spells the choice at each site — `.apply` for an explicit `set_*`
+apply, where re-asking is what the user asked for; `.reissue` for
+a Space or Desktop activation, its settle, and a drag that
+activates a Space — and `RetilePassRoutingTests` is the one
+census of who chooses what, since a wrong choice compiles and
+draws. (`TrackCeilingHealTests`, `TrackResizeFoldTests`,
 `SpaceSwitchReissueTests`, `RetileBoundSkipTests` ▸
 `reissueIssuesTheBound`)
 
@@ -3625,15 +3558,16 @@ chooses what, since a wrong choice compiles and draws.
 
 **A split store heals to a learned floor at retile, and the
 shared ratio may move for it (#934/#1430).** The split-layout
-row of the accepted limitations refused this for a long time on
-one argument: bsp's ratios are two per-Space scalars, so moving
-one for a stubborn window moves every same-orientation split.
-The owner's ruling (2026-09-14) accepts that distortion, because
-a resize press by hand moves the same number the same way — the
+row of the accepted limitations refused this on one argument:
+bsp's ratios are two per-Space scalars, so moving one for a
+stubborn window moves every same-orientation split. The owner's
+ruling accepts that distortion, because a resize press by hand
+moves the same number the same way — the
 #933 capped writers already clamp a press at a learned floor and
 the user sees the shared split move; a heal moving it to the
-same place is not a new kind of change, only an earlier one. Two
-sightings drove it: a window ARRIVING into a slot narrower than
+same place is not a
+new kind of change, only an earlier one. Two sightings: a window
+ARRIVING into a slot narrower than
 its app's minimum overhangs its neighbour until someone resizes
 by hand (#934), and a resize that walked the split past the
 floor in the presses before corroboration stays past it — the
@@ -3643,8 +3577,8 @@ the second ruling: a retile-time heal of the split stores at the
 `KiwiCore.retile` choke point, the `healTrackFloors` shape one
 store over — idempotent, reading corroborated floors only, over
 the LOCAL members, standing down on a forced pass like every
-corroborated-bound consumer. The one-shot write at the
-confirmation edge the issue first proposed was rejected as a
+corroborated-bound consumer. A one-shot write at the
+confirmation edge (the issue's first proposal) is rejected as a
 second mechanism on one store: the heal already runs on the
 retile that edge triggers, and an edge write and a heal cannot
 disagree about where the store should sit if only one of them
@@ -3654,9 +3588,10 @@ cues — a stored-parameter change, visible, undoable by a press,
 travelling with the Space like any interactive resize, which is
 also what keeps the bsp and stack algorithms bound-blind: the
 post-pass reads the bounds from the context, as Scrolling and
-Monocle do, and the algorithms read none. The stack zone's per-window shares stay out,
-per the #944 ruling; Track needs nothing, since #1355 re-shares
-its weights at retile already. Where the yield cannot fit — a
+Monocle do, and the algorithms read none. The stack zone's
+per-window shares stay out, per the #944 ruling; Track needs
+nothing, re-sharing its weights at retile already (#1355). Where
+the yield cannot fit — a
 same-axis neighbour already at its own floor — the engine says
 so ONCE per episode, at the first retile that finds it and shows
 the space, with the neighbour-minimum pill on the window that
@@ -3664,7 +3599,7 @@ overhangs and the neighbour marked, drawn by the retile without a
 press's glide note or bump — and without its sound unless a press
 is in flight, the speaker's own gate — re-armed when the window fits again or
 its bound is forgotten; and the overhang lands INWARD (owner
-ruling 2026-08-31): the frames the retile ISSUES take one
+ruling): the frames the retile ISSUES take one
 post-pass that emits a floor-bound slot at the floor and pulls it
 back inside the layout region, so a window that cannot fit
 overflows toward the screen's centre rather than past its edge,
@@ -3750,8 +3685,8 @@ is an own titled dialog — tracked and force-floated, per
 `OwnWindowTiling`'s census — but when Sparkle's progress window
 closes to yield to it, the destroy fold re-points state focus
 at the background survivor (#929's flow) and no focus event
-re-points it at the alert, so the ring kept drawing around the
-stale anchor behind the alert. While the process holds a key or
+re-points it at the alert, so the ring draws around the stale
+anchor behind the alert. While the process holds a key or
 modal window that is NOT the focus anchor, the focused ring is
 suppressed (`EventLoop.ownKeyWindow` — the one seam the #929
 close-return raise stand-down also reads, through a narrower
@@ -3762,17 +3697,17 @@ same answer a focused launcher gets (#300); an own key window
 that IS the anchor — the Settings window — keeps its ring.
 
 **A floating keyboard resize is symmetric, with pinned edges
-(#1091).** [Principle] `FloatResize` anchored at the origin, so a
-resize moved the right/bottom edge only — the mouse-drag-the-
-corner idiom, where the grabbed edge *is* the anchor. That is
-right for a drag and wrong for a chord: a keyboard resize has no
-grabbed edge, so privileging one is arbitrary, and against a
-screen edge it stopped the resize dead. Measured on device: a
-float parked with its right edge on the screen edge took 10
-further grow asks and moved **0 pt**, silently, with 892 pt of
-free space sitting to its left.
+(#1091).** [Principle] Anchoring `FloatResize` at the origin
+moves the right/bottom edge only — the mouse-drag-the-corner
+idiom, where the grabbed edge *is* the anchor. That is right for
+a drag and wrong for a chord: a keyboard resize has no grabbed
+edge, so privileging one is arbitrary, and against a screen edge
+it stops the resize dead. Measured on device: a float parked
+with its right edge on the screen edge took 10 further grow asks
+and moved **0 pt**, silently, with 892 pt of free space sitting
+to its left.
 
-So the delta now splits between both edges. An edge against the
+So the delta splits between both edges. An edge against the
 boundary is **pinned** and the whole delta goes to the other
 side; with both pinned a grow refuses and cues, while a shrink
 contracts symmetrically as normal — refusing a shrink would
@@ -3809,9 +3744,9 @@ standing, which is what makes the fold need no ordering rule.
 
 *Size is bounded there; position stays the user's.* The retile-time
 net fits an oversized float back inside the region — the clamp
-beside it only ever **moved** a window, so one larger than the
-space between two bars was pushed to one side and still
-overflowed under the other. It deliberately does not enforce the
+beside it only ever **moves** a window, so one larger than the
+space between two bars would be pushed to one side and still
+overflow under the other. It deliberately does not enforce the
 screen edge, because that net runs for every float on every
 retile and would drag back a window parked half off-screen by
 hand, which macOS allows and this change never asked for.
@@ -3820,10 +3755,10 @@ hand, which macOS allows and this change never asked for.
 held the ring's own outward reach off **every** edge of that
 region — bars and screen edges alike. The ring is the window
 frame outset by that reach and paints at `.normal` while bars
-paint at `BarPanel.level`, so a window flush against a strip had
-its outer sliver hidden; flush against a screen edge it was
-clipped instead. Device QA caught the first version insetting at
-bars only, which is two rules where the principle gives one:
+paint at `BarPanel.level`, so a window flush against a strip has
+its outer sliver hidden; flush against a screen edge it is
+clipped instead. Insetting at bars only (device QA) is two rules
+where the principle gives one:
 **float geometry follows PAINTED chrome**, and a ring is painted
 wherever it is drawn. The number is not invented for this — it is
 `BorderGeometry.outwardReach`, the renderer's own function, and
@@ -3856,8 +3791,8 @@ so the press record carries AppKit's click count and a
 double-click released there is read as the expand, not the
 drag — unless a drag on that window is already in flight, whose
 trailing events stay its own. For a TILED
-window the zoom is the layout's to undo (owner ruling
-2026-09-13): in a tiling layout a double-click on a title bar is
+window the zoom is the layout's to undo (owner ruling): in a
+tiling layout a double-click on a title bar is
 a slip far more often than an intent, and a window left at the
 OS-chosen size sits over its neighbours until some unrelated
 event happens to retile — which reads as the tiler having given
@@ -3918,11 +3853,11 @@ x match stays exact, because a 1 pt peek flush with the screen
 edge is where nothing but the park puts a window.
 
 *A window that left with its Desktop keeps its memory.* The
-Desktop sweep was a loss KiwiDesk caused itself: the restore
-pass swept the capture of a window that merely `vanished` with
-its Desktop while the away ledger (#1146) still knew it, and the
-recovery then centred what could have been restored. The sweep
-now spares every id the away ledger knows — the id is the same
+Desktop sweep is a loss KiwiDesk would cause itself: a restore
+pass sweeping the capture of a window that merely `vanished`
+with its Desktop while the away ledger (#1146) still knows it
+centres what could have been restored. The sweep
+spares every id the away ledger knows — the id is the same
 window when it returns — so the centring stays what it is meant
 to be, the net beneath a memory that is genuinely gone.
 
@@ -3932,19 +3867,19 @@ layout left off-screen, scoped by visibility (#1177).**
 switched to it keeps the frames its last layout drew — and
 scrolling's scrolled-out columns and monocle's parked pile are
 drawn out of reach on purpose. Switching to floating therefore
-lost windows behind the visible ones or off the screen, which
-the owner ruled crucial and frequent (2026-09-09). The rule is
+loses windows behind the visible ones or off the screen, which
+the owner ruled crucial and frequent. The rule is
 TRIGGERED by what is REACHABLE, never by which layout came
 before: a member partly or fully outside the space's float
 region trips it, and so does a member whose frame sits entirely
 inside another member's — a pile, one of the two behind the other
 whatever the z-order, which is what a monocle STACK is (owner
-ruling 2026-09-14, the second of the day: "stack should pile the
-same"). With every member inside and none piled, nothing moves.
-A plain tiled→floating switch then never trips it — tiles never
-contain each other — monocle and scrolling are covered without a
-mode matrix, and partly-outside counts (owner ruling 2026-08-31)
-because a sliver on screen is not a reachable window. The pile
+ruling: "stack should pile the same"). With every member inside
+and none piled, nothing moves. A plain tiled→floating switch
+then never trips it — tiles never contain each other — monocle
+and scrolling are covered without a mode matrix, and
+partly-outside counts (owner ruling) because a sliver on screen
+is not a reachable window. The pile
 test is containment, not overlap: two columns that merely cross
 are both grabbable. Two cases the test reads as a pile are priced
 rather than exempted: a flag float parked inside a tile by hand,
@@ -3953,10 +3888,10 @@ bound) — that neighbour IS unreachable, so the verdict stands.
 Once tripped, EVERY member takes the quit gather's grid
 ([#197](https://github.com/KiwiCanopy/KiwiDesk/issues/197)) —
 the exit's own function and depth, so a retune of the exit
-retunes this. The issue had the visible members staying put; the
-device showed why not (owner ruling 2026-09-14): two untouched
-columns beside a grid of the rest read as a mess, and the
-gathered windows laid exactly behind one another. The whole-space
+retunes this. Leaving the visible members in place (the issue's
+proposal) fails on device (owner ruling): two untouched columns
+beside a grid of the rest read as a mess, and the gathered
+windows lie exactly behind one another. The whole-space
 grid is what keeps a pile of columns findable rather than stacked
 at one edge, and it is laid inside the grow bound
 — the painted strips carved off and the focus ring's reach
@@ -3989,17 +3924,17 @@ reason: one path, delivered by the pass's own restore on a
 shown space and kept by the park for the activation on an
 unshown one; and it is seeded ahead of the strand net so a
 monocle pile at the corner takes the grid, never a second
-centring. The bar clamp learned to judge a pending capture
-rather than the state frame it is leaving, since a fit of the
-stale frame landed after the delivery and undid it.
+centring. The bar clamp judges a pending capture rather than
+the state frame it is leaving, since a fit of the stale frame
+lands after the delivery and undoes it.
 
 **A restore pays a window it could not set at that window's
 arrival (#1362).** [Principle] The session restore replays
 frames onto tracked windows, and a slow app's window is not
-tracked yet when it runs — so it was adopted later into its
-remembered Space carrying the frame the boot scan had tiled it
-at, on the main display, while its Space was a floating one on
-the other display, which assigns nothing. Two fixes were on the
+tracked yet when it runs — so it is adopted later into its
+remembered Space carrying the frame the boot scan tiled it at,
+on the main display, while its Space is a floating one on the
+other display, which assigns nothing. Two fixes were on the
 table: re-anchor the late adoption proportionally onto its
 Space's display, or keep the snapshot record and pay it at the
 arrival the way a Desktop return pays its owed focus
@@ -4012,10 +3947,10 @@ lifetime, is consumed once at the first arrival, and is paid
 through the stash seed so the arrival retile delivers it where
 the Space is shown and the park keeps it where it is not.
 
-*The screen-home stand-down stays on the float flag.* The
-#1286 sweep deferred one reader here: `screenHome` re-files a
-window returning on another display into that display's shown
-Space, standing down for a flag float. The discriminator is
+*The screen-home stand-down stays on the float flag.* One reader
+#1286's sweep leaves on the flag: `screenHome` re-files a window
+returning on another display into that display's shown Space,
+standing down for a flag float. The discriminator is
 what a re-file changes: the flag travels with the window and
 survives one, so a flag float keeps its home wherever it lands;
 floating-mode membership is the SPACE's, and is exactly what the
@@ -4024,48 +3959,49 @@ by ruling — standing down would keep a home whose layout
 assigns no frame on a display the window is not on, which is
 this issue's strand by another door.
 
-**The tiled→floating toggle nudges the window, and the nudge is
-a fixed magnitude, not proportional.** A window keeps its exact
+**The tiled→floating toggle nudges the window, and the nudge is a
+fixed magnitude, not proportional.** A window keeps its exact
 frame the instant it turns floating, so `make_floating` /
-`toggle_floating` looked like they did nothing — no acknowledgement
-of the state change. The float direction now gives the window a
-small shove toward its screen's visible-frame center (the tiled
-direction already animates a real move back into the layout, so it
-needs none). The magnitude is deliberately **fixed** —
-`min(24 pt, distance to center)` along the unit vector to the
-center — rather than proportional to the window size: a
-size-scaled nudge (longest-side × 0.2, say) teleports a maximized
-window clear across the screen while barely moving a small one.
-The fixed form self-tapers instead — a window already near the
-center has a short distance term and so moves less, reaching zero
-with no edge special-casing; a dead-centered window (direction
-undefined) shoves straight down. The target is clamped fully
-inside the visible frame, exactly like tiled placement, so it can
-never land under the menu bar / a reserved bar strip or partly
-off-screen, and it rides the existing relayout animation so the
-motion reads as a deliberate move, not a jump. Fires on the
-explicit float verbs only — `make_floating` and a
-`toggle_floating` that lands on floating — once per tiled→floating
-flip, never on an already-floating window. `make_auto` is
-deliberately excluded: its flip is detection-driven, not a
-deliberate user float, so it gets no acknowledging nudge.
-Fixed, not proportional, is the whole point — recorded
-here so it is not "optimized" back into a size-scaled form. A
-niche polish behavior, so the disable knob (`set_float_nudge`,
+`toggle_floating` would look like they did nothing — no
+acknowledgement of the state change. The float direction gives
+the window a small shove toward its screen's visible-frame center
+(the tiled direction already animates a real move back into the
+layout, so it needs none). The magnitude is deliberately
+**fixed** — `min(24 pt, distance to center)` along the unit
+vector to the center — rather than proportional to the window
+size: a size-scaled nudge (longest-side × 0.2, say) teleports a
+maximized window clear across the screen while barely moving a
+small one. The fixed form self-tapers instead — a window already
+near the center has a short distance term and so moves less,
+reaching zero with no edge special-casing; a dead-centered window
+(direction undefined) shoves straight down. The target is clamped
+fully inside the visible frame, exactly like tiled placement, so
+it can never land under the menu bar / a reserved bar strip or
+partly off-screen, and it rides the existing relayout animation
+so the motion reads as a deliberate move, not a jump. Fires on
+the explicit float verbs only — `make_floating` and a
+`toggle_floating` that lands on floating — once per
+tiled→floating flip, never on an already-floating window.
+`make_auto` is deliberately excluded: its flip is
+detection-driven, not a deliberate user float, so it gets no
+acknowledging nudge. Fixed, not proportional, is the whole point.
+A niche polish behavior, so the disable knob (`set_float_nudge`,
 default on) is Lua-only with no Settings toggle.
 
 **`resize` reads the *effective* float, so a floating-mode space
-resizes like a flag-float ([#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)).**
+resizes like a flag-float
+([#1184](https://github.com/KiwiCanopy/KiwiDesk/issues/1184)).**
 [Principle] A window can be free-floating two ways: it carries
 the float flag, or it sits in a space set to the floating layout,
-which assigns no frames at all. The gate asked the flag alone, so
-the same window, in the same space, under the same shortcut,
-resized or beeped `resize not supported in floating` depending on
-a flag the user never had to set to get the behavior they were
-looking at. Nothing downstream of the gate distinguishes the two
-either — the region a float may grow into, the symmetric split
-and the pinned edges are all read off geometry, not off the flag
-— so refusing was a difference with no reason behind it.
+which assigns no frames at all. A gate asking the flag alone
+makes the same window, in the same space, under the same
+shortcut, resize or beep `resize not supported in floating`
+depending on a flag the user never had to set to get the behavior
+they were looking at. Nothing downstream of the gate
+distinguishes the two either — the region a float may grow into,
+the symmetric split and the pinned edges are all read off
+geometry, not off the flag — so refusing was a difference with no
+reason behind it.
 
 It is ruled per verb rather than in one sweep, and that is the
 load-bearing half.
@@ -4086,11 +4022,11 @@ identity, a net already on the predicate, or the "is this a
 tiled member" question the predicate's docstring rules is *not*
 its negation; the three the #1184 entry named are each answered
 by what they mean. The **unfocused ring** reaches every float,
-flag and floating-mode alike, because the exclusion it replaced
-had nothing behind it: #278 excluded flag-floats from the
-unfocused set without an argument, a floating-mode member rang
-anyway since the code asked the flag, and the two are the same
-thing to the user. Ruled in rather than out (owner, 2026-09-13):
+flag and floating-mode alike, because excluding flag-floats from
+the unfocused set (#278) had no argument behind it, a
+floating-mode member rang anyway since the code asked the flag,
+and the two are the same thing to the user. Ruled in rather
+than out (owner):
 a ring sits behind its own window, so an overlapped float shows
 its ring where it peeks out and covers nothing, and in a Floating
 space the rings say which windows KiwiDesk manages — the reading
@@ -4099,7 +4035,7 @@ exclusions, monocle stays focused-only. The **float-tier
 raise** keeps floats above a tiled
 plane, and read through the flag a floating-mode member *is*
 that plane: every member focus, and every switch onto the space,
-lifted a flagged or sticky float back over its siblings, an
+lifts a flagged or sticky float back over its siblings, an
 order the user could never keep. So the raise stands down after
 a focus that lands on an effective float and takes no
 floating-mode member as the floor its switch-time lift clears,
@@ -4109,7 +4045,7 @@ space's layout — one window that floats where the rest tile —
 and a floating-mode space has no exception to mark: every glyph
 would wear the layout's own symbol and say nothing, so it keeps
 the flag, and the same-app grouping it breaks keeps it with it
-(owner ruling 2026-09-13). The ring and the badge do not
+(owner ruling). The ring and the badge do not
 "disagree" by this: one is a mark drawn, the other a ring
 withheld, and neither claims the space is anything but what the
 user set it to.
@@ -4142,15 +4078,15 @@ and icon is what removes the contradiction, and it needs no
 new concept. (#1230)
 
 **A profile switch restores that profile's partitioning; it
-does not merge by name.** Before #1230, `ensureSpace` matched
-the incoming profile's spaces onto the live ones by name, and
-`pruneSpaces` forwarded the rest to the fallback — so
-switching profiles and back merged an arrangement away
-permanently. Measured 2026-09-04: a profile holding five
-windows in space 1 and three in space 3 came back with all
-eight in space 1 and space 3 empty.
+does not merge by name.** With `ensureSpace` matching the
+incoming profile's spaces onto the live ones by name and
+`pruneSpaces` forwarding the rest to the fallback, switching
+profiles and back merges an arrangement away permanently —
+measured: a profile holding five windows in space 1 and three
+in space 3 came back with all eight in space 1 and space 3
+empty (#1230).
 
-Each profile now carries its own record of which windows its
+Each profile carries its own record of which windows its
 spaces held, filed when you switch away and restored when you
 return. Window ids only, never window state — about sixty
 integers across three profiles, written once per switch. The
@@ -4198,8 +4134,8 @@ copy of live *as of the last authoritative reconcile*: every
 explicit prune — a `load_profile` (including a scripted
 Lua/CLI one) or an in-place edit — writes the live set back.
 Hardware-driven applies (monitor change, Desktop
-binding) never MIRROR, and since #1230 they prune exactly when
-they change the profile — re-applying the live one still shuffles
+binding) never MIRROR, and they prune exactly when they change
+the profile (#1230) — re-applying the live one still shuffles
 nothing, which is what the no-shuffle-on-reconnect rule was
 protecting. So between such an event and the next reconcile the
 list may lag; the cold-boot seed and
@@ -4221,25 +4157,26 @@ Spaces" on — the macOS **default** — "Desktop N activates" needs
 one display to answer for it. #888 ruled that display to be the
 main one (the screen with the menu bar): a swipe on the main
 display selects profiles and a swipe on a secondary display never
-does. That is the PROFILE half, and it stands. The Space half
-moved in #1230: every Desktop keeps its own Space memory now,
-each screen's included, and a secondary swipe moves that screen
-onto its own Desktop's Space without touching the profile. Shared mode and a single display are
-degenerate cases — the main screen's Desktop IS the global one —
-so their behavior is unchanged, and the precedent was already in
-the tree: the starter setup is "named by the main screen".
+does. That is the PROFILE half. The Space half is #1230's:
+every Desktop keeps its own Space memory, each screen's
+included, and a secondary swipe moves that screen onto its own
+Desktop's Space without touching the profile. Shared mode and a
+single display are degenerate cases — the main screen's Desktop
+IS the global one — so their behavior is unchanged, and the
+precedent was already in the tree: the starter setup is "named
+by the main screen".
 
-This superseded #8's recommendation to turn the option off, which
-was the previous answer to the same ambiguity. That advice was
-wrong-by-default twice over: every multi-display user met the
-degraded state out of the box, and following the advice forfeited
-real macOS ergonomics — each display's own menu bar, the Dock
-summonable on any display, fullscreen on one screen not blanking
-the others, all of which exist only with separate Spaces ON.
-Shipping 1.0 with "change a macOS default" as standing advice and
-retracting it later would have been guidance churn.
+It supersedes #8's recommendation to turn the option off, which
+was wrong-by-default twice over: every multi-display user met
+the degraded state out of the box, and following the advice
+forfeited real macOS ergonomics — each display's own menu bar,
+the Dock summonable on any display, fullscreen on one screen not
+blanking the others, all of which exist only with separate
+Spaces ON. Shipping 1.0 with "change a macOS default" as
+standing advice and retracting it later would have been guidance
+churn.
 
-Two alternatives were weighed and rejected. **Coordinated
+Two alternatives rejected. **Coordinated
 switching** (KiwiDesk switches all displays together so a global
 number stays well-defined) is drift-prone — one swipe on one
 display breaks the invariant, and force-resync teleports screens;
@@ -4280,13 +4217,12 @@ tests, mutation through the `KiwiCore` facade — live in
 `AGENTS.md` §5.
 
 **Floating windows hide with their space; visible-everywhere
-is Sticky, an explicit flag.** Historically a floating window
-was exempt from the inactive-space stash and followed you
-across spaces — the stash comment even blessed it as
-intended "for PIP". #412 reclassified it as a bug: state
-always scoped the window to one space, only rendering
-disagreed, and a user who floats a scratchpad on space A does
-not expect it over space B. Now every window — tiled or
+is Sticky, an explicit flag.** A floating window exempt from
+the inactive-space stash, following you across spaces (once
+blessed as intended "for PIP"), is a bug (#412): state always
+scoped the window to one space, only rendering disagreed, and a
+user who floats a scratchpad on space A does not expect it over
+space B. Every window — tiled or
 floating — parks with its inactive space (the engine captures
 a floating window's frame on first stash and restores it when
 the space returns; layouts recompute tiled frames anyway).
@@ -4294,7 +4230,7 @@ The deliberate "present on every space" behavior is the
 per-window **Sticky** flag (#414, `toggle_sticky`) — fully
 managed, unlike the blunt `ignore_rules` gate. Consequence,
 accepted: a Picture-in-Picture panel that presents as a
-*managed floating* window now parks with its home space until
+*managed floating* window parks with its home space until
 marked sticky; most PIP/quick-terminal overlays are tracked
 as transient overlays or ignored outright and never stashed
 at all. "Sticky" is the settled user-facing term (tiling-WM
@@ -4340,9 +4276,9 @@ the Space-Bar drag both honour it. Which display a sticky
 *renders* on is `stickyRenderSpace`: a global sticky follows the
 **focused** display (one physical window can only be one place),
 a display sticky follows its home monitor's shown space — and its
-home space no longer reserves a phantom tiled slot when it has
-traveled away, which is what let the same window fight for two
-frames across monitors before. (#445)
+home space reserves no phantom tiled slot while it has traveled
+away, or the same window fights for two frames across monitors.
+(#445)
 
 **A window on another screen belongs to that screen's space,
 not to the one it came from.** KiwiDesk notes the space a
@@ -4405,11 +4341,11 @@ screen every one of these questions has the same answer it
 always had. (#1010)
 
 **The starter setup is chosen from the screens, not demonstrated
-on them.** The first version of it (#466) gave every display the
-same five spaces — one per layout mode — so a newcomer met the
-whole range at once. That is a showroom, and it is the wrong
-reading of "approachable by default": approachable means a setup
-you KEEP. So the layouts now come from each screen's shape, in
+on them.** Giving every display the same five spaces — one per
+layout mode (#466) — shows a newcomer the whole range at once.
+That is a showroom, and it is the wrong reading of "approachable
+by default": approachable means a setup you KEEP. So the layouts
+come from each screen's shape, in
 points (`ScreenClass`): a laptop under 1900 pt gets Scrolling and
 Monocle and never Track, which has no width to work in; a screen
 at or past 3000 pt — or past a 2.1 aspect, which catches a short
@@ -4441,11 +4377,11 @@ left.
 
 **Every screen opens in Scrolling but the smallest, which opens
 in Monocle.** The shape rule above decides what a screen is good
-for; it does not decide what the user should be shown FIRST, and
-for a while it did both. Best-first meant a 2560 pt desktop led
-with Grid and an ultrawide with Track, so the first thing most
-new users saw was their windows cut into halves or thirds — the
-impression that makes people close a tiling manager on day one.
+for; it does not decide what the user should be shown FIRST.
+Best-first — a 2560 pt desktop leading with Grid, an ultrawide
+with Track — makes the first thing most new users see their
+windows cut into halves or thirds, the impression that makes
+people close a tiling manager on day one.
 Scrolling is the one mode where nothing is squashed: each window
 keeps a comfortable slot and the neighbours wait one keystroke
 away. So it leads, and the rest of each screen's list follows
@@ -4461,9 +4397,9 @@ unconditional, so a 27" beside an ultrawide is "the smallest" and
 leads Monocle although its own class lists none — being smallest
 is a fact about the setup, and a per-class qualification would
 make the answer depend on two things instead of one. And
-Scrolling now leads several screens at once, which the
-no-layout-twice rule had to be carved out for explicitly: an
-accidental repeat is still a bug, this one is the feature.
+Scrolling leads several screens at once, which the
+no-layout-twice rule carves out explicitly: an accidental
+repeat is still a bug, this one is the feature.
 
 **A starter Scrolling slot is set, not left on `auto`.** `auto`
 resolves near-full — one window with a sliver of the next — which
@@ -4476,7 +4412,7 @@ columns, the case `ScrollSize.auto` already documented as wanting
 an explicit size. One profile-wide value and no per-space
 overrides: a first-run profile full of overrides is a second
 config the user has to understand before changing the first.
-(Owner ruling, 2026-08-25.)
+(Owner ruling.)
 
 **One tuning per profile, and it is the main screen's.** This is
 not a preference — `TilingSettings` is profile-wide, so a laptop
@@ -4492,25 +4428,25 @@ on, not a fixed `bsp`.** The workflow presets predate the
 screen-shape theory and several declare a mode for only some of
 their spaces — `Minimalist` leaves space 2 unlisted, `Focus
 Stack` space 3 — with the rest resolving to `bsp`. Those are
-one-screen presets, so applying either on a laptop silently
-handed it the one layout `ScreenClass` rules out there: below
-1900 pt a three-window BSP is already under the minimum in one
-axis. The unlisted mode now resolves to that screen's own best
-layout. Where the hardware genuinely is not knowable — a preset
-card draws a plan for a screen COUNT, and a three-screen preset
-is drawn on a one-screen Mac — the historic `bsp` stands, because
-inventing a shape is a worse answer than the old one. (Owner
-ruling, 2026-08-11.)
+one-screen presets, so applying either on a laptop with a fixed
+`bsp` fallback silently hands it the one layout `ScreenClass`
+rules out there: below 1900 pt a three-window BSP is already
+under the minimum in one axis. The unlisted mode resolves to
+that screen's own best layout. Where the hardware genuinely is
+not knowable — a preset card draws a plan for a screen COUNT,
+and a three-screen preset is drawn on a one-screen Mac — the
+historic `bsp` stands, because inventing a shape is a worse
+answer than the old one. (Owner ruling.)
 
 **There is one Starter preset, and it is for the screens you
-have.** There used to be three, one per screen count, because
-the ladder planned for a count in the abstract. A setup derived
-from screen shapes cannot answer "which two screens?", so a
-count you are not running offers the workflow layouts alone —
-that is what "For other setups" now means. The preset's summary
-loses the sentences that named its rungs for the same reason: a
-list of modes would be a different sentence on every Mac, so it
-states the rule and the thumbnails show the modes.
+have.** Three presets, one per screen count, plan for a count
+in the abstract. A setup derived from screen shapes cannot
+answer "which two screens?", so a count you are not running
+offers the workflow layouts alone — that is what "For other
+setups" means. The preset's summary names none of its rungs for
+the same reason: a list of modes would be a different sentence
+on every Mac, so it states the rule and the thumbnails show the
+modes.
 
 :::unreleased
 **A runtime `delete_space` stays a success, and names what brings
@@ -4526,10 +4462,10 @@ the active profile, the built-in Standard a reload recomposes
 while no saved profile fits, the script — because a hint naming
 one and silent on another is a half-truth a script will trust.
 `gui.json` is not a fourth: its space list is a mirror of live
-(#77), which the delete now rewrites like every other
-authoritative prune, so nothing there re-creates the space and
-a line telling the user to "remove it in Settings" would have
-named a file they never declared anything in. A distinct status was refused: it breaks
+(#77), which the delete rewrites like every other authoritative
+prune, so nothing there re-creates the space and a line telling
+the user to "remove it in Settings" would name a file they never
+declared anything in. A distinct status is refused: it breaks
 every consumer that pattern-matches `success` for a delete that
 did succeed. The profile and Standard halves are the last
 apply's set, read from adoption state like every question about
@@ -4543,17 +4479,17 @@ a diff can see, which is exactly the path the hint exists for.
 
 **[Principle]**
 
-Sticky promises "always with me", and before #1145 that promise
-stopped at the edge of KiwiDesk's own Spaces: a Desktop switch
-left the ∞ window behind. Where the window-management bridge
-exists, both scopes now follow the user across macOS Desktops.
-The rulings:
+Sticky promises "always with me", and a Desktop switch that
+leaves the ∞ window behind stops that promise at the edge of
+KiwiDesk's own Spaces. Where the window-management bridge
+exists, both scopes follow the user across macOS Desktops. The
+rulings:
 
 - **Reach is a carry, never a membership.** macOS applies no
   second Desktop membership for a foreign window — the bridge's
   ADD reports performed and changes nothing
-  (`.claude/rules/os-private-apis.md` carries the probe), and a
-  version built on it shipped and was reverted (#1205/#1206). So
+  (`.claude/rules/os-private-apis.md` carries the probe; a
+  version built on it was reverted, #1205/#1206). So
   reach is a MOVE: at every Desktop switch KiwiDesk moves each
   enabled sticky window onto the arriving Desktop of its own
   screen, eagerly from the switch and again at the settle. Same
@@ -4644,15 +4580,14 @@ never a bookkeeping entry about it). The choices, each argued
 against its alternative:
 
 - **The focus is remembered at the focus REPORT, per space —
-  never at the departure.** The first cut wrote the memory in
-  the switch handler, on the premise that the switch
-  notification precedes the reconcile burst
-  ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40)).
-  The device disproved it on the first eyeball: an app whose own
-  Accessibility observer reports fast folds its windows as
-  destroys *before* the notification arrives, so the handler read
-  a focus the walk had already moved and the return paid the
-  wrong window — over the very focus macOS had just restored. So
+  never at the departure.** Writing the memory in the switch
+  handler assumes the switch notification precedes the reconcile
+  burst ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40)),
+  and the device disproves it: an app whose own Accessibility
+  observer reports fast folds its windows as destroys *before*
+  the notification arrives, so the handler reads a focus the walk
+  has already moved and the return pays the wrong window — over
+  the very focus macOS had just restored. So
   the memory is written where the fact is born, at every honored
   focus report, under the space the window sits in and the native
   Space the WindowServer hosts it on — the compositor's answer,
@@ -4663,7 +4598,7 @@ against its alternative:
 - **The debt is paid at the owed window's own ARRIVAL, never at
   the settle.** The jump happens at the switch, when the first
   re-track claims the vacancy; the 600 ms settle is a second leg
-  that used to *assert* the wrong pick, and it runs before a slow
+  that would *assert* the wrong pick, and it runs before a slow
   app re-lists at all (TextEdit re-lists about a second after the
   switch). So the create fold takes the owed window mirrored in
   and does two things: the owed window takes the focus when it
@@ -4717,9 +4652,9 @@ stand-down, the payer's raise.
 
 **[Principle]**
 
-KiwiDesk used to know only the windows it could see. A window on
-a macOS Desktop no screen was showing was evicted from state at
-the switch, and everything downstream guessed: the gone reason
+Knowing only the windows it can see — a window on a macOS
+Desktop no screen shows evicted from state at the switch —
+leaves everything downstream guessing: the gone reason
 was a timer that read the *previous* switch for a fast app's
 departure ([#40](https://github.com/KiwiCanopy/KiwiDesk/issues/40),
 falsified by [#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)'s
@@ -4774,14 +4709,14 @@ and the choices, each argued against its alternative:
   state alone. *Hide empty Spaces* hides a Space holding only
   away windows.
 
-  Drawing them was tried first
-  ([#1146](https://github.com/KiwiCanopy/KiwiDesk/issues/1146))
-  on the reasoning that a Space holds its windows wherever macOS
-  is showing them. On device that reads as a lie: the bar is
-  always on screen, so it is taken as a picture of *here*, and a
-  glyph identical to a present one makes a click's consequence —
-  a Desktop switch — invisible. Marking them instead was refused
-  on its own terms: a dim tier already means *unfocused* in the
+  Drawing them — a Space holds its windows wherever macOS is
+  showing them — reads as a lie on device
+  ([#1146](https://github.com/KiwiCanopy/KiwiDesk/issues/1146)):
+  the bar is always on screen, so it is taken as a picture of
+  *here*, and a glyph identical to a present one makes a click's
+  consequence — a Desktop switch — invisible. Marking them
+  instead is refused on its own terms: a dim tier already means
+  *unfocused* in the
   bar, and any new mark needs a legend. The knowledge is not
   wasted — Open or Focus still reaches an away window, and the
   place to *see* everything is an overview panel summoned
@@ -4803,8 +4738,8 @@ and the choices, each argued against its alternative:
   session snapshot's space, else the Desktop's remembered Space,
   else recorded with no Space at all — known to the classifier
   and to Open or Focus, filed at its reveal through the newcomer
-  rules. Dropping it until shown was the alternative, and it
-  would have kept the cold-boot duplicate launch the issue names.
+  rules. Dropping it until shown keeps the cold-boot duplicate
+  launch the issue names.
 
   **A parked window is not recorded at all**
   ([#1234](https://github.com/KiwiCanopy/KiwiDesk/issues/1234)),
@@ -4949,9 +4884,9 @@ A globally sticky window renders on the space you focus
 ([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445)),
 and on a tiled space that means the layout places it — on
 whichever screen the space lives. A floating-mode space places
-nothing, so a ∞ window entering one on *another* screen kept the
+nothing, so a ∞ window entering one on *another* screen keeps the
 frame its previous space drew, physically on the old screen while
-the Space Bar already listed it on the new one
+the Space Bar already lists it on the new one
 ([#1217](https://github.com/KiwiCanopy/KiwiDesk/issues/1217)).
 That is a correction that places a window nothing else will — the
 definition of a float *net*
