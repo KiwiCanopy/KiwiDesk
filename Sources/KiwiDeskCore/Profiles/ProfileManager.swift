@@ -43,7 +43,10 @@ public final class ProfileManager {
     private(set) var active: ActiveProfile?
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
-    public private(set) var currentStandard: String?
+    public var currentStandard: String? { standard?.name }
+    /// The resolving Standard as one value, `currentStandard`'s
+    /// source (#1509).
+    private(set) var standard: ActiveStandard?
     /// True when live state diverged from saved profile.
     public private(set) var isDirty = false
 
@@ -111,7 +114,7 @@ public final class ProfileManager {
         }
         try write(profile)
         active = ActiveProfile(profile)
-        currentStandard = nil
+        standard = nil
         isDirty = false
     }
 
@@ -252,7 +255,7 @@ public final class ProfileManager {
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
         active = ActiveProfile(profile)
-        currentStandard = nil
+        standard = nil
         isDirty = !fits
     }
 
@@ -267,17 +270,28 @@ public final class ProfileManager {
         active = nil
     }
 
-    /// Records that a built-in Standard is resolving (dirty state).
-    func adoptStandard(named name: String) {
+    /// Records that a built-in Standard is resolving (dirty state),
+    /// with the Spaces it composed (#1509).
+    func adoptStandard(named name: String, spaces: Set<SpaceID>) {
         active = nil
-        currentStandard = name
+        standard = ActiveStandard(name: name, spaces: spaces)
         isDirty = true
+    }
+
+    /// A reload's recompose refreshes the Standard's Spaces; the
+    /// name and the dirtiness stay (#1509).
+    func recomposedStandard(spaces: Set<SpaceID>) {
+        guard let standard else { return }
+        self.standard = ActiveStandard(
+            name: standard.name,
+            spaces: spaces
+        )
     }
 
     /// Resets adoption state for Reset All Settings (#634).
     func resetAdoption() {
         active = nil
-        currentStandard = nil
+        standard = nil
         isDirty = false
     }
 

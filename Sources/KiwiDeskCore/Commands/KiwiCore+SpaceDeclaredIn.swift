@@ -7,16 +7,23 @@ import Foundation
 extension KiwiCore {
     /// Every source that re-creates `space` at the next load, in
     /// the payload's spelling: `profile:<name>` for the active
-    /// profile, read from adoption state and never its file
-    /// (#1245); `init.lua` for a Space the last script run asked
-    /// for; `gui.json` for a GUI-managed sidecar listing it.
-    /// Empty when the Space was runtime-only.
+    /// profile and `standard:<name>` for a resolving built-in
+    /// Standard — both the last APPLY's set, read from adoption
+    /// state and never a file or a recompose (#1245; a hand edit
+    /// lands at the next apply); `init.lua` for a Space the last
+    /// script run asked for; `gui.json` for a GUI-managed sidecar
+    /// listing it. Empty when the Space was runtime-only.
     func declaredSources(of space: SpaceID) -> [String] {
         var sources: [String] = []
         if let active = profiles.active,
             active.declaredSpaces.contains(space)
         {
             sources.append("profile:\(active.name)")
+        }
+        if let standard = profiles.standard,
+            standard.spaces.contains(space)
+        {
+            sources.append("standard:\(standard.name)")
         }
         if initDeclaredSpaces.contains(space) {
             sources.append("init.lua")

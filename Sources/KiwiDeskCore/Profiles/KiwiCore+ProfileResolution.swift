@@ -282,7 +282,10 @@ extension KiwiCore {
         // transient Standard instead of a stale profile. Adopting
         // the standard first also lets `buildProfile` tag the
         // starter setup from `currentStandard` (#485).
-        profiles.adoptStandard(named: composed.sourceName)
+        profiles.adoptStandard(
+            named: composed.sourceName,
+            spaces: Set(composed.spaces)
+        )
         let name = profiles.freeName(base: layout.name)
         // Capture-live: the standard was just adopted onto
         // live above, so live IS what this profile records.
@@ -317,6 +320,7 @@ extension KiwiCore {
             // Starter Standard re-applies the LADDER, not the count's
             // workflow Standard (#485). `apply` adopts its placement.
             apply(composed: composed, forceRetile: true)
+            profiles.recomposedStandard(spaces: Set(composed.spaces))
         }
     }
 }

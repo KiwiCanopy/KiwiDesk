@@ -68,7 +68,7 @@ extension APIReference {
         ),
         "delete_space": APIRecord(
             "Removes a Space after rehoming its windows; "
-                + "`declared_in` names what re-creates it on reload.",
+                + "declared_in names what re-creates it on reload.",
             .space("space")
         ),
         "make_floating": APIRecord(

@@ -1,13 +1,15 @@
+import CoreGraphics
 import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
 /// `delete_space` names every source that re-creates the Space
-/// on the next config load (#1509): the active profile from
-/// adoption state, the last `init.lua` run's asks, and a
-/// GUI-managed sidecar's list. A runtime-only Space carries no
-/// payload at all, so today's scripts see byte-identical output.
+/// on the next config load (#1509): the active profile or the
+/// resolving Standard from adoption state, the last `init.lua`
+/// run's asks, and a GUI-managed sidecar's list. A runtime-only
+/// Space carries no payload at all, so today's scripts see
+/// byte-identical output.
 @Suite("delete_space names its re-creators (#1509)", .serialized)
 @MainActor
 struct DeleteSpaceDeclaredInTests {
@@ -72,6 +74,86 @@ struct DeleteSpaceDeclaredInTests {
         )
         #expect(
             declaredIn(deleting: "2", on: core) == ["profile:Work"]
+        )
+    }
+
+    /// The ledger closes at the script's end, so a Space the
+    /// profile re-applies AFTER the run is the profile's alone.
+    @Test("a profile's own Space is never charged to the script")
+    func profileSpaceIsNotTheScripts() throws {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace(SpaceID("1"))
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        #expect(
+            core.execute("save_profile", args: [.string("Work")])
+                .isSuccess
+        )
+        try writeInitLua("KiwiDesk.set_gap_global(10)", core: core)
+        core.loadConfig()
+        #expect(
+            declaredIn(deleting: "2", on: core) == ["profile:Work"]
+        )
+    }
+
+    @Test("a Space the resolving Standard composes names it")
+    func standardIsNamedFromAdoptionState() throws {
+        let core = makeCore()
+        let display = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        core.state.workspaces.upsertDisplay(display)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: [display],
+                mainID: DisplayID(1)
+            )
+        )
+        core.apply(composed: composed, forceRetile: false)
+        // Adoption state, never a recompose: a Space the record
+        // omits is not named, though a recompose would list it.
+        let last = try #require(composed.spaces.last)
+        core.profiles.adoptStandard(
+            named: composed.sourceName,
+            spaces: Set(composed.spaces).subtracting([last])
+        )
+        #expect(declaredIn(deleting: last.raw, on: core) == nil)
+        let first = try #require(composed.spaces.first)
+        #expect(
+            declaredIn(deleting: first.raw, on: core)
+                == ["standard:\(composed.sourceName)"]
+        )
+    }
+
+    /// The reload's recompose is an apply too: the record follows
+    /// the Spaces it composed, so a reload cannot leave the last
+    /// adoption's set answering for a different composition.
+    @Test("a reload refreshes the Standard's recorded Spaces")
+    func reloadRefreshesStandardSpaces() throws {
+        let core = makeCore()
+        let display = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+        )
+        core.state.workspaces.upsertDisplay(display)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: [display],
+                mainID: DisplayID(1)
+            )
+        )
+        core.apply(composed: composed, forceRetile: false)
+        core.profiles.adoptStandard(
+            named: composed.sourceName,
+            spaces: [SpaceID("phantom")]
+        )
+        core.reapplyActiveProfileState()
+        let first = try #require(composed.spaces.first)
+        #expect(
+            declaredIn(deleting: first.raw, on: core)
+                == ["standard:\(composed.sourceName)"]
         )
     }
 

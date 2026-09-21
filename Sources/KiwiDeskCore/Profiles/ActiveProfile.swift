@@ -47,3 +47,12 @@ struct ActiveProfile {
         )
     }
 }
+
+/// The built-in Standard resolving live: its name and the Spaces
+/// it composed, one value for the same reason as `ActiveProfile`
+/// — a reload recomposes it, so `delete_space` names it as a
+/// re-creator from here, never by composing again (#1509).
+struct ActiveStandard {
+    let name: String
+    let spaces: Set<SpaceID>
+}

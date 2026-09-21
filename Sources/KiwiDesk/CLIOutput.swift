@@ -39,10 +39,16 @@ enum CLIOutput {
             return "still declared in profile \"\(name)\" — "
                 + "save the profile to make this durable"
         }
+        let standard = "standard:"
+        if source.hasPrefix(standard) {
+            let name = source.dropFirst(standard.count)
+            return "still composed by the built-in \"\(name)\" "
+                + "standard — save a profile to make this durable"
+        }
         switch source {
         case "init.lua":
             return "still created by init.lua — "
-                + "remove the create_space there"
+                + "remove the call that creates it"
         case "gui.json":
             return "still listed in gui.json — remove it in Settings"
         default:

@@ -130,7 +130,10 @@ extension KiwiCore {
             // the setup's five-per-display blocks land correctly
             // (not scattered into the workflow Standard's slots).
             apply(composed: composed, forceRetile: false)
-            profiles.adoptStandard(named: composed.sourceName)
+            profiles.adoptStandard(
+                named: composed.sourceName,
+                spaces: Set(composed.spaces)
+            )
             // Bind ⌃⌥N for spaces the change added past the
             // first-run seed — additive, never overwriting a
             // custom chord (#485).

@@ -73,25 +73,23 @@ extension KiwiCore {
         // Typo-guard hits are recorded only for the chunk run:
         // a guarded unknown call is non-fatal, so it must land
         // here as an issue to stay visible (#39).
-        // The run ledger, not a before/after diff of the space
-        // set: a reload's `create_space` of a live space changes
-        // nothing a diff could see (#1509).
-        state.workspaces.referenced = []
-        let typos = recordingTypoIssues {
-            if case .failure(let error) = fresh.runFile(
-                configURL
-            ) {
-                onLog("init.lua error: \(error)")
-                issues.append(
-                    ConfigIssue(
-                        source: "init.lua",
-                        kind: .luaError("\(error)")
+        var typos: [ConfigIssue] = []
+        initDeclaredSpaces = recordingSpaceReferences {
+            typos = recordingTypoIssues {
+                if case .failure(let error) = fresh.runFile(
+                    configURL
+                ) {
+                    onLog("init.lua error: \(error)")
+                    issues.append(
+                        ConfigIssue(
+                            source: "init.lua",
+                            kind: .luaError("\(error)")
+                        )
                     )
-                )
+                }
             }
         }
         issues.append(contentsOf: typos)
-        initDeclaredSpaces = state.workspaces.referenced
         // A sidecar that exists but no longer decodes means
         // the visual editor (and the structured loader) can't
         // see the user's rules — half-loaded, must be visible.
@@ -156,6 +154,20 @@ extension KiwiCore {
         refreshConfigIssues()
     }
 
+    /// The ids `ensureSpace` is handed while `body` runs — the
+    /// braces are the window, so the script's asks can never be
+    /// read after a later ensurer's. A run ledger rather than a
+    /// before/after diff of the space set: a reload's
+    /// `create_space` of a live space changes nothing a diff could
+    /// see (#1509).
+    private func recordingSpaceReferences(
+        _ body: () -> Void
+    ) -> Set<SpaceID> {
+        state.workspaces.referenced = []
+        body()
+        return state.workspaces.referenced
+    }
+
     private var unreadableSidecarIssue: ConfigIssue {
         ConfigIssue(
             source: "gui.json",
@@ -182,6 +194,7 @@ extension KiwiCore {
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
+        initDeclaredSpaces = []
         // The session resize layer reseeds on reload (#458):
         // the config about to apply is the new truth, and a
         // shadowing session value would make an edited ratio
