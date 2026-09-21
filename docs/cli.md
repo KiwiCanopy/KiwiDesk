@@ -17,16 +17,15 @@ kiwidesk help <name>          # one command's arguments
 ```
 
 > The Homebrew cask puts it on your `PATH` as lower-case
-> `kiwidesk`, which is what every example here uses. A source
-> build produces `.build/release/KiwiDesk` instead — same
-> commands, so substitute that path for `kiwidesk` throughout.
-> The capitalized `KiwiDesk` elsewhere on this page is the Lua
-> global, the config directory, or the product name — none of
-> those change.
+> `kiwidesk`, which every example here uses. A source build
+> produces `.build/release/KiwiDesk` instead — same commands, so
+> substitute that path for `kiwidesk` throughout. The capitalized
+> `KiwiDesk` elsewhere on this page is the Lua global, the config
+> directory, or the product name.
 
 **Installed from the `.dmg`?** The app bundle carries the same
-executable — the CLI is not a separate program — so all the cask
-does is link it onto your `PATH`. Do that once yourself:
+executable; the cask only links it onto your `PATH`. Do that once
+yourself:
 
 ```sh
 sudo mkdir -p /usr/local/bin
@@ -34,35 +33,24 @@ sudo ln -sf /Applications/KiwiDesk.app/Contents/MacOS/KiwiDesk \
   /usr/local/bin/kiwidesk
 ```
 
-The `mkdir` is not redundant: `/usr/local/bin` does not exist on a
-clean macOS that has never had Homebrew — which is exactly this
-paragraph's reader — and `ln` fails with *No such file or
-directory* without it.
+The `mkdir` is there because `/usr/local/bin` may not exist on a
+Mac that has never had Homebrew. Link, never copy: a copy fails
+its signature check.
 
-A symlink rather than a copy, deliberately. It resolves through to
-whatever is inside the bundle, so the CLI stays the version of the
-app you are running after KiwiDesk updates itself. A copy would
-not work at all: the executable's signature is sealed to its
-bundle and macOS kills it the moment it runs from anywhere else,
-and it would no longer find the Sparkle framework it loads from
-alongside the app.
-
-Another directory works if you would rather not use `sudo`, as
-long as it is one your shell already searches — note that
+Any directory your shell already searches works without `sudo`;
 `~/.local/bin` is **not** on the macOS default `PATH`, so it needs
 adding first.
 
 Commands are sent over a UNIX domain socket at
-`~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on
-success, 1 on error (error message — and, on some successes, a
-note — on stderr, data on stdout).
+`~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on success, 1
+on error; data goes to stdout, the error message — and, on some
+successes, a note — to stderr.
 
-Data on stdout is JSON with its object keys **sorted**, so two
-captures of the same response can be diffed. It is indented when
-stdout is a terminal and compact — one line — when it is piped or
-redirected, which keeps it exactly what a script or `jq` already
-expects. `subscribe` is unaffected either way: its stream is
-newline-delimited JSON, one event per line, whatever stdout is.
+Data on stdout is JSON with its object keys **sorted**, indented
+when stdout is a terminal and compact — one line — when it is
+piped or redirected. `subscribe` is unaffected either way: its
+stream is newline-delimited JSON, one event per line, whatever
+stdout is.
 
 ## Version
 
@@ -72,10 +60,8 @@ kiwidesk --version   # or -v; works without the app running
 
 Prints `<semantic version> (<short commit>)`, e.g. `0.1.0
 (abc1234)`, or just the semantic version when the commit is
-unknown. Only a build produced by the release workflow knows its
-own commit — a commit cannot contain its own SHA, so a checked-in
-tree cannot name the one it becomes, and any build you make
-yourself prints the bare version. The same information is
+unknown: only a release build knows its commit, so a build you
+make yourself prints the bare version. The same information is
 available over IPC/Lua as the `version` command — see the table
 below.
 
@@ -87,13 +73,9 @@ kiwidesk help scroll.set_anchor     # one command in full
 kiwidesk list_commands --json       # the same, machine-readable
 ```
 
-Both work **without the app running**. The listing describes the
-API the binary was built with — no app state goes into it — and
-that binary is the CLI, so nothing is asked over the socket. If
-an older KiwiDesk is running while a newer `kiwidesk` is first on
-your `PATH`, the listing describes the newer one; they ship as a
-single binary, so that is a half-finished install rather than
-something to reason about.
+Both work **without the app running**: the listing describes the
+API the binary was built with, carries no app state, and asks
+nothing over the socket.
 
 `list_commands` prints one block per group: the `KiwiDesk` table
 first (the commands a keybinding usually names), then each layout
@@ -131,8 +113,7 @@ arguments:
 ```
 
 Those values are **read from the decoder that accepts them**, so
-the listing cannot fall behind the code — that is the whole point
-of keeping this data in `APIReference` rather than in prose.
+the listing cannot fall behind the code.
 
 A misspelled name fails with a suggestion and exit code 1:
 
@@ -142,29 +123,21 @@ error: unknown command: focsu (did you mean focus?)
 ```
 
 Unlike the did-you-mean hint on an unknown *command*, this one
-will point at a Lua-only name: you are looking a name up, not
-invoking it.
+will point at a Lua-only name.
 
 **Text or JSON.** A terminal gets the text above; a pipe or a
 redirect gets JSON. `--json` forces JSON either way. An
 unrecognised option is an error, not a silent no-op.
 
-**The JSON shape changed, and nothing preserves the old one.**
-`list_commands` used to return a flat array of 262 name strings;
-it now returns `{"commands": <count>, "groups": [...]}`, each
-group carrying one object per command — `name`,
+`list_commands` returns `{"commands": <count>, "groups": [...]}`,
+each group carrying one object per command — `name`,
 `qualified_name`, `group`, `command`, `channel`, `summary`,
 `aliases`, and an `arguments` array whose enum entries add
-`values`. A script that read the old array needs updating; a
-command's output is not a stored value, so no compatibility
-shape is owed for one.
+`values`.
 
-The Swift type an enum's values were read from is deliberately
-**not** a JSON field. It is printed in the terminal rendering,
-where it helps a person find the decoder, but publishing it
-would make an internal symbol part of this command's output —
-and those get renamed freely. `values` is what answers "what may
-I send".
+The Swift type an enum's values were read from is **not** a JSON
+field; it appears in the terminal rendering only. `values` is
+what answers "what may I send".
 
 Bare `kiwidesk help` (and `--help` / `-h`) still prints the short
 usage block. Add a name, or `--json`, to get the API instead.
@@ -188,45 +161,38 @@ running` only when a process is actually running. `stop` prints
 `KiwiDesk service is not running` cleanly when nothing is
 loaded. `restart` boots the job out and back in; when nothing
 was loaded it reports `KiwiDesk service was not running —
-started it` rather than claiming to have restarted something
-that wasn't there. `status` reports the loaded/running state and
-the pid.
-A real `launchctl` failure exits non-zero; the ordinary
-already-running / not-running cases exit 0.
-`start` while KiwiDesk is already running loads the agent, whose
-`RunAtLoad` spawns one supervised launch; it finds the instance
-lock held, brings the running copy forward once — taking focus
-from your terminal — and exits cleanly.
+started it`. `status` reports the loaded/running state and the
+pid. A real `launchctl` failure exits non-zero; the ordinary
+already-running / not-running cases exit 0. `start` while
+KiwiDesk is already running loads the agent, whose `RunAtLoad`
+spawns one supervised launch; it finds the instance lock held,
+brings the running copy forward once — taking focus from your
+terminal — and exits cleanly.
 
-**This service is the only way to get crash supervision** (#1071).
-Settings offers no switch for it: it is a second launcher, and
-running it beside the login item means two mechanisms starting
-KiwiDesk at login, which is a thing to understand rather than a
-checkbox to tick. Settings ▸ General's **Start at login** is the
-`SMAppService` login item (visible in System Settings ▸ Login
-Items) and nothing else — it never touches this agent, and this
-agent never touches it.
+**This service is the only way to get crash supervision** (#1071),
+and Settings offers no switch for it. Settings ▸ General's
+**Start at login** is the `SMAppService` login item (visible in
+System Settings ▸ Login Items) and nothing else — it never
+touches this agent, and this agent never touches it.
 
 Both launch at login. The single-instance lock keeps that to one
-process, so they never fight over your windows — but only the
-launch that *wins* is supervised, so running both means
-supervision is a coin flip (see
+process, but only the launch that *wins* is supervised, so
+running both makes supervision a coin flip (see
 [Accepted limitations](accepted-limitations.md)). Run one: this
 service if you want crash restart, the login item if you do not.
 While the service is loaded, the Settings switch shows as on and
-inert, saying so. To keep the two
-visible to each other, `service status` adds a `login item:` line
+inert, saying so. `service status` adds a `login item:` line
 reporting the login-item state, and `service start` prints a note
-when the login item is *also* on — telling you two mechanisms
-will start KiwiDesk, and to run one. These strings are the login
-item's only appearance in CLI output.
+when the login item is *also* on, saying that two mechanisms will
+start KiwiDesk and to run one. These strings are the login item's
+only appearance in CLI output.
 
 ## Exporting the Log
 
 KiwiDesk writes its diagnostic lines to the macOS unified log
 under its own subsystem, at default level and with the text
-public — so the shipped app's log is readable on any Mac with no
-debug build and no extra permission. To hand it over with a bug
+public, so the shipped app's log is readable on any Mac with no
+debug build and no extra permission. To attach it to a bug
 report, export the last stretch to a file:
 
 ```sh
@@ -237,22 +203,16 @@ report, export the last stretch to a file:
 
 Reach back to just before the problem happened — `--last 15m`,
 `--last 2h`, or `--start "2026-09-02 09:40:00"` for an exact
-window — and attach the file to the issue rather than pasting
-fragments. `/usr/bin/log`, spelled out, because a shell alias
-named `log` is common. To watch live while reproducing:
+window — and attach the whole file to the issue. Spell out
+`/usr/bin/log`: a shell alias named `log` is common. To watch
+live while reproducing:
 
 ```sh
 /usr/bin/log stream --predicate 'subsystem == "com.kiwicanopy.kiwidesk"' --style compact
 ```
 
-The subsystem filter keeps the file to what KiwiDesk itself
-wrote — exact, and public text — which is what an attachable
-report wants. It deliberately excludes other processes' lines
-(the privacy daemon's Accessibility verdicts, the WindowServer);
-a maintainer who needs those widens to a word filter on
-"KiwiDesk", which also catches unrelated apps mentioning the
-name. (`kiwidesk debug_log [message]` WRITES a marker line into
-this same log, useful to bracket a repro; it exports nothing.)
+`kiwidesk debug_log [message]` writes a marker line into this
+same log, which brackets a repro; it exports nothing.
 
 ## Commands
 
@@ -264,8 +224,8 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
-| | `move_to_desktop` | Desktop number, [space id] — moves the focused window, you stay; the Space it joins when it lands, if given |
-| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window, switches there, and leaves keyboard focus on the window; the Space it joins when it lands, if given |
+| | `move_to_desktop` | Desktop number, [space id] — moves the focused window there; you stay. The space id, if given, is the Space it joins on landing |
+| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window there, switches with it and keeps keyboard focus on it. The space id, if given, is the Space it joins on landing |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |
@@ -391,43 +351,43 @@ structure alone
 ([Lua reference](lua-reference.md#reset_layout_sizing)).
 :::
 
-The table lists each layout global once. Every layout global
-has a per-space `_override` twin (e.g. `bsp.set_ratio_h_override`,
-`scroll.set_slot_size_override`) that takes a leading `space id,
-value` and shadows the global for that space only.
+Every layout global has a per-space `_override` twin (e.g.
+`bsp.set_ratio_h_override`, `scroll.set_slot_size_override`) that
+takes a leading `space id, value` and shadows the global for that
+space only.
 
 `resize` adapts to the active layout and is per-axis (#56). A
 floating focused window resizes itself directly in any mode
 (width for `x`, height for `y`, floored at `min_window_size`),
 splitting the delta between both edges and pinning one that is
 already against the screen edge or a bar (#1091). "Floating" is
-the effective float since #1184: the window's own flag, or any
-window in a floating-layout space, which places nothing. A
-focused window in native full screen is refused ahead of every
-layout, whatever its float state, with `the focused window is
+the effective float (#1184): the window's own flag, or any window
+in a floating-layout space, which places nothing. A focused
+window in native full screen is refused ahead of every layout,
+whatever its float state, with `the focused window is
 fullscreen` (#1298): nothing is written and no neighbour moves;
 the pill and sound rule below apply to it as to the monocle/grid
 reply.
 For tiled windows: in BSP, `x` moves the side-by-side split
 ratio and `y` the stacked one, independently, each in the
-direction that grows the *focused* window's region (#122).
-Stack is focus-aware too (#67) and arrangement-aware (#222):
-the split axis (`x` for a left/right stack zone, `y` for
-top/bottom) moves the master/stack split in the direction that
-grows the *focused* window; the focused zone's own axis grows
-that window's share of its zone (session-scoped weights, reset
-on relaunch). An axis matching neither fails with the cue — so
-a master zone lined up *along* the split axis has no reachable
-per-window shares (accepted, see design-decisions). Scrolling resizes
-the slot along its own scroll axis for either `x` or `y`. In a
-track space the axis across the tracks resizes the focused
-window's track, the axis along them its share within the track
-(#128; session-scoped weights too). monocle and grid
-reply "not supported" — that failure flashes a pill on the
-focused window whatever issued it, and adds the system alert
-sound when `set_refusal_sound` is on (default off) and a hotkey
-was what fired: a CLI or IPC caller reads the error reply and
-never hears one.
+direction that grows the *focused* window's region (#122). In
+stack (#67, #222), the split axis (`x` for a left/right stack
+zone, `y` for top/bottom) moves the master/stack split in the
+direction that grows the *focused* window; the focused zone's
+own axis grows that window's share of its zone (session-scoped
+weights, reset on relaunch). An axis matching neither fails with
+the cue, so a master zone lined up *along* the split axis has no
+reachable per-window shares (accepted — see
+[design decisions](design-decisions.md)). Scrolling resizes the
+slot along its own scroll axis for either `x` or `y`. In a track
+space the axis across the tracks resizes the focused window's
+track, the axis along them its share within the track (#128;
+session-scoped weights too). Monocle and grid reply "not
+supported" — that failure flashes a pill on the focused window
+whatever issued it, and adds the system alert sound when
+`set_refusal_sound` is on (default off) and a hotkey was what
+fired: a CLI or IPC caller reads the error reply and never hears
+one.
 
 ### Deleting a Space
 
@@ -446,8 +406,7 @@ where:
 next config load — what each means is under
 [`delete_space`](lua-reference.md#delete_space) — and is absent
 when none does. The JSON goes to stdout as always; the CLI adds
-one line per source on stderr, so a script parsing stdout sees
-nothing new:
+one line per source on stderr, so stdout carries nothing new:
 
 ```
 removed from the live layout but still in saved profile "Work" — save the profile to make this durable
@@ -466,10 +425,10 @@ apply it with:
 kiwidesk reload_config
 ```
 
-For GUI-managed setups, put the array at the root `ignore_rules` key
-in `gui.json`, then run `kiwidesk reload_config`. Matching apps
-disappear from KiwiDesk state and emit no window events. Removing an
-id and reloading makes its windows manageable again.
+For GUI-managed setups, put the array at the root `ignore_rules`
+key in `gui.json` and reload the same way. Matching apps
+disappear from KiwiDesk state and emit no window events. Removing
+an id and reloading makes its windows manageable again.
 
 Those declarations are the global base. A profile JSON may carry a
 sparse `ignore_rules` object: `true` adds an id and `null` removes an
@@ -506,14 +465,13 @@ confirmation line lists what was dropped:
 {"status": "success", "data": {"unknown": ["space_chnage"]}}
 ```
 
-A non-string argument appears there as `<non-string>`: it has no
-name to report back, but it was dropped just the same. The same
-names, truncated after the first few, go to the application log
-(viewable in Console.app).
+A non-string argument is dropped the same way and appears there
+as `<non-string>`. The same names, truncated after the first few,
+go to the application log (viewable in Console.app).
 
 Subscribe to nothing *but* unrecognised names and the stream
-stays silent — an empty filter is not the same request as no
-filter, and `unknown` says why nothing is arriving.
+stays silent: an empty filter is not the same request as no
+filter.
 
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `pull_or_spawn` match on) — next to
@@ -534,7 +492,7 @@ is available on the socket stream but not to a Lua handler:
 ```
 
 The window lifecycle events fire even when focus does not
-change, so bars can drop stale icons immediately:
+change:
 
 ```json
 {"event": "window_created",
@@ -581,15 +539,14 @@ unhide or a session restore.
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on
 `reason` to ignore them. The reason is read off the
-WindowServer, not a timer: a window it still hosts on an
-unshown Desktop is `vanished`, one it hosts nowhere is
-`closed`, whenever the destroy lands. A window closed *while
-its Desktop is off-screen* is reported `closed` when KiwiDesk
-next reads the Desktops — at the next Desktop switch, or
-within about five seconds while any window is away — so a
-consumer sees two destroys for that window, `vanished` then
-`closed`, and refreshing on `desktop_change` remains the safe
-pattern.
+WindowServer: a window it still hosts on an unshown Desktop is
+`vanished`, one it hosts nowhere is `closed`, whenever the
+destroy lands. A window closed *while its Desktop is off-screen*
+is reported `closed` when KiwiDesk next reads the Desktops — at
+the next Desktop switch, or within about five seconds while any
+window is away — so a consumer sees two destroys for that
+window, `vanished` then `closed`, and refreshing on
+`desktop_change` remains the safe pattern.
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another space (`move_to_space`,
@@ -598,7 +555,7 @@ live crossing emits as the membership moves, so a drag pulled
 back before release emits once per crossing). A
 `move_to_desktop` onto a Desktop that lives on **another
 screen** emits it too: the window joins the space that screen
-shows, or the layout would carry it back to the screen it left
+shows
 ([#1010](https://github.com/KiwiCanopy/KiwiDesk/issues/1010)).
 `move_to_desktop` with a **named Space** emits it as well when
 that Desktop is the one its screen is already showing —
@@ -643,8 +600,7 @@ option off, or with a single screen, `monitor` is always 1.
 a `switch_layer` call, a config reload returning you to
 `default`, a profile switch — and never when a switch names the
 layer already active. It carries the previous and the new layer
-names, `default` included, so a status bar can show the active
-layer without polling:
+names, `default` included:
 
 ```json
 {"event": "layer_change",
