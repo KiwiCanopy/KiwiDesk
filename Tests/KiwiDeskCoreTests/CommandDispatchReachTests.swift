@@ -41,8 +41,11 @@ import Testing
 /// `canDriveDesktops`, its arm answering. The Desktop topology
 /// is pinned too (`bind_profile_to_desktop` reads a snapshot
 /// past that gate). Both are written by the #884/#888 suites as
-/// well; all are synchronous main-actor bodies, so no window
-/// exists in which one observes the other. That this suite is
+/// well, whose bodies are synchronous main-actor ones, so no
+/// window exists in which one observes the other — and the pin
+/// here is held only in the two SYNCHRONOUS bodies: an `await`
+/// between `pinMachine()` and `unpin()` would open exactly that
+/// window, so the two `async` bodies pin nothing. That this suite is
 /// the first to execute EVERY verb, with the pin as two lines
 /// and no guard, is the accepted trade — `makeTestCore` cannot
 /// hold a process-global static without clobbering the suites
@@ -188,11 +191,14 @@ struct CommandDispatchReachTests {
         )
     }
 
-    /// `noArm` is exactly the no-arm half of every `"unknown …:`
-    /// refusal Core spells, the other half classified above with
-    /// its reason. A new spelling on either side reds here until
-    /// it is filed — which is what keeps `recognised` from going
-    /// blind to a namespace by construction.
+    /// `noArm` is exactly the no-arm half of every `"unknown
+    /// <words>: ` refusal Core spells, the other half classified
+    /// above with its reason. A new spelling of that grammar reds
+    /// here until it is filed. The grammar is the census's
+    /// bound: a refusal spelled outside it (`no such setting:`,
+    /// a concatenated string) is unseen here and blinds
+    /// `recognised` to its namespace — core-boundaries.md makes
+    /// the spelling a convention for that reason.
     @Test("the no-arm spellings are a census of Core's refusals")
     func spellingsAreCensus() async throws {
         let literals = try await Self.unknownLiterals()

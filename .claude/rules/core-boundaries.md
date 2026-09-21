@@ -106,10 +106,15 @@ itself when a sixth is added.
     `expected boolean`, an argument refusal the probe reads as
     the arm answering; `setBool` is the shape. And **a new "no
     arm" refusal spelling is classified in that suite's census**
-    — `noArm` is held against every `"unknown …:` literal in
-    Core, with the argument refusals (`unknown space:`) filed
-    beside it with their reason, so a fifth spelling reds until
-    it is filed rather than blinding the probe to its namespace.
+    — `noArm` is held against every `"unknown <words>: ` literal
+    in Core, with the argument refusals (`unknown space:`) filed
+    beside it with their reason, so a fifth spelling of THAT
+    grammar reds until it is filed. The grammar is the bound: a
+    refusal spelled otherwise (`no such setting:`, a
+    concatenated string) is outside the census and blinds the
+    probe to its namespace, so a no-arm refusal is spelled
+    `unknown <words>: ` by convention and one spelled otherwise
+    is review's.
     Recognition is the whole claim — a refused placeholder is the
     arm answering, a gutted arm returning `.ok()` passes — and
     the socket-only `subscribe` is the one exemption, its route
