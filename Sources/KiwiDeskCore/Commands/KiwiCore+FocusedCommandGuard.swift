@@ -82,11 +82,8 @@ extension KiwiCore {
     /// The denied clause, said twice from ONE reading — the
     /// log's `reason` and the response's `error`. An anchor
     /// missing because the ACTIVE Space is empty is the one
-    /// clause whose error leaves the generic sentence (#1336):
-    /// `get_state` marks a window focused in a Space that is not
-    /// active, so "no managed window is currently focused" names
-    /// the wrong fact. Every other clause keeps the sentence the
-    /// limitations table documents.
+    /// clause whose error leaves the generic sentence (#1336);
+    /// every other clause keeps it.
     private func denialSentences(
         focused: ManagedWindow?,
         front: pid_t?
@@ -119,11 +116,12 @@ extension KiwiCore {
     /// Space holds nothing (#1336), or nil when it is not empty —
     /// members none of which is focused stay the generic case.
     /// Names the window a sibling Space on the SAME screen marks
-    /// focused: that is the one the user sees parked, and
-    /// `focus_space` on that Space is what brings it under the
-    /// verb. `lastFocused`'s Space outranks the others when several
-    /// qualify; a Space on another screen lays its windows out
-    /// there and is never named.
+    /// focused and the `focus_space` that brings it under the
+    /// verb: `lastFocused`'s Space where it is among them, else
+    /// the first in Space order. Same screen is the assigned
+    /// display compared raw (the `FocusDistrust` reading), so an
+    /// unassigned Space pairs only with unassigned ones and a
+    /// Space on another screen is never named.
     func emptyActiveSpaceRefusal() -> String? {
         guard let active = activeSpace,
             state.effectiveMembers(of: active).isEmpty

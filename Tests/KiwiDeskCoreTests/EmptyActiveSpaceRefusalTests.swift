@@ -213,21 +213,55 @@ struct EmptyActiveSpaceRefusalTests {
         #expect(response.error == "the active Space 2 is empty")
     }
 
-    /// Two sibling Spaces each marking a focus: the one holding
-    /// `lastFocused` — the window that last held the system focus
-    /// — is the one named.
+    /// Two sibling Spaces each marking a focus, in Space order
+    /// [1, 3, 2]: the one holding `lastFocused` — the window that
+    /// last held the system focus — is named even where it is
+    /// the LATER Space, so the clause is told from the order
+    /// fallback below.
     @Test("lastFocused's Space outranks another marked Space")
     func lastFocusedSpaceOutranks() {
         let core = makeCore()
         addWindow(core, 1, pid: 1, app: "Finder")
         addWindow(core, 2, pid: 2, app: "Mail")
         core.moveWindow(WindowID(2), to: SpaceID("3"), follow: false)
-        // Space 1 marks 1, Space 3 marks 2; the last honored
-        // focus is window 1.
-        core.state.workspaces.focus(WindowID(1), in: SpaceID("1"))
         core.execute("focus_space", args: [.string("2")])
         pinDisplay(core, Self.displayA, spaces: ["1", "2", "3"])
-        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        // Space 1 marks 1, Space 3 marks 2; the last honored
+        // focus is window 2, in the later-created Space.
+        core.state.workspaces.focus(WindowID(2), in: SpaceID("3"))
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        #expect(
+            core.state.workspaces.allSpaces.map(\.id)
+                == [SpaceID("1"), SpaceID("3"), SpaceID("2")]
+        )
+        core.frontmostPIDProvider = { 1 }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(1)]
+        )
+        #expect(
+            response.error
+                == "the active Space 2 is empty; the focused window "
+                + "(Mail) is in Space 3 — focus_space 3 first"
+        )
+    }
+
+    /// With `lastFocused` in no marked sibling — here a Space on
+    /// the other screen — the first marked Space in Space order
+    /// is named.
+    @Test("Without lastFocused among them, Space order decides")
+    func spaceOrderIsTheFallback() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 1, app: "Finder")
+        addWindow(core, 2, pid: 2, app: "Mail")
+        core.moveWindow(WindowID(2), to: SpaceID("3"), follow: false)
+        addWindow(core, 5, pid: 5, app: "Notes")
+        core.moveWindow(WindowID(5), to: SpaceID("5"), follow: false)
+        core.execute("focus_space", args: [.string("2")])
+        pinDisplay(core, Self.displayA, spaces: ["1", "2", "3"])
+        pinDisplay(core, Self.displayB, spaces: ["5"])
+        core.state.workspaces.focus(WindowID(5), in: SpaceID("5"))
+        #expect(core.state.workspaces.lastFocused == WindowID(5))
         core.frontmostPIDProvider = { 1 }
         let response = core.execute(
             "move_to_desktop",
@@ -238,5 +272,23 @@ struct EmptyActiveSpaceRefusalTests {
                 == "the active Space 2 is empty; the focused window "
                 + "(Finder) is in Space 1 — focus_space 1 first"
         )
+    }
+
+    /// The recovery names a verb by a literal nothing else ties
+    /// to the catalogue (#1033's class): pin the word the
+    /// sentence spells against `APIReference.dispatchable`, so a
+    /// rename of `focus_space` reds here.
+    @Test("The recovery verb is a catalogued command")
+    func recoveryVerbIsCatalogued() {
+        let core = makeCore()
+        arriveOnEmptySpace(core, pid: 1)
+        core.frontmostPIDProvider = { 1 }
+        let error =
+            core.execute("move_to_desktop", args: [.number(1)]).error
+            ?? ""
+        let recovery = error.components(separatedBy: " — ").last ?? ""
+        let verb = recovery.split(separator: " ").first.map(String.init)
+        #expect(verb == "focus_space")
+        #expect(verb.map(APIReference.dispatchable.contains) == true)
     }
 }

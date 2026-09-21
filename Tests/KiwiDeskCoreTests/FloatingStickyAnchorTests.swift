@@ -184,17 +184,18 @@ struct FloatingStickyAnchorTests {
     @Test("resize is not denied while the sticky is frontmost")
     func resizeNotDenied() {
         let core = makeCore()
+        var logs: [String] = []
+        core.onLog = { logs.append($0) }
         seed(core, localPID: 100, travelerPID: getpid())
         // resize keeps resolving against the local slot (the
         // id-keyed-weights orphan rule) — but the guard vets
-        // the anchor, so it must not fail closed here.
-        let response = core.execute(
+        // the anchor, so it must not fail closed here. Anchored
+        // on the denial's log needle, since the guard has more
+        // than one sentence (#1336).
+        _ = core.execute(
             "resize",
             args: [.string("x"), .number(50)]
         )
-        #expect(
-            response.error
-                != "no managed window is currently focused"
-        )
+        #expect(!logs.contains { $0.contains("preflight (#292)") })
     }
 }

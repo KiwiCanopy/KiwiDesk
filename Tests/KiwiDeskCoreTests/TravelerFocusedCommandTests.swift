@@ -94,16 +94,18 @@ struct TravelerFocusedCommandTests {
     @Test("Directional focus from a cross-app traveler is not denied")
     func focusFromTravelerAllowed() {
         let core = makeCore()
+        var logs: [String] = []
+        core.onLog = { logs.append($0) }
         seed(core, travelerPID: getpid())
-        let response = core.execute(
+        _ = core.execute(
             "focus",
             args: [.string("left")]
         )
         // It may legitimately dead-end ("no window left of focus"),
-        // but must never be turned away by the foreground guard.
-        #expect(
-            response.error != "no managed window is currently focused"
-        )
+        // but must never be turned away by the foreground guard —
+        // anchored on the denial's log needle, since the guard has
+        // more than one sentence (#1336).
+        #expect(!logs.contains { $0.contains("preflight (#292)") })
     }
 
     @Test("toggle_floating targets the traveler, not the local slot")
