@@ -205,7 +205,13 @@ struct ClosedReturnFocusTests {
         core.lastDesktopSwitch = Date()
         core.handle(.windowDestroyed(owed, wasMinimized: false))
         core.lastDesktopSwitch = .distantPast
-        core.desktopMemory.returnFocus.record(owed)
+        // Stamped AHEAD: the debt drains on a wall clock, and a
+        // starved runner must not let the hold vanish between
+        // the record and the arrival (#1371, tests.md).
+        core.desktopMemory.returnFocus.record(
+            owed,
+            at: Date(timeIntervalSinceNow: 60)
+        )
         #expect(core.desktopMemory.returnFocus.owed() == owed)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.state.closedDepartures.contains(target))
