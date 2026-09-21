@@ -5770,7 +5770,7 @@ the reader it lies to is the one least able to tell a skipped
 screen from a broken one. The tour's length genuinely varies: a
 tour reopened from Settings starts past the screens that have
 nothing left to say, and any machine-gated step widens the
-variance again (the Displays recommendation was one,
+variance again (the Displays recommendation was one until
 #888; the principle does not lean on it).
 
 The row of pips at the top of each screen is not that counter
@@ -6360,7 +6360,7 @@ family lives in `LayoutSchematicStandIns` and
 `LayoutSchematicTrackFoldTests` holds the scale independence.
 
 **A layout gets one frame, whatever it has to teach** (#753,
-replacing the #125/#239 two-frame bar of [UI
+replacing the #125/#239 two-frame bar that once stood in [UI
 patterns](ui-patterns.md) ▸ Previews & schematics). That bar let a
 layout earn a second frame — two mini-screens with an arrow
 between them — for a fact "inexpressible in one frame at any
@@ -6480,8 +6480,8 @@ is a readout of the draft, never a decorative sketch: one pane per
 declared space, the colour fan and swatch grid of the config's
 real hexes, the Behaviour divider answering the real mouse-resize
 choice. There is no text-only fallback: a card without editor
-maths still draws its readout, on the tile the desktop plate
-(#786) gives the profile cards.
+maths still draws its readout — on the plate (#786), for a This
+Profile card.
 
 That tile is the **desktop plate**: a profile card's picture
 is a picture of the user's desktop, so it sits on a fixed
@@ -9281,7 +9281,7 @@ don't assume from tone.
 LIGHTNESS set per palette** (#1384), so that the ring composites
 to less contrast than the focused ring on the palette's home
 backdrop — dark for every palette but Clean Light — and never
-competes with it. A grey at ~35–60 % alpha over dark wallpaper
+competes with it. A dark grey at ~35–60 % alpha over dark wallpaper
 recedes twice — the vanish #1384 reported on six dark palettes —
 and below ~85 % the ring's colour is the wallpaper's, which on a
 busy one is no ring at all. Alpha is not the lever for receding;
@@ -10064,7 +10064,8 @@ so 0 means "the gap governs" and no floor is needed. Both default
 to 0, both bars on one edge stack outermost-first with the Space
 Bar carved first, and between the two the Space Bar's inner and
 the App Bar's outer both count — each bar owns its margins, so
-they add, and at the defaults the bars touch. Under two rules —
+they add, and at the defaults the bars touch. Under the pair of
+rules this replaces —
 the Space Bar flush with the windows' outer gap following it, the
 App Bar carved *inside* that outer gap with the windows' *inner*
 gap separating it from the windows — raising the outer gap moves
