@@ -42,8 +42,11 @@ extension APIReference {
             .integer("points")
         ),
         "reset_layout_sizing": APIRecord(
-            "Returns every Space's ratios, slot size and weights "
-                + "to the configured values; structure stays."
+            "Returns a Space's ratios, slot size and weights to "
+                + "what its profile set; structure stays. The "
+                + "active Space by default, one by id, or every "
+                + "Space for `all`.",
+            .space("space", optional: true)
         ),
         "set_refusal_sound": APIRecord(
             "Also plays an alert sound whenever a blocked "

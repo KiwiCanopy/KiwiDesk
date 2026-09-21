@@ -291,7 +291,7 @@ this same log, useful to bracket a repro; it exports nothing.)
 | | `set_gap_override` | space, size |
 | | `set_min_window_size` | pt (default 300) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
-| | `reset_layout_sizing` | — returns every space's ratios, slot size and weights to what the profile set; structure stays |
+| | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_float_nudge` | true\|false (default `true`) — shove a window toward center when it toggles to floating |
@@ -382,11 +382,12 @@ the same count replaces it.
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
 :::unreleased
-`reset_layout_sizing` clears what `resize` accumulated on every
-space — the session layer and the stack and track weights — so
-each lands on what its profile authored (an override's size
-field stays; the global only where nothing was authored), and
-leaves structure alone
+`reset_layout_sizing` clears what `resize` accumulated on the
+active space — or the space named, or every space for `all` —
+the session layer and the stack and track weights — so it
+lands on what its profile authored (an override's size field
+stays; the global only where nothing was authored), and leaves
+structure alone
 ([Lua reference](lua-reference.md#reset_layout_sizing)).
 :::
 

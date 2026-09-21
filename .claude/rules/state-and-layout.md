@@ -1201,7 +1201,9 @@ editing here:
   a resize never writes the authored override (#764).**
   `Space.resetSizing` clears the per-Space sizes (the session
   ratios, the stack and track weights); `reset_layout_sizing`
-  is a loop over it and lists nothing itself, and touches
+  is a loop over it — the active Space, one by id, or `all`
+  (`ResetLayoutSizingScopeTests`) — lists nothing itself, and
+  touches
   `TilingSettings` not at all. A resize path writes through
   `KiwiCore+SessionRatioWrite`'s `write*` and never an
   override's size field, and the overlay in

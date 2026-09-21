@@ -74,7 +74,8 @@ extension KiwiCore {
             // An action, not a setter, but it rides this
             // switch's forced-retile trailer like
             // `border.fit_gaps` (#764).
-            resetLayoutSizing()
+            let response = resetLayoutSizing(args)
+            guard response.isSuccess else { return response }
         default:
             var message = "unknown command: \(command)"
             if let hint = APIReference.suggestion(

@@ -5,8 +5,8 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// `reset_layout_sizing` (#764) clears every Space's SIZING —
-/// the session layer and the stack/track weights — and keeps
+/// `reset_layout_sizing` (#764) clears a Space's SIZING — the
+/// session layer and the stack/track weights — and keeps
 /// structure, the authored overrides (size fields included, the
 /// owner's 2026-09-21 ruling) and the globals. Display pinned
 /// (#531); a headless host reads as a
@@ -122,7 +122,10 @@ struct ResetLayoutSizingTests {
             core.state.workspaces[SpaceID("1")]?
                 .sessionRatios.splitRatioH != nil
         )
-        #expect(core.execute("reset_layout_sizing").isSuccess)
+        #expect(
+            core.execute("reset_layout_sizing", args: [.string("all")])
+                .isSuccess
+        )
         for space in core.state.workspaces.allSpaces {
             #expect(space.sessionRatios == SessionRatios())
             #expect(space.stackWeights.isEmpty)

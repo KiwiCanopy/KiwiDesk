@@ -622,11 +622,14 @@ KiwiDesk.set_resize_step(75)
 ### reset_layout_sizing
 
 :::unreleased
-**Expects:** nothing.
+**Expects:** optionally a space id, or `"all"`. Nothing means
+the active space.
 
-**Does:** returns every space's **sizing** — what `resize` and
+**Does:** returns the space's **sizing** — what `resize` and
 mouse resizes accumulate — to what your profile (or `init.lua`)
-set, in one action. Cleared on every space: the BSP split
+set, in one action; `"all"` does it on every space at once,
+for the week where you no longer know which ones drifted.
+Cleared: the BSP split
 ratios, the stack master ratio and the scrolling slot size (the
 session layer described under [resize](#resize)), the stack
 column's per-window weights and the track weights. Kept:
@@ -651,6 +654,8 @@ Lua bindings drawer.
 KiwiDesk.bind("ctrl+alt+equal", function()
     KiwiDesk.reset_layout_sizing()
 end)
+KiwiDesk.reset_layout_sizing("mail")
+KiwiDesk.reset_layout_sizing("all")
 ```
 :::
 

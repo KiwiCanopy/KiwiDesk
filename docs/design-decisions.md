@@ -2780,9 +2780,14 @@ the two routes back before `reset_layout_sizing` — nudging each
 ratio in the opposite direction, or `load_profile`, which also
 discards every non-sizing change since — were not answers. The
 verb clears the two stores a resize writes (the #458 session
-layer and the stack and track weights) on every space at once,
-because the problem is precisely not knowing which spaces
-drifted. Two rulings hold the shape. It resets each space to
+layer and the stack and track weights) on the active space by
+default — a reset is about the manual resizing in front of the
+user, and a bound key should undo what they just did, not what
+they did elsewhere — on one space by id, or on every space for
+`all`, which is the week-later case where the problem is
+precisely not knowing which spaces drifted (owner ruling
+2026-09-21; the issue asked for the universal one first). Two
+rulings hold the shape. It resets a space to
 what its profile or `init.lua` **authored** — a per-space
 `_override` size field survives, and only where nothing was
 authored does the space land on the global — never past either
