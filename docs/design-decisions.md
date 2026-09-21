@@ -8870,14 +8870,13 @@ that can't move, not the one that tried (#435). A move that simply
 *runs out of layout* — focus or swap in a direction with no window
 beyond the edge — gets a wordless **rubber-band bounce**: the
 focus ring offsets a few points toward the wall and springs back,
-the scroll-overscroll idiom, not the login-shake (#436). The split
-is deliberate: the bounce *means* "nothing there," so firing it on
-a locked-but-present traveler would contradict a cue users are
+the scroll-overscroll idiom, not the login-shake (#436). The
+bounce *means* "nothing there," so firing it on a
+locked-but-present traveler would contradict a cue users are
 trained to read as a genuine edge — and two cues for one keypress
-reads as a glitch. So keyboard-swap-onto-a-traveler is pill-only
-(there *is* a window there); the bounce is reserved for a true
-no-candidate edge (the exact `.fail("no window … of focus")`,
-never `"no focused window"`). The keyboard path has no snap-back
+reads as a glitch. So keyboard-swap-onto-a-traveler is pill-only;
+the bounce is reserved for a true no-candidate edge (the exact
+`.fail("no window … of focus")`, never `"no focused window"`). The keyboard path has no snap-back
 motion of its own, so the pill's own entrance gets a small scale
 overshoot — a third, smallest motion bound to the cue that
 explains, so a keypress still feels registered, without lending it
@@ -8911,11 +8910,11 @@ defaulting to Automatic.** The one sticky glyph reads the one
 `sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
 `floating.color` (a minimal `floating` namespace, since floating
-has no other setting) tinting its Space Bar badge only — it has
-no on-window mark. The color owns the *fill*, and the glyph on
-top is auto-contrasted black/white for legibility (a filled disc
-shows its hue far better than a thin glyph stroke at the 7–9 pt
-badge size, and an auto-contrast glyph means any picked fill stays
+has no other setting) tinting its Space Bar badge only — it has no
+on-window mark. The color owns the *fill*, and the glyph on top is
+auto-contrasted black/white for legibility (a filled disc shows
+its hue far better than a thin glyph stroke at the 7–9 pt badge
+size, and an auto-contrast glyph means any picked fill stays
 readable — a guardrail on legibility, never taste). The Space Bar
 sticky/floating marks stay filled discs in the count badge's
 family; the on-window mark nests the same filled disc inside its
@@ -8930,12 +8929,12 @@ content all day, and the adaptive label color is the only default
 guaranteed legible against anything behind the translucent plate,
 light or dark — a fixed hue can wash out or clash. So the shipped
 look is unchanged for anyone who never opens the grid; color is
-on-demand. The mark glyph itself changed to `infinity`
-("always / everywhere," and a single stroke that stays crisp at
-the 7–9 pt badge size where the old `square.stack.3d.up.fill`'s
-perspective smeared); the pushpin family is off-limits —
-`SpaceAssignmentChip` uses `pin.fill` for the opposite idea (a
-window bound to one space). (#429)
+on-demand. The mark glyph is `infinity` ("always / everywhere,"
+and a single stroke that stays crisp at the 7–9 pt badge size
+where `square.stack.3d.up.fill`'s perspective smeared); the
+pushpin family is off-limits — `SpaceAssignmentChip` uses
+`pin.fill` for the opposite idea (a window bound to one space).
+(#429)
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
@@ -9018,10 +9017,7 @@ disables. This extends *Overrides are visible-but-inherited* and
 *grey, don't hide* (AGENTS.md §2.7) from the override rows to the
 space-list cell that summarises them — the count is the scannable
 signal, and dropping it is the one way the data goes invisible.
-What breaks without it: a user floats a tuned space, sees the
-cell blank, assumes the overrides are gone, and is ambushed when
-they return on the next tiling switch. (`OverrideCellState`,
-owner ruling 2026-08-04; #678 8a)
+(`OverrideCellState`, owner ruling 2026-08-04; #678 8a)
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge
@@ -9029,26 +9025,24 @@ sliders behind a disclosure. When stored edges differ, the
 disclosure pre-expands so the values about to be overwritten
 are in view. (#68 §3.14)
 
-**A master whose followers disagree stays live and
-acknowledges; it never greys** (#1383, owner ruling
-2026-09-15 adopting the `ui-designer` verdict, reversing the
-issue's own "greyed but draggable"). Dimmed means "does not
-accept input" on every channel — mouse, keyboard, VoiceOver —
-and `SettingsSlider` refuses the drag, the arrow nudge and
-focus on the same bit that dims it, so a control that greys
-and still writes on a drag would be a second axis invented for
-one row, and a live control drawn dead is the one failure
-worse than a wrong grey. The gap masters therefore take the
-shape the Borders card's width master already had: the slider
-is live, the readout says "mixed" and speaks it, the label's
-`?` carries *the edges are set differently right now; a value
-here sets all of them*, and the first edit converges every
-edge — how a macOS inspector treats a mixed selection. This
-retires the reading that greying was the gap masters' special
-answer because a per-edge drawer sat under them to repair
-from: the drawer still pre-expands while mixed, but repair is
-one gesture on the master and never needed a grey to protect
-it. A "Sync" button was rejected as a second control for a
+**A master whose followers disagree stays live and acknowledges;
+it never greys** (#1383, owner ruling 2026-09-15 adopting the
+`ui-designer` verdict, reversing the issue's own "greyed but
+draggable"). Dimmed means "does not accept input" on every channel
+— mouse, keyboard, VoiceOver — and `SettingsSlider` refuses the
+drag, the arrow nudge and focus on the same bit that dims it, so a
+control that greys and still writes on a drag would be a second
+axis invented for one row, and a live control drawn dead is the
+one failure worse than a wrong grey. The gap masters therefore
+take the shape the Borders card's width master already had: the
+slider is live, the readout says "mixed" and speaks it, the
+label's `?` carries *the edges are set differently right now; a
+value here sets all of them*, and the first edit converges every
+edge — how a macOS inspector treats a mixed selection. Greying was
+never the gap masters' special answer licensed by the per-edge
+drawer under them: the drawer still pre-expands while mixed, but
+repair is one gesture on the master and never needed a grey to
+protect it. A "Sync" button was rejected as a second control for a
 one-gesture job. `GapsAndBordersGateWiringTests` ▸
 `gapMastersAcknowledgeAtTheLabel` holds the shape.
 
@@ -9063,38 +9057,34 @@ top of the range compresses, and per-edge asymmetry renders
 honestly as uneven margins. Deliberately not a "what will my
 layout look like" preview — that would be its own component.
 
-**Colors are just the native well; hex entry rides the
-system panel.** The inline `#RRGGBBAA` field originally kept
-beside every well (the "hex stays first-class" round-1 call)
-turned ten color rows into a wall of text boxes. The system
-color panel the well opens has native hex entry in its
-sliders pane, so the inline field was redundant chrome and
-was dropped — the stored value stays a hex string, and
-copy/paste theme sharing works through the panel. (#68
+**Colors are just the native well; hex entry rides the system
+panel.** An inline `#RRGGBBAA` field beside every well turns ten
+color rows into a wall of text boxes, and the system color panel
+the well opens has native hex entry in its sliders pane, so the
+inline field is redundant chrome — the stored value stays a hex
+string, and copy/paste theme sharing works through the panel. (#68
 §3.14, revised)
 
 **A palette carries every colour, including the two it used to
 miss.** (#678 Phase 3.) The colour surface is reflection-derived
 from `_color`-suffixed keys, which silently excluded the sticky
 and floating mark tints — their key is a bare `color`, because
-each struct IS one mark. That was invisible while the marks were
-edited on a different page from the shelf. Putting all of them on
-one page under a "save these as a palette" promise made it a
-defect: the bridge would have dropped two of its own rows. The
-filter now admits an exact `color` as well, and the empty
-"Automatic" value is accepted on those two paths and nowhere
-else — without that the surface would be one-directional (paint a
-mark, never hand it back), and the derived default palette, which
-extracts the shipped defaults, would carry two values apply
-dropped. The authored palettes in `Resources/Palettes` leave
-both keys out and should keep leaving them out: a mark tint is
-the one colour whose default is *adaptive*, so a palette that
-pins it takes a light/dark-following mark away without saying
-so. The derived default palette is the deliberate exception —
-it carries both, empty, which is what makes a reset reach them.
-This does not soften the colors-only rule below — two more
-COLOURS joined; no palette
-gained a flag, a width or an effect.
+each struct IS one mark. Putting all of them on one page under a
+"save these as a palette" promise makes that a defect: the bridge
+would drop two of its own rows. The filter admits an exact `color`
+as well, and the empty "Automatic" value is accepted on those two
+paths and nowhere else — without that the surface would be
+one-directional (paint a mark, never hand it back), and the
+derived default palette, which extracts the shipped defaults,
+would carry two values apply dropped. The authored palettes in
+`Resources/Palettes` leave both keys out and should keep leaving
+them out: a mark tint is the one colour whose default is
+*adaptive*, so a palette that pins it takes a light/dark-following
+mark away without saying so. The derived default palette is the
+deliberate exception — it carries both, empty, which is what makes
+a reset reach them. This does not soften the colors-only rule
+below — two more COLOURS joined; no palette gained a flag, a width
+or an effect.
 
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
@@ -9182,20 +9172,19 @@ don't assume from tone.
 - **Focus is one color across bar and border.**
   `border.focused_color` = the primary accent, and
   **`highlight_color` IS that accent — in every bundled palette,
-  without exception** (#756, narrowing this clause from the
-  permissive "borrow the secondary as a flourish" it used to
-  allow; `PaletteHighlightRoleTests` holds it). The flourish
-  reading did not survive contact with what the highlight
-  actually paints: under `active_indicator = outline` it strokes
-  a 2 pt ring around the whole active item, and on a `plain` bar
-  that ring plus one tinted glyph is the *entire* active state —
-  the item's own fill is clear. It is the largest mark either bar
-  makes, so a palette that gives it the second hue has the
-  subordinate colour outshouting the item it qualifies. Neither
-  palette loses the hue it gave up: both still carry it on
-  `drag.drop_zone.*`, where a second signal reads as distinct
-  rather than as competing. Where the *focused* accent sits is
-  the separation clause above's decision, not this one's.
+  without exception** (#756; `PaletteHighlightRoleTests` holds
+  it). The rejected reading — borrow the secondary as a flourish —
+  fails on what the highlight actually paints: under
+  `active_indicator = outline` it strokes a 2 pt ring around the
+  whole active item, and on a `plain` bar that ring plus one
+  tinted glyph is the *entire* active state — the item's own fill
+  is clear. It is the largest mark either bar makes, so a palette
+  that gives it the second hue has the subordinate colour
+  outshouting the item it qualifies. Neither palette loses the hue
+  it gave up: both still carry it on `drag.drop_zone.*`, where a
+  second signal reads as distinct rather than as competing. Where
+  the *focused* accent sits is the separation clause above's
+  decision, not this one's.
 - **A primary that cannot carry the ring is LIGHTENED, never
   swapped for the secondary.** Sunset is why the rule is phrased
   that way: its `#FF375F` simulated for protanopia sat 11 from
@@ -9234,137 +9223,128 @@ don't assume from tone.
   the active state.
 - **`group_badge_color` defaults to a neutral grey `#636366` /
   white**; a bespoke badge echoes the palette temperature and
-  pairs a text color chosen for contrast against *that* badge.
-  The default was `#B00020`/white until #955 — the macOS
-  notification badge, byte for byte — and that was the wrong
-  idiom to borrow. A notification badge counts things that
-  *arrived* and want an answer; a group badge counts windows
-  that are simply *there*. An alert hue on every grouped item,
-  at rest, before any interaction, spends urgency the state does
-  not carry, and urgency spent on nothing is not available when
-  something needs it. Contrast was never the argument on either
-  side — white clears 7.3:1 on the red and 6.0:1 on the grey —
-  and it is the reason the *lighter* neutral is not the answer:
-  systemGray `#8E8E93` cannot hold white at disc size (≈3.3:1).
-  Grey is also the bars' own vocabulary rather than an import,
-  Monochrome having picked `#636366` for exactly this role
-  before the default did, and a grey this near-neutral (three
-  points of blue and nothing else) is all but protan/deutan
-  invariant, so the colour-vision posture improves for free.
-  What is neutral is the **default**, not the knob: a theme that
-  wants a hue here still picks one, which is why the four
-  bundled palettes carrying the red as an inherited default
-  rather than as a choice (Kiwi Gold, Clean Light, Slate, True
-  Dark) moved with it while the four that chose their own
-  (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did not. **A
-  default retune reaches only what has not stored an answer,
-  and the two stores answer differently.** `gui.json` is sparse
-  — it records what was changed — so a machine that never
+  pairs a text color chosen for contrast against *that* badge. The
+  macOS notification badge — `#B00020`/white, byte for byte, the
+  default before #955 — is the wrong idiom to borrow. A
+  notification badge counts things that *arrived* and want an
+  answer; a group badge counts windows that are simply *there*. An
+  alert hue on every grouped item, at rest, before any
+  interaction, spends urgency the state does not carry, and
+  urgency spent on nothing is not available when something needs
+  it. Contrast was never the argument on either side — white
+  clears 7.3:1 on the red and 6.0:1 on the grey — and it is the
+  reason the *lighter* neutral is not the answer: systemGray
+  `#8E8E93` cannot hold white at disc size (≈3.3:1). Grey is also
+  the bars' own vocabulary rather than an import, Monochrome
+  having picked `#636366` for exactly this role before the default
+  did, and a grey this near-neutral (three points of blue and
+  nothing else) is all but protan/deutan invariant, so the
+  colour-vision posture improves for free. What is neutral is the
+  **default**, not the knob: a theme that wants a hue here still
+  picks one, which is why the four bundled palettes carrying the
+  red as an inherited default rather than as a choice (Kiwi Gold,
+  Clean Light, Slate, True Dark) moved with it while the four that
+  chose their own (Monochrome, Sunset, Ultraviolet, Kiwi Neon) did
+  not. **A default retune reaches only what has not stored an
+  answer, and the two stores answer differently.** `gui.json` is
+  sparse — it records what was changed — so a machine that never
   touched the badge takes the new grey at once. A **profile**
-  snapshots `TilingSettings` whole, so every profile saved
-  before this carries `#B00020` explicitly and keeps it on load.
-  That asymmetry is worth stating rather than smoothing over,
-  because the two are not the same kind of fact: a sparse entry
-  IS a choice, while a snapshot field is only "the default on
-  the day it was written", and a user cannot tell from the file
-  which they have. **Ruled: left as is — the retune is for fresh
-  installs, and a saved profile keeps what it saved.** A one-shot
-  migration over the retired pair was considered and declined,
-  and the reason generalizes past this colour: a migration that
-  chases a *default* has to rewrite a value it cannot read the
-  intent of, and the file does not record intent. Getting the
-  new default is one deliberate action away — re-apply a palette
-  or reset the colours — and that action is visible and
-  reversible, which a migration on next launch is neither. It
-  also means a retune can look like nothing happened to anyone
-  with saved profiles; that is the cost, and it is named here so
-  the next report of it is diagnosed rather than re-litigated.
-- **Drag ghost / drop-zone:** a deliberate two-hue split
-  (border opaque + fill ~15–25 %) so origin reads apart from
-  target — and since #511 it is held to the **same CVD
-  separation floor as the two accents** (`DragPairSeparationTests`;
-  **enforced**), because origin and target are the only two
-  overlays on screen at once. **Target tracks
-  `space_bar.focused_item_color`** — true for the shipped default
-  and six of the nine palettes; Monochrome, Sunset and
-  Ultraviolet keep a third colour and clear the floor anyway.
-  Origin is a green darkened for stroke duty, but *not*
-  necessarily the ring's green: see the overlay note below for
-  why the shipped ghost had to leave the hue family.
+  snapshots `TilingSettings` whole, so every profile saved before
+  this carries `#B00020` explicitly and keeps it on load. The two
+  are not the same kind of fact: a sparse entry IS a choice, while
+  a snapshot field is only "the default on the day it was
+  written", and a user cannot tell from the file which they have.
+  **Ruled: left as is — the retune is for fresh installs, and a
+  saved profile keeps what it saved.** A one-shot migration over
+  the retired pair was considered and declined, and the reason
+  generalizes past this colour: a migration that chases a
+  *default* has to rewrite a value it cannot read the intent of,
+  and the file does not record intent. Getting the new default is
+  one deliberate action away — re-apply a palette or reset the
+  colours — and that action is visible and reversible, which a
+  migration on next launch is neither. It also means a retune can
+  look like nothing happened to anyone with saved profiles; that
+  is the cost.
+- **Drag ghost / drop-zone:** a deliberate two-hue split (border
+  opaque + fill ~15–25 %) so origin reads apart from target — and
+  it is held to the **same CVD separation floor as the two
+  accents** (#511, `DragPairSeparationTests`; **enforced**),
+  because origin and target are the only two overlays on screen at
+  once. **Target tracks `space_bar.focused_item_color`** — true
+  for the shipped default and six of the nine palettes;
+  Monochrome, Sunset and Ultraviolet keep a third colour and clear
+  the floor anyway. Origin is a green darkened for stroke duty,
+  but *not* necessarily the ring's green: see the overlay note
+  below for why the shipped ghost had to leave the hue family.
 
 **The unfocused ring's grey sits at 85–90 % alpha with its
 LIGHTNESS set per palette** (#1384), so that the ring composites
 to less contrast than the focused ring on the palette's home
 backdrop — dark for every palette but Clean Light — and never
-competes with it. The guide used to read "~35–60 % alpha" and
-produced the vanish #1384 reported: six dark palettes shipped a
-dark grey at that alpha over dark wallpaper, which recedes
-twice, and below ~85 % the ring's colour is the wallpaper's,
-which on a busy one is no ring at all. Alpha is not the lever
-for receding; lightness is — and "receding" is measured as
-composited contrast, not lightness order, since on a light
-backdrop a ring recedes by approaching it. Two palettes fix their
-number so the argument is not re-run. **Sunset's grey stays
-dark** (`#6A665EE6`, ~25 L* below the pink) because `#FF8099`
-simulates to a neutral grey under protanopia, so only lightness
-separates the pair and a lighter grey walks into the collapse —
-`BorderRingSeparationTests` ▸ `aLiftedSunsetGreyCollapses` pins
-that the shared system grey the other dark palettes take fails
-Sunset outright. It is the weakest ring of the set on dark and
-accepted; if the pair reads too quiet, lighten the accent one
-step with hue held, never the grey. **Ultraviolet's grey sits
-level with its indigo** (`#7E7E96E6`, blue-grey cast kept)
-rather than below it: a grey clearly under the indigo's
-composited contrast is the vanish again, and the device pick
-`#BFBFBFE6` composited to more than twice the indigo's, inverting
-dominance — `BorderRingSeparationTests` ▸
+competes with it. A grey at ~35–60 % alpha over dark wallpaper
+recedes twice — the vanish #1384 reported on six dark palettes —
+and below ~85 % the ring's colour is the wallpaper's, which on a
+busy one is no ring at all. Alpha is not the lever for receding;
+lightness is — and "receding" is measured as composited contrast,
+not lightness order, since on a light backdrop a ring recedes by
+approaching it. Two palettes fix their number so the argument is
+not re-run. **Sunset's grey stays dark** (`#6A665EE6`, ~25 L*
+below the pink) because `#FF8099` simulates to a neutral grey
+under protanopia, so only lightness separates the pair and a
+lighter grey walks into the collapse — `BorderRingSeparationTests`
+▸ `aLiftedSunsetGreyCollapses` pins that the shared system grey
+the other dark palettes take fails Sunset outright. It is the
+weakest ring of the set on dark and accepted; if the pair reads
+too quiet, lighten the accent one step with hue held, never the
+grey. **Ultraviolet's grey sits level with its indigo**
+(`#7E7E96E6`, blue-grey cast kept) rather than below it: a grey
+clearly under the indigo's composited contrast is the vanish
+again, and the device pick `#BFBFBFE6` composited to more than
+twice the indigo's, inverting dominance —
+`BorderRingSeparationTests` ▸
 `theRefusedUltravioletPickInvertsDominance` measures it — so
-contrast parity with the indigo's chroma carrying the order is
-the compromise. The derived default keeps `#8E8E93CC`, the one
-value under the authored band. `BorderRingSeparationTests`
-holds the rest: the pair's CVD separation composited at both
-wallpaper extremes, the alpha band, opaque focused rings, the
-home-backdrop dominance derived from each palette's own fill,
-and a floor on the grey's own home contrast — the lightness
-half of the vanish, which a near-black grey at in-band alpha
-would otherwise clear on every pair clause.
+contrast parity with the indigo's chroma carrying the order is the
+compromise. The derived default keeps `#8E8E93CC`, the one value
+under the authored band. `BorderRingSeparationTests` holds the
+rest: the pair's CVD separation composited at both wallpaper
+extremes, the alpha band, opaque focused rings, the home-backdrop
+dominance derived from each palette's own fill, and a floor on the
+grey's own home contrast — the lightness half of the vanish, which
+a near-black grey at in-band alpha would otherwise clear on every
+pair clause.
 
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
 reason — ink contrast on a dark pane — and that is a *lightness*
 problem on the lettering, not a *hue* problem on the symbol.
 Re-hueing a mark per appearance reads as a different brand, which
-a young identity cannot afford. The docs site already worked this
-way before the rule was written down — `site/src/styles/theme.css`
-themes the Starlight title ink while its header mark stays fixed
-— so this generalizes a precedent rather than importing one. So the kiwi symbol is byte-identical in both
-appearances — there is deliberately **no dark symbol master**,
-and `logo.svg` serves the Settings header, the bundle's `AppIcon`,
-the site nav and the Starlight header in either theme. (The
-*runtime* Dock icon it once also served is gone with the
-activation-policy promotion — an `.accessory` app has no tile.) (The retired
-`logo_dark.svg` is recoverable at `1c135a4:assets/logo_dark.svg`
-— but a future dark variant should be derived from the current
-green master's geometry, not from a gold recolour authored
-against the pre-#439 palette.) Only the wordmark's ink moves: forest
-`#12251a` on light, mist-green `#E1EEDB` on dark. The kinship with the
-content-overlays note below is narrower than it looks and worth
-stating precisely: **both refuse to re-hue the identity
-element** — but the overlays reach for lightness *to avoid
-needing a variant at all* (one darkened hex survives both
-near-white and near-black), while the mark reaches for nothing
-and the wordmark keeps two pre-inked masters. Nor is the ink
-move itself a lightness-only shift: `#12251a` → `#E1EEDB` turns
-the hue as well, because ink has no identity to protect. Only
-the symbol does. Trade-off: the mark cannot be tuned for a dark
-backdrop, so it must read on both by construction — it does,
-because the pale kiwi flesh gives the dark window tiles their own
-ground regardless of what is behind the mark. What this replaced:
-a gold recolour of the *entire* logo, symbol included, authored
-before #439 made green-forward explicit and never revisited —
-which was possible only because the master fused the lettering
-and the mark's tiles into one path, so nothing could recolour the
-text alone. That path is now split (see `assets/README.md`).
+a young identity cannot afford. `site/src/styles/theme.css`
+follows the same rule: it themes the Starlight title ink while its
+header mark stays fixed. So the kiwi symbol is byte-identical in
+both appearances — there is deliberately **no dark symbol
+master**, and `logo.svg` serves the Settings header, the bundle's
+`AppIcon`, the site nav and the Starlight header in either theme.
+(There is no runtime Dock icon to serve — an `.accessory` app has
+no tile.) (The retired `logo_dark.svg` is recoverable at
+`1c135a4:assets/logo_dark.svg` — but a future dark variant should
+be derived from the current green master's geometry, not from a
+gold recolour authored against the pre-#439 palette.) Only the
+wordmark's ink moves: forest `#12251a` on light, mist-green
+`#E1EEDB` on dark. The kinship with the content-overlays note
+below is narrower than it looks: **both refuse to re-hue the
+identity element** — but the overlays reach for lightness *to
+avoid needing a variant at all* (one darkened hex survives both
+near-white and near-black), while the mark reaches for nothing and
+the wordmark keeps two pre-inked masters. Nor is the ink move
+itself a lightness-only shift: `#12251a` → `#E1EEDB` turns the hue
+as well, because ink has no identity to protect. Only the symbol
+does. Trade-off: the mark cannot be tuned for a dark backdrop, so
+it must read on both by construction — it does, because the pale
+kiwi flesh gives the dark window tiles their own ground regardless
+of what is behind the mark. The master keeps the lettering and the
+mark's tiles as separate paths (see `assets/README.md`): a fused
+path can only be recoloured whole, which is how the pre-#439 gold
+recolour of the entire logo, symbol included, came to exist.
 
 **The default palette adopts the KiwiCanopy brand tokens (#439).**
 KiwiDesk is one tool under the KiwiCanopy parent brand; the
@@ -9385,8 +9365,8 @@ unlike the derived
 brand-token change — shifting a brand hex means editing
 `bundled.json` by hand in the same change set.
 
-**Content overlays are the brand green, darkened for duty.**
-The focus ring and drag ghost paint over *arbitrary* third-party
+**Content overlays are the brand green, darkened for duty.** The
+focus ring and drag ghost paint over *arbitrary* third-party
 window content. The bright kiwi accent (`#8DB354`/`#AACB5D`) is a
 fill-only color — too light to survive as a thin stroke on light
 windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the **ring**
@@ -9398,29 +9378,25 @@ full-saturation same-hue `#538A00` still did on device). So the
 ring leaves the 84° family, shifting ~12° toward true green to
 `#4A9816` (H96 S75 L34), which escapes the cast and still clears
 3:1 on near-white (~3.6:1) and near-black (~5.8:1) while staying
-unmistakably on-brand green. The **ghost** shared the old
-`#588613` until #511, and no longer does — see the origin/target
-paragraph below; the 3:1-at-both-ends bar is what survived the
-move, the shared hue is what did not. The
-default ring width is 5 pt (was 2): a thicker stroke is not just
-more visible, it reads at a *more saturated* color than a hairline
-can (a 2 pt line's anti-aliased edges wash its effective contrast
-out), which is why the default could move off the duller `#567A1F`
-to a livelier green at the same lightness (the `#588613` era,
-since shifted to `#4A9816`). 5 pt is also the
-widest that still tiles cleanly with unfocused rings on: each ring
-reaches its width into the 10 pt default inner gap, so `2 × 5 = 10`
-fills the gap edge-to-edge without overlap (6 pt would overlap).
-That couples the width default to the gap default — changing either
-without the other re-opens or overlaps the ring band. The drag drop-zone
-keeps a distinct hue as a darkened amber `#C2790A` (the old
-`#E8A33D` had the same light-window problem), so origin still
-reads apart from target. For the *ring*, the darkening began as
-lightness-only — the same move the green-forward identity makes
-for ink and borders (keep the hue, drop the lightness where a role
-needs contrast) — but #578 added a deliberate ~12° hue shift on
-top. It is the one place that "keep the hue" rule is broken,
-because at the contrast-mandated lightness the 84° hue had no
+unmistakably on-brand green. The **ghost** does not share the
+ring's hue — see the origin/target paragraph below (#511); the
+3:1-at-both-ends bar is what it keeps. The default ring width is 5
+pt rather than 2: a thicker stroke is not just more visible, it
+reads at a *more saturated* color than a hairline can (a 2 pt
+line's anti-aliased edges wash its effective contrast out), which
+is what lets the default sit on a livelier green than the duller
+`#567A1F` at the same lightness. 5 pt is also the widest that
+still tiles cleanly with unfocused rings on: each ring reaches its
+width into the 10 pt default inner gap, so `2 × 5 = 10` fills the
+gap edge-to-edge without overlap (6 pt would overlap). That
+couples the width default to the gap default — changing either
+without the other re-opens or overlaps the ring band. The drag
+drop-zone keeps a distinct hue as a darkened amber `#C2790A` (the
+old `#E8A33D` had the same light-window problem), so origin still
+reads apart from target. The ring's ~12° hue shift (#578) is the
+one place the green-forward identity's rule for ink and borders —
+keep the hue, drop the lightness where a role needs contrast — is
+broken: at the contrast-mandated lightness the 84° hue had no
 non-mossy option left, so hue moved where lightness could not. The
 bars keep 84°; only the ring (and, separately, the ghost) leave
 it.
@@ -9440,28 +9416,26 @@ ghost could not simply be a darker or lighter `#588613`. Drop to
 the shipped ghost's S0.40 and the ring's hue does qualify, but
 only just: `#799D43` measures **61**, a point over the floor,
 where the emerald band (which caps at full saturation) gives
-**76** at the same chroma. That trade — chroma against
-separation, not impossibility — is pinned by
+**76** at the same chroma. That trade — chroma against separation,
+not impossibility — is pinned by
 `DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
-which is also where to start when re-deriving it; the numbers
-here are quoted from that guard rather than the other way round.
-So the ghost alone moved to a deep emerald `#347957` — hue 150,
-S0.40, **76/441**, 5.2:1 on near-white and 4.0:1 on near-black,
-margin on all three while keeping real chroma. The contrast bar
-held; the hue it shared with the ring did not. The ring has no
-partner to separate from, so nothing asks it to move *for CVD* —
-it later shifted to `#4A9816` for the unrelated moss reason
-(#578), not this one. Origin is therefore green-but-not-*the*-green, which
-is the cost, and the alternative (`#2F4A0C`, a yellow-green at
-85/441) was rejected for falling to 2.11:1 on near-black — that
-would have traded a colour-vision defect for a contrast one.
-Bundled palettes follow the same rule:
-target tracks `space_bar.focused_item_color` in six of the nine,
-which is what fixed Clean Light, Slate and True Dark, each of
-which had been shipping origin and target as the *same hex*
-(separation 0, for every viewer, not only CVD). Monochrome,
-Sunset and Ultraviolet keep a third colour and already clear the
-floor. `DragPairSeparationTests` guards all of it.
+which is also where to start when re-deriving it; the numbers here
+are quoted from that guard rather than the other way round. So the
+ghost alone moved to a deep emerald `#347957` — hue 150, S0.40,
+**76/441**, 5.2:1 on near-white and 4.0:1 on near-black, margin on
+all three while keeping real chroma. The ring has no partner to
+separate from, so nothing asks it to move *for CVD*; its own shift
+to `#4A9816` is the unrelated moss reason (#578). Origin is
+therefore green-but-not-*the*-green, which is the cost, and the
+alternative (`#2F4A0C`, a yellow-green at 85/441) was rejected for
+falling to 2.11:1 on near-black — that would have traded a
+colour-vision defect for a contrast one. Bundled palettes follow
+the same rule: target tracks `space_bar.focused_item_color` in six
+of the nine, without which Clean Light, Slate and True Dark ship
+origin and target as the *same hex* (separation 0, for every
+viewer, not only CVD). Monochrome, Sunset and Ultraviolet keep a
+third colour and already clear the floor.
+`DragPairSeparationTests` guards all of it.
 
 The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
@@ -9476,45 +9450,37 @@ colour-vision deficiency — see the lightness clause above), and
 reusing the ratified hex beat minting a second amber for one
 palette.
 
-**The App Bar has its own sidebar destination.** (#229,
-superseding the earlier "Appearance ends with the App Bar
-block" note; itself superseded on the destination shape — #293
-merged both bars into one **Bars** destination, and the #678
-Phase 2 redesign made it one page of two cards, with the
-per-layout overrides gone per the §3.4 rescope above. What
-survives of this entry is the argument: bar configuration is
-too deep to live inside the structure page — Appearance then,
-Gaps & Borders now — and stays out of it.)
-Appearance kept only Gaps and Drag & drop —
-the everyday controls people revisit — while the App Bar
-(global style + ~10 colors + per-layout overrides) was the
-deepest rabbit hole in that tab and dominated the scroll. It
-became a first-class, deep-linkable destination in the *This
-Profile* group, peer of that page. It is **not** a tab
-strip alongside Gaps/Drag: those are co-active concerns tuned
-together in one session, not a mutually-exclusive set, so a
-strip would misapply the #205 "tabs fit a fixed exclusive
-set" principle. (Superseded in part, #678 Phase 3: the bar
-colors left the Bars page entirely for Advanced Colors, and
-their "Advanced colors" disclosure became "More colors"
-there — see "Colour is its own destination" below. The
-at-rest/behind-a-drawer SPLIT survives verbatim: Fill and
-Highlight are still the two a drawing of the bar most visibly
-reflects, and are still the two at rest. The per-group preview
-strip that made that point went with #793's composite scene;
-the split never rested on it.)
+**The App Bar has its own sidebar destination.** (#229; #293
+merged both bars into one **Bars** destination, and the #678 Phase
+2 redesign made it one page of two cards, the per-layout overrides
+gone per the §3.4 rescope above.) Bar configuration is too deep to
+live inside the structure page — Appearance then, Gaps & Borders
+now — and stays out of it: Gaps and Drag & drop are the everyday
+controls people revisit, while the App Bar (global style + ~10
+colors + per-layout overrides) was the deepest rabbit hole in that
+tab and dominated the scroll, so it is a first-class,
+deep-linkable destination in the *This Profile* group, peer of
+that page. It is **not** a tab strip alongside Gaps/Drag: those
+are co-active concerns tuned together in one session, not a
+mutually-exclusive set, so a strip would misapply the #205 "tabs
+fit a fixed exclusive set" principle. The bar colors live on
+Advanced Colors (#678 Phase 3, "Colour is its own destination"
+below), their "Advanced colors" disclosure being "More colors"
+there; the at-rest/behind-a-drawer SPLIT holds: Fill and Highlight
+are the two a drawing of the bar most visibly reflects, and the
+two at rest (the per-group preview strip that once made that point
+went with #793's composite scene; the split never rested on it).
 
-**[Principle] Colour is its own destination, and a colour
-renders in exactly one of them.** (#678 Phase 3, 2026-08-02.)
-Filing a colour under the thing it paints — the ring's tint
-under Focus border, a bar's tints on the Bars page, the mark
-tints under Sticky windows — scatters one decision ("what does
-this look like") across every page, and it puts nothing in the
-way of the same hex getting a second editor. That is the failure
-worth naming: two editors for one value keep separate disclosure
-state and separate gates, so they disagree about whether the
-value is even editable, and a user who changes it in one place
-has no way to learn the other exists.
+**[Principle] Colour is its own destination, and a colour renders
+in exactly one of them.** (#678 Phase 3, 2026-08-02.) Filing a
+colour under the thing it paints — the ring's tint under Focus
+border, a bar's tints on the Bars page, the mark tints under
+Sticky windows — scatters one decision ("what does this look
+like") across every page, and it puts nothing in the way of the
+same hex getting a second editor. The failure: two editors for one
+value keep separate disclosure state and separate gates, so they
+disagree about whether the value is even editable, and a user who
+changes it in one place has no way to learn the other exists.
 
 So the split is by KIND, not by subsystem — **structure** (does
 this get drawn, how wide, how round) stays with its feature;
@@ -9530,8 +9496,7 @@ noticed something on screen is wrong, not looking for
 The cost is real and is paid deliberately: every gate on the
 Advanced Colours page now names a switch on another page, so
 "why is this greyed" has to say *where to go*, on a live `?`
-outside the dimmed rows. That is the price of the split, not an
-oversight in it.
+outside the dimmed rows.
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**
@@ -9574,9 +9539,9 @@ drop share the one cursor rule, so the highlight can never
 promise a target the drop won't act on.
 
 Releasing on **another display MOVES** the window into that
-display's active space. Onto a window's slot it takes the
-target's array index, the target and the rest shift up one; over
-an empty area (an empty monitor, or a gap) it appends. A **track**
+display's active space. Onto a window's slot it takes the target's
+array index, the target and the rest shift up one; over an empty
+area (an empty monitor, or a gap) it appends. A **track**
 destination is the exception: the arriving window follows the
 space's `new_window` rule (e.g. open in a new track), like a
 freshly spawned window, rather than the positional slot — routed
@@ -9584,58 +9549,56 @@ through the same `addFocusedToSpace` choke point a keyboard /
 Space-Bar move uses, so track cap / spill placement lives in one
 place. Because a cross-display drop is resolved **before** the
 resize gate, a big window clamped smaller as it crosses onto a
-smaller display still reads as a move, not a resize. Either way
-— because a tiling slot exists only where a window sits — the
+smaller display still reads as a move, not a resize. Either way —
+because a tiling slot exists only where a window sits — the
 destination display **re-partitions** to N+1 slots. A
 **same-display** drop still **swaps** the two windows. The
 destination is the active space of the display **under the
 cursor**, so an empty monitor still receives the drop; only a
-same-display release outside every slot snaps back.
-The move happens **live** (#504): once the cursor has dwelt on
-the destination display for a beat (a debounce, so skimming the
-seam — or an overflow-inducing crossing that would bounce right
-back — never re-tiles both displays per mouse event), the
-window's *membership* eager-moves there and both displays
-re-partition, opening a real slot under the cursor while the
-dragged window stays pinned under the pointer (`dragExemptWindow`
-— its frame is never set mid-drag). This is the Space-Bar-spring
-model (#372) keyed on displays, and it buys the unification: from
-the crossing on, the drag *is* a same-display drag in the
-destination space — swap on a window, snap into the opened gap,
-one "you're inside this space now" rule. Dragging back before
-release crosses back symmetrically; an abnormal end (window
-closed or rekeyed mid-drag) restores the origin space and index.
-A gesture that crossed is a **move for the rest of its life**:
-the drop skips the resize interpretation outright — the live twin
-of the relocate-before-resize-gate ordering — because macOS
-clamps a big window's size on a smaller display, which the
-magnitude test would misread as a resize. The drop-commit
+same-display release outside every slot snaps back. The move
+happens **live** (#504): once the cursor has dwelt on the
+destination display for a beat (a debounce, so skimming the seam —
+or an overflow-inducing crossing that would bounce right back —
+never re-tiles both displays per mouse event), the window's
+*membership* eager-moves there and both displays re-partition,
+opening a real slot under the cursor while the dragged window
+stays pinned under the pointer (`dragExemptWindow` — its frame is
+never set mid-drag). This is the Space-Bar-spring model (#372)
+keyed on displays, and it buys the unification: from the crossing
+on, the drag *is* a same-display drag in the destination space —
+swap on a window, snap into the opened gap, one "you're inside
+this space now" rule. Dragging back before release crosses back
+symmetrically; an abnormal end (window closed or rekeyed mid-drag)
+restores the origin space and index. A gesture that crossed is a
+**move for the rest of its life**: the drop skips the resize
+interpretation outright — the live twin of the
+relocate-before-resize-gate ordering above, since the magnitude
+test would misread macOS's clamp as a resize. The drop-commit
 relocate path remains for the fast flick whose dwell never fired,
 sharing one placement choke point (`insertDropped`) with the
 crossing so the two can never land a window differently. Sticky
 windows are the deliberate exception: they never live-cross —
-their cross-display drop keeps the full #445 gate + pill
-semantics of the drop-commit path, resolved once at release.
-*Rationale:* the primary
-reason to drag a window to another monitor is to *move it
-there* — swap-only would be frustrating, and it can fling a
+their cross-display drop keeps the full #445 gate + pill semantics
+of the drop-commit path, resolved once at release. *Rationale:*
+the primary reason to drag a window to another monitor is to *move
+it there* — swap-only would be frustrating, and it can fling a
 window you never touched onto your other display. *Trade-off:*
 this makes cross-display behave differently from same-display
-(move vs swap), and it is not capacity-neutral — the
-destination gains a window and the origin loses one, so both
-displays re-partition. That was chosen deliberately over the
+(move vs swap), and it is not capacity-neutral — the destination
+gains a window and the origin loses one, so both displays
+re-partition. That was chosen deliberately over the
 one-rule-everywhere swap (which a UI-design pass argued for on
 consistency grounds): the move model matches direct-manipulation
 expectation for a monitor-to-monitor drag. The sticky-move guard
-fires on both paths. The destination is the active space of the
-display **under the cursor**, so a tiled-sticky traveler injected
-onto a foreign display can't teleport the window to wherever its
-home space happens to show: a drop whose target isn't a real
-member of the cursor display's space (a foreign-display traveler,
-or an empty area) is treated as an empty drop and *moves* the
-window to that display rather than snapping back with the #435
-refusal pill — you were dragging there anyway. The same-display
-traveler drop still shows the pill.
+fires on both paths. Because the destination is the cursor
+display's active space, a tiled-sticky traveler injected onto a
+foreign display can't teleport the window to wherever its home
+space happens to show: a drop whose target isn't a real member of
+the cursor display's space (a foreign-display traveler, or an
+empty area) is treated as an empty drop and *moves* the window to
+that display rather than snapping back with the #435 refusal pill
+— you were dragging there anyway. The same-display traveler drop
+still shows the pill.
 
 **The track exception keeps the preview honest by suppressing,
 not lying.** A track destination files an arriving window by its
@@ -9647,19 +9610,19 @@ still holds: where the landing is rule-based, no slot is
 promised. Same-display track drops swap positionally, so their
 highlight stays.
 
-**[Principle] A float crossing displays scales to fit by
-default; keeping the exact size is the opt-out.** (#502,
-supersedes #444/#493.) *Rationale:* #444/#493 originally kept a
-float's exact size on a cross-display re-anchor — "size is the
-user's choice" — and explicitly rejected shrink/center as the
-default. QA reversed the judgment: because macOS half-clamps a
-too-tall window's height but lets its width overflow the screen
-edge, a float that keeps its size on a move to a *smaller*
-display arrives partly off-screen, which reads as broken to most
-users. So `float_scale_on_display_change` now defaults **on** —
-the window is scaled by the per-axis ratio of the two displays
-(same relative footprint) as well as re-anchored, wherever a
-float crosses displays and for floating-mode members too (#498/
+**[Principle] A float crossing displays scales to fit by default;
+keeping the exact size is the opt-out.** (#502, supersedes
+#444/#493.) *Rationale:* "size is the user's choice" — #444/#493's
+reading, which kept a float's exact size on a cross-display
+re-anchor and rejected shrink/center as the default — fails in QA:
+because macOS half-clamps a too-tall window's height but lets its
+width overflow the screen edge, a float that keeps its size on a
+move to a *smaller* display arrives partly off-screen, which reads
+as broken to most users. So `float_scale_on_display_change`
+defaults **on** — the window is scaled by the per-axis ratio of
+the two displays (same relative footprint) as well as re-anchored,
+wherever a float crosses displays and for floating-mode members
+too (#498/
 #500), still confined clear of the bars. *Trade-off:* the scale
 is per-axis, so on displays of different aspect ratio it slightly
 distorts the window's aspect, and it resizes floats that already
@@ -9674,62 +9637,54 @@ in its caption, which is contextual-help/Lua-reference work, not a
 Settings control. A future contributor must not re-derive "size is
 the user's choice" from the old #444/#493 record and revert this.
 
-**Ghost and Drop zone are two side-by-side columns.** (#231.)
-Each column leads with its own live preview and puts its
-controls directly beneath, so tuning a column's border width
-never scrolls that preview off-screen — the failure mode of
-the earlier one-strip-then-two-stacked-sections layout. They
-are a genuine A/B pair (same schema, edited by comparison),
-which is exactly where macOS System Settings itself reaches
-for twin panels (Displays' Arrangement, Desktop & Dock's
-light/dark), so twin columns state the pairing once instead
-of duplicating preview-then-controls structure. What a column
-keeps is what only that column can answer — whether its border
-and its fill are drawn at all. Everything a column once asked
-that the other strokes are asked too has left it: the shared
-corner radius sat full-width above both until #754, the border
-width and the alignment picker sat inside each, and all three
-now belong to the page's shared card or to Lua alone. The
-narrowing that let a half-width row hold a slider
-(`dragColumnLabelColumn`) and the in-group short form it was
-for ("Border width" → "Width", with the full name kept for
-VoiceOver through `a11yLabel`) both moved WITH those rows: the
-last of them left this editor in #754, so it no longer pushes
-the narrow axis in through `settingsLabelColumn` at all — what
-remains there is toggles, which draw their own labels. The pair
-lives on in Advanced Colours' twin drag columns, which take the
-width as `AdvancedColorRow`'s `labelWidth:`. The drawing beside
-those columns went with #793's composite scene, but the
-obligation it carried did not: wherever the ghost and drop zone
-are drawn — the Gaps & Borders panel, since #793 — the drawing
-shows the alignment, radius and width actually stored, because
-all three are still settable from Lua. Schematic, not
-pixel-exact, and it remaps the full value range instead of
-hard-capping halfway (the fix the retired App Bar preview strip
-asked for). The alignment drawing earns its keep twice over,
-the control having been dead before it — SwiftUI
-`.strokeBorder` always draws inside.
+**Ghost and Drop zone are two side-by-side columns.** (#231.) Each
+column leads with its own live preview and puts its controls
+directly beneath, so tuning a column's border width never scrolls
+that preview off-screen — the failure mode of the earlier
+one-strip-then-two-stacked-sections layout. They are a genuine A/B
+pair (same schema, edited by comparison), which is exactly where
+macOS System Settings itself reaches for twin panels (Displays'
+Arrangement, Desktop & Dock's light/dark), so twin columns state
+the pairing once instead of duplicating preview-then-controls
+structure. What a column keeps is what only that column can answer
+— whether its border and its fill are drawn at all; the shared
+corner radius, the border width and the alignment picker belong to
+the page's shared card or to Lua alone (#754). The narrowing that
+lets a half-width row hold a slider (`dragColumnLabelColumn`) and
+the in-group short form it is for ("Border width" → "Width", with
+the full name kept for VoiceOver through `a11yLabel`) travel with
+those rows: they live on in Advanced Colours' twin drag columns,
+which take the width as `AdvancedColorRow`'s `labelWidth:`, and
+this editor no longer pushes the narrow axis in through
+`settingsLabelColumn` at all — what remains here is toggles, which
+draw their own labels. Wherever the ghost and drop zone are drawn
+— the Gaps & Borders panel's composite scene (#793) — the drawing
+shows the alignment, radius and width actually stored, because all
+three are still settable from Lua. Schematic, not pixel-exact, and
+it remaps the full value range instead of hard-capping halfway.
+The alignment drawing earns its keep twice over, the control
+having been dead before it — SwiftUI `.strokeBorder` always draws
+inside.
 
 **[Trade-off]**
 
 **The slot-size unit picker offers Percent and Points only;
-`.auto` stays in the model and Lua but has no GUI segment.**
-The three-way picker's founding reason was that the shipped
-default could not be expressed as one number (a fixed pt
-horizontally, a fraction vertically). Once both axes' standards
-became the same fraction, a "Default" segment was
-indistinguishable from Percent at that number by anything the
-user could do in Settings — and a picker option that no in-app action can
-ever tell apart from its sibling is removed outright, not
-greyed ("grey, don't hide" covers controls another mode
-reactivates, which this was not). A stored `.auto` renders as
-Percent at the standard and stays `.auto` until the slider is
-touched, so an untouched config still tracks a future retune of
-the standard; `scroll.set_slot_size(0)` keeps that policy
-reachable from the open layer (GUI curates, Lua stays open —
-the `dim_factor` precedent). Removing `.auto` from the model
-instead would have spent Lua surface to solve a GUI problem the
-two-way picker already solves. (ui-designer, 2026-07-29.)
+`.auto` stays in the model and Lua but has no GUI segment.** A
+"Default" segment earns a three-way picker only while the shipped
+default cannot be expressed as one number (a fixed pt
+horizontally, a fraction vertically); with both axes' standards
+the same fraction it is indistinguishable from Percent at that
+number by anything the user could do in Settings — and a picker
+option that no in-app action can ever tell apart from its sibling
+is removed outright, not greyed ("grey, don't hide" covers
+controls another mode reactivates, which this was not). A stored
+`.auto` renders as Percent at the standard and stays `.auto` until
+the slider is touched, so an untouched config still tracks a
+future retune of the standard; `scroll.set_slot_size(0)` keeps
+that policy reachable from the open layer (GUI curates, Lua stays
+open — the `dim_factor` precedent). Removing `.auto` from the
+model instead would have spent Lua surface to solve a GUI problem
+the two-way picker already solves. (ui-designer, 2026-07-29.)
 
 **[Trade-off]**
 
@@ -9795,35 +9750,32 @@ control leaves the GUI (GUI_REMOVED_2026-08). The verbs stay
 open and unclamped, per stroke, for whoever genuinely wants
 three different ones.
 
-The first cut of this was a **Use one width for all borders**
-toggle over two masters, with the per-stroke sliders left on
-screen and dimmed. That is the wrong shape, and the reason
-generalises: a toggle that turns a defect on is still the
-defect, shipped with a switch. It asks a new question ("do you
-want them linked?") to protect an old answer nobody wanted, it
-needs a stored pick and a runtime gate and three dimmed rows
-to express, and the state it protects — three strokes drawn
-three ways — is the very state the card exists to end. Where
+The rejected shape is a **Use one width for all borders** toggle
+over two masters, with the per-stroke sliders left on screen and
+dimmed, and the reason generalises: a toggle that turns a defect
+on is still the defect, shipped with a switch. It asks a new
+question ("do you want them linked?") to protect an old answer
+nobody wanted, it needs a stored pick and a runtime gate and three
+dimmed rows to express, and the state it protects — three strokes
+drawn three ways — is the very state the card exists to end. Where
 the GUI would need a control to keep a bad option reachable,
 delete the option. This is not "grey, don't hide" (#171)
-overruled: that rule covers a control another mode brings back
-to life, and there is no mode here that revives a per-stroke
-width.
+overruled: that rule covers a control another mode brings back to
+life, and there is no mode here that revives a per-stroke width.
 
-**Corners passes the exact test alignment failed, which is why
-one is a control and the other is not.** The test is the entry
-below: can the question be put to all three strokes, or only
-to two? Square/Rounded can — but only as Square/Rounded. The
-ring stores a two-value corner STYLE and
-the drag pair a 0–40 pt radius, and the first cut derived the
-style from the radius (`> 0` ⇒ rounded), which is a slider
-collapsed into one bit: 1 pt and 40 pt drew an identical ring.
-A control whose range the thing it drives cannot represent is
-not a shared control, so the numeric radius left the GUI with
-the widths and the picker reads AND writes both halves — Square
-is a square ring and a 0 radius, Rounded is a rounded ring and
-any radius above zero, defaulting to the system window radius,
-which is also the radius's own shipped default.
+**Corners passes the exact test alignment failed, which is why one
+is a control and the other is not.** The test is the entry below:
+can the question be put to all three strokes, or only to two?
+Square/Rounded can — but only as Square/Rounded. The ring stores a
+two-value corner STYLE and the drag pair a 0–40 pt radius, and
+deriving the style from the radius (`> 0` ⇒ rounded) is a slider
+collapsed into one bit: 1 pt and 40 pt drew an identical ring. A
+control whose range the thing it drives cannot represent is not a
+shared control, so the numeric radius left the GUI with the widths
+and the picker reads AND writes both halves — Square is a square
+ring and a 0 radius, Rounded is a rounded ring and any radius
+above zero, defaulting to the system window radius, which is also
+the radius's own shipped default.
 
 **The picker READS both halves and WRITES only on a pick**, and
 that asymmetry is deliberate. A profile whose radius Lua set to
@@ -9949,25 +9901,22 @@ system rather than as two panels someone stuck on; the previous
 left-edge Space Bar competed with nothing and matched nothing.
 `plain` — one shared plate rather than a box per item — is what
 the menu bar itself does, and a boxed strip reads as a widget
-floating over the desktop. And the fill left 40 % because a
-translucent default is a bet on the user's wallpaper: 40 % was
-legible on the dark ones it was chosen against and a guess
-everywhere else, while opacity is the one axis where the safe
-default costs the confident user a single setting.
+floating over the desktop. And a translucent default is a bet on
+the user's wallpaper: the 40 % fill #660 chose was legible on the
+dark ones it was chosen against and a guess everywhere else, while
+opacity is the one axis where the safe default costs the confident
+user a single setting.
 
-**Where it landed is a separate decision, and #755 moved it.**
-#660 tuned one bar in isolation and took the number that was
-clearly safe. #755 could read all nine bundled palettes side by
-side, where the spread ran 40 % to 85 % and the readable ones had
-converged on one value on their own — so every bar fill KiwiDesk
-ships now carries that one alpha, the built-in default included.
-The reason it is one number rather than a range: how solid a bar
-reads is not a per-theme preference. A palette picks hues, and a
-user who switches theme is not asking for a less legible App Bar.
-Palettes and Lua stay unclamped either way — this is a claim
-about what ships, and re-applying a palette is the only migration
-(a palette paints one-shot, so a config already carrying an old
-alpha keeps it until then).
+**Where the fill landed is a separate decision (#755).** Read side
+by side, the nine bundled palettes' fills spread from 40 % to 85 %
+and the readable ones had converged on one value on their own — so
+every bar fill KiwiDesk ships carries that one alpha, the built-in
+default included. One number rather than a range because how solid
+a bar reads is not a per-theme preference: a palette picks hues,
+and a user who switches theme is not asking for a less legible App
+Bar. Re-applying a palette is the only migration (a palette
+paints one-shot, so a config already carrying an old alpha keeps
+it until then).
 
 None of this narrows anything — all six values stay reachable
 from Lua and from Settings. It is a claim about which starting
@@ -9976,25 +9925,22 @@ exactly the "approachable by default" clause: the default is for
 the user who never opens the editor.
 
 **The bars name the WINDOW, not its app.** (Owner ruling
-2026-08-19, replacing the `name` / `icon_and_name` content modes
-the bar has carried since it shipped.) `app_bar.set_content` takes
-`icon`, `title` or `icon_and_title`, and the Space Bar's front
-segment shows the focused window's title in place of its app's
-name. The retired spellings are simply gone.
+2026-08-19, replacing the `name` / `icon_and_name` content modes.)
+`app_bar.set_content` takes `icon`, `title` or `icon_and_title`,
+and the Space Bar's front segment shows the focused window's title
+in place of its app's name. The retired spellings are simply gone.
 
-**A stale enum spelling costs the FILE, not the field**, and
-that price is worth stating plainly because it is the one the
-config format already charges everywhere else. `TilingSettings`
+**A stale enum spelling costs the FILE, not the field** — the
+price the config format charges everywhere else. `TilingSettings`
 decodes `AppBarStyle` inline, so an unreadable value fails the
 enclosing decode: a profile carrying one is skipped by
-`allProfiles()` — it disappears from the profile list rather
-than opening at defaults, surfaced as a
-`ConfigIssue.profileBroken` with Delete / Reveal. And that is
-every profile v0.9.7 wrote, not the few whose owner changed the
-setting: `TilingSettings.encode` is exhaustive and
-`icon_and_name` was that build's default. The `gui.json` sidecar
-is NOT exposed — `GuiConfig.encode` writes the spaces, rules,
-bindings and layers, never `settings`.
+`allProfiles()` — it disappears from the profile list rather than
+opening at defaults, surfaced as a `ConfigIssue.profileBroken`
+with Delete / Reveal. And that is every profile v0.9.7 wrote, not
+the few whose owner changed the setting: `TilingSettings.encode`
+is exhaustive and `icon_and_name` was that build's default. The
+`gui.json` sidecar is NOT exposed — `GuiConfig.encode` writes the
+spaces, rules, bindings and layers, never `settings`.
 
 Leniency for this one field was refused anyway, and not because
 that damage is small. The argument for it — an unreadable enum
@@ -10012,11 +9958,10 @@ difference is that one of them ends. `ConfigMigration` rewrites
 `name` / `icon_and_name` in the file itself, once; a decoder that
 folded them would keep accepting the retired vocabulary forever,
 because nothing ever signals that the last config carrying it is
-gone. That is also why the earlier "re-editing the config IS the
-migration" answer was withdrawn rather than defended: it was
-sound while this repo had one user, and v0.9.7 shipped to others
-(AGENTS.md §5, amended). Asking a stranger to hand-edit JSON to
-get their profiles back is not a migration policy.
+gone. "Re-editing the config IS the migration" held while this
+repo had one user; v0.9.7 shipped to others (AGENTS.md §5), and
+asking a stranger to hand-edit JSON to get their profiles back is
+not a migration policy.
 
 `Profile` and `GuiConfig` carry a `format` version integer (#902),
 following `SetupBundle.currentFormat`. Migrations key off the format
@@ -10072,28 +10017,28 @@ uncapped title slides the whole run of Space items sideways.
 
 The refresh path is the subtler half. The bars are driven from
 `retile()`, and `TilingEngine.shouldRetile` returns false for
-`.windowTitleChanged` — correctly, since a title moves no
-window. Before this change that meant a title event did nothing
-and nothing needed it to; drawing a title makes the same event a
-*render* input. It is handled as one: `handleTitleChangedForBars`
-re-renders the bars and never retiles, because retiling on a
-rename would re-issue a frame set — and, on an app that refuses
-a size, re-teach the #677 ledger — every time a tab was renamed.
-It is debounced through a `DeferredTasks` slot rather than a
-bespoke flag, so teardown's `cancelAll()` reaches it like every
-other settle (#48), and gated on the **rendered** content, so a
-vertical bar (which collapses to icon-only) schedules nothing.
+`.windowTitleChanged` — correctly, since a title moves no window.
+While no title is drawn a title event needs nothing; drawing one
+makes the same event a *render* input. It is handled as one:
+`handleTitleChangedForBars` re-renders the bars and never retiles,
+because retiling on a rename would re-issue a frame set — and, on
+an app that refuses a size, re-teach the #677 ledger — every time
+a tab was renamed. It is debounced through a `DeferredTasks` slot
+rather than a bespoke flag, so teardown's `cancelAll()` reaches it
+like every other settle (#48), and gated on the **rendered**
+content, so a vertical bar (which collapses to icon-only)
+schedules nothing.
 
 **App Bar edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
-edges (`top` / `bottom` / `left` / `right`, default bottom) and the
-bar renders exactly there in every layout — the earlier
-`start`/`end` values that resolved against the layout's
-orientation are gone. Axis-relativity existed to prevent an
-edge/axis mismatch when the edge was derived per layout; with the
-Space Bar requiring free four-edge placement for both bars, the
-derivation (and its rationale) fell away. The Settings preview
-is edge-aware and draws a left- or right-edge bar vertical.
+edges (`top` / `bottom` / `left` / `right`, default bottom) and
+the bar renders exactly there in every layout. Axis-relative
+`start`/`end` values, resolved against the layout's orientation,
+prevented an edge/axis mismatch while the edge was derived per
+layout; the Space Bar's free four-edge placement for both bars
+removes the derivation and its rationale with it. The Settings
+preview is edge-aware and draws a left- or right-edge bar
+vertical.
 
 **The Space Bar reserves space-first.** (#293.) The Space
 Bar's strip is carved from the display's original visible frame,
@@ -10109,42 +10054,39 @@ frame).
 :::unreleased
 **Both bars are placed by ONE rule, and each owns two margins.**
 ([#1516](https://github.com/KiwiCanopy/KiwiDesk/issues/1516),
-owner ruling 2026-09-18.) From the screen edge inwards: the
-bar's **outer margin**, the strip, the bar's **inner margin**,
-then the windows' own outer gap, then the windows. The outer
-margin is absolute — nothing else lives on that side, so the
-value *is* the distance and 0 is flush. The inner margin is
-*added* to the windows' outer gap, which alone keeps the focus
-ring's clearance, so 0 means "the gap governs" and no floor is
-needed. Both default to 0, both bars on one edge stack
-outermost-first with the Space Bar carved first, and between
-the two the Space Bar's inner and the App Bar's outer both
-count — each bar owns its margins, so they add, and at the
-defaults the bars touch. Before this the two bars answered to
-different rules: the Space Bar sat flush and the windows' outer
-gap followed it, while the App Bar was carved *inside* that
-outer gap and the windows' *inner* gap separated it from the
-windows — so raising the outer gap moved one bar away from the
-border and the other's window side, and two bars on opposite
-corners could never be aligned. The alternatives refused: a set
-margin that *replaces* the derivation (an inner margin under
-the ring width would clip the ring, forcing a floor, and "not
-set" would keep both old rules alive), a single "distance to
-border" (leaves the window side differing per bar), and a 1 pt
-inner default (invisible on top of 10; the value means
-"extra"). The one visible change at update is accepted and
-owed a line in the release's Highlights: on the App Bar's edge
-the bar moves from inside the outer gap to flush with the
-screen edge and the tiled windows follow it by the same
-distance — 10 pt at the defaults, the window side now being the
-outer gap alone where it was the outer gap plus the inner — and
-the strip spans the whole edge rather than stopping at the side
-gaps. A user who wants the old look sets the App Bar's outer
-margin to the outer gap, which restores both. The Bars preview
-does not model the margins: at a
-thumbnail's scale a few points draw as nothing, and a caption
-that names a fact the frame does not draw is the schematic
-rule's own defect (`LayoutSchematicCaptionTests`).
+owner ruling 2026-09-18.) From the screen edge inwards: the bar's
+**outer margin**, the strip, the bar's **inner margin**, then the
+windows' own outer gap, then the windows. The outer margin is
+absolute — nothing else lives on that side, so the value *is* the
+distance and 0 is flush. The inner margin is *added* to the
+windows' outer gap, which alone keeps the focus ring's clearance,
+so 0 means "the gap governs" and no floor is needed. Both default
+to 0, both bars on one edge stack outermost-first with the Space
+Bar carved first, and between the two the Space Bar's inner and
+the App Bar's outer both count — each bar owns its margins, so
+they add, and at the defaults the bars touch. Under two rules —
+the Space Bar flush with the windows' outer gap following it, the
+App Bar carved *inside* that outer gap with the windows' *inner*
+gap separating it from the windows — raising the outer gap moves
+one bar away from the border and the other's window side, and two
+bars on opposite corners can never be aligned. The alternatives
+refused: a set margin that *replaces* the derivation (an inner
+margin under the ring width would clip the ring, forcing a floor,
+and "not set" would keep both old rules alive), a single "distance
+to border" (leaves the window side differing per bar), and a 1 pt
+inner default (invisible on top of 10; the value means "extra").
+The one visible change at update is accepted and owed a line in
+the release's Highlights: on the App Bar's edge the bar moves from
+inside the outer gap to flush with the screen edge and the tiled
+windows follow it by the same distance — 10 pt at the defaults,
+the window side now being the outer gap alone where it was the
+outer gap plus the inner — and the strip spans the whole edge
+rather than stopping at the side gaps. A user who wants the old
+look sets the App Bar's outer margin to the outer gap, which
+restores both. The Bars preview does not model the margins: at a
+thumbnail's scale a few points draw as nothing, and a caption that
+names a fact the frame does not draw is the schematic rule's own
+defect (`LayoutSchematicCaptionTests`).
 :::
 
 **Same-edge bar stacking is a supported layout, not an error.**
@@ -10167,29 +10109,28 @@ first, then cap, whatever the cap is. The overflow badge's `+n`
 counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
-**The Space Bar's two-accent model.** (#293.) Three tinted
-states, all GUI-exposed inline (never behind a disclosure —
-the system is the bar's defining signature): `item_color`
-paints inactive Spaces, `active_item_color` the active Space's
-identifier and glyphs, and `focused_item_color` the focused
-window **wherever it shows** — its glyph inside the active
-Space AND the front-app segment's glyph and text (QA 2026-07-19:
-the front-app segment IS the focused window, so it belongs to
-the focused accent, not the active-Space one; each accent now
-maps to exactly one concept — the Space vs the focused window).
-The focused accent is a deliberately **different hue** *and a
-step darker* (amber `#C2790A` in the Kiwi theme, #470), not a
-tint of the active green — a lighter shade of the same hue
-washed into "active space" and the two states read as one, and
-hue alone does not survive colour-vision deficiency against a
-green primary (see the lightness clause in the palette-coherence
-heuristics above). It has **two** surfaces, not three: the
-group-count / `+n` badge text was the third until #470, and is
-now the deliberate exception — badge ink stays
-`group_badge_text_color` and never takes the focused accent.
-A glyph and a badge do not share a background (a glyph's ink is
-contrast-tested against the bar plate, a badge's against a
-second, independently chosen fill), so the **alpha** half of the
+**The Space Bar's two-accent model.** (#293.) Three tinted states,
+all GUI-exposed inline (never behind a disclosure — the system is
+the bar's defining signature): `item_color` paints inactive
+Spaces, `active_item_color` the active Space's identifier and
+glyphs, and `focused_item_color` the focused window **wherever it
+shows** — its glyph inside the active Space AND the front-app
+segment's glyph and text (QA 2026-07-19: the front-app segment IS
+the focused window, so it takes the focused accent, not the
+active-Space one, and each accent maps to exactly one concept —
+the Space vs the focused window). The focused accent is a
+deliberately **different hue** *and a step darker* (amber
+`#C2790A` in the Kiwi theme, #470), not a tint of the active green
+— a lighter shade of the same hue washed into "active space" and
+the two states read as one, and hue alone does not survive
+colour-vision deficiency against a green primary (see the
+lightness clause in the palette-coherence heuristics above). It
+has **two** surfaces, not three: the group-count / `+n` badge text
+is the deliberate exception (#470) — badge ink stays
+`group_badge_text_color` and never takes the focused accent. A
+glyph and a badge do not share a background (a glyph's ink is
+contrast-tested against the bar plate, a badge's against a second,
+independently chosen fill), so the **alpha** half of the
 2026-07-20 uniform ladder generalizes and the **ink** half only
 ever held against the one badge fill it was eyeballed against —
 #470's darkening took that pair to 2.10:1. Nothing is lost:
@@ -10197,22 +10138,20 @@ ever held against the one badge fill it was eyeballed against —
 at full alpha, beside a glyph that *is* tinted. It also restores
 the grain the App Bar's own count badge and the sticky/floating
 state marks already had, and matches the platform — the system
-badge pairs one ink with one fill unconditionally, with no
-focused variant. (That fill is red and ours has been neutral
-grey since #955: what generalizes is the invariance, not the
-hue.)
-The corollary for a *bespoke* badge still stands: choose its
-text colour for contrast against that badge, not from the
-accents. In Settings the `Focused window`
-row greys out (#171) when its only surfaces are untintable:
-native-image glyphs *and* no front-app text shown. Emoji
-identifiers and native app
-images stay untinted; shape (the active indicator) carries the
-active state there, plus a half-strength alpha dim on inactive
-Spaces (alpha respects "never tint" while still reading as
-inactive), so color is never the only signal. A thin divider
-(the front-app segment's rule, shared helper) separates the
-identifier from the glyph row inside every occupied item.
+badge pairs one ink with one fill unconditionally, with no focused
+variant. (That fill is red and ours is neutral grey (#955): what
+generalizes is the invariance, not the hue.) The corollary for a
+*bespoke* badge still stands: choose its text colour for contrast
+against that badge, not from the accents. In Settings the
+`Focused window` row greys out (#171) when its only surfaces are
+untintable: native-image glyphs *and* no front-app text shown.
+Emoji identifiers and native app images stay untinted; shape (the
+active indicator) carries the active state there, plus a
+half-strength alpha dim on inactive Spaces (alpha respects "never
+tint" while still reading as inactive), so color is never the only
+signal. A thin divider (the front-app segment's rule, shared
+helper) separates the identifier from the glyph row inside every
+occupied item.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
 app glyphs — no clone of the App Bar's `Icon | Title |
@@ -10221,19 +10160,18 @@ compact glyphs are the point of the overview; a labelled-glyph
 mode needs its own demonstrated use case first.
 
 **Space identifiers are icon-only, with settled fallbacks.**
-(#293, revised QA 2026-07-19.) The configured Space icon
-(SF Symbol | emoji | single character) renders alone — no
-emoji-vs-name chooser. Without one: a numeric id renders as
-its plain tinted digits, any other id as a two-letter
-uppercase monogram ("mail" → "MA"). The earlier `N.square`
-SF Symbol fallback was dropped **in the bar**: a self-bordered
-glyph inside the default boxed background read as a
-box-in-a-box, and the symbol only existed for 0–50 — plain
-digits unify both fallback paths and have no range limit
-(capped at three digits so the square cell never clips). The
-shortcuts panel's symbol rows keep `N.square` deliberately:
-a symbol slot in a plain list row has no boxed wrapper, so
-the rationale doesn't apply there.
+(#293, revised QA 2026-07-19.) The configured Space icon (SF
+Symbol | emoji | single character) renders alone — no
+emoji-vs-name chooser. Without one: a numeric id renders as its
+plain tinted digits, any other id as a two-letter uppercase
+monogram ("mail" → "MA"). The `N.square` SF Symbol is not the
+fallback **in the bar**: a self-bordered glyph inside the default
+boxed background reads as a box-in-a-box, and the symbol only
+exists for 0–50 — plain digits unify both fallback paths and have
+no range limit (capped at three digits so the square cell never
+clips). The shortcuts panel's symbol rows keep `N.square`
+deliberately: a symbol slot in a plain list row has no boxed
+wrapper, so the rationale doesn't apply there.
 
 **The Space Bar ships enabled.** (QA 2026-07-19.) It is the
 only surface where KiwiDesk's Spaces are visible at
@@ -10290,15 +10228,18 @@ that keep the bars routed through it — is
 relocate.** (#372.) Dragging a window onto a Space item either
 relocates it (fast drop, `move_to_space`) or, after a 2 s dwell,
 springs the view to that Space so the window is dropped into its
-live layout. A first design pass rejected spring-loading over a
-cross-process race fear; it was reconsidered once grounded in the
-code, because KiwiDesk's Spaces are *virtual* (a retile, not a
-WindowServer Space change), which narrows the risk to one place.
-The load-bearing details, so they are not relitigated:
-- The dragged window is exempted from `stashInactive` for the
-  gesture's life (`TilingEngine.dragExemptWindow`), the same kind
-  of pin as the existing `!isFloating` exemption — otherwise the
-  spring's retile would stash it under the cursor mid-drag.
+live layout. The cross-process race that argues against
+spring-loading is narrowed to one place because KiwiDesk's Spaces
+are *virtual* (a retile, not a WindowServer Space change). The
+load-bearing details:
+- The dragged window is exempt from **all** frame application in
+  `retile` for the gesture's life — the layout loop and
+  `stashInactive` alike, via `TilingEngine.dragExemptWindow`, the
+  same kind of pin as the existing `!isFloating` exemption — so
+  the spring's retile places the target's OTHER windows but
+  leaves the dragged one under the cursor; without it the retile
+  stashes it or yanks it to its computed slot (a small dwindled
+  BSP corner, say) mid-drag.
 - The spring uses a private activate-plus-retile helper, **not**
   `focusSpace`: that command warps the cursor to hand off AX
   focus, which would rip the pointer out of the OS drag loop. No
@@ -10306,24 +10247,18 @@ The load-bearing details, so they are not relitigated:
   `animated: false` regardless of `animations.on_space_change`
   (a crisp switch must not add motion competing with the live
   foreign-app drag).
-- Space membership flips **eagerly at spring** (QA revision): the
-  window is moved into the target the moment the view springs, so
-  the live drag shows the ordinary drop preview (ghost + drop-
+- Space membership flips **eagerly at spring** (QA revision):
+  the window is moved into the target the moment the view springs,
+  so the live drag shows the ordinary drop preview (ghost + drop-
   zone) in the target's layout and the release lands it in the
-  exact slot. An earlier design flipped membership lazily at drop
-  to avoid stale state, but that left no preview during placement.
-  Eager membership needs no rollback: an abnormal end (window
-  closed / tab rekeyed) means the window is gone, so stranding is
-  moot, and a normal drop is *meant* to place into the sprung
-  space — `cancelDrag` only tears down the gesture bookkeeping
-  (pending spring, `dragExemptWindow`); it does not, and need not,
-  move the window back. The dragged window is exempt from **all**
-  frame application in `retile` for the gesture's life — both the
-  layout loop and `stashInactive`, via `dragExemptWindow` — so the
-  spring's retile places the target's OTHER windows but leaves the
-  dragged one under the cursor. Without the layout-loop exemption
-  the retile yanks it to its computed slot mid-drag (a small
-  dwindled BSP corner, say). Because the move commits at spring,
+  exact slot. Lazy membership at drop (to avoid stale state)
+  leaves no preview during placement. Eager membership needs no
+  rollback: an abnormal end (window closed / tab rekeyed) means
+  the window is gone, so stranding is moot, and a normal drop is
+  *meant* to place into the sprung space — `cancelDrag` only tears
+  down the gesture bookkeeping (pending spring,
+  `dragExemptWindow`); it does not, and need not, move the window
+  back. Because the move commits at spring,
   `window_moved_to_space` fires then rather than once at drop, and
   once per spring — a chained A→B→C dwell emits two moves. That
   cardinality change is deliberate; hooks keyed on the event see
@@ -10345,32 +10280,30 @@ The load-bearing details, so they are not relitigated:
   (`move_to_space_and_follow` already models following).
   Option-held-drop → follow is a deferred second gear.
 
-**Bar alignment is edge-relative, one shared default.**
-(#293 QA.) Both bars place their content run via `alignment` —
-`start` / `center` / `end`, values edge-relative (a left bar's
-`start` is its top) for the same reason `edge` is absolute:
-correct on every edge without a per-edge remap. One default
-(`center`) for both bars and every edge — never per-edge
-defaults. The Space Bar's pre-QA left/top anchoring was an
-omission, not a decision. Once an App Bar group overflows and
-scrolls, the three alignments deliberately collapse to the
-scroll offset; the control is not greyed for it (a static
-preview can't know real overflow). Copy-appearance copies
+**Bar alignment is edge-relative, one shared default.** (#293 QA.)
+Both bars place their content run via `alignment` — `start` /
+`center` / `end`, values edge-relative (a left bar's `start` is
+its top) for the same reason `edge` is absolute: correct on every
+edge without a per-edge remap. One default (`center`) for both
+bars and every edge — never per-edge defaults. Once an App Bar
+group overflows and scrolls, the three alignments deliberately
+collapse to the scroll offset; the control is not greyed for it (a
+static preview can't know real overflow). Copy-appearance copies
 alignment (arrangement is appearance); `edge` stays excluded
 (placement is not).
 
 **The Space Bar scrolls the whole bar when the Spaces overflow.**
-(#385, retiring the #293 stage-2 "spaces are a small, bounded set
-— clip, no scroll" assumption once a 100-Space case was stated.)
-It reuses the App Bar's overflow model rather than inventing a
-second one: an arrow zone (`BarArrowView.zone`, 24 pt) reserved at
-each end while the run overflows, the item viewport inset by that
-zone plus a gap, clickable chevrons toward the hidden Spaces, and
-a scroll that follows the active Space into view — the three
-alignments collapsing to the scroll offset exactly as the App Bar
-does. Items are **not** shrunk to fit: a Space item is a drag-drop
-well (#372), and shrinking the target a dragging cursor must land
-on, at the moment precision matters most, is worse than scrolling.
+(#385; a 100-Space case retires #293's "spaces are a small,
+bounded set — clip, no scroll" assumption.) It reuses the App
+Bar's overflow model rather than inventing a second one: an arrow
+zone (`BarArrowView.zone`, 24 pt) reserved at each end while the
+run overflows, the item viewport inset by that zone plus a gap,
+clickable chevrons toward the hidden Spaces, and a scroll that
+follows the active Space into view — the three alignments
+collapsing to the scroll offset exactly as the App Bar does. Items
+are **not** shrunk to fit: a Space item is a drag-drop well
+(#372), and shrinking the target a dragging cursor must land on,
+at the moment precision matters most, is worse than scrolling.
 Because a Space item is a drop target — unlike a click-only App
 Bar tab — an off-screen Space would be unreachable mid-drag, so a
 drag dwelling over an arrow zone **autoscrolls** the bar
@@ -10384,15 +10317,15 @@ spring govern disjoint zones with no shared dwell state. The
 front-app segment is the tail of the one aligned run, so it
 scrolls **with** the items (reachable at the forward end) rather
 than pinning at the rim — pinning would carve a second permanent
-reserved region and break the one-run invariant for a narrow
-combo (100+ Spaces and front-app on and caring while scrolled);
-an explicit pinned-segment mode stays an easy additive follow-up
-if real use proves it painful. The arrow view is shared with the
-App Bar (`BarArrowView`, style-agnostic — each bar hands it
-resolved `BarArrowColors`), with the one addition the Space Bar
-needs: a `setDragHover` synthetic-hover path, because a foreign
-AX-tracked window drag delivers no `mouseEntered`, so the arrow
-would otherwise go dark during the one gesture it exists for.
+reserved region and break the one-run invariant for a narrow combo
+(100+ Spaces and front-app on and caring while scrolled); an
+explicit pinned-segment mode stays an easy additive follow-up if
+real use proves it painful. The arrow view is shared with the App
+Bar (`BarArrowView`, style-agnostic — each bar hands it resolved
+`BarArrowColors`), with the one addition the Space Bar needs: a
+`setDragHover` synthetic-hover path, because a foreign AX-tracked
+window drag delivers no `mouseEntered`, so the arrow would
+otherwise go dark during the one gesture it exists for.
 
 **The two bar cards share one canonical row order.** (#374,
 re-cut by the #678 Phase 2 census render.) At rest: existence
@@ -10422,27 +10355,26 @@ surprise the palette entry below bans in the other direction.
 
 **The bars ship one thickness, 40 pt, on every screen, and the
 slider's floor is the Core floor by derivation.** (#1359, owner
-ruling 2026-09-13.) Two numbers used to answer "how thick": a
-Core default of 32 with a laptop starter of 28, and a GUI band
-that began at 30 — so the starter's own value sat below the
-slider, and one touch of the slider lost it for good. A stored
-value the GUI cannot reach is a defect, not a curation, so the
-band's floor is `AppBarStyle.minThickness` rather than a number
-beside it (`BarSliderBandTests`); the ceiling of 80 stays
-the GUI's, Lua open above it, the same split the glow slider
-takes. The default is one number because the reason for a
-thinner laptop bar — "a laptop cannot spare the chrome" — did
-not survive use: 40 read well on every class, and a per-class
-thickness is a second default a user has to know about before
-the slider's number means anything (`BarThicknessDefaultTests`).
-No migration is owed, and the reason is specific rather than
-borrowable: both bars' `thickness` predate the first tag
-(v0.9.0), and the settings encoder writes both bar groups whole
-(`AppBarParityTests`, `SpaceBarParityTests` hold each field
-encoded), so every file the app ever wrote carries its own
+ruling 2026-09-13.) With a Core default of 32, a laptop starter of
+28 and a GUI band beginning at 30 — the shape this replaces — the
+starter's own value sat below the slider, and one touch of the
+slider lost it for good. A stored value the GUI cannot reach is a
+defect, not a curation, so the band's floor is
+`AppBarStyle.minThickness` rather than a number beside it
+(`BarSliderBandTests`); the ceiling of 80 stays the GUI's, Lua
+open above it, the same split the glow slider takes. The default
+is one number because the reason for a thinner laptop bar — "a
+laptop cannot spare the chrome" — did not survive use: 40 read
+well on every class, and a per-class thickness is a second default
+a user has to know about before the slider's number means anything
+(`BarThicknessDefaultTests`). No migration is owed, and the reason
+is specific rather than borrowable: both bars' `thickness` predate
+the first tag (v0.9.0), and the settings encoder writes both bar
+groups whole (`AppBarParityTests`, `SpaceBarParityTests` hold each
+field encoded), so every file the app ever wrote carries its own
 number and only a fresh seed takes the new one — a leaf younger
 than a shipped release, or one a group elides, owes the #1369
-crossing instead (`BarSliderBandTests`, `BarThicknessDefaultTests`).
+crossing instead.
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is
@@ -10461,68 +10393,64 @@ computed answer cannot: the mark's *disappearance* is the honest
 report of a hand edit, which is why no "modified" state is
 needed to explain one.
 
-Two consequences worth stating so they are not read as bugs.
-**No card marked is a normal, informative state** — it means the
-colors are the user's own. And **more than one card can be
-marked**, because the question is "do these colors say what this
-palette says", not "which card was clicked": save your current
-colors while wearing a bundled palette and your copy IS that
-palette. Ranking them would mean telling the user that one of
-their own palettes is not the colors they are looking at.
+Two consequences. **No card marked is a normal, informative
+state** — it means the colors are the user's own. And **more than
+one card can be marked**, because the question is "do these colors
+say what this palette says", not "which card was clicked": save
+your current colors while wearing a bundled palette and your copy
+IS that palette. Ranking them would mean telling the user that one
+of their own palettes is not the colors they are looking at.
 `ColorPaletteMatchTests` holds both, and the comparison is by
-parsed color rather than by spelling, so re-typing a palette's
-own hex in lower case does not read as leaving the theme.
+parsed color rather than by spelling, so re-typing a palette's own
+hex in lower case does not read as leaving the theme.
 
 **A palette is a color recipe; a Profile owns the colors.**
 (#375.) A palette is a named color recipe you apply once to
 overwrite the active profile's colors; a Profile is the
-persistent, addressable configuration — tiling, layout, and
-sparse behavior overrides — that owns those colors afterward. So
-the palette shelf is a **colors-only, one-shot paint** (the
+persistent, addressable configuration — tiling, layout, and sparse
+behavior overrides — that owns those colors afterward. So the
+palette shelf is a **colors-only, one-shot paint** (the
 `copyAppearance` model — never a live link), and the palette
 *library* is **global**, not profile-scoped: scoping the recipe
 book per-profile would fragment a palette you saved while editing
 one profile away from the next, for no gain, since profiles
 already own the color *state* a palette writes into. A palette is
 a sparse map keyed by the same fully-qualified color paths the
-profile JSON uses (`app_bar.fill_color` vs `space_bar.fill_color` —
-bare wire keys collide between the two bars), so it is **not** a
+profile JSON uses (`app_bar.fill_color` vs `space_bar.fill_color`
+— bare wire keys collide between the two bars), so it is **not** a
 `TilingSettings` field and never widens the profile schema; it
 lives in its own global `palettes.json` plus a bundled resource.
 This colors-only scope is **strict: no palette carries a non-color
-_effect_.** Kiwi Neon briefly forced `border.glow` on via a
-name-check in the GUI apply path; **retracted in #578** — it was
-one-directional (a later sober palette, being color-only, could
-not clear it, so glow stuck on) and a category error (picking a
-color swatch silently flipping an unrelated Focus-border toggle
-the user may have set on purpose). A palette that wants to *point*
-at an effect **links to its control** instead of writing it —
-Neon's swatch carries a link that reveals the Glow toggle. Do not
-reintroduce a magic-name effect side-effect here; if a future
-palette genuinely needs to recommend non-color settings, that is a
-schema-level "recommended settings" sidecar, not a name-check.
-The nine built-ins are read-only with reserved names (a user
-palette can't shadow one — rename/delete are *omitted*, not
-greyed, because the constraint is never-meaningful-for-this-kind,
-not mode-inert); "Kiwi (Default)" is derived from the shipped
-struct defaults at load, so it never drifts and doubles as a
-reset. Escalating to a full design-package (bundling geometry,
-fonts, icon source with colors, or a tab restructure) waits on a
-real signal that people want to share the *whole look* as one
-artifact — not merely "more than nine palettes," which
-save/export/import already answers.
-Every bundled palette keeps `space_bar.focused_item_color` a
-**different hue** from its active accent (the two-accent rule,
-QA 2026-07-19) — Monochrome included: color is the only channel
-the focused-window state has, so even a mono palette carries one
-deliberate accent (`#FFD60A`) rather than erasing the state.
-Since #470 that rule carries a second clause: the pair must also
-separate under red-green vision loss (see the palette-coherence
-heuristics above, which carry the numbers and the reasoning).
-Every **bundled** palette satisfies it — the two green-primary
-siblings were retuned to a cool focused accent by #511 — and
-`SpaceBarAccentSeparationTests` measures that, catalog-wide.
-User palettes are not held to it; the shelf curates, Lua is open.
+_effect_.** A name-check in the GUI apply path that forces
+`border.glow` on for Kiwi Neon (retracted in #578) is
+one-directional (a later sober palette, being color-only, cannot
+clear it, so glow sticks on) and a category error (picking a color
+swatch silently flips an unrelated Focus-border toggle the user
+may have set on purpose). A palette that wants to *point* at an
+effect **links to its control** instead of writing it — Neon's
+swatch carries a link that reveals the Glow toggle — and a future
+palette that genuinely needs to recommend non-color settings takes
+a schema-level "recommended settings" sidecar, never a magic-name
+side-effect. The nine built-ins are read-only with reserved names
+(a user palette can't shadow one — rename/delete are *omitted*,
+not greyed, because the constraint is
+never-meaningful-for-this-kind, not mode-inert); "Kiwi (Default)"
+is derived from the shipped struct defaults at load, so it never
+drifts and doubles as a reset. Escalating to a full design-package
+(bundling geometry, fonts, icon source with colors, or a tab
+restructure) waits on a real signal that people want to share the
+*whole look* as one artifact — not merely "more than nine
+palettes," which save/export/import already answers. Every bundled
+palette keeps `space_bar.focused_item_color` a **different hue**
+from its active accent (the two-accent rule, QA 2026-07-19) —
+Monochrome included: color is the only channel the focused-window
+state has, so even a mono palette carries one deliberate accent
+(`#FFD60A`) rather than erasing the state. The pair must also
+separate under red-green vision loss (#470) — the separation
+clause of the palette-coherence heuristics above, which carries
+the numbers, the two green-primary siblings' cool focused accent
+(#511), `SpaceBarAccentSeparationTests`' catalog-wide sweep and
+its bundled-only scope; the shelf curates, Lua is open.
 
 **"Automatic" is a value; "Auto" is an adjective — and the
 readout column was widened to say it.** (R6/#406, owner ruling
@@ -10540,16 +10468,15 @@ keeping "Auto" as a documented compact-surface exception (the
 384 pt popover precedent), and dropping the word entirely for a
 dash. The owner chose the full word, so the width was paid.
 
-The bill came to 8 pt, not 20, because the **font** was the
-real cost. The readouts had been monospaced, where even narrow
-letters are padded to digit width; they now use the proportional
-system font with `monospacedDigit()` — System Settings' own
-idiom — which keeps digit runs tabular so magnitudes still stack
-down a column, while letters render at natural width. Measured
-at 13 pt: "Automatic" 61.3 and "2000 pt" 48.5 proportional,
-against 72.3 and 56.3 monospaced. So the column is **64 → 72**,
-and the per-Space popover **384 → 392** to pay it back on the
-app's narrowest editing surface.
+The bill is 8 pt, not 20, because the **font** is the real cost:
+monospaced readouts pad even narrow letters to digit width; the
+proportional system font with `monospacedDigit()` — System
+Settings' own idiom — which keeps digit runs tabular so magnitudes
+still stack down a column, while letters render at natural width.
+Measured at 13 pt: "Automatic" 61.3 and "2000 pt" 48.5
+proportional, against 72.3 and 56.3 monospaced. So the column is
+**64 → 72**, and the per-Space popover **384 → 392** to pay it
+back on the app's narrowest editing surface.
 
 The column stays **shared**: letting the Auto row size
 independently would keep the trailing edges aligned but leave
@@ -10562,50 +10489,46 @@ a ragged pane margin, trading something seen while dragging for
 something seen always (ui-designer, 2026-07-26, after the owner
 asked).
 
-One fact keeps the shrink from reading as a bug, and it is easy
-to lose: the word only ever renders on an `AutoGatedGroup`-gated
-row, so it is always dimmed and disabled beside full-size
-numbers — a slightly scaled word there reads as *inert*, not
-*broken*.
+The word only ever renders on an `AutoGatedGroup`-gated row, so
+it is always dimmed and disabled beside full-size numbers — a
+slightly scaled word there reads as *inert*, not *broken*, which
+is what keeps the shrink from reading as a bug.
 
-**The background control names WHERE the background is drawn,
-not what the rectangle is called.** (R6/#406, owner ruling
-2026-07-25.) The picker shipped as **"Tab background"** on the
-App Bar and **"Item background"** on the Space Bar. Both are
-false half the time: under `plain` **no item draws a box of its
-own** in steady state — there is one bar-wide plate (`BarPlate`),
-so the background belongs to the *bar*, not to the item. (Hover
-still reveals a box per item; that is a transient affordance,
-not the configured background.) "Tab" fails
-from the other side, since an App Bar entry is a window or a
-same-app group, not a browser tab. The control is not naming an
-object; it is choosing where the fill goes — per item, or one
-plate behind all of them. Hence **"Background style"** on both
-bars (options unchanged: Boxed / Plain), wire
-`tab_background` → `background_style`, which also makes the two
-bars finally name the same picker the same way. The rejected
-alternative was "Item background everywhere", which reads
-correctly under Boxed and is a lie under Plain — that asymmetry
-is the whole reason the name moved, so do not restore it. Item
-*geometry* did become "Item size" / "Item gap"
+**The background control names WHERE the background is drawn, not
+what the rectangle is called.** (R6/#406, owner ruling
+2026-07-25.) **"Tab background"** (App Bar) and **"Item
+background"** (Space Bar) are each false half the time: under
+`plain` **no item draws a box of its own** in steady state — there
+is one bar-wide plate (`BarPlate`), so the background belongs to
+the *bar*, not to the item. (Hover still reveals a box per item;
+that is a transient affordance, not the configured background.)
+"Tab" fails from the other side, since an App Bar entry is a
+window or a same-app group, not a browser tab. The control is not
+naming an object; it is choosing where the fill goes — per item,
+or one plate behind all of them. Hence **"Background style"** on
+both bars (options unchanged: Boxed / Plain), wire
+`tab_background` → `background_style`, so both bars name the same
+picker the same way. The rejected alternative was "Item background
+everywhere", which reads correctly under Boxed and is a lie under
+Plain — that asymmetry is the whole reason the name moved, so do
+not restore it. Item *geometry* is "Item size" / "Item gap"
 (`box_size` → `item_size`, `box_gap` → `item_gap`): those stay
 true under either style, because items have size and spacing in
 Plain too, they simply draw no box of their own.
 
 **A bar entry is an "item", not a "tab" — except in gesture
-prose.** (R6/#406, owner ruling 2026-07-25.) An App Bar entry is
-a window or a same-app group; it has none of a browser tab's
+prose.** (R6/#406, owner ruling 2026-07-25.) An App Bar entry is a
+window or a same-app group; it has none of a browser tab's
 semantics, and the Space Bar's entries were already items. The
-colors said `item_color` / `active_item_color` from the start,
-and T4 moved the geometry to match (`item_size` / `item_gap`),
-so **item is the model noun** — labels, help strings, captions,
-enum doc comments, and the Lua reference all use it. The one
-carve-out is the user guide's *gesture* prose ("click a tab",
-"drag a tab"), where the word names what the reader touches
-rather than what the model holds; that paragraph is deliberate,
-not an oversight. Note this is unrelated to **macOS native
-tabs** (`TabReconciler`, §5), which keep the word because they
-genuinely are tabs — a blanket rename must never reach them.
+colors are `item_color` / `active_item_color` and the geometry
+`item_size` / `item_gap`, so **item is the model noun** — labels,
+help strings, captions, enum doc comments, and the Lua reference
+all use it. The one carve-out is the user guide's *gesture* prose
+("click a tab", "drag a tab"), where the word names what the
+reader touches rather than what the model holds; that paragraph is
+deliberate, not an oversight. Note this is unrelated to **macOS
+native tabs** (`TabReconciler`, §5), which keep the word because
+they genuinely are tabs — a blanket rename must never reach them.
 
 **Plate reach is its own property, not a fourth background.**
 (QA 2026-07-19.) `background_fit` (`full` | `hug`, default
@@ -10622,12 +10545,11 @@ control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
 **One Liquid Glass switch governs every KiwiDesk surface that
-draws it.** (#1307, 2026-09-07.) The finish shipped as two
-independent per-bar settings, and the ⌃⌥K shortcuts panel drew
-glass unconditionally beside them (#1295) — three surfaces, two
-switches and a constant. One row on Colours & Animations now
-writes all three, and the panel's leaf is stored beside the bars'
-in the profile.
+draws it.** (#1307, 2026-09-07.) Three surfaces — the two bars and
+the ⌃⌥K shortcuts panel (#1295) — under two independent per-bar
+settings and a constant is the shape one row on Colours &
+Animations replaces: it writes all three, and the panel's leaf is
+stored beside the bars' in the profile.
 
 **Profile-scoped, and the alternative was not merely riskier but
 unbuildable.** Moving the value app-wide into `gui.json` needed a
@@ -10696,16 +10618,14 @@ in-app word why.
 
 **The per-layout override is deliberately outside the switch's
 reading.** `monocle.set_app_bar_liquid_glass` and
-`scroll.set_app_bar_liquid_glass` still shadow the global, and
-the row neither clears them nor reports them. That is the
-behaviour every per-layout override already has — the App Bar
-thickness slider says nothing about
-`monocle.set_app_bar_thickness` either — and the master could
-not clear one if it tried, so reporting it would state a
-disagreement while withholding the control that ends it. The
-divergence sentence is therefore about the three GLOBAL leaves
-only (`code-reviewer`, 2026-09-07, which found the row reading
-On over a glassless monocle App Bar).
+`scroll.set_app_bar_liquid_glass` still shadow the global, and the
+row neither clears them nor reports them. That is the behaviour
+every per-layout override already has — the App Bar thickness
+slider says nothing about `monocle.set_app_bar_thickness` either —
+and the master could not clear one if it tried, so reporting it
+would state a disagreement while withholding the control that ends
+it. The divergence sentence is therefore about the three GLOBAL
+leaves only.
 
 **The stored keys did NOT merge**, which is why there is no
 migration at all: three leaves, one row, through
@@ -10717,68 +10637,67 @@ A new top-level `set_shortcut_panel_liquid_glass` reaches the
 panel's leaf — the change ADDS Lua reach rather than capping it.
 
 **Liquid Glass is an orthogonal finish toggle, not a third
-`background_style`.** (#390; revised 2026-07-20.) It was first
-shipped as a third `BackgroundStyle` case (`material`) beside
-`boxed`/`plain`, on the reasoning that a toggle would be ambiguous
-("boxed + glass" = glass boxes or a glass strip under opaque
-boxes?). On-device testing (macOS 26.5.2) forced a rethink on two
-fronts. **First**, `NSGlassEffectView`'s own `tintColor` carries
-**no hue at all** — measured on macOS 26.6.2, red, green, blue
-and the shipped moss each move the composite by the same
-achromatic amount, over an opaque backdrop and over the bare
-desktop alike (per-channel spread ≤ 1.6/255, capture noise), and
-that amount tracks the colour's **alpha** alone: −26/255 at
-α 1.0, −18/255 at α 0.70. It is a colourless dimmer driven by
-alpha, so glass is a *finish*, not a colorable surface that could
-be a peer of the solid shapes. `.clear` and `.regular` differ on
-the same reading — `.regular` composites ~45/255 lighter over the
-same backdrop — and the bars draw `.clear`.
-**Second**, the ambiguity dissolves once each combination has a
-defined rendering: `boxed + glass` = a glass view **per box**
-(grouped in an `NSGlassEffectContainerView`), `plain + glass` = one
-shared glass plate. So the model is now shape (`boxed` | `plain`)
-× a separate `liquid_glass: Bool` finish that lays over either.
-**`fill_color` still tints the glass (#408)** — not through
-`tintColor`, which carries none of the hue, but by placing a
-solid colored view *behind* the glass, which the glass refracts
-into its hue (the way the Dock and Control Center tint their
-glass). That backdrop is the **only** channel a Fill reaches the
-glass on: driving `tintColor` from the Fill beside it dimmed the
-plate by an amount `GlassTint.maxAlpha` did not govern, which is
-why the bars read as a near-solid slab until #1297. `GlassTint`
-is the one place a Fill becomes a colour, and it takes the hex
-rather than a colour so no call site can hand one past the cap
-(`GlassTintCapTests`, `GlassTintSeamTests`). This is distinct from the
-earlier degraded-render bug: the items stay embedded as the glass's
+`background_style`.** (#390; revised 2026-07-20.) A third
+`BackgroundStyle` case (`material`) beside `boxed`/`plain` — the
+rejected shape — rests on a toggle being ambiguous ("boxed +
+glass" = glass boxes or a glass strip under opaque boxes?), and
+on-device measurement (macOS 26.5.2) rules it out on two fronts.
+**First**, `NSGlassEffectView`'s own `tintColor` carries **no hue
+at all** — measured on macOS 26.6.2, red, green, blue and the
+shipped moss each move the composite by the same achromatic
+amount, over an opaque backdrop and over the bare desktop alike
+(per-channel spread ≤ 1.6/255, capture noise), and that amount
+tracks the colour's **alpha** alone: −26/255 at α 1.0, −18/255 at
+α 0.70. It is a colourless dimmer driven by alpha, so glass is a
+*finish*, not a colorable surface that could be a peer of the
+solid shapes. `.clear` and `.regular` differ on the same reading —
+`.regular` composites ~45/255 lighter over the same backdrop — and
+the bars draw `.clear`. **Second**, the ambiguity dissolves once
+each combination has a defined rendering: `boxed + glass` = a
+glass view **per box** (grouped in an
+`NSGlassEffectContainerView`), `plain + glass` = one shared glass
+plate. So the model is now shape (`boxed` | `plain`) × a separate
+`liquid_glass: Bool` finish that lays over either. **`fill_color`
+still tints the glass (#408)** — not through `tintColor`, which
+carries none of the hue, but by placing a solid colored view
+*behind* the glass, which the glass refracts into its hue (the way
+the Dock and Control Center tint their glass). That backdrop is
+the **only** channel a Fill reaches the glass on: driving
+`tintColor` from the Fill beside it dimmed the plate by an amount
+`GlassTint.maxAlpha` did not govern, which read as a near-solid
+slab (#1297). `GlassTint` is the one place a Fill becomes a
+colour, and it takes the hex rather than a colour so no call site
+can hand one past the cap (`GlassTintCapTests`,
+`GlassTintSeamTests`). The items stay embedded as the glass's
 `contentView` (the required usage); the colored view is an
-*additional* backdrop sibling **behind** the whole glass, supplying
-a hue for it to sample — never a replacement for the content. A
-fully transparent `fill_color` leaves the glass clear. One seam
-owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
+*additional* backdrop sibling **behind** the whole glass,
+supplying a hue for it to sample — never a replacement for the
+content. A fully transparent `fill_color` leaves the glass clear.
+One seam owns the five hosting modes (`GlassHosting` /
+`GlassTint`, #407).
 
 The finish is ON by default on every surface (owner ruling
-2026-09-10, reversing the launch-day no-glass default: the bars
-are the app's face, and a fresh install or a Reset All Settings
-should show the finish the app is designed around rather than
-ask for it). A leaf whose ABSENCE changed meaning owes the §5
-crossing, because absence was a stored value: a profile written
-before v1.2.0 carries both bar leaves and no panel group at all,
-so read under the new default it says bars off beside a panel on
-— the state the one row exists to make unreachable — on a plain
-upgrade. `ConfigMigration` therefore fills a file below the
-floor: each absent BAR leaf takes the `false` its absence meant,
-and the panel — which had no surface before v1.2.0, so no leaf a
-user could have set — takes the two bars' agreement where they
-agree and `false` otherwise, since the bars are the user's
-stated opinion about glass, and a flat `false` would have minted
-the same divergence at the other polarity for a setup that had
-glass on. The step reaches the two shapes that carry
-`TilingSettings` by path, never by the look of an object
-(`GlassDefaultMigrationTests`, `ConfigMigrationGlassRoutingTests`).
-An existing setup keeps the look it had, and only a fresh seed
-takes the new default. Below macOS 26 the toggle is absent, so a
-setup authored there carries the stored value wherever it is
-imported, the finish included.
+2026-09-10: the bars are the app's face, and a fresh install or a
+Reset All Settings should show the finish the app is designed
+around rather than ask for it). A leaf whose ABSENCE changed
+meaning owes the §5 crossing, because absence was a stored value:
+a profile written before v1.2.0 carries both bar leaves and no
+panel group at all, so read under the new default it says bars off
+beside a panel on — the state the one row exists to make
+unreachable — on a plain upgrade. `ConfigMigration` therefore
+fills a file below the floor: each absent BAR leaf takes the
+`false` its absence meant, and the panel — which had no surface
+before v1.2.0, so no leaf a user could have set — takes the two
+bars' agreement where they agree and `false` otherwise, since the
+bars are the user's stated opinion about glass, and a flat `false`
+would have minted the same divergence at the other polarity for a
+setup that had glass on. The step reaches the two shapes that
+carry `TilingSettings` by path, never by the look of an object
+(`GlassDefaultMigrationTests`,
+`ConfigMigrationGlassRoutingTests`). An existing setup keeps the
+look it had, and only a fresh seed takes the new default. Below
+macOS 26 the toggle is absent, so a setup authored there carries
+the stored value wherever it is imported, the finish included.
 
 The finish stays OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
@@ -10789,63 +10708,60 @@ round-trips everywhere (portability). Explicitly out of scope: a
 glass border/stroke, a shadow (`BarPanel` is deliberately
 shadowless), and vibrancy-following text.
 
-**The glass variant is pinned from the Fill, because macOS
-decides it per view and the verdict sticks.** (#1308, settled
-2026-09-07.) The two bars, same Fill, same `plain` + glass,
-rendered 114 vs 68 luminance in their item-free plate rows; an
-in-process log showed every KiwiDesk input identical on both
-(hosting mode, plate/tint visibility, tint alpha, z-order) and
-one thing different: `NSGlassEffectView`'s adaptive content
-colour scheme, which the OS decides PER VIEW from the backdrop
-that view samples and then holds until a far brighter backdrop
-flips it. Either bar can be the dark one — the App Bar usually
-is, because the bottom edge launches over the darker band of a
-wallpaper — so a reading that names one bar as "the dark one" is
-reading the state, not the cause; the fix is a rule both bars
-follow, never a correction to whichever bar looked wrong. The
-ruling: the variant is DECIDED, once, from the Fill, in
-`GlassTint.apply` — a dark Fill pins `.darkAqua` on the glass
-view; a light Fill pins nothing, so the glass carries the app's
-appearance, `NSApp.appearance` as the Settings Appearance pick
-writes it (#678 item 8, above): dark under a Dark pick, and under
-Light or System the OS's own light scheme, which the bright tint
-holds — so two bars sharing a dark Fill cannot diverge, and two
-sharing a light one match wherever the pick is Dark. **Precedence,
-ruled here because two sanctioned writers now reach one view:**
-the Fill decides where it is dark, since the plate IS the Fill's
-colour and the dark variant is the one the ink reads on; the
-Appearance pick decides only the light branch. A user who picks
-Light for KiwiDesk's own windows and a dark bar Fill gets a dark
-bar, which is what they asked the bar to be.
-Every bundled palette gives both bars one Fill, and all but
-**Clean Light** a dark one. Three measured facts fix the shape.
-**Only dark can be pinned** — measured on macOS 26.6.2 under a
-light app appearance, where `.aqua` is what the bars already
-carry: pinning it changes nothing and the material keeps adapting
-under it, so a light pin would be a private `_adaptiveAppearance`
-write, refused. Whether `.aqua` pins light under a Dark app
-appearance is unmeasured, and nothing depends on it. **The
-dark variant is the legible one on a dark Fill:** on the shipped
-moss, palette ink `#EAF3EE` is 4.2:1 on the light variant and
-8.2:1 on the dark, and the active `#8DB354` FAILS at 2.0:1 on the
-light against 3.9:1 on the dark — the light variant both bars
-launched into was the worse plate. **`.regular` is no escape:**
-it adapts the same way, and its light variant puts the ink at
-1.9:1. The threshold is `wantsLightInk`'s, the one the mark
-glyphs already use, so "this fill wants light ink" and "this fill
-wants the dark glass" are one rule (`GlassTintPinTests`; the
-one-home clause in `GlassTintSeamTests`). Residue, stated and
-on the [Accepted limitations](accepted-limitations.md) page: a
-light Fill — Clean Light's `#F2F2F7` is the bundled one — still
-adapts per view, so two bars on it could in principle diverge
-over a very dark ground; unmeasured, and the bright tint
-dominates what the glass samples.
+**The glass variant is pinned from the Fill, because macOS decides
+it per view and the verdict sticks.** (#1308, settled 2026-09-07.)
+The two bars, same Fill, same `plain` + glass, rendered 114 vs 68
+luminance in their item-free plate rows; an in-process log showed
+every KiwiDesk input identical on both (hosting mode, plate/tint
+visibility, tint alpha, z-order) and one thing different:
+`NSGlassEffectView`'s adaptive content colour scheme, which the OS
+decides PER VIEW from the backdrop that view samples and then
+holds until a far brighter backdrop flips it. Either bar can be
+the dark one — the App Bar usually is, because the bottom edge
+launches over the darker band of a wallpaper — so a reading that
+names one bar as "the dark one" is reading the state, not the
+cause; the fix is a rule both bars follow, never a correction to
+whichever bar looked wrong. The ruling: the variant is DECIDED,
+once, from the Fill, in `GlassTint.apply` — a dark Fill pins
+`.darkAqua` on the glass view; a light Fill pins nothing, so the
+glass carries the app's appearance, `NSApp.appearance` as the
+Settings Appearance pick writes it (#678 item 8, above): dark
+under a Dark pick, and under Light or System the OS's own light
+scheme, which the bright tint holds — so two bars sharing a dark
+Fill cannot diverge, and two sharing a light one match wherever
+the pick is Dark. **Precedence, since two sanctioned writers reach
+one view:** the Fill decides where it is dark, since the plate IS
+the Fill's colour and the dark variant is the one the ink reads
+on; the Appearance pick decides only the light branch. A user who
+picks Light for KiwiDesk's own windows and a dark bar Fill gets a
+dark bar, which is what they asked the bar to be. Every bundled
+palette gives both bars one Fill, and all but **Clean Light** a
+dark one. Three measured facts fix the shape. **Only dark can be
+pinned** — measured on macOS 26.6.2 under a light app appearance,
+where `.aqua` is what the bars already carry: pinning it changes
+nothing and the material keeps adapting under it, so a light pin
+would be a private `_adaptiveAppearance` write, refused. Whether
+`.aqua` pins light under a Dark app appearance is unmeasured, and
+nothing depends on it. **The dark variant is the legible one on a
+dark Fill:** on the shipped moss, palette ink `#EAF3EE` is 4.2:1
+on the light variant and 8.2:1 on the dark, and the active
+`#8DB354` FAILS at 2.0:1 on the light against 3.9:1 on the dark —
+the light variant both bars launched into was the worse plate.
+**`.regular` is no escape:** it adapts the same way, and its light
+variant puts the ink at 1.9:1. The threshold is `wantsLightInk`'s,
+the one the mark glyphs already use, so "this fill wants light
+ink" and "this fill wants the dark glass" are one rule
+(`GlassTintPinTests`; the one-home clause in
+`GlassTintSeamTests`). Residue, stated and on the [Accepted
+limitations](accepted-limitations.md) page: a light Fill — Clean
+Light's `#F2F2F7` is the bundled one — still adapts per view, so
+two bars on it could in principle diverge over a very dark ground;
+unmeasured, and the bright tint dominates what the glass samples.
 
 **Background style and active indicator are orthogonal.** (#228.)
-The old coupled `style` enum (`pills` / `segments` / `underline`)
-conflated two orthogonal concerns: the per-item box rendering and
-the active-item marking. The redesign splits them into
-`background_style`
+A coupled `style` enum (`pills` / `segments` / `underline`)
+conflates two orthogonal concerns, the per-item box rendering and
+the active-item marking; they are split into `background_style`
 (`boxed` / `plain`) and `active_indicator` (`ring` / `edge_mark` /
 `gap`), so all combinations are expressible — e.g. boxed + edge
 mark (the old "segments" look), plain + edge mark (the old
@@ -10858,8 +10774,8 @@ roundness to sit flush inside the curve.
 **App icon rendering is one global choice with two honest
 options.** (#294.) `icon_source` — GUI label "App symbol style" —
 offers `app_image` (System default) and `app_font` (Glyphs).
-Decisions folded in, 2026-07-17/18 (ui-designer consult + user
-direction in chat):
+Decisions folded in (ui-designer consult and owner direction,
+2026-07-17/18):
 
 - **Global in the GUI, per-layout only in Lua.** A per-layout
   override row for icon rendering has no user story (it exists in
@@ -10875,7 +10791,7 @@ direction in chat):
 - **Glyphs follow the bar's state text colors** (normal / active
   / hover) — one color system with the labels. Glyph-less apps
   keep their native image.
-- **A synthesized Tinted mode was built and stripped** (with its
+- **A synthesized Tinted mode is rejected** (with its
   `tint_appearance` sub-setting): the system-wide Icon & widget
   style already covers the want for System default icons, and a
   luminance-ramp approximation misrepresents Apple's
@@ -10989,50 +10905,49 @@ merely declines to repeat itself.
 
 **[Principle]**
 
-**The rule that picks a profile is written down, not inferred
-from the badges.** Screen-count matching with a default
-preference is the single most consequential behavior on the page,
-and it was previously discoverable only by watching profiles load
-and guessing. The card states the rule and then answers it for
-the live machine, naming *why* this profile answered — a Desktop
-binding, an exact monitor set, the count's default, or a built-in
-layout when nothing saved matches — because those are different
-promises. An exact set stops matching the moment the hardware
-changes, and a count default keeps matching whatever monitors are
-plugged in, so a user who reads only the profile's name cannot
-tell which of the two they are relying on.
+**The rule that picks a profile is written down, not inferred from
+the badges.** Screen-count matching with a default preference is
+the single most consequential behavior on the page, and otherwise
+discoverable only by watching profiles load and guessing. The card
+states the rule and then answers it for the live machine, naming
+*why* this profile answered — a Desktop binding, an exact monitor
+set, the count's default, or a built-in layout when nothing saved
+matches — because those are different promises. An exact set stops
+matching the moment the hardware changes, and a count default
+keeps matching whatever monitors are plugged in, so a user who
+reads only the profile's name cannot tell which of the two they
+are relying on.
 
-**A card that explains a rule states the WHOLE rule.** The first
-cut asked `ProfileManager.match` and stopped there — which is
-only the display half, because a Desktop binding outranks
-matching — so on any machine with a bound Desktop the card named
-one profile while another was on screen, with the card that
-creates those bindings sitting directly below it. Half a rule
-stated confidently is worse than no card: it teaches a model the
-app does not follow, and the reader has no way to notice. Hence
-`KiwiCore.profileVerdict`, one query carrying the same precedence
-the live paths use, rather than a GUI-side composition of two
-answers that could be ordered wrongly a second time.
+**A card that explains a rule states the WHOLE rule.** Asking
+`ProfileManager.match` alone is only the display half, because a
+Desktop binding outranks matching — so on any machine with a bound
+Desktop such a card names one profile while another is on screen,
+with the card that creates those bindings sitting directly below
+it. Half a rule stated confidently is worse than no card: it
+teaches a model the app does not follow, and the reader has no way
+to notice. Hence `KiwiCore.profileVerdict`, one query carrying the
+same precedence the live paths use, rather than a GUI-side
+composition of two answers that could be ordered wrongly a second
+time.
 
 **[Trade-off]**
 
 **A control the OS has made meaningless is greyed, not left live
 under a warning — and #888 ended the instance by ending the
 meaninglessness.** While "Desktop N activates" named no single
-event under separate Spaces, #678 ruled the binding rows greyed
-rather than live-under-a-warning: leaving the menus live let a
-user configure bindings that could not do what the row says.
-That grey was correct *for as long as its premise held* — and
-#888 removed the premise rather than the ruling, by giving the
+event under separate Spaces, the binding rows were greyed rather
+than live-under-a-warning (#678): leaving the menus live lets a
+user configure bindings that cannot do what the row says.
+#888 removed the premise rather than the ruling, giving the
 trigger a definition (the main screen's Desktop) that holds in
-every display mode. The rows are live in every display state now, so the
-grey, its inline warning and its Desktop & Dock button retired
-together; the stored-profile grey, a different premise, fell to
+every display mode, so the grey, its inline warning and its
+Desktop & Dock button retired together; the stored-profile
+grey — a different premise — is ruled on its own terms at
 #1392 below. What survives, because it never depended on the
-instance: a control the OS genuinely makes meaningless is still
-greyed rather than left live, and existing config stays visible
-under any such grey — hiding a user's own configuration to
-protect them from it is the worse failure.
+instance: a control the OS genuinely makes meaningless is greyed
+rather than left live, and existing config stays visible under
+any such grey — hiding a user's own configuration to protect them
+from it is the worse failure.
 
 **And greying a control never removes the only way out of the
 state it describes.** The greyed rows were the only place a
@@ -11050,41 +10965,40 @@ safeguard.
 
 **A Desktop binding fires only for its profile's screen count
 ([#1394](https://github.com/KiwiCanopy/KiwiDesk/issues/1394),
-[#1332](https://github.com/KiwiCanopy/KiwiDesk/issues/1332)).**
-A binding outranks monitor matching, and a profile is saved for
-exactly one number of screens, so the two used to collide: a
+[#1332](https://github.com/KiwiCanopy/KiwiDesk/issues/1332)).** A
+binding outranks monitor matching, and a profile is saved for
+exactly one number of screens, so without it the two collide: a
 Desktop bound to a one-screen profile loaded it onto two screens,
 where nothing could save it — a profile refuses a set of another
 count — and Settings could only say *save as new instead*, which
 the binding would then not point at. Worse, the two doors that
-load a binding disagreed about the result: the boot and
-Desktop-switch door marked the misfit clean, the monitor-change
-door let it stand dirty, so a restart showed a *Screens* drift
-row that a Desktop switch did not. The ruling settles both by
-construction rather than by picking a side: **a binding fires
-only where its profile is saved for the connected screen count**,
-and for any other count it stands aside so the rungs below —
-exact set, count default, built-in — answer, exactly as a
-binding whose profile cannot be read already did. A bound load
-therefore always fits by count, the unconditional clean mark is
-gone, and both doors read one verdict from the apply. Screen
-*identity* was considered as the extra dimension and rejected: a
-binding is already filed under the Desktop's own stamp, and a
-Desktop lives on one screen, so the external's Desktop 2 and the
-built-in's Desktop 2 are different bindings by construction. The
-count is the dimension that was missing, and it needs no stored
-field, since the bound profile carries it. What this did not
-give — one Desktop loading a different profile per screen count
-— is the next entry (#1436). The Desktops row keeps a
-standing-aside binding visible, in keeping with *don't hide*:
-the binding is not broken, it is waiting, and the row narrates
-Core's verdict rather than re-deriving it — until #1436 as a
-*for N screen(s)* badge, since then as the count group's
-header. With no displays known — the first config load
-runs before the loop publishes displays, and a paused engine
-discovers none — the gate cannot judge and the binding waits
-too, rather than loading a profile that the boot scan's monitor
-change would then replace; that first monitor change fires it.
+load a binding disagree about the result — the boot and
+Desktop-switch door marking the misfit clean, the monitor-change
+door letting it stand dirty — so a restart shows a *Screens* drift
+row that a Desktop switch does not. The ruling settles both by
+construction rather than by picking a side: **a binding fires only
+where its profile is saved for the connected screen count**, and
+for any other count it stands aside so the rungs below — exact
+set, count default, built-in — answer, exactly as a binding whose
+profile cannot be read already did. A bound load therefore always
+fits by count, the unconditional clean mark is gone, and both
+doors read one verdict from the apply. Screen *identity* was
+considered as the extra dimension and rejected: a binding is
+already filed under the Desktop's own stamp, and a Desktop lives
+on one screen, so the external's Desktop 2 and the built-in's
+Desktop 2 are different bindings by construction. The count is the
+dimension that was missing, and it needs no stored field, since
+the bound profile carries it. What this did not give — one Desktop
+loading a different profile per screen count — is the next entry
+(#1436). The Desktops row keeps a standing-aside binding visible,
+in keeping with *don't hide*: the binding is not broken, it is
+waiting, and the row narrates Core's verdict rather than
+re-deriving it, as the count group's header (#1436). With no
+displays known — the first config load runs before the loop
+publishes displays, and a paused engine discovers none — the gate
+cannot judge and the binding waits too, rather than loading a
+profile that the boot scan's monitor change would then replace;
+that first monitor change fires it.
 
 **[Principle]**
 
@@ -11092,61 +11006,58 @@ change would then replace; that first monitor change fires it.
 groups by count rather than offering a count control
 ([#1436](https://github.com/KiwiCanopy/KiwiDesk/issues/1436)).**
 The feature the #1394 ruling named as its own: a laptop that is
-sometimes docked wants Desktop 2 to load *Laptop* alone and
-*Dual* when the external is connected. The record lists its
-profiles and stores no count beside them — each profile carries
-its own for life, and `upsert` refuses a set of another count —
-so the gate's one judgement picks the entry saved for the
-connected screens, and a second `bind_profile_to_desktop` with a
-profile of another count adds beside the first while one of the
-same count replaces it. A profile not saved yet is a class of its
-own there: two unsaved names cannot be told apart, so the newer
-replaces the older. The Settings surface was proposed as a
+sometimes docked wants Desktop 2 to load *Laptop* alone and *Dual*
+when the external is connected. The record lists its profiles and
+stores no count beside them — each profile carries its own for
+life, and `upsert` refuses a set of another count — so the gate's
+one judgement picks the entry saved for the connected screens, and
+a second `bind_profile_to_desktop` with a profile of another count
+adds beside the first while one of the same count replaces it. A
+profile not saved yet is a class of its own there: two unsaved
+names cannot be told apart, so the newer replaces the older. A
 screen-count control with one picker per Desktop for the chosen
-count, and the `ui-designer` ruled against it (2026-09-16): a
-control adds a mode whose selection can disagree with what is
-firing, hides the rest of the table, and — the count set being
-user-generated — would have to be a menu, the worse control for
-"which counts do I have profiles for". The Presets card on the
-same pane had already answered the same question without one:
-the connected count leads under *For your N screens*, the other
-counts follow under their own headers, and a single-count user
-sees the card exactly as before, headerless. Two consequences
-follow. The *for N screen(s)* badge is retired — its fact is the
-group header now, and the card's `?` states the one-per-count
-rule in one clause (the owner struck its "the others wait"
-tail, 2026-09-16) — and a bound name whose profile no reading can count sits in
-a last *Couldn't load* group, offering only None, since it
-belongs to no count and a picker that cannot say which count it
-edits must not pretend to. A connected count no profile is saved
-for draws no rows: a None-only picker is a dead control, the
-affordance-for-a-channel-that-does-not-exist case, so a caption
-takes its place and the other counts follow with headers.
+count was refused (`ui-designer`, 2026-09-16): a control adds a
+mode whose selection can disagree with what is firing, hides the
+rest of the table, and — the count set being user-generated —
+would have to be a menu, the worse control for "which counts do I
+have profiles for". The Presets card on the same pane answers the
+same question without one: the connected count leads under *For
+your N screens*, the other counts follow under their own headers,
+and a single-count user sees the card exactly as before,
+headerless. Two consequences follow. The group header carries the
+fact a *for N screen(s)* badge would, and the card's `?` states
+the one-per-count rule in one clause with no "the others wait"
+tail (owner, 2026-09-16) — and a bound name whose profile no
+reading can count sits in a last *Couldn't load* group, offering
+only None, since it belongs to no count and a picker that cannot
+say which count it edits must not pretend to. A connected count no
+profile is saved for draws no rows: a None-only picker is a dead
+control, the affordance-for-a-channel-that-does-not-exist case, so
+a caption takes its place and the other counts follow with
+headers.
 
 **[Rationale]**
 
 **The Desktop binding rows are live under every edit target
-([#1392](https://github.com/KiwiCanopy/KiwiDesk/issues/1392)).**
-A binding says which profile a Desktop loads, which is a fact
-about no one profile — the table is global — so the profile the
-Settings window happens to be editing does not change what a
-row means, and greying the rows behind *switch to Live* said
-nothing a user could act on except a detour. The grey was not
-protecting a ruling: it arrived with the stored-profile edit
-target, whose Save wrote only the profile's own file, so a live
-row there dropped its edit on Save. That was a missing write,
-not a reason to withhold the row — a stored-profile Save files
-an edited binding table into `gui.json` through one Core door
+([#1392](https://github.com/KiwiCanopy/KiwiDesk/issues/1392)).** A
+binding says which profile a Desktop loads, which is a fact about
+no one profile — the table is global — so the profile the Settings
+window happens to be editing does not change what a row means, and
+greying the rows behind *switch to Live* says nothing a user can
+act on except a detour. The grey protects no ruling: a
+stored-profile Save that writes only the profile's own file drops
+a live row's edit, which is a missing write, not a reason to
+withhold the row — a stored-profile Save files an edited binding
+table into `gui.json` through one Core door
 (`rewriteSidecarBindings`), and only for the rows that changed.
 The one state that still greys them is a stored profile of a
 config the GUI does not manage: that Save has no sidecar to file
 into, or one nothing reads, so a live row there would offer an
-edit that goes nowhere, and the rows dim with the cause — the
-one case the retired sentence was right about. Live is never
-greyed, since its Save creates the sidecar. Moving the binding
-*into* the profile was refused on the
-standing rule: a profile owns tiling plus sparse overrides,
-never anything that routes or selects the profile itself.
+edit that goes nowhere, and the rows dim with the cause. Live is
+never greyed, since its Save creates the sidecar. Moving the
+binding *into* the profile was refused on the standing rule: a
+profile owns tiling plus sparse overrides, never anything that
+routes or selects the profile itself.
 
 **[Principle]**
 
@@ -11180,19 +11091,18 @@ declared space's would.
 
 **One representation, and it is the arrangement itself.** A card
 on this page is a **drop target**, and a drop target must be
-identifiable by eye: the user aims at a rectangle, so they have
-to know which monitor on their desk it stands for before they
+identifiable by eye: the user aims at a rectangle, so they have to
+know which monitor on their desk it stands for before they
 release. Identity and order cannot tell them — three same-named
 cards in a row say nothing about which one is the portrait panel
 on the left. So the cards are the real arrangement, at their own
-sizes and positions, drawn from the live frames. This retires
-"macOS's Displays pane owns true spatial layout — identity +
-order is enough here", the earlier ruling that folded the old
-tab's three representations (proportional canvas, drag palette,
-resolution list) into one row of equal-sized cards in physical
-x-order: enough for a *list* of displays, and that consolidation
-kept the drag. Equal-sized cards can only come back together
-with the drop. (#68 §3.13, #678 turn 13b)
+sizes and positions, drawn from the live frames. The rejected
+reading — "macOS's Displays pane owns true spatial layout;
+identity + order is enough here", one row of equal-sized cards in
+physical x-order in place of a proportional canvas, a drag palette
+and a resolution list — is enough for a *list* of displays;
+equal-sized cards can only come back together with the drop. (#68
+§3.13, #678 turn 13b)
 
 **Drawn from POINTS — not pixels, and not physical millimetres.**
 Position is the reason, not fidelity: a display's global position
@@ -11232,55 +11142,50 @@ reports far fewer points and does not approach the cap at all).
 no rectangle: which space is *up* on a display right now
 (selecting one answers it), and the fact that two identical
 monitors are a single identity to KiwiDesk — `name:WxH` is what a
-pin is stored against, so a pinned space may open on either. The
-list this page replaced hid that second one; a picture cannot,
-and an unexplained duplicate reads as a bug in the drawing rather
-than a limit of the identity.
+pin is stored against, so a pinned space may open on either. A
+list hides that second one; a picture cannot, and an unexplained
+duplicate reads as a bug in the drawing rather than a limit of the
+identity.
 
 **Chips: pinned, follows-main, automatic.** Semantic micro-icons
 (pin, arrow) rather than border styles alone (accessibility), and
 automatic is drawn as an outline rather than a dimmed capsule —
 dimming is this app's inert vocabulary, and an automatic chip is
 the one most worth dragging. Four routes to move a space — drag
-it, its right-click menu, the same menu as VoiceOver actions,
-and the keyboard chord on the focused chip (#845, which also
-made the chip focusable at all) — all off ONE builder through
-the `rowActions` seam. The whole-chip `Menu` that once made the
-keyboard route real consumed the mouse-down that `.draggable`
-needs, which is why the restored route is a chord and a hidden
-anchor rather than a control shape that takes the drag (the
-argument lives on `SpaceAssignmentChip`; the ruling is ▸ The
-row menu's keyboard route, #845). The
-clear affordance never takes a slot in the chip's FLOW — the ⓧ
-rides the trailing-top corner as an overlay, and hover may
-change only its tint, never its presence or any metric —
-because the chips are sized by a flow layout whose arithmetic
-(`MonitorCardChips.minChipWidth`) must hold for both states,
-and both a hover-revealed button and an in-flow trailing slot
-have shipped and died of that measurement. It is not free of
-the layout, though: a chip that HAS a badge reserves 6 pt more
+it, its right-click menu, the same menu as VoiceOver actions, and
+the keyboard chord on the focused chip (#845, which also made the
+chip focusable at all) — all off ONE builder through the
+`rowActions` seam. A whole-chip `Menu` consumes the mouse-down
+that `.draggable` needs, which is why the keyboard route is a
+chord and a hidden anchor rather than a control shape that takes
+the drag (the argument lives on `SpaceAssignmentChip`; the ruling
+is ▸ The row menu's keyboard route, #845). The clear affordance
+never takes a slot in the chip's FLOW — the ⓧ rides the
+trailing-top corner as an overlay, and hover may change only its
+tint, never its presence or any metric — because the chips are
+sized by a flow layout whose arithmetic
+(`MonitorCardChips.minChipWidth`) must hold for both states, and
+both a hover-revealed button and an in-flow trailing slot have
+shipped and died of that measurement. It is not free of the
+layout, though: a chip that HAS a badge reserves 6 pt more
 trailing padding to sit under it, which that arithmetic absorbs
 because `minChipWidth` is the narrowest chip and capacity is an
-upper bound. This passage used to say the two kinds "measure
-identically", which #1240 found reading as licence to assume
-equal metrics. Decoration may ride
-the accent (the main card's bloom); the answer never rides hue
-alone (the "main" badge).
+upper bound (#1240). Decoration may ride the accent (the main
+card's bloom); the answer never rides hue alone (the "main"
+badge).
 
 ### App rules
 
 **[Principle]**
 
 **A rule is a sentence, and the sentence is the control.** An app
-rule states what an app does — "Spotify opens in media and
-floats" — so the row states it, with the two menus sitting inside
-the statement where their values complete it. The shape it
-replaced was a form *about* an app: a name header over two
-labelled facet columns, which made the reader assemble the
-meaning out of three fragments and read "Float: Never" as a
-setting rather than as behaviour. Three consequences bind
-anything added here, and the first is the one that is easy to
-get wrong twice.
+rule states what an app does — "Spotify opens in media and floats"
+— so the row states it, with the two menus sitting inside the
+statement where their values complete it. The rejected shape is a
+form *about* an app: a name header over two labelled facet
+columns, which made the reader assemble the meaning out of three
+fragments and read "Float: Never" as a setting rather than as
+behaviour. Three consequences bind anything added here.
 
 **The word order is the translator's.** A sentence with controls
 in it is one localized frame with positional specifiers, split
@@ -11329,12 +11234,12 @@ keystroke costs a filter over an array the GUI holds.
 
 **[Rationale]**
 
-**One row per app, two facets.** "Finder lives on space 2
-but its Get Info windows float" used to be two entries in two
-differently-shaped lists. Now each app has a Space facet and
-a Float facet; the `App:Title` colon syntax is assembled by
-the GUI and never shown (it's serialization, not UI). Storage
-is untouched, so hand-written configs round-trip. (#68 §3.11)
+**One row per app, two facets.** "Finder lives on space 2 but its
+Get Info windows float" is one row with a Space facet and a Float
+facet, not two entries in two differently-shaped lists; the
+`App:Title` colon syntax is assembled by the GUI and never shown
+(it's serialization, not UI). Storage is untouched, so
+hand-written configs round-trip. (#68 §3.11)
 
 ### Errors & the menu bar
 
@@ -11351,15 +11256,14 @@ refresh on save/delete, so repairing one clears its badge
 immediately. (#68 §3.7, #39/#31 own the validation cores)
 
 **An undecodable profile is greyed, never hidden.** A profile
-whose JSON won't decode yields no summary, but hiding it
-stranded a broken file with no reachable remedy (#246). It now
-stays listed everywhere — a Delete (and Reveal in Finder) on
-its Config Issues row, a greyed "couldn't load" row with a
-Delete in the Settings profile list, and a disabled entry in
-the quick menu's Switch Profile submenu (the remedy is the
-same panel, one entry up). Grey-don't-hide (#171); re-saving
-was never reachable for a file that can't be read, so the
-warning no longer suggests it. (#246)
+whose JSON won't decode yields no summary, but hiding it stranded
+a broken file with no reachable remedy (#246). It stays listed
+everywhere — a Delete (and Reveal in Finder) on its Config Issues
+row, a greyed "couldn't load" row with a Delete in the Settings
+profile list, and a disabled entry in the quick menu's Switch
+Profile submenu (the remedy is the same panel, one entry up).
+Grey-don't-hide (#171); re-saving was never reachable for a file
+that can't be read, so the warning no longer suggests it. (#246)
 
 **A typo is non-fatal, but never invisible.** An unknown call
 on `KiwiDesk` or a layout namespace table is a guarded no-op
@@ -11419,15 +11323,15 @@ constraint both went in #479, which split the fused path.)
 
 **[Principle]**
 
-**An accessory app that is present must answer.** The startup
-scan used to run as one synchronous block — ~10 s on a heavy
-session (109 running apps) — and it held the very run loop the
-menu-bar item and the ⌃⌥K panel are served from, so an icon the
-user could see answered nothing, and the silence ended with every
-window on the desk retiling at once. Both halves are the same
-root: work that long cannot own the main actor. The scan is a
-queue now, drained a chunk at a time with the run loop handed
-back in between ([#801](https://github.com/KiwiCanopy/KiwiDesk/issues/801)).
+**An accessory app that is present must answer.** A startup scan
+run as one synchronous block — ~10 s on a heavy session (109
+running apps) — holds the very run loop the menu-bar item and the
+⌃⌥K panel are served from, so an icon the user can see answers
+nothing, and the silence ends with every window on the desk
+retiling at once. Both halves are the same root: work that long
+cannot own the main actor. The scan is a queue, drained a chunk at
+a time with the run loop handed back in between
+([#801](https://github.com/KiwiCanopy/KiwiDesk/issues/801)).
 
 **A readiness state is only honest if the surface behind it
 works.** A "starting" badge over a menu that still will not open
@@ -11463,22 +11367,20 @@ while it is arranging, so a user who reads both surfaces never
 finds two.
 
 **A screen that claims a finished job must wait for it.** The
-tour's post-grant screen used to be reachable only after boot
-finished — because the Continue button was itself blocked by it —
-and it told the user their windows *have been* arranged.
-Chunked, the same screen is read mid-scan, so the claim now waits
-for readiness and the screen narrates until then. Rejected
-alternatives, all of which reintroduce something already ruled
-out: a **full-screen boot overlay or brand animation** (a
-takeover that fires uninvited at every login for a permanent
-accessory app, steals focus mid-keystroke, has no multi-monitor
-answer, puts brand chrome in a boot path — and, with the main
-thread starved, would freeze its own animation, exhibiting the
-hang it exists to excuse); a **transient HUD near the menu-bar
-item** (an uninvited window at every login, needing a dismissal
-policy and an anchor under a notch); and a **command queue**
-during boot (a retile queued at second 2 firing at second 9 is a
-worse surprise than the one being removed, and a new state
+tour's post-grant screen tells the user their windows *have been*
+arranged; chunked, it is read mid-scan rather than only after
+boot, so the claim waits for readiness and the screen narrates
+until then. Rejected alternatives, all of which reintroduce
+something already ruled out: a **full-screen boot overlay or brand
+animation** (a takeover that fires uninvited at every login for a
+permanent accessory app, steals focus mid-keystroke, has no
+multi-monitor answer, puts brand chrome in a boot path — and, with
+the main thread starved, would freeze its own animation,
+exhibiting the hang it exists to excuse); a **transient HUD near
+the menu-bar item** (an uninvited window at every login, needing a
+dismissal policy and an anchor under a notch); and a **command
+queue** during boot (a retile queued at second 2 firing at second
+9 is a worse surprise than the one being removed, and a new state
 machine paid on every boot to save seconds on heavy ones).
 
 **One slow app is deferred, never abandoned.** Chunking cannot
@@ -11502,28 +11404,27 @@ exists to guarantee and what this spares it.
 
 **An app that tracks nothing and shows nothing is never asked.**
 Accessibility is the only reader that can say what a window *is*,
-and the only one that can block: a message to an app not
-servicing AX — one App-Napped with every window on another
-Desktop, or a headless agent — returns when the messaging
-timeout fires, not before. The bulk re-sync a Desktop switch
-runs used to send that message to every observed app, and on a
-session with a handful of such apps every switch stalled the
-main actor for ~1 s per app, in series, with the arrived
-window's ring, retile and raise queued behind — an empty target
-Desktop cost exactly as much, because the price was never the
-windows that arrived but the apps that did not answer
-([#1037](https://github.com/KiwiCanopy/KiwiDesk/issues/1037)).
-The WindowServer census answers the one question a bulk pass
-needs *before* reading — is there anything here to change — in
-~1 ms and cannot block, the same trade the boot prefilter
+and the only one that can block: a message to an app not servicing
+AX — one App-Napped with every window on another Desktop, or a
+headless agent — returns when the messaging timeout fires, not
+before. The bulk re-sync a Desktop switch runs, sent to every
+observed app, stalls the main actor on a session with a handful of
+such apps for ~1 s per app, in series, with the arrived window's
+ring, retile and raise queued behind — an empty target Desktop
+costs exactly as much, because the price was never the windows
+that arrived but the apps that did not answer
+([#1037](https://github.com/KiwiCanopy/KiwiDesk/issues/1037)). The
+WindowServer census answers the one question a bulk pass needs
+*before* reading — is there anything here to change — in ~1 ms and
+cannot block, the same trade the boot prefilter
 ([#662](https://github.com/KiwiCanopy/KiwiDesk/issues/662)) and
 the adoption heal
 ([#675](https://github.com/KiwiCanopy/KiwiDesk/issues/675))
 already made. An app tracking a window has a departure to remove
 or a verdict to re-check; one showing a window has an arrival to
-adopt; one doing neither has nothing the pass could change, and
-is skipped whole — never read partway, since the sweep that
-derives destroys from a live list must see all of it.
+adopt; one doing neither has nothing the pass could change, and is
+skipped whole — never read partway, since the sweep that derives
+destroys from a live list must see all of it.
 
 The price is a beat, taken deliberately. The switch notification
 can fire before the arriving window composites (the
@@ -11664,36 +11565,34 @@ version appears.
 
 **[Trade-off]**
 
-- **Post-setup discovery** (#331) closes the first-run
-  discovery gap with the smallest durable surface that works: a
-  shortcuts page among the tour's own steps, listing the chord
-  families that are bound — including the one that opens the
-  shortcuts panel. It teaches the chords in the window rather
-  than pointing at the menu bar, so it works with the menu bar
-  auto-hidden, and it offers no button that opens the panel: the
-  panel is an overlay and would land on top of the tour it was
-  summoned from. Not a guided tour of every tab — that fights
-  the contextual-help convention (#94) and is the classic
-  skipped-onboarding trap. What the dedicated `UserDefaults`
-  flag (`onboarding.discoveryShown`) decides is whether the app
-  **opens the tour by itself** on a launch where nothing is
-  wrong: permission granted but the tour closed before its
-  closing beats, and the next launch reopens on that page;
-  closing a tour that reached them records the dismissal, so no
-  later quiet launch pitches it again. The flag is never the
-  Accessibility trust state, which is the part that must not be
-  undone — a TCC reset months later must not read as the app
-  having forgotten the user. It does **not** gate the page
-  inside a tour that is up for its own reason; gating it there
-  was tried and undone, because it hid the shortcuts from
-  everyone who had already finished once, which is the reader
-  most likely to have reopened the tour for exactly that
-  screen. So a revoked permission reopens the tour at its grant
-  step and walks its screens again from there — a user whose
-  window management has stopped is being helped, not pitched to.
-  Copy is jargon-free for a first-run
-  non-power user. (Supersedes #68 §5.9's "separate follow-up
-  pass" note.)
+- **Post-setup discovery** (#331) closes the first-run discovery
+  gap with the smallest durable surface that works: a shortcuts
+  page among the tour's own steps, listing the chord families that
+  are bound — including the one that opens the shortcuts panel. It
+  teaches the chords in the window rather than pointing at the
+  menu bar, so it works with the menu bar auto-hidden, and it
+  offers no button that opens the panel: the panel is an overlay
+  and would land on top of the tour it was summoned from. Not a
+  guided tour of every tab — that fights the contextual-help
+  convention (#94) and is the classic skipped-onboarding trap.
+  What the dedicated `UserDefaults` flag
+  (`onboarding.discoveryShown`) decides is whether the app **opens
+  the tour by itself** on a launch where nothing is wrong:
+  permission granted but the tour closed before its closing beats,
+  and the next launch reopens on that page; closing a tour that
+  reached them records the dismissal, so no later quiet launch
+  pitches it again. The flag is never the Accessibility trust
+  state, which is the part that must not be undone — a TCC reset
+  months later must not read as the app having forgotten the user.
+  It does **not** gate the page inside a tour that is up for its
+  own reason; gating it there hides the shortcuts from everyone
+  who has already finished once, which is the reader most likely
+  to have reopened the tour for exactly that screen. So a revoked
+  permission reopens the tour at its grant step and walks its
+  screens again from there — a user whose window management has
+  stopped is being helped, not pitched to. Copy is jargon-free for
+  a first-run non-power user. (Supersedes #68 §5.9's "separate
+  follow-up pass" note.)
 - **Configurable resize step** (#58): the `resize.step` setting
   is authoritative only at *authoring* time — it sizes
   newly-authored Grow/Shrink bindings and is recovered from
@@ -11782,51 +11681,47 @@ version appears.
   the list's job, and the picture's job is the glance.
 - **The board states two facts in two channels**: the FILL says
   what your config has done with a key (bound, free), and a RING
-  warns about it — dashed amber where macOS owns the key under
-  the shown modifier and nothing of yours claims it, solid red
-  where the key's combo clashes. A third fill for "reserved" was
-  tried and is wrong:
+  warns about it — dashed amber where macOS owns the key under the
+  shown modifier and nothing of yours claims it, solid red where
+  the key's combo clashes. A third fill for "reserved" is wrong:
   macOS owns a key *under a modifier*, so blacking it out claims
-  it is unavailable everywhere, when it is free under every
-  other. The two rings differ by dash as well as by colour,
-  because amber and red are both warm and hue alone collapses
-  them for the viewers this rule exists for. Each ring's colour
-  is measured against the ONE fill it can ever meet — the dashed
-  ring only rings an unbound key, a conflict ring only a bound
-  one — which is what lets both clear the floor
-  (`KeyboardRingSeparationTests` derives the pairs from the
-  shipped tokens).
+  it is unavailable everywhere, when it is free under every other.
+  The two rings differ by dash as well as by colour, because amber
+  and red are both warm and hue alone collapses them for the
+  viewers this rule exists for. Each ring's colour is measured
+  against the ONE fill it can ever meet — the dashed ring only
+  rings an unbound key, a conflict ring only a bound one — which
+  is what lets both clear the floor (`KeyboardRingSeparationTests`
+  derives the pairs from the shipped tokens).
 - **A bound reserved combo is conflict-class** (owner ruling
-  2026-08-10, revising pass 5's bound-wins reading). Binding ⌘W
-  does not un-reserve it: the user's row and macOS now contest
-  one chord, which is a clash of exactly the kind two of the
-  user's own rows have with each other — and the earlier
-  reading, where binding a key silently dropped its reserved
-  ring, hid the warning on precisely the key that most needs it.
-  So an overwrite takes the same solid red ring as an own-row
-  collision, sharing one legend word (a second label would cost
-  a translation round for a distinction the conflict banner
+  2026-08-10). Binding ⌘W does not un-reserve it: the user's row
+  and macOS now contest one chord, which is a clash of exactly the
+  kind two of the user's own rows have with each other — and the
+  bound-wins reading, where binding a key silently drops its
+  reserved ring, hides the warning on precisely the key that most
+  needs it. So an overwrite takes the same solid red ring as an
+  own-row collision, sharing one legend word (a second label would
+  cost a translation round for a distinction the conflict banner
   already narrates row by row). The colour is forced as well as
   chosen: a warning that follows a key from free to bound moves
   from `keyFree` onto the accent, and amber fails the separation
-  floor against the accent outright where the conflict red
-  clears it — the same suite holds that pairing — so "keep the
-  amber on bound keys" is not an available alternative. The
-  legend obeys the caption rule: each ring's entry exists only
-  while its ring is actually drawn on the board — the red while
-  a collision or an overwrite shows, the amber while a reserved
-  key is still free under the shown combination. A chip being
-  picked is not enough for the amber: a chip whose reserved keys
-  are all bound draws red alone, and under **All** there is no
-  single combination to check a reserved key against.
+  floor against the accent outright where the conflict red clears
+  it — the same suite holds that pairing — so "keep the amber on
+  bound keys" is not an available alternative. The legend obeys
+  the caption rule: each ring's entry exists only while its ring
+  is actually drawn on the board — the red while a collision or an
+  overwrite shows, the amber while a reserved key is still free
+  under the shown combination. A chip being picked is not enough
+  for the amber: a chip whose reserved keys are all bound draws
+  red alone, and under **All** there is no single combination to
+  check a reserved key against.
 - **Measure colour with `ColorVision`, never a re-derivation of
   it.** `ColorVision.separation` is Euclidean distance in
-  *simulated sRGB*. A hand-rolled CIE-Lab proxy used during pass
-  5 reported warm colours at 17–25 against the accent green when
-  the repo's own measure puts them at 84–126, and that single
-  wrong yardstick drove a redesign of every key fill — a neutral
-  key, a bespoke lighter green, a generated hue ramp — before
-  anyone ran the real function. The suites are the authority
-  precisely because the numbers are unintuitive; a plausible
-  re-implementation is not a second opinion, it is a different
-  question.
+  *simulated sRGB*. A hand-rolled CIE-Lab proxy reported warm
+  colours at 17–25 against the accent green when the repo's own
+  measure puts them at 84–126, and that single wrong yardstick
+  drove a redesign of every key fill — a neutral key, a bespoke
+  lighter green, a generated hue ramp — before anyone ran the real
+  function. The suites are the authority precisely because the
+  numbers are unintuitive; a plausible re-implementation is not a
+  second opinion, it is a different question.
