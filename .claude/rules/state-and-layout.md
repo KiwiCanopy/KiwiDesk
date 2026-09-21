@@ -482,7 +482,7 @@ editing here:
   never the focus command, whose displacement note would arm
   that bounce against every later report. The
   live strip read stays behind `mouse.pointerInMenuBarStrip`,
-  and a `makeTestCore` twin pins it false, since a live default
+  and both `makeTestCore` twins pin it false, since a live default
   reading the developer's pointer would return foreign reports
   in every focus suite. A fourth member of the family takes the
   same one-home shape with its own consulting site in
