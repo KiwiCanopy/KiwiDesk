@@ -420,7 +420,15 @@ why they are here rather than beside the views:
   catalog forever. This is an obligation on the **English
   author**, so it is repeated in [gui.md](gui.md) ▸ Strings,
   which is the file that loads while you are writing the call
-  site.
+  site. A label may sit beside a count in one frame: the guard
+  counts the label-bearing ARGUMENTS against `%N$@` alone, so
+  `…then %1$@. Restored: %2$d` is legal and a label's `%N$@`
+  going missing reds (#1117) — never widen it to accept `%N$d`,
+  which lets a label reverted to text hide behind the counts'
+  specifiers. Its stated residue: beside a non-label `%N$@` (a
+  link slot, a name) one label's missing specifier is masked,
+  and the floor register in `InterpolatedLabelTests+Converted`
+  is what sees that revert.
 - **One KiwiDesk concept gets one word per catalog**, and a
   common noun — *layout*, *gap*, *profile*, *shortcut* — is
   settled with `docs/localization-naming.md` ▸ Family C, whose
