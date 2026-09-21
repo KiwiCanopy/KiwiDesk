@@ -271,7 +271,7 @@ exports nothing.
 | | `bind_profile_to_desktop` | Desktop number, profile (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
-| | `debug_log` | message |
+| | `debug_log` | [message] |
 | Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
 | | `animations.set_scroll_duration` | ms (50–1000); scroll-layout focus-shift duration, persisted per-profile |
 | | `animations.set_on_space_change` | true\|false (default false) |
