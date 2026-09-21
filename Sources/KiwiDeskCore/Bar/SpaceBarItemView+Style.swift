@@ -25,13 +25,12 @@ extension SpaceBarItemView {
             .cgColor
     }
 
-    /// Alpha for untinted elements (QA 2026-07-19). The layer
-    /// item reads full-strength on this channel as on the ink
-    /// (#1169): an emoji icon takes no tint, so this is the one
-    /// channel that could dim it.
-    private var untintedAlpha: CGFloat {
-        isActive || isHovered || isDragHovered || space == nil
-            ? 1 : style.dimFactor
+    /// The state the identifier ink ladder reads; the layer item
+    /// is active by ruling (#1169), never "not current".
+    private var itemState: SpaceItemState {
+        if isActive || space == nil { return .active }
+        if isHovered || isDragHovered { return .hovered }
+        return .resting
     }
 
     /// Styles count and overflow badges (#293).
@@ -150,7 +149,11 @@ extension SpaceBarItemView {
         return NSColor(kiwiHex: style.itemColor)
     }
 
+    /// Paints the identifier in the ONE ink the style rules for
+    /// this glyph and state (`identifierInk`, #1485).
     private func styleIdentifier() {
+        let ink = style.identifierInk(of: spaceGlyph, state: itemState)
+        let tint = ink.hex.map { NSColor(kiwiHex: $0) }
         switch spaceGlyph {
         case .symbol(let name):
             identifierLabel.isHidden = true
@@ -164,15 +167,14 @@ extension SpaceBarItemView {
                     pointSize: identifierFont,
                     weight: .regular
                 )
-            identifierImage.contentTintColor = stateColor
-        case .text(let text, let tinted):
+            identifierImage.contentTintColor = tint
+            identifierImage.alphaValue = ink.alpha
+        case .text(let text, _):
             identifierImage.isHidden = true
             identifierLabel.isHidden = false
             identifierLabel.stringValue = text
-            identifierLabel.textColor =
-                tinted ? stateColor : .labelColor
-            identifierLabel.alphaValue =
-                tinted ? 1 : untintedAlpha
+            identifierLabel.textColor = tint ?? .labelColor
+            identifierLabel.alphaValue = ink.alpha
         }
     }
 

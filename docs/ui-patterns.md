@@ -156,7 +156,7 @@ choices; long, explanatory, or localization-risk labels; or
 a constrained repeated surface where showing every choice
 would crowd or truncate. A binary is a **toggle**, never two
 segments. Fixed editor-navigation tabs (the icon picker's
-Emoji / Symbol / Glyph strip) may exceed four — they switch the
+Symbols / Emoji strip) may exceed four — they switch the
 visible editor rather than edit a value, so the count cap
 doesn't apply. Layout Defaults' layout selector used to be the
 other instance and is no longer a segmented control at all: it

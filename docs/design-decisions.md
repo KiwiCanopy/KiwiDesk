@@ -7442,9 +7442,11 @@ ground.** The popover's header shows the selection where it
 lands: the Space Bar's `fill_color` composited over a light and
 a dark wallpaper swatch, the glyph tinted through `item_color`
 when it is a symbol and untinted when it is an emoji — Core's
-own classification, since a preview claiming the bar's
-behaviour calls the bar's ladder rather than re-implementing
-it beside the drawing. The old header drew the glyph on the
+own classification and Core's own ink rule, so the preview
+cannot tint what the bar does not. The plate is the flat fill;
+the Liquid Glass finish is not composited in a swatch, which
+is the one part of the bar the preview does not model. The old
+header drew the glyph on the
 pane's own surface, which the glyph is never seen on: a symbol
 that reads well there can vanish on a dark plate, and that
 difference is exactly what the Symbols-first ruling above

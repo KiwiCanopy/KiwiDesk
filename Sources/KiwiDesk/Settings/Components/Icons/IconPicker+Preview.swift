@@ -93,10 +93,10 @@ extension IconPicker {
         }
     }
 
-    /// The Space Bar's plate — `fill_color` over a wallpaper —
-    /// with the glyph the bar draws: a symbol takes `item_color`,
-    /// an emoji no tint, the classification Core's, never the
-    /// picker's own (#1485, #702).
+    /// The Space Bar's plate — `fill_color` over a wallpaper,
+    /// the flat plate rather than the Liquid Glass finish, which
+    /// a swatch cannot composite — with the glyph the bar draws,
+    /// classified and inked by Core's own ladders (#1485, #702).
     func barPlateSwatch(
         _ style: SpaceBarStyle,
         space: SpaceID,
@@ -134,31 +134,14 @@ extension IconPicker {
     }
 }
 
-/// A Space Bar identifier as the picker previews it, in the
-/// bar's resting ink (#1485).
+/// A Space Bar identifier as the picker previews it: at REST, in
+/// the ink the bar's own ladder rules for it (#1485).
 struct BarPlateGlyph: View {
     let glyph: SpaceGlyph
     let style: SpaceBarStyle
 
-    /// What the bar's resting item paints a glyph with: a tinted
-    /// one takes `item_color` at full strength, an untinted one
-    /// (an emoji) keeps its own colours at the bar's dim — the
-    /// bar's own `styleIdentifier` rule, so the preview cannot
-    /// tint what the bar does not.
-    static func ink(
-        of glyph: SpaceGlyph,
-        in style: SpaceBarStyle
-    ) -> (hex: String?, opacity: CGFloat) {
-        switch glyph {
-        case .symbol, .text(_, tinted: true):
-            return (style.itemColor, 1)
-        case .text(_, tinted: false):
-            return (nil, style.dimFactor)
-        }
-    }
-
     var body: some View {
-        let ink = Self.ink(of: glyph, in: style)
+        let ink = style.identifierInk(of: glyph, state: .resting)
         Group {
             switch glyph {
             case .symbol(let name):
@@ -173,6 +156,6 @@ struct BarPlateGlyph: View {
         .foregroundStyle(
             ink.hex.map { Color(kiwiHex: $0) } ?? .primary
         )
-        .opacity(ink.opacity)
+        .opacity(ink.alpha)
     }
 }
