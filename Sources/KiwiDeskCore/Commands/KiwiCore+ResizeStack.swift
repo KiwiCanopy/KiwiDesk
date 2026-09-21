@@ -84,12 +84,9 @@ extension KiwiCore {
         let tiled = state.effectiveTiledMembers(of: space)
         let splitAxis =
             stack.stackPosition.splitsHorizontally ? "x" : "y"
-        // The share write keys per-window state by id: a
-        // tiled-sticky traveler (#414 v2) is not in
-        // `space.windows`, so an entry under its id could never
-        // be pruned (orphan; recycled-id hazard, #308). The mouse
-        // path hands the DRAGGED window, which can be a traveler;
-        // the keyboard path's `space.focused` cannot.
+        // Not a member of this Space (a traveler, #414 v2/#308):
+        // a share entry under its id could never be pruned. The
+        // drop can hand one; `space.focused` cannot.
         guard space.windows.contains(focused) else {
             return .fail(
                 "the focused window is visiting from "

@@ -138,12 +138,9 @@ public enum MouseResize {
             return nil
         case .stack:
             // The dominant delta decides, as bsp and track do:
-            // the split axis moves the ratio (#222), the cross
-            // axis the dragged window's zone share (#941). Which
-            // zone the window is in, and whether that zone
-            // divides on the cross axis at all, is the apply
-            // site's — a master zone lined up along the split
-            // has no cross-axis parameter and refuses there.
+            // split axis → ratio (#222), cross axis → the
+            // dragged window's zone share (#941); the writer
+            // owns whether that zone divides on it.
             let change = stackSplitHorizontal ? dw : dh
             let cross = stackSplitHorizontal ? dh : dw
             if abs(change) >= abs(cross), abs(change) > threshold {

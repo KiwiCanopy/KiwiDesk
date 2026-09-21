@@ -134,5 +134,5 @@ The rejection in the row above has a second form. Issued while the Space KiwiDes
 :::
 
 :::unreleased
-On the current release, dragging a **stack** window's edge along its zone's own axis — a height drag beside a left or right stack, a width drag beside a top or bottom one — snaps back, and only the keyboard `resize` moves the share; the drag lands like the keyboard press after [#941](https://github.com/KiwiCanopy/KiwiDesk/issues/941) (the ruling is in [design decisions](design-decisions.md#layout-and-resize-behavior)). What stays: a master zone lined up *along* the split has no cross-axis share to move, by the row above on masters' shares, so that drag still snaps back.
+Dragging a **stack** window's edge along its zone's own axis — a height drag beside a left or right stack, a width drag beside a top or bottom one — moves the dragged window's share of its zone, as the keyboard `resize` does ([#941](https://github.com/KiwiCanopy/KiwiDesk/issues/941); the ruling is in [design decisions](design-decisions.md#layout-and-resize-behavior)). What remains: a master zone lined up *along* the split has no cross-axis share to move, by the row above on masters' shares, so that drag snaps back.
 :::

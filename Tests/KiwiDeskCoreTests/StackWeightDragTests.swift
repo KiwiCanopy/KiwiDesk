@@ -117,8 +117,9 @@ struct StackWeightDragTests {
             args: [.string("y"), .number(150)]
         )
         #expect(response.isSuccess)
-        let fromDrag = try? #require(weight(dragged, 2))
-        let fromKey = try? #require(weight(typed, 2))
+        let fromDrag = weight(dragged, 2)
+        let fromKey = weight(typed, 2)
+        #expect(fromDrag != nil)
         #expect(fromDrag == fromKey)
     }
 
@@ -179,22 +180,43 @@ struct StackWeightDragTests {
         #expect(weight(core, 3) == nil)
     }
 
-    /// The share write keys per-window state by id, so a window
-    /// that is no member of the Space — the drop can hand a
-    /// tiled-sticky traveler (#414 v2) — is refused rather than
-    /// orphaning an entry (#308).
-    @Test("A window that is no member of the Space is not written")
-    func nonMemberIsNotWritten() {
+    /// The share write keys per-window state by id, so a
+    /// tiled-sticky traveler (#414 v2) — in the tiled list the
+    /// drop reads, not in `space.windows` — is refused rather
+    /// than orphaning an entry (#308). The drop can hand one;
+    /// the keyboard's `space.focused` cannot.
+    @Test("A traveler is refused, not written")
+    func travelerIsNotWritten() {
         let core = makeCore()
         let space = stackSpace(core)
-        core.state.apply(
-            .windowCreated(
-                ManagedWindow(id: WindowID(9), pid: 2, appName: "B")
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        // Two home-mates ahead of the traveler, so it is injected
+        // past the master slot: at index 0 it would be the lone
+        // master and the AXIS clause would refuse it first
+        // (guard-prover, 2026-09-22).
+        for id: UInt32 in 60...61 {
+            core.state.windows.upsert(
+                ManagedWindow(id: WindowID(id), pid: 3, appName: "H")
+            )
+            core.state.workspaces.add(WindowID(id), to: SpaceID("2"))
+        }
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: WindowID(50),
+                pid: 2,
+                appName: "Traveler",
+                stickyScope: .global
             )
         )
-        core.moveWindow(WindowID(9), to: SpaceID("2"), follow: false)
+        core.state.workspaces.add(WindowID(50), to: SpaceID("2"))
+        // The traveler shape: injected into "1"'s tiled list in
+        // the stack column, absent from its members — the column
+        // lookup finds it and only the membership guard refuses.
+        let tiled = core.state.effectiveTiledMembers(of: space)
+        #expect((tiled.firstIndex(of: WindowID(50)) ?? 0) >= 1)
+        #expect(!space.windows.contains(WindowID(50)))
         let response = core.resizeStackMember(
-            WindowID(9),
+            WindowID(50),
             axis: "y",
             delta: 100,
             span: Double(bounds.height),
@@ -204,11 +226,31 @@ struct StackWeightDragTests {
             response.error
                 == "the focused window is visiting from another Space"
         )
-        #expect(weight(core, 9) == nil)
-        #expect(
-            core.state.workspaces[SpaceID("2")]?.stackWeights[WindowID(9)]
-                == nil
+        #expect(weight(core, 50) == nil)
+        let home = core.state.workspaces[SpaceID("2")]?.stackWeights
+        #expect(home?[WindowID(50)] == nil)
+    }
+
+    /// The drop end to end: `handleResizeEnd` classifies the
+    /// gesture against the Space's own split and hands the
+    /// dragged window through — the join this change wires.
+    /// Needs a screen for the layout bounds, as the track twin
+    /// does.
+    @Test("A height drag on the drop end lands the share")
+    func dropEndLandsTheShare() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        let space = stackSpace(core)
+        let slot = CGRect(x: 1000, y: 25, width: 900, height: 500)
+        let dragged = CGRect(x: 1000, y: 25, width: 900, height: 620)
+        core.handleResizeEnd(
+            WindowID(2),
+            slot: slot,
+            frame: dragged,
+            in: space
         )
+        #expect((weight(core, 2) ?? 1) > 1)
+        #expect(weight(core, 3) == nil)
     }
 
     /// The drop without a window identity writes nothing — nil

@@ -275,14 +275,9 @@ to the next over a blur; the flip and its duration live here
 too, not in Colors & Animations.
 
 > **A few resize behaviors are accepted limitations, not bugs** —
-> the inner window of a nested BSP pair not growing, or a
-> side-by-side master's share not moving. See
+> the inner window of a nested BSP pair not growing, or the shares
+> of masters lined up along the split not moving. See
 > [Accepted limitations](accepted-limitations.md).
-
-:::unreleased
-On the current release a stack window's mouse height-drag snaps
-back as well; the keyboard resize moves its share.
-:::
 
 ### Per-Space Overrides
 

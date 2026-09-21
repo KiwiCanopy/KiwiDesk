@@ -2811,27 +2811,24 @@ apply to the fully-tiled case only), and the resize command
 caps weight *growth* at that cliff so presses past it cannot
 ratchet the stored weight invisibly; clamping the *master
 ratio* against min window size stays a separate issue (#44).
-One deliberate asymmetry: a *drag* along the zones' own axis
-still snaps back (the mouse seam is windowless); only the
-keyboard/CLI `resize` moves weights. (#67)
+(#67)
 
 :::unreleased
-**The drag along the zone's own axis moves the weights too
-(#941).** The asymmetry above rested on one premise — the
-mouse-drag seam carried no window identity to key a weight
-against — and #925 ended it: the drop hands the dragged window
-to `applyResizeAdjustment(for:)`, which is what let the track
-layout's in-track share take the same drag. Leaving the stack
-snapping back after that was an accident of order, not a
-ruling, and the interaction users learn in Track is the one they
-try in Stack. The drop takes the one `resizeStackMember` the
-keyboard verb takes — the same #67 step, the same #933 clamps
-and refusal pills, the same #308 refusal of a window that is no
-member of the Space — so the two paths cannot drift, and the
-dominant delta of a corner drag decides between the split and
-the share, as bsp and track already decide. What stays: a master
-zone lined up along the split has no cross-axis share, and the
-writer refuses that drag exactly as it refuses the key.
+**A mouse drag along the zone's own axis moves the weights as
+the key does (#941).** #67 kept that drag snapping back on one
+premise — the mouse-drag seam carried no window identity to key
+a weight against — and #925 ended it: the drop hands the dragged
+window to `applyResizeAdjustment(for:)`, which is what let the
+track layout's in-track share take the same drag, and the
+interaction users learn in Track is the one they try in Stack.
+The drop takes the one `resizeStackMember` the keyboard verb
+takes — the same #67 step, the same #933 clamps and refusal
+pills, the same #308 refusal of a window that is no member of the
+Space — so the two paths cannot drift, and the dominant delta of
+a corner drag decides between the split and the share, as bsp
+and track already decide. What stays: a master zone lined up
+along the split has no cross-axis share, and the writer refuses
+that drag exactly as it refuses the key.
 :::
 
 **The stack zone's lineup derives from its position — no
