@@ -6,20 +6,13 @@ description: Which KiwiDesk names stay English in every language, which each loc
 # Feature name policy
 
 Some KiwiDesk names are the same in every language — "App Bar",
-"Space Bar". Others are different in almost all of them — the
-layout modes. A third group is not a name at all, but an ordinary
-word a language may have two of — *layout*, *gap*, *profile*.
-This page is the one place that says which is which, what each
-family requires of a translation, and why the first two are
-enforced by opposite-shaped guards while the third is enforced by
-nothing.
-
-It exists because getting this wrong is invisible: prose naming a
-feature the interface does not call that reads perfectly to
-anyone who does not have both the string and the screen in front
-of them, and search made it worse — a destination name is now a
-breadcrumb segment, so an invented name appears on every hit
-inside that pane.
+"Space Bar". The layout modes differ in almost all of them. A
+third group is not a name at all, but an ordinary word a language
+may have two of — *layout*, *gap*, *profile*. A wrong name reads
+perfectly to anyone without both the string and the screen in
+front of them, and a destination name is also a breadcrumb
+segment, so an invented one appears on every search hit inside
+its pane.
 
 If you are translating, the rules are the three **What it
 requires** sections. If you are changing the policy or adding a
@@ -37,15 +30,13 @@ name, read the rest.
 its own picker is enforced.
 
 **No key to ask about → Family C.** A common noun — *layout*,
-*gap*, *profile*, *shortcut* — has no label key of its own, so
-the question has nothing to read. That absence is what defines
-the third family, and it is checkable the same way: if you cannot
-name the key whose value is the name, you are in Family C.
+*gap*, *profile*, *shortcut* — has no label key of its own. If
+you cannot name the key whose value is the name, you are in
+Family C.
 
-The test is about the **catalogs**, not about the word. The
-tempting alternative — *does this name already have a
-domain-standard translation people know from other software?* —
-reads well and mis-sorts both families:
+The test reads the **catalogs**, not the word. A vocabulary test
+— *does this name have a domain-standard translation?* —
+mis-sorts both families:
 
 | name | vocabulary test says | catalogs say | correct |
 |---|---|---|---|
@@ -53,9 +44,8 @@ reads well and mis-sorts both families:
 | Track | **A** — no domain-standard "Track layout" exists | B | **B** |
 | `drag.ghost` | **A** — reads like a coinage | B (nine locales translate it: Silueta, Sagoma, ゴースト) | **B** |
 
-Coinage-vs-borrowed is the *explanation* for how the catalogs came
-out that way. It is not the test, because it is arguable and the
-catalog question is checkable.
+Coinage-vs-borrowed explains how the catalogs came out; it is
+arguable, and the catalog question is checkable.
 
 ## Family A — the same name everywhere
 
@@ -63,40 +53,29 @@ catalog question is checkable.
 and `bars.switch.space_bar` are Latin in all eleven catalogs, so the
 control every user taps says "Space Bar" whatever their language.
 
-**Sticky** (#579) is the first **single-word** and the first
-*added* member — it did not arrive here by the sort question (`de`,
-`ru`, `zh-Hant` had translated it to "Fixierung"/"Закреплённое"/
-"常駐", so the catalog test read Family B), but by the product
-decision to coin it verbatim the way the bars were, which Core
-already reflects (`design-decisions.md` calls it "the settled
-user-facing term"). Before admitting a single word, the
-descriptive-occurrence check below was run: all 17 keys (21
-`sticky`/`Sticky` occurrences) in `en.json` name this exact
-feature — there
-is no incidental "sticky" in ordinary prose to false-positive on
-(unlike `app`/`space`/`bar`, which are common words and needed the
-per-token glossary carve-outs). Its two scopes are **"Toggle sticky everywhere"** and **"Toggle
+**Sticky** (#579) is the one **single-word** member, admitted by
+product decision rather than by the sort question: `de`, `ru` and
+`zh-Hant` had rendered it "Fixierung"/"Закреплённое"/"常駐", so
+the catalog test read Family B until they were reharmonized, and
+`design-decisions.md` calls it "the settled user-facing term". It
+passes the descriptive-occurrence check in *Adding a name*. Its
+two scopes are **"Toggle sticky everywhere"** and **"Toggle
 sticky on this screen"** (#1094) — the qualifier is an ordinary
-phrase that each locale renders in its own words around the fixed
-"Sticky" atom. Render "screen" with the catalog's own SCREEN word,
-never its *display* or *monitor* word. Seven catalogs reached for
-the latter when this label was first renamed and were corrected
-before it shipped (#1094) — a past-tense fact, and the reason
-this sentence no longer says "Display Sticky". The risk it
-records is Family C rule 1: a row whose qualifier is the word
-that names the **Monitors** destination reads as a different
-destination, even where the whole string differs.
+phrase each locale renders in its own words around the fixed
+"Sticky" atom. Render "screen" with the catalog's own SCREEN
+word, never its *display* or *monitor* word: under Family C rule
+1, a qualifier that is the word naming the **Monitors**
+destination reads as a different destination, even where the
+whole string differs.
 
-**`zh-Hans` is the measured exception, not an oversight.** It
-splits the English "screen" by countability — 屏幕 where the
-sense is mass, 显示器 for a countable one (`presets.screen_name.
-main` 主显示器, `profiles.screens.many` %1$d 台显示器) — so 显示器
-IS its screen word here, and rule 2 is satisfied by the split
-rather than broken by it. That it also equals `destination.
-monitors` is a pre-existing overlap belonging to #865, and not
-something this label can fix on its own: a locale whose own
-screen word collides with a destination label needs the
-destination renamed, not the row.
+**`zh-Hans` is the measured exception.** It splits the English
+"screen" by countability — 屏幕 where the sense is mass, 显示器
+for a countable one (`presets.screen_name.main` 主显示器,
+`profiles.screens.many` %1$d 台显示器) — so 显示器 IS its screen
+word here, and rule 2 is satisfied by the split. That it also
+equals `destination.monitors` is a pre-existing overlap belonging
+to #865: a locale whose own screen word collides with a
+destination label needs the destination renamed, not the row.
 
 ### What it requires
 
@@ -111,66 +90,51 @@ Bar".
   two bars needs both, or the contrast collapses.
 - **Capitalization is yours** — "App bar" is fine.
 - **Compounding is fine.** German's "Space-Bar-Farben" keeps the
-  name; separators are flattened before comparison, so correct
-  compounding is never punished.
+  name; separators are flattened before comparison.
 
 Enforced by `dropped_product_names`, in every locale.
 
 ### Why script does not matter here
 
-The natural reading is that this mirrors the English-residue
-guard, which is non-Latin-only. The two ask different questions.
-Residue asks whether a word was *forgotten* — a judgment about the
-sentence around it, and therefore script-sensitive. This asks
-whether a name the interface never translates was translated
-anyway, which is script-independent in the same way "KiwiDesk",
-"Lua" and "BSP" are. `_is_partly_translated` already lists "App
-Bar" beside them as correctly all-English in a non-Latin catalog.
+This check is not the English-residue guard's mirror. Residue
+asks whether a word was *forgotten* — a judgment about the
+sentence around it, so script-sensitive. This asks whether a name
+the interface never translates was translated anyway, which is
+script-independent in the same way "KiwiDesk", "Lua" and "BSP"
+are; `_is_partly_translated` already lists "App Bar" beside them
+as correctly all-English in a non-Latin catalog.
 
-Adapting is **worse** in Japanese and Korean, not better:
-スペースバー and 스페이스바 are the ordinary words for the
-*spacebar key*, and neither script has capitalization to mark a
-proper noun, so the feature name would be indistinguishable from
-the key. English does not have that collision.
+Adapting is **worse** in Japanese and Korean: スペースバー and
+스페이스바 are the ordinary words for the *spacebar key*, and
+neither script has capitalization to mark a proper noun, so the
+feature name would be indistinguishable from the key.
 
 ### Presence, not parity
 
 The check requires the name to be **present**, never to appear as
-often as in the English. Tightening it to parity reads like a
-strengthening and is a regression: dropping a redundant repetition
-of a proper noun is ordinary translation practice, so parity
-rejects correct work and pushes the translator toward a literal,
-worse sentence. The defect this guards against is a locale
-*renaming* the feature; a locale naming it fewer times has not
-renamed anything.
-
-`LocalizationProductNameGuardTests` pins the distinction — a
-parity implementation fails two of its arguments.
+often as in the English. Dropping a redundant repetition of a
+proper noun is ordinary translation practice, so parity would
+reject correct work; the defect guarded against is a locale
+*renaming* the feature. `LocalizationProductNameGuardTests` pins
+the distinction — a parity implementation fails two of its
+arguments.
 
 ### No per-key opt-out
 
-There is no exemption file, and none is needed. The escape
-hatches, in order:
+There is no exemption file. The escape hatches, in order:
 
 1. **Reword around the name.** What every current translation
    does.
 2. **If the name is redundant under its section header, delete it
-   from the English.** That lifts the obligation in every locale at
-   once and improves the English — the GUI already works this way
-   (`SpaceBarGroups`' caption omits the name its header supplies),
-   so the obligation is *authored*, not imposed. An opt-out would
-   invert this, letting locales quietly diverge from an English
-   redundancy nobody fixed.
+   from the English.** That lifts the obligation in every locale
+   at once; the GUI already works this way (`bars.space_bar.caption`
+   omits the name its header supplies), so the obligation
+   is *authored*, not imposed.
 3. **`scripts/drop-key --locale <locale> <key>`** retires one
-   locale's value to the English fallback. A loud escape, which is
-   the point.
+   locale's value to the English fallback — a loud escape.
 
-Trade-off: a translator who wants the name gone entirely must
-change the English or drop the key. Accepted — the multi-mention
-strings *contrast* the two bars ("Space Bar sits at the screen
-edge, App Bar sits next to the windows"), where dropping one makes
-the sentence wrong rather than tighter. That is why presence is
-per-name.
+A translator who wants the name gone entirely must change the
+English or drop the key.
 
 ## Family B — the layout modes
 
@@ -187,61 +151,40 @@ English.
 says モノクル, the prose beside it says モノクル too, never
 "Monocle". If your file keeps "Monocle", so does your prose.
 
-No name is required — there is no single right word to demand.
-Enforced by `untranslated_mode_names`, which requires the
-*English* name to be **absent** once your picker translates it,
-and skips your locale entirely when your picker is the English
-word.
+No name is required. Enforced by `untranslated_mode_names`, which
+requires the *English* name to be **absent** once your picker
+translates it, and skips your locale entirely when your picker is
+the English word.
 
-Descriptive use is not naming, and case is how the guard tells
-them apart: it matches the capitalised form alone. This is a
+Descriptive use is not naming, and the guard tells them apart by
+case: it matches the capitalised form alone. This is a
 **heuristic, not a rule the English follows** — `en.json`
 capitalises in labels that name no picker entry ("Stack
 position", "Track limit") and lower-cases some referential uses
-("the track layout"). It is cheap and right on the corpus today;
-it is not a guarantee, and a name whose English is lower-cased
-everywhere would slip past it. So "la modalità floating"
-describes behaviour and is free, while "la disposizione Floating"
-names a picker entry that reads "Fluttuante" and is not.
+("the track layout") — so a name whose English is lower-cased
+everywhere would slip past it. "La modalità floating" describes
+behaviour and is free; "la disposizione Floating" names a picker
+entry that reads "Fluttuante" and is not.
 
 **Known blind spot: the check runs in one direction only.** It
 fires where a picker is translated, which today means the three
 CJK locales. The seven that keep the English names skip
-themselves — which is what removes the need for an exemption
-list, and equally means nothing checks *their* prose against
-their own picker. The mirror defect is therefore invisible: a
-German caption reading "Schwebend" beside a picker reading
-"Floating" passes. Those locales are held by review, and by
-`LocalizationModeNamePolicyTests` only at the label level.
+themselves, so nothing checks *their* prose against their own
+picker: a German caption reading "Schwebend" beside a picker
+reading "Floating" passes. Those locales are held by review, and
+by `LocalizationModeNamePolicyTests` only at the label level.
 
-**And that blind spot shipped, which is what added the rule
-below.** `de` carried "IDE-Stapel" and "scrollende
-Dokumentation" in three preset summaries beside pickers reading
-"Stack" and "Scrolling" — while keeping "Monocle" in the very
-next key, so one file translated one mode word and not the next.
-Ten catalogs each reconciled it alone. Review had not caught it
-in the time it existed.
-
-**So English prose does not name a layout mode either.** The
-remedy is not a better predicate over the translations — the
-polarity above is why none can exist — it is that the source
-stops handing translators a mode word to decide about. A
+**So English prose does not name a layout mode either.** No
+predicate over the translations can close the blind spot, so the
+source stops handing translators a mode word to decide about. A
 sentence that needs to name a layout interpolates
-`layout.<mode>.name`, which every catalog already renders under
-the policy this section pins; prose that merely describes what a
-Space is *for* names no mode at all.
-
-This is a Family B sub-rule rather than a section of its own,
-because it is the same fact from the authoring end: mode names
-are values, and a value belongs in a slot rather than in a
-sentence. It binds the **English** author first, which is the
-general form of it — one concept, one word, decided in `en`
-before any catalog can disagree.
-`PresetSummaryVocabularyTests` holds the one corpus where it has
-bitten (`presets.*.summary`), deriving its ban list from
-`layout.*.name` so a renamed or added mode cannot slip past it;
-a second family of prose that names layouts owes its own guard,
-that one being scoped to preset summaries.
+`layout.<mode>.name`; prose that merely describes what a Space
+is *for* names no mode at all. This binds the **English** author
+first — one concept, one word, decided in `en` before any catalog
+can disagree. `PresetSummaryVocabularyTests` holds
+`presets.*.summary`, deriving its ban list from `layout.*.name`
+so a renamed or added mode cannot slip past it; a second family
+of prose that names layouts owes its own guard.
 
 ### A mode's own structural unit is not a common noun
 
@@ -255,52 +198,44 @@ label, and every language has a good word of its own for each.
 says, and never with a word of your own.** A second word for it
 is a second name for one KiwiDesk concept — the shape
 `.claude/rules/config-vocabulary.md` bans for Space and for
-screen — and the two words land on the *same card*, since the
-picker entry and the help text under it are adjacent surfaces.
+screen — and the picker entry and the help text under it are
+adjacent surfaces on the *same card*.
 
 **Do not sort it with Family C's ladder.** Family C is the family
 with no label key to read (*The question that sorts a name*);
-this concept has one, so the sort is already answered and Family
-B governs. Running the ladder anyway decides it against the name
-every time: rule 2 counts occurrences, and the unit outnumbers
-the picker entry by construction — the owner ruling of
-2026-08-29 settled **Track** after `fr`, `es`, `pt-BR`, `ru` and
-`zh-Hant` had each reached for a noun of their own that
-outnumbered the "Track" their pickers already shipped.
+this concept has one, so Family B governs. The ladder decides it
+against the name every time, because rule 2 counts occurrences
+and the unit outnumbers the picker entry by construction (owner
+ruling 2026-08-29, which settled **Track**).
 
 **Where the derived name will not go into your sentence, say so
 rather than smoothing it over.** An indeclinable Latin noun in an
 inflecting language can leave a construction the grammar cannot
 build — Russian lost the genitive that disambiguated "the size of
-the window's Track", and had to gain a plural verb to carry a
-number the noun could no longer mark. Rewording around that is
-part of the obligation, not licence to bring the second word
-back. If nothing rewords, the escape is Family B's own and is a
-ruling rather than a translator's call: your picker may translate
-the mode name, after which the unit follows it there instead.
+the window's Track" and gained a plural verb to carry the number.
+Rewording around that is part of the obligation, not licence to
+bring the second word back. If nothing rewords, the escape is
+Family B's own and is a ruling rather than a translator's call:
+your picker may translate the mode name, after which the unit
+follows it there instead.
 
 **One half of this is guarded, and it is the same half as the
-rest of Family B.** `untranslated_mode_names` fires when a
-catalog whose picker translates the mode keeps the English name
-anyway, which catches a translated-picker locale writing "Track"
-for the unit — capitalised only, since that is how the predicate
-tells naming from description. The mirror — a locale whose picker
-keeps English writing its own word for the unit — is invisible to
-it for the polarity reason *Known blind spot* gives above, and no
-predicate can be built for it, because the unit's rival word is
-correct prose somewhere. That half is review's, and it is where
-every case ruled so far was found.
+rest of Family B.** `untranslated_mode_names` catches a
+translated-picker locale writing "Track" for the unit —
+capitalised only. The mirror — a locale whose picker keeps
+English writing its own word for the unit — is invisible to it
+(*Known blind spot*), and no predicate can be built for it,
+because the unit's rival word is correct prose somewhere. That
+half is review's.
 
 **A new mode joins no register for this.** The rule reads
 `layout.<mode>.name`, which `MODE_NAME_KEYS` already carries.
 What a new mode owes is the sweep: settle the unit's word in
-every catalog in the change that names the unit, rather than
-leaving ten translators to reach for ten nouns.
+every catalog in the change that names the unit.
 
 ### Why the Latin-script locales keep English
 
-A mode name is not an ordinary label. It is a value the user types
-verbatim:
+A mode name is a value the user types verbatim:
 
 ```lua
 KiwiDesk.set_mode(1, "stack")
@@ -312,12 +247,9 @@ KiwiDesk.set_mode(1, "stack")
 
 A Spanish picker reading "Pila" above a config that only accepts
 `"stack"` breaks the link between what is shown and what is
-written. No other setting has that property, which is why
-translating mode names reads as helpful and is not.
-
-The CJK locales are the exception for the same reason Family A has
-none: between two Latin-script languages the English word carries
-fine, but in a CJK sentence it is a foreign body.
+written. The CJK locales are the exception because the English
+word carries between two Latin-script languages and is a foreign
+body in a CJK sentence.
 
 `LocalizationModeNamePolicyTests` pins which locales are on which
 side, against the shipped catalogs.
@@ -330,13 +262,10 @@ own — they only ever appear inside a sentence about something
 else.
 
 Families A and B are about what a *feature* is called. Family C
-is about what happens when one language has two ordinary words
-for the same idea and a translation reaches for both. The user
-learns the word on one page and does not recognise it on the
-next; search finds one surface and not the other. It falls
-between adjacent surfaces most of the time — a tab bar and the
-help text under it, a destination label and the menu item that
-opens it — which is exactly where it is noticed.
+is about one language having two ordinary words for the same
+idea and a translation reaching for both. It falls between
+adjacent surfaces most of the time — a tab bar and the help text
+under it, a destination label and the menu item that opens it.
 
 ### What it requires
 
@@ -346,28 +275,26 @@ apply your answer everywhere in your file, not only in the key
 you were editing.
 
 1. **A word that already names another KiwiDesk concept in your
-   catalog loses, whatever its count.** This outranks everything
-   else, because a label that reuses another feature's noun does
-   not read as inconsistent — it reads as *true about the wrong
-   thing*. `zh-Hans` labelled a Profile 配置文件, which is what
-   `general.advanced.config_file` renders, so searching for a
-   profile returned a result whose kind line said *configuration
-   file*. `es`, `it` and `pt-BR` each labelled a bar gap with
-   their word for a **Space**. `ko` labelled a bound key with its
-   word for *connected*, beside a card counting connected
-   displays. `ja` had no word of its own for a Space at all: the
-   majority reading was Apple's own 操作スペース, the term for
-   the macOS Desktop that KiwiDesk's Spaces are deliberately not.
+   catalog loses, whatever its count — the rung nothing
+   outranks.** A label that reuses
+   another feature's noun reads as *true about the wrong thing*:
+   `zh-Hans` labelling a Profile 配置文件, which is what
+   `general.advanced.config_file` renders, made a profile's
+   search result say *configuration file*; `es`, `it` and `pt-BR`
+   labelling a bar gap with their word for a **Space**; `ko`
+   labelling a bound key with its word for *connected*, beside a
+   card counting connected displays; `ja` reaching for Apple's
+   own 操作スペース, the term for the macOS Desktop that
+   KiwiDesk's Spaces are deliberately not.
 2. **Otherwise your catalog's own occurrence count decides.**
    Grep your file for both candidates; the one already carrying
    the concept wins and the other is swept to it. **Your file is
    both of them** where your locale ships in the app and on the
    site — `Sources/KiwiDeskCore/Resources/Locales/<loc>.json` and
    `site/src/i18n/<loc>.json` are one register, so grep both and
-   let the pair decide. A reader meets them as one product, and
-   a per-file count cannot see a split that runs *between* the
-   files: `de` grepped site-only would have returned Desktop for
-   macOS's Desktop, which is the answer #1337 had to undo.
+   let the pair decide; a per-file count cannot see a split that
+   runs *between* the files (`de` grepped site-only returns
+   Desktop for macOS's Desktop, the answer #1337 had to undo).
 3. **Within about ten percent, the destination label or picker
    entry decides.** That string is a card title, a back-chip
    heading and a search kind-line at once, so it is the name the
@@ -377,12 +304,10 @@ you were editing.
    word.
 5. **Where the rivals are verbs for different OBJECTS, the one
    that names the right object wins — ahead of count** (owner
-   ruling, 2026-08-29). `es` split *aumentar* (increase a
+   ruling, 2026-08-29). `es` splits *aumentar* (increase a
    quantity) against *agrandar* (enlarge a window), and `fr`
-   *augmenter* against *agrandir*, with the quantity verb ahead
-   2–1 only because it sat on two keybinding rows. Counting
-   picked the word for the wrong kind of thing, and a tie-break
-   is the wrong tool for a distinction that is not a tie.
+   *augmenter* against *agrandir*; a count led by two keybinding
+   rows picks the word for the wrong kind of thing.
 
    Rule 2 still governs where both rivals name the same object —
    that is most splits, and it is why the register stays the
@@ -392,9 +317,7 @@ you were editing.
    fix it here.** These labels' grammatical object is a dimension
    (*Agrandar la altura*), so the winning verb reads a shade
    less naturally at the very sites it was chosen for. The fix is
-   a label whose object is the window, not a second verb —
-   which is exactly what rule 1's escape says about nouns, one
-   part of speech over.
+   a label whose object is the window, not a second verb.
 
 A rival word is usually still *correct somewhere else in the same
 file* — `it`'s «disposizione» renders English *arrangement* in ten
@@ -405,29 +328,26 @@ the list of keys it deliberately left alone.
 
 ### When rule 1 takes the word you needed
 
-Rule 1 says a word naming another KiwiDesk concept loses. That
-leaves a real question it does not answer: what does the *losing*
-site call the thing now? The tempting answer — reach for a second
-ordinary noun — is the exact defect this family exists to stop,
-so the escape is ranked too. Take the first that fits.
+Rule 1 does not say what the *losing* site calls the thing now,
+and a second ordinary noun is the exact defect this family exists
+to stop, so the escape is ranked too. Take the first that fits.
 
 1. **Check the destination label is faithful before working
    around it.** Where the English destination carries a
    qualifier and your catalog rendered it bare, the collision is
-   the *destination's* defect, not a shortage at the ordinary
-   site. Restore the qualifier and the bare noun is free again.
-   `destination.layout` is the worked case: English is "Layout
-   **Defaults**", and `fr` and `ru` had rendered it bare
-   ("Dispositions", "Раскладки"), which left the preset card's
-   own button reaching past the word it wanted — "Voir les
-   dispositions", "Раскладки набора". Restoring the qualifier
-   in both let each button collapse to the bare noun.
+   the *destination's* defect. Restore the qualifier and the bare
+   noun is free again. `destination.layout` is the worked case:
+   English is "Layout **Defaults**", and `fr` and `ru` had
+   rendered it bare ("Dispositions", "Раскладки"), leaving the
+   preset card's own button reaching past the word it wanted
+   ("Voir les dispositions", "Раскладки набора"); restoring the
+   qualifier let each button collapse to the bare noun.
 2. **Where English's own destination IS the bare noun** —
    Profiles, Spaces, Bars, Shortcuts — the shortage is real.
    Then **the ordinary site qualifies and the destination never
-   moves.** The destination label is the name the user learns,
-   which is rule 3's whole reason; moving it to make room for a
-   body string spends the one string that has to stay stable.
+   moves.** The destination label is the name the user learns
+   (rule 3); moving it spends the one string that has to stay
+   stable.
 3. **Prefer the shortest qualified NOUN phrase to a verb
    phrase** wherever the site is a control whose width is
    measured. A verb phrase can only grow; a qualified noun
@@ -435,14 +355,12 @@ so the escape is ranked too. Take the first that fits.
    `.claude/rules/localization.md` ▸ *an ACTION label must fit
    its control* owns the width half, including the obligation to
    re-measure a pair when a control joins a row.
-4. **Never coin a second bare noun for the concept.** That is
-   the defect the ladder exists to stop, and step 2 is where it
-   is tempting.
+4. **Never coin a second bare noun for the concept.** Step 2 is
+   where it is tempting.
 
 `DestinationNameCollisionTests` holds only the byte-identical
-case — it is what makes the collision *visible*, not what
-resolves it. Steps 1–4 are review's, like the rest of this
-family.
+case — it makes the collision *visible*, not resolved. Steps 1–4
+are review's, like the rest of this family.
 
 **One concept is ruled and deliberately unswept**: the physical
 screen, where English carries three words. The winner is
@@ -450,70 +368,51 @@ screen, where English carries three words. The winner is
 the English-side obligation is
 `.claude/rules/config-vocabulary.md` ▸ noun glossary, and the
 argument is `docs/design-decisions.md` ▸ Vocabulary: a screen is
-a screen. The sweep —
-including each catalog's own rule-2 run, which the English ruling
-does **not** decide — is #865.
+a screen. The sweep — including each catalog's own rule-2 run,
+which the English ruling does **not** decide — is #865.
 
 ### Why there is no per-locale word list here
 
-The obvious shape for this section is a table: eleven columns,
-one row per concept, the winning word in each cell. It is the
-wrong shape. That table would be a copy of facts the corpus
-already holds, and a copy of the corpus rots against it on any
-commit — while rule 2 makes the catalog **its own register**. A
-translator settling *layout* in `pt-BR` greps `pt-BR.json` and
-gets today's answer; a table would give them the answer as of
-whenever someone last edited this page.
-
-So what is written down is the **procedure**, which cannot go
-stale, rather than its output, which can.
+A table of winning words per locale would be a copy of the
+corpus, and a copy rots against it on any commit, while rule 2
+makes the catalog **its own register**: a translator settling
+*layout* in `pt-BR` greps `pt-BR.json` and gets today's answer.
+So this page states the **procedure**, not its output.
 
 ### What is guarded, and what is not
 
-**No content-guard predicate can hold this family.** The natural
-one is a banned-rival register — per locale, per concept, the
-winner plus the words that must not appear — and the reason it
-cannot be built is worth stating so nobody budgets for it twice:
-**every ruling above produced a keep-list, and each entry is the
-rival word, correctly used, in the same file.** `es`'s «espacio»,
-`it`'s «spazio» and `pt-BR`'s «espaço» name a Space in roughly a
-hundred keys each; `ko`'s 연결 means *connected* in eleven;
-`zh-Hans`'s 配置文件 is right in exactly the key the ruling exists
-to protect. A ban would fire on all of them. This page's own rule
-about single-word Family A members applies with more force here:
-*a guard failing on correct copy is the one failure that makes an
-exemption file look necessary*, and
+**No content-guard predicate can hold this family.** A
+banned-rival register — per locale, per concept, the winner plus
+the words that must not appear — would fire on correct copy,
+because **every ruling above produced a keep-list, and each entry
+is the rival word, correctly used, in the same file**: `es`'s
+«espacio», `it`'s «spazio» and `pt-BR`'s «espaço» name a Space in
+roughly a hundred keys each; `ko`'s 연결 means *connected* in
+eleven; `zh-Hans`'s 配置文件 is right in exactly the key the
+ruling exists to protect. A guard failing on correct copy is the
+one failure that makes an exemption file look necessary, and
 `scripts/localization_guards.py` has no exemption file by policy.
 
 **One sub-class is exactly checkable, and is checked.** Where the
-collision is byte-identity rather than near-synonymy, no
-vocabulary is needed at all — you compare two strings the same
-catalog already ships, which is what `SidebarCrossReferenceTests`
-does for breadcrumbs. `DestinationNameCollisionTests` reds when a
-`destination.*` title equals some other key's value in any
-catalog and the two English strings differ. That is ladder rule 1
-in its sharpest form, and it is the shape that shipped
-`zh-Hans`'s Profile as the words for *configuration file*. It
-lives in `Tests/` rather than in the guards script for a reason
-that matters: a Swift suite may carry a reasoned `allowed` map,
-the standing idiom across a dozen AGENTS.md §5 rows, so the one
-legitimate pair (`Shortcuts` / `Your shortcuts`, which `ja` and
-`ko` rightly render alike) is excused in writing instead of
-forcing the guard off.
+collision is byte-identity rather than near-synonymy, you compare
+two strings the same catalog already ships, which is what
+`SidebarCrossReferenceTests` does for breadcrumbs.
+`DestinationNameCollisionTests` reds when a `destination.*` title
+equals some other key's value in any catalog and the two English
+strings differ — ladder rule 1 in its sharpest form, and the
+shape that shipped `zh-Hans`'s Profile as the words for
+*configuration file*. It lives in `Tests/` rather than in the
+guards script because a Swift suite may carry a reasoned
+`allowed` map, so the one legitimate pair
+(`Shortcuts` / `Your shortcuts`, which `ja` and `ko` rightly
+render alike) is excused in writing instead of forcing the guard
+off.
 
 It covers only exact equality against a destination. `es`
 labelling a bar gap "Espacio" against a Space of "Espacios" is
 the same defect and is invisible to it — near-equality cannot be
 judged without per-language morphology, which is the vocabulary
 the suite refuses to carry. Do not read a green run as more.
-
-The shape argument, stated once so the gap does not read as an
-oversight: Family A can demand the English name be **present**,
-because it has no correct translation. Family B can demand the
-English name be **absent**, because the picker key is a
-per-locale declaration a predicate can read. A common noun
-supplies neither declaration — having no label key is what put it
-in Family C — so there is nothing in the file to compare against.
 
 Two of the three defect classes are nevertheless machine-held,
 by making them unwritable rather than by scanning for them:
@@ -525,17 +424,18 @@ by making them unwritable rather than by scanning for them:
 - **Prose that names a pane, a button or a role** interpolates
   that label's key rather than quoting it as text (#818), so
   `placeholder_drift` — an exact contract that already runs —
-  holds the anchor in every locale. `it` had drifted to «sezione
-  Abbreviazioni» while the pane read "Scorciatoie", and
-  `spaces.delete_confirm.message` quoted a "Main" role that had
-  no label key at all, so three locales invented one each.
+  holds the anchor in every locale. The shape it closes: `it`
+  drifting to «sezione Abbreviazioni» while the pane reads
+  "Scorciatoie", or `spaces.delete_confirm.message` quoting a
+  "Main" role that had no label key, so that three locales
+  invented one each.
 
 What is left — one language's two ordinary words for one idea —
-stays with review. The ladder above is what makes that review
-cheap: once the winner is named, auditing a catalog is one grep
-per concept, and a reviewer who does not speak the language can
-check it, because the keep-list names the English each rival is
-correctly rendering.
+stays with review. The ladder makes that review cheap: once the
+winner is named, auditing a catalog is one grep per concept, and
+a reviewer who does not speak the language can check it, because
+the keep-list names the English each rival is correctly
+rendering.
 
 ## Why the guards are opposite shapes
 
@@ -549,15 +449,12 @@ It is forced, not stylistic:
 | exemptions needed | none | none — locales keeping English skip themselves | an exemption per correct use, which is why there is no guard |
 
 The symmetric form for Family B — demand the locale's *own*
-translation be present — genuinely cannot work: a correct Spanish
+translation be present — cannot work: a correct Spanish
 inflection like "las ventanas… flotarán" carries no noun
-"Flotante", so it would flag correct copy.
-
-Rejecting that shape is right. Concluding from it that **no** guard
-is possible does not follow, and is the expensive mistake here.
-This defect is invisible to a reviewer reading a language they do
-not speak, so a family left to review alone accumulates precisely
-the errors a guard would have named.
+"Flotante", so it would flag correct copy. That **no** guard is
+possible does not follow from that: the defect is invisible to a
+reviewer reading a language they do not speak, so a family left
+to review alone accumulates the errors a guard would have named.
 
 ## Adding a name
 
@@ -569,59 +466,53 @@ Apply the catalog question, then:
 - **Family B** — add its `layout.<mode>.name` key to
   `MODE_NAME_KEYS`.
 - **Family C** — add nothing. There is no register to join and no
-  guard to arm; the ladder in that section is the whole policy,
-  and it reads the catalogs rather than a list. What a Family C
-  concept *does* owe is a sweep: settle its word per locale and
-  apply it across that whole file, in the change that introduces
-  the concept, rather than leaving a second word for the next
-  round to find.
+  guard to arm; the ladder in that section is the whole policy.
+  What a Family C concept *does* owe is a sweep: settle its word
+  per locale and apply it across that whole file, in the change
+  that introduces the concept.
 
 A **product-coinage decision may override a Family-B catalog
-reading** — the catalog question sorts what *already exists*, but a
-name can be coined into Family A even when some locales had
-translated it, provided (i) the descriptive-occurrence check below
-passes and (ii) those locales are reharmonized to keep it verbatim
-in the same change, so the catalog question agrees *afterward*. That
-is exactly what #579 did for **Sticky** (`de`/`ru`/`zh-Hant` had
-translated it). The override is one-time, not a standing exception:
-once reharmonized, the catalogs are the test again.
+reading** — the catalog question sorts what *already exists*, but
+a name can be coined into Family A even when some locales had
+translated it, provided (i) the descriptive-occurrence check
+below passes and (ii) those locales are reharmonized to keep it
+verbatim in the same change, so the catalog question agrees
+*afterward* (#579, **Sticky**). The override is one-time: once
+reharmonized, the catalogs are the test again.
 
 **A name that can occur for a _different_ thing does not belong in
 Family A.** The check is case-insensitive substring, so it cannot
 tell a referential mention from an unrelated one — and the
-substring reach means morphological variants inherit the obligation
-automatically (`keybinding.make_unsticky` "Make unsticky" already
-demands verbatim "Sticky", which every locale honors). The two bar
-names are two-word coinages that only ever occur referentially, so
-the question never arises for them. **Sticky** is the single word
-where it had to be asked: a grep found all 17 keys (21 occurrences)
-carrying `sticky`/`Sticky` name *this* feature, none a different
-one. The real collision to keep re-checking is not "sticky note" —
-it is macOS's own **Sticky Keys** accessibility feature: if a
+substring reach means morphological variants inherit the
+obligation automatically (`keybinding.make_unsticky` "Make
+unsticky" already demands verbatim "Sticky", which every locale
+honors). The two bar names are two-word coinages that only ever
+occur referentially, so the question never arises for them.
+**Sticky** is the single word where it had to be asked: every
+key in `en.json` carrying `sticky`/`Sticky` names *this*
+feature, none a different one — unlike
+`app`/`space`/`bar`, common words that needed the per-token
+glossary carve-outs. The collision to keep re-checking is macOS's
+own **Sticky Keys** accessibility feature: if a
 `system_shortcut.*` conflict string ever surfaces "Sticky Keys",
-this guard would demand KiwiDesk's "Sticky" be kept verbatim inside
-a correctly-localized *Apple* name (`de` "Einrastfunktion"), a false
-positive with no signpost back here. The corpus is clean today; when
-system-shortcut strings are added, re-grep `system_shortcut.*` for
-"Sticky Keys" specifically. That re-check is the price of a
-single-word Family A member — run it before adding one, and again
-when the shortcut corpus grows. A name built from *ordinary* words
-would fire on copy that was never naming the feature; a guard
-failing on correct copy is the one failure that makes an exemption
-file look necessary, so the rule holds: argue a name in, never add
-one to silence a hit.
+this guard would demand KiwiDesk's "Sticky" be kept verbatim
+inside a correctly-localized *Apple* name (`de`
+"Einrastfunktion"), a false positive with no signpost back here.
+Re-grep `system_shortcut.*` for "Sticky Keys" before adding a
+single-word Family A member, and again when the shortcut corpus
+grows. A name built from *ordinary* words would fire on copy that
+was never naming the feature, so the rule holds: argue a name in,
+never add one to silence a hit.
 
 ## The Settings-mode pair: Simple / Power User
 
 Neither family covers the Settings window's depth switch
-(#678 turn 9), so its policy is stated here directly (owner
-ruling 2026-08-04): the English pair is **"Simple" / "Power
-User"**, and **both names translate by meaning** — each locale
-picks natural words for an "easy" versus "power-user"
-register; neither is a verbatim coinage. No content guard
-enforces this pair (nothing to hold verbatim, nothing to hold
-absent); this ruling is what keeps ten translators from
-diverging.
+(#678 turn 9), so its policy is stated here (owner ruling
+2026-08-04): the English pair is **"Simple" / "Power User"**, and
+**both names translate by meaning** — each locale picks natural
+words for an "easy" versus "power-user" register; neither is a
+verbatim coinage. No content guard enforces this pair (nothing to
+hold verbatim, nothing to hold absent).
 
 The marketing site's slider is a **different surface with its
 own flair** — it says "Nerd" (`site/src/i18n/<locale>.json`,
@@ -629,8 +520,8 @@ keys `mode_simple` / `mode_dev`) and keeps it; do not
 "harmonize" the app onto the site's register or vice versa.
 The app's case name is `.powerUser`, matching the label; it is
 never the site's word. A translator drafting `mode.simple` /
-`mode.power_user` may still read the site's pair for their
-locale as context, but translates the app's own English.
+`mode.power_user` may read the site's pair for their locale as
+context, but translates the app's own English.
 
 ## See also
 
