@@ -154,6 +154,35 @@ extension AppBarCard {
             .searchAnchored(
                 SettingsCatalog.bars.appBarStyle.children.appBarStyleItemGap
             )
+        case .appBarOuterMargin:
+            PtSlider(
+                label: L("app_bar.outer_margin", "Outer margin"),
+                value: style.outerMargin,
+                range: BarSliderBands.margin,
+                help: L(
+                    "app_bar.outer_margin.help",
+                    "Distance from the screen edge; 0 is flush."
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children
+                    .appBarStyleOuterMargin
+            )
+        case .appBarInnerMargin:
+            PtSlider(
+                label: L("app_bar.inner_margin", "Inner margin"),
+                value: style.innerMargin,
+                range: BarSliderBands.margin,
+                help: L(
+                    "app_bar.inner_margin.help",
+                    "Extra room on the window side, added to the "
+                        + "windows' outer gap."
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.bars.appBarStyle.children
+                    .appBarStyleInnerMargin
+            )
         case .appBarFontSizeAuto:
             AutoGatedGroup(
                 title: L("app_bar.font_size.auto", "Auto font size"),

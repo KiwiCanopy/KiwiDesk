@@ -10,6 +10,8 @@ extension SpaceBarStyle {
         case edge
         case alignment
         case thickness
+        case outerMargin = "outer_margin"
+        case innerMargin = "inner_margin"
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case fontSize = "font_size"
@@ -65,6 +67,20 @@ extension SpaceBarStyle {
                 CGFloat.self,
                 forKey: .thickness
             ) ?? defaults.thickness
+        )
+        outerMargin = max(
+            AppBarStyle.minMargin,
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .outerMargin
+            ) ?? defaults.outerMargin
+        )
+        innerMargin = max(
+            AppBarStyle.minMargin,
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .innerMargin
+            ) ?? defaults.innerMargin
         )
         itemSize =
             try container.decodeIfPresent(

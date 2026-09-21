@@ -123,9 +123,10 @@ struct ScrollingBarGeometryTests {
         )
         let usable = context.usable
         let window = try #require(frames[w1])
-        // The pinned 32pt top strip + one 10pt inner gap.
-        #expect(window.minY == usable.minY + 32 + 10)
-        #expect(window.height == usable.height - 32 - 10)
+        // The pinned 32pt top strip, cut from the usable area;
+        // the outer gap is the window side (#1516).
+        #expect(window.minY == usable.minY + 32)
+        #expect(window.height == usable.height - 32)
         #expect(window.width == usable.width)
     }
 
@@ -160,8 +161,8 @@ struct ScrollingBarGeometryTests {
         )
         let usable = context.usable
         let window = try #require(frames[w1])
-        #expect(window.minX == usable.minX + 32 + 10)
-        #expect(window.width == usable.width - 32 - 10)
+        #expect(window.minX == usable.minX + 32)
+        #expect(window.width == usable.width - 32)
         #expect(window.height == usable.height)
     }
 
@@ -192,7 +193,7 @@ struct ScrollingBarGeometryTests {
         let first = try #require(frames[w1])
         // Rows keep full width and start below strip + gap.
         #expect(first.width == usable.width)
-        #expect(first.minY == usable.minY + 32 + 10)
+        #expect(first.minY == usable.minY + 32)
         #expect(first.height == 300)
     }
 
@@ -211,7 +212,7 @@ struct ScrollingBarGeometryTests {
         let first = try #require(frames[w1])
         // Columns keep full height, shifted right of the strip.
         #expect(first.height == usable.height)
-        #expect(first.minX == usable.minX + 32 + 10)
+        #expect(first.minX == usable.minX + 32)
         #expect(first.width == 500)
     }
 }

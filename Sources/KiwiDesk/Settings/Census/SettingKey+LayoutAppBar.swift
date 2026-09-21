@@ -15,6 +15,8 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case monocleAppBarGroupAdjacentWindows =
         "settings.monocle.appBar.groupAdjacentWindows"
     case monocleAppBarThickness = "settings.monocle.appBar.thickness"
+    case monocleAppBarOuterMargin = "settings.monocle.appBar.outerMargin"
+    case monocleAppBarInnerMargin = "settings.monocle.appBar.innerMargin"
     case monocleAppBarItemSize = "settings.monocle.appBar.itemSize"
     case monocleAppBarItemGap = "settings.monocle.appBar.itemGap"
     case monocleAppBarFontSize = "settings.monocle.appBar.fontSize"
@@ -48,6 +50,10 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case scrollingAppBarGroupAdjacentWindows =
         "settings.scrolling.appBar.groupAdjacentWindows"
     case scrollingAppBarThickness = "settings.scrolling.appBar.thickness"
+    case scrollingAppBarOuterMargin =
+        "settings.scrolling.appBar.outerMargin"
+    case scrollingAppBarInnerMargin =
+        "settings.scrolling.appBar.innerMargin"
     case scrollingAppBarItemSize = "settings.scrolling.appBar.itemSize"
     case scrollingAppBarItemGap = "settings.scrolling.appBar.itemGap"
     case scrollingAppBarFontSize = "settings.scrolling.appBar.fontSize"
@@ -85,6 +91,7 @@ extension LayoutAppBarKey {
         case .monocleAppBarEdge, .monocleAppBarAlignment,
             .monocleAppBarBackgroundStyle, .monocleAppBarActiveIndicator,
             .monocleAppBarGroupAdjacentWindows, .monocleAppBarThickness,
+            .monocleAppBarOuterMargin, .monocleAppBarInnerMargin,
             .monocleAppBarItemSize, .monocleAppBarItemGap,
             .monocleAppBarFontSize, .monocleAppBarCornerRoundness,
             .monocleAppBarFillColor, .monocleAppBarHighlightColor,
@@ -94,6 +101,7 @@ extension LayoutAppBarKey {
             .scrollingAppBarEdge, .scrollingAppBarAlignment,
             .scrollingAppBarBackgroundStyle, .scrollingAppBarActiveIndicator,
             .scrollingAppBarGroupAdjacentWindows, .scrollingAppBarThickness,
+            .scrollingAppBarOuterMargin, .scrollingAppBarInnerMargin,
             .scrollingAppBarItemSize, .scrollingAppBarItemGap,
             .scrollingAppBarFontSize, .scrollingAppBarCornerRoundness,
             .scrollingAppBarFillColor, .scrollingAppBarHighlightColor,
@@ -125,6 +133,7 @@ extension LayoutAppBarKey {
             .monocleAppBarActiveIndicator, .monocleAppBarContent,
             .monocleAppBarTitleCap,
             .monocleAppBarGroupAdjacentWindows, .monocleAppBarThickness,
+            .monocleAppBarOuterMargin, .monocleAppBarInnerMargin,
             .monocleAppBarItemSize, .monocleAppBarItemGap,
             .monocleAppBarFontSize, .monocleAppBarCornerRoundness,
             .monocleAppBarFillColor, .monocleAppBarHighlightColor,
@@ -137,7 +146,8 @@ extension LayoutAppBarKey {
             .scrollingAppBarBackgroundFit, .scrollingAppBarActiveIndicator,
             .scrollingAppBarContent, .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows,
-            .scrollingAppBarThickness, .scrollingAppBarItemSize,
+            .scrollingAppBarThickness, .scrollingAppBarOuterMargin,
+            .scrollingAppBarInnerMargin, .scrollingAppBarItemSize,
             .scrollingAppBarItemGap, .scrollingAppBarFontSize,
             .scrollingAppBarCornerRoundness, .scrollingAppBarFillColor,
             .scrollingAppBarHighlightColor, .scrollingAppBarItemColor,

@@ -76,7 +76,6 @@ struct ScrollingAppCeilingTests {
         let context = input.context
         return context.scrolling.windowFrame(
             in: context.usable,
-            inner: context.gaps.inner,
             global: context.appBarStyle
         ).width
     }

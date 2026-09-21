@@ -20,6 +20,8 @@ enum BarsRowOrder {
         .spaceBar(.spaceBarItemSizeAuto),
         .spaceBar(.spaceBarItemSize),
         .spaceBar(.spaceBarItemGap),
+        .spaceBar(.spaceBarOuterMargin),
+        .spaceBar(.spaceBarInnerMargin),
         .spaceBar(.spaceBarFontSizeAuto),
         .spaceBar(.spaceBarFontSize),
         .spaceBar(.spaceBarGlyphCap),
@@ -48,6 +50,8 @@ enum BarsRowOrder {
         .appBar(.appBarItemSizeAuto),
         .appBar(.appBarItemSize),
         .appBar(.appBarItemGap),
+        .appBar(.appBarOuterMargin),
+        .appBar(.appBarInnerMargin),
         .appBar(.appBarFontSizeAuto),
         .appBar(.appBarFontSize),
     ]

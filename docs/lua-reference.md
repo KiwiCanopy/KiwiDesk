@@ -1983,6 +1983,42 @@ app_bar.set_alignment("start")
 app_bar.set_thickness(32)
 ```
 
+### app_bar.set_outer_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** sets the bar's distance from the screen border. Nothing
+else lives on that side, so the value *is* the distance and `0`
+is flush. Both bars follow one rule — outer margin, strip, inner
+margin, then the windows' own outer gap — and on a shared edge
+each bar owns its margins, so between the two they add.
+
+**Example:**
+
+```lua
+app_bar.set_outer_margin(10)
+```
+:::
+
+### app_bar.set_inner_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** adds room on the bar's window side, on top of the
+windows' outer gap — which alone keeps the focus ring's
+clearance, so `0` means the gap governs.
+
+**Example:**
+
+```lua
+app_bar.set_inner_margin(4)
+```
+:::
+
 ### app_bar.set_background_style
 
 **Expects:** `"boxed"` or `"plain"` (default `"plain"`).
@@ -2372,7 +2408,8 @@ the global value. The available overrides are the same setters
 prefixed with the layout name:
 
 - `monocle.set_app_bar_enabled`, `monocle.set_app_bar_edge`,
-  `monocle.set_app_bar_thickness`, etc.
+  `monocle.set_app_bar_thickness`,
+  `monocle.set_app_bar_outer_margin`, etc.
 - `scroll.set_app_bar_enabled`, `scroll.set_app_bar_background_style`,
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_corner_roundness`, etc.
@@ -2473,6 +2510,38 @@ space_bar.set_alignment("center")
 ```lua
 space_bar.set_thickness(28)
 ```
+
+### space_bar.set_outer_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** sets the bar's distance from the screen border; `0` is
+flush. The rule is `app_bar.set_outer_margin`'s, one bar over.
+
+**Example:**
+
+```lua
+space_bar.set_outer_margin(6)
+```
+:::
+
+### space_bar.set_inner_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** adds room on the bar's window side, on top of the
+windows' outer gap — `app_bar.set_inner_margin`'s rule.
+
+**Example:**
+
+```lua
+space_bar.set_inner_margin(4)
+```
+:::
 
 ### space_bar.set_item_size
 

@@ -18,7 +18,6 @@ extension ScrollingLayout {
         }
         let area = context.scrolling.windowFrame(
             in: context.usable,
-            inner: context.gaps.inner,
             global: context.appBarStyle
         )
         let horizontal = context.scrolling.axisIsHorizontal
@@ -89,7 +88,6 @@ extension ScrollingLayout {
         guard windows.count > 1 else { return false }
         let area = context.scrolling.windowFrame(
             in: context.usable,
-            inner: context.gaps.inner,
             global: context.appBarStyle
         )
         let horizontal = context.scrolling.axisIsHorizontal

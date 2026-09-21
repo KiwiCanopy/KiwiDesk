@@ -14,32 +14,61 @@ public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
 
 /// Computes bar strips and window bounds for layouts hosting a bar.
 public enum AppBarGeometry {
-    /// The strip the bar occupies in AX coordinates.
+    /// The strip the bar occupies in AX coordinates, `outer`
+    /// points in from its edge (#1516).
     public static func barFrame(
-        in usable: CGRect,
+        in bounds: CGRect,
         edge: AppBarEdge,
-        thickness: CGFloat
+        thickness: CGFloat,
+        outer: CGFloat = 0
     ) -> CGRect {
+        let outer = max(0, outer)
         switch edge {
         case .top, .bottom:
-            let depth = min(thickness, usable.height)
+            let depth = max(0, min(thickness, bounds.height - outer))
             return CGRect(
-                x: usable.minX,
+                x: bounds.minX,
                 y: edge == .top
-                    ? usable.minY : usable.maxY - depth,
-                width: usable.width,
+                    ? bounds.minY + outer
+                    : bounds.maxY - outer - depth,
+                width: bounds.width,
                 height: depth
             )
         case .left, .right:
-            let depth = min(thickness, usable.width)
+            let depth = max(0, min(thickness, bounds.width - outer))
             return CGRect(
                 x: edge == .left
-                    ? usable.minX : usable.maxX - depth,
-                y: usable.minY,
+                    ? bounds.minX + outer
+                    : bounds.maxX - outer - depth,
+                y: bounds.minY,
                 width: depth,
-                height: usable.height
+                height: bounds.height
             )
         }
+    }
+
+    /// `bounds` with `cut` points carved off `edge` — the one
+    /// carve both bars' reservations take (#1516). Never a
+    /// negative extent.
+    public static func remaining(
+        _ bounds: CGRect,
+        edge: AppBarEdge,
+        reserving cut: CGFloat
+    ) -> CGRect {
+        var frame = bounds
+        switch edge {
+        case .top:
+            frame.origin.y += cut
+            frame.size.height = max(bounds.height - cut, 0)
+        case .bottom:
+            frame.size.height = max(bounds.height - cut, 0)
+        case .left:
+            frame.origin.x += cut
+            frame.size.width = max(bounds.width - cut, 0)
+        case .right:
+            frame.size.width = max(bounds.width - cut, 0)
+        }
+        return frame
     }
 
     /// Tolerance for bar frame clamping (2 pt, #148).
@@ -120,32 +149,6 @@ public enum AppBarGeometry {
         return result
     }
 
-    /// `usable` minus bar `strip` and inner gap.
-    public static func windowFrame(
-        in usable: CGRect,
-        minus strip: CGRect,
-        edge: AppBarEdge,
-        inner: Gaps.Inner
-    ) -> CGRect {
-        var frame = usable
-        switch edge {
-        case .top:
-            let cut = strip.height + inner.vertical
-            frame.origin.y += cut
-            frame.size.height = max(usable.height - cut, 0)
-        case .bottom:
-            let cut = strip.height + inner.vertical
-            frame.size.height = max(usable.height - cut, 0)
-        case .left:
-            let cut = strip.width + inner.horizontal
-            frame.origin.x += cut
-            frame.size.width = max(usable.width - cut, 0)
-        case .right:
-            let cut = strip.width + inner.horizontal
-            frame.size.width = max(usable.width - cut, 0)
-        }
-        return frame
-    }
 }
 
 /// Protocol for layouts supporting an indicator bar.
@@ -161,33 +164,38 @@ extension AppBarHosting {
         appBar.resolved(with: global)
     }
 
-    /// Bar strip bounds or nil when disabled.
+    /// The bar's strip in `bounds` — the layout bounds BEFORE
+    /// the windows' outer gap, since the bar's outer margin is
+    /// measured from the screen edge (#1516) — or nil when
+    /// disabled.
     public func barFrame(
-        in usable: CGRect,
+        in bounds: CGRect,
         global: AppBarStyle
     ) -> CGRect? {
         guard appBar.enabled else { return nil }
         let style = resolvedBar(global: global)
         return AppBarGeometry.barFrame(
-            in: usable,
+            in: bounds,
             edge: style.edge,
-            thickness: style.thickness
+            thickness: style.thickness,
+            outer: style.outerMargin
         )
     }
 
-    /// Window area minus bar strip and inner gap.
+    /// Window area: `usable` (the outer-gap-inset bounds) minus
+    /// the bar's reservation — outer margin, strip and inner
+    /// margin. The outer gap stays the windows' own, so the bar's
+    /// window side is `innerMargin` PLUS that gap (#1516).
     public func windowFrame(
         in usable: CGRect,
-        inner: Gaps.Inner,
         global: AppBarStyle
     ) -> CGRect {
-        guard let strip = barFrame(in: usable, global: global)
-        else { return usable }
-        return AppBarGeometry.windowFrame(
-            in: usable,
-            minus: strip,
-            edge: resolvedBar(global: global).edge,
-            inner: inner
+        guard appBar.enabled else { return usable }
+        let style = resolvedBar(global: global)
+        return AppBarGeometry.remaining(
+            usable,
+            edge: style.edge,
+            reserving: style.reservation
         )
     }
 }

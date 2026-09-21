@@ -9,6 +9,8 @@ enum SpaceBarCommandSetting {
     case edge(AppBarEdge)
     case alignment(SpaceBarStyle.Alignment)
     case thickness(CGFloat)
+    case outerMargin(CGFloat)
+    case innerMargin(CGFloat)
     case itemSize(CGFloat)
     case itemGap(CGFloat)
     case fontSize(CGFloat)
@@ -123,6 +125,8 @@ enum SpaceBarCommandSetting {
     {
         [
             "thickness": Self.thickness,
+            "outer_margin": Self.outerMargin,
+            "inner_margin": Self.innerMargin,
             "item_size": Self.itemSize,
             "item_gap": Self.itemGap,
             "font_size": Self.fontSize,
@@ -232,6 +236,10 @@ enum SpaceBarCommandSetting {
         case .alignment(let value): style.alignment = value
         case .thickness(let value):
             style.thickness = max(AppBarStyle.minThickness, value)
+        case .outerMargin(let value):
+            style.outerMargin = max(AppBarStyle.minMargin, value)
+        case .innerMargin(let value):
+            style.innerMargin = max(AppBarStyle.minMargin, value)
         case .itemSize(let value): style.itemSize = value
         case .itemGap(let value): style.itemGap = value
         case .fontSize(let value): style.fontSize = value

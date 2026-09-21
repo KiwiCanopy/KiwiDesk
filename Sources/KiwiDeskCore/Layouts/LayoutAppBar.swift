@@ -15,6 +15,8 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var edge: AppBarEdge?
     public var alignment: AppBarStyle.BarAlignment?
     public var thickness: CGFloat?
+    public var outerMargin: CGFloat?
+    public var innerMargin: CGFloat?
     public var backgroundStyle: BackgroundStyle?
     public var liquidGlass: Bool?
     public var backgroundFit: BackgroundFit?
@@ -46,6 +48,12 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let alignment { out.alignment = alignment }
         if let thickness {
             out.thickness = max(AppBarStyle.minThickness, thickness)
+        }
+        if let outerMargin {
+            out.outerMargin = max(AppBarStyle.minMargin, outerMargin)
+        }
+        if let innerMargin {
+            out.innerMargin = max(AppBarStyle.minMargin, innerMargin)
         }
         if let backgroundStyle { out.backgroundStyle = backgroundStyle }
         if let liquidGlass { out.liquidGlass = liquidGlass }
@@ -99,6 +107,8 @@ extension LayoutAppBar: Codable {
         case edge
         case alignment
         case thickness
+        case outerMargin = "outer_margin"
+        case innerMargin = "inner_margin"
         case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
         case backgroundFit = "background_fit"
@@ -140,6 +150,14 @@ extension LayoutAppBar: Codable {
         thickness = try container.decodeIfPresent(
             CGFloat.self,
             forKey: .thickness
+        )
+        outerMargin = try container.decodeIfPresent(
+            CGFloat.self,
+            forKey: .outerMargin
+        )
+        innerMargin = try container.decodeIfPresent(
+            CGFloat.self,
+            forKey: .innerMargin
         )
         backgroundStyle = try container.decodeIfPresent(
             BackgroundStyle.self,
@@ -244,6 +262,14 @@ extension LayoutAppBar: Codable {
         try container.encodeIfPresent(
             thickness,
             forKey: .thickness
+        )
+        try container.encodeIfPresent(
+            outerMargin,
+            forKey: .outerMargin
+        )
+        try container.encodeIfPresent(
+            innerMargin,
+            forKey: .innerMargin
         )
         try container.encodeIfPresent(
             backgroundStyle,

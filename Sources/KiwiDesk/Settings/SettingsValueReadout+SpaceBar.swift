@@ -84,6 +84,18 @@ extension SettingsValueReadout {
             return spaceBarAutoPointsRow(census, o.itemSize, n.itemSize)
         case .spaceBarItemGap:
             return spaceBarPointsRow(census, o.itemGap, n.itemGap)
+        case .spaceBarOuterMargin:
+            return spaceBarPointsRow(
+                census,
+                o.outerMargin,
+                n.outerMargin
+            )
+        case .spaceBarInnerMargin:
+            return spaceBarPointsRow(
+                census,
+                o.innerMargin,
+                n.innerMargin
+            )
         case .spaceBarFontSizeAuto:
             return spaceBarOnOffRow(
                 census,

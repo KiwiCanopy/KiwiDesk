@@ -55,9 +55,10 @@ struct MonocleGeometryTests {
             $0.appBar.edge = edge
         }
         let usable = context.usable
+        let bounds = context.bounds
         let bar = try #require(
             context.monocle.barFrame(
-                in: usable,
+                in: bounds,
                 global: context.appBarStyle
             )
         )
@@ -68,19 +69,22 @@ struct MonocleGeometryTests {
         let window = try #require(frames[w1])
         // All windows share the same frame.
         #expect(frames[w2] == window)
-        // Both stay inside the usable area (no monitor bleed).
-        #expect(usable.contains(bar))
+        // Both stay inside the bounds (no monitor bleed); the
+        // window inside the usable area.
+        #expect(bounds.contains(bar))
         #expect(usable.contains(window))
         // The strip and the window never overlap.
         #expect(!bar.intersects(window))
-        // The strip sits on the resolved edge.
+        // The strip sits flush on the resolved edge of the
+        // BOUNDS — its outer margin defaults to 0 (#1516).
         switch edge {
-        case .top: #expect(bar.minY == usable.minY)
-        case .bottom: #expect(bar.maxY == usable.maxY)
-        case .left: #expect(bar.minX == usable.minX)
-        case .right: #expect(bar.maxX == usable.maxX)
+        case .top: #expect(bar.minY == bounds.minY)
+        case .bottom: #expect(bar.maxY == bounds.maxY)
+        case .left: #expect(bar.minX == bounds.minX)
+        case .right: #expect(bar.maxX == bounds.maxX)
         }
-        // One inner gap between strip and window.
+        // The windows' OUTER gap between strip and window — the
+        // bar reads no inner gap (#1516).
         #expect(bar.height == 32 || bar.width == 32)
         if edge == .top {
             #expect(window.minY == bar.maxY + 10)
@@ -121,9 +125,9 @@ struct MonocleGeometryTests {
         #expect(window.width >= 0)
         #expect(window.height >= 0)
         let bar = try #require(
-            context.monocle.barFrame(in: context.usable, global: AppBarStyle())
+            context.monocle.barFrame(in: context.bounds, global: AppBarStyle())
         )
-        #expect(context.usable.contains(bar))
+        #expect(context.bounds.contains(bar))
     }
 }
 

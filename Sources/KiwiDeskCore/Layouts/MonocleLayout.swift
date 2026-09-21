@@ -13,7 +13,6 @@ public struct MonocleLayout: LayoutSystem {
     ) -> [WindowID: CGRect] {
         let frame = context.monocle.windowFrame(
             in: context.usable,
-            inner: context.gaps.inner,
             global: context.appBarStyle
         )
         // Center size-bound window in slot (#677).
@@ -77,7 +76,7 @@ public struct MonocleLayout: LayoutSystem {
         var bounds = context.bounds
         guard
             let strip = context.monocle.barFrame(
-                in: context.usable,
+                in: context.bounds,
                 global: context.appBarStyle
             )
         else { return bounds }

@@ -88,7 +88,6 @@ struct ScrollingFloatingFocusTests {
         let context = makeContext(focused: w9, offset: nil)
         let area = context.scrolling.windowFrame(
             in: context.usable,
-            inner: context.gaps.inner,
             global: context.appBarStyle
         )
         let rowLength = 3 * CGFloat(800) + 2 * 10

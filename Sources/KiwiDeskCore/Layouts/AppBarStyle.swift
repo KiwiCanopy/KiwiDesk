@@ -11,6 +11,13 @@ public struct AppBarStyle: Sendable, Equatable {
     /// class (owner ruling 2026-09-13, #1359); `SpaceBarStyle`
     /// carries the same number (`BarThicknessDefaultTests`).
     public var thickness: CGFloat = 40
+    /// Distance from the screen border to the bar (pt) — the
+    /// bar's own, absolute; 0 is flush (#1516).
+    public var outerMargin: CGFloat = 0
+    /// Extra room on the window side (pt), ADDED to the windows'
+    /// outer gap, which alone keeps the focus ring's clearance —
+    /// so 0 needs no floor (#1516).
+    public var innerMargin: CGFloat = 0
     /// Background plate style (plain by default, #660).
     public var backgroundStyle: BackgroundStyle = .plain
     /// Liquid Glass material (macOS 26+, #390). On by default
@@ -55,6 +62,13 @@ public struct AppBarStyle: Sendable, Equatable {
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}
+
+    /// The depth the bar reserves off its edge — outer margin,
+    /// strip and inner margin (#1516); `SpaceBarStyle.reservation` is
+    /// the twin.
+    public var reservation: CGFloat {
+        outerMargin + thickness + innerMargin
+    }
 
     /// Concrete corner radius in pt for a given thickness.
     public func resolvedCornerRadius(

@@ -205,6 +205,12 @@ synonym:
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).
+- **gap** vs **margin** — a *gap* is room between or around
+  WINDOWS (`gap.inner`, `gap.outer`, a bar's `item_gap`); a
+  *margin* is a BAR's own clearance from what it sits beside
+  (`app_bar.set_outer_margin` to the screen edge,
+  `set_inner_margin` on its window side, #1516). Both reuse the
+  `inner` / `outer` adjectives rather than coining a third pair.
 - **limit** / **cap** / **count** — a `limit` is a user-set
   maximum (`track.set_limit`); `cap` is the same idea where it
   already reads better (`space_bar.set_glyph_cap`, and
