@@ -1919,8 +1919,9 @@ purpose: the command is the right raise on any shown Space, so
 an arm that widens later is covered already.
 
 :::unreleased
-**A window returning from a close takes the focus at its
-arrival (#1414).** An `NSWindow` keeps its number across a close
+**A window returning from a close is a new window: it takes the
+focus at its arrival and lands where the user is (#1414,
+#1561).** An `NSWindow` keeps its number across a close
 and a re-show, so a window the user closed and reopened comes
 back to Core as a RETURN — `rememberedSpaces` still names its
 Space — and a returning window never steals the focus that
@@ -1935,20 +1936,25 @@ close hides the window, and a third-party window has no door to
 be told through. So the provenance moves to where it is known:
 the gone handler already classifies a close apart from a Desktop
 departure and a hide, it marks the departure, and the fold reads
-the mark at the return and grants the window the focus a new
-window gets — in the active Space only, the mark consumed on
-every arrival, taken or not, and ahead of a Desktop return's
-vacancy hold (#1207): the re-show is the user's own act, and the
-honored report that follows retires that debt the way any
-honored focus does. The report then lands intended, which the
-predicate never reads: no exemption in it, the provenance the
-report was owed. #636's rule stands for a Desktop return, whose
+the mark at the return and treats the window as NEW: placed by
+its app rule, else in the Space the user is on — never the Space
+it left, whose slot and break it gives up — with the focus a new
+window gets, the mark consumed on every arrival. That placement
+is the owner's ruling (#1561): a window you bring back is wanted
+where you are, so you can move it somewhere else if you want,
+and a window manager opens windows where you are rather than
+sending them back to where they once were; it also ends the
+asymmetry with a minimize, whose restore already landed as new.
+The report then lands intended, which the predicate never reads:
+no exemption in it, the provenance the report was owed. #636's rule stands for a Desktop return, whose
 windows come back as a burst in arbitrary order and where only
 the remembered focus is macOS's (#1345), and #913's for a hide,
 whose windows come back the same way. The #1380 debt is retired
-by this — the fold grants what it paid. Two trades, stated: an
+by this — the fold grants what it paid. Three trades, stated: an
 app that re-shows a closed window on its own, with no user act
-behind it, takes the focus once; and the two readings
+behind it, takes the focus once, where the user is; a closed
+window no longer takes back its slot and track break; and the
+two readings
 `gonePresence` already calls a wrong `closed` it never corrects
 — a host without the compositor read past the switch settle, a
 fast app's destroy landing before the topology flips — now cost

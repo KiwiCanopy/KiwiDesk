@@ -311,16 +311,19 @@ editing here:
   follow's bound, macOS's own restored focus standing (the
   accepted-limitations row); the #634 arrangement reset forgets
   the memory with `rememberedSpaces`. A window returning from a
-  CLOSE takes the focus at its arrival, the way a new window does
-  (#1414): the gone handler marks the departure through the one
-  `rememberClosedDeparture`, inside its `closed` arm and nowhere
-  else — a Desktop `vanished` keeps #636's rule, a hide #913's —
-  the fold consumes the mark on EVERY arrival and grants only in
-  the active Space, AHEAD of a Desktop return's vacancy hold —
-  the user's own act outranks it, and the honored report that
-  follows retires that debt as any honored focus does
-  (`ClosedReturnFocusTests` ▸ `closeReturnOutranksTheVacancyHold`);
-  the mark rides the re-key with the departed memory
+  CLOSE is a NEW window (#1414/#1561): the gone handler marks the
+  departure through the one `rememberClosedDeparture`, inside its
+  `closed` arm and nowhere else — a Desktop `vanished` keeps
+  #636's rule, a hide #913's — and the fold, consuming the mark
+  on EVERY arrival, drops the departed memory and the slot record
+  and takes the new-window path: the app rule, else the active
+  Space, the focus a new window gets there, its old slot and
+  break given up (`ClosedReturnFocusTests` ▸
+  `closedReturnLandsWhereYouAre`, `closedReturnFollowsTheAppRule`,
+  `closedReturnGivesUpItsSlot`); a placement of a return that
+  reads the departed memory or the slot record is a Desktop
+  return's alone. The mark rides the re-key with the departed
+  memory
   (`ClosedReturnFocusTests` ▸ `markFollowsRekey`, and
   `WindowRekeyParityTests`' count) and a path retiring that
   memory retires the mark beside it; and the report

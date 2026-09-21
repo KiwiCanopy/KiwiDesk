@@ -84,10 +84,10 @@ extension KiwiCore {
                 hadRememberedSpace: effects.hadRememberedSpace
             )
             if reason == .returned { recentReturns[window.id] = Date() }
-            if effects.closedReturnTookFocus {
+            if effects.closedReturnPlacedAsNew {
                 onLog(
                     "close return: w\(window.id.raw) re-shown — "
-                        + "focus taken (#1414)"
+                        + "placed as new, focus taken (#1414/#1561)"
                 )
             }
             emitWindowCreated(window, reason: reason)

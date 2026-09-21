@@ -10,6 +10,19 @@ extension StateCoordinator {
         effects.appearedWasMinimized = forgetMinimized(window.id)
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
+        // A window returning from a CLOSE is placed as a NEW
+        // window (#1561): its app rule, else the active Space —
+        // never the Space it left — and its slot and break are
+        // given up; it takes the focus a new window gets (#1414).
+        // The mark is consumed on every arrival, taken or not.
+        if closedDepartures.remove(window.id) != nil,
+            case .departed? = rememberedSpaces[window.id]
+        {
+            rememberedSpaces[window.id] = nil
+            retireDepartureRecord(of: window.id)
+            effects.hadRememberedSpace = false
+            effects.closedReturnPlacedAsNew = true
+        }
         // Once: the restore's frame is the FIRST arrival's (#1362).
         effects.restoredFrame =
             restoredFrames.removeValue(forKey: window.id)
@@ -120,10 +133,6 @@ extension StateCoordinator {
                     && rememberedSpaces[$0] == .departed(target)
                     && windows[$0] == nil
             } ?? false
-        // Consumed on EVERY arrival, taken or not: a mark that
-        // outlived its return would fire on a later, unrelated
-        // one (#1414).
-        let closedReturn = closedDepartures.remove(window.id) != nil
         guard windows[window.id]?.isTransientOverlay != true
         else { return }
         if effects.hadRememberedSpace, owed == window.id,
@@ -134,17 +143,10 @@ extension StateCoordinator {
         } else if !effects.hadRememberedSpace
             || (workspaces[target]?.focused == nil && !owedHere)
         {
+            // A new window — a close return among them (#1414):
+            // its own report then arrives intended, and the
+            // placement distrust never reads it.
             workspaces.focus(window.id, in: target)
-        } else if closedReturn, target == workspaces.activeSpace {
-            // A window returning from a CLOSE is the user
-            // re-showing it (#1414): it takes the focus a new
-            // window gets, so its own report arrives intended
-            // and the placement distrust never reads it — and it
-            // outranks a Desktop return's vacancy hold, the way
-            // the honored report that follows retires that debt.
-            // A Desktop return itself keeps #636's rule above.
-            workspaces.focus(window.id, in: target)
-            effects.closedReturnTookFocus = true
         }
     }
 
