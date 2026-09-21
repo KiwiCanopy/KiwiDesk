@@ -4883,6 +4883,59 @@ responses entirely, so a keyboard user still sees nothing; a
 screen that did not move is its own evidence there, and giving
 it a cue is a separate question from this one.
 
+### An empty active Space refuses by name (#1336)
+
+**[Principle]**
+
+:::unreleased
+A focused-window verb issued while the active Space is **empty**
+refuses, and the refusal names the Space that is empty, the
+window `get_state` marks focused elsewhere, and the `focus_space`
+that brings it back under the verb — never "no managed window is
+currently focused", which names a fact that is not the case.
+
+The measurement: `move_to_desktop 2` leaves the window's Space
+membership behind, and `focus_desktop 2` opens that Desktop on
+its own remembered Space, so on arrival KiwiDesk shows Space 2
+(empty) while the window sits in Space 1 — parked, and marked
+`focused` there. The #292 preflight reads the ACTIVE Space's
+anchor, finds none, and refused with the generic sentence — which
+reads as a divergence between KiwiDesk's focus and the system's,
+and there is none: the log named the clause (`no focus anchor`),
+and the recovery — `focus_space 1`, after which the verb works at
+once — confirmed it from the other side. A trackpad swipe onto that
+Desktop lands on the Space holding the window and never reaches
+the refusal; `focus_desktop`'s "exactly as a swipe would" is not
+true in that respect, and is its own question.
+
+**A refusal rather than acting on the parked window**, because
+the verbs act on the Space the user is on. A window in another
+Space of the same screen is parked off its edge — it is not the
+window in front of the user, and reaching for it would let every
+focused-window verb reach into an inactive Space whenever the
+active one happens to be empty. The honest answer is to say which
+Space is empty and where the marked window is; `focus_space` on
+that Space is a one-word recovery and the sentence names it.
+
+**One sentence on both channels.** The log's clause and the
+response's error come from one reading (`denialSentences`), so a
+trace reads as the CLI does. The sibling Space named is on the
+SAME screen — a Space on another screen lays its windows out
+there — and where several mark a focus, the one holding
+`lastFocused`, the window that last held the system focus. An
+active Space with members and no focus slot keeps the generic
+sentence: nothing is parked elsewhere for the user to see.
+
+**The original "silent" `_and_follow` is this same arm.** The
+report's `_and_follow` call was denied by this clause and logged
+as such (`denied move_to_desktop_and_follow — anchor none, no
+focus anchor`), and the CLI writes `error:` to stderr and exits
+1 on a denial — so the only silence left is a reader's, on
+stdout. The measured silence that IS a defect — a target Desktop
+already showing — is the ruling above, a different arm. There is
+no third.
+:::
+
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**

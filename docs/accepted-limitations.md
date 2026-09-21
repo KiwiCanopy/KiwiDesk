@@ -129,3 +129,7 @@ A window you closed and then reopened — an app whose close hides the window an
 :::unreleased
 On macOS 27 the focus that a menu-bar reveal moves to the previous app comes back: KiwiDesk returns it to its own window once per reveal, and the previous app's bar stays revealed above the still-key Settings window until the pointer leaves the edge ([#1532](https://github.com/KiwiCanopy/KiwiDesk/issues/1532); the ruling is in [design decisions](design-decisions.md)). What remains: a deliberate ⌘-Tab away from a KiwiDesk window while the pointer is parked at the top edge is returned the same way — only a second one within about a second goes through — so move the pointer off the edge first; a click is honored as choosing that app.
 :::
+
+:::unreleased
+A focused-window shortcut issued while the Space KiwiDesk shows is **empty** — after `move_to_desktop` and a `focus_desktop` to that Desktop, where the window rejoins the Space it was in while the Desktop opens on its own remembered Space — is still rejected, and the refusal now says so: `the active Space 2 is empty; the focused window (Finder) is in Space 1 — focus_space 1 first`, the same line the log carries ([#1336](https://github.com/KiwiCanopy/KiwiDesk/issues/1336); the ruling is in [design decisions](design-decisions.md)). What remains: the verb acts only on the Space you are on, so the window that `get_state` marks focused in another Space is parked, not focused, until `focus_space` brings its Space back.
+:::
