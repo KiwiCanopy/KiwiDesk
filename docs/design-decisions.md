@@ -4442,9 +4442,13 @@ rides `data.declared_in`, absent rather than empty so a
 runtime-only delete's output is byte-identical and the key's
 presence is itself the signal, and it names EVERY re-creator —
 the active profile, the built-in Standard a reload recomposes
-while no saved profile fits, the script, the GUI's space list —
-because a hint naming one and silent on another is a half-truth
-a script will trust. A distinct status was refused: it breaks
+while no saved profile fits, the script — because a hint naming
+one and silent on another is a half-truth a script will trust.
+`gui.json` is not a fourth: its space list is a mirror of live
+(#77), which the delete now rewrites like every other
+authoritative prune, so nothing there re-creates the space and
+a line telling the user to "remove it in Settings" would have
+named a file they never declared anything in. A distinct status was refused: it breaks
 every consumer that pattern-matches `success` for a delete that
 did succeed. The profile and Standard halves are the last
 apply's set, read from adoption state like every question about

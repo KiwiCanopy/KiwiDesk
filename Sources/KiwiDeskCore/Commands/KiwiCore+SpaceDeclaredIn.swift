@@ -11,8 +11,9 @@ extension KiwiCore {
     /// Standard — both the last APPLY's set, read from adoption
     /// state and never a file or a recompose (#1245; a hand edit
     /// lands at the next apply); `init.lua` for a Space the last
-    /// script run asked for; `gui.json` for a GUI-managed sidecar
-    /// listing it. Empty when the Space was runtime-only.
+    /// script run asked for. Never `gui.json`: its space list
+    /// is a mirror of live the delete itself rewrites, not a
+    /// declaration (#77). Empty when the Space was runtime-only.
     func declaredSources(of space: SpaceID) -> [String] {
         var sources: [String] = []
         if let active = profiles.active,
@@ -27,11 +28,6 @@ extension KiwiCore {
         }
         if initDeclaredSpaces.contains(space) {
             sources.append("init.lua")
-        }
-        if isGuiManaged,
-            guiConfigStore.load()?.spaces.contains(space) == true
-        {
-            sources.append("gui.json")
         }
         return sources
     }

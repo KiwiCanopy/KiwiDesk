@@ -7,9 +7,9 @@ import Testing
 /// `delete_space` names every source that re-creates the Space
 /// on the next config load (#1509): the active profile or the
 /// resolving Standard from adoption state, the last `init.lua`
-/// run's asks, and a GUI-managed sidecar's list. A runtime-only
-/// Space carries no payload at all, so today's scripts see
-/// byte-identical output.
+/// run's asks — never a GUI-managed sidecar's list, which the
+/// delete mirrors (#77). A runtime-only Space carries no payload
+/// at all, so today's scripts see byte-identical output.
 @Suite("delete_space names its re-creators (#1509)", .serialized)
 @MainActor
 struct DeleteSpaceDeclaredInTests {
@@ -234,8 +234,11 @@ struct DeleteSpaceDeclaredInTests {
         #expect(declaredIn(deleting: "later", on: core) == nil)
     }
 
-    @Test("a Space a GUI-managed sidecar lists names gui.json")
-    func guiSidecarIsNamed() throws {
+    /// The sidecar's list is a mirror of live, not a declaration
+    /// (#77): the delete rewrites it, so the cold-boot seed
+    /// cannot bring the Space back and nothing names the file.
+    @Test("a GUI-managed sidecar is mirrored, never named")
+    func guiSidecarIsMirrored() throws {
         let core = makeCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1"), SpaceID("2")]
@@ -243,7 +246,10 @@ struct DeleteSpaceDeclaredInTests {
         #expect(core.isGuiManaged)
         core.state.workspaces.ensureSpace(SpaceID("1"))
         core.state.workspaces.ensureSpace(SpaceID("2"))
-        #expect(declaredIn(deleting: "2", on: core) == ["gui.json"])
+        #expect(declaredIn(deleting: "2", on: core) == nil)
+        #expect(
+            core.guiConfigStore.load()?.spaces == [SpaceID("1")]
+        )
     }
 
     @Test("every re-creator is named in one array")
@@ -263,7 +269,10 @@ struct DeleteSpaceDeclaredInTests {
         )
         #expect(
             declaredIn(deleting: "scratch", on: core)
-                == ["profile:Work", "init.lua", "gui.json"]
+                == ["profile:Work", "init.lua"]
+        )
+        #expect(
+            core.guiConfigStore.load()?.spaces == [SpaceID("1")]
         )
     }
 

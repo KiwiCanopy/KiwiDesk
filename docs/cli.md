@@ -428,7 +428,7 @@ where:
 
 ```json
 {"status": "success",
- "data": {"declared_in": ["profile:Work", "init.lua", "gui.json"]}}
+ "data": {"declared_in": ["profile:Work", "init.lua"]}}
 ```
 
 `declared_in` names every source that re-creates the space on the
@@ -439,10 +439,9 @@ one line per source on stderr, so a script parsing stdout sees
 nothing new:
 
 ```
-still declared in profile "Work" — save the profile to drop it there
+removed from the live layout but still in saved profile "Work" — save the profile to make this durable
 still composed by the built-in "Developer" standard — save a profile to make this durable
 still created by init.lua — remove the call that creates it
-still listed in gui.json — remove it in Settings
 ```
 :::
 

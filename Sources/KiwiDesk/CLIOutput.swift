@@ -36,8 +36,9 @@ enum CLIOutput {
         let profile = "profile:"
         if source.hasPrefix(profile) {
             let name = source.dropFirst(profile.count)
-            return "still declared in profile \"\(name)\" — "
-                + "save the profile to drop it there"
+            return "removed from the live layout but still in "
+                + "saved profile \"\(name)\" — "
+                + "save the profile to make this durable"
         }
         let standard = "standard:"
         if source.hasPrefix(standard) {
@@ -49,8 +50,6 @@ enum CLIOutput {
         case "init.lua":
             return "still created by init.lua — "
                 + "remove the call that creates it"
-        case "gui.json":
-            return "still listed in gui.json — remove it in Settings"
         default:
             return "still declared in \(source)"
         }
