@@ -150,7 +150,7 @@ struct PlacementIntentTests {
         core.handle(.windowCreated(reshown(target)))
         #expect(
             log.lines.contains {
-                $0.contains("close return: w1 re-shown — focus taken")
+                $0.contains("close return: w1 re-shown — placed as new")
             }
         )
         #expect(core.activeSpace?.focused == target)
@@ -167,49 +167,27 @@ struct PlacementIntentTests {
         )
     }
 
-    /// The grant is the active Space's only, like a new window's:
-    /// an arrival off it takes nothing, and the report stays the
-    /// window's own to reach it by.
-    @Test("An arrival off the active Space takes nothing")
-    func arrivalOffTheActiveSpaceTakesNothing() {
+    /// A re-shown window is a NEW window (#1561): it lands where
+    /// you are, not where it left, with the focus a new window
+    /// gets, so its report is intended wherever it was closed.
+    @Test("A re-shown window lands where you are")
+    func reshownWindowLandsWhereYouAre() {
         let (core, target, other) = makeFixture()
         let home = core.state.workspaces.space(of: target)!
         core.state.workspaces.focus(target, in: home)
         _ = core.execute("move_to_space", args: [.string("2")])
-        // A neighbour keeps Space 2's focus, so the fold grants
-        // the return no vacancy and a mis-pay would COMMAND —
-        // stepping off `other` (guard-prover).
-        let neighbour = WindowID(3)
-        core.handle(
-            .windowCreated(
-                ManagedWindow(
-                    id: neighbour,
-                    pid: 3,
-                    appName: "App3",
-                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
-                )
-            )
-        )
-        core.state.workspaces.focus(neighbour, in: home)
-        _ = core.execute("move_to_space", args: [.string("2")])
+        #expect(core.state.workspaces.space(of: target) != home)
         core.state.workspaces.focus(other, in: home)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         #expect(core.focusOwnWindow(number: Int(target.raw)))
         let log = Log()
         core.onLog = { log.lines.append($0) }
         core.handle(.windowCreated(reshown(target)))
-        #expect(core.state.workspaces.space(of: target) != home)
+        #expect(core.state.workspaces.space(of: target) == home)
+        #expect(core.activeSpace?.focused == target)
         #expect(
-            core.state.workspaces.space(of: target)
-                == core.state.workspaces.space(of: neighbour)
+            log.lines.contains { $0.contains("placed as new") }
         )
-        #expect(core.activeSpace?.focused == other)
-        #expect(
-            !log.lines.contains { $0.contains("focus taken") }
-        )
-        // Nothing commanded: the fold's grant notes no
-        // displacement, and there was none here anyway.
-        #expect(!core.tiler.placements.recentDisplacement(other))
     }
 
     @Test("Without the intent the same report is bounced")

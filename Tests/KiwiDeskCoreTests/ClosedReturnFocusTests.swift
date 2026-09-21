@@ -5,13 +5,14 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A window returning from a CLOSE takes the focus at its
-/// arrival (#1414): the gone handler marks the departure, the
-/// create fold reads the mark, and the app's own make-key report
-/// then reaches the placement distrust with the focus already
-/// intended — measured 3 of 3 bounced in scrolling on the device
-/// before this, 0 in bsp. A Desktop return keeps #636's rule; a
-/// minimize carries no mark; the mark is consumed on every
-/// arrival.
+/// arrival (#1414), and is placed as a NEW window — its app rule,
+/// else the Space you are on (#1561): the gone handler marks the
+/// departure, the create fold reads the mark, and the app's own
+/// make-key report then reaches the placement distrust with the
+/// focus already intended — measured 3 of 3 bounced in scrolling
+/// on the device before this, 0 in bsp. A Desktop return keeps
+/// #636's rule; a minimize carries no mark; the mark is consumed
+/// on every arrival.
 @Suite("A window returning from a close takes the focus (#1414)", .serialized)
 @MainActor
 struct ClosedReturnFocusTests {
@@ -92,7 +93,7 @@ struct ClosedReturnFocusTests {
         #expect(core.activeSpace?.focused == target)
         #expect(
             log.lines.contains {
-                $0.contains("close return: w1 re-shown — focus taken")
+                $0.contains("close return: w1 re-shown — placed as new")
             }
         )
         // Consumed by the arrival.
@@ -160,30 +161,11 @@ struct ClosedReturnFocusTests {
         #expect(state.closedDepartures.contains(WindowID(23)))
     }
 
-    @Test("A return off the active Space steals nothing")
-    func inactiveSpaceReturnStealsNothing() {
-        let (core, target, other) = makeFixture()
-        core.handle(.windowDestroyed(target, wasMinimized: false))
-        #expect(core.state.closedDepartures.contains(target))
-        // The user is elsewhere when the window comes back to
-        // its remembered Space: the grant is the active Space's
-        // only, like a new window's.
-        let elsewhere = SpaceID("2")
-        core.state.workspaces.ensureSpace(elsewhere)
-        core.state.workspaces.activate(elsewhere)
-        #expect(core.state.workspaces.activeSpace == elsewhere)
-        core.handle(.windowCreated(reshown(target)))
-        #expect(core.state.workspaces.space(of: target) == SpaceID("1"))
-        #expect(core.state.workspaces[SpaceID("1")]?.focused == other)
-        // Consumed all the same.
-        #expect(!core.state.closedDepartures.contains(target))
-    }
-
     /// A Desktop return's vacancy hold (#1207) keeps other
     /// RETURNING windows off the focus while the owed window is
-    /// still departed; a close return is the user's own act and
-    /// outranks it — the honored report that follows retires the
-    /// debt the way any honored focus does.
+    /// still departed; a close return is a NEW window and takes
+    /// the focus like one — the honored report that follows
+    /// retires the debt the way any honored focus does.
     @Test("A close return outranks a Desktop return's vacancy hold")
     func closeReturnOutranksTheVacancyHold() {
         let (core, target, _) = makeFixture()

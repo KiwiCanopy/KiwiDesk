@@ -8,6 +8,15 @@ extension StateCoordinator {
     ) {
         // Forget record to test if window was minimized (#40, #673).
         effects.appearedWasMinimized = forgetMinimized(window.id)
+        // A close return is placed as NEW (#1414/#1561): memory,
+        // slot and any restore filed over it dropped FIRST, so
+        // every reader below sees one fact; consumed on every arrival.
+        if closedDepartures.remove(window.id) != nil {
+            rememberedSpaces[window.id] = nil
+            restoredFrames[window.id] = nil
+            retireDepartureRecord(of: window.id)
+            effects.closedReturnPlacedAsNew = true
+        }
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
         // Once: the restore's frame is the FIRST arrival's (#1362).
@@ -120,10 +129,6 @@ extension StateCoordinator {
                     && rememberedSpaces[$0] == .departed(target)
                     && windows[$0] == nil
             } ?? false
-        // Consumed on EVERY arrival, taken or not: a mark that
-        // outlived its return would fire on a later, unrelated
-        // one (#1414).
-        let closedReturn = closedDepartures.remove(window.id) != nil
         guard windows[window.id]?.isTransientOverlay != true
         else { return }
         if effects.hadRememberedSpace, owed == window.id,
@@ -134,17 +139,10 @@ extension StateCoordinator {
         } else if !effects.hadRememberedSpace
             || (workspaces[target]?.focused == nil && !owedHere)
         {
+            // A new window — a close return among them (#1414):
+            // its own report then arrives intended, and the
+            // placement distrust never reads it.
             workspaces.focus(window.id, in: target)
-        } else if closedReturn, target == workspaces.activeSpace {
-            // A window returning from a CLOSE is the user
-            // re-showing it (#1414): it takes the focus a new
-            // window gets, so its own report arrives intended
-            // and the placement distrust never reads it — and it
-            // outranks a Desktop return's vacancy hold, the way
-            // the honored report that follows retires that debt.
-            // A Desktop return itself keeps #636's rule above.
-            workspaces.focus(window.id, in: target)
-            effects.closedReturnTookFocus = true
         }
     }
 

@@ -150,9 +150,9 @@ extension StateCoordinator {
     /// in the Space (`Space.promoteHandedBreak`); away, on its
     /// record — or its next return would leave the break on the
     /// member behind it. Consumes the link. The gone handler's
-    /// `.closed` arm promotes without retiring, since the rank is
-    /// kept for later arrivals; every other ender takes
-    /// `retireDepartureRecord`.
+    /// `.closed` arm promotes without retiring — the record then
+    /// ends at the return, which drops it unread (#1561), or at a
+    /// later ender; every other ender takes `retireDepartureRecord`.
     mutating func promoteHandedSuccessor(of id: WindowID) {
         guard let holder = departedSlots[id]?.handedTo else { return }
         departedSlots[id]?.handedTo = nil

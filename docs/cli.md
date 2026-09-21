@@ -560,6 +560,13 @@ lifecycle; the `reason` field says why the set changed:
   window, where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
 
+:::unreleased
+A window re-shown after a `closed` destroy — an app whose close
+hides the window and shows the same one again — comes back as
+`new` and is placed like one; `returned` is a Desktop return, an
+unhide or a session restore.
+:::
+
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on
 `reason` to ignore them. The reason is read off the
