@@ -51,7 +51,13 @@ carries the argument (#96, #601).
 Spotlight, Mission Control, Force Quit, App Windows — and macOS
 already ships a name for each in your language. Use the name a
 user sees in System Settings › Keyboard › Shortcuts, not a
-literal translation of the English.
+literal translation of the English, and read it off the machine:
+`KeyboardSettings.appex/Contents/Resources/DefaultShortcutsTable.loctable`
+carries every locale's row (`plutil -convert json -o -`), and
+AppKit's `MenuCommands.loctable` the ⌘M / ⌘W menu items. Where
+the English is a deliberate short paraphrase of a longer row
+("Spotlight", "Mission Control: Space Left"), keep the paraphrase
+and take only its words from Apple's row.
 
 ## Key convention
 
