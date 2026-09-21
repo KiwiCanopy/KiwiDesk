@@ -176,4 +176,16 @@ struct TitleArmRouteTests {
         box.drainOne()
         #expect(box.titles.isEmpty, "delivered \(box.titles)")
     }
+
+    @Test("A window released during the read delivers nothing")
+    func releasedDuringFlightDeliversNothing() {
+        // The registration is re-checked at delivery, the focus
+        // arm's shape: a sweep or a #913 hide can land inside
+        // the read's flight.
+        let (loop, box) = makeLoop()
+        notify(loop)
+        loop.elements[pid] = [:]
+        box.drainOne()
+        #expect(box.titles.isEmpty, "delivered \(box.titles)")
+    }
 }

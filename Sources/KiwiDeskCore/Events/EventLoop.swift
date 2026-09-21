@@ -185,6 +185,11 @@ public final class EventLoop {
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
+    /// When KiwiDesk last COMMANDED a focus (`KiwiCore.focusWindow`
+    /// writes it; `NotificationArmNeedleTests` pins the write). A
+    /// focus report received before it and delivered after it is
+    /// stale — the command's own echo follows (#1088).
+    var lastCommandedFocus: ContinuousClock.Instant?
     public internal(set) var isRunning = false
 
     /// The chunked boot pass's queue, counters and per-app budget

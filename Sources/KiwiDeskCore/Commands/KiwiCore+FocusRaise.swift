@@ -91,6 +91,9 @@ extension KiwiCore {
             )
             return
         }
+        // A report of the OS state this command supersedes may
+        // still be in its read's flight (#1088).
+        eventLoop.lastCommandedFocus = .now
         // The anchor, not `activeSpace?.focused`: stepping off a
         // tiled-sticky traveler must classify the scroll pan
         // direction from the traveler's slot, not from the stale

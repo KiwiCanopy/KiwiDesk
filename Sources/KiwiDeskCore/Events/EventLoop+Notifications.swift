@@ -55,9 +55,11 @@ extension EventLoop {
             }
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
-            if let id = windowID(of: element, pid: pid, arm: note),
-                elements[pid]?[id] != nil
-            {
+            if let id = trackedWindowID(
+                of: element,
+                pid: pid,
+                arm: note
+            ), elements[pid]?[id] != nil {
                 // A destroyed native-tab carrier (or any window of an
                 // app that has one) may be a switch or active-tab
                 // close; leave it tracked and let the reconcile below
@@ -177,11 +179,11 @@ extension EventLoop {
                 self.onEvent(.windowMoved(id, frame))
             case .resized:
                 self.onEvent(.windowResized(id, frame))
-            case .settleProbe, .focused:
+            case .settleProbe:
                 // Never requested through this wire — the
                 // #677 probe (`KiwiCore.runSizeBoundProbe`)
-                // and the focus report (`EventLoop+FocusReport`)
-                // pass their own completions.
+                // passes its own completion and emits no
+                // event.
                 break
             }
         }

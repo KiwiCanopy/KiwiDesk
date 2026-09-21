@@ -8,16 +8,12 @@ extension EventLoop {
     /// The `kAXFocusedWindowChanged` branch, on its own so a test
     /// can drive it past the handler's process-policy guard.
     ///
-    /// The id comes from the tracked map (#1084/#1088); a
-    /// tracked window's report then rides one off-main frame
-    /// read (#618's shape) and is delivered by
-    /// `deliverFocusReport`, which drops a dead element on its
-    /// `.zero` frame — the liveness the ask used to give for
-    /// free. An untracked id still asks: the #21 classification
-    /// needs the panel's id, and the ask is the one reader that
-    /// has it. The reconcile ahead of both is the #21 destroy
-    /// net and stays a main-actor list read; it is not this
-    /// route's subject.
+    /// The id comes from the tracked map and a tracked window's
+    /// report rides one off-main frame read, delivered by
+    /// `deliverFocusReport` (#1088, input-and-animation.md). An
+    /// untracked id still asks: the #21 classification needs
+    /// the panel's id. The reconcile ahead of both is the #21
+    /// destroy net and stays a main-actor list read.
     func handleFocusedWindowChanged(
         _ element: AXUIElement,
         pid: pid_t,
@@ -51,12 +47,8 @@ extension EventLoop {
             return
         }
         let requested = ContinuousClock.now
-        axReads.request(
-            .focused,
-            window: id,
-            element: element,
-            pid: pid
-        ) { [weak self] frame in
+        axReads.requestFocus(element: element, pid: pid) {
+            [weak self] frame in
             self?.deliverFocusReport(
                 id,
                 pid: pid,
@@ -66,14 +58,11 @@ extension EventLoop {
         }
     }
 
-    /// The report's delivery, one run-loop hop after the
-    /// notification. Every gate is judged HERE rather than at
-    /// receipt: the observer and the registration because a
-    /// detach or a release can land inside the read's flight,
-    /// and the #1322 provenance because two apps' reads ride
-    /// two queues — a slow app's report landing after a fast
-    /// app's activation is the reorder that would otherwise
-    /// park the focus on the wrong app.
+    /// The report's delivery, after the read. Every gate is
+    /// judged HERE, not at receipt — the read's flight is where
+    /// a detach, a release, another app's activation or a focus
+    /// KiwiDesk commanded can land (#1088, the rule file's
+    /// delivery clause).
     private func deliverFocusReport(
         _ id: WindowID,
         pid: pid_t,
@@ -89,6 +78,16 @@ extension EventLoop {
             return
         }
         trackedFrames[id] = frame
+        // A report older than the last focus KiwiDesk commanded
+        // describes a state the command superseded; the
+        // command's own echo follows, so this one is stale.
+        if let commanded = lastCommandedFocus, requested < commanded {
+            onLog(
+                "focus: w\(id.raw) stale — a focus was commanded "
+                    + "during its read, dropped"
+            )
+            return
+        }
         // A focus report from an app macOS did not activate is
         // app-internal; dropped, never held (#1322).
         guard reportsFromActiveApp(pid) else {

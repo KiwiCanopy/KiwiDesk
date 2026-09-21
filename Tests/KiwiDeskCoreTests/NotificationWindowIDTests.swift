@@ -157,6 +157,32 @@ struct NotificationWindowIDTests {
         #expect(asked == 1)
     }
 
+    @Test("A destroy for an unknown element never asks")
+    func untrackedDestroyNeverAsks() {
+        // The destroy arm's window was usually swept by the
+        // focus-change reconcile ahead of the notification, so
+        // a miss there is the COMMON case, and asking a
+        // tearing-down app for it paid the round-trip — and
+        // printed the ask line — per close (#1088 review). A
+        // miss drops; the reconcile that follows still diffs
+        // the live list.
+        let id = WindowID(7)
+        let pid = pid_t(getpid())
+        var asked = 0
+        let loop = makeLoop(id: id, pid: pid) { asked += 1 }
+        loop.elements[pid] = [:]
+        loop.axWindows = { _ in [] }
+        loop.onScreenNormalWindowIDs = { [:] }
+        loop.appIsHidden = { _ in false }
+        loop.handle(
+            kAXUIElementDestroyedNotification,
+            element,
+            pid: pid,
+            app: AppRef(bundleID: nil, name: "Test")
+        )
+        #expect(asked == 0)
+    }
+
     @Test("An unknown window still asks — the map is not a wall")
     func untrackedWindowStillAsks() {
         // The fallback must stay, and stay SECOND: a window not

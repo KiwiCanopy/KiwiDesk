@@ -20,14 +20,36 @@ final class AXReadCoalescer {
         case resized
         /// Post-settle frame probe (#677).
         case settleProbe
-        /// A focus report's liveness read (#1088): the frame,
-        /// whose `.zero` names a dead element.
-        case focused
+    }
+
+    /// One serial queue per app per lane, so a focus report is
+    /// never parked behind that app's frame storm (#1088): its
+    /// consumers read wall-clock ledgers, and a storm's queue
+    /// depth times a stalled app's messaging timeout would age
+    /// the report past them.
+    private enum Lane: Hashable {
+        case frames
+        case focus
+        case titles
     }
 
     private enum Key: Hashable, Sendable {
         case frame(WindowID, Kind)
+        /// One per APP, never per window (#1088):
+        /// `kAXFocusedWindowChanged` is a single-valued stream,
+        /// so newest-wins must collapse ACROSS windows — keyed
+        /// per window, a re-report of X queued behind X's own
+        /// read dispatches behind Y's and delivers X last.
+        case focus(pid_t)
         case title(WindowID)
+
+        var lane: Lane {
+            switch self {
+            case .frame: .frames
+            case .focus: .focus
+            case .title: .titles
+            }
+        }
     }
 
     /// What one read answered — the key decides which.
@@ -40,6 +62,11 @@ final class AXReadCoalescer {
         let element: AXUIElement
         let pid: pid_t
         let onReading: @MainActor (Reading) -> Void
+    }
+
+    private struct QueueKey: Hashable {
+        let pid: pid_t
+        let lane: Lane
     }
 
     /// The blocking AX frame read, called OFF the main actor.
@@ -66,7 +93,7 @@ final class AXReadCoalescer {
                 -> Void
         )?
 
-    private var queues: [pid_t: DispatchQueue] = [:]
+    private var queues: [QueueKey: DispatchQueue] = [:]
     private var inFlight: [Key: Pending] = [:]
     private var queued: [Key: Pending] = [:]
 
@@ -80,6 +107,18 @@ final class AXReadCoalescer {
         onFrame: @escaping @MainActor (CGRect) -> Void
     ) {
         enqueue(.frame(window, kind), element: element, pid: pid) {
+            if case .frame(let frame) = $0 { onFrame(frame) }
+        }
+    }
+
+    /// Requests the liveness frame behind a focus report
+    /// (#1088): one in flight per app, the newest window winning.
+    func requestFocus(
+        element: AXUIElement,
+        pid: pid_t,
+        onFrame: @escaping @MainActor (CGRect) -> Void
+    ) {
+        enqueue(.focus(pid), element: element, pid: pid) {
             if case .frame(let frame) = $0 { onFrame(frame) }
         }
     }
@@ -122,10 +161,10 @@ final class AXReadCoalescer {
         let reader = reader
         let titleReader = titleReader
         let deliver = deliver
-        dispatch(pending.pid) { [weak self] in
+        dispatch(pending.pid, lane: key.lane) { [weak self] in
             let reading: Reading
             switch key {
-            case .frame:
+            case .frame, .focus:
                 reading = .frame(reader(element))
             case .title:
                 reading = .title(titleReader(element))
@@ -149,31 +188,33 @@ final class AXReadCoalescer {
 
     private func dispatch(
         _ pid: pid_t,
+        lane: Lane,
         _ work: @escaping @Sendable () -> Void
     ) {
         if let dispatchOverride {
             dispatchOverride(pid, work)
             return
         }
-        queue(for: pid).async(execute: work)
+        queue(for: pid, lane: lane).async(execute: work)
     }
 
-    /// Returns per-PID serial queue — or the MAIN queue for the
-    /// own process: an AX read against ourselves from a background
-    /// queue deadlocks against the main actor answering it
-    /// (`FrameApplier`).
-    private func queue(for pid: pid_t) -> DispatchQueue {
+    /// Returns the per-PID, per-lane serial queue — or the MAIN
+    /// queue for the own process: an AX read against ourselves
+    /// from a background queue deadlocks against the main actor
+    /// answering it (`FrameApplier`).
+    private func queue(for pid: pid_t, lane: Lane) -> DispatchQueue {
         if pid == getpid() {
             return DispatchQueue.main
         }
-        if let existing = queues[pid] {
+        let key = QueueKey(pid: pid, lane: lane)
+        if let existing = queues[key] {
             return existing
         }
         let queue = DispatchQueue(
-            label: "org.kiwidesk.axreads.\(pid)",
+            label: "org.kiwidesk.axreads.\(lane).\(pid)",
             qos: .userInteractive
         )
-        queues[pid] = queue
+        queues[key] = queue
         return queue
     }
 }

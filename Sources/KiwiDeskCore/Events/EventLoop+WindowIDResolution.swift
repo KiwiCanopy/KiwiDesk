@@ -82,9 +82,8 @@ extension EventLoop {
     /// title arm (#1088; `EventLoop+FocusReport`,
     /// `EventLoop+TitleReport`).
     ///
-    /// `arm` names the notification in the ask's log line — the
-    /// rare path by construction, so a click into a tracked
-    /// window or a title storm that prints none took the map.
+    /// `arm` names the notification in the ask's log line, so a
+    /// device trace tells the blocking path from the map.
     func windowID(
         of element: AXUIElement,
         pid: pid_t,
@@ -100,6 +99,33 @@ extension EventLoop {
                 arm: arm,
                 reason: "untracked"
             )
+        case .ambiguous:
+            return askWindowID(
+                element,
+                pid: pid,
+                arm: arm,
+                reason: "ambiguous"
+            )
+        }
+    }
+
+    /// The map's answer for an arm whose notification only ever
+    /// names a window the map once held, so a MISS is a released
+    /// window and drops rather than asks — the title arm, whose
+    /// notification is registered per window at `track`, and the
+    /// destroy/minimize arm, whose window the focus-change
+    /// reconcile has usually swept already (#1088). An ambiguous
+    /// match still asks: both its ids are tracked.
+    func trackedWindowID(
+        of element: AXUIElement,
+        pid: pid_t,
+        arm: String
+    ) -> WindowID? {
+        switch trackedMatch(of: element, pid: pid) {
+        case .one(let id):
+            return id
+        case .none:
+            return nil
         case .ambiguous:
             return askWindowID(
                 element,

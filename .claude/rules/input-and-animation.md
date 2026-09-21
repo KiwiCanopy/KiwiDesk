@@ -247,11 +247,11 @@ editing here:
   every page load and every command — and a new arm on this
   path takes it too: the id from `EventLoop+WindowIDResolution`,
   and every read of the element OFF the main actor through
-  `AXReadCoalescer` (#618's shape), delivered one run-loop hop
-  later with the observer and the registration re-checked
-  there. The ask is logged (`notify: … asked pid …`) and the
-  focus delivery names its read (`focus: w… liveness read …ms
-  off main`), so a device trace tells the two paths apart.
+  `AXReadCoalescer` (#618's shape), delivered after the read
+  with the observer and the registration re-checked there.
+  The ask is logged (`notify: … asked pid …`) and the focus
+  delivery names its read (`focus: w… liveness read …ms off
+  main`), so a device trace tells the two paths apart.
 
   Two properties the map does NOT have, both paid for in
   regressions the same night, so a router owes an answer to
@@ -279,24 +279,39 @@ editing here:
     (`EventLoop+Tabs.applyTabRekey`) is what keeps ambiguity
     rare; it is not what makes the lookup safe.
 
-  Two things the hop changes, each held by the suite that
-  drives its arm. **The title arm drops a map MISS rather than
-  asking**: title notifications are registered per window at
-  `track`, so an unmatched element is a window already
-  released, and no consumer of `.windowTitleChanged` reads an
-  untracked id — a hidden browser (#913) loading pages paid the
-  round-trip per notification for an event nobody folded. The
-  focus arm keeps the ask for a miss, because #21's
-  classification needs the panel's id. And **the #1322
-  provenance gate is judged at DELIVERY, never at receipt**:
-  two apps' reads ride two queues, so a slow app's report can
-  land after a fast app's activation, and a gate read at receipt
-  would honor it. The #160 float recheck rides the title
-  delivery too, pinned by `NotificationArmNeedleTests` because
-  its next read is a direct AX call no fixture can answer; that
-  suite also holds every arm file to the seam, since a
-  `AXHelper.windowID(` spelled beside the resolver re-enters the
-  round-trip with every route suite green.
+  What the hop changes, each held by the suite that drives it.
+  **An arm whose notification only ever names a window the map
+  once held drops a MISS rather than asking** — the title arm,
+  registered per window at `track`, and the destroy/minimize
+  arm, whose window the focus-change reconcile has usually
+  swept — through the one `trackedWindowID`; a consumer of
+  `.windowTitleChanged` that comes to need an untracked id owes
+  the title arm its ask back (`TitleArmRouteTests`,
+  `NotificationWindowIDTests`). The focus arm keeps the ask for
+  a miss, because #21's classification needs the panel's id.
+  **The focus read is keyed per APP and rides its own per-app
+  lane** (`AXReadCoalescerFocusTests`): `kAXFocusedWindowChanged`
+  is a single-valued stream, so a per-window key lets a
+  re-report of X dispatch behind Y's read and land LAST, and a
+  lane shared with the frame storm parks the report behind
+  queue depth × a stalled app's messaging timeout, past the
+  wall-clock ledgers its consumers read. **Every gate on a
+  focus report is judged at DELIVERY, never at receipt**
+  (`FocusArmDeliveryTests`): the #1322 provenance, because two
+  apps' reads ride two queues and a slow app's report can land
+  after a fast app's activation; and a report older than the
+  last focus KiwiDesk COMMANDED is dropped, since the blocking
+  read used to serialize the notification ahead of the next
+  hotkey and a stale report landing after `focusWindow` dropped
+  the scrolling raise and a Monocle flip's owed focus —
+  `focusWindow` stamps `EventLoop.lastCommandedFocus`, and a new
+  door that moves state focus without it stamps too. The #160
+  float recheck rides the title delivery, pinned by
+  `NotificationArmNeedleTests` because its next read is a
+  direct AX call no fixture can answer; that suite also holds
+  the whole `Events/` tree to the seam, its `allowed` map the
+  one copy of who may spell `AXHelper.windowID(` and pins the
+  `focusWindow` stamp, which no behavior suite can see.
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **Every `.windowFocused` the loop emits comes from the app
