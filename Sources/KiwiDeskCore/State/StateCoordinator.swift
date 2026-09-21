@@ -37,6 +37,12 @@ public struct StateCoordinator: Sendable {
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
 
+    /// The departed windows whose departure was a CLOSE (#1414):
+    /// written by `rememberClosedDeparture` from the gone
+    /// handler's own classification, consumed by the create fold,
+    /// which grants such a return the focus a new window gets.
+    var closedDepartures: [WindowID: Date] = [:]
+
     /// The snapshot frame of a restored window not yet tracked
     /// (#1362), beside its `.restored` Space above — the arrival
     /// fold consumes it once, since a later return is not the
@@ -121,6 +127,9 @@ public struct StateCoordinator: Sendable {
         workspaces.rekey(old, to: new)
         if let space = rememberedSpaces.removeValue(forKey: old) {
             rememberedSpaces[new] = space
+        }
+        if let closed = closedDepartures.removeValue(forKey: old) {
+            closedDepartures[new] = closed
         }
         if let frame = restoredFrames.removeValue(forKey: old) {
             restoredFrames[new] = frame

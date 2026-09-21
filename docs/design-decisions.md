@@ -1918,26 +1918,36 @@ how it is reached. It is wider than the arm by the mode on
 purpose: the command is the right raise on any shown Space, so
 an arm that widens later is covered already.
 
-The door owes a CLOSED own window the same command (#1380). An
-`NSWindow` keeps its number across a close and a re-show, so the
-Settings window a user closed and reopened comes back to Core as
-a RETURN — `rememberedSpaces` still names its Space — and a
-returning window never steals the focus that stands (#636): the
-fold sets no intent, and the report reaches the predicate
-clickless inside the placement window of the arrival's own
-retile, which in the active scrolling Space is the whole
-verdict. Refusing the untracked number, as the door first did,
-left that report with nothing on it a foreign one would lack. So
-the door records the number as a debt — the third
-`FollowFocusIntent` instance beside the follow's (#1007) and the
-return's (#1207) — drained on the same `.windowCreated` arm and
-paid with the same focus command the tracked arm issues once the
-arrival has given the window an id, judged there on the Space it
-landed in, the one thing the door could not read, and stood down
-where the fold or a sibling debt already set the focus. Only a
-scrolling Space shows the defect: anywhere else the bounce needs
-an origin the window refused, which a compliant own window never
-gives.
+:::unreleased
+**A window returning from a close takes the focus at its
+arrival (#1414).** An `NSWindow` keeps its number across a close
+and a re-show, so a window the user closed and reopened comes
+back to Core as a RETURN — `rememberedSpaces` still names its
+Space — and a returning window never steals the focus that
+stands (#636): the fold set no intent, and the report reached
+the predicate clickless inside the placement window of the
+arrival's own retile, which in the active scrolling Space is the
+whole verdict. #1380 first closed that for KiwiDesk's own
+Settings window with a debt the door recorded and the arrival
+paid; measured 2026-09-21 with Telegram's main window (3 of 3
+bounced in scrolling, 0 in bsp), the class is every app whose
+close hides the window, and a third-party window has no door to
+be told through. So the provenance moves to where it is known:
+the gone handler already classifies a close apart from a Desktop
+departure and a hide, it marks the departure, and the fold reads
+the mark at the return and grants the window the focus a new
+window gets — in the active Space only, the mark consumed on
+every arrival, taken or not. The report then lands intended,
+which the predicate never reads: no exemption in it, the
+provenance the report was owed. #636's rule stands for a Desktop
+return, whose windows come back as a burst in arbitrary order
+and where only the remembered focus is macOS's (#1345), and
+#913's for a hide, whose windows come back the same way. The
+#1380 debt is retired by this — the fold grants what it paid.
+The accepted trade: an app that re-shows a closed window on its
+own, with no user act behind it, takes the focus once.
+(`ClosedReturnFocusTests`, `ClosedReturnSeamTests`)
+:::
 
 State stays on the intended window and it is re-asserted with a
 direct, unstamped raise — the #465 sibling-distrust shape. The

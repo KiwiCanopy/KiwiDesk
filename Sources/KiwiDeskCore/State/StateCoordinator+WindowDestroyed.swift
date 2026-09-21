@@ -14,6 +14,7 @@ extension StateCoordinator {
         var handedTo: WindowID?
         if wasMinimized {
             rememberedSpaces[id] = nil
+            closedDepartures[id] = nil
             rememberMinimized(id)
         } else if let space = workspaces.space(of: id) {
             rememberedSpaces[id] = .departed(space)
