@@ -12,7 +12,9 @@ struct HomeCardBarsTile: View {
     var scale: CGFloat = 1
     /// Space identifiers for panel scale rendering — Core's own
     /// verdict per Space (#1538); the tint flag is not modelled,
-    /// a schematic dims nothing.
+    /// a schematic dims nothing. Nor are the bar margins or the
+    /// outer gap (#1516): a few points draw as nothing at this
+    /// scale, so the strips sit flush by construction.
     var spaceLabels: [SpaceGlyph] = []
     @Environment(\.schematicPalette) private var palette
 

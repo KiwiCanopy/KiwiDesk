@@ -113,7 +113,8 @@ struct SpaceBarGeometryTests {
         let appStrip = AppBarGeometry.barFrame(
             in: remaining,
             edge: .top,
-            thickness: appStyle.thickness
+            thickness: appStyle.thickness,
+            outer: 0
         )
         #expect(spaceStrip.maxY == appStrip.minY)
         #expect(!spaceStrip.intersects(appStrip))
@@ -140,7 +141,8 @@ struct SpaceBarGeometryTests {
         let appStrip = AppBarGeometry.barFrame(
             in: remaining,
             edge: .bottom,
-            thickness: 32
+            thickness: 32,
+            outer: 0
         )
         #expect(!spaceStrip.intersects(appStrip))
         #expect(appStrip.minX == spaceStrip.maxX)

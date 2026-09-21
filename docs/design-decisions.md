@@ -10294,11 +10294,15 @@ set" would keep both old rules alive), a single "distance to
 border" (leaves the window side differing per bar), and a 1 pt
 inner default (invisible on top of 10; the value means
 "extra"). The one visible change at update is accepted and
-release-noted: the App Bar moves from inside the outer gap to
-flush with the screen edge — 10 pt at the defaults, the windows
-staying put since outer and inner default alike — and a user
-who wants the old look sets the App Bar's outer margin to the
-outer gap. The Bars preview does not model the margins: at a
+owed a line in the release's Highlights: on the App Bar's edge
+the bar moves from inside the outer gap to flush with the
+screen edge and the tiled windows follow it by the same
+distance — 10 pt at the defaults, the window side now being the
+outer gap alone where it was the outer gap plus the inner — and
+the strip spans the whole edge rather than stopping at the side
+gaps. A user who wants the old look sets the App Bar's outer
+margin to the outer gap, which restores both. The Bars preview
+does not model the margins: at a
 thumbnail's scale a few points draw as nothing, and a caption
 that names a fact the frame does not draw is the schematic
 rule's own defect (`LayoutSchematicCaptionTests`).

@@ -2443,8 +2443,9 @@ accent).
 
 The bar is **layout-independent** and reserves real screen area
 on its edge before any layout runs. It may share an edge with
-the App Bar: the Space Bar always sits at the screen edge, the
-App Bar next to the windows, and the insets add. All settings
+the App Bar: the Space Bar is carved first, on the screen side,
+the App Bar inside it on the window side, and the two
+reservations add. All settings
 are global — there are no per-layout overrides. While a
 native-fullscreen app holds the screen the bar hides; it
 returns with the Desktop.

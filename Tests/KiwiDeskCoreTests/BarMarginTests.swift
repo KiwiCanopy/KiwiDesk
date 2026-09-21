@@ -92,7 +92,12 @@ struct BarMarginTests {
         let context = context(
             bounds: visible,
             gaps: Gaps(
-                outer: Gaps.Outer(),
+                outer: Gaps.Outer(
+                    top: 10,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
+                ),
                 inner: Gaps.Inner(horizontal: 6, vertical: 6)
             ),
             edge: .bottom
@@ -107,7 +112,8 @@ struct BarMarginTests {
         #expect(strip.minX == visible.minX)
         #expect(strip.width == visible.width)
         let area = context.scrolling.windowFrame(
-            in: context.usable,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         // Window side: thickness, then the 10 pt OUTER gap —
@@ -133,7 +139,8 @@ struct BarMarginTests {
         #expect(strip.maxY == visible.maxY - 5)
         #expect(strip.height == 32)
         let area = context.scrolling.windowFrame(
-            in: context.usable,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         #expect(area.maxY == visible.maxY - 5 - 32 - 7 - 10)
@@ -180,7 +187,8 @@ struct BarMarginTests {
         #expect(spaceStrip.minY == visible.minY + 2)
         #expect(appStrip.minY == spaceStrip.maxY + 3 + 4)
         let area = context.scrolling.windowFrame(
-            in: context.usable,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         #expect(area.minY == appStrip.maxY + 5 + 10)

@@ -85,7 +85,8 @@ extension KiwiCore {
             } ?? 0
         )
         let drawn = context.scrolling.windowFrame(
-            in: context.usable,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         // The current size joins the ceiling only for a POINTS

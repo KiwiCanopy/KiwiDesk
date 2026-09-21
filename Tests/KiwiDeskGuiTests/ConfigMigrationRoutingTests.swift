@@ -288,7 +288,7 @@ struct ConfigMigrationRoutingTests {
             "Layouts/AppBarStyle+Coding.swift",
             // ...and a layout's override, one level down, which
             // is why the walk rewrites by key at any depth.
-            "Layouts/LayoutAppBar.swift",
+            "Layouts/LayoutAppBar+Coding.swift",
             // NOT a CodingKey: `AppBarCommandSetting.content` is
             // the `app_bar.set_content` verb, an in-memory
             // command payload. It is never serialized as a key,

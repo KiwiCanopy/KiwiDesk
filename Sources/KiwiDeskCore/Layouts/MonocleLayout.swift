@@ -12,7 +12,8 @@ public struct MonocleLayout: LayoutSystem {
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
         let frame = context.monocle.windowFrame(
-            in: context.usable,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         // Center size-bound window in slot (#677).
@@ -69,39 +70,23 @@ public struct MonocleLayout: LayoutSystem {
         } ?? members.first
     }
 
-    /// Computes park anchor bounds accounting for bar insets (#293, #881).
+    /// Park anchor bounds: the layout bounds clear of the PAINTED
+    /// bar strip (#293, #881) — the one `regionClear` carve the
+    /// float region takes, since the park places no window.
     private func parkBounds(
         in context: LayoutContext
     ) -> CGRect {
-        var bounds = context.bounds
         guard
             let strip = context.monocle.barFrame(
                 in: context.bounds,
                 global: context.appBarStyle
             )
-        else { return bounds }
-        switch context.monocle
-            .resolvedBar(global: context.appBarStyle).edge
-        {
-        case .top:
-            let cut = strip.maxY - bounds.minY
-            bounds.origin.y += cut
-            bounds.size.height = max(bounds.height - cut, 0)
-        case .bottom:
-            bounds.size.height = max(
-                strip.minY - bounds.minY,
-                0
-            )
-        case .left:
-            let cut = strip.maxX - bounds.minX
-            bounds.origin.x += cut
-            bounds.size.width = max(bounds.width - cut, 0)
-        case .right:
-            bounds.size.width = max(
-                strip.minX - bounds.minX,
-                0
-            )
-        }
-        return bounds
+        else { return context.bounds }
+        return AppBarGeometry.regionClear(
+            context.bounds,
+            of: strip,
+            edge: context.monocle
+                .resolvedBar(global: context.appBarStyle).edge
+        )
     }
 }

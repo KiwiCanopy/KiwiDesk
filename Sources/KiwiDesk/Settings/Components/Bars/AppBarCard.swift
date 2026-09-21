@@ -194,8 +194,8 @@ struct AppBarCard: View {
     private var styleSummary: String {
         L(
             "bars.style.app_bar.summary",
-            "Background, content, indicator, sizes, symbol "
-                + "style"
+            "Background, content, indicator, sizes, margins, "
+                + "symbol style"
         )
     }
 

@@ -187,8 +187,9 @@ extension SpaceBarCard {
                 range: BarSliderBands.margin,
                 help: L(
                     "space_bar.inner_margin.help",
-                    "Extra room on the window side, added to the "
-                        + "windows' outer gap."
+                    "Extra room on the side facing the windows, on "
+                        + "top of whatever gap already sits there; "
+                        + "0 lets that gap govern."
                 )
             )
             .searchAnchored(

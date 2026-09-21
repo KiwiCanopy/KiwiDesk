@@ -16,7 +16,8 @@ public struct AppBarStyle: Sendable, Equatable {
     public var outerMargin: CGFloat = 0
     /// Extra room on the window side (pt), ADDED to the windows'
     /// outer gap, which alone keeps the focus ring's clearance —
-    /// so 0 needs no floor (#1516).
+    /// so 0 needs no floor. A reservation like the gap: floats
+    /// ignore it and clear the painted strip alone (#1516).
     public var innerMargin: CGFloat = 0
     /// Background plate style (plain by default, #660).
     public var backgroundStyle: BackgroundStyle = .plain

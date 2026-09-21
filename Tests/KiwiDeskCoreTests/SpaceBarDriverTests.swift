@@ -314,7 +314,8 @@ struct CombinedClampTests {
         let appStrip = AppBarGeometry.barFrame(
             in: remaining,
             edge: .top,
-            thickness: 32
+            thickness: 32,
+            outer: 0
         )
         let float = CGRect(x: 10, y: 5, width: 400, height: 300)
         var clamped = AppBarGeometry.clampClear(

@@ -204,7 +204,8 @@ extension TilingSettings {
         let gaps = space.map(gaps(for:)) ?? gapsGlobal
         let params = space.map(resolvedScrolling(for:)) ?? scrolling
         let area = params.windowFrame(
-            in: LayoutContext.usable(bounds, outer: gaps.outer),
+            in: bounds,
+            outer: gaps.outer,
             global: appBarStyle
         )
         let horizontal = params.axisIsHorizontal

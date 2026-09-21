@@ -15,14 +15,14 @@ public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
 /// Computes bar strips and window bounds for layouts hosting a bar.
 public enum AppBarGeometry {
     /// The strip the bar occupies in AX coordinates, `outer`
-    /// points in from its edge (#1516).
+    /// points in from its edge (#1516) — every caller chooses,
+    /// the floor being the style's (`AppBarStyle.minMargin`).
     public static func barFrame(
         in bounds: CGRect,
         edge: AppBarEdge,
         thickness: CGFloat,
-        outer: CGFloat = 0
+        outer: CGFloat
     ) -> CGRect {
-        let outer = max(0, outer)
         switch edge {
         case .top, .bottom:
             let depth = max(0, min(thickness, bounds.height - outer))
@@ -113,11 +113,13 @@ public enum AppBarGeometry {
     }
 
     /// Carves `strip` from `region` for float bounding (#1091).
-    /// Its sibling is `windowFrame(in:minus:edge:inner:)`, NOT
-    /// `clampClear` (architect review 2026-08-29): a new caller
-    /// takes `windowFrame` if the layout is placing the window and
-    /// this if it is not. Monotonic, and never a negative extent —
-    /// an inside-out rect reads as enormous free space.
+    /// Its sibling is `AppBarHosting.windowFrame(in:outer:global:)`
+    /// over `remaining(_:edge:reserving:)`, NOT `clampClear`
+    /// (architect review 2026-08-29): a new caller takes
+    /// `windowFrame` if the layout is placing the window and this
+    /// if it is not — the monocle park takes this. Monotonic, and
+    /// never a negative extent — an inside-out rect reads as
+    /// enormous free space.
     public static func regionClear(
         _ region: CGRect,
         of strip: CGRect,
@@ -182,14 +184,18 @@ extension AppBarHosting {
         )
     }
 
-    /// Window area: `usable` (the outer-gap-inset bounds) minus
-    /// the bar's reservation — outer margin, strip and inner
-    /// margin. The outer gap stays the windows' own, so the bar's
-    /// window side is `innerMargin` PLUS that gap (#1516).
+    /// Window area: the same `bounds` `barFrame` takes, less the
+    /// windows' outer gap and the bar's reservation — outer
+    /// margin, strip and inner margin. Both doors read one rect
+    /// so no caller can hand one the other's; the outer gap
+    /// stays the windows' own, so the bar's window side is
+    /// `innerMargin` PLUS that gap (#1516).
     public func windowFrame(
-        in usable: CGRect,
+        in bounds: CGRect,
+        outer: Gaps.Outer,
         global: AppBarStyle
     ) -> CGRect {
+        let usable = LayoutContext.usable(bounds, outer: outer)
         guard appBar.enabled else { return usable }
         let style = resolvedBar(global: global)
         return AppBarGeometry.remaining(
