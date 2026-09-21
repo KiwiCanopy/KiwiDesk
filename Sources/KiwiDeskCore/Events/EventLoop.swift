@@ -185,10 +185,12 @@ public final class EventLoop {
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
-    /// When KiwiDesk last COMMANDED a focus (`KiwiCore.focusWindow`
-    /// writes it; `NotificationArmNeedleTests` pins the write). A
-    /// focus report received before it and delivered after it is
-    /// stale — the command's own echo follows (#1088).
+    /// When KiwiDesk last COMMANDED a focus onto another window
+    /// (`KiwiCore.focusWindow` writes it; `NotificationArmNeedleTests`
+    /// pins the write). A focus report received before it and
+    /// delivered after it is stale — the command's own echo
+    /// follows (#1088). The report-reacting re-asserts write no
+    /// stamp by ruling (input-and-animation.md).
     var lastCommandedFocus: ContinuousClock.Instant?
     public internal(set) var isRunning = false
 

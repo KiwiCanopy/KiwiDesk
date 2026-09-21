@@ -306,8 +306,22 @@ editing here:
   read used to serialize the notification ahead of the next
   hotkey and a stale report landing after `focusWindow` dropped
   the scrolling raise and a Monocle flip's owed focus —
-  `focusWindow` stamps `EventLoop.lastCommandedFocus`, and a new
-  door that moves state focus without it stamps too. The #160
+  `focusWindow` stamps `EventLoop.lastCommandedFocus` for a
+  command onto ANOTHER window, after the #1345 refusal, so the
+  z-order closing re-asserts (same target) and a refused command
+  supersede nothing. The report-reacting re-asserts
+  (`+PlacementBounce`, `+AccessibilityReturn`,
+  `+MenuBarRevealReturn`, `+FocusEvents`' sibling arm) write no
+  stamp BY RULING: each runs inside `handleWindowFocused`,
+  restores the focus the report displaced and is bounded by its
+  own door, so a stale report meets the arm it would have met
+  anyway; a NEW door that moves state focus onto another window
+  outside a report stamps, or argues here why not. Priced
+  residue: the create fold's spawn focus stamps nothing, so an
+  older same-app report landing after ⌘N is corrected by the
+  new window's own queued report one read later — in scrolling
+  a double pan; stamp at the fold's consumer if a device sitting
+  shows it. The #160
   float recheck rides the title delivery, pinned by
   `NotificationArmNeedleTests` because its next read is a
   direct AX call no fixture can answer; that suite also holds

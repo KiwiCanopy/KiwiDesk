@@ -165,6 +165,22 @@ struct FocusArmDeliveryTests {
         )
     }
 
+    /// The z-order closing re-asserts call `focusWindow` on the
+    /// UNCHANGED focus; a click landing inside that flight must
+    /// win, as it did when the report landed synchronously.
+    /// The predicate is `focusWindow`'s, pinned by
+    /// `NotificationArmNeedleTests`; here the loop side.
+    @Test("A same-target command leaves an older report standing")
+    func sameTargetCommandLeavesTheReportStanding() {
+        let (loop, box) = makeLoop()
+        report(loop)
+        // No stamp is written for a same-target command; the
+        // loop-side contract is that ONLY a stamp drops.
+        #expect(loop.lastCommandedFocus == nil)
+        box.drainOne()
+        #expect(box.focused == [id])
+    }
+
     @Test("A command before the report leaves it standing")
     func commandBeforeReceiptStillDelivers() {
         let (loop, box) = makeLoop()

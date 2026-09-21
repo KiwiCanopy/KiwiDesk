@@ -28,10 +28,13 @@ import Testing
 /// added to one of those files reds too.
 ///
 /// The commanded-focus stamp: `deliverFocusReport` drops a
-/// report older than `lastCommandedFocus`, which only
+/// report older than `lastCommandedFocus`, which
 /// `KiwiCore.focusWindow` writes — a deleted write leaves the
 /// drop dead with `FocusArmDeliveryTests` green, since that
-/// suite sets the stamp by hand.
+/// suite sets the stamp by hand. Position is pinned too: ahead
+/// of the #1345 refusal the stamp would fire on a REFUSED
+/// command, and without the same-target predicate on the
+/// z-order closing re-asserts, dropping a click in flight.
 @Suite("Notification arm needles (#1088)")
 struct NotificationArmNeedleTests {
     private static let idRead = "AXHelper.windowID("
@@ -66,11 +69,18 @@ struct NotificationArmNeedleTests {
         source.components(separatedBy: needle).count - 1
     }
 
+    /// Every Swift file under `Events/`, subdirectories included,
+    /// so an arm homed one level down is scanned too.
     private static func eventsFiles() throws -> [URL] {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDeskCore/Events")
-        return try FileManager.default
-            .contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
+        let walker = try #require(
+            FileManager.default.enumerator(
+                at: root,
+                includingPropertiesForKeys: nil
+            )
+        )
+        return walker.compactMap { $0 as? URL }
             .filter { $0.pathExtension == "swift" }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
@@ -144,7 +154,23 @@ struct NotificationArmNeedleTests {
             under: "Commands"
         )
         try #require(!body.isEmpty)
-        #expect(body.contains("eventLoop.lastCommandedFocus = .now"))
+        let refusal = try #require(
+            body.range(of: "raiseCrossesDesktops(id)")
+        )
+        let predicate = try #require(
+            body.range(of: "if activeSpace?.focused != id {")
+        )
+        let stamp = try #require(
+            body.range(of: "eventLoop.lastCommandedFocus = .now")
+        )
+        #expect(refusal.lowerBound < predicate.lowerBound)
+        #expect(predicate.lowerBound < stamp.lowerBound)
+        #expect(
+            body.distance(
+                from: predicate.upperBound,
+                to: stamp.lowerBound
+            ) < 20
+        )
         let delivery = try SourceScan.functionBody(
             of: "deliverFocusReport",
             in: "EventLoop+FocusReport.swift",
