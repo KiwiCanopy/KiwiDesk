@@ -14,13 +14,16 @@ extension SourceScan {
     struct Frame {
         let key: String
         let labels: [String]
-        /// Top-level arguments after the key and the English —
-        /// i.e. how many specifiers the frame must carry. NOT
-        /// `labels.count`: a ternary picks between two labels
-        /// for ONE slot, which `layout.schematic.grid.ax` does,
-        /// and counting keys reported it as a defect on this
-        /// suite's first derived run.
-        let slots: Int
+        /// Top-level arguments after the key and the English
+        /// that carry a LABEL — a nested `L(` or a destination
+        /// title — i.e. how many `%N$@` the frame must carry
+        /// (#1117). Neither of the two neighbouring counts: not
+        /// `labels.count`, since a ternary picks between two
+        /// labels for ONE slot (`layout.schematic.grid.ax`), and
+        /// not every argument, since a count rides `%N$d` and a
+        /// frame passing a label beside two counts is correct
+        /// with one `%N$@`.
+        let labelSlots: Int
         let file: String
     }
 
@@ -86,7 +89,10 @@ extension SourceScan {
                         Frame(
                             key: keys[0],
                             labels: Array(keys.dropFirst()),
-                            slots: slotCount(in: body),
+                            labelSlots: labelSlotCount(
+                                in: body,
+                                destinations: destinations
+                            ),
                             file: file.lastPathComponent
                         )
                     )
@@ -110,77 +116,6 @@ extension SourceScan {
     ) -> Bool {
         guard index > 0 else { return true }
         return !isIdentifier(text[index - 1], orDot: true)
-    }
-
-    /// `SettingsDestination.<case>.title` → the key that case
-    /// returns, parsed from the one file that owns the switch.
-    ///
-    /// A destination title is the label five-plus frames name,
-    /// and it is reached through a property rather than an
-    /// inline `L(` precisely so the English is authored once.
-    /// Without this, every one of those frames is invisible to
-    /// the scan and gets no floor — and the alternative,
-    /// reshaping the call sites to inline `L(`, would paste the
-    /// same English at five sites to please a test. So the scan
-    /// learns the one accessor shape it can resolve from source.
-    ///
-    /// The case name is NOT derivable from the key
-    /// (`.layoutDefaults` returns `destination.layout`), so the
-    /// pairing is read out of the switch rather than guessed.
-    static func destinationTitleKeys() throws
-        -> [String: String]
-    {
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf: SourceScan.repoRoot(from: #filePath)
-                    .appendingPathComponent("Sources")
-                    .appendingPathComponent("KiwiDesk")
-                    .appendingPathComponent("Settings")
-                    .appendingPathComponent(
-                        "SettingsDestination.swift"
-                    ),
-                encoding: .utf8
-            )
-        )
-        // Scanned over the WHOLE source, not line by line: a
-        // case's `L(` and its key literal need not share a line,
-        // and `.advancedColors` is exactly that shape. The
-        // line-scoped first cut missed it, silently — the frame
-        // naming that destination simply went undiscovered and
-        // lost its floor, which is how a fail-open parser hurts.
-        var pairs: [String: String] = [:]
-        var pending: String?
-        var index = source.startIndex
-        while index < source.endIndex {
-            let rest = source[index...]
-            if rest.hasPrefix("case ."),
-                let colon = rest.firstIndex(of: ":")
-            {
-                let name = rest[
-                    rest.index(rest.startIndex, offsetBy: 6)..<colon
-                ]
-                if name.allSatisfy({ $0.isLetter || $0.isNumber }) {
-                    pending = String(name)
-                }
-            }
-            if let name = pending, rest.hasPrefix("L(") {
-                if let open = rest.firstIndex(of: "\""),
-                    let close = rest[
-                        rest.index(after: open)...
-                    ].firstIndex(of: "\"")
-                {
-                    let key = String(
-                        rest[rest.index(after: open)..<close]
-                    )
-                    if key.hasPrefix("destination.") {
-                        pairs[name] = key
-                        pending = nil
-                    }
-                }
-            }
-            index = source.index(after: index)
-        }
-        return pairs
     }
 
     /// The `L(` key literal of the body and of each nested `L(`,
@@ -257,31 +192,79 @@ extension SourceScan {
         return (key, cursor + suffix.count)
     }
 
-    /// Arguments after the key and the English literal, counted
-    /// by top-level commas so a ternary, a nested call or a
-    /// `+`-concatenated English all read as one argument each.
-    private static func slotCount(in body: String) -> Int {
+    /// The arguments after the key and the English that pass a
+    /// label. Split at top-level commas so a ternary, a nested
+    /// call or a `+`-concatenated English read as one argument
+    /// each; an argument counts when it contains a nested `L(`
+    /// or a `SettingsDestination.<case>.title` — the two shapes
+    /// `keyLiterals` reads labels from, so the two derivations
+    /// cannot disagree about what a label is.
+    private static func labelSlotCount(
+        in body: String,
+        destinations: [String: String]
+    ) -> Int {
         let text = Array(body)
         var depth = 0
-        var commas = 0
+        var arguments: [[Character]] = [[]]
         var index = 0
         while index < text.count {
             if text[index] == "\"",
                 let literal = literal(text, from: index)
             {
+                arguments[arguments.count - 1]
+                    .append(contentsOf: text[index..<literal.end])
                 index = literal.end
                 continue
             }
             switch text[index] {
             case "(", "[", "{": depth += 1
             case ")", "]", "}": depth -= 1
-            case "," where depth == 0: commas += 1
+            case "," where depth == 0:
+                arguments.append([])
+                index += 1
+                continue
             default: break
+            }
+            arguments[arguments.count - 1].append(text[index])
+            index += 1
+        }
+        // key, English, then the interpolated arguments.
+        return arguments.dropFirst(2).filter {
+            carriesLabel($0, destinations: destinations)
+        }.count
+    }
+
+    /// Whether one argument passes a label, by the same two
+    /// shapes `keyLiterals` collects. Literals are skipped so an
+    /// English `"L("` inside one cannot count.
+    private static func carriesLabel(
+        _ argument: [Character],
+        destinations: [String: String]
+    ) -> Bool {
+        var index = 0
+        while index < argument.count {
+            if argument[index] == "\"",
+                let literal = literal(argument, from: index)
+            {
+                index = literal.end
+                continue
+            }
+            if argument[index] == "L", index + 1 < argument.count,
+                argument[index + 1] == "(",
+                isCallStart(argument, at: index)
+            {
+                return true
+            }
+            if destinationTitle(
+                argument,
+                at: index,
+                destinations: destinations
+            ) != nil {
+                return true
             }
             index += 1
         }
-        // key, English, then one argument per remaining comma.
-        return max(0, commas - 1)
+        return false
     }
 
     /// Plain-quote walk: knows neither `"""` nor `#"…"#`, and is

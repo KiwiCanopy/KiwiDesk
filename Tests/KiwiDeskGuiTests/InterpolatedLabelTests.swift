@@ -131,11 +131,21 @@ struct InterpolatedLabelTests {
         }
     }
 
-    /// The frame carries a positional specifier for each
-    /// argument it passes, the labels it names included.
-    /// Reverting a label to literal text drops a specifier and
-    /// reds here. One distinct positional specifier, `@` or `d`,
-    /// per argument.
+    /// The frame carries a `%N$@` for each LABEL argument it
+    /// passes. A label whose specifier the English forgot reds
+    /// here; so does a label reverted to literal text while its
+    /// argument stays.
+    ///
+    /// Labels, not every argument (#1117): a count rides `%N$d`,
+    /// and a frame passing a label beside two counts is correct
+    /// with one `%N$@`. The first cut counted every argument
+    /// against `%N$@` alone and redded on that frame, and the
+    /// #1437 lane took the tempting one-line fix — accept `%N$d`
+    /// too — which guts the guard: revert the label to text and
+    /// the counts' specifiers still satisfy the floor. So the
+    /// count is of label-bearing ARGUMENTS and the specifier
+    /// counted is `%N$@` alone, `>=` because a link slot or a
+    /// name is a `%N$@` that is not a label.
     @Test("each named label has a specifier to land in")
     func labelsHaveSpecifiers() throws {
         let en = try Self.english()
@@ -143,16 +153,14 @@ struct InterpolatedLabelTests {
             guard let value = en[frame.key] else { continue }
             let found = (1...9).filter {
                 value.contains("%\($0)$@")
-                    || value.contains("%\($0)$d")
             }
             #expect(
-                found.count >= frame.slots,
+                found.count >= frame.labelSlots,
                 """
-                \(frame.key) passes \(frame.slots) interpolated \
-                argument(s) but carries \(found.count) \
-                positional specifier(s) — a label re-typed as \
-                literal text is a mirror no locale can keep in \
-                step.
+                \(frame.key) passes \(frame.labelSlots) control \
+                label(s) but carries \(found.count) `%N$@` — a \
+                label re-typed as literal text is a mirror no \
+                locale can keep in step.
                 """
             )
         }
