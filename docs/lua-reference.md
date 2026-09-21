@@ -3126,10 +3126,19 @@ border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
 Resizing a tiled window with the mouse adjusts the layout the same
 way the `resize` command does, applied when you release: neighbors
 give or take the difference. What changes depends on the layout —
-Master/Stack maps width changes to the master ratio, BSP steers its
-split ratio toward the dragged side, Scrolling adjusts the column
-width. Axes a layout has no parameter for (stack heights, grid,
-monocle) animate back into place. Floating windows resize freely.
+Master/Stack maps a drag along the split to the master ratio and a
+drag along the zone's own axis to the dragged window's share of
+its zone, BSP steers its split ratio toward the dragged side,
+Scrolling adjusts the column width. Axes a layout has no parameter
+for (a side-by-side master's height, grid, monocle) animate back
+into place. Floating windows resize freely.
+
+:::unreleased
+On the current release the stack zone's own axis animates back
+too — a stack window's height beside a left or right stack, its
+width beside a top or bottom one — and only `resize` moves that
+share.
+:::
 
 Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and

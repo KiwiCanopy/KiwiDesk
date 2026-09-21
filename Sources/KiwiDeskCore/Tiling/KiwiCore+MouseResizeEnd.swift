@@ -221,6 +221,23 @@ extension KiwiCore {
                 space: space,
                 bounds: bounds
             )
+        case .stackWeight(let delta):
+            // The zone's own axis is the cross axis of the split
+            // (#222); whether the dragged window's zone divides
+            // on it — a master zone lined up along the split does
+            // not — is the writer's verdict, cued there (#941).
+            guard let window else { break }
+            let stack = tiler.settings.resolvedStack(for: space)
+            let splitH = stack.stackPosition.splitsHorizontally
+            let weightAxis = splitH ? "y" : "x"
+            let span = Double(splitH ? bounds.height : bounds.width)
+            resizeStackMember(
+                window,
+                axis: weightAxis,
+                delta: Double(delta),
+                span: span,
+                space: space
+            )
         case .trackAcross(let delta):
             guard let window else { break }
             let track = tiler.settings.resolvedTrack(for: space.id)

@@ -55,7 +55,48 @@ extension KiwiCore {
             )
             return .ok()
         }
-        guard let focused = space.focused,
+        guard let focused = space.focused else {
+            return .fail("no focused tiled window")
+        }
+        return resizeStackMember(
+            focused,
+            axis: axis,
+            delta: delta,
+            span: span,
+            space: space
+        )
+    }
+
+    /// The per-window weight write of a stack resize on the
+    /// zone's own axis, for the window a gesture is ABOUT: the
+    /// keyboard verb hands `space.focused`, the mouse drop the
+    /// dragged window (#941), and a refusal names the one that
+    /// cannot move (#435).
+    @discardableResult
+    func resizeStackMember(
+        _ focused: WindowID,
+        axis: String,
+        delta: Double,
+        span: Double,
+        space: Space
+    ) -> CommandResponse {
+        let stack = tiler.settings.resolvedStack(for: space)
+        let tiled = state.effectiveTiledMembers(of: space)
+        let splitAxis =
+            stack.stackPosition.splitsHorizontally ? "x" : "y"
+        // The share write keys per-window state by id: a
+        // tiled-sticky traveler (#414 v2) is not in
+        // `space.windows`, so an entry under its id could never
+        // be pruned (orphan; recycled-id hazard, #308). The mouse
+        // path hands the DRAGGED window, which can be a traveler;
+        // the keyboard path's `space.focused` cannot.
+        guard space.windows.contains(focused) else {
+            return .fail(
+                "the focused window is visiting from "
+                    + "another Space"
+            )
+        }
+        guard
             let column = StackLayout.column(
                 containing: focused,
                 in: tiled,
