@@ -1967,7 +1967,8 @@ landing before the topology flips — now cost, on top of the
 close-return raise, a focus grant at the Desktop return and the
 window's re-placement as a newcomer where the user is, its slot
 in the Space it left given up, priced at the same rarity.
-(`ClosedReturnFocusTests`, `ClosedReturnSeamTests`)
+(`ClosedReturnFocusTests`, `ClosedReturnPlacementTests`,
+`ClosedReturnSeamTests`)
 :::
 
 State stays on the intended window and it is re-asserted with a

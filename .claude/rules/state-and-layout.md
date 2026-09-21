@@ -318,7 +318,7 @@ editing here:
   on EVERY arrival, drops the departed memory and the slot record
   and takes the new-window path: the app rule, else the active
   Space, the focus a new window gets there, its old slot and
-  break given up (`ClosedReturnFocusTests` ▸
+  break given up (`ClosedReturnPlacementTests` ▸
   `closedReturnLandsWhereYouAre`, `closedReturnFollowsTheAppRule`,
   `closedReturnGivesUpItsSlot`); the departed memory and the
   slot record are read at a return only where no mark was filed
