@@ -37,11 +37,13 @@ public struct StateCoordinator: Sendable {
     /// Last known space per window for native-Space restores.
     var rememberedSpaces: [WindowID: SpaceMemory] = [:]
 
-    /// The departed windows whose departure was a CLOSE (#1414):
-    /// written by `rememberClosedDeparture` from the gone
+    /// The departed windows whose departure was a CLOSE (#1414,
+    /// #1561): written by `rememberClosedDeparture` from the gone
     /// handler's own classification, consumed by the create fold,
-    /// which grants such a return the focus a new window gets. A
-    /// set, not a clock: its lifetime is `rememberedSpaces`'s.
+    /// which drops the departed memory, the slot record and any
+    /// restore filed over them and places the window as NEW — its
+    /// app rule, else the active Space, with a new window's focus.
+    /// A set, not a clock: its lifetime is `rememberedSpaces`'s.
     var closedDepartures: Set<WindowID> = []
 
     /// The snapshot frame of a restored window not yet tracked

@@ -320,10 +320,11 @@ editing here:
   Space, the focus a new window gets there, its old slot and
   break given up (`ClosedReturnFocusTests` ▸
   `closedReturnLandsWhereYouAre`, `closedReturnFollowsTheAppRule`,
-  `closedReturnGivesUpItsSlot`); a placement of a return that
-  reads the departed memory or the slot record is a Desktop
-  return's alone. The mark rides the re-key with the departed
-  memory
+  `closedReturnGivesUpItsSlot`); the departed memory and the
+  slot record are read at a return only where no mark was filed
+  — a Desktop `vanished`, a hide — and a placement path that
+  reads them for a marked return re-opens #1561. The mark rides
+  the re-key with the departed memory
   (`ClosedReturnFocusTests` ▸ `markFollowsRekey`, and
   `WindowRekeyParityTests`' count) and a path retiring that
   memory retires the mark beside it; and the report

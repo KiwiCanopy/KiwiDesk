@@ -1943,23 +1943,30 @@ window gets, the mark consumed on every arrival. That placement
 is the owner's ruling (#1561): a window you bring back is wanted
 where you are, so you can move it somewhere else if you want,
 and a window manager opens windows where you are rather than
-sending them back to where they once were; it also ends the
+sending them back to where they once were — on two screens,
+"where you are" is the active Space, so a window closed on the
+other screen and re-shown there lands as a new window would and
+the retile carries it across (#1010's screen-home reads the
+memory the mark dropped); it also ends the
 asymmetry with a minimize, whose restore already landed as new.
 The report then lands intended, which the predicate never reads:
-no exemption in it, the provenance the report was owed. #636's rule stands for a Desktop return, whose
-windows come back as a burst in arbitrary order and where only
-the remembered focus is macOS's (#1345), and #913's for a hide,
-whose windows come back the same way. The #1380 debt is retired
-by this — the fold grants what it paid. Three trades, stated: an
-app that re-shows a closed window on its own, with no user act
-behind it, takes the focus once, where the user is; a closed
-window no longer takes back its slot and track break; and the
-two readings
-`gonePresence` already calls a wrong `closed` it never corrects
-— a host without the compositor read past the switch settle, a
-fast app's destroy landing before the topology flips — now cost
-a focus grant at the Desktop return on top of the close-return
-raise, priced at the same rarity.
+no exemption in it, the provenance the report was owed. #636's
+rule stands for a Desktop return, whose windows come back as a
+burst in arbitrary order and where only the remembered focus is
+macOS's (#1345), and #913's for a hide, whose windows come back
+the same way — both to the Spaces they left, at their slots: the
+OS bringing a burst back, not the user bringing one window back.
+The #1380 debt is retired by this — the fold grants what it
+paid. Three trades, stated: an app that re-shows a closed window
+on its own, with no user act behind it, takes the focus once,
+where the user is; a closed window no longer takes back its slot
+and track break; and the two readings `gonePresence` already
+calls a wrong `closed` it never corrects — a host without the
+compositor read past the switch settle, a fast app's destroy
+landing before the topology flips — now cost, on top of the
+close-return raise, a focus grant at the Desktop return and the
+window's re-placement as a newcomer where the user is, its slot
+in the Space it left given up, priced at the same rarity.
 (`ClosedReturnFocusTests`, `ClosedReturnSeamTests`)
 :::
 
@@ -4547,8 +4554,9 @@ return the first window to re-list took the empty slot: focus
 jumped to first-in-row, and a scrolling layout panned to it, at
 the moment macOS had just restored the window you actually left
 ([#1207](https://github.com/KiwiCanopy/KiwiDesk/issues/1207)).
-A window returning from a CLOSE is the other case: it takes the
-focus itself (the #1414 entry under the placement bounce).
+A window returning from a CLOSE is the other case: it is a new
+window, placed where the user is and taking the focus itself
+(the #1414/#1561 entry under the placement bounce).
 
 The ruling is that the departure is **not** a close and the
 return owes the user the window they left, the way a follow owes

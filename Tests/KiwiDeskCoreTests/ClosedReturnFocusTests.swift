@@ -70,6 +70,31 @@ struct ClosedReturnFocusTests {
         return (core, target, other)
     }
 
+    /// A focused resident of `space`, so a grant there is the
+    /// new-window arm's and not the vacancy arm's.
+    private func seat(_ id: WindowID, in space: SpaceID, on core: KiwiCore) {
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: id,
+                    pid: pid_t(id.raw),
+                    appName: "Resident",
+                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+                )
+            )
+        )
+        if core.state.workspaces.space(of: id) != space {
+            core.state.workspaces.focus(id, in: SpaceID("1"))
+            _ = core.execute(
+                "move_to_space",
+                args: [.string(space.raw)]
+            )
+        }
+        core.state.workspaces.focus(id, in: space)
+        #expect(core.state.workspaces.space(of: id) == space)
+        #expect(core.state.workspaces[space]?.focused == id)
+    }
+
     private func reshown(_ id: WindowID) -> ManagedWindow {
         ManagedWindow(
             id: id,
@@ -173,6 +198,9 @@ struct ClosedReturnFocusTests {
         core.state.workspaces.ensureSpace(elsewhere)
         core.state.workspaces.activate(elsewhere)
         #expect(core.state.workspaces.activeSpace == elsewhere)
+        // A focused resident, so the focus clause proves the
+        // new-window grant and not the vacancy arm (guard-prover).
+        seat(WindowID(5), in: elsewhere, on: core)
         core.handle(.windowCreated(reshown(target)))
         #expect(core.state.workspaces.space(of: target) == elsewhere)
         #expect(core.state.workspaces[elsewhere]?.focused == target)
@@ -190,6 +218,7 @@ struct ClosedReturnFocusTests {
         let ruled = SpaceID("2")
         core.state.workspaces.ensureSpace(ruled)
         core.state.appRules["app.one"] = ruled
+        seat(WindowID(5), in: ruled, on: core)
         core.handle(.windowDestroyed(target, wasMinimized: false))
         core.handle(
             .windowCreated(
@@ -204,6 +233,30 @@ struct ClosedReturnFocusTests {
         )
         #expect(core.state.workspaces.space(of: target) == ruled)
         #expect(core.state.workspaces[ruled]?.focused == target)
+    }
+
+    /// A session restore filed OVER the mark — the window captured,
+    /// closed, then a snapshot adopted before it re-shows — does not
+    /// outrank the close: the re-show still lands as new, and the
+    /// restore's frame is spent with the memory (#1561).
+    @Test("A restore filed after the close does not outrank it")
+    func restoreFiledAfterTheCloseDoesNotOutrank() {
+        let (core, target, _) = makeFixture()
+        core.handle(.windowDestroyed(target, wasMinimized: false))
+        #expect(core.state.closedDepartures.contains(target))
+        let elsewhere = SpaceID("2")
+        core.state.workspaces.ensureSpace(elsewhere)
+        core.state.remember(target, in: elsewhere)
+        core.state.restoredFrames[target] = CGRect(
+            x: 9,
+            y: 9,
+            width: 90,
+            height: 90
+        )
+        core.handle(.windowCreated(reshown(target)))
+        #expect(core.state.workspaces.space(of: target) == SpaceID("1"))
+        #expect(core.activeSpace?.focused == target)
+        #expect(core.state.restoredFrames[target] == nil)
     }
 
     /// The slot and break a departed window would take back

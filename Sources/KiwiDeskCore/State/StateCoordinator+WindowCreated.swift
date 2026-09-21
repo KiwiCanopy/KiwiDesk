@@ -8,21 +8,17 @@ extension StateCoordinator {
     ) {
         // Forget record to test if window was minimized (#40, #673).
         effects.appearedWasMinimized = forgetMinimized(window.id)
-        effects.hadRememberedSpace =
-            rememberedSpaces[window.id] != nil
-        // A window returning from a CLOSE is placed as a NEW
-        // window (#1561): its app rule, else the active Space —
-        // never the Space it left — and its slot and break are
-        // given up; it takes the focus a new window gets (#1414).
-        // The mark is consumed on every arrival, taken or not.
-        if closedDepartures.remove(window.id) != nil,
-            case .departed? = rememberedSpaces[window.id]
-        {
+        // A close return is placed as NEW (#1414/#1561): memory,
+        // slot and any restore filed over it dropped FIRST, so
+        // every reader below sees one fact; consumed on every arrival.
+        if closedDepartures.remove(window.id) != nil {
             rememberedSpaces[window.id] = nil
+            restoredFrames[window.id] = nil
             retireDepartureRecord(of: window.id)
-            effects.hadRememberedSpace = false
             effects.closedReturnPlacedAsNew = true
         }
+        effects.hadRememberedSpace =
+            rememberedSpaces[window.id] != nil
         // Once: the restore's frame is the FIRST arrival's (#1362).
         effects.restoredFrame =
             restoredFrames.removeValue(forKey: window.id)
