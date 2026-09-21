@@ -37,9 +37,9 @@ The `mkdir` is there because `/usr/local/bin` may not exist on a
 Mac that has never had Homebrew. Link, never copy: a copy fails
 its signature check.
 
-Any directory your shell already searches works without `sudo`;
-`~/.local/bin` is **not** on the macOS default `PATH`, so it needs
-adding first.
+A directory you own works without `sudo` as long as your shell
+already searches it; `~/.local/bin` is **not** on the macOS
+default `PATH`, so it needs adding first.
 
 Commands are sent over a UNIX domain socket at
 `~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on success, 1
@@ -154,10 +154,8 @@ kiwidesk service status    # loaded? running? pid?
 
 `start` bootstraps the agent when it isn't loaded, and
 **relaunches it when the job is loaded but idle** — the state a
-quick-menu Quit leaves behind (the app exits cleanly, so
-`KeepAlive` doesn't restart it, but the launchd job stays
-registered). It no-ops with `KiwiDesk service is already
-running` only when a process is actually running. `stop` prints
+quick-menu Quit leaves behind. It no-ops with `KiwiDesk service
+is already running` only when a process is actually running. `stop` prints
 `KiwiDesk service is not running` cleanly when nothing is
 loaded. `restart` boots the job out and back in; when nothing
 was loaded it reports `KiwiDesk service was not running —
@@ -212,7 +210,8 @@ live while reproducing:
 ```
 
 `kiwidesk debug_log [message]` writes a marker line into this
-same log, which brackets a repro; it exports nothing.
+same log — one before and one after a repro brackets it; it
+exports nothing.
 
 ## Commands
 
@@ -224,8 +223,8 @@ same log, which brackets a repro; it exports nothing.
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number (Mission Control's) |
-| | `move_to_desktop` | Desktop number, [space id] — moves the focused window there; you stay. The space id, if given, is the Space it joins on landing |
-| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window there, switches with it and keeps keyboard focus on it. The space id, if given, is the Space it joins on landing |
+| | `move_to_desktop` | Desktop number, [space id] — moves the focused window there; you stay. `space id` names the Space it lands in |
+| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] |
