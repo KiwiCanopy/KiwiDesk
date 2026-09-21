@@ -111,4 +111,6 @@ load for whoever edits `docs/**`.
 When a review or manual pass classifies a behavior as
 **accepted-by-architecture**, it adds a row here in the same
 change set — the user-facing twin of the AGENTS.md §5 guardrail
-rule.
+rule. A row needs an architectural root and, where one exists,
+the planned escape hatch; the page is not a wontfix dumping
+ground.
