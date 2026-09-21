@@ -45,19 +45,33 @@ extension AppBarItemView {
             cell = glyphLabel.cell?.cellSize ?? .zero
         }
         // With a name, a narrow glyph snugs toward the text so
-        // its slack doesn't widen the gap — clamped to its box,
-        // so a wide glyph can never hang out of the item.
-        // Icon-only items center.
+        // its slack doesn't widen the gap; icon-only items center.
         let snugToName = horizontal && !label.isHidden
-        // Clamp BEFORE positioning: centering the unclamped
-        // cell width then clamping the frame shifted the glyph
-        // toward the leading edge whenever the measured cell
-        // exceeded its box (QA 2026-07-19, vertical bars).
-        let width = min(cell.width, box.width)
-        let x =
-            snugToName
-            ? max(square.maxX - width, box.minX)
-            : box.midX - width / 2
+        // The frame takes the cell's own width, so the alignment
+        // holds — a narrower frame draws the string left-aligned
+        // (#1529) — and the INK is what centres and snugs, never
+        // the advance: a ligature's slack sits on its trailing
+        // side, so the advance's centre drew the glyph a sixth of
+        // the slot to the left and the snug left the slack between
+        // glyph and name (#1543). The frame's padding may cross
+        // the box; the ink, scaled with the cell above, does not.
+        let width = ceil(cell.width)
+        let x: CGFloat
+        if let metrics = BarTextGlyph.metrics(of: glyphLabel) {
+            let lead = metrics.inkLead(inFrameOfWidth: width)
+            x =
+                snugToName
+                ? max(
+                    square.maxX - lead - metrics.ink.width,
+                    box.minX - lead
+                )
+                : box.midX - lead - metrics.ink.width / 2
+        } else {
+            x =
+                snugToName
+                ? max(square.maxX - width, box.minX)
+                : box.midX - width / 2
+        }
         glyphLabel.frame = CGRect(
             x: x.rounded(),
             y: (box.midY - cell.height / 2).rounded(),
