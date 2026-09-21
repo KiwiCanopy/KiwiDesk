@@ -32,6 +32,14 @@ enum BarTextGlyph {
             mid - inkLead(inFrameOfWidth: width) - ink.width / 2
         }
 
+        /// The frame origin that starts the ink at `leading`.
+        func originX(
+            inkLeadingAt leading: CGFloat,
+            frameWidth width: CGFloat
+        ) -> CGFloat {
+            leading - inkLead(inFrameOfWidth: width)
+        }
+
         /// The frame origin that ends the ink at `trailing`.
         func originX(
             inkTrailingAt trailing: CGFloat,

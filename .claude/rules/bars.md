@@ -318,9 +318,10 @@ sites clipped alike.
   trailing edge to the name left the slack between glyph and
   name. The App Bar's icon slot (`AppBarItemView+GlyphSlot`)
   keeps its own font-scaling and `snugToName` rulings and takes
-  `originX(centringInkOn:)` / `originX(inkTrailingAt:)`; a badge
-  hangs on `glyphInkFrame`, not the label's frame, which carries
-  the cell's padding. `AppBarGlyphInkTests` renders both anchors
+  `originX(centringInkOn:)` / `originX(inkTrailingAt:)` /
+  `originX(inkLeadingAt:)`; a badge hangs on `glyphInkFrame`,
+  whose x-span is the ink's — the label's frame carries the
+  cell's padding on that axis. `AppBarGlyphInkTests` renders both anchors
   and holds their OUTPUT — a hand-copied CoreText read that
   anchored the ink correctly would stay green there, so the
   routing is review's.

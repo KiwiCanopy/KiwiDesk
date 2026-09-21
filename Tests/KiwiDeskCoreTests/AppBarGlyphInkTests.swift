@@ -98,6 +98,9 @@ struct AppBarGlyphInkTests {
     /// From 32 up: at 24 the pre-fix clamp lands the advance's
     /// frame within a rounding of the same place, so a thinner
     /// argument would be blind to the regression (guard-prover).
+    /// The leading clamp — the ink never before the box — is not
+    /// held: it fires only for ink wider than the square, which
+    /// the cell-based scaling above never produces.
     @Test(
         "a named glyph's ink snugs to the name",
         arguments: [32.0, 48.0]

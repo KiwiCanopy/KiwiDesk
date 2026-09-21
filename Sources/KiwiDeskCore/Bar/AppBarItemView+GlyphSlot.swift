@@ -61,7 +61,10 @@ extension AppBarItemView {
                     inkTrailingAt: square.maxX,
                     frameWidth: width
                 ),
-                box.minX - metrics.inkLead(inFrameOfWidth: width)
+                metrics.originX(
+                    inkLeadingAt: box.minX,
+                    frameWidth: width
+                )
             )
             : metrics.originX(
                 centringInkOn: box.midX,
