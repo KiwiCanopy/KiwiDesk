@@ -4929,12 +4929,11 @@ what changed is that "would Apple draw it this way" no longer
 vetoes a layout that is simpler for *this* app's shape.
 
 What breaks if this is ignored: a reviewer holding a redesign
-screen against System Settings' visual conventions rejects
-exactly the improvements the redesign exists for, or —
-the inverse failure — someone reads "GUI ours" as licence for
-non-standard *controls*, which is the half that stays bound.
-(Owner ruling 2026-08-02, in chat; first applied in the Phase 2
-Bars area.)
+screen against System Settings' visual conventions rejects exactly
+the improvements the redesign exists for, or — the inverse failure
+— someone reads "GUI ours" as licence for non-standard *controls*,
+which is the half that stays bound. (Owner ruling 2026-08-02, in
+chat.)
 
 ### An action lives on the card whose values it writes
 
@@ -5057,14 +5056,14 @@ ones a Settings change keeps paying.
 
 *A shape change states where focus goes.* When the view holding
 focus stops existing — a deleted row, a pushed sub-view — nothing
-claims it and the next Tab starts from the top of the window, so
-a keyboard user re-walks the list after every deletion. The
-destination is read BEFORE the mutation (afterwards the list
-names whichever row slid into the gap, right by accident and
-wrong at the end of a list), and it must be a control that is
-always DRAWN and non-destructive: the first cut of this bound the
-spaces list to a mode-gated button, which on a fresh install is
-not drawn at all, so focus went to the top by a second road.
+claims it and the next Tab starts from the top of the window, so a
+keyboard user re-walks the list after every deletion. The
+destination is read BEFORE the mutation (afterwards the list names
+whichever row slid into the gap, right by accident and wrong at
+the end of a list), and it must be a control that is always DRAWN
+and non-destructive: binding the spaces list to a mode-gated
+button, which on a fresh install is not drawn at all, sends focus
+to the top by a second road.
 
 *A dim is not a sentence.* Greying keeps a control visible
 because the dimming means *switch that on and I act* — so a
@@ -5091,48 +5090,44 @@ one more thing to forget: `GateReasonPlacement` answers it, and
 it reproduces every site that already drew one, which is what
 makes it checkable.
 
-*Amended 2026-09-14 (#1310, owner ruling on the device):* channel
-3 has two shapes, and which one a row takes follows from what is
-dimmed, not from whether a live label exists. A header `?` scopes
-the CARD: when the whole card is grey (Borders with the ring off)
-the reader's eye lands on the heading and the glyph obviously
-belongs to the grey beneath it. When ONE row is greyed inside a
-card whose other rows are live, the same `?` two rows up reads as
-"about this card" and nothing points it at the row — the owner
-looked at the Space Bar colours card with a `?` on its heading
-and asked whether that was understandable, and it was not. Such
-a row takes a `CrossReferenceRow` directly beneath the grid,
-outside the dimmed subtree: the sentence states the fact and the
-destination name is the link, so the fix is one click rather
-than a popover that then says to go elsewhere
-(`AdvancedColorsHelp.focusedItemReference`). The Borders card was
-the same shape one card up — *Unfocused windows* greyed alone
-while the ring is on, its reason on the heading — and took the
-same link (`unfocusedReference`); its header `?` now answers only
-for the ring being off, when every row is grey. The header `?`
-stays the shape for a greyed block.
+Channel 3 has two shapes (#1310, owner ruling 2026-09-14 on the
+device), and which one a row takes follows from what is dimmed,
+not from whether a live label exists. A header `?` scopes the
+CARD: when the whole card is grey (Borders with the ring off) the
+reader's eye lands on the heading and the glyph obviously belongs
+to the grey beneath it. When ONE row is greyed inside a card whose
+other rows are live, the same `?` two rows up reads as "about this
+card" and nothing points it at the row — the Space Bar colours
+card with a `?` on its heading was not understandable on the
+device. Such a row takes a `CrossReferenceRow` directly beneath
+the grid, outside the dimmed subtree: the sentence states the fact
+and the destination name is the link, so the fix is one click
+rather than a popover that then says to go elsewhere
+(`AdvancedColorsHelp.focusedItemReference`). The Borders card is
+the same shape — *Unfocused windows* greyed alone while the ring
+is on — and takes the same link (`unfocusedReference`); its header
+`?` answers only for the ring being off, when every row is grey.
+The header `?` stays the shape for a greyed block.
 
-The temptation to answer all of this with `.accessibilityHint`
-is why the ladder is written down. A hint on a **leaf** control
-is ordinary and two rows ship one. A hint on `GreyOut` is not:
-that modifier wraps whole blocks, so whether it reaches the
-controls inside — and whether its empty value in the un-gated
-state displaces a hint a descendant sets for itself — cannot be
-observed headlessly, and it was written and backed out for
-exactly that reason. Re-adding it needs a recorded Accessibility
-Inspector session, not an argument.
+The temptation to answer all of this with `.accessibilityHint` is
+why the ladder is written down. A hint on a **leaf** control is
+ordinary and two rows ship one. A hint on `GreyOut` is not: that
+modifier wraps whole blocks, so whether it reaches the controls
+inside — and whether its empty value in the un-gated state
+displaces a hint a descendant sets for itself — cannot be observed
+headlessly. Adding it needs a recorded Accessibility Inspector
+session, not an argument.
 
 What breaks if this is ignored: the window keeps passing every
 accessibility guard in the suite while being unusable from the
 keyboard, because both failures are silent — an unattached
-`@FocusState` compiles and moves focus nowhere, and a reason in
-a tooltip is invisible to everything except a pointer. Stated
-residue, so it is not mistaken for coverage: for the co-located
-class the VoiceOver reader hears the cause before the dimmed row
-but must infer the link, and macOS gates keyboard focus for
-non-text controls behind System Settings ▸ Keyboard ▸ Keyboard
-navigation, which no app may set for the user — so a focus
-destination is verified with that ON. (#678 turn 20a, #815,
+`@FocusState` compiles and moves focus nowhere, and a reason in a
+tooltip is invisible to everything except a pointer. Residue: for
+the co-located class the VoiceOver reader hears the cause before
+the dimmed row but must infer the link, and macOS gates keyboard
+focus for non-text controls behind System Settings ▸ Keyboard ▸
+Keyboard navigation, which no app may set for the user — so a
+focus destination is verified with that ON. (#678 turn 20a, #815,
 #816.)
 
 ### A name replaces the announcement, so the value comes back with it
@@ -5185,49 +5180,44 @@ who cannot glance navigates card to card, and Home's two group
 labels had been the only headings in the app.
 
 What breaks if this is ignored: the next control is named for
-search or for a census guard, passes every scan, and takes its
-own value away from exactly the reader the name was for. The
-residue, stated: nothing headless can hear an announcement, so a
-change here is verified on a device with VoiceOver on, and the
+search or for a census guard, passes every scan, and takes its own
+value away from exactly the reader the name was for. The residue:
+a change here is verified on a device with VoiceOver on, since the
 guards say only that the declarations are present.
 
 ### The row menu's keyboard route is a chord on the focused row
 
 **[Trade-off]**
 
-**Context-menu-only actions get their plain-keyboard route from
-a chord on the focused row — invisible chrome, documented key —
-rather than a visible trigger.** The alternatives were each
-rejected on grounds that still hold, and are re-litigable in
-both directions, which is why this is written down: a visible
-`⋯` per row was rejected twice as clutter (owner 2026-08-04,
-upheld 2026-08-11 against turn 20a's ask), a whole-chip `Menu`
-eats the `.draggable` it would sit on (it shipped on the
-assignment chip and silently retired the drag), and
-accept-and-document leaves a Tab-only keyboard user locked out
-of actions the app offers everyone else — the gap #845 was
-filed on, once it was seen that `.accessibilityActions` reaches
-only a running VoiceOver. The accepted cost is discoverability:
-an invisible key is found in documentation
-(`docs/user-guide.md` ▸ Using Settings from the Keyboard) or
-not at all, and an in-app hint is a candidate follow-up rather
-than part of the ruling.
+**Context-menu-only actions get their plain-keyboard route from a
+chord on the focused row — invisible chrome, documented key —
+rather than a visible trigger.** The alternatives are each
+rejected on grounds that still hold: a visible `⋯` per row is
+clutter (owner rulings 2026-08-04 and 2026-08-11), a whole-chip
+`Menu` eats the `.draggable` it sits on (measured on the
+assignment chip, where it silently retired the drag), and
+accept-and-document leaves a Tab-only keyboard user locked out of
+actions the app offers everyone else — the gap #845 was filed on,
+once it was seen that `.accessibilityActions` reaches only a
+running VoiceOver. The accepted cost is discoverability: an
+invisible key is found in documentation (`docs/user-guide.md` ▸
+Using Settings from the Keyboard) or not at all, and an in-app
+hint is a candidate follow-up rather than part of the ruling.
 
 Two consequences bind every row menu, not just the ones that
 prompted it. The chord must target the row that HOLDS focus —
 per-row window-wide shortcut registrations resolve by hierarchy
-order, which sent the chord to the first row on the page
-whatever was focused, cross-targeting destructive items (#845
-review blocker) — so the seam gates the binding on the focused
-row's published identity, one live binding at a time. And a row
-in the family must be able to hold focus at all, which is a
-separate claim from offering the menu: the assignment chip
-offered every channel and had no Tab stop until it took
-`.focusable()`. The seam, its guard and the engineering
-obligations live in `.claude/rules/gui.md` ▸ the keyboard path;
-the chord itself is stated once in code
-(`ContextShortcut.swift`, needled) and once for users (the
-guide). (#845; owner ruling 2026-08-23, recorded on the issue.)
+order, which sends the chord to the first row on the page whatever
+is focused, cross-targeting destructive items (#845) — so the seam
+gates the binding on the focused row's published identity, one
+live binding at a time. And a row in the family must be able to
+hold focus at all, which is a separate claim from offering the
+menu: the assignment chip offered every channel and had no Tab
+stop until it took `.focusable()`. The seam, its guard and the
+engineering obligations live in `.claude/rules/gui.md` ▸ the
+keyboard path; the chord itself is stated once in code
+(`ContextShortcut.swift`, needled) and once for users (the guide).
+(#845; owner ruling 2026-08-23, recorded on the issue.)
 
 ### A focus ring is the platform's; a chip that removes it draws its own
 
@@ -5284,15 +5274,15 @@ ruling 2026-08-12.)
 **[Rationale]**
 
 The pill's leading readout is the ROW COUNT of the list it opens
-(owner 2026-08-10), so every reason the pill appears must be a
-row in that list. Two reasons exist: a draft config leaf, which
+(owner 2026-08-10), so every reason the pill appears must be a row
+in that list. Two reasons exist: a draft config leaf, which
 `SettingsDraftDiff` attributes to a census row, and live drift —
 the active profile storing no monitor set for the connected
-screens, a built-in layout composing, a matched profile deleted
-— which is model state, not a leaf. A pill summoned by the
-second while its list was built from the first alone said
-*Unsaved changes* over nothing, and the header, deriving the
-same fact on its own, said *Unsaved monitor changes* beside it.
+screens, a built-in layout composing, a matched profile deleted —
+which is model state, not a leaf. A pill summoned by the second
+while its list is built from the first alone says *Unsaved
+changes* over nothing, and a header deriving the same fact on its
+own says *Unsaved monitor changes* beside it.
 
 The ruling is **one verdict, three readers, not three
 predicates**: `SettingsModel.profileDrift` decides whether and
@@ -5307,12 +5297,11 @@ drift that cannot be itemised (option 2), was reserved for a
 residue that did not materialise.
 
 A drift row says what is missing and names the button that fixes
-it, in its OWN words: the header's sentences were borrowed at
-first and read as "Profile · Built-in layout — save as a profile
-to make it yours" (owner, 2026-09-03), because a header narrates
-a status line while a row narrates a change beside a label. The
-button is interpolated rather than quoted, so the row names what
-is actually on screen.
+it, in its OWN words, not the header's: borrowed, those read as
+"Profile · Built-in layout — save as a profile to make it yours"
+(owner, 2026-09-03), because a header narrates a status line while
+a row narrates a change beside a label. The button is interpolated
+rather than quoted, so the row names what is actually on screen.
 
 Two consequences are deliberate. A stored profile's draft
 carries no drift row and summons no pill for drift: the header
@@ -5331,29 +5320,26 @@ a note that says *save as a profile*.
 **The search entry in the header is the real text field, and its
 results hang below it as an overlay rather than in a popover.**
 
-It shipped the other way round: a field-shaped button that opened
-a popover containing the actual field and the results. That was
-defensible while the button was a small pill — a popover takes
-the key window for free, so focus and dismissal come from AppKit
-— and it became indefensible the moment the field grew to the
-full width the design calls for. A search field you click and
-cannot type into is a lie about what the control is, and the
-second field appearing on top of the first is the user's evidence
-for it.
+The other way round — a field-shaped button opening a popover that
+holds the actual field and the results — is defensible while the
+button is a small pill, since a popover takes the key window for
+free and focus and dismissal come from AppKit, and indefensible
+once the field grows to the full width the design calls for. A
+search field you click and cannot type into is a lie about what
+the control is, and the second field appearing on top of the first
+is the user's evidence for it.
 
 The trade-off is that a popover cannot be used for the results
-either: it would take the key window away from the header field
-on the first keystroke that produced a result, which is precisely
-why the field lived inside the popover before. So the results are
-a plain overlay, and the shell must lift the header's `zIndex`
-above the content below it or the list is drawn over. That lift
-looks like a cosmetic line and is load-bearing.
+either: it would take the key window away from the header field on
+the first keystroke that produces a result, which is why the
+popover shape held the field inside it. So the results are a plain
+overlay, and the shell must lift the header's `zIndex` above the
+content below it or the list is drawn over. That lift looks like a
+cosmetic line and is load-bearing.
 
-What breaks if this is ignored: someone "simplifies" the overlay
-back into a popover and the field stops accepting the second
-keystroke — or removes the `zIndex` and the results become
-invisible while every test still passes, since nothing about
-paint order is observable from the view tree. (Owner report
+What breaks if this is ignored: the `zIndex` goes and the results
+become invisible while every test still passes, since nothing
+about paint order is observable from the view tree. (Owner report
 2026-08-04, in chat.)
 
 ### Search: one result per setting, and a fast path kept pure
@@ -5405,16 +5391,15 @@ touches AX, the filesystem or the running session
 (`SettingsSearchIndexTests` scans the match-path files for the
 violation; enrichment reads only the draft the shell hands it).
 
-That line is why palette names joined the group last (#805):
-`PaletteStore` is stateless and file-backed by design — a
-palette saved anywhere is seen everywhere with no cache to
-invalidate — so listing them from the store would put a disk
-read on every keystroke. The palettes live on the model
-instead (`SettingsModel.userPalettes`) — the one in-memory copy,
-which the shelf already needed and now shares with search —
-written at the shelf's mutations and at the window's reload and
-never lazily from the search path; the store keeps its
-contract, and `PaletteCacheTests` holds the reader by
+That line is why palette names are read from the model (#805):
+`PaletteStore` is stateless and file-backed by design — a palette
+saved anywhere is seen everywhere with no cache to invalidate — so
+listing them from the store would put a disk read on every
+keystroke. The palettes live on the model instead
+(`SettingsModel.userPalettes`), the one in-memory copy the shelf
+and search share, written at the shelf's mutations and at the
+window's reload and never lazily from the search path; the store
+keeps its contract, and `PaletteCacheTests` holds the reader by
 construction and the writers.
 
 **The pill is the only place the mode is mentioned.** Search
@@ -5430,12 +5415,6 @@ keep one stable destination order in both modes, because an
 exact match the user asked for must not sink for living in a
 Power-User area, and a list that reorders on a mode flip reads
 as random.
-
-What breaks if this is ignored: index instances and a
-twelve-space config turns "gap" into sixty rows; enrich on the
-match path and every keystroke pays a disk or AX round-trip the
-moment someone adds "just one" richer column; rank by mode and
-the same query answers differently before and after one click.
 
 ### A search hit lands on the control only where the section hides it (#277)
 
@@ -5481,43 +5460,41 @@ and `SettingsCatalogDrawerTests` the ones ruled childless.
 
 ### The search panel shows nothing before you type
 
-**[Principle]** (#1030 tried the opposite; #1470 retired it, owner
-ruling 2026-09-15)
+**[Principle]** (#1030, #1470, owner ruling 2026-09-15)
 
 **A focused search field with nothing typed shows no panel.** The
 field is the window's first text field, so macOS hands it the
-arrival focus on every open — and a panel with rows before a
-query therefore dropped over Home every time Settings appeared
-(#1468). #1030 had put one row there, the Guide, on the argument
-that an `.accessory` app has no Help menu and the search field is
-the closest thing to one; that argument now belongs to the Mac
-Checklist's foot, the app's one permanent guide pointer (▸ *The
-app links the guide…*). What remains from that pass is the rule
-it also stated: `results("")` returns nothing, so a bare Return
-in an untouched field cannot navigate somewhere the user never
-named (`SettingsSearchTests` ▸ `emptyQuery`), and any list
-volunteered under the field would be a second navigator, which
-"Home is the only navigator" rules against. The narrower fix —
-keep the row, show it only on a focus the USER gave — was
-refused too: telling a click or ⌘K from the window's arrival
-focus means reading focus provenance at the field, which is the
+arrival focus on every open — and a panel with rows before a query
+therefore drops over Home every time Settings appears (#1468). One
+row there, the Guide (#1030), on the argument that an `.accessory`
+app has no Help menu and the search field is the closest thing to
+one, is refused: that argument belongs to the Mac Checklist's
+foot, the app's one permanent guide pointer (▸ *The app links the
+guide…*). `results("")` returns nothing, so a bare Return in an
+untouched field cannot navigate somewhere the user never named
+(`SettingsSearchTests` ▸ `emptyQuery`), and any list volunteered
+under the field would be a second navigator, which "Home is the
+only navigator" rules against. The narrower shape — keep the row,
+show it only on a focus the USER gave — is refused too: telling a
+click or ⌘K from the window's arrival focus means reading focus
+provenance at the field, which is the
 #991 trap (`currentEvent` is the last event retrieved, and a
 VoiceOver press has none), and `SettingsInputSourceSeamTests`
 bounds who may read the input source at all.
 
-Two settled behaviours from that pass stay: Escape on an EMPTY
-field resigns focus (clearing an already-empty query would leave
-the field uncloseable from the keyboard), and the narrow-width
-entry collapses once neither focus nor the pointer holds it, not
-on blur alone. Where focus goes after that Escape is ruled, not
-stated: nowhere. The window has no focused control, and the next
-Tab restarts the key loop at its first key view — the search
-field, which the guide already makes the window's focus home.
-Escape means "stop searching", Tab means "start from the top";
-sending focus into the page instead would move it somewhere the
-user was not looking (owner eyeball 2026-09-14, keyboard
-navigation on, wide and narrow). `HomeSurfacingTests` needles
-the query-only panel and the collapse.
+Two behaviours ride along: Escape on an EMPTY field resigns focus
+(clearing an already-empty query would leave the field uncloseable
+from the keyboard), and the narrow-width entry collapses once
+neither focus nor the pointer holds it, not on blur alone. Where
+focus goes after that Escape is ruled, not stated: nowhere. The
+window has no focused control, and the next Tab restarts the key
+loop at its first key view — the search field, which the guide
+already makes the window's focus home. Escape means "stop
+searching", Tab means "start from the top"; sending focus into the
+page instead would move it somewhere the user was not looking
+(owner eyeball 2026-09-14, keyboard navigation on, wide and
+narrow). `HomeSurfacingTests` needles the query-only panel and the
+collapse.
 
 ### Hover help appears sooner than AppKit's default
 
@@ -5564,17 +5541,17 @@ bugs and focus-handoff lockouts wholesale, so shortcuts and focus
 commands stay reliable without any dynamic switching.
 
 Stated as an obligation on controllers rather than as a claim
-about the process, because the claim was the failure. The rule
-used to be promote-on-open / demote-on-close, and a demote had to
-survive being the *last* of {Settings, onboarding, Config Issues}
-to close — one rule spread over three controllers, each holding
-half of it. Removing the demote from Settings while leaving the
-promotion in onboarding left exactly one reachable order
-(onboarding → Settings → close both) that stranded the app
-`.regular` with nothing on screen, which is the invisible-but-
-foreground state that breaks `focusedCommandDenial`'s
-`front == focused.pid` test. Not promoting is the only form of the
-rule with nowhere left to forget it.
+about the process, because the claim is the failure. Under
+promote-on-open / demote-on-close, a demote has to survive being
+the *last* of {Settings, onboarding, Config Issues} to close — one
+rule spread over three controllers, each holding half of it — and
+removing the demote from one while leaving the promotion in
+another leaves a reachable order (onboarding → Settings → close
+both) that strands the app `.regular` with nothing on screen, the
+invisible-but-foreground state that breaks
+`focusedCommandDenial`'s `front == focused.pid` test. Not
+promoting is the only form of the rule with nowhere left to forget
+it.
 
 **One exception, and it is structural rather than trusted:** the
 already-running alert in `SingleInstanceGuard` raises `.regular`
@@ -5635,19 +5612,17 @@ Sparkle is the worked case
 ([#1011](https://github.com/KiwiCanopy/KiwiDesk/issues/1011)). It
 activates for the windows it opens on a check the *user* asked
 for, then marks the later install-and-restart prompt with
-`requestUserAttention` alone — right for a Dock app, inert
-here. The prompt arrived
-behind everything the user had open with nothing saying the update
-was waiting, which makes the in-app update path read as broken:
-the exact trust the section
+`requestUserAttention` alone — right for a Dock app, inert here,
+so the prompt arrives behind everything the user has open with
+nothing saying the update is waiting, which makes the in-app
+update path read as broken: the exact trust the section
 [above](#no-distribution-channel-without-an-update-path) exists to
 keep. `UpdatePromptDriver` overrides
 `showReadyToInstallAndRelaunch` — the one moment neither Sparkle
 delegate protocol reaches — while `UpdatePromptFocusTests` holds
 the activation inside that override and `UpdatePromptWiringTests`
-that Sparkle is shown through that driver rather than a stock
-one, which is the way an
-override goes dead without anything noticing.
+that Sparkle is shown through that driver rather than a stock one,
+which is the way an override goes dead without anything noticing.
 
 ### Settings is miniaturizable; modal chrome is not
 
@@ -5692,53 +5667,52 @@ would teach is not "KiwiDesk tiles" — it is "KiwiDesk grabbed
 and resized the window I was reading", which is the fear a new
 tiling user arrives with.
 
-**The demonstration was already happening, unnarrated.** The
-moment the grant lands, management starts and every window behind
-the tour is arranged — over the following seconds, since #801,
-and the screen now narrates that wait rather than claiming a
-finished job (▸ *Boot: the wait is narrated, never hidden*). That is a better demonstration than tiling
-the tour could ever be — the user's own windows, at the moment it
-means something, at no cost — and the tour used to answer it with
-"Permission granted!". It now points at it, and says once that
-setup windows are left alone because they go away. Said once, the
-exception stops reading as an inconsistency and starts reading as
-a rule. (#678 Phase 4 pass 11)
+**The demonstration is already happening; the tour narrates it.**
+The moment the grant lands, management starts and every window
+behind the tour is arranged — over the following seconds (#801),
+the screen narrating that wait rather than claiming a finished job
+(▸ *Boot: the wait is narrated, never hidden*). That is a better
+demonstration than tiling the tour could ever be — the user's own
+windows, at the moment it means something, at no cost — so the
+tour points at it rather than announcing "Permission granted!",
+and says once that setup windows are left alone because they go
+away. Said once, the exception stops reading as an inconsistency
+and starts reading as a rule. (#678 Phase 4 pass 11)
 
 ### Settings tiles — discriminated per window, never per process
 
 **[Principle]**
 
 **The Settings window tiles like any other window, and the
-force-float policy asks which own WINDOW it is looking at,
-never merely whose process it belongs to.** (#678 item 18,
-Phase 5.) The engine used to force-float every own window by
-`isOwnProcess(pid)` — one predicate answering for three titled
-windows that want two different fates, Settings against the
-tour and the Config Issues window. (The app's utility panels never
-reach it: `shouldIgnoreOwnWindow` drops non-key overlays and
-borderless panels before tracking.) Relaxing that predicate per
-PROCESS would have swept the tour and the Config Issues window
-into layouts alongside Settings, so the exemption rides a
-per-window mark instead
+force-float policy asks which own WINDOW it is looking at, never
+merely whose process it belongs to.** (#678 item 18, Phase 5.)
+Force-floating every own window by `isOwnProcess(pid)` is one
+predicate answering for three titled windows that want two
+different fates, Settings against the tour and the Config Issues
+window. (The app's utility panels never reach it:
+`shouldIgnoreOwnWindow` drops non-key overlays and borderless
+panels before tracking.) Relaxing that predicate per PROCESS would
+sweep the tour and the Config Issues window into layouts alongside
+Settings, so the exemption rides a per-window mark instead
 (`OwnWindowTiling.identifier`, stamped by
-`SettingsWindowController` alone —
-`OwnWindowTilingSeamTests`' map is the one copy of who may).
-The entry above rules WHICH windows are chrome; this one rules
-the mechanism: an own window is chrome by DEFAULT, and tiling
-is the marked exception — a new own window floats until someone
-argues otherwise, which is the failure direction that costs a
-misplaced float rather than a stolen layout slot.
+`SettingsWindowController` alone — `OwnWindowTilingSeamTests`' map
+is the one copy of who may). The entry above rules WHICH windows
+are chrome; this one rules the mechanism: an own window is chrome
+by DEFAULT, and tiling is the marked exception — a new own window
+floats until someone argues otherwise, which is the failure
+direction that costs a misplaced float rather than a stolen layout
+slot.
 
-Two consequences worth stating because each was reachable
-another way. **The app stays `.accessory` throughout** — tiling
-a window and promoting a process are unrelated axes, and a
-window that takes a layout slot is not thereby a reason to grow
-a Dock icon; the activation-policy seam is untouched. And **the
-⌃⌥K panel needs no mark and no bar exclusion**: item 18 asks for
-one, but an own borderless `NSPanel` is ignored by
-`shouldIgnoreOwnWindow` before tracking and it reaches no bar's
-enumeration to be excluded from. A written exclusion would have
-been dead code asserting a fact the type system already holds.
+Two consequences, each reachable another way. **The app stays
+`.accessory` throughout** — tiling a window and promoting a
+process are unrelated axes, and a window that takes a layout slot
+is not thereby a reason to grow a Dock icon; the activation-policy
+seam is untouched. And **the ⌃⌥K panel needs no mark and no bar
+exclusion**: item 18 asks for one, but an own borderless `NSPanel`
+is ignored by `shouldIgnoreOwnWindow` before tracking and it
+reaches no bar's enumeration to be excluded from. A written
+exclusion would have been dead code asserting a fact the type
+system already holds.
 
 The companion affordance: **"Open Settings" is bindable**
 (`KiwiDesk.open_settings()`, offered under Shortcuts ▸
@@ -5764,18 +5738,17 @@ beside the real menu-bar item.** The closing card carries a small
 drawing of a menu bar with the app's own mark in it, and the
 sentence under it says what clicking that mark opens.
 
-Pointing at the real item is the obvious answer, and it was built
-that way once: the window vanishing is exactly the moment someone
-wonders where the app went, so point at the thing itself. What
-that costs is a promise the app cannot keep. Outside its own
-windows KiwiDesk is drawing against a strip it does not control —
-a menu bar set to auto-hide is not on screen at all (common among
-the keyboard-driven users this app attracts, and the same defect
-that retired #331's timed popover), and a menu-bar manager may
-have parked the item off the visible strip or somewhere else
-entirely. An honest overlay therefore has to skip itself, and it
-skips for precisely the user who most needs telling; a dishonest
-one points at empty screen.
+Pointing at the real item is the obvious answer: the window
+vanishing is exactly the moment someone wonders where the app
+went, so point at the thing itself. What that costs is a promise
+the app cannot keep. Outside its own windows KiwiDesk is drawing
+against a strip it does not control — a menu bar set to auto-hide
+is not on screen at all (common among the keyboard-driven users
+this app attracts, and the same defect that retired #331's timed
+popover), and a menu-bar manager may have parked the item off the
+visible strip or somewhere else entirely. An honest overlay
+therefore has to skip itself, and it skips for precisely the user
+who most needs telling; a dishonest one points at empty screen.
 
 So the ruling is about the *surface*, not the artwork: what the
 tour promises, it promises inside a window it drew. Two things
@@ -5796,10 +5769,9 @@ of 4" is false at any door that opens past the first screen, and
 the reader it lies to is the one least able to tell a skipped
 screen from a broken one. The tour's length genuinely varies: a
 tour reopened from Settings starts past the screens that have
-nothing left to say, and any future machine-gated step widens the
-variance again (the Displays recommendation was that step until
-#888 retired it — the principle predates its retirement and does
-not lean on it).
+nothing left to say, and any machine-gated step widens the
+variance again (the Displays recommendation was one,
+#888; the principle does not lean on it).
 
 The row of pips at the top of each screen is not that counter
 re-admitted. The banned thing is a **fixed** total; a
@@ -5822,15 +5794,14 @@ repair is to delete it rather than patch it.
 
 **[Principle]**
 
-**A chord the reader cannot press is not taught.** The tour's
-keys step draws the shortcuts KiwiDesk seeds, and it shipped
-drawing them as native glyphs alone — `⌃⌥ ← ↓ ↑ →`, `⌃⌥ 1–5`.
-That is a perfectly good reminder for someone who already knows
-the symbols, and it is illegible to the reader the screen exists
-for: `⌃ ⌥ ⇧` are exactly the three glyphs a person who has never
-pressed a Mac keyboard shortcut cannot name, and on a German
-keyboard the caps print "ctrl" and "alt" rather than the symbols
-at all.
+**A chord the reader cannot press is not taught.** The tour's keys
+step draws the shortcuts KiwiDesk seeds. Native glyphs alone —
+`⌃⌥ ← ↓ ↑ →`, `⌃⌥ 1–5` — are a perfectly good reminder for someone
+who already knows the symbols, and illegible to the reader the
+screen exists for: `⌃ ⌥ ⇧` are exactly the three glyphs a person
+who has never pressed a Mac keyboard shortcut cannot name, and on
+a German keyboard the caps print "ctrl" and "alt" rather than the
+symbols at all.
 
 Two obligations follow, and they are one screen's worth of work.
 
@@ -5851,23 +5822,22 @@ tokens like the glyphs above them, so they carry no catalog keys:
 four fewer strings to mistranslate and one fewer line on every
 locale round, for nothing given up.
 
-Two rejected answers are worth recording, because both look right
-until they are checked. **Writing what the CAP prints, per
-locale** — German "alt" — uses the UI language as a proxy for the
-physical keyboard, which is wrong for anyone running German on a
-US layout; and it coins a second name for a key the app already
-names one screen away, in `key_recorder.help_press`, which is the
-Shortcuts editor's own help and where the reader goes to change
-these very chords. **Using that screen's full words** (Control /
-Option / Command) is right about the vocabulary, and loses on
-MARGIN rather than on fit: measured against the 560 pt window,
-the widest seeded row with full names fits in every locale — but
-German fits by about two points, one longer label or one wider
-translation from wrapping, where the abbreviations leave it
-tens. `OnboardingModifierNameTests` holds the numbers; they are
-deliberately not repeated here, all three copies of them having
-been wrong at once (one had measured Italian's modifier names
-against a German label, a pairing that cannot occur).
+Two rejected answers, both of which look right until checked.
+**Writing what the CAP prints, per locale** — German "alt" — uses
+the UI language as a proxy for the physical keyboard, which is
+wrong for anyone running German on a US layout; and it coins a
+second name for a key the app already names one screen away, in
+`key_recorder.help_press`, which is the Shortcuts editor's own
+help and where the reader goes to change these very chords.
+**Using that screen's full words** (Control / Option / Command) is
+right about the vocabulary, and loses on MARGIN rather than on
+fit: measured against the 560 pt window, the widest seeded row
+with full names fits in every locale — but German fits by about
+two points, one longer label or one wider translation from
+wrapping, where the abbreviations leave it tens.
+`OnboardingModifierNameTests` holds the numbers, which are
+deliberately not repeated here: a hand copy of a measurement
+drifts from the suite.
 
 An abbreviation of the app's own word is not a second word; the
 reader who wants the full name meets it in the editor. That is
@@ -5882,14 +5852,14 @@ localizing four tokens whose whole value is that they do not
 vary.
 
 **Every glyph carries a word, including the ones "everybody
-knows".** ⇧ shipped bare for exactly one build, on the reasonable
-argument that it is on every keyboard ever made and needs no
-gloss. It looked broken — a gap under one chip in a row of four,
-which a reader takes for a rendering fault rather than a
-judgement about which symbols are obvious. The gloss is also
-free: measured, every abbreviation is narrower than the 25.4 pt
-chip above it, so the columns are chip-bound and no word here
-costs a pixel. There is nothing to buy by withholding one.
+knows".** A bare ⇧ — on the reasonable argument that it is on
+every keyboard ever made and needs no gloss — looks broken: a gap
+under one chip in a row of four, which a reader takes for a
+rendering fault rather than a judgement about which symbols are
+obvious. The gloss is also free: measured, every abbreviation is
+narrower than the 25.4 pt chip above it, so the columns are
+chip-bound and no word here costs a pixel. There is nothing to buy
+by withholding one.
 
 **And the rule outranks the rows.** The seeded keymap is a tier
 system — `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, `⌃⌥⌘`
@@ -5935,10 +5905,10 @@ undo:
   face and the section header both read it. The card face draws the
   essentials as the rows' own ticks — the filled check and the
   hollow ring, same inks — never a chart of the number: a row of
-  squares shipped for an evening and read as a bar graph, and a
-  bare face sat shorter than every other Whole App card (owner,
-  2026-09-14). The subtitle carries the spoken count; the ticks
-  are hidden from VoiceOver like every other card preview.
+  squares reads as a bar graph, and a bare face sits shorter than
+  every other Whole App card (owner, 2026-09-14). The subtitle
+  carries the spoken count; the ticks are hidden from VoiceOver
+  like every other card preview.
 - **Detected rows are chips, not controls; the self-tick is the
   FALLBACK.** macOS answers these rows, so the tick is not the
   user's to toggle, and greying a checkbox would say "switch
@@ -5964,63 +5934,60 @@ undo:
   undocumented and move between releases.
 
 What is deliberately NOT on the card: *Displays have separate
-Spaces* (both states are supported and the app does not ask you
-to change it — the Desktops row is descriptive, never
-prescriptive), a KiwiDesk to-do ("find your palette, add a
-Space") whose items are mostly undetectable and would turn the
-count into a tour score, and how-to tricks, which are the
-guide's. And the tour's last button now lands on this card: a
-user who pressed "Start using it" used to land on nothing, and
-the card reaches a new user only if the tour hands them to it
-— so the first thing they see is "Essentials done: 0 of 4",
-which is why the count is essentials only and the card never
-shouts. This does not reopen the #678 Phase 4 pass 11 ruling
-that moved the tour's default action off Open Settings: that
-ruling was about handing a new user the whole Settings window
-to dig through, and this button lands them on one card of
-things to finish, the same shape as the tour's own steps. It is
-also why the card sits LAST on Home, after
-General: the tour carries discovery, Home carries return visits,
-and a checklist most people finish once is the right card to
-orphan where the Whole App row wraps. A habit that names a macOS
-switch — the Dock — links the pane the way the settings rows do,
-and the keyboard habit names the shortcuts panel's LIVE chord,
-read from the resolved layer like the tour's keys, with a second
-frame for a Mac where nothing is bound.
+Spaces* (both states are supported and the app does not ask you to
+change it — the Desktops row is descriptive, never prescriptive),
+a KiwiDesk to-do ("find your palette, add a Space") whose items
+are mostly undetectable and would turn the count into a tour
+score, and how-to tricks, which are the guide's. The tour's last
+button lands on this card, because the card reaches a new user
+only if the tour hands them to it — so the first thing they see is
+"Essentials done: 0 of 4", which is why the count is essentials
+only and the card never shouts. This does not reopen the #678
+Phase 4 pass 11 ruling that moved the tour's default action off
+Open Settings: that ruling was about handing a new user the whole
+Settings window to dig through, and this button lands them on one
+card of things to finish, the same shape as the tour's own steps.
+It is also why the card sits LAST on Home, after General: the tour
+carries discovery, Home carries return visits, and a checklist
+most people finish once is the right card to orphan where the
+Whole App row wraps. A habit that names a macOS switch — the Dock
+— links the pane the way the settings rows do, and the keyboard
+habit names the shortcuts panel's LIVE chord, read from the
+resolved layer like the tour's keys, with a second frame for a Mac
+where nothing is bound.
 
 ### The app links the guide, in a language the site actually serves
 
 **[Rationale]**
 
-For a long time nothing in KiwiDesk named the written guide at
-all. A user who finished the tour and later wanted to make the
-setup theirs had to find the site on their own.
+Without a pointer in the app, a user who finishes the tour and
+later wants to make the setup theirs has to find the site on their
+own.
 
-**What the tour's closing card gave up when #1019 put the pointer
-there is the more interesting half.** That card used to end on a quiet
-paragraph — "Settings is where you change any of this — different
-keys, more Spaces, other colours. If this is your first tiling
-manager, you do not need it today" — above a footer offering
-"Tiled before? Open Settings". Both are gone, and the card is
-better for it.
+**The tour's closing card carries neither a reassurance nor an
+Open Settings footer (#1019).** A quiet closing paragraph —
+"Settings is where you change any of this — different keys, more
+Spaces, other colours. If this is your first tiling manager, you
+do not need it today" — above a footer offering "Tiled before?
+Open Settings" is worse than the card without them.
 
-The first clause was the menu-bar card directly above it saying
-the same thing a second time, and that card says it beside a
-PICTURE, which is the version that teaches. The second clause
-sorted the reader before it reassured them: it made
-beginner-against-experienced the organizing idea of the last
-thing the tour says, and it carries a false converse — a reader
-who is NOT a beginner is told by implication that they DO need
-Settings today. The footer then asked the same question again in
-the other direction. Nothing on that screen needs to know which
-reader it has.
+The first clause is the menu-bar card directly above it saying the
+same thing a second time, and that card says it beside a PICTURE,
+which is the version that teaches. The second clause sorts the
+reader before it reassures them: it makes
+beginner-against-experienced the organizing idea of the last thing
+the tour says, and it carries a false converse — a reader who is
+NOT a beginner is told by implication that they DO need Settings
+today. The footer then asked the same question again in the other
+direction. Nothing on that screen needs to know which reader it
+has.
 
-**A closing screen ends with one action and one destination.**
-Before this the card said four things about where to go next, and
-two of them argued with each other in the reader's field of view:
-Settings is where you change everything, you do not need
-Settings, open Settings, start using it. Removing the fork beats
-re-wording it. What remained was the button and the pointer.
+**A closing screen ends with one action and one destination.** A
+card saying four things about where to go next has two of them
+arguing with each other in the reader's field of view: Settings is
+where you change everything, you do not need Settings, open
+Settings, start using it. Removing the fork beats re-wording it,
+leaving the button and the pointer.
 
 **Dropping the tour's Open Settings link EXTENDS the #678 Phase 4
 pass 11 ruling rather than contradicting it.** That pass moved
@@ -6033,35 +6000,32 @@ they will still be using on day 30, against a one-time button in
 a window that never returns — the tour reopens FROM Settings, and
 `KiwiDesk.open_settings()` is bindable.
 
-Since #1365 the default action lands on the Mac Checklist card;
-▸ *The Mac Checklist counts what macOS can confirm* argues why
-that is not the Open Settings link coming back.
+The default action lands on the Mac Checklist card (#1365); ▸ *The
+Mac Checklist counts what macOS can confirm* argues why that is
+not the Open Settings link coming back.
 
 **The banner is one-shot, so only a permanent pointer closes the
-gap.** Home's first-run banner reaches someone who closed the
-tour early, or finished it months ago and is in Settings for the
-first time — and it retires permanently on dismiss or on the
-first save, so a user who dismissed the welcome, or simply saved
-one change, had no route to the guide anywhere in the app. That
-is the gap this entry is about, not a nicety on top of it, and
-only a permanent pointer closes it.
+gap.** Home's first-run banner reaches someone who closed the tour
+early, or finished it months ago and is in Settings for the first
+time — and it retires permanently on dismiss or on the first save,
+so a user who dismissed the welcome, or simply saved one change,
+would otherwise have no route to the guide anywhere in the app.
 
 That permanent pointer is the Mac Checklist's foot (#1365,
-#1470). It was General ▸ About's bare "Guide" link, and the
-tour's closing card carried the sentence too; both went with
-#1470 (owner ruling 2026-09-15): the tour's button now lands ON
-the checklist, one line above its own copy of the sentence, and
-two permanent pointers to one page is the drift a one-pointer
-entry exists to stop. The search declaration moved with it, so
-"guide" typed into the field still lands on the pointer
-(`GuideLinkSurfaceTests` is the register of the two sites, the
-one URL reader, and the mount count). The pointer is permanent
-only where the checklist is OFFERED — in Simple, on every
-display count, withheld only while a stored profile is edited,
-exactly as About was (`HomeCardOrderTests` ▸ `modeCounts`,
-`DestinationParityTests` ▸ `profileContextExcludesOnlyProfileless`)
-— so a change that withholds the checklist further owes the
-pointer a new home in the same change.
+#1470; owner ruling 2026-09-15) — not General ▸ About's bare
+"Guide" link and not the tour's closing card: the tour's button
+lands ON the checklist, one line above the sentence, and two
+permanent pointers to one page is the drift a one-pointer entry
+exists to stop. The search declaration sits with it, so "guide"
+typed into the field lands on the pointer (`GuideLinkSurfaceTests`
+is the register of the two sites, the one URL reader, and the
+mount count). The pointer is permanent only where the checklist is
+OFFERED — in Simple, on every display count, withheld only while a
+stored profile is edited (`HomeCardOrderTests` ▸ `modeCounts`,
+`DestinationParityTests` ▸
+`profileContextExcludesOnlyProfileless`) — so a change that
+withholds the checklist further owes the pointer a new home in the
+same change.
 
 The two surfaces share ONE frame and one label, because the same
 English names the same action at both; the search row draws the
@@ -6107,25 +6071,22 @@ beside a working link is worse than the browser's own error page.
 **[Principle]**
 
 **Settings owns the login item; crash supervision is the CLI's.**
-(#342, #576, #678 item 16, re-ruled by #1071) General shows ONE
-switch — "Start at login", in the "Applies immediately" group —
-and it drives the `SMAppService` login item and nothing else.
-The `kiwidesk service` LaunchAgent, which adds `KeepAlive`
-crash restart, is reachable only from the command line.
+(#342, #576, #678 item 16, #1071) General shows ONE switch —
+"Start at login", in the "Applies immediately" group — and it
+drives the `SMAppService` login item and nothing else. The
+`kiwidesk service` LaunchAgent, which adds `KeepAlive` crash
+restart, is reachable only from the command line.
 
-**Why the second switch went away.** It was never one setting
-with two faces: the two mechanisms are two launchers, and having
-one switch install both meant they raced for the instance lock
-at every login. That race is not cosmetic — whichever launch
-loses decides whether supervision runs at all, and the losing
-launch is what produced #1068's ten-second focus theft and
-#1071's silently idle job. The GUI curates and the power layer
-is open (`gui.md`'s north star): a risky-but-valid knob is
-hidden from the GUI and left to the CLI rather than guarded with
-a second switch that cannot express the state honestly. Two
-doc corrections failed to describe the old behaviour truthfully
-before this was ruled, which is the evidence that it could not
-be described — a coin flip the user cannot see has no honest
+**One switch, because the two mechanisms are two launchers.** They
+are not one setting with two faces: one switch installing both
+makes them race for the instance lock at every login, and that
+race is not cosmetic — whichever launch loses decides whether
+supervision runs at all, and the losing launch is what produced
+#1068's ten-second focus theft and #1071's silently idle job. The
+GUI curates and the power layer is open (`gui.md`'s north star): a
+risky-but-valid knob is hidden from the GUI and left to the CLI
+rather than guarded with a second switch that cannot express the
+state honestly — a coin flip the user cannot see has no honest
 short sentence.
 
 **What the mainstream user loses is a crash they can answer
@@ -6161,7 +6122,7 @@ Rulings a contributor might otherwise undo:
   argues *for* pre-checked here. Supervision, though, *lacks*
   that no-neutral-absence argument and installs a
   less-discoverable LaunchAgent, so it is never on by default
-  and, since #1071, never offered in Settings at all — the good
+  and never offered in Settings at all (#1071) — the good
   default is the login item alone.
 - **No modal on every start.** A dialog that asks "open at
   login?" each launch was considered and rejected — it is the
@@ -6171,36 +6132,32 @@ Rulings a contributor might otherwise undo:
   there is no informative third case. Ask once, then the durable
   control owns the decision.
 
-**The impossible pair was refused in the fold, not made
-unrepresentable — which is why splitting the control was
-survivable, and why removing it costs nothing.** The service is `RunAtLoad` +
+**The impossible pair is refused in the fold, not made
+unrepresentable in a control.** The service is `RunAtLoad` +
 `KeepAlive` as one indivisible unit, so "restart on crash" is a
 *superset* of "open at login," and two independent toggles can
 render *Open at Login: OFF + Restart: ON* — a state whose first
 control's own label is false while the app still launches at
-login. #576 answered that by folding both into ONE three-level
-picker, which made the pair *unrepresentable*. Turn 14b (#678
-item 16) splits the picker back into two switches, because the
-supervision half is advanced and does not belong beside the
-language pick — which re-opens the shape #576 closed. So the
-constraint had to move rather than disappear, and it moved down a
-layer to where it is total: `AutoStartLevel.level(openAtLogin:
-restartOnCrash:)` **discards** the restart flag whenever login is
-off, so no caller could express the contradiction whatever its
-toggles said. That is the layer that holds for a CLI verb, a
-restored preference or a test — anything that never passes
-through the view.
+login. Folding both into ONE three-level picker makes the pair
+unrepresentable
+(#576), but the supervision half is advanced and does not belong
+beside the language pick, so the picker splits into two switches
+(#678 item 16) and re-opens the shape. The constraint therefore
+lives one layer down, where it is total:
+`AutoStartLevel.level(openAtLogin: restartOnCrash:)` **discards**
+the restart flag whenever login is off, so no caller can express
+the contradiction whatever its toggles say — the layer that holds
+for a CLI verb, a restored preference or a test, anything that
+never passes through the view.
 
-**#1071 ended the pair by removing the second switch.** The GUI
-expresses no level at all now: it writes the login item through
-`SettingsModel.setLoginItem`, and the level ladder survives as
-the READ that folds both mechanisms into one answer. Nothing
-writes a level any more, which is why `setAutoStart` and
-`AutoStartManager.set`/`apply` went with the row — a write path
-for a pair nobody can express is dead weight that would invite
-the pair back. Making it unrepresentable in one control was
-#576's answer; refusing it in the fold is what survived the
-control being split; not having two controls is what ended it.
+**Removing the second switch ends the pair (#1071).** The GUI
+expresses no level at all: it writes the login item through
+`SettingsModel.setLoginItem`, and the level ladder survives as the
+READ that folds both mechanisms into one answer. Nothing writes a
+level, which is why `setAutoStart` and
+`AutoStartManager.set`/`apply` go with the row — a write path for
+a pair nobody can express is dead weight that would invite the
+pair back.
 
 The `AutoStartManager` facade owns that coupling (the GUI analog
 of `CLIMain.runService`): `ServiceManager` stays a pure launchctl
@@ -6212,50 +6169,46 @@ SwiftUI `body` would be the AGENTS.md violation the CLI-only
 fallback existed to avoid.
 
 **The switch reads through, so it reports what the OS holds —
-including ON while the service is what starts KiwiDesk.** With
-one control there is no pair to remember and no third state to
-lose: the switch answers "does KiwiDesk start at login", which
-is true whichever mechanism does it, and goes inert while the
-service owns the answer. Storing a preference instead would mean
-holding a value the OS itself does not have, which is the exact
-drift read-through exists to prevent.
-
-**The control is read-through, and the two subsystems are the
-authority.** It never caches a bool — every level is derived from
-a fresh dual read (`SMAppService.mainApp.status` +
-`ServiceManager`'s structured launchd state) on appear and on
-`didBecomeActive`, and a `set(_:)` re-reads, so a change made in
-System Settings ▸ Login Items directly is reflected without a
-second source of truth. A `.requiresApproval` status reads as the
-At-Login level (the user's intent) with a jump to Login Items,
-reusing onboarding's "asked, not yet confirmed" shape. `.notFound`
-is the *pre-registration* state macOS reports for `mainApp`, so it
-reads as off-but-registerable, not as an error. A copy that
-genuinely cannot register greys the switch out (grey, don't
-hide) — the login item needs a stable `.app` path, so there is
-no valid "on" and only off remains, matching the #171
-"inapplicable control is greyed, not hidden" precedent. The
-control is greyed rather than its row, so its `?` help stays
-readable, and the
-reason-specific caption (a live sibling) names the fix for the
-specific cause: **move to Applications** for a
-Gatekeeper-translocated
-download, **run the packaged app** for a bare non-bundled binary
-(the device-QA `.build/release` path). The registerability check
-is a *location* fact, evaluated before the OS status, so it holds
-even if a prior install left a stale registration. The service's
-`KeepAlive { SuccessfulExit = false }` restarts only a *crash* —
-a deliberate Quit is never resurrected. The overlap that used to
-be invisible (a loaded service's `RunAtLoad` also launches at
-login) is now something a user assembles deliberately from two
-surfaces rather than one switch installing both, made
-runtime-safe by the #196 instance lock — and by that second launch exiting **successfully**, since
+including ON while the service is what starts KiwiDesk — and the
+two subsystems are the authority.** With one control there is no
+pair to remember and no third state to lose: the switch answers
+"does KiwiDesk start at login", which is true whichever mechanism
+does it, and goes inert while the service owns the answer. Storing
+a preference instead would mean holding a value the OS itself does
+not have, which is the exact drift read-through exists to prevent.
+It never caches a bool — every level is derived from a fresh dual
+read (`SMAppService.mainApp.status` + `ServiceManager`'s
+structured launchd state) on appear and on `didBecomeActive`, and
+a `set(_:)` re-reads, so a change made in System Settings ▸ Login
+Items directly is reflected without a second source of truth. A
+`.requiresApproval` status reads as the At-Login level (the user's
+intent) with a jump to Login Items, reusing onboarding's "asked,
+not yet confirmed" shape. `.notFound` is the *pre-registration*
+state macOS reports for `mainApp`, so it reads as
+off-but-registerable, not as an error. A copy that genuinely
+cannot register greys the switch out (grey, don't hide) — the
+login item needs a stable `.app` path, so there is no valid "on"
+and only off remains, matching the #171 "inapplicable control is
+greyed, not hidden" precedent. The control is greyed rather than
+its row, so its `?` help stays readable, and the reason-specific
+caption (a live sibling) names the fix for the specific cause:
+**move to Applications** for a Gatekeeper-translocated download,
+**run the packaged app** for a bare non-bundled binary (the
+device-QA `.build/release` path). The registerability check is a
+*location* fact, evaluated before the OS status, so it holds even
+if a prior install left a stale registration. The service's
+`KeepAlive { SuccessfulExit = false }` restarts only a *crash* — a
+deliberate Quit is never resurrected. The overlap (a loaded
+service's `RunAtLoad` also launches at login) is something a user
+assembles deliberately from two surfaces rather than one switch
+installing both, made runtime-safe by the #196 instance lock — and
+by that second launch exiting **successfully**, since
 `KeepAlive { SuccessfulExit = false }` would otherwise read the
 decline as a crash and respawn it every throttle
 ([#1068](https://github.com/KiwiCanopy/KiwiDesk/issues/1068);
-`SecondLaunchExitTests` pins the exit status and the plist
-clause together). The lock alone was not enough: it deduped the
-processes and said nothing about what the loser reported.
+`SecondLaunchExitTests` pins the exit status and the plist clause
+together). The lock alone was not enough: it deduped the processes
+and said nothing about what the loser reported.
 
 ### Appearance (light / dark override)
 
@@ -6284,12 +6237,11 @@ Light / Dark*; System is the default and stores nothing.
   a dark counterpart, and the bars and border overlays are their
   own windows a Settings-view modifier never reaches. And it does
   not cleanly revert: AppKit-backed subviews (`NSViewRepresentable`
-  captions, and at the time the sidebar's visual-effect
-  backing) resolve their appearance
+  captions, a visual-effect backing) resolve their appearance
   when made and do not re-read it when the modifier returns to
-  `nil`, so *Dark → System* stranded them dark while *Dark → Light*
-  — a new concrete value — looked fine (found on device before it
-  shipped). Assigning `NSApp.appearance = nil` hands the decision
+  `nil`, so *Dark → System* strands them dark while *Dark → Light*
+  — a new concrete value — looks fine. Assigning
+  `NSApp.appearance = nil` hands the decision
   back to macOS, and AppKit propagates it to every window,
   including ones opened later. One surface overrides the pick by
   ruling: a bar's Liquid Glass with a dark Fill pins `.darkAqua`
@@ -6323,40 +6275,39 @@ the page's own preview draws, from the same staged settings —
 a strip of stylised mock drawings would be a second, quietly
 disagreeing picture of the same configuration.
 
-**A preview that takes a window count simulates; one that does
-not illustrates.** Several Layout Defaults settings are
-invisible at any fixed number of windows. Cascade overflow and
-Cascade all draw the identical frame until the stack is deep
-enough to overflow; a track limit means nothing until there are
-more windows than tracks; a dynamic grid's balance only shows
-as it rebalances. A still frame at a baked-in count therefore
-cannot teach the setting it is under, and the reader has to
-save, watch real windows, and come back. So the count is an
-input on a slider, and each schematic runs its real fill logic
-against it. The obligation that carries: **call the engine
-wherever the engine can answer**, so that much of the picture
-cannot drift — BSP tiles through `BspLayout` and a dynamic grid
-takes its balance from `GridLayout.balanced` rather than a copy
-of the arithmetic. The rest is hand-drawn for two different
-reasons, and they want different remedies: some of the engine's
-constants do not suit a mini canvas at all (the cascade's 40 pt
-title-bar reveal would throw tiles off it), while some rules —
-a grid's fill order, its capacity clamp, the leftover span —
-have no such obstacle and are simply not exported apart from
-`calculateGeometry`. The second kind is the standing reason to
-widen the seam rather than the licence not to: a schematic
-reproducing a rule the engine already owns is a picture that
-stops agreeing with the layout the day the rule moves. Two consequences worth stating, because both
-look like regressions in isolation: the two-frame "4 windows →
-a 5th opens" growth pair retired, since a reader who can add
-the fifth window themselves does not need it staged; and the
-count is view state that resets on leaving, because it is a
-question asked of the preview rather than a setting — writing
-it to the config would be a second, invisible knob. What the
-count does **not** buy is a render of the user's actual
-windows: that needs live window state, which is exactly the
-live-apply coupling #123 rejects (see
-[accepted limitations](accepted-limitations.md)).
+**A preview that takes a window count simulates; one that does not
+illustrates.** Several Layout Defaults settings are invisible at
+any fixed number of windows. Cascade overflow and Cascade all draw
+the identical frame until the stack is deep enough to overflow; a
+track limit means nothing until there are more windows than
+tracks; a dynamic grid's balance only shows as it rebalances. A
+still frame at a baked-in count therefore cannot teach the setting
+it is under, and the reader has to save, watch real windows, and
+come back. So the count is an input on a slider, and each
+schematic runs its real fill logic against it. The obligation that
+carries: **call the engine wherever the engine can answer**, so
+that much of the picture cannot drift — BSP tiles through
+`BspLayout` and a dynamic grid takes its balance from
+`GridLayout.balanced` rather than a copy of the arithmetic. The
+rest is hand-drawn for two different reasons, and they want
+different remedies: some of the engine's constants do not suit a
+mini canvas at all (the cascade's 40 pt title-bar reveal would
+throw tiles off it), while some rules — a grid's fill order, its
+capacity clamp, the leftover span — have no such obstacle and are
+simply not exported apart from `calculateGeometry`. The second
+kind is the standing reason to widen the seam rather than the
+licence not to: a schematic reproducing a rule the engine already
+owns is a picture that stops agreeing with the layout the day the
+rule moves. Two consequences, since both look like regressions in
+isolation: the two-frame "4 windows → a 5th opens" growth pair
+retired, since a reader who can add the fifth window themselves
+does not need it staged; and the count is view state that resets
+on leaving, because it is a question asked of the preview rather
+than a setting — writing it to the config would be a second,
+invisible knob. What the count does **not** buy is a render of the
+user's actual windows: that needs live window state, which is
+exactly the live-apply coupling #123 rejects (see [accepted
+limitations](accepted-limitations.md)).
 
 **The count's floor is per layout, and it reaches 1 only where
 one window draws two ways.** The slider began at 2 because at
@@ -6374,23 +6325,22 @@ a layout switch is clamped into the layout's own band rather
 than drawn by a schematic that never modelled it.
 
 **Where the engine's rule needs a display, the preview stands a
-number in for the display — never a simpler rule.** (#708,
-extending the paragraph above; the pattern was first ruled for
-Grid in #712.) Some engine rules are not merely unexported, they
-are unanswerable on a mini-canvas: how many minimum-size cells a
-grid fits, how many windows fit in one track before a new one
-opens, how many tracks fit across a screen. Each is a function of
+number in for the display — never a simpler rule.** (#708, #712.)
+Some engine rules are not merely unexported, they are unanswerable
+on a mini-canvas: how many minimum-size cells a grid fits, how
+many windows fit in one track before a new one opens, how many
+tracks fit across a screen. Each is a function of
 `min_window_size` against real geometry, and the canvas has
 neither.
 
-The tempting escapes are both worse than the problem. Dropping
-the rule ships a preview that teaches a behaviour the app does
-not have — the Track schematic did exactly this, growing the
-focused track to a drawn ceiling and piling the surplus, while
-the app has filled-then-spilled into a new track since #437.
-Disclaiming it in the caption ("this preview shows position
-only") leaves the reader knowing a rule exists without knowing
-what it is, and a caption's job is to label what is shown.
+The tempting escapes are both worse than the problem. Dropping the
+rule ships a preview that teaches a behaviour the app does not
+have — a Track schematic that grows the focused track to a drawn
+ceiling and piles the surplus, while the app fills and then spills
+into a new track (#437). Disclaiming it in the caption ("this
+preview shows position only") leaves the reader knowing a rule
+exists without knowing what it is, and a caption's job is to label
+what is shown.
 
 So: **keep the engine's rule, substitute the display quantity**,
 as a named constant that says it is a stand-in and argues its
@@ -6400,27 +6350,23 @@ asks — and only the number is local. Two obligations make the
 substitution honest rather than a clamp by another name. The
 stand-in must be **the same at every drawing scale**, or one
 configuration draws two different capacities and the thumbnail
-contradicts the panel (#712's first cut did exactly that, and
-review caught it before it shipped: a rigid 8 × 1 at five windows
-piled two windows on the strip thumbnail and none in the panel,
-inventing an overflow the engine does not have). And it must
-**not bind below a value the user typed** — a preview
-answering a typed limit of 4 with
-three tracks is a stand-in overruling the setting it illustrates.
-Clamp the drawing if you must; never the rule. The family lives
-in `LayoutSchematicStandIns` and
+contradicts the panel (a rigid 8 × 1 at five windows piles two
+windows on the strip thumbnail and none in the panel, inventing an
+overflow the engine does not have — #712). And it must **not bind
+below a value the user typed** — a preview answering a typed limit
+of 4 with three tracks is a stand-in overruling the setting it
+illustrates. Clamp the drawing if you must; never the rule. The
+family lives in `LayoutSchematicStandIns` and
 `LayoutSchematicTrackFoldTests` holds the scale independence.
 
 **A layout gets one frame, whatever it has to teach** (#753,
-superseding the #125/#239 two-frame bar, which stood in
-[UI patterns](ui-patterns.md) ▸ Previews & schematics). That
-earlier
-rule let a layout earn a second frame — two mini-screens with an
-arrow between them — for a fact "inexpressible in one frame at
-any window count", and exactly one claim ever cleared it:
-Scrolling's `follow` anchor, where the viewport pans the minimum
-to reveal the newly focused window. A still picture cannot show
-motion.
+replacing the #125/#239 two-frame bar of [UI
+patterns](ui-patterns.md) ▸ Previews & schematics). That bar let a
+layout earn a second frame — two mini-screens with an arrow
+between them — for a fact "inexpressible in one frame at any
+window count", and exactly one claim ever cleared it: Scrolling's
+`follow` anchor, where the viewport pans the minimum to reveal the
+newly focused window. A still picture cannot show motion.
 
 The premise is true and the conclusion does not follow. **A pair
 does not show motion either.** It shows two *states* and asks the
@@ -6443,16 +6389,16 @@ was never a test, only a description of the one case that had
 already been built.
 
 **The cost is named rather than argued away: two picker options
-now draw the same picture.** `follow` pins the focus nowhere, so
-the only resting position it can honestly draw is the neutral
-one — which is `center`'s, to the pixel. A reader who clicks
-between the two sees the frame not move. That is accepted,
-because the preview's subject is the **rest state** and at rest
-the two genuinely are the same layout; what separates them is
-behaviour *under motion*, which no frame of any count denotes.
-So the caption carries it, and the caption **switches on the
-anchor** — the words are what changes when the picker does, and
-they are also the only place `follow` can be described at all.
+draw the same picture.** `follow` pins the focus nowhere, so the
+only resting position it can honestly draw is the neutral one —
+which is `center`'s, to the pixel. A reader who clicks between the
+two sees the frame not move. That is accepted, because the
+preview's subject is the **rest state** and at rest the two
+genuinely are the same layout; what separates them is behaviour
+*under motion*, which no frame of any count denotes. So the
+caption carries it, and the caption **switches on the anchor** —
+the words are what changes when the picker does, and they are also
+the only place `follow` can be described at all.
 
 That last point generalises, and it is the obligation the trade
 buys: **one string spanning a picker's options states the odd
@@ -6486,62 +6432,56 @@ draw it at all — leaving it to the frame's clip is not the same
 thing, for the reason `SchematicCanvas.screen` states: the clip
 does not crop where a reader would assume.
 
-**Home is the only navigator: a card grid, not a sidebar.**
-(#678 turn 9, superseding the #68/#297 fixed source list.) A
-sidebar is a menu the user pays for on every visit — a column
-of names that answers nothing until clicked. Home inverts
-that: each destination is a card carrying its **current
-values** (and, where a real renderer exists, a small live
-picture), so "is my gap 8 or 10?" is answered without opening
-anything, and the window opens as a status board rather than a
-launcher. An area screen is a pushed view behind a "← Home"
-back chip (⌘[ and Escape pop it; Escape only when no inner
-view claimed the key). What this buys over the sidebar it
-replaced: the full window width for content, an entry screen
-that scales to the mode's card count instead of a fixed
-taxonomy column, and per-language label budgets that die with
-the fixed column (a card flexes; an over-long label truncates
-visibly). What it costs, accepted: a second click to move
-between sibling areas until the pill row lands (Phase 4). The
-old `HStack`-not-`NavigationSplitView` finding stands as
-history — macOS 26 cannot lock a split-view divider — but
-nothing composes columns any more, so nothing rests on it.
+**Home is the only navigator: a card grid, not a sidebar.** (#678
+turn 9, superseding the #68/#297 fixed source list.) A sidebar is
+a menu the user pays for on every visit — a column of names that
+answers nothing until clicked. Home inverts that: each destination
+is a card carrying its **current values** (and, where a real
+renderer exists, a small live picture), so "is my gap 8 or 10?" is
+answered without opening anything, and the window opens as a
+status board rather than a launcher. An area screen is a pushed
+view behind a "← Home" back chip (⌘[ and Escape pop it; Escape
+only when no inner view claimed the key). What this buys over a
+sidebar: the full window width for content, an entry screen that
+scales to the mode's card count instead of a fixed taxonomy
+column, and per-language label budgets that die with the fixed
+column (a card flexes; an over-long label truncates visibly). What
+it costs, accepted: a second click to move between sibling areas
+until the pill row lands (Phase 4). (The sidebar shell was an
+`HStack`, never a `NavigationSplitView`, because macOS 26 cannot
+lock a split-view divider — a finding nothing rests on once no
+columns are composed.)
 
 **Home's two groups are scope-named: "This Profile" / "Whole
-App".** (#678 turn 9, reversing the #68 "Design"/"System"
-topical naming — deliberately, not by drift.) The topical
-names existed because a *sidebar* label had to predict
-placement for a user who couldn't see the contents. A card
-grid shows the contents: every This Profile card renders
-values from the draft the header's profile chip names, so the
-scope label is no longer a prediction the user must make — it
-is a caption over evidence. Scope was always the primary
-navigation axis (turn 2 kept it through every concept);
-naming it honestly beats a topical alias once the cards carry
-the proof. `SettingsDestination.thisProfile` / `.wholeApp`
-remain the membership's one copy, and `HomeCardOrderTests`
-pins the grid's groups to them.
+App".** (#678 turn 9, replacing #68's "Design"/"System".) Topical
+names exist because a *sidebar* label has to predict placement for
+a user who cannot see the contents. A card grid shows the
+contents: every This Profile card renders values from the draft
+the header's profile chip names, so the scope label is not a
+prediction the user must make — it is a caption over evidence.
+Scope is the primary navigation axis; naming it honestly beats a
+topical alias once the cards carry the proof.
+`SettingsDestination.thisProfile` / `.wholeApp` remain the
+membership's one copy, and `HomeCardOrderTests` pins the grid's
+groups to them.
 
-**A card's picture asks the real data — reusing its editor's
-own maths where one exists, staying a data readout where none
-does — and is never a sketch drawn beside either.** (#678 turn
-9; the desktop plate #786, owner rulings 2026-08-09,
-superseding turn 9's text-only fallback.) A hand-drawn
-stand-in ships a preview that teaches what the app does not
-do — the #702 class of defect, at grid scale. So where an
-editor already owns the maths, the card calls it: the layout
-schematic family with its `SchematicPlacement` splice,
-`GapPreviewScale.mini` and `FocusBorderPreview`'s width remap
-on the Gaps & Borders tile, `MonitorArrangement.layout`,
-`BarsGates`' own shown-bar predicate. Where no editor maths
-exists, the picture is a readout of the draft, never a
-decorative sketch: one pane per declared space, the colour fan
-and swatch grid of the config's real hexes, the Behaviour
-divider answering the real mouse-resize choice. Turn 9's "or
-the card stays text-only" was this same rule under scarcity —
-the unified dark preview tile did not exist yet, so cards
-without a renderer went without a picture; #786 built the
-tile, and the fallback retired with it.
+**A card's picture asks the real data — reusing its editor's own
+maths where one exists, staying a data readout where none does —
+and is never a sketch drawn beside either.** (#678 turn 9; the
+desktop plate #786, owner rulings 2026-08-09.) A hand-drawn
+stand-in ships a preview that teaches what the app does not do —
+the #702 class of defect, at grid scale. So where an editor
+already owns the maths, the card calls it: the layout schematic
+family with its `SchematicPlacement` splice,
+`GapPreviewScale.mini` and `FocusBorderPreview`'s width remap on
+the Gaps & Borders tile, `MonitorArrangement.layout`, `BarsGates`'
+own shown-bar predicate. Where no editor maths exists, the picture
+is a readout of the draft, never a decorative sketch: one pane per
+declared space, the colour fan and swatch grid of the config's
+real hexes, the Behaviour divider answering the real mouse-resize
+choice. There is no text-only fallback: a card without editor
+maths still draws its readout, on the tile the desktop plate
+(#786) gives the profile cards.
 
 That tile is the **desktop plate**: a profile card's picture
 is a picture of the user's desktop, so it sits on a fixed
@@ -6588,7 +6528,7 @@ flip config ownership).
 
 **The flip to Power User answers with motion plus an
 accent-tinted weight — the mode's own colour, at reduced
-strength.** (#760, amended on device 2026-08-09.) Without an
+strength.** (#760, owner ruling 2026-08-09.) Without an
 answer, the flip changes the page silently and users toggle
 twice to compare — the tell that the transition carries no
 information. So the moment washes the *containers* it
@@ -6601,47 +6541,42 @@ animates the insertion, and the durable half is the frame:
 1.5 pt of the accent at `modeGatedStrokeOpacity` against the
 1 pt hairline rest.
 
-The first cut of this ruling said "weight, never a hue", and
-its premise failed on real hardware: a weight step on the
+"Weight, never a hue" fails on real hardware: a weight step on the
 hairline is a step in a stroke whose contrast is ~1.2:1 —
-invisible in both appearances — and a stronger *neutral*
-read as "different" without saying *which* different. The
-frame borrows THE accent, not a second hue, and that
-distinction is what keeps the original argument's teeth: no
-ok/warn misread, because the accent's meaning here is "the
-mode whose segment wears this colour" — the wash paints it
-on exactly the containers that then keep the tinted frame,
-so the continuity from wash to frame to the active Power
-User segment is the legend, drawn nowhere. Hue still never
-carries alone: the weight step stays, and the strength is
-measured, not felt — 0.5 sat exactly on the CVD separation
-floor against the light hairline; the shipped value clears
-the hairline it neighbours on that edge over both grounds a
-card is drawn on, in both appearances, and
-`ModeGatedFrameSeparationTests` derives those floors from
-the shipped tokens. The weight stays below the doubling the
-Monitors (1.5→3 pt) and palette (1→2 pt) pairs spend on
-selected/applied — a mode-gated card is present, not picked.
+invisible in both appearances — and a stronger *neutral* reads as
+"different" without saying *which* different. The frame borrows
+THE accent, not a second hue, and that distinction is what keeps
+the weight argument's teeth: no ok/warn misread, because the
+accent's meaning here is "the mode whose segment wears this
+colour" — the wash paints it on exactly the containers that then
+keep the tinted frame, so the continuity from wash to frame to the
+active Power User segment is the legend, drawn nowhere. Hue still
+never carries alone: the weight step stays, and the strength is
+measured, not felt — 0.5 sat exactly on the CVD separation floor
+against the light hairline; the shipped value clears the hairline
+it neighbours on that edge over both grounds a card is drawn on,
+in both appearances, and `ModeGatedFrameSeparationTests` derives
+those floors from the shipped tokens. The weight stays below the
+doubling the Monitors (1.5→3 pt) and palette (1→2 pt) pairs spend
+on selected/applied — a mode-gated card is present, not picked.
 
 **A persistent statement and a transient one never share a
-property.** (#1173.) Hover first took the full-strength
-accent on that same edge, on the reasoning that the marking's
-own strength therefore had a ceiling. Sharing the property
-was the defect, not the strengths: the two states then differ
-only in degree, so a marked card reads as permanently
-hovered — and pointing at a marked card OVERWRITES the one
-channel carrying its marking, which no ceiling can fix,
-because a statement a pointer can delete is not a statement.
-So the channels split by what they answer: the border says
-which mode a card belongs to, the fill says where the pointer
-is (`cardHover`, `card` stepped one notch toward the ground
-in each appearance — opaque, so the inks above it are
-measured against what they actually sit on). The two facts
-compose, which is the whole prize: a marked card under the
-pointer keeps its frame AND lifts. It also returns the Home
-card to the idiom the rest of the tree already keeps — a
-neutral lift for the pointer, the accent reserved for what a
-thing IS.
+property.** (#1173.) Hover on the full-strength accent of that
+same edge, with the marking's own strength capped beneath it,
+shares the property, and that is the defect rather than the
+strengths: the two states then differ only in degree, so a marked
+card reads as permanently hovered — and pointing at a marked card
+OVERWRITES the one channel carrying its marking, which no ceiling
+can fix, because a statement a pointer can delete is not a
+statement. So the channels split by what they answer: the border
+says which mode a card belongs to, the fill says where the pointer
+is (`cardHover`, `card` stepped one notch toward the ground in
+each appearance — opaque, so the inks above it are measured
+against what they actually sit on). The two facts compose, which
+is the whole prize: a marked card under the pointer keeps its
+frame AND lifts. It also returns the Home card to the idiom the
+rest of the tree already keeps — a neutral lift for the pointer,
+the accent reserved for what a thing IS.
 
 **Only the user's own flip glows; the implicit promotion
 stays silent.** (#760.) A search or cross-reference landing
@@ -6661,98 +6596,78 @@ would take the answer from precisely the users who lose the
 motion channel. `ModeGatedChromeTests` and
 `SettingsModeRevealTests` hold the two halves.
 
-**One draft, three views — and the save surface is the
-floating pill.** (#678 turn 9; Phase 4 shell.) The turn-9
-frame draws three views of one draft on one screen: the
-floating save pill, the change-list popover, and the detail
-panel's "Changed in this draft" list. All three ship now.
-The popover opens from the pill's own count line, not from a
-header chip (owner 2026-08-10, retiring the turn-9 top-right
-button): the pill already narrates the draft, so a second
-count in the header stated one fact in two corners of the
-window — and every corner the count occupies is one the
-responsive pass must defend at 720 pt. An earlier ruling
-kept the docked three-verb
-footer, arguing it was the pill's final form since the spec's
-responsive pass would dock the pill below 900 pt anyway — the
-owner overturned
-that on sight (2026-08-09): at every width this window
-actually opens at, a full-width bar under the content reads
-as chrome that is always there, while the pill exists exactly
-when the draft does, which is the fact the surface is FOR.
-So the pill floats over the content column, centred on it
-(offset past the preview panel when one is open), appears
-only while there is something to act on, and disappears at
-zero — the one deliberate exception to grey-don't-hide,
-carried by `GreyOutHidingTests`. Below 900 pt it docks into
-a real footer bar (turn 17a, shipped): the pill's argument is
-that it costs a strip of gutter and covers nothing, and below
-900 that second half stops being true — the same pill sits on
-top of the rows it is about. So the pill is the form, not the
-fact; what
-survives both forms is that it exists only while the draft
-does. It is the one component in the shell that changes KIND
-rather than size, which is also why it stays ONE view with
-two containers: two footer types is two places for one draft
-to be described differently.
-The shown N is the ROW COUNT of the list it opens (owner
-2026-08-10, revising the earlier settings-count ruling): a
-per-instance family expands one census setting into a row
-per touched instance — three space modes changed is one
-setting, three rows — and a count a user can cross-check
-against a visible list must be that list's count, or the
-surface reads as dropping changes. Many leaves under one
-ROW still count once (`SettingsDraftDiff` resolves leaves
-to census settings; the readout expands instances), and the
-dirty-tracking `draftChangeCount` keeps the settings
-granularity internally — only surfaces beside a list state
-the list's number. The popover and the panel list are no
-longer partial — the readout (`SettingsValueReadout`)
-narrates every attributed key, and its totality guard is
-what discharged the earlier partial-list objection — so
-each row states old → new and jumps to the control that
-changed. Save and Revert live in the pill alone.
+**One draft, three views — and the save surface is the floating
+pill.** (#678 turn 9; Phase 4 shell.) Three views of one draft on
+one screen: the floating save pill, the change-list popover, and
+the detail panel's "Changed in this draft" list. The popover opens
+from the pill's own count line, not from a header chip (owner
+2026-08-10): the pill already narrates the draft, so a second
+count in the header states one fact in two corners of the window —
+and every corner the count occupies is one the responsive pass
+must defend at 720 pt. A docked three-verb footer — defended as
+the pill's final form, since the responsive pass docks the pill
+below 900 pt anyway — is refused (owner 2026-08-09): at every
+width this window actually opens at, a full-width bar under the
+content reads as chrome that is always there, while the pill
+exists exactly when the draft does, which is the fact the surface
+is FOR. So the pill floats over the content column, centred on it
+(offset past the preview panel when one is open), appears only
+while there is something to act on, and disappears at zero — the
+one deliberate exception to grey-don't-hide, carried by
+`GreyOutHidingTests`. Below 900 pt it docks into a real footer bar
+(turn 17a): the pill's argument is that it costs a strip of gutter
+and covers nothing, and below 900 that second half stops being
+true — the same pill sits on top of the rows it is about. It is
+the one component in the shell that changes KIND rather than size,
+which is also why it stays ONE view with two containers: two
+footer types is two places for one draft to be described
+differently. The shown N is the ROW COUNT of the list it opens
+(owner 2026-08-10): a per-instance family expands one census
+setting into a row per touched instance — three space modes
+changed is one setting, three rows — and a count a user can
+cross-check against a visible list must be that list's count, or
+the surface reads as dropping changes. Many leaves under one ROW
+still count once (`SettingsDraftDiff` resolves leaves to census
+settings; the readout expands instances), and the dirty-tracking
+`draftChangeCount` keeps the settings granularity internally —
+only surfaces beside a list state the list's number. The readout
+(`SettingsValueReadout`) narrates every attributed key, held total
+by its guard, so each row states old → new and jumps to the
+control that changed. Save and Revert live in the pill alone.
 
-**The detail view is two columns, and the panel is where the
-draft is watched.** (#678 Phase 4.) An area that
-has something to show gets a fixed 392 pt right column: "Live
-preview · <area>" over the area's preview drawn from the
-DRAFT, then the diff list. The redesign spec's `›` collapse
-handle is deliberately NOT built (owner 2026-08-10): the
-window drops the panel by WIDTH below 1200 pt (turn 17a), and
-a manual collapse beside that is a persisted preference
-duplicating what the window already decides —
-`DetailPanelTests` pins the absence so a handle quietly
-returning must re-argue it. The detached card's close button
-is not that handle and the difference is one stored key wide:
-it is per-mount state, cleared on every navigation, so it
-answers "not on this screen, right now" rather than "this
-area has no preview" — an answer that outlived the window
-growing back past 1200 would leave a docked column the user
-could not explain. Which
-areas offer one is a single data set
-(`SettingsDetailPanelOffer.offering`), because the
-prototype's rule is a verdict either way: an area with
-nothing to show hides the panel and takes the full width —
-absence must be a decision, never a missing branch. The
-panel's previews are existing renderers moved or recycled,
-never new drawings beside them: the schematic-and-slider,
-the palette scene, the gap miniature with the ring and the
-drag ghost, and — for Bars — the Home plate's fused two-bar
-desktop scene mounted at panel size (the two card strips
-retired with their cards); Shortcuts later joined with the
-keyboard board (pass 5), a panel-first renderer with no card
-twin to retire — the rule bans duplicates, not first
-previews. The in-card mounts are REMOVED in
-the same change — one screen must not state one fact twice —
-which NARROWS the old "live preview leads its editor"
+**The detail view is two columns, and the panel is where the draft
+is watched.** (#678 Phase 4.) An area that has something to show
+gets a fixed 392 pt right column: "Live preview · <area>" over the
+area's preview drawn from the DRAFT, then the diff list. The
+redesign spec's `›` collapse handle is deliberately NOT built
+(owner 2026-08-10): the window drops the panel by WIDTH below 1200
+pt (turn 17a), and a manual collapse beside that is a persisted
+preference duplicating what the window already decides —
+`DetailPanelTests` pins the absence so a handle quietly returning
+must re-argue it. The detached card's close button is not that
+handle and the difference is one stored key wide: it is per-mount
+state, cleared on every navigation, so it answers "not on this
+screen, right now" rather than "this area has no preview" — an
+answer that outlived the window growing back past 1200 would leave
+a docked column the user could not explain. Which areas offer one
+is a single data set (`SettingsDetailPanelOffer.offering`),
+because the prototype's rule is a verdict either way: an area with
+nothing to show hides the panel and takes the full width — absence
+must be a decision, never a missing branch. The panel's previews
+are existing renderers moved or recycled, never new drawings
+beside them: the schematic-and-slider, the palette scene, the gap
+miniature with the ring and the drag ghost, and — for Bars — the
+Home plate's fused two-bar desktop scene mounted at panel size
+(the two card strips retired with their cards); Shortcuts'
+keyboard board is a panel-first renderer with no card twin to
+retire — the rule bans duplicates, not first previews. The in-card
+mounts are REMOVED in the same change — one screen must not state
+one fact twice — which narrows the "live preview leads its editor"
 convention to areas without a panel: in the panel areas no
-migrated preview survives in its card (`DetailPanelTests`
-holds the offer set and the removals both). Advanced Colours
-was the worked exception while it had no panel of its own;
-#793 gave it one, and its four group previews left under this
-same rule rather than by a new decision — the condition
-changed, not the convention.
+migrated preview survives in its card (`DetailPanelTests` holds
+the offer set and the removals both). Advanced Colours' four group
+previews left under this same rule once
+#793 gave it a panel — the condition changed, not the convention.
 
 **The panel's object is the DRAFT, so a picture of anything else
 is not a panel** — it is a sheet. (#859, owner 2026-08-16.)
@@ -6789,26 +6704,24 @@ grounds, precisely because the redesign prototype drew a panel
 here and a later reader would otherwise take the prototype for
 the ruling.
 
-One consequence worth stating because it is not obvious: the
-sheet draws from the preset's own `TilingSettings`, never the
-draft's. Drawing it from the draft would make the picture change
-when the user edited something unrelated, and would quietly turn
-Profiles back into a draft-preview surface — the one line the
-whole ruling above rests on.
+One consequence that is not obvious: the sheet draws from the
+preset's own `TilingSettings`, never the draft's. Drawing it from
+the draft would make the picture change when the user edited
+something unrelated, and would quietly turn Profiles back into a
+draft-preview surface — the one line the whole ruling above rests
+on.
 
-**A composite question needs a composite picture, in the
-colours the user actually set.** (#793, owner 2026-08-16.)
-Advanced Colours edits twenty-five colours in four groups, and
-four group previews can answer "is this row right?" while
-leaving "do these work *together*?" unanswerable without
-saving and looking at the real desktop. The accent ladders,
-the two rings, the state marks and the drag pair are judged
-against each other. So the panel draws one scene holding every
-role at once — which reverses that page's own earlier
-reasoning, recorded here because it was argued rather than
-merely outgrown: grouping by *where you see it* decides the
-ROWS, and never settled whether the PICTURE should be
-per-group.
+**A composite question needs a composite picture, in the colours
+the user actually set.** (#793, owner 2026-08-16.) Advanced
+Colours edits twenty-five colours in four groups, and four group
+previews can answer "is this row right?" while leaving "do these
+work *together*?" unanswerable without saving and looking at the
+real desktop. The accent ladders, the two rings, the state marks
+and the drag pair are judged against each other. So the panel
+draws one scene holding every role at once — which does not
+contradict that page's own reasoning: grouping by *where you see
+it* decides the ROWS, and never settled whether the PICTURE should
+be per-group.
 
 Two constraints the scene is built under. It draws from **raw
 palette paths, never the Home plate's accent/ink/base fold** —
@@ -6824,19 +6737,16 @@ disclaiming itself, and `PaletteSceneRoleTests` holds every
 palette path to being drawn or argued away — so a new colour
 cannot quietly miss the page that exists to show them all.
 
-**Wide windows cap the content, not the panel.** (#678
-Phase 4; owner 2026-08-10.) The prototype was drawn at 1440
-and the breakpoints only go DOWN, so full screen was
-unspecced — and an uncapped content column stretches every
-row past readability while the panel's previews are pt-tuned
-at 392. So the content column stops at 980 pt (the widest
-column the prototype drew) and centres in the surplus; the
-panel stays 392. Home follows the same instinct at its own
-scale: never more than the redesign spec's four columns — on
-a big screen the CARDS grow instead of a fifth column
-appearing.
-Whether the panel should take some surplus at extreme widths
-is an open follow-up, not a decision this entry makes.
+**Wide windows cap the content, not the panel.** (#678 Phase 4; owner
+2026-08-10.) The prototype was drawn at 1440 and the breakpoints only
+go DOWN, so full screen was unspecced — and an uncapped content column
+stretches every row past readability while the panel's previews are
+pt-tuned at 392. So the content column stops at 980 pt (the widest
+column the prototype drew) and centres in the surplus; the panel stays
+392. Home follows the same instinct at its own scale: never more than
+the redesign spec's four columns — on a big screen the CARDS grow
+instead of a fifth column appearing. Whether the panel takes some
+surplus at extreme widths is open.
 
 **Narrow windows drop the preview before they drop a
 control.** (#678 turn 17a.) The window is the user's to make
@@ -6856,8 +6766,7 @@ that is one where every row is two lines and nothing is
 comparable — a minimum size is a kinder answer than a layout
 nobody wants.
 
-Three consequences worth stating, because each was reachable
-another way and rejected:
+Three consequences, each reachable another way and rejected:
 
 - **The preview loses its COLUMN, never its existence.** It
   detaches into a card over the content — draggable, and
@@ -6892,46 +6801,40 @@ And what a drawer reveals sits in ONE sunken well, never one
 well per row of its contents.
 
 **A drawer header is a whole clickable row, not a triangle.**
-(#956, owner 2026-08-23; the second round on the same
-complaint.) The rule above says "different kind of row" and
-does not say *openable*, and the native disclosure header
-answers only its own small triangle — so the header
-under-signalled and then under-delivered when a reader
-clicked the label it does signal with. Both halves are one
-seam, `SettingsDisclosureStyle`: the header becomes one
-full-width `.plain` `Button` over the whole row, and it rests
-on a chevron with real weight that rotates on expand,
-confirming on hover. The
-button is preferred over a tap gesture on the label
-specifically because it is a control — it takes one focus
-stop, Space activates it, and macOS keyboard navigation can
-reach it, none of which a gesture offers. (Space, not Return:
-Return belongs to the window's default button, so a ruling
-that promised it would be promising the platform's behaviour
-rather than ours.) The
-cost is what every custom control here costs and must be paid
-back in the same change: a `Button` is not a disclosure
-triangle, so VoiceOver stops saying whether the drawer is
-open, and `.accessibilityValue` gives expanded / collapsed
-back (the `LinkedCaptionHitTests` rule, generalised). One
-style, both chromes and the one drawer outside the wrapper:
-a header that reads as openable in a card and not inline
-would be the same defect wearing a different frame.
+(#956, owner 2026-08-23.) The rule above says "different kind of
+row" and does not say *openable*, and the native disclosure header
+answers only its own small triangle — so the header under-signals
+and then under-delivers when a reader clicks the label it does
+signal with. Both halves are one seam, `SettingsDisclosureStyle`:
+the header becomes one full-width `.plain` `Button` over the whole
+row, and it rests on a chevron with real weight that rotates on
+expand, confirming on hover. The button is preferred over a tap
+gesture on the label specifically because it is a control — it
+takes one focus stop, Space activates it, and macOS keyboard
+navigation can reach it, none of which a gesture offers. (Space,
+not Return: Return belongs to the window's default button, so a
+ruling that promised it would be promising the platform's
+behaviour rather than ours.) The cost is what every custom control
+here costs and must be paid back in the same change: a `Button` is
+not a disclosure triangle, so VoiceOver stops saying whether the
+drawer is open, and `.accessibilityValue` gives expanded /
+collapsed back (the `LinkedCaptionHitTests` rule, generalised).
+One style, both chromes and the one drawer outside the wrapper: a
+header that reads as openable in a card and not inline would be
+the same defect wearing a different frame.
 
-**The cue is the chevron and the hover, never a resting
-fill.** The first build wore the house *icon-chip* cue — a
-0.06 rest fill — and the owner read it on device as "the grey
-doesn't fit the kiwi design" (2026-08-24). They were right,
-and the arithmetic says why it is a HUE fault rather than a
-strength one: that fill is `Color.primary`, so on a light
-card it composites to `#F0F0F0`, R=G=B exactly — the one
-achromatic surface in a window whose every other surface and
-border is green-tinted. It measures 1.14:1 against its card,
-faint enough that pure lightness at that step would be
-invisible; it was seen anyway. Beside a `sunken` well of
+**The cue is the chevron and the hover, never a resting fill.** The
+house *icon-chip* cue — a 0.06 rest fill — reads on device as "the
+grey doesn't fit the kiwi design" (owner, 2026-08-24), and the
+arithmetic says why it is a HUE fault rather than a strength one: that
+fill is `Color.primary`, so on a light card it composites to
+`#F0F0F0`, R=G=B exactly — the one achromatic surface in a window
+whose every other surface and border is green-tinted. It measures
+1.14:1 against its card, faint enough that pure lightness at that step
+would be invisible; it was seen anyway. Beside a `sunken` well of
 almost the same lightness, a hue difference at equal value is
-maximally salient, and the collapsed header even sat *darker*
-than the interior it opens onto.
+maximally salient, and the collapsed header even sat *darker* than the
+interior it opens onto.
 
 The fix is not a better-coloured fill, because **no fixed
 surface token can be a rest cue for this style at all**: it
@@ -6953,84 +6856,72 @@ the full-row cue are two ladders for two sizes, and taking the
 smaller one to a full row is how a token nobody notices
 becomes the most visible thing on the page.
 
-**The third round, and what the first two actually bought.**
-(#1021, owner 2026-08-25: *"in some menus the accordion is way
-too small"* and, asked which, *all of them*.) The complaint
-came back because #956 fixed the hit target and the
-announcement while leaving the two things a reader sees. The
-chevron it introduced "with real weight" was pinned at
-`.footnote` — the *smallest* step on the ramp — so the
-argument above ("the native triangle is drawn at the system's
-own small size, which is what made it easy to miss") applied
-verbatim to its own replacement. And the header's SIZE was a
-call-site decision: `Chrome` carried a `font:` payload, so one
-component drew its title at four tiers and seven of the
-fifteen drawers were drawn smaller than the rows they head. A
-header quieter than its own contents is not a subtle cue, it
-is an inverted hierarchy.
+**The header's size and its indicator are the two things a reader
+sees, and the hit target fixes neither.** (#1021, owner
+2026-08-25: *"in some menus the accordion is way too small"* and,
+asked which, *all of them*.) A chevron "with real weight" pinned
+at `.footnote` — the *smallest* step on the ramp — is the native
+triangle's own defect ("drawn at the system's own small size,
+which is what made it easy to miss") in its replacement. And a
+header SIZE decided at the call site — `Chrome` carrying a `font:`
+payload — draws one component's title at four tiers, seven of the
+fifteen drawers smaller than the rows they head. A header quieter
+than its own contents is not a subtle cue, it is an inverted
+hierarchy.
 
-Two changes, and they are a pair because each reaches a half
-of the surface the other cannot. **The tier stops being a
-call-site decision**: `Chrome` loses its payload, both chromes
-draw one tier — `SettingsDrawerHeader.tier`, named so the
-title and the summary beside it cannot drift apart — and seven
-call sites lose an argument. Which tier it is was always the
-tunable half; *that there is one* is the half that must not
-drift back, and `SettingsDisclosureSizeTests` is what holds
-it, for wrapper users: the drawer built outside the wrapper
-takes the style's row without the wrapper's tier, and keeps
-its own quiet title deliberately. It is
-`.callout` at semibold — 12 pt, a point *under* the `.body`
-rows it heads, carrying the header on weight rather than on
-size. It stood at `.headline` (13 pt semibold) for a round and
-the owner read the result as heavy, most of all on the two
-pages that carry seven of the fifteen drawers between them.
-There is deliberately no "bigger" available either way —
-macOS's ramp runs body 13 → headline 13 at weight 0.4 → title3
-15, so below 15 "bigger" and "weightier" are the *same edit*,
-and the only genuine size step is `title3`, which is
-`SettingsGroupHeader`'s tier and would outrank the section
-title an inline drawer sits inside. **And the indicator is
-sized by the header it marks**, taking no font *and no scale
-step* of its own: bold at the title's own size, about 12 pt,
-shrinking to about 10 pt on the one deliberately-quiet drawer.
-Proportional by construction, so a future header move carries
-its chevron along instead of stranding a constant.
+Two changes, and they are a pair because each reaches a half of
+the surface the other cannot. **The tier stops being a call-site
+decision**: `Chrome` loses its payload, both chromes draw one tier
+— `SettingsDrawerHeader.tier`, named so the title and the summary
+beside it cannot drift apart — and seven call sites lose an
+argument. Which tier it is was always the tunable half; *that
+there is one* is the half that must not drift back, and
+`SettingsDisclosureSizeTests` is what holds it, for wrapper users:
+the drawer built outside the wrapper takes the style's row without
+the wrapper's tier, and keeps its own quiet title deliberately. It
+is `.callout` at semibold — 12 pt, a point *under* the `.body`
+rows it heads, carrying the header on weight rather than on size.
+`.headline` (13 pt semibold) reads as heavy (owner), most of all
+on the two pages that carry seven of the fifteen drawers between
+them. There is deliberately no "bigger" available either way —
+macOS's ramp runs body 13 → headline 13 at weight 0.4 → title3 15,
+so below 15 "bigger" and "weightier" are the *same edit*, and the
+only genuine size step is `title3`, which is
+`SettingsGroupHeader`'s tier and would outrank the section title
+an inline drawer sits inside. **And the indicator is sized by the
+header it marks**, taking no font *and no scale step* of its own:
+bold at the title's own size, about 12 pt, shrinking to about 10
+pt on the one deliberately-quiet drawer. Proportional by
+construction, so a future header move carries its chevron along
+instead of stranding a constant.
 
-**Weight is the only step the indicator takes**, and that is
-the second half of what read back as heavy. It wore
-`.imageScale(.large)` on top of the inheritance for a round,
-which made the chevron larger than the title it marks — the
+**Weight is the only step the indicator takes**, and that is the
+second half of heavy. `.imageScale(.large)` on top of the
+inheritance makes the chevron larger than the title it marks — the
 biggest thing in the row, on a row whose job is to be found
 without shouting. An indicator that outgrows its own label has
-overshot the same way a header quieter than its rows
-undershoots. The five `.card` drawers are the reason the pair
-was needed at all: their labels already sat at the tier the
-other ten have only now joined, so the tier change alone
-reached nothing in them and the indicator is the only thing
-that ever moved there — which is why the owner's "bigger text
-**or** a better indicator" was a false choice.
+overshot the same way a header quieter than its rows undershoots.
+The five `.card` drawers are why size and indicator are a pair:
+their labels already sit at the tier the other ten take, so the
+tier change alone reaches nothing in them and the indicator is the
+only thing that moves there — which is why "bigger text **or** a
+better indicator" is a false choice.
 
-One clause of the ruling above is narrowed rather than
-inherited, since it was argued absolutely from a single
-candidate. "No fixed surface token can be a rest cue at all"
-was tested on `sunken`; the untested one is `hairline`, which
-is green-tinted and so answers the achromatic objection
-outright. It fails for a different, measured reason —
-about 1.05:1 against `sunken`, invisible on precisely the
-drawer whose card already is `sunken`. Same verdict, honest
-premise. And a resting fill is refused on a second ground the
-first round did not state: fifteen headers wearing a band
-would make the drawers the most-filled things on pages whose
-real controls carry no fill at all.
+"No fixed surface token can be a rest cue at all" holds for
+`hairline` too, which is green-tinted and so answers the
+achromatic objection outright: it fails for a different, measured
+reason — about 1.05:1 against `sunken`, invisible on precisely the
+drawer whose card already is `sunken`. And a resting fill is
+refused on a second ground: fifteen headers wearing a band would
+make the drawers the most-filled things on pages whose real
+controls carry no fill at all.
 
-**A drawer's summary belongs to the row, not beside it.** The
-same round's third complaint was the text that states what a
-shut drawer hides: five call sites drew it by hand at
-`.font(.caption)`, 10 pt against a 12 pt header, and four of
-the five wrapped their own shut-only `if` while the fifth did
-not — the header tier's drift wearing a different slot. One
-`summary:` slot now owns the words, the tier and the rule.
+**A drawer's summary belongs to the row, not beside it.** The text
+that states what a shut drawer hides, drawn by hand at five call
+sites — `.font(.caption)`, 10 pt against a 12 pt header, four of
+the five wrapping their own shut-only `if` — is the header tier's
+drift wearing a different slot. One `summary:` slot owns the
+words, the tier and the rule.
 
 Two placement rulings fall out, and each is the interesting
 one. **It renders inside the header button**: the ruling below
@@ -7056,37 +6947,34 @@ A summary is description, which is what `ink3` is for; a whole
 phrase of it at the chevron's darkness competes with the title
 it supports.
 
-**Every drawer is a heading.** All fifteen were absent from
-the VoiceOver headings rotor until this round — the same
-"cannot find it as one" complaint on the channel no number of
-points can answer — so `.isHeader` goes on the style's button,
-where it reaches the one drawer built outside the wrapper too.
-(gui.md already required it of a title component; nothing had
-noticed that a drawer title is one.)
+**Every drawer is a heading.** Fifteen drawers absent from the
+VoiceOver headings rotor is the same "cannot find it as one"
+complaint on the channel no number of points can answer — so
+`.isHeader` goes on the style's button, where it reaches the one
+drawer built outside the wrapper too. (gui.md requires it of a
+title component, and a drawer title is one.)
 
-**The header's accessory is a SIBLING of that button, never
-its child.** A drawer's `accessory:` slot may hold a control —
-the Profiles-per-Desktop drawer puts its `?` there — and the
-first draft of the style wrapped the whole label, accessory
-included, in the header button. A control inside a control
-loses both halves of being one: the click lands on the outer
-button (the `?` toggled the drawer instead of explaining it)
-and the inner name and hint collapse into the outer element's
-single announcement. So the row's hit shape stops where the
-accessory begins, which is also what makes the drawer's
-disclosure label still usable as a live help anchor. **That
-puts the accessory at the row's TRAILING edge**, where it sat
-beside the title before: the button keeps the `Spacer`, and
-the only way to return the accessory to the title's side is to
-end the button at the title — which gives back the full-row
-hit target that is this whole ruling's point. Trailing is also
-where macOS puts a row's accessory, so the pair of "click
-anywhere" and "the accessory is on the right" is one idiom
-rather than two compromises. The
-general rule this instance serves is already written down —
-two controls in one strip are two accessibility elements —
-and the lesson is that wrapping a slot whose contents you do
-not own silently breaks it.
+**The header's accessory is a SIBLING of that button, never its
+child.** A drawer's `accessory:` slot may hold a control — the
+Profiles-per-Desktop drawer puts its `?` there — and wrapping the
+whole label, accessory included, in the header button puts a
+control inside a control, which loses both halves of being one:
+the click lands on the outer button (the `?` toggled the drawer
+instead of explaining it) and the inner name and hint collapse
+into the outer element's single announcement. So the row's hit
+shape stops where the accessory begins, which is also what makes
+the drawer's disclosure label still usable as a live help anchor.
+**That puts the accessory at the row's TRAILING edge** rather than
+beside the title: the button keeps the `Spacer`, and the only way
+to return the accessory to the title's side is to end the button
+at the title — which gives back the full-row hit target that is
+this whole ruling's point. Trailing is also where macOS puts a
+row's accessory, so the pair of "click anywhere" and "the
+accessory is on the right" is one idiom rather than two
+compromises. The general rule this instance serves is already
+written down — two controls in one strip are two accessibility
+elements — and the lesson is that wrapping a slot whose contents
+you do not own silently breaks it.
 
 **Census labels render at runtime from the English
 manifest.** (#678 Phase 4.) A surface that renders a
@@ -7153,42 +7041,37 @@ rename/delete/make-default/preset-apply are immediate file
 The Spaces tab's per-space layout picker stays staged. **No
 control besides the key recorder passes the live-apply bar.**
 
-**Three save verbs: Revert / Save a copy… / Save.**
-The old footer showed up to seven differently-labeled verbs
-depending on invisible mode state, but they expressed only
-two intents: "persist to what I'm editing" and "duplicate
-under a new name". Three stable slots — a consolidation the
-floating pill inherits whole, verbs and per-mode semantics
-alike (see "One draft, three views" above). The header's
-profile picker names the edit
-target authoritatively — a destination caption beside Save
-duplicated it, read as confusing, and its fixed width split
-the button cluster apart, so it was dropped. Adopt is not a
-save verb — it lives with the raw-Lua content it migrates.
-(#68 §3.12)
+**Three save verbs: Revert / Save a copy… / Save.** Seven
+differently-labeled verbs switching on invisible mode state
+express only two intents: "persist to what I'm editing" and
+"duplicate under a new name". Three stable slots — a consolidation
+the floating pill inherits whole, verbs and per-mode semantics
+alike (see "One draft, three views" above). The header's profile
+picker names the edit target authoritatively — a destination
+caption beside Save duplicates it, reads as confusing, and its
+fixed width splits the button cluster apart. Adopt is not a save
+verb — it lives with the raw-Lua content it migrates. (#68 §3.12)
 
-**The edit-target dropdown lists the loaded profile as its own
-row — no collapse to Live.** (#209.) The top **Live** entry
-edits the running/global config; every saved profile lists
-below, the loaded one included. Picking the loaded profile used
-to silently remap to Live, which made it the one profile whose
-*stored* sparse overrides (key layers #55, app rules #109) could
-never be edited — you could only touch the live/global config.
-The considered fix — listing the loaded profile **twice**, top
-meaning global and list meaning overrides — was rejected as a
-menu anti-pattern: the ✓ can't disambiguate two identical rows,
-the closed title goes ambiguous, and the discard guard keys on
-the profile name. Instead the rows are already textually
-distinct (`Live (currently loaded)` vs `Name (currently
-loaded)`), so the collapse is simply deleted and each profile
-is one real `.storedProfile` target. Editing the loaded
+**The edit-target dropdown lists the loaded profile as its own row
+— no collapse to Live.** (#209.) The top **Live** entry edits the
+running/global config; every saved profile lists below, the loaded
+one included. Remapping the loaded profile to Live makes it the
+one profile whose *stored* sparse overrides (key layers #55, app
+rules #109) can never be edited — only the live/global config is
+reachable. Listing the loaded profile **twice**, top meaning
+global and list meaning overrides, is a menu anti-pattern: the ✓
+can't disambiguate two identical rows, the closed title goes
+ambiguous, and the discard guard keys on the profile name. The
+rows are already textually distinct (`Live (currently loaded)` vs
+`Name (currently loaded)`), so there is no collapse and each
+profile is one real `.storedProfile` target. Editing the loaded
 profile is the sole target whose Save hits the screen at once:
 `saveEditedProfile` → `reapplyIfInEffect` re-applies it **in
-place** (no switch), because it *is* the layout on screen — so
-its status caption drops the generic "changes won't switch your
+place** (no switch), because it *is* the layout on screen — so its
+status caption drops the generic "changes won't switch your
 layout" for a truthful "saving re-applies *Name* with your
-changes", and the closed menu title reads "*Name* — overrides"
-to stay distinct from Live-with-that-profile-loaded.
+changes", and the closed menu title reads "*Name* — overrides" to
+stay distinct from Live-with-that-profile-loaded.
 
 *The two doors write different layers, by design.* #209 makes
 the loaded profile reachable through **both** the Live entry and
@@ -7219,37 +7102,34 @@ absolute and silently break the sparse override. Pinned by
 `ProfileSaveAsymmetryTests` so a future edit that erases the
 asymmetry fails red.
 
-**One header bar: section title leading, profile picker
-trailing; status only when non-nominal.** The section name and
-the profile edit-target picker are related facts (what am I
-looking at / in which profile), so they share one titlebar row
-instead of a title stacked over a separate profile banner. The
-picker moves into a trailing toolbar item, shown everywhere
-except General (`showsProfileContext`) — App Rules keeps it
-because its rules target profile-scoped spaces (and, since
-#109, its Space facet is itself per-profile-overridable).
-The status sentence is demoted to a conditional strip that
-mounts only when there's something non-nominal to say
-(divergence, unsaved, built-in, no-match, or a warning) — a
-synced profile says nothing, so the common case is a single
-bar and content scrolls straight under the blurred titlebar.
-(#68 §3.1)
+**One header bar: section title leading, profile picker trailing;
+status only when non-nominal.** The section name and the profile
+edit-target picker are related facts (what am I looking at / in
+which profile), so they share one titlebar row instead of a title
+stacked over a separate profile banner. The picker moves into a
+trailing toolbar item, shown everywhere except General
+(`showsProfileContext`) — App Rules keeps it because its rules
+target profile-scoped spaces (and its Space facet is itself
+per-profile-overridable,
+#109). The status sentence is demoted to a conditional strip that
+mounts only when there's something non-nominal to say (divergence,
+unsaved, built-in, no-match, or a warning) — a synced profile says
+nothing, so the common case is a single bar and content scrolls
+straight under the blurred titlebar. (#68 §3.1)
 
-**"Unsaved changes" is a live comparison, not a latched
-flag.** `isDirty` compares the edited config and Lua source
-against the as-loaded baselines on every change, so manually
-undoing an edit clears the save pill again — a latched flag
-kept claiming unsaved changes after the user had already
-put everything back.
+**"Unsaved changes" is a live comparison, not a latched flag.**
+`isDirty` compares the edited config and Lua source against the
+as-loaded baselines on every change, so manually undoing an edit
+clears the save pill again — a latched flag keeps claiming unsaved
+changes after the user has put everything back.
 
-**Every edit-dropping action routes through one discard gate,
-and the guard over it is a lens, not a list.** Seven Settings
-actions ended in `reload()` — which re-seeds from disk and
-clears `isDirty` — and six of them dropped the user's staged
-edits with no prompt at all. They now share
-`SettingsModel.discardingEdits`, which runs the action when
-clean and parks it behind a single dashboard-wide dialog when
-dirty.
+**Every edit-dropping action routes through one discard gate, and
+the guard over it is a lens, not a list.** Seven Settings actions
+end in `reload()` — which re-seeds from disk and clears `isDirty`
+— so ungated, six of them drop the user's staged edits with no
+prompt at all. They share `SettingsModel.discardingEdits`, which
+runs the action when clean and parks it behind a single
+dashboard-wide dialog when dirty.
 
 *The gate lives at the call site, not on the model methods.*
 The alternative — a required `confirming:` parameter on
@@ -7266,18 +7146,16 @@ source-scanning guard stands in for the type constraint. Revisit
 if a third surface outside `Sources/KiwiDesk/Settings` ever
 drives one of them.
 
-*The guard discovers, it does not enumerate.* It walks
-delimiters to extract every `discardingEdits` trailing closure,
-then requires every occurrence of a destructive `model.*` call
-to sit inside one. A hand-listed "these seven are gated" would
-be fail-**open** for the case that matters — an eighth path
-absent from both the list and the index is never examined. That
-is not hypothetical: discovery found a seventh path the #406
-audit's own hand-traced list had missed (the broken-profile
-Delete). An eighth, `adoptIntoGui`, was found by a *reviewer*,
-not by the guard — it had no token for that call. Recorded
-because the difference matters: the guard covers what it has
-needles for, and `adoptIntoGui` now carries one.
+*The guard discovers, it does not enumerate.* It walks delimiters
+to extract every `discardingEdits` trailing closure, then requires
+every occurrence of a destructive `model.*` call to sit inside
+one. A hand-listed "these seven are gated" would be fail-**open**
+for the case that matters — an eighth path absent from both the
+list and the index is never examined. That is not hypothetical:
+discovery found a path a hand-traced list had missed (the
+broken-profile Delete, #406). The guard covers only what it has
+needles for — `adoptIntoGui`, which had no token, was a reviewer's
+catch, and carries one.
 
 *Deliberate exceptions, so they are not "fixed" later.* The
 pill's **Revert** is unconfirmed on purpose — the verb is the
@@ -7301,16 +7179,15 @@ honest reduction. Adding the third verb later means changing
 `PendingDiscard` and every call site — decide before doing it,
 not by accretion.
 
-**A paused engine blocks profile saves, never global ones.**
-The #335 gate exists for one reason: with Accessibility off no
+**A paused engine blocks profile saves, never global ones.** The
+#335 gate exists for one reason: with Accessibility off no
 displays are discovered, so persisting a *profile* would record a
-degenerate 0-screen monitor set that can never resolve. It caught
-the six `gui.json` globals — keybindings, app/float/ignore rules,
-the space list, Desktop→profile bindings — as collateral, purely
-because `saveGuiConfig` had exactly one caller and that caller sat
-behind the gate. None of the six has a monitor dependency, so a
-user editing app rules met a greyed Save explaining *monitors*,
-and lost the work on close.
+degenerate 0-screen monitor set that can never resolve. The six
+`gui.json` globals — keybindings, app/float/ignore rules, the
+space list, Desktop→profile bindings — are collateral if
+`saveGuiConfig`'s one caller sits behind that gate: none of the
+six has a monitor dependency, so a user editing app rules meets a
+greyed Save explaining *monitors*, and loses the work on close.
 
 A fifth `PrimarySaveAction` case (`.saveGlobalsOnly`) takes the
 primary slot while paused **and** a global actually changed. Three
@@ -7331,9 +7208,9 @@ things that are load-bearing rather than incidental:
 The copy names what is **excluded** ("Layout and monitors stay
 paused; Save covers everything else") rather than listing six
 field names — one sentence, and the paused banner above already
-carries the why. The blocked tooltip's monitor wording is
-unchanged and is finally accurate: it now appears only when a
-monitor set really is the only thing a save would write.
+carries the why. The blocked tooltip's monitor wording appears
+only when a monitor set really is the only thing a save would
+write.
 
 **Quick-menu layout switch is session-only, and Settings does
 not narrate it.** Changing a space's layout from the status-bar
@@ -7391,16 +7268,15 @@ here so they read that way:
   a standing temporary layout. Ending one is the quick menu's
   job: switch back, or Keep.
 
-**Settings stopped surfacing drift at all.** There is no drift
-pill, no drift-armed Save, no drift caption under the Spaces
-mode picker, and Revert is a plain draft revert again. A Save
-enabled *because of* drift whose effect on that drift was
-identical to Revert is what this removes; the one permanent path
-through Settings is the ordinary draft flow — Spaces, change the
-mode, Save. A quick-menu Keep does move the open draft's saved
-baseline onto the layout it just wrote, leaving staged edits
-staged: without that, the next Save would commit the pre-keep
-mode over the layout just kept.
+**Settings surfaces no drift at all.** There is no drift pill, no
+drift-armed Save, no drift caption under the Spaces mode picker,
+and Revert is a plain draft revert. A Save enabled *because of*
+drift whose effect on that drift is identical to Revert is the
+thing refused; the one permanent path through Settings is the
+ordinary draft flow — Spaces, change the mode, Save. A quick-menu
+Keep does move the open draft's saved baseline onto the layout it
+just wrote, leaving staged edits staged: without that, the next
+Save would commit the pre-keep mode over the layout just kept.
 
 ### Spaces
 
@@ -7456,15 +7332,14 @@ profile, so wandering must stay legal. All of it is
 state-driven on "no saved profiles" (no persisted
 seen-flag) and vanishes with the first profile.
 
-**A binding row reads "Desktop n", and binding is
-dropdown-only.** The naming is the product-wide rule —
-[macOS has Desktops, KiwiDesk has Spaces](#vocabulary-macos-has-desktops-kiwidesk-has-spaces)
-— and this page is where it first shipped, because a row per
-Mission Control Desktop sitting beside a list of KiwiDesk's
-own spaces is where the two systems blurred hardest. The
-interaction is settled separately: the earlier draggable
-profile chips duplicated the dropdown while adding a chip
-palette row and drop-target styling — a second interaction
+**A binding row reads "Desktop n", and binding is dropdown-only.**
+The naming is the product-wide rule — [macOS has Desktops,
+KiwiDesk has
+Spaces](#vocabulary-macos-has-desktops-kiwidesk-has-spaces) — and
+this page is where the two systems blur hardest: a row per Mission
+Control Desktop sits beside a list of KiwiDesk's own spaces.
+Draggable profile chips would duplicate the dropdown while adding
+a chip palette row and drop-target styling — a second interaction
 model with zero extra capability. (#7)
 
 ### Icons
@@ -7482,32 +7357,29 @@ any single character (incl. emoji) works via "Use as text".
 One `IconPicker` serves layer icons and space icons. (#68 §6.4)
 
 **Browsing is tabbed (Symbols first, every caller); search is
-global; every open starts in one resting shape.** The
-picker's popover splits Symbols and Emoji into segmented
-tabs, and a typed query searches both vocabularies at once
-(the tabs stand back, like Character Viewer). Symbols lead
-(#1379, owner ruling 2026-09-15, superseding #68 §6.4's
-"Emoji first"): that reason — space
-icons are the picker's most frequent use — said which
-destination to optimise for, not what that destination
-renders best, and the bar answers that itself. An SF Symbol
-identifier takes `item_color` / `active_item_color` /
-`focused_item_color`, while an emoji is untinted content the
-bar dims exactly as it dims a native app image (`iconGlyph`),
-so a space labelled with an emoji sits in the app-icon class
-and carries none of the bar's state encoding. The layer icon
-rides the same ladder into the menu bar as a template image,
-so it wants symbols at least as much, and Recents is one
-shared list, so a per-caller default would leak through it
-anyway — hence no per-caller switch. Emoji stay one segment
-away, a user's recent emoji sit above either tab, and search
-lists Symbol results above Emoji for the same reason, the two
-special results staying first. Search AND tab reset when the
-popover closes — a choice, the clear button or a click-away
-alike (#1357) — so no picker reopens on a filtered view the
-user did not ask for (`IconPickerRestingShapeTests`), and
-every popover holding a per-open search takes that same
-dismissal-edge hook — the app picker was the second member.
+global; every open starts in one resting shape.** The picker's
+popover splits Symbols and Emoji into segmented tabs, and a typed
+query searches both vocabularies at once (the tabs stand back,
+like Character Viewer). Symbols lead (#1379, owner ruling
+2026-09-15, superseding #68 §6.4's "Emoji first"): that reason —
+space icons are the picker's most frequent use — said which
+destination to optimise for, not what that destination renders
+best, and the bar answers that itself. An SF Symbol identifier
+takes `item_color` / `active_item_color` / `focused_item_color`,
+while an emoji is untinted content the bar dims exactly as it dims
+a native app image (`iconGlyph`), so a space labelled with an
+emoji sits in the app-icon class and carries none of the bar's
+state encoding. The layer icon rides the same ladder into the menu
+bar as a template image, so it wants symbols at least as much, and
+Recents is one shared list, so a per-caller default would leak
+through it anyway — hence no per-caller switch. Emoji stay one
+segment away, a user's recent emoji sit above either tab, and
+search lists Symbol results above Emoji for the same reason, the
+two special results staying first. Search AND tab reset when the
+popover closes — a choice, the clear button or a click-away alike
+(#1357) — so no picker reopens on a filtered view the user did not
+ask for (`IconPickerRestingShapeTests`), and every popover holding
+a per-open search takes that same dismissal-edge hook.
 
 **The picker button and its clear control.** The button shows
 a glyph-sized placeholder when no icon is set, never a
@@ -7572,14 +7444,13 @@ the simple one richer; what Simple withholds is only the
 invitation to create the first one, and that invitation retires
 itself the moment it is accepted.
 
-The failure this prevents is the one worth naming, because the
-Shortcuts area shipped it: a user who created a layer, then
-found the Layers card gone because they were in the simple mode.
-Hiding a control the user has never used is curation. Hiding
-something they *made* is losing their work as far as they can
-tell, and it teaches them that the mode switch is dangerous —
-which costs the mode its whole purpose. Nothing a user has
-configured is ever hidden by a mode.
+The failure this prevents: a user creates a layer, then finds the
+Layers card gone because they are in the simple mode. Hiding a
+control the user has never used is curation. Hiding something they
+*made* is losing their work as far as they can tell, and it
+teaches them that the mode switch is dangerous — which costs the
+mode its whole purpose. Nothing a user has configured is ever
+hidden by a mode.
 
 It follows that "which mode is this row in" is the wrong
 question for such a row; the right one is "does the thing
@@ -7592,13 +7463,13 @@ for a concept the app has not introduced is an OFFER, not a
 setting** (#1125). The Desktop shortcut families are the worked
 case. Nothing seeds them, a **Desktop** is macOS's arrangement
 rather than KiwiDesk's, and they scale per Desktop — so a
-four-Desktop Mac drew twelve rows about a thing a first-run user
+four-Desktop Mac draws twelve rows about a thing a first-run user
 has never met, in the area whose own ordering already says
 KiwiDesk's Spaces lead and a Desktop row is the escape into
 macOS's. They sit behind a disclosure in each card, which stays
 mounted and simply OPENS on arrival once one is bound — in both
-modes, which is the paragraph above applied to a capability
-rather than to a layer.
+modes, which is the paragraph above applied to a capability rather
+than to a layer.
 
 The drawer stays rather than giving way to a bare list, and that
 is not a detail: the flip would fire at the instant the user
@@ -7647,16 +7518,15 @@ and the reason is stated so the order is a decision rather than
 an accident.)
 
 **Overrides always resolve; the Simple/Power User mode never
-changes what runs.** There is no stored flag deciding whether a profile's
-shortcut overrides apply — an early draft of the redesign
-specified one, with a default and an upgrade migration, and it
-was cut before any of it was built. The reason it must stay
-cut: a preference that changes *which shortcuts fire* is not a
-preference, it is a second config the user cannot see, and the
-first time a shortcut goes dead because of a display setting
-the app has lied. So the resolver takes a base list and a
-sparse override and nothing else, and nothing in the Settings
-window is read-only because of the mode a user picked.
+changes what runs.** There is no stored flag deciding whether a
+profile's shortcut overrides apply (a redesign draft specified
+one, with a default and an upgrade migration): a preference that
+changes *which shortcuts fire* is not a preference, it is a second
+config the user cannot see, and the first time a shortcut goes
+dead because of a display setting the app has lied. So the
+resolver takes a base list and a sparse override and nothing else,
+and nothing in the Settings window is read-only because of the
+mode a user picked.
 
 What the mode may decide is only whether *creating* an override
 is offered — and that offer retires itself. **A used capability
@@ -7781,91 +7651,85 @@ so VoiceOver reads what the eye does.
 :::
 
 **The recorder snaps in on key-down.** (#212, replacing the
-#68 lock-on-full-release machine.) Modifiers can be pressed
-and released freely — the preview mirrors what is held — and
-the first non-modifier keyDown locks the combo instantly:
-that key plus the modifiers held at that moment, the way the
-native System Settings recorder reads. Correction is
-re-recording (one click). A release-model recorder that formed
-chords on release was tried and dropped — buggier in practice
-than the one-click re-record it bought. Bare
-Escape cancels (Escape with modifiers records — ⌃Escape is a
-valid hotkey); click-away and app deactivation cancel
-unchanged. A swallowed key-down owns its matching key-up even
-if the field disappears or another recorder takes over; a
-short timeout bounds that handoff monitor. The post-commit
-duplicate hard-block below is now the sole conflict surface.
+#68 lock-on-full-release machine.) Modifiers can be pressed and
+released freely — the preview mirrors what is held — and the first
+non-modifier keyDown locks the combo instantly: that key plus the
+modifiers held at that moment, the way the native System Settings
+recorder reads. Correction is re-recording (one click). A
+release-model recorder that forms chords on release is buggier in
+practice than the one-click re-record it buys. Bare Escape cancels
+(Escape with modifiers records — ⌃Escape is a valid hotkey);
+click-away and app deactivation cancel unchanged. A swallowed
+key-down owns its matching key-up even if the field disappears or
+another recorder takes over; a short timeout bounds that handoff
+monitor. The post-commit duplicate hard-block below is the sole
+conflict surface.
 
-**Duplicates hard-block; system shortcuts soft-warn.**
-Recording a combo another KiwiDesk row already holds is
-rejected inline with *Steal* (rebind here) and *Go to* (jump
-to the holder) — silent duplicates were the #34 bug class. A
-collision compares parsed physical shortcuts, so aliases such
-as `alt+j` and `option+j` cannot evade the block. A
-macOS system-shortcut collision instead commits with a
-persistent ⚠ — shadowing one can be intentional, and the row is
-the reference surface, warning on every registered chord whether
-macOS currently answers it or not; the aggregate surfaces consult
-the live enabled state to decide what COUNTS (the ⌃⌥⌘8 ruling
-below, #1105), and since #1126 the row reads the same bit to pick
-its TIER: a symbolic hotkey macOS has on is a dead row — outlined
-chord, worded caption, "won't work" — because the press goes to
-macOS and the row never fires (measured 2026-09-03); one macOS
-has off keeps the quiet ⚠ and says it is off; a chord every app's
-menus carry (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse — KiwiDesk wins it,
-measured on ⌘W and ⌘P, so the row says every app loses that item;
-and the two system-level chords outside the table (⌘Tab, ⌥⌘Esc)
-keep the collision wording, their precedence being unmeasured. The treatment is deliberately smaller than a
-tinted row: outline plus caption already carry the fact in two
-channels, a red ground would be a new register needing its own
-inks, and a filled badge has no ink that clears 4.5:1 in both
-modes (ui-designer, 2026-09-03).
-Conflict surfaces
-(the banner and the "Assigned to…" row) re-derive from live
-bindings on every render, so fixing the conflict anywhere —
-clearing either row, deleting the holder — retires them
-without a dismiss. (#33/#34/#35, #68 §3.6.2)
+**Duplicates hard-block; system shortcuts soft-warn.** Recording a
+combo another KiwiDesk row already holds is rejected inline with
+*Steal* (rebind here) and *Go to* (jump to the holder) — silent
+duplicates were the #34 bug class. A collision compares parsed
+physical shortcuts, so aliases such as `alt+j` and `option+j`
+cannot evade the block. A macOS system-shortcut collision instead
+commits with a persistent ⚠ — shadowing one can be intentional,
+and the row is the reference surface, warning on every registered
+chord whether macOS currently answers it or not; the aggregate
+surfaces consult the live enabled state to decide what COUNTS (the
+⌃⌥⌘8 ruling below, #1105), and the row reads the same bit to pick
+its TIER (#1126): a symbolic hotkey macOS has on is a dead row —
+outlined chord, worded caption, "won't work" — because the press
+goes to macOS and the row never fires (measured 2026-09-03); one
+macOS has off keeps the quiet ⚠ and says it is off; a chord every
+app's menus carry (⌘W, ⌘Q, ⌘H, ⌘M) is the reverse — KiwiDesk wins
+it, measured on ⌘W and ⌘P, so the row says every app loses that
+item; and the two system-level chords outside the table (⌘Tab,
+⌥⌘Esc) keep the collision wording, their precedence being
+unmeasured. The treatment is deliberately smaller than a tinted
+row: outline plus caption already carry the fact in two channels,
+a red ground would be a new register needing its own inks, and a
+filled badge has no ink that clears 4.5:1 in both modes
+(ui-designer, 2026-09-03). Conflict surfaces (the banner and the
+"Assigned to…" row) re-derive from live bindings on every render,
+so fixing the conflict anywhere — clearing either row, deleting
+the holder — retires them without a dismiss. (#33/#34/#35, #68
+§3.6.2)
 
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
 
-**An armed recorder suspends KiwiDesk's hotkeys.** (#213.) A
-combo you are about to bind is often already bound to a window
-action, so pressing it to test it would fire that action
-mid-capture. While any recorder is open, the manager
-unregisters every KiwiDesk Carbon hotkey and re-registers the
-current layer when it closes — the suspend/resume round-trip the
-exact table, so a layer change made while armed is honored on
-resume. The `RecorderCoordinator` drives this on the idle↔armed
-edge only, so hopping between fields never bounces the
-registration. It never touches macOS/system shortcuts (not ours
-to unregister) and needs no Input Monitoring permission — it is
-pure Carbon (un)registration. This is the accepted first slice
-of the recorder-collision redesign (#213): the "Assigned to…"
-row also gains a colour-independent ⚠ glyph so the conflict does
+**An armed recorder suspends KiwiDesk's hotkeys.** (#213.) A combo
+you are about to bind is often already bound to a window action,
+so pressing it to test it would fire that action mid-capture.
+While any recorder is open, the manager unregisters every KiwiDesk
+Carbon hotkey and re-registers the current layer when it closes —
+the suspend/resume round-trip the exact table, so a layer change
+made while armed is honored on resume. The `RecorderCoordinator`
+drives this on the idle↔armed edge only, so hopping between fields
+never bounces the registration. It never touches macOS/system
+shortcuts (not ours to unregister) and needs no Input Monitoring
+permission — it is pure Carbon (un)registration. The "Assigned
+to…" row carries a colour-independent ⚠ glyph so the conflict does
 not read by colour alone. The larger pending-candidate model
-(candidate-only "Not assigned" state, Replace/Change
-transactions) is scoped separately in #213 pending a design
-round — the current *Steal*/*Go to* hard-block stays the
-shipped conflict UX until then.
+(candidate-only "Not assigned" state, Replace/Change transactions)
+is scoped in #213 pending a design round — the *Steal*/*Go to*
+hard-block is the conflict UX until then.
 
-**The recorder live-applies on the live target; stored
-profiles stay staged.** (#123 Part 1.) A recorder is an input
-device — "recorded but inert until Save" broke its mental
-model (users pressed the new combo and nothing happened). A
-successfully committed recording (or clear) on the live edit
-target re-registers the running Carbon hotkeys immediately,
-with no file writes. The runtime source starts from the clean
-Settings baseline and accumulates **recorder combo mutations
-only**: staged Lua bodies, app choices, layer edits, and other
-shortcut fields never hitchhike on a recording. A new row's
-action is required payload for its first recording; later
-non-recorder edits to it stay staged. The base then resolves
-through the active profile's override, matching Save + reload
-semantics. `isDirty` and the save pill keep their meaning ("the
-file hasn't caught up"); Save persists base shortcuts globally
-in `gui.json`, while stored-profile editing owns sparse profile
-overrides.
+**The recorder live-applies on the live target; stored profiles
+stay staged.** (#123 Part 1.) A recorder is an input device —
+"recorded but inert until Save" breaks its mental model (the user
+presses the new combo and nothing happens). A successfully
+committed recording (or clear) on the live edit target
+re-registers the running Carbon hotkeys immediately, with no file
+writes. The runtime source starts from the clean Settings baseline
+and accumulates **recorder combo mutations only**: staged Lua
+bodies, app choices, layer edits, and other shortcut fields never
+hitchhike on a recording. A new row's action is required payload
+for its first recording; later non-recorder edits to it stay
+staged. The base then resolves through the active profile's
+override, matching Save + reload semantics. `isDirty` and the save
+pill keep their meaning ("the file hasn't caught up"); Save
+persists base shortcuts globally in `gui.json`, while
+stored-profile editing owns sparse profile overrides.
 
 Re-registration prepares every Lua callback before one atomic
 layer-table swap, then activates the preserved runtime layer once
@@ -7885,96 +7749,89 @@ profile is being edited); the override banner states that its
 shortcuts take effect the next time the profile is active.
 
 **A catalog label's identity and its display text are two
-different fields.** `KeybindingCatalog`'s `NavCommand.label`
-(and `StandardLayout.name`/`.summary`) stay the stable,
-English canonical text — persisted into `KeyBinding.label`,
-matched on by `KeybindingImportClassifier` (keyed off `lua`,
-never display text), and used to seed a new saved profile's
-name (`freeName(base: layout.name)`). Only a separate
-`resolvedLabel` / `displayName` / `displaySummary` — resolved
-through `L(...)` at render time, keyed by the stable field —
-translates. This keeps a language switch from ever rewriting
-persisted data or breaking import classification (issue #9
-follow-up: the original literal-routing sweep covered SwiftUI
-view literals but missed catalog-defined strings).
+different fields.** `KeybindingCatalog`'s `NavCommand.label` (and
+`StandardLayout.name`/`.summary`) stay the stable, English
+canonical text — persisted into `KeyBinding.label`, matched on by
+`KeybindingImportClassifier` (keyed off `lua`, never display
+text), and used to seed a new saved profile's name
+(`freeName(base: layout.name)`). Only a separate `resolvedLabel` /
+`displayName` / `displaySummary` — resolved through `L(...)` at
+render time, keyed by the stable field — translates. This keeps a
+language switch from ever rewriting persisted data or breaking
+import classification (#9).
 
 **Core names it; the GUI says it (#96).** Core never returns a
-rendered sentence: it returns the structure, and the GUI
-localizes at its own boundary. The reason is **ownership**, and
-stating it as actor isolation is a trap worth naming, because the
-codebase falsifies that version — `L()` is `@MainActor`, but so
-is `KiwiCore`, which called it happily until #601. Some detection
-genuinely is actor-free (`KeybindingConflicts`, `StandardProfiles`)
-and so genuinely cannot; that is a consequence, not the rule.
-What binds everywhere is that copy owned by Core cannot be
-re-rendered when the user switches language, and an English
-literal there never reaches `extract-keys` — so it never becomes
-a key and no locale can translate it, however complete. That is
-the failure #601 found in `ConfigIssue` and the preset summaries,
-and a rule phrased around `L()` would not have caught either. `KeybindingConflicts.conflict`
+rendered sentence: it returns the structure, and the GUI localizes
+at its own boundary. The reason is **ownership**, and stating it
+as actor isolation is a trap, because the codebase falsifies that
+version — `L()` is `@MainActor`, but so is `KiwiCore`, which can
+call it (#601). Some detection genuinely is actor-free
+(`KeybindingConflicts`, `StandardProfiles`) and so genuinely
+cannot; that is a consequence, not the rule. What binds everywhere
+is that copy owned by Core cannot be re-rendered when the user
+switches language, and an English literal there never reaches
+`extract-keys` — so it never becomes a key and no locale can
+translate it, however complete. That is the failure #601 found in
+`ConfigIssue` and the preset summaries, and a rule phrased around
+`L()` would not have caught either. `KeybindingConflicts.conflict`
 returns a `Conflict` whose target names a `SystemShortcut`
 **case**, and `ConflictText` / `SettingsModel+ConflictMessages`
 render the row tooltip and the banner from it at two different
 lengths. The rejected alternative was a non-`@MainActor` lookup
 path for "just these few strings", which buys one file's
-convenience by making the manager's isolation a special case.
-The mirror this creates — one `L(…)` per enum case — is
-**guarded by the compiler**, because the switch is exhaustive: a
-new case cannot ship without a string. Only what the compiler
-cannot see needs a test (two cases resolving to the same string,
+convenience by making the manager's isolation a special case. The
+mirror this creates — one `L(…)` per enum case — is **guarded by
+the compiler**, because the switch is exhaustive: a new case
+cannot ship without a string. Only what the compiler cannot see
+needs a test (two cases resolving to the same string,
 `SystemShortcutNamesTests`).
 
-**First run seeds a starter shortcut set — base tier, only
-into emptiness.** A fresh install used to boot with zero
-shortcuts (the default layer existed but was empty): a GUI-first
-user had no way to focus or move a window until they authored
-every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
-**escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
-`⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
-/ move-and-follow, `⌃⌥F` float, `⌃⌥S` sticky everywhere, `⌃⌥P`
-sticky to this screen (#1094) — plus, since #1075, `⌥⌘` `1`/`2`
-and `4`/`5` for size on a base of its own — with one guard
-everywhere: **only when no layer carries a single binding** — a
-user- or Lua-authored binding anywhere blocks the seed, making it
+**First run seeds a starter shortcut set — base tier, only into
+emptiness.** Unseeded, a fresh install boots with zero shortcuts
+(the default layer exists but is empty): a GUI-first user has no
+way to focus or move a window until they author every combo.
+`Core.DefaultKeybindings` seeds a starter set on an **escalating
+Control-Option scheme** (#270): `⌃⌥` arrows focus / `⌃⌥⇧` arrows
+swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move /
+move-and-follow, `⌃⌥F` float, `⌃⌥S` sticky everywhere, `⌃⌥P`
+sticky to this screen (#1094) — plus `⌥⌘` `1`/`2` and `4`/`5` for
+size on a base of its own (#1075) — with one guard everywhere:
+**only when no layer carries a single binding** — a user- or
+Lua-authored binding anywhere blocks the seed, making it
 idempotent and never destructive.
 
-**Why Control-Option, not bare Option (#270).** On macOS Option is
-the special-character (AltGr) modifier, so a *global* `⌥`+key
-hotkey swallows text entry on every Apple keyboard layout.
-**What it composes is layout-specific, and the examples here were
-the author's own keyboard until they were measured** (through
-`UCKeyTranslate` over every installed layout, 2026-08-29, macOS
-26.6): `⌥L`=@ and `⌥5`=[ hold on German, Austrian and ABC–QWERTZ,
-while US, British, Canadian, Dutch, Danish, Spanish and Brazilian
-give `¬` and `∞`, French `¬` and `{`, Italian `¬` and `~`. The
-rule survives the spread and the examples do not, which is the
-point: name a layout when quoting a glyph. (Japanese Kana input is
-the one measured exception — `⌥` there returns the plain
+**Why Control-Option, not bare Option (#270).** On macOS Option is the
+special-character (AltGr) modifier, so a *global* `⌥`+key hotkey
+swallows text entry on every Apple keyboard layout. **What it composes
+is layout-specific** (measured through `UCKeyTranslate` over every
+installed layout, 2026-08-29, macOS 26.6): `⌥L`=@ and `⌥5`=[ hold on
+German, Austrian and ABC–QWERTZ, while US, British, Canadian, Dutch,
+Danish, Spanish and Brazilian give `¬` and `∞`, French `¬` and `{`,
+Italian `¬` and `~`. The rule survives the spread and the examples do
+not, which is the point: name a layout when quoting a glyph. (Japanese
+Kana input is the one measured exception — `⌥` there returns the plain
 character — so a Japanese-language surface must not quote these at
-all.) macOS composes those characters only
-when the modifier is exactly `⌥` or `⌥⇧`; adding Control (or
-Command) suppresses it, so `⌃⌥` is the lightest text-safe chord
-(the earlier bare-`⌥` set, and Amethyst's `⌥⇧`, are not). It
-overlaps VoiceOver's `⌃⌥` modifier, inert unless VoiceOver is on
-and remappable to Caps Lock, and macOS reserves exactly one chord
-on it — `⌃⌥space` switches the input source
-(`com.apple.symbolichotkeys` id 61, enabled, read 2026-08-29 on
-macOS 26.6). Nothing is seeded there, and `SystemShortcuts.map`
-carries it so a user who binds it is warned rather than left with
-a silently dead hotkey (#1094). `⌘⌥` was rejected because it
-collides with chords macOS and every app's menus already hold
-(Force Quit, Dock, Hide/Minimize — the last two are app
-accelerators KiwiDesk would take away rather than lose, #1126) — **narrowed by #1075 below**, which measures the
-base and opens it to digits under a stated boundary.
-Directions bind the arrow keys, which never compose a character on
-any layout. The set lives in the **base `gui.json`
-layers**, never a profile override (profiles stay
-tiling-plus-sparse-behavior, #55): on first launch the seeded
-model is persisted so the very first boot is GUI-managed and the
-shortcuts actually fire.
+all.) macOS composes those characters only when the modifier is
+exactly `⌥` or `⌥⇧`; adding Control (or Command) suppresses it, so
+`⌃⌥` is the lightest text-safe chord (a bare-`⌥` set, and Amethyst's
+`⌥⇧`, are not). It overlaps VoiceOver's `⌃⌥` modifier, inert unless
+VoiceOver is on and remappable to Caps Lock, and macOS reserves
+exactly one chord on it — `⌃⌥space` switches the input source
+(`com.apple.symbolichotkeys` id 61, enabled, read 2026-08-29 on macOS
+26.6). Nothing is seeded there, and `SystemShortcuts.map` carries it
+so a user who binds it is warned rather than left with a silently dead
+hotkey (#1094). `⌘⌥` was rejected because it collides with chords
+macOS and every app's menus already hold (Force Quit, Dock,
+Hide/Minimize — the last two are app accelerators KiwiDesk would take
+away rather than lose, #1126) — **narrowed by #1075 below**, which
+measures the base and opens it to digits under a stated boundary.
+Directions bind the arrow keys, which never compose a character on any
+layout. The set lives in the **base `gui.json` layers**, never a
+profile override (profiles stay tiling-plus-sparse-behavior, #55): on
+first launch the seeded model is persisted so the very first boot is
+GUI-managed and the shortcuts actually fire.
 
-**The ladder is not uncontested either, and that is named here so
-a later measurement does not read it as a regression.** Finder
+**The ladder is not uncontested either.** Finder
 binds `⌃⌥⌘1`–`7` to View ▸ Sort Groups By (2026-08-29, macOS
 26.6), which is tier 3's digit range (move-to-space-and-follow).
 It is admitted on the same criterion the size digits are, below:
@@ -7986,41 +7843,40 @@ than accidental (#1094).** It is tier 3's move-to-space-8 chord
 AND macOS's Invert Colors (`symbolichotkeys` id 21, read
 2026-08-29 on macOS 26.6). Unlike the Finder rows this one is not
 recoverable: the WindowServer delivers a press of an ENABLED
-symbolic hotkey to macOS's own handler and KiwiDesk never hears
-it (measured 2026-09-03 on ⌘Space and ⌃↑; the registration itself
-is accepted — #1126), so for a user who turns Invert Colors on
-the row does nothing and says nothing. It stays bound anyway, because
+symbolic hotkey to macOS's own handler and KiwiDesk never hears it
+(measured 2026-09-03 on ⌘Space and ⌃↑; the registration itself is
+accepted — #1126), so for a user who turns Invert Colors on the
+row does nothing and says nothing. It stays bound anyway, because
 Invert Colors ships DISABLED — dropping the row would take a
 working shortcut from everyone to spare the few who enable it —
 and because moving it is not available, the digits being space
 POSITIONS rather than names. What the ruling buys is the register
-entry: the chord is now in `SystemShortcuts.map`, so the editor
-can say why, where before the failure was mute on both sides.
+entry: the chord is in `SystemShortcuts.map`, so the editor can
+say why rather than failing mute on both sides.
 `SizeLayerSeedTests` ▸ `knownShadows` is the one copy of that
 exemption, and it reds if the chord ever stops being reserved.
 
-Since #1105 the verdict stops guessing at that population split:
+The verdict does not guess at that population split (#1105):
 aggregate surfaces (count, banner) read the machine's own
-`com.apple.symbolichotkeys` enabled bit live, so a user who
-turns Invert Colors on sees the collision counted while everyone
-else stays unalarmed — a static "ships disabled" set was wrong
-for exactly the people the warning matters to, and silent about
-being wrong. The read is an ordinary preference read at the GUI
-boundary, and a cached reader does see an external write
-(measured 2026-09-01, macOS 26.6.2, foreign-domain probe); a
-toggle made while Settings is open is honored on the next
-recompute, one recompute stale at worst — accepted, since the
-alternative is refresh machinery for a state that changes at
-most once per user, ever. The two
-rungs carrying the most traffic take no *app* collision at all —
-`⌃⌥` and `⌃⌥⇧` came back with **no menu bindings** across the
-same sixteen apps, which is the property #270 chose this base for
-in the first place; the one chord macOS itself reserves on `⌃⌥`
-is named above. One near-miss for whoever measures next: macOS 26
-puts a Window ▸ Move & Resize submenu in every app's menu bar
-whose quarter-tile rows read `⌃⌥⇧`+arrow, and they carry `fn` as
-well — a different chord, and not one a Carbon hotkey can be
-registered on.
+`com.apple.symbolichotkeys` enabled bit live, so a user who turns
+Invert Colors on sees the collision counted while everyone else
+stays unalarmed — a static "ships disabled" set was wrong for
+exactly the people the warning matters to, and silent about being
+wrong. The read is an ordinary preference read at the GUI
+boundary, and a cached reader does see an external write (measured
+2026-09-01, macOS 26.6.2, foreign-domain probe); a toggle made
+while Settings is open is honored on the next recompute, one
+recompute stale at worst — accepted, since the alternative is
+refresh machinery for a state that changes at most once per user,
+ever. The two rungs carrying the most traffic take no *app*
+collision at all — `⌃⌥` and `⌃⌥⇧` came back with **no menu
+bindings** across the same sixteen apps, which is the property
+#270 chose this base for in the first place; the one chord macOS
+itself reserves on `⌃⌥` is named above. One near-miss for whoever
+measures next: macOS 26 puts a Window ▸ Move & Resize submenu in
+every app's menu bar whose quarter-tile rows read `⌃⌥⇧`+arrow, and
+they carry `fn` as well — a different chord, and not one a Carbon
+hotkey can be registered on.
 
 **The keypad's ten digits ARE their number-row twins (#1074).** A
 binding written `4` fires from either physical key, and nothing
@@ -8040,9 +7896,9 @@ number row — so the twin has to be stated somewhere, and
 `KeypadKeys` is the one place it is: hotkey registration reads it
 to register the second physical key, `KeyCombo.keyName` reads it
 to canonicalise a captured keypad press back to its digit. The
-cost is accepted rather than discovered — ten keys a power user
-might have wanted bound separately are gone for good, and "the
-keypad works like the number row" is worth more than they are.
+cost is accepted — ten keys a power user might have wanted bound
+separately are gone for good, and "the keypad works like the
+number row" is worth more than they are.
 
 **The keypad is deliberately NOT drawn on the Settings board
 (#1074).** `KeyboardMatrix.PhysicalType` distinguishes ANSI, ISO
@@ -8054,18 +7910,18 @@ undrawn is already the board's shape: `f1`–`f12`, `home`, `end`,
 `drawnCodes` states outright that a key the board omits is not
 counted as free. The board is a preview, never a census.
 
-Two display residues follow, both accepted rather than
-discovered. **The "taken" tally counts what the board does not
-draw**: `KeyboardCensus.takenKeyCount` folds over every bound
-code, so binding `⌃⌥keypadplus` raises the count while lighting
-no cap — already true of `f1`–`f12` and the navigation keys, and
-widened by eight codes here. And **a non-digit keypad key draws
-the character it prints**, which is the glyph its main-block twin
-already shows, so `⌃⌥keypaddecimal` and `⌃⌥period` both render
-`⌃⌥.`. The bindings stay distinct — conflict detection compares
-key codes — so it is a display collision only, and it is left
-alone deliberately: macOS offers no keypad-distinguishing glyph,
-and a `Num`-style English prefix minted in Core would be neither
+Two display residues follow, both accepted. **The "taken" tally
+counts what the board does not draw**:
+`KeyboardCensus.takenKeyCount` folds over every bound code, so
+binding `⌃⌥keypadplus` raises the count while lighting no cap —
+already true of `f1`–`f12` and the navigation keys, and widened by
+eight codes here. And **a non-digit keypad key draws the character
+it prints**, which is the glyph its main-block twin already shows,
+so `⌃⌥keypaddecimal` and `⌃⌥period` both render `⌃⌥.`. The
+bindings stay distinct — conflict detection compares key codes —
+so it is a display collision only, and it is left alone
+deliberately: macOS offers no keypad-distinguishing glyph, and a
+`Num`-style English prefix minted in Core would be neither
 localizable nor Apple-native. Keypad **Clear** is the one that
 could not be left, because it prints nothing at all: without a
 fixed `⌧` in `ComboSymbols.specials` it fell through to the
@@ -8075,27 +7931,24 @@ chord (`KeypadKeysTests`).
 **Size is not a positional verb, so it takes a base of its own:
 `⌥⌘` (#1075).** The `⌃⌥` ladder above escalates over one idea —
 who the verb acts on — and resize never belonged to it. Focus,
-swap, move and follow all place a window in the flat array;
-resize changes a weight or a scroll-slot domain instead. Parking
-it on tier 3 made `⌘` mean two unrelated things at once — resize
-with an arrow, "and follow" with a digit — so the ladder could
-not be stated in one sentence. Moving it off restored that, and
-#1176 below then gave `⌘` a second POSITIONAL sense on purpose:
-what it may not carry is a verb from another idea, which resize
-was.
+swap, move and follow all place a window in the flat array; resize
+changes a weight or a scroll-slot domain instead. Parked on tier
+3, `⌘` means two unrelated things at once — resize with an arrow,
+"and follow" with a digit — so the ladder cannot be stated in one
+sentence.
+#1176 below gives `⌘` a second POSITIONAL sense on purpose: what
+it may not carry is a verb from another idea, which resize is.
 
-The ladder is **two bases plus one key**, and what divides them
-is not taxonomy: **`⌥⌘` carries the verbs you HOLD, `⌃⌥` the
-verbs you PRESS.** "Not positional" is why resize had to leave
-tier 3; "you hold it" (#1056) is why it landed on `⌥⌘`. Those two
-are different arguments, and conflating them is what left this
-split feeling unsettled — every later attempt to move the
-non-positional TOGGLES onto `⌥⌘` was reasoning from the taxonomy,
-which was never the load-bearing half. Size is the only held
-verb, so it is the only thing on `⌥⌘`; the toggles (`⌃⌥F`,
-`⌃⌥S`, `⌃⌥P`) are pressed, so they stay on `⌃⌥` as mnemonic
-letters; and app chrome (`⌃⌥K`) is the one key that is not a
-window verb at all.
+The ladder is **two bases plus one key**, and what divides them is
+not taxonomy: **`⌥⌘` carries the verbs you HOLD, `⌃⌥` the verbs
+you PRESS.** "Not positional" is why resize had to leave tier 3;
+"you hold it" (#1056) is why it lands on `⌥⌘`. Those two are
+different arguments: moving the non-positional TOGGLES onto `⌥⌘`
+reasons from the taxonomy, which is not the load-bearing half.
+Size is the only held verb, so it is the only thing on `⌥⌘`; the
+toggles (`⌃⌥F`, `⌃⌥S`, `⌃⌥P`) are pressed, so they stay on `⌃⌥` as
+mnemonic letters; and app chrome (`⌃⌥K`) is the one key that is
+not a window verb at all.
 
 Stated that way the rule **predicts**, which is what makes it a
 rule rather than a label: a future glide-able verb goes to `⌥⌘`,
@@ -8122,78 +7975,71 @@ setup, or an existing one through Shortcuts ▸ Restore
 Defaults…, which lands it in the default layer; a layer made
 before this carries it only by hand.
 
-**Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner
-ruling 2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on
-one hand; `⌃⌥⌘`+arrows is markedly easier, and it was free of
-KiwiDesk's own verbs since the size layer left. The cost is
-stated plainly: `⇧` stops being the uniform "act on the window"
-qualifier across arrows AND digits, and `⌃⌥⌘` stops meaning only
-"and follow". What replaces it is still one sentence — `⇧` sends
-the window to a space, `⌘` is the stronger step: swap it with a
-neighbour, or send it and go along — so the ladder is retuned
-rather than muddled. Ergonomics beat grammar purity here because
-the grammar survives the change in a form a user can still say
-out loud.
+**Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner ruling
+2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on one hand;
+`⌃⌥⌘`+arrows is markedly easier, and with size on its own base it
+is free of KiwiDesk's own verbs. The cost is stated plainly: `⇧`
+stops being the uniform "act on the window" qualifier across
+arrows AND digits, and `⌃⌥⌘` stops meaning only "and follow". What
+replaces it is still one sentence — `⇧` sends the window to a
+space, `⌘` is the stronger step: swap it with a neighbour, or send
+it and go along — so the ladder is retuned rather than muddled.
+Ergonomics beat grammar purity here because the grammar survives
+the change in a form a user can still say out loud.
 
-**What the collision measure actually says, and the artefact it
-nearly shipped.** `SystemShortcuts.map` carries no `⌃⌥⌘`+arrow
-entry, and it is necessary and not sufficient (#1098), so the
-app menus were enumerated over the AX menu-bar tree of every
-running application. Measured 2026-09-04, macOS 26.6, ten
-running apps: neither `⌃⌥⌘`+arrows
-nor the `⌃⌥⇧`+arrows it retires is claimed by any app's SHIPPED
-menu defaults. So the retune neither buys nor costs an app-menu
-collision, and rests on the ergonomics alone.
+**What the collision measure says.** `SystemShortcuts.map` carries
+no `⌃⌥⌘`+arrow entry, and it is necessary and not sufficient
+(#1098), so the app menus were enumerated over the AX menu-bar
+tree of every running application. Measured 2026-09-04, macOS
+26.6, ten running apps: neither `⌃⌥⌘`+arrows nor the `⌃⌥⇧`+arrows
+it retires is claimed by any app's SHIPPED menu defaults. So the
+retune neither buys nor costs an app-menu collision, and rests on
+the ergonomics alone.
 
-Two blind spots, both paid for by getting this wrong first. The
-sweep reads EFFECTIVE accelerators, so it cannot tell a shipped
-default from the reader's own override: the one `⌃⌥⌘`+arrow hit
-it returned was a developer's own terminal config, not Ghostty's
-default (`super+alt`+arrow), which the app's own
-`+list-keybinds` settles in a second. Check a hit against the
-app's defaults before recording it as one.
+Two blind spots. The sweep reads EFFECTIVE accelerators, so it
+cannot tell a shipped default from the reader's own override: the
+one `⌃⌥⌘`+arrow hit the sweep returned was a developer's own
+terminal config, not Ghostty's default (`super+alt`+arrow), which
+the app's own `+list-keybinds` settles in a second. Check a hit
+against the app's defaults before recording it as one.
 
-And the first pass reported every one of the ten apps claiming
-`⌃⌥⇧`+arrows — an artefact worth recording, because the trap is
-invisible and this file had already warned about it one section
-up. `AXMenuItemCmdModifiers`
-encodes `fn` in a bit the AX headers do not document (16), so a
-reader checking only shift/option/control/command sees macOS's
-`fn⌃⌥⇧` quarter-tile rows as a plain `⌃⌥⇧` collision, in every
-app, because macOS injects that submenu everywhere. **Decode
-that bit, or the sweep invents a collision with the system's own
-window tiling.** The known-truth check that settles it: Window ▸
-Move & Resize ▸ Left reads `mods=28`, which is `fn` + control +
-"no command" and matches Apple's own documented `fn⌃←`.
+And a reader that ignores the `fn` bit reports every app claiming
+`⌃⌥⇧`+arrows. `AXMenuItemCmdModifiers` encodes `fn` in a bit the
+AX headers do not document (16), so a reader checking only
+shift/option/control/command sees macOS's `fn⌃⌥⇧` quarter-tile
+rows as a plain `⌃⌥⇧` collision, in every app, because macOS
+injects that submenu everywhere. **Decode that bit, or the sweep
+invents a collision with the system's own window tiling.** The
+known-truth check that settles it: Window ▸ Move & Resize ▸ Left
+reads `mods=28`, which is `fn` + control + "no command" and
+matches Apple's own documented `fn⌃←`.
 
 **`⇧` has one meaning, and a toggle does not qualify (#1094).**
-`⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder
-three rows up spends it on "act on the window" — the one chord in
-the seed a user who had correctly learned the ladder would read
-wrong. It is gone: global sticky took `⌃⌥S` (`S` still leads
-the label a GUI-first user is shown, "Toggle sticky everywhere"), and the screen-scoped one took `⌃⌥P`, named for the
-`pin.fill` mark `StickyStyle` draws rather than for a label —
-because a label-derived mnemonic only works in the language the
-label was written in, while a mark is a picture.
+`⌃⌥⇧S` spent `⇧` on "a broader scope" while the ladder three rows
+up spends it on "act on the window" — the one chord in the seed a
+user who had correctly learned the ladder would read wrong. Global
+sticky is `⌃⌥S` (`S` still leads the label a GUI-first user is
+shown, "Toggle sticky everywhere"), and the screen-scoped one
+`⌃⌥P`, named for the `pin.fill` mark `StickyStyle` draws rather
+than for a label — because a label-derived mnemonic only works in
+the language the label was written in, while a mark is a picture.
 
-**`D` was the obvious letter and it was refused**, recorded here
-because a later author will reach for it again. Three counts:
-*Desktop* is a first-class noun in this app with its own catalog
-rows, so `⌃⌥D` reads as a Desktop verb before it reads as a
-sticky one; the letter would anchor to *display*, a word
-`config-vocabulary.md` retires for a screen, so #865 would strand
-it; and the mitigation offered for the first count — "Desktops
-and Spaces are always digit-bound, so no lettered chord means
-Desktop" — is a state claim nothing enforces (#614), since
-`goToDesktop` and `moveToDesktop` ship as offerable unbound rows
-a user may bind to any letter they like. So `⇧` now means
-exactly one thing everywhere, and so does `⌘`.
+**`D`, the obvious letter, is refused** on three counts: *Desktop*
+is a first-class noun in this app with its own catalog rows, so
+`⌃⌥D` reads as a Desktop verb before it reads as a sticky one; the
+letter would anchor to *display*, a word `config-vocabulary.md`
+retires for a screen, so #865 would strand it; and the mitigation
+offered for the first count — "Desktops and Spaces are always
+digit-bound, so no lettered chord means Desktop" — is a state
+claim nothing enforces (#614), since `goToDesktop` and
+`moveToDesktop` ship as offerable unbound rows a user may bind to
+any letter they like. So `⇧` means exactly one thing everywhere,
+and so does `⌘`.
 
-The ergonomics ran backwards too. #1056 made resize the one verb
-a user HOLDS, and it sat on the heaviest chord in the scheme —
-three modifiers with `⌃` and `⌘` at opposite ends of the left
-cluster. `⌥⌘` is a single thumb roll, because the two keys are
-adjacent.
+The ergonomics agree. Resize is the one verb a user HOLDS (#1056),
+and tier 3 is the heaviest chord in the scheme — three modifiers
+with `⌃` and `⌘` at opposite ends of the left cluster. `⌥⌘` is a
+single thumb roll, because the two keys are adjacent.
 
 **This amends #270's rejection of `⌘⌥` rather than contradicting
 it.** That ruling turned the base down for colliding with
@@ -8203,22 +8049,20 @@ they are real, and the boundary below keeps clear of them. What
 #270 did not do is enumerate the base, so the collisions were
 known by reputation rather than measured.
 
-**They are measured now, and the first draft of this layer was
-wrong because they were not.** Reading `com.apple.symbolichotkeys`
-on macOS 26.6 (2026-08-28), the chords whose modifiers are exactly
+**The base is measured.** Reading `com.apple.symbolichotkeys` on
+macOS 26.6 (2026-08-28), the chords whose modifiers are exactly
 `⌥⌘` are: `8` (Zoom on/off, id 15), `=` (Zoom in, 17), `-` (Zoom
 out, 19), `\` (23), `D` (Dock hiding, 52) and `space` (Finder
-search, 65). So **`⌥⌘8` is a digit and it is macOS's**, which an
-earlier `4`/`5` + `7`/`8` draft of this very layer had taken for
-Grow height — dead for every user with Zoom's keyboard shortcuts
-on, since macOS answers an enabled symbolic hotkey first and the
-row is never told (#1126; the registration is accepted, which is
-why nothing said so). Zoom's three are gated on Accessibility ▸ Zoom ▸ "Use
-keyboard shortcuts to zoom" and ship off, which is exactly why a
-reputation-based enumeration missed them. `SystemShortcuts.map`
-now carries the `⌥⌘` family, so the app warns instead of the
-prose promising; `SizeLayerSeedTests` holds every seeded row
-against it.
+search, 65). So **`⌥⌘8` is a digit and it is macOS's**: a `4`/`5`
++ `7`/`8` layer with `8` on Grow height is dead for every user
+with Zoom's keyboard shortcuts on, since macOS answers an enabled
+symbolic hotkey first and the row is never told (#1126; the
+registration is accepted, which is why nothing says so). Zoom's
+three are gated on Accessibility ▸ Zoom ▸ "Use keyboard shortcuts
+to zoom" and ship off, which is exactly why a reputation-based
+enumeration misses them. `SystemShortcuts.map` carries the `⌥⌘`
+family, so the app warns instead of the prose promising;
+`SizeLayerSeedTests` holds every seeded row against it.
 
 **The boundary, stated as what it is: `⌥⌘` is free only where the
 register says so.** Never arrows — `⌥⌘←`/`→` is next/previous tab
@@ -8243,51 +8087,49 @@ against `SystemShortcuts.map`, not against this paragraph.
 **And the criterion is applied to digits too, rather than assumed
 past them.** Arrows are excluded above on an *app*-level
 collision, so it would be dishonest to admit digits on the system
-list alone. The first draft of this paragraph admitted them from
-Xcode's reputation rather than from a measurement. Enumerating the
-menu
-shortcuts of sixteen installed apps through the accessibility API
-(2026-08-29, macOS 26.6) found `⌥⌘`+digit bound by **Finder**
-(`1 2 5 6 7`, View ▸ Clean Up By), **Preview** (`0 1 2 3 4 5 6 9`),
-**Safari** (`1`–`4`, Bookmarks ▸ Favorites — a range that scales
-with the user's own bookmark count) and **PowerPoint** (`1 2 3`,
-Masters). Finder and Preview ship on every Mac, so this is not a
-collision some installs have and others do not: wherever the size
-layer seeds, it shadows something.
+list alone. Enumerating the menu shortcuts of sixteen installed
+apps through the accessibility API (2026-08-29, macOS 26.6) found
+`⌥⌘`+digit bound by **Finder** (`1 2 5 6 7`, View ▸ Clean Up By),
+**Preview** (`0 1 2 3 4 5 6 9`), **Safari** (`1`–`4`, Bookmarks ▸
+Favorites — a range that scales with the user's own bookmark
+count) and **PowerPoint** (`1 2 3`, Masters). Finder and Preview
+ship on every Mac, so this is not a collision some installs have
+and others do not: wherever the size layer seeds, it shadows
+something.
 
-**The digits stay; what changed is the criterion.** Nine of the
-ten digits were claimed by an app in that enumeration, and the
-tenth — `8` — is macOS's own Zoom toggle above, so there was no
-free pair to move to. The rule that outlives the snapshot is the
-shape of the question: never which digits are free, but which
-collisions are worth accepting. What separates the admitted set
-from the refused arrows is not frequency (somebody's Safari
-Favorite `1` is pressed all day) but **recoverability and
-diagnosability**: Clean Up By, Preview's View menu and Safari's
-Favorites each have a visible menu path, so what is lost is an
-accelerator rather than a capability, and the failure presents as
-a menu item that did not respond — something a user can reason
-about. `⌥⌘←`/`→` tab switching has no menu affordance anyone
-thinks to check, so its failure presents as "the browser is
-broken" and never reaches us. Apply that test to the next chord
-question. The enumeration above is dated evidence for it, never
-the rule itself: restating a snapshot of other people's software
-as a rule is exactly how the Xcode sentence rotted.
+**The digits stay; the criterion is the rule.** Nine of the ten
+digits were claimed by an app in that enumeration, and the tenth —
+`8` — is macOS's own Zoom toggle above, so there was no free pair
+to move to. The rule that outlives the snapshot is the shape of
+the question: never which digits are free, but which collisions
+are worth accepting. What separates the admitted set from the
+refused arrows is not frequency (somebody's Safari Favorite `1` is
+pressed all day) but **recoverability and diagnosability**: Clean
+Up By, Preview's View menu and Safari's Favorites each have a
+visible menu path, so what is lost is an accelerator rather than a
+capability, and the failure presents as a menu item that did not
+respond — something a user can reason about. `⌥⌘←`/`→` tab
+switching has no menu affordance anyone thinks to check, so its
+failure presents as "the browser is broken" and never reaches us.
+Apply that test to the next chord question. The enumeration above
+is dated evidence for it, never the rule itself: restating a
+snapshot of other people's software as a rule is exactly how a
+reputation-based sentence rots.
 
 **The geometry was load-bearing independently of any of this.**
-The measurement chooses, and it chooses AGAINST the
-shipped set: `{4,5,7,8}` takes five app bindings (4 → Preview and
-Safari, 5 → Finder and Preview, 7 → Finder, 8 → none) against
-`{1,2,4,5}`'s twelve, since `1` and `2` are each claimed by all
-four apps. What refuses the rejected draft is not the app count
-but the SYSTEM chord: `⌥⌘8` is macOS's Zoom toggle, KiwiDesk
-loses that one outright, and a seeded row that silently never
-fires is worse than one that costs an app a menu accelerator. One thing the
-glide changes in the arithmetic: since #1082 resize is HELD, the
-chord is pressed once per gesture rather than tapped repeatedly
-— which strengthens the `⌥⌘` thumb roll and weakens the
-frequency case against its collisions, a held verb being used in
-bursts rather than scattered through the day.
+The measurement chooses, and it chooses AGAINST the shipped set:
+`{4,5,7,8}` takes five app bindings (4 → Preview and Safari, 5 →
+Finder and Preview, 7 → Finder, 8 → none) against `{1,2,4,5}`'s
+twelve, since `1` and `2` are each claimed by all four apps. What
+refuses the rejected draft is not the app count but the SYSTEM
+chord: `⌥⌘8` is macOS's Zoom toggle, KiwiDesk loses that one
+outright, and a seeded row that silently never fires is worse than
+one that costs an app a menu accelerator. One thing the glide
+changes in the arithmetic: resize is HELD (#1082), so the chord is
+pressed once per gesture rather than tapped repeatedly — which
+strengthens the `⌥⌘` thumb roll and weakens the frequency case
+against its collisions, a held verb being used in bursts rather
+than scattered through the day.
 
 **Why digits and not some other pair.** An arrow carries two
 readings on a tiled window — "which axis and sign" and "which way
@@ -8305,24 +8147,23 @@ anyway.
 
 Within a pair the higher digit grows. `1`/`2` and `4`/`5` form a
 2×2 block on a numeric keypad, `4`/`5` directly above `1`/`2`, so
-the pair that sits higher drives the dimension that grows upward
-— the only place a keyboard encodes a second axis without arrows,
-and the reason this binds digits at all. **#1074 landed the
-aliasing that makes those keypad keys reach these rows**: a keypad
-digit IS its number-row twin, so both physical keys fire them. The pairs are also separated by `3` on the
-number row, so a mistimed reach for one axis cannot land on the
-other (owner, 2026-08-28). Any pair spanning `5`/`6` was rejected:
-touch typing splits the row there.
+the pair that sits higher drives the dimension that grows upward —
+the only place a keyboard encodes a second axis without arrows,
+and the reason this binds digits at all. A keypad digit IS its
+number-row twin (#1074), so both physical keys fire them. The
+pairs are also separated by `3` on the number row, so a mistimed
+reach for one axis cannot land on the other (owner, 2026-08-28).
+Any pair spanning `5`/`6` was rejected: touch typing splits the
+row there.
 
-**What this costs, since the charter's job is to stop the
-re-litigation.** A user now learns a base *and* a ladder rather
+**What this costs.** A user learns a base *and* a ladder rather
 than one ladder, and the digit→axis map has no glyph relation to
-width or height — an arrow at least carried its own meaning,
-where `1`/`2` versus `4`/`5` must be memorised or read off the
-keypad block. The trade accepted: that cost is paid once, while
-the arrow's ambiguity was paid on every press from a column where
-the free edge ran the other way, and `⌘`'s double meaning was paid
-by every reader of the scheme.
+width or height — an arrow at least carried its own meaning, where
+`1`/`2` versus `4`/`5` must be memorised or read off the keypad
+block. The trade accepted: that cost is paid once, while the
+arrow's ambiguity was paid on every press from a column where the
+free edge ran the other way, and `⌘`'s double meaning was paid by
+every reader of the scheme.
 
 **No migration, deliberately.** The seed guard above fires only
 when no layer carries a single binding, so every existing config
@@ -8339,11 +8180,11 @@ which is why the resize workaround in
 `⌃⌥K` panel instead of naming one (`SizeLayerSeedTests`).
 
 **The seed fires whenever `init.lua` declares no managed
-_settings_ — not only when `init.lua` is absent (#354).** The
-original gate ("no `init.lua` yet") silently punished a user
-whose `init.lua` carries only harmless custom Lua — the
-documented sketchybar event-hook bridge — booting them to a bare
-single space with no profile. The seed now gates on
+_settings_ — not only when `init.lua` is absent (#354).** A gate
+on "no `init.lua` yet" silently punishes a user whose `init.lua`
+carries only harmless custom Lua — the documented sketchybar
+event-hook bridge — booting them to a bare single space with no
+profile. The seed gates on
 `ManagedConfig.declaresManagedSettings`: a superset of
 `hasForeignCode` that also catches the `set_*` verbs, including
 the **namespaced** layout setters (`bsp.set_ratio_h`,
@@ -8356,31 +8197,30 @@ declares tiling settings of its own stays Lua-owned (no seed —
 seeding would let the GUI defaults overwrite its Lua tiling) and
 is offered the **Adopt** path instead. With a settings-free
 `init.lua` the seed appears in the editable model and persists on
-the first Save. Per-space rows number the digits
-by display position but bind each to its space **by name**
-(`⌃⌥3` → the third space's name at seed time; a later rename
-rewrites the binding to follow it, so it survives). The first run
-pads the discovered list to the **starter setup** (see below) so
-the digit shortcuts seed even though a fresh macOS reports only
-the active Space (#270). Digits scale to the seeded count,
-whatever the setup's budget makes it: up to `⌃⌥1`–`⌃⌥9` plus
-`⌃⌥0` for a tenth space (`0` is the top-row key after `9`; there
-is no eleventh, so spaces past the tenth ship unbound — see
-[Accepted limitations](accepted-limitations.md)). The seeded Lua and labels mirror
-`KeybindingCatalog` byte-for-byte (guarded by
+the first Save. Per-space rows number the digits by display
+position but bind each to its space **by name** (`⌃⌥3` → the third
+space's name at seed time; a later rename rewrites the binding to
+follow it, so it survives). The first run pads the discovered list
+to the **starter setup** (see below) so the digit shortcuts seed
+even though a fresh macOS reports only the active Space (#270).
+Digits scale to the seeded count, whatever the setup's budget
+makes it: up to `⌃⌥1`–`⌃⌥9` plus `⌃⌥0` for a tenth space (`0` is
+the top-row key after `9`; there is no eleventh, so spaces past
+the tenth ship unbound — see [Accepted
+limitations](accepted-limitations.md)). The seeded Lua and labels
+mirror `KeybindingCatalog` byte-for-byte (guarded by
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
 Custom (#4). (#91/#466)
 
-**A fresh install seeds a real starter setup, not nine flat
-spaces (#466).** The old first run padded to nine numbered `bsp`
-spaces purely so `⌃⌥1`–`⌃⌥9` had somewhere to go (#270). But a
-shortcut never needs a pre-created space — `focus_space` already
-`ensureSpace`s on first press — so the nine existed only to back
-the digits, and every new user stared at nine identical `bsp`
-spaces.
+**A fresh install seeds a real starter setup, not nine flat spaces
+(#466).** Padding to nine numbered `bsp` spaces so that
+`⌃⌥1`–`⌃⌥9` have somewhere to go (#270) is wrong: a shortcut never
+needs a pre-created space — `focus_space` already `ensureSpace`s
+on first press — so the nine exist only to back the digits, and
+every new user stares at nine identical `bsp` spaces.
 
-*What the seed CONTAINS is now ruled above, under "the starter
-setup is chosen from the screens" (#678 Phase 4 pass 11), which
+*What the seed CONTAINS is ruled above, under "the starter setup
+is chosen from the screens" (#678 Phase 4 pass 11), which
 supersedes #466's five-per-display ladder.* What survives from
 #466 is everything about how it is delivered, and those parts are
 load-bearing whatever the layouts are:
@@ -8403,63 +8243,62 @@ disarms the seed" guard, so it never touches a configured setup.
 on WHICH layouts by #678 Phase 4 pass 11)
 
 **The starter setup IS the unmatched-change fallback — but only
-while it's the active baseline (#485).** [Rationale] #466 keeps
-it out of the silent `isStandard` fallback so nobody *else* lands
-in a setup derived from someone else's hardware. But the beginner
-who started on it hit the mirror-image bug: the seeded **Starter**
-profile only covers its first-run display count, so plugging a
-second monitor matched no stored set, fell to `.none`, and
-composed a *workflow* Standard — handing the newcomer a different
-number of spaces and no `⌃⌥N` past the seeded count. The fix scopes the
-override tightly: `handleMonitorChange`'s `.none` branch recomposes
-the **starter setup** for the live screens *only when the user is
-on the Starter baseline* (`isOnStarterBaseline` — the adopted seed profile,
-flagged `Profile.isStarterSetup` so the identity survives a rename
-or an edited mode, or a transient Starter Standard from an earlier
-change,
-sticky via `currentStandard`). Every other baseline still gets the
-workflow Standard, so #466's "no silent demo layout" promise holds for
-everyone who didn't choose it. The flag rides re-saves and
-edits but **not** a save-as-new — an explicitly named copy is the
-user's own profile and resolves normally (`copyProfile` clears it
-beside `isDefault`, the two identity flags a copy must neutralize). A
-transient Starter Standard carries the flag onto the first profile the
-user *saves* of it, via `buildProfile` reading `currentStandard`, so a
-save doesn't drop them off the baseline either. Both recompose sites are
-covered: `handleMonitorChange`'s `.none` branch and
-`reapplyActiveProfileState` (a config reload) both route through
-`composeMonitorChangeFallback`, and `apply(composed:)` now adopts its
-own `composed.assignment` (`adoptComposedPlacement`) rather than
-discarding it — equivalent for a workflow Standard, correct for
-the starter setup's per-screen blocks, which are no longer even
-the same size as each other. The digit-shortcut half is the
-additive twin: `topUpDigitShortcuts` binds only the `⌃⌥N` a growth
-left unbound (GUI-managed, never overwriting a custom chord, capped at
-ten), so the shortcuts follow the spaces. Do not "simplify" either
-recompose site back to a bare `StandardProfiles.standard`, nor make
-`apply(composed:)` discard its assignment again — each reintroduces
+while it's the active baseline (#485).** [Rationale] #466 keeps it
+out of the silent `isStandard` fallback so nobody *else* lands in
+a setup derived from someone else's hardware. But the seeded
+**Starter** profile only covers its first-run display count, so
+plugging a second monitor matches no stored set, falls to `.none`,
+and would compose a *workflow* Standard — handing the newcomer a
+different number of spaces and no `⌃⌥N` past the seeded count. The
+override is scoped tightly: `handleMonitorChange`'s `.none` branch
+recomposes the **starter setup** for the live screens *only when
+the user is on the Starter baseline* (`isOnStarterBaseline` — the
+adopted seed profile, flagged `Profile.isStarterSetup` so the
+identity survives a rename or an edited mode, or a transient
+Starter Standard from an earlier change, sticky via
+`currentStandard`). Every other baseline still gets the workflow
+Standard, so #466's "no silent demo layout" promise holds for
+everyone who didn't choose it. The flag rides re-saves and edits
+but **not** a save-as-new — an explicitly named copy is the user's
+own profile and resolves normally (`copyProfile` clears it beside
+`isDefault`, the two identity flags a copy must neutralize). A
+transient Starter Standard carries the flag onto the first profile
+the user *saves* of it, via `buildProfile` reading
+`currentStandard`, so a save doesn't drop them off the baseline
+either. Both recompose sites are covered: `handleMonitorChange`'s
+`.none` branch and `reapplyActiveProfileState` (a config reload)
+both route through `composeMonitorChangeFallback`, and
+`apply(composed:)` adopts its own `composed.assignment`
+(`adoptComposedPlacement`) rather than discarding it — equivalent
+for a workflow Standard, correct for the starter setup's
+per-screen blocks, which are not even the same size as each other.
+The digit-shortcut half is the additive twin:
+`topUpDigitShortcuts` binds only the `⌃⌥N` a growth left unbound
+(GUI-managed, never overwriting a custom chord, capped at ten), so
+the shortcuts follow the spaces. Do not "simplify" either
+recompose site back to a bare `StandardProfiles.standard`, nor
+make `apply(composed:)` discard its assignment again — each
+reintroduces
 #485. (#485)
 
-**Orphaned space shortcuts are surfaced, never pruned.** A
-binding that targets a space by name outlives the space's
-presence in the current profile: it stays Carbon-registered
-(pressing it recreates the space via `ensureSpace`) and keeps
-its combo (the recorder preflight checks every stored row, not
-just visible ones). Before #92 it was also *invisible* — the
-per-space catalog rows render only live spaces, and the
-Advanced drawer shows only `.custom` — so the user was
-hard-blocked by a holder they could not see, and the
-rejection's *Go to* scrolled to a row that did not exist. Now
-a dimmed **Inactive shortcuts** section renders one ordinary
-`NavRow` per orphaned binding (detected via
+**Orphaned space shortcuts are surfaced, never pruned.** A binding
+that targets a space by name outlives the space's presence in the
+current profile: it stays Carbon-registered (pressing it recreates
+the space via `ensureSpace`) and keeps its combo (the recorder
+preflight checks every stored row, not just visible ones). Without
+a row of its own it is *invisible* — the per-space catalog rows
+render only live spaces, and the Advanced drawer shows only
+`.custom` — so the user is hard-blocked by a holder they cannot
+see, and the rejection's *Go to* scrolls to a row that does not
+exist. A dimmed **Inactive shortcuts** section renders one
+ordinary `NavRow` per orphaned binding (detected via
 `SpaceLuaArg.targetSpace`, the strict inverse of the catalog's
-authoring, against the live-derived space list, #77), so
-rebind / clear / *Go to* all work. Pruning on save was
-explicitly rejected: a binding orphaned under a 4-space
-profile is valid again under the 8-space one — silently
-deleting it would lose config across a routine monitor swap.
-The rows stay live at runtime by design; only their
-*visibility* was broken. (#92)
+authoring, against the live-derived space list, #77), so rebind /
+clear / *Go to* all work. Pruning on save was explicitly rejected:
+a binding orphaned under a 4-space profile is valid again under
+the 8-space one — silently deleting it would lose config across a
+routine monitor swap. The rows stay live at runtime by design.
+(#92)
 
 **The shortcuts panel scrolls, and says so — in words, in the
 footer.** The panel is a glance surface but not a small one: the
@@ -8472,19 +8311,18 @@ the content clipped — `overflows(fitting:ceiling:)`, one home,
 handed to the view rather than re-derived by it, so the cue
 cannot disagree with the clamp that causes it.
 
-**The platform's own indicator was tried first and does not
-work.** `.scrollIndicators(.visible)` shipped for one commit
-and was measured on device (macOS 26.6.2, 2026-09-07,
-`AppleShowScrollBars` unset — *Automatically* — 46 bound
-shortcuts, ~45 rows against ~20 that fit): the overlay scroller
-still appeared only during a gesture. Apple documents the
-visibility as depending on "user preference behaviors in
-macOS", so the modifier is expressed intent the platform may
-decline, and here it declines. It is unobservable in all three
-preference states — under *Automatically* with a trackpad it
-loses to the auto-hide, with a mouse macOS already draws a
-legacy scroller, and under *Always* the scroller is permanent
-anyway — so it was removed rather than left as a hedge.
+**The platform's own indicator does not work.**
+`.scrollIndicators(.visible)`, measured on device (macOS 26.6.2,
+2026-09-07, `AppleShowScrollBars` unset — *Automatically* — 46
+bound shortcuts, ~45 rows against ~20 that fit): the overlay
+scroller still appears only during a gesture. Apple documents the
+visibility as depending on "user preference behaviors in macOS",
+so the modifier is expressed intent the platform may decline, and
+here it declines. It is unobservable in all three preference
+states — under *Automatically* with a trackpad it loses to the
+auto-hide, with a mouse macOS already draws a legacy scroller, and
+under *Always* the scroller is permanent anyway — so it is not
+kept as a hedge.
 
 **Why words, and why in the footer: a partial row is not a fold
 cue when a terminator sits under it.** The fold cuts a row in
@@ -8506,29 +8344,27 @@ ship the static cue as its fallback anyway. It names its object
 because *Scrolling* is one of KiwiDesk's layout modes and its
 verbs can be on screen in the same panel.
 
-Two rejections worth keeping. A **bottom fade** cannot be
-judged here at all: the panel's ground is `.regularMaterial`
-over a clear window, so a gradient fades the last rows toward
-the user's wallpaper — there is no colour to fade to, its
-lightness is unmeasurable, and the colour-vision clauses
-therefore have no answer. It also removes information on a
-surface whose only job is to be read.
+Two rejections. A **bottom fade** cannot be judged here at all:
+the panel's ground is `.regularMaterial` over a clear window, so a
+gradient fades the last rows toward the user's wallpaper — there
+is no colour to fade to, its lightness is unmeasurable, and the
+colour-vision clauses therefore have no answer. It also removes
+information on a surface whose only job is to be read.
 
 And **`scrollerStyle = .legacy` is refused on ownership, not on
 preference.** It is a per-`NSScrollView` property, it writes no
 user default, and *Automatically* is a delegation rather than a
-vote against legacy scrollers — so a preference argument would
-not carry. What decides it is that KiwiDesk does not own this
-scroll view — it is SwiftUI's
-private backing, reachable only by walking the hosting
-hierarchy for a class SwiftUI does not promise to keep. That is
-the same species of bet `.scrollIndicators(.visible)` just
-lost, and it fails *silently*: the traversal returns nil, no
-cue is drawn, and nothing says so — which means the words are
-owed as its fallback, and once the words exist the traversal
-buys nothing. `flashScrollers()` dies the same way, plus
-transience. The door is open by ownership: if this panel is
-ever rebuilt as an `NSViewRepresentable` over a scroll view it
+vote against legacy scrollers — so a preference argument would not
+carry. What decides it is that KiwiDesk does not own this scroll
+view — it is SwiftUI's private backing, reachable only by walking
+the hosting hierarchy for a class SwiftUI does not promise to
+keep. That is the same species of bet
+`.scrollIndicators(.visible)` loses, and it fails *silently*: the
+traversal returns nil, no cue is drawn, and nothing says so —
+which means the words are owed as its fallback, and once the words
+exist the traversal buys nothing. `flashScrollers()` dies the same
+way, plus transience. The door is open by ownership: if this panel
+is ever rebuilt as an `NSViewRepresentable` over a scroll view it
 constructs, `.legacy` becomes legitimate and is re-argued then.
 
 Making the content *fit* (#1294) lowers how often the fold
@@ -8598,8 +8434,7 @@ backdrop actually carries hue, because the glass refracts a
 sibling plane behind it. That is precisely why no tint belongs
 here: a backdrop opaque enough to read as a colour is opaque
 enough to stop the wallpaper coming through, and the wallpaper
-coming through is the whole reason to adopt glass. Recorded so a
-future attempt does not reopen this by trying "the other one".
+coming through is the whole reason to adopt glass.
 
 **The panel takes `.regular` and the bars take `.clear`, and
 that divergence is the ruling rather than a drift.** The variant
@@ -8614,17 +8449,15 @@ simply unreadable (owner, 2026-09-07), which is the whole
 argument; the greyness it costs is the price of the surface's
 job.
 
-**The two variants are not the same value in the two toolkits,
-so there is no single finish for the surfaces to agree on.** In
+**The two variants are not the same value in the two toolkits, so
+there is no single finish for the surfaces to agree on.** In
 **AppKit** `.clear` and `.regular` measured visually *identical*
 (#390, 26.5.2) — which is why `GlassPlate` picking `.clear` cost
 the bars nothing; in **SwiftUI** they are 59/255 of luminance
-apart. An earlier draft of this entry argued the two surfaces
-should share one finish and was wrong for exactly that reason: it
-would have unified a spelling rather than a rendering. Note the
-direction, too — `Glass.regular` is the API default, so the panel
-is on the plain path and it is the **bars** that take the special
-variant.
+apart. Sharing one finish across the two surfaces would unify a
+spelling rather than a rendering. Note the direction, too —
+`Glass.regular` is the API default, so the panel is on the plain
+path and it is the **bars** that take the special variant.
 
 A bar moving to `.regular`, or this panel back to `.clear`, is
 therefore a fresh device sitting rather than an inherited choice.
@@ -8636,20 +8469,19 @@ therefore a fresh device sitting rather than an inherited choice.
 **The chip stays at 0.2 on glass, and that is a decision rather
 than an oversight.** Its separation from the ground is
 `0.2 × (accent − local composite)`, and chip and ground share one
-backdrop: under `.regularMaterial` that composite was dragged
-toward a desaturated grey and the delta was near-constant, while
-glass keeps the backdrop's chroma, so the delta now tracks the
-wallpaper and collapses where the composite approaches the
-accent's own luminance. That is accepted because **the chip's
-colour carries no information** — the layer name is text, drawn
-vibrant — so the failure mode is "identity fades on some
-desktops", not "the user cannot tell which layer they are in",
-and nothing rides the hue for a colour-vision floor to bind. Both
-escalations are worse: an opaque accent capsule puts the loudest
-mark in the footer on a passive readout and reads as a control,
-and an accent stroke swaps an unmeasurable wash for an
-unmeasurable hairline at fixed luminance — the same objection
-that defers the panel edge.
+backdrop: under `.regularMaterial` that composite is dragged
+toward a desaturated grey and the delta near-constant, while glass
+keeps the backdrop's chroma, so the delta tracks the wallpaper and
+collapses where the composite approaches the accent's own
+luminance. That is accepted because **the chip's colour carries no
+information** — the layer name is text, drawn vibrant — so the
+failure mode is "identity fades on some desktops", not "the user
+cannot tell which layer they are in", and nothing rides the hue
+for a colour-vision floor to bind. Both escalations are worse: an
+opaque accent capsule puts the loudest mark in the footer on a
+passive readout and reads as a control, and an accent stroke swaps
+an unmeasurable wash for an unmeasurable hairline at fixed
+luminance — the same objection that defers the panel edge.
 
 The panel keeps its drop shadow (`hasShadow = true`, which
 `BarPanel` deliberately does not have) and draws no edge stroke.
@@ -8658,40 +8490,39 @@ shadow that suffices for a material panel may not suffice for a
 more transparent one, and the honest test is a plate that
 actually refracts, over a light wallpaper and a dark one.
 
-**A window states its own accent, and a tree that draws chrome
-is inside the lens** (#1293). Every KiwiDesk window sets
+**A window states its own accent, and a tree that draws chrome is
+inside the lens** (#1293). Every KiwiDesk window sets
 `.tint(SettingsTheme.accent)` at its root, because the retired
 `Color.accentColor` reads the *user's* system accent and an
-unstyled `Button` takes whatever tint it finds — so a surface
-that states neither renders in the user's accent inside a kiwi
-app. The panel's `Shortcuts/` tree was outside `ChromeScanRoots`
-and therefore not partly covered but *silently exempt*, which is
-why it did.
+unstyled `Button` takes whatever tint it finds — so a surface that
+states neither renders in the user's accent inside a kiwi app. A
+tree outside `ChromeScanRoots` — the panel's `Shortcuts/` tree was
+one — is not partly covered but *silently exempt*, which is how
+such a surface ships.
 
 **The shortcuts panel never lists its own opener.** The
-`show_shortcuts` binding (⌃⌥K, seeded per layer since #602) is
-dropped from the panel builder's working set and renders in no
-band — the one deliberate exception to the panel's "no bound
-shortcut is ever invisible" contract. The footer's dismiss hint
-is its home: it shows the live resolved combo wherever bindings
-are live, follows a rebind automatically, and still renders in
-the empty and unavailable states, which no band does — a row
-can't match that. A row would also be self-referential (you
-just pressed the combo it teaches; no macOS surface lists its
-own trigger as content) and, pre-fix, it surfaced in *Custom*,
-the band that means "user-authored raw Lua" — a first-party
-seeded default there reads as the user's own script. Promoting
-the row to the top instead was considered and rejected:
-redundancy with the footer is most jarring as the first line
-read, ahead of the actions the user opened the panel to look
-up. The editor's General section likewise stays low — macOS's
-own Keyboard pane puts "Keyboard Shortcuts…" below the content,
-and the menu bar's "View Shortcuts…" plus the onboarding hint
-already carry discovery. Consequence to keep: a fresh layer
-(seeded with only the opener) honestly shows the "nothing
-bound" placeholder while the footer teaches ⌃⌥K.
-`ShortcutsSelfRowTests` pins the suppression — un-suppressing
-it re-leaks the seed into Custom. (#602, PR #638)
+`show_shortcuts` binding (⌃⌥K, seeded per layer, #602) is dropped
+from the panel builder's working set and renders in no band — the
+one deliberate exception to the panel's "no bound shortcut is ever
+invisible" contract. The footer's dismiss hint is its home: it
+shows the live resolved combo wherever bindings are live, follows
+a rebind automatically, and still renders in the empty and
+unavailable states, which no band does — a row can't match that. A
+row would also be self-referential (you just pressed the combo it
+teaches; no macOS surface lists its own trigger as content) and,
+listed, it surfaces in *Custom*, the band that means
+"user-authored raw Lua" — a first-party seeded default there reads
+as the user's own script. Promoting the row to the top instead was
+considered and rejected: redundancy with the footer is most
+jarring as the first line read, ahead of the actions the user
+opened the panel to look up. The editor's General section likewise
+stays low — macOS's own Keyboard pane puts "Keyboard Shortcuts…"
+below the content, and the menu bar's "View Shortcuts…" plus the
+onboarding hint already carry discovery. Consequence to keep: a
+fresh layer (seeded with only the opener) honestly shows the
+"nothing bound" placeholder while the footer teaches ⌃⌥K.
+`ShortcutsSelfRowTests` pins the suppression — un-suppressing it
+re-leaks the seed into Custom. (#602, PR #638)
 
 **The summoned reference yields the activation it stole — and
 only where the user chose nothing else.** The ⌃⌥K panel is
