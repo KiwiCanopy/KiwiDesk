@@ -168,12 +168,11 @@ struct SecondarySwitchTests {
         )
     }
 
-    /// The diff is taken ONCE per switch: a second call would
-    /// compare against the stamp the first one wrote and report
-    /// nothing changed, which is how the handler's arm and the
-    /// event could name different displays.
-    @Test("The switched-display diff re-stamps as it reads")
-    func diffStampsOnce() {
+    /// The diff reads against the last FILED reading and files
+    /// nothing itself (#1215): the handler files at its tail, so
+    /// the diff is the same answer until then and empty after.
+    @Test("The switched-display diff files only at the handler's tail")
+    func diffFilesAtTheTail() {
         defer { resetAuthorityOverrides() }
         let core = makeSeparateCore()
         NativeSpaces.spacesOverride = authorityTopology(
@@ -184,6 +183,10 @@ struct SecondarySwitchTests {
         #expect(
             core.switchedDisplays(in: snapshot).changed == ["UUID-B"]
         )
+        #expect(
+            core.switchedDisplays(in: snapshot).changed == ["UUID-B"]
+        )
+        core.fileDisplaySpaces(in: snapshot)
         #expect(core.switchedDisplays(in: snapshot).changed.isEmpty)
     }
 }

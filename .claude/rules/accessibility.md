@@ -374,13 +374,22 @@ editing AX code:
   and cap, the destroy notification deferring through the one
   `expectedAbsence` reading, so the handler — 30–130 ms later —
   finds the window in state, MOVES it, stamps it in flight and
-  files the switch, after which the carried arm takes over and
-  this one is closed. Residue, recorded in
+  only THEN files the switch (`fileDisplaySpaces`, at the
+  handler's tail), after which the carried arm takes over and
+  this one is closed. **The filing must follow the carry**: a
+  bound Desktop's profile apply runs a full reconcile inside the
+  handler, and filed at the top that sweep found every arm closed
+  and removed the window the carry was about to move (device,
+  2026-09-21, Desktop 2 bound; the notification can land on
+  either side of the handler). No behavior test drives that
+  sweep, so `ReachFilingOrderSeamTests` pins the order and the
+  store's one writer beside the boot seed. Residue, recorded in
   `docs/accepted-limitations.md`: a reach-enabled sticky window
   closed in the beat before the handler files a switch, or one
-  that beat's switch cannot carry, takes its removal one recheck
-  late. `ReachDepartureRemovalTests` pins both halves — the
-  sweep's clauses and the notification's deferral.
+  that switch cannot carry, takes its removal at the sweep that
+  follows the switch rather than at once.
+  `ReachDepartureRemovalTests` pins both halves — the sweep's
+  clauses and the notification's deferral.
 
   **The fullscreen arm (#1272) refuses the beat a native
   fullscreen transition orders the window out for, on BOTH
