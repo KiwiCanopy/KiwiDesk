@@ -18,6 +18,16 @@ extension APIReference {
                 + "the layout.",
             .number("thickness")
         ),
+        "set_outer_margin": APIRecord(
+            "Sets the bar's distance from the screen border in "
+                + "points; 0 is flush.",
+            .number("margin")
+        ),
+        "set_inner_margin": APIRecord(
+            "Adds points on the bar's window side, on top of the "
+                + "windows' outer gap.",
+            .number("margin")
+        ),
         "set_background_style": APIRecord(
             "Sets where the background is drawn: a box per item "
                 + "or one shared plate.",

@@ -21,6 +21,8 @@ enum AppBarCommandSetting {
     case edge(AppBarEdge)
     case alignment(AppBarStyle.BarAlignment)
     case thickness(CGFloat)
+    case outerMargin(CGFloat)
+    case innerMargin(CGFloat)
     case backgroundStyle(AppBarStyle.BackgroundStyle)
     case liquidGlass(Bool)
     case backgroundFit(AppBarStyle.BackgroundFit)
@@ -123,6 +125,8 @@ enum AppBarCommandSetting {
     {
         [
             "thickness": Self.thickness,
+            "outer_margin": Self.outerMargin,
+            "inner_margin": Self.innerMargin,
             "item_size": Self.itemSize,
             "item_gap": Self.itemGap,
             "font_size": Self.fontSize,
@@ -193,6 +197,10 @@ enum AppBarCommandSetting {
         case .alignment(let value): style.alignment = value
         case .thickness(let value):
             style.thickness = max(AppBarStyle.minThickness, value)
+        case .outerMargin(let value):
+            style.outerMargin = max(AppBarStyle.minMargin, value)
+        case .innerMargin(let value):
+            style.innerMargin = max(AppBarStyle.minMargin, value)
         case .backgroundStyle(let value):
             style.backgroundStyle = value
         case .liquidGlass(let value): style.liquidGlass = value
@@ -235,6 +243,10 @@ enum AppBarCommandSetting {
         case .alignment(let value): bar.alignment = value
         case .thickness(let value):
             bar.thickness = max(AppBarStyle.minThickness, value)
+        case .outerMargin(let value):
+            bar.outerMargin = max(AppBarStyle.minMargin, value)
+        case .innerMargin(let value):
+            bar.innerMargin = max(AppBarStyle.minMargin, value)
         case .backgroundStyle(let value): bar.backgroundStyle = value
         case .liquidGlass(let value): bar.liquidGlass = value
         case .backgroundFit(let value):

@@ -13,6 +13,8 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarShowFrontApp = "settings.spaceBarStyle.showFrontApp"
     case spaceBarSpringDelay = "settings.spaceBarStyle.springDelay"
     case spaceBarThickness = "settings.spaceBarStyle.thickness"
+    case spaceBarOuterMargin = "settings.spaceBarStyle.outerMargin"
+    case spaceBarInnerMargin = "settings.spaceBarStyle.innerMargin"
     case spaceBarItemSizeAuto = "settings.spaceBarStyle.itemSize (auto)"
     case spaceBarItemSize = "settings.spaceBarStyle.itemSize"
     case spaceBarItemGap = "settings.spaceBarStyle.itemGap"
@@ -54,7 +56,8 @@ extension SpaceBarKey {
         case .spaceBarAlignment, .spaceBarBackground, .spaceBarActiveIndicator,
             .spaceBarIconSource, .spaceBarSpringDelay, .spaceBarItemSizeAuto,
             .spaceBarItemGap, .spaceBarFontSizeAuto, .spaceBarGlyphCap,
-            .spaceBarCornerRoundness:
+            .spaceBarCornerRoundness, .spaceBarOuterMargin,
+            .spaceBarInnerMargin:
             return .row(.bars, .spaceBar, .showMore)
         case .spaceBarTitleCap:
             // Inert while front segment is off.
@@ -166,6 +169,16 @@ extension SpaceBarKey {
             )
         case .spaceBarThickness:
             return .text("space_bar.thickness")
+        case .spaceBarOuterMargin:
+            return .text(
+                "space_bar.outer_margin",
+                help: "space_bar.outer_margin.help"
+            )
+        case .spaceBarInnerMargin:
+            return .text(
+                "space_bar.inner_margin",
+                help: "space_bar.inner_margin.help"
+            )
         case .spaceBarItemSizeAuto:
             return .text("space_bar.item_size.auto")
         case .spaceBarItemSize:

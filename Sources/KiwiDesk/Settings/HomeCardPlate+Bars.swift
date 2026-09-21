@@ -3,7 +3,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Schematic preview of configured App Bar and Space Bar strips
-/// (#793, owner 2026-08-10).
+/// (#793, owner 2026-08-10). Not modelled: the bar margins and
+/// the outer gap (#1516) — a few points draw as nothing at this
+/// scale, so the strips sit flush by construction — and the
+/// identifier tint flag, a schematic dims nothing (#1538).
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
     /// Real space count from draft (owner 2026-08-10).
@@ -11,8 +14,7 @@ struct HomeCardBarsTile: View {
     /// Scale factor (1 on home plate, larger in detail panel).
     var scale: CGFloat = 1
     /// Space identifiers for panel scale rendering — Core's own
-    /// verdict per Space (#1538); the tint flag is not modelled,
-    /// a schematic dims nothing.
+    /// verdict per Space (#1538).
     var spaceLabels: [SpaceGlyph] = []
     @Environment(\.schematicPalette) private var palette
 

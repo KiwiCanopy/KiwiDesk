@@ -127,8 +127,8 @@ struct ScrollingSlotCeilingTests {
         )
         let context = input.context
         let area = context.scrolling.windowFrame(
-            in: context.usable,
-            inner: context.gaps.inner,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         return horizontal ? area.width : area.height

@@ -15,8 +15,8 @@ public struct ScrollingLayout: LayoutSystem {
         guard !windows.isEmpty else { return [:] }
 
         let area = context.scrolling.windowFrame(
-            in: context.usable,
-            inner: context.gaps.inner,
+            in: context.bounds,
+            outer: context.gaps.outer,
             global: context.appBarStyle
         )
         let horizontal = context.scrolling.axisIsHorizontal

@@ -139,6 +139,7 @@ public enum APIReference {
             "set_orientation_override",
             "set_app_bar_enabled", "set_app_bar_edge", "set_app_bar_alignment",
             "set_app_bar_thickness",
+            "set_app_bar_outer_margin", "set_app_bar_inner_margin",
             "set_app_bar_background_style",
             "set_app_bar_liquid_glass",
             "set_app_bar_background_fit",
@@ -161,6 +162,7 @@ public enum APIReference {
         ],
         "space_bar": [
             "set_enabled", "set_edge", "set_alignment", "set_thickness",
+            "set_outer_margin", "set_inner_margin",
             "set_item_size", "set_item_gap", "set_font_size",
             "set_glyph_cap",
             "set_icon_source", "set_background_style",
@@ -182,6 +184,7 @@ public enum APIReference {
         ],
         "app_bar": [
             "set_edge", "set_alignment", "set_thickness",
+            "set_outer_margin", "set_inner_margin",
             "set_background_style",
             "set_liquid_glass",
             "set_background_fit",
@@ -216,6 +219,7 @@ public enum APIReference {
             "set_wrap_focus", "set_new_window_placement",
             "set_app_bar_enabled", "set_app_bar_edge", "set_app_bar_alignment",
             "set_app_bar_thickness",
+            "set_app_bar_outer_margin", "set_app_bar_inner_margin",
             "set_app_bar_background_style",
             "set_app_bar_liquid_glass",
             "set_app_bar_background_fit",

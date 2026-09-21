@@ -73,7 +73,9 @@ struct SettingsCatalogSiteTests {
         // 122 since #1473: Gaps & Borders' seven at-rest rows
         // leave with their corrected tier.
         // 121 since #1536: the General ▸ About card left.
-        #expect(names.count == 121)
+        // 125 since #1516: the two margin rows in each bar's
+        // Style drawer.
+        #expect(names.count == 125)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

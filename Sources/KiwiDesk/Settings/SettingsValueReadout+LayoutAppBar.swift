@@ -156,6 +156,22 @@ extension SettingsValueReadout {
                 layoutBarPoints(o.itemGap),
                 layoutBarPoints(n.itemGap)
             )
+        case .monocleAppBarOuterMargin, .scrollingAppBarOuterMargin:
+            return layoutBarRow(
+                census,
+                mode,
+                .appBarOuterMargin,
+                layoutBarPoints(o.outerMargin),
+                layoutBarPoints(n.outerMargin)
+            )
+        case .monocleAppBarInnerMargin, .scrollingAppBarInnerMargin:
+            return layoutBarRow(
+                census,
+                mode,
+                .appBarInnerMargin,
+                layoutBarPoints(o.innerMargin),
+                layoutBarPoints(n.innerMargin)
+            )
         case .monocleAppBarFontSize, .scrollingAppBarFontSize:
             return layoutBarRow(
                 census,
@@ -277,6 +293,7 @@ extension SettingsValueReadout {
             .monocleAppBarTitleCap,
             .monocleAppBarGroupAdjacentWindows,
             .monocleAppBarThickness, .monocleAppBarItemSize,
+            .monocleAppBarOuterMargin, .monocleAppBarInnerMargin,
             .monocleAppBarItemGap, .monocleAppBarFontSize,
             .monocleAppBarCornerRoundness, .monocleAppBarFillColor,
             .monocleAppBarHighlightColor, .monocleAppBarItemColor,
@@ -296,6 +313,7 @@ extension SettingsValueReadout {
             .scrollingAppBarContent, .scrollingAppBarTitleCap,
             .scrollingAppBarGroupAdjacentWindows,
             .scrollingAppBarThickness, .scrollingAppBarItemSize,
+            .scrollingAppBarOuterMargin, .scrollingAppBarInnerMargin,
             .scrollingAppBarItemGap, .scrollingAppBarFontSize,
             .scrollingAppBarCornerRoundness,
             .scrollingAppBarFillColor,

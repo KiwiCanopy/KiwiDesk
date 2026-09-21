@@ -10267,6 +10267,47 @@ window-facing, insets add) and perpendicular corners that
 cannot overlap (the App Bar strip spans the already-inset
 frame).
 
+:::unreleased
+**Both bars are placed by ONE rule, and each owns two margins.**
+([#1516](https://github.com/KiwiCanopy/KiwiDesk/issues/1516),
+owner ruling 2026-09-18.) From the screen edge inwards: the
+bar's **outer margin**, the strip, the bar's **inner margin**,
+then the windows' own outer gap, then the windows. The outer
+margin is absolute — nothing else lives on that side, so the
+value *is* the distance and 0 is flush. The inner margin is
+*added* to the windows' outer gap, which alone keeps the focus
+ring's clearance, so 0 means "the gap governs" and no floor is
+needed. Both default to 0, both bars on one edge stack
+outermost-first with the Space Bar carved first, and between
+the two the Space Bar's inner and the App Bar's outer both
+count — each bar owns its margins, so they add, and at the
+defaults the bars touch. Before this the two bars answered to
+different rules: the Space Bar sat flush and the windows' outer
+gap followed it, while the App Bar was carved *inside* that
+outer gap and the windows' *inner* gap separated it from the
+windows — so raising the outer gap moved one bar away from the
+border and the other's window side, and two bars on opposite
+corners could never be aligned. The alternatives refused: a set
+margin that *replaces* the derivation (an inner margin under
+the ring width would clip the ring, forcing a floor, and "not
+set" would keep both old rules alive), a single "distance to
+border" (leaves the window side differing per bar), and a 1 pt
+inner default (invisible on top of 10; the value means
+"extra"). The one visible change at update is accepted and
+owed a line in the release's Highlights: on the App Bar's edge
+the bar moves from inside the outer gap to flush with the
+screen edge and the tiled windows follow it by the same
+distance — 10 pt at the defaults, the window side now being the
+outer gap alone where it was the outer gap plus the inner — and
+the strip spans the whole edge rather than stopping at the side
+gaps. A user who wants the old look sets the App Bar's outer
+margin to the outer gap, which restores both. The Bars preview
+does not model the margins: at a
+thumbnail's scale a few points draw as nothing, and a caption
+that names a fact the frame does not draw is the schematic
+rule's own defect (`LayoutSchematicCaptionTests`).
+:::
+
 **Same-edge bar stacking is a supported layout, not an error.**
 (#293.) Both bars on one edge is a reversible, deliberate
 choice: no conflict dialog, no automatic relocation, no blocked

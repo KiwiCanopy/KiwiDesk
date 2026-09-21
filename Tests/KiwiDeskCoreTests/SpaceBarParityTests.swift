@@ -148,7 +148,7 @@ struct SpaceBarCommandParityTests {
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false), .edge(.bottom), .alignment(.end),
-        .thickness(44),
+        .thickness(44), .outerMargin(4), .innerMargin(6),
         .itemSize(120), .itemGap(3), .fontSize(15),
         .glyphCap(8), .titleCap(40),
         .iconSource(.appFont), .backgroundStyle(.boxed),
@@ -240,8 +240,9 @@ struct SpaceBarCommandParityTests {
         case .backgroundStyle: return [.string("boxed")]
         case .backgroundFit: return [.string("full")]
         case .activeIndicator: return [.string("gap")]
-        case .thickness, .itemSize, .itemGap, .fontSize,
-            .cornerRoundness, .dimFactor, .activeDimFactor:
+        case .thickness, .outerMargin, .innerMargin, .itemSize,
+            .itemGap, .fontSize, .cornerRoundness, .dimFactor,
+            .activeDimFactor:
             return [.number(10)]
         case .springDelay: return [.number(1000)]
         case .glyphCap: return [.number(8)]

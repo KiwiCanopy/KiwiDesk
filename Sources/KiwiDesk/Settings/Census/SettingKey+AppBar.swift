@@ -13,6 +13,8 @@ enum AppBarKey: String, CaseIterable, Hashable {
     case appBarGroupAdjacentWindows =
         "settings.appBarStyle.groupAdjacentWindows"
     case appBarThickness = "settings.appBarStyle.thickness"
+    case appBarOuterMargin = "settings.appBarStyle.outerMargin"
+    case appBarInnerMargin = "settings.appBarStyle.innerMargin"
     case appBarItemSizeAuto = "settings.appBarStyle.itemSize (auto)"
     case appBarItemSize = "settings.appBarStyle.itemSize"
     case appBarItemGap = "settings.appBarStyle.itemGap"
@@ -37,7 +39,8 @@ extension AppBarKey {
             return .row(.bars, .appBar, .atRest)
         case .appBarAlignment, .appBarBackground, .appBarActiveIndicator,
             .appBarItemSizeAuto, .appBarItemGap, .appBarFontSizeAuto,
-            .appBarCornerRoundness:
+            .appBarCornerRoundness, .appBarOuterMargin,
+            .appBarInnerMargin:
             return .row(.bars, .appBar, .showMore)
         case .appBarFontSize:
             return .row(
@@ -149,6 +152,16 @@ extension AppBarKey {
             )
         case .appBarThickness:
             return .text("app_bar.thickness")
+        case .appBarOuterMargin:
+            return .text(
+                "app_bar.outer_margin",
+                help: "app_bar.outer_margin.help"
+            )
+        case .appBarInnerMargin:
+            return .text(
+                "app_bar.inner_margin",
+                help: "app_bar.inner_margin.help"
+            )
         case .appBarItemSizeAuto:
             return .text("app_bar.item_size.auto")
         case .appBarItemSize:

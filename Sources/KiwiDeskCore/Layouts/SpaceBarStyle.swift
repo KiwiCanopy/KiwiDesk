@@ -19,6 +19,12 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Depth of the reserved strip (pt); the one number
     /// `AppBarStyle.thickness` argues (#1359).
     public var thickness: CGFloat = 40
+    /// Distance from the screen border to the bar (pt), absolute;
+    /// 0 is flush — `AppBarStyle.outerMargin`'s twin (#1516).
+    public var outerMargin: CGFloat = 0
+    /// Extra room on the window side (pt), added to the windows'
+    /// outer gap — `AppBarStyle.innerMargin`'s twin (#1516).
+    public var innerMargin: CGFloat = 0
     /// Box length along the bar (pt); 0 = auto.
     public var itemSize: CGFloat = 0
     /// Spacing between space boxes (pt).
@@ -74,6 +80,13 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}
+
+    /// The depth the bar reserves off its edge — outer margin,
+    /// strip and inner margin (#1516); `AppBarStyle.reservation` is
+    /// the twin.
+    public var reservation: CGFloat {
+        outerMargin + thickness + innerMargin
+    }
 
     /// True if Liquid Glass is enabled and supported on this platform.
     public var glassEnabled: Bool {
