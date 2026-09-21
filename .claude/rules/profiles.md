@@ -449,7 +449,7 @@ The obligations below bind this directory:
   the name, so no ender can drop the name and leave a stale Space
   set answering for it; a new fact the switch path needs about
   that profile joins the value rather than re-reading
-  (`ProfileAuthoritySeamTests` ▸ `firstVisitPickReadsNoFile` pins
+  (`ProfileAuthoritySeamTests` ▸ `switchPathReadsNoFile` pins
   the one function, and `DesktopFirstVisitTests` proves the
   answer survives the file's deletion). The resolving Standard
   is the same shape one value over (#1509): `ActiveStandard`

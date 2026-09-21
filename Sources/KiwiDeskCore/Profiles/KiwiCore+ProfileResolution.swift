@@ -239,9 +239,10 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
-        // Symmetry with `apply(profile:)`, which must be last;
-        // nothing in this body reads the name, so the position
-        // here is a convention rather than a constraint.
+        // Last, like `apply(profile:)`'s `becameLive` — and after
+        // `recordLivePartitioning` by constraint: it files under
+        // the outgoing name, which this call stands down
+        // (`ProfileSaveAdoptionTests`).
         profiles.standardIsLive(
             ActiveStandard(
                 name: composed.sourceName,
