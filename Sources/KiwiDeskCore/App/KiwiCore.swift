@@ -143,14 +143,11 @@ public final class KiwiCore {
     /// deliberate focus (#689).
     var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
-    /// Bumped per z-order raise sequence (float raise or pile
-    /// restore) so a stale sequence's focus handoff cannot
-    /// steal focus back (the `runPendingFocusRaise` staleness
-    /// pattern) — safe to pair with a live-focus check only
-    /// because the `zOrderRaiseEchoes` revert keeps focus on
-    /// the real target. A counter OBJECT rather than an `Int`
-    /// because the drain re-reads it off the main actor between
-    /// raises — `ZOrderGeneration` carries that argument.
+    /// Bumped per z-order raise sequence so a stale sequence's
+    /// focus handoff cannot steal focus back (the
+    /// `runPendingFocusRaise` staleness pattern); a counter
+    /// OBJECT because the drain re-reads it off the main actor
+    /// between raises — `ZOrderGeneration` carries the argument.
     let zOrderRaiseGeneration = ZOrderGeneration()
 
     /// Resolves the OS foreground app's pid for the focused-command
@@ -194,6 +191,9 @@ public final class KiwiCore {
 
     /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
     var accessibilityReturn: AccessibilityReturnDebt?
+
+    /// The last #1532 reveal return; `KiwiCore+MenuBarRevealReturn`.
+    var menuBarRevealReturnAt: Date?
 
     /// Z-order restores whose raises have not re-asserted focus
     /// yet (#186); their echoes lack provenance (#152), so the

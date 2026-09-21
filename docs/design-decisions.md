@@ -8669,6 +8669,52 @@ never fought. The accepted trade is the one clickless
 cross-app focus inside that window being returned once.
 (`AccessibilityReturnTests`)
 
+:::unreleased
+**A menu-bar reveal's activation is returned, once (#1532).**
+With the menu bar set to auto-hide, macOS 27 answers the
+pointer reaching the top edge by activating the last *regular*
+app, so there is a bar to reveal — KiwiDesk is an accessory app
+and owns none (the #329 row in accepted limitations) — and a
+clickless focus report for that app's window lands ~190 ms
+later, ahead of the bar itself (device measurement 2026-09-21,
+bsp and scrolling alike). The user asked to see the menu bar,
+not to change windows. The #952 boundary binds as it does for
+#958: the activation is a genuine OS focus event, so Core keeps
+state focus on the own window and re-asserts it — and measured
+on the device, re-activating KiwiDesk while the pointer stays at
+the edge HOLDS: macOS does not steal it back, the previous app's
+bar stays revealed above the key own window, and it hides when
+the pointer leaves. The re-assert is the STAMPED raise
+(`raiseWindow`) rather than #958's direct one, because in a
+scrolling Space the pan that honored the activation has just
+placed the own window, and an unstamped raise's report is
+exactly the clickless focus the placement distrust bounces
+(#1414's class) — the stamp makes it our own echo (#1281's
+point). Not the focus command either: its displacement note
+would put the foreign window in the placement ledger, and in an
+active scrolling Space that live entry bounces every later
+report from that app for the ledger's window, so the one-shot
+below would never decide there. Decided at the report from
+readable facts rather than armed ahead, since nothing precedes
+the reveal: a report from another app while the active Space's
+focused window is one of our own pid — a sticky own window
+rendering as a traveler elsewhere is not, and is not returned —
+the bar auto-hides, the pointer is in the reveal strip, and the
+OS is macOS 27 or later, since on 26 the reveal activates
+nothing and the arm would be all cost. Stood down by any left press inside the echo
+window — a click into the revealed bar's menus reaches no
+managed window, so the click-reached escape cannot see it —
+never when the re-assert would switch Desktops (#1345), and
+bounded to one return per echo window so an activation KiwiDesk
+cannot hold is never fought twice. The accepted trade: any
+deliberate CLICKLESS move away from an own window while the
+pointer is parked at the top edge — a cmd-tab, Spotlight's
+Return, another app's hotkey — is returned like the reveal;
+only a second one inside that bound goes through, and the
+pointer leaving the edge, or a click, is what ends it.
+(`MenuBarRevealReturnTests`, `MenuBarRevealSeamTests`)
+:::
+
 **Open-or-Focus cycles in canonical order, never
 most-recently-used.** A repeat press of the shortcut walks the
 app's tracked windows in space-creation order, then flat-array

@@ -672,9 +672,12 @@ depends on the value, so no hostile cursor flips a verdict
 (guard-prover, 2026-09-06); it is kept for the next drag test
 that forgets its own pin, not for a live defect. Do not read
 the two as equals.
-`MouseButtonSeamGuardTests` holds the read to its two homes
-AND both pins into both twins, a deletion from both being
-silent otherwise; it is a sibling of `MachineTouchTests`
+The reveal-strip read `MouseTracker.pointerInMenuBarStrip`
+(#1532) is the same class a third time — a live pointer read a
+focus arm decides on — pinned false beside the mask.
+`MouseButtonSeamGuardTests` holds each read to its homes AND
+every pin into both twins, a deletion from both being silent
+otherwise; it is a sibling of `MachineTouchTests`
 because that file is at the §2.1 ceiling, the split
 `StatusItemSeamGuardTests` already carries. The key-repeat
 delay `HoldGlide.initialDelay` reads is the same shape and

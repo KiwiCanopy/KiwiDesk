@@ -43,6 +43,33 @@ public final class MouseTracker {
     /// gesture, whichever button started it.
     var anyButtonHeld: Bool { pressedButtons() != 0 }
 
+    /// Whether the pointer sits in the strip an auto-hidden menu
+    /// bar reveals from (#1532); false outright while the bar
+    /// does not auto-hide, and below macOS 27, where the reveal
+    /// activates nothing (the #329 row) and the return would be
+    /// all cost. Live in production, pinned false by
+    /// `makeTestCore` the way `pressedButtons` is.
+    var pointerInMenuBarStrip: @MainActor () -> Bool = {
+        guard #available(macOS 27, *),
+            GeometryUtils.menuBarAutoHides
+        else { return false }
+        return GeometryUtils.pointerInMenuBarStrip(
+            NSEvent.mouseLocation,
+            screens: NSScreen.screens.map {
+                GeometryUtils.MenuBarScreen(
+                    frame: $0.frame,
+                    band: GeometryUtils.menuBarBand(
+                        safeTop: $0.safeAreaInsets.top,
+                        reservedTop: $0.frame.maxY
+                            - $0.visibleFrame.maxY,
+                        barHeight: NSApplication.shared.mainMenu?
+                            .menuBarHeight ?? 0
+                    )
+                )
+            }
+        )
+    }
+
     private var monitors: [Any] = []
 
     /// Fired once per left press, in Cocoa screen space, with the

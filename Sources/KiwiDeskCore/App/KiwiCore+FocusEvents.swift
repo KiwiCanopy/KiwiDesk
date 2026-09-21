@@ -12,22 +12,13 @@ extension KiwiCore {
         effects: AppliedEffects
     ) {
         let now = Date()
-        // Dismissing an ignored panel (Ghostty's quick
-        // terminal) leaves the app frontmost and makes AX
-        // re-report its managed main window — which may live
-        // on another space — as focused. Following that
-        // stale report switches spaces, or in a focus-driven
-        // layout yanks focus to the main window on the
-        // active space. The panel was flagged active while
-        // it held focus (#21); consume the flag here and
-        // restore the pre-panel focus instead of acting on
-        // the report (#244). The flag survives a short
-        // dismissal GRACE against a same-app-resigned focus
-        // report, rather than clearing synchronously, because
-        // live capture showed the panel app's stale re-report
-        // winning that race by 125-200 ms (#951) —
-        // `shouldConsumeIgnoredPanelReport` owns the state
-        // machine and the click-provenance escape.
+        // Dismissing an ignored panel (Ghostty's quick terminal)
+        // makes AX re-report the app's managed main window —
+        // possibly on another space — as focused (#21/#244):
+        // consume the flag and restore the pre-panel focus. The
+        // flag outlives the dismissal by a grace, since the stale
+        // re-report wins that race by 125-200 ms (#951);
+        // `shouldConsumeIgnoredPanelReport` owns the machine.
         if let pid = state.windows[id]?.pid,
             shouldConsumeIgnoredPanelReport(
                 pid: pid,
@@ -216,14 +207,11 @@ extension KiwiCore {
             return
         }
         // A placement bounce (#1161): the app answering where we
-        // just PUT its window, in a cmd-tab's shape — the ruling is
-        // in docs/design-decisions.md, both arms. Above
-        // the #958 return, which stays last, and BELOW the z-order
-        // revert on purpose: a restore's echo keeps its state-only
-        // revert, its sequence's closing re-assert owning OS focus.
-        // The re-assert answers whether it took the report: it
-        // stands down, and the report is honored, when raising
-        // `intended` would switch Desktops (#1345).
+        // just PUT its window, in a cmd-tab's shape (the ruling is
+        // in docs/design-decisions.md). Below the z-order revert on
+        // purpose — a restore's echo keeps its state-only revert —
+        // and the re-assert stands down when raising `intended`
+        // would switch Desktops (#1345).
         if !selfEcho,
             let intended = effects.focusBefore, intended != id,
             let placed = placementBounce(id, now: now),
@@ -239,15 +227,25 @@ extension KiwiCore {
         {
             return
         }
-        // The accessibility-steal return (#958): LAST among
-        // the consumes — a report an earlier machine claims is
-        // our raises' fallout must not spend the one-shot debt
-        // — AND gated on `!selfEcho`, because a stamped
-        // self-raise echo can fall PAST the drop block above
-        // (a non-defer layout, or `intended == id`) while
-        // still being our own fallout, not macOS's misdirected
-        // yield (re-review, 2026-08-27). The rest is
-        // `returnAccessibilitySteal`'s.
+        // A menu-bar reveal's activation (#1532): macOS fronts
+        // the last regular app so it has a bar to show. Returned
+        // once, with the stamped raise so the report that follows
+        // is our own echo (#1281); the arm's own file argues.
+        if !selfEcho,
+            returnMenuBarReveal(
+                id: id,
+                intended: effects.focusBefore,
+                now: now
+            )
+        {
+            return
+        }
+        // The accessibility-steal return (#958): LAST among the
+        // consumes, so a report an earlier machine claims never
+        // spends the one-shot debt; gated on `!selfEcho` because
+        // a stamped self-raise echo can fall past the drop block
+        // above while still being our own fallout (re-review,
+        // 2026-08-27).
         if !selfEcho,
             returnAccessibilitySteal(id: id, now: now)
         {

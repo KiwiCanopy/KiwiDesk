@@ -90,6 +90,18 @@ extension KiwiCore {
         return click.reached == id
     }
 
+    /// Whether ANY left press landed within the echo window —
+    /// the one "mouse made this" reading: the warp hold's (#689)
+    /// and the menu-bar reveal return's stand-down (#1532), where
+    /// a click into the revealed bar's menus reaches no managed
+    /// window, so `recentClickReached` cannot see the user
+    /// choosing.
+    func recentLeftPress(now: Date) -> Bool {
+        guard let click = lastLeftClick else { return false }
+        return now.timeIntervalSince(click.at)
+            < Self.zOrderRaiseEchoWindow
+    }
+
     /// The one press stamp (#687/#1281), both monitor arms'.
     /// Resolves which managed window the press reached NOW —
     /// press time is when the fact exists.

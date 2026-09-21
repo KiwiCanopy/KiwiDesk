@@ -92,3 +92,51 @@ public enum GeometryUtils {
         return result
     }
 }
+
+/// Where an auto-hidden menu bar reveals from (#1532): the top
+/// band of the screen the pointer is on, as deep as the bar the
+/// reveal draws — the notch's safe area where there is one, the
+/// menu bar's own height elsewhere. Pure over the frames handed
+/// in; `MouseTracker.pointerInMenuBarStrip` is the live reading.
+extension GeometryUtils {
+    /// One screen's frame and band, Cocoa coordinates (origin
+    /// bottom-left, `NSScreen.frame`'s).
+    struct MenuBarScreen: Equatable {
+        var frame: CGRect
+        var band: CGFloat
+    }
+
+    /// The deepest of the three readings a screen offers: its
+    /// safe area (the notch), the strip it reserves above its
+    /// visible frame, and the installed main menu's bar height —
+    /// a bare `NSMenu()` answers 0, the installed one the metric.
+    static func menuBarBand(
+        safeTop: CGFloat,
+        reservedTop: CGFloat,
+        barHeight: CGFloat
+    ) -> CGFloat {
+        max(safeTop, reservedTop, barHeight)
+    }
+
+    /// `pointer` in Cocoa screen coordinates. A pointer resting
+    /// ON the top edge reads `y == frame.maxY`, which
+    /// `CGRect.contains` excludes — so the containing screen is
+    /// preferred (a point on the seam between stacked screens is
+    /// the upper one's bottom row) and the inclusive-top match is
+    /// the fallback for the edge itself.
+    static func pointerInMenuBarStrip(
+        _ pointer: CGPoint,
+        screens: [MenuBarScreen]
+    ) -> Bool {
+        let screen =
+            screens.first(where: { $0.frame.contains(pointer) })
+            ?? screens.first(where: {
+                $0.frame.minX <= pointer.x
+                    && pointer.x < $0.frame.maxX
+                    && $0.frame.minY <= pointer.y
+                    && pointer.y <= $0.frame.maxY
+            })
+        guard let screen else { return false }
+        return pointer.y >= screen.frame.maxY - screen.band
+    }
+}
