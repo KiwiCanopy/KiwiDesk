@@ -130,6 +130,10 @@ struct ReachAwaitsCarrySeamTests {
     func fullscreenSpaceHostDoesNotOpenTheArm() {
         let core = makeCore()
         defer { teardown() }
+        // The handler files a fullscreen Space as a display's
+        // current one too (no `isUser` filter on the snapshot), so
+        // the equality holds and only `isUser` closes the arm.
+        core.desktopMemory.lastDisplaySpaces = ["UUID-A": 1716]
         core.desktopMemory.readWindowSpace = { _ in .hosted(1716) }
         #expect(!core.eventLoop.reachAwaitsCarry(window))
         #expect(core.eventLoop.fullscreenSpaceHosts(window))
@@ -144,7 +148,8 @@ struct ReachAwaitsCarrySeamTests {
         core.desktopMemory.readWindowSpace = { _ in .unavailable }
         #expect(!core.eventLoop.reachAwaitsCarry(window))
         // A Space the topology does not list names no display to
-        // read a pending switch off.
+        // read a pending switch off — even one a display filed.
+        core.desktopMemory.lastDisplaySpaces = ["UUID-A": 9_999]
         core.desktopMemory.readWindowSpace = { _ in .hosted(9_999) }
         #expect(!core.eventLoop.reachAwaitsCarry(window))
     }
