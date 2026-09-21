@@ -45,24 +45,48 @@ extension AppBarItemView {
             cell = glyphLabel.cell?.cellSize ?? .zero
         }
         // With a name, a narrow glyph snugs toward the text so
-        // its slack doesn't widen the gap — clamped to its box,
-        // so a wide glyph can never hang out of the item.
-        // Icon-only items center.
+        // its slack doesn't widen the gap; icon-only items center.
         let snugToName = horizontal && !label.isHidden
-        // Clamp BEFORE positioning: centering the unclamped
-        // cell width then clamping the frame shifted the glyph
-        // toward the leading edge whenever the measured cell
-        // exceeded its box (QA 2026-07-19, vertical bars).
-        let width = min(cell.width, box.width)
+        // The frame takes the cell's own width so the alignment
+        // holds, and the INK is what centres and snugs, never the
+        // advance (#1529, #1543). The frame's padding may cross
+        // the box; the ink stays inside it while the cell's
+        // padding exceeds a ligature's overshoot of its advance.
+        let width = ceil(cell.width)
+        let metrics = BarTextGlyph.metrics(of: glyphLabel)
         let x =
             snugToName
-            ? max(square.maxX - width, box.minX)
-            : box.midX - width / 2
+            ? max(
+                metrics.originX(
+                    inkTrailingAt: square.maxX,
+                    frameWidth: width
+                ),
+                metrics.originX(
+                    inkLeadingAt: box.minX,
+                    frameWidth: width
+                )
+            )
+            : metrics.originX(
+                centringInkOn: box.midX,
+                frameWidth: width
+            )
         glyphLabel.frame = CGRect(
             x: x.rounded(),
             y: (box.midY - cell.height / 2).rounded(),
             width: width,
             height: cell.height
+        )
+    }
+
+    /// The glyph's ink along the bar — what a badge hangs on.
+    var glyphInkFrame: CGRect {
+        let frame = glyphLabel.frame
+        let span = BarTextGlyph.metrics(of: glyphLabel).inkSpan(in: frame)
+        return CGRect(
+            x: span.lowerBound,
+            y: frame.minY,
+            width: span.upperBound - span.lowerBound,
+            height: frame.height
         )
     }
 }

@@ -147,7 +147,7 @@ struct SpaceBarGlyphCellTests {
     ) throws {
         let font = try requireAppFont(field)
         let span = try #require(Self.inkSpan(of: field))
-        let ink = BarTextGlyph.inkBounds(field.stringValue, font: font)
+        let ink = BarTextGlyph.metrics(field.stringValue, font: font).ink
         #expect(
             span.lowerBound > 0 && span.upperBound < field.bounds.width,
             "\(axis): ink \(span) touches the field's edge"
@@ -244,7 +244,7 @@ struct SpaceBarGlyphCellTests {
         #expect(width > Self.cell, "the fixture no longer overflows")
         #expect(field.frame.width >= width)
         let span = try #require(Self.inkSpan(of: field))
-        let ink = BarTextGlyph.inkBounds(field.stringValue, font: font)
+        let ink = BarTextGlyph.metrics(field.stringValue, font: font).ink
         #expect(
             span.lowerBound > 0 && span.upperBound < field.bounds.width,
             "ink \(span) touches the field's edge"
