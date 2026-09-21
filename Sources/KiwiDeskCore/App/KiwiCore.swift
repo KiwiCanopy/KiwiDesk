@@ -151,12 +151,9 @@ public final class KiwiCore {
     let zOrderRaiseGeneration = ZOrderGeneration()
 
     /// Resolves the OS foreground app's pid for the focused-command
-    /// preflight (#292). `nil` disables the guard — the default, so
-    /// unit tests exercising focused commands directly are
-    /// unaffected; `start()` installs the real
-    /// `NSWorkspace.frontmostApplication` reader, and guard tests
-    /// inject a stub. When wired, a `nil` *return* means foreground
-    /// ownership is unknown, which fails the command closed.
+    /// preflight (#292). nil disables the guard (the unit-test
+    /// default); `start()` wires the real reader, and a wired nil
+    /// RETURN fails the command closed.
     var frontmostPIDProvider: (@MainActor () -> pid_t?)?
 
     /// Trusted OS-frontmost focused window id (#1130); nil until
@@ -309,6 +306,9 @@ public final class KiwiCore {
     /// gui.json) — kept so profile mutations can refresh the
     /// profile half without losing these.
     var configLoadIssues: [ConfigIssue] = []
+    /// The Spaces the last `init.lua` run asked for (#1509) —
+    /// `delete_space` names the script as a re-creator from it.
+    var initDeclaredSpaces: Set<SpaceID> = []
     /// Typo-guard hits from the init.lua chunk currently
     /// running (#39). Armed exclusively by
     /// `recordingTypoIssues`; nil gates runtime hits (a typo

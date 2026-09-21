@@ -128,9 +128,9 @@ extension KiwiCore {
             }
             // `apply(composed:)` adopts the composed placement, so
             // the setup's five-per-display blocks land correctly
-            // (not scattered into the workflow Standard's slots).
+            // (not scattered into the workflow Standard's slots),
+            // and files the Standard it composed.
             apply(composed: composed, forceRetile: false)
-            profiles.adoptStandard(named: composed.sourceName)
             // Bind ⌃⌥N for spaces the change added past the
             // first-run seed — additive, never overwriting a
             // custom chord (#485).

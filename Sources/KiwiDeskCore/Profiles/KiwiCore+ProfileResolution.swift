@@ -239,10 +239,16 @@ extension KiwiCore {
         emitSpaceChange()
         // #1145: same tail as `apply(profile:)`, same reasons.
         refreshStickyReach()
-        // Symmetry with `apply(profile:)`, which must be last;
-        // nothing in this body reads the name, so the position
-        // here is a convention rather than a constraint.
-        profiles.noProfileIsLive()
+        // Last, like `apply(profile:)`'s `becameLive` — and after
+        // `recordLivePartitioning` by constraint: it files under
+        // the outgoing name, which this call stands down
+        // (`ProfileSaveAdoptionTests`).
+        profiles.standardIsLive(
+            ActiveStandard(
+                name: composed.sourceName,
+                spaces: Set(composed.spaces)
+            )
+        )
     }
 
     /// Applies a built-in Preset and materializes it as a real,
@@ -276,13 +282,12 @@ extension KiwiCore {
             )
         }
         // `apply(composed:)` adopts the composed placement, so the
-        // pins/mains `buildProfile` captures below are already set.
+        // pins/mains `buildProfile` captures below are already set
+        // — and files the Standard, so if the save below fails,
+        // state honestly reflects a transient Standard instead of
+        // a stale profile, and `buildProfile` tags the starter
+        // setup from `currentStandard` (#485).
         apply(composed: composed, forceRetile: true)
-        // If the save below fails, state honestly reflects a
-        // transient Standard instead of a stale profile. Adopting
-        // the standard first also lets `buildProfile` tag the
-        // starter setup from `currentStandard` (#485).
-        profiles.adoptStandard(named: composed.sourceName)
         let name = profiles.freeName(base: layout.name)
         // Capture-live: the standard was just adopted onto
         // live above, so live IS what this profile records.
@@ -315,7 +320,8 @@ extension KiwiCore {
             // Recompose through the same baseline-aware fallback as
             // a monitor change, so a reload while on the transient
             // Starter Standard re-applies the LADDER, not the count's
-            // workflow Standard (#485). `apply` adopts its placement.
+            // workflow Standard (#485). `apply` adopts its placement
+            // and files what it recomposed (#1509).
             apply(composed: composed, forceRetile: true)
         }
     }

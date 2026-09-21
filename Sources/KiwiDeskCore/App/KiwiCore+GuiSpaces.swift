@@ -31,8 +31,9 @@ extension KiwiCore {
     }
 
     /// Mirrors the live space set back into `gui.json` after an
-    /// authoritative reconcile changed it (a `load_profile` or an
-    /// in-effect edit that pruned stale spaces), keeping the
+    /// authoritative reconcile changed it (a `load_profile`, an
+    /// in-effect edit that pruned stale spaces, a `delete_space`
+    /// — #1509), keeping the
     /// sidecar a faithful copy of live so the cold-boot seed above
     /// never re-injects a space a profile load dropped (#77).
     /// GUI-managed only (no sidecar otherwise); writes the store

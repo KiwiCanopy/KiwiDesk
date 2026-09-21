@@ -450,8 +450,19 @@ KiwiDesk.create_space("scratch", "monocle")
 fallback space (or the first surviving space), so nothing is
 orphaned, and clears the space from the placement pins, Main
 role, and per-space settings. Refuses to delete the only space.
-Runtime only — a space still declared in `init.lua` or the GUI
-config reappears on the next config load.
+Runtime only — a space still declared in `init.lua` or the
+active profile reappears on the next config load.
+
+:::unreleased
+**Returns** `nil` for a space nothing declares (and for a refused
+delete, which is logged). When the space comes back on the next
+config load, it returns a table whose `declared_in` array names
+every source that re-creates it: `profile:<name>` (the active
+profile — save it to make the removal last), `standard:<name>`
+(the built-in layout resolving while no saved profile fits —
+save a profile), `init.lua` (a verb there references it — remove
+the call). Test the return, not the status (#1509).
+:::
 
 A screen this leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).

@@ -4431,6 +4431,33 @@ loses the sentences that named its rungs for the same reason: a
 list of modes would be a different sentence on every Mac, so it
 states the rule and the thumbnails show the modes.
 
+:::unreleased
+**A runtime `delete_space` stays a success, and names what brings
+the space back** (#1509, owner ruling). `init.lua` running at
+every launch and re-creating what it declares is intended, so
+the delete of a declared space is not an error and a warning on
+every delete would be noise — but automation that reads
+`success` as durable is surprised at the next load. The fact
+rides `data.declared_in`, absent rather than empty so a
+runtime-only delete's output is byte-identical and the key's
+presence is itself the signal, and it names EVERY re-creator —
+the active profile, the built-in Standard a reload recomposes
+while no saved profile fits, the script — because a hint naming
+one and silent on another is a half-truth a script will trust.
+`gui.json` is not a fourth: its space list is a mirror of live
+(#77), which the delete now rewrites like every other
+authoritative prune, so nothing there re-creates the space and
+a line telling the user to "remove it in Settings" would have
+named a file they never declared anything in. A distinct status was refused: it breaks
+every consumer that pattern-matches `success` for a delete that
+did succeed. The profile and Standard halves are the last
+apply's set, read from adoption state like every question about
+the live profile; the script's half is a run ledger of what
+`init.lua` ASKED for, never a before/after diff of the space set:
+a reload's `create_space` of a space already live changes nothing
+a diff can see, which is exactly the path the hint exists for.
+:::
+
 ### Sticky reach spans macOS Desktops (#1145)
 
 **[Principle]**

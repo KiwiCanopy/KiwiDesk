@@ -128,7 +128,7 @@ struct ProfileSaveAdoptionTests {
     /// What this watches, exactly: that the compose door filed the
     /// outgoing profile AT ALL, and that the preset's saved
     /// profile is current afterwards — the clause that reds if
-    /// `adoptStandard` moves below the save. It does NOT tell the
+    /// `standardIsLive` moves below the save. It does NOT tell the
     /// pre-Standard arrangement from the post-Standard one:
     /// nothing between the compose and the save moves a window, so
     /// the two are equal here (`guard-prover`, 2026-09-07). That

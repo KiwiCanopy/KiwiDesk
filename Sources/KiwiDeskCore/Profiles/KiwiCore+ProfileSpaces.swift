@@ -56,7 +56,7 @@ extension KiwiCore {
     ///
     /// Unconditional rather than a caller's choice: on the preset
     /// path `apply(composed:)` has already filed and stood the
-    /// name down through `noProfileIsLive`, so the record here is
+    /// name down through `standardIsLive`, so the record here is
     /// a no-op — which is what leaves no exit anything to decide.
     func saveProfile(_ profile: Profile) throws {
         recordLivePartitioning()

@@ -34,9 +34,10 @@ extension KiwiCore {
     /// windows to the fallback space (or the first surviving space),
     /// so no window is orphaned. Clears the space from every runtime
     /// map (placement pins, Main role, per-space settings). Runtime
-    /// only: a space still declared in `init.lua` / the GUI config
-    /// reappears on the next config load. Refuses to delete the only
-    /// space.
+    /// only: a space still declared in `init.lua` or the profile
+    /// reappears on the next config load, and `data.declared_in`
+    /// names every such source (#1509, `declaredSources(of:)`).
+    /// Refuses to delete the only space.
     func deleteSpace(_ args: [JSONValue]) -> CommandResponse {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
@@ -58,6 +59,10 @@ extension KiwiCore {
         }
         forwardWindows(of: space, to: target)
         tiler.settings.removeSpace(space)
+        // The sidecar's list mirrors live (#77), so the delete
+        // keeps it faithful or the cold-boot seed re-injects
+        // the space (#1509).
+        syncGuiSpacesToLive()
         spacePins[space] = nil
         mainSpaces.remove(space)
         if fallbackSpace == space { fallbackSpace = nil }
@@ -69,6 +74,12 @@ extension KiwiCore {
         reanchorFloats(of: target)
         retile(pass: .apply)
         emitSpaceChange()
-        return .ok()
+        let declared = declaredSources(of: space)
+        guard !declared.isEmpty else { return .ok() }
+        return .ok(
+            .object([
+                "declared_in": .array(declared.map { .string($0) })
+            ])
+        )
     }
 }

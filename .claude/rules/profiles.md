@@ -432,11 +432,11 @@ The obligations below bind this directory:
   current, so a site that spells `profiles.save(` itself has
   already lost the name it needed.
 - **Move the name only where the Spaces move with it.** The two
-  apply doors do (`becameLive`, `noProfileIsLive`), each at the
+  apply doors do (`becameLive`, `standardIsLive`), each at the
   end of its own body. This is not a claim that nothing else
-  writes `currentName` — `save`, `adoptStandard`, `delete`,
-  `rename` and `resetAdoption` all do, each for a reason that is
-  not an apply. It is an obligation on a NEW writer: if it moves
+  writes `currentName` — `save`, `delete`, `rename` and
+  `resetAdoption` all do, each for a reason that is not an
+  apply. It is an obligation on a NEW writer: if it moves
   the name while the Spaces stay put, the store starts filing one
   profile's windows under another's name.
 - **Answer a question about the ACTIVE profile from adoption
@@ -449,9 +449,16 @@ The obligations below bind this directory:
   the name, so no ender can drop the name and leave a stale Space
   set answering for it; a new fact the switch path needs about
   that profile joins the value rather than re-reading
-  (`ProfileAuthoritySeamTests` ▸ `firstVisitPickReadsNoFile` pins
+  (`ProfileAuthoritySeamTests` ▸ `switchPathReadsNoFile` pins
   the one function, and `DesktopFirstVisitTests` proves the
-  answer survives the file's deletion).
+  answer survives the file's deletion). The resolving Standard
+  is the same shape one value over (#1509): `ActiveStandard`
+  carries its name and the Spaces the last `apply(composed:)`
+  composed, filed BY that apply through `standardIsLive` so no
+  caller can forget them, and a reader never recomposes to learn
+  them — a fact about the live Standard joins that value too
+  (`DeleteSpaceDeclaredInTests` ▸
+  `standardIsNamedFromAdoptionState`).
 
   This binds a question about the profile ALREADY live. Loading a
   DIFFERENT one is a read by definition — `applyDesktopBinding`
