@@ -851,8 +851,7 @@ def prune(mapping: dict[str, str], regen: bool = True) -> int:
     command — run after a key is deliberately removed/renamed
     (not via `scripts/rename-key`) in code. `regen=False` (site
     mode) skips the en.json rewrite: the site's en.json is the
-    hand-authored source of truth, so re-emitting it sorted would
-    destroy its deliberate grouping.
+    hand-authored source of truth, not a derived file.
 
     Validates first, because this is the one mode that *rewrites*
     the catalog directory: it walks `shipped_locale_files()`,
