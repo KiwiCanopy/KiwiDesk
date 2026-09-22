@@ -1243,11 +1243,16 @@ editing here:
   `writeCapped*` family, named by that prefix rather than by a
   file, since it has already outgrown one
   (`KiwiCore+RatioWriters` and `KiwiCore+ResizeScrollSlot`) —
-  never a raw `writeSlotSize`,
-  `writeSplitRatio*`, `writeMasterRatio` or `stackWeights`
-  write from a resize path, which is exactly how the mouse
-  `.scrollWidth` drag crossed the floor the keyboard path
-  refused. The writers clamp each side at its members'
+  and, for the two WEIGHT stores, the one `resizeStackMember`
+  and the one `resizeTrackMember`, which clamp through
+  `StackLayout.weightStep` and which the keyboard verb and the
+  mouse drop both take (#941, `StackWeightDragTests` ▸
+  `dragMatchesTheKeyboardVerb`) — never a raw `writeSlotSize`,
+  `writeSplitRatio*`, `writeMasterRatio`, `stackWeights` or
+  `trackWeights` write beside a resize call site, which is
+  exactly how the mouse `.scrollWidth` drag crossed the floor
+  the keyboard path refused. The writers clamp each side at its
+  members'
   effective minimums (`min_window_size`, raised by a #677
   learned bound) and cue a truncated attempt — a pill on each end
   (the trier names the reason, the blocker marks itself), the
