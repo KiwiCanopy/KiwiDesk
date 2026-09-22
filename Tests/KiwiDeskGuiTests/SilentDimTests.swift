@@ -31,6 +31,16 @@ import Testing
 /// listed below whose reason later stops being drawn stays green
 /// here; that half is the render guards' and the eye's.
 ///
+/// And the map is keyed on the FILE, so a file already listed
+/// accepts any FURTHER unexplained dim — proved by adding a
+/// second, reasonless opacity to a listed file and watching all
+/// 5773 tests stay green (guard-prover, 2026-09-22). That is why
+/// each entry names WHICH dims it stands for and how many: the
+/// count is the only thing a reader can check the file against,
+/// and an entry that has gone stale is the finding. Per-dim
+/// granularity would need a walker that pairs each opacity with
+/// a reason, which nothing here does yet.
+///
 /// Scope is `Settings/` rather than `ChromeScanRoots`, and the
 /// reason is the invariant's own subject: a dim owes a reason
 /// where a GATE withheld an answer, which is a settings-row
@@ -77,13 +87,13 @@ struct SilentDimTests {
             + "(`shortcuts.row.inherited.axhint`), the same leaf "
             + "case as the entry above",
         "AppRuleRow.swift":
-            "the same inheritance dim, per facet — one opacity "
-            + "each on the Space menu and the float menu, saying "
-            + "the facet is in sync with the base profile. The "
-            + "Space menu's own GATE is a GreyOut (no Spaces "
-            + "declared), whose reason is the card's live pointer "
-            + "to the Spaces destination, outside every dimmed "
-            + "subtree (#1022)",
+            "the same inheritance dim, THREE of them: one each on "
+            + "the Space menu, the float menu and the titled "
+            + "editor below them, saying the facet is in sync "
+            + "with the base profile. The Space menu's own GATE "
+            + "is a GreyOut (no Spaces declared), whose reason is "
+            + "the card's live pointer to the Spaces "
+            + "destination, outside every dimmed subtree (#1022)",
         "SettingsSlider.swift":
             "the shared slider's own disabled fade, which rides "
             + "`isEnabled` — set by whatever gate disabled it, so "

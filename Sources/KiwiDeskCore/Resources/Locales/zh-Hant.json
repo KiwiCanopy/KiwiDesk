@@ -97,6 +97,7 @@
   "app_rules.section.title": "各 App 的規則",
   "app_rules.space": "開啟的空間",
   "app_rules.space.clear": "移除這個 App 的開啟空間",
+  "app_rules.space.dash": "—",
   "app_rules.space.no_spaces": "這個描述檔還沒有可供 App 開啟的空間。",
   "app_rules.space.none": "無空間",
   "app_rules.title_contains": "標題包含…",

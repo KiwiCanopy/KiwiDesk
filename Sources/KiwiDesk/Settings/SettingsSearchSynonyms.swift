@@ -31,6 +31,12 @@ enum SettingsSearchSynonyms {
     /// Alternate vocabulary terms for census setting keys.
     static func terms(for key: SettingKey) -> [String] {
         switch key {
+        // The row's label moved from "Space" to "Opens in" in
+        // #1022, so the two nouns a user arrives with — the one it
+        // used to be called, and the relation's retired verb —
+        // are the alternate vocabulary that has to reach it.
+        case .appRules(.appRules):
+            return ["space", "pin"]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]
         case .borders(.borderEnabled):

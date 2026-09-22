@@ -37,7 +37,12 @@ extension AppRuleRow {
             }
             .menuStyle(.borderlessButton)
             .neutralMenuLabel()
-            .fixedSize()
+            // Hugs its content only where NO column constrains it.
+            // `.fixedSize()` unconditionally made the Menu ignore
+            // its 130 pt frame and draw over the float cell beside
+            // it — a Space named "development" was enough, and
+            // nothing caps a Space name (code review, 2026-09-22).
+            .fixedSize(horizontal: stacked, vertical: false)
             .modifier(
                 GreyOut(
                     active: pinVerdict == .unavailable,
@@ -62,7 +67,8 @@ extension AppRuleRow {
     /// The pin's DRAWN cell. A dash, not a word: a word here would
     /// be a value naming the absence.
     var spaceCellText: String {
-        model.config.appRules[app]?.raw ?? "—"
+        model.config.appRules[app]?.raw
+            ?? L("app_rules.space.dash", "—")
     }
 
     /// Clears the pin — offered only where the rule survives
@@ -81,7 +87,10 @@ extension AppRuleRow {
             }
             .buttonStyle(.borderless)
             .iconButtonAffordance(
-                L("app_rules.space.clear", "Remove this Space")
+                L(
+                    "app_rules.space.clear",
+                    "Remove this app's Space"
+                )
             )
         }
     }
@@ -125,6 +134,13 @@ extension AppRuleRow {
     var floatMenu: some View {
         Menu {
             Button(neverLabel) { setNever() }
+                // Grey rather than refuse silently: with no Space
+                // to open in, `setNever` returns and the menu
+                // still reads "Floats always" with no cue (code
+                // review, 2026-09-22).
+                .disabled(
+                    pinVerdict == .unavailable && !isPinned
+                )
             Button(allLabel) { setAll() }
             if offersTitles {
                 Button(titledLabel) { openTitles() }
@@ -134,7 +150,7 @@ extension AppRuleRow {
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
-        .fixedSize()
+        .fixedSize(horizontal: stacked, vertical: false)
         .accessibilityLabel(L("app_rules.float", "Float"))
         .accessibilityValue(floatLabel)
     }

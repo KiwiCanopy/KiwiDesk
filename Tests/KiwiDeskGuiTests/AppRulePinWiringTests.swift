@@ -39,11 +39,70 @@ struct AppRulePinWiringTests {
         try source("Sections/AppRuleRow+Facets.swift")
     }
 
+    /// The raw (comment-stripped, UNsquashed) facets source, for
+    /// the brace-balanced reads below.
+    private func facetsRaw() throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/"
+                            + "AppRuleRow+Facets.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+    }
+
+    /// The brace-balanced body of the declaration whose signature
+    /// is `signature`, squashed.
+    ///
+    /// Scoped rather than file-wide because a file-wide needle is
+    /// satisfied by a NEIGHBOUR: guard-prover cut both conditions
+    /// below out of their real sites and parked them verbatim in
+    /// dead properties in the same file, and every clause here
+    /// stayed green while the whole of #1022 was broken
+    /// (2026-09-22). The sibling suite
+    /// `AppRulesAddOnSelectTests` had already paid for this on
+    /// `roleLabel`; this suite did not take the lesson until it
+    /// was proved twice.
+    private func body(of signature: String) throws -> String {
+        let raw = try facetsRaw()
+        let offset = try #require(
+            raw.range(of: signature),
+            Comment(
+                rawValue:
+                    "\(signature) is gone — the decision it "
+                    + "carried is wired somewhere this clause "
+                    + "cannot see"
+            )
+        )
+        var cursor = raw.distance(
+            from: raw.startIndex,
+            to: offset.upperBound
+        )
+        let found = try #require(
+            SourceScan.balanced(
+                Array(raw),
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "\(signature) has no balanced body to read"
+        )
+        return Self.squashed(found)
+    }
+
     /// The two sites that make the rule run, each keyed on what
     /// it cannot lose rather than on its body verbatim.
     @Test("both pin sites ask the verdict")
     func everySiteAsksTheVerdict() throws {
-        let source = try facets()
+        // Read from each site's OWN balanced body, never the
+        // file — see `body(of:)`.
+        let clear = try body(
+            of: "private var clearPinButton: some View"
+        )
+        let never = try body(of: "private func setNever()")
         // 1. The clear button EXISTS only where the rule
         //    survives without a Space. Its absence is what makes
         //    "a rule must say something" visible, and it replaced
@@ -52,7 +111,7 @@ struct AppRulePinWiringTests {
         //    setter refusal is owed any more (#1022, owner
         //    eyeball 2026-09-22).
         #expect(
-            source.contains(
+            clear.contains(
                 Self.squashed("if isPinned, pinVerdict == .free")
             ),
             Comment(
@@ -68,7 +127,7 @@ struct AppRulePinWiringTests {
         //    row has none. This is the write; the clause above is
         //    the control.
         #expect(
-            source.contains(
+            never.contains(
                 Self.squashed(
                     "if !isPinned, overrideBase == nil, "
                         + "let space = prospectiveSpace"
@@ -90,7 +149,7 @@ struct AppRulePinWiringTests {
     @Test("setNever refuses rather than stranding the row")
     func setNeverRefusesWhenItCannotPin() throws {
         #expect(
-            try facets().contains(
+            try body(of: "private func setNever()").contains(
                 Self.squashed(
                     "guard pinVerdict != .unavailable "
                         + "|| isPinned else"

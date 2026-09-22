@@ -14,27 +14,26 @@ extension AppRulesKey {
     var placement: SettingPlacement {
         switch self {
         case .appRules:
-            // Gated BY the float facet beside it (#1022): tiling
-            // holds the pin engaged, because a rule that neither
-            // floats nor pins says nothing. The cause is one
-            // control to its left in the same row, which is what
-            // makes this `.adjacent` and spares every row an
-            // inline sentence it would stamp per app.
+            // Gated by the SPACE LIST, on another destination
+            // (#1022). This row's one grey is "this profile
+            // declares no Spaces", so `GateReasonPlacement`
+            // resolves it `.remote` and the card owes a live
+            // pointer naming where to fix it — which is the
+            // `CrossReferenceRow` at its foot.
             //
-            // Stated residue: the renderer's predicate is a
-            // DISJUNCTION — the pin is also inert with no Space to
-            // pin to, whose cause is on the Spaces destination —
-            // and `SettingGate` cannot mix `.setting` with a
-            // `.runtime` condition. So the declaration names the
-            // half that is adjacent, and the other half carries
-            // its own live pointer (the card's
-            // `CrossReferenceRow`) rather than a census-derived
-            // channel.
+            // It is NOT gated by the float facet, though that
+            // facet does decide whether the clear button is
+            // OFFERED: withholding an affordance is a surfacing
+            // decision, not a grey, so declaring the float
+            // setting here would hand the derivation a cause
+            // that greys nothing and answer `.adjacent` for a
+            // reason that lives one destination away (code
+            // review, 2026-09-22).
             return .row(
                 .appRules,
                 .rulesPerApp,
                 .atRest,
-                gate: .setting(.appRules(.floatRules))
+                gate: .setting(.spaces(.spaceList))
             )
         case .floatRules, .appRulesAddSpace, .appRulesAddFloat,
             .appRulesDelete:
@@ -61,10 +60,10 @@ extension AppRulesKey {
     var text: SettingRowText {
         switch self {
         case .appRules:
-            // The Space facet's name, which is what a diff row
-            // and a search hit want — `app_rules.pin` labels the
-            // CHECKBOX that writes the same setting, and is
-            // authored at its own call sites.
+            // The Space facet's name, drawn as the column
+            // heading and spoken as the menu's own — one key, both
+            // channels, since #1022 retired the checkbox that used
+            // to carry a second label beside it.
             return .text("app_rules.space")
         case .floatRules:
             // The help key is still this row's, and still the one

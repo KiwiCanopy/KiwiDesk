@@ -97,6 +97,7 @@
   "app_rules.section.title": "Regole per app",
   "app_rules.space": "Si apre in",
   "app_rules.space.clear": "Rimuovi lo spazio di questa app",
+  "app_rules.space.dash": "—",
   "app_rules.space.no_spaces": "Questo profilo non ha ancora spazi in cui aprire un'app.",
   "app_rules.space.none": "Nessuno spazio",
   "app_rules.title_contains": "Il titolo contiene…",

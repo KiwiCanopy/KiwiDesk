@@ -77,10 +77,10 @@ synonym:
   a label is read with nothing around it: "Monitor pin", never a
   bare "Pin". A SENTENCE may lean on its subject instead, which
   is why `home.card.app_rules.subtitle`'s "%1$d apps pinned or
-  floating" and `home.card.monitors.subtitle`'s "%2$d Spaces
-  pinned" are correct as they stand — the thing being pinned is
-  already named, and those two are the app→Space sense's only
-  surviving mentions of the word.
+  floating" (the app→Space sense) and
+  `home.card.monitors.subtitle`'s "%2$d Spaces pinned" (the
+  Monitor sense) are both correct as they stand — the thing being
+  pinned is already named in each.
 
   Two obligations, and no claim about what the corpus currently
   says: **author every new label to this**, and **do not sweep

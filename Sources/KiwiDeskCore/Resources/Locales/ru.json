@@ -97,6 +97,7 @@
   "app_rules.section.title": "Правила по приложениям",
   "app_rules.space": "Открывается в",
   "app_rules.space.clear": "Убрать пространство для этого приложения",
+  "app_rules.space.dash": "—",
   "app_rules.space.no_spaces": "В этом профиле пока нет пространств, в которых можно открыть приложение.",
   "app_rules.space.none": "Нет пространства",
   "app_rules.title_contains": "Заголовок содержит…",

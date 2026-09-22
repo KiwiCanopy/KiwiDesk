@@ -97,6 +97,7 @@
   "app_rules.section.title": "Règles par app",
   "app_rules.space": "S'ouvre dans",
   "app_rules.space.clear": "Retirer l'espace de cette app",
+  "app_rules.space.dash": "—",
   "app_rules.space.no_spaces": "Ce profil n'a encore aucun espace dans lequel ouvrir une app.",
   "app_rules.space.none": "Aucun espace",
   "app_rules.title_contains": "Le titre contient…",

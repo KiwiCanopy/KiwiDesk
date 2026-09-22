@@ -7,10 +7,11 @@ import SwiftUI
 ///
 /// The row was an editable natural-language sentence until #1022
 /// (#68 turn 14a); the reversal is argued in
-/// `docs/design-decisions.md` ▸ App rules. Its facets are labelled
-/// once by the table header `AppRulesSection` draws above the
-/// list, never per row — three rows would otherwise read the same
-/// two labels six times.
+/// `docs/design-decisions.md` ▸ App rules. The Space facet is
+/// labelled once by the table header `AppRulesSection` draws
+/// above the list, never per row — three rows would otherwise
+/// read the same label three times — and the float facet is
+/// labelled nowhere, its values being whole predicates.
 struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
@@ -33,6 +34,11 @@ struct AppRuleRow: View {
     @FocusState.Binding var returningRow: String?
     @Environment(\.settingsWidth) private var width
 
+    /// Whether the row is in its stacked form. Read by the facet
+    /// controls, which hug their content only where no column
+    /// constrains them.
+    var stacked: Bool { width.stacksRows }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             facets
@@ -54,10 +60,10 @@ struct AppRuleRow: View {
     /// `AnyLayout` rather than two subtrees: a reflow must not
     /// tear the menus down — one would close mid-gesture and the
     /// focus this row holds for a deletion would drop. Only the
-    /// stacked form's labels are conditional, and they are
-    /// decorative text with no identity worth keeping.
+    /// stacked form's label is conditional, and it is decorative
+    /// text with no identity worth keeping.
     private var facets: some View {
-        let stacked = width.stacksRows
+        let stacked = self.stacked
         let layout =
             stacked
             ? AnyLayout(

@@ -54,8 +54,11 @@ struct AppRuleTitleOfferWiringTests {
                     + "(#1022)"
             )
         )
+        // The `?`'s prose lives in the section's own extension,
+        // split off at the §2.1 ceiling — so this clause names
+        // that file, and a further split moves it again.
         #expect(
-            try source("Sections/AppRulesSection.swift")
+            try source("Sections/AppRulesSection+Prose.swift")
                 .contains(Self.squashed("if offersTitles {")),
             Comment(
                 rawValue:
