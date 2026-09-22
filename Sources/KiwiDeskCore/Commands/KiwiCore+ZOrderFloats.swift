@@ -210,6 +210,12 @@ extension KiwiCore {
     /// value. Re-reading it agreed only for as long as nothing ran
     /// between the stamp and this call (architect review,
     /// 2026-08-02).
+    ///
+    /// The drain holds the core WEAKLY (#1501), which costs
+    /// nothing only because `AppDelegate` owns it for the
+    /// process: make a `KiwiCore` that can die mid-drain and the
+    /// stamp release and the `zOrderRestoresInFlight` decrement
+    /// become live nil paths.
     func performZOrderSequence(
         targets: [(WindowID, AXUIElement)],
         above floor: [WindowID],
@@ -244,9 +250,12 @@ extension KiwiCore {
             generation: generation
         )
         let order = foreign.map(\.0)
-        zOrderQueue.async {
+        // Weak at the DISPATCH, not only on the Task: a capture
+        // list on the inner closure alone leaves this one holding
+        // the core strongly across the drain (#1501).
+        zOrderQueue.async { [weak self] in
             let raised = drain.run(order)
-            Task { @MainActor [weak self] in
+            Task { @MainActor in
                 self?.releaseZOrderStamps(
                     of: order,
                     keeping: raised,
