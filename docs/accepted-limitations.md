@@ -113,12 +113,12 @@ class — see
 | The Monocle focus flip turns a **plate carrying the two apps' icons**, never the windows' own pixels — and cycling between two windows of the **same app** turns one icon into the same icon; the direction of the turn is the only tell. | A live-image flip needs the window's pixels, which reach no process without the Screen Recording permission, and the owner ruled no new permission prompt ([#1391](https://github.com/KiwiCanopy/KiwiDesk/issues/1391); the ruling is in [design decisions](design-decisions.md)); the plate shows icons alone because the turn is below reading time. | `MonocleFlipPlate` draws a `CALayer` wash with the app icon over the compositor's own behind-window blur (`NSVisualEffectView`); `SLSSetWindowTransform`/`SLSSetWindowAlpha` on another app's window perform and apply nothing from an ordinary connection. | None planned — closed, not deferred. `animations.set_on_monocle_focus(false)` turns the flip off. |
 
 :::unreleased
-The sticky-window row above describes the *gesture* switch as it
-behaves after [#1215](https://github.com/KiwiCanopy/KiwiDesk/issues/1215).
-On the current release a sticky window whose app drops its
-Accessibility element before KiwiDesk hears of a swipe stays on
-the Desktop you left and comes back into its slot when you
-return, with its sticky scope restored but its reach pin cleared.
+The sticky-window row above covers the *gesture* switch too: a
+sticky window whose app drops its Accessibility element before
+KiwiDesk hears of a swipe is carried onto the arriving Desktop
+with its slot, sticky scope and reach pin kept
+([#1215](https://github.com/KiwiCanopy/KiwiDesk/issues/1215)),
+rather than staying on the Desktop you left until you return.
 :::
 
 :::unreleased
