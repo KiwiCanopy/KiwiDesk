@@ -72,10 +72,11 @@ A page — user-facing or contributor — is held to the budget once
 its sweep has landed: swept so far, `user-guide.md` (#1395),
 `localization-naming.md` (#1404), `cli.md` (#1397),
 `accepted-limitations.md` (#1399), `design-decisions.md` (#1405),
-`lua-reference.md` (#1396), `index.md` (#1400); every other page
-is swept by its own audit under collector #1406, and
-`docs/recipes/` joins when its audit is filed. Extend the swept
-list here in the same change set as the sweep.
+`lua-reference.md` (#1396), `index.md` (#1400), `translating.md`
+(#1403); every other page is swept by its own audit under
+collector #1406, and `docs/recipes/` joins when its audit is
+filed. Extend the swept list here in the same change set as the
+sweep.
 
 The style is adapted from the Caveman compression rules (seen
 2026-09-13), whose own guidance is to drop the compression for
