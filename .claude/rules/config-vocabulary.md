@@ -63,6 +63,26 @@ synonym:
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One
   family, three different corners.
+- **pin** — two ruled senses, each QUALIFIED BY ITS OBJECT in
+  copy (#1022): a **Monitor pin** binds a Space to a screen
+  (`diff.label.space_pin`, `spaces.pin_badge.help`,
+  `monitors.orphan_pins.title`), and **Pin to a Space** binds an
+  app to a Space (`app_rules.pin`, the App Rules checkbox). The
+  second sense is not new — `home.card.app_rules.subtitle` has
+  counted "apps pinned or floating" all along — but #1022 gave it
+  a control of its own, and a bare "pin" then names two
+  relations in one window. So neither sense ever appears
+  unqualified in a label: the object is what tells them apart,
+  and *pinned* alone in a sentence is the defect. Retired as
+  names for either: *attach*, *assign*, *lock*. What a locale
+  spells them is its own to settle under
+  `docs/localization-naming.md` ▸ Family C — **one word per
+  catalog for BOTH senses unless that catalog's own two words
+  track the two objects**, which no catalog's do today (`de`'s
+  «pinnen»/«anheften» split runs across both, which is why its
+  count decides and not the sense). Never *Fixierung* in `de`:
+  that is the rendering it was reharmonized off for **Sticky**,
+  so Family C rule 1 retires it whatever its count.
 - **pill** — two ruled senses, deliberately (2026-08-10): a
   transient worded on-window cue — the sticky mark's EXPANDED
   state (#435/#438) and, since #933, the size-limit refusal
