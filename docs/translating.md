@@ -306,10 +306,10 @@ round-trip above. Its docstring names this case.
 ## The marketing site
 
 The website under `site/` (the landing page and the `/guide/`
-guide) keeps its strings in flat
-`{key: string}` manifests under **`site/src/i18n/`** —
-`en.json`, `de.json`, one file per language — the shape the app
-uses, read by the Astro components as `t.<key>`.
+guide) keeps its strings in flat `{key: string}` manifests
+under **`site/src/i18n/`** — `en.json`, `de.json`, one file per
+language — the shape the app uses, read by the Astro components
+as `t.<key>`.
 
 The one difference from the app: **the site's `en.json` is the
 source of truth, authored by hand.** There is no Swift to scan,
@@ -345,11 +345,9 @@ The other maintenance verbs take `--site` too:
   over its values, warns on orphan keys (present in a locale,
   absent from `en.json`), and **fails** when a site catalog is
   missing a key `en.json` has — an absent key renders nothing on
-  the page, since the site has no per-call-site English fallback
-  (#869). It does **not** check `en.json`
-  freshness — there is no code to derive it from. The `Site`
-  workflow runs it on every PR that touches `site/**` or
-  `docs/**`.
+  the page (#869). It does **not** check `en.json` freshness —
+  there is no code to derive it from. The `Site` workflow runs
+  it on every PR that touches `site/**` or `docs/**`.
 - `scripts/extract-keys --site --prune` — drops orphan keys from
   the site locale files, leaving the hand-authored `en.json`
   alone.
