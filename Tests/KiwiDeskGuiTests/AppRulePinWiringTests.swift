@@ -215,67 +215,56 @@ struct AppRulePinWiringTests {
         )
     }
 
-    /// The title-pattern OFFER's surfacing branches — the consult
-    /// is `AppRuleTitleOfferTests`', the drawing is this one's.
-    /// Deleting either `if` ships the power-user choice, and its
-    /// help paragraph, to every Simple user.
-    @Test("the offer gates the menu item and the help paragraph")
-    func offerGatesWhatItDraws() throws {
-        #expect(
-            try facets().contains(Self.squashed("if offersTitles {")),
+    /// The deletion-focus destination rides the FLOAT menu.
+    ///
+    /// `KeyboardActionParityTests` claims this in prose and cannot
+    /// hold it: its needle is keyed on the FILE, deliberately, so
+    /// that a split of `AppRuleRow` does not red it — and the cost
+    /// of that refinement is that moving the destination onto the
+    /// space menu, which is exactly the pre-#1022 wiring, left the
+    /// whole 5765-test tree green (guard-prover, 2026-09-22). The
+    /// #816 harm is a keyboard user losing their place in the list
+    /// on every deletion, reintroducible in two lines.
+    ///
+    /// Held as an ORDER over the layout's children rather than as
+    /// a contiguous run from the control. A first cut pinned the
+    /// run `floatMenu.opacity(…).focused(…)` and went red the same
+    /// afternoon on a `.padding` inserted between the two — a
+    /// contiguous needle pins its own glue, which is the cost that
+    /// shape carries. Position between two siblings is what the
+    /// destination cannot lose while riding the float menu.
+    @Test("the focus destination rides the float menu")
+    func focusDestinationRidesTheFloatMenu() throws {
+        let body = try source("Sections/AppRuleRow.swift")
+        let float = try #require(
+            body.range(of: "floatMenu"),
+            "the row draws no float menu"
+        )
+        let pin = try #require(
+            body.range(of: "pinPair"),
+            "the row draws no pin pair"
+        )
+        let focus = try #require(
+            body.range(of: Self.squashed(".focused($returningRow")),
             Comment(
                 rawValue:
-                    "the titled menu item is no longer gated on "
-                    + "the offer — every Simple user gets it "
-                    + "(#1022)"
+                    "the row names no focus destination at all — "
+                    + "deleting a row then drops focus out of the "
+                    + "list entirely (#816)"
             )
         )
         #expect(
-            try source("Sections/AppRulesSection.swift")
-                .contains(Self.squashed("if offersTitles {")),
+            focus.lowerBound > float.lowerBound
+                && focus.lowerBound < pin.lowerBound,
             Comment(
                 rawValue:
-                    "the `?`'s title-pattern paragraph is no "
-                    + "longer gated on the offer, so it explains "
-                    + "a menu item the row withholds (#1022)"
+                    "the row's focus destination left the float "
+                    + "menu — every other control here is "
+                    + "disabled in some row state, and a disabled "
+                    + "control cannot take the assignment a "
+                    + "deletion makes, so focus lands at the top "
+                    + "of the window instead (#816, #1022)"
             )
-        )
-    }
-
-    /// The offer's INPUT has one home too. The predicate is pure
-    /// and guarded, but a second hand-assembled argument list is
-    /// where the two sites drift — one forgetting the override
-    /// base gives a Simple user editing a stored profile a `?`
-    /// describing a choice the row withholds (architect review).
-    @Test("the offer is resolved once and handed down")
-    func offerIsResolvedOnce() throws {
-        let row = try source("Sections/AppRuleRow.swift")
-        #expect(
-            row.contains(Self.squashed("let offersTitles: Bool")),
-            Comment(
-                rawValue:
-                    "the row no longer TAKES the offer — if it "
-                    + "re-derives it, its answer can disagree "
-                    + "with the section's (#1022)"
-            )
-        )
-        #expect(
-            !(try facets()).contains(
-                Self.squashed("AppRuleTitleOffer.isOffered")
-            ),
-            Comment(
-                rawValue:
-                    "the row assembles the offer's input again — "
-                    + "there must be one copy of "
-                    + "`floatRules + overrideFloatBase` (#1022)"
-            )
-        )
-        #expect(
-            try source("Sections/AppRulesSection.swift")
-                .contains(
-                    Self.squashed("AppRuleTitleOffer.isOffered")
-                ),
-            "the section resolves the offer nowhere"
         )
     }
 }

@@ -49,6 +49,34 @@ struct AppRulesAddOnSelectTests {
         text.split(whereSeparator: \.isWhitespace).joined()
     }
 
+    /// `roleLabel`'s brace-balanced body — the expression that
+    /// actually becomes the picker's name and its announced text.
+    private func roleLabelBody() throws -> String {
+        let raw = try controls()
+        let signature = "private var roleLabel: String"
+        let offset = try #require(
+            raw.range(of: signature),
+            Comment(
+                rawValue:
+                    "roleLabel is gone — the picker's name comes "
+                    + "from somewhere this clause cannot see"
+            )
+        )
+        var cursor = raw.distance(
+            from: raw.startIndex,
+            to: offset.upperBound
+        )
+        return try #require(
+            SourceScan.balanced(
+                Array(raw),
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "roleLabel has no balanced body to read"
+        )
+    }
+
     @Test("picking an app commits it, with nothing in between")
     func pickCommits() throws {
         // Anchored on what the closure cannot LOSE — a commit
@@ -140,7 +168,15 @@ struct AppRulesAddOnSelectTests {
         // it: hand-typed on both sides, the two agree with each
         // other and with nothing else, and renaming a key reds
         // here instead of at the drawing site.
-        let source = squashed(try controls())
+        // Scoped to `roleLabel`'s own body, not the file. A
+        // file-wide read stayed green with `roleLabel` returning a
+        // bare unlocalized literal for both cases and the two
+        // `L(…)` calls parked in an unused property beside it —
+        // the picker then announces a string that is neither
+        // localized nor the census key (guard-prover, 2026-09-22;
+        // the class is "a file-scoped needle is satisfied by a
+        // neighbour").
+        let source = squashed(try roleLabelBody())
         for census in [
             AppRulesKey.appRulesAddPin, .appRulesAddFloat,
         ] {
