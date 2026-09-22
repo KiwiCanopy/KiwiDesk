@@ -9,6 +9,7 @@ extension View {
     /// with no Automatic concept. Also a named VoiceOver action
     /// (#678) and keyboard shortcut (#845).
     @ViewBuilder
+    @MainActor
     func automaticMenu(
         automatic: Bool,
         hex: Binding<String>,
@@ -28,6 +29,7 @@ extension View {
 /// The one "Automatic" item, built once for every route so a
 /// change to what it resets cannot reach only one of them.
 @ViewBuilder
+@MainActor
 private func automaticItem(
     hex: Binding<String>,
     draft: Binding<String>
