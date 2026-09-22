@@ -4341,12 +4341,11 @@ untouched because re-homing one is precisely the move
 `stickyMoveRefused` gates at every command choke point (#445),
 and neither a pure state fold nor a Desktop verb may make it
 quietly; sticky reach across Desktops is #1145's (*Sticky reach
-spans macOS Desktops*). And
-only the window's membership ever moves — no space is
-re-assigned to another display — so an arrival or a Desktop
-move can never break a `pin_space_to_display` pin. On a single
-screen every one of these questions has the same answer it
-always had. (#1010)
+spans macOS Desktops*). And only the window's membership ever
+moves — no space is re-assigned to another display — so an
+arrival or a Desktop move can never break a
+`pin_space_to_display` pin. On a single screen every one of
+these questions has the same answer it always had. (#1010)
 
 **The starter setup is chosen from the screens, not demonstrated
 on them.** Giving every display the same five spaces — one per
@@ -6455,10 +6454,10 @@ scales to the mode's card count instead of a fixed taxonomy
 column, and per-language label budgets that die with the fixed
 column (a card flexes; an over-long label truncates visibly). What
 it costs, accepted: a second click to move between sibling
-areas. (The sidebar shell was an
-`HStack`, never a `NavigationSplitView`, because macOS 26 cannot
-lock a split-view divider — a finding nothing rests on once no
-columns are composed.)
+areas. (The sidebar shell was an `HStack`, never a
+`NavigationSplitView`, because macOS 26 cannot lock a split-view
+divider — a finding nothing rests on once no columns are
+composed.)
 
 **Home's two groups are scope-named: "This Profile" / "Whole
 App".** (#678 turn 9, replacing #68's "Design"/"System".) Topical
@@ -7279,16 +7278,15 @@ here so they read that way:
 **Settings surfaces no temporary-layout drift.** No pill row,
 no drift-armed Save and no caption under the Spaces mode picker
 narrates a standing temporary layout, and Revert is a plain
-draft revert. (The save pill's *live drift* rows — a profile
-edited outside the draft — are a different question, ruled in
-*The save pill counts what the header claims*, #1197.) A Save
-enabled *because of* a temporary layout whose effect on it is
-identical to Revert is the thing refused; the one permanent path
-through Settings is the ordinary draft flow — Spaces, change the
-mode, Save. A quick-menu Keep does move the open draft's saved
-baseline onto the layout it just wrote, leaving staged edits
-staged: without that, the next Save would commit the pre-keep
-mode over the layout just kept.
+draft revert. (The save pill's *live drift* rows are a different
+question, ruled in *The save pill counts what the header
+claims*, #1197.) A Save enabled *because of* a temporary layout
+whose effect on it is identical to Revert is the thing refused;
+the one permanent path through Settings is the ordinary draft
+flow — Spaces, change the mode, Save. A quick-menu Keep does
+move the open draft's saved baseline onto the layout it just
+wrote, leaving staged edits staged: without that, the next Save
+would commit the pre-keep mode over the layout just kept.
 
 ### Spaces
 
@@ -10241,9 +10239,9 @@ that keep the bars routed through it — is
 
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either
-relocates it (fast drop, `move_to_space`) or, after a 1.5 s
-dwell, springs the view to that Space so the window is dropped into its
-live layout. The cross-process race that argues against
+relocates it (fast drop, `move_to_space`) or, after a dwell,
+springs the view to that Space so the window is dropped into
+its live layout. The cross-process race that argues against
 spring-loading is narrowed to one place because KiwiDesk's Spaces
 are *virtual* (a retile, not a WindowServer Space change). The
 load-bearing details:
@@ -10532,15 +10530,14 @@ true under either style, because items have size and spacing in
 Plain too, they simply draw no box of their own.
 
 **A bar entry is an "item", not a "tab".** (R6/#406, owner
-ruling 2026-07-25; the gesture-prose carve-out retired
-2026-09-22.) An App Bar entry is a window or a same-app group;
-it has none of a browser tab's semantics, and the Space Bar's
-entries were already items. The colors are `item_color` /
-`active_item_color` and the geometry `item_size` / `item_gap`,
-so **item is the model noun** — labels, help strings, captions,
-enum doc comments, the Lua reference and the user guide all use
-it. Note this is unrelated to **macOS native tabs**
-(`TabReconciler`, §5), which keep the word because they
+rulings 2026-07-25 and 2026-09-22.) An App Bar entry is a window
+or a same-app group; it has none of a browser tab's semantics,
+and the Space Bar's entries were already items. The colors are
+`item_color` / `active_item_color` and the geometry `item_size`
+/ `item_gap`, so **item is the model noun** — labels, help
+strings, captions, enum doc comments, the Lua reference and the
+user guide all use it. Note this is unrelated to **macOS native
+tabs** (`TabReconciler`, §5), which keep the word because they
 genuinely are tabs — a blanket rename must never reach them.
 
 **Plate reach is its own property, not a fourth background.**
