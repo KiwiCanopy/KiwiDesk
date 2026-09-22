@@ -22,10 +22,10 @@ sentence of explanation carries a small `questionmark.circle`
 button **immediately after the field's label text, inside the
 shared `settingsLabelColumn`** — where the question is born,
 and where System Settings puts its own info glyph.
-`labelColumn` (210 pt) holds the longest label plus the glyph;
-a long label + glyph truncates visibly
-(`lineLimit(1)`), and long German labels on help rows are
-shortening candidates for the de review pass. An *unlabeled*
+`labelColumn` holds the longest label plus the glyph; a long
+label + glyph truncates visibly (`lineLimit(1)`), and long
+German labels on help rows are shortening candidates for the de
+review pass. An *unlabeled*
 `SegmentedPicker` (icon tabs) has no label to sit beside, so
 its `?` trails the track. The button wears the shared
 `hoverHighlight` chip like every other icon-only borderless
