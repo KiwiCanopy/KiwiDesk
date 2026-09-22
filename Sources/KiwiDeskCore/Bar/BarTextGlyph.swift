@@ -75,6 +75,7 @@ enum BarTextGlyph {
         return Metrics(advance: advance, ink: ink)
     }
 
+    @MainActor
     static func metrics(of field: NSTextField) -> Metrics {
         metrics(
             field.stringValue,
@@ -96,6 +97,7 @@ enum BarTextGlyph {
     /// a thin bar's cell for every glyph. The ink is centred
     /// rather than the advance, since the cell's neighbours are
     /// image cells whose pixels centre.
+    @MainActor
     static func frame(
         for field: NSTextField,
         in cell: CGRect,
@@ -122,6 +124,7 @@ enum BarTextGlyph {
     /// bar an app cell abuts its neighbour. Converted through the
     /// font manager, which keeps the face, and re-measured once,
     /// since the system font's tracking is not linear in size.
+    @MainActor
     private static func fit(
         _ field: NSTextField,
         toWidth width: CGFloat
