@@ -4902,11 +4902,13 @@ its own remembered Space, so on arrival KiwiDesk shows Space 2
 (empty) while the window sits in Space 1 — parked, and marked
 `focused` there. The #292 preflight reads the ACTIVE Space's
 anchor, finds none, and refused with the generic sentence, which
-asserts a focus divergence that does not exist. One uncontrolled
-observation (2026-09-08) had a trackpad swipe arrive on the
-Space holding the window rather than the remembered one; whether
-`focus_desktop`'s "exactly as a swipe would" holds there is
-unpinned and not ruled here.
+asserts a focus divergence that does not exist. The verb is not
+what decides the arrival Space: a swipe and `focus_desktop` end
+in the one switch handler, which activates the Desktop's
+remembered Space (#1230) either way, so whether the user lands
+on an empty Space is a fact about that memory — Desktop 2
+remembered Space 2 on 2026-09-08 and Space 1 on 2026-09-22 — and
+never about which of the two brought them there.
 
 **A refusal rather than acting on the parked window**, because
 the verbs act on the Space the user is on. A window in another
