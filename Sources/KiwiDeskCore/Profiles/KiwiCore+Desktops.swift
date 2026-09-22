@@ -86,7 +86,6 @@ extension KiwiCore {
         // stamped at the first switch that shows it, and every
         // question below is still answered from this ONE reading.
         let snapshot = stampedDesktopSnapshot()
-        let number = snapshot.authority
         // The arriving Desktop, answered from the SAME snapshot
         // (#1147): its stamp where it carries one, its Mission
         // Control number where it does not.
@@ -186,12 +185,13 @@ extension KiwiCore {
                 // the settle's own sync.
                 //
                 // The verdict is read for the MAIN display, the
-                // one `number` is keyed to (review, 2026-08-18):
-                // the global-focus read could answer for a
-                // secondary display, so a fullscreen main display
-                // with focus on a secondary user space skipped
-                // both branches and left the bars painted over
-                // the fullscreen app.
+                // one `snapshot.mainUUID` names (review,
+                // 2026-08-18): the global-focus read could
+                // answer for a secondary display, so a
+                // fullscreen main display with focus on a
+                // secondary user space skipped both branches
+                // and left the bars painted over the
+                // fullscreen app.
                 updateAppBar()
                 updateSpaceBar()
             }

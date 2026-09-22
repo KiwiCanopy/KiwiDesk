@@ -75,7 +75,7 @@ extension KiwiCore {
     /// gap, and `docs/spaces-and-desktops.md` says so.
     func persistDesktopSpaceMemory() {
         guard isGuiManaged, desktopMemory.spaceMemoryEstablished,
-            var live = guiConfigStore.load()
+            let live = guiConfigStore.load()
         else { return }
         // The STORE, never `saveGuiConfig` — that reloads the
         // whole config, which at quit would rebuild the Lua VM
