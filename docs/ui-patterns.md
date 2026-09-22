@@ -823,8 +823,8 @@ bar has a thickness), `track.set_count` → `track.set_limit`
 `tab_background` → `background_style` on both bars (the entries
 are not browser tabs, and under Plain no item draws a box of
 its own in steady state). The discriminator is never churn
-cost — pre-release makes churn cheap on both sides (§5) — but
-which side misdescribes the thing.
+cost — a Lua verb renames freely and a stored key owes its
+migration (§5) — but which side misdescribes the thing.
 
 **An override stepper's range must exclude any value that
 carries a separate meaning on the wire (audit finding 20,
