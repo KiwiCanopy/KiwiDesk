@@ -13,9 +13,12 @@ import Foundation
 ///
 /// The App Rules row drew through this until #1022 reverted it to
 /// labelled facets, which took the slot-to-control mapping with
-/// it. The keyboard preview's layout sentence is the remaining
-/// consumer, and the next surface that wants a sentence inherits
-/// the splitter and `SentenceFrameTests`.
+/// it. It is homed beside its ONE remaining consumer rather than
+/// in `Common/`, which admits only primitives shared across
+/// component areas: "the next surface inherits it" is the
+/// argument that rule declines, and a splitter advertised as
+/// common invites a stitched sentence where localization.md wants
+/// one localized frame. Move it up when a second area wants it.
 struct SentenceFrame {
     /// Literal text chunk or argument position.
     enum Slot: Hashable {

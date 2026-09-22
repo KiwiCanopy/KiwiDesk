@@ -55,8 +55,23 @@ enum SettingsMetrics {
     /// breakpoint (844 pt at 900); below it the rows stack and
     /// these go unread.
     static let appRuleNameColumn: CGFloat = 160
-    static let appRuleFloatColumn: CGFloat = 170
+    /// 190 rather than 170 because `タイトル指定のウインドウ` is
+    /// twelve CJK glyphs plus a chevron, which truncates at 170
+    /// (ui-designer, 2026-09-22). The slack at the row breakpoint
+    /// absorbs it.
+    static let appRuleFloatColumn: CGFloat = 190
     static let appRulePinColumn: CGFloat = 190
+
+    /// The row's app icon, and the inset everything hanging under
+    /// the app name shares. DERIVED so the table header, the
+    /// stacked facet block and the pattern editor cannot drift
+    /// from the row — the header restated it as a hand-typed
+    /// `+ 26` until review caught it (2026-09-22).
+    static let appRuleIconColumn: CGFloat = 20
+    static let appRuleIdentityInset: CGFloat =
+        appRuleIconColumn + 6
+    static let appRuleIdentityColumn: CGFloat =
+        appRuleIdentityInset + appRuleNameColumn
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {

@@ -17,11 +17,20 @@ struct AppRuleRow: View {
     /// Base rules when editing stored profile (#109).
     let overrideBase: [String: SpaceID]?
     let overrideFloatBase: [String]?
+    /// Whether the float facet offers title-pattern matching.
+    /// Resolved ONCE by the section and handed down: the predicate
+    /// has one home, and so must its input — a row re-assembling
+    /// `floatRules + overrideFloatBase` could disagree with the
+    /// section's `?` about whether the choice exists (architect
+    /// review, 2026-09-22).
+    let offersTitles: Bool
+    /// The app whose pattern editor is open, owned by the section
+    /// so the row survives losing its last stored rule while it
+    /// composes one (#1022, the vanishing-row blocker).
+    @Binding var composingTitles: String?
     let onDelete: () -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
-    /// Keeps titled editor visible while patterns are empty.
-    @State private var editingTitles = false
     @Environment(\.settingsWidth) private var width
 
     var body: some View {
@@ -31,9 +40,12 @@ struct AppRuleRow: View {
                 AppRuleTitledEditor(
                     model: model,
                     app: app,
-                    editingTitles: $editingTitles
+                    editingTitles: titlesEditing
                 )
-                .padding(.leading, 28)
+                .padding(
+                    .leading,
+                    SettingsMetrics.appRuleIdentityInset
+                )
                 .opacity(floatInherited ? 0.55 : 1)
             }
         }
@@ -65,6 +77,7 @@ struct AppRuleRow: View {
             )
             floatMenu
                 .opacity(floatInherited ? 0.55 : 1)
+                .padding(.leading, facetInset(stacked))
                 // The row's focus destination, and the one
                 // control every row state keeps enabled: the
                 // space menu is disabled on any unpinned row, and
@@ -86,6 +99,7 @@ struct AppRuleRow: View {
                         ? nil : SettingsMetrics.appRulePinColumn,
                     alignment: .leading
                 )
+                .padding(.leading, facetInset(stacked))
             if !stacked {
                 Spacer(minLength: 8)
                 deleteButton
@@ -128,8 +142,20 @@ struct AppRuleRow: View {
             Text(text)
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink3)
+                .padding(.leading, SettingsMetrics.appRuleIdentityInset)
                 .accessibilityHidden(true)
         }
+    }
+
+    /// Stacked, everything below the identity line hangs under the
+    /// app NAME rather than sitting flush left with its icon: five
+    /// lines 6 pt apart, inside rows separated by 8 pt and a
+    /// divider, read as five rows (ui-designer, 2026-09-22). Wide,
+    /// the columns place them and this is 0. A modifier rather
+    /// than a nested stack, so the controls stay direct children
+    /// of the layout and keep their identity across the reflow.
+    private func facetInset(_ stacked: Bool) -> CGFloat {
+        stacked ? SettingsMetrics.appRuleIdentityInset : 0
     }
 
     /// The gate and the gated dim as ONE unit: an inherited facet
@@ -142,8 +168,16 @@ struct AppRuleRow: View {
         .opacity(spaceInherited ? 0.55 : 1)
     }
 
+    /// An inherited pin, which the 0.55 dim says is in sync with
+    /// the base. A row that NEITHER side pins is not inheriting a
+    /// pin — it has none — so it draws at full strength: the old
+    /// `!isDraft` term used to keep a freshly added row out of
+    /// this branch, and dropping it dimmed every float-only row's
+    /// whole pin pair (architect review, 2026-09-22).
     private var spaceInherited: Bool {
-        guard let base = overrideBase else { return false }
+        guard let base = overrideBase, base[app] != nil else {
+            return false
+        }
         return model.config.appRules[app] == base[app]
     }
 
@@ -216,5 +250,15 @@ struct AppRuleRow: View {
         )
     }
 
-    var titlesEditing: Binding<Bool> { $editingTitles }
+    /// The pattern editor's open state, owned by the SECTION so a
+    /// row losing its last stored rule mid-composition is still
+    /// listed. It holds no value and only ever names one row.
+    var titlesEditing: Binding<Bool> {
+        Binding(
+            get: { composingTitles == app },
+            set: { composingTitles = $0 ? app : nil }
+        )
+    }
+
+    private var editingTitles: Bool { composingTitles == app }
 }

@@ -11,6 +11,14 @@ enum FloatFacet: Equatable {
     case all
     case titled
 
+    /// Whether a float rule matches by title rather than floating
+    /// every window. The one spelling of the marker test, so
+    /// `AppRuleTitleOffer` cannot read the colon differently from
+    /// `current(_:app:)` (architect review, 2026-09-22).
+    static func isTitled(_ rule: String) -> Bool {
+        rule.contains(":")
+    }
+
     /// Extracts app segment from float rule string (`FloatRules`).
     static func appSegment(of rule: String) -> String {
         let parts = rule.split(separator: ":", maxSplits: 1)

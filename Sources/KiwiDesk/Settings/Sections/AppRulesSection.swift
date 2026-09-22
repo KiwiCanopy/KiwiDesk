@@ -6,6 +6,14 @@ struct AppRulesSection: View {
     @ObservedObject var model: SettingsModel
     /// Restores keyboard focus after deleting a rule row (#816).
     @FocusState private var returningRow: String?
+    /// The app whose pattern editor is open. Owned here, not by
+    /// the row, because a float-only row clears its ONLY stored
+    /// rule while composing a titled one and `apps` is derived
+    /// from the store — without this the ForEach dropped the row
+    /// mid-gesture (#1022, architect + ui-designer review). It is
+    /// not a re-admitted `draftApps`: it names at most one row,
+    /// only while that row's editor is open, and holds no value.
+    @State private var composingTitles: String?
     @State private var newPinnedApp = ""
     @State private var newFloatingApp = ""
     @Environment(\.settingsWidth) private var width
@@ -39,6 +47,8 @@ struct AppRulesSection: View {
                             app: app,
                             overrideBase: overrideBase,
                             overrideFloatBase: overrideFloatBase,
+                            offersTitles: offersTitles,
+                            composingTitles: $composingTitles,
                             onDelete: { delete(app) },
                             returningRow: $returningRow
                         )
@@ -76,8 +86,8 @@ struct AppRulesSection: View {
                 // name are their own.
                 Color.clear
                     .frame(
-                        width: SettingsMetrics.appRuleNameColumn
-                            + 26,
+                        width: SettingsMetrics
+                            .appRuleIdentityColumn,
                         height: 1
                     )
                 Text(L("app_rules.float", "Float"))
@@ -132,19 +142,26 @@ struct AppRulesSection: View {
     /// argument rather than restated, so the float explanation
     /// exists once; the title-pattern paragraph joins only where
     /// the mode offers patterns at all.
+    ///
+    /// It deliberately does NOT restate "an app that does not
+    /// float needs a Space": the always-visible caption says it
+    /// and the locked checkbox's own sentence says it again, and
+    /// a third copy here made this the longest help string in the
+    /// app — past `desktops.help`, on a window whose minimum
+    /// height is 540 pt (ui-designer, 2026-09-22). The
+    /// remembered-Space exception rides the last paragraph rather
+    /// than the first, being a precedence detail rather than the
+    /// thing a newcomer came to read.
     private var sectionHelp: String {
         var text = L(
             "app_rules.section.help",
             "**%1$@** — the app's windows open in that Space, "
-                + "whatever Space you are in. A window KiwiDesk "
-                + "already remembers keeps the Space it was last "
-                + "in.\n\nAn app that does not float needs a pin: "
-                + "without one the rule says nothing, because "
-                + "apps with no rule already tile in whichever "
-                + "Space you open them.\n\n%2$@\n\nA pin and "
-                + "floating combine — a floating window still "
+                + "whatever Space you are in.\n\n%2$@\n\nA pin "
+                + "and floating combine: a floating window still "
                 + "belongs to its pinned Space, it simply is not "
-                + "tiled inside it.",
+                + "tiled inside it. A window KiwiDesk already "
+                + "remembers keeps the Space it was last in, "
+                + "whichever rule applies.",
             L("app_rules.pin", "Pin to a Space"),
             L(
                 "app_rules.float.help",
@@ -196,6 +213,11 @@ struct AppRulesSection: View {
             for rule in base {
                 set.insert(FloatFacet.appSegment(of: rule))
             }
+        }
+        // The row under composition, which may hold no stored rule
+        // for as long as its editor is open.
+        if let composing = composingTitles {
+            set.insert(composing)
         }
         let names = Dictionary(
             uniqueKeysWithValues: set.map {
@@ -273,20 +295,25 @@ struct AppRulesSection: View {
     /// Space. Picking an app is the whole gesture (#1172), so this
     /// runs straight off the pick.
     private func addPinned(_ picked: String) {
+        // Cleared whatever happens: a refused pick used to stay in
+        // the binding, and `AppPickerButton` draws and announces
+        // whatever `name` holds — so the button read the refused
+        // app's name until an unrelated pick succeeded (code
+        // review, 2026-09-22).
+        defer { newPinnedApp = "" }
         guard let app = normalized(picked),
-            let space = AppRulePin.defaultSpace(model.config)
+            let space = AppRulePin.engagedSpace(model.config)
         else { return }
         model.config.appRules[app] = space
-        newPinnedApp = ""
     }
 
     /// Adds a rule that floats every window of the picked app.
     private func addFloating(_ picked: String) {
+        defer { newFloatingApp = "" }
         guard let app = normalized(picked) else { return }
         if !model.config.floatRules.contains(app) {
             model.config.floatRules.append(app)
         }
-        newFloatingApp = ""
     }
 
     /// Lower-cased so a hand-typed mixed-case bundle id
@@ -307,6 +334,9 @@ struct AppRulesSection: View {
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
+        // Or the deleted row is the one the composing slot keeps
+        // listed, and the trash appears to do nothing.
+        if composingTitles == app { composingTitles = nil }
         if !apps.contains(app) {
             returningRow = neighbour
         }

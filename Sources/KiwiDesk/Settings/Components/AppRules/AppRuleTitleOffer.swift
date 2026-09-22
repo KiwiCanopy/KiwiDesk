@@ -30,6 +30,6 @@ enum AppRuleTitleOffer {
         floatRules: [String]
     ) -> Bool {
         if mode == .powerUser { return true }
-        return floatRules.contains { $0.contains(":") }
+        return floatRules.contains(where: FloatFacet.isTitled)
     }
 }

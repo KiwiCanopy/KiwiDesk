@@ -20,6 +20,16 @@ extension AppRulesKey {
             // control to its left in the same row, which is what
             // makes this `.adjacent` and spares every row an
             // inline sentence it would stamp per app.
+            //
+            // Stated residue: the renderer's predicate is a
+            // DISJUNCTION — the pin is also inert with no Space to
+            // pin to, whose cause is on the Spaces destination —
+            // and `SettingGate` cannot mix `.setting` with a
+            // `.runtime` condition. So the declaration names the
+            // half that is adjacent, and the other half carries
+            // its own live pointer (the card's
+            // `CrossReferenceRow`) rather than a census-derived
+            // channel.
             return .row(
                 .appRules,
                 .rulesPerApp,
@@ -57,7 +67,16 @@ extension AppRulesKey {
             // authored at its own call sites.
             return .text("app_rules.space")
         case .floatRules:
-            return .text("app_rules.float", help: "app_rules.float.help")
+            // The help key is still this row's, and still the one
+            // copy of the float explanation — but since #1022 it
+            // renders in the section's `?` rather than as a
+            // tooltip on this row, a hover being reachable by
+            // neither keyboard nor VoiceOver. The census keeps it
+            // so the search index still finds the row by it.
+            return .text(
+                "app_rules.float",
+                help: "app_rules.float.help"
+            )
         case .floatRulesPattern:
             return .dynamic
         case .ignoreRules:
