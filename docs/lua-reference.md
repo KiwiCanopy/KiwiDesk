@@ -800,8 +800,9 @@ bsp.set_ratio_v(0.5)
 `"after_focused"`.
 
 **Does:** sets where a new window enters the BSP order. Default
-`"after_focused"`: the new window splits the focused window's
-region.
+`"after_focused"`: the new window takes the split right after
+the focused window, which keeps its frame; the windows after it
+move one split deeper.
 
 **Example:**
 
@@ -1204,7 +1205,7 @@ scroll.set_orientation("horizontal")
 ### scroll.set_new_window_placement
 
 **Expects:** `"first"`, `"last"`, `"before_focused"`, or
-`"after_focused"` (the values every layout's setter takes).
+`"after_focused"`.
 
 **Does:** sets where new windows land. Default
 `"after_focused"`.
@@ -2037,12 +2038,11 @@ app_bar.set_title_cap(25)
 `"app_image"`).
 
 **Does:** sets how app icons are drawn. `app_image` shows the
-app's icon as macOS provides it, which already follows the
-system-wide Icon & widget style the user picked; the other
-styles (Dark, Clear, Tinted) are not offered as choices of their
-own, since macOS gives an app no way to fetch a rendering other
-than the current one. `app_font` shows a monochrome glyph from
-the bundled [SketchyBar App
+app's icon as macOS provides it, which follows the system-wide
+Icon & widget style the user picked; the system's Dark, Clear
+and Tinted looks are not separate choices
+([Accepted limitations](accepted-limitations.md)). `app_font`
+shows a monochrome glyph from the bundled [SketchyBar App
 Font](https://github.com/kvndrsslr/sketchybar-app-font)
 instead, colored by the bar's item colors (Item / Active item /
 Hover item); apps without a glyph keep their icon.
@@ -2668,8 +2668,8 @@ KiwiDesk.set_new_window_placement_override("mail", "last")
 
 **Layout defaults:**
 
-- **BSP** `after_focused` — the new window splits the focused
-  window's region.
+- **BSP** `after_focused` — the new window takes the split right
+  after the focused window, which keeps its frame.
 - **Master/Stack** `first` — new window becomes master.
 - **Scrolling** `after_focused` — opens next to the focused
   column.
