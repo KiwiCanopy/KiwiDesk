@@ -56,12 +56,15 @@ extension KiwiCore {
         // does nothing" trap. Log which clause denied: the
         // anchor/frontmost divergence is usually a dropped
         // cooperative activate (#463).
-        logFocusedCommandDenial(
-            command,
+        let denial = denialSentences(
             focused: focusedWindow,
             front: front
         )
-        return .fail("no managed window is currently focused")
+        onLog(
+            "preflight (#292): denied \(command) — anchor "
+                + "\(denial.anchor), \(denial.reason)"
+        )
+        return .fail(denial.error)
     }
 
     /// The #292 ownership clauses in one place, so the wake heal
@@ -76,16 +79,19 @@ extension KiwiCore {
         return true
     }
 
-    /// One line naming the denied command, both sides of the
-    /// divergence, and the clause that failed.
-    private func logFocusedCommandDenial(
-        _ command: String,
+    /// The denied clause, said twice from ONE reading — the
+    /// log's `reason` and the response's `error`. An anchor
+    /// missing because the ACTIVE Space is empty is the one
+    /// clause whose error leaves the generic sentence (#1336);
+    /// every other clause keeps it.
+    private func denialSentences(
         focused: ManagedWindow?,
         front: pid_t?
-    ) {
-        let anchor = focused.map {
-            "window \($0.id.raw) pid \($0.pid)"
-        }
+    ) -> (anchor: String, reason: String, error: String) {
+        let generic = "no managed window is currently focused"
+        let anchor =
+            focused.map { "window \($0.id.raw) pid \($0.pid)" }
+            ?? "none"
         let reason: String
         if let focused, let front {
             if front != focused.pid {
@@ -96,13 +102,52 @@ extension KiwiCore {
                 reason = "ignored panel latched"
             }
         } else if focused == nil {
+            if let empty = emptyActiveSpaceRefusal() {
+                return (anchor, "no focus anchor — \(empty)", empty)
+            }
             reason = "no focus anchor"
         } else {
             reason = "foreground unknown"
         }
-        onLog(
-            "preflight (#292): denied \(command) — anchor "
-                + "\(anchor ?? "none"), \(reason)"
-        )
+        return (anchor, reason, generic)
+    }
+
+    /// The refusal for a focus anchor missing because the active
+    /// Space holds nothing (#1336), or nil when it is not empty —
+    /// members none of which is focused stay the generic case.
+    /// Names the window a sibling Space on the SAME screen marks
+    /// focused and the `focus_space` that brings it under the
+    /// verb: `lastFocused`'s Space where it is among them, else
+    /// the first in Space order. Same screen is the assigned
+    /// display compared raw (the `FocusDistrust` reading), so an
+    /// unassigned Space pairs only with unassigned ones and a
+    /// Space on another screen is never named.
+    func emptyActiveSpaceRefusal() -> String? {
+        guard let active = activeSpace,
+            state.effectiveMembers(of: active).isEmpty
+        else { return nil }
+        let sentence = "the active Space \(active.id.raw) is empty"
+        let display = state.workspaces.display(of: active.id)
+        typealias Marked = (window: ManagedWindow, space: SpaceID)
+        let marked = state.workspaces.allSpaces
+            .filter {
+                $0.id != active.id
+                    && state.workspaces.display(of: $0.id) == display
+            }
+            .compactMap { space -> Marked? in
+                guard let focused = space.focused,
+                    let window = state.windows[focused]
+                else { return nil }
+                return (window, space.id)
+            }
+        let last = state.workspaces.lastFocused
+        guard
+            let hit = marked.first(where: { $0.window.id == last })
+                ?? marked.first
+        else { return sentence }
+        return sentence
+            + "; the focused window (\(hit.window.appName)) is in "
+            + "Space \(hit.space.raw) — focus_space \(hit.space.raw) "
+            + "first"
     }
 }

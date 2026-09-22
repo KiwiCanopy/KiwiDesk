@@ -248,6 +248,15 @@ gone with `reason: vanished`, the value a Desktop swipe
 produces. When that Desktop is next shown the window rejoins
 the **KiwiDesk Space it was in**.
 
+:::unreleased
+That Space is not always the one you arrive on: `focus_desktop`
+opens a Desktop on the Space it remembers for it, and when that
+Space is empty a focused-window verb refuses by name —
+`the active Space 2 is empty; the focused window (Finder) is in
+Space 1 — focus_space 1 first` — the window being parked in its
+own Space until you focus that Space.
+:::
+
 When that Desktop lives on **another screen**, the window
 instead joins the KiwiDesk Space that screen is showing when
 the window lands there — for a hidden Desktop, the Space shown

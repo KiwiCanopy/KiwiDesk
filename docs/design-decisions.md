@@ -4883,6 +4883,56 @@ responses entirely, so a keyboard user still sees nothing; a
 screen that did not move is its own evidence there, and giving
 it a cue is a separate question from this one.
 
+### An empty active Space refuses by name (#1336)
+
+**[Trade-off]**
+
+:::unreleased
+A focused-window verb issued while the active Space is **empty**
+refuses, and the refusal names the Space that is empty, the
+window `get_state` marks focused in a sibling Space on the same
+screen, and the `focus_space` that brings it back under the verb
+— or the Space alone, when no sibling there marks a focus — never
+"no managed window is currently focused", which names a fact
+that is not the case.
+
+The measurement: `move_to_desktop 2` leaves the window's Space
+membership behind, and `focus_desktop 2` opens that Desktop on
+its own remembered Space, so on arrival KiwiDesk shows Space 2
+(empty) while the window sits in Space 1 — parked, and marked
+`focused` there. The #292 preflight reads the ACTIVE Space's
+anchor, finds none, and refused with the generic sentence, which
+asserts a focus divergence that does not exist. The verb is not
+what decides the arrival Space: a swipe and `focus_desktop` end
+in the one switch handler, which activates the Desktop's
+remembered Space (#1230) either way, so whether the user lands
+on an empty Space is a fact about that memory — Desktop 2
+remembered Space 2 on 2026-09-08 and Space 1 on 2026-09-22 — and
+never about which of the two brought them there.
+
+**A refusal rather than acting on the parked window**, because
+the verbs act on the Space the user is on. A window in another
+Space of the same screen is parked off its edge — the windows in
+front of the user are the ones to act on, and reaching for a
+parked one would point every focused-window verb away from them
+whenever the active Space happens to be empty. The honest answer
+is to say which Space is empty and where the marked window is;
+`focus_space` on that Space is a one-word recovery and the
+sentence names it. The cost, accepted: the user pays one
+`focus_space` where a swipe would have paid nothing.
+
+**One sentence on both channels.** The log's clause and the
+response's error come from one reading (`denialSentences`), so a
+trace reads as the CLI does. The sibling Space named is on the
+SAME screen — a Space on another screen lays its windows out
+there — and where several mark a focus, the one holding
+`lastFocused`, the window that last held the system focus, else
+the first in Space order. An active Space with members and no
+focus slot keeps the generic sentence: the members in front of
+the user are still the ones to act on, so the refusal points at
+nothing beyond them.
+:::
+
 ### A ∞ window entering a floating Space on another screen is moved, not left (#1217)
 
 **[Rationale]**
