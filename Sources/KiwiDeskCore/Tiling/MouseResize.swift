@@ -14,6 +14,10 @@ public enum ResizeAdjustment: Equatable, Sendable {
     case bspRatioV(CGFloat)
     case masterRatio(CGFloat)
     case scrollWidth(CGFloat)
+    /// The dragged window's share of its stack zone along the
+    /// zone's own axis, in points (#941) — the `.trackAlong`
+    /// shape for the stack layout.
+    case stackWeight(CGFloat)
     case trackAcross(CGFloat)
     case trackAlong(CGFloat)
 }
@@ -133,16 +137,23 @@ public enum MouseResize {
             }
             return nil
         case .stack:
-            // The ratio drag follows the split axis (#222); the
-            // cross-axis drag snaps back (the #67 weight-drag
-            // exception).
+            // The dominant delta decides, as bsp and track do:
+            // split axis → ratio (#222), cross axis → the
+            // dragged window's zone share (#941); the writer
+            // owns whether that zone divides on it.
             let change = stackSplitHorizontal ? dw : dh
-            guard abs(change) > threshold else { return nil }
-            let sign: CGFloat = isMaster ? 1 : -1
-            let extent =
-                stackSplitHorizontal
-                ? bounds.width : bounds.height
-            return .masterRatio(sign * change / extent)
+            let cross = stackSplitHorizontal ? dh : dw
+            if abs(change) >= abs(cross), abs(change) > threshold {
+                let sign: CGFloat = isMaster ? 1 : -1
+                let extent =
+                    stackSplitHorizontal
+                    ? bounds.width : bounds.height
+                return .masterRatio(sign * change / extent)
+            }
+            if abs(cross) > threshold {
+                return .stackWeight(cross)
+            }
+            return nil
         case .scrolling:
             guard abs(dw) > threshold else { return nil }
             return .scrollWidth(dw)

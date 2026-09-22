@@ -76,7 +76,7 @@ struct MouseResizeTests {
         #expect(adjustment == .masterRatio(-0.1))
     }
 
-    @Test("Stack height changes snap back")
+    @Test("Stack height changes move the zone share (#941)")
     func stackHeight() {
         let slot = slot(x: 600, height: 300)
         let adjustment = MouseResize.translate(
@@ -88,7 +88,44 @@ struct MouseResizeTests {
             frame: grown(slot, dh: 100),
             bounds: bounds
         )
-        #expect(adjustment == nil)
+        #expect(adjustment == .stackWeight(100))
+    }
+
+    /// A corner drag is decided by the dominant delta, as bsp
+    /// and track are — the split axis wins a tie.
+    @Test("A corner drag follows the dominant axis (#941)")
+    func stackCornerDominance() {
+        let slot = slot(x: 600, height: 300)
+        let heightWins = MouseResize.translate(
+            mode: .stack,
+            isMaster: false,
+            stackSplitHorizontal: true,
+            trackAxisVertical: true,
+            slot: slot,
+            frame: grown(slot, dw: 40, dh: -90),
+            bounds: bounds
+        )
+        #expect(heightWins == .stackWeight(-90))
+        let widthWins = MouseResize.translate(
+            mode: .stack,
+            isMaster: false,
+            stackSplitHorizontal: true,
+            trackAxisVertical: true,
+            slot: slot,
+            frame: grown(slot, dw: 100, dh: 100),
+            bounds: bounds
+        )
+        #expect(widthWins == .masterRatio(-0.1))
+        let underThreshold = MouseResize.translate(
+            mode: .stack,
+            isMaster: false,
+            stackSplitHorizontal: true,
+            trackAxisVertical: true,
+            slot: slot,
+            frame: grown(slot, dw: 4, dh: 6),
+            bounds: bounds
+        )
+        #expect(underThreshold == nil)
     }
 
     @Test("A vertical split follows height drags (#222)")
@@ -106,7 +143,7 @@ struct MouseResizeTests {
         #expect(adjustment == .masterRatio(0.1))
     }
 
-    @Test("A vertical split snaps width drags back (#222)")
+    @Test("A vertical split's width drag moves the zone share")
     func stackVerticalSplitWidth() {
         let slot = slot(x: 0, width: 600, height: 300)
         let adjustment = MouseResize.translate(
@@ -118,7 +155,7 @@ struct MouseResizeTests {
             frame: grown(slot, dw: 100),
             bounds: bounds
         )
-        #expect(adjustment == nil)
+        #expect(adjustment == .stackWeight(100))
     }
 
     @Test("BSP grows toward the dragged side")
