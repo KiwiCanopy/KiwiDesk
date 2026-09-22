@@ -33,6 +33,12 @@ enum SettingRuntimeGate: Hashable {
     /// A Desktop shortcut is bound (#1125) — the rows are an
     /// OFFER until one is, the seed authoring none of them.
     case desktopBindingsExist
+    /// Some app rule matches windows by a title fragment
+    /// (#1022) — the float facet's titled choice is an OFFER
+    /// until one does, since matching windows on a title
+    /// fragment is power-user work that sat one click from the
+    /// two choices a newcomer wants.
+    case titlePatternsExist
     /// A Track space exists or a Track verb is bound (#1440) —
     /// the rows are an OFFER until the layout is in play.
     case trackInUse

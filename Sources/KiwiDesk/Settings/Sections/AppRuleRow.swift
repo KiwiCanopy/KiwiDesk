@@ -2,24 +2,31 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// App rule row rendered as an editable natural-language sentence (turn 14a).
+/// App rule row: an app, the scope of its windows that float, and
+/// its Space pin (#1022).
+///
+/// The row was an editable natural-language sentence until #1022
+/// (#68 turn 14a); the reversal is argued in
+/// `docs/design-decisions.md` ▸ App rules. Its facets are labelled
+/// once by the table header `AppRulesSection` draws above the
+/// list, never per row — three rows would otherwise read the same
+/// two labels six times.
 struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
     /// Base rules when editing stored profile (#109).
     let overrideBase: [String: SpaceID]?
     let overrideFloatBase: [String]?
-    /// Whether row is a newly added session draft without saved rules.
-    let isDraft: Bool
     let onDelete: () -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
     /// Keeps titled editor visible while patterns are empty.
     @State private var editingTitles = false
+    @Environment(\.settingsWidth) private var width
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            sentence
+            facets
             if floatFacet == .titled || editingTitles {
                 AppRuleTitledEditor(
                     model: model,
@@ -32,71 +39,116 @@ struct AppRuleRow: View {
         }
     }
 
-    /// Sentence row driven by the localized `SentenceFrame`. The
-    /// word order is the TRANSLATOR's, never this stack's — ja/ko
-    /// are verb-final, so pieces stitched in Swift can never be
-    /// grammatical. Spacing is 0: the frame's literals own it
-    /// (`" opens in "`), and a stack gap would tear a ja/ko
-    /// particle off the noun it hugs (`SentenceFrameTests` pins
-    /// the literals arrive spaces-intact).
-    private var sentence: some View {
-        HStack(spacing: 0) {
-            appIcon
-                .padding(.trailing, 6)
-            ForEach(frame.segments) { segment in
-                switch segment.slot {
-                case .text(let words):
-                    Text(words).foregroundStyle(.secondary)
-                case .argument(let position):
-                    control(at: position)
-                }
+    /// `AnyLayout` rather than two subtrees: a reflow must not
+    /// tear the menus down — one would close mid-gesture and the
+    /// focus this row holds for a deletion would drop. Only the
+    /// stacked form's labels are conditional, and they are
+    /// decorative text with no identity worth keeping.
+    private var facets: some View {
+        let stacked = width.stacksRows
+        let layout =
+            stacked
+            ? AnyLayout(
+                VStackLayout(alignment: .leading, spacing: 6)
+            )
+            : AnyLayout(
+                HStackLayout(
+                    alignment: .firstTextBaseline,
+                    spacing: 8
+                )
+            )
+        return layout {
+            identity(stacked: stacked)
+            facetLabel(
+                L("app_rules.float", "Float"),
+                drawn: stacked
+            )
+            floatMenu
+                .opacity(floatInherited ? 0.55 : 1)
+                // The row's focus destination, and the one
+                // control every row state keeps enabled: the
+                // space menu is disabled on any unpinned row, and
+                // a disabled control cannot take the assignment a
+                // deletion makes (#1022; #816 is the harm).
+                .focused($returningRow, equals: app)
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRuleFloatColumn,
+                    alignment: .leading
+                )
+            facetLabel(
+                L("app_rules.pin", "Pin to a Space"),
+                drawn: stacked
+            )
+            pinPair
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRulePinColumn,
+                    alignment: .leading
+                )
+            if !stacked {
+                Spacer(minLength: 8)
+                deleteButton
             }
-            Spacer()
-            deleteButton
         }
         .font(.callout)
     }
 
-    /// Control mapped via `SentenceFrame.control(at:)`, so an
-    /// unrecognized position draws NOTHING — never the last case a
-    /// `default:` arm happens to name.
+    /// The icon and the app's name — and, stacked, the trash,
+    /// which has no trailing edge of its own to sit on there.
     @ViewBuilder
-    private func control(at position: Int) -> some View {
-        switch SentenceFrame.control(at: position) {
-        case .appName:
+    private func identity(stacked: Bool) -> some View {
+        HStack(spacing: 6) {
+            appIcon
             Text(KeybindingCatalog.displayName(forBundleID: app))
                 .fontWeight(.medium)
-        case .space:
-            spaceMenu
-                .opacity(spaceInherited ? 0.55 : 1)
-                .focused($returningRow, equals: app)
-        case .float:
-            floatMenu.opacity(floatInherited ? 0.55 : 1)
-        case nil:
-            EmptyView()
+                .lineLimit(1)
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRuleNameColumn,
+                    alignment: .leading
+                )
+            if stacked {
+                Spacer(minLength: 8)
+                deleteButton
+            }
         }
     }
 
-    private var frame: SentenceFrame {
-        SentenceFrame(
-            L(
-                "app_rules.sentence",
-                "%1$@ opens in %2$@ and %3$@"
-            )
-        )
+    /// A facet's label, drawn only in the stacked form — wide, the
+    /// table header above the list carries it. Never spoken: each
+    /// control names itself, so read aloud this would be the same
+    /// words twice (`SettingsRowLabel`'s ruling, applied here).
+    @ViewBuilder
+    private func facetLabel(
+        _ text: String,
+        drawn: Bool
+    ) -> some View {
+        if drawn {
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink3)
+                .accessibilityHidden(true)
+        }
+    }
+
+    /// The gate and the gated dim as ONE unit: an inherited facet
+    /// whose checkbox faded on its own would read as two states.
+    private var pinPair: some View {
+        HStack(spacing: 6) {
+            pinCheckbox
+            spaceMenu
+        }
+        .opacity(spaceInherited ? 0.55 : 1)
     }
 
     private var spaceInherited: Bool {
-        guard let base = overrideBase, !isDraft else {
-            return false
-        }
+        guard let base = overrideBase else { return false }
         return model.config.appRules[app] == base[app]
     }
 
     private var floatInherited: Bool {
-        guard let base = overrideFloatBase, !isDraft else {
-            return false
-        }
+        guard let base = overrideFloatBase else { return false }
         return Set(FloatFacet.rules(base, app: app))
             == Set(
                 FloatFacet.rules(
@@ -118,7 +170,6 @@ struct AppRuleRow: View {
             overrideBase != nil
                 && model.config.appRules[app] == nil
                 && floatFacet == .never
-                && !isDraft
         )
     }
 

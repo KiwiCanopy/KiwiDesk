@@ -4,8 +4,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The app-rule sentence's word order belongs to the
-/// translation, not to the `HStack` (#678 turn 14a).
+/// A sentence with controls in it is ONE localized frame, whose
+/// word order belongs to the translation rather than to the
+/// `HStack` (#678 turn 14a).
 ///
 /// An earlier cut emitted the connectives as their own keys
 /// between fixed stack positions, which is the harm
@@ -15,6 +16,14 @@ import Testing
 /// verb-final language cannot put "opens in" where an English
 /// stack puts it — so no catalog edit could have produced a
 /// grammatical row.
+///
+/// The frames in the splitter cases below are still spelled as
+/// the retired App Rules sentence, deliberately: that row is what
+/// drove the splitter's shape, its three-slot reordering is the
+/// hardest case anything here has to survive, and they are inputs
+/// to a pure function rather than a claim about a shipped
+/// surface. What the shipped surface is, is read off the source
+/// in the last test — the keyboard preview since #1022.
 @Suite("Sentence frame")
 struct SentenceFrameTests {
     private func slots(_ format: String) -> [SentenceFrame.Slot] {
@@ -84,25 +93,28 @@ struct SentenceFrameTests {
         #expect(positions == [1, 4])
     }
 
-    /// The shipped English frame draws exactly the three
-    /// controls the row has, each once — a frame that lost one
-    /// would drop a menu off the row entirely.
+    /// The shipped frame of the one surface that still draws
+    /// through this carries exactly the argument it interpolates,
+    /// once — a frame that lost it would draw the keyboard
+    /// preview's sentence with no layout name in it at all.
     ///
-    /// Read from the ROW's source, not restated here. An earlier
-    /// cut passed its own copy of the format string to `L()`,
-    /// which on an English host returns the caller's literal
-    /// unchanged — so the test parsed its own argument and
-    /// asserted about that. Editing the real frame in both the
-    /// call site and `en.json` left it green (guard-prover): the
-    /// number-pin failure, applied to a string.
-    @Test("the shipped frame carries all three controls once")
+    /// Read from the VIEW's source, not restated here. An earlier
+    /// cut of this clause — then aimed at the App Rules row —
+    /// passed its own copy of the format string to `L()`, which
+    /// on an English host returns the caller's literal unchanged,
+    /// so the test parsed its own argument and asserted about
+    /// that. Editing the real frame in both the call site and
+    /// `en.json` left it green (guard-prover): the number-pin
+    /// failure, applied to a string.
+    @Test("the shipped frame carries its argument once")
     func shippedFrameIsComplete() throws {
         let source = SourceScan.stripComments(
             try String(
                 contentsOf: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent(
-                        "Sources/KiwiDesk/Settings/Sections/"
-                            + "AppRuleRow.swift"
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/KeyboardPreviewPanel"
+                            + ".swift"
                     ),
                 encoding: .utf8
             )
@@ -110,34 +122,18 @@ struct SentenceFrameTests {
         let shipped = try #require(
             SourceScan.firstMatch(
                 in: source,
-                pattern: #""app_rules\.sentence",\s*\n?\s*"([^"]+)""#
+                pattern:
+                    #""keyboard\.layout\.sentence",\s*\n?\s*"([^"]+)""#
             ),
-            "AppRuleRow no longer authors app_rules.sentence"
+            Comment(
+                rawValue:
+                    "the keyboard preview no longer authors "
+                    + "keyboard.layout.sentence"
+            )
         )
-        let frame = SentenceFrame(shipped)
-        #expect(frame.argumentPositions.sorted() == [1, 2, 3])
-        // …and each position maps to a distinct control, so the
-        // row cannot draw one menu twice or lose one.
         #expect(
-            frame.controls == [.appName, .space, .float],
+            SentenceFrame(shipped).argumentPositions == [1],
             Comment(rawValue: "shipped frame: \(shipped)")
         )
-    }
-
-    /// The slot → control mapping the row draws through. Made a
-    /// pure function because the row's `switch` had a `default:`
-    /// arm: replacing it with `EmptyView()` dropped the float
-    /// menu and the WHOLE SUITE stayed green (guard-prover), and
-    /// an out-of-range `%4$@` drew a second float menu rather
-    /// than the visible oddity `SentenceFrame` preserves it for.
-    @Test("every drawn position maps to its own control")
-    func controlMapping() {
-        #expect(SentenceFrame.control(at: 1) == .appName)
-        #expect(SentenceFrame.control(at: 2) == .space)
-        #expect(SentenceFrame.control(at: 3) == .float)
-        // An unmapped position draws NOTHING — never the last
-        // case a `default:` arm happens to name.
-        #expect(SentenceFrame.control(at: 4) == nil)
-        #expect(SentenceFrame.control(at: 0) == nil)
     }
 }

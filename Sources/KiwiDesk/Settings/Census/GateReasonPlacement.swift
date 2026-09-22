@@ -85,7 +85,8 @@ extension SettingRuntimeGate {
             .paletteGlowPairing, .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent, .desktopBindingsExist,
-            .trackInUse, .defaultsToRestore:
+            .trackInUse, .defaultsToRestore,
+            .titlePatternsExist:
             return false
         }
     }
@@ -106,7 +107,8 @@ extension SettingRuntimeGate {
             .paletteGlowPairing, .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent, .desktopBindingsExist,
-            .trackInUse, .defaultsToRestore:
+            .trackInUse, .defaultsToRestore,
+            .titlePatternsExist:
             return true
         }
     }

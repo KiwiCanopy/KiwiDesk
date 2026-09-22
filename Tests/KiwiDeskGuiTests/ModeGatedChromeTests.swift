@@ -146,6 +146,14 @@ struct ModeGatedChromeTests {
         // cells appear plainly.
         "SpaceOverrideOffer.swift":
             "per-row control offer; no container to mark",
+        // One MENU ITEM inside a Simple-tier card (#1022). The
+        // frame marks a CONTAINER, and marking App Rules would
+        // say the whole card is power-user surface — which is the
+        // first alternative #1022 rejects, since pinning an app
+        // to a Space is one of the most teachable things KiwiDesk
+        // does.
+        "AppRuleTitleOffer.swift":
+            "per-row control offer; the card stays Simple",
         // The reveal pipeline's promotion CHECK (did
         // ensureModeAdmits flip?) — announces the search
         // notice; it offers nothing and draws no chrome.

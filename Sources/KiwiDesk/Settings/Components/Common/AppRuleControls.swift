@@ -11,7 +11,19 @@ import SwiftUI
 /// on demand. The escape is now the same file panel the app
 /// shortcuts row offers, so one control behaves one way in both
 /// places.
+///
+/// Since #1022 a row cannot be a no-op, so the picker states
+/// WHICH rule it composes: the `role` is chosen before the app,
+/// and the pick then authors a complete rule. One picker could
+/// not — it would have to default to a pin (authoring a Space
+/// nobody chose) or to floating (stopping an app tiling when the
+/// user meant to pin it), and both are rejected in #1022. The
+/// gesture stays one click on the app, exactly as #1172 ruled.
 struct AppSelector: View {
+    /// The rule this picker composes.
+    enum Role { case pin, float }
+
+    let role: Role
     /// Bundle identifier of chosen app (`AppRef`).
     @Binding var name: String
     /// Bundle IDs to omit — App Rules passes the apps that
@@ -24,10 +36,7 @@ struct AppSelector: View {
 
     var body: some View {
         AppPickerButton(
-            placeholder: L(
-                "shortcuts.choose_app",
-                "Choose app…"
-            ),
+            placeholder: roleLabel,
             selection: name.isEmpty
                 ? nil
                 : KeybindingCatalog.displayName(
@@ -56,13 +65,23 @@ struct AppSelector: View {
         // census's name — and gives back the choice the name
         // replaces, which for this Button is the text drawn
         // inside it.
-        .accessibilityLabel(
-            L("app_rules.add_rule", "Add app rule")
-        )
+        .accessibilityLabel(roleLabel)
         .accessibilityValue(
             name.isEmpty
-                ? L("shortcuts.choose_app", "Choose app…")
+                ? roleLabel
                 : KeybindingCatalog.displayName(forBundleID: name)
         )
+    }
+
+    /// Drawn as the button's placeholder and spoken as its name,
+    /// from one expression — and the census key for this add
+    /// action, authored here where the key scanner can see it.
+    private var roleLabel: String {
+        switch role {
+        case .pin:
+            return L("app_rules.add_pin", "Pin an app…")
+        case .float:
+            return L("app_rules.add_float", "Float an app…")
+        }
     }
 }

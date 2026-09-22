@@ -11253,39 +11253,109 @@ badge).
 
 **[Principle]**
 
-**A rule is a sentence, and the sentence is the control.** An app
-rule states what an app does — "Spotify opens in media and floats"
-— so the row states it, with the two menus sitting inside the
-statement where their values complete it. The rejected shape is a
-form *about* an app: a name header over two labelled facet
-columns, which made the reader assemble the meaning out of three
-fragments and read "Float: Never" as a setting rather than as
-behaviour. Three consequences bind anything added here.
+:::unreleased
+**A rule must say something.** An app rule states what an app
+does *differently* from an unruled one, so a row that states
+nothing must not be expressible. Each facet says something on its
+own — a Space pin ("Finder opens in *work*"), floating ("Spotify
+stays out of tiling") — and either alone is a whole rule. Not
+floating is not: it is what every app without a rule already
+does, so a row resting there needs the pin, which engages as the
+visible consequence of choosing it and cannot be released while
+it is the only thing the row says.
 
-**The word order is the translator's.** A sentence with controls
-in it is one localized frame with positional specifiers, split
-on those specifiers and emitted in whatever order the
-translation put them — never connectives authored as their own
-keys between fixed stack positions. That shortcut is the harm
-`.claude/rules/localization.md` names by title, and it is not
-theoretical here: ja and ko are verb-final, so no catalog edit
-could have produced a grammatical row. `SentenceFrame` is the
-split, `SentenceFrameTests` holds it, and the next area that
-wants a sentence inherits both.
+Two states are exempt, because "tiles, and no pin" is a real
+instruction in them: while a stored profile is edited the absent
+pin is a **tombstone**, un-pinning an app the base profile pins;
+and with no Spaces declared there is nothing to pin to, so the
+card points at where to declare one instead. Both are derived in
+one place (`AppRulePin`, `AppRulePinTests`) — a second copy of
+"may this be released" is a lock that disagrees with itself.
 
-**The values are verb phrases, in EVERY facet.** A menu inside a
-sentence has to read as part of one — a noun that completed a
-"Float:" label completes nothing in a statement. Converting one
-facet and not the other leaves the row half-built in exactly the
-state most rows are in: the unset space facet is what every
-float-only rule shows.
+**So "Automatic" is not a value.** The absence of a pin is drawn
+as the absence of a pin — a cleared checkbox — never as a menu
+item named after it. A value naming the absence of a rule is
+unreadable twice over: alone it says *automatic what?*, and it
+cannot agree with the words the row uses for the same state,
+which is how one card came to offer **Automatic** in a menu and
+settle to "whichever Space you open it in" beside it. Deleting
+the value is what makes the two readings one.
 
-**The labels the sentence stopped showing become the controls'
-accessibility names.** A sentence gives a screen reader no name
-for its controls, and the settings census names those rows by
-the same keys — so the call site is load-bearing three ways at
-once, and dropping it is silent in all three until a locale
-prunes the key.
+**The rule is chosen before the app, so adding one takes two
+pickers** — *Pin an app…* and *Float an app…*, each composing a
+complete rule out of the pick. One picker would have to default
+to a facet, authoring a pin nobody chose or stopping an app
+tiling when the user meant to pin it, and one that adds a bare
+row re-admits the state this principle forbids. Picking the app
+is still the whole gesture ([Settings UI
+patterns](ui-patterns.md)).
+
+**This reverses "a rule is a sentence, and the sentence is the
+control"** (#68 turn 14a), which had deliberately replaced a
+labelled facet form; the reversal is that form again, with its
+costs paid rather than argued away. The sentence could not
+express the rule above. Running prose renders the empty state
+most convincingly of all — "Finder opens in whichever Space you
+open it in and tiles normally" is a fluent sentence that says
+nothing — and it leaves nowhere to put a lock, or the reason for
+one.
+
+The cheaper route was on the table and lost: keep the sentence
+and merely stop offering the unset item while the app tiles. It
+buys identical behaviour, keeps the localized frame and its
+guards, and reverses no ruling. It loses because **the locked pin
+must explain itself.** A disabled checkbox saying "this app
+doesn't float, so it needs a Space to open in" answers *why can't
+I un-pin this?* in the place and at the moment the user asks it;
+a menu item that has quietly stopped being listed answers
+nothing, and is not even noticed. The repo's default is
+grey-don't-hide (gui.md ▸ grey, don't hide), and the exception
+that hides covers mode-gated surface — which a facet the rule
+itself needs is not.
+
+What the reversal costs, named rather than omitted: the harm the
+sentence ruling removed comes back. A labelled facet form makes
+the reader assemble one meaning out of an app name and two
+columns, and "Float: No windows" is read as a setting rather than
+as behaviour. Drawing each facet label once, as a heading over
+the list rather than per row, mitigates that; it does not refute
+it. The float values are also re-authored in eleven locales, from
+verb phrases to nouns.
+
+**The float values are nouns naming the scope that floats** — *No
+windows*, *All windows*, *Windows by title*. A verb phrase reads
+as a value only inside the statement it completes; beside a label,
+"Float: floats" is the two-wordings defect again. Deliberately not
+*Floating*, which is the name of the Floating layout mode: a facet
+value spelled like a mode invites the same misreading one surface
+over.
+
+**Matching windows by title is a capability, not a mode tier.**
+Pinning an app to a Space is one of the most teachable things
+KiwiDesk does, so the card stays Simple whole and the *Windows by
+title…* choice is an offer instead — present in Power User, and
+present in Simple from the moment any rule in the list carries a
+pattern. It is the shape [Shortcuts](#shortcuts) ▸ *A used
+capability unlocks its whole list* already rules, and all three of
+its properties hold here unchanged. The one thing to get right is
+the third of them: a pattern saved in Power User keeps matching in
+Simple, so this offer's predicate reads saved state and not the
+mode alone, or a Simple user can neither see nor clear a rule that
+is still firing (`AppRuleTitleOffer`, `AppRuleTitleOfferTests`).
+:::
+
+**The word order of a sentence with controls in it is the
+translator's.** Such a sentence is one localized frame with
+positional specifiers, split on those specifiers and emitted in
+whatever order the translation put them — never connectives
+authored as their own keys between fixed stack positions. That
+shortcut is the harm `.claude/rules/localization.md` names by
+title, and it was not theoretical on the row that produced this
+ruling: ja and ko are verb-final, so no catalog edit could have
+made that row grammatical. `SentenceFrame` is the split,
+`SentenceFrameTests` holds it, the keyboard preview's layout line
+draws through it, and any surface that wants a sentence inherits
+both.
 
 **A rule whose effect you cannot read off the rule gets a live
 check.** A title fragment is that case: "Windows titled Info"

@@ -1,13 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ App Rules settings section (#68 §3.11).
+/// Whole App ▸ App Rules settings section (#68 §3.11, #1022).
 struct AppRulesSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var draftApps: [String] = []
     /// Restores keyboard focus after deleting a rule row (#816).
     @FocusState private var returningRow: String?
-    @State private var newApp = ""
+    @State private var newPinnedApp = ""
+    @State private var newFloatingApp = ""
+    @Environment(\.settingsWidth) private var width
 
     /// Base rules when editing stored profile (#109); nil during live editing.
     private var overrideBase: [String: SpaceID]? {
@@ -23,11 +24,14 @@ struct AppRulesSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 SettingsSection(
                     SettingsCatalog.appRules.rulesPerApp,
-                    caption: rulesCaption
+                    caption: rulesCaption,
+                    help: sectionHelp
                 ) {
                     overrideIndicator
                     if apps.isEmpty {
                         emptyNote
+                    } else {
+                        tableHeader
                     }
                     ForEach(apps, id: \.self) { app in
                         AppRuleRow(
@@ -35,13 +39,13 @@ struct AppRulesSection: View {
                             app: app,
                             overrideBase: overrideBase,
                             overrideFloatBase: overrideFloatBase,
-                            isDraft: draftApps.contains(app),
                             onDelete: { delete(app) },
                             returningRow: $returningRow
                         )
                         Divider()
                     }
                     addRow
+                    noSpacesNote
                 }
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
@@ -62,6 +66,45 @@ struct AppRulesSection: View {
         }
     }
 
+    /// Facet labels, drawn ONCE over the list. Below the row
+    /// breakpoint the rows stack and carry their own labels
+    /// instead, so this goes away rather than compressing.
+    @ViewBuilder private var tableHeader: some View {
+        if !width.stacksRows {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                // The app column needs no heading: an icon and a
+                // name are their own.
+                Color.clear
+                    .frame(
+                        width: SettingsMetrics.appRuleNameColumn
+                            + 26,
+                        height: 1
+                    )
+                Text(L("app_rules.float", "Float"))
+                    .frame(
+                        width: SettingsMetrics.appRuleFloatColumn,
+                        alignment: .leading
+                    )
+                Text(L("app_rules.pin", "Pin to a Space"))
+                    .frame(
+                        width: SettingsMetrics.appRulePinColumn,
+                        alignment: .leading
+                    )
+                Spacer(minLength: 8)
+            }
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink3)
+            // Drawn, not spoken: each control below names itself,
+            // so a heading read aloud is the same words twice.
+            .accessibilityHidden(true)
+        }
+    }
+
+    /// The caption carries the rule a locked checkbox obeys.
+    /// Must-know information never lives only in a popover, and a
+    /// `GreyOut` inside a `ForEach` may not stamp a sentence under
+    /// every row — so the one copy sits here, above the list and
+    /// outside every dimmed subtree (#815, #1022).
     private var rulesCaption: String {
         if overrideBase != nil {
             return L(
@@ -79,11 +122,67 @@ struct AppRulesSection: View {
         }
         return L(
             "app_rules.section.caption",
-            "What an app should do when it opens."
+            "What an app should do when it opens. An app that "
+                + "doesn't float needs a Space to open in."
         )
     }
 
-    /// Sorted list of unique apps with configured rules or drafts (#333,
+    /// The `?` beside the heading, in the order a newcomer meets
+    /// the parts. `app_rules.float.help` is reused verbatim as an
+    /// argument rather than restated, so the float explanation
+    /// exists once; the title-pattern paragraph joins only where
+    /// the mode offers patterns at all.
+    private var sectionHelp: String {
+        var text = L(
+            "app_rules.section.help",
+            "**%1$@** — the app's windows open in that Space, "
+                + "whatever Space you are in. A window KiwiDesk "
+                + "already remembers keeps the Space it was last "
+                + "in.\n\nAn app that does not float needs a pin: "
+                + "without one the rule says nothing, because "
+                + "apps with no rule already tile in whichever "
+                + "Space you open them.\n\n%2$@\n\nA pin and "
+                + "floating combine — a floating window still "
+                + "belongs to its pinned Space, it simply is not "
+                + "tiled inside it.",
+            L("app_rules.pin", "Pin to a Space"),
+            L(
+                "app_rules.float.help",
+                "Floating takes this app's matching windows out "
+                    + "of tiling: each keeps its last position "
+                    + "and size and stays above the tiled "
+                    + "windows, instead of snapping into one "
+                    + "Space's grid.\n\nThis is per-app floating "
+                    + "— not the **Floating** layout mode, which "
+                    + "floats every window in a Space."
+            )
+        )
+        if offersTitles {
+            text +=
+                "\n\n"
+                + L(
+                    "app_rules.section.help.titles",
+                    "%1$@ matches a fragment of a window's "
+                        + "title, so an app can float some of "
+                        + "its windows and tile the rest.",
+                    L(
+                        "app_rules.float.titled.resting",
+                        "Windows by title"
+                    )
+                )
+        }
+        return text
+    }
+
+    private var offersTitles: Bool {
+        AppRuleTitleOffer.isOffered(
+            mode: model.settingsMode,
+            floatRules: model.config.floatRules
+                + (overrideFloatBase ?? [])
+        )
+    }
+
+    /// Sorted list of unique apps with configured rules (#333,
     /// #109).
     private var apps: [String] {
         var set = Set(model.config.appRules.keys)
@@ -98,7 +197,6 @@ struct AppRulesSection: View {
                 set.insert(FloatFacet.appSegment(of: rule))
             }
         }
-        set.formUnion(draftApps)
         let names = Dictionary(
             uniqueKeysWithValues: set.map {
                 ($0, KeybindingCatalog.displayName(forBundleID: $0))
@@ -124,33 +222,82 @@ struct AppRulesSection: View {
         .foregroundStyle(.secondary)
     }
 
+    /// With no Spaces declared there is nothing to pin to, so the
+    /// remedy lives on another destination — a live pointer naming
+    /// it, which is what a gate whose cause is off this surface
+    /// owes (#815).
+    @ViewBuilder private var noSpacesNote: some View {
+        if model.config.spaces.isEmpty {
+            CrossReferenceRow(
+                prose: Self.noSpacesProse,
+                linkTitle: SettingsDestination.spaces.title,
+                destination: .spaces
+            )
+        }
+    }
+
+    /// Computed per read, never stored: a `static let` resolves
+    /// `L()` once and keeps that locale for the process (#1311).
+    static var noSpacesProse: String {
+        L(
+            "app_rules.no_spaces",
+            "This profile has no Spaces yet, so there is nothing "
+                + "to pin an app to. Add one in %1$@.",
+            CrossReferenceRow.linkSlot
+        )
+    }
+
+    /// Two pickers, because the rule is chosen before the app: a
+    /// row that says nothing can no longer be created (#1022), and
+    /// picking the app is still the whole gesture (#1172).
     private var addRow: some View {
-        HStack {
+        HStack(spacing: 8) {
             AppSelector(
-                name: $newApp,
+                role: .pin,
+                name: $newPinnedApp,
                 exclude: Set(apps),
-                onCommit: add
+                onCommit: addPinned
+            )
+            .disabled(model.config.spaces.isEmpty)
+            AppSelector(
+                role: .float,
+                name: $newFloatingApp,
+                exclude: Set(apps),
+                onCommit: addFloating
             )
             Spacer()
         }
     }
 
-    /// Adds the rule the selector committed. Picking an app is
-    /// the whole gesture (#1172), so this runs straight off the
-    /// pick — the picked-but-not-added state it replaces was
-    /// also the one state that drew no icon.
-    private func add(_ picked: String) {
-        // Lower-cased so a hand-typed mixed-case bundle
-        // id (osascript reports `com.apple.Safari`) keys
-        // the same as the normalized `appBundleID` the
-        // engine and dropdown use — otherwise dedup and
-        // the open-title list silently miss (#262 review).
-        let app = picked.trimmed.lowercased()
-        guard !app.isEmpty else { return }
-        if !apps.contains(app) {
-            draftApps.append(app)
+    /// Adds a rule that pins the picked app to the designated
+    /// Space. Picking an app is the whole gesture (#1172), so this
+    /// runs straight off the pick.
+    private func addPinned(_ picked: String) {
+        guard let app = normalized(picked),
+            let space = AppRulePin.defaultSpace(model.config)
+        else { return }
+        model.config.appRules[app] = space
+        newPinnedApp = ""
+    }
+
+    /// Adds a rule that floats every window of the picked app.
+    private func addFloating(_ picked: String) {
+        guard let app = normalized(picked) else { return }
+        if !model.config.floatRules.contains(app) {
+            model.config.floatRules.append(app)
         }
-        newApp = ""
+        newFloatingApp = ""
+    }
+
+    /// Lower-cased so a hand-typed mixed-case bundle id
+    /// (osascript reports `com.apple.Safari`) keys the same as the
+    /// normalized `appBundleID` the engine and dropdown use —
+    /// otherwise dedup and the open-title list silently miss
+    /// (#262 review).
+    private func normalized(_ picked: String) -> String? {
+        let app = picked.trimmed.lowercased()
+        guard !app.isEmpty, !apps.contains(app) else { return nil }
+        return app
     }
 
     /// Removes app rules and updates focus target (#816, #109, 2026-08-12).
@@ -160,7 +307,6 @@ struct AppRulesSection: View {
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
-        draftApps.removeAll { $0 == app }
         if !apps.contains(app) {
             returningRow = neighbour
         }
@@ -170,50 +316,5 @@ struct AppRulesSection: View {
         _ app: String
     ) -> String? {
         DeletionFocus.neighbour(after: app, in: apps)
-    }
-}
-
-/// Float facet parsing and filtering helper matching `FloatRules`.
-enum FloatFacet: Equatable {
-    case never
-    case all
-    case titled
-
-    /// Extracts app segment from float rule string (`FloatRules`).
-    static func appSegment(of rule: String) -> String {
-        let parts = rule.split(separator: ":", maxSplits: 1)
-        return parts.count == 2 ? String(parts[0]) : rule
-    }
-
-    static func current(
-        _ rules: [String],
-        app: String
-    ) -> FloatFacet {
-        var sawTitled = false
-        for rule in rules where appSegment(of: rule) == app {
-            if rule == app { return .all }
-            sawTitled = true
-        }
-        return sawTitled ? .titled : .never
-    }
-
-    static func patterns(
-        _ rules: [String],
-        app: String
-    ) -> [String] {
-        rules.compactMap { rule in
-            let parts = rule.split(
-                separator: ":",
-                maxSplits: 1
-            )
-            guard parts.count == 2,
-                String(parts[0]) == app
-            else { return nil }
-            return String(parts[1])
-        }
-    }
-
-    static func rules(_ rules: [String], app: String) -> [String] {
-        rules.filter { appSegment(of: $0) == app }
     }
 }

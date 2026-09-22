@@ -596,6 +596,12 @@ editable profile; presets cannot be deleted.
 
 ## App Rules
 
+:::unreleased
+Floating **Windows by title** is a Power User choice: the Float
+menu lists it in that mode. Once any rule uses it, the choice
+stays listed in Simple as well.
+:::
+
 **The title match is case-sensitive**, and "Info" also catches
 "Information"; the live window list under the chips shows what
 the rule as written would float. Dialogs, sheets and

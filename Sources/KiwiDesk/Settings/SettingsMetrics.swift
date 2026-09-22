@@ -46,6 +46,17 @@ enum SettingsMetrics {
 
     /// Trailing override column in per-space override editor (#678).
     static let overrideStateColumn: CGFloat = 88
+
+    /// App Rules table columns (#1022). These are a TABLE's own
+    /// columns, headed once above the list, not the shared row
+    /// label axis — a repeating list item would otherwise read
+    /// its two facet labels once per app. They sum, with the icon
+    /// and the trash, well inside the card interior at the row
+    /// breakpoint (844 pt at 900); below it the rows stack and
+    /// these go unread.
+    static let appRuleNameColumn: CGFloat = 160
+    static let appRuleFloatColumn: CGFloat = 170
+    static let appRulePinColumn: CGFloat = 190
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {

@@ -77,8 +77,13 @@ struct SilentDimTests {
             + "(`shortcuts.row.inherited.axhint`), the same leaf "
             + "case as the entry above",
         "AppRuleRow.swift":
-            "the same inheritance dim, per facet, for the two "
-            + "menus inside the rule sentence",
+            "the same inheritance dim, per facet — the float "
+            + "menu, and the pin checkbox and Space menu as one "
+            + "unit so a gate and the control it gates cannot "
+            + "fade apart. The pin's own GATE is a GreyOut, and "
+            + "its reason is the always-visible card caption "
+            + "plus the section's `?`, both outside every dimmed "
+            + "subtree (#1022)",
         "SettingsSlider.swift":
             "the shared slider's own disabled fade, which rides "
             + "`isEnabled` — set by whatever gate disabled it, so "
