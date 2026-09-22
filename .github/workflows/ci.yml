@@ -159,8 +159,27 @@ jobs:
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
 
+      # The warning ratchet (#1594): swiftc errors on anything
+      # but a deprecation, which stays a warning while
+      # AXHelper's `activateIgnoringOtherApps` call is #1170's
+      # to remove — an exemption held live by
+      # `WarningRatchetWorkflowTests`. The debug build alone:
+      # the release job takes no ratchet, so a new toolchain's
+      # diagnostics can never block a release
+      # (packaging-and-release.md ▸ CI).
+      #
+      # `-Xswiftc` reaches every target swiftc compiles from
+      # source, which today is this package's own; Vendor/CLua
+      # is clang's and unreached. Tests/ is not compiled here
+      # and carries 31 warnings of its own (#1596) — the test
+      # steps join the ratchet once that lands, and until then
+      # the differing flags cost one rebuild between this step
+      # and Test (~16 s), SwiftPM keying its build directory on
+      # them.
       - name: Build
-        run: swift build
+        run: >-
+          swift build -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
       - name: Lint
         run: ./scripts/lint.sh
