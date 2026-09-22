@@ -53,7 +53,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
         BarAccent.activeUnfocusedAlpha
     /// Trailing front-app segment; off by default (ui-designer verdict 6).
     public var showFrontApp = false
-    /// Front-segment character limit to prevent layout shifts. Default 25.
+    /// Front-segment character limit to prevent layout shifts.
     public var titleCap = 10
     /// Hides empty spaces except current; off by default (verdict 4).
     public var hideEmpty = false

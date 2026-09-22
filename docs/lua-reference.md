@@ -794,6 +794,21 @@ independently of the side-by-side ratio (#56).
 bsp.set_ratio_v(0.5)
 ```
 
+### bsp.set_new_window_placement
+
+**Expects:** `"first"`, `"last"`, `"before_focused"`, or
+`"after_focused"`.
+
+**Does:** sets where a new window enters the BSP order. Default
+`"after_focused"`: the new window splits the focused window's
+region.
+
+**Example:**
+
+```lua
+bsp.set_new_window_placement("after_focused")
+```
+
 ### bsp.set_strategy_override
 
 **Expects:**
@@ -1188,7 +1203,8 @@ scroll.set_orientation("horizontal")
 
 ### scroll.set_new_window_placement
 
-**Expects:** a placement string (same values as `bsp` above).
+**Expects:** `"first"`, `"last"`, `"before_focused"`, or
+`"after_focused"` (the values every layout's setter takes).
 
 **Does:** sets where new windows land. Default
 `"after_focused"`.
@@ -1347,6 +1363,20 @@ capacity cascade in the last cell.
 
 ```lua
 grid.set_auto_size(true)
+```
+
+### grid.set_new_window_placement
+
+**Expects:** `"first"`, `"last"`, `"before_focused"`, or
+`"after_focused"`.
+
+**Does:** sets where a new window enters the grid order. Default
+`"last"`: appending keeps the existing cells in place.
+
+**Example:**
+
+```lua
+grid.set_new_window_placement("last")
 ```
 
 ### grid.set_type_override
@@ -2007,14 +2037,15 @@ app_bar.set_title_cap(25)
 `"app_image"`).
 
 **Does:** sets how app icons are drawn. `app_image` shows the
-app's icon as macOS provides it — including whatever
-system-wide Icon & widget style the user picked. `app_font`
-shows a monochrome glyph from the bundled [SketchyBar App
+app's icon as macOS provides it, which already follows the
+system-wide Icon & widget style the user picked; the other
+styles (Dark, Clear, Tinted) are not offered as choices of their
+own, since macOS gives an app no way to fetch a rendering other
+than the current one. `app_font` shows a monochrome glyph from
+the bundled [SketchyBar App
 Font](https://github.com/kvndrsslr/sketchybar-app-font)
 instead, colored by the bar's item colors (Item / Active item /
-Hover item); apps without a glyph keep their icon. Styled icon
-variants (the system's Dark/Clear/Tinted renderings) cannot be
-fetched by apps.
+Hover item); apps without a glyph keep their icon.
 
 **Example:**
 
@@ -2042,7 +2073,7 @@ app_bar.set_font_size(0)
 **Does:** sets the corner rounding of boxed items as a percentage,
 where 0 = square and 100 = a full capsule (radius = thickness/2).
 It only affects `boxed` items (ignored for `plain`). Values above
-`100` clamp.
+`100` render as `100`.
 
 **Example:**
 
