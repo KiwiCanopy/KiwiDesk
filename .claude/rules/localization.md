@@ -39,9 +39,12 @@ wanting different cases cannot both be served. Author one key
 per resulting sentence instead. English is where this hides,
 since its adjectives do not inflect and always precede their
 noun, so the call site reads correctly in the one language the
-author checks. Nothing scans for it; what is held is the
-sub-class #1110 fixed, the four track rows, pinned by
-`TrackRowSentenceTests`.
+author checks. Nothing scans for it; what is held are the
+sub-classes fixed so far — #1110's four track rows, pinned by
+`TrackRowSentenceTests`, and #1287's App Bar cross-reference,
+where a shared `common.on` participle went into two frames
+whose noun is feminine in four catalogs, pinned by
+`AppBarXrefSentenceTests`.
 
 Ask whether the value must change form BETWEEN the frames it
 serves, not whether it is a word. `keybinding.dir.*` next door
