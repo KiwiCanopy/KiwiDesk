@@ -159,27 +159,23 @@ jobs:
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
 
-      # The PR build is the warning ratchet (#1594): swiftc
-      # errors on anything but a deprecation, which stays a
-      # warning because AXHelper's `activateIgnoringOtherApps`
-      # call is #1170's to remove. Debug only — the release job
-      # and the tag path take no ratchet, so a new toolchain's
+      # The warning ratchet (#1594): swiftc errors on anything
+      # but a deprecation, which stays a warning while
+      # AXHelper's `activateIgnoringOtherApps` call is #1170's
+      # to remove — an exemption held live by
+      # `WarningRatchetWorkflowTests`. The debug build alone:
+      # the release job takes no ratchet, so a new toolchain's
       # diagnostics can never block a release
-      # (packaging-and-release.md).
+      # (packaging-and-release.md ▸ CI).
       #
-      # `swift build` does not compile Tests/, so this ratchets
-      # Sources/ alone — deliberately, not by oversight. Tests/
-      # carries 31 warnings of its own (measured 2026-09-22);
-      # sweeping them is #1596, and the test steps below join
-      # the ratchet once it lands. The cost until then is one
-      # rebuild between this step and Test, SwiftPM keying its
-      # build directory on the flags: ~16 s against a run of
-      # minutes.
-      #
-      # Spelled inline rather than carried in an `env:` var: a
-      # variable holding flags only word-splits because `run:`
-      # happens to default to bash, and the step that would have
-      # shared it is the one #1596 still owes.
+      # `-Xswiftc` reaches every target swiftc compiles from
+      # source, which today is this package's own; Vendor/CLua
+      # is clang's and unreached. Tests/ is not compiled here
+      # and carries 31 warnings of its own (#1596) — the test
+      # steps join the ratchet once that lands, and until then
+      # the differing flags cost one rebuild between this step
+      # and Test (~16 s), SwiftPM keying its build directory on
+      # them.
       - name: Build
         run: >-
           swift build -Xswiftc -warnings-as-errors

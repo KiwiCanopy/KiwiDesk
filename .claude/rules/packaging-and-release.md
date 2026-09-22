@@ -566,6 +566,33 @@ build-lint-test one — `scripts/protect-main.sh`'s `CONTEXTS`
 names both — and when to run it locally as well is decided by
 the `verify-gate` skill, which owns that call.
 
+**Ratchet a compiler diagnostic on the DEBUG PR build, never on
+the release job or the tag path (#1594).** `ci.yml`'s `Build`
+step passes `-warnings-as-errors`, so a new warning reds a PR
+someone is already reading; the release build and
+`release.yml`'s verify job take no ratchet, because a toolchain
+bump that introduces a diagnostic would otherwise block a tag
+push — a release refused over a deprecation notice. That is the
+same asymmetry the rest of this section rests on: a PR is the
+cheap place to fail, a release is not.
+
+Two obligations fall out. **A diagnostic group held back is an
+EXEMPTION and owes a liveness clause** — `DeprecatedDeclaration`
+is downgraded only while the call it excuses still exists
+(`AXHelper.swift`'s `activateIgnoringOtherApps`, #1170's to
+remove), and an exemption that outlives its reason silently
+widens the hole it was cut for, the idiom `CiPathFilterTests` ▸
+`exemptionsAreLive` states. And **the ratchet itself is pinned
+two-sided** — the debug step carries it, the release step must
+not — since a one-sided clause passes on a workflow that
+ratchets everything, which is the change this rule refuses.
+`WarningRatchetWorkflowTests` holds all three.
+
+What the ratchet does NOT reach is worth stating once: `-Xswiftc`
+is swiftc's, so `Vendor/`'s C stays clang's, and `swift build`
+does not compile `Tests/` — whose own corpus is #1596's, after
+which the test steps join.
+
 **`ci.yml` filters by exclusion; `site.yml` filters by
 inclusion.** Keep it that way. The site build's inputs are a
 closed, small set, so naming them is safe. The app's are open, and
