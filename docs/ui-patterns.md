@@ -22,10 +22,10 @@ sentence of explanation carries a small `questionmark.circle`
 button **immediately after the field's label text, inside the
 shared `settingsLabelColumn`** — where the question is born,
 and where System Settings puts its own info glyph.
-`labelColumn` grew 128 → 150 pt to hold the longest label plus
-the glyph; a long label + glyph truncates visibly
-(`lineLimit(1)`), and long German labels on help rows are
-shortening candidates for the de review pass. An *unlabeled*
+`labelColumn` holds the longest label plus the glyph; a long
+label + glyph truncates visibly (`lineLimit(1)`), and long
+German labels on help rows are shortening candidates for the de
+review pass. An *unlabeled*
 `SegmentedPicker` (icon tabs) has no label to sit beside, so
 its `?` trails the track. The button wears the shared
 `hoverHighlight` chip like every other icon-only borderless
@@ -136,18 +136,18 @@ them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
 
-Every shipped segmented strip fits the ~650 pt a full-width row
-has at the 840 pt minimum, measured against all ten locales
-(#95): the widest is Mouse resize action at ~503 pt (`es`,
-"Redimensionar las ventanas contiguas"), then App Bar active
-indicator at ~408 pt (`fr`). Re-measure a strip before adding a
-fourth segment to either of those two.
+Every shipped segmented strip fits a full-width row at the
+720 pt minimum (`SettingsWidthClass.minimum`), measured against
+all ten locales (#95): the widest is Mouse resize action at
+~503 pt (`es`, "Redimensionar las ventanas contiguas"), then App
+Bar active indicator at ~408 pt (`fr`). Re-measure a strip
+before adding a fourth segment to either of those two.
 
 **The per-Space override rows keep menus, not segmented
 controls (#291).** The override editor is a full pushed pane
 (#678 8b) whose rows sit in a **bounded ~700 pt column** with a
 trailing OVERRIDE checkbox column (`overrideStateColumn`,
-64 pt) and the `OverrideChrome` accent bar, so a 2–4-peer field
+88 pt) and the `OverrideChrome` accent bar, so a 2–4-peer field
 has no room for a segmented render; `OverridePickerRow`
 renders `.menu` and has no `.segmented` branch, since the
 per-space editor is the only override surface. Restore a
@@ -225,10 +225,9 @@ itself draws them:
   and "Layouts" on a preset card is the one that exists (#859):
   its verb-phrase form is "Show layouts", and *show* is spoken
   for in this window by the detail panel's own chip ("Show
-  preview") (`docs/localization-naming.md` ▸ Family C, rule 1,
-  which binds the English author before any translator). The
-  clash is of *verbs*, not nouns: `fr` and `ru` both take the
-  verb-phrase form, because in those catalogs the bare noun
+  preview") (`docs/localization-naming.md` ▸ Family C, rule 1).
+  The clash is of *verbs*, not nouns: `fr` and `ru` both take
+  the verb-phrase form, because in those catalogs the bare noun
   would be byte-identical to the Layout Defaults destination
   and `DestinationNameCollisionTests` would redden. Where both
   forms are free, take the verb.
@@ -824,8 +823,8 @@ bar has a thickness), `track.set_count` → `track.set_limit`
 `tab_background` → `background_style` on both bars (the entries
 are not browser tabs, and under Plain no item draws a box of
 its own in steady state). The discriminator is never churn
-cost — pre-release makes churn cheap on both sides (§5) — but
-which side misdescribes the thing.
+cost — a Lua verb renames freely and a stored key owes its
+migration (§5) — but which side misdescribes the thing.
 
 **An override stepper's range must exclude any value that
 carries a separate meaning on the wire (audit finding 20,
@@ -1006,7 +1005,8 @@ Hiding it would jump the list layout every time the governing
 toggle flips and lose the cue that its stored value is
 *preserved* (turn Auto-size back off and the old counts
 return). Greying reads as "not right now"; hiding reads as
-"gone". Precedent: `scrollSpeedRow` disabled by `onScrolling`.
+"gone". Precedent: the scroll-duration row, gated by
+`onScrolling` (`LayoutDefaultsGates`).
 
 **One deliberate exception: the floating save pill vanishes at
 zero.** Save and Revert live in a dark pill floating over the
@@ -1296,7 +1296,7 @@ by an Auto toggle stores `0` as the sentinel but its readout
 prints "Automatic" while gated — "0 pt" next to a greyed slider
 reads like a broken value. The full word, not "Auto": a readout
 is a value, and the column is widened to hold it (see
-*"Automatic" is the word for a value*, below). The slider
+*"Automatic" is the word for a value*, above). The slider
 itself stays floored at 1 so dragging can never write the
 sentinel (#381).
 
