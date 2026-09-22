@@ -28,9 +28,10 @@ public final class LocalizationManager: ObservableObject {
     /// `CFBundleLocalizations`, and the two ship together).
     public var effectiveLocale: String? {
         if let selection {
-            // Explicit English: no en.json ships, so it resolves
-            // to inline English everywhere — never the OS
-            // language. Distinct from nil (System default).
+            // Explicit English: en.json is not a catalog `L()`
+            // resolves through, so this is inline English
+            // everywhere — never the OS language. Distinct from
+            // nil (System default).
             if selection == "en" { return nil }
             return available.contains(selection)
                 ? selection : nil

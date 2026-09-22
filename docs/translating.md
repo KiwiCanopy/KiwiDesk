@@ -11,8 +11,8 @@ localizable. This page is the contributor workflow for adding or
 fixing a translation. Lua- and CLI-facing strings stay
 English-only and are not covered.
 
-The **marketing website** (the landing page and, soon, the
-`/learn/` guide) takes the same `extract-keys` / `merge-keys`
+The **marketing website** (the landing page and the `/guide/`
+guide) takes the same `extract-keys` / `merge-keys`
 round-trip with a `--site` flag — see [The marketing
 site](#the-marketing-site). The rest of this page is about the
 app.
@@ -305,18 +305,18 @@ round-trip above. Its docstring names this case.
 
 ## The marketing site
 
-The website under `site/` (the landing page, and the `/learn/`
-guide once it is externalized) keeps its strings in flat
-`{key: string}` manifests under **`site/src/i18n/`** —
-`en.json`, `de.json`, one file per language — the shape the app
-uses, read by the Astro components as `t.<key>`.
+The website under `site/` (the landing page and the `/guide/`
+guide) keeps its strings in flat `{key: string}` manifests
+under **`site/src/i18n/`** — `en.json`, `de.json`, one file per
+language — the shape the app uses, read by the Astro components
+as `t.<key>`.
 
 The one difference from the app: **the site's `en.json` is the
 source of truth, authored by hand.** There is no Swift to scan,
 so the tooling takes a `--site` flag that points it at
 `site/src/i18n/` and, for `extract-keys`, loads `en.json` as the
-key list instead of scanning Swift — and never rewrites it, since
-re-emitting it sorted would wreck its deliberate grouping.
+key list instead of scanning Swift — and never rewrites it: it
+is the authored source, not a derived file.
 
 Everything else is the identical round-trip:
 
@@ -342,11 +342,12 @@ The other maintenance verbs take `--site` too:
   shipped `site/src/i18n/<locale>.json` decodes as a flat
   `{string: string}` map, runs every [content
   guard](#content-guards) except the English-residue heuristic
-  over its values, and warns on orphan keys (present in a locale,
-  absent from `en.json`). It does **not** check `en.json`
-  freshness — there is no code to derive it from. The `Site`
-  workflow runs it on every PR that touches `site/**` or
-  `docs/**`.
+  over its values, warns on orphan keys (present in a locale,
+  absent from `en.json`), and **fails** when a site catalog is
+  missing a key `en.json` has — an absent key renders nothing on
+  the page (#869). It does **not** check `en.json` freshness —
+  there is no code to derive it from. The `Site` workflow runs
+  it on every PR that touches `site/**` or `docs/**`.
 - `scripts/extract-keys --site --prune` — drops orphan keys from
   the site locale files, leaving the hand-authored `en.json`
   alone.
@@ -466,12 +467,15 @@ rather than re-litigating it string by string.
 
 English lives at the call site (`L("key", "English text")`) so a
 developer reading the Swift source sees the real copy, never a
-bare key. `en.json` is a **build-time translator manifest**, not
-a runtime resource: it gives the extractor a canonical key list
+bare key. `en.json` is a **build-time translator manifest**
+first: it gives the extractor a canonical key list
 to diff other locales against, and lets a Python (or any
 external) tool enumerate every key without parsing Swift. The
-running app never loads it — there is no `en` entry in the
-bundled locale list (`LocaleCatalog`'s `!= "en"` filter). Never
+running app never resolves `L()` through it — there is no `en`
+entry in the bundled locale list (`LocaleCatalog`'s `!= "en"`
+filter); its one runtime reader is `SettingsCensusLabel`, which
+loads it as the English fallback for a census label rendered
+away from its row (diff rows, the search index). Never
 add or edit a key only in `en.json`; the next `extract-keys` run
 overwrites it. To change a string's English, edit the `L(...)`
 call site in Swift and re-run `extract-keys`.
