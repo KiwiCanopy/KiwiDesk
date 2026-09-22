@@ -67,10 +67,29 @@ struct AXReadCoalescerFocusTests {
         #expect(pump.work.isEmpty)
     }
 
-    /// The lane suite's hang guard (tests.md): generous, since a
-    /// passing run exits the instant the focus read lands, and
-    /// only a merged lane — or a starved runner — reaches it.
-    private static let laneHangGuard = Duration.seconds(30)
+    /// The lane clause's hang guard (tests.md): a `Date()`
+    /// deadline poll rather than an awaited handle, because a
+    /// task-group watchdog racing a never-completing main-actor
+    /// await never resumed under swift-testing — the guard's
+    /// first shape hung a mutated run for 16 minutes instead of
+    /// redding it (guard-prover, 2026-09-22). Generous: a passing
+    /// run exits the instant the focus read lands.
+    private static let laneHangGuard: TimeInterval = 30
+
+    @MainActor
+    private final class Landing {
+        var focus = false
+        var frame = false
+    }
+
+    private func wait(
+        until landed: @escaping @MainActor () -> Bool
+    ) async {
+        let deadline = Date().addingTimeInterval(Self.laneHangGuard)
+        while !landed(), Date() < deadline {
+            try? await Task.sleep(for: .milliseconds(10))
+        }
+    }
 
     @Test("A focus read is not parked behind a frame storm")
     func focusReadRidesItsOwnLane() async {
@@ -79,7 +98,7 @@ struct AXReadCoalescerFocusTests {
         // it would wait behind the held read, and the guard
         // below would trip. Both requests are enqueued
         // synchronously, in this order, so the frame read is
-        // dispatched first whatever the tasks below do.
+        // dispatched first.
         let coalescer = AXReadCoalescer()
         let gate = DispatchSemaphore(value: 0)
         nonisolated(unsafe) let held = elementA
@@ -87,32 +106,21 @@ struct AXReadCoalescerFocusTests {
             if CFEqual(element, held) { gate.wait() }
             return CGRect(x: 0, y: 0, width: 1, height: 1)
         }
-        let (frameLanded, frameCont) = AsyncStream<Void>.makeStream()
-        let (focusLanded, focusCont) = AsyncStream<Void>.makeStream()
+        let landing = Landing()
         coalescer.request(
             .moved,
             window: WindowID(1),
             element: elementA,
             pid: pid
-        ) { _ in frameCont.finish() }
+        ) { _ in landing.frame = true }
         coalescer.requestFocus(element: elementB, pid: pid) { _ in
-            focusCont.finish()
+            landing.focus = true
         }
-        let landed = await withTaskGroup(of: Bool.self) { group in
-            group.addTask {
-                for await _ in focusLanded {}
-                return true
-            }
-            group.addTask {
-                try? await Task.sleep(for: Self.laneHangGuard)
-                return false
-            }
-            let first = await group.next() ?? false
-            group.cancelAll()
-            return first
-        }
-        #expect(landed, "the focus read waited behind the frame read")
+        await wait { landing.focus }
+        #expect(landing.focus, "the focus read waited behind the frame read")
+        #expect(!landing.frame, "the held frame read delivered")
         gate.signal()
-        for await _ in frameLanded {}
+        await wait { landing.frame }
+        #expect(landing.frame, "the released frame read never landed")
     }
 }
