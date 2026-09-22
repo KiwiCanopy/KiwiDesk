@@ -63,20 +63,24 @@ synonym:
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One
   family, three different corners.
-- **pin** — two ruled senses, each QUALIFIED BY ITS OBJECT in
-  copy (#1022): a **Monitor pin** binds a Space to a screen
-  (`diff.label.space_pin`, `spaces.pin_badge.help`,
-  `monitors.orphan_pins.title`), and **Pin to a Space** binds an
-  app to a Space (`app_rules.pin`, the App Rules checkbox). The
-  second sense is not new — `home.card.app_rules.subtitle` has
-  counted "apps pinned or floating" all along — but #1022 gave it
-  a control of its own, and a bare "pin" then names two
-  relations in one window. **A LABEL naming the relation carries
-  the object** — "Monitor pin", "Pin to a Space" — because a
-  label is read with nothing around it. A SENTENCE may lean on
-  its subject instead, which is why "%1$d apps pinned or
-  floating" and "%2$d Spaces pinned" are correct as they stand:
-  the thing being pinned is already named.
+- **pin** — two relations, and only ONE of them still spends the
+  word (#1022). A **Monitor pin** binds a Space to a screen and
+  takes the word in its labels (`diff.label.space_pin`,
+  `spaces.pin_badge.help`, `monitors.orphan_pins.title`). The
+  app→Space relation is real but is named by its EFFECT instead —
+  **Opens in** (`app_rules.space`) — and the App Rules card
+  spends no pin word anywhere, which is how #1022 resolved having
+  two relations named alike in one window. The argument is
+  `docs/design-decisions.md` ▸ App rules.
+
+  **A LABEL naming either relation carries its object**, because
+  a label is read with nothing around it: "Monitor pin", never a
+  bare "Pin". A SENTENCE may lean on its subject instead, which
+  is why `home.card.app_rules.subtitle`'s "%1$d apps pinned or
+  floating" and `home.card.monitors.subtitle`'s "%2$d Spaces
+  pinned" are correct as they stand — the thing being pinned is
+  already named, and those two are the app→Space sense's only
+  surviving mentions of the word.
 
   Two obligations, and no claim about what the corpus currently
   says: **author every new label to this**, and **do not sweep

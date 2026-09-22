@@ -5,7 +5,7 @@ enum AppRulesKey: String, CaseIterable, Hashable {
     case floatRules = "config.floatRules"
     case floatRulesPattern = "config.floatRules[].pattern"
     case ignoreRules = "config.ignoreRules"
-    case appRulesAddPin = "(action) app_rules.add_pin"
+    case appRulesAddSpace = "(action) app_rules.add_space"
     case appRulesAddFloat = "(action) app_rules.add_float"
     case appRulesDelete = "(action) app_rules.delete"
 }
@@ -36,7 +36,7 @@ extension AppRulesKey {
                 .atRest,
                 gate: .setting(.appRules(.floatRules))
             )
-        case .floatRules, .appRulesAddPin, .appRulesAddFloat,
+        case .floatRules, .appRulesAddSpace, .appRulesAddFloat,
             .appRulesDelete:
             return .row(.appRules, .rulesPerApp, .atRest)
         case .floatRulesPattern:
@@ -81,8 +81,8 @@ extension AppRulesKey {
             return .dynamic
         case .ignoreRules:
             return .none
-        case .appRulesAddPin:
-            return .text("app_rules.add_pin")
+        case .appRulesAddSpace:
+            return .text("app_rules.add_space")
         case .appRulesAddFloat:
             return .text("app_rules.add_float")
         case .appRulesDelete:

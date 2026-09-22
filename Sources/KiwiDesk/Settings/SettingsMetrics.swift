@@ -60,7 +60,10 @@ enum SettingsMetrics {
     /// (ui-designer, 2026-09-22). The slack at the row breakpoint
     /// absorbs it.
     static let appRuleFloatColumn: CGFloat = 190
-    static let appRulePinColumn: CGFloat = 190
+    /// The Space column. Values are short Space names plus a
+    /// clear button, so it needs less room than the predicates
+    /// beside it.
+    static let appRuleSpaceColumn: CGFloat = 130
 
     /// The row's app icon, and the inset everything hanging under
     /// the app name shares. DERIVED so the table header, the

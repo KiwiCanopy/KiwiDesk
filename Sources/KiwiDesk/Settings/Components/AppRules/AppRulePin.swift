@@ -2,12 +2,12 @@ import KiwiDeskCore
 
 /// The Space-pin half of an app rule (#1022).
 ///
-/// A rule that neither floats nor pins says nothing — it is the
-/// default behaviour of every unruled app, which the card's own
-/// empty note already states. So tiling REQUIRES a pin, and this
-/// is the one place both halves of that are derived: which Space
-/// an auto-engaged pin takes, and when the checkbox may not be
-/// released.
+/// A rule that neither floats nor names a Space says nothing —
+/// it is the default behaviour of every unruled app, which the
+/// card's own empty note already states. So tiling REQUIRES a
+/// Space, and this is the one place both halves of that are
+/// derived: which Space an engaged assignment takes, and when it
+/// may not be cleared.
 enum AppRulePin {
     /// Space a pin takes when it engages, for a row whose base
     /// pins `inherited` (nil outside override mode).
@@ -44,14 +44,16 @@ enum AppRulePin {
         return config.spaces.first
     }
 
-    /// What the pin checkbox may do on a row.
+    /// What may be done with a row's Space assignment.
     ///
     /// Three cases, not a `Bool`, because the middle one is where
-    /// a two-state answer shipped a live checkbox that silently
-    /// wrote nothing: with no Spaces declared the pin is neither
-    /// held engaged nor usable, and "grey, don't hide" forbids a
-    /// control that pretends (architect + ui-designer review,
-    /// 2026-09-22).
+    /// a two-state answer shipped a live control that silently
+    /// wrote nothing: with no Spaces declared the assignment is
+    /// neither held nor settable, and "grey, don't hide" forbids
+    /// a control that pretends (architect + ui-designer review,
+    /// 2026-09-22). `.locked` now means the clear button is not
+    /// OFFERED, which is the same rule without a control that
+    /// has to explain itself.
     enum Verdict: Equatable {
         /// Tiling holds the pin engaged; it may not be released.
         case locked

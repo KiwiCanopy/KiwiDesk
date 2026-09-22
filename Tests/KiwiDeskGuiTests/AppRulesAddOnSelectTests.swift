@@ -178,7 +178,7 @@ struct AppRulesAddOnSelectTests {
         // neighbour").
         let source = squashed(try roleLabelBody())
         for census in [
-            AppRulesKey.appRulesAddPin, .appRulesAddFloat,
+            AppRulesKey.appRulesAddSpace, .appRulesAddFloat,
         ] {
             guard case .key(let key) = census.text.label else {
                 Issue.record("\(census) no longer names a key")

@@ -11256,84 +11256,137 @@ badge).
 :::unreleased
 **A rule must say something.** An app rule states what an app
 does *differently* from an unruled one, so a row that states
-nothing must not be expressible. Each facet says something on its
-own — a Space pin ("Finder opens in *work*"), floating ("Spotify
-stays out of tiling") — and either alone is a whole rule. Not
-floating is not: it is what every app without a rule already
-does, so a row resting there needs the pin, which engages as the
-visible consequence of choosing it and cannot be released while
-it is the only thing the row says.
+nothing must not be expressible. Each facet says something on
+its own — a Space ("Finder opens in *work*"), floating
+("Spotify stays out of tiling") — and either alone is a whole
+rule. Tiling is not: it is what every app without a rule
+already does, which the card's own empty note says. So a row
+that tiles needs a Space, and choosing to tile engages one.
 
-Two states are exempt, because "tiles, and no pin" is a real
+Two states are exempt, because "tiles, and no Space" is a real
 instruction in them: while a stored profile is edited the absent
-pin is a **tombstone**, un-pinning an app the base profile pins;
-and with no Spaces declared there is nothing to pin to, so the
-card points at where to declare one instead. Both are derived in
-one place (`AppRulePin`, `AppRulePinTests`) — a second copy of
-"may this be released" is a lock that disagrees with itself.
+Space is a **tombstone**, dropping the assignment the base
+profile makes; and with no Spaces declared there is nothing to
+assign to, so the card points at where to declare one instead.
+Both are derived in one place (`AppRulePin`, `AppRulePinTests`)
+— a second copy of "may this row give up its Space" is two
+answers that will eventually disagree.
 
-**So "Automatic" is not a value.** The absence of a pin is drawn
-as the absence of a pin — a cleared checkbox — never as a menu
-item named after it. A value naming the absence of a rule is
-unreadable twice over: alone it says *automatic what?*, and it
-cannot agree with the words the row uses for the same state,
-which is how one card came to offer **Automatic** in a menu and
-settle to "whichever Space you open it in" beside it. Deleting
-the value is what makes the two readings one.
+**So "Automatic" is not a value.** The absence of a Space is
+drawn as an absence — an em dash — never as a menu item named
+after it. A value naming the absence of a rule is unreadable
+twice over: alone it says *automatic what?*, and it cannot agree
+with the words the row uses for the same state, which is how one
+card came to offer **Automatic** in a menu and settle to
+"whichever Space you open it in" beside it. Deleting the value
+is what makes the two readings one. The dash's own cost is paid
+one level down: it announces nothing, so the menu's spoken value
+carries a word instead (`.claude/rules/gui.md`).
+
+**This reverses "a rule is a sentence, and the sentence is the
+control"** (#678 turn 14a), which had itself replaced a labelled
+facet form — so the reversal is that form again, with the cost
+the sentence ruling named paid rather than argued away. The
+sentence cannot express the rule above: running prose renders an
+empty rule most convincingly of all ("Finder opens in whichever
+Space you open it in and tiles normally" is fluent and says
+nothing), and a frame with a slot per facet has nowhere to put an
+absence. What comes back is the objection that ruling raised — a
+labelled facet form makes the reader assemble one meaning out of
+an app name and two columns — and it came back on the first
+device pass, where the owner read this card's own row back as
+"float no windows → pin to space" and rejected it
+(2026-09-22). A recital of labels and values, the float facet
+read as a negation, and no statement anywhere in it. So the
+columns are only affordable with those fragments paid off, which
+is what the ordering, the headings and the values below are for.
+
+**A sentence can omit a clause; a table column cannot.** That is
+what forced the control this card no longer has, and it
+generalises to every table over an optional value. "Slack floats"
+is a complete rule with no Space in it; once the facets are
+columns, the Space column must render *something* for that row,
+so the shape demands either an unset VALUE — which is
+`Automatic`, deleted above — or a control meaning "no value
+here". A checkbox is what that second option looks like, and it
+is what that device pass was looking at: auto-checked, disabled
+while the app tiles, with help text explaining why it could not
+be released. It was not a design choice that went wrong — it was
+forced by the choice of columns, which is why deleting it took a
+different answer to the absence rather than a better checkbox.
+
+**A control that must explain itself is the cost, not the
+remedy** — which is the thing to answer before proposing a
+checkbox here again. A disabled control invites *why can't I
+change this?*, so it owes an answer where and when the question
+is asked, and that answer is a sentence the user must read before
+the row means anything. Withholding the ACT asks nothing, because
+nothing looks blocked: while an app tiles there is simply no
+clear button, the row still reads as a complete statement, and no
+help text is owed. Nor is this "grey, don't hide" (#171)
+overruled — that rule covers a control another mode brings back
+to life, and there is no mode in which a rule may say nothing. So
+an absence renders as an absence and the way back to it is an
+ACTION: a clear button (×) beside a set value, offered only where
+the rule survives without one ([Settings UI
+patterns](ui-patterns.md)).
+
+**One heading, over the Space column, and the row leads with
+it.** A bare Space name — *work* — does not say what it is, so
+its column takes a heading; a whole predicate does say what it
+is, so a heading over the float column would be a word the rows
+do not need. It would also have to be a word this app has spare,
+and the two that fit are both spent: **Mode** is a Space's layout
+mode (and the Settings mode), **Behavior** is a destination in
+this window. A label that reuses another feature's noun reads as
+true about the wrong thing, which is the rung nothing outranks in
+[naming](localization-naming.md) ▸ Family C — so the choice was a
+misleading heading or none, and none is right wherever the values
+are whole predicates. Space first because "this app opens in
+*work*" is the headline reason
+to write a rule at all, so the row reads left to right as one
+statement — *Finder · work · Tiles always* — with the float facet
+as the qualifier after it.
+
+**The heading is "Opens in", not "On open, moved to".** The
+card's caption already owns *when* ("What an app should do when it
+opens") and the heading owns *what*; a seventeen-character
+heading would set the column's width for no information gained.
+Its being a verb phrase costs a catalog nothing: the heading
+interpolates none of the cells under it and they hold
+user-authored Space names in whatever case the locale likes, so a
+catalog may render this key as the noun phrase its grammar
+prefers, or as the finite verb `de` and `ru` chose.
+
+**The float values state the tiling case positively** — *Tiles
+always*, *Floats always*, *Floats if titled…*. The pair they
+replaced named the scope that floats (*No windows*, *All
+windows*), which makes the commonest row a negation the reader
+has to invert before it says anything about tiling; the reading
+quoted above is that inversion happening out loud. "always" is
+deliberate shorthand for an app's ordinary windows — a dialog, a
+sheet and a picture-in-picture window float whatever a rule says,
+which the [user guide](user-guide.md#app-rules) carries — and it
+earns the overclaim by making the two unconditional values scan
+as one set against the conditional third. Deliberately not
+*Floating*, which is the name of the Floating layout mode: a
+facet value spelled like a mode invites the same misreading one
+surface over. Re-authoring these in eleven catalogs is the bill
+for a facet's wording, and it falls due whichever wording wins.
 
 **The rule is chosen before the app, so adding one takes two
 pickers** — *Pin an app…* and *Float an app…*, each composing a
 complete rule out of the pick. One picker would have to default
-to a facet, authoring a pin nobody chose or stopping an app
-tiling when the user meant to pin it, and one that adds a bare
+to a facet, authoring a Space nobody chose or stopping an app
+tiling when the user meant to place it, and one that adds a bare
 row re-admits the state this principle forbids. Picking the app
 is still the whole gesture ([Settings UI
 patterns](ui-patterns.md)).
 
-**This reverses "a rule is a sentence, and the sentence is the
-control"** (#68 turn 14a), which had deliberately replaced a
-labelled facet form; the reversal is that form again, with its
-costs paid rather than argued away. The sentence could not
-express the rule above. Running prose renders the empty state
-most convincingly of all — "Finder opens in whichever Space you
-open it in and tiles normally" is a fluent sentence that says
-nothing — and it leaves nowhere to put a lock, or the reason for
-one.
-
-The cheaper route was on the table and lost: keep the sentence
-and merely stop offering the unset item while the app tiles. It
-buys identical behaviour, keeps the localized frame and its
-guards, and reverses no ruling. It loses because **the locked pin
-must explain itself.** A disabled checkbox saying "this app
-doesn't float, so it needs a Space to open in" answers *why can't
-I un-pin this?* in the place and at the moment the user asks it;
-a menu item that has quietly stopped being listed answers
-nothing, and is not even noticed. The repo's default is
-grey-don't-hide (gui.md ▸ grey, don't hide), and the exception
-that hides covers mode-gated surface — which a facet the rule
-itself needs is not.
-
-What the reversal costs, named rather than omitted: the harm the
-sentence ruling removed comes back. A labelled facet form makes
-the reader assemble one meaning out of an app name and two
-columns, and "Float: No windows" is read as a setting rather than
-as behaviour. Drawing each facet label once, as a heading over
-the list rather than per row, mitigates that; it does not refute
-it. The float values are also re-authored in eleven locales, from
-verb phrases to nouns.
-
-**The float values are nouns naming the scope that floats** — *No
-windows*, *All windows*, *Windows by title*. A verb phrase reads
-as a value only inside the statement it completes; beside a label,
-"Float: floats" is the two-wordings defect again. Deliberately not
-*Floating*, which is the name of the Floating layout mode: a facet
-value spelled like a mode invites the same misreading one surface
-over.
-
 **Matching windows by title is a capability, not a mode tier.**
-Pinning an app to a Space is one of the most teachable things
-KiwiDesk does, so the card stays Simple whole and the *Windows by
-title…* choice is an offer instead — present in Power User, and
+Placing an app in a Space is one of the most teachable things
+KiwiDesk does, so the card stays Simple whole and the *Floats if
+titled…* choice is an offer instead — present in Power User, and
 present in Simple from the moment any rule in the list carries a
 pattern. It is the shape [Shortcuts](#shortcuts) ▸ *A used
 capability unlocks its whole list* already rules, and all three of

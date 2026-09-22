@@ -14,7 +14,7 @@ struct AppRulesSection: View {
     /// not a re-admitted `draftApps`: it names at most one row,
     /// only while that row's editor is open, and holds no value.
     @State private var composingTitles: String?
-    @State private var newPinnedApp = ""
+    @State private var newSpaceApp = ""
     @State private var newFloatingApp = ""
     @Environment(\.settingsWidth) private var width
 
@@ -76,7 +76,7 @@ struct AppRulesSection: View {
         }
     }
 
-    /// Facet labels, drawn ONCE over the list. Below the row
+    /// The ONE facet heading, drawn over the list. Below the row
     /// breakpoint the rows stack and carry their own labels
     /// instead, so this goes away rather than compressing.
     @ViewBuilder private var tableHeader: some View {
@@ -90,16 +90,14 @@ struct AppRulesSection: View {
                             .appRuleIdentityColumn,
                         height: 1
                     )
-                Text(L("app_rules.float", "Float"))
+                Text(L("app_rules.space", "Opens in"))
                     .frame(
-                        width: SettingsMetrics.appRuleFloatColumn,
+                        width: SettingsMetrics.appRuleSpaceColumn,
                         alignment: .leading
                     )
-                Text(L("app_rules.pin", "Pin to a Space"))
-                    .frame(
-                        width: SettingsMetrics.appRulePinColumn,
-                        alignment: .leading
-                    )
+                // The float column carries NO heading: its values
+                // are whole predicates and name themselves, so a
+                // heading would be a word the rows do not need.
                 Spacer(minLength: 8)
             }
             .font(.caption)
@@ -110,11 +108,11 @@ struct AppRulesSection: View {
         }
     }
 
-    /// The caption carries the rule a locked checkbox obeys.
-    /// Must-know information never lives only in a popover, and a
-    /// `GreyOut` inside a `ForEach` may not stamp a sentence under
-    /// every row — so the one copy sits here, above the list and
-    /// outside every dimmed subtree (#815, #1022).
+    /// The caption carries the rule behind a missing clear
+    /// button. Must-know information never lives only in a
+    /// popover, and a `GreyOut` inside a `ForEach` may not stamp a
+    /// sentence under every row — so the one copy sits here, above
+    /// the list and outside every dimmed subtree (#815, #1022).
     private var rulesCaption: String {
         if overrideBase != nil {
             return L(
@@ -133,7 +131,7 @@ struct AppRulesSection: View {
         return L(
             "app_rules.section.caption",
             "What an app should do when it opens. An app that "
-                + "doesn't float needs a Space to open in."
+                + "tiles needs a Space to open in."
         )
     }
 
@@ -143,26 +141,26 @@ struct AppRulesSection: View {
     /// exists once; the title-pattern paragraph joins only where
     /// the mode offers patterns at all.
     ///
-    /// It deliberately does NOT restate "an app that does not
-    /// float needs a Space": the always-visible caption says it
-    /// and the locked checkbox's own sentence says it again, and
-    /// a third copy here made this the longest help string in the
-    /// app — past `desktops.help`, on a window whose minimum
-    /// height is 540 pt (ui-designer, 2026-09-22). The
-    /// remembered-Space exception rides the last paragraph rather
-    /// than the first, being a precedence detail rather than the
-    /// thing a newcomer came to read.
+    /// It deliberately does NOT restate "an app that tiles needs
+    /// a Space": the always-visible caption says it, and a second
+    /// copy here made this the longest help string in the app —
+    /// past `desktops.help`, on a window whose minimum height is
+    /// 540 pt (ui-designer, 2026-09-22). The remembered-Space
+    /// exception rides the last paragraph rather than the first,
+    /// being a precedence detail. It stays silent on whether the
+    /// user TRAVELS with the window: #1599 rules that they
+    /// should, and documenting behaviour we intend to change is
+    /// how docs and code drift apart.
     private var sectionHelp: String {
         var text = L(
             "app_rules.section.help",
-            "**%1$@** — the app's windows open in that Space, "
-                + "whatever Space you are in.\n\n%2$@\n\nA pin "
-                + "and floating combine: a floating window still "
-                + "belongs to its pinned Space, it simply is not "
-                + "tiled inside it. A window KiwiDesk already "
-                + "remembers keeps the Space it was last in, "
-                + "whichever rule applies.",
-            L("app_rules.pin", "Pin to a Space"),
+            "**%1$@** — the app's windows go to that Space, "
+                + "whatever Space you are in.\n\n%2$@\n\nThe two "
+                + "combine: a floating window still belongs to "
+                + "its Space, it simply is not tiled inside it. A "
+                + "window KiwiDesk already remembers keeps the "
+                + "Space it was last in, whichever rule applies.",
+            L("app_rules.space", "Opens in"),
             L(
                 "app_rules.float.help",
                 "Floating takes this app's matching windows out "
@@ -184,7 +182,7 @@ struct AppRulesSection: View {
                         + "its windows and tile the rest.",
                     L(
                         "app_rules.float.titled.resting",
-                        "Windows by title"
+                        "Floats if titled"
                     )
                 )
         }
@@ -244,7 +242,7 @@ struct AppRulesSection: View {
         .foregroundStyle(.secondary)
     }
 
-    /// With no Spaces declared there is nothing to pin to, so the
+    /// With no Spaces declared there is nothing to open in, so the
     /// remedy lives on another destination — a live pointer naming
     /// it, which is what a gate whose cause is off this surface
     /// owes (#815).
@@ -264,7 +262,7 @@ struct AppRulesSection: View {
         L(
             "app_rules.no_spaces",
             "This profile has no Spaces yet, so there is nothing "
-                + "to pin an app to. Add one in %1$@.",
+                + "to open an app in. Add one in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }
@@ -275,10 +273,10 @@ struct AppRulesSection: View {
     private var addRow: some View {
         HStack(spacing: 8) {
             AppSelector(
-                role: .pin,
-                name: $newPinnedApp,
+                role: .space,
+                name: $newSpaceApp,
                 exclude: Set(apps),
-                onCommit: addPinned
+                onCommit: addWithSpace
             )
             .disabled(model.config.spaces.isEmpty)
             AppSelector(
@@ -294,13 +292,13 @@ struct AppRulesSection: View {
     /// Adds a rule that pins the picked app to the designated
     /// Space. Picking an app is the whole gesture (#1172), so this
     /// runs straight off the pick.
-    private func addPinned(_ picked: String) {
+    private func addWithSpace(_ picked: String) {
         // Cleared whatever happens: a refused pick used to stay in
         // the binding, and `AppPickerButton` draws and announces
         // whatever `name` holds — so the button read the refused
         // app's name until an unrelated pick succeeded (code
         // review, 2026-09-22).
-        defer { newPinnedApp = "" }
+        defer { newSpaceApp = "" }
         guard let app = normalized(picked),
             let space = AppRulePin.engagedSpace(model.config)
         else { return }

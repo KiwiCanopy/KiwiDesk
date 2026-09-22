@@ -71,35 +71,35 @@ struct AppRuleRow: View {
             )
         return layout {
             identity(stacked: stacked)
+            // Space FIRST: "this app opens in work" is the
+            // headline reason to write a rule at all, and the
+            // float facet reads as the qualifier after it.
             facetLabel(
-                L("app_rules.float", "Float"),
+                L("app_rules.space", "Opens in"),
                 drawn: stacked
             )
+            spaceMenu
+                .opacity(spaceInherited ? 0.55 : 1)
+                .padding(.leading, facetInset(stacked))
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRuleSpaceColumn,
+                    alignment: .leading
+                )
             floatMenu
                 .opacity(floatInherited ? 0.55 : 1)
                 .padding(.leading, facetInset(stacked))
                 // The row's focus destination, and the one
                 // control every row state keeps enabled: the
-                // space menu is disabled on any unpinned row, and
-                // a disabled control cannot take the assignment a
-                // deletion makes (#1022; #816 is the harm).
+                // space menu is inert with no Space to pin to,
+                // and a disabled control cannot take the
+                // assignment a deletion makes (#1022; #816).
                 .focused($returningRow, equals: app)
                 .frame(
                     width: stacked
                         ? nil : SettingsMetrics.appRuleFloatColumn,
                     alignment: .leading
                 )
-            facetLabel(
-                L("app_rules.pin", "Pin to a Space"),
-                drawn: stacked
-            )
-            pinPair
-                .frame(
-                    width: stacked
-                        ? nil : SettingsMetrics.appRulePinColumn,
-                    alignment: .leading
-                )
-                .padding(.leading, facetInset(stacked))
             if !stacked {
                 Spacer(minLength: 8)
                 deleteButton
@@ -156,16 +156,6 @@ struct AppRuleRow: View {
     /// of the layout and keep their identity across the reflow.
     private func facetInset(_ stacked: Bool) -> CGFloat {
         stacked ? SettingsMetrics.appRuleIdentityInset : 0
-    }
-
-    /// The gate and the gated dim as ONE unit: an inherited facet
-    /// whose checkbox faded on its own would read as two states.
-    private var pinPair: some View {
-        HStack(spacing: 6) {
-            pinCheckbox
-            spaceMenu
-        }
-        .opacity(spaceInherited ? 0.55 : 1)
     }
 
     /// An inherited pin, which the 0.55 dim says is in sync with

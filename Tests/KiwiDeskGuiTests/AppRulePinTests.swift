@@ -7,8 +7,8 @@ import Testing
 ///
 /// "Tiles normally" on its own is the default behaviour of every
 /// unruled app — the card's own empty note says so — so choosing
-/// it REQUIRES a Space pin, and the checkbox is locked while it
-/// holds. What that costs is two states where "tiles, no pin" is
+/// it REQUIRES a Space, and the clear button is withheld while
+/// that holds. What that costs is two states where "tiles, no pin" is
 /// a real instruction rather than an empty row, and both are
 /// asserted here because both are one missing arm away from being
 /// broken:
@@ -20,10 +20,10 @@ import Testing
 /// - **no Spaces declared**, where there is nothing to pin to.
 ///
 /// The verdict is three-cased rather than a `Bool` because a
-/// two-state answer shipped a checkbox that was neither locked nor
-/// usable: live, undimmed, and writing nil on click. That is the
-/// state "grey, don't hide" exists to forbid, so `.unavailable` is
-/// a case and not the absence of one.
+/// two-state answer shipped a control that was neither held nor
+/// settable: live, undimmed, and writing nil on click. That is
+/// the state "grey, don't hide" exists to forbid, so
+/// `.unavailable` is a case and not the absence of one.
 ///
 /// `AppRulePinWiringTests` is the other half — this suite holds
 /// what the decisions ARE, that one holds that the row asks them.
@@ -71,8 +71,9 @@ struct AppRulePinTests {
     // MARK: - The two states the rule must not break
 
     /// The tombstone. A one-armed predicate that forgot this
-    /// would lock the checkbox that IS the instruction, so a
-    /// profile could no longer un-pin an app its base pins.
+    /// would withhold the clear button that IS the instruction,
+    /// so a profile could no longer un-assign an app its base
+    /// assigns.
     @Test("override mode keeps a tiling row's pin releasable")
     func overrideModeNeverLocks() {
         #expect(
@@ -91,8 +92,8 @@ struct AppRulePinTests {
     }
 
     /// With no Spaces there is nothing to pin to, and the answer
-    /// is `.unavailable` rather than `.free`: a free checkbox is
-    /// one the user may set, and this one cannot be set at all.
+    /// is `.unavailable` rather than `.free`: `.free` means the
+    /// user may set it, and this one cannot be set at all.
     /// It outranks BOTH other arms — a tiling row and an override
     /// row alike — because the absence of a target is not a thing
     /// either of them can overcome.
@@ -168,12 +169,12 @@ struct AppRulePinTests {
         )
     }
 
-    /// A TOMBSTONED row's prospective pin is the base's own Space,
+    /// A TOMBSTONED row's prospective Space is the base's own,
     /// outranking the designated fallback. Both channels read this
-    /// — the greyed menu draws it and re-checking the box writes
-    /// it — so falling through to the fallback drew the wrong
-    /// Space and then silently REPLACED the inherited pin with it
-    /// rather than restoring it (ui-designer, 2026-09-22).
+    /// — the menu draws it and re-assigning writes it — so
+    /// falling through to the fallback drew the wrong Space and
+    /// then silently REPLACED the inherited one with it rather
+    /// than restoring it (ui-designer, 2026-09-22).
     @Test("a tombstone's prospective pin is the base's Space")
     func inheritedSpaceOutranksTheFallback() {
         let config = config(

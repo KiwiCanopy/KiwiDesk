@@ -638,15 +638,19 @@ constant frame passes.
 **A census-named row that draws no visible label authors its
 label key as an `.accessibilityLabel` — and gives back whatever
 that label displaced.** The App Rules facet menus are the worked
-case: neither draws a label of its own — the column over the
-Space menu is headed `app_rules.pin`, for the checkbox beside
-it, and a facet heading is `.accessibilityHidden` wherever it is
-drawn — while the census still names those rows by
-`app_rules.space` / `app_rules.float`. That one call site is
-load-bearing three ways — VoiceOver has nothing else to call the
-control, `SettingKeyLocaleTests` requires the key in every
-locale, and search indexes it — and dropping it is silent in all
-three until a locale prunes the key.
+case: neither draws a label of its own — the list carries ONE
+column heading, `app_rules.space` over the Space menu, and the
+float column is unheaded because its values are whole predicates
+— while the census names both rows, by `app_rules.space` /
+`app_rules.float`. A drawn heading is no substitute for the
+modifier either, and must not be offered as one: a heading is
+`.accessibilityHidden` — it would otherwise announce a word the
+menu under it already speaks — so that menu has nothing else to
+be called, wide or stacked. That one call site is
+load-bearing three ways — VoiceOver has nothing else to
+call the control, `SettingKeyLocaleTests` requires the key in
+every locale, and search indexes it — and dropping it is silent
+in all three until a locale prunes the key.
 `AppRulesCensusRenderTests`' `facetsKeepTheirLabels` matches the
 modifier's SHAPE over stripped source, because an earlier cut
 accepted any mention of the key and went green when the
@@ -660,12 +664,18 @@ current choice.** Both facet menus announced "Space, pop up
 button" and never *which* space, for as long as they shipped —
 a sighted reader reads the value off the menu's own label, so
 nothing looks wrong, and every guard was green because the label
-was exactly where it was required to be. So a control named this way
-owes an `.accessibilityValue` carrying what it announced before,
-drawn and spoken from ONE expression
-(`AppRuleRow.spaceFacetLabel`); `facetsAnnounceTheirValue` holds
-the count. Read the rule as: whenever you name a control for
-VoiceOver, ask what naming it took away.
+was exactly where it was required to be. So a control named this
+way owes an `.accessibilityValue` carrying what it announced
+before, keyed per control on that control's OWN value expression
+(`AppRulesCensusRenderTests` ▸ `facetsAnnounceTheirValue`, which
+a count of two satisfied with both values on one menu and the
+other silent). Draw and speak it from one expression wherever the
+cell is a word; where it cannot be — a cell drawn as a GLYPH a
+screen reader reads as nothing, which is the Space facet's em
+dash — author the spoken variant beside the drawn one and keep
+the pair in step. Nothing scans for that pair. Read the rule as:
+whenever you name a control for VoiceOver, ask what naming it
+took away.
 
 **A sentence with controls in it is one localized frame, not
 connectives between fixed stack positions.** Author the frame

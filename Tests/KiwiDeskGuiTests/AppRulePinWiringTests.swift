@@ -8,11 +8,10 @@ import Testing
 /// A separate suite, because the one reading what a pure function
 /// answers cannot see whether anything calls it — and this change
 /// shipped that exact gap for a day: deleting the pin-engaging
-/// block in `setNever()`, or the setter's refusal, or the Space
-/// menu's inert branch left the whole suite green with "tiling
-/// requires a pin" inert (code review, 2026-09-22). Nothing
-/// headless can click a `Menu`, so the whole guard is a wiring
-/// guard.
+/// block in `setNever()` or the clear button's own condition left
+/// the whole suite green with "a rule must say something" inert
+/// (code review, 2026-09-22). Nothing headless can click a
+/// `Menu`, so the whole guard is a wiring guard.
 ///
 /// Every clause is anchored on a CONDITION or a call, never on a
 /// value a later tuning may move.
@@ -40,43 +39,34 @@ struct AppRulePinWiringTests {
         try source("Sections/AppRuleRow+Facets.swift")
     }
 
-    /// The three sites that make the rule run, each keyed on what
+    /// The two sites that make the rule run, each keyed on what
     /// it cannot lose rather than on its body verbatim.
-    @Test("the three pin sites ask the verdict")
+    @Test("both pin sites ask the verdict")
     func everySiteAsksTheVerdict() throws {
         let source = try facets()
-        // 1. The checkbox is inert unless the verdict is `.free`,
-        //    which is what dims it while tiling AND with no Space
-        //    to pin to. A `!= .locked` here would ship the live
-        //    checkbox that writes nothing.
+        // 1. The clear button EXISTS only where the rule
+        //    survives without a Space. Its absence is what makes
+        //    "a rule must say something" visible, and it replaced
+        //    a locked checkbox that had to explain itself — so
+        //    there is no disabled control to reach past, and no
+        //    setter refusal is owed any more (#1022, owner
+        //    eyeball 2026-09-22).
         #expect(
             source.contains(
-                Self.squashed("GreyOut(active: pinVerdict != .free")
+                Self.squashed("if isPinned, pinVerdict == .free")
             ),
             Comment(
                 rawValue:
-                    "the pin checkbox no longer greys on the "
-                    + "verdict — either tiling stops locking it, "
-                    + "or it goes live with no Space to pin to "
-                    + "and silently writes nothing (#1022)"
+                    "the clear button no longer asks the verdict "
+                    + "— either it is offered on a tiling row, "
+                    + "which lets every rule fall back to saying "
+                    + "nothing, or it is offered with no Space to "
+                    + "clear (#1022)"
             )
         )
-        // 2. The setter refuses past the grey. A keyboard or
-        //    VoiceOver route to a checkbox is not the mouse's.
-        #expect(
-            source.contains(
-                Self.squashed("guard pinVerdict == .free else { return }")
-            ),
-            Comment(
-                rawValue:
-                    "the pin binding no longer refuses while "
-                    + "locked — the store is then reachable past "
-                    + "the GreyOut (#1022)"
-            )
-        )
-        // 3. Dropping the float rule engages a pin where the row
-        //    has none. This is the write; the two above are the
-        //    control.
+        // 2. Dropping the float rule engages a Space where the
+        //    row has none. This is the write; the clause above is
+        //    the control.
         #expect(
             source.contains(
                 Self.squashed(
@@ -240,9 +230,9 @@ struct AppRulePinWiringTests {
             body.range(of: "floatMenu"),
             "the row draws no float menu"
         )
-        let pin = try #require(
-            body.range(of: "pinPair"),
-            "the row draws no pin pair"
+        let space = try #require(
+            body.range(of: "spaceMenu"),
+            "the row draws no Space menu"
         )
         let focus = try #require(
             body.range(of: Self.squashed(".focused($returningRow")),
@@ -253,17 +243,23 @@ struct AppRulePinWiringTests {
                     + "list entirely (#816)"
             )
         )
+        // Two invariants in one ordering, and both matter: the
+        // Space column comes FIRST ("opens in work" is the
+        // headline the row leads with), and the focus destination
+        // rides the float menu AFTER it. A destination moved onto
+        // the Space menu lands between the two and reds here.
         #expect(
-            focus.lowerBound > float.lowerBound
-                && focus.lowerBound < pin.lowerBound,
+            space.lowerBound < float.lowerBound
+                && float.lowerBound < focus.lowerBound,
             Comment(
                 rawValue:
-                    "the row's focus destination left the float "
-                    + "menu — every other control here is "
-                    + "disabled in some row state, and a disabled "
-                    + "control cannot take the assignment a "
-                    + "deletion makes, so focus lands at the top "
-                    + "of the window instead (#816, #1022)"
+                    "either the columns swapped order, or the "
+                    + "row's focus destination left the float "
+                    + "menu — the Space menu is inert with no "
+                    + "Space to open in, and a disabled control "
+                    + "cannot take the assignment a deletion "
+                    + "makes, so focus lands at the top of the "
+                    + "window instead (#816, #1022)"
             )
         )
     }

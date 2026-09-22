@@ -15,13 +15,13 @@ import SwiftUI
 /// Since #1022 a row cannot be a no-op, so the picker states
 /// WHICH rule it composes: the `role` is chosen before the app,
 /// and the pick then authors a complete rule. One picker could
-/// not — it would have to default to a pin (authoring a Space
+/// not — it would have to default to a Space (authoring one
 /// nobody chose) or to floating (stopping an app tiling when the
-/// user meant to pin it), and both are rejected in #1022. The
+/// user meant it in a Space), and both are rejected in #1022. The
 /// gesture stays one click on the app, exactly as #1172 ruled.
 struct AppSelector: View {
     /// The rule this picker composes.
-    enum Role { case pin, float }
+    enum Role { case space, float }
 
     let role: Role
     /// Bundle identifier of chosen app (`AppRef`).
@@ -78,8 +78,11 @@ struct AppSelector: View {
     /// action, authored here where the key scanner can see it.
     private var roleLabel: String {
         switch role {
-        case .pin:
-            return L("app_rules.add_pin", "Pin an app…")
+        case .space:
+            return L(
+                "app_rules.add_space",
+                "Open an app in a Space…"
+            )
         case .float:
             return L("app_rules.add_float", "Float an app…")
         }
