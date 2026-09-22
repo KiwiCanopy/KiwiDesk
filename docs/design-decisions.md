@@ -641,9 +641,10 @@ Two consequences fall out, both structural rather than stylistic:
   that.
 
 This binds whichever surface carries the notes: the GitHub
-release body today — this project's changelog — and the curated
-changelog page (#873) that Sparkle renders (#874) inherits it
-rather than restating it.
+release body is the source, and the changelog page (#873) and
+Sparkle's update window (#874) are generated from its curated
+block — `scripts/changelog-sync` and `scripts/appcast-sync` — so
+they inherit it rather than restating it.
 
 No guard is proposed, and that is a ruling rather than an
 omission: nothing mechanical separates "the focus outline keeps
@@ -3021,6 +3022,39 @@ app's limit. Two different windows confirmed an identical bound
 was nowhere near, and dragging the edge by hand worked, which is
 what proved the app imposed nothing.
 
+The cause is that an echo reporting the pre-ask frame is the
+same bytes whether the app refused or has merely not redrawn
+yet, and under load the second is ordinary for ANY app — this
+reproduced on Ghostty, the fast one. So the ladder's two votes —
+seeding a candidate and confirming it — are only meaningful from
+a read that waited out the app's chance to answer. Only the
+settle probe does. Raw echoes seed, refresh and clear; they
+do not promote. A genuine limit is learned one probe
+grace (~0.6 s) after its animation settles rather than at echo
+time, which is the whole cost.
+
+**The permissive alternative is rejected, and the reasoning is
+worth keeping.** The obvious durable fix is to stop a learned
+bound refusing a press at all — three separate paths can
+mistake latency for a refusal, each guarded by its own heuristic
+about whether the app has answered, and they degrade together
+under load. Being wrong permissively costs a window that does
+not fill its region (the accepted split-layout residue,
+self-correcting on the next retile); being wrong restrictively
+costs the user the feature and states a falsehood. On frequency
+alone that argues for permissive. Implemented and measured, the
+owner ruled the other way: with the learner fixed, the bounds it
+produces
+are real — device capture showed the same eight minutes of use
+going from sixteen false confirmations to zero, with subsequent
+confirmations landing on plausible app minimums (500, 400, 825)
+— and a window resizing past what its app will follow, leaving
+a neighbour overlapped, is worse than a stop that is almost
+always correct. The permissive rule is the right answer when
+bounds are guesses; it is the wrong trade once they are facts.
+Should a fourth latency path ever be found, this entry is the
+argument for reaching for it again.
+
 **A refusal DRAWS; the sound is an addition to the drawing, and
 cannot fire without one (#1255).** [Principle] Two refusals cued
 by sound alone — a resize press in a layout with no resizing
@@ -3065,6 +3099,17 @@ attempts while looking for it. Widening that to every refusal
 while keeping the stored `true` would have made every existing
 install noisier at limits it currently hits silently. So the
 crossing drops the retired key rather than carrying it.
+
+The setting lives in Behaviour rather than General, and that is a
+STORAGE decision wearing a placement question: every row in
+General is a `UserDefaults` preference, a live service toggle or
+an action, so a draft-and-Save row there would be the only one
+that does not do what it was just told. Keeping it in the draft
+config is what preserves the Lua verb and lets it travel in
+profiles and backups — the GUI curates, Lua is open — and
+Behaviour is where app-wide draft behaviour already lives. The
+cost, stated: Behaviour is Power-User-only, so a Simple user
+gets the pill and not the switch.
 
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
@@ -3134,50 +3179,6 @@ true — the #1083 bet the maximum clamp was already making
 silently. And every sentence is written to hold with no press
 behind it, because the neighbour pair is also drawn by a retile
 (#934).
-
-It lives in Behaviour rather than General, and that is a
-STORAGE decision wearing a placement question: every row in
-General is a `UserDefaults` preference, a live service toggle or
-an action, so a draft-and-Save row there would be the only one
-that does not do what it was just told. Keeping it in the draft
-config is what preserves the Lua verb and lets it travel in
-profiles and backups — the GUI curates, Lua is open — and
-Behaviour is where app-wide draft behaviour already lives. The
-cost, stated: Behaviour is Power-User-only, so a Simple user
-gets the pill and not the switch.
-
-The cause is that an echo reporting the pre-ask frame is the
-same bytes whether the app refused or has merely not redrawn
-yet, and under load the second is ordinary for ANY app — this
-reproduced on Ghostty, the fast one. So the ladder's two votes —
-seeding a candidate and confirming it — are only meaningful from
-a read that waited out the app's chance to answer. Only the
-settle probe does. Raw echoes seed, refresh and clear; they
-do not promote. A genuine limit is learned one probe
-grace (~0.6 s) after its animation settles rather than at echo
-time, which is the whole cost.
-
-**The permissive alternative is rejected, and the reasoning is
-worth keeping.** The obvious durable fix is to stop a learned
-bound refusing a press at all — three separate paths can
-mistake latency for a refusal, each guarded by its own heuristic
-about whether the app has answered, and they degrade together
-under load. Being wrong permissively costs a window that does
-not fill its region (the accepted split-layout residue,
-self-correcting on the next retile); being wrong restrictively
-costs the user the feature and states a falsehood. On frequency
-alone that argues for permissive. Implemented and measured, the
-owner ruled the other way: with the learner fixed, the bounds it
-produces
-are real — device capture showed the same eight minutes of use
-going from sixteen false confirmations to zero, with subsequent
-confirmations landing on plausible app minimums (500, 400, 825)
-— and a window resizing past what its app will follow, leaving
-a neighbour overlapped, is worse than a stop that is almost
-always correct. The permissive rule is the right answer when
-bounds are guesses; it is the wrong trade once they are facts.
-Should a fourth latency path ever be found, this entry is the
-argument for reaching for it again.
 
 **A press writes forward, never across the store (#1083).** The
 layout draws a bound-pinned window at its learned limit, and a
@@ -4246,8 +4247,9 @@ rule list, never a profile key, and never stored by
 duplicating the id into other spaces' arrays. (#412, #414)
 Because it is a coinage, it is kept **verbatim in every locale**
 (#579) — a Family A product name like "App Bar"/"Space Bar", not
-translated to a native word for "pinned" (the display tier is
-"Display Sticky"); see `docs/localization-naming.md`.
+translated to a native word for "pinned" (the display tier's
+verbs read "sticky on this screen", #1094); see
+`docs/localization-naming.md`.
 
 **Sticky has two scopes: global and display (#445).** The
 original sticky is *global* — every space of every monitor.
@@ -4338,7 +4340,8 @@ float is never laid out; its cross-display anchoring stays
 untouched because re-homing one is precisely the move
 `stickyMoveRefused` gates at every command choke point (#445),
 and neither a pure state fold nor a Desktop verb may make it
-quietly; sticky reach across Desktops is #890's own item. And
+quietly; sticky reach across Desktops is #1145's (*Sticky reach
+spans macOS Desktops*). And
 only the window's membership ever moves — no space is
 re-assigned to another display — so an arrival or a Desktop
 move can never break a `pin_space_to_display` pin. On a single
@@ -6451,8 +6454,8 @@ sidebar: the full window width for content, an entry screen that
 scales to the mode's card count instead of a fixed taxonomy
 column, and per-language label budgets that die with the fixed
 column (a card flexes; an over-long label truncates visibly). What
-it costs, accepted: a second click to move between sibling areas
-until the pill row lands (Phase 4). (The sidebar shell was an
+it costs, accepted: a second click to move between sibling
+areas. (The sidebar shell was an
 `HStack`, never a `NavigationSplitView`, because macOS 26 cannot
 lock a split-view divider — a finding nothing rests on once no
 columns are composed.)
@@ -7273,15 +7276,19 @@ here so they read that way:
   a standing temporary layout. Ending one is the quick menu's
   job: switch back, or Keep.
 
-**Settings surfaces no drift at all.** There is no drift pill, no
-drift-armed Save, no drift caption under the Spaces mode picker,
-and Revert is a plain draft revert. A Save enabled *because of*
-drift whose effect on that drift is identical to Revert is the
-thing refused; the one permanent path through Settings is the
-ordinary draft flow — Spaces, change the mode, Save. A quick-menu
-Keep does move the open draft's saved baseline onto the layout it
-just wrote, leaving staged edits staged: without that, the next
-Save would commit the pre-keep mode over the layout just kept.
+**Settings surfaces no temporary-layout drift.** No pill row,
+no drift-armed Save and no caption under the Spaces mode picker
+narrates a standing temporary layout, and Revert is a plain
+draft revert. (The save pill's *live drift* rows — a profile
+edited outside the draft — are a different question, ruled in
+*The save pill counts what the header claims*, #1197.) A Save
+enabled *because of* a temporary layout whose effect on it is
+identical to Revert is the thing refused; the one permanent path
+through Settings is the ordinary draft flow — Spaces, change the
+mode, Save. A quick-menu Keep does move the open draft's saved
+baseline onto the layout it just wrote, leaving staged edits
+staged: without that, the next Save would commit the pre-keep
+mode over the layout just kept.
 
 ### Spaces
 
@@ -7567,9 +7574,11 @@ the whole width of the product — the Lua verbs
 override in Core, the `"layers"` key in `gui.json` and in a
 profile, the GUI, and the strings — because a vocabulary
 split across two names is the ambiguity it was meant to
-remove. Pre-release, single user: no aliases and no migration,
-so an old `"modes"` key reads as *absent* rather than as
-layers, and re-saving is the migration.
+remove. The rename shipped before AGENTS.md §5 ruled that a
+stored key owes a `ConfigMigration` step, so it carries none:
+an old `"modes"` key reads as *absent* rather than as layers,
+and re-saving is the migration. It is no precedent for a rename
+today.
 
 **Switch-layer shortcuts sit right under the layer strip.**
 The rows that switch layers render directly beneath the strip
@@ -10232,8 +10241,8 @@ that keep the bars routed through it — is
 
 **Space Bar drag-drop is a two-speed spring, not a blind
 relocate.** (#372.) Dragging a window onto a Space item either
-relocates it (fast drop, `move_to_space`) or, after a 2 s dwell,
-springs the view to that Space so the window is dropped into its
+relocates it (fast drop, `move_to_space`) or, after a 1.5 s
+dwell, springs the view to that Space so the window is dropped into its
 live layout. The cross-process race that argues against
 spring-loading is narrowed to one place because KiwiDesk's Spaces
 are *virtual* (a retile, not a WindowServer Space change). The
@@ -10522,19 +10531,17 @@ not restore it. Item *geometry* is "Item size" / "Item gap"
 true under either style, because items have size and spacing in
 Plain too, they simply draw no box of their own.
 
-**A bar entry is an "item", not a "tab" — except in gesture
-prose.** (R6/#406, owner ruling 2026-07-25.) An App Bar entry is a
-window or a same-app group; it has none of a browser tab's
-semantics, and the Space Bar's entries were already items. The
-colors are `item_color` / `active_item_color` and the geometry
-`item_size` / `item_gap`, so **item is the model noun** — labels,
-help strings, captions, enum doc comments, and the Lua reference
-all use it. The one carve-out is the user guide's *gesture* prose
-("click a tab", "drag a tab"), where the word names what the
-reader touches rather than what the model holds; that paragraph is
-deliberate, not an oversight. Note this is unrelated to **macOS
-native tabs** (`TabReconciler`, §5), which keep the word because
-they genuinely are tabs — a blanket rename must never reach them.
+**A bar entry is an "item", not a "tab".** (R6/#406, owner
+ruling 2026-07-25; the gesture-prose carve-out retired
+2026-09-22.) An App Bar entry is a window or a same-app group;
+it has none of a browser tab's semantics, and the Space Bar's
+entries were already items. The colors are `item_color` /
+`active_item_color` and the geometry `item_size` / `item_gap`,
+so **item is the model noun** — labels, help strings, captions,
+enum doc comments, the Lua reference and the user guide all use
+it. Note this is unrelated to **macOS native tabs**
+(`TabReconciler`, §5), which keep the word because they
+genuinely are tabs — a blanket rename must never reach them.
 
 **Plate reach is its own property, not a fourth background.**
 (QA 2026-07-19.) `background_fit` (`full` | `hug`, default
@@ -10814,8 +10821,7 @@ Decisions folded in (ui-designer consult and owner direction,
   (CC0-1.0), refreshed by `scripts/update-app-font.sh` which pins
   the upstream release in `UPSTREAM.md`. CC0 waives copyright but
   not third-party trademark rights in the depicted app marks —
-  accepted deliberately pre-release; revisit at public 1.0 with
-  the other distribution decisions.
+  accepted deliberately.
 - **The shortcuts panel follows the GLOBAL symbol style**: with
   Glyphs active its Apps band leads with the same ligatures. The
   panel spans all layouts, so a Lua-only per-layout
