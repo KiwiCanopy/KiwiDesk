@@ -159,8 +159,31 @@ jobs:
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
 
+      # The PR build is the warning ratchet (#1594): swiftc
+      # errors on anything but a deprecation, which stays a
+      # warning because AXHelper's `activateIgnoringOtherApps`
+      # call is #1170's to remove. Debug only — the release job
+      # and the tag path take no ratchet, so a new toolchain's
+      # diagnostics can never block a release
+      # (packaging-and-release.md).
+      #
+      # `swift build` does not compile Tests/, so this ratchets
+      # Sources/ alone — deliberately, not by oversight. Tests/
+      # carries 31 warnings of its own (measured 2026-09-22);
+      # sweeping them is #1596, and the test steps below join
+      # the ratchet once it lands. The cost until then is one
+      # rebuild between this step and Test, SwiftPM keying its
+      # build directory on the flags: ~16 s against a run of
+      # minutes.
+      #
+      # Spelled inline rather than carried in an `env:` var: a
+      # variable holding flags only word-splits because `run:`
+      # happens to default to bash, and the step that would have
+      # shared it is the one #1596 still owes.
       - name: Build
-        run: swift build
+        run: >-
+          swift build -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
       - name: Lint
         run: ./scripts/lint.sh
