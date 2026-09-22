@@ -71,9 +71,22 @@ synonym:
   second sense is not new — `home.card.app_rules.subtitle` has
   counted "apps pinned or floating" all along — but #1022 gave it
   a control of its own, and a bare "pin" then names two
-  relations in one window. So neither sense ever appears
-  unqualified in a label: the object is what tells them apart,
-  and *pinned* alone in a sentence is the defect. Retired as
+  relations in one window. **A LABEL naming the relation carries
+  the object** — "Monitor pin", "Pin to a Space" — because a
+  label is read with nothing around it. A SENTENCE may lean on
+  its subject instead, which is why "%1$d apps pinned or
+  floating" and "%2$d Spaces pinned" are correct as they stand:
+  the thing being pinned is already named.
+
+  Two obligations, and no claim about what the corpus currently
+  says: **author every new label to this**, and **do not sweep
+  the existing ones as a rider on some other branch** — the
+  sweep reaches the census, the site corpus and ten catalogs,
+  and #1022 measured the residue at one genuine site
+  (`spaces.pin_offline_badge`, "Pin offline", whose `de` is
+  already the qualified "Monitor-Pin offline") plus the two
+  `monitor_chip.hint.*` drag hints, which lean on a chip whose
+  third sibling names the monitor. Retired as
   names for either: *attach*, *assign*, *lock*. What a locale
   spells them is its own to settle under
   `docs/localization-naming.md` ▸ Family C — **one word per
