@@ -6,32 +6,23 @@ description: A tiling window manager for macOS — docs home.
 # KiwiDesk Documentation
 
 KiwiDesk is a tiling window manager for macOS. Windows live in
-a flat list per space, layouts are pure functions over
-that list, and everything is configurable twice over: visually
-in the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
-
-Seven layouts ship out of the box — **bsp**, **stack**,
-**scrolling** (PaperWM-style), **monocle**, **grid**, **track**,
-and **floating** — with per-space overrides, profiles that follow
-your monitor setup, and integration with macOS Desktops. Every
-layout is fully reconfigurable: each carries its own optional
-parameters, so the shape it opens in is yours to set as the
-default, globally or per space.
+a flat list per space, layouts are pure functions over that
+list, and everything is configurable twice over: visually in
+the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
 
 ## Where to go
 
-- **[User Guide](user-guide.md)** — the Settings app: layouts,
-  profiles, shortcuts, monitors, and the visual editor. Start
-  here if you configure KiwiDesk through the app.
+- **[User Guide](user-guide.md)** — what the Settings app
+  cannot tell you: how settings interact, where things live,
+  which profile loads.
 - **[Spaces & Desktops](spaces-and-desktops.md)** — how your
-  screens, macOS's Desktops, profiles and KiwiDesk's own Spaces
-  fit together. Read this if a Desktop switch ever landed you
-  somewhere you did not expect.
+  screens, macOS's Desktops, profiles and KiwiDesk's Spaces
+  fit together.
 - **[Lua Reference](lua-reference.md)** — the complete
   `init.lua` API, every setting in *expects → does → example*
-  form. Start here if you hand-write your config.
+  form.
 - **[CLI & IPC](cli.md)** — every command, the event stream,
-  and the raw socket protocol, for scripts and external tools.
+  and the raw socket protocol.
 - **[Recipes](recipes/index.md)** — ready-to-copy integrations:
   [SketchyBar](recipes/sketchybar.md),
   [JankyBorders](recipes/jankyborders.md), and
@@ -48,34 +39,24 @@ default, globally or per space.
 
 ## Install
 
-Requirements: macOS 14 or later on Apple silicon. Install it with
-Homebrew:
+Requirements: macOS 14 or later on Apple silicon.
 
 ```sh
 brew install --cask kiwicanopy/tap/kiwidesk
 ```
 
-That installs the app and puts the `kiwidesk` CLI on your
-`PATH`. The [User Guide](user-guide.md) covers the starter setup,
-starting at login, and the Accessibility permission under
-Troubleshooting.
-
 Or download the signed, notarized `.dmg` from
 [kiwidesk.kiwicanopy.com](https://kiwidesk.kiwicanopy.com/) and
 drag KiwiDesk into your Applications folder. It is the same app;
-what Homebrew adds is the `kiwidesk` CLI on your `PATH`, which
-[the CLI page](cli.md) explains how to link after a `.dmg`
-install.
+the cask additionally puts the `kiwidesk` CLI on your `PATH`,
+which [the CLI page](cli.md) shows how to link after a `.dmg`
+install. Either way KiwiDesk checks for updates itself.
 
-Later builds install themselves — KiwiDesk checks in the
-background and offers you the update. Upgrade an older copy
-through Homebrew once to reach a version that can do that; the
-[User Guide](user-guide.md#the-status-bar-quick-menu) covers the
-rest.
+The [User Guide](user-guide.md) covers the Starter setup,
+**Start at login**, and the Accessibility permission under
+[Troubleshooting](user-guide.md#troubleshooting). If windows stop
+being managed after an upgrade, re-approve KiwiDesk in **System
+Settings › Privacy & Security › Accessibility**.
 
-Releases are signed with a stable Developer ID and notarized. If
-windows stop being managed after an upgrade, re-approve KiwiDesk in
-**System Settings › Privacy & Security › Accessibility**.
-
-Prefer to build it yourself? `swift build -c release` produces
+To build it yourself, `swift build -c release` produces
 `.build/release/KiwiDesk`, which takes the same commands.
