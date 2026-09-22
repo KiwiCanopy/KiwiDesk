@@ -50,10 +50,13 @@ flowchart TD
    destroyed, moved, focused) or an event listener fires. AX
    callbacks arrive on the run loop of the thread that registered
    them, and observer registration stays on the main thread (§5).
-   A move/resize notification carries no geometry: the frame is
-   read back on a per-app background queue, newest-wins coalesced,
-   and delivered to the main actor afterwards
-   (`FrameReadCoalescer`, #618).
+   A notification names its window from the tracked element map
+   before asking the app (#1084), and every read of that element
+   — the frame behind a move/resize, the liveness frame behind a
+   focus report, the title behind a title change — runs on a
+   per-app, per-lane background queue, newest-wins coalesced (the
+   focus read across the app's windows), and is delivered to the
+   main actor afterwards (`AXReadCoalescer`, #618/#1088).
 2. **reconcile** — the raw OS delta is reconciled against known
    state. macOS **native tabs** surface as one window vanishing
    while another appears at the same frame; `TabReconciler`

@@ -25,6 +25,7 @@ extension EventLoop {
         // the observers down, so the gate falls back to the
         // frontmost reading on restart (#1322).
         lastActivePid = nil
+        lastCommandedFocus = nil
         if let screenToken {
             NotificationCenter.default
                 .removeObserver(screenToken)

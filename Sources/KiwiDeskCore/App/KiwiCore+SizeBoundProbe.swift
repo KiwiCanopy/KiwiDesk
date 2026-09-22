@@ -89,7 +89,7 @@ extension KiwiCore {
         guard let element = eventLoop.element(for: id),
             let pid = state.windows[id]?.pid
         else { return }
-        eventLoop.frameReads.request(
+        eventLoop.axReads.request(
             .settleProbe,
             window: id,
             element: element,

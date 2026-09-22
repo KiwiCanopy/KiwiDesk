@@ -67,11 +67,11 @@ struct SizeBoundCorroborationProbeEngineTests {
         _ core: KiwiCore,
         returning frame: CGRect
     ) {
-        core.eventLoop.frameReads.reader = { _ in frame }
-        core.eventLoop.frameReads.deliver = { work in
+        core.eventLoop.axReads.reader = { _ in frame }
+        core.eventLoop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        core.eventLoop.frameReads.dispatchOverride = { _, work in
+        core.eventLoop.axReads.dispatchOverride = { _, work in
             work()
         }
         core.eventLoop.elements[1] = [

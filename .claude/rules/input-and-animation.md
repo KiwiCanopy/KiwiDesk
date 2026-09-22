@@ -242,8 +242,16 @@ editing here:
   seconds of held resize, worst 607 ms, ~37% of main-thread
   samples blocked in it — against 1 stall at 134 ms once the
   arms resolved from `elements[pid]` instead (device,
-  2026-08-29). A new arm on this path takes the same route, and
-  the remaining two — focus and title — are #1088.
+  2026-08-29). Since #1088 the focus and title arms take the
+  same route — a browser storms title changes on that thread,
+  every page load and every command — and a new arm on this
+  path takes it too: the id from `EventLoop+WindowIDResolution`,
+  and every read of the element OFF the main actor through
+  `AXReadCoalescer` (#618's shape), delivered after the read
+  with the observer and the registration re-checked there.
+  The ask is logged (`notify: … asked pid …`) and the focus
+  delivery names its read (`focus: w… liveness read …ms off
+  main`), so a device trace tells the two paths apart.
 
   Two properties the map does NOT have, both paid for in
   regressions the same night, so a router owes an answer to
@@ -254,7 +262,13 @@ editing here:
     that follows answers `.zero`, which folds into state and
     drags the overlays with it. The move/resize arms buy it
     back by dropping a zero frame at delivery
-    (`NotificationWindowIDTests`).
+    (`NotificationWindowIDTests`); the focus arm reads a frame
+    for exactly that verdict and drops the same way
+    (`FocusArmRouteTests`); the title arm drops a FAILED copy —
+    `nil`, never the empty string a window can really carry
+    (`TitleArmRouteTests`). A new arm states which of the two
+    it drops on, or a dead window's stale reading folds into
+    state again.
   - **Uniqueness.** The map is keyed by id, so nothing forbids
     two ids pointing at one element, and `Dictionary`'s
     iteration order is undefined — "the first match" is a coin
@@ -264,6 +278,59 @@ editing here:
     settle it. A re-key removing its old key first
     (`EventLoop+Tabs.applyTabRekey`) is what keeps ambiguity
     rare; it is not what makes the lookup safe.
+
+  What the hop changes, each held by the suite that drives it.
+  **An arm that acts only on a TRACKED window drops a MISS
+  rather than asking**, through the one `trackedWindowID` — the
+  title arm, registered per window at `track`, so a miss is a
+  released window; and the destroy/minimize arm, whose own
+  tracked gate an asked id could pass only under a non-equal
+  element the map never holds, and whose miss is the COMMON
+  case since the focus-change reconcile sweeps a closing window
+  first. A consumer of `.windowTitleChanged` that comes to need
+  an untracked id owes the title arm its ask back
+  (`TitleArmRouteTests`, `NotificationWindowIDTests`). The focus arm keeps the ask for
+  a miss, because #21's classification needs the panel's id.
+  **The focus read is keyed per APP and rides its own per-app
+  lane** (`AXReadCoalescerFocusTests`): `kAXFocusedWindowChanged`
+  is a single-valued stream, so a per-window key lets a
+  re-report of X dispatch behind Y's read and land LAST, and a
+  lane shared with the frame storm parks the report behind
+  queue depth × a stalled app's messaging timeout, past the
+  wall-clock ledgers its consumers read. **Every gate on a
+  focus report is judged at DELIVERY, never at receipt**
+  (`FocusArmDeliveryTests`): the #1322 provenance, because two
+  apps' reads ride two queues and a slow app's report can land
+  after a fast app's activation; and a report older than the
+  last focus KiwiDesk COMMANDED is dropped, since the blocking
+  read used to serialize the notification ahead of the next
+  hotkey and a stale report landing after `focusWindow` dropped
+  the scrolling raise and a Monocle flip's owed focus —
+  `focusWindow` stamps `EventLoop.lastCommandedFocus` for a
+  command onto ANOTHER window, after the #1345 refusal, so the
+  z-order closing re-asserts (same target) and a refused command
+  supersede nothing. The report-reacting re-asserts
+  (`+PlacementBounce`, `+AccessibilityReturn`,
+  `+MenuBarRevealReturn`, `+FocusEvents`' sibling arm) write no
+  stamp BY RULING: each runs inside `handleWindowFocused`,
+  restores the focus the report displaced and is bounded by its
+  own door, so a stale report meets the arm it would have met
+  anyway; a NEW door that moves state focus onto another window
+  outside a report stamps, or argues here why not. Priced
+  residue: the create fold's spawn focus stamps nothing, so an
+  older same-app report landing after ⌘N is corrected by the
+  new window's own queued report one read later — in scrolling
+  a double pan; stamp at the fold's consumer if a device sitting
+  shows it. The #160
+  float recheck rides the title delivery, pinned by
+  `NotificationArmNeedleTests` because its next read is a
+  direct AX call no fixture can answer; that suite also holds
+  the whole `Events/` tree to the resolver — its `allowed` map
+  the one copy of who may spell `AXHelper.windowID(`, its
+  `allowedSeam` map of who may call `resolveWindowID(` directly,
+  the blind spot the route suites' log-line channel has — and
+  pins the `focusWindow` stamp, which no behavior suite can
+  see.
 - Use **one `DisplayLink` per monitor** (mixed refresh rates).
   Never drive animations from a single global timer.
 - **Every `.windowFocused` the loop emits comes from the app
@@ -281,7 +348,9 @@ editing here:
   a wiring `ClickProvenanceWiringTests` needles — standing in
   before the first activation; it DROPS rather than
   holds, and with no reading at all the report stands (fails
-  OPEN). `FocusReportProvenanceTests` drives the real branch and
+  OPEN). Since #1088 the gate is read at the report's DELIVERY,
+  after the off-main liveness read (the bullet above says why).
+  `FocusReportProvenanceTests` drives the real branch and
   `FocusReportEmitterCensusTests` pins the two emitters. Stated,
   not held: an app that does activate is re-reported by
   `appActivated`'s own focused-window read, which is what closes

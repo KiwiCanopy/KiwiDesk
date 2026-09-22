@@ -115,11 +115,11 @@ struct SizeBoundAnswerChannelTests {
             origin: target.origin,
             size: CGSize(width: 715, height: target.height)
         )
-        core.eventLoop.frameReads.reader = { _ in refused }
-        core.eventLoop.frameReads.deliver = { work in
+        core.eventLoop.axReads.reader = { _ in refused }
+        core.eventLoop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        core.eventLoop.frameReads.dispatchOverride = {
+        core.eventLoop.axReads.dispatchOverride = {
             _,
             work in
             work()
@@ -181,11 +181,11 @@ struct SizeBoundAnswerChannelTests {
         // the grace.
         #expect(core.tiler.sizeBound(for: w) == nil)
         #expect(core.tiler.candidateSizeBound(for: w) != nil)
-        core.eventLoop.frameReads.reader = { _ in refused }
-        core.eventLoop.frameReads.deliver = { work in
+        core.eventLoop.axReads.reader = { _ in refused }
+        core.eventLoop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        core.eventLoop.frameReads.dispatchOverride = {
+        core.eventLoop.axReads.dispatchOverride = {
             _,
             work in
             work()

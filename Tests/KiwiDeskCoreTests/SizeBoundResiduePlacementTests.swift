@@ -81,11 +81,11 @@ struct SizeBoundResiduePlacementTests {
         // unchanged, and it is what the assertions below hold:
         // the confirmation edge places the residue in its OWN
         // turn rather than waiting for a later event.
-        core.eventLoop.frameReads.reader = { _ in refused }
-        core.eventLoop.frameReads.deliver = { work in
+        core.eventLoop.axReads.reader = { _ in refused }
+        core.eventLoop.axReads.deliver = { work in
             MainActor.assumeIsolated { work() }
         }
-        core.eventLoop.frameReads.dispatchOverride = {
+        core.eventLoop.axReads.dispatchOverride = {
             _,
             work in
             work()

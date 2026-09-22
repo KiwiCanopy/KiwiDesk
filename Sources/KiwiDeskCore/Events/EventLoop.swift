@@ -106,15 +106,17 @@ public final class EventLoop {
     /// one on a native-tab switch (#308). Kept for all windows (not
     /// just carriers) so the 1↔2 tab boundary — where the vanishing
     /// or appearing window has no tab group yet — still matches by
-    /// frame. Set at track, refreshed on move/resize/reconcile,
-    /// moved on re-key, cleared on destroy/detach/stop.
+    /// frame. Set at track, refreshed on move/resize/reconcile
+    /// and by the focus report's liveness read (#1088), moved
+    /// on re-key, cleared on destroy/detach/stop.
     var trackedFrames: [WindowID: CGRect] = [:]
-    /// Per-app off-main frame reads for move/resize
-    /// notifications (#618) — the read is blocking IPC into an
-    /// app that is busiest exactly when it storms, and on the
-    /// main actor it froze the focus ring for the app's whole
-    /// busy stretch. The type owns the coalescing argument.
-    let frameReads = FrameReadCoalescer()
+    /// Per-app off-main AX reads behind the notification arms —
+    /// the move/resize frame (#618), the focus report's liveness
+    /// frame and the title (#1088). Each read is blocking IPC
+    /// into an app that is busiest exactly when it storms, and
+    /// on the main actor it froze the focus ring for the app's
+    /// whole busy stretch. The type owns the coalescing argument.
+    let axReads = AXReadCoalescer()
     /// Tracked windows that carry (or last carried) an `AXTabGroup`.
     /// A re-key needs a tab group on only one side, so this preserves
     /// the "was a carrier" fact for a window that vanishes after a
@@ -183,6 +185,13 @@ public final class EventLoop {
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
+    /// When KiwiDesk last COMMANDED a focus onto another window
+    /// (`KiwiCore.focusWindow` writes it; `NotificationArmNeedleTests`
+    /// pins the write). A focus report received before it and
+    /// delivered after it is stale — the command's own echo
+    /// follows (#1088). The report-reacting re-asserts write no
+    /// stamp by ruling (input-and-animation.md).
+    var lastCommandedFocus: ContinuousClock.Instant?
     public internal(set) var isRunning = false
 
     /// The chunked boot pass's queue, counters and per-app budget

@@ -91,6 +91,13 @@ extension KiwiCore {
             )
             return
         }
+        // A report of the OS state this command supersedes may
+        // still be in its read's flight (#1088). A same-target
+        // command — the z-order closing re-asserts — supersedes
+        // nothing, so a click landing inside that flight stands.
+        if activeSpace?.focused != id {
+            eventLoop.lastCommandedFocus = .now
+        }
         // The anchor, not `activeSpace?.focused`: stepping off a
         // tiled-sticky traveler must classify the scroll pan
         // direction from the traveler's slot, not from the stale
