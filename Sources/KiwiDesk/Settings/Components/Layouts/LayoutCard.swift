@@ -126,30 +126,44 @@ enum LayoutCardText {
     }
 
     /// App Bar cross-reference prose (`CrossReferenceRowSlotTests`).
+    /// One key per resulting sentence: the state word must agree
+    /// with "App Bar", which a shared `common.on` cannot (#1287,
+    /// `AppBarXrefSentenceTests`).
     static func appBarState(
         _ mode: LayoutMode,
         on: Bool
     ) -> String? {
-        let state =
-            on ? L("common.on", "on") : L("common.off", "off")
-        switch mode {
-        case .monocle:
+        switch (mode, on) {
+        case (.monocle, true):
             return L(
-                "monocle.app_bar_xref_state",
-                "The monocle App Bar (currently %1$@) is "
-                    + "configured in %2$@.",
-                state,
+                "monocle.app_bar_xref_on",
+                "The monocle App Bar (currently on) is "
+                    + "configured in %1$@.",
                 CrossReferenceRow.linkSlot
             )
-        case .scrolling:
+        case (.monocle, false):
             return L(
-                "scroll_grid.app_bar_xref_state",
-                "The scrolling App Bar (currently %1$@) is "
-                    + "configured in %2$@.",
-                state,
+                "monocle.app_bar_xref_off",
+                "The monocle App Bar (currently off) is "
+                    + "configured in %1$@.",
                 CrossReferenceRow.linkSlot
             )
-        case .bsp, .stack, .grid, .track, .floating:
+        case (.scrolling, true):
+            return L(
+                "scroll_grid.app_bar_xref_on",
+                "The scrolling App Bar (currently on) is "
+                    + "configured in %1$@.",
+                CrossReferenceRow.linkSlot
+            )
+        case (.scrolling, false):
+            return L(
+                "scroll_grid.app_bar_xref_off",
+                "The scrolling App Bar (currently off) is "
+                    + "configured in %1$@.",
+                CrossReferenceRow.linkSlot
+            )
+        case (.bsp, _), (.stack, _), (.grid, _), (.track, _),
+            (.floating, _):
             // Non-hosting layouts return nil (`CrossReferenceRowSlotTests`).
             return nil
         }

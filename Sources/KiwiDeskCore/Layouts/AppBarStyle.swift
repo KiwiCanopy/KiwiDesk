@@ -32,8 +32,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Spacing between item boxes in pt.
     public var itemGap: CGFloat = 6
     public var content: Content = .iconAndTitle
-    /// Longest title drawn per item before tail-truncation. Default 25
-    /// (owner 2026-08-19).
+    /// Longest title drawn per item before tail-truncation (#1171).
     public var titleCap = 10
     /// App icon source: native image or SketchyBar App Font glyph (#294).
     public var iconSource: BarAppIconSource = .appImage
