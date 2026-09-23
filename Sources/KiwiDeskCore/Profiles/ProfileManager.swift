@@ -66,8 +66,13 @@ public final class ProfileManager {
     /// On the WRITE rather than on either caller (#1179).
     public var onCapturedLive: @MainActor (String) -> Void = { _ in }
 
+    /// A profile predating the one-owner format was on disk when
+    /// this manager was made, and no settle has run since (#1530).
+    public internal(set) var owesSetSettle: Bool
+
     public init(directory: URL) {
         self.directory = directory
+        owesSetSettle = Self.owesSettle(in: directory)
     }
 
     public func list() -> [String] {

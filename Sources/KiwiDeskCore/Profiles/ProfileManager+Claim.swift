@@ -10,8 +10,9 @@ extension ProfileManager {
     /// Non-adopting writes only. A default left dormant — never
     /// auto-matched — hands its flag to `name`, so the count keeps
     /// a default that can load. The caller writes `name`'s own set
-    /// first; boot never calls this (two hand-edited owners
-    /// resolve as `match` always has).
+    /// first. Boot calls this only through the one-time
+    /// `settleSharedSets`; a duplicate hand-edited in later
+    /// resolves as `match` always has.
     @discardableResult
     func claim(
         _ monitors: [String],

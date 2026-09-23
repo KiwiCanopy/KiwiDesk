@@ -4627,7 +4627,9 @@ from another profile, the command returns the names and why:
 `{"taken_from": ["Work"], "reason": "…"}`; otherwise it returns
 nothing. The first start after updating, and restoring a
 backup, settle every set several profiles hold onto the one that
-loads it today (the alphabetically first). After that, start-up, a
+loads it today (the alphabetically first); if that leaves the
+count's default without a set, the default moves to the profile
+that kept it. After that, start-up, a
 monitor change and a Desktop binding never move a set, so two
 hand-edited profiles that hold the same set still resolve as
 before. A profile left with no set is *dormant*:

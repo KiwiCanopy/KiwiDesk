@@ -11253,9 +11253,14 @@ consequences:
   start past the one-owner format, and every restore of a backup,
   settles each set several profiles held onto the one that loads
   it today — the alphabetically first — and takes it from the
-  rest. Nothing loads differently; only entries that could never
-  win go, so the Profiles page is truthful from its first
-  showing. Leaving them for the next save or load was weighed and
+  rest. Every screen setup a profile holds loads the profile it
+  loaded before; only entries that could never win go, so the
+  Profiles page is truthful from its first showing. The one
+  visible move is a default: a holder left dormant hands its flag
+  to the profile that kept the set, which then answers screen
+  setups no profile holds, and the log says so. The crossing is
+  decided when the profile store opens, before any reader can
+  stamp a file, and counts only files that decode as profiles. Leaving them for the next save or load was weighed and
   refused: a user who never saves on that screen setup would keep
   a page contradicting its own rule indefinitely.
 - **A set changing hands keeps its pins.** It arrives with the

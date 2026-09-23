@@ -4,9 +4,9 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
-        // #1530's one-time settle, at the format crossing: ahead of
-        // every read here, since a read stamps the file it reads.
-        if profiles.hasFilesBeforeOneOwnerFormat() {
+        // #1530's one-time settle, owed from when the manager was
+        // made — before any reader could stamp a file.
+        if profiles.owesSetSettle {
             settleSharedSets()
         }
         keybindingRuntimeGeneration &+= 1
