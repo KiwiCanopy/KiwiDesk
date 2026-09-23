@@ -103,7 +103,8 @@ struct MonitorSetClaimTests {
         try core.persistProfile(named: "Work", modes: nil)
         connect(core, ["V"])
         try core.persistProfile(named: "Vision", modes: nil)
-        try core.persistProfile(named: "Work", modes: nil)
+        // A load claims where a save of an owned set does not.
+        try core.loadProfile(named: "Work")
         // "Work" now holds A and V; loading "Vision" on V takes V.
         let released = try core.loadProfile(named: "Vision")
         #expect(released == ["Work"])

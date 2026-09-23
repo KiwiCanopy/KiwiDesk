@@ -216,11 +216,19 @@ extension KiwiCore {
             return released
         }
         let live = liveMonitorSet()
-        guard existing.upsert(live) else {
+        guard existing.monitorCount == live.monitors.count else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: existing.monitorCount,
                 live: live.monitors.count
             )
+        }
+        // A set ANOTHER profile owns stays with it: the live profile
+        // is on those screens through a binding or a set moved away
+        // by hand, and a save takes nothing (owner, 2026-09-23).
+        if existing.set(matching: live.monitors) != nil
+            || !isOwnedElsewhere(live.monitors, than: name)
+        {
+            existing.upsert(live)
         }
         let fresh = buildProfile(name: name, modes: modes)
         existing.spaces = fresh.spaces

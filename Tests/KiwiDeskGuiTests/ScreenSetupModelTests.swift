@@ -216,4 +216,31 @@ struct ScreenSetupModelTests {
                 == ["Sidecar (100x100)"]
         )
     }
+
+    /// A profile a binding put on screens ANOTHER profile owns has
+    /// nothing to save there, so no "Screens" row appears (#1530).
+    @Test("An owned setup is no unsaved Screens change")
+    func ownedSetupIsNoDrift() throws {
+        let core = makeCore()
+        connect(core, ["A"])
+        try core.persistProfile(named: "Starter", modes: nil)
+        connect(core, ["V"])
+        try core.persistProfile(named: "Vision", modes: nil)
+        core.apply(
+            profile: try core.profiles.read(name: "Starter"),
+            forceRetile: false
+        )
+        let model = makeTestModel(core: core)
+        model.refreshProfiles()
+        #expect(model.profileDirty)
+        #expect(model.profileDrift == nil)
+        // Unowned screens are still the profile's to save.
+        connect(core, ["N"])
+        core.apply(
+            profile: try core.profiles.read(name: "Starter"),
+            forceRetile: false
+        )
+        model.refreshProfiles()
+        #expect(model.profileDrift == .screensUnsaved(profile: "Starter"))
+    }
 }

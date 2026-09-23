@@ -199,4 +199,38 @@ struct MonitorSetHandOverTests {
         #expect(try core.profiles.read(name: "Work").isDefault)
         #expect(try !core.profiles.read(name: "Resting").isDefault)
     }
+
+    /// A save never takes a set another profile owns — the live
+    /// profile is on those screens through a binding or a set
+    /// moved away by hand (owner, 2026-09-23). A load still does.
+    @Test("A save leaves a set another profile owns with it")
+    func saveLeavesOwnedSet() throws {
+        let core = makeCore()
+        connect(core, ["A"])
+        try core.persistProfile(named: "Starter", modes: nil)
+        connect(core, ["V"])
+        try core.persistProfile(named: "Vision", modes: nil)
+        // Starter lands on V the way a binding puts it there.
+        core.apply(
+            profile: try core.profiles.read(name: "Starter"),
+            forceRetile: false
+        )
+        let released = try core.persistProfile(
+            named: "Starter",
+            modes: nil
+        )
+        #expect(released.isEmpty)
+        #expect(
+            try core.profiles.read(name: "Starter")
+                .set(matching: ["V:100x100"]) == nil
+        )
+        #expect(try !core.profiles.read(name: "Vision").isDormant)
+        // A save of a set no one owns still adds it.
+        connect(core, ["N"])
+        try core.persistProfile(named: "Starter", modes: nil)
+        #expect(
+            try core.profiles.read(name: "Starter")
+                .set(matching: ["N:100x100"]) != nil
+        )
+    }
 }

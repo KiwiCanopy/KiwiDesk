@@ -32,6 +32,17 @@ extension KiwiCore {
                 == MonitorSet(monitors: liveFingerprints).monitors
     }
 
+    /// Whether a profile other than `name` holds `monitors` — a
+    /// save of `name` then leaves the set with its owner (#1530).
+    public func isOwnedElsewhere(
+        _ monitors: [String],
+        than name: String
+    ) -> Bool {
+        profiles.allProfiles().contains {
+            $0.name != name && $0.set(matching: monitors) != nil
+        }
+    }
+
     /// Strips the connected set from every other profile of its
     /// count when `profile` holds it — `saveProfile`'s tail.
     func claimLiveSet(heldBy profile: Profile) throws -> [String] {
