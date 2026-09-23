@@ -20,6 +20,18 @@ extension KiwiCore {
         state.workspaces.allDisplays.map(\.fingerprint)
     }
 
+    /// The live Space→monitor pins, read-only — what a pick onto
+    /// the loaded profile leaves live, for the draft to follow.
+    public var livePins: [SpaceID: String] { spacePins }
+
+    /// Whether `monitors` is the connected set — the one answer
+    /// the Profiles page and the pick both take (#1530).
+    public func isConnectedMonitorSet(_ monitors: [String]) -> Bool {
+        !monitors.isEmpty
+            && MonitorSet(monitors: monitors).monitors
+                == MonitorSet(monitors: liveFingerprints).monitors
+    }
+
     /// Strips the connected set from every other profile of its
     /// count when `profile` holds it — `saveProfile`'s tail.
     func claimLiveSet(heldBy profile: Profile) throws -> [String] {
@@ -103,7 +115,7 @@ extension KiwiCore {
             )
         }
         let released = try handOver(monitors, to: &profile)
-        if monitors.sorted() == liveFingerprints.sorted(),
+        if isConnectedMonitorSet(monitors),
             let current = profiles.currentName
         {
             if current == name {
@@ -134,7 +146,7 @@ extension KiwiCore {
             $0.monitorCount == count
         }
         var sets = Set(peers.flatMap { $0.monitorSets.map(\.monitors) })
-        let live = liveFingerprints.sorted()
+        let live = MonitorSet(monitors: liveFingerprints).monitors
         if live.count == count { sets.insert(live) }
         let own = Set(profile.monitorSets.map(\.monitors))
         return sets.subtracting(own)
@@ -144,7 +156,7 @@ extension KiwiCore {
                     owner: peers.first {
                         $0.set(matching: monitors) != nil
                     }?.name,
-                    isConnected: monitors == live
+                    isConnected: isConnectedMonitorSet(monitors)
                 )
             }
             .sorted {
@@ -154,6 +166,20 @@ extension KiwiCore {
                 return ($0.owner ?? "", $0.monitors.joined())
                     < ($1.owner ?? "", $1.monitors.joined())
             }
+    }
+
+    /// The one-time settle of sets several profiles held before
+    /// #1530 — each stays with the profile that loads it today.
+    /// Called at the format crossing (`loadConfig`) and after a
+    /// restore, whose files may predate the rule; never per boot.
+    func settleSharedSets() {
+        do {
+            for line in try profiles.settleSharedSets() {
+                onLog(line)
+            }
+        } catch {
+            onLog("profiles: settling shared monitor sets failed: \(error)")
+        }
     }
 
     /// The `save_profile` / `load_profile` answer: plain `ok`, or

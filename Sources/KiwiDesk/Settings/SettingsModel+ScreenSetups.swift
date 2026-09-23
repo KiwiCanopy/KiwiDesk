@@ -5,9 +5,9 @@ import KiwiDeskCore
 /// sets a profile could take and who holds them; this narrates
 /// them and performs the take.
 extension SettingsModel {
-    /// Whether `monitors` is the connected setup.
+    /// Whether `monitors` is the connected setup — Core's answer.
     func isConnectedSetup(_ monitors: [String]) -> Bool {
-        monitors.sorted() == displays.map(\.fingerprint).sorted()
+        core.isConnectedMonitorSet(monitors)
     }
 
     /// Setups `name` could take, in Core's order (connected first).
@@ -20,6 +20,7 @@ extension SettingsModel {
     func claimScreenSetup(_ monitors: [String], for name: String) {
         do {
             try core.claimMonitorSet(monitors, for: name)
+            adoptClaimedPins()
         } catch {
             profileWarning = L(
                 "profiles.save_failed",
@@ -29,6 +30,21 @@ extension SettingsModel {
             core.onLog("screen setup claim failed: \(error)")
         }
         refreshProfiles()
+    }
+
+    /// A pick onto the loaded profile moves the LIVE pins (Core
+    /// adopts them), so the Live draft's baseline follows, and an
+    /// unedited draft with it — or its next Save writes the old
+    /// pins back. The pick's one caller is this model
+    /// (`MonitorSetClaimSeamTests`' census).
+    private func adoptClaimedPins() {
+        guard target == .live else { return }
+        let live = core.livePins
+        if config.spacePins == cleanConfig.spacePins {
+            config.spacePins = live
+        }
+        cleanConfig.spacePins = live
+        recomputeDirty()
     }
 
     /// A setup's screens as one localized list: a connected screen

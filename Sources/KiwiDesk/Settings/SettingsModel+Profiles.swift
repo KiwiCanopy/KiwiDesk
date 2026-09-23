@@ -197,6 +197,8 @@ struct ProfileSummary: Identifiable {
     let sets: [[String]]
     /// Holds no screen combination (#1530).
     var isDormant = false
+    /// The count's default AND able to load as one (#1530).
+    var isUsableDefault = false
     let isDefault: Bool
     let matchesLive: Bool
     let matchesConnectedCount: Bool

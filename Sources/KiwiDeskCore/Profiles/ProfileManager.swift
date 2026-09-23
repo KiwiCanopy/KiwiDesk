@@ -116,6 +116,7 @@ public final class ProfileManager {
             defaultProfile(count: profile.monitorCount) == nil
         {
             profile.isDefault = true
+            try clearDormantDefaults(count: profile.monitorCount)
         }
         try write(profile)
         active = ActiveProfile(profile)
@@ -143,6 +144,7 @@ public final class ProfileManager {
             }) {
                 heir.isDefault = true
                 try write(heir)
+                try clearDormantDefaults(count: count)
             }
         }
     }

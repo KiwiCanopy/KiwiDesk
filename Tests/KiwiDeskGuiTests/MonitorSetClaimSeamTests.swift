@@ -85,13 +85,23 @@ struct MonitorSetClaimSeamTests {
             "KiwiCore+MonitorSetClaim.swift": 1,
             "KiwiCore+ProfileSpaces.swift": 1,
         ],
+        "settleSharedSets(": [
+            // The one-time settle (#1530): the manager's pass and
+            // its declaration, the core's wrapper, and the two
+            // crossings — the format crossing in `loadConfig` and a
+            // restore. Never a per-boot caller.
+            "ProfileManager+Settle.swift": 1,
+            "KiwiCore+MonitorSetClaim.swift": 2,
+            "KiwiCore+Config.swift": 1,
+            "KiwiCore+BackupRestore.swift": 1,
+        ],
         "applyStandard(": [
             "KiwiCore+ProfileResolution.swift": 1,
             // Presets ▸ Apply.
             "SettingsModel+Profiles.swift": 1,
             // The one boot caller: the first-run Starter seed,
-            // which runs only with no profile saved, so its claim
-            // has no sibling to strip.
+            // whose own guard refuses a non-empty profile store,
+            // so its claim has no sibling to strip.
             "KiwiCore+StarterSeed.swift": 1,
         ],
     ]
@@ -102,6 +112,10 @@ struct MonitorSetClaimSeamTests {
             .appendingPathComponent("Sources")
         let files = try SourceScan.swiftSources(under: root)
         #expect(!files.isEmpty)
+        // Keyed by name, so two same-named files must not exist:
+        // one would hide the other's count.
+        let names = files.map(\.lastPathComponent)
+        #expect(Set(names).count == names.count)
         let sources = try files.map {
             (
                 $0.lastPathComponent,

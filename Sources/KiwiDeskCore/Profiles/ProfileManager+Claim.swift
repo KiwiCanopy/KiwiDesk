@@ -40,4 +40,17 @@ extension ProfileManager {
         }
         return released.sorted()
     }
+
+    /// Drops the flag from a dormant profile of `count` — a hand
+    /// edit's leftover — when another is made that count's
+    /// default, so the count never shows two (#1530).
+    func clearDormantDefaults(count: Int) throws {
+        for var stale in allProfiles()
+        where stale.monitorCount == count
+            && stale.isDormant && stale.isDefault
+        {
+            stale.isDefault = false
+            try write(stale)
+        }
+    }
 }

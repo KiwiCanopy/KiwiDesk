@@ -4625,9 +4625,12 @@ profile with that count; the set keeps the pins its previous owner
 held for the Spaces the new owner declares. When that took the set
 from another profile, the command returns the names and why:
 `{"taken_from": ["Work"], "reason": "…"}`; otherwise it returns
-nothing. Start-up, a monitor change and a Desktop binding never
-move a set, so two hand-edited profiles that hold the same set
-still resolve as before. A profile left with no set is *dormant*:
+nothing. The first start after updating, and restoring a
+backup, settle every set several profiles hold onto the one that
+loads it today (the alphabetically first). After that, start-up, a
+monitor change and a Desktop binding never move a set, so two
+hand-edited profiles that hold the same set still resolve as
+before. A profile left with no set is *dormant*:
 its file keeps `"monitor_sets": []` beside `"monitor_count"`, it is
 never picked by its screens (a Desktop binding still loads it), it
 still loads by name, and it takes a set back on its next load. A

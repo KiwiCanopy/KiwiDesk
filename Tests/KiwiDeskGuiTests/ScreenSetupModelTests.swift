@@ -57,6 +57,11 @@ struct ScreenSetupModelTests {
             model.setupLabel(["Studio Display:2560x1440"], sized: true)
                 == "Studio Display (2560x1440)"
         )
+        // The size is after the LAST colon; a name may hold one.
+        #expect(
+            model.setupLabel(["Dell: U2723:2560x1440"])
+                == "Dell: U2723"
+        )
     }
 
     @Test("Two setups that would read alike keep their sizes")

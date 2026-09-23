@@ -117,7 +117,7 @@ enum HomeCardContent {
                 )
             }
             if let fallback = summaries.first(
-                where: \.isDefault
+                where: \.isUsableDefault
             ) {
                 return L(
                     "home.card.profiles.subtitle",

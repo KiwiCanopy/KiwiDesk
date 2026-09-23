@@ -111,6 +111,26 @@ struct MonitorSetHandOverTests {
         #expect(core.spacePins == ["2": "B:100x100"])
     }
 
+    @Test("A pick of a disconnected set leaves the live fit alone")
+    func disconnectedPickKeepsFit() throws {
+        let core = makeCore()
+        connect(core, ["B"])
+        try core.persistProfile(named: "Home", modes: nil)
+        connect(core, ["A"])
+        try core.persistProfile(named: "Work", modes: nil)
+        try core.loadProfile(named: "Work")
+        // Taking Home's B for Work fits nothing new on screen.
+        core.profiles.markDirty()
+        try core.claimMonitorSet(["B:100x100"], for: "Work")
+        #expect(core.profiles.isDirty)
+        // A is no longer connected, so taking it from the loaded
+        // Work re-judges nothing either.
+        core.profiles.markClean()
+        connect(core, ["C"])
+        try core.claimMonitorSet(["A:100x100"], for: "Home")
+        #expect(!core.profiles.isDirty)
+    }
+
     /// The owner order runs against the monitor order, so a sort
     /// by monitors cannot pass for a sort by owner.
     @Test("The + list: connected first, then by owner")

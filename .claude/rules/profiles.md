@@ -659,7 +659,11 @@ loaded with it. The obligations:
   Desktop binding's load never claim, because a claim there
   rewrites files the user did not touch — so a new caller of a
   claiming door registers in `MonitorSetClaimSeamTests`' census
-  with its reason, and one on those paths is refused.
+  with its reason, and one on those paths is refused. The ONE
+  exception is `settleSharedSets`, the one-time settle at the
+  format crossing and after a restore, which keeps each set with
+  the profile `match` already loads for it
+  (`MonitorSetSettleTests`); it never runs per boot.
 - **Treat a profile with no set as dormant, never as invalid.** It
   keeps its count in `monitor_count` and is never a count's
   default: a reader asking for a fallback takes

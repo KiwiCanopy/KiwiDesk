@@ -11249,6 +11249,15 @@ consequences:
   cannot rewrite files you did not touch. A binding picks a
   profile and owns no screens (#1436), so a bound profile that
   lost the set loads dirty.
+- **Except once, at the update (owner, 2026-09-23).** The first
+  start past the one-owner format, and every restore of a backup,
+  settles each set several profiles held onto the one that loads
+  it today — the alphabetically first — and takes it from the
+  rest. Nothing loads differently; only entries that could never
+  win go, so the Profiles page is truthful from its first
+  showing. Leaving them for the next save or load was weighed and
+  refused: a user who never saves on that screen setup would keep
+  a page contradicting its own rule indefinitely.
 - **A set changing hands keeps its pins.** It arrives with the
   pins its previous owner held for the Spaces the new owner
   declares, so a round trip keeps the pins of Spaces both
