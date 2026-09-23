@@ -34,7 +34,10 @@ struct AppFontGlyphMap: Sendable, Equatable {
         prefixes.sort { $0.prefix.count > $1.prefix.count }
     }
 
-    /// Test convenience: one ligature per name.
+    /// No entries: the resolver's fallback when the load fails.
+    static let empty = AppFontGlyphMap([])
+
+    /// One ligature per name, through the same parsing.
     init(_ map: [String: String]) {
         self.init(map.map { (name: $0.key, ligature: $0.value) })
     }
@@ -104,7 +107,14 @@ struct AppFontGlyphMap: Sendable, Equatable {
             var row = try decoder.unkeyedContainer()
             ligature = try row.decode(String.self)
             _ = try row.decode(Int.self)
-            appNames = try row.decodeIfPresent([String].self) ?? []
+            appNames =
+                try row.decodeNil() ? [] : row.decode([String].self)
+            guard row.isAtEnd else {
+                throw DecodingError.dataCorruptedError(
+                    in: row,
+                    debugDescription: "icon row longer than three"
+                )
+            }
         }
     }
 }

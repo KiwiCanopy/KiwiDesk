@@ -10971,11 +10971,9 @@ Decisions folded in (ui-designer consult and owner direction,
   independent of the user's Lua VM. Upstream's `icon_map.json` /
   `.lua` / `.sh` snapshots are not vendored: they are copies of
   the same table that can go stale against the font they
-  describe, while the embedded one cannot. A name ending in `*`
-  is a prefix match (a versioned app name such as "Adobe
-  Photoshop 2026"); an exact name wins, then the longest prefix.
-- **Vendored, not user-supplied**: the TTF + map ship in the app
-  (CC0-1.0), refreshed by `scripts/update-app-font.sh` which pins
+  describe, while the embedded one cannot.
+- **Vendored, not user-supplied**: the TTF, carrying its own name
+  table, ships in the app (CC0-1.0), refreshed by `scripts/update-app-font.sh` which pins
   the upstream release in `UPSTREAM.md`. CC0 waives copyright but
   not third-party trademark rights in the depicted app marks —
   accepted deliberately.

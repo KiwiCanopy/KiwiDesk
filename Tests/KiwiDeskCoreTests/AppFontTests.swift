@@ -26,8 +26,7 @@ struct AppFontResourceTests {
         )
     }
 
-    /// Upstream marks versioned app names with a trailing `*`;
-    /// read as an exact key, "Adobe Photoshop 2026" found none.
+    /// Upstream marks versioned app names with a trailing `*`.
     @Test("Bundled prefix names match a versioned app name")
     func bundledPrefixNames() throws {
         let map = try #require(AppFontGlyphMap.loadBundled())

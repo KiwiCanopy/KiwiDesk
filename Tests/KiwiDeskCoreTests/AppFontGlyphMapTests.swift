@@ -69,10 +69,37 @@ struct AppFontGlyphMapTests {
         )
     }
 
-    @Test("A truncated font answers nil")
+    /// Cut in the `meta` header, in the data map record and in
+    /// the payload itself: each is its own bounds check.
+    @Test("A truncated font answers nil at every depth")
     func truncatedFont() {
-        let data = font(#"{"version": 1, "icons": []}"#)
-        #expect(AppFontGlyphMap.load(fontData: data.prefix(40)) == nil)
+        let data = font(#"{"version": 1, "icons": [[":a:", 1, ["A"]]]}"#)
+        #expect(AppFontGlyphMap.load(fontData: data) != nil)
+        for cut in [40, 50, data.count - 1] {
+            #expect(
+                AppFontGlyphMap.load(fontData: data.prefix(cut)) == nil,
+                "cut at \(cut)"
+            )
+        }
+    }
+
+    @Test("A map count past the buffer ends the walk")
+    func bogusMapCount() {
+        var bytes = [UInt8](font(#"{"version": 1, "icons": []}"#))
+        bytes.replaceSubrange(40..<44, with: [0xFF, 0xFF, 0xFF, 0xFF])
+        bytes.replaceSubrange(44..<48, with: Array("XXXX".utf8))
+        #expect(AppFontGlyphMap.load(fontData: Data(bytes)) == nil)
+    }
+
+    @Test("An icon row is exactly three elements")
+    func rowShape() {
+        for icons in [
+            #"[[":a:", 1]]"#,
+            #"[[":a:", 1, ["A"], "extra"]]"#,
+        ] {
+            let data = font("{\"version\": 1, \"icons\": \(icons)}")
+            #expect(AppFontGlyphMap.load(fontData: data) == nil, "\(icons)")
+        }
     }
 
     @Test("A trailing star matches by prefix, case-sensitively")

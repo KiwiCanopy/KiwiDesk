@@ -18,6 +18,9 @@ enum AppFontMetaTable {
         else { return nil }
         for index in 0..<Int(mapCount) {
             let record = meta + 16 + index * 12
+            // A count past the buffer ends the walk; a bogus
+            // 0xFFFFFFFF would otherwise spin the whole range.
+            guard record + 12 <= bytes.count else { return nil }
             guard
                 self.tag(bytes, at: record) == tag,
                 let offset = u32(bytes, at: record + 4),

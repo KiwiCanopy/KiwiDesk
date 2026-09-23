@@ -32,7 +32,7 @@ public final class AppFontResolver {
             let loaded = loader()
             await MainActor.run {
                 guard let self else { return }
-                self.map = loaded ?? AppFontGlyphMap([:])
+                self.map = loaded ?? .empty
                 self.onLoad()
             }
         }

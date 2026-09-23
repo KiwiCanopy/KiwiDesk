@@ -59,7 +59,8 @@ done
 
 # Sanity: the font must carry the APPM name table (schema 1, an
 # array of [ligature, codepoint, appNames|null]) before we clobber
-# anything.
+# anything. AppFontGlyphMap.load(fontData:) is the authority; a
+# schema change moves both.
 if ! python3 -c "
 import json, struct
 b = open('$TMP/sketchybar-app-font.ttf', 'rb').read()
