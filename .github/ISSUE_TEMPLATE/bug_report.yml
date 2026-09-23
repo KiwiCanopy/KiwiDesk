@@ -6,8 +6,17 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting! Please provide enough detail to
-        reproduce the issue. Fill in all fields below.
+        Thanks for reporting! Please give enough detail to
+        reproduce the issue.
+
+        **Please attach the log.** If you can, make the problem
+        happen again first. Then open KiwiDesk Settings ▸ General ▸
+        Advanced, pick a time range beside **Export Log…** that
+        reaches back to before it happened, press the button, and
+        drag the file into *Extra context* below. Can't open
+        Settings? The CLI reference shows the same export from a
+        terminal:
+        https://kiwidesk.app/docs/cli/#exporting-the-log
 
   - type: input
     id: kiwidesk_version
@@ -24,17 +33,6 @@ body:
       label: macOS version
       description: "Run `sw_vers` or check System Settings."
       placeholder: "macOS 15.2"
-    validations:
-      required: true
-
-  - type: dropdown
-    id: mac_model
-    attributes:
-      label: Mac model type
-      options:
-        - Apple Silicon (M1, M2, M3, etc.)
-        - Intel
-        - Not sure
     validations:
       required: true
 
@@ -64,32 +62,6 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: logs_and_state
-    attributes:
-      label: Relevant output and logs
-      description: |
-        Paste the output of these commands (one per block):
-        - `kiwidesk get_state` (print as JSON)
-        - `kiwidesk get_layout_info` (current layout details)
-
-        Then the log: if you can make the problem happen again, do
-        that first. Open KiwiDesk Settings ▸ General ▸ Advanced, pick
-        a time range beside **Export Log…** that reaches back to
-        before it happened, press the button, and **attach the file**
-        here (drag it into this field) instead of pasting fragments.
-        Can't open Settings? The same export from a terminal is in
-        the CLI reference: https://kiwidesk.app/docs/cli/#exporting-the-log
-      placeholder: |
-        ## kiwidesk get_state
-        { "spaces": {...}, ... }
-
-        ## kiwidesk get_layout_info
-        { "layout": "bsp", ... }
-
-        ## Log
-        (attached: KiwiDesk-log-….txt, Last 15 minutes)
-
   - type: checkboxes
     id: other_tools
     attributes:
@@ -108,7 +80,13 @@ body:
     id: extra_context
     attributes:
       label: Extra context
-      description: "Any other relevant details?"
+      description: |
+        Drag the exported log in here. A screenshot or a short
+        screen recording of the problem helps a lot too — crop
+        out anything private first.
       placeholder: |
+        (attached: KiwiDesk-log-….txt, Last 15 minutes)
+        (attached: screenshot of the misplaced window)
+
         Happens only with a specific app?
-        Only on external monitor?
+        Only on an external monitor?
