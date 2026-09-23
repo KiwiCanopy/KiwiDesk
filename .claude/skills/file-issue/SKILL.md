@@ -1,6 +1,6 @@
 ---
 description: File a KiwiDesk GitHub issue the way an agent must — render the template body by hand, then set the Type and the Priority/Effort issue fields the web form would have set for a human. Use whenever creating an issue with `gh`.
-argument-hint: "[template: bug_report|feature_request|docs_report|collector]"
+argument-hint: "[template: bug_report|feature_request|report_docs|collector]"
 ---
 
 File a GitHub issue for this repository. AGENTS.md §3 (Branching
