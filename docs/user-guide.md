@@ -537,7 +537,7 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 The card at the top of the Profiles page answers for your
 machine now — *"Right now: 2 screens →
 Desk (it holds this screen setup)"* — naming which rung resolved
-it; the **?** beside **Your profiles** lists the rungs.
+it; its **?** lists the rungs.
 :::
 
 The rungs, in order:

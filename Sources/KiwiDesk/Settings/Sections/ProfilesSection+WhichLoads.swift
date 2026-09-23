@@ -6,7 +6,10 @@ import SwiftUI
 /// #678 turn 13a).
 extension ProfilesSection {
     @ViewBuilder var whichProfileLoads: some View {
-        SettingsSection(SettingsCatalog.profiles.whichProfileLoads) {
+        SettingsSection(
+            SettingsCatalog.profiles.whichProfileLoads,
+            help: ladderHelp
+        ) {
             Text(rulesSentence)
                 .font(.callout)
                 .fixedSize(horizontal: false, vertical: true)
@@ -31,13 +34,13 @@ extension ProfilesSection {
         )
     }
 
-    /// The whole ladder, numbered in its order (#1609) — the
-    /// Saved profiles header's one `?`, which this card's status
-    /// line narrates a rung of. The binding card is named by
-    /// interpolation, never quoted (#818).
-    var ladderHelp: String {
+    /// The whole ladder, numbered in its order (#1609) — this
+    /// card's one `?`, beside the status line that names a rung of
+    /// it; the flow states only the premise (#1241). The binding
+    /// card is named by interpolation, never quoted (#818).
+    private var ladderHelp: String {
         L(
-            "profiles.saved.help",
+            "profiles.which_loads.help",
             "KiwiDesk loads the first of these that applies:\n"
                 + "1. A profile bound to the Desktop on your main "
                 + "screen for the connected screen setup.\n"

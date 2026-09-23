@@ -217,12 +217,12 @@ extension InterpolatedLabelTests {
         //    the sentence would have named a control that no
         //    longer exists under that name in any locale.
         "keybinding.toggle_display_sticky.help": 1,
-        // 5. #1241, #1609. The ladder lives in the Saved
-        //    profiles header's one `?`, where it names the card
+        // 5. #1241, #1609. The ladder lives in the Which profile
+        //    loads card's one `?`, where it names the card
         //    that sets the binding — the interpolated title is also
         //    what anchors "Desktop" to macOS for a reader who
         //    has not met the word yet.
-        "profiles.saved.help": 1,
+        "profiles.which_loads.help": 1,
         // 6. #1114. The Desktop drawers' one explanation names
         //    the card that binds a profile to a Desktop — the
         //    same card as the entry above, reached from the

@@ -39,7 +39,15 @@ extension DesktopsGroup {
                 )
             }
             Spacer()
-            profileMenu(row, slot: slot, nested: true)
+            profileMenu(
+                row,
+                slot: slot,
+                name: L(
+                    "desktops.profile_ax.setup",
+                    "Profile for this Desktop on %1$@",
+                    label
+                )
+            )
             Button {
                 clear(row, slot: slot)
             } label: {
@@ -59,11 +67,9 @@ extension DesktopsGroup {
         .padding(.leading, Self.nestIndent)
     }
 
-    /// Whether a Desktop draws its setup list — the add menu and
-    /// the labelled fallback — rather than one line: its count
-    /// offers two setups or more — with one, there is nothing to
-    /// tell apart — or the record already scopes one of that
-    /// count (#1609).
+    /// Whether a Desktop draws the add menu: its count offers two
+    /// setups or more — with one, there is nothing to add — or the
+    /// record already scopes one of that count (#1609).
     func offersSetups(count: Int, row: DesktopRow) -> Bool {
         let counts = profileCounts
         return (model.bindableSetups[count]?.count ?? 0) >= 2

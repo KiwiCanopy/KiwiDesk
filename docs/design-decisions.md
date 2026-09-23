@@ -11233,8 +11233,10 @@ wants the holder to win on one setup says so by giving that setup
 its own row, which ranks first. The price is that a setup's badge
 on the Profiles page can sit on a profile that does not load on a
 bound Desktop, so the ladder is stated once, numbered, in the **?**
-of the page's profile list, the status line names the rung that
-answered, and the Desktop's own row names the holder it loads
+of the card that says what loads — at the top of the page, beside
+the status line naming the rung that answered, the flow stating a
+fact and the **?** the concept — and the Desktop's own row names
+the holder it loads
 over, rather than leaving the badge to mislead by omission.
 
 **This does not reopen #1394's refusal of screen identity.** That
@@ -11257,16 +11259,20 @@ owes a file whose object entries it cannot read.
 
 **The Desktops card reads top-down in the ladder's order.** Under
 a Desktop come its screen-setup rows, then **Add a screen setup**,
-then **All other screen setups** — the first row that matches the
+then **All other screen setups with 1 screen** — the first row
+that matches the
 connected screens is the one that loads, the same order the **?**
 numbers, so the layout teaches the rule rather than needing a
-caption to. Where a count has two known setups or more, every
-Desktop draws that list even with nothing added — **All screen
-setups** beside its picker — because a bare picker there binds
-every setup without saying so, which is the silent over-reach the
-scope exists to prevent (owner, 2026-09-23). With one known setup
-there is nothing to tell apart, so the Desktop stays one line and
-that user sees the card as before. Adding a
+caption to. The scope is written on every Desktop even with nothing
+added — **All screen setups with 1 screen** beside its picker, one
+known setup or many — because a bare picker binds every setup of
+its count without saying so, and a first binding made undocked
+then silently fires docked: the over-reach the scope exists to
+prevent (owner, 2026-09-23). The label names the screen count
+because that is where the binding stops; a count of KNOWN setups
+would claim it stops short of setups not yet connected. **Add a
+screen setup** is offered only where a second setup is known,
+since with one there is nothing to add. Adding a
 setup fills in the profile that holds it, where one does: that is
 the likeliest wish, and it is the fix for the row that says the
 holder is being loaded over. A scope menu under each picker is

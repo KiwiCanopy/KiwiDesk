@@ -26,49 +26,62 @@ extension DesktopsGroup {
             profileCounts: profileCounts
         )
         let others = BindingSlot.count(count, setup: nil)
+        let fallback = fallbackLabel(count: count, scoped: slots.count > 1)
         VStack(alignment: .leading, spacing: 4) {
-            // With one known setup there is no scope to choose, so
-            // the card stays one line; with two or more the scope is
-            // always WRITTEN — even with nothing added, the picker
-            // says it binds all screen setups (owner, 2026-09-23).
-            if !offersSetups(count: count, row: row) {
-                HStack {
-                    desktopLabel(row)
-                    Spacer()
-                    profileMenu(row, slot: others, nested: false)
-                }
-            } else {
-                desktopLabel(row)
-                ForEach(slots.dropLast(), id: \.self) { slot in
-                    setupRow(row, slot: slot)
-                }
+            desktopLabel(row)
+            ForEach(slots.dropLast(), id: \.self) { slot in
+                setupRow(row, slot: slot)
+            }
+            // Only where a second setup is known is there one to
+            // add (owner, 2026-09-23).
+            if offersSetups(count: count, row: row) {
                 addSetupMenu(row, count: count)
                     .padding(.leading, Self.nestIndent)
-                HStack {
-                    Text(fallbackLabel(scoped: slots.count > 1))
-                        .accessibilityHidden(true)
-                    Spacer()
-                    profileMenu(
-                        row,
-                        slot: others,
-                        nested: true,
-                        scoped: slots.count > 1
-                    )
-                    Color.clear.frame(width: Self.removeColumn, height: 1)
-                        .accessibilityHidden(true)
-                }
-                .padding(.leading, Self.nestIndent)
             }
+            // The scope is always WRITTEN, one setup known or many:
+            // a bare picker binds every setup of the count without
+            // saying so (owner, 2026-09-23).
+            HStack {
+                Text(fallback).accessibilityHidden(true)
+                Spacer()
+                profileMenu(row, slot: others, name: fallback)
+                Color.clear.frame(width: Self.removeColumn, height: 1)
+                    .accessibilityHidden(true)
+            }
+            .padding(.leading, Self.nestIndent)
             if leads { conflictLine(row) }
         }
     }
 
-    /// The fallback row's label: all screen setups, or all OTHER
-    /// ones once a setup has a row of its own.
-    func fallbackLabel(scoped: Bool) -> String {
-        scoped
-            ? L("desktops.scope.others", "All other screen setups")
-            : L("desktops.scope.all", "All screen setups")
+    /// The fallback row's label, naming the screen count its
+    /// binding stops at: all screen setups of that count, or all
+    /// OTHER ones once a setup has a row of its own. The count is
+    /// last, so no locale has to agree with it.
+    func fallbackLabel(count: Int, scoped: Bool) -> String {
+        switch (scoped, count == 1) {
+        case (false, true):
+            return L(
+                "desktops.scope.all.one",
+                "All screen setups with 1 screen"
+            )
+        case (false, false):
+            return L(
+                "desktops.scope.all.many",
+                "All screen setups with %1$d screens",
+                count
+            )
+        case (true, true):
+            return L(
+                "desktops.scope.others.one",
+                "All other screen setups with 1 screen"
+            )
+        case (true, false):
+            return L(
+                "desktops.scope.others.many",
+                "All other screen setups with %1$d screens",
+                count
+            )
+        }
     }
 
     /// An orphan's row: a bound name no saved profile counts.
@@ -76,7 +89,11 @@ extension DesktopsGroup {
         HStack {
             desktopLabel(row)
             Spacer()
-            profileMenu(row, slot: .orphan(profile), nested: false)
+            profileMenu(
+                row,
+                slot: .orphan(profile),
+                name: L("desktops.profile_ax", "Profile for this Desktop")
+            )
         }
     }
 
@@ -142,17 +159,18 @@ extension DesktopsGroup {
         }
     }
 
+    /// A slot's picker, named for VoiceOver by `name` — the
+    /// fallback row's own label, a setup's, or an orphan's.
     func profileMenu(
         _ row: DesktopRow,
         slot: BindingSlot,
-        nested: Bool,
-        scoped: Bool = true
+        name: String
     ) -> some View {
         Picker("", selection: binding(row, slot: slot)) {
             // A screen-setup row has no empty choice — its × removes
             // it — and the fallback's says what it means: no
             // binding, so the rungs below it answer (#1609).
-            if let none = noneLabel(slot, nested: nested) {
+            if let none = noneLabel(slot) {
                 Text(none).tag(String?.none)
             }
             ForEach(options(slot), id: \.self) { name in
@@ -176,73 +194,22 @@ extension DesktopsGroup {
         // An empty title names nothing, so the picker is named
         // here, and named, it owes its selection back as the
         // value (#812).
-        .accessibilityLabel(
-            pickerLabel(slot, nested: nested, scoped: scoped)
-        )
+        .accessibilityLabel(name)
         .accessibilityValue(
             binding(row, slot: slot).wrappedValue
-                ?? noneLabel(slot, nested: nested)
+                ?? noneLabel(slot)
                 ?? L("desktops.none", "None")
         )
     }
 
-    /// The picker's empty choice: None on a one-line Desktop, "No
-    /// binding" on the nested fallback, none on a setup row.
-    private func noneLabel(_ slot: BindingSlot, nested: Bool) -> String? {
-        if case .count(_, _?) = slot { return nil }
-        return nested
-            ? L("desktops.no_binding", "No binding")
-            : L("desktops.none", "None")
-    }
-
-    private func pickerLabel(
-        _ slot: BindingSlot,
-        nested: Bool,
-        scoped: Bool
-    ) -> String {
+    /// The picker's empty choice: "No binding" on the fallback —
+    /// the rungs below it answer — None on an orphan, and none on
+    /// a setup row, whose × removes it.
+    private func noneLabel(_ slot: BindingSlot) -> String? {
         switch slot {
-        case .count(_, let setup?):
-            return L(
-                "desktops.profile_ax.setup",
-                "Profile for this Desktop on %1$@",
-                model.setupLabels([setup])[0]
-            )
-        case .count:
-            if nested, !scoped {
-                return L(
-                    "desktops.profile_ax.all",
-                    "Profile for this Desktop on all screen setups"
-                )
-            }
-            guard !nested else {
-                return L(
-                    "desktops.profile_ax.others",
-                    "Profile for this Desktop on all other screen "
-                        + "setups"
-                )
-            }
-            return countLabel(slot)
-        case .orphan:
-            return L(
-                "desktops.profile_ax",
-                "Profile for this Desktop"
-            )
+        case .count(_, _?): return nil
+        case .count: return L("desktops.no_binding", "No binding")
+        case .orphan: return L("desktops.none", "None")
         }
-    }
-
-    /// A one-line Desktop's picker, named by its count group,
-    /// since one Desktop draws a picker per group.
-    private func countLabel(_ slot: BindingSlot) -> String {
-        guard case .count(let count, _) = slot else { return "" }
-        return count == 1
-            ? L(
-                "desktops.profile_ax.count.one",
-                "Profile for this Desktop on 1 screen"
-            )
-            : L(
-                "desktops.profile_ax.count.many",
-                "Profile for this Desktop on %1$d screens",
-                count
-            )
     }
 }

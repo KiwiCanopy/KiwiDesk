@@ -58,8 +58,7 @@ struct ProfilesSection: View {
                 "profiles.saved.caption",
                 "A profile loads on the screen setups it holds, "
                     + "unless a Desktop is bound to another."
-            ),
-            help: ladderHelp
+            )
         ) {
             if model.profileSummaries.isEmpty
                 && model.brokenProfiles.isEmpty
