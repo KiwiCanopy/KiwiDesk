@@ -125,7 +125,7 @@ struct PresetPreviewSheetTests {
     /// Four columns is a claim about the narrowest window, so it is
     /// asserted against that window rather than restated.
     @Test("the column count is the most the window can host")
-    func columnCountFitsTheNarrowestWindow() {
+    @MainActor func columnCountFitsTheNarrowestWindow() {
         let fits = PresetPreviewSheet.width(
             forColumns: PresetPreviewSheet.columns
         )

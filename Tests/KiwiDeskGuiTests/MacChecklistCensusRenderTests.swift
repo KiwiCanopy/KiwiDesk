@@ -83,7 +83,7 @@ struct MacChecklistCensusRenderTests {
     /// census label key, which is what lets a census search hit
     /// resolve to the row (#1250); only the tick store has none.
     @Test("every row anchors on its own label key")
-    func rowsAnchorOnTheirLabelKey() {
+    @MainActor func rowsAnchorOnTheirLabelKey() {
         for key in MacChecklistKey.allCases {
             let control = MacChecklistSection.control(for: key)
             if key == .selfTicks {
