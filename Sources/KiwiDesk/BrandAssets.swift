@@ -44,7 +44,7 @@ enum BrandAssets {
 
     /// The services' marks on Home's support strip (#1536), as
     /// template images: the strip draws them in secondary ink.
-    static let markTelegram: NSImage? = templateMark("MarkTelegram")
+    static let markDiscord: NSImage? = templateMark("MarkDiscord")
     static let markGitHub: NSImage? = templateMark("MarkGitHub")
     static let markKofi: NSImage? = templateMark("MarkKofi")
 

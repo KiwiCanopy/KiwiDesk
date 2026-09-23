@@ -11794,7 +11794,7 @@ of it, rather than separate rulings:
 things a user asks about the app itself — where to talk about
 it, which version this is, whether an update is waiting — are
 answered where they arrive: on Home, below the cards, as a
-community strip (Telegram, GitHub, Ko-fi) and one footer line
+community strip (Discord, GitHub, Ko-fi) and one footer line
 (mark, name, version, update state, *About KiwiDesk*). A fact
 one navigation away is a fact most users never meet, and an
 update state that showed only in the menu bar was one. The

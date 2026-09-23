@@ -208,7 +208,7 @@ GLOSSARY = {
     # The two other services Home's support strip links (#1536),
     # the same class as `github`. `_WORD` splits "Ko-fi" on its
     # hyphen, so the brand is carried as its two halves.
-    "telegram",
+    "discord",
     "ko",
     "fi",
     "ide",
