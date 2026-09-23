@@ -152,15 +152,25 @@ extension KiwiCore {
     ) -> [ClaimableMonitorSet] {
         guard let profile = try? profiles.read(name: name)
         else { return [] }
-        let count = profile.monitorCount
+        let own = Set(profile.monitorSets.map(\.monitors))
+        return monitorSets(count: profile.monitorCount)
+            .filter { !own.contains($0.monitors) }
+    }
+
+    /// Every set a profile saved for `count` screens holds, plus
+    /// the connected one where it has that count, each with its
+    /// holder — the connected one first, then by owner. What a
+    /// Desktop binding can be scoped to (#1609), and the pool a
+    /// profile's claimable sets are drawn from (#1530).
+    public func monitorSets(count: Int) -> [ClaimableMonitorSet] {
         let peers = profiles.allProfiles().filter {
             $0.monitorCount == count
         }
         var sets = Set(peers.flatMap { $0.monitorSets.map(\.monitors) })
         let live = MonitorSet(monitors: liveFingerprints).monitors
-        if live.count == count { sets.insert(live) }
-        let own = Set(profile.monitorSets.map(\.monitors))
-        return sets.subtracting(own)
+        if !live.isEmpty, live.count == count { sets.insert(live) }
+        return
+            sets
             .map { monitors in
                 ClaimableMonitorSet(
                     monitors: monitors,

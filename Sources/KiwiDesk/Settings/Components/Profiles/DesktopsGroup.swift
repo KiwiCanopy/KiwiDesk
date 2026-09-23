@@ -11,6 +11,9 @@ import SwiftUI
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = true
+    /// The picker a screen-setup row's add or removal hands
+    /// focus to (#1609).
+    @FocusState var focusedSlot: BindingFocus?
 
     private var gates: ProfilesGates {
         ProfilesGates(
@@ -76,9 +79,12 @@ struct DesktopsGroup: View {
                 + "of them able to select one, at the cost of "
                 + "each screen's own menu bar, its own Dock, and "
                 + "fullscreen windows that no longer blank the "
-                + "others. A Desktop can hold one profile per "
-                + "screen count: the one saved for as many "
-                + "screens as are connected loads."
+                + "others. For each screen count, a Desktop can "
+                + "load a profile on each screen setup you add, and "
+                + "one on all other screen setups. A screen setup "
+                + "you added comes first; otherwise the profile for "
+                + "all other screen setups loads, even over the "
+                + "profile that holds those screens."
         )
     }
 
@@ -120,14 +126,14 @@ struct DesktopsGroup: View {
         case .count(let count, let leads, let rows):
             if drawsHeaders { header(forCount: count, leads: leads) }
             ForEach(rows, id: \.key) { row in
-                spaceRow(row, slot: .count(count))
+                desktopBlock(row, count: count, leads: leads)
             }
         case .orphans(let orphans):
             SettingsGroupHeader(
                 L("profiles.broken.title", "Couldn't load")
             )
             ForEach(orphans, id: \.self) { orphan in
-                spaceRow(orphan.row, slot: .orphan(orphan.profile))
+                orphanRow(orphan.row, profile: orphan.profile)
             }
         }
     }

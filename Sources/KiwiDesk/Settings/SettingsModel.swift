@@ -145,6 +145,17 @@ final class SettingsModel: ObservableObject {
     /// Bindable user Desktops snapshot (`KiwiCore.bindableDesktops`, #888).
     @Published var bindableDesktops: [Int] = []
 
+    /// The screen setups a Desktop binding can be scoped to, per
+    /// screen count, with their holders (#1609) — Core's list,
+    /// read once per refresh.
+    @Published var bindableSetups: [Int: [ClaimableMonitorSet]] = [:]
+
+    /// What each DRAFT binding loads on the connected screens
+    /// (#1609) — Core's reading, re-read by
+    /// `refreshBindingReadings` rather than per render, since the
+    /// gate reads profile files.
+    @Published var bindingReadings: [DesktopKey: BoundReading] = [:]
+
     /// Each present Desktop's durable key by its Mission Control
     /// number (#1147) — the join a Profiles row resolves its
     /// binding through, from the same snapshot as `mainDesktops`.

@@ -108,13 +108,22 @@ goes live again if a screen change makes that Desktop your main
 screen's.
 
 **A binding fires only for its profile's screen count.** A
-Desktop holds one profile per screen count, so the same Desktop
+Desktop holds a profile per screen count, so the same Desktop
 can load a one-screen profile undocked and a two-screen one
 docked: the profile saved for as many screens as are connected
 fires, and the others wait until that many are. A Desktop bound
 only to a one-screen profile stands aside on two, and KiwiDesk
 picks by your screens ([Which Profile
 Loads](user-guide.md#which-profile-loads)).
+
+:::unreleased
+**A binding can also be for one screen setup.** Within a screen
+count, a Desktop can hold a profile for each particular set of
+screens you name, beside the one for all its other setups: with
+exactly those screens connected, that set's profile loads; any
+other setup of the count loads the one for all setups. Either
+loads over a profile saved for exactly those screens.
+:::
 
 ## A binding follows its Desktop, not its number
 

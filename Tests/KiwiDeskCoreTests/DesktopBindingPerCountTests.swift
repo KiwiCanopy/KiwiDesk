@@ -255,9 +255,13 @@ struct DesktopBindingPerCountTests {
                 in: NativeSpaces.desktopSnapshot()
             )
         )
-        #expect(
-            verdict.verdict == .boundToDesktop(name: "Laptop", desktop: 1)
+        // "Other", loaded, holds these screens (#1609).
+        let over = ProfileVerdict.boundToDesktop(
+            name: "Laptop",
+            desktop: 1,
+            over: "Other"
         )
+        #expect(verdict.verdict == over)
     }
 
     /// A rename follows into the list, in memory and in the

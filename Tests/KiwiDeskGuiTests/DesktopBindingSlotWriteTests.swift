@@ -20,14 +20,14 @@ struct DesktopBindingSlotWriteTests {
     @Test("a pick edits one slot and leaves the others")
     func pickEditsOneSlot() {
         let (card, model) = DesktopBindingFixture.makeCard()
-        card.write("Laptop", key: live, slot: .count(1))
+        card.write("Laptop", key: live, slot: .count(1, setup: nil))
         #expect(
             model.config.profileBindings[live]?.profiles == ["Laptop"]
         )
         // The projections come from the row it was built from.
         #expect(model.config.profileBindings[live]?.desktop == 1)
         #expect(model.config.profileBindings[live]?.screen == "Built-in")
-        card.write("Dual", key: live, slot: .count(2))
+        card.write("Dual", key: live, slot: .count(2, setup: nil))
         #expect(
             model.config.profileBindings[live]?.profiles
                 == ["Laptop", "Dual"]
@@ -36,16 +36,16 @@ struct DesktopBindingSlotWriteTests {
         model.profileSummaries.append(
             DesktopBindingFixture.summary("Solo", count: 1)
         )
-        card.write("Solo", key: live, slot: .count(1))
+        card.write("Solo", key: live, slot: .count(1, setup: nil))
         #expect(
             model.config.profileBindings[live]?.profiles
                 == ["Dual", "Solo"]
         )
-        card.write(nil, key: live, slot: .count(2))
+        card.write(nil, key: live, slot: .count(2, setup: nil))
         #expect(
             model.config.profileBindings[live]?.profiles == ["Solo"]
         )
-        card.write(nil, key: live, slot: .count(1))
+        card.write(nil, key: live, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[live] == nil)
     }
 
@@ -66,17 +66,19 @@ struct DesktopBindingSlotWriteTests {
         model.profileSummaries.append(
             DesktopBindingFixture.summary("Third", count: 1)
         )
-        card.write("Third", key: live, slot: .count(1))
+        card.write("Third", key: live, slot: .count(1, setup: nil))
         #expect(
             model.config.profileBindings[live]?.profiles
                 == ["Dual", "Third"]
         )
         // …and the stale number projection took the row's.
         #expect(model.config.profileBindings[live]?.desktop == 1)
-        model.config.profileBindings[live]?.profiles = [
-            "Laptop", "Solo", "Dual",
-        ]
-        card.write(nil, key: live, slot: .count(1))
+        let seeded = model.config.profileBindings[live]
+        model.config.profileBindings[live] = DesktopBinding(
+            profiles: ["Laptop", "Solo", "Dual"],
+            desktop: seeded?.desktop ?? 1
+        )
+        card.write(nil, key: live, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[live]?.profiles == ["Dual"])
     }
 
@@ -105,7 +107,7 @@ struct DesktopBindingSlotWriteTests {
             profiles: ["Dual"],
             desktop: 1
         )
-        card.write("Laptop", key: live, slot: .count(1))
+        card.write("Laptop", key: live, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[.number(1)] == nil)
         #expect(
             model.config.profileBindings[live]?.profiles
@@ -119,7 +121,7 @@ struct DesktopBindingSlotWriteTests {
             profiles: ["Laptop"],
             desktop: 1
         )
-        card.write(nil, key: gone, slot: .count(1))
+        card.write(nil, key: gone, slot: .count(1, setup: nil))
         #expect(model.config.profileBindings[gone] == nil)
         #expect(
             model.config.profileBindings[.number(1)]?.profiles == ["Dual"]
@@ -139,9 +141,10 @@ struct DesktopBindingSlotWriteTests {
             desktop: 1
         )
         model.activeProfile = "Solo"
-        #expect(card.boundName(key: live, slot: .count(1)) == "Solo")
+        let all = BindingSlot.count(1, setup: nil)
+        #expect(card.boundName(key: live, slot: all) == "Solo")
         model.activeProfile = "Other"
-        #expect(card.boundName(key: live, slot: .count(1)) == "Laptop")
+        #expect(card.boundName(key: live, slot: all) == "Laptop")
     }
 
 }

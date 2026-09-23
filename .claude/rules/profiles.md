@@ -237,41 +237,71 @@ The obligations that fall on a change here:
   the write is one macOS persists
   (`DesktopStampSeamTests`, tests.md ▸ machine touch).
 
-## A Desktop binding is a per-count LIST, judged at the gate (#1436)
+## A Desktop binding is a per-count, per-scope LIST, judged at the gate (#1436, #1609)
 
-`DesktopBinding.profiles` lists the profiles and never a count
-beside them — a count is each profile's own `monitorCount`, and a
-writer that wants one stored re-argues the design entry rather
-than adding a field. It is read by `boundProfile(of:)`, the one
-gate, which picks the LIVE profile where it is listed and saved
-for the connected screens, else the first entry that is — the
-one rank `DesktopBinding.ordered(preferring:)` gives, which the
-card's picker reads too — and stands the whole record aside
-where none is (`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
+`DesktopBinding.entries` lists (profile, scope) pairs — the scope
+the sorted screen fingerprints of one setup, nil for all setups —
+and never a count beside them: a count is each profile's own
+`monitorCount`, and a writer that wants one stored re-argues the
+design entry rather than adding a field. It is read by
+`boundProfile(of:)`, the one gate, in the one rank
+`DesktopBinding.ranked(for:preferring:)` gives — entries scoped to
+the connected setup, then those for all setups, each tier with the
+LIVE profile first where listed and then binding order, an entry
+scoped to another setup not ranked at all — picking the first
+saved for the connected screens and standing the whole record
+aside where none is, `.otherSetups` where every entry is scoped
+elsewhere (`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
 `gatePrefersTheLiveProfile`, `noFitStandsAside`;
-`DesktopBindingGroupTests` ▸ `pickerPrefersTheLiveEntry`). The obligations: a reader of a binding's
+`DesktopBindingScopeModelTests` ▸ `rankedTiers`;
+`DesktopBindingScopeGateTests` ▸ `specificOutranksAll`,
+`otherSetupsStandAside`; `DesktopBindingSlotWriteTests` ▸
+`pickerPrefersTheLiveEntry`). The gate outranks the setup's
+holder (#1530) — ruled in `docs/design-decisions.md` ▸ Profiles,
+not restated here. The obligations: a reader of a binding's
 profile takes the PICKED profile off the gate's `.success` and
-never a listed name (`readersFollowThePick`); a writer files
-through `DesktopBinding.bind(_:countOf:)` — same count replaces,
-another adds, an unsaved name replaces an unsaved name
-(`recordAlgebra`, `verbAddsAndReplaces`) — the list is never
+never a listed name (`readersFollowThePick`), and a reader that
+must also say WHICH rung answered takes `KiwiCore.boundReading(of:)`
+rather than re-deriving the scope or the holder beside it
+(`DesktopBindingScopeGateTests` ▸ `readingNamesTheHolder`); a
+writer files through `DesktopBinding.bind(_:setup:countOf:)` —
+same count AND same scope replaces, anything else adds, an unsaved
+name replaces an unsaved name of the same scope
+(`recordAlgebra`, `verbAddsAndReplaces`;
+`DesktopBindingScopeModelTests` ▸ `overlapReplaces`,
+`unbindIsScoped`, `renameKeepsScope`) — the entries are never
 edited by hand beside a call site (`DesktopBindingWriterSeamTests`),
-and the GUI's slot write files through that same algebra so every
-entry of one count goes with a pick and a record left empty is
-removed (`DesktopBindingGroupTests` ▸ `pickEditsOneSlot`,
-`pickReplacesEveryEntryOfItsCount`); the binding door stands down
-for the profile ALREADY live from adoption state and never by
-re-reading its file on a swipe (#1245, `ActiveProfile.monitorCount`,
-`DesktopBindingPerCountTests` ▸ `liveProfileIsNotReread`); which
-profiles a count group OFFERS, and which count LEADS, is the
-bind-fit question asked of `DesktopBindingRefusal.of` against the
-group's count, never a hand `==` (`DesktopBindingFitSeamTests` ▸
-`judgementCallersAreCounted`); and the stored `profile`→`profiles`
-crossing is `migratingProfileBindingLists`, which bumped
+and the GUI's slot write files through that same algebra, one
+slot per count and scope, so a pick replaces only its own scope's
+entries and a record left empty is removed
+(`DesktopBindingSlotWriteTests` ▸ `pickEditsOneSlot`,
+`pickReplacesEveryEntryOfItsCount`; `DesktopBindingScopeCardTests`
+▸ `pickIsScoped`), while the card draws a Desktop's slots from the
+one `ProfilesFamilyRows.slots(of:count:profileCounts:)`, setups
+first and all other setups last, which the census expands too
+(`DesktopBindingScopeCardTests` ▸ `slotsReadAsTheLadder`,
+`censusCarriesTheScope`); the binding door stands down for the
+profile ALREADY live only where the gate's own rank would pick it,
+asked through the read-free `bindingPicksLiveProfile(_:)` beside
+the gate and never by re-checking the list or the count by hand,
+nor by re-reading the live file on a swipe (#1245,
+`ActiveProfile.monitorCount`, `DesktopBindingPerCountTests` ▸
+`liveProfileIsNotReread`; `DesktopBindingScopeGateTests` ▸
+`standDownAsksTheScope`); which profiles a count group OFFERS,
+and which count LEADS, is the bind-fit question asked of
+`DesktopBindingRefusal.of` against the group's count, never a hand
+`==` (`DesktopBindingFitSeamTests` ▸ `judgementCallersAreCounted`);
+and the stored `profile`→`profiles` crossing is
+`migratingProfileBindingLists`, which bumped
 `GuiConfig.currentFormat` and `SetupBundle.currentFormat`
-(`ProfileBindingListMigrationTests`).
-The card's shape — count groups, no count control — is
-`docs/design-decisions.md` ▸ Profiles' ruling, not restated here.
+(`ProfileBindingListMigrationTests`), while the scope owes no
+step — a bare name still decodes as an all-setups entry and an
+object carries `setup` — so its bump of both is the refusal an
+older reader owes, with no `ConfigMigration` step beside it
+(`DesktopBindingScopeModelTests` ▸ `storedShape`).
+The card's shape — count groups, no count control, setup rows
+top-down in the ladder's order — is `docs/design-decisions.md`
+▸ Profiles' ruling, not restated here.
 
 ## The active Desktop is the MAIN display's (#888)
 

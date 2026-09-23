@@ -157,7 +157,11 @@ struct ProfileVerdictTests {
                     .number(2)
                 ]
             ).verdict
-                == .boundToDesktop(name: "Bound", desktop: 2)
+                == .boundToDesktop(
+                    name: "Bound",
+                    desktop: 2,
+                    over: "Desk"
+                )
         )
     }
 

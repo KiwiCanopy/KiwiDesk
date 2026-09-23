@@ -43,6 +43,8 @@ struct AnnouncedValueTests {
         "AppRuleFloatRow.swift": 1,
         "SpacesSection+ModePicker.swift": 1,
         "DesktopsGroup+Row.swift": 1,
+        // #1609: the add menu names its Desktop.
+        "DesktopsGroup+Setups.swift": 1,
         "ProfileHeader.swift": 1,
         "KeybindingAppGroup+Behavior.swift": 1,
         // #1209: the export row's range menu, named by the range

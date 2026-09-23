@@ -182,9 +182,9 @@ struct DesktopBindingGroupTests {
         #expect(
             expander.rows(for: .profiles(.profileBindings))
                 == [
-                    .binding(live, .count(2)),
-                    .binding(live, .count(1)),
-                    .binding(live, .count(3)),
+                    .binding(live, .count(2, setup: nil)),
+                    .binding(live, .count(1, setup: nil)),
+                    .binding(live, .count(3, setup: nil)),
                     .binding(live, .orphan("Vanished")),
                 ]
         )
@@ -210,10 +210,15 @@ struct DesktopBindingGroupTests {
         let card = try squashed("DesktopsGroup.swift")
         #expect(card.contains("ProfilesFamilyRows.bindingGroups("))
         #expect(card.contains("ProfilesFamilyRows.bindingCounts("))
-        #expect(card.contains("spaceRow(row,slot:.count(count))"))
         #expect(
-            card.contains("spaceRow(orphan.row,slot:.orphan(orphan.profile))")
+            card.contains("desktopBlock(row,count:count,leads:leads)")
         )
+        #expect(
+            card.contains("orphanRow(orphan.row,profile:orphan.profile)")
+        )
+        // A Desktop's rows are the census's own slots (#1609).
+        let block = try squashed("DesktopsGroup+Row.swift")
+        #expect(block.contains("ProfilesFamilyRows.slots("))
         // The caption asks the ONE leading derivation, and
         // stands down with no display reading (#1436 review).
         #expect(

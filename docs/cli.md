@@ -335,8 +335,16 @@ exports nothing.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 `bind_profile_to_desktop` files one profile per screen count on a
-Desktop: a second profile of another count adds beside the first,
-the same count replaces it.
+Desktop, for all screen setups: a second profile of another count
+adds beside the first, the same count replaces it.
+
+:::unreleased
+Screen fingerprints after the profile, as `list_monitors` prints
+them, bind it for that one screen setup: the call replaces only
+the entry of the same count and the same setup, and the entry for
+the connected setup loads before the one for all setups ([Lua
+reference](lua-reference.md#bind_profile_to_desktop)).
+:::
 
 ¹ placement: `first\|last\|before_focused\|after_focused`
 

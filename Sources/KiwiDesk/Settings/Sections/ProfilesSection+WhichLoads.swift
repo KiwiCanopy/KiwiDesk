@@ -6,10 +6,7 @@ import SwiftUI
 /// #678 turn 13a).
 extension ProfilesSection {
     @ViewBuilder var whichProfileLoads: some View {
-        SettingsSection(
-            SettingsCatalog.profiles.whichProfileLoads,
-            help: ladderHelp
-        ) {
+        SettingsSection(SettingsCatalog.profiles.whichProfileLoads) {
             Text(rulesSentence)
                 .font(.callout)
                 .fixedSize(horizontal: false, vertical: true)
@@ -34,22 +31,26 @@ extension ProfilesSection {
         )
     }
 
-    /// The whole ladder, in order, naming the card that sets the
-    /// binding — interpolated, never quoted (#818), which is
-    /// also what anchors "Desktop" to macOS for a reader who has
-    /// not met the word yet.
-    private var ladderHelp: String {
+    /// The whole ladder, numbered in its order (#1609) — the
+    /// Saved profiles header's one `?`, which this card's status
+    /// line narrates a rung of. The binding card is named by
+    /// interpolation, never quoted (#818).
+    var ladderHelp: String {
         L(
-            "profiles.which_loads.help",
-            "A Desktop can hold one profile per screen count. "
-                + "The one bound to the Desktop your main screen "
-                + "is on, saved for this many screens, wins "
-                + "outright; set those bindings in %1$@, "
-                + "just below. With no such binding, "
-                + "KiwiDesk takes a profile saved for exactly "
-                + "these screens, then the one marked default "
-                + "for this many screens, and finally a built-in "
-                + "layout if nothing you saved fits.",
+            "profiles.saved.help",
+            "KiwiDesk loads the first of these that applies:\n"
+                + "1. A profile bound to the Desktop on your main "
+                + "screen for the connected screen setup.\n"
+                + "2. A profile bound to that Desktop for all "
+                + "screen setups.\n"
+                + "3. The profile that holds the connected screen "
+                + "setup.\n"
+                + "4. The profile marked default for this many "
+                + "screens.\n"
+                + "5. A built-in layout.\n\n"
+                + "Bind profiles to Desktops in %1$@, below. A "
+                + "binding counts only for a profile saved for as "
+                + "many screens as are connected.",
             L("desktops.title", "Profiles per macOS Desktop")
         )
     }
@@ -65,30 +66,29 @@ extension ProfilesSection {
         let resolution = model.profileResolution
         let screens = screensPhrase(resolution.screens)
         switch resolution.verdict {
-        case .boundToDesktop(let name, let desktop):
-            // The count the binding resolved on (#1436): with
-            // one profile per count, it is the discriminator
-            // the user set.
-            return resolution.screens == 1
+        case .boundToDesktop(let name, let desktop, let setup, _):
+            // The rung the binding took (#1609): the user set a
+            // scope, not a count, so the scope is what it names.
+            return setup == nil
                 ? L(
-                    "profiles.which_loads.bound.one",
-                    "Right now: Desktop %1$d → %2$@ (bound below "
-                        + "for 1 screen).",
+                    "profiles.which_loads.bound_all",
+                    "Right now: Desktop %1$d → %2$@ (bound for all "
+                        + "screen setups).",
                     desktop,
                     name
                 )
                 : L(
-                    "profiles.which_loads.bound.many",
-                    "Right now: Desktop %1$d → %2$@ (bound below "
-                        + "for %3$d screens).",
+                    "profiles.which_loads.bound_setup",
+                    "Right now: Desktop %1$d → %2$@ (bound for this "
+                        + "screen setup).",
                     desktop,
-                    name,
-                    resolution.screens
+                    name
                 )
         case .exactMonitors(let name):
             return L(
-                "profiles.which_loads.exact",
-                "Right now: %1$@ → %2$@ (these exact monitors).",
+                "profiles.which_loads.holds",
+                "Right now: %1$@ → %2$@ (it holds this screen "
+                    + "setup).",
                 screens,
                 name
             )
