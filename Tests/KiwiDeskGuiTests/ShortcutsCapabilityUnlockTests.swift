@@ -175,19 +175,16 @@ struct ShortcutsCapabilityUnlockTests {
         #expect(model.editingStoredProfile)
 
         #expect(model.editedProfileOverridesKeys)
-        // Vacuity, BOTH sides. `editedProfileOverridesAppRules`
-        // short-circuits to false on a missing baseline, so the
-        // assertion below is satisfied by the app-rules base
-        // being absent as readily as by scoping holding — a
-        // fail-open `guard-prover` caught by nilling the
-        // baseline and watching this suite stay green. The
-        // layers half needs no such pin: its baseline is
-        // self-checking, because the line above asserts it TRUE.
+        // The neighbouring list keeps its rules shared — the
+        // capability stayed in its own list (#1393's checklist).
+        // `== true` fails on a missing reading, so the clause
+        // cannot pass on an absent checklist.
         #expect(model.config.appRules.count == 2)
-        #expect(model.profileEditingBaseAppRules?.isEmpty == false)
-        // The neighbouring list with the same override shape is
-        // untouched — the capability stayed in its own list.
-        #expect(!model.editedProfileOverridesAppRules)
+        #expect(
+            model.config.appRules.keys.allSatisfy {
+                model.spaceReach($0)?.shared == true
+            }
+        )
     }
 
     /// Nothing in the Shortcuts area is read-only or withheld

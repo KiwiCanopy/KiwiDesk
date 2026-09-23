@@ -55,21 +55,6 @@ struct AppRuleListsTests {
         #expect(view.floatApps == ["app.zen"])
     }
 
-    /// A stored profile's nil un-pins an app its base pins, and
-    /// the row stays so the pin can be restored.
-    @Test("an override lists the base's pins and float apps")
-    func overrideListsTheBase() {
-        let view = section()
-        view.model.profileEditingBaseAppRules = [
-            "com.apple.finder": SpaceID("work")
-        ]
-        view.model.profileEditingBaseFloatRules = [
-            "com.apple.calculator"
-        ]
-        #expect(view.spaceApps == ["com.apple.finder"])
-        #expect(view.floatApps == ["com.apple.calculator"])
-    }
-
     @Test("the empty note reads both lists")
     func emptyMeansBothEmpty() {
         #expect(section().hasNoRules)

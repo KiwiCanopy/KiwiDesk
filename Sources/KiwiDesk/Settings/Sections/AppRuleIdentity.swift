@@ -34,19 +34,46 @@ struct AppRuleIdentity: View {
 }
 
 /// The trash at a rule row's trailing edge. Its help names what
-/// the ROW removes, so each list hands its own sentence in.
+/// the ROW removes, so each list hands its own sentence in. Where
+/// other profiles share the rule it asks where the removal goes
+/// (#1393): the edited profile, or every profile holding it.
 struct AppRuleDeleteButton: View {
     let help: String
-    let onDelete: () -> Void
+    /// The edited profile, when others share the rule.
+    var sharedFrom: String?
+    let onDelete: (RuleRemoval) -> Void
 
-    var body: some View {
-        Button {
-            onDelete()
-        } label: {
-            Image(systemName: "trash")
+    @ViewBuilder var body: some View {
+        if let sharedFrom {
+            Menu {
+                Button(
+                    L("app_rules.remove.here", "Remove from %1$@", sharedFrom)
+                ) { onDelete(.here) }
+                Button(
+                    L(
+                        "app_rules.remove.everywhere",
+                        "Remove from every profile"
+                    )
+                ) { onDelete(.everywhere) }
+            } label: {
+                Image(systemName: "trash")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .neutralMenuLabel()
+            .fixedSize()
+            .help(help)
+            .accessibilityLabel(help)
+            .accessibilityValue(sharedFrom)
+        } else {
+            Button {
+                onDelete(.everywhere)
+            } label: {
+                Image(systemName: "trash")
+            }
+            .buttonStyle(.borderless)
+            .iconButtonAffordance(help)
         }
-        .buttonStyle(.borderless)
-        .iconButtonAffordance(help)
     }
 }
 

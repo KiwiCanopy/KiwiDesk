@@ -1,7 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Profile edit-target dropdown menu (#18, #94, #251, #259).
+/// Profile edit-target dropdown menu (#18, #94, #251, #259,
+/// #1393). Each profile is listed once: what is running on top —
+/// the loaded profile, or the built-in or transient layout — then
+/// the others, grouped by the screen count they are saved for,
+/// the connected count first.
 struct ProfileEditTargetMenu: View {
     @ObservedObject var model: SettingsModel
 
@@ -20,19 +24,21 @@ struct ProfileEditTargetMenu: View {
 
     private var menu: some View {
         Menu {
-            Button {
-                requestSelect(nil)
-            } label: {
-                Text(liveEntryLabel)
-            }
-            if !model.profileSummaries.isEmpty {
-                Divider()
-                ForEach(model.profileSummaries) { summary in
-                    Button {
-                        requestSelect(summary.name)
-                    } label: {
-                        Text(menuRowLabel(summary.name))
+            Button(checked(liveTitle, nil)) { requestSelect(nil) }
+            if !others.isEmpty { Divider() }
+            if groups.count > 1 {
+                ForEach(groups, id: \.count) { group in
+                    Section(Self.countHeader(group.count)) {
+                        ForEach(group.names, id: \.self) { name in
+                            Button(checked(name, name)) {
+                                requestSelect(name)
+                            }
+                        }
                     }
+                }
+            } else {
+                ForEach(others, id: \.self) { name in
+                    Button(checked(name, name)) { requestSelect(name) }
                 }
             }
         } label: {
@@ -53,7 +59,41 @@ struct ProfileEditTargetMenu: View {
         .accessibilityLabel(
             L("profile_header.menu.ax", "Profile to edit")
         )
-        .accessibilityValue(title)
+        .accessibilityValue(spokenValue)
+    }
+
+    /// A row's title, marked where it is the open target.
+    private func checked(_ label: String, _ name: String?) -> String {
+        (model.editingProfile == name ? "✓ " : "") + label
+    }
+
+    /// Every profile but the loaded one, in the menu's order.
+    private var others: [String] {
+        model.profileMenuOrder.filter { $0 != model.activeProfile }
+    }
+
+    /// `others` split by the screen count each is saved for.
+    private var groups: [(count: Int, names: [String])] {
+        let counts = Dictionary(
+            model.profileSummaries.map { ($0.name, $0.count) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        var result: [(count: Int, names: [String])] = []
+        for name in others {
+            let count = counts[name] ?? 0
+            if let at = result.firstIndex(where: { $0.count == count }) {
+                result[at].names.append(name)
+            } else {
+                result.append((count, [name]))
+            }
+        }
+        return result
+    }
+
+    static func countHeader(_ count: Int) -> String {
+        count == 1
+            ? L("desktops.for_count.one", "For 1 screen")
+            : L("desktops.for_count.many", "For %1$d screens", count)
     }
 
     private func requestSelect(_ name: String?) {
@@ -75,53 +115,9 @@ struct ProfileEditTargetMenu: View {
         ) { model.selectEditTarget(name) }
     }
 
-    private var liveEntryLabel: String {
-        let mark = model.editingProfile == nil ? "✓ " : ""
-        if model.activeProfile != nil {
-            return mark
-                + L(
-                    "profile_header.live.loaded",
-                    "Live (currently loaded)"
-                )
-        }
-        if let standard = model.activeStandard {
-            return mark
-                + L(
-                    "profile_header.live.standard",
-                    "Live — Standard: %1$@",
-                    standardDisplayName(standard)
-                )
-        }
-        return mark
-            + L(
-                "profile_header.live.transient",
-                "Live — transient layout"
-            )
-    }
-
-    private func menuRowLabel(_ name: String) -> String {
-        let mark = model.editingProfile == name ? "✓ " : ""
-        guard name == model.activeProfile else {
-            return "\(mark)\(name)"
-        }
-        return mark
-            + L(
-                "profile_header.menu_row.loaded",
-                "%1$@ (currently loaded)",
-                name
-            )
-    }
-
-    private var title: String {
-        // Override form distinguishes editing stored copy from loaded live
-        // layout (#209).
-        if let editing = model.editingProfile {
-            return L(
-                "profile_header.title.overrides",
-                "%1$@ — overrides",
-                editing
-            )
-        }
+    /// What is running: the loaded profile, else the layout that
+    /// stands in for one.
+    private var liveTitle: String {
         if let profile = model.activeProfile { return profile }
         if let standard = model.activeStandard {
             return L(
@@ -134,5 +130,21 @@ struct ProfileEditTargetMenu: View {
             "profile_header.title.transient",
             "Transient layout"
         )
+    }
+
+    private var title: String { model.editingProfile ?? liveTitle }
+
+    /// The closed menu's value; the dot beside it is hidden, so the
+    /// loaded state is spoken here.
+    private var spokenValue: String {
+        if let editing = model.editingProfile {
+            return L(
+                "profile_header.menu.value.not_loaded",
+                "%1$@, not loaded",
+                editing
+            )
+        }
+        guard let profile = model.activeProfile else { return liveTitle }
+        return L("profile_header.menu.value.loaded", "%1$@, loaded", profile)
     }
 }

@@ -100,18 +100,14 @@ struct AppRuleTitleOfferWiringTests {
                     + "resolver's input (#1022)"
             )
         )
-        // The one assembly, read whole. A probe that dropped the
-        // override base left the WHOLE tree green (guard-prover,
-        // 2026-09-22): the predicate's suite asserts it ACCEPTS
-        // such a list, and nothing asserted a caller hands it one
-        // — so a Simple user editing a stored profile whose base
-        // carries patterns silently loses the editor.
+        // The one assembly, read whole: the gates are built from
+        // the draft the page shows, which since #1393 is the
+        // edited profile's RESOLVED rules, base patterns included.
         let section = try source("Sections/AppRulesSection.swift")
         #expect(
             section.contains(
                 Self.squashed(
-                    "AppRulesGates(config: model.config, "
-                        + "baseFloatRules: overrideFloatBase)"
+                    "AppRulesGates(config: model.config)"
                 )
             )
                 && section.contains(

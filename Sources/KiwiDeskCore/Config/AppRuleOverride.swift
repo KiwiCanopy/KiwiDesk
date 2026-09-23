@@ -64,7 +64,8 @@ extension AppRuleOverride {
         return result
     }
 
-    private var normalizedRules: [String: SpaceID?] {
+    /// Lowercased entries, a tombstone winning over a pin.
+    var normalizedRules: [String: SpaceID?] {
         var result: [String: SpaceID?] = [:]
         for (app, target) in rules.sorted(by: {
             $0.key < $1.key

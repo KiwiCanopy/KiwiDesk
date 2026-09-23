@@ -21,26 +21,37 @@ extension SettingsModel {
         var placementEditable: Bool
         var savedSidecar: GuiConfig?
         var profileEditingBaseLayers: [KeyLayer]?
-        var profileEditingBaseAppRules: [String: SpaceID]?
-        var profileEditingBaseFloatRules: [String]?
         var keybindingWarning: String?
     }
 
-    /// Switches dashboard edit target between live config and
-    /// stored profile. Editing the loaded profile is a real target
-    /// (#209), not a synonym for Live: saving re-applies in place,
-    /// which Live's adopt-on-save path does not.
+    /// Switches the edit target. The loaded profile IS the live
+    /// target (#1393): it is listed once, and its page reaches
+    /// both the shared rules and its own through each rule's
+    /// checklist, so no second door into it exists.
     func selectEditTarget(_ name: String?) {
-        let normalized: EditTarget =
-            name.map { .storedProfile($0) } ?? .live
+        let normalized = Self.editTarget(name, loaded: activeProfile)
         guard normalized != target else { return }
         target = normalized
         reload()
     }
 
+    /// The one mapping from a picked profile to a target.
+    static func editTarget(_ name: String?, loaded: String?) -> EditTarget {
+        guard let name, name != loaded else { return .live }
+        return .storedProfile(name)
+    }
+
     /// Reloads configuration and profile state from core into view model.
     func reload() {
         restoreLiveKeySessionIfNeeded()
+        // A load can make the stored target the loaded one.
+        // Core's name, not `activeProfile`, which `refreshProfiles`
+        // updates only after this.
+        target = Self.editTarget(
+            editingProfile,
+            loaded: core.profiles.currentName
+        )
+        ruleReachStored = core.ruleReachSnapshot()
         let state: TargetState
         switch target {
         case .live:
@@ -54,6 +65,9 @@ extension SettingsModel {
             }
         }
         apply(state)
+        suppressDirty = true
+        reachEdits = RuleReachEdits()
+        suppressDirty = false
         refreshProfiles()
         refreshPalettes()
         // Recompute, never hand-set: `apply` assigns under
@@ -79,10 +93,6 @@ extension SettingsModel {
         placementEditable = state.placementEditable
         savedSidecar = state.savedSidecar
         profileEditingBaseLayers = state.profileEditingBaseLayers
-        profileEditingBaseAppRules =
-            state.profileEditingBaseAppRules
-        profileEditingBaseFloatRules =
-            state.profileEditingBaseFloatRules
         keybindingWarning = state.keybindingWarning
     }
 
@@ -105,6 +115,7 @@ extension SettingsModel {
         {
             loaded.spaces = persisted.spaces
         }
+        resolveLoadedRules(&loaded)
         KeybindingImportClassifier.classify(&loaded)
         let source =
             (try? String(
@@ -125,8 +136,6 @@ extension SettingsModel {
             // transient spaces into gui.json and init.lua.
             savedSidecar: core.isGuiManaged ? loaded : nil,
             profileEditingBaseLayers: nil,
-            profileEditingBaseAppRules: nil,
-            profileEditingBaseFloatRules: nil,
             keybindingWarning: nil
         )
     }
@@ -151,11 +160,8 @@ extension SettingsModel {
             savedSidecar: nil,
             // The same base the seed resolved onto (ONE
             // definition, `KiwiCore.baseKeyLayers`) — never the
-            // resolved set the tabs edit (#55); `baseAppRules`
-            // plays the same role for App Rules (#109).
+            // resolved set the tabs edit (#55).
             profileEditingBaseLayers: core.baseKeyLayers(),
-            profileEditingBaseAppRules: core.baseAppRules(),
-            profileEditingBaseFloatRules: core.baseFloatRules(),
             keybindingWarning: nil
         )
     }

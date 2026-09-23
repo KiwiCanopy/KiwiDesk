@@ -1,17 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One row of the "Open in a Space" list: an app and the Space
-/// its new windows open in, whatever their title (#1608).
+/// One row of the "Open in a Space" list: an app, the Space its
+/// new windows open in, whatever their title (#1608), and which
+/// profiles the rule reaches (#1393).
 struct AppRuleSpaceRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
-    /// Base pins while a stored profile is edited (#109); nil
-    /// during live editing.
-    let overrideBase: [String: SpaceID]?
     /// The area's census gates, built by the section alone.
     let gates: AppRulesGates
-    let onDelete: () -> Void
+    /// Whether the section draws the "Applies to" column.
+    let showsReach: Bool
+    let onDelete: (RuleRemoval) -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
 
@@ -22,14 +22,35 @@ struct AppRuleSpaceRow: View {
         ) {
             AppRuleIdentity(app: app)
             spaceMenu
-                .opacity(inherited ? 0.55 : 1)
                 .focused($returningRow, equals: focusValue(menu: true))
+            if showsReach, let reading {
+                RuleReachControl(
+                    model: model,
+                    family: .space,
+                    app: app,
+                    reading: reading,
+                    value: spaceFacetLabel
+                )
+            }
             Spacer(minLength: SettingsMetrics.appRuleColumnSpacing)
-            AppRuleDeleteButton(help: removeHelp, onDelete: onDelete)
-                .disabled(tombstoned)
-                .focused($returningRow, equals: focusValue(menu: false))
+            AppRuleDeleteButton(
+                help: removeHelp,
+                sharedFrom: sharedFrom,
+                onDelete: onDelete
+            )
+            .focused($returningRow, equals: focusValue(menu: false))
         }
         .font(.callout)
+    }
+
+    private var reading: RuleReachReading? { model.spaceReach(app) }
+
+    /// The edited profile, where the trash must ask: another
+    /// profile uses this rule too.
+    private var sharedFrom: String? {
+        guard showsReach, let reading, reading.users.count > 1
+        else { return nil }
+        return reading.editing
     }
 
     /// The row's focus destination (#816) must be able to HOLD
@@ -41,8 +62,7 @@ struct AppRuleSpaceRow: View {
     }
 
     /// No "none" item: a row in this list HAS a Space, and the way
-    /// to stop opening an app in one is the trash. The one
-    /// exception is an override tombstone, drawn as a dash below.
+    /// to stop opening an app in one is the trash.
     private var spaceMenu: some View {
         Menu {
             ForEach(model.config.spaces, id: \.raw) { space in
@@ -51,7 +71,7 @@ struct AppRuleSpaceRow: View {
                 }
             }
         } label: {
-            AppRuleMenuLabel(text: cellText)
+            AppRuleMenuLabel(text: spaceFacetLabel)
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
@@ -63,43 +83,16 @@ struct AppRuleSpaceRow: View {
         .accessibilityValue(spaceFacetLabel)
     }
 
-    /// The SPOKEN value. A dash reads as nothing aloud, so only the
-    /// tombstone differs from the drawn cell.
+    /// The drawn and spoken value, one expression.
     var spaceFacetLabel: String {
-        spaceText(ifNone: L("app_rules.space.none", "No Space"))
-    }
-
-    private var cellText: String {
-        spaceText(ifNone: L("app_rules.dash", "—"))
-    }
-
-    private func spaceText(ifNone none: String) -> String {
-        model.config.appRules[app]?.raw ?? none
-    }
-
-    /// A profile's stored nil un-pins an app the base pins, so the
-    /// row stays listed with nothing left for the trash to remove;
-    /// picking a Space restores a pin.
-    private var tombstoned: Bool {
-        overrideBase != nil && model.config.appRules[app] == nil
-    }
-
-    /// In sync with the base, which the 0.55 dim says.
-    private var inherited: Bool {
-        guard let base = overrideBase?[app] else { return false }
-        return model.config.appRules[app] == base
+        model.config.appRules[app]?.raw ?? ""
     }
 
     private var removeHelp: String {
-        overrideBase == nil
-            ? L(
-                "app_rules.space.remove.help",
-                "Stop opening this app in a Space"
-            )
-            : L(
-                "app_rules.space.remove_override.help",
-                "Stop opening this app in a Space in this profile"
-            )
+        L(
+            "app_rules.space.remove.help",
+            "Stop opening this app in a Space"
+        )
     }
 
     private var noSpacesHelp: String {

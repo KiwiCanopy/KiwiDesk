@@ -44,6 +44,7 @@ extension SettingsModel {
             return
         }
         persistBindingsIfEdited()
+        saveRuleReach(rewriting: name)
         core.reapplyIfInEffect(name)
         reload()
     }
@@ -105,24 +106,5 @@ extension SettingsModel {
             base: base,
             edited: config.layers
         ) != nil
-    }
-
-    /// Indicates whether edited profile app rules diverge from base (#109).
-    var editedProfileOverridesAppRules: Bool {
-        guard let appBase = profileEditingBaseAppRules,
-            let floatBase = profileEditingBaseFloatRules
-        else {
-            return false
-        }
-        return
-            AppRuleOverride.diff(
-                base: appBase,
-                edited: config.appRules
-            ) != nil
-            || RuleListOverride.diff(
-                base: floatBase,
-                edited: config.floatRules,
-                normalizing: FloatRules.normalizedRule
-            ) != nil
     }
 }

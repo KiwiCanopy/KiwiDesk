@@ -23,20 +23,9 @@ struct AppRulesSection: View {
     @State var newSpaceApp = ""
     @State var newFloatingApp = ""
 
-    /// Base pins when editing a stored profile (#109); nil during
-    /// live editing.
-    var overrideBase: [String: SpaceID]? {
-        model.profileEditingBaseAppRules
-    }
-
-    var overrideFloatBase: [String]? {
-        model.profileEditingBaseFloatRules
-    }
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                overrideIndicator
                 spaceList
                 floatList
             }
@@ -49,37 +38,14 @@ struct AppRulesSection: View {
         .onChange(of: model.cleanConfig) { composingTitles = nil }
     }
 
-    /// Shown while a stored profile is edited: both lists then
-    /// edit that profile's overrides, so the note sits above them
-    /// rather than inside either card.
-    @ViewBuilder private var overrideIndicator: some View {
-        if overrideBase != nil {
-            VStack(alignment: .leading, spacing: 4) {
-                if model.editedProfileOverridesAppRules {
-                    Label(
-                        L(
-                            "app_rules.override.overrides",
-                            "This profile overrides base app rules."
-                        ),
-                        systemImage: "app.badge"
-                    )
-                    .font(.callout)
-                }
-                Text(Self.overrideProse)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
     /// The area's census gates, from one construction site for
     /// both lists and every row.
     var gates: AppRulesGates {
-        AppRulesGates(
-            config: model.config,
-            baseFloatRules: overrideFloatBase
-        )
+        AppRulesGates(config: model.config)
     }
+
+    /// Whether the rows draw the "Applies to" column (#1393).
+    var showsReach: Bool { model.offersReachColumn }
 
     var offersTitles: Bool {
         AppRuleTitleOffer.isOffered(

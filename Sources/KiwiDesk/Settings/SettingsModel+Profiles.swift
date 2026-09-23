@@ -115,6 +115,9 @@ extension SettingsModel {
             core.onLog("profile save failed: \(error)")
             saved = false
         }
+        // Profile files first: the gui.json write below reloads
+        // the config, which re-reads the loaded profile's rules.
+        saveRuleReach()
         persistGlobalsIfNeeded()
         reload()
         return saved
@@ -124,7 +127,7 @@ extension SettingsModel {
     private func persistGlobalsIfNeeded() {
         guard globalsChanged else { return }
         do {
-            try core.saveGuiConfig(config)
+            try core.saveGuiConfig(sidecarConfig)
         } catch {
             core.onLog("settings save failed: \(error)")
         }

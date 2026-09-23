@@ -42,21 +42,6 @@ extension AppRulesSection {
         )
     }
 
-    /// Stated once above both lists while a stored profile is
-    /// edited. Must-know, so never only in a popover (#815).
-    static var overrideProse: String {
-        L(
-            "app_rules.override.lists.caption",
-            "Rules made here apply to this profile only. Dimmed "
-                + "values are inherited from the app-wide rules "
-                + "and stay in sync with them; changing one "
-                + "overrides it for this profile, and removing a "
-                + "row removes an inherited rule here. To edit the "
-                + "app-wide rules, switch back to the currently "
-                + "loaded profile in the header's picker."
-        )
-    }
-
     /// The Space card's `?`: which arrivals the rule places — a
     /// return that only comes back into view keeps its Space — and
     /// the launch follow (#1599), which ⌘N in a running app does

@@ -231,10 +231,16 @@ final class SettingsModel: ObservableObject {
     var savedSidecar: GuiConfig?
     /// Base key layers diff baseline for profile shortcuts editing (#55).
     var profileEditingBaseLayers: [KeyLayer]?
-    /// Base app rules diff baseline for profile rules editing (#109).
-    var profileEditingBaseAppRules: [String: SpaceID]?
-    /// Global float rules used to resolve and diff a stored profile.
-    var profileEditingBaseFloatRules: [String]?
+    /// The App Rules families across the shared base and every
+    /// profile, as stored (#1393); nil where no checklist is
+    /// offered. Re-read by `reload()` alone.
+    var ruleReachStored: RuleReachSnapshot?
+    /// The draft's checklist choices over `ruleReachStored`.
+    @Published var reachEdits = RuleReachEdits() {
+        didSet {
+            if !suppressDirty { recomputeDirty() }
+        }
+    }
 
     /// Injected preferences seam allowing scratch domain in tests.
     init(

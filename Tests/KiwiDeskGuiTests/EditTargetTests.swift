@@ -69,11 +69,8 @@ struct EditTargetTests {
         #expect(model.savedSidecar == nil)
         // The profile's monitors aren't attached.
         #expect(!model.placementEditable)
-        // Override-mode baselines for the Shortcuts and App
-        // Rules tabs (#55/#109).
+        // Override-mode baseline for the Shortcuts tab (#55).
         #expect(model.profileEditingBaseLayers != nil)
-        #expect(model.profileEditingBaseAppRules != nil)
-        #expect(model.profileEditingBaseFloatRules != nil)
         // Pending edits are discarded on switch.
         #expect(!model.isDirty)
     }
@@ -90,23 +87,25 @@ struct EditTargetTests {
         #expect(!model.editingStoredProfile)
         #expect(model.placementEditable)
         #expect(model.profileEditingBaseLayers == nil)
-        #expect(model.profileEditingBaseAppRules == nil)
-        #expect(model.profileEditingBaseFloatRules == nil)
         // GUI-managed: the sidecar baseline is back.
         #expect(model.savedSidecar != nil)
         #expect(!model.isDirty)
     }
 
-    @Test("selecting the loaded profile edits its overrides")
-    func loadedProfileEditsItsOverrides() {
+    @Test("the loaded profile is the live target, its rules resolved")
+    func loadedProfileIsLive() throws {
         let model = makeModel()
+        var global = try #require(model.core.guiConfigStore.load())
+        global.appRules = ["base.app": SpaceID("1")]
+        try model.core.guiConfigStore.save(global)
         // `save` adopts: "active" becomes the current profile.
-        try? model.core.profiles.save(
+        try model.core.profiles.save(
             Profile(
                 name: "active",
                 monitorSets: [MonitorSet(monitors: [])],
                 spaceModes: [:],
-                settings: TilingSettings()
+                settings: TilingSettings(),
+                appRules: AppRuleOverride(rules: ["own.app": SpaceID("2")])
             )
         )
         model.reload()
@@ -114,14 +113,14 @@ struct EditTargetTests {
 
         model.selectEditTarget("active")
 
-        // #209: the loaded profile is a real stored target now,
-        // no longer collapsed to Live — its saved overrides are
-        // editable like any other profile's, and saving re-
-        // applies in place instead of writing the global sidecar.
-        #expect(model.target == .storedProfile("active"))
-        #expect(model.editingStoredProfile)
-        #expect(model.editingProfile == "active")
-        #expect(model.savedSidecar == nil)
+        // #1393: listed once — the loaded profile IS the live
+        // target, and its page shows the rules it resolves.
+        #expect(model.target == .live)
+        #expect(!model.editingStoredProfile)
+        #expect(model.config.appRules["own.app"] == SpaceID("2"))
+        #expect(model.config.appRules["base.app"] == SpaceID("1"))
+        // gui.json takes the shared rules alone.
+        #expect(model.sidecarConfig.appRules == ["base.app": SpaceID("1")])
     }
 
     @Test("a vanished profile falls back to live editing")
@@ -136,8 +135,6 @@ struct EditTargetTests {
         #expect(model.target == .live)
         #expect(model.placementEditable)
         #expect(model.profileEditingBaseLayers == nil)
-        #expect(model.profileEditingBaseAppRules == nil)
-        #expect(model.profileEditingBaseFloatRules == nil)
     }
 
     @Test("forced Lua clears in stored mode, returns on live")
@@ -212,7 +209,7 @@ struct EditTargetTests {
         #expect(profile.floatRules == nil)
     }
 
-    @Test("Stored float edit writes only the profile diff")
+    @Test("A stored float edit removed here writes the profile diff")
     func storedFloatEditWritesProfile() throws {
         let model = makeModel()
         var global = try #require(
@@ -222,6 +219,9 @@ struct EditTargetTests {
         try model.core.guiConfigStore.save(global)
         storeProfile(model, named: "p")
         model.selectEditTarget("p")
+        // The trash's "Remove from p" (#1393); the new rule starts
+        // at "p only" on a profile that isn't loaded.
+        model.recordRemoval(.float, "base.float", .here)
         model.config.floatRules = ["profile.float"]
 
         model.saveEditedProfile()
@@ -238,22 +238,5 @@ struct EditTargetTests {
                     "profile.float": true,
                 ])
         )
-    }
-
-    @Test("Float divergence drives the app-rule indicator")
-    func floatDivergenceShowsOverride() throws {
-        let model = makeModel()
-        var global = try #require(
-            model.core.guiConfigStore.load()
-        )
-        global.floatRules = ["base.float"]
-        try model.core.guiConfigStore.save(global)
-        storeProfile(model, named: "p")
-        model.selectEditTarget("p")
-        #expect(!model.editedProfileOverridesAppRules)
-
-        model.config.floatRules = ["profile.float"]
-
-        #expect(model.editedProfileOverridesAppRules)
     }
 }

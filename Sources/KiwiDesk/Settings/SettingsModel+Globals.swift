@@ -54,6 +54,7 @@ extension SettingsModel {
             )
             seedSpaces = config.spaces
         }
+        saveRuleReach()
         do {
             if core.lua == nil {
                 // Cold paused boot: core.start() never ran, so a
@@ -62,9 +63,9 @@ extension SettingsModel {
                 // retile while the dashboard says "paused". Write
                 // the store directly; start() picks the file up
                 // when permission arrives.
-                try core.guiConfigStore.save(config)
+                try core.guiConfigStore.save(sidecarConfig)
             } else {
-                try core.saveGuiConfig(config)
+                try core.saveGuiConfig(sidecarConfig)
             }
         } catch {
             profileWarning = L(
@@ -75,6 +76,9 @@ extension SettingsModel {
             core.onLog("globals save failed: \(error)")
             return
         }
+        // The checklist's writes landed; its baseline moves too.
+        ruleReachStored = core.ruleReachSnapshot()
+        reachEdits = RuleReachEdits()
         adoptGlobalsBaseline()
     }
 

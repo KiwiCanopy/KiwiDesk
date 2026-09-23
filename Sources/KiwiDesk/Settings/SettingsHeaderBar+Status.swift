@@ -28,6 +28,24 @@ extension SettingsHeaderBar {
         }
     }
 
+    /// A stored profile is selected (#1393): one line saying so,
+    /// in the warnings' shape, with Load where the dismiss sits.
+    /// What a save changes is said per change in the save pill.
+    func notLoadedRow(_ name: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "info.circle")
+                .foregroundStyle(SettingsTheme.ink2)
+                .accessibilityHidden(true)
+            Text(
+                L("profile_header.not_loaded", "%1$@ isn't loaded.", name)
+            )
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink2)
+            Spacer()
+            ProfileLoadButton(model: model, name: name, controlSize: .small)
+        }
+    }
+
     func warningRow(_ warning: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "exclamationmark.bubble")
@@ -49,27 +67,8 @@ extension SettingsHeaderBar {
     }
 
     var statusText: String? {
-        if model.editingStoredProfile {
-            // Editing the loaded profile's own overrides DOES
-            // hit the screen — saving re-applies it in place
-            // (#209) — so the generic "won't switch" copy is
-            // false for that one target.
-            if let name = model.editingProfile,
-                name == model.activeProfile
-            {
-                return L(
-                    "profile_header.status.editing_loaded",
-                    "Editing %1$@'s saved overrides — saving "
-                        + "re-applies %1$@ with your changes.",
-                    name
-                )
-            }
-            return L(
-                "profile_header.status.editing_stored",
-                "Editing a saved profile — changes won't "
-                    + "switch your layout."
-            )
-        }
+        // A stored target says so on its own line (#1393).
+        if model.editingStoredProfile { return nil }
         // The drift arms read the ONE verdict the pill's rows
         // read (#1197): a deleted match used to say "update the
         // profile" here with no profile to update.

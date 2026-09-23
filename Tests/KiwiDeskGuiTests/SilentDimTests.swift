@@ -86,18 +86,6 @@ struct SilentDimTests {
             + "its own accessibilityHint on the row "
             + "(`shortcuts.row.inherited.axhint`), the same leaf "
             + "case as the entry above",
-        "AppRuleSpaceRow.swift":
-            "the same inheritance dim, on the Space menu, saying "
-            + "the pin is in sync with the base profile. The "
-            + "menu's own GATE is a GreyOut (no Spaces declared), "
-            + "whose reason is the card's live pointer to the "
-            + "Spaces destination, outside every dimmed subtree "
-            + "(#1022, #1608)",
-        "AppRuleFloatRow.swift":
-            "the same inheritance dim, TWO of them: the scope "
-            + "menu and the pattern editor below it, saying the "
-            + "float rules are in sync with the base profile "
-            + "(#1608)",
         "SettingsSlider.swift":
             "the shared slider's own disabled fade, which rides "
             + "`isEnabled` — set by whatever gate disabled it, so "

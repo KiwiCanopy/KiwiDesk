@@ -135,7 +135,9 @@ struct AppRulesSectionWiringTests {
         )
         #expect(
             try body(
-                of: "private func deleteFloat(_ app: String)",
+                of:
+                    "private func deleteFloat(_ app: String, "
+                    + "_ removal: RuleRemoval)",
                 in: Self.lists
             ).contains(
                 Self.squashed(

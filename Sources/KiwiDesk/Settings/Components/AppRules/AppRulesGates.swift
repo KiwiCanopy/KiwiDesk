@@ -7,11 +7,6 @@ import KiwiDeskCore
 /// (`AppRulesGateTests`).
 struct AppRulesGates {
     let config: GuiConfig
-    /// The override base's float rules while a stored profile is
-    /// edited (#109); nil during live editing. A pattern the base
-    /// carries is one the reader can see on the card, so it
-    /// counts.
-    let baseFloatRules: [String]?
 
     /// Reason a gated App Rules row is withheld or greyed.
     enum InertReason: Hashable, CaseIterable {
@@ -29,8 +24,7 @@ struct AppRulesGates {
         case .appRules(.appRules):
             return config.spaces.isEmpty ? .noSpaces : nil
         case .appRules(.floatRulesPattern):
-            let rules = config.floatRules + (baseFloatRules ?? [])
-            return rules.contains(where: FloatFacet.isTitled)
+            return config.floatRules.contains(where: FloatFacet.isTitled)
                 ? nil : .noTitlePatterns
         default:
             assertionFailure(

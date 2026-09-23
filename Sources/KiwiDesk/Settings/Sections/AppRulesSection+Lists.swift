@@ -17,9 +17,9 @@ extension AppRulesSection {
                 AppRuleSpaceRow(
                     model: model,
                     app: app,
-                    overrideBase: overrideBase,
                     gates: gates,
-                    onDelete: { deleteSpace(app) },
+                    showsReach: showsReach,
+                    onDelete: { deleteSpace(app, $0) },
                     returningRow: $returningSpaceRow
                 )
                 Divider()
@@ -35,13 +35,10 @@ extension AppRulesSection {
         }
     }
 
-    /// Apps this list draws: every pin, and while a stored profile
-    /// is edited every BASE pin too — a profile's stored nil is the
-    /// tombstone that un-pins it, and the row stays to be restored.
+    /// Apps this list draws: every rule the edited profile
+    /// resolves (#1393).
     var spaceApps: [String] {
-        var set = Set(model.config.appRules.keys)
-        if let base = overrideBase { set.formUnion(base.keys) }
-        return sortedByName(set)
+        sortedByName(Set(model.config.appRules.keys))
     }
 
     /// Pins the picked app to the Space a new pin takes. Picking
@@ -56,23 +53,11 @@ extension AppRulesSection {
         model.config.appRules[app] = space
     }
 
-    private func deleteSpace(_ app: String) {
-        let candidates = spaceApps.filter {
-            $0 == app || spaceRowHoldsFocus($0)
-        }
-        let neighbour = DeletionFocus.neighbour(after: app, in: candidates)
+    private func deleteSpace(_ app: String, _ removal: RuleRemoval) {
+        let neighbour = DeletionFocus.neighbour(after: app, in: spaceApps)
+        model.recordRemoval(.space, app, removal)
         model.config.appRules[app] = nil
-        // An override tombstone keeps the row, whose trash has just
-        // disabled itself under the focus: stay on the row.
-        returningSpaceRow = spaceRowHoldsFocus(app) ? app : neighbour
-    }
-
-    /// Whether a listed Space row can take focus (#816): all can,
-    /// except a tombstone while no Space is declared — its menu
-    /// greys and its trash disables.
-    private func spaceRowHoldsFocus(_ app: String) -> Bool {
-        spaceApps.contains(app)
-            && (gates.hasSpaces || model.config.appRules[app] != nil)
+        returningSpaceRow = neighbour
     }
 
     /// With no Spaces declared there is nothing to open in, so the
@@ -107,10 +92,10 @@ extension AppRulesSection {
                 AppRuleFloatRow(
                     model: model,
                     app: app,
-                    overrideFloatBase: overrideFloatBase,
+                    showsReach: showsReach,
                     offersTitles: offersTitles,
                     composingTitles: $composingTitles,
-                    onDelete: { deleteFloat(app) },
+                    onDelete: { deleteFloat(app, $0) },
                     returningRow: $returningFloatRow
                 )
                 Divider()
@@ -124,13 +109,11 @@ extension AppRulesSection {
         }
     }
 
-    /// Apps this list draws: every float rule, the base's while a
-    /// stored profile is edited, and the row under composition,
-    /// which may hold no stored rule while its editor is open.
+    /// Apps this list draws: every float rule the edited profile
+    /// resolves, and the row under composition, which may hold no
+    /// stored rule while its editor is open.
     var floatApps: [String] {
-        var rules = model.config.floatRules
-        rules += overrideFloatBase ?? []
-        var set = Set(rules.map(FloatFacet.appSegment(of:)))
+        var set = Set(model.config.floatRules.map(FloatFacet.appSegment(of:)))
         if let composing = composingTitles { set.insert(composing) }
         return sortedByName(set)
     }
@@ -144,8 +127,9 @@ extension AppRulesSection {
         model.config.floatRules.append(app)
     }
 
-    private func deleteFloat(_ app: String) {
+    private func deleteFloat(_ app: String, _ removal: RuleRemoval) {
         let neighbour = DeletionFocus.neighbour(after: app, in: floatApps)
+        model.recordRemoval(.float, app, removal)
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
