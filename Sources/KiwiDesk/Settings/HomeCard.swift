@@ -62,10 +62,9 @@ struct HomeCard: View {
         HomeCardOrder.thisProfile.contains(destination)
     }
 
-    /// Only a plated card pins its subtitle to the bottom. A
-    /// bare card keeps an empty preview row, so its text sits
-    /// exactly as an empty App Rules card's does (owner report
-    /// 2026-09-23, General).
+    /// Only a plated card pins its subtitle to the bottom; a
+    /// bare card keeps an empty preview row, sitting as an
+    /// empty-preview card does (#1610).
     private func textBand(plated: Bool) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             // Mode reveal wash restricted to title row (#760).

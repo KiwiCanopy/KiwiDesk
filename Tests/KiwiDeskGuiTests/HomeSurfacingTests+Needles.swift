@@ -293,13 +293,8 @@ extension HomeSurfacingTests {
             // the body emptied).
             "ifletpreview=HomeCardPreview.preview("
                 + "for:destination,model:model){preview}",
-            // Only a PLATED card spends the band's slack above
-            // its subtitle; a bare one fed that slack strands
-            // its subtitle at the bottom (owner report
-            // 2026-09-23, General), and a bare one with no row
-            // at all sits 5 pt tighter than an empty preview —
-            // so the branch names the plate, fed the real one,
-            // and the bare arm keeps a zero-height row.
+            // Only a PLATED card pins its subtitle low; a bare
+            // one keeps a zero-height preview row (#1610).
             "{preview}elseifplated{Spacer(minLength:0)}"
                 + "else{Color.clear.frame(height:0)}",
             // A plated card DRAWS its desktop plate (#786) —
