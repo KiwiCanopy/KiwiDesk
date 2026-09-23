@@ -98,16 +98,22 @@ struct AppRuleListsWiringTests {
     @Test("the Space row never writes an absent Space")
     func spaceRowWritesNoAbsence() throws {
         // Comparisons blanked first: `appRules[app] == base` is a
-        // read, and would count as a write.
+        // read. Every subscript assignment counts, however its
+        // index is spelled, and the one allowed is the pick whole,
+        // up to its closing brace.
         let row = try source("AppRuleSpaceRow.swift")
             .replacingOccurrences(of: "==", with: "≡")
-        let writes = row.components(separatedBy: "appRules[app]=")
-        let picks = row.components(
-            separatedBy: "appRules[app]=space"
+        let writes = try NSRegularExpression(
+            pattern: #"appRules\[[^\]]*\]="#
+        ).numberOfMatches(
+            in: row,
+            range: NSRange(row.startIndex..., in: row)
         )
         #expect(
-            writes.count == 2 && picks.count == 2
+            writes == 1
+                && row.contains("{model.config.appRules[app]=space}")
                 && !row.contains("removeValue")
+                && !row.contains("$model")
                 && !row.contains("config.appRules="),
             Comment(
                 rawValue:
@@ -130,19 +136,31 @@ struct AppRuleListsWiringTests {
                 in: file
             ).contains(
                 Self.squashed(
-                    "menu == gates.hasSpaces ? app : Self.neverFocused"
+                    "menu == gates.hasSpaces ? app : app + \"\\u{0}\""
                 )
             ),
             "the focus no longer follows the Space menu's grey"
         )
+        // Contiguous with each control's own chain, so a binding
+        // moved onto another control reds; the `.opacity` and
+        // `.disabled` arguments are glue holding the needle there.
+        let row = try body(of: "var body: some View", in: file)
         #expect(
-            try source(file).contains(
+            row.contains(
                 Self.squashed(
-                    ".focused($returningRow, "
-                        + "equals: focusValue(menu: false))"
+                    "spaceMenu .opacity(inherited ? 0.55 : 1) "
+                        + ".focused($returningRow, "
+                        + "equals: focusValue(menu: true))"
                 )
-            ),
-            "the trash is no longer the fallback focus destination"
+            )
+                && row.contains(
+                    Self.squashed(
+                        "onDelete: onDelete) .disabled(tombstoned) "
+                            + ".focused($returningRow, "
+                            + "equals: focusValue(menu: false))"
+                    )
+                ),
+            "the menu or the trash no longer carries its focus value"
         )
     }
 
@@ -153,7 +171,8 @@ struct AppRuleListsWiringTests {
         #expect(
             try source("AppRuleFloatRow.swift").contains(
                 Self.squashed(
-                    ".disabled(scope == .never && !editingTitles)"
+                    "onDelete: onDelete ) "
+                        + ".disabled(scope == .never && !editingTitles)"
                 )
             ),
             Comment(

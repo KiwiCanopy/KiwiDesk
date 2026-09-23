@@ -30,8 +30,7 @@ extension AppRulesSection {
     static var spaceCaption: String {
         L(
             "app_rules.space_list.caption",
-            "Each new window of the app opens in its Space, "
-                + "whatever its title."
+            "Every new window of the app opens in its Space."
         )
     }
 
@@ -58,19 +57,18 @@ extension AppRulesSection {
         )
     }
 
-    /// The Space card's `?`. That the user travels with a window
-    /// they OPEN is #1599's launch follow; the remembered-Space
-    /// exception is a precedence detail, so it comes last.
+    /// The Space card's `?`: which arrivals the rule places — a
+    /// return that only comes back into view keeps its Space — and
+    /// the launch follow (#1599), which ⌘N in a running app does
+    /// not take.
     static var spaceHelp: String {
         L(
             "app_rules.space_list.help",
-            "The app's new windows go to its Space, whatever Space "
-                + "you are in, and opening the app takes you there "
-                + "with them.\n\nAn app can float as well: a "
-                + "floating window still belongs to its Space, it "
-                + "simply is not tiled inside it. A window KiwiDesk "
-                + "already remembers keeps the Space it was last "
-                + "in."
+            "The rule applies to every new window of the app: "
+                + "when you launch it, open another window, reopen "
+                + "a window you closed, or restore one you "
+                + "minimized. Launching the app also takes you to "
+                + "its Space."
         )
     }
 

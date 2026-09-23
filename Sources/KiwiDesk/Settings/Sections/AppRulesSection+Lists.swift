@@ -57,11 +57,22 @@ extension AppRulesSection {
     }
 
     private func deleteSpace(_ app: String) {
-        let neighbour = DeletionFocus.neighbour(after: app, in: spaceApps)
+        let candidates = spaceApps.filter {
+            $0 == app || spaceRowHoldsFocus($0)
+        }
+        let neighbour = DeletionFocus.neighbour(after: app, in: candidates)
         model.config.appRules[app] = nil
         // An override tombstone keeps the row, whose trash has just
         // disabled itself under the focus: stay on the row.
-        returningSpaceRow = spaceApps.contains(app) ? app : neighbour
+        returningSpaceRow = spaceRowHoldsFocus(app) ? app : neighbour
+    }
+
+    /// Whether a listed Space row can take focus (#816): all can,
+    /// except a tombstone while no Space is declared — its menu
+    /// greys and its trash disables.
+    private func spaceRowHoldsFocus(_ app: String) -> Bool {
+        spaceApps.contains(app)
+            && (gates.hasSpaces || model.config.appRules[app] != nil)
     }
 
     /// With no Spaces declared there is nothing to open in, so the

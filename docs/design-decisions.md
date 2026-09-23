@@ -11433,9 +11433,8 @@ cards, **Open in a Space** and **Float**, each over its own store
 (`GuiConfig.appRules`, `floatRules`; `AppRuleListsTests` ▸
 `eachListReadsItsOwnStore`), and a pattern's editor opens under
 the Float row it qualifies (`AppRuleListsWiringTests` ▸
-`patternEditorScopesToFloat`). An app may sit in both lists; the
-Space card's help says the two combine. This is the storage's own
-shape, so it costs the engine nothing.
+`patternEditorScopesToFloat`). An app may sit in both lists.
+This is the storage's own shape, so it costs the engine nothing.
 
 **This reverses "a rule is a sentence, and the sentence is the
 control"** (#678 turn 14a). Running prose renders an empty rule

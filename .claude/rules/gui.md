@@ -671,7 +671,9 @@ cell is a word; where it cannot be — a cell drawn as a GLYPH a
 screen reader reads as nothing, which is an override
 tombstone's em dash on either App Rules list — author the
 spoken variant beside the drawn one and keep the pair in step.
-Nothing scans for that pair. Read the rule as: whenever you
+`AppRuleListsWiringTests` ▸ `tombstonesSpeak` holds that each App
+Rules menu speaks its word; nothing scans that a pair stays in
+step. Read the rule as: whenever you
 name a control for VoiceOver, ask what naming it took away.
 
 **A sentence with controls in it is one localized frame, not

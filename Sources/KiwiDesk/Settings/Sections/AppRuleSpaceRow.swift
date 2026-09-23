@@ -35,12 +35,10 @@ struct AppRuleSpaceRow: View {
     /// The row's focus destination (#816) must be able to HOLD
     /// focus: the Space menu, except while no Space is declared and
     /// the menu is greyed, when it is the trash. The other control
-    /// takes a value no deletion ever assigns.
+    /// takes a per-row value no deletion ever assigns.
     private func focusValue(menu: Bool) -> String {
-        menu == gates.hasSpaces ? app : Self.neverFocused
+        menu == gates.hasSpaces ? app : app + "\u{0}"
     }
-
-    private static let neverFocused = "\u{0}"
 
     /// No "none" item: a row in this list HAS a Space, and the way
     /// to stop opening an app in one is the trash. The one
