@@ -99,7 +99,7 @@ struct ProfilesSection: View {
         guard !model.profileSummaries.isEmpty else { return nil }
         return L(
             "profiles.sets.one_owner_note",
-            "A screen setup belongs to one profile at a time. Moving "
+            "Each screen setup belongs to one profile at a time. Moving "
                 + "it to another profile removes it from the current one."
         )
     }
