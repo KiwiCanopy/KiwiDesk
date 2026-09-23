@@ -218,7 +218,7 @@ struct ProfileModelTests {
         )
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        let decoded = try decoder.decode(Profile.self, from: data)
+        _ = try decoder.decode(Profile.self, from: data)
         // Decoding an OLDER stamp, not the one just encoded:
         // `init(from:)` assigns `format = Self.currentFormat`
         // unconditionally, so re-decoding what we wrote asserts
