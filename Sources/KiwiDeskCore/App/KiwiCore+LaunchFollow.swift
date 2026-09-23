@@ -49,14 +49,17 @@ extension KiwiCore {
             bundleID,
             since: pressedAt
         ),
-            placed.space != state.workspaces.activeSpace,
             state.workspaces.space(of: placed.window) == placed.space
         {
-            onLog(
-                "launch follow: w\(placed.window.raw) arrived before "
-                    + "its app's activation — following now"
-            )
-            followSwitch(to: placed.space, focusing: placed.window)
+            // This open's window is here already: follow it, or —
+            // the user reached its Space first — owe nothing more.
+            if placed.space != state.workspaces.activeSpace {
+                onLog(
+                    "launch follow: w\(placed.window.raw) arrived "
+                        + "before its app's activation — following now"
+                )
+                followSwitch(to: placed.space, focusing: placed.window)
+            }
             return
         }
         onLog("launch follow: owed to \(bundleID)")
