@@ -222,8 +222,10 @@ struct SettingsSearchIndexTests {
                 // count RISING is the unusual direction the
                 // docstring above warns about, and the reason is
                 // that a new census row landed rather than a
-                // catalog anchor going missing.
-                .profiles: 6,
+                // catalog anchor going missing. 7 since #1530:
+                // `(action) profiles.sets.add`, the screen-setup
+                // `+` on every profile row — a new census row.
+                .profiles: 7,
                 // 13: `keybinding.open_settings` joined
                 // anchor-less (#678 item 18 — the bindable
                 // "Open Settings" row has no #277 catalog

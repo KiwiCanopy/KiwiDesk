@@ -644,6 +644,27 @@ already-merged values (the `AppBarStyle.resolved…` pattern).
 Resolution runs before layout math so the layout functions stay
 pure over the flat array.
 
+## A screen combination has one owner (#1530)
+
+A monitor set belongs to the profile most recently stored or
+loaded with it. The obligations:
+
+- **Claim only at the ruled doors.** A save or create of the live
+  arrangement (through `saveProfile`'s tail), an explicit load
+  (`loadProfile`) and the Profiles page's pick (`claimMonitorSet`)
+  hand the set over and strip it from same-count siblings; each
+  goes through `ProfileManager.claim`. Boot and monitor-change
+  matching never claim, because a claim there rewrites files the
+  user did not touch. `MonitorSetClaimSeamTests` holds the one home
+  and the save door's tail.
+- **Treat a profile with no set as dormant, never as invalid.** It
+  keeps its count in `monitor_count`, matching skips it, and a
+  dormant default hands its flag on inside `claim`. A new reader
+  that judges "is this profile for these screens" takes
+  `monitorCount` and `isDormant` rather than
+  `monitorSets.first`. The argument is `docs/design-decisions.md`
+  ▸ *A screen combination belongs to one profile*.
+
 ## The two profile writes mean different things (#1179)
 
 A layout can be changed in two places, and the writes they lead

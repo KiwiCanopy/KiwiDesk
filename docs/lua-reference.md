@@ -4435,6 +4435,8 @@ end)
   keybinding override).
 - `load_profile` switches to the named profile and makes its space
   list the authority (see *Space Reconciliation*).
+- Both hand the connected screen combination to that profile (see
+  [Profile Monitor Sets](#profile-monitor-sets)).
 - `delete_profile` removes the profile; deleting the last profile of
   a count reverts that count to its built-in Standard.
 - `set_default_profile` marks a profile as the fallback for its
@@ -4609,6 +4611,21 @@ never does.
 Explicitly loading a profile whose stored sets don't cover the
 connected monitors works, but the state loads *dirty* until you
 update the profile on this hardware or return to a covered set.
+
+:::unreleased
+A monitor set belongs to one profile. `save_profile`, `load_profile`
+and creating a profile add the connected set to that profile when
+its screen count fits, and remove the set from every other profile
+with that count. The command then answers with the names that lost
+it and why: `{"takenFrom": ["Work"], "reason": "…"}`. Start-up
+never removes a set, so two hand-edited profiles that hold the same
+set still resolve as before. A profile left with no set is
+*dormant*: its file keeps `"monitor_sets": []` beside
+`"monitor_count"`, it is never matched automatically, it still
+loads by name, and it takes a set back on its next save or load. A
+dormant profile that was its count's default hands the flag to the
+profile that took its set.
+:::
 
 ### Profile JSON Format
 

@@ -58,9 +58,14 @@ extension KiwiCore {
     /// path `apply(composed:)` has already filed and stood the
     /// name down through `standardIsLive`, so the record here is
     /// a no-op — which is what leaves no exit anything to decide.
-    func saveProfile(_ profile: Profile) throws {
+    ///
+    /// The saved profile claims the connected combination it now
+    /// holds (#1530); returns the profiles that lost it.
+    @discardableResult
+    func saveProfile(_ profile: Profile) throws -> [String] {
         recordLivePartitioning()
         try profiles.save(profile)
+        return try claimLiveSet(heldBy: profile)
     }
 
     /// Forwards every window of `space` into `fallback` and drops

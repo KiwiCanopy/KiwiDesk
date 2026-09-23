@@ -5,6 +5,7 @@ enum ProfilesRowOrder {
     static let savedProfiles: [SettingKey] = [
         .profiles(.profilesRename),
         .profiles(.isDefault),
+        .profiles(.profilesAddScreenSetup),
         .profiles(.profilesLoad),
         .profiles(.profilesDelete),
     ]

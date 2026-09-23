@@ -19,6 +19,7 @@ extension SettingsModel {
                 name: profile.name,
                 count: profile.monitorCount,
                 sets: profile.monitorSets.map(\.monitors),
+                isDormant: profile.isDormant,
                 isDefault: profile.isDefault,
                 matchesLive: profile.set(matching: live) != nil,
                 matchesConnectedCount: profile.monitorCount

@@ -7361,8 +7361,8 @@ things that are load-bearing rather than incidental:
   never blocked and must not be rerouted. **Save a copy…** stays
   unconditionally gated — a copy always captures the live set.
 - *Its own narrow method.* Routing through `persist(named:)` would
-  drag in the overlapping-monitor-set warning and a "Saving
-  failed" message naming a profile the save never touched.
+  drag in a "Saving failed" message naming a profile the save
+  never touched.
 - *Partial-clean, never `reload()`.* Only the six fields are
   adopted as clean; a blanket reload would discard staged tiling
   edits this save did not persist, and with both pending the
@@ -11225,6 +11225,39 @@ never greyed, since its Save creates the sidecar. Moving the
 binding *into* the profile was refused on the standing rule: a
 profile owns tiling plus sparse overrides, never anything that
 routes or selects the profile itself.
+
+**[Principle]**
+
+**A screen combination belongs to one profile: the one most
+recently stored or loaded with it
+([#1530](https://github.com/KiwiCanopy/KiwiDesk/issues/1530)).**
+Matching picks the first profile, alphabetically, that holds the
+connected combination, so two profiles holding the same one load
+the wrong profile half the time. The fix is to have one owner, not
+to pick more carefully between two. A save of the live arrangement,
+a load and a create each hand the combination to that profile and
+take it from every other profile of the same screen count, without
+a warning. The Profiles page shows each profile's combinations, so
+you can see where one went. Resolving by a recency stamp was
+refused, because it hides the state that page exists to show.
+Three consequences follow:
+- **Boot never takes a combination.** Two hand-edited files that
+  hold the same one still resolve as before, and the next save or
+  load settles it, so a start-up cannot rewrite files you did not
+  touch.
+- **A profile that loses its last combination goes *dormant*
+  rather than being deleted.** It keeps its screen count (the file
+  carries `monitor_count`), is never matched automatically, still
+  loads by hand, and takes a combination back on its next save or
+  load. This amends #36's "zero entries is invalid". If it was the
+  default for its count, the flag moves to the profile that took
+  the combination, because a count's default must be a profile that
+  can load. A copy made with **Save a copy…** starts dormant too:
+  copying the source's combinations would give each of them two
+  owners.
+- **`save_profile` and `load_profile` name what they took, and
+  why.** A scripted save that changes another file must not do it
+  silently.
 
 **[Principle]**
 

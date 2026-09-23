@@ -9,6 +9,8 @@ struct ProfilesSection: View {
     @ObservedObject var model: SettingsModel
     /// Profile whose rename popover is presented (#843).
     @State var renameRequest: NameEditRequest?
+    /// Profile whose full screen-setup list is open (#1530).
+    @State var setupListRequest: ScreenSetupListRequest?
     /// Keyboard focus return anchor after row deletion (#816).
     @FocusState var returningRow: String?
 
@@ -138,7 +140,7 @@ struct ProfilesSection: View {
                 Text(subtitle(summary))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .help(monitorTooltip(summary))
+                screenSetupsLine(summary)
             }
             Spacer()
             if !summary.isDefault {
@@ -182,12 +184,22 @@ struct ProfilesSection: View {
                 )
             }
             if summary.isDefault {
-                BadgeChip(
-                    label: L("profiles.badge.default", "default")
-                )
+                BadgeChip(label: defaultBadge(summary.count))
                 duplicateDefaultWarning(summary)
             }
         }
+    }
+
+    /// A default is per screen count, so the badge says which
+    /// (#1530).
+    private func defaultBadge(_ count: Int) -> String {
+        count == 1
+            ? L("profiles.badge.default_for.one", "default for 1 screen")
+            : L(
+                "profiles.badge.default_for.many",
+                "default for %1$d screens",
+                count
+            )
     }
 
     /// Warning shown when multiple profiles share a default flag for count.

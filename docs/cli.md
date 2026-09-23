@@ -262,7 +262,7 @@ exports nothing.
 | | `get_state` | — (returns `{active_space, spaces, windows, away_windows, monitor_count, desktop, exec_running}`; `desktop` is the main screen's current Desktop; `away_windows` lists the windows on Desktops no screen shows, each with `id`, `app`, `bundle_id`, `space_id` and `desktop`, and each space object carries its own `away_windows` ids) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
-| Profiles | `save_profile` | name (updates in place when it exists) |
+| Profiles | `save_profile` | name (updates in place when it exists; see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
 | | `load_profile` | name |
 | | `delete_profile` | name |
 | | `set_default_profile` | name (its screen count's fallback) |

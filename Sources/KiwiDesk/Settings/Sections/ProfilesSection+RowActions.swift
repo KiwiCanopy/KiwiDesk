@@ -25,12 +25,12 @@ extension ProfilesSection {
         // Focus return target on dismissal (#816).
         .focused($returningRow, equals: summary.name)
         .help(
-            summary.matchesLive
+            summary.matchesConnectedCount
                 ? ""
                 : L(
-                    "profiles.other_monitors.help",
-                    "Saved for other monitors — loads "
-                        + "with unsaved-changes state."
+                    "profiles.other_count.help",
+                    "Saved for a different number of screens — "
+                        + "loads with unsaved changes."
                 )
         )
     }

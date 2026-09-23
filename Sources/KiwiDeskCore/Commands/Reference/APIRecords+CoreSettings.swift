@@ -105,12 +105,18 @@ extension APIReference {
             .choice("event", KiwiNotification.self, optional: true)
         ),
         "save_profile": APIRecord(
-            "Saves the current configuration to a profile.",
+            "Saves the current configuration to a profile, which "
+                + "claims the connected screen combination; "
+                + "returns takenFrom and reason when another "
+                + "profile lost it.",
             .text("name")
         ),
         "load_profile": APIRecord(
             "Loads a profile and applies its Spaces and "
-                + "settings.",
+                + "settings, claiming the connected screen "
+                + "combination where its screen count fits; "
+                + "returns takenFrom and reason when another "
+                + "profile lost it.",
             .text("name")
         ),
         "delete_profile": APIRecord(

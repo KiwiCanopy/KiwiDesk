@@ -236,28 +236,6 @@ struct ProfileCommandTests {
         #expect(try !core.profiles.read(name: "alpha").isDefault)
     }
 
-    @Test("Overlapping profiles claiming the live set listed")
-    func overlapWarning() {
-        let core = makeCore()
-        connect(core, [display(1, "A")])
-        core.execute(
-            "save_profile",
-            args: [.string("desk")]
-        )
-        core.execute(
-            "save_profile",
-            args: [.string("other")]
-        )
-        #expect(
-            core.profilesClaimingLiveSet(excluding: "desk")
-                == ["other"]
-        )
-        #expect(
-            core.profilesClaimingLiveSet(excluding: "other")
-                == ["desk"]
-        )
-    }
-
     @Test("Profile tiling survives a Lua config reload")
     func profileSurvivesReload() {
         let core = makeCore()
