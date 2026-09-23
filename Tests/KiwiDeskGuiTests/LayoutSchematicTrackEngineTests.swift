@@ -70,7 +70,8 @@ struct LayoutSchematicTrackEngineTests {
                         rawValue:
                             "own track at \(count), "
                             + "\(placement.rawValue): preview "
-                            + "\(drawn.incoming), engine "
+                            + "\(drawn.incoming.map { "\($0)" } ?? "none"), "
+                            + "engine "
                             + "\(engine.incoming)"
                     )
                 )
