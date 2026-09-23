@@ -59,10 +59,11 @@ extension DesktopsGroup {
         .padding(.leading, Self.nestIndent)
     }
 
-    /// Whether a one-line Desktop draws the add menu: its count
+    /// Whether a Desktop draws its setup list — the add menu and
+    /// the labelled fallback — rather than one line: its count
     /// offers two setups or more — with one, there is nothing to
-    /// tell apart — or the record already scopes one, which then
-    /// draws nested anyway (#1609, ui-designer).
+    /// tell apart — or the record already scopes one of that
+    /// count (#1609).
     func offersSetups(count: Int, row: DesktopRow) -> Bool {
         let counts = profileCounts
         return (model.bindableSetups[count]?.count ?? 0) >= 2
@@ -90,11 +91,7 @@ extension DesktopsGroup {
     /// profile that loads there when nothing is bound, so adding
     /// it is also the fix for the conflict line below — and moves
     /// focus to its picker.
-    func addSetupMenu(
-        _ row: DesktopRow,
-        count: Int,
-        iconOnly: Bool
-    ) -> some View {
+    func addSetupMenu(_ row: DesktopRow, count: Int) -> some View {
         let choices = unscopedSetups(row, count: count)
         let labels = model.setupLabels(choices.map(\.monitors))
         return Menu {
@@ -124,11 +121,7 @@ extension DesktopsGroup {
                 }
             }
         } label: {
-            if iconOnly {
-                Image(systemName: "plus")
-            } else {
-                Label(addTitle, systemImage: "plus")
-            }
+            Label(addTitle, systemImage: "plus")
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)

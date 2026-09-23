@@ -221,6 +221,9 @@ struct DesktopBindingGroupTests {
         let block = try squashed("DesktopsGroup+Row.swift")
         #expect(block.contains("ProfilesFamilyRows.slots("))
         #expect(block.contains("ifleads{conflictLine(row)}"))
+        // Where setups are known, the scope is always written: the
+        // list, not one line, decided by the one offer predicate.
+        #expect(block.contains("if!offersSetups(count:count,row:row){"))
         // The caption asks the ONE leading derivation, and
         // stands down with no display reading (#1436 review).
         #expect(

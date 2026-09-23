@@ -27,32 +27,33 @@ extension DesktopsGroup {
         )
         let others = BindingSlot.count(count, setup: nil)
         VStack(alignment: .leading, spacing: 4) {
-            if slots.count == 1 {
+            // With one known setup there is no scope to choose, so
+            // the card stays one line; with two or more the scope is
+            // always WRITTEN — even with nothing added, the picker
+            // says it binds all screen setups (owner, 2026-09-23).
+            if !offersSetups(count: count, row: row) {
                 HStack {
                     desktopLabel(row)
                     Spacer()
                     profileMenu(row, slot: others, nested: false)
-                    if offersSetups(count: count, row: row) {
-                        addSetupMenu(row, count: count, iconOnly: true)
-                    }
                 }
             } else {
                 desktopLabel(row)
                 ForEach(slots.dropLast(), id: \.self) { slot in
                     setupRow(row, slot: slot)
                 }
-                addSetupMenu(row, count: count, iconOnly: false)
+                addSetupMenu(row, count: count)
                     .padding(.leading, Self.nestIndent)
                 HStack {
-                    Text(
-                        L(
-                            "desktops.scope.others",
-                            "All other screen setups"
-                        )
-                    )
-                    .accessibilityHidden(true)
+                    Text(fallbackLabel(scoped: slots.count > 1))
+                        .accessibilityHidden(true)
                     Spacer()
-                    profileMenu(row, slot: others, nested: true)
+                    profileMenu(
+                        row,
+                        slot: others,
+                        nested: true,
+                        scoped: slots.count > 1
+                    )
                     Color.clear.frame(width: Self.removeColumn, height: 1)
                         .accessibilityHidden(true)
                 }
@@ -60,6 +61,14 @@ extension DesktopsGroup {
             }
             if leads { conflictLine(row) }
         }
+    }
+
+    /// The fallback row's label: all screen setups, or all OTHER
+    /// ones once a setup has a row of its own.
+    func fallbackLabel(scoped: Bool) -> String {
+        scoped
+            ? L("desktops.scope.others", "All other screen setups")
+            : L("desktops.scope.all", "All screen setups")
     }
 
     /// An orphan's row: a bound name no saved profile counts.
@@ -136,7 +145,8 @@ extension DesktopsGroup {
     func profileMenu(
         _ row: DesktopRow,
         slot: BindingSlot,
-        nested: Bool
+        nested: Bool,
+        scoped: Bool = true
     ) -> some View {
         Picker("", selection: binding(row, slot: slot)) {
             // A screen-setup row has no empty choice — its × removes
@@ -166,7 +176,9 @@ extension DesktopsGroup {
         // An empty title names nothing, so the picker is named
         // here, and named, it owes its selection back as the
         // value (#812).
-        .accessibilityLabel(pickerLabel(slot, nested: nested))
+        .accessibilityLabel(
+            pickerLabel(slot, nested: nested, scoped: scoped)
+        )
         .accessibilityValue(
             binding(row, slot: slot).wrappedValue
                 ?? noneLabel(slot, nested: nested)
@@ -183,7 +195,11 @@ extension DesktopsGroup {
             : L("desktops.none", "None")
     }
 
-    private func pickerLabel(_ slot: BindingSlot, nested: Bool) -> String {
+    private func pickerLabel(
+        _ slot: BindingSlot,
+        nested: Bool,
+        scoped: Bool
+    ) -> String {
         switch slot {
         case .count(_, let setup?):
             return L(
@@ -192,6 +208,12 @@ extension DesktopsGroup {
                 model.setupLabels([setup])[0]
             )
         case .count:
+            if nested, !scoped {
+                return L(
+                    "desktops.profile_ax.all",
+                    "Profile for this Desktop on all screen setups"
+                )
+            }
             guard !nested else {
                 return L(
                     "desktops.profile_ax.others",

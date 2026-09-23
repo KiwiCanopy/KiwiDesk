@@ -11260,10 +11260,13 @@ a Desktop come its screen-setup rows, then **Add a screen setup**,
 then **All other screen setups** — the first row that matches the
 connected screens is the one that loads, the same order the **?**
 numbers, so the layout teaches the rule rather than needing a
-caption to. A Desktop with no setup rows stays one line, so a
-user with one setup per count sees the card as before, and the
-add menu is offered only where a count has two known setups or
-more, since with one there is nothing to tell apart. Adding a
+caption to. Where a count has two known setups or more, every
+Desktop draws that list even with nothing added — **All screen
+setups** beside its picker — because a bare picker there binds
+every setup without saying so, which is the silent over-reach the
+scope exists to prevent (owner, 2026-09-23). With one known setup
+there is nothing to tell apart, so the Desktop stays one line and
+that user sees the card as before. Adding a
 setup fills in the profile that holds it, where one does: that is
 the likeliest wish, and it is the fix for the row that says the
 holder is being loaded over. A scope menu under each picker is
