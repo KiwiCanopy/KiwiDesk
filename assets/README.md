@@ -14,7 +14,7 @@ an asset catalog — `swift build` on CI does not run actool).
 | `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances) and the Settings Home footer. No longer a runtime Dock icon — the app never leaves `.accessory`, so there is no tile to paint |
 | `mark-discord-mono.svg` | `MarkDiscord.png` (64 px) | The Discord link on Settings Home ▸ Community & Support (#1536), as a template image. A black fill of `discord.svg`, Discord's own mark (the Simple Icons path, CC0) |
 | `mark-github-mono.svg` | `MarkGitHub.png` (64 px) | The GitHub link there, the same way. A black fill of `mark-github.svg` — Primer Octicons' `mark-github-24`, MIT, notice in `ACKNOWLEDGEMENTS` |
-| `mark-kofi-mono.svg` | `MarkKofi.png` (64 px) | The Ko-fi link there, the same way. A black knockout of `kofi_symbol.svg` |
+| `mark-kofi-mono.svg` | `MarkKofi.png` (64 px) | The Ko-fi link there, the same way. A black knockout of `kofi_symbol.svg`, its viewBox cropped to the ink so it draws as large as the other two |
 | `logo.svg` | `AppIcon.icon/Assets/*.svg` | App icon — see [App icon](#app-icon-appiconicon) below (#89) |
 
 ## Website-only assets
