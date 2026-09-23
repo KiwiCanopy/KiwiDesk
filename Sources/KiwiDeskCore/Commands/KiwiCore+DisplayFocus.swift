@@ -88,7 +88,11 @@ extension KiwiCore {
     /// (`handFollowFocus` below is this sequence's deliberate
     /// partial twin, #1007 — a step added or reordered here
     /// likely belongs there too.)
-    func followSwitch(to target: SpaceID, focusing id: WindowID) {
+    func followSwitch(
+        to target: SpaceID,
+        focusing id: WindowID,
+        arriving: Bool = false
+    ) {
         let priorFrontmost = frontmostPIDProvider?()
         state.workspaces.activate(target)
         focusWindow(id, refocusRetile: false, warp: true)
@@ -97,7 +101,7 @@ extension KiwiCore {
             target,
             priorFrontmost: priorFrontmost
         )
-        spaceSwitchRetile()
+        spaceSwitchRetile(newcomer: arriving ? id : nil)
     }
 
     /// Pay the focus a `move_to_desktop_and_follow` owes the

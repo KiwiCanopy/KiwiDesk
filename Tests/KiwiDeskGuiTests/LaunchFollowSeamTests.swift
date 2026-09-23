@@ -41,12 +41,20 @@ struct LaunchFollowSeamTests {
         ("launchFollow.record(", followFile, 1),
         ("oweLaunchFollow(bundleID, at: now)", followFile, 1),
         ("oweLaunchFollow(bundleID)", "KiwiCore+Launch.swift", 2),
-        // The claim at the arrival, and the switch after its
-        // retile.
+        // The claim at the arrival, the switch in place of its
+        // retile, and the arrival's #45 start-at-target carried
+        // into the switch's own pass.
+        (
+            "newlyCreatedWindow: newcomer,",
+            "KiwiCore+SpaceTransition.swift", 1
+        ),
         ("launchFollow.claim(", followFile, 1),
         ("= claimLaunchFollow(", "KiwiCore+Events.swift", 1),
         ("payLaunchFollow($0.0, into: $0.1)", "KiwiCore+Events.swift", 1),
-        ("followSwitch(to: space, focusing: window)", followFile, 1),
+        (
+            "followSwitch(to: space, focusing: window, arriving: true)",
+            followFile, 1
+        ),
         // The fold's one input to the payer.
         (
             "effects.placedByAppRule =",

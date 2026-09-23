@@ -82,7 +82,7 @@ extension KiwiCore {
             "launch follow: w\(window.raw) opened into its app "
                 + "rule's space \(space.raw)"
         )
-        followSwitch(to: space, focusing: window)
+        followSwitch(to: space, focusing: window, arriving: true)
         return true
     }
 
