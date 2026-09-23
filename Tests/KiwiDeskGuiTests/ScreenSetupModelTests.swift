@@ -141,4 +141,52 @@ struct ScreenSetupModelTests {
         #expect(model.config.spacePins == core.livePins)
         #expect(model.cleanConfig.spacePins == core.livePins)
     }
+
+    /// The rebase follows an UNEDITED draft only: a pin the user
+    /// has edited and not saved is theirs, and only the baseline
+    /// moves under it.
+    @Test("An edited draft keeps its pins across a pick")
+    func editedDraftKeepsPins() throws {
+        let core = makeCore()
+        connect(core, ["A", "B"])
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.ensureSpace("2")
+        core.spacePins = ["2": "B:100x100"]
+        try core.persistProfile(named: "Work", modes: nil)
+        try core.persistProfile(named: "Home", modes: nil)
+        try core.loadProfile(named: "Work")
+        let model = makeTestModel(core: core)
+        model.refreshProfiles()
+        let pair = ["A:100x100", "B:100x100"]
+        model.claimScreenSetup(pair, for: "Home")
+        let edited: [SpaceID: String] = ["1": "A:100x100"]
+        model.config.spacePins = edited
+        model.cleanConfig.spacePins = [:]
+        model.claimScreenSetup(pair, for: "Work")
+        #expect(model.config.spacePins == edited)
+        #expect(model.cleanConfig.spacePins == core.livePins)
+    }
+
+    @Test("Home names a default that can load, never a dormant one")
+    func homeNamesAUsableDefault() throws {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let core = makeCore()
+        try core.profiles.write(
+            Profile(
+                name: "Resting",
+                monitorSets: [],
+                monitorCount: 1,
+                isDefault: true,
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        let model = makeTestModel(core: core)
+        model.refreshProfiles()
+        #expect(
+            HomeCardContent.subtitle(for: .profiles, model: model)
+                == "1 saved"
+        )
+    }
 }

@@ -23,9 +23,6 @@ extension KiwiCore {
     /// gates it on the same signal as the `gui.json` seed plus an
     /// empty profile list, so an existing setup is never touched.
     func seedFirstRunStarterProfile() {
-        // Its `applyStandard` claims the live set (#1530), which
-        // must find no sibling to strip.
-        guard profiles.list().isEmpty else { return }
         let displays = firstRunDisplays()
         guard !displays.isEmpty else {
             onLog(

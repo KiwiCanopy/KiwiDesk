@@ -100,8 +100,9 @@ struct MonitorSetClaimSeamTests {
             // Presets ▸ Apply.
             "SettingsModel+Profiles.swift": 1,
             // The one boot caller: the first-run Starter seed,
-            // whose own guard refuses a non-empty profile store,
-            // so its claim has no sibling to strip.
+            // which `loadConfig` calls only with no profile saved
+            // (`seedStarterProfile`), so its claim has no sibling
+            // to strip.
             "KiwiCore+StarterSeed.swift": 1,
         ],
     ]

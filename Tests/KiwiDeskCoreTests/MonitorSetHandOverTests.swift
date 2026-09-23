@@ -177,4 +177,26 @@ struct MonitorSetHandOverTests {
             core.profiles.defaultProfile(count: 1)?.name == "Charlie"
         )
     }
+
+    /// A dormant default left by a hand edit loses its flag when
+    /// another profile becomes that count's default, so the count
+    /// never shows two.
+    @Test("A new default clears a dormant profile's stale flag")
+    func newDefaultClearsDormantFlag() throws {
+        let core = makeCore()
+        try core.profiles.write(
+            Profile(
+                name: "Resting",
+                monitorSets: [],
+                monitorCount: 1,
+                isDefault: true,
+                spaceModes: [:],
+                settings: TilingSettings()
+            )
+        )
+        connect(core, ["A"])
+        try core.persistProfile(named: "Work", modes: nil)
+        #expect(try core.profiles.read(name: "Work").isDefault)
+        #expect(try !core.profiles.read(name: "Resting").isDefault)
+    }
 }
