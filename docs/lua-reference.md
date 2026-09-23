@@ -4618,9 +4618,10 @@ connected monitors works, but the state loads *dirty* until you
 update the profile on this hardware or return to a covered set.
 
 :::unreleased
-A monitor set belongs to one profile. `save_profile`, `load_profile`
-of a profile saved for as many screens, and creating a profile hand
-the connected set to that profile and remove it from every other
+A monitor set belongs to one profile. `save_profile` (unless
+another profile owns the set), `load_profile` of a profile saved
+for as many screens, and creating a profile hand the connected set
+to that profile and remove it from every other
 profile with that count; the set keeps the pins its previous owner
 held for the Spaces the new owner declares. When that took the set
 from another profile, the command returns the names and why:

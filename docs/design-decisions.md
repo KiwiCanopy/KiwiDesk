@@ -11236,9 +11236,9 @@ Matching picks the first profile, alphabetically, that holds the
 connected monitor set, so of two profiles holding the same one the
 same one always wins, whichever you saved or loaded last. The fix
 is one owner, not a better tie-break. A save of the live
-arrangement, a create, a load of a profile saved for as many
-screens, and the Profiles page's **+** each hand the set to that
-profile and take it from every other of the same screen count,
+arrangement (when no other profile owns the set), a create, a
+load of a profile saved for as many screens, and the Profiles
+page's **+** each hand the set to that profile and take it from every other of the same screen count,
 without asking. The page shows each profile's screen setups, so you
 can see where one went. Resolving by a recency stamp was refused,
 because it hides the state that page exists to show. The
@@ -11283,8 +11283,12 @@ consequences:
   source's sets would give each of them two owners.
 - **Taking the connected set away from the loaded profile marks it
   unsaved.** No apply runs on a pick, so the pick re-judges the
-  #36 fit itself. The loaded profile's next save takes the set
-  back.
+  #36 fit itself.
+- **A save never takes a set another profile owns.** The loaded
+  profile only reaches such screens through a Desktop binding or a
+  set moved away by hand, and in both the owner keeps it; a load
+  and a create still claim. So a binding load shows no "Screens"
+  unsaved change, and its Save cannot strip the owner.
 - **`save_profile` and `load_profile` name what they took, and
   why.** A scripted save that changes another file must not do it
   silently.
