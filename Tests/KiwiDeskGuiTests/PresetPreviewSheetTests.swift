@@ -87,7 +87,7 @@ struct PresetPreviewSheetTests {
     /// reason the production fallback cannot start standing in for
     /// a moved constant.
     @Test("the sheet's column derives from the tile scale")
-    func tileWidthIsTheTileScale() {
+    @MainActor func tileWidthIsTheTileScale() {
         #expect(
             PresetPreviewSheet.tileWidth == SchematicScale.tile.width
         )
@@ -99,7 +99,7 @@ struct PresetPreviewSheetTests {
     /// a derivation from a literal that agrees with it today
     /// (4b's `slotWidth` lesson).
     @Test("the sheet's width is the grid's arithmetic")
-    func widthIsDerivedFromTheGrid() {
+    @MainActor func widthIsDerivedFromTheGrid() {
         let sheet = PresetPreviewSheet.self
         // Each extra column adds one tile plus one gutter, at
         // every count — the property, not the shipped value.
@@ -149,7 +149,7 @@ struct PresetPreviewSheetTests {
     /// 540 and the window OPENS at 620, so it was false at both
     /// (code review, 2026-08-17).
     @Test("the sheet's floor fits the narrowest window")
-    func heightBoundsAreOrderedAndFit() throws {
+    @MainActor func heightBoundsAreOrderedAndFit() throws {
         let sheet = PresetPreviewSheet.self
         #expect(sheet.minHeight < SettingsWidthClass.minimumHeight)
         #expect(sheet.minHeight < sheet.idealHeight)
@@ -184,7 +184,7 @@ struct PresetPreviewSheetTests {
     /// arithmetic AND on the spelling, because the two fail apart:
     /// the slack could return without `.adaptive` coming back.
     @Test("the grid states four columns, with no reliance on slack")
-    func gridStatesItsColumns() throws {
+    @MainActor func gridStatesItsColumns() throws {
         let source = try squashed(Self.sheet)
         #expect(source.occurrences(of: ".fixed(Self.tileWidth)") == 1)
         #expect(source.occurrences(of: ".adaptive(") == 0)

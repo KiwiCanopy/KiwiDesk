@@ -230,7 +230,7 @@ struct FractionChipsTests {
     }
 
     @Test("a chip is pressed only where the share reads as it")
-    func pressed() {
+    @MainActor func pressed() {
         #expect(FractionChips.matches(0.5, 0.5))
         #expect(FractionChips.matches(0.3333, 1.0 / 3))
         #expect(!FractionChips.matches(0.34, 1.0 / 3))

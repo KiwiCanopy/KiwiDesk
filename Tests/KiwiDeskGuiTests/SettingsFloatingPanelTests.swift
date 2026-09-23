@@ -91,7 +91,7 @@ struct SettingsFloatingPanelTests {
     /// clamp that pins the card to its corner and calls the
     /// drag a feature.
     @Test("a legal drag is not clamped")
-    func legalDragSurvives() {
+    @MainActor func legalDragSurvives() {
         let moved = CGSize(width: -120, height: 60)
         #expect(
             SettingsFloatingPanel.clamp(moved, in: roomyBounds)
@@ -162,7 +162,7 @@ struct SettingsFloatingPanelTests {
     /// the height it has, floored so a very short window still
     /// leaves something to read rather than a sliver.
     @Test("the card's height yields to a short window")
-    func heightYields() {
+    @MainActor func heightYields() {
         #expect(
             SettingsFloatingPanel.height(in: roomyBounds)
                 == SettingsFloatingPanel.maxHeight
