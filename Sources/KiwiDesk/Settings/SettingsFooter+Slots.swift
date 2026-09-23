@@ -43,9 +43,10 @@ extension SettingsFooter {
         )
     }
 
-    /// Why a copy waits: the draft reaches other profiles.
+    /// Why a copy waits: a checklist choice reaches other
+    /// profiles. A plain value edit is the copy's own.
     var copyBlockedReason: String? {
-        guard !model.reachDiffRows().isEmpty else { return nil }
+        guard !model.reachEdits.isEmpty else { return nil }
         return L(
             "footer.save_copy.reach_blocked",
             "This draft changes other profiles too. %1$@ first, "

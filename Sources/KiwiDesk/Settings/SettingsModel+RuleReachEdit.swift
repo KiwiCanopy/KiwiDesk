@@ -146,7 +146,9 @@ extension SettingsModel {
             ).union([editing]),
             own: own,
             ownIsShared: ownIsShared,
-            leftOut: Set(table.leftOut(key)).subtracting([editing])
+            // Only the shared rule's own row names who left it out.
+            leftOut: table.follows(key, editing)
+                ? Set(table.leftOut(key)).subtracting([editing]) : []
         )
     }
 

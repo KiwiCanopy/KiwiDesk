@@ -86,18 +86,18 @@ struct RuleReachModelEdgeTests {
         #expect(model.draftChangeCount >= 1 + rows.count)
     }
 
-    @Test("A copy waits while the draft reaches other profiles")
+    @Test("A copy waits only on a checklist choice")
     func copyWaitsOnReach() throws {
         let model = try makeModel()
         model.selectEditTarget("Home")
-        #expect(model.reachDiffRows().isEmpty)
-        model.config.appRules["notes"] = SpaceID("2")
-        #expect(model.reachDiffRows().isEmpty)
+        // A value edit, even to a shared row, is the copy's own.
+        model.config.appRules["mail"] = SpaceID("2")
+        #expect(model.reachEdits.isEmpty)
 
         model.config.appRules["spotify"] = SpaceID("2")
         model.setAllProfiles(.space, "spotify", true)
 
-        #expect(!model.reachDiffRows().isEmpty)
+        #expect(!model.reachEdits.isEmpty)
     }
 
     /// The predicate above greys the copy button — the wiring,
@@ -112,6 +112,6 @@ struct RuleReachModelEdgeTests {
             try String(contentsOf: file, encoding: .utf8)
         )
         #expect(source.contains(".disabled(copyBlockedReason != nil)"))
-        #expect(source.contains("model.reachDiffRows().isEmpty"))
+        #expect(source.contains("model.reachEdits.isEmpty"))
     }
 }

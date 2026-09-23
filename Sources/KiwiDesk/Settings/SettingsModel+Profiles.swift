@@ -117,7 +117,15 @@ extension SettingsModel {
         }
         // Profile files first: the gui.json write below reloads
         // the config, which re-reads the loaded profile's rules.
-        if saved { saveRuleReach() }
+        if saved {
+            saveRuleReach()
+        } else {
+            // The files half did not land, so neither may the
+            // base half: the globals write keeps the stored rules.
+            config.appRules = cleanConfig.appRules
+            config.floatRules = cleanConfig.floatRules
+            reachEdits = RuleReachEdits()
+        }
         persistGlobalsIfNeeded()
         reload()
         return saved
