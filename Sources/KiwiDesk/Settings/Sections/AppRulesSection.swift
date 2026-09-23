@@ -48,6 +48,7 @@ struct AppRulesSection: View {
                             overrideBase: overrideBase,
                             overrideFloatBase: overrideFloatBase,
                             offersTitles: offersTitles,
+                            gates: gates,
                             composingTitles: $composingTitles,
                             onDelete: { delete(app) },
                             returningRow: $returningRow
@@ -60,6 +61,10 @@ struct AppRulesSection: View {
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
+        // The composing row belongs to the profile it was opened
+        // in; carried across an edit-target switch it would list
+        // an empty row, editor open, in the other one.
+        .onChange(of: model.target) { composingTitles = nil }
     }
 
     /// Banner shown when active profile overrides base app rules (#109).
@@ -108,11 +113,19 @@ struct AppRulesSection: View {
         }
     }
 
+    /// The area's census gates, assembled once for the section
+    /// and every row.
+    var gates: AppRulesGates {
+        AppRulesGates(
+            config: model.config,
+            baseFloatRules: overrideFloatBase
+        )
+    }
+
     var offersTitles: Bool {
         AppRuleTitleOffer.isOffered(
             mode: model.settingsMode,
-            floatRules: model.config.floatRules
-                + (overrideFloatBase ?? [])
+            gates: gates
         )
     }
 
@@ -150,15 +163,9 @@ struct AppRulesSection: View {
     }
 
     private var emptyNote: some View {
-        Text(
-            L(
-                "app_rules.empty",
-                "Apps with no rule tile normally, in whichever "
-                    + "Space you open them."
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
+        Text(Self.emptyProse)
+            .font(.caption)
+            .foregroundStyle(.secondary)
     }
 
     /// With no Spaces declared there is nothing to open in, so the
@@ -166,24 +173,13 @@ struct AppRulesSection: View {
     /// it, which is what a gate whose cause is off this surface
     /// owes (#815).
     @ViewBuilder private var noSpacesNote: some View {
-        if model.config.spaces.isEmpty {
+        if !gates.hasSpaces {
             CrossReferenceRow(
                 prose: Self.noSpacesProse,
                 linkTitle: SettingsDestination.spaces.title,
                 destination: .spaces
             )
         }
-    }
-
-    /// Computed per read, never stored: a `static let` resolves
-    /// `L()` once and keeps that locale for the process (#1311).
-    static var noSpacesProse: String {
-        L(
-            "app_rules.no_spaces",
-            "This profile has no Spaces yet, so there is nothing "
-                + "to open an app in. Add one in %1$@.",
-            CrossReferenceRow.linkSlot
-        )
     }
 
     /// Two pickers, because the rule is chosen before the app: a
@@ -197,7 +193,7 @@ struct AppRulesSection: View {
                 exclude: Set(apps),
                 onCommit: addWithSpace
             )
-            .disabled(model.config.spaces.isEmpty)
+            .disabled(!gates.hasSpaces)
             AppSelector(
                 role: .float,
                 name: $newFloatingApp,

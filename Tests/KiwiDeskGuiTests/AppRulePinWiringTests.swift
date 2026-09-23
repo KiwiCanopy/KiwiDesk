@@ -112,7 +112,7 @@ struct AppRulePinWiringTests {
         //    eyeball 2026-09-22).
         #expect(
             clear.contains(
-                Self.squashed("if isPinned, pinVerdict == .free")
+                Self.squashed("if isPinned, pinVerdict == .optional")
             ),
             Comment(
                 rawValue:
@@ -125,11 +125,16 @@ struct AppRulePinWiringTests {
         )
         // 2. Dropping the float rule engages a Space where the
         //    row has none. This is the write; the clause above is
-        //    the control.
+        //    the control. It asks the verdict for the row as it
+        //    will stand — tiling — so an exception the verdict
+        //    grows reaches the write and the clear button alike
+        //    (architect review, 2026-09-23: this used to spell
+        //    the override exception a second time).
         #expect(
             never.contains(
                 Self.squashed(
-                    "if !isPinned, overrideBase == nil, "
+                    "if !isPinned, "
+                        + "pinVerdict(floats: false) == .required, "
                         + "let space = prospectiveSpace"
                 )
             ),

@@ -58,6 +58,10 @@ enum SettingRuntimeGate: Hashable {
 /// Gating specification for disabled or conditionally surfaced setting rows
 /// (#406).
 enum SettingGate: Hashable {
+    /// The owner names WHERE the cause lives, for
+    /// `GateReasonPlacement`; the condition itself is the area
+    /// resolver's, and need not be the owner being off — App
+    /// Rules is gated on the Space list being EMPTY (#1022).
     case setting(SettingKey)
     case anyOf([SettingKey])
     case runtime(SettingRuntimeGate)

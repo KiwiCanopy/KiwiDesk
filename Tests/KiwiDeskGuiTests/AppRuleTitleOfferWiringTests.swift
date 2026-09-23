@@ -77,6 +77,7 @@ struct AppRuleTitleOfferWiringTests {
     @Test("the offer is resolved once and handed down")
     func offerIsResolvedOnce() throws {
         let row = try source("Sections/AppRuleRow.swift")
+        let rowFacets = try facets()
         #expect(
             row.contains(Self.squashed("let offersTitles: Bool")),
             Comment(
@@ -87,14 +88,17 @@ struct AppRuleTitleOfferWiringTests {
             )
         )
         #expect(
-            !(try facets()).contains(
+            !rowFacets.contains(
                 Self.squashed("AppRuleTitleOffer.isOffered")
-            ),
+            )
+                && !(row + rowFacets).contains(
+                    Self.squashed("AppRulesGates(")
+                ),
             Comment(
                 rawValue:
-                    "the row assembles the offer's input again — "
-                    + "there must be one copy of "
-                    + "`floatRules + overrideFloatBase` (#1022)"
+                    "the row assembles the offer or its gates "
+                    + "again — there must be one copy of the "
+                    + "resolver's input (#1022)"
             )
         )
         // The one assembly, read whole. A probe that dropped the
@@ -103,14 +107,19 @@ struct AppRuleTitleOfferWiringTests {
         // such a list, and nothing asserted a caller hands it one
         // — so a Simple user editing a stored profile whose base
         // carries patterns silently loses the editor.
+        let section = try source("Sections/AppRulesSection.swift")
         #expect(
-            try source("Sections/AppRulesSection.swift")
-                .contains(
+            section.contains(
+                Self.squashed(
+                    "AppRulesGates(config: model.config, "
+                        + "baseFloatRules: overrideFloatBase)"
+                )
+            )
+                && section.contains(
                     Self.squashed(
                         "AppRuleTitleOffer.isOffered("
                             + "mode: model.settingsMode, "
-                            + "floatRules: model.config.floatRules"
-                            + " + (overrideFloatBase ?? []))"
+                            + "gates: gates)"
                     )
                 ),
             Comment(

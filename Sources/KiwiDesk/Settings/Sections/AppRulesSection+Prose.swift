@@ -1,11 +1,30 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The App Rules card's prose — the caption and the `?`
-/// popover (#1022). Split from `AppRulesSection` at the §2.1
-/// ceiling; the seam is the subject, the section owning the views
-/// and this owning the words they are handed.
+/// The App Rules card's prose (#1022): every sentence the
+/// section draws, the section owning the views and this the
+/// words they are handed.
 extension AppRulesSection {
+    /// What an empty list says.
+    static var emptyProse: String {
+        L(
+            "app_rules.empty",
+            "Apps with no rule tile normally, in whichever "
+                + "Space you open them."
+        )
+    }
+
+    /// Computed per read, never stored: a `static let` resolves
+    /// `L()` once and keeps that locale for the process (#1311).
+    static var noSpacesProse: String {
+        L(
+            "app_rules.no_spaces",
+            "This profile has no Spaces yet, so there is nothing "
+                + "to open an app in. Add one in %1$@.",
+            CrossReferenceRow.linkSlot
+        )
+    }
+
     /// The caption carries the rule behind a missing clear
     /// button. Must-know information never lives only in a
     /// popover, and a `GreyOut` inside a `ForEach` may not stamp a

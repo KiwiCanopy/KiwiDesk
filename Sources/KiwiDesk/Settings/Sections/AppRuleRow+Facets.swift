@@ -55,20 +55,23 @@ extension AppRuleRow {
         }
     }
 
-    /// The pin's SPOKEN value, and the canonical one. A dash reads
-    /// as nothing aloud, so the drawn cell diverges from this by
-    /// necessity rather than by choice — `spaceCellText` is the
-    /// variant and the two must stay in step.
+    /// The pin's SPOKEN value. A dash reads as nothing aloud, so
+    /// only the absent case differs from the drawn cell, and
+    /// both go through `spaceText(ifNone:)`.
     var spaceFacetLabel: String {
-        model.config.appRules[app]?.raw
-            ?? L("app_rules.space.none", "No Space")
+        spaceText(ifNone: L("app_rules.space.none", "No Space"))
     }
 
     /// The pin's DRAWN cell. A dash, not a word: a word here would
     /// be a value naming the absence.
     var spaceCellText: String {
-        model.config.appRules[app]?.raw
-            ?? L("app_rules.space.dash", "—")
+        spaceText(ifNone: L("app_rules.space.dash", "—"))
+    }
+
+    /// The pinned Space's name, or `none`: the one reading both
+    /// channels take.
+    private func spaceText(ifNone none: String) -> String {
+        model.config.appRules[app]?.raw ?? none
     }
 
     /// Clears the pin — offered only where the rule survives
@@ -77,7 +80,7 @@ extension AppRuleRow {
     /// app tiles there is simply no clear button, rather than a
     /// greyed control owing an explanation.
     @ViewBuilder private var clearPinButton: some View {
-        if isPinned, pinVerdict == .free {
+        if isPinned, pinVerdict == .optional {
             Button {
                 model.config.appRules[app] = nil
             } label: {
@@ -100,16 +103,23 @@ extension AppRuleRow {
 
     /// What may be done with the pin on this row.
     var pinVerdict: AppRulePin.Verdict {
-        AppRulePin.verdict(
-            // A row whose pattern editor is open floats as far as
-            // this question goes, even before its first pattern
-            // exists: the user is composing a titled rule, and
-            // forcing the pin mid-composition would pin an app
-            // they are floating.
+        // A row whose pattern editor is open floats as far as
+        // this question goes, even before its first pattern
+        // exists: forcing the pin mid-composition would pin an
+        // app the user is floating.
+        pinVerdict(
             floats: floatFacet != .never
-                || titlesEditing.wrappedValue,
+                || titlesEditing.wrappedValue
+        )
+    }
+
+    /// The verdict for this row were it to float or not — the
+    /// one call both the clear button and `setNever` reach.
+    private func pinVerdict(floats: Bool) -> AppRulePin.Verdict {
+        AppRulePin.verdict(
+            floats: floats,
             isOverride: overrideBase != nil,
-            hasSpaces: !model.config.spaces.isEmpty
+            hasSpaces: gates.hasSpaces
         )
     }
 
@@ -219,7 +229,9 @@ extension AppRuleRow {
             return
         }
         clearFloatRules()
-        if !isPinned, overrideBase == nil,
+        // Asked for the row as it now stands — tiling — rather
+        // than read back from the store this call just wrote.
+        if !isPinned, pinVerdict(floats: false) == .required,
             let space = prospectiveSpace
         {
             model.config.appRules[app] = space

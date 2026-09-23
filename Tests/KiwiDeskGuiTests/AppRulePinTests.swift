@@ -41,25 +41,25 @@ struct AppRulePinTests {
 
     // MARK: - Tiling forces the pin
 
-    @Test("a tiling row's pin is locked")
-    func tilingLocksThePin() {
+    @Test("a tiling row's pin is required")
+    func tilingRequiresThePin() {
         #expect(
             AppRulePin.verdict(
                 floats: false,
                 isOverride: false,
                 hasSpaces: true
-            ) == .locked
+            ) == .required
         )
     }
 
-    @Test("a floating row's pin is free")
+    @Test("a floating row's pin is optional")
     func floatingLeavesThePinOptional() {
         #expect(
             AppRulePin.verdict(
                 floats: true,
                 isOverride: false,
                 hasSpaces: true
-            ) == .free,
+            ) == .optional,
             Comment(
                 rawValue:
                     "\"floats\" says something by itself, so "
@@ -75,13 +75,13 @@ struct AppRulePinTests {
     /// so a profile could no longer un-assign an app its base
     /// assigns.
     @Test("override mode keeps a tiling row's pin releasable")
-    func overrideModeNeverLocks() {
+    func overrideModeNeverRequires() {
         #expect(
             AppRulePin.verdict(
                 floats: false,
                 isOverride: true,
                 hasSpaces: true
-            ) == .free,
+            ) == .optional,
             Comment(
                 rawValue:
                     "the stored nil is the tombstone — \"tiles, "
@@ -92,12 +92,12 @@ struct AppRulePinTests {
     }
 
     /// With no Spaces there is nothing to pin to, and the answer
-    /// is `.unavailable` rather than `.free`: `.free` means the
+    /// is `.unavailable` rather than `.optional`, which means the
     /// user may set it, and this one cannot be set at all.
     /// It outranks BOTH other arms — a tiling row and an override
     /// row alike — because the absence of a target is not a thing
     /// either of them can overcome.
-    @Test("no Spaces makes the pin unavailable, not free")
+    @Test("no Spaces makes the pin unavailable, not optional")
     func emptySpacesIsUnavailable() {
         for isOverride in [true, false] {
             for floats in [true, false] {

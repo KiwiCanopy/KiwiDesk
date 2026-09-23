@@ -39,33 +39,43 @@ struct AppRuleTitleOfferTests {
         "com.apple.safari",
     ]
 
+    /// Asks the offer through the area resolver, as the section
+    /// does: `rules` are the draft's float rules, `base` the
+    /// override base's.
+    private func offered(
+        _ mode: SettingsMode,
+        _ rules: [String],
+        base: [String]? = nil
+    ) -> Bool {
+        var config = GuiConfig()
+        config.floatRules = rules
+        return AppRuleTitleOffer.isOffered(
+            mode: mode,
+            gates: AppRulesGates(
+                config: config,
+                baseFloatRules: base
+            )
+        )
+    }
+
     // MARK: - The offer is withheld until it is earned
 
     @Test("Simple with no pattern anywhere withholds the offer")
     func simpleWithoutPatternsIsLocked() {
         #expect(
-            !AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: plainRules
-            )
+            !offered(.simple, plainRules)
         )
         // And with no float rules at all — the state a fresh
         // install is in.
         #expect(
-            !AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: []
-            )
+            !offered(.simple, [])
         )
     }
 
     @Test("Power User always offers it, patterns or not")
     func powerUserIsAlwaysOffered() {
         #expect(
-            AppRuleTitleOffer.isOffered(
-                mode: .powerUser,
-                floatRules: []
-            )
+            offered(.powerUser, [])
         )
     }
 
@@ -84,10 +94,7 @@ struct AppRuleTitleOfferTests {
         var rules = plainRules
         rules[1] = "com.apple.mail:Drafts"
         #expect(
-            AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: rules
-            ),
+            offered(.simple, rules),
             "a pattern on Mail must unlock Finder's row too"
         )
         // And it is the LIST that is consulted, not one app:
@@ -95,10 +102,7 @@ struct AppRuleTitleOfferTests {
         // locked answer, so the true above came from the list
         // rather than from the mode leaking through.
         #expect(
-            !AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: [rules[0]]
-            ),
+            !offered(.simple, [rules[0]]),
             "a list with no pattern in it stays locked"
         )
     }
@@ -109,17 +113,11 @@ struct AppRuleTitleOfferTests {
     func clearingTheLastPatternRelocks() {
         var rules = ["com.apple.finder:Get Info"]
         #expect(
-            AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: rules
-            )
+            offered(.simple, rules)
         )
         rules = ["com.apple.finder"]
         #expect(
-            !AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: rules
-            ),
+            !offered(.simple, rules),
             "the offer must collapse with the last pattern"
         )
     }
@@ -133,26 +131,20 @@ struct AppRuleTitleOfferTests {
     @Test("saved patterns stay reachable in Simple")
     func savedPatternsStayReachableInSimple() {
         #expect(
-            AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: ["com.apple.finder:Get Info"]
-            ),
+            offered(.simple, ["com.apple.finder:Get Info"]),
             "a Simple user with patterns must still reach them"
         )
     }
 
     /// And a pattern the OVERRIDE BASE carries counts, because
     /// that is a pattern the reader can see on the card while
-    /// editing a stored profile. The callers union the two lists
-    /// for exactly this; handing the base's rules alone is how
-    /// that union is asserted to matter.
+    /// editing a stored profile. The resolver unions the two
+    /// lists for exactly this; a base-only pattern with an empty
+    /// draft is how that union is asserted to matter.
     @Test("a base profile's pattern unlocks the offer too")
     func overrideBasePatternUnlocks() {
         #expect(
-            AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: [] + ["com.apple.mail:Drafts"]
-            )
+            offered(.simple, [], base: ["com.apple.mail:Drafts"])
         )
     }
 
@@ -169,10 +161,7 @@ struct AppRuleTitleOfferTests {
                 == .titled
         )
         #expect(
-            AppRuleTitleOffer.isOffered(
-                mode: .simple,
-                floatRules: [rule]
-            )
+            offered(.simple, [rule])
         )
     }
 }

@@ -18,18 +18,13 @@ import KiwiDeskCore
 /// ruling 2026-08-04), since the mode adds surface rather than
 /// expanding it.
 enum AppRuleTitleOffer {
-    /// Offered in Power User mode, or while any float rule
-    /// anywhere in the list carries a title pattern.
-    ///
-    /// `floatRules` is the union of the rules the reader can see:
-    /// the draft's, plus the override base's while a stored
-    /// profile is edited — a Simple user must still reach a
-    /// pattern the base carries.
+    /// Offered in Power User mode, or while the area's resolver
+    /// finds a title pattern the reader can see — the census
+    /// gate `.titlePatternsExist`, answered in one place.
     static func isOffered(
         mode: SettingsMode,
-        floatRules: [String]
+        gates: AppRulesGates
     ) -> Bool {
-        if mode == .powerUser { return true }
-        return floatRules.contains(where: FloatFacet.isTitled)
+        mode == .powerUser || gates.titlePatternsExist
     }
 }
