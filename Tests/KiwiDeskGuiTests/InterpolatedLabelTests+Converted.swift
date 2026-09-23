@@ -47,8 +47,10 @@ extension InterpolatedLabelTests {
     /// ONE slot with a ternary (so 2), and `home.card.ax_value`
     /// has two call sites of which only one interpolates a key
     /// (the count is the larger).
-    /// The twelve below `profiles.current_setup_note` are the
-    /// `i18n/terminology-round` batch. Five of them had ALREADY
+    /// The eleven from `app_bar.alignment.label.help` on are the
+    /// `i18n/terminology-round` batch, less
+    /// `profiles.current_setup_note`, retired with its note
+    /// (#1530). Five of them had ALREADY
     /// drifted in a shipped catalog before the conversion —
     /// `es` named the boxed style "En casillas" against a picker
     /// reading "En caja", `it` a colour row "Elemento sotto il
@@ -93,7 +95,6 @@ extension InterpolatedLabelTests {
         // way from the start.
         "monocle.hide_style.help": 2,
         "space_override.slot_size.help": 4,
-        "profiles.current_setup_note": 1,
         "app_bar.alignment.label.help": 2,
         "app_bar.background_fit.boxed_only": 1,
         "app_bar.color.gap_only": 1,

@@ -69,7 +69,7 @@ struct ProfilesSection: View {
             ForEach(orderedSummaries) { summary in
                 profileRow(summary)
             }
-            if let note = currentSetupNote {
+            if let note = oneOwnerNote {
                 Text(note)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -93,18 +93,14 @@ struct ProfilesSection: View {
         )
     }
 
-    /// Note describing current setup destination (#818).
-    private var currentSetupNote: String? {
-        guard !model.editingStoredProfile,
-            let active = model.activeProfile
-        else { return nil }
+    /// The one rule the badge lines cannot show: moving a screen
+    /// setup takes it from its holder (#1530, owner 2026-09-23).
+    private var oneOwnerNote: String? {
+        guard !model.profileSummaries.isEmpty else { return nil }
         return L(
-            "profiles.current_setup_note",
-            "Your current setup is saved into %1$@. To keep it "
-                + "separately, use \u{201C}%2$@\u{201D} in the "
-                + "bar below.",
-            active,
-            L("footer.save_a_copy_as", "Save as new profile…")
+            "profiles.sets.one_owner_note",
+            "Each screen setup belongs to one profile. Moving it to a "
+                + "profile takes it from the profile that has it now."
         )
     }
 
