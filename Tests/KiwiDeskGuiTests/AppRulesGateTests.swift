@@ -109,7 +109,17 @@ struct AppRulesGateTests {
         let facets = try source("AppRuleRow+Facets.swift")
         for (needle, text, site) in [
             ("if !gates.hasSpaces {", section, "the Spaces pointer"),
-            (".disabled(!gates.hasSpaces)", section, "the add picker"),
+            // Contiguous with the SPACE picker's own arguments: a
+            // file-wide `.disabled(!gates.hasSpaces)` stayed green
+            // moved onto the float picker (guard-prover,
+            // 2026-09-23). The arguments are glue holding the
+            // needle to that control, not an assertion.
+            (
+                "role: .space, name: $newSpaceApp, "
+                    + "exclude: Set(apps), onCommit: addWithSpace) "
+                    + ".disabled(!gates.hasSpaces)",
+                section, "the Space add picker"
+            ),
             ("hasSpaces: gates.hasSpaces", facets, "the pin verdict"),
         ] {
             #expect(
