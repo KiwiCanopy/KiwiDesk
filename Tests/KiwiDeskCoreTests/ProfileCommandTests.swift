@@ -174,16 +174,17 @@ struct ProfileCommandTests {
         #expect(core.profiles.list().isEmpty)
     }
 
-    @Test("A profile saved for other monitors loads dirty")
+    /// A same-count load claims the connected set and loads clean
+    /// (#1530, `MonitorSetClaimTests`); only another COUNT is dirty.
+    @Test("A profile saved for another screen count loads dirty")
     func loadMismatchedDirty() {
         let core = makeCore()
-        connect(core, [display(1, "A")])
+        connect(core, [display(1, "A"), display(2, "B", x: 100)])
         core.execute(
             "save_profile",
             args: [.string("desk")]
         )
-        core.state.workspaces.removeDisplay(DisplayID(1))
-        connect(core, [display(2, "B")])
+        core.state.workspaces.removeDisplay(DisplayID(2))
         core.execute(
             "load_profile",
             args: [.string("desk")]

@@ -106,17 +106,12 @@ extension APIReference {
         ),
         "save_profile": APIRecord(
             "Saves the current configuration to a profile, which "
-                + "claims the connected screen combination; "
-                + "returns takenFrom and reason when another "
-                + "profile lost it.",
+                + "claims the connected screen setup.",
             .text("name")
         ),
         "load_profile": APIRecord(
-            "Loads a profile and applies its Spaces and "
-                + "settings, claiming the connected screen "
-                + "combination where its screen count fits; "
-                + "returns takenFrom and reason when another "
-                + "profile lost it.",
+            "Loads a profile, claiming the connected screen "
+                + "setup where its screen count fits.",
             .text("name")
         ),
         "delete_profile": APIRecord(

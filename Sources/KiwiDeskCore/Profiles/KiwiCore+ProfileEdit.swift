@@ -61,7 +61,10 @@ extension KiwiCore {
         // here, and both identity flags the copy must neutralize
         // (#485, AGENTS.md §5 mirror rule).
         copy.isStarterSetup = false
-        for set in copy.monitorSets { copy.release(set.monitors) }
+        // A 0-screen source has no count to keep dormant (#335).
+        if copy.monitorCount > 0 {
+            for set in copy.monitorSets { copy.release(set.monitors) }
+        }
         try profiles.write(copy)
         return copy.name
     }

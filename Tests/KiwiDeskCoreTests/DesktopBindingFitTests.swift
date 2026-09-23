@@ -192,16 +192,23 @@ struct DesktopBindingFitTests {
         try seed(
             core,
             [
-                profile("Duo", monitors: live(core)),
                 // Same count, other monitors: an exact match
                 // cannot pick "Duo" by ordering luck.
                 profile("Other", monitors: ["X:1x1", "Y:1x1"]),
+                // Seeded LAST: the seed's load claims the connected
+                // set for it (#1530).
+                profile("Duo", monitors: live(core)),
             ]
         )
         bind(core, "Duo")
         #expect(core.profiles.currentName == "Duo")
         #expect(!core.profiles.isDirty)
-        core.execute("load_profile", args: [.string("Other")])
+        // A non-claiming apply: `load_profile` would hand "Other"
+        // the connected set (#1530), which is not this subject.
+        core.apply(
+            profile: try core.profiles.read(name: "Other"),
+            forceRetile: false
+        )
         #expect(core.profiles.currentName == "Other")
         core.handleMonitorChange()
         #expect(core.profiles.currentName == "Duo")

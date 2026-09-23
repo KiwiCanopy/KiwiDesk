@@ -105,6 +105,24 @@ struct ProfileModelTests {
         #expect(profile.monitorCount == 2)
     }
 
+    @Test("A zero monitor_count does not make a dormant profile")
+    func zeroCountRefused() {
+        let json = """
+            {"name": "broken", "monitor_sets": [],
+             "monitor_count": 0,
+             "space_modes": {}, "settings": {},
+             "saved_at": "2026-06-01T00:00:00Z"}
+            """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        #expect(throws: DecodingError.self) {
+            try decoder.decode(
+                Profile.self,
+                from: Data(json.utf8)
+            )
+        }
+    }
+
     @Test("Release keeps the count; upsert wakes it at that count")
     func releaseAndWake() throws {
         var profile = makeProfile(

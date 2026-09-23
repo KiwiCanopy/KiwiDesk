@@ -47,9 +47,6 @@ struct AnnouncedValueTests {
         // #1209: the export row's range menu, named by the range
         // key because the button beside it names the export.
         "GeneralSection+LogExport.swift": 1,
-        // #1530: the screen-setup `+`, an action menu named for
-        // what it adds and valued by how many setups it offers.
-        "ProfilesSection+ScreenSetups.swift": 1,
     ]
 
     @Test("a named picker or menu gives its value back")

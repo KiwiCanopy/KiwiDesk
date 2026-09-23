@@ -77,7 +77,7 @@ struct ProfileCopyTests {
 
     // MARK: - What the copy carries
 
-    @Test("Copy carries monitor sets, override, spaces; not default")
+    @Test("Copy carries its count, override, spaces; not default")
     func copyCarriesStoredState() throws {
         let core = try makeGuiCore()
         try core.profiles.save(sourceProfile())
@@ -91,13 +91,10 @@ struct ProfileCopyTests {
 
         #expect(created == "Dock Copy")
         let copy = try core.profiles.read(name: "Dock Copy")
-        // Other-hardware monitor sets survive the copy
-        // (fingerprints are stored normalized/sorted).
-        #expect(
-            copy.monitorSets.map(\.monitors) == [
-                ["Dell:1920x1080", "LG:2560x1440"]
-            ]
-        )
+        // A set belongs to one profile, so the copy takes none
+        // and waits dormant at the source's count (#1530).
+        #expect(copy.isDormant)
+        #expect(copy.monitorCount == 2)
         // The sparse keybinding override survives.
         #expect(copy.layers == sourceProfile().layers)
         // Spaces and modes survive.

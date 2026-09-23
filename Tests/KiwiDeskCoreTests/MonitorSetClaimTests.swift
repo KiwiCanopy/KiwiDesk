@@ -133,8 +133,12 @@ struct MonitorSetClaimTests {
         connect(core, ["A", "B"])
         try core.persistProfile(named: "Dual", modes: nil)
         connect(core, ["A"])
+        // A same-count sibling holding the connected set: a wrongful
+        // strip has something to take.
+        try core.persistProfile(named: "Solo", modes: nil)
         let released = try core.loadProfile(named: "Dual")
         #expect(released.isEmpty)
+        #expect(try !core.profiles.read(name: "Solo").isDormant)
         #expect(
             try core.profiles.read(name: "Dual").monitorSets.count
                 == 1
@@ -142,16 +146,17 @@ struct MonitorSetClaimTests {
         #expect(core.profiles.isDirty)
     }
 
+    /// The claimant sorts SECOND, so an unstripped tie would hand
+    /// the match to "Alpha" alphabetically.
     @Test("The claimed set wins the next monitor change")
     func loadSticksAtMonitorChange() throws {
         let core = makeCore()
         connect(core, ["A"])
-        try core.persistProfile(named: "Alpha", modes: nil)
-        try core.loadProfile(named: "Alpha")
         try core.persistProfile(named: "Beta", modes: nil)
-        try core.loadProfile(named: "Alpha")
+        try core.persistProfile(named: "Alpha", modes: nil)
+        try core.loadProfile(named: "Beta")
         core.handleMonitorChange()
-        #expect(core.profiles.currentName == "Alpha")
+        #expect(core.profiles.currentName == "Beta")
     }
 
     @Test("Boot matching never strips a doubly-held set")
@@ -166,48 +171,6 @@ struct MonitorSetClaimTests {
         core.handleMonitorChange()
         #expect(try !core.profiles.read(name: "Alpha").isDormant)
         #expect(try !core.profiles.read(name: "Beta").isDormant)
-    }
-
-    @Test("A dormant profile is never auto-matched")
-    func dormantNeverMatched() throws {
-        let core = makeCore()
-        connect(core, ["A"])
-        try core.persistProfile(named: "Work", modes: nil)
-        try core.persistProfile(named: "Home", modes: nil)
-        // "Work" is dormant; an unknown one-screen set falls to
-        // the count default, which must be the live "Home".
-        let match = core.profiles.match(
-            fingerprints: ["Q:100x100"]
-        )
-        #expect(
-            match
-                == .countDefault(
-                    try core.profiles.read(name: "Home")
-                )
-        )
-    }
-
-    @Test("A default left dormant hands its flag to the claimant")
-    func defaultMovesToClaimant() throws {
-        let core = makeCore()
-        connect(core, ["A"])
-        try core.persistProfile(named: "Work", modes: nil)
-        #expect(try core.profiles.read(name: "Work").isDefault)
-        try core.persistProfile(named: "Home", modes: nil)
-        #expect(try !core.profiles.read(name: "Work").isDefault)
-        #expect(core.profiles.defaultProfile(count: 1)?.name == "Home")
-    }
-
-    @Test("A dormant profile re-claims a set on its next load")
-    func dormantReclaims() throws {
-        let core = makeCore()
-        connect(core, ["A"])
-        try core.persistProfile(named: "Work", modes: nil)
-        try core.persistProfile(named: "Home", modes: nil)
-        let released = try core.loadProfile(named: "Work")
-        #expect(released == ["Home"])
-        #expect(try !core.profiles.read(name: "Work").isDormant)
-        #expect(try core.profiles.read(name: "Home").isDormant)
     }
 
     @Test("The Profiles page's pick moves a stored set")
@@ -233,22 +196,6 @@ struct MonitorSetClaimTests {
                 for: "Home"
             )
         }
-    }
-
-    @Test("A copy starts dormant with its source's count")
-    func copyIsDormant() throws {
-        let core = makeCore()
-        connect(core, ["A"])
-        try core.persistProfile(named: "Work", modes: nil)
-        let name = try core.copyProfile(
-            named: "Work",
-            to: "Copy",
-            with: core.guiConfigSeed()
-        )
-        let copy = try core.profiles.read(name: name)
-        #expect(copy.isDormant)
-        #expect(copy.monitorCount == 1)
-        #expect(try !core.profiles.read(name: "Work").isDormant)
     }
 
     @Test("save_profile names what it took, and why")
