@@ -53,6 +53,8 @@ extension DesktopsGroup {
                     .accessibilityHidden(true)
                     Spacer()
                     profileMenu(row, slot: others, nested: true)
+                    Color.clear.frame(width: Self.removeColumn, height: 1)
+                        .accessibilityHidden(true)
                 }
                 .padding(.leading, Self.nestIndent)
             }
@@ -137,8 +139,12 @@ extension DesktopsGroup {
         nested: Bool
     ) -> some View {
         Picker("", selection: binding(row, slot: slot)) {
-            Text(L("desktops.none", "None"))
-                .tag(String?.none)
+            // A screen-setup row has no empty choice — its × removes
+            // it — and the fallback's says what it means: no
+            // binding, so the rungs below it answer (#1609).
+            if let none = noneLabel(slot, nested: nested) {
+                Text(none).tag(String?.none)
+            }
             ForEach(options(slot), id: \.self) { name in
                 Text(name).tag(String?.some(name))
             }
@@ -163,8 +169,18 @@ extension DesktopsGroup {
         .accessibilityLabel(pickerLabel(slot, nested: nested))
         .accessibilityValue(
             binding(row, slot: slot).wrappedValue
+                ?? noneLabel(slot, nested: nested)
                 ?? L("desktops.none", "None")
         )
+    }
+
+    /// The picker's empty choice: None on a one-line Desktop, "No
+    /// binding" on the nested fallback, none on a setup row.
+    private func noneLabel(_ slot: BindingSlot, nested: Bool) -> String? {
+        if case .count(_, _?) = slot { return nil }
+        return nested
+            ? L("desktops.no_binding", "No binding")
+            : L("desktops.none", "None")
     }
 
     private func pickerLabel(_ slot: BindingSlot, nested: Bool) -> String {

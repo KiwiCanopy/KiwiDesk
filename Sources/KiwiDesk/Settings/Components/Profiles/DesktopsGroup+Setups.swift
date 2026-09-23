@@ -7,9 +7,13 @@ import SwiftUI
 extension DesktopsGroup {
     /// How far a Desktop's own rows sit in from its label.
     static let nestIndent: CGFloat = 26
+    /// The × column's width, reserved on the fallback row too so
+    /// a Desktop's pickers keep one trailing edge.
+    static let removeColumn: CGFloat = 18
 
     /// One screen setup's row: its name as the Saved profiles
-    /// chips name it, static — None removes it — and its picker.
+    /// chips name it, static, its picker, and the × that removes
+    /// it (owner, 2026-09-23).
     func setupRow(_ row: DesktopRow, slot: BindingSlot) -> some View {
         let setup: [String]
         if case .count(_, let scoped?) = slot {
@@ -36,6 +40,21 @@ extension DesktopsGroup {
             }
             Spacer()
             profileMenu(row, slot: slot, nested: true)
+            Button {
+                clear(row, slot: slot)
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.borderless)
+            .frame(width: Self.removeColumn)
+            .iconButtonAffordance(
+                L(
+                    "desktops.scope.remove",
+                    "Remove the profile for %1$@",
+                    label
+                )
+            )
         }
         .padding(.leading, Self.nestIndent)
     }

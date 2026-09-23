@@ -21,15 +21,16 @@ struct ProfilesSection: View {
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                // What loads right now leads: the page's live answer,
+                // above the cards that decide it (owner, #1609).
+                whichProfileLoads
                 if model.profileSummaries.isEmpty {
                     // Presets lead when no user profile is saved (#53).
                     PresetsSection(model: model)
                     profileSection
-                    whichProfileLoads
                     DesktopsGroup(model: model)
                 } else {
                     profileSection
-                    whichProfileLoads
                     DesktopsGroup(model: model)
                     PresetsSection(model: model)
                 }

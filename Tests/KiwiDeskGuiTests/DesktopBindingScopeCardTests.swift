@@ -63,6 +63,33 @@ struct DesktopBindingScopeCardTests {
         )
     }
 
+    /// A setup row's × removes that row alone; the row takes no
+    /// empty choice, which would read as "load nothing here"
+    /// (owner, 2026-09-23).
+    @Test("a setup row's × removes it alone")
+    func removeClearsOneScope() throws {
+        let (card, model) = DesktopBindingFixture.makeCard()
+        card.write("Laptop", key: live, slot: .count(1, setup: nil))
+        card.write("Laptop", key: live, slot: .count(1, setup: vision))
+        card.clear(try row(card), slot: .count(1, setup: vision))
+        #expect(
+            model.config.profileBindings[live]?.entries
+                == [.init(profile: "Laptop")]
+        )
+        let setups = try String(
+            contentsOf: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/Components/Profiles/"
+                        + "DesktopsGroup+Setups.swift"
+                ),
+            encoding: .utf8
+        )
+        #expect(
+            SourceScan.stripComments(setups)
+                .contains("clear(row, slot: slot)")
+        )
+    }
+
     /// A single-setup user sees today's card: no add menu until a
     /// second setup of the count is known, or one is scoped.
     @Test("the add menu shows only with a setup to tell apart")

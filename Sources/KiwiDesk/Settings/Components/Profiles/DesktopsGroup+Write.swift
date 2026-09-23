@@ -109,12 +109,13 @@ extension DesktopsGroup {
         model.config.profileBindings[key] = record
     }
 
-    /// A pick of None, with the focus it owes (#1609): a removed
+    /// A removal — None, or a setup row's × — with the focus it
+    /// owes (#1609): a removed
     /// screen-setup row hands focus to its Desktop's always-drawn
     /// fallback picker, and a record the removal empties — a
     /// dormant row then leaves the card — to the neighbouring
     /// Desktop's, read BEFORE the write (`DeletionFocus`, #816).
-    private func clear(_ row: DesktopRow, slot: BindingSlot) {
+    func clear(_ row: DesktopRow, slot: BindingSlot) {
         let keys = desktopRows.map(\.key)
         let neighbour = DeletionFocus.neighbour(after: row.key, in: keys)
         write(nil, key: row.key, slot: slot)
