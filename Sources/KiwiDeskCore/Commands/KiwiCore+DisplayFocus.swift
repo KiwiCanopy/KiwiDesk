@@ -74,7 +74,8 @@ extension KiwiCore {
 
     /// The follow-shaped switch: activate `target`, focus and
     /// raise `id` there, and arm the switch settle — shared by
-    /// `moveWindow(follow: true)` and the launch cycle (#637).
+    /// `moveWindow(follow: true)`, the launch cycle (#637) and
+    /// the launch follow (#1599).
     /// The ORDER is the load-bearing part, which is why this is
     /// one copy: the frontmost pid is captured before the raise
     /// can change it (the settle's dropped-activate detection,

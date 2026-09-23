@@ -7,21 +7,25 @@ import Testing
 /// Opening an app follows its window into the Space its app rule
 /// files it in (#1599), through the real activation entry, fold
 /// and `.windowCreated` arm. Every refusal sits beside the paid
-/// case it differs from by one input: a background spawn (no
-/// activation), a login restore (no press), a Desktop switch, a
-/// remembered Space, the rule naming the Space you are in, an
-/// overlay, another app, a later activation.
+/// case it differs from by one input: no activation (a background
+/// spawn), no press (a login restore), an old process (a switch
+/// to a running app), a remembered Space, the rule naming the
+/// Space you are in, an overlay. The retires and the Open or
+/// Focus door are `LaunchFollowRetireTests`'.
+///
+/// The activation is stamped AHEAD of the wall clock the arrival
+/// claims on (tests.md, #1456), so no runner stall can age it.
 @Suite("A launch follows its app rule's window (#1599)", .serialized)
 @MainActor
 struct LaunchFollowTests {
-    private static let bundle = "app.launched"
-    private static let pid: pid_t = 7
-    private static let ruled = SpaceID("2")
-    private static let home = SpaceID("1")
+    static let bundle = "app.launched"
+    static let ruled = SpaceID("2")
+    static let home = SpaceID("1")
 
     /// A resident focused in Space 1, the app ruled to Space 2,
-    /// and a press 0.2 s ago unless the case says otherwise.
-    private func makeCore(pressAge: TimeInterval? = 0.2) -> KiwiCore {
+    /// and a press 0.2 s before the activation unless the case
+    /// says otherwise.
+    static func makeCore(pressAge: TimeInterval? = 0.2) -> KiwiCore {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-launch-follow-\(UUID().uuidString)"
@@ -35,55 +39,78 @@ struct LaunchFollowTests {
                 ManagedWindow(id: WindowID(1), pid: 1, appName: "Here")
             )
         )
-        core.state.workspaces.ensureSpace(Self.ruled)
-        core.state.appRules[Self.bundle] = Self.ruled
+        core.state.workspaces.ensureSpace(ruled)
+        core.state.appRules[bundle] = ruled
         core.launchFollow.pressAge = { pressAge }
-        #expect(core.state.workspaces.activeSpace == Self.home)
+        #expect(core.state.workspaces.activeSpace == home)
         return core
     }
 
-    private func arrive(
+    /// The activation's own clock, read fresh and ahead of every
+    /// later read — a stored one ages across a full run.
+    static var ahead: Date {
+        Date().addingTimeInterval(LaunchFollowIntent.drainWindow / 2)
+    }
+
+    /// An activation of `bundleID`, whose process started
+    /// `launchedAgo` seconds before it.
+    static func activate(
+        _ core: KiwiCore,
+        bundleID: String = bundle,
+        launchedAgo: TimeInterval = 0.3
+    ) {
+        core.noteAppActivation(
+            AppActivation(
+                pid: 7,
+                bundleID: bundleID,
+                launchedAt: ahead.addingTimeInterval(-launchedAgo)
+            ),
+            now: ahead
+        )
+    }
+
+    static func arrive(
         _ id: UInt32,
         on core: KiwiCore,
-        pid: pid_t = LaunchFollowTests.pid,
-        bundleID: String? = LaunchFollowTests.bundle
+        bundleID: String = bundle,
+        overlay: Bool = false
     ) {
-        core.handle(
-            .windowCreated(
-                ManagedWindow(
-                    id: WindowID(id),
-                    pid: pid,
-                    appName: "Launched",
-                    appBundleID: bundleID,
-                    frame: CGRect(x: 0, y: 0, width: 400, height: 300)
-                )
-            )
+        var window = ManagedWindow(
+            id: WindowID(id),
+            pid: 7,
+            appName: "Launched",
+            appBundleID: bundleID,
+            frame: CGRect(x: 0, y: 0, width: 400, height: 300)
         )
+        window.isTransientOverlay = overlay
+        core.handle(.windowCreated(window))
     }
 
-    private func expectStayed(_ core: KiwiCore, window: UInt32 = 9) {
+    static func expectStayed(_ core: KiwiCore, window: UInt32 = 9) {
         #expect(
-            core.state.workspaces.space(of: WindowID(window))
-                == Self.ruled
+            core.state.workspaces.space(of: WindowID(window)) == ruled
         )
-        #expect(core.state.workspaces.activeSpace == Self.home)
+        #expect(core.state.workspaces.activeSpace == home)
     }
 
-    @Test("A press-caused activation follows the ruled window there")
-    func pressedLaunchFollows() {
-        let core = makeCore()
-        core.noteAppActivation(Self.pid)
-        arrive(9, on: core)
+    @Test("A launch follows the ruled window there, as a full switch")
+    func launchFollows() {
+        let core = Self.makeCore()
+        Self.activate(core)
+        Self.arrive(9, on: core)
         #expect(core.state.workspaces.activeSpace == Self.ruled)
         #expect(core.state.workspaces[Self.ruled]?.focused == WindowID(9))
         #expect(core.focusedWindowID == WindowID(9))
+        // The switch's settle is armed — `followSwitch`, not a
+        // bare hand-off with no native switch behind it.
+        #expect(core.deferred.task(for: .spaceSettle) != nil)
     }
 
     @Test("A window spawned with no activation stays put")
     func backgroundSpawnStays() {
-        let core = makeCore()
-        arrive(9, on: core)
-        expectStayed(core)
+        let core = Self.makeCore()
+        Self.arrive(9, on: core)
+        Self.expectStayed(core)
     }
 
     @Test("An activation no press caused owes nothing")
@@ -91,111 +118,83 @@ struct LaunchFollowTests {
         // The login restore: its activation came 15 s after the
         // password; and no press read at all is the unit default.
         for age in [15.0, nil] as [TimeInterval?] {
-            let core = makeCore(pressAge: age)
-            core.noteAppActivation(Self.pid)
-            arrive(9, on: core)
-            expectStayed(core)
+            let core = Self.makeCore(pressAge: age)
+            Self.activate(core)
+            Self.arrive(9, on: core)
+            Self.expectStayed(core)
         }
     }
 
     @Test("The press bound is inclusive at the grace")
     func pressAtTheGraceFollows() {
-        let core = makeCore(pressAge: LaunchFollowIntent.pressGrace)
-        core.noteAppActivation(Self.pid)
-        arrive(9, on: core)
+        let core = Self.makeCore(
+            pressAge: LaunchFollowIntent.pressGrace
+        )
+        Self.activate(core)
+        Self.arrive(9, on: core)
         #expect(core.state.workspaces.activeSpace == Self.ruled)
     }
 
-    @Test("An activation inside a Desktop switch owes nothing")
-    func activationWithADesktopSwitchStays() {
-        let core = makeCore()
-        core.lastDesktopSwitch = Date()
-        core.noteAppActivation(Self.pid)
-        arrive(9, on: core)
-        expectStayed(core)
+    @Test("A running app brought forward is no launch")
+    func runningAppActivationStays() {
+        // A switch into an app, its own call window, an
+        // un-minimize: the process is older than the launch grace.
+        let core = Self.makeCore()
+        Self.activate(core, launchedAgo: 3_600)
+        Self.arrive(9, on: core)
+        Self.expectStayed(core)
     }
 
-    @Test("A Desktop switch after the activation retires the debt")
-    func desktopSwitchRetires() {
-        let core = makeCore()
-        core.noteAppActivation(Self.pid)
-        #expect(core.launchFollow.owed() == Self.pid)
-        core.handleDesktopChange()
-        #expect(core.launchFollow.owed() == nil)
-    }
-
-    @Test("Another app's activation replaces the debt")
-    func laterActivationReplaces() {
-        let core = makeCore()
-        core.noteAppActivation(Self.pid)
-        core.noteAppActivation(99)
-        arrive(9, on: core)
-        expectStayed(core)
-    }
-
-    @Test("Another app's ruled window does not claim the debt")
-    func otherAppDoesNotClaim() {
-        let core = makeCore()
-        core.state.appRules["app.other"] = Self.ruled
-        core.noteAppActivation(Self.pid)
-        arrive(8, on: core, pid: 8, bundleID: "app.other")
-        expectStayed(core, window: 8)
-        // …and the owing app's own window still follows after it.
-        arrive(9, on: core)
+    @Test("The launch bound is inclusive at the grace")
+    func launchAtTheGraceFollows() {
+        let core = Self.makeCore()
+        Self.activate(core, launchedAgo: LaunchFollowIntent.launchGrace)
+        Self.arrive(9, on: core)
         #expect(core.state.workspaces.activeSpace == Self.ruled)
     }
 
-    @Test("A window with a remembered Space is no launch")
-    func rememberedSpaceStays() {
-        let core = makeCore()
-        let elsewhere = SpaceID("3")
-        core.state.workspaces.ensureSpace(elsewhere)
-        core.state.rememberedSpaces[WindowID(9)] = .restored(elsewhere)
-        core.noteAppActivation(Self.pid)
-        arrive(9, on: core)
-        #expect(core.state.workspaces.space(of: WindowID(9)) == elsewhere)
-        #expect(core.state.workspaces.activeSpace == Self.home)
+    @Test("A window remembered in the ruled Space is no launch")
+    func rememberedInTheRuledSpaceStays() {
+        // The rule's own Space, so only the fold's gate — never the
+        // payer's space re-check — can refuse it.
+        let core = Self.makeCore()
+        core.state.rememberedSpaces[WindowID(9)] = .restored(Self.ruled)
+        Self.activate(core)
+        Self.arrive(9, on: core)
+        Self.expectStayed(core)
         // Unspent: the next ruled window of the app still follows.
-        #expect(core.launchFollow.owed() == Self.pid)
+        #expect(core.launchFollow.owed() == Self.bundle)
     }
 
     @Test("A rule naming the Space you are in switches nothing")
     func ruleIntoActiveSpaceIsNoFollow() {
-        let core = makeCore()
+        let core = Self.makeCore()
         core.state.appRules[Self.bundle] = Self.home
-        core.noteAppActivation(Self.pid)
-        arrive(9, on: core)
+        Self.activate(core)
+        Self.arrive(9, on: core)
         #expect(core.state.workspaces.space(of: WindowID(9)) == Self.home)
-        #expect(core.launchFollow.owed() == Self.pid)
+        #expect(core.launchFollow.owed() == Self.bundle)
     }
 
     @Test("A transient overlay never spends the follow")
     func overlayDoesNotClaim() {
-        let core = makeCore()
-        core.noteAppActivation(Self.pid)
-        var splash = ManagedWindow(
-            id: WindowID(8),
-            pid: Self.pid,
-            appName: "Launched",
-            appBundleID: Self.bundle,
-            frame: CGRect(x: 0, y: 0, width: 200, height: 100)
-        )
-        splash.isTransientOverlay = true
-        core.handle(.windowCreated(splash))
-        expectStayed(core, window: 8)
-        arrive(9, on: core)
+        let core = Self.makeCore()
+        Self.activate(core)
+        Self.arrive(8, on: core, overlay: true)
+        Self.expectStayed(core, window: 8)
+        Self.arrive(9, on: core)
         #expect(core.state.workspaces.activeSpace == Self.ruled)
     }
 
     @Test("The follow is paid once")
     func paidOnce() {
-        let core = makeCore()
-        core.noteAppActivation(Self.pid)
-        arrive(9, on: core)
+        let core = Self.makeCore()
+        Self.activate(core)
+        Self.arrive(9, on: core)
         #expect(core.launchFollow.owed() == nil)
         _ = core.execute("focus_space", args: [.string(Self.home.raw)])
         #expect(core.state.workspaces.activeSpace == Self.home)
-        arrive(10, on: core)
-        expectStayed(core, window: 10)
+        Self.arrive(10, on: core)
+        Self.expectStayed(core, window: 10)
     }
 }

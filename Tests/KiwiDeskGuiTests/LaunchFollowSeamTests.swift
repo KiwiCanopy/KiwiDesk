@@ -22,49 +22,65 @@ struct LaunchFollowSeamTests {
     )
     private static let followFile = "KiwiCore+LaunchFollow.swift"
 
-    /// needle → the file that may carry it.
-    private static let wirings: [(String, String)] = [
+    /// needle → the one file that carries it, and how often.
+    private static let wirings: [(String, String, Int)] = [
         // The activation channel, and its one consumer.
-        ("onAppActivated(pid)", "EventLoop+Apps.swift"),
-        ("self?.noteAppActivation(pid)", "KiwiCore+Bootstrap.swift"),
+        ("onAppActivated(", "EventLoop+Apps.swift", 1),
+        (
+            "self?.noteAppActivation(activation)",
+            "KiwiCore+Bootstrap.swift", 1
+        ),
         // The press read, armed with the other machine seams.
-        ("launchFollow.pressAge = {", "KiwiCore+BootSeams.swift"),
-        // The debt: owed at a press-caused activation, paid at
-        // the ruled window's arrival.
-        ("launchFollow.record(", followFile),
-        ("launchFollow.claim(", followFile),
-        ("payLaunchFollow(arrived:", "KiwiCore+Events.swift"),
+        (
+            "launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }",
+            "KiwiCore+BootSeams.swift", 1
+        ),
+        // The ONE door that owes, and its two owers: the
+        // activation judged a launch, and Open or Focus's launch
+        // and pull branches.
+        ("launchFollow.record(", followFile, 1),
+        ("oweLaunchFollow(bundleID, at: now)", followFile, 1),
+        ("oweLaunchFollow(bundleID)", "KiwiCore+Launch.swift", 2),
+        // The claim at the arrival, and the switch after its
+        // retile.
+        ("launchFollow.claim(", followFile, 1),
+        ("= claimLaunchFollow(", "KiwiCore+Events.swift", 1),
+        (
+            "payLaunchFollow(window, into: space)",
+            "KiwiCore+Events.swift", 1
+        ),
+        ("followSwitch(to: space, focusing: window)", followFile, 1),
         // The fold's one input to the payer.
         (
             "effects.placedByAppRule =",
-            "StateCoordinator+WindowCreated.swift"
+            "StateCoordinator+WindowCreated.swift", 1
         ),
     ]
 
-    @Test("each wiring exists exactly once, in its own file")
-    func wiringsAreSingular() throws {
-        for (needle, file) in Self.wirings {
+    @Test("each wiring exists exactly as often as pinned, in its file")
+    func wiringsArePinned() throws {
+        for (needle, file, count) in Self.wirings {
             let sites = try SourceScan.identifierSites(
                 of: needle,
                 under: Self.core
             )
             #expect(
-                sites.count == 1
+                sites.count == count
                     && sites.allSatisfy {
                         $0.file.lastPathComponent == file
                     },
                 """
-                expected one `\(needle)` in \(file), found: \
+                expected \(count)× `\(needle)` in \(file), found: \
                 \(sites.map(\.site).joined(separator: ", "))
                 """
             )
         }
     }
 
-    /// Two retires, both load-bearing: every activation (the user
-    /// moved on) and the Desktop switch (the windows it reveals
-    /// are not a launch's). A third would be a new moment ruled
-    /// "not a launch", which is the judgement this rests on.
+    /// Two retires, both load-bearing: another app's activation
+    /// (the user moved on) and the Desktop switch (the windows it
+    /// reveals are not a launch's). A third would be a new moment
+    /// ruled "not a launch", which is the judgement this rests on.
     @Test("the debt is retired by an activation and a Desktop switch")
     func twoRetires() throws {
         let sites = try SourceScan.identifierSites(
@@ -88,8 +104,24 @@ struct LaunchFollowSeamTests {
             in: "EventLoop+Apps.swift",
             under: "Events"
         )
-        let report = try #require(body.range(of: "onAppActivated(pid)"))
+        let report = try #require(body.range(of: "onAppActivated("))
         let reconcile = try #require(body.range(of: "reconcile("))
         #expect(report.lowerBound < reconcile.lowerBound)
+    }
+
+    /// The switch runs AFTER the arrival retile has filed the
+    /// window, so the settle and the reissue deliver it.
+    @Test("the launch follow pays after the arrival retile")
+    func paidAfterTheArrivalRetile() throws {
+        let body = try SourceScan.functionBody(
+            of: "handle",
+            in: "KiwiCore+Events.swift",
+            under: "App"
+        )
+        let retile = try #require(
+            body.range(of: "retile(newlyCreatedWindow:")
+        )
+        let pay = try #require(body.range(of: "payLaunchFollow("))
+        #expect(retile.lowerBound < pay.lowerBound)
     }
 }

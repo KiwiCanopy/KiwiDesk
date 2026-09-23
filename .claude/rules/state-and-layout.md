@@ -251,18 +251,23 @@ editing here:
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
 - **A launch follows its window into its app rule's Space, and
-  only a PRESS-CAUSED activation owes it (#1599).** The debt is
-  `LaunchFollowIntent`, keyed by the APP because the window does
-  not exist at the activation, and minted in
-  `noteAppActivation` only for an activation within
-  `pressGrace` of a click or key-down and outside a Desktop
-  switch — never on "the app is active" alone, which the boot
-  scan and a switch's arriving app both satisfy (measured on the
-  issue). The fold's only input to the payer is
-  `AppliedEffects.placedByAppRule`, set where the RULE chose a
-  Space other than the active one, and the payer is #1007's
-  `handFollowFocus`. A new route that should follow a launch
-  mints through that entry, and a new moment that is "not a
+  only a LAUNCH owes it (#1599).** The debt is
+  `LaunchFollowIntent`, keyed by the app's bundle id because the
+  window does not exist when it is owed, and owed through the
+  one `oweLaunchFollow` door: by Open or Focus, and by
+  `noteAppActivation` for an activation within `pressGrace` of a
+  click or key-down, of a process started within `launchGrace`,
+  outside a Desktop switch — never on "the app is active" or "a
+  press just happened" alone, which the boot scan, a switch's
+  arriving app and any app that activates while the user types
+  satisfy (the measurements are `docs/design-decisions.md` ▸
+  *Opening an app follows its window into its rule's Space*).
+  The fold's only input is `AppliedEffects.placedByAppRule`, set
+  where the RULE chose a Space other than the active one; the
+  arrival arm CLAIMS and pays with `followSwitch` after its own
+  retile — a whole switch, settle included, since no native
+  switch rides along. A new route that should follow a launch
+  owes through that door, and a new moment that is "not a
   launch" retires through `forget()` beside the two there —
   `LaunchFollowSeamTests` counts them, since both seams default
   inert and a lost wiring turns the feature off with

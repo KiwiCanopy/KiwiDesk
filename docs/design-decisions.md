@@ -4586,56 +4586,71 @@ follow the user stays where they were: they asked for the app
 and it opened somewhere they could not see. **Opening an app is
 a request to use it**, so its window arriving out of sight is
 wrong rather than merely surprising, and the arrival follows it
-— a Space switch AND the focus, the #1007 hand-off, because
-either half alone leaves the user hunting. The move verbs are
-the opposite case and keep not teleporting: they act on a window
-the user is already looking at, which is what `MoveIntentLatch`
-enforces.
+— a whole Space switch with the focus, `followSwitch`'s shape,
+because either half alone leaves the user hunting, and because
+no native switch rides along to settle what the switch dropped
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)'s
+hand-off leans on one). A move WITHOUT follow is the opposite
+case: it acts on a window the user is already looking at, so
+its arrival must not take them along, which is what
+`MoveIntentLatch` enforces.
 
 **The discrimination is the feature**, and following the wrong
-arrivals is worse than following none. A background app's spawned
-window, the windows macOS reopens at login, the ones KiwiDesk
-adopts at boot, and the ones a Desktop switch reveals are all
-window creations with an app rule behind them, and none of them
-is the user asking. What separates them, measured on device, is
-what CAUSED the app to become active:
+arrivals is worse than following none. A background app's
+spawned window, the windows macOS reopens at login, the ones
+KiwiDesk adopts at boot, the ones a Desktop switch reveals, an
+un-minimized window and a new tab are all window creations with
+an app rule behind them, and none of them is the user opening
+the app. What separates them, measured on device, is a LAUNCH
+the user caused:
 
-- **A press-caused activation owes the follow.** A Dock click
-  activated the launching app 0.29 s after the press and a
-  Spotlight Return 0.35 s after it; a login restore's activation
-  came 15 s after the password, and a scripted launch 17 s or
-  more after the last press. So the debt is minted only for an
-  activation within one second of a left click or key-down —
-  read from the HID state, which needs no permission. A boot
-  scan and a background spawn involve no activation at all, so
-  they owe nothing by construction rather than by a check.
-- **"The app is active" alone is not enough**, which is why the
-  press is part of the rule. At boot the frontmost app's windows
-  read as the active app's, and on a Desktop switch the arriving
-  Desktop's app activates 0.3–0.9 s after the switch with its
-  windows discovered around it. The switch is ruled out twice:
-  an activation inside twice the switch settle owes nothing, and
-  a switch retires a standing debt.
-- **The debt is keyed to the app and paid by its window's
-  arrival**, never at the activation, because the window does
-  not exist yet. It is paid once, replaced by the next
-  activation (the user moved on), and bounded — but at the
-  follow's own five seconds PLUS one adoption-heal period, since
-  a fresh launch's first window is routinely adopted by the heal
-  rather than its create notification and was measured landing
-  6.3 s after the activation.
-- **Only the rule's own verdict pays it.** A window with a
-  remembered Space, one re-homed to the screen it landed on, or
-  one the rule files in the Space you are already in is no
-  launch to follow; a transient overlay (a splash, a panel)
-  never spends the debt, so the window behind it still can.
+- **A press within a second.** A Dock click activated the
+  launching app 0.29 s after the press and a Spotlight Return
+  0.35 s after it; a login restore's activation came 15 s after
+  the password, and a scripted launch 17 s or more after the
+  last press. The read is the HID state's last click or
+  key-down, which needs no permission.
+- **A process that just started.** A press alone is not a
+  cause — anyone typing has pressed a key in the last second,
+  and an app that brings itself forward then, or a plain switch
+  into a running app, would take the user along to wherever its
+  rule points. The launching app's process was measured
+  starting at most 0.3 s before its activation; a running app
+  coming forward — a switch, its own call window, an
+  un-minimize — is older, so it owes nothing. The boot scan
+  involves no activation at all.
+- **No Desktop switch around it.** The arriving Desktop's app
+  activates 0.3–0.9 s after a switch, inside the press grace
+  when the switch was a key press, so an activation inside
+  twice the switch settle owes nothing, and a switch retires a
+  standing debt.
+- **Open or Focus owes it outright.** The verb is the user
+  naming the app, so it owes the follow whatever the press
+  timing — from the CLI there is none — and the app's own
+  activation that follows keeps the debt rather than retiring
+  it, since it is that launch completing.
+
+The debt is keyed by the app's bundle id and paid by its
+window's ARRIVAL, never at the activation, because the window
+does not exist yet — and Open or Focus owes it before the
+process does. It is paid once and retired by ANOTHER app's
+activation (the user moved on), and it is bounded at the
+follow's own bound PLUS one adoption-heal period: a fresh
+launch's first window is routinely adopted by the heal rather
+than its create notification, and was measured landing 6.3 s
+after the activation. **Only the rule's own verdict pays it**:
+a window with a remembered Space, one re-homed to the screen it
+landed on, or one the rule files in the Space the user is
+already in is no launch to follow, and a transient overlay (a
+splash, a panel) never spends the debt, so the window behind it
+still can.
 
 There is no setting and no same-screen narrowing. A user who
 pins an app to a Space has already said where they want it, a
 per-app follow flag is the third facet the App Rules row was
 redesigned to remove, and a follow onto another screen is the
 same request — the window went there, and the focus goes with
-it. Reopen that if someone asks for it.
+it. A setting is owed only when a user asks for one.
 :::
 
 ### A Desktop switch is not a close (#1207)

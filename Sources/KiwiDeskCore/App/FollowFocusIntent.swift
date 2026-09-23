@@ -11,7 +11,10 @@ import Foundation
 /// closed own window re-shown needs no instance since #1414: a
 /// return from a close takes the focus in the fold. Bounded: an
 /// unpaid debt must not fire minutes later. A third such ledger
-/// weighs a third instance before minting (#890).
+/// weighs a third instance before minting (#890); the launch
+/// follow was weighed and keyed by app instead
+/// (`LaunchFollowIntent`, #1599), paid only where the fold's app
+/// rule placed the window, which neither instance's window is.
 @MainActor
 final class FollowFocusIntent {
     /// Maximum duration focus debt remains claimable (5.0s, #1007).

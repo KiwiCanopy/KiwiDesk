@@ -171,7 +171,13 @@ extension EventLoop {
         // Ahead of both reconciles below: a window this app shows
         // on its own activation is adopted by them, and must find
         // the #1599 launch follow already owed.
-        onAppActivated(pid)
+        onAppActivated(
+            AppActivation(
+                pid: pid,
+                bundleID: AppRef(app).bundleID,
+                launchedAt: app.launchDate
+            )
+        )
         // The reconcile below takes this app's window snapshot
         // on the same turn — no second scan at attach (#672).
         syncObservation(
@@ -246,6 +252,14 @@ extension EventLoop {
         }
         onEvent(.displaysChanged(displays))
     }
+}
+
+/// One app activation's facts, as `onAppActivated` reports them
+/// (#1599): the launch date is what tells a launch from a switch.
+struct AppActivation {
+    let pid: pid_t
+    let bundleID: String?
+    let launchedAt: Date?
 }
 
 /// What the app-lifecycle funnels (`syncObservation`, `attach`,

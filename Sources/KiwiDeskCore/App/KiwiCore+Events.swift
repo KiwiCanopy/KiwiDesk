@@ -60,6 +60,7 @@ extension KiwiCore {
         }
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
+        var launchFollow: (WindowID, SpaceID)? = nil
         var goneReason: WindowGoneReason? = nil
         switch event {
         case .displaysChanged:
@@ -111,8 +112,12 @@ extension KiwiCore {
             // the fold said it returned.
             payReturningFocus(arrived: window.id, effects: effects)
             // #1599: a launch follows its window into the Space
-            // its app rule chose.
-            payLaunchFollow(arrived: window, effects: effects)
+            // its app rule chose — claimed here, switched after
+            // the arrival retile below has filed the window.
+            launchFollow = claimLaunchFollow(
+                arrived: window,
+                effects: effects
+            ).map { (window.id, $0) }
             // #1362: the snapshot frame the restore could not set
             // on an untracked window, seeded before the arrival
             // retile below delivers it.
@@ -301,6 +306,9 @@ extension KiwiCore {
             && !defersEventRetiles
         if willRetile {
             retile(newlyCreatedWindow: newlyCreatedWindow)
+        }
+        if let (window, space) = launchFollow {
+            payLaunchFollow(window, into: space)
         }
         runCloseReturnTail(
             event: event,
