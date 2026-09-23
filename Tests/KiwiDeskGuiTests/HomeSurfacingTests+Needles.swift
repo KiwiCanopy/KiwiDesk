@@ -293,12 +293,22 @@ extension HomeSurfacingTests {
             // the body emptied).
             "ifletpreview=HomeCardPreview.preview("
                 + "for:destination,model:model){preview}",
+            // Only a PLATED card spends the band's slack above
+            // its subtitle; a bare one fed that slack strands
+            // its subtitle at the bottom (owner report
+            // 2026-09-23, General), and a bare one with no row
+            // at all sits 5 pt tighter than an empty preview —
+            // so the branch names the plate, fed the real one,
+            // and the bare arm keeps a zero-height row.
+            "{preview}elseifplated{Spacer(minLength:0)}"
+                + "else{Color.clear.frame(height:0)}",
             // A plated card DRAWS its desktop plate (#786) —
             // same branch-body form, same reason — and the
             // plate mounts ABOVE the washed title band, which
             // keeps it outside the reveal wash by structure.
-            "ifletplate=HomeCardPlate.plate("
-                + "for:destination,model:model){plate}",
+            "letplate=HomeCardPlate.plate("
+                + "for:destination,model:model)",
+            "ifletplate{plate}textBand(plated:plate!=nil)",
         ],
         "Settings/HomeCardPreview.swift": [
             // The checklist card's face DRAWS the one `verdicts`

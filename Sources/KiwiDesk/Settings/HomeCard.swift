@@ -13,15 +13,14 @@ struct HomeCard: View {
 
     var body: some View {
         Button(action: open) {
+            let plate = HomeCardPlate.plate(
+                for: destination,
+                model: model
+            )
             VStack(alignment: .leading, spacing: 0) {
                 // Full-bleed plate band (#786).
-                if let plate = HomeCardPlate.plate(
-                    for: destination,
-                    model: model
-                ) {
-                    plate
-                }
-                textBand
+                if let plate { plate }
+                textBand(plated: plate != nil)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(
@@ -63,7 +62,11 @@ struct HomeCard: View {
         HomeCardOrder.thisProfile.contains(destination)
     }
 
-    private var textBand: some View {
+    /// Only a plated card pins its subtitle to the bottom. A
+    /// bare card keeps an empty preview row, so its text sits
+    /// exactly as an empty App Rules card's does (owner report
+    /// 2026-09-23, General).
+    private func textBand(plated: Bool) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             // Mode reveal wash restricted to title row (#760).
             titleRow.modeRevealWash(modeGated)
@@ -72,8 +75,10 @@ struct HomeCard: View {
                 model: model
             ) {
                 preview
-            } else {
+            } else if plated {
                 Spacer(minLength: 0)
+            } else {
+                Color.clear.frame(height: 0)
             }
             Text(subtitle)
                 .font(.caption)
