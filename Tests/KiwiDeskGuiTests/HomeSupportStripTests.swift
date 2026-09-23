@@ -52,14 +52,14 @@ struct HomeSupportStripTests {
     }
 
     @Test("The marks ship, and as template images")
-    func marksAreTemplates() {
+    func marksAreTemplates() throws {
         for (name, mark) in [
             ("MarkTelegram", BrandAssets.markTelegram),
             ("MarkGitHub", BrandAssets.markGitHub),
             ("MarkKofi", BrandAssets.markKofi),
         ] {
-            let image = try? #require(mark, Comment(rawValue: name))
-            #expect(image?.isTemplate == true, Comment(rawValue: name))
+            let image = try #require(mark, Comment(rawValue: name))
+            #expect(image.isTemplate, Comment(rawValue: name))
         }
     }
 
