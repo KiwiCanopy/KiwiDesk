@@ -3341,6 +3341,13 @@ in their space
 ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599)).
 :::
 
+:::unreleased
+A popup menu the app opens — a window above the normal window
+layer — is not filed by the rule: it opens in the space you are
+in. The app's dialogs and panels follow the rule like its other
+windows.
+:::
+
 **Example:**
 
 ```lua
