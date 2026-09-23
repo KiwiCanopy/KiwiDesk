@@ -53,6 +53,9 @@ public struct ManagedWindow: Sendable, Equatable {
     public var isSticky: Bool { stickyScope != .none }
     /// Transient launcher or accessory panel without focus ring (#300).
     public var isTransientOverlay: Bool
+    /// WindowServer layer above the normal one at adoption — a
+    /// popup menu, a reaction bar (#1602).
+    public var isRaisedLayer: Bool
     /// Native fullscreen state (`kAXFullScreenAttribute`).
     public var isFullscreen: Bool
 
@@ -66,6 +69,7 @@ public struct ManagedWindow: Sendable, Equatable {
         isFloating: Bool = false,
         stickyScope: StickyScope = .none,
         isTransientOverlay: Bool = false,
+        isRaisedLayer: Bool = false,
         isFullscreen: Bool = false
     ) {
         self.id = id
@@ -77,6 +81,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.isFloating = isFloating
         self.stickyScope = stickyScope
         self.isTransientOverlay = isTransientOverlay
+        self.isRaisedLayer = isRaisedLayer
         self.isFullscreen = isFullscreen
     }
 
@@ -95,6 +100,7 @@ public struct ManagedWindow: Sendable, Equatable {
             isFloating: isFloating,
             stickyScope: stickyScope,
             isTransientOverlay: isTransientOverlay,
+            isRaisedLayer: isRaisedLayer,
             isFullscreen: isFullscreen
         )
     }

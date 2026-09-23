@@ -76,7 +76,8 @@ struct LaunchFollowTests {
         _ id: UInt32,
         on core: KiwiCore,
         bundleID: String = bundle,
-        overlay: Bool = false
+        overlay: Bool = false,
+        raised: Bool = false
     ) {
         var window = ManagedWindow(
             id: WindowID(id),
@@ -86,6 +87,7 @@ struct LaunchFollowTests {
             frame: CGRect(x: 0, y: 0, width: 400, height: 300)
         )
         window.isTransientOverlay = overlay
+        window.isRaisedLayer = raised
         core.handle(.windowCreated(window))
     }
 
@@ -186,6 +188,23 @@ struct LaunchFollowTests {
         Self.activate(core)
         Self.arrive(8, on: core, overlay: true)
         Self.expectStayed(core, window: 8)
+        Self.arrive(9, on: core)
+        #expect(core.state.workspaces.activeSpace == Self.ruled)
+    }
+
+    /// A raised-layer popup is no rule's to file (#1602), so it
+    /// opens where you are and records no placement — the follow
+    /// stays owed to the launch's own window, which still pays it.
+    @Test("A raised-layer popup lands where you are, spending nothing")
+    func raisedPopupLandsHere() {
+        let core = Self.makeCore()
+        Self.activate(core)
+        Self.arrive(8, on: core, overlay: true, raised: true)
+        #expect(
+            core.state.workspaces.space(of: WindowID(8)) == Self.home
+        )
+        #expect(core.state.workspaces.activeSpace == Self.home)
+        #expect(core.launchFollow.owed() == Self.bundle)
         Self.arrive(9, on: core)
         #expect(core.state.workspaces.activeSpace == Self.ruled)
     }

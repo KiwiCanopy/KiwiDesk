@@ -66,6 +66,7 @@ struct WindowRekeyTests {
             isFloating: true,
             stickyScope: .global,
             isTransientOverlay: true,
+            isRaisedLayer: true,
             isFullscreen: true
         )
         // The fixture must touch every field, so a new field added
