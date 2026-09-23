@@ -60,7 +60,7 @@ extension ProfilesKey {
         case .profilesRename:
             return .text("profiles.rename", help: "profiles.rename.help")
         case .isDefault:
-            return .text("profiles.make_default")
+            return .text("profiles.make_default.one")
         case .profilesAddScreenSetup:
             return .text("profiles.sets.move.help")
         case .isStarterSetup:
