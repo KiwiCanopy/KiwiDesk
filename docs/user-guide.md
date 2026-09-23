@@ -611,8 +611,7 @@ editable profile; presets cannot be deleted.
 :::unreleased
 **Windows titled…** is a Power User choice in the Float list's
 menu. Once any rule uses it, the choice stays listed in Simple as
-well. A title pattern decides only whether a window floats; the
-app's Space rule, if it has one, still applies to every window.
+well.
 :::
 
 **The title match is case-sensitive**, and "Info" also catches
@@ -641,7 +640,7 @@ ignore rule also opts a misbehaving tabbed app out.
 ### Per-Profile Space Assignments
 
 While you edit a stored profile, App Rules enters override mode:
-dimmed facets are inherited, changing one overrides it for this
+dimmed values are inherited, changing one overrides it for this
 profile, and deleting a row removes inherited rules there. The
 profile stores a sparse diff: `app_rules` maps apps to spaces,
 while `float_rules` and `ignore_rules` are objects whose `true`

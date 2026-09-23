@@ -83,17 +83,76 @@ struct AppRuleListsWiringTests {
 
     /// A rule must say something, by construction: the Space
     /// menu offers only Spaces, and the one way out of a list is
-    /// its trash — which the section, not the row, performs.
+    /// its trash — which the section, not the row, performs. So
+    /// the row's ONE write to the store is the pick of a Space;
+    /// counted, so a `= .none` or a `removeValue` reds as surely
+    /// as a `= nil`.
     @Test("the Space row never writes an absent Space")
     func spaceRowWritesNoAbsence() throws {
+        // Comparisons blanked first: `appRules[app] == base` is a
+        // read, and would count as a write.
+        let row = try source("AppRuleSpaceRow.swift")
+            .replacingOccurrences(of: "==", with: "≡")
+        let writes = row.components(separatedBy: "appRules[app]=")
+        let picks = row.components(
+            separatedBy: "appRules[app]=space"
+        )
         #expect(
-            !(try source("AppRuleSpaceRow.swift"))
-                .contains(Self.squashed("appRules[app] = nil")),
+            writes.count == 2 && picks.count == 2
+                && !row.contains("removeValue")
+                && !row.contains("config.appRules="),
             Comment(
                 rawValue:
-                    "the Space row can clear its own Space again "
-                    + "— a row left saying nothing, the state "
-                    + "#1022 and #1608 exist to forbid"
+                    "the Space row writes its store other than by "
+                    + "picking a Space — a row left saying nothing "
+                    + "is the state #1022 and #1608 forbid"
+            )
+        )
+    }
+
+    /// The deletion focus lands on a control that can HOLD it
+    /// (#816): the Space menu, or the trash while the menu is
+    /// greyed for want of a Space.
+    @Test("the Space row's focus falls back to the trash")
+    func spaceFocusFallsBack() throws {
+        let file = "AppRuleSpaceRow.swift"
+        #expect(
+            try body(
+                of: "private func focusValue(menu: Bool) -> String",
+                in: file
+            ).contains(
+                Self.squashed(
+                    "menu == gates.hasSpaces ? app : Self.neverFocused"
+                )
+            ),
+            "the focus no longer follows the Space menu's grey"
+        )
+        #expect(
+            try source(file).contains(
+                Self.squashed(
+                    ".focused($returningRow, "
+                        + "equals: focusValue(menu: false))"
+                )
+            ),
+            "the trash is no longer the fallback focus destination"
+        )
+    }
+
+    /// A row composing its first pattern holds no stored rule, and
+    /// its trash is the way back out — so it stays enabled.
+    @Test("a composing Float row keeps its trash")
+    func composingRowKeepsItsTrash() throws {
+        #expect(
+            try source("AppRuleFloatRow.swift").contains(
+                Self.squashed(
+                    ".disabled(scope == .never && !editingTitles)"
+                )
+            ),
+            Comment(
+                rawValue:
+                    "the Float trash no longer stays live while "
+                    + "a first pattern is composed — the user "
+                    + "cannot back out of the editor (#1608)"
             )
         )
     }

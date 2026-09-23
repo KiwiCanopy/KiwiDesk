@@ -53,10 +53,14 @@ enum SettingsMetrics {
     /// hugs instead.
     static let appRuleNameColumn: CGFloat = 160
 
+    /// The gap between an App Rules row's columns, read by the
+    /// rows and by the pattern editor's inset alike.
+    static let appRuleColumnSpacing: CGFloat = 8
+
     /// The row's app icon, and the widths the pattern editor is
     /// indented by. DERIVED so the editor cannot drift from the
     /// row's value column.
-    static let appRuleIconColumn: CGFloat = 20
+    static let appRuleIconColumn: CGFloat = AppIconCache.side
     static let appRuleIdentityInset: CGFloat =
         appRuleIconColumn + 6
     static let appRuleIdentityColumn: CGFloat =

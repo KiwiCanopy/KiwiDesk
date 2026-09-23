@@ -126,7 +126,7 @@ extension ApplicationsGroup {
         )
     }
 
-    /// Label view with dropdown chevron (`AppRuleRow`).
+    /// Label view with dropdown chevron (`AppRuleMenuLabel`).
     private func behaviorLabelView(
         _ text: String
     ) -> some View {

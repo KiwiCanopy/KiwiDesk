@@ -25,13 +25,16 @@ struct AppRuleFloatRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
+            HStack(
+                alignment: .firstTextBaseline,
+                spacing: SettingsMetrics.appRuleColumnSpacing
+            ) {
                 AppRuleIdentity(app: app)
                 floatMenu
                     .opacity(inherited ? 0.55 : 1)
                     // The row's focus destination (#816).
                     .focused($returningRow, equals: app)
-                Spacer(minLength: 8)
+                Spacer(minLength: SettingsMetrics.appRuleColumnSpacing)
                 AppRuleDeleteButton(
                     help: removeHelp,
                     onDelete: onDelete
@@ -57,7 +60,8 @@ struct AppRuleFloatRow: View {
     private var editorInset: CGFloat {
         width.stacksRows
             ? SettingsMetrics.appRuleIdentityInset
-            : SettingsMetrics.appRuleIdentityColumn + 8
+            : SettingsMetrics.appRuleIdentityColumn
+                + SettingsMetrics.appRuleColumnSpacing
     }
 
     /// Two scopes and no "tiles" value: a row in this list floats,

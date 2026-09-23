@@ -242,8 +242,8 @@ struct KeyboardActionParityTests {
             ),
             Wiring(
                 "AppRuleSpaceRow.swift",
-                ".focused($returningRow, equals: app)",
-                "the Space menu, drawn on every row (#1608)"
+                ".focused($returningRow, equals: focusValue(menu: true))",
+                "the Space menu, or the trash once it greys (#1608)"
             ),
             Wiring(
                 "AppRuleFloatRow.swift",
@@ -252,12 +252,14 @@ struct KeyboardActionParityTests {
             ),
             Wiring(
                 "AppRulesSection+Lists.swift",
-                "returningSpaceRow = neighbour",
+                "returningSpaceRow = spaceApps.contains(app) "
+                    + "? app : neighbour",
                 "each list names its own neighbour (#1608)"
             ),
             Wiring(
                 "AppRulesSection+Lists.swift",
-                "returningFloatRow = neighbour",
+                "returningFloatRow = floatApps.contains(app) "
+                    + "? app : neighbour",
                 "and so does the Float list"
             ),
             Wiring(

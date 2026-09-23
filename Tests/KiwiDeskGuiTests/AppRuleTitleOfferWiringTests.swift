@@ -14,9 +14,8 @@ import Testing
 /// lost an editor for patterns that were still firing
 /// (guard-prover, 2026-09-22).
 ///
-/// Split from `AppRulePinWiringTests` at the \u00A72.1 ceiling, and the
-/// seam is the subject rather than the line count: that suite
-/// watches the pin, this one watches the offer.
+/// `AppRuleListsWiringTests` watches the lists; this one watches
+/// the offer.
 @Suite("App rule title offer wiring (#1022)")
 struct AppRuleTitleOfferWiringTests {
     private static func squashed(_ text: String) -> String {

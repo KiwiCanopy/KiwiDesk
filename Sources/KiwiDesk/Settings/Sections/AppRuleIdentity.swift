@@ -1,4 +1,3 @@
-import AppKit
 import KiwiDeskCore
 import SwiftUI
 
@@ -24,24 +23,13 @@ struct AppRuleIdentity: View {
         }
     }
 
-    @ViewBuilder private var icon: some View {
-        if let url = NSWorkspace.shared.urlForApplication(
-            withBundleIdentifier: app
-        ) {
-            Image(nsImage: NSWorkspace.shared.icon(forFile: url.path))
-                .resizable()
-                .frame(
-                    width: SettingsMetrics.appRuleIconColumn,
-                    height: SettingsMetrics.appRuleIconColumn
-                )
-        } else {
-            Image(systemName: "app.dashed")
-                .foregroundStyle(.secondary)
-                .frame(
-                    width: SettingsMetrics.appRuleIconColumn,
-                    height: SettingsMetrics.appRuleIconColumn
-                )
-        }
+    private var icon: some View {
+        Image(nsImage: AppIconCache.shared.icon(forBundleID: app))
+            .resizable()
+            .frame(
+                width: SettingsMetrics.appRuleIconColumn,
+                height: SettingsMetrics.appRuleIconColumn
+            )
     }
 }
 

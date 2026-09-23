@@ -69,8 +69,8 @@ synonym:
   `spaces.pin_badge.help`, `monitors.orphan_pins.title`). The
   app→Space relation is real but is named by its EFFECT instead —
   **Open in a Space** (`app_rules.space_list.title`), spoken as
-  **Opens in** on its menu (`app_rules.space`) — and the App
-  Rules card spends no pin word anywhere, which is how #1022
+  **Opens in** on its menu (`app_rules.space`) — and App
+  Rules spends no pin word anywhere, which is how #1022
   resolved having two relations named alike in one window. The
   argument is `docs/design-decisions.md` ▸ App rules.
 

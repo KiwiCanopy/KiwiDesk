@@ -59,7 +59,9 @@ extension AppRulesSection {
     private func deleteSpace(_ app: String) {
         let neighbour = DeletionFocus.neighbour(after: app, in: spaceApps)
         model.config.appRules[app] = nil
-        if !spaceApps.contains(app) { returningSpaceRow = neighbour }
+        // An override tombstone keeps the row, whose trash has just
+        // disabled itself under the focus: stay on the row.
+        returningSpaceRow = spaceApps.contains(app) ? app : neighbour
     }
 
     /// With no Spaces declared there is nothing to open in, so the
@@ -139,6 +141,6 @@ extension AppRulesSection {
         // Or the deleted row is the one the composing slot keeps
         // listed, and the trash appears to do nothing.
         if composingTitles == app { composingTitles = nil }
-        if !floatApps.contains(app) { returningFloatRow = neighbour }
+        returningFloatRow = floatApps.contains(app) ? app : neighbour
     }
 }

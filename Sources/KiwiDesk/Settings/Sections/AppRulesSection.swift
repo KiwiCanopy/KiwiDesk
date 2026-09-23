@@ -5,9 +5,8 @@ import SwiftUI
 ///
 /// Two lists, matching the two stores `GuiConfig` keeps: which
 /// Space an app's windows open in, and which of its windows
-/// float. They were one row per app until #1608, and a title
-/// pattern drawn under that row read as scoping its Space too —
-/// the Space is title-blind (`docs/design-decisions.md` ▸ App
+/// float. The Space is title-blind, so a title pattern belongs
+/// to the Float list alone (`docs/design-decisions.md` ▸ App
 /// rules).
 struct AppRulesSection: View {
     @ObservedObject var model: SettingsModel

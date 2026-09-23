@@ -2,13 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// One row of the "Open in a Space" list: an app and the Space
-/// its new windows open in (#1608).
-///
-/// The Space applies to EVERY window of the app, whatever its
-/// title — which is why it is a list of its own rather than a
-/// column beside the float facet, where a title pattern below the
-/// row read as scoping the Space too (owner, on device,
-/// 2026-09-23).
+/// its new windows open in, whatever their title (#1608).
 struct AppRuleSpaceRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
@@ -22,18 +16,31 @@ struct AppRuleSpaceRow: View {
     @FocusState.Binding var returningRow: String?
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
+        HStack(
+            alignment: .firstTextBaseline,
+            spacing: SettingsMetrics.appRuleColumnSpacing
+        ) {
             AppRuleIdentity(app: app)
             spaceMenu
                 .opacity(inherited ? 0.55 : 1)
-                // The row's focus destination (#816).
-                .focused($returningRow, equals: app)
-            Spacer(minLength: 8)
+                .focused($returningRow, equals: focusValue(menu: true))
+            Spacer(minLength: SettingsMetrics.appRuleColumnSpacing)
             AppRuleDeleteButton(help: removeHelp, onDelete: onDelete)
                 .disabled(tombstoned)
+                .focused($returningRow, equals: focusValue(menu: false))
         }
         .font(.callout)
     }
+
+    /// The row's focus destination (#816) must be able to HOLD
+    /// focus: the Space menu, except while no Space is declared and
+    /// the menu is greyed, when it is the trash. The other control
+    /// takes a value no deletion ever assigns.
+    private func focusValue(menu: Bool) -> String {
+        menu == gates.hasSpaces ? app : Self.neverFocused
+    }
+
+    private static let neverFocused = "\u{0}"
 
     /// No "none" item: a row in this list HAS a Space, and the way
     /// to stop opening an app in one is the trash. The one

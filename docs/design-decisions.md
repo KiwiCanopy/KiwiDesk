@@ -4660,8 +4660,8 @@ still can.
 
 There is no setting and no same-screen narrowing. A user who
 pins an app to a Space has already said where they want it, a
-per-app follow flag is the third facet the App Rules row was
-redesigned to remove, and a follow onto another screen is the
+per-app follow flag is a third rule the App Rules lists would
+have to carry, and a follow onto another screen is the
 same request — the window went there, and the focus goes with
 it. A setting is owed only when a user asks for one.
 :::
@@ -7265,18 +7265,18 @@ absolute and silently break the sparse override. Pinned by
 `ProfileSaveAsymmetryTests` so a future edit that erases the
 asymmetry fails red.
 
-**One header bar: section title leading, profile picker trailing;
-status only when non-nominal.** The section name and the profile
-edit-target picker are related facts (what am I looking at / in
-which profile), so they share one titlebar row instead of a title
-stacked over a separate profile banner. The picker moves into a
-trailing toolbar item, shown everywhere except General
-(`showsProfileContext`) — App Rules keeps it because its rules
-target profile-scoped spaces (and its Space facet is itself
-per-profile-overridable,
-#109). The status sentence is demoted to a conditional strip that
-mounts only when there's something non-nominal to say (divergence,
-unsaved, built-in, no-match, or a warning) — a synced profile says
+**One header bar: section title leading, profile picker
+trailing; status only when non-nominal.** The section name and
+the profile edit-target picker are related facts (what am I
+looking at / in which profile), so they share one titlebar row
+instead of a title stacked over a separate profile banner. The
+picker moves into a trailing toolbar item, shown everywhere
+except General (`showsProfileContext`) — App Rules keeps it
+because its rules target profile-scoped spaces (and its Space
+rules are themselves per-profile-overridable, #109). The status
+sentence is demoted to a conditional strip that mounts only when
+there's something non-nominal to say (divergence, unsaved,
+built-in, no-match, or a warning) — a synced profile says
 nothing, so the common case is a single bar and content scrolls
 straight under the blurred titlebar. (#68 §3.1)
 
@@ -11426,23 +11426,29 @@ already does, which the card's own empty note says.
 A Space is title-blind — every new window of the app opens in
 it — while floating may match windows by title. Drawn as two
 facets of one row, the title pattern's editor sat under the
-whole row and read as scoping the Space too: the owner read
-"Zen · sdfg… · Floats if titled [Pull requests…]" as *only the
-Pull requests window goes to sdfg…* (on device, 2026-09-23). No
-wording fixes that, because the row's shape makes the claim. So
-App Rules is two cards, **Open in a Space** and **Float**, each
-over its own store (`GuiConfig.appRules`, `floatRules`), and a
-pattern's editor opens under the Float row it qualifies. An app
-may sit in both lists; the Space card's help says the two
-combine. This is the storage's own shape, so it costs the engine
-nothing.
+whole row and read as scoping the Space too — *only the titled
+window goes to that Space* (#1608). No wording fixes that,
+because the row's shape makes the claim. So App Rules is two
+cards, **Open in a Space** and **Float**, each over its own store
+(`GuiConfig.appRules`, `floatRules`; `AppRuleListsTests` ▸
+`eachListReadsItsOwnStore`), and a pattern's editor opens under
+the Float row it qualifies (`AppRuleListsWiringTests` ▸
+`patternEditorScopesToFloat`). An app may sit in both lists; the
+Space card's help says the two combine. This is the storage's own
+shape, so it costs the engine nothing.
+
+**This reverses "a rule is a sentence, and the sentence is the
+control"** (#678 turn 14a). Running prose renders an empty rule
+most convincingly of all — "Finder opens in whichever Space you
+open it in and tiles normally" is fluent and says nothing — and
+with one rule per list there is no second clause for a sentence
+to join: the list title and the row's one value already read as
+one statement (*Float · All windows*).
 
 **So neither list has an absent value.** A row in the Space list
 holds a Space and a row in the Float list floats; the way to
-stop is the trash. That deletes what the one-row form needed to
-express an absence: *Tiles always* as a value, the em dash in the
-Space column, the × clear button and the rule deciding when it
-could be offered. The one exception is a stored profile's
+stop is the trash, so no value, dash or clear control exists to
+express "no rule". The one exception is a stored profile's
 **tombstone** — a profile un-pinning an app, or dropping a float
 rule, that its base profile makes. The row stays listed so the
 rule can be restored, and it draws as an absence: an em dash,
@@ -11454,7 +11460,7 @@ at where to declare one.
 
 **A sentence can omit a clause; a table column cannot.** That
 generalises to every table over an optional value, and it is why
-the facets were not simply laid out as columns. "Slack floats" is
+the two rules are not columns of one table. "Slack floats" is
 a complete rule with no Space in it; once the facets are columns,
 the Space column must render *something* for that row — an unset
 value, or a control meaning "no value here", which needs help
@@ -11466,32 +11472,32 @@ drop the empty cell instead of explaining it.
 
 **The list titles are the headings, and the rows take none.**
 "Open in a Space" matches its picker, *Open an app in a Space…*,
-and "Open" covers every new window, not only a launch; *On open,
-move to…* was rejected because "move" suggests KiwiDesk moves
-windows that are already open. "Float" matches *Float an app…*,
+and "Open" covers every new window, not only a launch. Not *On
+open, move to…*: "move" suggests KiwiDesk moves windows that are
+already open. "Float" matches *Float an app…*,
 and is deliberately not *Floating*, which is the name of the
 Floating layout mode. A column heading over a bare Space name
 would repeat the title one line down.
 
 **The float scope values name WHICH windows**: *All windows* and
 *Windows titled…*. Under a "Float" title they complete its
-sentence. They were rejected once only because they stood
-opposite *No windows*, a negation the reader had to invert; that
-value is gone. Dialogs, sheets and picture-in-picture windows
+sentence, and they name the scope positively, so no row reads as
+a negation to invert. Dialogs, sheets and picture-in-picture windows
 float whatever a rule says, which the
 [user guide](user-guide.md#app-rules) carries.
 
 **Each list's picker composes its own rule**, so a pick lands a
 complete rule and never a row with a defaulted facet
 ([Settings UI patterns](ui-patterns.md)). A picker excludes only
-the apps its own list holds, since an app may carry both rules.
+the apps its own list holds, since an app may carry both rules
+(`AppRuleListsWiringTests` ▸ `pickersExcludeTheirOwnList`).
 
 **Matching windows by title is a capability, not a mode tier.**
 Placing an app in a Space is one of the most teachable things
-KiwiDesk does, so the card stays Simple whole and the *Windows
+KiwiDesk does, so the area stays Simple whole and the *Windows
 titled…* choice is an offer instead — present in Power User, and
-present in Simple from the moment any rule in the list carries a
-pattern. It is the shape [Shortcuts](#shortcuts) ▸ *A used
+present in Simple from the moment any rule in the Float list
+carries a pattern. It is the shape [Shortcuts](#shortcuts) ▸ *A used
 capability unlocks its whole list* already rules, and all three of
 its properties hold here unchanged. The one thing to get right is
 the third of them: a pattern saved in Power User keeps matching in
@@ -11535,12 +11541,9 @@ keystroke costs a filter over an array the GUI holds.
 
 **[Rationale]**
 
-**One row per app, two facets.** "Finder lives on space 2 but its
-Get Info windows float" is one row with a Space facet and a Float
-facet, not two entries in two differently-shaped lists; the
-`App:Title` colon syntax is assembled by the GUI and never shown
-(it's serialization, not UI). Storage is untouched, so
-hand-written configs round-trip. (#68 §3.11)
+**The `App:Title` colon syntax is serialization, not UI.** The
+GUI assembles it and never shows it, so hand-written configs
+round-trip. (#68 §3.11)
 
 ### Errors & the menu bar
 

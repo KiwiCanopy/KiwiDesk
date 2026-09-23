@@ -26,8 +26,7 @@ extension AppRulesSection {
         )
     }
 
-    /// Says the Space is title-blind, which is the reading the
-    /// one-row form got wrong (#1608).
+    /// Says the Space is title-blind (#1608).
     static var spaceCaption: String {
         L(
             "app_rules.space_list.caption",
@@ -52,8 +51,8 @@ extension AppRulesSection {
             "Rules made here apply to this profile only. Dimmed "
                 + "values are inherited from the app-wide rules "
                 + "and stay in sync with them; changing one "
-                + "overrides it for this profile, and the trash "
-                + "removes an inherited rule here. To edit the "
+                + "overrides it for this profile, and removing a "
+                + "row removes an inherited rule here. To edit the "
                 + "app-wide rules, switch back to the currently "
                 + "loaded profile in the header's picker."
         )
@@ -94,7 +93,7 @@ extension AppRulesSection {
                 "\n\n"
                 + L(
                     "app_rules.section.help.titles",
-                    "%1$@ matches a fragment of a window's "
+                    "**%1$@** matches a fragment of a window's "
                         + "title, so an app can float some of "
                         + "its windows and tile the rest.",
                     L(

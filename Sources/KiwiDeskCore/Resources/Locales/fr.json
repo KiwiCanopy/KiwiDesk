@@ -91,7 +91,7 @@
   "app_rules.matches.title": "À quoi s'applique cette règle",
   "app_rules.no_spaces": "Ce profil n'a encore aucun espace, il n'y a donc nulle part où ouvrir une app. Ajoutez un espace dans %1$@.",
   "app_rules.other_specify": "Autre (préciser)…",
-  "app_rules.override.lists.caption": "Les règles définies ici ne s'appliquent qu'à ce profil. Les valeurs grisées sont héritées des règles globales de l'app et restent synchronisées avec elles ; en modifier une la remplace pour ce profil, et la corbeille retire ici une règle héritée. Pour modifier les règles globales, revenez au profil actuellement chargé dans le sélecteur de l'en-tête.",
+  "app_rules.override.lists.caption": "Les règles définies ici ne s'appliquent qu'à ce profil. Les valeurs grisées sont héritées des règles globales de l'app et restent synchronisées avec elles ; en modifier une la remplace pour ce profil, et supprimer une ligne retire ici une règle héritée. Pour modifier les règles globales, revenez au profil actuellement chargé dans le sélecteur de l'en-tête.",
   "app_rules.override.overrides": "Ce profil remplace les règles de base de l'app.",
   "app_rules.remove_pattern": "Supprimer le motif de titre",
   "app_rules.section.help.titles": "L'option « %1$@ » recherche un fragment du titre d'une fenêtre, de sorte qu'une app peut faire flotter certaines de ses fenêtres et laisser les autres se tuiler.",
