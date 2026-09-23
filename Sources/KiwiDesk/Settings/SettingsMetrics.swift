@@ -46,6 +46,35 @@ enum SettingsMetrics {
 
     /// Trailing override column in per-space override editor (#678).
     static let overrideStateColumn: CGFloat = 88
+
+    /// App Rules table columns (#1022). These are a TABLE's own
+    /// columns, headed once above the list, not the shared row
+    /// label axis — a repeating list item would otherwise read
+    /// its two facet labels once per app. They sum, with the icon
+    /// and the trash, well inside the card interior at the row
+    /// breakpoint (844 pt at 900); below it the rows stack and
+    /// these go unread.
+    static let appRuleNameColumn: CGFloat = 160
+    /// 190 rather than 170 because `タイトル指定のウインドウ` is
+    /// twelve CJK glyphs plus a chevron, which truncates at 170
+    /// (ui-designer, 2026-09-22). The slack at the row breakpoint
+    /// absorbs it.
+    static let appRuleFloatColumn: CGFloat = 190
+    /// The Space column. Values are short Space names plus a
+    /// clear button, so it needs less room than the predicates
+    /// beside it.
+    static let appRuleSpaceColumn: CGFloat = 130
+
+    /// The row's app icon, and the inset everything hanging under
+    /// the app name shares. DERIVED so the table header, the
+    /// stacked facet block and the pattern editor cannot drift
+    /// from the row — the header restated it as a hand-typed
+    /// `+ 26` until review caught it (2026-09-22).
+    static let appRuleIconColumn: CGFloat = 20
+    static let appRuleIdentityInset: CGFloat =
+        appRuleIconColumn + 6
+    static let appRuleIdentityColumn: CGFloat =
+        appRuleIdentityInset + appRuleNameColumn
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {

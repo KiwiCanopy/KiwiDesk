@@ -63,6 +63,43 @@ synonym:
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One
   family, three different corners.
+- **pin** — two relations, and only ONE of them still spends the
+  word (#1022). A **Monitor pin** binds a Space to a screen and
+  takes the word in its labels (`diff.label.space_pin`,
+  `spaces.pin_badge.help`, `monitors.orphan_pins.title`). The
+  app→Space relation is real but is named by its EFFECT instead —
+  **Opens in** (`app_rules.space`) — and the App Rules card
+  spends no pin word anywhere, which is how #1022 resolved having
+  two relations named alike in one window. The argument is
+  `docs/design-decisions.md` ▸ App rules.
+
+  **A LABEL naming either relation carries its object**, because
+  a label is read with nothing around it: "Monitor pin", never a
+  bare "Pin". A SENTENCE may lean on its subject instead, which
+  is why `home.card.app_rules.subtitle`'s "%1$d apps pinned or
+  floating" (the app→Space sense) and
+  `home.card.monitors.subtitle`'s "%2$d Spaces pinned" (the
+  Monitor sense) are both correct as they stand — the thing being
+  pinned is already named in each.
+
+  Two obligations, and no claim about what the corpus currently
+  says: **author every new label to this**, and **do not sweep
+  the existing ones as a rider on some other branch** — the
+  sweep reaches the census, the site corpus and ten catalogs,
+  and #1022 measured the residue at one genuine site
+  (`spaces.pin_offline_badge`, "Pin offline", whose `de` is
+  already the qualified "Monitor-Pin offline") plus the two
+  `monitor_chip.hint.*` drag hints, which lean on a chip whose
+  third sibling names the monitor. Retired as
+  names for either: *attach*, *assign*, *lock*. What a locale
+  spells them is its own to settle under
+  `docs/localization-naming.md` ▸ Family C — **one word per
+  catalog for BOTH senses unless that catalog's own two words
+  track the two objects**, which no catalog's do today (`de`'s
+  «pinnen»/«anheften» split runs across both, which is why its
+  count decides and not the sense). Never *Fixierung* in `de`:
+  that is the rendering it was reharmonized off for **Sticky**,
+  so Family C rule 1 retires it whatever its count.
 - **pill** — two ruled senses, deliberately (2026-08-10): a
   transient worded on-window cue — the sticky mark's EXPANDED
   state (#435/#438) and, since #933, the size-limit refusal

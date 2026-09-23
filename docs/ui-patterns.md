@@ -844,7 +844,7 @@ value the space actually gets, never the global.
 **"Automatic" is the word for a value; "Auto" is the adjective
 in a toggle label (R6/#406).** A value the user *reads* or
 *picks* takes macOS's own full word — the empty-hex colour
-sentinel, an app rule's target, a monitor chip's placement, and
+sentinel, a monitor chip's placement, and
 `PtSlider`'s readout, which prints **Automatic** in place of
 `0 pt` while the Auto sentinel is set. A toggle that turns
 automation on takes "Auto" as an adjective, since its noun is
@@ -865,6 +865,22 @@ track is itself automatic, only how many of them exist, so
 "Automatic tracks" is not a label. And "Automatic" is for a
 value the system *computes* — a fixed built-in default stays
 **"Default"**.
+
+:::unreleased
+**Neither word fits a field that can hold no value at all: that
+is an absence, and it is drawn as one.** Where clearing a field
+hands the decision to nothing — because the setting then simply
+is not made — the cell draws an em dash and the way back to it is
+an **action** beside the value, the icon-only ×-clear above,
+never a menu item named after the absence. *The system decides*
+is a value and takes "Automatic"; *there is no rule here* is not
+a value and takes no word, since a word for it has to agree with
+every sentence the surface uses for the same state and cannot.
+Ask which of the two you have before reaching for either. A
+table column is where this bites, having no way to render a row
+that omits the field ([Design decisions](design-decisions.md) ▸
+App rules).
+:::
 
 **A boolean mode flag names the MODE on the wire, even when its
 label names the field it gates (R6/#406).** "Auto track limit"
@@ -946,6 +962,15 @@ already took. Both the app rules row and the app shortcuts row
 work this way. The typed free-text path keeps a commit of its
 own, because every keystroke of an identifier is a prefix of
 that identifier and no moment in it means "this is the one".
+
+:::unreleased
+**Where the list may hold no empty rows, the picker names the
+rule it composes.** App Rules offers one picker per facet —
+*Pin an app…* and *Float an app…* — so a pick lands a complete
+rule instead of a row with both facets at their defaults. One
+picker over a defaulted facet authors a choice the user did not
+make ([Design decisions](design-decisions.md) ▸ App rules).
+:::
 
 These pickers exclude the entries that cannot be added, but
 their escape route — one file panel, the same on both rows

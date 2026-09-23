@@ -2,101 +2,185 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// App rule row rendered as an editable natural-language sentence (turn 14a).
+/// App rule row: an app, the scope of its windows that float, and
+/// its Space pin (#1022).
+///
+/// The row was an editable natural-language sentence until #1022
+/// (#68 turn 14a); the reversal is argued in
+/// `docs/design-decisions.md` ▸ App rules. The Space facet is
+/// labelled once by the table header `AppRulesSection` draws
+/// above the list, never per row — three rows would otherwise
+/// read the same label three times — and the float facet is
+/// labelled nowhere, its values being whole predicates.
 struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
     /// Base rules when editing stored profile (#109).
     let overrideBase: [String: SpaceID]?
     let overrideFloatBase: [String]?
-    /// Whether row is a newly added session draft without saved rules.
-    let isDraft: Bool
+    /// Whether the float facet offers title-pattern matching.
+    /// Resolved ONCE by the section and handed down: the predicate
+    /// has one home, and so must its input — a row re-assembling
+    /// `floatRules + overrideFloatBase` could disagree with the
+    /// section's `?` about whether the choice exists (architect
+    /// review, 2026-09-22).
+    let offersTitles: Bool
+    /// The area's census gates, built by the section alone.
+    let gates: AppRulesGates
+    /// The app whose pattern editor is open, owned by the section
+    /// so the row survives losing its last stored rule while it
+    /// composes one (#1022, the vanishing-row blocker).
+    @Binding var composingTitles: String?
     let onDelete: () -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
-    /// Keeps titled editor visible while patterns are empty.
-    @State private var editingTitles = false
+    @Environment(\.settingsWidth) private var width
+
+    /// Whether the row is in its stacked form. Read by the facet
+    /// controls, which hug their content only where no column
+    /// constrains them.
+    var stacked: Bool { width.stacksRows }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            sentence
+            facets
             if floatFacet == .titled || editingTitles {
                 AppRuleTitledEditor(
                     model: model,
                     app: app,
-                    editingTitles: $editingTitles
+                    editingTitles: titlesEditing
                 )
-                .padding(.leading, 28)
+                .padding(
+                    .leading,
+                    SettingsMetrics.appRuleIdentityInset
+                )
                 .opacity(floatInherited ? 0.55 : 1)
             }
         }
     }
 
-    /// Sentence row driven by the localized `SentenceFrame`. The
-    /// word order is the TRANSLATOR's, never this stack's — ja/ko
-    /// are verb-final, so pieces stitched in Swift can never be
-    /// grammatical. Spacing is 0: the frame's literals own it
-    /// (`" opens in "`), and a stack gap would tear a ja/ko
-    /// particle off the noun it hugs (`SentenceFrameTests` pins
-    /// the literals arrive spaces-intact).
-    private var sentence: some View {
-        HStack(spacing: 0) {
-            appIcon
-                .padding(.trailing, 6)
-            ForEach(frame.segments) { segment in
-                switch segment.slot {
-                case .text(let words):
-                    Text(words).foregroundStyle(.secondary)
-                case .argument(let position):
-                    control(at: position)
-                }
+    /// `AnyLayout` rather than two subtrees: a reflow must not
+    /// tear the menus down — one would close mid-gesture and the
+    /// focus this row holds for a deletion would drop. Only the
+    /// stacked form's label is conditional, and it is decorative
+    /// text with no identity worth keeping.
+    private var facets: some View {
+        let stacked = self.stacked
+        let layout =
+            stacked
+            ? AnyLayout(
+                VStackLayout(alignment: .leading, spacing: 6)
+            )
+            : AnyLayout(
+                HStackLayout(
+                    alignment: .firstTextBaseline,
+                    spacing: 8
+                )
+            )
+        return layout {
+            identity(stacked: stacked)
+            // Space FIRST: "this app opens in work" is the
+            // headline reason to write a rule at all, and the
+            // float facet reads as the qualifier after it.
+            facetLabel(
+                L("app_rules.space", "Opens in"),
+                drawn: stacked
+            )
+            spaceMenu
+                .opacity(spaceInherited ? 0.55 : 1)
+                .padding(.leading, facetInset(stacked))
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRuleSpaceColumn,
+                    alignment: .leading
+                )
+            floatMenu
+                .opacity(floatInherited ? 0.55 : 1)
+                .padding(.leading, facetInset(stacked))
+                // The row's focus destination, and the one
+                // control every row state keeps enabled: the
+                // space menu is inert with no Space to pin to,
+                // and a disabled control cannot take the
+                // assignment a deletion makes (#1022; #816).
+                .focused($returningRow, equals: app)
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRuleFloatColumn,
+                    alignment: .leading
+                )
+            if !stacked {
+                Spacer(minLength: 8)
+                deleteButton
             }
-            Spacer()
-            deleteButton
         }
         .font(.callout)
     }
 
-    /// Control mapped via `SentenceFrame.control(at:)`, so an
-    /// unrecognized position draws NOTHING — never the last case a
-    /// `default:` arm happens to name.
+    /// The icon and the app's name — and, stacked, the trash,
+    /// which has no trailing edge of its own to sit on there.
     @ViewBuilder
-    private func control(at position: Int) -> some View {
-        switch SentenceFrame.control(at: position) {
-        case .appName:
+    private func identity(stacked: Bool) -> some View {
+        HStack(spacing: 6) {
+            appIcon
             Text(KeybindingCatalog.displayName(forBundleID: app))
                 .fontWeight(.medium)
-        case .space:
-            spaceMenu
-                .opacity(spaceInherited ? 0.55 : 1)
-                .focused($returningRow, equals: app)
-        case .float:
-            floatMenu.opacity(floatInherited ? 0.55 : 1)
-        case nil:
-            EmptyView()
+                .lineLimit(1)
+                .frame(
+                    width: stacked
+                        ? nil : SettingsMetrics.appRuleNameColumn,
+                    alignment: .leading
+                )
+            if stacked {
+                Spacer(minLength: 8)
+                deleteButton
+            }
         }
     }
 
-    private var frame: SentenceFrame {
-        SentenceFrame(
-            L(
-                "app_rules.sentence",
-                "%1$@ opens in %2$@ and %3$@"
-            )
-        )
+    /// A facet's label, drawn only in the stacked form — wide, the
+    /// table header above the list carries it. Never spoken: each
+    /// control names itself, so read aloud this would be the same
+    /// words twice (`SettingsRowLabel`'s ruling, applied here).
+    @ViewBuilder
+    private func facetLabel(
+        _ text: String,
+        drawn: Bool
+    ) -> some View {
+        if drawn {
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink3)
+                .padding(.leading, SettingsMetrics.appRuleIdentityInset)
+                .accessibilityHidden(true)
+        }
     }
 
+    /// Stacked, everything below the identity line hangs under the
+    /// app NAME rather than sitting flush left with its icon: five
+    /// lines 6 pt apart, inside rows separated by 8 pt and a
+    /// divider, read as five rows (ui-designer, 2026-09-22). Wide,
+    /// the columns place them and this is 0. A modifier rather
+    /// than a nested stack, so the controls stay direct children
+    /// of the layout and keep their identity across the reflow.
+    private func facetInset(_ stacked: Bool) -> CGFloat {
+        stacked ? SettingsMetrics.appRuleIdentityInset : 0
+    }
+
+    /// An inherited pin, which the 0.55 dim says is in sync with
+    /// the base. A row that NEITHER side pins is not inheriting a
+    /// pin — it has none — so it draws at full strength: the old
+    /// `!isDraft` term used to keep a freshly added row out of
+    /// this branch, and dropping it dimmed every float-only row's
+    /// whole pin pair (architect review, 2026-09-22).
     private var spaceInherited: Bool {
-        guard let base = overrideBase, !isDraft else {
+        guard let base = overrideBase, base[app] != nil else {
             return false
         }
         return model.config.appRules[app] == base[app]
     }
 
     private var floatInherited: Bool {
-        guard let base = overrideFloatBase, !isDraft else {
-            return false
-        }
+        guard let base = overrideFloatBase else { return false }
         return Set(FloatFacet.rules(base, app: app))
             == Set(
                 FloatFacet.rules(
@@ -118,7 +202,6 @@ struct AppRuleRow: View {
             overrideBase != nil
                 && model.config.appRules[app] == nil
                 && floatFacet == .never
-                && !isDraft
         )
     }
 
@@ -165,5 +248,15 @@ struct AppRuleRow: View {
         )
     }
 
-    var titlesEditing: Binding<Bool> { $editingTitles }
+    /// The pattern editor's open state, owned by the SECTION so a
+    /// row losing its last stored rule mid-composition is still
+    /// listed. It holds no value and only ever names one row.
+    var titlesEditing: Binding<Bool> {
+        Binding(
+            get: { composingTitles == app },
+            set: { composingTitles = $0 ? app : nil }
+        )
+    }
+
+    private var editingTitles: Bool { composingTitles == app }
 }

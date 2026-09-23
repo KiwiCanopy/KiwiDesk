@@ -1,6 +1,24 @@
 import Foundation
 
-/// Localized format string parsed into interleaved text and control slots.
+/// Localized format string parsed into interleaved text and
+/// argument slots.
+///
+/// The word order is the TRANSLATOR's: a sentence with controls
+/// in it is ONE localized frame with positional specifiers, split
+/// on those specifiers and emitted in whatever order the
+/// translation put them — never connectives authored as their own
+/// keys between fixed stack positions, which no catalog can
+/// reorder and which this app's four verb-final locales cannot
+/// render grammatically.
+///
+/// The App Rules row drew through this until #1022 reverted it to
+/// labelled facets, which took the slot-to-control mapping with
+/// it. It is homed beside its ONE remaining consumer rather than
+/// in `Common/`, which admits only primitives shared across
+/// component areas: "the next surface inherits it" is the
+/// argument that rule declines, and a splitter advertised as
+/// common invites a stitched sentence where localization.md wants
+/// one localized frame. Move it up when a second area wants it.
 struct SentenceFrame {
     /// Literal text chunk or argument position.
     enum Slot: Hashable {
@@ -49,28 +67,6 @@ struct SentenceFrame {
         literal += rest
         flushLiteral()
         self.segments = segments
-    }
-
-    /// Supported control types mapped to argument positions.
-    enum Control: Hashable {
-        case appName
-        case space
-        case float
-    }
-
-    /// Resolves argument index to control type, returning nil if unmapped.
-    static func control(at position: Int) -> Control? {
-        switch position {
-        case 1: return .appName
-        case 2: return .space
-        case 3: return .float
-        default: return nil
-        }
-    }
-
-    /// Controls referenced by frame in parsed appearance order.
-    var controls: [Control] {
-        argumentPositions.compactMap(Self.control(at:))
     }
 
     /// Argument slot indices referenced by the format string.

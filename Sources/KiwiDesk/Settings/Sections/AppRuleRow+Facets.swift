@@ -1,72 +1,168 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Facet dropdown menus and mutations within `AppRuleRow`'s
-/// sentence. The values are VERB PHRASES — each completes the
-/// sentence it sits in. Each menu carries the facet's old label
-/// as its accessibility label, which also keeps
-/// `app_rules.space` / `app_rules.float` authored at a call site
-/// the key scanner can see, or they are pruned from every locale.
+/// Facet controls and mutations within `AppRuleRow` (#1022).
+///
+/// Both facets are STATEMENTS, and the float values state the
+/// tiling case positively: "Tiles always", never "Off" or "No
+/// windows". A negation makes the reader invert it, which is what
+/// sank the first cut — the owner's own reading of it was "float,
+/// no windows, pin to a space, work" (owner, on device,
+/// 2026-09-22). Deliberately not "Floating", which is
+/// `layout.floating.name`, the layout MODE.
+///
+/// Each menu carries the facet's census label as its
+/// accessibility name, which also keeps `app_rules.space` /
+/// `app_rules.float` authored at a call site the key scanner can
+/// see, or they are pruned from every locale. Naming a `Menu`
+/// REPLACES the choice VoiceOver would read, so each gives the
+/// value back explicitly.
 extension AppRuleRow {
-    /// Space assignment dropdown menu (`app_rules.space`, #678 Phase 4,
-    /// turn 20a rule 3).
+    /// Space assignment dropdown (`app_rules.space`, drawn under
+    /// the "Opens in" heading). No unset item: the absence of a
+    /// pin renders as an absence — a dash — and the way back to it
+    /// is the CLEAR BUTTON beside the value, never a value named
+    /// after the absence (#1022 retired `Automatic`, and a menu
+    /// item spelled "Anywhere" is `Automatic` under a new name).
     var spaceMenu: some View {
-        return Menu {
-            Button(L("app_rules.automatic", "Automatic")) {
-                model.config.appRules[app] = nil
-            }
-            Divider()
-            ForEach(model.config.spaces, id: \.raw) { space in
-                Button(space.raw) {
-                    model.config.appRules[app] = space
+        HStack(spacing: 4) {
+            Menu {
+                ForEach(model.config.spaces, id: \.raw) { space in
+                    Button(space.raw) {
+                        model.config.appRules[app] = space
+                    }
                 }
+            } label: {
+                menuLabel(spaceCellText)
             }
-        } label: {
-            menuLabel(spaceFacetLabel)
-        }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .fixedSize()
-        .accessibilityLabel(L("app_rules.space", "Space"))
-        .accessibilityValue(spaceFacetLabel)
-    }
-
-    /// Spoken and rendered space assignment label.
-    var spaceFacetLabel: String {
-        model.config.appRules[app]?.raw
-            ?? L(
-                "app_rules.space.anywhere",
-                "whichever Space you open it in"
+            .menuStyle(.borderlessButton)
+            .neutralMenuLabel()
+            // Hugs its content only where NO column constrains it.
+            // `.fixedSize()` unconditionally made the Menu ignore
+            // its 130 pt frame and draw over the float cell beside
+            // it — a Space named "development" was enough, and
+            // nothing caps a Space name (code review, 2026-09-22).
+            .fixedSize(horizontal: stacked, vertical: false)
+            .modifier(
+                GreyOut(
+                    active: pinVerdict == .unavailable,
+                    help: noSpacesHelp
+                )
             )
+            .accessibilityLabel(L("app_rules.space", "Opens in"))
+            .accessibilityValue(spaceFacetLabel)
+            clearPinButton
+        }
     }
 
-    /// Float behavior dropdown menu (`app_rules.float`, #68).
+    /// The pin's SPOKEN value. A dash reads as nothing aloud, so
+    /// only the absent case differs from the drawn cell, and
+    /// both go through `spaceText(ifNone:)`.
+    var spaceFacetLabel: String {
+        spaceText(ifNone: L("app_rules.space.none", "No Space"))
+    }
+
+    /// The pin's DRAWN cell. A dash, not a word: a word here would
+    /// be a value naming the absence.
+    var spaceCellText: String {
+        spaceText(ifNone: L("app_rules.space.dash", "—"))
+    }
+
+    /// The pinned Space's name, or `none`: the one reading both
+    /// channels take.
+    private func spaceText(ifNone none: String) -> String {
+        model.config.appRules[app]?.raw ?? none
+    }
+
+    /// Clears the pin — offered only where the rule survives
+    /// without one, which is what makes "a rule must say
+    /// something" visible without disabling anything. While the
+    /// app tiles there is simply no clear button, rather than a
+    /// greyed control owing an explanation.
+    @ViewBuilder private var clearPinButton: some View {
+        if isPinned, pinVerdict == .optional {
+            Button {
+                model.config.appRules[app] = nil
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.borderless)
+            .iconButtonAffordance(
+                L(
+                    "app_rules.space.clear",
+                    "Remove this app's Space"
+                )
+            )
+        }
+    }
+
+    /// Whether this app carries a Space pin right now.
+    var isPinned: Bool { model.config.appRules[app] != nil }
+
+    /// What may be done with the pin on this row.
+    var pinVerdict: AppRulePin.Verdict {
+        // A row whose pattern editor is open floats as far as
+        // this question goes, even before its first pattern
+        // exists: forcing the pin mid-composition would pin an
+        // app the user is floating.
+        pinVerdict(
+            floats: floatFacet != .never
+                || titlesEditing.wrappedValue
+        )
+    }
+
+    /// The verdict for this row were it to float or not — the
+    /// one call both the clear button and `setNever` reach.
+    private func pinVerdict(floats: Bool) -> AppRulePin.Verdict {
+        AppRulePin.verdict(
+            floats: floats,
+            isOverride: overrideBase != nil,
+            hasSpaces: gates.hasSpaces
+        )
+    }
+
+    /// The Space menu's one greyed state, whose cause lives on
+    /// another destination — so the card draws a live pointer to
+    /// it rather than leaving this hover string to carry it alone
+    /// (#815; the census declares the gate and
+    /// `GateReasonPlacement` derives the channel).
+    private var noSpacesHelp: String {
+        L(
+            "app_rules.space.no_spaces",
+            "This profile has no Spaces to open an app in yet."
+        )
+    }
+
+    /// Float behavior dropdown (`app_rules.float`), drawn with no
+    /// column heading: its values are whole predicates and name
+    /// themselves. The titled choice is an OFFER (#1022) —
+    /// withheld in Simple until some row carries a pattern, and
+    /// hidden rather than greyed, per the 2026-08-04 ruling that
+    /// mode-withheld surface is absent in this window.
     var floatMenu: some View {
         Menu {
             Button(neverLabel) { setNever() }
+                // Grey rather than refuse silently: with no Space
+                // to open in, `setNever` returns and the menu
+                // still reads "Floats always" with no cue (code
+                // review, 2026-09-22).
+                .disabled(
+                    pinVerdict == .unavailable && !isPinned
+                )
             Button(allLabel) { setAll() }
-            Button(titledLabel) {
-                // Re-selecting the active choice must not wipe
-                // the pattern list (#68 review m3).
-                if floatFacet != .titled {
-                    setNever()
-                }
-                titlesEditing.wrappedValue = true
+            if offersTitles {
+                Button(titledLabel) { openTitles() }
             }
         } label: {
             menuLabel(floatLabel)
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
-        .fixedSize()
+        .fixedSize(horizontal: stacked, vertical: false)
         .accessibilityLabel(L("app_rules.float", "Float"))
         .accessibilityValue(floatLabel)
-        .help(
-            // The catalog string carries Markdown for the `?`
-            // popover; a tooltip renders none, so strip the
-            // markers as `HelpButton` does for its own fallback.
-            floatHelp.replacingOccurrences(of: "**", with: "")
-        )
     }
 
     /// Inline menu label with disclosure chevron (`ProfileEditTargetMenu`).
@@ -80,59 +176,106 @@ extension AppRuleRow {
         }
     }
 
+    /// "always" is shorthand for the app's ORDINARY windows: a
+    /// dialog, a sheet and a picture-in-picture window float with
+    /// no rule at all, which the user guide carries. It earns the
+    /// overclaim by making the trio scan as one set against the
+    /// conditional third choice.
     private var neverLabel: String {
-        L("app_rules.float.never", "tiles normally")
+        L("app_rules.float.never", "Tiles always")
     }
 
     private var allLabel: String {
-        L("app_rules.float.all_windows", "floats")
+        L("app_rules.float.all_windows", "Floats always")
     }
 
     private var titledLabel: String {
-        L("app_rules.float.titled", "floats when titled…")
+        L("app_rules.float.titled", "Floats if titled…")
     }
 
     /// The resting VALUE drops the menu item's ellipsis: an
     /// ellipsis promises further UI — right on a choice opening
-    /// the pattern editor, wrong inside a statement.
+    /// the pattern editor, wrong on a value at rest.
     private var restingTitledLabel: String {
-        L("app_rules.float.titled.resting", "floats when titled")
+        L("app_rules.float.titled.resting", "Floats if titled")
     }
 
+    /// An open pattern editor reads as the titled value whatever
+    /// the store currently holds, because that is the rule being
+    /// composed — including while the bare float rule is still
+    /// there, which `openTitles` deliberately leaves alone.
     private var floatLabel: String {
+        if titlesEditing.wrappedValue { return restingTitledLabel }
         switch floatFacet {
-        case .never:
-            return titlesEditing.wrappedValue
-                ? restingTitledLabel : neverLabel
+        case .never: return neverLabel
         case .all: return allLabel
         case .titled: return restingTitledLabel
         }
     }
 
-    /// Tooltip explanation for float facet (#260, `AppRuleTitledEditor`).
-    private var floatHelp: String {
-        L(
-            "app_rules.float.help",
-            "Floating takes this app's matching windows out of "
-                + "tiling: each keeps its last position and size "
-                + "and stays above the tiled windows, instead of "
-                + "snapping into one Space's grid.\n\nThis is "
-                + "per-app floating — not the **Floating** layout "
-                + "mode, which floats every window in a Space."
+    // MARK: - Mutations (GUI assembles the colon syntax)
+
+    /// Tiling requires a pin, so dropping the float rule engages
+    /// one where the row has none — the one consequence that keeps
+    /// every row a live rule. Asked of the verdict, so the write
+    /// and the clear button cannot disagree about the exceptions.
+    private func setNever() {
+        // Refused rather than stranding the row: with no Space to
+        // pin to, clearing the float rule would leave an app with
+        // no stored rule at all, and the list — derived from the
+        // store since #1022 retired `draftApps` — would drop the
+        // row out from under the user.
+        guard pinVerdict != .unavailable || isPinned else {
+            return
+        }
+        clearFloatRules()
+        // Asked for the row as it now stands — tiling — rather
+        // than read back from the store this call just wrote.
+        if !isPinned, pinVerdict(floats: false) == .required,
+            let space = prospectiveSpace
+        {
+            model.config.appRules[app] = space
+        }
+    }
+
+    /// The Space a forced pin takes, nil where there is none. In
+    /// override mode that is the BASE's own Space, so a tombstoned
+    /// row re-pins to what it removed rather than to the fallback.
+    var prospectiveSpace: SpaceID? {
+        AppRulePin.engagedSpace(
+            model.config,
+            inherited: overrideBase?[app]
         )
     }
 
-    // MARK: - Mutations (GUI assembles the colon syntax)
+    /// Opens the pattern editor WITHOUT clearing the float rule.
+    ///
+    /// The clear used to happen here, and it deleted the row: a
+    /// float-only row's bare rule is its only stored rule, so
+    /// removing it dropped the app out of `AppRulesSection.apps`
+    /// mid-composition. Nothing needs it —
+    /// `AppRuleTitledEditor.addPattern` drops the bare rule as the
+    /// first pattern lands, which is the moment the row genuinely
+    /// stops floating everything.
+    private func openTitles() {
+        titlesEditing.wrappedValue = true
+    }
 
-    private func setNever() {
+    /// Drops every float rule for this app and closes the pattern
+    /// editor, authoring no pin.
+    private func clearFloatRules() {
         titlesEditing.wrappedValue = false
         model.config.floatRules.removeAll {
             FloatFacet.appSegment(of: $0) == app
         }
     }
 
+    /// Flipping back to floating LEAVES the pin: "floats, and
+    /// opens in work" is a legal rule, the clear button is right
+    /// there, and remembering which gesture authored a stored
+    /// value is the session state #1022 deleted.
     private func setAll() {
-        setNever()
+        clearFloatRules()
         model.config.floatRules.append(app)
     }
 }

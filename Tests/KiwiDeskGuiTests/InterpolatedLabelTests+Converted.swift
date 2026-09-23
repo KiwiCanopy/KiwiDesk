@@ -249,5 +249,14 @@ extension InterpolatedLabelTests {
         // The tour's Spaces step names the window and the pane a
         // layout is changed in, as a breadcrumb (#1534).
         "onboarding.starter_spaces.layouts_differ": 2,
+        // The App Rules `?` (#1022), authored interpolating from
+        // the start. Two: the pin checkbox's label, and the whole
+        // of `app_rules.float.help` as its own paragraph — the
+        // facet's existing explanation reused verbatim rather
+        // than restated, so the float mechanism is described once
+        // and the popover cannot drift from the facet's own text.
+        // The titles paragraph names the float VALUE it explains.
+        "app_rules.section.help": 2,
+        "app_rules.section.help.titles": 1,
     ]
 }

@@ -596,13 +596,20 @@ editable profile; presets cannot be deleted.
 
 ## App Rules
 
+:::unreleased
+**Floats if titled…** is a Power User choice: the menu beside a
+rule's Space lists it in that mode. Once any rule uses it, the
+choice stays listed in Simple as well.
+:::
+
 **The title match is case-sensitive**, and "Info" also catches
 "Information"; the live window list under the chips shows what
 the rule as written would float. Dialogs, sheets and
-picture-in-picture windows float without a rule, as do windows of
-apps that remain accessory processes. For an app you have not
-installed, `app_rules` in Lua takes bundle identifiers ([Finding
-a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
+picture-in-picture windows float whatever a rule says, as do
+windows of apps that remain accessory processes. For an app you
+have not installed, `app_rules` in Lua takes bundle identifiers
+([Finding a bundle
+identifier](lua-reference.md#finding-a-bundle-identifier)).
 
 Apps with **macOS native tabs** (Finder, Terminal, Ghostty) are
 one tile per window that follows the active tab. Tabs cannot be

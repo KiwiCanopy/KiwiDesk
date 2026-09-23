@@ -235,7 +235,11 @@ struct SettingsSearchIndexTests {
                 // 10 since #277: the two General drawer rows
                 // gained anchors so a hit opens the drawer.
                 .shortcuts: 10,
-                .appRules: 3,
+                // 4 since #1022: the one `app_rules.add_rule`
+                // action became two, one picker per rule, because
+                // a row can no longer be a no-op — a new census
+                // row landing, not an anchor going missing.
+                .appRules: 4,
                 // 3 since #1250: the eight Advanced rows gained
                 // their catalog anchors so a hit opens the
                 // drawer; language, appearance and the login

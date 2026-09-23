@@ -243,9 +243,13 @@ struct KeyboardActionParityTests {
             Wiring(
                 "AppRuleRow.swift",
                 ".focused($returningRow, equals: app)",
-                "the rule sentence's space menu is the row's "
-                    + "always-drawn control; the trash disables "
-                    + "itself in override mode"
+                "the FLOAT menu is the row's always-drawn, "
+                    + "always-enabled control since #1022 — the "
+                    + "space menu it used to carry is disabled on "
+                    + "every unpinned row, and a disabled control "
+                    + "cannot take the assignment a deletion "
+                    + "makes; the trash disables itself in "
+                    + "override mode"
             ),
             Wiring(
                 "AppRulesSection.swift",
