@@ -34,7 +34,18 @@ struct AppRulesGateTests {
             }
         )
         #expect(!gated.isEmpty)
-        #expect(gated == AppRulesGates.resolved)
+        #expect(
+            gated
+                == AppRulesGates.resolved
+                .union(AppRulesGates.resolvedElsewhere)
+        )
+        #expect(
+            AppRulesGates.resolved
+                .isDisjoint(with: AppRulesGates.resolvedElsewhere)
+        )
+        // The resolver has no `containerReason` arm, so a gate on
+        // the card's container would grey nothing, silently.
+        #expect(SettingsContainer.rulesPerApp.gate == nil)
     }
 
     // MARK: - The two reasons
@@ -89,7 +100,9 @@ struct AppRulesGateTests {
     }
 
     /// Gate-granular: each use site of the no-Spaces answer is
-    /// named, so one site going hand-rolled reds on its own.
+    /// named, so one site going hand-rolled reds on its own. A
+    /// NEW site re-deriving the condition is review's: no spelling
+    /// of "the list is empty" is one a negative needle can hold.
     @Test("the no-Spaces sites consult the resolver")
     func noSpacesSitesConsult() throws {
         let section = try source("AppRulesSection.swift")
@@ -102,17 +115,6 @@ struct AppRulesGateTests {
             #expect(
                 text.contains(Self.squashed(needle)),
                 "\(site) no longer asks `AppRulesGates`"
-            )
-        }
-        let files = [
-            "AppRulesSection.swift", "AppRulesSection+Prose.swift",
-            "AppRuleRow.swift", "AppRuleRow+Facets.swift",
-            "AppRuleTitledEditor.swift",
-        ]
-        for file in files {
-            #expect(
-                !(try source(file)).contains("spaces.isEmpty"),
-                "\(file) re-derives the no-Spaces gate inline"
             )
         }
     }

@@ -58,4 +58,8 @@ struct AppRulesGates {
         .appRules(.appRules),
         .appRules(.floatRulesPattern),
     ]
+
+    /// Gated keys answered outside this resolver — none; named so
+    /// the gap stays deliberate, as in every sibling resolver.
+    static let resolvedElsewhere: Set<SettingKey> = []
 }

@@ -25,7 +25,7 @@ struct AppRuleRow: View {
     /// section's `?` about whether the choice exists (architect
     /// review, 2026-09-22).
     let offersTitles: Bool
-    /// The area's census gates, assembled once by the section.
+    /// The area's census gates, built by the section alone.
     let gates: AppRulesGates
     /// The app whose pattern editor is open, owned by the section
     /// so the row survives losing its last stored rule while it

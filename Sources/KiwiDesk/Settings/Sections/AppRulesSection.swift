@@ -61,10 +61,11 @@ struct AppRulesSection: View {
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
-        // The composing row belongs to the profile it was opened
-        // in; carried across an edit-target switch it would list
-        // an empty row, editor open, in the other one.
-        .onChange(of: model.target) { composingTitles = nil }
+        // The composing row belongs to the draft it was opened in.
+        // Every reload — an edit-target switch, a Revert — replaces
+        // the draft's baseline, and a slot carried across one lists
+        // an empty row, editor open, in a draft that never had it.
+        .onChange(of: model.cleanConfig) { composingTitles = nil }
     }
 
     /// Banner shown when active profile overrides base app rules (#109).
@@ -113,8 +114,8 @@ struct AppRulesSection: View {
         }
     }
 
-    /// The area's census gates, assembled once for the section
-    /// and every row.
+    /// The area's census gates, from one construction site for
+    /// the section and every row.
     var gates: AppRulesGates {
         AppRulesGates(
             config: model.config,

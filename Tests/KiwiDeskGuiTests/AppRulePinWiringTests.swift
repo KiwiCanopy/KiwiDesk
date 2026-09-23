@@ -128,8 +128,7 @@ struct AppRulePinWiringTests {
         //    the control. It asks the verdict for the row as it
         //    will stand — tiling — so an exception the verdict
         //    grows reaches the write and the clear button alike
-        //    (architect review, 2026-09-23: this used to spell
-        //    the override exception a second time).
+        //    (#1022).
         #expect(
             never.contains(
                 Self.squashed(
@@ -264,6 +263,18 @@ struct AppRulePinWiringTests {
             source.contains(
                 Self.squashed(
                     "if composingTitles == app { composingTitles = nil }"
+                )
+            )
+        )
+        // And by a reload, which replaces the draft under it: a
+        // slot carried across an edit-target switch or a Revert
+        // lists an empty row, editor open, in a draft that never
+        // had it (#1022).
+        #expect(
+            source.contains(
+                Self.squashed(
+                    ".onChange(of: model.cleanConfig) "
+                        + "{ composingTitles = nil }"
                 )
             )
         )
