@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "Supprimer les règles d'espace et de flottement effectives de ce profil pour cette app",
   "app_rules.remove_pattern": "Supprimer le motif de titre",
   "app_rules.section.caption": "Ce qu'une app doit faire à son ouverture. Une app qui se tuile a besoin d'un espace où s'ouvrir.",
-  "app_rules.section.help": "**%1$@** — les fenêtres de l'app vont dans cet espace, quel que soit l'espace où vous vous trouvez.\n\n%2$@\n\nLes deux se combinent : une fenêtre flottante appartient toujours à son espace, elle n'y est simplement pas tuilée. Une fenêtre que KiwiDesk connaît déjà conserve l'espace où elle se trouvait en dernier, quelle que soit la règle appliquée.",
+  "app_rules.section.help": "**%1$@** — les fenêtres de l'app vont dans cet espace, quel que soit l'espace où vous vous trouvez, et ouvrir l'app vous y emmène avec elles.\n\n%2$@\n\nLes deux se combinent : une fenêtre flottante appartient toujours à son espace, elle n'y est simplement pas tuilée. Une fenêtre que KiwiDesk connaît déjà conserve l'espace où elle se trouvait en dernier, quelle que soit la règle appliquée.",
   "app_rules.section.help.titles": "L'option « %1$@ » recherche un fragment du titre d'une fenêtre, de sorte qu'une app peut faire flotter certaines de ses fenêtres et laisser les autres se tuiler.",
   "app_rules.section.title": "Règles par app",
   "app_rules.space": "S'ouvre dans",

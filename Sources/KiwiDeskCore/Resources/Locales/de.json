@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "Space- und Schwebe-Regeln dieses Profils für diese App entfernen",
   "app_rules.remove_pattern": "Titelmuster entfernen",
   "app_rules.section.caption": "Was eine App beim Öffnen tun soll. Eine App, die gekachelt wird, braucht einen Space, in dem sie sich öffnet.",
-  "app_rules.section.help": "**%1$@** — die Fenster der App wandern in diesen Space, egal in welchem Space du gerade bist.\n\n%2$@\n\nBeides lässt sich kombinieren: Ein schwebendes Fenster gehört weiterhin zu seinem Space, es wird darin nur nicht gekachelt. Ein Fenster, das KiwiDesk schon kennt, behält den Space, in dem es zuletzt war, welche Regel auch gilt.",
+  "app_rules.section.help": "**%1$@** — die Fenster der App wandern in diesen Space, egal in welchem Space du gerade bist, und beim Öffnen der App wechselst du mit ihnen dorthin.\n\n%2$@\n\nBeides lässt sich kombinieren: Ein schwebendes Fenster gehört weiterhin zu seinem Space, es wird darin nur nicht gekachelt. Ein Fenster, das KiwiDesk schon kennt, behält den Space, in dem es zuletzt war, welche Regel auch gilt.",
   "app_rules.section.help.titles": "Die Option „%1$@“ gleicht einen Teil des Fenstertitels ab, sodass eine App einige ihrer Fenster schweben lassen und die übrigen kacheln kann.",
   "app_rules.section.title": "Regeln pro App",
   "app_rules.space": "Öffnet sich in",

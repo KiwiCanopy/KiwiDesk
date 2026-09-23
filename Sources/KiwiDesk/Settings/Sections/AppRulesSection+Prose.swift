@@ -64,15 +64,15 @@ extension AppRulesSection {
     /// past `desktops.help`, on a window whose minimum height is
     /// 540 pt (ui-designer, 2026-09-22). The remembered-Space
     /// exception rides the last paragraph rather than the first,
-    /// being a precedence detail. It stays silent on whether the
-    /// user TRAVELS with the window: #1599 rules that they
-    /// should, and documenting behaviour we intend to change is
-    /// how docs and code drift apart.
+    /// being a precedence detail. That the user travels with a
+    /// window they OPEN is #1599's launch follow, stated in the
+    /// first paragraph beside the rule it follows.
     var sectionHelp: String {
         var text = L(
             "app_rules.section.help",
             "**%1$@** — the app's windows go to that Space, "
-                + "whatever Space you are in.\n\n%2$@\n\nThe two "
+                + "whatever Space you are in, and opening the app "
+                + "takes you there with them.\n\n%2$@\n\nThe two "
                 + "combine: a floating window still belongs to "
                 + "its Space, it simply is not tiled inside it. A "
                 + "window KiwiDesk already remembers keeps the "

@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "Eliminar las reglas efectivas de espacio y flotación de este perfil para esta app",
   "app_rules.remove_pattern": "Eliminar el patrón de título",
   "app_rules.section.caption": "Qué debe hacer una app al abrirse. Una app que se coloca en mosaico necesita un espacio en el que abrirse.",
-  "app_rules.section.help": "**%1$@** — las ventanas de la app van a ese espacio, sea cual sea el espacio en el que estés.\n\n%2$@\n\nLas dos cosas se combinan: una ventana flotante sigue perteneciendo a su espacio, simplemente no se coloca en mosaico dentro de él. Una ventana que KiwiDesk ya recuerda conserva el espacio en el que estuvo por última vez, cualquiera que sea la regla que se aplique.",
+  "app_rules.section.help": "**%1$@** — las ventanas de la app van a ese espacio, sea cual sea el espacio en el que estés, y abrir la app te lleva allí con ellas.\n\n%2$@\n\nLas dos cosas se combinan: una ventana flotante sigue perteneciendo a su espacio, simplemente no se coloca en mosaico dentro de él. Una ventana que KiwiDesk ya recuerda conserva el espacio en el que estuvo por última vez, cualquiera que sea la regla que se aplique.",
   "app_rules.section.help.titles": "La opción «%1$@» busca un fragmento del título de una ventana, de modo que una app puede hacer flotar algunas de sus ventanas y colocar el resto en mosaico.",
   "app_rules.section.title": "Reglas por aplicación",
   "app_rules.space": "Se abre en",

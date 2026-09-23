@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "移除此描述文件针对该 App 的有效空间和浮动规则",
   "app_rules.remove_pattern": "移除标题模式",
   "app_rules.section.caption": "App 打开时应有的行为。平铺的 App 需要一个用于打开的空间。",
-  "app_rules.section.help": "**%1$@** — 无论你在哪个空间，该 App 的窗口都会前往这个空间。\n\n%2$@\n\n两者可以同时使用：浮动窗口仍然属于它所在的空间，只是不在其中平铺。无论应用哪条规则，KiwiDesk 已经记住的窗口都会保留它上次所在的空间。",
+  "app_rules.section.help": "**%1$@** — 无论你在哪个空间，该 App 的窗口都会前往这个空间；打开该 App 时，你也会随窗口一起切换到那里。\n\n%2$@\n\n两者可以同时使用：浮动窗口仍然属于它所在的空间，只是不在其中平铺。无论应用哪条规则，KiwiDesk 已经记住的窗口都会保留它上次所在的空间。",
   "app_rules.section.help.titles": "“%1$@”会匹配窗口标题的片段，因此一个 App 可以让部分窗口浮动，其余窗口平铺。",
   "app_rules.section.title": "按 App 设置规则",
   "app_rules.space": "打开的空间",

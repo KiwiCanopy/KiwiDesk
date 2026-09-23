@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "Rimuovi le regole di spazio e fluttuazione effettive di questo profilo per questa app",
   "app_rules.remove_pattern": "Rimuovi il modello di titolo",
   "app_rules.section.caption": "Cosa deve fare un'app quando si apre. Un'app che si affianca ha bisogno di uno spazio in cui aprirsi.",
-  "app_rules.section.help": "**%1$@** — le finestre dell'app vanno in quello spazio, qualunque sia lo spazio in cui ti trovi.\n\n%2$@\n\nLe due cose si combinano: una finestra fluttuante appartiene ancora al suo spazio, semplicemente non viene affiancata al suo interno. Una finestra che KiwiDesk ricorda già mantiene lo spazio in cui si trovava l'ultima volta, qualunque sia la regola applicata.",
+  "app_rules.section.help": "**%1$@** — le finestre dell'app vanno in quello spazio, qualunque sia lo spazio in cui ti trovi, e aprire l'app ti porta lì insieme a loro.\n\n%2$@\n\nLe due cose si combinano: una finestra fluttuante appartiene ancora al suo spazio, semplicemente non viene affiancata al suo interno. Una finestra che KiwiDesk ricorda già mantiene lo spazio in cui si trovava l'ultima volta, qualunque sia la regola applicata.",
   "app_rules.section.help.titles": "L'opzione «%1$@» cerca un frammento del titolo di una finestra, così un'app può far fluttuare alcune delle sue finestre e affiancare le altre.",
   "app_rules.section.title": "Regole per app",
   "app_rules.space": "Si apre in",
