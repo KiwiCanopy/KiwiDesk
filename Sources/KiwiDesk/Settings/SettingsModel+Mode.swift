@@ -8,7 +8,7 @@ extension SettingsModel {
     func recomputeDirty() {
         // A checklist change may reach only OTHER profiles, which
         // the config comparison cannot see (#1393).
-        let reachRows = reachEdits.isEmpty ? 0 : reachDiffRows().count
+        let reachRows = reachDiffRows().count
         isDirty =
             config != cleanConfig
             || luaSource != cleanLuaSource

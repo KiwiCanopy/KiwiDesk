@@ -33,7 +33,13 @@ extension SettingsModel {
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
         do {
-            try core.overwriteProfile(named: name, with: config)
+            // With a checklist the rule families are the table's
+            // to encode — one encoder per field.
+            try core.overwriteProfile(
+                named: name,
+                with: config,
+                writingRules: encodedReach == nil
+            )
         } catch {
             profileWarning = L(
                 "profiles.save_failed",
@@ -44,7 +50,7 @@ extension SettingsModel {
             return
         }
         persistBindingsIfEdited()
-        saveRuleReach(rewriting: name)
+        saveRuleReach()
         core.reapplyIfInEffect(name)
         reload()
     }

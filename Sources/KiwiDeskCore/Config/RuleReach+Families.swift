@@ -22,6 +22,19 @@ extension RuleReachTable where Value == SpaceID {
         )
     }
 
+    /// The base app rules: `original` with only the touched keys
+    /// replaced, so an untouched rule keeps its stored spelling.
+    public func appRuleBase(original: [String: SpaceID]) -> [String: SpaceID] {
+        guard !baseTouched.isEmpty else { return original }
+        var result = original.filter {
+            !baseTouched.contains($0.key.lowercased())
+        }
+        for key in baseTouched {
+            if let value = base[key] { result[key] = value }
+        }
+        return result
+    }
+
     /// `profile`'s override as the table now holds it; nil when
     /// empty. Only a profile a change touched differs from its file.
     public func appRuleOverride(for profile: String) -> AppRuleOverride? {
@@ -104,14 +117,13 @@ extension RuleReachTable where Value == [String] {
         }
         for app in apps {
             guard let entry = own[app] else { continue }
-            let inherited = Set(base[app] ?? [])
-            let wanted = Set(entry ?? [])
-            for rule in wanted.subtracting(inherited) {
-                rules[rule] = true
-            }
-            for rule in inherited.subtracting(wanted) {
-                rules.updateValue(nil, forKey: rule)
-            }
+            // The list primitive's own encoding, per app.
+            let encoded = RuleListOverride.diff(
+                base: base[app] ?? [],
+                edited: entry ?? [],
+                normalizing: FloatRules.normalizedRule
+            )
+            rules.merge(encoded?.rules ?? [:]) { _, new in new }
         }
         let override = RuleListOverride(rules: rules)
         return override.isEmpty ? nil : override

@@ -56,10 +56,14 @@ struct RuleReachRequest: Identifiable {
 /// (localization.md).
 @MainActor
 enum RuleReachWords {
+    /// The checkbox's label, which every sentence naming it
+    /// interpolates (#818).
+    static var allProfiles: String {
+        L("app_rules.reach.all", "All profiles")
+    }
+
     static func label(_ reading: RuleReachReading) -> String {
-        if reading.shared {
-            return L("app_rules.reach.all", "All profiles")
-        }
+        if reading.shared { return allProfiles }
         let users = reading.profiles.filter(reading.users.contains)
         switch users.count {
         case 1:
@@ -102,16 +106,15 @@ enum RuleReachWords {
         }
     }
 
-    /// The control's announced value: the label, and the profiles
-    /// that differ, which the drawn ⚠ says below it.
+    /// The control's announced value: the label, and the ⚠ the
+    /// row draws below it, whose names each locale joins itself.
     static func spoken(_ reading: RuleReachReading) -> String {
-        let names = reading.differing
-        guard !names.isEmpty else { return label(reading) }
+        guard let differs = differing(reading) else { return label(reading) }
         return L(
             "app_rules.reach.spoken_differs",
-            "%1$@; different in %2$@",
+            "%1$@; %2$@",
             label(reading),
-            names.joined(separator: ", ")
+            differs
         )
     }
 }

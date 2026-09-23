@@ -86,6 +86,13 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         )
     }
 
+    /// Profiles that leave an inherited `key` out — they resolve
+    /// nothing while the base holds it.
+    public func leftOut(_ key: String) -> [String] {
+        guard base[key] != nil else { return [] }
+        return profiles.filter { entries[$0]?[key] == .some(nil) }
+    }
+
     /// Profiles other than `editing` that resolve a DIFFERENT
     /// value for `key` — the ⚠ on the row.
     public func differing(_ key: String, editing: String) -> [String] {
@@ -114,6 +121,14 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         }
         switch reach {
         case .shared(let joining):
+            // An entry equal to the old base READ as following it,
+            // so it follows the new one too.
+            if let oldBase = base[key] {
+                for profile in profiles
+                where entries[profile]?[key] == .some(oldBase) {
+                    setEntry(key, for: profile, .none)
+                }
+            }
             setBase(key, value)
             setEntry(key, for: editing, .none)
             for profile in joining { setEntry(key, for: profile, .none) }
@@ -123,7 +138,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
                 let entry = entries[profile]?[key]
                 if members.contains(profile) || profile == editing {
                     setEntry(key, for: profile, .some(value))
-                } else if entry == .some(old)
+                } else if (old != nil && entry == .some(old))
                     || (entry == .some(nil) && base[key] == nil)
                 {
                     // An unticked member, or a left-out mark with

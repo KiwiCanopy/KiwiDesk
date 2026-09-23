@@ -16,9 +16,13 @@ struct RuleReachReading: Equatable {
     let own: [String: String]
     /// Those of `own` whose value is the shared rule.
     let ownIsShared: Set<String>
+    /// Profiles that leave this shared rule out.
+    let leftOut: Set<String>
 
     /// The profiles the row ⚠ names, in menu order.
-    var differing: [String] { profiles.filter { own[$0] != nil } }
+    var differing: [String] {
+        profiles.filter { own[$0] != nil || leftOut.contains($0) }
+    }
 }
 
 extension SettingsModel {
@@ -38,16 +42,21 @@ extension SettingsModel {
         return reading(reach.floatRules, app, reach.unreadable, describe)
     }
 
-    /// Whether the column is drawn at all: a second profile to
-    /// name, or a row that already differs.
+    /// Whether the column is drawn at all: a profile loaded, and
+    /// a second profile to name or a row that already differs.
     var offersReachColumn: Bool {
-        guard let reach = encodedReach, let editing = reachProfile
+        guard core.profiles.currentName != nil,
+            let reach = encodedReach, let editing = reachProfile
         else { return false }
         if reach.appRules.profiles.count >= 2 { return true }
-        return config.appRules.keys.contains {
-            !reach.appRules.reach(of: $0.lowercased(), editing: editing)
-                .isShared
+        let spaces = reach.appRules.resolved(for: editing).keys
+        let floats = reach.floatRules.resolved(for: editing).keys
+        return spaces.contains {
+            !reach.appRules.reach(of: $0, editing: editing).isShared
         }
+            || floats.contains {
+                !reach.floatRules.reach(of: $0, editing: editing).isShared
+            }
     }
 
     /// Ticks or unticks "All profiles" on a row.
@@ -136,7 +145,8 @@ extension SettingsModel {
                 }
             ).union([editing]),
             own: own,
-            ownIsShared: ownIsShared
+            ownIsShared: ownIsShared,
+            leftOut: Set(table.leftOut(key)).subtracting([editing])
         )
     }
 

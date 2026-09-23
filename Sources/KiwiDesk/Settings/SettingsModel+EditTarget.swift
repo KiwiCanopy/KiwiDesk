@@ -52,6 +52,9 @@ extension SettingsModel {
             loaded: core.profiles.currentName
         )
         ruleReachStored = core.ruleReachSnapshot()
+        reachPage =
+            ruleReachStored == nil
+            ? nil : (editingProfile ?? core.profiles.currentName)
         let state: TargetState
         switch target {
         case .live:

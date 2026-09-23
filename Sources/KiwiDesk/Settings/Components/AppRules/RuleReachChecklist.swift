@@ -18,7 +18,11 @@ struct RuleReachChecklist: View {
                 .frame(minWidth: 260, alignment: .leading)
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(
-                    L("app_rules.reach.popover", "Applies to %1$@", name)
+                    L(
+                        "app_rules.reach.popover",
+                        "Where %1$@'s rule applies",
+                        name
+                    )
                 )
         }
     }
@@ -62,7 +66,7 @@ struct RuleReachChecklist: View {
     private func allProfiles(_ reading: RuleReachReading) -> some View {
         VStack(alignment: .leading, spacing: 1) {
             Toggle(
-                L("app_rules.reach.all", "All profiles"),
+                RuleReachWords.allProfiles,
                 isOn: Binding(
                     get: { reading.shared },
                     set: { model.setAllProfiles(family, app, $0) }
@@ -84,8 +88,9 @@ struct RuleReachChecklist: View {
         _ reading: RuleReachReading
     ) -> some View {
         let own = reading.own[profile]
+        let leftOut = reading.leftOut.contains(profile)
         let locked = profile == reading.editing
-        let follows = reading.shared && own == nil
+        let follows = reading.shared && own == nil && !leftOut
         return VStack(alignment: .leading, spacing: 1) {
             Toggle(
                 isOn: Binding(
@@ -114,6 +119,11 @@ struct RuleReachChecklist: View {
                         : L("app_rules.reach.own", "⚠ Own rule: %1$@", own),
                     warning: true
                 )
+            } else if leftOut {
+                caption(
+                    L("app_rules.reach.left_out", "⚠ Left out of this rule"),
+                    warning: true
+                )
             }
         }
     }
@@ -126,7 +136,8 @@ struct RuleReachChecklist: View {
             caption(
                 L(
                     "app_rules.reach.unreadable",
-                    "⚠ Can't be read — see Profiles."
+                    "⚠ Can't be read — see %1$@.",
+                    SettingsDestination.profiles.title
                 ),
                 warning: true
             )
@@ -163,7 +174,11 @@ struct RuleReachChecklist: View {
             )
         }
         return follows
-            ? L("app_rules.reach.follows_help", "Follows All profiles.")
+            ? L(
+                "app_rules.reach.follows_help",
+                "Follows %1$@.",
+                RuleReachWords.allProfiles
+            )
             : ""
     }
 
@@ -171,7 +186,8 @@ struct RuleReachChecklist: View {
         if reading.shared {
             return L(
                 "app_rules.reach.leave_out_note",
-                "To leave a profile out, untick All profiles first."
+                "To leave a profile out, untick %1$@ first.",
+                RuleReachWords.allProfiles
             )
         }
         guard reading.profiles.allSatisfy(reading.users.contains) else {
@@ -179,8 +195,8 @@ struct RuleReachChecklist: View {
         }
         return L(
             "app_rules.reach.new_profiles_note",
-            "New profiles won't get this rule. Tick All profiles "
-                + "to share it."
+            "New profiles won't get this rule. Tick %1$@ to share it.",
+            RuleReachWords.allProfiles
         )
     }
 }

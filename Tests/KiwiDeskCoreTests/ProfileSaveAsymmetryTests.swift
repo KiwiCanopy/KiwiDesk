@@ -4,18 +4,16 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Pins the #209 write-path asymmetry. The loaded profile is now
-/// reachable through both save doors, and they touch disjoint
-/// field sets *by design*: the Live-adopt save
-/// (`persistProfile` / `buildProfile`) adopts only tiling and
-/// MUST preserve the profile's sparse behavior overrides
-/// overrides (Live editing changes the global base, not the
-/// diff), while the override-row save (`overwriteProfile`)
-/// rewrites those diffs — that half is covered by
-/// `ProfileModesEditTests` / `ProfileAppRulesEditTests`. A
-/// future edit that made the adopt path also write
-/// those overrides would collapse the sparse diff into an
-/// absolute and silently break overrides; these fail red first.
+/// Pins the #209 write-path asymmetry, which #1393 keeps. The
+/// tiling save (`persistProfile` / `buildProfile`) adopts only
+/// tiling and MUST preserve the profile's sparse behavior
+/// overrides; those diffs are written by the stored-profile save
+/// (`overwriteProfile`) and by the rule checklist
+/// (`saveRuleReach`), covered by `ProfileModesEditTests`,
+/// `ProfileAppRulesEditTests` and `RuleReachSaveTests`. A future
+/// edit that made the tiling save also write those overrides
+/// would collapse the sparse diff into an absolute and silently
+/// break them; these fail red first.
 @Suite("Profile save-path asymmetry (#209)", .serialized)
 @MainActor
 struct ProfileSaveAsymmetryTests {

@@ -6,10 +6,7 @@ extension SettingsModel {
     /// The profile whose page the checklist is read from — the
     /// edited one, or the loaded one on the live target. nil hides
     /// the column: no profile to name, or no GUI-owned base.
-    var reachProfile: String? {
-        guard ruleReachStored != nil else { return nil }
-        return editingProfile ?? core.profiles.currentName
-    }
+    var reachProfile: String? { reachPage }
 
     /// Whether the page is the loaded profile's, which decides a
     /// new rule's starting reach.
@@ -46,8 +43,7 @@ extension SettingsModel {
     /// screen does. The shared rules alone go back to gui.json,
     /// through `sidecarConfig`.
     func resolveLoadedRules(_ config: inout GuiConfig) {
-        guard let stored = ruleReachStored,
-            let loaded = core.profiles.currentName,
+        guard let stored = ruleReachStored, let loaded = reachPage,
             stored.appRules.profiles.contains(loaded)
         else { return }
         config.appRules = stored.appRules.resolved(for: loaded)
@@ -65,7 +61,9 @@ extension SettingsModel {
             return config
         }
         var sidecar = config
-        sidecar.appRules = reach.appRules.base
+        sidecar.appRules = reach.appRules.appRuleBase(
+            original: reach.storedAppBase
+        )
         sidecar.floatRules = reach.floatRules.floatRuleBase(
             original: reach.storedFloatBase
         )
@@ -73,12 +71,11 @@ extension SettingsModel {
     }
 
     /// Writes every profile file and the shared rules the draft's
-    /// checklist reached. `rewriting` is the stored profile a Save
-    /// just rewrote by diff (`saveEditedProfile`).
-    func saveRuleReach(rewriting name: String? = nil) {
+    /// checklist reached.
+    func saveRuleReach() {
         guard let reach = encodedReach else { return }
         do {
-            try core.saveRuleReach(reach, rewriting: name)
+            try core.saveRuleReach(reach)
         } catch {
             profileWarning = L(
                 "profiles.save_failed",

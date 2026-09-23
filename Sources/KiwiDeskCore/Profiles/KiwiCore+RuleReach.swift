@@ -5,8 +5,9 @@ import Foundation
 public struct RuleReachSnapshot: Equatable, Sendable {
     public var appRules: RuleReachTable<SpaceID>
     public var floatRules: RuleReachTable<[String]>
-    /// The stored float base and overrides, re-encoded against
-    /// only where a change reached (`floatRuleOverride`).
+    /// The stored bases and float overrides, re-encoded only
+    /// where a change reached (`appRuleBase`, `floatRuleOverride`).
+    public let storedAppBase: [String: SpaceID]
     public let storedFloatBase: [String]
     public let storedFloatOverrides: [String: RuleListOverride]
     /// Profiles whose file could not be read, listed so a shared
@@ -16,12 +17,14 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public init(
         appRules: RuleReachTable<SpaceID>,
         floatRules: RuleReachTable<[String]>,
+        storedAppBase: [String: SpaceID],
         storedFloatBase: [String],
         storedFloatOverrides: [String: RuleListOverride],
         unreadable: [String]
     ) {
         self.appRules = appRules
         self.floatRules = floatRules
+        self.storedAppBase = storedAppBase
         self.storedFloatBase = storedFloatBase
         self.storedFloatOverrides = storedFloatOverrides
         self.unreadable = unreadable
@@ -57,6 +60,7 @@ extension KiwiCore {
                 base: sidecar.floatRules,
                 overrides: stored.map { ($0.name, $0.floatRules) }
             ),
+            storedAppBase: sidecar.appRules,
             storedFloatBase: sidecar.floatRules,
             storedFloatOverrides: floats,
             unreadable: profiles.brokenProfiles().map(\.name)
@@ -66,15 +70,9 @@ extension KiwiCore {
     /// Writes an edited snapshot: each profile the change reached,
     /// then the shared base, then re-resolves the live rules so
     /// the loaded profile's page is what the screen does. A
-    /// profile the change did not reach is not rewritten, except
-    /// `rewriting`: a stored-profile Save names the profile whose
-    /// rules `overwriteProfile` just re-diffed, so the table's
-    /// reading of them is what lands.
-    public func saveRuleReach(
-        _ snapshot: RuleReachSnapshot,
-        rewriting forced: String? = nil
-    ) throws {
-        guard snapshot.isEdited || forced != nil else { return }
+    /// profile the change did not reach is not rewritten.
+    public func saveRuleReach(_ snapshot: RuleReachSnapshot) throws {
+        guard snapshot.isEdited else { return }
         let app = snapshot.appRules
         let float = snapshot.floatRules
         for name in app.profiles {
@@ -83,12 +81,8 @@ extension KiwiCore {
                 for: name,
                 original: original
             )
-            let appTouched =
-                name == forced || !(app.touched[name] ?? []).isEmpty
-            guard
-                appTouched || floatOverride != original
-                    || name == forced
-            else {
+            let appTouched = !(app.touched[name] ?? []).isEmpty
+            guard appTouched || floatOverride != original else {
                 continue
             }
             var profile = try profiles.read(name: name)
@@ -102,7 +96,9 @@ extension KiwiCore {
             guard var sidecar = guiConfigStore.load() else {
                 throw SidecarError.unreadable
             }
-            sidecar.appRules = app.base
+            sidecar.appRules = app.appRuleBase(
+                original: snapshot.storedAppBase
+            )
             sidecar.floatRules = float.floatRuleBase(
                 original: snapshot.storedFloatBase
             )
