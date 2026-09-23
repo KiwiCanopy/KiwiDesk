@@ -145,9 +145,12 @@ struct DesktopBindingScopeGateTests {
         #expect(
             core.profileVerdict(activeBinding: binding).verdict
                 == .boundToDesktop(
-                    name: "Starter",
                     desktop: 1,
-                    over: "Vision"
+                    reading: .init(
+                        name: "Starter",
+                        setup: nil,
+                        over: "Vision"
+                    )
                 )
         )
     }
@@ -188,5 +191,13 @@ struct DesktopBindingScopeGateTests {
             args: [.number(1), .string("Vision"), .bool(true)]
         )
         #expect(refused != .ok())
+        // A setup of another count than the profile's could never
+        // fire, and an empty fingerprint names no screen.
+        #expect(bind(core, "Vision", screens: ["A:1x1", "B:1x1"]) != .ok())
+        #expect(bind(core, "Vision", screens: [""]) != .ok())
+        #expect(
+            core.desktopBindings[.identity(stamp)]?.entries
+                == [.init(profile: "Vision", setup: here)]
+        )
     }
 }

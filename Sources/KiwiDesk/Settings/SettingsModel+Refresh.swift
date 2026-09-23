@@ -61,12 +61,16 @@ extension SettingsModel {
         refreshBindingReadings()
     }
 
-    /// Re-reads what each draft binding loads (#1609) — after a
-    /// refresh, and after the Desktops card edits one.
+    /// Re-reads what each draft binding loads (#1609). Owed by
+    /// every writer of `config.profileBindings` and every change
+    /// of what the gate reads (the screens, the live profile) —
+    /// today the profile refresh and the Desktops card's write.
     func refreshBindingReadings() {
-        bindingReadings = config.profileBindings.compactMapValues {
-            core.boundReading(of: $0)
+        var readings: [DesktopBinding: BoundReading] = [:]
+        for record in config.profileBindings.values {
+            readings[record] = core.boundReading(of: record)
         }
+        bindingReadings = readings
     }
 
     /// Take Core's re-keyed bindings into an UNEDITED draft

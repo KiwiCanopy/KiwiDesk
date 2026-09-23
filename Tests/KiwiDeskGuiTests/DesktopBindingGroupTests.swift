@@ -227,7 +227,7 @@ struct DesktopBindingGroupTests {
                     + "caption(noProfileForCount)"
             )
         )
-        let row = try squashed("DesktopsGroup+Row.swift")
+        let row = try squashed("DesktopsGroup+Write.swift")
         #expect(
             row.contains(
                 "DesktopBindingRefusal.of(profileCount:$0.count,"

@@ -88,7 +88,7 @@ struct DesktopBindingWriterSeamTests {
         #expect(
             constructions == [
                 "KiwiCore+Desktops.swift": 1,
-                "DesktopsGroup+Row.swift": 1,
+                "DesktopsGroup+Write.swift": 1,
             ],
             Comment(
                 rawValue:

@@ -11266,17 +11266,14 @@ add menu is offered only where a count has two known setups or
 more, since with one there is nothing to tell apart. Adding a
 setup fills in the profile that holds it, where one does: that is
 the likeliest wish, and it is the fix for the row that says the
-holder is being loaded over. A scope menu under each picker was
-tried first and dropped: in a clickable mock the owner could not
-tell which row loaded, because the scope was a value to open
-rather than a place in the list (the issue's ruling amendment,
-2026-09-23). A disclosure per Desktop was refused: a Settings row
-drawn inside a collapsed container is owed a catalog child
-anchored for search, or its search hit lands with the container
-shut (#1250), and a Desktop is the user's rather than a
-declaration the catalog can carry. Collapsed, it would also hide
-the rows that decide what loads, which is the one thing the card
-exists to show.
+holder is being loaded over. A scope menu under each picker is
+refused: the scope is then a value to open rather than a place in
+the list, and in a clickable mock the owner could not tell which
+row loaded (the issue's ruling amendment, 2026-09-23). A
+disclosure per Desktop is refused: it adds a click in front of
+the only control a row has, and collapsed it hides the rows that
+decide what loads, which is the one thing the card exists to
+show.
 :::
 
 **[Rationale]**

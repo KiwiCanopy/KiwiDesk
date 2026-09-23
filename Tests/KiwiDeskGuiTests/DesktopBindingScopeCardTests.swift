@@ -117,4 +117,27 @@ struct DesktopBindingScopeCardTests {
         #expect(rows?.contains(scoped) == true)
         #expect(rows?.contains(others) == true)
     }
+
+    /// A scope moved under an unchanged name still owes the
+    /// unsaved list its row (gui.md: every reason the pill shows).
+    @Test("a scope-only edit is a diff row naming its screens")
+    func scopeOnlyEditIsDiffed() {
+        LocalizationManager.shared.select("en")
+        var old = GuiConfig()
+        old.profileBindings[live] = DesktopBinding(
+            profile: "Laptop",
+            desktop: 1
+        )
+        var new = old
+        new.profileBindings[live]?.bind("Laptop", setup: vision) {
+            _ in 1
+        }
+        let rows = SettingsValueReadout.profilesRows(
+            .profileBindings,
+            old: old,
+            new: new
+        )
+        #expect(rows.count == 1)
+        #expect("\(rows)".contains("Laptop on Sidecar"))
+    }
 }

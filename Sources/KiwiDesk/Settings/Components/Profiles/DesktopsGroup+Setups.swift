@@ -45,8 +45,11 @@ extension DesktopsGroup {
     /// tell apart — or the record already scopes one, which then
     /// draws nested anyway (#1609, ui-designer).
     func offersSetups(count: Int, row: DesktopRow) -> Bool {
-        (model.bindableSetups[count]?.count ?? 0) >= 2
-            || row.binding?.entries.contains { $0.setup != nil } == true
+        let counts = profileCounts
+        return (model.bindableSetups[count]?.count ?? 0) >= 2
+            || row.binding?.entries.contains {
+                $0.setup != nil && counts[$0.profile] == count
+            } == true
     }
 
     /// The setups of `count` this Desktop has no row for yet, in
@@ -96,7 +99,8 @@ extension DesktopsGroup {
                         addSetup(choices[index], count: count, row: row)
                     } label: {
                         Text(labels[index])
-                        Text(setupDetail(choices[index]))
+                        let detail = setupDetail(choices[index])
+                        if !detail.isEmpty { Text(detail) }
                     }
                 }
             }
@@ -180,8 +184,7 @@ extension DesktopsGroup {
     /// Desktop on the main screen can fire, so only it says so.
     @ViewBuilder func conflictLine(_ row: DesktopRow) -> some View {
         if !row.isDormant, model.mainDesktops.contains(row.number),
-            let reading = model.bindingReadings[row.key]
-                ?? model.bindingReadings[.number(row.number)],
+            let reading = row.binding.flatMap({ model.bindingReadings[$0] }),
             let holder = reading.over
         {
             Text(

@@ -158,9 +158,12 @@ struct ProfileVerdictTests {
                 ]
             ).verdict
                 == .boundToDesktop(
-                    name: "Bound",
                     desktop: 2,
-                    over: "Desk"
+                    reading: BoundReading(
+                        name: "Bound",
+                        setup: nil,
+                        over: "Desk"
+                    )
                 )
         )
     }

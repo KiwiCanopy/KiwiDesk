@@ -36,7 +36,7 @@ struct DesktopBindingFitSeamTests {
             // a group's picker offers — the bind-fit question,
             // asked of the one judgement (#1437's forward
             // obligation).
-            profilesDir + "DesktopsGroup+Row.swift": 1,
+            profilesDir + "DesktopsGroup+Write.swift": 1,
             profilesDir + "ProfilesFamilyRows.swift": 1,
         ]
     }

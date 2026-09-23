@@ -31,9 +31,21 @@ extension KiwiCore {
         }
         let screens = args.dropFirst(2)
         let setup = screens.compactMap(\.stringValue)
-        guard setup.count == screens.count else {
+        guard setup.count == screens.count, !setup.contains("") else {
             return .fail(
                 "expected screen fingerprints (see list_monitors)"
+            )
+        }
+        // A scope names a setup of the profile's own count, or the
+        // entry could never fire (#1609); an unsaved profile is
+        // judged once its file exists, as the count is.
+        if !setup.isEmpty,
+            let count = (try? profiles.read(name: profile))?.monitorCount,
+            count != setup.count
+        {
+            return .fail(
+                "profile '\(profile)' is saved for \(count) "
+                    + "screen(s); the setup names \(setup.count)"
             )
         }
         // A verb, not a switch: no snapshot in hand, so this is
@@ -302,7 +314,8 @@ extension KiwiCore {
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
         switch boundProfile(of: binding) {
-        case .success(let profile):
+        case .success(let pick):
+            let profile = pick.profile
             guard profile.name != profiles.currentName else {
                 return
             }

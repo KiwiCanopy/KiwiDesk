@@ -66,10 +66,11 @@ extension ProfilesSection {
         let resolution = model.profileResolution
         let screens = screensPhrase(resolution.screens)
         switch resolution.verdict {
-        case .boundToDesktop(let name, let desktop, let setup, _):
+        case .boundToDesktop(let desktop, let reading):
             // The rung the binding took (#1609): the user set a
             // scope, not a count, so the scope is what it names.
-            return setup == nil
+            let name = reading.name
+            return reading.setup == nil
                 ? L(
                     "profiles.which_loads.bound_all",
                     "Right now: Desktop %1$d → %2$@ (bound for all "

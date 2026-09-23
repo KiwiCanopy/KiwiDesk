@@ -4532,7 +4532,8 @@ loads; a call with a profile of the same count replaces it. A
 profile not saved yet replaces any other not saved yet.
 
 ```lua
--- Desktop 3 docked and undocked: one profile per screen count.
+-- Desktop 3 docked and undocked: one profile per screen count,
+-- for all setups.
 KiwiDesk.bind_profile_to_desktop(3, "Laptop")
 KiwiDesk.bind_profile_to_desktop(3, "Dual")
 ```
@@ -4544,10 +4545,10 @@ as `list_monitors` prints them; the binding then loads only while
 exactly those screens are connected. A call replaces the entry of
 the same screen count **and** the same scope, so per count a
 Desktop holds one profile for all screen setups and one for each
-setup named. Where both apply, the one for the connected setup
-loads. Either kind loads over the profile that holds the
-connected setup ([Profile Monitor
-Sets](#profile-monitor-sets)).
+setup named, each of the profile's own screen count. Which entry
+loads, and that either loads over the profile that holds the
+connected setup, is the binding rung of [Profile Monitor
+Sets](#profile-monitor-sets).
 
 ```lua
 -- Desktop 3 on two screens: "Dual" anywhere, "Studio" at the desk.

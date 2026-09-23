@@ -304,6 +304,7 @@
   "diff.note.added": "Added",
   "diff.note.edited": "Edited",
   "diff.note.removed": "Removed",
+  "diff.value.binding_setup": "%1$@ on %2$@",
   "diff.value.border_alignment.inside": "Inside",
   "diff.value.border_alignment.outside": "Outside",
   "diff.value.draw_order.behind": "Behind",

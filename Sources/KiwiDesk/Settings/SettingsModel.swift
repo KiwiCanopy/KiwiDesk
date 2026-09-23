@@ -154,7 +154,9 @@ final class SettingsModel: ObservableObject {
     /// (#1609) — Core's reading, re-read by
     /// `refreshBindingReadings` rather than per render, since the
     /// gate reads profile files.
-    @Published var bindingReadings: [DesktopKey: BoundReading] = [:]
+    /// Keyed by the RECORD, so a row reads the reading of the
+    /// record it resolved, under whichever key.
+    @Published var bindingReadings: [DesktopBinding: BoundReading] = [:]
 
     /// Each present Desktop's durable key by its Mission Control
     /// number (#1147) — the join a Profiles row resolves its

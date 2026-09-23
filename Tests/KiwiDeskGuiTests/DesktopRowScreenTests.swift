@@ -153,10 +153,11 @@ struct DesktopRowScreenTests {
         let card = try squashed("DesktopsGroup.swift")
         #expect(card.contains("screens:model.desktopScreens,"))
         let row = try squashed("DesktopsGroup+Row.swift")
-        #expect(row.contains("record.screen=row.screen??record.screen"))
+        let write = try squashed("DesktopsGroup+Write.swift")
+        #expect(write.contains("record.screen=row.screen??record.screen"))
         // The picker's setter files through the one write (#1609
         // moved it into a closure that also states focus).
-        #expect(row.contains("set:{nameinwrite(name,key:row.key,slot:slot)"))
+        #expect(write.contains("write(name,key:row.key,slot:slot)"))
         #expect(row.contains("ifletscreen=row.screen{Text(screen)"))
     }
 }

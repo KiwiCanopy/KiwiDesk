@@ -27,11 +27,11 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
             self.setup = Self.canonical(setup)
         }
 
-        /// A setup in its canonical order; nil or empty is all
-        /// screen setups.
+        /// A setup in `MonitorSet`'s canonical order; nil or empty
+        /// is all screen setups.
         static func canonical(_ setup: [String]?) -> [String]? {
             guard let setup, !setup.isEmpty else { return nil }
-            return setup.sorted()
+            return MonitorSet(monitors: setup).monitors
         }
 
         /// Stored as a bare name when scoped to all setups — the
@@ -205,12 +205,20 @@ public struct DesktopBinding: Hashable, Sendable, Codable {
         preferring live: String?
     ) -> [Entry] {
         let here = Entry.canonical(fingerprints)
-        func tier(_ scope: [String]?) -> [Entry] {
-            let listed = entries.filter { $0.setup == scope }
-            return listed.filter { $0.profile == live }
-                + listed.filter { $0.profile != live }
-        }
-        return (here.map(tier) ?? []) + tier(nil)
+        let scoped = here.map { ranked(scope: $0, preferring: live) }
+        return (scoped ?? []) + ranked(scope: nil, preferring: live)
+    }
+
+    /// One tier of that rank: the entries scoped to `setup` (nil:
+    /// all screen setups), `live` first, then binding order — the
+    /// one copy a slot's picker reads too.
+    public func ranked(
+        scope setup: [String]?,
+        preferring live: String?
+    ) -> [Entry] {
+        let listed = entries.filter { $0.setup == Entry.canonical(setup) }
+        return listed.filter { $0.profile == live }
+            + listed.filter { $0.profile != live }
     }
 
     private enum CodingKeys: String, CodingKey {

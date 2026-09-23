@@ -73,6 +73,14 @@ public enum DesktopBindingRefusal: Error {
     }
 }
 
+/// What a Desktop binding loads: the profile, and the entry that
+/// fired it (#1609) — so a reader of the rung asks the pick rather
+/// than re-deriving which tier matched.
+struct BoundPick {
+    let profile: Profile
+    let entry: DesktopBinding.Entry
+}
+
 /// A binding whose list is empty — a shape no writer produces,
 /// named so the gate can refuse it rather than crash.
 struct EmptyDesktopBinding: Error {}
@@ -95,7 +103,7 @@ extension KiwiCore {
     /// therefore always fits by count and by scope.
     func boundProfile(
         of binding: DesktopBinding
-    ) -> Result<Profile, DesktopBindingRefusal> {
+    ) -> Result<BoundPick, DesktopBindingRefusal> {
         let connected = state.workspaces.allDisplays.count
         let ranked = binding.ranked(
             for: liveFingerprints,
@@ -109,7 +117,8 @@ extension KiwiCore {
         var saved: [DesktopBindingRefusal.SavedCount] = []
         var unreadable: Error = EmptyDesktopBinding()
         var waiting = false
-        for name in ranked.map(\.profile) {
+        for entry in ranked {
+            let name = entry.profile
             let profile: Profile
             do {
                 profile = try profiles.read(name: name)
@@ -122,7 +131,7 @@ extension KiwiCore {
                 connected: connected
             ) {
             case nil:
-                return .success(profile)
+                return .success(BoundPick(profile: profile, entry: entry))
             case .displaysUnknown?:
                 waiting = true
             case .screenCount?:

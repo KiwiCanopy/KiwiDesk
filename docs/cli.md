@@ -340,9 +340,7 @@ adds beside the first, the same count replaces it.
 
 :::unreleased
 Screen fingerprints after the profile, as `list_monitors` prints
-them, bind it for that one screen setup: the call replaces only
-the entry of the same count and the same setup, and the entry for
-the connected setup loads before the one for all setups ([Lua
+them, scope the binding to that one screen setup ([Lua
 reference](lua-reference.md#bind_profile_to_desktop)).
 :::
 

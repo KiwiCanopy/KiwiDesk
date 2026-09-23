@@ -25,9 +25,11 @@ extension SettingsValueReadout {
         }
     }
 
-    /// One row per re-bound Desktop, valued by its profile names
-    /// — one per screen count, listed (#1436) — with the unset
-    /// dash for a binding that appeared or was cleared.
+    /// One row per re-bound Desktop, valued by its entries — one
+    /// per screen count and scope, listed (#1436, #1609), a scoped
+    /// one naming its screens — with the unset dash for a binding
+    /// that appeared or was cleared. Diffed by ENTRY, so a scope
+    /// moved under an unchanged name still owes its row.
     ///
     /// Diffed by KEY and NARRATED by the number each record was
     /// last seen at (#1147) — a key is not a name any reader has.
@@ -44,13 +46,13 @@ extension SettingsValueReadout {
             "Profile binding"
         )
         func names(_ binding: DesktopBinding?) -> String {
-            guard let binding, !binding.profiles.isEmpty else {
+            guard let binding, !binding.entries.isEmpty else {
                 return unset
             }
-            return LocalizedList.join(binding.profiles)
+            return LocalizedList.join(binding.entries.map(entryName))
         }
         let touched = Set(old.keys).union(new.keys)
-            .filter { old[$0]?.profiles != new[$0]?.profiles }
+            .filter { old[$0]?.entries != new[$0]?.entries }
             .map { key in
                 (key, new[key]?.desktop ?? old[key]?.desktop ?? 0)
             }
@@ -72,5 +74,19 @@ extension SettingsValueReadout {
                 new: names(new[key])
             )
         }
+    }
+
+    /// An entry as the diff names it: the profile, and for a
+    /// scoped one the screens of its setup by name.
+    private static func entryName(_ entry: DesktopBinding.Entry) -> String {
+        guard let setup = entry.setup else { return entry.profile }
+        return L(
+            "diff.value.binding_setup",
+            "%1$@ on %2$@",
+            entry.profile,
+            LocalizedList.join(
+                setup.map { Display.fingerprintParts($0).name }
+            )
+        )
     }
 }

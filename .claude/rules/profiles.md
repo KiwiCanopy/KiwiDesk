@@ -256,14 +256,24 @@ elsewhere (`DesktopBindingPerCountTests` ▸ `gatePicksTheFit`,
 `DesktopBindingScopeModelTests` ▸ `rankedTiers`;
 `DesktopBindingScopeGateTests` ▸ `specificOutranksAll`,
 `otherSetupsStandAside`; `DesktopBindingSlotWriteTests` ▸
-`pickerPrefersTheLiveEntry`). The gate outranks the setup's
-holder (#1530) — ruled in `docs/design-decisions.md` ▸ Profiles,
-not restated here. The obligations: a reader of a binding's
+`pickerPrefersTheLiveEntry`) — a slot's picker reading one tier of
+that rank through `ranked(scope:preferring:)`, never a hand copy
+of the live-first rule. The gate outranks the setup's holder
+(#1530, `DesktopBindingScopeGateTests` ▸ `readingNamesTheHolder`)
+— ruled in `docs/design-decisions.md` ▸ Profiles, not restated
+here. The obligations: a reader of a binding's
 profile takes the PICKED profile off the gate's `.success` and
 never a listed name (`readersFollowThePick`), and a reader that
-must also say WHICH rung answered takes `KiwiCore.boundReading(of:)`
-rather than re-deriving the scope or the holder beside it
-(`DesktopBindingScopeGateTests` ▸ `readingNamesTheHolder`); a
+must also say WHICH rung answered takes `KiwiCore.boundReading(of:)`,
+which reads the entry the gate's `BoundPick` says fired, rather
+than re-deriving the scope or the holder beside it
+(`DesktopBindingScopeGateTests` ▸ `readingNamesTheHolder`) — and
+the GUI keeps those readings for its DRAFT records at refresh time,
+so a new writer of `config.profileBindings`, or a new change to
+what the gate reads, re-reads them through
+`refreshBindingReadings`; a scope names a setup of its profile's
+own count, the verb refusing any other since it could never fire
+(`DesktopBindingScopeGateTests` ▸ `verbTakesScreens`); a
 writer files through `DesktopBinding.bind(_:setup:countOf:)` —
 same count AND same scope replaces, anything else adds, an unsaved
 name replaces an unsaved name of the same scope

@@ -554,11 +554,6 @@ The rungs, in order:
 4. A **built-in Standard** for that screen count, or a line
    saying nothing matches.
 
-:::unreleased
-Within the first rung, a profile bound for exactly the connected
-screen setup comes before one bound for all screen setups.
-:::
-
 A new hardware combination therefore uses the Standard and marks
 the profile dirty until you Save on it; a profile saved for two
 *different* monitors sorts after your exact matches but before

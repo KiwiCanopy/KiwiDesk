@@ -40,11 +40,11 @@ extension KiwiCore {
         let desktops = stampedDesktopSnapshot()
         if let binding = mainDesktopBinding(in: desktops) {
             switch boundProfile(of: binding) {
-            case .success(let bound):
-                apply(profile: bound, forceRetile: false)
+            case .success(let pick):
+                apply(profile: pick.profile, forceRetile: false)
                 onLog(
                     "monitor change: loaded bound profile "
-                        + "'\(bound.name)'"
+                        + "'\(pick.profile.name)'"
                 )
                 return
             case .failure(let refusal):
