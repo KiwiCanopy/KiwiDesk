@@ -65,6 +65,9 @@ extension KiwiCore {
                     census: census
                 )
             }
+            // Only an app with nothing up here opens a window for
+            // this pull; one already showing is merely focused.
+            if census.visible == 0 { oweLaunchFollow(bundleID) }
             openOrFocus.activate(pid)
             return .ok()
         }
@@ -77,6 +80,9 @@ extension KiwiCore {
         guard openOrFocus.openApp(bundleID, newInstance) else {
             return .fail("app not found: \(bundleID)")
         }
+        // The user named the app: its next rule-placed window
+        // takes them along, whatever the press timing (#1599).
+        oweLaunchFollow(bundleID)
         return .ok()
     }
 }

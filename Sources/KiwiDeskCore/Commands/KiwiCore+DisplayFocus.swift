@@ -74,7 +74,8 @@ extension KiwiCore {
 
     /// The follow-shaped switch: activate `target`, focus and
     /// raise `id` there, and arm the switch settle — shared by
-    /// `moveWindow(follow: true)` and the launch cycle (#637).
+    /// `moveWindow(follow: true)`, the launch cycle (#637) and
+    /// the launch follow (#1599).
     /// The ORDER is the load-bearing part, which is why this is
     /// one copy: the frontmost pid is captured before the raise
     /// can change it (the settle's dropped-activate detection,
@@ -87,7 +88,11 @@ extension KiwiCore {
     /// (`handFollowFocus` below is this sequence's deliberate
     /// partial twin, #1007 — a step added or reordered here
     /// likely belongs there too.)
-    func followSwitch(to target: SpaceID, focusing id: WindowID) {
+    func followSwitch(
+        to target: SpaceID,
+        focusing id: WindowID,
+        arriving: Bool = false
+    ) {
         let priorFrontmost = frontmostPIDProvider?()
         state.workspaces.activate(target)
         focusWindow(id, refocusRetile: false, warp: true)
@@ -96,7 +101,7 @@ extension KiwiCore {
             target,
             priorFrontmost: priorFrontmost
         )
-        spaceSwitchRetile()
+        spaceSwitchRetile(newcomer: arriving ? id : nil)
     }
 
     /// Pay the focus a `move_to_desktop_and_follow` owes the

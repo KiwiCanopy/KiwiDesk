@@ -88,6 +88,10 @@ extension KiwiCore {
         seedStartupFocus()
     }
 
+    /// The default `adoptionHealInterval`; the #1599 launch
+    /// follow's bound is derived from it.
+    static let adoptionHealDefault: Duration = .seconds(5)
+
     /// The steady-state net under the one-shot sweep above
     /// (#675): every event-driven adoption path can go silent
     /// at once for a fresh-launch app (a failed observer

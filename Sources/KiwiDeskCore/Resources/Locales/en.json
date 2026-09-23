@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "Remove this profile's effective Space and float rules for this app",
   "app_rules.remove_pattern": "Remove title pattern",
   "app_rules.section.caption": "What an app should do when it opens. An app that tiles needs a Space to open in.",
-  "app_rules.section.help": "**%1$@** — the app's windows go to that Space, whatever Space you are in.\n\n%2$@\n\nThe two combine: a floating window still belongs to its Space, it simply is not tiled inside it. A window KiwiDesk already remembers keeps the Space it was last in, whichever rule applies.",
+  "app_rules.section.help": "**%1$@** — the app's windows go to that Space, whatever Space you are in, and opening the app takes you there with them.\n\n%2$@\n\nThe two combine: a floating window still belongs to its Space, it simply is not tiled inside it. A window KiwiDesk already remembers keeps the Space it was last in, whichever rule applies.",
   "app_rules.section.help.titles": "%1$@ matches a fragment of a window's title, so an app can float some of its windows and tile the rest.",
   "app_rules.section.title": "Rules per app",
   "app_rules.space": "Opens in",

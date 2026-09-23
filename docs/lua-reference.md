@@ -3328,6 +3328,19 @@ An app is named by its bundle identifier (case-insensitive), not
 its display name. See [Finding a bundle
 identifier](#finding-a-bundle-identifier).
 
+:::unreleased
+Opening a listed app takes you with it: when you launch it,
+reopen it with no window showing, or restore its minimized
+window yourself — a Dock click, Spotlight, `pull_or_spawn` —
+and the window goes to a space other than the one you are on,
+KiwiDesk switches to that space and focuses the window. A
+window an app opens on its own while another of its windows is
+showing, the windows macOS reopens at login or KiwiDesk finds
+when it starts, and the windows a Desktop switch shows you stay
+in their space
+([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599)).
+:::
+
 **Example:**
 
 ```lua

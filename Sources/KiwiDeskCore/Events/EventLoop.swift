@@ -32,6 +32,8 @@ public final class EventLoop {
     /// the core schedules the one-shot re-track that drains it
     /// (`scheduleTransientRetrack`).
     var onTransientDrop: @MainActor () -> Void = {}
+    /// Every activation, ahead of its reconciles (#1599).
+    var onAppActivated: @MainActor (AppActivation) -> Void = { _ in }
     /// Fired when a pid joins an idle `pendingRemovalRecheck`
     /// (#1157); the core schedules the follow-up reconcile that
     /// drains it (`scheduleRemovalRecheck`).

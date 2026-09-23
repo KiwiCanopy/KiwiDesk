@@ -92,7 +92,7 @@
   "app_rules.remove_override.help": "Remover as regras efetivas de espaço e flutuação deste perfil para este app",
   "app_rules.remove_pattern": "Remover o padrão de título",
   "app_rules.section.caption": "O que um app deve fazer ao abrir. Um app que fica lado a lado precisa de um espaço para abrir.",
-  "app_rules.section.help": "**%1$@** — as janelas do app vão para esse espaço, em qualquer espaço em que você esteja.\n\n%2$@\n\nOs dois se combinam: uma janela flutuante continua pertencendo ao seu espaço, ela apenas não fica lado a lado dentro dele. Uma janela que o KiwiDesk já lembra mantém o espaço em que esteve por último, qualquer que seja a regra aplicada.",
+  "app_rules.section.help": "**%1$@** — as janelas do app vão para esse espaço, em qualquer espaço em que você esteja, e abrir o app leva você até lá junto com elas.\n\n%2$@\n\nOs dois se combinam: uma janela flutuante continua pertencendo ao seu espaço, ela apenas não fica lado a lado dentro dele. Uma janela que o KiwiDesk já lembra mantém o espaço em que esteve por último, qualquer que seja a regra aplicada.",
   "app_rules.section.help.titles": "A opção “%1$@” procura um fragmento do título de uma janela, então um app pode fazer algumas de suas janelas flutuarem e deixar as outras lado a lado.",
   "app_rules.section.title": "Regras por app",
   "app_rules.space": "Abre em",

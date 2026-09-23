@@ -4576,6 +4576,96 @@ rulings:
   stated there.
 
 
+### Opening an app follows its window into its rule's Space (#1599)
+
+**[Principle]**
+
+:::unreleased
+An app rule files a new window in its Space, and without a
+follow the user stays where they were: they asked for the app
+and it opened somewhere they could not see. **Opening an app is
+a request to use it**, so its window arriving out of sight is
+wrong rather than merely surprising, and the arrival follows it
+— a whole Space switch with the focus, `followSwitch`'s shape,
+because either half alone leaves the user hunting, and because
+no native switch rides along to settle what the switch dropped
+([#1007](https://github.com/KiwiCanopy/KiwiDesk/issues/1007)'s
+hand-off leans on one). A move WITHOUT follow is the opposite
+case: it acts on a window the user is already looking at, so
+its arrival must not take them along, which is what
+`MoveIntentLatch` enforces.
+
+**The discrimination is the feature**, and following the wrong
+arrivals is worse than following none. A background app's
+spawned window, the windows macOS reopens at login, the ones
+KiwiDesk adopts at boot, the ones a Desktop switch reveals and
+a new tab are all window creations with an app rule behind them,
+and none of them is the user opening the app. What separates
+them, measured on device, is an OPEN the user caused:
+
+- **A press within a second.** A Dock click activated the
+  launching app 0.29 s after the press and a Spotlight Return
+  0.35 s after it; a login restore's activation came 15 s after
+  the password, and a scripted launch 17 s or more after the
+  last press. The read is the HID state's last click or
+  key-down, which needs no permission.
+- **An app with nothing showing.** A press alone is not a
+  cause — anyone typing has pressed a key in the last second,
+  and an app that brings itself forward then, or a plain switch
+  into a running app, would take the user along to wherever its
+  rule points. So the app must be OPENING: a process that just
+  started (measured at most 0.3 s before its activation), or a
+  running app showing no window at all — a reopen after its
+  last window closed, an un-minimize. Reopen and restore are
+  opens by owner ruling (2026-09-23): the rule already moves
+  those windows to its Space, and moving a window without the
+  user is the worst of the three outcomes — it vanishes from
+  where they are. A running app still showing a window — a
+  switch into it, its own call window, ⌘T — owes nothing. The
+  boot scan involves no activation at all.
+- **Either order.** A reopen can show its window BEFORE macOS
+  reports the app active (Telegram, on device), so a
+  rule-placed window arriving with nothing owed is kept for the
+  activation that follows, which pays it — only where the
+  window arrived AFTER the press, so an older window is never
+  mistaken for the one the press opened.
+- **No Desktop switch around it.** The arriving Desktop's app
+  activates 0.3–0.9 s after a switch, inside the press grace
+  when the switch was a key press, so an activation inside
+  twice the switch settle owes nothing, and a switch retires a
+  standing debt.
+- **Open or Focus owes it outright where it opens something.**
+  The verb is the user naming the app, so a launch — or a pull
+  of a running app with nothing up — owes the follow whatever
+  the press timing (from the CLI there is none), and the app's
+  own activation that follows keeps the debt rather than
+  retiring it, since it is that launch completing. A pull of an
+  app already showing a window opens nothing, so it owes
+  nothing, and a ⌘N moments later stays where the rule files it.
+
+The debt is keyed by the app's bundle id and paid by its
+window's ARRIVAL, never at the activation, because the window
+does not exist yet — and Open or Focus owes it before the
+process does. It is paid once and retired by ANOTHER app's
+activation (the user moved on), and it is bounded at the
+follow's own bound PLUS one adoption-heal period: a fresh
+launch's first window is routinely adopted by the heal rather
+than its create notification, and was measured landing 6.3 s
+after the activation. **Only the rule's own verdict pays it**:
+a window with a remembered Space, one re-homed to the screen it
+landed on, or one the rule files in the Space the user is
+already in is no launch to follow, and a transient overlay (a
+splash, a panel) never spends the debt, so the window behind it
+still can.
+
+There is no setting and no same-screen narrowing. A user who
+pins an app to a Space has already said where they want it, a
+per-app follow flag is the third facet the App Rules row was
+redesigned to remove, and a follow onto another screen is the
+same request — the window went there, and the focus goes with
+it. A setting is owed only when a user asks for one.
+:::
+
 ### A Desktop switch is not a close (#1207)
 
 **[Principle]**

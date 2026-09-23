@@ -26,6 +26,8 @@ extension KiwiCore {
         frontmostPIDProvider = frontmost
         // The focus-report gate reads the same chain (#1322).
         eventLoop.frontmostPID = frontmost
+        // The launch follow's press read (#1599).
+        launchFollow.pressAge = { KiwiCore.secondsSinceUserPress() }
         // The wake payment's fallback seed reads the one trusted
         // frontmost chain (#442/#1130).
         trustedFrontmostProvider = { [weak self] in

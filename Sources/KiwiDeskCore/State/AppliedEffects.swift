@@ -27,6 +27,11 @@ public struct AppliedEffects: Sendable {
     /// (`ArrivalScreenHomeTests`, #1010).
     var rehomedToScreenSpace: SpaceID?
 
+    /// The Space the create's app rule chose, when it is not the
+    /// active one — the launch follow's one input from the fold
+    /// (#1599, `LaunchFollowTests`).
+    var placedByAppRule: SpaceID?
+
     /// Whether the create paid a Desktop return's owed focus
     /// (`ReturningFocusFoldTests`, #1207).
     var paidReturningFocus = false

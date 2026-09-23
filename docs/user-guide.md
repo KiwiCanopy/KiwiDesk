@@ -315,6 +315,11 @@ the bare wallpaper. A new window, and a global sticky window,
 appear on that monitor's space. Clicking the menu bar or the Dock
 does not move focus.
 
+:::unreleased
+Opening an app whose [app rule](#app-rules) names a space on
+another monitor moves the focus there with its window.
+:::
+
 ## Gaps & Borders
 
 ### Shared by all borders

@@ -250,6 +250,39 @@ editing here:
   any one of them leaves `FollowFocusIntentTests` fully green
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
+- **Opening an app follows its window into its app rule's Space,
+  and only an OPEN owes it (#1599).** The debt is
+  `LaunchFollowIntent`, keyed by the app's bundle id because the
+  window does not exist when it is owed, and owed through the
+  one `oweLaunchFollow` door: by Open or Focus, and by
+  `noteAppActivation` for an activation within `pressGrace` of a
+  click or key-down, of a process started within `launchGrace`
+  or showing no window (a reopen, an un-minimize — owner ruling
+  2026-09-23), outside a Desktop switch — never on "the app is
+  active" or "a press just happened" alone, which the boot scan,
+  a switch's arriving app and any app that activates while the
+  user types satisfy (the measurements are
+  `docs/design-decisions.md` ▸ *Opening an app follows its
+  window into its rule's Space*). The fold's only input is
+  `AppliedEffects.placedByAppRule`, set where the RULE chose a
+  Space other than the active one; the arrival arm CLAIMS and
+  pays with `followSwitch` IN PLACE of its own event retile — a
+  whole switch, settle included, since no native switch rides
+  along, and never after that retile, which parks the new window
+  for the switch to bring back (`LaunchFollowSeamTests` ▸
+  `paidInPlaceOfTheArrivalRetile`). A window that lands BEFORE
+  its app's activation is noted as the ledger's one placement and
+  paid by that activation, only where it arrived after the press
+  (`LaunchFollowReopenTests`). Open or Focus owes only where
+  nothing of the app is up; one already showing is merely
+  focused. A new route that should follow an open owes through
+  that door, and a new moment that is "not an open" retires
+  through `forget(` beside the two there — `LaunchFollowSeamTests`
+  counts them, since both seams default inert and a lost wiring
+  turns the feature off with `LaunchFollowTests` green. Its bound
+  is derived from `FollowFocusIntent.drainWindow` plus one
+  adoption-heal period and must stay above the measured heal
+  latency (`LaunchFollowIntentTests` ▸ `boundCoversTheHeal`).
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves
   `Space.focused` down the departing windows to nil — or onto a
