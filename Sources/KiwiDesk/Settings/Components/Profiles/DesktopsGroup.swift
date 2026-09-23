@@ -10,7 +10,25 @@ import SwiftUI
 /// dim (#815).
 struct DesktopsGroup: View {
     @ObservedObject var model: SettingsModel
-    @State private var expanded = true
+    @State private var expanded: Bool
+
+    init(model: SettingsModel) {
+        self.model = model
+        _expanded = State(
+            initialValue: Self.startsExpanded(
+                bindings: model.config.profileBindings
+            )
+        )
+    }
+
+    /// The card opens on what the user has set: collapsed while no
+    /// Desktop holds a binding — every Desktop still draws a row —
+    /// open once one does (owner, 2026-09-24).
+    static func startsExpanded(
+        bindings: [DesktopKey: DesktopBinding]
+    ) -> Bool {
+        !bindings.isEmpty
+    }
     /// The picker a screen-setup row's add or removal hands
     /// focus to (#1609).
     @FocusState var focusedSlot: BindingFocus?

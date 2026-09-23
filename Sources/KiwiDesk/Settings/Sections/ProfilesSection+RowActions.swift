@@ -72,12 +72,25 @@ extension ProfilesSection {
         Button {
             model.makeDefault(named: summary.name)
         } label: {
-            Text(L("profiles.make_default", "make default"))
+            Text(makeDefaultTitle(summary.count))
                 .underline()
         }
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
         .disabled(summary.isDormant)
+    }
+
+    /// A default is per screen count, so the link names its count
+    /// — the number last, as the badge beside it does (owner,
+    /// 2026-09-24).
+    func makeDefaultTitle(_ count: Int) -> String {
+        count == 1
+            ? L("profiles.make_default.one", "make default for 1 screen")
+            : L(
+                "profiles.make_default.many",
+                "make default for %1$d screens",
+                count
+            )
     }
 }
