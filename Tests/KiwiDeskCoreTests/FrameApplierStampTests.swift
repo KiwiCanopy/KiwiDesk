@@ -52,8 +52,8 @@ struct FrameApplierStampTests {
     @Test("The grace is measured on the injected clock")
     func graceRunsOnTheInjectedClock() {
         let applier = makeApplier()
-        // Locked, not captured: the applier's post-set stamp reads
-        // the clock on the AX queue while this test moves it.
+        // Locked, not captured: `clock` is `@Sendable`, and
+        // production reads it off the main actor.
         let now = OSAllocatedUnfairLock<TimeInterval>(initialState: 100)
         applier.clock = { now.withLock { $0 } }
         applier.applyInstant(

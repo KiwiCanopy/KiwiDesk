@@ -170,11 +170,9 @@ struct WarningRatchetWorkflowTests {
             .map { String(words[$0 + 1]) }
     }
 
-    /// The test steps compile `Tests/` under the Build step's
-    /// flags VERBATIM (#1596): a test-only warning must red, and
-    /// SwiftPM keys its build directory on the flags, so any
-    /// difference rebuilds the package between the two steps.
-    /// Read off the Build step rather than restated, so a flag
+    /// The test steps pass the Build step's `-Xswiftc` arguments
+    /// (#1596; the argument is packaging-and-release.md's). Read
+    /// off the Build step rather than restated, so an argument
     /// added there is owed here too.
     @Test("The test steps ratchet with the Build step's flags")
     func testStepsTakeTheBuildFlags() throws {
@@ -247,6 +245,35 @@ struct WarningRatchetWorkflowTests {
             the call (#1170), or the ratchet stops seeing every \
             future deprecation.
             """
+        )
+    }
+
+    /// The `verify-gate` skill's local check is the fourth copy
+    /// of these arguments, and the one a developer runs: out of
+    /// step, a green local check precedes a red PR — the gap it
+    /// exists to close (#1596).
+    @Test("The skill's local ratchet check matches the Build step")
+    func skillCheckMatchesTheBuildStep() throws {
+        let skill = try String(
+            contentsOf: scriptFixtureRepoRoot()
+                .appendingPathComponent(
+                    ".claude/skills/verify-gate/SKILL.md"
+                ),
+            encoding: .utf8
+        )
+        // Odd pieces are the fenced blocks; the prose around them
+        // names the flag too.
+        let fenced = skill.components(separatedBy: "```")
+            .enumerated().filter { $0.offset % 2 == 1 }.map(\.element)
+        let check = try #require(
+            fenced.first { $0.contains("-warnings-as-errors") },
+            "the skill no longer shows the ratchet check"
+        )
+        #expect(check.contains("--build-tests"))
+        #expect(
+            Self.ratchetFlags(in: check)
+                == Self.ratchetFlags(in: try debugBuildStep()),
+            "the skill's ratchet check has drifted from ci.yml"
         )
     }
 }

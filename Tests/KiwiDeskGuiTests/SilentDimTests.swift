@@ -177,11 +177,9 @@ struct SilentDimTests {
     /// `keybindingRowStyle(inherited:)` calls a bare `opacity(`
     /// inside a `View` extension — the first cut required the
     /// dot and silently missed one of the three dimmers this
-    /// suite was written for. The receiver is NOT read: a
-    /// COLOUR's alpha matches the shape too, and is listed in
-    /// `allowed` rather than excluded, since a receiver test let
-    /// a real dim hide behind a tinted fill (`FollowsMainTray`'s
-    /// entry carries the case).
+    /// suite was written for. The receiver is not read: a
+    /// COLOUR's alpha matches the shape too and is listed in
+    /// `allowed` (`FollowsMainTray`'s entry).
     private func dimmingOpacity(in source: String) -> Bool {
         var scanned = Substring(source)
         while let call = scanned.range(of: "opacity(") {
