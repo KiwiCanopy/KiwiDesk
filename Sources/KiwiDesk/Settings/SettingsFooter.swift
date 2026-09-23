@@ -187,10 +187,10 @@ struct SettingsFooter: View {
         L(
             "footer.save_copy_as.message",
             "Duplicates \u{201C}%1$@\u{201D} with your "
-                + "pending edits — monitor sets and shortcut "
-                + "overrides included. The copy becomes the "
-                + "edit target; the running layout is not "
-                + "changed.",
+                + "pending edits and shortcut overrides; the copy "
+                + "takes a screen setup the first time you load "
+                + "it. The copy becomes the edit target; the "
+                + "running layout is not changed.",
             model.editingProfile ?? ""
         )
     }

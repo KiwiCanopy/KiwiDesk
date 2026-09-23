@@ -109,8 +109,7 @@ extension KiwiCore {
         // Adopt the pins of the set covering the live monitors
         // (none when the profile loads dirty on other hardware)
         // and the profile-wide Main role.
-        let live = state.workspaces.allDisplays
-            .map(\.fingerprint)
+        let live = liveFingerprints
         let fitting = profile.set(matching: live)
         let fits = fitting != nil
         spacePins = fitting?.spaceMonitorMap ?? [:]

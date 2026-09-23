@@ -7358,8 +7358,8 @@ things that are load-bearing rather than incidental:
 
 - *Ahead of the two profile verbs only.* `.saveLua` and
   `.updateStoredProfile` write no monitor set either, so they were
-  never blocked and must not be rerouted. **Save a copy…** stays
-  unconditionally gated — a copy always captures the live set.
+  never blocked and must not be rerouted. **Save as new profile…**
+  on Live stays unconditionally gated — it captures the live set.
 - *Its own narrow method.* Routing through `persist(named:)` would
   drag in a "Saving failed" message naming a profile the save
   never touched.
@@ -11228,36 +11228,51 @@ routes or selects the profile itself.
 
 **[Principle]**
 
-**A screen combination belongs to one profile: the one most
-recently stored or loaded with it
+:::unreleased
+**A monitor set belongs to one profile: the one most recently
+stored or loaded with it
 ([#1530](https://github.com/KiwiCanopy/KiwiDesk/issues/1530)).**
 Matching picks the first profile, alphabetically, that holds the
-connected combination, so two profiles holding the same one load
-the wrong profile half the time. The fix is to have one owner, not
-to pick more carefully between two. A save of the live arrangement,
-a load and a create each hand the combination to that profile and
-take it from every other profile of the same screen count, without
-a warning. The Profiles page shows each profile's combinations, so
-you can see where one went. Resolving by a recency stamp was
-refused, because it hides the state that page exists to show.
-Three consequences follow:
-- **Boot never takes a combination.** Two hand-edited files that
-  hold the same one still resolve as before, and the next save or
-  load settles it, so a start-up cannot rewrite files you did not
-  touch.
-- **A profile that loses its last combination goes *dormant*
-  rather than being deleted.** It keeps its screen count (the file
-  carries `monitor_count`), is never matched automatically, still
-  loads by hand, and takes a combination back on its next save or
-  load. This amends #36's "zero entries is invalid". If it was the
-  default for its count, the flag moves to the profile that took
-  the combination, because a count's default must be a profile that
-  can load. A copy made with **Save a copy…** starts dormant too:
-  copying the source's combinations would give each of them two
-  owners.
+connected monitor set, so of two profiles holding the same one the
+same one always wins, whichever you saved or loaded last. The fix
+is one owner, not a better tie-break. A save of the live
+arrangement, a create, a load of a profile saved for as many
+screens, and the Profiles page's **+** each hand the set to that
+profile and take it from every other of the same screen count,
+without asking. The page shows each profile's screen setups, so you
+can see where one went. Resolving by a recency stamp was refused,
+because it hides the state that page exists to show. The
+consequences:
+- **Boot, a monitor change and a Desktop binding never take a
+  set.** Two hand-edited files holding the same one still resolve
+  as before, and the next save or load settles it, so a start-up
+  cannot rewrite files you did not touch. A binding picks a
+  profile and owns no screens (#1436), so a bound profile that
+  lost the set loads dirty.
+- **A set changing hands keeps its pins.** It arrives with the
+  pins its previous owner held for the Spaces the new owner
+  declares, so a round trip does not lose them.
+- **A profile that loses its last set goes *dormant* rather than
+  being deleted.** It keeps its screen count (the file carries
+  `monitor_count`), is never picked by the exact-match or
+  count-default rungs, still loads by hand or through a Desktop
+  binding, and takes a set back on its next load. This amends
+  [#36](https://github.com/KiwiCanopy/KiwiDesk/issues/36)'s ruling
+  that a profile with zero valid monitor sets is invalid. A
+  count's default must be a profile that can load: a dormant
+  default hands its flag to the profile that took its set, **make
+  default** refuses a dormant profile, and a deleted default's heir
+  is never one. A copy made with **Save as new profile…** while
+  editing a stored profile starts dormant too, because copying the
+  source's sets would give each of them two owners.
+- **Taking the connected set away from the loaded profile marks it
+  unsaved.** No apply runs on a pick, so the pick re-judges the
+  #36 fit itself. The loaded profile's next save takes the set
+  back.
 - **`save_profile` and `load_profile` name what they took, and
   why.** A scripted save that changes another file must not do it
   silently.
+:::
 
 **[Principle]**
 

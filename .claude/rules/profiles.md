@@ -644,7 +644,7 @@ already-merged values (the `AppBarStyle.resolved…` pattern).
 Resolution runs before layout math so the layout functions stay
 pure over the flat array.
 
-## A screen combination has one owner (#1530)
+## A monitor set has one owner (#1530)
 
 A monitor set belongs to the profile most recently stored or
 loaded with it. The obligations:
@@ -652,18 +652,24 @@ loaded with it. The obligations:
 - **Claim only at the ruled doors.** A save or create of the live
   arrangement (through `saveProfile`'s tail), an explicit load
   (`loadProfile`) and the Profiles page's pick (`claimMonitorSet`)
-  hand the set over and strip it from same-count siblings; each
-  goes through `ProfileManager.claim`. Boot and monitor-change
-  matching never claim, because a claim there rewrites files the
-  user did not touch. `MonitorSetClaimSeamTests` holds the one home
-  and the save door's tail.
+  hand the set over and strip it from same-count siblings, the
+  load and the pick through the one `handOver`, which carries the
+  previous owner's pins; each strip goes through
+  `ProfileManager.claim`. Boot, monitor-change matching and a
+  Desktop binding's load never claim, because a claim there
+  rewrites files the user did not touch — so a new caller of a
+  claiming door registers in `MonitorSetClaimSeamTests`' census
+  with its reason, and one on those paths is refused.
 - **Treat a profile with no set as dormant, never as invalid.** It
-  keeps its count in `monitor_count`, matching skips it, and a
-  dormant default hands its flag on inside `claim`. A new reader
-  that judges "is this profile for these screens" takes
-  `monitorCount` and `isDormant` rather than
-  `monitorSets.first`. The argument is `docs/design-decisions.md`
-  ▸ *A screen combination belongs to one profile*.
+  keeps its count in `monitor_count` and is never a count's
+  default: a reader asking for a fallback takes
+  `Profile.isUsableDefault`, a reader judging "is this profile for
+  these screens" takes `monitorCount` and `isDormant` rather than
+  `monitorSets.first`, and a writer of the default flag refuses a
+  dormant profile (`MonitorSetDormantTests`,
+  `MonitorSetHandOverTests`). The argument is
+  `docs/design-decisions.md` ▸ *A monitor set belongs to one
+  profile*.
 
 ## The two profile writes mean different things (#1179)
 

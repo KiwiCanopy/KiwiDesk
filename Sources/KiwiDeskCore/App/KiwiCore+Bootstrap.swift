@@ -179,8 +179,7 @@ extension KiwiCore {
             self?.restoreAndSettleAfterWake(snapshot)
         }
         sleepWake.displayFingerprints = { [weak self] in
-            self?.state.workspaces.allDisplays
-                .map(\.fingerprint) ?? []
+            self?.liveFingerprints ?? []
         }
         sleepWake.sessionPresence = { .live() }
     }

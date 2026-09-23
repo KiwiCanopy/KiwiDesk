@@ -263,7 +263,7 @@ exports nothing.
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name (updates in place when it exists; see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
-| | `load_profile` | name |
+| | `load_profile` | name (see [Profile Monitor Sets](lua-reference.md#profile-monitor-sets)) |
 | | `delete_profile` | name |
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |

@@ -27,7 +27,7 @@ extension KiwiCore {
         // `MonitorChangeSpaceResolveTests` pins that a second
         // immediate resolve is a no-op.
         defer { resolveSpaceDisplays() }
-        let fingerprints = displays.map(\.fingerprint)
+        let fingerprints = liveFingerprints
 
         // A native-Space binding wins over matching (#7); a
         // binding that fails to load, or is for another screen

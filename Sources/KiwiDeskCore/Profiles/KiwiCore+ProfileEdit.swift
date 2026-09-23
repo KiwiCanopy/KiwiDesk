@@ -143,8 +143,7 @@ extension KiwiCore {
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.
         }
-        let live = state.workspaces.allDisplays
-            .map(\.fingerprint)
+        let live = liveFingerprints
         if profile.set(matching: live) != nil {
             profile.upsert(
                 MonitorSet(

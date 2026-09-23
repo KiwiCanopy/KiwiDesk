@@ -41,13 +41,11 @@ extension ProfilesSection {
             ? L(
                 "profiles.sets.dormant_default",
                 "No screen setup yet, so it isn't loaded as the "
-                    + "default — it takes one when you load or "
-                    + "save it."
+                    + "default — it takes one when you load it."
             )
             : L(
                 "profiles.sets.dormant",
-                "No screen setup yet — takes one when you load or "
-                    + "save it."
+                "No screen setup yet — takes one when you load it."
             )
     }
 
@@ -190,7 +188,7 @@ extension ProfilesSection {
         .fixedSize()
         .neutralMenuLabel()
         .iconButtonAffordance(
-            L("profiles.sets.add.help", "Add a screen setup")
+            L("profiles.sets.move.help", "Move a screen setup here")
         )
         .accessibilityValue(
             L(
@@ -201,7 +199,7 @@ extension ProfilesSection {
         )
     }
 
-    private func choiceDetail(_ choice: ScreenSetupChoice) -> String {
+    private func choiceDetail(_ choice: ClaimableMonitorSet) -> String {
         switch (choice.isConnected, choice.owner) {
         case (true, let owner?):
             return L(

@@ -5,7 +5,7 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case profilesLoad = "(action) profiles.load"
     case profilesDelete = "(action) profiles.delete"
     case profilesRename = "(action) profiles.rename"
-    case profilesAddScreenSetup = "(action) profiles.sets.add"
+    case profilesAddScreenSetup = "(action) profiles.sets.move"
     case isDefault = "profile.isDefault"
     case isStarterSetup = "profile.isStarterSetup"
     case presetsApply = "(action) presets.apply"
@@ -62,7 +62,7 @@ extension ProfilesKey {
         case .isDefault:
             return .text("profiles.make_default")
         case .profilesAddScreenSetup:
-            return .text("profiles.sets.add.help")
+            return .text("profiles.sets.move.help")
         case .isStarterSetup:
             return .none
         case .presetsApply:

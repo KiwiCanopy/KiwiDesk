@@ -141,11 +141,7 @@ extension KiwiCore {
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop).
     func liveMonitorSet() -> MonitorSet {
-        MonitorSet(
-            monitors: state.workspaces.allDisplays
-                .map(\.fingerprint),
-            spaceMonitorMap: spacePins
-        )
+        MonitorSet(monitors: liveFingerprints, spaceMonitorMap: spacePins)
     }
 
     /// Snapshot of the current configuration as a new profile

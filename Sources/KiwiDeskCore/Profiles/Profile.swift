@@ -7,12 +7,15 @@ public struct Profile: Codable, Sendable, Equatable {
     /// (#1020), 3 since the retired `resize.feedback` drop
     /// (#1255), 4 since the absent Liquid Glass leaves' fill
     /// (#1369), 5 since the track limit counts the overflow
-    /// track (#1354). The bump is what RUNS a step: `needsMigration`
+    /// track (#1354), 6 since a dormant profile holds no set
+    /// beside its `monitor_count` (#1530) — no step: an older
+    /// reader refuses the shape, and the stamp says why. The bump
+    /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 5
+    public static let currentFormat = 6
 
     public var format: Int
     public var name: String
@@ -62,6 +65,10 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Holds no monitor combination: never auto-matched, loadable
     /// by hand, re-claiming a set on its next save or load (#1530).
     public var isDormant: Bool { monitorSets.isEmpty }
+
+    /// Is its screen count's default AND can load as one: a
+    /// dormant profile is never a count's fallback (#1530).
+    public var isUsableDefault: Bool { isDefault && !isDormant }
 
     enum CodingKeys: String, CodingKey {
         case format

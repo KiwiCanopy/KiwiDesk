@@ -27,8 +27,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 7 = the track limit lifted to count the overflow track
     /// (#1354), on `[Profile]` alone again;
     /// 8 = a Desktop binding's per-count profile list (#1436),
-    /// which reaches a bundle the way 4 did.
-    public static let currentFormat = 8
+    /// which reaches a bundle the way 4 did;
+    /// 9 = a dormant profile, a `[Profile]` entry with no monitor
+    /// set beside its `monitor_count` (#1530).
+    public static let currentFormat = 9
 
     public let format: Int
 

@@ -569,11 +569,6 @@ next loads. **Save a copy…** while editing a stored profile
 duplicates it with your pending edits, without touching the
 running layout.
 
-:::unreleased
-The copy starts with no screen setup of its own and takes one the
-first time you load or save it.
-:::
-
 ### Saving
 
 **Save** writes to the current target and adds or refreshes the
@@ -584,10 +579,9 @@ row. On a temporary layout or a built-in Standard the slot reads
 **Save as New Profile…**.
 
 :::unreleased
-Saving or loading a profile moves the connected screen setup to it
-from any other profile, so the next time these screens connect,
-this profile loads. The Profiles page shows the setups each profile
-holds.
+Saving the running layout, or loading a profile saved for this many
+screens, moves the connected screen setup to that profile from any
+other, so the next time these screens connect, it loads.
 :::
 
 While management is **paused** (Accessibility off), KiwiDesk

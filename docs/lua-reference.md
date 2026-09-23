@@ -4435,12 +4435,17 @@ end)
   keybinding override).
 - `load_profile` switches to the named profile and makes its space
   list the authority (see *Space Reconciliation*).
-- Both hand the connected screen combination to that profile (see
-  [Profile Monitor Sets](#profile-monitor-sets)).
 - `delete_profile` removes the profile; deleting the last profile of
   a count reverts that count to its built-in Standard.
 - `set_default_profile` marks a profile as the fallback for its
   monitor count.
+
+:::unreleased
+`save_profile` and `load_profile` also hand the connected monitor
+set to that profile, and `set_default_profile` refuses a profile
+that holds no set (see [Profile Monitor
+Sets](#profile-monitor-sets)).
+:::
 
 **Example:**
 
@@ -4576,7 +4581,7 @@ The record is per session and is not written to disk.
 
 ### Profile Monitor Sets
 
-A profile covers one or more concrete **monitor sets** — each a list
+A profile covers concrete **monitor sets** of one screen count — each a list
 of monitor fingerprints plus the space→monitor pins valid for that
 arrangement. Updating a profile while a new combination is connected
 teaches it that combination. When displays change, KiwiDesk resolves
@@ -4614,17 +4619,20 @@ update the profile on this hardware or return to a covered set.
 
 :::unreleased
 A monitor set belongs to one profile. `save_profile`, `load_profile`
-and creating a profile add the connected set to that profile when
-its screen count fits, and remove the set from every other profile
-with that count. The command then answers with the names that lost
-it and why: `{"takenFrom": ["Work"], "reason": "…"}`. Start-up
-never removes a set, so two hand-edited profiles that hold the same
-set still resolve as before. A profile left with no set is
-*dormant*: its file keeps `"monitor_sets": []` beside
-`"monitor_count"`, it is never matched automatically, it still
-loads by name, and it takes a set back on its next save or load. A
-dormant profile that was its count's default hands the flag to the
-profile that took its set.
+of a profile saved for as many screens, and creating a profile hand
+the connected set to that profile and remove it from every other
+profile with that count; the set keeps the pins its previous owner
+held for the Spaces the new owner declares. When that took the set
+from another profile, the command returns the names and why:
+`{"taken_from": ["Work"], "reason": "…"}`; otherwise it returns
+nothing. Start-up, a monitor change and a Desktop binding never
+move a set, so two hand-edited profiles that hold the same set
+still resolve as before. A profile left with no set is *dormant*:
+its file keeps `"monitor_sets": []` beside `"monitor_count"`, it is
+never picked by its screens (a Desktop binding still loads it), it
+still loads by name, and it takes a set back on its next load. A
+dormant profile loses its default flag; the profile that took its
+set becomes the default unless the count already has another.
 :::
 
 ### Profile JSON Format

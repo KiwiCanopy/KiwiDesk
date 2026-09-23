@@ -180,9 +180,15 @@ struct MonitorSetClaimTests {
         try core.persistProfile(named: "Work", modes: nil)
         connect(core, ["B"])
         try core.persistProfile(named: "Home", modes: nil)
+        // Home's own connected B is not offered; Work's A is.
         #expect(
-            core.claimableMonitorSets(for: "Home")
-                == [["A:100x100"], ["B:100x100"]]
+            core.claimableMonitorSets(for: "Home") == [
+                ClaimableMonitorSet(
+                    monitors: ["A:100x100"],
+                    owner: "Work",
+                    isConnected: false
+                )
+            ]
         )
         let released = try core.claimMonitorSet(
             ["A:100x100"],
@@ -215,7 +221,7 @@ struct MonitorSetClaimTests {
             Issue.record("no payload: \(second)")
             return
         }
-        #expect(payload["takenFrom"] == .array([.string("Work")]))
+        #expect(payload["taken_from"] == .array([.string("Work")]))
         #expect(payload["reason"]?.stringValue?.isEmpty == false)
         let load = core.execute(
             "load_profile",
@@ -225,6 +231,6 @@ struct MonitorSetClaimTests {
             Issue.record("no payload: \(load)")
             return
         }
-        #expect(back["takenFrom"] == .array([.string("Home")]))
+        #expect(back["taken_from"] == .array([.string("Home")]))
     }
 }

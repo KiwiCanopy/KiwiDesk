@@ -15,7 +15,7 @@ extension ProfileManager {
             return .exact(exact)
         }
         if let fallback = profiles.first(where: {
-            $0.isDefault && !$0.isDormant
+            $0.isUsableDefault
                 && $0.monitorCount == fingerprints.count
         }) {
             return .countDefault(fallback)
@@ -28,8 +28,7 @@ extension ProfileManager {
     /// auto-matched, so it is never the default either (#1530).
     public func defaultProfile(count: Int) -> Profile? {
         allProfiles().first {
-            $0.isDefault && !$0.isDormant
-                && $0.monitorCount == count
+            $0.isUsableDefault && $0.monitorCount == count
         }
     }
 
@@ -38,7 +37,7 @@ extension ProfileManager {
     public func duplicateDefaultCounts() -> [Int] {
         var counts: [Int: Int] = [:]
         for profile in allProfiles()
-        where profile.isDefault && !profile.isDormant {
+        where profile.isUsableDefault {
             counts[profile.monitorCount, default: 0] += 1
         }
         return counts.filter { $0.value > 1 }.keys.sorted()

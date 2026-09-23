@@ -144,7 +144,7 @@ struct ProfilesSection: View {
             }
             Spacer()
             if !summary.isDefault {
-                makeDefaultLink(summary.name)
+                makeDefaultLink(summary)
             }
             loadButton(summary)
             deleteButton(summary.name)
@@ -191,15 +191,9 @@ struct ProfilesSection: View {
     }
 
     /// A default is per screen count, so the badge says which
-    /// (#1530).
+    /// (#1530) — the count last, behind a label (localization.md).
     private func defaultBadge(_ count: Int) -> String {
-        count == 1
-            ? L("profiles.badge.default_for.one", "default for 1 screen")
-            : L(
-                "profiles.badge.default_for.many",
-                "default for %1$d screens",
-                count
-            )
+        L("profiles.badge.default_for", "default · screens: %1$d", count)
     }
 
     /// Warning shown when multiple profiles share a default flag for count.

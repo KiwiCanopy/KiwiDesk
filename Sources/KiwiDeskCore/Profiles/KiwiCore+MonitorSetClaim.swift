@@ -1,17 +1,27 @@
 import Foundation
 
-/// The doors through which a profile claims a monitor combination
+/// A monitor set another profile could take (#1530): its
+/// monitors, the profile holding it now, and whether it is the
+/// connected one.
+public struct ClaimableMonitorSet: Equatable, Sendable {
+    public let monitors: [String]
+    public let owner: String?
+    public let isConnected: Bool
+}
+
+/// The doors through which a profile claims a monitor set
 /// (#1530): a save or create of the live arrangement, a load, and
-/// the Profiles page's pick. Boot and monitor-change matching
-/// never claim.
+/// the Profiles page's pick. Boot, monitor-change matching and a
+/// Desktop binding's load never claim.
 extension KiwiCore {
-    /// The connected monitors' fingerprints.
+    /// The connected monitors' fingerprints — the one reading of
+    /// the live set every profile door takes.
     var liveFingerprints: [String] {
         state.workspaces.allDisplays.map(\.fingerprint)
     }
 
-    /// Strips the connected combination from every other profile
-    /// of its count when `profile` holds it — `saveProfile`'s tail.
+    /// Strips the connected set from every other profile of its
+    /// count when `profile` holds it — `saveProfile`'s tail.
     func claimLiveSet(heldBy profile: Profile) throws -> [String] {
         let live = liveFingerprints
         guard !live.isEmpty, profile.set(matching: live) != nil
@@ -19,23 +29,45 @@ extension KiwiCore {
         return try profiles.claim(live, for: profile.name)
     }
 
+    /// Hands `monitors` to `profile` — the load's and the pick's
+    /// one hand-over. A set the profile does not hold yet arrives
+    /// with its current owner's pins for the Spaces `profile`
+    /// declares, so a round trip keeps them.
+    private func handOver(
+        _ monitors: [String],
+        to profile: inout Profile
+    ) throws -> [String] {
+        if profile.set(matching: monitors) == nil {
+            let declared = profile.declaredSpaces
+            let pins =
+                profiles.allProfiles()
+                .first { $0.set(matching: monitors) != nil }?
+                .set(matching: monitors)?.spaceMonitorMap ?? [:]
+            profile.upsert(
+                MonitorSet(
+                    monitors: monitors,
+                    spaceMonitorMap: pins.filter {
+                        declared.contains($0.key)
+                    }
+                )
+            )
+            try profiles.write(profile)
+        }
+        return try profiles.claim(monitors, for: profile.name)
+    }
+
     /// Loads `name` explicitly — `load_profile`, Switch Profile —
-    /// and, where its screen count fits, adds the connected
-    /// combination to it and strips it from the others first, so
-    /// the load sticks at the next monitor change. A profile for
-    /// another count loads dirty, claiming nothing (#36). Returns
-    /// the profiles that lost the combination.
+    /// and, where its screen count fits, hands it the connected
+    /// set first, so the load sticks at the next monitor change. A
+    /// profile for another count loads dirty, claiming nothing
+    /// (#36). Returns the profiles that lost the set.
     @discardableResult
     public func loadProfile(named name: String) throws -> [String] {
         var profile = try profiles.read(name: name)
         let live = liveFingerprints
         var released: [String] = []
         if !live.isEmpty, profile.monitorCount == live.count {
-            if profile.set(matching: live) == nil {
-                profile.upsert(MonitorSet(monitors: live))
-                try profiles.write(profile)
-            }
-            released = try profiles.claim(live, for: name)
+            released = try handOver(live, to: &profile)
         }
         // Explicit user load: the profile's spaces become
         // authoritative — stale spaces are pruned and their
@@ -48,12 +80,14 @@ extension KiwiCore {
         return released
     }
 
-    /// Gives the combination `monitors` to `name` — the Profiles
-    /// page's pick, stripped from its previous owner without a
-    /// warning (ruled). Pins travel from that owner for the Spaces
-    /// `name` declares. Live state is untouched: the pick decides
-    /// the next match, not what is on screen. Returns the profiles
-    /// that lost it.
+    /// Gives `monitors` to `name` — the Profiles page's pick,
+    /// taken from its previous owner without a warning (ruled).
+    /// Returns the profiles that lost it.
+    ///
+    /// No apply runs, so where the pick is the CONNECTED set the
+    /// live profile's #36 fit is re-judged here: it fits exactly
+    /// when it is the claimant (profiles.md ▸ "Let the apply judge
+    /// the #36 fit" — a caller whose verdict differs says why).
     @discardableResult
     public func claimMonitorSet(
         _ monitors: [String],
@@ -66,45 +100,57 @@ extension KiwiCore {
                 live: monitors.count
             )
         }
-        if profile.set(matching: monitors) == nil {
-            let declared = profile.declaredSpaces
-            let previous =
-                profiles.allProfiles().lazy
-                .compactMap { $0.set(matching: monitors) }
-                .first?.spaceMonitorMap ?? [:]
-            profile.upsert(
-                MonitorSet(
-                    monitors: monitors,
-                    spaceMonitorMap: previous.filter {
-                        declared.contains($0.key)
-                    }
-                )
-            )
-            try profiles.write(profile)
+        let released = try handOver(monitors, to: &profile)
+        if monitors.sorted() == liveFingerprints.sorted(),
+            let current = profiles.currentName
+        {
+            if current == name {
+                profiles.markClean()
+            } else if released.contains(current) {
+                profiles.markDirty()
+            }
         }
-        return try profiles.claim(monitors, for: name)
+        return released
     }
 
-    /// The combinations `name` could claim: every set a profile of
-    /// its screen count holds, plus the connected one where it fits,
-    /// each once, sorted (#1530).
-    public func claimableMonitorSets(for name: String) -> [[String]] {
+    /// The sets `name` could take: every set a profile of its
+    /// screen count holds, plus the connected one where it fits,
+    /// minus its own — the connected one first, then by owner.
+    public func claimableMonitorSets(
+        for name: String
+    ) -> [ClaimableMonitorSet] {
         guard let profile = try? profiles.read(name: name)
         else { return [] }
         let count = profile.monitorCount
-        var sets = Set(
-            profiles.allProfiles()
-                .filter { $0.monitorCount == count }
-                .flatMap { $0.monitorSets.map(\.monitors) }
-        )
+        let peers = profiles.allProfiles().filter {
+            $0.monitorCount == count
+        }
+        var sets = Set(peers.flatMap { $0.monitorSets.map(\.monitors) })
         let live = liveFingerprints.sorted()
         if live.count == count { sets.insert(live) }
-        return sets.sorted { $0.joined() < $1.joined() }
+        let own = Set(profile.monitorSets.map(\.monitors))
+        return sets.subtracting(own)
+            .map { monitors in
+                ClaimableMonitorSet(
+                    monitors: monitors,
+                    owner: peers.first {
+                        $0.set(matching: monitors) != nil
+                    }?.name,
+                    isConnected: monitors == live
+                )
+            }
+            .sorted {
+                if $0.isConnected != $1.isConnected {
+                    return $0.isConnected
+                }
+                return ($0.owner ?? "", $0.monitors.joined())
+                    < ($1.owner ?? "", $1.monitors.joined())
+            }
     }
 
     /// The `save_profile` / `load_profile` answer: plain `ok`, or
-    /// the profiles that lost the connected combination and why,
-    /// so a scripted save is not a silent change to another file.
+    /// the profiles that lost the connected set and why, so a
+    /// scripted save is not a silent change to another file.
     /// English — a machine contract (core-boundaries.md).
     static func claimResponse(
         _ released: [String],
@@ -113,11 +159,11 @@ extension KiwiCore {
         guard !released.isEmpty else { return .ok() }
         return .ok(
             .object([
-                "takenFrom": .array(released.map { .string($0) }),
+                "taken_from": .array(released.map { .string($0) }),
                 "reason": .string(
-                    "The connected screen combination now "
-                        + "belongs to '\(claimant)'; a combination "
-                        + "belongs to one profile."
+                    "The connected monitor set now belongs to "
+                        + "'\(claimant)'; a monitor set belongs to "
+                        + "one profile."
                 ),
             ])
         )

@@ -46,22 +46,23 @@ private func connect(_ core: KiwiCore, _ names: [String]) {
 struct ScreenSetupModelTests {
     @Test("A disconnected screen reads by its name, not its size")
     func disconnectedScreenName() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let model = makeTestModel(core: makeCore())
         #expect(
-            SettingsModel.fingerprintLabel(
-                "Studio Display:2560x1440",
-                sized: false
-            ) == "Studio Display"
+            model.setupLabel(["Studio Display:2560x1440"])
+                == "Studio Display"
         )
         #expect(
-            SettingsModel.fingerprintLabel(
-                "Studio Display:2560x1440",
-                sized: true
-            ) == "Studio Display (2560x1440)"
+            model.setupLabel(["Studio Display:2560x1440"], sized: true)
+                == "Studio Display (2560x1440)"
         )
     }
 
     @Test("Two setups that would read alike keep their sizes")
     func sameNamedSetupsAreSized() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
         let model = makeTestModel(core: makeCore())
         let labels = model.setupLabels([
             ["LG:1920x1080"],
