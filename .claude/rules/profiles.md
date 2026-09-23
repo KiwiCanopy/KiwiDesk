@@ -739,12 +739,40 @@ to are not the same verb. Keep them apart, in both directions:
 draft commit.** Editing a stored profile seeds the draft from
 THAT profile's JSON, so its Save is "update this profile", and
 `saveEditedProfile` re-applies it wholesale through
-`reapplyIfInEffect` when it is the one in effect — every mode
-re-asserted, a standing temporary layout included. Whether that
-is right is a question about what editing the running profile
-means, not about #1179's defect, and it is open on that thread:
-scope this claim to the live target rather than reading it as
-covering all three.
+`reapplyIfInEffect` when it is in effect — every mode
+re-asserted. **Keep the loaded profile off this verb** (#1393):
+a pick of the loaded profile maps to the LIVE target through
+the one `SettingsModel.editTarget(_:loaded:)` (`EditTargetTests`
+▸ `loadedProfileIsLive`), which `reload` re-runs so a Load that
+makes the stored target the loaded one moves the target with
+it. The running profile is then edited as a
+draft and committed as one, and a wholesale re-apply never
+reaches a standing temporary layout from Settings. A second
+door into the loaded profile as a stored target reopens that.
+
+**A Settings Save may write OTHER profiles' files and the shared
+base (#1393).** An App Rules row's "Applies to" checklist
+reaches every profile it names, so a Save on any target writes
+each profile a change reached and `gui.json`'s shared rules.
+Route those writes through the one `KiwiCore.saveRuleReach`,
+which rewrites only the rules a change reached — an untouched
+rule is written back as stored, and a profile no change reached
+is not rewritten (`RuleReachTableTests` ▸
+`untouchedStaysAsStored`, `RuleReachSaveTests` ▸
+`uneditedWritesNothing`) — and call it BEFORE any `gui.json`
+write in the same Save, since that write reloads the config,
+which re-reads the loaded profile's rules. Its profile writes
+stay non-adopting (`ProfileManager.write`), so reaching another
+profile never moves `currentName` (#1249).
+
+**The loaded profile's page holds its RESOLVED rules, so the
+draft is not the sidecar.** On the live target the draft's app
+and float rules are the loaded profile's resolved set — the
+shared ones and its own — so every GUI write of the draft to
+`gui.json` takes `SettingsModel.sidecarConfig`, which swaps the
+shared rules back in, and never `config`: writing `config`
+bakes one profile's own rules into the base every profile
+inherits (`SidecarConfigSeamTests`).
 
 **A global leaf a stored-profile draft keeps LIVE owes its own
 write on that Save (#1392).** `overwriteProfile` writes the

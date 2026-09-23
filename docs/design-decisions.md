@@ -7215,55 +7215,99 @@ caption beside Save duplicates it, reads as confusing, and its
 fixed width splits the button cluster apart. Adopt is not a save
 verb — it lives with the raw-Lua content it migrates. (#68 §3.12)
 
-**The edit-target dropdown lists the loaded profile as its own row
-— no collapse to Live.** (#209.) The top **Live** entry edits the
-running/global config; every saved profile lists below, the loaded
-one included. Remapping the loaded profile to Live makes it the
-one profile whose *stored* sparse overrides (key layers #55, app
-rules #109) can never be edited — only the live/global config is
-reachable. Listing the loaded profile **twice**, top meaning
-global and list meaning overrides, is a menu anti-pattern: the ✓
-can't disambiguate two identical rows, the closed title goes
-ambiguous, and the discard guard keys on the profile name. The
-rows are already textually distinct (`Live (currently loaded)` vs
-`Name (currently loaded)`), so there is no collapse and each
-profile is one real `.storedProfile` target. Editing the loaded
-profile is the sole target whose Save hits the screen at once:
-`saveEditedProfile` → `reapplyIfInEffect` re-applies it **in
-place** (no switch), because it *is* the layout on screen — so its
-status caption drops the generic "changes won't switch your
-layout" for a truthful "saving re-applies *Name* with your
-changes", and the closed menu title reads "*Name* — overrides" to
-stay distinct from Live-with-that-profile-loaded.
+:::unreleased
+**Every profile's own rules stay editable, and the rule — not
+the dropdown — says which layer it writes.** (#209, #1393.) A
+profile's stored sparse overrides (app rules #109, key layers
+#55) are a shipped capability, so no edit target may leave a
+profile whose own rules the GUI cannot reach. That is the
+substance, and it outlives any one surface for it. What it
+rules out is the obvious simplification: map the loaded profile
+to the running config and stop there, and it becomes the one
+profile whose stored diff is unreachable — only the shared base
+edits.
 
-*The two doors write different layers, by design.* #209 makes
-the loaded profile reachable through **both** the Live entry and
-its own row, and the two saves touch **disjoint** field sets of
-the same file — intentionally, because they edit different
-layers of the sparse-override model, not the same data twice:
+The door belongs on the rule, because the choice is about the
+rule. Two dropdown rows for one profile — one writing the
+shared base, one writing its diff — keep the capability and
+hide the decision: the rows save identically on every page but
+App Rules and Shortcuts, and there the same "Spotify → Float"
+lands on every profile or on one depending on a pick made two
+clicks from the rule, with nothing on the page saying which.
+So the dropdown lists each profile once, the loaded one on top,
+and picking the loaded one IS the running config; its page
+shows the rules it resolves, the shared ones and its own.
+A profile that is not loaded says so in one line with **Load**,
+since its page cannot show its effect on screen.
 
-- **Live Save** (`updateActiveProfile` → `persistProfile` →
+**Each App Rules row carries an "Applies to" checklist, and its
+semantics are the storage model's, read aloud:**
+
+- **All profiles** is the shared base rule, which a profile
+  created later inherits. Ticked profiles are a *list*: each
+  holds its own entry, and a later profile does not get it —
+  ticking every box by hand is still a list, and the popover
+  says so. Under All profiles no other box can be unticked,
+  since "every profile but Home" is not the shared rule: leaving
+  one out means unticking All profiles first.
+- **The edited profile's box is ticked and locked.** A page shows
+  what its profile resolves, so a row that left its own profile
+  would vanish from the page it was edited on. Removal is the
+  trash's, and where other profiles share the rule it asks
+  *Remove from Work* or *Remove from every profile* rather than
+  guessing.
+- **A profile with a different value is warned, never
+  blocked.** The row names it ("⚠ Different in Home") and
+  ticking it gives it this row's value; the save pill names both
+  values. A block would let one profile's stale rule veto an
+  edit made for another.
+- **A new rule starts at All profiles on the loaded profile's
+  page and at that profile alone on one that is not loaded** —
+  a shared rule written there can change the running layout
+  from a page whose header says the profile is not loaded.
+
+**The ticks are derived, never stored.** They are read from what
+each profile resolves over the shared base and its sparse
+override, so the files are unchanged and nothing migrates. That
+holds only because a Save re-encodes just the rows a change
+reached: an untouched row is written back exactly as stored, and
+a profile no change reached is not rewritten
+(`RuleReachTableTests` ▸ `untouchedStaysAsStored`,
+`floatUntouched`; `RuleReachSaveTests` ▸
+`uneditedWritesNothing`). A changed row is written as the shared
+rule for All profiles, or as per-profile entries for a list. The
+trap is a stored "reach" field to make the ticks cheaper: it is
+a second answer beside the files to the question they already
+answer, and it goes stale the first time a profile file is
+edited by hand.
+
+*The saves write different layers, by design.* The loaded
+profile's Save and a stored profile's Save touch **disjoint**
+field sets, because they edit different layers of the
+sparse-override model, not the same data twice:
+
+- **The loaded profile's Save** (`persistProfile` →
   `buildProfile`) adopts the live **tiling** state (`spaces`,
   `spaceModes`, `mainSpaces`, `fallbackSpace`, `settings`) and
-  **deliberately preserves** the profile's stored `modes`,
-  `appRules`, `floatRules`, and `ignoreRules` — those are sparse
-  *diffs* against the global base, and Live editing changes the
-  base (`gui.json` or `init.lua`), never the diff.
-- **Override-row Save** (`saveEditedProfile` →
-  `overwriteProfile` → `applyProfileEdits`) writes the profile's
-  sparse behavior **diffs** (against the matching global bases)
-  plus its tiling — this is the surface that edits the diff.
-  Ignore rules have no GUI control yet, so that hidden diff is
-  preserved verbatim rather than reconstructed from resolved state.
+  **preserves** the profile's stored `layers`, `appRules`,
+  `floatRules` and `ignoreRules`. Those are sparse *diffs*
+  against the shared base, and the checklist's own write
+  (`KiwiCore.saveRuleReach`) is what changes a rule diff — for
+  every profile the change reached, this one included.
+- **A stored profile's Save** (`overwriteProfile` →
+  `applyProfileEdits`) writes that profile's tiling and its
+  key-layer diff against the shared base, and its rule diffs
+  land as the checklist encodes them — one encoder for a rule
+  family, never a second diff beside it. Ignore rules have no
+  GUI control, so that hidden diff is preserved verbatim rather
+  than reconstructed from resolved state.
 
-So "Live leaves `profile.layers` frozen while the row rewrites
-it" is the model working, not divergence: one door edits the
-base, the other edits the per-profile diff over it. The trap to
-avoid is "fixing" `buildProfile`/`persistProfile` to also adopt
-the behavior overrides — that would collapse the diff into an
-absolute and silently break the sparse override. Pinned by
-`ProfileSaveAsymmetryTests` so a future edit that erases the
-asymmetry fails red.
+The trap here is "fixing" `buildProfile`/`persistProfile` to
+also adopt the behavior overrides: that collapses the diff into
+an absolute and silently breaks the sparse override.
+`ProfileSaveAsymmetryTests` pins the preserving half so an edit
+that erases the asymmetry fails red.
+:::
 
 **One header bar: section title leading, profile picker
 trailing; status only when non-nominal.** The section name and

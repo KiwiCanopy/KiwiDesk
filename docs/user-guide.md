@@ -562,26 +562,27 @@ one-screen profiles.
 
 ### The Profile Banner
 
+:::unreleased
 The dropdown at the top of any section picks what your edits
-target. **Live (currently loaded)** edits the running, global
-config; every saved profile lists below it, one row each.
+target. Each profile is listed once: on top what is on screen —
+the loaded profile, or the Standard or temporary layout in its
+place — then every other profile, under a **For N screens**
+heading per screen count when there is more than one.
 
-- **Live**: saving adopts your changes into the loaded profile.
-- **A saved profile, without switching**: Home becomes
+- **The top row**: saving adopts your changes into the loaded
+  profile.
+- **Another profile, without switching**: Home becomes
   profile-scoped, the General card leaves the grid, and Save
-  writes to that profile's JSON. Shortcuts and App Rules enter
-  override mode and edit only what the profile changes.
-- **The loaded profile's own row**: saving re-applies the
-  profile in place, no switch. This row edits the profile's
-  *stored* overrides (its app rules and shortcut layers); Live
-  edits the global base every profile inherits. For gaps,
-  layouts and bars the two rows save the same thing.
+  writes to that profile's JSON. Shortcuts enters override mode
+  and edits only what the profile changes.
 
-Saving a stored profile hot-reloads the running layout only if
-that profile is on screen; otherwise the change waits until it
-next loads. **Save a copy…** while editing a stored profile
-duplicates it with your pending edits, without touching the
-running layout.
+Saving a profile that isn't loaded leaves the running layout
+alone until it next loads, except for an App Rule it shares with
+the loaded profile ([Per-Profile Space
+Assignments](#per-profile-space-assignments)). **Save a copy…**
+while editing a stored profile duplicates it with your pending
+edits, without touching the running layout.
+:::
 
 ### Saving
 
@@ -606,9 +607,11 @@ the space list and Desktop bindings carry no monitor set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 
+:::unreleased
 Neither live save carries a keybinding override: to give a
-profile its own shortcuts, pick it in the banner and edit its
-Shortcuts section.
+profile its own shortcuts, pick it in the banner while it isn't
+loaded and edit its Shortcuts section.
+:::
 
 ### Built-in Standards & Presets
 
@@ -653,10 +656,14 @@ ignore rule also opts a misbehaving tabbed app out.
 
 ### Per-Profile Space Assignments
 
-While you edit a stored profile, App Rules enters override mode:
-dimmed values are inherited, changing one overrides it for this
-profile, and deleting a row removes inherited rules there. The
-profile stores a sparse diff: `app_rules` maps apps to spaces,
+:::unreleased
+An App Rules row's **Applies to** menu picks the profiles its
+rule reaches: **All profiles** keeps the rule in `gui.json`, and
+otherwise each ticked profile stores it in its own JSON.
+Removing a shared rule from one profile stores a `null` there.
+:::
+
+A profile stores a sparse diff: `app_rules` maps apps to spaces,
 while `float_rules` and `ignore_rules` are objects whose `true`
 entries add rules and `null` entries remove inherited ones:
 
@@ -782,9 +789,9 @@ it is bound.
 
 The recorder **suspends your KiwiDesk shortcuts while it is
 open**, so a combo already bound to a window action can be
-tested. On the live target a recording, a clear or a deleted row
-takes effect at once, before Save; Revert restores the saved
-ones, also live.
+tested. With the banner's top row picked, a recording, a clear
+or a deleted row takes effect at once, before Save; Revert
+restores the saved ones, also live.
 
 ### Keyboard Modifiers & Keys
 
