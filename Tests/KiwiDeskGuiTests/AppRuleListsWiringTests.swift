@@ -69,9 +69,17 @@ struct AppRuleListsWiringTests {
                 .contains("AppRuleTitledEditor("),
             "the Float row no longer mounts the pattern editor"
         )
+        // Every file the Space row spans, so an extension beside it
+        // cannot mount the editor unseen.
+        let spaceRow = try SourceScan.swiftSources(
+            under: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources/KiwiDesk/Settings")
+        )
+        .filter { $0.lastPathComponent.hasPrefix("AppRuleSpaceRow") }
+        .map { try source($0.lastPathComponent) }
+        .joined()
         #expect(
-            !(try source("AppRuleSpaceRow.swift"))
-                .contains("AppRuleTitledEditor"),
+            !spaceRow.isEmpty && !spaceRow.contains("AppRuleTitledEditor"),
             Comment(
                 rawValue:
                     "the Space row draws a title pattern again — "
@@ -182,63 +190,39 @@ struct AppRuleListsWiringTests {
         )
     }
 
-    /// The composing row stays LISTED while its editor is open,
-    /// and the slot is released by a deletion and by a reload.
-    @Test("the composing row is unioned into the Float list")
-    func composingRowSurvivesInTheList() throws {
-        let file = "AppRulesSection+Lists.swift"
+    /// The grey rides the Space MENU: moved onto any other control
+    /// the menu stays live with nothing to pick (#1022).
+    @Test("the Space menu itself greys without a Space")
+    func spaceMenuGreys() throws {
         #expect(
-            try body(of: "var floatApps: [String]", in: file)
-                .contains(
-                    Self.squashed(
-                        "if let composing = composingTitles { "
-                            + "set.insert(composing) }"
-                    )
-                ),
-            Comment(
-                rawValue:
-                    "`floatApps` no longer keeps the row under "
-                    + "composition — a titled rule has nothing "
-                    + "stored until its first pattern lands (#1022)"
-            )
-        )
-        #expect(
-            try body(of: "private func deleteFloat(_ app: String)", in: file)
-                .contains(
-                    Self.squashed(
-                        "if composingTitles == app "
-                            + "{ composingTitles = nil }"
-                    )
-                )
-        )
-        #expect(
-            try source("AppRulesSection.swift").contains(
-                Self.squashed(
-                    ".onChange(of: model.cleanConfig) "
-                        + "{ composingTitles = nil }"
-                )
-            )
+            try body(
+                of: "private var spaceMenu: some View",
+                in: "AppRuleSpaceRow.swift"
+            ).contains(
+                Self.squashed("GreyOut(active: !gates.hasSpaces")
+            ),
+            "the Space menu no longer greys for want of a Space"
         )
     }
 
-    /// Each list reads its own store. `AppRuleListsTests` holds
-    /// the answers; this holds that the pickers exclude by the
-    /// list they add to, or a pinned app could never be floated.
-    @Test("each picker excludes only its own list")
-    func pickersExcludeTheirOwnList() throws {
-        let file = "AppRulesSection+Lists.swift"
-        for (card, list) in [
-            ("spaceList", "spaceApps"), ("floatList", "floatApps"),
+    /// A tombstone's cell is a dash, which VoiceOver reads as
+    /// nothing, so each menu SPEAKS a word for it (gui.md).
+    @Test("a tombstone speaks a word, not the dash")
+    func tombstonesSpeak() throws {
+        for (signature, file, key) in [
+            (
+                "var spaceFacetLabel: String",
+                "AppRuleSpaceRow.swift", "app_rules.space.none"
+            ),
+            (
+                "var floatFacetLabel: String",
+                "AppRuleFloatRow.swift", "app_rules.float.none"
+            ),
         ] {
             #expect(
-                try body(of: "var \(card): some View", in: file)
-                    .contains("exclude:Set(\(list))"),
-                Comment(
-                    rawValue:
-                        "\(card)'s picker no longer excludes "
-                        + "\(list) — excluding the OTHER list "
-                        + "stops an app ever carrying both rules"
-                )
+                try body(of: signature, in: file)
+                    .contains("L(\"\(key)\""),
+                "\(signature) no longer speaks `\(key)`"
             )
         }
     }
