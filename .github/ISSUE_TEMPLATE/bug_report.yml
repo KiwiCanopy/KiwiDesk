@@ -9,8 +9,11 @@ body:
         Thanks for reporting! Please give enough detail to
         reproduce the issue.
 
-        **Please attach the log.** If you can, make the problem
-        happen again first. Then open KiwiDesk Settings ▸ General ▸
+        **Windows ending up in the wrong place, focus jumping, or
+        something that only happens sometimes?** Then the log
+        helps us most — a plainly broken setting or wrong label
+        doesn't need one. If you can, make the problem happen
+        again first. Then open KiwiDesk Settings ▸ General ▸
         Advanced, pick a time range beside **Export Log…** that
         reaches back to before it happened, press the button, and
         drag the file into *Extra context* below. Can't open
@@ -81,9 +84,9 @@ body:
     attributes:
       label: Extra context
       description: |
-        Drag the exported log in here. A screenshot or a short
-        screen recording of the problem helps a lot too — crop
-        out anything private first.
+        A screenshot or a short screen recording of the problem
+        helps a lot — crop out anything private first. If the
+        note above asked for the log, drag it in here too.
       placeholder: |
         (attached: KiwiDesk-log-….txt, Last 15 minutes)
         (attached: screenshot of the misplaced window)
