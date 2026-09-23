@@ -81,7 +81,11 @@ struct DesktopBindingWriterSeamTests {
                 )
                 .split(whereSeparator: \.isWhitespace)
                 .joined()
-                let hits = source.occurrences(of: "DesktopBinding(profiles:")
+                // Either seeding init: a list of entries built by
+                // hand bypasses the algebra the same way (#1609).
+                let hits =
+                    source.occurrences(of: "DesktopBinding(profiles:")
+                    + source.occurrences(of: "DesktopBinding(entries:")
                 if hits > 0 { constructions[file.lastPathComponent] = hits }
             }
         }

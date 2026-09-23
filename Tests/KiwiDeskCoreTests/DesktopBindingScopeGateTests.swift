@@ -155,6 +155,47 @@ struct DesktopBindingScopeGateTests {
         )
     }
 
+    /// An all-setups binding to the holder itself loads over no
+    /// one; a scoped entry that cannot fire (unsaved) leaves the
+    /// all-setups pick naming the holder it DOES load over — the
+    /// rung is the entry that fired, never one merely listed.
+    @Test("the reading names the rung that fired")
+    func readingFollowsThePick() throws {
+        defer { reset() }
+        pinTopology()
+        let core = try seeded()
+        _ = bind(core, "Vision")
+        let own = try #require(core.mainDesktopBinding(in: snapshot))
+        #expect(
+            core.boundReading(of: own)
+                == BoundReading(name: "Vision", setup: nil, over: nil)
+        )
+        _ = bind(core, "Ghost", screens: here)
+        _ = bind(core, "Starter")
+        let record = try #require(core.mainDesktopBinding(in: snapshot))
+        #expect(
+            core.boundReading(of: record)
+                == BoundReading(name: "Starter", setup: nil, over: "Vision")
+        )
+    }
+
+    /// Before the first display reading, a binding scoped
+    /// elsewhere waits like any other rather than standing aside.
+    @Test("with no display reading a scoped binding waits")
+    func scopedWaitsForDisplays() throws {
+        let core = try seeded()
+        core.state.workspaces.removeDisplay(DisplayID(1))
+        let binding = DesktopBinding(
+            entries: [.init(profile: "Starter", setup: elsewhere)],
+            desktop: 1
+        )
+        guard case .failure(.displaysUnknown) = core.boundProfile(of: binding)
+        else {
+            Issue.record("expected the binding to wait for displays")
+            return
+        }
+    }
+
     /// Every entry scoped elsewhere: the binding stands aside and
     /// the holder loads — rung 3.
     @Test("a binding for other screens stands aside")

@@ -216,9 +216,11 @@ struct DesktopBindingGroupTests {
         #expect(
             card.contains("orphanRow(orphan.row,profile:orphan.profile)")
         )
-        // A Desktop's rows are the census's own slots (#1609).
+        // A Desktop's rows are the census's own slots, and the
+        // leading group draws the conflict caption (#1609).
         let block = try squashed("DesktopsGroup+Row.swift")
         #expect(block.contains("ProfilesFamilyRows.slots("))
+        #expect(block.contains("ifleads{conflictLine(row)}"))
         // The caption asks the ONE leading derivation, and
         // stands down with no display reading (#1436 review).
         #expect(
