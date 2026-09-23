@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "아직 화면 구성이 없습니다 — 로드하면 화면 구성이 지정됩니다.",
   "profiles.sets.dormant_default": "아직 화면 구성이 없어 기본값으로 로드되지 않습니다 — 로드하면 화면 구성이 지정됩니다.",
   "profiles.sets.move.help": "여기로 화면 구성 이동",
-  "profiles.sets.one_owner_note": "각 화면 구성은 하나의 프로필에만 속합니다. 프로필로 이동하면 현재 사용 중인 프로필에서 제거됩니다.",
+  "profiles.sets.one_owner_note": "화면 구성은 한 번에 하나의 프로필에만 속합니다. 다른 프로필로 이동하면 현재 속한 프로필에서 제거됩니다.",
   "profiles.spaces.many": "%1$d개 공간",
   "profiles.spaces.one": "1개 공간",
   "profiles.summary.pair": "%1$@ · %2$@",

@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "画面構成はまだありません — 読み込むと割り当てられます。",
   "profiles.sets.dormant_default": "画面構成がまだないため、デフォルトとして読み込まれません — 読み込むと割り当てられます。",
   "profiles.sets.move.help": "画面構成をここに移動",
-  "profiles.sets.one_owner_note": "各画面構成は1つのプロファイルにのみ属します。プロファイルに移動すると、現在のプロファイルからは外れます。",
+  "profiles.sets.one_owner_note": "画面構成は一度に1つのプロファイルにのみ属します。別のプロファイルに移動すると、現在属しているプロファイルからは外れます。",
   "profiles.spaces.many": "%1$d個のスペース",
   "profiles.spaces.one": "1個のスペース",
   "profiles.summary.pair": "%1$@ · %2$@",

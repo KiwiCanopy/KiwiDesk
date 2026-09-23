@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "Ainda sem configuração de telas — recebe uma quando você o carrega.",
   "profiles.sets.dormant_default": "Ainda sem configuração de telas, então não é carregado como padrão — recebe uma quando você o carrega.",
   "profiles.sets.move.help": "Mover uma configuração de telas para cá",
-  "profiles.sets.one_owner_note": "Cada configuração de telas pertence a um só perfil. Ao movê-la para um perfil, ela sai do perfil que a tem agora.",
+  "profiles.sets.one_owner_note": "Uma configuração de telas pertence a um só perfil por vez. Ao movê-la para outro perfil, ela sai do perfil que a tem agora.",
   "profiles.spaces.many": "%1$d espaços",
   "profiles.spaces.one": "1 espaço",
   "profiles.summary.pair": "%1$@ · %2$@",

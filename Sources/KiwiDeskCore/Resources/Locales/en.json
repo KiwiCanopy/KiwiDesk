@@ -1023,7 +1023,7 @@
   "profiles.sets.dormant": "No screen setup yet — takes one when you load it.",
   "profiles.sets.dormant_default": "No screen setup yet, so it isn't loaded as the default — it takes one when you load it.",
   "profiles.sets.move.help": "Move a screen setup here",
-  "profiles.sets.one_owner_note": "Each screen setup belongs to one profile. Moving it to a profile takes it from the profile that has it now.",
+  "profiles.sets.one_owner_note": "A screen setup belongs to one profile at a time. Moving it to another profile removes it from the current one.",
   "profiles.spaces.many": "%1$d Spaces",
   "profiles.spaces.one": "1 Space",
   "profiles.summary.pair": "%1$@ · %2$@",

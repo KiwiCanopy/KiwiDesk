@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "Noch kein Bildschirm-Setup — es erhält eins, wenn du es lädst.",
   "profiles.sets.dormant_default": "Noch kein Bildschirm-Setup, daher wird es nicht als Standard geladen — es erhält eins, wenn du es lädst.",
   "profiles.sets.move.help": "Bildschirm-Setup hierher verschieben",
-  "profiles.sets.one_owner_note": "Jedes Bildschirm-Setup gehört zu genau einem Profil. Verschiebst du es in ein Profil, wird es aus dem Profil entfernt, in dem es gerade ist.",
+  "profiles.sets.one_owner_note": "Ein Bildschirm-Setup gehört immer nur zu einem Profil. Verschiebst du es in ein anderes Profil, wird es aus dem bisherigen entfernt.",
   "profiles.spaces.many": "%1$d Spaces",
   "profiles.spaces.one": "1 Space",
   "profiles.summary.pair": "%1$@ · %2$@",

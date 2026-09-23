@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "尚無螢幕組態 — 載入時會取得一個。",
   "profiles.sets.dormant_default": "尚無螢幕組態，因此不會作為預設載入 — 載入時會取得一個。",
   "profiles.sets.move.help": "將螢幕組態移到這裡",
-  "profiles.sets.one_owner_note": "每個螢幕組態只屬於一個描述檔。將它移到某個描述檔後，它會從目前所在的描述檔中移除。",
+  "profiles.sets.one_owner_note": "螢幕組態同一時間只屬於一個描述檔。將它移到另一個描述檔後，它會從目前所在的描述檔中移除。",
   "profiles.spaces.many": "%1$d 個空間",
   "profiles.spaces.one": "1 個空間",
   "profiles.summary.pair": "%1$@ · %2$@",

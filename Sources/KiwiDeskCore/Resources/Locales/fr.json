@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "Pas encore de configuration d'écrans — il en reçoit une quand vous le chargez.",
   "profiles.sets.dormant_default": "Pas encore de configuration d'écrans, il n'est donc pas chargé par défaut — il en reçoit une quand vous le chargez.",
   "profiles.sets.move.help": "Déplacer une configuration d'écrans ici",
-  "profiles.sets.one_owner_note": "Chaque configuration d'écrans appartient à un seul profil. La déplacer vers un profil la retire du profil qui l'a actuellement.",
+  "profiles.sets.one_owner_note": "Une configuration d'écrans appartient à un seul profil à la fois. La déplacer vers un autre profil la retire du profil qui l'a actuellement.",
   "profiles.spaces.many": "%1$d espaces",
   "profiles.spaces.one": "1 espace",
   "profiles.summary.pair": "%1$@ · %2$@",

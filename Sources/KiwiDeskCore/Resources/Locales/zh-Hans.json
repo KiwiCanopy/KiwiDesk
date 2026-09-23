@@ -1019,7 +1019,7 @@
   "profiles.sets.dormant": "尚无屏幕组合 — 加载时会获得一个。",
   "profiles.sets.dormant_default": "尚无屏幕组合，因此不会作为默认加载 — 加载时会获得一个。",
   "profiles.sets.move.help": "将屏幕组合移到这里",
-  "profiles.sets.one_owner_note": "每个屏幕组合只属于一个描述文件。将它移到某个描述文件后，它会从当前所在的描述文件中移除。",
+  "profiles.sets.one_owner_note": "屏幕组合同一时间只属于一个描述文件。将它移到另一个描述文件后，它会从当前所在的描述文件中移除。",
   "profiles.spaces.many": "%1$d 个空间",
   "profiles.spaces.one": "1 个空间",
   "profiles.summary.pair": "%1$@ · %2$@",
