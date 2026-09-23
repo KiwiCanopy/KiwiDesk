@@ -30,7 +30,7 @@ struct HomeSupportStripTests {
     func linksAreTheSupportLinks() throws {
         let source = try strip
         for needle in [
-            "url:SupportLinks.telegram", "url:SupportLinks.gitHub",
+            "url:SupportLinks.discord", "url:SupportLinks.gitHub",
             "url:SupportLinks.koFi",
         ] {
             #expect(
@@ -44,17 +44,17 @@ struct HomeSupportStripTests {
         #expect(!source.contains("URL(string:"))
     }
 
-    @Test("The Telegram link is the group's invite, on t.me")
-    func telegramLinkIsTheGroup() {
-        #expect(SupportLinks.telegram.host == "t.me")
-        #expect(SupportLinks.telegram.path.hasPrefix("/+"))
+    @Test("The Discord link is the server invite, on discord.gg")
+    func discordLinkIsTheServer() {
+        #expect(SupportLinks.discord.host == "discord.gg")
+        #expect(SupportLinks.discord.pathComponents.count == 2)
         #expect(SupportLinks.website.host == "kiwidesk.kiwicanopy.com")
     }
 
     @Test("The marks ship, and as template images")
     func marksAreTemplates() throws {
         for (name, mark) in [
-            ("MarkTelegram", BrandAssets.markTelegram),
+            ("MarkDiscord", BrandAssets.markDiscord),
             ("MarkGitHub", BrandAssets.markGitHub),
             ("MarkKofi", BrandAssets.markKofi),
         ] {

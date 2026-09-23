@@ -17,13 +17,13 @@ struct HomeSupportStrip: View {
                 )
                 FlowLayout(spacing: 12) {
                     SupportLinkRow(
-                        mark: BrandAssets.markTelegram,
+                        mark: BrandAssets.markDiscord,
                         title: L(
-                            "home.support.telegram",
-                            "Join the Telegram group"
+                            "home.support.discord",
+                            "Join the Discord server"
                         ),
-                        caption: telegramCaption,
-                        url: SupportLinks.telegram
+                        caption: discordCaption,
+                        url: SupportLinks.discord
                     )
                     SupportLinkRow(
                         mark: BrandAssets.markGitHub,
@@ -48,9 +48,9 @@ struct HomeSupportStrip: View {
 
     // Hoisted out of `body`: a `+`-joined literal inside a builder
     // is the type-checker shape gui.md warns about.
-    private var telegramCaption: String {
+    private var discordCaption: String {
         L(
-            "home.support.telegram.caption",
+            "home.support.discord.caption",
             "Questions, ideas and polls — the discussions that "
                 + "shape KiwiDesk."
         )

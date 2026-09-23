@@ -85,7 +85,7 @@ extension SettingsButtonStyleConventionTests {
             "SupportLinkRow.swift": (
                 1, ".buttonStyle(.plain)",
                 "One Link taking plain style — the row Home's "
-                    + "support strip draws for Telegram, GitHub "
+                    + "support strip draws for Discord, GitHub "
                     + "and Ko-fi"
             ),
             "AboutSheet.swift": (

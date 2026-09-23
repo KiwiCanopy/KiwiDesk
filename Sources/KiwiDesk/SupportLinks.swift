@@ -13,9 +13,9 @@ enum SupportLinks {
         string: "https://github.com/KiwiCanopy/KiwiDesk"
     )!
 
-    /// The Telegram group — questions, ideas and polls (#1536).
-    static let telegram = URL(
-        string: "https://t.me/+Jsty97sOACozMmUy"
+    /// The Discord server — questions, ideas and polls (#1536).
+    static let discord = URL(
+        string: "https://discord.gg/bYeTrJyZyS"
     )!
 
     /// The website, for About (#1536).
