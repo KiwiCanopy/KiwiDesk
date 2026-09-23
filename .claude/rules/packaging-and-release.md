@@ -588,10 +588,13 @@ not — since a one-sided clause passes on a workflow that
 ratchets everything, which is the change this rule refuses.
 `WarningRatchetWorkflowTests` holds all three.
 
-What the ratchet does NOT reach is worth stating once: `-Xswiftc`
-is swiftc's, so `Vendor/`'s C stays clang's, and `swift build`
-does not compile `Tests/` — whose own corpus is #1596's, after
-which the test steps join.
+The test steps carry the Build step's flags VERBATIM, so
+`Tests/` is ratcheted too (#1596): a flag differing between the
+two is a test-only warning landing green AND a from-scratch
+rebuild, SwiftPM keying its build directory on the flags —
+`WarningRatchetWorkflowTests` reads the test steps' flags off the
+Build step's. What the ratchet does NOT reach is worth stating
+once: `-Xswiftc` is swiftc's, so `Vendor/`'s C stays clang's.
 
 **`ci.yml` filters by exclusion; `site.yml` filters by
 inclusion.** Keep it that way. The site build's inputs are a

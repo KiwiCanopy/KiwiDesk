@@ -170,12 +170,11 @@ jobs:
       #
       # `-Xswiftc` reaches every target swiftc compiles from
       # source, which today is this package's own; Vendor/CLua
-      # is clang's and unreached. Tests/ is not compiled here
-      # and carries 31 warnings of its own (#1596) — the test
-      # steps join the ratchet once that lands, and until then
-      # the differing flags cost one rebuild between this step
-      # and Test (~16 s), SwiftPM keying its build directory on
-      # them.
+      # is clang's and unreached. Tests/ is compiled by the Test
+      # steps, which take these flags VERBATIM (#1596): SwiftPM
+      # keys its build directory on them, so a step with other
+      # flags rebuilds from scratch, and a test-only warning
+      # would land green.
       - name: Build
         run: >-
           swift build -Xswiftc -warnings-as-errors
@@ -191,10 +190,16 @@ jobs:
       # ExecTests prefix (.claude/rules/tests.md, pinned by
       # MachineTouchTests).
       - name: Test
-        run: swift test --skip ExecTests
+        run: >-
+          swift test --skip ExecTests
+          -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
       - name: Test (ExecTests)
-        run: swift test --filter ExecTests
+        run: >-
+          swift test --filter ExecTests
+          -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
   release-build:
     needs: changes

@@ -162,6 +162,44 @@ struct WarningRatchetWorkflowTests {
         )
     }
 
+    /// The `-Xswiftc` arguments a step passes, in order.
+    private static func ratchetFlags(in step: String) -> [String] {
+        let words = step.split(whereSeparator: \.isWhitespace)
+        return words.indices.dropLast()
+            .filter { words[$0] == "-Xswiftc" }
+            .map { String(words[$0 + 1]) }
+    }
+
+    /// The test steps compile `Tests/` under the Build step's
+    /// flags VERBATIM (#1596): a test-only warning must red, and
+    /// SwiftPM keys its build directory on the flags, so any
+    /// difference rebuilds the package between the two steps.
+    /// Read off the Build step rather than restated, so a flag
+    /// added there is owed here too.
+    @Test("The test steps ratchet with the Build step's flags")
+    func testStepsTakeTheBuildFlags() throws {
+        let yaml = try ci()
+        let build = Self.ratchetFlags(in: try debugBuildStep())
+        try #require(build.contains("-warnings-as-errors"))
+        for name in ["Test", "Test (ExecTests)"] {
+            let step = try workflowStep(name, in: yaml)
+            let first = step.split(separator: "\n").first
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+            try #require(
+                first == "- name: \(name)",
+                "'\(name)' matched \(first ?? "nothing")"
+            )
+            #expect(
+                Self.ratchetFlags(in: step) == build,
+                """
+                ci.yml's \(name) step does not pass the Build \
+                step's flags: a warning in Tests/ would land \
+                green, and the package rebuilds between steps
+                """
+            )
+        }
+    }
+
     /// The exemption, and why it is a clause rather than a
     /// comment: a ratchet on the release build would let a
     /// toolchain bump block a tag push, which
@@ -192,8 +230,8 @@ struct WarningRatchetWorkflowTests {
     /// #1170 removes it the downgrade must go with it, or every
     /// later deprecated-API use is permanently un-ratcheted with
     /// nothing to say so. Scoped to `Sources/` because that is
-    /// what this step compiles — `swift build` does not build
-    /// `Tests/` (#1596).
+    /// where the excused call lives; the test steps share the
+    /// downgrade only because they share the flags.
     @Test("The deprecation downgrade is still load-bearing")
     func downgradeIsLive() throws {
         let step = try debugBuildStep()
