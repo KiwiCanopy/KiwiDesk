@@ -241,20 +241,24 @@ struct KeyboardActionParityTests {
                     + "another heading"
             ),
             Wiring(
-                "AppRuleRow.swift",
+                "AppRuleSpaceRow.swift",
                 ".focused($returningRow, equals: app)",
-                "the FLOAT menu is the row's always-drawn, "
-                    + "always-enabled control since #1022 — the "
-                    + "space menu it used to carry is disabled on "
-                    + "every unpinned row, and a disabled control "
-                    + "cannot take the assignment a deletion "
-                    + "makes; the trash disables itself in "
-                    + "override mode"
+                "the Space menu, drawn on every row (#1608)"
             ),
             Wiring(
-                "AppRulesSection.swift",
-                "returningRow = neighbour",
-                "and the list that owns the deletion names it"
+                "AppRuleFloatRow.swift",
+                ".focused($returningRow, equals: app)",
+                "the scope menu, drawn on every row (#1608)"
+            ),
+            Wiring(
+                "AppRulesSection+Lists.swift",
+                "returningSpaceRow = neighbour",
+                "each list names its own neighbour (#1608)"
+            ),
+            Wiring(
+                "AppRulesSection+Lists.swift",
+                "returningFloatRow = neighbour",
+                "and so does the Float list"
             ),
             Wiring(
                 "LayerStripEditor.swift",

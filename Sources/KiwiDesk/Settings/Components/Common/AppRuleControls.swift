@@ -26,9 +26,8 @@ struct AppSelector: View {
     let role: Role
     /// Bundle identifier of chosen app (`AppRef`).
     @Binding var name: String
-    /// Bundle IDs to omit — App Rules passes the apps that
-    /// already have a rule row, since each app carries at most
-    /// one (its space + float facets live on that single row).
+    /// Bundle IDs to omit — the apps the picker's own list
+    /// already holds (#1608).
     var exclude: Set<String> = []
     /// Called with the bundle id the user committed. The caller
     /// owns normalisation and dedup; this view only says when.

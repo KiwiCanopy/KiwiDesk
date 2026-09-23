@@ -39,7 +39,8 @@ import Testing
 struct AnnouncedValueTests {
     /// File basename → how many labelled pickers/menus it holds.
     private static let labelled: [String: Int] = [
-        "AppRuleRow+Facets.swift": 2,
+        "AppRuleSpaceRow.swift": 1,
+        "AppRuleFloatRow.swift": 1,
         "SpacesSection+ModePicker.swift": 1,
         "DesktopsGroup+Row.swift": 1,
         "ProfileHeader.swift": 1,

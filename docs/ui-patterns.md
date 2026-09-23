@@ -965,11 +965,11 @@ that identifier and no moment in it means "this is the one".
 
 :::unreleased
 **Where the list may hold no empty rows, the picker names the
-rule it composes.** App Rules offers one picker per facet —
-*Pin an app…* and *Float an app…* — so a pick lands a complete
-rule instead of a row with both facets at their defaults. One
-picker over a defaulted facet authors a choice the user did not
-make ([Design decisions](design-decisions.md) ▸ App rules).
+rule it composes.** App Rules keeps one list per rule, each with
+its own picker — *Open an app in a Space…* and *Float an app…* —
+so a pick lands a complete rule. One picker over a defaulted rule
+authors a choice the user did not make ([Design
+decisions](design-decisions.md) ▸ App rules).
 :::
 
 These pickers exclude the entries that cannot be added, but

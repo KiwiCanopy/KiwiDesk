@@ -8,6 +8,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case dragAndDrop
     case essentialSettings
     case focus
+    case floatRules
     case focusBorder
     case gaps
     case general
@@ -32,13 +33,13 @@ enum SettingsContainer: CaseIterable, Hashable {
     case pinnedToDisconnectedMonitors
     case presets
     case profilesPerMacOSSpace
-    case rulesPerApp
     case savedProfiles
     case scrolling
     case sizeAndFloat
     case spaceBar
     case spaceList
     case spacePlacement
+    case spaceRules
     case stack
     case stickyWindows
     case track
@@ -70,7 +71,8 @@ enum SettingsContainer: CaseIterable, Hashable {
             .moveWindows, .onQuit, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedMonitors, .presets,
-            .profilesPerMacOSSpace, .rulesPerApp,
+            .profilesPerMacOSSpace, .floatRules,
+            .spaceRules,
             .savedProfiles, .scrolling, .sizeAndFloat,
             .spaceList, .spacePlacement, .stack,
             .stickyWindows, .track:

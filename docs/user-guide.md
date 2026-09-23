@@ -609,9 +609,10 @@ editable profile; presets cannot be deleted.
 ## App Rules
 
 :::unreleased
-**Floats if titled…** is a Power User choice: the menu beside a
-rule's Space lists it in that mode. Once any rule uses it, the
-choice stays listed in Simple as well.
+**Windows titled…** is a Power User choice in the Float list's
+menu. Once any rule uses it, the choice stays listed in Simple as
+well. A title pattern decides only whether a window floats; the
+app's Space rule, if it has one, still applies to every window.
 :::
 
 **The title match is case-sensitive**, and "Info" also catches

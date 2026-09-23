@@ -75,7 +75,8 @@ struct SettingsCatalogSiteTests {
         // 121 since #1536: the General ▸ About card left.
         // 125 since #1516: the two margin rows in each bar's
         // Style drawer.
-        #expect(names.count == 125)
+        // 126 since #1608: App Rules' second card.
+        #expect(names.count == 126)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

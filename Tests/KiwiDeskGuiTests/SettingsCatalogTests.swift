@@ -96,7 +96,8 @@ struct SettingsCatalogTests {
         // Home's footer and the About sheet.
         // 131 since #1516: the two margin rows in each bar's
         // Style drawer.
-        #expect(allEntries.count == 131)
+        // 132 since #1608: App Rules is two cards, one per store.
+        #expect(allEntries.count == 132)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

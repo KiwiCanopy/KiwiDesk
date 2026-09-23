@@ -45,7 +45,8 @@ struct AppRulesGateTests {
         )
         // The resolver has no `containerReason` arm, so a gate on
         // the card's container would grey nothing, silently.
-        #expect(SettingsContainer.rulesPerApp.gate == nil)
+        #expect(SettingsContainer.spaceRules.gate == nil)
+        #expect(SettingsContainer.floatRules.gate == nil)
     }
 
     // MARK: - The two reasons
@@ -105,10 +106,10 @@ struct AppRulesGateTests {
     /// of "the list is empty" is one a negative needle can hold.
     @Test("the no-Spaces sites consult the resolver")
     func noSpacesSitesConsult() throws {
-        let section = try source("AppRulesSection.swift")
-        let facets = try source("AppRuleRow+Facets.swift")
+        let lists = try source("AppRulesSection+Lists.swift")
+        let row = try source("AppRuleSpaceRow.swift")
         for (needle, text, site) in [
-            ("if !gates.hasSpaces {", section, "the Spaces pointer"),
+            ("if !gates.hasSpaces {", lists, "the Spaces pointer"),
             // Contiguous with the SPACE picker's own arguments: a
             // file-wide `.disabled(!gates.hasSpaces)` stayed green
             // moved onto the float picker (guard-prover,
@@ -116,11 +117,15 @@ struct AppRulesGateTests {
             // needle to that control, not an assertion.
             (
                 "role: .space, name: $newSpaceApp, "
-                    + "exclude: Set(apps), onCommit: addWithSpace) "
+                    + "exclude: Set(spaceApps), "
+                    + "onCommit: addWithSpace) "
                     + ".disabled(!gates.hasSpaces)",
-                section, "the Space add picker"
+                lists, "the Space add picker"
             ),
-            ("hasSpaces: gates.hasSpaces", facets, "the pin verdict"),
+            (
+                "GreyOut(active: !gates.hasSpaces",
+                row, "the Space menu's grey"
+            ),
         ] {
             #expect(
                 text.contains(Self.squashed(needle)),

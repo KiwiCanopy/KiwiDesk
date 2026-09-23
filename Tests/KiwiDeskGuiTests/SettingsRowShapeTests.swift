@@ -40,12 +40,12 @@ struct SettingsRowShapeTests {
     /// makes an unconditional frame the thing this scan looks
     /// for. That site is pinned by `shapeSwapsLayout` instead.
     ///
-    /// `AppRuleRow` is out of scope for BOTH reasons at once, and
-    /// is named here so it reads as ruled rather than missed
-    /// (#1022): its columns are a TABLE's own axis, headed once
-    /// above a list rather than per row — the same standing
-    /// exception `ColorField` takes — and it frames them
-    /// conditionally, the shape this clause has just excused.
+    /// `AppRuleIdentity` is out of scope for BOTH reasons at once,
+    /// and is named here so it reads as ruled rather than missed
+    /// (#1022, #1608): its name column is a LIST's own axis, not
+    /// a label beside a control — the same standing exception
+    /// `ColorField` takes — and it frames it conditionally, the
+    /// shape this clause has just excused.
     private static let allowed: [String: String] = [
         "ColorField.swift":
             "the colour grid's own axis, never the row axis"
