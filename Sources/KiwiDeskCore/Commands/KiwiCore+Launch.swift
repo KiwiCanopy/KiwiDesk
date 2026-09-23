@@ -65,7 +65,9 @@ extension KiwiCore {
                     census: census
                 )
             }
-            oweLaunchFollow(bundleID)
+            // Only an app with nothing up here opens a window for
+            // this pull; one already showing is merely focused.
+            if census.visible == 0 { oweLaunchFollow(bundleID) }
             openOrFocus.activate(pid)
             return .ok()
         }

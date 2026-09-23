@@ -59,13 +59,15 @@ struct LaunchFollowTests {
         bundleID: String = bundle,
         launchedAgo: TimeInterval = 0.3
     ) {
+        // One reading: two would drift apart at the inclusive edge.
+        let now = ahead
         core.noteAppActivation(
             AppActivation(
                 pid: 7,
                 bundleID: bundleID,
-                launchedAt: ahead.addingTimeInterval(-launchedAgo)
+                launchedAt: now.addingTimeInterval(-launchedAgo)
             ),
-            now: ahead
+            now: now
         )
     }
 

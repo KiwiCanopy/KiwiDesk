@@ -52,9 +52,4 @@ struct LaunchFollowIntentTests {
         intent.forget()
         #expect(intent.owed(at: t0) == nil)
     }
-
-    @Test("A Duration converts with its fraction")
-    func durationSeconds() {
-        #expect(Duration.milliseconds(1_500).seconds == 1.5)
-    }
 }

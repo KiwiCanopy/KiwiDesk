@@ -17,11 +17,18 @@ struct LaunchFollowRetireTests {
 
     @Test("Another app's activation retires the debt, press or not")
     func otherAppActivationRetires() {
-        for press in [0.2, 15.0] {
+        // Neither activation of the other app is a launch, so no
+        // new record can stand in for the retire: a running app
+        // switched to by a press, and a fresh one with no press.
+        for (press, launchedAgo) in [(0.2, 3_600.0), (15.0, 0.3)] {
             let core = F.makeCore()
             F.activate(core)
             core.launchFollow.pressAge = { press }
-            F.activate(core, bundleID: "app.other")
+            F.activate(
+                core,
+                bundleID: "app.other",
+                launchedAgo: launchedAgo
+            )
             F.arrive(9, on: core)
             F.expectStayed(core)
         }
@@ -79,16 +86,22 @@ struct LaunchFollowRetireTests {
             ).isSuccess
         )
         #expect(launched.launchFollow.owed() == F.bundle)
-        // Running with nothing up: the activate branch.
-        let pulled = F.makeCore(pressAge: nil)
-        pulled.openOrFocus.runningAppPID = { _ in 7 }
-        pulled.openOrFocus.activate = { _ in }
-        #expect(
-            pulled.execute(
-                "pull_or_spawn",
-                args: [.string(F.bundle)]
-            ).isSuccess
-        )
-        #expect(pulled.launchFollow.owed() == F.bundle)
+        // Running: the activate branch owes only where nothing of
+        // the app is up here — one showing is merely focused.
+        for (visible, owes) in [(0, true), (1, false)] {
+            let pulled = F.makeCore(pressAge: nil)
+            pulled.openOrFocus.runningAppPID = { _ in 7 }
+            pulled.openOrFocus.census = { _ in
+                KiwiCore.AppWindowCensus(visible: visible, minimized: [])
+            }
+            pulled.openOrFocus.activate = { _ in }
+            #expect(
+                pulled.execute(
+                    "pull_or_spawn",
+                    args: [.string(F.bundle)]
+                ).isSuccess
+            )
+            #expect((pulled.launchFollow.owed() == F.bundle) == owes)
+        }
     }
 }

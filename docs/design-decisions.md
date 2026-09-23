@@ -4624,11 +4624,14 @@ the user caused:
   when the switch was a key press, so an activation inside
   twice the switch settle owes nothing, and a switch retires a
   standing debt.
-- **Open or Focus owes it outright.** The verb is the user
-  naming the app, so it owes the follow whatever the press
-  timing — from the CLI there is none — and the app's own
-  activation that follows keeps the debt rather than retiring
-  it, since it is that launch completing.
+- **Open or Focus owes it outright where it opens something.**
+  The verb is the user naming the app, so a launch — or a pull
+  of a running app with nothing up — owes the follow whatever
+  the press timing (from the CLI there is none), and the app's
+  own activation that follows keeps the debt rather than
+  retiring it, since it is that launch completing. A pull of an
+  app already showing a window opens nothing, so it owes
+  nothing, and a ⌘N moments later stays where the rule files it.
 
 The debt is keyed by the app's bundle id and paid by its
 window's ARRIVAL, never at the activation, because the window

@@ -22,7 +22,10 @@ final class LaunchFollowIntent {
     /// 0.04–6.3 s after the activation on device (#1599).
     static let drainWindow: TimeInterval =
         FollowFocusIntent.drainWindow
-        + KiwiCore.adoptionHealDefault.seconds
+        + TimeInterval(
+            KiwiCore.adoptionHealDefault
+                / Duration.milliseconds(1)
+        ) / 1_000
 
     /// Longest gap between a click or key-down and the activation
     /// it caused: a Dock click measured 0.29 s and a Spotlight
@@ -35,7 +38,7 @@ final class LaunchFollowIntent {
     /// 0.3 s; the rest is headroom for a slow cold start. A
     /// running app coming forward — a switch, a self-activation,
     /// an un-minimize — is older (#1599).
-    static let launchGrace: TimeInterval = FollowFocusIntent.drainWindow
+    static let launchGrace: TimeInterval = 5
 
     /// An activation this soon after a native Desktop switch is
     /// the switch's own, not a launch: measured 0.3–0.9 s after
@@ -80,14 +83,5 @@ final class LaunchFollowIntent {
     /// Retires the debt unpaid.
     func forget() {
         pending = nil
-    }
-}
-
-extension Duration {
-    /// The duration in seconds, fraction included.
-    var seconds: TimeInterval {
-        let parts = components
-        return TimeInterval(parts.seconds)
-            + TimeInterval(parts.attoseconds) / 1e18
     }
 }

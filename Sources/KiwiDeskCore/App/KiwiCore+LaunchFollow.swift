@@ -65,18 +65,25 @@ extension KiwiCore {
         return space
     }
 
-    /// The switch itself, after the arrival retile has filed the
-    /// window: a whole `followSwitch` — settle, reissue retile,
-    /// Monocle drop — since no native switch rides along.
-    func payLaunchFollow(_ window: WindowID, into space: SpaceID) {
+    /// The switch itself, IN PLACE of the arrival's event retile,
+    /// which would park the new window in its still-hidden Space
+    /// only for the switch to bring it back: a whole
+    /// `followSwitch` — settle, reissue retile, Monocle drop —
+    /// since no native switch rides along. False when nothing was
+    /// switched, so the caller retiles as usual.
+    func payLaunchFollow(
+        _ window: WindowID,
+        into space: SpaceID
+    ) -> Bool {
         guard state.workspaces.space(of: window) == space else {
-            return
+            return false
         }
         onLog(
             "launch follow: w\(window.raw) opened into its app "
                 + "rule's space \(space.raw)"
         )
         followSwitch(to: space, focusing: window)
+        return true
     }
 
     /// The lesser of the seconds since the last left click and

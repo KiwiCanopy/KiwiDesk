@@ -264,9 +264,13 @@ editing here:
   *Opening an app follows its window into its rule's Space*).
   The fold's only input is `AppliedEffects.placedByAppRule`, set
   where the RULE chose a Space other than the active one; the
-  arrival arm CLAIMS and pays with `followSwitch` after its own
-  retile — a whole switch, settle included, since no native
-  switch rides along. A new route that should follow a launch
+  arrival arm CLAIMS and pays with `followSwitch` IN PLACE of
+  its own event retile — a whole switch, settle included, since
+  no native switch rides along, and never after that retile,
+  which parks the new window for the switch to bring back
+  (`LaunchFollowSeamTests` ▸ `paidInPlaceOfTheArrivalRetile`).
+  Open or Focus owes only where nothing of the app is up; one
+  already showing is merely focused. A new route that should follow a launch
   owes through that door, and a new moment that is "not a
   launch" retires through `forget()` beside the two there —
   `LaunchFollowSeamTests` counts them, since both seams default

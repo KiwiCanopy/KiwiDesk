@@ -45,10 +45,7 @@ struct LaunchFollowSeamTests {
         // retile.
         ("launchFollow.claim(", followFile, 1),
         ("= claimLaunchFollow(", "KiwiCore+Events.swift", 1),
-        (
-            "payLaunchFollow(window, into: space)",
-            "KiwiCore+Events.swift", 1
-        ),
+        ("payLaunchFollow($0.0, into: $0.1)", "KiwiCore+Events.swift", 1),
         ("followSwitch(to: space, focusing: window)", followFile, 1),
         // The fold's one input to the payer.
         (
@@ -109,19 +106,24 @@ struct LaunchFollowSeamTests {
         #expect(report.lowerBound < reconcile.lowerBound)
     }
 
-    /// The switch runs AFTER the arrival retile has filed the
-    /// window, so the settle and the reissue deliver it.
-    @Test("the launch follow pays after the arrival retile")
-    func paidAfterTheArrivalRetile() throws {
+    /// The switch REPLACES the arrival's event retile: run after
+    /// it, that retile parks the new window in its still-hidden
+    /// Space for the switch to bring back — a visible double move.
+    @Test("the launch follow pays in place of the arrival retile")
+    func paidInPlaceOfTheArrivalRetile() throws {
         let body = try SourceScan.functionBody(
             of: "handle",
             in: "KiwiCore+Events.swift",
             under: "App"
         )
+        let pay = try #require(body.range(of: "payLaunchFollow("))
+        let gate = try #require(
+            body.range(of: "if willRetile, followed != true {")
+        )
         let retile = try #require(
             body.range(of: "retile(newlyCreatedWindow:")
         )
-        let pay = try #require(body.range(of: "payLaunchFollow("))
-        #expect(retile.lowerBound < pay.lowerBound)
+        #expect(pay.lowerBound < gate.lowerBound)
+        #expect(gate.lowerBound < retile.lowerBound)
     }
 }

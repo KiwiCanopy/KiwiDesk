@@ -304,11 +304,13 @@ extension KiwiCore {
         let willRetile =
             TilingEngine.shouldRetile(after: event)
             && !defersEventRetiles
-        if willRetile {
-            retile(newlyCreatedWindow: newlyCreatedWindow)
+        // A paid launch follow's switch retile places the arrival
+        // in its Space, so the event retile would only park it.
+        let followed = launchFollow.map {
+            payLaunchFollow($0.0, into: $0.1)
         }
-        if let (window, space) = launchFollow {
-            payLaunchFollow(window, into: space)
+        if willRetile, followed != true {
+            retile(newlyCreatedWindow: newlyCreatedWindow)
         }
         runCloseReturnTail(
             event: event,
