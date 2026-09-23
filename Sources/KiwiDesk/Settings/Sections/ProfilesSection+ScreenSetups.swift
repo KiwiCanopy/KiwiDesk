@@ -156,7 +156,7 @@ extension ProfilesSection {
             Section(
                 L(
                     "profiles.sets.add.header",
-                    "Move a screen setup to %1$@",
+                    "Move a screen setup to “%1$@”",
                     summary.name
                 )
             ) {
@@ -204,13 +204,17 @@ extension ProfilesSection {
         case (true, let owner?):
             return L(
                 "profiles.sets.add.connected_held_by",
-                "Connected now · in %1$@",
+                "Connected · currently in “%1$@”",
                 owner
             )
         case (true, nil):
             return L("profiles.sets.add.connected", "Connected now")
         case (false, let owner?):
-            return L("profiles.sets.add.held_by", "In %1$@", owner)
+            return L(
+                "profiles.sets.add.held_by",
+                "Currently in “%1$@”",
+                owner
+            )
         case (false, nil):
             return ""
         }
