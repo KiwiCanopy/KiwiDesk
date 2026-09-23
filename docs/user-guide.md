@@ -579,9 +579,10 @@ row. On a temporary layout or a built-in Standard the slot reads
 **Save as New Profile…**.
 
 :::unreleased
-Saving the running layout, or loading a profile saved for this many
-screens, moves the connected screen setup to that profile from any
-other, so the next time these screens connect, it loads.
+Loading a profile saved for this many screens moves the connected
+screen setup to it from any other profile, so the next time these
+screens connect, it loads. Saving adds the connected screen setup
+only when no other profile has it.
 :::
 
 While management is **paused** (Accessibility off), KiwiDesk
