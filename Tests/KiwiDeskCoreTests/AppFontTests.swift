@@ -8,31 +8,43 @@ import Testing
 /// fails here at `swift test` time, never silently at runtime.
 @Suite("App font shipped resources")
 struct AppFontResourceTests {
-    @Test("Bundled icon map decodes and is non-empty")
-    func bundledMapDecodes() {
-        let map = AppFontGlyphMap.loadBundled()
-        #expect((map?.count ?? 0) > 100)
+    @Test("Bundled font's name table decodes and is non-empty")
+    func bundledMapDecodes() throws {
+        let map = try #require(AppFontGlyphMap.loadBundled())
+        #expect(map.exact.count > 100)
         // Ligatures are :name: tokens; spot-check a stable app.
-        #expect(map?["Safari"]?.hasPrefix(":") == true)
+        #expect(map.ligature(for: "Safari")?.hasPrefix(":") == true)
     }
 
     @Test("Localized aliases are plain keys in the same map")
-    func localizedAliases() {
-        let map = AppFontGlyphMap.loadBundled()
-        #expect(map?["Activity Monitor"] != nil)
+    func localizedAliases() throws {
+        let map = try #require(AppFontGlyphMap.loadBundled())
+        #expect(map.ligature(for: "Activity Monitor") != nil)
         #expect(
-            map?["Aktivitätsanzeige"]
-                == map?["Activity Monitor"]
+            map.ligature(for: "Aktivitätsanzeige")
+                == map.ligature(for: "Activity Monitor")
         )
     }
 
-    @Test("Corrupt map file decodes to nil, not a crash")
-    func corruptFile() throws {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("kiwi-bad-icon-map.json")
-        try Data("{\"not\": \"an array\"}".utf8).write(to: url)
-        defer { try? FileManager.default.removeItem(at: url) }
-        #expect(AppFontGlyphMap.load(from: url) == nil)
+    /// Upstream marks versioned app names with a trailing `*`;
+    /// read as an exact key, "Adobe Photoshop 2026" found none.
+    @Test("Bundled prefix names match a versioned app name")
+    func bundledPrefixNames() throws {
+        let map = try #require(AppFontGlyphMap.loadBundled())
+        #expect(!map.prefixes.isEmpty)
+        #expect(
+            map.ligature(for: "Adobe Photoshop 2026") == ":photoshop:"
+        )
+        #expect(map.exact.keys.allSatisfy { !$0.hasSuffix("*") })
+    }
+
+    @Test("Corrupt font data decodes to nil, not a crash")
+    func corruptFont() {
+        #expect(AppFontGlyphMap.load(fontData: Data()) == nil)
+        #expect(
+            AppFontGlyphMap.load(fontData: Data(repeating: 0xFF, count: 64))
+                == nil
+        )
     }
 
     @Test("Bundled TTF registers and resolves to a font")
@@ -51,7 +63,7 @@ struct AppFontResourceTests {
     @Test("Bundled map and TTF both carry the KiwiDesk glyph")
     func kiwiDeskGlyph() throws {
         let map = AppFontGlyphMap.loadBundled()
-        #expect(map?["KiwiDesk"] == ":kiwidesk:")
+        #expect(map?.ligature(for: "KiwiDesk") == ":kiwidesk:")
         let font = try #require(AppFont.font(size: 12))
         // A present ligature collapses the whole token into one
         // glyph; a missing one leaves the characters unshaped.
@@ -62,24 +74,6 @@ struct AppFontResourceTests {
             )
         )
         #expect(CTLineGetGlyphCount(line) == 1)
-    }
-
-    @Test("Degenerate map entries are dropped, not served")
-    func degenerateEntriesDropped() throws {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("kiwi-degenerate-map.json")
-        let json = """
-            [
-              {"iconName": "", "appNames": ["Ghost"]},
-              {"iconName": ":ok:", "appNames": ["", "Real"]}
-            ]
-            """
-        try Data(json.utf8).write(to: url)
-        defer { try? FileManager.default.removeItem(at: url) }
-        let map = AppFontGlyphMap.load(from: url)
-        #expect(map?["Ghost"] == nil)
-        #expect(map?[""] == nil)
-        #expect(map?["Real"] == ":ok:")
     }
 }
 
@@ -110,7 +104,7 @@ struct AppFontResolverTests {
         let gate = DispatchSemaphore(value: 0)
         let resolver = AppFontResolver(loader: {
             gate.wait()
-            return ["Zed": ":zed:"]
+            return AppFontGlyphMap(["Zed": ":zed:"])
         })
         await loaded(resolver) {
             // Kicks the load; the loader is still gated, so
@@ -132,7 +126,7 @@ struct AppFontResolverTests {
     @Test("Known name hits; unknown app and image source nil")
     func glyphHit() async {
         let resolver = AppFontResolver(loader: {
-            ["Zed": ":zed:", "Éditeur": ":zed:"]
+            AppFontGlyphMap(["Zed": ":zed:", "Éditeur": ":zed:"])
         })
         await loaded(resolver) { resolver.preload() }
         #expect(
@@ -180,7 +174,7 @@ struct AppFontResolverTests {
         let count = Count()
         let resolver = AppFontResolver(loader: {
             count.bump()
-            return [:]
+            return AppFontGlyphMap([:])
         })
         await loaded(resolver) {
             _ = resolver.glyph(forAppName: "A", source: .appFont)

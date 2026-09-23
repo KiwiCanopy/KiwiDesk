@@ -61,7 +61,7 @@ extension SpaceBarGlyphCellTests {
     @Test("every bundled ligature's ink fits the floor's cell")
     func everyLigatureFitsTheCell() throws {
         let map = try #require(AppFontGlyphMap.loadBundled())
-        let ligatures = Set(map.values)
+        let ligatures = map.ligatures
         try #require(ligatures.count > 100)
         let size = Self.style.glyphFontSize(forDepth: Self.depth)
         let cell = CGRect(x: 0, y: 0, width: Self.cell, height: Self.cell)

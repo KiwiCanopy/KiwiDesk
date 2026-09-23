@@ -117,7 +117,6 @@ jobs:
           # the question is whether an ASSET moved. A tag bump that
           # ships byte-identical files is not worth a PR.
           if git diff --quiet -- \
-            Sources/KiwiDeskCore/Resources/AppFont/icon_map.json \
             Sources/KiwiDeskCore/Resources/AppFont/sketchybar-app-font.ttf
           then
             echo "::error::$TAG ships identical assets"

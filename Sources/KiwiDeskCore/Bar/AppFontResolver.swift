@@ -5,12 +5,12 @@ import AppKit
 @MainActor
 public final class AppFontResolver {
     /// Injectable for tests; defaults to bundled map.
-    private let loader: @Sendable () -> [String: String]?
+    private let loader: @Sendable () -> AppFontGlyphMap?
 
     /// Callback fired once background map loading completes (`KiwiCore`).
     public var onLoad: @MainActor () -> Void = {}
 
-    private var map: [String: String]?
+    private var map: AppFontGlyphMap?
     private var loadStarted = false
 
     public init() {
@@ -18,7 +18,7 @@ public final class AppFontResolver {
     }
 
     /// Test seam: inject a map loader.
-    init(loader: @escaping @Sendable () -> [String: String]?) {
+    init(loader: @escaping @Sendable () -> AppFontGlyphMap?) {
         self.loader = loader
     }
 
@@ -32,7 +32,7 @@ public final class AppFontResolver {
             let loaded = loader()
             await MainActor.run {
                 guard let self else { return }
-                self.map = loaded ?? [:]
+                self.map = loaded ?? AppFontGlyphMap([:])
                 self.onLoad()
             }
         }
@@ -48,8 +48,6 @@ public final class AppFontResolver {
         guard source == .appFont, AppFont.registered else {
             return nil
         }
-        return map?[name].flatMap {
-            $0.isEmpty ? nil : $0
-        }
+        return map?.ligature(for: name)
     }
 }
