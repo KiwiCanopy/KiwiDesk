@@ -115,4 +115,30 @@ struct ScreenSetupModelTests {
         let home = model.profileSummaries.first { $0.name == "Home" }
         #expect(home?.sets.count == 2)
     }
+
+    /// A pick onto the loaded profile moves the LIVE pins, and an
+    /// unedited Live draft follows — or its next Save would write
+    /// the old pins back.
+    @Test("An unedited draft follows the pins a pick leaves live")
+    func draftFollowsPickedPins() throws {
+        let core = makeCore()
+        connect(core, ["A", "B"])
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.ensureSpace("2")
+        core.spacePins = ["2": "B:100x100"]
+        try core.persistProfile(named: "Work", modes: nil)
+        try core.persistProfile(named: "Home", modes: nil)
+        try core.loadProfile(named: "Work")
+        let model = makeTestModel(core: core)
+        model.refreshProfiles()
+        let pair = ["A:100x100", "B:100x100"]
+        model.claimScreenSetup(pair, for: "Home")
+        model.config.spacePins = [:]
+        model.cleanConfig.spacePins = [:]
+        core.spacePins = [:]
+        model.claimScreenSetup(pair, for: "Work")
+        #expect(core.livePins == ["2": "B:100x100"])
+        #expect(model.config.spacePins == core.livePins)
+        #expect(model.cleanConfig.spacePins == core.livePins)
+    }
 }
