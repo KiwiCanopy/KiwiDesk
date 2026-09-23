@@ -1,6 +1,7 @@
 import ApplicationServices
 import CoreGraphics
 import Testing
+import os
 
 @testable import KiwiDeskCore
 
@@ -51,17 +52,19 @@ struct FrameApplierStampTests {
     @Test("The grace is measured on the injected clock")
     func graceRunsOnTheInjectedClock() {
         let applier = makeApplier()
-        nonisolated(unsafe) var now: TimeInterval = 100
-        applier.clock = { now }
+        // Locked, not captured: `clock` is `@Sendable`, and
+        // production reads it off the main actor.
+        let now = OSAllocatedUnfairLock<TimeInterval>(initialState: 100)
+        applier.clock = { now.withLock { $0 } }
         applier.applyInstant(
             w,
             CGRect(x: 0, y: 0, width: 100, height: 100)
         )
         #expect(applier.didRecentlySetFrame(w))
         #expect(applier.instantTarget(w) != nil)
-        now = 100.5
+        now.withLock { $0 = 100.5 }
         #expect(applier.didRecentlySetFrame(w))
-        now = 101.5
+        now.withLock { $0 = 101.5 }
         #expect(!applier.didRecentlySetFrame(w))
         #expect(applier.instantTarget(w) == nil)
     }

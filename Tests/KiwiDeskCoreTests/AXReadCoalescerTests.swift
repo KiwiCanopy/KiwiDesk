@@ -45,16 +45,24 @@ struct AXReadCoalescerTests {
 
     private let element = AXUIElementCreateSystemWide()
 
+    /// The frame the app reports, changed by the test between
+    /// pumps. Main-actor state: the pump runs every read on this
+    /// actor, and the reader says so by asserting it.
+    @MainActor
+    private final class Reported {
+        var frame: CGRect
+        init(_ frame: CGRect) { self.frame = frame }
+    }
+
     @Test("A storm coalesces to one read plus one re-read")
     func stormCoalesces() {
         let pump = Pump()
-        nonisolated(unsafe) var frame = CGRect(
-            x: 0,
-            y: 0,
-            width: 800,
-            height: 600
+        let reported = Reported(
+            CGRect(x: 0, y: 0, width: 800, height: 600)
         )
-        let coalescer = makeCoalescer(pump: pump) { frame }
+        let coalescer = makeCoalescer(pump: pump) {
+            MainActor.assumeIsolated { reported.frame }
+        }
         var delivered: [CGRect] = []
         for _ in 0..<10 {
             coalescer.request(
@@ -73,7 +81,7 @@ struct AXReadCoalescerTests {
         // Dirty: one re-read was scheduled so the final frame
         // lands too.
         #expect(pump.work.count == 1)
-        frame = CGRect(x: 0, y: 0, width: 563, height: 600)
+        reported.frame = CGRect(x: 0, y: 0, width: 563, height: 600)
         pump.drainOne()
         #expect(delivered.count == 2)
         #expect(delivered.last?.width == 563)

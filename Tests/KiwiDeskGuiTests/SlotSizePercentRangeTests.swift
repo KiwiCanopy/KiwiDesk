@@ -12,7 +12,7 @@ import Testing
 @Suite("Slot size percent range")
 struct SlotSizePercentRangeTests {
     @Test("The slider spans exactly what the model stores")
-    func rangeMatchesTheModel() {
+    @MainActor func rangeMatchesTheModel() {
         // A stop below `minFraction` would write a percentage the
         // setter refuses to keep — the control would report a
         // value the config does not hold. Above, a full-axis slot
@@ -28,7 +28,7 @@ struct SlotSizePercentRangeTests {
     }
 
     @Test("The shipped standard is a stop the slider can return to")
-    func defaultIsReachable() {
+    @MainActor func defaultIsReachable() {
         let standard = ScrollSize.autoHorizontalFraction * 100
         #expect(SlotSizeRows.percentRange.contains(standard))
         let steps =
@@ -38,7 +38,7 @@ struct SlotSizePercentRangeTests {
     }
 
     @Test("A step moves a visible amount of window")
-    func stepIsPerceptible() {
+    @MainActor func stepIsPerceptible() {
         // The slot resolves against the axis, so one step is
         // `step%` of it — on the narrowest display this app
         // targets that is still tens of points, which is why the

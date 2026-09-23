@@ -120,7 +120,7 @@ struct PaletteSceneRoleTests {
     /// the panel column's own width budget, and not the
     /// runaway the tile's multiplier produced.
     @Test("the panel scene fits the panel column")
-    func panelSceneFitsItsColumn() {
+    @MainActor func panelSceneFitsItsColumn() {
         let height = PaletteSceneThumbnail.panelHeight
         // A real drawing, not a collapsed one.
         #expect(height > 120)

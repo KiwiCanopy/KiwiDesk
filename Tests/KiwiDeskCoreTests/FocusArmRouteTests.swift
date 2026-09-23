@@ -39,6 +39,8 @@ struct FocusArmRouteTests {
         var listed: [WindowID] = []
         var work: [@Sendable () -> Void] = []
         var frame = CGRect(x: 10, y: 20, width: 800, height: 600)
+        /// Ids the window-id resolver hands out, in order.
+        var answers: [WindowID] = []
 
         func drainOne() {
             guard !work.isEmpty else { return }
@@ -169,9 +171,9 @@ struct FocusArmRouteTests {
         let twin = WindowID(12)
         loop.elements[pid] = [id: element, twin: element]
         box.listed = [id, twin]
-        nonisolated(unsafe) var answers = [id, twin, id]
+        box.answers = [id, twin, id]
         loop.resolveWindowID = { _ in
-            MainActor.assumeIsolated { answers.removeFirst() }
+            MainActor.assumeIsolated { box.answers.removeFirst() }
         }
         report(loop)
         #expect(

@@ -366,6 +366,11 @@ bite large test PRs:
   convenience data. Pure queries stay non-discardable, and tests
   about command success/failure still assert the response; never
   remove coverage merely to silence a warning.
+- **Leave no compiler warning in `Tests/`**: the test steps carry
+  the Build step's ratchet (#1596,
+  `WarningRatchetWorkflowTests`; the argument is
+  [packaging-and-release.md](packaging-and-release.md)'s), so run
+  the `verify-gate` skill's local ratchet check before pushing.
 - Config/profile shape is pinned by `SettingsCodingTests` — extend
   it when adding a setting (Lua name → JSON key via `CodingKeys`;
   see [config-vocabulary.md](config-vocabulary.md)).

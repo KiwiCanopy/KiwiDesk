@@ -162,6 +162,42 @@ struct WarningRatchetWorkflowTests {
         )
     }
 
+    /// The `-Xswiftc` arguments a step passes, in order.
+    private static func ratchetFlags(in step: String) -> [String] {
+        let words = step.split(whereSeparator: \.isWhitespace)
+        return words.indices.dropLast()
+            .filter { words[$0] == "-Xswiftc" }
+            .map { String(words[$0 + 1]) }
+    }
+
+    /// The test steps pass the Build step's `-Xswiftc` arguments
+    /// (#1596; the argument is packaging-and-release.md's). Read
+    /// off the Build step rather than restated, so an argument
+    /// added there is owed here too.
+    @Test("The test steps ratchet with the Build step's flags")
+    func testStepsTakeTheBuildFlags() throws {
+        let yaml = try ci()
+        let build = Self.ratchetFlags(in: try debugBuildStep())
+        try #require(build.contains("-warnings-as-errors"))
+        for name in ["Test", "Test (ExecTests)"] {
+            let step = try workflowStep(name, in: yaml)
+            let first = step.split(separator: "\n").first
+                .map { $0.trimmingCharacters(in: .whitespaces) }
+            try #require(
+                first == "- name: \(name)",
+                "'\(name)' matched \(first ?? "nothing")"
+            )
+            #expect(
+                Self.ratchetFlags(in: step) == build,
+                """
+                ci.yml's \(name) step does not pass the Build \
+                step's flags: a warning in Tests/ would land \
+                green, and the package rebuilds between steps
+                """
+            )
+        }
+    }
+
     /// The exemption, and why it is a clause rather than a
     /// comment: a ratchet on the release build would let a
     /// toolchain bump block a tag push, which
@@ -192,8 +228,8 @@ struct WarningRatchetWorkflowTests {
     /// #1170 removes it the downgrade must go with it, or every
     /// later deprecated-API use is permanently un-ratcheted with
     /// nothing to say so. Scoped to `Sources/` because that is
-    /// what this step compiles — `swift build` does not build
-    /// `Tests/` (#1596).
+    /// where the excused call lives; the test steps share the
+    /// downgrade only because they share the flags.
     @Test("The deprecation downgrade is still load-bearing")
     func downgradeIsLive() throws {
         let step = try debugBuildStep()
@@ -209,6 +245,35 @@ struct WarningRatchetWorkflowTests {
             the call (#1170), or the ratchet stops seeing every \
             future deprecation.
             """
+        )
+    }
+
+    /// The `verify-gate` skill's local check is the fourth copy
+    /// of these arguments, and the one a developer runs: out of
+    /// step, a green local check precedes a red PR — the gap it
+    /// exists to close (#1596).
+    @Test("The skill's local ratchet check matches the Build step")
+    func skillCheckMatchesTheBuildStep() throws {
+        let skill = try String(
+            contentsOf: scriptFixtureRepoRoot()
+                .appendingPathComponent(
+                    ".claude/skills/verify-gate/SKILL.md"
+                ),
+            encoding: .utf8
+        )
+        // Odd pieces are the fenced blocks; the prose around them
+        // names the flag too.
+        let fenced = skill.components(separatedBy: "```")
+            .enumerated().filter { $0.offset % 2 == 1 }.map(\.element)
+        let check = try #require(
+            fenced.first { $0.contains("-warnings-as-errors") },
+            "the skill no longer shows the ratchet check"
+        )
+        #expect(check.contains("--build-tests"))
+        #expect(
+            Self.ratchetFlags(in: check)
+                == Self.ratchetFlags(in: try debugBuildStep()),
+            "the skill's ratchet check has drifted from ci.yml"
         )
     }
 }

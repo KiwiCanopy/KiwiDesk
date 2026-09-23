@@ -44,7 +44,7 @@ struct ZOrderDrainTests {
         )
         server.latency[WindowID(2)] = 0.06
         let drain = server.restoreDrain(above: ids([9]))
-        drain.run(ids([2, 1]))
+        _ = drain.run(ids([2, 1]))
         #expect(server.stacking() == ids([7, 1, 2, 9]))
         #expect(server.raised == ids([2, 1]))
     }
@@ -89,7 +89,7 @@ struct ZOrderDrainTests {
         // rest, and raised first, which is the case that broke.
         server.latency[WindowID(3)] = 0.08
         let drain = server.restoreDrain()
-        drain.run(ids([4, 3, 2, 1]))
+        _ = drain.run(ids([4, 3, 2, 1]))
         #expect(server.stacking() == ids([1, 2, 3, 4]))
         #expect(server.raised == ids([3, 2, 1]))
     }
@@ -102,9 +102,13 @@ struct ZOrderDrainTests {
         let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
         server.latency[WindowID(3)] = .infinity
         let drain = server.restoreDrain()
-        drain.run(ids([4, 3, 2, 1]))
+        let returned = drain.run(ids([4, 3, 2, 1]))
         #expect(server.raised.contains(WindowID(1)))
         #expect(server.raised.contains(WindowID(2)))
+        // The wedged raise is still RETURNED: the echo ledger keys
+        // off this, and a raise left out has its stamp dropped
+        // while its echo is in flight.
+        #expect(returned == server.raised)
         // It is not retried — a second raise inside one sequence
         // strands focus, see `neverRaisesAWindowTwice` — so it
         // stays where it is, and the windows that do answer still
@@ -163,7 +167,7 @@ struct ZOrderDrainTests {
             let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
             server.latency[WindowID(2)] = latency
             let drain = server.restoreDrain()
-            drain.run(ids([4, 3, 2, 1]))
+            _ = drain.run(ids([4, 3, 2, 1]))
             // Non-empty first: `Set(raised).count == raised.count`
             // is also true of a drain that raised nothing, so
             // without this the guard passes on the very failure
@@ -213,7 +217,7 @@ struct ZOrderDrainTests {
         let server = FakeWindowServer(order: ids([4, 3, 2, 1]))
         server.currentUntilRaises = 2
         let drain = server.restoreDrain()
-        drain.run(ids([4, 3, 2, 1]))
+        _ = drain.run(ids([4, 3, 2, 1]))
         #expect(server.raised == ids([3, 2]))
     }
 }

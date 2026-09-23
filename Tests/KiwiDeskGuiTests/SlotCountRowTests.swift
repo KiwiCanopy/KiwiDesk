@@ -221,7 +221,7 @@ struct PercentFormatterTests {
 @Suite("Fraction chips (#1382)")
 struct FractionChipsTests {
     @Test("the five shares, in reading order")
-    func shares() {
+    @MainActor func shares() {
         let glyphs = FractionChips.shares.map(\.glyph)
         #expect(glyphs == ["¼", "⅓", "½", "⅔", "¾"])
         let values = FractionChips.shares.map(\.value)
@@ -230,7 +230,7 @@ struct FractionChipsTests {
     }
 
     @Test("a chip is pressed only where the share reads as it")
-    func pressed() {
+    @MainActor func pressed() {
         #expect(FractionChips.matches(0.5, 0.5))
         #expect(FractionChips.matches(0.3333, 1.0 / 3))
         #expect(!FractionChips.matches(0.34, 1.0 / 3))
