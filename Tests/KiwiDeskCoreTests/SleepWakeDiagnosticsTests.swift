@@ -54,6 +54,16 @@ struct SleepWakeDiagnosticsTests {
         var lines: [String] = []
     }
 
+    /// The connected screens, changed between a rest and a
+    /// return. Main-actor state, as the seam reading it is.
+    @MainActor
+    private final class Screens {
+        var fingerprints: [String]
+        init(_ fingerprints: [String]) {
+            self.fingerprints = fingerprints
+        }
+    }
+
     /// The one line containing `needle`. Fails the test when no
     /// line matches, so an assertion about a line's CONTENT can
     /// never pass by that line being absent.
@@ -142,10 +152,10 @@ struct SleepWakeDiagnosticsTests {
     func skipCarriesTheSessionLockState() async throws {
         let log = LogBox()
         let manager = makeManager(log, locked: true)
-        var displays = ["main", "side"]
-        manager.displayFingerprints = { displays }
+        let screens = Screens(["main", "side"])
+        manager.displayFingerprints = { screens.fingerprints }
         manager.systemWillRest(.lock)
-        displays = ["main"]
+        screens.fingerprints = ["main"]
         manager.systemDidReturn(.unlock)
         await manager.pendingReplay?.value
         #expect(
