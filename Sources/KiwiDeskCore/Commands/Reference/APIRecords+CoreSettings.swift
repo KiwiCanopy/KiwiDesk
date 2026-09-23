@@ -130,10 +130,11 @@ extension APIReference {
             "Returns the active profile and whether it is dirty."
         ),
         "bind_profile_to_desktop": APIRecord(
-            "Binds a profile to a macOS Desktop on the main "
-                + "screen, one per screen count.",
+            "Binds a profile to a main-screen Desktop; screen "
+                + "fingerprints after it scope it to that setup.",
             .desktop("desktop"),
-            .text("profile")
+            .text("profile"),
+            .text("screen", optional: true)
         ),
     ]
 }

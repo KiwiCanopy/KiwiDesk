@@ -12,8 +12,9 @@ import Foundation
 public enum ProfileVerdict: Equatable, Sendable {
     /// A native Desktop binding claims the active Desktop. This
     /// OUTRANKS monitor matching (#7), so it is a case rather
-    /// than a footnote on the others.
-    case boundToDesktop(name: String, desktop: Int)
+    /// than a footnote on the others. `reading` names the rung the
+    /// binding took (#1609).
+    case boundToDesktop(desktop: Int, reading: BoundReading)
     /// A saved profile stores exactly these monitors.
     case exactMonitors(name: String)
     /// No exact set matches; this profile is the screen count's
@@ -32,6 +33,22 @@ public enum ProfileVerdict: Equatable, Sendable {
     /// Nothing matches and no built-in plans for this many
     /// screens.
     case none
+}
+
+/// What a Desktop binding loads on the connected screens (#1609):
+/// the profile, the setup its entry is scoped to — nil for all
+/// screen setups — and the profile holding the connected setup
+/// that an all-setups pick outranks, nil where none does.
+public struct BoundReading: Equatable, Sendable {
+    public let name: String
+    public let setup: [String]?
+    public let over: String?
+
+    public init(name: String, setup: [String]?, over: String?) {
+        self.name = name
+        self.setup = setup
+        self.over = over
+    }
 }
 
 extension KiwiCore {
@@ -98,11 +115,11 @@ extension KiwiCore {
         // both of a Desktop's keys — so this stays a pure query
         // over injected state.
         if let binding = activeBinding,
-            case .success(let bound) = boundProfile(of: binding)
+            let reading = boundReading(of: binding)
         {
             return .boundToDesktop(
-                name: bound.name,
-                desktop: binding.desktop
+                desktop: binding.desktop,
+                reading: reading
             )
         }
         switch profiles.match(
@@ -115,6 +132,30 @@ extension KiwiCore {
         case .none:
             return fallbackVerdict(displays: displays)
         }
+    }
+
+    /// What `binding` loads on the connected screens, and by which
+    /// rung (#1609) — nil where the gate stands it aside. The one
+    /// reading the verdict and each Desktop row take: both call
+    /// this, the verdict over the LIVE binding and a row over its
+    /// DRAFT record, so an unsaved edit shows on the row first.
+    ///
+    /// COST: the gate reads profile files and an all-setups pick
+    /// scans them for the holder, so this is a refresh-time query.
+    public func boundReading(of binding: DesktopBinding) -> BoundReading? {
+        guard case .success(let pick) = boundProfile(of: binding)
+        else { return nil }
+        let name = pick.profile.name
+        if let setup = pick.entry.setup {
+            return BoundReading(name: name, setup: setup, over: nil)
+        }
+        var over: String?
+        if case .exact(let holder) = profiles.match(
+            fingerprints: liveFingerprints
+        ), holder.name != name {
+            over = holder.name
+        }
+        return BoundReading(name: name, setup: nil, over: over)
     }
 
     /// The `.none` arm, mirroring `handleMonitorChange`'s: the

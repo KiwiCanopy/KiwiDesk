@@ -6,12 +6,14 @@ import Foundation
 extension KiwiCore {
     // MARK: - Commands
 
-    /// `bind_profile_to_desktop(desktop, profile)`.
+    /// `bind_profile_to_desktop(desktop, profile, screen…)`.
     /// The binding applies immediately when the bound space is
     /// the current one, and on every future switch to it — where
     /// the profile fits the connected screen count (#1394). A
     /// second call with a profile of another count ADDS beside
-    /// the first; one of the same count replaces it (#1436).
+    /// the first; one of the same count and scope replaces it
+    /// (#1436). Further arguments, screen fingerprints, scope the
+    /// entry to that one screen setup (#1609).
     func bindProfileToDesktop(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -26,6 +28,25 @@ extension KiwiCore {
             !profile.isEmpty
         else {
             return .fail("expected profile name")
+        }
+        let screens = args.dropFirst(2)
+        let setup = screens.compactMap(\.stringValue)
+        guard setup.count == screens.count, !setup.contains("") else {
+            return .fail(
+                "expected screen fingerprints (see list_monitors)"
+            )
+        }
+        // A scope names a setup of the profile's own count, or the
+        // entry could never fire (#1609); an unsaved profile is
+        // judged once its file exists, as the count is.
+        if !setup.isEmpty,
+            let count = (try? profiles.read(name: profile))?.monitorCount,
+            count != setup.count
+        {
+            return .fail(
+                "profile '\(profile)' is saved for \(count) "
+                    + "screen(s); the setup names \(setup.count)"
+            )
         }
         // A verb, not a switch: no snapshot in hand, so this is
         // the one reading of the topology on this path — stamped,
@@ -52,7 +73,7 @@ extension KiwiCore {
         }) {
             binding.screen = screen
         }
-        binding.bind(profile) { name in
+        binding.bind(profile, setup: setup) { name in
             (try? profiles.read(name: name))?.monitorCount
         }
         desktopBindings[key] = binding
@@ -287,24 +308,14 @@ extension KiwiCore {
     func applyDesktopBinding(in snapshot: DesktopSnapshot) {
         guard let binding = mainDesktopBinding(in: snapshot)
         else { return }
-        // A Desktop bound to the profile ALREADY live stands down
-        // before the gate: what is live is answered from adoption
-        // state, never by re-reading its file on a swipe (#1245,
-        // `DesktopBindingPerCountTests` ▸ `liveProfileIsNotReread`).
-        if let live = profiles.currentName,
-            binding.profiles.contains(live),
-            let count = profiles.currentMonitorCount,
-            DesktopBindingRefusal.of(
-                profileCount: count,
-                connected: state.workspaces.allDisplays.count
-            ) == nil
-        {
-            return
-        }
+        // The gate's pick is the profile ALREADY live: stand down
+        // without reading its file on a swipe (#1245).
+        if bindingPicksLiveProfile(binding) { return }
         // The LOG names the number, which is the only name for a
         // Desktop the user has; the lookup above never does.
         switch boundProfile(of: binding) {
-        case .success(let profile):
+        case .success(let pick):
+            let profile = pick.profile
             guard profile.name != profiles.currentName else {
                 return
             }

@@ -157,7 +157,7 @@ hand-written setup, the first time you Save in Settings.
   "ignore_rules": [ "eu.exelban.Stats" ],
   "profile_bindings": {
     "9C1F2A44-3B0E-4E7D-9A21-6D5C8B7E0143": {
-      "profile": "Developer", "desktop": 1
+      "profiles": [ "Developer" ], "desktop": 1
     }
   },
   "layers": [
@@ -188,9 +188,18 @@ hand-written setup, the first time you Save in Settings.
   "application", or "custom") and **`label`**.
 
 A `profile_bindings` entry names its profiles as a list,
-`profiles`, one per screen count — a file with the older single
-`profile` is rewritten once on load — and may also carry
-`screen`, the name of the screen its Desktop was last seen on.
+`profiles`, one per screen count, each for all screen setups — a
+file with the older single `profile` is rewritten once on load —
+and may also carry `screen`, the name of the screen its Desktop
+was last seen on.
+
+:::unreleased
+An item of `profiles` may instead be an object that binds its
+profile for one screen setup, naming every screen by its
+fingerprint as `list_monitors` prints it:
+`{ "profile": "Studio", "setup": [ "Built-in Retina Display:1512x982", "LG UltraFine:2560x1440" ] }`.
+A bare name binds for all screen setups.
+:::
 
 A hand-edited `layers` list is normalized on load: empty names
 are dropped, a duplicated name keeps its first entry, `default`
@@ -524,8 +533,13 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ### Which Profile Loads
 
-The card answers for your machine now — *"Right now: 2 screens →
-Desk (these exact monitors)"* — naming which rung resolved it.
+:::unreleased
+The card at the top of the Profiles page answers for your
+machine now — *"Right now: 2 screens →
+Desk (it holds this screen setup)"* — naming which rung resolved
+it; its **?** lists the rungs.
+:::
+
 The rungs, in order:
 
 1. A **Desktop binding** on the Desktop your main screen is on
@@ -867,9 +881,10 @@ Under a row, the screen its Desktop is on — for a *not present*
 row, the screen it was last seen on.
 
 With profiles saved for more than one screen count, the card
-groups its rows by count and a Desktop holds one profile per
-group ([one profile per screen
-count](spaces-and-desktops.md#a-binding-gives-a-desktop-a-different-set-of-spaces)).
+groups its rows by count, and a pick in a group binds a profile
+for that count alone ([a binding fires only for its profile's
+screen
+count](spaces-and-desktops.md#the-main-screen-chooses-the-profile)).
 A bound name no saved profile carries sits in a last *Couldn't
 load* group; None clears it.
 
@@ -884,9 +899,9 @@ A Save while editing a stored profile keeps a binding change too.
 
 ```mermaid
 flowchart TD
-    S["Your main screen switches<br/>to a macOS Desktop"] --> B{"A profile bound<br/>to this Desktop,<br/>saved for this many screens?"}
+    S["Your main screen switches<br/>to a macOS Desktop"] --> B{"A profile bound<br/>to this Desktop<br/>for these screens?"}
     B -->|"Yes"| A["That profile activates —<br/>its layout, gaps, and rules"]
-    B -->|"No binding, or<br/>another screen count"| K["The current profile<br/>stays active"]
+    B -->|"No binding, or<br/>not for these screens"| K["The current profile<br/>stays active"]
     P["You pick a profile<br/>by shortcut or menu"] --> A
 ```
 

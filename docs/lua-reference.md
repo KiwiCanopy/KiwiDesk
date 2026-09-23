@@ -4524,17 +4524,39 @@ the call lives in `init.lua`; when the config is GUI-managed,
 bindings are stored in `gui.json` (`profile_bindings`) and
 edited in the Profiles section instead.
 
-A Desktop holds one profile per screen count: a second call
-with a profile saved for another count adds beside the first,
-and the one saved for as many screens as are connected loads;
-a call with a profile of the same count replaces it. A profile
-not saved yet replaces any other not saved yet.
+A call binds the profile for all screen setups of its screen
+count, and a Desktop holds one such profile per count: a second
+call with a profile saved for another count adds beside the
+first, and the one saved for as many screens as are connected
+loads; a call with a profile of the same count replaces it. A
+profile not saved yet replaces any other not saved yet.
 
 ```lua
--- Desktop 3 docked and undocked: one profile per screen count.
+-- Desktop 3 docked and undocked: one profile per screen count,
+-- for all setups.
 KiwiDesk.bind_profile_to_desktop(3, "Laptop")
 KiwiDesk.bind_profile_to_desktop(3, "Dual")
 ```
+
+:::unreleased
+**Screen arguments bind a profile for one screen setup.** After
+the profile, pass the fingerprint of every screen in that setup,
+as `list_monitors` prints them; the binding then loads only while
+exactly those screens are connected. A call replaces the entry of
+the same screen count **and** the same scope, so per count a
+Desktop holds one profile for all screen setups and one for each
+setup named, each of the profile's own screen count. Which entry
+loads, and that either loads over the profile that holds the
+connected setup, is the binding rung of [Profile Monitor
+Sets](#profile-monitor-sets).
+
+```lua
+-- Desktop 3 on two screens: "Dual" anywhere, "Studio" at the desk.
+KiwiDesk.bind_profile_to_desktop(3, "Dual")
+KiwiDesk.bind_profile_to_desktop(3, "Studio",
+  "Built-in Retina Display:1512x982", "LG UltraFine:2560x1440")
+```
+:::
 
 **The number names the Desktop; it does not key the binding.**
 KiwiDesk resolves the number you pass to the Desktop it
@@ -4587,11 +4609,15 @@ arrangement. Updating a profile while a new combination is connected
 teaches it that combination. When displays change, KiwiDesk resolves
 in this order:
 
-1. **Exact match** — a profile stores exactly the connected monitors
+1. **Desktop binding** — a profile bound to the Desktop your main
+   screen is on and saved for the connected screen count
+   ([bind_profile_to_desktop](#bind_profile_to_desktop)); a binding
+   that cannot fire stands aside.
+2. **Exact match** — a profile stores exactly the connected monitors
    → loaded clean.
-2. **Count default** — the profile marked `default` for that screen
+3. **Count default** — the profile marked `default` for that screen
    count → loaded with the dirty flag.
-3. **Built-in Standard** — no saved profile for that count → a built-in
+4. **Built-in Standard** — no saved profile for that count → a built-in
    positional layout composes silently; screens beyond its plan each
    get one monocle space, so no screen is ever blank.
 
@@ -4600,6 +4626,11 @@ in this order:
    the managed vocabulary. With a hand-written — or hybrid — config,
    your Lua-declared tiling stays authoritative and the Standard
    merely steers the space→screen placement.
+
+:::unreleased
+Within the binding rung, a profile bound for exactly the connected
+screen setup comes before one bound for all screen setups.
+:::
 
 Every space always resolves to a screen: an explicit fingerprint pin
 wins, then the **Main** role (the space follows whatever display is

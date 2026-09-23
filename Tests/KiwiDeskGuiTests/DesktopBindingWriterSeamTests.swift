@@ -4,10 +4,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// A Desktop binding's profile list is written through the
+/// A Desktop binding's entry list is written through the
 /// record's own algebra — `bind`, `unbind`, `rename` on
-/// `DesktopBinding` — and never by a hand edit of `profiles`
-/// beside a call site (#1436, profiles.md). The GUI's slot
+/// `DesktopBinding` — and never by a hand edit of `entries`
+/// beside a call site (#1436, #1609, profiles.md). The GUI's slot
 /// write shipped as such a hand copy and could drop a pick on a
 /// record holding two entries of one count.
 @Suite("Desktop binding writer seam (#1436)")
@@ -20,17 +20,17 @@ struct DesktopBindingWriterSeamTests {
     /// member, whatever the receiver is called. `self.profiles =`
     /// is another type's own init (a manager, a bundle).
     private let needles = [
-        ".profiles.append(",
-        ".profiles.insert(",
-        ".profiles.remove",
-        ".profiles.swapAt(",
-        ".profiles.replaceSubrange(",
-        ".profiles += ",
-        ".profiles -= ",
-        ".profiles[",
-        ".profiles = ",
+        ".entries.append(",
+        ".entries.insert(",
+        ".entries.remove",
+        ".entries.swapAt(",
+        ".entries.replaceSubrange(",
+        ".entries += ",
+        ".entries -= ",
+        ".entries[",
+        ".entries = ",
     ]
-    private let exempt = ["self.profiles = "]
+    private let exempt = ["self.entries = "]
 
     @Test("the list is edited only through the record's algebra")
     func listHasOneWriter() throws {
@@ -46,9 +46,9 @@ struct DesktopBindingWriterSeamTests {
                 if file.path.hasSuffix(home) {
                     // The algebra spells its own edits bare.
                     homeEdits +=
-                        source.occurrences(of: "profiles.append(")
-                        + source.occurrences(of: "profiles.removeAll")
-                        + source.occurrences(of: "profiles = ")
+                        source.occurrences(of: "entries.append(")
+                        + source.occurrences(of: "entries.removeAll")
+                        + source.occurrences(of: "entries = ")
                     continue
                 }
                 var scrubbed = source
@@ -81,14 +81,18 @@ struct DesktopBindingWriterSeamTests {
                 )
                 .split(whereSeparator: \.isWhitespace)
                 .joined()
-                let hits = source.occurrences(of: "DesktopBinding(profiles:")
+                // Either seeding init: a list of entries built by
+                // hand bypasses the algebra the same way (#1609).
+                let hits =
+                    source.occurrences(of: "DesktopBinding(profiles:")
+                    + source.occurrences(of: "DesktopBinding(entries:")
                 if hits > 0 { constructions[file.lastPathComponent] = hits }
             }
         }
         #expect(
             constructions == [
                 "KiwiCore+Desktops.swift": 1,
-                "DesktopsGroup+Row.swift": 1,
+                "DesktopsGroup+Write.swift": 1,
             ],
             Comment(
                 rawValue:

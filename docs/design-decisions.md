@@ -11075,8 +11075,8 @@ merely declines to repeat itself.
 **The rule that picks a profile is written down, not inferred from
 the badges.** Screen-count matching with a default preference is
 the single most consequential behavior on the page, and otherwise
-discoverable only by watching profiles load and guessing. The card
-states the rule and then answers it for the live machine, naming
+discoverable only by watching profiles load and guessing. The page
+states the rule and the card answers it for the live machine, naming
 *why* this profile answered — a Desktop binding, an exact monitor
 set, the count's default, or a built-in layout when nothing saved
 matches — because those are different promises. An exact set stops
@@ -11169,8 +11169,9 @@ that first monitor change fires it.
 
 **[Principle]**
 
-**A Desktop holds one profile per screen count, and the card
-groups by count rather than offering a count control
+**A Desktop holds one profile per screen count for all screen
+setups, and the card groups by count rather than offering a count
+control
 ([#1436](https://github.com/KiwiCanopy/KiwiDesk/issues/1436)).**
 The feature the #1394 ruling named as its own: a laptop that is
 sometimes docked wants Desktop 2 to load *Laptop* alone and *Dual*
@@ -11193,8 +11194,8 @@ your N screens*, the other counts follow under their own headers,
 and a single-count user sees the card exactly as before,
 headerless. Two consequences follow. The group header carries the
 fact a *for N screen(s)* badge would, and the card's `?` states
-the one-per-count rule in one clause with no "the others wait"
-tail (owner, 2026-09-16) — and a bound name whose profile no
+the per-count rule with no "the others wait" tail (owner,
+2026-09-16) — and a bound name whose profile no
 reading can count sits in a last *Couldn't load* group, offering
 only None, since it belongs to no count and a picker that cannot
 say which count it edits must not pretend to. A connected count no
@@ -11202,6 +11203,87 @@ profile is saved for draws no rows: a None-only picker is a dead
 control, the affordance-for-a-channel-that-does-not-exist case, so
 a caption takes its place and the other counts follow with
 headers.
+
+**[Principle]**
+
+:::unreleased
+**A Desktop binding for all screen setups outranks the profile
+that holds the connected setup, and a binding scoped to that
+setup outranks both
+([#1609](https://github.com/KiwiCanopy/KiwiDesk/issues/1609)).**
+Once a screen setup has one holder (#1530) and a Desktop picks a
+profile per count (#1436), the two answer the same question on a
+bound Desktop and one has to rank. The ladder, first that applies:
+a profile bound to the main screen's Desktop for the connected
+setup, one bound there for all setups, the profile that holds the
+setup, the count's default, a built-in layout. Putting the holder
+above the all-setups binding was the other candidate, and it was
+refused on what it does to files that already exist. A binding
+written before scopes names no setup, so it can only mean all of
+them, and after #1530 nearly every setup a user has saved on has a
+holder — so on update every existing binding would stop firing
+wherever its author had ever saved a profile, silently, with
+nothing on screen to connect the change to the update. No
+migration could undo that faithfully: nothing in a stored binding
+records which setups its author meant it to win on, so any
+rewrite is a guess, and either guess breaks someone. With the
+binding above the holder, an unscoped binding means exactly what
+it meant, nothing moves, and no migration is owed. A user who
+wants the holder to win on one setup says so by giving that setup
+its own row, which ranks first. The price is that a setup's badge
+on the Profiles page can sit on a profile that does not load on a
+bound Desktop, so the ladder is stated once, numbered, in the **?**
+of the card that says what loads — at the top of the page, beside
+the status line naming the rung that answered, the flow stating a
+fact and the **?** the concept — and the Desktop's own row names
+the holder it loads
+over, rather than leaving the badge to mislead by omission.
+
+**This does not reopen #1394's refusal of screen identity.** That
+refusal was of the Desktop's OWN screen as a binding key, which
+the Desktop stamp already separates. A scope names the whole
+connected set, by the sorted fingerprints a monitor set already
+carries, so a binding and a holder name a setup the same way.
+
+**An entry is the pair (profile, scope), and only a pair that
+overlaps replaces.** One profile may be bound for several setups
+on one Desktop, and a Desktop may hold, per count, one profile for
+all setups and one per named setup: those never compete, since
+the gate ranks a scoped entry above the all-setups one and two
+different setups are never connected at once. Two entries of one
+count and one scope are the only pair that would claim the same
+screens, so that pair, and no other, replaces. A bare name stays the stored
+shape of an all-setups entry, so every existing file decodes
+unchanged; the format bump is only the refusal an older KiwiDesk
+owes a file whose object entries it cannot read.
+
+**The Desktops card reads top-down in the ladder's order.** Under
+a Desktop come its screen-setup rows, then **Add a screen setup**,
+then **All other screen setups with 1 screen** — the first row
+that matches the
+connected screens is the one that loads, the same order the **?**
+numbers, so the layout teaches the rule rather than needing a
+caption to. The scope is written on every Desktop even with nothing
+added — **All screen setups with 1 screen** beside its picker, one
+known setup or many — because a bare picker binds every setup of
+its count without saying so, and a first binding made undocked
+then silently fires docked: the over-reach the scope exists to
+prevent (owner, 2026-09-23). The label names the screen count
+because that is where the binding stops; a count of KNOWN setups
+would claim it stops short of setups not yet connected. **Add a
+screen setup** is offered only where a second setup is known,
+since with one there is nothing to add. Adding a
+setup fills in the profile that holds it, where one does: that is
+the likeliest wish, and it is the fix for the row that says the
+holder is being loaded over. A scope menu under each picker is
+refused: the scope is then a value to open rather than a place in
+the list, and in a clickable mock the owner could not tell which
+row loaded (the issue's ruling amendment, 2026-09-23). A
+disclosure per Desktop is refused: it adds a click in front of
+the only control a row has, and collapsed it hides the rows that
+decide what loads, which is the one thing the card exists to
+show.
+:::
 
 **[Rationale]**
 

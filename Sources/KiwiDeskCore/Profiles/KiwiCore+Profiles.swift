@@ -264,9 +264,9 @@ extension KiwiCore {
             let binding = mainDesktopBinding(
                 in: NativeSpaces.desktopSnapshot()
             ), binding.profiles.contains(name),
-            case .success(let bound) = boundProfile(of: binding)
+            case .success(let pick) = boundProfile(of: binding)
         else { return false }
-        return bound.name == name
+        return pick.profile.name == name
     }
 
     /// Re-applies `name` to the live layout after an in-effect

@@ -143,11 +143,11 @@ struct DesktopBindingPerCountTests {
             core.desktopBindings[.identity(stamp)]
         )
         #expect(
-            try core.boundProfile(of: binding).get().name == "Laptop"
+            try core.boundProfile(of: binding).get().profile.name == "Laptop"
         )
         connect(core, 2)
         #expect(
-            try core.boundProfile(of: binding).get().name == "Dual"
+            try core.boundProfile(of: binding).get().profile.name == "Dual"
         )
         core.handleMonitorChange()
         #expect(core.profiles.currentName == "Dual")
@@ -201,13 +201,13 @@ struct DesktopBindingPerCountTests {
             core.desktopBindings[.identity(stamp)]
         )
         #expect(
-            try core.boundProfile(of: binding).get().name == "Solo"
+            try core.boundProfile(of: binding).get().profile.name == "Solo"
         )
         #expect(core.isProfileInEffect("Solo"))
         #expect(!core.isProfileInEffect("Laptop"))
         core.execute("load_profile", args: [.string("Other")])
         #expect(
-            try core.boundProfile(of: binding).get().name == "Laptop"
+            try core.boundProfile(of: binding).get().profile.name == "Laptop"
         )
     }
 
@@ -255,9 +255,12 @@ struct DesktopBindingPerCountTests {
                 in: NativeSpaces.desktopSnapshot()
             )
         )
-        #expect(
-            verdict.verdict == .boundToDesktop(name: "Laptop", desktop: 1)
+        // "Other", loaded, holds these screens (#1609).
+        let over = ProfileVerdict.boundToDesktop(
+            desktop: 1,
+            reading: .init(name: "Laptop", setup: nil, over: "Other")
         )
+        #expect(verdict.verdict == over)
     }
 
     /// A rename follows into the list, in memory and in the

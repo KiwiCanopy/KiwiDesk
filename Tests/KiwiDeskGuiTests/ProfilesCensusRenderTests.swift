@@ -251,12 +251,12 @@ struct ProfilesCensusRenderTests {
         #expect(
             expander.rows(for: .profiles(.profileBindings))
                 == [
-                    .binding(.number(1), .count(1)),
-                    .binding(.number(2), .count(1)),
-                    .binding(.number(3), .count(1)),
+                    .binding(.number(1), .count(1, setup: nil)),
+                    .binding(.number(2), .count(1, setup: nil)),
+                    .binding(.number(3), .count(1, setup: nil)),
                     .binding(
                         .identity(DesktopIdentity(raw: "GONE")),
-                        .count(1)
+                        .count(1, setup: nil)
                     ),
                 ]
         )

@@ -20,7 +20,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     ///
     /// **3 (#1436)**: a binding's `profile` became the per-count
     /// list `profiles` — the same key, so the same bump.
-    public static let currentFormat = 3
+    ///
+    /// **4 (#1609)**: a `profiles` entry may be an object scoped to
+    /// one screen setup. No step — a bare name still means all
+    /// setups — so the bump is the refusal an older reader owes.
+    public static let currentFormat = 4
 
     public var format: Int = GuiConfig.currentFormat
     /// Active profile tiling parameters.

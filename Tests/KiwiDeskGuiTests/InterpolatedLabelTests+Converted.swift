@@ -217,9 +217,9 @@ extension InterpolatedLabelTests {
         //    the sentence would have named a control that no
         //    longer exists under that name in any locale.
         "keybinding.toggle_display_sticky.help": 1,
-        // 5. #1241. The ladder moved out of the flow and into
-        //    this card's own `?`, where it names the card that
-        //    sets the binding — the interpolated title is also
+        // 5. #1241, #1609. The ladder lives in the Which profile
+        //    loads card's one `?`, where it names the card
+        //    that sets the binding — the interpolated title is also
         //    what anchors "Desktop" to macOS for a reader who
         //    has not met the word yet.
         "profiles.which_loads.help": 1,

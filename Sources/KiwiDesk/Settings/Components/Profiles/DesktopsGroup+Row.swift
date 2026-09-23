@@ -1,13 +1,105 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// One row of the Desktops card: the Desktop's number, the
-/// screen it lives on (#1438), its badges and its picker for one
-/// binding slot (#1436).
+/// Which picker holds keyboard focus on the Desktops card — a
+/// row's slot, stated when a screen-setup row is added or removed
+/// (#1609).
+struct BindingFocus: Hashable {
+    let key: DesktopKey
+    let slot: BindingSlot
+}
+
+/// One Desktop on the Desktops card (#1436, #1609): its number,
+/// the screen it lives on (#1438), its badges, and a picker per
+/// binding slot — one line while it holds no screen-setup row,
+/// else the ladder's own order: each setup's row, the add row,
+/// then all other screen setups.
 extension DesktopsGroup {
-    func spaceRow(_ row: DesktopRow, slot: BindingSlot) -> some View {
-        let number = row.number
-        return HStack {
+    @ViewBuilder func desktopBlock(
+        _ row: DesktopRow,
+        count: Int,
+        leads: Bool
+    ) -> some View {
+        let slots = ProfilesFamilyRows.slots(
+            of: row,
+            count: count,
+            profileCounts: profileCounts
+        )
+        let others = BindingSlot.count(count, setup: nil)
+        let fallback = fallbackLabel(count: count, scoped: slots.count > 1)
+        VStack(alignment: .leading, spacing: 4) {
+            desktopLabel(row)
+            ForEach(slots.dropLast(), id: \.self) { slot in
+                setupRow(row, slot: slot)
+            }
+            // Only where a second setup is known is there one to
+            // add (owner, 2026-09-23).
+            if offersSetups(count: count, row: row) {
+                addSetupMenu(row, count: count)
+                    .padding(.leading, Self.nestIndent)
+            }
+            // The scope is always WRITTEN, one setup known or many:
+            // a bare picker binds every setup of the count without
+            // saying so (owner, 2026-09-23).
+            HStack {
+                Text(fallback).accessibilityHidden(true)
+                Spacer()
+                profileMenu(row, slot: others, name: fallback)
+                Color.clear.frame(width: Self.removeColumn, height: 1)
+                    .accessibilityHidden(true)
+            }
+            .padding(.leading, Self.nestIndent)
+            if leads { conflictLine(row) }
+        }
+    }
+
+    /// The fallback row's label, naming the screen count its
+    /// binding stops at: all screen setups of that count, or all
+    /// OTHER ones once a setup has a row of its own. The count is
+    /// last, so no locale has to agree with it.
+    func fallbackLabel(count: Int, scoped: Bool) -> String {
+        switch (scoped, count == 1) {
+        case (false, true):
+            return L(
+                "desktops.scope.all.one",
+                "All screen setups with 1 screen"
+            )
+        case (false, false):
+            return L(
+                "desktops.scope.all.many",
+                "All screen setups with %1$d screens",
+                count
+            )
+        case (true, true):
+            return L(
+                "desktops.scope.others.one",
+                "All other screen setups with 1 screen"
+            )
+        case (true, false):
+            return L(
+                "desktops.scope.others.many",
+                "All other screen setups with %1$d screens",
+                count
+            )
+        }
+    }
+
+    /// An orphan's row: a bound name no saved profile counts.
+    func orphanRow(_ row: DesktopRow, profile: String) -> some View {
+        HStack {
+            desktopLabel(row)
+            Spacer()
+            profileMenu(
+                row,
+                slot: .orphan(profile),
+                name: L("desktops.profile_ax", "Profile for this Desktop")
+            )
+        }
+    }
+
+    /// The Desktop's glyph, number, screen line and badges.
+    func desktopLabel(_ row: DesktopRow) -> some View {
+        HStack {
             Image(systemName: DesktopGlyph.symbol)
                 .foregroundStyle(.secondary)
             VStack(alignment: .leading, spacing: 2) {
@@ -15,7 +107,7 @@ extension DesktopsGroup {
                     L(
                         "desktops.desktop",
                         "Desktop %1$d",
-                        number
+                        row.number
                     )
                 )
                 .fontWeight(.medium)
@@ -28,45 +120,25 @@ extension DesktopsGroup {
                         .foregroundStyle(.secondary)
                 }
             }
-            // By the DESKTOP, never its number: a dormant record
-            // and a live Desktop can share one, and both rows
-            // then claim to be current (owner device QA).
-            if row.key == model.currentDesktopKey {
-                BadgeChip(
-                    label: L("desktops.current", "current")
-                )
-            }
-            // A Desktop that is bound but does NOT live on the
-            // main screen: listed because it carries the user's
-            // own configuration, badged because a binding there
-            // cannot fire in this arrangement — it waits for a
-            // display change that makes that Desktop the main
-            // screen's.
-            //
-            // A badge, never a grey: this row's picker is the
-            // only way to change or clear that binding, so
-            // dimming it would be the trap
-            // `docs/design-decisions.md` bans — and the store is
-            // valid and already effective, which "grey, don't
-            // hide" does not describe (ui-designer, 2026-08-18).
-            //
-            // A Desktop that is not there AT ALL — its screen
-            // unplugged, or the Desktop deleted — is the same
-            // ruling one step further: the record is kept
-            // (absence is never proof it is gone), the row is
-            // labelled with the number it was last seen at, and
-            // the badge says why nothing will fire.
-            if row.isDormant {
-                BadgeChip(
-                    label: L(
-                        "desktops.absent",
-                        "not present"
-                    )
-                )
+            badges(row)
+        }
+    }
+
+    /// By the DESKTOP, never its number: a dormant record and a
+    /// live Desktop can share one, and both rows then claim to be
+    /// current (owner device QA). A bound Desktop that cannot
+    /// fire here is BADGED, never greyed — its picker is the only
+    /// way to change or clear it (ui-designer, 2026-08-18) — and
+    /// an absent one keeps its record, absence never being proof
+    /// it is gone (#1147).
+    @ViewBuilder private func badges(_ row: DesktopRow) -> some View {
+        if row.key == model.currentDesktopKey {
+            BadgeChip(label: L("desktops.current", "current"))
+        }
+        if row.isDormant {
+            BadgeChip(label: L("desktops.absent", "not present"))
                 // The badge alone can read as "your binding is
-                // lost", which is the one thing this must not
-                // mean — the sibling pin badge pairs a help for
-                // the same reason.
+                // lost", which is the one thing it must not mean.
                 .help(
                     L(
                         "desktops.absent.help",
@@ -77,26 +149,30 @@ extension DesktopsGroup {
                             + "again if that Desktop comes back."
                     )
                 )
-            } else if !model.mainDesktops.contains(number) {
-                BadgeChip(
-                    label: L(
-                        "desktops.not_on_main",
-                        "not on main screen"
-                    )
+        } else if !model.mainDesktops.contains(row.number) {
+            BadgeChip(
+                label: L(
+                    "desktops.not_on_main",
+                    "not on main screen"
                 )
-            }
-            Spacer()
-            profileMenu(row, slot: slot)
+            )
         }
     }
 
-    private func profileMenu(
+    /// A slot's picker, named for VoiceOver by `name` — the
+    /// fallback row's own label, a setup's, or an orphan's.
+    func profileMenu(
         _ row: DesktopRow,
-        slot: BindingSlot
+        slot: BindingSlot,
+        name: String
     ) -> some View {
         Picker("", selection: binding(row, slot: slot)) {
-            Text(L("desktops.none", "None"))
-                .tag(String?.none)
+            // A screen-setup row has no empty choice — its × removes
+            // it — and the fallback's says what it means: no
+            // binding, so the rungs below it answer (#1609).
+            if let none = noneLabel(slot) {
+                Text(none).tag(String?.none)
+            }
             ForEach(options(slot), id: \.self) { name in
                 Text(name).tag(String?.some(name))
             }
@@ -111,129 +187,29 @@ extension DesktopsGroup {
         // different profiles draw two widths. Trailing-aligned,
         // the column keeps one edge, as System Settings' does.
         .frame(width: 180, alignment: .trailing)
+        .focused(
+            $focusedSlot,
+            equals: BindingFocus(key: row.key, slot: slot)
+        )
         // An empty title names nothing, so the picker is named
-        // here — a count group's by its count, since one Desktop
-        // draws a picker per group — and named, it owes its
-        // selection back as the value (#812).
-        .accessibilityLabel(pickerLabel(slot))
+        // here, and named, it owes its selection back as the
+        // value (#812).
+        .accessibilityLabel(name)
         .accessibilityValue(
             binding(row, slot: slot).wrappedValue
+                ?? noneLabel(slot)
                 ?? L("desktops.none", "None")
         )
     }
 
-    private func pickerLabel(_ slot: BindingSlot) -> String {
+    /// The picker's empty choice: "No binding" on the fallback —
+    /// the rungs below it answer — None on an orphan, and none on
+    /// a setup row, whose × removes it.
+    private func noneLabel(_ slot: BindingSlot) -> String? {
         switch slot {
-        case .count(1):
-            return L(
-                "desktops.profile_ax.count.one",
-                "Profile for this Desktop on 1 screen"
-            )
-        case .count(let count):
-            return L(
-                "desktops.profile_ax.count.many",
-                "Profile for this Desktop on %1$d screens",
-                count
-            )
-        case .orphan:
-            return L(
-                "desktops.profile_ax",
-                "Profile for this Desktop"
-            )
+        case .count(_, _?): return nil
+        case .count: return L("desktops.no_binding", "No binding")
+        case .orphan: return L("desktops.none", "None")
         }
-    }
-
-    /// A count group offers the profiles saved for that count —
-    /// the bind-fit question, asked of Core's one judgement
-    /// (#1394) — and an orphan row only the name it clears.
-    private func options(_ slot: BindingSlot) -> [String] {
-        switch slot {
-        case .count(let count):
-            return model.profileSummaries.filter {
-                DesktopBindingRefusal.of(
-                    profileCount: $0.count,
-                    connected: count
-                ) == nil
-            }
-            .map(\.name)
-        case .orphan(let name):
-            return [name]
-        }
-    }
-
-    /// The slot's bound name off the row's own record: for a
-    /// count, the entry saved for it in the gate's own rank, so
-    /// the picker names what fires; for an orphan, the name
-    /// itself while bound.
-    private func bound(_ row: DesktopRow, slot: BindingSlot) -> String? {
-        guard let record = row.binding else { return nil }
-        switch slot {
-        case .count(let count):
-            return record.ordered(preferring: model.activeProfile)
-                .first { profileCounts[$0] == count }
-        case .orphan(let name):
-            return record.profiles.contains(name) ? name : nil
-        }
-    }
-
-    /// `bound` by key, for a test that holds no row.
-    func boundName(key: DesktopKey, slot: BindingSlot) -> String? {
-        desktopRows.first { $0.key == key }.flatMap { bound($0, slot: slot) }
-    }
-
-    private func binding(
-        _ row: DesktopRow,
-        slot: BindingSlot
-    ) -> Binding<String?> {
-        Binding(
-            get: { bound(row, slot: slot) },
-            set: { write($0, key: row.key, slot: slot) }
-        )
-    }
-
-    /// One slot's pick, filed on the Desktop's record through the
-    /// record's own algebra: every entry of the slot's count goes
-    /// whatever comes in, the other slots' entries stay, and a
-    /// record left empty is removed (#1436,
-    /// `DesktopBindingGroupTests`).
-    func write(_ profile: String?, key: DesktopKey, slot: BindingSlot) {
-        // The row BEFORE the twin drop below: a Desktop bound
-        // only under its twin leaves the rows the moment that
-        // record goes, and its projections would fall to their
-        // nil arms.
-        let row = desktopRows.first { $0.key == key }
-        var record =
-            row?.binding
-            ?? model.config.profileBindings[key]
-            ?? DesktopBinding(
-                profiles: [],
-                desktop: row?.number ?? key.number ?? 0
-            )
-        // Writing settles the ambiguity rather than leaving two
-        // records for one Desktop, which Core's drop rule would
-        // later resolve by deleting the edit.
-        if let twin = twin(key) {
-            model.config.profileBindings[twin] = nil
-        }
-        let counts = profileCounts
-        switch (slot, profile) {
-        case (.count, let profile?):
-            record.bind(profile) { counts[$0] }
-        case (.count(let count), nil):
-            record.unbind(count: count) { counts[$0] }
-        case (.orphan(let name), _):
-            record.unbind(name)
-        }
-        guard !record.profiles.isEmpty else {
-            model.config.profileBindings[key] = nil
-            return
-        }
-        // The projections are refreshed from the reading this
-        // row was built from, never invented.
-        if let row {
-            record.desktop = row.number
-            record.screen = row.screen ?? record.screen
-        }
-        model.config.profileBindings[key] = record
     }
 }

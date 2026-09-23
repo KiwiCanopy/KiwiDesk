@@ -27,16 +27,16 @@ struct DesktopBindingFitSeamTests {
     private let profilesDir = "Sources/KiwiDesk/Settings/Components/Profiles/"
     private var judgementCallers: [String: Int] {
         [
+            // The gate, and its read-free twin the binding door's
+            // stand-down for the profile already live takes
+            // (#1436, #1609).
             "Sources/KiwiDeskCore/Profiles/KiwiCore+DesktopBindingFit.swift":
-                1,
-            // #1436: the binding door's stand-down for the
-            // profile already live asks whether it FITS.
-            "Sources/KiwiDeskCore/Profiles/KiwiCore+Desktops.swift": 1,
+                2,
             // #1436: which count group leads, and which profiles
             // a group's picker offers — the bind-fit question,
             // asked of the one judgement (#1437's forward
             // obligation).
-            profilesDir + "DesktopsGroup+Row.swift": 1,
+            profilesDir + "DesktopsGroup+Write.swift": 1,
             profilesDir + "ProfilesFamilyRows.swift": 1,
         ]
     }

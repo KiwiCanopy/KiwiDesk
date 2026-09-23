@@ -21,10 +21,11 @@ struct DesktopRow: Hashable {
 }
 
 /// Which binding a Desktops-card row edits (#1436): the profile
-/// for one screen count, or one bound name no saved profile
-/// carries a count for.
+/// for one screen count and scope — `setup` nil for all screen
+/// setups (#1609) — or one bound name no saved profile carries a
+/// count for.
 enum BindingSlot: Hashable {
-    case count(Int)
+    case count(Int, setup: [String]?)
     case orphan(String)
 }
 
@@ -198,7 +199,7 @@ struct ProfilesFamilyRows {
             ) {
             case nil: leading = count
             case .displaysUnknown?: unknown = true
-            case .screenCount?, .unreadable?: break
+            case .screenCount?, .unreadable?, .otherSetups?: break
             }
         }
         return BindingCounts(
@@ -237,6 +238,27 @@ struct ProfilesFamilyRows {
         }
         if !orphans.isEmpty { groups.append(.orphans(orphans)) }
         return groups
+    }
+
+    /// The slots one Desktop draws in a count group, in the
+    /// ladder's own order (#1609): one per screen setup an entry
+    /// of that count is scoped to, in binding order, then the
+    /// slot for all other screen setups, always.
+    static func slots(
+        of row: DesktopRow,
+        count: Int,
+        profileCounts: [String: Int]
+    ) -> [BindingSlot] {
+        var setups: [[String]] = []
+        for entry in row.binding?.entries ?? [] {
+            guard let setup = entry.setup,
+                profileCounts[entry.profile] == count,
+                !setups.contains(setup)
+            else { continue }
+            setups.append(setup)
+        }
+        return setups.map { .count(count, setup: $0) }
+            + [.count(count, setup: nil)]
     }
 
     /// Presets matching screen count, including starter derivation (#678).
@@ -287,7 +309,15 @@ struct ProfilesFamilyRows {
             .flatMap { group -> [ProfilesRowInstance] in
                 switch group {
                 case .count(let count, _, let rows):
-                    return rows.map { .binding($0.key, .count(count)) }
+                    let counts = Self.profileCounts(profiles)
+                    return rows.flatMap { row in
+                        Self.slots(
+                            of: row,
+                            count: count,
+                            profileCounts: counts
+                        )
+                        .map { .binding(row.key, $0) }
+                    }
                 case .orphans(let orphans):
                     return orphans.map {
                         .binding($0.row.key, .orphan($0.profile))

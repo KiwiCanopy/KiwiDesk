@@ -182,9 +182,9 @@ struct DesktopBindingGroupTests {
         #expect(
             expander.rows(for: .profiles(.profileBindings))
                 == [
-                    .binding(live, .count(2)),
-                    .binding(live, .count(1)),
-                    .binding(live, .count(3)),
+                    .binding(live, .count(2, setup: nil)),
+                    .binding(live, .count(1, setup: nil)),
+                    .binding(live, .count(3, setup: nil)),
                     .binding(live, .orphan("Vanished")),
                 ]
         )
@@ -210,10 +210,25 @@ struct DesktopBindingGroupTests {
         let card = try squashed("DesktopsGroup.swift")
         #expect(card.contains("ProfilesFamilyRows.bindingGroups("))
         #expect(card.contains("ProfilesFamilyRows.bindingCounts("))
-        #expect(card.contains("spaceRow(row,slot:.count(count))"))
         #expect(
-            card.contains("spaceRow(orphan.row,slot:.orphan(orphan.profile))")
+            card.contains("desktopBlock(row,count:count,leads:leads)")
         )
+        #expect(
+            card.contains("orphanRow(orphan.row,profile:orphan.profile)")
+        )
+        // A Desktop's rows are the census's own slots, and the
+        // leading group draws the conflict caption (#1609).
+        let block = try squashed("DesktopsGroup+Row.swift")
+        #expect(block.contains("ProfilesFamilyRows.slots("))
+        #expect(block.contains("ifleads{conflictLine(row)}"))
+        // The add menu stands behind the one offer predicate; the
+        // fallback's scope is always written (owner, 2026-09-23).
+        #expect(
+            block.contains(
+                "ifoffersSetups(count:count,row:row){addSetupMenu("
+            )
+        )
+        #expect(block.contains("Text(fallback).accessibilityHidden(true)"))
         // The caption asks the ONE leading derivation, and
         // stands down with no display reading (#1436 review).
         #expect(
@@ -222,7 +237,7 @@ struct DesktopBindingGroupTests {
                     + "caption(noProfileForCount)"
             )
         )
-        let row = try squashed("DesktopsGroup+Row.swift")
+        let row = try squashed("DesktopsGroup+Write.swift")
         #expect(
             row.contains(
                 "DesktopBindingRefusal.of(profileCount:$0.count,"

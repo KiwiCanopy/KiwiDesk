@@ -29,8 +29,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 8 = a Desktop binding's per-count profile list (#1436),
     /// which reaches a bundle the way 4 did;
     /// 9 = a dormant profile, a `[Profile]` entry with no monitor
-    /// set beside its `monitor_count` (#1530).
-    public static let currentFormat = 9
+    /// set beside its `monitor_count` (#1530);
+    /// 10 = a Desktop binding entry scoped to one screen setup
+    /// (#1609), which reaches a bundle the way 4 and 8 did.
+    public static let currentFormat = 10
 
     public let format: Int
 

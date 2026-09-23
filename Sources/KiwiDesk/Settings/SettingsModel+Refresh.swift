@@ -53,7 +53,24 @@ extension SettingsModel {
             verdict: resolved.verdict,
             screens: resolved.screens
         )
+        bindableSetups = Dictionary(
+            uniqueKeysWithValues: Set(profileSummaries.map(\.count))
+                .map { ($0, core.monitorSets(count: $0)) }
+        )
         adoptRekeyedBindings()
+        refreshBindingReadings()
+    }
+
+    /// Re-reads what each draft binding loads (#1609). Owed by
+    /// every writer of `config.profileBindings` and every change
+    /// of what the gate reads (the screens, the live profile) —
+    /// today the profile refresh and the Desktops card's write.
+    func refreshBindingReadings() {
+        var readings: [DesktopBinding: BoundReading] = [:]
+        for record in config.profileBindings.values {
+            readings[record] = core.boundReading(of: record)
+        }
+        bindingReadings = readings
     }
 
     /// Take Core's re-keyed bindings into an UNEDITED draft
