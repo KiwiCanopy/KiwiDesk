@@ -63,14 +63,22 @@ extension SettingsModel {
         )
     }
 
-    /// Labels for a list of setups, sized only where two would
-    /// otherwise read the same.
+    /// Labels for `sets`, each sized where ANY other setup the
+    /// Profiles page shows — every profile's, and the connected
+    /// one — would read the same, so one page never names two
+    /// setups alike.
     func setupLabels(_ sets: [[String]]) -> [String] {
-        let plain = sets.map { setupLabel($0) }
-        return sets.indices.map { index in
-            plain.filter { $0 == plain[index] }.count > 1
-                ? setupLabel(sets[index], sized: true)
-                : plain[index]
+        let known = Set(
+            profileSummaries.flatMap(\.sets).map { $0.sorted() }
+                + sets.map { $0.sorted() }
+                + [displays.map(\.fingerprint).sorted()]
+        )
+        var seen: [String: Set<[String]>] = [:]
+        for set in known { seen[setupLabel(set), default: []].insert(set) }
+        return sets.map { set in
+            let plain = setupLabel(set)
+            return (seen[plain]?.count ?? 0) > 1
+                ? setupLabel(set, sized: true) : plain
         }
     }
 }

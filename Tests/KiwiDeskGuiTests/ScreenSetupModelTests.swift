@@ -189,4 +189,31 @@ struct ScreenSetupModelTests {
                 == "1 saved"
         )
     }
+
+    /// Two same-named setups held by DIFFERENT profiles read
+    /// alike on one page, so each is sized even in a list where it
+    /// is alone (owner, 2026-09-23: two Sidecar resolutions).
+    @Test("A lookalike held elsewhere on the page keeps the size")
+    func lookalikeAcrossProfilesIsSized() throws {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let core = makeCore()
+        connect(core, ["Sidecar"])
+        try core.persistProfile(named: "Vision", modes: nil)
+        core.state.workspaces.removeDisplay(DisplayID(1))
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "Sidecar",
+                frame: CGRect(x: 0, y: 0, width: 200, height: 100)
+            )
+        )
+        try core.persistProfile(named: "Wide", modes: nil)
+        let model = makeTestModel(core: core)
+        model.refreshProfiles()
+        #expect(
+            model.setupLabels([["Sidecar:100x100"]])
+                == ["Sidecar (100x100)"]
+        )
+    }
 }
