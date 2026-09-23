@@ -10965,13 +10965,15 @@ Decisions folded in (ui-designer consult and owner direction,
   choices remain API-blocked — see [Accepted limitations](accepted-limitations.md);
   [#362](https://github.com/KiwiCanopy/KiwiDesk/issues/362)
   tracks the private-IconServices probe that could add them.
-- **The glyph map format is JSON** (`icon_map.json` vendored from
-  upstream): decoded directly in Swift, validated once, cached —
-  keeps bar rendering independent of the user's Lua VM. The Lua
-  and shell forms upstream ships were rejected (coupling static
-  vendor data to an interpreter buys nothing).
-- **Vendored, not user-supplied**: the TTF + map ship in the app
-  (CC0-1.0), refreshed by `scripts/update-app-font.sh` which pins
+- **The glyph map is read from the font itself** — the `APPM`
+  data map upstream embeds in the TTF's `meta` table, decoded
+  directly in Swift and cached, which keeps bar rendering
+  independent of the user's Lua VM. Upstream's `icon_map.json` /
+  `.lua` / `.sh` snapshots are not vendored: they are copies of
+  the same table that can go stale against the font they
+  describe, while the embedded one cannot.
+- **Vendored, not user-supplied**: the TTF, carrying its own name
+  table, ships in the app (CC0-1.0), refreshed by `scripts/update-app-font.sh` which pins
   the upstream release in `UPSTREAM.md`. CC0 waives copyright but
   not third-party trademark rights in the depicted app marks —
   accepted deliberately.
