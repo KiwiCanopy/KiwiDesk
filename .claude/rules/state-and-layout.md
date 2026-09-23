@@ -250,6 +250,26 @@ editing here:
   any one of them leaves `FollowFocusIntentTests` fully green
   while the follow silently stops carrying focus. The ruling is
   `docs/design-decisions.md`'s.
+- **A launch follows its window into its app rule's Space, and
+  only a PRESS-CAUSED activation owes it (#1599).** The debt is
+  `LaunchFollowIntent`, keyed by the APP because the window does
+  not exist at the activation, and minted in
+  `noteAppActivation` only for an activation within
+  `pressGrace` of a click or key-down and outside a Desktop
+  switch — never on "the app is active" alone, which the boot
+  scan and a switch's arriving app both satisfy (measured on the
+  issue). The fold's only input to the payer is
+  `AppliedEffects.placedByAppRule`, set where the RULE chose a
+  Space other than the active one, and the payer is #1007's
+  `handFollowFocus`. A new route that should follow a launch
+  mints through that entry, and a new moment that is "not a
+  launch" retires through `forget()` beside the two there —
+  `LaunchFollowSeamTests` counts them, since both seams default
+  inert and a lost wiring turns the feature off with
+  `LaunchFollowTests` green. Its bound is derived from
+  `FollowFocusIntent.drainWindow` plus one adoption-heal period
+  and must stay above the measured heal latency
+  (`LaunchFollowIntentTests` ▸ `boundCoversTheHeal`).
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves
   `Space.focused` down the departing windows to nil — or onto a

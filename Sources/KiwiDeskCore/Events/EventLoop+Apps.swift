@@ -168,6 +168,10 @@ extension EventLoop {
     /// app switch, reconcile the app we just left.
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
+        // Ahead of both reconciles below: a window this app shows
+        // on its own activation is adopted by them, and must find
+        // the #1599 launch follow already owed.
+        onAppActivated(pid)
         // The reconcile below takes this app's window snapshot
         // on the same turn — no second scan at attach (#672).
         syncObservation(

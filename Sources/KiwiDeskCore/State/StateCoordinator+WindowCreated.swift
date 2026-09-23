@@ -45,11 +45,17 @@ extension StateCoordinator {
             arrival: arrival
         )
         effects.rehomedToScreenSpace = preferred
-        let target =
-            preferred
-            ?? livingRememberedSpace(remembered)
-            ?? window.appBundleID.flatMap { appRules[$0] }
-            ?? workspaces.activeSpace
+        let held = preferred ?? livingRememberedSpace(remembered)
+        let ruled =
+            held == nil
+            ? window.appBundleID.flatMap { appRules[$0] }
+            : nil
+        // Only the rule's own verdict may earn the launch follow
+        // (#1599), and only into a Space the user is not in.
+        if let ruled, ruled != workspaces.activeSpace {
+            effects.placedByAppRule = ruled
+        }
+        let target = held ?? ruled ?? workspaces.activeSpace
         guard let target else { return }
         let mode = workspaces[target]?.mode ?? .bsp
         let track =

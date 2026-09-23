@@ -152,6 +152,9 @@ extension KiwiCore {
             self?.armIgnoredPanel(pid)
             self?.armAccessibilityReturn(bundleID: bundleID)
         }
+        eventLoop.onAppActivated = { [weak self] pid in
+            self?.noteAppActivation(pid)
+        }
         eventLoop.onTransientDrop = { [weak self] in
             self?.scheduleTransientRetrack()
         }

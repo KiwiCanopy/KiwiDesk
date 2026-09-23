@@ -226,15 +226,16 @@ public final class KiwiCore {
     /// 5 s: a healthy tick is one ~1 ms census, so the cadence only
     /// bounds worst-case latency. 750 ms outlasts a Dock zoom, a
     /// fade-in or a close's teardown (#1157).
-    var adoptionHealInterval: Duration = .seconds(5)
+    var adoptionHealInterval: Duration = KiwiCore.adoptionHealDefault
     var transientRetrackDelay: Duration = .milliseconds(750)
 
-    /// Three intent ledgers, each type doc carrying its argument:
+    /// Four intent ledgers, each type doc carrying its argument:
     /// the move latch (#482/#483), the follow focus debt (#1007),
-    /// and a hidden-Desktop move's Space (#1150).
+    /// a hidden-Desktop move's Space (#1150), a launch's (#1599).
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
+    let launchFollow = LaunchFollowIntent()
 
     /// The MAIN display's current native Desktop (#888) — the
     /// binding authority, and the per-Desktop Space memory

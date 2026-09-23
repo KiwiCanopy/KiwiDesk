@@ -91,6 +91,8 @@ extension KiwiCore {
         // Control number where it does not.
         let key = snapshot.mainCurrentKey
         lastDesktopSwitch = Date()
+        // Windows a switch reveals are not a launch's (#1599).
+        launchFollow.forget()
         // A secondary display switched: the authority is a live
         // Desktop that did not move, and some OTHER display's
         // current Space did. Both halves are read from the ONE

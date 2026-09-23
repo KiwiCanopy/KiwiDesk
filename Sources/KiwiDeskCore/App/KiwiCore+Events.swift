@@ -110,6 +110,9 @@ extension KiwiCore {
             // #1207: the Desktop return's owed focus, paid where
             // the fold said it returned.
             payReturningFocus(arrived: window.id, effects: effects)
+            // #1599: a launch follows its window into the Space
+            // its app rule chose.
+            payLaunchFollow(arrived: window, effects: effects)
             // #1362: the snapshot frame the restore could not set
             // on an untracked window, seeded before the arrival
             // retile below delivers it.
