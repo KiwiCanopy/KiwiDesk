@@ -122,7 +122,7 @@ struct CrossReferenceRowSlotTests {
         // ceiling: MacChecklistCrossReferenceTests (#1365),
         // AppRulePinTests (#1022).
         "MacHabitRow.swift:prose",
-        "AppRulesSection.swift:Self.noSpacesProse",
+        "AppRulesSection+Lists.swift:Self.noSpacesProse",
     ]
 
     // MARK: - The values

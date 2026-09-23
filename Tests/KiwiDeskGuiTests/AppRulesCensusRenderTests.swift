@@ -8,26 +8,44 @@ import Testing
 /// 14a).
 ///
 /// The promise here is WEAKER than in Bars or Layout Defaults,
-/// and these say so rather than implying otherwise: this area's
-/// one container is bespoke, because one census setting draws a
-/// row per app. There is no order list to pin — an order list
+/// and these say so rather than implying otherwise: both of this
+/// area's containers are bespoke, because one census setting
+/// draws a row per app. There is no order list to pin — an order list
 /// here would be a second copy of a census filter — so what is
 /// guarded is that the bespoke declaration stays true of the
 /// tree, and that the sentence keeps naming its facets somewhere
 /// a screen reader and the search index can reach.
 @Suite("App Rules render ↔ census parity")
 struct AppRulesCensusRenderTests {
-    /// The area's one container, derived from the census — a
-    /// second one would mount nowhere, since the section draws
-    /// exactly one card.
-    @Test("the area holds only the container it renders")
-    func onlyOneContainer() {
+    /// Each value menu's census key and the row file drawing it.
+    private static let menus = [
+        ("app_rules.space", "AppRuleSpaceRow.swift"),
+        ("app_rules.float", "AppRuleFloatRow.swift"),
+    ]
+
+    private static func source(_ file: String) throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Sections/" + file
+                    ),
+                encoding: .utf8
+            )
+        )
+    }
+
+    /// The area's two containers, derived from the census — a
+    /// third would mount nowhere, since the section draws exactly
+    /// two cards, one per store (#1608).
+    @Test("the area holds only the containers it renders")
+    func onlyTheRenderedContainers() {
         let declared = Set(
             SettingKey.allCases
                 .filter { $0.placement.area == .appRules }
                 .compactMap { $0.placement.container }
         )
-        #expect(declared == [.rulesPerApp])
+        #expect(declared == [.spaceRules, .floatRules])
     }
 
     /// The bespoke claim, read off the TREE rather than restated
@@ -36,10 +54,11 @@ struct AppRulesCensusRenderTests {
     /// detect). A container is bespoke exactly when nothing
     /// `ForEach`es an order list for it — so the check is that
     /// this area's views declare no such list to walk.
-    @Test("the bespoke container really has no order list")
+    @Test("the bespoke containers really have no order list")
     func bespokeMeansNoOrderList() throws {
         #expect(
-            AppRulesRowOrder.bespokeContainers == [.rulesPerApp]
+            AppRulesRowOrder.bespokeContainers
+                == [.spaceRules, .floatRules]
         )
         // Whitespace-normalised, and the AppRules directory is
         // scanned WHOLE rather than by filename: guard-prover
@@ -86,9 +105,9 @@ struct AppRulesCensusRenderTests {
         )
     }
 
-    /// The sentence has to keep naming its facets somewhere a
-    /// screen reader and the search index can reach, because it
-    /// has no visible labels. The census names both rows by
+    /// Each list's value menu has to keep its census name
+    /// somewhere a screen reader and the search index can reach,
+    /// because it draws no visible label. The census names both rows by
     /// those keys, so losing the call sites would prune them
     /// from every locale — which `SettingKeyLocaleTests` catches
     /// only after the fact.
@@ -108,19 +127,9 @@ struct AppRulesCensusRenderTests {
         // still somewhere in the file. Comments are stripped for
         // the same reason: a commented-out call site also
         // satisfied the weak half.
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf: SourceScan.repoRoot(from: #filePath)
-                    .appendingPathComponent(
-                        "Sources/KiwiDesk/Settings/Sections/"
-                            + "AppRuleRow+Facets.swift"
-                    ),
-                encoding: .utf8
-            )
-        )
-        for key in ["app_rules.space", "app_rules.float"] {
+        for (key, file) in Self.menus {
             #expect(
-                source.contains(
+                try Self.source(file).contains(
                     "accessibilityLabel(L(\"\(key)\""
                 ),
                 Comment(
@@ -152,16 +161,6 @@ struct AppRulesCensusRenderTests {
     /// the same lens and for the same reason as the label half.
     @Test("the facets announce their value, not just their name")
     func facetsAnnounceTheirValue() throws {
-        let source = SourceScan.stripComments(
-            try String(
-                contentsOf: SourceScan.repoRoot(from: #filePath)
-                    .appendingPathComponent(
-                        "Sources/KiwiDesk/Settings/Sections/"
-                            + "AppRuleRow+Facets.swift"
-                    ),
-                encoding: .utf8
-            )
-        )
         // Keyed on each menu's OWN value expression, not on a
         // count of call sites. A bare count of two is satisfied
         // by both values landing on one control while the other
@@ -170,9 +169,13 @@ struct AppRulesCensusRenderTests {
         // its comment claimed to catch. The expressions differ
         // per menu, so one missing reds however many the file
         // holds in total.
-        for value in ["spaceFacetLabel", "floatLabel"] {
+        for (value, file) in [
+            ("spaceFacetLabel", "AppRuleSpaceRow.swift"),
+            ("floatFacetLabel", "AppRuleFloatRow.swift"),
+        ] {
             #expect(
-                source.contains(".accessibilityValue(\(value))"),
+                try Self.source(file)
+                    .contains(".accessibilityValue(\(value))"),
                 Comment(
                     rawValue:
                         "the facet menu whose choice is "

@@ -44,7 +44,8 @@ extension SettingsValueReadout {
                 old: old.ignoreRules,
                 new: new.ignoreRules
             )
-        case .appRulesAddSpace, .appRulesAddFloat, .appRulesDelete:
+        case .appRulesAddSpace, .appRulesAddFloat, .spaceRuleDelete,
+            .floatRuleDelete:
             // No model path — never booked by the diff.
             return []
         }

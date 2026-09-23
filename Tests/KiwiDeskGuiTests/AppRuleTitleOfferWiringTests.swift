@@ -14,9 +14,8 @@ import Testing
 /// lost an editor for patterns that were still firing
 /// (guard-prover, 2026-09-22).
 ///
-/// Split from `AppRulePinWiringTests` at the \u00A72.1 ceiling, and the
-/// seam is the subject rather than the line count: that suite
-/// watches the pin, this one watches the offer.
+/// `AppRuleListsWiringTests` watches the lists; this one watches
+/// the offer.
 @Suite("App rule title offer wiring (#1022)")
 struct AppRuleTitleOfferWiringTests {
     private static func squashed(_ text: String) -> String {
@@ -36,7 +35,7 @@ struct AppRuleTitleOfferWiringTests {
     }
 
     private func facets() throws -> String {
-        try source("Sections/AppRuleRow+Facets.swift")
+        try source("Sections/AppRuleFloatRow.swift")
     }
 
     /// The title-pattern OFFER's surfacing branches — the consult
@@ -76,8 +75,8 @@ struct AppRuleTitleOfferWiringTests {
     /// describing a choice the row withholds (architect review).
     @Test("the offer is resolved once and handed down")
     func offerIsResolvedOnce() throws {
-        let row = try source("Sections/AppRuleRow.swift")
-        let rowFacets = try facets()
+        let row = try facets()
+        let spaceRow = try source("Sections/AppRuleSpaceRow.swift")
         #expect(
             row.contains(Self.squashed("let offersTitles: Bool")),
             Comment(
@@ -88,15 +87,15 @@ struct AppRuleTitleOfferWiringTests {
             )
         )
         #expect(
-            !rowFacets.contains(
+            !row.contains(
                 Self.squashed("AppRuleTitleOffer.isOffered")
             )
-                && !(row + rowFacets).contains(
+                && !(row + spaceRow).contains(
                     Self.squashed("AppRulesGates(")
                 ),
             Comment(
                 rawValue:
-                    "the row assembles the offer or its gates "
+                    "a row assembles the offer or its gates "
                     + "again — there must be one copy of the "
                     + "resolver's input (#1022)"
             )
@@ -131,6 +130,12 @@ struct AppRuleTitleOfferWiringTests {
                     + "them with a pattern they can neither see "
                     + "nor clear (#1022, #678 8c)"
             )
+        )
+        // …and handed to the Float row from that one reading.
+        #expect(
+            try source("Sections/AppRulesSection+Lists.swift")
+                .contains(Self.squashed("offersTitles: offersTitles")),
+            "the Float row is no longer handed the section's offer"
         )
     }
 }

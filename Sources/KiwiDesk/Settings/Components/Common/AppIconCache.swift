@@ -2,13 +2,13 @@ import AppKit
 import KiwiDeskCore
 
 /// Cache for downsized application icons (#263, `InstalledApp`,
-/// `AppRuleRow.appIcon`).
+/// `AppRuleIdentity`).
 @MainActor
 final class AppIconCache {
     static let shared = AppIconCache()
 
     /// Row-size icon side length.
-    static let side: CGFloat = 20
+    nonisolated static let side: CGFloat = 20
 
     private var memo: [String: NSImage] = [:]
     private var warming = false

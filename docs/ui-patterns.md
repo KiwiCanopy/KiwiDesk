@@ -868,18 +868,17 @@ value the system *computes* — a fixed built-in default stays
 
 :::unreleased
 **Neither word fits a field that can hold no value at all: that
-is an absence, and it is drawn as one.** Where clearing a field
-hands the decision to nothing — because the setting then simply
-is not made — the cell draws an em dash and the way back to it is
-an **action** beside the value, the icon-only ×-clear above,
-never a menu item named after the absence. *The system decides*
-is a value and takes "Automatic"; *there is no rule here* is not
-a value and takes no word, since a word for it has to agree with
-every sentence the surface uses for the same state and cannot.
-Ask which of the two you have before reaching for either. A
-table column is where this bites, having no way to render a row
-that omits the field ([Design decisions](design-decisions.md) ▸
-App rules).
+is an absence, and it is drawn as one.** Where a field holds no
+value — because the setting then simply is not made — the cell
+draws an em dash, never a menu item named after the absence.
+*The system decides* is a value and takes "Automatic"; *there is
+no rule here* is not a value and takes no word, since a word for
+it has to agree with every sentence the surface uses for the
+same state and cannot. Ask which of the two you have before
+reaching for either. A table column is where this bites, having
+no way to render a row that omits the field; App Rules answers
+it with one list per rule, so no row has the absent cell
+([Design decisions](design-decisions.md) ▸ App rules).
 :::
 
 **A boolean mode flag names the MODE on the wire, even when its
@@ -965,11 +964,11 @@ that identifier and no moment in it means "this is the one".
 
 :::unreleased
 **Where the list may hold no empty rows, the picker names the
-rule it composes.** App Rules offers one picker per facet —
-*Pin an app…* and *Float an app…* — so a pick lands a complete
-rule instead of a row with both facets at their defaults. One
-picker over a defaulted facet authors a choice the user did not
-make ([Design decisions](design-decisions.md) ▸ App rules).
+rule it composes.** App Rules keeps one list per rule, each with
+its own picker — *Open an app in a Space…* and *Float an app…* —
+so a pick lands a complete rule. One picker over a defaulted rule
+authors a choice the user did not make ([Design
+decisions](design-decisions.md) ▸ App rules).
 :::
 
 These pickers exclude the entries that cannot be added, but

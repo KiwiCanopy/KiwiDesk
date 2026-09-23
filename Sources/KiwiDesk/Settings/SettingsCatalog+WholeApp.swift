@@ -109,9 +109,13 @@ struct GeneralKeysControls: Sendable {
 }
 
 struct AppRulesControls: Sendable {
-    let rulesPerApp = SettingsControl(
-        "app_rules.section.title",
-        "Rules per app"
+    let spaceList = SettingsControl(
+        "app_rules.space_list.title",
+        "Open in a Space"
+    )
+    let floatList = SettingsControl(
+        "app_rules.float_list.title",
+        "Float"
     )
 }
 

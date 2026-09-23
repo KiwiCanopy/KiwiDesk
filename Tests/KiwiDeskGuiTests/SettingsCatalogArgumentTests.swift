@@ -187,7 +187,8 @@ struct SettingsCatalogArgumentTests {
         // in the census too, so their anchors go.
         // 97 since #1536: the General ▸ About card's anchor left.
         // 101 since #1516: the four margin rows' anchors.
-        #expect(direct.values.reduce(0, +) == 101)
+        // 102 since #1608: App Rules' second card.
+        #expect(direct.values.reduce(0, +) == 102)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

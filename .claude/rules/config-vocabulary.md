@@ -68,10 +68,11 @@ synonym:
   takes the word in its labels (`diff.label.space_pin`,
   `spaces.pin_badge.help`, `monitors.orphan_pins.title`). The
   app→Space relation is real but is named by its EFFECT instead —
-  **Opens in** (`app_rules.space`) — and the App Rules card
-  spends no pin word anywhere, which is how #1022 resolved having
-  two relations named alike in one window. The argument is
-  `docs/design-decisions.md` ▸ App rules.
+  **Open in a Space** (`app_rules.space_list.title`), spoken as
+  **Opens in** on its menu (`app_rules.space`) — and App
+  Rules spends no pin word anywhere, which is how #1022
+  resolved having two relations named alike in one window. The
+  argument is `docs/design-decisions.md` ▸ App rules.
 
   **A LABEL naming either relation carries its object**, because
   a label is read with nothing around it: "Monitor pin", never a

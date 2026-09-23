@@ -1,63 +1,44 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Whole App ▸ App Rules settings section (#68 §3.11, #1022).
+/// Whole App ▸ App Rules settings section (#68 §3.11, #1608).
+///
+/// Two lists, matching the two stores `GuiConfig` keeps: which
+/// Space an app's windows open in, and which of its windows
+/// float. The Space is title-blind, so a title pattern belongs
+/// to the Float list alone (`docs/design-decisions.md` ▸ App
+/// rules).
 struct AppRulesSection: View {
     @ObservedObject var model: SettingsModel
-    /// Restores keyboard focus after deleting a rule row (#816).
-    @FocusState private var returningRow: String?
+    /// Restore keyboard focus after deleting a row (#816), one
+    /// per list: an app may sit in both.
+    @FocusState var returningSpaceRow: String?
+    @FocusState var returningFloatRow: String?
     /// The app whose pattern editor is open. Owned here, not by
-    /// the row, because a float-only row clears its ONLY stored
-    /// rule while composing a titled one and `apps` is derived
-    /// from the store — without this the ForEach dropped the row
-    /// mid-gesture (#1022, architect + ui-designer review). It is
-    /// not a re-admitted `draftApps`: it names at most one row,
-    /// only while that row's editor is open, and holds no value.
-    @State private var composingTitles: String?
-    @State private var newSpaceApp = ""
-    @State private var newFloatingApp = ""
-    @Environment(\.settingsWidth) private var width
+    /// the row, because a row composing its first pattern may
+    /// hold no stored rule and `floatApps` is derived from the
+    /// store — without this the list drops the row mid-gesture
+    /// (#1022). It names at most one row and holds no value.
+    @State var composingTitles: String?
+    @State var newSpaceApp = ""
+    @State var newFloatingApp = ""
 
-    /// Base rules when editing stored profile (#109); nil during live editing.
+    /// Base pins when editing a stored profile (#109); nil during
+    /// live editing.
     var overrideBase: [String: SpaceID]? {
         model.profileEditingBaseAppRules
     }
 
-    private var overrideFloatBase: [String]? {
+    var overrideFloatBase: [String]? {
         model.profileEditingBaseFloatRules
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SettingsSection(
-                    SettingsCatalog.appRules.rulesPerApp,
-                    caption: rulesCaption,
-                    help: sectionHelp
-                ) {
-                    overrideIndicator
-                    if apps.isEmpty {
-                        emptyNote
-                    } else {
-                        tableHeader
-                    }
-                    ForEach(apps, id: \.self) { app in
-                        AppRuleRow(
-                            model: model,
-                            app: app,
-                            overrideBase: overrideBase,
-                            overrideFloatBase: overrideFloatBase,
-                            offersTitles: offersTitles,
-                            gates: gates,
-                            composingTitles: $composingTitles,
-                            onDelete: { delete(app) },
-                            returningRow: $returningRow
-                        )
-                        Divider()
-                    }
-                    addRow
-                    noSpacesNote
-                }
+                overrideIndicator
+                spaceList
+                floatList
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }
@@ -68,54 +49,31 @@ struct AppRulesSection: View {
         .onChange(of: model.cleanConfig) { composingTitles = nil }
     }
 
-    /// Banner shown when active profile overrides base app rules (#109).
+    /// Shown while a stored profile is edited: both lists then
+    /// edit that profile's overrides, so the note sits above them
+    /// rather than inside either card.
     @ViewBuilder private var overrideIndicator: some View {
-        if model.editedProfileOverridesAppRules {
-            Label(
-                L(
-                    "app_rules.override.overrides",
-                    "This profile overrides base app rules."
-                ),
-                systemImage: "app.badge"
-            )
-            .font(.callout)
-        }
-    }
-
-    /// The ONE facet heading, drawn over the list. Below the row
-    /// breakpoint the rows stack and carry it themselves, so this
-    /// goes away rather than compressing.
-    @ViewBuilder private var tableHeader: some View {
-        if !width.stacksRows {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                // The app column needs no heading: an icon and a
-                // name are their own.
-                Color.clear
-                    .frame(
-                        width: SettingsMetrics
-                            .appRuleIdentityColumn,
-                        height: 1
+        if overrideBase != nil {
+            VStack(alignment: .leading, spacing: 4) {
+                if model.editedProfileOverridesAppRules {
+                    Label(
+                        L(
+                            "app_rules.override.overrides",
+                            "This profile overrides base app rules."
+                        ),
+                        systemImage: "app.badge"
                     )
-                Text(L("app_rules.space", "Opens in"))
-                    .frame(
-                        width: SettingsMetrics.appRuleSpaceColumn,
-                        alignment: .leading
-                    )
-                // The float column carries NO heading: its values
-                // are whole predicates and name themselves, so a
-                // heading would be a word the rows do not need.
-                Spacer(minLength: 8)
+                    .font(.callout)
+                }
+                Text(Self.overrideProse)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink3)
-            // Drawn, not spoken: each control below names itself,
-            // so a heading read aloud is the same words twice.
-            .accessibilityHidden(true)
         }
     }
 
     /// The area's census gates, from one construction site for
-    /// the section and every row.
+    /// both lists and every row.
     var gates: AppRulesGates {
         AppRulesGates(
             config: model.config,
@@ -130,26 +88,12 @@ struct AppRulesSection: View {
         )
     }
 
-    /// Sorted list of unique apps with configured rules (#333,
-    /// #109).
-    private var apps: [String] {
-        var set = Set(model.config.appRules.keys)
-        for rule in model.config.floatRules {
-            set.insert(FloatFacet.appSegment(of: rule))
-        }
-        if let base = overrideBase {
-            set.formUnion(base.keys)
-        }
-        if let base = overrideFloatBase {
-            for rule in base {
-                set.insert(FloatFacet.appSegment(of: rule))
-            }
-        }
-        // The row under composition, which may hold no stored rule
-        // for as long as its editor is open.
-        if let composing = composingTitles {
-            set.insert(composing)
-        }
+    /// With both lists empty the card says what an unruled app
+    /// does — once, for the whole area.
+    var hasNoRules: Bool { spaceApps.isEmpty && floatApps.isEmpty }
+
+    /// Sorted by display name, then bundle id for a stable tie.
+    func sortedByName(_ set: Set<String>) -> [String] {
         let names = Dictionary(
             uniqueKeysWithValues: set.map {
                 ($0, KeybindingCatalog.displayName(forBundleID: $0))
@@ -163,102 +107,13 @@ struct AppRulesSection: View {
         }
     }
 
-    private var emptyNote: some View {
-        Text(Self.emptyProse)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-    }
-
-    /// With no Spaces declared there is nothing to open in, so the
-    /// remedy lives on another destination — a live pointer naming
-    /// it, which is what a gate whose cause is off this surface
-    /// owes (#815).
-    @ViewBuilder private var noSpacesNote: some View {
-        if !gates.hasSpaces {
-            CrossReferenceRow(
-                prose: Self.noSpacesProse,
-                linkTitle: SettingsDestination.spaces.title,
-                destination: .spaces
-            )
-        }
-    }
-
-    /// Two pickers, because the rule is chosen before the app: a
-    /// row that says nothing can no longer be created (#1022), and
-    /// picking the app is still the whole gesture (#1172).
-    private var addRow: some View {
-        HStack(spacing: 8) {
-            AppSelector(
-                role: .space,
-                name: $newSpaceApp,
-                exclude: Set(apps),
-                onCommit: addWithSpace
-            )
-            .disabled(!gates.hasSpaces)
-            AppSelector(
-                role: .float,
-                name: $newFloatingApp,
-                exclude: Set(apps),
-                onCommit: addFloating
-            )
-            Spacer()
-        }
-    }
-
-    /// Adds a rule that pins the picked app to the designated
-    /// Space. Picking an app is the whole gesture (#1172), so this
-    /// runs straight off the pick.
-    private func addWithSpace(_ picked: String) {
-        // Cleared whatever happens: a refused pick used to stay in
-        // the binding, and `AppPickerButton` draws and announces
-        // whatever `name` holds — so the button read the refused
-        // app's name until an unrelated pick succeeded (code
-        // review, 2026-09-22).
-        defer { newSpaceApp = "" }
-        guard let app = normalized(picked),
-            let space = AppRulePin.engagedSpace(model.config)
-        else { return }
-        model.config.appRules[app] = space
-    }
-
-    /// Adds a rule that floats every window of the picked app.
-    private func addFloating(_ picked: String) {
-        defer { newFloatingApp = "" }
-        guard let app = normalized(picked) else { return }
-        if !model.config.floatRules.contains(app) {
-            model.config.floatRules.append(app)
-        }
-    }
-
     /// Lower-cased so a hand-typed mixed-case bundle id
     /// (osascript reports `com.apple.Safari`) keys the same as the
-    /// normalized `appBundleID` the engine and dropdown use —
-    /// otherwise dedup and the open-title list silently miss
-    /// (#262 review).
-    private func normalized(_ picked: String) -> String? {
+    /// normalized `appBundleID` the engine and dropdown use
+    /// (#262 review). Refused where the list already holds it.
+    func normalized(_ picked: String, in list: [String]) -> String? {
         let app = picked.trimmed.lowercased()
-        guard !app.isEmpty, !apps.contains(app) else { return nil }
+        guard !app.isEmpty, !list.contains(app) else { return nil }
         return app
-    }
-
-    /// Removes app rules and updates focus target (#816, #109, 2026-08-12).
-    private func delete(_ app: String) {
-        let neighbour = neighbourAfterDeleting(app)
-        model.config.appRules[app] = nil
-        model.config.floatRules.removeAll {
-            FloatFacet.appSegment(of: $0) == app
-        }
-        // Or the deleted row is the one the composing slot keeps
-        // listed, and the trash appears to do nothing.
-        if composingTitles == app { composingTitles = nil }
-        if !apps.contains(app) {
-            returningRow = neighbour
-        }
-    }
-
-    private func neighbourAfterDeleting(
-        _ app: String
-    ) -> String? {
-        DeletionFocus.neighbour(after: app, in: apps)
     }
 }

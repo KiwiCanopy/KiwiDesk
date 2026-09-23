@@ -637,16 +637,13 @@ constant frame passes.
 
 **A census-named row that draws no visible label authors its
 label key as an `.accessibilityLabel` — and gives back whatever
-that label displaced.** The App Rules facet menus are the worked
-case: neither draws a label of its own — the list carries ONE
-column heading, `app_rules.space` over the Space menu, and the
-float column is unheaded because its values are whole predicates
-— while the census names both rows, by `app_rules.space` /
-`app_rules.float`. A drawn heading is no substitute for the
-modifier either, and must not be offered as one: a heading is
-`.accessibilityHidden` — it would otherwise announce a word the
-menu under it already speaks — so that menu has nothing else to
-be called, wide or stacked. That one call site is
+that label displaced.** The App Rules value menus are the worked
+case: neither draws a label of its own — each list's title says
+what its one column is (#1608) — while the census names both
+rows, by `app_rules.space` / `app_rules.float`. A card title is
+no substitute for the modifier, and must not be offered as one:
+it names the list, not the control, so the menu has nothing else
+to be called. That one call site is
 load-bearing three ways — VoiceOver has nothing else to
 call the control, `SettingKeyLocaleTests` requires the key in
 every locale, and search indexes it — and dropping it is silent
@@ -671,11 +668,13 @@ before, keyed per control on that control's OWN value expression
 a count of two satisfied with both values on one menu and the
 other silent). Draw and speak it from one expression wherever the
 cell is a word; where it cannot be — a cell drawn as a GLYPH a
-screen reader reads as nothing, which is the Space facet's em
-dash — author the spoken variant beside the drawn one and keep
-the pair in step. Nothing scans for that pair. Read the rule as:
-whenever you name a control for VoiceOver, ask what naming it
-took away.
+screen reader reads as nothing, which is an override
+tombstone's em dash on either App Rules list — author the
+spoken variant beside the drawn one and keep the pair in step.
+`AppRuleListsWiringTests` ▸ `tombstonesSpeak` holds that each App
+Rules menu speaks its word; nothing scans that a pair stays in
+step. Read the rule as: whenever you
+name a control for VoiceOver, ask what naming it took away.
 
 **A sentence with controls in it is one localized frame, not
 connectives between fixed stack positions.** Author the frame
