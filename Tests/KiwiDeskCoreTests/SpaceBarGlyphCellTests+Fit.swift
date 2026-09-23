@@ -69,7 +69,8 @@ extension SpaceBarGlyphCellTests {
         for ligature in ligatures {
             let field = NSTextField(labelWithString: ligature)
             field.alignment = .center
-            field.font = try #require(AppFont.font(size: size))
+            let appFont = try #require(AppFont.font(size: size))
+            field.font = appFont
             field.frame = BarTextGlyph.frame(for: field, in: cell)
             let font = try Self.requireAppFont(field)
             let ink = BarTextGlyph.metrics(ligature, font: font).ink

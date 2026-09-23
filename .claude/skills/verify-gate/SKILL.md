@@ -49,16 +49,17 @@ Say in the report which gate you ran and why.
 `scripts/lint.sh` prints warnings that are not failures — only
 its **exit code** decides.
 
-**A compiler warning in `Sources/` reds CI even though step 1
-passes (#1594).** `ci.yml`'s Build step ratchets
+**A compiler warning reds CI even though step 1 passes (#1594,
+#1596).** `ci.yml`'s Build and Test steps ratchet
 (`-warnings-as-errors`, deprecations excepted) and step 1 above
-does not, so a new warning is a red PR after a green local gate.
+does not, so a new warning — in `Sources/` or `Tests/` — is a
+red PR after a green local gate.
 Worse, SwiftPM re-emits nothing for a module it did not
 recompile, so a warm tree hides it from a re-run. Before pushing,
 check the warning the ratchet would see:
 
 ```
-swift build -Xswiftc -warnings-as-errors \
+swift build --build-tests -Xswiftc -warnings-as-errors \
   -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 ```
 

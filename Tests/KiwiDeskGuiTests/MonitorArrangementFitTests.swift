@@ -92,24 +92,21 @@ struct MonitorArrangementFitTests {
     /// tall enough for one, since the short-canvas case has no
     /// room for a tray at all.
     @Test("a tray canvas leaves room for the tray")
-    func trayCanvasReservesTheBand() {
+    func trayCanvasReservesTheBand() throws {
         let canvas = CGSize(width: 420, height: 300)
         let layout = MonitorArrangement.layout(
             displays: single,
             mainID: DisplayID(1),
             canvas: canvas
         )
-        let tray = try? #require(layout.tray)
-        #expect(tray != nil)
+        let tray = try #require(layout.tray)
         for drawn in layout.displays {
             #expect(drawn.rect.maxY <= canvas.height + 0.5)
         }
-        if let tray {
-            #expect(
-                tray.maxY <= canvas.height + 0.5,
-                "the tray itself must fit the canvas"
-            )
-        }
+        #expect(
+            tray.maxY <= canvas.height + 0.5,
+            "the tray itself must fit the canvas"
+        )
     }
 
     /// An ordinary desk must not make the picture SCROLL.

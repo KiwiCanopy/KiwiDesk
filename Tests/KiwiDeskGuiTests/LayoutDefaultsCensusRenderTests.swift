@@ -32,12 +32,12 @@ struct LayoutDefaultsCensusRenderTests {
     /// then covered by existing code, and one that forgot its
     /// order list reds here instead of rendering an empty card.
     @Test("each layout's rows are that container's census rows")
-    func everyLayoutMatchesItsContainer() {
+    func everyLayoutMatchesItsContainer() throws {
         for mode in LayoutMode.placementTabs {
-            let container = try? #require(
-                LayoutDefaultsRowOrder.container(for: mode)
+            let container = try #require(
+                LayoutDefaultsRowOrder.container(for: mode),
+                "\(mode) is a placement tab with no container"
             )
-            guard let container else { continue }
             let rendered = LayoutDefaultsRowOrder.rows(for: mode)
             #expect(
                 Set(rendered) == censusRows(container),
