@@ -241,7 +241,7 @@ bug reports turn on.
 Pick the template by what the issue *is*: `bug_report` when
 something shipped behaves wrongly (including a guard that cannot
 fail — the repro is the mutation that ought to red it),
-`feature_request` for new or retuned behavior, `docs_report` for
+`feature_request` for new or retuned behavior, `report_docs` for
 prose. Those three are the whole chooser, and `config.yml` — not
 a template but the chooser itself — turns blank issues off, so
 one of the three is the only way in. Each is written for a
