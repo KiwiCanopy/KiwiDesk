@@ -34,7 +34,7 @@ extension KiwiCore {
     /// `init.lua` stay untouched. The copy inherits the
     /// source's screen count but none of its monitor sets — a
     /// combination belongs to one profile, so the copy starts
-    /// dormant and claims one on its first load or save (#1530) —
+    /// dormant and claims one on its first load (#1530) —
     /// and its sparse keybinding and window-rule overrides
     /// re-diffed with the edits; the count-default flag is NOT
     /// copied (two defaults per count would be ambiguous).

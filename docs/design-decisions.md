@@ -11251,7 +11251,9 @@ consequences:
   lost the set loads dirty.
 - **A set changing hands keeps its pins.** It arrives with the
   pins its previous owner held for the Spaces the new owner
-  declares, so a round trip does not lose them.
+  declares, so a round trip keeps the pins of Spaces both
+  declare; picked onto the loaded profile, the pins take effect at
+  once.
 - **A profile that loses its last set goes *dormant* rather than
   being deleted.** It keeps its screen count (the file carries
   `monitor_count`), is never picked by the exact-match or

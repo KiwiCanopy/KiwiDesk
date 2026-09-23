@@ -96,17 +96,19 @@ struct MonitorSetHandOverTests {
     @Test("Picking the connected set away leaves the live one dirty")
     func pickAwayDirtiesLive() throws {
         let core = makeCore()
-        connect(core, ["A"])
-        try core.persistProfile(named: "Work", modes: nil)
+        try pinnedWork(core)
         try core.persistProfile(named: "Home", modes: nil)
         try core.loadProfile(named: "Work")
         #expect(!core.profiles.isDirty)
-        try core.claimMonitorSet(["A:100x100"], for: "Home")
+        try core.claimMonitorSet(pair, for: "Home")
         #expect(core.profiles.currentName == "Work")
         #expect(core.profiles.isDirty)
-        // Picked back onto the live profile, it fits again.
-        try core.claimMonitorSet(["A:100x100"], for: "Work")
+        // Picked back onto the live profile, it fits again and its
+        // pins are live at once — its next save cannot drop them.
+        core.spacePins = [:]
+        try core.claimMonitorSet(pair, for: "Work")
         #expect(!core.profiles.isDirty)
+        #expect(core.spacePins == ["2": "B:100x100"])
     }
 
     /// The owner order runs against the monitor order, so a sort

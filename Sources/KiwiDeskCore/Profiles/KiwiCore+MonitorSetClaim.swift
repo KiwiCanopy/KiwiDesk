@@ -32,7 +32,7 @@ extension KiwiCore {
     /// Hands `monitors` to `profile` — the load's and the pick's
     /// one hand-over. A set the profile does not hold yet arrives
     /// with its current owner's pins for the Spaces `profile`
-    /// declares, so a round trip keeps them.
+    /// declares, so a round trip keeps those both declare.
     private func handOver(
         _ monitors: [String],
         to profile: inout Profile
@@ -87,7 +87,9 @@ extension KiwiCore {
     /// No apply runs, so where the pick is the CONNECTED set the
     /// live profile's #36 fit is re-judged here: it fits exactly
     /// when it is the claimant (profiles.md ▸ "Let the apply judge
-    /// the #36 fit" — a caller whose verdict differs says why).
+    /// the #36 fit" — a caller whose verdict differs says why), and
+    /// then adopts the set's pins as the monitor-change exact arm
+    /// does, or its next save would overwrite them with live's.
     @discardableResult
     public func claimMonitorSet(
         _ monitors: [String],
@@ -105,6 +107,12 @@ extension KiwiCore {
             let current = profiles.currentName
         {
             if current == name {
+                spacePins =
+                    profile.set(matching: monitors)?.spaceMonitorMap
+                    ?? [:]
+                resolveSpaceDisplays()
+                retile()
+                emitSpaceChange()
                 profiles.markClean()
             } else if released.contains(current) {
                 profiles.markDirty()

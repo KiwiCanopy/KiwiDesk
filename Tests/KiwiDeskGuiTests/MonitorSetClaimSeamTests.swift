@@ -73,6 +73,18 @@ struct MonitorSetClaimSeamTests {
             "AppDelegate.swift": 1,
             "SettingsModel+Profiles.swift": 1,
         ],
+        "saveProfile(": [
+            // The one write door (#1249) and its callers: the two
+            // persist arms and the preset.
+            "KiwiCore+ProfileSpaces.swift": 1,
+            "KiwiCore+Profiles.swift": 2,
+            "KiwiCore+ProfileResolution.swift": 1,
+        ],
+        "claimLiveSet(": [
+            // Declaration, and `saveProfile`'s tail.
+            "KiwiCore+MonitorSetClaim.swift": 1,
+            "KiwiCore+ProfileSpaces.swift": 1,
+        ],
         "applyStandard(": [
             "KiwiCore+ProfileResolution.swift": 1,
             // Presets ▸ Apply.
