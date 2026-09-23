@@ -25,12 +25,12 @@ extension ProfilesSection {
         // Focus return target on dismissal (#816).
         .focused($returningRow, equals: summary.name)
         .help(
-            summary.matchesLive
+            summary.matchesConnectedCount
                 ? ""
                 : L(
-                    "profiles.other_monitors.help",
-                    "Saved for other monitors — loads "
-                        + "with unsaved-changes state."
+                    "profiles.other_count.help",
+                    "Saved for a different number of screens — "
+                        + "loads with unsaved changes."
                 )
         )
     }
@@ -63,12 +63,14 @@ extension ProfilesSection {
         )
     }
 
-    /// Inline text link to set profile as default.
+    /// Inline text link to set profile as default. Greyed on a
+    /// dormant row, which cannot load as a fallback (#1530); the
+    /// row's own caption says why.
     func makeDefaultLink(
-        _ name: String
+        _ summary: ProfileSummary
     ) -> some View {
         Button {
-            model.makeDefault(named: name)
+            model.makeDefault(named: summary.name)
         } label: {
             Text(L("profiles.make_default", "make default"))
                 .underline()
@@ -76,5 +78,6 @@ extension ProfilesSection {
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
+        .disabled(summary.isDormant)
     }
 }

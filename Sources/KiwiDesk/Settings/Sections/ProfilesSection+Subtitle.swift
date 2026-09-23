@@ -24,16 +24,6 @@ extension ProfilesSection {
         )
     }
 
-    /// Tooltip text listing associated monitor names.
-    func monitorTooltip(_ summary: ProfileSummary) -> String {
-        summary.sets
-            .map { set in
-                set.map(model.monitorName)
-                    .joined(separator: ", ")
-            }
-            .joined(separator: "\n")
-    }
-
     /// Localized Space count phrase (`PresetScreenCard.spaceCountPhrase`).
     private func spacesPhrase(_ count: Int) -> String {
         count == 1

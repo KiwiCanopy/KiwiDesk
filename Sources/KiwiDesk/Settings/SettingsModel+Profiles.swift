@@ -54,21 +54,7 @@ extension SettingsModel {
     /// Persists edited tiling into active profile and refreshes monitor set.
     func updateActiveProfile() {
         guard let name = activeProfile else { return }
-        let overlap = core.profilesClaimingLiveSet(
-            excluding: name
-        )
-        guard persist(named: name) else { return }
-        if !overlap.isEmpty {
-            let names = overlap.map { "\"\($0)\"" }
-                .joined(separator: ", ")
-            profileWarning = L(
-                "profiles.overlap_warning",
-                "This screen setup is also used by %1$@ "
-                    + "— if multiple profiles match on startup, "
-                    + "the first one alphabetically is loaded.",
-                names
-            )
-        }
+        persist(named: name)
     }
 
     /// Creates new profile with unique name capturing live monitor set.
@@ -209,6 +195,10 @@ struct ProfileSummary: Identifiable {
     let name: String
     let count: Int
     let sets: [[String]]
+    /// Holds no screen combination (#1530).
+    var isDormant = false
+    /// The count's default AND able to load as one (#1530).
+    var isUsableDefault = false
     let isDefault: Bool
     let matchesLive: Bool
     let matchesConnectedCount: Bool

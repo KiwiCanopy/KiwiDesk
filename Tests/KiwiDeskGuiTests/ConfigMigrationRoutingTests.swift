@@ -45,6 +45,10 @@ struct ConfigMigrationRoutingTests {
     /// the rule files point here rather than restating it.
     private let readers: [String: Bool] = [
         "Profiles/ProfileManager.swift": true,
+        // The one-time settle's crossing check (#1530) decodes a
+        // file to learn it IS a profile, migrating in memory only:
+        // `read` would stamp the file it asks about.
+        "Profiles/ProfileManager+Settle.swift": true,
         // A bundle carries `[Profile]` inline, so it reads the
         // same shape from a file this app wrote earlier.
         "App/KiwiCore+Backup.swift": true,

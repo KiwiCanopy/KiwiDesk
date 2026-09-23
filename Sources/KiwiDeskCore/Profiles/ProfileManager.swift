@@ -11,6 +11,7 @@ public enum ProfileMatch: Equatable {
 public enum ProfileError: Error, CustomStringConvertible {
     case invalidName(String)
     case nameTaken(String)
+    case dormantDefault(String)
 
     public var description: String {
         switch self {
@@ -18,6 +19,10 @@ public enum ProfileError: Error, CustomStringConvertible {
             return "invalid profile name: '\(name)'"
         case .nameTaken(let name):
             return "a profile named '\(name)' already exists"
+        case .dormantDefault(let name):
+            return
+                "'\(name)' holds no monitor set, so it cannot be "
+                + "a screen count's default; load it first"
         }
     }
 }
@@ -61,8 +66,13 @@ public final class ProfileManager {
     /// On the WRITE rather than on either caller (#1179).
     public var onCapturedLive: @MainActor (String) -> Void = { _ in }
 
+    /// A profile predating the one-owner format was on disk when
+    /// this manager was made, and no settle has run since (#1530).
+    public internal(set) var owesSetSettle: Bool
+
     public init(directory: URL) {
         self.directory = directory
+        owesSetSettle = Self.owesSettle(in: directory)
     }
 
     public func list() -> [String] {
@@ -111,6 +121,7 @@ public final class ProfileManager {
             defaultProfile(count: profile.monitorCount) == nil
         {
             profile.isDefault = true
+            try clearDormantDefaults(count: profile.monitorCount)
         }
         try write(profile)
         active = ActiveProfile(profile)
@@ -134,10 +145,11 @@ public final class ProfileManager {
         for count in counts
         where defaultProfile(count: count) == nil {
             if var heir = allProfiles().first(where: {
-                $0.monitorCount == count
+                $0.monitorCount == count && !$0.isDormant
             }) {
                 heir.isDefault = true
                 try write(heir)
+                try clearDormantDefaults(count: count)
             }
         }
     }
@@ -170,9 +182,13 @@ public final class ProfileManager {
         }
     }
 
-    /// Re-designates a count's default profile.
+    /// Re-designates a count's default profile. A dormant profile
+    /// cannot load as a fallback, so it is refused (#1530).
     func setDefault(name: String) throws {
         var chosen = try read(name: name)
+        guard !chosen.isDormant else {
+            throw ProfileError.dormantDefault(name)
+        }
         chosen.isDefault = true
         try write(chosen)
         for var other in allProfiles()

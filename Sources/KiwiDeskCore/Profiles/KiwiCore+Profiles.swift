@@ -24,25 +24,13 @@ extension KiwiCore {
     ) -> CommandResponse {
         switch command {
         case "save_profile":
-            return namedProfileCommand(args) { name in
+            return claimingProfileCommand(args) { name in
                 // Capture-live, like the quick menu's Keep.
                 try self.persistProfile(named: name, modes: nil)
             }
         case "load_profile":
-            return namedProfileCommand(args) { name in
-                let profile = try self.profiles.read(
-                    name: name
-                )
-                // Explicit user load: the profile's spaces become
-                // authoritative — stale spaces are pruned and
-                // their windows forwarded (see `pruneSpaces`).
-                // The apply adopts, and a profile saved for other
-                // monitors stays loadable but lands dirty (#36).
-                self.apply(
-                    profile: profile,
-                    pruneStaleSpaces: true,
-                    forceRetile: true
-                )
+            return claimingProfileCommand(args) { name in
+                try self.loadProfile(named: name)
             }
         case "delete_profile":
             return namedProfileCommand(args) { name in
@@ -80,6 +68,22 @@ extension KiwiCore {
         default:
             return .fail("unknown command: \(command)")
         }
+    }
+
+    /// A save or load: answers with the profiles that lost the
+    /// connected combination to it (#1530).
+    private func claimingProfileCommand(
+        _ args: [JSONValue],
+        _ body: (String) throws -> [String]
+    ) -> CommandResponse {
+        var released: [String] = []
+        let response = namedProfileCommand(args) { name in
+            released = try body(name)
+        }
+        guard response.isSuccess,
+            let name = args.first?.stringValue
+        else { return response }
+        return Self.claimResponse(released, claimant: name)
     }
 
     private func namedProfileCommand(
@@ -137,11 +141,7 @@ extension KiwiCore {
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop).
     func liveMonitorSet() -> MonitorSet {
-        MonitorSet(
-            monitors: state.workspaces.allDisplays
-                .map(\.fingerprint),
-            spaceMonitorMap: spacePins
-        )
+        MonitorSet(monitors: liveFingerprints, spaceMonitorMap: spacePins)
     }
 
     /// Snapshot of the current configuration as a new profile
@@ -192,7 +192,8 @@ extension KiwiCore {
     /// live monitor set added or refreshed), a new name creates
     /// a profile with only the live set. Updating a profile of
     /// a different screen count is refused — that state needs
-    /// "save as new" (#36).
+    /// "save as new" (#36). Either way the profile claims the
+    /// live set; returns the profiles that lost it (#1530).
     ///
     /// `modes` is REQUIRED so every call site chooses (the
     /// `forceRetile` pattern, §5). Nil means capture live — the
@@ -200,25 +201,34 @@ extension KiwiCore {
     /// Save passes its draft's modes, dense over the live
     /// spaces, because that write commits what was edited and a
     /// standing temporary layout is not in it (#1179).
+    @discardableResult
     public func persistProfile(
         named name: String,
         modes: [SpaceID: LayoutMode]?
-    ) throws {
+    ) throws -> [String] {
         guard var existing = try? profiles.read(name: name)
         else {
-            try saveProfile(
+            let released = try saveProfile(
                 buildProfile(name: name, modes: modes)
             )
             refreshConfigIssues()
             if modes == nil { profiles.onCapturedLive(name) }
-            return
+            return released
         }
         let live = liveMonitorSet()
-        guard existing.upsert(live) else {
+        guard existing.monitorCount == live.monitors.count else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: existing.monitorCount,
                 live: live.monitors.count
             )
+        }
+        // A set ANOTHER profile owns stays with it: the live profile
+        // is on those screens through a binding or a set moved away
+        // by hand, and a save takes nothing (owner, 2026-09-23).
+        if existing.set(matching: live.monitors) != nil
+            || !isOwnedElsewhere(live.monitors, than: name)
+        {
+            existing.upsert(live)
         }
         let fresh = buildProfile(name: name, modes: modes)
         existing.spaces = fresh.spaces
@@ -227,11 +237,12 @@ extension KiwiCore {
         existing.mainSpaces = fresh.mainSpaces
         existing.settings = fresh.settings
         existing.savedAt = .now
-        try saveProfile(existing)
+        let released = try saveProfile(existing)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()
         if modes == nil { profiles.onCapturedLive(name) }
+        return released
     }
 
     // The non-adopting edit writes (`overwriteProfile`,
@@ -282,21 +293,5 @@ extension KiwiCore {
         } else {
             handleMonitorChange()
         }
-    }
-
-    /// Names of profiles (other than `name`) already claiming
-    /// the live monitor set — the GUI warns before Update
-    /// makes the set ambiguous (#36 overlap policy).
-    public func profilesClaimingLiveSet(
-        excluding name: String
-    ) -> [String] {
-        let live = state.workspaces.allDisplays
-            .map(\.fingerprint)
-        return profiles.allProfiles()
-            .filter {
-                $0.name != name
-                    && $0.set(matching: live) != nil
-            }
-            .map(\.name)
     }
 }

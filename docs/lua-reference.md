@@ -4440,6 +4440,13 @@ end)
 - `set_default_profile` marks a profile as the fallback for its
   monitor count.
 
+:::unreleased
+`save_profile` and `load_profile` also hand the connected monitor
+set to that profile, and `set_default_profile` refuses a profile
+that holds no set (see [Profile Monitor
+Sets](#profile-monitor-sets)).
+:::
+
 **Example:**
 
 ```lua
@@ -4574,7 +4581,7 @@ The record is per session and is not written to disk.
 
 ### Profile Monitor Sets
 
-A profile covers one or more concrete **monitor sets** — each a list
+A profile covers concrete **monitor sets** of one screen count — each a list
 of monitor fingerprints plus the space→monitor pins valid for that
 arrangement. Updating a profile while a new combination is connected
 teaches it that combination. When displays change, KiwiDesk resolves
@@ -4609,6 +4616,30 @@ never does.
 Explicitly loading a profile whose stored sets don't cover the
 connected monitors works, but the state loads *dirty* until you
 update the profile on this hardware or return to a covered set.
+
+:::unreleased
+A monitor set belongs to one profile. `save_profile` (unless
+another profile owns the set), `load_profile` of a profile saved
+for as many screens, and creating a profile hand the connected set
+to that profile and remove it from every other
+profile with that count; the set keeps the pins its previous owner
+held for the Spaces the new owner declares. When that took the set
+from another profile, the command returns the names and why:
+`{"taken_from": ["Work"], "reason": "…"}`; otherwise it returns
+nothing. The first start after updating, and restoring a
+backup, settle every set several profiles hold onto the one that
+loads it today (the alphabetically first); if that leaves the
+count's default without a set, the default moves to the profile
+that kept it. After that, start-up, a
+monitor change and a Desktop binding never move a set, so two
+hand-edited profiles that hold the same set still resolve as
+before. A profile left with no set is *dormant*:
+its file keeps `"monitor_sets": []` beside `"monitor_count"`, it is
+never picked by its screens (a Desktop binding still loads it), it
+still loads by name, and it takes a set back on its next load. A
+dormant profile loses its default flag; the profile that took its
+set becomes the default unless the count already has another.
+:::
 
 ### Profile JSON Format
 

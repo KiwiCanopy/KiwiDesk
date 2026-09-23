@@ -138,6 +138,11 @@ extension KiwiCore {
         // and Main dropped, and a space living only in
         // `spaceModes` pruned away. Every one was invisible to a
         // test that read files.
+        //
+        // The restored profiles may predate #1530's one owner per
+        // set, and were rewritten at the current format, so the
+        // crossing inside `loadConfig` cannot see them.
+        settleSharedSets()
         loadConfig()
         if let config = bundle.config {
             applyProfileScopedState(from: config)

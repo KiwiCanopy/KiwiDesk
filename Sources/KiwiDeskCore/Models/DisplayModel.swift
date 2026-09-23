@@ -44,4 +44,18 @@ public struct Display: Sendable, Equatable {
         let h = Int(frame.height)
         return "\(name):\(w)x\(h)"
     }
+
+    /// `fingerprint`'s two parts — the screen name and its
+    /// `WxH` size — for a screen that is not connected (#1530).
+    public static func fingerprintParts(
+        _ fingerprint: String
+    ) -> (name: String, size: String) {
+        guard let colon = fingerprint.lastIndex(of: ":") else {
+            return (fingerprint, "")
+        }
+        return (
+            String(fingerprint[..<colon]),
+            String(fingerprint[fingerprint.index(after: colon)...])
+        )
+    }
 }

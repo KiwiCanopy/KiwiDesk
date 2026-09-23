@@ -222,9 +222,8 @@ struct ProfileSaveAdoptionTests {
         // matches the live set (#36).
         var misfit = fitting
         misfit.name = "B"
-        misfit.monitorSets = [
-            MonitorSet(monitors: ["Nowhere:640x480"])
-        ]
+        misfit.upsert(MonitorSet(monitors: ["Nowhere:640x480"]))
+        misfit.release(fitting.monitorSets[0].monitors)
         core.apply(profile: misfit, forceRetile: false)
         #expect(core.profiles.currentName == "B")
         #expect(core.profiles.isDirty)
@@ -256,16 +255,16 @@ struct ProfileSaveAdoptionTests {
         #expect(!core.profiles.isDirty)
 
         // Edited to name a screen this Mac does not have. A
-        // DECODABLE misfit on purpose: `monitorSets = []` does
-        // not survive `Profile`'s decoder ("profile has no valid
-        // monitor set"), so the re-apply's `try? read` would fail
-        // and `handleMonitorChange` would mark it dirty for an
-        // unrelated reason — green, and measuring nothing
+        // DECODABLE misfit on purpose: a profile with no set and
+        // no `monitor_count` does not survive `Profile`'s decoder
+        // ("profile has no valid monitor set"), so the re-apply's
+        // `try? read` would fail and `handleMonitorChange` would
+        // mark it dirty for an unrelated reason — green, and
+        // measuring nothing
         // (measured on the device, 2026-09-07).
         var misfit = fitting
-        misfit.monitorSets = [
-            MonitorSet(monitors: ["Nowhere:640x480"])
-        ]
+        misfit.upsert(MonitorSet(monitors: ["Nowhere:640x480"]))
+        misfit.release(fitting.monitorSets[0].monitors)
         try core.profiles.write(misfit)
         core.reapplyIfInEffect("A")
         #expect(core.profiles.isDirty)

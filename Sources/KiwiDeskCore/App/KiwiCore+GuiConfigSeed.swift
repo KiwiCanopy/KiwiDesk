@@ -18,8 +18,7 @@ extension KiwiCore {
         config.settings = profile.settings
         config.spaceModes = profile.spaceModes
         config.mainSpaces = Set(profile.mainSpaces)
-        let live = state.workspaces.allDisplays
-            .map(\.fingerprint)
+        let live = liveFingerprints
         config.spacePins =
             profile.set(matching: live)?.spaceMonitorMap ?? [:]
         // The space set is the profile's own — NOT unioned with

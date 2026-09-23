@@ -4,6 +4,11 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
+        // #1530's one-time settle, owed from when the manager was
+        // made — before any reader could stamp a file.
+        if profiles.owesSetSettle {
+            settleSharedSets()
+        }
         keybindingRuntimeGeneration &+= 1
         bus.resetLuaCallbacks()
         appliedStructuredLayers = nil

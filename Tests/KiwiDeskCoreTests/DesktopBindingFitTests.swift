@@ -183,26 +183,31 @@ struct DesktopBindingFitTests {
         )
     }
 
+    /// Both doors, each the REASON Duo loads: "Aardvark" also
+    /// holds the connected set and sorts first, written without a
+    /// claim, so matching alone would pick it, and the fixture
+    /// starts on "Other", so the bind door has something to load.
+    /// Written rather than saved or loaded: those claim (#1530).
     @Test("A fitting binding loads on both doors")
     func fittingBindingLoads() throws {
         defer { resetTopology() }
         pinTopology()
         let core = makeCore()
         connect(core, 2)
-        try seed(
-            core,
-            [
-                profile("Duo", monitors: live(core)),
-                // Same count, other monitors: an exact match
-                // cannot pick "Duo" by ordering luck.
-                profile("Other", monitors: ["X:1x1", "Y:1x1"]),
-            ]
-        )
+        for fixture in [
+            profile("Aardvark", monitors: live(core)),
+            profile("Duo", monitors: live(core)),
+            profile("Other", monitors: ["X:1x1", "Y:1x1"]),
+        ] {
+            try core.profiles.write(fixture)
+        }
+        let other = try core.profiles.read(name: "Other")
+        core.apply(profile: other, forceRetile: false)
+        #expect(core.profiles.currentName == "Other")
         bind(core, "Duo")
         #expect(core.profiles.currentName == "Duo")
         #expect(!core.profiles.isDirty)
-        core.execute("load_profile", args: [.string("Other")])
-        #expect(core.profiles.currentName == "Other")
+        core.apply(profile: other, forceRetile: false)
         core.handleMonitorChange()
         #expect(core.profiles.currentName == "Duo")
         #expect(!core.profiles.isDirty)

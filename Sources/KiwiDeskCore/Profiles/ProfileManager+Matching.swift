@@ -3,7 +3,8 @@ import Foundation
 /// Monitor-set profile matching queries for ProfileManager.
 extension ProfileManager {
     /// Matches a live monitor set: exact stored set (sorted
-    /// arrays) → the count's default user profile → none (the
+    /// arrays) → the count's default user profile, never a
+    /// dormant one (#1530) → none (the
     /// caller composes the Standard). Ties resolve
     /// alphabetically.
     public func match(fingerprints: [String]) -> ProfileMatch {
@@ -14,7 +15,7 @@ extension ProfileManager {
             return .exact(exact)
         }
         if let fallback = profiles.first(where: {
-            $0.isDefault
+            $0.isUsableDefault
                 && $0.monitorCount == fingerprints.count
         }) {
             return .countDefault(fallback)
@@ -23,10 +24,11 @@ extension ProfileManager {
     }
 
     /// The count's default profile (alphabetically first when
-    /// hand-edited duplicates exist).
+    /// hand-edited duplicates exist). A dormant profile is never
+    /// auto-matched, so it is never the default either (#1530).
     public func defaultProfile(count: Int) -> Profile? {
         allProfiles().first {
-            $0.isDefault && $0.monitorCount == count
+            $0.isUsableDefault && $0.monitorCount == count
         }
     }
 
@@ -34,7 +36,8 @@ extension ProfileManager {
     /// flag (hand-edited) — surfaces a GUI warning badge.
     public func duplicateDefaultCounts() -> [Int] {
         var counts: [Int: Int] = [:]
-        for profile in allProfiles() where profile.isDefault {
+        for profile in allProfiles()
+        where profile.isUsableDefault {
             counts[profile.monitorCount, default: 0] += 1
         }
         return counts.filter { $0.value > 1 }.keys.sorted()

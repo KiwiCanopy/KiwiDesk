@@ -566,8 +566,8 @@ config; every saved profile lists below it, one row each.
 Saving a stored profile hot-reloads the running layout only if
 that profile is on screen; otherwise the change waits until it
 next loads. **Save a copy…** while editing a stored profile
-duplicates it with your pending edits and its monitor sets, even
-for absent hardware, without touching the running layout.
+duplicates it with your pending edits, without touching the
+running layout.
 
 ### Saving
 
@@ -577,6 +577,13 @@ count differs from the profile's. A screen setup the profile has
 no set for is itself an unsaved change, listed as a **Screens**
 row. On a temporary layout or a built-in Standard the slot reads
 **Save as New Profile…**.
+
+:::unreleased
+Loading a profile saved for this many screens moves the connected
+screen setup to it from any other profile, so the next time these
+screens connect, it loads. Saving adds the connected screen setup
+only when no other profile has it.
+:::
 
 While management is **paused** (Accessibility off), KiwiDesk
 detects no displays, so any save that captures the live monitor

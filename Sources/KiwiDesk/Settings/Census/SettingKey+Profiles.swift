@@ -5,6 +5,7 @@ enum ProfilesKey: String, CaseIterable, Hashable {
     case profilesLoad = "(action) profiles.load"
     case profilesDelete = "(action) profiles.delete"
     case profilesRename = "(action) profiles.rename"
+    case profilesAddScreenSetup = "(action) profiles.sets.move"
     case isDefault = "profile.isDefault"
     case isStarterSetup = "profile.isStarterSetup"
     case presetsApply = "(action) presets.apply"
@@ -24,7 +25,8 @@ extension ProfilesKey {
                 .showMore,
                 gate: .runtime(.noBindingStore)
             )
-        case .profilesLoad, .profilesDelete, .profilesRename, .isDefault:
+        case .profilesLoad, .profilesDelete, .profilesRename, .isDefault,
+            .profilesAddScreenSetup:
             return .row(.profiles, .savedProfiles, .atRest)
         case .isStarterSetup:
             return .luaOnly
@@ -59,6 +61,8 @@ extension ProfilesKey {
             return .text("profiles.rename", help: "profiles.rename.help")
         case .isDefault:
             return .text("profiles.make_default")
+        case .profilesAddScreenSetup:
+            return .text("profiles.sets.move.help")
         case .isStarterSetup:
             return .none
         case .presetsApply:

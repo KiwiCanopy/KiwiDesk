@@ -174,16 +174,17 @@ struct ProfileCommandTests {
         #expect(core.profiles.list().isEmpty)
     }
 
-    @Test("A profile saved for other monitors loads dirty")
+    /// A same-count load claims the connected set and loads clean
+    /// (#1530, `MonitorSetClaimTests`); only another COUNT is dirty.
+    @Test("A profile saved for another screen count loads dirty")
     func loadMismatchedDirty() {
         let core = makeCore()
-        connect(core, [display(1, "A")])
+        connect(core, [display(1, "A"), display(2, "B", x: 100)])
         core.execute(
             "save_profile",
             args: [.string("desk")]
         )
-        core.state.workspaces.removeDisplay(DisplayID(1))
-        connect(core, [display(2, "B")])
+        core.state.workspaces.removeDisplay(DisplayID(2))
         core.execute(
             "load_profile",
             args: [.string("desk")]
@@ -234,28 +235,6 @@ struct ProfileCommandTests {
                 == "beta"
         )
         #expect(try !core.profiles.read(name: "alpha").isDefault)
-    }
-
-    @Test("Overlapping profiles claiming the live set listed")
-    func overlapWarning() {
-        let core = makeCore()
-        connect(core, [display(1, "A")])
-        core.execute(
-            "save_profile",
-            args: [.string("desk")]
-        )
-        core.execute(
-            "save_profile",
-            args: [.string("other")]
-        )
-        #expect(
-            core.profilesClaimingLiveSet(excluding: "desk")
-                == ["other"]
-        )
-        #expect(
-            core.profilesClaimingLiveSet(excluding: "other")
-                == ["desk"]
-        )
     }
 
     @Test("Profile tiling survives a Lua config reload")

@@ -32,7 +32,9 @@ extension KiwiCore {
     /// transform and non-adopting write as `overwriteProfile`,
     /// so live state, `current`/`dirty`, `gui.json`, and
     /// `init.lua` stay untouched. The copy inherits the
-    /// source's monitor sets (including other-hardware ones)
+    /// source's screen count but none of its monitor sets — a
+    /// combination belongs to one profile, so the copy starts
+    /// dormant and claims one on its first load (#1530) —
     /// and its sparse keybinding and window-rule overrides
     /// re-diffed with the edits; the count-default flag is NOT
     /// copied (two defaults per count would be ambiguous).
@@ -59,6 +61,10 @@ extension KiwiCore {
         // here, and both identity flags the copy must neutralize
         // (#485, AGENTS.md §5 mirror rule).
         copy.isStarterSetup = false
+        // A 0-screen source has no count to keep dormant (#335).
+        if copy.monitorCount > 0 {
+            for set in copy.monitorSets { copy.release(set.monitors) }
+        }
         try profiles.write(copy)
         return copy.name
     }
@@ -137,8 +143,7 @@ extension KiwiCore {
             // no ignore editor, so even an inert hidden tombstone must
             // survive overwrite/copy until an external edit removes it.
         }
-        let live = state.workspaces.allDisplays
-            .map(\.fingerprint)
+        let live = liveFingerprints
         if profile.set(matching: live) != nil {
             profile.upsert(
                 MonitorSet(

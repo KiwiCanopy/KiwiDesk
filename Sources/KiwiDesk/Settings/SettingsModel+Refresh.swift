@@ -12,17 +12,20 @@ extension SettingsModel {
         profileDirty = core.profiles.isDirty
         duplicateDefaultCounts =
             core.profiles.duplicateDefaultCounts()
-        let live = displays.map(\.fingerprint)
         profileSummaries = core.profiles.allProfiles().map {
             profile in
             ProfileSummary(
                 name: profile.name,
                 count: profile.monitorCount,
                 sets: profile.monitorSets.map(\.monitors),
+                isDormant: profile.isDormant,
+                isUsableDefault: profile.isUsableDefault,
                 isDefault: profile.isDefault,
-                matchesLive: profile.set(matching: live) != nil,
+                matchesLive: profile.monitorSets.contains {
+                    core.isConnectedMonitorSet($0.monitors)
+                },
                 matchesConnectedCount: profile.monitorCount
-                    == live.count,
+                    == displays.count,
                 openingModes: profile.openingModes(),
                 spaceCount: profile.declaredSpaces.count,
                 shortcutOverrideCount:

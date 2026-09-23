@@ -9,6 +9,8 @@ struct ProfilesSection: View {
     @ObservedObject var model: SettingsModel
     /// Profile whose rename popover is presented (#843).
     @State var renameRequest: NameEditRequest?
+    /// Profile whose full screen-setup list is open (#1530).
+    @State var setupListRequest: ScreenSetupListRequest?
     /// Keyboard focus return anchor after row deletion (#816).
     @FocusState var returningRow: String?
 
@@ -67,7 +69,7 @@ struct ProfilesSection: View {
             ForEach(orderedSummaries) { summary in
                 profileRow(summary)
             }
-            if let note = currentSetupNote {
+            if let note = oneOwnerNote {
                 Text(note)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -91,18 +93,14 @@ struct ProfilesSection: View {
         )
     }
 
-    /// Note describing current setup destination (#818).
-    private var currentSetupNote: String? {
-        guard !model.editingStoredProfile,
-            let active = model.activeProfile
-        else { return nil }
+    /// The one rule the badge lines cannot show: moving a screen
+    /// setup takes it from its holder (#1530, owner 2026-09-23).
+    private var oneOwnerNote: String? {
+        guard !model.profileSummaries.isEmpty else { return nil }
         return L(
-            "profiles.current_setup_note",
-            "Your current setup is saved into %1$@. To keep it "
-                + "separately, use \u{201C}%2$@\u{201D} in the "
-                + "bar below.",
-            active,
-            L("footer.save_a_copy_as", "Save as new profile…")
+            "profiles.sets.one_owner_note",
+            "Each screen setup belongs to one profile at a time. Moving "
+                + "it to another profile removes it from the current one."
         )
     }
 
@@ -138,11 +136,11 @@ struct ProfilesSection: View {
                 Text(subtitle(summary))
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .help(monitorTooltip(summary))
+                screenSetupsLine(summary)
             }
             Spacer()
             if !summary.isDefault {
-                makeDefaultLink(summary.name)
+                makeDefaultLink(summary)
             }
             loadButton(summary)
             deleteButton(summary.name)
@@ -182,12 +180,16 @@ struct ProfilesSection: View {
                 )
             }
             if summary.isDefault {
-                BadgeChip(
-                    label: L("profiles.badge.default", "default")
-                )
+                BadgeChip(label: defaultBadge(summary.count))
                 duplicateDefaultWarning(summary)
             }
         }
+    }
+
+    /// A default is per screen count, so the badge says which
+    /// (#1530) — the count last, behind a label (localization.md).
+    private func defaultBadge(_ count: Int) -> String {
+        L("profiles.badge.default_for", "default · screens: %1$d", count)
     }
 
     /// Warning shown when multiple profiles share a default flag for count.

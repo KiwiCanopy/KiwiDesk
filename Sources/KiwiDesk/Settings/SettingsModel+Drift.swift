@@ -31,6 +31,16 @@ extension SettingsModel {
         guard liveDrift else { return nil }
         if activeStandard != nil { return .builtIn }
         if let name = activeProfile {
+            // A set another profile owns is not this profile's to
+            // save — a binding put it here, or a pick moved the set
+            // away — so it is no unsaved change (#1530).
+            let fitsCount =
+                profileSummaries.first { $0.name == name }?
+                .matchesConnectedCount ?? false
+            let ownedElsewhere = profileSummaries.contains {
+                $0.name != name && $0.matchesLive
+            }
+            if fitsCount, ownedElsewhere { return nil }
             return .screensUnsaved(profile: name)
         }
         return .noMatch

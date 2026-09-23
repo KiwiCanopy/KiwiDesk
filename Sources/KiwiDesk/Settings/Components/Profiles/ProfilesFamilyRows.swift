@@ -265,7 +265,7 @@ struct ProfilesFamilyRows {
     ) -> [ProfilesRowInstance]? {
         switch family {
         case .profilesLoad, .profilesDelete, .profilesRename,
-            .isDefault:
+            .isDefault, .profilesAddScreenSetup:
             return Self.orderedProfiles(profiles)
                 .map { ProfilesRowInstance.profile($0.name) }
         case .profileBindings:

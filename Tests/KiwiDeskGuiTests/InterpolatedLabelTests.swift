@@ -95,8 +95,8 @@ struct InterpolatedLabelTests {
             found \(frames.count) interpolating frame(s) — the \
             call-site parser is broken, not the tree. At least \
             track.new_window_position.help, \
-            space_override.slot_size.help, onboarding.grant.body \
-            and profiles.current_setup_note interpolate a label.
+            space_override.slot_size.help and \
+            onboarding.grant.body interpolate a label.
             """
         )
         let keys = Set(frames.map(\.key))

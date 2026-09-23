@@ -7,17 +7,25 @@ public struct Profile: Codable, Sendable, Equatable {
     /// (#1020), 3 since the retired `resize.feedback` drop
     /// (#1255), 4 since the absent Liquid Glass leaves' fill
     /// (#1369), 5 since the track limit counts the overflow
-    /// track (#1354). The bump is what RUNS a step: `needsMigration`
+    /// track (#1354), 6 since a dormant profile holds no set
+    /// beside its `monitor_count` (#1530) — no step: an older
+    /// reader refuses the shape, and the stamp says why. The bump
+    /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 5
+    public static let currentFormat = 6
 
     public var format: Int
     public var name: String
-    /// Monitor combinations this profile covers (uniform screen count).
-    public var monitorSets: [MonitorSet]
+    /// Monitor combinations this profile covers (uniform screen
+    /// count). A combination belongs to one profile (#1530), so
+    /// it changes only through `upsert` and `release`.
+    public private(set) var monitorSets: [MonitorSet]
+    /// The screen count of a DORMANT profile — one whose last set
+    /// another profile claimed (#1530). Nil while it holds a set.
+    private(set) var dormantMonitorCount: Int?
     /// Spaces assigned to Main role on current main display.
     public var mainSpaces: [SpaceID]
     /// Default profile for this screen count.
@@ -50,37 +58,23 @@ public struct Profile: Codable, Sendable, Equatable {
 
     /// Number of monitors covered by profile sets.
     public var monitorCount: Int {
-        monitorSets.first?.monitors.count ?? 0
+        monitorSets.first?.monitors.count
+            ?? dormantMonitorCount ?? 0
     }
 
-    /// All spaces declared across ordered list, modes, Main, or pins.
-    public var declaredSpaces: Set<SpaceID> {
-        var all = Set(spaces)
-        all.formUnion(spaceModes.keys)
-        all.formUnion(mainSpaces)
-        for set in monitorSets {
-            all.formUnion(set.spaceMonitorMap.keys)
-        }
-        return all
-    }
+    /// Holds no monitor combination: never auto-matched, loadable
+    /// by hand, re-claiming a set on its next save or load (#1530).
+    public var isDormant: Bool { monitorSets.isEmpty }
 
-    /// Authoritative display order with unlisted declared spaces appended.
-    public var orderedSpaces: [SpaceID] {
-        if spaces.isEmpty {
-            return SpaceID.numericLexicalSorted(
-                Array(declaredSpaces)
-            )
-        }
-        let stored = Set(spaces)
-        let extra = declaredSpaces.subtracting(stored)
-        return spaces
-            + SpaceID.numericLexicalSorted(Array(extra))
-    }
+    /// Is its screen count's default AND can load as one: a
+    /// dormant profile is never a count's fallback (#1530).
+    public var isUsableDefault: Bool { isDefault && !isDormant }
 
     enum CodingKeys: String, CodingKey {
         case format
         case name
         case monitorSets = "monitor_sets"
+        case dormantMonitorCount = "monitor_count"
         case mainSpaces = "main_spaces"
         case isDefault = "default"
         case isStarterSetup = "starter_setup"
@@ -99,6 +93,7 @@ public struct Profile: Codable, Sendable, Equatable {
         format: Int = Profile.currentFormat,
         name: String,
         monitorSets: [MonitorSet],
+        monitorCount: Int? = nil,
         mainSpaces: [SpaceID] = [],
         isDefault: Bool = false,
         isStarterSetup: Bool = false,
@@ -115,6 +110,8 @@ public struct Profile: Codable, Sendable, Equatable {
         self.format = format
         self.name = name
         self.monitorSets = Self.sanitized(monitorSets)
+        self.dormantMonitorCount =
+            self.monitorSets.isEmpty ? monitorCount : nil
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
         self.isDefault = isDefault
         self.isStarterSetup = isStarterSetup
@@ -131,7 +128,8 @@ public struct Profile: Codable, Sendable, Equatable {
 
     /// Lenient where safe (missing flags default), strict where
     /// the profile would be meaningless: zero valid monitor sets
-    /// is a decoding error (#31).
+    /// is a decoding error (#31) unless `monitor_count` names the
+    /// count a dormant profile keeps (#1530).
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
@@ -158,7 +156,14 @@ public struct Profile: Codable, Sendable, Equatable {
                 forKey: .monitorSets
             )
         )
-        guard !monitorSets.isEmpty else {
+        let dormantCount = try container.decodeIfPresent(
+            Int.self,
+            forKey: .dormantMonitorCount
+        )
+        dormantMonitorCount =
+            monitorSets.isEmpty ? dormantCount : nil
+        guard !monitorSets.isEmpty || (dormantCount ?? 0) > 0
+        else {
             throw DecodingError.dataCorruptedError(
                 forKey: .monitorSets,
                 in: container,
@@ -251,13 +256,14 @@ public struct Profile: Codable, Sendable, Equatable {
 
     /// Adds or replaces the set covering the same monitors.
     /// Rejects (returns false) a set of a different length —
-    /// a profile covers exactly one screen count.
+    /// a profile covers exactly one screen count, a dormant one
+    /// included.
     @discardableResult
     public mutating func upsert(
         _ set: MonitorSet
     ) -> Bool {
         guard
-            monitorSets.isEmpty
+            monitorCount == 0
                 || set.monitors.count == monitorCount
         else { return false }
         if let index = monitorSets.firstIndex(where: {
@@ -267,6 +273,24 @@ public struct Profile: Codable, Sendable, Equatable {
         } else {
             monitorSets.append(set)
         }
+        dormantMonitorCount = nil
+        return true
+    }
+
+    /// Removes the set covering `monitors`, keeping the count so a
+    /// profile left with none goes dormant (#1530). False when no
+    /// set covers them.
+    @discardableResult
+    mutating func release(_ monitors: [String]) -> Bool {
+        let wanted = monitors.sorted()
+        guard
+            let index = monitorSets.firstIndex(where: {
+                $0.monitors == wanted
+            })
+        else { return false }
+        let count = monitorCount
+        monitorSets.remove(at: index)
+        if monitorSets.isEmpty { dormantMonitorCount = count }
         return true
     }
 }
