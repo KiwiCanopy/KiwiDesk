@@ -57,10 +57,11 @@ struct LaunchFollowTests {
     static func activate(
         _ core: KiwiCore,
         bundleID: String = bundle,
-        launchedAgo: TimeInterval = 0.3
+        launchedAgo: TimeInterval = 0.3,
+        at clock: Date? = nil
     ) {
         // One reading: two would drift apart at the inclusive edge.
-        let now = ahead
+        let now = clock ?? ahead
         core.noteAppActivation(
             AppActivation(
                 pid: 7,
@@ -137,11 +138,12 @@ struct LaunchFollowTests {
         #expect(core.state.workspaces.activeSpace == Self.ruled)
     }
 
-    @Test("A running app brought forward is no launch")
+    @Test("A running app already showing a window is no open")
     func runningAppActivationStays() {
-        // A switch into an app, its own call window, an
-        // un-minimize: the process is older than the launch grace.
+        // A switch into an app, or its own call window: the process
+        // is older than the launch grace AND shows a window.
         let core = Self.makeCore()
+        Self.arrive(5, on: core, bundleID: "app.unruled")
         Self.activate(core, launchedAgo: 3_600)
         Self.arrive(9, on: core)
         Self.expectStayed(core)

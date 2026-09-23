@@ -14,36 +14,72 @@ extension KiwiCore {
 
     /// Another app coming forward retires the debt (the user moved
     /// on); the owing app's own activation does not, since it is
-    /// the launch completing. An activation owes a new one only as
-    /// a LAUNCH: a click or key-down within `pressGrace`, a process
-    /// started within `launchGrace`, and no native Desktop switch
-    /// within `desktopSwitchGrace` — a switch by key press
+    /// the open completing. An activation owes a new one only as an
+    /// OPEN: a click or key-down within `pressGrace`, of a process
+    /// started within `launchGrace` or showing no other window — a
+    /// reopen or an un-minimize — and no native Desktop switch
+    /// within `desktopSwitchGrace`, since a switch by key press
     /// activates the arriving Desktop's app inside the press grace.
+    /// A rule-placed window that arrived after the press and before
+    /// this activation is paid here rather than owed.
     func noteAppActivation(
         _ activation: AppActivation,
         now: Date = Date()
     ) {
         if launchFollow.owed(at: now) != activation.bundleID {
-            launchFollow.forget()
+            launchFollow.forget(keeping: activation.bundleID)
         }
         guard let bundleID = activation.bundleID,
             let press = launchFollow.pressAge?(),
             press <= LaunchFollowIntent.pressGrace,
-            let launchedAt = activation.launchedAt,
-            now.timeIntervalSince(launchedAt)
-                <= LaunchFollowIntent.launchGrace
+            isOpening(activation, now: now)
         else { return }
         guard
             now.timeIntervalSince(lastDesktopSwitch)
                 > LaunchFollowIntent.desktopSwitchGrace
         else {
             onLog(
-                "launch follow: pid \(activation.pid) launched "
-                    + "with a Desktop switch — nothing owed"
+                "launch follow: pid \(activation.pid) opened with a "
+                    + "Desktop switch — nothing owed"
             )
             return
         }
+        let pressedAt = now.addingTimeInterval(-press)
+        if let placed = launchFollow.takePlacement(
+            bundleID,
+            since: pressedAt
+        ),
+            placed.space != state.workspaces.activeSpace,
+            state.workspaces.space(of: placed.window) == placed.space
+        {
+            onLog(
+                "launch follow: w\(placed.window.raw) arrived before "
+                    + "its app's activation — following now"
+            )
+            followSwitch(to: placed.space, focusing: placed.window)
+            return
+        }
+        onLog("launch follow: owed to \(bundleID)")
         oweLaunchFollow(bundleID, at: now)
+    }
+
+    /// A fresh process, or one showing no window beyond a
+    /// rule placement waiting for this activation: a running app
+    /// that already shows one is a switch or its own spawn.
+    private func isOpening(
+        _ activation: AppActivation,
+        now: Date
+    ) -> Bool {
+        if let launchedAt = activation.launchedAt,
+            now.timeIntervalSince(launchedAt)
+                <= LaunchFollowIntent.launchGrace
+        {
+            return true
+        }
+        let waiting = launchFollow.placement?.window
+        return !state.windows.windows(pid: activation.pid).contains {
+            $0.id != waiting
+        }
     }
 
     /// Claims the follow when the create fold filed `window` by
@@ -59,9 +95,20 @@ extension KiwiCore {
         guard let space = effects.placedByAppRule,
             let bundleID = window.appBundleID,
             state.workspaces.space(of: window.id) == space,
-            state.windows[window.id]?.isTransientOverlay == false,
-            launchFollow.claim(bundleID, at: now)
+            state.windows[window.id]?.isTransientOverlay == false
         else { return nil }
+        guard launchFollow.claim(bundleID, at: now) else {
+            // Owed nothing yet: its app's activation may still come.
+            launchFollow.notePlacement(
+                .init(
+                    window: window.id,
+                    bundleID: bundleID,
+                    space: space,
+                    at: now
+                )
+            )
+            return nil
+        }
         return space
     }
 

@@ -4598,11 +4598,10 @@ its arrival must not take them along, which is what
 **The discrimination is the feature**, and following the wrong
 arrivals is worse than following none. A background app's
 spawned window, the windows macOS reopens at login, the ones
-KiwiDesk adopts at boot, the ones a Desktop switch reveals, an
-un-minimized window and a new tab are all window creations with
-an app rule behind them, and none of them is the user opening
-the app. What separates them, measured on device, is a LAUNCH
-the user caused:
+KiwiDesk adopts at boot, the ones a Desktop switch reveals and
+a new tab are all window creations with an app rule behind them,
+and none of them is the user opening the app. What separates
+them, measured on device, is an OPEN the user caused:
 
 - **A press within a second.** A Dock click activated the
   launching app 0.29 s after the press and a Spotlight Return
@@ -4610,15 +4609,26 @@ the user caused:
   the password, and a scripted launch 17 s or more after the
   last press. The read is the HID state's last click or
   key-down, which needs no permission.
-- **A process that just started.** A press alone is not a
+- **An app with nothing showing.** A press alone is not a
   cause — anyone typing has pressed a key in the last second,
   and an app that brings itself forward then, or a plain switch
   into a running app, would take the user along to wherever its
-  rule points. The launching app's process was measured
-  starting at most 0.3 s before its activation; a running app
-  coming forward — a switch, its own call window, an
-  un-minimize — is older, so it owes nothing. The boot scan
-  involves no activation at all.
+  rule points. So the app must be OPENING: a process that just
+  started (measured at most 0.3 s before its activation), or a
+  running app showing no window at all — a reopen after its
+  last window closed, an un-minimize. Reopen and restore are
+  opens by owner ruling (2026-09-23): the rule already moves
+  those windows to its Space, and moving a window without the
+  user is the worst of the three outcomes — it vanishes from
+  where they are. A running app still showing a window — a
+  switch into it, its own call window, ⌘T — owes nothing. The
+  boot scan involves no activation at all.
+- **Either order.** A reopen can show its window BEFORE macOS
+  reports the app active (Telegram, on device), so a
+  rule-placed window arriving with nothing owed is kept for the
+  activation that follows, which pays it — only where the
+  window arrived AFTER the press, so an older window is never
+  mistaken for the one the press opened.
 - **No Desktop switch around it.** The arriving Desktop's app
   activates 0.3–0.9 s after a switch, inside the press grace
   when the switch was a key press, so an activation inside

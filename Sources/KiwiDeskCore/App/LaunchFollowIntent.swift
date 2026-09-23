@@ -1,7 +1,8 @@
 import Foundation
 
-/// The follow a LAUNCH owes its app's next window when an app
-/// rule files it in another Space (#1599), paid at that window's
+/// The follow an OPEN — a launch, a reopen, an un-minimize — owes
+/// its app's next window when an app rule files it in another
+/// Space (#1599), paid at that window's
 /// ARRIVAL like `FollowFocusIntent`'s debts. Keyed by the app's
 /// bundle id, not a window or a pid: at the launch the window
 /// does not exist, and Open or Focus owes it before the process
@@ -35,9 +36,8 @@ final class LaunchFollowIntent {
 
     /// Longest gap between a process starting and its activation
     /// for that activation to be its LAUNCH: measured at most
-    /// 0.3 s; the rest is headroom for a slow cold start. A
-    /// running app coming forward — a switch, a self-activation,
-    /// an un-minimize — is older (#1599).
+    /// 0.3 s; the rest is headroom for a slow cold start. An
+    /// older process opens only when it shows no window (#1599).
     static let launchGrace: TimeInterval = 5
 
     /// An activation this soon after a native Desktop switch is
@@ -52,6 +52,33 @@ final class LaunchFollowIntent {
     var pressAge: (@MainActor () -> TimeInterval?)?
 
     private var pending: (bundleID: String, at: Date)?
+
+    /// A rule-placed window that arrived with NO debt standing — a
+    /// reopen or an un-minimize can show the window before macOS
+    /// reports its app active (device, #1599). One slot: the
+    /// activation that follows it claims it or it is replaced.
+    struct Placement {
+        let window: WindowID
+        let bundleID: String
+        let space: SpaceID
+        let at: Date
+    }
+    private(set) var placement: Placement?
+
+    /// Remembers `placement` for an activation still to come.
+    func notePlacement(_ placement: Placement) {
+        self.placement = placement
+    }
+
+    /// Takes the placement for `bundleID` if it arrived no earlier
+    /// than `since` — after the press that caused the activation.
+    func takePlacement(_ bundleID: String, since: Date) -> Placement? {
+        guard let placement, placement.bundleID == bundleID,
+            placement.at >= since
+        else { return nil }
+        self.placement = nil
+        return placement
+    }
 
     /// Records that `bundleID`'s next rule-placed window is owed a
     /// follow; replaces any earlier debt.
@@ -80,8 +107,12 @@ final class LaunchFollowIntent {
         return pending.bundleID
     }
 
-    /// Retires the debt unpaid.
-    func forget() {
+    /// Retires the debt unpaid, and any placement waiting for one
+    /// except `keeping`'s — the app whose activation is judging it.
+    func forget(keeping bundleID: String? = nil) {
         pending = nil
+        if placement?.bundleID != bundleID || bundleID == nil {
+            placement = nil
+        }
     }
 }

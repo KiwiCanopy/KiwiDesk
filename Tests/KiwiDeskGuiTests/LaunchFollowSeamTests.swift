@@ -55,6 +55,15 @@ struct LaunchFollowSeamTests {
             "followSwitch(to: space, focusing: window, arriving: true)",
             followFile, 1
         ),
+        // A window landing before its app's activation (a reopen,
+        // an un-minimize): noted at the arrival, paid at the
+        // activation, as a whole switch.
+        ("launchFollow.notePlacement(", followFile, 1),
+        ("launchFollow.takePlacement(", followFile, 1),
+        (
+            "followSwitch(to: placed.space, focusing: placed.window)",
+            followFile, 1
+        ),
         // The fold's one input to the payer.
         (
             "effects.placedByAppRule =",
@@ -89,7 +98,7 @@ struct LaunchFollowSeamTests {
     @Test("the debt is retired by an activation and a Desktop switch")
     func twoRetires() throws {
         let sites = try SourceScan.identifierSites(
-            of: "launchFollow.forget()",
+            of: "launchFollow.forget(",
             under: Self.core
         )
         #expect(
