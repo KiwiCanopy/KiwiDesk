@@ -10481,108 +10481,164 @@ content, so a vertical bar (which collapses to icon-only)
 schedules nothing.
 
 :::unreleased
-**[Principle] One shelf holds both bars, and a field both bars
-read is stored once, on it.**
+**[Principle] One shelf holds both bars on one plate, and a
+field both bars read is stored once, on it.**
 ([#1517](https://github.com/KiwiCanopy/KiwiDesk/issues/1517).)
 The Space Bar and the App Bar sit on **KiwiShelf**, one screen
-edge. Where they hang and the strip they share — edge,
-alignment, order, share, thickness, margins, background style
-and fit, Liquid Glass, corner roundness, item gap, font size —
-is `kiwishelf`'s. A field each bar may set for itself stays on
+edge. Where they hang and the plate they share — edge,
+alignment, order, the Space Bar minimum, thickness, margins,
+background style and fit, Liquid Glass, corner roundness, item
+gap, font size, the plate's fill and the app symbol style — is
+`kiwishelf`'s. A field each bar may set for itself stays on
 that bar, whether or not the other bar has one like it: the
-indicator, symbol style, dim factors and colours of either, the
-App Bar's content and title cap, the Space Bar's glyph cap,
-spring delay and front-app title cap are examples, not the
-list. Each bar keeps its own plate too,
-in its own Fill, so the two stay two bars rather than one merged
-strip.
+active indicator, item colours, badges and dim factors of
+either, the App Bar's content and title cap, the Space Bar's
+glyph cap, spring delay and front-app title cap are examples,
+not the list.
 
-*One edge, reserved in every layout.* Two bars on independent
-edges each carved a reservation, and the App Bar's came and went
-with the layout, so switching a Space between Monocle and BSP
-reflowed every window by a strip's depth: showing a bar moved
-windows the user never touched. The shelf's strip is carved from
-the display's original visible frame whenever ANY bar can show,
-and the remainder is the bounds every layout operates inside, so
-a layout switch costs nothing. The price is an empty strip in a
-layout that draws no bar there — BSP, say, with the Space Bar
-off and the App Bar on in Monocle — and it is accepted: an empty
-strip costs a strip's depth once, where a reflow costs it on
-every switch, and turning every bar off returns it. Layouts
-still never learn a bar exists (resolution before layout; layout
-functions stay pure over the flat array). The stacking rules the two edges needed —
-which bar is screen-facing, how two reservations add, which
-margins count between them — have nothing left to govern: both
-bars take opposite ends of one strip in `order` while both show,
-and a lone bar sits by `alignment`. The trade is stated in
-Settings rather than engineered away: under a centred or
-far-end alignment the Space Bar moves to its end when an App Bar
-appears, and the one alignment that holds it still is named
-beside the control.
+*One plate, two sections.* While both bars show they are one
+plate with two sections, Space and App, placed as one unit by
+`alignment`; `order` picks which section comes first. A fill
+both bars draw side by side is a value two bars must agree on:
+two plates in two fills on one strip read as two bars
+competing for the edge, and a user who matched them by hand had
+answered one question twice. So the plate has one fill, and the
+divider between the sections is derived from the item colour
+at a fixed alpha rather than being a palette role of its own.
+What separates the sections is what each bar shows, not a
+second surface: the active indicator stays per bar and differs
+by default — Outline on the Space Bar, Edge mark on the App Bar
+— so the two kinds of "current" never read as one. The seam
+sits where the two needs put it. A seam held on the centre was
+refused: it holds a line still by padding the shorter section
+with empty plate, which is a cost paid on every screen to
+steady a mark nobody navigates by.
+
+*Reserved where a bar draws.* The strip is carved from the
+display's visible frame in every layout while the Space Bar is
+on, and only in the layouts whose App Bar is on while it is
+off; the remainder is the bounds the layout operates inside,
+and layouts still never learn a bar exists (resolution before
+layout; layout functions stay pure over the flat array). With
+the Space Bar off, switching a Space between BSP and Monocle
+therefore moves its windows by the strip's depth. That is
+accepted: the move is the bar the user turned on for that
+layout appearing, while reserving everywhere left an empty
+strip — permanently, in every layout that draws nothing there —
+to spare it.
 
 *One placement rule, asked by every picture of it.* Where each
-bar sits along the edge is decided in ONE pure function,
+section sits along the edge is decided in ONE pure function,
 `ShelfArrangement`, which both live bars take their segments
 from and which the Settings preview and the alignment note ask
 too. A second copy — a preview laying the bars out by its own
 arithmetic, a note deriving "the Space Bar moves" by hand — is
 a picture that can claim a placement the engine does not make,
 the schematic rule's defect (#702) on the one surface where the
-user decides where the bars go.
+user decides where the bars go. When an App Bar section appears
+or leaves under a centred or far-end alignment the plate grows
+or shrinks and slides to its new place over a short spring,
+through `BarMotion` — a re-placement the user did not ask for
+must be seen to travel, never snap — and under Reduce Motion it
+arrives without travelling.
 
-*Overflow stays each bar's own.* Each bar scrolls inside its
-own stretch, with an arrow at each end that still hides items,
-and the edge is split by `share` only once EACH bar needs more
-than its share — a bar that needs less keeps its need and gives
-the rest back, so the share never costs a bar that fits. The front-app segment hides while an App Bar
-shares the shelf: the App Bar already marks the focused window,
-and two marks of one fact on one strip is one too many.
+*A minimum, not a share.* Each section is as long as its items
+while both fit. Once the shelf is full the Space section
+shrinks, never below the **Space Bar minimum**, and the App
+section takes the rest and scrolls. A split would tax a bar
+that fits to make room for one that does not; a minimum names
+the one guarantee a user asks for — how much of the Space Bar
+stays visible — and leaves every other length to the content.
+The Space Bar is the one guaranteed because its items are a
+short set navigated by position, where the App Bar's are the
+list built to scroll. The minimum is clamped between a hard
+floor (the active item and both fades) and the Space Bar's
+natural length. The divider is a plain line while everything
+fits and nothing hovers on it; only while the shelf is full
+does its hit area take the left-right resize cursor, a drag
+writing the minimum and a double-click resetting it — a handle
+that moves nothing while nothing is hidden is chrome with no
+job.
 
-*A shared field is stored once.* A value two bars must agree on,
-stored twice, is a question the user answers twice and can answer
-inconsistently — two thicknesses on one strip is not a look but a
-conflict the layout would have to arbitrate. The copy action
-("Copy sizes and style from Space Bar…") existed to keep those
-copies in step; with them gone it had nothing left worth
-copying, the indicator and the symbol style differing in their
-options (the App Bar has Gap), so it went with them. The same
-reasoning takes the per-layout overrides of shared fields: a
-Monocle bar at 44 pt beside a BSP bar at 32 is a shelf whose
-depth changes with the layout, the reflow this entry exists to
-remove. `monocle.set_app_bar_*` / `scroll.set_app_bar_*` keep
-`enabled` and the App Bar's own fields, which is the #678
-Phase 2 boundary intact for everything that is a bar's own. And
-Liquid Glass becomes one leaf for both bars, so the one switch
-writes two leaves — the shelf's and the panel's — and no
-per-layout glass can disagree with it.
+*Overflow fades; it has no arrows.* Each section scrolls on its
+own. A hidden side fades the content itself — a mask on the
+items, not a gradient laid over them, which would paint a
+colour over Liquid Glass that the glass does not have —
+starting well before the edge, and a count (`‹3`, `4›`) sits on
+the faded end; clicking it pages, and a side already at its end
+shows nothing. Arrows cost a fixed box at both ends of every
+section that overflows and draw chrome that reads as items; a
+fade costs no room and says the same thing. The fade scales
+with thickness, clamped, and never takes more than a fraction
+of what the section shows. The count keeps its chevron because
+a bare number beside a glyph reads as that glyph's badge. The
+wheel scrolls along the shelf on either axis, a trackpad
+smoothly with momentum, natural scrolling respected, and a
+manual scroll holds until the active Space or focus changes.
+The front-app segment hides while an App Bar shares the shelf:
+the App Bar already marks the focused window, and two marks of
+one fact on one plate is one too many.
 
-*No item size.* A Space item sizes to its content and
-an App Bar slot to the widest title, between the icon square and
-a quarter of the whole shelf edge — measured on the edge rather
-than the App Bar's share of it, so a slot does not shrink when
-the Space Bar joins. A pinned item size answered only what the
-title cap already answers, and a second size knob beside the cap
-doubles the question "why is this slot this wide", so it is
-retired and the cap is the App Bar's one size control. The Space
-Bar's cap measures a different string — the front-app segment's
-title, inert whenever that segment is hidden — so it is named
-for it: `front_app_title_cap`.
+*A shared field is stored once.* A value two bars must agree
+on, stored twice, is a question the user answers twice and can
+answer inconsistently — two thicknesses on one strip is not a
+look but a conflict the layout would have to arbitrate. The copy
+action ("Copy sizes and style from Space Bar…") existed to keep
+those copies in step and went with them. The same reasoning
+takes the per-layout overrides of shared fields: a Monocle bar
+at 44 pt beside a BSP bar at 32 is a shelf whose depth changes
+with the layout. `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
+keep `enabled` and the App Bar's own fields, which is the #678
+Phase 2 boundary intact for everything that is a bar's own. The
+symbol style joins the shelf for the same reason one step
+further: one app drawn in two icon styles on one plate is a
+mismatch, not a choice, so the four `set_*icon_source` verbs
+retire — the per-layout two included, which narrows what Lua
+reaches by exactly that — and the style is one Settings row
+beside the font size. Liquid Glass is one leaf for both bars,
+so the one switch writes two leaves — the shelf's and the
+panel's — and no per-layout glass can disagree with it.
+
+*No Gap indicator.* Gap marked the active item by leaving the
+plate out around it. On one plate that hole reads as the seam
+between the sections, and on glass as a rendering fault, so it
+is a defect rather than a style and is removed: a stored `gap`
+becomes `outline` once, and Lua refuses `gap` naming the values
+that remain.
+
+*No item size.* A Space item sizes to its content and an App
+Bar slot to the widest title, between the icon square and a
+quarter of the whole shelf edge — measured on the edge rather
+than the App section, so a slot does not shrink when the Space
+Bar joins. A pinned item size answered only what the title cap
+already answers, and a second size knob beside the cap doubles
+the question "why is this slot this wide", so it is retired and
+the cap is the App Bar's one size control. The Space Bar's cap
+measures a different string — the front-app segment's title,
+inert whenever that segment is hidden — so it is named for it:
+`front_app_title_cap`.
 
 *The crossing.* A saved profile or bundle is rewritten once
 (`KiwiShelfMigrationTests`): the shelf takes the Space Bar's
-values, because it is the bar shown in every layout and so the
-one the user was looking at — the App Bar's where the Space Bar
-is off, since then the App Bar was the only bar there was. The
-other copies drop. Where the Space Bar is on, an App Bar that sat
-on its own edge moves to the Space Bar's. Where the App Bar is
-the source and never stored an edge, the step writes its old
-default, `bottom`: absence meant bottom when the file was
-written, and reading it as the shelf's new default would move
-the one bar the user had to the top. That reading of absence is
-true only of a file older than the shelf, so the step stands
-down on any file stamped at the formats it introduced — profile
-8, bundle 12 — where an absent `kiwishelf.edge` means the new
-top.
+values — its fill and symbol style included — because it is the
+bar shown in every layout and so the one the user was looking
+at; the App Bar's where the Space Bar is off, since then the
+App Bar was the only bar there was. The other copies drop, and
+a palette is rewritten the same way (`palettes.json` format 2):
+its Space Bar fill becomes the shelf's and its App Bar fill
+drops. Where the Space Bar is on, an App Bar that sat on its own
+edge moves to the Space Bar's. Where the App Bar is the source
+and never stored an edge, the step writes its old default,
+`bottom`: absence meant bottom when the file was written, and
+reading it as the shelf's new default would move the one bar the
+user had to the top. That reading of absence is true only of a
+file older than the shelf, so the step stands down on any file
+stamped at the formats it introduced — profile 8, bundle 12 —
+where an absent `kiwishelf.edge` means the new top. The App
+Bar's new Edge-mark default reaches only a fresh setup: every
+saved file stores its indicator, so no crossing is owed.
+The Space Bar share was never released and is renamed to the
+minimum outright.
 `init.lua` is user code and is not rewritten; a retired verb
 fails loudly with its replacement named, which is its migration,
 and there is no alias (AGENTS.md §5), because an alias is the
