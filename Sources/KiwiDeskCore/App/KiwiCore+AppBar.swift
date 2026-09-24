@@ -8,7 +8,8 @@ import AppKit
 /// space→display assignment (`resolveSpaceDisplays`). Any layout
 /// that hosts a bar (monocle, scrolling) drives its display's
 /// overlay; the bar's look is the global `AppBarStyle` overlaid
-/// by that layout's own overrides.
+/// by that layout's own overrides, and its place is the segment
+/// of the KiwiShelf it is given (`KiwiCore+Shelf`, #1517).
 extension KiwiCore {
     func updateAppBar() {
         let settings = tiler.settings
@@ -33,98 +34,87 @@ extension KiwiCore {
         appBars.sync(bars)
     }
 
-    /// The bar for the space currently shown on `display`, or nil
-    /// when that space hosts no enabled, non-empty bar.
+    /// The bar for the space currently shown on `display`, in
+    /// the segment the shelf gives it (#1517), or nil when that
+    /// space hosts no enabled, non-empty bar.
     private func bar(
         for display: Display,
         settings: TilingSettings
     ) -> AppBarManager.Bar? {
         guard
-            // A fullscreen space hosts the panels by
-            // construction (`.canJoinAllSpaces` +
-            // `.fullScreenAuxiliary`), so the stand-down (#670)
-            // gates here: nil retires the overlay through the
-            // manager, keeping `shownStrips` consistent with
-            // `clampFloatsClearOfBars` — a panel-level-only
-            // hide would not.
-            NativeSpaces.currentSpaceIsUser(display: display.id),
-            let id = state.workspaces.currentSpace(on: display.id),
-            let space = state.workspaces[id],
-            let host = barHost(for: space),
-            host.appBar.enabled,
+            let app = appBarContent(
+                on: display.id,
+                settings: settings
+            ),
             let screen = screen(for: display.id)
         else { return nil }
-        return buildBar(
-            space: space,
+        return placedBar(
+            app,
             display: display.id,
-            bounds: GeometryUtils.axVisibleFrame(of: screen),
-            host: host,
+            visible: GeometryUtils.axVisibleFrame(of: screen),
+            spaceItems: spaceBarContent(
+                on: display.id,
+                style: settings.spaceBarLook
+            ),
             settings: settings
         )
     }
 
     /// Single bar for the active space on the main screen, used
-    /// only until the display list is populated.
+    /// only until the display list is populated — no Space Bar
+    /// shows before it, so the App Bar has the shelf alone.
     private func mainScreenFallback(
         settings: TilingSettings
     ) -> [AppBarManager.Bar] {
         guard NativeSpaces.activeSpaceIsUser(),
             let space = activeSpace,
-            let host = barHost(for: space),
-            host.appBar.enabled,
+            let app = appBarContent(space: space, settings: settings),
             let screen = NSScreen.main ?? NSScreen.screens.first,
-            let bar = buildBar(
-                space: space,
+            let bar = placedBar(
+                app,
                 display: screen.kiwiDisplay?.id
                     ?? DisplayID(CGMainDisplayID()),
-                bounds: GeometryUtils.axVisibleFrame(of: screen),
-                host: host,
+                visible: GeometryUtils.axVisibleFrame(of: screen),
+                spaceItems: nil,
                 settings: settings
             )
         else { return [] }
         return [bar]
     }
 
-    /// Assembles one display's bar from its space and usable
-    /// bounds; nil when the space has no items or the bar is off.
-    private func buildBar(
-        space: Space,
+    /// Assembles one display's bar in its shelf segment. The
+    /// shelf is measured on the screen's visible frame rather
+    /// than the engine's `layoutBounds(on:)` seam because chrome
+    /// is drawn on a REAL screen: one of the deliberate
+    /// `visibleBounds` exemptions, whose reason lives in
+    /// `VisibleBoundsRoutingTests.allowed` (#537 review).
+    private func placedBar(
+        _ app: AppBarContent,
         display: DisplayID,
-        bounds: CGRect,
-        host: AppBarHosting,
+        visible: CGRect,
+        spaceItems: [SpaceBarOverlay.Item]?,
         settings: TilingSettings
     ) -> AppBarManager.Bar? {
-        let style = host.resolvedBar(
-            global: settings.appBarGlobalLook
+        let plan = shelfPlan(
+            visible: visible,
+            settings: settings,
+            spaceItems: spaceItems,
+            app: app
         )
-        // Space-first reservation (#293): the App Bar carves
-        // inside the frame the Space Bar already inset — same
-        // rule the retile path applies, reached through
-        // `layoutBounds(from:)` rather than the engine's
-        // `layoutBounds(on:)` seam because chrome is drawn on a
-        // REAL screen: this is one of the deliberate
-        // `visibleBounds` exemptions, and the reason lives in
-        // `VisibleBoundsRoutingTests.allowed` (#537 review).
-        let groups = barGroups(
-            in: space,
-            grouping: style.groupAdjacentWindows
-        )
-        guard !groups.isEmpty,
-            let strip = host.barFrame(
-                in: settings.layoutBounds(from: bounds),
-                global: settings.appBarGlobalLook
-            )
-        else { return nil }
+        guard let slot = plan.arrangement.app else { return nil }
+        var style = app.style
+        style.alignment = slot.alignment
         return AppBarManager.Bar(
             display: display,
-            space: space.id,
-            items: groups.map { barItem(for: $0, style: style) },
-            activeIndex: groups.firstIndex { group in
-                appBarFocused(of: space).map(group.contains)
+            space: app.space.id,
+            items: app.items,
+            activeIndex: app.groups.firstIndex { group in
+                appBarFocused(of: app.space).map(group.contains)
                     ?? false
             },
-            strip: strip,
-            style: style
+            strip: plan.segment(slot),
+            style: style,
+            capAxis: plan.length
         )
     }
 

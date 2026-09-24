@@ -83,9 +83,17 @@ extension TilingSettings {
         return params
     }
 
-    /// True if the Space Bar and an enabled layout App Bar both
-    /// show — they always share the shelf's edge (#1517).
-    public var spaceBarSharesEdgeWithAppBar: Bool {
+    /// Whether the KiwiShelf carries any bar — the Space Bar or
+    /// any layout's App Bar is on — and so reserves its strip in
+    /// EVERY layout (#1517). The one "does the shelf show"
+    /// predicate: the reservation and the Settings gates ask it.
+    public var shelfShows: Bool {
+        spaceBarStyle.enabled || appBarHosts.contains { $0.enabled }
+    }
+
+    /// True if the Space Bar and a layout's App Bar can both show,
+    /// splitting the shelf between them (`ShelfArrangement`).
+    public var bothBarsCanShow: Bool {
         spaceBarStyle.enabled && appBarHosts.contains { $0.enabled }
     }
 
@@ -102,12 +110,10 @@ extension TilingSettings {
     }
 
     /// What a layout's App Bar draws from: the shelf and the App
-    /// Bar's style after that layout's overrides.
+    /// Bar's style after that layout's overrides — the one body,
+    /// which `AppBarHosting.resolvedBar` calls too.
     public func appBarLook(for bar: LayoutAppBar) -> AppBarLook {
-        AppBarLook(
-            shelf: kiwishelf,
-            bar: bar.resolved(with: appBarStyle)
-        )
+        bar.look(on: appBarGlobalLook)
     }
 
     /// The bar-hosting layout for a mode — the ONE place that
@@ -133,16 +139,18 @@ extension TilingSettings {
         }
     }
 
-    /// Insets visible bounds by the Space Bar reservation (#293).
+    /// Insets visible bounds by the shelf's reservation whenever
+    /// a bar can show, whatever the layout (#293, #1517).
     /// Deliberately NOT public: it takes a raw frame the caller
     /// obtained some other way — the unsafe half. Callers with a
     /// screen want `TilingEngine.layoutBounds(on:)` (#537), and
     /// the routing guards scan only this module, so a cross-module
     /// caller would be invisible to them.
     func layoutBounds(from visible: CGRect) -> CGRect {
-        SpaceBarGeometry.remainingFrame(
+        guard shelfShows else { return visible }
+        return ShelfGeometry.remainingFrame(
             in: visible,
-            style: spaceBarLook
+            shelf: kiwishelf
         )
     }
 
@@ -159,11 +167,7 @@ extension TilingSettings {
     ) -> Int {
         let gaps = space.map(gaps(for:)) ?? gapsGlobal
         let params = space.map(resolvedScrolling(for:)) ?? scrolling
-        let area = params.windowFrame(
-            in: bounds,
-            outer: gaps.outer,
-            global: appBarGlobalLook
-        )
+        let area = LayoutContext.usable(bounds, outer: gaps.outer)
         let horizontal = params.axisIsHorizontal
         return ScrollSize.maxCount(
             along: horizontal ? area.width : area.height,
@@ -205,8 +209,7 @@ extension TilingSettings {
             scrolling: resolvedScrolling(for: space),
             grid: resolvedGrid(for: space.id),
             monocle: resolvedMonocle(for: space.id),
-            track: resolvedTrack(for: space.id),
-            appBarStyle: appBarGlobalLook
+            track: resolvedTrack(for: space.id)
         )
     }
 

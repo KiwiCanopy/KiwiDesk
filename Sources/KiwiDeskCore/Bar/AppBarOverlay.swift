@@ -26,6 +26,7 @@ public final class AppBarOverlay {
         let activeIndex: Int?
         let strip: CGRect
         let style: AppBarLook
+        let capAxis: CGFloat?
     }
 
     private var panel: NSPanel?
@@ -71,7 +72,8 @@ public final class AppBarOverlay {
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
-        style: AppBarLook
+        style: AppBarLook,
+        capAxis: CGFloat? = nil
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -83,7 +85,8 @@ public final class AppBarOverlay {
             items: items,
             activeIndex: activeIndex,
             strip: strip,
-            style: style
+            style: style,
+            capAxis: capAxis
         )
         render(followingFocus: true)
     }
@@ -124,7 +127,8 @@ public final class AppBarOverlay {
             strip: strip,
             count: items.count,
             style: style,
-            items: items
+            items: items,
+            capAxis: state.capAxis
         )
         lastMetrics = m
         scrollOffset = Self.scrollOffset(

@@ -91,35 +91,39 @@ struct ScrollingBarGeometryTests {
 
     private func context(
         orientation: ScrollingParams.Orientation = .horizontal,
-        barEnabled: Bool = true,
-        edge: AppBarEdge = .top
+        barEnabled: Bool = true
     ) -> LayoutContext {
         var context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             gaps: .uniform(10)
         )
-        // Pinned (#660): the strip arithmetic reasons from it.
-        context.appBarStyle.thickness = 32
         context.scrolling.orientation = orientation
         context.scrolling.appBar.enabled = barEnabled
-        context.appBarStyle.edge = edge
         return context
     }
 
-    @Test("Horizontal bar carves a top strip by default")
-    func horizontalStrip() throws {
-        let context = context()
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        let usable = context.usable
-        let window = try #require(frames[w1])
-        // The pinned 32pt top strip, cut from the usable area;
-        // the outer gap is the window side (#1516).
-        #expect(window.minY == usable.minY + 32)
-        #expect(window.height == usable.height - 32)
-        #expect(window.width == usable.width)
+    /// The shelf reserves the bar's room before the layout runs
+    /// (#1517), so the layout places the same frames with the
+    /// App Bar on or off, on either axis.
+    @Test(
+        "The App Bar's switch moves no window",
+        arguments: [
+            ScrollingParams.Orientation.horizontal, .vertical,
+        ]
+    )
+    func barSwitchMovesNothing(
+        orientation: ScrollingParams.Orientation
+    ) throws {
+        var on = context(orientation: orientation)
+        var off = context(orientation: orientation, barEnabled: false)
+        on.scrolling.slotSize = .points(300)
+        off.scrolling.slotSize = .points(300)
+        let shown = layout.calculateGeometry(for: [w1, w2], in: on)
+        let hidden = layout.calculateGeometry(for: [w1, w2], in: off)
+        #expect(shown == hidden)
+        let first = try #require(shown[w1])
+        #expect(first.minX == on.usable.minX)
+        #expect(first.minY == on.usable.minY)
     }
 
     @Test("Vertical orientation stacks windows into rows")
@@ -140,72 +144,6 @@ struct ScrollingBarGeometryTests {
         #expect(first.height == 300)
         #expect(second.minY > first.minY)
         #expect(first.minX == context.usable.minX)
-    }
-
-    @Test("A left edge carves a left strip")
-    func verticalStrip() throws {
-        // The edge is absolute (#293): a left bar eats window
-        // *width*, not height, on any orientation.
-        let context = context(orientation: .vertical, edge: .left)
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        let usable = context.usable
-        let window = try #require(frames[w1])
-        #expect(window.minX == usable.minX + 32)
-        #expect(window.width == usable.width - 32)
-        #expect(window.height == usable.height)
-    }
-
-    @Test("A disabled bar leaves the full usable area")
-    func disabledBar() throws {
-        let context = context(barEnabled: false)
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        #expect(frames[w1] == context.usable)
-    }
-
-    // The decoupled combos are the point of #293: the strip may
-    // now carve along OR across the scroll axis.
-
-    @Test("Vertical scrolling under a top bar loses height")
-    func verticalScrollTopBar() throws {
-        // The new default for vertical scrolling: a top strip
-        // carves the same axis the rows scroll along.
-        var context = context(orientation: .vertical, edge: .top)
-        context.scrolling.slotSize = .points(300)
-        let frames = layout.calculateGeometry(
-            for: [w1, w2],
-            in: context
-        )
-        let usable = context.usable
-        let first = try #require(frames[w1])
-        // Rows keep full width and start below strip + gap.
-        #expect(first.width == usable.width)
-        #expect(first.minY == usable.minY + 32)
-        #expect(first.height == 300)
-    }
-
-    @Test("Horizontal scrolling beside a left bar loses width")
-    func horizontalScrollLeftBar() throws {
-        var context = context(
-            orientation: .horizontal,
-            edge: .left
-        )
-        context.scrolling.slotSize = .points(500)
-        let frames = layout.calculateGeometry(
-            for: [w1, w2],
-            in: context
-        )
-        let usable = context.usable
-        let first = try #require(frames[w1])
-        // Columns keep full height, shifted right of the strip.
-        #expect(first.height == usable.height)
-        #expect(first.minX == usable.minX + 32)
-        #expect(first.width == 500)
     }
 }
 

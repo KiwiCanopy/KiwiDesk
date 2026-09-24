@@ -146,36 +146,24 @@ struct MonocleParkLayoutTests {
         #expect(frames[w1] != frames[w2])
     }
 
-    @Test("The sliver clears an enabled bottom App Bar strip")
-    func parkClearsTheBarStrip() throws {
-        // The bar renders ABOVE windows on its edge and
-        // defaults ENABLED — a park anchored to the raw bounds
-        // would hide the sliver underneath it (#881 review
-        // round).
+    @Test("The sliver parks inside the bounds the shelf left")
+    func parkStaysInsideTheLayoutBounds() throws {
+        // The bar renders ABOVE windows on its edge — a park
+        // anchored past the layout bounds would hide the sliver
+        // underneath it (#881 review round). The shelf's strip is
+        // already outside `bounds` (#1517), so the park anchors
+        // to them and nothing else.
         var context = makeContext()
         context.monocle.appBar.enabled = true
-        // Pinned: the shelf's default edge is top (#1517).
-        context.appBarStyle.edge = .bottom
         context.focused = w1
-        let strip = try #require(
-            context.monocle.barFrame(
-                in: context.bounds,
-                global: context.appBarStyle
-            )
-        )
         let frames = layout.calculateGeometry(
             for: [w1, w2],
             in: context
         )
         let parked = try #require(frames[w2])
-        // The whole visible band sits above the strip.
-        #expect(
-            parked.minY + TilingEngine.stashPeekY
-                <= strip.minY
-        )
         #expect(
             parked.minY
-                == strip.minY - TilingEngine.stashPeekY
+                == context.bounds.maxY - TilingEngine.stashPeekY
         )
     }
 

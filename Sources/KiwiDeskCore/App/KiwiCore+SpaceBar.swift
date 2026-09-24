@@ -16,7 +16,10 @@ extension KiwiCore {
     func wireSpaceBarLayerRefresh() {
         bus.addSink { [weak self] event, _ in
             guard event == .layerChange else { return }
+            // The layer item changes the Space Bar's need, and
+            // with it the App Bar's share of the shelf.
             self?.updateSpaceBar()
+            self?.updateAppBar()
         }
     }
 
@@ -37,43 +40,43 @@ extension KiwiCore {
         spaceBars.sync(bars)
     }
 
-    /// One display's bar, or nil when it has no screen or no
-    /// visible items.
+    /// One display's bar in the segment the shelf gives it
+    /// (#1517), or nil when it has no screen or no visible
+    /// items.
     private func spaceBar(
         for display: Display,
         style: SpaceBarLook
     ) -> SpaceBarManager.Bar? {
-        // Same fullscreen-space stand-down as the App Bar
-        // (#670): the panel joins every space by construction,
-        // so the per-display verdict gates the build and nil
-        // retires the overlay through the manager.
         guard
-            NativeSpaces.currentSpaceIsUser(display: display.id),
+            let items = spaceBarContent(
+                on: display.id,
+                style: style
+            ),
             let screen = screen(for: display.id)
         else { return nil }
-        var items = spaceBarItems(
-            display: display.id,
-            style: style
+        let settings = tiler.settings
+        let app = appBarContent(on: display.id, settings: settings)
+        let plan = shelfPlan(
+            visible: GeometryUtils.axVisibleFrame(of: screen),
+            settings: settings,
+            spaceItems: items,
+            app: app
         )
-        guard !items.isEmpty,
-            let strip = SpaceBarGeometry.strip(
-                in: GeometryUtils.axVisibleFrame(of: screen),
-                style: style
-            )
-        else { return nil }
-        // After the emptiness guard: a layer never draws a bar
-        // on a screen with no Space item to lead.
-        if let layer = spaceBarLayerItem() {
-            items.insert(layer, at: 0)
-        }
-        let front = frontApp(display: display.id, style: style)
+        guard let slot = plan.arrangement.space else { return nil }
+        var placed = style
+        placed.alignment = slot.alignment
+        // The front app hides while an App Bar shares the shelf:
+        // that bar already names every window (#1517).
+        let front =
+            app == nil
+            ? frontApp(display: display.id, style: style) : nil
         return SpaceBarManager.Bar(
             display: display.id,
             items: items,
             frontApp: front?.app,
             frontWindow: front?.window,
-            strip: strip,
-            style: style,
+            strip: plan.segment(slot),
+            style: placed,
             stateMarkColors: StateMarkColors(
                 sticky: tiler.settings.stickyStyle.color,
                 floating: tiler.settings.floatingStyle.color

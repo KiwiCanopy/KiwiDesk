@@ -4,11 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Space-first reservation math (#293): strips on all four
-/// edges, disabled combinations, same-edge and perpendicular
-/// stacking with the App Bar, and the combined float clamp.
-@Suite("Space bar geometry")
-struct SpaceBarGeometryTests {
+/// The shelf's reservation (#293, #1517): the strip on all four
+/// edges, the one predicate that decides whether it is taken,
+/// and the float clamp against it.
+@Suite("Shelf geometry")
+struct ShelfGeometryTests {
     private let visible = CGRect(
         x: 0,
         y: 25,
@@ -16,30 +16,26 @@ struct SpaceBarGeometryTests {
         height: 1055
     )
 
-    private func style(
+    private func shelf(
         edge: AppBarEdge,
-        enabled: Bool = true,
         thickness: CGFloat = 32
-    ) -> SpaceBarLook {
-        var style = SpaceBarLook()
-        style.enabled = enabled
-        style.edge = edge
-        style.thickness = thickness
-        return style
+    ) -> KiwiShelf {
+        var shelf = KiwiShelf()
+        shelf.edge = edge
+        shelf.thickness = thickness
+        return shelf
     }
 
     @Test(
         "Strip hugs its edge and remaining frame loses it",
         arguments: [AppBarEdge.top, .bottom, .left, .right]
     )
-    func reservation(edge: AppBarEdge) throws {
-        let style = style(edge: edge)
-        let strip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: style)
-        )
-        let remaining = SpaceBarGeometry.remainingFrame(
+    func reservation(edge: AppBarEdge) {
+        let shelf = shelf(edge: edge)
+        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let remaining = ShelfGeometry.remainingFrame(
             in: visible,
-            style: style
+            shelf: shelf
         )
         // Strip and remaining frame partition the visible frame:
         // disjoint, and their union spans it.
@@ -67,94 +63,53 @@ struct SpaceBarGeometryTests {
         }
     }
 
-    @Test("A disabled bar reserves nothing")
-    func disabled() {
-        let style = style(edge: .left, enabled: false)
-        #expect(
-            SpaceBarGeometry.strip(in: visible, style: style)
-                == nil
+    /// Whether the shelf reserves is one predicate over the three
+    /// Show switches — never the layout on screen, so a layout
+    /// switch reflows nothing.
+    @Test("The shelf reserves exactly while any bar can show")
+    func reservesWhileAnyBarShows() {
+        var settings = TilingSettings()
+        settings.kiwishelf = shelf(edge: .left)
+        settings.spaceBarStyle.enabled = false
+        settings.monocle.appBar.enabled = false
+        settings.scrolling.appBar.enabled = false
+        #expect(!settings.shelfShows)
+        #expect(settings.layoutBounds(from: visible) == visible)
+        let reserved = ShelfGeometry.remainingFrame(
+            in: visible,
+            shelf: settings.kiwishelf
         )
-        #expect(
-            SpaceBarGeometry.remainingFrame(
-                in: visible,
-                style: style
-            ) == visible
-        )
+        for flip in [
+            { (s: inout TilingSettings) in
+                s.spaceBarStyle.enabled = true
+            },
+            { $0.monocle.appBar.enabled = true },
+            { $0.scrolling.appBar.enabled = true },
+        ] {
+            var one = settings
+            flip(&one)
+            #expect(one.shelfShows)
+            #expect(one.layoutBounds(from: visible) == reserved)
+        }
     }
 
     @Test("Oversized thickness never yields a negative frame")
     func oversized() {
-        let style = style(edge: .top, thickness: 5000)
-        let remaining = SpaceBarGeometry.remainingFrame(
+        let remaining = ShelfGeometry.remainingFrame(
             in: visible,
-            style: style
+            shelf: shelf(edge: .top, thickness: 5000)
         )
         #expect(remaining.height == 0)
         #expect(remaining.width == visible.width)
     }
 
-    /// Same edge: the App Bar carves from the already-inset
-    /// frame, so the Space Bar is screen-facing, the App Bar
-    /// window-facing, and the insets add.
-    @Test("Same-edge stacking: space bar outer, app bar inner")
-    func sameEdgeStacking() throws {
-        let space = style(edge: .top)
-        let remaining = SpaceBarGeometry.remainingFrame(
+    /// The #242 clamp applies to the shelf's strip: a float
+    /// under a top strip is pushed below it.
+    @Test("Float clamp clears a top shelf strip")
+    func floatClamp() {
+        let strip = ShelfGeometry.strip(
             in: visible,
-            style: space
-        )
-        let spaceStrip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: space)
-        )
-        var appStyle = AppBarLook()
-        appStyle.edge = .top
-        // Pinned (#660): the sum below reasons from it.
-        appStyle.thickness = 32
-        let appStrip = AppBarGeometry.barFrame(
-            in: remaining,
-            edge: .top,
-            thickness: appStyle.thickness,
-            outer: 0
-        )
-        #expect(spaceStrip.maxY == appStrip.minY)
-        #expect(!spaceStrip.intersects(appStrip))
-        // Combined inset = sum of both strips.
-        #expect(
-            appStrip.maxY
-                == visible.minY + space.thickness + appStyle.thickness
-        )
-    }
-
-    /// Perpendicular edges: the App Bar strip spans the inset
-    /// frame, so it starts inside the Space Bar's inset — the
-    /// corner cannot overlap.
-    @Test("Perpendicular edges never overlap at the corner")
-    func perpendicularCorner() throws {
-        let space = style(edge: .left)
-        let remaining = SpaceBarGeometry.remainingFrame(
-            in: visible,
-            style: space
-        )
-        let spaceStrip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: space)
-        )
-        let appStrip = AppBarGeometry.barFrame(
-            in: remaining,
-            edge: .bottom,
-            thickness: 32,
-            outer: 0
-        )
-        #expect(!spaceStrip.intersects(appStrip))
-        #expect(appStrip.minX == spaceStrip.maxX)
-    }
-
-    /// The #242 clamp applies to the space bar strip the same
-    /// way: a float under a top strip is pushed below it.
-    @Test("Float clamp clears a top space bar strip")
-    func floatClamp() throws {
-        let style = style(edge: .top)
-        let strip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: style)
+            shelf: shelf(edge: .top)
         )
         let float = CGRect(
             x: 100,

@@ -15,16 +15,12 @@ private func ids(_ n: Int) -> [WindowID] {
 
 private func makeContext(
     bounds: CGRect = CGRect(x: 0, y: 0, width: 1920, height: 1080),
-    monocle: (inout MonocleParams) -> Void = { _ in },
-    shelf: (inout KiwiShelf) -> Void = { _ in }
+    monocle: (inout MonocleParams) -> Void = { _ in }
 ) -> LayoutContext {
     var context = LayoutContext(
         bounds: bounds,
         gaps: .uniform(10)
     )
-    // Pinned (#660): the strip arithmetic below reasons from it.
-    context.appBarStyle.thickness = 32
-    shelf(&context.appBarStyle.shelf)
     monocle(&context.monocle)
     return context
 }
@@ -33,61 +29,22 @@ private func makeContext(
 struct MonocleGeometryTests {
     let layout = MonocleLayout()
 
-    @Test("Bar disabled: every window fills the usable area")
-    func barDisabled() throws {
-        let context = makeContext { $0.appBar.enabled = false }
+    /// The shelf reserves its strip before the layout runs
+    /// (`TilingSettings.layoutBounds(from:)`, #1517), so the
+    /// App Bar's switch no longer moves a window: the frames are
+    /// the usable area either way.
+    @Test(
+        "Every window fills the usable area, App Bar on or off",
+        arguments: [true, false]
+    )
+    func fillsUsable(barEnabled: Bool) throws {
+        let context = makeContext { $0.appBar.enabled = barEnabled }
         let frames = layout.calculateGeometry(
             for: ids(3),
             in: context
         )
         for id in ids(3) {
             #expect(frames[id] == context.usable)
-        }
-    }
-
-    @Test(
-        "Bar strip and window never overlap and stay usable",
-        arguments: [
-            AppBarEdge.top, .bottom, .left, .right,
-        ]
-    )
-    func stripCarving(edge: AppBarEdge) throws {
-        // The edge is the shelf's, stored absolute (#293, #1517).
-        let context = makeContext(shelf: { $0.edge = edge })
-        let usable = context.usable
-        let bounds = context.bounds
-        let bar = try #require(
-            context.monocle.barFrame(
-                in: bounds,
-                global: context.appBarStyle
-            )
-        )
-        let frames = layout.calculateGeometry(
-            for: ids(2),
-            in: context
-        )
-        let window = try #require(frames[w1])
-        // All windows share the same frame.
-        #expect(frames[w2] == window)
-        // Both stay inside the bounds (no monitor bleed); the
-        // window inside the usable area.
-        #expect(bounds.contains(bar))
-        #expect(usable.contains(window))
-        // The strip and the window never overlap.
-        #expect(!bar.intersects(window))
-        // The strip sits flush on the resolved edge of the
-        // BOUNDS — its outer margin defaults to 0 (#1516).
-        switch edge {
-        case .top: #expect(bar.minY == bounds.minY)
-        case .bottom: #expect(bar.maxY == bounds.maxY)
-        case .left: #expect(bar.minX == bounds.minX)
-        case .right: #expect(bar.maxX == bounds.maxX)
-        }
-        // The windows' OUTER gap between strip and window — the
-        // bar reads no inner gap (#1516).
-        #expect(bar.height == 32 || bar.width == 32)
-        if edge == .top {
-            #expect(window.minY == bar.maxY + 10)
         }
     }
 
@@ -104,26 +61,6 @@ struct MonocleGeometryTests {
         #expect(
             params.resolvedBar(global: global).edge == .right
         )
-    }
-
-    @Test("Oversized thickness never produces negative frames")
-    func oversizedThickness() throws {
-        var context = makeContext()
-        context.appBarStyle.thickness = 5000
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        let window = try #require(frames[w1])
-        #expect(window.width >= 0)
-        #expect(window.height >= 0)
-        let bar = try #require(
-            context.monocle.barFrame(
-                in: context.bounds,
-                global: context.appBarStyle
-            )
-        )
-        #expect(context.bounds.contains(bar))
     }
 }
 

@@ -74,11 +74,7 @@ struct ScrollingAppCeilingTests {
             core.tiler.layoutInput(state: core.state)
         )
         let context = input.context
-        return context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        ).width
+        return context.usable.width
     }
 
     /// Teaches the learner a believed ceiling of 715pt for

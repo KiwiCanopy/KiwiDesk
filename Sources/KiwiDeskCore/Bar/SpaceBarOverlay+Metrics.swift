@@ -16,6 +16,42 @@ extension SpaceBarOverlay {
         case forward
     }
 
+    /// Each item's length along the bar; the layer item's slot
+    /// carries its section rule. The one derivation `render` and
+    /// `naturalLength` share.
+    static func itemLengths(
+        _ items: [Item],
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> [CGFloat] {
+        let leadsWithLayer = leadsWithLayer(items)
+        return items.enumerated().map { index, item in
+            let length = SpaceBarItemView.autoLength(
+                appCount: item.apps.count,
+                overflow: item.overflow,
+                depth: depth
+            )
+            return index == 0 && leadsWithLayer
+                ? length + layerDividerExtent(gap: gap)
+                : length
+        }
+    }
+
+    /// The Space run's natural length along the shelf, plate pad
+    /// included — what `ShelfArrangement` hands this bar before
+    /// it has to share (#1517). No front-app segment: it hides
+    /// while an App Bar shares the shelf, the one case a need is
+    /// read.
+    static func naturalLength(
+        items: [Item],
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        let lengths = itemLengths(items, depth: depth, gap: gap)
+        return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
+            + 2 * max(gap, SpaceBarItemView.pad)
+    }
+
     /// Calculates item frames and front segment start coordinate.
     nonisolated static func runMetrics(
         lengths: [CGFloat],

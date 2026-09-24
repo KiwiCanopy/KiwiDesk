@@ -17,26 +17,20 @@ extension AppBarOverlay {
         strip: CGRect,
         count: Int,
         style: AppBarLook,
-        items: [Item]
+        items: [Item],
+        capAxis: CGFloat? = nil
     ) -> Metrics {
         let horizontal = style.edge.isHorizontal
         let axis = horizontal ? strip.width : strip.height
         let thickness = horizontal ? strip.height : strip.width
         let gap = style.itemGap
-        let slot = Self.slotLength(
-            content: style.renderedContent,
+        let slot = Self.slot(
+            items: items,
+            style: style,
             thickness: thickness,
-            axis: axis,
-            autoWidth: Self.autoSlotWidth(
-                items: items,
-                style: style,
-                horizontal: horizontal,
-                thickness: thickness
-            )
+            capAxis: capAxis ?? axis
         )
-        let total =
-            slot * CGFloat(count)
-            + gap * CGFloat(max(count - 1, 0))
+        let total = Self.runLength(slot: slot, count: count, gap: gap)
         let inset = total > axis ? Self.arrowZone + gap : 0
         return Metrics(
             horizontal: horizontal,
@@ -47,6 +41,57 @@ extension AppBarOverlay {
             viewport: max(axis - inset * 2, 0),
             alignment: style.alignment
         )
+    }
+
+    /// The run's natural length along the shelf — every slot at
+    /// its size, gaps between, and the plate's pad at both ends:
+    /// what `ShelfArrangement` hands this bar before it has to
+    /// share (#1517).
+    @MainActor
+    static func naturalLength(
+        items: [Item],
+        style: AppBarLook,
+        thickness: CGFloat,
+        capAxis: CGFloat
+    ) -> CGFloat {
+        let slot = slot(
+            items: items,
+            style: style,
+            thickness: thickness,
+            capAxis: capAxis
+        )
+        let gap = style.itemGap
+        return runLength(slot: slot, count: items.count, gap: gap)
+            + 2 * gap
+    }
+
+    /// One slot's length, its quarter cap measured on `capAxis`.
+    @MainActor
+    static func slot(
+        items: [Item],
+        style: AppBarLook,
+        thickness: CGFloat,
+        capAxis: CGFloat
+    ) -> CGFloat {
+        slotLength(
+            content: style.renderedContent,
+            thickness: thickness,
+            axis: capAxis,
+            autoWidth: autoSlotWidth(
+                items: items,
+                style: style,
+                horizontal: style.edge.isHorizontal,
+                thickness: thickness
+            )
+        )
+    }
+
+    nonisolated static func runLength(
+        slot: CGFloat,
+        count: Int,
+        gap: CGFloat
+    ) -> CGFloat {
+        slot * CGFloat(count) + gap * CGFloat(max(count - 1, 0))
     }
 
     /// Measures automatic slot width across items. Measure

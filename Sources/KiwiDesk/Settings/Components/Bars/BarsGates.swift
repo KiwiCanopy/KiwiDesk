@@ -44,7 +44,7 @@ struct BarsGates {
 
     /// True when the Space Bar and an App Bar both show, so the
     /// shelf's order and share apply (#1517).
-    var bothBarsShow: Bool { settings.spaceBarSharesEdgeWithAppBar }
+    var bothBarsShow: Bool { settings.bothBarsCanShow }
 
     /// True when NO shown bar draws a shared plate to size.
     var everyShownBarBoxed: Bool {

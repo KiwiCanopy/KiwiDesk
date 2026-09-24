@@ -58,9 +58,8 @@ extension TilingEngine {
         space: Space,
         screen: NSScreen
     ) -> (space: Space, tiled: [WindowID], context: LayoutContext) {
-        // Space-first reservation (#293): the Space Bar strip
-        // comes off the visible frame before any layout — or
-        // the App Bar — sees its bounds.
+        // The shelf's reservation (#293, #1517) comes off the
+        // visible frame before any layout sees its bounds.
         let bounds = layoutBounds(on: screen)
         let tiled = state.effectiveTiledMembers(of: space)
         var context = settings.context(

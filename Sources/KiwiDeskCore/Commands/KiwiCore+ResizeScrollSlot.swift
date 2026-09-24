@@ -29,13 +29,12 @@ extension KiwiCore {
     /// invisible step before anything moved.
     ///
     /// The ceiling is the area the layout actually DRAWS into —
-    /// `ScrollingParams.windowFrame`, the same carve
+    /// `LayoutContext.usable`, the same carve
     /// `ScrollingLayout.metrics` caps against — not the layout
     /// region it is carved from. Capping at the region leaves
-    /// the outer gaps and any bar strip bankable, which on a
-    /// VERTICAL axis is the App Bar's own thickness: tens of
-    /// points of slot the layout can never draw, the same defect
-    /// in miniature. (The `auto`/`%` seed above still reads the
+    /// the outer gaps bankable: points of slot the layout can
+    /// never draw, the same defect in miniature. (The
+    /// `auto`/`%` seed above still reads the
     /// region, per #537. That mismatch predates this and is not
     /// this clamp's to settle.)
     ///
@@ -58,8 +57,8 @@ extension KiwiCore {
         let horizontal = scrolling.axisIsHorizontal
         let along = horizontal ? bounds.width : bounds.height
         // Built through the same resolver `layoutInput` uses,
-        // so the viewport CARVE — `usable` (bounds less the
-        // outer gaps) and the bar strip — cannot drift from
+        // so the viewport CARVE — `usable`, bounds less the
+        // outer gaps — cannot drift from
         // what the layout drew. The carve is all this local
         // rebuild serves (the ceiling below); the press BASE
         // takes the engine's full context via
@@ -84,19 +83,15 @@ extension KiwiCore {
                 effectiveMinSize(of: $0, axis: axis)
             } ?? 0
         )
-        let drawn = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let drawn = context.usable
         // The current size joins the ceiling only for a POINTS
         // store — the case the clause is about, where the user
         // wrote a number. `auto`/`%` resolve against the layout
         // REGION (#537) while the ceiling is the drawn area, so
-        // admitting them here would re-bank the bar strip on the
-        // very first press: a default `auto` on the axis
-        // carrying the App Bar already resolves above what the
-        // layout draws. A fraction is screen-relative anyway, so
+        // admitting them here would re-bank the outer gaps on
+        // the very first press: a default `auto` already
+        // resolves above what the layout draws. A fraction is
+        // screen-relative anyway, so
         // it survives undocking on its own and has no stated
         // size to preserve.
         let configured: CGFloat

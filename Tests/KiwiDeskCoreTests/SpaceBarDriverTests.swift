@@ -253,66 +253,56 @@ struct SpaceBarDriverTests {
     }
 }
 
-/// The both-bars predicate (#1517): the shelf holds one edge, so
-/// the two bars share it exactly when the Space Bar and at least
-/// one ENABLED layout App Bar show.
-@Suite("Space bar same-edge predicate")
+/// The both-bars predicate (#1517): the two bars split the shelf
+/// exactly when the Space Bar and at least one ENABLED layout App
+/// Bar can show.
+@Suite("Space bar both-bars predicate")
 struct SpaceBarSameEdgeTests {
     @Test("Predicate honors each bar's enablement")
     func predicate() {
         var settings = TilingSettings()
         settings.spaceBarStyle.enabled = true
-        #expect(settings.spaceBarSharesEdgeWithAppBar)
+        #expect(settings.bothBarsCanShow)
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = false
-        #expect(!settings.spaceBarSharesEdgeWithAppBar)
+        #expect(!settings.bothBarsCanShow)
         settings.monocle.appBar.enabled = true
-        #expect(settings.spaceBarSharesEdgeWithAppBar)
+        #expect(settings.bothBarsCanShow)
         settings.spaceBarStyle.enabled = false
-        #expect(!settings.spaceBarSharesEdgeWithAppBar)
+        #expect(!settings.bothBarsCanShow)
     }
 }
 
-/// Stacked top strips (#293): the float clamp composes — the
-/// space bar strip pushes first, the app bar strip (carved
-/// below it) pushes further.
-@Suite("Combined top-strip float clamp")
+/// Both bars on one strip (#1517): each takes a segment of it, so
+/// the float clamp composes to the one strip's depth.
+@Suite("Combined shelf float clamp")
 struct CombinedClampTests {
-    @Test("A float clears both stacked strips")
-    func stackedStrips() {
+    @Test("A float clears both bars' segments on the one strip")
+    func sharedStrip() {
         let visible = CGRect(x: 0, y: 0, width: 1920, height: 1080)
-        var space = SpaceBarLook()
-        space.enabled = true
-        space.edge = .top
-        // Pinned (#660): the combined inset reasons from it.
-        space.thickness = 32
-        let spaceStrip = SpaceBarGeometry.strip(
-            in: visible,
-            style: space
-        )!
-        let remaining = SpaceBarGeometry.remainingFrame(
-            in: visible,
-            style: space
+        var shelf = KiwiShelf()
+        shelf.edge = .top
+        // Pinned (#660): the inset reasons from it.
+        shelf.thickness = 32
+        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let arrangement = ShelfArrangement.arrange(
+            length: strip.width,
+            spaceNeed: 300,
+            appNeed: 500,
+            shelf: shelf
         )
-        let appStrip = AppBarGeometry.barFrame(
-            in: remaining,
-            edge: .top,
-            thickness: 32,
-            outer: 0
-        )
-        let float = CGRect(x: 10, y: 5, width: 400, height: 300)
-        var clamped = AppBarGeometry.clampClear(
-            float,
-            of: spaceStrip,
-            edge: .top
-        )
-        clamped = AppBarGeometry.clampClear(
-            clamped,
-            of: appStrip,
-            edge: .top
-        )
-        // Below the combined reservation: 32 + 32.
-        #expect(clamped.minY == 64)
-        #expect(clamped.size == float.size)
+        let segments = [arrangement.space, arrangement.app]
+            .compactMap { $0?.rect(in: strip, horizontal: true) }
+        #expect(segments.count == 2)
+        var clamped = CGRect(x: 10, y: 5, width: 400, height: 300)
+        for segment in segments {
+            clamped = AppBarGeometry.clampClear(
+                clamped,
+                of: segment,
+                edge: .top
+            )
+        }
+        #expect(clamped.minY == 32)
+        #expect(clamped.size.width == 400)
     }
 }
