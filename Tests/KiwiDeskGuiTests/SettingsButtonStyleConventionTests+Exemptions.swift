@@ -78,14 +78,6 @@ extension SettingsButtonStyleConventionTests {
 
     var stylesOnNonButtons: [String: StyleNote] {
         [
-            // A `Menu` is not a `Button`: the Desktops card's add-
-            // setup pull-down takes the bordered seal as a text
-            // action (#1393).
-            "DesktopsGroup+Setups.swift": (
-                1, ".settingsActionButton()",
-                "The add-screen-setup Menu, bordered like the "
-                    + "window's other text actions"
-            ),
             // `Link`s taking plain style: a `Link` is not a
             // `Button` and cannot take the seal (#1407). Since
             // #1536 they live on Home's support strip and in the

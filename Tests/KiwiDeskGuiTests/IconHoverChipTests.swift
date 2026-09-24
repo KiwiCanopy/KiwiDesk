@@ -51,7 +51,7 @@ struct IconHoverChipTests {
     }
 
     /// A glyph standing alone beside text keeps the rest fill; the
-    /// register is the two owner-ruled sites (2026-09-25), so a new
+    /// register is the owner-ruled sites (2026-09-25), so a new
     /// one is a ruling rather than a default.
     @Test("only the standalone glyphs rest on a fill")
     func restingRegister() throws {
@@ -71,5 +71,21 @@ struct IconHoverChipTests {
                 "ProfilesSection+ScreenSetups.swift": 1,
             ]
         )
+    }
+
+    /// The raised chip is the card's own recipe at chip size, and
+    /// its one caller is the Desktops card's add-setup trigger.
+    @Test("the add-setup trigger rides a raised chip")
+    func addSetupIsRaised() throws {
+        let rows = try source("Components/Common/SettingsRows.swift")
+        let chip = body(of: "raisedChip", in: rows)
+        #expect(chip.contains("SettingsTheme.card"))
+        #expect(chip.contains("SettingsTheme.hairline"))
+        #expect(chip.contains("SettingsTheme.planeRing"))
+        let setups = try source(
+            "Components/Profiles/DesktopsGroup+Setups.swift"
+        )
+        #expect(setups.occurrences(of: ".raisedChip()") == 1)
+        #expect(!setups.contains(".settingsActionButton()"))
     }
 }

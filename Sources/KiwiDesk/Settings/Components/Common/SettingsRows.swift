@@ -242,6 +242,34 @@ extension View {
             )
     }
 
+    /// A KiwiDesk-drawn text trigger on a `sunken` ground: the card's
+    /// own fill and edge at chip size, so it reads raised and light
+    /// rather than as a grey well (#1393). Native controls keep their
+    /// own bezel and never take it.
+    func raisedChip() -> some View {
+        let shape = RoundedRectangle(
+            cornerRadius: SettingsTheme.chipRadius
+        )
+        return hoverHighlight(
+            restOpacity: 0,
+            cornerRadius: SettingsTheme.chipRadius,
+            padding: 4
+        )
+        .background(shape.fill(SettingsTheme.card))
+        .overlay(
+            shape.strokeBorder(
+                SettingsTheme.hairline,
+                lineWidth: SettingsTheme.containerStroke
+            )
+        )
+        .overlay(
+            shape.strokeBorder(
+                SettingsTheme.planeRing,
+                lineWidth: SettingsTheme.containerStroke
+            )
+        )
+    }
+
     /// Complete affordance for icon buttons with hover chip, tooltip, and
     /// accessibility label.
     func iconButtonAffordance(

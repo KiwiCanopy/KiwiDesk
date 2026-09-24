@@ -127,14 +127,18 @@ extension DesktopsGroup {
                 }
             }
         } label: {
-            Label(addTitle, systemImage: "plus")
+            Label {
+                Text(addTitle).foregroundStyle(SettingsTheme.ink)
+            } icon: {
+                Image(systemName: "plus")
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
         }
-        // A text action, bordered like the window's others (#1393).
-        .menuStyle(.button)
-        .settingsActionButton()
+        .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
         .neutralMenuLabel()
+        .raisedChip()
         .help(addTitle)
         .accessibilityLabel(
             L(
