@@ -705,12 +705,15 @@ Three consequences:
   break opens that section, addressed to the people it reaches
   ("If you write your own Lua config: …"), rather than alarming
   everyone above the fold.
-- **"Before you update" is for what changes for everyone who
-  updates:** one closing paragraph of the summary, and usually
-  absent. Say what carries over as well as what does not. "Your
-  settings carry over; 1.4 can no longer open them" informs,
-  while "can't be opened by 1.4" alone frightens a reader who
-  was never going back.
+- **"Before you update" is for something everyone who updates
+  must do or will notice at once:** one closing paragraph of the
+  summary, and usually absent. It never warns about going back:
+  a downgrade limit ("the older version can't open your
+  profiles") alarms every reader for the few who would ever
+  downgrade, so it belongs in the full release notes, if
+  anywhere. Say what the reader keeps rather than what they
+  risk: "Your settings carry over on their own" (owner,
+  2026-09-24).
 
 Releases before 2.0.0 keep the free titles they were published
 with.
