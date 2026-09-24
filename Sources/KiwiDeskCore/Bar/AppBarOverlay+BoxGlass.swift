@@ -61,64 +61,6 @@ extension AppBarOverlay {
         }
     }
 
-    /// Updates frosted glass backdrops behind scroll arrows
-    /// (`BarArrowView`, #408).
-    func updateArrowGlasses(style: AppBarLook) {
-        guard let content = itemContainer.superview else { return }
-        updateArrowGlass(
-            &backArrowGlass,
-            tint: &backArrowTint,
-            behind: backArrow,
-            in: content,
-            style: style
-        )
-        updateArrowGlass(
-            &forwardArrowGlass,
-            tint: &forwardArrowTint,
-            behind: forwardArrow,
-            in: content,
-            style: style
-        )
-    }
-
-    private func updateArrowGlass(
-        _ glass: inout NSView?,
-        tint: inout NSView?,
-        behind arrow: BarArrowView,
-        in content: NSView,
-        style: AppBarLook
-    ) {
-        guard !arrow.isHidden else {
-            glass?.isHidden = true
-            tint?.isHidden = true
-            return
-        }
-        guard let box = glass ?? GlassPlate.make() else { return }
-        glass = box
-        if box.superview !== content {
-            content.addSubview(box, positioned: .below, relativeTo: arrow)
-            GlassPlate.setContent(box, NSView())
-        }
-        box.isHidden = false
-        let radius =
-            max(0, min(style.cornerRoundness, 100)) / 100
-            * (min(arrow.frame.width, arrow.frame.height) / 2)
-        GlassPlate.update(
-            box,
-            frame: arrow.frame,
-            cornerRadius: radius
-        )
-        let backdrop = tint ?? NSView()
-        tint = backdrop
-        GlassTint.apply(
-            backdrop,
-            below: box,
-            frame: arrow.frame,
-            cornerRadius: radius,
-            hex: style.fillColor
-        )
-    }
-
     /// Returns the target view for drag operations (`AppBarItemView`).
     func draggableView(for item: AppBarItemView) -> NSView {
         guard let i = itemViews.firstIndex(of: item),
@@ -130,10 +72,6 @@ extension AppBarOverlay {
 
     /// Detaches items from glass wrappers and tears down box glass views.
     func teardownBoxGlasses() {
-        backArrowGlass?.isHidden = true
-        forwardArrowGlass?.isHidden = true
-        backArrowTint?.isHidden = true
-        forwardArrowTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
         for glass in boxGlasses {
             for item in itemViews where GlassPlate.holds(glass, item) {

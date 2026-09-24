@@ -31,15 +31,21 @@ extension SpaceBarOverlay {
 
     /// Records the drag-drop hit frames in strip-local
     /// coordinates, offset by the viewport origin and clamped to
-    /// the visible viewport (#385): a point over an arrow zone or
-    /// a scrolled-off item resolves to no Space.
+    /// the CLEAR part of the viewport (#385, #1517): a point over a
+    /// fading end — the autoscroll's zone — or a scrolled-off item
+    /// resolves to no Space, so the two never contend.
     func recordHitFrames(
         items: [Item],
         frames: [CGRect],
-        strip: CGRect
+        strip: CGRect,
+        fades: ShelfOverflow.Fades,
+        horizontal: Bool
     ) {
         hitStrip = strip
-        let container = itemContainer.frame
+        let container = fades.clear(
+            of: itemContainer.frame,
+            horizontal: horizontal
+        )
         hitFrames = zip(items, frames).compactMap { item, frame in
             // The layer item is no drop target (#1169).
             guard let space = item.space else { return nil }

@@ -124,4 +124,66 @@ public enum ShelfOverflow {
         }
         return min(max(target, 0), last)
     }
+    /// How far each end of the viewport fades (#1517): a side
+    /// fades only while a whole entry is hidden there, so a sliver
+    /// draws no fade and no count.
+    public struct Fades: Equatable, Sendable {
+        public var leading: CGFloat
+        public var trailing: CGFloat
+        public var before: Int
+        public var after: Int
+
+        public static let none = Fades(
+            leading: 0,
+            trailing: 0,
+            before: 0,
+            after: 0
+        )
+
+        /// `frame` less its fading ends along the axis.
+        public func clear(of frame: CGRect, horizontal: Bool) -> CGRect {
+            horizontal
+                ? CGRect(
+                    x: frame.minX + leading,
+                    y: frame.minY,
+                    width: max(frame.width - leading - trailing, 0),
+                    height: frame.height
+                )
+                : CGRect(
+                    x: frame.minX,
+                    y: frame.minY + leading,
+                    width: frame.width,
+                    height: max(frame.height - leading - trailing, 0)
+                )
+        }
+    }
+
+    /// The viewport's fades at `offset`, from `ShelfOverflow`.
+    public static func fades(
+        lengths: [CGFloat],
+        gap: CGFloat,
+        total: CGFloat,
+        offset: CGFloat,
+        viewport: CGFloat,
+        depth: CGFloat
+    ) -> Fades {
+        guard total > viewport, viewport > 0 else { return .none }
+        let hidden = hiddenCounts(
+            lengths: lengths,
+            gap: gap,
+            offset: offset,
+            viewport: viewport
+        )
+        let fade = fadeLength(
+            thickness: depth,
+            visible: viewport
+        )
+        return Fades(
+            leading: hidden.before > 0 ? fade : 0,
+            trailing: hidden.after > 0 ? fade : 0,
+            before: hidden.before,
+            after: hidden.after
+        )
+    }
+
 }

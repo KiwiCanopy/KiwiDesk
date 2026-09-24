@@ -11,7 +11,7 @@ extension SpaceBarOverlay {
     }
 
     /// Scroll direction for whole-bar scrolling (#385).
-    enum ScrollArrow {
+    enum ScrollDirection {
         case back
         case forward
     }
@@ -132,16 +132,6 @@ extension SpaceBarOverlay {
             + frontExtent
     }
 
-    /// Computes scroll arrow insets and viewport size (#385).
-    nonisolated static func scrollViewport(
-        axis: CGFloat,
-        total: CGFloat,
-        gap: CGFloat
-    ) -> (inset: CGFloat, viewport: CGFloat) {
-        let inset = total > axis ? BarArrowView.zone + gap : 0
-        return (inset, max(axis - inset * 2, 0))
-    }
-
     /// The scroll offset keeping the active item in view, in
     /// this bar's measures — `ShelfOverflow.offset` does the
     /// arithmetic (#1517).
@@ -179,24 +169,26 @@ extension SpaceBarOverlay {
         return avg + gap
     }
 
-    /// Evaluates whether point falls inside scroll arrow zones (#385, #409).
-    nonisolated static func arrowHit(
+    /// Which fading end a point rests on, for the drag
+    /// autoscroll (#385, #1517): nil in the clear view, where the
+    /// items are drop targets instead.
+    nonisolated static func fadeHit(
         at local: CGPoint,
         strip: CGRect,
-        inset: CGFloat,
+        fades: ShelfOverflow.Fades,
         trailingAxis: CGFloat,
         horizontal: Bool
-    ) -> ScrollArrow? {
-        guard inset > 0 else { return nil }
+    ) -> ScrollDirection? {
         let axisPos = horizontal ? local.x : local.y
         let crossPos = horizontal ? local.y : local.x
         let crossLen = horizontal ? strip.height : strip.width
         guard crossPos >= 0, crossPos <= crossLen,
             axisPos >= 0, axisPos <= trailingAxis
         else { return nil }
-        let zone = BarArrowView.zone
-        if axisPos < zone { return .back }
-        if axisPos > trailingAxis - zone { return .forward }
+        if fades.leading > 0, axisPos < fades.leading { return .back }
+        if fades.trailing > 0, axisPos > trailingAxis - fades.trailing {
+            return .forward
+        }
         return nil
     }
 }

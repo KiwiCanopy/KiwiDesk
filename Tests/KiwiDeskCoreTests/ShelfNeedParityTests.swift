@@ -63,12 +63,8 @@ struct ShelfNeedParityTests {
             gap: gap,
             frontExtent: 0
         )
-        let (inset, _) = SpaceBarOverlay.scrollViewport(
-            axis: need,
-            total: total,
-            gap: gap
-        )
-        #expect(inset == 0)
+        // The natural segment holds the whole run: nothing fades.
+        #expect(total <= need)
         let start = SpaceBarOverlay.contentStart(
             total: total,
             axis: need,

@@ -63,8 +63,9 @@ public final class SpaceBarOverlay {
     var itemViews: [SpaceBarItemView] = []
     /// Clipping item viewport (#385).
     let itemContainer = AppBarOverlay.FlippedView()
-    let backArrow = BarArrowView()
-    let forwardArrow = BarArrowView()
+    /// Hidden-entry counts on each fading end (#1517).
+    let backCount = ShelfCountView(side: .before)
+    let forwardCount = ShelfCountView(side: .after)
     /// Host view for front-app segment (#409).
     weak var frontHost: NSView?
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
@@ -84,7 +85,7 @@ public final class SpaceBarOverlay {
     /// `@Sendable` block cannot weak-capture this non-`Sendable`
     /// `@MainActor` type in a release build.
     var autoScrollTask: Task<Void, Never>?
-    var autoScrollDirection: ScrollArrow?
+    var autoScrollDirection: ScrollDirection?
     /// Last-rendered strip in AX coordinates and the per-item
     /// frames within it (strip-local, top-left), for the #372
     /// drag-drop hit test. Kept in lockstep with what `render()`

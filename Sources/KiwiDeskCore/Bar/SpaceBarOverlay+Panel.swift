@@ -52,13 +52,13 @@ extension SpaceBarOverlay {
         root.isHidden = true
         root.layer?.masksToBounds = true
         root.layer?.backgroundColor = NSColor.clear.cgColor
-        // Clipping viewport prevents scrolled items sliding under
-        // arrows (#385).
+        // Clipping viewport: the run fades at its hidden ends
+        // (#385, #1517).
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
         itemContainer.addSubview(layerDivider)
         root.addSubview(itemContainer)
-        root.addSubview(backArrow)
-        root.addSubview(forwardArrow)
+        root.addSubview(backCount)
+        root.addSubview(forwardCount)
     }
 }

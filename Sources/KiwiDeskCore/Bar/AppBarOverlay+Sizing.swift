@@ -31,7 +31,9 @@ extension AppBarOverlay {
             capAxis: capAxis ?? axis
         )
         let total = Self.runLength(slot: slot, count: count, gap: gap)
-        let inset = total > axis ? Self.arrowZone + gap : 0
+        // No arrow zones: the run fills its section and fades on a
+        // side that hides entries (#1517).
+        let inset: CGFloat = 0
         return Metrics(
             horizontal: horizontal,
             slot: slot,

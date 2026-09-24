@@ -17,9 +17,6 @@ public final class AppBarOverlay {
         _ in
     }
 
-    /// Depth of scroll-arrow zones at strip ends (`BarArrowView.zone`, #385).
-    nonisolated static let arrowZone = BarArrowView.zone
-
     /// Cached inputs from last `show()` for manual arrow scrolling.
     private struct RenderState {
         let items: [Item]
@@ -39,18 +36,13 @@ public final class AppBarOverlay {
     var onRendered: @MainActor () -> Void = {}
     var itemViews: [AppBarItemView] = []
     let itemContainer = FlippedView()
-    let backArrow = BarArrowView()
-    let forwardArrow = BarArrowView()
+    /// Hidden-entry counts on each fading end (#1517).
+    let backCount = ShelfCountView(side: .before)
+    let forwardCount = ShelfCountView(side: .after)
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [NSView] = []
-    /// Scroll arrows frosted backdrop boxes.
-    var backArrowGlass: NSView?
-    var forwardArrowGlass: NSView?
-    /// Tinted backdrops behind arrow glasses (#408).
-    var backArrowTint: NSView?
-    var forwardArrowTint: NSView?
     var scrollOffset: CGFloat = 0
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
@@ -215,7 +207,7 @@ public final class AppBarOverlay {
             depth: depth,
             animated: true
         )
-        layoutArrows(strip: strip, m: m, style: style)
+        layoutOverflow(strip: strip, m: m, style: style)
         root.isHidden = false
         onRendered()
     }

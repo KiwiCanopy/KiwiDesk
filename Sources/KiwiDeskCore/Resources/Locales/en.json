@@ -640,6 +640,8 @@
   "kiwishelf.colors.title": "KiwiShelf colors",
   "kiwishelf.corner_roundness": "Corner roundness",
   "kiwishelf.corner_roundness.help": "Rounds the plates and every item box — both bars alike.",
+  "kiwishelf.count.after.ax": "More after: %1$d",
+  "kiwishelf.count.before.ax": "More before: %1$d",
   "kiwishelf.edge.label": "Position",
   "kiwishelf.edge.label.help": "Which screen edge KiwiShelf occupies. It reserves that edge in every layout, whichever bars it shows.",
   "kiwishelf.empty.help": "Turn on a bar under “%1$@” to edit these settings.",

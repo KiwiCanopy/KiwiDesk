@@ -52,9 +52,7 @@ extension AppBarOverlay {
     }
 
     /// Builds the section's view once. Items render inside a
-    /// clipping viewport so that, while scrolled, the cut-off item
-    /// ends a gap short of the arrows instead of sliding under
-    /// them.
+    /// clipping viewport that fades at its hidden ends (#1517).
     func configureRoot() {
         root.wantsLayer = true
         root.isHidden = true
@@ -63,7 +61,7 @@ extension AppBarOverlay {
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
         root.addSubview(itemContainer)
-        root.addSubview(backArrow)
-        root.addSubview(forwardArrow)
+        root.addSubview(backCount)
+        root.addSubview(forwardCount)
     }
 }

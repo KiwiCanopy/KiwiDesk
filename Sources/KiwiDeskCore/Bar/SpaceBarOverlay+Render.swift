@@ -32,10 +32,10 @@ extension SpaceBarOverlay {
         // real viewport; a pathological near-full-width app name
         // falls back to scrolling with the run rather than
         // collapsing the Spaces to nothing (#409).
-        let arrowRoom = 2 * (BarArrowView.zone + gap)
+        let fadeRoom = 2 * (ShelfOverflow.fadeLength(thickness: depth) + gap)
         let pinFront =
             total > axis && frontApp != nil
-            && front < axis - arrowRoom
+            && front < axis - fadeRoom
         let scrolledFront = pinFront ? 0 : front
         let spacesAxis = pinFront ? axis - front : axis
         let scrolledTotal = Self.runTotal(
@@ -43,11 +43,10 @@ extension SpaceBarOverlay {
             gap: gap,
             frontExtent: scrolledFront
         )
-        let (inset, viewport) = Self.scrollViewport(
-            axis: spacesAxis,
-            total: scrolledTotal,
-            gap: gap
-        )
+        // No arrow zones: the run fills its section and fades on
+        // a side that hides entries (#1517).
+        let inset: CGFloat = 0
+        let viewport = spacesAxis
         scrollOffset = Self.scrollOffset(
             current: scrollOffset,
             lengths: lengths,
@@ -56,6 +55,14 @@ extension SpaceBarOverlay {
             activeIndex: followingActive ? activeIndex(items) : nil,
             viewport: viewport,
             margin: gap
+        )
+        let fades = ShelfOverflow.fades(
+            lengths: scrolledFront > 0 ? lengths + [scrolledFront] : lengths,
+            gap: gap,
+            total: scrolledTotal,
+            offset: scrollOffset,
+            viewport: viewport,
+            depth: depth
         )
         let viewportRect = placeItemContainer(
             inset: inset,
@@ -111,7 +118,9 @@ extension SpaceBarOverlay {
         recordHitFrames(
             items: items,
             frames: itemFrames,
-            strip: strip
+            strip: strip,
+            fades: fades,
+            horizontal: horizontal
         )
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
@@ -148,16 +157,16 @@ extension SpaceBarOverlay {
             style: style,
             depth: horizontal ? strip.height : strip.width
         )
-        layoutArrows(
+        layoutOverflow(
+            fades,
             strip: strip,
-            inset: inset,
             viewport: viewport,
             total: scrolledTotal,
-            trailingAxis: spacesAxis,
             lengths: lengths,
             gap: gap,
             horizontal: horizontal,
-            style: style
+            style: style,
+            depth: depth
         )
         root.isHidden = false
         onRendered()
