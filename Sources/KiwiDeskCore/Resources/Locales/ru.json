@@ -497,6 +497,7 @@
   "general.login_item.unavailable_binary": "Доступно только при запуске приложения KiwiDesk.",
   "general.login_item.updating": "Применение…",
   "general.updates.install_automatically": "Устанавливать обновления автоматически",
+  "general.updates.install_automatically.checks_off": "Доступно, пока KiwiDesk сам проверяет обновления.",
   "general.updates.install_automatically.help": "KiwiDesk сам загружает обновления и устанавливает их при следующем завершении. Сам он никогда не перезапускается.",
   "general.version": "Версия %1$@",
   "help.button": "Справка",

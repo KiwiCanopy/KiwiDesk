@@ -497,6 +497,7 @@
   "general.login_item.unavailable_binary": "僅在執行 KiwiDesk 應用程式時可用。",
   "general.login_item.updating": "正在套用…",
   "general.updates.install_automatically": "自動安裝更新",
+  "general.updates.install_automatically.checks_off": "僅在 KiwiDesk 自行檢查更新時可用。",
   "general.updates.install_automatically.help": "KiwiDesk 會自行下載更新，並在下次結束時安裝。它絕不會自行重新啟動。",
   "general.version": "版本 %1$@",
   "help.button": "輔助說明",

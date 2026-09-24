@@ -497,6 +497,7 @@
   "general.login_item.unavailable_binary": "Disponible uniquement avec l’app KiwiDesk.",
   "general.login_item.updating": "Application en cours…",
   "general.updates.install_automatically": "Installer les mises à jour automatiquement",
+  "general.updates.install_automatically.checks_off": "Disponible tant que KiwiDesk recherche des mises à jour de lui-même.",
   "general.updates.install_automatically.help": "KiwiDesk télécharge les mises à jour de lui-même et les installe la prochaine fois qu'il se ferme. Il ne redémarre jamais tout seul.",
   "general.version": "v%1$@",
   "help.button": "Aide",
