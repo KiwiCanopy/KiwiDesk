@@ -56,7 +56,7 @@ struct GlassTintOrderTests {
             display: barTitleDisplay,
             strip: barTitleStrip,
             shelf: shelf,
-            space: (section, barTitleStrip),
+            space: section,
             app: nil
         )
     }

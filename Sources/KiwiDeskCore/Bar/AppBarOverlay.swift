@@ -55,6 +55,10 @@ public final class AppBarOverlay {
 
     public var isVisible: Bool { lastShown != nil && !root.isHidden }
 
+    /// The slot this section last drew into (AX coordinates) — the
+    /// one the shelf places it at.
+    var shownStrip: CGRect? { lastShown?.strip }
+
     /// Renders `items` into `strip` (AX coordinates).
     public func show(
         items: [Item],

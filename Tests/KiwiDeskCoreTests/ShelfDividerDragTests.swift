@@ -157,7 +157,7 @@ struct ShelfDividerDragTests {
                 display: barTitleDisplay,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),
-                space: (section, barTitleStrip),
+                space: section,
                 app: nil
             )
         ])

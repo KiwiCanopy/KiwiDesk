@@ -128,6 +128,10 @@ public final class SpaceBarOverlay {
 
     public var isVisible: Bool { lastShown != nil && !root.isHidden }
 
+    /// The slot this section last drew into (AX coordinates) — the
+    /// one the shelf places it at.
+    var shownStrip: CGRect? { lastShown?.strip }
+
     /// Renders `items` into `strip` in AX coordinates.
     func show(
         items: [Item],

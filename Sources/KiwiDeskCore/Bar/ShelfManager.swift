@@ -13,8 +13,10 @@ final class ShelfManager {
         let display: DisplayID
         let strip: CGRect
         let shelf: KiwiShelf
-        let space: (overlay: SpaceBarOverlay, slot: CGRect)?
-        let app: (overlay: AppBarOverlay, slot: CGRect)?
+        /// The sections shown here; each is placed at the slot it
+        /// drew into (`shownStrip`), so the two cannot disagree.
+        let space: SpaceBarOverlay?
+        let app: AppBarOverlay?
         /// Set while the shelf is full, so the divider drags.
         var divider: ShelfArrangement.Divider? = nil
     }
@@ -50,10 +52,10 @@ final class ShelfManager {
         }
         for shelf in shelves {
             last[shelf.display] = shelf
-            shelf.space?.overlay.onRendered = { [weak self] in
+            shelf.space?.onRendered = { [weak self] in
                 self?.relayout(shelf.display)
             }
-            shelf.app?.overlay.onRendered = { [weak self] in
+            shelf.app?.onRendered = { [weak self] in
                 self?.relayout(shelf.display)
             }
             relayout(shelf.display)
@@ -64,22 +66,16 @@ final class ShelfManager {
     func relayout(_ display: DisplayID) {
         guard !holdsRelayout, let shelf = last[display] else { return }
         var sections: [ShelfOverlay.Section] = []
-        if let space = shelf.space, space.overlay.isVisible {
+        if let space = shelf.space, space.isVisible,
+            let slot = space.shownStrip
+        {
             sections.append(
-                .init(
-                    view: space.overlay.root,
-                    slot: space.slot,
-                    plate: space.overlay.plateFrame
-                )
+                .init(view: space.root, slot: slot, plate: space.plateFrame)
             )
         }
-        if let app = shelf.app, app.overlay.isVisible {
+        if let app = shelf.app, app.isVisible, let slot = app.shownStrip {
             sections.append(
-                .init(
-                    view: app.overlay.root,
-                    slot: app.slot,
-                    plate: app.overlay.plateFrame
-                )
+                .init(view: app.root, slot: slot, plate: app.plateFrame)
             )
         }
         let overlay = overlays[display] ?? ShelfOverlay()

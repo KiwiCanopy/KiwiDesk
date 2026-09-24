@@ -76,11 +76,6 @@ public final class AppBarManager {
         }
     }
 
-    /// Each painted bar's display and slot, for its shelf.
-    var shownBarStrips: [(DisplayID, CGRect)] {
-        shownBars.map { ($0.display, $0.strip) }
-    }
-
     /// True when a painted bar is currently rendering or
     /// announcing `id`'s title (#670, 2026-08-20). Deliberately
     /// NOT gated on `showsText` or the edge (#937): icon-only and

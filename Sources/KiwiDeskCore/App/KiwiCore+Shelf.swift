@@ -86,30 +86,14 @@ extension KiwiCore {
         dividers: [DisplayID: ShelfArrangement.Divider] = [:],
         settings: TilingSettings
     ) {
-        let spaceSlots = Dictionary(
-            spaceBars.shownStrips.map { ($0.display, $0.strip) },
-            uniquingKeysWith: { first, _ in first }
-        )
-        let appSlots = Dictionary(
-            appBars.shownBarStrips,
-            uniquingKeysWith: { first, _ in first }
-        )
         shelves.sync(
             strips.map { display, strip in
                 ShelfManager.Shelf(
                     display: display,
                     strip: strip,
                     shelf: settings.kiwishelf,
-                    space: spaceSlots[display].flatMap { slot in
-                        spaceBars.shownOverlay(on: display).map {
-                            ($0, slot)
-                        }
-                    },
-                    app: appSlots[display].flatMap { slot in
-                        appBars.shownOverlay(on: display).map {
-                            ($0, slot)
-                        }
-                    },
+                    space: spaceBars.shownOverlay(on: display),
+                    app: appBars.shownOverlay(on: display),
                     divider: dividers[display]
                 )
             }
