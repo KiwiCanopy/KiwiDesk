@@ -6,7 +6,8 @@ public enum RuleReach: Hashable, Sendable {
     /// The shared base rule. `joining` names the profiles whose
     /// own entry the save drops so they follow it.
     case shared(joining: Set<String>)
-    /// Exactly these profiles, each holding its own entry.
+    /// These profiles get the value; the others keep what they
+    /// had, and taking a rule away is a removal's.
     case listed(Set<String>)
 
     public var isShared: Bool {
@@ -113,7 +114,6 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         removal: RuleRemoval = .everywhere,
         editing: String
     ) {
-        let wasShared = follows(key, editing)
         let old = resolved(key, for: editing)
         guard let value else {
             remove(key, old: old, removal: removal, editing: editing)
@@ -133,20 +133,80 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
             setEntry(key, for: editing, .none)
             for profile in joining { setEntry(key, for: profile, .none) }
         case .listed(let members):
-            if wasShared { setBase(key, nil) }
+            // The ticked profiles get `value`; an unticked one keeps
+            // what it resolved — taking a rule away is the removal's.
             for profile in profiles {
-                let entry = entries[profile]?[key]
                 if members.contains(profile) || profile == editing {
-                    setEntry(key, for: profile, .some(value))
-                } else if (old != nil && entry == .some(old))
-                    || (entry == .some(nil) && base[key] == nil)
+                    setEntry(
+                        key,
+                        for: profile,
+                        base[key] == value ? .none : .some(value)
+                    )
+                } else if entries[profile]?[key] == .some(nil)
+                    && base[key] == nil
                 {
-                    // An unticked member, or a left-out mark with
-                    // nothing left to leave out.
+                    // A left-out mark with nothing left to leave out.
                     setEntry(key, for: profile, .none)
                 }
             }
         }
+    }
+
+    /// A combo written for `key` takes it from `rivals` — keys bound
+    /// to the same combo, which the caller names (only a family whose
+    /// value is a combo has any). The base's rival leaves the base;
+    /// a profile the user `ticked` gives its rival up; a profile that
+    /// did not keeps its own rival, which wins on that combo, so it
+    /// reads as leaving `key` out.
+    mutating func takeOver(
+        _ key: String,
+        value: Value,
+        from old: Value?,
+        rivals: [String],
+        ticked: Set<String>,
+        editing: String
+    ) {
+        if base[key] == value {
+            for rival in rivals where base[rival] == value {
+                setBase(rival, nil)
+            }
+        }
+        for profile in profiles
+        where profile != editing && resolved(key, for: profile) == value {
+            let held = rivals.filter {
+                resolved($0, for: profile) == value
+            }
+            guard !held.isEmpty else { continue }
+            if ticked.contains(profile) {
+                for rival in held { setEntry(rival, for: profile, .some(nil)) }
+            } else {
+                setEntry(key, for: profile, .some(nil))
+            }
+        }
+        // When the shared combo moves, a "left out" that was only a
+        // rival on the OLD combo ends — that profile follows again, as
+        // its file will read — while a removal is re-written onto the
+        // new combo, since the file stores it by combo.
+        guard base[key] == value, old != value else { return }
+        for profile in profiles
+        where profile != editing && entries[profile]?[key] == .some(nil)
+            && !rivals.contains(where: { resolved($0, for: profile) == value })
+        {
+            let rivalHeldOld =
+                old.map { old in
+                    rivals.contains { resolved($0, for: profile) == old }
+                } ?? false
+            if rivalHeldOld {
+                setEntry(key, for: profile, .none)
+            } else {
+                touched[profile, default: []].insert(key)
+            }
+        }
+    }
+
+    /// Leaves `left` out of the shared `key`.
+    private mutating func leaveOut(_ key: String, _ left: Set<String>) {
+        for profile in left { setEntry(key, for: profile, .some(nil)) }
     }
 
     private mutating func remove(
@@ -157,25 +217,30 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     ) {
         switch removal {
         case .here:
-            setEntry(
-                key,
-                for: editing,
-                base[key] == nil ? .none : .some(nil)
-            )
+            if base[key] == nil {
+                setEntry(key, for: editing, .none)
+            } else {
+                leaveOut(key, [editing])
+            }
         case .everywhere:
             if base[key] == old { setBase(key, nil) }
             // Where another shared value survives, a holder of this
             // one is left out of it rather than handed it.
-            let drop: Value?? = base[key] == nil ? .none : .some(nil)
+            var holders: Set<String> = []
             for profile in profiles {
                 let entry = entries[profile]?[key]
                 if entry == .some(old) {
-                    setEntry(key, for: profile, drop)
+                    if base[key] == nil {
+                        setEntry(key, for: profile, .none)
+                    } else {
+                        holders.insert(profile)
+                    }
                 } else if entry == .some(nil) && base[key] == nil {
                     // A left-out mark goes with the rule it left out.
                     setEntry(key, for: profile, .none)
                 }
             }
+            if !holders.isEmpty { leaveOut(key, holders) }
         }
     }
 

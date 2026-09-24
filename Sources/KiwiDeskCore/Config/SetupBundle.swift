@@ -31,8 +31,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 9 = a dormant profile, a `[Profile]` entry with no monitor
     /// set beside its `monitor_count` (#1530);
     /// 10 = a Desktop binding entry scoped to one screen setup
-    /// (#1609), which reaches a bundle the way 4 and 8 did.
-    public static let currentFormat = 10
+    /// (#1609), which reaches a bundle the way 4 and 8 did;
+    /// 11 = a shortcut override's left-out combo (#1393), on
+    /// `[Profile]` alone.
+    public static let currentFormat = 11
 
     public let format: Int
 

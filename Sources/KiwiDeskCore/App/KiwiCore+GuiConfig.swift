@@ -30,7 +30,8 @@ extension KiwiCore {
     /// override-mode baseline (#55). Sidecar modes when the
     /// sidecar decodes; the live seed otherwise. Asymmetric
     /// bases would mint spurious overrides (e.g. the whole
-    /// recovered set diffed against []). The seed branch is
+    /// recovered set diffed against []) and spurious removals
+    /// (a base row the page never saw, #1393). The seed branch is
     /// time-dependent (recovers from the live VM) — callers
     /// should read it once per edit/save cycle, not cache it
     /// across reloads.

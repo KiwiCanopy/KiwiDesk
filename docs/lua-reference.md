@@ -4150,20 +4150,22 @@ The override is **sparse and soft**:
 - A profile stores only the layers and rows that diverge; a
   profile without a `"layers"` key inherits the base shortcuts
   completely.
-- Every base binding the profile doesn't rebind survives — your
-  profile-switch shortcut included, so a profile can never trap
-  you by *omission*. Rebinding the same combo differently per
-  profile stays possible.
-- Removing a base binding per profile is not expressible:
-  deleting an inherited row in the editor resets it. To disable
-  a combo in one profile, rebind it to a no-op action. The same
-  applies to a base layer's icon — a profile can *change* it,
-  but clearing it reverts to the base icon.
+- Rebinding the same combo differently per profile stays
+  possible. A base layer's icon a profile clears reverts to the
+  base icon.
 - Keybindings live in ONE home: the structured config (gui.json +
   profiles) when GUI-managed, or your `init.lua` otherwise —
   never merged. Hand-written binds that evade the managed-
   vocabulary detection are silently unregistered on every reload
   while GUI-managed.
+
+:::unreleased
+A profile can also leave a base binding out: its layer entry
+lists the combo under `"removed"`, and that base row is not
+registered while the profile is loaded. That includes your
+profile-switch shortcut — leave it in, or switch from the menu
+bar.
+:::
 
 Profiles re-resolve their bindings whenever they apply: on
 `load_profile`, on a monitor change, and on a Desktop binding

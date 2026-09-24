@@ -97,7 +97,8 @@ struct SettingsCatalogTests {
         // 131 since #1516: the two margin rows in each bar's
         // Style drawer.
         // 132 since #1608: App Rules is two cards, one per store.
-        #expect(allEntries.count == 132)
+        // 131 since #1393: the Profile shortcuts banner left.
+        #expect(allEntries.count == 131)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

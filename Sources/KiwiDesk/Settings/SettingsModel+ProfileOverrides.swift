@@ -34,6 +34,8 @@ extension SettingsModel {
         guard let name = editingProfile else { return }
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
+        // Its own shortcut override is the diff `overwriteProfile`
+        // takes below, against the base written here.
         let rules = saveRuleReach()
         guard rules != .failed else {
             // A write that failed after others landed: re-read, so
@@ -105,24 +107,5 @@ extension SettingsModel {
                     + "not be read."
             )
         }
-    }
-
-    /// Base keybinding rows for Shortcuts override affordance (#55).
-    func overrideBaseRows(layer name: String) -> [KeyBinding]? {
-        guard let base = profileEditingBaseLayers else {
-            return nil
-        }
-        return base.first { $0.name == name }?.bindings ?? []
-    }
-
-    /// Indicates whether edited profile keys diverge from base (#55 phase 7).
-    var editedProfileOverridesKeys: Bool {
-        guard let base = profileEditingBaseLayers else {
-            return false
-        }
-        return KeyLayerOverride.diff(
-            base: base,
-            edited: config.layers
-        ) != nil
     }
 }

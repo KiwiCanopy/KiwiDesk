@@ -1,10 +1,18 @@
 import KiwiDeskCore
 
-/// The two App Rules families an "Applies to" checklist edits
-/// (#1393).
+/// The rule families an "Applies to" checklist edits (#1393).
 enum RuleFamily: Hashable {
     case space
     case float
+    /// A shortcut: one action in one layer, keyed by
+    /// `RuleReachTable.keyID`.
+    case key
+
+    /// How a row's subject keys its table: app rules by the
+    /// lowercased bundle id, a shortcut's action verbatim.
+    func key(_ subject: String) -> String {
+        self == .key ? subject : subject.lowercased()
+    }
 }
 
 /// The checklist choices a draft holds over the stored rules
@@ -48,7 +56,13 @@ enum RuleReachDraft {
         editing: String,
         isLoaded: Bool,
         reach: [String: RuleReach],
-        removal: [String: RuleRemoval]
+        removal: [String: RuleRemoval],
+        apply: (
+            inout RuleReachTable<V>, String, V?, RuleReach, RuleRemoval,
+            String
+        ) -> Void = {
+            $0.apply($1, value: $2, reach: $3, removal: $4, editing: $5)
+        }
     ) -> RuleReachTable<V> {
         var table = stored
         let keys = Set(current.keys)
@@ -62,18 +76,19 @@ enum RuleReachDraft {
                 picked != nil || removal[key] != nil
                     || value != stored.resolved(key, for: editing)
             else { continue }
-            table.apply(
+            apply(
+                &table,
                 key,
-                value: value,
-                reach: picked
+                value,
+                picked
                     ?? defaultReach(
                         of: key,
                         in: stored,
                         editing: editing,
                         isLoaded: isLoaded
                     ),
-                removal: removal[key] ?? .everywhere,
-                editing: editing
+                removal[key] ?? .everywhere,
+                editing
             )
         }
         return table

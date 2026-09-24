@@ -29,7 +29,9 @@ struct HelpButton: View {
         }
         .buttonStyle(.plain)
         .controlSize(.small)
-        .hoverHighlight(cornerRadius: 4, padding: 2)
+        // No padding: the glyph's own circle is its shape, and the
+        // chip's inset would read as a gap before it (#1393).
+        .iconHoverChip(cornerRadius: 8, padding: 0)
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             Text(rich)
                 .font(.callout)

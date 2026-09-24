@@ -1,0 +1,119 @@
+import Foundation
+import Testing
+
+/// A glyph-only icon control rests as the bare glyph and shows its
+/// chip on hover (#1393): one chip, `iconHoverChip`, reached by the
+/// icon affordance, the `?` and both branches of the rule trash.
+@Suite("Icon hover chip (#1393)")
+struct IconHoverChipTests {
+    private func source(_ path: String) throws -> String {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent(path)
+        return SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+    }
+
+    private func body(of name: String, in source: String) -> String {
+        guard let start = source.range(of: "func \(name)(") else {
+            return ""
+        }
+        let rest = source[start.upperBound...]
+        let end = rest.range(of: "\n    func ")?.lowerBound ?? rest.endIndex
+        return String(rest[..<end])
+    }
+
+    @Test("the chip rests at nothing, and the icon affordance takes it")
+    func chipRestsAtNothing() throws {
+        let rows = try source("Components/Common/SettingsRows.swift")
+        let chip = body(of: "iconHoverChip", in: rows)
+        #expect(chip.contains("restOpacity: resting ? 0.06 : 0,"))
+        #expect(chip.contains("resting: Bool = false"))
+        #expect(chip.contains("tint(SettingsTheme.ink2)"))
+        #expect(
+            body(of: "iconButtonAffordance", in: rows).contains(
+                "iconHoverChip("
+            )
+        )
+    }
+
+    @Test("the ? and both rule-trash branches take the one chip")
+    func everyIconTakesIt() throws {
+        let help = try source("Components/Common/HelpButton.swift")
+        #expect(help.contains(".iconHoverChip(cornerRadius: 8, padding: 0)"))
+        #expect(!help.contains(".hoverHighlight("))
+        let trash = try source("Sections/AppRuleIdentity.swift")
+        #expect(trash.occurrences(of: ".iconHoverChip()") == 1)
+        // The menu's own neutral label ink sits closer to the glyph.
+        #expect(trash.contains(".foregroundStyle(SettingsTheme.ink2)"))
+        #expect(trash.occurrences(of: ".iconButtonAffordance(") == 1)
+    }
+
+    /// A glyph standing alone beside text keeps the rest fill; the
+    /// register is the owner-ruled sites (2026-09-25), so a new
+    /// one is a ruling rather than a default.
+    @Test("only the standalone glyphs rest on a fill")
+    func restingRegister() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var hits: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: root) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            let n = text.occurrences(of: "resting: true")
+            if n > 0 { hits[url.lastPathComponent] = n }
+        }
+        #expect(
+            hits == [
+                "ProfilesSection+Rename.swift": 1,
+                "ProfilesSection+ScreenSetups.swift": 1,
+            ]
+        )
+    }
+
+    /// The add-setup trigger is the window's bordered action button
+    /// opening a native menu, never a SwiftUI `Menu`, whose bordered
+    /// bezel takes the tint — green while key, near-black under the
+    /// neutral ink (#1393).
+    @Test("the add-setup trigger is a bordered button, not a Menu")
+    func addSetupIsAButton() throws {
+        let setups = try source(
+            "Components/Profiles/DesktopsGroup+Setups.swift"
+        )
+        let body = body(of: "addSetupMenu", in: setups)
+        #expect(body.contains("NativePullDown("))
+        #expect(!body.contains("Menu {"))
+        let pullDown = try source("Components/Common/NativePullDown.swift")
+        #expect(pullDown.contains(".settingsActionButton()"))
+        #expect(pullDown.contains("menu.autoenablesItems = false"))
+        #expect(pullDown.contains("entry.isEnabled = item.enabled"))
+    }
+
+    /// The wiring the behaviour tests cannot see (guard-prover,
+    /// #1393): the affordance hands `resting` on, both trash sites
+    /// take the one words ladder, and the checklist greys a follower.
+    @Test("the affordance, trash words and follower grey are wired")
+    func wiringIsWired() throws {
+        let rows = try source("Components/Common/SettingsRows.swift")
+        #expect(
+            body(of: "iconButtonAffordance", in: rows).contains(
+                "resting: resting"
+            )
+        )
+        for path in [
+            "Sections/AppRuleIdentity.swift",
+            "Components/Keybindings/KeybindingNavRow.swift",
+        ] {
+            #expect(
+                try source(path).contains("RuleReachWords.removeEverywhere("),
+                Comment(rawValue: path)
+            )
+        }
+        let checklist = try source(
+            "Components/AppRules/RuleReachChecklist.swift"
+        )
+        #expect(checklist.contains(".disabled(locked || follows)"))
+    }
+}

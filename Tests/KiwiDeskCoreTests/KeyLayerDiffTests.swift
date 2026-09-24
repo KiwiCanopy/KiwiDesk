@@ -32,9 +32,9 @@ private func layer(
 
 /// `KeyLayerOverride.diff(base:edited:)` — the inverse of
 /// `resolved(onto:)` used by the override-layer Shortcuts tab
-/// (#55 phase 7). Deletion is intentionally NOT expressible
-/// (O4 soft): a base row missing from `edited` is absent from
-/// the diff and reappears on resolve.
+/// (#55 phase 7). A base row missing from a layer `edited` keeps
+/// is a removed combo (#1393); a whole base layer `edited` drops
+/// is not expressible and passes through on resolve.
 @Suite("KeyLayerOverride.diff — sparse inverse (#55 phase 7)")
 struct KeyLayerDiffTests {
 
@@ -136,12 +136,32 @@ struct KeyLayerDiffTests {
         )
     }
 
-    @Test("Deleted base row is NOT expressed (O4 revert)")
-    func deletionNotExpressed() {
+    @Test("A deleted base row is a removed combo (#1393)")
+    func deletionExpressed() throws {
         var edited = base
         edited[0].bindings.removeAll { $0.combo == "alt+h" }
-        // Nothing else diverges → no override at all; the row
-        // reappears on resolve (delete-inherited = revert).
+        let over = try #require(
+            KeyLayerOverride.diff(base: base, edited: edited)
+        )
+        #expect(over.layers.isEmpty)
+        #expect(over.removed == ["default": ["alt+h"]])
+        #expect(over.resolved(onto: base) == edited)
+    }
+
+    @Test("A base row moved to another combo removes the old one")
+    func moveExpressed() throws {
+        var edited = base
+        edited[0].bindings[1].combo = "alt+j"
+        let over = try #require(
+            KeyLayerOverride.diff(base: base, edited: edited)
+        )
+        #expect(over.removed == ["default": ["alt+h"]])
+        #expect(over.resolved(onto: base) == edited)
+    }
+
+    @Test("A dropped base layer is not expressed and passes through")
+    func droppedLayerNotExpressed() {
+        let edited = [base[0]]
         #expect(
             KeyLayerOverride.diff(base: base, edited: edited)
                 == nil

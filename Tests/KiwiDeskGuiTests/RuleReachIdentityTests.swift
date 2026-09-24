@@ -167,13 +167,17 @@ struct RuleReachIdentityTests {
     @Test("An unreadable reached profile refuses the whole rule write")
     func unreadableRefusesAll() throws {
         let model = try makeModel()
-        // Unticking All reaches Work and Home; Home cannot be read.
+        // A value for the list reaches Work and Home; Home cannot be
+        // read.
         model.setAllProfiles(.space, "mail", false)
+        model.config.appRules["mail"] = SpaceID("2")
         try corrupt(model, "Home")
 
         model.updateActiveProfile()
 
-        // Nothing landed: Work's file and the base are as stored.
+        // The refusal fired, and nothing landed: Work's file and the
+        // base are as stored.
+        #expect(model.profileWarning != nil)
         #expect(try model.core.profiles.read(name: "Work").appRules == nil)
         #expect(
             model.core.guiConfigStore.load()?.appRules["mail"]
@@ -185,11 +189,13 @@ struct RuleReachIdentityTests {
     func failedReachKeepsBase() throws {
         let model = try makeModel()
         model.setAllProfiles(.space, "mail", false)
+        model.config.appRules["mail"] = SpaceID("2")
         model.config.ignoreRules = ["com.example.ignored"]
         try corrupt(model, "Home")
 
         model.updateActiveProfile()
 
+        #expect(model.profileWarning != nil)
         let saved = model.core.guiConfigStore.load()
         #expect(saved?.appRules["mail"] == SpaceID("1"))
         #expect(saved?.ignoreRules == ["com.example.ignored"])
@@ -200,6 +206,7 @@ struct RuleReachIdentityTests {
         let model = try makeModel()
         model.selectEditTarget("Home")
         model.setAllProfiles(.space, "mail", false)
+        model.config.appRules["mail"] = SpaceID("2")
         model.config.spaces = [SpaceID("1")]
         try corrupt(model, "Work")
 

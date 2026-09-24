@@ -45,10 +45,6 @@ struct ShortcutsSection: View {
                     [.horizontal, .bottom],
                     SettingsMetrics.paneInset
                 )
-                .environment(
-                    \.keybindingOverrideBase,
-                    model.overrideBaseRows(layer: selected)
-                )
                 .environment(\.keybindingLayerName, selected)
                 // One live read per section render (#1105), so
                 // every row narrates the same verdict (#1126).
@@ -92,7 +88,6 @@ struct ShortcutsSection: View {
 
     @ViewBuilder private var header: some View {
         KeybindingConflictBanner(model: model)
-        overrideBanner
         ShortcutsHeader(model: model, selected: selection)
         // LayersCard leads section (owner ruling 2026-08-04).
         layersCard
@@ -139,69 +134,6 @@ struct ShortcutsSection: View {
             spaces: model.config.spaces
         )
         advancedDrawer
-    }
-
-    // Profile keybinding overrides (#55, #123, #209).
-    @ViewBuilder private var overrideBanner: some View {
-        if model.editingStoredProfile {
-            SettingsSection(
-                SettingsCatalog.shortcuts.profileShortcuts
-            ) {
-                if let name = model.editingProfile {
-                    Text(overrideBannerText(name))
-                        .font(.callout)
-                }
-                if model.editedProfileOverridesKeys {
-                    Label(
-                        L(
-                            "shortcuts.override.overrides",
-                            "This profile overrides base "
-                                + "keybindings."
-                        ),
-                        systemImage:
-                            "keyboard.badge.ellipsis"
-                    )
-                    .font(.callout)
-                }
-                Text(overrideCaption)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    /// Re-application notice when editing active vs stored profile (#209).
-    private func overrideBannerText(_ name: String) -> String {
-        if name == model.activeProfile {
-            return L(
-                "shortcuts.override.staged_loaded",
-                "Editing \u{201C}%1$@\u{201D} — shortcuts "
-                    + "re-apply as soon as you save.",
-                name
-            )
-        }
-        return L(
-            "shortcuts.override.staged",
-            "Editing \u{201C}%1$@\u{201D} — shortcuts take "
-                + "effect the next time this profile is "
-                + "active.",
-            name
-        )
-    }
-
-    private var overrideCaption: String {
-        L(
-            "shortcuts.override.caption",
-            "Dimmed rows are inherited from the base "
-                + "shortcuts and stay in sync with "
-                + "them. Edit a row to override it "
-                + "for this profile only; matching "
-                + "the base again makes it inherited "
-                + "again. Removing an inherited row "
-                + "only resets it — to disable a "
-                + "combo in this profile, rebind it "
-                + "to a no-op action instead."
-        )
     }
 
     /// Withheld in Simple (owner ruling 2026-08-04): importing

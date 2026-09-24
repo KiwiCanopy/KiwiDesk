@@ -2,46 +2,50 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The "Applies to" column of an App Rules row (#1393): the
-/// closed label, the ⚠ for a profile that differs, and the
-/// checklist popover.
+/// closed label with a ⚠ beside it where a profile differs — the
+/// names ride its tooltip and the spoken value, the checklist
+/// holds the detail — and the checklist popover.
 struct RuleReachControl: View {
     @ObservedObject var model: SettingsModel
     let family: RuleFamily
     let app: String
+    /// What the row is about, in words (`RuleReachChecklist`).
+    let subject: String
     let reading: RuleReachReading
     /// The row's value in words, for the popover's top line.
     let value: String
     @State private var request: RuleReachRequest?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Button {
-                request = RuleReachRequest(id: app)
-            } label: {
+        let warning = RuleReachWords.differing(reading)
+        Button {
+            request = RuleReachRequest(id: app)
+        } label: {
+            HStack(spacing: 4) {
                 AppRuleMenuLabel(text: RuleReachWords.label(reading))
+                if warning != nil {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.warningInk)
+                }
             }
-            .buttonStyle(.borderless)
-            .foregroundStyle(
-                reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(
+            reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
+        )
+        .frame(minWidth: SettingsMetrics.ruleReachColumn, alignment: .leading)
+        .help(RuleReachWords.spoken(reading))
+        .accessibilityLabel(L("app_rules.reach", "Applies to"))
+        .accessibilityValue(RuleReachWords.spoken(reading))
+        .popover(item: $request, arrowEdge: .bottom) { _ in
+            RuleReachChecklist(
+                model: model,
+                family: family,
+                app: app,
+                subject: subject,
+                value: value
             )
-            .fixedSize()
-            .accessibilityLabel(L("app_rules.reach", "Applies to"))
-            .accessibilityValue(RuleReachWords.spoken(reading))
-            .popover(item: $request, arrowEdge: .bottom) { _ in
-                RuleReachChecklist(
-                    model: model,
-                    family: family,
-                    app: app,
-                    value: value
-                )
-            }
-            if let warning = RuleReachWords.differing(reading) {
-                Text(warning)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.warningInk)
-                    .padding(.leading, 4)
-                    .accessibilityHidden(true)
-            }
         }
     }
 }
@@ -80,7 +84,42 @@ enum RuleReachWords {
         }
     }
 
+    /// The trash's "this profile" choice.
+    static func removeHere(_ reading: RuleReachReading) -> String {
+        L("app_rules.remove.here", "Remove from %1$@", reading.editing)
+    }
+
+    /// The trash's other choice: every profile holding this value —
+    /// named while there are two, counted past that, and "every
+    /// profile" only when that is all of them.
+    static func removeEverywhere(_ reading: RuleReachReading) -> String {
+        let users = reading.profiles.filter(reading.users.contains)
+        if users.count >= reading.profiles.count {
+            return L(
+                "app_rules.remove.everywhere",
+                "Remove from every profile"
+            )
+        }
+        if users.count == 2 {
+            return L(
+                "app_rules.remove.pair",
+                "Remove from %1$@ and %2$@",
+                users[0],
+                users[1]
+            )
+        }
+        return L(
+            "app_rules.remove.count",
+            "Remove from every profile using it (%1$d)",
+            users.count
+        )
+    }
+
+    /// The ⚠ a shared row owes: a profile that differs does not
+    /// follow a change made under All profiles. A list says who it
+    /// reaches already, so it owes none.
     static func differing(_ reading: RuleReachReading) -> String? {
+        guard reading.shared else { return nil }
         let names = reading.differing
         switch names.count {
         case 0: return nil
@@ -106,8 +145,8 @@ enum RuleReachWords {
         }
     }
 
-    /// The control's announced value: the label, and the ⚠ the
-    /// row draws below it, whose names each locale joins itself.
+    /// The control's announced value and its tooltip: the label, and
+    /// what its ⚠ stands for, whose names each locale joins itself.
     static func spoken(_ reading: RuleReachReading) -> String {
         guard let differs = differing(reading) else { return label(reading) }
         return L(
@@ -115,6 +154,41 @@ enum RuleReachWords {
             "%1$@; %2$@",
             label(reading),
             differs
+        )
+    }
+
+    /// The popover's closing notes: what a tick does from here.
+    static func notes(_ reading: RuleReachReading) -> [String] {
+        guard reading.shared else { return note(reading).map { [$0] } ?? [] }
+        var result = [
+            L(
+                "app_rules.reach.some_profiles_note",
+                "To give only some profiles a new value, untick %1$@ first.",
+                RuleReachWords.allProfiles
+            )
+        ]
+        // Once, however many profiles keep their own rule.
+        if reading.profiles.contains(where: { reading.own[$0] != nil }) {
+            result.append(
+                L(
+                    "app_rules.reach.replace_own_note",
+                    "Ticking a profile with its own rule replaces it "
+                        + "with the shared one."
+                )
+            )
+        }
+        return result
+    }
+
+    private static func note(_ reading: RuleReachReading) -> String? {
+        // With a shared rule beside the list, a new profile gets that.
+        guard !reading.hasShared,
+            reading.profiles.allSatisfy(reading.users.contains)
+        else { return nil }
+        return L(
+            "app_rules.reach.new_profiles_note",
+            "New profiles won't get this rule. Tick %1$@ to share it.",
+            RuleReachWords.allProfiles
         )
     }
 }

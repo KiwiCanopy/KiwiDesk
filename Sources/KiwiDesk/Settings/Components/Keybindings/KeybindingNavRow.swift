@@ -7,12 +7,13 @@ struct NavRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let command: NavCommand
-    @Environment(\.keybindingOverrideBase)
-    private var overrideBase
     @Environment(\.keybindingLayerName)
     private var layerName
     @Environment(\.disabledSystemShortcuts)
     private var disabledSystemShortcuts
+    /// A clear of a shortcut other profiles share asks where it
+    /// goes, as the trash does (#1393).
+    @State private var confirmingClear = false
 
     var body: some View {
         HStack {
@@ -38,6 +39,13 @@ struct NavRow: View {
                 )
             }
             Spacer()
+            if let index {
+                KeyReachColumn(
+                    model: model,
+                    layer: layerName,
+                    binding: bindings[index]
+                )
+            }
             KeyRecorderField(
                 name: command.resolvedLabel,
                 combo: index.map { bindings[$0].combo } ?? "",
@@ -47,27 +55,26 @@ struct NavRow: View {
                 onClear: clear
             )
         }
-        .keybindingRowStyle(
-            inherited: isInherited,
-            unavailable: command.unavailable?()
-        )
+        .keybindingRowStyle(unavailable: command.unavailable?())
+        .confirmationDialog(
+            L(
+                "shortcuts.clear_shared.title",
+                "Other profiles use this shortcut too."
+            ),
+            isPresented: $confirmingClear
+        ) {
+            if let reading = sharedFrom {
+                Button(RuleReachWords.removeHere(reading)) { clear(.here) }
+                Button(RuleReachWords.removeEverywhere(reading)) {
+                    clear(.everywhere)
+                }
+            }
+        }
         .id(command.lua)
     }
 
     private var index: Int? {
         bindings.firstIndex {
-            $0.kind == .navigation && $0.lua == command.lua
-        }
-    }
-
-    /// Override layer: bound-and-equal to the base row, or
-    /// unbound on both sides. Always false while editing live.
-    private var isInherited: Bool {
-        guard let base = overrideBase else { return false }
-        if let index {
-            return bindings[index].isInherited(from: base)
-        }
-        return !base.contains {
             $0.kind == .navigation && $0.lua == command.lua
         }
     }
@@ -125,8 +132,38 @@ struct NavRow: View {
         return nil
     }
 
+    /// The edited profile, where another profile shares this row.
+    private var sharedFrom: RuleReachReading? {
+        guard model.offersReachColumn, let index,
+            let reading = model.keyReach(
+                RuleReachTable<String>.keyID(
+                    layer: layerName,
+                    lua: bindings[index].lua
+                )
+            ),
+            reading.users.count > 1
+        else { return nil }
+        return reading
+    }
+
     private func clear() {
+        if sharedFrom != nil {
+            confirmingClear = true
+        } else {
+            clear(.everywhere)
+        }
+    }
+
+    private func clear(_ removal: RuleRemoval) {
         guard let index else { return }
+        model.recordRemoval(
+            .key,
+            RuleReachTable<String>.keyID(
+                layer: layerName,
+                lua: bindings[index].lua
+            ),
+            removal
+        )
         let id = bindings[index].id
         bindings.remove(at: index)
         // Live target: the removed hotkey unregisters now

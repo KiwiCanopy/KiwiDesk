@@ -9,6 +9,9 @@ struct RuleReachChecklist: View {
     @ObservedObject var model: SettingsModel
     let family: RuleFamily
     let app: String
+    /// What the row is about, in words: an app's name, or a
+    /// shortcut's action.
+    let subject: String
     let value: String
 
     var body: some View {
@@ -32,12 +35,11 @@ struct RuleReachChecklist: View {
         case .space: model.spaceReach(app)
         case .float:
             model.floatReach(app, describe: SettingsModel.floatWords)
+        case .key: model.keyReach(app)
         }
     }
 
-    private var name: String {
-        KeybindingCatalog.displayName(forBundleID: app)
-    }
+    private var name: String { subject }
 
     private func content(_ reading: RuleReachReading) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -54,7 +56,7 @@ struct RuleReachChecklist: View {
             ForEach(reading.unreadable, id: \.self) { profile in
                 unreadableRow(profile)
             }
-            if let note = note(reading) {
+            ForEach(RuleReachWords.notes(reading), id: \.self) { note in
                 Text(note)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
@@ -119,6 +121,15 @@ struct RuleReachChecklist: View {
                         : L("app_rules.reach.own", "⚠ Own rule: %1$@", own),
                     warning: true
                 )
+            } else if let taker = reading.takenBy[profile] {
+                caption(
+                    L(
+                        "app_rules.reach.key_taken",
+                        "⚠ Key is used for %1$@",
+                        taker
+                    ),
+                    warning: true
+                )
             } else if leftOut {
                 caption(
                     L("app_rules.reach.left_out", "⚠ Left out of this rule"),
@@ -180,23 +191,5 @@ struct RuleReachChecklist: View {
                 RuleReachWords.allProfiles
             )
             : ""
-    }
-
-    private func note(_ reading: RuleReachReading) -> String? {
-        if reading.shared {
-            return L(
-                "app_rules.reach.leave_out_note",
-                "To leave a profile out, untick %1$@ first.",
-                RuleReachWords.allProfiles
-            )
-        }
-        guard reading.profiles.allSatisfy(reading.users.contains) else {
-            return nil
-        }
-        return L(
-            "app_rules.reach.new_profiles_note",
-            "New profiles won't get this rule. Tick %1$@ to share it.",
-            RuleReachWords.allProfiles
-        )
     }
 }

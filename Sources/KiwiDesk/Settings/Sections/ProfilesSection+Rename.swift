@@ -15,6 +15,7 @@ extension ProfilesSection {
         .frame(width: 22, height: 22)
         .iconButtonAffordance(
             L("profiles.rename.help", "Rename profile"),
+            resting: true,
             cornerRadius: 11,
             padding: 0
         )

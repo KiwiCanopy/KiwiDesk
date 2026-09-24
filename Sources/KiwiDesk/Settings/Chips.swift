@@ -28,6 +28,10 @@ struct BadgeChip: View {
     var body: some View {
         Text(label)
             .font(.caption2)
+            // One line whatever the row's width: a badge is a label,
+            // and a wrapped one reads as two.
+            .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, 6)
             .padding(.vertical, 1)
             .background(.tint.opacity(0.2))

@@ -32,6 +32,7 @@ extension SettingsModel {
     var encodedReach: RuleReachSnapshot? {
         guard var snapshot = ruleReachStored, let editing = reachProfile
         else { return nil }
+        var pageTemplates: [String: KeyBinding] = [:]
         snapshot.appRules = RuleReachDraft.encode(
             snapshot.appRules,
             current: AppRuleOverride.normalized(config.appRules),
@@ -50,6 +51,33 @@ extension SettingsModel {
             reach: reachEdits.reach[.float] ?? [:],
             removal: reachEdits.removal[.float] ?? [:]
         )
+        let pageKeys = RuleReachTable<String>.combos(config.layers)
+        RuleReachTable<String>.collectTemplates(
+            config.layers,
+            into: &pageTemplates
+        )
+        snapshot.keyTemplates.merge(pageTemplates) { _, page in page }
+        snapshot.keyLayers = RuleReachDraft.encode(
+            snapshot.keyLayers,
+            current: pageKeys,
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.key] ?? [:],
+            removal: reachEdits.removal[.key] ?? [:]
+        ) {
+            $0.applyKey($1, value: $2, reach: $3, removal: $4, editing: $5)
+        }
+        // The loaded page's gui.json layers, derived ONCE so the rule
+        // write and the globals write read the same base.
+        if reachIsLoaded {
+            snapshot.pageKeyBase = snapshot.keyLayers.keyLayerBase(
+                page: config.layers,
+                editing: editing,
+                storedPage: snapshot.storedKeyLayers(for: editing),
+                storedBase: snapshot.storedKeyBase,
+                templates: snapshot.keyTemplates
+            )
+        }
         return snapshot
     }
 
@@ -58,13 +86,16 @@ extension SettingsModel {
     /// screen does. The shared rules alone go back to gui.json,
     /// through `sidecarConfig`.
     func resolveLoadedRules(_ config: inout GuiConfig) {
+        resolvedPage = nil
         guard let stored = ruleReachStored, let loaded = reachPage,
             stored.appRules.profiles.contains(loaded)
         else { return }
+        resolvedPage = loaded
         config.appRules = stored.appRules.resolved(for: loaded)
         config.floatRules = stored.floatRules.resolved(for: loaded)
             .sorted { $0.key < $1.key }
             .flatMap(\.value)
+        config.layers = stored.storedKeyLayers(for: loaded)
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -82,19 +113,22 @@ extension SettingsModel {
         sidecar.floatRules = reach.floatRules.floatRuleBase(
             original: reach.storedFloatBase
         )
+        sidecar.layers = reach.keyBase
         return sidecar
     }
 
     /// Writes every profile file and the shared rules the draft's
     /// checklist reached, and says what happened — the one answer
     /// every Save door reads, so none infers from its own control
-    /// flow which half landed.
+    /// flow which half landed. A stored page's own shortcut
+    /// override is left to its Save's diff (`overwriteProfile`),
+    /// which carries its layer structure too.
     func saveRuleReach() -> RuleReachWrite {
         guard let reach = encodedReach, reach.isEdited else {
             return .nothing
         }
         do {
-            try core.saveRuleReach(reach)
+            try core.saveRuleReach(reach, keysLeftTo: editingProfile)
             return .landed
         } catch {
             profileWarning = L(
@@ -118,6 +152,8 @@ extension SettingsModel {
         suppressDirty = true
         cleanConfig.appRules = config.appRules
         cleanConfig.floatRules = config.floatRules
+        // Not the layers: a stored page's own shortcut diff is the
+        // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
         reachEdits = RuleReachEdits()
         suppressDirty = false
@@ -129,6 +165,7 @@ extension SettingsModel {
     func dropRuleHalf() {
         config.appRules = cleanConfig.appRules
         config.floatRules = cleanConfig.floatRules
+        config.layers = cleanConfig.layers
         reachEdits = RuleReachEdits()
     }
 

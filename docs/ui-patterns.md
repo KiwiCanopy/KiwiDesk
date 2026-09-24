@@ -28,7 +28,7 @@ German labels on help rows are shortening candidates for the de
 review pass. An *unlabeled*
 `SegmentedPicker` (icon tabs) has no label to sit beside, so
 its `?` trails the track. The button wears the shared
-`hoverHighlight` chip like every other icon-only borderless
+`iconHoverChip` like every other icon-only borderless
 control.
 
 Clicking opens a fixed-width popover; `.help()` rides along as
@@ -999,8 +999,14 @@ channel.
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,
 toggles, sliders, and fields keep system hover. Ambiguous
-icon-only borderless actions use the shared adaptive chip
-(`0.06` rest → `0.12` hover); custom full-row picker entries
+icon-only borderless actions use the shared adaptive chip on
+hover only (`0.12`), resting as the bare glyph in `ink2` at a
+row's end (`iconHoverChip`) — the accent is a control fill's, not
+a glyph's — while a glyph standing alone beside text keeps the
+`0.06` rest fill (`resting: true`), nothing else marking it as a
+button, and the `?` rests bare with no inset, its own circle
+being its shape; a chip-shaped control keeps its rest fill,
+which is its shape; custom full-row picker entries
 use a hover-only `0.06` fill; unselected custom segments and
 mode chips lift their existing fill by about `0.05`. A draggable
 token chip is the one case stated as an ORDER rather than a

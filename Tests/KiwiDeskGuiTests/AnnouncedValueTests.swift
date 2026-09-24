@@ -45,7 +45,8 @@ struct AnnouncedValueTests {
         "AppRuleIdentity.swift": 1,
         "SpacesSection+ModePicker.swift": 1,
         "DesktopsGroup+Row.swift": 1,
-        // #1609: the add menu names its Desktop.
+        // #1609: the add pull-down names its Desktop (#1393: a
+        // `NativePullDown` since).
         "DesktopsGroup+Setups.swift": 1,
         "ProfileHeader.swift": 1,
         "KeybindingAppGroup+Behavior.swift": 1,
@@ -102,7 +103,7 @@ struct AnnouncedValueTests {
         let text = Array(source)
         var chains: [String] = []
         let controls: [(String, Character)] = [
-            ("Picker", "("), ("Menu", "{"),
+            ("Picker", "("), ("Menu", "{"), ("NativePullDown", "("),
         ]
         for (needle, opener) in controls {
             var cursor = 0

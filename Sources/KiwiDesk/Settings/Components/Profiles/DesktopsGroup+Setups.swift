@@ -100,39 +100,36 @@ extension DesktopsGroup {
     func addSetupMenu(_ row: DesktopRow, count: Int) -> some View {
         let choices = unscopedSetups(row, count: count)
         let labels = model.setupLabels(choices.map(\.monitors))
-        return Menu {
-            Section(
-                L(
-                    "desktops.scope.add.header",
-                    "Screen setups without a profile on this Desktop"
-                )
-            ) {
+        return NativePullDown(
+            header: L(
+                "desktops.scope.add.header",
+                "Screen setups without a profile on this Desktop"
+            ),
+            items: {
                 if choices.isEmpty {
-                    Text(
-                        L(
-                            "desktops.scope.add.none",
-                            "Every screen setup already has a profile "
-                                + "here"
+                    return [
+                        PullDownItem(
+                            title: L(
+                                "desktops.scope.add.none",
+                                "Every screen setup already has a profile "
+                                    + "here"
+                            ),
+                            enabled: false
                         )
-                    )
+                    ]
                 }
-                ForEach(choices.indices, id: \.self) { index in
-                    Button {
+                return choices.indices.map { index in
+                    PullDownItem(
+                        title: labels[index],
+                        subtitle: setupDetail(choices[index])
+                    ) {
                         addSetup(choices[index], count: count, row: row)
-                    } label: {
-                        Text(labels[index])
-                        let detail = setupDetail(choices[index])
-                        if !detail.isEmpty { Text(detail) }
                     }
                 }
             }
-        } label: {
+        ) {
             Label(addTitle, systemImage: "plus")
         }
-        .menuStyle(.borderlessButton)
-        .menuIndicator(.hidden)
-        .fixedSize()
-        .neutralMenuLabel()
         .help(addTitle)
         .accessibilityLabel(
             L(

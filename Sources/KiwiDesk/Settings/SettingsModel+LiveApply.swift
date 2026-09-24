@@ -67,9 +67,11 @@ extension SettingsModel {
             return feedback(for: combo, status: .unavailable)
         }
 
+        // The loaded page holds its resolved layers (#1393).
         switch core.liveApplyKeybindings(
             layers: session.layers,
-            target: target
+            target: target,
+            resolvedFor: resolvedPage
         ) {
         case .success(let status):
             if status != .compileFailed {

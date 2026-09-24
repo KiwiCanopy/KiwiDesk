@@ -56,6 +56,10 @@ enum SettingsMetrics {
     /// The gap between an App Rules row's columns, read by the
     /// rows and by the pattern editor's inset alike.
     static let appRuleColumnSpacing: CGFloat = 8
+    /// The "Applies to" column's least width (#1393): labels
+    /// left-aligned from one start in every list, a longer one (two
+    /// profile names) growing rather than cut.
+    static let ruleReachColumn: CGFloat = 150
 
     /// The row's app icon, and the widths the pattern editor is
     /// indented by. DERIVED so the editor cannot drift from the

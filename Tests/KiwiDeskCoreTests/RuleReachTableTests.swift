@@ -42,21 +42,34 @@ struct RuleReachTableTests {
         #expect(t.reach(of: "slack", editing: "Work").isShared)
     }
 
-    @Test("Unticking All turns the followers into a list, base gone")
+    @Test("A new value for a list reaches the ticked, not the base")
     func sharedToList() {
         var t = table
         t.apply(
             "mail",
-            value: 1,
+            value: 3,
             reach: .listed(["Work", "Home"]),
             editing: "Work"
         )
-        #expect(t.base["mail"] == nil)
-        #expect(t.resolved("mail", for: "Work") == 1)
-        #expect(t.resolved("mail", for: "Home") == 1)
-        // Travel's left-out mark had nothing left to leave out.
-        #expect(t.entries["Travel"]?["mail"] == nil)
-        #expect(t.resolved("mail", for: "Travel") == nil)
+        #expect(t.base["mail"] == 1)
+        #expect(t.resolved("mail", for: "Work") == 3)
+        #expect(t.resolved("mail", for: "Home") == 3)
+        // Travel was unticked: it keeps leaving the rule out.
+        #expect(t.entries["Travel"]?["mail"] == .some(nil))
+        #expect(t.touched["Travel"] == nil)
+    }
+
+    @Test("Unticking with no new value changes nothing")
+    func untickAloneIsInert() {
+        var t = table
+        t.apply(
+            "mail",
+            value: 1,
+            reach: .listed(["Work"]),
+            editing: "Work"
+        )
+        #expect(t == table)
+        #expect(t.touched.isEmpty && t.baseTouched.isEmpty)
     }
 
     @Test("Ticking a profile with its own value under All drops it")
@@ -102,7 +115,7 @@ struct RuleReachTableTests {
         #expect(t.resolved("figma", for: "Travel") == 4)
     }
 
-    @Test("Unticking a list member drops its entry")
+    @Test("An unticked list member keeps its own value")
     func untickMember() {
         var t = RuleReachTable<SpaceID>.appRules(
             base: [:],
@@ -113,12 +126,13 @@ struct RuleReachTableTests {
         )
         t.apply(
             "mail",
-            value: 1,
+            value: 2,
             reach: .listed(["Work"]),
             editing: "Work"
         )
-        #expect(t.resolved("mail", for: "Home") == nil)
-        #expect(t.touched["Home"] == ["mail"])
+        #expect(t.resolved("mail", for: "Work") == 2)
+        #expect(t.resolved("mail", for: "Home") == 1)
+        #expect(t.touched["Home"] == nil)
     }
 
     @Test("Remove here leaves out a shared rule, drops an own one")
@@ -276,20 +290,20 @@ struct RuleReachSaveTests {
         return core
     }
 
-    @Test("Unticking Home writes Work's file and drops the base")
+    @Test("A value for Work alone writes Work's file, keeps the base")
     func unticksHome() throws {
         let core = try makeCore()
         var snapshot = try #require(core.ruleReachSnapshot())
         snapshot.appRules.apply(
             "mail",
-            value: 1,
+            value: 2,
             reach: .listed(["Work"]),
             editing: "Work"
         )
         try core.saveRuleReach(snapshot)
-        #expect(core.guiConfigStore.load()?.appRules["mail"] == nil)
+        #expect(core.guiConfigStore.load()?.appRules["mail"] == 1)
         let work = try core.profiles.read(name: "Work")
-        #expect(work.appRules == AppRuleOverride(rules: ["mail": 1]))
+        #expect(work.appRules == AppRuleOverride(rules: ["mail": 2]))
         let home = try core.profiles.read(name: "Home")
         #expect(home.appRules == nil)
     }

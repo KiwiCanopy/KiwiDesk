@@ -76,7 +76,8 @@ struct SettingsCatalogSiteTests {
         // 125 since #1516: the two margin rows in each bar's
         // Style drawer.
         // 126 since #1608: App Rules' second card.
-        #expect(names.count == 126)
+        // 125 since #1393: the Profile shortcuts banner left.
+        #expect(names.count == 125)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

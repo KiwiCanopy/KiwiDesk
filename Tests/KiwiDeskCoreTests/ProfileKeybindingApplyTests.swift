@@ -103,8 +103,8 @@ struct ProfileKeybindingApplyTests {
     // MARK: - O4 switch-key-trap invariant
 
     /// The profile rebinds one combo; every other base binding
-    /// must still resolve — in particular the switch key, so a
-    /// profile can never trap the user (O4 soft base layer).
+    /// it does not remove must still resolve — the switch key
+    /// included.
     @Test("Override rebinds one combo; base survives (O4)")
     func overrideAppliesBaseSurvives() throws {
         let core = makeGuiCore()

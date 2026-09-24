@@ -74,9 +74,15 @@ extension KiwiCore {
     /// complete before one manager swap. The target result is
     /// scoped to its effective action and runtime mode; absence
     /// from `activationFailures` alone never proves success.
+    ///
+    /// `resolvedFor`: the profile whose RESOLVED layers these are —
+    /// the loaded page's (#1393). When it is the active profile its
+    /// override is not laid over them a second time, which would
+    /// bring back a row the page moved or cleared.
     public func liveApplyKeybindings(
         layers base: [KeyLayer],
-        target: LiveKeybindingTarget?
+        target: LiveKeybindingTarget?,
+        resolvedFor: String? = nil
     ) -> Result<
         LiveKeybindingApplyStatus?,
         LiveKeybindingApplyError
@@ -92,12 +98,15 @@ extension KiwiCore {
         // rather than lie — this is the enforced tripwire behind
         // that ordering invariant (#213).
         guard !keys.isSuspended else { return .failure(.unavailable) }
-        let profile: KeyLayerOverride?
+        var profile: KeyLayerOverride?
         switch activeProfileLayersForLiveApply() {
         case .success(let modes):
             profile = modes
         case .failure(let error):
             return .failure(error)
+        }
+        if resolvedFor != nil, resolvedFor == profiles.currentName {
+            profile = nil
         }
 
         let resolved = ConfigResolver.resolvedLayers(

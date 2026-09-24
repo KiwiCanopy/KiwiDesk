@@ -170,7 +170,12 @@ struct ProfilesSection: View {
         _ summary: ProfileSummary
     ) -> some View {
         HStack(spacing: 6) {
+            // One line, never wrapping under its badges; in a narrow
+            // window the name shortens rather than the row overflowing.
             Text(summary.name)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .layoutPriority(1)
                 .onTapGesture(count: 2) {
                     beginRename(summary.name)
                 }

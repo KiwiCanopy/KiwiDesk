@@ -6,8 +6,6 @@ import SwiftUI
 struct ApplicationsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
-    @Environment(\.keybindingOverrideBase)
-    var overrideBase
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)

@@ -50,11 +50,16 @@ struct RuleReachSaveWiringTests {
         try marked.write(to: url, atomically: true, encoding: .utf8)
         model.reload()
 
-        // Reaches Home alone: Mail becomes Work and Home only.
+        // Mail moves for Work and Home; Travel, unticked, keeps it.
         model.setAllProfiles(.space, "mail", false)
         model.setProfile(.space, "mail", "Travel", false)
+        model.config.appRules["mail"] = SpaceID("2")
         model.updateActiveProfile()
 
+        #expect(
+            try model.core.profiles.read(name: "Home").appRules
+                == AppRuleOverride(rules: ["mail": SpaceID("2")])
+        )
         #expect(try model.core.profiles.read(name: "Travel").appRules == nil)
         let after = try String(contentsOf: url, encoding: .utf8)
         #expect(after == marked)
@@ -78,13 +83,39 @@ struct RuleReachSaveWiringTests {
         let model = try makeModel()
         model.setAllProfiles(.space, "mail", false)
         model.setProfile(.space, "mail", "Home", false)
+        model.config.appRules["mail"] = SpaceID("2")
 
         model.saveGlobalsWhilePaused()
 
-        #expect(model.core.guiConfigStore.load()?.appRules["mail"] == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"] == SpaceID("1")
+        )
         #expect(
             try model.core.profiles.read(name: "Work").appRules
-                == AppRuleOverride(rules: ["mail": SpaceID("1")])
+                == AppRuleOverride(rules: ["mail": SpaceID("2")])
+        )
+    }
+
+    @Test("Two unticks both hold until the value lands")
+    func twoUnticksHold() throws {
+        let model = try makeModel()
+        model.setAllProfiles(.space, "mail", false)
+        model.setProfile(.space, "mail", "Home", false)
+        model.setProfile(.space, "mail", "Travel", false)
+        let row = try #require(model.spaceReach("mail"))
+        #expect(!row.shared && row.users == ["Work"])
+
+        model.config.appRules["mail"] = SpaceID("2")
+        model.updateActiveProfile()
+
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"] == SpaceID("1")
+        )
+        #expect(try model.core.profiles.read(name: "Home").appRules == nil)
+        #expect(try model.core.profiles.read(name: "Travel").appRules == nil)
+        #expect(
+            try model.core.profiles.read(name: "Work").appRules?.rules["mail"]
+                == .some(SpaceID("2"))
         )
     }
 }

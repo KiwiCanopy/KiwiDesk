@@ -8,14 +8,16 @@ public struct Profile: Codable, Sendable, Equatable {
     /// (#1255), 4 since the absent Liquid Glass leaves' fill
     /// (#1369), 5 since the track limit counts the overflow
     /// track (#1354), 6 since a dormant profile holds no set
-    /// beside its `monitor_count` (#1530) — no step: an older
-    /// reader refuses the shape, and the stamp says why. The bump
+    /// beside its `monitor_count` (#1530), 7 since a shortcut
+    /// override may leave a shared combo out (#1393) — no step
+    /// for either: an older reader refuses the shape, and the
+    /// stamp says why. The bump
     /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 6
+    public static let currentFormat = 7
 
     public var format: Int
     public var name: String

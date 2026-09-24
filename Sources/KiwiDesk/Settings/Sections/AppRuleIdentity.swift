@@ -39,32 +39,33 @@ struct AppRuleIdentity: View {
 /// (#1393): the edited profile, or every profile holding it.
 struct AppRuleDeleteButton: View {
     let help: String
-    /// The edited profile, when others share the rule.
-    var sharedFrom: String?
+    /// The row's checklist, when others share the rule.
+    var sharedFrom: RuleReachReading?
     let onDelete: (RuleRemoval) -> Void
 
     @ViewBuilder var body: some View {
         if let sharedFrom {
             Menu {
-                Button(
-                    L("app_rules.remove.here", "Remove from %1$@", sharedFrom)
-                ) { onDelete(.here) }
-                Button(
-                    L(
-                        "app_rules.remove.everywhere",
-                        "Remove from every profile"
-                    )
-                ) { onDelete(.everywhere) }
+                Button(RuleReachWords.removeHere(sharedFrom)) {
+                    onDelete(.here)
+                }
+                Button(RuleReachWords.removeEverywhere(sharedFrom)) {
+                    onDelete(.everywhere)
+                }
             } label: {
+                // The icon ink, which the neutral menu label's own
+                // ink would otherwise outrank (#1393).
                 Image(systemName: "trash")
+                    .foregroundStyle(SettingsTheme.ink2)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .neutralMenuLabel()
             .fixedSize()
+            .iconHoverChip()
             .help(help)
             .accessibilityLabel(help)
-            .accessibilityValue(sharedFrom)
+            .accessibilityValue(sharedFrom.editing)
         } else {
             Button {
                 onDelete(.everywhere)

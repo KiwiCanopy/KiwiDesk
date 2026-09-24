@@ -7019,6 +7019,25 @@ the full-row cue are two ladders for two sizes, and taking the
 smaller one to a full row is how a token nobody notices
 becomes the most visible thing on the page.
 
+The icon ladder rests at nothing too (#1393, owner 2026-09-24:
+the Profiles and Spaces trash read as a tinted container beside a
+bare one). Its `0.06` rest fill was the same colourless
+`Color.primary` surface the full row refused, only smaller: the
+fault is its hue, not its area. So a glyph-only icon control at a
+row's end — trash, ✕-clear — rests as the bare glyph and shows
+the chip on hover (`iconHoverChip`), neutral as macOS's own list
+controls are, the row framing it; a glyph standing alone beside
+text — the rename pencil, the add-screen-setup `+` — keeps the
+rest fill, since nothing else says it is a button, and the `?`
+rests bare because its own circle is its shape (owner
+2026-09-25). A Menu drawn as a bordered text button takes the
+neutral label on its LABEL: on the Menu itself the tint also fills
+the bezel, near-black. Every glyph
+takes `ink2`; a destructive glyph does not turn red on
+hover, since that promises an immediate delete a trash offering
+"here or everywhere" does not make. A chip-shaped control keeps
+its rest fill, which is its shape rather than a container.
+
 **The header's size and its indicator are the two things a reader
 sees, and the hit target fixes neither.** (#1021, owner
 2026-08-25: *"in some menus the accordion is way too small"* and,
@@ -7248,8 +7267,19 @@ semantics are the storage model's, read aloud:**
   holds its own entry, and a later profile does not get it —
   ticking every box by hand is still a list, and the popover
   says so. Under All profiles no other box can be unticked,
-  since "every profile but Home" is not the shared rule: leaving
-  one out means unticking All profiles first.
+  since "every profile but Home" is not the shared rule: giving
+  only some profiles a new value means unticking All profiles
+  first.
+- **The ticks say who gets the row's value, and nothing else.**
+  A value written with some profiles ticked reaches those; an
+  unticked profile keeps what it had — the shared value, its
+  own, or none — so "every profile keeps ⌃⌥T, Work takes ⌃⌥Y"
+  is one edit. Unticking alone therefore changes nothing, and
+  taking a rule away is the trash's. The trap is "only these
+  profiles": it makes one profile's own value an edit that
+  strips the rule from every other, which is the opposite of an
+  override (`RuleReachTableTests` ▸ `sharedToList`,
+  `untickAloneIsInert`).
 - **The edited profile's box is ticked and locked.** A page shows
   what its profile resolves, so a row that left its own profile
   would vanish from the page it was edited on. Removal is the
@@ -7268,7 +7298,8 @@ semantics are the storage model's, read aloud:**
 
 **The ticks are derived, never stored.** They are read from what
 each profile resolves over the shared base and its sparse
-override, so the files are unchanged and nothing migrates. That
+override — or, while a Save is pending, from the draft's own
+pick — so the files are unchanged and nothing migrates. That
 holds only because a Save re-encodes just the rows a change
 reached: an untouched row is written back exactly as stored, and
 a profile no change reached is not rewritten
@@ -7280,6 +7311,50 @@ trap is a stored "reach" field to make the ticks cheaper: it is
 a second answer beside the files to the question they already
 answer, and it goes stale the first time a profile file is
 edited by hand.
+
+**Shortcuts rows take the same checklist.** A Shortcuts row is
+one action in one layer, its value the combo:
+
+- **"Not here" is a removed combo, as App Rules' is a
+  tombstone.** A profile's shortcut override replaces a row per
+  combo and also lists the shared combos it leaves out
+  (`KeyLayerOverride.removed`), so *Remove from Work* marks Work
+  alone and the shared row stays for every other profile and
+  every later one. The two ways around a missing mark are
+  rejected: carrying the shared shortcut into each other
+  profile's file means a profile created later never gets it,
+  and rebinding the combo to a no-op still holds the combo and
+  shows as a binding. A removal costs a `Profile.currentFormat`
+  bump, since an older reader would otherwise drop it silently,
+  and a removal whose combo the base no longer binds resolves to
+  nothing and falls out of the next diff
+  (`KeyLayerOverrideRemovalTests`). The removal is stored by
+  combo while the row is one action, so a shared move re-writes
+  it onto the new combo (`RuleReachKeyLeftOutTests` ▸
+  `sharedMoveKeepsRemoval`). A profile may leave out its own
+  profile-switch shortcut: no trap follows, because the menu bar
+  and Settings still switch profiles, and a rebind could always
+  take that combo too.
+- **Ticking a profile whose combo does something else takes the
+  key over**, and the warning names the action that loses it
+  (⚠ Key is used for …); the takeover is written into the table,
+  so the save pill and that action's own row see it.
+- **Clearing a shortcut other profiles share asks**, as the trash
+  does, rather than removing it from every profile.
+- **A profile can move a shared action to another combo** — its
+  override removes the shared combo and binds the new one, and
+  neither reaches the shared base (`RuleReachKeyLeftOutTests` ▸
+  `movedInOneProfile`, `pageLeftOutKeepsBase`). A file written
+  before removals, with the moved row beside the shared one,
+  still keeps its added row out of the base (`RuleReachKeyTests`
+  ▸ `movedComboStaysOut`).
+- **A stored profile's own shortcut override stays
+  `overwriteProfile`'s diff**, since it carries layer structure
+  (a new layer, an icon) the checklist does not; it is written
+  after the checklist has written the shared base it diffs
+  against. On the loaded page the shared layers are derived once,
+  from the page's own structure, and both the rule write and the
+  globals write read that one base.
 
 *The saves write different layers, by design.* The loaded
 profile's Save and a stored profile's Save touch **disjoint**

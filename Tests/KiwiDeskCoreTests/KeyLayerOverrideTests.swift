@@ -243,8 +243,8 @@ struct KeyLayerOverrideTests {
     // MARK: - Default-layer invariant (O4 switch-key-trap)
 
     /// A profile that rebinds exactly one combo in the default
-    /// layer must still expose every other base binding — the
-    /// O4 soft base layer guarantees no switch-key trap.
+    /// layer must still expose every other base binding it does
+    /// not remove.
     @Test("Default-layer invariant: unbound base combos survive")
     func defaultLayerInvariant() {
         let switchKey = binding(
