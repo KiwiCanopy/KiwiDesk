@@ -22,7 +22,7 @@ struct UpdateWindowFooter: View {
         .padding(.vertical, 14)
         .frame(minHeight: 60)
         .background(SettingsTheme.panel)
-        .onChange(of: session.phase) { answerFocused = true }
+        .onChange(of: session.phase.step) { answerFocused = true }
         .onAppear { primaryFocused = true }
         .overlay(alignment: .top) {
             Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
@@ -120,8 +120,8 @@ struct UpdateWindowFooter: View {
         )
     }
 
-    /// What VoiceOver hears when a phase arrives on its own —
-    /// nil for one the user's own press caused.
+    /// What VoiceOver hears when Sparkle moves the window to a
+    /// phase; nil for one that is never announced.
     @MainActor
     static func announcement(_ phase: UpdateWindowPhase) -> String? {
         switch phase {

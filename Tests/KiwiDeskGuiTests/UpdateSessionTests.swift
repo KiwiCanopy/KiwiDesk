@@ -108,14 +108,36 @@ struct UpdateSessionTests {
         #expect(!session.dismissed())
     }
 
-    /// A retry whose check never answers can still be closed.
-    @Test("a download with nothing to cancel still closes")
-    func stalledDownloadCloses() {
+    /// A retried check that never answers can still be closed;
+    /// Install's own gap before Sparkle hands over the cancel is
+    /// not a stall, and closing there would orphan the session.
+    @Test("only a stalled retry closes with nothing to cancel")
+    func stalledRetryCloses() {
         let (session, log) = session()
         session.install()
         #expect(!session.canCancel)
         session.later()
+        #expect(log.ends == 0)
+        session.failed {}
+        session.tryAgain()
+        #expect(session.dismissed())
+        session.cycleEnded()
+        session.later()
         #expect(log.ends == 1)
+    }
+
+    /// VoiceOver hears the phases Sparkle moves to, never the one
+    /// the user's own press caused.
+    @Test("only Sparkle's phase changes are announced")
+    func announcements() {
+        let (session, _) = session()
+        var spoken: [UpdateWindowPhase] = []
+        session.announce = { spoken.append($0) }
+        session.install()
+        session.preparing()
+        session.failed {}
+        session.tryAgain()
+        #expect(spoken == [.preparing, .failed(.download)])
     }
 
     /// A download Sparkle already fetched resumes past it.

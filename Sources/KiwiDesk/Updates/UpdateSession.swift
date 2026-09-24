@@ -13,6 +13,18 @@ enum UpdateWindowPhase: Equatable {
     case installing
     case failed(UpdateFailure)
 
+    /// The phase without its progress, for what changes only when
+    /// the step does — focus, not every downloaded chunk.
+    var step: Int {
+        switch self {
+        case .found: return 0
+        case .downloading: return 1
+        case .preparing: return 2
+        case .installing: return 3
+        case .failed: return 4
+        }
+    }
+
     /// Whether the window's close (Escape, ⌘W, the button) is
     /// honoured: Later where the footer offers it, Cancel while
     /// the download can still stop.
@@ -73,6 +85,9 @@ final class UpdateSession: ObservableObject {
     var hide: () -> Void = {}
     /// Closes the window: Later answered the offer.
     var end: () -> Void = {}
+    /// Speaks a phase Sparkle moved to on its own — never one the
+    /// user's own press caused.
+    var announce: (UpdateWindowPhase) -> Void = { _ in }
     /// Arms the check that KiwiDesk quit after the installer
     /// asked it to: ten seconds, or by hand in a test.
     var armQuitWatch: (@escaping @MainActor () -> Void) -> Void = {
@@ -134,12 +149,14 @@ final class UpdateSession: ObservableObject {
     func preparing() {
         cancellation = nil
         phase = .preparing
+        announce(phase)
     }
 
     /// The installer sent its quit, or the relaunch is under way.
     func installing(retryTermination: (() -> Void)?) {
         self.retryTermination = retryTermination
         phase = .installing
+        announce(phase)
         if retryTermination != nil { watchQuit() }
     }
 
@@ -158,6 +175,7 @@ final class UpdateSession: ObservableObject {
         guard phase == .installing, retryTermination != nil
         else { return }
         phase = .failed(.quit)
+        announce(phase)
     }
 
     func failed(acknowledgement: @escaping () -> Void) {
@@ -165,6 +183,7 @@ final class UpdateSession: ObservableObject {
         cancellation = nil
         retry = .none
         phase = .failed(.download)
+        announce(phase)
     }
 
     /// Sparkle tore the session down. True when the window stays:
@@ -205,9 +224,13 @@ final class UpdateSession: ObservableObject {
             hide()
         case .downloading where canCancel:
             cancel()
-        case .downloading:
-            // Nothing left to cancel: a stall must still close.
+        case .downloading where retry != .none:
+            // A retried check that never answers must still close.
             end()
+        case .downloading:
+            // Install's gap before Sparkle hands over the download's
+            // cancel: closing now would orphan the session.
+            break
         case .preparing, .installing:
             break
         }

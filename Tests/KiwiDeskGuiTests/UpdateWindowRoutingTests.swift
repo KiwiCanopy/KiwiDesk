@@ -12,15 +12,13 @@ import Testing
 @MainActor
 @Suite(
     "Update window routing (#1542)",
-    .serialized,
-    // A regression that routes a failure back to Sparkle blocks
-    // on its modal alert; the limit turns that hang into a red.
-    .timeLimit(.minutes(1))
+    .serialized
 )
 struct UpdateWindowRoutingTests {
     private final class Log {
         var presented = 0
         var replies: [SPUUserUpdateChoice] = []
+        var sparkleErrors = 0
     }
 
     private func driver() -> (UpdatePromptDriver, Log) {
@@ -30,6 +28,9 @@ struct UpdateWindowRoutingTests {
             delegate: UpdatePromptPolicy()
         )
         driver.presents = { _ in log.presented += 1 }
+        // Sparkle's alert is modal: a routing regression must red
+        // on the record, never block on the real thing.
+        driver.sparkleError = { _, _ in log.sparkleErrors += 1 }
         return (driver, log)
     }
 
@@ -62,7 +63,8 @@ struct UpdateWindowRoutingTests {
         let (driver, log) = driver()
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: false
+            userInitiated: false,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         #expect(driver.window != nil)
         #expect(log.presented == 0)
@@ -78,7 +80,8 @@ struct UpdateWindowRoutingTests {
         let (driver, log) = driver()
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         #expect(log.presented == 1)
         #expect(!driver.prompts.updatePending)
@@ -94,7 +97,8 @@ struct UpdateWindowRoutingTests {
         ]
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         let digest = try #require(driver.window?.offer.digest)
         #expect(digest.versions == ["9999.1.0", "9999.0.5"])
@@ -111,7 +115,8 @@ struct UpdateWindowRoutingTests {
         let (driver, log) = driver()
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         let session = try #require(driver.window?.session)
         session.install()
@@ -138,7 +143,8 @@ struct UpdateWindowRoutingTests {
         let (driver, log) = driver()
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: false
+            userInitiated: false,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         let controller = try #require(driver.window)
         let window = controller.makeWindow()
@@ -153,15 +159,15 @@ struct UpdateWindowRoutingTests {
     }
 
     /// Sparkle's own entry points, not the flat overload: the
-    /// retried check stays in the window, the second "Install and
-    /// Relaunch" prompt is answered for the user, and a failure
-    /// before Install is Sparkle's to show.
+    /// download's cancel reaches the window, and the second
+    /// "Install and Relaunch" prompt is answered for the user.
     @Test("the overrides route to the window")
     func overridesRoute() async throws {
         let (driver, log) = driver()
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         let session = try #require(driver.window?.session)
         session.install()
@@ -180,7 +186,8 @@ struct UpdateWindowRoutingTests {
         driver.startCheck = {}
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         let first = try #require(driver.window)
         first.session.install()
@@ -197,11 +204,29 @@ struct UpdateWindowRoutingTests {
         var again: [SPUUserUpdateChoice] = []
         driver.showUpdateFound(
             try Self.item("9999.2.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { again.append($0) }
         #expect(again.isEmpty)
         #expect(driver.window !== first)
         #expect(driver.window?.offer.build == "9999.2.0")
+    }
+
+    /// Before Install nothing of the window's is under way, so a
+    /// failure is Sparkle's to show; after it, the window's.
+    @Test("a failure before Install is Sparkle's")
+    func failureBeforeInstallIsSparkles() throws {
+        let (driver, log) = driver()
+        driver.showUpdateFound(
+            try Self.item("9999.1.0"),
+            userInitiated: true,
+            stage: .notDownloaded
+        ) { log.replies.append($0) }
+        driver.showUpdaterError(
+            NSError(domain: NSURLErrorDomain, code: -1)
+        ) {}
+        #expect(log.sparkleErrors == 1)
+        #expect(driver.window?.session.phase == .found)
     }
 
     /// A download failure holds Sparkle's acknowledgement in the
@@ -211,7 +236,8 @@ struct UpdateWindowRoutingTests {
         let (driver, log) = driver()
         driver.showUpdateFound(
             try Self.item("9999.1.0"),
-            userInitiated: true
+            userInitiated: true,
+            stage: .notDownloaded
         ) { log.replies.append($0) }
         let session = try #require(driver.window?.session)
         session.install()
@@ -221,6 +247,7 @@ struct UpdateWindowRoutingTests {
         ) { acknowledged += 1 }
         #expect(session.phase == .failed(.download))
         #expect(acknowledged == 0)
+        #expect(log.sparkleErrors == 0)
         session.later()
         #expect(acknowledged == 1)
     }

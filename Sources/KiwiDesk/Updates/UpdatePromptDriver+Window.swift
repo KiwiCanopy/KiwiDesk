@@ -11,7 +11,7 @@ extension UpdatePromptDriver {
     func showUpdateFound(
         _ item: SUAppcastItem,
         userInitiated: Bool,
-        stage: SPUUserUpdateStage = .notDownloaded,
+        stage: SPUUserUpdateStage,
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
         // Sparkle's "Checking…" window closes with the offer; its

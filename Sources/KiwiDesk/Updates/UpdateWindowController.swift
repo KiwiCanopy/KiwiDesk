@@ -60,26 +60,30 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
         window.setContentSize(
             NSSize(
                 width: UpdateWindowMetrics.width,
+                // The probe has no window, so no title-bar inset.
                 height: UpdateWindowMetrics.height(
                     fitting: fittingNotesHeight()
+                        + UpdateWindowMetrics.titleBar
                 )
             )
         )
         window.delegate = self
         phaseWatch = session.$phase.sink { [weak window] phase in
-            Self.phaseChanged(to: phase, in: window)
+            window?.standardWindowButton(.closeButton)?.isEnabled =
+                phase.closes
+        }
+        session.announce = { [weak window] phase in
+            Self.announce(phase, in: window)
         }
         return window
     }
 
-    /// Greys the close button where the close does nothing (grey,
-    /// don't hide), and speaks a phase the user did not cause.
-    private static func phaseChanged(
-        to phase: UpdateWindowPhase,
+    /// Speaks a phase Sparkle moved to on its own. The close
+    /// button greys above where the close does nothing.
+    private static func announce(
+        _ phase: UpdateWindowPhase,
         in window: NSWindow?
     ) {
-        window?.standardWindowButton(.closeButton)?.isEnabled =
-            phase.closes
         guard let window, window.isVisible,
             let text = UpdateWindowFooter.announcement(phase)
         else { return }

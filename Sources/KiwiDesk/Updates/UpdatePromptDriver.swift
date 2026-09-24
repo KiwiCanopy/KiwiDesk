@@ -103,6 +103,9 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     var window: UpdateWindowController?
     /// Puts the window on screen; a test records it instead.
     var presents: (UpdateWindowController) -> Void = { $0.present() }
+    /// Replaces Sparkle's modal error alert in a test, which would
+    /// otherwise block the run; nil is Sparkle's own.
+    var sparkleError: ((any Error, @escaping () -> Void) -> Void)?
 
     init(hostBundle: Bundle, delegate: UpdatePromptPolicy) {
         prompts = delegate
@@ -241,6 +244,9 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         acknowledgement: @escaping () -> Void
     ) {
         guard let window, window.session.phase != .found else {
+            if let sparkleError {
+                return sparkleError(error, acknowledgement)
+            }
             return super.showUpdaterError(
                 error,
                 acknowledgement: acknowledgement
