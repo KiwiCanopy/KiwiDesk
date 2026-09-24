@@ -642,7 +642,7 @@
   "kiwishelf.alignment.note.start": "显示 App Bar 时，两个栏位于相对的两端，因此 Space Bar 会移到开头。选择“%1$@”可让它保持不动。",
   "kiwishelf.background_fit.boxed_only": "“%1$@”会在每个项目周围绘制方框，而非共享底板，因此没有可调整尺寸的对象。",
   "kiwishelf.background_fit.label": "背景尺寸",
-  "kiwishelf.background_fit.label.help": "“%1$@”：每个栏的底板贴合其项目，使用各自的填充。“%2$@”：一块底板横跨整条边缘，从 Space Bar 的填充渐变到 App Bar 的填充。",
+  "kiwishelf.background_fit.label.help": "“%1$@”：每个栏的底板贴合其项目。“%2$@”：每个栏的底板横跨它在边缘上所占的整段。各自保留自己的填充。",
   "kiwishelf.background_style.label": "背景样式",
   "kiwishelf.background_style.label.help": "“%1$@”在每个栏的项目后面绘制一块底板；“%2$@”为每个项目绘制方框，不绘制底板。",
   "kiwishelf.corner_roundness": "圆角半径",

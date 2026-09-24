@@ -642,7 +642,7 @@
   "kiwishelf.alignment.note.start": "Solange die App Bar angezeigt wird, sitzen die beiden Leisten an entgegengesetzten Enden, daher rückt die Space Bar an den Anfang. „%1$@“ hält sie an ihrem Platz.",
   "kiwishelf.background_fit.boxed_only": "„%1$@“ zeichnet ein Kästchen pro Element statt einer gemeinsamen Fläche, daher gibt es keine Größe einzustellen.",
   "kiwishelf.background_fit.label": "Hintergrundgröße",
-  "kiwishelf.background_fit.label.help": "„%1$@“: Die Fläche jeder Leiste passt sich ihren Elementen an, in ihrer eigenen Füllung. „%2$@“: Eine Fläche überspannt die Kante und geht von der Füllung der Space Bar in die der App Bar über.",
+  "kiwishelf.background_fit.label.help": "„%1$@“: Die Fläche jeder Leiste passt sich ihren Elementen an. „%2$@“: Die Fläche jeder Leiste überspannt ihren ganzen Teil der Kante. Jede behält ihre eigene Füllung.",
   "kiwishelf.background_style.label": "Hintergrundstil",
   "kiwishelf.background_style.label.help": "„%1$@“ zeichnet eine Fläche hinter die Elemente jeder Leiste; „%2$@“ zeichnet ein Kästchen pro Element und keine Fläche.",
   "kiwishelf.corner_roundness": "Eckenrundung",

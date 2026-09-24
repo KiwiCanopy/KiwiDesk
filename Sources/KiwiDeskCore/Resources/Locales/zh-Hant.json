@@ -642,7 +642,7 @@
   "kiwishelf.alignment.note.start": "顯示 App Bar 時，兩個列位於相對的兩端，因此 Space Bar 會移到起始端。選擇「%1$@」可讓它保持不動。",
   "kiwishelf.background_fit.boxed_only": "「%1$@」會為每個項目各繪一個方塊，而非共用底板，因此沒有可調整的尺寸。",
   "kiwishelf.background_fit.label": "背景尺寸",
-  "kiwishelf.background_fit.label.help": "「%1$@」：每個列的底板貼合其項目，使用各自的填色。「%2$@」：一塊底板橫跨整條邊緣，從 Space Bar 的填色漸變到 App Bar 的填色。",
+  "kiwishelf.background_fit.label.help": "「%1$@」：每個列的底板貼合其項目。「%2$@」：每個列的底板橫跨它在邊緣上所佔的整段。各自保留自己的填色。",
   "kiwishelf.background_style.label": "背景樣式",
   "kiwishelf.background_style.label.help": "「%1$@」在每個列的項目後方繪製一塊底板；「%2$@」為每個項目各繪一個方塊，不繪製底板。",
   "kiwishelf.corner_roundness": "圓角程度",

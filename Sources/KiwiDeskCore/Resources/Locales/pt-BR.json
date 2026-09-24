@@ -642,7 +642,7 @@
   "kiwishelf.alignment.note.start": "Enquanto a App Bar é exibida, as duas barras ficam em extremidades opostas, então a Space Bar vai para o início. “%1$@” a mantém parada.",
   "kiwishelf.background_fit.boxed_only": "“%1$@” desenha uma caixa por item em vez de uma placa compartilhada, portanto não há o que redimensionar.",
   "kiwishelf.background_fit.label": "Tamanho do fundo",
-  "kiwishelf.background_fit.label.help": "“%1$@”: a placa de cada barra se ajusta aos seus itens, com o próprio preenchimento. “%2$@”: uma única placa cobre a borda, passando do preenchimento da Space Bar para o da App Bar.",
+  "kiwishelf.background_fit.label.help": "“%1$@”: a placa de cada barra se ajusta aos seus itens. “%2$@”: a placa de cada barra cobre toda a sua parte da borda. Cada uma mantém o próprio preenchimento.",
   "kiwishelf.background_style.label": "Estilo de fundo",
   "kiwishelf.background_style.label.help": "“%1$@” desenha uma placa atrás dos itens de cada barra; “%2$@” desenha uma caixa por item e nenhuma placa.",
   "kiwishelf.corner_roundness": "Arredondamento de cantos",

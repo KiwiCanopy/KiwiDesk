@@ -642,7 +642,7 @@
   "kiwishelf.alignment.note.start": "Mentre la App Bar è visibile, le due barre stanno alle estremità opposte, quindi la Space Bar si sposta all'inizio. «%1$@» la tiene ferma.",
   "kiwishelf.background_fit.boxed_only": "«%1$@» disegna un riquadro per elemento invece di una piastra condivisa, quindi non c'è nulla da dimensionare.",
   "kiwishelf.background_fit.label": "Dimensione sfondo",
-  "kiwishelf.background_fit.label.help": "«%1$@»: la piastra di ogni barra si adatta ai suoi elementi, con il proprio riempimento. «%2$@»: un'unica piastra copre il bordo, sfumando dal riempimento della Space Bar a quello della App Bar.",
+  "kiwishelf.background_fit.label.help": "«%1$@»: la piastra di ogni barra si adatta ai suoi elementi. «%2$@»: la piastra di ogni barra copre tutta la sua parte del bordo. Ognuna mantiene il proprio riempimento.",
   "kiwishelf.background_style.label": "Stile sfondo",
   "kiwishelf.background_style.label.help": "«%1$@» disegna una piastra dietro gli elementi di ogni barra; «%2$@» disegna un riquadro per elemento e nessuna piastra.",
   "kiwishelf.corner_roundness": "Arrotondamento angoli",

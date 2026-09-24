@@ -148,9 +148,9 @@ extension KiwiShelfCard {
             help: L(
                 "kiwishelf.background_fit.label.help",
                 "\u{201C}%1$@\u{201D}: each bar's plate fits its "
-                    + "items, in its own fill. \u{201C}%2$@\u{201D}: "
-                    + "one plate spans the edge, blending from the "
-                    + "Space Bar's fill to the App Bar's.",
+                    + "items. \u{201C}%2$@\u{201D}: each bar's plate "
+                    + "spans its whole part of the edge. Each keeps "
+                    + "its own fill.",
                 L("app_bar.background_fit.hug", "Hug"),
                 L("app_bar.background_fit.full", "Full")
             )

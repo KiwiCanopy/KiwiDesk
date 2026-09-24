@@ -642,7 +642,7 @@
   "kiwishelf.alignment.note.start": "App Barが表示されている間は2本のバーが反対側の端に分かれるため、Space Barは先頭に移動します。「%1$@」にすると動きません。",
   "kiwishelf.background_fit.boxed_only": "「%1$@」は共有のプレートではなく項目ごとにボックスを描画するため、サイズを変更する対象がありません。",
   "kiwishelf.background_fit.label": "背景サイズ",
-  "kiwishelf.background_fit.label.help": "「%1$@」：各バーのプレートが項目に合わせたサイズになり、それぞれの塗りつぶしを使います。「%2$@」：1枚のプレートが端全体に広がり、Space Barの塗りつぶしからApp Barの塗りつぶしへ変化します。",
+  "kiwishelf.background_fit.label.help": "「%1$@」：各バーのプレートが項目に合わせたサイズになります。「%2$@」：各バーのプレートが、端のうちそのバーが受け持つ部分全体に広がります。どちらもそれぞれの塗りつぶしを使います。",
   "kiwishelf.background_style.label": "背景スタイル",
   "kiwishelf.background_style.label.help": "「%1$@」は各バーの項目の背後にプレートを1枚描画し、「%2$@」は項目ごとにボックスを描画してプレートは描きません。",
   "kiwishelf.corner_roundness": "角の丸み",

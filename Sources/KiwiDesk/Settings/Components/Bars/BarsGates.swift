@@ -116,8 +116,8 @@ enum BarsGateHelp {
         case .shelfEmpty:
             return L(
                 "kiwishelf.empty.help",
-                "Turn on a bar under \u{201C}%1$@\u{201D} to shape "
-                    + "the shelf.",
+                "Turn on a bar under \u{201C}%1$@\u{201D} to edit "
+                    + "these settings.",
                 L("kiwishelf.show.label", "Show")
             )
         case .boxedShelf:
