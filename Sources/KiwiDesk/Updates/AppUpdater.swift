@@ -56,6 +56,9 @@ final class SparkleUpdater: AppUpdating {
         )
         observer = UpdateCycleObserver(store: updates)
         observer.onAppcast = { [driver] in driver.loadedItems = $0 }
+        observer.onCycleFinished = { [driver] in
+            driver.updateCycleFinished()
+        }
         updater = SPUUpdater(
             hostBundle: host,
             applicationBundle: host,

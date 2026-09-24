@@ -54,6 +54,19 @@ final class UpdatePromptPolicy: NSObject,
         updatePending = false
     }
 
+    /// KiwiDesk's own window got an offer (#1542): the same answer
+    /// as above — a scheduled one waits behind the mark, a user's
+    /// own check shows now. True when it shows.
+    func offerArrived(userInitiated: Bool) -> Bool {
+        updatePending = !userInitiated
+        return userInitiated
+    }
+
+    /// The own window's offer is on screen.
+    func offerGotAttention() {
+        updatePending = false
+    }
+
     /// Disallows minimizing the status window (#1011): activating
     /// a process deminiaturizes nothing, so a parked prompt would
     /// sit in a Dock KiwiDesk has no icon in — refusing the
@@ -101,10 +114,8 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         state: SPUUserUpdateState,
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
-        guard
-            !appcastItem.isInformationOnlyUpdate
-                || window?.session.retry == .checking
-        else {
+        guard !appcastItem.isInformationOnlyUpdate else {
+            closeWindow()
             return super.showUpdateFound(
                 with: appcastItem,
                 state: state,
@@ -114,6 +125,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
         showUpdateFound(
             appcastItem,
             userInitiated: state.userInitiated,
+            stage: state.stage,
             reply: reply
         )
     }
@@ -175,6 +187,12 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
             return super.showDownloadDidStartExtractingUpdate()
         }
         window.session.preparing()
+    }
+
+    /// Sparkle's cycle ended — the one moment Try Again's check
+    /// can start (`SPUUpdater` allows a new session from here).
+    func updateCycleFinished() {
+        window?.session.cycleEnded()
     }
 
     /// Preparing draws an indeterminate bar, so the window reads

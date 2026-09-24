@@ -1,25 +1,6 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// What the update window says about the offer, fixed for its
-/// lifetime (#1542).
-struct UpdateOffer {
-    /// The offered version, as displayed.
-    let version: String
-    /// The running version, as displayed.
-    let installed: String
-    let released: Date?
-    /// Nil when the offered version's notes cannot be read.
-    let digest: UpdateNotesDigest?
-
-    /// A version's full release notes on GitHub.
-    static func notesURL(for version: String) -> URL {
-        SupportLinks.releases
-            .appendingPathComponent("tag")
-            .appendingPathComponent("v" + version)
-    }
-}
-
 /// KiwiDesk's own update window (#1542 ruling ▸ Window): a pinned
 /// header and footer around the notes, which scroll.
 struct UpdateWindowView: View {
@@ -40,7 +21,9 @@ struct UpdateWindowView: View {
             UpdateWindowFooter(session: session)
         }
         .frame(width: UpdateWindowMetrics.width)
-        .background(SettingsTheme.page)
+        // SwiftUI keeps the content below the transparent title
+        // bar; only the ground runs up behind the traffic lights.
+        .background(SettingsTheme.page.ignoresSafeArea())
         .tint(SettingsTheme.accent)
     }
 
@@ -54,7 +37,7 @@ enum UpdateWindowMetrics {
     static let width: CGFloat = 560
     static let minHeight: CGFloat = 420
     static let maxHeight: CGFloat = 640
-    /// Room for the transparent title bar's traffic lights.
+    /// The transparent title bar the content sits below.
     static let titleBar: CGFloat = 28
 
     /// The window opens at its content, between the ruled bounds.
@@ -83,7 +66,7 @@ private struct UpdateWindowHeader: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.top, UpdateWindowMetrics.titleBar + 4)
+        .padding(.top, 4)
         .padding(.horizontal, 20)
         .padding(.bottom, 18)
     }

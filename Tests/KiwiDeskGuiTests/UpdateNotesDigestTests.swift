@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The update window's "everything since your version" merge
 /// (#1542 ruling) and the feed document's growth rules
@@ -222,13 +223,22 @@ struct UpdateNotesDigestTests {
         )
         #expect(UpdateNotesDisclosure.initiallyOpen([]).isEmpty)
     }
+}
 
-    /// Up to five show; past five, four and "Show more".
-    @Test("an open group shows five, or four and Show more")
-    func shownCount() {
-        #expect(UpdateNotesDisclosure.shown(of: 5, expanded: false) == 5)
-        #expect(UpdateNotesDisclosure.shown(of: 6, expanded: false) == 4)
-        #expect(UpdateNotesDisclosure.shown(of: 9, expanded: false) == 4)
-        #expect(UpdateNotesDisclosure.shown(of: 9, expanded: true) == 9)
+/// Entries carry their version in brackets only when the window
+/// spans several versions (owner, 2026-09-24).
+@MainActor
+@Suite("Update notes entry version (#1542)", .serialized)
+struct UpdateNotesEntryVersionTests {
+    @Test("the version follows the entry in brackets, or not at all")
+    func versionInBrackets() {
+        LocalizationManager.shared.select("en")
+        let labelled = UpdateNotesMarkdown.entry(
+            "**A** fix.",
+            version: "2.0.1"
+        )
+        #expect(String(labelled.characters) == "A fix. (2.0.1)")
+        let plain = UpdateNotesMarkdown.entry("**A** fix.", version: nil)
+        #expect(String(plain.characters) == "A fix.")
     }
 }

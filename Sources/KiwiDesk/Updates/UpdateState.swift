@@ -89,6 +89,8 @@ final class UpdateCycleObserver: NSObject, @MainActor SPUUpdaterDelegate {
     /// Every item of each appcast Sparkle loads, for the update
     /// window's "everything since your version" (#1542).
     var onAppcast: ([SUAppcastItem]) -> Void = { _ in }
+    /// Each cycle's end — when Try Again's check may start.
+    var onCycleFinished: () -> Void = {}
 
     init(store: UpdateStateStore) {
         self.store = store
@@ -128,6 +130,7 @@ final class UpdateCycleObserver: NSObject, @MainActor SPUUpdaterDelegate {
         error: (any Error)?
     ) {
         fold(.finished(error), updater)
+        onCycleFinished()
     }
 
     private func fold(_ outcome: UpdateCycleOutcome, _ updater: SPUUpdater) {

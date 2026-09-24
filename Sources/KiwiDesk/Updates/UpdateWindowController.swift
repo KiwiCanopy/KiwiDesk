@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import KiwiDeskCore
 import SwiftUI
 
@@ -11,6 +12,7 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
     let session: UpdateSession
     let offer: UpdateOffer
     private var window: NSWindow?
+    private var phaseWatch: AnyCancellable?
 
     init(offer: UpdateOffer, session: UpdateSession) {
         self.offer = offer
@@ -32,6 +34,7 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
     }
 
     func close() {
+        phaseWatch = nil
         window?.delegate = nil
         window?.orderOut(nil)
         window = nil
@@ -53,7 +56,7 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
         window.titleVisibility = .hidden
         window.title = L("update.window.window_title", "KiwiDesk Update")
         window.isReleasedWhenClosed = false
-        window.animationBehavior = .alertPanel
+        window.animationBehavior = .documentWindow
         window.setContentSize(
             NSSize(
                 width: UpdateWindowMetrics.width,
@@ -63,7 +66,31 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
             )
         )
         window.delegate = self
+        phaseWatch = session.$phase.sink { [weak window] phase in
+            Self.phaseChanged(to: phase, in: window)
+        }
         return window
+    }
+
+    /// Greys the close button where the close does nothing (grey,
+    /// don't hide), and speaks a phase the user did not cause.
+    private static func phaseChanged(
+        to phase: UpdateWindowPhase,
+        in window: NSWindow?
+    ) {
+        window?.standardWindowButton(.closeButton)?.isEnabled =
+            phase.closes
+        guard let window, window.isVisible,
+            let text = UpdateWindowFooter.announcement(phase)
+        else { return }
+        NSAccessibility.post(
+            element: window,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: text,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+            ]
+        )
     }
 
     /// The notes' natural height at the window's width, measured

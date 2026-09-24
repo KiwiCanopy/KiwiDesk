@@ -51,8 +51,10 @@ struct UpdateStateRow: View {
                     L("menu.update_available", "Update Available…"),
                     action: check
                 )
+                // The seal ignores `.controlSize`, so it drew at full
+                // size in a 12 pt line; the dot carries the accent.
                 .controlSize(.small)
-                .kiwiProminentButton()
+                .settingsActionButton()
             case .failed:
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.system(size: 11))

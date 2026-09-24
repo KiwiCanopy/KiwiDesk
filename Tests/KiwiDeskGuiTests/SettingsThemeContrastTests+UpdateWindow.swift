@@ -32,6 +32,13 @@ extension SettingsThemeContrastTests {
             on: SettingsTheme.card,
             washedWith: highlightWash
         ),
+        // An entry's version label when versions merge.
+        Pairing(
+            "ink3 on the washed Highlights",
+            SettingsTheme.ink3,
+            on: SettingsTheme.card,
+            washedWith: highlightWash
+        ),
         Pairing(
             "groupHeading on page",
             SettingsTheme.groupHeading,

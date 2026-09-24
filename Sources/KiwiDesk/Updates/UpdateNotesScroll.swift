@@ -11,8 +11,9 @@ struct UpdateNotesScroll: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var open: Set<String>
-    @State private var expanded: Set<String> = []
     @State private var moreBelow = false
+    /// Where a per-type link sends VoiceOver: the group it opened.
+    @AccessibilityFocusState private var focusedGroup: String?
 
     init(offer: UpdateOffer, failed: Bool, measuring: Bool) {
         self.offer = offer
@@ -55,10 +56,10 @@ struct UpdateNotesScroll: View {
                     UpdateNotesGroupCard(
                         group: group,
                         labelled: digest.spansVersions,
-                        open: binding(open: group.id),
-                        expanded: binding(expanded: group.id)
+                        open: binding(open: group.id)
                     )
                     .id(group.id)
+                    .accessibilityFocused($focusedGroup, equals: group.id)
                 }
                 ForEach(digest.unreadable, id: \.self) { version in
                     UpdateNotesLink(
@@ -74,7 +75,7 @@ struct UpdateNotesScroll: View {
                 Text(
                     L(
                         "update.window.no_notes",
-                        "This version's notes are on the KiwiDesk site."
+                        "This version's notes are online."
                     )
                 )
                 .foregroundStyle(SettingsTheme.ink2)
@@ -107,6 +108,7 @@ struct UpdateNotesScroll: View {
     /// A per-type link opens its group and scrolls to it.
     private func jump(to id: String, _ proxy: ScrollViewProxy) {
         open.insert(id)
+        focusedGroup = id
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
             proxy.scrollTo(id, anchor: .top)
         }
@@ -116,13 +118,6 @@ struct UpdateNotesScroll: View {
         Binding(
             get: { open.contains(id) },
             set: { if $0 { open.insert(id) } else { open.remove(id) } }
-        )
-    }
-
-    private func binding(expanded id: String) -> Binding<Bool> {
-        Binding(
-            get: { expanded.contains(id) },
-            set: { if $0 { expanded.insert(id) } }
         )
     }
 }

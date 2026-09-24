@@ -93,6 +93,11 @@ struct UpdateSessionTests {
         #expect(log.acks == 1)
         #expect(session.retry == .acknowledging)
         #expect(session.dismissed())
+        // Sparkle's session is still ending: a check now would
+        // only re-show the offer, so it waits for the cycle.
+        #expect(log.checks == 0)
+        #expect(session.retry == .waiting)
+        session.cycleEnded()
         #expect(log.checks == 1)
         #expect(session.retry == .checking)
         var refound: [SPUUserUpdateChoice] = []
@@ -101,6 +106,34 @@ struct UpdateSessionTests {
         #expect(session.retry == .none)
         // Any later dismiss closes the window.
         #expect(!session.dismissed())
+    }
+
+    /// A retry whose check never answers can still be closed.
+    @Test("a download with nothing to cancel still closes")
+    func stalledDownloadCloses() {
+        let (session, log) = session()
+        session.install()
+        #expect(!session.canCancel)
+        session.later()
+        #expect(log.ends == 1)
+    }
+
+    /// A download Sparkle already fetched resumes past it.
+    @Test("Install resumes from the stage Sparkle reached")
+    func installResumes() {
+        let resumed = UpdateSession(
+            reply: { _ in },
+            installsFrom: UpdatePromptDriver.installsFrom(.downloaded)
+        )
+        resumed.install()
+        #expect(resumed.phase == .preparing)
+        #expect(
+            UpdatePromptDriver.installsFrom(.installing) == .installing
+        )
+        #expect(
+            UpdatePromptDriver.installsFrom(.notDownloaded)
+                == .downloading(received: 0, expected: nil)
+        )
     }
 
     @Test("Later after a failed download acknowledges it")

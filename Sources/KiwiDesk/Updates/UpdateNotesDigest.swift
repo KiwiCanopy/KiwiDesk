@@ -140,14 +140,11 @@ struct UpdateNotesDigest: Equatable {
     }
 }
 
-/// Which groups start open, and how many entries an open group
-/// shows before "Show more" (#1542 ruling).
+/// Which groups start open (#1542 ruling). An open group shows
+/// every entry: the disclosure is the one budget, and a second
+/// "Show more" inside it hid what the user had just opened
+/// (owner, 2026-09-24).
 enum UpdateNotesDisclosure {
-    /// An open group shows up to this many entries…
-    static let capacity = 5
-    /// …otherwise this many plus "Show more · N".
-    static let withMarker = 4
-
     /// The first group opens unless it is Lua & CLI, which always
     /// starts collapsed; the rest start collapsed.
     static func initiallyOpen(
@@ -156,15 +153,5 @@ enum UpdateNotesDisclosure {
         guard let first = groups.first, first.kind != .scripting
         else { return [] }
         return [first.id]
-    }
-
-    static func shown(of count: Int, expanded: Bool) -> Int {
-        expanded
-            ? count
-            : OverflowSplit.shown(
-                of: count,
-                fitting: capacity,
-                withMarker: withMarker
-            )
     }
 }

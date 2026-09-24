@@ -5,6 +5,9 @@ import SwiftUI
 /// ruling ▸ States). Return installs, Escape means Later.
 struct UpdateWindowFooter: View {
     @ObservedObject var session: UpdateSession
+    /// The pressed button leaves with its phase; VoiceOver moves
+    /// to the one that replaces it.
+    @AccessibilityFocusState private var answerFocused: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -16,6 +19,7 @@ struct UpdateWindowFooter: View {
         .padding(.vertical, 14)
         .frame(minHeight: 60)
         .background(SettingsTheme.panel)
+        .onChange(of: session.phase) { answerFocused = true }
         .overlay(alignment: .top) {
             Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
         }
@@ -42,18 +46,9 @@ struct UpdateWindowFooter: View {
                 text: Self.downloadText(received, expected)
             )
         case .preparing:
-            progress(
-                fraction: nil,
-                text: L("update.window.preparing", "Preparing…")
-            )
+            progress(fraction: nil, text: Self.preparingText)
         case .installing:
-            progress(
-                fraction: nil,
-                text: L(
-                    "update.window.installing",
-                    "Installing… KiwiDesk quits and comes back in a moment."
-                )
-            )
+            progress(fraction: nil, text: Self.installingText)
         case .failed(let failure):
             Label {
                 Text(Self.failureText(failure))
@@ -110,6 +105,29 @@ struct UpdateWindowFooter: View {
         return formatter.string(fromByteCount: Int64(clamping: count))
     }
 
+    @MainActor static var preparingText: String {
+        L("update.window.preparing", "Preparing…")
+    }
+
+    @MainActor static var installingText: String {
+        L(
+            "update.window.installing",
+            "Installing… KiwiDesk quits and comes back in a moment."
+        )
+    }
+
+    /// What VoiceOver hears when a phase arrives on its own —
+    /// nil for one the user's own press caused.
+    @MainActor
+    static func announcement(_ phase: UpdateWindowPhase) -> String? {
+        switch phase {
+        case .preparing: return preparingText
+        case .installing: return installingText
+        case .failed(let failure): return failureText(failure)
+        case .found, .downloading: return nil
+        }
+    }
+
     @MainActor
     static func failureText(_ failure: UpdateFailure) -> String {
         switch failure {
@@ -141,6 +159,7 @@ struct UpdateWindowFooter: View {
                 .settingsActionButton()
                 .keyboardShortcut(.cancelAction)
                 .disabled(!session.canCancel)
+                .accessibilityFocused($answerFocused)
         case .failed:
             later
             primary(
@@ -163,5 +182,6 @@ struct UpdateWindowFooter: View {
         Button(title, action: action)
             .kiwiProminentButton()
             .keyboardShortcut(.defaultAction)
+            .accessibilityFocused($answerFocused)
     }
 }

@@ -13,6 +13,7 @@ struct UpdateHighlightsPanel: View {
             label
             Text(UpdateNotesMarkdown.text(digest.summary))
                 .font(.system(size: 14))
+                .lineSpacing(4)
                 .foregroundStyle(SettingsTheme.ink)
                 .fixedSize(horizontal: false, vertical: true)
             if !digest.cautions.isEmpty { cautions }
@@ -29,6 +30,7 @@ struct UpdateHighlightsPanel: View {
         Label {
             Text(L("update.window.highlights", "Highlights"))
                 .textCase(.uppercase)
+                .tracking(0.9)
         } icon: {
             Image(systemName: "star.fill")
                 .foregroundStyle(
@@ -44,6 +46,7 @@ struct UpdateHighlightsPanel: View {
         VStack(alignment: .leading, spacing: 3) {
             Text(L("update.window.before_you_update", "Before you update"))
                 .textCase(.uppercase)
+                .tracking(0.66)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(SettingsTheme.ink2)
                 .accessibilityAddTraits(.isHeader)
@@ -51,7 +54,8 @@ struct UpdateHighlightsPanel: View {
                 UpdateNotesEntryText(
                     text: caution.text,
                     version: digest.spansVersions ? caution.version : nil,
-                    size: 12.5
+                    size: 12.5,
+                    bulleted: false
                 )
             }
         }
@@ -106,11 +110,14 @@ struct UpdateNotesTally: View {
                 )
             )
             .textCase(.uppercase)
+            .tracking(0.66)
             .font(.system(size: 11, weight: .semibold))
             .foregroundStyle(SettingsTheme.groupHeading)
             .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 0)
-            HStack(spacing: 6) {
+            // Wraps: a long locale or a feed-titled group must not
+            // truncate the run.
+            FlowLayout(spacing: 12) {
                 ForEach(digest.groups) { group in
                     Button {
                         jump(group.id)
@@ -120,6 +127,13 @@ struct UpdateNotesTally: View {
                             .foregroundStyle(SettingsTheme.ink2)
                     }
                     .buttonStyle(.plain)
+                    .pointingHandCursor()
+                    .accessibilityHint(
+                        L(
+                            "update.window.jump_hint",
+                            "Opens this group of changes."
+                        )
+                    )
                 }
             }
             .font(.system(size: 12))
@@ -135,7 +149,6 @@ struct UpdateNotesGroupCard: View {
     /// Entries carry their version when the view spans several.
     let labelled: Bool
     @Binding var open: Bool
-    @Binding var expanded: Bool
 
     var body: some View {
         DisclosureGroup(isExpanded: $open) {
@@ -161,17 +174,10 @@ struct UpdateNotesGroupCard: View {
         )
     }
 
-    private var shown: Int {
-        UpdateNotesDisclosure.shown(
-            of: group.entries.count,
-            expanded: expanded
-        )
-    }
-
     private var entries: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(
-                Array(group.entries.prefix(shown).enumerated()),
+                Array(group.entries.enumerated()),
                 id: \.offset
             ) { _, entry in
                 UpdateNotesEntryText(
@@ -179,22 +185,6 @@ struct UpdateNotesGroupCard: View {
                     version: labelled ? entry.version : nil,
                     size: 13
                 )
-            }
-            if shown < group.entries.count {
-                Button {
-                    expanded = true
-                } label: {
-                    Text(
-                        L(
-                            "update.window.show_more",
-                            "Show more · %1$d",
-                            group.entries.count - shown
-                        )
-                    )
-                    .font(.system(size: 12.5))
-                    .foregroundStyle(SettingsTheme.ink2)
-                }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -205,20 +195,22 @@ struct UpdateNotesEntryText: View {
     let text: String
     let version: String?
     let size: CGFloat
+    /// Changes are a bulleted list; a caution is a paragraph.
+    var bulleted = true
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            if let version {
-                Text(version)
-                    .font(.system(size: 11).monospacedDigit())
+        HStack(alignment: .firstTextBaseline, spacing: 7) {
+            if bulleted {
+                Text(verbatim: "•")
                     .foregroundStyle(SettingsTheme.ink3)
+                    .accessibilityHidden(true)
             }
-            Text(UpdateNotesMarkdown.text(text))
-                .font(.system(size: size))
+            Text(UpdateNotesMarkdown.entry(text, version: version))
+                .lineSpacing(3)
                 .foregroundStyle(SettingsTheme.ink)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .accessibilityElement(children: .combine)
+        .font(.system(size: size))
     }
 }
 
@@ -254,6 +246,34 @@ enum UpdateNotesNaming {
     }
 }
 
+/// An entry followed by its version in brackets, which only a
+/// window spanning several versions passes (owner, 2026-09-24).
+/// One localized frame, since the brackets are punctuation a
+/// locale may write differently; the version is drawn quieter.
+extension UpdateNotesMarkdown {
+    @MainActor
+    static func entry(_ markdown: String, version: String?)
+        -> AttributedString
+    {
+        var text = self.text(markdown)
+        guard let version else { return text }
+        let frame = L("update.window.entry_version", "%1$@ (%2$@)")
+        let parts = frame.components(separatedBy: "%1$@")
+        guard parts.count == 2 else { return text }
+        // Either side may carry the version, whichever order the
+        // locale writes.
+        let quiet = parts.map { part -> AttributedString in
+            var run = AttributedString(
+                part.replacingOccurrences(of: "%2$@", with: version)
+            )
+            run.foregroundColor = SettingsTheme.ink3
+            return run
+        }
+        text = quiet[0] + text + quiet[1]
+        return text
+    }
+}
+
 /// The feed's entries are inline markdown — bold, emphasis, code
 /// and links, the subset `appcast-sync`'s `inline` renders.
 enum UpdateNotesMarkdown {
@@ -268,8 +288,13 @@ enum UpdateNotesMarkdown {
                 )
             )
         else { return AttributedString(markdown) }
-        for run in text.runs where run.link != nil {
-            text[run.range].underlineStyle = .single
+        for run in text.runs {
+            if run.link != nil {
+                text[run.range].underlineStyle = .single
+            }
+            if run.inlinePresentationIntent?.contains(.code) == true {
+                text[run.range].backgroundColor = SettingsTheme.sunken
+            }
         }
         return text
     }

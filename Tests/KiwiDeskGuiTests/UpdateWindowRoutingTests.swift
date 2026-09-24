@@ -10,7 +10,13 @@ import Testing
 /// (#1013), a user's own check comes forward (#1011). Nothing is
 /// put on screen — the present step is recorded.
 @MainActor
-@Suite("Update window routing (#1542)", .serialized)
+@Suite(
+    "Update window routing (#1542)",
+    .serialized,
+    // A regression that routes a failure back to Sparkle blocks
+    // on its modal alert; the limit turns that hang into a red.
+    .timeLimit(.minutes(1))
+)
 struct UpdateWindowRoutingTests {
     private final class Log {
         var presented = 0
@@ -144,6 +150,58 @@ struct UpdateWindowRoutingTests {
         #expect(!controller.windowShouldClose(window))
         #expect(log.replies == [.dismiss])
         #expect(driver.window == nil)
+    }
+
+    /// Sparkle's own entry points, not the flat overload: the
+    /// retried check stays in the window, the second "Install and
+    /// Relaunch" prompt is answered for the user, and a failure
+    /// before Install is Sparkle's to show.
+    @Test("the overrides route to the window")
+    func overridesRoute() async throws {
+        let (driver, log) = driver()
+        driver.showUpdateFound(
+            try Self.item("9999.1.0"),
+            userInitiated: true
+        ) { log.replies.append($0) }
+        let session = try #require(driver.window?.session)
+        session.install()
+        driver.showDownloadInitiated {}
+        #expect(session.canCancel)
+        #expect(await driver.showReadyToInstallAndRelaunch() == .install)
+        #expect(session.phase == .installing)
+    }
+
+    /// Try Again: the retried check shows no Sparkle window, and
+    /// the same version re-found installs; a different one is a
+    /// new offer the user sees.
+    @Test("a retry installs the same version, re-offers another")
+    func retryChecksTheVersion() throws {
+        let (driver, log) = driver()
+        driver.startCheck = {}
+        driver.showUpdateFound(
+            try Self.item("9999.1.0"),
+            userInitiated: true
+        ) { log.replies.append($0) }
+        let first = try #require(driver.window)
+        first.session.install()
+        driver.showUpdaterError(
+            NSError(domain: NSURLErrorDomain, code: -1)
+        ) {}
+        first.session.tryAgain()
+        driver.dismissUpdateInstallation()
+        #expect(driver.window === first)
+        driver.updateCycleFinished()
+        #expect(first.session.retry == .checking)
+        driver.showUserInitiatedUpdateCheck {}
+        #expect(first.session.canCancel)
+        var again: [SPUUserUpdateChoice] = []
+        driver.showUpdateFound(
+            try Self.item("9999.2.0"),
+            userInitiated: true
+        ) { again.append($0) }
+        #expect(again.isEmpty)
+        #expect(driver.window !== first)
+        #expect(driver.window?.offer.build == "9999.2.0")
     }
 
     /// A download failure holds Sparkle's acknowledgement in the

@@ -140,4 +140,32 @@ struct UpdatePromptWiringTests {
             live.contains("set { policy.onUpdatePendingChanged = newValue }")
         )
     }
+
+    /// The own window's three hand-offs from the updater (#1542):
+    /// the loaded appcast ("everything since your version"), the
+    /// cycle's end and the check Try Again starts. Each default is
+    /// a silent no-op, so a dropped line shrinks the window to one
+    /// version or leaves Try Again waiting forever.
+    @Test("the live updater hands the window its appcast and cycle")
+    func liveUpdaterFeedsTheWindow() throws {
+        let text = try Self.seamSource()
+        let live = try #require(
+            SourceScan.declarationBody(
+                after: "final class SparkleUpdater",
+                in: text
+            )
+        )
+        #expect(
+            live.contains(
+                "observer.onAppcast = { [driver] in driver.loadedItems = $0 }"
+            )
+        )
+        #expect(live.contains("driver.updateCycleFinished()"))
+        #expect(
+            live.contains(
+                "driver.startCheck = { [weak self] in "
+                    + "self?.checkForUpdates() }"
+            )
+        )
+    }
 }

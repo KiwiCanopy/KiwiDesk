@@ -11,36 +11,42 @@ extension UpdatePromptDriver {
     func showUpdateFound(
         _ item: SUAppcastItem,
         userInitiated: Bool,
+        stage: SPUUserUpdateStage = .notDownloaded,
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
-        if let window, window.session.retry == .checking {
+        // Sparkle's "Checking…" window closes with the offer; its
+        // own close is private, and this is the public door to it.
+        super.dismissUpdateInstallation()
+        if let window, window.session.retry == .checking,
+            window.offer.build == item.versionString
+        {
             return window.session.refound(reply: reply)
         }
-        openWindow(for: item, reply: reply)
-        // A scheduled offer never takes the screen (#1013): the
-        // status item carries the mark until the user asks.
-        if userInitiated {
+        openWindow(for: item, stage: stage, reply: reply)
+        if prompts.offerArrived(userInitiated: userInitiated) {
             presentWindow()
-        } else {
-            prompts.updatePending = true
         }
     }
 
     func openWindow(
         for item: SUAppcastItem,
+        stage: SPUUserUpdateStage,
         reply: @escaping (SPUUserUpdateChoice) -> Void
     ) {
         closeWindow()
-        let session = UpdateSession(reply: reply)
+        let session = UpdateSession(
+            reply: reply,
+            installsFrom: Self.installsFrom(stage)
+        )
         let window = UpdateWindowController(
-            offer: offer(for: item),
+            offer: UpdateOffer.make(
+                item: item,
+                loaded: loadedItems,
+                host: Bundle.main
+            ),
             session: session
         )
-        // Sparkle is mid-teardown when the dismiss that starts
-        // Try Again's check arrives.
-        session.startCheck = { [weak self] in
-            DispatchQueue.main.async { self?.startCheck() }
-        }
+        session.startCheck = { [weak self] in self?.startCheck() }
         session.hide = { [weak window] in window?.hide() }
         session.end = { [weak self] in self?.closeWindow() }
         self.window = window
@@ -48,45 +54,24 @@ extension UpdatePromptDriver {
 
     /// Shows the window: the offer got the user's attention.
     func presentWindow() {
-        prompts.updatePending = false
+        prompts.offerGotAttention()
         if let window { presents(window) }
+    }
+
+    /// A download Sparkle already fetched, or began installing,
+    /// resumes past the steps it has done.
+    static func installsFrom(_ stage: SPUUserUpdateStage)
+        -> UpdateWindowPhase
+    {
+        switch stage {
+        case .downloaded: return .preparing
+        case .installing: return .installing
+        default: return .downloading(received: 0, expected: nil)
+        }
     }
 
     func closeWindow() {
         window?.close()
         window = nil
-    }
-
-    /// The offer and its merged notes, read off every item of the
-    /// appcast Sparkle last loaded. Versions compare as Sparkle
-    /// compares them: `sparkle:version` against `CFBundleVersion`.
-    private func offer(for item: SUAppcastItem) -> UpdateOffer {
-        let host = Bundle.main
-        let installed =
-            host.object(forInfoDictionaryKey: "CFBundleVersion")
-            as? String ?? ""
-        let shown =
-            host.object(
-                forInfoDictionaryKey: "CFBundleShortVersionString"
-            ) as? String ?? installed
-        let comparator = SUStandardVersionComparator.default
-        let sources = (loadedItems + [item]).map {
-            UpdateNotesDigest.Source(
-                version: $0.versionString,
-                notes: $0.propertiesDictionary[ReleaseNotes.element]
-                    as? String
-            )
-        }
-        return UpdateOffer(
-            version: item.displayVersionString,
-            installed: shown,
-            released: item.date,
-            digest: UpdateNotesDigest.make(
-                sources: sources,
-                installed: installed,
-                offered: item.versionString,
-                compare: comparator.compareVersion(_:toVersion:)
-            )
-        )
     }
 }

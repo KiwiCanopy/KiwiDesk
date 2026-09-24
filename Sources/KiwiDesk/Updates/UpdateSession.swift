@@ -46,13 +46,24 @@ final class UpdateSession: ObservableObject {
         case none
         /// The failure was acknowledged; Sparkle's dismiss follows.
         case acknowledging
+        /// Dismissed; the check waits for Sparkle's cycle to end,
+        /// since a check started inside it only re-shows the offer.
+        case waiting
         /// The fresh check is running.
         case checking
     }
     private(set) var retry: Retry = .none
 
     private var reply: ((SPUUserUpdateChoice) -> Void)?
-    private var cancellation: (() -> Void)?
+    private var cancellation: (() -> Void)? {
+        didSet { canCancel = cancellation != nil }
+    }
+    /// Whether Cancel can still stop something: a download, or
+    /// Try Again's check.
+    @Published private(set) var canCancel = false
+    /// Where Install lands: a download already fetched in the
+    /// background goes straight to Preparing.
+    private let installsFrom: UpdateWindowPhase
     private var acknowledgement: (() -> Void)?
     private var retryTermination: (() -> Void)?
 
@@ -73,8 +84,15 @@ final class UpdateSession: ObservableObject {
     /// Only the latest armed watch may fail the install.
     private var quitWatch = 0
 
-    init(reply: @escaping (SPUUserUpdateChoice) -> Void) {
+    init(
+        reply: @escaping (SPUUserUpdateChoice) -> Void,
+        installsFrom: UpdateWindowPhase = .downloading(
+            received: 0,
+            expected: nil
+        )
+    ) {
         self.reply = reply
+        self.installsFrom = installsFrom
     }
 
     // MARK: - Sparkle → session
@@ -153,16 +171,22 @@ final class UpdateSession: ObservableObject {
     /// only the dismiss a Try Again's acknowledgement causes.
     func dismissed() -> Bool {
         guard retry == .acknowledging else { return false }
+        retry = .waiting
+        return true
+    }
+
+    /// Sparkle's update cycle ended: Try Again's check may start.
+    func cycleEnded() {
+        guard retry == .waiting else { return }
         retry = .checking
         startCheck()
-        return true
     }
 
     // MARK: - Buttons → Sparkle
 
     func install() {
         guard phase == .found else { return }
-        phase = .downloading(received: 0, expected: nil)
+        phase = installsFrom
         reply?(.install)
         reply = nil
     }
@@ -179,16 +203,15 @@ final class UpdateSession: ObservableObject {
         case .failed(.quit):
             // Sparkle still installs when KiwiDesk next quits.
             hide()
-        case .downloading:
+        case .downloading where canCancel:
             cancel()
+        case .downloading:
+            // Nothing left to cancel: a stall must still close.
+            end()
         case .preparing, .installing:
             break
         }
     }
-
-    /// Whether Cancel can still stop something: a download, or
-    /// Try Again's check.
-    var canCancel: Bool { cancellation != nil }
 
     func cancel() {
         guard case .downloading = phase else { return }
