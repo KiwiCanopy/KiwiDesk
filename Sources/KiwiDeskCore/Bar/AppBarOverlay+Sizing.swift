@@ -173,7 +173,9 @@ extension AppBarOverlay {
             : thickness
     }
 
-    /// Scroll offset calculation ensuring focused item remains visible.
+    /// The scroll offset keeping the focused item in view, in
+    /// equal slots — `ShelfOverflow.offset` does the arithmetic
+    /// (#1517).
     nonisolated static func scrollOffset(
         current: CGFloat,
         activeIndex: Int?,
@@ -183,22 +185,16 @@ extension AppBarOverlay {
         axis: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
-        let total =
-            slot * CGFloat(count)
-            + gap * CGFloat(max(count - 1, 0))
-        guard total > axis, axis > 0 else { return 0 }
-        var offset = current
-        if let index = activeIndex {
-            let lower = CGFloat(index) * (slot + gap)
-            let upper = lower + slot
-            if lower < offset + margin {
-                offset = lower - margin
-            }
-            if upper > offset + axis - margin {
-                offset = upper - axis + margin
-            }
-        }
-        return min(max(offset, 0), total - axis)
+        ShelfOverflow.offset(
+            current: current,
+            lengths: Array(repeating: slot, count: max(count, 0)),
+            gap: gap,
+            total: slot * CGFloat(count)
+                + gap * CGFloat(max(count - 1, 0)),
+            activeIndex: activeIndex,
+            viewport: axis,
+            margin: margin
+        )
     }
 
     /// Computes item frames along the bar axis (#293 QA).

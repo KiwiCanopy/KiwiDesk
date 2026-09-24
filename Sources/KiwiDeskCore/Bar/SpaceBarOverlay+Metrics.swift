@@ -142,7 +142,9 @@ extension SpaceBarOverlay {
         return (inset, max(axis - inset * 2, 0))
     }
 
-    /// Calculates clamped scroll offset keeping active item in view.
+    /// The scroll offset keeping the active item in view, in
+    /// this bar's measures — `ShelfOverflow.offset` does the
+    /// arithmetic (#1517).
     nonisolated static func scrollOffset(
         current: CGFloat,
         lengths: [CGFloat],
@@ -152,28 +154,19 @@ extension SpaceBarOverlay {
         viewport: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
-        let total = runTotal(
+        ShelfOverflow.offset(
+            current: current,
             lengths: lengths,
             gap: gap,
-            frontExtent: frontExtent
+            total: runTotal(
+                lengths: lengths,
+                gap: gap,
+                frontExtent: frontExtent
+            ),
+            activeIndex: activeIndex,
+            viewport: viewport,
+            margin: margin
         )
-        guard total > viewport, viewport > 0 else { return 0 }
-        var offset = current
-        if let index = activeIndex,
-            index >= 0, index < lengths.count
-        {
-            let lower = lengths[..<index].reduce(0) {
-                $0 + $1 + gap
-            }
-            let upper = lower + lengths[index]
-            if lower < offset + margin {
-                offset = lower - margin
-            }
-            if upper > offset + viewport - margin {
-                offset = upper - viewport + margin
-            }
-        }
-        return min(max(offset, 0), total - viewport)
     }
 
     /// Calculates shift distance per scroll arrow tick (#385).
