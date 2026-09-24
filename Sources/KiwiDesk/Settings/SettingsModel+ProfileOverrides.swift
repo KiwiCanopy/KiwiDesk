@@ -106,23 +106,4 @@ extension SettingsModel {
             )
         }
     }
-
-    /// Base keybinding rows for Shortcuts override affordance (#55).
-    func overrideBaseRows(layer name: String) -> [KeyBinding]? {
-        guard let base = profileEditingBaseLayers else {
-            return nil
-        }
-        return base.first { $0.name == name }?.bindings ?? []
-    }
-
-    /// Indicates whether edited profile keys diverge from base (#55 phase 7).
-    var editedProfileOverridesKeys: Bool {
-        guard let base = profileEditingBaseLayers else {
-            return false
-        }
-        return KeyLayerOverride.diff(
-            base: base,
-            edited: config.layers
-        ) != nil
-    }
 }

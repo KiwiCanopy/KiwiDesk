@@ -7,8 +7,6 @@ struct NavRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let command: NavCommand
-    @Environment(\.keybindingOverrideBase)
-    private var overrideBase
     @Environment(\.keybindingLayerName)
     private var layerName
     @Environment(\.disabledSystemShortcuts)
@@ -38,6 +36,13 @@ struct NavRow: View {
                 )
             }
             Spacer()
+            if let index {
+                KeyReachColumn(
+                    model: model,
+                    layer: layerName,
+                    binding: bindings[index]
+                )
+            }
             KeyRecorderField(
                 name: command.resolvedLabel,
                 combo: index.map { bindings[$0].combo } ?? "",
@@ -47,27 +52,12 @@ struct NavRow: View {
                 onClear: clear
             )
         }
-        .keybindingRowStyle(
-            inherited: isInherited,
-            unavailable: command.unavailable?()
-        )
+        .keybindingRowStyle(unavailable: command.unavailable?())
         .id(command.lua)
     }
 
     private var index: Int? {
         bindings.firstIndex {
-            $0.kind == .navigation && $0.lua == command.lua
-        }
-    }
-
-    /// Override layer: bound-and-equal to the base row, or
-    /// unbound on both sides. Always false while editing live.
-    private var isInherited: Bool {
-        guard let base = overrideBase else { return false }
-        if let index {
-            return bindings[index].isInherited(from: base)
-        }
-        return !base.contains {
             $0.kind == .navigation && $0.lua == command.lua
         }
     }

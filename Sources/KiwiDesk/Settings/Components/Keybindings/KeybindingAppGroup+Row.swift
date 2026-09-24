@@ -25,6 +25,11 @@ extension ApplicationsGroup {
                 behaviorMenu(binding)
             }
             Spacer()
+            KeyReachColumn(
+                model: model,
+                layer: layerName,
+                binding: binding.wrappedValue
+            )
             KeyRecorderField(
                 name: binding.wrappedValue.label.isEmpty
                     ? L("shortcuts.choose_app", "Choose app…")
@@ -63,24 +68,12 @@ extension ApplicationsGroup {
                     )
                 }
             )
-            Button {
-                remove(binding.wrappedValue.id)
-            } label: {
-                Image(systemName: "trash")
-            }
-            .buttonStyle(.borderless)
-            .iconButtonAffordance(
-                L(
-                    "shortcuts.remove_binding",
-                    "Remove shortcut"
-                )
-            )
+            KeyReachTrash(
+                model: model,
+                layer: layerName,
+                binding: binding.wrappedValue
+            ) { remove(binding.wrappedValue.id) }
         }
-        .keybindingRowStyle(
-            inherited: binding.wrappedValue.isInherited(
-                from: overrideBase
-            )
-        )
         .id(binding.wrappedValue.id.uuidString)
     }
 

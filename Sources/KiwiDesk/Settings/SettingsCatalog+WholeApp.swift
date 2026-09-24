@@ -85,10 +85,6 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.inactive",
         "Inactive shortcuts"
     )
-    let profileShortcuts = SettingsControl(
-        "shortcuts.override.title",
-        "Profile shortcuts"
-    )
     let luaBindings = SettingsDrawer(
         "shortcuts.advanced.title",
         "Lua bindings"

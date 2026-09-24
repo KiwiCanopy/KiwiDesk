@@ -28,6 +28,7 @@ struct AppRuleSpaceRow: View {
                     model: model,
                     family: .space,
                     app: app,
+                    subject: KeybindingCatalog.displayName(forBundleID: app),
                     reading: reading,
                     value: spaceFacetLabel
                 )

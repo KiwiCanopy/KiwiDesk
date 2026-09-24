@@ -89,12 +89,9 @@ extension RuleReachTable where Value == String {
     ) -> [KeyLayer] {
         let baseNames = Set(storedBase.map(\.name))
         let sharedLayers = Set(base.keys.map { Self.keyParts($0).layer })
-        var layers = page.filter {
-            baseNames.contains($0.name)
-                || !storedPage.contains(where: { stored in
-                    stored.name == $0.name
-                })
-                || sharedLayers.contains($0.name)
+        let pageOwn = Set(storedPage.map(\.name)).subtracting(baseNames)
+        var layers = page.filter { layer in
+            !pageOwn.contains(layer.name) || sharedLayers.contains(layer.name)
         }
         for at in layers.indices {
             let name = layers[at].name

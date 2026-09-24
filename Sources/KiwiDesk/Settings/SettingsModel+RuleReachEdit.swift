@@ -18,6 +18,10 @@ struct RuleReachReading: Equatable {
     let ownIsShared: Set<String>
     /// Profiles that leave this shared rule out.
     let leftOut: Set<String>
+    /// A shortcut's combo that another profile binds to a
+    /// different action, in that action's words — ticking takes
+    /// the key over.
+    var takenBy: [String: String] = [:]
 
     /// Whether `profile`'s box is the edited profile's, locked.
     func isLocked(_ profile: String) -> Bool { profile == editing }
@@ -39,7 +43,9 @@ extension SettingsModel {
     /// The checklist of a Space-list row; nil without a checklist.
     func spaceReach(_ app: String) -> RuleReachReading? {
         guard let reach = encodedReach else { return nil }
-        return reading(reach.appRules, app, reach.unreadable) { $0.raw }
+        return reading(reach.appRules, app.lowercased(), reach.unreadable) {
+            $0.raw
+        }
     }
 
     /// The checklist of a Float-list row, each other value
@@ -49,7 +55,52 @@ extension SettingsModel {
         describe: ([String]) -> String
     ) -> RuleReachReading? {
         guard let reach = encodedReach else { return nil }
-        return reading(reach.floatRules, app, reach.unreadable, describe)
+        return reading(
+            reach.floatRules,
+            app.lowercased(),
+            reach.unreadable,
+            describe
+        )
+    }
+
+    /// The checklist of a shortcut row, keyed by
+    /// `RuleReachTable.keyID`.
+    func keyReach(_ key: String) -> RuleReachReading? {
+        guard let reach = encodedReach,
+            var row = reading(
+                reach.keyLayers,
+                key,
+                reach.unreadable,
+                { ShortcutsReferenceBuilder.glyphs($0) }
+            )
+        else { return nil }
+        row.takenBy = keyTakers(key, in: reach, editing: row.editing)
+        return row
+    }
+
+    /// Who binds this row's combo to another action, per profile.
+    private func keyTakers(
+        _ key: String,
+        in reach: RuleReachSnapshot,
+        editing: String
+    ) -> [String: String] {
+        guard let combo = reach.keyLayers.resolved(key, for: editing),
+            !combo.isEmpty
+        else { return [:] }
+        let (layer, lua) = RuleReachTable<String>.keyParts(key)
+        var result: [String: String] = [:]
+        for profile in reach.keyLayers.profiles where profile != editing {
+            let layers =
+                reach.storedKeyOverrides[profile]?.resolved(
+                    onto: reach.storedKeyBase
+                ) ?? reach.storedKeyBase
+            let taker = layers.first { $0.name == layer }?.bindings
+                .first { $0.combo == combo && $0.lua != lua }
+            if let taker {
+                result[profile] = taker.label.isEmpty ? taker.lua : taker.label
+            }
+        }
+        return result
     }
 
     /// Whether the column is drawn at all: a profile loaded, and
@@ -109,7 +160,7 @@ extension SettingsModel {
         _ app: String,
         _ removal: RuleRemoval
     ) {
-        reachEdits.removal[family, default: [:]][app.lowercased()] = removal
+        reachEdits.removal[family, default: [:]][family.key(app)] = removal
     }
 
     // MARK: - Internals
@@ -121,6 +172,7 @@ extension SettingsModel {
         switch family {
         case .space: spaceReach(app)
         case .float: floatReach(app) { $0.joined(separator: ", ") }
+        case .key: keyReach(app)
         }
     }
 
@@ -131,7 +183,7 @@ extension SettingsModel {
         _ describe: (V) -> String
     ) -> RuleReachReading? {
         guard let editing = reachProfile else { return nil }
-        let key = app.lowercased()
+        let key = app
         let value = table.resolved(key, for: editing)
         var own: [String: String] = [:]
         var ownIsShared: Set<String> = []
@@ -169,7 +221,7 @@ extension SettingsModel {
         _ app: String,
         row: RuleReachReading
     ) -> RuleReach {
-        if let picked = reachEdits.reach[family]?[app.lowercased()] {
+        if let picked = reachEdits.reach[family]?[family.key(app)] {
             return picked
         }
         return row.shared ? .shared(joining: []) : .listed(row.users)
@@ -180,6 +232,6 @@ extension SettingsModel {
         _ app: String,
         _ reach: RuleReach
     ) {
-        reachEdits.reach[family, default: [:]][app.lowercased()] = reach
+        reachEdits.reach[family, default: [:]][family.key(app)] = reach
     }
 }

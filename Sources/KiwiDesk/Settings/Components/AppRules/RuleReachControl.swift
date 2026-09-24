@@ -8,6 +8,8 @@ struct RuleReachControl: View {
     @ObservedObject var model: SettingsModel
     let family: RuleFamily
     let app: String
+    /// What the row is about, in words (`RuleReachChecklist`).
+    let subject: String
     let reading: RuleReachReading
     /// The row's value in words, for the popover's top line.
     let value: String
@@ -32,6 +34,7 @@ struct RuleReachControl: View {
                     model: model,
                     family: family,
                     app: app,
+                    subject: subject,
                     value: value
                 )
             }

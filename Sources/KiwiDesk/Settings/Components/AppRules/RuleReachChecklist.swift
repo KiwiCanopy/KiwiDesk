@@ -9,6 +9,9 @@ struct RuleReachChecklist: View {
     @ObservedObject var model: SettingsModel
     let family: RuleFamily
     let app: String
+    /// What the row is about, in words: an app's name, or a
+    /// shortcut's action.
+    let subject: String
     let value: String
 
     var body: some View {
@@ -32,12 +35,11 @@ struct RuleReachChecklist: View {
         case .space: model.spaceReach(app)
         case .float:
             model.floatReach(app, describe: SettingsModel.floatWords)
+        case .key: model.keyReach(app)
         }
     }
 
-    private var name: String {
-        KeybindingCatalog.displayName(forBundleID: app)
-    }
+    private var name: String { subject }
 
     private func content(_ reading: RuleReachReading) -> some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -117,6 +119,15 @@ struct RuleReachChecklist: View {
                             own
                         )
                         : L("app_rules.reach.own", "⚠ Own rule: %1$@", own),
+                    warning: true
+                )
+            } else if let taker = reading.takenBy[profile] {
+                caption(
+                    L(
+                        "app_rules.reach.key_taken",
+                        "⚠ Key is used for %1$@",
+                        taker
+                    ),
                     warning: true
                 )
             } else if leftOut {

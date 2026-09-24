@@ -37,6 +37,9 @@ struct AppRuleFloatRow: View {
                         model: model,
                         family: .float,
                         app: app,
+                        subject: KeybindingCatalog.displayName(
+                            forBundleID: app
+                        ),
                         reading: reading,
                         value: floatLabel
                     )

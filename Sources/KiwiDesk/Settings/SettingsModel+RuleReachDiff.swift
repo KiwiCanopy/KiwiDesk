@@ -23,6 +23,19 @@ extension SettingsModel {
                 editing: editing,
                 describe: Self.floatWords
             )
+            + rows(
+                .shortcuts(.layers),
+                stored.keyLayers,
+                encoded.keyLayers,
+                editing: editing,
+                name: { key in
+                    let row = encoded.keyTemplates[key]
+                    let label = row?.label ?? ""
+                    return label.isEmpty
+                        ? RuleReachTable<String>.keyParts(key).lua : label
+                },
+                describe: { ShortcutsReferenceBuilder.glyphs($0) }
+            )
     }
 
     /// A float rule set in the Float menu's own words.
@@ -37,6 +50,9 @@ extension SettingsModel {
         _ stored: RuleReachTable<V>,
         _ encoded: RuleReachTable<V>,
         editing: String,
+        name: (String) -> String = {
+            KeybindingCatalog.displayName(forBundleID: $0)
+        },
         describe: (V) -> String
     ) -> [SettingsDiffRow] {
         let apps = Set(encoded.touched.values.flatMap { $0 })
@@ -45,7 +61,7 @@ extension SettingsModel {
         let none = L("app_rules.reach.diff.none", "No rule")
         var result: [SettingsDiffRow] = []
         for app in apps.sorted() {
-            let name = KeybindingCatalog.displayName(forBundleID: app)
+            let name = name(app)
             for profile in encoded.profiles where profile != editing {
                 let old = stored.resolved(app, for: profile)
                 let new = encoded.resolved(app, for: profile)
