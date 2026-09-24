@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// Why the live target reports unsaved state that no draft leaf
 /// carries (#1197). ONE verdict, read by the header's status
@@ -44,5 +45,20 @@ extension SettingsModel {
             return .screensUnsaved(profile: name)
         }
         return .noMatch
+    }
+
+    /// Why the live draft cannot be saved as it stands: another
+    /// profile was loaded under it, and its page is the old one.
+    var pageMovedReason: String? {
+        guard target == .live, let page = reachPage,
+            let current = core.profiles.currentName, current != page
+        else { return nil }
+        return L(
+            "profiles.page_moved",
+            "%1$@ was loaded while you were editing %2$@. Revert, "
+                + "then make your edits again.",
+            current,
+            page
+        )
     }
 }

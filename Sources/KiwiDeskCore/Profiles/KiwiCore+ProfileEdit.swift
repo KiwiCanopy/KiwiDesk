@@ -23,7 +23,7 @@ extension KiwiCore {
     public func overwriteProfile(
         named name: String,
         with config: GuiConfig,
-        writingRules: Bool = true
+        writingRules: Bool
     ) throws {
         var existing = try profiles.read(name: name)
         let stored = (existing.appRules, existing.floatRules)

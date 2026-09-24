@@ -51,23 +51,19 @@ extension SettingsModel {
             editingProfile,
             loaded: core.profiles.currentName
         )
+        // Settle the target first — an unreadable stored profile
+        // falls back to live — so the page pin names the page
+        // actually drawn.
+        var stored: TargetState?
+        if let name = editingProfile {
+            stored = storedState(name)
+            if stored == nil { target = .live }
+        }
         ruleReachStored = core.ruleReachSnapshot()
         reachPage =
             ruleReachStored == nil
             ? nil : (editingProfile ?? core.profiles.currentName)
-        let state: TargetState
-        switch target {
-        case .live:
-            state = liveState()
-        case .storedProfile(let name):
-            if let stored = storedState(name) {
-                state = stored
-            } else {
-                target = .live
-                state = liveState()
-            }
-        }
-        apply(state)
+        apply(stored ?? liveState())
         suppressDirty = true
         reachEdits = RuleReachEdits()
         suppressDirty = false

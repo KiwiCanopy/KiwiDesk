@@ -32,13 +32,16 @@ extension SettingsModel {
     /// Overwrites stored profile with staged configuration (#18).
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
+        // The rule half first: a failed write keeps the draft
+        // whole rather than committing the tiling alone.
+        guard saveRuleReach() else { return }
         do {
-            // With a checklist the rule families are the table's
-            // to encode — one encoder per field.
+            // With a checklist the rule families are the table's,
+            // already written above — one encoder per field.
             try core.overwriteProfile(
                 named: name,
                 with: config,
-                writingRules: encodedReach == nil
+                writingRules: ruleReachStored == nil
             )
         } catch {
             profileWarning = L(
@@ -50,7 +53,6 @@ extension SettingsModel {
             return
         }
         persistBindingsIfEdited()
-        saveRuleReach()
         core.reapplyIfInEffect(name)
         reload()
     }

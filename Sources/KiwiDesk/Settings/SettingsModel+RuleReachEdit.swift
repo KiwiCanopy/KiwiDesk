@@ -45,7 +45,7 @@ extension SettingsModel {
     /// Whether the column is drawn at all: a profile loaded, and
     /// a second profile to name or a row that already differs.
     var offersReachColumn: Bool {
-        guard core.profiles.currentName != nil,
+        guard activeProfile != nil,
             let reach = encodedReach, let editing = reachProfile
         else { return false }
         if reach.appRules.profiles.count >= 2 { return true }
@@ -135,7 +135,7 @@ extension SettingsModel {
         let order = profileMenuOrder.filter(table.profiles.contains)
         return RuleReachReading(
             editing: editing,
-            loaded: core.profiles.currentName,
+            loaded: activeProfile,
             profiles: order + table.profiles.filter { !order.contains($0) },
             unreadable: unreadable,
             shared: table.follows(key, editing),

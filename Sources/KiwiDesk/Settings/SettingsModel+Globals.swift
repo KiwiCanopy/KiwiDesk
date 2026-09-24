@@ -54,7 +54,11 @@ extension SettingsModel {
             )
             seedSpaces = config.spaces
         }
-        saveRuleReach()
+        if let moved = pageMovedReason {
+            profileWarning = moved
+            return
+        }
+        if !saveRuleReach() { dropRuleHalf() }
         do {
             if core.lua == nil {
                 // Cold paused boot: core.start() never ran, so a

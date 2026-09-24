@@ -116,7 +116,11 @@ struct ProfileModesEditTests {
         }
         config.layers[0].bindings[try #require(at)].lua =
             "OVERRIDE"
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         let stored = try #require(saved.layers)
@@ -133,7 +137,11 @@ struct ProfileModesEditTests {
 
         // Load for edit and save straight back.
         let config = try core.loadGuiConfig(editing: "Work")
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.layers == override)
@@ -151,7 +159,11 @@ struct ProfileModesEditTests {
         }
         config.layers[0].bindings[try #require(at)].lua =
             "focus_left"
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.layers == nil)
@@ -173,7 +185,11 @@ struct ProfileModesEditTests {
 
         var config = try core.loadGuiConfig(editing: "Work")
         config.layers[0].bindings[0].lua = "CHANGED"
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let after = try Data(contentsOf: sidecarURL)
         #expect(after == before)

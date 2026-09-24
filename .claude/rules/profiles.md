@@ -765,6 +765,21 @@ which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
 profile never moves `currentName` (#1249).
 
+**One draft, one identity, one encoder (#1393).** The page a
+draft resolves and encodes against is `SettingsModel.reachPage`,
+pinned by `reload()` once the target settles, and never
+`currentName` read live: a Save as New makes its profile current
+mid-save and a Desktop binding loads another under an open
+window, and encoding against the new name bakes the page's own
+rules into the shared base (`RuleReachIdentityTests` ▸
+`reachFilesReadThePin`). A live draft whose pin no longer names
+the loaded profile refuses its Save rather than splitting it
+(`pageMovedRefuses`). On a checklist Save the rule families are
+written by `saveRuleReach` alone — `overwriteProfile` keeps the
+stored ones (`writingRules: false`, `OverwriteProfileRulesTests`)
+— and a rule write that fails keeps the base half out of the
+globals write (`failedReachKeepsBase`).
+
 **The loaded profile's page holds its RESOLVED rules, so the
 draft is not the sidecar.** On the live target the draft's app
 and float rules are the loaded profile's resolved set — the

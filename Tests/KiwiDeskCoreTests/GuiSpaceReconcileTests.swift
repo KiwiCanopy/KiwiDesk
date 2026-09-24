@@ -176,7 +176,8 @@ struct GuiSpaceReconcileTests {
         // The edit session drops "3"; write it and hot-reload.
         try core.overwriteProfile(
             named: "edit",
-            with: config(spaces: [SpaceID("1"), SpaceID("2")])
+            with: config(spaces: [SpaceID("1"), SpaceID("2")]),
+            writingRules: true
         )
         core.reapplyIfInEffect("edit")
         #expect(core.state.workspaces[SpaceID("3")] == nil)

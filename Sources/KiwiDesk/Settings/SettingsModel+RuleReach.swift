@@ -71,11 +71,14 @@ extension SettingsModel {
     }
 
     /// Writes every profile file and the shared rules the draft's
-    /// checklist reached.
-    func saveRuleReach() {
-        guard let reach = encodedReach else { return }
+    /// checklist reached. False when a write failed; the caller
+    /// then keeps the base half from landing alone.
+    @discardableResult
+    func saveRuleReach() -> Bool {
+        guard let reach = encodedReach else { return true }
         do {
             try core.saveRuleReach(reach)
+            return true
         } catch {
             profileWarning = L(
                 "profiles.save_failed",
@@ -83,7 +86,16 @@ extension SettingsModel {
                 "\(error)"
             )
             core.onLog("rule reach save failed: \(error)")
+            return false
         }
+    }
+
+    /// Drops the draft's rule half, so a globals write after a
+    /// failed or refused rule write carries the stored rules.
+    func dropRuleHalf() {
+        config.appRules = cleanConfig.appRules
+        config.floatRules = cleanConfig.floatRules
+        reachEdits = RuleReachEdits()
     }
 
     /// Profiles in the order the edit-target menu lists them: the

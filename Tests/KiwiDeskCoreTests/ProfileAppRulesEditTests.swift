@@ -85,7 +85,11 @@ struct ProfileAppRulesEditTests {
         config.appRules["mail"] = SpaceID(3)
         config.appRules["safari"] = SpaceID(4)
         config.appRules["music"] = nil
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         let stored = try #require(saved.appRules)
@@ -99,7 +103,11 @@ struct ProfileAppRulesEditTests {
 
         // Load for edit and save straight back.
         let config = try core.loadGuiConfig(editing: "Work")
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.appRules == override)
@@ -116,7 +124,11 @@ struct ProfileAppRulesEditTests {
             "mail": SpaceID(1),
             "music": SpaceID(2),
         ]
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.appRules == nil)
@@ -138,7 +150,11 @@ struct ProfileAppRulesEditTests {
 
         var config = try core.loadGuiConfig(editing: "Work")
         config.appRules["mail"] = SpaceID(9)
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let after = try Data(contentsOf: sidecarURL)
         #expect(after == before)

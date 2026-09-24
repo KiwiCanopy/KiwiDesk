@@ -84,6 +84,12 @@ extension SettingsModel {
     /// comparison re-derived beside this apply.
     @discardableResult
     private func persist(named name: String) -> Bool {
+        // One draft, one identity: never split a Save between the
+        // page it was drawn for and a profile loaded under it.
+        if let moved = pageMovedReason {
+            profileWarning = moved
+            return false
+        }
         core.mergeLiveSpaces(
             into: &config,
             seededWith: seedSpaces
@@ -117,15 +123,9 @@ extension SettingsModel {
         }
         // Profile files first: the gui.json write below reloads
         // the config, which re-reads the loaded profile's rules.
-        if saved {
-            saveRuleReach()
-        } else {
-            // The files half did not land, so neither may the
-            // base half: the globals write keeps the stored rules.
-            config.appRules = cleanConfig.appRules
-            config.floatRules = cleanConfig.floatRules
-            reachEdits = RuleReachEdits()
-        }
+        // The files half must land for the base half to: a failed
+        // write keeps the stored rules in the globals write too.
+        if !saved || !saveRuleReach() { dropRuleHalf() }
         persistGlobalsIfNeeded()
         reload()
         return saved
