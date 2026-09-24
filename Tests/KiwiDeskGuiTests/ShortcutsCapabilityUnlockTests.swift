@@ -126,16 +126,17 @@ struct ShortcutsCapabilityUnlockTests {
         model.selectEditTarget("Desk")
         #expect(model.editingStoredProfile)
 
-        let base = model.overrideBaseRows(layer: KeyLayer.defaultName)
-        #expect(base != nil, "editing a profile must expose a base")
-        // Every base row is reachable, not just the overridden
-        // one — the affordance is the LIST's, not the row's.
-        #expect(base?.count == baseCombos.count)
-        for (combo, lua) in baseCombos {
+        // Every row of the list reads its reach, not just the
+        // overridden one — the checklist is the LIST's, not the
+        // row's (#1393). `!= nil` fails on a missing checklist.
+        for (_, lua) in baseCombos {
+            let key = RuleReachTable<String>.keyID(
+                layer: KeyLayer.defaultName,
+                lua: lua
+            )
             #expect(
-                base?.contains { $0.lua == lua && $0.combo == combo }
-                    == true,
-                Comment(rawValue: "peer \(lua) lost its base row")
+                model.keyReach(key) != nil,
+                Comment(rawValue: "peer \(lua) has no reach reading")
             )
         }
     }
@@ -156,10 +157,13 @@ struct ShortcutsCapabilityUnlockTests {
                     KeyLayer(
                         name: KeyLayer.defaultName,
                         bindings: [
+                            // An action the base lacks, so Desk's
+                            // own — a moved combo would leave the
+                            // base row beside it (no deletions).
                             KeyBinding(
-                                combo: "ctrl+alt+h",
-                                lua: baseCombos[0].1,
-                                kind: .navigation
+                                combo: "ctrl+alt+r",
+                                lua: "KiwiDesk.reload_config()",
+                                kind: .custom
                             )
                         ]
                     )
@@ -174,7 +178,12 @@ struct ShortcutsCapabilityUnlockTests {
         model.selectEditTarget("Desk")
         #expect(model.editingStoredProfile)
 
-        #expect(model.editedProfileOverridesKeys)
+        // The overridden shortcut is Desk's own, not the shared one.
+        let own = RuleReachTable<String>.keyID(
+            layer: KeyLayer.defaultName,
+            lua: "KiwiDesk.reload_config()"
+        )
+        #expect(model.keyReach(own)?.shared == false)
         // The neighbouring list keeps its rules shared — the
         // capability stayed in its own list (#1393's checklist).
         // `== true` fails on a missing reading, so the clause

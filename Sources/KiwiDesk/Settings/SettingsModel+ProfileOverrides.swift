@@ -34,7 +34,9 @@ extension SettingsModel {
         guard let name = editingProfile else { return }
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
-        let rules = saveRuleReach()
+        // Its own shortcut override is the diff `overwriteProfile`
+        // takes below, against the base written here.
+        let rules = saveRuleReach(keysLeftTo: name)
         guard rules != .failed else {
             // A write that failed after others landed: re-read, so
             // the draft's diff shows only what did not land.

@@ -52,7 +52,10 @@ extension SettingsModel {
             removal: reachEdits.removal[.float] ?? [:]
         )
         let pageKeys = RuleReachTable<String>.combos(config.layers)
-        KiwiCore.collectTemplates(config.layers, into: &pageTemplates)
+        RuleReachTable<String>.collectTemplates(
+            config.layers,
+            into: &pageTemplates
+        )
         snapshot.keyTemplates.merge(pageTemplates) { _, page in page }
         snapshot.keyLayers = RuleReachDraft.encode(
             snapshot.keyLayers,

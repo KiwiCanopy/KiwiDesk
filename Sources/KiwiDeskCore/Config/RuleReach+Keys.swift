@@ -159,4 +159,21 @@ extension RuleReachTable where Value == String {
         }
         layers[at].bindings.append(row)
     }
+
+    /// Each stored row, keyed as the key table keys it, for a row
+    /// the save must write into a file that lacks it.
+    public static func collectTemplates(
+        _ layers: [KeyLayer],
+        into templates: inout [String: KeyBinding]
+    ) {
+        for layer in layers {
+            for row in layer.bindings where !row.lua.isEmpty {
+                let key = keyID(
+                    layer: layer.name,
+                    lua: row.lua
+                )
+                if templates[key] == nil { templates[key] = row }
+            }
+        }
+    }
 }

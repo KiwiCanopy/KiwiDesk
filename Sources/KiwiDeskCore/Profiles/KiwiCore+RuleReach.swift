@@ -79,12 +79,12 @@ extension KiwiCore {
         for profile in stored {
             floats[profile.name] = profile.floatRules
             keys[profile.name] = profile.layers
-            Self.collectTemplates(
+            RuleReachTable<String>.collectTemplates(
                 profile.layers?.resolved(onto: keyBase) ?? keyBase,
                 into: &templates
             )
         }
-        Self.collectTemplates(keyBase, into: &templates)
+        RuleReachTable<String>.collectTemplates(keyBase, into: &templates)
         return RuleReachSnapshot(
             appRules: .appRules(
                 base: sidecar.appRules,
@@ -174,22 +174,5 @@ extension KiwiCore {
         if let sidecar { try guiConfigStore.save(sidecar) }
         refreshConfigIssues()
         refreshStructuredOverrides()
-    }
-
-    /// Each stored row, keyed as the key table keys it, for a row
-    /// the save must write into a file that lacks it.
-    public static func collectTemplates(
-        _ layers: [KeyLayer],
-        into templates: inout [String: KeyBinding]
-    ) {
-        for layer in layers {
-            for row in layer.bindings where !row.lua.isEmpty {
-                let key = RuleReachTable<String>.keyID(
-                    layer: layer.name,
-                    lua: row.lua
-                )
-                if templates[key] == nil { templates[key] = row }
-            }
-        }
     }
 }
