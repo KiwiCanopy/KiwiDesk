@@ -41,6 +41,7 @@ struct HomeCardBarsTile: View {
         var items: [BarItem]
         var alignment: AppBarStyle.BarAlignment
         var spans: Bool
+        /// Boxes per item and no plate: `KiwiShelf.drawsPlate`.
         var boxed: Bool
         var thickness: CGFloat
         var corner: CGFloat
@@ -146,7 +147,7 @@ struct HomeCardBarsTile: View {
             items: spaceItems(style.shelf),
             alignment: style.alignment,
             spans: style.plateSpans,
-            boxed: style.hasBox,
+            boxed: !style.shelf.drawsPlate,
             thickness: cross,
             corner: style.resolvedCornerRadius(forThickness: cross),
             itemCorner: style.resolvedCornerRadius(
@@ -169,7 +170,7 @@ struct HomeCardBarsTile: View {
             items: appItems(style, vertical: vertical),
             alignment: style.alignment,
             spans: style.plateSpans,
-            boxed: style.hasBox,
+            boxed: !style.shelf.drawsPlate,
             thickness: cross,
             corner: style.resolvedCornerRadius(forThickness: cross),
             itemCorner: style.resolvedCornerRadius(

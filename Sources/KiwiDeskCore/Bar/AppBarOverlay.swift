@@ -44,12 +44,8 @@ public final class AppBarOverlay {
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [NSView] = []
     var scrollOffset: CGFloat = 0
-    /// The focused window the offset last followed, so a manual
-    /// scroll holds until it changes (#1517).
-    var followedFocus: WindowID?
-    var hasFollowed = false
-    /// Set by a page; cleared when the focus changes.
-    var manuallyScrolled = false
+    /// Follows the focused window unless a manual scroll holds.
+    var follow = ShelfFollow<WindowID>()
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
@@ -80,22 +76,14 @@ public final class AppBarOverlay {
             style: style,
             capAxis: capAxis
         )
-        // A MANUAL scroll holds until the focus changes (#1517);
-        // without one, every render keeps the focus in view.
         let focus = activeIndex.flatMap {
             items.indices.contains($0) ? items[$0].id : nil
         }
-        if !hasFollowed || focus != followedFocus {
-            manuallyScrolled = false
-        }
-        hasFollowed = true
-        followedFocus = focus
-        render(followingFocus: !manuallyScrolled)
+        render(followingFocus: follow.follows(focus))
     }
 
     public func hide() {
-        hasFollowed = false
-        manuallyScrolled = false
+        follow.reset()
         lastShown = nil
         scrollOffset = 0
         root.isHidden = true

@@ -31,7 +31,7 @@ extension SpaceBarOverlay {
         // real viewport; a pathological near-full-width app name
         // falls back to scrolling with the run rather than
         // collapsing the Spaces to nothing (#409).
-        let fadeRoom = 2 * (ShelfOverflow.fadeLength(thickness: depth) + gap)
+        let fadeRoom = ShelfArrangement.fadeRoom(thickness: depth, gap: gap)
         let pinFront =
             total > axis && frontApp != nil
             && front < axis - fadeRoom

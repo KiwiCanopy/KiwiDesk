@@ -148,8 +148,16 @@ public struct ShelfArrangement: Equatable, Sendable {
         thickness: CGFloat,
         gap: CGFloat
     ) -> CGFloat {
-        activeExtent
-            + 2 * (ShelfOverflow.fadeLength(thickness: thickness) + gap)
+        activeExtent + fadeRoom(thickness: thickness, gap: gap)
+    }
+
+    /// Both follow margins' room at their widest: what a section
+    /// keeps beyond its active item.
+    public static func fadeRoom(
+        thickness: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        2 * (ShelfOverflow.fadeLength(thickness: thickness) + gap)
     }
 
     /// The Space section's length: its need while both fit;

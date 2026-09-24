@@ -21,7 +21,14 @@ final class ShelfManager {
     /// Set while `updateBars` syncs the two bars: their renders
     /// would otherwise re-lay the shelf against the previous plan
     /// before `sync` hands it the new one.
-    var holdsRelayout = false
+    private(set) var holdsRelayout = false
+
+    /// Runs `body` with relayout held, released however it exits.
+    func holdingRelayout(_ body: () -> Void) {
+        holdsRelayout = true
+        defer { holdsRelayout = false }
+        body()
+    }
     private var last: [DisplayID: Shelf] = [:]
 
     /// Shows `shelves`, retiring the shelf of any display absent.

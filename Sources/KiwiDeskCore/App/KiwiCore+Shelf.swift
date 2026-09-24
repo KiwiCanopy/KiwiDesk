@@ -18,11 +18,12 @@ extension KiwiCore {
         defer { publishStatusSpaceMark() }
         let settings = tiler.settings
         let displays = state.workspaces.allDisplays
-        shelves.holdsRelayout = true
         guard !displays.isEmpty else {
             let fallback = appBarFallback(settings: settings)
-            appBars.sync(fallback)
-            spaceBars.sync([])
+            shelves.holdingRelayout {
+                appBars.sync(fallback)
+                spaceBars.sync([])
+            }
             // A lone bar's slot IS its strip.
             syncShelves(
                 fallback.map { ($0.display, $0.strip) },
@@ -69,8 +70,10 @@ extension KiwiCore {
                 spaceBarsShown.append(bar)
             }
         }
-        appBars.sync(appBarsShown)
-        spaceBars.sync(spaceBarsShown)
+        shelves.holdingRelayout {
+            appBars.sync(appBarsShown)
+            spaceBars.sync(spaceBarsShown)
+        }
         syncShelves(strips, settings: settings)
     }
 
@@ -80,7 +83,6 @@ extension KiwiCore {
         _ strips: [(DisplayID, CGRect)],
         settings: TilingSettings
     ) {
-        shelves.holdsRelayout = false
         let spaceSlots = Dictionary(
             spaceBars.shownStrips.map { ($0.display, $0.strip) },
             uniquingKeysWith: { first, _ in first }

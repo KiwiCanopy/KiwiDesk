@@ -76,6 +76,40 @@ struct ShelfFollowTests {
         #expect(overlay.scrollOffset < paged)
     }
 
+    /// Sixty windows on the App Bar, the `active`-th focused.
+    private static func appBar(active: Int) -> AppBarManager.Bar {
+        let bar = paintedAppBar(
+            items: (1...60).map { appBarItem(UInt32($0), text: "W\($0)") }
+        )
+        return AppBarManager.Bar(
+            display: bar.display,
+            space: bar.space,
+            items: bar.items,
+            activeIndex: active - 1,
+            strip: bar.strip,
+            style: bar.style,
+            capAxis: bar.capAxis
+        )
+    }
+
+    /// The App Bar holds its page on the same rule (architect
+    /// re-review): a refresh keeps it, a new focus follows.
+    @Test("An App Bar page holds until the focus changes")
+    func appBarPageHolds() throws {
+        let manager = AppBarManager()
+        manager.sync([Self.appBar(active: 1)])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        overlay.forwardCount.onPage()
+        let paged = overlay.scrollOffset
+        try #require(paged > 0, "the page moved nothing")
+        manager.sync([Self.appBar(active: 1)])
+        #expect(overlay.scrollOffset == paged)
+        manager.sync([Self.appBar(active: 2)])
+        #expect(overlay.scrollOffset < paged)
+    }
+
     /// Without a manual scroll every render follows: a strip that
     /// shrinks under the active Space brings it back into view.
     @Test("Without a page, a shrinking section still follows")
@@ -111,18 +145,19 @@ struct ShelfFollowTests {
             spaces.shownOverlay(on: barTitleDisplay)
         )
         let shelves = ShelfManager()
-        shelves.holdsRelayout = true
-        shelves.sync([
-            .init(
-                display: barTitleDisplay,
-                strip: barTitleStrip,
-                shelf: KiwiShelf(),
-                space: (section, barTitleStrip),
-                app: nil
-            )
-        ])
+        shelves.holdingRelayout {
+            shelves.sync([
+                .init(
+                    display: barTitleDisplay,
+                    strip: barTitleStrip,
+                    shelf: KiwiShelf(),
+                    space: (section, barTitleStrip),
+                    app: nil
+                )
+            ])
+        }
+        #expect(!shelves.holdsRelayout)
         #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
-        shelves.holdsRelayout = false
         shelves.relayout(barTitleDisplay)
         #expect(shelves.overlayForTesting(barTitleDisplay) != nil)
     }

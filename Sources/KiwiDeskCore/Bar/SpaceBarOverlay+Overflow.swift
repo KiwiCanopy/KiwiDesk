@@ -99,7 +99,7 @@ extension SpaceBarOverlay {
         viewport: CGFloat,
         fade: CGFloat
     ) {
-        manuallyScrolled = true
+        follow.scrolledByHand()
         scrollOffset = ShelfOverflow.pageTarget(
             from: scrollOffset,
             lengths: lengths,
@@ -113,7 +113,7 @@ extension SpaceBarOverlay {
 
     /// Shifts bar offset and re-renders without forcing active follow.
     func scroll(by delta: CGFloat) {
-        manuallyScrolled = true
+        follow.scrolledByHand()
         scrollOffset += delta
         render(followingActive: false)
     }
