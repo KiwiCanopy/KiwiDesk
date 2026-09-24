@@ -448,19 +448,22 @@ takes any value from 20 up.
 
 ### App Bar
 
+The App Bar renders only in **Monocle** and **Scrolling**, and
+its card has no on/off row.
+
 :::unreleased
-The App Bar renders only in **Monocle** and **Scrolling**; its
-card has no on/off row, the KiwiShelf card's **App Bar in
-Monocle** and **App Bar in Scrolling** switches are its
-visibility. Drag an item to reorder the windows;
-a grouped item expands into its members on click. Styling it
-differently per layout is Lua-only: every `app_bar.*` field has a
-`monocle.set_app_bar_*` / `scroll.set_app_bar_*` twin ([Per-layout
-App Bar overrides](lua-reference.md#per-layout-app-bar-overrides)).
+The KiwiShelf card's **App Bar in Monocle** and **App Bar in
+Scrolling** switches are its visibility.
+:::
+
+Drag an item to reorder the windows; a grouped item expands into
+its members on click. Styling it differently per layout is
+Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
+`scroll.set_app_bar_*` twin ([Per-layout App Bar
+overrides](lua-reference.md#per-layout-app-bar-overrides)).
 **Liquid Glass** is one switch for both bars and the shortcuts
 panel (**Colours & Animations**), tinted by each bar's Fill; on
 macOS before 26 the Boxed or Plain shape draws underneath.
-:::
 
 On by default, on all three surfaces. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,

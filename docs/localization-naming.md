@@ -49,11 +49,25 @@ arguable, and the catalog question is checkable.
 
 ## Family A — the same name everywhere
 
-**App Bar**, **Space Bar**, and **Sticky**. `bars.switch.app_bar`
-and `bars.switch.space_bar` are Latin in all eleven catalogs, so the
-control every user taps says "Space Bar" whatever their language.
+The members are `PRODUCT_NAMES` in
+`scripts/localization_guards.py` — that tuple is the register,
+and this section argues the ones that needed arguing.
+`bars.switch.app_bar` and `bars.switch.space_bar` are Latin in all
+eleven catalogs, so the control every user taps says "Space Bar"
+whatever their language.
 
-**Sticky** (#579) is the one **single-word** member, admitted by
+**KiwiShelf** (#1517) is the edge both bars sit on, coined on the
+product name, and `bars.switch.kiwishelf` is Latin in all eleven
+catalogs from its first translation. The sort question answers
+it directly — no locale ever translated it — and the
+descriptive-occurrence check in *Adding a name* passes by
+construction: the word exists only as this feature's name. The
+palette picker's `PaletteShelf` is a source type no catalog value
+spells, so it raises no collision; the common noun *shelf* is not
+the name and is not UI copy
+(`.claude/rules/config-vocabulary.md` ▸ KiwiShelf).
+
+**Sticky** (#579) is the first **single-word** member, admitted by
 product decision rather than by the sort question: `de`, `ru` and
 `zh-Hant` had rendered it "Fixierung"/"Закреплённое"/"常駐", so
 the catalog test read Family B until they were reharmonized, and
@@ -487,7 +501,8 @@ substring reach means morphological variants inherit the
 obligation automatically (`keybinding.make_unsticky` "Make
 unsticky" already demands verbatim "Sticky", which every locale
 honors). The two bar names are two-word coinages that only ever
-occur referentially, so the question never arises for them.
+occur referentially, so the question never arises for them,
+nor for **KiwiShelf**, a coinage no other text can contain.
 **Sticky** is the single word where it had to be asked: every
 key in `en.json` carrying `sticky`/`Sticky` names *this*
 feature, none a different one — unlike

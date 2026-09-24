@@ -1471,8 +1471,7 @@ grid.set_auto_size_override("3", true)
 **Expects:** `"horizontal"` or `"vertical"`.
 
 **Does:** sets the focus axis. Horizontal: `focus("left"/"right")`
-cycles through windows; the bar sits on top/bottom. Vertical:
-`focus("up"/"down")` cycles; the bar sits on left/right.
+cycles through windows. Vertical: `focus("up"/"down")` cycles.
 
 **Example:**
 
@@ -1792,15 +1791,20 @@ track.set_overflow_style_override("code", "cascade_overflow")
 share it and the look they share; each bar keeps its own plate,
 colours and content. The shelf reserves its edge in every layout
 whenever any bar can show, so switching a Space to a layout with
-or without an App Bar never moves a window. Stored as
+or without an App Bar never moves a window. Monocle and
+scrolling show an App Bar by default, so the shelf reserves its
+edge even with the Space Bar off until both
+`monocle.set_app_bar_enabled(false)` and
+`scroll.set_app_bar_enabled(false)` are set. Stored as
 `settings.kiwishelf` in a profile.
 
-With both bars shown they sit at opposite ends of the edge, in
-`set_order`; a lone bar sits where `set_alignment` puts it. Each
-bar scrolls on its own when its items overflow, with an arrow
-zone at each end counting what is hidden on that side. Only when
-both bars overflow does `set_share` split the edge, and a divider
-between them can then be dragged to change the share.
+A lone bar spans the edge and sits where `set_alignment` puts
+it. With both bars shown they take opposite ends of the edge, in
+`set_order`, each at the length its items need, `set_item_gap`
+apart. Only when both need more than the edge holds does
+`set_share` split it. Each bar scrolls on its own when its items
+overflow, with a clickable arrow at each end that still hides
+items.
 :::
 
 ### kiwishelf.set_edge
@@ -1869,7 +1873,6 @@ the range are clamped.
 **Does:** sets the Space Bar's share of the edge once both bars
 overflow; the App Bar takes the rest, and each scrolls inside its
 own. A bar that needs less than its share gives the rest back.
-Dragging the divider between two full bars writes this value.
 
 **Example:**
 
@@ -1997,8 +2000,8 @@ kiwishelf.set_liquid_glass(true)
 **Does:** sets how far the plate reaches under `plain` (and the
 Liquid Glass finish over it). `hug` gives each bar its own plate
 in its own `fill_color`, wrapping its item run plus one item gap
-per end. `full` spans one plate along the whole edge, blending
-from the Space Bar's `fill_color` to the App Bar's in bar order.
+per end. `full` spans each bar's plate across that bar's whole
+part of the edge, so two bars' plates meet one item gap apart.
 While a bar's items overflow and scroll, its plate spans that
 bar instead of hugging.
 Inert under `boxed` (the Settings control greys there).
@@ -2033,7 +2036,7 @@ kiwishelf.set_corner_roundness(50)
 `0`).
 
 **Does:** sets the gap between items, Space items and App Bar
-items alike.
+items alike, and between the two bars while both show.
 
 **Example:**
 
@@ -2086,7 +2089,9 @@ content`.
 `init.lua` is not rewritten; a saved profile is, once, the first
 time 2.0 reads it: the shelf takes the Space Bar's values — the
 App Bar's where the Space Bar is off — and every other copy is
-dropped. A profile 2.0 has written no longer opens in 1.x.
+dropped, as is every stored `item_size`; the Space Bar's stored
+`title_cap` becomes its `front_app_title_cap`. A profile 2.0 has
+written no longer opens in 1.x.
 :::
 
 ## App Bar
@@ -3974,7 +3979,7 @@ What the `delta` adjusts depends on the layout:
   window the delta moves the left/top region. The write stops
   at the bound that keeps both regions at their effective
   minimums (per side, #933) within the area the layout fills
-  (#383) — the display minus any Space Bar strip.
+  (#383) — the display minus any bar strip.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;

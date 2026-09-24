@@ -97,7 +97,8 @@ editing here:
   why — so add the entry there rather than a note here.
 - A layout **span** reads one hook further in:
   `TilingEngine.layoutBounds(on:)` (#537), which reserves the
-  Space Bar's strip (#293) so a resize divides its delta by the
+  KiwiShelf strip while any bar can show (#293, #1517; the one
+  reservation is bars.md's) so a resize divides its delta by the
   region the layout filled, not the whole display. Routing
   through `visibleBounds` and then dividing by the display
   passes the guard above and is still the bug —
@@ -1197,16 +1198,16 @@ editing here:
   property of a slot and an ABSOLUTE-LENGTH maximum is a
   property of the screen (`maxFraction` is rightly in the type:
   a fraction is unitless). It is the area the layout DRAWS,
-  taken from the same `windowFrame` carve
+  taken from the same `LayoutContext.usable` carve
   `ScrollingLayout.metrics` caps against, never the layout
-  region it is carved from — on a vertical axis the difference
-  is the App Bar's own thickness, the same defect in miniature.
+  region it is carved from — the difference is the outer gaps,
+  the same defect in miniature.
   And it never reduces a CONFIGURED LENGTH: an explicit
   `scroll.set_slot_size` above the ceiling is a deliberate
   statement that survives undocking, so a grow refuses rather
   than rewrites. An `auto`/`%` store is deliberately NOT covered
   — it resolves against the region, so leaving it alone would
-  re-bank the strip on the first press; that trim is the rule
+  re-bank the outer gaps on the first press; that trim is the rule
   working, not a defect to fix back.
   The focused window's learned app MAXIMUM joins the same
   write-site ceiling (#1055): believed only under the floor's

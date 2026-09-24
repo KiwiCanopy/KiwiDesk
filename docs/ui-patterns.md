@@ -852,7 +852,7 @@ already on the next row. Two shapes, picked by **how many
 fields the toggle gates**:
 
 - **One gated field → `Auto <Field>`**, naming it exactly:
-  "Auto item size" over **Item size**, "Auto track limit" over
+  "Auto font size" over **Font size**, "Auto track limit" over
   **Track limit**. The pair reads top-to-bottom.
 - **A gate over a *set* of fields → verb + object** naming the
   composite: **"Auto-size grid"** gates Columns *and* Rows, so

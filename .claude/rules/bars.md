@@ -12,11 +12,75 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
+  # The one shelf (#1517): where a bar field lives, the one
+  # reservation, the one placement rule, the retired verbs.
+  - "Sources/KiwiDeskCore/App/KiwiCore+Shelf.swift"
+  - "Sources/KiwiDeskCore/Layouts/KiwiShelf*.swift"
+  - "Sources/KiwiDeskCore/Layouts/Shelf*.swift"
+  - "Sources/KiwiDeskCore/Layouts/SpaceBarStyle*.swift"
+  - "Sources/KiwiDeskCore/Layouts/AppBarStyle*.swift"
+  - "Sources/KiwiDeskCore/Layouts/LayoutAppBar*.swift"
+  - "Sources/KiwiDeskCore/Commands/Reference/APIReference+Retired.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)
 
 Canonical for this subsystem (AGENTS.md §5 indexes it).
+
+## Both bars sit on ONE KiwiShelf (#1517)
+
+The Space Bar and the App Bar share one screen edge, KiwiShelf
+(`TilingSettings.kiwishelf`). Two bars on independent edges each
+carved a reservation, and the App Bar's came and went with the
+layout, so a layout switch reflowed every window; a field both
+bars read, stored twice, was a question the user answered twice.
+The argument is `docs/design-decisions.md` ▸ One shelf holds both
+bars. Obligations:
+
+- **Store a bar field in exactly one of `KiwiShelf`,
+  `SpaceBarStyle` and `AppBarStyle`.** A value both bars must
+  agree on — where they hang, the strip's depth and look, the
+  item gap, the font size — is the shelf's; a value each bar may
+  set for itself is that bar's style, even where both bars spell
+  it alike (an indicator, a colour). A shelf field takes **no
+  per-layout override**: `LayoutAppBar` mirrors `AppBarStyle`
+  and nothing else. `KiwiShelfParityTests` ▸ `looksAreDisjoint`
+  reds a name on the shelf and on either style, and
+  `AppBarParityTests` ▸ `propertyParity` a `LayoutAppBar` field
+  that is not `AppBarStyle`'s; whether a NEW field is shared or
+  a bar's own is review's, since no guard can tell.
+- **Retire a bar verb by adding it to `APIReference.retired`**,
+  naming its replacement or nil, and never by an alias (AGENTS.md
+  §5). A field the shelf migration moves joins
+  `ConfigMigration.shelfMovedKeys`, which the retired list
+  derives its setter spellings from, so a verb and its stored key
+  retire together. `KiwiShelfRetiredVerbTests` holds the list:
+  ▸ `replacementsAreLive` that every replacement is dispatchable,
+  ▸ `retiredAreUnregistered` that no retired name is still
+  registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
+  one as its own Config Issue.
+- **Reserve the shelf ONCE, through
+  `TilingSettings.layoutBounds(from:)`, in every layout while
+  `shelfShows`** — never a layout, a bar or a mode carving a
+  strip of its own, and never a second "does the shelf show"
+  predicate beside `shelfShows`. A per-layout reservation is the
+  reflow this section exists to remove. `ShelfGeometryTests` ▸
+  `reservesWhileAnyBarShows` and `ShelfDriverTests` ▸
+  `layoutSwitchReflowsNothing` hold it; `LayoutBoundsRoutingTests`
+  holds the route (#537).
+- **Place every bar along the edge through the one
+  `ShelfArrangement`** — the live drivers through
+  `KiwiCore.shelfPlan`, and the Settings preview and the
+  alignment note by asking it too
+  (`ShelfArrangement.spaceBarMoves`), never by arithmetic of
+  their own: a picture that places the bars by hand can claim a
+  placement the engine does not make (gui.md, #702). The Space
+  Bar's front-app segment stands down on the same App Bar content
+  the plan is built from. `ShelfArrangementTests` holds the rule,
+  `ShelfDriverTests` ▸ `bothBarsShareTheStrip` the disjoint
+  segments and ▸ `frontAppYieldsToTheAppBar` the stand-down; no
+  suite scans the Settings tree for a hand placement, so the GUI
+  callers are review's.
 
 ## A bar item's title is SHOWN on two channels: drawn and announced
 

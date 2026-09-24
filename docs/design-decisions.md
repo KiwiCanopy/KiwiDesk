@@ -10472,11 +10472,12 @@ read is stored once, on it.**
 The Space Bar and the App Bar sit on **KiwiShelf**, one screen
 edge. Where they hang and the strip they share — edge,
 alignment, order, share, thickness, margins, background style
-and size, Liquid Glass, corner roundness, item gap, font size —
-is `kiwishelf`'s; each bar keeps only what is its own: content,
-indicator, title cap, symbol style, glyph cap, spring delay, dim
-factors, colours. Each bar keeps its own plate too, so the two
-stay two bars rather than one merged strip.
+and fit, Liquid Glass, corner roundness, item gap, font size —
+is `kiwishelf`'s; a field each bar may set for itself — its
+content, indicator, title cap, symbol style, dim factors,
+colours — stays on that bar. Each bar keeps its own plate too,
+in its own Fill, so the two stay two bars rather than one merged
+strip.
 
 *One edge, reserved in every layout.* Two bars on independent
 edges each carved a reservation, and the App Bar's came and went
@@ -10485,9 +10486,13 @@ reflowed every window by a strip's depth: showing a bar moved
 windows the user never touched. The shelf's strip is carved from
 the display's original visible frame whenever ANY bar can show,
 and the remainder is the bounds every layout operates inside, so
-a layout switch costs nothing. Layouts still never learn a bar
-exists (resolution before layout; layout functions stay pure
-over the flat array). The stacking rules the two edges needed —
+a layout switch costs nothing. The price is an empty strip in a
+layout that draws no bar there — BSP, say, with the Space Bar
+off and the App Bar on in Monocle — and it is accepted: an empty
+strip costs a strip's depth once, where a reflow costs it on
+every switch, and turning every bar off returns it. Layouts
+still never learn a bar exists (resolution before layout; layout
+functions stay pure over the flat array). The stacking rules the two edges needed —
 which bar is screen-facing, how two reservations add, which
 margins count between them — have nothing left to govern: both
 bars take opposite ends of one strip in `order` while both show,
@@ -10497,13 +10502,23 @@ far-end alignment the Space Bar moves to its end when an App Bar
 appears, and the one alignment that holds it still is named
 beside the control.
 
+*One placement rule, asked by every picture of it.* Where each
+bar sits along the edge is decided in ONE pure function,
+`ShelfArrangement`, which both live bars take their segments
+from and which the Settings preview and the alignment note ask
+too. A second copy — a preview laying the bars out by its own
+arithmetic, a note deriving "the Space Bar moves" by hand — is
+a picture that can claim a placement the engine does not make,
+the schematic rule's defect (#702) on the one surface where the
+user decides where the bars go.
+
 *Overflow stays each bar's own.* Each bar scrolls inside its
-own stretch, counting what is hidden on each side, and the edge
-is split by `share` only once BOTH overflow — a bar that needs
-less gives the rest back, so the share never costs a bar that
-fits. The front-app segment shows only while no App Bar does:
-the App Bar already marks the focused window, and two marks of
-one fact on one strip is one too many.
+own stretch, with an arrow at each end that still hides items,
+and the edge is split by `share` only once BOTH overflow — a bar
+that needs less gives the rest back, so the share never costs a
+bar that fits. The front-app segment hides while an App Bar
+shares the shelf: the App Bar already marks the focused window,
+and two marks of one fact on one strip is one too many.
 
 *A shared field is stored once.* A value two bars must agree on,
 stored twice, is a question the user answers twice and can answer
@@ -10543,7 +10558,11 @@ the shelf's: at the old defaults, from the bottom to the top.
 `init.lua` is user code and is not rewritten; a retired verb
 fails loudly with its replacement named, which is its migration,
 and there is no alias (AGENTS.md §5), because an alias is the
-crossing that never ends.
+crossing that never ends. In `init.lua` that failure is its own
+Config Issue, never the unknown-call issue's "did you mean":
+the call is spelled right, so a nearest-spelling guess would
+send the user to the wrong fix, where the retired list knows the
+replacement (or that none exists) for certain.
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
@@ -10843,8 +10862,8 @@ ruling 2026-09-13.) With a Core default of 32, a laptop starter of
 28 and a GUI band beginning at 30 — the shape this replaces — the
 starter's own value sat below the slider, and one touch of the
 slider lost it for good. A stored value the GUI cannot reach is a
-defect, not a curation, so the band's floor is
-`KiwiShelf.minThickness` rather than a number beside it
+defect, not a curation, so the band's floor is Core's own
+minimum-thickness constant rather than a number beside it
 (`BarSliderBandTests`); the ceiling of 80 stays the GUI's, Lua
 open above it, the same split the glow slider takes. The default
 is one number because the reason for a thinner laptop bar — "a
@@ -10854,13 +10873,19 @@ a user has to know about before the slider's number means anything
 (`BarThicknessDefaultTests`). No migration is owed, and the reason
 is specific rather than borrowable: both bars' `thickness` predate
 the first tag (v0.9.0), and the settings encoder writes the group
-holding the field whole (`KiwiShelfParityTests` holds each shelf
-field encoded; before the shelf, each bar's own group carried it,
-and the #1517 crossing moves that number onto the shelf), so
-every file the app ever wrote carries its own
-number and only a fresh seed takes the new one — a leaf younger
-than a shipped release, or one a group elides, owes the #1369
-crossing instead.
+holding the field whole, so every file the app ever wrote carries
+its own number and only a fresh seed takes the new one — a leaf
+younger than a shipped release, or one a group elides, owes the
+#1369 crossing instead.
+
+:::unreleased
+On the shelf the floor is `KiwiShelf.minThickness` and the group
+holding `thickness` is `kiwishelf`, whose every field
+`KiwiShelfParityTests` holds encoded; the #1517 crossing moves a
+stored bar's number onto the shelf rather than letting the
+default in, so the argument that no migration is owed carries
+over unchanged.
+:::
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is
@@ -11031,12 +11056,12 @@ control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
 :::unreleased
-On the shelf, `full` is one plate along the whole edge, and it
-takes no colour of its own: it blends from the Space Bar's Fill
-to the App Bar's in bar order, so each bar keeps its colour and
-the join shows where one ends. A third "shelf fill" would be a
-colour the user must keep in step with two others, the problem
-the shelf exists to remove.
+On the shelf each bar keeps its own plate, in its own Fill, and
+`full` stretches it across that bar's part of the edge — so two
+full plates meet one item gap apart and the join shows where one
+bar ends. One plate spanning both would need a colour of its
+own: a third "shelf fill" the user must keep in step with two
+others, the problem the shelf exists to remove.
 :::
 
 :::unreleased
@@ -11207,9 +11232,10 @@ every KiwiDesk input identical on both (hosting mode, plate/tint
 visibility, tint alpha, z-order) and one thing different:
 `NSGlassEffectView`'s adaptive content colour scheme, which the OS
 decides PER VIEW from the backdrop that view samples and then
-holds until a far brighter backdrop flips it. Either bar can be
-the dark one — the App Bar usually is, because the bottom edge
-launches over the darker band of a wallpaper — so a reading that
+holds until a far brighter backdrop flips it. Either bar could be
+the dark one — in that measurement the App Bar usually was, since
+it sat on the bottom edge, which launches over the darker band of
+a wallpaper — so a reading that
 names one bar as "the dark one" is reading the state, not the
 cause; the fix is a rule both bars follow, never a correction to
 whichever bar looked wrong. The ruling: the variant is DECIDED,
