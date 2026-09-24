@@ -76,18 +76,52 @@ public enum ShelfOverflow {
         return (before, after)
     }
 
-    /// Where one page back or forward lands: a viewport less the
-    /// two fades, so what sat under the far fade arrives in the
-    /// clear, clamped to the run.
+    /// Where one page back or forward lands — on an entry
+    /// boundary, never mid-entry: forward, the first entry not
+    /// wholly clear of the far fade becomes the first one clear of
+    /// the near fade; back, the mirror. Where less than one entry
+    /// would remain before an end, the page goes to that end, so a
+    /// paging run never stops a sliver short of it. A single entry
+    /// wider than the clear view still moves by a view.
     public static func pageTarget(
         from offset: CGFloat,
-        total: CGFloat,
+        lengths: [CGFloat],
+        gap: CGFloat,
         viewport: CGFloat,
         fade: CGFloat,
         forward: Bool
     ) -> CGFloat {
-        let step = max(viewport - 2 * fade, viewport / 2)
-        let target = offset + (forward ? step : -step)
-        return min(max(target, 0), max(total - viewport, 0))
+        let starts = lengths.indices.map { index in
+            lengths[..<index].reduce(0) { $0 + $1 + gap }
+        }
+        let ends = zip(starts, lengths).map { $0 + $1 }
+        let total = ends.last ?? 0
+        let last = max(total - viewport, 0)
+        let entry = lengths.min() ?? 0
+        let clear = max(viewport - 2 * fade, viewport / 2)
+        let nudge: CGFloat = 0.5
+        var target: CGFloat
+        if forward {
+            let clearEnd = offset + viewport - fade
+            if let index = ends.firstIndex(where: { $0 > clearEnd + nudge }) {
+                target = starts[index] - fade
+                if target <= offset + nudge { target = offset + clear }
+            } else {
+                target = last
+            }
+            if last - target < entry { target = last }
+        } else {
+            let clearStart = offset + fade
+            if let index = starts.lastIndex(where: {
+                $0 < clearStart - nudge
+            }) {
+                target = ends[index] - viewport + fade
+                if target >= offset - nudge { target = offset - clear }
+            } else {
+                target = 0
+            }
+            if target < entry { target = 0 }
+        }
+        return min(max(target, 0), last)
     }
 }

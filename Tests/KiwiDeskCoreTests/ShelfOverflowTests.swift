@@ -62,44 +62,53 @@ struct ShelfOverflowPagingTests {
         #expect(none.before == 0 && none.after == 0)
     }
 
-    @Test("A page moves a viewport less both fades, clamped")
-    func paging() {
-        #expect(
-            ShelfOverflow.pageTarget(
-                from: 0,
-                total: 1000,
-                viewport: 400,
-                fade: 50,
-                forward: true
-            ) == 300
+    /// Ten 100 pt entries, no gap (run 1000), a 400 viewport,
+    /// 50 pt fades: the clear view is 50…350 of the viewport.
+    private func page(
+        from offset: CGFloat,
+        forward: Bool,
+        lengths: [CGFloat]? = nil
+    ) -> CGFloat {
+        ShelfOverflow.pageTarget(
+            from: offset,
+            lengths: lengths ?? self.lengths,
+            gap: 0,
+            viewport: 400,
+            fade: 50,
+            forward: forward
         )
-        #expect(
-            ShelfOverflow.pageTarget(
-                from: 500,
-                total: 1000,
-                viewport: 400,
-                fade: 50,
-                forward: true
-            ) == 600
-        )
-        #expect(
-            ShelfOverflow.pageTarget(
-                from: 100,
-                total: 1000,
-                viewport: 400,
-                fade: 50,
-                forward: false
-            ) == 0
-        )
-        // Fades wider than half the viewport still move half.
-        #expect(
-            ShelfOverflow.pageTarget(
-                from: 0,
-                total: 1000,
-                viewport: 100,
-                fade: 40,
-                forward: true
-            ) == 50
-        )
+    }
+
+    @Test("A page lands on an entry boundary")
+    func pagesAlignToEntries() {
+        // From 0 the clear view ends at 350: entry 3 (300…400) is
+        // the first not wholly clear, so it arrives just past the
+        // near fade — offset 250.
+        #expect(page(from: 0, forward: true) == 250)
+        // Back from 450: clear view starts at 500, entry 4
+        // (400…500) is the last not clear, its end arrives just
+        // before the far fade — 500 - 400 + 50.
+        #expect(page(from: 450, forward: false) == 150)
+    }
+
+    /// The owner's report: a page that stopped a few points short
+    /// left the last entry "almost" shown and the arrow on.
+    @Test("A page never stops a sliver short of an end")
+    func pagesReachTheEnds() {
+        // The run's last offset is 600; forward from 250 lands on
+        // 550, less than an entry short — so it goes to 600.
+        #expect(page(from: 250, forward: true) == 600)
+        #expect(page(from: 600, forward: true) == 600)
+        // Back from 90 would land under an entry from the start.
+        #expect(page(from: 90, forward: false) == 0)
+        #expect(page(from: 0, forward: false) == 0)
+    }
+
+    @Test("An entry wider than the clear view still moves a view")
+    func wideEntryStillMoves() {
+        let wide: [CGFloat] = [100, 900, 100]
+        let next = page(from: 0, forward: true, lengths: wide)
+        #expect(next > 0)
+        #expect(next <= 700)
     }
 }
