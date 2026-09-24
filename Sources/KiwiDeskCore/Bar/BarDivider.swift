@@ -7,6 +7,12 @@ enum BarDivider {
     /// separation (QA 2026-07-19).
     static let sectionThickness: CGFloat = 2
 
+    /// The shelf's section divider colour (#1517).
+    static func sectionColor(textColor: String) -> NSColor {
+        NSColor(kiwiHex: textColor)
+            .withAlphaComponent(SpaceBarStyle.sectionDividerAlpha)
+    }
+
     /// Returns divider color applying SpaceBarStyle.dividerAlpha.
     static func color(textColor: String) -> NSColor {
         NSColor(kiwiHex: textColor)

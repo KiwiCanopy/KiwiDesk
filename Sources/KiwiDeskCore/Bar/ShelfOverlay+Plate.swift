@@ -7,7 +7,8 @@ extension ShelfOverlay {
     func layoutPlate(
         _ frame: CGRect?,
         shelf: KiwiShelf,
-        radius: CGFloat
+        radius: CGFloat,
+        animated: Bool
     ) {
         guard let frame else {
             hidePlates()
@@ -24,13 +25,19 @@ extension ShelfOverlay {
             }
             glass.isHidden = false
             GlassPlate.setContent(glass, glassFiller)
-            GlassPlate.update(glass, frame: frame, cornerRadius: radius)
+            GlassPlate.update(
+                glass,
+                frame: frame,
+                cornerRadius: radius,
+                animated: animated
+            )
             GlassTint.apply(
                 tintView(),
                 below: glass,
                 frame: frame,
                 cornerRadius: radius,
-                hex: shelf.fillColor
+                hex: shelf.fillColor,
+                animated: animated
             )
             return
         }
@@ -45,7 +52,7 @@ extension ShelfOverlay {
             )
         }
         plate.isHidden = false
-        plate.frame = frame
+        BarMotion.setFrame(plate, to: frame, animated: animated)
         plate.layer?.cornerRadius = radius
         plate.layer?.backgroundColor =
             NSColor(kiwiHex: shelf.fillColor).cgColor
@@ -57,7 +64,8 @@ extension ShelfOverlay {
         sections: [Section],
         strip: CGRect,
         shelf: KiwiShelf,
-        horizontal: Bool
+        horizontal: Bool,
+        animated: Bool
     ) {
         guard
             let frame = Self.dividerFrame(
@@ -70,13 +78,15 @@ extension ShelfOverlay {
             return
         }
         divider.isHidden = false
-        divider.frame = frame
+        BarMotion.setFrame(divider, to: frame, animated: animated)
         divider.layer?.backgroundColor =
-            BarDivider.color(textColor: shelf.itemColor).cgColor
+            BarDivider.sectionColor(textColor: shelf.itemColor).cgColor
     }
 
     /// The divider's frame in strip coordinates: centred in the
-    /// gutter between two slots, half the depth long. Nil unless
+    /// gutter between two slots, `lengthShare` of the depth long
+    /// and a section break thick. Never full depth: a full-height
+    /// seam splits the one plate back into two bars. Nil unless
     /// exactly two sections show.
     nonisolated static func dividerFrame(
         slots: [CGRect],
@@ -88,15 +98,29 @@ extension ShelfOverlay {
             horizontal ? $0.minX < $1.minX : $0.minY < $1.minY
         }
         let depth = horizontal ? strip.height : strip.width
-        let length = depth / 2
+        let length = depth * dividerLengthShare
         let inset = (depth - length) / 2
+        let width = BarDivider.sectionThickness
         if horizontal {
             let x = (ordered[0].maxX + ordered[1].minX) / 2 - strip.minX
-            return CGRect(x: x - 0.5, y: inset, width: 1, height: length)
+            return CGRect(
+                x: x - width / 2,
+                y: inset,
+                width: width,
+                height: length
+            )
         }
         let y = (ordered[0].maxY + ordered[1].minY) / 2 - strip.minY
-        return CGRect(x: inset, y: y - 0.5, width: length, height: 1)
+        return CGRect(
+            x: inset,
+            y: y - width / 2,
+            width: length,
+            height: width
+        )
     }
+
+    /// The divider's length as a share of the shelf's depth.
+    nonisolated static let dividerLengthShare: CGFloat = 0.7
 
     private func hidePlates() {
         solidPlate?.isHidden = true

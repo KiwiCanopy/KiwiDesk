@@ -46,9 +46,10 @@ final class ShelfOverlay {
         }
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        let bounds = CGRect(origin: .zero, size: strip.size)
-        stripView.frame = bounds
-        place(sections, in: strip)
+        // A shelf appearing arrives; one already on screen glides
+        // to its new placement (#1517).
+        let glides = panel.isVisible
+        stripView.frame = CGRect(origin: .zero, size: strip.size)
         let horizontal = shelf.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
         let plate = Self.plateFrame(
@@ -56,17 +57,22 @@ final class ShelfOverlay {
             strip: strip,
             shelf: shelf
         )
-        layoutPlate(
-            plate,
-            shelf: shelf,
-            radius: shelf.resolvedCornerRadius(forThickness: depth)
-        )
-        layoutDivider(
-            sections: sections,
-            strip: strip,
-            shelf: shelf,
-            horizontal: horizontal
-        )
+        BarMotion.runPlateGlide {
+            place(sections, in: strip, animated: glides)
+            layoutPlate(
+                plate,
+                shelf: shelf,
+                radius: shelf.resolvedCornerRadius(forThickness: depth),
+                animated: glides
+            )
+            layoutDivider(
+                sections: sections,
+                strip: strip,
+                shelf: shelf,
+                horizontal: horizontal,
+                animated: glides
+            )
+        }
         panel.setFrame(
             GeometryUtils.flip(
                 strip,
@@ -106,7 +112,11 @@ final class ShelfOverlay {
 
     /// Adds each section's view once and sets its origin; a view
     /// no section names any more leaves the strip.
-    private func place(_ sections: [Section], in strip: CGRect) {
+    private func place(
+        _ sections: [Section],
+        in strip: CGRect,
+        animated: Bool
+    ) {
         let wanted = sections.map(\.view)
         for view in stripView.subviews
         where view !== divider && !wanted.contains(where: { $0 === view }) {
@@ -120,11 +130,14 @@ final class ShelfOverlay {
                     relativeTo: divider
                 )
             }
-            section.view.setFrameOrigin(
-                CGPoint(
-                    x: section.slot.minX - strip.minX,
-                    y: section.slot.minY - strip.minY
-                )
+            let origin = CGPoint(
+                x: section.slot.minX - strip.minX,
+                y: section.slot.minY - strip.minY
+            )
+            BarMotion.setFrame(
+                section.view,
+                to: CGRect(origin: origin, size: section.view.frame.size),
+                animated: animated
             )
         }
     }

@@ -76,8 +76,9 @@ struct ShelfOverlayTests {
             strip: Self.strip,
             horizontal: true
         )
-        // Gutter 650…656, centre 653, strip-local 553.
-        #expect(frame == CGRect(x: 552.5, y: 10, width: 1, height: 20))
+        // Gutter 650…656, centre 653, strip-local 553; a section
+        // break thick, 70% of the 40 pt depth.
+        #expect(frame == CGRect(x: 552, y: 6, width: 2, height: 28))
         #expect(
             ShelfOverlay.dividerFrame(
                 slots: [slots[0]],
