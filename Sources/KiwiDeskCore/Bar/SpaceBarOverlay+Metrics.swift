@@ -39,7 +39,8 @@ extension SpaceBarOverlay {
 
     /// The Space run's natural length along the shelf — the
     /// `pad` `contentStart` sets it in from the end it hugs, the
-    /// run, and the one gap `BarPlate.frame` pads past it: what
+    /// run, and past it the plate's one gap, or the `pad` an
+    /// `.end` placement keeps where that is larger: what
     /// `ShelfArrangement` hands this bar before it has to share
     /// (#1517). No front-app segment: it hides while an App Bar
     /// shares the shelf, the one case a need is read.
@@ -50,7 +51,7 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         let lengths = itemLengths(items, depth: depth, gap: gap)
         return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
-            + SpaceBarItemView.pad + gap
+            + SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
     }
 
     /// Calculates item frames and front segment start coordinate.

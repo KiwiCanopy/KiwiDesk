@@ -50,7 +50,9 @@ struct BarsGates {
 
     /// Why order and share are inert: whichever of the two bars
     /// is missing, so the sentence names only that one.
+    /// Nil while no bar shows: the card's block grey answers then.
     var bothBarsReason: InertReason? {
+        guard settings.shelfShows else { return nil }
         if !settings.spaceBarStyle.enabled { return .spaceBarOff }
         return anyBarShown ? nil : .noBarShown
     }

@@ -92,8 +92,10 @@ bars. Obligations:
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:
   handed a segment exactly that long, the run fits with no arrow
-  and its plate reaches the segment's end.
-  `ShelfNeedParityTests` holds both bars to it.
+  and its plate reaches the segment's GUTTER-side end, the Space
+  run's outer `pad` the one slack allowed where `item_gap` is
+  below it. `ShelfNeedParityTests` holds both bars to it, both
+  placements, a gap each side of the pad.
 
 ## A bar item's title is SHOWN on two channels: drawn and announced
 
