@@ -47,8 +47,10 @@ enum SettingsSearchSynonyms {
             return ["neon", "shadow"]
         case .kiwishelf(.thickness):
             return ["height", "size"]
-        case .kiwishelf(.share):
-            return ["split", "divider", "ratio"]
+        case .kiwishelf(.minimum):
+            return ["share", "split", "divider"]
+        case .kiwishelf(.iconSource):
+            return ["icon", "glyph"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):

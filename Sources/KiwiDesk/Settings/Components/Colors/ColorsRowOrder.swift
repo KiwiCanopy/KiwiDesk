@@ -49,37 +49,23 @@ enum ColorsRowOrder {
         .borders(.dragDropZoneFillColor),
     ]
 
-    /// Space Bar primary accent swatches.
-    static let spaceBarAtRest: [SettingKey] = [
-        .spaceBar(.spaceBarItemColor),
-        .spaceBar(.spaceBarActiveItemColor),
+    /// KiwiShelf colours at rest — the one set both bars draw
+    /// (#1517).
+    static let kiwishelfAtRest: [SettingKey] = [
+        .kiwishelf(.fillColor),
+        .kiwishelf(.itemColor),
+        .kiwishelf(.activeItemColor),
+        .kiwishelf(.highlightColor),
+    ]
+
+    /// KiwiShelf colours behind More, with the Space Bar's own
+    /// focused-window ink and the floating mark.
+    static let kiwishelfMore: [SettingKey] = [
+        .kiwishelf(.hoverFillColor),
+        .kiwishelf(.hoverItemColor),
+        .kiwishelf(.groupBadgeColor),
+        .kiwishelf(.groupBadgeTextColor),
         .spaceBar(.spaceBarFocusedItemColor),
-    ]
-
-    /// Space Bar additional color swatches.
-    static let spaceBarMore: [SettingKey] = [
-        .spaceBar(.spaceBarFillColor),
-        .spaceBar(.spaceBarHighlightColor),
-        .spaceBar(.spaceBarHoverFillColor),
-        .spaceBar(.spaceBarHoverItemColor),
-        .spaceBar(.spaceBarGroupBadgeColor),
-        .spaceBar(.spaceBarGroupBadgeTextColor),
         .borders(.floatingColor),
-    ]
-
-    /// App Bar primary color swatches.
-    static let appBarAtRest: [SettingKey] = [
-        .appBar(.appBarFillColor),
-        .appBar(.appBarHighlightColor),
-    ]
-
-    /// App Bar additional color swatches.
-    static let appBarMore: [SettingKey] = [
-        .appBar(.appBarItemColor),
-        .appBar(.appBarActiveItemColor),
-        .appBar(.appBarHoverFillColor),
-        .appBar(.appBarHoverItemColor),
-        .appBar(.appBarGroupBadgeColor),
-        .appBar(.appBarGroupBadgeTextColor),
     ]
 }

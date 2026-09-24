@@ -18,8 +18,8 @@ struct AdvancedColorRow: View {
 
     @ViewBuilder var body: some View {
         switch key {
-        case .appBar(let k):
-            appBarRow(k)
+        case .kiwishelf(let k):
+            kiwishelfRow(k)
         case .spaceBar(let k):
             spaceBarRow(k)
         case .borders(let k):

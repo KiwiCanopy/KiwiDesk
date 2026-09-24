@@ -143,7 +143,7 @@ struct HomeCardBarsTile: View {
         return BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
-            items: spaceItems(style.bar),
+            items: spaceItems(style.shelf),
             alignment: style.alignment,
             spans: style.plateSpans,
             boxed: style.hasBox,
@@ -166,7 +166,7 @@ struct HomeCardBarsTile: View {
         return BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
-            items: appItems(style.bar, vertical: vertical),
+            items: appItems(style, vertical: vertical),
             alignment: style.alignment,
             spans: style.plateSpans,
             boxed: style.hasBox,
@@ -181,8 +181,9 @@ struct HomeCardBarsTile: View {
         )
     }
 
+    /// Idle Spaces draw the shelf's idle ink, as the live bar does.
     func spaceItems(
-        _ style: SpaceBarStyle
+        _ shelf: KiwiShelf
     ) -> [BarItem] {
         let count = min(max(spaceCount, 1), 8)
         var items: [BarItem] = []
@@ -190,8 +191,8 @@ struct HomeCardBarsTile: View {
             let active = index == 0
             var item = BarItem(
                 color: active
-                    ? style.activeItemColor
-                    : style.itemColor,
+                    ? shelf.activeItemColor
+                    : shelf.idleItemColor,
                 length: 12 * scale
             )
             if spaceLabels.indices.contains(index) {
@@ -211,7 +212,7 @@ struct HomeCardBarsTile: View {
 
     /// Mock window items at panel scale (owner 2026-08-10).
     private func appItems(
-        _ style: AppBarStyle,
+        _ style: AppBarLook,
         vertical: Bool
     ) -> [BarItem] {
         let mocks: [(glyph: String, title: String)] = [
@@ -222,7 +223,7 @@ struct HomeCardBarsTile: View {
                 L("bars_scene.title_files", "Downloads")
             ),
         ]
-        let content = style.content.rendered(
+        let content = style.bar.content.rendered(
             horizontal: !vertical
         )
         var items: [BarItem] = []

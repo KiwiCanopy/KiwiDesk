@@ -5,7 +5,6 @@ import SwiftUI
 /// sits and whether it shows are the KiwiShelf card's (#1517).
 struct SpaceBarCard: View {
     @ObservedObject var model: SettingsModel
-    @State private var styleExpanded = false
 
     var style: Binding<SpaceBarStyle> {
         $model.config.settings.spaceBarStyle
@@ -27,8 +26,7 @@ struct SpaceBarCard: View {
             help: reason.map(BarsGateHelp.sentence)
         ) {
             // Preview strip renders in BarsPanelPreview (#678).
-            rows(BarsRowOrder.spaceBarAtRest)
-            styleDisclosure
+            rows(BarsRowOrder.spaceBar)
         }
     }
 
@@ -61,32 +59,11 @@ struct SpaceBarCard: View {
         }
     }
 
-    /// Style disclosure; inner rows carry the gate (#527).
-    private var styleDisclosure: some View {
-        SettingsDisclosure(
-            SettingsCatalog.bars.spaceBarStyle,
-            isExpanded: $styleExpanded,
-            scrollHoisted: true,
-            summary: styleSummary
-        ) {
-            rows(BarsRowOrder.spaceBarStyle)
-                .padding(.top, 8)
-        }
-    }
-
     private var cardCaption: String {
         L(
             "bars.space_bar.shelf_caption",
             "One item per Space — one bar per screen, every "
                 + "layout. KiwiShelf places this bar."
-        )
-    }
-
-    private var styleSummary: String {
-        L(
-            "bars.style.space_bar.shelf_summary",
-            "Indicator, symbol style, glyph cap, front app title "
-                + "length, spring delay"
         )
     }
 }

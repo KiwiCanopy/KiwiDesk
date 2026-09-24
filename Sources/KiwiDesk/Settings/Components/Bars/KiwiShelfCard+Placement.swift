@@ -16,7 +16,9 @@ extension KiwiShelfCard {
                     "The Space Bar shows in every layout. Only "
                         + "%1$@ and %2$@ can carry an App Bar — "
                         + "the other layouts keep every window "
-                        + "visible.",
+                        + "visible. With the Space Bar off, the "
+                        + "menu bar shows the Space each screen is "
+                        + "on.",
                     L("layout.monocle.name", "Monocle"),
                     L("layout.scrolling.name", "Scrolling")
                 )
@@ -126,19 +128,21 @@ extension KiwiShelfCard {
 
     /// The share row is a split row: the same slider, readout and
     /// ¼…¾ chips, over the stored percent read as a fraction.
-    var shareRow: some View {
-        RatioRow(
-            label: L("kiwishelf.share", "Space Bar share"),
-            value: shareFraction,
+    /// The Space Bar's floor once the shelf is full (#1517): a
+    /// minimum, not a split, so a slider and no quick picks.
+    var minimumRow: some View {
+        PtSlider(
+            label: L("kiwishelf.minimum", "Space Bar minimum"),
+            value: shelf.minimum,
+            range: BarSliderBands.minimum,
+            unit: "%",
             help: L(
-                "kiwishelf.share.help",
-                "Only matters once neither bar fits: the Space "
-                    + "Bar gets this share of the edge, the App "
-                    + "Bar the rest, and each scrolls inside its "
-                    + "own. A bar that needs less always gives "
-                    + "the rest back."
-            ),
-            range: shareBand
+                "kiwishelf.minimum.help",
+                "Only matters once both bars together are longer "
+                    + "than the edge: the Space Bar shrinks, but "
+                    + "keeps at least this much of the edge, and "
+                    + "the App Bar scrolls instead."
+            )
         )
         .modifier(
             GreyOut(
@@ -147,19 +151,5 @@ extension KiwiShelfCard {
                     ?? ""
             )
         )
-    }
-
-    private var shareFraction: Binding<Double> {
-        Binding(
-            get: { Double(shelf.wrappedValue.share) / 100 },
-            set: { shelf.wrappedValue.share = CGFloat($0 * 100) }
-        )
-    }
-
-    private var shareBand: ClosedRange<Double> {
-        let range = KiwiShelf.shareRange
-        let low = Double(range.lowerBound) / 100
-        let high = Double(range.upperBound) / 100
-        return low...high
     }
 }

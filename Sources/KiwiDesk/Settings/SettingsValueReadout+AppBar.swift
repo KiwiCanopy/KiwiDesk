@@ -26,13 +26,6 @@ extension SettingsValueReadout {
                 n.content,
                 AppBarOptions.content
             )
-        case .appBarIconSource:
-            return appBarChoiceRow(
-                census,
-                o.iconSource,
-                n.iconSource,
-                AppBarOptions.iconSource
-            )
         case .appBarGroupAdjacentWindows:
             return appBarOnOffRow(
                 census,
@@ -44,52 +37,6 @@ extension SettingsValueReadout {
                 census,
                 trimmed(Double(o.titleCap)),
                 trimmed(Double(n.titleCap))
-            )
-        case .appBarDimFactor:
-            return appBarRow(
-                census,
-                trimmed(o.dimFactor),
-                trimmed(n.dimFactor)
-            )
-        case .appBarFillColor:
-            return appBarHexRow(census, o.fillColor, n.fillColor)
-        case .appBarHighlightColor:
-            return appBarHexRow(
-                census,
-                o.highlightColor,
-                n.highlightColor
-            )
-        case .appBarItemColor:
-            return appBarHexRow(census, o.itemColor, n.itemColor)
-        case .appBarActiveItemColor:
-            return appBarHexRow(
-                census,
-                o.activeItemColor,
-                n.activeItemColor
-            )
-        case .appBarHoverFillColor:
-            return appBarHexRow(
-                census,
-                o.hoverFillColor,
-                n.hoverFillColor
-            )
-        case .appBarHoverItemColor:
-            return appBarHexRow(
-                census,
-                o.hoverItemColor,
-                n.hoverItemColor
-            )
-        case .appBarGroupBadgeColor:
-            return appBarHexRow(
-                census,
-                o.groupBadgeColor,
-                n.groupBadgeColor
-            )
-        case .appBarGroupBadgeTextColor:
-            return appBarHexRow(
-                census,
-                o.groupBadgeTextColor,
-                n.groupBadgeTextColor
             )
         }
     }
@@ -161,13 +108,5 @@ extension SettingsValueReadout {
     ) -> String {
         options.first { $0.0 == value }?.1
             ?? String(describing: value)
-    }
-
-    private static func appBarHexRow(
-        _ census: SettingKey,
-        _ old: String,
-        _ new: String
-    ) -> [SettingsDiffRow] {
-        appBarRow(census, hexDisplay(old), hexDisplay(new))
     }
 }

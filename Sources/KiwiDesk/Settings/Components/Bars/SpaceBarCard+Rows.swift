@@ -59,27 +59,12 @@ extension SpaceBarCard {
                 ),
                 selection: style.activeIndicator,
                 options: AppBarOptions.activeIndicator
-                    .filter { $0.0 != .gap }
                     .map { ($0.1, $0.0) }
             )
-            .searchAnchored(
-                SettingsCatalog.bars.spaceBarStyle.children
-                    .spaceBarStyleActiveIndicator
-            )
-        case .spaceBarIconSource:
-            iconSourceRow
-                .searchAnchored(
-                    SettingsCatalog.bars.spaceBarStyle.children
-                        .spaceBarStyleIconSource
-                )
         case .spaceBarGlyphCap:
             glyphCapRow
         case .spaceBarFrontAppTitleCap:
             titleCapRow
-                .searchAnchored(
-                    SettingsCatalog.bars.spaceBarStyle.children
-                        .spaceBarStyleFrontAppTitleCap
-                )
         case .spaceBarSpringDelay:
             SecondsRow(
                 label: L("space_bar.spring_delay", "Spring delay"),
@@ -94,17 +79,8 @@ extension SpaceBarCard {
                         + "window there without switching."
                 )
             )
-            .searchAnchored(
-                SettingsCatalog.bars.spaceBarStyle.children
-                    .spaceBarStyleSpringDelay
-            )
-        case .spaceBarEnabled, .spaceBarDimFactor,
-            .spaceBarActiveDimFactor,
-            .spaceBarStickyBadge, .spaceBarItemColor,
-            .spaceBarActiveItemColor, .spaceBarFocusedItemColor,
-            .spaceBarFillColor, .spaceBarHighlightColor,
-            .spaceBarHoverFillColor, .spaceBarHoverItemColor,
-            .spaceBarGroupBadgeColor, .spaceBarGroupBadgeTextColor:
+        case .spaceBarEnabled, .spaceBarActiveDimFactor,
+            .spaceBarStickyBadge, .spaceBarFocusedItemColor:
             let _ = assertionFailure(
                 "unrendered Space Bar census key: \(key.rawValue)"
             )

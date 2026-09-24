@@ -13,7 +13,7 @@ enum BarsRowOrder {
         .kiwishelf(.thickness),
         .kiwishelf(.alignment),
         .kiwishelf(.order),
-        .kiwishelf(.share),
+        .kiwishelf(.minimum),
     ]
 
     /// KiwiShelf card, behind the Style disclosure.
@@ -24,6 +24,7 @@ enum BarsRowOrder {
         .kiwishelf(.itemGap),
         .kiwishelf(.fontSizeAuto),
         .kiwishelf(.fontSize),
+        .kiwishelf(.iconSource),
     ]
 
     /// KiwiShelf card, behind the Margins disclosure.
@@ -32,31 +33,23 @@ enum BarsRowOrder {
         .kiwishelf(.innerMargin),
     ]
 
-    /// Space Bar card, at rest.
-    static let spaceBarAtRest: [SettingKey] = [
-        .spaceBar(.spaceBarShowFrontApp),
+    /// Space Bar card — every row shown, each gate directly
+    /// above what it gates (#1517).
+    static let spaceBar: [SettingKey] = [
         .spaceBar(.spaceBarHideEmpty),
-    ]
-
-    /// Space Bar card, behind the Style disclosure.
-    static let spaceBarStyle: [SettingKey] = [
-        .spaceBar(.spaceBarActiveIndicator),
-        .spaceBar(.spaceBarIconSource),
         .spaceBar(.spaceBarGlyphCap),
+        .spaceBar(.spaceBarShowFrontApp),
         .spaceBar(.spaceBarFrontAppTitleCap),
+        .spaceBar(.spaceBarActiveIndicator),
         .spaceBar(.spaceBarSpringDelay),
     ]
 
-    /// App Bar card, at rest.
-    static let appBarAtRest: [SettingKey] = [
-        .appBar(.appBarGroupAdjacentWindows)
-    ]
-
-    /// App Bar card, behind the Style disclosure.
-    static let appBarStyle: [SettingKey] = [
-        .appBar(.appBarActiveIndicator),
+    /// App Bar card — every row shown, each gate directly above
+    /// what it gates (#1517).
+    static let appBar: [SettingKey] = [
         .appBar(.appBarContent),
         .appBar(.appBarTitleCap),
-        .appBar(.appBarIconSource),
+        .appBar(.appBarGroupAdjacentWindows),
+        .appBar(.appBarActiveIndicator),
     ]
 }

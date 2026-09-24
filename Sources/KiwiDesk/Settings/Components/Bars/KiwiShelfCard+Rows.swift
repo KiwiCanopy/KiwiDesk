@@ -34,8 +34,8 @@ extension KiwiShelfCard {
             alignmentRow
         case .order:
             orderRow
-        case .share:
-            shareRow
+        case .minimum:
+            minimumRow
         case .background:
             backgroundStyleRow
         case .backgroundFit:
@@ -107,9 +107,56 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfMargins.children
                     .kiwishelfInnerMargin
             )
-        case .fontSize, .liquidGlass:
+        case .iconSource:
+            iconSourceRow
+        case .fontSize, .liquidGlass, .dimFactor, .fillColor,
+            .itemColor, .activeItemColor, .highlightColor,
+            .hoverFillColor, .hoverItemColor, .groupBadgeColor,
+            .groupBadgeTextColor:
             EmptyView()
         }
+    }
+
+    /// App icon rendering for both bars (#294, #1517): one app is
+    /// never drawn in two styles on one plate. Greys only while
+    /// no bar draws an app icon.
+    private var iconSourceRow: some View {
+        DropdownRow(
+            label: L("kiwishelf.icon_source.label", "App symbol style"),
+            spokenValue: AppBarOptions.iconSourceTitle(
+                shelf.iconSource.wrappedValue
+            ),
+            // Interpolated labels (#818).
+            help: L(
+                "kiwishelf.icon_source.help",
+                "How app icons are drawn on both bars. "
+                    + "\u{201C}%1$@\u{201D} shows a monochrome "
+                    + "symbol colored by the shelf's item colors, "
+                    + "set in %2$@; apps without a symbol keep "
+                    + "their app icon.",
+                L("app_bar.icon_source.app_font", "Glyphs"),
+                SettingsDestination.advancedColors.title
+            )
+        ) {
+            Picker(
+                L("kiwishelf.icon_source.label", "App symbol style"),
+                selection: shelf.iconSource
+            ) {
+                ForEach(AppBarOptions.iconSource, id: \.0) { option in
+                    Text(option.1).tag(option.0)
+                }
+            }
+        }
+        .modifier(
+            GreyOut(
+                active: gates.noBarDrawsIcon,
+                help: BarsGateHelp.sentence(for: .noAppIcon)
+            )
+        )
+        .searchAnchored(
+            SettingsCatalog.bars.kiwishelfStyle.children
+                .kiwishelfStyleIconSource
+        )
     }
 
     private var backgroundStyleRow: some View {

@@ -147,16 +147,7 @@ extension SpaceBarItemView {
         if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverItemColor)
         }
-        return Self.idleColor(style.itemColor)
-    }
-
-    /// An idle identifier's ink: the shelf's item colour at the
-    /// one idle alpha, relative to its own (#1517).
-    static func idleColor(_ hex: String) -> NSColor {
-        let ink = NSColor(kiwiHex: hex)
-        return ink.withAlphaComponent(
-            ink.alphaComponent * KiwiShelf.idleItemAlpha
-        )
+        return NSColor(kiwiHex: style.idleItemColor)
     }
 
     private func styleIdentifier() {

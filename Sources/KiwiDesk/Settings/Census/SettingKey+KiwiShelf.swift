@@ -8,7 +8,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case thickness = "settings.kiwishelf.thickness"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
-    case share = "settings.kiwishelf.share"
+    case minimum = "settings.kiwishelf.minimum"
     case background = "settings.kiwishelf.backgroundStyle"
     case backgroundFit = "settings.kiwishelf.backgroundFit"
     case cornerRoundness = "settings.kiwishelf.cornerRoundness"
@@ -18,11 +18,21 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case outerMargin = "settings.kiwishelf.outerMargin"
     case innerMargin = "settings.kiwishelf.innerMargin"
     case liquidGlass = "settings.kiwishelf.liquidGlass"
+    case iconSource = "settings.kiwishelf.iconSource"
+    case dimFactor = "settings.kiwishelf.dimFactor"
+    case fillColor = "settings.kiwishelf.fillColor"
+    case itemColor = "settings.kiwishelf.itemColor"
+    case activeItemColor = "settings.kiwishelf.activeItemColor"
+    case highlightColor = "settings.kiwishelf.highlightColor"
+    case hoverFillColor = "settings.kiwishelf.hoverFillColor"
+    case hoverItemColor = "settings.kiwishelf.hoverItemColor"
+    case groupBadgeColor = "settings.kiwishelf.groupBadgeColor"
+    case groupBadgeTextColor = "settings.kiwishelf.groupBadgeTextColor"
 }
 
 extension KiwiShelfKey {
     /// The three Show switches: every row but those greys while
-    /// none is on. Order and share further need BOTH bars, which
+    /// none is on. Order and minimum further need BOTH bars, which
     /// is their wiring's predicate (`BarsGates.bothBarsShow`).
     static let showGate = SettingGate.anyOf([
         .spaceBar(.spaceBarEnabled),
@@ -32,10 +42,10 @@ extension KiwiShelfKey {
 
     var placement: SettingPlacement {
         switch self {
-        case .edge, .thickness, .alignment, .order, .share:
+        case .edge, .thickness, .alignment, .order, .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
         case .background, .cornerRoundness, .itemGap, .fontSizeAuto,
-            .outerMargin, .innerMargin:
+            .outerMargin, .innerMargin, .iconSource:
             return .row(
                 .bars,
                 .kiwishelf,
@@ -59,6 +69,23 @@ extension KiwiShelfKey {
         case .liquidGlass:
             // Written by the one Liquid Glass row (#1307).
             return .luaOnly
+        case .dimFactor:
+            return .luaOnly
+        case .fillColor, .itemColor, .activeItemColor, .highlightColor:
+            return .row(
+                .advancedColours,
+                .kiwishelf,
+                .atRest,
+                gate: Self.showGate
+            )
+        case .hoverFillColor, .hoverItemColor, .groupBadgeColor,
+            .groupBadgeTextColor:
+            return .row(
+                .advancedColours,
+                .kiwishelf,
+                .showMore,
+                gate: Self.showGate
+            )
         }
     }
 
@@ -84,10 +111,10 @@ extension KiwiShelfKey {
                 "kiwishelf.order.label",
                 help: "kiwishelf.order.label.help"
             )
-        case .share:
+        case .minimum:
             return .text(
-                "kiwishelf.share",
-                help: "kiwishelf.share.help"
+                "kiwishelf.minimum",
+                help: "kiwishelf.minimum.help"
             )
         case .background:
             return .text(
@@ -126,8 +153,32 @@ extension KiwiShelfKey {
                 "kiwishelf.inner_margin",
                 help: "kiwishelf.inner_margin.help"
             )
-        case .liquidGlass:
+        case .liquidGlass, .dimFactor:
             return .none
+        case .iconSource:
+            return .text(
+                "kiwishelf.icon_source.label",
+                help: "kiwishelf.icon_source.help"
+            )
+        case .fillColor:
+            return .text("kiwishelf.color.fill")
+        case .itemColor:
+            return .text(
+                "kiwishelf.color.item",
+                help: "kiwishelf.color.item.help"
+            )
+        case .activeItemColor:
+            return .text("kiwishelf.color.active_item")
+        case .highlightColor:
+            return .text("kiwishelf.color.highlight")
+        case .hoverFillColor:
+            return .text("kiwishelf.color.hover_fill")
+        case .hoverItemColor:
+            return .text("kiwishelf.color.hover_item")
+        case .groupBadgeColor:
+            return .text("kiwishelf.color.group_badge")
+        case .groupBadgeTextColor:
+            return .text("kiwishelf.color.badge_text")
         }
     }
 }

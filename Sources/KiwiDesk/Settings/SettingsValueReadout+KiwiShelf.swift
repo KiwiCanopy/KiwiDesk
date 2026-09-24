@@ -34,11 +34,11 @@ extension SettingsValueReadout {
                 n.order,
                 AppBarOptions.order
             )
-        case .share:
+        case .minimum:
             return spaceBarRow(
                 census,
-                percent(Double(o.share) / 100),
-                percent(Double(n.share) / 100)
+                percent(Double(o.minimum) / 100),
+                percent(Double(n.minimum) / 100)
             )
         case .thickness:
             return spaceBarPointsRow(census, o.thickness, n.thickness)
@@ -78,6 +78,40 @@ extension SettingsValueReadout {
             return spaceBarAutoPointsRow(census, o.fontSize, n.fontSize)
         case .liquidGlass:
             return spaceBarOnOffRow(census, o.liquidGlass, n.liquidGlass)
+        case .iconSource:
+            return spaceBarChoiceRow(
+                census,
+                o.iconSource,
+                n.iconSource,
+                AppBarOptions.iconSource
+            )
+        case .dimFactor:
+            return spaceBarRow(
+                census,
+                trimmed(o.dimFactor),
+                trimmed(n.dimFactor)
+            )
+        case .fillColor, .itemColor, .activeItemColor,
+            .highlightColor, .hoverFillColor, .hoverItemColor,
+            .groupBadgeColor, .groupBadgeTextColor:
+            let path = Self.shelfColor(key)
+            return spaceBarHexRow(census, o[keyPath: path], n[keyPath: path])
+        }
+    }
+
+    /// The stored colour a colour key narrates.
+    private static func shelfColor(
+        _ key: KiwiShelfKey
+    ) -> KeyPath<KiwiShelf, String> {
+        switch key {
+        case .fillColor: return \.fillColor
+        case .itemColor: return \.itemColor
+        case .activeItemColor: return \.activeItemColor
+        case .highlightColor: return \.highlightColor
+        case .hoverFillColor: return \.hoverFillColor
+        case .hoverItemColor: return \.hoverItemColor
+        case .groupBadgeColor: return \.groupBadgeColor
+        default: return \.groupBadgeTextColor
         }
     }
 }

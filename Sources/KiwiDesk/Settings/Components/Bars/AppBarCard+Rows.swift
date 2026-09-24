@@ -33,37 +33,10 @@ extension AppBarCard {
                 options: AppBarOptions.activeIndicator
                     .map { ($0.1, $0.0) }
             )
-            .searchAnchored(
-                SettingsCatalog.bars.appBarStyle.children
-                    .appBarStyleActiveIndicator
-            )
         case .appBarContent:
             contentRow
-                .searchAnchored(
-                    SettingsCatalog.bars.appBarStyle.children
-                        .appBarStyleContent
-                )
         case .appBarTitleCap:
             titleCapRow
-                .searchAnchored(
-                    SettingsCatalog.bars.appBarStyle.children
-                        .appBarStyleTitleCap
-                )
-        case .appBarIconSource:
-            iconSourceRow
-                .searchAnchored(
-                    SettingsCatalog.bars.appBarStyle.children
-                        .appBarStyleIconSource
-                )
-        case .appBarDimFactor, .appBarFillColor,
-            .appBarHighlightColor, .appBarItemColor,
-            .appBarActiveItemColor, .appBarHoverFillColor,
-            .appBarHoverItemColor, .appBarGroupBadgeColor,
-            .appBarGroupBadgeTextColor:
-            let _ = assertionFailure(
-                "unrendered App Bar census key: \(key.rawValue)"
-            )
-            EmptyView()
         }
     }
 }

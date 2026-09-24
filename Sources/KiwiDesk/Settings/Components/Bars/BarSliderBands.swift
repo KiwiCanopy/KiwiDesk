@@ -16,6 +16,15 @@ enum BarSliderBands {
     static let margin: ClosedRange<Double> =
         Double(KiwiShelf.minMargin)...60
 
+    /// The Space Bar minimum row, in percent: both edges are
+    /// Core's, which clamps the stored value to them (#1517).
+    static let minimum: ClosedRange<Double> =
+        Double(
+            KiwiShelf.minimumRange.lowerBound
+        )...Double(
+            KiwiShelf.minimumRange.upperBound
+        )
+
     /// The Space Bar's Spring delay row, in the seconds the row
     /// shows; `springDelayRange` is the milliseconds it stores.
     static let springDelaySeconds: ClosedRange<Double> = {

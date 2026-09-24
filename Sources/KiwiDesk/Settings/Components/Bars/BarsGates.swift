@@ -13,8 +13,9 @@ struct BarsGates {
         case noBarShown
         /// The Space Bar is switched off.
         case spaceBarOff
-        /// The active indicator is Gap — active items are hidden.
-        case gapOnly
+        /// No shown bar draws an app icon: the Space Bar is off and
+        /// every shown App Bar is title-only.
+        case noAppIcon
         /// No bar shows, so the shelf draws nothing to shape.
         case shelfEmpty
         /// Boxed draws a box per item — no plate to size.
@@ -31,6 +32,8 @@ struct BarsGates {
         case .spaceBar:
             return settings.spaceBarStyle.enabled
                 ? nil : .spaceBarOff
+        case .kiwishelf:
+            return shelfShows ? nil : .shelfEmpty
         default:
             return nil
         }
@@ -80,13 +83,10 @@ struct BarsGates {
             }
     }
 
-    /// True when active indicator hides active items outright
-    /// (`AppBarOverlay`, `AppBarItemView`).
-    var gapOnly: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                settings.appBarLook(for: $0).activeIndicator == .gap
-            }
+    /// True when a bar shows but none draws an app icon, so the
+    /// shelf's symbol style has nothing to style.
+    var noBarDrawsIcon: Bool {
+        !settings.spaceBarStyle.enabled && everyShownBarTitleOnly
     }
 }
 
@@ -127,14 +127,13 @@ enum BarsGateHelp {
                     + "nothing to size.",
                 L("app_bar.background_style.boxed", "Boxed")
             )
-        case .gapOnly:
+        case .noAppIcon:
             // Interpolated from picker entry (#818).
             return L(
-                "app_bar.color.gap_only",
-                "The \u{201C}%1$@\u{201D} indicator hides the "
-                    + "active item instead of marking it, so "
-                    + "these colors aren't drawn.",
-                L("app_bar.active_indicator.gap", "Gap")
+                "kiwishelf.icon_source.no_icon",
+                "Every bar shows \u{201C}%1$@\u{201D}, so no app "
+                    + "icon is drawn.",
+                L("app_bar.content.title", "Title")
             )
         }
     }

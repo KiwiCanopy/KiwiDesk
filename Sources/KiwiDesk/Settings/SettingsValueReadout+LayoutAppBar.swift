@@ -54,20 +54,6 @@ extension SettingsValueReadout {
                 layoutBarChoice(o.content, AppBarOptions.content),
                 layoutBarChoice(n.content, AppBarOptions.content)
             )
-        case .monocleAppBarIconSource, .scrollingAppBarIconSource:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarIconSource,
-                layoutBarChoice(
-                    o.iconSource,
-                    AppBarOptions.iconSource
-                ),
-                layoutBarChoice(
-                    n.iconSource,
-                    AppBarOptions.iconSource
-                )
-            )
         case .monocleAppBarGroupAdjacentWindows,
             .scrollingAppBarGroupAdjacentWindows:
             return layoutBarRow(
@@ -76,84 +62,6 @@ extension SettingsValueReadout {
                 .appBarGroupAdjacentWindows,
                 layoutBarOnOff(o.groupAdjacentWindows),
                 layoutBarOnOff(n.groupAdjacentWindows)
-            )
-        case .monocleAppBarDimFactor, .scrollingAppBarDimFactor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarDimFactor,
-                layoutBarNumber(o.dimFactor),
-                layoutBarNumber(n.dimFactor)
-            )
-        case .monocleAppBarFillColor, .scrollingAppBarFillColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarFillColor,
-                layoutBarHex(o.fillColor),
-                layoutBarHex(n.fillColor)
-            )
-        case .monocleAppBarHighlightColor,
-            .scrollingAppBarHighlightColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarHighlightColor,
-                layoutBarHex(o.highlightColor),
-                layoutBarHex(n.highlightColor)
-            )
-        case .monocleAppBarItemColor, .scrollingAppBarItemColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarItemColor,
-                layoutBarHex(o.itemColor),
-                layoutBarHex(n.itemColor)
-            )
-        case .monocleAppBarActiveItemColor,
-            .scrollingAppBarActiveItemColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarActiveItemColor,
-                layoutBarHex(o.activeItemColor),
-                layoutBarHex(n.activeItemColor)
-            )
-        case .monocleAppBarHoverFillColor,
-            .scrollingAppBarHoverFillColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarHoverFillColor,
-                layoutBarHex(o.hoverFillColor),
-                layoutBarHex(n.hoverFillColor)
-            )
-        case .monocleAppBarHoverItemColor,
-            .scrollingAppBarHoverItemColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarHoverItemColor,
-                layoutBarHex(o.hoverItemColor),
-                layoutBarHex(n.hoverItemColor)
-            )
-        case .monocleAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarGroupBadgeColor,
-                layoutBarHex(o.groupBadgeColor),
-                layoutBarHex(n.groupBadgeColor)
-            )
-        case .monocleAppBarGroupBadgeTextColor,
-            .scrollingAppBarGroupBadgeTextColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarGroupBadgeTextColor,
-                layoutBarHex(o.groupBadgeTextColor),
-                layoutBarHex(n.groupBadgeTextColor)
             )
         }
     }
@@ -176,21 +84,11 @@ extension SettingsValueReadout {
         switch key {
         case .monocleAppBarEnabled, .monocleAppBarActiveIndicator,
             .monocleAppBarContent, .monocleAppBarTitleCap,
-            .monocleAppBarGroupAdjacentWindows, .monocleAppBarFillColor,
-            .monocleAppBarHighlightColor, .monocleAppBarItemColor,
-            .monocleAppBarActiveItemColor, .monocleAppBarHoverFillColor,
-            .monocleAppBarHoverItemColor, .monocleAppBarGroupBadgeColor,
-            .monocleAppBarGroupBadgeTextColor, .monocleAppBarIconSource,
-            .monocleAppBarDimFactor:
+            .monocleAppBarGroupAdjacentWindows:
             return .monocle
         case .scrollingAppBarEnabled, .scrollingAppBarActiveIndicator,
             .scrollingAppBarContent, .scrollingAppBarTitleCap,
-            .scrollingAppBarGroupAdjacentWindows, .scrollingAppBarFillColor,
-            .scrollingAppBarHighlightColor, .scrollingAppBarItemColor,
-            .scrollingAppBarActiveItemColor, .scrollingAppBarHoverFillColor,
-            .scrollingAppBarHoverItemColor, .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarIconSource,
-            .scrollingAppBarDimFactor:
+            .scrollingAppBarGroupAdjacentWindows:
             return .scrolling
         }
     }

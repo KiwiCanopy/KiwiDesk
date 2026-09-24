@@ -86,7 +86,6 @@ enum AppBarOptions {
                     "Edge mark"
                 )
             ),
-            (.gap, L("app_bar.active_indicator.gap", "Gap")),
         ]
     }
 

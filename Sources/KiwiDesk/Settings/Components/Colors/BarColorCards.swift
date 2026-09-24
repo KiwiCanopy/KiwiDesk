@@ -1,8 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Space Bar color group on Advanced Colours.
-struct SpaceBarColorCard: View {
+/// The shelf's one colour group on Advanced Colours (#1517):
+/// every colour both bars draw, plus the Space Bar's own
+/// focused-window ink.
+struct KiwiShelfColorCard: View {
     @ObservedObject var model: SettingsModel
     @State private var moreExpanded = false
 
@@ -10,35 +12,25 @@ struct SpaceBarColorCard: View {
         AdvancedColorsGates(settings: model.config.settings)
     }
     private var allows: Bool {
-        gates.bars.containerReason(for: .spaceBar) == nil
+        gates.bars.containerReason(for: .kiwishelf) == nil
     }
 
     var body: some View {
         // Section header help provides the block gate anchor (#527).
         SettingsSection(
-            SettingsCatalog.advancedColors.spaceBarGroup,
-            help: allows ? nil : AdvancedColorsHelp.spaceBarOff
+            SettingsCatalog.advancedColors.kiwishelfGroup,
+            help: allows ? nil : AdvancedColorsHelp.kiwishelfOff
         ) {
             ColorGrid {
                 AdvancedColorRows(
                     model: model,
-                    keys: ColorsRowOrder.spaceBarAtRest,
+                    keys: ColorsRowOrder.kiwishelfAtRest,
                     allows: allows,
-                    gateHelp: AdvancedColorsHelp.spaceBarOff
-                )
-            }
-            // One greyed ROW in a live card takes its reason
-            // beneath it as a live link, outside the dimmed
-            // subtree — a header `?` scopes the card (#1310).
-            if gates.focusedItemNeedsReference {
-                CrossReferenceRow(
-                    prose: AdvancedColorsHelp.focusedItemReference,
-                    linkTitle: SettingsDestination.bars.title,
-                    destination: .bars
+                    gateHelp: AdvancedColorsHelp.kiwishelfOff
                 )
             }
             SettingsDisclosure(
-                SettingsCatalog.advancedColors.spaceBarMore,
+                SettingsCatalog.advancedColors.kiwishelfMore,
                 isExpanded: $moreExpanded,
                 scrollHoisted: true,
                 summary: summary
@@ -46,71 +38,30 @@ struct SpaceBarColorCard: View {
                 ColorGrid {
                     AdvancedColorRows(
                         model: model,
-                        keys: ColorsRowOrder.spaceBarMore,
+                        keys: ColorsRowOrder.kiwishelfMore,
                         allows: allows,
-                        gateHelp: AdvancedColorsHelp.spaceBarOff
+                        gateHelp: AdvancedColorsHelp.kiwishelfOff
                     )
                 }
                 .padding(.top, 8)
+                // One greyed ROW in a live card takes its reason
+                // beneath it as a live link, outside the dimmed
+                // subtree — a header `?` scopes the card (#1310).
+                if gates.focusedItemNeedsReference {
+                    CrossReferenceRow(
+                        prose: AdvancedColorsHelp.focusedItemReference,
+                        linkTitle: SettingsDestination.bars.title,
+                        destination: .bars
+                    )
+                }
             }
         }
     }
 
     private var summary: String {
         L(
-            "colors.more.space_bar.summary",
-            "Plate, highlight, hover, badges"
-        )
-    }
-}
-
-struct AppBarColorCard: View {
-    @ObservedObject var model: SettingsModel
-    @State private var moreExpanded = false
-
-    private var gates: AdvancedColorsGates {
-        AdvancedColorsGates(settings: model.config.settings)
-    }
-    private var allows: Bool {
-        gates.bars.containerReason(for: .appBar) == nil
-    }
-
-    var body: some View {
-        SettingsSection(
-            SettingsCatalog.advancedColors.appBarGroup,
-            help: allows ? nil : AdvancedColorsHelp.appBarOff
-        ) {
-            ColorGrid {
-                AdvancedColorRows(
-                    model: model,
-                    keys: ColorsRowOrder.appBarAtRest,
-                    allows: allows,
-                    gateHelp: AdvancedColorsHelp.appBarOff
-                )
-            }
-            SettingsDisclosure(
-                SettingsCatalog.advancedColors.appBarMore,
-                isExpanded: $moreExpanded,
-                scrollHoisted: true,
-                summary: summary
-            ) {
-                ColorGrid {
-                    AdvancedColorRows(
-                        model: model,
-                        keys: ColorsRowOrder.appBarMore,
-                        allows: allows,
-                        gateHelp: AdvancedColorsHelp.appBarOff
-                    )
-                }
-                .padding(.top, 8)
-            }
-        }
-    }
-
-    private var summary: String {
-        L(
-            "colors.more.app_bar.summary",
-            "Item, active item, hover, badges"
+            "colors.more.kiwishelf.summary",
+            "Hover, badges, focused window"
         )
     }
 }

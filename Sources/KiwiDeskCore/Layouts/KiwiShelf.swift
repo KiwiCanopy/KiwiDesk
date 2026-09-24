@@ -121,6 +121,20 @@ public struct KiwiShelf: Sendable, Equatable {
         )
     }
 
+    /// An idle Space identifier's ink — `itemColor` at
+    /// `idleItemAlpha` of its own alpha, as `#RRGGBBAA`. The one
+    /// home the live bar and the Settings preview both read.
+    public var idleItemColor: String {
+        let body = itemColor.uppercased().drop { $0 == "#" }
+        guard body.count == 6 || body.count == 8,
+            body.allSatisfy(\.isHexDigit)
+        else { return itemColor }
+        let alpha =
+            body.count == 8 ? Int(body.suffix(2), radix: 16) ?? 255 : 255
+        let idle = Int((CGFloat(alpha) * Self.idleItemAlpha).rounded())
+        return "#" + body.prefix(6) + String(format: "%02X", idle)
+    }
+
     /// Concrete corner radius in pt for a given thickness.
     public func resolvedCornerRadius(
         forThickness thickness: CGFloat

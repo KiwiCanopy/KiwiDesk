@@ -13,19 +13,6 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case monocleAppBarTitleCap = "settings.monocle.appBar.titleCap"
     case monocleAppBarGroupAdjacentWindows =
         "settings.monocle.appBar.groupAdjacentWindows"
-    case monocleAppBarFillColor = "settings.monocle.appBar.fillColor"
-    case monocleAppBarHighlightColor = "settings.monocle.appBar.highlightColor"
-    case monocleAppBarItemColor = "settings.monocle.appBar.itemColor"
-    case monocleAppBarActiveItemColor =
-        "settings.monocle.appBar.activeItemColor"
-    case monocleAppBarHoverFillColor = "settings.monocle.appBar.hoverFillColor"
-    case monocleAppBarHoverItemColor = "settings.monocle.appBar.hoverItemColor"
-    case monocleAppBarGroupBadgeColor =
-        "settings.monocle.appBar.groupBadgeColor"
-    case monocleAppBarGroupBadgeTextColor =
-        "settings.monocle.appBar.groupBadgeTextColor"
-    case monocleAppBarIconSource = "settings.monocle.appBar.iconSource"
-    case monocleAppBarDimFactor = "settings.monocle.appBar.dimFactor"
     case scrollingAppBarEnabled = "settings.scrolling.appBar.enabled"
     case scrollingAppBarActiveIndicator =
         "settings.scrolling.appBar.activeIndicator"
@@ -33,22 +20,6 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case scrollingAppBarTitleCap = "settings.scrolling.appBar.titleCap"
     case scrollingAppBarGroupAdjacentWindows =
         "settings.scrolling.appBar.groupAdjacentWindows"
-    case scrollingAppBarFillColor = "settings.scrolling.appBar.fillColor"
-    case scrollingAppBarHighlightColor =
-        "settings.scrolling.appBar.highlightColor"
-    case scrollingAppBarItemColor = "settings.scrolling.appBar.itemColor"
-    case scrollingAppBarActiveItemColor =
-        "settings.scrolling.appBar.activeItemColor"
-    case scrollingAppBarHoverFillColor =
-        "settings.scrolling.appBar.hoverFillColor"
-    case scrollingAppBarHoverItemColor =
-        "settings.scrolling.appBar.hoverItemColor"
-    case scrollingAppBarGroupBadgeColor =
-        "settings.scrolling.appBar.groupBadgeColor"
-    case scrollingAppBarGroupBadgeTextColor =
-        "settings.scrolling.appBar.groupBadgeTextColor"
-    case scrollingAppBarIconSource = "settings.scrolling.appBar.iconSource"
-    case scrollingAppBarDimFactor = "settings.scrolling.appBar.dimFactor"
 }
 
 extension LayoutAppBarKey {
@@ -60,19 +31,9 @@ extension LayoutAppBarKey {
             return .row(.bars, .kiwishelf, .atRest)
         case .monocleAppBarActiveIndicator, .monocleAppBarContent,
             .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
-            .monocleAppBarFillColor, .monocleAppBarHighlightColor,
-            .monocleAppBarItemColor, .monocleAppBarActiveItemColor,
-            .monocleAppBarHoverFillColor, .monocleAppBarHoverItemColor,
-            .monocleAppBarGroupBadgeColor, .monocleAppBarGroupBadgeTextColor,
-            .monocleAppBarIconSource, .monocleAppBarDimFactor,
             .scrollingAppBarActiveIndicator, .scrollingAppBarContent,
-            .scrollingAppBarTitleCap, .scrollingAppBarGroupAdjacentWindows,
-            .scrollingAppBarFillColor, .scrollingAppBarHighlightColor,
-            .scrollingAppBarItemColor, .scrollingAppBarActiveItemColor,
-            .scrollingAppBarHoverFillColor, .scrollingAppBarHoverItemColor,
-            .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarIconSource,
-            .scrollingAppBarDimFactor:
+            .scrollingAppBarTitleCap,
+            .scrollingAppBarGroupAdjacentWindows:
             return .luaOnly
         }
     }
@@ -87,19 +48,9 @@ extension LayoutAppBarKey {
             return .text("kiwishelf.show.scrolling")
         case .monocleAppBarActiveIndicator, .monocleAppBarContent,
             .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
-            .monocleAppBarFillColor, .monocleAppBarHighlightColor,
-            .monocleAppBarItemColor, .monocleAppBarActiveItemColor,
-            .monocleAppBarHoverFillColor, .monocleAppBarHoverItemColor,
-            .monocleAppBarGroupBadgeColor, .monocleAppBarGroupBadgeTextColor,
-            .monocleAppBarIconSource, .monocleAppBarDimFactor,
             .scrollingAppBarActiveIndicator, .scrollingAppBarContent,
-            .scrollingAppBarTitleCap, .scrollingAppBarGroupAdjacentWindows,
-            .scrollingAppBarFillColor, .scrollingAppBarHighlightColor,
-            .scrollingAppBarItemColor, .scrollingAppBarActiveItemColor,
-            .scrollingAppBarHoverFillColor, .scrollingAppBarHoverItemColor,
-            .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarIconSource,
-            .scrollingAppBarDimFactor:
+            .scrollingAppBarTitleCap,
+            .scrollingAppBarGroupAdjacentWindows:
             return .none
         }
     }
