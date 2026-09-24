@@ -772,13 +772,18 @@ pinned by `reload()` once the target settles, and never
 mid-save and a Desktop binding loads another under an open
 window, and encoding against the new name bakes the page's own
 rules into the shared base (`RuleReachIdentityTests` ▸
-`reachFilesReadThePin`). A live draft whose pin no longer names
-the loaded profile refuses its Save rather than splitting it
-(`pageMovedRefuses`). On a checklist Save the rule families are
+`reachFilesReadThePin`). When the loaded profile moves under a
+live page, a clean draft repins by reloading and a dirty one
+refuses its Save rather than splitting it
+(`RuleReachIdentityTests` ▸ `pageMovedRefuses`,
+`cleanPageRepins`). On a checklist Save the rule families are
 written by `saveRuleReach` alone — `overwriteProfile` keeps the
-stored ones (`writingRules: false`, `OverwriteProfileRulesTests`)
-— and a rule write that fails keeps the base half out of the
-globals write (`failedReachKeepsBase`).
+stored ones (`writingRules: false`, `OverwriteProfileRulesTests`
+▸ `keepsStoredRules`)
+— a rule write that fails keeps the base half out of the
+globals write (`RuleReachIdentityTests` ▸ `failedReachKeepsBase`),
+and a rule half that landed before a failed tiling write is
+adopted as clean (`storedTilingFailureAdoptsRules`).
 
 **The loaded profile's page holds its RESOLVED rules, so the
 draft is not the sidecar.** On the live target the draft's app

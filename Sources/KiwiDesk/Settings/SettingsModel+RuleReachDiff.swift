@@ -41,7 +41,7 @@ extension SettingsModel {
     ) -> [SettingsDiffRow] {
         let apps = Set(encoded.touched.values.flatMap { $0 })
             .union(encoded.baseTouched)
-        let loaded = activeProfile
+        let loaded = reachLoaded
         let none = L("app_rules.reach.diff.none", "No rule")
         var result: [SettingsDiffRow] = []
         for app in apps.sorted() {

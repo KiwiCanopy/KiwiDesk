@@ -89,8 +89,8 @@ struct RuleReachChecklist: View {
     ) -> some View {
         let own = reading.own[profile]
         let leftOut = reading.leftOut.contains(profile)
-        let locked = profile == reading.editing
-        let follows = reading.shared && own == nil && !leftOut
+        let locked = reading.isLocked(profile)
+        let follows = reading.follows(profile)
         return VStack(alignment: .leading, spacing: 1) {
             Toggle(
                 isOn: Binding(

@@ -19,6 +19,16 @@ struct RuleReachReading: Equatable {
     /// Profiles that leave this shared rule out.
     let leftOut: Set<String>
 
+    /// Whether `profile`'s box is the edited profile's, locked.
+    func isLocked(_ profile: String) -> Bool { profile == editing }
+
+    /// Whether `profile`'s box follows All profiles — ticked and
+    /// greyed. One with its own value, or left out, stays
+    /// tickable, which drops that value.
+    func follows(_ profile: String) -> Bool {
+        shared && own[profile] == nil && !leftOut.contains(profile)
+    }
+
     /// The profiles the row ⚠ names, in menu order.
     var differing: [String] {
         profiles.filter { own[$0] != nil || leftOut.contains($0) }
@@ -45,7 +55,7 @@ extension SettingsModel {
     /// Whether the column is drawn at all: a profile loaded, and
     /// a second profile to name or a row that already differs.
     var offersReachColumn: Bool {
-        guard activeProfile != nil,
+        guard reachLoaded != nil,
             let reach = encodedReach, let editing = reachProfile
         else { return false }
         if reach.appRules.profiles.count >= 2 { return true }
@@ -135,7 +145,7 @@ extension SettingsModel {
         let order = profileMenuOrder.filter(table.profiles.contains)
         return RuleReachReading(
             editing: editing,
-            loaded: activeProfile,
+            loaded: reachLoaded,
             profiles: order + table.profiles.filter { !order.contains($0) },
             unreadable: unreadable,
             shared: table.follows(key, editing),

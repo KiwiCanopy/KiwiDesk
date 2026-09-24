@@ -12,6 +12,11 @@ extension SettingsModel {
     /// new rule's starting reach.
     var reachIsLoaded: Bool { editingProfile == nil }
 
+    /// The profile the checklist marks "loaded": on the live
+    /// target the page's own, pinned with it; on a stored page the
+    /// one on screen.
+    var reachLoaded: String? { reachIsLoaded ? reachPage : activeProfile }
+
     /// The stored tables with the draft applied; nil without a
     /// checklist.
     var encodedReach: RuleReachSnapshot? {
@@ -88,6 +93,23 @@ extension SettingsModel {
             core.onLog("rule reach save failed: \(error)")
             return false
         }
+    }
+
+    /// Whether Save as new profile… waits: a checklist choice
+    /// reaches other profiles, which a copy cannot carry. A plain
+    /// value edit is the copy's own.
+    var copyWaitsOnReach: Bool { !reachEdits.isEmpty }
+
+    /// Takes a rule half that landed as the draft's baseline, so
+    /// only what did not land stays unsaved.
+    func adoptRuleHalf() {
+        suppressDirty = true
+        cleanConfig.appRules = config.appRules
+        cleanConfig.floatRules = config.floatRules
+        ruleReachStored = core.ruleReachSnapshot()
+        reachEdits = RuleReachEdits()
+        suppressDirty = false
+        recomputeDirty()
     }
 
     /// Drops the draft's rule half, so a globals write after a

@@ -44,6 +44,14 @@ struct RuleReachParityTests {
             reach: .listed(["Work"]),
             editing: "Work"
         )
+        // Home's page re-encodes its own tombstone over the base.
+        table.apply(
+            "zoom",
+            value: ["zoom:Meeting", "zoom:Share"],
+            reach: .listed(["Home"]),
+            editing: "Home"
+        )
+        #expect(table.touched["Home"]?.contains("zoom") == true)
         let base = table.floatRuleBase(original: ["zoom", "com.calc"])
         for (name, original) in [("Work", nil), ("Home", home)] {
             let encoded = table.floatRuleOverride(
@@ -132,22 +140,26 @@ struct OverwriteProfileRulesTests {
         )
         try core.guiConfigStore.save(GuiConfig())
         let own = AppRuleOverride(rules: ["mail": 2])
-        try core.profiles.write(
-            Profile(
-                name: "Home",
-                monitorSets: [MonitorSet(monitors: ["H:1x1"])],
-                spaceModes: [:],
-                settings: TilingSettings(),
-                appRules: own
-            )
+        let floats = RuleListOverride(rules: ["zoom": true])
+        var home = Profile(
+            name: "Home",
+            monitorSets: [MonitorSet(monitors: ["H:1x1"])],
+            spaceModes: [:],
+            settings: TilingSettings(),
+            appRules: own
         )
+        home.floatRules = floats
+        try core.profiles.write(home)
         var config = try core.loadGuiConfig(editing: "Home")
         config.appRules = ["mail": 3]
+        config.floatRules = ["slack"]
         try core.overwriteProfile(
             named: "Home",
             with: config,
             writingRules: false
         )
-        #expect(try core.profiles.read(name: "Home").appRules == own)
+        let stored = try core.profiles.read(name: "Home")
+        #expect(stored.appRules == own)
+        #expect(stored.floatRules == floats)
     }
 }

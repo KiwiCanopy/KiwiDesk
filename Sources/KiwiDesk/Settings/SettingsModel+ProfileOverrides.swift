@@ -50,6 +50,9 @@ extension SettingsModel {
                 "\(error)"
             )
             core.onLog("profile edit save failed: \(error)")
+            // The rule half already landed: the draft takes it as
+            // clean, so it never shows saved rules as unsaved.
+            adoptRuleHalf()
             return
         }
         persistBindingsIfEdited()

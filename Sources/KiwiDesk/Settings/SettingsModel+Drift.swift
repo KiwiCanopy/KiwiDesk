@@ -47,18 +47,35 @@ extension SettingsModel {
         return .noMatch
     }
 
-    /// Why the live draft cannot be saved as it stands: another
-    /// profile was loaded under it, and its page is the old one.
+    /// Whether the live page no longer names the loaded profile —
+    /// one was loaded under it, or over a page drawn with none.
+    var pageMoved: Bool {
+        target == .live && ruleReachStored != nil
+            && reachPage != core.profiles.currentName
+    }
+
+    /// Why a dirty live draft cannot be saved as it stands: its
+    /// page is not the loaded profile's any more.
     var pageMovedReason: String? {
-        guard target == .live, let page = reachPage,
-            let current = core.profiles.currentName, current != page
-        else { return nil }
+        guard pageMoved, isDirty else { return nil }
+        let current = core.profiles.currentName ?? ""
+        let revert = L("footer.revert", "Revert")
+        guard let page = reachPage else {
+            return L(
+                "profiles.page_moved.unnamed",
+                "%1$@ was loaded while you were editing. %2$@, then "
+                    + "make your edits again.",
+                current,
+                revert
+            )
+        }
         return L(
             "profiles.page_moved",
-            "%1$@ was loaded while you were editing %2$@. Revert, "
+            "%1$@ was loaded while you were editing %2$@. %3$@, "
                 + "then make your edits again.",
             current,
-            page
+            page,
+            revert
         )
     }
 }

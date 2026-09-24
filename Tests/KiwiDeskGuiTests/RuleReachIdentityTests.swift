@@ -5,9 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// One draft, one identity, and no half a Save (#1393, architect
-/// round 2): the page is pinned per settled target, a profile
-/// loaded under a dirty draft refuses the Save, and a failed rule
-/// write never lets the base half land alone.
+/// round 2): the page is pinned per settled target; a profile
+/// loaded under a clean page repins it and under a dirty one
+/// refuses the Save; a failed rule write never lets the base half
+/// land alone, and a landed one is adopted as clean.
 @Suite("Rule reach identity and failure (#1393)", .serialized)
 @MainActor
 struct RuleReachIdentityTests {
@@ -67,7 +68,41 @@ struct RuleReachIdentityTests {
             model.core.guiConfigStore.load()?.appRules["mail"]
                 == SpaceID("1")
         )
-        #expect(try model.core.profiles.read(name: "Home").appRules == nil)
+        #expect(try model.core.profiles.read(name: "Work").appRules == nil)
+    }
+
+    @Test("A clean live page repins when another profile loads")
+    func cleanPageRepins() throws {
+        let model = try makeModel()
+        #expect(!model.isDirty)
+        _ = try model.core.loadProfile(named: "Home")
+
+        model.refreshProfiles()
+
+        #expect(model.reachProfile == "Home")
+        #expect(model.pageMovedReason == nil)
+    }
+
+    @Test("A stored Save whose tiling write fails adopts the rules")
+    func storedTilingFailureAdoptsRules() throws {
+        let model = try makeModel()
+        model.selectEditTarget("Home")
+        // A shared-value edit reaches only the base, so the rule
+        // half lands; Home's own file then refuses the tiling read.
+        model.config.appRules["mail"] = SpaceID("2")
+        model.config.spaces = [SpaceID("1")]
+        try corrupt(model, "Home")
+
+        model.saveEditedProfile()
+
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"]
+                == SpaceID("2")
+        )
+        #expect(model.cleanConfig.appRules["mail"] == SpaceID("2"))
+        #expect(model.reachDiffRows().isEmpty)
+        // The tiling edit did not land, so it stays unsaved.
+        #expect(model.isDirty)
     }
 
     @Test("A failed rule write keeps the base out of the globals")
@@ -102,7 +137,9 @@ struct RuleReachIdentityTests {
 
     /// The page a draft encodes against is the pin, never Core's
     /// live name: a live read is how a mid-save name change baked
-    /// one profile's own rules into the shared base.
+    /// one profile's own rules into the shared base. A spelling
+    /// scan over these four files — a fifth reach file is
+    /// review's.
     @Test("the rule-reach files read no live profile name")
     func reachFilesReadThePin() throws {
         let settings = SourceScan.repoRoot(from: #filePath)

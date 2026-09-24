@@ -64,6 +64,8 @@ struct RuleReachModelEdgeTests {
         #expect(row.shared)
         #expect(row.leftOut == ["Home"])
         #expect(row.differing == ["Home"])
+        #expect(!row.follows("Home"))
+        #expect(!row.isLocked("Home") && row.isLocked("Work"))
 
         model.setProfile(.space, "mail", "Home", true)
         model.updateActiveProfile()
@@ -92,12 +94,12 @@ struct RuleReachModelEdgeTests {
         model.selectEditTarget("Home")
         // A value edit, even to a shared row, is the copy's own.
         model.config.appRules["mail"] = SpaceID("2")
-        #expect(model.reachEdits.isEmpty)
+        #expect(!model.copyWaitsOnReach)
 
         model.config.appRules["spotify"] = SpaceID("2")
         model.setAllProfiles(.space, "spotify", true)
 
-        #expect(!model.reachEdits.isEmpty)
+        #expect(model.copyWaitsOnReach)
     }
 
     /// The predicate above greys the copy button — the wiring,
@@ -112,6 +114,6 @@ struct RuleReachModelEdgeTests {
             try String(contentsOf: file, encoding: .utf8)
         )
         #expect(source.contains(".disabled(copyBlockedReason != nil)"))
-        #expect(source.contains("model.reachEdits.isEmpty"))
+        #expect(source.contains("guard model.copyWaitsOnReach else"))
     }
 }
