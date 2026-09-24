@@ -1037,6 +1037,8 @@
   "profiles.other_count.help": "Enregistré pour un autre nombre d'écrans — se charge avec des modifications non enregistrées.",
   "profiles.overrides.many": "%1$d surcharges de raccourci",
   "profiles.overrides.one": "1 surcharge de raccourci",
+  "profiles.page_moved": "%1$@ a été chargé pendant que vous modifiiez %2$@. Choisissez « %3$@ », puis refaites vos modifications.",
+  "profiles.page_moved.unnamed": "%1$@ a été chargé pendant vos modifications. Choisissez « %2$@ », puis refaites vos modifications.",
   "profiles.rename": "Renommer",
   "profiles.rename.help": "Renommer le profil",
   "profiles.rename_failed": "Le renommage a échoué : %1$@",

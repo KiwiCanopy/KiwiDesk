@@ -1037,6 +1037,8 @@
   "profiles.other_count.help": "다른 화면 수용으로 저장되었습니다. 저장하지 않은 변경 사항이 있는 상태로 로드됩니다.",
   "profiles.overrides.many": "%1$d개의 단축키 오버라이드",
   "profiles.overrides.one": "1개의 단축키 오버라이드",
+  "profiles.page_moved": "‘%2$@’을(를) 편집하는 동안 ‘%1$@’이(가) 로드되었습니다. ‘%3$@’을(를) 사용한 다음 다시 편집하십시오.",
+  "profiles.page_moved.unnamed": "편집하는 동안 ‘%1$@’이(가) 로드되었습니다. ‘%2$@’을(를) 사용한 다음 다시 편집하십시오.",
   "profiles.rename": "이름 변경",
   "profiles.rename.help": "프로필 이름 변경",
   "profiles.rename_failed": "이름 변경 실패: %1$@",

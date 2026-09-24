@@ -1037,6 +1037,8 @@
   "profiles.other_count.help": "Salvato per un numero diverso di schermi — viene caricato con modifiche non salvate.",
   "profiles.overrides.many": "%1$d personalizzazioni delle scorciatoie",
   "profiles.overrides.one": "1 personalizzazione della scorciatoia",
+  "profiles.page_moved": "%1$@ è stato caricato mentre modificavi %2$@. Usa «%3$@», poi ripeti le tue modifiche.",
+  "profiles.page_moved.unnamed": "%1$@ è stato caricato mentre stavi modificando. Usa «%2$@», poi ripeti le tue modifiche.",
   "profiles.rename": "Rinomina",
   "profiles.rename.help": "Rinomina profilo",
   "profiles.rename_failed": "Ridenominazione non riuscita: %1$@",

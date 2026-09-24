@@ -59,14 +59,13 @@ extension SettingsModel {
     var pageMovedReason: String? {
         guard pageMoved, isDirty else { return nil }
         let current = core.profiles.currentName ?? ""
-        let revert = L("footer.revert", "Revert")
         guard let page = reachPage else {
             return L(
                 "profiles.page_moved.unnamed",
                 "%1$@ was loaded while you were editing. %2$@, then "
                     + "make your edits again.",
                 current,
-                revert
+                L("footer.revert", "Revert")
             )
         }
         return L(
@@ -75,7 +74,7 @@ extension SettingsModel {
                 + "then make your edits again.",
             current,
             page,
-            revert
+            L("footer.revert", "Revert")
         )
     }
 }

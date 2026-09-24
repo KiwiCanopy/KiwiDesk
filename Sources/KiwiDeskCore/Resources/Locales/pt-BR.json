@@ -1037,6 +1037,8 @@
   "profiles.other_count.help": "Salvo para outro número de telas — carrega com alterações não salvas.",
   "profiles.overrides.many": "%1$d substituições de atalho",
   "profiles.overrides.one": "1 substituição de atalho",
+  "profiles.page_moved": "%1$@ foi carregado enquanto você editava %2$@. Use “%3$@” e depois refaça suas edições.",
+  "profiles.page_moved.unnamed": "%1$@ foi carregado enquanto você editava. Use “%2$@” e depois refaça suas edições.",
   "profiles.rename": "Renomear",
   "profiles.rename.help": "Renomear perfil",
   "profiles.rename_failed": "Falha ao renomear: %1$@",

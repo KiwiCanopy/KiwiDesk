@@ -1037,6 +1037,8 @@
   "profiles.other_count.help": "Guardado para otro número de pantallas — se carga con cambios sin guardar.",
   "profiles.overrides.many": "%1$d anulaciones de atajos",
   "profiles.overrides.one": "1 anulación de atajo",
+  "profiles.page_moved": "Se cargó %1$@ mientras editabas %2$@. Pulsa «%3$@» y vuelve a hacer tus cambios.",
+  "profiles.page_moved.unnamed": "Se cargó %1$@ mientras editabas. Pulsa «%2$@» y vuelve a hacer tus cambios.",
   "profiles.rename": "Renombrar",
   "profiles.rename.help": "Renombrar perfil",
   "profiles.rename_failed": "Error al renombrar: %1$@",

@@ -1037,6 +1037,8 @@
   "profiles.other_count.help": "別の画面数用に保存されています。未保存の変更がある状態で読み込まれます。",
   "profiles.overrides.many": "%1$d個のショートカットオーバーライド",
   "profiles.overrides.one": "1個のショートカットオーバーライド",
+  "profiles.page_moved": "「%2$@」の編集中に「%1$@」が読み込まれました。「%3$@」を実行してから、もう一度編集してください。",
+  "profiles.page_moved.unnamed": "編集中に「%1$@」が読み込まれました。「%2$@」を実行してから、もう一度編集してください。",
   "profiles.rename": "名前を変更",
   "profiles.rename.help": "プロファイルの名前を変更",
   "profiles.rename_failed": "名前の変更に失敗しました: %1$@",
