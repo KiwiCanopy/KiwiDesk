@@ -433,6 +433,48 @@ def description(entry: dict | None, version: str) -> str:
     return "".join(parts) or f"{_STYLE}<p>KiwiDesk {html.escape(version)}.</p>"
 
 
+# The structured notes' element and its namespace (#1542). Sparkle
+# hands an unknown item element to the app as a string in
+# `SUAppcastItem.propertiesDictionary`, keyed by its qualified name,
+# so KiwiDesk's own update window reads this rather than parsing
+# the HTML above, which stays for every 1.x client.
+NOTES_NAMESPACE = "https://github.com/KiwiCanopy/KiwiDesk/appcast"
+NOTES_ELEMENT = "kiwidesk:notes"
+NOTES_FORMAT = 1
+
+
+def structured_notes(entry: dict | None) -> str | None:
+    """A typed release's notes as JSON, or None for a release
+    before 2.0.0, whose free sections the window does not group.
+
+    The document carries each section's generated `type` as-is —
+    readers branch on it, never on the title
+    (packaging-and-release.md) — and the entries stay markdown for
+    the window to render. `]]>` cannot occur outside a JSON string,
+    so escaping its `>` keeps the CDATA closed and the JSON equal."""
+    if not entry:
+        return None
+    sections = entry.get("sections") or []
+    if not sections or not all("type" in s for s in sections):
+        return None
+    document: dict = {
+        "format": NOTES_FORMAT,
+        "summary": entry.get("summary") or "",
+        "sections": [
+            {
+                "type": section["type"],
+                "title": section["title"],
+                "items": list(section.get("items") or []),
+            }
+            for section in sections
+        ],
+    }
+    if entry.get("heads"):
+        document["heads"] = entry["heads"]
+    text = json.dumps(document, ensure_ascii=False, separators=(",", ":"))
+    return text.replace("]]>", "]]\\u003e")
+
+
 def pub_date(published_at: str) -> str:
     """RFC 822, which is what an RSS `pubDate` is."""
     if not published_at:
@@ -591,6 +633,7 @@ def build_item(
         "length": length,
         "signature": signature,
         "description": description(notes.get(tag), version),
+        "notes": structured_notes(notes.get(tag)),
     }
 
 
@@ -630,7 +673,13 @@ def render(items: list[dict], floor: str) -> str:
             f"</sparkle:minimumSystemVersion>\n"
             f"      <description><![CDATA["
             f"{item['description']}]]></description>\n"
-            f"      <enclosure\n"
+            + (
+                f"      <{NOTES_ELEMENT}><![CDATA["
+                f"{item['notes']}]]></{NOTES_ELEMENT}>\n"
+                if item.get("notes")
+                else ""
+            )
+            + f"      <enclosure\n"
             f'        url="{html.escape(item["url"], quote=True)}"'
             f"\n"
             f'        length="{item["length"]}"\n'
@@ -649,7 +698,8 @@ def render(items: list[dict], floor: str) -> str:
         "-->\n"
         '<rss version="2.0"\n'
         '     xmlns:sparkle="http://www.andymatuschak.org/'
-        'xml-namespaces/sparkle">\n'
+        'xml-namespaces/sparkle"\n'
+        f'     xmlns:kiwidesk="{NOTES_NAMESPACE}">\n'
         "  <channel>\n"
         "    <title>KiwiDesk</title>\n"
         f"    <link>{feed_url()}</link>\n"

@@ -196,6 +196,19 @@ the releases API and skips anything still a draft;
 published`, alongside the notes it shares a corpus with.
 `.claude/rules/site.md` owns the generated file itself.
 
+**A typed release's item carries its notes twice: as HTML and as
+data (#1542).** The `<description>` HTML stays, because every
+client before KiwiDesk's own update window renders only that;
+beside it, one `kiwidesk:notes` element holds the same
+`changelog.json` entry as versioned JSON (`NOTES_FORMAT`), which
+Sparkle hands the app through `SUAppcastItem.propertiesDictionary`
+under that qualified name. Both come from the one entry in one
+run, so they cannot describe different notes, and a release
+before 2.0.0 carries the HTML alone. A breaking change to that
+document's shape bumps `NOTES_FORMAT`, and the window refuses a
+format it does not know rather than half-rendering it
+(`AppcastStructuredNotesTests`).
+
 **Three clauses decide whether a release enters the feed, and
 `scripts/appcast-sync` names the one that failed:** it is
 published; it carries exactly one distributable `.zip`, never a
