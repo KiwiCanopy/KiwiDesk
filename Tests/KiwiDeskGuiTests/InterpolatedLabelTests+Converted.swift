@@ -95,16 +95,12 @@ extension InterpolatedLabelTests {
         // way from the start.
         "monocle.hide_style.help": 2,
         "space_override.slot_size.help": 4,
-        "app_bar.color.gap_only": 1,
-        "app_bar.icon_source.help": 5,
-        "app_bar.icon_source.title_only": 2,
         "space_bar.title_cap.front_app_only": 1,
         "lua_editor.adopt_help.body": 1,
         "shortcuts.import.help": 1,
         "kiwishelf.background_fit.boxed_only": 1,
         "kiwishelf.empty.help": 1,
         "space_bar.color.focused_item.help": 2,
-        "space_bar.icon_source.help": 2,
         "spaces.delete_confirm.message": 2,
         // The entries below were ALWAYS interpolating and were
         // invisible until the scan learned
@@ -119,8 +115,10 @@ extension InterpolatedLabelTests {
         // "turn one on" having left the referent to the reader.
         // Its Bars-page twin joins the register for the same
         // change.
-        "colors.app_bar_off.help": 3,
         "app_bar.no_layout.shelf_help": 2,
+        "colors.kiwishelf_off.help": 3,
+        "kiwishelf.icon_source.help": 2,
+        "kiwishelf.icon_source.no_icon": 1,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
         // says tints the glass, rather than quoting the word —
@@ -138,7 +136,6 @@ extension InterpolatedLabelTests {
         // and the Gaps & Borders switch — two by key; the third
         // slot is the link.
         "colors.unfocused_off.xref": 2,
-        "colors.space_bar_off.help": 1,
         "colors.unfocused_off.help": 1,
         "layout_defaults.spaces_using.none": 1,
         // The `i18n/residue-round` batch (#830), in three

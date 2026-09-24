@@ -14,40 +14,21 @@ import Foundation
 enum AppBarFixtures {
     static func everyGlobalField() -> AppBarStyle {
         var style = AppBarStyle()
-        style.activeIndicator = .gap
+        // Non-default: the App Bar ships Edge mark (#1517).
+        style.activeIndicator = .outline
         style.content = .title
         style.titleCap = 40
-        style.iconSource = .appFont
         style.groupAdjacentWindows = false
-        style.dimFactor = 0.3
-        style.itemColor = "#010101"
-        style.fillColor = "#020202"
-        style.activeItemColor = "#030303"
-        style.highlightColor = "#050505"
-        style.hoverFillColor = "#060606"
-        style.hoverItemColor = "#070707"
-        style.groupBadgeColor = "#090909"
-        style.groupBadgeTextColor = "#0A0A0A"
         return style
     }
 
     static func everyOverrideField() -> LayoutAppBar {
         var bar = LayoutAppBar()
         bar.enabled = false
-        bar.activeIndicator = .outline
+        bar.activeIndicator = .edgeMark
         bar.content = .iconAndTitle
         bar.titleCap = 60
-        bar.iconSource = .appImage
         bar.groupAdjacentWindows = true
-        bar.dimFactor = 0.5
-        bar.itemColor = "#111111"
-        bar.fillColor = "#222222"
-        bar.activeItemColor = "#333333"
-        bar.highlightColor = "#555555"
-        bar.hoverFillColor = "#666666"
-        bar.hoverItemColor = "#777777"
-        bar.groupBadgeColor = "#999999"
-        bar.groupBadgeTextColor = "#AAAAAA"
         return bar
     }
 
@@ -57,7 +38,7 @@ enum AppBarFixtures {
         shelf.edge = .left
         shelf.alignment = .end
         shelf.order = .appsFirst
-        shelf.share = 60
+        shelf.minimum = 60
         shelf.thickness = 44
         shelf.outerMargin = 4
         shelf.innerMargin = 6
@@ -67,6 +48,16 @@ enum AppBarFixtures {
         shelf.cornerRoundness = 5
         shelf.itemGap = 3
         shelf.fontSize = 15
+        shelf.iconSource = .appFont
+        shelf.dimFactor = 0.3
+        shelf.itemColor = "#010101"
+        shelf.fillColor = "#020202"
+        shelf.activeItemColor = "#030303"
+        shelf.highlightColor = "#050505"
+        shelf.hoverFillColor = "#060606"
+        shelf.hoverItemColor = "#070707"
+        shelf.groupBadgeColor = "#090909"
+        shelf.groupBadgeTextColor = "#0A0A0A"
         return shelf
     }
 }

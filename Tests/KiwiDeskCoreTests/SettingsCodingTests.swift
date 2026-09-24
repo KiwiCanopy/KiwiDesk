@@ -63,12 +63,10 @@ struct SettingsCodingTests {
         // Bar chrome defaults take the brand kiwi green (#439);
         // pinned here so an accidental struct-default change
         // fails the build, not just the doc-drift breadcrumb.
-        let appBar = try object(root["app_bar"])
-        #expect(appBar["active_item_color"] as? String == "#8DB354")
-        #expect(appBar["highlight_color"] as? String == "#8DB354")
-        let spaceBar = try object(root["space_bar"])
-        #expect(spaceBar["active_item_color"] as? String == "#8DB354")
-        #expect(spaceBar["highlight_color"] as? String == "#8DB354")
+        // One set for both bars, on the shelf (#1517).
+        let shelf = try object(root["kiwishelf"])
+        #expect(shelf["active_item_color"] as? String == "#8DB354")
+        #expect(shelf["highlight_color"] as? String == "#8DB354")
         // `sticky.set_mark` → `sticky.mark` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.

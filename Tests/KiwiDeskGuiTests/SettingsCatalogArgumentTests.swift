@@ -191,7 +191,9 @@ struct SettingsCatalogArgumentTests {
         // 101 since #1393: the Profile shortcuts banner's anchor.
         // 90 since #1517: the bars' shared rows' anchors are one
         // set on the KiwiShelf card, not one per bar.
-        #expect(direct.values.reduce(0, +) == 90)
+        // 78 since the #1517 redesign: the bar cards' Style
+        // drawers and their nine anchored rows left.
+        #expect(direct.values.reduce(0, +) == 78)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

@@ -61,13 +61,23 @@ struct KiwiShelfParityTests {
 /// `kiwishelf` namespace lists exactly the fields' verbs.
 @Suite("KiwiShelf command apply parity")
 struct KiwiShelfCommandParityTests {
-    private static let everySetting: [KiwiShelfCommandSetting] = [
-        .edge(.left), .alignment(.end), .order(.appsFirst),
-        .share(60), .thickness(44), .outerMargin(4),
-        .innerMargin(6), .backgroundStyle(.boxed),
-        .liquidGlass(false), .backgroundFit(.full),
-        .cornerRoundness(5), .itemGap(3), .fontSize(15),
-    ]
+    private static var everySetting: [KiwiShelfCommandSetting] {
+        fixedSettings
+            + KiwiShelfCommandSetting.colorFields.values.map {
+                .color($0, "#010203")
+            }
+    }
+
+    private static var fixedSettings: [KiwiShelfCommandSetting] {
+        [
+            .edge(.left), .alignment(.end), .order(.appsFirst),
+            .minimum(60), .thickness(44), .outerMargin(4),
+            .innerMargin(6), .backgroundStyle(.boxed),
+            .liquidGlass(false), .backgroundFit(.full),
+            .cornerRoundness(5), .itemGap(3), .fontSize(15),
+            .iconSource(.appFont), .dimFactor(0.3),
+        ]
+    }
 
     @Test("Each command sets exactly one field")
     func applyParity() {
@@ -112,10 +122,10 @@ struct KiwiShelfCommandParityTests {
     @Test("Share clamps to its range")
     func shareClamps() {
         var shelf = KiwiShelf()
-        KiwiShelfCommandSetting.share(95).apply(to: &shelf)
-        #expect(shelf.share == KiwiShelf.shareRange.upperBound)
-        KiwiShelfCommandSetting.share(-5).apply(to: &shelf)
-        #expect(shelf.share == KiwiShelf.shareRange.lowerBound)
+        KiwiShelfCommandSetting.minimum(95).apply(to: &shelf)
+        #expect(shelf.minimum == KiwiShelf.minimumRange.upperBound)
+        KiwiShelfCommandSetting.minimum(-5).apply(to: &shelf)
+        #expect(shelf.minimum == KiwiShelf.minimumRange.lowerBound)
     }
 
     private func sampleArgs(
@@ -128,9 +138,15 @@ struct KiwiShelfCommandParityTests {
         case .order: return [.string("apps_first")]
         case .backgroundStyle: return [.string("boxed")]
         case .backgroundFit: return [.string("full")]
-        case .share, .thickness, .outerMargin, .innerMargin,
+        case .iconSource: return [.string("app_font")]
+        case .dimFactor: return [.number(0.3)]
+        case .minimum, .thickness, .outerMargin, .innerMargin,
             .cornerRoundness, .itemGap, .fontSize:
             return [.number(30)]
+        case .itemColor, .activeItemColor, .highlightColor,
+            .hoverFillColor, .hoverItemColor, .fillColor,
+            .groupBadgeColor, .groupBadgeTextColor:
+            return [.string("#010203")]
         }
     }
 }

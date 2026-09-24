@@ -4,8 +4,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The one placement rule for the bars on the shelf (#1517): a
-/// lone bar at the alignment, two at opposite ends in `order`,
-/// each at its need, `share` deciding only when both overflow.
+/// lone bar at the alignment; two as one joined plate in `order`
+/// at the alignment, each section its need until the shelf is
+/// full, the Space section then shrinking no further than the
+/// minimum.
 @Suite("Shelf arrangement")
 struct ShelfArrangementTests {
     private typealias Slot = ShelfArrangement.Slot
@@ -14,13 +16,13 @@ struct ShelfArrangementTests {
     private func shelf(
         order: KiwiShelf.Order = .spacesFirst,
         alignment: KiwiShelf.Alignment = .center,
-        share: CGFloat = 40,
+        minimum: CGFloat = 40,
         gap: CGFloat = 0
     ) -> KiwiShelf {
         var shelf = KiwiShelf()
         shelf.order = order
         shelf.alignment = alignment
-        shelf.share = share
+        shelf.minimum = minimum
         shelf.itemGap = gap
         return shelf
     }
@@ -60,78 +62,82 @@ struct ShelfArrangementTests {
         #expect(app == ShelfArrangement(app: whole))
     }
 
-    @Test("Two that fit each take at least their need, ends hugged")
+    @Test("Two that fit are one plate, each section its need")
     func bothFit() {
         let placed = arrange(300, 200, shelf())
         #expect(
             placed.space
-                == Slot(offset: 0, length: 400, alignment: .start)
+                == Slot(offset: 250, length: 300, alignment: .end)
         )
         #expect(
             placed.app
-                == Slot(offset: 400, length: 600, alignment: .end)
+                == Slot(offset: 550, length: 200, alignment: .start)
         )
     }
 
-    @Test("A bar that fits its need past its share keeps it")
-    func needPastShareFits() {
-        let placed = arrange(700, 200, shelf())
-        #expect(placed.space?.length == 700)
+    @Test(
+        "The joined plate sits at the alignment",
+        arguments: [
+            (KiwiShelf.Alignment.start, CGFloat(0)),
+            (.center, 250),
+            (.end, 500),
+        ]
+    )
+    func joinedAtAlignment(alignment: KiwiShelf.Alignment, lead: CGFloat) {
+        let placed = arrange(300, 200, shelf(alignment: alignment))
+        #expect(placed.space?.offset == lead)
+        #expect(placed.app?.offset == lead + 300)
+    }
+
+    @Test("Full: the Space section shrinks to the App Bar's need")
+    func spaceGivesWay() {
+        let placed = arrange(900, 200, shelf())
+        #expect(
+            placed.space
+                == Slot(offset: 0, length: 800, alignment: .end)
+        )
         #expect(
             placed.app
-                == Slot(offset: 700, length: 300, alignment: .end)
+                == Slot(offset: 800, length: 200, alignment: .start)
         )
     }
 
-    @Test("One overflows: the other keeps its need and gives the rest")
-    func oneOverflows() {
-        let space = arrange(900, 200, shelf())
-        #expect(space.space?.length == 800)
+    @Test("Full: never below the minimum; the App Bar takes the rest")
+    func minimumHolds() {
+        let placed = arrange(700, 800, shelf())
+        #expect(placed.space?.length == 400)
         #expect(
-            space.app
-                == Slot(offset: 800, length: 200, alignment: .end)
-        )
-        let app = arrange(100, 900, shelf())
-        #expect(app.space?.length == 100)
-        #expect(
-            app.app
-                == Slot(offset: 100, length: 900, alignment: .end)
+            placed.app
+                == Slot(offset: 400, length: 600, alignment: .start)
         )
     }
 
-    /// The first bar under its share while the second overflows
-    /// the rest: the first keeps its need, never the share.
-    @Test("A bar under its share keeps its need beside an overflow")
-    func underShareKeepsItsNeed() {
+    /// The minimum is a floor on shrinking, never a length the
+    /// Space Bar is padded up to.
+    @Test("A Space Bar needing less than its minimum keeps its need")
+    func underMinimumKeepsItsNeed() {
         let placed = arrange(100, 950, shelf())
         #expect(placed.space?.length == 100)
         #expect(
             placed.app
-                == Slot(offset: 100, length: 900, alignment: .end)
+                == Slot(offset: 100, length: 900, alignment: .start)
         )
     }
 
-    @Test("Both overflow: the share decides")
-    func bothOverflow() {
-        let placed = arrange(700, 800, shelf())
-        #expect(placed.space?.length == 400)
-        #expect(placed.app?.length == 600)
-    }
-
-    @Test("Apps first swaps the ends and the share's side")
+    @Test("Apps first puts the App section first")
     func appsFirst() {
         let placed = arrange(700, 800, shelf(order: .appsFirst))
         #expect(
             placed.app
-                == Slot(offset: 0, length: 600, alignment: .start)
+                == Slot(offset: 0, length: 600, alignment: .end)
         )
         #expect(
             placed.space
-                == Slot(offset: 600, length: 400, alignment: .end)
+                == Slot(offset: 600, length: 400, alignment: .start)
         )
     }
 
-    @Test("The item gap separates the two segments")
+    @Test("The item gap separates the two sections")
     func gutter() throws {
         let placed = arrange(700, 800, shelf(gap: 10))
         let space = try #require(placed.space)
@@ -141,9 +147,9 @@ struct ShelfArrangementTests {
         #expect(app.offset + app.length == 1000)
     }
 
-    @Test("The share is clamped to its range")
-    func shareClamped() {
-        let placed = arrange(700, 800, shelf(share: 5))
+    @Test("The minimum is clamped to its range")
+    func minimumClamped() {
+        let placed = arrange(700, 800, shelf(minimum: 5))
         #expect(placed.space?.length == 200)
     }
 

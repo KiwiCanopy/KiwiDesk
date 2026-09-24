@@ -13,32 +13,26 @@ enum PaletteSceneScale {
 enum PaletteSceneRoles {
     /// The seven roles drawn by the shelf tile.
     static let tile: Set<String> = [
-        "app_bar.fill_color",
-        "app_bar.item_color",
-        "app_bar.active_item_color",
-        "app_bar.highlight_color",
+        "kiwishelf.fill_color",
+        "kiwishelf.item_color",
+        "kiwishelf.active_item_color",
+        "kiwishelf.highlight_color",
         "border.focused_color",
         "drag.ghost.fill_color",
         "drag.ghost.border_color",
     ]
 
-    /// The twenty-one roles drawn by the detail panel (#231).
+    /// The fifteen roles drawn by the detail panel (#231).
     static let panel: Set<String> = [
-        // Space Bar: plate, the accent ladder, the badge pair.
-        "space_bar.fill_color",
-        "space_bar.item_color",
-        "space_bar.active_item_color",
+        // The shelf: plate, the accent ladder, the badge pair,
+        // and the Space Bar's own focused-window ink (#1517).
+        "kiwishelf.fill_color",
+        "kiwishelf.item_color",
+        "kiwishelf.active_item_color",
+        "kiwishelf.highlight_color",
+        "kiwishelf.group_badge_color",
+        "kiwishelf.group_badge_text_color",
         "space_bar.focused_item_color",
-        "space_bar.highlight_color",
-        "space_bar.group_badge_color",
-        "space_bar.group_badge_text_color",
-        // App Bar: the same shape, one accent step shorter.
-        "app_bar.fill_color",
-        "app_bar.item_color",
-        "app_bar.active_item_color",
-        "app_bar.highlight_color",
-        "app_bar.group_badge_color",
-        "app_bar.group_badge_text_color",
         // Border focus pair.
         "border.focused_color",
         "border.unfocused_color",
@@ -54,13 +48,9 @@ enum PaletteSceneRoles {
 
     /// Roles withheld from still frame rendering (#708).
     static let withheld: [String: String] = [
-        "app_bar.hover_fill_color": "a pointer state, which a "
+        "kiwishelf.hover_fill_color": "a pointer state, which a "
             + "still frame can only draw as the resting one",
-        "app_bar.hover_item_color": "a pointer state, which a "
-            + "still frame can only draw as the resting one",
-        "space_bar.hover_fill_color": "a pointer state, which a "
-            + "still frame can only draw as the resting one",
-        "space_bar.hover_item_color": "a pointer state, which a "
+        "kiwishelf.hover_item_color": "a pointer state, which a "
             + "still frame can only draw as the resting one",
     ]
 

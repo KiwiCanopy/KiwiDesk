@@ -71,11 +71,10 @@ struct MonocleSettingsTests {
         var settings = TilingSettings()
         settings.monocle.orientation = .vertical
         settings.monocle.appBar.enabled = false
-        settings.monocle.appBar.activeIndicator = .gap
+        settings.monocle.appBar.activeIndicator = .outline
         settings.monocle.appBar.content = .icon
-        settings.monocle.appBar.highlightColor = "#FF0000"
+        settings.monocle.appBar.titleCap = 7
         settings.monocle.appBar.groupAdjacentWindows = false
-        settings.monocle.appBar.groupBadgeColor = "#112233"
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,

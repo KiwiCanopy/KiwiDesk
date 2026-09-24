@@ -78,9 +78,12 @@ struct ShelfDriverTests {
         #expect(strip.contains(space.strip))
         #expect(strip.contains(app.strip))
         #expect(!space.strip.intersects(app.strip))
-        // Spaces first by default: the Space Bar leads.
-        #expect(space.strip.minX == strip.minX)
-        #expect(app.strip.maxX == strip.maxX)
+        // Spaces first by default: one joined plate, the Space
+        // section leading, the pair centred on the edge.
+        #expect(space.strip.maxX <= app.strip.minX)
+        let lead = space.strip.minX - strip.minX
+        let trail = strip.maxX - app.strip.maxX
+        #expect(abs(lead - trail) <= 1)
         #expect(space.strip.height == strip.height)
         #expect(app.strip.height == strip.height)
     }

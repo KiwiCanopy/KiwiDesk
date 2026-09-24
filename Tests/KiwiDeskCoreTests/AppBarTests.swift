@@ -24,23 +24,23 @@ struct AppBarOverrideTests {
     func inheritance() {
         var global = AppBarStyle()
         global.content = .icon
-        global.itemColor = "#010203"
+        global.titleCap = 7
         let resolved = LayoutAppBar().resolved(with: global)
         #expect(resolved.content == .icon)
-        #expect(resolved.itemColor == "#010203")
+        #expect(resolved.titleCap == 7)
     }
 
     @Test("Set fields override just themselves")
     func overrideOne() {
         var global = AppBarStyle()
         global.content = .icon
-        global.itemColor = "#010203"
+        global.titleCap = 7
         var bar = LayoutAppBar()
         bar.content = .title
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
         #expect(resolved.content == .title)
-        #expect(resolved.itemColor == "#010203")
+        #expect(resolved.titleCap == 7)
     }
 
     @Test("The shelf's edge is absolute, orientation aside")

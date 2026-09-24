@@ -60,18 +60,12 @@ struct SpaceBarCommandParityTests {
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false),
         .glyphCap(8), .frontAppTitleCap(40),
-        .iconSource(.appFont),
-        .activeIndicator(.gap),
-        .dimFactor(0.3), .activeDimFactor(0.7),
+        .activeIndicator(.edgeMark),
+        .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
         .stickyBadge(false),
         .springDelay(1000),
-        .itemColor("#010101"), .activeItemColor("#020202"),
-        .focusedItemColor("#030303"), .hoverFillColor("#040404"),
-        .hoverItemColor("#050505"), .fillColor("#060606"),
-        .highlightColor("#080808"),
-        .groupBadgeColor("#0A0A0A"),
-        .groupBadgeTextColor("#0B0B0B"),
+        .focusedItemColor("#030303"),
     ]
 
     @Test("Each command sets exactly one field")
@@ -140,9 +134,8 @@ struct SpaceBarCommandParityTests {
         switch key {
         case .enabled, .showFrontApp, .hideEmpty, .stickyBadge:
             return [.bool(true)]
-        case .iconSource: return [.string("app_font")]
-        case .activeIndicator: return [.string("gap")]
-        case .dimFactor, .activeDimFactor:
+        case .activeIndicator: return [.string("edge_mark")]
+        case .activeDimFactor:
             return [.number(0.5)]
         case .springDelay: return [.number(1000)]
         case .glyphCap: return [.number(8)]

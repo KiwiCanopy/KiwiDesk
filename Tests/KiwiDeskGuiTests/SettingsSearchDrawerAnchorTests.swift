@@ -50,19 +50,11 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
-                .bars, "Bars", .kiwishelf,
+                .bars, "KiwiShelf & Bars", .kiwishelf,
                 [
                     SettingsCatalog.bars.kiwishelfStyle,
                     SettingsCatalog.bars.kiwishelfMargins,
                 ]
-            ),
-            (
-                .bars, "Bars", .spaceBar,
-                [SettingsCatalog.bars.spaceBarStyle]
-            ),
-            (
-                .bars, "Bars", .appBar,
-                [SettingsCatalog.bars.appBarStyle]
             ),
             (
                 .colors, "Colors & Animations", .motion,
@@ -275,12 +267,10 @@ struct SettingsSearchDrawerAnchorTests {
         #expect((glassRow != nil) == AppBarStyle.glassAvailable)
     }
 
-    /// The Bars area's Style drawers share one label key and are
-    /// told apart by instance; their rows carry each card's OWN
-    /// keys, so the join lands each census row on its own card's
-    /// child rather than the first drawer declared. Pinned on
-    /// the row both bars have under the same English.
-    @Test("a bar's row lands on its own bar's drawer")
+    /// The bar cards have no drawer since #1517: a bar row with
+    /// the same English as the other bar's is at rest on its own
+    /// card, and no drawer opens for it.
+    @Test("a bar's row lands on its own bar's row")
     func barRowsLandOnTheirOwnBar() {
         pinEnglish()
         defer { reset() }
@@ -291,21 +281,18 @@ struct SettingsSearchDrawerAnchorTests {
         let app = rows.first {
             $0.key == .appBar(.appBarActiveIndicator)
         }
-        #expect(
-            space?.anchor.anchor == "space_bar.active_indicator.label"
-        )
-        #expect(
-            app?.anchor.anchor == "app_bar.active_indicator.label"
-        )
-        #expect(
-            SettingsCatalog.bars.spaceBarStyle.shouldExpand(
-                revealing: space?.anchor.anchor
+        // At rest on their own card, so each lands on the card
+        // (no anchor) and never on a drawer.
+        #expect(space != nil)
+        #expect(app != nil)
+        #expect(space?.anchor.anchor == nil)
+        #expect(app?.anchor.anchor == nil)
+        for anchor in [space?.anchor.anchor, app?.anchor.anchor] {
+            #expect(
+                !SettingsCatalog.bars.kiwishelfStyle.shouldExpand(
+                    revealing: anchor
+                )
             )
-        )
-        #expect(
-            !SettingsCatalog.bars.appBarStyle.shouldExpand(
-                revealing: space?.anchor.anchor
-            )
-        )
+        }
     }
 }

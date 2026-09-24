@@ -86,21 +86,21 @@ struct PaletteSceneThumbnail: View {
     /// active (accent), and a plain one.
     private var barStrip: some View {
         RoundedRectangle(cornerRadius: 4 * scale)
-            .fill(color("app_bar.fill_color"))
+            .fill(color("kiwishelf.fill_color"))
             .frame(height: 16 * scale)
             .overlay(
                 HStack(spacing: 4 * scale) {
-                    pill(color("app_bar.item_color"))
-                    pill(color("app_bar.active_item_color"))
+                    pill(color("kiwishelf.item_color"))
+                    pill(color("kiwishelf.active_item_color"))
                         .overlay(
                             RoundedRectangle(cornerRadius: 2 * scale)
                                 .stroke(
 
-                                    color("app_bar.highlight_color"),
+                                    color("kiwishelf.highlight_color"),
                                     lineWidth: 1 * scale
                                 )
                         )
-                    pill(color("app_bar.item_color").opacity(0.6))
+                    pill(color("kiwishelf.item_color").opacity(0.6))
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 4 * scale)

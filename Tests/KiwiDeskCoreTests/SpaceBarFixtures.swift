@@ -15,23 +15,13 @@ enum SpaceBarFixtures {
         style.enabled = false
         style.glyphCap = 8
         style.frontAppTitleCap = 40
-        style.iconSource = .appFont
-        style.activeIndicator = .gap
-        style.dimFactor = 0.3
+        style.activeIndicator = .edgeMark
         style.activeDimFactor = 0.7
         style.showFrontApp = true
         style.hideEmpty = true
         style.stickyBadge = false
         style.springDelay = 1000
-        style.itemColor = "#010101"
-        style.activeItemColor = "#020202"
         style.focusedItemColor = "#030303"
-        style.hoverFillColor = "#040404"
-        style.hoverItemColor = "#050505"
-        style.fillColor = "#060606"
-        style.highlightColor = "#080808"
-        style.groupBadgeColor = "#0A0A0A"
-        style.groupBadgeTextColor = "#0B0B0B"
         return style
     }
 }

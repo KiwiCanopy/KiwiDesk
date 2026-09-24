@@ -51,8 +51,7 @@ struct BarsGateWiringTests {
                 "gates.containerReason(for:.spaceBar)"
             ],
             "Components/Colors/BarColorCards.swift": [
-                "gates.bars.containerReason(for:.spaceBar)",
-                "gates.bars.containerReason(for:.appBar)",
+                "gates.bars.containerReason(for:.kiwishelf)"
             ],
         ]
         for (path, needles) in consults {
@@ -73,8 +72,8 @@ struct BarsGateWiringTests {
     /// Every gate sentence is authored ONCE, in `BarsGateHelp`; a
     /// row that re-authors one is the duplication that let General
     /// describe one status two ways. The two bar cards read the
-    /// help for their block reason; the gap-indicator colour rows
-    /// read it for theirs. (`BarColorCards` renders the block
+    /// help for their block reason; the shelf's symbol-style row
+    /// reads it for its own. (`BarColorCards` renders the block
     /// sentence from `AdvancedColorsHelp` instead — it must name
     /// the OTHER page — so it is not a `BarsGateHelp` consumer.)
     @Test("gate sentences come only from BarsGateHelp")
@@ -83,7 +82,7 @@ struct BarsGateWiringTests {
             "Components/Bars/AppBarCard.swift",
             "Components/Bars/SpaceBarCard.swift",
             "Components/Bars/KiwiShelfCard+Placement.swift",
-            "Components/Colors/AdvancedColorRow+Bars.swift",
+            "Components/Bars/KiwiShelfCard+Rows.swift",
         ] {
             #expect(
                 try squashed(path).contains("BarsGateHelp.sentence"),
@@ -101,13 +100,14 @@ struct BarsGateWiringTests {
             "Components/Bars/SpaceBarCard.swift",
             "Components/Bars/KiwiShelfCard.swift",
             "Components/Bars/KiwiShelfCard+Placement.swift",
+            "Components/Bars/KiwiShelfCard+Rows.swift",
             "Components/Colors/AdvancedColorRow+Bars.swift",
             "Components/Colors/BarColorCards.swift",
         ]
         for key in [
             "app_bar.no_layout.shelf_help",
             "space_bar.disabled.shelf_help",
-            "app_bar.color.gap_only",
+            "kiwishelf.icon_source.no_icon",
         ] {
             #expect(
                 help.contains(key),
@@ -133,7 +133,8 @@ struct BarsGateWiringTests {
     @Test("each reason has its own sentence")
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
-            .noBarShown, .spaceBarOff, .gapOnly,
+            .noBarShown, .spaceBarOff, .noAppIcon, .shelfEmpty,
+            .boxedShelf,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }

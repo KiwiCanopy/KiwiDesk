@@ -130,7 +130,7 @@ struct SpaceBarLayerOverlayTests {
         )
         #expect(
             other.itemViews[1].identifierLabel.alphaValue
-                == SpaceBarStyle().dimFactor
+                == KiwiShelf().dimFactor
         )
     }
 

@@ -209,13 +209,17 @@ struct SettingsSearchIndexTests {
                 // 9 since #1517: the KiwiShelf card's at-rest
                 // rows replace the bars' shared ones, the Space
                 // Bar's Show row anchor-less by ruling.
-                .bars: 9,
+                // 16 since the #1517 redesign: the bar cards
+                // lost their Style drawers, so every bar row is
+                // at rest and anchor-less by the same ruling.
+                .bars: 16,
                 // 7 since #277: the Animations drawer's five
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to
                 // anchor and stay anchor-less by ruling.
                 .colors: 7,
-                .advancedColors: 25,
+                // 17 since #1517: one shelf colour set.
+                .advancedColors: 17,
                 // 4 since #1255: the refusal sound moved here
                 // from Shortcuts ▸ Size & float, the cue having
                 // stopped being a resize setting.

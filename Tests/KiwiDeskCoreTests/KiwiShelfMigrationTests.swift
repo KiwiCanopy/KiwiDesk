@@ -28,6 +28,7 @@ struct KiwiShelfMigrationTests {
             "app_bar" : {
               "content" : "icon",
               "edge" : "bottom",
+              "item_color" : "#EAF3EE",
               "item_size" : 120,
               "liquid_glass" : true,
               "thickness" : 30
@@ -46,8 +47,11 @@ struct KiwiShelfMigrationTests {
               "liquid_glass" : false
             },
             "space_bar" : {
-              "dim_factor" : 0.4,
+              "active_dim_factor" : 0.4,
+              "active_indicator" : "gap",
               "edge" : "left",
+              "fill_color" : "#112233B3",
+              "item_color" : "#EAF3EE66",
               "item_gap" : 3,
               "liquid_glass" : false,
               "thickness" : 36,
@@ -90,12 +94,24 @@ struct KiwiShelfMigrationTests {
         #expect(space["thickness"] == nil)
         #expect(space["title_cap"] == nil)
         #expect(space["front_app_title_cap"] as? Double == 24)
-        #expect(space["dim_factor"] as? Double == 0.4)
+        #expect(space["active_dim_factor"] as? Double == 0.4)
+        // Colours move too; the Space Bar's dimmed idle ink is the
+        // App Bar's colour at a lower alpha, so the shelf takes the
+        // full colour and the idle rule dims it.
+        #expect(shelf["fill_color"] as? String == "#112233B3")
+        #expect(shelf["item_color"] as? String == "#EAF3EE")
+        #expect(space["fill_color"] == nil)
+        #expect(space["item_color"] == nil)
+        // Gap is gone; the App Bar that named none keeps Outline
+        // ahead of its default's flip.
+        #expect(space["active_indicator"] as? String == "outline")
         let app = try #require(group(s, "app_bar"))
         #expect(app["edge"] == nil)
         #expect(app["thickness"] == nil)
         #expect(app["item_size"] == nil)
         #expect(app["content"] as? String == "icon")
+        #expect(app["item_color"] == nil)
+        #expect(app["active_indicator"] as? String == "outline")
         #expect(try root(out)["format"] as? Int == Profile.currentFormat)
     }
 
@@ -138,7 +154,7 @@ struct KiwiShelfMigrationTests {
         let data = Data(Self.preShelfProfile.utf8)
         let out = try #require(ConfigMigration.migrated(data))
         let text = try #require(String(data: out, encoding: .utf8))
-        #expect(text.contains("\"dim_factor\" : 0.4,"))
+        #expect(text.contains("\"active_dim_factor\" : 0.4,"))
         #expect(text.contains("\"kiwishelf\":{"))
         #expect(!text.contains("0.40000"))
     }

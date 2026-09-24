@@ -49,16 +49,16 @@ struct GroupBadgeNeutralityTests {
     /// pair is read rather than the fill alone.
     @Test("A palette listed as a chooser really chose one")
     func choosersDifferFromTheDefault() throws {
-        let app = AppBarLook()
+        let app = KiwiShelf()
         let authored = PaletteCatalog.authored()
         for (name, reason) in Self.choosers {
             let palette = try #require(
                 authored.first { $0.name == name },
                 Comment(rawValue: "missing palette \(name)")
             )
-            let fill = palette.colors["app_bar.group_badge_color"]
+            let fill = palette.colors["kiwishelf.group_badge_color"]
             let ink =
-                palette.colors["app_bar.group_badge_text_color"]
+                palette.colors["kiwishelf.group_badge_text_color"]
             #expect(
                 fill != app.groupBadgeColor
                     || ink != app.groupBadgeTextColor,
@@ -115,40 +115,21 @@ struct GroupBadgeNeutralityTests {
         return spread <= 8.0 / 255.0
     }
 
-    @Test("Both bars default to one near-neutral badge fill")
-    func defaultBadgeIsNeutralOnBothBars() {
-        let app = AppBarLook().groupBadgeColor
-        let space = SpaceBarLook().groupBadgeColor
-        #expect(isGrey(app), Comment(rawValue: app))
-        #expect(isGrey(space), Comment(rawValue: space))
-        // The two bars' badges are one idiom, so they move
-        // together or one of them is the odd badge out.
-        #expect(app.lowercased() == space.lowercased())
-        #expect(
-            AppBarStyle().groupBadgeTextColor
-                == SpaceBarStyle().groupBadgeTextColor
-        )
+    /// One badge for both bars since #1517: the shelf's.
+    @Test("The shelf defaults to a near-neutral badge fill")
+    func defaultBadgeIsNeutral() {
+        let fill = KiwiShelf().groupBadgeColor
+        #expect(isGrey(fill), Comment(rawValue: fill))
     }
 
     @Test("The palettes that inherited the default still do")
     func inheritingPalettesCarryTheDefaultPair() throws {
-        // Each bar's keys are read against THAT bar's struct.
-        // Reading both against the App Bar would have left the
-        // Space Bar default with one net — the cross-bar
-        // equality above — and a guard with one net is one
-        // careless edit from watching nothing (guard-prover,
-        // 2026-08-24).
-        let app = AppBarLook()
-        let space = SpaceBarLook()
+        let shelf = KiwiShelf()
         let pairs = [
             (
-                "app_bar", app.groupBadgeColor,
-                app.groupBadgeTextColor
-            ),
-            (
-                "space_bar", space.groupBadgeColor,
-                space.groupBadgeTextColor
-            ),
+                "kiwishelf", shelf.groupBadgeColor,
+                shelf.groupBadgeTextColor
+            )
         ]
         let authored = PaletteCatalog.authored()
         for name in Self.inheritors {

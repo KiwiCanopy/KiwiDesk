@@ -41,52 +41,19 @@ struct BarsCensusRenderTests {
         #expect(rendered.count == Set(rendered).count)
     }
 
-    @Test("Space Bar at-rest rows are the census's")
-    func spaceBarAtRest() {
-        #expect(
-            Set(BarsRowOrder.spaceBarAtRest)
-                == censusRows(.spaceBar, .atRest)
-        )
-        #expect(
-            BarsRowOrder.spaceBarAtRest.count
-                == Set(BarsRowOrder.spaceBarAtRest).count
-        )
-    }
-
-    @Test("Space Bar Style rows are the census's show-more set")
-    func spaceBarStyle() {
-        #expect(
-            Set(BarsRowOrder.spaceBarStyle)
-                == censusRows(.spaceBar, .showMore)
-        )
-        #expect(
-            BarsRowOrder.spaceBarStyle.count
-                == Set(BarsRowOrder.spaceBarStyle).count
-        )
-    }
-
-    @Test("App Bar at-rest rows are the census's")
-    func appBarAtRest() {
-        #expect(
-            Set(BarsRowOrder.appBarAtRest)
-                == censusRows(.appBar, .atRest)
-        )
-        #expect(
-            BarsRowOrder.appBarAtRest.count
-                == Set(BarsRowOrder.appBarAtRest).count
-        )
-    }
-
-    @Test("App Bar Style rows are the census's show-more set")
-    func appBarStyle() {
-        #expect(
-            Set(BarsRowOrder.appBarStyle)
-                == censusRows(.appBar, .showMore)
-        )
-        #expect(
-            BarsRowOrder.appBarStyle.count
-                == Set(BarsRowOrder.appBarStyle).count
-        )
+    /// The bar cards have no drawer (#1517): every row is at
+    /// rest, and the card draws exactly the census's set.
+    @Test(
+        "A bar card draws every census row at rest",
+        arguments: [
+            (SettingsContainer.spaceBar, BarsRowOrder.spaceBar),
+            (.appBar, BarsRowOrder.appBar),
+        ]
+    )
+    func barCardRows(container: SettingsContainer, rows: [SettingKey]) {
+        #expect(Set(rows) == censusRows(container, .atRest))
+        #expect(censusRows(container, .showMore).isEmpty)
+        #expect(rows.count == Set(rows).count)
     }
 
     /// The area's render knows exactly three containers; a
@@ -150,7 +117,7 @@ struct BarsCensusRenderTests {
                     && $0.placement.exemptFromContainerGate
             }
         )
-        #expect(exempt == [.appBar(.appBarIconSource)])
+        #expect(exempt.isEmpty)
     }
 
     /// Core's `appBarHost(for:)` is "the one place that decides

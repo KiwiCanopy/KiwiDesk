@@ -84,16 +84,9 @@ struct AppBarCommandParityTests {
     /// `applyParity` goes red if this list, either apply switch,
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
-        .activeIndicator(.gap),
-        .content(.title), .titleCap(40), .iconSource(.appFont),
+        .activeIndicator(.outline),
+        .content(.title), .titleCap(40),
         .groupAdjacentWindows(false),
-        .dimFactor(0.3),
-        .itemColor("#111111"), .fillColor("#222222"),
-        .activeItemColor("#333333"),
-        .highlightColor("#555555"), .hoverFillColor("#666666"),
-        .hoverItemColor("#777777"),
-        .groupBadgeColor("#999999"),
-        .groupBadgeTextColor("#AAAAAA"),
     ]
 
     @Test("Each command sets one matching field on style and bar")
@@ -145,14 +138,9 @@ struct AppBarCommandParityTests {
         switch key {
         case .groupAdjacentWindows:
             return [.bool(true)]
-        case .iconSource: return [.string("app_font")]
-        case .activeIndicator: return [.string("gap")]
+        case .activeIndicator: return [.string("outline")]
         case .content: return [.string("icon")]
         case .titleCap: return [.number(40)]
-        case .dimFactor:
-            return [.number(0.5)]
-        default:
-            return [.string("#123456")]
         }
     }
 

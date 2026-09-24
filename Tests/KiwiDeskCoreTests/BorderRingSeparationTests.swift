@@ -83,7 +83,7 @@ struct BorderRingSeparationTests {
     /// never a hand list of names, which a future light palette
     /// would silently miss and then be judged on black.
     private static func home(of palette: ColorPalette) -> String? {
-        guard let fill = palette.colors["space_bar.fill_color"]
+        guard let fill = palette.colors["kiwishelf.fill_color"]
         else { return nil }
         return NSColor(kiwiHex: fill).wantsLightInk
             ? "#000000" : "#FFFFFF"

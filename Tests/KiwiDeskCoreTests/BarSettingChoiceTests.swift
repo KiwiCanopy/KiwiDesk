@@ -74,10 +74,6 @@ struct BarSettingChoiceTests {
         // makes the derivation itself the only way to be green.
         let fields: [(String, String)] = [
             (
-                "icon_source",
-                expectedMessage(BarAppIconSource.self)
-            ),
-            (
                 "content",
                 expectedMessage(AppBarStyle.Content.self)
             ),

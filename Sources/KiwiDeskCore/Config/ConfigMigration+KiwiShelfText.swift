@@ -26,8 +26,16 @@ extension ConfigMigration {
         else { return nil }
         let whole = NSRange(text.startIndex..., in: text)
         let matches = regex.matches(in: text, range: whole)
+        // A layout's App Bar sits inside the one `layout` object;
+        // every other App Bar match is the global one.
+        guard let layout = objectSpan(ofKey: shelfLayoutKey, in: text)
+        else { return nil }
+        func inLayout(_ match: NSTextCheckingResult) -> Bool {
+            layout.map { NSLocationInRange(match.range.location, $0) }
+                ?? false
+        }
         var spaceBar: [ShelfPair]?
-        var appBars: [[ShelfPair]] = []
+        var globalApp: [ShelfPair]?
         for match in matches {
             guard let opener = Range(match.range(at: 1), in: text),
                 let body = Range(match.range(at: 2), in: text),
@@ -36,8 +44,9 @@ extension ConfigMigration {
             if text[opener].hasPrefix("\"\(shelfSpaceBarKey)\"") {
                 guard spaceBar == nil else { return nil }
                 spaceBar = pairs
-            } else {
-                appBars.append(pairs)
+            } else if !inLayout(match) {
+                guard globalApp == nil else { return nil }
+                globalApp = pairs
             }
         }
         // The walk's own choice, handed what the text says.
@@ -45,20 +54,11 @@ extension ConfigMigration {
             .map { ["enabled": $0.value != "false"] }
         let sourceIsSpaceBar =
             shelfSourceKey(spaceBar: enabled) == shelfSpaceBarKey
-        // The global App Bar cannot be told from a layout's by
-        // text alone once there are two.
-        if !sourceIsSpaceBar && appBars.count > 1 { return nil }
-        let source =
-            (sourceIsSpaceBar ? spaceBar : appBars.first) ?? []
-        // The global App Bar is the one beside the Space Bar; a
-        // layout's may share its spelling, so name it only when
-        // there is one — the walk decides every other shape.
-        let globalApp = appBars.count == 1 ? appBars.first : nil
-        if appBars.contains(where: { bar in
-            !bar.contains { $0.key == shelfIndicatorKey }
-        }) {
-            return nil
-        }
+        let source = (sourceIsSpaceBar ? spaceBar : globalApp) ?? []
+        let lacksIndicator =
+            globalApp.map { bar in
+                !bar.contains { $0.key == shelfIndicatorKey }
+            } ?? false
         var out = text
         for match in matches.reversed() {
             guard let opener = Range(match.range(at: 1), in: out),
@@ -68,9 +68,14 @@ extension ConfigMigration {
             let isSpaceBar = out[opener].hasPrefix(
                 "\"\(shelfSpaceBarKey)\""
             )
+            let isGlobalApp = !isSpaceBar && !inLayout(match)
             out.replaceSubrange(
                 body,
-                with: shelvedBody(parsed, isSpaceBar: isSpaceBar)
+                with: shelvedBody(
+                    parsed,
+                    isSpaceBar: isSpaceBar,
+                    addsIndicator: isGlobalApp && lacksIndicator
+                )
             )
         }
         let fullItem = globalApp?.first { $0.key == shelfItemColorKey }
@@ -116,7 +121,8 @@ extension ConfigMigration {
     /// Space Bar's title length renamed.
     static func shelvedBody(
         _ parsed: (pairs: [ShelfPair], tail: String),
-        isSpaceBar: Bool
+        isSpaceBar: Bool,
+        addsIndicator: Bool = false
     ) -> String {
         let stripped = Set(shelfMovedKeys + shelfDroppedKeys)
         var kept = parsed.pairs.filter { !stripped.contains($0.key) }
@@ -138,7 +144,13 @@ extension ConfigMigration {
                 )
             }
         }
-        return kept.map(\.text).joined(separator: ",") + parsed.tail
+        var texts = kept.map(\.text)
+        if addsIndicator {
+            texts.append(
+                "\"\(shelfIndicatorKey)\":\"\(shelfIndicatorFallback)\""
+            )
+        }
+        return texts.joined(separator: ",") + parsed.tail
     }
 
     /// Splits a flat object body into its pairs and the
@@ -193,6 +205,54 @@ extension ConfigMigration {
             cursor = all.upperBound
         }
         return (pairs, tail)
+    }
+
+    /// The character range of the object `key` opens, found by
+    /// brace depth outside string literals: `.some(nil)` where no
+    /// object has that key, nil where more than one does (the
+    /// caller then stands down to the walk).
+    static func objectSpan(
+        ofKey key: String,
+        in text: String
+    ) -> NSRange?? {
+        let pattern = "\"\(key)\"\\s*:\\s*\\{"
+        guard let regex = try? NSRegularExpression(pattern: pattern)
+        else { return nil }
+        let utf16 = Array(text.utf16)
+        let found = regex.matches(
+            in: text,
+            range: NSRange(location: 0, length: utf16.count)
+        )
+        guard found.count <= 1 else { return nil }
+        guard let opener = found.first else { return .some(nil) }
+        var index = opener.range.location + opener.range.length - 1
+        var depth = 0
+        var inString = false
+        while index < utf16.count {
+            let unit = utf16[index]
+            if inString {
+                if unit == 0x5C {
+                    index += 1
+                }  // backslash
+                else if unit == 0x22 {
+                    inString = false
+                }
+            } else if unit == 0x22 {
+                inString = true
+            } else if unit == 0x7B {
+                depth += 1
+            } else if unit == 0x7D {
+                depth -= 1
+                if depth == 0 {
+                    let start = opener.range.location
+                    return .some(
+                        NSRange(location: start, length: index - start + 1)
+                    )
+                }
+            }
+            index += 1
+        }
+        return nil
     }
 
     /// A JSON string literal's contents; other scalars as written.

@@ -32,7 +32,7 @@ struct KiwiShelfMigrationSourceTests {
                   \(edge)"thickness" : 30
                 },
                 "space_bar" : {
-                  "dim_factor" : 0.4,
+                  "active_dim_factor" : 0.4,
                   "enabled" : \(spaceBarEnabled),
                   "thickness" : 44
                 }
@@ -55,7 +55,7 @@ struct KiwiShelfMigrationSourceTests {
         let data = Self.profile(spaceBarEnabled: false, appBarEdge: "left")
         let out = try #require(ConfigMigration.migrated(data))
         let text = try #require(String(data: out, encoding: .utf8))
-        #expect(text.contains("\"dim_factor\" : 0.4,"))
+        #expect(text.contains("\"active_dim_factor\" : 0.4,"))
         #expect(text.contains("\"kiwishelf\":{"))
         let shelf = try shelf(out)
         #expect(shelf["thickness"] as? Double == 30)
@@ -67,7 +67,7 @@ struct KiwiShelfMigrationSourceTests {
         let data = Self.profile(spaceBarEnabled: false, appBarEdge: nil)
         let out = try #require(ConfigMigration.migrated(data))
         let text = try #require(String(data: out, encoding: .utf8))
-        #expect(text.contains("\"dim_factor\" : 0.4,"))
+        #expect(text.contains("\"active_dim_factor\" : 0.4,"))
         #expect(try shelf(out)["edge"] as? String == "bottom")
     }
 
@@ -160,7 +160,7 @@ struct KiwiShelfMigrationSourceTests {
         // In place, so the text path chose the Space Bar itself
         // rather than the walk's re-encode repairing it.
         let text = try #require(String(data: out, encoding: .utf8))
-        #expect(text.contains("\"dim_factor\" : 0.4,"))
+        #expect(text.contains("\"active_dim_factor\" : 0.4,"))
         #expect(try shelf(out)["edge"] == nil)
         #expect(try shelf(out)["thickness"] as? Double == 44)
     }

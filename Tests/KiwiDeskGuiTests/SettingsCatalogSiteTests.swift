@@ -79,7 +79,9 @@ struct SettingsCatalogSiteTests {
         // 125 since #1393: the Profile shortcuts banner left.
         // 114 since #1517: the bars' shared Style rows moved to
         // the KiwiShelf card, one row per field.
-        #expect(names.count == 114)
+        // 102 since the #1517 redesign: the bar Style drawers
+        // and their rows, and one of the two colour groups, left.
+        #expect(names.count == 102)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
