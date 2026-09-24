@@ -94,7 +94,7 @@ struct ReleaseSyncTokenTests {
                 consumes != shadows,
                 """
                 a step neither consumes `SYNC_TOKEN` nor shadows \
-                it. The job-level token is a REAL ACTOR's and \
+                it. The workflow-level token is a REAL ACTOR's and \
                 `permissions:` cannot narrow it, so every step \
                 inherits it — including `npm ci`, which runs \
                 lifecycle scripts from the whole site dependency \
