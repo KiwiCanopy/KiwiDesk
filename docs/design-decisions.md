@@ -7019,6 +7019,18 @@ the full-row cue are two ladders for two sizes, and taking the
 smaller one to a full row is how a token nobody notices
 becomes the most visible thing on the page.
 
+The icon ladder rests at nothing too (#1393, owner 2026-09-24:
+the Profiles and Spaces trash read as a tinted container beside a
+bare one). Its `0.06` rest fill was the same colourless
+`Color.primary` surface the full row refused, only smaller: the
+fault is its hue, not its area. So a glyph-only icon control —
+trash, ✕-clear, pencil, the `?` — rests as the bare glyph and
+shows the chip on hover (`iconHoverChip`), neutral as macOS's own
+list controls are; a destructive glyph does not turn red on
+hover, since that promises an immediate delete a trash offering
+"here or everywhere" does not make. A chip-shaped control keeps
+its rest fill, which is its shape rather than a container.
+
 **The header's size and its indicator are the two things a reader
 sees, and the hit target fixes neither.** (#1021, owner
 2026-08-25: *"in some menus the accordion is way too small"* and,

@@ -224,6 +224,19 @@ extension View {
         )
     }
 
+    /// The hover chip of a glyph-only icon control: nothing at rest,
+    /// so the glyph sits in its card, and the chip on hover (#1393).
+    func iconHoverChip(
+        cornerRadius: CGFloat = 4,
+        padding: CGFloat = 2
+    ) -> some View {
+        hoverHighlight(
+            restOpacity: 0,
+            cornerRadius: cornerRadius,
+            padding: padding
+        )
+    }
+
     /// Complete affordance for icon buttons with hover chip, tooltip, and
     /// accessibility label.
     func iconButtonAffordance(
@@ -231,12 +244,9 @@ extension View {
         cornerRadius: CGFloat = 4,
         padding: CGFloat = 2
     ) -> some View {
-        hoverHighlight(
-            cornerRadius: cornerRadius,
-            padding: padding
-        )
-        .help(label)
-        .accessibilityLabel(label)
+        iconHoverChip(cornerRadius: cornerRadius, padding: padding)
+            .help(label)
+            .accessibilityLabel(label)
     }
 
     /// Hover highlight for full-width row buttons starting with transparent

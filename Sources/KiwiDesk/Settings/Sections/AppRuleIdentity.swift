@@ -62,6 +62,7 @@ struct AppRuleDeleteButton: View {
             .menuIndicator(.hidden)
             .neutralMenuLabel()
             .fixedSize()
+            .iconHoverChip()
             .help(help)
             .accessibilityLabel(help)
             .accessibilityValue(sharedFrom)

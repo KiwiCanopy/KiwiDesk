@@ -29,7 +29,7 @@ struct HelpButton: View {
         }
         .buttonStyle(.plain)
         .controlSize(.small)
-        .hoverHighlight(cornerRadius: 4, padding: 2)
+        .iconHoverChip()
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             Text(rich)
                 .font(.callout)
