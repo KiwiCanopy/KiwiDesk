@@ -132,10 +132,11 @@ extension DesktopsGroup {
             Label(addTitle, systemImage: "plus")
                 .neutralMenuLabel()
         }
-        // A text action, bordered like the window's others.
+        // A pull-down, bordered like the window's text actions, its
+        // chevron saying a list opens (#1393).
         .menuStyle(.button)
         .buttonStyle(.bordered)
-        .menuIndicator(.hidden)
+        .menuIndicator(.visible)
         .fixedSize()
         .help(addTitle)
         .accessibilityLabel(
