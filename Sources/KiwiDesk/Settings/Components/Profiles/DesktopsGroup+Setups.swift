@@ -129,7 +129,9 @@ extension DesktopsGroup {
         } label: {
             Label(addTitle, systemImage: "plus")
         }
-        .menuStyle(.borderlessButton)
+        // A text action, bordered like the window's others (#1393).
+        .menuStyle(.button)
+        .settingsActionButton()
         .menuIndicator(.hidden)
         .fixedSize()
         .neutralMenuLabel()

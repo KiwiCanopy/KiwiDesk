@@ -10,7 +10,8 @@ struct ProfileEditTargetMenu: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        HStack(spacing: 4) {
+        // The menu's own trailing inset is the gap before the `?`.
+        HStack(spacing: 0) {
             menu
             HelpButton(
                 explanation: L(
