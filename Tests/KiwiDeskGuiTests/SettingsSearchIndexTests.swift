@@ -245,8 +245,9 @@ struct SettingsSearchIndexTests {
                 // 3 since #1250: the eight Advanced rows gained
                 // their catalog anchors so a hit opens the
                 // drawer; language, appearance and the login
-                // item stay anchor-less.
-                .general: 3,
+                // item stay anchor-less. 4 since #1542: the
+                // automatic-install row — a new census row.
+                .general: 4,
             ]
         )
     }

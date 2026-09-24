@@ -76,6 +76,7 @@ struct GeneralSection: View {
             .foregroundStyle(.secondary)
             appearanceRow
             LoginItemCard(model: model)
+            AutoInstallRow(model: model)
         }
     }
 

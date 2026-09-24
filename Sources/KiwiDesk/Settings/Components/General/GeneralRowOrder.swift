@@ -6,6 +6,7 @@ enum GeneralRowOrder {
         .general(.language),
         .general(.appearance),
         .general(.startAtLogin),
+        .general(.installUpdatesAutomatically),
     ]
 
     /// Advanced configuration and reset rows in ascending severity

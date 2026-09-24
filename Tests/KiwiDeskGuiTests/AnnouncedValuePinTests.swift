@@ -123,7 +123,8 @@ struct AnnouncedValuePinTests {
     /// green, because the walker cannot see a label that lands
     /// on a parameter. The map is the one copy of who may.
     private static let nilSpokenValue: [String: Int] = [
-        "LoginItemCard.swift": 1
+        "LoginItemCard.swift": 1,
+        "AutoInstallRow.swift": 1,
     ]
 
     @Test("a nil spoken value is for a Toggle, and enumerated")

@@ -40,6 +40,11 @@ protocol AppUpdating: AnyObject {
     /// "What's new" after an update (#1542); nil where the channel
     /// is inert, so an unbundled run owes no notes.
     var whatsNew: WhatsNewCoordinator? { get }
+
+    /// "Install updates automatically" (#1542): Sparkle downloads
+    /// in the background and installs when KiwiDesk quits, never
+    /// relaunching on its own. Stored by Sparkle, not the profile.
+    var installsAutomatically: Bool { get set }
 }
 
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
@@ -108,6 +113,11 @@ final class SparkleUpdater: AppUpdating {
 
     var updatePending: Bool { policy.updatePending }
 
+    var installsAutomatically: Bool {
+        get { updater.automaticallyDownloadsUpdates }
+        set { updater.automaticallyDownloadsUpdates = newValue }
+    }
+
     var onUpdatePendingChanged: () -> Void {
         get { policy.onUpdatePendingChanged }
         set { policy.onUpdatePendingChanged = newValue }
@@ -131,6 +141,10 @@ final class NoUpdater: AppUpdating {
     var onUpdatePendingChanged: () -> Void = {}
     let updates = UpdateStateStore()
     var whatsNew: WhatsNewCoordinator? { nil }
+    var installsAutomatically: Bool {
+        get { false }
+        set {}
+    }
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

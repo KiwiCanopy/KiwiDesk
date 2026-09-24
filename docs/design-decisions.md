@@ -496,6 +496,29 @@ builds one — this entry answers "why is there none *yet*", so a
 future row supersedes it without contradicting it. What must
 not happen is unsetting the key and letting Sparkle ask again.
 
+### Installing updates automatically is a switch, and it never relaunches (#1542)
+
+**[Rationale]**
+
+"Install updates automatically" sits under General, below Start
+at login, and is off until the user turns it on. On, Sparkle
+downloads a found update in the background and installs it the
+next time KiwiDesk quits; it never quits or relaunches KiwiDesk
+on its own. The user's windows are the app's whole job, and a
+window manager that restarts itself mid-task rearranges the
+screen under someone who asked for nothing.
+
+Unlike [the background check](#background-update-checks-are-on-and-there-is-no-switch),
+this one is a choice, and offering it costs nothing: it has no
+first-launch prompt to ask badly, since Settings asks when the
+user goes looking. Sparkle's own alert used to offer the same
+choice as a checkbox; KiwiDesk's update window has no such box,
+so without this row the choice would have left the app entirely.
+The value is Sparkle's (`SUAutomaticallyUpdate`), stored per Mac
+and never in a profile or a backup, since whether this Mac
+updates itself is not part of a setup. After such an install the
+notes nobody read show once as "What's new".
+
 ### Scheduled update reminders are a mark, not a notification (#1013)
 
 **[Rationale]**
