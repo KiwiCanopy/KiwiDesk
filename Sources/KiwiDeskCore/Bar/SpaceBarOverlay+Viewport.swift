@@ -42,18 +42,19 @@ extension SpaceBarOverlay {
         horizontal: Bool
     ) {
         hitStrip = strip
-        let container = fades.clear(
-            of: itemContainer.frame,
-            horizontal: horizontal
-        )
+        // Item frames are viewport-relative, so they offset by the
+        // viewport's own origin; only the INTERSECTION stops at
+        // the fades.
+        let viewport = itemContainer.frame
+        let clear = fades.clear(of: viewport, horizontal: horizontal)
         hitFrames = zip(items, frames).compactMap { item, frame in
             // The layer item is no drop target (#1169).
             guard let space = item.space else { return nil }
             let stripLocal = frame.offsetBy(
-                dx: container.minX,
-                dy: container.minY
+                dx: viewport.minX,
+                dy: viewport.minY
             )
-            let visible = stripLocal.intersection(container)
+            let visible = stripLocal.intersection(clear)
             guard !visible.isNull, visible.width >= 1,
                 visible.height >= 1
             else { return nil }

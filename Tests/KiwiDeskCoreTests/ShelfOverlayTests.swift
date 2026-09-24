@@ -53,16 +53,20 @@ struct ShelfOverlayTests {
                 shelf: full
             ) == CGRect(x: 0, y: 0, width: 1000, height: 40)
         )
-        var boxed = KiwiShelf()
-        boxed.backgroundStyle = .boxed
-        boxed.liquidGlass = false
-        #expect(
-            ShelfOverlay.plateFrame(
-                sections: [lone],
-                strip: Self.strip,
-                shelf: boxed
-            ) == nil
-        )
+        // Boxed draws no plate, solid boxes or glass ones.
+        for glass in [false, true] {
+            var boxed = KiwiShelf()
+            boxed.backgroundStyle = .boxed
+            boxed.liquidGlass = glass
+            #expect(
+                ShelfOverlay.plateFrame(
+                    sections: [lone],
+                    strip: Self.strip,
+                    shelf: boxed
+                ) == nil,
+                Comment(rawValue: "glass: \(glass)")
+            )
+        }
     }
 
     @Test("The divider sits centred in the gutter, only for two")

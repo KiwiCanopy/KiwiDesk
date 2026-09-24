@@ -67,10 +67,7 @@ extension PaletteSceneThumbnail {
         // Both strips draw the shelf's one set (#1517); an idle
         // Space identifier is its item colour at the idle alpha.
         barPlate(fill: color("kiwishelf.fill_color")) {
-            item(
-                color("kiwishelf.item_color")
-                    .opacity(KiwiShelf.idleItemAlpha)
-            )
+            item(idleInk)
             item(
                 color("kiwishelf.active_item_color"),
                 highlight: color("kiwishelf.highlight_color")
@@ -83,6 +80,15 @@ extension PaletteSceneThumbnail {
             }
             item(color("space_bar.focused_item_color"))
         }
+    }
+
+    /// The idle Space ink, from the one home the live bar reads
+    /// (`KiwiShelf.idleItemColor`).
+    private var idleInk: Color {
+        var shelf = KiwiShelf()
+        shelf.itemColor =
+            palette.colors["kiwishelf.item_color"] ?? shelf.itemColor
+        return Color(kiwiHex: shelf.idleItemColor)
     }
 
     private var appBarStrip: some View {

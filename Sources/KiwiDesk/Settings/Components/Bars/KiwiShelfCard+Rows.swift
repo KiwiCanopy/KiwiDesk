@@ -131,7 +131,7 @@ extension KiwiShelfCard {
                 "kiwishelf.icon_source.help",
                 "How app icons are drawn on both bars. "
                     + "\u{201C}%1$@\u{201D} shows a monochrome "
-                    + "symbol colored by the shelf's item colors, "
+                    + "symbol colored by KiwiShelf's item colors, "
                     + "set in %2$@; apps without a symbol keep "
                     + "their app icon.",
                 L("app_bar.icon_source.app_font", "Glyphs"),

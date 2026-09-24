@@ -18,6 +18,7 @@ extension KiwiCore {
         defer { publishStatusSpaceMark() }
         let settings = tiler.settings
         let displays = state.workspaces.allDisplays
+        shelves.holdsRelayout = true
         guard !displays.isEmpty else {
             let fallback = appBarFallback(settings: settings)
             appBars.sync(fallback)
@@ -79,6 +80,7 @@ extension KiwiCore {
         _ strips: [(DisplayID, CGRect)],
         settings: TilingSettings
     ) {
+        shelves.holdsRelayout = false
         let spaceSlots = Dictionary(
             spaceBars.shownStrips.map { ($0.display, $0.strip) },
             uniquingKeysWith: { first, _ in first }

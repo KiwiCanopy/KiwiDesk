@@ -96,7 +96,7 @@ final class ShelfOverlay {
         strip: CGRect,
         shelf: KiwiShelf
     ) -> CGRect? {
-        guard !shelf.hasBox else { return nil }
+        guard shelf.drawsPlate else { return nil }
         let bounds = CGRect(origin: .zero, size: strip.size)
         guard !shelf.plateSpans else { return bounds }
         let asks = sections.compactMap { section -> CGRect? in
@@ -123,21 +123,28 @@ final class ShelfOverlay {
             view.removeFromSuperview()
         }
         for section in sections {
-            if section.view.superview !== stripView {
+            // A section joining lands at its slot; only one already
+            // on the strip glides there (ruling 7).
+            let joining = section.view.superview !== stripView
+            if joining {
                 stripView.addSubview(
                     section.view,
                     positioned: .below,
                     relativeTo: divider
                 )
             }
-            let origin = CGPoint(
+            // Origin and size in ONE write, so a section never
+            // re-lays at a new size from its old place.
+            let frame = CGRect(
                 x: section.slot.minX - strip.minX,
-                y: section.slot.minY - strip.minY
+                y: section.slot.minY - strip.minY,
+                width: section.slot.width,
+                height: section.slot.height
             )
             BarMotion.setFrame(
                 section.view,
-                to: CGRect(origin: origin, size: section.view.frame.size),
-                animated: animated
+                to: frame,
+                animated: animated && !joining
             )
         }
     }

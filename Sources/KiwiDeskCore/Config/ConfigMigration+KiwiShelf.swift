@@ -130,13 +130,15 @@ extension ConfigMigration {
         let sourceKey = shelfSourceKey(spaceBar: spaceBar)
         let source = settings[sourceKey] as? [String: Any] ?? [:]
         var shelf = settings[shelfKey] as? [String: Any] ?? [:]
+        let heldItemColor = shelf[shelfItemColorKey] != nil
         for key in shelfMovedKeys {
             guard let value = source[key], shelf[key] == nil
             else { continue }
             shelf[key] = value
             changed = true
         }
-        if let app = settings[shelfAppBarKey] as? [String: Any],
+        if !heldItemColor,
+            let app = settings[shelfAppBarKey] as? [String: Any],
             let full = app[shelfItemColorKey] as? String,
             let dimmed = source[shelfItemColorKey] as? String,
             isDimmedTwin(dimmed, of: full)

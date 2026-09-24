@@ -36,6 +36,7 @@ struct ShelfArrangementTests {
             length: 1000,
             spaceNeed: spaceNeed,
             appNeed: appNeed,
+            spaceFloor: 0,
             shelf: shelf
         )
     }

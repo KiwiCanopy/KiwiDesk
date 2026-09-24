@@ -44,6 +44,10 @@ public final class AppBarOverlay {
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [NSView] = []
     var scrollOffset: CGFloat = 0
+    /// The focused window the offset last followed, so a manual
+    /// scroll holds until it changes (#1517).
+    var followedFocus: WindowID?
+    var hasFollowed = false
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
@@ -74,10 +78,18 @@ public final class AppBarOverlay {
             style: style,
             capAxis: capAxis
         )
-        render(followingFocus: true)
+        // A manual scroll holds until the focus changes (#1517).
+        let focus = activeIndex.flatMap {
+            items.indices.contains($0) ? items[$0].id : nil
+        }
+        let follows = !hasFollowed || focus != followedFocus
+        hasFollowed = true
+        followedFocus = focus
+        render(followingFocus: follows)
     }
 
     public func hide() {
+        hasFollowed = false
         lastShown = nil
         scrollOffset = 0
         root.isHidden = true
@@ -99,7 +111,6 @@ public final class AppBarOverlay {
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
         let edge = style.edge
-        root.setFrameSize(strip.size)
         syncItemViewCount(items.count)
         let m = metrics(
             strip: strip,
@@ -116,7 +127,11 @@ public final class AppBarOverlay {
             gap: m.gap,
             count: items.count,
             axis: m.viewport,
-            margin: m.gap
+            margin: ShelfOverflow.followMargin(
+                gap: m.gap,
+                depth: edge.isHorizontal ? strip.height : strip.width,
+                viewport: m.viewport
+            )
         )
         let viewport =
             m.horizontal

@@ -106,12 +106,14 @@ public struct KiwiShelf: Sendable, Equatable {
         backgroundStyle == .boxed && !glassEnabled
     }
 
-    /// True if the plate spans edge-to-edge — the SETTINGS
-    /// PREVIEWS' one copy of the spans rule; the live bars resolve
-    /// one layer down in `BarPlate.frame`, which adds the
-    /// hug→full overflow fallback, so retune the two together.
+    /// Whether the shelf draws a plate at all — the ONE answer
+    /// (#1517): Boxed draws a box per item, solid or glass, and no
+    /// plate beneath them.
+    public var drawsPlate: Bool { backgroundStyle != .boxed }
+
+    /// True if the plate spans edge-to-edge.
     public var plateSpans: Bool {
-        !hasBox && backgroundFit == .full
+        drawsPlate && backgroundFit == .full
     }
 
     /// `minimum` clamped to `minimumRange`.

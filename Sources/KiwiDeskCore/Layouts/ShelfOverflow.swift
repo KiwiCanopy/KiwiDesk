@@ -54,10 +54,25 @@ public enum ShelfOverflow {
         return min(max(offset, 0), total - viewport)
     }
 
-    /// How many items lie hidden before and after the viewport at
-    /// `offset` — an item counts once its middle is out of view,
-    /// so a half-shown item under a fade is counted, a sliver is
-    /// not.
+    /// How far from a viewport edge a followed item is kept: past
+    /// the fade that side may draw, so the active Space or focused
+    /// window never lands half-transparent under it.
+    public static func followMargin(
+        gap: CGFloat,
+        depth: CGFloat,
+        viewport: CGFloat
+    ) -> CGFloat {
+        gap + fadeLength(thickness: depth, visible: viewport)
+    }
+
+    /// How far an entry may overhang the viewport and still read
+    /// as whole — a sub-point overhang is rounding, not content.
+    public static let clipTolerance: CGFloat = 1
+
+    /// How many entries are not wholly visible before and after
+    /// the viewport at `offset`: any entry cut by the edge counts,
+    /// so a side that clips an entry always fades and says so,
+    /// while a sub-point overhang counts for nothing.
     public static func hiddenCounts(
         lengths: [CGFloat],
         gap: CGFloat,
@@ -68,9 +83,10 @@ public enum ShelfOverflow {
         var before = 0
         var after = 0
         for length in lengths {
-            let middle = cursor + length / 2
-            if middle < offset { before += 1 }
-            if middle > offset + viewport { after += 1 }
+            if cursor < offset - clipTolerance { before += 1 }
+            if cursor + length > offset + viewport + clipTolerance {
+                after += 1
+            }
             cursor += length + gap
         }
         return (before, after)
@@ -125,8 +141,8 @@ public enum ShelfOverflow {
         return min(max(target, 0), last)
     }
     /// How far each end of the viewport fades (#1517): a side
-    /// fades only while a whole entry is hidden there, so a sliver
-    /// draws no fade and no count.
+    /// fades while it cuts an entry, and a sub-point overhang draws
+    /// no fade and no count.
     public struct Fades: Equatable, Sendable {
         public var leading: CGFloat
         public var trailing: CGFloat

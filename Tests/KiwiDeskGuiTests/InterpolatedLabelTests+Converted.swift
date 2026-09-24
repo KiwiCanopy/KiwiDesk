@@ -118,7 +118,8 @@ extension InterpolatedLabelTests {
         "app_bar.no_layout.shelf_help": 2,
         "colors.kiwishelf_off.help": 3,
         "kiwishelf.icon_source.help": 2,
-        "kiwishelf.icon_source.no_icon": 1,
+        "kiwishelf.icon_source.no_icon": 2,
+        "scroll_grid.app_bar_xref_link": 2,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
         // says tints the glass, rather than quoting the word —

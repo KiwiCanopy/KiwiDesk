@@ -289,6 +289,7 @@ struct CombinedClampTests {
             length: strip.width,
             spaceNeed: 300,
             appNeed: 500,
+            spaceFloor: 0,
             shelf: shelf
         )
         let segments = [arrangement.space, arrangement.app]

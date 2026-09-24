@@ -56,7 +56,7 @@ public struct ShelfArrangement: Equatable, Sendable {
         length: CGFloat,
         spaceNeed: CGFloat?,
         appNeed: CGFloat?,
-        spaceFloor: CGFloat = 0,
+        spaceFloor: CGFloat,
         shelf: KiwiShelf
     ) -> ShelfArrangement {
         let whole = max(length, 0)

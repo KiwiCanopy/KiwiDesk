@@ -47,16 +47,26 @@ struct SpaceBarScrollTests {
         )
         #expect(start.leading == 0 && start.before == 0)
         #expect(start.trailing > 0 && start.after == 2)
-        // A sliver short of the end hides no whole entry: no fade.
-        let sliver = ShelfOverflow.fades(
+        // Half an entry cut at the end still fades and counts.
+        let cut = ShelfOverflow.fades(
             lengths: lengths,
             gap: 0,
             total: 500,
-            offset: 199,
+            offset: 150,
             viewport: 300,
             depth: 40
         )
-        #expect(sliver.trailing == 0 && sliver.after == 0)
+        #expect(cut.trailing > 0 && cut.after == 1)
+        // A sub-point overhang at the end draws nothing.
+        let rounding = ShelfOverflow.fades(
+            lengths: lengths,
+            gap: 0,
+            total: 500,
+            offset: 199.5,
+            viewport: 300,
+            depth: 40
+        )
+        #expect(rounding.trailing == 0 && rounding.after == 0)
     }
 
     @Test("The clear view is the viewport less its fades")

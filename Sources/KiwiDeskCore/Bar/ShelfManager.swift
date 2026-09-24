@@ -18,6 +18,10 @@ final class ShelfManager {
     }
 
     private var overlays: [DisplayID: ShelfOverlay] = [:]
+    /// Set while `updateBars` syncs the two bars: their renders
+    /// would otherwise re-lay the shelf against the previous plan
+    /// before `sync` hands it the new one.
+    var holdsRelayout = false
     private var last: [DisplayID: Shelf] = [:]
 
     /// Shows `shelves`, retiring the shelf of any display absent.
@@ -42,7 +46,7 @@ final class ShelfManager {
 
     /// Re-lays one display's shelf from what its sections drew.
     func relayout(_ display: DisplayID) {
-        guard let shelf = last[display] else { return }
+        guard !holdsRelayout, let shelf = last[display] else { return }
         var sections: [ShelfOverlay.Section] = []
         if let space = shelf.space, space.overlay.isVisible {
             sections.append(

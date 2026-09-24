@@ -191,8 +191,7 @@ extension AppBarOverlay {
             current: current,
             lengths: Array(repeating: slot, count: max(count, 0)),
             gap: gap,
-            total: slot * CGFloat(count)
-                + gap * CGFloat(max(count - 1, 0)),
+            total: runLength(slot: slot, count: count, gap: gap),
             activeIndex: activeIndex,
             viewport: axis,
             margin: margin

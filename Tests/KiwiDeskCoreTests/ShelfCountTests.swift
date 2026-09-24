@@ -94,3 +94,43 @@ struct ShelfCountTests {
         #expect(overlay.forwardCount.isHidden)
     }
 }
+
+/// Drop targets keep their places when the leading end fades: an
+/// item's hit frame is offset by the viewport, and only cut at
+/// the fade (#1517 review blocker).
+@Suite("Shelf drop targets under a fade")
+@MainActor
+struct ShelfDropTargetTests {
+    init() { LiquidGlassGate.override = { false } }
+
+    @Test("A scrolled Space Bar's drop targets sit on their items")
+    func hitFramesStayOnTheirItems() throws {
+        let manager = SpaceBarManager()
+        manager.sync([paintedSpaceBar(front: nil, spaces: 60)])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        overlay.scrollOffset = 400
+        overlay.render(followingActive: false)
+        let fades = try #require(overlay.scrollGeom).fades
+        try #require(fades.leading > 0, "nothing hidden at the start")
+        let viewport = overlay.itemContainer.frame
+        for (index, item) in overlay.itemViews.enumerated() {
+            guard let space = SpaceID("\(index + 1)") as SpaceID?,
+                let hit = overlay.hitFrames.first(where: {
+                    $0.space == space
+                })
+            else { continue }
+            let drawn = item.frame.offsetBy(
+                dx: viewport.minX,
+                dy: viewport.minY
+            )
+            #expect(
+                drawn.contains(CGPoint(x: hit.frame.midX, y: hit.frame.midY)),
+                Comment(
+                    rawValue: "Space \(index + 1): \(hit.frame) vs \(drawn)"
+                )
+            )
+        }
+    }
+}

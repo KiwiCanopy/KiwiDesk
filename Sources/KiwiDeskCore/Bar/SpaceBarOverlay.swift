@@ -78,6 +78,10 @@ public final class SpaceBarOverlay {
     var frontTint: NSView?
     /// Whole-bar scroll offset (#385).
     var scrollOffset: CGFloat = 0
+    /// The active Space the offset last followed, so a manual
+    /// scroll holds until it changes (#1517).
+    var followedSpace: SpaceID?
+    var hasFollowed = false
     /// Cached scroll geometry for hit-testing and autoscroll (#385).
     var scrollGeom: ScrollGeom?
     /// Running drag-autoscroll task when dwelling on an arrow
@@ -141,10 +145,17 @@ public final class SpaceBarOverlay {
             return
         }
         lastShown = (items, frontApp, strip, style, stateMarkColors)
-        render(followingActive: true)
+        // A manual scroll holds until the active Space changes
+        // (#1517): a refresh that changes nothing does not follow.
+        let active = items.first(where: \.active)?.space
+        let follows = !hasFollowed || active != followedSpace
+        hasFollowed = true
+        followedSpace = active
+        render(followingActive: follows)
     }
 
     public func hide() {
+        hasFollowed = false
         lastShown = nil
         hitStrip = .zero
         hitFrames = []

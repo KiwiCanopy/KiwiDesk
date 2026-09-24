@@ -9,7 +9,6 @@ extension SpaceBarOverlay {
         // The one place the stored style becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
-        root.setFrameSize(strip.size)
         syncItemViewCount(items.count)
         let horizontal = style.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
@@ -54,10 +53,18 @@ extension SpaceBarOverlay {
             frontExtent: scrolledFront,
             activeIndex: followingActive ? activeIndex(items) : nil,
             viewport: viewport,
-            margin: gap
+            margin: ShelfOverflow.followMargin(
+                gap: gap,
+                depth: depth,
+                viewport: viewport
+            )
         )
+        // The front segment scrolls with the run unless pinned, so
+        // it is an entry the fades count and a page reaches.
+        let runEntries =
+            scrolledFront > 0 ? lengths + [scrolledFront] : lengths
         let fades = ShelfOverflow.fades(
-            lengths: scrolledFront > 0 ? lengths + [scrolledFront] : lengths,
+            lengths: runEntries,
             gap: gap,
             total: scrolledTotal,
             offset: scrollOffset,
@@ -162,7 +169,7 @@ extension SpaceBarOverlay {
             strip: strip,
             viewport: viewport,
             total: scrolledTotal,
-            lengths: lengths,
+            lengths: runEntries,
             gap: gap,
             horizontal: horizontal,
             style: style,

@@ -40,19 +40,21 @@ struct ShelfOverflowTests {
 struct ShelfOverflowPagingTests {
     private let lengths: [CGFloat] = Array(repeating: 100, count: 10)
 
-    @Test("Hidden items are counted on each side by their middle")
+    /// Owner, on device: a Space cut by the edge drew no fade and
+    /// no count while its middle was still in view.
+    @Test("Any entry the edge cuts is counted on its side")
     func hiddenCounts() {
-        // Items at 0,100,…,900 (no gap); viewport 250..570.
+        // Entries at 0,100,…,900 (no gap); viewport 250…570.
         let counts = ShelfOverflow.hiddenCounts(
             lengths: lengths,
             gap: 0,
             offset: 250,
             viewport: 320
         )
-        // Middles 50,150 are before; 250 is on the edge (in).
-        #expect(counts.before == 2)
-        // Middles 650…950 are after; 550 is in.
-        #expect(counts.after == 4)
+        // 0, 100 and the cut 200…300 are before.
+        #expect(counts.before == 3)
+        // The cut 500…600 and everything past are after.
+        #expect(counts.after == 5)
         let none = ShelfOverflow.hiddenCounts(
             lengths: [100, 100],
             gap: 0,
@@ -60,6 +62,14 @@ struct ShelfOverflowPagingTests {
             viewport: 200
         )
         #expect(none.before == 0 && none.after == 0)
+        // A sub-point overhang is rounding, not a hidden entry.
+        let rounding = ShelfOverflow.hiddenCounts(
+            lengths: [100, 100],
+            gap: 0,
+            offset: 0,
+            viewport: 199.5
+        )
+        #expect(rounding.after == 0)
     }
 
     /// Ten 100 pt entries, no gap (run 1000), a 400 viewport,

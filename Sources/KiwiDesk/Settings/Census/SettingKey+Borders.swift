@@ -182,8 +182,14 @@ extension BordersKey {
             )
         case .floatingColor:
             // The floating badge is drawn on Space Bar items, whose
-            // colours are the shelf's card since #1517.
-            return .row(.advancedColours, .kiwishelf, .showMore)
+            // colours are the shelf's card since #1517; only the
+            // Space Bar draws it, so its switch gates the row.
+            return .row(
+                .advancedColours,
+                .kiwishelf,
+                .showMore,
+                gate: .setting(.spaceBar(.spaceBarEnabled))
+            )
         }
     }
 }

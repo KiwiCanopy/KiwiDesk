@@ -44,6 +44,10 @@ struct ShelfStripPreview: View {
             length: length,
             spaceNeed: space.map(need),
             appNeed: app.map(need),
+            // The mock run is a few items, so the floor never binds
+            // at a thumbnail's scale; the #1517 preview redraw hands
+            // it the scaled floor once the preview draws overflow.
+            spaceFloor: 0,
             shelf: scaled
         )
     }
