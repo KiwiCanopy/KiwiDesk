@@ -57,6 +57,10 @@ struct GateReasonPlacementTests {
                 // Shipped inline before #815, and the reason the
                 // derivation is checkable at all.
                 .general(.startAtLogin),
+                // Its neighbour (#1542): greyed by Sparkle's own
+                // refusal, a cause shown nowhere else, so
+                // `AutoInstallRow` draws the sentence under it.
+                .general(.installUpdatesAutomatically),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

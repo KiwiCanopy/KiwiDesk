@@ -504,20 +504,27 @@ not happen is unsetting the key and letting Sparkle ask again.
 at login, and is off until the user turns it on. On, Sparkle
 downloads a found update in the background and installs it the
 next time KiwiDesk quits; it never quits or relaunches KiwiDesk
-on its own. The user's windows are the app's whole job, and a
+on its own. Off applies from the next check: an update already
+downloaded and prepared still installs at the next quit. The user's windows are the app's whole job, and a
 window manager that restarts itself mid-task rearranges the
 screen under someone who asked for nothing.
 
 Unlike [the background check](#background-update-checks-are-on-and-there-is-no-switch),
-this one is a choice, and offering it costs nothing: it has no
-first-launch prompt to ask badly, since Settings asks when the
-user goes looking. Sparkle's own alert used to offer the same
+this one is a choice, and one Settings asks only when the user
+goes looking, so there is no first-launch prompt to ask badly.
+**What it trades:** an automatic install never shows the update
+window, so a release's "Before you update" is read after the
+update rather than before it, in "What's new". That is the
+bargain the switch offers, and it stays off by default for that
+reason. Sparkle takes the switch only while it checks on its own,
+so the row greys with that reason where the checks are off. Sparkle's own alert used to offer the same
 choice as a checkbox; KiwiDesk's update window has no such box,
 so without this row the choice would have left the app entirely.
 The value is Sparkle's (`SUAutomaticallyUpdate`), stored per Mac
 and never in a profile or a backup, since whether this Mac
-updates itself is not part of a setup. After such an install the
-notes nobody read show once as "What's new".
+updates itself is not part of a setup. After such an install "What's
+new" is owed: it opens on the next launch the user starts, and a
+login launch leaves the status item's mark instead.
 
 ### Scheduled update reminders are a mark, not a notification (#1013)
 

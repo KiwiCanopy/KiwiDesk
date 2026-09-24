@@ -60,6 +60,9 @@ extension SettingsModel {
 
     /// Gate resolver for General section auto-start rows.
     var generalGates: GeneralGates {
-        GeneralGates(autoStart: autoStart)
+        GeneralGates(
+            autoStart: autoStart,
+            autoInstall: updater.autoInstall.unavailable
+        )
     }
 }

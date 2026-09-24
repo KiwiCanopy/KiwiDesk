@@ -6,7 +6,7 @@ enum GeneralKey: String, CaseIterable, Hashable {
     case appearance = "UserDefaults.appearance"
     case startAtLogin = "AutoStartManager (no stored pref)"
     case installUpdatesAutomatically =
-        "Sparkle SUAutomaticallyUpdate (no stored pref)"
+        "UserDefaults.SUAutomaticallyUpdate (Sparkle)"
     case advancedConfigFile = "(readonly) general.advanced.config_file"
     case advancedEditLua = "(action) general.advanced.edit_lua"
     case advancedDiscardArrangement =
@@ -41,7 +41,12 @@ extension GeneralKey {
                 ])
             )
         case .installUpdatesAutomatically:
-            return .row(.general, .appliesImmediately, .atRest)
+            return .row(
+                .general,
+                .appliesImmediately,
+                .atRest,
+                gate: .runtime(.automaticInstallUnavailable)
+            )
         case .advancedConfigFile, .advancedEditLua,
             .advancedDiscardArrangement, .advancedResetAll,
             .advancedExportBackup, .advancedRestoreBackup,

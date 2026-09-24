@@ -17,7 +17,7 @@ private final class FakeStatusItem: StatusItemHandle {
 /// whether it was actually asked to check.
 @MainActor
 private final class FakeUpdater: AppUpdating {
-    var installsAutomatically = false
+    let autoInstall = AutoInstallSetting.inert()
     var whatsNew: WhatsNewCoordinator? { nil }
     let updates = UpdateStateStore()
     var canCheckForUpdates: Bool
