@@ -61,15 +61,19 @@ DATA_FILE = ROOT / "site" / "src" / "data" / "changelog.json"
 # human wrote; what follows is `--generate-notes`' own output,
 # which stays on the release rather than being mirrored here.
 
-# Section titles are NOT enumerated, and that is the ruling rather
-# than a gap (owner, 2026-08-19). A fixed New/Improved/Fixed triple
-# splits one story across three buckets — 0.9.7's "Multi-screen
-# Desktops" is at once new, improved and a fix, while a reader
-# notices it as one thing — so a release names its own sections and
-# may name one "Fixed" when that genuinely is the story. What this
-# parser holds is the SHAPE: a summary, at least one section, no
-# empty section, no empty entry, no issue numbers.
+# From 2.0.0 the sections are TYPED (#1542, revising the
+# 2026-08-19 free-title ruling): readers scan a release by
+# question — "what's new?", "was my bug fixed?" — so the titles
+# are this fixed list, in this order, each change under exactly
+# one. `docs/design-decisions.md` ▸ *Release notes are written for
+# the person installing* carries the argument. Releases before
+# `TYPED_FROM` keep the free titles they were published with.
 HIGHLIGHTS_HEADING = "Highlights"
+TYPED_SECTIONS = ("New", "Improved", "Fixed", "Lua & CLI")
+TYPED_FROM = (2, 0, 0)
+# The one paragraph a typed summary may end in: what breaks for
+# someone updating. Its text travels as the entry's `heads`.
+HEADS_MARKER = "**Before you update:**"
 
 _H1 = re.compile(r"^#(?!#)")
 _H2 = re.compile(r"^##(?!#)\s+(?P<title>.+?)\s*$")
@@ -289,15 +293,32 @@ def split_body(body: str) -> tuple[bool, list[str], list[str]]:
     return True, lines[start:end], problems
 
 
+def is_typed(tag: str | None) -> bool:
+    """Whether a release is held to the typed grammar. A body
+    with no tag is a DRAFT being checked (`--body`), and a draft
+    is always a new release."""
+    match = _TAG.match(tag or "")
+    if not match:
+        return True
+    version = tuple(
+        int(part) for part in match.group("version").split(".")
+    )
+    return version >= TYPED_FROM
+
+
 def parse_curated(
     tag: str,
     lines: list[str],
     problems: list[str] | None = None,
-) -> tuple[str, list[dict]]:
-    """The curated block → (summary, sections). Raises NotesError
-    carrying every structural problem found."""
+    typed: bool = True,
+) -> tuple[str, list[dict], str]:
+    """The curated block → (summary, sections, heads). `heads` is
+    the typed grammar's optional "Before you update" paragraph,
+    empty when absent. Raises NotesError carrying every
+    structural problem found."""
     problems = list(problems or [])
     summary_parts: list[str] = []
+    paragraphs: list[list[str]] = [[]]
     sections: list[dict] = []
     current: dict | None = None
     pending: list[str] = []
@@ -385,9 +406,12 @@ def parse_curated(
             continue
         if not line.strip():
             flush()
+            if current is None and paragraphs[-1]:
+                paragraphs.append([])
             continue
         if current is None:
             summary_parts.append(line.strip())
+            paragraphs[-1].append(line.strip())
             continue
         continuation = _CONTINUATION.match(line)
         if pending:
@@ -398,8 +422,17 @@ def parse_curated(
             )
         else:
             # Prose directly under a `###` with no bullets — the
-            # "Translations" / "Also" shape, legitimate, and it
-            # becomes that section's single entry.
+            # "Translations" / "Also" shape, legitimate before
+            # 2.0.0, and it becomes that section's single entry.
+            # A typed section counts changes, so it holds bullets.
+            if typed:
+                problems.append(
+                    f"line {number}: prose under "
+                    f"`### {current['title']}`. A typed section "
+                    "lists one bullet per change; the prose "
+                    "belongs in the summary."
+                )
+                continue
             pending_line = number
             pending.append(line.strip())
 
@@ -407,6 +440,40 @@ def parse_curated(
     if current is not None:
         sections.append(current)
 
+    heads = ""
+    written = [" ".join(p).strip() for p in paragraphs if p]
+    if typed:
+        marked = [
+            i
+            for i, text in enumerate(written)
+            if HEADS_MARKER in text
+        ]
+        for i in marked:
+            if not written[i].startswith(HEADS_MARKER):
+                problems.append(
+                    f"`{HEADS_MARKER}` must open its own "
+                    "paragraph, not sit inside one."
+                )
+        if len(marked) > 1:
+            problems.append(
+                f"{len(marked)} `{HEADS_MARKER}` paragraphs. "
+                "One per release, listing everything that "
+                "breaks."
+            )
+        elif marked:
+            if marked[0] != len(written) - 1:
+                problems.append(
+                    f"`{HEADS_MARKER}` is not the last paragraph "
+                    "of the summary. It closes the summary, "
+                    "right above the first `###`."
+                )
+            heads = written[marked[0]][len(HEADS_MARKER):].strip()
+            if not heads:
+                problems.append(
+                    f"`{HEADS_MARKER}` with nothing after it."
+                )
+            written = written[: marked[0]] + written[marked[0] + 1:]
+        summary_parts = written
     summary = " ".join(summary_parts).strip()
     if not summary:
         problems.append(
@@ -418,6 +485,33 @@ def parse_curated(
         problems.append(
             f"no `###` sections under `## {HIGHLIGHTS_HEADING}`."
         )
+    if typed:
+        titles = [section["title"] for section in sections]
+        for title in titles:
+            if title and title not in TYPED_SECTIONS:
+                problems.append(
+                    f"section {title!r} is not a type. From "
+                    "2.0.0 the sections are exactly "
+                    + ", ".join(
+                        f"`### {t}`" for t in TYPED_SECTIONS
+                    )
+                    + " — each change under the one that fits."
+                )
+        known = [t for t in titles if t in TYPED_SECTIONS]
+        for title in sorted(set(known)):
+            if known.count(title) > 1:
+                problems.append(
+                    f"section {title!r} appears "
+                    f"{known.count(title)} times. One section "
+                    "per type."
+                )
+        order = [TYPED_SECTIONS.index(t) for t in known]
+        if order != sorted(order):
+            problems.append(
+                "the typed sections are out of order. They run "
+                + ", ".join(TYPED_SECTIONS)
+                + ", leaving out any that are empty."
+            )
     for section in sections:
         if not section["items"]:
             problems.append(
@@ -429,7 +523,10 @@ def parse_curated(
     # EVERY authored slot is checked, not only the entries: a
     # number in the summary or in a section title is the same
     # defect one line up.
-    slots: list[tuple[str, str]] = [("the summary", summary)]
+    slots: list[tuple[str, str]] = [
+        ("the summary", summary),
+        ("the Before you update paragraph", heads),
+    ]
     for section in sections:
         slots.append(
             (
@@ -452,13 +549,15 @@ def parse_curated(
 
     if problems:
         raise NotesError(tag, problems)
-    return summary, sections
+    return summary, sections, heads
 
 
 def parse_release_body(
-    tag: str, body: str
-) -> tuple[str, list[dict]]:
-    """A whole release body → (summary, sections), strictly. The
+    tag: str, body: str, typed: bool | None = None
+) -> tuple[str, list[dict], str]:
+    """A whole release body → (summary, sections, heads),
+    strictly, under the grammar `is_typed(tag)` picks unless
+    `typed` says otherwise. The
     "no block at all" case is its own NotesError so `--all` can
     tell it apart from a body that is merely malformed."""
     found, lines, problems = split_body(body or "")
@@ -481,7 +580,12 @@ def parse_release_body(
                 "— the heading is there and nothing is under it."
             ],
         )
-    return parse_curated(tag, lines, problems)
+    return parse_curated(
+        tag,
+        lines,
+        problems,
+        is_typed(tag) if typed is None else typed,
+    )
 
 
 # ---------------------------------------------------------------
@@ -592,7 +696,7 @@ def build_entry(
     if download:
         entry["download"] = download
     try:
-        summary, sections = parse_release_body(
+        summary, sections, heads = parse_release_body(
             tag, release.get("body") or ""
         )
     except NotesError as error:
@@ -600,7 +704,12 @@ def build_entry(
             raise
         return entry, "; ".join(error.problems)
     entry["summary"] = summary
+    # Absent, never empty, like `download`: readers test the key.
+    if heads:
+        entry["heads"] = heads
     entry["sections"] = sections
+    if is_typed(tag):
+        entry["typed"] = True
     return entry, ""
 
 
@@ -721,14 +830,16 @@ def _report(error: NotesError) -> int:
 # Modes
 
 
-def run_body(path: str) -> int:
+def run_body(path: str, tag: str | None = None) -> int:
     try:
         body = Path(path).read_text(encoding="utf-8")
     except OSError as error:
         print(f"changelog-sync: {error}", file=sys.stderr)
         return 1
     try:
-        summary, sections = parse_release_body(path, body)
+        summary, sections, heads = parse_release_body(
+            tag or path, body, is_typed(tag)
+        )
     except NotesError as error:
         return _report(error)
     entries = sum(len(s["items"]) for s in sections)
@@ -737,6 +848,8 @@ def run_body(path: str) -> int:
         f"{entries} entr(ies)."
     )
     print(f"  summary: {summary}")
+    if heads:
+        print(f"  before you update: {heads}")
     for section in sections:
         print(
             f"  ### {section['title']} "
@@ -844,6 +957,13 @@ def main(argv: list[str]) -> int:
         "malformed curated block FAILS",
     )
     parser.add_argument(
+        "--tag",
+        metavar="TAG",
+        help="with --body: the tag the draft will carry, which "
+        "picks the grammar — a tag before v2.0.0 takes the free "
+        "section titles; no tag means a new release (typed)",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="parse and report, writing nothing",
@@ -881,8 +1001,10 @@ def main(argv: list[str]) -> int:
             "fixture run would rewrite it from test data"
         )
 
+    if args.tag and not args.body:
+        parser.error("--tag only applies to --body")
     if args.body:
-        return run_body(args.body)
+        return run_body(args.body, args.tag)
     if args.all:
         return run_all(args.check, args.releases, args.output)
     return run_release(

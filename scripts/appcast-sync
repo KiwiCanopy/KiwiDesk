@@ -411,6 +411,14 @@ def description(entry: dict | None, version: str) -> str:
     summary = entry.get("summary")
     if summary:
         parts.append(f"<p>{inline(summary)}</p>")
+    # The typed grammar's closing paragraph (#1542). Sparkle's
+    # window is what a 1.x client reads, so it carries it too.
+    heads = entry.get("heads")
+    if heads:
+        parts.append(
+            f"<p><strong>Before you update:</strong> "
+            f"{inline(heads)}</p>"
+        )
     for section in entry.get("sections") or []:
         title = section.get("title")
         if title:

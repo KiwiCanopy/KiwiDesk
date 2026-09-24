@@ -37,11 +37,15 @@ reaches people who did not ask to read anything.
    would, or a correction to something not yet shipped. The
    design-decisions entry rules all three — apply its test
    rather than your taste.
-3. **Group by what the reader recognises, not by subsystem and
-   not one bullet per issue.** Several commits usually make one
-   sentence: three distrust arms that each moved focus off the
-   window someone was on are one bullet about focus, not three
-   about mechanisms.
+3. **Merge by what the reader recognises, then file each change
+   under its type.** Several commits usually make one bullet:
+   three distrust arms that each moved focus off the window
+   someone was on are one bullet about focus, not three about
+   mechanisms. Each bullet then goes under exactly one of the
+   typed sections, and the story that spans them goes in the
+   summary. The types, their order and the "Before you update"
+   paragraph are ruled in `packaging-and-release.md` and the
+   design-decisions entry above.
 4. **Draft into the parser's form**, then validate every time —
    `python3 scripts/changelog-sync --body <file>`. It refuses
    rather than half-rendering, so a green run is the floor, not
@@ -81,7 +85,7 @@ stay quiet about:
   bullet is ONE line — the symptom, and that it is fixed — and a
   second sentence is earned only when one line cannot say it,
   never by the diagnosis, which stays in the PR. The lead
-  paragraph is one or two sentences. If a section will not
+  paragraph is two or three sentences. If a section will not
   come under control, the honest move is usually that half of
   it is not news.
 - **A site fix.** A corrected heading, a term, a translation, a

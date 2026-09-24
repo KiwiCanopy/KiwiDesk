@@ -72,8 +72,15 @@ interface Release {
   url: string;
   download?: string;
   summary?: string;
+  heads?: string;
   sections?: Section[];
+  typed?: boolean;
 }
+
+// From 2.0.0 the sections are the four types (#1542). The one
+// written for scripters starts closed, as in the update window:
+// everyone can open it, nobody has to scroll past it.
+const SCRIPTING = "Lua & CLI";
 
 const releases = (changelog.releases as Release[]).filter(
   (release) =>
@@ -174,20 +181,42 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
         </header>
 
         {release.summary && (
-          <p class="rel__summary">{release.summary}</p>
+          <p class="rel__summary" set:html={inline(release.summary)} />
         )}
 
+        {release.heads && (
+          <p class="rel__heads">
+            <strong>{t("changelog_before_update")}</strong>{" "}
+            <span set:html={inline(release.heads)} />
+          </p>
+        )}
 
-        {(release.sections ?? []).map((section) => (
-          <div class="grp">
-            <h3>{section.title}</h3>
-            <ul>
-              {section.items.map((item) => (
-                <li set:html={inline(item)} />
-              ))}
-            </ul>
-          </div>
-        ))}
+        {(release.sections ?? []).map((section) =>
+          release.typed && section.title === SCRIPTING ? (
+            <details class="grp grp--fold">
+              <summary>
+                <h3>{section.title} · {section.items.length}</h3>
+              </summary>
+              <ul>
+                {section.items.map((item) => (
+                  <li set:html={inline(item)} />
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <div class="grp">
+              <h3>
+                {section.title}
+                {release.typed && ` · ${section.items.length}`}
+              </h3>
+              <ul>
+                {section.items.map((item) => (
+                  <li set:html={inline(item)} />
+                ))}
+              </ul>
+            </div>
+          ),
+        )}
 
         {!release.summary &&
           !(release.sections ?? []).length && (
@@ -307,6 +336,39 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
     margin: 0 0 1.6rem;
     font-size: 1.06rem;
     color: var(--text);
+  }
+  .rel__heads {
+    margin: -0.6rem 0 1.6rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .rel__heads :global(code) {
+    font-family: var(--mono);
+    font-size: 0.9em;
+  }
+  .grp--fold summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  .grp--fold summary::-webkit-details-marker {
+    display: none;
+  }
+  .grp--fold summary h3 {
+    display: inline;
+  }
+  .grp--fold summary::before {
+    content: "▸ ";
+    color: var(--text-dim);
+  }
+  .grp--fold[open] summary::before {
+    content: "▾ ";
+  }
+  .grp--fold ul {
+    margin-top: 0.55rem;
   }
   .rel__none {
     margin: 0 0 1.2rem;

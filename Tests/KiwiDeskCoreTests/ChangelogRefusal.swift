@@ -40,7 +40,7 @@ extension ChangelogRefusal {
             body: """
                 ## Highlights
 
-                ### Thing
+                ### New
 
                 - An entry.
                 """,
@@ -53,9 +53,9 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Empty
+                ### New
 
-                ### Thing
+                ### Fixed
 
                 - An entry.
                 """,
@@ -68,7 +68,7 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Thing
+                ### New
 
                 -
                 """,
@@ -81,7 +81,7 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Thing
+                ### New
 
                 - The outline keeps up now (#618).
                 """,
@@ -94,7 +94,7 @@ extension ChangelogRefusal {
 
                 Fixes the crash from #873 at last.
 
-                ### Thing
+                ### New
 
                 - An entry.
                 """,
@@ -120,7 +120,7 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Thing
+                ### New
 
                 - See github.com/KiwiCanopy/KiwiDesk/pull/880 for
                   the detail.
@@ -134,7 +134,7 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Thing
+                ### New
 
                 #### Deeper
 
@@ -150,7 +150,7 @@ extension ChangelogRefusal {
                 Summary.
                 # Stray
 
-                ### Thing
+                ### New
 
                 - An entry.
                 """,
@@ -176,7 +176,7 @@ extension ChangelogRefusal {
 
                 - A bullet where the summary belongs.
 
-                ### Thing
+                ### New
 
                 - An entry.
                 """,
@@ -189,7 +189,7 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Thing
+                ### New
 
                 - Parent entry.
                   - a child
@@ -203,13 +203,13 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### One
+                ### New
 
                 - An entry.
 
                 ## Highlights
 
-                ### Two
+                ### Fixed
 
                 - Another.
                 """,
@@ -222,7 +222,7 @@ extension ChangelogRefusal {
 
                 Summary.
 
-                ### Thing
+                ### New
 
                 - An entry.
 

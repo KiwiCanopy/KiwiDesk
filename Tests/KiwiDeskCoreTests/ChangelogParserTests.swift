@@ -25,7 +25,10 @@ struct ChangelogParserTests {
             .appendingPathComponent("changelog-sync")
     }
 
-    private func parse(_ body: String) throws -> ScriptRun {
+    private func parse(
+        _ body: String,
+        tag: String? = nil
+    ) throws -> ScriptRun {
         let file = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "changelog-body-\(UUID().uuidString).md"
@@ -35,30 +38,52 @@ struct ChangelogParserTests {
         return try runPythonScript(
             at: script(),
             arguments: ["--body", file.path]
+                + (tag.map { ["--tag", $0] } ?? [])
         )
     }
 
-    /// The shape every other case is a mutation of. Deliberately
-    /// exercises the two legitimate entry forms at once: a
-    /// bulleted section, and a section whose body is plain prose
-    /// with no bullet (0.9.7's "Translations" and "Also").
+    /// The shape every other case is a mutation of (#1542): a
+    /// summary closing in the optional Before you update
+    /// paragraph, then typed sections in their order, one
+    /// skipped.
     private static let valid = """
+        ## Highlights
+
+        One or two sentences about the release.
+
+        **Before you update:** a profile saved by this release
+        cannot be opened by the one before.
+
+        ### New
+
+        - **The focus outline keeps up.** It used to trail
+          behind when windows moved quickly.
+        - Scrolling stops at the edge of your screen.
+
+        ### Lua & CLI
+
+        - **`kiwishelf.*`** holds what both bars share.
+
+        ## What's Changed
+        * fix(bars): something reviewers say by @someone
+        """
+
+    /// A body published before 2.0.0: free section titles, and
+    /// a section whose body is plain prose (0.9.7's
+    /// "Translations"). It must keep parsing, or `--all` drops
+    /// the history it re-reads.
+    private static let legacy = """
         ## Highlights
 
         One or two sentences about the release.
 
         ### Windows behave
 
-        - **The focus outline keeps up.** It used to trail
-          behind when windows moved quickly.
-        - Scrolling stops at the edge of your screen.
+        - **The focus outline keeps up.**
 
         ### Translations
 
         Better translations across all ten languages.
-
-        ## What's Changed
-        * fix(bars): something reviewers say by @someone
         """
 
     @Test("the shipped form parses")
@@ -67,6 +92,35 @@ struct ChangelogParserTests {
         #expect(run.status == 0)
         #expect(run.stdout.contains("2 section(s)"))
         #expect(run.stdout.contains("3 entr(ies)"))
+    }
+
+    /// The paragraph leaves the summary: a reader meets it once,
+    /// in its own place, never repeated inside the prose.
+    @Test("Before you update is split off the summary")
+    func headsSplitOff() throws {
+        let run = try parse(Self.valid)
+        #expect(
+            run.stdout.contains(
+                "before you update: a profile saved by this release"
+            )
+        )
+        #expect(!run.stdout.contains("**Before"))
+    }
+
+    @Test("a release before 2.0.0 keeps its free titles")
+    func legacyBodyParses() throws {
+        let run = try parse(Self.legacy, tag: "v1.4.0")
+        #expect(run.status == 0, "\(run.stderr)")
+        #expect(run.stdout.contains("Translations (1)"))
+    }
+
+    /// The cut is by version, so the same body on a new tag is
+    /// held to the typed grammar rather than slipping through.
+    @Test("the same free titles on a 2.0.0 tag are refused")
+    func legacyBodyRefusedWhenTyped() throws {
+        let run = try parse(Self.legacy, tag: "v2.0.0")
+        #expect(run.status != 0)
+        #expect(run.stderr.contains("is not a type"))
     }
 
     /// The generated list below the block is not this page's to
@@ -85,14 +139,14 @@ struct ChangelogParserTests {
     @Test("a wrapped entry stays one entry")
     func wrappedEntryJoins() throws {
         let run = try parse(Self.valid)
-        #expect(run.stdout.contains("Windows behave (2)"))
+        #expect(run.stdout.contains("### New (2)"))
     }
 
     // MARK: - Refusals
 
     @Test(
         "each malformed body is refused, and says why",
-        arguments: ChangelogRefusal.all
+        arguments: ChangelogRefusal.all + ChangelogRefusal.typed
     )
     func malformedBodyRefused(_ refusal: ChangelogRefusal) throws {
         let run = try parse(refusal.body)
@@ -142,7 +196,7 @@ struct ChangelogParserTests {
 
             Summary.
 
-            ### Thing
+            ### New
 
             \(testCase.entry)
             """
@@ -170,7 +224,7 @@ struct ChangelogParserTests {
 
             Summary.
 
-            ### Thing
+            ### New
 
             - Your #1 request, shipped.
             """

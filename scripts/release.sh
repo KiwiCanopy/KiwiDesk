@@ -454,9 +454,9 @@ echo "  draft:    gh release view $TAG"
 # drifts on the release someone is in a hurry for; this one is
 # unavoidable.
 #
-# Section titles are the author's own — a fixed
-# New/Improved/Fixed triple splits one story across three buckets,
-# and a reader notices the story. The parser holds the SHAPE.
+# The section titles are the four types (#1542): readers scan by
+# question, "what's new?", "was my bug fixed?". The parser refuses
+# any other title.
 cat <<SKELETON
 
 --------------------------------------------------------------
@@ -465,15 +465,29 @@ Curate the draft, THEN publish. Paste above the generated
 
 ## Highlights
 
-One or two sentences: what this release is about, plainly.
+Two or three sentences: what this release is about, plainly.
 
-### <A thing a user noticed>
+**Before you update:** only when something changes for everyone
+who updates. Say what carries over, too. Usually omitted.
+
+### New
 
 - **The short version.** Then the detail, from the user's side.
 
-### <Another one>
+### Improved
 
 - ...
+
+### Fixed
+
+- ...
+
+### Lua & CLI
+
+- **If you write your own Lua config:** a break for scripters
+  goes first, addressed to them.
+
+(Keep the order; drop a section with nothing in it.)
 
 
 --------------------------------------------------------------
@@ -488,6 +502,8 @@ The rules, in four lines:
     so they are fine.
   * Highlights are highlights. Site fixes, a font bump and
     release plumbing collapse into one closing line.
+  * One change, one bullet, under the type that fits best. A
+    new feature that also fixes something goes under New.
 
   Voice:  docs/design-decisions.md
           -> Release notes are written for the person installing

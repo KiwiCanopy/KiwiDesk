@@ -45,7 +45,7 @@ struct ChangelogDownloadTests {
 
             A summary sentence about the release.
 
-            ### Bits
+            ### New
 
             - **A thing changed.** And here is how.
             """,
