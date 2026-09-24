@@ -107,6 +107,21 @@ struct PlaceholderSpaceTests {
         )
     }
 
+    @Test("the drop re-places the survivor on the screen")
+    func dropReResolvesDisplays() throws {
+        let core = makeTestCore(configDirectory: directory())
+        core.state.workspaces.upsertDisplay(Self.display)
+        // `set_mode` places nothing, so only the drop's own resolve
+        // can give the screen a Space.
+        try writeLua("KiwiDesk.set_mode(\"Work\", \"stack\")", core)
+        core.loadConfig()
+        #expect(liveSpaces(core) == ["Work"])
+        #expect(
+            core.state.workspaces.spaces(on: Self.display.id)
+                == [SpaceID("Work")]
+        )
+    }
+
     @Test("Reset All Settings rules on its Lua-owned seed too")
     func resetRetiresItsSeed() throws {
         let core = makeTestCore(configDirectory: directory())
