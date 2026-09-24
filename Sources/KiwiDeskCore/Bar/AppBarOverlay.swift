@@ -48,6 +48,8 @@ public final class AppBarOverlay {
     /// scroll holds until it changes (#1517).
     var followedFocus: WindowID?
     var hasFollowed = false
+    /// Set by a page; cleared when the focus changes.
+    var manuallyScrolled = false
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
@@ -78,18 +80,22 @@ public final class AppBarOverlay {
             style: style,
             capAxis: capAxis
         )
-        // A manual scroll holds until the focus changes (#1517).
+        // A MANUAL scroll holds until the focus changes (#1517);
+        // without one, every render keeps the focus in view.
         let focus = activeIndex.flatMap {
             items.indices.contains($0) ? items[$0].id : nil
         }
-        let follows = !hasFollowed || focus != followedFocus
+        if !hasFollowed || focus != followedFocus {
+            manuallyScrolled = false
+        }
         hasFollowed = true
         followedFocus = focus
-        render(followingFocus: follows)
+        render(followingFocus: !manuallyScrolled)
     }
 
     public func hide() {
         hasFollowed = false
+        manuallyScrolled = false
         lastShown = nil
         scrollOffset = 0
         root.isHidden = true

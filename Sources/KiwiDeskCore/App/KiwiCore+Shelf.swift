@@ -230,7 +230,8 @@ extension KiwiCore {
                         depth: depth,
                         gap: shelf.itemGap
                     ),
-                    thickness: depth
+                    thickness: depth,
+                    gap: shelf.itemGap
                 )
             } ?? 0
         let appNeed = app.map {

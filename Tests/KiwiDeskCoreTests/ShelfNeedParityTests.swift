@@ -188,7 +188,8 @@ struct ShelfFloorWiringTests {
                 depth: depth,
                 gap: settings.kiwishelf.itemGap
             ),
-            thickness: depth
+            thickness: depth,
+            gap: settings.kiwishelf.itemGap
         )
         let plainMinimum =
             (600 - settings.kiwishelf.itemGap)

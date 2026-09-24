@@ -190,12 +190,21 @@ struct ShelfArrangementTests {
         )
     }
 
-    @Test("The hard floor is the active item plus a fade each side")
+    /// The floor holds the active item with the follow margin
+    /// clear each side, so a followed item never meets a fade.
+    @Test("The hard floor is the active item plus a margin each side")
     func hardFloorSum() {
-        let fade = ShelfOverflow.fadeLength(thickness: 40)
+        let margin = ShelfOverflow.followMargin(
+            gap: 6,
+            depth: 40,
+            viewport: .infinity
+        )
         #expect(
-            ShelfArrangement.hardFloor(activeExtent: 50, thickness: 40)
-                == 50 + 2 * fade
+            ShelfArrangement.hardFloor(
+                activeExtent: 50,
+                thickness: 40,
+                gap: 6
+            ) == 50 + 2 * margin
         )
     }
 

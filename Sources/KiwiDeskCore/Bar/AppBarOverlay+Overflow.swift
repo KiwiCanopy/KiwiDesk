@@ -82,6 +82,7 @@ extension AppBarOverlay {
         m: Metrics,
         fade: CGFloat
     ) {
+        manuallyScrolled = true
         scrollOffset = ShelfOverflow.pageTarget(
             from: scrollOffset,
             lengths: lengths,

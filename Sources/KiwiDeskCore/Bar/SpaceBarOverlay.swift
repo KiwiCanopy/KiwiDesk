@@ -82,6 +82,9 @@ public final class SpaceBarOverlay {
     /// scroll holds until it changes (#1517).
     var followedSpace: SpaceID?
     var hasFollowed = false
+    /// Set by a page or an autoscroll; cleared when the active
+    /// Space changes.
+    var manuallyScrolled = false
     /// Cached scroll geometry for hit-testing and autoscroll (#385).
     var scrollGeom: ScrollGeom?
     /// Running drag-autoscroll task when dwelling on an arrow
@@ -145,17 +148,21 @@ public final class SpaceBarOverlay {
             return
         }
         lastShown = (items, frontApp, strip, style, stateMarkColors)
-        // A manual scroll holds until the active Space changes
-        // (#1517): a refresh that changes nothing does not follow.
+        // A MANUAL scroll holds until the active Space changes
+        // (#1517); without one, every render keeps the active
+        // Space in view, whatever else moved.
         let active = items.first(where: \.active)?.space
-        let follows = !hasFollowed || active != followedSpace
+        if !hasFollowed || active != followedSpace {
+            manuallyScrolled = false
+        }
         hasFollowed = true
         followedSpace = active
-        render(followingActive: follows)
+        render(followingActive: !manuallyScrolled)
     }
 
     public func hide() {
         hasFollowed = false
+        manuallyScrolled = false
         lastShown = nil
         hitStrip = .zero
         hitFrames = []

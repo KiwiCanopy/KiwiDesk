@@ -143,3 +143,28 @@ struct KiwiShelfPaletteMigrationTests {
         #expect(imported.colors["app_bar.fill_color"] == nil)
     }
 }
+
+/// The profile walk and the palette path agree: a shelf that
+/// already holds an item colour keeps it, the dimmed-twin rule
+/// only filling an absent one (#1517 review).
+@Suite("KiwiShelf crossing keeps a held item colour")
+struct KiwiShelfHeldItemColorTests {
+    @Test("A held shelf item colour survives the twin rule")
+    func heldItemColorKept() throws {
+        let data = Data(
+            """
+            {"format":7,"monitor_sets":[],"name":"A","settings":{\
+            "kiwishelf":{"item_color":"#123456"},\
+            "app_bar":{"item_color":"#EAF3EE"},\
+            "space_bar":{"item_color":"#EAF3EE66"}}}
+            """.utf8
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let root = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        let settings = try #require(root["settings"] as? [String: Any])
+        let shelf = try #require(settings["kiwishelf"] as? [String: Any])
+        #expect(shelf["item_color"] as? String == "#123456")
+    }
+}

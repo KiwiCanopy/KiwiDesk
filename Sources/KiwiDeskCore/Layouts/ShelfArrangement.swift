@@ -140,12 +140,16 @@ public struct ShelfArrangement: Equatable, Sendable {
     }
 
     /// The Space section's hard floor for an active item
-    /// `activeExtent` long on a shelf `thickness` deep.
+    /// `activeExtent` long on a shelf `thickness` deep: the item
+    /// and, each side, the follow margin that keeps it clear of a
+    /// fade (`ShelfOverflow.followMargin`).
     public static func hardFloor(
         activeExtent: CGFloat,
-        thickness: CGFloat
+        thickness: CGFloat,
+        gap: CGFloat
     ) -> CGFloat {
-        activeExtent + 2 * ShelfOverflow.fadeLength(thickness: thickness)
+        activeExtent
+            + 2 * (ShelfOverflow.fadeLength(thickness: thickness) + gap)
     }
 
     /// The Space section's length: its need while both fit;
