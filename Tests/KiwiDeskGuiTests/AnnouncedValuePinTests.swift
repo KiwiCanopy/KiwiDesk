@@ -87,6 +87,10 @@ struct AnnouncedValuePinTests {
         // while the directory was still outside every lens, so
         // this is the backlog arriving rather than a new title.
         "ShortcutsBands.swift": 2,
+        // The update window's title, and the Highlights, Before
+        // you update and All changes labels (#1542).
+        "UpdateWindowView.swift": 1,
+        "UpdateNotesGroups.swift": 3,
     ]
 
     @Test("title components are rotor headings")

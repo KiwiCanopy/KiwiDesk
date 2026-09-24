@@ -57,6 +57,7 @@ struct SettingsThemeWiringTests {
         "warningSurface": "PermissionPausedBanner.swift",
         "warningInk": "SettingsHeaderBar+Status.swift",
         "danger": "KeyRecorderRejectionRow.swift",
+        "highlight": "UpdateNotesGroups.swift",
         "panel": "SettingsDetailPanel.swift",
         "savePill": "SettingsFooter.swift",
         "savePillInk": "SettingsFooter.swift",

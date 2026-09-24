@@ -86,9 +86,19 @@ final class UpdateStateStore: ObservableObject {
 @MainActor
 final class UpdateCycleObserver: NSObject, @MainActor SPUUpdaterDelegate {
     let store: UpdateStateStore
+    /// Every item of each appcast Sparkle loads, for the update
+    /// window's "everything since your version" (#1542).
+    var onAppcast: ([SUAppcastItem]) -> Void = { _ in }
 
     init(store: UpdateStateStore) {
         self.store = store
+    }
+
+    func updater(
+        _ updater: SPUUpdater,
+        didFinishLoading appcast: SUAppcast
+    ) {
+        onAppcast(appcast.items)
     }
 
     func updater(
