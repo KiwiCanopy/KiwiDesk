@@ -10488,13 +10488,14 @@ The Space Bar and the App Bar sit on **KiwiShelf**, one screen
 edge. Where they hang and the plate they share — edge,
 alignment, order, the Space Bar minimum, thickness, margins,
 background style and fit, Liquid Glass, corner roundness, item
-gap, font size, the app symbol style and every colour the two
-bars share — is `kiwishelf`'s. A field each bar may set for
+gap, font size, the app symbol style, the idle opacity of
+untinted content (`dim_factor`) and every colour the two bars
+share — is `kiwishelf`'s. A field each bar may set for
 itself stays on that bar, whether or not the other bar has one
 like it: the active indicator's shape, the App Bar's content and
 title cap, the Space Bar's glyph cap, spring delay, front-app
-title cap and the colour of the focused window's glyph inside a
-Space item are examples, not the list.
+title cap, its active-Space dim and the colour of the focused
+window's glyph inside a Space item are examples, not the list.
 
 *One plate, two sections.* While both bars show they are one
 plate with two sections, Space and App, placed as one unit by
@@ -11246,8 +11247,8 @@ leaf because a field both bars read is the shelf's (▸ one shelf,
 above), which leaves no per-layout glass for the switch to
 explain; the panel is a different surface with its own
 `set_shortcut_panel_liquid_glass`, so the row ADDS Lua reach
-rather than capping it. `icon_source` and `dim_factor` keep
-their per-layout grounding, being the App Bar's own fields.
+rather than capping it. `icon_source` and `dim_factor` left the
+per-layout chain the same way, both bars reading them alike.
 :::
 
 **Liquid Glass is an orthogonal finish toggle, not a third
