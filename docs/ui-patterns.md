@@ -1000,9 +1000,12 @@ channel.
 affordance.** Native bordered/prominent buttons, sidebars,
 toggles, sliders, and fields keep system hover. Ambiguous
 icon-only borderless actions use the shared adaptive chip on
-hover only (`0.12`), resting as the bare glyph in `ink2` in its
-card (`iconHoverChip`) — the accent is a control fill's, not a
-glyph's; a chip-shaped control keeps its rest fill,
+hover only (`0.12`), resting as the bare glyph in `ink2` at a
+row's end (`iconHoverChip`) — the accent is a control fill's, not
+a glyph's — while a glyph standing alone beside text keeps the
+`0.06` rest fill (`resting: true`), nothing else marking it as a
+button, and the `?` rests bare with no inset, its own circle
+being its shape; a chip-shaped control keeps its rest fill,
 which is its shape; custom full-row picker entries
 use a hover-only `0.06` fill; unselected custom segments and
 mode chips lift their existing fill by about `0.05`. A draggable

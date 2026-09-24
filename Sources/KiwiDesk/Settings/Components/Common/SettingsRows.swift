@@ -224,16 +224,19 @@ extension View {
         )
     }
 
-    /// The hover chip of a glyph-only icon control: the glyph in
-    /// `ink2` with nothing at rest, so it sits in its card, and the
-    /// chip on hover (#1393). The accent is a control FILL's.
+    /// The hover chip of a glyph-only icon control, its glyph in
+    /// `ink2` (#1393; the accent is a control FILL's). At a row's end
+    /// it rests at nothing, the row framing it; `resting` keeps the
+    /// rest fill for a glyph standing alone beside text, which
+    /// nothing else marks as a button.
     func iconHoverChip(
+        resting: Bool = false,
         cornerRadius: CGFloat = 4,
         padding: CGFloat = 2
     ) -> some View {
         tint(SettingsTheme.ink2)
             .hoverHighlight(
-                restOpacity: 0,
+                restOpacity: resting ? 0.06 : 0,
                 cornerRadius: cornerRadius,
                 padding: padding
             )
@@ -243,12 +246,17 @@ extension View {
     /// accessibility label.
     func iconButtonAffordance(
         _ label: String,
+        resting: Bool = false,
         cornerRadius: CGFloat = 4,
         padding: CGFloat = 2
     ) -> some View {
-        iconHoverChip(cornerRadius: cornerRadius, padding: padding)
-            .help(label)
-            .accessibilityLabel(label)
+        iconHoverChip(
+            resting: resting,
+            cornerRadius: cornerRadius,
+            padding: padding
+        )
+        .help(label)
+        .accessibilityLabel(label)
     }
 
     /// Hover highlight for full-width row buttons starting with transparent

@@ -7023,10 +7023,14 @@ The icon ladder rests at nothing too (#1393, owner 2026-09-24:
 the Profiles and Spaces trash read as a tinted container beside a
 bare one). Its `0.06` rest fill was the same colourless
 `Color.primary` surface the full row refused, only smaller: the
-fault is its hue, not its area. So a glyph-only icon control —
-trash, ✕-clear, pencil, the `?` — rests as the bare glyph and
-shows the chip on hover (`iconHoverChip`), neutral as macOS's own
-list controls are; a destructive glyph does not turn red on
+fault is its hue, not its area. So a glyph-only icon control at a
+row's end — trash, ✕-clear — rests as the bare glyph and shows
+the chip on hover (`iconHoverChip`), neutral as macOS's own list
+controls are, the row framing it; a glyph standing alone beside
+text — the rename pencil, the add-screen-setup `+` — keeps the
+rest fill, since nothing else says it is a button, and the `?`
+rests bare because its own circle is its shape (owner
+2026-09-25). Every glyph takes `ink2`; a destructive glyph does not turn red on
 hover, since that promises an immediate delete a trash offering
 "here or everywhere" does not make. A chip-shaped control keeps
 its rest fill, which is its shape rather than a container.

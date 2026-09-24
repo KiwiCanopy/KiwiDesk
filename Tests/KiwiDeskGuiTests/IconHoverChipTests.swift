@@ -28,7 +28,8 @@ struct IconHoverChipTests {
     func chipRestsAtNothing() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
         let chip = body(of: "iconHoverChip", in: rows)
-        #expect(chip.contains("restOpacity: 0,"))
+        #expect(chip.contains("restOpacity: resting ? 0.06 : 0,"))
+        #expect(chip.contains("resting: Bool = false"))
         #expect(chip.contains("tint(SettingsTheme.ink2)"))
         #expect(
             body(of: "iconButtonAffordance", in: rows).contains(
@@ -40,12 +41,35 @@ struct IconHoverChipTests {
     @Test("the ? and both rule-trash branches take the one chip")
     func everyIconTakesIt() throws {
         let help = try source("Components/Common/HelpButton.swift")
-        #expect(help.contains(".iconHoverChip()"))
+        #expect(help.contains(".iconHoverChip(cornerRadius: 8, padding: 0)"))
         #expect(!help.contains(".hoverHighlight("))
         let trash = try source("Sections/AppRuleIdentity.swift")
         #expect(trash.occurrences(of: ".iconHoverChip()") == 1)
         // The menu's own neutral label ink sits closer to the glyph.
         #expect(trash.contains(".foregroundStyle(SettingsTheme.ink2)"))
         #expect(trash.occurrences(of: ".iconButtonAffordance(") == 1)
+    }
+
+    /// A glyph standing alone beside text keeps the rest fill; the
+    /// register is the two owner-ruled sites (2026-09-25), so a new
+    /// one is a ruling rather than a default.
+    @Test("only the standalone glyphs rest on a fill")
+    func restingRegister() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var hits: [String: Int] = [:]
+        for url in try SourceScan.swiftSources(under: root) {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            let n = text.occurrences(of: "resting: true")
+            if n > 0 { hits[url.lastPathComponent] = n }
+        }
+        #expect(
+            hits == [
+                "ProfilesSection+Rename.swift": 1,
+                "ProfilesSection+ScreenSetups.swift": 1,
+            ]
+        )
     }
 }

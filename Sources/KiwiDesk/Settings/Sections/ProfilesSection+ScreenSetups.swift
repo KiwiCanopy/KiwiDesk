@@ -181,14 +181,18 @@ extension ProfilesSection {
                 }
             }
         } label: {
+            // The icon ink, which the neutral menu label's own ink
+            // would otherwise outrank (#1393).
             Image(systemName: "plus")
+                .foregroundStyle(SettingsTheme.ink2)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
         .neutralMenuLabel()
         .iconButtonAffordance(
-            L("profiles.sets.move.help", "Move a screen setup here")
+            L("profiles.sets.move.help", "Move a screen setup here"),
+            resting: true
         )
         .accessibilityValue(
             L(
