@@ -72,14 +72,14 @@ extension SettingsModel {
 
     /// Parks a profile delete behind its confirm, clean or dirty:
     /// a profile has no undo (#1619). Staged edits fold into the
-    /// same dialog — never a second one after it. A `broken`
+    /// same dialog — never a second one after it. A broken
     /// profile's file may not be readable, so its message names
-    /// only the file.
+    /// only the file — read off `brokenProfiles`, never handed in.
     func confirmingProfileDelete(
         _ name: String,
-        broken: Bool = false,
         perform action: @escaping @MainActor () -> Void
     ) {
+        let broken = brokenProfiles.contains { $0.name == name }
         pendingDiscard = PendingDiscard(
             kind: .deleteProfile(name: name),
             message: deleteMessage(broken: broken),

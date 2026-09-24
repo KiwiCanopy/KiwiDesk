@@ -11,8 +11,8 @@ struct DiscardConfirmation: ViewModifier {
 
     func body(content: Content) -> some View {
         content.confirmationDialog(
-            model.pendingDiscard?.title
-                ?? L("discard.title", "Discard unsaved changes?"),
+            // Nothing presents without a pending value.
+            model.pendingDiscard?.title ?? "",
             isPresented: Binding(
                 get: { model.pendingDiscard != nil },
                 set: { shown in

@@ -86,17 +86,25 @@ struct ProfileDeleteConfirmTests {
     func brokenNamesTheFile() throws {
         pinEnglish()
         let model = try makeModel()
-        model.confirmingProfileDelete("Work", broken: true) {}
+        model.brokenProfiles = [
+            BrokenProfile(name: "Work", cause: .malformedJSON)
+        ]
+        model.confirmingProfileDelete("Work") {}
         let clean = try #require(model.pendingDiscard)
         #expect(clean.message.hasPrefix("This removes the profile file"))
         #expect(!clean.message.contains("haven't saved"))
         model.cancelPendingDiscard()
         model.config.settings.gapsGlobal.inner.horizontal += 7
-        model.confirmingProfileDelete("Work", broken: true) {}
+        model.confirmingProfileDelete("Work") {}
         let dirty = try #require(model.pendingDiscard)
         #expect(dirty.message.hasPrefix("This removes the profile file"))
         #expect(dirty.message.contains("haven't saved"))
         #expect(dirty.cancelIsDefault)
+        // A healthy profile beside it keeps the full message.
+        model.cancelPendingDiscard()
+        model.confirmingProfileDelete("Home") {}
+        let healthy = try #require(model.pendingDiscard)
+        #expect(healthy.message.hasPrefix("Its Spaces"))
     }
 
     /// `discard.cancel` reads "keep editing" in several catalogs;
@@ -148,6 +156,10 @@ struct ProfileDeleteConfirmTests {
         )
         .split(whereSeparator: \.isWhitespace).joined()
         #expect(source.contains("model.pendingDiscard?.title"))
+        #expect(
+            source.contains("Button(pending.confirmLabel,role:.destructive)")
+        )
+        #expect(source.contains("Text(pending.message)"))
         let destructive = try #require(
             source.range(of: "role:.destructive")
         )

@@ -7411,9 +7411,7 @@ end in `reload()` — which re-seeds from disk and clears `isDirty`
 — so ungated, six of them drop the user's staged edits with no
 prompt at all. They share `SettingsModel.discardingEdits`, which
 runs the action when clean and parks it behind a single
-dashboard-wide dialog when dirty. The profile delete takes the sibling
-`SettingsModel.confirmingProfileDelete` instead, which parks on
-the same dialog clean or dirty.
+dashboard-wide dialog when dirty.
 
 *The gate lives at the call site, not on the model methods.*
 The alternative — a required `confirming:` parameter on
@@ -7431,8 +7429,7 @@ if a third surface outside `Sources/KiwiDesk/Settings` ever
 drives one of them.
 
 *The guard discovers, it does not enumerate.* It walks delimiters
-to extract every `discardingEdits` and `confirmingProfileDelete`
-trailing closure, then requires
+to extract every gate's trailing closure, then requires
 every occurrence of a destructive `model.*` call to sit inside
 one. A hand-listed "these seven are gated" would be fail-**open**
 for the case that matters — an eighth path absent from both the

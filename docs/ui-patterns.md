@@ -1157,8 +1157,8 @@ skipped site. `ModeGatedChromeTests` pins the chrome,
 **An action that reloads must ask before it discards.** Any
 Settings action whose tail is `model.reload()` re-seeds from
 disk and clears `isDirty`, so it destroys whatever the user has
-staged. Route it through `SettingsModel.discardingEdits` — a
-profile delete excepted, below — which runs it immediately when
+staged. Route it through `SettingsModel.discardingEdits`, which
+runs it immediately when
 nothing is staged and otherwise parks it behind the one
 dashboard-wide dialog. Supply the *specific* consequence as the
 message ("Loading a profile replaces the edits you haven't

@@ -57,7 +57,7 @@ extension ProfilesSection {
             // Same `reload()` tail as the healthy-row Delete, so
             // the same confirm (#515, #1619).
             Button {
-                model.confirmingProfileDelete(name, broken: true) {
+                model.confirmingProfileDelete(name) {
                     let neighbour = neighbourBrokenAfter(name)
                     model.deleteProfile(named: name)
                     returningRow = neighbour
