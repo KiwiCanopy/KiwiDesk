@@ -177,7 +177,7 @@ struct ProfilesSection: View {
             renameButton(summary.name)
             if summary.name == model.activeProfile {
                 BadgeChip(
-                    label: L("profiles.badge.active", "active")
+                    label: L("profiles.badge.loaded", "loaded")
                 )
             }
             if summary.isDefault {

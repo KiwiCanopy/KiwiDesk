@@ -191,6 +191,7 @@ enum SettingsDiffRowSource {
                 new: model.config
             )
         }
+        rows += model.reachDiffRows()
         if diff.luaChanged {
             rows.append(
                 SettingsDiffRow.note(

@@ -3,25 +3,16 @@ import SwiftUI
 
 /// Profile row action controls (Load, Delete, Make Default, #515, #789, #816).
 extension ProfilesSection {
-    // Load and Delete confirm discard when edits are pending (#515).
+    // Load and Delete confirm discard when edits are pending (#515);
+    // Load is the header's own (#1393).
     func loadButton(
         _ summary: ProfileSummary
     ) -> some View {
-        Button(L("profiles.load", "Load")) {
-            model.discardingEdits(
-                message: L(
-                    "discard.load_profile.message",
-                    "Loading a profile replaces the edits "
-                        + "you haven't saved."
-                ),
-                confirmLabel: L(
-                    "discard.load_profile.confirm",
-                    "Discard & load"
-                )
-            ) { model.loadProfile(named: summary.name) }
-        }
-        .settingsActionButton()
-        .controlSize(.large)
+        ProfileLoadButton(
+            model: model,
+            name: summary.name,
+            controlSize: .large
+        )
         // Focus return target on dismissal (#816).
         .focused($returningRow, equals: summary.name)
         .help(

@@ -59,6 +59,10 @@ extension SettingsModel {
         )
         adoptRekeyedBindings()
         refreshBindingReadings()
+        // A profile loaded under a CLEAN live page (a Desktop
+        // binding, `load_profile`) takes the page with it (#1393);
+        // a dirty draft keeps its page and its Save refuses.
+        if pageMoved, !isDirty { reload() }
     }
 
     /// Re-reads what each draft binding loads (#1609). Owed by

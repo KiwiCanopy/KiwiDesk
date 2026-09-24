@@ -7,9 +7,8 @@ import SwiftUI
 struct AppRuleFloatRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
-    /// The override base's float rules while a stored profile is
-    /// edited (#109); nil during live editing.
-    let overrideFloatBase: [String]?
+    /// Whether the section draws the "Applies to" column (#1393).
+    let showsReach: Bool
     /// Whether the scope menu offers title matching, resolved ONCE
     /// by the section: the predicate has one home, and so must its
     /// input (`AppRuleTitleOfferWiringTests`).
@@ -18,7 +17,7 @@ struct AppRuleFloatRow: View {
     /// so the row survives having no stored rule while it composes
     /// its first pattern (#1022).
     @Binding var composingTitles: String?
-    let onDelete: () -> Void
+    let onDelete: (RuleRemoval) -> Void
     /// Target for restoring keyboard focus after deletion (#816).
     @FocusState.Binding var returningRow: String?
     @Environment(\.settingsWidth) private var width
@@ -31,12 +30,21 @@ struct AppRuleFloatRow: View {
             ) {
                 AppRuleIdentity(app: app)
                 floatMenu
-                    .opacity(inherited ? 0.55 : 1)
                     // The row's focus destination (#816).
                     .focused($returningRow, equals: app)
+                if showsReach, let reading {
+                    RuleReachControl(
+                        model: model,
+                        family: .float,
+                        app: app,
+                        reading: reading,
+                        value: floatLabel
+                    )
+                }
                 Spacer(minLength: SettingsMetrics.appRuleColumnSpacing)
                 AppRuleDeleteButton(
                     help: removeHelp,
+                    sharedFrom: sharedFrom,
                     onDelete: onDelete
                 )
                 .disabled(scope == .never && !editingTitles)
@@ -49,7 +57,6 @@ struct AppRuleFloatRow: View {
                     editingTitles: titlesEditing
                 )
                 .padding(.leading, editorInset)
-                .opacity(inherited ? 0.55 : 1)
             }
         }
     }
@@ -66,8 +73,8 @@ struct AppRuleFloatRow: View {
 
     /// Two scopes and no "tiles" value: a row in this list floats,
     /// and the way to stop floating an app is the trash. The dash
-    /// is the override tombstone — a profile that drops a float
-    /// rule its base makes.
+    /// is a row whose last rule has just gone, for the frame the
+    /// list still draws it.
     private var floatMenu: some View {
         Menu {
             Button(allLabel) { setAll() }
@@ -110,7 +117,7 @@ struct AppRuleFloatRow: View {
     }
 
     /// The SPOKEN value. A dash reads as nothing aloud, so only
-    /// the tombstone differs from the drawn cell.
+    /// the empty row differs from the drawn cell.
     var floatFacetLabel: String {
         scope == .never && !editingTitles
             ? L("app_rules.float.none", "Does not float")
@@ -121,20 +128,20 @@ struct AppRuleFloatRow: View {
         FloatFacet.current(model.config.floatRules, app: app)
     }
 
-    /// In sync with the base, which the 0.55 dim says.
-    private var inherited: Bool {
-        guard let base = overrideFloatBase else { return false }
-        return Set(FloatFacet.rules(base, app: app))
-            == Set(FloatFacet.rules(model.config.floatRules, app: app))
+    private var reading: RuleReachReading? {
+        model.floatReach(app, describe: SettingsModel.floatWords)
+    }
+
+    /// The edited profile, where the trash must ask: another
+    /// profile uses this rule too.
+    private var sharedFrom: String? {
+        guard showsReach, let reading, reading.users.count > 1
+        else { return nil }
+        return reading.editing
     }
 
     private var removeHelp: String {
-        overrideFloatBase == nil
-            ? L("app_rules.float.remove.help", "Stop floating this app")
-            : L(
-                "app_rules.float.remove_override.help",
-                "Stop floating this app in this profile"
-            )
+        L("app_rules.float.remove.help", "Stop floating this app")
     }
 
     var titlesEditing: Binding<Bool> {

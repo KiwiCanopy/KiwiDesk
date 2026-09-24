@@ -16,12 +16,21 @@ extension KiwiCore {
     /// whose monitors aren't attached never gets them injected
     /// (its Canvas is read-only in that case, so `spacePins` is
     /// empty here anyway).
+    ///
+    /// `writingRules: false` leaves the app and float rule
+    /// overrides as stored, for a caller whose `saveRuleReach`
+    /// writes them — one encoder per field (#1393).
     public func overwriteProfile(
         named name: String,
-        with config: GuiConfig
+        with config: GuiConfig,
+        writingRules: Bool
     ) throws {
         var existing = try profiles.read(name: name)
+        let stored = (existing.appRules, existing.floatRules)
         applyProfileEdits(from: config, onto: &existing)
+        if !writingRules {
+            (existing.appRules, existing.floatRules) = stored
+        }
         try profiles.write(existing)
         refreshConfigIssues()
     }

@@ -12,13 +12,12 @@ import Testing
 struct AppRulesGateTests {
     private func gates(
         spaces: [String] = ["1"],
-        floatRules: [String] = [],
-        base: [String]? = nil
+        floatRules: [String] = []
     ) -> AppRulesGates {
         var config = GuiConfig()
         config.spaces = spaces.map { SpaceID($0) }
         config.floatRules = floatRules
-        return AppRulesGates(config: config, baseFloatRules: base)
+        return AppRulesGates(config: config)
     }
 
     // MARK: - The census and the resolver agree
@@ -62,19 +61,14 @@ struct AppRulesGateTests {
         #expect(gates().hasSpaces)
     }
 
-    /// The draft's patterns and the override base's both count,
-    /// and a bare float rule is not a pattern.
-    @Test("a title pattern on either side retires the offer gate")
+    /// The draft's patterns count, and a bare float rule is not a
+    /// pattern.
+    @Test("a title pattern retires the offer gate")
     func titlePatterns() {
         #expect(!gates(floatRules: ["com.apple.mail"]).titlePatternsExist)
         #expect(
             gates(floatRules: ["com.apple.mail:Drafts"])
                 .titlePatternsExist
-        )
-        #expect(
-            gates(base: ["com.apple.mail:Drafts"])
-                .titlePatternsExist,
-            "a pattern the base carries is one the reader sees"
         )
         #expect(
             gates().inertReason(for: .appRules(.floatRulesPattern))

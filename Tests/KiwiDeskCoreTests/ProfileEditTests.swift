@@ -54,7 +54,11 @@ struct ProfileEditTests {
         var cfg = try core.loadGuiConfig(editing: "stored")
         cfg.settings.gapsGlobal = .uniform(42)
         cfg.spaceModes[SpaceID(1)] = .grid
-        try core.overwriteProfile(named: "stored", with: cfg)
+        try core.overwriteProfile(
+            named: "stored",
+            with: cfg,
+            writingRules: true
+        )
 
         // Live state and current-profile tracking are untouched.
         #expect(core.profiles.currentName == "active")
@@ -73,7 +77,7 @@ struct ProfileEditTests {
 
         var cfg = try core.loadGuiConfig(editing: "p")
         cfg.mainSpaces = [SpaceID(2)]
-        try core.overwriteProfile(named: "p", with: cfg)
+        try core.overwriteProfile(named: "p", with: cfg, writingRules: true)
 
         let read = try core.profiles.read(name: "p")
         #expect(read.mainSpaces == [SpaceID(2)])
@@ -94,7 +98,11 @@ struct ProfileEditTests {
 
         var cfg = try core.loadGuiConfig(editing: "multi")
         cfg.spacePins[SpaceID(1)] = "A:100x100"
-        try core.overwriteProfile(named: "multi", with: cfg)
+        try core.overwriteProfile(
+            named: "multi",
+            with: cfg,
+            writingRules: true
+        )
 
         let read = try core.profiles.read(name: "multi")
         #expect(read.monitorSets.count == 2)
@@ -113,7 +121,11 @@ struct ProfileEditTests {
 
         var cfg = try core.loadGuiConfig(editing: "single")
         cfg.settings.gapsGlobal = .uniform(9)
-        try core.overwriteProfile(named: "single", with: cfg)
+        try core.overwriteProfile(
+            named: "single",
+            with: cfg,
+            writingRules: true
+        )
 
         let read = try core.profiles.read(name: "single")
         // The connected monitors were not grafted on.
@@ -161,7 +173,11 @@ struct ProfileEditTests {
         // "active" is current; live gap is 30.
         var cfg = try core.loadGuiConfig(editing: "stored")
         cfg.settings.gapsGlobal = .uniform(77)
-        try core.overwriteProfile(named: "stored", with: cfg)
+        try core.overwriteProfile(
+            named: "stored",
+            with: cfg,
+            writingRules: true
+        )
 
         // "stored" is not on screen — no live reapply.
         core.reapplyIfInEffect("stored")
@@ -190,7 +206,11 @@ struct ProfileEditTests {
 
         var cfg = try core.loadGuiConfig(editing: "small")
         cfg.settings.gapsGlobal = .uniform(5)
-        try core.overwriteProfile(named: "small", with: cfg)
+        try core.overwriteProfile(
+            named: "small",
+            with: cfg,
+            writingRules: true
+        )
 
         let after = try core.profiles.read(name: "small")
         #expect(after.spaceModes[SpaceID(9)] == nil)
@@ -211,7 +231,11 @@ struct ProfileEditTests {
         #expect(cfg.spacePins.isEmpty)
         // Even a stray pin is dropped: {A} untouched, no {B} set.
         cfg.spacePins[SpaceID(1)] = "B:100x100"
-        try core.overwriteProfile(named: "deskA", with: cfg)
+        try core.overwriteProfile(
+            named: "deskA",
+            with: cfg,
+            writingRules: true
+        )
 
         let after = try core.profiles.read(name: "deskA")
         #expect(after.monitorSets.count == 1)
@@ -231,7 +255,7 @@ struct ProfileEditTests {
 
         var cfg = try core.loadGuiConfig(editing: "cur")
         cfg.settings.gapsGlobal = .uniform(50)
-        try core.overwriteProfile(named: "cur", with: cfg)
+        try core.overwriteProfile(named: "cur", with: cfg, writingRules: true)
         // The JSON changed but live state is still the old gap.
         #expect(core.tiler.settings.gapsGlobal == .uniform(30))
 

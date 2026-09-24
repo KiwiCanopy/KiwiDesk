@@ -32,8 +32,24 @@ extension SettingsModel {
     /// Overwrites stored profile with staged configuration (#18).
     func saveEditedProfile() {
         guard let name = editingProfile else { return }
+        // The rule half first: a failed write keeps the draft
+        // whole rather than committing the tiling alone.
+        let rules = saveRuleReach()
+        guard rules != .failed else {
+            // A write that failed after others landed: re-read, so
+            // the draft's diff shows only what did not land.
+            ruleReachStored = core.ruleReachSnapshot()
+            recomputeDirty()
+            return
+        }
         do {
-            try core.overwriteProfile(named: name, with: config)
+            // With a checklist the rule families are the table's,
+            // already written above — one encoder per field.
+            try core.overwriteProfile(
+                named: name,
+                with: config,
+                writingRules: ruleReachStored == nil
+            )
         } catch {
             profileWarning = L(
                 "profiles.save_failed",
@@ -41,6 +57,9 @@ extension SettingsModel {
                 "\(error)"
             )
             core.onLog("profile edit save failed: \(error)")
+            // A rule half that landed is the draft's clean state;
+            // one that wrote nothing stays unsaved with the rest.
+            if rules == .landed { adoptRuleHalf() }
             return
         }
         persistBindingsIfEdited()
@@ -105,24 +124,5 @@ extension SettingsModel {
             base: base,
             edited: config.layers
         ) != nil
-    }
-
-    /// Indicates whether edited profile app rules diverge from base (#109).
-    var editedProfileOverridesAppRules: Bool {
-        guard let appBase = profileEditingBaseAppRules,
-            let floatBase = profileEditingBaseFloatRules
-        else {
-            return false
-        }
-        return
-            AppRuleOverride.diff(
-                base: appBase,
-                edited: config.appRules
-            ) != nil
-            || RuleListOverride.diff(
-                base: floatBase,
-                edited: config.floatRules,
-                normalizing: FloatRules.normalizedRule
-            ) != nil
     }
 }

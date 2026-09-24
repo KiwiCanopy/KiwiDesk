@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 
 /// Why the live target reports unsaved state that no draft leaf
 /// carries (#1197). ONE verdict, read by the header's status
@@ -44,5 +45,45 @@ extension SettingsModel {
             return .screensUnsaved(profile: name)
         }
         return .noMatch
+    }
+
+    /// Whether the live page no longer names the loaded profile —
+    /// one was loaded under it, or over a page drawn with none.
+    var pageMoved: Bool {
+        target == .live && ruleReachStored != nil
+            && reachPage != core.profiles.currentName
+    }
+
+    /// Why a dirty live draft cannot be saved as it stands: its
+    /// page is not the loaded profile's any more.
+    var pageMovedReason: String? {
+        guard pageMoved, isDirty else { return nil }
+        guard let current = core.profiles.currentName else {
+            // The loaded profile went away under the page.
+            return L(
+                "profiles.page_gone",
+                "%1$@ is no longer loaded. %2$@, then make your edits "
+                    + "again.",
+                reachPage ?? "",
+                L("footer.revert", "Revert")
+            )
+        }
+        guard let page = reachPage else {
+            return L(
+                "profiles.page_moved.unnamed",
+                "%1$@ was loaded while you were editing. %2$@, then "
+                    + "make your edits again.",
+                current,
+                L("footer.revert", "Revert")
+            )
+        }
+        return L(
+            "profiles.page_moved",
+            "%1$@ was loaded while you were editing %2$@. %3$@, "
+                + "then make your edits again.",
+            current,
+            page,
+            L("footer.revert", "Revert")
+        )
     }
 }

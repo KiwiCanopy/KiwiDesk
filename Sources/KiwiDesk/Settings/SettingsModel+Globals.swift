@@ -40,6 +40,10 @@ extension SettingsModel {
         // caller remembering to check (§5 — refine the one
         // `isGuiManaged` predicate, never mirror it).
         guard core.isGuiManaged else { return }
+        if let moved = pageMovedReason {
+            profileWarning = moved
+            return
+        }
         // The spaces freshness net runs here too — but only when
         // live is trustworthy: on an AX-off cold boot it would
         // append StateCoordinator's boot default and the saved
@@ -54,6 +58,7 @@ extension SettingsModel {
             )
             seedSpaces = config.spaces
         }
+        if saveRuleReach() == .failed { dropRuleHalf() }
         do {
             if core.lua == nil {
                 // Cold paused boot: core.start() never ran, so a
@@ -62,9 +67,9 @@ extension SettingsModel {
                 // retile while the dashboard says "paused". Write
                 // the store directly; start() picks the file up
                 // when permission arrives.
-                try core.guiConfigStore.save(config)
+                try core.guiConfigStore.save(sidecarConfig)
             } else {
-                try core.saveGuiConfig(config)
+                try core.saveGuiConfig(sidecarConfig)
             }
         } catch {
             profileWarning = L(
@@ -75,6 +80,9 @@ extension SettingsModel {
             core.onLog("globals save failed: \(error)")
             return
         }
+        // The checklist's writes landed; its baseline moves too.
+        ruleReachStored = core.ruleReachSnapshot()
+        reachEdits = RuleReachEdits()
         adoptGlobalsBaseline()
     }
 

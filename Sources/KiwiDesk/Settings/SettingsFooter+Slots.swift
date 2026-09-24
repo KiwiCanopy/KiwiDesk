@@ -8,6 +8,9 @@ extension SettingsFooter {
         if model.editingLua {
             EmptyView()
         } else if model.editingStoredProfile {
+            // A copy takes this profile's draft; a checklist change
+            // reaches OTHER profiles, which a copy cannot carry
+            // (#1393), so it waits for a Save.
             Button(saveCopyAsLabel) {
                 namingProfileCopy = true
             }
@@ -15,6 +18,8 @@ extension SettingsFooter {
             .foregroundStyle(
                 SettingsTheme.savePillInk.opacity(0.8)
             )
+            .disabled(copyBlockedReason != nil)
+            .help(copyBlockedReason ?? "")
         } else if model.activeProfile != nil {
             // Blocked while permission is paused (#335).
             Button(saveCopyAsLabel) {
@@ -34,6 +39,18 @@ extension SettingsFooter {
             "footer.save.globals_only",
             "Layout and screens stay paused; %1$@ covers "
                 + "everything else.",
+            L("footer.save", "Save")
+        )
+    }
+
+    /// Why a copy waits: a checklist choice reaches other
+    /// profiles. A plain value edit is the copy's own.
+    var copyBlockedReason: String? {
+        guard model.copyWaitsOnReach else { return nil }
+        return L(
+            "footer.save_copy.reach_blocked",
+            "This draft changes other profiles too. %1$@ first, "
+                + "then save a copy.",
             L("footer.save", "Save")
         )
     }

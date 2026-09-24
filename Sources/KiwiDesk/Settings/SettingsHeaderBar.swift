@@ -34,6 +34,9 @@ struct SettingsHeaderBar: View {
         VStack(alignment: .leading, spacing: 6) {
             titleRow
             if showsProfileContext {
+                if let name = model.editingProfile {
+                    notLoadedRow(name)
+                }
                 if let status = statusText {
                     statusRow(status)
                 }
@@ -115,15 +118,31 @@ struct SettingsHeaderBar: View {
         .accessibilityLabel(L("home.back", "Home"))
     }
 
-    /// Profile edit target dropdown chip (#18, #209).
+    /// Profile edit target dropdown chip (#18, #1393). The dot is
+    /// green while the target is what is on screen and a hollow
+    /// ring on a stored profile — a shape as well as a hue; the
+    /// menu's value speaks it.
     private var profileChip: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(SettingsTheme.accent)
+            targetDot(stored: model.editingStoredProfile)
                 .frame(width: 8, height: 8)
+                .accessibilityHidden(true)
             ProfileEditTargetMenu(model: model)
         }
         .chipSurface()
+    }
+
+    /// One circle either way — filled, or a ring — so the dot
+    /// changes shape rather than appearing and leaving.
+    private func targetDot(stored: Bool) -> some View {
+        Circle()
+            .fill(stored ? Color.clear : SettingsTheme.accent)
+            .overlay(
+                Circle().strokeBorder(
+                    stored ? SettingsTheme.ink3 : Color.clear,
+                    lineWidth: 1.5
+                )
+            )
     }
 
     /// Mode segment picker triggering mode reveal wash (#760, #823).

@@ -252,8 +252,7 @@ struct KeyboardActionParityTests {
             ),
             Wiring(
                 "AppRulesSection+Lists.swift",
-                "returningSpaceRow = spaceRowHoldsFocus(app) "
-                    + "? app : neighbour",
+                "returningSpaceRow = neighbour",
                 "each list names its own neighbour (#1608)"
             ),
             Wiring(

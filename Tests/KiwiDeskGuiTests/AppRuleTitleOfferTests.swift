@@ -44,17 +44,13 @@ struct AppRuleTitleOfferTests {
     /// override base's.
     private func offered(
         _ mode: SettingsMode,
-        _ rules: [String],
-        base: [String]? = nil
+        _ rules: [String]
     ) -> Bool {
         var config = GuiConfig()
         config.floatRules = rules
         return AppRuleTitleOffer.isOffered(
             mode: mode,
-            gates: AppRulesGates(
-                config: config,
-                baseFloatRules: base
-            )
+            gates: AppRulesGates(config: config)
         )
     }
 
@@ -133,18 +129,6 @@ struct AppRuleTitleOfferTests {
         #expect(
             offered(.simple, ["com.apple.finder:Get Info"]),
             "a Simple user with patterns must still reach them"
-        )
-    }
-
-    /// And a pattern the OVERRIDE BASE carries counts, because
-    /// that is a pattern the reader can see on the card while
-    /// editing a stored profile. The resolver unions the two
-    /// lists for exactly this; a base-only pattern with an empty
-    /// draft is how that union is asserted to matter.
-    @Test("a base profile's pattern unlocks the offer too")
-    func overrideBasePatternUnlocks() {
-        #expect(
-            offered(.simple, [], base: ["com.apple.mail:Drafts"])
         )
     }
 

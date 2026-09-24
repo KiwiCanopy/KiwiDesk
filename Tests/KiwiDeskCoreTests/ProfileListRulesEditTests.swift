@@ -78,7 +78,11 @@ struct ProfileListRulesEditTests {
         var config = try core.loadGuiConfig(editing: "Work")
         config.floatRules = ["shared.float", "other.float"]
 
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         #expect(
@@ -96,7 +100,11 @@ struct ProfileListRulesEditTests {
         try saveWork(core)
         let config = try core.loadGuiConfig(editing: "Work")
 
-        try core.overwriteProfile(named: "Work", with: config)
+        try core.overwriteProfile(
+            named: "Work",
+            with: config,
+            writingRules: true
+        )
 
         let saved = try core.profiles.read(name: "Work")
         #expect(saved.ignoreRules == ignoreOverride)

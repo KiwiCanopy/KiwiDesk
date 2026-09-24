@@ -6,9 +6,13 @@ extension SettingsModel {
     /// Recomputes dirty status and draft modification count
     /// (`SettingsDraftDiff`).
     func recomputeDirty() {
+        // A checklist change may reach only OTHER profiles, which
+        // the config comparison cannot see (#1393).
+        let reachRows = reachDiffRows().count
         isDirty =
             config != cleanConfig
             || luaSource != cleanLuaSource
+            || reachRows > 0
         draftChangeCount =
             isDirty
             ? SettingsDraftDiff.between(
@@ -16,7 +20,7 @@ extension SettingsModel {
                 cleanConfig: cleanConfig,
                 luaSource: luaSource,
                 cleanLuaSource: cleanLuaSource
-            ).total
+            ).total + reachRows
             : 0
     }
 

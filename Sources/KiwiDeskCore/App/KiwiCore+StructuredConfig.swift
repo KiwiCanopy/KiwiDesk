@@ -144,6 +144,22 @@ extension KiwiCore {
         globalIgnoreRuleBase = IgnoreRules(ignoreRules).rawRules
     }
 
+    /// Re-resolves the window rules from the stored base and the
+    /// active profile's file, touching nothing else — the tail of
+    /// a rule write that changed no other setting (#1393).
+    func refreshWindowRules() {
+        guard isGuiManaged, let config = loadStructuredConfig() else {
+            return
+        }
+        let profile = activeProfileOverrides()
+        captureGlobalWindowRuleBase(from: config)
+        setResolvedWindowRules(
+            appRules: profile?.appRules,
+            floatRules: profile?.floatRules,
+            ignoreRules: profile?.ignoreRules
+        )
+    }
+
     private func setResolvedWindowRules(
         appRules: AppRuleOverride?,
         floatRules: RuleListOverride?,

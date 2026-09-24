@@ -57,9 +57,11 @@ struct MonitorSetClaimSeamTests {
     /// the defect this suite exists for, not an entry.
     private let doorCallers: [String: [String: Int]] = [
         "loadProfile(named:": [
-            // The `load_profile` arm, and the Profiles row's Load.
+            // The `load_profile` arm, and the one Settings Load
+            // the Profiles row and the header's not-loaded line
+            // share (#1393).
             "KiwiCore+Profiles.swift": 1,
-            "ProfilesSection+RowActions.swift": 1,
+            "ProfileLoadButton.swift": 1,
         ],
         "claimMonitorSet(": [
             "KiwiCore+MonitorSetClaim.swift": 1,

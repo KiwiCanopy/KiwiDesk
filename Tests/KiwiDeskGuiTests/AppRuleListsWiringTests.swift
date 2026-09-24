@@ -142,20 +142,18 @@ struct AppRuleListsWiringTests {
             "the focus no longer follows the Space menu's grey"
         )
         // Contiguous with each control's own chain, so a binding
-        // moved onto another control reds; the `.opacity` and
-        // `.disabled` arguments are glue holding the needle there.
+        // moved onto another control reds.
         let row = try body(of: "var body: some View", in: file)
         #expect(
             row.contains(
                 Self.squashed(
-                    "spaceMenu .opacity(inherited ? 0.55 : 1) "
-                        + ".focused($returningRow, "
+                    "spaceMenu .focused($returningRow, "
                         + "equals: focusValue(menu: true))"
                 )
             )
                 && row.contains(
                     Self.squashed(
-                        "onDelete: onDelete) .disabled(tombstoned) "
+                        "onDelete: onDelete) "
                             + ".focused($returningRow, "
                             + "equals: focusValue(menu: false))"
                     )
@@ -224,19 +222,17 @@ struct AppRuleListsWiringTests {
         )
     }
 
-    /// A tombstone's cell is a dash, which VoiceOver reads as
-    /// nothing, so each menu SPEAKS a word for it (gui.md).
-    @Test("a tombstone speaks a word, not the dash")
+    /// An emptied Float row's cell is a dash, which VoiceOver
+    /// reads as nothing, so the menu SPEAKS a word for it (gui.md).
+    /// The Space list has no such row since #1393 retired the
+    /// override tombstone.
+    @Test("an emptied Float row speaks a word, not the dash")
     func tombstonesSpeak() throws {
         for (signature, file, key) in [
             (
-                "var spaceFacetLabel: String",
-                "AppRuleSpaceRow.swift", "app_rules.space.none"
-            ),
-            (
                 "var floatFacetLabel: String",
                 "AppRuleFloatRow.swift", "app_rules.float.none"
-            ),
+            )
         ] {
             #expect(
                 try body(of: signature, in: file)
