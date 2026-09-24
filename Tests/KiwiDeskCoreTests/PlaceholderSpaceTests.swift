@@ -87,14 +87,21 @@ struct PlaceholderSpaceTests {
         #expect(liveSpaces(core) == ["1", "Work"])
     }
 
-    @Test("known displays do not make the placeholder declared")
+    @Test("a display resolve inside the script declares nothing")
     func knownDisplaysStillRetire() throws {
-        let dir = directory()
-        try namedSetup(in: dir)
-        let core = makeTestCore(configDirectory: dir)
+        let core = makeTestCore(configDirectory: directory())
         core.state.workspaces.upsertDisplay(Self.display)
+        // `create_space` resolves every live Space onto a display
+        // while the script's ledger is open.
+        try writeLua(
+            """
+            KiwiDesk.set_gap_global(4)
+            KiwiDesk.create_space("Work")
+            """,
+            core
+        )
         core.loadConfig()
-        #expect(!liveSpaces(core).contains("1"))
+        #expect(liveSpaces(core) == ["Work"])
         #expect(
             !core.state.workspaces.spaces(on: Self.display.id).isEmpty
         )
