@@ -156,12 +156,12 @@ extension SettingsModel {
         switch reach(family, app, row: row) {
         case .shared(let joining):
             // A tick under All profiles is a join the Save has not made
-            // yet, so it can be taken back — and taking the last one
-            // back on a row stored shared leaves no pick at all.
+            // yet, so it can be taken back — and a pick equal to the
+            // row's own default is no pick at all.
             let now =
                 on
                 ? joining.union([profile]) : joining.subtracting([profile])
-            if now.isEmpty, storedIsShared(family, app) {
+            if storedDefault(family, app) == .shared(joining: now) {
                 reachEdits.reach[family]?[family.key(app)] = nil
             } else {
                 setReach(family, app, .shared(joining: now))
@@ -257,16 +257,37 @@ extension SettingsModel {
         return row.shared ? .shared(joining: []) : .listed(row.users)
     }
 
-    /// Whether the row reads shared in the STORED files, before any
-    /// pick of the draft.
-    private func storedIsShared(_ family: RuleFamily, _ app: String) -> Bool {
+    /// The reach the draft encodes a row at when nothing is picked —
+    /// the encoder's own `RuleReachDraft.defaultReach`, one copy.
+    private func storedDefault(
+        _ family: RuleFamily,
+        _ app: String
+    ) -> RuleReach? {
         guard let stored = ruleReachStored, let editing = reachProfile
-        else { return false }
+        else { return nil }
         let key = family.key(app)
         switch family {
-        case .space: return stored.appRules.follows(key, editing)
-        case .float: return stored.floatRules.follows(key, editing)
-        case .key: return stored.keyLayers.follows(key, editing)
+        case .space:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.appRules,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .float:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.floatRules,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .key:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.keyLayers,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
         }
     }
 

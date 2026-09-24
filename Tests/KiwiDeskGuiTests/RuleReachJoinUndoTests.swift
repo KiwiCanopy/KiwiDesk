@@ -11,7 +11,7 @@ import Testing
 @MainActor
 struct RuleReachJoinUndoTests {
     /// gui.json opens Mail in Space 1; Work (loaded) follows it,
-    /// Home keeps its own Space 2.
+    /// Home and Travel keep their own Space 2.
     private func makeModel() throws -> SettingsModel {
         let core = makeTestCore()
         var config = GuiConfig()
@@ -22,6 +22,9 @@ struct RuleReachJoinUndoTests {
         var home = profile("Home")
         home.appRules = AppRuleOverride(rules: ["mail": SpaceID("2")])
         try core.profiles.write(home)
+        var travel = profile("Travel")
+        travel.appRules = AppRuleOverride(rules: ["mail": SpaceID("2")])
+        try core.profiles.write(travel)
         let model = makeTestModel(core: core)
         model.reload()
         return model
@@ -91,7 +94,12 @@ struct RuleReachJoinUndoTests {
         let before = try #require(model.spaceReach("mail"))
         #expect(RuleReachWords.notes(before).filter { $0 == note }.count == 1)
 
+        // Still one note while Travel keeps its own; none once both
+        // have joined.
         model.setProfile(.space, "mail", "Home", true)
+        let one = try #require(model.spaceReach("mail"))
+        #expect(RuleReachWords.notes(one).filter { $0 == note }.count == 1)
+        model.setProfile(.space, "mail", "Travel", true)
         let joined = try #require(model.spaceReach("mail"))
         #expect(!RuleReachWords.notes(joined).contains(note))
     }
