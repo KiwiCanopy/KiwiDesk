@@ -25,6 +25,12 @@ extension ConfigMigration {
         "font_size",
     ]
     static let shelfDroppedKeys = ["item_size"]
+    static let shelfEdgeKey = "edge"
+    /// The App Bar's edge default before #1517, which the shelf's
+    /// own (top) replaced: an App Bar source that never stored
+    /// its edge sat there, so the shelf writes it rather than
+    /// letting absence mean the new default.
+    static let shelfAppBarOldEdge = "bottom"
     static let shelfRetiredTitleKey = "title_cap"
     static let shelfFrontTitleKey = "front_app_title_cap"
 
@@ -92,14 +98,17 @@ extension ConfigMigration {
         var out = settings
         var changed = false
         let spaceBar = settings[shelfSpaceBarKey] as? [String: Any]
-        let source =
-            settings[shelfSourceKey(spaceBar: spaceBar)]
-            as? [String: Any] ?? [:]
+        let sourceKey = shelfSourceKey(spaceBar: spaceBar)
+        let source = settings[sourceKey] as? [String: Any] ?? [:]
         var shelf = settings[shelfKey] as? [String: Any] ?? [:]
         for key in shelfMovedKeys {
             guard let value = source[key], shelf[key] == nil
             else { continue }
             shelf[key] = value
+            changed = true
+        }
+        if sourceKey == shelfAppBarKey, shelf[shelfEdgeKey] == nil {
+            shelf[shelfEdgeKey] = shelfAppBarOldEdge
             changed = true
         }
         if !shelf.isEmpty { out[shelfKey] = shelf }

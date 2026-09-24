@@ -40,8 +40,11 @@ extension ConfigMigration {
                 appBars.append(pairs)
             }
         }
-        let enabled = spaceBar?.first { $0.key == "enabled" }?.value
-        let sourceIsSpaceBar = enabled != "false"
+        // The walk's own choice, handed what the text says.
+        let enabled = spaceBar?.first { $0.key == "enabled" }
+            .map { ["enabled": $0.value != "false"] }
+        let sourceIsSpaceBar =
+            shelfSourceKey(spaceBar: enabled) == shelfSpaceBarKey
         // The global App Bar cannot be told from a layout's by
         // text alone once there are two.
         if !sourceIsSpaceBar && appBars.count > 1 { return nil }
@@ -61,10 +64,18 @@ extension ConfigMigration {
                 with: shelvedBody(parsed, isSpaceBar: isSpaceBar)
             )
         }
-        let entries = shelfMovedKeys.compactMap { key in
+        var entries = shelfMovedKeys.compactMap { key in
             source.first { $0.key == key }.map {
                 "\"\(key)\":\($0.value)"
             }
+        }
+        if !sourceIsSpaceBar,
+            !source.contains(where: { $0.key == shelfEdgeKey })
+        {
+            entries.insert(
+                "\"\(shelfEdgeKey)\":\"\(shelfAppBarOldEdge)\"",
+                at: 0
+            )
         }
         if !entries.isEmpty {
             let shelf =

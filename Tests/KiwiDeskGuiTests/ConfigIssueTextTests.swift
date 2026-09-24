@@ -64,6 +64,14 @@ struct ConfigIssueTextTests {
                 suggestion: "focus"
             ),
             .unknownCall(name: "KiwiDesk.nope", suggestion: nil),
+            .retiredCall(
+                name: "space_bar.set_edge",
+                replacement: "kiwishelf.set_edge"
+            ),
+            .retiredCall(
+                name: "space_bar.set_item_size",
+                replacement: nil
+            ),
         ]
     }
 
@@ -71,12 +79,13 @@ struct ConfigIssueTextTests {
     func everyKindRenders() {
         pinEnglish()
         defer { reset() }
-        // Five cases; the fixture count is three causes plus the
-        // five hand-listed entries (`unknownCall` twice). The
-        // cause half derives, so only the hand-listed half is
-        // pinned — bump the 5 deliberately when a `Kind` is
-        // added, which is the reminder the compiler cannot give.
-        #expect(kinds.count == ProfileBrokenCause.allCases.count + 5)
+        // Six cases; the fixture count is three causes plus the
+        // seven hand-listed entries (`unknownCall` and
+        // `retiredCall` twice each). The cause half derives, so
+        // only the hand-listed half is pinned — bump the 7
+        // deliberately when a `Kind` is added, which is the
+        // reminder the compiler cannot give.
+        #expect(kinds.count == ProfileBrokenCause.allCases.count + 7)
         var seen: Set<String> = []
         for kind in kinds {
             let text = ConfigIssueText.message(for: kind)

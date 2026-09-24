@@ -14,10 +14,19 @@ extension ConfigMigration {
     static let glassProfilesKey = "profiles"
     static let glassBarGroups = ["app_bar", "space_bar"]
     static let glassPanelGroup = "shortcut_panel"
+    /// The formats this step introduced — a profile's and a
+    /// bundle's — spelled as history. A file at or above them was
+    /// written after the default flip, where an absent leaf MEANS
+    /// the new default, so filling one would invert it; that
+    /// includes #1517's shape, whose bars hold no leaf at all and
+    /// whose shelf may be encoded empty.
+    static let glassFillProfileFormat = 4
+    static let glassFillBundleFormat = 6
 
     @Sendable
     static func migratingAbsentGlassLeaves(_ data: Data) -> Data? {
-        surgicallyApplying(
+        guard glassFillApplies(to: data) else { return nil }
+        return surgicallyApplying(
             data,
             gate: {
                 $0.range(of: Data("\"\(glassSettingsKey)\"".utf8))
@@ -26,6 +35,20 @@ extension ConfigMigration {
             rewriting: withGlassLeaves,
             editing: surgicallyFilledGlassLeaves
         )
+    }
+
+    /// Whether `data`'s stamp is below the format this step
+    /// introduced for its shape. An unreadable root stands down.
+    static func glassFillApplies(to data: Data) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        let floor =
+            root[SetupBundle.shapeMarker] != nil
+            ? glassFillBundleFormat : glassFillProfileFormat
+        return format < floor
     }
 
     /// The two paths: the root's own `settings`, and each inline
@@ -68,9 +91,9 @@ extension ConfigMigration {
     static func filledGlassLeaves(
         _ settings: [String: Any]
     ) -> ([String: Any], Bool) {
-        // A settings object carrying the shelf is #1517's shape,
-        // where the bars hold no glass leaf at all: nothing is
-        // absent, so nothing is filled.
+        // A settings object carrying the shelf was written after
+        // the flip whatever its stamp says; the format floor
+        // above is what covers one whose shelf encoded empty.
         if settings[shelfKey] != nil { return (settings, false) }
         var out = settings
         var changed = false

@@ -58,10 +58,7 @@ struct KiwiShelfRetiredVerbTests {
         )
         #expect(!space.isSuccess)
         #expect(space.error?.contains("follows its content") == true)
-        #expect(
-            APIReference.suggestion(for: "space_bar.set_item_size")
-                == nil
-        )
+        #expect(APIReference.retired["space_bar.set_item_size"] == .some(nil))
     }
 
     @Test("the front-app title length names its new verb")
@@ -86,19 +83,60 @@ struct KiwiShelfRetiredVerbTests {
         #expect(core.tiler.settings.spaceBarStyle.frontAppTitleCap == 20)
     }
 
-    /// The Lua channel: the typo guard's did-you-mean reads the
-    /// same table, so a retired name suggests its replacement
-    /// rather than whatever is spelled closest.
-    @Test("the did-you-mean names the replacement")
-    func suggestionNamesTheReplacement() {
+    /// The Lua channel: a retired call in init.lua is its own
+    /// issue naming the replacement — never a typo, whose
+    /// did-you-mean would point at whatever is spelled closest.
+    @Test("init.lua's retired call is an issue naming the replacement")
+    func retiredCallIsAnIssue() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwidesk-\(UUID())")
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        try "space_bar.set_edge(\"top\")\nspace_bar.set_item_size(9)"
+            .write(
+                to: dir.appendingPathComponent("init.lua"),
+                atomically: true,
+                encoding: .utf8
+            )
+        let core = makeTestCore(configDirectory: dir)
+        core.loadConfig()
+        let kinds = core.configIssues.map(\.kind)
         #expect(
-            APIReference.suggestion(for: "space_bar.set_edge")
-                == "kiwishelf.set_edge"
+            kinds.contains(
+                .retiredCall(
+                    name: "space_bar.set_edge",
+                    replacement: "kiwishelf.set_edge"
+                )
+            )
         )
         #expect(
-            APIReference.suggestion(for: "monocle.set_app_bar_font_size")
-                == "kiwishelf.set_font_size"
+            kinds.contains(
+                .retiredCall(
+                    name: "space_bar.set_item_size",
+                    replacement: nil
+                )
+            )
         )
+        #expect(
+            !kinds.contains {
+                if case .unknownCall = $0 { return true }
+                return false
+            }
+        )
+    }
+
+    /// A replacement that is not itself a live verb would send
+    /// the user from one refusal to another.
+    @Test("every replacement is a dispatchable verb")
+    func replacementsAreLive() {
+        for case (let verb, let replacement?) in APIReference.retired {
+            #expect(
+                APIReference.dispatchable.contains(replacement),
+                "\(verb) → \(replacement)"
+            )
+        }
     }
 
     /// A retired name is never still registered: the typo guard

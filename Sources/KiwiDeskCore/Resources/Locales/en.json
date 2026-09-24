@@ -244,6 +244,8 @@
   "config_issues.lua_vm_unavailable": "The Lua engine couldn't start, so none of your configuration was applied.",
   "config_issues.reload": "Reload config",
   "config_issues.reload.help": "Re-runs the config load; fixed files clear their issues.",
+  "config_issues.retired_call": "'%1$@' was retired in 2.0 and has no replacement.",
+  "config_issues.retired_call_replacement": "'%1$@' was retired in 2.0 — use '%2$@'.",
   "config_issues.reveal": "Reveal in Finder",
   "config_issues.title": "Config Issues",
   "config_issues.unknown_call": "Unknown call '%1$@'.",
