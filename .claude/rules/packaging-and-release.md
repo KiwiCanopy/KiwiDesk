@@ -196,6 +196,39 @@ the releases API and skips anything still a draft;
 published`, alongside the notes it shares a corpus with.
 `.claude/rules/site.md` owns the generated file itself.
 
+**A typed release's item carries its notes twice: as HTML and as
+data (#1542).** The `<description>` HTML stays, because every
+client before KiwiDesk's own update window renders only that;
+beside it, one `kiwidesk:notes` element holds the same
+`changelog.json` entry as versioned JSON (`NOTES_FORMAT`), which
+Sparkle hands the app through `SUAppcastItem.propertiesDictionary`
+under that qualified name. Both come from the one entry in one
+run, so they cannot describe different notes, and an entry whose
+sections are untyped (a release before 2.0.0, or a body
+`changelog-sync` could not parse) carries the HTML alone (the writer is held by
+`AppcastStructuredNotesTests`; Sparkle's keying and the window's
+reading are owed by the window's own end-to-end test against a
+local feed). That element's NAME is a permanent contract from the
+first build that reads it, like `SUFeedURL`: Sparkle keys it by
+the prefixed name as written, so a renamed prefix empties every
+shipped window. The window's copy of the name and of the formats
+it knows is held to `appcast-sync` by a parity test that runs the
+script, never by a hand-typed literal.
+
+The document must grow without breaking a shipped window. A new
+section type does NOT bump `NOTES_FORMAT`, so a window must show
+a type it does not know as a group under its `title` — the one
+thing `title` is for, since a known type is named by the window
+in the reader's language — and must ignore keys it does not
+know. `NOTES_FORMAT` bumps only when an existing field changes
+meaning or goes away. A window that cannot read one item's notes
+(an unknown format, malformed JSON) must drop that version alone
+from the merged view and point at its full release notes, falling
+back to the one-sentence notes link only when the NEWEST item
+cannot be read. The feed is that view's only source: a published
+release the three clauses below keep out of the feed is missing
+from it too, and the notes link is what covers it.
+
 **Three clauses decide whether a release enters the feed, and
 `scripts/appcast-sync` names the one that failed:** it is
 published; it carries exactly one distributable `.zip`, never a
