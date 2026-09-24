@@ -25,8 +25,9 @@ public struct KiwiShelf: Sendable, Equatable {
     public var order: Order = .spacesFirst
     /// The Space Bar's floor, in percent of the edge, once the
     /// shelf is full: it shrinks no further, and the App Bar
-    /// scrolls instead.
-    public var minimum: CGFloat = 40
+    /// scrolls instead. A floor on shrinking, never a length it is
+    /// padded up to — a Space Bar needing less keeps its need.
+    public var minimum: CGFloat = 30
     /// Depth of the strip (pt): 40 on every screen class (owner
     /// ruling 2026-09-13, #1359; `BarThicknessDefaultTests`).
     public var thickness: CGFloat = 40
