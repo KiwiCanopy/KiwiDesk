@@ -15,6 +15,8 @@ struct BarsGates {
         case spaceBarOff
         /// The active indicator is Gap — active items are hidden.
         case gapOnly
+        /// Only one bar shows, so there is no order or share.
+        case oneBarShown
     }
 
     /// Resolves container gate to an inert reason, or nil if active.
@@ -40,30 +42,25 @@ struct BarsGates {
 
     var anyBarShown: Bool { !shownBars.isEmpty }
 
+    /// True when the Space Bar and an App Bar both show, so the
+    /// shelf's order and share apply (#1517).
+    var bothBarsShow: Bool { settings.spaceBarSharesEdgeWithAppBar }
+
     /// True when NO shown bar draws a shared plate to size.
     var everyShownBarBoxed: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                $0.resolved(with: settings.appBarStyle)
-                    .backgroundStyle == .boxed
-            }
+        anyBarShown && settings.kiwishelf.backgroundStyle == .boxed
     }
 
     /// True when EVERY shown bar renders on a vertical edge.
     var everyShownBarVertical: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                !$0.resolved(with: settings.appBarStyle)
-                    .edge.isHorizontal
-            }
+        anyBarShown && !settings.kiwishelf.edge.isHorizontal
     }
 
     /// True when no shown bar renders an icon at all.
     var everyShownBarTitleOnly: Bool {
         anyBarShown
             && shownBars.allSatisfy {
-                let bar = $0.resolved(with: settings.appBarStyle)
-                return bar.renderedContent == .title
+                settings.appBarLook(for: $0).renderedContent == .title
             }
     }
 
@@ -86,16 +83,26 @@ enum BarsGateHelp {
         case .noBarShown:
             // Points to the block holding the switches (#705, #818).
             return L(
-                "app_bar.no_layout.help",
-                "No layout shows an App Bar — turn a layout's "
-                    + "App Bar on under “%1$@”.",
-                L("bars.show_in.title", "Show it in")
+                "app_bar.no_layout.shelf_help",
+                "No layout shows an App Bar — turn one on under "
+                    + "“%1$@” in %2$@.",
+                L("kiwishelf.show.label", "Show"),
+                L("bars.switch.kiwishelf", "KiwiShelf")
             )
         case .spaceBarOff:
             return L(
-                "space_bar.disabled.help",
-                "Turn on %1$@ to edit these settings.",
-                L("space_bar.enabled", "Show Space Bar")
+                "space_bar.disabled.shelf_help",
+                "Turn on the Space Bar under “%1$@” in %2$@ to edit "
+                    + "these settings.",
+                L("kiwishelf.show.label", "Show"),
+                L("bars.switch.kiwishelf", "KiwiShelf")
+            )
+        case .oneBarShown:
+            return L(
+                "kiwishelf.one_bar.help",
+                "Applies once both bars show — turn on the Space "
+                    + "Bar and an App Bar under “%1$@”.",
+                L("kiwishelf.show.label", "Show")
             )
         case .gapOnly:
             // Interpolated from picker entry (#818).

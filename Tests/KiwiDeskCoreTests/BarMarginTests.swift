@@ -219,13 +219,13 @@ struct BarMarginCommandTests {
         let core = makeCore()
         #expect(
             core.execute(
-                "app_bar.set_outer_margin",
+                "kiwishelf.set_outer_margin",
                 args: [.number(12)]
             ).isSuccess
         )
         #expect(
             core.execute(
-                "app_bar.set_inner_margin",
+                "kiwishelf.set_inner_margin",
                 args: [.number(4)]
             ).isSuccess
         )
@@ -233,13 +233,13 @@ struct BarMarginCommandTests {
         #expect(core.tiler.settings.kiwishelf.innerMargin == 4)
         #expect(
             core.execute(
-                "space_bar.set_outer_margin",
+                "kiwishelf.set_outer_margin",
                 args: [.number(6)]
             ).isSuccess
         )
         #expect(
             core.execute(
-                "space_bar.set_inner_margin",
+                "kiwishelf.set_inner_margin",
                 args: [.number(-2)]
             ).isSuccess
         )
@@ -247,7 +247,7 @@ struct BarMarginCommandTests {
         #expect(core.tiler.settings.kiwishelf.innerMargin == 0)
         #expect(
             !core.execute(
-                "app_bar.set_outer_margin",
+                "kiwishelf.set_outer_margin",
                 args: [.string("x")]
             ).isSuccess
         )

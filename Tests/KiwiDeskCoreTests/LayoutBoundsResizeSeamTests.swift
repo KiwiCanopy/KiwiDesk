@@ -34,9 +34,9 @@ struct LayoutBoundsResizeSeamTests {
         core.tiler.visibleBounds = { _ in bounds }
         core.execute("set_gap_global", args: [.number(0)])
         core.execute("space_bar.set_enabled", args: [.bool(true)])
-        core.execute("space_bar.set_edge", args: [.string(edge)])
+        core.execute("kiwishelf.set_edge", args: [.string(edge)])
         core.execute(
-            "space_bar.set_thickness",
+            "kiwishelf.set_thickness",
             args: [.number(400)]
         )
         // Pin every default these fixtures reason from (§5). The

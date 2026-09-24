@@ -12,40 +12,6 @@ extension SettingsValueReadout {
         let o = old.settings.appBarStyle
         let n = new.settings.appBarStyle
         switch key {
-        case .appBarEdge:
-            return appBarChoiceRow(
-                census,
-                o.edge,
-                n.edge,
-                AppBarOptions.edge
-            )
-        case .appBarAlignment:
-            return appBarChoiceRow(
-                census,
-                o.alignment,
-                n.alignment,
-                AppBarOptions.alignment
-            )
-        case .appBarBackground:
-            return appBarChoiceRow(
-                census,
-                o.backgroundStyle,
-                n.backgroundStyle,
-                AppBarOptions.backgroundStyle
-            )
-        case .appBarLiquidGlass:
-            return appBarOnOffRow(
-                census,
-                o.liquidGlass,
-                n.liquidGlass
-            )
-        case .appBarBackgroundFit:
-            return appBarChoiceRow(
-                census,
-                o.backgroundFit,
-                n.backgroundFit,
-                AppBarOptions.backgroundFit
-            )
         case .appBarActiveIndicator:
             return appBarChoiceRow(
                 census,
@@ -73,49 +39,11 @@ extension SettingsValueReadout {
                 o.groupAdjacentWindows,
                 n.groupAdjacentWindows
             )
-        case .appBarThickness:
-            return appBarPointsRow(census, o.thickness, n.thickness)
-        case .appBarItemSizeAuto:
-            return appBarOnOffRow(
-                census,
-                o.itemSize == 0,
-                n.itemSize == 0
-            )
-        case .appBarItemSize:
-            return appBarAutoPointsRow(
-                census,
-                o.itemSize,
-                n.itemSize
-            )
-        case .appBarItemGap:
-            return appBarPointsRow(census, o.itemGap, n.itemGap)
-        case .appBarOuterMargin:
-            return appBarPointsRow(census, o.outerMargin, n.outerMargin)
-        case .appBarInnerMargin:
-            return appBarPointsRow(census, o.innerMargin, n.innerMargin)
         case .appBarTitleCap:
             return appBarRow(
                 census,
                 trimmed(Double(o.titleCap)),
                 trimmed(Double(n.titleCap))
-            )
-        case .appBarFontSizeAuto:
-            return appBarOnOffRow(
-                census,
-                o.fontSize == 0,
-                n.fontSize == 0
-            )
-        case .appBarFontSize:
-            return appBarAutoPointsRow(
-                census,
-                o.fontSize,
-                n.fontSize
-            )
-        case .appBarCornerRoundness:
-            return appBarRow(
-                census,
-                percent(Double(o.cornerRoundness) / 100),
-                percent(Double(n.cornerRoundness) / 100)
             )
         case .appBarDimFactor:
             return appBarRow(

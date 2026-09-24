@@ -7,16 +7,17 @@ import Testing
 /// What the one Liquid Glass row WRITES and SHOWS (#1307).
 ///
 /// Nothing else can see either half. The census records one row
-/// over three stored leaves, and a master that flips two of them
-/// ships a switch whose whole claim — one finish across both
-/// bars and the shortcuts panel — is false at the pixel on
-/// whichever surface it missed. The `?` half matters for the
-/// same reason: a boolean cannot show "two of three", so the
-/// sentence is the only channel that state has.
+/// over two stored leaves — the bars' shelf (one leaf since
+/// #1517) and the shortcuts panel — and a master that flips one
+/// ships a switch whose whole claim — one finish across the bars
+/// and the panel — is false at the pixel on whichever surface it
+/// missed. The `?` half matters for the same reason: a boolean
+/// cannot show "one of two", so the sentence is the only channel
+/// that state has.
 @MainActor
 @Suite("The Liquid Glass master")
 struct LiquidGlassMasterTests {
-    /// The default this suite reasons from (tests.md): all three
+    /// The default this suite reasons from (tests.md): both
     /// ship ON together (owner ruling 2026-09-10), so an untouched
     /// config already agrees with what the row shows and the
     /// master never has to write to make that true. A panel
@@ -39,44 +40,38 @@ struct LiquidGlassMasterTests {
     @Test("the shipped default is on")
     func shippedDefaultIsOn() {
         let settings = TilingSettings()
-        #expect(settings.appBarStyle.liquidGlass)
-        #expect(settings.spaceBarStyle.liquidGlass)
+        #expect(settings.kiwishelf.liquidGlass)
         #expect(settings.shortcutPanelLiquidGlass)
     }
 
-    @Test("the master writes all three surfaces")
+    @Test("the master writes every surface")
     func masterFansOut() {
         for on in [true, false] {
             let model = makeTestModel()
             // Seed the OPPOSITE first, or the `false` pass
             // starts where it means to end and a setter that
             // writes nothing passes it.
-            model.config.settings.appBarStyle.liquidGlass = !on
-            model.config.settings.spaceBarStyle.liquidGlass = !on
+            model.config.settings.kiwishelf.liquidGlass = !on
             model.config.settings.shortcutPanelLiquidGlass = !on
             model.liquidGlassMaster.wrappedValue = on
             let settings = model.config.settings
-            #expect(settings.appBarStyle.liquidGlass == on)
-            #expect(settings.spaceBarStyle.liquidGlass == on)
+            #expect(settings.kiwishelf.liquidGlass == on)
             #expect(settings.shortcutPanelLiquidGlass == on)
         }
     }
 
-    /// Both values of the choice, and the third leaf tested on
-    /// its own: a guard that only ever flips all three at once
-    /// is blind to a master that reads two of them.
-    @Test("the master shows on only when all three are on")
-    func masterShowsAllThree() {
+    /// Both values of the choice, and each leaf tested on its
+    /// own: a guard that only ever flips both at once is blind to
+    /// a master that reads one of them.
+    @Test("the master shows on only when every leaf is on")
+    func masterShowsEveryLeaf() {
         let model = makeTestModel()
         model.liquidGlassMaster.wrappedValue = true
         #expect(model.liquidGlassMaster.wrappedValue)
         model.config.settings.shortcutPanelLiquidGlass = false
         #expect(model.liquidGlassMaster.wrappedValue == false)
         model.config.settings.shortcutPanelLiquidGlass = true
-        model.config.settings.spaceBarStyle.liquidGlass = false
-        #expect(model.liquidGlassMaster.wrappedValue == false)
-        model.config.settings.spaceBarStyle.liquidGlass = true
-        model.config.settings.appBarStyle.liquidGlass = false
+        model.config.settings.kiwishelf.liquidGlass = false
         #expect(model.liquidGlassMaster.wrappedValue == false)
     }
 
@@ -87,29 +82,22 @@ struct LiquidGlassMasterTests {
     func divergenceSeen() {
         var settings = TilingSettings()
         #expect(!LiquidGlassAgreement(settings: settings).differ)
-        settings.appBarStyle.liquidGlass = true
-        settings.spaceBarStyle.liquidGlass = true
+        settings.kiwishelf.liquidGlass = true
         settings.shortcutPanelLiquidGlass = true
         #expect(!LiquidGlassAgreement(settings: settings).differ)
-        settings.spaceBarStyle.liquidGlass = false
+        settings.kiwishelf.liquidGlass = false
         #expect(LiquidGlassAgreement(settings: settings).differ)
         #expect(
             !LiquidGlassAgreement(settings: settings).allOn
         )
     }
 
-    /// A retired row is not a retired setting: both bar verbs
-    /// still reach their leaves, which is what keeps #678 Phase
-    /// 2's per-layout precedent standing.
-    @Test("the two bar leaves stay Lua-reachable")
-    func barLeavesStayLuaOnly() {
+    /// A retired row is not a retired setting: the shelf's
+    /// leaf still has its Lua verb, and no row of its own.
+    @Test("the shelf's leaf stays Lua-reachable")
+    func shelfLeafStaysLuaOnly() {
         #expect(
-            SettingKey.appBar(.appBarLiquidGlass).placement
-                == .luaOnly
-        )
-        #expect(
-            SettingKey.spaceBar(.spaceBarLiquidGlass).placement
-                == .luaOnly
+            SettingKey.kiwishelf(.liquidGlass).placement == .luaOnly
         )
     }
 

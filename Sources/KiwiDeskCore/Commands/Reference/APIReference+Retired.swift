@@ -6,7 +6,7 @@ import Foundation
 /// guard's did-you-mean, over IPC through `layoutCommand`.
 extension APIReference {
     /// Retired verb → its replacement, or nil where nothing
-    /// replaces it (`item_size`: items size themselves).
+    /// replaces it (the Space Bar's `item_size`).
     public static let retired: [String: String?] = {
         let moved = [
             "edge", "alignment", "thickness", "outer_margin",
@@ -22,12 +22,16 @@ extension APIReference {
             map["monocle.set_app_bar_\(field)"] = target
             map["scroll.set_app_bar_\(field)"] = target
         }
+        // An App Bar item is as wide as its title allows, so the
+        // title length is the one width control left; a Space
+        // item fits its content, with nothing to point at.
         for bar in [
-            "space_bar.set_", "app_bar.set_",
-            "monocle.set_app_bar_", "scroll.set_app_bar_",
+            "app_bar.set_", "monocle.set_app_bar_",
+            "scroll.set_app_bar_",
         ] {
-            map[bar + "item_size"] = .some(nil)
+            map[bar + "item_size"] = bar + "title_cap"
         }
+        map["space_bar.set_item_size"] = .some(nil)
         map["space_bar.set_title_cap"] =
             "space_bar.set_front_app_title_cap"
         return map
@@ -38,8 +42,8 @@ extension APIReference {
     public static func retirement(of command: String) -> String? {
         guard let replacement = retired[command] else { return nil }
         guard let replacement else {
-            return "\(command) was retired in 2.0: bar items size"
-                + " themselves"
+            return "\(command) was retired in 2.0: a Space item's"
+                + " length follows its content"
         }
         return "\(command) was retired in 2.0 — use \(replacement)"
     }

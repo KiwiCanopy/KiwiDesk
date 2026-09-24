@@ -28,8 +28,8 @@ struct ColorsGateTests {
         // half is exercised with a key that actually carries it.
         // None is in this area yet — which is the point: the
         // resolver has to be right BEFORE the first one lands.
-        let exempt = SettingKey.spaceBar(.spaceBarEnabled)
-        let plain = SettingKey.spaceBar(.spaceBarFocusedItemColor)
+        let exempt = SettingKey.appBar(.appBarIconSource)
+        let plain = SettingKey.appBar(.appBarItemColor)
         #expect(exempt.placement.exemptFromContainerGate)
         #expect(!plain.placement.exemptFromContainerGate)
 

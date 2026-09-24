@@ -41,11 +41,10 @@ struct BarSliderBandTests {
     @Test("the thickness floor is Core's, by derivation")
     func thicknessFloorIsDerived() throws {
         let band = BarSliderBands.thickness
-        #expect(band.lowerBound == Double(AppBarStyle.minThickness))
-        #expect(band.contains(Double(AppBarStyle().thickness)))
-        #expect(band.contains(Double(SpaceBarStyle().thickness)))
+        #expect(band.lowerBound == Double(KiwiShelf.minThickness))
+        #expect(band.contains(Double(KiwiShelf().thickness)))
         let declared = try declaration(of: "thickness")
-        #expect(declared.contains("AppBarStyle.minThickness"))
+        #expect(declared.contains("KiwiShelf.minThickness"))
     }
 
     @Test("the spring delay band is Core's range, by derivation")
@@ -61,20 +60,20 @@ struct BarSliderBandTests {
     @Test("the margin floor is Core's, by derivation")
     func marginFloorIsDerived() throws {
         let band = BarSliderBands.margin
-        #expect(band.lowerBound == Double(AppBarStyle.minMargin))
-        #expect(band.contains(Double(AppBarStyle().outerMargin)))
-        #expect(band.contains(Double(SpaceBarStyle().innerMargin)))
+        #expect(band.lowerBound == Double(KiwiShelf.minMargin))
+        #expect(band.contains(Double(KiwiShelf().outerMargin)))
+        #expect(band.contains(Double(KiwiShelf().innerMargin)))
         let declared = try declaration(of: "margin")
-        #expect(declared.contains("AppBarStyle.minMargin"))
+        #expect(declared.contains("KiwiShelf.minMargin"))
     }
 
     /// Which band each Core-clamped bar row reads, keyed by the
     /// suffix of its census model path — a third band joins by
     /// data (#1516).
     private static let bands: [(suffix: String, band: String)] = [
-        ("Style.thickness", "thickness"),
-        ("Style.outerMargin", "margin"),
-        ("Style.innerMargin", "margin"),
+        ("kiwishelf.thickness", "thickness"),
+        ("kiwishelf.outerMargin", "margin"),
+        ("kiwishelf.innerMargin", "margin"),
     ]
 
     /// The census keys whose model path ends in `suffix` — the
@@ -82,9 +81,7 @@ struct BarSliderBandTests {
     private func keys(withSuffix suffix: String) -> [String] {
         SettingKey.allCases.compactMap { key in
             switch key {
-            case .appBar(let k) where k.rawValue.hasSuffix(suffix):
-                return String(describing: k)
-            case .spaceBar(let k) where k.rawValue.hasSuffix(suffix):
+            case .kiwishelf(let k) where k.rawValue.hasSuffix(suffix):
                 return String(describing: k)
             default:
                 return nil
@@ -99,7 +96,7 @@ struct BarSliderBandTests {
         let sources = try SourceScan.swiftSources(under: root)
         for (suffix, band) in Self.bands {
             let keys = keys(withSuffix: suffix)
-            #expect(keys.count == 2, "\(suffix): \(keys)")
+            #expect(keys.count == 1, "\(suffix): \(keys)")
             var rendered: [String: Int] = [:]
             for file in sources {
                 let text = try SourceScan.strippedSource(at: file)

@@ -206,6 +206,9 @@ struct SettingsSearchIndexTests {
                 // Style drawers gained their catalog anchors so
                 // a hit opens the drawer; the at-rest rows stay
                 // anchor-less by ruling (the issue's tier split).
+                // 9 since #1517: the KiwiShelf card's at-rest
+                // rows replace the bars' shared ones, the Space
+                // Bar's Show row anchor-less by ruling.
                 .bars: 9,
                 // 7 since #277: the Animations drawer's five
                 // rows gained anchors; the palette shelf's three

@@ -68,6 +68,10 @@ extension ConfigMigration {
     static func filledGlassLeaves(
         _ settings: [String: Any]
     ) -> ([String: Any], Bool) {
+        // A settings object carrying the shelf is #1517's shape,
+        // where the bars hold no glass leaf at all: nothing is
+        // absent, so nothing is filled.
+        if settings[shelfKey] != nil { return (settings, false) }
         var out = settings
         var changed = false
         func leaf(_ group: String) -> Bool? {
@@ -106,7 +110,8 @@ extension ConfigMigration {
     /// compare is the net for a stray edit and for that
     /// cross-profile case alike.
     static func surgicallyFilledGlassLeaves(_ text: String) -> Data? {
-        guard text.range(of: "\"\(glassPanelGroup)\"") == nil
+        guard text.range(of: "\"\(glassPanelGroup)\"") == nil,
+            text.range(of: "\"\(shelfKey)\"") == nil
         else { return nil }
         let values = Set(
             captures(

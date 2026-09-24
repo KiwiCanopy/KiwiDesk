@@ -282,7 +282,7 @@ struct SettingsValueReadoutTests {
         edited.settings.gapsGlobal.inner.horizontal = 4
         edited.settings.minWindowSize = 350
         edited.settings.borderStyle.enabled.toggle()
-        edited.settings.spaceBarStyle.thickness += 4
+        edited.settings.kiwishelf.thickness += 4
         edited.spaces = [SpaceID("a"), SpaceID("b")]
         edited.settings.animations.onScrolling.toggle()
         let diff = SettingsDraftDiff.between(

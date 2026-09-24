@@ -1,27 +1,16 @@
-/// Per-layout App Bar overrides census slice (`LayoutAppBar`, Monocle and
-/// Scrolling).
+/// Per-layout App Bar census slice (`LayoutAppBar`, Monocle and
+/// Scrolling): whether each layout shows one — drawn in the
+/// KiwiShelf card — and its Lua-only overrides of the bar's OWN
+/// fields; the shelf's fields have none (#1517).
 
 enum LayoutAppBarKey: String, CaseIterable, Hashable {
     case monocleAppBarEnabled = "settings.monocle.appBar.enabled"
-    case monocleAppBarEdge = "settings.monocle.appBar.edge"
-    case monocleAppBarAlignment = "settings.monocle.appBar.alignment"
-    case monocleAppBarBackgroundStyle =
-        "settings.monocle.appBar.backgroundStyle"
-    case monocleAppBarBackgroundFit = "settings.monocle.appBar.backgroundFit"
     case monocleAppBarActiveIndicator =
         "settings.monocle.appBar.activeIndicator"
     case monocleAppBarContent = "settings.monocle.appBar.content"
     case monocleAppBarTitleCap = "settings.monocle.appBar.titleCap"
     case monocleAppBarGroupAdjacentWindows =
         "settings.monocle.appBar.groupAdjacentWindows"
-    case monocleAppBarThickness = "settings.monocle.appBar.thickness"
-    case monocleAppBarOuterMargin = "settings.monocle.appBar.outerMargin"
-    case monocleAppBarInnerMargin = "settings.monocle.appBar.innerMargin"
-    case monocleAppBarItemSize = "settings.monocle.appBar.itemSize"
-    case monocleAppBarItemGap = "settings.monocle.appBar.itemGap"
-    case monocleAppBarFontSize = "settings.monocle.appBar.fontSize"
-    case monocleAppBarCornerRoundness =
-        "settings.monocle.appBar.cornerRoundness"
     case monocleAppBarFillColor = "settings.monocle.appBar.fillColor"
     case monocleAppBarHighlightColor = "settings.monocle.appBar.highlightColor"
     case monocleAppBarItemColor = "settings.monocle.appBar.itemColor"
@@ -33,32 +22,15 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
         "settings.monocle.appBar.groupBadgeColor"
     case monocleAppBarGroupBadgeTextColor =
         "settings.monocle.appBar.groupBadgeTextColor"
-    case monocleAppBarLiquidGlass = "settings.monocle.appBar.liquidGlass"
     case monocleAppBarIconSource = "settings.monocle.appBar.iconSource"
     case monocleAppBarDimFactor = "settings.monocle.appBar.dimFactor"
     case scrollingAppBarEnabled = "settings.scrolling.appBar.enabled"
-    case scrollingAppBarEdge = "settings.scrolling.appBar.edge"
-    case scrollingAppBarAlignment = "settings.scrolling.appBar.alignment"
-    case scrollingAppBarBackgroundStyle =
-        "settings.scrolling.appBar.backgroundStyle"
-    case scrollingAppBarBackgroundFit =
-        "settings.scrolling.appBar.backgroundFit"
     case scrollingAppBarActiveIndicator =
         "settings.scrolling.appBar.activeIndicator"
     case scrollingAppBarContent = "settings.scrolling.appBar.content"
     case scrollingAppBarTitleCap = "settings.scrolling.appBar.titleCap"
     case scrollingAppBarGroupAdjacentWindows =
         "settings.scrolling.appBar.groupAdjacentWindows"
-    case scrollingAppBarThickness = "settings.scrolling.appBar.thickness"
-    case scrollingAppBarOuterMargin =
-        "settings.scrolling.appBar.outerMargin"
-    case scrollingAppBarInnerMargin =
-        "settings.scrolling.appBar.innerMargin"
-    case scrollingAppBarItemSize = "settings.scrolling.appBar.itemSize"
-    case scrollingAppBarItemGap = "settings.scrolling.appBar.itemGap"
-    case scrollingAppBarFontSize = "settings.scrolling.appBar.fontSize"
-    case scrollingAppBarCornerRoundness =
-        "settings.scrolling.appBar.cornerRoundness"
     case scrollingAppBarFillColor = "settings.scrolling.appBar.fillColor"
     case scrollingAppBarHighlightColor =
         "settings.scrolling.appBar.highlightColor"
@@ -73,7 +45,6 @@ enum LayoutAppBarKey: String, CaseIterable, Hashable {
         "settings.scrolling.appBar.groupBadgeColor"
     case scrollingAppBarGroupBadgeTextColor =
         "settings.scrolling.appBar.groupBadgeTextColor"
-    case scrollingAppBarLiquidGlass = "settings.scrolling.appBar.liquidGlass"
     case scrollingAppBarIconSource = "settings.scrolling.appBar.iconSource"
     case scrollingAppBarDimFactor = "settings.scrolling.appBar.dimFactor"
 }
@@ -82,40 +53,24 @@ extension LayoutAppBarKey {
     var placement: SettingPlacement {
         switch self {
         case .monocleAppBarEnabled, .scrollingAppBarEnabled:
-            return .row(
-                .bars,
-                .appBar,
-                .atRest,
-                exemptFromContainerGate: true
-            )
-        case .monocleAppBarEdge, .monocleAppBarAlignment,
-            .monocleAppBarBackgroundStyle, .monocleAppBarActiveIndicator,
-            .monocleAppBarGroupAdjacentWindows, .monocleAppBarThickness,
-            .monocleAppBarOuterMargin, .monocleAppBarInnerMargin,
-            .monocleAppBarItemSize, .monocleAppBarItemGap,
-            .monocleAppBarFontSize, .monocleAppBarCornerRoundness,
+            // Drawn in the KiwiShelf card's Show group, which has
+            // no container gate.
+            return .row(.bars, .kiwishelf, .atRest)
+        case .monocleAppBarActiveIndicator, .monocleAppBarContent,
+            .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
             .monocleAppBarFillColor, .monocleAppBarHighlightColor,
             .monocleAppBarItemColor, .monocleAppBarActiveItemColor,
             .monocleAppBarHoverFillColor, .monocleAppBarHoverItemColor,
             .monocleAppBarGroupBadgeColor, .monocleAppBarGroupBadgeTextColor,
-            .scrollingAppBarEdge, .scrollingAppBarAlignment,
-            .scrollingAppBarBackgroundStyle, .scrollingAppBarActiveIndicator,
-            .scrollingAppBarGroupAdjacentWindows, .scrollingAppBarThickness,
-            .scrollingAppBarOuterMargin, .scrollingAppBarInnerMargin,
-            .scrollingAppBarItemSize, .scrollingAppBarItemGap,
-            .scrollingAppBarFontSize, .scrollingAppBarCornerRoundness,
+            .monocleAppBarIconSource, .monocleAppBarDimFactor,
+            .scrollingAppBarActiveIndicator, .scrollingAppBarContent,
+            .scrollingAppBarTitleCap, .scrollingAppBarGroupAdjacentWindows,
             .scrollingAppBarFillColor, .scrollingAppBarHighlightColor,
             .scrollingAppBarItemColor, .scrollingAppBarActiveItemColor,
             .scrollingAppBarHoverFillColor, .scrollingAppBarHoverItemColor,
             .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor,
-            .monocleAppBarBackgroundFit, .monocleAppBarContent,
-            .monocleAppBarTitleCap,
-            .scrollingAppBarBackgroundFit, .scrollingAppBarContent,
-            .scrollingAppBarTitleCap,
-            .monocleAppBarLiquidGlass, .monocleAppBarIconSource,
-            .monocleAppBarDimFactor, .scrollingAppBarLiquidGlass,
-            .scrollingAppBarIconSource, .scrollingAppBarDimFactor:
+            .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarIconSource,
+            .scrollingAppBarDimFactor:
             return .luaOnly
         }
     }
@@ -125,36 +80,24 @@ extension LayoutAppBarKey {
     var text: SettingRowText {
         switch self {
         case .monocleAppBarEnabled:
-            return .text("layout.monocle.name")
+            return .text("kiwishelf.show.monocle")
         case .scrollingAppBarEnabled:
-            return .text("layout.scrolling.name")
-        case .monocleAppBarEdge, .monocleAppBarAlignment,
-            .monocleAppBarBackgroundStyle, .monocleAppBarBackgroundFit,
-            .monocleAppBarActiveIndicator, .monocleAppBarContent,
-            .monocleAppBarTitleCap,
-            .monocleAppBarGroupAdjacentWindows, .monocleAppBarThickness,
-            .monocleAppBarOuterMargin, .monocleAppBarInnerMargin,
-            .monocleAppBarItemSize, .monocleAppBarItemGap,
-            .monocleAppBarFontSize, .monocleAppBarCornerRoundness,
+            return .text("kiwishelf.show.scrolling")
+        case .monocleAppBarActiveIndicator, .monocleAppBarContent,
+            .monocleAppBarTitleCap, .monocleAppBarGroupAdjacentWindows,
             .monocleAppBarFillColor, .monocleAppBarHighlightColor,
             .monocleAppBarItemColor, .monocleAppBarActiveItemColor,
             .monocleAppBarHoverFillColor, .monocleAppBarHoverItemColor,
             .monocleAppBarGroupBadgeColor, .monocleAppBarGroupBadgeTextColor,
-            .monocleAppBarLiquidGlass, .monocleAppBarIconSource,
-            .monocleAppBarDimFactor, .scrollingAppBarEdge,
-            .scrollingAppBarAlignment, .scrollingAppBarBackgroundStyle,
-            .scrollingAppBarBackgroundFit, .scrollingAppBarActiveIndicator,
-            .scrollingAppBarContent, .scrollingAppBarTitleCap,
-            .scrollingAppBarGroupAdjacentWindows,
-            .scrollingAppBarThickness, .scrollingAppBarOuterMargin,
-            .scrollingAppBarInnerMargin, .scrollingAppBarItemSize,
-            .scrollingAppBarItemGap, .scrollingAppBarFontSize,
-            .scrollingAppBarCornerRoundness, .scrollingAppBarFillColor,
-            .scrollingAppBarHighlightColor, .scrollingAppBarItemColor,
-            .scrollingAppBarActiveItemColor, .scrollingAppBarHoverFillColor,
-            .scrollingAppBarHoverItemColor, .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarLiquidGlass,
-            .scrollingAppBarIconSource, .scrollingAppBarDimFactor:
+            .monocleAppBarIconSource, .monocleAppBarDimFactor,
+            .scrollingAppBarActiveIndicator, .scrollingAppBarContent,
+            .scrollingAppBarTitleCap, .scrollingAppBarGroupAdjacentWindows,
+            .scrollingAppBarFillColor, .scrollingAppBarHighlightColor,
+            .scrollingAppBarItemColor, .scrollingAppBarActiveItemColor,
+            .scrollingAppBarHoverFillColor, .scrollingAppBarHoverItemColor,
+            .scrollingAppBarGroupBadgeColor,
+            .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarIconSource,
+            .scrollingAppBarDimFactor:
             return .none
         }
     }

@@ -101,6 +101,15 @@ extension TilingSettings {
         AppBarLook(shelf: kiwishelf, bar: appBarStyle)
     }
 
+    /// What a layout's App Bar draws from: the shelf and the App
+    /// Bar's style after that layout's overrides.
+    public func appBarLook(for bar: LayoutAppBar) -> AppBarLook {
+        AppBarLook(
+            shelf: kiwishelf,
+            bar: bar.resolved(with: appBarStyle)
+        )
+    }
+
     /// The bar-hosting layout for a mode — the ONE place that
     /// decides which layouts host an App Bar (#527): everything
     /// asking "does this mode show a bar?" derives from here, so

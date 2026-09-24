@@ -45,9 +45,10 @@ enum SettingsSearchSynonyms {
             return ["outline", "focus ring"]
         case .borders(.borderGlow):
             return ["neon", "shadow"]
-        case .appBar(.appBarThickness),
-            .spaceBar(.spaceBarThickness):
+        case .kiwishelf(.thickness):
             return ["height", "size"]
+        case .kiwishelf(.share):
+            return ["split", "divider", "ratio"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):

@@ -50,6 +50,13 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
+                .bars, "Bars", .kiwishelf,
+                [
+                    SettingsCatalog.bars.kiwishelfStyle,
+                    SettingsCatalog.bars.kiwishelfMargins,
+                ]
+            ),
+            (
                 .bars, "Bars", .spaceBar,
                 [SettingsCatalog.bars.spaceBarStyle]
             ),
@@ -268,22 +275,28 @@ struct SettingsSearchDrawerAnchorTests {
         #expect((glassRow != nil) == AppBarStyle.glassAvailable)
     }
 
-    /// The two bars' Style drawers share one label key and are
-    /// told apart by instance; their rows carry the bar's OWN
-    /// keys, so the join lands each census row on its own bar's
+    /// The Bars area's Style drawers share one label key and are
+    /// told apart by instance; their rows carry each card's OWN
+    /// keys, so the join lands each census row on its own card's
     /// child rather than the first drawer declared. Pinned on
-    /// the one row both bars have under the same English.
+    /// the row both bars have under the same English.
     @Test("a bar's row lands on its own bar's drawer")
     func barRowsLandOnTheirOwnBar() {
         pinEnglish()
         defer { reset() }
         let rows = SettingsSearchIndex.rows()
         let space = rows.first {
-            $0.key == .spaceBar(.spaceBarFontSize)
+            $0.key == .spaceBar(.spaceBarActiveIndicator)
         }
-        let app = rows.first { $0.key == .appBar(.appBarFontSize) }
-        #expect(space?.anchor.anchor == "space_bar.font_size")
-        #expect(app?.anchor.anchor == "app_bar.font_size")
+        let app = rows.first {
+            $0.key == .appBar(.appBarActiveIndicator)
+        }
+        #expect(
+            space?.anchor.anchor == "space_bar.active_indicator.label"
+        )
+        #expect(
+            app?.anchor.anchor == "app_bar.active_indicator.label"
+        )
         #expect(
             SettingsCatalog.bars.spaceBarStyle.shouldExpand(
                 revealing: space?.anchor.anchor

@@ -214,6 +214,10 @@ GLOSSARY = {
     "ide",
     "json",  # the profile file format, named in `profiles.broken.*`
     "kiwidesk",
+    # The shelf both bars sit on (#1517): a product name, kept
+    # verbatim like `kiwidesk` — `bars.switch.kiwishelf` ships
+    # Latin in every catalog.
+    "kiwishelf",
     "lua",
     "macos",
     "tiling",
@@ -301,6 +305,9 @@ PRODUCT_NAMES = (
     # "Display-Sticky"), "display" being an ordinary qualifier that
     # compounds per locale around the fixed "Sticky" atom.
     "Sticky",
+    # The shelf both bars sit on (#1517, owner ruling 2026-09-24):
+    # a coined name like the bars, kept verbatim in every locale.
+    "KiwiShelf",
 )
 
 # Locale codes a stub marker is written with. Keyed by the base

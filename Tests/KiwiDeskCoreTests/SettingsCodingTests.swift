@@ -27,7 +27,7 @@ struct SettingsCodingTests {
         )
         #expect(
             Set(root.keys) == [
-                "animations", "app_bar", "border", "drag",
+                "animations", "app_bar", "border", "drag", "kiwishelf",
                 "float_nudge", "float_scale_on_display_change",
                 "gap",
                 "layout", "min_window_size", "mouse",

@@ -1,7 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Settings card for Space Bar configuration (#678).
+/// Settings card for the Space Bar's own look (#678); where it
+/// sits and whether it shows are the KiwiShelf card's (#1517).
 struct SpaceBarCard: View {
     @ObservedObject var model: SettingsModel
     @State private var styleExpanded = false
@@ -75,17 +76,17 @@ struct SpaceBarCard: View {
 
     private var cardCaption: String {
         L(
-            "bars.space_bar.caption",
-            "One item per Space, always on screen — one bar "
-                + "per display, every layout."
+            "bars.space_bar.shelf_caption",
+            "One item per Space — one bar per display, every "
+                + "layout. KiwiShelf places it."
         )
     }
 
     private var styleSummary: String {
         L(
-            "bars.style.space_bar.summary",
-            "Background, alignment, indicator, sizes, margins, "
-                + "glyph cap, spring delay"
+            "bars.style.space_bar.shelf_summary",
+            "Indicator, symbol style, glyph cap, front app title "
+                + "length, spring delay"
         )
     }
 }

@@ -127,8 +127,8 @@ navigation strip past four segments still qualifies. Layout
 Defaults' layout selector is a strip of live schematic
 thumbnails, not a segmented control (below). The *same
 semantic field uses the same control on comparable full-width
-surfaces*: the two bar cards both render Position / Background
-style / Active indicator as segments. Segmented under the
+surfaces*: the two bar cards both render Active indicator as
+segments. Segmented under the
 rule: the App Bar fields, Stack's Master orientation / Stack
 position / Overflow, Track's Overflow, and Corners (which
 drives all three strokes, #754). Menus where the rule keeps
@@ -1247,8 +1247,7 @@ Greying applied across a whole editor (#520, #527):
   parameter) when the whole section body is gated, the drawer's
   live disclosure label when only the drawer's content is. A
   header `?` may scope a card whose census-exempt rows stay
-  live (the App Bar card's Show-it-in switches) exactly when
-  its copy points at them ("turn one on below"). When the gate
+  live exactly when its copy points at them. When the gate
   must reach inside a child view to do this, pass it in
   (`AdvancedColorRows(allows:gateHelp:)`) rather than wrapping
   the child from outside, which would disable the anchor too. A

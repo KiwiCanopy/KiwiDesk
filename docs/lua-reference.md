@@ -708,13 +708,15 @@ profile switch can change the panel's material.
 
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
-([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
+([Liquid Glass](#kiwishelfset_liquid_glass)).
 
+:::unreleased
 The GUI twin is the **Liquid Glass** switch on Colours &amp;
 Animations, which writes this leaf together with
-`app_bar.liquid_glass` and `space_bar.liquid_glass` and shows on
-only when all three are on; with one set and not the others,
-the switch reads off and says so in its `?`.
+`kiwishelf.liquid_glass` and shows on only when both are on;
+with one set and not the other, the switch reads off and says so
+in its `?`.
+:::
 
 **Example:**
 
@@ -1781,6 +1783,312 @@ space.
 track.set_overflow_style_override("code", "cascade_overflow")
 ```
 
+## KiwiShelf
+
+:::unreleased
+**KiwiShelf** is the one screen edge both bars sit on — the
+[App Bar](#app-bar) and the [Space Bar](#space-bar).
+`kiwishelf.set_*` sets where the shelf hangs, how the two bars
+share it and the look they share; each bar keeps its own plate,
+colours and content. The shelf reserves its edge in every layout
+whenever any bar can show, so switching a Space to a layout with
+or without an App Bar never moves a window. Stored as
+`settings.kiwishelf` in a profile.
+
+With both bars shown they sit at opposite ends of the edge, in
+`set_order`; a lone bar sits where `set_alignment` puts it. Each
+bar scrolls on its own when its items overflow, with an arrow
+zone at each end counting what is hidden on that side. Only when
+both bars overflow does `set_share` split the edge, and a divider
+between them can then be dragged to change the share.
+:::
+
+### kiwishelf.set_edge
+
+:::unreleased
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
+
+**Does:** sets the screen edge the shelf occupies, for both bars
+and every layout. The edge is absolute — it does not follow a
+layout's orientation (#293).
+
+**Example:**
+
+```lua
+kiwishelf.set_edge("bottom")
+```
+:::
+
+### kiwishelf.set_alignment
+
+:::unreleased
+**Expects:** `"start"`, `"center"`, or `"end"`
+(default `"center"`).
+
+**Does:** places a bar along the edge while it is the only one
+shown. Values are edge-relative: a left edge's `start` is its
+top, a top edge's `start` its left. Once a bar's items overflow
+and scroll, all three values behave the same.
+
+While both bars show they take the ends `set_order` gives them,
+so an App Bar appearing moves the Space Bar to its end unless
+the alignment already put it there: `start` under
+`spaces_first`, `end` under `apps_first`.
+
+**Example:**
+
+```lua
+kiwishelf.set_alignment("start")
+```
+:::
+
+### kiwishelf.set_order
+
+:::unreleased
+**Expects:** `"spaces_first"` or `"apps_first"` (default
+`"spaces_first"`).
+
+**Does:** sets which bar takes the start of the edge while both
+show; the other takes the end. Edge-relative, like
+`set_alignment`.
+
+**Example:**
+
+```lua
+kiwishelf.set_order("apps_first")
+```
+:::
+
+### kiwishelf.set_share
+
+:::unreleased
+**Expects:** a percentage, 20–80 (default `40`); values outside
+the range are clamped.
+
+**Does:** sets the Space Bar's share of the edge once both bars
+overflow; the App Bar takes the rest, and each scrolls inside its
+own. A bar that needs less than its share gives the rest back.
+Dragging the divider between two full bars writes this value.
+
+**Example:**
+
+```lua
+kiwishelf.set_share(50)
+```
+:::
+
+### kiwishelf.set_thickness
+
+:::unreleased
+**Expects:** thickness in points (default `40`; anything below
+`20` is raised to it).
+
+**Does:** sets the shelf's thickness — both bars' — carved out of
+the layout.
+
+**Example:**
+
+```lua
+kiwishelf.set_thickness(32)
+```
+:::
+
+### kiwishelf.set_outer_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** sets the shelf's distance from the screen border; `0`
+is flush. From the border inwards: outer margin, the strip, inner
+margin, then the windows' own outer gap.
+
+**Example:**
+
+```lua
+kiwishelf.set_outer_margin(10)
+```
+:::
+
+### kiwishelf.set_inner_margin
+
+:::unreleased
+**Expects:** points (default `0`; a negative value is raised to
+it).
+
+**Does:** adds room on the shelf's window side, on top of the
+windows' outer gap. The outer gap alone keeps the focus ring's
+clearance, so `0` means the gap governs.
+
+**Example:**
+
+```lua
+kiwishelf.set_inner_margin(4)
+```
+:::
+
+### kiwishelf.set_background_style
+
+:::unreleased
+**Expects:** `"boxed"` or `"plain"` (default `"plain"`).
+
+**Does:** sets WHERE the background is drawn, for both bars:
+- **boxed** — a box per item honoring the corner roundness
+  (0% = square, 100% = full capsule).
+- **plain** — no per-item box; the items sit on a shared
+  translucent plate, whose reach is `set_background_fit`.
+
+Liquid Glass is a separate finish toggle, `set_liquid_glass`
+(below), that lays over either style.
+
+**Example:**
+
+```lua
+kiwishelf.set_background_style("plain")
+```
+:::
+
+### kiwishelf.set_liquid_glass
+
+:::unreleased
+**Expects:** a boolean (default `true`).
+
+**Does:** lays a macOS 26 Liquid Glass material over both bars'
+item backgrounds (the boxes or the plate); it combines with
+either shape. Each bar's `fill_color` tints its glass: a solid
+colored layer sits behind the glass and the glass refracts it.
+The material's light or dark variant follows the fill too: a
+dark `fill_color` pins the dark glass. A light `fill_color` pins
+nothing — only the dark variant can be pinned — and the glass
+follows KiwiDesk's Appearance setting instead: dark glass under
+Dark, and under Light or System macOS's own choice, which the
+bright tint normally holds at light. A fully transparent
+`fill_color` leaves the glass clear. Ignored below macOS 26,
+where the Settings toggle is hidden; the stored value still
+round-trips so a profile stays portable.
+
+Stood down, live, while macOS's Reduce transparency is on: every
+glass surface draws its Boxed or Plain shape with the
+`fill_color` at full alpha (the panel its plain material). The
+stored values are untouched, so the glass and the alpha return
+the moment the setting goes off (#1374).
+
+Settings has no KiwiShelf row for this (#1307): one **Liquid
+Glass** switch on Colours &amp; Animations writes this leaf and
+the shortcuts panel's
+([set_shortcut_panel_liquid_glass](#set_shortcut_panel_liquid_glass))
+together, and shows on only when both are on. This verb sets the
+bars alone; setting one and not the other is a Lua-only state,
+and the Settings switch then reads off and says so in its `?`.
+
+**Example:**
+
+```lua
+kiwishelf.set_liquid_glass(true)
+```
+:::
+
+### kiwishelf.set_background_fit
+
+:::unreleased
+**Expects:** `"full"` or `"hug"` (default `"hug"`).
+
+**Does:** sets how far the plate reaches under `plain` (and the
+Liquid Glass finish over it). `hug` gives each bar its own plate
+in its own `fill_color`, wrapping its item run plus one item gap
+per end. `full` spans one plate along the whole edge, blending
+from the Space Bar's `fill_color` to the App Bar's in bar order.
+While a bar's items overflow and scroll, its plate spans that
+bar instead of hugging.
+Inert under `boxed` (the Settings control greys there).
+
+**Example:**
+
+```lua
+kiwishelf.set_background_fit("full")
+```
+:::
+
+### kiwishelf.set_corner_roundness
+
+:::unreleased
+**Expects:** a number 0–100 (percentage; default `50`).
+
+**Does:** sets the corner rounding of the plates and item boxes
+of both bars, where 0 = square and 100 = a full capsule
+(radius = thickness/2). Values above `100` render as `100`.
+
+**Example:**
+
+```lua
+kiwishelf.set_corner_roundness(50)
+```
+:::
+
+### kiwishelf.set_item_gap
+
+:::unreleased
+**Expects:** points (default `6`; a negative value is raised to
+`0`).
+
+**Does:** sets the gap between items, Space items and App Bar
+items alike.
+
+**Example:**
+
+```lua
+kiwishelf.set_item_gap(6)
+```
+:::
+
+### kiwishelf.set_font_size
+
+:::unreleased
+**Expects:** points; `0` (default) means auto.
+
+**Does:** if `0`, each bar's text scales with the thickness; any
+positive value pins the font size for both bars.
+
+**Example:**
+
+```lua
+kiwishelf.set_font_size(0)
+```
+:::
+
+### Retired bar verbs
+
+:::unreleased
+These verbs are retired. A call in `init.lua` is reported in
+Config Issues, naming what replaces it where something does;
+over the CLI it fails with
+`<verb> was retired in 2.0 — use <replacement>`, or, for
+`space_bar.set_item_size`, `…: a Space item's length follows its
+content`.
+
+- `space_bar.set_<field>`, `app_bar.set_<field>`,
+  `monocle.set_app_bar_<field>` and `scroll.set_app_bar_<field>`
+  for `edge`, `alignment`, `thickness`, `outer_margin`,
+  `inner_margin`, `background_style`, `liquid_glass`,
+  `background_fit`, `corner_roundness`, `item_gap` and
+  `font_size` → `kiwishelf.set_<field>`.
+- `app_bar.set_item_size`, `monocle.set_app_bar_item_size` and
+  `scroll.set_app_bar_item_size` → that bar's `title_cap`
+  ([`app_bar.set_title_cap`](#app_barset_title_cap)): an App Bar
+  slot is as wide as the widest title, so the title length is
+  its one width control.
+- `space_bar.set_item_size` → nothing: a Space item's length
+  follows its content.
+- `space_bar.set_title_cap` →
+  [`space_bar.set_front_app_title_cap`](#space_barset_front_app_title_cap).
+
+`init.lua` is not rewritten; a saved profile is, once, the first
+time 2.0 reads it: the shelf takes the Space Bar's values — the
+App Bar's where the Space Bar is off — and every other copy is
+dropped. A profile 2.0 has written no longer opens in 1.x.
+:::
+
 ## App Bar
 
 The **App Bar** lists the windows of the current space in the two
@@ -1791,166 +2099,14 @@ monitors each display shows its own bar, on that display, for the
 space it is showing, and dragging an item reorders that display's
 space.
 
-Its look is **global**: `app_bar.set_*` styles every layout's
-bar. Each layout decides whether it shows one and may override
-any field for itself ([Per-Layout App Bar
+:::unreleased
+The bar sits on [KiwiShelf](#kiwishelf), which sets its edge,
+thickness, margins and background. Everything else about it is
+**global**: `app_bar.set_*` styles every layout's bar. Each
+layout decides whether it shows one and may override the App
+Bar's own fields for itself ([Per-Layout App Bar
 Overrides](#per-layout-app-bar-overrides)).
-
-### app_bar.set_edge
-
-**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"bottom"`).
-
-**Does:** sets the screen edge the bar occupies, for every layout
-that shows a bar. The edge is absolute — it does not follow the
-layout's orientation (#293). Per-layout overrides can change it.
-
-**Example:**
-
-```lua
-app_bar.set_edge("top")
-```
-
-### app_bar.set_alignment
-
-**Expects:** `"start"`, `"center"`, or `"end"`
-(default `"center"`).
-
-**Does:** places the item group along the bar while it fits.
-Values are edge-relative: a left bar's `start` is its top, a top
-bar's `start` its left. Once the items overflow and scroll, all
-three values behave the same. Per-layout overrides can change it
-(`monocle.set_app_bar_alignment`, `scroll.set_app_bar_alignment`).
-
-**Example:**
-
-```lua
-app_bar.set_alignment("start")
-```
-
-### app_bar.set_thickness
-
-**Expects:** thickness in points (default `40`; anything below
-`20` is raised to it).
-
-**Does:** sets the bar's thickness, carved out of the layout.
-
-**Example:**
-
-```lua
-app_bar.set_thickness(32)
-```
-
-### app_bar.set_outer_margin
-
-:::unreleased
-**Expects:** points (default `0`; a negative value is raised to
-it).
-
-**Does:** sets the bar's distance from the screen border; `0` is
-flush. Both bars follow one rule — outer margin, strip, inner
-margin, then the windows' own outer gap — and on a shared edge
-each bar owns its margins, so between the two they add.
-
-**Example:**
-
-```lua
-app_bar.set_outer_margin(10)
-```
 :::
-
-### app_bar.set_inner_margin
-
-:::unreleased
-**Expects:** points (default `0`; a negative value is raised to
-it).
-
-**Does:** adds room on the bar's window side, on top of the
-windows' outer gap. The outer gap alone keeps the focus ring's
-clearance, so `0` means the gap governs.
-
-**Example:**
-
-```lua
-app_bar.set_inner_margin(4)
-```
-:::
-
-### app_bar.set_background_style
-
-**Expects:** `"boxed"` or `"plain"` (default `"plain"`).
-
-**Does:** sets WHERE the background is drawn:
-- **boxed** — a box per item honoring the corner roundness
-  (0% = square, 100% = full capsule).
-- **plain** — no per-item box; names sit on one shared
-  translucent strip that spans the whole bar.
-
-Liquid Glass is a separate finish toggle, `set_liquid_glass`
-(below), that lays over either style.
-
-**Example:**
-
-```lua
-app_bar.set_background_style("plain")
-```
-
-### app_bar.set_liquid_glass
-
-**Expects:** a boolean (default `true`).
-
-**Does:** lays a macOS 26 Liquid Glass material over the item
-backgrounds (the boxes or the plate); it combines with either
-shape. `fill_color` tints the glass: a solid colored layer sits
-behind the glass and the glass refracts it. The material's light
-or dark variant follows the fill too: a dark `fill_color` pins
-the dark glass on both bars. A light `fill_color` pins nothing —
-only the dark variant can be pinned — and the glass follows
-KiwiDesk's Appearance setting instead: dark glass under Dark,
-and under Light or System macOS's own choice, which the bright
-tint normally holds at light. A fully transparent `fill_color`
-leaves the glass clear. Ignored below macOS 26, where the
-Settings toggle is hidden; the stored value still round-trips so
-a profile stays portable. Per-layout override:
-`monocle.set_app_bar_liquid_glass` /
-`scroll.set_app_bar_liquid_glass`.
-
-Stood down, live, while macOS's Reduce transparency is on: every
-glass surface draws its Boxed or Plain shape with the
-`fill_color` at full alpha (the panel its plain material). The
-stored values are untouched, so the glass and the alpha return
-the moment the setting goes off (#1374).
-
-Settings has no per-bar row for this (#1307): one **Liquid
-Glass** switch on Colours &amp; Animations writes this leaf, the
-Space Bar's and the shortcuts panel's together, and shows on
-only when all three are on. This verb sets this bar alone;
-setting one and not the others is a Lua-only state, and the
-Settings switch then reads off and says so in its `?`.
-
-**Example:**
-
-```lua
-app_bar.set_liquid_glass(true)
-```
-
-### app_bar.set_background_fit
-
-**Expects:** `"full"` or `"hug"` (default `"hug"`).
-
-**Does:** sets how far the shared background plate reaches
-under `plain` (and the Liquid Glass finish over it): `hug` wraps
-the item run plus one item gap per end, `full` spans the whole
-strip. Hug falls back to full while the items overflow and
-scroll. Inert under `boxed` (the Settings control greys there).
-Per-layout override: `monocle.set_app_bar_background_fit` /
-`scroll.set_app_bar_background_fit`.
-
-**Example:**
-
-```lua
-app_bar.set_background_fit("full")
-```
 
 ### app_bar.set_active_indicator
 
@@ -1967,36 +2123,6 @@ with `background_style`:
 
 ```lua
 app_bar.set_active_indicator("outline")
-```
-
-### app_bar.set_item_size
-
-**Expects:** a number (points); `0` means auto (default).
-
-**Does:** sets the width (horizontal) or height (vertical) of each
-item; every item is the same size. Auto measures each item's
-rendered width (icon + name at the effective font) and sizes the
-slot to the widest, so one long title widens every slot. The
-slot is clamped to at least the icon square (icons never clip)
-and at most a quarter of the bar; items that then do not fit the
-strip scroll instead of shrinking.
-
-**Example:**
-
-```lua
-app_bar.set_item_size(0)
-```
-
-### app_bar.set_item_gap
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the gap between items.
-
-**Example:**
-
-```lua
-app_bar.set_item_gap(6)
 ```
 
 ### app_bar.set_content
@@ -2031,9 +2157,14 @@ outside the range are clamped.
 **Does:** sets how much of a window's title an item shows;
 longer titles are cut at the end and marked with an ellipsis. A
 title is also cut where it does not fit its slot; with
-`icon_and_title` only the title shrinks, never the icon. With
-`item_size` left at `0` the cap also bounds the slot (see
-`app_bar.set_item_size`).
+`icon_and_title` only the title shrinks, never the icon.
+
+:::unreleased
+Every slot is as wide as the widest item, at least the icon
+square and at most a quarter of the bar, so the cap is the App
+Bar's one size control; items that then do not fit scroll
+instead of shrinking.
+:::
 
 **Example:**
 
@@ -2060,34 +2191,6 @@ Hover item); apps without a glyph keep their icon.
 
 ```lua
 app_bar.set_icon_source("app_font")
-```
-
-### app_bar.set_font_size
-
-**Expects:** a number (points); `0` means auto (default).
-
-**Does:** if `0`, text scales with bar thickness; any positive
-value pins the font size.
-
-**Example:**
-
-```lua
-app_bar.set_font_size(0)
-```
-
-### app_bar.set_corner_roundness
-
-**Expects:** a number 0–100 (percentage; default 50).
-
-**Does:** sets the corner rounding of boxed items as a percentage,
-where 0 = square and 100 = a full capsule (radius = thickness/2).
-It only affects `boxed` items (ignored for `plain`). Values above
-`100` render as `100`.
-
-**Example:**
-
-```lua
-app_bar.set_corner_roundness(50)
 ```
 
 ### app_bar.set_dim_factor
@@ -2141,7 +2244,7 @@ app_bar.set_item_color("#EAF3EE")
 dark moss at 70% opacity; every bundled palette's bar fill
 carries that same alpha. With the `liquid_glass` finish on, it
 also tints the glass, and a dark fill selects the dark glass
-variant (see `app_bar.set_liquid_glass`). Under glass the
+variant (see [Liquid Glass](#kiwishelfset_liquid_glass)). Under glass the
 backdrop's opacity is held under a ceiling: a fill below it
 renders as you picked it, a more opaque
 one is capped, and the stored value is unchanged either way
@@ -2149,7 +2252,7 @@ one is capped, and the stored value is unchanged either way
 
 While macOS's Reduce transparency is on, Boxed/Plain draw it at
 full alpha instead
-([app_bar.set_liquid_glass](#app_barset_liquid_glass)).
+([Liquid Glass](#kiwishelfset_liquid_glass)).
 
 **Example:**
 
@@ -2235,26 +2338,30 @@ app_bar.set_group_badge_text_color("#FFFFFF")
 
 ### Per-Layout App Bar Overrides
 
-Each bar-hosting layout (monocle, scrolling) can override any
-individual bar field for itself. Only these two layouts show a
-bar, so only they expose `set_app_bar_*`. Unset fields inherit
-the global value. The available overrides are the same setters
-prefixed with the layout name:
+:::unreleased
+Each bar-hosting layout (monocle, scrolling) can override the
+App Bar's own fields for itself — `enabled`, `active_indicator`,
+`content`, `title_cap`, `icon_source`, `group_adjacent_windows`,
+`dim_factor` and the colours. Only these two layouts show a bar,
+so only they expose `set_app_bar_*`. Unset fields inherit the
+global value. [KiwiShelf](#kiwishelf)'s fields take no
+per-layout override. The overrides are the same setters prefixed
+with the layout name:
 
-- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_edge`,
-  `monocle.set_app_bar_thickness`,
-  `monocle.set_app_bar_outer_margin`, etc.
-- `scroll.set_app_bar_enabled`, `scroll.set_app_bar_background_style`,
+- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_content`,
+  `monocle.set_app_bar_title_cap`, etc.
+- `scroll.set_app_bar_enabled`,
   `scroll.set_app_bar_active_indicator`,
-  `scroll.set_app_bar_corner_roundness`, etc.
+  `scroll.set_app_bar_fill_color`, etc.
 
 **Example:**
 
 ```lua
 monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
-scroll.set_app_bar_background_style("plain")  -- override for scrolling
+scroll.set_app_bar_content("icon")  -- override for scrolling
 ```
+:::
 
 ## Space Bar
 
@@ -2271,138 +2378,29 @@ holding the focused window stays collapsed and takes the focused
 accent. The user guide's [Space Bar](user-guide.md#space-bar)
 section covers the badges and the drag-onto-a-Space gesture.
 
-The bar is layout-independent and reserves its area on its edge
-before any layout runs; every setting is global, with no
-per-layout override. On an edge shared with the App Bar the Space
-Bar is carved first, on the screen side, the App Bar inside it on
-the window side, and the two reservations add. While a
-native-fullscreen app holds the screen the bar hides; it returns
-with the Desktop.
+:::unreleased
+The bar is layout-independent and sits on
+[KiwiShelf](#kiwishelf), which sets its edge, thickness, margins
+and background; every `space_bar.*` setting is global, with no
+per-layout override. While a native-fullscreen app holds the
+screen the bar hides; it returns with the Desktop.
+:::
 
 ### space_bar.set_enabled
 
 **Expects:** boolean (default `true`).
 
-**Does:** shows or hides the Space Bar. A disabled bar reserves
-no area.
+**Does:** shows or hides the Space Bar.
+
+:::unreleased
+With the Space Bar off and no layout showing an App Bar,
+[KiwiShelf](#kiwishelf) reserves no area.
+:::
 
 **Example:**
 
 ```lua
 space_bar.set_enabled(true)
-```
-
-### space_bar.set_edge
-
-**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"top"`).
-
-**Does:** sets the screen edge the bar occupies. Sharing an
-edge with the App Bar is supported: the Space Bar stays
-screen-facing, the App Bar window-facing.
-
-**Example:**
-
-```lua
-space_bar.set_edge("left")
-```
-
-### space_bar.set_alignment
-
-**Expects:** `"start"`, `"center"`, or `"end"`
-(default `"center"`).
-
-**Does:** places the Space items (and the front-app segment)
-along the bar. Values are edge-relative — a left bar's
-`start` is its top.
-
-**Example:**
-
-```lua
-space_bar.set_alignment("center")
-```
-
-### space_bar.set_thickness
-
-**Expects:** thickness in points (default `40`; anything below
-`20` is raised to it).
-
-**Does:** sets the bar's thickness, carved out of the layout.
-
-**Example:**
-
-```lua
-space_bar.set_thickness(28)
-```
-
-### space_bar.set_outer_margin
-
-:::unreleased
-**Expects:** points (default `0`; a negative value is raised to
-it).
-
-**Does:** sets the bar's distance from the screen border; `0` is
-flush. The rule is `app_bar.set_outer_margin`'s, one bar over.
-
-**Example:**
-
-```lua
-space_bar.set_outer_margin(6)
-```
-:::
-
-### space_bar.set_inner_margin
-
-:::unreleased
-**Expects:** points (default `0`; a negative value is raised to
-it).
-
-**Does:** adds room on the bar's window side, on top of the
-windows' outer gap — `app_bar.set_inner_margin`'s rule.
-
-**Example:**
-
-```lua
-space_bar.set_inner_margin(4)
-```
-:::
-
-### space_bar.set_item_size
-
-**Expects:** length in points; `0` (default) = auto.
-
-**Does:** pins every Space item to one length along the bar.
-Auto sizes each item to its content (identifier + glyphs).
-
-**Example:**
-
-```lua
-space_bar.set_item_size(0)
-```
-
-### space_bar.set_item_gap
-
-**Expects:** points (default `6`).
-
-**Does:** sets the spacing between Space items.
-
-**Example:**
-
-```lua
-space_bar.set_item_gap(6)
-```
-
-### space_bar.set_font_size
-
-**Expects:** points; `0` (default) = auto (scales with
-thickness).
-
-**Does:** pins the identifier / glyph text size.
-
-**Example:**
-
-```lua
-space_bar.set_font_size(0)
 ```
 
 ### space_bar.set_glyph_cap
@@ -2437,49 +2435,6 @@ app with no image falls back to the App Font either way.
 space_bar.set_icon_source("app_font")
 ```
 
-### space_bar.set_background_style
-
-**Expects:** `"boxed"` or `"plain"` (default `"plain"`).
-
-**Does:** boxes each Space item, or draws all items on one
-shared strip — same vocabulary as the App Bar. Liquid Glass is a
-separate finish, `space_bar.set_liquid_glass`.
-
-**Example:**
-
-```lua
-space_bar.set_background_style("boxed")
-```
-
-### space_bar.set_liquid_glass
-
-**Expects:** a boolean (default `true`).
-
-**Does:** lays the macOS 26 Liquid Glass finish over the Space
-items — see `app_bar.set_liquid_glass` for the full behavior
-(orthogonal to the background style, tinted by `fill_color`,
-hidden and inert below macOS 26).
-
-**Example:**
-
-```lua
-space_bar.set_liquid_glass(true)
-```
-
-### space_bar.set_background_fit
-
-**Expects:** `"full"` or `"hug"` (default `"hug"`).
-
-**Does:** how far the shared plate reaches under `plain` (and the
-Liquid Glass finish) — see `app_bar.set_background_fit`; same
-vocabulary, same boxed inertness and overflow fallback.
-
-**Example:**
-
-```lua
-space_bar.set_background_fit("hug")
-```
-
 ### space_bar.set_active_indicator
 
 **Expects:** `"outline"`, `"edge_mark"`, or `"gap"` (default
@@ -2493,19 +2448,6 @@ is never hidden.
 
 ```lua
 space_bar.set_active_indicator("outline")
-```
-
-### space_bar.set_corner_roundness
-
-**Expects:** percent 0–100 (default `50`).
-
-**Does:** corner rounding as a percentage of the maximum, like
-the App Bar.
-
-**Example:**
-
-```lua
-space_bar.set_corner_roundness(50)
 ```
 
 ### space_bar.set_dim_factor
@@ -2551,14 +2493,19 @@ title yet falls back to its app's name. On vertical (left/right)
 bars the segment is icon-only and the divider flips to a
 horizontal rule.
 
+:::unreleased
+The segment shows only while no App Bar is shown on that screen.
+:::
+
 **Example:**
 
 ```lua
 space_bar.set_show_front_app(false)
 ```
 
-### space_bar.set_title_cap
+### space_bar.set_front_app_title_cap
 
+:::unreleased
 **Expects:** a character count, 8–80 (default `10`). Values
 outside the range are clamped.
 
@@ -2573,8 +2520,9 @@ title.
 **Example:**
 
 ```lua
-space_bar.set_title_cap(25)
+space_bar.set_front_app_title_cap(25)
 ```
+:::
 
 ### space_bar.set_hide_empty
 
@@ -4737,9 +4685,8 @@ stripped, grouped by namespace — `set_gap_override` becomes
                 "new_window_placement": "last" },
       "monocle": { "orientation": "horizontal",
                    "app_bar": { "enabled": true,
-                                "edge": "top",
-                                "background_style": "boxed",
-                                "item_size": 0 } },
+                                "content": "icon",
+                                "active_indicator": "edge_mark" } },
       "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,

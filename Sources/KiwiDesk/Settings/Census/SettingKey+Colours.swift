@@ -2,7 +2,7 @@
 
 enum ColoursKey: String, CaseIterable, Hashable {
     case liquidGlassMaster =
-        "settings.appBarStyle.liquidGlass (master)"
+        "settings.kiwishelf.liquidGlass (master)"
     case shortcutPanelLiquidGlass =
         "settings.shortcutPanelLiquidGlass"
     case animationsMaster = "settings.animations (master)"

@@ -95,15 +95,12 @@ extension InterpolatedLabelTests {
         // way from the start.
         "monocle.hide_style.help": 2,
         "space_override.slot_size.help": 4,
-        "app_bar.alignment.label.help": 2,
-        "app_bar.background_fit.boxed_only": 1,
         "app_bar.color.gap_only": 1,
         "app_bar.icon_source.help": 5,
         "app_bar.icon_source.title_only": 2,
         "space_bar.title_cap.front_app_only": 1,
         "lua_editor.adopt_help.body": 1,
         "shortcuts.import.help": 1,
-        "space_bar.alignment.label.help": 2,
         "space_bar.background_fit.boxed_only": 1,
         "space_bar.color.focused_item.help": 2,
         "space_bar.icon_source.help": 2,
@@ -122,7 +119,7 @@ extension InterpolatedLabelTests {
         // Its Bars-page twin joins the register for the same
         // change.
         "colors.app_bar_off.help": 2,
-        "app_bar.no_layout.help": 1,
+        "app_bar.no_layout.shelf_help": 2,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
         // says tints the glass, rather than quoting the word —
@@ -161,7 +158,18 @@ extension InterpolatedLabelTests {
         "update.window.keys_hint": 1,
         // The Fit rows' own reason on the Gaps card (#1360).
         "border.fit_gaps.disabled": 1,
-        "space_bar.disabled.help": 1,
+        "space_bar.disabled.shelf_help": 2,
+        // #1517: the KiwiShelf card's frames, authored
+        // interpolating from the start.
+        "kiwishelf.alignment.label.help": 2,
+        "kiwishelf.alignment.note.start": 1,
+        "kiwishelf.alignment.note.end": 1,
+        "kiwishelf.background_style.label.help": 2,
+        "kiwishelf.background_fit.label.help": 2,
+        "kiwishelf.one_bar.help": 1,
+        "app_bar.content.vertical_only.shelf": 2,
+        "bars.app_bar.shelf_caption": 2,
+        "kiwishelf.show.help": 2,
         "scroll_grid.scroll_duration.animation_off": 1,
         "monocle.flip_duration.flip_off": 1,
         "track.auto_tracks.limit_inert": 1,

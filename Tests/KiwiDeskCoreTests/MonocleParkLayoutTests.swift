@@ -149,11 +149,13 @@ struct MonocleParkLayoutTests {
     @Test("The sliver clears an enabled bottom App Bar strip")
     func parkClearsTheBarStrip() throws {
         // The bar renders ABOVE windows on its edge and
-        // defaults ENABLED at the bottom — a park anchored to
-        // the raw bounds would hide the sliver underneath it
-        // (#881 review round).
+        // defaults ENABLED — a park anchored to the raw bounds
+        // would hide the sliver underneath it (#881 review
+        // round).
         var context = makeContext()
         context.monocle.appBar.enabled = true
+        // Pinned: the shelf's default edge is top (#1517).
+        context.appBarStyle.edge = .bottom
         context.focused = w1
         let strip = try #require(
             context.monocle.barFrame(

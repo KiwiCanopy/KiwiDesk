@@ -440,15 +440,18 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 
 ## Bars
 
-**Thickness** runs 20–80 pt in both cards; Lua
-([`app_bar.set_thickness`](lua-reference.md#app_barset_thickness),
-[`space_bar.set_thickness`](lua-reference.md#space_barset_thickness))
+:::unreleased
+**Thickness** runs 20–80 pt on the **KiwiShelf** card; Lua
+([`kiwishelf.set_thickness`](lua-reference.md#kiwishelfset_thickness))
 takes any value from 20 up.
+:::
 
 ### App Bar
 
+:::unreleased
 The App Bar renders only in **Monocle** and **Scrolling**; its
-card has no on/off row, the two **Show it in** switches are its
+card has no on/off row, the KiwiShelf card's **App Bar in
+Monocle** and **App Bar in Scrolling** switches are its
 visibility. Drag an item to reorder the windows;
 a grouped item expands into its members on click. Styling it
 differently per layout is Lua-only: every `app_bar.*` field has a
@@ -457,6 +460,7 @@ App Bar overrides](lua-reference.md#per-layout-app-bar-overrides)).
 **Liquid Glass** is one switch for both bars and the shortcuts
 panel (**Colours & Animations**), tinted by each bar's Fill; on
 macOS before 26 the Boxed or Plain shape draws underneath.
+:::
 
 On by default, on all three surfaces. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,

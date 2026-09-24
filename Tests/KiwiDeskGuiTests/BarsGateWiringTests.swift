@@ -82,6 +82,7 @@ struct BarsGateWiringTests {
         for path in [
             "Components/Bars/AppBarCard.swift",
             "Components/Bars/SpaceBarCard.swift",
+            "Components/Bars/KiwiShelfCard+Placement.swift",
             "Components/Colors/AdvancedColorRow+Bars.swift",
         ] {
             #expect(
@@ -98,13 +99,16 @@ struct BarsGateWiringTests {
             "Components/Bars/AppBarCard.swift",
             "Components/Bars/AppBarCard+Rows.swift",
             "Components/Bars/SpaceBarCard.swift",
+            "Components/Bars/KiwiShelfCard.swift",
+            "Components/Bars/KiwiShelfCard+Placement.swift",
             "Components/Colors/AdvancedColorRow+Bars.swift",
             "Components/Colors/BarColorCards.swift",
         ]
         for key in [
-            "app_bar.no_layout.help",
-            "space_bar.disabled.help",
+            "app_bar.no_layout.shelf_help",
+            "space_bar.disabled.shelf_help",
             "app_bar.color.gap_only",
+            "kiwishelf.one_bar.help",
         ] {
             #expect(
                 help.contains(key),

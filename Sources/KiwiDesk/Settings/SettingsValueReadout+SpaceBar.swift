@@ -14,36 +14,6 @@ extension SettingsValueReadout {
         switch key {
         case .spaceBarEnabled:
             return spaceBarOnOffRow(census, o.enabled, n.enabled)
-        case .spaceBarEdge:
-            return spaceBarChoiceRow(
-                census,
-                o.edge,
-                n.edge,
-                AppBarOptions.edge
-            )
-        case .spaceBarAlignment:
-            return spaceBarChoiceRow(
-                census,
-                o.alignment,
-                n.alignment,
-                AppBarOptions.alignment
-            )
-        case .spaceBarBackground:
-            return spaceBarChoiceRow(
-                census,
-                o.backgroundStyle,
-                n.backgroundStyle,
-                AppBarOptions.backgroundStyle
-            )
-        case .spaceBarLiquidGlass:
-            return spaceBarOnOffRow(census, o.liquidGlass, n.liquidGlass)
-        case .spaceBarBackgroundFit:
-            return spaceBarChoiceRow(
-                census,
-                o.backgroundFit,
-                n.backgroundFit,
-                AppBarOptions.backgroundFit
-            )
         case .spaceBarActiveIndicator:
             return spaceBarChoiceRow(
                 census,
@@ -72,55 +42,17 @@ extension SettingsValueReadout {
                 spaceBarSeconds(o.springDelay),
                 spaceBarSeconds(n.springDelay)
             )
-        case .spaceBarThickness:
-            return spaceBarPointsRow(census, o.thickness, n.thickness)
-        case .spaceBarItemSizeAuto:
-            return spaceBarOnOffRow(
-                census,
-                o.itemSize == 0,
-                n.itemSize == 0
-            )
-        case .spaceBarItemSize:
-            return spaceBarAutoPointsRow(census, o.itemSize, n.itemSize)
-        case .spaceBarItemGap:
-            return spaceBarPointsRow(census, o.itemGap, n.itemGap)
-        case .spaceBarOuterMargin:
-            return spaceBarPointsRow(
-                census,
-                o.outerMargin,
-                n.outerMargin
-            )
-        case .spaceBarInnerMargin:
-            return spaceBarPointsRow(
-                census,
-                o.innerMargin,
-                n.innerMargin
-            )
-        case .spaceBarFontSizeAuto:
-            return spaceBarOnOffRow(
-                census,
-                o.fontSize == 0,
-                n.fontSize == 0
-            )
-        case .spaceBarFontSize:
-            return spaceBarAutoPointsRow(census, o.fontSize, n.fontSize)
         case .spaceBarGlyphCap:
             return spaceBarRow(
                 census,
                 trimmed(Double(o.glyphCap)),
                 trimmed(Double(n.glyphCap))
             )
-        case .spaceBarTitleCap:
+        case .spaceBarFrontAppTitleCap:
             return spaceBarRow(
                 census,
-                trimmed(Double(o.titleCap)),
-                trimmed(Double(n.titleCap))
-            )
-        case .spaceBarCornerRoundness:
-            return spaceBarRow(
-                census,
-                percent(Double(o.cornerRoundness) / 100),
-                percent(Double(n.cornerRoundness) / 100)
+                trimmed(Double(o.frontAppTitleCap)),
+                trimmed(Double(n.frontAppTitleCap))
             )
         case .spaceBarDimFactor:
             return spaceBarRow(
@@ -162,15 +94,12 @@ extension SettingsValueReadout {
                 o.groupBadgeTextColor,
                 n.groupBadgeTextColor
             )
-        case .copyAppearance:
-            // An action, not stored state — nothing to diff.
-            return []
         }
     }
 }
 
 extension SettingsValueReadout {
-    private static func spaceBarRow(
+    static func spaceBarRow(
         _ census: SettingKey,
         _ old: String,
         _ new: String
@@ -185,7 +114,7 @@ extension SettingsValueReadout {
         ]
     }
 
-    private static func spaceBarOnOffRow(
+    static func spaceBarOnOffRow(
         _ census: SettingKey,
         _ old: Bool,
         _ new: Bool
@@ -193,7 +122,7 @@ extension SettingsValueReadout {
         spaceBarRow(census, onOff(old), onOff(new))
     }
 
-    private static func spaceBarPointsRow(
+    static func spaceBarPointsRow(
         _ census: SettingKey,
         _ old: CGFloat,
         _ new: CGFloat
@@ -202,7 +131,7 @@ extension SettingsValueReadout {
     }
 
     /// Readout for size sliders with 0 as Automatic sentinel.
-    private static func spaceBarAutoPointsRow(
+    static func spaceBarAutoPointsRow(
         _ census: SettingKey,
         _ old: CGFloat,
         _ new: CGFloat
@@ -210,7 +139,7 @@ extension SettingsValueReadout {
         spaceBarRow(census, autoPoints(old), autoPoints(new))
     }
 
-    private static func spaceBarChoiceRow<T: Equatable>(
+    static func spaceBarChoiceRow<T: Equatable>(
         _ census: SettingKey,
         _ old: T,
         _ new: T,

@@ -217,14 +217,14 @@ struct AppBarCommandTests {
         let core = makeCore()
         #expect(
             core.execute(
-                "app_bar.set_thickness",
+                "kiwishelf.set_thickness",
                 args: [.number(44)]
             ).isSuccess
         )
         #expect(core.tiler.settings.kiwishelf.thickness == 44)
         #expect(
             core.execute(
-                "app_bar.set_background_style",
+                "kiwishelf.set_background_style",
                 args: [.string("plain")]
             ).isSuccess
         )
@@ -313,13 +313,13 @@ struct AppBarCommandTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "app_bar.set_background_style",
+                "kiwishelf.set_background_style",
                 args: [.string("triangles")]
             ).isSuccess
         )
         #expect(
             !core.execute(
-                "app_bar.set_thickness",
+                "kiwishelf.set_thickness",
                 args: [.string("thick")]
             ).isSuccess
         )

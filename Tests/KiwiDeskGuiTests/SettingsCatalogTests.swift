@@ -98,7 +98,10 @@ struct SettingsCatalogTests {
         // Style drawer.
         // 132 since #1608: App Rules is two cards, one per store.
         // 131 since #1393: the Profile shortcuts banner left.
-        #expect(allEntries.count == 131)
+        // 120 since #1517: the bars' Style drawers keep only
+        // their own 9 rows; the KiwiShelf card, its two drawers
+        // and its 8 drawer rows join.
+        #expect(allEntries.count == 120)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

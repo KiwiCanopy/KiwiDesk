@@ -3,7 +3,10 @@ import SwiftUI
 
 /// Content configuration rows for AppBarCard: content, title cap, icon style.
 extension AppBarCard {
-    var contentRow: some View {
+    /// The content picker; inert on a vertical edge, which is set
+    /// on the KiwiShelf card, so the reason is drawn beside it
+    /// rather than left to the dim (#815, #1517).
+    @ViewBuilder var contentRow: some View {
         SegmentedPicker(
             L("app_bar.content.label", "Content"),
             selection: style.content,
@@ -12,12 +15,27 @@ extension AppBarCard {
         .modifier(
             GreyOut(
                 active: gates.everyShownBarVertical,
-                help: L(
-                    "app_bar.content.vertical_only",
-                    "Left and right bars always show icons "
-                        + "only."
-                )
+                help: contentVerticalReason
             )
+        )
+        if gates.everyShownBarVertical,
+            GateReasonPlacement.owesInlineReason(
+                .appBar(.appBarContent)
+            )
+        {
+            Text(contentVerticalReason)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink2)
+        }
+    }
+
+    private var contentVerticalReason: String {
+        L(
+            "app_bar.content.vertical_only.shelf",
+            "Left and right edges show icons only — the edge is "
+                + "the \u{201C}%1$@\u{201D} in %2$@.",
+            L("kiwishelf.edge.label", "Position"),
+            L("bars.switch.kiwishelf", "KiwiShelf")
         )
     }
 

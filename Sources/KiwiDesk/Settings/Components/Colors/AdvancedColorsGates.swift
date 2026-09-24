@@ -51,7 +51,7 @@ struct AdvancedColorsGates {
     /// In-chip glyphs are native images and no front-app name renders
     /// (`SpaceBarOverlay+FrontApp`).
     var focusedItemInert: Bool {
-        let style = settings.spaceBarStyle
+        let style = settings.spaceBarLook
         return style.iconSource == .appImage
             && !(style.showFrontApp && style.edge.isHorizontal)
     }

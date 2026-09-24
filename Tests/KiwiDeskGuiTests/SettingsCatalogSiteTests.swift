@@ -77,7 +77,9 @@ struct SettingsCatalogSiteTests {
         // Style drawer.
         // 126 since #1608: App Rules' second card.
         // 125 since #1393: the Profile shortcuts banner left.
-        #expect(names.count == 125)
+        // 114 since #1517: the bars' shared Style rows moved to
+        // the KiwiShelf card, one row per field.
+        #expect(names.count == 114)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

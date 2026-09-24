@@ -6,65 +6,6 @@ import SwiftUI
 /// (not private) only because the `row(for:)` switch lives in
 /// the sibling extension file.
 extension SpaceBarCard {
-    /// Space Bar enable toggle (#678, `StickyMarkEditor`).
-    var showToggle: some View {
-        ToggleRow(
-            label: L("space_bar.enabled", "Show Space Bar"),
-            isOn: style.enabled,
-            help: L(
-                "space_bar.enabled.help",
-                "One bar per display listing that "
-                    + "display's Spaces — click a Space to "
-                    + "switch to it. The bar reserves its "
-                    + "edge in every layout."
-            )
-        )
-    }
-
-    /// Position plus the shared-edge info row directly under it (#374).
-    @ViewBuilder var edgeRow: some View {
-        SegmentedPicker(
-            L("space_bar.edge.label", "Position"),
-            selection: style.edge,
-            options: AppBarOptions.edge.map { ($0.1, $0.0) },
-            help: L(
-                "space_bar.edge.label.help",
-                "Which screen edge the Space Bar occupies. "
-                    + "Sharing an edge with the App Bar is "
-                    + "fine — the two stack."
-            )
-        )
-        if model.config.settings.spaceBarSharesEdgeWithAppBar {
-            BarSameEdgeRow(edge: style.wrappedValue.edge)
-        }
-    }
-
-    var backgroundFitRow: some View {
-        SegmentedPicker(
-            L(
-                "space_bar.background_fit.label",
-                "Background size"
-            ),
-            selection: style.backgroundFit,
-            options: AppBarOptions.backgroundFit
-                .map { ($0.1, $0.0) }
-        )
-        .modifier(
-            GreyOut(
-                // Inert when Boxed (#660, #818).
-                active: style.wrappedValue.backgroundStyle
-                    == .boxed,
-                help: L(
-                    "space_bar.background_fit.boxed_only",
-                    "\u{201C}%1$@\u{201D} draws a box per item, "
-                        + "not a shared plate, so there is "
-                        + "nothing to size.",
-                    L("app_bar.background_style.boxed", "Boxed")
-                )
-            )
-        )
-    }
-
     var iconSourceRow: some View {
         DropdownRow(
             label: L(
@@ -103,18 +44,21 @@ extension SpaceBarCard {
         }
     }
 
-    /// Front segment title length cap (#171, #818, #901, #937,
-    /// `SettingKey+SpaceBar`, `SpaceBarOverlay+FrontApp`). Greys on the toggle
-    /// alone: vertical bars announce the name via AX even when not drawn.
+    /// Front-app segment title length (#171, #818, #901, #937,
+    /// renamed by #1517). Greys on the toggle alone: vertical
+    /// bars announce the name via AX even when not drawn.
     @ViewBuilder var titleCapRow: some View {
         StepperRow(
-            label: L("space_bar.title_cap", "Title length"),
-            value: style.titleCap,
+            label: L(
+                "space_bar.front_app_title_cap",
+                "Front app title length"
+            ),
+            value: style.frontAppTitleCap,
             in: AppBarStyle.titleCapRange,
             help: L(
-                "space_bar.title_cap.help",
+                "space_bar.front_app_title_cap.help",
                 "How many characters of the focused window's "
-                    + "title the front segment shows before it "
+                    + "title the front-app segment shows before it "
                     + "is shortened."
             )
         )

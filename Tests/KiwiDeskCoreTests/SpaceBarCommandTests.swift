@@ -31,7 +31,7 @@ struct SpaceBarCommandTests {
         #expect(core.tiler.settings.spaceBarStyle.enabled)
         #expect(
             core.execute(
-                "space_bar.set_edge",
+                "kiwishelf.set_edge",
                 args: [.string("bottom")]
             ).isSuccess
         )
@@ -62,7 +62,7 @@ struct SpaceBarCommandTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "space_bar.set_edge",
+                "kiwishelf.set_edge",
                 args: [.string("start")]
             ).isSuccess
         )
