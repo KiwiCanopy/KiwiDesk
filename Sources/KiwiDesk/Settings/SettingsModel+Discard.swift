@@ -4,9 +4,14 @@ import KiwiDeskCore
 /// Destructive action staged behind unsaved-changes confirmation (#515).
 struct PendingDiscard: Identifiable {
     let id = UUID()
+    /// Dialog title; nil takes the unsaved-changes one.
+    var title: String? = nil
     let message: String
     let confirmLabel: String
     let perform: @MainActor () -> Void
+    /// Return picks Cancel, so a reflex keypress never runs a
+    /// destructive action that has no undo (#1619).
+    var cancelIsDefault = false
 }
 
 /// Discard confirmation gating logic on `SettingsModel`
@@ -29,6 +34,38 @@ extension SettingsModel {
             message: message,
             confirmLabel: confirmLabel,
             perform: action
+        )
+    }
+
+    /// Parks a profile delete behind its confirm, clean or dirty:
+    /// a profile has no undo (#1619). Staged edits fold into the
+    /// same dialog — never a second one after it.
+    func confirmingProfileDelete(
+        _ name: String,
+        perform action: @escaping @MainActor () -> Void
+    ) {
+        pendingDiscard = PendingDiscard(
+            title: L(
+                "profiles.delete.confirm.title",
+                "Delete “%1$@”?",
+                name
+            ),
+            message: isDirty
+                ? L(
+                    "profiles.delete.confirm.message_dirty",
+                    "Its Spaces, layouts, rules and shortcuts will "
+                        + "be deleted, and the edits you haven't "
+                        + "saved will be discarded. You can't undo "
+                        + "this."
+                )
+                : L(
+                    "profiles.delete.confirm.message",
+                    "Its Spaces, layouts, rules and shortcuts will "
+                        + "be deleted. You can't undo this."
+                ),
+            confirmLabel: L("profiles.delete.confirm.button", "Delete"),
+            perform: action,
+            cancelIsDefault: true
         )
     }
 

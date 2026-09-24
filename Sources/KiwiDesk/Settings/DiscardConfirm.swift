@@ -11,7 +11,8 @@ struct DiscardConfirmation: ViewModifier {
 
     func body(content: Content) -> some View {
         content.confirmationDialog(
-            L("discard.title", "Discard unsaved changes?"),
+            model.pendingDiscard?.title
+                ?? L("discard.title", "Discard unsaved changes?"),
             isPresented: Binding(
                 get: { model.pendingDiscard != nil },
                 set: { shown in
@@ -30,10 +31,10 @@ struct DiscardConfirmation: ViewModifier {
             Button(pending.confirmLabel, role: .destructive) {
                 model.confirmPendingDiscard(pending)
             }
-            Button(
-                L("discard.cancel", "Cancel"),
-                role: .cancel
-            ) {}
+            Button(L("discard.cancel", "Cancel"), role: .cancel) {}
+                .keyboardShortcut(
+                    pending.cancelIsDefault ? .defaultAction : nil
+                )
         } message: { pending in
             Text(pending.message)
         }

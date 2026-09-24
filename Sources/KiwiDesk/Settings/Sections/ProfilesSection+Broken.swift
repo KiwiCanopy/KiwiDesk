@@ -55,21 +55,9 @@ extension ProfilesSection {
                 L("config_issues.reveal", "Reveal in Finder")
             )
             // Same `reload()` tail as the healthy-row Delete, so
-            // the same discard gate (#515) — found by the
-            // structural guard, not the audit.
+            // the same confirm (#515, #1619).
             Button {
-                model.discardingEdits(
-                    message: L(
-                        "discard.delete_profile.message",
-                        "Deleting reloads the dashboard, "
-                            + "dropping the edits you haven't "
-                            + "saved."
-                    ),
-                    confirmLabel: L(
-                        "discard.delete_profile.confirm",
-                        "Discard & delete"
-                    )
-                ) {
+                model.confirmingProfileDelete(name) {
                     let neighbour = neighbourBrokenAfter(name)
                     model.deleteProfile(named: name)
                     returningRow = neighbour

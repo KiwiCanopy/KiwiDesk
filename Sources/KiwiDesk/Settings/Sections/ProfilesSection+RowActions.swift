@@ -3,8 +3,8 @@ import SwiftUI
 
 /// Profile row action controls (Load, Delete, Make Default, #515, #789, #816).
 extension ProfilesSection {
-    // Load and Delete confirm discard when edits are pending (#515);
-    // Load is the header's own (#1393).
+    // Load confirms discard when edits are pending (#515), and is
+    // the header's own (#1393); Delete always confirms (#1619).
     func loadButton(
         _ summary: ProfileSummary
     ) -> some View {
@@ -28,18 +28,7 @@ extension ProfilesSection {
 
     func deleteButton(_ name: String) -> some View {
         Button {
-            model.discardingEdits(
-                message: L(
-                    "discard.delete_profile.message",
-                    "Deleting reloads the dashboard, "
-                        + "dropping the edits you haven't "
-                        + "saved."
-                ),
-                confirmLabel: L(
-                    "discard.delete_profile.confirm",
-                    "Discard & delete"
-                )
-            ) {
+            model.confirmingProfileDelete(name) {
                 // Determine focus target before mutation (#816).
                 let neighbour = neighbourAfterDeleting(name)
                 model.deleteProfile(named: name)

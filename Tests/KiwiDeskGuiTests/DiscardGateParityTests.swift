@@ -90,8 +90,11 @@ struct DiscardGateParityTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let gated = gateClosures(in: source)
-                .joined(separator: "\n")
+            let gated =
+                (gateClosures(in: source, gate: "discardingEdits")
+                + gateClosures(in: source, gate: deleteGate)).joined(
+                    separator: "\n"
+                )
             for (call, _) in destructive {
                 let total = source.occurrences(of: call)
                 guard total > 0 else { continue }
@@ -127,6 +130,29 @@ struct DiscardGateParityTests {
         }
     }
 
+    /// A profile delete has no undo, so it takes the gate that
+    /// asks even when nothing is staged (#1619) — the plain
+    /// discard gate would run it on one click while clean.
+    @Test("a profile delete always confirms")
+    func profileDeleteTakesTheAlwaysGate() throws {
+        let call = "model.deleteProfile("
+        var total = 0
+        var confirmed = 0
+        for file in try SourceScan.swiftSources(
+            under: settingsDir
+        ) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            total += source.occurrences(of: call)
+            confirmed += gateClosures(in: source, gate: deleteGate)
+                .joined(separator: "\n")
+                .occurrences(of: call)
+        }
+        #expect(total == 2)
+        #expect(confirmed == total)
+    }
+
     /// `adoptIntoGui` is exempted from the shared gate because
     /// it carries its own dialog — so that dialog must name the
     /// loss. Pinned here, beside the exemption that depends on
@@ -146,13 +172,18 @@ struct DiscardGateParityTests {
         #expect(source.contains("model.isDirty"))
     }
 
-    /// The trailing closure of every `discardingEdits(…) { … }`
+    private let deleteGate = "confirmingProfileDelete"
+
+    /// The trailing closure of every `<gate>(…) { … }`
     /// call, found by walking `(…)` then `{…}` nesting. A flat
     /// regex cannot do this: the argument list spans lines and
     /// contains its own braces and parens inside `L(…)` strings.
-    private func gateClosures(in source: String) -> [String] {
+    private func gateClosures(
+        in source: String,
+        gate: String
+    ) -> [String] {
         let text = Array(source)
-        let needle = Array("discardingEdits")
+        let needle = Array(gate)
         var found: [String] = []
         var i = 0
         while i + needle.count <= text.count {

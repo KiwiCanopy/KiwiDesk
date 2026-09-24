@@ -652,6 +652,16 @@ SHEET, not the panel** (#859): the preset preview is a sheet
 off the card, and Profiles stays out of
 `SettingsDetailPanelOffer.offering` (`DetailPanelTests` pins the
 refusal). *Why* is
+**An action with no undo asks every time, not only while
+dirty.** Deleting a profile throws away a whole setup, so it
+parks behind `SettingsModel.confirmingProfileDelete` whether or
+not anything is staged (#1619). It rides the same one dialog: when
+edits are staged its message says they go too, never a second
+dialog after the first. Its title names the object, Delete is
+destructive, and Return picks Cancel (`cancelIsDefault`), so a
+reflex keypress deletes nothing. A Desktop binding is quick to
+set up again and stays one click.
+
 [Design decisions](design-decisions.md) ▸ the panel's object is
 the DRAFT.
 
