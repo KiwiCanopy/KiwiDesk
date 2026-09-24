@@ -112,7 +112,7 @@
   "app_rules.reach.own": "⚠ 独有规则：%1$@",
   "app_rules.reach.pair": "%1$@、%2$@",
   "app_rules.reach.popover": "%1$@ 规则的适用范围",
-  "app_rules.reach.replace_own_note": "勾选有自己规则的描述文件，会以共享规则替换它。",
+  "app_rules.reach.replace_own_note": "勾选有自己规则的描述文件，会将其规则替换为共享规则。",
   "app_rules.reach.shared_value": "⚠ 共享规则：%1$@",
   "app_rules.reach.some_profiles_note": "要只为部分描述文件设定新值，请先取消勾选“%1$@”。",
   "app_rules.reach.spoken_differs": "%1$@；%2$@",
