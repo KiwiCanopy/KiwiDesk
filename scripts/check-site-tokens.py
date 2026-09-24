@@ -1254,6 +1254,83 @@ def check_unreleased_markers(dist: pathlib.Path) -> None:
     )
 
 
+def check_typed_changelog(dist: pathlib.Path) -> None:
+    """Every typed release in `changelog.json` reached each
+    changelog page with its counts, and its scripting section
+    folded (#1542).
+
+    Reads the data the page was built from and the built pages,
+    never a restated list of titles: the page branches on each
+    section's `type`, which `scripts/changelog-sync` writes.
+
+    **Vacuous until the first typed release is published.** Before
+    2.0.0 the corpus holds no typed entry and this checks nothing;
+    it goes live on the 2.0.0 sync PR, which `changelog.yml`
+    builds, so a broken render reds the one PR that would ship it.
+    The render was checked by hand against a synthetic entry when
+    the page learned the grammar.
+    """
+    data = json.loads(
+        (REPO / "site" / "src" / "data" / "changelog.json")
+        .read_text(encoding="utf-8")
+    )
+    typed = [
+        entry
+        for entry in data.get("releases", [])
+        if any("type" in s for s in entry.get("sections") or [])
+    ]
+    if not typed:
+        print("typed changelog: no typed release yet (checks from 2.0.0)")
+        return
+    pages = [
+        dist / "changelog" / "index.html",
+        dist / "de" / "changelog" / "index.html",
+        dist / "ja" / "changelog" / "index.html",
+    ]
+    for page in pages:
+        if not page.is_file():
+            fail(f"typed changelog: {page} was not built")
+        html = re.sub(
+            r"\s+data-astro-cid-\w+", "", page.read_text(encoding="utf-8")
+        )
+        for entry in typed:
+            anchor = f'id="v-{entry["tag"]}"'
+            start = html.find(anchor)
+            if start < 0:
+                fail(f"typed changelog: {entry['tag']} missing on {page}")
+            end = html.find('class="rel"', start + len(anchor))
+            block = html[start : end if end > 0 else len(html)]
+            for section in entry.get("sections") or []:
+                title = (
+                    section["title"]
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                )
+                heading = f"{title} · {len(section['items'])}"
+                if heading not in block:
+                    fail(
+                        f"typed changelog: {entry['tag']} on {page} "
+                        f"has no heading {heading!r}"
+                    )
+                if section.get("type") == "scripting":
+                    fold = block.find("<details")
+                    if fold < 0 or block.find(heading) < fold:
+                        fail(
+                            f"typed changelog: {entry['tag']}'s "
+                            f"scripting section on {page} is not "
+                            "folded"
+                        )
+            if entry.get("heads") and "rel__heads" not in block:
+                fail(
+                    f"typed changelog: {entry['tag']}'s Before you "
+                    f"update paragraph is missing on {page}"
+                )
+    print(
+        f"typed changelog: {len(typed)} typed release(s) rendered "
+        f"on {len(pages)} page(s)"
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1275,6 +1352,7 @@ def main() -> None:
     check_var_references(dist)
     check_markdown_pipeline(dist)
     check_unreleased_markers(dist)
+    check_typed_changelog(dist)
 
 
 if __name__ == "__main__":

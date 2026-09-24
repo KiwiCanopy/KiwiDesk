@@ -63,6 +63,9 @@ const t = (k: string): string =>
 interface Section {
   title: string;
   items: string[];
+  // Present on a typed release's sections (#1542); the one field
+  // this page branches on, the title only ever being displayed.
+  type?: string;
 }
 interface Release {
   version: string;
@@ -74,13 +77,7 @@ interface Release {
   summary?: string;
   heads?: string;
   sections?: Section[];
-  typed?: boolean;
 }
-
-// From 2.0.0 the sections are the four types (#1542). The one
-// written for scripters starts closed, as in the update window:
-// everyone can open it, nobody has to scroll past it.
-const SCRIPTING = "Lua & CLI";
 
 const releases = (changelog.releases as Release[]).filter(
   (release) =>
@@ -92,6 +89,17 @@ const releases = (changelog.releases as Release[]).filter(
 // and no block structure — the sections ARE the block structure,
 // and they arrive parsed. Build-time only: no client JS, and the
 // source is our own release bodies rather than visitor input.
+// Raw HTML in a body is shown as text, as `appcast-sync`'s
+// `inline()` shows it, so the page and the update window agree.
+marked.use({
+  renderer: {
+    html: (token) =>
+      token.text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;"),
+  },
+});
 const inline = (md: string): string => marked.parseInline(md) as string;
 
 // The date a visitor reads, in their own locale. The ISO string in
@@ -171,28 +179,32 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
             {readable(release.date)}
           </time>
           {index === 0 && (
-            <span class="tag tag--latest">
+            <span class="tag tag--latest" lang={lang}>
               {t("changelog_latest")}
             </span>
           )}
           {release.prerelease && (
-            <span class="tag">{t("changelog_beta")}</span>
+            <span class="tag" lang={lang}>{t("changelog_beta")}</span>
           )}
         </header>
 
         {release.summary && (
-          <p class="rel__summary" set:html={inline(release.summary)} />
+          <p class="rel__summary md" set:html={inline(release.summary)} />
         )}
 
         {release.heads && (
-          <p class="rel__heads">
-            <strong>{t("changelog_before_update")}</strong>{" "}
+          <p class="rel__heads md">
+            <strong class="rel__heads-label" lang={lang}>
+              {t("changelog_before_update")}
+            </strong>
             <span set:html={inline(release.heads)} />
           </p>
         )}
 
+        {/* The scripting section starts closed, as in the update
+            window (#1542): open to everyone, in nobody's way. */}
         {(release.sections ?? []).map((section) =>
-          release.typed && section.title === SCRIPTING ? (
+          section.type === "scripting" ? (
             <details class="grp grp--fold">
               <summary>
                 <h3>{section.title} · {section.items.length}</h3>
@@ -207,7 +219,7 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
             <div class="grp">
               <h3>
                 {section.title}
-                {release.typed && ` · ${section.items.length}`}
+                {section.type && ` · ${section.items.length}`}
               </h3>
               <ul>
                 {section.items.map((item) => (
@@ -224,7 +236,7 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
           )}
 
         <a class="rel__out" href={release.url} target="_blank"
-          rel="noopener">
+          rel="noopener" lang={lang}>
           {t("changelog_full_list")} ↗
         </a>
       </section>
@@ -346,9 +358,8 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
     font-size: 0.95rem;
     line-height: 1.55;
   }
-  .rel__heads :global(code) {
-    font-family: var(--mono);
-    font-size: 0.9em;
+  .rel__heads-label {
+    margin-inline-end: 0.35em;
   }
   .grp--fold summary {
     cursor: pointer;
@@ -361,11 +372,11 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
     display: inline;
   }
   .grp--fold summary::before {
-    content: "▸ ";
+    content: "▸ " / "";
     color: var(--text-dim);
   }
   .grp--fold[open] summary::before {
-    content: "▾ ";
+    content: "▾ " / "";
   }
   .grp--fold ul {
     margin-top: 0.55rem;
@@ -396,10 +407,12 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
   .grp li {
     line-height: 1.6;
   }
-  .grp li :global(strong) {
+  .grp li :global(strong),
+  .md :global(strong) {
     color: var(--text);
   }
-  .grp li :global(code) {
+  .grp li :global(code),
+  .md :global(code) {
     font-family: var(--mono);
     font-size: 0.9em;
     padding: 0.1em 0.35em;

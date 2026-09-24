@@ -629,8 +629,8 @@ Two consequences fall out, both structural rather than stylistic:
   is fixed. A second sentence is earned only when one line
   cannot say it — a default that changed, a control to go and
   find — and never by the diagnosis, which is the PR's (owner
-  ruling). The whole block should read in one screen of
-  KiwiDesk's update window (#1542).
+  ruling). The whole block should read in one screen of the
+  update window.
 - **A site change is news only when a visitor would come for
   it.** A new page, a new language, a changed download earns a
   line. A heading that now fits its column, a corrected term, a
@@ -641,7 +641,7 @@ Two consequences fall out, both structural rather than stylistic:
   that.
 
 **The sections are typed: New, Improved, Fixed, Lua & CLI
-(#1542, owner 2026-09-24).** This reverses the earlier ruling
+(#1542).** This reverses the earlier ruling
 that a release names its own sections. That ruling's argument
 was that fixed buckets split one story three ways: 0.9.7's
 multi-screen Desktops was at once new, improved and a fix. It
@@ -670,8 +670,7 @@ Three consequences:
   was never going back.
 
 Releases before 2.0.0 keep the free titles they were published
-with. `scripts/changelog-sync` holds the grammar and refuses a
-title outside the four.
+with.
 
 This binds whichever surface carries the notes: the GitHub
 release body is the source, and the changelog page (#873) and

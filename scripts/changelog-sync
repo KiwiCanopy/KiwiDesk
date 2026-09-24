@@ -61,18 +61,22 @@ DATA_FILE = ROOT / "site" / "src" / "data" / "changelog.json"
 # human wrote; what follows is `--generate-notes`' own output,
 # which stays on the release rather than being mirrored here.
 
-# From 2.0.0 the sections are TYPED (#1542, revising the
-# 2026-08-19 free-title ruling): readers scan a release by
-# question — "what's new?", "was my bug fixed?" — so the titles
-# are this fixed list, in this order, each change under exactly
-# one. `docs/design-decisions.md` ▸ *Release notes are written for
-# the person installing* carries the argument. Releases before
-# `TYPED_FROM` keep the free titles they were published with.
+# From 2.0.0 the sections are typed, in this order (#1542;
+# design-decisions ▸ *Release notes are written for the person
+# installing*). Each carries its machine `type` into the data, and
+# consumers branch on that, never on the displayed title.
+# Releases before `TYPED_FROM` keep their free titles.
 HIGHLIGHTS_HEADING = "Highlights"
-TYPED_SECTIONS = ("New", "Improved", "Fixed", "Lua & CLI")
+SECTION_TYPES = (
+    ("New", "new"),
+    ("Improved", "improved"),
+    ("Fixed", "fixed"),
+    ("Lua & CLI", "scripting"),
+)
+TYPED_SECTIONS = tuple(title for title, _ in SECTION_TYPES)
 TYPED_FROM = (2, 0, 0)
-# The one paragraph a typed summary may end in: what breaks for
-# someone updating. Its text travels as the entry's `heads`.
+# The paragraph a typed summary may close in: what changes for
+# everyone who updates. Its text travels as the entry's `heads`.
 HEADS_MARKER = "**Before you update:**"
 
 _H1 = re.compile(r"^#(?!#)")
@@ -103,6 +107,20 @@ _ISSUE_REF = re.compile(
 
 # A tag this project cuts: `v` + semantic version.
 _TAG = re.compile(r"^v(?P<version>\d+\.\d+\.\d+)$")
+# The version a tag carries, read off its leading `vX.Y.Z` so a
+# prerelease suffix still orders among its neighbours.
+_TAG_VERSION = re.compile(r"^v?(?P<version>\d+\.\d+\.\d+)")
+
+
+def tag_version(tag: str | None) -> tuple[int, ...] | None:
+    """The one reading of how old a tag is, for the grammar cut
+    and the sort alike; None when the tag carries no version."""
+    match = _TAG_VERSION.match(tag or "")
+    if not match:
+        return None
+    return tuple(
+        int(part) for part in match.group("version").split(".")
+    )
 
 
 class NotesError(Exception):
@@ -294,16 +312,13 @@ def split_body(body: str) -> tuple[bool, list[str], list[str]]:
 
 
 def is_typed(tag: str | None) -> bool:
-    """Whether a release is held to the typed grammar. A body
-    with no tag is a DRAFT being checked (`--body`), and a draft
-    is always a new release."""
-    match = _TAG.match(tag or "")
-    if not match:
+    """Whether a release is held to the typed grammar. No tag at
+    all is a DRAFT being checked (`--body`), and a draft is a new
+    release; a tag carrying no version sorts oldest and reads as
+    history."""
+    if tag is None:
         return True
-    version = tuple(
-        int(part) for part in match.group("version").split(".")
-    )
-    return version >= TYPED_FROM
+    return (tag_version(tag) or (0, 0, 0)) >= TYPED_FROM
 
 
 def parse_curated(
@@ -457,8 +472,8 @@ def parse_curated(
         if len(marked) > 1:
             problems.append(
                 f"{len(marked)} `{HEADS_MARKER}` paragraphs. "
-                "One per release, listing everything that "
-                "breaks."
+                "One per release, saying what changes for "
+                "everyone who updates."
             )
         elif marked:
             if marked[0] != len(written) - 1:
@@ -478,7 +493,7 @@ def parse_curated(
     if not summary:
         problems.append(
             f"no summary: `## {HIGHLIGHTS_HEADING}` must be "
-            "followed by a sentence or two saying what the "
+            "followed by two or three sentences saying what the "
             "release is about, before the first `###`."
         )
     if not sections:
@@ -707,9 +722,13 @@ def build_entry(
     # Absent, never empty, like `download`: readers test the key.
     if heads:
         entry["heads"] = heads
-    entry["sections"] = sections
     if is_typed(tag):
-        entry["typed"] = True
+        kinds = dict(SECTION_TYPES)
+        sections = [
+            {**section, "type": kinds[section["title"]]}
+            for section in sections
+        ]
+    entry["sections"] = sections
     return entry, ""
 
 
@@ -724,15 +743,10 @@ def _sort_key(entry: dict) -> tuple:
     release and is what "newest" means on a changelog anyway. The
     version tuple stays as the tiebreak for two releases
     published the same day."""
-    match = _TAG.match(entry["tag"])
-    version = (
-        tuple(
-            int(part) for part in match.group("version").split(".")
-        )
-        if match
-        else (0, 0, 0)
+    return (
+        entry.get("date", ""),
+        tag_version(entry["tag"]) or (0, 0, 0),
     )
-    return (entry.get("date", ""), version)
 
 
 def write(entries: list[dict], output: str | None = None) -> None:
@@ -1003,6 +1017,11 @@ def main(argv: list[str]) -> int:
 
     if args.tag and not args.body:
         parser.error("--tag only applies to --body")
+    if args.tag and tag_version(args.tag) is None:
+        parser.error(
+            f"--tag {args.tag!r} carries no version; give the "
+            "tag the release will have, e.g. v2.0.0"
+        )
     if args.body:
         return run_body(args.body, args.tag)
     if args.all:
