@@ -39,6 +39,36 @@ struct SpaceNameRefusalTests {
         #expect(notice("   ") == nil)
     }
 
+    @Test("the field reports its notice, retires it, and speaks it")
+    func fieldWiresItsNotice() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/SpaceNameField.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let changed = SourceScan.declarationBody(
+            after: ".onChange(of: notice)",
+            in: source
+        )
+        #expect(changed?.contains("onNotice(notice)") == true)
+        let gone = SourceScan.declarationBody(
+            after: ".onDisappear",
+            in: source
+        )
+        #expect(gone?.contains("onNotice(nil)") == true)
+        let commit = try #require(
+            SourceScan.declarationBody(
+                after: "private func commit()",
+                in: source
+            )
+        )
+        let refused = SourceScan.declarationBody(
+            after: "if let refusal = takenNotice(for: draft)",
+            in: commit
+        )
+        #expect(refused?.contains("announce(refusal)") == true)
+    }
+
     @Test("the row draws what its field reports")
     func rowDrawsTheReportedNotice() throws {
         let file = SourceScan.repoRoot(from: #filePath)

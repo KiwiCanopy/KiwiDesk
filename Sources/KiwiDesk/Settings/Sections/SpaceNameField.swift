@@ -44,13 +44,16 @@ struct SpaceNameField: View {
             .frame(width: 180, alignment: .leading)
             .onSubmit(commit)
             .onChange(of: focused) { _, isFocused in
-                if isFocused {
-                    announcement?.cancel()
-                } else {
-                    commit()
-                }
+                if !isFocused { commit() }
             }
             .onChange(of: notice) { _, notice in onNotice(notice) }
+            // A row removed mid-edit runs no `onChange`: retire
+            // its caption here, or a later Space of the same id
+            // inherits it.
+            .onDisappear {
+                onNotice(nil)
+                announcement?.cancel()
+            }
     }
 
     /// The caption while the focused draft names another Space.
