@@ -105,8 +105,6 @@ _ISSUE_REF = re.compile(
     r"|github\.com/[^\s)]+/(?:issues|pull)/\d+"
 )
 
-# A tag this project cuts: `v` + semantic version.
-_TAG = re.compile(r"^v(?P<version>\d+\.\d+\.\d+)$")
 # The version a tag carries, read off its leading `vX.Y.Z` so a
 # prerelease suffix still orders among its neighbours.
 _TAG_VERSION = re.compile(r"^v?(?P<version>\d+\.\d+\.\d+)")
@@ -695,9 +693,10 @@ def build_entry(
                 "`tag_name` or no `html_url`."
             ],
         )
-    match = _TAG.match(tag)
     entry = {
-        "version": match.group("version") if match else tag,
+        # Display only, the tag minus its `v`, suffix and all;
+        # ordering and the grammar cut read `tag_version`.
+        "version": tag[1:] if tag.startswith("v") else tag,
         "tag": tag,
         "date": (release.get("published_at") or "")[:10],
         "prerelease": bool(release.get("prerelease")),

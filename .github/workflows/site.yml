@@ -90,6 +90,12 @@ jobs:
       # the corpus carries no marker, which is most of the time —
       # scripts/unreleased-strip retires them all at each release
       # — so this is what actually holds the plugin's behavior.
+      # The typed release notes' own subject (#1542): the corpus
+      # holds no typed release before 2.0.0, so the built-page
+      # check above goes vacuous until then.
+      - name: Check the typed changelog view
+        run: node test-changelog.mjs
+
       - name: Check the unreleased-docs marker
         run: |
           set -euo pipefail

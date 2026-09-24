@@ -462,7 +462,14 @@ summary of two or three sentences, optionally closing in one
 present only when it carries a bullet, one bullet per change
 (#1542, held by `ChangelogParserTests` ▸ `malformedBodyRefused`;
 a release before 2.0.0 keeps its free titles, and
-`--body <file> --tag <tag>` checks one of those). **Curate the draft,
+`--body <file> --tag <tag>` checks one of those). Every reader of
+the generated notes — the site, the feed, the update window —
+branches on each section's generated `type` and never on its
+displayed title, and a new type joins `changelog-sync`'s
+`SECTION_TYPES` alone; a reader that keeps its own list of the
+types (the window's Swift enum) is held to that table by a parity
+test that runs the generator, never by a hand-typed copy.
+**Curate the draft,
 then publish** — `release.yml` drafts, and
 `.github/workflows/changelog.yml` fires on *publish* and syncs the
 body onto the site's release-notes page AND into Sparkle's feed,

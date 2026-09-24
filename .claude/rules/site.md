@@ -448,8 +448,10 @@ tag push, which is the one place every release passes through.
 The section titles are the typed grammar's from 2.0.0 (#1542);
 a release before it keeps the free titles it was published with.
 The page branches on each section's generated `type`, never on
-its title, and `check-site-tokens.py` ▸ `check_typed_changelog`
-holds the built render once a typed release exists. What the
+its title. `site/test-changelog.mjs` holds the view over fixtures,
+since the corpus has no typed release before 2.0.0, and
+`check-site-tokens.py` ▸ `check_typed_changelog` holds the built
+render once one exists. What the
 entries must SAY is `docs/design-decisions.md` ▸ *Release notes
 are written for the person installing*, which is a review-time
 rule by its own ruling and has no guard.

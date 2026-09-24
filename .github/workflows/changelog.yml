@@ -246,6 +246,9 @@ jobs:
           # vacuous on this path and this is the only thing
           # exercising the marker at all (#1232).
           node test-unreleased.mjs
+          # The typed release notes' view (#1542), for the same
+          # reason: the built-page check reads only the corpus.
+          node test-changelog.mjs
         working-directory: site
 
       # One step for all three: the branch name is the thread
