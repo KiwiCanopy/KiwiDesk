@@ -46,6 +46,9 @@ struct RuleReachIdentityTests {
         let model = try makeModel()
         model.selectEditTarget("Home")
         #expect(model.reachProfile == "Home")
+        // Dirty, so the clean-page repin cannot mask the pin order.
+        model.config.appRules["notes"] = SpaceID("2")
+        #expect(model.isDirty)
         try model.core.profiles.delete(name: "Home")
 
         model.reload()
