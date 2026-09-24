@@ -19,13 +19,20 @@ extension KiwiCore {
         let settings = tiler.settings
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {
-            appBars.sync(appBarFallback(settings: settings))
+            let fallback = appBarFallback(settings: settings)
+            appBars.sync(fallback)
             spaceBars.sync([])
+            // A lone bar's slot IS its strip.
+            syncShelves(
+                fallback.map { ($0.display, $0.strip) },
+                settings: settings
+            )
             return
         }
         let look = settings.spaceBarLook
         var appBarsShown: [AppBarManager.Bar] = []
         var spaceBarsShown: [SpaceBarManager.Bar] = []
+        var strips: [(DisplayID, CGRect)] = []
         for display in displays {
             let app = appBarContent(on: display.id, settings: settings)
             let items = spaceBarContent(on: display.id, style: look)
@@ -43,6 +50,7 @@ extension KiwiCore {
                 spaceItems: items,
                 app: app
             )
+            strips.append((display.id, plan.strip))
             if let app,
                 let bar = placedBar(app, display: display.id, plan: plan)
             {
@@ -62,6 +70,42 @@ extension KiwiCore {
         }
         appBars.sync(appBarsShown)
         spaceBars.sync(spaceBarsShown)
+        syncShelves(strips, settings: settings)
+    }
+
+    /// Hands each display's shelf the sections its two bars just
+    /// rendered, at the slots the plan gave them.
+    private func syncShelves(
+        _ strips: [(DisplayID, CGRect)],
+        settings: TilingSettings
+    ) {
+        let spaceSlots = Dictionary(
+            spaceBars.shownStrips.map { ($0.display, $0.strip) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let appSlots = Dictionary(
+            appBars.shownBarStrips,
+            uniquingKeysWith: { first, _ in first }
+        )
+        shelves.sync(
+            strips.map { display, strip in
+                ShelfManager.Shelf(
+                    display: display,
+                    strip: strip,
+                    shelf: settings.kiwishelf,
+                    space: spaceSlots[display].flatMap { slot in
+                        spaceBars.shownOverlay(on: display).map {
+                            ($0, slot)
+                        }
+                    },
+                    app: appSlots[display].flatMap { slot in
+                        appBars.shownOverlay(on: display).map {
+                            ($0, slot)
+                        }
+                    }
+                )
+            }
+        )
     }
 
     /// What one display's App Bar would draw, before the shelf

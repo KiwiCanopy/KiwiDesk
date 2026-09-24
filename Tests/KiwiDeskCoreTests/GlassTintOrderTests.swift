@@ -7,14 +7,12 @@ import Testing
 /// hosting arm** (#1314).
 ///
 /// `GlassTint.apply` inserted the backdrop below the glass only
-/// while it had no superview. The Space Bar's `spanBackdrop` arm
-/// then MOVES the glass below the item container, and a sibling
-/// move leaves the backdrop where it was — above the glass, an
-/// opaque-ish colour over the material for the rest of the
-/// process, since nothing re-ordered it. The clauses drive the
-/// production render through `SpaceBarManager.sync` rather than
-/// a hand-built hierarchy, so the arm that moves the glass is
-/// the real one.
+/// while it had no superview, so a glass moved among its siblings
+/// left the backdrop above it — an opaque-ish colour over the
+/// material for the rest of the process. The glass is the
+/// shelf's since #1517; the first clause drives the production
+/// shelf through `ShelfManager.sync` rather than a hand-built
+/// hierarchy, the rest pin the mechanism.
 @Suite("Glass tint order (#1314)")
 @MainActor
 struct GlassTintOrderTests {
@@ -31,82 +29,69 @@ struct GlassTintOrderTests {
         return false
     }
 
-    /// The hug arm: three Spaces on the 1440 pt fixture strip.
-    private static var hugged: SpaceBarManager.Bar {
-        paintedSpaceBar(front: nil, spaces: 3, glass: true)
-    }
-
-    /// The span-backdrop arm: sixty Spaces overflow the strip
-    /// (each auto-length slot is 28 pt plus a 6 pt gap, ~2034 pt
-    /// against 1440), and the front-app segment, ~76 pt, still
-    /// fits the pinned band. Those are defaults the fixture
-    /// reasons from (tests.md ▸ #660), so the clause REQUIRES the
-    /// arm rather than trusting the arithmetic.
-    private static var spanned: SpaceBarManager.Bar {
-        paintedSpaceBar(front: WindowID(1), spaces: 60, glass: true)
-    }
-
-    /// The tint's and the plate's indices in the panel content.
+    /// The tint's and the plate's indices in the shelf content.
     private static func order(
-        _ overlay: SpaceBarOverlay
+        _ overlay: ShelfOverlay
     ) throws -> (tint: Int, plate: Int) {
-        let content = try #require(overlay.panel?.contentView)
         let tint = try #require(overlay.glassTint)
         let plate = try #require(overlay.glassPlate)
+        let content = overlay.content
         return (
             try #require(content.subviews.firstIndex(of: tint)),
             try #require(content.subviews.firstIndex(of: plate))
         )
     }
 
-    @Test("The tint stays beneath the plate across the span-backdrop arm")
+    /// One display's shelf over a Space Bar of `spaces`, glass on
+    /// or off.
+    private static func shelf(
+        _ section: SpaceBarOverlay,
+        glass: Bool
+    ) -> ShelfManager.Shelf {
+        var shelf = KiwiShelf()
+        shelf.liquidGlass = glass
+        return ShelfManager.Shelf(
+            display: barTitleDisplay,
+            strip: barTitleStrip,
+            shelf: shelf,
+            space: (section, barTitleStrip),
+            app: nil
+        )
+    }
+
+    /// The shelf's one plate (#1517) moves between hosting a
+    /// solid fill and glass, and a section re-renders on its own
+    /// between shelf passes; the tint stays directly beneath the
+    /// glass through all of it.
+    @Test("The tint stays beneath the shelf's glass across arms")
     func tintStaysBeneathAcrossArms() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
-        let manager = SpaceBarManager()
-        manager.sync([Self.hugged])
+        let spaces = SpaceBarManager()
+        spaces.sync([paintedSpaceBar(front: nil, spaces: 3, glass: true)])
+        let section = try #require(
+            spaces.shownOverlay(on: barTitleDisplay)
+        )
+        let shelves = ShelfManager()
+        shelves.sync([Self.shelf(section, glass: true)])
         let overlay = try #require(
-            manager.overlayForTesting(barTitleDisplay)
+            shelves.overlayForTesting(barTitleDisplay)
         )
-        let plate = try #require(overlay.glassPlate)
-        try #require(
-            GlassPlate.holds(plate, try #require(overlay.glassRun)),
-            "three Spaces did not take the hug arm"
+        let first = try Self.order(overlay)
+        #expect(first.tint == first.plate - 1, "\(first)")
+        // The plate sits beneath the strip that holds the sections.
+        let strip = try #require(
+            overlay.content.subviews.firstIndex(of: overlay.stripView)
         )
-        let hugged = try Self.order(overlay)
-        try #require(
-            hugged.tint == hugged.plate - 1,
-            "the hugged arm already misorders: \(hugged)"
-        )
-        manager.sync([Self.spanned])
-        // Only the span-backdrop arm hosts the filler and moves the
-        // plate beneath the item container; on either other arm
-        // the order below holds on unfixed code too.
-        try #require(
-            GlassPlate.holds(plate, overlay.glassBackdropFiller),
-            "sixty Spaces with a front app did not take span-backdrop"
-        )
-        let content = try #require(overlay.panel?.contentView)
-        try #require(
-            try #require(content.subviews.firstIndex(of: plate))
-                < (try #require(
-                    content.subviews.firstIndex(of: overlay.itemContainer)
-                )),
-            "the span-backdrop arm did not move the plate"
-        )
-        let spanned = try Self.order(overlay)
-        #expect(
-            spanned.tint == spanned.plate - 1,
-            "span-backdrop leaves the tint above the plate: \(spanned)"
-        )
-        manager.sync([Self.hugged])
-        try #require(
-            GlassPlate.holds(plate, try #require(overlay.glassRun)),
-            "the return to three Spaces did not take the hug arm"
-        )
+        #expect(first.plate < strip)
+        shelves.sync([Self.shelf(section, glass: false)])
+        shelves.sync([Self.shelf(section, glass: true)])
+        spaces.sync([
+            paintedSpaceBar(front: WindowID(1), spaces: 60, glass: true)
+        ])
         let again = try Self.order(overlay)
         #expect(
             again.tint == again.plate - 1,
-            "the tint stays above the plate after the arm: \(again)"
+            "the tint left its glass after the arms: \(again)"
         )
     }
 

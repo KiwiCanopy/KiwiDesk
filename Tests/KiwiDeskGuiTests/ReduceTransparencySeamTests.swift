@@ -322,7 +322,9 @@ struct ReduceTransparencySeamTests {
                 )
             )
         }
-        #expect(fixtures >= 5, Comment(rawValue: "\(fixtures) fixtures"))
+        // 4 since #1517: the churn suite no longer drives a glass
+        // run, the shelf's plate never hosting a view.
+        #expect(fixtures >= 4, Comment(rawValue: "\(fixtures) fixtures"))
     }
 
     private static func files(

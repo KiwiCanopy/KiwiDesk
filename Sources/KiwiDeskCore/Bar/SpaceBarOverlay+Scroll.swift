@@ -98,7 +98,7 @@ extension SpaceBarOverlay {
 
     /// Updates drag autoscroll state based on cursor position (#385).
     func updateDragAutoScroll(atGlobal cocoaPoint: CGPoint) {
-        guard isPanelVisible, let geom = scrollGeom else {
+        guard isVisible, let geom = scrollGeom else {
             cancelDragAutoScroll()
             return
         }

@@ -165,6 +165,14 @@ public final class SpaceBarManager {
         overlays.values.forEach { $0.cancelDragAutoScroll() }
     }
 
+    /// The section a display's shelf places, while it shows
+    /// (#1517).
+    func shownOverlay(on display: DisplayID) -> SpaceBarOverlay? {
+        guard let overlay = overlays[display], overlay.isVisible
+        else { return nil }
+        return overlay
+    }
+
     #if DEBUG
         /// Test seam: overlay backing a specific display.
         func overlayForTesting(

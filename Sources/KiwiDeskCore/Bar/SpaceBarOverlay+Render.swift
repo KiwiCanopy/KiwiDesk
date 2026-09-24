@@ -9,9 +9,7 @@ extension SpaceBarOverlay {
         // The one place the stored style becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
-        let panel = self.panel ?? makePanel()
-        self.panel = panel
-        styleContainer(panel, style: style, strip: strip)
+        root.setFrameSize(strip.size)
         syncItemViewCount(items.count)
         let horizontal = style.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
@@ -99,16 +97,9 @@ extension SpaceBarOverlay {
                 horizontal: horizontal,
                 fit: style.backgroundFit
             )
-        let hosting = glassHosting(style, overflow: inset > 0)
-        prepareGlassHosting(
-            hosting,
-            panel: panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame,
-            viewport: viewportRect,
-            pinnedFront: pinFront
-        )
+        self.plateFrame = plateFrame
+        let hosting = glassHosting(style)
+        prepareGlassHosting(hosting, pinnedFront: pinFront)
         let itemFrames = layoutLayerDivider(
             frames: metrics.itemFrames,
             leads: leadsWithLayer,
@@ -153,11 +144,7 @@ extension SpaceBarOverlay {
         )
         installGlassHosting(
             hosting,
-            panel: panel,
             frames: itemFrames,
-            viewport: viewportRect,
-            plateFrame: plateFrame,
-            pinnedFront: pinFront,
             style: style,
             depth: horizontal ? strip.height : strip.width
         )
@@ -172,16 +159,8 @@ extension SpaceBarOverlay {
             horizontal: horizontal,
             style: style
         )
-        panel.setFrame(
-            GeometryUtils.flip(
-                strip,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: true
-        )
-        if !panel.isVisible {
-            panel.orderFrontRegardless()
-        }
+        root.isHidden = false
+        onRendered()
     }
 
     /// Index of the active Space for scroll-follow navigation.

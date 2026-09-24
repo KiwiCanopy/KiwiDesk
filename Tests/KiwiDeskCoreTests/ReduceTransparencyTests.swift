@@ -120,7 +120,6 @@ struct ReduceTransparencyTests {
                     overlay.boxGlasses.count == (reduced ? 0 : 1),
                     Comment(rawValue: "reduced: \(reduced)")
                 )
-                #expect(overlay.glassPlate?.isHidden ?? true)
                 #expect(
                     overlay.itemViews.first?.style.hasBox == reduced,
                     Comment(rawValue: "reduced: \(reduced)")
@@ -129,24 +128,40 @@ struct ReduceTransparencyTests {
         }
     }
 
-    /// The Space Bar's plain glass run stands down the same way.
-    @Test("a plain glass Space Bar draws its solid plate")
-    func spaceBarDrawsSolidPlate() throws {
+    /// The shelf's one plate (#1517) stands down the same way:
+    /// glass while transparency is not reduced, solid while it is.
+    @Test("a plain glass shelf draws its solid plate")
+    func shelfDrawsSolidPlate() throws {
         try #require(Self.platformGlass)
         let bar = paintedSpaceBar(front: nil, spaces: 2, glass: true)
-        let manager = SpaceBarManager()
+        let spaces = SpaceBarManager()
+        let shelves = ShelfManager()
         for reduced in [false, true, false] {
             try reducing(reduced) {
-                manager.sync([bar])
+                spaces.sync([bar])
+                let section = try #require(
+                    spaces.shownOverlay(on: barTitleDisplay)
+                )
+                var shelf = KiwiShelf()
+                shelf.liquidGlass = true
+                shelves.sync([
+                    .init(
+                        display: barTitleDisplay,
+                        strip: barTitleStrip,
+                        shelf: shelf,
+                        space: (section, barTitleStrip),
+                        app: nil
+                    )
+                ])
                 let overlay = try #require(
-                    manager.overlayForTesting(barTitleDisplay)
+                    shelves.overlayForTesting(barTitleDisplay)
                 )
                 #expect(
                     (overlay.glassPlate?.isHidden ?? true) == reduced,
                     Comment(rawValue: "reduced: \(reduced)")
                 )
                 #expect(
-                    (overlay.plainPlate?.isHidden ?? true) == !reduced,
+                    (overlay.solidPlate?.isHidden ?? true) == !reduced,
                     Comment(rawValue: "reduced: \(reduced)")
                 )
             }

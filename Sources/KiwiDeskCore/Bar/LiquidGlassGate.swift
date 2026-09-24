@@ -45,6 +45,17 @@ enum LiquidGlassGate {
         return copy
     }
 
+    /// The shelf the plate renders from — the same stand-down
+    /// as a bar's, since the plate is where the fill is drawn.
+    static func rendered(_ shelf: KiwiShelf) -> KiwiShelf {
+        guard reducesTransparency else { return shelf }
+        var copy = shelf
+        copy.liquidGlass = false
+        copy.fillColor = opaque(shelf.fillColor)
+        copy.hoverFillColor = opaque(shelf.hoverFillColor)
+        return copy
+    }
+
     /// A Fill at full alpha, keeping its hue. A fully transparent
     /// Fill stays so: it asked for no plate, and none is opaque.
     static func opaque(_ hex: String) -> String {

@@ -5,18 +5,14 @@ import Testing
 
 /// **A steady-state Space Bar render reparents nothing** (#1315).
 ///
-/// With `plain` + glass + `show_front_app` and no overflow, every
-/// render added the five front-app views to the item container
-/// and the hug arm then added them back into the glass run — ten
-/// `addSubview` calls inside an `NSGlassEffectView` subtree for
-/// views that never needed to move, each a hierarchy change the
-/// glass re-evaluates. The run is now the segment's host while
-/// it hugs, so a hugged render that changes nothing adds nothing.
-/// The clauses drive `SpaceBarManager.sync`, so the arm under
-/// test is the production one. The hug arm's wrong-host case is
-/// discriminated by the ADD COUNT alone: `hugRun` re-hosts any
-/// view outside the run, so an end-state clause on the hug arm
-/// cannot see a wrong host (guard-prover, measured).
+/// Since #1517 the plate is the shelf's and never hosts a view —
+/// the glass shows through behind the sections — so the glass run
+/// this suite used to watch is gone. What stays owed is the same
+/// property one level up: the front-app segment has ONE host per
+/// arm (the section root while pinned, else the item container),
+/// a render that changes nothing moves nothing, and the shelf
+/// places a section's view once. The clauses drive the managers'
+/// `sync`, so the arms under test are the production ones.
 @Suite("Space Bar front-view churn (#1315)")
 @MainActor
 struct SpaceBarFrontViewChurnTests {
@@ -24,27 +20,9 @@ struct SpaceBarFrontViewChurnTests {
     /// fixture reasons from, so it is pinned off (#660, #1374).
     init() { LiquidGlassGate.override = { false } }
 
-    /// Below macOS 26 no run is hosted, so the spy would count
-    /// nothing and every clause would pass on that.
-    private static var drawsGlass: Bool {
-        if #available(macOS 26, *) { return true }
-        return false
-    }
-
-    /// Counts what a render adds to the run. A same-parent
-    /// `addSubview` fires no hook at all (measured) — it is a
-    /// reorder, which the order clause below pins instead.
-    private final class SpyRun: AppBarOverlay.FlippedView {
-        var adds = 0
-        override func didAddSubview(_ subview: NSView) {
-            super.didAddSubview(subview)
-            adds += 1
-        }
-    }
-
     /// A plain Space Bar with the front-app segment on. Three
-    /// Spaces hug the fixture strip; sixty overflow it with the
-    /// segment pinned, the `spanBackdrop` arm.
+    /// Spaces fit the fixture strip; sixty overflow it with the
+    /// segment pinned.
     private static func bar(
         spaces: Int = 3,
         glass: Bool = true
@@ -92,129 +70,98 @@ struct SpaceBarFrontViewChurnTests {
         ]
     }
 
-    /// The overlay after one glass-OFF render, with the spy in
-    /// place of the run the first glass render would create.
-    private static func spied() throws -> (
-        manager: SpaceBarManager, overlay: SpaceBarOverlay, run: SpyRun
-    ) {
+    @Test("A second identical render moves no view")
+    func steadyRenderMovesNothing() throws {
         let manager = SpaceBarManager()
-        manager.sync([bar(glass: false)])
+        manager.sync([Self.bar()])
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )
-        let run = SpyRun()
-        overlay.glassRun = run
-        return (manager, overlay, run)
-    }
-
-    @Test("A second hugged render adds nothing to the glass run")
-    func steadyRenderAddsNothing() throws {
-        try #require(Self.drawsGlass, "no glass below macOS 26")
-        let (manager, overlay, run) = try Self.spied()
-        manager.sync([Self.bar()])
-        try #require(run.adds > 0, "the first glass render hosted none")
-        let hosted = run.adds
-        let order = run.subviews
+        let hosts = Self.frontViews(overlay).map(\.superview)
+        let order = overlay.itemContainer.subviews
         let frames = Self.frontViews(overlay).map(\.frame)
         manager.sync([Self.bar()])
-        #expect(
-            run.adds == hosted,
-            "a steady render added \(run.adds - hosted) views to the run"
-        )
-        for view in Self.frontViews(overlay) {
-            #expect(view.superview === run, "\(view) left the run")
+        for (view, host) in zip(Self.frontViews(overlay), hosts) {
+            #expect(view.superview === host, "\(view) changed host")
         }
         // Identity, elementwise: a re-add into the SAME host is a
-        // reorder no hook reports, and it is the attach guard's.
+        // reorder no hook reports.
         #expect(
-            run.subviews.count == order.count
-                && zip(run.subviews, order).allSatisfy { $0 === $1 },
-            "a steady render reordered the run"
+            overlay.itemContainer.subviews.count == order.count
+                && zip(overlay.itemContainer.subviews, order)
+                    .allSatisfy { $0 === $1 },
+            "a steady render reordered the container"
         )
-        // The frames of the views this style never lays out too:
-        // the hug offset used to move them by the delta every
-        // pass, hidden.
         #expect(
             Self.frontViews(overlay).map(\.frame) == frames,
             "the segment moved between identical renders"
         )
     }
 
-    /// The run is prepare's to create, and nothing else creates
-    /// it: this render is UNSEEDED, so the creation line is what
-    /// hosts the plate and the segment here. `spied()` stands a
-    /// spy in for that line, which is why it cannot hold this.
-    @Test("An unseeded hugged render hosts the segment in the run")
-    func unseededHugCreatesTheRun() throws {
-        try #require(Self.drawsGlass, "no glass below macOS 26")
+    /// The host changes with the arm and the segment follows it,
+    /// glass or not: the plate never hosts it.
+    @Test(
+        "The segment follows its host across the arms",
+        arguments: [true, false]
+    )
+    func segmentFollowsTheHost(glass: Bool) throws {
         let manager = SpaceBarManager()
-        manager.sync([Self.bar()])
+        manager.sync([Self.bar(glass: glass)])
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )
-        let run = try #require(overlay.glassRun, "no run was created")
-        let plate = try #require(overlay.glassPlate)
-        #expect(GlassPlate.holds(plate, run), "the plate hugs no run")
-        for view in Self.frontViews(overlay) {
-            #expect(view.superview === run, "\(view) not in the run")
-        }
-    }
-
-    /// A run that GROWS keeps the segment hosted and clear of the
-    /// items. The per-render re-add this replaces was kept "so the
-    /// segment stays above item views created later"; the segment
-    /// is laid out after the last item, so the two never overlap
-    /// and z-order among them is moot — held here rather than
-    /// argued.
-    @Test("A growing run keeps the segment hosted and clear")
-    func growingRunKeepsTheSegmentClear() throws {
-        try #require(Self.drawsGlass, "no glass below macOS 26")
-        let (manager, overlay, run) = try Self.spied()
-        manager.sync([Self.bar(spaces: 3)])
-        manager.sync([Self.bar(spaces: 4)])
-        try #require(overlay.itemViews.count == 4)
-        let drawn = Self.frontViews(overlay).filter { !$0.isHidden }
-        try #require(!drawn.isEmpty, "no front view is drawn")
-        for view in drawn {
-            #expect(view.superview === run, "\(view) left the run")
-            for item in overlay.itemViews {
-                #expect(
-                    !view.frame.intersects(item.frame),
-                    "\(view) overlaps an item at \(item.frame)"
-                )
-            }
-        }
-    }
-
-    /// The host changes with the arm and the segment follows it:
-    /// the mode change is where the guarded add has to fire, and
-    /// the return to the container is what the teardown owes.
-    @Test("The segment follows its host across the hosting arms")
-    func segmentFollowsTheHost() throws {
-        try #require(Self.drawsGlass, "no glass below macOS 26")
-        let (manager, overlay, run) = try Self.spied()
-        manager.sync([Self.bar()])
-        let content = try #require(overlay.panel?.contentView)
-        manager.sync([Self.bar(spaces: 60)])
-        for view in Self.frontViews(overlay) {
-            #expect(
-                view.superview === content,
-                "pinned segment not on the panel: \(view)"
-            )
-        }
-        manager.sync([Self.bar()])
-        for view in Self.frontViews(overlay) {
-            #expect(
-                view.superview === run,
-                "hugged segment not in the run: \(view)"
-            )
-        }
-        manager.sync([Self.bar(glass: false)])
         for view in Self.frontViews(overlay) {
             #expect(
                 view.superview === overlay.itemContainer,
-                "plain segment not in the container: \(view)"
+                "scrolled-with segment not in the container: \(view)"
             )
         }
+        manager.sync([Self.bar(spaces: 60, glass: glass)])
+        for view in Self.frontViews(overlay) {
+            #expect(
+                view.superview === overlay.root,
+                "pinned segment not on the section root: \(view)"
+            )
+        }
+        manager.sync([Self.bar(glass: glass)])
+        for view in Self.frontViews(overlay) {
+            #expect(
+                view.superview === overlay.itemContainer,
+                "segment did not return to the container: \(view)"
+            )
+        }
+    }
+
+    /// The shelf places a section's view once; a re-layout that
+    /// changes nothing reorders nothing on the strip.
+    @Test("A shelf re-layout moves no section")
+    func shelfPlacesOnce() throws {
+        let spaces = SpaceBarManager()
+        spaces.sync([Self.bar()])
+        let section = try #require(
+            spaces.shownOverlay(on: barTitleDisplay)
+        )
+        let shelves = ShelfManager()
+        let shelf = ShelfManager.Shelf(
+            display: barTitleDisplay,
+            strip: barTitleStrip,
+            shelf: KiwiShelf(),
+            space: (section, barTitleStrip),
+            app: nil
+        )
+        shelves.sync([shelf])
+        let overlay = try #require(
+            shelves.overlayForTesting(barTitleDisplay)
+        )
+        let order = overlay.stripView.subviews
+        #expect(section.root.superview === overlay.stripView)
+        shelves.sync([shelf])
+        spaces.sync([Self.bar()])
+        #expect(
+            overlay.stripView.subviews.count == order.count
+                && zip(overlay.stripView.subviews, order)
+                    .allSatisfy { $0 === $1 },
+            "a steady re-layout reordered the strip"
+        )
     }
 }

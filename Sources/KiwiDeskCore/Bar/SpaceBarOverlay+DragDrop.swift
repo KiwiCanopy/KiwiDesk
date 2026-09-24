@@ -8,7 +8,7 @@ extension SpaceBarOverlay {
     /// the bar while its grab point is far away. The whole item
     /// is one drop well.
     func spaceItem(atGlobal cocoaPoint: CGPoint) -> SpaceID? {
-        guard isPanelVisible else { return nil }
+        guard isVisible else { return nil }
         let ax = GeometryUtils.axPoint(cocoaPoint)
         guard hitStrip.contains(ax) else { return nil }
         let local = CGPoint(

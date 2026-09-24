@@ -76,6 +76,11 @@ public final class AppBarManager {
         }
     }
 
+    /// Each painted bar's display and slot, for its shelf.
+    var shownBarStrips: [(DisplayID, CGRect)] {
+        shownBars.map { ($0.display, $0.strip) }
+    }
+
     /// True when a painted bar is currently rendering or
     /// announcing `id`'s title (#670, 2026-08-20). Deliberately
     /// NOT gated on `showsText` or the edge (#937): icon-only and
@@ -125,6 +130,14 @@ public final class AppBarManager {
                 capAxis: bar.capAxis
             )
         }
+    }
+
+    /// The section a display's shelf places, while it shows
+    /// (#1517).
+    func shownOverlay(on display: DisplayID) -> AppBarOverlay? {
+        guard let overlay = overlays[display], overlay.isVisible
+        else { return nil }
+        return overlay
     }
 
     #if DEBUG
