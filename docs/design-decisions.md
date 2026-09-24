@@ -546,6 +546,49 @@ first-run story that is already a permission wizard, to tell
 someone about an update. No setting was added — the reminder
 costs nothing to ignore.
 
+### KiwiDesk draws its own update window (#1542)
+
+**[Rationale]**
+
+From 2.0.0 a found update opens KiwiDesk's own window rather
+than Sparkle's: the offered version's summary in one panel, then
+every change grouped as New, Improved, Fixed and Lua & CLI, each
+group a disclosure with its count. Sparkle's window renders the
+notes as one block of HTML, which is readable and answers
+neither question a reader arrives with ("what's new?", "was my
+bug fixed?") at a glance — the grouping
+[the release notes are written in](#release-notes-are-written-for-the-person-installing)
+only pays off where something groups on it.
+
+**The window covers everything since your version, not only the
+offered one.** A user who skipped three releases is about to
+receive all of them, so the groups merge across the skipped
+versions, each entry labelled with its version and the counts
+covering all of them; the panel keeps the newest summary, and
+every skipped version's "Before you update" line is shown, since
+a caution published two versions ago still applies to someone
+crossing it now. One version behind looks like any other offer.
+
+**What stays Sparkle's:** checking, "you're up to date", and the
+download and install themselves. The window takes over at the
+offer and holds it through downloading, preparing and installing
+— one window per offer rather than an alert followed by a status
+window — because the notes stay readable while the download
+runs. A scheduled offer still never takes the screen
+([the reminder](#scheduled-update-reminders-are-a-mark-not-a-notification-1013)
+is unchanged); the row it leaves opens this window.
+
+**There is no Skip This Version.** Skipping is the one choice a
+user cannot find again: Sparkle stops offering the version, and
+nothing in KiwiDesk says an update was waiting. Later costs a
+reminder; Skip costs every fix in that release for as long as the
+user does not think to check by hand.
+
+**What a 1.x client sees is unchanged.** The feed keeps its HTML
+description beside the structured notes, so a copy that predates
+this window keeps Sparkle's; the window first appears for the
+update after 2.0.0.
+
 ### Linking the notes is not opening a channel
 
 **[Rationale]**
@@ -662,19 +705,23 @@ Three consequences:
   break opens that section, addressed to the people it reaches
   ("If you write your own Lua config: …"), rather than alarming
   everyone above the fold.
-- **"Before you update" is for what changes for everyone who
-  updates:** one closing paragraph of the summary, and usually
-  absent. Say what carries over as well as what does not. "Your
-  settings carry over; 1.4 can no longer open them" informs,
-  while "can't be opened by 1.4" alone frightens a reader who
-  was never going back.
+- **"Before you update" is for something everyone who updates
+  must do or will notice at once:** one closing paragraph of the
+  summary, and usually absent. It never warns about going back:
+  a downgrade limit ("the older version can't open your
+  profiles") alarms every reader for the few who would ever
+  downgrade, so it belongs in the full release notes, if
+  anywhere. Say what the reader keeps rather than what they
+  risk: "Your settings carry over on their own" (owner,
+  2026-09-24).
 
 Releases before 2.0.0 keep the free titles they were published
 with.
 
 This binds whichever surface carries the notes: the GitHub
 release body is the source, and the changelog page (#873) and
-Sparkle's update window (#874) are generated from its curated
+the update window (#874, KiwiDesk's own from 2.0 — #1542) are
+generated from its curated
 block — `scripts/changelog-sync` and `scripts/appcast-sync` — so
 they inherit it rather than restating it.
 

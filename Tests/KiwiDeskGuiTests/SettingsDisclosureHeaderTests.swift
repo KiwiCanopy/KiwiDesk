@@ -41,6 +41,7 @@ struct SettingsDisclosureHeaderTests {
     private static let disclosureSites: Set<String> = [
         "SettingsDisclosure.swift",
         "SpaceOverrideRows+Footer.swift",
+        "UpdateNotesGroups.swift",
     ]
 
     private static let styleFile =

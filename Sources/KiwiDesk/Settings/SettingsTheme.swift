@@ -152,6 +152,11 @@ enum SettingsTheme {
         dark: 0xEA_F3_EE
     )
 
+    /// Kiwi Gold: the update window's Highlights border and mark
+    /// (#1542). Darker in light mode to clear 3:1 on its washed
+    /// card (`SettingsThemeContrastTests`).
+    static let highlight = token(light: 0xA6_7E_17, dark: 0xD9_A5_21)
+
     // MARK: - States
 
     /// Paused bar and first-run banner fill.

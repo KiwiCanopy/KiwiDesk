@@ -274,8 +274,11 @@ struct MachineTouchTests {
             }
         )
         let raw = processSites + launched + classRun
+        // `GuiScriptFixture.swift` is the GUI target's copy of
+        // that primitive, which this target cannot import (#1542).
         let strays = raw.filter {
             $0.file.lastPathComponent != "ScriptFixture.swift"
+                && $0.file.lastPathComponent != "GuiScriptFixture.swift"
                 && !$0.file.lastPathComponent
                     .hasPrefix("ExecTests")
         }

@@ -14,11 +14,12 @@ import Foundation
 /// **This doc is where the own-window census lives** — the
 /// other sites cite it rather than re-listing, since a new own
 /// window falsifies every copy and reds none of them. As of
-/// #678 Phase 5 the process builds three titled windows and
-/// several panels:
+/// #1542 the process builds four titled windows and several
+/// panels:
 ///
 /// - **Settings** — marked, tiles. The one exception.
-/// - **The onboarding tour**, **the Config Issues window**, and
+/// - **The onboarding tour**, **the Config Issues window**,
+///   **the update window** (`UpdateWindowController`) and
 ///   **update dialogs/alerts** (`NSAlert` / Sparkle) — titled,
 ///   main- or key-capable, unmarked, so they are tracked and
 ///   force-floated. All end.

@@ -55,12 +55,17 @@ final class SparkleUpdater: AppUpdating {
             delegate: policy
         )
         observer = UpdateCycleObserver(store: updates)
+        observer.onAppcast = { [driver] in driver.loadedItems = $0 }
+        observer.onCycleFinished = { [driver] in
+            driver.updateCycleFinished()
+        }
         updater = SPUUpdater(
             hostBundle: host,
             applicationBundle: host,
             userDriver: driver,
             delegate: observer
         )
+        driver.startCheck = { [weak self] in self?.checkForUpdates() }
         do {
             try updater.start()
             // Until this session's first answer only the DATE of

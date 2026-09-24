@@ -345,6 +345,27 @@ because `checkForUpdates` is the one door that brings the waiting
 alert forward, and asking for a check is the Settings footer's
 (`UpdateReminderTests`, `UpdatesRowTests`).
 
+**A found update is KiwiDesk's own window's from the offer on
+(#1542), and the reminder DECISION stays the policy's.**
+`UpdatePromptDriver` routes every phase after the offer —
+download, preparing, installing, a failure — to that window
+while one is open, and defers to the standard driver otherwise;
+checking, "up to date" and an information-only offer stay
+Sparkle's (`UpdateWindowRoutingTests`). Bypassing `super` there
+also bypasses the policy's delegate answers, so the own path
+asks the policy through its own doors (`offerArrived`,
+`offerGotAttention`) and never writes `updatePending` itself.
+Three orderings are Sparkle 2.9.6's and a bump re-checks them
+beside #1011's: the offer closes Sparkle's "Checking…" window
+through the standard driver's public teardown; the
+ready-to-install prompt is answered `.install` because the
+window already had its Install; and Try Again's check starts at
+the update cycle's end (`updater(_:didFinishUpdateCycleFor:)`,
+after `sessionInProgress` clears), since a check started inside
+the ending session only re-shows the offer
+(`UpdateSessionTests`, `UpdateCycleObserverSelectorTests`,
+`UpdatePromptWiringTests` ▸ the window's hand-offs).
+
 ## A window that must clear the bars derives its level
 
 The bars render at `BarPanel.level`. **A window that must not be

@@ -52,6 +52,7 @@ struct SettingsThemeMetricTests {
         "panelWidth": "SettingsDetailPanel.swift",
         "contentMaxWidth": "SettingsView+Detail.swift",
         "searchNoticeFillOpacity": "SettingsSearchNotice.swift",
+        "highlightWashOpacity": "UpdateNotesGroups.swift",
     ]
 
     /// Metric → why nothing draws it yet. Empty today, and kept
@@ -264,8 +265,9 @@ struct SettingsThemeMetricTests {
         return false
     }
 
+    /// Any chrome tree: the update window draws a metric too.
     private func site(named file: String) throws -> URL {
-        let match = try SourceScan.swiftSources(under: settingsDir)
+        let match = try ChromeScanRoots.sources(from: #filePath)
             .first { $0.lastPathComponent == file }
         return try #require(match, Comment(rawValue: file))
     }

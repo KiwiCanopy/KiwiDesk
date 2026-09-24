@@ -33,7 +33,7 @@ import Testing
 @MainActor
 @Suite("Settings theme contrast floors")
 struct SettingsThemeContrastTests {
-    private struct Pairing {
+    struct Pairing {
         let name: String
         let ink: Color
         let surface: Color
@@ -291,7 +291,7 @@ struct SettingsThemeContrastTests {
         // A scan that measured nothing would pass having
         // looked at nothing (#635).
         #expect(!pairings.isEmpty)
-        for pairing in pairings {
+        for pairing in pairings + Self.updateWindow {
             for dark in [false, true] {
                 let ratio = try ThemeContrast.contrast(
                     pairing.ink,

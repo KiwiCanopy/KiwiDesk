@@ -54,6 +54,10 @@ extension SettingsTheme {
     /// (`SettingsSearchNotice`, #678).
     static let searchNoticeFillOpacity: CGFloat = 0.12
 
+    /// The update window's Highlights wash over `card`
+    /// (`SettingsThemeContrastTests`, #1542).
+    static let highlightWashOpacity: CGFloat = 0.08
+
     /// Display card stand scale and clamp metrics
     /// (`MonitorsChromeWiringTests`, #758).
     static let monitorStandScale: CGFloat = 0.52

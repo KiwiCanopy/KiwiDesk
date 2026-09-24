@@ -185,6 +185,14 @@ struct SettingsThemeTokenTests {
             0xE0_82_76,
             SettingsTheme.danger
         ),
+        // Kiwi Gold (#1542): darker in light mode, where the
+        // mid gold misses 3:1 on the washed card.
+        Pin(
+            "highlight",
+            0xA6_7E_17,
+            0xD9_A5_21,
+            SettingsTheme.highlight
+        ),
         Pin(
             "savePill",
             0x12_25_1A,
