@@ -21,7 +21,7 @@ struct NativePullDown<Label: View>: View {
     /// Built at the click, so the list is current.
     let items: () -> [PullDownItem]
     @ViewBuilder let label: () -> Label
-    @State private var frame: CGRect = .zero
+    @State private var anchor = PullDownAnchor()
 
     var body: some View {
         Button {
@@ -32,19 +32,13 @@ struct NativePullDown<Label: View>: View {
         .settingsActionButton()
         // A Button does not say a list opens, as a Menu would.
         .accessibilityHint(L("pull_down.ax_hint", "Opens a menu."))
-        .background(
-            GeometryReader { proxy in
-                Color.clear
-                    .onAppear { frame = proxy.frame(in: .global) }
-                    .onChange(of: proxy.frame(in: .global)) { _, now in
-                        frame = now
-                    }
-            }
-        )
+        // The button's own view, so the menu opens in ITS window
+        // whichever window is key.
+        .background(PullDownAnchorView(anchor: anchor))
     }
 
     private func present() {
-        guard let view = NSApp.keyWindow?.contentView else { return }
+        guard let view = anchor.view, view.window != nil else { return }
         let target = PullDownTarget(items: items())
         let menu = NSMenu()
         menu.autoenablesItems = false
@@ -58,27 +52,45 @@ struct NativePullDown<Label: View>: View {
             entry.target = target
             entry.tag = index
             entry.isEnabled = item.enabled
-            if !item.subtitle.isEmpty {
-                if #available(macOS 14.4, *) {
-                    entry.subtitle = item.subtitle
-                } else {
-                    entry.title = item.title + " — " + item.subtitle
-                }
+            // Before 14.4 a row shows its title alone.
+            if !item.subtitle.isEmpty, #available(macOS 14.4, *) {
+                entry.subtitle = item.subtitle
             }
             menu.addItem(entry)
         }
-        // The frame is in window coordinates, top-left origin.
+        // Just under the button, in the anchor's own coordinates.
         let below = CGFloat(4)
         let y =
-            view.isFlipped
-            ? frame.maxY + below : view.bounds.height - frame.maxY - below
+            view.isFlipped ? view.bounds.maxY + below : -below
         withExtendedLifetime(target) {
             _ = menu.popUp(
                 positioning: nil,
-                at: NSPoint(x: frame.minX, y: y),
+                at: NSPoint(x: 0, y: y),
                 in: view
             )
         }
+    }
+}
+
+/// The button's backing view, filled in by `PullDownAnchorView`.
+@MainActor
+private final class PullDownAnchor {
+    weak var view: NSView?
+}
+
+/// A view laid behind the button at its size, handing the anchor
+/// the `NSView` the menu opens from.
+private struct PullDownAnchorView: NSViewRepresentable {
+    let anchor: PullDownAnchor
+
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        anchor.view = view
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        anchor.view = nsView
     }
 }
 

@@ -34,8 +34,8 @@ struct RuleReachControl: View {
         .foregroundStyle(
             reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
         )
-        .frame(width: SettingsMetrics.ruleReachColumn, alignment: .leading)
-        .help(warning ?? "")
+        .frame(minWidth: SettingsMetrics.ruleReachColumn, alignment: .leading)
+        .help(RuleReachWords.spoken(reading))
         .accessibilityLabel(L("app_rules.reach", "Applies to"))
         .accessibilityValue(RuleReachWords.spoken(reading))
         .popover(item: $request, arrowEdge: .bottom) { _ in
@@ -145,8 +145,8 @@ enum RuleReachWords {
         }
     }
 
-    /// The control's announced value: the label, and the ⚠ the
-    /// row draws below it, whose names each locale joins itself.
+    /// The control's announced value and its tooltip: the label, and
+    /// what its ⚠ stands for, whose names each locale joins itself.
     static func spoken(_ reading: RuleReachReading) -> String {
         guard let differs = differing(reading) else { return label(reading) }
         return L(
@@ -154,6 +154,41 @@ enum RuleReachWords {
             "%1$@; %2$@",
             label(reading),
             differs
+        )
+    }
+
+    /// The popover's closing notes: what a tick does from here.
+    static func notes(_ reading: RuleReachReading) -> [String] {
+        guard reading.shared else { return note(reading).map { [$0] } ?? [] }
+        var result = [
+            L(
+                "app_rules.reach.some_profiles_note",
+                "To give only some profiles a new value, untick %1$@ first.",
+                RuleReachWords.allProfiles
+            )
+        ]
+        // Once, however many profiles keep their own rule.
+        if reading.profiles.contains(where: { reading.own[$0] != nil }) {
+            result.append(
+                L(
+                    "app_rules.reach.replace_own_note",
+                    "Ticking a profile with its own rule replaces it "
+                        + "with the shared one."
+                )
+            )
+        }
+        return result
+    }
+
+    private static func note(_ reading: RuleReachReading) -> String? {
+        // With a shared rule beside the list, a new profile gets that.
+        guard !reading.hasShared,
+            reading.profiles.allSatisfy(reading.users.contains)
+        else { return nil }
+        return L(
+            "app_rules.reach.new_profiles_note",
+            "New profiles won't get this rule. Tick %1$@ to share it.",
+            RuleReachWords.allProfiles
         )
     }
 }

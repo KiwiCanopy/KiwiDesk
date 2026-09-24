@@ -52,6 +52,8 @@ struct RuleReachJoinUndoTests {
         let undone = try #require(model.spaceReach("mail"))
         #expect(undone.own["Home"] != nil)
         #expect(!model.isDirty)
+        // No pick is left behind to grey Save as new profile.
+        #expect(!model.copyWaitsOnReach)
     }
 
     @Test("after the Save a joined profile follows, locked")
@@ -76,5 +78,21 @@ struct RuleReachJoinUndoTests {
         let listed = try #require(model.spaceReach("mail"))
         #expect(!listed.shared)
         #expect(RuleReachWords.differing(listed) == nil)
+    }
+
+    @Test("the replace note shows once, while a profile keeps its own")
+    func replaceNoteOnce() throws {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let model = try makeModel()
+        let note =
+            "Ticking a profile with its own rule replaces it with the "
+            + "shared one."
+        let before = try #require(model.spaceReach("mail"))
+        #expect(RuleReachWords.notes(before).filter { $0 == note }.count == 1)
+
+        model.setProfile(.space, "mail", "Home", true)
+        let joined = try #require(model.spaceReach("mail"))
+        #expect(!RuleReachWords.notes(joined).contains(note))
     }
 }
