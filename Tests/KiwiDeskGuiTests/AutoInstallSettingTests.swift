@@ -97,6 +97,18 @@ struct AutoInstallSettingTests {
                     + "setting: model.updater.autoInstall)"
             ) == 1
         )
+        // The live model hands the refusal to the resolver the
+        // row reads, or the row never greys.
+        let model = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/SettingsModel+AutoStart.swift"
+            )
+        )
+        #expect(
+            model.occurrences(
+                of: "autoInstall: updater.autoInstall.unavailable"
+            ) == 1
+        )
         let updater = try SourceScan.strippedSource(
             at: root.appendingPathComponent(
                 "Sources/KiwiDesk/Updates/AppUpdater.swift"
