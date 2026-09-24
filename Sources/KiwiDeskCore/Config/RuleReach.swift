@@ -149,6 +149,29 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         }
     }
 
+    /// Removes `key` from `editing` in a family that cannot store
+    /// a left-out mark (`KeyLayerOverride`): the shared rule leaves
+    /// the base, and every other profile that followed it keeps
+    /// its own copy — the same reach, spelled without a mark.
+    public mutating func removeCarrying(_ key: String, editing: String) {
+        guard let shared = base[key], follows(key, editing) else {
+            apply(
+                key,
+                value: nil,
+                reach: .listed([editing]),
+                removal: .here,
+                editing: editing
+            )
+            return
+        }
+        for profile in profiles
+        where profile != editing && follows(key, profile) {
+            setEntry(key, for: profile, .some(shared))
+        }
+        setBase(key, nil)
+        setEntry(key, for: editing, .none)
+    }
+
     private mutating func remove(
         _ key: String,
         old: Value?,

@@ -32,6 +32,7 @@ extension SettingsModel {
     var encodedReach: RuleReachSnapshot? {
         guard var snapshot = ruleReachStored, let editing = reachProfile
         else { return nil }
+        var pageTemplates: [String: KeyBinding] = [:]
         snapshot.appRules = RuleReachDraft.encode(
             snapshot.appRules,
             current: AppRuleOverride.normalized(config.appRules),
@@ -50,6 +51,18 @@ extension SettingsModel {
             reach: reachEdits.reach[.float] ?? [:],
             removal: reachEdits.removal[.float] ?? [:]
         )
+        let pageKeys = RuleReachTable<String>.combos(config.layers)
+        KiwiCore.collectTemplates(config.layers, into: &pageTemplates)
+        snapshot.keyTemplates.merge(pageTemplates) { _, page in page }
+        snapshot.keyLayers = RuleReachDraft.encode(
+            snapshot.keyLayers,
+            current: pageKeys,
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.key] ?? [:],
+            removal: reachEdits.removal[.key] ?? [:],
+            holdsLeftOut: false
+        )
         return snapshot
     }
 
@@ -65,6 +78,10 @@ extension SettingsModel {
         config.floatRules = stored.floatRules.resolved(for: loaded)
             .sorted { $0.key < $1.key }
             .flatMap(\.value)
+        config.layers =
+            stored.storedKeyOverrides[loaded]?.resolved(
+                onto: stored.storedKeyBase
+            ) ?? stored.storedKeyBase
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -82,19 +99,30 @@ extension SettingsModel {
         sidecar.floatRules = reach.floatRules.floatRuleBase(
             original: reach.storedFloatBase
         )
+        sidecar.layers = reach.keyLayers.keyLayerBase(
+            page: config.layers,
+            storedPage: reachPage.flatMap {
+                reach.storedKeyOverrides[$0]?.resolved(
+                    onto: reach.storedKeyBase
+                )
+            } ?? reach.storedKeyBase,
+            storedBase: reach.storedKeyBase,
+            templates: reach.keyTemplates
+        )
         return sidecar
     }
 
     /// Writes every profile file and the shared rules the draft's
     /// checklist reached, and says what happened — the one answer
     /// every Save door reads, so none infers from its own control
-    /// flow which half landed.
-    func saveRuleReach() -> RuleReachWrite {
+    /// flow which half landed. `keysLeftTo` is a stored page, whose
+    /// own shortcut override its Save diffs from the page.
+    func saveRuleReach(keysLeftTo page: String? = nil) -> RuleReachWrite {
         guard let reach = encodedReach, reach.isEdited else {
             return .nothing
         }
         do {
-            try core.saveRuleReach(reach)
+            try core.saveRuleReach(reach, keysLeftTo: page)
             return .landed
         } catch {
             profileWarning = L(

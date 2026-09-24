@@ -19,7 +19,9 @@ extension KiwiCore {
     ///
     /// `writingRules: false` leaves the app and float rule
     /// overrides as stored, for a caller whose `saveRuleReach`
-    /// writes them — one encoder per field (#1393).
+    /// writes them — one encoder per field (#1393). The shortcut
+    /// override is always this diff, against the base as stored
+    /// now, so a caller writes the base first.
     public func overwriteProfile(
         named name: String,
         with config: GuiConfig,

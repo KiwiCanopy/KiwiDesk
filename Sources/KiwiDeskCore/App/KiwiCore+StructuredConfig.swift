@@ -144,10 +144,11 @@ extension KiwiCore {
         globalIgnoreRuleBase = IgnoreRules(ignoreRules).rawRules
     }
 
-    /// Re-resolves the window rules from the stored base and the
-    /// active profile's file, touching nothing else — the tail of
-    /// a rule write that changed no other setting (#1393).
-    func refreshWindowRules() {
+    /// Re-resolves the window rules and the shortcuts from the
+    /// stored base and the active profile's file, touching nothing
+    /// else — the tail of a rule write that changed no other
+    /// setting (#1393).
+    func refreshStructuredOverrides() {
         guard isGuiManaged, let config = loadStructuredConfig() else {
             return
         }
@@ -157,6 +158,12 @@ extension KiwiCore {
             appRules: profile?.appRules,
             floatRules: profile?.floatRules,
             ignoreRules: profile?.ignoreRules
+        )
+        guard let lua = keys.lua else { return }
+        applyStructuredKeybindings(
+            layers: config.layers,
+            profile: profile?.layers,
+            lua: lua
         )
     }
 
