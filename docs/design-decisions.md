@@ -7289,20 +7289,21 @@ one action in one layer, its value the combo:
   combo and also lists the shared combos it leaves out
   (`KeyLayerOverride.removed`), so *Remove from Work* marks Work
   alone and the shared row stays for every other profile and
-  every later one. The override could once only replace, which
-  left a profile two workarounds: carrying the shared shortcut
-  into each other profile's file, so a profile created later lost
-  it, or rebinding the combo to a no-op. Both are gone. A removal
-  costs a `Profile.currentFormat` bump, since an older reader
-  would otherwise drop it silently, and a removal whose combo the
-  base no longer binds resolves to nothing and falls out of the
-  next diff (`KeyLayerOverrideRemovalTests`). The removal is stored by combo
-  while the row is one action, so a shared move re-writes it onto
-  the new combo (`RuleReachKeyLeftOutTests` ▸
-  `sharedMoveKeepsRemoval`). A profile may now leave out its own
-  profile-switch shortcut: the old "no trap by omission" guarantee
-  is given up, because the menu bar and Settings still switch
-  profiles — a rebind was never guarded against either.
+  every later one. The two ways around a missing mark are
+  rejected: carrying the shared shortcut into each other
+  profile's file means a profile created later never gets it,
+  and rebinding the combo to a no-op still holds the combo and
+  shows as a binding. A removal costs a `Profile.currentFormat`
+  bump, since an older reader would otherwise drop it silently,
+  and a removal whose combo the base no longer binds resolves to
+  nothing and falls out of the next diff
+  (`KeyLayerOverrideRemovalTests`). The removal is stored by
+  combo while the row is one action, so a shared move re-writes
+  it onto the new combo (`RuleReachKeyLeftOutTests` ▸
+  `sharedMoveKeepsRemoval`). A profile may leave out its own
+  profile-switch shortcut: no trap follows, because the menu bar
+  and Settings still switch profiles, and a rebind could always
+  take that combo too.
 - **Ticking a profile whose combo does something else takes the
   key over**, and the warning names the action that loses it
   (⚠ Key is used for …); the takeover is written into the table,
