@@ -39,7 +39,7 @@ extension AppBarOverlay {
                 ink: ink,
                 hoverInk: hoverInk
             )
-            place(view, atEnd: view === forwardCount, m.horizontal)
+            view.place(in: itemContainer.frame, atEnd: view === forwardCount)
         }
         let fade = max(fades.leading, fades.trailing)
         backCount.onPage = { [weak self] in
@@ -48,31 +48,6 @@ extension AppBarOverlay {
         forwardCount.onPage = { [weak self] in
             self?.page(forward: true, lengths: lengths, m: m, fade: fade)
         }
-    }
-
-    /// Sits a count on its fading end of the viewport.
-    private func place(
-        _ view: ShelfCountView,
-        atEnd: Bool,
-        _ horizontal: Bool
-    ) {
-        guard !view.isHidden else { return }
-        let container = itemContainer.frame
-        let length = view.fittingLength
-        view.frame =
-            horizontal
-            ? CGRect(
-                x: atEnd ? container.maxX - length : container.minX,
-                y: container.minY,
-                width: length,
-                height: container.height
-            )
-            : CGRect(
-                x: container.minX,
-                y: atEnd ? container.maxY - length : container.minY,
-                width: container.width,
-                height: length
-            )
     }
 
     /// Pages one way to the next slot boundary (`ShelfOverflow`).

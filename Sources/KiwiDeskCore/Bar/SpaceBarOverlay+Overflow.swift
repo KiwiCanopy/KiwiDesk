@@ -59,8 +59,8 @@ extension SpaceBarOverlay {
             hoverInk: hoverInk
         )
         let container = itemContainer.frame
-        placeCount(backCount, in: container, atEnd: false, horizontal)
-        placeCount(forwardCount, in: container, atEnd: true, horizontal)
+        backCount.place(in: container, atEnd: false)
+        forwardCount.place(in: container, atEnd: true)
         let fade = max(fades.leading, fades.trailing)
         backCount.onPage = { [weak self] in
             self?.page(
@@ -89,31 +89,6 @@ extension SpaceBarOverlay {
             maxOffset: max(total - viewport, 0),
             trailingAxis: axisEnd
         )
-    }
-
-    /// Sits a count on its fading end of `container`.
-    private func placeCount(
-        _ view: ShelfCountView,
-        in container: CGRect,
-        atEnd: Bool,
-        _ horizontal: Bool
-    ) {
-        guard !view.isHidden else { return }
-        let length = view.fittingLength
-        view.frame =
-            horizontal
-            ? CGRect(
-                x: atEnd ? container.maxX - length : container.minX,
-                y: container.minY,
-                width: length,
-                height: container.height
-            )
-            : CGRect(
-                x: container.minX,
-                y: atEnd ? container.maxY - length : container.minY,
-                width: container.width,
-                height: length
-            )
     }
 
     /// Pages one way to the next entry boundary (`ShelfOverflow`).
