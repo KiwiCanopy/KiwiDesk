@@ -10,7 +10,10 @@ import Testing
 @Suite("Space rename refusal caption (#1623)", .serialized)
 @MainActor
 struct SpaceNameRefusalTests {
-    private let taken: Set<SpaceID> = [SpaceID("Work"), SpaceID(2)]
+    /// The app's own shape: the row's Space is in the set too.
+    private let taken: Set<SpaceID> = [
+        SpaceID("Mail"), SpaceID("Work"), SpaceID(2),
+    ]
 
     private func notice(_ draft: String) -> String? {
         SpaceNameField.takenNotice(
