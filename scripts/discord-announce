@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""Post a PUBLISHED release to the KiwiDesk Discord's
+announcements channel (#1627).
+
+The post is the release's curated `## Highlights`, read by
+`scripts/changelog-sync`'s own parser — never the generated
+"What's Changed" list, which is reviewer language
+(`docs/design-decisions.md` ▸ *Release notes are written for the
+person installing*). One Discord embed: the version as its title
+linking the release, the summary, the Before you update
+paragraph, then each section with its count and bullets. A body
+past Discord's embed limit is cut at a section boundary and closes
+on a line pointing at the full notes, never mid-sentence.
+
+    scripts/discord-announce --release <tag> [--releases FILE]
+        [--dry-run]
+
+`--dry-run` prints the webhook payload and posts nothing — the
+mode the guard suite drives, and how to preview a post. Without
+it the webhook URL is read from `DISCORD_RELEASE_WEBHOOK`; an
+unset or empty one skips the post with a notice and exits 0, so a
+fork's run or a rotated webhook never fails the release sync.
+
+`.github/workflows/changelog.yml` runs it on `release: published`
+only: a dispatch rebuild must never announce a release twice.
+"""
+
+from __future__ import annotations
+
+import argparse
+import importlib.machinery
+import importlib.util
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+# Loaded by path, as `appcast-sync` loads its siblings: the
+# scripts carry no `.py` suffix, so the loader is spelled out.
+_sync_path = Path(__file__).resolve().parent / "changelog-sync"
+_sync_loader = importlib.machinery.SourceFileLoader(
+    "changelog_sync", str(_sync_path)
+)
+_sync = importlib.util.module_from_spec(
+    importlib.util.spec_from_loader("changelog_sync", _sync_loader)
+)
+_sync_loader.exec_module(_sync)
+
+WEBHOOK_ENV = "DISCORD_RELEASE_WEBHOOK"
+# Discord caps an embed's description at 4096 characters; the
+# margin leaves room for the closing pointer.
+DESCRIPTION_BUDGET = 3900
+USERNAME = "KiwiDesk Releases"
+
+
+def section_block(section: dict) -> str:
+    """One section as Discord markdown: its title and, on a typed
+    release, its count, then its bullets."""
+    title = section["title"]
+    if section.get("type"):
+        title = f"{title} · {len(section['items'])}"
+    bullets = "\n".join(f"- {item}" for item in section["items"])
+    return f"**{title}**\n{bullets}"
+
+
+def description(entry: dict) -> str:
+    """The embed body, cut at a section boundary to fit."""
+    head: list[str] = []
+    if entry.get("summary"):
+        head.append(entry["summary"])
+    if entry.get("heads"):
+        head.append(f"**Before you update:** {entry['heads']}")
+    more = f"Full notes: {entry['url']}"
+    parts = list(head)
+    for section in entry.get("sections") or []:
+        block = section_block(section)
+        candidate = "\n\n".join(parts + [block])
+        if len(candidate) + len(more) + 2 > DESCRIPTION_BUDGET:
+            parts.append(more)
+            return "\n\n".join(parts)
+        parts.append(block)
+    return "\n\n".join(parts)
+
+
+def payload(entry: dict) -> dict:
+    return {
+        "username": USERNAME,
+        "allowed_mentions": {"parse": []},
+        "embeds": [
+            {
+                "title": f"KiwiDesk {entry['version']}",
+                "url": entry["url"],
+                "description": description(entry),
+            }
+        ],
+    }
+
+
+def post(url: str, body: dict) -> None:
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "KiwiDesk-release-sync",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        if response.status >= 300:
+            raise urllib.error.HTTPError(
+                url, response.status, "unexpected status", None, None
+            )
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="discord-announce",
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument("--release", metavar="TAG", required=True)
+    parser.add_argument(
+        "--releases",
+        metavar="FILE",
+        help="read the release from a JSON fixture instead of `gh`",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print the payload and post nothing",
+    )
+    args = parser.parse_args(argv[1:])
+
+    try:
+        entry, _ = _sync.build_entry(
+            _sync.fetch_release(args.release, args.releases),
+            strict=True,
+        )
+    except _sync.NotesError as error:
+        return _sync._report(error)
+    body = payload(entry)
+    if args.dry_run:
+        print(json.dumps(body, indent=2, ensure_ascii=False))
+        return 0
+    url = os.environ.get(WEBHOOK_ENV, "").strip()
+    if not url:
+        print(
+            f"discord-announce: {WEBHOOK_ENV} is not set; "
+            f"{args.release} was not announced.",
+        )
+        return 0
+    try:
+        post(url, body)
+    except (urllib.error.URLError, OSError) as error:
+        # Never the URL: it is the secret.
+        print(
+            f"discord-announce: the post for {args.release} "
+            f"failed ({type(error).__name__}).",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"discord-announce: announced {args.release}.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

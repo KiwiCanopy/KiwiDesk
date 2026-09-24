@@ -229,6 +229,16 @@ cannot be read. The feed is that view's only source: a published
 release the three clauses below keep out of the feed is missing
 from it too, and the notes link is what covers it.
 
+**A published release is announced on Discord from the same
+curated block (#1627).** The sync job runs `scripts/discord-announce`
+on `release: published` only — a dispatch is a rebuild, and a
+rebuild that posted would announce an old release again — reading
+the body through `changelog-sync`'s parser, never the generated
+list, and it may not fail the sync: the page and the feed outrank
+a chat post, and an unset `DISCORD_RELEASE_WEBHOOK` skips with a
+notice (`DiscordAnnounceTests`). The webhook URL is the secret, so
+nothing prints it.
+
 **Three clauses decide whether a release enters the feed, and
 `scripts/appcast-sync` names the one that failed:** it is
 published; it carries exactly one distributable `.zip`, never a

@@ -173,6 +173,24 @@ jobs:
             python3 scripts/appcast-sync --all
           fi
 
+      # Announce the release on Discord (#1627), from the curated
+      # block the step above just refused or accepted. PUBLICATION
+      # only: a dispatch is a rebuild, and a rebuild that posted
+      # would announce an old release a second time. It never
+      # blocks the sync — the notes page and the feed matter more
+      # than a chat post — and an unset webhook skips with a
+      # notice rather than failing (scripts/discord-announce).
+      - name: Announce the release on Discord
+        if: github.event_name == 'release'
+        continue-on-error: true
+        env:
+          # `gh` reads the one home every step takes (#1154); this
+          # step only reads the release it announces.
+          GH_TOKEN: ${{ env.SYNC_TOKEN }}
+          TAG: ${{ github.event.release.tag_name }}
+          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
+        run: python3 scripts/discord-announce --release "$TAG"
+
       # Retire the docs markers this release ships (#1232).
       #
       # HERE and not in release.yml, for the reason the feed is
