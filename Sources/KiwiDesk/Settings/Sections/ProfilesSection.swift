@@ -170,7 +170,9 @@ struct ProfilesSection: View {
         _ summary: ProfileSummary
     ) -> some View {
         HStack(spacing: 6) {
+            // One line: a profile name never wraps under its badges.
             Text(summary.name)
+                .fixedSize()
                 .onTapGesture(count: 2) {
                     beginRename(summary.name)
                 }

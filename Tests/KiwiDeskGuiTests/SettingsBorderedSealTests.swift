@@ -120,12 +120,6 @@ struct SettingsBorderedSealTests {
                     + "until this fix — its sealed sibling is "
                     + "rename"
             ),
-            "DesktopsGroup+Setups.swift": (
-                1, ".neutralMenuLabel()",
-                "a Menu drawn bordered: the seal's tint would fill "
-                    + "its bezel near-black, so the neutral ink rides "
-                    + "its label instead (#1393)"
-            ),
             "KeyRecorderField.swift": (
                 1, ".tint(buttonTint)",
                 "resolves its own tint per state: red on a "

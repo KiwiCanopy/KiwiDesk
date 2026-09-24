@@ -100,44 +100,36 @@ extension DesktopsGroup {
     func addSetupMenu(_ row: DesktopRow, count: Int) -> some View {
         let choices = unscopedSetups(row, count: count)
         let labels = model.setupLabels(choices.map(\.monitors))
-        return Menu {
-            Section(
-                L(
-                    "desktops.scope.add.header",
-                    "Screen setups without a profile on this Desktop"
-                )
-            ) {
+        return NativePullDown(
+            header: L(
+                "desktops.scope.add.header",
+                "Screen setups without a profile on this Desktop"
+            ),
+            items: {
                 if choices.isEmpty {
-                    Text(
-                        L(
-                            "desktops.scope.add.none",
-                            "Every screen setup already has a profile "
-                                + "here"
+                    return [
+                        PullDownItem(
+                            title: L(
+                                "desktops.scope.add.none",
+                                "Every screen setup already has a profile "
+                                    + "here"
+                            ),
+                            enabled: false
                         )
-                    )
+                    ]
                 }
-                ForEach(choices.indices, id: \.self) { index in
-                    Button {
+                return choices.indices.map { index in
+                    PullDownItem(
+                        title: labels[index],
+                        subtitle: setupDetail(choices[index])
+                    ) {
                         addSetup(choices[index], count: count, row: row)
-                    } label: {
-                        Text(labels[index])
-                        let detail = setupDetail(choices[index])
-                        if !detail.isEmpty { Text(detail) }
                     }
                 }
             }
-        } label: {
-            // Neutral on the LABEL: on the Menu, its tint would also
-            // fill the bordered bezel near-black (#1393).
+        ) {
             Label(addTitle, systemImage: "plus")
-                .neutralMenuLabel()
         }
-        // A pull-down, bordered like the window's text actions, its
-        // chevron saying a list opens (#1393).
-        .menuStyle(.button)
-        .buttonStyle(.bordered)
-        .menuIndicator(.visible)
-        .fixedSize()
         .help(addTitle)
         .accessibilityLabel(
             L(

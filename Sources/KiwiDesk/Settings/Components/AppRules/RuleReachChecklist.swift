@@ -56,7 +56,7 @@ struct RuleReachChecklist: View {
             ForEach(reading.unreadable, id: \.self) { profile in
                 unreadableRow(profile)
             }
-            if let note = note(reading) {
+            ForEach(notes(reading), id: \.self) { note in
                 Text(note)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
@@ -193,14 +193,29 @@ struct RuleReachChecklist: View {
             : ""
     }
 
-    private func note(_ reading: RuleReachReading) -> String? {
-        if reading.shared {
-            return L(
+    private func notes(_ reading: RuleReachReading) -> [String] {
+        guard reading.shared else { return note(reading).map { [$0] } ?? [] }
+        var result = [
+            L(
                 "app_rules.reach.some_profiles_note",
                 "To give only some profiles a new value, untick %1$@ first.",
                 RuleReachWords.allProfiles
             )
+        ]
+        // Once, however many profiles keep their own rule.
+        if reading.profiles.contains(where: { reading.own[$0] != nil }) {
+            result.append(
+                L(
+                    "app_rules.reach.replace_own_note",
+                    "Ticking a profile with its own rule replaces it "
+                        + "with the shared one."
+                )
+            )
         }
+        return result
+    }
+
+    private func note(_ reading: RuleReachReading) -> String? {
         // With a shared rule beside the list, a new profile gets that.
         guard !reading.hasShared,
             reading.profiles.allSatisfy(reading.users.contains)

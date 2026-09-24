@@ -73,23 +73,21 @@ struct IconHoverChipTests {
         )
     }
 
-    /// The add-setup Menu is a native bordered trigger whose label,
-    /// not the Menu, takes the neutral ink: on the Menu the tint
-    /// also fills the bezel near-black (#1393).
-    @Test("the add-setup trigger's neutral ink sits on its label")
-    func addSetupNeutralOnLabel() throws {
+    /// The add-setup trigger is the window's bordered action button
+    /// opening a native menu, never a SwiftUI `Menu`, whose bordered
+    /// bezel takes the tint — green while key, near-black under the
+    /// neutral ink (#1393).
+    @Test("the add-setup trigger is a bordered button, not a Menu")
+    func addSetupIsAButton() throws {
         let setups = try source(
             "Components/Profiles/DesktopsGroup+Setups.swift"
         )
-        let label = try #require(
-            setups.range(of: "Label(addTitle, systemImage: \"plus\")")
-        )
-        let menuEnd = try #require(
-            setups.range(of: ".menuStyle(.button)")
-        )
-        let neutral = try #require(setups.range(of: ".neutralMenuLabel()"))
-        #expect(label.upperBound <= neutral.lowerBound)
-        #expect(neutral.upperBound <= menuEnd.lowerBound)
-        #expect(setups.contains(".buttonStyle(.bordered)"))
+        let body = body(of: "addSetupMenu", in: setups)
+        #expect(body.contains("NativePullDown("))
+        #expect(!body.contains("Menu {"))
+        let pullDown = try source("Components/Common/NativePullDown.swift")
+        #expect(pullDown.contains(".settingsActionButton()"))
+        #expect(pullDown.contains("menu.autoenablesItems = false"))
+        #expect(pullDown.contains("entry.isEnabled = item.enabled"))
     }
 }

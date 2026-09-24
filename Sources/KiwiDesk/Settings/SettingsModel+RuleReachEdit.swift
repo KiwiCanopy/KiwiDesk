@@ -22,6 +22,9 @@ struct RuleReachReading: Equatable {
     let ownIsShared: Set<String>
     /// Profiles that leave this shared rule out.
     var leftOut: Set<String>
+    /// Profiles the draft's pick ticked into the shared rule — still
+    /// tickable until the Save, so a tick can be taken back.
+    var joined: Set<String> = []
     /// A shortcut's combo that another profile binds to a
     /// different action, in that action's words — ticking takes
     /// the key over.
@@ -35,6 +38,7 @@ struct RuleReachReading: Equatable {
     /// tickable, which drops that value.
     func follows(_ profile: String) -> Bool {
         shared && own[profile] == nil && !leftOut.contains(profile)
+            && !joined.contains(profile)
     }
 
     /// The profiles the row ⚠ names, in menu order.
@@ -151,8 +155,17 @@ extension SettingsModel {
         else { return }
         switch reach(family, app, row: row) {
         case .shared(let joining):
-            guard on else { return }
-            setReach(family, app, .shared(joining: joining.union([profile])))
+            // A tick under All profiles is a join the Save has not made
+            // yet, so it can be taken back.
+            setReach(
+                family,
+                app,
+                .shared(
+                    joining: on
+                        ? joining.union([profile])
+                        : joining.subtracting([profile])
+                )
+            )
         case .listed(let members):
             let users =
                 on ? members.union([profile]) : members.subtracting([profile])
@@ -227,6 +240,7 @@ extension SettingsModel {
             row.users = members.union([editing])
             row.leftOut = []
         }
+        if case .shared(let joining) = picked { row.joined = joining }
         return row
     }
 

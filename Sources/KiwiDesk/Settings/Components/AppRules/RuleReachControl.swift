@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The "Applies to" column of an App Rules row (#1393): the
-/// closed label, the ⚠ for a profile that differs, and the
-/// checklist popover.
+/// closed label with a ⚠ beside it where a profile differs — the
+/// names ride its tooltip and the spoken value, the checklist
+/// holds the detail — and the checklist popover.
 struct RuleReachControl: View {
     @ObservedObject var model: SettingsModel
     let family: RuleFamily
@@ -16,35 +17,35 @@ struct RuleReachControl: View {
     @State private var request: RuleReachRequest?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Button {
-                request = RuleReachRequest(id: app)
-            } label: {
+        let warning = RuleReachWords.differing(reading)
+        Button {
+            request = RuleReachRequest(id: app)
+        } label: {
+            HStack(spacing: 4) {
                 AppRuleMenuLabel(text: RuleReachWords.label(reading))
+                if warning != nil {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(SettingsTheme.warningInk)
+                }
             }
-            .buttonStyle(.borderless)
-            .foregroundStyle(
-                reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(
+            reading.shared ? SettingsTheme.ink2 : SettingsTheme.ink
+        )
+        .frame(width: SettingsMetrics.ruleReachColumn, alignment: .leading)
+        .help(warning ?? "")
+        .accessibilityLabel(L("app_rules.reach", "Applies to"))
+        .accessibilityValue(RuleReachWords.spoken(reading))
+        .popover(item: $request, arrowEdge: .bottom) { _ in
+            RuleReachChecklist(
+                model: model,
+                family: family,
+                app: app,
+                subject: subject,
+                value: value
             )
-            .fixedSize()
-            .accessibilityLabel(L("app_rules.reach", "Applies to"))
-            .accessibilityValue(RuleReachWords.spoken(reading))
-            .popover(item: $request, arrowEdge: .bottom) { _ in
-                RuleReachChecklist(
-                    model: model,
-                    family: family,
-                    app: app,
-                    subject: subject,
-                    value: value
-                )
-            }
-            if let warning = RuleReachWords.differing(reading) {
-                Text(warning)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.warningInk)
-                    .padding(.leading, 4)
-                    .accessibilityHidden(true)
-            }
         }
     }
 }
@@ -114,7 +115,11 @@ enum RuleReachWords {
         )
     }
 
+    /// The ⚠ a shared row owes: a profile that differs does not
+    /// follow a change made under All profiles. A list says who it
+    /// reaches already, so it owes none.
     static func differing(_ reading: RuleReachReading) -> String? {
+        guard reading.shared else { return nil }
         let names = reading.differing
         switch names.count {
         case 0: return nil
