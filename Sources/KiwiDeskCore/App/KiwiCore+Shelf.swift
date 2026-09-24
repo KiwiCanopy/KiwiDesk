@@ -35,6 +35,7 @@ extension KiwiCore {
         var appBarsShown: [AppBarManager.Bar] = []
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [(DisplayID, CGRect)] = []
+        var dividers: [DisplayID: ShelfArrangement.Divider] = [:]
         for display in displays {
             let app = appBarContent(on: display.id, settings: settings)
             let items = spaceBarContent(on: display.id, style: look)
@@ -53,6 +54,7 @@ extension KiwiCore {
                 app: app
             )
             strips.append((display.id, plan.strip))
+            dividers[display.id] = plan.arrangement.divider
             if let app,
                 let bar = placedBar(app, display: display.id, plan: plan)
             {
@@ -74,13 +76,14 @@ extension KiwiCore {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
         }
-        syncShelves(strips, settings: settings)
+        syncShelves(strips, dividers: dividers, settings: settings)
     }
 
     /// Hands each display's shelf the sections its two bars just
     /// rendered, at the slots the plan gave them.
     private func syncShelves(
         _ strips: [(DisplayID, CGRect)],
+        dividers: [DisplayID: ShelfArrangement.Divider] = [:],
         settings: TilingSettings
     ) {
         let spaceSlots = Dictionary(
@@ -106,7 +109,8 @@ extension KiwiCore {
                         appBars.shownOverlay(on: display).map {
                             ($0, slot)
                         }
-                    }
+                    },
+                    divider: dividers[display]
                 )
             }
         )

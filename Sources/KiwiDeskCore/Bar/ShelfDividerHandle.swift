@@ -1,0 +1,90 @@
+import AppKit
+
+/// The section divider's grip (#1517, ruling 15): a strip over
+/// the divider line, live only while the shelf is full. Dragging
+/// it moves the Space Bar minimum; a double-click resets it. The
+/// cursor is set, never pushed (gui.md).
+@MainActor
+final class ShelfDividerHandle: NSView {
+    /// A minimum the drag reached; `committed` on the release.
+    var onMinimum: (_ percent: CGFloat, _ committed: Bool) -> Void = {
+        _,
+        _ in
+    }
+    /// A double-click: restore the default minimum.
+    var onReset: () -> Void = {}
+    /// Set while the shelf is full; the handle hides otherwise.
+    var range: ShelfArrangement.Divider?
+    var horizontal = true
+    /// How wide the grip reaches across the divider line.
+    nonisolated static let reach: CGFloat = 8
+
+    private var dragStart: CGPoint?
+    private var dragRange: ShelfArrangement.Divider?
+
+    override var isFlipped: Bool { true }
+
+    private var cursor: NSCursor {
+        horizontal ? .resizeLeftRight : .resizeUpDown
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        for area in trackingAreas { removeTrackingArea(area) }
+        addTrackingArea(
+            NSTrackingArea(
+                rect: bounds,
+                options: [
+                    .mouseEnteredAndExited, .cursorUpdate,
+                    .activeAlways, .inVisibleRect,
+                ],
+                owner: self
+            )
+        )
+    }
+
+    override func cursorUpdate(with event: NSEvent) {
+        cursor.set()
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        cursor.set()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        guard dragStart == nil else { return }
+        NSCursor.arrow.set()
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        if event.clickCount >= 2 {
+            dragStart = nil
+            onReset()
+            return
+        }
+        dragStart = event.locationInWindow
+        dragRange = range
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        report(event, committed: false)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        report(event, committed: true)
+        dragStart = nil
+        dragRange = nil
+    }
+
+    /// The drag's travel along the shelf, measured from where it
+    /// began against the range it began with — the layout moving
+    /// underneath does not move the reference.
+    private func report(_ event: NSEvent, committed: Bool) {
+        guard let start = dragStart, let range = dragRange else { return }
+        let now = event.locationInWindow
+        // Window coordinates grow upward; the shelf's run grows
+        // downward on a vertical edge.
+        let delta = horizontal ? now.x - start.x : start.y - now.y
+        onMinimum(range.minimum(afterDragging: delta), committed)
+    }
+}

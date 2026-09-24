@@ -41,10 +41,17 @@ public struct ShelfArrangement: Equatable, Sendable {
 
     public var space: Slot?
     public var app: Slot?
+    /// Set only while both bars need more than the edge holds.
+    public var divider: Divider?
 
-    public init(space: Slot? = nil, app: Slot? = nil) {
+    public init(
+        space: Slot? = nil,
+        app: Slot? = nil,
+        divider: Divider? = nil
+    ) {
         self.space = space
         self.app = app
+        self.divider = divider
     }
 
     /// Places the shown bars along an edge `length` long. A nil
@@ -100,9 +107,18 @@ public struct ShelfArrangement: Equatable, Sendable {
                 length: spacesFirst ? appLength : spaceLength,
                 alignment: .start
             )
+            let divider =
+                spaceNeed + appNeed > room
+                ? Divider(
+                    room: room,
+                    spaceLength: spaceLength,
+                    bounds: bounds,
+                    spacesFirst: spacesFirst
+                )
+                : nil
             return spacesFirst
-                ? ShelfArrangement(space: first, app: second)
-                : ShelfArrangement(space: second, app: first)
+                ? ShelfArrangement(space: first, app: second, divider: divider)
+                : ShelfArrangement(space: second, app: first, divider: divider)
         }
     }
 

@@ -15,6 +15,15 @@ final class ShelfManager {
         let shelf: KiwiShelf
         let space: (overlay: SpaceBarOverlay, slot: CGRect)?
         let app: (overlay: AppBarOverlay, slot: CGRect)?
+        /// Set while the shelf is full, so the divider drags.
+        var divider: ShelfArrangement.Divider? = nil
+    }
+
+    /// A Space Bar minimum the divider reached (`committed` on
+    /// release) — wired once, to the settings-apply door.
+    var onMinimum: (_ percent: CGFloat, _ committed: Bool) -> Void = {
+        _,
+        _ in
     }
 
     private var overlays: [DisplayID: ShelfOverlay] = [:]
@@ -75,10 +84,17 @@ final class ShelfManager {
         }
         let overlay = overlays[display] ?? ShelfOverlay()
         overlays[display] = overlay
+        overlay.handle.onMinimum = { [weak self] percent, committed in
+            self?.onMinimum(percent, committed)
+        }
+        overlay.handle.onReset = { [weak self] in
+            self?.onMinimum(KiwiShelf.resetMinimum, true)
+        }
         overlay.show(
             strip: shelf.strip,
             shelf: LiquidGlassGate.rendered(shelf.shelf),
-            sections: sections
+            sections: sections,
+            divider: shelf.divider
         )
     }
 

@@ -28,6 +28,8 @@ final class ShelfOverlay {
     /// hosting them, so nothing is ever reparented into it.
     let glassFiller = NSView()
     let divider = NSView()
+    /// The divider's grip, live only while the shelf is full.
+    let handle = ShelfDividerHandle()
 
     var isVisible: Bool { panel?.isVisible == true }
 
@@ -37,7 +39,8 @@ final class ShelfOverlay {
     func show(
         strip: CGRect,
         shelf: KiwiShelf,
-        sections: [Section]
+        sections: [Section],
+        divider range: ShelfArrangement.Divider? = nil
     ) {
         guard !sections.isEmpty, strip.width >= 1, strip.height >= 1
         else {
@@ -73,6 +76,7 @@ final class ShelfOverlay {
                 animated: glides
             )
         }
+        layoutHandle(range: range, horizontal: horizontal)
         panel.setFrame(
             GeometryUtils.flip(
                 strip,
@@ -85,6 +89,50 @@ final class ShelfOverlay {
 
     func hide() {
         panel?.orderOut(nil)
+    }
+
+    /// Lays the grip over the divider line while the shelf is
+    /// full (`range`); otherwise the line is plain, with no hover.
+    private func layoutHandle(
+        range: ShelfArrangement.Divider?,
+        horizontal: Bool
+    ) {
+        handle.range = range
+        handle.horizontal = horizontal
+        guard range != nil, !divider.isHidden else {
+            handle.isHidden = true
+            return
+        }
+        handle.isHidden = false
+        handle.frame = Self.handleFrame(
+            divider: divider.frame,
+            depth: horizontal
+                ? stripView.bounds.height : stripView.bounds.width,
+            horizontal: horizontal
+        )
+    }
+
+    /// The grip: centred on the divider line, `reach` across it
+    /// and the shelf's whole depth along it.
+    nonisolated static func handleFrame(
+        divider: CGRect,
+        depth: CGFloat,
+        horizontal: Bool
+    ) -> CGRect {
+        let reach = ShelfDividerHandle.reach
+        return horizontal
+            ? CGRect(
+                x: divider.midX - reach / 2,
+                y: 0,
+                width: reach,
+                height: depth
+            )
+            : CGRect(
+                x: 0,
+                y: divider.midY - reach / 2,
+                width: depth,
+                height: reach
+            )
     }
 
     /// The one plate under both sections, in strip coordinates:
@@ -119,7 +167,9 @@ final class ShelfOverlay {
     ) {
         let wanted = sections.map(\.view)
         for view in stripView.subviews
-        where view !== divider && !wanted.contains(where: { $0 === view }) {
+        where view !== divider && view !== handle
+            && !wanted.contains(where: { $0 === view })
+        {
             view.removeFromSuperview()
         }
         for section in sections {
@@ -181,6 +231,8 @@ final class ShelfOverlay {
         divider.wantsLayer = true
         divider.isHidden = true
         stripView.addSubview(divider)
+        handle.isHidden = true
+        stripView.addSubview(handle)
         return panel
     }
 }

@@ -61,6 +61,9 @@ extension KiwiCore {
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }
+        shelves.onMinimum = { [weak self] percent, committed in
+            self?.dragShelfMinimum(percent, committed: committed)
+        }
         appBars.onMove = { [weak self] space, from, to in
             self?.moveBarItem(space: space, from: from, to: to)
         }
