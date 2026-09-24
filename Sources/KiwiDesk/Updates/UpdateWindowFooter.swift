@@ -8,6 +8,9 @@ struct UpdateWindowFooter: View {
     /// The pressed button leaves with its phase; VoiceOver moves
     /// to the one that replaces it.
     @AccessibilityFocusState private var answerFocused: Bool
+    /// With keyboard navigation on, the window rests on its
+    /// answer rather than on the first link in the notes.
+    @FocusState private var primaryFocused: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -20,6 +23,7 @@ struct UpdateWindowFooter: View {
         .frame(minHeight: 60)
         .background(SettingsTheme.panel)
         .onChange(of: session.phase) { answerFocused = true }
+        .onAppear { primaryFocused = true }
         .overlay(alignment: .top) {
             Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
         }
@@ -182,6 +186,7 @@ struct UpdateWindowFooter: View {
         Button(title, action: action)
             .kiwiProminentButton()
             .keyboardShortcut(.defaultAction)
+            .focused($primaryFocused)
             .accessibilityFocused($answerFocused)
     }
 }
