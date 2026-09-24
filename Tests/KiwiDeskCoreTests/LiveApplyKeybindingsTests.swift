@@ -243,7 +243,7 @@ struct LiveApplyKeybindingsTests {
         _ = core.liveApplyKeybindings(
             layers: baseConfig().layers,
             target: nil,
-            alreadyResolved: true
+            resolvedFor: "Work"
         )
 
         #expect(try !registered("alt+j", core: core))

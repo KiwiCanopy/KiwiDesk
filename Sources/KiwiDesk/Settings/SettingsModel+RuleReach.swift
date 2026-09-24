@@ -85,9 +85,11 @@ extension SettingsModel {
     /// screen does. The shared rules alone go back to gui.json,
     /// through `sidecarConfig`.
     func resolveLoadedRules(_ config: inout GuiConfig) {
+        resolvedPage = nil
         guard let stored = ruleReachStored, let loaded = reachPage,
             stored.appRules.profiles.contains(loaded)
         else { return }
+        resolvedPage = loaded
         config.appRules = stored.appRules.resolved(for: loaded)
         config.floatRules = stored.floatRules.resolved(for: loaded)
             .sorted { $0.key < $1.key }

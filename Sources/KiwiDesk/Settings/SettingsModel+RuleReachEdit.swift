@@ -89,18 +89,9 @@ extension SettingsModel {
         let table = reach.keyLayers
         guard let combo = table.resolved(key, for: editing), !combo.isEmpty
         else { return [:] }
-        let layer = RuleReachTable<String>.keyParts(key).layer
-        let keys = Set(table.base.keys)
-            .union(table.entries.values.flatMap(\.keys))
-            .filter {
-                $0 != key && RuleReachTable<String>.keyParts($0).layer == layer
-            }
         var result: [String: String] = [:]
         for profile in table.profiles where profile != editing {
-            guard
-                let rival = keys.sorted().first(where: {
-                    table.resolved($0, for: profile) == combo
-                })
+            guard let rival = table.rival(of: key, for: profile, combo: combo)
             else { continue }
             let label = reach.keyTemplates[rival]?.label ?? ""
             result[profile] =

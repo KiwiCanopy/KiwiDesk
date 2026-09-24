@@ -287,7 +287,9 @@ struct RuleReachKeyTests {
             layer: "default",
             lua: finder
         )
+        // Home keeps its own row, which wins on that combo, so it
+        // reads as leaving the moved Terminal out — as its file will.
         #expect(t.resolved(finderKey, for: "Home") == "ctrl+alt+y")
-        #expect(t.touched["Home"] == nil)
+        #expect(t.resolved(key, for: "Home") == nil)
     }
 }

@@ -45,7 +45,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     /// shortcut override replaces per combo and cannot delete
     /// (`KeyLayerOverride`), so its table carries a shared rule
     /// into the others instead of marking one profile out.
-    public var holdsLeftOut = true
+    public internal(set) var holdsLeftOut = true
 
     public init(
         base: [String: Value],
@@ -154,6 +154,49 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         }
     }
 
+    /// A combo written for `key` takes it from `rivals` — keys bound
+    /// to the same combo, which the caller names (only a family whose
+    /// value is a combo has any). The base's rival leaves the base;
+    /// a profile the user `ticked` gives its rival up; a profile that
+    /// did not keeps its own rival, which wins on that combo, so it
+    /// reads as leaving `key` out — the one "not here" a combo family
+    /// CAN store.
+    mutating func takeOver(
+        _ key: String,
+        value: Value,
+        rivals: [String],
+        ticked: Set<String>,
+        editing: String
+    ) {
+        if base[key] == value {
+            for rival in rivals where base[rival] == value {
+                setBase(rival, nil)
+            }
+        }
+        for profile in profiles
+        where profile != editing && resolved(key, for: profile) == value {
+            let held = rivals.filter {
+                resolved($0, for: profile) == value
+            }
+            guard !held.isEmpty else { continue }
+            if ticked.contains(profile) {
+                for rival in held { setEntry(rival, for: profile, .some(nil)) }
+            } else {
+                setEntry(key, for: profile, .some(nil))
+            }
+        }
+        // A "left out" that was only a rival on the OLD combo ends
+        // when the shared combo moves off it: that profile follows
+        // again, as its file will read.
+        guard base[key] == value else { return }
+        for profile in profiles
+        where profile != editing && entries[profile]?[key] == .some(nil)
+            && !rivals.contains(where: { resolved($0, for: profile) == value })
+        {
+            setEntry(key, for: profile, .none)
+        }
+    }
+
     /// Leaves `left` out of the shared `key` — the one place a
     /// profile is marked out. A family that cannot store the mark
     /// carries the shared rule into every other profile following
@@ -209,7 +252,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
 
     /// `.none` drops the entry (follow the base); `.some(nil)`
     /// leaves the rule out; `.some(v)` is the profile's own.
-    mutating func setEntry(
+    private mutating func setEntry(
         _ key: String,
         for profile: String,
         _ entry: Value??
@@ -226,7 +269,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         touched[profile, default: []].insert(key)
     }
 
-    mutating func setBase(_ key: String, _ value: Value?) {
+    private mutating func setBase(_ key: String, _ value: Value?) {
         guard base[key] != value else { return }
         base[key] = value
         baseTouched.insert(key)

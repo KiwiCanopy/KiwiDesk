@@ -75,14 +75,14 @@ extension KiwiCore {
     /// scoped to its effective action and runtime mode; absence
     /// from `activationFailures` alone never proves success.
     ///
-    /// `alreadyResolved`: the layers are the active profile's
-    /// RESOLVED set — the loaded page's (#1393) — so its override is
-    /// not laid over them a second time, which would bring back a
-    /// row the page moved or cleared.
+    /// `resolvedFor`: the profile whose RESOLVED layers these are —
+    /// the loaded page's (#1393). When it is the active profile its
+    /// override is not laid over them a second time, which would
+    /// bring back a row the page moved or cleared.
     public func liveApplyKeybindings(
         layers base: [KeyLayer],
         target: LiveKeybindingTarget?,
-        alreadyResolved: Bool = false
+        resolvedFor: String? = nil
     ) -> Result<
         LiveKeybindingApplyStatus?,
         LiveKeybindingApplyError
@@ -105,7 +105,9 @@ extension KiwiCore {
         case .failure(let error):
             return .failure(error)
         }
-        if alreadyResolved { profile = nil }
+        if resolvedFor != nil, resolvedFor == profiles.currentName {
+            profile = nil
+        }
 
         let resolved = ConfigResolver.resolvedLayers(
             base: base,

@@ -7304,7 +7304,7 @@ Shortcuts row is one action in one layer, its value the combo:
   its override adds the new row and the shared one stays. That
   is an accepted limitation until the override can delete; the
   page reads the first row, and the added row never reaches the
-  shared base (`movedComboStaysOut`).
+  shared base (`RuleReachKeyTests` ▸ `movedComboStaysOut`).
 - **A stored profile's own shortcut override stays
   `overwriteProfile`'s diff**, since it carries layer structure
   (a new layer, an icon) the checklist does not; it is written

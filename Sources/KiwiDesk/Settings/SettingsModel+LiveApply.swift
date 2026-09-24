@@ -71,8 +71,7 @@ extension SettingsModel {
         switch core.liveApplyKeybindings(
             layers: session.layers,
             target: target,
-            // Only while the page still names the loaded profile.
-            alreadyResolved: reachPage != nil && !pageMoved
+            resolvedFor: resolvedPage
         ) {
         case .success(let status):
             if status != .compileFailed {

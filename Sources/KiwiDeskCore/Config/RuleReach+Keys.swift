@@ -97,31 +97,35 @@ extension RuleReachTable where Value == String {
             editing: editing
         )
         guard let value, !value.isEmpty else { return }
-        let layer = Self.keyParts(key).layer
-        let keys = Set(base.keys).union(entries.values.flatMap(\.keys))
-        let rivals = keys.filter {
-            $0 != key && Self.keyParts($0).layer == layer
-        }
-        if base[key] == value {
-            for rival in rivals where base[rival] == value {
-                setBase(rival, nil)
-            }
-        }
-        // Only a profile the user ticked gives its key up. One that
-        // merely follows keeps its own row, which wins on that
-        // combo and reads as leaving this shortcut out; the page's
-        // own rows are the page's (the recorder's steal).
         let ticked: Set<String>
         switch reach {
         case .shared(let joining): ticked = joining
         case .listed(let members): ticked = members
         }
-        for profile in ticked
-        where profile != editing && resolved(key, for: profile) == value {
-            for rival in rivals where resolved(rival, for: profile) == value {
-                setEntry(rival, for: profile, .some(nil))
-            }
-        }
+        takeOver(
+            key,
+            value: value,
+            rivals: rivals(of: key),
+            ticked: ticked,
+            editing: editing
+        )
+    }
+
+    /// The other actions in `key`'s layer — the keys a combo written
+    /// for `key` may take its combo from.
+    public func rivals(of key: String) -> [String] {
+        let layer = Self.keyParts(key).layer
+        return Set(base.keys).union(entries.values.flatMap(\.keys))
+            .filter { $0 != key && Self.keyParts($0).layer == layer }
+            .sorted()
+    }
+
+    /// The action `profile` binds to `key`'s combo instead, if any —
+    /// the one ticking would take the key from.
+    public func rival(of key: String, for profile: String, combo: String)
+        -> String?
+    {
+        rivals(of: key).first { resolved($0, for: profile) == combo }
     }
 
     /// The base layers: `original` with each touched key's row
