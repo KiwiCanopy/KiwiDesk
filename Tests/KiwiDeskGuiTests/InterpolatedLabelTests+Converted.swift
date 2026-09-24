@@ -156,6 +156,9 @@ extension InterpolatedLabelTests {
         //    already converted by the re-review that filed it, so
         //    it is read as a starting set rather than a register.
         "border.controls.disabled": 1,
+        // The update window's key hint names Later by its key
+        // (#1542).
+        "update.window.keys_hint": 1,
         // The Fit rows' own reason on the Gaps card (#1360).
         "border.fit_gaps.disabled": 1,
         "space_bar.disabled.help": 1,
