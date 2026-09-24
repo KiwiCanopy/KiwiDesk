@@ -147,6 +147,57 @@ struct ShelfArrangementTests {
         #expect(app.offset + app.length == 1000)
     }
 
+    /// A minimum below the hard floor would cut the Space the
+    /// user is on; the floor wins.
+    @Test("The hard floor outranks a low minimum")
+    func hardFloorWins() {
+        let placed = ShelfArrangement.arrange(
+            length: 1000,
+            spaceNeed: 700,
+            appNeed: 800,
+            spaceFloor: 300,
+            shelf: shelf(minimum: 20)
+        )
+        #expect(placed.space?.length == 300)
+        #expect(placed.app?.length == 700)
+    }
+
+    @Test("The minimum's range runs from the floor to the need")
+    func minimumRange() {
+        #expect(
+            ShelfArrangement.minimumRange(
+                hardFloor: 150,
+                spaceNeed: 600,
+                room: 1000
+            ) == 150...600
+        )
+        // A floor past the need collapses onto the need, and the
+        // need never exceeds the room.
+        #expect(
+            ShelfArrangement.minimumRange(
+                hardFloor: 900,
+                spaceNeed: 600,
+                room: 1000
+            ) == 600...600
+        )
+        #expect(
+            ShelfArrangement.minimumRange(
+                hardFloor: 100,
+                spaceNeed: 1400,
+                room: 1000
+            ) == 100...1000
+        )
+    }
+
+    @Test("The hard floor is the active item plus a fade each side")
+    func hardFloorSum() {
+        let fade = ShelfOverflow.fadeLength(thickness: 40)
+        #expect(
+            ShelfArrangement.hardFloor(activeExtent: 50, thickness: 40)
+                == 50 + 2 * fade
+        )
+    }
+
     @Test("The minimum is clamped to its range")
     func minimumClamped() {
         let placed = arrange(700, 800, shelf(minimum: 5))

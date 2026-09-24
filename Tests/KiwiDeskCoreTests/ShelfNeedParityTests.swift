@@ -143,3 +143,63 @@ struct ShelfNeedParityTests {
         #expect(slack == 0)
     }
 }
+
+/// The hard floor reaches the live plan (#1517): a minimum below
+/// it, beside an App Bar that needs the whole edge, still leaves
+/// the active Space item and a fade each side in view.
+@MainActor
+@Suite("Shelf floor wiring")
+struct ShelfFloorWiringTests {
+    @Test("the live plan keeps the Space section at its hard floor")
+    func planHonoursTheFloor() throws {
+        let core = makeTestCore()
+        var settings = core.tiler.settings
+        settings.kiwishelf.minimum = KiwiShelf.minimumRange.lowerBound
+        let depth = settings.kiwishelf.thickness
+        let spaces = (1...12).map {
+            SpaceBarOverlay.Item(
+                space: SpaceID("\($0)"),
+                spaceGlyph: .text("Space \($0)", tinted: false),
+                apps: [],
+                active: $0 == 12,
+                overflow: 0,
+                focusInOverflow: false
+            )
+        }
+        let windows = (1...40).map {
+            AppBarOverlay.Item(
+                id: WindowID(UInt32($0)),
+                text: "A long window title \($0)",
+                icon: nil
+            )
+        }
+        let app = KiwiCore.AppBarContent(
+            space: Space(id: "s", windows: []),
+            style: settings.appBarLook(for: settings.monocle.appBar),
+            groups: windows.map { [$0.id] },
+            items: windows
+        )
+        let plan = core.shelfPlan(
+            visible: CGRect(x: 0, y: 0, width: 600, height: 400),
+            settings: settings,
+            spaceItems: spaces,
+            app: app
+        )
+        let slot = try #require(plan.arrangement.space)
+        let floor = ShelfArrangement.hardFloor(
+            activeExtent: SpaceBarOverlay.activeExtent(
+                items: spaces,
+                depth: depth,
+                gap: settings.kiwishelf.itemGap
+            ),
+            thickness: depth
+        )
+        let plainMinimum =
+            (600 - settings.kiwishelf.itemGap)
+            * KiwiShelf.minimumRange.lowerBound / 100
+        // The fixture only proves the wiring if the floor is
+        // what binds: above the plain percentage.
+        #expect(floor > plainMinimum)
+        #expect(slot.length >= floor - 0.5)
+    }
+}

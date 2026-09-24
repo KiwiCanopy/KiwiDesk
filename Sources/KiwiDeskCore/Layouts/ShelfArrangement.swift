@@ -49,11 +49,14 @@ public struct ShelfArrangement: Equatable, Sendable {
 
     /// Places the shown bars along an edge `length` long. A nil
     /// need means that bar does not show; a need is the bar's
-    /// natural run length, plate included.
+    /// natural run length, plate included. `spaceFloor` is the
+    /// Space section's hard floor (`minimumRange`), below which no
+    /// minimum may shrink it.
     public static func arrange(
         length: CGFloat,
         spaceNeed: CGFloat?,
         appNeed: CGFloat?,
+        spaceFloor: CGFloat = 0,
         shelf: KiwiShelf
     ) -> ShelfArrangement {
         let whole = max(length, 0)
@@ -67,11 +70,20 @@ public struct ShelfArrangement: Equatable, Sendable {
         case (.some(let spaceNeed), .some(let appNeed)):
             let gutter = max(shelf.itemGap, 0)
             let room = max(whole - gutter, 0)
+            let bounds = minimumRange(
+                hardFloor: spaceFloor,
+                spaceNeed: spaceNeed,
+                room: room
+            )
+            let minimum = min(
+                max(room * shelf.resolvedMinimum / 100, bounds.lowerBound),
+                bounds.upperBound
+            )
             let spaceLength = spaceSection(
                 room: room,
                 spaceNeed: spaceNeed,
                 appNeed: appNeed,
-                floor: room * shelf.resolvedMinimum / 100
+                floor: minimum
             )
             let appLength = min(appNeed, room - spaceLength)
             let unit = spaceLength + gutter + appLength
@@ -111,6 +123,29 @@ public struct ShelfArrangement: Equatable, Sendable {
         _ shelf: KiwiShelf
     ) -> Slot {
         Slot(offset: 0, length: length, alignment: shelf.alignment)
+    }
+
+    /// Where the Space section's minimum may lie, in points: from
+    /// the hard floor — the active item and a fade each side, so
+    /// the Space the user is on is never cut — to the Space Bar's
+    /// natural length, both within `room`. The one clamp `arrange`
+    /// and the divider drag share.
+    public static func minimumRange(
+        hardFloor: CGFloat,
+        spaceNeed: CGFloat,
+        room: CGFloat
+    ) -> ClosedRange<CGFloat> {
+        let ceiling = max(min(spaceNeed, room), 0)
+        return min(max(hardFloor, 0), ceiling)...ceiling
+    }
+
+    /// The Space section's hard floor for an active item
+    /// `activeExtent` long on a shelf `thickness` deep.
+    public static func hardFloor(
+        activeExtent: CGFloat,
+        thickness: CGFloat
+    ) -> CGFloat {
+        activeExtent + 2 * ShelfOverflow.fadeLength(thickness: thickness)
     }
 
     /// The Space section's length: its need while both fit;

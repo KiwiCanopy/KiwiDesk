@@ -176,6 +176,17 @@ extension KiwiCore {
                 gap: shelf.itemGap
             )
         }
+        let spaceFloor =
+            spaceItems.map {
+                ShelfArrangement.hardFloor(
+                    activeExtent: SpaceBarOverlay.activeExtent(
+                        items: $0,
+                        depth: depth,
+                        gap: shelf.itemGap
+                    ),
+                    thickness: depth
+                )
+            } ?? 0
         let appNeed = app.map {
             AppBarOverlay.naturalLength(
                 items: $0.items,
@@ -191,6 +202,7 @@ extension KiwiCore {
                 length: length,
                 spaceNeed: spaceNeed,
                 appNeed: appNeed,
+                spaceFloor: spaceFloor,
                 shelf: shelf
             )
         )

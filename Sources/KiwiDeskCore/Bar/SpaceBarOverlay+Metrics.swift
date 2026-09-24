@@ -54,6 +54,21 @@ extension SpaceBarOverlay {
             + SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
     }
 
+    /// The active Space item's length — what the shelf's hard
+    /// floor keeps in view (#1517); the longest item where none is
+    /// active.
+    static func activeExtent(
+        items: [Item],
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        let lengths = itemLengths(items, depth: depth, gap: gap)
+        if let index = items.firstIndex(where: \.active) {
+            return lengths[index]
+        }
+        return lengths.max() ?? 0
+    }
+
     /// Calculates item frames and front segment start coordinate.
     nonisolated static func runMetrics(
         lengths: [CGFloat],
