@@ -41,11 +41,6 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     public private(set) var touched: [String: Set<String>] = [:]
     /// Whether the base was touched at all.
     public private(set) var baseTouched: Set<String> = []
-    /// Whether the family's file can store "left out here". A
-    /// shortcut override replaces per combo and cannot delete
-    /// (`KeyLayerOverride`), so its table carries a shared rule
-    /// into the others instead of marking one profile out.
-    public internal(set) var holdsLeftOut = true
 
     public init(
         base: [String: Value],
@@ -159,8 +154,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     /// value is a combo has any). The base's rival leaves the base;
     /// a profile the user `ticked` gives its rival up; a profile that
     /// did not keeps its own rival, which wins on that combo, so it
-    /// reads as leaving `key` out — the one "not here" a combo family
-    /// CAN store.
+    /// reads as leaving `key` out.
     mutating func takeOver(
         _ key: String,
         value: Value,
@@ -197,22 +191,9 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         }
     }
 
-    /// Leaves `left` out of the shared `key` — the one place a
-    /// profile is marked out. A family that cannot store the mark
-    /// carries the shared rule into every other profile following
-    /// it and drops it from the base: the same reach, spelled
-    /// without a mark (`holdsLeftOut`).
+    /// Leaves `left` out of the shared `key`.
     private mutating func leaveOut(_ key: String, _ left: Set<String>) {
-        guard !holdsLeftOut, let shared = base[key] else {
-            for profile in left { setEntry(key, for: profile, .some(nil)) }
-            return
-        }
-        for profile in profiles
-        where !left.contains(profile) && follows(key, profile) {
-            setEntry(key, for: profile, .some(shared))
-        }
-        setBase(key, nil)
-        for profile in left { setEntry(key, for: profile, .none) }
+        for profile in left { setEntry(key, for: profile, .some(nil)) }
     }
 
     private mutating func remove(

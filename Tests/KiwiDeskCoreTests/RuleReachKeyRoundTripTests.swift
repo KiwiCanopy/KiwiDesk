@@ -3,10 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// What `holdsLeftOut` claims, held as one invariant (#1393): every
-/// change the key table takes, once encoded to files, reads back
-/// through the override resolution as the table said — so no path
-/// can leave a profile resolving what the checklist showed away.
+/// One invariant (#1393): every change the key table takes, once
+/// encoded to files, reads back through the override resolution as
+/// the table said — so no path can leave a profile resolving what
+/// the checklist showed away.
 @Suite("Rule reach, shortcut round trip (#1393)")
 struct RuleReachKeyRoundTripTests {
     private let terminal = "open_or_focus('com.apple.Terminal')"
@@ -122,7 +122,19 @@ struct RuleReachKeyRoundTripTests {
             removal: .here,
             editing: "Work"
         )
-        expectSame(here, "remove here carries")
+        expectSame(here, "remove here leaves out")
+
+        var moved = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: overrides
+        )
+        moved.applyKey(
+            key(terminal),
+            value: "ctrl+alt+u",
+            reach: .listed(["Work"]),
+            editing: "Work"
+        )
+        expectSame(moved, "listed to one profile")
 
         var everywhere = RuleReachTable<String>.keyLayers(
             base: base,

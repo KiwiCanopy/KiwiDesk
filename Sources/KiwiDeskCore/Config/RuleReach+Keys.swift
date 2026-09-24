@@ -1,11 +1,10 @@
 import Foundation
 
 // Shortcuts as a `RuleReachTable` (#1393): a key is one action in
-// one layer, its value the combo. `KeyLayerOverride` replaces per
-// combo and cannot delete, so this family holds no left-out mark
-// (`holdsLeftOut`) — "not here" carries the shared rule into the
-// others — and a row written into a profile takes its combo over
-// from whatever that profile bound there (`applyKey`).
+// one layer, its value the combo. "Left out" is the override's
+// removed combo (`KeyLayerOverride.removed`), and a row written
+// into a profile takes its combo over from whatever that profile
+// bound there (`applyKey`).
 
 extension RuleReachTable where Value == String {
     /// The key of `lua` in `layer`.
@@ -68,20 +67,17 @@ extension RuleReachTable where Value == String {
             }
             entries[profile] = entry
         }
-        var table = Self(
+        return Self(
             base: shared,
             entries: entries,
             profiles: overrides.map(\.profile)
         )
-        table.holdsLeftOut = false
-        return table
     }
 
     /// `apply`, then the takeover: where `key` now holds `value` —
     /// the base, or a profile — another action bound to that combo
     /// in the same layer loses it, recorded in the table so the
-    /// pill and its own row see it. The one shape this family CAN
-    /// store as "not here" is a combo another action replaced.
+    /// pill and its own row see it.
     public mutating func applyKey(
         _ key: String,
         value: String?,
@@ -148,6 +144,7 @@ extension RuleReachTable where Value == String {
     /// page left alone taken from the base.
     public func keyLayerBase(
         page: [KeyLayer],
+        editing: String,
         storedPage: [KeyLayer],
         storedBase: [KeyLayer],
         templates: [String: KeyBinding]
@@ -167,10 +164,11 @@ extension RuleReachTable where Value == String {
             layers[at].icon = shared.icon
         }
         // An untouched action's rows are the page's, minus the ones
-        // its profile's OWN override added — so a combo the profile
-        // moved (its row beside the shared one) stays out, while an
-        // edit to a second shared combo lands. A touched action's
-        // row is the table's.
+        // its profile's OWN override added and plus the shared ones
+        // it left out or rebound — so a combo the profile moved
+        // stays its own, while an edit to a second shared combo
+        // lands. A touched action's row is the table's, and one
+        // the page's profile alone changed keeps the stored base.
         let held = Self.allCombos(layers)
         let storedPage = Self.allCombos(storedPage)
         let stored = Self.allCombos(storedBase)
@@ -180,15 +178,21 @@ extension RuleReachTable where Value == String {
             var target: [String]
             if baseTouched.contains(key) {
                 target = base[key].map { [$0] } ?? []
+            } else if touched[editing]?.contains(key) == true {
+                target = stored[key] ?? []
             } else {
                 target = held[key] ?? []
                 var own = storedPage[key] ?? []
+                var dropped: [String] = []
                 for combo in stored[key] ?? [] {
                     if let at = own.firstIndex(of: combo) {
                         own.remove(at: at)
+                    } else {
+                        dropped.append(combo)
                     }
                 }
                 target.removeAll { own.contains($0) }
+                target += dropped.filter { !target.contains($0) }
             }
             if held[key] ?? [] != target {
                 Self.setRows(&layers, key, target, templates[key])

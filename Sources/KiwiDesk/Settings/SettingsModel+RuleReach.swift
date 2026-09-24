@@ -72,6 +72,7 @@ extension SettingsModel {
         if reachIsLoaded {
             snapshot.pageKeyBase = snapshot.keyLayers.keyLayerBase(
                 page: config.layers,
+                editing: editing,
                 storedPage: snapshot.storedKeyLayers(for: editing),
                 storedBase: snapshot.storedKeyBase,
                 templates: snapshot.keyTemplates

@@ -7281,30 +7281,34 @@ a second answer beside the files to the question they already
 answer, and it goes stale the first time a profile file is
 edited by hand.
 
-**Shortcuts rows take the same checklist, bent to what a
-shortcut override can store.** A profile's shortcut override
-replaces a row per key combo and cannot delete one, so a
-Shortcuts row is one action in one layer, its value the combo:
+**Shortcuts rows take the same checklist.** A Shortcuts row is
+one action in one layer, its value the combo:
 
-- **"Not here" is spelled by carrying, not by a mark.** The file
-  cannot say "Work leaves this shared shortcut out", so *Remove
-  from Work* moves the shortcut out of the shared set and gives
-  every other profile that used it its own copy: the same
-  profiles keep it, but a profile created later no longer
-  inherits it. The table knows its family holds no mark
-  (`RuleReachTable.holdsLeftOut`), so no path can write one it
-  would silently lose (`RuleReachKeyTests` ▸ `everywhereCarries`).
+- **"Not here" is a removed combo, as App Rules' is a
+  tombstone.** A profile's shortcut override replaces a row per
+  combo and also lists the shared combos it leaves out
+  (`KeyLayerOverride.removed`), so *Remove from Work* marks Work
+  alone and the shared row stays for every other profile and
+  every later one. The override could once only replace, which
+  left a profile two workarounds: carrying the shared shortcut
+  into each other profile's file, so a profile created later lost
+  it, or rebinding the combo to a no-op. Both are gone. A removal
+  costs a `Profile.currentFormat` step, since an older reader
+  would drop it silently, and a removal whose combo the base no
+  longer binds resolves to nothing and falls out of the next diff
+  (`KeyLayerOverrideRemovalTests`).
 - **Ticking a profile whose combo does something else takes the
   key over**, and the warning names the action that loses it
   (⚠ Key is used for …); the takeover is written into the table,
   so the save pill and that action's own row see it.
 - **Clearing a shortcut other profiles share asks**, as the trash
   does, rather than removing it from every profile.
-- **A profile cannot move a shared action to another combo** —
-  its override adds the new row and the shared one stays. That
-  is an accepted limitation until the override can delete; the
-  page reads the first row, and the added row never reaches the
-  shared base (`RuleReachKeyTests` ▸ `movedComboStaysOut`).
+- **A profile can move a shared action to another combo** — its
+  override removes the shared combo and binds the new one, and
+  neither reaches the shared base (`RuleReachKeyLeftOutTests` ▸
+  `pageLeftOutKeepsBase`). A file written before removals, with
+  the moved row beside the shared one, still keeps its added row
+  out of the base (`RuleReachKeyTests` ▸ `movedComboStaysOut`).
 - **A stored profile's own shortcut override stays
   `overwriteProfile`'s diff**, since it carries layer structure
   (a new layer, an icon) the checklist does not; it is written

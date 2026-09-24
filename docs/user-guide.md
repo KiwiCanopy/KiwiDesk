@@ -867,13 +867,11 @@ reference](lua-reference.md)).
 
 :::unreleased
 Each binding's **Applies to** says which profiles use it: **All
-profiles**, or the profiles ticked. A profile file can't leave a
-shared shortcut out, so **Remove from** one profile moves the
-shortcut into each other profile that used it, and a profile you
-create later doesn't get it. Ticking a profile that uses the key
-for something else gives the key to this shortcut there. A
-profile can't move a shared shortcut to another key: the new key
-is added and the shared one keeps working.
+profiles**, or the profiles ticked. **Remove from** one profile
+turns a shared shortcut off there and keeps it everywhere else,
+and a profile can put a shared shortcut on another key of its
+own. Ticking a profile that uses the key for something else
+gives the key to this shortcut there.
 :::
 
 A new layer also carries the `⌃⌥,` Open Settings row.

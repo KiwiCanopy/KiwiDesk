@@ -92,8 +92,8 @@ struct RuleReachKeyModelTests {
         #expect(RuleReachTable<String>.combos(base)[key(reload)] == nil)
     }
 
-    @Test("Remove from Work carries a shared shortcut to the others")
-    func removeHereCarries() throws {
+    @Test("Remove from Work leaves Work out of a shared shortcut")
+    func removeHereLeavesOut() throws {
         let model = try makeModel()
         model.recordRemoval(.key, key(focus), .here)
         let at = try #require(
@@ -104,6 +104,30 @@ struct RuleReachKeyModelTests {
 
         #expect(try combos(model, "Work")[key(focus)] == nil)
         #expect(try combos(model, "Home")[key(focus)] == "alt+h")
+        // The shared row stays; Work's file marks it out; Home's
+        // file is not touched.
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        #expect(RuleReachTable<String>.combos(base)[key(focus)] == "alt+h")
+        let work = try model.core.profiles.read(name: "Work").layers
+        #expect(work?.removed[KeyLayer.defaultName] == ["alt+h"])
+        #expect(try model.core.profiles.read(name: "Home").layers == nil)
+    }
+
+    @Test("Remove from Home on its stored page leaves Home out")
+    func storedRemoveHereLeavesOut() throws {
+        let model = try makeModel()
+        model.selectEditTarget("Home")
+        model.recordRemoval(.key, key(focus), .here)
+        let at = try #require(
+            model.config.layers.firstIndex { $0.name == KeyLayer.defaultName }
+        )
+        model.config.layers[at].bindings.removeAll { $0.lua == focus }
+        model.saveEditedProfile()
+
+        #expect(try combos(model, "Home")[key(focus)] == nil)
+        #expect(try combos(model, "Work")[key(focus)] == "alt+h")
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        #expect(RuleReachTable<String>.combos(base)[key(focus)] == "alt+h")
     }
 
     @Test("A layer only Work carries stays out of gui.json")

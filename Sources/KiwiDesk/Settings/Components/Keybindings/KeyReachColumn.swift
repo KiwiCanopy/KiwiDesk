@@ -32,9 +32,8 @@ struct KeyReachColumn: View {
 }
 
 /// A shortcut row's trash, asking where a shared shortcut goes
-/// (#1393): "Remove from <profile>" keeps it for the others, each
-/// in its own file, since a profile cannot leave a shared shortcut
-/// out.
+/// (#1393): "Remove from <profile>" leaves that profile out and
+/// keeps it for the others.
 struct KeyReachTrash: View {
     @ObservedObject var model: SettingsModel
     let layer: String

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Sparse per-profile app→space rule override (#109). A stored
-/// nil is a TOMBSTONE (un-pin), unlike `KeyLayerOverride`.
+/// nil is a TOMBSTONE (un-pin), like `KeyLayerOverride.removed`.
 /// Bespoke on that seam, NOT a generic sparse-override primitive
 /// (AGENTS.md §5, `.claude/rules/parity-tests.md`); guarded by
 /// round-trip + resolve + diff-inverse in `AppRuleOverrideTests`.
