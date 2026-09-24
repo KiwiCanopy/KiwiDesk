@@ -241,4 +241,53 @@ struct RuleReachKeyTests {
         )
         #expect(shared[0].bindings.map(\.combo) == ["ctrl+alt+t"])
     }
+
+    @Test("A base action bound to two combos keeps both")
+    func baseTwoCombosKept() {
+        let twice = [
+            KeyLayer(
+                name: "default",
+                bindings: [
+                    row("ctrl+alt+t", terminal), row("alt+t", terminal),
+                ]
+            )
+        ]
+        let t = RuleReachTable<String>.keyLayers(
+            base: twice,
+            overrides: [("Work", nil)]
+        )
+        let shared = t.keyLayerBase(
+            page: twice,
+            storedPage: twice,
+            storedBase: twice,
+            templates: templates
+        )
+        #expect(shared[0].bindings.map(\.combo) == ["ctrl+alt+t", "alt+t"])
+        #expect(RuleReachTable<String>.sameShortcuts(shared, twice))
+    }
+
+    @Test("A shared move leaves a follower's own row on that combo")
+    func followerOwnRowKept() {
+        // Home binds ctrl+alt+y to Finder on its own; Work moves the
+        // shared Terminal onto ctrl+alt+y. Home did not tick anything.
+        let home = KeyLayerOverride(layers: [
+            KeyLayer(name: "default", bindings: [row("ctrl+alt+y", finder)])
+        ])
+        var t = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: [("Work", nil), ("Home", home)]
+        )
+        t.applyKey(
+            key,
+            value: "ctrl+alt+y",
+            reach: .shared(joining: []),
+            editing: "Work"
+        )
+        let finderKey = RuleReachTable<String>.keyID(
+            layer: "default",
+            lua: finder
+        )
+        #expect(t.resolved(finderKey, for: "Home") == "ctrl+alt+y")
+        #expect(t.touched["Home"] == nil)
+    }
 }

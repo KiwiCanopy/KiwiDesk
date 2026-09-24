@@ -107,7 +107,17 @@ extension RuleReachTable where Value == String {
                 setBase(rival, nil)
             }
         }
-        for profile in profiles where resolved(key, for: profile) == value {
+        // Only a profile the user ticked gives its key up. One that
+        // merely follows keeps its own row, which wins on that
+        // combo and reads as leaving this shortcut out; the page's
+        // own rows are the page's (the recorder's steal).
+        let ticked: Set<String>
+        switch reach {
+        case .shared(let joining): ticked = joining
+        case .listed(let members): ticked = members
+        }
+        for profile in ticked
+        where profile != editing && resolved(key, for: profile) == value {
             for rival in rivals where resolved(rival, for: profile) == value {
                 setEntry(rival, for: profile, .some(nil))
             }
@@ -152,13 +162,22 @@ extension RuleReachTable where Value == String {
             else { continue }
             layers[at].icon = shared.icon
         }
-        // Every row per action, not the first: a combo the page's
-        // profile MOVED keeps the base row beside its own, and only
-        // the shared one may reach the base.
+        // Each action's rows are the base's: the stored ones for an
+        // untouched key — two combos included — and the table's for
+        // a touched one. So a combo the page's profile MOVED (its
+        // own row beside the shared one) never reaches the base, and
+        // an untouched row is not re-set.
         let held = Self.allCombos(layers)
-        for key in Set(held.keys).union(base.keys).sorted()
-        where held[key] != base[key].map { [$0] } {
-            Self.set(&layers, key, base[key], templates[key])
+        let stored = Self.allCombos(storedBase)
+        for key in Set(held.keys).union(stored.keys).union(baseTouched)
+            .sorted()
+        {
+            let target =
+                baseTouched.contains(key)
+                ? base[key].map { [$0] } ?? [] : stored[key] ?? []
+            if held[key] ?? [] != target {
+                Self.setRows(&layers, key, target, templates[key])
+            }
         }
         return layers
     }
@@ -195,23 +214,51 @@ extension RuleReachTable where Value == String {
         _ combo: String?,
         _ template: KeyBinding?
     ) {
+        setRows(&layers, key, combo.map { [$0] } ?? [], template)
+    }
+
+    /// `key`'s rows in `layers` become exactly `combos`, each taking
+    /// its combo over from any row bound to it.
+    static func setRows(
+        _ layers: inout [KeyLayer],
+        _ key: String,
+        _ combos: [String],
+        _ template: KeyBinding?
+    ) {
         let (name, lua) = keyParts(key)
         var at = layers.firstIndex { $0.name == name }
         if let at {
             layers[at].bindings.removeAll { $0.lua == lua }
         }
-        guard let combo, var row = template else { return }
-        row.combo = combo
-        row.lua = lua
+        guard !combos.isEmpty, let template else { return }
         if at == nil {
             layers.append(KeyLayer(name: name))
             at = layers.count - 1
         }
         guard let at else { return }
-        if !combo.isEmpty {
-            layers[at].bindings.removeAll { $0.combo == combo }
+        for combo in combos {
+            var row = template
+            row.combo = combo
+            row.lua = lua
+            if !combo.isEmpty {
+                layers[at].bindings.removeAll { $0.combo == combo }
+            }
+            layers[at].bindings.append(row)
         }
-        layers[at].bindings.append(row)
+    }
+
+    /// Whether two layer lists carry the same shortcuts — names,
+    /// icons and each row's combo and action, in order. Label and
+    /// kind are presentation the import classifier rewrites.
+    public static func sameShortcuts(_ a: [KeyLayer], _ b: [KeyLayer]) -> Bool
+    {
+        func shape(_ layers: [KeyLayer]) -> [[String]] {
+            layers.map { layer in
+                [layer.name, layer.icon ?? ""]
+                    + layer.bindings.map { $0.combo + "\u{1F}" + $0.lua }
+            }
+        }
+        return shape(a) == shape(b)
     }
 
     /// Each stored row, keyed as the key table keys it, for a row

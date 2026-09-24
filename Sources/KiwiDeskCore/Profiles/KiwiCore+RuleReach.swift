@@ -49,7 +49,9 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var isEdited: Bool {
         !appRules.baseTouched.isEmpty || !floatRules.baseTouched.isEmpty
             || !keyLayers.baseTouched.isEmpty
-            || (pageKeyBase.map { $0 != storedKeyBase } ?? false)
+            || (pageKeyBase.map {
+                !RuleReachTable<String>.sameShortcuts($0, storedKeyBase)
+            } ?? false)
             || appRules.touched.values.contains { !$0.isEmpty }
             || floatRules.touched.values.contains { !$0.isEmpty }
             || keyLayers.touched.values.contains { !$0.isEmpty }
@@ -174,7 +176,10 @@ extension KiwiCore {
         var sidecar: GuiConfig?
         let keysMoved =
             !snapshot.keyLayers.baseTouched.isEmpty
-            || snapshot.keyBase != snapshot.storedKeyBase
+            || !RuleReachTable<String>.sameShortcuts(
+                snapshot.keyBase,
+                snapshot.storedKeyBase
+            )
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
             || keysMoved
         {
