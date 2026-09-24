@@ -158,6 +158,11 @@ struct DiscordAnnounceTests {
         let text = try #require(try embed(result)["description"] as? String)
         #expect(text.count <= 4096)
         #expect(text.hasSuffix("Full notes: \(Self.url)"))
+        // Cut at a sentence end, never mid-sentence.
+        let summary = try #require(
+            text.components(separatedBy: "\n\n").first
+        )
+        #expect(summary.hasSuffix("end."))
     }
 
     /// The issue's "a link to the release and the download": the
@@ -247,5 +252,11 @@ struct DiscordAnnounceTests {
         #expect(job.contains("needs: sync"))
         #expect(job.contains("github.event_name == 'release'"))
         #expect(job.contains("inputs.announce && inputs.tag != ''"))
+        // A status function in the gate overrides `needs`, and
+        // the job would post after a failed sync.
+        let gate = job.components(separatedBy: "runs-on:").first ?? ""
+        for status in ["always()", "failure()", "cancelled()"] {
+            #expect(!gate.contains(status), "the gate spells \(status)")
+        }
     }
 }

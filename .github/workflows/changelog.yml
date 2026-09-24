@@ -113,7 +113,7 @@ jobs:
       # one Node pin (.claude/rules/site.md), shared with site.yml
       # and a local `nvm use`, and Astro refuses anything older.
       - uses: actions/setup-node@v7
-        # Shadowed, not inherited: the job-level token is a real
+        # Shadowed, not inherited: the workflow-level token is a real
         # actor's, and `npm ci` below runs lifecycle scripts from
         # the site's whole dependency tree. `permissions:` cannot
         # narrow a PAT, so a step that does not CONSUME it says so
