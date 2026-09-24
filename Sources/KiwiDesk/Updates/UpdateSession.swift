@@ -85,6 +85,9 @@ final class UpdateSession: ObservableObject {
     var hide: () -> Void = {}
     /// Closes the window: Later answered the offer.
     var end: () -> Void = {}
+    /// The user pressed Install: the notes were read here, so no
+    /// "What's new" is owed after it.
+    var onInstall: () -> Void = {}
     /// Speaks a phase Sparkle moved to on its own — never one the
     /// user's own press caused.
     var announce: (UpdateWindowPhase) -> Void = { _ in }
@@ -205,6 +208,7 @@ final class UpdateSession: ObservableObject {
 
     func install() {
         guard phase == .found else { return }
+        onInstall()
         phase = installsFrom
         reply?(.install)
         reply = nil

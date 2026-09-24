@@ -58,4 +58,33 @@ struct UpdateOffer {
             )
         )
     }
+
+    /// "What's new" for the running version, merged across every
+    /// feed item after `since`; nil when the running version's
+    /// own notes cannot be read.
+    static func whatsNew(
+        items: [WhatsNewFeed.Item],
+        since: String?,
+        current: String
+    ) -> UpdateOffer? {
+        guard let item = items.first(where: { $0.version == current })
+        else { return nil }
+        let digest = UpdateNotesDigest.make(
+            sources: items.map {
+                UpdateNotesDigest.Source(version: $0.version, notes: $0.notes)
+            },
+            installed: since,
+            offered: current,
+            compare: SUStandardVersionComparator.default
+                .compareVersion(_:toVersion:)
+        )
+        guard let digest else { return nil }
+        return UpdateOffer(
+            version: item.shown,
+            build: item.version,
+            installed: since ?? "",
+            released: item.released,
+            digest: digest
+        )
+    }
 }

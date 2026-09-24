@@ -51,18 +51,25 @@ struct UpdateNotesDigest: Equatable {
     /// Merges every source newer than `installed` up to `offered`.
     /// Nil when the offered version's own notes cannot be read —
     /// the window then falls back to the notes link alone.
+    /// `installed` nil is a 1.x upgrade whose start was never
+    /// recorded: every version up to the offer, and the untyped
+    /// 1.x releases dropped silently rather than each linked.
     static func make(
         sources: [Source],
-        installed: String,
+        installed: String?,
         offered: String,
         compare: (String, String) -> ComparisonResult
     ) -> UpdateNotesDigest? {
         var seen = Set<String>()
         let inRange =
             sources
-            .filter {
-                compare($0.version, installed) == .orderedDescending
-                    && compare($0.version, offered) != .orderedDescending
+            .filter { source in
+                let newer = installed.map {
+                    compare(source.version, $0) == .orderedDescending
+                }
+                return (newer ?? true)
+                    && compare(source.version, offered)
+                        != .orderedDescending
             }
             .filter { seen.insert($0.version).inserted }
             .sorted {
@@ -80,7 +87,7 @@ struct UpdateNotesDigest: Equatable {
                 readable.append((source.version, offeredNotes))
             } else if let notes = ReleaseNotes.decode(source.notes) {
                 readable.append((source.version, notes))
-            } else {
+            } else if installed != nil {
                 unreadable.append(source.version)
             }
         }

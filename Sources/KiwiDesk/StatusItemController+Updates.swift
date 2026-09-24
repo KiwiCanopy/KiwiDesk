@@ -37,4 +37,30 @@ extension StatusItemController {
         NSApp.activate(ignoringOtherApps: true)
         updater.checkForUpdates()
     }
+
+    /// "What's New in X…" while a login launch left it waiting
+    /// (#1542), in the updates row's shape: it exists only then.
+    func makeWhatsNewItem() -> NSMenuItem? {
+        guard let version = whatsNewWaiting else { return nil }
+        let item = NSMenuItem(
+            title: L(
+                "menu.whats_new",
+                "What's New in KiwiDesk %1$@…",
+                version
+            ),
+            action: #selector(showWhatsNew(_:)),
+            keyEquivalent: ""
+        )
+        item.target = self
+        item.image = NSImage(
+            systemSymbolName: "sparkles",
+            accessibilityDescription: nil
+        )
+        item.isEnabled = true
+        return item
+    }
+
+    @objc func showWhatsNew(_ sender: NSMenuItem) {
+        whatsNew?.show()
+    }
 }

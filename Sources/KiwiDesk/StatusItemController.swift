@@ -40,6 +40,17 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// A scheduled update waiting behind the gentle reminder
     /// (#1013), read from the updater at every render.
     var updatePending: Bool { updater.updatePending }
+    /// "What's new" left waiting by a login launch (#1542): the
+    /// same mark, read from the coordinator at every render.
+    var whatsNew: WhatsNewCoordinator? {
+        didSet {
+            whatsNew?.onWaitingChanged = { [weak self] in
+                self?.render()
+            }
+            render()
+        }
+    }
+    var whatsNewWaiting: String? { whatsNew?.waiting?.version }
     var onShowAccessibilityHelp: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
     /// Saved profiles, pulled fresh each menu open; broken entries
@@ -187,6 +198,22 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         // after the early returns above, so a warning, the
         // starting phase and a config error outrank an offer on
         // the glyph AND the name.
+        if !updatePending, let version = whatsNewWaiting {
+            if let image = button.image {
+                button.image = Self.badged(image)
+            }
+            button.setAccessibilityLabel(
+                L(
+                    "menu.status.whats_new.a11y",
+                    "KiwiDesk (what's new in %1$@)",
+                    version
+                )
+            )
+            button.toolTip = L(
+                "menu.status.whats_new.tooltip",
+                "KiwiDesk was updated — open the menu to see what's new."
+            )
+        }
         if updatePending {
             if let image = button.image {
                 button.image = Self.badged(image)
