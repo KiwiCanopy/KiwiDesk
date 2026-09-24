@@ -454,9 +454,8 @@ echo "  draft:    gh release view $TAG"
 # drifts on the release someone is in a hurry for; this one is
 # unavoidable.
 #
-# Section titles are the author's own — a fixed
-# New/Improved/Fixed triple splits one story across three buckets,
-# and a reader notices the story. The parser holds the SHAPE.
+# The section titles are the four types, in order (#1542); the
+# parser refuses any other.
 cat <<SKELETON
 
 --------------------------------------------------------------
@@ -465,19 +464,31 @@ Curate the draft, THEN publish. Paste above the generated
 
 ## Highlights
 
-One or two sentences: what this release is about, plainly.
+Two or three sentences: what this release is about, plainly.
 
-### <A thing a user noticed>
+**Before you update:** only when something changes for everyone
+who updates. Say what carries over, too. Usually omitted.
+
+### New
 
 - **The short version.** Then the detail, from the user's side.
 
-### <Another one>
+### Improved
 
 - ...
 
+### Fixed
+
+- ...
+
+### Lua & CLI
+
+- **If you write your own Lua config:** a break for scripters
+  goes first, addressed to them.
+
 
 --------------------------------------------------------------
-The rules, in four lines:
+The rules:
 
   * An entry earns its place by what a USER can observe — never
     by having a commit. This is the whole rule.
@@ -487,11 +498,15 @@ The rules, in four lines:
     actor). Layout names, Space, profile, App Bar are on screen,
     so they are fine.
   * Highlights are highlights. Site fixes, a font bump and
-    release plumbing collapse into one closing line.
+    release plumbing earn no line at all.
+  * Keep the section order; drop a section with nothing in it.
+  * One change, one bullet, under the type that fits best. A
+    new feature that also fixes something goes under New.
 
   Voice:  docs/design-decisions.md
           -> Release notes are written for the person installing
   Form:   .claude/rules/packaging-and-release.md
+  Draft:  python3 scripts/changelog-sync --body <file> --tag $TAG
   Check:  python3 scripts/changelog-sync --release $TAG --check
 --------------------------------------------------------------
 SKELETON

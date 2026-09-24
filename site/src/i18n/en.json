@@ -34,6 +34,7 @@
   "changelog_meta_desc": "What changed in each KiwiDesk release, newest first — new features, improvements and fixes for every version, in plain language.",
   "changelog_meta_title": "KiwiDesk Release Notes — what changed, version by version",
   "changelog_no_notes": "Released before these notes existed — the full list is on GitHub.",
+  "changelog_before_update": "Before you update:",
   "changelog_older_label": "Looking for older releases?",
   "changelog_older_link": "View all releases on GitHub",
   "changelog_title": "Release Notes",

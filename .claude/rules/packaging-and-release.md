@@ -455,9 +455,21 @@ never a price) — then the curated `## Highlights` block, then
 parser reads from `## Highlights`, and the site and Sparkle
 render the parsed block, so it is never put in front of a user
 who only asked to update; the curator's draft carries it so the
-whole draft pastes as the body. Under `## Highlights`: one or two
-sentences of summary, then `###` sections whose titles the author
-chooses, each carrying at least one entry. **Curate the draft,
+whole draft pastes as the body. Under `## Highlights`: a prose
+summary of two or three sentences, optionally closing in one
+`**Before you update:**` paragraph, then the typed `###` sections
+`New`, `Improved`, `Fixed`, `Lua & CLI`, in that order, each
+present only when it carries a bullet, one bullet per change
+(#1542, held by `ChangelogParserTests` ▸ `malformedBodyRefused`;
+a release before 2.0.0 keeps its free titles, and
+`--body <file> --tag <tag>` checks one of those). Every reader of
+the generated notes — the site, the feed, the update window —
+branches on each section's generated `type` and never on its
+displayed title, and a new type joins `changelog-sync`'s
+`SECTION_TYPES` alone; a reader that keeps its own list of the
+types (the window's Swift enum) is held to that table by a parity
+test that runs the generator, never by a hand-typed copy.
+**Curate the draft,
 then publish** — `release.yml` drafts, and
 `.github/workflows/changelog.yml` fires on *publish* and syncs the
 body onto the site's release-notes page AND into Sparkle's feed,

@@ -630,7 +630,7 @@ Two consequences fall out, both structural rather than stylistic:
   cannot say it — a default that changed, a control to go and
   find — and never by the diagnosis, which is the PR's (owner
   ruling). The whole block should read in one screen of the
-  update sheet Sparkle shows.
+  update window.
 - **A site change is news only when a visitor would come for
   it.** A new page, a new language, a changed download earns a
   line. A heading that now fits its column, a corrected term, a
@@ -639,6 +639,38 @@ Two consequences fall out, both structural rather than stylistic:
   update has no reason to care that the website was tidied. The
   generated list still carries each of them for whoever wants
   that.
+
+**The sections are typed: New, Improved, Fixed, Lua & CLI
+(#1542).** This reverses the earlier ruling
+that a release names its own sections. That ruling's argument
+was that fixed buckets split one story three ways: 0.9.7's
+multi-screen Desktops was at once new, improved and a fix. It
+lost to how the notes are READ. A reader comes with a question,
+"what's new?" or "was the bug that annoyed me fixed?", and a
+title of the release's own choosing answers neither at a glance.
+Three consequences:
+
+- **Each change goes under one type, the one that fits best.** A
+  change that is both new and a fix goes under New, and its
+  wording says what it also fixes. A fix that also improves
+  something goes under Improved. The story a type splits is told
+  in the summary, which stays prose.
+- **Lua & CLI holds only what exists for scripting:** new,
+  renamed or retired verbs and setters, and changed output. A
+  feature people use through Settings goes under New even when it
+  also has a Lua side, so nothing is written twice. A scripting
+  break opens that section, addressed to the people it reaches
+  ("If you write your own Lua config: …"), rather than alarming
+  everyone above the fold.
+- **"Before you update" is for what changes for everyone who
+  updates:** one closing paragraph of the summary, and usually
+  absent. Say what carries over as well as what does not. "Your
+  settings carry over; 1.4 can no longer open them" informs,
+  while "can't be opened by 1.4" alone frightens a reader who
+  was never going back.
+
+Releases before 2.0.0 keep the free titles they were published
+with.
 
 This binds whichever surface carries the notes: the GitHub
 release body is the source, and the changelog page (#873) and

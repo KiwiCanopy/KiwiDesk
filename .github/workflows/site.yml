@@ -85,6 +85,12 @@ jobs:
       - name: Check the shared brand tokens and the branded 404
         run: python3 ../scripts/check-site-tokens.py --dist dist
 
+      # The typed release notes' own subject (#1542): the corpus
+      # holds no typed release before 2.0.0, so the built-page
+      # check above goes vacuous until then.
+      - name: Check the typed changelog view
+        run: node test-changelog.mjs
+
       # The unreleased-marker plugin's own subject (#1232). The
       # artifact clauses in the check above go vacuous whenever
       # the corpus carries no marker, which is most of the time —

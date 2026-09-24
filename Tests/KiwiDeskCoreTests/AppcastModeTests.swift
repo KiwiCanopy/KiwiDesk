@@ -167,6 +167,7 @@ struct AppcastModeTests {
                     "tag": Self.goodTag,
                     "version": "9999.1.0",
                     "summary": summary,
+                    "heads": "Settings carry over.",
                     "sections": [
                         [
                             "title": "Things",
@@ -197,6 +198,13 @@ struct AppcastModeTests {
         // `marked.parseInline`, rendered the same way here.
         #expect(run.stdout.contains("<strong>Bold</strong>"))
         #expect(run.stdout.contains("<em>why</em>"))
+        // A 1.x client reads the typed grammar's closing
+        // paragraph in Sparkle's window, or nowhere (#1542).
+        #expect(
+            run.stdout.contains(
+                "<strong>Before you update:</strong> Settings carry over."
+            )
+        )
     }
 
     /// `--notes` has to reach the STRICT path as well.

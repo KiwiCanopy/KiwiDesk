@@ -431,10 +431,13 @@ alike — and names every problem at once rather than the first. A
 template is a suggestion that drifts on the release someone is in
 a hurry for; refusing is what keeps the shape identical across
 releases, and it fails the workflow loudly instead of rendering a
-half-page. Each of those refusals is pinned by
-`ChangelogParserTests`, which also pins the bodies that must NOT
-be refused — a guard that rejects legitimate input gets switched
-off.
+half-page. From 2.0.0 it also holds the typed grammar
+`packaging-and-release.md` states — a title outside the four
+types, a type repeated or out of order, prose under a type, and a
+Before you update paragraph that is misplaced, repeated or empty.
+Each of those refusals is pinned by `ChangelogParserTests`, which
+also pins the bodies that must NOT be refused — a guard that
+rejects legitimate input gets switched off.
 
 **Check a draft before publishing it**, with
 `scripts/changelog-sync --body <file>`: a draft has no tag, so
@@ -442,14 +445,16 @@ off.
 on the site. `scripts/release.sh` prints the skeleton after the
 tag push, which is the one place every release passes through.
 
-Section titles under `## Highlights` are the author's own, and
-that is a ruling rather than a gap (owner, 2026-08-19): a fixed
-New / Improved / Fixed triple splits one story across three
-buckets, while a reader notices the story. The parser holds the
-SHAPE and never a vocabulary. What the entries must SAY is
-`docs/design-decisions.md` ▸ *Release notes are written for the
-person installing*, which is a review-time rule by its own ruling
-and has no guard.
+The section titles are the typed grammar's from 2.0.0 (#1542);
+a release before it keeps the free titles it was published with.
+The page branches on each section's generated `type`, never on
+its title. `site/test-changelog.mjs` holds the view over fixtures,
+since the corpus has no typed release before 2.0.0, and
+`check-site-tokens.py` ▸ `check_typed_changelog` holds the built
+render once one exists. What the
+entries must SAY is `docs/design-decisions.md` ▸ *Release notes
+are written for the person installing*, which is a review-time
+rule by its own ruling and has no guard.
 
 **A promoted download link is read off the release's own asset
 list, never composed from a version (#904).** `changelog-sync`
