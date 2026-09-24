@@ -126,11 +126,7 @@ struct ProfilesSection: View {
         // Centred: the counters belong to the whole text block
         // (owner eye-confirm, 2026-08-16; #1624).
         HStack(alignment: .center) {
-            ProfileCounters(
-                screens: summary.count,
-                spaces: summary.spaceCount,
-                help: subtitle(summary)
-            )
+            counters(summary)
             VStack(alignment: .leading, spacing: 3) {
                 rowTitle(summary)
                 screenSetupsLine(summary)
@@ -144,6 +140,14 @@ struct ProfilesSection: View {
         }
     }
 
+    private func counters(_ summary: ProfileSummary) -> ProfileCounters {
+        ProfileCounters(
+            screens: summary.count,
+            spaces: summary.spaceCount,
+            overrides: summary.shortcutOverrideCount
+        )
+    }
+
     private func rowTitle(
         _ summary: ProfileSummary
     ) -> some View {
@@ -155,7 +159,7 @@ struct ProfilesSection: View {
                 .truncationMode(.tail)
                 .layoutPriority(1)
                 // The counters' tooltip, read after the name (#1624).
-                .accessibilityValue(subtitle(summary))
+                .accessibilityValue(counters(summary).sentence)
                 .onTapGesture(count: 2) {
                     beginRename(summary.name)
                 }

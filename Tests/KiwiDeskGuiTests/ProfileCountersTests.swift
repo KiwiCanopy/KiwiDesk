@@ -52,57 +52,90 @@ struct ProfileCountersTests {
     }
 
     /// The symbols say nothing to VoiceOver, so the counters hide
-    /// and the tooltip carries the sentence it was handed.
+    /// and the tooltip carries their own sentence.
     @Test("the counters show their sentence and hide from VoiceOver")
     func countersCarryTheSentence() throws {
         let source = try squashed(
             "Components/Profiles/ProfileCounters.swift"
         )
-        #expect(source.contains(".help(help)"))
+        #expect(source.contains(".help(sentence)"))
         #expect(source.contains(".accessibilityHidden(true)"))
     }
 
-    /// Each surface hands the counters the sentence of its OWN
-    /// counts and reads the same sentence after the name.
-    @Test("the profile row wires the sentence to both channels")
+    /// Every surface that draws the counters hands VoiceOver their
+    /// sentence, found by construction site rather than a list of
+    /// files, so a third surface cannot go symbol-only.
+    @Test("every surface drawing the counters reads their sentence")
+    func everySurfaceReadsTheSentence() throws {
+        let value = try Regex(
+            #"\.accessibilityValue\([A-Za-z]+(\([A-Za-z]+\))?\.sentence\)"#
+        )
+        var surfaces = 0
+        for file in try SourceScan.swiftSources(under: Self.settings)
+        where file.lastPathComponent != "ProfileCounters.swift" {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            .split(whereSeparator: \.isWhitespace).joined()
+            guard source.contains("ProfileCounters(") else { continue }
+            surfaces += 1
+            #expect(
+                source.contains(value),
+                Comment(rawValue: file.lastPathComponent)
+            )
+        }
+        #expect(surfaces >= 2)
+    }
+
+    /// The value sits on the NAME, read right after it, and the
+    /// row no longer draws the sentence as a caption.
+    @Test("the profile row reads the sentence after the name")
     func profileRowWiring() throws {
         let row = try squashed("Sections/ProfilesSection.swift")
         #expect(
             row.contains(
                 "ProfileCounters(screens:summary.count,"
                     + "spaces:summary.spaceCount,"
-                    + "help:subtitle(summary))"
+                    + "overrides:summary.shortcutOverrideCount)"
             )
         )
-        #expect(row.contains(".accessibilityValue(subtitle(summary))"))
-        // The caption line moved into the tooltip.
-        #expect(!row.contains("Text(subtitle("))
-        let subtitle = try squashed(
-            "Sections/ProfilesSection+Subtitle.swift"
+        let name = try #require(row.range(of: "Text(summary.name)"))
+        let rename = try #require(
+            row.range(of: "renameButton(summary.name)")
         )
+        #expect(name.upperBound < rename.lowerBound)
         #expect(
-            subtitle.contains(
-                "overrides:summary.shortcutOverrideCount"
+            row[name.upperBound..<rename.lowerBound].contains(
+                ".accessibilityValue(counters(summary).sentence)"
             )
         )
+        // The sentence's one use is the name's value; any other
+        // spelling of a caption is a second use (guard-prover).
+        #expect(row.occurrences(of: "counters(summary).sentence") == 1)
+        #expect(!row.contains("ProfileCounters.sentence"))
     }
 
-    @Test("the preset card wires the sentence to both channels")
+    @Test("the preset card reads the sentence after its title")
     func presetCardWiring() throws {
         let card = try squashed("Components/Profiles/PresetCard.swift")
         #expect(
             card.contains(
                 "ProfileCounters(screens:layout.screenCount,"
-                    + "spaces:layout.spaceCount,help:countsSentence)"
-            )
-        )
-        #expect(card.contains(".accessibilityValue(countsSentence)"))
-        #expect(
-            card.contains(
-                "ProfileCounters.sentence(screens:layout.screenCount,"
                     + "spaces:layout.spaceCount)"
             )
         )
+        let title = try #require(
+            card.range(of: "Text(layout.displayName)")
+        )
+        let badge = try #require(card.range(of: "iflayout.isStandard"))
+        #expect(title.upperBound < badge.lowerBound)
+        #expect(
+            card[title.upperBound..<badge.lowerBound].contains(
+                ".accessibilityValue(counters.sentence)"
+            )
+        )
+        #expect(card.occurrences(of: "counters.sentence") == 1)
+        #expect(!card.contains("ProfileCounters.sentence"))
     }
 
     /// `display` beside a number is the row's screen count; the

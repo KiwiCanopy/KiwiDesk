@@ -4456,7 +4456,7 @@ one-screen presets, so applying either on a laptop with a fixed
 rules out there: below 1900 pt a three-window BSP is already
 under the minimum in one axis. The unlisted mode resolves to
 that screen's own best layout. Where the hardware genuinely is
-not knowable — a preset card draws a plan for a screen COUNT,
+not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
@@ -4468,8 +4468,7 @@ answer "which two screens?", so a count you are not running
 offers the workflow layouts alone — that is what "For other
 setups" means. The preset's summary names none of its rungs for
 the same reason: a list of modes would be a different sentence
-on every Mac, so it states the rule and the thumbnails show the
-modes.
+on every Mac, so it states the rule and its **Layouts** sheet shows the modes.
 
 :::unreleased
 **A runtime `delete_space` stays a success, and names what brings
@@ -6835,7 +6834,7 @@ previews left under this same rule once
 **The panel's object is the DRAFT, so a picture of anything else
 is not a panel** — it is a sheet. (#859, owner 2026-08-16.)
 Preset cards raised the case: a card can identify a preset — its
-name, how many screens it plans for, one glyph per screen — but
+name, how many screens and Spaces it plans for — but
 it cannot describe one, and Apply is consequential, so the only
 way to find out what a preset contained was to apply it and read
 the result. The panel is where this window already puts depth,
@@ -11168,25 +11167,21 @@ row that represents a diff is a count of the diff.
 
 :::unreleased
 **A profile row and a preset card COUNT their screens and
-Spaces; they draw neither (#1624).** The leading picture used to
-be an outline per display carrying the layout its first Space
-opens in, and it read as a layout preview — "the layout of Space
-2" — which hid its real job, how many screens. It also sat off
-centre, since the column reserved room for the widest profile.
-Two counters, `display` and the Spaces page's own
-`squares.below.rectangle` symbol, answer the one question the
-thumbnail was for and stay legible from one display to thirty.
-What is given up is per-screen opening modes, which the preset's
-**Layouts** sheet (#859) already describes and the Spaces page
-owns once a profile loads: the thumbnail identifies, it never
-describes. The counters' sentence — the caption line the row
-used to spend under the name — is their tooltip and the name's
-VoiceOver value, so the counts are never symbol-only. A fact that
-changes what loads (the dormant line) stays in the row; only the
-counts moved behind hover. Once `display` beside a number means
-the screen count, the collapsed setups chip says "setups: 3" in
-words rather than reusing the glyph for a different count. This
-retires #959's elimination rule with the glyph it decided.
+Spaces; they draw neither (#1624).** An outline per screen
+carrying the layout its first Space opens in reads as a layout
+preview, and hides the thumbnail's one job: how many screens.
+Two counters — `display` and the Spaces page's own
+`squares.below.rectangle` — answer that at any count, in a column
+that does not reserve room for the widest profile. Per-screen
+opening modes belong to the preset's **Layouts** sheet (#859)
+and, once a profile loads, the Spaces page: the thumbnail
+identifies, it never describes. The counts' sentence is the
+counters' tooltip and the name's VoiceOver value, so they are
+never symbol-only; a fact that changes what loads (the dormant
+line) stays in the row, and only the counts sit behind hover.
+One glyph means one count: once `display` beside a number is the
+screen count, the collapsed setups chip counts in words
+("setups: 3").
 :::
 
 **[Principle]**

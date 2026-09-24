@@ -26,9 +26,6 @@ struct PresetPreviewPlan: Equatable {
         let screen: Int
         let slots: [Slot]
         var id: Int { screen }
-
-        /// Opening layout mode for the first space on this screen.
-        var openingMode: LayoutMode? { slots.first?.mode }
     }
 
     let groups: [Group]
@@ -38,11 +35,6 @@ struct PresetPreviewPlan: Equatable {
 
     /// All planned slots across drawn groups.
     var slots: [Slot] { drawnGroups.flatMap(\.slots) }
-
-    /// Returns group for specified screen index.
-    func group(screen: Int) -> Group? {
-        groups.first { $0.screen == screen }
-    }
 
     init(layout: StandardLayout, liveSizes: [CGSize]?) {
         let screens = max(layout.screenCount, 0)

@@ -17,11 +17,7 @@ struct PresetCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ProfileCounters(
-                screens: layout.screenCount,
-                spaces: layout.spaceCount,
-                help: countsSentence
-            )
+            counters
             titleRow
             Text(layout.displaySummary)
                 .font(.caption)
@@ -45,8 +41,8 @@ struct PresetCard: View {
         }
     }
 
-    private var countsSentence: String {
-        ProfileCounters.sentence(
+    private var counters: ProfileCounters {
+        ProfileCounters(
             screens: layout.screenCount,
             spaces: layout.spaceCount
         )
@@ -55,7 +51,7 @@ struct PresetCard: View {
     private var titleRow: some View {
         HStack(spacing: 6) {
             Text(layout.displayName).font(.headline)
-                .accessibilityValue(countsSentence)
+                .accessibilityValue(counters.sentence)
             if layout.isStandard {
                 BadgeChip(
                     label: L("presets.standard_badge", "standard")

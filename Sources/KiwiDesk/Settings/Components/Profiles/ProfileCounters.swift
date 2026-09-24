@@ -2,16 +2,22 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Screen and Space counts leading a saved-profile row and a
-/// preset card (#1624). The sentence is the tooltip; the counters
-/// are hidden from VoiceOver, which reads it off the name instead.
+/// preset card (#1624). `sentence` is the tooltip; the counters
+/// are hidden from VoiceOver, so every surface owes the same
+/// `sentence` as its name's `.accessibilityValue`
+/// (`ProfileCountersTests`).
 struct ProfileCounters: View {
     let screens: Int
     let spaces: Int
-    /// `ProfileCounters.sentence` for the same counts.
-    let help: String
+    var overrides = 0
 
-    /// Fits `display 9  squares 99` without clipping a longer count.
-    static let columnWidth: CGFloat = 68
+    /// One-digit screens beside two-digit Spaces at `.subheadline`
+    /// measure ~69 pt; a wider count grows its own row.
+    static let columnWidth: CGFloat = 72
+
+    var sentence: String {
+        Self.sentence(screens: screens, spaces: spaces, overrides: overrides)
+    }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -24,7 +30,7 @@ struct ProfileCounters: View {
         .fixedSize()
         .frame(minWidth: Self.columnWidth, alignment: .leading)
         .contentShape(Rectangle())
-        .help(help)
+        .help(sentence)
         .accessibilityHidden(true)
     }
 

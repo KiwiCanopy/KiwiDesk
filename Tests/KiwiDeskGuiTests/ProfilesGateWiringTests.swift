@@ -270,7 +270,7 @@ struct ProfilesGateWiringTests {
                 // invisible to this guard.
                 "Sections/ProfilesSection+Broken.swift",
                 "Sections/ProfilesSection+Rename.swift",
-                "Sections/ProfilesSection+Subtitle.swift",
+                "Components/Profiles/ProfileCounters.swift",
             ]
         for key in [
             "profiles.desktops.lua_owned",
