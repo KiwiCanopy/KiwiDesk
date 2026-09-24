@@ -253,7 +253,7 @@ extension KiwiCore {
             in: state
         )
         let bounds =
-            screen.map { tiler.layoutBounds(on: $0) }
+            screen.map { tiler.layoutBounds(on: $0, for: space) }
             ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
         // Clamp + refusal cue via the shared writer (#933),
         // the same one the mouse `.scrollWidth` path calls.

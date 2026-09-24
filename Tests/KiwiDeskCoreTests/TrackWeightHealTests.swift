@@ -79,7 +79,7 @@ struct TrackWeightHealTests {
             for: id,
             in: core.state
         )!
-        let bounds = core.tiler.layoutBounds(on: screen)
+        let bounds = core.tiler.layoutBounds(on: screen, for: space)
         let context = core.tiler.settings.context(
             bounds: bounds,
             space: space,
@@ -266,7 +266,10 @@ struct TrackWeightHealTests {
             for: space,
             in: core.state
         )!
-        let bounds = core.tiler.layoutBounds(on: screen)
+        let bounds = core.tiler.layoutBounds(
+            on: screen,
+            for: core.state.workspaces[space]!
+        )
         let along = TrackLayout.alongSpan(
             region: Double(bounds.height),
             gaps: core.tiler.settings.gaps(for: space),

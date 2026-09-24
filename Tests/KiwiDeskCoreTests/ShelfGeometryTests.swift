@@ -63,34 +63,40 @@ struct ShelfGeometryTests {
         }
     }
 
-    /// Whether the shelf reserves is one predicate over the three
-    /// Show switches — never the layout on screen, so a layout
-    /// switch reflows nothing.
-    @Test("The shelf reserves exactly while any bar can show")
-    func reservesWhileAnyBarShows() {
+    /// The strip is reserved exactly where a bar draws: the Space
+    /// Bar draws in every layout, an App Bar only in its own. A
+    /// layout that draws no bar keeps the whole screen.
+    @Test("The shelf reserves exactly where a bar draws")
+    func reservesWhereABarDraws() {
         var settings = TilingSettings()
         settings.kiwishelf = shelf(edge: .left)
         settings.spaceBarStyle.enabled = false
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = false
-        #expect(!settings.shelfShows)
-        #expect(settings.layoutBounds(from: visible) == visible)
         let reserved = ShelfGeometry.remainingFrame(
             in: visible,
             shelf: settings.kiwishelf
         )
-        for flip in [
-            { (s: inout TilingSettings) in
-                s.spaceBarStyle.enabled = true
-            },
-            { $0.monocle.appBar.enabled = true },
-            { $0.scrolling.appBar.enabled = true },
-        ] {
-            var one = settings
-            flip(&one)
-            #expect(one.shelfShows)
-            #expect(one.layoutBounds(from: visible) == reserved)
+        func bounds(_ s: TilingSettings, _ mode: LayoutMode) -> CGRect {
+            s.layoutBounds(from: visible, mode: mode)
         }
+        for mode in LayoutMode.allCases {
+            #expect(bounds(settings, mode) == visible, "\(mode)")
+        }
+        var spaceBar = settings
+        spaceBar.spaceBarStyle.enabled = true
+        for mode in LayoutMode.allCases {
+            #expect(bounds(spaceBar, mode) == reserved, "\(mode)")
+        }
+        var monocle = settings
+        monocle.monocle.appBar.enabled = true
+        #expect(bounds(monocle, .monocle) == reserved)
+        #expect(bounds(monocle, .scrolling) == visible)
+        #expect(bounds(monocle, .bsp) == visible)
+        var scrolling = settings
+        scrolling.scrolling.appBar.enabled = true
+        #expect(bounds(scrolling, .scrolling) == reserved)
+        #expect(bounds(scrolling, .monocle) == visible)
     }
 
     @Test("Oversized thickness never yields a negative frame")

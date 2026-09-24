@@ -125,7 +125,10 @@ struct ScrollingColumnCapTests {
         settings.kiwishelf.thickness = 100
         #expect(
             settings.scrollingColumnCap(
-                bounds: settings.layoutBounds(from: visible),
+                bounds: settings.layoutBounds(
+                    from: visible,
+                    mode: .scrolling
+                ),
                 space: SpaceID("1")
             ) == 5
         )

@@ -20,7 +20,10 @@ extension KiwiCore {
         let widest = Self.widest(of: screens.map(\.frame)).map { screens[$0] }
         guard let screen = own ?? widest else { return nil }
         return settings.scrollingColumnCap(
-            bounds: settings.layoutBounds(from: tiler.visibleBounds(screen)),
+            bounds: settings.layoutBounds(
+                from: tiler.visibleBounds(screen),
+                mode: .scrolling
+            ),
             space: space
         )
     }

@@ -83,7 +83,7 @@ struct BarMarginTests {
         let settings = settings(shelf(edge: .bottom))
         let outer = Gaps.Outer(top: 10, bottom: 10, left: 10, right: 10)
         let area = LayoutContext.usable(
-            settings.layoutBounds(from: visible),
+            settings.layoutBounds(from: visible, mode: .scrolling),
             outer: outer
         )
         #expect(area.maxY == visible.maxY - 32 - 10)
@@ -96,7 +96,7 @@ struct BarMarginTests {
         #expect(strip.maxY == visible.maxY - 5)
         #expect(strip.height == 32)
         let area = LayoutContext.usable(
-            settings(shelf).layoutBounds(from: visible),
+            settings(shelf).layoutBounds(from: visible, mode: .scrolling),
             outer: Gaps.uniform(10).outer
         )
         #expect(area.maxY == visible.maxY - 5 - 32 - 7 - 10)
@@ -107,9 +107,9 @@ struct BarMarginTests {
     @Test("Both bars share one reservation")
     func bothBarsReserveOnce() {
         let shelf = shelf(edge: .top, outer: 2, inner: 3)
-        let one = settings(shelf).layoutBounds(from: visible)
+        let one = settings(shelf).layoutBounds(from: visible, mode: .scrolling)
         let both = settings(shelf, spaceBar: true)
-            .layoutBounds(from: visible)
+            .layoutBounds(from: visible, mode: .scrolling)
         #expect(both == one)
         #expect(both.minY == visible.minY + 2 + 32 + 3)
     }

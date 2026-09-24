@@ -83,12 +83,23 @@ extension TilingSettings {
         return params
     }
 
-    /// Whether the KiwiShelf carries any bar — the Space Bar or
-    /// any layout's App Bar is on — and so reserves its strip in
-    /// EVERY layout (#1517). The one "does the shelf show"
-    /// predicate: the reservation and the Settings gates ask it.
+    /// Whether the KiwiShelf carries any bar in some layout — the
+    /// Space Bar or any layout's App Bar is on. The Settings gates
+    /// ask it; the reservation asks `shelfShows(in:)`.
     public var shelfShows: Bool {
         spaceBarStyle.enabled || anyAppBarCanShow
+    }
+
+    /// Whether a bar draws on the shelf of a space laid out in
+    /// `mode` — the Space Bar, which draws in every layout, or
+    /// that layout's own App Bar — and so whether the strip is
+    /// reserved there (#1517). A layout that draws no bar keeps
+    /// the whole screen; the price is that with the Space Bar off,
+    /// a switch into a layout whose App Bar shows moves windows
+    /// by the strip.
+    public func shelfShows(in mode: LayoutMode) -> Bool {
+        spaceBarStyle.enabled
+            || appBarHost(for: mode)?.appBar.enabled == true
     }
 
     /// True if any layout's App Bar is switched on.
@@ -144,15 +155,18 @@ extension TilingSettings {
         }
     }
 
-    /// Insets visible bounds by the shelf's reservation whenever
-    /// a bar can show, whatever the layout (#293, #1517).
+    /// Insets visible bounds by the shelf's reservation wherever a
+    /// bar draws in `mode` (#293, #1517).
     /// Deliberately NOT public: it takes a raw frame the caller
     /// obtained some other way — the unsafe half. Callers with a
     /// screen want `TilingEngine.layoutBounds(on:)` (#537), and
     /// the routing guards scan only this module, so a cross-module
     /// caller would be invisible to them.
-    func layoutBounds(from visible: CGRect) -> CGRect {
-        guard shelfShows else { return visible }
+    func layoutBounds(
+        from visible: CGRect,
+        mode: LayoutMode
+    ) -> CGRect {
+        guard shelfShows(in: mode) else { return visible }
         return ShelfGeometry.remainingFrame(
             in: visible,
             shelf: kiwishelf
