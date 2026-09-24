@@ -36,9 +36,11 @@ struct KiwiShelfMigrationTests {
             "layout" : {
               "monocle" : {
                 "app_bar" : {
+                  "active_indicator" : "gap",
                   "content" : "title",
                   "edge" : "left",
                   "enabled" : true,
+                  "fill_color" : "#445566B3",
                   "thickness" : 50
                 }
               }
@@ -126,6 +128,10 @@ struct KiwiShelfMigrationTests {
         #expect(bar["thickness"] == nil)
         #expect(bar["content"] as? String == "title")
         #expect(bar["enabled"] as? Bool == true)
+        // A layout's colour is the shelf's now, and its Gap is
+        // gone like the global bar's.
+        #expect(bar["fill_color"] == nil)
+        #expect(bar["active_indicator"] as? String == "outline")
     }
 
     /// The bar the user actually saw: with the Space Bar off,
