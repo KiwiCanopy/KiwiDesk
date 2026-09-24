@@ -18,15 +18,15 @@ extension ConfigMigration {
     @Sendable
     static func migratingPalettesOntoShelf(_ data: Data) -> Data? {
         guard
+            stampBelow(
+                data,
+                file: shelfPaletteFormat,
+                bundle: shelfBundleFormat
+            ),
             let root = try? JSONSerialization.jsonObject(with: data)
                 as? [String: Any],
             var palettes = root[shelfPalettesKey] as? [[String: Any]]
         else { return nil }
-        let format = root["format"] as? Int ?? 0
-        let floor =
-            root[SetupBundle.shapeMarker] != nil
-            ? shelfBundleFormat : shelfPaletteFormat
-        guard format < floor else { return nil }
         var changed = false
         for index in palettes.indices {
             guard

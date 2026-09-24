@@ -73,7 +73,7 @@ extension ConfigMigration {
     static func shelfStepApplies(to data: Data) -> Bool {
         stampBelow(
             data,
-            profile: shelfProfileFormat,
+            file: shelfProfileFormat,
             bundle: shelfBundleFormat
         )
     }

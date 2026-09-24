@@ -45,7 +45,7 @@ extension ConfigMigration {
     static func trackLiftApplies(to data: Data) -> Bool {
         stampBelow(
             data,
-            profile: trackLiftProfileFormat,
+            file: trackLiftProfileFormat,
             bundle: trackLiftBundleFormat
         )
     }

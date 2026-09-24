@@ -42,7 +42,7 @@ extension ConfigMigration {
     static func glassFillApplies(to data: Data) -> Bool {
         stampBelow(
             data,
-            profile: glassFillProfileFormat,
+            file: glassFillProfileFormat,
             bundle: glassFillBundleFormat
         )
     }
