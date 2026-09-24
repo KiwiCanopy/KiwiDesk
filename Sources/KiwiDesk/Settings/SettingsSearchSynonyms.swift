@@ -70,6 +70,8 @@ enum SettingsSearchSynonyms {
             return ["dark mode", "light mode", "theme"]
         case .general(.startAtLogin):
             return ["login item", "autostart", "launch"]
+        case .general(.installUpdatesAutomatically):
+            return ["auto update", "automatic updates", "sparkle"]
         case .shortcuts(.toggleSticky),
             .shortcuts(.toggleDisplaySticky):
             // The SHORTCUTS carry "pin", not the appearance rows

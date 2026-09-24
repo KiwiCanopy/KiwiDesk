@@ -191,6 +191,9 @@ struct GreyOutParityTests {
         // `ProfilesGateWiringTests` for why the card is
         // its own widget now.
         ("PresetCard.swift", ".disabled(reason != nil)", 1),
+        // The automatic-install switch greys where Sparkle
+        // refuses it (#1542).
+        ("AutoInstallRow.swift", ".disabled(reason != nil)", 1),
     ]
 
     @Test("every gated editor still greys off its own switch")

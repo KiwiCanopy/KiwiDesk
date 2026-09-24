@@ -11,6 +11,9 @@ enum SettingRuntimeGate: Hashable {
     case loginItemServiceStatus
     /// LaunchAgent service is already loaded (#1071).
     case autoStartServiceLoaded
+    /// Sparkle refuses automatic install: no update channel, or
+    /// automatic checks are off (#1542).
+    case automaticInstallUnavailable
     /// Space reset is inert when no overrides exist.
     case spaceHasNoOverrides
     /// macOS Reduce Motion greys animations card.

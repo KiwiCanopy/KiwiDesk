@@ -54,6 +54,7 @@ enum WhatsNewFixture {
 
 @MainActor
 final class WhatsNewFakeUpdater: AppUpdating {
+    let autoInstall = AutoInstallSetting.inert()
     let whatsNew: WhatsNewCoordinator?
     let updates = UpdateStateStore()
     var canCheckForUpdates = true

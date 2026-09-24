@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import KiwiDeskCore
 import Sparkle
@@ -40,6 +41,11 @@ protocol AppUpdating: AnyObject {
     /// "What's new" after an update (#1542); nil where the channel
     /// is inert, so an unbundled run owes no notes.
     var whatsNew: WhatsNewCoordinator? { get }
+
+    /// "Install updates automatically" (#1542): Sparkle downloads
+    /// in the background and installs when KiwiDesk quits, never
+    /// relaunching on its own. Stored by Sparkle, not the profile.
+    var autoInstall: AutoInstallSetting { get }
 }
 
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
@@ -51,6 +57,7 @@ final class SparkleUpdater: AppUpdating {
     let updates = UpdateStateStore()
     private let observer: UpdateCycleObserver
     let whatsNew: WhatsNewCoordinator?
+    let autoInstall: AutoInstallSetting
 
     init() {
         let host = Bundle.main
@@ -78,6 +85,27 @@ final class SparkleUpdater: AppUpdating {
             record: record,
             host: host,
             feedURL: { [updater] in updater.feedURL }
+        )
+        // Sparkle takes the switch only while it checks on its own
+        // (`allowsAutomaticUpdates`); both values are KVO.
+        autoInstall = AutoInstallSetting(
+            read: { [updater] in
+                (
+                    updater.automaticallyDownloadsUpdates,
+                    updater.allowsAutomaticUpdates ? nil : .checksOff
+                )
+            },
+            write: { [updater] in
+                updater.automaticallyDownloadsUpdates = $0
+            },
+            changes: Publishers.Merge(
+                updater.publisher(for: \.automaticallyDownloadsUpdates)
+                    .map { _ in },
+                updater.publisher(for: \.automaticallyChecksForUpdates)
+                    .map { _ in }
+            )
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
         )
         driver.startCheck = { [weak self] in self?.checkForUpdates() }
         do {
@@ -131,6 +159,7 @@ final class NoUpdater: AppUpdating {
     var onUpdatePendingChanged: () -> Void = {}
     let updates = UpdateStateStore()
     var whatsNew: WhatsNewCoordinator? { nil }
+    let autoInstall = AutoInstallSetting.inert()
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

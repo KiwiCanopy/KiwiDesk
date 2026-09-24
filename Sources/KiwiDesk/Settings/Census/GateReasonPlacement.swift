@@ -78,6 +78,7 @@ extension SettingRuntimeGate {
         switch self {
         case .editingStoredProfile, .screenCountMismatch,
             .loginItemServiceStatus, .autoStartServiceLoaded,
+            .automaticInstallUnavailable,
             .spaceHasNoOverrides, .reduceMotion, .reduceTransparency,
             .noBindingStore:
             return true
@@ -99,7 +100,7 @@ extension SettingRuntimeGate {
             return true
         case .reduceMotion, .reduceTransparency,
             .loginItemServiceStatus, .autoStartServiceLoaded,
-            .noBindingStore:
+            .automaticInstallUnavailable, .noBindingStore:
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true

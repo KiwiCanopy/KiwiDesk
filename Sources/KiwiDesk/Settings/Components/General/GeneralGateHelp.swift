@@ -19,6 +19,16 @@ enum GeneralGateHelp {
                 "general.login_item.unavailable_binary",
                 "Available only when running the KiwiDesk app."
             )
+        case .automaticInstall(.noChannel):
+            return L(
+                "general.login_item.unavailable_binary",
+                "Available only when running the KiwiDesk app."
+            )
+        case .automaticInstall(.checksOff):
+            return L(
+                "general.updates.install_automatically.checks_off",
+                "Available while KiwiDesk checks for updates on its own."
+            )
         case .managedByService:
             // Command string and control label are interpolated (#818, #1071).
             return L(

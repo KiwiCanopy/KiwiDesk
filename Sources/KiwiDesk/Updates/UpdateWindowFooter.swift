@@ -34,10 +34,12 @@ struct UpdateWindowFooter: View {
     @ViewBuilder private var status: some View {
         switch session.phase {
         case .found:
+            // Names the Later button by its own key (#818).
             Text(
                 L(
                     "update.window.keys_hint",
-                    "Return installs · Esc means Later"
+                    "Return installs · Esc means %1$@",
+                    L("update.window.later", "Later")
                 )
             )
             .font(.system(size: 11))
