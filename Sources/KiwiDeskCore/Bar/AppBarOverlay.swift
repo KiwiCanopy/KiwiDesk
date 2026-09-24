@@ -163,7 +163,6 @@ public final class AppBarOverlay {
             strip: strip,
             runStart: runStart,
             runTotal: m.total,
-            inset: m.inset,
             gap: m.gap,
             horizontal: m.horizontal,
             fit: style.backgroundFit

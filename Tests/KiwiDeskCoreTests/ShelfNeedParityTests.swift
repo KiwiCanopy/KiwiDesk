@@ -75,7 +75,6 @@ struct ShelfNeedParityTests {
             strip: CGRect(x: 0, y: 0, width: need, height: depth),
             runStart: start,
             runTotal: total,
-            inset: 0,
             gap: gap,
             horizontal: true,
             fit: .hug
@@ -129,7 +128,6 @@ struct ShelfNeedParityTests {
             strip: strip,
             runStart: runStart,
             runTotal: metrics.total,
-            inset: 0,
             gap: gap,
             horizontal: true,
             fit: .hug

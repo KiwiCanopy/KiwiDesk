@@ -1,7 +1,19 @@
 import AppKit
 
-/// Shared divider geometry and color rendering for Space Bar.
+/// The divider ladder's one home (#1517): every rule a bar
+/// draws — inside a Space item, at a layer or front-app break,
+/// and between the shelf's two sections — takes its geometry and
+/// ink from here (`ShelfDividerWeightTests`).
 enum BarDivider {
+    /// The in-item rule's and the breaks' alpha over the item
+    /// colour.
+    static let ruleAlpha: CGFloat = 0.4
+
+    /// The shelf's section divider alpha: above the rule, below
+    /// idle ink, so the boundary between two bars outranks a
+    /// detail inside one item without reading as an item.
+    static let sectionAlpha: CGFloat = 0.5
+
     /// Width of front-app section break divider — heavier than
     /// the 1 pt in-chip rule so the boundary reads as a bigger
     /// separation (QA 2026-07-19).
@@ -19,13 +31,13 @@ enum BarDivider {
     /// The shelf's section divider colour (#1517).
     static func sectionColor(textColor: String) -> NSColor {
         NSColor(kiwiHex: textColor)
-            .withAlphaComponent(SpaceBarStyle.sectionDividerAlpha)
+            .withAlphaComponent(sectionAlpha)
     }
 
-    /// Returns divider color applying SpaceBarStyle.dividerAlpha.
+    /// The rule's and the breaks' colour.
     static func color(textColor: String) -> NSColor {
         NSColor(kiwiHex: textColor)
-            .withAlphaComponent(SpaceBarStyle.dividerAlpha)
+            .withAlphaComponent(ruleAlpha)
     }
 
     /// Computes divider frame at offset along bar axis.

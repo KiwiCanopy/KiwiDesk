@@ -98,25 +98,16 @@ extension ShelfOverlay {
         let ordered = slots.sorted {
             horizontal ? $0.minX < $1.minX : $0.minY < $1.minY
         }
-        let depth = horizontal ? strip.height : strip.width
-        let length = depth * BarDivider.sectionLengthShare
-        let inset = (depth - length) / 2
-        let width = BarDivider.sectionThickness
-        if horizontal {
-            let x = (ordered[0].maxX + ordered[1].minX) / 2 - strip.minX
-            return CGRect(
-                x: x - width / 2,
-                y: inset,
-                width: width,
-                height: length
-            )
-        }
-        let y = (ordered[0].maxY + ordered[1].minY) / 2 - strip.minY
-        return CGRect(
-            x: inset,
-            y: y - width / 2,
-            width: length,
-            height: width
+        let middle =
+            horizontal
+            ? (ordered[0].maxX + ordered[1].minX) / 2 - strip.minX
+            : (ordered[0].maxY + ordered[1].minY) / 2 - strip.minY
+        return BarDivider.frame(
+            at: middle - BarDivider.sectionThickness / 2,
+            depth: horizontal ? strip.height : strip.width,
+            horizontal: horizontal,
+            thickness: BarDivider.sectionThickness,
+            lengthShare: BarDivider.sectionLengthShare
         )
     }
 

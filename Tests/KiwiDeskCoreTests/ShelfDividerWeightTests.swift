@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -12,8 +13,8 @@ import Testing
 struct ShelfDividerWeightTests {
     @Test("Heavier than the in-item rule, quieter than idle ink")
     func ordering() {
-        #expect(SpaceBarStyle.dividerAlpha < SpaceBarStyle.sectionDividerAlpha)
-        #expect(SpaceBarStyle.sectionDividerAlpha < KiwiShelf.idleItemAlpha)
+        #expect(BarDivider.ruleAlpha < BarDivider.sectionAlpha)
+        #expect(BarDivider.sectionAlpha < KiwiShelf.idleItemAlpha)
         #expect(BarDivider.sectionThickness > 1)
         // Lengths ladder too: the in-item rule is the shortest,
         // and nothing spans the full depth.
@@ -32,7 +33,7 @@ struct ShelfDividerWeightTests {
             let fill = try #require(palette.colors["kiwishelf.fill_color"])
             let rgb = item.uppercased().drop { $0 == "#" }.prefix(6)
             let alpha = Int(
-                (SpaceBarStyle.sectionDividerAlpha * 255).rounded()
+                (BarDivider.sectionAlpha * 255).rounded()
             )
             let ink = "#" + rgb + String(format: "%02X", alpha)
             for wallpaper in ["#FFFFFF", "#000000"] {
@@ -56,5 +57,47 @@ struct ShelfDividerWeightTests {
             }
         }
         #expect(measured == PaletteCatalog.bundled().count * 2)
+    }
+
+    /// The consumers take the ladder's alphas, not a copy: the
+    /// shelf's live divider draws at the section alpha, the rule
+    /// and breaks at the rule alpha.
+    @Test("The drawn divider takes the section alpha")
+    @MainActor
+    func drawnDividerTakesTheLadder() throws {
+        #expect(
+            BarDivider.sectionColor(textColor: "#FFFFFF").alphaComponent
+                == BarDivider.sectionAlpha
+        )
+        #expect(
+            BarDivider.color(textColor: "#FFFFFF").alphaComponent
+                == BarDivider.ruleAlpha
+        )
+        let overlay = ShelfOverlay()
+        let strip = CGRect(x: 0, y: 0, width: 400, height: 30)
+        overlay.show(
+            strip: strip,
+            shelf: KiwiShelf(),
+            sections: [
+                .init(
+                    view: NSView(),
+                    slot: CGRect(x: 0, y: 0, width: 200, height: 30),
+                    plate: .zero
+                ),
+                .init(
+                    view: NSView(),
+                    slot: CGRect(x: 200, y: 0, width: 200, height: 30),
+                    plate: .zero
+                ),
+            ]
+        )
+        let ink = try #require(overlay.divider.layer?.backgroundColor)
+        #expect(ink.alpha == BarDivider.sectionAlpha)
+        #expect(overlay.divider.frame.width == BarDivider.sectionThickness)
+        #expect(
+            overlay.divider.frame.height
+                == strip.height * BarDivider.sectionLengthShare
+        )
+        overlay.hide()
     }
 }

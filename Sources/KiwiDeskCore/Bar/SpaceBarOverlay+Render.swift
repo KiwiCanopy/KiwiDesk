@@ -106,7 +106,6 @@ extension SpaceBarOverlay {
                 strip: strip,
                 runStart: runStart,
                 runTotal: total,
-                inset: inset,
                 gap: gap,
                 horizontal: horizontal,
                 fit: style.backgroundFit

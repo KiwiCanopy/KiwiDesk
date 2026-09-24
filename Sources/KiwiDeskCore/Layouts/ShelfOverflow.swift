@@ -2,8 +2,8 @@ import CoreGraphics
 
 /// How a shelf section shows what it cannot fit (#1517): no
 /// arrows — the content fades on each hidden side. The ONE home of
-/// the overflow arithmetic both sections and the Settings preview
-/// read, pure so it is unit-testable (`ShelfOverflowTests`).
+/// the overflow arithmetic both sections read, pure so it is
+/// unit-testable (`ShelfOverflowTests`).
 public enum ShelfOverflow {
     /// The fade's bounds (pt) and its share of a section's visible
     /// length it may never exceed, so a short section keeps most

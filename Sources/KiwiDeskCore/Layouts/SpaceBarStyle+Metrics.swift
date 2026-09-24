@@ -6,15 +6,6 @@ extension SpaceBarStyle {
     /// Muted-badge background alpha over `item_color` on inactive spaces.
     public static let mutedBadgeAlpha: CGFloat = 0.3
 
-    /// Divider rule alpha over `item_color`.
-    public static let dividerAlpha: CGFloat = 0.4
-
-    /// The shelf's section divider alpha over the shelf's item
-    /// colour (#1517): above the in-item rule, below idle ink, so
-    /// the boundary between two bars outranks a detail inside one
-    /// item without reading as an item (`ShelfDividerWeightTests`).
-    public static let sectionDividerAlpha: CGFloat = 0.5
-
     /// Valid drag-drop dwell bounds in milliseconds.
     public static let springDelayRange = 1000...4000
 
