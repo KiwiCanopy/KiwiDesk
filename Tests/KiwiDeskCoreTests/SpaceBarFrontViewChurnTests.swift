@@ -80,7 +80,17 @@ struct SpaceBarFrontViewChurnTests {
         let hosts = Self.frontViews(overlay).map(\.superview)
         let order = overlay.itemContainer.subviews
         let frames = Self.frontViews(overlay).map(\.frame)
+        let inserts = (
+            overlay.itemContainer.insertCount, overlay.root.insertCount
+        )
         manager.sync([Self.bar()])
+        // A same-host re-add keeps the order; only the parent
+        // counts it.
+        #expect(
+            overlay.itemContainer.insertCount == inserts.0
+                && overlay.root.insertCount == inserts.1,
+            "a steady render re-added a view"
+        )
         for (view, host) in zip(Self.frontViews(overlay), hosts) {
             #expect(view.superview === host, "\(view) changed host")
         }
@@ -155,8 +165,13 @@ struct SpaceBarFrontViewChurnTests {
         )
         let order = overlay.stripView.subviews
         #expect(section.root.superview === overlay.stripView)
+        let inserts = overlay.stripView.insertCount
         shelves.sync([shelf])
         spaces.sync([Self.bar()])
+        #expect(
+            overlay.stripView.insertCount == inserts,
+            "a steady re-layout re-added a section"
+        )
         #expect(
             overlay.stripView.subviews.count == order.count
                 && zip(overlay.stripView.subviews, order)

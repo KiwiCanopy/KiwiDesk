@@ -111,6 +111,10 @@ struct ShelfOverflowPagingTests {
         #expect(page(from: 600, forward: true) == 600)
         // Back from 90 would land under an entry from the start.
         #expect(page(from: 90, forward: false) == 0)
+        // Back from 350 aligns to 50, less than an entry from the
+        // start — so it goes to the start (the clamp alone would
+        // leave 50).
+        #expect(page(from: 350, forward: false) == 0)
         #expect(page(from: 0, forward: false) == 0)
     }
 

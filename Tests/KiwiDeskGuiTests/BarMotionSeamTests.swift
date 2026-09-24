@@ -281,6 +281,12 @@ struct BarMotionSeamTests {
                     "\(name) does not name \(needle)"
                 )
             }
+            if needles.contains("isReduced"), let decision = needles.first {
+                #expect(
+                    Self.handsOnTheRead(body, to: decision),
+                    "\(name) hands \(decision) something other than isReduced"
+                )
+            }
             guard needles.isEmpty, Self.startsMotion(body) else {
                 continue
             }
@@ -288,6 +294,25 @@ struct BarMotionSeamTests {
                 "\(name) starts motion, censused as gateless"
             )
         }
+    }
+
+    /// Whether the gated decision is handed the live read: naming
+    /// `isReduced` beside a constant argument gates nothing
+    /// (guard-prover, #1517).
+    private static func handsOnTheRead(
+        _ body: String,
+        to decision: String
+    ) -> Bool {
+        let squash = { (text: String) in
+            text.split(whereSeparator: \.isWhitespace).joined()
+        }
+        guard
+            let args = SourceScan.callArguments(of: decision, in: body)
+        else { return false }
+        let handed = squash(args)
+        if handed.contains("reduceMotion:isReduced") { return true }
+        return handed.contains("reduceMotion:reduceMotion")
+            && squash(body).contains("letreduceMotion=isReduced")
     }
 
     /// Whether a member's body reaches a motion starter.

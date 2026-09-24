@@ -8,6 +8,31 @@ extension AppBarOverlay {
     /// Open, not `final`: the #1315 churn guard subclasses it.
     class FlippedView: NSView {
         override var isFlipped: Bool { true }
+
+        #if DEBUG
+            /// Subviews added, re-adds included: AppKit reports a
+            /// same-parent re-add to no hook, so the #1315 churn
+            /// guards count it at the parent.
+            private(set) var insertCount = 0
+
+            override func addSubview(_ view: NSView) {
+                insertCount += 1
+                super.addSubview(view)
+            }
+
+            override func addSubview(
+                _ view: NSView,
+                positioned place: NSWindow.OrderingMode,
+                relativeTo otherView: NSView?
+            ) {
+                insertCount += 1
+                super.addSubview(
+                    view,
+                    positioned: place,
+                    relativeTo: otherView
+                )
+            }
+        #endif
     }
 
     /// Resolves the section's own glass hosting (#407).

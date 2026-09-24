@@ -68,11 +68,19 @@ struct IdleItemContrastTests {
     /// pinned to one absolute alpha.
     @Test("The idle ink scales the item colour's own alpha")
     func idleInkIsRelative() {
+        // Derived from the constant, so a retune moves no clause.
+        let idle = { (alpha: Int) in
+            String(
+                format: "%02X",
+                Int((CGFloat(alpha) * KiwiShelf.idleItemAlpha).rounded())
+            )
+        }
         var shelf = KiwiShelf()
         shelf.itemColor = "#EAF3EE"
-        #expect(shelf.idleItemColor == "#EAF3EE99")
+        #expect(shelf.idleItemColor == "#EAF3EE" + idle(255))
         shelf.itemColor = "#eaf3ee80"
-        #expect(shelf.idleItemColor == "#EAF3EE4D")
+        #expect(shelf.idleItemColor == "#EAF3EE" + idle(0x80))
+        #expect(idle(0x80) != idle(255))
         shelf.itemColor = "not a colour"
         #expect(shelf.idleItemColor == "not a colour")
     }

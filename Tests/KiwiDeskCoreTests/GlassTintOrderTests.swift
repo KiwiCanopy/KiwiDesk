@@ -10,9 +10,11 @@ import Testing
 /// while it had no superview, so a glass moved among its siblings
 /// left the backdrop above it — an opaque-ish colour over the
 /// material for the rest of the process. The glass is the
-/// shelf's since #1517; the first clause drives the production
-/// shelf through `ShelfManager.sync` rather than a hand-built
-/// hierarchy, the rest pin the mechanism.
+/// shelf's since #1517, and the shelf never moves it among its
+/// siblings, so the first clause holds only the production ORDER
+/// — tint beneath plate beneath the section strip, across arms —
+/// and cannot see #1314's drift; the mechanism clauses below are
+/// what hold the repair.
 @Suite("Glass tint order (#1314)")
 @MainActor
 struct GlassTintOrderTests {
