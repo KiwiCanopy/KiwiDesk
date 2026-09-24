@@ -83,6 +83,37 @@ enum RuleReachWords {
         }
     }
 
+    /// The trash's "this profile" choice.
+    static func removeHere(_ reading: RuleReachReading) -> String {
+        L("app_rules.remove.here", "Remove from %1$@", reading.editing)
+    }
+
+    /// The trash's other choice: every profile holding this value —
+    /// named while there are two, counted past that, and "every
+    /// profile" only when that is all of them.
+    static func removeEverywhere(_ reading: RuleReachReading) -> String {
+        let users = reading.profiles.filter(reading.users.contains)
+        if users.count >= reading.profiles.count {
+            return L(
+                "app_rules.remove.everywhere",
+                "Remove from every profile"
+            )
+        }
+        if users.count == 2 {
+            return L(
+                "app_rules.remove.pair",
+                "Remove from %1$@ and %2$@",
+                users[0],
+                users[1]
+            )
+        }
+        return L(
+            "app_rules.remove.count",
+            "Remove from every profile using it (%1$d)",
+            users.count
+        )
+    }
+
     static func differing(_ reading: RuleReachReading) -> String? {
         let names = reading.differing
         switch names.count {

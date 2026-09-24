@@ -63,14 +63,12 @@ struct NavRow: View {
             ),
             isPresented: $confirmingClear
         ) {
-            if let editing = sharedFrom {
-                Button(
-                    L("app_rules.remove.here", "Remove from %1$@", editing)
-                ) { clear(.here) }
+            if let reading = sharedFrom {
+                Button(RuleReachWords.removeHere(reading)) { clear(.here) }
+                Button(RuleReachWords.removeEverywhere(reading)) {
+                    clear(.everywhere)
+                }
             }
-            Button(
-                L("app_rules.remove.everywhere", "Remove from every profile")
-            ) { clear(.everywhere) }
         }
         .id(command.lua)
     }
@@ -135,7 +133,7 @@ struct NavRow: View {
     }
 
     /// The edited profile, where another profile shares this row.
-    private var sharedFrom: String? {
+    private var sharedFrom: RuleReachReading? {
         guard model.offersReachColumn, let index,
             let reading = model.keyReach(
                 RuleReachTable<String>.keyID(
@@ -145,7 +143,7 @@ struct NavRow: View {
             ),
             reading.users.count > 1
         else { return nil }
-        return reading.editing
+        return reading
     }
 
     private func clear() {

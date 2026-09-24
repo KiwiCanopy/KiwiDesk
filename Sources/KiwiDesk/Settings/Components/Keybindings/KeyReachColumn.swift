@@ -54,10 +54,10 @@ struct KeyReachTrash: View {
         RuleReachTable<String>.keyID(layer: layer, lua: binding.lua)
     }
 
-    private var sharedFrom: String? {
+    private var sharedFrom: RuleReachReading? {
         guard model.offersReachColumn, !binding.lua.isEmpty,
             let reading = model.keyReach(key), reading.users.count > 1
         else { return nil }
-        return reading.editing
+        return reading
     }
 }

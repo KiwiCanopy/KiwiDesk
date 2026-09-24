@@ -137,10 +137,10 @@ struct AppRuleFloatRow: View {
 
     /// The edited profile, where the trash must ask: another
     /// profile uses this rule too.
-    private var sharedFrom: String? {
+    private var sharedFrom: RuleReachReading? {
         guard showsReach, let reading, reading.users.count > 1
         else { return nil }
-        return reading.editing
+        return reading
     }
 
     private var removeHelp: String {
