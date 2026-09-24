@@ -56,6 +56,22 @@ struct SidecarConfigSeamTests {
         )
     }
 
+    /// A door that writes the draft to gui.json refuses first when
+    /// the live page moved (#1393) — a third door without the check
+    /// splits a Save between two profiles.
+    @Test("each writing door checks the page first")
+    func writersCheckThePage() throws {
+        for (name, source) in try files where writers[name] != nil {
+            #expect(
+                source.occurrences(of: "pageMovedReason")
+                    == source.occurrences(of: "saveGuiConfig(sidecarConfig)"),
+                Comment(
+                    rawValue: "\(name): a gui.json door without the page check"
+                )
+            )
+        }
+    }
+
     @Test("each write passes sidecarConfig")
     func writesPassSidecarConfig() throws {
         for (name, source) in try files {

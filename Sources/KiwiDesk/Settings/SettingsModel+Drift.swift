@@ -58,7 +58,16 @@ extension SettingsModel {
     /// page is not the loaded profile's any more.
     var pageMovedReason: String? {
         guard pageMoved, isDirty else { return nil }
-        let current = core.profiles.currentName ?? ""
+        guard let current = core.profiles.currentName else {
+            // The loaded profile went away under the page.
+            return L(
+                "profiles.page_gone",
+                "%1$@ is no longer loaded. %2$@, then make your edits "
+                    + "again.",
+                reachPage ?? "",
+                L("footer.revert", "Revert")
+            )
+        }
         guard let page = reachPage else {
             return L(
                 "profiles.page_moved.unnamed",

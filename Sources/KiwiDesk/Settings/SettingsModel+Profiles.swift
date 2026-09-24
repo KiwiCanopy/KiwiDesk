@@ -125,7 +125,7 @@ extension SettingsModel {
         // the config, which re-reads the loaded profile's rules.
         // The files half must land for the base half to: a failed
         // write keeps the stored rules in the globals write too.
-        if !saved || !saveRuleReach() { dropRuleHalf() }
+        if !saved || saveRuleReach() == .failed { dropRuleHalf() }
         persistGlobalsIfNeeded()
         reload()
         return saved

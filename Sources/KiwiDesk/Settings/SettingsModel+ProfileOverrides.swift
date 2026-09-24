@@ -34,7 +34,8 @@ extension SettingsModel {
         guard let name = editingProfile else { return }
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
-        guard saveRuleReach() else { return }
+        let rules = saveRuleReach()
+        guard rules != .failed else { return }
         do {
             // With a checklist the rule families are the table's,
             // already written above — one encoder per field.
@@ -50,9 +51,9 @@ extension SettingsModel {
                 "\(error)"
             )
             core.onLog("profile edit save failed: \(error)")
-            // The rule half already landed: the draft takes it as
-            // clean, so it never shows saved rules as unsaved.
-            adoptRuleHalf()
+            // A rule half that landed is the draft's clean state;
+            // one that wrote nothing stays unsaved with the rest.
+            if rules == .landed { adoptRuleHalf() }
             return
         }
         persistBindingsIfEdited()

@@ -80,7 +80,7 @@ struct RuleReachIdentityTests {
         model.refreshProfiles()
 
         #expect(model.reachProfile == "Home")
-        #expect(model.pageMovedReason == nil)
+        #expect(!model.pageMoved)
     }
 
     @Test("A stored Save whose tiling write fails adopts the rules")
@@ -102,6 +102,44 @@ struct RuleReachIdentityTests {
         #expect(model.cleanConfig.appRules["mail"] == SpaceID("2"))
         #expect(model.reachDiffRows().isEmpty)
         // The tiling edit did not land, so it stays unsaved.
+        #expect(model.isDirty)
+    }
+
+    @Test("A page drawn with no profile counts as moved by a load")
+    func unnamedPageMoves() throws {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        try core.profiles.write(profile("Home"))
+        let model = makeTestModel(core: core)
+        model.reload()
+        #expect(model.reachProfile == nil)
+        model.config.appRules["mail"] = SpaceID("2")
+        _ = try core.loadProfile(named: "Home")
+        model.refreshProfiles()
+
+        #expect(model.pageMoved)
+        model.saveGlobalsWhilePaused()
+        #expect(model.profileWarning != nil)
+        #expect(core.guiConfigStore.load()?.appRules["mail"] == nil)
+    }
+
+    @Test("A stored Save with no checklist adopts nothing on failure")
+    func noChecklistAdoptsNothing() throws {
+        let core = makeTestCore()
+        // No gui.json: the base is not GUI-owned, so no checklist.
+        try core.profiles.save(profile("Work"))
+        try core.profiles.write(profile("Home"))
+        let model = makeTestModel(core: core)
+        model.reload()
+        model.selectEditTarget("Home")
+        #expect(model.ruleReachStored == nil)
+        model.config.appRules["notes"] = SpaceID("2")
+        let url = try core.profiles.fileURL(name: "Home")
+        try Data("not json".utf8).write(to: url)
+
+        model.saveEditedProfile()
+
+        #expect(model.cleanConfig.appRules["notes"] == nil)
         #expect(model.isDirty)
     }
 

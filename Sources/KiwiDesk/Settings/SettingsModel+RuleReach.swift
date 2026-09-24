@@ -1,5 +1,15 @@
 import KiwiDeskCore
 
+/// What a Save's rule half did (#1393).
+enum RuleReachWrite: Equatable {
+    /// No checklist, or nothing it reaches changed.
+    case nothing
+    /// Every reached file and the base were written.
+    case landed
+    /// A write failed; some files may have been written.
+    case failed
+}
+
 /// Which profiles an App Rule reaches (#1393): the stored table,
 /// the draft's choices over it, and the writes a Save owes.
 extension SettingsModel {
@@ -76,14 +86,16 @@ extension SettingsModel {
     }
 
     /// Writes every profile file and the shared rules the draft's
-    /// checklist reached. False when a write failed; the caller
-    /// then keeps the base half from landing alone.
-    @discardableResult
-    func saveRuleReach() -> Bool {
-        guard let reach = encodedReach else { return true }
+    /// checklist reached, and says what happened — the one answer
+    /// every Save door reads, so none infers from its own control
+    /// flow which half landed.
+    func saveRuleReach() -> RuleReachWrite {
+        guard let reach = encodedReach, reach.isEdited else {
+            return .nothing
+        }
         do {
             try core.saveRuleReach(reach)
-            return true
+            return .landed
         } catch {
             profileWarning = L(
                 "profiles.save_failed",
@@ -91,7 +103,7 @@ extension SettingsModel {
                 "\(error)"
             )
             core.onLog("rule reach save failed: \(error)")
-            return false
+            return .failed
         }
     }
 

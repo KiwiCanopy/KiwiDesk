@@ -241,6 +241,7 @@ extension InterpolatedLabelTests {
         // A draft whose page moved names Revert.
         "profiles.page_moved": 1,
         "profiles.page_moved.unnamed": 1,
+        "profiles.page_gone": 1,
         // The Track drawer's `?` (#1440): names the Layout
         // Defaults pane where the layout is tuned.
         "shortcuts.tracks.help": 1,

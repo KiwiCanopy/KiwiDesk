@@ -58,7 +58,7 @@ extension SettingsModel {
             )
             seedSpaces = config.spaces
         }
-        if !saveRuleReach() { dropRuleHalf() }
+        if saveRuleReach() == .failed { dropRuleHalf() }
         do {
             if core.lua == nil {
                 // Cold paused boot: core.start() never ran, so a
