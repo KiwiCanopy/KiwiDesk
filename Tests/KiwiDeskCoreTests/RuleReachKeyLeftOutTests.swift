@@ -167,4 +167,31 @@ struct RuleReachKeyLeftOutTests {
         )
         #expect(RuleReachTable<String>.combos(shared)[key] == "ctrl+alt+t")
     }
+
+    @Test("A shared move keeps a profile's removal on the new combo")
+    func sharedMoveKeepsRemoval() {
+        let work = KeyLayerOverride(removed: ["default": ["ctrl+alt+t"]])
+        var t = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: [("Work", work), ("Home", nil)]
+        )
+        #expect(t.leftOut(key) == ["Work"])
+        t.applyKey(
+            key,
+            value: "ctrl+alt+y",
+            reach: .shared(joining: []),
+            editing: "Home"
+        )
+        #expect(t.leftOut(key) == ["Work"])
+        let newBase = t.keyLayerBase(original: base, templates: templates)
+        let encoded = t.keyLayerOverride(
+            for: "Work",
+            original: work,
+            newBase: newBase,
+            templates: templates
+        )
+        #expect(encoded?.removed == ["default": ["ctrl+alt+y"]])
+        let resolved = encoded?.resolved(onto: newBase) ?? newBase
+        #expect(RuleReachTable<String>.combos(resolved)[key] == nil)
+    }
 }

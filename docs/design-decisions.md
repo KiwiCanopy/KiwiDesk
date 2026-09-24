@@ -7293,10 +7293,16 @@ one action in one layer, its value the combo:
   left a profile two workarounds: carrying the shared shortcut
   into each other profile's file, so a profile created later lost
   it, or rebinding the combo to a no-op. Both are gone. A removal
-  costs a `Profile.currentFormat` step, since an older reader
-  would drop it silently, and a removal whose combo the base no
-  longer binds resolves to nothing and falls out of the next diff
-  (`KeyLayerOverrideRemovalTests`).
+  costs a `Profile.currentFormat` bump, since an older reader
+  would otherwise drop it silently, and a removal whose combo the
+  base no longer binds resolves to nothing and falls out of the
+  next diff (`KeyLayerOverrideRemovalTests`). The removal is stored by combo
+  while the row is one action, so a shared move re-writes it onto
+  the new combo (`RuleReachKeyLeftOutTests` ▸
+  `sharedMoveKeepsRemoval`). A profile may now leave out its own
+  profile-switch shortcut: the old "no trap by omission" guarantee
+  is given up, because the menu bar and Settings still switch
+  profiles — a rebind was never guarded against either.
 - **Ticking a profile whose combo does something else takes the
   key over**, and the warning names the action that loses it
   (⚠ Key is used for …); the takeover is written into the table,
@@ -7306,9 +7312,10 @@ one action in one layer, its value the combo:
 - **A profile can move a shared action to another combo** — its
   override removes the shared combo and binds the new one, and
   neither reaches the shared base (`RuleReachKeyLeftOutTests` ▸
-  `pageLeftOutKeepsBase`). A file written before removals, with
-  the moved row beside the shared one, still keeps its added row
-  out of the base (`RuleReachKeyTests` ▸ `movedComboStaysOut`).
+  `movedInOneProfile`, `pageLeftOutKeepsBase`). A file written
+  before removals, with the moved row beside the shared one,
+  still keeps its added row out of the base (`RuleReachKeyTests`
+  ▸ `movedComboStaysOut`).
 - **A stored profile's own shortcut override stays
   `overwriteProfile`'s diff**, since it carries layer structure
   (a new layer, an icon) the checklist does not; it is written

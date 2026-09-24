@@ -135,4 +135,18 @@ struct KeyLayerOverrideRemovalTests {
         )
         #expect(back.layers == profile.layers)
     }
+
+    /// `removed` shares the JSON object `KeyLayer` encodes into, so
+    /// a `KeyLayer` field spelled `removed` would collide silently.
+    @Test("KeyLayer never encodes a field named removed")
+    func layerKeysLeaveRemovedFree() throws {
+        let data = try JSONEncoder().encode(
+            KeyLayer(name: "x", icon: "i", bindings: [row("a", "b")])
+        )
+        let json = try #require(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        #expect(json["removed"] == nil)
+        #expect(Set(json.keys) == ["name", "icon", "bindings"])
+    }
 }

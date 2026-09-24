@@ -85,6 +85,7 @@ extension RuleReachTable where Value == String {
         removal: RuleRemoval = .everywhere,
         editing: String
     ) {
+        let old = base[key]
         apply(
             key,
             value: value,
@@ -101,6 +102,7 @@ extension RuleReachTable where Value == String {
         takeOver(
             key,
             value: value,
+            from: old,
             rivals: rivals(of: key),
             ticked: ticked,
             editing: editing

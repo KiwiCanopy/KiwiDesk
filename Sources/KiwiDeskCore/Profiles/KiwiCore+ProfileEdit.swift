@@ -119,8 +119,10 @@ extension KiwiCore {
         // RESOLVED sets (seeded by `overlayProfileState`);
         // store only the sparse diffs against the SAME base
         // the seed resolved onto (`baseKeyLayers()` /
-        // `baseAppRules()`). nil when nothing diverges — an
-        // empty override is never persisted (O3/o4), and
+        // `baseAppRules()`) — a base row the page lacks is
+        // stored as removed, so a drifted base writes a lasting
+        // removal (#1393). nil when nothing diverges — an
+        // empty override is never persisted (O3), and
         // gui.json itself is NOT written here. A sidecar that
         // exists but fails to decode gives no trustworthy
         // base — keep the stored overrides untouched rather

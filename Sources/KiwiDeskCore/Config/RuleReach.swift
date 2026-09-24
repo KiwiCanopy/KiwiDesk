@@ -158,6 +158,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     mutating func takeOver(
         _ key: String,
         value: Value,
+        from old: Value?,
         rivals: [String],
         ticked: Set<String>,
         editing: String
@@ -179,15 +180,24 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
                 setEntry(key, for: profile, .some(nil))
             }
         }
-        // A "left out" that was only a rival on the OLD combo ends
-        // when the shared combo moves off it: that profile follows
-        // again, as its file will read.
-        guard base[key] == value else { return }
+        // When the shared combo moves, a "left out" that was only a
+        // rival on the OLD combo ends — that profile follows again, as
+        // its file will read — while a removal is re-written onto the
+        // new combo, since the file stores it by combo.
+        guard base[key] == value, old != value else { return }
         for profile in profiles
         where profile != editing && entries[profile]?[key] == .some(nil)
             && !rivals.contains(where: { resolved($0, for: profile) == value })
         {
-            setEntry(key, for: profile, .none)
+            let rivalHeldOld =
+                old.map { old in
+                    rivals.contains { resolved($0, for: profile) == old }
+                } ?? false
+            if rivalHeldOld {
+                setEntry(key, for: profile, .none)
+            } else {
+                touched[profile, default: []].insert(key)
+            }
         }
     }
 
