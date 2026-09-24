@@ -10488,13 +10488,13 @@ The Space Bar and the App Bar sit on **KiwiShelf**, one screen
 edge. Where they hang and the plate they share — edge,
 alignment, order, the Space Bar minimum, thickness, margins,
 background style and fit, Liquid Glass, corner roundness, item
-gap, font size, the plate's fill and the app symbol style — is
-`kiwishelf`'s. A field each bar may set for itself stays on
-that bar, whether or not the other bar has one like it: the
-active indicator, item colours, badges and dim factors of
-either, the App Bar's content and title cap, the Space Bar's
-glyph cap, spring delay and front-app title cap are examples,
-not the list.
+gap, font size, the app symbol style and every colour the two
+bars share — is `kiwishelf`'s. A field each bar may set for
+itself stays on that bar, whether or not the other bar has one
+like it: the active indicator's shape, the App Bar's content and
+title cap, the Space Bar's glyph cap, spring delay, front-app
+title cap and the colour of the focused window's glyph inside a
+Space item are examples, not the list.
 
 *One plate, two sections.* While both bars show they are one
 plate with two sections, Space and App, placed as one unit by
@@ -10502,13 +10502,21 @@ plate with two sections, Space and App, placed as one unit by
 both bars draw side by side is a value two bars must agree on:
 two plates in two fills on one strip read as two bars
 competing for the edge, and a user who matched them by hand had
-answered one question twice. So the plate has one fill, and the
-divider between the sections is derived from the item colour
-at a fixed alpha rather than being a palette role of its own.
-What separates the sections is what each bar shows, not a
-second surface: the active indicator stays per bar and differs
-by default — Outline on the Space Bar, Edge mark on the App Bar
-— so the two kinds of "current" never read as one. The seam
+answered one question twice. The same holds one step further
+for every colour drawn on that plate — item, active item,
+highlight, hover, badge — and the bundled palettes already said
+so, giving both bars the same value for each; the one exception,
+the Space Bar's dimmer item colour, was the same hue at a lower
+alpha, which is a rule rather than a colour. So the shelf has
+one set of colours: idle Space identifiers are dimmed from the
+shelf's item colour at a fixed alpha, and the divider between
+the sections is derived from it the same way rather than being
+a palette role of its own. What separates the sections is what
+each bar shows, not a second surface or a second palette: the
+active indicator stays per bar in SHAPE, in the shelf's one
+highlight colour, and differs by default — Outline on the Space
+Bar, Edge mark on the App Bar — so the two kinds of "current"
+never read as one. The seam
 sits where the two needs put it. A seam held on the centre was
 refused: it holds a line still by padding the shorter section
 with empty plate, which is a cost paid on every screen to
@@ -10595,7 +10603,9 @@ further: one app drawn in two icon styles on one plate is a
 mismatch, not a choice, so the four `set_*icon_source` verbs
 retire — the per-layout two included, which narrows what Lua
 reaches by exactly that — and the style is one Settings row
-beside the font size. Liquid Glass is one leaf for both bars,
+beside the font size. Every per-bar and per-layout setter of a
+shared colour retires the same way, each naming its
+`kiwishelf.set_*` replacement. Liquid Glass is one leaf for both bars,
 so the one switch writes two leaves — the shelf's and the
 panel's — and no per-layout glass can disagree with it.
 
@@ -10620,13 +10630,16 @@ inert whenever that segment is hidden — so it is named for it:
 
 *The crossing.* A saved profile or bundle is rewritten once
 (`KiwiShelfMigrationTests`): the shelf takes the Space Bar's
-values — its fill and symbol style included — because it is the
-bar shown in every layout and so the one the user was looking
-at; the App Bar's where the Space Bar is off, since then the
-App Bar was the only bar there was. The other copies drop, and
-a palette is rewritten the same way (`palettes.json` format 2):
-its Space Bar fill becomes the shelf's and its App Bar fill
-drops. Where the Space Bar is on, an App Bar that sat on its own
+values — its colours and symbol style included — because it is
+the bar shown in every layout and so the one the user was
+looking at; the App Bar's where the Space Bar is off, since then
+the App Bar was the only bar there was. One colour reads the
+other way: where the Space Bar's item colour is the App Bar's at
+a lower alpha, the shelf takes the App Bar's full colour, since
+the dimming is now the rule's and keeping the dimmed value would
+dim twice. The other copies drop, per-layout App Bar colour
+overrides with them, and a palette is rewritten the same way
+(a `palettes.json` format bump, and the bundle's). Where the Space Bar is on, an App Bar that sat on its own
 edge moves to the Space Bar's. Where the App Bar is the source
 and never stored an edge, the step writes its old default,
 `bottom`: absence meant bottom when the file was written, and
@@ -10635,8 +10648,9 @@ user had to the top. That reading of absence is true only of a
 file older than the shelf, so the step stands down on any file
 stamped at the formats it introduced — profile 8, bundle 12 —
 where an absent `kiwishelf.edge` means the new top. The App
-Bar's new Edge-mark default reaches only a fresh setup: every
-saved file stores its indicator, so no crossing is owed.
+Bar's default indicator flips to Edge mark, and the same step
+writes `outline` into any stored App Bar that names none, so the
+flip reaches a fresh setup and never an existing one.
 The Space Bar share was never released and is renamed to the
 minimum outright.
 `init.lua` is user code and is not rewritten; a retired verb
