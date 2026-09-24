@@ -1409,6 +1409,7 @@
   "update.window.failed_download": "The download didn't finish.",
   "update.window.failed_quit": "KiwiDesk didn't quit to install the update.",
   "update.window.full_notes": "Full release notes",
+  "update.window.good_to_know": "Good to know",
   "update.window.group.fixed": "Fixed",
   "update.window.group.improved": "Improved",
   "update.window.group.new": "New",

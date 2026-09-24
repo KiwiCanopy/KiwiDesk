@@ -76,6 +76,7 @@ private struct UpdateWindowLayout<Footer: View>: View {
             UpdateNotesScroll(
                 offer: offer,
                 failed: failed,
+                whatsNew: whatsNew,
                 measuring: measuring
             )
             footer()

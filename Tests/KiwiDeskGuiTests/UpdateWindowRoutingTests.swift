@@ -186,6 +186,21 @@ struct UpdateWindowRoutingTests {
         #expect(session.phase == .installing)
     }
 
+    /// Never "What's new" after a clicked Install (#1542): the
+    /// driver's own Install records the offered version as read.
+    @Test("the window's Install records its notes as read")
+    func installRecordsSeen() throws {
+        let (driver, log) = driver()
+        driver.showUpdateFound(
+            try Self.item("9999.1.0"),
+            userInitiated: true,
+            stage: .notDownloaded
+        ) { log.replies.append($0) }
+        #expect(driver.seenRecord?.seen == nil)
+        try #require(driver.window?.session).install()
+        #expect(driver.seenRecord?.seen == "9999.1.0")
+    }
+
     /// A download Sparkle already fetched: Install goes straight
     /// to Preparing, through the stage the override hands on.
     @Test("a resumed stage reaches the window")

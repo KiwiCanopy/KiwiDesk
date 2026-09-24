@@ -168,4 +168,45 @@ struct UpdatePromptWiringTests {
             )
         )
     }
+
+    /// "What's new" (#1542): the updater builds ONE record for
+    /// the window's Install and the next launch, and hands the
+    /// coordinator the feed Sparkle resolved rather than a copy.
+    @Test("the live updater hands What's new its record and feed")
+    func liveUpdaterWiresWhatsNew() throws {
+        let text = try Self.seamSource()
+        let live = try #require(
+            SourceScan.declarationBody(
+                after: "final class SparkleUpdater",
+                in: text
+            )
+        )
+        #expect(live.contains("driver.seenRecord = record"))
+        #expect(live.contains("record: record,"))
+        #expect(live.contains("feedURL: { [updater] in updater.feedURL }"))
+    }
+
+    /// The launch origin is read FIRST in didFinishLaunching — the
+    /// open event is current only there (measured 2026-09-24:
+    /// nil in willFinishLaunching) — and only a user launch the
+    /// permission tour does not own opens the window.
+    @Test("the app reads the launch origin where the event is live")
+    func appReadsLaunchOrigin() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/AppDelegate.swift"
+            )
+        )
+        #expect(!source.contains("applicationWillFinishLaunching"))
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func applicationDidFinishLaunching",
+                in: source
+            )
+        )
+        let firstStatement = body.drop { $0 == "{" || $0.isWhitespace }
+        #expect(firstStatement.hasPrefix("let origin = LaunchOrigin.of("))
+        #expect(body.contains("let opensWindow = origin == .user && trusted"))
+        #expect(body.contains("opensWindow: opensWindow"))
+    }
 }

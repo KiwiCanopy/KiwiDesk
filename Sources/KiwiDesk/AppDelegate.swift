@@ -18,10 +18,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// status item and the dashboard alike (#1536,
     /// `UpdaterSeamGuardTests` pins both hand-overs).
     private let updater: any AppUpdating = AppUpdaterFactory.make()
-    /// "What's new" after an update (#1542).
-    private let whatsNew = WhatsNewCoordinator()
-    /// Read while the opening Apple event is still current.
-    private var loginLaunch = false
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
@@ -57,11 +53,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// rest of the app upholds.
     private var localeObserver: AnyCancellable?
 
-    func applicationWillFinishLaunching(_ notification: Notification) {
-        loginLaunch = LaunchOrigin.isLoginLaunch()
-    }
-
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // First: the open event is current only while this runs.
+        let origin = LaunchOrigin.of(
+            NSAppleEventManager.shared().currentAppleEvent
+        )
+
         // Shorten the hover-help delay before any window opens
         // (`ToolTipDelay` carries why).
         ToolTipDelay.install()
@@ -84,7 +81,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
 
         let statusItem = StatusItemController()
         statusItem.updater = updater
-        statusItem.whatsNew = whatsNew
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
@@ -232,20 +228,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         permissions.start()
 
-        // Only where the update channel is live: an unbundled run
-        // has no feed and no version worth a note.
-        if updater is SparkleUpdater {
-            let userStarted = !loginLaunch
+        let trusted = permissions.isTrusted
+        // The window only for a launch the user started and the
+        // permission tour does not own; otherwise the mark.
+        if let whatsNew = updater.whatsNew {
+            let opensWindow = origin == .user && trusted
             let existingUser = OnboardingDiscovery.hasShown()
-            Task { [whatsNew] in
+            Task {
                 await whatsNew.launched(
-                    userStarted: userStarted,
+                    opensWindow: opensWindow,
                     existingUser: existingUser
                 )
             }
         }
-
-        let trusted = permissions.isTrusted
         if trusted {
             startManaging()
             if OnboardingDiscovery.shouldResume(

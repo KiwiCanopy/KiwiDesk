@@ -10,6 +10,8 @@ import Sparkle
 final class WhatsNewCoordinator {
     private let record: WhatsNewRecord
     private let host: Bundle
+    /// The feed Sparkle resolved; asked at launch, not copied.
+    private let feedURL: () -> URL?
     /// Fetches the feed; a test hands items in.
     var fetch: (URL) async -> [WhatsNewFeed.Item]? = WhatsNewFeed.fetch
     /// Puts the window on screen; a test records it instead.
@@ -24,9 +26,14 @@ final class WhatsNewCoordinator {
     }
     private var window: WhatsNewWindowController?
 
-    init(record: WhatsNewRecord = WhatsNewRecord(), host: Bundle = .main) {
+    init(
+        record: WhatsNewRecord,
+        host: Bundle,
+        feedURL: @escaping () -> URL?
+    ) {
         self.record = record
         self.host = host
+        self.feedURL = feedURL
     }
 
     private var current: String {
@@ -34,8 +41,13 @@ final class WhatsNewCoordinator {
             ?? ""
     }
 
-    /// Run once per launch. `userStarted` false is a login launch.
-    func launched(userStarted: Bool, existingUser: Bool) async {
+    /// Run once per launch. `opensWindow` false — a login launch,
+    /// an unrecognised one, or one the permission tour owns —
+    /// leaves only the mark. `existingUser` is the tour having
+    /// reached its end, the proxy for a 1.x install: 1.x recorded
+    /// no version, so a user who left the tour early is read as a
+    /// fresh install and owed nothing.
+    func launched(opensWindow: Bool, existingUser: Bool) async {
         let current = self.current
         guard
             let due = WhatsNewRecord.due(
@@ -50,9 +62,12 @@ final class WhatsNewCoordinator {
             record.markAnswered(current)
             return
         }
-        guard let url = WhatsNewFeed.url(host: host),
-            let items = await fetch(url)
-        else { return }  // Offline: still owed next launch.
+        // Offline, or a feed that does not list this version yet
+        // (a direct download ahead of the feed): still owed.
+        guard let url = feedURL(),
+            let items = await fetch(url),
+            items.contains(where: { $0.version == current })
+        else { return }
         guard
             let offer = UpdateOffer.whatsNew(
                 items: items,
@@ -60,12 +75,12 @@ final class WhatsNewCoordinator {
                 current: current
             )
         else {
-            // This version carries no notes the window can read.
+            // Listed, with no notes the window can read.
             record.markAnswered(current)
             return
         }
         waiting = offer
-        if userStarted { show() }
+        if opensWindow { show() }
     }
 
     /// Opens the window: at a user-started launch, or from the

@@ -61,6 +61,6 @@ extension StatusItemController {
     }
 
     @objc func showWhatsNew(_ sender: NSMenuItem) {
-        whatsNew?.show()
+        updater.whatsNew?.show()
     }
 }

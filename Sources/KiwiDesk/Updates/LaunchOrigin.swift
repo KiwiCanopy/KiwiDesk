@@ -1,20 +1,23 @@
 import AppKit
 
-/// Whether this launch was the user's or the login items' (#1542:
-/// "What's new" opens only on a launch the user started).
-enum LaunchOrigin {
-    /// Read from the Apple event that opened the app, which the
-    /// login-item launch marks `keyAELaunchedAsLogInItem`. Valid
-    /// only while that event is current — during launch.
-    @MainActor
-    static func isLoginLaunch(
-        _ event: NSAppleEventDescriptor? = NSAppleEventManager.shared()
-            .currentAppleEvent
-    ) -> Bool {
+/// Who started this launch (#1542: "What's new" opens only on a
+/// launch the user started). Read from the open-application Apple
+/// event, which is current at the top of
+/// `applicationDidFinishLaunching` and not yet in
+/// `applicationWillFinishLaunching` (measured, 2026-09-24).
+enum LaunchOrigin: Equatable {
+    case user
+    case login
+    /// No open event to read: treated as not the user's, so the
+    /// safe answer is the mark rather than a window.
+    case unknown
+
+    static func of(_ event: NSAppleEventDescriptor?) -> LaunchOrigin {
         guard let event, event.eventID == kAEOpenApplication else {
-            return false
+            return .unknown
         }
-        return event.paramDescriptor(forKeyword: keyAEPropData)?
-            .enumCodeValue == keyAELaunchedAsLogInItem
+        let property = event.paramDescriptor(forKeyword: keyAEPropData)
+        return property?.enumCodeValue == keyAELaunchedAsLogInItem
+            ? .login : .user
     }
 }

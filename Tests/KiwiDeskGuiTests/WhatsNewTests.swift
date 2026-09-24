@@ -87,48 +87,14 @@ struct WhatsNewTests {
 
     // MARK: - The launch
 
-    private static func notes(_ entry: String) -> String {
-        """
-        {"format":1,"summary":"S.","sections":\
-        [{"type":"new","title":"New","items":["\(entry)"]}]}
-        """
-    }
-
-    private static func items(_ versions: [String]) -> [WhatsNewFeed.Item] {
-        versions.map {
-            .init(version: $0, shown: $0, released: nil, notes: notes($0))
-        }
-    }
-
-    private final class Log {
-        var presented = 0
-    }
-
-    /// A coordinator on a host bundle reporting `current`, with the
-    /// feed handed in.
-    private func coordinator(
-        current: String,
-        lastRun: String?,
-        feed: [WhatsNewFeed.Item]?
-    ) throws -> (WhatsNewCoordinator, WhatsNewRecord, Log) {
-        let record = WhatsNewRecord(Self.defaults())
-        if let lastRun { record.markAnswered(lastRun) }
-        let host = try FeedFixture.host(version: current)
-        let coordinator = WhatsNewCoordinator(record: record, host: host)
-        let log = Log()
-        coordinator.fetch = { _ in feed }
-        coordinator.presents = { _ in log.presented += 1 }
-        return (coordinator, record, log)
-    }
-
     @Test("a launch the user started opens it")
     func userLaunchOpens() async throws {
-        let (coordinator, record, log) = try coordinator(
+        let (coordinator, record, log) = try WhatsNewFixture.coordinator(
             current: "9999.2.0",
             lastRun: "9999.0.0",
-            feed: Self.items(["9999.2.0", "9999.1.0", "9999.0.0"])
+            feed: WhatsNewFixture.items(["9999.2.0", "9999.1.0", "9999.0.0"])
         )
-        await coordinator.launched(userStarted: true, existingUser: true)
+        await coordinator.launched(opensWindow: true, existingUser: true)
         #expect(log.presented == 1)
         #expect(
             coordinator.waiting?.digest?.versions == ["9999.2.0", "9999.1.0"]
@@ -140,12 +106,12 @@ struct WhatsNewTests {
     /// A login launch leaves the mark and the row, never the window.
     @Test("a login launch waits behind the mark")
     func loginLaunchWaits() async throws {
-        let (coordinator, _, log) = try coordinator(
+        let (coordinator, _, log) = try WhatsNewFixture.coordinator(
             current: "9999.2.0",
             lastRun: "9999.1.0",
-            feed: Self.items(["9999.2.0"])
+            feed: WhatsNewFixture.items(["9999.2.0"])
         )
-        await coordinator.launched(userStarted: false, existingUser: true)
+        await coordinator.launched(opensWindow: false, existingUser: true)
         #expect(log.presented == 0)
         #expect(coordinator.waiting?.version == "9999.2.0")
         coordinator.show()
@@ -154,24 +120,24 @@ struct WhatsNewTests {
 
     @Test("offline, it stays owed for the next launch")
     func offlineStaysOwed() async throws {
-        let (coordinator, record, log) = try coordinator(
+        let (coordinator, record, log) = try WhatsNewFixture.coordinator(
             current: "9999.2.0",
             lastRun: "9999.1.0",
             feed: nil
         )
-        await coordinator.launched(userStarted: true, existingUser: true)
+        await coordinator.launched(opensWindow: true, existingUser: true)
         #expect(log.presented == 0)
         #expect(record.lastRun == "9999.1.0")
     }
 
     @Test("a launch that owes nothing records the version")
     func nothingOwedRecords() async throws {
-        let (coordinator, record, log) = try coordinator(
+        let (coordinator, record, log) = try WhatsNewFixture.coordinator(
             current: "9999.2.0",
             lastRun: nil,
-            feed: Self.items(["9999.2.0"])
+            feed: WhatsNewFixture.items(["9999.2.0"])
         )
-        await coordinator.launched(userStarted: true, existingUser: false)
+        await coordinator.launched(opensWindow: true, existingUser: false)
         #expect(log.presented == 0)
         #expect(record.lastRun == "9999.2.0")
     }
@@ -191,111 +157,56 @@ struct WhatsNewTests {
         #expect(seen == 1)
     }
 
-    @Test("the quick menu offers What's New only while it waits")
-    func quickMenuRow() async throws {
-        LocalizationManager.shared.select("en")
-        let (coordinator, _, _) = try coordinator(
+    /// A version the feed does not list yet — a direct download
+    /// ahead of the feed — stays owed; one listed with notes the
+    /// window cannot read is answered.
+    @Test("an unlisted version stays owed, an unreadable one is answered")
+    func unlistedAndUnreadable() async throws {
+        let (unlisted, unlistedRecord, _) = try WhatsNewFixture.coordinator(
             current: "9999.2.0",
             lastRun: "9999.1.0",
-            feed: Self.items(["9999.2.0"])
+            feed: WhatsNewFixture.items(["9999.1.0"])
         )
-        let controller = StatusItemController(item: RowFakeStatusItem())
-        controller.whatsNew = coordinator
-        #expect(controller.makeWhatsNewItem() == nil)
-        await coordinator.launched(userStarted: false, existingUser: true)
-        let row = try #require(controller.makeWhatsNewItem())
-        #expect(row.title == "What's New in KiwiDesk 9999.2.0…")
-        #expect(row.isEnabled)
-        #expect(row.target === controller)
-    }
-}
-
-@MainActor
-private final class RowFakeStatusItem: StatusItemHandle {
-    let button: NSStatusBarButton? = NSStatusBarButton()
-    var menu: NSMenu?
-}
-
-/// Fixtures: a feed from the real generator, and a host bundle
-/// reporting a version.
-enum FeedFixture {
-    static func feed(versions: [String]) throws -> Data {
-        func asset(_ tag: String, _ name: String, _ size: Int) -> [String: Any]
-        {
-            [
-                "name": name, "size": size,
-                "browser_download_url":
-                    "https://example.invalid/\(tag)/\(name)",
-                "url": "https://api.github.com/assets/9",
-            ]
-        }
-        let releases: [[String: Any]] = versions.enumerated().map { index, v in
-            let tag = "v\(v)"
-            let archive = "KiwiDesk-\(v).zip"
-            return [
-                "tag_name": tag,
-                "published_at": "2026-09-2\(4 - index)T10:00:00Z",
-                "draft": false,
-                "edsig": Data(repeating: 0x41, count: 64)
-                    .base64EncodedString(),
-                "assets": [
-                    asset(tag, archive, 9_123_456),
-                    asset(tag, "\(archive).edsig", 89),
-                ],
-            ]
-        }
-        let notes: [String: Any] = [
-            "generated_by": "WhatsNewTests",
-            "releases": versions.map {
-                [
-                    "tag": "v\($0)", "version": $0, "summary": "S.",
-                    "sections": [
-                        ["title": "New", "type": "new", "items": ["A."]]
-                    ],
+        await unlisted.launched(opensWindow: true, existingUser: true)
+        #expect(unlistedRecord.lastRun == "9999.1.0")
+        let (unreadable, unreadableRecord, log) =
+            try WhatsNewFixture.coordinator(
+                current: "9999.2.0",
+                lastRun: "9999.1.0",
+                feed: [
+                    .init(
+                        version: "9999.2.0",
+                        shown: "9999.2.0",
+                        released: nil,
+                        notes: "{broken"
+                    )
                 ]
-            },
-        ]
-        let dir = FileManager.default.temporaryDirectory
-        let releasesFile = dir.appendingPathComponent("wn-r-\(UUID()).json")
-        let notesFile = dir.appendingPathComponent("wn-n-\(UUID()).json")
-        try JSONSerialization.data(withJSONObject: releases)
-            .write(to: releasesFile)
-        try JSONSerialization.data(withJSONObject: notes)
-            .write(to: notesFile)
-        defer {
-            try? FileManager.default.removeItem(at: releasesFile)
-            try? FileManager.default.removeItem(at: notesFile)
-        }
-        let script = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("scripts/appcast-sync").path
-        let run = try GuiScriptFixture.python([
-            script, "--all", "--releases", releasesFile.path,
-            "--notes", notesFile.path, "--output", "-",
-        ])
-        #expect(run.status == 0, "\(run.stderr)")
-        return Data(run.stdout.utf8)
+            )
+        await unreadable.launched(opensWindow: true, existingUser: true)
+        #expect(unreadableRecord.lastRun == "9999.2.0")
+        #expect(log.presented == 0)
     }
 
-    /// A throwaway bundle whose Info.plist carries the version and
-    /// a feed URL — the coordinator reads both off its host.
-    static func host(version: String) throws -> Bundle {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("wn-host-\(UUID()).bundle")
-        let contents = dir.appendingPathComponent("Contents")
-        try FileManager.default.createDirectory(
-            at: contents,
-            withIntermediateDirectories: true
+    /// The 1.x jump: no start recorded, so every typed version up
+    /// to the running one, and untyped 1.x releases dropped
+    /// silently rather than each linked.
+    @Test("a 1.x upgrade merges every typed version, silently")
+    func upgradeFromOneX() async throws {
+        let untyped = WhatsNewFeed.Item(
+            version: "9999.0.5",
+            shown: "9999.0.5",
+            released: nil,
+            notes: nil
         )
-        let plist: [String: Any] = [
-            "CFBundleIdentifier": "test.whatsnew.\(UUID())",
-            "CFBundleVersion": version,
-            "SUFeedURL": "https://example.invalid/appcast.xml",
-        ]
-        try PropertyListSerialization.data(
-            fromPropertyList: plist,
-            format: .xml,
-            options: 0
-        ).write(to: contents.appendingPathComponent("Info.plist"))
-        return try #require(Bundle(url: dir))
+        let (coordinator, _, _) = try WhatsNewFixture.coordinator(
+            current: "9999.2.0",
+            lastRun: nil,
+            feed: WhatsNewFixture.items(["9999.2.0", "9999.1.0"]) + [untyped]
+        )
+        await coordinator.launched(opensWindow: false, existingUser: true)
+        let digest = try #require(coordinator.waiting?.digest)
+        #expect(digest.versions == ["9999.2.0", "9999.1.0"])
+        #expect(digest.unreadable.isEmpty)
     }
+
 }

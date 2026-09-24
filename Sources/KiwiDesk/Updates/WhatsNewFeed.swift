@@ -48,18 +48,6 @@ enum WhatsNewFeed {
         return formatter.date(from: text)
     }
 
-    /// The feed Sparkle reads: its user-default override first,
-    /// then the bundle's `SUFeedURL`, as `SPUUpdater` resolves it.
-    static func url(
-        host: Bundle = .main,
-        defaults: UserDefaults = .standard
-    ) -> URL? {
-        let string =
-            defaults.string(forKey: "SUFeedURL")
-            ?? host.object(forInfoDictionaryKey: "SUFeedURL") as? String
-        return string.flatMap(URL.init(string:))
-    }
-
     /// One GET; nil when offline or refused — "What's new" then
     /// stays owed until a later launch.
     static func fetch(_ url: URL) async -> [Item]? {

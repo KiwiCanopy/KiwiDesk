@@ -239,6 +239,24 @@ struct UpdateReminderReadNotStoredTests {
         let nudge = source[start.upperBound..<close.lowerBound]
         #expect(nudge.contains("render()"))
         #expect(!nudge.contains("="))
+        // "What's new" waiting (#1542) is the second fact under the
+        // same rule: read from the coordinator, its nudge a render.
+        #expect(
+            source.contains(
+                "var whatsNewWaiting: String? { "
+                    + "updater.whatsNew?.waiting?.version }"
+            )
+        )
+        #expect(!source.contains("whatsNewWaiting ="))
+        let waitStart = try #require(
+            source.range(of: "onWaitingChanged = {")
+        )
+        let waitClose = try #require(
+            source[waitStart.upperBound...].range(of: "}")
+        )
+        let waitNudge = source[waitStart.upperBound..<waitClose.lowerBound]
+        #expect(waitNudge.contains("render()"))
+        #expect(!waitNudge.contains("="))
     }
 }
 

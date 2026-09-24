@@ -75,16 +75,21 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     /// Brings it forward: the user started this launch, or asked
     /// for it from the quick menu.
     func present() {
-        let window =
-            self.window
-            ?? UpdateWindowChrome.window(
-                offer: offer,
-                mode: .whatsNew { [weak self] in self?.finish() }
-            )
-        window.delegate = self
-        self.window = window
+        let window = self.window ?? makeWindow()
         if !window.isVisible { window.center() }
         NSApp.forceFront(window)
+    }
+
+    /// Internal so a test takes the production window and hands
+    /// it the close.
+    func makeWindow() -> NSWindow {
+        let window = UpdateWindowChrome.window(
+            offer: offer,
+            mode: .whatsNew { [weak self] in self?.finish() }
+        )
+        window.delegate = self
+        self.window = window
+        return window
     }
 
     private func finish() {
