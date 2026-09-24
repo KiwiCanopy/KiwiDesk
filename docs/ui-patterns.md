@@ -652,16 +652,6 @@ SHEET, not the panel** (#859): the preset preview is a sheet
 off the card, and Profiles stays out of
 `SettingsDetailPanelOffer.offering` (`DetailPanelTests` pins the
 refusal). *Why* is
-**An action with no undo asks every time, not only while
-dirty.** Deleting a profile throws away a whole setup, so it
-parks behind `SettingsModel.confirmingProfileDelete` whether or
-not anything is staged (#1619). It rides the same one dialog: when
-edits are staged its message says they go too, never a second
-dialog after the first. Its title names the object, Delete is
-destructive, and Return picks Cancel (`cancelIsDefault`), so a
-reflex keypress deletes nothing. A Desktop binding is quick to
-set up again and stays one click.
-
 [Design decisions](design-decisions.md) ▸ the panel's object is
 the DRAFT.
 
@@ -1167,13 +1157,14 @@ skipped site. `ModeGatedChromeTests` pins the chrome,
 **An action that reloads must ask before it discards.** Any
 Settings action whose tail is `model.reload()` re-seeds from
 disk and clears `isDirty`, so it destroys whatever the user has
-staged. Route it through `SettingsModel.discardingEdits`, which
-runs it immediately when nothing is staged and otherwise parks
-it behind the one dashboard-wide dialog. Supply the *specific*
-consequence as the message ("Loading a profile replaces the
-edits you haven't saved") and put the verb on the confirm
-button, so Cancel is always the safe default; the title and
-Cancel are shared and must not be re-stated per site.
+staged. Route it through `SettingsModel.discardingEdits` — a
+profile delete excepted, below — which runs it immediately when
+nothing is staged and otherwise parks it behind the one
+dashboard-wide dialog. Supply the *specific* consequence as the
+message ("Loading a profile replaces the edits you haven't
+saved") and put the verb on the confirm button, so Cancel is
+always the safe choice; the title and Cancel are shared and must
+not be re-stated per site.
 
 **The parked action has to genuinely discard** — flipping a
 flag without reloading leaves the save pill up, still claiming
@@ -1187,6 +1178,21 @@ asks for. A source-scanning guard (`DiscardGateParityTests`)
 fails the build on an ungated path; see
 `docs/design-decisions.md` for why the gate sits at the call
 site and which exceptions are deliberate.
+
+:::unreleased
+**A profile delete asks every time, not only while dirty.**
+Route it through `SettingsModel.confirmingProfileDelete`, never
+`discardingEdits`: it parks behind the same one dialog whether or
+not anything is staged, and when edits are staged its message
+says they go too, never a second dialog after the first. The
+dialog's `PendingDiscard.Kind` decides its title (naming the
+profile), its Cancel wording and that Return picks Cancel, so a
+reflex keypress deletes nothing. `DiscardGateParityTests` ▸
+`profileDeleteTakesTheAlwaysGate` fails the build on a delete
+that takes the plain gate. *Why* is
+[Design decisions](design-decisions.md) ▸ every edit-dropping
+action routes through one discard gate.
+:::
 
 Greying applied across a whole editor (#520, #527):
 

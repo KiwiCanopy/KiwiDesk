@@ -31,7 +31,7 @@ struct DiscardConfirmation: ViewModifier {
             Button(pending.confirmLabel, role: .destructive) {
                 model.confirmPendingDiscard(pending)
             }
-            Button(L("discard.cancel", "Cancel"), role: .cancel) {}
+            Button(pending.cancelLabel, role: .cancel) {}
                 .keyboardShortcut(
                     pending.cancelIsDefault ? .defaultAction : nil
                 )

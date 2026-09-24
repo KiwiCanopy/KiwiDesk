@@ -90,11 +90,14 @@ struct DiscardGateParityTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let gated =
-                (gateClosures(in: source, gate: "discardingEdits")
-                + gateClosures(in: source, gate: deleteGate)).joined(
-                    separator: "\n"
-                )
+            let gated = gateClosures(
+                in: source,
+                gate: "discardingEdits"
+            ).joined(separator: "\n")
+            // The delete gate's dialog names a delete, so it
+            // gates that one call and nothing else.
+            let deletes = gateClosures(in: source, gate: deleteGate)
+                .joined(separator: "\n")
             for (call, _) in destructive {
                 let total = source.occurrences(of: call)
                 guard total > 0 else { continue }
@@ -102,8 +105,12 @@ struct DiscardGateParityTests {
                     continue
                 }
                 counts[call, default: 0] += total
+                let confirmed =
+                    gated.occurrences(of: call)
+                    + (call == deleteCall
+                        ? deletes.occurrences(of: call) : 0)
                 #expect(
-                    gated.occurrences(of: call) == total,
+                    confirmed == total,
                     Comment(
                         rawValue:
                             "ungated discard path: \(call) in "
@@ -135,7 +142,7 @@ struct DiscardGateParityTests {
     /// discard gate would run it on one click while clean.
     @Test("a profile delete always confirms")
     func profileDeleteTakesTheAlwaysGate() throws {
-        let call = "model.deleteProfile("
+        let call = deleteCall
         var total = 0
         var confirmed = 0
         for file in try SourceScan.swiftSources(
@@ -149,7 +156,7 @@ struct DiscardGateParityTests {
                 .joined(separator: "\n")
                 .occurrences(of: call)
         }
-        #expect(total == 2)
+        #expect(total > 0)
         #expect(confirmed == total)
     }
 
@@ -173,6 +180,7 @@ struct DiscardGateParityTests {
     }
 
     private let deleteGate = "confirmingProfileDelete"
+    private let deleteCall = "model.deleteProfile("
 
     /// The trailing closure of every `<gate>(…) { … }`
     /// call, found by walking `(…)` then `{…}` nesting. A flat

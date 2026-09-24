@@ -48,6 +48,7 @@ struct ProfileDeleteConfirmTests {
         )
         #expect(pending.confirmLabel == "Delete")
         #expect(pending.cancelIsDefault)
+        #expect(pending.cancelLabel == "Cancel")
     }
 
     /// Staged edits fold into the delete's own message rather
@@ -79,6 +80,46 @@ struct ProfileDeleteConfirmTests {
         #expect(!ran)
     }
 
+    /// A broken profile's file may not be readable, so its
+    /// message names the file rather than what it held.
+    @Test("a broken profile's delete names only the file")
+    func brokenNamesTheFile() throws {
+        pinEnglish()
+        let model = try makeModel()
+        model.confirmingProfileDelete("Work", broken: true) {}
+        let clean = try #require(model.pendingDiscard)
+        #expect(clean.message.hasPrefix("This removes the profile file"))
+        #expect(!clean.message.contains("haven't saved"))
+        model.cancelPendingDiscard()
+        model.config.settings.gapsGlobal.inner.horizontal += 7
+        model.confirmingProfileDelete("Work", broken: true) {}
+        let dirty = try #require(model.pendingDiscard)
+        #expect(dirty.message.hasPrefix("This removes the profile file"))
+        #expect(dirty.message.contains("haven't saved"))
+        #expect(dirty.cancelIsDefault)
+    }
+
+    /// `discard.cancel` reads "keep editing" in several catalogs;
+    /// a clean delete has nothing being edited, so its Cancel
+    /// takes a key of its own.
+    @Test("a delete's Cancel is not the discard dialog's")
+    func deleteCancelIsItsOwn() throws {
+        LocalizationManager.shared.select("fr")
+        defer { LocalizationManager.shared.select("en") }
+        let discard = PendingDiscard(
+            message: "m",
+            confirmLabel: "c",
+            perform: {}
+        )
+        let delete = PendingDiscard(
+            kind: .deleteProfile(name: "Work"),
+            message: "m",
+            confirmLabel: "c",
+            perform: {}
+        )
+        #expect(delete.cancelLabel != discard.cancelLabel)
+    }
+
     /// The plain discard gate keeps its shared title and its
     /// verb-as-default behaviour.
     @Test("the discard gate keeps the shared dialog")
@@ -88,12 +129,15 @@ struct ProfileDeleteConfirmTests {
         model.config.settings.gapsGlobal.inner.horizontal += 7
         model.discardingEdits(message: "m", confirmLabel: "c") {}
         let pending = try #require(model.pendingDiscard)
-        #expect(pending.title == nil)
+        #expect(pending.kind == .discard)
+        #expect(pending.title == "Discard unsaved changes?")
         #expect(!pending.cancelIsDefault)
     }
 
-    /// The host reads the flag; a field nothing renders is inert.
-    @Test("the dialog host wires the default to Cancel")
+    /// The host reads the kind's answers, and the Return shortcut
+    /// sits on Cancel's chain — never on the destructive button,
+    /// where it would make Return delete.
+    @Test("the dialog host puts the default on Cancel")
     func hostWiresCancelDefault() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -102,12 +146,24 @@ struct ProfileDeleteConfirmTests {
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
-        #expect(source.contains("pending.cancelIsDefault"))
+        .split(whereSeparator: \.isWhitespace).joined()
+        #expect(source.contains("model.pendingDiscard?.title"))
+        let destructive = try #require(
+            source.range(of: "role:.destructive")
+        )
+        let cancel = try #require(
+            source.range(of: "Button(pending.cancelLabel,role:.cancel)")
+        )
+        let end = try #require(source.range(of: "}message:"))
+        #expect(destructive.upperBound < cancel.lowerBound)
+        let deleteChain = source[destructive.upperBound..<cancel.lowerBound]
+        let cancelChain = source[cancel.upperBound..<end.lowerBound]
+        #expect(!deleteChain.contains("keyboardShortcut"))
         #expect(
-            source.contains(
-                "pending.cancelIsDefault ? .defaultAction : nil"
+            cancelChain.contains(
+                ".keyboardShortcut(pending.cancelIsDefault?"
+                    + ".defaultAction:nil)"
             )
         )
-        #expect(source.contains("model.pendingDiscard?.title"))
     }
 }
