@@ -42,7 +42,7 @@ final class WhatsNewCoordinator {
     }
 
     /// Run once per launch. `opensWindow` false — a login launch,
-    /// an unrecognised one, or one the permission tour owns —
+    /// an unrecognised one, or one a tour owns —
     /// leaves only the mark. `existingUser` is the tour having
     /// reached its end, the proxy for a 1.x install: 1.x recorded
     /// no version, so a user who left the tour early is read as a

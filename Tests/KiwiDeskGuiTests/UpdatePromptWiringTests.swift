@@ -205,8 +205,19 @@ struct UpdatePromptWiringTests {
             )
         )
         let firstStatement = body.drop { $0 == "{" || $0.isWhitespace }
-        #expect(firstStatement.hasPrefix("let origin = LaunchOrigin.of("))
-        #expect(body.contains("let opensWindow = origin == .user && trusted"))
+        #expect(
+            firstStatement.hasPrefix(
+                "let origin = LaunchOrigin.of(\n"
+                    + "            NSAppleEventManager.shared()"
+                    + ".currentAppleEvent\n"
+            )
+        )
+        #expect(body.contains("origin == .user && trusted"))
+        #expect(
+            body.contains(
+                "!OnboardingDiscovery.shouldResume(isTrusted: trusted)"
+            )
+        )
         #expect(body.contains("opensWindow: opensWindow"))
     }
 }

@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 
 /// Who started this launch (#1542: "What's new" opens only on a
 /// launch the user started). Read from the open-application Apple
@@ -12,7 +13,18 @@ enum LaunchOrigin: Equatable {
     /// safe answer is the mark rather than a window.
     case unknown
 
-    static func of(_ event: NSAppleEventDescriptor?) -> LaunchOrigin {
+    /// The service agent starts the binary directly, which still
+    /// delivers an open event without the login-item mark — so its
+    /// own environment marker is read first. An agent plist
+    /// written before this marker existed reads as the user's
+    /// until the service is reinstalled.
+    static func of(
+        _ event: NSAppleEventDescriptor?,
+        environment: [String: String] = ProcessInfo.processInfo
+            .environment
+    ) -> LaunchOrigin {
+        let marker = ServiceManager.launchMarker
+        if environment[marker.key] == marker.value { return .login }
         guard let event, event.eventID == kAEOpenApplication else {
             return .unknown
         }

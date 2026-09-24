@@ -5,6 +5,14 @@ import Foundation
 public enum ServiceManager {
     public static let label = "org.kiwidesk.KiwiDesk"
 
+    /// Set in the agent's environment so the app can tell a launch
+    /// the service started — at login, or after a crash — from one
+    /// the user started (#1542; the GUI's `LaunchOrigin` reads it).
+    public static let launchMarker = (
+        key: "KIWIDESK_LAUNCHED_BY",
+        value: "service"
+    )
+
     public static var agentURL: URL {
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(
@@ -28,6 +36,11 @@ public enum ServiceManager {
             <array>
                 <string>\(executable)</string>
             </array>
+            <key>EnvironmentVariables</key>
+            <dict>
+                <key>\(launchMarker.key)</key>
+                <string>\(launchMarker.value)</string>
+            </dict>
             <key>RunAtLoad</key>
             <true/>
             <key>KeepAlive</key>

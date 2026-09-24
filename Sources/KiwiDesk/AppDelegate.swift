@@ -229,10 +229,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         permissions.start()
 
         let trusted = permissions.isTrusted
-        // The window only for a launch the user started and the
-        // permission tour does not own; otherwise the mark.
+        // The window only for a launch the user started and no
+        // tour owns — the permission grant or a resuming discovery;
+        // otherwise the mark.
         if let whatsNew = updater.whatsNew {
-            let opensWindow = origin == .user && trusted
+            let opensWindow =
+                origin == .user && trusted
+                && !OnboardingDiscovery.shouldResume(isTrusted: trusted)
             let existingUser = OnboardingDiscovery.hasShown()
             Task {
                 await whatsNew.launched(

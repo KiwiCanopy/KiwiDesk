@@ -26,6 +26,11 @@ struct WhatsNewSurfaceTests {
         #expect(row.title == "What's New in KiwiDesk 9999.2.0…")
         #expect(row.isEnabled)
         #expect(row.target === controller)
+        // The row's own action opens it.
+        var presented = 0
+        coordinator.presents = { _ in presented += 1 }
+        controller.showWhatsNew(row)
+        #expect(presented == 1)
     }
 
     /// The mark on both channels, and a waiting update outranks
@@ -96,11 +101,26 @@ struct WhatsNewSurfaceTests {
             }
             return event
         }
-        #expect(LaunchOrigin.of(open(nil)) == .user)
+        #expect(LaunchOrigin.of(open(nil), environment: [:]) == .user)
         #expect(
-            LaunchOrigin.of(open(OSType(keyAELaunchedAsLogInItem)))
+            LaunchOrigin.of(
+                open(OSType(keyAELaunchedAsLogInItem)),
+                environment: [:]
+            )
                 == .login
         )
-        #expect(LaunchOrigin.of(nil) == .unknown)
+        #expect(LaunchOrigin.of(nil, environment: [:]) == .unknown)
+        // The service agent starts the binary directly: its open
+        // event has no login mark, its environment does.
+        let marker = ServiceManager.launchMarker
+        #expect(
+            LaunchOrigin.of(open(nil), environment: [marker.key: marker.value])
+                == .login
+        )
+        #expect(
+            ServiceManager.plistContent(executable: "/x").contains(
+                "<key>\(marker.key)</key>"
+            )
+        )
     }
 }

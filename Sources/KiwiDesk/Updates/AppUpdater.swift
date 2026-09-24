@@ -42,10 +42,6 @@ protocol AppUpdating: AnyObject {
     var whatsNew: WhatsNewCoordinator? { get }
 }
 
-extension AppUpdating {
-    var whatsNew: WhatsNewCoordinator? { nil }
-}
-
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
 @MainActor
 final class SparkleUpdater: AppUpdating {
@@ -134,6 +130,7 @@ final class NoUpdater: AppUpdating {
     var updatePending: Bool { false }
     var onUpdatePendingChanged: () -> Void = {}
     let updates = UpdateStateStore()
+    var whatsNew: WhatsNewCoordinator? { nil }
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

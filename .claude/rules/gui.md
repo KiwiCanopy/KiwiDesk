@@ -378,7 +378,12 @@ read from the open-application Apple event at the top of
 `applicationDidFinishLaunching`, where it is current (nil in
 `applicationWillFinishLaunching`, measured 2026-09-24), and a
 launch with no event to read is unknown and takes the mark, never
-the window (`UpdatePromptWiringTests` ▸ the launch origin).
+the window. The service agent starts the binary directly, whose
+open event carries no login mark, so a launch the agent spawns is
+told by `ServiceManager.launchMarker` in its environment, read
+first; a new direct-launch path owes a marker of its own
+(`UpdatePromptWiringTests` ▸ the launch origin,
+`WhatsNewSurfaceTests`).
 
 ## A window that must clear the bars derives its level
 
