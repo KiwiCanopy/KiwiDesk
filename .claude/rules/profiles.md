@@ -687,13 +687,14 @@ space is healed*. The obligations:
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
-field, with cross-field clamps applied *last* on the
-already-merged values — the per-layout App Bar is the pattern:
-`LayoutAppBar.resolved(with:)` merges a layout's overrides onto
-the global style, `LayoutAppBar.look(on:)` pairs that with the
-shelf, and a reader of "this layout's App Bar" takes one of the
-two, never a merge of its own. Resolution runs before layout
-math so the layout functions stay pure over the flat array.
+field, and any cross-field clamp applies *last*, on the
+already-merged values. The per-layout App Bar is the per-field
+merge (it clamps nothing): `LayoutAppBar.resolved(with:)` lays a
+layout's overrides onto the global style,
+`LayoutAppBar.look(on:)` pairs that with the shelf, and a reader
+of "this layout's App Bar" takes one of the two, never a merge of
+its own. Resolution runs before layout math so the layout
+functions stay pure over the flat array.
 
 ## A monitor set has one owner (#1530)
 

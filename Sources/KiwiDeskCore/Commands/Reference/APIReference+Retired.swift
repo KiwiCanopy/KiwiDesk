@@ -39,9 +39,9 @@ extension APIReference {
     public static func retirement(of command: String) -> String? {
         guard let replacement = retired[command] else { return nil }
         guard let replacement else {
-            return "\(command) was retired in 2.0: a Space item's"
+            return "\(command) was retired: a Space item's"
                 + " length follows its content"
         }
-        return "\(command) was retired in 2.0 — use \(replacement)"
+        return "\(command) was retired — use \(replacement)"
     }
 }

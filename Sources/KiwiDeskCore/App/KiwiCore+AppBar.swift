@@ -1,69 +1,23 @@
 import AppKit
 
-/// Keeps the indicator bars in sync with the spaces on screen.
-/// Driven from `retile()`, which already fires on every
-/// structural, focus, mode, and settings change. One bar per
-/// display (#16): each display shows the bar of the space
-/// currently visible on it, resolved through the total
-/// space→display assignment (`resolveSpaceDisplays`). Any layout
-/// that hosts a bar (monocle, scrolling) drives its display's
-/// overlay; the bar's look is the global `AppBarStyle` overlaid
-/// by that layout's own overrides, and its place is the segment
-/// of the KiwiShelf it is given (`KiwiCore+Shelf`, #1517).
+/// The App Bar half of the bar refresh (`updateBars`,
+/// `KiwiCore+Shelf`). One bar per display (#16): each display
+/// shows the bar of the space currently visible on it, resolved
+/// through the total space→display assignment
+/// (`resolveSpaceDisplays`). Any layout that hosts a bar
+/// (monocle, scrolling) drives its display's overlay; the bar's
+/// look is the global `AppBarStyle` overlaid by that layout's own
+/// overrides, and its place is the segment of the KiwiShelf it is
+/// given (#1517).
 extension KiwiCore {
-    func updateAppBar() {
-        let settings = tiler.settings
-        let displays = state.workspaces.allDisplays
-        // Cold start: `loadConfig()` can apply a profile and
-        // retile before `eventLoop.start()` publishes the
-        // displays, so `allDisplays` is briefly empty while a
-        // bar-hosting space is already active. Fall back to the
-        // active space on the main screen — the pre-#16
-        // single-bar behavior — until the display list seeds.
-        // Once seeded, an active space that resolves to no
-        // display (so `resolveSpaceDisplays` never assigned it)
-        // shows no bar; in the normal flow resolution always
-        // assigns it first.
-        guard !displays.isEmpty else {
-            appBars.sync(mainScreenFallback(settings: settings))
-            return
-        }
-        let bars = displays.compactMap {
-            bar(for: $0, settings: settings)
-        }
-        appBars.sync(bars)
-    }
-
-    /// The bar for the space currently shown on `display`, in
-    /// the segment the shelf gives it (#1517), or nil when that
-    /// space hosts no enabled, non-empty bar.
-    private func bar(
-        for display: Display,
-        settings: TilingSettings
-    ) -> AppBarManager.Bar? {
-        guard
-            let app = appBarContent(
-                on: display.id,
-                settings: settings
-            ),
-            let screen = screen(for: display.id)
-        else { return nil }
-        return placedBar(
-            app,
-            display: display.id,
-            visible: GeometryUtils.axVisibleFrame(of: screen),
-            spaceItems: spaceBarContent(
-                on: display.id,
-                style: settings.spaceBarLook
-            ),
-            settings: settings
-        )
-    }
-
     /// Single bar for the active space on the main screen, used
     /// only until the display list is populated — no Space Bar
     /// shows before it, so the App Bar has the shelf alone.
-    private func mainScreenFallback(
+    /// Cold start: `loadConfig()` can apply a profile and retile
+    /// before `eventLoop.start()` publishes the displays; once
+    /// seeded, an active space that resolves to no display shows
+    /// no bar.
+    func appBarFallback(
         settings: TilingSettings
     ) -> [AppBarManager.Bar] {
         guard NativeSpaces.activeSpaceIsUser(),
@@ -74,33 +28,23 @@ extension KiwiCore {
                 app,
                 display: screen.kiwiDisplay?.id
                     ?? DisplayID(CGMainDisplayID()),
-                visible: GeometryUtils.axVisibleFrame(of: screen),
-                spaceItems: nil,
-                settings: settings
+                plan: shelfPlan(
+                    visible: GeometryUtils.axVisibleFrame(of: screen),
+                    settings: settings,
+                    spaceItems: nil,
+                    app: app
+                )
             )
         else { return [] }
         return [bar]
     }
 
-    /// Assembles one display's bar in its shelf segment. The
-    /// shelf is measured on the screen's visible frame rather
-    /// than the engine's `layoutBounds(on:)` seam because chrome
-    /// is drawn on a REAL screen: one of the deliberate
-    /// `visibleBounds` exemptions, whose reason lives in
-    /// `VisibleBoundsRoutingTests.allowed` (#537 review).
-    private func placedBar(
+    /// Assembles one display's bar in its shelf segment.
+    func placedBar(
         _ app: AppBarContent,
         display: DisplayID,
-        visible: CGRect,
-        spaceItems: [SpaceBarOverlay.Item]?,
-        settings: TilingSettings
+        plan: ShelfPlan
     ) -> AppBarManager.Bar? {
-        let plan = shelfPlan(
-            visible: visible,
-            settings: settings,
-            spaceItems: spaceItems,
-            app: app
-        )
         guard let slot = plan.arrangement.app else { return nil }
         var style = app.style
         style.alignment = slot.alignment

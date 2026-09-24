@@ -167,7 +167,6 @@ extension InterpolatedLabelTests {
         "kiwishelf.alignment.note.end": 1,
         "kiwishelf.background_style.label.help": 2,
         "kiwishelf.background_fit.label.help": 2,
-        "kiwishelf.one_bar.help": 1,
         "app_bar.content.vertical_only.shelf": 2,
         "bars.app_bar.shelf_caption": 2,
         "kiwishelf.show.help": 2,

@@ -59,8 +59,7 @@ extension KiwiCore {
             _ = self?.focusSpace([.string(id.raw)])
         }
         appFont.onLoad = { [weak self] in
-            self?.updateAppBar()
-            self?.updateSpaceBar()
+            self?.updateBars()
         }
         appBars.onMove = { [weak self] space, from, to in
             self?.moveBarItem(space: space, from: from, to: to)

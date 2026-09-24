@@ -24,7 +24,6 @@ extension KiwiCore {
 
     /// The observer body: both bars, from their drivers.
     func reduceTransparencyDidChange() {
-        updateAppBar()
-        updateSpaceBar()
+        updateBars()
     }
 }

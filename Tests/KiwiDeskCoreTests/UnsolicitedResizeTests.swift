@@ -203,7 +203,7 @@ struct UnsolicitedResizeTests {
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.updateSpaceBar()
+        core.updateBars()
         let strip = try #require(core.spaceBars.shownStrips.first?.1)
         var log: [String] = []
         core.onLog = { log.append($0) }

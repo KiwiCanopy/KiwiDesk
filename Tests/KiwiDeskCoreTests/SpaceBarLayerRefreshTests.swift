@@ -8,7 +8,7 @@ import Testing
 /// bus event (#1169): a switch retiles nothing, so without the
 /// sink the bar would show the layer only at the next retile.
 /// Drives the real switch and reads the painted bar — nothing
-/// here calls `updateSpaceBar` after the fixture is up.
+/// here calls `updateBars` after the fixture is up.
 @Suite("Space Bar layer refresh (#1169)", .serialized)
 @MainActor
 struct SpaceBarLayerRefreshTests {
@@ -37,7 +37,7 @@ struct SpaceBarLayerRefreshTests {
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         LiquidGlassGate.override = { false }
-        core.updateSpaceBar()
+        core.updateBars()
         return core
     }
 

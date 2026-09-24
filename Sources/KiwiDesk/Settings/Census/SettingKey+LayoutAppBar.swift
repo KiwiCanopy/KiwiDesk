@@ -1,3 +1,5 @@
+import KiwiDeskCore
+
 /// Per-layout App Bar census slice (`LayoutAppBar`, Monocle and
 /// Scrolling): whether each layout shows one — drawn in the
 /// KiwiShelf card — and its Lua-only overrides of the bar's OWN
@@ -99,6 +101,20 @@ extension LayoutAppBarKey {
             .scrollingAppBarGroupBadgeTextColor, .scrollingAppBarIconSource,
             .scrollingAppBarDimFactor:
             return .none
+        }
+    }
+}
+
+extension SettingKey {
+    /// The layout a row's label names at `%1$@` (#818, Family
+    /// B) — the same argument its catalog control interpolates
+    /// (`SettingsControl(naming:)`), so the census label, the
+    /// search row and the diff row read one sentence.
+    var labelMode: LayoutMode? {
+        switch self {
+        case .layoutAppBar(.monocleAppBarEnabled): return .monocle
+        case .layoutAppBar(.scrollingAppBarEnabled): return .scrolling
+        default: return nil
         }
     }
 }

@@ -24,11 +24,13 @@ struct BarsControls: Sendable {
     )
     let monocleShowIn = SettingsControl(
         "kiwishelf.show.monocle",
-        "App Bar in Monocle"
+        "App Bar in %1$@",
+        naming: .monocle
     )
     let scrollingShowIn = SettingsControl(
         "kiwishelf.show.scrolling",
-        "App Bar in Scrolling"
+        "App Bar in %1$@",
+        naming: .scrolling
     )
     let spaceBarCard = SettingsControl(
         "bars.switch.space_bar",

@@ -9,15 +9,12 @@ struct BarNoteRow: View {
         SettingsRowShape {
             BarRowIndent()
         } control: {
-            Label {
-                Text(text)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            } icon: {
-                Image(systemName: "info.circle")
-                    .foregroundStyle(.secondary)
-            }
+            // A plain caption, as `FitGapsAction`'s inline reason
+            // is: one shape for a note under a row.
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(SettingsTheme.ink2)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

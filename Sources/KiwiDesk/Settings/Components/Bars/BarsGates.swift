@@ -15,8 +15,6 @@ struct BarsGates {
         case spaceBarOff
         /// The active indicator is Gap — active items are hidden.
         case gapOnly
-        /// Only one bar shows, so there is no order or share.
-        case oneBarShown
         /// No bar shows, so the shelf draws nothing to shape.
         case shelfEmpty
         /// Boxed draws a box per item — no plate to size.
@@ -44,11 +42,18 @@ struct BarsGates {
         settings.appBarHosts.filter(\.enabled)
     }
 
-    var anyBarShown: Bool { !shownBars.isEmpty }
+    var anyBarShown: Bool { settings.anyAppBarCanShow }
 
     /// True when the Space Bar and an App Bar both show, so the
     /// shelf's order and share apply (#1517).
     var bothBarsShow: Bool { settings.bothBarsCanShow }
+
+    /// Why order and share are inert: whichever of the two bars
+    /// is missing, so the sentence names only that one.
+    var bothBarsReason: InertReason? {
+        if !settings.spaceBarStyle.enabled { return .spaceBarOff }
+        return anyBarShown ? nil : .noBarShown
+    }
 
     /// True while any bar can show — Core's one predicate — so
     /// the shelf has something to place and shape.
@@ -78,8 +83,7 @@ struct BarsGates {
     var gapOnly: Bool {
         anyBarShown
             && shownBars.allSatisfy {
-                $0.resolved(with: settings.appBarStyle)
-                    .activeIndicator == .gap
+                settings.appBarLook(for: $0).activeIndicator == .gap
             }
     }
 }
@@ -105,13 +109,6 @@ enum BarsGateHelp {
                     + "these settings.",
                 L("kiwishelf.show.label", "Show"),
                 L("bars.switch.kiwishelf", "KiwiShelf")
-            )
-        case .oneBarShown:
-            return L(
-                "kiwishelf.one_bar.help",
-                "Applies once both bars show — turn on the Space "
-                    + "Bar and an App Bar under “%1$@”.",
-                L("kiwishelf.show.label", "Show")
             )
         case .shelfEmpty:
             return L(

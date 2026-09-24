@@ -7,8 +7,8 @@ import SwiftUI
 /// placed by Core's `ShelfArrangement`. Not modelled: the margins
 /// and the outer gap (#1516) — a few points draw as nothing at
 /// this scale — the identifier tint
-/// flag, a schematic dims nothing (#1538), and the Full plate's
-/// blend between the two fills.
+/// flag, a schematic dims nothing (#1538), and a second host's
+/// own App Bar look: the frame draws the first host's.
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
     /// Real space count from draft (owner 2026-08-10).

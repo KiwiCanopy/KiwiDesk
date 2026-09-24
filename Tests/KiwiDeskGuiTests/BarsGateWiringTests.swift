@@ -108,7 +108,6 @@ struct BarsGateWiringTests {
             "app_bar.no_layout.shelf_help",
             "space_bar.disabled.shelf_help",
             "app_bar.color.gap_only",
-            "kiwishelf.one_bar.help",
         ] {
             #expect(
                 help.contains(key),

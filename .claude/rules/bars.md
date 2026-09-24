@@ -81,6 +81,19 @@ bars. Obligations:
   segments and ▸ `frontAppYieldsToTheAppBar` the stand-down; no
   suite scans the Settings tree for a hand placement, so the GUI
   callers are review's.
+- **Refresh both bars through the one `KiwiCore.updateBars()`,
+  never a single-bar sync.** It builds each display's plan once
+  from both bars' content and syncs both managers from it, so a
+  change to either bar's need moves the other in the same pass;
+  a path refreshing one bar leaves the other in a segment the
+  plan no longer gives it. `ShelfDriverTests` drives the pair
+  through it.
+- **Keep a bar's `naturalLength` equal to what its render
+  draws** — the need the plan hands `ShelfArrangement` restates
+  the render's padding, so a change to either side moves both:
+  handed a segment exactly that long, the run fits with no arrow
+  and its plate reaches the segment's end.
+  `ShelfNeedParityTests` holds both bars to it.
 
 ## A bar item's title is SHOWN on two channels: drawn and announced
 

@@ -8,6 +8,7 @@ struct BarsPanelPreview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if settings.bothBarsCanShow {
+                framed(showsAppBar: true, caption: hostNames)
                 framed(
                     showsAppBar: false,
                     caption: L(
@@ -15,9 +16,14 @@ struct BarsPanelPreview: View {
                         "Other layouts"
                     )
                 )
-                framed(showsAppBar: true, caption: hostNames)
             } else {
-                framed(showsAppBar: true, caption: nil)
+                // An App Bar alone shows only in its layouts, so
+                // the one frame says which.
+                framed(
+                    showsAppBar: true,
+                    caption: settings.anyAppBarCanShow
+                        ? hostNames : nil
+                )
             }
             Text(
                 L(
@@ -77,9 +83,13 @@ struct BarsPanelPreview: View {
             .accessibilityHidden(true)
             .allowsHitTesting(false)
             if let caption {
+                // Hidden with the frame it names: a caption read
+                // over a picture VoiceOver does not see is a
+                // sentence about nothing.
                 Text(caption)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
+                    .accessibilityHidden(true)
             }
         }
     }

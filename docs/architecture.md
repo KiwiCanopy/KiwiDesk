@@ -208,9 +208,9 @@ flowchart TD
    *routes or selects the profile itself* (§5).
 3. **resolve** — settings that layer (global → layout → space)
    merge **field-by-field**, and cross-field clamps apply **last**,
-   on the merged values (the pattern: `LayoutAppBar.resolved(with:)`,
-   paired with KiwiShelf by `LayoutAppBar.look(on:)`).
-   Resolution runs **before** layout math (§5).
+   on the merged values. Resolution runs **before** layout math
+   (§5); the worked example is `.claude/rules/profiles.md` ▸
+   Resolve before layout.
 
 Hand-mirrored field lists here are guarded by parity tests — see
 `.claude/rules/parity-tests.md`.

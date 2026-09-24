@@ -37,11 +37,12 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// The Space run's natural length along the shelf, plate pad
-    /// included — what `ShelfArrangement` hands this bar before
-    /// it has to share (#1517). No front-app segment: it hides
-    /// while an App Bar shares the shelf, the one case a need is
-    /// read.
+    /// The Space run's natural length along the shelf — the
+    /// `pad` `contentStart` sets it in from the end it hugs, the
+    /// run, and the one gap `BarPlate.frame` pads past it: what
+    /// `ShelfArrangement` hands this bar before it has to share
+    /// (#1517). No front-app segment: it hides while an App Bar
+    /// shares the shelf, the one case a need is read.
     static func naturalLength(
         items: [Item],
         depth: CGFloat,
@@ -49,7 +50,7 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         let lengths = itemLengths(items, depth: depth, gap: gap)
         return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
-            + 2 * max(gap, SpaceBarItemView.pad)
+            + SpaceBarItemView.pad + gap
     }
 
     /// Calculates item frames and front segment start coordinate.

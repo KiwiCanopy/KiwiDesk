@@ -34,9 +34,18 @@ extension ConfigMigration {
     static let shelfRetiredTitleKey = "title_cap"
     static let shelfFrontTitleKey = "front_app_title_cap"
 
+    /// The formats this step introduced — a profile's and a
+    /// bundle's — spelled as history. The step reads ABSENCE as
+    /// the old defaults (an App Bar source's edge is its old
+    /// bottom), which is true only below them: a shelf-shaped
+    /// file whose `kiwishelf.edge` is absent MEANS the new top.
+    static let shelfProfileFormat = 8
+    static let shelfBundleFormat = 12
+
     @Sendable
     static func migratingBarsOntoShelf(_ data: Data) -> Data? {
-        surgicallyApplying(
+        guard shelfStepApplies(to: data) else { return nil }
+        return surgicallyApplying(
             data,
             gate: {
                 $0.range(of: Data("\"\(shelfSpaceBarKey)\"".utf8))
@@ -47,6 +56,20 @@ extension ConfigMigration {
             rewriting: withBarsOnShelf,
             editing: surgicallyShelvedBars
         )
+    }
+
+    /// Whether `data`'s stamp is below the format this step
+    /// introduced for its shape. An unreadable root stands down.
+    static func shelfStepApplies(to data: Data) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        let floor =
+            root[SetupBundle.shapeMarker] != nil
+            ? shelfBundleFormat : shelfProfileFormat
+        return format < floor
     }
 
     /// The two paths: the root's own `settings`, and each inline

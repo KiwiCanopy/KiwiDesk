@@ -88,13 +88,18 @@ extension TilingSettings {
     /// EVERY layout (#1517). The one "does the shelf show"
     /// predicate: the reservation and the Settings gates ask it.
     public var shelfShows: Bool {
-        spaceBarStyle.enabled || appBarHosts.contains { $0.enabled }
+        spaceBarStyle.enabled || anyAppBarCanShow
+    }
+
+    /// True if any layout's App Bar is switched on.
+    public var anyAppBarCanShow: Bool {
+        appBarHosts.contains { $0.enabled }
     }
 
     /// True if the Space Bar and a layout's App Bar can both show,
     /// splitting the shelf between them (`ShelfArrangement`).
     public var bothBarsCanShow: Bool {
-        spaceBarStyle.enabled && appBarHosts.contains { $0.enabled }
+        spaceBarStyle.enabled && anyAppBarCanShow
     }
 
     /// What the Space Bar draws from: the shelf and its own style.

@@ -56,8 +56,7 @@ struct ShelfDriverTests {
         settings.kiwishelf.thickness = 40
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateAppBar()
-        core.updateSpaceBar()
+        core.updateBars()
         return core
     }
 

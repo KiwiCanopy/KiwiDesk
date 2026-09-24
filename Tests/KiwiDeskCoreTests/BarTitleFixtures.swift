@@ -82,7 +82,8 @@ func paintedAppBar(
         items: items,
         activeIndex: 0,
         strip: barTitleStrip,
-        style: style
+        style: style,
+        capAxis: barTitleStrip.width
     )
 }
 

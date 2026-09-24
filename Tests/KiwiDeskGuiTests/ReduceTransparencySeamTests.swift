@@ -120,9 +120,11 @@ struct ReduceTransparencySeamTests {
         }
     }
 
-    /// The wired handler re-draws BOTH bars; a handler that forgot
-    /// one leaves that bar on stale glass until its next unrelated
-    /// retile. Named, so `ReduceTransparencyTests` drives it.
+    /// The wired handler re-draws BOTH bars — through the one
+    /// `updateBars` refresh, which builds both from one shelf plan;
+    /// a handler that skipped it leaves the bars on stale glass
+    /// until their next unrelated retile. Named, so
+    /// `ReduceTransparencyTests` drives it.
     @Test("the handler re-renders both bars")
     func handlerRerendersBothBars() throws {
         let source = try SourceScan.strippedSource(
@@ -137,7 +139,7 @@ struct ReduceTransparencySeamTests {
             ),
             "the handler is gone"
         )
-        for update in ["updateAppBar()", "updateSpaceBar()"] {
+        for update in ["updateBars()"] {
             #expect(
                 handler.contains(update),
                 Comment(rawValue: "the handler skips \(update)")

@@ -5,7 +5,7 @@ extension AppBarStyle {
     /// Title-cap bounds, shared by both bars. 8 at the floor —
     /// below it every title collapses to its first word and stops
     /// telling two windows apart; 80 at the ceiling — the slot
-    /// clamps to a quarter of the bar long before that. A fixed
+    /// clamps to a quarter of the edge long before that. A fixed
     /// clamp, never fit-derived: a display-dependent cap resolves
     /// differently per screen.
     public static let titleCapRange = 8...80

@@ -106,7 +106,8 @@ struct ReduceTransparencyTests {
             items: [appBarItem(1, text: "One")],
             activeIndex: 0,
             strip: barTitleStrip,
-            style: style
+            style: style,
+            capAxis: barTitleStrip.width
         )
         let manager = AppBarManager()
         for reduced in [false, true, false] {

@@ -40,7 +40,7 @@ struct FloatClampPendingCaptureTests {
         core.tiler.settings.kiwishelf.edge = .top
         core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateSpaceBar()
+        core.updateBars()
         return core
     }
 

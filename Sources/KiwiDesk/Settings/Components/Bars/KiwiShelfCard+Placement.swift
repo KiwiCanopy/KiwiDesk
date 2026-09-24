@@ -39,13 +39,13 @@ extension KiwiShelfCard {
             )
         case .layoutAppBar(.monocleAppBarEnabled):
             Toggle(
-                L("kiwishelf.show.monocle", "App Bar in Monocle"),
+                SettingsCatalog.bars.monocleShowIn.text,
                 isOn: $model.config.settings.monocle.appBar.enabled
             )
             .searchAnchored(SettingsCatalog.bars.monocleShowIn)
         case .layoutAppBar(.scrollingAppBarEnabled):
             Toggle(
-                L("kiwishelf.show.scrolling", "App Bar in Scrolling"),
+                SettingsCatalog.bars.scrollingShowIn.text,
                 isOn: $model.config.settings.scrolling.appBar.enabled
             )
             .searchAnchored(SettingsCatalog.bars.scrollingShowIn)
@@ -117,8 +117,9 @@ extension KiwiShelfCard {
         )
         .modifier(
             GreyOut(
-                active: !gates.bothBarsShow,
-                help: BarsGateHelp.sentence(for: .oneBarShown)
+                active: gates.bothBarsReason != nil,
+                help: gates.bothBarsReason.map(BarsGateHelp.sentence)
+                    ?? ""
             )
         )
     }
@@ -131,7 +132,7 @@ extension KiwiShelfCard {
             value: shareFraction,
             help: L(
                 "kiwishelf.share.help",
-                "Only matters once both bars are full: the Space "
+                "Only matters once neither bar fits: the Space "
                     + "Bar gets this share of the edge, the App "
                     + "Bar the rest, and each scrolls inside its "
                     + "own. A bar that needs less always gives "
@@ -141,8 +142,9 @@ extension KiwiShelfCard {
         )
         .modifier(
             GreyOut(
-                active: !gates.bothBarsShow,
-                help: BarsGateHelp.sentence(for: .oneBarShown)
+                active: gates.bothBarsReason != nil,
+                help: gates.bothBarsReason.map(BarsGateHelp.sentence)
+                    ?? ""
             )
         )
     }

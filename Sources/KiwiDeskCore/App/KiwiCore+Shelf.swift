@@ -5,6 +5,64 @@ import AppKit
 /// bar drivers ask this, so neither re-derives the other's
 /// presence and the two can never overlap.
 extension KiwiCore {
+    /// The ONE bar refresh (#1517): each display's plan built
+    /// once from both bars' content, then both managers synced
+    /// from it, so a change to either bar's need moves the other
+    /// in the same pass. Driven from `retile()` — which fires on
+    /// every structural, focus, mode, settings, space and profile
+    /// change — plus the few changes that retile nothing (a
+    /// focus, a layer switch, a title, Reduce transparency). The
+    /// menu bar's stand-in rides the same refresh (#1413).
+    func updateBars() {
+        defer { publishStatusSpaceMark() }
+        let settings = tiler.settings
+        let displays = state.workspaces.allDisplays
+        guard !displays.isEmpty else {
+            appBars.sync(appBarFallback(settings: settings))
+            spaceBars.sync([])
+            return
+        }
+        let look = settings.spaceBarLook
+        var appBarsShown: [AppBarManager.Bar] = []
+        var spaceBarsShown: [SpaceBarManager.Bar] = []
+        for display in displays {
+            let app = appBarContent(on: display.id, settings: settings)
+            let items = spaceBarContent(on: display.id, style: look)
+            guard app != nil || items != nil,
+                let screen = screen(for: display.id)
+            else { continue }
+            // Chrome is drawn on a REAL screen, so the shelf is
+            // measured on its visible frame rather than the
+            // engine's `layoutBounds(on:)` seam: one of the
+            // deliberate `visibleBounds` exemptions
+            // (`VisibleBoundsRoutingTests.allowed`, #537).
+            let plan = shelfPlan(
+                visible: GeometryUtils.axVisibleFrame(of: screen),
+                settings: settings,
+                spaceItems: items,
+                app: app
+            )
+            if let app,
+                let bar = placedBar(app, display: display.id, plan: plan)
+            {
+                appBarsShown.append(bar)
+            }
+            if let items,
+                let bar = placedSpaceBar(
+                    items,
+                    display: display.id,
+                    plan: plan,
+                    sharesWithAppBar: app != nil,
+                    style: look
+                )
+            {
+                spaceBarsShown.append(bar)
+            }
+        }
+        appBars.sync(appBarsShown)
+        spaceBars.sync(spaceBarsShown)
+    }
+
     /// What one display's App Bar would draw, before the shelf
     /// places it.
     struct AppBarContent {
@@ -24,10 +82,6 @@ extension KiwiCore {
         /// The strip's length along the edge.
         var length: CGFloat {
             horizontal ? strip.width : strip.height
-        }
-        /// The strip's depth off the edge.
-        var depth: CGFloat {
-            horizontal ? strip.height : strip.width
         }
 
         func segment(_ slot: ShelfArrangement.Slot) -> CGRect {

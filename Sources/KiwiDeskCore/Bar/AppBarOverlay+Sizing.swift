@@ -44,9 +44,11 @@ extension AppBarOverlay {
     }
 
     /// The run's natural length along the shelf — every slot at
-    /// its size, gaps between, and the plate's pad at both ends:
-    /// what `ShelfArrangement` hands this bar before it has to
-    /// share (#1517).
+    /// its size, gaps between, and the plate's pad on the side
+    /// away from the end it hugs (`frames` sets the run flush at
+    /// its end, `BarPlate.frame` pads by one gap): what
+    /// `ShelfArrangement` hands this bar before it has to share
+    /// (#1517).
     @MainActor
     static func naturalLength(
         items: [Item],
@@ -62,7 +64,7 @@ extension AppBarOverlay {
         )
         let gap = style.itemGap
         return runLength(slot: slot, count: items.count, gap: gap)
-            + 2 * gap
+            + gap
     }
 
     /// One slot's length, its quarter cap measured on `capAxis`.

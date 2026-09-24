@@ -18,17 +18,22 @@ struct SettingsControl: Hashable, Sendable {
     /// hierarchy.
     var surface: SettingsSurface = .main
     private let instanceTag: String?
+    /// A layout whose name the label interpolates at `%1$@`
+    /// (#818, Family B): the mode's own name, never typed.
+    private let namedMode: LayoutMode?
 
     /// Tuple literal shape scanned by `scripts/extract-keys`.
     init(
         _ key: String,
         _ english: String,
         surface: SettingsSurface = .main,
-        instance: String? = nil
+        instance: String? = nil,
+        naming mode: LayoutMode? = nil
     ) {
         self.label = .tuple(key: key, english: english)
         self.surface = surface
         self.instanceTag = instance
+        self.namedMode = mode
     }
 
     /// Layout Defaults mode tab descriptor.
@@ -40,6 +45,7 @@ struct SettingsControl: Hashable, Sendable {
         self.label = .mode(mode)
         self.surface = .layoutMode(mode)
         self.instanceTag = nil
+        self.namedMode = nil
     }
 
     /// Scroll-anchor identifier for search reveal navigation.
@@ -65,7 +71,8 @@ struct SettingsControl: Hashable, Sendable {
     @MainActor var text: String {
         switch label {
         case .tuple(let key, let english):
-            return L(key, english)
+            guard let namedMode else { return L(key, english) }
+            return L(key, english, namedMode.displayName)
         case .mode(let mode):
             return mode.displayName
         }

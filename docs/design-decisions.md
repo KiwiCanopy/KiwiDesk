@@ -2612,6 +2612,14 @@ thing to have done, so a grow press refuses to go further rather
 than quietly rewriting it. The clamp exists to stop growth
 running away, not to overrule a value someone chose.
 
+:::unreleased
+On KiwiShelf the bar strip is reserved in `layoutBounds` before
+any layout runs, so no layout carves a bar of its own and the
+difference between the drawn area and the region is the outer
+gaps alone; the argument is unchanged, only the bankable width
+shrinks.
+:::
+
 **Scrolling at a screen seam: a blocked edge is a hard stop
 (#878).** A scrolling edge is *open* or *blocked*, decided per
 edge from the screen arrangement. Open edges keep the #142
@@ -2798,6 +2806,13 @@ than the strips config would reserve. Which files that
 covers, and why each qualifies, is the allowlist in
 `LayoutBoundsRoutingTests` — the exemption list, and the only
 copy of it.
+
+:::unreleased
+The reserved strip is KiwiShelf's, taken whenever any bar can
+show — the Space Bar or any layout's App Bar — so the region is
+the same in every layout and a mode switch never changes a span
+(#1517).
+:::
 
 **Interactive resizes are session-scoped per space; the config
 layers never move underneath them (#458).** A resize on a
@@ -10473,9 +10488,12 @@ The Space Bar and the App Bar sit on **KiwiShelf**, one screen
 edge. Where they hang and the strip they share — edge,
 alignment, order, share, thickness, margins, background style
 and fit, Liquid Glass, corner roundness, item gap, font size —
-is `kiwishelf`'s; a field each bar may set for itself — its
-content, indicator, title cap, symbol style, dim factors,
-colours — stays on that bar. Each bar keeps its own plate too,
+is `kiwishelf`'s. A field each bar may set for itself stays on
+that bar, whether or not the other bar has one like it: the
+indicator, symbol style, dim factors and colours of either, the
+App Bar's content and title cap, the Space Bar's glyph cap,
+spring delay and front-app title cap are examples, not the
+list. Each bar keeps its own plate too,
 in its own Fill, so the two stay two bars rather than one merged
 strip.
 
@@ -10514,9 +10532,9 @@ user decides where the bars go.
 
 *Overflow stays each bar's own.* Each bar scrolls inside its
 own stretch, with an arrow at each end that still hides items,
-and the edge is split by `share` only once BOTH overflow — a bar
-that needs less gives the rest back, so the share never costs a
-bar that fits. The front-app segment hides while an App Bar
+and the edge is split by `share` only once EACH bar needs more
+than its share — a bar that needs less keeps its need and gives
+the rest back, so the share never costs a bar that fits. The front-app segment hides while an App Bar
 shares the shelf: the App Bar already marks the focused window,
 and two marks of one fact on one strip is one too many.
 
@@ -10540,7 +10558,9 @@ per-layout glass can disagree with it.
 
 *No item size.* A Space item sizes to its content and
 an App Bar slot to the widest title, between the icon square and
-a quarter of the bar. A pinned item size answered only what the
+a quarter of the whole shelf edge — measured on the edge rather
+than the App Bar's share of it, so a slot does not shrink when
+the Space Bar joins. A pinned item size answered only what the
 title cap already answers, and a second size knob beside the cap
 doubles the question "why is this slot this wide", so it is
 retired and the cap is the App Bar's one size control. The Space
@@ -10553,8 +10573,16 @@ for it: `front_app_title_cap`.
 values, because it is the bar shown in every layout and so the
 one the user was looking at — the App Bar's where the Space Bar
 is off, since then the App Bar was the only bar there was. The
-other copies drop. An App Bar that sat on its own edge moves to
-the shelf's: at the old defaults, from the bottom to the top.
+other copies drop. Where the Space Bar is on, an App Bar that sat
+on its own edge moves to the Space Bar's. Where the App Bar is
+the source and never stored an edge, the step writes its old
+default, `bottom`: absence meant bottom when the file was
+written, and reading it as the shelf's new default would move
+the one bar the user had to the top. That reading of absence is
+true only of a file older than the shelf, so the step stands
+down on any file stamped at the formats it introduced — profile
+8, bundle 12 — where an absent `kiwishelf.edge` means the new
+top.
 `init.lua` is user code and is not rewritten; a retired verb
 fails loudly with its replacement named, which is its migration,
 and there is no alias (AGENTS.md §5), because an alias is the

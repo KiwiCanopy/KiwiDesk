@@ -76,8 +76,7 @@ extension KiwiCore {
     /// refuses a size, re-teach the #677 ledger) every time a
     /// tab was renamed.
     func runBarTitleRefresh() {
-        updateAppBar()
-        updateSpaceBar()
+        updateBars()
     }
 
     /// Whether any bar on screen right now is showing this

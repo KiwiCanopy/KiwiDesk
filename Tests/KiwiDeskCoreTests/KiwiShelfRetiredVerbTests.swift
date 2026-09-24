@@ -127,6 +127,15 @@ struct KiwiShelfRetiredVerbTests {
         )
     }
 
+    /// `kiwidesk help <retired verb>` answers the retirement, not
+    /// the nearest spelling.
+    @Test("help on a retired verb names its replacement")
+    func helpNamesTheReplacement() {
+        let response = APIReference.helpResponse(for: "space_bar.set_edge")
+        #expect(!response.isSuccess)
+        #expect(response.error?.contains("kiwishelf.set_edge") == true)
+    }
+
     /// A replacement that is not itself a live verb would send
     /// the user from one refusal to another.
     @Test("every replacement is a dispatchable verb")

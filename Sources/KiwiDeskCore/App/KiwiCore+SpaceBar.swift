@@ -1,77 +1,40 @@
 import AppKit
 
-/// Keeps the Space Bars in sync with workspace state (#293).
-/// Driven from `retile()` — which already fires on every
-/// structural, focus, mode, settings, space, and profile
-/// change — plus the one change that retiles nothing, a
-/// shortcut-layer switch (`wireSpaceBarLayerRefresh`). One bar
-/// per display, listing that display's Spaces in profile
-/// order. Everything is read from snapshotted state: no AX
-/// calls in bar building.
+/// The Space Bar half of the bar refresh (`updateBars`,
+/// `KiwiCore+Shelf`, #293): one bar per display, listing that
+/// display's Spaces in profile order. Everything is read from
+/// snapshotted state: no AX calls in bar building.
 extension KiwiCore {
     /// The bar follows the active layer off the `layer_change`
     /// bus event — never a hook on the manager, which keeps one
     /// seam (#1169, #1168) — and its refresh carries the menu
-    /// bar's mark with it (#1413).
+    /// bar's mark with it (#1413). The layer item changes the
+    /// Space Bar's need, so both bars refresh together.
     func wireSpaceBarLayerRefresh() {
         bus.addSink { [weak self] event, _ in
             guard event == .layerChange else { return }
-            // The layer item changes the Space Bar's need, and
-            // with it the App Bar's share of the shelf.
-            self?.updateSpaceBar()
-            self?.updateAppBar()
+            self?.updateBars()
         }
-    }
-
-    func updateSpaceBar() {
-        // The menu bar's stand-in rides the same refresh (#1413).
-        defer { publishStatusSpaceMark() }
-        let style = tiler.settings.spaceBarLook
-        guard style.enabled else {
-            spaceBars.sync([])
-            return
-        }
-        // No main-screen cold-start fallback (unlike the App
-        // Bar): the display list seeds on the first event loop
-        // tick and the bar appears with it.
-        let bars = state.workspaces.allDisplays.compactMap {
-            spaceBar(for: $0, style: style)
-        }
-        spaceBars.sync(bars)
     }
 
     /// One display's bar in the segment the shelf gives it
-    /// (#1517), or nil when it has no screen or no visible
-    /// items.
-    private func spaceBar(
-        for display: Display,
+    /// (#1517). The front app hides while an App Bar shares the
+    /// shelf: that bar already names every window.
+    func placedSpaceBar(
+        _ items: [SpaceBarOverlay.Item],
+        display: DisplayID,
+        plan: ShelfPlan,
+        sharesWithAppBar: Bool,
         style: SpaceBarLook
     ) -> SpaceBarManager.Bar? {
-        guard
-            let items = spaceBarContent(
-                on: display.id,
-                style: style
-            ),
-            let screen = screen(for: display.id)
-        else { return nil }
-        let settings = tiler.settings
-        let app = appBarContent(on: display.id, settings: settings)
-        let plan = shelfPlan(
-            visible: GeometryUtils.axVisibleFrame(of: screen),
-            settings: settings,
-            spaceItems: items,
-            app: app
-        )
         guard let slot = plan.arrangement.space else { return nil }
         var placed = style
         placed.alignment = slot.alignment
-        // The front app hides while an App Bar shares the shelf:
-        // that bar already names every window (#1517).
         let front =
-            app == nil
-            ? frontApp(display: display.id, style: style) : nil
+            sharesWithAppBar
+            ? nil : frontApp(display: display, style: style)
         return SpaceBarManager.Bar(
-            display: display.id,
+            display: display,
             items: items,
             frontApp: front?.app,
             frontWindow: front?.window,

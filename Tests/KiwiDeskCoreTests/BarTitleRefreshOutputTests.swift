@@ -15,7 +15,7 @@ import Testing
 ///
 /// Its own file because its fixture differs on purpose: this one
 /// goes through the DRIVER, so no display is assigned and
-/// `updateAppBar` takes its documented cold-start fallback to the
+/// `updateBars` takes its documented cold-start fallback to the
 /// main screen — a real bar without a `DisplayID` that happens to
 /// match this host's. The gate's own suite paints through the
 /// manager instead, and the two meet in
@@ -46,7 +46,7 @@ struct BarTitleRefreshOutputTests {
     @Test("The refresh re-renders the bar with the new title")
     func refreshRedrawsTheItem() throws {
         let core = seededOnMainScreen()
-        core.updateAppBar()
+        core.updateBars()
         // `#require`, not `if let`: a fixture that built no bar
         // would make every assertion below pass vacuously, which
         // is the failure this whole suite exists to rule out.
@@ -78,7 +78,7 @@ struct BarTitleRefreshOutputTests {
     func iconContentRefreshStillCarriesTitle() throws {
         let core = seededOnMainScreen()
         core.tiler.settings.appBarStyle.content = .icon
-        core.updateAppBar()
+        core.updateBars()
         let before = try #require(
             core.appBars.shownBarsForTesting.first?.items.first
         )

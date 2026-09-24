@@ -119,6 +119,38 @@ struct KiwiShelfMigrationSourceTests {
         #expect(bar["content"] as? String == "icon")
     }
 
+    /// At or above the formats the step introduced, an absent
+    /// shelf edge MEANS the new top — the step stands down rather
+    /// than reading it as an App Bar's old bottom.
+    @Test("the shelf step stands down at the format it introduced")
+    func standsDownAtItsFloor() {
+        let floor = ConfigMigration.shelfProfileFormat
+        let crossed = Data(
+            """
+            {"format":\(floor),"monitor_sets":[],"name":"A",\
+            "settings":{"app_bar":{"content":"icon"},\
+            "space_bar":{"enabled":false}}}
+            """.utf8
+        )
+        #expect(ConfigMigration.migratingBarsOntoShelf(crossed) == nil)
+        let bundle = Data(
+            """
+            {"format":\(ConfigMigration.shelfBundleFormat),\
+            "writtenBy":"KiwiDesk","config":{},"profiles":[{\
+            "settings":{"app_bar":{},"space_bar":{"enabled":false}}}]}
+            """.utf8
+        )
+        #expect(ConfigMigration.migratingBarsOntoShelf(bundle) == nil)
+        let below = Data(
+            """
+            {"format":\(floor - 1),"monitor_sets":[],"name":"A",\
+            "settings":{"app_bar":{"content":"icon"},\
+            "space_bar":{"enabled":false}}}
+            """.utf8
+        )
+        #expect(ConfigMigration.migratingBarsOntoShelf(below) != nil)
+    }
+
     /// The Space Bar's old default edge IS the shelf's, so its
     /// silence carries over as silence.
     @Test("a Space Bar source with no edge writes none")

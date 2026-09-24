@@ -1801,8 +1801,10 @@ edge even with the Space Bar off until both
 A lone bar spans the edge and sits where `set_alignment` puts
 it. With both bars shown they take opposite ends of the edge, in
 `set_order`, each at the length its items need, `set_item_gap`
-apart. Only when both need more than the edge holds does
-`set_share` split it. Each bar scrolls on its own when its items
+apart. When the two need more than the edge holds, a bar needing
+less than its [share](#kiwishelfset_share) keeps its need and the
+other takes the rest; only when each needs more than its share
+does `set_share` decide the split. Each bar scrolls on its own when its items
 overflow, with a clickable arrow at each end that still hides
 items.
 :::
@@ -1870,9 +1872,10 @@ kiwishelf.set_order("apps_first")
 **Expects:** a percentage, 20–80 (default `40`); values outside
 the range are clamped.
 
-**Does:** sets the Space Bar's share of the edge once both bars
-overflow; the App Bar takes the rest, and each scrolls inside its
-own. A bar that needs less than its share gives the rest back.
+**Does:** sets the Space Bar's share of the edge once each bar
+needs more than its share; the App Bar takes the rest, and each
+scrolls inside its own. A bar that needs less than its share
+keeps its need and gives the rest back.
 
 **Example:**
 
@@ -2066,7 +2069,7 @@ kiwishelf.set_font_size(0)
 These verbs are retired. A call in `init.lua` is reported in
 Config Issues, naming what replaces it where something does;
 over the CLI it fails with
-`<verb> was retired in 2.0 — use <replacement>`, or, for
+`<verb> was retired — use <replacement>`, or, for
 `space_bar.set_item_size`, `…: a Space item's length follows its
 content`.
 
@@ -2088,10 +2091,12 @@ content`.
 
 `init.lua` is not rewritten; a saved profile is, once, the first
 time 2.0 reads it: the shelf takes the Space Bar's values — the
-App Bar's where the Space Bar is off — and every other copy is
+App Bar's where the Space Bar is off, keeping the App Bar's old
+`bottom` edge where it stored none — and every other copy is
 dropped, as is every stored `item_size`; the Space Bar's stored
-`title_cap` becomes its `front_app_title_cap`. A profile 2.0 has
-written no longer opens in 1.x.
+`title_cap` becomes its `front_app_title_cap`. A profile or
+bundle 2.0 has written is left as it is, and no longer opens in
+1.x.
 :::
 
 ## App Bar
@@ -2166,9 +2171,9 @@ title is also cut where it does not fit its slot; with
 
 :::unreleased
 Every slot is as wide as the widest item, at least the icon
-square and at most a quarter of the bar, so the cap is the App
-Bar's one size control; items that then do not fit scroll
-instead of shrinking.
+square and at most a quarter of the whole KiwiShelf edge, so
+the cap is the App Bar's one size control; items that then do
+not fit scroll instead of shrinking.
 :::
 
 **Example:**
@@ -3979,7 +3984,7 @@ What the `delta` adjusts depends on the layout:
   window the delta moves the left/top region. The write stops
   at the bound that keeps both regions at their effective
   minimums (per side, #933) within the area the layout fills
-  (#383) — the display minus any bar strip.
+  (#383) — the display minus any Space Bar strip.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
@@ -4019,6 +4024,12 @@ What the `delta` adjusts depends on the layout:
   can still hold `min_window_size`. Weights that still fit are
   never touched. A stack column's per-window weights keep only
   the write-time clamp (see the accepted limitations).
+
+:::unreleased
+The area a layout fills, which every bound above is taken
+within, is the display minus the [KiwiShelf](#kiwishelf) strip
+while any bar can show, in every layout alike (#1517).
+:::
 
 :::unreleased
 **Where the ratio write lands (#458):** in a **session layer

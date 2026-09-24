@@ -15,9 +15,8 @@ public final class AppBarManager {
         public let style: AppBarLook
         /// The length a slot's quarter cap is measured on — the
         /// whole shelf's, so sharing the shelf with the Space
-        /// Bar does not shrink the slots (#1517). Nil is the
-        /// strip's own.
-        public let capAxis: CGFloat?
+        /// Bar does not shrink the slots (#1517).
+        public let capAxis: CGFloat
 
         public init(
             display: DisplayID,
@@ -26,7 +25,7 @@ public final class AppBarManager {
             activeIndex: Int?,
             strip: CGRect,
             style: AppBarLook,
-            capAxis: CGFloat? = nil
+            capAxis: CGFloat
         ) {
             self.display = display
             self.space = space
