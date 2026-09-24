@@ -21,8 +21,10 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
 }
 
 extension KiwiShelfKey {
-    /// Order and share matter only while both bars show.
-    static let bothBarsGate = SettingGate.anyOf([
+    /// The three Show switches: every row but those greys while
+    /// none is on. Order and share further need BOTH bars, which
+    /// is their wiring's predicate (`BarsGates.bothBarsShow`).
+    static let showGate = SettingGate.anyOf([
         .spaceBar(.spaceBarEnabled),
         .layoutAppBar(.monocleAppBarEnabled),
         .layoutAppBar(.scrollingAppBarEnabled),
@@ -30,17 +32,15 @@ extension KiwiShelfKey {
 
     var placement: SettingPlacement {
         switch self {
-        case .edge, .thickness, .alignment:
-            return .row(.bars, .kiwishelf, .atRest)
+        case .edge, .thickness, .alignment, .order, .share:
+            return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
         case .background, .cornerRoundness, .itemGap, .fontSizeAuto,
             .outerMargin, .innerMargin:
-            return .row(.bars, .kiwishelf, .showMore)
-        case .order, .share:
             return .row(
                 .bars,
                 .kiwishelf,
-                .atRest,
-                gate: Self.bothBarsGate
+                .showMore,
+                gate: Self.showGate
             )
         case .backgroundFit:
             return .row(

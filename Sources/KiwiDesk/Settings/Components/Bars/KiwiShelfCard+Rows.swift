@@ -152,19 +152,13 @@ extension KiwiShelfCard {
                     + "one plate spans the edge, blending from the "
                     + "Space Bar's fill to the App Bar's.",
                 L("app_bar.background_fit.hug", "Hug"),
-                L("app_bar.background_fit.full", "Full width")
+                L("app_bar.background_fit.full", "Full")
             )
         )
         .modifier(
             GreyOut(
-                active: shelf.wrappedValue.backgroundStyle == .boxed,
-                help: L(
-                    "space_bar.background_fit.boxed_only",
-                    "\u{201C}%1$@\u{201D} draws a box per item, "
-                        + "not a shared plate, so there is "
-                        + "nothing to size.",
-                    L("app_bar.background_style.boxed", "Boxed")
-                )
+                active: gates.boxedShelf,
+                help: BarsGateHelp.sentence(for: .boxedShelf)
             )
         )
         .searchAnchored(

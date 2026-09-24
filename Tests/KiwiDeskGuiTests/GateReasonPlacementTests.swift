@@ -97,7 +97,7 @@ struct GateReasonPlacementTests {
             channel(.appBar(.appBarActiveItemColor)) == .remote
         )
         // A row with no gate has no channel at all.
-        #expect(channel(.kiwishelf(.thickness)) == nil)
+        #expect(channel(.spaceBar(.spaceBarEnabled)) == nil)
     }
 
     /// `SpacesGateHelp.remote` agrees with the census.

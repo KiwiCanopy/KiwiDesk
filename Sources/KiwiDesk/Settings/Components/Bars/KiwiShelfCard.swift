@@ -4,7 +4,8 @@ import SwiftUI
 /// Settings card for the shelf both bars sit on (#1517): which
 /// bars it shows, where it hangs, how the two share the edge, and
 /// the look they share. No container gate — the Show rows that
-/// switch the bars on live here.
+/// switch the bars on live here — so every other row greys as a
+/// block while no bar shows (`BarsGates.shelfShows`).
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
     @State private var styleExpanded = false
@@ -23,11 +24,19 @@ struct KiwiShelfCard: View {
             caption: cardCaption
         ) {
             showGroup
-            ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) { key in
-                row(for: key)
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) {
+                    row(for: $0)
+                }
+                styleDisclosure
+                marginsDisclosure
             }
-            styleDisclosure
-            marginsDisclosure
+            .modifier(
+                GreyOut(
+                    active: !gates.shelfShows,
+                    help: BarsGateHelp.sentence(for: .shelfEmpty)
+                )
+            )
         }
     }
 

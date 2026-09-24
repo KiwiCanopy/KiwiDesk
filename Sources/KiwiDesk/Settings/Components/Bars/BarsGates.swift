@@ -17,6 +17,10 @@ struct BarsGates {
         case gapOnly
         /// Only one bar shows, so there is no order or share.
         case oneBarShown
+        /// No bar shows, so the shelf draws nothing to shape.
+        case shelfEmpty
+        /// Boxed draws a box per item — no plate to size.
+        case boxedShelf
     }
 
     /// Resolves container gate to an inert reason, or nil if active.
@@ -46,9 +50,14 @@ struct BarsGates {
     /// shelf's order and share apply (#1517).
     var bothBarsShow: Bool { settings.bothBarsCanShow }
 
-    /// True when NO shown bar draws a shared plate to size.
-    var everyShownBarBoxed: Bool {
-        anyBarShown && settings.kiwishelf.backgroundStyle == .boxed
+    /// True while any bar can show — Core's one predicate — so
+    /// the shelf has something to place and shape.
+    var shelfShows: Bool { settings.shelfShows }
+
+    /// True when the shelf draws a box per item, so no plate is
+    /// there for the background size to fit.
+    var boxedShelf: Bool {
+        settings.kiwishelf.backgroundStyle == .boxed
     }
 
     /// True when EVERY shown bar renders on a vertical edge.
@@ -103,6 +112,21 @@ enum BarsGateHelp {
                 "Applies once both bars show — turn on the Space "
                     + "Bar and an App Bar under “%1$@”.",
                 L("kiwishelf.show.label", "Show")
+            )
+        case .shelfEmpty:
+            return L(
+                "kiwishelf.empty.help",
+                "Turn on a bar under \u{201C}%1$@\u{201D} to shape "
+                    + "the shelf.",
+                L("kiwishelf.show.label", "Show")
+            )
+        case .boxedShelf:
+            return L(
+                "kiwishelf.background_fit.boxed_only",
+                "\u{201C}%1$@\u{201D} draws a box per item, "
+                    + "not a shared plate, so there is "
+                    + "nothing to size.",
+                L("app_bar.background_style.boxed", "Boxed")
             )
         case .gapOnly:
             // Interpolated from picker entry (#818).

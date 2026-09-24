@@ -23,17 +23,15 @@ extension AppBarCard {
                 .appBar(.appBarContent)
             )
         {
-            Text(contentVerticalReason)
-                .font(.caption)
-                .foregroundStyle(SettingsTheme.ink2)
+            BarNoteRow(text: contentVerticalReason)
         }
     }
 
     private var contentVerticalReason: String {
         L(
             "app_bar.content.vertical_only.shelf",
-            "Left and right edges show icons only — the edge is "
-                + "the \u{201C}%1$@\u{201D} in %2$@.",
+            "Left and right edges show icons only. The edge is set "
+                + "under \u{201C}%1$@\u{201D} in %2$@.",
             L("kiwishelf.edge.label", "Position"),
             L("bars.switch.kiwishelf", "KiwiShelf")
         )

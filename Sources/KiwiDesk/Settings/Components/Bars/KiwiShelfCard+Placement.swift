@@ -33,15 +33,10 @@ extension KiwiShelfCard {
     @ViewBuilder func showRow(_ key: SettingKey) -> some View {
         switch key {
         case .spaceBar(.spaceBarEnabled):
-            HStack(spacing: 6) {
-                Toggle(
-                    L("kiwishelf.show.space_bar", "Space Bar"),
-                    isOn: $model.config.settings.spaceBarStyle.enabled
-                )
-                Text(L("kiwishelf.show.every_layout", "every layout"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Toggle(
+                L("kiwishelf.show.space_bar", "Space Bar"),
+                isOn: $model.config.settings.spaceBarStyle.enabled
+            )
         case .layoutAppBar(.monocleAppBarEnabled):
             Toggle(
                 L("kiwishelf.show.monocle", "App Bar in Monocle"),
@@ -128,28 +123,22 @@ extension KiwiShelfCard {
         )
     }
 
+    /// The share row is a split row: the same slider, readout and
+    /// ¼…¾ chips, over the stored percent read as a fraction.
     var shareRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            PtSlider(
-                label: L("kiwishelf.share", "Space Bar share"),
-                value: shelf.share,
-                range: shareBand,
-                unit: "%",
-                help: L(
-                    "kiwishelf.share.help",
-                    "Only matters once both bars are full: the Space "
-                        + "Bar gets this share of the edge, the App "
-                        + "Bar the rest, and each scrolls inside its "
-                        + "own. A bar that needs less always gives "
-                        + "the rest back."
-                )
-            )
-            SettingsRowShape {
-                BarRowIndent()
-            } control: {
-                ShareChips(share: shelf.share)
-            }
-        }
+        RatioRow(
+            label: L("kiwishelf.share", "Space Bar share"),
+            value: shareFraction,
+            help: L(
+                "kiwishelf.share.help",
+                "Only matters once both bars are full: the Space "
+                    + "Bar gets this share of the edge, the App "
+                    + "Bar the rest, and each scrolls inside its "
+                    + "own. A bar that needs less always gives "
+                    + "the rest back."
+            ),
+            range: shareBand
+        )
         .modifier(
             GreyOut(
                 active: !gates.bothBarsShow,
@@ -158,34 +147,17 @@ extension KiwiShelfCard {
         )
     }
 
+    private var shareFraction: Binding<Double> {
+        Binding(
+            get: { Double(shelf.wrappedValue.share) / 100 },
+            set: { shelf.wrappedValue.share = CGFloat($0 * 100) }
+        )
+    }
+
     private var shareBand: ClosedRange<Double> {
         let range = KiwiShelf.shareRange
-        return Double(range.lowerBound)...Double(range.upperBound)
-    }
-}
-
-/// Quick picks for the Space Bar share: the common fractions.
-private struct ShareChips: View {
-    @Binding var share: CGFloat
-
-    private static let fractions: [(String, CGFloat)] = [
-        ("¼", 25), ("⅓", 33), ("½", 50), ("⅔", 67), ("¾", 75),
-    ]
-
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(Self.fractions, id: \.1) { glyph, value in
-                Button(glyph) { share = value }
-                    .settingsActionButton()
-                    .controlSize(.small)
-                    .accessibilityLabel(
-                        L(
-                            "kiwishelf.share.fraction",
-                            "Space Bar share (percent): %1$d",
-                            Int(value)
-                        )
-                    )
-            }
-        }
+        let low = Double(range.lowerBound) / 100
+        let high = Double(range.upperBound) / 100
+        return low...high
     }
 }

@@ -66,7 +66,7 @@ enum AppBarOptions {
                 .full,
                 L(
                     "app_bar.background_fit.full",
-                    "Full width"
+                    "Full"
                 )
             ),
         ]
