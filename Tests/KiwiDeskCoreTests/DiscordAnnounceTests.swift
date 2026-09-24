@@ -23,7 +23,8 @@ struct DiscordAnnounceTests {
     private func run(
         body: String,
         arguments: [String] = ["--dry-run"],
-        environment: [String: String]? = nil
+        environment: [String: String]? = nil,
+        assets: [[String: Any]] = []
     ) throws -> ScriptRun {
         let release: [String: Any] = [
             "tag_name": Self.tag,
@@ -31,7 +32,7 @@ struct DiscordAnnounceTests {
             "draft": false,
             "html_url": Self.url,
             "body": body,
-            "assets": [],
+            "assets": assets,
         ]
         let file = FileManager.default.temporaryDirectory
             .appendingPathComponent(
@@ -138,6 +139,63 @@ struct DiscordAnnounceTests {
         #expect(shown % 12 == 0)
     }
 
+    /// The head alone can pass the embed limit; it is clipped at
+    /// a sentence so the pointer to the full notes still fits.
+    @Test("a summary past the limit is clipped, not rejected")
+    func longSummaryClipped() throws {
+        let sentence = String(repeating: "word ", count: 30) + "end. "
+        let body = """
+            ## Highlights
+
+            \(String(repeating: sentence, count: 40))
+
+            ### New
+
+            - **A change.**
+            """
+        let result = try run(body: body)
+        #expect(result.status == 0, "\(result.stderr)")
+        let text = try #require(try embed(result)["description"] as? String)
+        #expect(text.count <= 4096)
+        #expect(text.hasSuffix("Full notes: \(Self.url)"))
+    }
+
+    /// The issue's "a link to the release and the download": the
+    /// release's own image, as the site promotes it.
+    @Test("the post links the download when there is one")
+    func downloadLinked() throws {
+        let image = "https://example.invalid/KiwiDesk-9999.3.0.dmg"
+        let result = try run(
+            body: Self.body,
+            assets: [
+                [
+                    "name": "KiwiDesk-9999.3.0.dmg",
+                    "browser_download_url": image,
+                ]
+            ]
+        )
+        let text = try #require(try embed(result)["description"] as? String)
+        #expect(text.contains("Download: \(image)"))
+    }
+
+    /// The webhook URL is the secret: a malformed one fails the
+    /// post without being printed.
+    @Test("a malformed webhook fails without printing it")
+    func malformedWebhookNotPrinted() throws {
+        let path = ProcessInfo.processInfo.environment["PATH"] ?? ""
+        let result = try run(
+            body: Self.body,
+            arguments: [],
+            environment: [
+                "PATH": path,
+                "DISCORD_RELEASE_WEBHOOK": "not-a-url secretvalue",
+            ]
+        )
+        #expect(result.status != 0)
+        #expect(!result.stderr.contains("secretvalue"))
+        #expect(!result.stdout.contains("secretvalue"))
+    }
+
     /// A fork's run or a rotated webhook must not fail the sync.
     @Test("no webhook skips with a notice and succeeds")
     func missingWebhookSkips() throws {
@@ -172,7 +230,6 @@ struct DiscordAnnounceTests {
                 $0.contains("scripts/discord-announce")
             }
         )
-        #expect(step.contains("if: github.event_name == 'release'"))
         #expect(step.contains("continue-on-error: true"))
         #expect(
             step.contains(
@@ -180,5 +237,15 @@ struct DiscordAnnounceTests {
                     + "${{ secrets.DISCORD_RELEASE_WEBHOOK }}"
             )
         )
+        // Its own job, after the sync: a re-run of a failed sync
+        // must not post again, and nothing posts before the sync
+        // proved the notes.
+        let job = try #require(
+            yaml.components(separatedBy: "\n  announce:\n").last
+        )
+        #expect(yaml.contains("\n  announce:\n"))
+        #expect(job.contains("needs: sync"))
+        #expect(job.contains("github.event_name == 'release'"))
+        #expect(job.contains("inputs.announce && inputs.tag != ''"))
     }
 }

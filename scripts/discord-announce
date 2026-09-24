@@ -19,10 +19,13 @@ on a line pointing at the full notes, never mid-sentence.
 mode the guard suite drives, and how to preview a post. Without
 it the webhook URL is read from `DISCORD_RELEASE_WEBHOOK`; an
 unset or empty one skips the post with a notice and exits 0, so a
-fork's run or a rotated webhook never fails the release sync.
+fork's run or a rotated webhook never fails the release sync. To
+see a real post, point that variable at a private channel's
+webhook and run the script locally against a published tag.
 
-`.github/workflows/changelog.yml` runs it on `release: published`
-only: a dispatch rebuild must never announce a release twice.
+`.github/workflows/changelog.yml` runs it in its own job after the
+sync is green, on `release: published` or a dispatch that sets
+`announce` — never on a plain rebuild.
 """
 
 from __future__ import annotations
@@ -65,14 +68,38 @@ def section_block(section: dict) -> str:
     return f"**{title}**\n{bullets}"
 
 
+def clip(text: str, budget: int) -> str:
+    """`text` cut to `budget` at a sentence end where one fits,
+    else at a word, marked with an ellipsis."""
+    budget = max(budget, 1)
+    if len(text) <= budget:
+        return text
+    cut = text[: budget - 1]
+    end = cut.rfind(". ")
+    if end > budget // 2:
+        return cut[: end + 1]
+    return cut.rsplit(" ", 1)[0] + "…"
+
+
 def description(entry: dict) -> str:
-    """The embed body, cut at a section boundary to fit."""
+    """The embed body, cut at a section boundary to fit. The head
+    — summary, Before you update, the download — is clipped first
+    if it alone would not leave room for the pointer."""
+    more = f"Full notes: {entry['url']}"
     head: list[str] = []
     if entry.get("summary"):
         head.append(entry["summary"])
     if entry.get("heads"):
         head.append(f"**Before you update:** {entry['heads']}")
-    more = f"Full notes: {entry['url']}"
+    if entry.get("download"):
+        head.append(f"Download: {entry['download']}")
+    room = DESCRIPTION_BUDGET - len(more) - 2
+    clipped = False
+    while len("\n\n".join(head)) > room and head:
+        clipped = True
+        over = len("\n\n".join(head)) - room
+        longest = max(range(len(head)), key=lambda i: len(head[i]))
+        head[longest] = clip(head[longest], len(head[longest]) - over)
     parts = list(head)
     for section in entry.get("sections") or []:
         block = section_block(section)
@@ -81,6 +108,9 @@ def description(entry: dict) -> str:
             parts.append(more)
             return "\n\n".join(parts)
         parts.append(block)
+    # A clipped head says so, as a cut section list does.
+    if clipped:
+        parts.append(more)
     return "\n\n".join(parts)
 
 
@@ -154,7 +184,7 @@ def main(argv: list[str]) -> int:
         return 0
     try:
         post(url, body)
-    except (urllib.error.URLError, OSError) as error:
+    except (urllib.error.URLError, OSError, ValueError) as error:
         # Never the URL: it is the secret.
         print(
             f"discord-announce: the post for {args.release} "
