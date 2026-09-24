@@ -7429,7 +7429,7 @@ if a third surface outside `Sources/KiwiDesk/Settings` ever
 drives one of them.
 
 *The guard discovers, it does not enumerate.* It walks delimiters
-to extract every `discardingEdits` trailing closure, then requires
+to extract every gate's trailing closure, then requires
 every occurrence of a destructive `model.*` call to sit inside
 one. A hand-listed "these seven are gated" would be fail-**open**
 for the case that matters — an eighth path absent from both the
@@ -7450,6 +7450,20 @@ reopening is not a user action against their edits (#455). The
 menu-bar Load Profile and the Config Issues delete go straight
 to the core and never `reload()` the model, so they drop
 nothing.
+
+:::unreleased
+A **profile delete** confirms even when nothing is staged
+(#1619): a profile holds a whole setup and nothing undoes its
+deletion, so a clean click must not be the whole gesture. Staged
+edits fold into that dialog's message rather than a second
+dialog, so one gesture prompts once — Adopt's reason. Return
+picks Cancel there, because the dialog is all that stands
+between a reflex keypress and a loss with no undo. The dialog is
+the shared one rather than a local one because two rows delete a
+profile (the healthy and the broken), and one pending slot is
+what makes "never two dialogs" hold. A Desktop binding's × stays
+unconfirmed: it is one pick to set again.
+:::
 
 *The dialog offers two verbs, not three.* macOS document apps
 offer Save / Discard / Cancel with Save as default. An
@@ -11972,9 +11986,8 @@ of it, rather than separate rulings:
   subsystem would be new state the "start fresh" action then
   fails to clean up.
 - The tier-1 **Discard Saved Window Arrangement** confirms
-  nothing: it is strictly less consequential than the
-  unconfirmed single-profile delete, because the snapshots
-  regenerate from live state within one autosave cycle. The
+  nothing: the snapshots regenerate from live state within one
+  autosave cycle, so it loses nothing that cannot come back. The
   tier-2 wipe confirms every time, through its own dialog —
   never the staged-edit discard gate, which only fires while
   dirty.
