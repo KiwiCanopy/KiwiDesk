@@ -63,5 +63,6 @@ extension AppBarOverlay {
         root.addSubview(itemContainer)
         root.addSubview(backCount)
         root.addSubview(forwardCount)
+        root.onScroll = { [weak self] in self?.scroll($0) ?? false }
     }
 }

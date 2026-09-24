@@ -111,6 +111,19 @@ extension SpaceBarOverlay {
         render(followingActive: false)
     }
 
+    /// A wheel or trackpad scroll (`ShelfScrollInput`): taken
+    /// while entries are hidden, fluid rather than entry-aligned,
+    /// and a manual scroll only where the offset moved.
+    func scroll(_ delta: ShelfScrollInput.Delta) -> Bool {
+        guard isVisible, let geom = scrollGeom, geom.maxOffset > 0
+        else { return false }
+        let before = scrollOffset
+        scrollOffset += ShelfScrollInput.travel(delta, itemStep: geom.step)
+        render(followingActive: false)
+        if scrollOffset != before { follow.scrolledByHand() }
+        return true
+    }
+
     /// Shifts bar offset and re-renders without forcing active follow.
     func scroll(by delta: CGFloat) {
         follow.scrolledByHand()

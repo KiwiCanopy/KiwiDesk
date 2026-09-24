@@ -54,7 +54,7 @@ public final class SpaceBarOverlay {
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.
-    let root = AppBarOverlay.FlippedView()
+    let root = ShelfSectionRoot()
     /// The plate this section's run asks for, in `root`'s
     /// coordinates — the shelf unions it with the other section's.
     var plateFrame: CGRect = .zero

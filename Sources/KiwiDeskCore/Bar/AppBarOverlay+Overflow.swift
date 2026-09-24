@@ -50,6 +50,22 @@ extension AppBarOverlay {
         }
     }
 
+    /// A wheel or trackpad scroll (`ShelfScrollInput`): taken
+    /// while entries are hidden, fluid rather than slot-aligned,
+    /// and a manual scroll only where the offset moved.
+    func scroll(_ delta: ShelfScrollInput.Delta) -> Bool {
+        guard isVisible, let m = lastMetrics, m.total > m.viewport
+        else { return false }
+        let before = scrollOffset
+        scrollOffset += ShelfScrollInput.travel(
+            delta,
+            itemStep: m.slot + m.gap
+        )
+        render(followingFocus: false)
+        if scrollOffset != before { follow.scrolledByHand() }
+        return true
+    }
+
     /// Pages one way to the next slot boundary (`ShelfOverflow`).
     private func page(
         forward: Bool,
