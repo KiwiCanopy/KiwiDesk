@@ -11,6 +11,9 @@ struct NavRow: View {
     private var layerName
     @Environment(\.disabledSystemShortcuts)
     private var disabledSystemShortcuts
+    /// A clear of a shortcut other profiles share asks where it
+    /// goes, as the trash does (#1393).
+    @State private var confirmingClear = false
 
     var body: some View {
         HStack {
@@ -53,6 +56,22 @@ struct NavRow: View {
             )
         }
         .keybindingRowStyle(unavailable: command.unavailable?())
+        .confirmationDialog(
+            L(
+                "shortcuts.clear_shared.title",
+                "Other profiles use this shortcut too."
+            ),
+            isPresented: $confirmingClear
+        ) {
+            if let editing = sharedFrom {
+                Button(
+                    L("app_rules.remove.here", "Remove from %1$@", editing)
+                ) { clear(.here) }
+            }
+            Button(
+                L("app_rules.remove.everywhere", "Remove from every profile")
+            ) { clear(.everywhere) }
+        }
         .id(command.lua)
     }
 
@@ -115,8 +134,38 @@ struct NavRow: View {
         return nil
     }
 
+    /// The edited profile, where another profile shares this row.
+    private var sharedFrom: String? {
+        guard model.offersReachColumn, let index,
+            let reading = model.keyReach(
+                RuleReachTable<String>.keyID(
+                    layer: layerName,
+                    lua: bindings[index].lua
+                )
+            ),
+            reading.users.count > 1
+        else { return nil }
+        return reading.editing
+    }
+
     private func clear() {
+        if sharedFrom != nil {
+            confirmingClear = true
+        } else {
+            clear(.everywhere)
+        }
+    }
+
+    private func clear(_ removal: RuleRemoval) {
         guard let index else { return }
+        model.recordRemoval(
+            .key,
+            RuleReachTable<String>.keyID(
+                layer: layerName,
+                lua: bindings[index].lua
+            ),
+            removal
+        )
         let id = bindings[index].id
         bindings.remove(at: index)
         // Live target: the removed hotkey unregisters now

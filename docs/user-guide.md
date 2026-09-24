@@ -573,12 +573,12 @@ heading per screen count when there is more than one.
   profile.
 - **Another profile, without switching**: Home becomes
   profile-scoped, the General card leaves the grid, and Save
-  writes to that profile's JSON. Shortcuts enters override mode
-  and edits only what the profile changes.
+  writes to that profile's JSON. Each App Rule and shortcut says
+  which profiles it applies to.
 
 Saving a profile that isn't loaded leaves the running layout
-alone until it next loads, except for an App Rule it shares with
-the loaded profile ([Per-Profile Space
+alone until it next loads, except for an App Rule or shortcut it
+shares with the loaded profile ([Per-Profile Space
 Assignments](#per-profile-space-assignments)). **Save a copy…**
 while editing a stored profile duplicates it with your pending
 edits, without touching the running layout.
@@ -863,10 +863,18 @@ The **+** beside the layer chips defines a layer: a name, an
 optional icon, and bindings that shadow the base
 shortcuts while it is active. Every layer gets its own `⌃⌥K`
 row. Switch layers with `KiwiDesk.switch_layer` ([Lua
-reference](lua-reference.md)). Editing a stored profile puts
-Shortcuts in override mode: dimmed rows are inherited, an edited
-row overrides for that profile only, and only those rows are
-stored in its JSON.
+reference](lua-reference.md)).
+
+:::unreleased
+Each binding's **Applies to** says which profiles use it: **All
+profiles**, or the profiles ticked. A profile file can't leave a
+shared shortcut out, so **Remove from** one profile moves the
+shortcut into each other profile that used it, and a profile you
+create later doesn't get it. Ticking a profile that uses the key
+for something else gives the key to this shortcut there. A
+profile can't move a shared shortcut to another key: the new key
+is added and the shared one keeps working.
+:::
 
 A new layer also carries the `⌃⌥,` Open Settings row.
 

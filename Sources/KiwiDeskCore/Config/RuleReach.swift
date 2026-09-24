@@ -41,6 +41,11 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     public private(set) var touched: [String: Set<String>] = [:]
     /// Whether the base was touched at all.
     public private(set) var baseTouched: Set<String> = []
+    /// Whether the family's file can store "left out here". A
+    /// shortcut override replaces per combo and cannot delete
+    /// (`KeyLayerOverride`), so its table carries a shared rule
+    /// into the others instead of marking one profile out.
+    public var holdsLeftOut = true
 
     public init(
         base: [String: Value],
@@ -149,27 +154,22 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         }
     }
 
-    /// Removes `key` from `editing` in a family that cannot store
-    /// a left-out mark (`KeyLayerOverride`): the shared rule leaves
-    /// the base, and every other profile that followed it keeps
-    /// its own copy — the same reach, spelled without a mark.
-    public mutating func removeCarrying(_ key: String, editing: String) {
-        guard let shared = base[key], follows(key, editing) else {
-            apply(
-                key,
-                value: nil,
-                reach: .listed([editing]),
-                removal: .here,
-                editing: editing
-            )
+    /// Leaves `left` out of the shared `key` — the one place a
+    /// profile is marked out. A family that cannot store the mark
+    /// carries the shared rule into every other profile following
+    /// it and drops it from the base: the same reach, spelled
+    /// without a mark (`holdsLeftOut`).
+    private mutating func leaveOut(_ key: String, _ left: Set<String>) {
+        guard !holdsLeftOut, let shared = base[key] else {
+            for profile in left { setEntry(key, for: profile, .some(nil)) }
             return
         }
         for profile in profiles
-        where profile != editing && follows(key, profile) {
+        where !left.contains(profile) && follows(key, profile) {
             setEntry(key, for: profile, .some(shared))
         }
         setBase(key, nil)
-        setEntry(key, for: editing, .none)
+        for profile in left { setEntry(key, for: profile, .none) }
     }
 
     private mutating func remove(
@@ -180,31 +180,36 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
     ) {
         switch removal {
         case .here:
-            setEntry(
-                key,
-                for: editing,
-                base[key] == nil ? .none : .some(nil)
-            )
+            if base[key] == nil {
+                setEntry(key, for: editing, .none)
+            } else {
+                leaveOut(key, [editing])
+            }
         case .everywhere:
             if base[key] == old { setBase(key, nil) }
             // Where another shared value survives, a holder of this
             // one is left out of it rather than handed it.
-            let drop: Value?? = base[key] == nil ? .none : .some(nil)
+            var holders: Set<String> = []
             for profile in profiles {
                 let entry = entries[profile]?[key]
                 if entry == .some(old) {
-                    setEntry(key, for: profile, drop)
+                    if base[key] == nil {
+                        setEntry(key, for: profile, .none)
+                    } else {
+                        holders.insert(profile)
+                    }
                 } else if entry == .some(nil) && base[key] == nil {
                     // A left-out mark goes with the rule it left out.
                     setEntry(key, for: profile, .none)
                 }
             }
+            if !holders.isEmpty { leaveOut(key, holders) }
         }
     }
 
     /// `.none` drops the entry (follow the base); `.some(nil)`
     /// leaves the rule out; `.some(v)` is the profile's own.
-    private mutating func setEntry(
+    mutating func setEntry(
         _ key: String,
         for profile: String,
         _ entry: Value??
@@ -221,7 +226,7 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         touched[profile, default: []].insert(key)
     }
 
-    private mutating func setBase(_ key: String, _ value: Value?) {
+    mutating func setBase(_ key: String, _ value: Value?) {
         guard base[key] != value else { return }
         base[key] = value
         baseTouched.insert(key)

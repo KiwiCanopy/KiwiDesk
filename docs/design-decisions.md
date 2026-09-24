@@ -7281,6 +7281,38 @@ a second answer beside the files to the question they already
 answer, and it goes stale the first time a profile file is
 edited by hand.
 
+**Shortcuts rows take the same checklist, bent to what a
+shortcut override can store.** A profile's shortcut override
+replaces a row per key combo and cannot delete one, so a
+Shortcuts row is one action in one layer, its value the combo:
+
+- **"Not here" is spelled by carrying, not by a mark.** The file
+  cannot say "Work leaves this shared shortcut out", so *Remove
+  from Work* moves the shortcut out of the shared set and gives
+  every other profile that used it its own copy: the same
+  profiles keep it, but a profile created later no longer
+  inherits it. The table knows its family holds no mark
+  (`RuleReachTable.holdsLeftOut`), so no path can write one it
+  would silently lose (`RuleReachKeyTests` ▸ `everywhereCarries`).
+- **Ticking a profile whose combo does something else takes the
+  key over**, and the warning names the action that loses it
+  (⚠ Key is used for …); the takeover is written into the table,
+  so the save pill and that action's own row see it.
+- **Clearing a shortcut other profiles share asks**, as the trash
+  does, rather than removing it from every profile.
+- **A profile cannot move a shared action to another combo** —
+  its override adds the new row and the shared one stays. That
+  is an accepted limitation until the override can delete; the
+  page reads the first row, and the added row never reaches the
+  shared base (`movedComboStaysOut`).
+- **A stored profile's own shortcut override stays
+  `overwriteProfile`'s diff**, since it carries layer structure
+  (a new layer, an icon) the checklist does not; it is written
+  after the checklist has written the shared base it diffs
+  against. On the loaded page the shared layers are derived once,
+  from the page's own structure, and both the rule write and the
+  globals write read that one base.
+
 *The saves write different layers, by design.* The loaded
 profile's Save and a stored profile's Save touch **disjoint**
 field sets, because they edit different layers of the

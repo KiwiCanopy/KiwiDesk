@@ -147,8 +147,9 @@ extension KiwiCore {
     /// Re-resolves the window rules and the shortcuts from the
     /// stored base and the active profile's file, touching nothing
     /// else — the tail of a rule write that changed no other
-    /// setting (#1393).
-    func refreshStructuredOverrides() {
+    /// setting (#1393). Shortcuts re-register only when `keys`,
+    /// in the running layer rather than the default one.
+    func refreshStructuredOverrides(keys changed: Bool) {
         guard isGuiManaged, let config = loadStructuredConfig() else {
             return
         }
@@ -159,11 +160,12 @@ extension KiwiCore {
             floatRules: profile?.floatRules,
             ignoreRules: profile?.ignoreRules
         )
-        guard let lua = keys.lua else { return }
+        guard changed, let lua = keys.lua else { return }
         applyStructuredKeybindings(
             layers: config.layers,
             profile: profile?.layers,
-            lua: lua
+            lua: lua,
+            preferredLayer: keys.currentLayer
         )
     }
 

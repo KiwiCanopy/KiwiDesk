@@ -49,17 +49,32 @@ public struct RuleReachSnapshot: Equatable, Sendable {
     public var isEdited: Bool {
         !appRules.baseTouched.isEmpty || !floatRules.baseTouched.isEmpty
             || !keyLayers.baseTouched.isEmpty
+            || (pageKeyBase.map { $0 != storedKeyBase } ?? false)
             || appRules.touched.values.contains { !$0.isEmpty }
             || floatRules.touched.values.contains { !$0.isEmpty }
             || keyLayers.touched.values.contains { !$0.isEmpty }
     }
 
-    /// The base layers the key table now holds.
+    /// The loaded page's gui.json layers, when the draft is that
+    /// page (`keyLayerBase(page:)`) — set by the Settings draft so
+    /// the rule write and the globals write read ONE base.
+    public var pageKeyBase: [KeyLayer]?
+
+    /// The base layers the key table now holds: the page's shape
+    /// on the loaded page, else the stored base with each touched
+    /// key rebuilt.
     public var keyBase: [KeyLayer] {
-        keyLayers.keyLayerBase(
-            original: storedKeyBase,
-            templates: keyTemplates
-        )
+        pageKeyBase
+            ?? keyLayers.keyLayerBase(
+                original: storedKeyBase,
+                templates: keyTemplates
+            )
+    }
+
+    /// `profile`'s resolved layers as stored.
+    public func storedKeyLayers(for profile: String) -> [KeyLayer] {
+        storedKeyOverrides[profile]?.resolved(onto: storedKeyBase)
+            ?? storedKeyBase
     }
 }
 
@@ -76,6 +91,9 @@ extension KiwiCore {
         var keys: [String: KeyLayerOverride] = [:]
         var templates: [String: KeyBinding] = [:]
         let keyBase = sidecar.layers
+        // The base's own rows first, so a row the save writes takes
+        // the shared label and kind over any one profile's.
+        RuleReachTable<String>.collectTemplates(keyBase, into: &templates)
         for profile in stored {
             floats[profile.name] = profile.floatRules
             keys[profile.name] = profile.layers
@@ -84,7 +102,6 @@ extension KiwiCore {
                 into: &templates
             )
         }
-        RuleReachTable<String>.collectTemplates(keyBase, into: &templates)
         return RuleReachSnapshot(
             appRules: .appRules(
                 base: sidecar.appRules,
@@ -155,8 +172,11 @@ extension KiwiCore {
             pending.append(profile)
         }
         var sidecar: GuiConfig?
+        let keysMoved =
+            !snapshot.keyLayers.baseTouched.isEmpty
+            || snapshot.keyBase != snapshot.storedKeyBase
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty
-            || !snapshot.keyLayers.baseTouched.isEmpty
+            || keysMoved
         {
             guard var stored = guiConfigStore.load() else {
                 throw SidecarError.unreadable
@@ -173,6 +193,9 @@ extension KiwiCore {
         for profile in pending { try profiles.write(profile) }
         if let sidecar { try guiConfigStore.save(sidecar) }
         refreshConfigIssues()
-        refreshStructuredOverrides()
+        refreshStructuredOverrides(
+            keys: keysMoved
+                || snapshot.keyLayers.touched.values.contains { !$0.isEmpty }
+        )
     }
 }

@@ -215,6 +215,40 @@ struct LiveApplyKeybindingsTests {
         )
     }
 
+    /// The loaded page previews its RESOLVED layers (#1393):
+    /// laying the override over them again brings back a row the
+    /// page cleared.
+    @Test("A row the loaded page cleared stays unregistered")
+    func resolvedPageClearsItsOwnRow() throws {
+        let core = makeGuiCore()
+        try core.saveGuiConfig(baseConfig())
+        let own = binding("alt+j", lua: "marker = 'own'")
+        try core.profiles.save(
+            Profile(
+                name: "Work",
+                monitorSets: [MonitorSet(monitors: ["A:100x100"])],
+                spaceModes: [:],
+                settings: TilingSettings(),
+                layers: KeyLayerOverride(
+                    layers: [KeyLayer(name: "default", bindings: [own])]
+                )
+            )
+        )
+        #expect(
+            core.execute("load_profile", args: [.string("Work")]).isSuccess
+        )
+        #expect(try registered("alt+j", core: core))
+
+        // The page resolved Work's own row, and the user cleared it.
+        _ = core.liveApplyKeybindings(
+            layers: baseConfig().layers,
+            target: nil,
+            alreadyResolved: true
+        )
+
+        #expect(try !registered("alt+j", core: core))
+    }
+
     @Test("Surviving active layer is preserved")
     func activeModeSurvives() throws {
         let core = makeGuiCore()

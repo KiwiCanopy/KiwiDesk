@@ -2,10 +2,10 @@ import Foundation
 
 // Shortcuts as a `RuleReachTable` (#1393): a key is one action in
 // one layer, its value the combo. `KeyLayerOverride` replaces per
-// combo and cannot delete, so this family never stores a left-out
-// mark — `removeCarrying` spells "not here" instead — and a row
-// written into a profile takes its combo over from whatever that
-// profile bound there.
+// combo and cannot delete, so this family holds no left-out mark
+// (`holdsLeftOut`) — "not here" carries the shared rule into the
+// others — and a row written into a profile takes its combo over
+// from whatever that profile bound there (`applyKey`).
 
 extension RuleReachTable where Value == String {
     /// The key of `lua` in `layer`.
@@ -37,6 +37,18 @@ extension RuleReachTable where Value == String {
         return result
     }
 
+    /// Every combo each action holds per layer, in row order.
+    static func allCombos(_ layers: [KeyLayer]) -> [String: [String]] {
+        var result: [String: [String]] = [:]
+        for layer in layers {
+            for row in layer.bindings where !row.lua.isEmpty {
+                result[keyID(layer: layer.name, lua: row.lua), default: []]
+                    .append(row.combo)
+            }
+        }
+        return result
+    }
+
     /// The shortcut family, each profile read through the override
     /// resolution the engine registers.
     public static func keyLayers(
@@ -56,11 +68,50 @@ extension RuleReachTable where Value == String {
             }
             entries[profile] = entry
         }
-        return Self(
+        var table = Self(
             base: shared,
             entries: entries,
             profiles: overrides.map(\.profile)
         )
+        table.holdsLeftOut = false
+        return table
+    }
+
+    /// `apply`, then the takeover: where `key` now holds `value` —
+    /// the base, or a profile — another action bound to that combo
+    /// in the same layer loses it, recorded in the table so the
+    /// pill and its own row see it. The one shape this family CAN
+    /// store as "not here" is a combo another action replaced.
+    public mutating func applyKey(
+        _ key: String,
+        value: String?,
+        reach: RuleReach,
+        removal: RuleRemoval = .everywhere,
+        editing: String
+    ) {
+        apply(
+            key,
+            value: value,
+            reach: reach,
+            removal: removal,
+            editing: editing
+        )
+        guard let value, !value.isEmpty else { return }
+        let layer = Self.keyParts(key).layer
+        let keys = Set(base.keys).union(entries.values.flatMap(\.keys))
+        let rivals = keys.filter {
+            $0 != key && Self.keyParts($0).layer == layer
+        }
+        if base[key] == value {
+            for rival in rivals where base[rival] == value {
+                setBase(rival, nil)
+            }
+        }
+        for profile in profiles where resolved(key, for: profile) == value {
+            for rival in rivals where resolved(rival, for: profile) == value {
+                setEntry(rival, for: profile, .some(nil))
+            }
+        }
     }
 
     /// The base layers: `original` with each touched key's row
@@ -101,9 +152,12 @@ extension RuleReachTable where Value == String {
             else { continue }
             layers[at].icon = shared.icon
         }
-        let held = Self.combos(layers)
+        // Every row per action, not the first: a combo the page's
+        // profile MOVED keeps the base row beside its own, and only
+        // the shared one may reach the base.
+        let held = Self.allCombos(layers)
         for key in Set(held.keys).union(base.keys).sorted()
-        where held[key] != base[key] {
+        where held[key] != base[key].map { [$0] } {
             Self.set(&layers, key, base[key], templates[key])
         }
         return layers

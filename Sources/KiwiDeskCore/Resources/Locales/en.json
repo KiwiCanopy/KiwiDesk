@@ -1168,6 +1168,7 @@
   "shortcuts.apps.empty": "No app has a key of its own yet. Add one and its key takes you to that app's window, wherever it is, or launches the app if it isn't running.",
   "shortcuts.base_layer_protected": "Base layers can't be removed here",
   "shortcuts.choose_app": "Choose app…",
+  "shortcuts.clear_shared.title": "Other profiles use this shortcut too.",
   "shortcuts.delete_layer": "Delete layer",
   "shortcuts.desktop_away": "Dimmed rows target a Desktop that isn't on any screen right now. Their shortcuts stay recorded and work again when it comes back.",
   "shortcuts.desktops.focus": "Go to a macOS Desktop",

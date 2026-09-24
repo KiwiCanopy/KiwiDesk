@@ -78,27 +78,34 @@ extension SettingsModel {
         return row
     }
 
-    /// Who binds this row's combo to another action, per profile.
+    /// Who binds this row's combo to another action, per profile,
+    /// read off the encoded table — the action ticking would take
+    /// the key from.
     private func keyTakers(
         _ key: String,
         in reach: RuleReachSnapshot,
         editing: String
     ) -> [String: String] {
-        guard let combo = reach.keyLayers.resolved(key, for: editing),
-            !combo.isEmpty
+        let table = reach.keyLayers
+        guard let combo = table.resolved(key, for: editing), !combo.isEmpty
         else { return [:] }
-        let (layer, lua) = RuleReachTable<String>.keyParts(key)
-        var result: [String: String] = [:]
-        for profile in reach.keyLayers.profiles where profile != editing {
-            let layers =
-                reach.storedKeyOverrides[profile]?.resolved(
-                    onto: reach.storedKeyBase
-                ) ?? reach.storedKeyBase
-            let taker = layers.first { $0.name == layer }?.bindings
-                .first { $0.combo == combo && $0.lua != lua }
-            if let taker {
-                result[profile] = taker.label.isEmpty ? taker.lua : taker.label
+        let layer = RuleReachTable<String>.keyParts(key).layer
+        let keys = Set(table.base.keys)
+            .union(table.entries.values.flatMap(\.keys))
+            .filter {
+                $0 != key && RuleReachTable<String>.keyParts($0).layer == layer
             }
+        var result: [String: String] = [:]
+        for profile in table.profiles where profile != editing {
+            guard
+                let rival = keys.sorted().first(where: {
+                    table.resolved($0, for: profile) == combo
+                })
+            else { continue }
+            let label = reach.keyTemplates[rival]?.label ?? ""
+            result[profile] =
+                label.isEmpty
+                ? RuleReachTable<String>.keyParts(rival).lua : label
         }
         return result
     }

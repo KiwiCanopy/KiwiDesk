@@ -36,7 +36,7 @@ extension SettingsModel {
         // whole rather than committing the tiling alone.
         // Its own shortcut override is the diff `overwriteProfile`
         // takes below, against the base written here.
-        let rules = saveRuleReach(keysLeftTo: name)
+        let rules = saveRuleReach()
         guard rules != .failed else {
             // A write that failed after others landed: re-read, so
             // the draft's diff shows only what did not land.

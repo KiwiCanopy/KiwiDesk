@@ -117,4 +117,28 @@ struct RuleReachKeyModelTests {
             ] == nil
         )
     }
+
+    @Test("A failed Save keeps a Work-only new shortcut out of the base")
+    func failedSaveKeepsListedOut() throws {
+        let model = try makeModel()
+        let lua = "KiwiDesk.toggle_float()"
+        let at = try #require(
+            model.config.layers.firstIndex { $0.name == KeyLayer.defaultName }
+        )
+        model.config.layers[at].bindings.append(
+            KeyBinding(combo: "ctrl+alt+f", lua: lua, kind: .custom)
+        )
+        model.setAllProfiles(.key, key(lua), false)
+        // The rule write reads Home (ticked onto Work's reload), and
+        // Home cannot be read — the tiling save never touches it.
+        model.setProfile(.key, key(reload), "Home", true)
+        model.config.ignoreRules = ["com.example.ignored"]
+        let url = try model.core.profiles.fileURL(name: "Home")
+        try Data("not json".utf8).write(to: url)
+
+        model.updateActiveProfile()
+
+        let base = model.core.guiConfigStore.load()?.layers ?? []
+        #expect(RuleReachTable<String>.combos(base)[key(lua)] == nil)
+    }
 }

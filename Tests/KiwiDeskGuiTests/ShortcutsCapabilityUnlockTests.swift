@@ -128,15 +128,17 @@ struct ShortcutsCapabilityUnlockTests {
 
         // Every row of the list reads its reach, not just the
         // overridden one — the checklist is the LIST's, not the
-        // row's (#1393). `!= nil` fails on a missing checklist.
+        // row's (#1393). Each base row reads SHARED: a missing
+        // checklist reads nil and a mis-keyed row reads not shared,
+        // so the clause fails on either.
         for (_, lua) in baseCombos {
             let key = RuleReachTable<String>.keyID(
                 layer: KeyLayer.defaultName,
                 lua: lua
             )
             #expect(
-                model.keyReach(key) != nil,
-                Comment(rawValue: "peer \(lua) has no reach reading")
+                model.keyReach(key)?.shared == true,
+                Comment(rawValue: "peer \(lua) has no shared reading")
             )
         }
     }

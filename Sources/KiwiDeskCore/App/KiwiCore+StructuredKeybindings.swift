@@ -32,7 +32,8 @@ extension KiwiCore {
     func applyStructuredKeybindings(
         layers base: [KeyLayer],
         profile: KeyLayerOverride?,
-        lua: LuaInterpreter
+        lua: LuaInterpreter,
+        preferredLayer: String = KeybindingManager.defaultLayer
     ) {
         let resolved = ConfigResolver.resolvedLayers(
             base: base,
@@ -42,10 +43,7 @@ extension KiwiCore {
             resolved,
             lua: lua
         )
-        install(
-            prepared,
-            preferredLayer: KeybindingManager.defaultLayer
-        )
+        install(prepared, preferredLayer: preferredLayer)
     }
 
     /// Compiles every representable, assigned binding without

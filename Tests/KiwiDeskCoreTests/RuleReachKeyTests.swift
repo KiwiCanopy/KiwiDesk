@@ -6,7 +6,8 @@ import Testing
 /// Shortcuts as a rule-reach table (#1393): one action per layer,
 /// read through the override resolution the engine registers and
 /// written back through `KeyLayerOverride.diff`, which cannot
-/// delete — so "not here" is spelled by `removeCarrying`.
+/// delete — so "not here" carries the shared rule into the others
+/// (`holdsLeftOut`), and a written combo takes its key over.
 @Suite("Rule reach, shortcuts (#1393)")
 struct RuleReachKeyTests {
     private let terminal = "open_or_focus('com.apple.Terminal')"
@@ -59,7 +60,13 @@ struct RuleReachKeyTests {
     @Test("Remove here carries the shared shortcut into the others")
     func removeCarrying() {
         var t = table
-        t.removeCarrying(key, editing: "Work")
+        t.applyKey(
+            key,
+            value: nil,
+            reach: .shared(joining: []),
+            removal: .here,
+            editing: "Work"
+        )
         #expect(t.base[key] == nil)
         #expect(t.resolved(key, for: "Work") == nil)
         #expect(t.resolved(key, for: "Home") == "ctrl+alt+t")
@@ -70,7 +77,13 @@ struct RuleReachKeyTests {
     @Test("A carried shortcut encodes and resolves as the table reads")
     func carriedEncodes() {
         var t = table
-        t.removeCarrying(key, editing: "Work")
+        t.applyKey(
+            key,
+            value: nil,
+            reach: .shared(joining: []),
+            removal: .here,
+            editing: "Work"
+        )
         let newBase = t.keyLayerBase(original: base, templates: templates)
         #expect(RuleReachTable<String>.combos(newBase)[key] == nil)
         let home = t.keyLayerOverride(
@@ -86,7 +99,7 @@ struct RuleReachKeyTests {
     @Test("Ticking a profile takes its combo over from the other action")
     func tickTakesTheKey() {
         var t = table
-        t.apply(
+        t.applyKey(
             key,
             value: "ctrl+alt+t",
             reach: .shared(joining: ["Travel"]),
@@ -140,5 +153,92 @@ struct RuleReachKeyTests {
             templates: templates
         )
         #expect(shared.map(\.name) == ["default"])
+    }
+
+    @Test("The takeover is recorded in the table, not only the file")
+    func takeoverRecorded() {
+        var t = table
+        t.applyKey(
+            key,
+            value: "ctrl+alt+t",
+            reach: .shared(joining: ["Travel"]),
+            editing: "Work"
+        )
+        let finderKey = RuleReachTable<String>.keyID(
+            layer: "default",
+            lua: finder
+        )
+        #expect(t.resolved(finderKey, for: "Travel") == nil)
+        #expect(t.touched["Travel"]?.contains(finderKey) == true)
+    }
+
+    @Test("A shared combo taken by a new shared action leaves the base")
+    func baseTakeover() {
+        var t = table
+        let reloadKey = RuleReachTable<String>.keyID(
+            layer: "default",
+            lua: "reload"
+        )
+        t.applyKey(
+            reloadKey,
+            value: "ctrl+alt+t",
+            reach: .shared(joining: []),
+            editing: "Work"
+        )
+        #expect(t.base[reloadKey] == "ctrl+alt+t")
+        #expect(t.base[key] == nil)
+    }
+
+    @Test("Removing everywhere over another shared value carries it")
+    func everywhereCarries() {
+        // Home moved Terminal to its own combo: its override takes
+        // the shared combo for Finder (an override cannot delete the
+        // shared row) and binds Terminal anew.
+        let home = KeyLayerOverride(layers: [
+            KeyLayer(
+                name: "default",
+                bindings: [
+                    row("ctrl+alt+t", finder), row("ctrl+alt+y", terminal),
+                ]
+            )
+        ])
+        var t = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: [("Work", nil), ("Home", home)]
+        )
+        #expect(t.resolved(key, for: "Home") == "ctrl+alt+y")
+        t.applyKey(
+            key,
+            value: nil,
+            reach: .listed(["Home"]),
+            removal: .everywhere,
+            editing: "Home"
+        )
+        // No left-out mark: Work keeps the shared combo as its own.
+        #expect(t.entries.values.allSatisfy { $0[key] != .some(nil) })
+        #expect(t.resolved(key, for: "Work") == "ctrl+alt+t")
+        #expect(t.resolved(key, for: "Home") == nil)
+    }
+
+    @Test("A combo the page's profile moved never reaches the base")
+    func movedComboStaysOut() {
+        // Work moved Terminal to ctrl+alt+y: the shared row stays and
+        // its own is appended (an override cannot delete).
+        let work = KeyLayerOverride(layers: [
+            KeyLayer(name: "default", bindings: [row("ctrl+alt+y", terminal)])
+        ])
+        let page = work.resolved(onto: base)
+        #expect(page[0].bindings.count == 2)
+        let t = RuleReachTable<String>.keyLayers(
+            base: base,
+            overrides: [("Work", work)]
+        )
+        let shared = t.keyLayerBase(
+            page: page,
+            storedPage: page,
+            storedBase: base,
+            templates: templates
+        )
+        #expect(shared[0].bindings.map(\.combo) == ["ctrl+alt+t"])
     }
 }

@@ -13,10 +13,6 @@ enum RuleFamily: Hashable {
     func key(_ subject: String) -> String {
         self == .key ? subject : subject.lowercased()
     }
-
-    /// Whether the family's file can store "left out here".
-    /// `KeyLayerOverride` replaces per combo and cannot delete.
-    var holdsLeftOut: Bool { self != .key }
 }
 
 /// The checklist choices a draft holds over the stored rules
@@ -61,7 +57,12 @@ enum RuleReachDraft {
         isLoaded: Bool,
         reach: [String: RuleReach],
         removal: [String: RuleRemoval],
-        holdsLeftOut: Bool = true
+        apply: (
+            inout RuleReachTable<V>, String, V?, RuleReach, RuleRemoval,
+            String
+        ) -> Void = {
+            $0.apply($1, value: $2, reach: $3, removal: $4, editing: $5)
+        }
     ) -> RuleReachTable<V> {
         var table = stored
         let keys = Set(current.keys)
@@ -75,22 +76,19 @@ enum RuleReachDraft {
                 picked != nil || removal[key] != nil
                     || value != stored.resolved(key, for: editing)
             else { continue }
-            if value == nil, removal[key] == .here, !holdsLeftOut {
-                table.removeCarrying(key, editing: editing)
-                continue
-            }
-            table.apply(
+            apply(
+                &table,
                 key,
-                value: value,
-                reach: picked
+                value,
+                picked
                     ?? defaultReach(
                         of: key,
                         in: stored,
                         editing: editing,
                         isLoaded: isLoaded
                     ),
-                removal: removal[key] ?? .everywhere,
-                editing: editing
+                removal[key] ?? .everywhere,
+                editing
             )
         }
         return table

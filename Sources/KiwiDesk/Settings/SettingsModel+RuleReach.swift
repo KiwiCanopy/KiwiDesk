@@ -63,9 +63,20 @@ extension SettingsModel {
             editing: editing,
             isLoaded: reachIsLoaded,
             reach: reachEdits.reach[.key] ?? [:],
-            removal: reachEdits.removal[.key] ?? [:],
-            holdsLeftOut: false
-        )
+            removal: reachEdits.removal[.key] ?? [:]
+        ) {
+            $0.applyKey($1, value: $2, reach: $3, removal: $4, editing: $5)
+        }
+        // The loaded page's gui.json layers, derived ONCE so the rule
+        // write and the globals write read the same base.
+        if reachIsLoaded {
+            snapshot.pageKeyBase = snapshot.keyLayers.keyLayerBase(
+                page: config.layers,
+                storedPage: snapshot.storedKeyLayers(for: editing),
+                storedBase: snapshot.storedKeyBase,
+                templates: snapshot.keyTemplates
+            )
+        }
         return snapshot
     }
 
@@ -81,10 +92,7 @@ extension SettingsModel {
         config.floatRules = stored.floatRules.resolved(for: loaded)
             .sorted { $0.key < $1.key }
             .flatMap(\.value)
-        config.layers =
-            stored.storedKeyOverrides[loaded]?.resolved(
-                onto: stored.storedKeyBase
-            ) ?? stored.storedKeyBase
+        config.layers = stored.storedKeyLayers(for: loaded)
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -102,30 +110,22 @@ extension SettingsModel {
         sidecar.floatRules = reach.floatRules.floatRuleBase(
             original: reach.storedFloatBase
         )
-        sidecar.layers = reach.keyLayers.keyLayerBase(
-            page: config.layers,
-            storedPage: reachPage.flatMap {
-                reach.storedKeyOverrides[$0]?.resolved(
-                    onto: reach.storedKeyBase
-                )
-            } ?? reach.storedKeyBase,
-            storedBase: reach.storedKeyBase,
-            templates: reach.keyTemplates
-        )
+        sidecar.layers = reach.keyBase
         return sidecar
     }
 
     /// Writes every profile file and the shared rules the draft's
     /// checklist reached, and says what happened — the one answer
     /// every Save door reads, so none infers from its own control
-    /// flow which half landed. `keysLeftTo` is a stored page, whose
-    /// own shortcut override its Save diffs from the page.
-    func saveRuleReach(keysLeftTo page: String? = nil) -> RuleReachWrite {
+    /// flow which half landed. A stored page's own shortcut
+    /// override is left to its Save's diff (`overwriteProfile`),
+    /// which carries its layer structure too.
+    func saveRuleReach() -> RuleReachWrite {
         guard let reach = encodedReach, reach.isEdited else {
             return .nothing
         }
         do {
-            try core.saveRuleReach(reach, keysLeftTo: page)
+            try core.saveRuleReach(reach, keysLeftTo: editingProfile)
             return .landed
         } catch {
             profileWarning = L(
@@ -149,6 +149,8 @@ extension SettingsModel {
         suppressDirty = true
         cleanConfig.appRules = config.appRules
         cleanConfig.floatRules = config.floatRules
+        // Not the layers: a stored page's own shortcut diff is the
+        // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
         reachEdits = RuleReachEdits()
         suppressDirty = false
@@ -160,6 +162,7 @@ extension SettingsModel {
     func dropRuleHalf() {
         config.appRules = cleanConfig.appRules
         config.floatRules = cleanConfig.floatRules
+        config.layers = cleanConfig.layers
         reachEdits = RuleReachEdits()
     }
 
