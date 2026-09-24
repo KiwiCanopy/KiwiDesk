@@ -1353,6 +1353,7 @@
   "spaces.preview.count_hint": "Modifie uniquement cet aperçu ; rien n'est enregistré.",
   "spaces.preview.none": "Aucun espace dans ce brouillon pour l'instant.",
   "spaces.preview.title": "Disposition de cet espace",
+  "spaces.rename.taken": "Un espace nommé « %1$@ » existe déjà.",
   "spaces.title": "Espaces",
   "sticky.caption": "Les fenêtres Sticky restent visibles sur tous les espaces (« %1$@ », dans %2$@).",
   "sticky.color": "Sticky",

@@ -19,6 +19,8 @@ struct SpacesSection: View {
     /// config (#299). nil when idle.
     @State var dragOrder: [SpaceID]?
     @State var hoveredHandle: SpaceID?
+    /// The refusal caption each row's name field reports (#1623).
+    @State var renameNotices: [SpaceID: String] = [:]
     @State var rowFrames: [SpaceID: CGRect] = [:]
     /// Measured, never guessed, so every row's button locks to one
     /// column width across locales and counts (#290).
@@ -136,7 +138,8 @@ struct SpacesSection: View {
                             from: space,
                             to: $0
                         )
-                    }
+                    },
+                    onNotice: { renameNotices[space] = $0 }
                 )
                 if model.config.fallbackSpace == space {
                     BadgeChip(
@@ -165,6 +168,14 @@ struct SpacesSection: View {
                     .frame(height: 16)
                     .padding(.horizontal, 2)
                 deleteButton(space)
+            }
+            // Under the row, not the field: stacked in the HStack
+            // it would pull the field off the row's centre line.
+            if let notice = renameNotices[space] {
+                Text(notice)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(8)

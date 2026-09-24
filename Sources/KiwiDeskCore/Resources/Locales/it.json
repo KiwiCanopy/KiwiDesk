@@ -1353,6 +1353,7 @@
   "spaces.preview.count_hint": "Cambia solo questa anteprima; non viene salvata.",
   "spaces.preview.none": "Ancora nessuno spazio in questa bozza.",
   "spaces.preview.title": "Layout di questo spazio",
+  "spaces.rename.taken": "Esiste già uno spazio chiamato «%1$@».",
   "spaces.title": "Spazi",
   "sticky.caption": "Le finestre Sticky restano visibili su tutti gli spazi («%1$@», in %2$@).",
   "sticky.color": "Sticky",
