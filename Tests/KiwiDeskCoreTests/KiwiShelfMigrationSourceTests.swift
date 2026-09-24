@@ -95,12 +95,40 @@ struct KiwiShelfMigrationSourceTests {
         #expect(shelf["edge"] as? String == "bottom")
     }
 
+    /// Both hosts' shared overrides drop — the scrolling one is
+    /// stored under `scroll`, the monocle one under `monocle`.
+    @Test("the scrolling layout's shared overrides drop too")
+    func scrollOverridesDrop() throws {
+        let data = Data(
+            """
+            {"format":7,"monitor_sets":[],"name":"A","settings":\
+            {"layout":{"scroll":{"app_bar":{"content":"icon",\
+            "edge":"left","thickness":50}}}}}
+            """.utf8
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        let root = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        let settings = try #require(root["settings"] as? [String: Any])
+        let layout = try #require(settings["layout"] as? [String: Any])
+        let scroll = try #require(layout["scroll"] as? [String: Any])
+        let bar = try #require(scroll["app_bar"] as? [String: Any])
+        #expect(bar["edge"] == nil)
+        #expect(bar["thickness"] == nil)
+        #expect(bar["content"] as? String == "icon")
+    }
+
     /// The Space Bar's old default edge IS the shelf's, so its
     /// silence carries over as silence.
     @Test("a Space Bar source with no edge writes none")
     func spaceBarSourceWritesNoEdge() throws {
         let data = Self.profile(spaceBarEnabled: true, appBarEdge: "left")
         let out = try #require(ConfigMigration.migrated(data))
+        // In place, so the text path chose the Space Bar itself
+        // rather than the walk's re-encode repairing it.
+        let text = try #require(String(data: out, encoding: .utf8))
+        #expect(text.contains("\"dim_factor\" : 0.4,"))
         #expect(try shelf(out)["edge"] == nil)
         #expect(try shelf(out)["thickness"] as? Double == 44)
     }
@@ -115,23 +143,25 @@ struct KiwiShelfMigrationSourceTests {
 struct KiwiShelfGlassFloorTests {
     @Test("the glass fill stands down at the format it introduced")
     func standsDownAtItsFloor() {
+        let floor = ConfigMigration.glassFillProfileFormat
+        let bundleFloor = ConfigMigration.glassFillBundleFormat
         let atFloor = Data(
             """
-            {"format":4,"monitor_sets":[],"name":"A",\
+            {"format":\(floor),"monitor_sets":[],"name":"A",\
             "settings":{"space_bar":{"enabled":true}}}
             """.utf8
         )
         #expect(ConfigMigration.migratingAbsentGlassLeaves(atFloor) == nil)
         let bundle = Data(
             """
-            {"format":6,"writtenBy":"KiwiDesk","config":{},\
-            "profiles":[{"settings":{"space_bar":{}}}]}
+            {"format":\(bundleFloor),"writtenBy":"KiwiDesk",\
+            "config":{},"profiles":[{"settings":{"space_bar":{}}}]}
             """.utf8
         )
         #expect(ConfigMigration.migratingAbsentGlassLeaves(bundle) == nil)
         let below = Data(
             """
-            {"format":3,"monitor_sets":[],"name":"A",\
+            {"format":\(floor - 1),"monitor_sets":[],"name":"A",\
             "settings":{"space_bar":{"enabled":true}}}
             """.utf8
         )

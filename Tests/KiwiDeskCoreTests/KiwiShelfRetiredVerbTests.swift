@@ -131,6 +131,7 @@ struct KiwiShelfRetiredVerbTests {
     /// the user from one refusal to another.
     @Test("every replacement is a dispatchable verb")
     func replacementsAreLive() {
+        #expect(!APIReference.retired.isEmpty)
         for case (let verb, let replacement?) in APIReference.retired {
             #expect(
                 APIReference.dispatchable.contains(replacement),

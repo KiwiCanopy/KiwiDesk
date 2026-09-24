@@ -99,6 +99,18 @@ struct ShelfArrangementTests {
         )
     }
 
+    /// The first bar under its share while the second overflows
+    /// the rest: the first keeps its need, never the share.
+    @Test("A bar under its share keeps its need beside an overflow")
+    func underShareKeepsItsNeed() {
+        let placed = arrange(100, 950, shelf())
+        #expect(placed.space?.length == 100)
+        #expect(
+            placed.app
+                == Slot(offset: 100, length: 900, alignment: .end)
+        )
+    }
+
     @Test("Both overflow: the share decides")
     func bothOverflow() {
         let placed = arrange(700, 800, shelf())

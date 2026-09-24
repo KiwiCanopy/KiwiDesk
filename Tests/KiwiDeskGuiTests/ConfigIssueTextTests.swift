@@ -130,4 +130,20 @@ struct ConfigIssueTextTests {
         #expect(with.contains("a.c"))
         #expect(!without.contains("a.c"))
     }
+
+    /// A retired call's replacement is named in the sentence —
+    /// the one thing the user needs to fix their init.lua.
+    @Test("A replacement changes the retired sentence")
+    func replacementSelectsItsOwnKey() {
+        pinEnglish()
+        defer { reset() }
+        let without = ConfigIssueText.message(
+            for: .retiredCall(name: "a.b", replacement: nil)
+        )
+        let with = ConfigIssueText.message(
+            for: .retiredCall(name: "a.b", replacement: "a.c")
+        )
+        #expect(without != with)
+        #expect(with.contains("a.c"))
+    }
 }
