@@ -196,14 +196,15 @@ struct RuleReachChecklist: View {
     private func note(_ reading: RuleReachReading) -> String? {
         if reading.shared {
             return L(
-                "app_rules.reach.leave_out_note",
-                "To leave a profile out, untick %1$@ first.",
+                "app_rules.reach.some_profiles_note",
+                "To give only some profiles a new value, untick %1$@ first.",
                 RuleReachWords.allProfiles
             )
         }
-        guard reading.profiles.allSatisfy(reading.users.contains) else {
-            return nil
-        }
+        // With a shared rule beside the list, a new profile gets that.
+        guard !reading.hasShared,
+            reading.profiles.allSatisfy(reading.users.contains)
+        else { return nil }
         return L(
             "app_rules.reach.new_profiles_note",
             "New profiles won't get this rule. Tick %1$@ to share it.",

@@ -50,8 +50,10 @@ struct RuleReachModelTests {
 
         model.setAllProfiles(.space, "mail", false)
         model.setProfile(.space, "mail", "Home", false)
-        // Unticking alone changes nothing to save.
+        // Unticking alone changes nothing to save, but the ticks show it.
         #expect(!model.isDirty)
+        let picked = try #require(model.spaceReach("mail"))
+        #expect(!picked.shared && picked.users == ["Work"])
         model.config.appRules["mail"] = SpaceID("2")
 
         #expect(model.isDirty)

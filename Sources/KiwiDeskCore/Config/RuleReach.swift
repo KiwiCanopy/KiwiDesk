@@ -6,7 +6,8 @@ public enum RuleReach: Hashable, Sendable {
     /// The shared base rule. `joining` names the profiles whose
     /// own entry the save drops so they follow it.
     case shared(joining: Set<String>)
-    /// Exactly these profiles, each holding its own entry.
+    /// These profiles get the value; the others keep what they
+    /// had, and taking a rule away is a removal's.
     case listed(Set<String>)
 
     public var isShared: Bool {

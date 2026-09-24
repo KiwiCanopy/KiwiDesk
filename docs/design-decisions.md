@@ -7248,8 +7248,9 @@ semantics are the storage model's, read aloud:**
   holds its own entry, and a later profile does not get it —
   ticking every box by hand is still a list, and the popover
   says so. Under All profiles no other box can be unticked,
-  since "every profile but Home" is not the shared rule: leaving
-  one out means unticking All profiles first.
+  since "every profile but Home" is not the shared rule: giving
+  only some profiles a new value means unticking All profiles
+  first.
 - **The ticks say who gets the row's value, and nothing else.**
   A value written with some profiles ticked reaches those; an
   unticked profile keeps what it had — the shared value, its
@@ -7278,7 +7279,8 @@ semantics are the storage model's, read aloud:**
 
 **The ticks are derived, never stored.** They are read from what
 each profile resolves over the shared base and its sparse
-override, so the files are unchanged and nothing migrates. That
+override — or, while a Save is pending, from the draft's own
+pick — so the files are unchanged and nothing migrates. That
 holds only because a Save re-encodes just the rows a change
 reached: an untouched row is written back exactly as stored, and
 a profile no change reached is not rewritten

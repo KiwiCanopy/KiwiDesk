@@ -175,7 +175,9 @@ struct RuleReachIdentityTests {
 
         model.updateActiveProfile()
 
-        // Nothing landed: Work's file and the base are as stored.
+        // The refusal fired, and nothing landed: Work's file and the
+        // base are as stored.
+        #expect(model.profileWarning != nil)
         #expect(try model.core.profiles.read(name: "Work").appRules == nil)
         #expect(
             model.core.guiConfigStore.load()?.appRules["mail"]
@@ -193,6 +195,7 @@ struct RuleReachIdentityTests {
 
         model.updateActiveProfile()
 
+        #expect(model.profileWarning != nil)
         let saved = model.core.guiConfigStore.load()
         #expect(saved?.appRules["mail"] == SpaceID("1"))
         #expect(saved?.ignoreRules == ["com.example.ignored"])

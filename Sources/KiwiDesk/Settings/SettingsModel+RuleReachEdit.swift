@@ -9,15 +9,19 @@ struct RuleReachReading: Equatable {
     let profiles: [String]
     let unreadable: [String]
     /// Whether the row is the shared rule.
-    let shared: Bool
-    /// The profiles that resolve this row's value, `editing` too.
-    let users: Set<String>
+    var shared: Bool
+    /// Whether a shared rule exists for this row's subject, which a
+    /// profile created later inherits.
+    let hasShared: Bool
+    /// The profiles that resolve this row's value, `editing` too —
+    /// or, while a picked list waits for a value, the ticked ones.
+    var users: Set<String>
     /// Profiles resolving a DIFFERENT value, in its words.
     let own: [String: String]
     /// Those of `own` whose value is the shared rule.
     let ownIsShared: Set<String>
     /// Profiles that leave this shared rule out.
-    let leftOut: Set<String>
+    var leftOut: Set<String>
     /// A shortcut's combo that another profile binds to a
     /// different action, in that action's words — ticking takes
     /// the key over.
@@ -43,9 +47,12 @@ extension SettingsModel {
     /// The checklist of a Space-list row; nil without a checklist.
     func spaceReach(_ app: String) -> RuleReachReading? {
         guard let reach = encodedReach else { return nil }
-        return reading(reach.appRules, app.lowercased(), reach.unreadable) {
-            $0.raw
-        }
+        return reading(
+            reach.appRules,
+            app.lowercased(),
+            reach.unreadable,
+            picked: reachEdits.reach[.space]?[app.lowercased()]
+        ) { $0.raw }
     }
 
     /// The checklist of a Float-list row, each other value
@@ -59,6 +66,7 @@ extension SettingsModel {
             reach.floatRules,
             app.lowercased(),
             reach.unreadable,
+            picked: reachEdits.reach[.float]?[app.lowercased()],
             describe
         )
     }
@@ -71,6 +79,7 @@ extension SettingsModel {
                 reach.keyLayers,
                 key,
                 reach.unreadable,
+                picked: reachEdits.reach[.key]?[key],
                 { ShortcutsReferenceBuilder.glyphs($0) }
             )
         else { return nil }
@@ -144,10 +153,9 @@ extension SettingsModel {
         case .shared(let joining):
             guard on else { return }
             setReach(family, app, .shared(joining: joining.union([profile])))
-        case .listed:
+        case .listed(let members):
             let users =
-                on
-                ? row.users.union([profile]) : row.users.subtracting([profile])
+                on ? members.union([profile]) : members.subtracting([profile])
             setReach(family, app, .listed(users))
         }
     }
@@ -178,6 +186,7 @@ extension SettingsModel {
         _ table: RuleReachTable<V>,
         _ app: String,
         _ unreadable: [String],
+        picked: RuleReach?,
         _ describe: (V) -> String
     ) -> RuleReachReading? {
         guard let editing = reachProfile else { return nil }
@@ -193,12 +202,13 @@ extension SettingsModel {
             if table.follows(key, profile) { ownIsShared.insert(profile) }
         }
         let order = profileMenuOrder.filter(table.profiles.contains)
-        return RuleReachReading(
+        var row = RuleReachReading(
             editing: editing,
             loaded: reachLoaded,
             profiles: order + table.profiles.filter { !order.contains($0) },
             unreadable: unreadable,
             shared: table.follows(key, editing),
+            hasShared: table.base[key] != nil,
             users: Set(
                 table.profiles.filter {
                     value != nil && table.resolved(key, for: $0) == value
@@ -210,6 +220,14 @@ extension SettingsModel {
             leftOut: table.follows(key, editing)
                 ? Set(table.leftOut(key)).subtracting([editing]) : []
         )
+        // A picked list the draft has not given a value yet changes
+        // nothing in the table, so the ticks read the pick.
+        if case .listed(let members) = picked {
+            row.shared = false
+            row.users = members.union([editing])
+            row.leftOut = []
+        }
+        return row
     }
 
     /// The reach a row has now: the draft's pick, else the shared

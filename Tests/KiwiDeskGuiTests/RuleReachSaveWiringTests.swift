@@ -95,4 +95,27 @@ struct RuleReachSaveWiringTests {
                 == AppRuleOverride(rules: ["mail": SpaceID("2")])
         )
     }
+
+    @Test("Two unticks both hold until the value lands")
+    func twoUnticksHold() throws {
+        let model = try makeModel()
+        model.setAllProfiles(.space, "mail", false)
+        model.setProfile(.space, "mail", "Home", false)
+        model.setProfile(.space, "mail", "Travel", false)
+        let row = try #require(model.spaceReach("mail"))
+        #expect(!row.shared && row.users == ["Work"])
+
+        model.config.appRules["mail"] = SpaceID("2")
+        model.updateActiveProfile()
+
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"] == SpaceID("1")
+        )
+        #expect(try model.core.profiles.read(name: "Home").appRules == nil)
+        #expect(try model.core.profiles.read(name: "Travel").appRules == nil)
+        #expect(
+            try model.core.profiles.read(name: "Work").appRules?.rules["mail"]
+                == .some(SpaceID("2"))
+        )
+    }
 }
