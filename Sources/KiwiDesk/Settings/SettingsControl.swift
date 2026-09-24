@@ -20,7 +20,7 @@ struct SettingsControl: Hashable, Sendable {
     private let instanceTag: String?
     /// A layout whose name the label interpolates at `%1$@`
     /// (#818, Family B): the mode's own name, never typed.
-    private let namedMode: LayoutMode?
+    let namedMode: LayoutMode?
 
     /// Tuple literal shape scanned by `scripts/extract-keys`.
     init(

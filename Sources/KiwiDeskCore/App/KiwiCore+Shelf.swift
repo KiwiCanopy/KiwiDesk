@@ -1,9 +1,10 @@
 import AppKit
 
 /// The KiwiShelf per display (#1517): which bars show there, what
-/// each needs, and the segment `ShelfArrangement` gives it. Both
-/// bar drivers ask this, so neither re-derives the other's
-/// presence and the two can never overlap.
+/// each needs, and the segment `ShelfArrangement` gives it. The
+/// one refresh (`updateBars`) builds it once per display for both
+/// bars, so neither re-derives the other's presence and the two
+/// can never overlap.
 extension KiwiCore {
     /// The ONE bar refresh (#1517): each display's plan built
     /// once from both bars' content, then both managers synced

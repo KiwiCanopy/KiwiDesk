@@ -12,6 +12,12 @@ import Testing
 /// where the two are held together. The Space run keeps a `pad`
 /// at its outer end, so below `item_gap == pad` its gutter side
 /// may sit `pad − gap` in; that is the whole allowed slack.
+/// Residue, stated: the suite re-runs render's pure steps
+/// (`itemLengths` → `runTotal` → `scrollViewport` →
+/// `contentStart` → `BarPlate.frame`; `metrics` → `frames` →
+/// `BarPlate.frame`) rather than `render` itself, so a change to
+/// how `render` composes them — a new inset at the call site —
+/// stays green here.
 @Suite("Shelf need parity (#1517)")
 @MainActor
 struct ShelfNeedParityTests {

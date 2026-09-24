@@ -64,6 +64,27 @@ public enum ConfigMigration {
         return GuiConfig.currentFormat
     }
 
+    /// Whether `data`'s stamp is below the floor a step introduced
+    /// for its shape — a bundle's `bundle`, any other root's
+    /// `profile`. A `gui.json` root reads the profile floor, which
+    /// is harmless only while no format-gated step reaches it: each
+    /// gates on `settings`, which a `gui.json` never carries. An
+    /// unreadable root stands down.
+    static func stampBelow(
+        _ data: Data,
+        profile: Int,
+        bundle: Int
+    ) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        let floor =
+            root[SetupBundle.shapeMarker] != nil ? bundle : profile
+        return format < floor
+    }
+
     /// Whether `data` is below current format version (#902).
     static func needsMigration(_ data: Data) -> Bool {
         guard

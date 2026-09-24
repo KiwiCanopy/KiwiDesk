@@ -86,8 +86,9 @@ bars. Obligations:
   from both bars' content and syncs both managers from it, so a
   change to either bar's need moves the other in the same pass;
   a path refreshing one bar leaves the other in a segment the
-  plan no longer gives it. `ShelfDriverTests` drives the pair
-  through it.
+  plan no longer gives it. `BarsRefreshSeamTests` holds both
+  managers' `sync(` to `KiwiCore+Shelf.swift`, and
+  `ShelfDriverTests` drives the pair through it.
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:

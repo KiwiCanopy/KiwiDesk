@@ -61,15 +61,11 @@ extension ConfigMigration {
     /// Whether `data`'s stamp is below the format this step
     /// introduced for its shape. An unreadable root stands down.
     static func shelfStepApplies(to data: Data) -> Bool {
-        guard
-            let root = try? JSONSerialization.jsonObject(with: data)
-                as? [String: Any]
-        else { return false }
-        let format = root["format"] as? Int ?? 0
-        let floor =
-            root[SetupBundle.shapeMarker] != nil
-            ? shelfBundleFormat : shelfProfileFormat
-        return format < floor
+        stampBelow(
+            data,
+            profile: shelfProfileFormat,
+            bundle: shelfBundleFormat
+        )
     }
 
     /// The two paths: the root's own `settings`, and each inline
