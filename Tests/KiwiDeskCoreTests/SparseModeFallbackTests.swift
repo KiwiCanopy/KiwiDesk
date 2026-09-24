@@ -72,7 +72,7 @@ struct SparseModeFallbackTests {
     /// so renaming the preset would retire this guard in silence
     /// (guard-prover, 2026-08-11).
     /// The CARD's accessor against the composed mode, which is
-    /// the parity `PresetScreenCard`'s docstring claims and the
+    /// the parity the preset preview claims and the
     /// only thing that observes what it actually passes.
     ///
     /// The sweep above compares the plan to the composer with a

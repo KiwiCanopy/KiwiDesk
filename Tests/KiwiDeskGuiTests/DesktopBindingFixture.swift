@@ -20,7 +20,6 @@ enum DesktopBindingFixture {
             isDefault: false,
             matchesLive: false,
             matchesConnectedCount: false,
-            openingModes: [],
             spaceCount: 0,
             shortcutOverrideCount: 0
         )

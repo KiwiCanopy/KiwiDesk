@@ -1,46 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Subtitle and summary phrase formatting for profile items
-/// (`ProfileSummary`, #678 turn 13a).
+/// A saved profile's counts as one sentence — the counters'
+/// tooltip and the name's VoiceOver value (#1624).
 extension ProfilesSection {
     func subtitle(_ summary: ProfileSummary) -> String {
-        let screens = screensPhrase(summary.count)
-        let spaces = spacesPhrase(summary.spaceCount)
-        guard summary.shortcutOverrideCount > 0 else {
-            return L(
-                "profiles.summary.pair",
-                "%1$@ · %2$@",
-                screens,
-                spaces
-            )
-        }
-        return L(
-            "profiles.summary.triple",
-            "%1$@ · %2$@ · %3$@",
-            screens,
-            spaces,
-            overridesPhrase(summary.shortcutOverrideCount)
+        ProfileCounters.sentence(
+            screens: summary.count,
+            spaces: summary.spaceCount,
+            overrides: summary.shortcutOverrideCount
         )
-    }
-
-    /// Localized Space count phrase (`PresetScreenCard.spaceCountPhrase`).
-    private func spacesPhrase(_ count: Int) -> String {
-        count == 1
-            ? L("profiles.spaces.one", "1 Space")
-            : L("profiles.spaces.many", "%1$d Spaces", count)
-    }
-
-    private func overridesPhrase(_ count: Int) -> String {
-        count == 1
-            ? L(
-                "profiles.overrides.one",
-                "1 shortcut override"
-            )
-            : L(
-                "profiles.overrides.many",
-                "%1$d shortcut overrides",
-                count
-            )
     }
 }

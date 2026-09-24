@@ -29,7 +29,6 @@ struct SettingsDriftRowsTests {
             isDefault: true,
             matchesLive: false,
             matchesConnectedCount: count == 0,
-            openingModes: [],
             spaceCount: 0,
             shortcutOverrideCount: 0
         )

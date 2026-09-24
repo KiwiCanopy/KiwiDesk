@@ -37,7 +37,6 @@ struct ProfilesFamilyRowsTests {
             isDefault: false,
             matchesLive: matchesLive,
             matchesConnectedCount: matchesCount,
-            openingModes: [],
             spaceCount: 0,
             shortcutOverrideCount: 0
         )

@@ -147,48 +147,17 @@ struct ProfilesGateWiringTests {
                 "PresetCard(layout:layout,sizes:sizes",
                 "liveSizes:request.liveSizes",
             ],
-            "Components/Profiles/PresetScreenCard.swift": [
-                // …and the card must actually spend it. Since
-                // #859's review round the card does not resolve
-                // the shape itself — it consumes the ONE
-                // derivation, which is where the four lines it
-                // used to keep now live. So the needle moved with
-                // them: the card's obligation is to build the plan
-                // FROM `liveSizes`, and the plan's is below.
-                "PresetPreviewPlan(layout:layout,liveSizes:liveSizes)",
-                // The outline is a Shape, so `.help` alone
-                // reaches no screen reader — the sentence that
-                // names the main display only exists for a
-                // non-visual reader through this pair, and
-                // deleting both modifiers is silent in every
-                // other guard. Headless can prove the
-                // construction is present, never that VoiceOver
-                // reaches it; that half is an Accessibility
-                // Inspector pass (gui.md ▸ the keyboard path).
-                ".accessibilityElement()",
-                ".accessibilityLabel(screenHelp(screen))",
-            ],
-            // The one derivation both the card and the preview
-            // sheet read. This is the needle that used to sit on
-            // the card: a plan that stopped resolving against the
-            // live displays would re-ship the 2026-08-11 defect
-            // for BOTH surfaces at once, which is the cost of
-            // sharing and the reason the needle followed rather
-            // than being dropped.
-            // The card is the last hop before both drawings, so it
-            // must spend `sizes` on each of them — the picture it
-            // draws itself, and the request it hands the sheet.
+            // The card's one drawing that reads the displays is
+            // the sheet (#1624 retired its picture), so it must
+            // spend `sizes` on the request it hands over — spelled
+            // WHOLE, since a bare `liveSizes:sizes` matched a
+            // sibling needle and could not fail on its own.
             "Components/Profiles/PresetCard.swift": [
-                "PresetScreenCard(layout:layout,liveSizes:sizes)",
-                // The request hop, spelled WHOLE. It was
-                // `"liveSizes:sizes"`, which is a substring of the
-                // needle above and so could not fail on its own —
-                // the hop could go to `nil` with the suite green,
-                // while the commit that added it claimed every hop
-                // was needled (re-review, 2026-08-17). A needle
-                // contained in a sibling needle is not a needle.
-                "PresetPreviewRequest(layout:layout,liveSizes:sizes)",
+                "PresetPreviewRequest(layout:layout,liveSizes:sizes)"
             ],
+            // The one derivation the preview sheet reads: a plan
+            // that stopped resolving against the live displays
+            // would re-ship the 2026-08-11 defect.
             "Components/Profiles/PresetPreviewPlan.swift": [
                 "ScreenClass.of(liveSizes[screen])",
                 "on:shape",

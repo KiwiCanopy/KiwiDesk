@@ -123,20 +123,16 @@ struct ProfilesSection: View {
     private func profileRow(
         _ summary: ProfileSummary
     ) -> some View {
-        // CENTRED, not first-text-baseline (owner eye-confirm,
-        // 2026-08-16): the picture belongs to the whole two-line
-        // block. Centring is also what RETIRED an .alignmentGuide
-        // here — a picture with no text baseline resolves to its
-        // own bottom edge, so rows with and without a "+N" chip
-        // seated differently under baseline alignment.
+        // Centred: the counters belong to the whole text block
+        // (owner eye-confirm, 2026-08-16; #1624).
         HStack(alignment: .center) {
-            // Screen count icon (#789).
-            screenPicture(summary)
+            ProfileCounters(
+                screens: summary.count,
+                spaces: summary.spaceCount,
+                help: subtitle(summary)
+            )
             VStack(alignment: .leading, spacing: 3) {
                 rowTitle(summary)
-                Text(subtitle(summary))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
                 screenSetupsLine(summary)
             }
             Spacer()
@@ -146,24 +142,6 @@ struct ProfilesSection: View {
             loadButton(summary)
             deleteButton(summary.name)
         }
-    }
-
-    /// Leading screen count diagram (#789).
-    private func screenPicture(
-        _ summary: ProfileSummary
-    ) -> some View {
-        ProfileScreenPips(
-            count: summary.count,
-            openingModes: summary.openingModes,
-            reservedSlots: reservedScreenSlots
-        )
-    }
-
-    /// Slot count reserved for monitor icons across rows.
-    private var reservedScreenSlots: Int {
-        ProfileScreenPips.reservedSlots(
-            forScreenCounts: orderedSummaries.map(\.count)
-        )
     }
 
     private func rowTitle(
@@ -176,6 +154,8 @@ struct ProfilesSection: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .layoutPriority(1)
+                // The counters' tooltip, read after the name (#1624).
+                .accessibilityValue(subtitle(summary))
                 .onTapGesture(count: 2) {
                     beginRename(summary.name)
                 }

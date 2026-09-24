@@ -159,10 +159,8 @@ struct PresetPreviewPlanTests {
 
     // MARK: - Screens with nothing on them
 
-    /// The plan KEEPS an empty screen and the drawing drops it —
-    /// the split that lets `PresetScreenCard` consume this plan
-    /// (it draws an outline per screen, empty or not) while the
-    /// sheet draws no heading over an empty row.
+    /// The plan KEEPS an empty screen and the drawing drops it,
+    /// so the sheet draws no heading over an empty row.
     @Test("an empty screen is kept in the plan, not in the drawing")
     func emptyScreensAreKeptButNotDrawn() {
         // Three screens, both spaces on the first: screens 1 and 2
@@ -245,7 +243,8 @@ struct PresetPreviewPlanTests {
 
     // MARK: - One derivation, not two
 
-    /// `PresetScreenCard` used to hold its own `spaces(on:)`,
+    /// The card's picture (retired #1624) used to hold its own
+    /// `spaces(on:)`,
     /// `openingMode(_:)` and `shape(of:)`, and an agreement test
     /// lived here requiring the two to answer alike on every
     /// shipped preset. Both #859 reviewers found that test could
