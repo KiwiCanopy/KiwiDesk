@@ -132,6 +132,7 @@ struct RuleReachIdentityTests {
         let model = makeTestModel(core: core)
         model.reload()
         model.selectEditTarget("Home")
+        #expect(model.target == .storedProfile("Home"))
         #expect(model.ruleReachStored == nil)
         model.config.appRules["notes"] = SpaceID("2")
         let url = try core.profiles.fileURL(name: "Home")
@@ -139,8 +140,42 @@ struct RuleReachIdentityTests {
 
         model.saveEditedProfile()
 
+        #expect(model.profileWarning != nil)
         #expect(model.cleanConfig.appRules["notes"] == nil)
         #expect(model.isDirty)
+    }
+
+    @Test("A loaded profile gone under a dirty page refuses its Save")
+    func pageGoneRefuses() throws {
+        let model = try makeModel()
+        model.config.appRules["mail"] = SpaceID("2")
+        try model.core.profiles.delete(name: "Work")
+        model.refreshProfiles()
+
+        #expect(model.pageMoved)
+        model.saveGlobalsWhilePaused()
+        #expect(model.profileWarning?.contains("Work") == true)
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"]
+                == SpaceID("1")
+        )
+    }
+
+    @Test("An unreadable reached profile refuses the whole rule write")
+    func unreadableRefusesAll() throws {
+        let model = try makeModel()
+        // Unticking All reaches Work and Home; Home cannot be read.
+        model.setAllProfiles(.space, "mail", false)
+        try corrupt(model, "Home")
+
+        model.updateActiveProfile()
+
+        // Nothing landed: Work's file and the base are as stored.
+        #expect(try model.core.profiles.read(name: "Work").appRules == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"]
+                == SpaceID("1")
+        )
     }
 
     @Test("A failed rule write keeps the base out of the globals")

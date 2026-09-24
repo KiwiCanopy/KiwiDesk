@@ -70,11 +70,15 @@ extension KiwiCore {
     /// Writes an edited snapshot: each profile the change reached,
     /// then the shared base, then re-resolves the live rules so
     /// the loaded profile's page is what the screen does. A
-    /// profile the change did not reach is not rewritten.
+    /// profile the change did not reach is not rewritten. Every
+    /// reached file and the base are read and encoded before any
+    /// write, so an unreadable one refuses the whole write rather
+    /// than half of it.
     public func saveRuleReach(_ snapshot: RuleReachSnapshot) throws {
         guard snapshot.isEdited else { return }
         let app = snapshot.appRules
         let float = snapshot.floatRules
+        var pending: [Profile] = []
         for name in app.profiles {
             let original = snapshot.storedFloatOverrides[name]
             let floatOverride = float.floatRuleOverride(
@@ -90,20 +94,23 @@ extension KiwiCore {
                 profile.appRules = app.appRuleOverride(for: name)
             }
             profile.floatRules = floatOverride
-            try profiles.write(profile)
+            pending.append(profile)
         }
+        var sidecar: GuiConfig?
         if !app.baseTouched.isEmpty || !float.baseTouched.isEmpty {
-            guard var sidecar = guiConfigStore.load() else {
+            guard var stored = guiConfigStore.load() else {
                 throw SidecarError.unreadable
             }
-            sidecar.appRules = app.appRuleBase(
+            stored.appRules = app.appRuleBase(
                 original: snapshot.storedAppBase
             )
-            sidecar.floatRules = float.floatRuleBase(
+            stored.floatRules = float.floatRuleBase(
                 original: snapshot.storedFloatBase
             )
-            try guiConfigStore.save(sidecar)
+            sidecar = stored
         }
+        for profile in pending { try profiles.write(profile) }
+        if let sidecar { try guiConfigStore.save(sidecar) }
         refreshConfigIssues()
         refreshWindowRules()
     }

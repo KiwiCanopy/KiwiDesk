@@ -1037,6 +1037,7 @@
   "profiles.other_count.help": "為不同的螢幕數量儲存 — 載入時會帶著未儲存的變更。",
   "profiles.overrides.many": "%1$d 個快速鍵覆寫",
   "profiles.overrides.one": "1 個快速鍵覆寫",
+  "profiles.page_gone": "「%1$@」已不再載入。請先「%2$@」，再重新進行編輯。",
   "profiles.page_moved": "你編輯「%2$@」時，「%1$@」已被載入。請先「%3$@」，再重新進行編輯。",
   "profiles.page_moved.unnamed": "你編輯時，「%1$@」已被載入。請先「%2$@」，再重新進行編輯。",
   "profiles.rename": "重新命名",

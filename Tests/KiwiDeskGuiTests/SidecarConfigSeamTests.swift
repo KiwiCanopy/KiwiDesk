@@ -72,6 +72,27 @@ struct SidecarConfigSeamTests {
         }
     }
 
+    /// And the check comes FIRST — ahead of any draft change or
+    /// write in its door — or a refused Save still mutates.
+    @Test("the page check precedes every change and write")
+    func pageCheckComesFirst() throws {
+        for (name, source) in try files where writers[name] != nil {
+            guard let check = source.range(of: "pageMovedReason") else {
+                continue
+            }
+            for later in ["mergeLiveSpaces(", "saveRuleReach()"] {
+                guard let at = source.range(of: later) else { continue }
+                #expect(
+                    check.lowerBound < at.lowerBound,
+                    Comment(
+                        rawValue:
+                            "\(name): \(later) runs before the page check"
+                    )
+                )
+            }
+        }
+    }
+
     @Test("each write passes sidecarConfig")
     func writesPassSidecarConfig() throws {
         for (name, source) in try files {

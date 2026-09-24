@@ -35,7 +35,13 @@ extension SettingsModel {
         // The rule half first: a failed write keeps the draft
         // whole rather than committing the tiling alone.
         let rules = saveRuleReach()
-        guard rules != .failed else { return }
+        guard rules != .failed else {
+            // A write that failed after others landed: re-read, so
+            // the draft's diff shows only what did not land.
+            ruleReachStored = core.ruleReachSnapshot()
+            recomputeDirty()
+            return
+        }
         do {
             // With a checklist the rule families are the table's,
             // already written above — one encoder per field.

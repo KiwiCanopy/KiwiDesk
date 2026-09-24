@@ -1037,6 +1037,7 @@
   "profiles.other_count.help": "Für eine andere Bildschirmanzahl gespeichert — lädt mit ungesicherten Änderungen.",
   "profiles.overrides.many": "%1$d Tastenkürzel-Überschreibungen",
   "profiles.overrides.one": "1 Tastenkürzel-Überschreibung",
+  "profiles.page_gone": "„%1$@“ ist nicht mehr geladen. Wähle „%2$@“ und nimm deine Änderungen dann erneut vor.",
   "profiles.page_moved": "„%1$@“ wurde geladen, während du „%2$@“ bearbeitet hast. Wähle „%3$@“ und nimm deine Änderungen dann erneut vor.",
   "profiles.page_moved.unnamed": "„%1$@“ wurde während deiner Bearbeitung geladen. Wähle „%2$@“ und nimm deine Änderungen dann erneut vor.",
   "profiles.rename": "Umbenennen",

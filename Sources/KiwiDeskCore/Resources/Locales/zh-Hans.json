@@ -1037,6 +1037,7 @@
   "profiles.other_count.help": "为不同的显示器数量保存 — 加载时带有未保存的更改。",
   "profiles.overrides.many": "%1$d 个快捷键覆盖",
   "profiles.overrides.one": "1 个快捷键覆盖",
+  "profiles.page_gone": "“%1$@”已不再加载。请先“%2$@”，然后重新进行编辑。",
   "profiles.page_moved": "你编辑“%2$@”时，“%1$@”已被加载。请先“%3$@”，然后重新进行编辑。",
   "profiles.page_moved.unnamed": "你编辑时，“%1$@”已被加载。请先“%2$@”，然后重新进行编辑。",
   "profiles.rename": "重命名",
