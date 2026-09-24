@@ -26,7 +26,6 @@ extension SettingsModel {
                 },
                 matchesConnectedCount: profile.monitorCount
                     == displays.count,
-                openingModes: profile.openingModes(),
                 spaceCount: profile.declaredSpaces.count,
                 shortcutOverrideCount:
                     profile.layers?.overrideCount ?? 0

@@ -167,7 +167,7 @@ struct StandardLayoutScreensTests {
                         // observes nothing — which is what this
                         // assertion did after it was "fixed",
                         // leaving the production `nil` in
-                        // `PresetScreenCard` unwatched (code
+                        // the preview unwatched (code
                         // review, 2026-08-11).
                         on: ScreenClass.of(composerSize)
                     )

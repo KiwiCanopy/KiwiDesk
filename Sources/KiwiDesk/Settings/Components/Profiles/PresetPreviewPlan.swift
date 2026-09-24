@@ -20,16 +20,12 @@ struct PresetPreviewPlan: Equatable {
 
     /// One screen's planned spaces — INCLUDING a screen the
     /// preset plans nothing for (empty `slots`): empties are kept
-    /// in the value and dropped at the DRAWING site, which is what
-    /// lets `PresetScreenCard` consume this plan too (review,
+    /// in the value and dropped at the DRAWING site (review,
     /// 2026-08-17).
     struct Group: Equatable, Identifiable {
         let screen: Int
         let slots: [Slot]
         var id: Int { screen }
-
-        /// Opening layout mode for the first space on this screen.
-        var openingMode: LayoutMode? { slots.first?.mode }
     }
 
     let groups: [Group]
@@ -39,11 +35,6 @@ struct PresetPreviewPlan: Equatable {
 
     /// All planned slots across drawn groups.
     var slots: [Slot] { drawnGroups.flatMap(\.slots) }
-
-    /// Returns group for specified screen index.
-    func group(screen: Int) -> Group? {
-        groups.first { $0.screen == screen }
-    }
 
     init(layout: StandardLayout, liveSizes: [CGSize]?) {
         let screens = max(layout.screenCount, 0)
@@ -65,10 +56,7 @@ struct PresetPreviewPlan: Equatable {
     }
 
     /// Resolves `ScreenClass` for a screen index — THE ONE COPY
-    /// (#859): `PresetScreenCard` kept its own four lines of this,
-    /// held by an agreement test that could not see the card's
-    /// private half, so a drift passed green (code review,
-    /// 2026-08-17). Both consumers now read this.
+    /// (#859).
     static func shape(
         of screen: Int,
         in liveSizes: [CGSize]?

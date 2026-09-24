@@ -87,9 +87,16 @@ extension ProfilesSection {
         Button {
             setupListRequest = ScreenSetupListRequest(id: summary.name)
         } label: {
+            // Text, not `display` + count: the row's counters own
+            // that glyph for the screen count (#1624).
             HStack(spacing: 3) {
-                Image(systemName: "display")
-                Text("\(summary.sets.count)")
+                Text(
+                    L(
+                        "profiles.sets.collapsed",
+                        "setups: %1$d",
+                        summary.sets.count
+                    )
+                )
                 Image(systemName: "chevron.down")
                     .imageScale(.small)
             }

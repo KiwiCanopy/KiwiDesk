@@ -4456,7 +4456,7 @@ one-screen presets, so applying either on a laptop with a fixed
 rules out there: below 1900 pt a three-window BSP is already
 under the minimum in one axis. The unlisted mode resolves to
 that screen's own best layout. Where the hardware genuinely is
-not knowable — a preset card draws a plan for a screen COUNT,
+not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
@@ -4468,8 +4468,7 @@ answer "which two screens?", so a count you are not running
 offers the workflow layouts alone — that is what "For other
 setups" means. The preset's summary names none of its rungs for
 the same reason: a list of modes would be a different sentence
-on every Mac, so it states the rule and the thumbnails show the
-modes.
+on every Mac, so it states the rule and its **Layouts** sheet shows the modes.
 
 :::unreleased
 **A runtime `delete_space` stays a success, and names what brings
@@ -6835,7 +6834,7 @@ previews left under this same rule once
 **The panel's object is the DRAFT, so a picture of anything else
 is not a panel** — it is a sheet. (#859, owner 2026-08-16.)
 Preset cards raised the case: a card can identify a preset — its
-name, how many screens it plans for, one glyph per screen — but
+name, how many screens and Spaces it plans for — but
 it cannot describe one, and Apply is consequential, so the only
 way to find out what a preset contained was to apply it and read
 the result. The panel is where this window already puts depth,
@@ -11154,8 +11153,8 @@ never fired for the Desktop that inherited its number.
 **A profile row counts what the profile OWNS, never what it
 resolves to.** A profile carries a *sparse diff* over the global
 config — its own keybindings are the rows it overrides, not the
-rows that fire while it is loaded. So the row's subtitle counts
-screens, spaces and shortcut *overrides*, and a profile that
+rows that fire while it is loaded. So the row's count sentence
+names screens, spaces and shortcut *overrides*, and a profile that
 overrides nothing shows no such segment at all. The alternative
 reads "18 shortcuts" on every profile, which states the opposite
 of how overriding works: a user who believes each profile owns a
@@ -11166,42 +11165,24 @@ row that represents a diff is a count of the diff.
 
 **[Rationale]**
 
-**A preset card draws screens, not spaces.** One tile per space
-reads at four and becomes a row of identical stamps at ten, and
-at no count does it answer the question a multi-screen preset
-exists to answer: *which screen gets what*. Screens are the one
-thing that stays legible from one display to three, so the card
-draws an outline per display carrying the layout that display's
-first space opens in, and the space total goes underneath as
-text. What is given up is per-space detail in the thumbnail —
-which #859 gave back *before* applying, in the preview sheet the
-card's own **Layouts** button opens (see "the panel's object is
-the DRAFT" above); the Spaces page still owns it once the preset
-is applied. Read the thumbnail's job as identifying a preset
-rather than describing one: the moment a card is asked to
-describe, the answer is a surface of its own.
-
-**A saved profile's screens answer by ELIMINATION where they
-can, and stay blank where they cannot.** A saved profile says
-less than a preset: a preset plans positionally, while a
-profile pins spaces to monitor fingerprints and leaves the
-rest to the Main role — which is resolved live, not stored.
-So a screen the profile does not name draws its outline and
-no glyph, the same refusal the preset card already makes, and
-inventing a glyph there would put a claim about behaviour on
-screen that loading the profile might not produce. But
-refusing too much is its own defect (#959): saving pins only
-the spaces that are NOT on the main display, so on an
-ordinary two-screen profile the main monitor is *precisely*
-the covered screen carrying no pin, and its outline drew
-blank beside a caption announcing six Spaces. Where exactly
-one covered screen carries no pin, the follows-main spaces
-have nowhere else to be — that is elimination over stored
-facts, not a guess about hardware, and it is as reliable as
-any pin. Two blank screens stay blank, because then the
-unpinned spaces genuinely fit on either. Read the general
-rule as: refuse where the file is silent, never where it
-merely declines to repeat itself.
+:::unreleased
+**A profile row and a preset card COUNT their screens and
+Spaces; they draw neither (#1624).** An outline per screen
+carrying the layout its first Space opens in reads as a layout
+preview, and hides the thumbnail's one job: how many screens.
+Two counters — `display` and the Spaces page's own
+`squares.below.rectangle` — answer that at any count, in a column
+that does not reserve room for the widest profile. Per-screen
+opening modes belong to the preset's **Layouts** sheet (#859)
+and, once a profile loads, the Spaces page: the thumbnail
+identifies, it never describes. The counts' sentence is the
+counters' tooltip and the name's VoiceOver value, so they are
+never symbol-only; a fact that changes what loads (the dormant
+line) stays in the row, and only the counts sit behind hover.
+One glyph means one count: once `display` beside a number is the
+screen count, the collapsed setups chip counts in words
+("setups: 3").
+:::
 
 **[Principle]**
 

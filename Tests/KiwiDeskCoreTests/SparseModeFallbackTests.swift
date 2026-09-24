@@ -71,15 +71,15 @@ struct SparseModeFallbackTests {
     /// failure and returns from a test having asserted nothing,
     /// so renaming the preset would retire this guard in silence
     /// (guard-prover, 2026-08-11).
-    /// The CARD's accessor against the composed mode, which is
-    /// the parity `PresetScreenCard`'s docstring claims and the
-    /// only thing that observes what it actually passes.
+    /// The layout's opening-mode accessor against the composed
+    /// mode — what a preview naming a screen's layout must agree
+    /// with.
     ///
     /// The sweep above compares the plan to the composer with a
     /// shape supplied by the test; this compares what the view
     /// resolves to what the apply path produces. They fail apart:
     /// a card that stops threading the live shape reds only here.
-    @Test("the appliable card names the layout Apply produces")
+    @Test("the opening-mode accessor names the layout Apply produces")
     func cardAgreesWithApply() throws {
         let laptop = CGSize(width: 1728, height: 1117)
         let wide = CGSize(width: 3440, height: 1440)

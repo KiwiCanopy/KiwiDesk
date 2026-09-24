@@ -213,7 +213,6 @@ struct ProfileSummary: Identifiable {
     let isDefault: Bool
     let matchesLive: Bool
     let matchesConnectedCount: Bool
-    let openingModes: [LayoutMode?]
     let spaceCount: Int
     let shortcutOverrideCount: Int
     var id: String { name }

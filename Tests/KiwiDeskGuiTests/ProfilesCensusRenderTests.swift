@@ -39,7 +39,6 @@ struct ProfilesCensusRenderTests {
             // it cannot decide this suite's answers — the order
             // rules are `ProfilesFamilyRowsTests`' to hold.
             matchesConnectedCount: true,
-            openingModes: [],
             spaceCount: 0,
             shortcutOverrideCount: 0
         )

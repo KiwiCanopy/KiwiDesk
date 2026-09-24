@@ -159,10 +159,8 @@ struct PresetPreviewPlanTests {
 
     // MARK: - Screens with nothing on them
 
-    /// The plan KEEPS an empty screen and the drawing drops it —
-    /// the split that lets `PresetScreenCard` consume this plan
-    /// (it draws an outline per screen, empty or not) while the
-    /// sheet draws no heading over an empty row.
+    /// The plan KEEPS an empty screen and the drawing drops it,
+    /// so the sheet draws no heading over an empty row.
     @Test("an empty screen is kept in the plan, not in the drawing")
     func emptyScreensAreKeptButNotDrawn() {
         // Three screens, both spaces on the first: screens 1 and 2
@@ -173,36 +171,8 @@ struct PresetPreviewPlanTests {
         )
         #expect(plan.groups.map(\.screen) == [0, 1, 2])
         #expect(plan.groups[1].slots.isEmpty)
-        #expect(plan.groups[1].openingMode == nil)
         #expect(plan.drawnGroups.map(\.screen) == [0])
         #expect(plan.slots.count == 2)
-    }
-
-    /// `openingMode` is the FIRST slot's, which is what the card's
-    /// glyph draws.
-    ///
-    /// Stated limit: this cannot discriminate a `min`/`sorted`
-    /// slip, and an earlier docstring claimed it could.
-    /// `spaces(onScreen:)` filters `plannedSpaces`, so a group's
-    /// slots are ALWAYS in ascending plan order and no fixture can
-    /// express the case (re-review, 2026-08-17). What it does
-    /// discriminate is `first` vs a fixed space id, and vs the
-    /// LAYOUT's first space rather than the screen's — screen 1's
-    /// opener here is space 2, not space 1.
-    @Test("a group opens in its first space's mode")
-    func openingModeIsTheFirstSlot() {
-        let plan = PresetPreviewPlan(
-            layout: layout(
-                screens: 2,
-                spaces: 4,
-                screensBySpace: ["2": 1, "3": 1],
-                modes: ["2": .monocle, "3": .track]
-            ),
-            liveSizes: nil
-        )
-        #expect(plan.groups[1].slots.map(\.space) == ["2", "3"])
-        #expect(plan.groups[1].openingMode == .monocle)
-        #expect(plan.groups[0].openingMode == .bsp)
     }
 
     /// The omission above is only safe while no shipped preset has
@@ -245,20 +215,10 @@ struct PresetPreviewPlanTests {
 
     // MARK: - One derivation, not two
 
-    /// `PresetScreenCard` used to hold its own `spaces(on:)`,
-    /// `openingMode(_:)` and `shape(of:)`, and an agreement test
-    /// lived here requiring the two to answer alike on every
-    /// shipped preset. Both #859 reviewers found that test could
-    /// not see the card's half — the card's `shape(of:)` was
-    /// `private` and the test recomputed `ScreenClass.of(...)`
-    /// itself — so it is GONE rather than repaired: the card now
-    /// consumes this plan, and a structural single derivation
-    /// needs no agreement assertion.
-    ///
-    /// What replaces it is a needle, because the thing worth
-    /// pinning is now "the card consumes the plan" and that is a
-    /// wiring claim: `ProfilesGateWiringTests` holds it, keyed on
-    /// the card's own use site.
+    /// `shape(of:)` is the one derivation of a screen's class; the
+    /// plan's one consumer is the preview sheet, reached through
+    /// `PresetPreviewRequest` — `ProfilesGateWiringTests` pins
+    /// that hop.
     @Test("the plan resolves each screen's shape once")
     func shapeIsResolvedPerScreen() throws {
         let laptop = try #require(Self.sizes[.laptop])
