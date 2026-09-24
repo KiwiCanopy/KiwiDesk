@@ -84,7 +84,8 @@ extension ShelfOverlay {
     }
 
     /// The divider's frame in strip coordinates: centred in the
-    /// gutter between two slots, `lengthShare` of the depth long
+    /// gutter between two slots, `BarDivider.sectionLengthShare` of
+    /// the depth long
     /// and a section break thick. Never full depth: a full-height
     /// seam splits the one plate back into two bars. Nil unless
     /// exactly two sections show.
@@ -98,7 +99,7 @@ extension ShelfOverlay {
             horizontal ? $0.minX < $1.minX : $0.minY < $1.minY
         }
         let depth = horizontal ? strip.height : strip.width
-        let length = depth * dividerLengthShare
+        let length = depth * BarDivider.sectionLengthShare
         let inset = (depth - length) / 2
         let width = BarDivider.sectionThickness
         if horizontal {
@@ -118,9 +119,6 @@ extension ShelfOverlay {
             height: width
         )
     }
-
-    /// The divider's length as a share of the shelf's depth.
-    nonisolated static let dividerLengthShare: CGFloat = 0.7
 
     private func hidePlates() {
         solidPlate?.isHidden = true

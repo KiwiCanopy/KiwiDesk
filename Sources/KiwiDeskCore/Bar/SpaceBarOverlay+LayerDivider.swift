@@ -50,10 +50,9 @@ extension SpaceBarOverlay {
         layerDivider.frame = BarDivider.frame(
             at: (horizontal ? item.maxX : item.maxY) + gap,
             depth: depth,
-            cell: cell,
             horizontal: horizontal,
             thickness: BarDivider.sectionThickness,
-            fullDepth: true
+            lengthShare: BarDivider.sectionLengthShare
         )
         var trimmed = frames
         trimmed[0] = item

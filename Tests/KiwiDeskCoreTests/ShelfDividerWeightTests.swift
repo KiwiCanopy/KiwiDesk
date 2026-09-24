@@ -15,7 +15,10 @@ struct ShelfDividerWeightTests {
         #expect(SpaceBarStyle.dividerAlpha < SpaceBarStyle.sectionDividerAlpha)
         #expect(SpaceBarStyle.sectionDividerAlpha < KiwiShelf.idleItemAlpha)
         #expect(BarDivider.sectionThickness > 1)
-        #expect(ShelfOverlay.dividerLengthShare < 1)
+        // Lengths ladder too: the in-item rule is the shortest,
+        // and nothing spans the full depth.
+        #expect(BarDivider.ruleLengthShare < BarDivider.sectionLengthShare)
+        #expect(BarDivider.sectionLengthShare < 1)
     }
 
     /// Measured as `IdleItemContrastTests` measures idle ink: the

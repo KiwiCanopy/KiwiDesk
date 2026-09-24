@@ -132,10 +132,9 @@ extension SpaceBarOverlay {
         frontDivider.frame = BarDivider.frame(
             at: offset,
             depth: depth,
-            cell: cell,
             horizontal: horizontal,
             thickness: BarDivider.sectionThickness,
-            fullDepth: true
+            lengthShare: BarDivider.sectionLengthShare
         )
         let chip = style.hasBox || wantsBoxGlass(style)
         return BarDivider.sectionThickness + style.itemGap

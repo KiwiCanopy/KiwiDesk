@@ -226,7 +226,12 @@ struct SpaceBarLayerOverlayTests {
         let first = overlay.itemViews[1].frame
         let gap = SpaceBarLook().itemGap
         #expect(rule.frame.width == BarDivider.sectionThickness)
-        #expect(rule.frame.height == barTitleStrip.height)
+        // The section breaks' share of the depth, never all of it
+        // (#1517 ladder).
+        #expect(
+            rule.frame.height
+                == barTitleStrip.height * BarDivider.sectionLengthShare
+        )
         #expect(rule.frame.minX == layer.maxX + gap)
         #expect(first.minX == rule.frame.maxX + gap)
         // The item keeps its own length: the rule rides the slot,
@@ -252,7 +257,7 @@ struct SpaceBarLayerOverlayTests {
         let first = overlay.itemViews[1].frame
         let gap = SpaceBarLook().itemGap
         #expect(rule.frame.height == BarDivider.sectionThickness)
-        #expect(rule.frame.width == 28)
+        #expect(rule.frame.width == 28 * BarDivider.sectionLengthShare)
         #expect(rule.frame.minY == layer.maxY + gap)
         #expect(first.minY == rule.frame.maxY + gap)
         #expect(

@@ -51,7 +51,6 @@ extension SpaceBarItemView {
             identifierDivider.frame = BarDivider.frame(
                 at: cursor,
                 depth: depth,
-                cell: cell,
                 horizontal: horizontal
             )
             cursor += 1 + Self.pad
