@@ -41,7 +41,7 @@ struct RuleReachModelTests {
         try model.core.profiles.read(name: name).appRules
     }
 
-    @Test("Unticking Home on Work's page reaches Home's file")
+    @Test("A new value for Work alone leaves Home on the shared one")
     func untickHome() throws {
         let model = try makeModel()
         #expect(model.reachProfile == "Work")
@@ -50,18 +50,24 @@ struct RuleReachModelTests {
 
         model.setAllProfiles(.space, "mail", false)
         model.setProfile(.space, "mail", "Home", false)
+        // Unticking alone changes nothing to save.
+        #expect(!model.isDirty)
+        model.config.appRules["mail"] = SpaceID("2")
 
         #expect(model.isDirty)
-        #expect(model.reachDiffRows().contains { $0.label.contains("Home") })
         model.updateActiveProfile()
 
-        #expect(model.core.guiConfigStore.load()?.appRules["mail"] == nil)
+        #expect(
+            model.core.guiConfigStore.load()?.appRules["mail"] == SpaceID("1")
+        )
         #expect(
             try appRules(model, "Work")
-                == AppRuleOverride(rules: ["mail": SpaceID("1")])
+                == AppRuleOverride(rules: ["mail": SpaceID("2")])
         )
         #expect(try appRules(model, "Home") == nil)
         #expect(!model.isDirty)
+        let after = try #require(model.spaceReach("mail"))
+        #expect(!after.shared && after.users == ["Work"])
     }
 
     @Test("A shared rule edited on a stored page moves the base")

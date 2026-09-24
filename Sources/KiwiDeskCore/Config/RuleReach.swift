@@ -113,7 +113,6 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
         removal: RuleRemoval = .everywhere,
         editing: String
     ) {
-        let wasShared = follows(key, editing)
         let old = resolved(key, for: editing)
         guard let value else {
             remove(key, old: old, removal: removal, editing: editing)
@@ -133,16 +132,19 @@ public struct RuleReachTable<Value: Hashable & Sendable>: Equatable,
             setEntry(key, for: editing, .none)
             for profile in joining { setEntry(key, for: profile, .none) }
         case .listed(let members):
-            if wasShared { setBase(key, nil) }
+            // The ticked profiles get `value`; an unticked one keeps
+            // what it resolved — taking a rule away is the removal's.
             for profile in profiles {
-                let entry = entries[profile]?[key]
                 if members.contains(profile) || profile == editing {
-                    setEntry(key, for: profile, .some(value))
-                } else if (old != nil && entry == .some(old))
-                    || (entry == .some(nil) && base[key] == nil)
+                    setEntry(
+                        key,
+                        for: profile,
+                        base[key] == value ? .none : .some(value)
+                    )
+                } else if entries[profile]?[key] == .some(nil)
+                    && base[key] == nil
                 {
-                    // An unticked member, or a left-out mark with
-                    // nothing left to leave out.
+                    // A left-out mark with nothing left to leave out.
                     setEntry(key, for: profile, .none)
                 }
             }

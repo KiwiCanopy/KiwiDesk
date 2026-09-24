@@ -167,8 +167,10 @@ struct RuleReachIdentityTests {
     @Test("An unreadable reached profile refuses the whole rule write")
     func unreadableRefusesAll() throws {
         let model = try makeModel()
-        // Unticking All reaches Work and Home; Home cannot be read.
+        // A value for the list reaches Work and Home; Home cannot be
+        // read.
         model.setAllProfiles(.space, "mail", false)
+        model.config.appRules["mail"] = SpaceID("2")
         try corrupt(model, "Home")
 
         model.updateActiveProfile()
@@ -185,6 +187,7 @@ struct RuleReachIdentityTests {
     func failedReachKeepsBase() throws {
         let model = try makeModel()
         model.setAllProfiles(.space, "mail", false)
+        model.config.appRules["mail"] = SpaceID("2")
         model.config.ignoreRules = ["com.example.ignored"]
         try corrupt(model, "Home")
 
@@ -200,6 +203,7 @@ struct RuleReachIdentityTests {
         let model = try makeModel()
         model.selectEditTarget("Home")
         model.setAllProfiles(.space, "mail", false)
+        model.config.appRules["mail"] = SpaceID("2")
         model.config.spaces = [SpaceID("1")]
         try corrupt(model, "Work")
 

@@ -659,7 +659,9 @@ ignore rule also opts a misbehaving tabbed app out.
 :::unreleased
 An App Rules row's **Applies to** menu picks the profiles its
 rule reaches: **All profiles** keeps the rule in `gui.json`, and
-otherwise each ticked profile stores it in its own JSON.
+otherwise each ticked profile stores it in its own JSON. A new
+value reaches only the ticked profiles; the others keep theirs,
+and the trash removes a rule.
 Removing a shared rule from one profile stores a `null` there.
 :::
 

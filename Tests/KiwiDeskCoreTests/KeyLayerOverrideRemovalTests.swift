@@ -148,5 +148,9 @@ struct KeyLayerOverrideRemovalTests {
         )
         #expect(json["removed"] == nil)
         #expect(Set(json.keys) == ["name", "icon", "bindings"])
+        // An optional field encodes nothing while nil; reflection
+        // sees it anyway.
+        let fields = Mirror(reflecting: KeyLayer(name: "x")).children
+        #expect(!fields.contains { $0.label == "removed" })
     }
 }

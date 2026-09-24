@@ -7250,6 +7250,16 @@ semantics are the storage model's, read aloud:**
   says so. Under All profiles no other box can be unticked,
   since "every profile but Home" is not the shared rule: leaving
   one out means unticking All profiles first.
+- **The ticks say who gets the row's value, and nothing else.**
+  A value written with some profiles ticked reaches those; an
+  unticked profile keeps what it had — the shared value, its
+  own, or none — so "every profile keeps ⌃⌥T, Work takes ⌃⌥Y"
+  is one edit. Unticking alone therefore changes nothing, and
+  taking a rule away is the trash's. The trap is "only these
+  profiles": it makes one profile's own value an edit that
+  strips the rule from every other, which is the opposite of an
+  override (`RuleReachTableTests` ▸ `sharedToList`,
+  `untickAloneIsInert`).
 - **The edited profile's box is ticked and locked.** A page shows
   what its profile resolves, so a row that left its own profile
   would vanish from the page it was edited on. Removal is the
