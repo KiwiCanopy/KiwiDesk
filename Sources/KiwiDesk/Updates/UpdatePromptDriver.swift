@@ -106,6 +106,9 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     /// Replaces Sparkle's modal error alert in a test, which would
     /// otherwise block the run; nil is Sparkle's own.
     var sparkleError: ((any Error, @escaping () -> Void) -> Void)?
+    /// Replaces Sparkle's own ready-to-install prompt in a test,
+    /// for the same reason; nil is Sparkle's own.
+    var sparkleReadyToInstall: (() -> SPUUserUpdateChoice)?
 
     init(hostBundle: Bundle, delegate: UpdatePromptPolicy) {
         prompts = delegate
@@ -217,6 +220,7 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
             window.session.installing(retryTermination: nil)
             return .install
         }
+        if let sparkleReadyToInstall { return sparkleReadyToInstall() }
         NSApp.activate(ignoringOtherApps: true)
         return await super.showReadyToInstallAndRelaunch()
     }

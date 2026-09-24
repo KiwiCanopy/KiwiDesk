@@ -19,6 +19,7 @@ struct UpdateWindowRoutingTests {
         var presented = 0
         var replies: [SPUUserUpdateChoice] = []
         var sparkleErrors = 0
+        var sparklePrompts = 0
     }
 
     private func driver() -> (UpdatePromptDriver, Log) {
@@ -31,6 +32,10 @@ struct UpdateWindowRoutingTests {
         // Sparkle's alert is modal: a routing regression must red
         // on the record, never block on the real thing.
         driver.sparkleError = { _, _ in log.sparkleErrors += 1 }
+        driver.sparkleReadyToInstall = {
+            log.sparklePrompts += 1
+            return .dismiss
+        }
         return (driver, log)
     }
 
@@ -174,7 +179,23 @@ struct UpdateWindowRoutingTests {
         driver.showDownloadInitiated {}
         #expect(session.canCancel)
         #expect(await driver.showReadyToInstallAndRelaunch() == .install)
+        #expect(log.sparklePrompts == 0)
         #expect(session.phase == .installing)
+    }
+
+    /// A download Sparkle already fetched: Install goes straight
+    /// to Preparing, through the stage the override hands on.
+    @Test("a resumed stage reaches the window")
+    func resumedStageReachesTheWindow() throws {
+        let (driver, log) = driver()
+        driver.showUpdateFound(
+            try Self.item("9999.1.0"),
+            userInitiated: true,
+            stage: .downloaded
+        ) { log.replies.append($0) }
+        let session = try #require(driver.window?.session)
+        session.install()
+        #expect(session.phase == .preparing)
     }
 
     /// Try Again: the retried check shows no Sparkle window, and
