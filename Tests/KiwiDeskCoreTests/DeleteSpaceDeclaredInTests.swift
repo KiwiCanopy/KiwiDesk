@@ -40,6 +40,12 @@ struct DeleteSpaceDeclaredInTests {
         deleting space: String,
         on core: KiwiCore
     ) -> [String]? {
+        // A survivor, so the delete is never refused as the last
+        // Space — a script's undeclared placeholder is retired
+        // (#1526).
+        if core.state.workspaces.allSpaces.count == 1 {
+            core.state.workspaces.ensureSpace(SpaceID("keeper"))
+        }
         let r = core.execute("delete_space", args: [.string(space)])
         #expect(r.isSuccess)
         guard case .object(let fields)? = r.data,

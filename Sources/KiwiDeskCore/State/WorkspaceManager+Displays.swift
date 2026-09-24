@@ -25,7 +25,9 @@ extension WorkspaceManager {
         _ space: SpaceID,
         to display: DisplayID
     ) {
-        ensureSpace(space)
+        // Placing a Space is not asking for it: only a missing one
+        // enters the `referenced` ledger (#1526, #1509).
+        if self[space] == nil { ensureSpace(space) }
         spaceDisplay[space] = display
         // Reassigning a space can strand a `secondaryShown` entry
         // that still points at it on its OLD display; drop any

@@ -151,6 +151,7 @@ extension KiwiCore {
         if seedStarterProfile {
             seedFirstRunStarterProfile()
         }
+        retirePlaceholderSpace()
         retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON

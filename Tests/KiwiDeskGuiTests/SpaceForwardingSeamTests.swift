@@ -30,12 +30,13 @@ struct SpaceForwardingSeamTests {
             if calls > 0 { callers[key] = calls }
         }
         #expect(homes == [Self.home: 1])
-        // The two callers (the definition spells its labels with
+        // The callers (the definition spells its labels with
         // parameter names, so the call needle misses it).
         #expect(
             callers == [
                 "Profiles/KiwiCore+ProfileResolution.swift": 1,
                 "Commands/KiwiCore+SpaceLifecycleCommands.swift": 1,
+                "App/KiwiCore+PlaceholderSpace.swift": 1,
             ]
         )
     }
