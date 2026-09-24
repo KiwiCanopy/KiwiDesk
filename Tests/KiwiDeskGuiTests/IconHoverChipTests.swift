@@ -90,4 +90,30 @@ struct IconHoverChipTests {
         #expect(pullDown.contains("menu.autoenablesItems = false"))
         #expect(pullDown.contains("entry.isEnabled = item.enabled"))
     }
+
+    /// The wiring the behaviour tests cannot see (guard-prover,
+    /// #1393): the affordance hands `resting` on, both trash sites
+    /// take the one words ladder, and the checklist greys a follower.
+    @Test("the affordance, trash words and follower grey are wired")
+    func wiringIsWired() throws {
+        let rows = try source("Components/Common/SettingsRows.swift")
+        #expect(
+            body(of: "iconButtonAffordance", in: rows).contains(
+                "resting: resting"
+            )
+        )
+        for path in [
+            "Sections/AppRuleIdentity.swift",
+            "Components/Keybindings/KeybindingNavRow.swift",
+        ] {
+            #expect(
+                try source(path).contains("RuleReachWords.removeEverywhere("),
+                Comment(rawValue: path)
+            )
+        }
+        let checklist = try source(
+            "Components/AppRules/RuleReachChecklist.swift"
+        )
+        #expect(checklist.contains(".disabled(locked || follows)"))
+    }
 }
