@@ -448,9 +448,10 @@ def structured_notes(entry: dict | None) -> str | None:
     before 2.0.0, whose free sections the window does not group.
 
     The document carries each section's generated `type` as-is —
-    readers branch on it, never on the title
-    (packaging-and-release.md) — and the entries stay markdown for
-    the window to render. `]]>` cannot occur outside a JSON string,
+    readers branch on it, never on the title, which the window
+    shows only for a type it does not know
+    (packaging-and-release.md owns the growth rules) — and the
+    entries stay markdown for the window to render. `]]>` cannot occur outside a JSON string,
     so escaping its `>` keeps the CDATA closed and the JSON equal."""
     if not entry:
         return None

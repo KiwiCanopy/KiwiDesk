@@ -56,6 +56,25 @@ struct AppcastStructuredNotesTests {
         return try #require(object as? [String: Any])
     }
 
+    /// `NOTES_FORMAT` as the script declares it, so a deliberate
+    /// bump moves this test with it.
+    private static func notesFormat() throws -> Int {
+        let source = try String(
+            contentsOf: scriptFixtureRepoRoot()
+                .appendingPathComponent("scripts")
+                .appendingPathComponent("appcast-sync"),
+            encoding: .utf8
+        )
+        let line = try #require(
+            source.split(separator: "\n").first {
+                $0.hasPrefix("NOTES_FORMAT = ")
+            }
+        )
+        return try #require(
+            Int(line.dropFirst("NOTES_FORMAT = ".count))
+        )
+    }
+
     @Test("a typed release carries its notes with each type")
     func typedNotesCarried() throws {
         let doc = try feed(
@@ -66,7 +85,7 @@ struct AppcastStructuredNotesTests {
             heads: "Settings carry over."
         )
         let notes = try decoded(doc)
-        #expect(notes["format"] as? Int == 1)
+        #expect(notes["format"] as? Int == (try Self.notesFormat()))
         #expect(notes["summary"] as? String == "A summary.")
         #expect(notes["heads"] as? String == "Settings carry over.")
         let sections = notes["sections"] as? [[String: Any]] ?? []
@@ -84,6 +103,10 @@ struct AppcastStructuredNotesTests {
     @Test("an untyped release carries no notes element")
     func untypedCarriesNone() throws {
         let doc = try feed(sections: [["title": "Things", "items": ["A"]]])
+        // The lookup does reach this item, so the absence below
+        // is the element's and not a broken query's.
+        let children = try doc.nodes(forXPath: "//item/*").compactMap(\.name)
+        #expect(children.contains("description"))
         #expect(try notesElement(doc) == nil)
     }
 
