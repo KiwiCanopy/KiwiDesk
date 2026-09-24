@@ -1015,9 +1015,9 @@ def main(argv: list[str]) -> int:
             "fixture run would rewrite it from test data"
         )
 
-    if args.tag and not args.body:
+    if args.tag is not None and not args.body:
         parser.error("--tag only applies to --body")
-    if args.tag and tag_version(args.tag) is None:
+    if args.tag is not None and tag_version(args.tag) is None:
         parser.error(
             f"--tag {args.tag!r} carries no version; give the "
             "tag the release will have, e.g. v2.0.0"
