@@ -114,6 +114,7 @@
   "app_rules.titled.caption": "Windows whose title contains a pattern stay floating.",
   "bars.app_bar.shelf_caption": "The windows in the current Space — %1$@ and %2$@ only. KiwiShelf places it.",
   "bars.kiwishelf.caption": "Where both bars sit — which edge, how deep, and how the two share the room.",
+  "bars.preview.other_layouts": "Other layouts",
   "bars.show_in.title": "Show it in",
   "bars.space_bar.shelf_caption": "One item per Space — one bar per display, every layout. KiwiShelf places it.",
   "bars.style": "Style",

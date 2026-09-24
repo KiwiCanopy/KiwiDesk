@@ -83,13 +83,12 @@ extension KiwiShelfCard {
     }
 
     /// The accepted trade-off, said where it is chosen: with both
-    /// bars at opposite ends, a centred Space Bar moves when the
-    /// App Bar appears (#1517).
+    /// bars at opposite ends, a Space Bar aligned elsewhere moves
+    /// when the App Bar appears — Core's own verdict (#1517).
     private var alignmentNote: String? {
-        let value = shelf.wrappedValue
         guard gates.bothBarsShow else { return nil }
-        switch (value.order, value.alignment) {
-        case (.spacesFirst, .center), (.spacesFirst, .end):
+        switch ShelfArrangement.spaceBarMoves(shelf: shelf.wrappedValue) {
+        case .start:
             return L(
                 "kiwishelf.alignment.note.start",
                 "While the App Bar shows, the two bars sit at "
@@ -97,7 +96,7 @@ extension KiwiShelfCard {
                     + "start. \u{201C}%1$@\u{201D} keeps it still.",
                 L("app_bar.alignment.start", "Start")
             )
-        case (.appsFirst, .start), (.appsFirst, .center):
+        case .end:
             return L(
                 "kiwishelf.alignment.note.end",
                 "While the App Bar shows, the two bars sit at "
@@ -105,7 +104,7 @@ extension KiwiShelfCard {
                     + "end. \u{201C}%1$@\u{201D} keeps it still.",
                 L("app_bar.alignment.end", "End")
             )
-        default:
+        case .center, nil:
             return nil
         }
     }

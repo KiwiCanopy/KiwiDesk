@@ -3,10 +3,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Schematic preview of the shelf and the bars on it (#793, owner
-/// 2026-08-10, #1517): one strip on the shelf's edge, a lone bar
-/// placed by the alignment, two at opposite ends in the shelf's
-/// order. Not modelled: the margins and the outer gap (#1516) — a
-/// few points draw as nothing at this scale — the identifier tint
+/// 2026-08-10, #1517): one strip on the shelf's edge, the bars
+/// placed by Core's `ShelfArrangement`. Not modelled: the margins
+/// and the outer gap (#1516) — a few points draw as nothing at
+/// this scale — the identifier tint
 /// flag, a schematic dims nothing (#1538), and the Full plate's
 /// blend between the two fills.
 struct HomeCardBarsTile: View {
@@ -18,6 +18,9 @@ struct HomeCardBarsTile: View {
     /// Space identifiers for panel scale rendering — Core's own
     /// verdict per Space (#1538).
     var spaceLabels: [SpaceGlyph] = []
+    /// Whether this frame draws the App Bar — false for the
+    /// layouts that host none, where the Space Bar is alone.
+    var showsAppBar = true
     @Environment(\.schematicPalette) private var palette
 
     struct BarItem {
@@ -103,57 +106,36 @@ struct HomeCardBarsTile: View {
         shelfStrip(on: edge, vertical: true)
     }
 
-    /// The shelf's one strip: a lone bar where the alignment puts
-    /// it, two at opposite ends in the shelf's order.
+    /// The shelf's one strip, each shown bar in the segment
+    /// Core's `ShelfArrangement` gives it — the preview never
+    /// places a bar the engine would not (#702, #1517).
     @ViewBuilder
     private func shelfStrip(
         on edge: AppBarEdge,
         vertical: Bool
     ) -> some View {
-        let shelf = settings.kiwishelf
-        if shelf.edge == edge {
-            let specs = shelfSpecs(vertical: vertical)
-            if specs.count == 2 {
-                let stack =
-                    vertical
-                    ? AnyLayout(VStackLayout(spacing: 3 * scale))
-                    : AnyLayout(HStackLayout(spacing: 3 * scale))
-                stack {
-                    strip(specs[0], .start, edge, vertical)
-                    strip(specs[1], .end, edge, vertical)
-                }
-            } else if let spec = specs.first {
-                strip(spec, shelf.alignment, edge, vertical)
+        if settings.kiwishelf.edge == edge {
+            let space = spaceSpecIfShown
+            let app =
+                showsAppBar
+                ? appBarLook.map { appSpec($0, vertical: vertical) }
+                : nil
+            if space != nil || app != nil {
+                ShelfStripPreview(
+                    shelf: settings.kiwishelf,
+                    space: space,
+                    app: app,
+                    edge: edge,
+                    vertical: vertical,
+                    scale: scale
+                )
             }
         }
     }
 
-    private func strip(
-        _ spec: BarSpec,
-        _ alignment: AppBarStyle.BarAlignment,
-        _ edge: AppBarEdge,
-        _ vertical: Bool
-    ) -> some View {
-        var seated = spec
-        seated.alignment = alignment
-        return BarStripView(
-            spec: seated,
-            edge: edge,
-            vertical: vertical,
-            scale: scale
-        )
-    }
-
-    /// The shown bars' specs in the shelf's order.
-    private func shelfSpecs(vertical: Bool) -> [BarSpec] {
-        let space =
-            settings.spaceBarStyle.enabled
+    private var spaceSpecIfShown: BarSpec? {
+        settings.spaceBarStyle.enabled
             ? spaceSpec(settings.spaceBarLook) : nil
-        let app = appBarLook.map { appSpec($0, vertical: vertical) }
-        let ordered =
-            settings.kiwishelf.order == .spacesFirst
-            ? [space, app] : [app, space]
-        return ordered.compactMap { $0 }
     }
 
     private func spaceSpec(_ style: SpaceBarLook) -> BarSpec {

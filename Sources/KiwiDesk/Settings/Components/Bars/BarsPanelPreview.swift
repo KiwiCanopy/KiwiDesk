@@ -7,14 +7,57 @@ struct BarsPanelPreview: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
+            if settings.bothBarsCanShow {
+                framed(
+                    showsAppBar: false,
+                    caption: L(
+                        "bars.preview.other_layouts",
+                        "Other layouts"
+                    )
+                )
+                framed(showsAppBar: true, caption: hostNames)
+            } else {
+                framed(showsAppBar: true, caption: nil)
+            }
+            Text(
+                L(
+                    "panel.caption.draft",
+                    "Shows your draft, not the saved profile."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(SettingsTheme.ink3)
+        }
+    }
+
+    private var settings: TilingSettings { model.config.settings }
+
+    /// The layouts whose App Bar joins the Space Bar, in the
+    /// order Core lists its hosts — the frame they share.
+    private var hostNames: String {
+        LayoutMode.allCases
+            .filter { settings.appBarHost(for: $0)?.appBar.enabled == true }
+            .map(\.displayName)
+            .joined(separator: " · ")
+    }
+
+    /// One desktop frame. While both bars can show, the panel
+    /// draws two — the Space Bar alone, and the two sharing the
+    /// shelf — since no layout shows both pictures at once.
+    private func framed(
+        showsAppBar: Bool,
+        caption: String?
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             HomeCardBarsTile(
-                settings: model.config.settings,
+                settings: settings,
                 spaceCount: model.config.spaces.count,
                 scale: 1.8,
-                spaceLabels: spaceLabels
+                spaceLabels: spaceLabels,
+                showsAppBar: showsAppBar
             )
             .padding(12)
-            .frame(height: 210)
+            .frame(height: caption == nil ? 210 : 150)
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 12)
@@ -29,18 +72,15 @@ struct BarsPanelPreview: View {
             )
             .environment(
                 \.schematicPalette,
-                HomeCardPlate.palette(model.config.settings)
+                HomeCardPlate.palette(settings)
             )
             .accessibilityHidden(true)
             .allowsHitTesting(false)
-            Text(
-                L(
-                    "panel.caption.draft",
-                    "Shows your draft, not the saved profile."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(SettingsTheme.ink3)
+            if let caption {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
         }
     }
 
