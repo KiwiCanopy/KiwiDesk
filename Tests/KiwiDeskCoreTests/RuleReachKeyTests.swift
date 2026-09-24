@@ -292,4 +292,31 @@ struct RuleReachKeyTests {
         #expect(t.resolved(finderKey, for: "Home") == "ctrl+alt+y")
         #expect(t.resolved(key, for: "Home") == nil)
     }
+
+    @Test("An edit to a shared action's second combo lands in the base")
+    func secondComboEditLands() {
+        let twice = [
+            KeyLayer(
+                name: "default",
+                bindings: [
+                    row("ctrl+alt+t", terminal), row("alt+t", terminal),
+                ]
+            )
+        ]
+        let t = RuleReachTable<String>.keyLayers(
+            base: twice,
+            overrides: [("Work", nil)]
+        )
+        var page = twice
+        page[0].bindings[1].combo = "alt+shift+t"
+        let shared = t.keyLayerBase(
+            page: page,
+            storedPage: twice,
+            storedBase: twice,
+            templates: templates
+        )
+        #expect(
+            shared[0].bindings.map(\.combo) == ["ctrl+alt+t", "alt+shift+t"]
+        )
+    }
 }

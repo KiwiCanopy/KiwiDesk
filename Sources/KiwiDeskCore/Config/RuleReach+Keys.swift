@@ -166,19 +166,30 @@ extension RuleReachTable where Value == String {
             else { continue }
             layers[at].icon = shared.icon
         }
-        // Each action's rows are the base's: the stored ones for an
-        // untouched key — two combos included — and the table's for
-        // a touched one. So a combo the page's profile MOVED (its
-        // own row beside the shared one) never reaches the base, and
-        // an untouched row is not re-set.
+        // An untouched action's rows are the page's, minus the ones
+        // its profile's OWN override added — so a combo the profile
+        // moved (its row beside the shared one) stays out, while an
+        // edit to a second shared combo lands. A touched action's
+        // row is the table's.
         let held = Self.allCombos(layers)
+        let storedPage = Self.allCombos(storedPage)
         let stored = Self.allCombos(storedBase)
         for key in Set(held.keys).union(stored.keys).union(baseTouched)
             .sorted()
         {
-            let target =
-                baseTouched.contains(key)
-                ? base[key].map { [$0] } ?? [] : stored[key] ?? []
+            var target: [String]
+            if baseTouched.contains(key) {
+                target = base[key].map { [$0] } ?? []
+            } else {
+                target = held[key] ?? []
+                var own = storedPage[key] ?? []
+                for combo in stored[key] ?? [] {
+                    if let at = own.firstIndex(of: combo) {
+                        own.remove(at: at)
+                    }
+                }
+                target.removeAll { own.contains($0) }
+            }
             if held[key] ?? [] != target {
                 Self.setRows(&layers, key, target, templates[key])
             }
