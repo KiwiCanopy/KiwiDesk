@@ -7030,11 +7030,9 @@ controls are, the row framing it; a glyph standing alone beside
 text — the rename pencil, the add-screen-setup `+` — keeps the
 rest fill, since nothing else says it is a button, and the `?`
 rests bare because its own circle is its shape (owner
-2026-09-25). A KiwiDesk-drawn text trigger on a `sunken` ground
-takes the card's own recipe at chip size — `card` fill, `hairline`
-and `planeRing` edge (`raisedChip`) — since a grey fill only greys
-further there and a hairline on it is invisible; native controls
-keep their own bezel, never a stroke laid over it. Every glyph
+2026-09-25). A Menu drawn as a bordered text button takes the
+neutral label on its LABEL: on the Menu itself the tint also fills
+the bezel, near-black. Every glyph
 takes `ink2`; a destructive glyph does not turn red on
 hover, since that promises an immediate delete a trash offering
 "here or everywhere" does not make. A chip-shaped control keeps

@@ -73,19 +73,23 @@ struct IconHoverChipTests {
         )
     }
 
-    /// The raised chip is the card's own recipe at chip size, and
-    /// its one caller is the Desktops card's add-setup trigger.
-    @Test("the add-setup trigger rides a raised chip")
-    func addSetupIsRaised() throws {
-        let rows = try source("Components/Common/SettingsRows.swift")
-        let chip = body(of: "raisedChip", in: rows)
-        #expect(chip.contains("SettingsTheme.card"))
-        #expect(chip.contains("SettingsTheme.hairline"))
-        #expect(chip.contains("SettingsTheme.planeRing"))
+    /// The add-setup Menu is a native bordered trigger whose label,
+    /// not the Menu, takes the neutral ink: on the Menu the tint
+    /// also fills the bezel near-black (#1393).
+    @Test("the add-setup trigger's neutral ink sits on its label")
+    func addSetupNeutralOnLabel() throws {
         let setups = try source(
             "Components/Profiles/DesktopsGroup+Setups.swift"
         )
-        #expect(setups.occurrences(of: ".raisedChip()") == 1)
-        #expect(!setups.contains(".settingsActionButton()"))
+        let label = try #require(
+            setups.range(of: "Label(addTitle, systemImage: \"plus\")")
+        )
+        let menuEnd = try #require(
+            setups.range(of: ".menuStyle(.button)")
+        )
+        let neutral = try #require(setups.range(of: ".neutralMenuLabel()"))
+        #expect(label.upperBound <= neutral.lowerBound)
+        #expect(neutral.upperBound <= menuEnd.lowerBound)
+        #expect(setups.contains(".buttonStyle(.bordered)"))
     }
 }

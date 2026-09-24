@@ -127,18 +127,16 @@ extension DesktopsGroup {
                 }
             }
         } label: {
-            Label {
-                Text(addTitle).foregroundStyle(SettingsTheme.ink)
-            } icon: {
-                Image(systemName: "plus")
-                    .foregroundStyle(SettingsTheme.ink2)
-            }
+            // Neutral on the LABEL: on the Menu, its tint would also
+            // fill the bordered bezel near-black (#1393).
+            Label(addTitle, systemImage: "plus")
+                .neutralMenuLabel()
         }
-        .menuStyle(.borderlessButton)
+        // A text action, bordered like the window's others.
+        .menuStyle(.button)
+        .buttonStyle(.bordered)
         .menuIndicator(.hidden)
         .fixedSize()
-        .neutralMenuLabel()
-        .raisedChip()
         .help(addTitle)
         .accessibilityLabel(
             L(
