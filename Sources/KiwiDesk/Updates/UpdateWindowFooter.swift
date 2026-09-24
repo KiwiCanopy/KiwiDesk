@@ -190,3 +190,30 @@ struct UpdateWindowFooter: View {
             .accessibilityFocused($answerFocused)
     }
 }
+
+/// "What's new"'s footer: one Done, which Return and Escape both
+/// answer — the notes are read, there is nothing to decline.
+struct WhatsNewFooter: View {
+    let done: () -> Void
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack {
+            Spacer(minLength: 0)
+            Button(L("update.window.done", "Done"), action: done)
+                .kiwiProminentButton()
+                .keyboardShortcut(.defaultAction)
+                .focused($focused)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .frame(minHeight: 60)
+        .background(SettingsTheme.panel)
+        .overlay(alignment: .top) {
+            Rectangle().fill(SettingsTheme.hairline).frame(height: 1)
+        }
+        .onAppear { focused = true }
+        // Escape answers Done too; a Button cannot carry both.
+        .onExitCommand(perform: done)
+    }
+}

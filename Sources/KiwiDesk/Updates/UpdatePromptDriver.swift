@@ -101,6 +101,9 @@ final class UpdatePromptDriver: SPUStandardUserDriver {
     /// Starts a user-initiated check; Try Again's door.
     var startCheck: () -> Void = {}
     var window: UpdateWindowController?
+    /// Where the window's own Install records its notes as read;
+    /// nil keeps a test's driver off the real defaults.
+    var seenRecord: WhatsNewRecord?
     /// Puts the window on screen; a test records it instead.
     var presents: (UpdateWindowController) -> Void = { $0.present() }
     /// Replaces Sparkle's modal error alert in a test, which would

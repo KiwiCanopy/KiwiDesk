@@ -54,6 +54,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     private var localeObserver: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // First: the open event is current only while this runs.
+        let origin = LaunchOrigin.of(
+            NSAppleEventManager.shared().currentAppleEvent
+        )
+
         // Shorten the hover-help delay before any window opens
         // (`ToolTipDelay` carries why).
         ToolTipDelay.install()
@@ -224,6 +229,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         permissions.start()
 
         let trusted = permissions.isTrusted
+        // The window only for a launch the user started and no
+        // tour owns — the permission grant or a resuming discovery;
+        // otherwise the mark.
+        if let whatsNew = updater.whatsNew {
+            let opensWindow =
+                origin == .user && trusted
+                && !OnboardingDiscovery.shouldResume(isTrusted: trusted)
+            let existingUser = OnboardingDiscovery.hasShown()
+            Task {
+                await whatsNew.launched(
+                    opensWindow: opensWindow,
+                    existingUser: existingUser
+                )
+            }
+        }
         if trusted {
             startManaging()
             if OnboardingDiscovery.shouldResume(

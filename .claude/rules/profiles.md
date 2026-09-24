@@ -618,6 +618,14 @@ nearly was that symptom: applying a palette writes its colours
 into `gui.json`, so the current *look* travelled while the saved
 *library* would have been left behind.
 
+
+**State about THIS MAC stays out of the register, in the app's
+defaults.** What a Mac has run and read — the "What's new" record
+(`WhatsNewRecord`, #1542), the tour's progress, the Settings mode
+— describes the machine, not the setup, and a backup restored on
+another Mac must neither replay nor swallow it. Such state never
+moves into the config folder "for consistency" and never joins
+`ConfigArtifact`.
 ## A screen is never left with zero spaces (#1175)
 
 A connected screen the space→display resolution leaves empty

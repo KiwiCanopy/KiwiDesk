@@ -584,6 +584,21 @@ nothing in KiwiDesk says an update was waiting. Later costs a
 reminder; Skip costs every fix in that release for as long as the
 user does not think to check by hand.
 
+**"What's new" follows an update whose notes nobody saw.** After
+an automatic install, or the jump from 1.x (which has no window
+of its own), the first launch shows the same layout with one
+Done; after the window's own Install it shows nothing, the notes
+having been read. It opens only on a launch the user started — a
+login launch is not someone at the keyboard, so there the status
+item carries the reminder's mark and the quick menu a row. The
+notes are fetched from the same feed Sparkle reads rather than
+shipped inside the app, because they are written into the release
+after the build; offline, they stay owed for the next launch. The
+record of what was last run and read lives in the app's own
+defaults rather than the config folder: it describes this Mac,
+and a backup restored elsewhere must neither replay nor swallow
+it.
+
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
 this window keeps Sparkle's; the window first appears for the

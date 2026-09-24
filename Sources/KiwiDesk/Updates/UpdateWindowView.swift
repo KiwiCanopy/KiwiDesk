@@ -1,35 +1,91 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// What the window is for: an offer Sparkle is waiting on, or
+/// the notes of an update already installed (#1542 ruling ▸ After
+/// the update).
+enum UpdateWindowMode {
+    case offer(UpdateSession)
+    case whatsNew(done: () -> Void)
+}
+
 /// KiwiDesk's own update window (#1542 ruling ▸ Window): a pinned
 /// header and footer around the notes, which scroll.
 struct UpdateWindowView: View {
     let offer: UpdateOffer
-    @ObservedObject var session: UpdateSession
+    let mode: UpdateWindowMode
     /// Lays the notes out unscrolled, so the controller can read
     /// their natural height.
     var measuring = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            UpdateWindowHeader(offer: offer)
-            UpdateNotesScroll(
+        switch mode {
+        case .offer(let session):
+            UpdateOfferLayout(
                 offer: offer,
-                failed: isFailed,
+                session: session,
                 measuring: measuring
             )
+        case .whatsNew(let done):
+            UpdateWindowLayout(
+                offer: offer,
+                whatsNew: true,
+                failed: false,
+                measuring: measuring
+            ) {
+                WhatsNewFooter(done: done)
+            }
+        }
+    }
+}
+
+/// The offer's layout, observing the session for its footer and
+/// the Failed step-back of the Highlights gold.
+private struct UpdateOfferLayout: View {
+    let offer: UpdateOffer
+    @ObservedObject var session: UpdateSession
+    let measuring: Bool
+
+    var body: some View {
+        UpdateWindowLayout(
+            offer: offer,
+            whatsNew: false,
+            failed: isFailed,
+            measuring: measuring
+        ) {
             UpdateWindowFooter(session: session)
+        }
+    }
+
+    private var isFailed: Bool {
+        if case .failed = session.phase { return true }
+        return false
+    }
+}
+
+private struct UpdateWindowLayout<Footer: View>: View {
+    let offer: UpdateOffer
+    let whatsNew: Bool
+    let failed: Bool
+    let measuring: Bool
+    @ViewBuilder let footer: () -> Footer
+
+    var body: some View {
+        VStack(spacing: 0) {
+            UpdateWindowHeader(offer: offer, whatsNew: whatsNew)
+            UpdateNotesScroll(
+                offer: offer,
+                failed: failed,
+                whatsNew: whatsNew,
+                measuring: measuring
+            )
+            footer()
         }
         .frame(width: UpdateWindowMetrics.width)
         // SwiftUI keeps the content below the transparent title
         // bar; only the ground runs up behind the traffic lights.
         .background(SettingsTheme.page.ignoresSafeArea())
         .tint(SettingsTheme.accent)
-    }
-
-    private var isFailed: Bool {
-        if case .failed = session.phase { return true }
-        return false
     }
 }
 
@@ -48,6 +104,7 @@ enum UpdateWindowMetrics {
 
 private struct UpdateWindowHeader: View {
     let offer: UpdateOffer
+    let whatsNew: Bool
 
     var body: some View {
         HStack(spacing: 16) {
@@ -60,9 +117,11 @@ private struct UpdateWindowHeader: View {
                     .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(SettingsTheme.ink)
                     .accessibilityAddTraits(.isHeader)
-                Text(subtitle)
-                    .font(.system(size: 12))
-                    .foregroundStyle(SettingsTheme.ink2)
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(.system(size: 12))
+                        .foregroundStyle(SettingsTheme.ink2)
+                }
             }
             Spacer(minLength: 0)
         }
@@ -72,7 +131,14 @@ private struct UpdateWindowHeader: View {
     }
 
     private var title: String {
-        L(
+        if whatsNew {
+            return L(
+                "update.window.whats_new_title",
+                "What's new in KiwiDesk %1$@",
+                offer.version
+            )
+        }
+        return L(
             "update.window.title",
             "KiwiDesk %1$@ is available",
             offer.version
@@ -80,6 +146,14 @@ private struct UpdateWindowHeader: View {
     }
 
     private var subtitle: String {
+        if whatsNew {
+            guard let released = offer.released else { return "" }
+            return L(
+                "update.window.released",
+                "Released %1$@",
+                released.formatted(date: .long, time: .omitted)
+            )
+        }
         guard let released = offer.released else {
             return L(
                 "update.window.installed",

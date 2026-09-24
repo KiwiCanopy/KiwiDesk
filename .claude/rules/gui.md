@@ -366,6 +366,25 @@ the ending session only re-shows the offer
 (`UpdateSessionTests`, `UpdateCycleObserverSelectorTests`,
 `UpdatePromptWiringTests` ▸ the window's hand-offs).
 
+**"What's new" is the second pending fact under the same rule
+(#1542).** It has ONE home, `WhatsNewCoordinator.waiting`, reached
+through the updater's `whatsNew` and read at render; the mark is
+composited once, its words picked by rank — a waiting update
+outranks the notes of one already installed — and its row exists
+only while it waits (`UpdateReminderReadNotStoredTests`,
+`WhatsNewSurfaceTests`). The window opens only on a launch the
+USER started and the permission tour does not own: the origin is
+read from the open-application Apple event at the top of
+`applicationDidFinishLaunching`, where it is current (nil in
+`applicationWillFinishLaunching`, measured 2026-09-24), and a
+launch with no event to read is unknown and takes the mark, never
+the window. The service agent starts the binary directly, whose
+open event carries no login mark, so a launch the agent spawns is
+told by `ServiceManager.launchMarker` in its environment, read
+first; a new direct-launch path owes a marker of its own
+(`UpdatePromptWiringTests` ▸ the launch origin,
+`WhatsNewSurfaceTests`).
+
 ## A window that must clear the bars derives its level
 
 The bars render at `BarPanel.level`. **A window that must not be

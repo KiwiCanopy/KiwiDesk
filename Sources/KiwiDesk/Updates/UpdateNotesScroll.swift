@@ -7,6 +7,8 @@ struct UpdateNotesScroll: View {
     let offer: UpdateOffer
     /// The Failed state steps the Highlights gold back.
     let failed: Bool
+    /// After the update: the cautions are past advice.
+    let whatsNew: Bool
     let measuring: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -15,7 +17,13 @@ struct UpdateNotesScroll: View {
     /// Where a per-type link sends VoiceOver: the group it opened.
     @AccessibilityFocusState private var focusedGroup: String?
 
-    init(offer: UpdateOffer, failed: Bool, measuring: Bool) {
+    init(
+        offer: UpdateOffer,
+        failed: Bool,
+        whatsNew: Bool,
+        measuring: Bool
+    ) {
+        self.whatsNew = whatsNew
         self.offer = offer
         self.failed = failed
         self.measuring = measuring
@@ -50,7 +58,11 @@ struct UpdateNotesScroll: View {
     private func content(_ proxy: ScrollViewProxy) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             if let digest = offer.digest {
-                UpdateHighlightsPanel(digest: digest, failed: failed)
+                UpdateHighlightsPanel(
+                    digest: digest,
+                    failed: failed,
+                    whatsNew: whatsNew
+                )
                 UpdateNotesTally(digest: digest) { jump(to: $0, proxy) }
                 ForEach(digest.groups) { group in
                     UpdateNotesGroupCard(

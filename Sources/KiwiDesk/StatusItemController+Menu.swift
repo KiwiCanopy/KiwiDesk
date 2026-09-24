@@ -122,6 +122,9 @@ extension StatusItemController {
         menu.addItem(settings)
 
         menu.addItem(.separator())
+        if let whatsNew = makeWhatsNewItem() {
+            menu.addItem(whatsNew)
+        }
         if let updates = makeUpdatesItem() {
             menu.addItem(updates)
         }

@@ -36,6 +36,10 @@ protocol AppUpdating: AnyObject {
     /// What the channel last said (#1536) — an inert updater's
     /// store stays `unavailable`.
     var updates: UpdateStateStore { get }
+
+    /// "What's new" after an update (#1542); nil where the channel
+    /// is inert, so an unbundled run owes no notes.
+    var whatsNew: WhatsNewCoordinator? { get }
 }
 
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
@@ -46,6 +50,7 @@ final class SparkleUpdater: AppUpdating {
     private let updater: SPUUpdater
     let updates = UpdateStateStore()
     private let observer: UpdateCycleObserver
+    let whatsNew: WhatsNewCoordinator?
 
     init() {
         let host = Bundle.main
@@ -64,6 +69,15 @@ final class SparkleUpdater: AppUpdating {
             applicationBundle: host,
             userDriver: driver,
             delegate: observer
+        )
+        // One record: the window's Install writes what the next
+        // launch reads, and the feed is the one Sparkle resolved.
+        let record = WhatsNewRecord()
+        driver.seenRecord = record
+        whatsNew = WhatsNewCoordinator(
+            record: record,
+            host: host,
+            feedURL: { [updater] in updater.feedURL }
         )
         driver.startCheck = { [weak self] in self?.checkForUpdates() }
         do {
@@ -116,6 +130,7 @@ final class NoUpdater: AppUpdating {
     var updatePending: Bool { false }
     var onUpdatePendingChanged: () -> Void = {}
     let updates = UpdateStateStore()
+    var whatsNew: WhatsNewCoordinator? { nil }
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

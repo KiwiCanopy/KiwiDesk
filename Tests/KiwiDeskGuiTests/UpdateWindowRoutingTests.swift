@@ -29,6 +29,9 @@ struct UpdateWindowRoutingTests {
             delegate: UpdatePromptPolicy()
         )
         driver.presents = { _ in log.presented += 1 }
+        driver.seenRecord = WhatsNewRecord(
+            UserDefaults(suiteName: "UpdateWindowRoutingTests.\(UUID())")!
+        )
         // Sparkle's alert is modal: a routing regression must red
         // on the record, never block on the real thing.
         driver.sparkleError = { _, _ in log.sparkleErrors += 1 }
@@ -181,6 +184,21 @@ struct UpdateWindowRoutingTests {
         #expect(await driver.showReadyToInstallAndRelaunch() == .install)
         #expect(log.sparklePrompts == 0)
         #expect(session.phase == .installing)
+    }
+
+    /// Never "What's new" after a clicked Install (#1542): the
+    /// driver's own Install records the offered version as read.
+    @Test("the window's Install records its notes as read")
+    func installRecordsSeen() throws {
+        let (driver, log) = driver()
+        driver.showUpdateFound(
+            try Self.item("9999.1.0"),
+            userInitiated: true,
+            stage: .notDownloaded
+        ) { log.replies.append($0) }
+        #expect(driver.seenRecord?.seen == nil)
+        try #require(driver.window?.session).install()
+        #expect(driver.seenRecord?.seen == "9999.1.0")
     }
 
     /// A download Sparkle already fetched: Install goes straight

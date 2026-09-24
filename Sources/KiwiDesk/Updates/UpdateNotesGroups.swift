@@ -7,6 +7,9 @@ struct UpdateHighlightsPanel: View {
     let digest: UpdateNotesDigest
     /// Failed steps the gold back to a plain card.
     let failed: Bool
+    /// After the update the cautions are past advice, so their
+    /// label reads "Good to know" (owner, 2026-09-24).
+    let whatsNew: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
@@ -44,7 +47,7 @@ struct UpdateHighlightsPanel: View {
 
     private var cautions: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(L("update.window.before_you_update", "Before you update"))
+            Text(cautionsLabel)
                 .textCase(.uppercase)
                 .tracking(0.66)
                 .font(.system(size: 11, weight: .semibold))
@@ -70,6 +73,12 @@ struct UpdateHighlightsPanel: View {
                 .frame(height: 1)
         }
         .padding(.top, 3)
+    }
+
+    private var cautionsLabel: String {
+        whatsNew
+            ? L("update.window.good_to_know", "Good to know")
+            : L("update.window.before_you_update", "Before you update")
     }
 
     private var shape: RoundedRectangle {

@@ -49,6 +49,9 @@ extension UpdatePromptDriver {
         session.startCheck = { [weak self] in self?.startCheck() }
         session.hide = { [weak window] in window?.hide() }
         session.end = { [weak self] in self?.closeWindow() }
+        session.onInstall = { [record = seenRecord] in
+            record?.markSeen(item.versionString)
+        }
         self.window = window
     }
 

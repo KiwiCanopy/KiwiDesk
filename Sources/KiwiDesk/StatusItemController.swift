@@ -34,12 +34,18 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             updater.onUpdatePendingChanged = { [weak self] in
                 self?.render()
             }
+            updater.whatsNew?.onWaitingChanged = { [weak self] in
+                self?.render()
+            }
             render()
         }
     }
     /// A scheduled update waiting behind the gentle reminder
     /// (#1013), read from the updater at every render.
     var updatePending: Bool { updater.updatePending }
+    /// "What's new" left waiting by a launch that did not open it
+    /// (#1542), read from the updater's coordinator at every render.
+    var whatsNewWaiting: String? { updater.whatsNew?.waiting?.version }
     var onShowAccessibilityHelp: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
     /// Saved profiles, pulled fresh each menu open; broken entries
@@ -187,19 +193,39 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         // after the early returns above, so a warning, the
         // starting phase and a config error outrank an offer on
         // the glyph AND the name.
+        guard let mark = markNarration else { return }
+        if let image = button.image {
+            button.image = Self.badged(image)
+        }
+        button.setAccessibilityLabel(mark.label)
+        button.toolTip = mark.tooltip
+    }
+
+    /// What the mark says, by rank: an update waiting outranks
+    /// the notes of one already installed (#1013, #1542).
+    private var markNarration: (label: String, tooltip: String)? {
         if updatePending {
-            if let image = button.image {
-                button.image = Self.badged(image)
-            }
-            button.setAccessibilityLabel(
-                L("menu.status.update.a11y", "KiwiDesk (update available)")
-            )
-            button.toolTip = L(
-                "menu.status.update.tooltip",
-                "A KiwiDesk update is available — open the menu to "
-                    + "install it."
+            return (
+                L("menu.status.update.a11y", "KiwiDesk (update available)"),
+                L(
+                    "menu.status.update.tooltip",
+                    "A KiwiDesk update is available — open the menu to "
+                        + "install it."
+                )
             )
         }
+        guard let version = whatsNewWaiting else { return nil }
+        return (
+            L(
+                "menu.status.whats_new.a11y",
+                "KiwiDesk (what's new in %1$@)",
+                version
+            ),
+            L(
+                "menu.status.whats_new.tooltip",
+                "KiwiDesk was updated — open the menu to see what's new."
+            )
+        )
     }
 
     func symbol(_ name: String) -> NSImage? {

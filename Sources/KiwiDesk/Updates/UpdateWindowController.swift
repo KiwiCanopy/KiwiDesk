@@ -43,29 +43,9 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
     /// Internal so a test takes the production window — its style
     /// mask is what the ruling is about.
     func makeWindow() -> NSWindow {
-        let hosting = NSHostingController(
-            rootView: LocaleScopedRoot {
-                UpdateWindowView(offer: offer, session: session)
-            }
-            .environmentObject(LocalizationManager.shared)
-        )
-        hosting.sizingOptions = []
-        let window = NSWindow(contentViewController: hosting)
-        window.styleMask = [.titled, .closable, .fullSizeContentView]
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
-        window.title = L("update.window.window_title", "KiwiDesk Update")
-        window.isReleasedWhenClosed = false
-        window.animationBehavior = .documentWindow
-        window.setContentSize(
-            NSSize(
-                width: UpdateWindowMetrics.width,
-                // The probe has no window, so no title-bar inset.
-                height: UpdateWindowMetrics.height(
-                    fitting: fittingNotesHeight()
-                        + UpdateWindowMetrics.titleBar
-                )
-            )
+        let window = UpdateWindowChrome.window(
+            offer: offer,
+            mode: .offer(session)
         )
         window.delegate = self
         phaseWatch = session.$phase.sink { [weak window] phase in
@@ -95,21 +75,6 @@ final class UpdateWindowController: NSObject, NSWindowDelegate {
                 .priority: NSAccessibilityPriorityLevel.high.rawValue,
             ]
         )
-    }
-
-    /// The notes' natural height at the window's width, measured
-    /// once so the window opens at its content between the ruled
-    /// bounds and scrolls beyond them.
-    private func fittingNotesHeight() -> CGFloat {
-        let probe = NSHostingView(
-            rootView: LocaleScopedRoot { unscrolled }
-                .environmentObject(LocalizationManager.shared)
-        )
-        return probe.fittingSize.height
-    }
-
-    private var unscrolled: UpdateWindowView {
-        UpdateWindowView(offer: offer, session: session, measuring: true)
     }
 
     // MARK: - NSWindowDelegate

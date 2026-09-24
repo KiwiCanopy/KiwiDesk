@@ -17,6 +17,7 @@ private final class FakeStatusItem: StatusItemHandle {
 /// whether it was actually asked to check.
 @MainActor
 private final class FakeUpdater: AppUpdating {
+    var whatsNew: WhatsNewCoordinator? { nil }
     let updates = UpdateStateStore()
     var canCheckForUpdates: Bool
     private(set) var checks = 0
