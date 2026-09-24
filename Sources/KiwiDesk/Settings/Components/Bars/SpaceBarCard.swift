@@ -77,8 +77,8 @@ struct SpaceBarCard: View {
     private var cardCaption: String {
         L(
             "bars.space_bar.shelf_caption",
-            "One item per Space — one bar per display, every "
-                + "layout. KiwiShelf places it."
+            "One item per Space — one bar per screen, every "
+                + "layout. KiwiShelf places this bar."
         )
     }
 

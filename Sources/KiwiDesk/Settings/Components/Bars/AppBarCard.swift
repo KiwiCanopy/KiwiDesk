@@ -75,7 +75,7 @@ struct AppBarCard: View {
         L(
             "bars.app_bar.shelf_caption",
             "The windows in the current Space — %1$@ and %2$@ "
-                + "only. KiwiShelf places it.",
+                + "only. KiwiShelf places this bar.",
             L("layout.monocle.name", "Monocle"),
             L("layout.scrolling.name", "Scrolling")
         )

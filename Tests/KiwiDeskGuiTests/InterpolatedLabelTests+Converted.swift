@@ -119,7 +119,7 @@ extension InterpolatedLabelTests {
         // "turn one on" having left the referent to the reader.
         // Its Bars-page twin joins the register for the same
         // change.
-        "colors.app_bar_off.help": 2,
+        "colors.app_bar_off.help": 3,
         "app_bar.no_layout.shelf_help": 2,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it

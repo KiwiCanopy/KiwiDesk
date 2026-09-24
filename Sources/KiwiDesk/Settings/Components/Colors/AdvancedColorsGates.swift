@@ -169,10 +169,11 @@ enum AdvancedColorsHelp {
         L(
             "colors.app_bar_off.help",
             "No layout shows an App Bar, so its colors aren't "
-                + "drawn. In %1$@, turn a layout's App Bar on "
-                + "under “%2$@”.",
+                + "drawn. In %1$@, turn one on under “%2$@” in "
+                + "%3$@.",
             SettingsDestination.bars.title,
-            L("bars.show_in.title", "Show it in")
+            L("kiwishelf.show.label", "Show"),
+            L("bars.switch.kiwishelf", "KiwiShelf")
         )
     }
 }
