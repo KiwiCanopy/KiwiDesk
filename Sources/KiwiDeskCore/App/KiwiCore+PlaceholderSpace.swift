@@ -1,25 +1,34 @@
 import Foundation
 
 extension KiwiCore {
-    /// Drops the space `StateCoordinator.init` seeded unasked
-    /// when the first config load declared other Spaces but not
-    /// it (#1526). Kept, it was a Space nobody made: every boot
-    /// re-added a `1` after the user renamed theirs away, and a
-    /// later mirror or save wrote it into their files. Rules
-    /// once — a reload never touches a `1` the user owns.
+    /// Drops the placeholder Space (`StateCoordinator`) when the
+    /// load after its planting neither declared nor named it and
+    /// it holds no window (#1526). Rules once per planting.
+    ///
+    /// Declared is asked of the sources, never of `referenced`:
+    /// the display resolve ensures every live Space, the
+    /// placeholder included.
     func retirePlaceholderSpace() {
         guard let placeholder = state.placeholderSpace else {
             return
         }
         state.placeholderSpace = nil
-        let declared = state.workspaces.referenced
-        guard !declared.contains(placeholder),
+        let sidecar =
+            isGuiManaged ? guiConfigStore.load()?.spaces ?? [] : []
+        guard declaredSources(of: placeholder).isEmpty,
+            !sidecar.contains(placeholder),
+            fallbackSpace != placeholder,
+            spacePins[placeholder] == nil,
+            !mainSpaces.contains(placeholder),
             state.workspaces[placeholder]?.windows.isEmpty ?? false,
             let survivor = state.workspaces.order.first(where: {
                 $0 != placeholder
             })
         else { return }
         forwardWindows(of: placeholder, to: survivor)
+        tiler.settings.removeSpace(placeholder)
+        resolveSpaceDisplays()
+        emitSpaceChange()
         onLog(
             "boot: dropped undeclared placeholder space "
                 + placeholder.raw

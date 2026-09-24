@@ -113,12 +113,16 @@ public struct StateCoordinator: Sendable {
         }
     }
 
-    /// The space `init` seeded unasked so state is never
-    /// spaceless before a config loads; nil once the first load
-    /// has ruled on it (#1526, `retirePlaceholderSpace`).
+    /// The id a first launch seeds before any config declares one.
+    public static let placeholderID = SpaceID(1)
+
+    /// A seed planted unasked so state is never spaceless before a
+    /// config loads — by `init`, and by the #634 reset for a
+    /// Lua-owned config; nil once a load has ruled on it (#1526,
+    /// `retirePlaceholderSpace`).
     var placeholderSpace: SpaceID?
 
-    public init(defaultSpace: SpaceID = SpaceID(1)) {
+    public init(defaultSpace: SpaceID = placeholderID) {
         workspaces.ensureSpace(defaultSpace)
         placeholderSpace = defaultSpace
     }

@@ -107,10 +107,15 @@ extension KiwiCore {
         // default space plus whatever the Lua declares on the
         // reload below, so grafting starter spaces here would
         // produce a state no first launch ever shows.
+        let luaOwned = configDeclaresManagedSettings
         let fresh =
-            configDeclaresManagedSettings
-            ? [SpaceID(1)]
+            luaOwned
+            ? [StateCoordinator.placeholderID]
             : starterSpaces()
+        // The Lua-owned seed is a first launch's placeholder, so
+        // the reload rules on it the same way (#1526).
+        state.placeholderSpace =
+            luaOwned ? StateCoordinator.placeholderID : nil
         for space in fresh {
             state.workspaces.ensureSpace(space)
         }

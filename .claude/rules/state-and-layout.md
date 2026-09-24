@@ -21,6 +21,15 @@ editing here:
 
 - Windows live in a **flat `[WindowID]` array per space**. Do not
   introduce tree or container structures into state or layout code.
+- **A Space seeded before any config declares one is
+  PROVISIONAL (#1526).** Whoever plants one arms
+  `StateCoordinator.placeholderSpace`, and the next config load
+  retires it through `retirePlaceholderSpace` unless a source
+  declares it — asked of the sources (`declaredSources(of:)` and
+  the sidecar's list), never of `referenced`, which the display
+  resolve fills with every live Space. An unarmed seed is a Space
+  nobody made that every launch brings back
+  (`PlaceholderSpaceTests`).
 - **Never store which Space a window holds PER DESKTOP; do store
   it per PROFILE (#1230).** The two look alike and are
   opposites, and the discriminator is **when the record is

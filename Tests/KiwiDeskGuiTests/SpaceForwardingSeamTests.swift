@@ -31,8 +31,7 @@ struct SpaceForwardingSeamTests {
         }
         #expect(homes == [Self.home: 1])
         // The callers (the definition spells its labels with
-        // parameter names, so the call needle misses it) — the
-        // boot's placeholder retirement the third (#1526).
+        // parameter names, so the call needle misses it).
         #expect(
             callers == [
                 "Profiles/KiwiCore+ProfileResolution.swift": 1,
