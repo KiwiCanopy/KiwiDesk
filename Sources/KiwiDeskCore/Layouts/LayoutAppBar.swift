@@ -3,8 +3,9 @@ import Foundation
 
 /// Per-layout App Bar settings: whether the layout shows one, and
 /// overrides of the bar's OWN fields (`AppBarStyle`). The shelf's
-/// fields have no per-layout override (#1517): one shelf, one
-/// edge and depth, so a layout switch never moves it.
+/// fields — colours, symbol style and dim included — have no
+/// per-layout override (#1517): one shelf, one look, so a layout
+/// switch never changes it.
 public struct LayoutAppBar: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Content = AppBarStyle.Content
@@ -15,17 +16,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var activeIndicator: ActiveIndicator?
     public var content: Content?
     public var titleCap: Int?
-    public var iconSource: BarAppIconSource?
     public var groupAdjacentWindows: Bool?
-    public var dimFactor: CGFloat?
-    public var itemColor: String?
-    public var fillColor: String?
-    public var activeItemColor: String?
-    public var highlightColor: String?
-    public var hoverFillColor: String?
-    public var hoverItemColor: String?
-    public var groupBadgeColor: String?
-    public var groupBadgeTextColor: String?
 
     public init() {}
 
@@ -37,28 +28,8 @@ public struct LayoutAppBar: Sendable, Equatable {
         }
         if let content { out.content = content }
         if let titleCap { out.titleCap = titleCap }
-        if let iconSource { out.iconSource = iconSource }
         if let groupAdjacentWindows {
             out.groupAdjacentWindows = groupAdjacentWindows
-        }
-        if let dimFactor { out.dimFactor = dimFactor }
-        if let itemColor { out.itemColor = itemColor }
-        if let fillColor { out.fillColor = fillColor }
-        if let activeItemColor {
-            out.activeItemColor = activeItemColor
-        }
-        if let highlightColor {
-            out.highlightColor = highlightColor
-        }
-        if let hoverFillColor { out.hoverFillColor = hoverFillColor }
-        if let hoverItemColor {
-            out.hoverItemColor = hoverItemColor
-        }
-        if let groupBadgeColor {
-            out.groupBadgeColor = groupBadgeColor
-        }
-        if let groupBadgeTextColor {
-            out.groupBadgeTextColor = groupBadgeTextColor
         }
         return out
     }

@@ -4,8 +4,10 @@ import Foundation
 /// `KiwiShelfMigrationTests`): the Space Bar's values become
 /// `kiwishelf`'s — the App Bar's, where the Space Bar is switched
 /// off and so was not what the user looked at — every bar's
-/// copies drop, `item_size` drops everywhere, and the Space Bar's
-/// `title_cap` becomes `front_app_title_cap`. Reaches a profile
+/// copies drop, `item_size` drops everywhere, the Space Bar's
+/// `title_cap` becomes `front_app_title_cap`, a `gap` indicator
+/// becomes `outline`, and an App Bar that names no indicator gets
+/// `outline` ahead of its default's flip. Reaches a profile
 /// root's `settings` and a bundle root's `profiles[].settings`,
 /// the per-layout `app_bar` overrides under `layout` included.
 extension ConfigMigration {
@@ -22,8 +24,16 @@ extension ConfigMigration {
         "edge", "alignment", "thickness", "outer_margin",
         "inner_margin", "background_style", "liquid_glass",
         "background_fit", "corner_roundness", "item_gap",
-        "font_size",
+        "font_size", "icon_source", "dim_factor", "item_color",
+        "active_item_color", "highlight_color", "hover_fill_color",
+        "hover_item_color", "fill_color", "group_badge_color",
+        "group_badge_text_color",
     ]
+    static let shelfItemColorKey = "item_color"
+    static let shelfIndicatorKey = "active_indicator"
+    /// The indicator #1517 removed, and the one it becomes.
+    static let shelfRetiredIndicator = "gap"
+    static let shelfIndicatorFallback = "outline"
     static let shelfDroppedKeys = ["item_size"]
     static let shelfEdgeKey = "edge"
     /// The App Bar's edge default before #1517, which the shelf's
@@ -126,6 +136,13 @@ extension ConfigMigration {
             shelf[key] = value
             changed = true
         }
+        if let app = settings[shelfAppBarKey] as? [String: Any],
+            let full = app[shelfItemColorKey] as? String,
+            let dimmed = source[shelfItemColorKey] as? String,
+            isDimmedTwin(dimmed, of: full)
+        {
+            shelf[shelfItemColorKey] = full
+        }
         if sourceKey == shelfAppBarKey, shelf[shelfEdgeKey] == nil {
             shelf[shelfEdgeKey] = shelfAppBarOldEdge
             changed = true
@@ -138,6 +155,11 @@ extension ConfigMigration {
             }
             for key in stripped where bar[key] != nil {
                 bar[key] = nil
+                changed = true
+            }
+            if retiringGap(&bar) { changed = true }
+            if group == shelfAppBarKey, bar[shelfIndicatorKey] == nil {
+                bar[shelfIndicatorKey] = shelfIndicatorFallback
                 changed = true
             }
             if group == shelfSpaceBarKey,
@@ -160,11 +182,43 @@ extension ConfigMigration {
                     bar[key] = nil
                     changed = true
                 }
+                if retiringGap(&bar) { changed = true }
                 params[shelfAppBarKey] = bar
                 layout[host] = params
             }
             out[shelfLayoutKey] = layout
         }
         return (out, changed)
+    }
+
+    /// Rewrites a `gap` indicator to `outline`; true if it did.
+    static func retiringGap(_ bar: inout [String: Any]) -> Bool {
+        guard bar[shelfIndicatorKey] as? String == shelfRetiredIndicator
+        else { return false }
+        bar[shelfIndicatorKey] = shelfIndicatorFallback
+        return true
+    }
+
+    /// Whether `dimmed` is `full`'s colour at a lower alpha — the
+    /// Space Bar's idle ink as every bundled palette wrote it,
+    /// which the shelf's idle rule now applies (#1517), so the
+    /// shelf takes `full` rather than dimming twice.
+    static func isDimmedTwin(_ dimmed: String, of full: String) -> Bool {
+        guard let low = hexChannels(dimmed), let high = hexChannels(full)
+        else { return false }
+        return low.rgb == high.rgb && low.alpha < high.alpha
+    }
+
+    /// A `#RRGGBB` / `#RRGGBBAA` string's colour and alpha,
+    /// upper-cased; an absent alpha is opaque.
+    static func hexChannels(
+        _ hex: String
+    ) -> (rgb: String, alpha: String)? {
+        let body = hex.uppercased().drop { $0 == "#" }
+        guard body.count == 6 || body.count == 8,
+            body.allSatisfy(\.isHexDigit)
+        else { return nil }
+        let rgb = String(body.prefix(6))
+        return (rgb, body.count == 8 ? String(body.suffix(2)) : "FF")
     }
 }

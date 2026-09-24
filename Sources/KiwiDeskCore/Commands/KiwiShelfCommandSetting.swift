@@ -8,7 +8,7 @@ enum KiwiShelfCommandSetting {
     case edge(AppBarEdge)
     case alignment(KiwiShelf.Alignment)
     case order(KiwiShelf.Order)
-    case share(CGFloat)
+    case minimum(CGFloat)
     case thickness(CGFloat)
     case outerMargin(CGFloat)
     case innerMargin(CGFloat)
@@ -18,6 +18,9 @@ enum KiwiShelfCommandSetting {
     case cornerRoundness(CGFloat)
     case itemGap(CGFloat)
     case fontSize(CGFloat)
+    case iconSource(BarAppIconSource)
+    case dimFactor(CGFloat)
+    case color(WritableKeyPath<KiwiShelf, String>, String)
 
     /// Parses a setter's field (the verb minus `set_`) and args.
     static func parse(
@@ -32,6 +35,12 @@ enum KiwiShelfCommandSetting {
                 value.isFinite
             else { return .failure("expected a length (pt)") }
             return .success(keyword(max(0, value)))
+        }
+        if let path = colorFields[field] {
+            guard let hex = args.first?.stringValue,
+                DragVisual.parseHex(hex) != nil
+            else { return .failure("expected #RRGGBB or #RRGGBBAA") }
+            return .success(.color(path, hex))
         }
         return .failure("unknown kiwishelf setting: \(field)")
     }
@@ -52,11 +61,21 @@ enum KiwiShelfCommandSetting {
         case "order":
             return BarSettingChoice.value(args, KiwiShelf.Order.self)
                 .map(Self.order)
-        case "share":
+        case "minimum":
             guard let value = args.first?.numberValue,
                 value.isFinite
             else { return .failure("expected a percentage") }
-            return .success(.share(value))
+            return .success(.minimum(value))
+        case "icon_source":
+            return BarSettingChoice.value(
+                args,
+                BarAppIconSource.self
+            ).map(Self.iconSource)
+        case "dim_factor":
+            guard let value = args.first?.numberValue,
+                value.isFinite
+            else { return .failure("expected an opacity (0.05–1)") }
+            return .success(.dimFactor(value))
         case "background_style":
             return BarSettingChoice.value(
                 args,
@@ -90,6 +109,21 @@ enum KiwiShelfCommandSetting {
         ]
     }
 
+    /// Colour fields by wire key. Internal, not private: a palette
+    /// (#375) routes through these same validated setters.
+    static var colorFields: [String: WritableKeyPath<KiwiShelf, String>] {
+        [
+            "item_color": \.itemColor,
+            "active_item_color": \.activeItemColor,
+            "highlight_color": \.highlightColor,
+            "hover_fill_color": \.hoverFillColor,
+            "hover_item_color": \.hoverItemColor,
+            "fill_color": \.fillColor,
+            "group_badge_color": \.groupBadgeColor,
+            "group_badge_text_color": \.groupBadgeTextColor,
+        ]
+    }
+
     /// Writes the value into the shelf, clamped where the shelf
     /// has a floor or a range.
     func apply(to shelf: inout KiwiShelf) {
@@ -97,10 +131,10 @@ enum KiwiShelfCommandSetting {
         case .edge(let value): shelf.edge = value
         case .alignment(let value): shelf.alignment = value
         case .order(let value): shelf.order = value
-        case .share(let value):
-            shelf.share = min(
-                max(value, KiwiShelf.shareRange.lowerBound),
-                KiwiShelf.shareRange.upperBound
+        case .minimum(let value):
+            shelf.minimum = min(
+                max(value, KiwiShelf.minimumRange.lowerBound),
+                KiwiShelf.minimumRange.upperBound
             )
         case .thickness(let value):
             shelf.thickness = max(KiwiShelf.minThickness, value)
@@ -114,6 +148,10 @@ enum KiwiShelfCommandSetting {
         case .cornerRoundness(let value): shelf.cornerRoundness = value
         case .itemGap(let value): shelf.itemGap = value
         case .fontSize(let value): shelf.fontSize = value
+        case .iconSource(let value): shelf.iconSource = value
+        case .dimFactor(let value):
+            shelf.dimFactor = AppBarStyle.clampDim(value)
+        case .color(let path, let hex): shelf[keyPath: path] = hex
         }
     }
 }

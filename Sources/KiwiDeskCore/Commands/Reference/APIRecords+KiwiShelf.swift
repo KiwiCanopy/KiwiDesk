@@ -6,22 +6,22 @@ extension APIReference {
     static let kiwishelfRecords: [String: APIRecord] = [
         "set_edge": APIRecord(
             "Sets the screen edge the shelf occupies; it reserves "
-                + "that edge in every layout.",
+                + "that edge wherever a bar draws.",
             .choice("edge", AppBarEdge.self)
         ),
         "set_alignment": APIRecord(
-            "Places a bar along the edge while it is the only one "
-                + "showing.",
+            "Places the plate along the edge — one bar, or both as "
+                + "one joined plate.",
             .choice("alignment", KiwiShelf.Alignment.self)
         ),
         "set_order": APIRecord(
-            "Sets which bar takes the start of the edge while "
-                + "both show; they sit at opposite ends.",
+            "Sets which bar's section comes first while both "
+                + "show on the joined plate.",
             .choice("order", KiwiShelf.Order.self)
         ),
-        "set_share": APIRecord(
-            "Sets the Space Bar's percentage of the edge (20–80) "
-                + "once both bars overflow.",
+        "set_minimum": APIRecord(
+            "Sets the percentage of the edge (20–80) the Space Bar "
+                + "keeps once the shelf is full.",
             .number("percent")
         ),
         "set_thickness": APIRecord(
@@ -67,6 +67,50 @@ extension APIReference {
             "Pins the font size in points for both bars; 0 scales "
                 + "with thickness.",
             .number("size")
+        ),
+        "set_icon_source": APIRecord(
+            "Sets whether both bars draw app icons from the app "
+                + "image or the bundled glyph font.",
+            .choice("source", BarAppIconSource.self)
+        ),
+        "set_dim_factor": APIRecord(
+            "Sets the opacity of untinted idle content — emoji "
+                + "and app images — on both bars.",
+            .number("factor")
+        ),
+        "set_item_color": APIRecord(
+            "Sets the text and glyph color of items; an idle "
+                + "Space identifier draws it dimmed.",
+            .color("hex")
+        ),
+        "set_active_item_color": APIRecord(
+            "Sets the text and glyph color of the active item.",
+            .color("hex")
+        ),
+        "set_highlight_color": APIRecord(
+            "Sets the color of both bars' active indicator.",
+            .color("hex")
+        ),
+        "set_hover_fill_color": APIRecord(
+            "Sets the hover fill on non-active items.",
+            .color("hex")
+        ),
+        "set_hover_item_color": APIRecord(
+            "Sets the text and glyph color of hovered items.",
+            .color("hex")
+        ),
+        "set_fill_color": APIRecord(
+            "Sets the plate's one fill, or the glass tint.",
+            .color("hex")
+        ),
+        "set_group_badge_color": APIRecord(
+            "Sets the background color of count and overflow "
+                + "badges.",
+            .color("hex")
+        ),
+        "set_group_badge_text_color": APIRecord(
+            "Sets the text color of count and overflow badges.",
+            .color("hex")
         ),
     ]
 }

@@ -50,6 +50,15 @@ extension ConfigMigration {
         if !sourceIsSpaceBar && appBars.count > 1 { return nil }
         let source =
             (sourceIsSpaceBar ? spaceBar : appBars.first) ?? []
+        // The global App Bar is the one beside the Space Bar; a
+        // layout's may share its spelling, so name it only when
+        // there is one — the walk decides every other shape.
+        let globalApp = appBars.count == 1 ? appBars.first : nil
+        if appBars.contains(where: { bar in
+            !bar.contains { $0.key == shelfIndicatorKey }
+        }) {
+            return nil
+        }
         var out = text
         for match in matches.reversed() {
             guard let opener = Range(match.range(at: 1), in: out),
@@ -64,9 +73,19 @@ extension ConfigMigration {
                 with: shelvedBody(parsed, isSpaceBar: isSpaceBar)
             )
         }
+        let fullItem = globalApp?.first { $0.key == shelfItemColorKey }
         var entries = shelfMovedKeys.compactMap { key in
-            source.first { $0.key == key }.map {
-                "\"\(key)\":\($0.value)"
+            source.first { $0.key == key }.map { pair in
+                var value = pair.value
+                if key == shelfItemColorKey, let fullItem,
+                    isDimmedTwin(
+                        unquoted(pair.value),
+                        of: unquoted(fullItem.value)
+                    )
+                {
+                    value = fullItem.value
+                }
+                return "\"\(key)\":\(value)"
             }
         }
         if !sourceIsSpaceBar,
@@ -101,6 +120,15 @@ extension ConfigMigration {
     ) -> String {
         let stripped = Set(shelfMovedKeys + shelfDroppedKeys)
         var kept = parsed.pairs.filter { !stripped.contains($0.key) }
+        for index in kept.indices
+        where kept[index].key == shelfIndicatorKey
+            && unquoted(kept[index].value) == shelfRetiredIndicator
+        {
+            kept[index].text = kept[index].text.replacingOccurrences(
+                of: "\"\(shelfRetiredIndicator)\"",
+                with: "\"\(shelfIndicatorFallback)\""
+            )
+        }
         if isSpaceBar {
             for index in kept.indices
             where kept[index].key == shelfRetiredTitleKey {
@@ -165,6 +193,14 @@ extension ConfigMigration {
             cursor = all.upperBound
         }
         return (pairs, tail)
+    }
+
+    /// A JSON string literal's contents; other scalars as written.
+    static func unquoted(_ literal: String) -> String {
+        guard literal.count >= 2, literal.hasPrefix("\""),
+            literal.hasSuffix("\"")
+        else { return literal }
+        return String(literal.dropFirst().dropLast())
     }
 
     private static func count(of needle: String, in text: String) -> Int {

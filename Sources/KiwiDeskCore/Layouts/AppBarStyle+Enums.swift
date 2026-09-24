@@ -25,7 +25,6 @@ extension AppBarStyle {
     public enum ActiveIndicator: String, Sendable, Codable, CaseIterable {
         case outline
         case edgeMark = "edge_mark"
-        case gap
     }
 
     /// Content drawn per item (owner 2026-08-19, #160).

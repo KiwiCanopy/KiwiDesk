@@ -8,23 +8,13 @@ enum SpaceBarCommandSetting {
     case enabled(Bool)
     case glyphCap(Int)
     case frontAppTitleCap(Int)
-    case iconSource(BarAppIconSource)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
-    case dimFactor(CGFloat)
     case activeDimFactor(CGFloat)
     case showFrontApp(Bool)
     case hideEmpty(Bool)
     case stickyBadge(Bool)
     case springDelay(Int)
-    case itemColor(String)
-    case activeItemColor(String)
     case focusedItemColor(String)
-    case hoverFillColor(String)
-    case hoverItemColor(String)
-    case fillColor(String)
-    case highlightColor(String)
-    case groupBadgeColor(String)
-    case groupBadgeTextColor(String)
 
     /// Parses a setter field and its arguments into SpaceBarCommandSetting.
     static func parse(
@@ -63,11 +53,6 @@ enum SpaceBarCommandSetting {
         args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError>? {
         switch field {
-        case "icon_source":
-            return BarSettingChoice.value(
-                args,
-                BarAppIconSource.self
-            ).map(Self.iconSource)
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -91,8 +76,7 @@ enum SpaceBarCommandSetting {
         [String: (CGFloat) -> SpaceBarCommandSetting]
     {
         [
-            "dim_factor": Self.dimFactor,
-            "active_dim_factor": Self.activeDimFactor,
+            "active_dim_factor": Self.activeDimFactor
         ]
     }
 
@@ -101,15 +85,7 @@ enum SpaceBarCommandSetting {
     /// validated setters; see the AppBar twin.
     static var colorFields: [String: (String) -> SpaceBarCommandSetting] {
         [
-            "item_color": Self.itemColor,
-            "active_item_color": Self.activeItemColor,
-            "focused_item_color": Self.focusedItemColor,
-            "hover_fill_color": Self.hoverFillColor,
-            "hover_item_color": Self.hoverItemColor,
-            "fill_color": Self.fillColor,
-            "highlight_color": Self.highlightColor,
-            "group_badge_color": Self.groupBadgeColor,
-            "group_badge_text_color": Self.groupBadgeTextColor,
+            "focused_item_color": Self.focusedItemColor
         ]
     }
 
@@ -195,11 +171,8 @@ enum SpaceBarCommandSetting {
         case .glyphCap(let value): style.glyphCap = value
         case .frontAppTitleCap(let value):
             style.frontAppTitleCap = value
-        case .iconSource(let value): style.iconSource = value
         case .activeIndicator(let value):
             style.activeIndicator = value
-        case .dimFactor(let value):
-            style.dimFactor = AppBarStyle.clampDim(value)
         case .activeDimFactor(let value):
             style.activeDimFactor = AppBarStyle.clampDim(value)
         case .showFrontApp(let value):
@@ -208,21 +181,8 @@ enum SpaceBarCommandSetting {
         case .stickyBadge(let value): style.stickyBadge = value
         case .springDelay(let value):
             style.springDelay = value
-        case .itemColor(let value): style.itemColor = value
-        case .activeItemColor(let value):
-            style.activeItemColor = value
         case .focusedItemColor(let value):
             style.focusedItemColor = value
-        case .hoverFillColor(let value): style.hoverFillColor = value
-        case .hoverItemColor(let value):
-            style.hoverItemColor = value
-        case .fillColor(let value): style.fillColor = value
-        case .highlightColor(let value):
-            style.highlightColor = value
-        case .groupBadgeColor(let value):
-            style.groupBadgeColor = value
-        case .groupBadgeTextColor(let value):
-            style.groupBadgeTextColor = value
         }
     }
 }

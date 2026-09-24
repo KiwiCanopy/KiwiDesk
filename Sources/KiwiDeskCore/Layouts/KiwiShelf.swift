@@ -23,9 +23,10 @@ public struct KiwiShelf: Sendable, Equatable {
     public var alignment: Alignment = .center
     /// Bar order while both show — they take opposite ends.
     public var order: Order = .spacesFirst
-    /// The Space Bar's percentage of the edge once BOTH bars
-    /// overflow; a bar needing less gives the rest back.
-    public var share: CGFloat = 40
+    /// The Space Bar's floor, in percent of the edge, once the
+    /// shelf is full: it shrinks no further, and the App Bar
+    /// scrolls instead.
+    public var minimum: CGFloat = 40
     /// Depth of the strip (pt): 40 on every screen class (owner
     /// ruling 2026-09-13, #1359; `BarThicknessDefaultTests`).
     public var thickness: CGFloat = 40
@@ -48,6 +49,29 @@ public struct KiwiShelf: Sendable, Equatable {
     public var itemGap: CGFloat = 6
     /// Font size in pt; 0 = auto, each bar scaling with thickness.
     public var fontSize: CGFloat = 0
+    /// App icon rendering: native image or App Font glyph (#294).
+    public var iconSource: BarAppIconSource = .appImage
+    /// Opacity (0.05–1) of UNTINTED idle content — emoji and app
+    /// images, which keep their own colours
+    /// (`BarAccent.untintedAlpha`). Tinted idle identifiers take
+    /// `idleItemAlpha` instead.
+    public var dimFactor: CGFloat = BarAccent.untintedAlpha
+    /// Item text and glyph colour. The colour defaults are
+    /// mirrored as examples in docs/lua-reference.md — change both.
+    public var itemColor = "#EAF3EE"
+    /// Active item colour.
+    public var activeItemColor = "#8DB354"
+    /// The active indicator's colour, both bars' (#1517).
+    public var highlightColor = "#8DB354"
+    /// Hover fill and item colours on non-active items.
+    public var hoverFillColor = "#AACB5D80"
+    public var hoverItemColor = "#EAF3EE"
+    /// The plate's one fill (#660, retuned by #755;
+    /// `PaletteBarFillTests`).
+    public var fillColor = "#14201CB3"
+    /// Group count badge colours (#955).
+    public var groupBadgeColor = "#636366"
+    public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}
 
@@ -57,8 +81,13 @@ public struct KiwiShelf: Sendable, Equatable {
     public static let minThickness: CGFloat = 20
     /// A margin's floor (#1516): flush.
     public static let minMargin: CGFloat = 0
-    /// Bounds of `share` in percent.
-    public static let shareRange: ClosedRange<CGFloat> = 20...80
+    /// Bounds of `minimum` in percent.
+    public static let minimumRange: ClosedRange<CGFloat> = 20...80
+    /// Alpha of `itemColor` on an idle Space identifier — a rule,
+    /// not a colour (#1517): at it every bundled palette's idle
+    /// identifier holds 2.2:1 on its plate over white and black
+    /// wallpaper (`IdleItemContrastTests`).
+    public static let idleItemAlpha: CGFloat = 0.6
 
     /// The depth the shelf reserves off its edge — outer margin,
     /// strip and inner margin (#1516).
@@ -84,11 +113,11 @@ public struct KiwiShelf: Sendable, Equatable {
         !hasBox && backgroundFit == .full
     }
 
-    /// `share` clamped to `shareRange`.
-    public var resolvedShare: CGFloat {
+    /// `minimum` clamped to `minimumRange`.
+    public var resolvedMinimum: CGFloat {
         min(
-            max(share, Self.shareRange.lowerBound),
-            Self.shareRange.upperBound
+            max(minimum, Self.minimumRange.lowerBound),
+            Self.minimumRange.upperBound
         )
     }
 

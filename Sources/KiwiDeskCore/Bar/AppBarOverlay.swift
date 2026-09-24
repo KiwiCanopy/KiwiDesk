@@ -208,9 +208,7 @@ public final class AppBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex
-            // "gap" indicator: focused window slot stays empty.
-            view.isHidden =
-                active && style.activeIndicator == .gap
+            view.isHidden = false
             view.configure(
                 id: item.id,
                 name: item.name,

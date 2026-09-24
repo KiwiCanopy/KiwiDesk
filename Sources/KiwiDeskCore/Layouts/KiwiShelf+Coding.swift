@@ -13,7 +13,7 @@ extension KiwiShelf {
         case edge
         case alignment
         case order
-        case share
+        case minimum
         case thickness
         case outerMargin = "outer_margin"
         case innerMargin = "inner_margin"
@@ -23,6 +23,16 @@ extension KiwiShelf {
         case cornerRoundness = "corner_roundness"
         case itemGap = "item_gap"
         case fontSize = "font_size"
+        case iconSource = "icon_source"
+        case dimFactor = "dim_factor"
+        case itemColor = "item_color"
+        case activeItemColor = "active_item_color"
+        case highlightColor = "highlight_color"
+        case hoverFillColor = "hover_fill_color"
+        case hoverItemColor = "hover_item_color"
+        case fillColor = "fill_color"
+        case groupBadgeColor = "group_badge_color"
+        case groupBadgeTextColor = "group_badge_text_color"
     }
 
     /// Decodes a shelf, a missing key taking its default.
@@ -38,9 +48,9 @@ extension KiwiShelf {
         order =
             try c.decodeIfPresent(Order.self, forKey: .order)
             ?? d.order
-        share =
-            try c.decodeIfPresent(CGFloat.self, forKey: .share)
-            ?? d.share
+        minimum =
+            try c.decodeIfPresent(CGFloat.self, forKey: .minimum)
+            ?? d.minimum
         thickness = max(
             Self.minThickness,
             try c.decodeIfPresent(CGFloat.self, forKey: .thickness)
@@ -80,5 +90,38 @@ extension KiwiShelf {
         fontSize =
             try c.decodeIfPresent(CGFloat.self, forKey: .fontSize)
             ?? d.fontSize
+        iconSource =
+            try c.decodeIfPresent(
+                BarAppIconSource.self,
+                forKey: .iconSource
+            ) ?? d.iconSource
+        dimFactor = AppBarStyle.clampDim(
+            try c.decodeIfPresent(CGFloat.self, forKey: .dimFactor)
+                ?? d.dimFactor
+        )
+        try decodeColors(from: c)
+    }
+
+    private mutating func decodeColors(
+        from c: KeyedDecodingContainer<CodingKeys>
+    ) throws {
+        let d = Self()
+        func color(
+            _ key: CodingKeys,
+            _ fallback: String
+        ) throws -> String {
+            try c.decodeIfPresent(String.self, forKey: key) ?? fallback
+        }
+        itemColor = try color(.itemColor, d.itemColor)
+        activeItemColor = try color(.activeItemColor, d.activeItemColor)
+        highlightColor = try color(.highlightColor, d.highlightColor)
+        hoverFillColor = try color(.hoverFillColor, d.hoverFillColor)
+        hoverItemColor = try color(.hoverItemColor, d.hoverItemColor)
+        fillColor = try color(.fillColor, d.fillColor)
+        groupBadgeColor = try color(.groupBadgeColor, d.groupBadgeColor)
+        groupBadgeTextColor = try color(
+            .groupBadgeTextColor,
+            d.groupBadgeTextColor
+        )
     }
 }

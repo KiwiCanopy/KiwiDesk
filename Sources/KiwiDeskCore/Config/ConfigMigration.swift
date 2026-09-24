@@ -44,6 +44,7 @@ public enum ConfigMigration {
         migratingTrackLimitCount,
         migratingProfileBindingLists,
         migratingBarsOntoShelf,
+        migratingPalettesOntoShelf,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).

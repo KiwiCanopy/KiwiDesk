@@ -22,53 +22,10 @@ extension APIReference {
                 + "shows, longer ones ending in an ellipsis.",
             .integer("characters")
         ),
-        "set_icon_source": APIRecord(
-            "Sets whether icons come from the app image or the "
-                + "bundled glyph font.",
-            .choice("source", BarAppIconSource.self)
-        ),
-        "set_dim_factor": APIRecord(
-            "Sets the opacity of an inactive item's untinted "
-                + "icon.",
-            .number("factor")
-        ),
         "set_group_adjacent_windows": APIRecord(
             "Collapses adjacent same-app windows into one item "
                 + "with a count badge.",
             .boolean("enabled")
-        ),
-        "set_item_color": APIRecord(
-            "Sets an item's text and glyph color.",
-            .color("hex")
-        ),
-        "set_fill_color": APIRecord(
-            "Sets the fill under the items — a box each, or the "
-                + "shared plate.",
-            .color("hex")
-        ),
-        "set_active_item_color": APIRecord(
-            "Sets the text and glyph color of the focused item.",
-            .color("hex")
-        ),
-        "set_highlight_color": APIRecord(
-            "Sets the color of the active indicator.",
-            .color("hex")
-        ),
-        "set_hover_fill_color": APIRecord(
-            "Sets the hover fill on clickable items.",
-            .color("hex")
-        ),
-        "set_hover_item_color": APIRecord(
-            "Sets an item's text color while hovered.",
-            .color("hex")
-        ),
-        "set_group_badge_color": APIRecord(
-            "Sets the count badge's background color.",
-            .color("hex")
-        ),
-        "set_group_badge_text_color": APIRecord(
-            "Sets the count badge's text color.",
-            .color("hex")
         ),
     ]
 }

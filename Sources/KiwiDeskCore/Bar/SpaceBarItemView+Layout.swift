@@ -272,8 +272,6 @@ extension SpaceBarItemView {
                     height: bounds.height
                 )
             }
-        case .gap:
-            accent.frame = .zero
         }
     }
 }

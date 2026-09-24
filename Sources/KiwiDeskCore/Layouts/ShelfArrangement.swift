@@ -6,9 +6,11 @@ import CoreGraphics
 /// states a placement the engine does not make (gui.md, #702).
 ///
 /// A lone bar spans the edge and sits where `alignment` puts it.
-/// Two bars take opposite ends in `order`, each hugging its own
-/// end; the edge splits by `share` only once BOTH need more than
-/// their share, and a bar that needs less gives the rest back.
+/// Two bars are one joined plate of two sections in `order`,
+/// placed as a unit by `alignment`: each section is its need
+/// while both fit; once the shelf is full the Space section
+/// shrinks, never below the Space Bar minimum, and the App
+/// section takes the rest and scrolls.
 public struct ShelfArrangement: Equatable, Sendable {
     /// One bar's segment: `offset` and `length` along the edge
     /// from its start (left on a horizontal edge, top on a
@@ -63,34 +65,39 @@ public struct ShelfArrangement: Equatable, Sendable {
         case (nil, .some):
             return ShelfArrangement(app: lone(whole, shelf))
         case (.some(let spaceNeed), .some(let appNeed)):
-            let spacesFirst = shelf.order == .spacesFirst
             let gutter = max(shelf.itemGap, 0)
             let room = max(whole - gutter, 0)
-            let firstNeed = spacesFirst ? spaceNeed : appNeed
-            let secondNeed = spacesFirst ? appNeed : spaceNeed
-            let spaceShare = shelf.resolvedShare / 100
-            let firstShare = spacesFirst ? spaceShare : 1 - spaceShare
-            let first = firstLength(
+            let spaceLength = spaceSection(
                 room: room,
-                firstNeed: firstNeed,
-                secondNeed: secondNeed,
-                firstShare: firstShare
+                spaceNeed: spaceNeed,
+                appNeed: appNeed,
+                floor: room * shelf.resolvedMinimum / 100
             )
-            let leading = Slot(offset: 0, length: first, alignment: .start)
-            let trailing = Slot(
-                offset: first + gutter,
-                length: room - first,
+            let appLength = min(appNeed, room - spaceLength)
+            let unit = spaceLength + gutter + appLength
+            let start = lead(unit, in: whole, shelf.alignment)
+            let spacesFirst = shelf.order == .spacesFirst
+            let firstLength = spacesFirst ? spaceLength : appLength
+            let first = Slot(
+                offset: start,
+                length: firstLength,
                 alignment: .end
             )
+            let second = Slot(
+                offset: start + firstLength + gutter,
+                length: spacesFirst ? appLength : spaceLength,
+                alignment: .start
+            )
             return spacesFirst
-                ? ShelfArrangement(space: leading, app: trailing)
-                : ShelfArrangement(space: trailing, app: leading)
+                ? ShelfArrangement(space: first, app: second)
+                : ShelfArrangement(space: second, app: first)
         }
     }
 
-    /// Whether the Space Bar sits somewhere else once an App Bar
-    /// joins it — the trade-off the alignment picker states — and
-    /// which end it moves to. Nil where it stays put.
+    /// Whether the Space section moves once an App Bar joins it —
+    /// the trade-off the alignment picker states — as the one
+    /// alignment that would hold it still: the plate anchored at
+    /// the Space section's own end. Nil where it stays put.
     public static func spaceBarMoves(
         shelf: KiwiShelf
     ) -> KiwiShelf.Alignment? {
@@ -106,24 +113,29 @@ public struct ShelfArrangement: Equatable, Sendable {
         Slot(offset: 0, length: length, alignment: shelf.alignment)
     }
 
-    /// The first bar's length: each bar gets what it needs while
-    /// both fit; past that the bar needing less than its share
-    /// keeps its need and the other takes the rest, and only when
-    /// both overflow does `share` decide.
-    private static func firstLength(
+    /// The Space section's length: its need while both fit;
+    /// past that it gives way to the App section down to `floor`
+    /// and no further — never longer than its need.
+    private static func spaceSection(
         room: CGFloat,
-        firstNeed: CGFloat,
-        secondNeed: CGFloat,
-        firstShare: CGFloat
+        spaceNeed: CGFloat,
+        appNeed: CGFloat,
+        floor: CGFloat
     ) -> CGFloat {
-        let firstShareLength = room * firstShare
-        if firstNeed + secondNeed <= room {
-            return min(max(firstShareLength, firstNeed), room - secondNeed)
+        min(spaceNeed, max(floor, room - appNeed), room)
+    }
+
+    /// Where a run `length` long starts on an edge `whole` long.
+    private static func lead(
+        _ length: CGFloat,
+        in whole: CGFloat,
+        _ alignment: KiwiShelf.Alignment
+    ) -> CGFloat {
+        let slack = max(whole - length, 0)
+        switch alignment {
+        case .start: return 0
+        case .center: return slack / 2
+        case .end: return slack
         }
-        if firstNeed <= firstShareLength { return firstNeed }
-        if secondNeed <= room - firstShareLength {
-            return room - secondNeed
-        }
-        return firstShareLength
     }
 }

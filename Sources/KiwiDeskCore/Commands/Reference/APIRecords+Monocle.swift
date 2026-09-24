@@ -54,57 +54,10 @@ extension APIReference {
                 + "layout.",
             .integer("characters")
         ),
-        "set_app_bar_icon_source": APIRecord(
-            "Overrides where the App Bar's icons come from for "
-                + "this layout.",
-            .choice("source", BarAppIconSource.self)
-        ),
-        "set_app_bar_dim_factor": APIRecord(
-            "Overrides the App Bar's inactive-icon opacity for "
-                + "this layout.",
-            .number("factor")
-        ),
         "set_app_bar_group_adjacent_windows": APIRecord(
             "Overrides same-app window grouping in the App Bar "
                 + "for this layout.",
             .boolean("enabled")
-        ),
-        "set_app_bar_item_color": APIRecord(
-            "Overrides the App Bar's item color for this layout.",
-            .color("hex")
-        ),
-        "set_app_bar_fill_color": APIRecord(
-            "Overrides the App Bar's fill color for this layout.",
-            .color("hex")
-        ),
-        "set_app_bar_active_item_color": APIRecord(
-            "Overrides the App Bar's focused-item color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_highlight_color": APIRecord(
-            "Overrides the App Bar's indicator color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_hover_fill_color": APIRecord(
-            "Overrides the App Bar's hover fill for this layout.",
-            .color("hex")
-        ),
-        "set_app_bar_hover_item_color": APIRecord(
-            "Overrides the App Bar's hover text color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_group_badge_color": APIRecord(
-            "Overrides the App Bar's count badge color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_group_badge_text_color": APIRecord(
-            "Overrides the App Bar's badge text color for this "
-                + "layout.",
-            .color("hex")
         ),
     ]
 }
