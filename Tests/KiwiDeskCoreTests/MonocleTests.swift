@@ -15,7 +15,8 @@ private func ids(_ n: Int) -> [WindowID] {
 
 private func makeContext(
     bounds: CGRect = CGRect(x: 0, y: 0, width: 1920, height: 1080),
-    monocle: (inout MonocleParams) -> Void = { _ in }
+    monocle: (inout MonocleParams) -> Void = { _ in },
+    shelf: (inout KiwiShelf) -> Void = { _ in }
 ) -> LayoutContext {
     var context = LayoutContext(
         bounds: bounds,
@@ -23,6 +24,7 @@ private func makeContext(
     )
     // Pinned (#660): the strip arithmetic below reasons from it.
     context.appBarStyle.thickness = 32
+    shelf(&context.appBarStyle.shelf)
     monocle(&context.monocle)
     return context
 }
@@ -50,10 +52,8 @@ struct MonocleGeometryTests {
         ]
     )
     func stripCarving(edge: AppBarEdge) throws {
-        // The edge is stored absolute (#293) — set it directly.
-        let context = makeContext {
-            $0.appBar.edge = edge
-        }
+        // The edge is the shelf's, stored absolute (#293, #1517).
+        let context = makeContext(shelf: { $0.edge = edge })
         let usable = context.usable
         let bounds = context.bounds
         let bar = try #require(
@@ -91,32 +91,25 @@ struct MonocleGeometryTests {
         }
     }
 
-    @Test("Stored edge resolves absolute, override beats global")
+    @Test("The shelf's edge resolves absolute, orientation aside")
     func edgeResolves() {
         var params = MonocleParams()
-        // No override: the global edge wins.
-        var global = AppBarStyle()
+        var global = AppBarLook()
         global.edge = .right
         #expect(
             params.resolvedBar(global: global).edge == .right
         )
-        // A per-layout override beats the global.
-        params.appBar.edge = .left
+        // Orientation never affects the edge (#293).
+        params.orientation = .vertical
         #expect(
-            params.resolvedBar(global: global).edge == .left
-        )
-        // Orientation no longer affects the edge (#293).
-        params.orientation = .horizontal
-        #expect(
-            params.resolvedBar(global: global).edge == .left
+            params.resolvedBar(global: global).edge == .right
         )
     }
 
     @Test("Oversized thickness never produces negative frames")
     func oversizedThickness() throws {
-        let context = makeContext {
-            $0.appBar.thickness = 5000
-        }
+        var context = makeContext()
+        context.appBarStyle.thickness = 5000
         let frames = layout.calculateGeometry(
             for: [w1],
             in: context
@@ -125,7 +118,10 @@ struct MonocleGeometryTests {
         #expect(window.width >= 0)
         #expect(window.height >= 0)
         let bar = try #require(
-            context.monocle.barFrame(in: context.bounds, global: AppBarStyle())
+            context.monocle.barFrame(
+                in: context.bounds,
+                global: context.appBarStyle
+            )
         )
         #expect(context.bounds.contains(bar))
     }
@@ -138,12 +134,7 @@ struct MonocleSettingsTests {
         var settings = TilingSettings()
         settings.monocle.orientation = .vertical
         settings.monocle.appBar.enabled = false
-        settings.monocle.appBar.edge = .bottom
-        settings.monocle.appBar.thickness = 48
-        settings.monocle.appBar.backgroundStyle = .plain
         settings.monocle.appBar.activeIndicator = .gap
-        settings.monocle.appBar.itemSize = 90
-        settings.monocle.appBar.itemGap = 0
         settings.monocle.appBar.content = .icon
         settings.monocle.appBar.highlightColor = "#FF0000"
         settings.monocle.appBar.groupAdjacentWindows = false
@@ -163,12 +154,12 @@ struct MonocleSettingsTests {
             try JSONSerialization.jsonObject(with: data)
                 as? [String: Any]
         )
-        // The global look sits top-level; item_size is a
+        // The global look sits top-level; title_cap is a
         // concrete field there.
         let global = try #require(
             json["app_bar"] as? [String: Any]
         )
-        #expect(global["item_size"] as? Double == 0)
+        #expect(global["title_cap"] as? Int == 10)
         // The per-layout bar under monocle only carries its
         // own enabled flag until a field is overridden.
         let layout = try #require(
@@ -181,7 +172,7 @@ struct MonocleSettingsTests {
             monocle["app_bar"] as? [String: Any]
         )
         #expect(bar["enabled"] as? Bool == true)
-        #expect(bar["item_size"] == nil)
+        #expect(bar["title_cap"] == nil)
     }
 
     @Test("Profiles without a monocle key keep the defaults")
@@ -194,7 +185,7 @@ struct MonocleSettingsTests {
         #expect(decoded.monocle == MonocleParams())
         #expect(decoded.monocle.appBar.enabled)
         // Nothing is overridden, so every look field inherits.
-        #expect(decoded.monocle.appBar.itemSize == nil)
+        #expect(decoded.monocle.appBar.titleCap == nil)
         #expect(decoded.monocle.orientation == .horizontal)
     }
 
@@ -202,16 +193,16 @@ struct MonocleSettingsTests {
     func lenientBarDecoding() throws {
         let json = #"""
             {"layout": {"monocle": {
-                "app_bar": {"item_size": 90}
+                "app_bar": {"title_cap": 30}
             }}}
             """#
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.monocle.appBar.itemSize == 90)
+        #expect(decoded.monocle.appBar.titleCap == 30)
         // Unlisted fields stay nil (inherit the global style).
-        #expect(decoded.monocle.appBar.thickness == nil)
+        #expect(decoded.monocle.appBar.content == nil)
         #expect(decoded.monocle.appBar.enabled)
     }
 }

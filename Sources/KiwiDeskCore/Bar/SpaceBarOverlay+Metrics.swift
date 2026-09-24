@@ -24,7 +24,7 @@ extension SpaceBarOverlay {
         strip: CGRect,
         viewport: CGFloat,
         horizontal: Bool,
-        alignment: SpaceBarStyle.Alignment,
+        alignment: KiwiShelf.Alignment,
         pad: CGFloat,
         scrollOffset: CGFloat
     ) -> RunMetrics {

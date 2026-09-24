@@ -69,7 +69,7 @@ func paintedAppBar(
     edge: AppBarEdge = .top,
     items: [AppBarOverlay.Item]
 ) -> AppBarManager.Bar {
-    var style = AppBarStyle()
+    var style = AppBarLook()
     style.content = content
     style.edge = edge
     // Pinned (tests.md #660): the default flipped on in #1369 and
@@ -95,7 +95,7 @@ func paintedSpaceBar(
     spaces: Int = 1,
     glass: Bool = false
 ) -> SpaceBarManager.Bar {
-    var style = SpaceBarStyle()
+    var style = SpaceBarLook()
     style.edge = edge
     style.showFrontApp = front != nil
     // Both pinned in BOTH arms (tests.md #660): the leaf's default

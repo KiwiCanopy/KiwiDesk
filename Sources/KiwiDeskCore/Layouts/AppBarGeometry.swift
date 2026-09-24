@@ -16,7 +16,7 @@ public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
 public enum AppBarGeometry {
     /// The strip the bar occupies in AX coordinates, `outer`
     /// points in from its edge (#1516) — every caller chooses,
-    /// the floor being the style's (`AppBarStyle.minMargin`).
+    /// the floor being the style's (`KiwiShelf.minMargin`).
     public static func barFrame(
         in bounds: CGRect,
         edge: AppBarEdge,
@@ -161,9 +161,12 @@ public protocol AppBarHosting {
 extension AppBarHosting {
     /// Resolves layout bar overrides against global style.
     public func resolvedBar(
-        global: AppBarStyle
-    ) -> AppBarStyle {
-        appBar.resolved(with: global)
+        global: AppBarLook
+    ) -> AppBarLook {
+        AppBarLook(
+            shelf: global.shelf,
+            bar: appBar.resolved(with: global.bar)
+        )
     }
 
     /// The bar's strip in `bounds` — the layout bounds BEFORE
@@ -172,7 +175,7 @@ extension AppBarHosting {
     /// disabled.
     public func barFrame(
         in bounds: CGRect,
-        global: AppBarStyle
+        global: AppBarLook
     ) -> CGRect? {
         guard appBar.enabled else { return nil }
         let style = resolvedBar(global: global)
@@ -193,7 +196,7 @@ extension AppBarHosting {
     public func windowFrame(
         in bounds: CGRect,
         outer: Gaps.Outer,
-        global: AppBarStyle
+        global: AppBarLook
     ) -> CGRect {
         let usable = LayoutContext.usable(bounds, outer: outer)
         guard appBar.enabled else { return usable }

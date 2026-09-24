@@ -18,23 +18,11 @@ struct AppBarSettingError: Error, Equatable,
 
 /// Parsed App Bar command setting representation.
 enum AppBarCommandSetting {
-    case edge(AppBarEdge)
-    case alignment(AppBarStyle.BarAlignment)
-    case thickness(CGFloat)
-    case outerMargin(CGFloat)
-    case innerMargin(CGFloat)
-    case backgroundStyle(AppBarStyle.BackgroundStyle)
-    case liquidGlass(Bool)
-    case backgroundFit(AppBarStyle.BackgroundFit)
     case activeIndicator(AppBarStyle.ActiveIndicator)
-    case itemSize(CGFloat)
-    case itemGap(CGFloat)
     case content(AppBarStyle.Content)
     case titleCap(Int)
     case iconSource(BarAppIconSource)
     case groupAdjacentWindows(Bool)
-    case fontSize(CGFloat)
-    case cornerRoundness(CGFloat)
     case dimFactor(CGFloat)
     case itemColor(String)
     case fillColor(String)
@@ -68,31 +56,6 @@ enum AppBarCommandSetting {
         args: [JSONValue]
     ) -> Result<AppBarCommandSetting, AppBarSettingError>? {
         switch field {
-        case "edge":
-            return BarSettingChoice.value(
-                args,
-                AppBarEdge.self
-            ).map(Self.edge)
-        case "alignment":
-            return BarSettingChoice.value(
-                args,
-                AppBarStyle.BarAlignment.self
-            ).map(Self.alignment)
-        case "background_style":
-            return BarSettingChoice.value(
-                args,
-                AppBarStyle.BackgroundStyle.self
-            ).map(Self.backgroundStyle)
-        case "liquid_glass":
-            guard let flag = args.first?.boolValue else {
-                return .failure("expected boolean")
-            }
-            return .success(.liquidGlass(flag))
-        case "background_fit":
-            return BarSettingChoice.value(
-                args,
-                AppBarStyle.BackgroundFit.self
-            ).map(Self.backgroundFit)
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -124,14 +87,7 @@ enum AppBarCommandSetting {
         [String: (CGFloat) -> AppBarCommandSetting]
     {
         [
-            "thickness": Self.thickness,
-            "outer_margin": Self.outerMargin,
-            "inner_margin": Self.innerMargin,
-            "item_size": Self.itemSize,
-            "item_gap": Self.itemGap,
-            "font_size": Self.fontSize,
-            "corner_roundness": Self.cornerRoundness,
-            "dim_factor": Self.dimFactor,
+            "dim_factor": Self.dimFactor
         ]
     }
 
@@ -193,31 +149,13 @@ enum AppBarCommandSetting {
     /// Applies concrete setting to AppBarStyle.
     func apply(to style: inout AppBarStyle) {
         switch self {
-        case .edge(let value): style.edge = value
-        case .alignment(let value): style.alignment = value
-        case .thickness(let value):
-            style.thickness = max(AppBarStyle.minThickness, value)
-        case .outerMargin(let value):
-            style.outerMargin = max(AppBarStyle.minMargin, value)
-        case .innerMargin(let value):
-            style.innerMargin = max(AppBarStyle.minMargin, value)
-        case .backgroundStyle(let value):
-            style.backgroundStyle = value
-        case .liquidGlass(let value): style.liquidGlass = value
-        case .backgroundFit(let value):
-            style.backgroundFit = value
         case .activeIndicator(let value):
             style.activeIndicator = value
-        case .itemSize(let value): style.itemSize = value
-        case .itemGap(let value): style.itemGap = value
         case .content(let value): style.content = value
         case .titleCap(let value): style.titleCap = value
         case .iconSource(let value): style.iconSource = value
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
-        case .fontSize(let value): style.fontSize = value
-        case .cornerRoundness(let value):
-            style.cornerRoundness = value
         case .dimFactor(let value):
             style.dimFactor = AppBarStyle.clampDim(value)
         case .itemColor(let value): style.itemColor = value
@@ -239,30 +177,13 @@ enum AppBarCommandSetting {
     /// Writes the value into a layout's bar as an override.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
-        case .edge(let value): bar.edge = value
-        case .alignment(let value): bar.alignment = value
-        case .thickness(let value):
-            bar.thickness = max(AppBarStyle.minThickness, value)
-        case .outerMargin(let value):
-            bar.outerMargin = max(AppBarStyle.minMargin, value)
-        case .innerMargin(let value):
-            bar.innerMargin = max(AppBarStyle.minMargin, value)
-        case .backgroundStyle(let value): bar.backgroundStyle = value
-        case .liquidGlass(let value): bar.liquidGlass = value
-        case .backgroundFit(let value):
-            bar.backgroundFit = value
         case .activeIndicator(let value):
             bar.activeIndicator = value
-        case .itemSize(let value): bar.itemSize = value
-        case .itemGap(let value): bar.itemGap = value
         case .content(let value): bar.content = value
         case .titleCap(let value): bar.titleCap = value
         case .iconSource(let value): bar.iconSource = value
         case .groupAdjacentWindows(let value):
             bar.groupAdjacentWindows = value
-        case .fontSize(let value): bar.fontSize = value
-        case .cornerRoundness(let value):
-            bar.cornerRoundness = value
         case .dimFactor(let value):
             bar.dimFactor = AppBarStyle.clampDim(value)
         case .itemColor(let value): bar.itemColor = value

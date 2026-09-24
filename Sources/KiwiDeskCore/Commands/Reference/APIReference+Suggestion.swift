@@ -8,7 +8,8 @@ extension APIReference {
     public static func suggestion(
         for unknown: String
     ) -> String? {
-        closest(to: unknown, among: dispatchable)
+        if let replacement = retired[unknown] { return replacement }
+        return closest(to: unknown, among: dispatchable)
     }
 
     /// Nearest candidate within a typo's worth of edits. Shared

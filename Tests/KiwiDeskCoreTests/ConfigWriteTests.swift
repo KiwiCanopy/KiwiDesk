@@ -29,7 +29,7 @@ private func richConfig() -> GuiConfig {
     config.settings.scrolling.slotSize = .points(900)
     config.settings.grid.columns = 4
     config.settings.grid.rows = 3
-    config.settings.monocle.appBar.thickness = 40
+    config.settings.kiwishelf.thickness = 44
     config.settings.monocle.appBar.itemColor = "#112233"
     config.settings.dragCornerRadius = 12
     config.settings.mouseResize = .snapBack

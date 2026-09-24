@@ -14,23 +14,11 @@ import Foundation
 enum AppBarFixtures {
     static func everyGlobalField() -> AppBarStyle {
         var style = AppBarStyle()
-        style.edge = .left
-        style.alignment = .end
-        style.thickness = 44
-        style.outerMargin = 4
-        style.innerMargin = 6
-        style.backgroundStyle = .boxed
-        style.liquidGlass = false
-        style.backgroundFit = .full
         style.activeIndicator = .gap
-        style.itemSize = 120
-        style.itemGap = 3
         style.content = .title
         style.titleCap = 40
         style.iconSource = .appFont
         style.groupAdjacentWindows = false
-        style.fontSize = 15
-        style.cornerRoundness = 5
         style.dimFactor = 0.3
         style.itemColor = "#010101"
         style.fillColor = "#020202"
@@ -46,27 +34,11 @@ enum AppBarFixtures {
     static func everyOverrideField() -> LayoutAppBar {
         var bar = LayoutAppBar()
         bar.enabled = false
-        bar.edge = .right
-        bar.alignment = .start
-        bar.thickness = 50
-        bar.outerMargin = 7
-        bar.innerMargin = 8
-        bar.backgroundStyle = .plain
-        // Differs from the global fixture (false) so resolve parity
-        // sees the override write.
-        bar.liquidGlass = true
-        // The global fixture uses .full, so the override must
-        // differ for the resolve parity to see the write.
-        bar.backgroundFit = .hug
         bar.activeIndicator = .outline
-        bar.itemSize = 88
-        bar.itemGap = 9
         bar.content = .iconAndTitle
         bar.titleCap = 60
         bar.iconSource = .appImage
         bar.groupAdjacentWindows = true
-        bar.fontSize = 20
-        bar.cornerRoundness = 12
         bar.dimFactor = 0.5
         bar.itemColor = "#111111"
         bar.fillColor = "#222222"
@@ -77,5 +49,24 @@ enum AppBarFixtures {
         bar.groupBadgeColor = "#999999"
         bar.groupBadgeTextColor = "#AAAAAA"
         return bar
+    }
+
+    /// Every `KiwiShelf` field off its default (`KiwiShelfParityTests`).
+    static func everyShelfField() -> KiwiShelf {
+        var shelf = KiwiShelf()
+        shelf.edge = .left
+        shelf.alignment = .end
+        shelf.order = .appsFirst
+        shelf.share = 60
+        shelf.thickness = 44
+        shelf.outerMargin = 4
+        shelf.innerMargin = 6
+        shelf.backgroundStyle = .boxed
+        shelf.liquidGlass = false
+        shelf.backgroundFit = .full
+        shelf.cornerRoundness = 5
+        shelf.itemGap = 3
+        shelf.fontSize = 15
+        return shelf
     }
 }

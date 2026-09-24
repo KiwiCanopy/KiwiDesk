@@ -26,8 +26,8 @@ struct BarMarginTests {
         edge: AppBarEdge,
         outer: CGFloat,
         inner: CGFloat
-    ) -> SpaceBarStyle {
-        var style = SpaceBarStyle()
+    ) -> SpaceBarLook {
+        var style = SpaceBarLook()
         style.edge = edge
         // Pinned (#660): the sums below reason from it.
         style.thickness = 32
@@ -146,19 +146,6 @@ struct BarMarginTests {
         #expect(area.maxY == visible.maxY - 5 - 32 - 7 - 10)
     }
 
-    @Test("A per-layout override moves the margins")
-    func layoutOverrideResolves() {
-        var global = AppBarStyle()
-        global.outerMargin = 3
-        var bar = LayoutAppBar()
-        bar.innerMargin = 9
-        let resolved = bar.resolved(with: global)
-        #expect(resolved.outerMargin == 3)
-        #expect(resolved.innerMargin == 9)
-        bar.outerMargin = -4
-        #expect(bar.resolved(with: global).outerMargin == 0)
-    }
-
     /// The issue's stacking picture, both bars on one edge:
     /// |SB outer|Space Bar|SB inner|AB outer|App Bar|AB inner|gap|.
     @Test("Both bars on one edge stack outermost-first, margins adding")
@@ -198,13 +185,13 @@ struct BarMarginTests {
     func decodingDefaultsAndFloors() throws {
         let decoder = JSONDecoder()
         let bare = try decoder.decode(
-            AppBarStyle.self,
+            KiwiShelf.self,
             from: Data("{}".utf8)
         )
         #expect(bare.outerMargin == 0)
         #expect(bare.innerMargin == 0)
         let negative = try decoder.decode(
-            SpaceBarStyle.self,
+            KiwiShelf.self,
             from: Data(
                 #"{"outer_margin": -3, "inner_margin": -1}"#.utf8
             )
@@ -242,8 +229,8 @@ struct BarMarginCommandTests {
                 args: [.number(4)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.appBarStyle.outerMargin == 12)
-        #expect(core.tiler.settings.appBarStyle.innerMargin == 4)
+        #expect(core.tiler.settings.kiwishelf.outerMargin == 12)
+        #expect(core.tiler.settings.kiwishelf.innerMargin == 4)
         #expect(
             core.execute(
                 "space_bar.set_outer_margin",
@@ -256,8 +243,8 @@ struct BarMarginCommandTests {
                 args: [.number(-2)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.outerMargin == 6)
-        #expect(core.tiler.settings.spaceBarStyle.innerMargin == 0)
+        #expect(core.tiler.settings.kiwishelf.outerMargin == 6)
+        #expect(core.tiler.settings.kiwishelf.innerMargin == 0)
         #expect(
             !core.execute(
                 "app_bar.set_outer_margin",
@@ -266,25 +253,21 @@ struct BarMarginCommandTests {
         )
     }
 
-    @Test("scroll and monocle override the App Bar's margins")
-    func layoutOverrides() {
+    @Test("The margins have no per-layout override (#1517)")
+    func layoutOverridesRetired() {
         let core = makeCore()
         #expect(
-            core.execute(
+            !core.execute(
                 "scroll.set_app_bar_outer_margin",
                 args: [.number(9)]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.outerMargin == 9
-        )
-        #expect(
-            core.execute(
+            !core.execute(
                 "monocle.set_app_bar_inner_margin",
                 args: [.number(3)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.monocle.appBar.innerMargin == 3)
-        #expect(core.tiler.settings.appBarStyle.outerMargin == 0)
+        #expect(core.tiler.settings.kiwishelf.outerMargin == 0)
     }
 }

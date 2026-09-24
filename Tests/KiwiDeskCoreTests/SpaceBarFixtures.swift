@@ -13,22 +13,10 @@ enum SpaceBarFixtures {
         var style = SpaceBarStyle()
         // Non-default: the bar ships enabled (QA 2026-07-19).
         style.enabled = false
-        style.edge = .bottom
-        style.alignment = .end
-        style.thickness = 44
-        style.outerMargin = 4
-        style.innerMargin = 6
-        style.itemSize = 120
-        style.itemGap = 3
-        style.fontSize = 15
         style.glyphCap = 8
-        style.titleCap = 40
+        style.frontAppTitleCap = 40
         style.iconSource = .appFont
-        style.backgroundStyle = .boxed
-        style.liquidGlass = false
-        style.backgroundFit = .full
         style.activeIndicator = .gap
-        style.cornerRoundness = 5
         style.dimFactor = 0.3
         style.activeDimFactor = 0.7
         style.showFrontApp = true

@@ -21,7 +21,7 @@ private func makeContext(
     // Bar on the left (edge is absolute since #293), carving
     // width, so top/bottom snapping is against the full usable
     // height.
-    context.scrolling.appBar.edge = .left
+    context.appBarStyle.edge = .left
     return context
 }
 

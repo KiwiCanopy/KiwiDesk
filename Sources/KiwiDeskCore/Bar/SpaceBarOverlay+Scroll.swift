@@ -32,7 +32,7 @@ extension SpaceBarOverlay {
         lengths: [CGFloat],
         gap: CGFloat,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         let maxOffset = max(total - viewport, 0)
         let overflowing = inset > 0

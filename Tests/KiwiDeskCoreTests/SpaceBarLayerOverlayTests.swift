@@ -20,7 +20,7 @@ struct SpaceBarLayerOverlayTests {
         edge: AppBarEdge = .top
     ) throws -> SpaceBarOverlay {
         LiquidGlassGate.override = { false }
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.backgroundStyle = .boxed
         style.liquidGlass = false
         style.edge = edge
@@ -122,7 +122,7 @@ struct SpaceBarLayerOverlayTests {
             apps: [],
             active: false,
             horizontal: true,
-            style: SpaceBarStyle(),
+            style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
                 floating: "#ffffff"
@@ -161,7 +161,7 @@ struct SpaceBarLayerOverlayTests {
             apps: [],
             active: false,
             horizontal: true,
-            style: SpaceBarStyle(),
+            style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
                 floating: "#ffffff"
@@ -224,7 +224,7 @@ struct SpaceBarLayerOverlayTests {
         #expect(!rule.isHidden)
         let layer = overlay.itemViews[0].frame
         let first = overlay.itemViews[1].frame
-        let gap = SpaceBarStyle().itemGap
+        let gap = SpaceBarLook().itemGap
         #expect(rule.frame.width == BarDivider.sectionThickness)
         #expect(rule.frame.height == barTitleStrip.height)
         #expect(rule.frame.minX == layer.maxX + gap)
@@ -250,7 +250,7 @@ struct SpaceBarLayerOverlayTests {
         #expect(!rule.isHidden)
         let layer = overlay.itemViews[0].frame
         let first = overlay.itemViews[1].frame
-        let gap = SpaceBarStyle().itemGap
+        let gap = SpaceBarLook().itemGap
         #expect(rule.frame.height == BarDivider.sectionThickness)
         #expect(rule.frame.width == 28)
         #expect(rule.frame.minY == layer.maxY + gap)

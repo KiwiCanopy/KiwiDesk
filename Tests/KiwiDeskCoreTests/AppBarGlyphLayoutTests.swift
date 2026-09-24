@@ -12,7 +12,7 @@ struct AppBarGlyphLayoutTests {
     private func makeView(
         thickness: CGFloat,
         glyph: String?,
-        style: AppBarStyle = AppBarStyle()
+        style: AppBarLook = AppBarLook()
     ) -> AppBarItemView {
         let view = AppBarItemView(
             frame: NSRect(
@@ -78,7 +78,7 @@ struct AppBarGlyphLayoutTests {
             count: 1,
             active: false,
             horizontal: true,
-            style: AppBarStyle()
+            style: AppBarLook()
         )
         view.layout()
         #expect(view.label.stringValue == "Downloads")
@@ -86,7 +86,7 @@ struct AppBarGlyphLayoutTests {
 
     @Test("Name-only content shows neither glyph nor image")
     func nameOnlyHidesGlyph() {
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.content = .title
         let view = makeView(
             thickness: 32,
@@ -114,7 +114,7 @@ struct AppBarGlyphLayoutTests {
         variant: (AppBarStyle.Content, CGFloat)
     ) {
         let thickness: CGFloat = 32
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.content = variant.0
         style.fontSize = variant.1
         let items = [
@@ -194,7 +194,7 @@ struct AppBarGlyphLayoutTests {
             count: 1,
             active: false,
             horizontal: false,
-            style: AppBarStyle()
+            style: AppBarLook()
         )
         view.layout()
         #expect(view.label.isHidden)
@@ -219,7 +219,7 @@ struct AppBarGlyphLayoutTests {
     /// inherits the answer (review 2026-08-20).
     @Test("An icon-only item hides its label")
     func iconOnlyHidesLabel() {
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.content = .icon
         let view = makeView(
             thickness: 32,

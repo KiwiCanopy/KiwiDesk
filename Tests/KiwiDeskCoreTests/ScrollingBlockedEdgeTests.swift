@@ -189,7 +189,7 @@ struct ScrollingBlockedEdgeTests {
         // Bar on the left (edge is absolute since #293), carving
         // width, so bottom snapping is against the full usable
         // height — the vertical suite's fixture.
-        context.scrolling.appBar.edge = .left
+        context.appBarStyle.edge = .left
         context.scrolling.orientation = .vertical
         context.scrolling.slotSize = .points(400)
         // Pin the floor the slot resolution reasons from (#660).

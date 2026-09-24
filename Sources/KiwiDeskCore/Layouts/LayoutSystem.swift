@@ -116,7 +116,7 @@ public struct LayoutContext: Sendable {
     public var monocle: MonocleParams
     public var track: TrackParams
     /// Global indicator bar style for strip reservation.
-    public var appBarStyle: AppBarStyle
+    public var appBarStyle: AppBarLook
 
     public init(
         bounds: CGRect,
@@ -136,7 +136,7 @@ public struct LayoutContext: Sendable {
         grid: GridParams = GridParams(),
         monocle: MonocleParams = MonocleParams(),
         track: TrackParams = TrackParams(),
-        appBarStyle: AppBarStyle = AppBarStyle()
+        appBarStyle: AppBarLook = AppBarLook()
     ) {
         self.bounds = bounds
         self.gaps = gaps

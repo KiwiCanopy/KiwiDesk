@@ -95,7 +95,7 @@ extension KiwiCore {
         settings: TilingSettings
     ) -> AppBarManager.Bar? {
         let style = host.resolvedBar(
-            global: settings.appBarStyle
+            global: settings.appBarGlobalLook
         )
         // Space-first reservation (#293): the App Bar carves
         // inside the frame the Space Bar already inset — same
@@ -112,7 +112,7 @@ extension KiwiCore {
         guard !groups.isEmpty,
             let strip = host.barFrame(
                 in: settings.layoutBounds(from: bounds),
-                global: settings.appBarStyle
+                global: settings.appBarGlobalLook
             )
         else { return nil }
         return AppBarManager.Bar(
@@ -170,7 +170,7 @@ extension KiwiCore {
             let host = barHost(for: space.mode)
         else { return }
         let style = host.resolvedBar(
-            global: tiler.settings.appBarStyle
+            global: tiler.settings.appBarGlobalLook
         )
         var groups = barGroups(
             in: space,

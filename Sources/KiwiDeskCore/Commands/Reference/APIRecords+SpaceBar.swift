@@ -12,43 +12,6 @@ extension APIReference {
             "Shows or hides the Space Bar.",
             .boolean("enabled")
         ),
-        "set_edge": APIRecord(
-            "Sets the screen edge the bar occupies.",
-            .choice("edge", AppBarEdge.self)
-        ),
-        "set_alignment": APIRecord(
-            "Places the Space items along the bar.",
-            .choice("alignment", AppBarStyle.BarAlignment.self)
-        ),
-        "set_thickness": APIRecord(
-            "Sets the bar's thickness in points, carved out of "
-                + "the layout.",
-            .number("thickness")
-        ),
-        "set_outer_margin": APIRecord(
-            "Sets the bar's distance from the screen border in "
-                + "points; 0 is flush.",
-            .number("margin")
-        ),
-        "set_inner_margin": APIRecord(
-            "Adds points on the bar's window side, on top of the "
-                + "windows' outer gap.",
-            .number("margin")
-        ),
-        "set_item_size": APIRecord(
-            "Pins every Space item to one length along the bar; "
-                + "0 is auto.",
-            .number("size")
-        ),
-        "set_item_gap": APIRecord(
-            "Sets the spacing between Space items in points.",
-            .number("gap")
-        ),
-        "set_font_size": APIRecord(
-            "Pins the item font size in points; 0 scales with "
-                + "thickness.",
-            .number("size")
-        ),
         "set_glyph_cap": APIRecord(
             "Sets how many app-group glyphs a Space item shows.",
             .integer("glyphs")
@@ -58,32 +21,12 @@ extension APIReference {
                 + "bundled glyph font.",
             .choice("source", BarAppIconSource.self)
         ),
-        "set_background_style": APIRecord(
-            "Sets where the background is drawn: a box per item "
-                + "or one shared strip.",
-            .choice("style", AppBarStyle.BackgroundStyle.self)
-        ),
-        "set_liquid_glass": APIRecord(
-            "Lays the macOS 26 Liquid Glass finish over the "
-                + "Space items.",
-            .boolean("enabled")
-        ),
-        "set_background_fit": APIRecord(
-            "Sets how far the shared background strip reaches "
-                + "under the items.",
-            .choice("fit", AppBarStyle.BackgroundFit.self)
-        ),
         "set_active_indicator": APIRecord(
             "Sets how the active Space is marked.",
             .choice(
                 "indicator",
                 AppBarStyle.ActiveIndicator.self
             )
-        ),
-        "set_corner_roundness": APIRecord(
-            "Sets the corner rounding of boxed items, as a "
-                + "percentage of the maximum.",
-            .number("percent")
         ),
         "set_dim_factor": APIRecord(
             "Sets the opacity of everything on an inactive Space.",
@@ -99,9 +42,9 @@ extension APIReference {
                 + "frontmost window.",
             .boolean("enabled")
         ),
-        "set_title_cap": APIRecord(
+        "set_front_app_title_cap": APIRecord(
             "Sets how many characters of the front window's "
-                + "title are shown.",
+                + "title the front-app segment shows.",
             .integer("characters")
         ),
         "set_hide_empty": APIRecord(

@@ -36,7 +36,7 @@ struct SpaceBarCommandTests {
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.spaceBarStyle.edge == .bottom
+            core.tiler.settings.kiwishelf.edge == .bottom
         )
         #expect(
             core.execute(

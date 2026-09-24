@@ -23,48 +23,40 @@ struct AppBarOverrideTests {
     @Test("Unset fields inherit the global style")
     func inheritance() {
         var global = AppBarStyle()
-        global.thickness = 20
-        global.backgroundStyle = .plain
+        global.content = .icon
         global.itemColor = "#010203"
-        let bar = LayoutAppBar()
-        let resolved = bar.resolved(with: global)
-        #expect(resolved.thickness == 20)
-        #expect(resolved.backgroundStyle == .plain)
+        let resolved = LayoutAppBar().resolved(with: global)
+        #expect(resolved.content == .icon)
         #expect(resolved.itemColor == "#010203")
     }
 
     @Test("Set fields override just themselves")
     func overrideOne() {
         var global = AppBarStyle()
-        global.thickness = 20
-        global.backgroundStyle = .plain
+        global.content = .icon
+        global.itemColor = "#010203"
         var bar = LayoutAppBar()
-        bar.thickness = 50
+        bar.content = .title
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
-        #expect(resolved.thickness == 50)
-        #expect(resolved.backgroundStyle == .plain)
+        #expect(resolved.content == .title)
+        #expect(resolved.itemColor == "#010203")
     }
 
-    @Test("Stored edge is absolute; override beats global")
+    @Test("The shelf's edge is absolute, orientation aside")
     func edgeResolves() {
         var scroll = ScrollingParams()
         // No override: the global edge wins, orientation is
         // irrelevant (#293 — the edge is stored absolute).
-        var global = AppBarStyle()
+        var global = AppBarLook()
         global.edge = .bottom
         scroll.orientation = .vertical
         #expect(
             scroll.resolvedBar(global: global).edge == .bottom
         )
-        // A per-layout override beats the global on any axis.
-        scroll.appBar.edge = .right
-        #expect(
-            scroll.resolvedBar(global: global).edge == .right
-        )
         scroll.orientation = .horizontal
         #expect(
-            scroll.resolvedBar(global: global).edge == .right
+            scroll.resolvedBar(global: global).edge == .bottom
         )
     }
 
@@ -110,7 +102,7 @@ struct ScrollingBarGeometryTests {
         context.appBarStyle.thickness = 32
         context.scrolling.orientation = orientation
         context.scrolling.appBar.enabled = barEnabled
-        context.scrolling.appBar.edge = edge
+        context.appBarStyle.edge = edge
         return context
     }
 
@@ -229,7 +221,7 @@ struct AppBarCommandTests {
                 args: [.number(44)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.appBarStyle.thickness == 44)
+        #expect(core.tiler.settings.kiwishelf.thickness == 44)
         #expect(
             core.execute(
                 "app_bar.set_background_style",
@@ -237,7 +229,7 @@ struct AppBarCommandTests {
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.appBarStyle.backgroundStyle
+            core.tiler.settings.kiwishelf.backgroundStyle
                 == .plain
         )
     }
@@ -257,18 +249,16 @@ struct AppBarCommandTests {
         )
         #expect(
             core.execute(
-                "scroll.set_app_bar_background_style",
-                args: [.string("plain")]
+                "scroll.set_app_bar_content",
+                args: [.string("icon")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.backgroundStyle
-                == .plain
+            core.tiler.settings.scrolling.appBar.content == .icon
         )
         // Untouched fields stay nil (inherit the global look).
         #expect(
-            core.tiler.settings.scrolling.appBar.thickness
-                == nil
+            core.tiler.settings.scrolling.appBar.titleCap == nil
         )
     }
 

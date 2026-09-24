@@ -9,7 +9,7 @@ extension SpaceBarOverlay {
         after cursor: CGFloat,
         strip: CGRect,
         nameBound: CGFloat,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         horizontal: Bool
     ) {
         guard let app else {
@@ -64,7 +64,7 @@ extension SpaceBarOverlay {
         _ app: SpaceBarItemView.App?,
         depth: CGFloat,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> CGFloat {
         guard let app else { return 0 }
         let pad = SpaceBarItemView.pad
@@ -123,7 +123,7 @@ extension SpaceBarOverlay {
         depth: CGFloat,
         cell: CGFloat,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> CGFloat {
         frontDivider.isHidden = false
         frontDivider.layer?.backgroundColor =
@@ -151,7 +151,7 @@ extension SpaceBarOverlay {
         cell: CGFloat,
         horizontal: Bool,
         accent: NSColor,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> CGFloat {
         let inset = (depth - cell) / 2
         let frame =
@@ -225,7 +225,7 @@ extension SpaceBarOverlay {
         viewport: CGFloat,
         horizontal: Bool,
         accent: NSColor,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         guard horizontal else {
             frontName.isHidden = true

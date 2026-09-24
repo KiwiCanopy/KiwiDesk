@@ -26,11 +26,11 @@ extension SpaceBarStyle {
         )
     }
 
-    /// Front-segment title cap clamped to shared range
+    /// Front-app title length clamped to the shared range
     /// (`AppBarStyle.titleCapRange`).
-    public var resolvedTitleCap: Int {
+    public var resolvedFrontAppTitleCap: Int {
         min(
-            max(titleCap, AppBarStyle.titleCapRange.lowerBound),
+            max(frontAppTitleCap, AppBarStyle.titleCapRange.lowerBound),
             AppBarStyle.titleCapRange.upperBound
         )
     }
@@ -42,31 +42,5 @@ extension SpaceBarStyle {
             Self.springDelayRange.upperBound
         )
         return TimeInterval(ms) / 1000
-    }
-
-    /// Calculated font size for space identifier based on bar depth.
-    public func identifierFontSize(
-        forDepth depth: CGFloat
-    ) -> CGFloat {
-        let base = fontSize > 0 ? fontSize : depth * 0.5
-        return min(base, max(depth - 8, 8))
-    }
-
-    /// Scaled font size for app glyphs — a ratio of ONE ladder,
-    /// so item glyphs, front-app glyph and identifier can never
-    /// desync (two formulas rendered the same app at visibly
-    /// different sizes, QA 2026-07-19).
-    public func glyphFontSize(
-        forDepth depth: CGFloat
-    ) -> CGFloat {
-        identifierFontSize(forDepth: depth) * 0.9
-    }
-
-    /// Resolves corner radius proportional to bar thickness
-    /// (`AppBarStyle.resolvedCornerRadius`).
-    public func resolvedCornerRadius(
-        forThickness thickness: CGFloat
-    ) -> CGFloat {
-        max(0, min(cornerRoundness, 100)) / 100 * (thickness / 2)
     }
 }

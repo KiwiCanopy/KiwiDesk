@@ -23,7 +23,7 @@ extension KiwiCore {
     func updateSpaceBar() {
         // The menu bar's stand-in rides the same refresh (#1413).
         defer { publishStatusSpaceMark() }
-        let style = tiler.settings.spaceBarStyle
+        let style = tiler.settings.spaceBarLook
         guard style.enabled else {
             spaceBars.sync([])
             return
@@ -41,7 +41,7 @@ extension KiwiCore {
     /// visible items.
     private func spaceBar(
         for display: Display,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> SpaceBarManager.Bar? {
         // Same fullscreen-space stand-down as the App Bar
         // (#670): the panel joins every space by construction,
@@ -112,7 +112,7 @@ extension KiwiCore {
     /// this guard chain (`SpaceBarManager.showsTitle(of:)`).
     func frontApp(
         display: DisplayID,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> (window: WindowID, app: SpaceBarItemView.App)? {
         guard style.showFrontApp,
             // SHOWN, not focused (#1214): the segment names
@@ -154,7 +154,7 @@ extension KiwiCore {
             ? nil
             : AppBarStyle.cappedTitle(
                 title,
-                to: style.resolvedTitleCap
+                to: style.resolvedFrontAppTitleCap
             )
         return (window: focused, app: app)
     }

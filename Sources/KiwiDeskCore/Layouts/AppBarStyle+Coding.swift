@@ -10,23 +10,11 @@ extension AppBarStyle {
     /// is load-bearing — `AppBarParityTests` reflects over
     /// `allCases`; do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case edge
-        case alignment
-        case thickness
-        case outerMargin = "outer_margin"
-        case innerMargin = "inner_margin"
-        case backgroundStyle = "background_style"
-        case liquidGlass = "liquid_glass"
-        case backgroundFit = "background_fit"
         case activeIndicator = "active_indicator"
-        case itemSize = "item_size"
-        case itemGap = "item_gap"
         case content
         case titleCap = "title_cap"
         case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
-        case fontSize = "font_size"
-        case cornerRoundness = "corner_roundness"
         case dimFactor = "dim_factor"
         case itemColor = "item_color"
         case fillColor = "fill_color"
@@ -44,67 +32,11 @@ extension AppBarStyle {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
-        edge =
-            try container.decodeIfPresent(
-                AppBarEdge.self,
-                forKey: .edge
-            ) ?? defaults.edge
-        alignment =
-            try container.decodeIfPresent(
-                BarAlignment.self,
-                forKey: .alignment
-            ) ?? defaults.alignment
-        thickness = max(
-            Self.minThickness,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .thickness
-            ) ?? defaults.thickness
-        )
-        outerMargin = max(
-            Self.minMargin,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .outerMargin
-            ) ?? defaults.outerMargin
-        )
-        innerMargin = max(
-            Self.minMargin,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .innerMargin
-            ) ?? defaults.innerMargin
-        )
-        backgroundStyle =
-            try container.decodeIfPresent(
-                BackgroundStyle.self,
-                forKey: .backgroundStyle
-            ) ?? defaults.backgroundStyle
-        liquidGlass =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .liquidGlass
-            ) ?? defaults.liquidGlass
-        backgroundFit =
-            try container.decodeIfPresent(
-                BackgroundFit.self,
-                forKey: .backgroundFit
-            ) ?? defaults.backgroundFit
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,
                 forKey: .activeIndicator
             ) ?? defaults.activeIndicator
-        itemSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemSize
-            ) ?? defaults.itemSize
-        itemGap =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemGap
-            ) ?? defaults.itemGap
         content =
             try container.decodeIfPresent(
                 Content.self,
@@ -132,16 +64,6 @@ extension AppBarStyle {
         from container: KeyedDecodingContainer<CodingKeys>
     ) throws {
         let defaults = Self()
-        fontSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .fontSize
-            ) ?? defaults.fontSize
-        cornerRoundness =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .cornerRoundness
-            ) ?? defaults.cornerRoundness
         dimFactor = Self.clampDim(
             try container.decodeIfPresent(
                 CGFloat.self,

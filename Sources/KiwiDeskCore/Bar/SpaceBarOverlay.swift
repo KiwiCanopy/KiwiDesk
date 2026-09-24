@@ -116,7 +116,7 @@ public final class SpaceBarOverlay {
             items: [Item],
             frontApp: SpaceBarItemView.App?,
             strip: CGRect,
-            style: SpaceBarStyle,
+            style: SpaceBarLook,
             stateMarkColors: StateMarkColors
         )?
 
@@ -129,7 +129,7 @@ public final class SpaceBarOverlay {
         items: [Item],
         frontApp: SpaceBarItemView.App? = nil,
         strip: CGRect,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         stateMarkColors: StateMarkColors
     ) {
         guard !items.isEmpty,
@@ -159,7 +159,7 @@ public final class SpaceBarOverlay {
     nonisolated static func contentStart(
         total: CGFloat,
         axis: CGFloat,
-        alignment: SpaceBarStyle.Alignment,
+        alignment: KiwiShelf.Alignment,
         pad: CGFloat
     ) -> CGFloat {
         switch alignment {

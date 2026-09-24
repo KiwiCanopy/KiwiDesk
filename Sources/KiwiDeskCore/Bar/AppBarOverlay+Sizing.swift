@@ -16,7 +16,7 @@ extension AppBarOverlay {
     func metrics(
         strip: CGRect,
         count: Int,
-        style: AppBarStyle,
+        style: AppBarLook,
         items: [Item]
     ) -> Metrics {
         let horizontal = style.edge.isHorizontal
@@ -24,7 +24,6 @@ extension AppBarOverlay {
         let thickness = horizontal ? strip.height : strip.width
         let gap = style.itemGap
         let slot = Self.slotLength(
-            itemSize: style.itemSize,
             content: style.renderedContent,
             thickness: thickness,
             axis: axis,
@@ -58,7 +57,7 @@ extension AppBarOverlay {
     @MainActor
     static func autoSlotWidth(
         items: [Item],
-        style: AppBarStyle,
+        style: AppBarLook,
         horizontal: Bool,
         thickness: CGFloat
     ) -> CGFloat {
@@ -103,15 +102,13 @@ extension AppBarOverlay {
 
     /// Shared slot length for bar layout pass.
     nonisolated static func slotLength(
-        itemSize: CGFloat,
         content: AppBarStyle.Content,
         thickness: CGFloat,
         axis: CGFloat,
         autoWidth: CGFloat
     ) -> CGFloat {
-        let requested = itemSize > 0 ? itemSize : autoWidth
         return max(
-            min(requested, axis / 4),
+            min(autoWidth, axis / 4),
             minimumSlot(thickness: thickness, content: content)
         )
     }

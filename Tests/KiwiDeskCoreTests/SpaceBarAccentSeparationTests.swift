@@ -39,7 +39,7 @@ import Testing
 /// don't read a green pass here as the rule being satisfied.
 @Suite("Space Bar accent separation")
 struct SpaceBarAccentSeparationTests {
-    private var style: SpaceBarStyle { SpaceBarStyle() }
+    private var style: SpaceBarLook { SpaceBarLook() }
 
     /// Both accents must be opaque for any of this to mean
     /// anything: `parseHex` accepts `#RRGGBBAA`, and the Lua

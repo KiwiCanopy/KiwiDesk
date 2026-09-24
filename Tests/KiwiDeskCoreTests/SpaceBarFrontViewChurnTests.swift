@@ -49,7 +49,7 @@ struct SpaceBarFrontViewChurnTests {
         spaces: Int = 3,
         glass: Bool = true
     ) -> SpaceBarManager.Bar {
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.backgroundStyle = .plain
         style.liquidGlass = glass
         style.showFrontApp = true

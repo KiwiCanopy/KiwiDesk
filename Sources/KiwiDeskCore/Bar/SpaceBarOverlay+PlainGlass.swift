@@ -9,7 +9,7 @@ extension SpaceBarOverlay {
         plateFrame: CGRect,
         overflow: Bool,
         pinnedFront: Bool,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         depth: CGFloat
     ) {
         guard let content = panel.contentView,
@@ -69,7 +69,7 @@ extension SpaceBarOverlay {
         plate: NSView,
         viewport: CGRect,
         radius: CGFloat,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         returnRunToContainer()
         if !GlassPlate.holds(plate, itemContainer) {
@@ -96,7 +96,7 @@ extension SpaceBarOverlay {
         viewport: CGRect,
         plateFrame: CGRect,
         radius: CGFloat,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         returnRunToContainer()
         if GlassPlate.holds(plate, itemContainer) {
@@ -171,7 +171,7 @@ extension SpaceBarOverlay {
         viewport: CGRect,
         plateFrame: CGRect,
         radius: CGFloat,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         guard let run = glassRun else {
             // Unreachable: `render` prepares the mode it installs,

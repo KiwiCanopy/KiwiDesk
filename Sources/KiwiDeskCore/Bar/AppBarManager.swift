@@ -12,7 +12,7 @@ public final class AppBarManager {
         public let activeIndex: Int?
         public let strip: CGRect
         /// The resolved style with absolute bar edge (#293).
-        public let style: AppBarStyle
+        public let style: AppBarLook
 
         public init(
             display: DisplayID,
@@ -20,7 +20,7 @@ public final class AppBarManager {
             items: [AppBarOverlay.Item],
             activeIndex: Int?,
             strip: CGRect,
-            style: AppBarStyle
+            style: AppBarLook
         ) {
             self.display = display
             self.space = space

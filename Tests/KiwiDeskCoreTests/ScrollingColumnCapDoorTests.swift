@@ -39,16 +39,16 @@ struct ScrollingColumnCapDoorTests {
         core.tiler.visibleBounds = { _ in pinned }
         // The live bar is wide and on the left; the draft has none.
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.spaceBarStyle.edge = .left
-        core.tiler.settings.spaceBarStyle.thickness = 700
+        core.tiler.settings.kiwishelf.edge = .left
+        core.tiler.settings.kiwishelf.thickness = 700
         // 3100 across at 300 + 10: ten — the live bar's 700 pt
         // strip would leave seven.
         #expect(core.scrollingColumnCap(for: nil, settings: draft()) == 10)
         // And the draft's own strip is reserved.
         var barred = draft()
         barred.spaceBarStyle.enabled = true
-        barred.spaceBarStyle.edge = .left
-        barred.spaceBarStyle.thickness = 700
+        barred.kiwishelf.edge = .left
+        barred.kiwishelf.thickness = 700
         #expect(core.scrollingColumnCap(for: nil, settings: barred) == 7)
         // A space is answered on ITS resolution: an override gap
         // widens the pitch — (3100 + 100) / 400 = 8.

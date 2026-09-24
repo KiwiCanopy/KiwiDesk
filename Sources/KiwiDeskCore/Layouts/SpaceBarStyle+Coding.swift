@@ -7,22 +7,10 @@ extension SpaceBarStyle {
     /// JSON coding keys for SpaceBarStyle (`SpaceBarParityTests`).
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
-        case edge
-        case alignment
-        case thickness
-        case outerMargin = "outer_margin"
-        case innerMargin = "inner_margin"
-        case itemSize = "item_size"
-        case itemGap = "item_gap"
-        case fontSize = "font_size"
         case glyphCap = "glyph_cap"
-        case titleCap = "title_cap"
+        case frontAppTitleCap = "front_app_title_cap"
         case iconSource = "icon_source"
-        case backgroundStyle = "background_style"
-        case liquidGlass = "liquid_glass"
-        case backgroundFit = "background_fit"
         case activeIndicator = "active_indicator"
-        case cornerRoundness = "corner_roundness"
         case dimFactor = "dim_factor"
         case activeDimFactor = "active_dim_factor"
         case showFrontApp = "show_front_app"
@@ -51,92 +39,26 @@ extension SpaceBarStyle {
                 Bool.self,
                 forKey: .enabled
             ) ?? defaults.enabled
-        edge =
-            try container.decodeIfPresent(
-                AppBarEdge.self,
-                forKey: .edge
-            ) ?? defaults.edge
-        alignment =
-            try container.decodeIfPresent(
-                Alignment.self,
-                forKey: .alignment
-            ) ?? defaults.alignment
-        thickness = max(
-            AppBarStyle.minThickness,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .thickness
-            ) ?? defaults.thickness
-        )
-        outerMargin = max(
-            AppBarStyle.minMargin,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .outerMargin
-            ) ?? defaults.outerMargin
-        )
-        innerMargin = max(
-            AppBarStyle.minMargin,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .innerMargin
-            ) ?? defaults.innerMargin
-        )
-        itemSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemSize
-            ) ?? defaults.itemSize
-        itemGap =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemGap
-            ) ?? defaults.itemGap
-        fontSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .fontSize
-            ) ?? defaults.fontSize
         glyphCap =
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .glyphCap
             ) ?? defaults.glyphCap
-        titleCap =
+        frontAppTitleCap =
             try container.decodeIfPresent(
                 Int.self,
-                forKey: .titleCap
-            ) ?? defaults.titleCap
+                forKey: .frontAppTitleCap
+            ) ?? defaults.frontAppTitleCap
         iconSource =
             try container.decodeIfPresent(
                 BarAppIconSource.self,
                 forKey: .iconSource
             ) ?? defaults.iconSource
-        backgroundStyle =
-            try container.decodeIfPresent(
-                BackgroundStyle.self,
-                forKey: .backgroundStyle
-            ) ?? defaults.backgroundStyle
-        liquidGlass =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .liquidGlass
-            ) ?? defaults.liquidGlass
-        backgroundFit =
-            try container.decodeIfPresent(
-                BackgroundFit.self,
-                forKey: .backgroundFit
-            ) ?? defaults.backgroundFit
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,
                 forKey: .activeIndicator
             ) ?? defaults.activeIndicator
-        cornerRoundness =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .cornerRoundness
-            ) ?? defaults.cornerRoundness
         dimFactor = AppBarStyle.clampDim(
             try container.decodeIfPresent(
                 CGFloat.self,

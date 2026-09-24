@@ -5,7 +5,7 @@ extension SpaceBarOverlay {
     /// Configures base panel container styling.
     func styleContainer(
         _ panel: NSPanel,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         strip: CGRect
     ) {
         guard let layer = panel.contentView?.layer else {
@@ -19,7 +19,7 @@ extension SpaceBarOverlay {
     /// Updates or hides solid plain background plate (`SpaceBarStyle`).
     func updatePlainPlate(
         _ panel: NSPanel,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         strip: CGRect,
         plateFrame: CGRect
     ) {
@@ -51,7 +51,7 @@ extension SpaceBarOverlay {
 
     /// Resolves glass hosting mode for current render pass (#407).
     func glassHosting(
-        _ style: SpaceBarStyle,
+        _ style: SpaceBarLook,
         overflow: Bool
     ) -> GlassHosting {
         GlassHosting.resolve(
@@ -71,7 +71,7 @@ extension SpaceBarOverlay {
     func prepareGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         strip: CGRect,
         plateFrame: CGRect,
         viewport: CGRect,
@@ -120,7 +120,7 @@ extension SpaceBarOverlay {
         viewport: CGRect,
         plateFrame: CGRect,
         pinnedFront: Bool,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         depth: CGFloat
     ) {
         switch mode {

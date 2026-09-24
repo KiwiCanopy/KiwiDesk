@@ -25,7 +25,7 @@ public final class AppBarOverlay {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
-        let style: AppBarStyle
+        let style: AppBarLook
     }
 
     private var panel: NSPanel?
@@ -71,7 +71,7 @@ public final class AppBarOverlay {
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
-        style: AppBarStyle
+        style: AppBarLook
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1

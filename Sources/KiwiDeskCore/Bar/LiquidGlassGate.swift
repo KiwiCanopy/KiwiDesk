@@ -27,7 +27,7 @@ enum LiquidGlassGate {
     /// The style a bar renders: the stored one, glass stood down
     /// and both fills at full alpha while transparency is reduced
     /// — the setting asks for opaque backgrounds.
-    static func rendered(_ style: AppBarStyle) -> AppBarStyle {
+    static func rendered(_ style: AppBarLook) -> AppBarLook {
         guard reducesTransparency else { return style }
         var copy = style
         copy.liquidGlass = false
@@ -36,7 +36,7 @@ enum LiquidGlassGate {
         return copy
     }
 
-    static func rendered(_ style: SpaceBarStyle) -> SpaceBarStyle {
+    static func rendered(_ style: SpaceBarLook) -> SpaceBarLook {
         guard reducesTransparency else { return style }
         var copy = style
         copy.liquidGlass = false

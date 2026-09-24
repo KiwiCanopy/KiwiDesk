@@ -10,7 +10,7 @@ public enum SpaceBarGeometry {
     /// disabled.
     public static func strip(
         in visible: CGRect,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> CGRect? {
         guard style.enabled else { return nil }
         return AppBarGeometry.barFrame(
@@ -26,7 +26,7 @@ public enum SpaceBarGeometry {
     /// the windows' own outer gap applies to what remains.
     public static func remainingFrame(
         in visible: CGRect,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> CGRect {
         guard style.enabled else { return visible }
         return AppBarGeometry.remaining(

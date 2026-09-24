@@ -46,16 +46,6 @@ struct MonocleCommandTests {
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_background_style",
-                args: [.string("plain")]
-            ).isSuccess
-        )
-        #expect(
-            core.tiler.settings.monocle.appBar.backgroundStyle
-                == .plain
-        )
-        #expect(
-            core.execute(
                 "monocle.set_app_bar_active_indicator",
                 args: [.string("gap")]
             ).isSuccess
@@ -65,15 +55,6 @@ struct MonocleCommandTests {
                 "monocle.set_app_bar_content",
                 args: [.string("icon_and_title")]
             ).isSuccess
-        )
-        #expect(
-            core.execute(
-                "monocle.set_app_bar_item_size",
-                args: [.number(150)]
-            ).isSuccess
-        )
-        #expect(
-            core.tiler.settings.monocle.appBar.itemSize == 150
         )
         #expect(
             core.execute(
@@ -109,7 +90,7 @@ struct MonocleCommandTests {
 
     @Test("Hover default is a shade off the highlight")
     func hoverDefault() {
-        let bar = AppBarStyle()
+        let bar = AppBarLook()
         #expect(bar.hoverFillColor != bar.highlightColor)
     }
 
@@ -133,45 +114,23 @@ struct MonocleCommandTests {
         )
         #expect(
             !core.execute(
-                "monocle.set_app_bar_edge",
-                args: [.string("middle")]
-            ).isSuccess
-        )
-        #expect(
-            !core.execute(
-                "monocle.set_app_bar_item_size",
-                args: [.string("wide")]
-            ).isSuccess
-        )
-        #expect(
-            !core.execute(
                 "monocle.set_app_bar_item_color",
                 args: [.string("red")]
             ).isSuccess
         )
     }
 
-    @Test("Edge takes the four edges, rejects start/end")
-    func edgeTokens() {
+    @Test("A shared field's override is retired, naming the shelf")
+    func sharedOverrideRetired() {
         let core = makeCore()
-        // Absolute tokens are stored as-is (#293) — the layout
-        // orientation plays no part.
-        #expect(
-            core.execute(
-                "monocle.set_app_bar_edge",
-                args: [.string("left")]
-            ).isSuccess
+        let response = core.execute(
+            "monocle.set_app_bar_edge",
+            args: [.string("left")]
         )
+        #expect(!response.isSuccess)
         #expect(
-            core.tiler.settings.monocle
-                .resolvedBar(global: AppBarStyle()).edge == .left
-        )
-        // The old axis-relative tokens are no longer valid.
-        #expect(
-            !core.execute(
-                "monocle.set_app_bar_edge",
-                args: [.string("start")]
-            ).isSuccess
+            response.error?.contains("kiwishelf.set_edge")
+                == true
         )
     }
 }

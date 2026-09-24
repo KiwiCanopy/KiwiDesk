@@ -20,8 +20,8 @@ struct SpaceBarGeometryTests {
         edge: AppBarEdge,
         enabled: Bool = true,
         thickness: CGFloat = 32
-    ) -> SpaceBarStyle {
-        var style = SpaceBarStyle()
+    ) -> SpaceBarLook {
+        var style = SpaceBarLook()
         style.enabled = enabled
         style.edge = edge
         style.thickness = thickness
@@ -106,7 +106,7 @@ struct SpaceBarGeometryTests {
         let spaceStrip = try #require(
             SpaceBarGeometry.strip(in: visible, style: space)
         )
-        var appStyle = AppBarStyle()
+        var appStyle = AppBarLook()
         appStyle.edge = .top
         // Pinned (#660): the sum below reasons from it.
         appStyle.thickness = 32

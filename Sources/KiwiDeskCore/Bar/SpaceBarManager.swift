@@ -13,7 +13,7 @@ public final class SpaceBarManager {
         /// (`showsTitle(of:)`).
         let frontWindow: WindowID?
         public let strip: CGRect
-        public let style: SpaceBarStyle
+        public let style: SpaceBarLook
         /// Mark indicator colors (#429, `StickyStyle`, `FloatingStyle`).
         let stateMarkColors: StateMarkColors
 
@@ -23,7 +23,7 @@ public final class SpaceBarManager {
             frontApp: SpaceBarItemView.App? = nil,
             frontWindow: WindowID? = nil,
             strip: CGRect,
-            style: SpaceBarStyle,
+            style: SpaceBarLook,
             stateMarkColors: StateMarkColors
         ) {
             self.display = display

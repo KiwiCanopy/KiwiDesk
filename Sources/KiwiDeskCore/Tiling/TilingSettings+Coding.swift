@@ -10,6 +10,7 @@ extension TilingSettings: Codable {
     enum CodingKeys: String, CodingKey {
         case animations
         case appBar = "app_bar"
+        case kiwishelf
         case spaceBar = "space_bar"
         case border
         case sticky
@@ -110,6 +111,11 @@ extension TilingSettings: Codable {
                 [SpaceID: SpawnPlacement].self,
                 forKey: .placementOverride
             ) ?? [:]
+        kiwishelf =
+            try container.decodeIfPresent(
+                KiwiShelf.self,
+                forKey: .kiwishelf
+            ) ?? KiwiShelf()
         appBarStyle =
             try container.decodeIfPresent(
                 AppBarStyle.self,

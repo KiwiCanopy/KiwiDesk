@@ -54,8 +54,8 @@ struct FloatingModeBarClampTests {
         let space = core.state.workspaces.space(of: Self.window)!
         core.state.workspaces.setMode(space, mode)
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.spaceBarStyle.edge = .top
-        core.tiler.settings.spaceBarStyle.thickness = 40
+        core.tiler.settings.kiwishelf.edge = .top
+        core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateSpaceBar()
         return core

@@ -51,11 +51,14 @@ struct ReduceTransparencyTests {
     /// the one translucent box on the bar — and nothing else.
     @Test("the rendered style drops glass and alpha, nothing else")
     func renderedStyleDropsGlassOnly() {
-        var app = AppBarFixtures.everyGlobalField()
+        var app = AppBarLook(
+            shelf: AppBarFixtures.everyShelfField(),
+            bar: AppBarFixtures.everyGlobalField()
+        )
         app.liquidGlass = true
         app.fillColor = "#020202B3"
         app.hoverFillColor = "#06060680"
-        var space = SpaceBarStyle()
+        var space = SpaceBarLook()
         space.liquidGlass = true
         space.backgroundStyle = .boxed
         space.fillColor = "#030303B3"
@@ -94,7 +97,7 @@ struct ReduceTransparencyTests {
     @Test("a boxed glass App Bar draws its solid box")
     func appBarDrawsSolidBox() throws {
         try #require(Self.platformGlass)
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.backgroundStyle = .boxed
         style.liquidGlass = true
         let bar = AppBarManager.Bar(

@@ -49,7 +49,7 @@ struct GroupBadgeNeutralityTests {
     /// pair is read rather than the fill alone.
     @Test("A palette listed as a chooser really chose one")
     func choosersDifferFromTheDefault() throws {
-        let app = AppBarStyle()
+        let app = AppBarLook()
         let authored = PaletteCatalog.authored()
         for (name, reason) in Self.choosers {
             let palette = try #require(
@@ -117,8 +117,8 @@ struct GroupBadgeNeutralityTests {
 
     @Test("Both bars default to one near-neutral badge fill")
     func defaultBadgeIsNeutralOnBothBars() {
-        let app = AppBarStyle().groupBadgeColor
-        let space = SpaceBarStyle().groupBadgeColor
+        let app = AppBarLook().groupBadgeColor
+        let space = SpaceBarLook().groupBadgeColor
         #expect(isGrey(app), Comment(rawValue: app))
         #expect(isGrey(space), Comment(rawValue: space))
         // The two bars' badges are one idiom, so they move
@@ -138,8 +138,8 @@ struct GroupBadgeNeutralityTests {
         // equality above — and a guard with one net is one
         // careless edit from watching nothing (guard-prover,
         // 2026-08-24).
-        let app = AppBarStyle()
-        let space = SpaceBarStyle()
+        let app = AppBarLook()
+        let space = SpaceBarLook()
         let pairs = [
             (
                 "app_bar", app.groupBadgeColor,

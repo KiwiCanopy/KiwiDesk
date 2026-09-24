@@ -44,7 +44,7 @@ struct SpaceBarSizingTests {
 
     @Test("Glyph ladder: auto scales, explicit wins, clamped")
     func glyphLadder() {
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         // Auto: half depth, clamped to depth - 8, then ×0.9.
         #expect(
             style.glyphFontSize(forDepth: 32) == 14.4

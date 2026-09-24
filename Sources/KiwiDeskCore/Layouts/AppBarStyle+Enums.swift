@@ -3,15 +3,6 @@ import Foundation
 
 /// App bar nested option vocabularies (split from `AppBarStyle.swift`).
 extension AppBarStyle {
-    /// Minimum bar thickness in pt (QA 2026-07-19): below it the
-    /// plate stroke and glyph run collide. Every entry point
-    /// clamps to it — profile decode, the Lua/CLI setter, and the
-    /// GUI slider's floor, derived (#1359, `BarSliderBandTests`).
-    public static let minThickness: CGFloat = 20
-    /// A margin's floor (#1516): flush. Both bars' decoders,
-    /// setters and the GUI's slider band derive from it.
-    public static let minMargin: CGFloat = 0
-
     /// True if platform supports Liquid Glass (macOS 26+, #390).
     public static var glassAvailable: Bool {
         if #available(macOS 26, *) { return true }

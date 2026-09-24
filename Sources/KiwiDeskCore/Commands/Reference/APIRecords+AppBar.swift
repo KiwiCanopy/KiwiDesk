@@ -5,59 +5,12 @@ import Foundation
 /// `.choice` reading its decoder's cases.
 extension APIReference {
     static let appBarRecords: [String: APIRecord] = [
-        "set_edge": APIRecord(
-            "Sets the screen edge the bar occupies.",
-            .choice("edge", AppBarEdge.self)
-        ),
-        "set_alignment": APIRecord(
-            "Places the item group along the bar while it fits.",
-            .choice("alignment", AppBarStyle.BarAlignment.self)
-        ),
-        "set_thickness": APIRecord(
-            "Sets the bar's thickness in points, carved out of "
-                + "the layout.",
-            .number("thickness")
-        ),
-        "set_outer_margin": APIRecord(
-            "Sets the bar's distance from the screen border in "
-                + "points; 0 is flush.",
-            .number("margin")
-        ),
-        "set_inner_margin": APIRecord(
-            "Adds points on the bar's window side, on top of the "
-                + "windows' outer gap.",
-            .number("margin")
-        ),
-        "set_background_style": APIRecord(
-            "Sets where the background is drawn: a box per item "
-                + "or one shared plate.",
-            .choice("style", AppBarStyle.BackgroundStyle.self)
-        ),
-        "set_liquid_glass": APIRecord(
-            "Lays a macOS 26 Liquid Glass material over the item "
-                + "backgrounds.",
-            .boolean("enabled")
-        ),
-        "set_background_fit": APIRecord(
-            "Sets how far the shared background plate reaches "
-                + "under the items.",
-            .choice("fit", AppBarStyle.BackgroundFit.self)
-        ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",
             .choice(
                 "indicator",
                 AppBarStyle.ActiveIndicator.self
             )
-        ),
-        "set_item_size": APIRecord(
-            "Sets each item's size in points; 0 measures the "
-                + "widest item and fits.",
-            .number("size")
-        ),
-        "set_item_gap": APIRecord(
-            "Sets the gap between items in points.",
-            .number("gap")
         ),
         "set_content": APIRecord(
             "Sets what each item draws: the icon, the window "
@@ -73,16 +26,6 @@ extension APIReference {
             "Sets whether icons come from the app image or the "
                 + "bundled glyph font.",
             .choice("source", BarAppIconSource.self)
-        ),
-        "set_font_size": APIRecord(
-            "Pins the item font size in points; 0 scales it with "
-                + "the bar thickness.",
-            .number("size")
-        ),
-        "set_corner_roundness": APIRecord(
-            "Sets the corner rounding of boxed items, as a "
-                + "percentage of the maximum.",
-            .number("percent")
         ),
         "set_dim_factor": APIRecord(
             "Sets the opacity of an inactive item's untinted "

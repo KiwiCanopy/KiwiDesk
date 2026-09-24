@@ -130,7 +130,7 @@ extension KiwiCore {
         for group: [WindowID],
         window: ManagedWindow?,
         appName: String,
-        style: AppBarStyle
+        style: AppBarLook
     ) -> String {
         guard group.count == 1,
             let title = window?.title,
@@ -144,7 +144,7 @@ extension KiwiCore {
 
     func barItem(
         for group: [WindowID],
-        style: AppBarStyle
+        style: AppBarLook
     ) -> AppBarOverlay.Item {
         let window = group.first.flatMap {
             state.windows[$0]

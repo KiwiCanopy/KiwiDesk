@@ -12,7 +12,7 @@ extension AppBarOverlay {
     /// Configures container layer properties (`background_fit`).
     func styleContainer(
         _ panel: NSPanel,
-        style: AppBarStyle,
+        style: AppBarLook,
         depth: CGFloat
     ) {
         guard let layer = panel.contentView?.layer else {
@@ -26,7 +26,7 @@ extension AppBarOverlay {
     /// Updates plain shared background plate geometry and style.
     func updatePlainPlate(
         _ panel: NSPanel,
-        style: AppBarStyle,
+        style: AppBarLook,
         strip: CGRect,
         plateFrame: CGRect,
         animated: Bool = false
@@ -59,7 +59,7 @@ extension AppBarOverlay {
 
     /// Resolves glass hosting mode (#407).
     func glassHosting(
-        _ style: AppBarStyle,
+        _ style: AppBarLook,
         overflow: Bool
     ) -> GlassHosting {
         GlassHosting.resolve(
@@ -75,7 +75,7 @@ extension AppBarOverlay {
     func prepareGlassHosting(
         _ mode: GlassHosting,
         panel: NSPanel,
-        style: AppBarStyle,
+        style: AppBarLook,
         strip: CGRect,
         plateFrame: CGRect,
         viewport: CGRect,
@@ -113,7 +113,7 @@ extension AppBarOverlay {
         frames: [CGRect],
         viewport: CGRect,
         plateFrame: CGRect,
-        style: AppBarStyle,
+        style: AppBarLook,
         depth: CGFloat,
         animated: Bool
     ) {

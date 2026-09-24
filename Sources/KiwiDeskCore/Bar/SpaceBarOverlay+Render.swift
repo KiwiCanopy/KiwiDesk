@@ -19,14 +19,11 @@ extension SpaceBarOverlay {
         let gap = style.itemGap
         let leadsWithLayer = Self.leadsWithLayer(items)
         let lengths = items.enumerated().map { index, item in
-            let length =
-                style.itemSize > 0
-                ? style.itemSize
-                : SpaceBarItemView.autoLength(
-                    appCount: item.apps.count,
-                    overflow: item.overflow,
-                    depth: depth
-                )
+            let length = SpaceBarItemView.autoLength(
+                appCount: item.apps.count,
+                overflow: item.overflow,
+                depth: depth
+            )
             // The layer item's slot carries its section rule.
             return index == 0 && leadsWithLayer
                 ? length + Self.layerDividerExtent(gap: gap)

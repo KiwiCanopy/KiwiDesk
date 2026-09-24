@@ -12,7 +12,7 @@ extension SpaceBarOverlay {
         depth: CGFloat,
         cell: CGFloat,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         // Boxed fills the chip; per-box glass frosts it as a
         // backdrop; plain (shared plate) draws neither here.

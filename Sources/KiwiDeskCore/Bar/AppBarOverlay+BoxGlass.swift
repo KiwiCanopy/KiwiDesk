@@ -4,7 +4,7 @@ import AppKit
 /// (`GlassPlate`, #408).
 extension AppBarOverlay {
     /// Indicates whether styling specifies per-box glass.
-    func wantsBoxGlass(_ style: AppBarStyle) -> Bool {
+    func wantsBoxGlass(_ style: AppBarLook) -> Bool {
         style.glassEnabled && style.backgroundStyle == .boxed
     }
 
@@ -12,7 +12,7 @@ extension AppBarOverlay {
     /// (`GlassPlate`, `GlassTint`, #408).
     func updateBoxGlasses(
         frames: [CGRect],
-        style: AppBarStyle,
+        style: AppBarLook,
         depth: CGFloat,
         animated: Bool
     ) {
@@ -63,7 +63,7 @@ extension AppBarOverlay {
 
     /// Updates frosted glass backdrops behind scroll arrows
     /// (`BarArrowView`, #408).
-    func updateArrowGlasses(style: AppBarStyle) {
+    func updateArrowGlasses(style: AppBarLook) {
         guard let content = itemContainer.superview else { return }
         updateArrowGlass(
             &backArrowGlass,
@@ -86,7 +86,7 @@ extension AppBarOverlay {
         tint: inout NSView?,
         behind arrow: BarArrowView,
         in content: NSView,
-        style: AppBarStyle
+        style: AppBarLook
     ) {
         guard !arrow.isHidden else {
             glass?.isHidden = true

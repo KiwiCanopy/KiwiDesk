@@ -84,15 +84,10 @@ struct AppBarCommandParityTests {
     /// `applyParity` goes red if this list, either apply switch,
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
-        .edge(.right), .alignment(.end), .thickness(50),
-        .outerMargin(7), .innerMargin(8),
-        .backgroundStyle(.boxed), .liquidGlass(false),
-        .backgroundFit(.full),
         .activeIndicator(.gap),
-        .itemSize(88), .itemGap(9),
         .content(.title), .titleCap(40), .iconSource(.appFont),
         .groupAdjacentWindows(false),
-        .fontSize(20), .cornerRoundness(12), .dimFactor(0.3),
+        .dimFactor(0.3),
         .itemColor("#111111"), .fillColor("#222222"),
         .activeItemColor("#333333"),
         .highlightColor("#555555"), .hoverFillColor("#666666"),
@@ -148,19 +143,14 @@ struct AppBarCommandParityTests {
         for key: AppBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .liquidGlass, .groupAdjacentWindows:
+        case .groupAdjacentWindows:
             return [.bool(true)]
-        case .edge: return [.string("right")]
-        case .alignment: return [.string("end")]
         case .iconSource: return [.string("app_font")]
-        case .backgroundStyle: return [.string("boxed")]
-        case .backgroundFit: return [.string("full")]
         case .activeIndicator: return [.string("gap")]
         case .content: return [.string("icon")]
         case .titleCap: return [.number(40)]
-        case .thickness, .outerMargin, .innerMargin, .itemSize,
-            .itemGap, .fontSize, .cornerRoundness, .dimFactor:
-            return [.number(10)]
+        case .dimFactor:
+            return [.number(0.5)]
         default:
             return [.string("#123456")]
         }

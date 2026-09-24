@@ -101,7 +101,7 @@ struct BarAlignmentTests {
 
     @Test("Oversized Space Bar run falls back to the pad")
     func spaceBarOverflowFloorsAtPad() {
-        for alignment in SpaceBarStyle.Alignment.allCases {
+        for alignment in KiwiShelf.Alignment.allCases {
             #expect(
                 SpaceBarOverlay.contentStart(
                     total: 500,

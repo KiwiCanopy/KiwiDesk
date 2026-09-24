@@ -29,7 +29,7 @@ extension SpaceBarOverlay {
         gap: CGFloat,
         strip: CGRect,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> [CGRect] {
         guard leads, let slot = frames.first else {
             layerDivider.isHidden = true

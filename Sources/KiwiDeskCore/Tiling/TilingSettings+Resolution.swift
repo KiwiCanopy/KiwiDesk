@@ -83,14 +83,22 @@ extension TilingSettings {
         return params
     }
 
-    /// True if Space Bar and an enabled layout App Bar share an edge (#293).
+    /// True if the Space Bar and an enabled layout App Bar both
+    /// show — they always share the shelf's edge (#1517).
     public var spaceBarSharesEdgeWithAppBar: Bool {
-        guard spaceBarStyle.enabled else { return false }
-        return appBarHosts.contains {
-            $0.enabled
-                && $0.resolved(with: appBarStyle).edge
-                    == spaceBarStyle.edge
-        }
+        spaceBarStyle.enabled && appBarHosts.contains { $0.enabled }
+    }
+
+    /// What the Space Bar draws from: the shelf and its own style.
+    public var spaceBarLook: SpaceBarLook {
+        SpaceBarLook(shelf: kiwishelf, bar: spaceBarStyle)
+    }
+
+    /// The shelf and the App Bar's global style, before any
+    /// layout's overrides — what `AppBarHosting.resolvedBar`
+    /// resolves from.
+    public var appBarGlobalLook: AppBarLook {
+        AppBarLook(shelf: kiwishelf, bar: appBarStyle)
     }
 
     /// The bar-hosting layout for a mode — the ONE place that
@@ -125,7 +133,7 @@ extension TilingSettings {
     func layoutBounds(from visible: CGRect) -> CGRect {
         SpaceBarGeometry.remainingFrame(
             in: visible,
-            style: spaceBarStyle
+            style: spaceBarLook
         )
     }
 
@@ -145,7 +153,7 @@ extension TilingSettings {
         let area = params.windowFrame(
             in: bounds,
             outer: gaps.outer,
-            global: appBarStyle
+            global: appBarGlobalLook
         )
         let horizontal = params.axisIsHorizontal
         return ScrollSize.maxCount(
@@ -189,7 +197,7 @@ extension TilingSettings {
             grid: resolvedGrid(for: space.id),
             monocle: resolvedMonocle(for: space.id),
             track: resolvedTrack(for: space.id),
-            appBarStyle: appBarStyle
+            appBarStyle: appBarGlobalLook
         )
     }
 

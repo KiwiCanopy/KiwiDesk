@@ -50,6 +50,29 @@ extension KiwiCore {
         }
     }
 
+    /// `kiwishelf.set_*` (#1517) — the shelf both bars sit on.
+    func kiwishelfCommand(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard command.hasPrefix("kiwishelf.set_") else {
+            return .fail("unknown command: \(command)")
+        }
+        let field = String(
+            command.dropFirst("kiwishelf.set_".count)
+        )
+        switch KiwiShelfCommandSetting.parse(
+            field: field,
+            args: args
+        ) {
+        case .success(let setting):
+            setting.apply(to: &tiler.settings.kiwishelf)
+            return .ok()
+        case .failure(let error):
+            return .fail(error.message)
+        }
+    }
+
     /// Applies a layout's `*.set_app_bar_<field>` override.
     /// `enabled` is the layout's own concrete toggle; every
     /// other field writes an override of the global style.

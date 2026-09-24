@@ -49,7 +49,7 @@ extension FullscreenStandDownTests {
             args: [.string(spaceID.raw), .string("monocle")]
         )
         core.tiler.settings.appBarStyle.content = .iconAndTitle
-        core.tiler.settings.appBarStyle.edge = .top
+        core.tiler.settings.kiwishelf.edge = .top
         core.tiler.settings.spaceBarStyle.showFrontApp = false
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
 

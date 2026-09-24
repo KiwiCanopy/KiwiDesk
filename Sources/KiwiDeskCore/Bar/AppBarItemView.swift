@@ -49,7 +49,7 @@ final class AppBarItemView: NSView {
     var isFirstInRun = false
     var isLastInRun = false
     var isHovered = false
-    var style = AppBarStyle()
+    var style = AppBarLook()
     var onSelect: (WindowID) -> Void = { _ in }
     var onDragMoved: (AppBarItemView, CGPoint) -> Void = { _, _ in }
     var onDragEnded: (AppBarItemView) -> Void = { _ in }
@@ -152,7 +152,7 @@ final class AppBarItemView: NSView {
         count: Int,
         active: Bool,
         horizontal: Bool,
-        style: AppBarStyle
+        style: AppBarLook
     ) {
         windowID = id
         self.name = name

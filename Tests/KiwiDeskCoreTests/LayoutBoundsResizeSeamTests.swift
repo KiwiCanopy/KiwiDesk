@@ -48,7 +48,7 @@ struct LayoutBoundsResizeSeamTests {
         #expect(core.tiler.settings.minWindowSize == 200)
         #expect(core.tiler.settings.mouseResize == .layout)
         #expect(core.tiler.settings.spaceBarStyle.enabled)
-        #expect(core.tiler.settings.spaceBarStyle.thickness == 400)
+        #expect(core.tiler.settings.kiwishelf.thickness == 400)
         core.execute(
             "set_mode",
             args: [.string("1"), .string("bsp")]

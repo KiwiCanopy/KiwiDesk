@@ -6,22 +6,10 @@ import Foundation
 /// one vocabulary and their messages must not drift.
 enum SpaceBarCommandSetting {
     case enabled(Bool)
-    case edge(AppBarEdge)
-    case alignment(SpaceBarStyle.Alignment)
-    case thickness(CGFloat)
-    case outerMargin(CGFloat)
-    case innerMargin(CGFloat)
-    case itemSize(CGFloat)
-    case itemGap(CGFloat)
-    case fontSize(CGFloat)
     case glyphCap(Int)
-    case titleCap(Int)
+    case frontAppTitleCap(Int)
     case iconSource(BarAppIconSource)
-    case backgroundStyle(SpaceBarStyle.BackgroundStyle)
-    case liquidGlass(Bool)
-    case backgroundFit(SpaceBarStyle.BackgroundFit)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
-    case cornerRoundness(CGFloat)
     case dimFactor(CGFloat)
     case activeDimFactor(CGFloat)
     case showFrontApp(Bool)
@@ -55,8 +43,8 @@ enum SpaceBarCommandSetting {
         if field == "glyph_cap" {
             return glyphCap(args)
         }
-        if field == "title_cap" {
-            return titleCap(args)
+        if field == "front_app_title_cap" {
+            return frontAppTitleCap(args)
         }
         if let setting = parseChoice(field: field, args: args) {
             return setting
@@ -75,31 +63,11 @@ enum SpaceBarCommandSetting {
         args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError>? {
         switch field {
-        case "edge":
-            return BarSettingChoice.value(
-                args,
-                AppBarEdge.self
-            ).map(Self.edge)
-        case "alignment":
-            return BarSettingChoice.value(
-                args,
-                SpaceBarStyle.Alignment.self
-            ).map(Self.alignment)
         case "icon_source":
             return BarSettingChoice.value(
                 args,
                 BarAppIconSource.self
             ).map(Self.iconSource)
-        case "background_style":
-            return BarSettingChoice.value(
-                args,
-                SpaceBarStyle.BackgroundStyle.self
-            ).map(Self.backgroundStyle)
-        case "background_fit":
-            return BarSettingChoice.value(
-                args,
-                SpaceBarStyle.BackgroundFit.self
-            ).map(Self.backgroundFit)
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -116,7 +84,6 @@ enum SpaceBarCommandSetting {
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
             "sticky_badge": Self.stickyBadge,
-            "liquid_glass": Self.liquidGlass,
         ]
     }
 
@@ -124,13 +91,6 @@ enum SpaceBarCommandSetting {
         [String: (CGFloat) -> SpaceBarCommandSetting]
     {
         [
-            "thickness": Self.thickness,
-            "outer_margin": Self.outerMargin,
-            "inner_margin": Self.innerMargin,
-            "item_size": Self.itemSize,
-            "item_gap": Self.itemGap,
-            "font_size": Self.fontSize,
-            "corner_roundness": Self.cornerRoundness,
             "dim_factor": Self.dimFactor,
             "active_dim_factor": Self.activeDimFactor,
         ]
@@ -172,8 +132,8 @@ enum SpaceBarCommandSetting {
         return .success(.springDelay(Int(clamped)))
     }
 
-    /// Parses title character cap (#58).
-    private static func titleCap(
+    /// Parses the front-app title length in characters (#58).
+    private static func frontAppTitleCap(
         _ args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
         guard let value = args.first?.numberValue,
@@ -186,7 +146,7 @@ enum SpaceBarCommandSetting {
             max(value.rounded(), Double(range.lowerBound)),
             Double(range.upperBound)
         )
-        return .success(.titleCap(Int(clamped)))
+        return .success(.frontAppTitleCap(Int(clamped)))
     }
 
     /// Parses app glyph count cap (#58, #376).
@@ -232,29 +192,12 @@ enum SpaceBarCommandSetting {
     func apply(to style: inout SpaceBarStyle) {
         switch self {
         case .enabled(let value): style.enabled = value
-        case .edge(let value): style.edge = value
-        case .alignment(let value): style.alignment = value
-        case .thickness(let value):
-            style.thickness = max(AppBarStyle.minThickness, value)
-        case .outerMargin(let value):
-            style.outerMargin = max(AppBarStyle.minMargin, value)
-        case .innerMargin(let value):
-            style.innerMargin = max(AppBarStyle.minMargin, value)
-        case .itemSize(let value): style.itemSize = value
-        case .itemGap(let value): style.itemGap = value
-        case .fontSize(let value): style.fontSize = value
         case .glyphCap(let value): style.glyphCap = value
-        case .titleCap(let value): style.titleCap = value
+        case .frontAppTitleCap(let value):
+            style.frontAppTitleCap = value
         case .iconSource(let value): style.iconSource = value
-        case .backgroundStyle(let value):
-            style.backgroundStyle = value
-        case .liquidGlass(let value): style.liquidGlass = value
-        case .backgroundFit(let value):
-            style.backgroundFit = value
         case .activeIndicator(let value):
             style.activeIndicator = value
-        case .cornerRoundness(let value):
-            style.cornerRoundness = value
         case .dimFactor(let value):
             style.dimFactor = AppBarStyle.clampDim(value)
         case .activeDimFactor(let value):

@@ -6,7 +6,7 @@ extension AppBarOverlay {
     func layoutArrows(
         strip: CGRect,
         m: Metrics,
-        style: AppBarStyle
+        style: AppBarLook
     ) {
         backArrow.isHidden =
             m.inset == 0 || scrollOffset <= 0.5

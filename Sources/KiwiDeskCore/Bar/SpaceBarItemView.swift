@@ -67,7 +67,7 @@ final class SpaceBarItemView: NSView {
     /// Spring sweep ring (#372).
     let springRing = CAShapeLayer()
     var horizontal = true
-    var style = SpaceBarStyle()
+    var style = SpaceBarLook()
     /// State mark colors (#429).
     var stateMarkColors = StateMarkColors(sticky: "", floating: "")
     var onSelect: (SpaceID) -> Void = { _ in }
@@ -151,7 +151,7 @@ final class SpaceBarItemView: NSView {
         apps: [App],
         active: Bool,
         horizontal: Bool,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         stateMarkColors: StateMarkColors,
         overflow: Int = 0,
         focusInOverflow: Bool = false

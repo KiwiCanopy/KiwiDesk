@@ -9,7 +9,7 @@ extension AppBarOverlay {
         viewport: CGRect,
         plateFrame: CGRect,
         overflow: Bool,
-        style: AppBarStyle,
+        style: AppBarLook,
         depth: CGFloat
     ) {
         guard let content = panel.contentView,
@@ -113,7 +113,7 @@ extension AppBarOverlay {
         viewport: CGRect,
         plateFrame: CGRect,
         radius: CGFloat,
-        style: AppBarStyle
+        style: AppBarLook
     ) {
         let run = glassRun ?? AppBarOverlay.FlippedView()
         glassRun = run
