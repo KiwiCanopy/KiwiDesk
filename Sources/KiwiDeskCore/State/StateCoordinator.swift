@@ -113,8 +113,14 @@ public struct StateCoordinator: Sendable {
         }
     }
 
+    /// The space `init` seeded unasked so state is never
+    /// spaceless before a config loads; nil once the first load
+    /// has ruled on it (#1526, `retirePlaceholderSpace`).
+    var placeholderSpace: SpaceID?
+
     public init(defaultSpace: SpaceID = SpaceID(1)) {
         workspaces.ensureSpace(defaultSpace)
+        placeholderSpace = defaultSpace
     }
 
     /// Swaps a window ID across every ID-keyed map for native tab
