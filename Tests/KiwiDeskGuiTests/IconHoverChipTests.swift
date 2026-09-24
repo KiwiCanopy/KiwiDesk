@@ -27,9 +27,9 @@ struct IconHoverChipTests {
     @Test("the chip rests at nothing, and the icon affordance takes it")
     func chipRestsAtNothing() throws {
         let rows = try source("Components/Common/SettingsRows.swift")
-        #expect(
-            body(of: "iconHoverChip", in: rows).contains("restOpacity: 0,")
-        )
+        let chip = body(of: "iconHoverChip", in: rows)
+        #expect(chip.contains("restOpacity: 0,"))
+        #expect(chip.contains("tint(SettingsTheme.ink2)"))
         #expect(
             body(of: "iconButtonAffordance", in: rows).contains(
                 "iconHoverChip("
@@ -44,6 +44,8 @@ struct IconHoverChipTests {
         #expect(!help.contains(".hoverHighlight("))
         let trash = try source("Sections/AppRuleIdentity.swift")
         #expect(trash.occurrences(of: ".iconHoverChip()") == 1)
+        // The menu's own neutral label ink sits closer to the glyph.
+        #expect(trash.contains(".foregroundStyle(SettingsTheme.ink2)"))
         #expect(trash.occurrences(of: ".iconButtonAffordance(") == 1)
     }
 }

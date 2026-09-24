@@ -56,7 +56,10 @@ struct AppRuleDeleteButton: View {
                     )
                 ) { onDelete(.everywhere) }
             } label: {
+                // The icon ink, which the neutral menu label's own
+                // ink would otherwise outrank (#1393).
                 Image(systemName: "trash")
+                    .foregroundStyle(SettingsTheme.ink2)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)

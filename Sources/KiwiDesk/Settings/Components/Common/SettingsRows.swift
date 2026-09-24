@@ -224,17 +224,19 @@ extension View {
         )
     }
 
-    /// The hover chip of a glyph-only icon control: nothing at rest,
-    /// so the glyph sits in its card, and the chip on hover (#1393).
+    /// The hover chip of a glyph-only icon control: the glyph in
+    /// `ink2` with nothing at rest, so it sits in its card, and the
+    /// chip on hover (#1393). The accent is a control FILL's.
     func iconHoverChip(
         cornerRadius: CGFloat = 4,
         padding: CGFloat = 2
     ) -> some View {
-        hoverHighlight(
-            restOpacity: 0,
-            cornerRadius: cornerRadius,
-            padding: padding
-        )
+        tint(SettingsTheme.ink2)
+            .hoverHighlight(
+                restOpacity: 0,
+                cornerRadius: cornerRadius,
+                padding: padding
+            )
     }
 
     /// Complete affordance for icon buttons with hover chip, tooltip, and
