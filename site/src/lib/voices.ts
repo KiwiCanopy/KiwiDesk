@@ -56,7 +56,7 @@ export const voices: Voice[] = [
       "and error.",
     avatar: null,
     link: "https://www.reddit.com/r/MacOS/s/mp0lqJx9uQ",
-    source: "Reddit",
+    source: "Reddit · r/MacOS",
   },
 ];
 
