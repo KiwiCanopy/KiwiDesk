@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "Masquer les espaces vides",
   "space_bar.hide_empty.help": "Les espaces sans fenêtre sont masqués de la barre, sauf l'espace sur lequel vous vous trouvez. Utilisez un raccourci pour accéder à un espace masqué.",
   "space_bar.item.ax.current": "%1$@, actuel",
+  "space_bar.item.ax.held": "Espace %1$@, repris de l'écran %2$@, non enregistré, %3$d applications",
+  "space_bar.item.ax.held_renumbered": "Espace %1$@, repris de l'écran %2$@, où il était l'Espace %3$@, non enregistré, %4$d applications",
   "space_bar.item.ax.layer": "Calque de raccourcis %1$@",
   "space_bar.item.ax.not_current": "%1$@, non actuel",
   "space_bar.item.ax.space": "Espace %1$@, %2$d applications",

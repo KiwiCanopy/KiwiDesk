@@ -228,7 +228,7 @@ struct ScreenSetupModelTests {
         try core.persistProfile(named: "Vision", modes: nil)
         core.apply(
             profile: try core.profiles.read(name: "Starter"),
-            forceRetile: false
+            cause: .event
         )
         let model = makeTestModel(core: core)
         model.refreshProfiles()
@@ -238,7 +238,7 @@ struct ScreenSetupModelTests {
         connect(core, ["N"])
         core.apply(
             profile: try core.profiles.read(name: "Starter"),
-            forceRetile: false
+            cause: .event
         )
         model.refreshProfiles()
         #expect(model.profileDrift == .screensUnsaved(profile: "Starter"))

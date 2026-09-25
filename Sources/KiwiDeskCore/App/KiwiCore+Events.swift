@@ -54,6 +54,7 @@ extension KiwiCore {
         let preEventFrame = preEventFrame(of: event)
         let goneWindowPID = goneWindowPID(of: event)
         let priorDisplayCount = state.workspaces.allDisplays.count
+        let priorScreens = spaceScreens(for: event)
         // An exiting app's away entries are gone for good (#1146);
         // read before the fold drops them.
         if case .appTerminated(let pid) = event {
@@ -70,6 +71,9 @@ extension KiwiCore {
             tiler.displaysChanged()
             borders.displaysChanged()
             if monitorChangeSettles(priorCount: priorDisplayCount) {
+                if !monitorSettlePending {
+                    state.settlingScreens = priorScreens
+                }
                 scheduleMonitorSettle()
                 settleRetiles = true
                 // Owed: windows wait for the profile, bars re-home.

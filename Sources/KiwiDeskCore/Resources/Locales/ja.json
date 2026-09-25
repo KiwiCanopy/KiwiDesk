@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "空のスペースを非表示",
   "space_bar.hide_empty.help": "ウインドウのないスペースをバーから隠します。ただし現在いるスペースは表示されたままです。隠れているスペースへはショートカットで移動できます。",
   "space_bar.item.ax.current": "%1$@、現在地",
+  "space_bar.item.ax.held": "スペース %1$@、画面「%2$@」から引き継ぎ、未保存、アプリ%3$d個",
+  "space_bar.item.ax.held_renumbered": "スペース %1$@、画面「%2$@」から引き継ぎ（元はスペース %3$@）、未保存、アプリ%4$d個",
   "space_bar.item.ax.layer": "ショートカットレイヤー %1$@",
   "space_bar.item.ax.not_current": "%1$@、非選択",
   "space_bar.item.ax.space": "スペース %1$@、アプリ%2$d個",

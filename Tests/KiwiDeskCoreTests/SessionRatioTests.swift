@@ -179,14 +179,14 @@ struct SessionRatioTests {
             spaceModes: ["1": .bsp],
             settings: core.tiler.settings
         )
-        core.apply(profile: profile, forceRetile: true)
+        core.apply(profile: profile, cause: .reapply)
         #expect(
             core.state.workspaces[SpaceID("1")]?
                 .sessionRatios == SessionRatios()
         )
         // An event-driven (un-forced) apply keeps the layer.
         core.execute("resize", args: [.string("x"), .number(500)])
-        core.apply(profile: profile, forceRetile: false)
+        core.apply(profile: profile, cause: .event)
         #expect(
             core.state.workspaces[SpaceID("1")]?
                 .sessionRatios.splitRatioH != nil

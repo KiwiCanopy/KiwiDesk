@@ -43,6 +43,7 @@ extension SpaceBarItemView {
             cell: cell,
             slack: Self.pad
         )
+        layoutHeldBadge(onCellAt: cursor, cell: cell)
         cursor += cell
         if !identifierDivider.isHidden {
             cursor += Self.pad

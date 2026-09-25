@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "Ocultar espaços vazios",
   "space_bar.hide_empty.help": "Os espaços sem janelas ficam ocultos na barra, exceto o espaço em que você está. Use um atalho para ir até um espaço oculto.",
   "space_bar.item.ax.current": "%1$@, posição atual",
+  "space_bar.item.ax.held": "Espaço %1$@, mantido da tela %2$@, não salvo, %3$d apps",
+  "space_bar.item.ax.held_renumbered": "Espaço %1$@, mantido da tela %2$@, onde era o Espaço %3$@, não salvo, %4$d apps",
   "space_bar.item.ax.layer": "Camada de atalhos %1$@",
   "space_bar.item.ax.not_current": "%1$@, não selecionado",
   "space_bar.item.ax.space": "Espaço %1$@, %2$d apps",

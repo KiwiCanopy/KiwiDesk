@@ -109,7 +109,7 @@ extension SettingsModel {
             try core.persistProfile(
                 named: name,
                 modes: config.modes(
-                    for: core.state.workspaces.allSpaces.map(\.id)
+                    for: core.capturedSpaces.map(\.id)
                 )
             )
         } catch {

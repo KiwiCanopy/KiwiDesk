@@ -97,8 +97,7 @@ extension KiwiCore {
         // windows forwarded (see `pruneSpaces`).
         apply(
             profile: profile,
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         return released
     }

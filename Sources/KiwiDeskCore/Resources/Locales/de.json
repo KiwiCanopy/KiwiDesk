@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "Leere Spaces ausblenden",
   "space_bar.hide_empty.help": "Spaces ohne Fenster werden in der Leiste ausgeblendet, außer der Space, auf dem du dich befindest. Verwende ein Tastenkürzel, um zu einem ausgeblendeten Space zu springen.",
   "space_bar.item.ax.current": "%1$@, aktuell",
+  "space_bar.item.ax.held": "Space %1$@, übernommen von Bildschirm %2$@, nicht gesichert, %3$d Anwendungen",
+  "space_bar.item.ax.held_renumbered": "Space %1$@, übernommen von Bildschirm %2$@, dort Space %3$@, nicht gesichert, %4$d Anwendungen",
   "space_bar.item.ax.layer": "Tastenkürzel-Ebene %1$@",
   "space_bar.item.ax.not_current": "%1$@, nicht aktuell",
   "space_bar.item.ax.space": "Space %1$@, %2$d Anwendungen",

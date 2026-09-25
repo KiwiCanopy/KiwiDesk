@@ -38,6 +38,8 @@ struct SpaceForwardingSeamTests {
                 "Commands/KiwiCore+SpaceLifecycleCommands.swift": 1,
                 "App/KiwiCore+PlaceholderSpace.swift": 1,
                 "Profiles/KiwiCore+EmptyDisplayHeal.swift": 1,
+                // A held Space's re-file home and its retire (#1507).
+                "Profiles/KiwiCore+HeldSpaces.swift": 2,
             ]
         )
     }

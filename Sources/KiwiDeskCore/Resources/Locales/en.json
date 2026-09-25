@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "Hide empty Spaces",
   "space_bar.hide_empty.help": "Spaces with no windows are hidden from the bar, except the Space you're currently on. Use a shortcut to jump to a hidden Space.",
   "space_bar.item.ax.current": "%1$@, current",
+  "space_bar.item.ax.held": "Space %1$@, held from %2$@, not saved, %3$d applications",
+  "space_bar.item.ax.held_renumbered": "Space %1$@, held from %2$@, where it was Space %3$@, not saved, %4$d applications",
   "space_bar.item.ax.layer": "Shortcut layer %1$@",
   "space_bar.item.ax.not_current": "%1$@, not current",
   "space_bar.item.ax.space": "Space %1$@, %2$d applications",

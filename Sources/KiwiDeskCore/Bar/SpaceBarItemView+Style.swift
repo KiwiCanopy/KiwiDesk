@@ -13,6 +13,7 @@ extension SpaceBarItemView {
         styleIdentifier()
         styleApps()
         styleBadges()
+        styleHeldBadge()
         styleDivider()
         styleAccent()
     }
@@ -29,7 +30,7 @@ extension SpaceBarItemView {
     /// item reads full-strength on this channel as on the ink
     /// (#1169): an emoji icon takes no tint, so this is the one
     /// channel that could dim it.
-    private var untintedAlpha: CGFloat {
+    var untintedAlpha: CGFloat {
         isActive || isHovered || isDragHovered || space == nil
             ? 1 : style.dimFactor
     }
