@@ -11,6 +11,11 @@ extension KiwiCore {
     /// times the longest in-between report measured.
     nonisolated static let monitorSettleDefault: Duration = .seconds(1)
 
+    /// The longest a flapping topology can hold the choice off —
+    /// a fixed bound, not a multiple of the delay, so a short test
+    /// delay cannot turn it into a synchronous settle mid-burst.
+    nonisolated static let monitorSettleBound: Duration = .seconds(5)
+
     /// Whether a profile choice is owed to a pending settle.
     var monitorSettlePending: Bool {
         deferred.isScheduled(.monitorSettle)
@@ -40,7 +45,7 @@ extension KiwiCore {
         deferred.schedule(
             .monitorSettle,
             after: delay,
-            maxWait: delay * 5
+            maxWait: max(delay, Self.monitorSettleBound)
         ) { [weak self] in
             self?.settleMonitorChange()
         }
