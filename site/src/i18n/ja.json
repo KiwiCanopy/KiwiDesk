@@ -459,5 +459,15 @@
   "what_compare": "すでに別のものを使っていますか？",
   "what_eyebrow": "はじめての方はこちら",
   "what_learn": "基本を学ぶ",
-  "what_title": "KiwiDesk とは、結局なに？"
+  "what_title": "KiwiDesk とは、結局なに？",
+  "stars_on_github": "GitHub のスター {n}",
+  "voices_eyebrow_simple": "ユーザーの声",
+  "voices_eyebrow_dev": "現場からの声",
+  "voices_title_simple": "使っている人たちからの言葉",
+  "voices_title_dev": "試して、使い続けている。",
+  "voices_sub_simple": "ウィンドウを KiwiDesk に任せている人たちの声を少しだけ。完熟で摘みたて、搾ってはいません。",
+  "voices_sub_dev": "果汁100%、混ぜ物なし。",
+  "voices_track_aria": "ユーザーの声（スクロール可能）",
+  "voices_prev_aria": "前の声",
+  "voices_next_aria": "次の声"
 }
