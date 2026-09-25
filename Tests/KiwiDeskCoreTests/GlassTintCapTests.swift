@@ -14,10 +14,11 @@ import Testing
 /// install and the plate read as a slab.
 ///
 /// These assert the CONSUMERS rather than the arithmetic: what a
-/// backdrop's layer ends up carrying, and what the plate ends up
-/// carrying. A test that only exercised the pure clamp would
-/// have stayed green through the whole defect — the clamp was
-/// always right; the second channel was the bug.
+/// backdrop's gradient ends up carrying at each end (#1622), and
+/// what the plate ends up carrying. A test that only exercised
+/// the pure clamp would have stayed green through the whole
+/// defect — the clamp was always right; the second channel was
+/// the bug.
 ///
 /// Every clause derives its expectation from
 /// `GlassTint.maxAlpha` rather than restating today's number, so
@@ -33,25 +34,37 @@ struct GlassTintCapTests {
     private static let frame = CGRect(x: 0, y: 0, width: 80, height: 24)
 
     /// A host with a superview, which `apply` needs to insert into.
-    private static func host() -> (glass: NSView, backdrop: NSView) {
+    private static func host() -> (glass: NSView, backdrop: GlassBackdrop) {
         let parent = NSView(frame: frame)
         let glass = NSView(frame: frame)
         parent.addSubview(glass)
-        return (glass, NSView(frame: frame))
+        return (glass, GlassBackdrop(frame: frame))
     }
 
-    /// The alpha a Fill actually lands on a backdrop's layer.
-    private static func landed(_ hex: String) -> CGFloat? {
+    /// The alphas a Fill actually lands on a backdrop's gradient,
+    /// anchor end first.
+    private static func ends(
+        _ hex: String
+    ) -> (anchor: CGFloat, floor: CGFloat)? {
         let (glass, backdrop) = host()
         GlassTint.apply(
             backdrop,
             below: glass,
             frame: frame,
             cornerRadius: 4,
-            hex: hex
+            hex: hex,
+            edge: .top
         )
-        guard !backdrop.isHidden else { return nil }
-        return backdrop.layer?.backgroundColor?.alpha
+        guard !backdrop.isHidden,
+            let colors = backdrop.gradient?.colors as? [CGColor],
+            colors.count == 2
+        else { return nil }
+        return (colors[0].alpha, colors[1].alpha)
+    }
+
+    /// The anchor end's alpha: where the cap binds.
+    private static func landed(_ hex: String) -> CGFloat? {
+        ends(hex)?.anchor
     }
 
     /// Guard against a vacuous suite: below macOS 26 `rendered`
@@ -105,6 +118,35 @@ struct GlassTintCapTests {
         )
         let alpha = try #require(Self.landed(hex))
         #expect(abs(alpha - picked) < 0.01, "landed \(alpha)")
+    }
+
+    /// The floor is a share of the ANCHOR, not of the raw Fill:
+    /// a Fill above the cap fades to the share of the cap, so the
+    /// clamp governs the whole surface rather than one end of it.
+    /// Derived from `floorShare` and `maxAlpha` (tests.md ▸ #1021).
+    @Test(
+        "The far end is floorShare of the anchor",
+        arguments: [1.0, 0.5]
+    )
+    func floorIsAShareOfTheAnchor(_ ofCap: CGFloat) throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        try #require(
+            GlassTint.floorShare > 0 && GlassTint.floorShare < 1,
+            "a floor share outside (0, 1) is no fade"
+        )
+        // 1.0 × the cap reaches it from ABOVE (a fully opaque
+        // Fill), 0.5 stays under it; both ends must agree.
+        let fill = ofCap == 1 ? 1 : GlassTint.maxAlpha * ofCap
+        let hex = String(
+            format: "#14201C%02X",
+            Int((fill * 255).rounded())
+        )
+        let landed = try #require(Self.ends(hex))
+        #expect(
+            abs(landed.floor - landed.anchor * GlassTint.floorShare)
+                < 0.01,
+            "\(hex): \(landed)"
+        )
     }
 
     /// The require is not boilerplate here — it is the clause

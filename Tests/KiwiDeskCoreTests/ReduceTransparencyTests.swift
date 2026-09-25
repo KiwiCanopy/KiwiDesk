@@ -176,14 +176,15 @@ struct ReduceTransparencyTests {
         let glass = NSView(frame: CGRect(x: 0, y: 0, width: 40, height: 20))
         let parent = NSView(frame: glass.frame)
         parent.addSubview(glass)
-        let backdrop = NSView()
+        let backdrop = GlassBackdrop()
         reducing(true) {
             GlassTint.apply(
                 backdrop,
                 below: glass,
                 frame: glass.frame,
                 cornerRadius: 4,
-                hex: "#000000B3"
+                hex: "#000000B3",
+                edge: .top
             )
             #expect(backdrop.isHidden)
             #expect(glass.appearance == nil)
@@ -194,7 +195,8 @@ struct ReduceTransparencyTests {
                 below: glass,
                 frame: glass.frame,
                 cornerRadius: 4,
-                hex: "#000000B3"
+                hex: "#000000B3",
+                edge: .top
             )
             #expect(!backdrop.isHidden)
         }

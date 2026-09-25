@@ -18,10 +18,12 @@ struct GlassTintCensusTests {
     /// `memberBodies` returns the members that open a body, which
     /// is the same residue `BarMotionSeamTests` states.
     private static let members: [String: [String]] = [
-        "rendered": ["maxAlpha", "drawsGlass"],
+        "rendered": ["maxAlpha", "floorShare", "drawsGlass"],
+        // Pure direction: reaches no colour, so it names none.
+        "fade": [],
         "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
         "sits": ["subviews"],
-        "apply": ["rendered(", "pinnedAppearance(", "sits("],
+        "apply": ["rendered(", "fade(", "pinnedAppearance(", "sits("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body
@@ -29,6 +31,7 @@ struct GlassTintCensusTests {
     /// is painting a colour the cap never saw.
     private static let painters = [
         "backgroundColor", "tintColor", "setFill", "fillColor",
+        "colors",
     ]
 
     /// A literal painting site per `painters` entry, spelled out
@@ -45,6 +48,7 @@ struct GlassTintCensusTests {
         (site: "glass.tintColor = NSColor.red", entry: "tintColor"),
         (site: "NSColor.red.setFill()", entry: "setFill"),
         (site: "let hex = style.fillColor", entry: "fillColor"),
+        (site: "gradient.colors = [c.cgColor]", entry: "colors"),
     ]
 
     /// A body that paints nothing — the negative control that
@@ -118,6 +122,17 @@ struct GlassTintCensusTests {
             apply takes a colour, so a call site can substitute \
             one for the capped Fill: \(signature)
             """
+        )
+        // The fade's anchor is the shelf's edge, stated at every
+        // call site (#1622): a default would draw a shelf on any
+        // other edge fading from the top, silently.
+        #expect(
+            signature.contains("edge: AppBarEdge"),
+            "apply no longer takes the fade's edge: \(signature)"
+        )
+        #expect(
+            !signature.contains("edge: AppBarEdge ="),
+            "apply defaults the fade's edge: \(signature)"
         )
     }
 

@@ -392,6 +392,14 @@ Obligations:
   The pinned arm's plate move is order-guarded the same way, and
   its ORDER half is `GlassTintOrderTests`' index pin; its
   no-reparent half has no counting clause — stated, fails OPEN.
+- **The fade is built in `GlassTint.apply` too, from the edge
+  every call site hands it without a default** (#1622). The
+  backdrop is a `GlassBackdrop`, whose BACKING layer is the
+  gradient so it rides the plate glide; a sublayer would jump to
+  the final size, and a call site that dropped the shelf's edge
+  for a constant draws every shelf as a top shelf — which only a
+  fixture on another edge can see (`GlassTintFadeTests`,
+  `GlassTintCensusTests` ▸ `applyTakesAFillNotAColour`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

@@ -42,7 +42,7 @@ public final class AppBarOverlay {
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).
-    var boxTints: [NSView] = []
+    var boxTints: [GlassBackdrop] = []
     var scrollOffset: CGFloat = 0
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()

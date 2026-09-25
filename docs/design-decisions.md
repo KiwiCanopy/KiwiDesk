@@ -11349,6 +11349,34 @@ content. A fully transparent `fill_color` leaves the glass clear.
 One seam owns the five hosting modes (`GlassHosting` /
 `GlassTint`, #407).
 
+:::unreleased
+**On glass the Fill FADES: its capped alpha at the shelf's screen
+edge, an eighth of that toward the windows.** (#1622, owner
+rulings 2026-09-24/25.) A flat tint at `GlassTint.maxAlpha` is
+what made a glass shelf read as a coloured plate, so the fade is
+how a Fill tints glass rather than a second style beside it — a
+choice between the two would be a setting whose only job is to
+undo the glass. Both ends are relative to the Fill: the anchor
+is its alpha capped at `maxAlpha`, the floor
+`GlassTint.floorShare` of that, so a transparency choice still
+means how much colour the glass carries and a transparent Fill
+still draws none. The floor is never zero, so a hint of the
+colour runs the whole surface. It runs from the SHELF's edge
+because the shelf has one Fill and one plate (#1517), and a
+boxed item fades the same way. The gradient is the backdrop's
+own backing layer (`GlassBackdrop`), so it rides the plate
+glide, and it is built in `GlassTint.apply`, which every call
+site hands the edge without a default (`GlassTintFadeTests`,
+`GlassTintCensusTests`). Legibility at the clear end rests on
+the #1308 pin below, not on the alpha: a dark Fill keeps the
+whole glass dark. With the finish off, or Reduce transparency on
+(#1374), the Fill renders flat as before. **No config migration
+is owed**: no stored value or key changed and the Fill still
+means the colour, now at the anchor edge — a rendering change,
+not a meaning moved under a key (#1354) or a default flipped
+(#1369).
+:::
+
 The finish is ON by default on every surface (owner ruling
 2026-09-10: the bars are the app's face, and a fresh install or a
 Reset All Settings should show the finish the app is designed

@@ -71,11 +71,11 @@ public final class SpaceBarOverlay {
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
     /// Colored backdrops behind per-box glass (#408).
-    var boxTints: [NSView] = []
+    var boxTints: [GlassBackdrop] = []
     /// Front-app segment frosted backdrop box.
     var frontGlass: NSView?
     /// Colored backdrop behind front segment glass (#408).
-    var frontTint: NSView?
+    var frontTint: GlassBackdrop?
     /// Whole-bar scroll offset (#385).
     var scrollOffset: CGFloat = 0
     /// Follows the active Space unless a manual scroll holds.

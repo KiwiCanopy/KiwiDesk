@@ -23,7 +23,7 @@ final class ShelfOverlay {
     let stripView = AppBarOverlay.FlippedView()
     var solidPlate: NSView?
     var glassPlate: NSView?
-    var glassTint: NSView?
+    var glassTint: GlassBackdrop?
     /// The glass shows through behind the sections rather than
     /// hosting them, so nothing is ever reparented into it.
     let glassFiller = NSView()
@@ -247,9 +247,9 @@ final class ShelfOverlay {
         return glassPlate
     }
 
-    func tintView() -> NSView {
+    func tintView() -> GlassBackdrop {
         if let glassTint { return glassTint }
-        let tint = NSView()
+        let tint = GlassBackdrop()
         glassTint = tint
         return tint
     }
