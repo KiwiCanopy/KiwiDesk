@@ -1353,6 +1353,7 @@
   "spaces.preview.count_hint": "このプレビューだけが変わります。保存はされません。",
   "spaces.preview.none": "この下書きにはまだスペースがありません。",
   "spaces.preview.title": "このスペースのレイアウト",
+  "spaces.rename.empty": "名前を入力してください。空のままにすると「%1$@」に戻ります。",
   "spaces.rename.taken": "「%1$@」という名前のスペースはすでに存在します。",
   "spaces.title": "スペース",
   "sticky.caption": "Sticky ウインドウはすべてのスペースで表示され続けます（%2$@の「%1$@」）。",

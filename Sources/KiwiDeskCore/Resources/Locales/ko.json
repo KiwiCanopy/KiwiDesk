@@ -1353,6 +1353,7 @@
   "spaces.preview.count_hint": "이 미리보기만 바뀌며 저장되지 않습니다.",
   "spaces.preview.none": "이 초안에는 아직 공간이 없습니다.",
   "spaces.preview.title": "이 공간의 레이아웃",
+  "spaces.rename.empty": "이름을 입력하십시오. 비워 두면 ‘%1$@’(으)로 돌아갑니다.",
   "spaces.rename.taken": "이름이 ‘%1$@’인 공간이 이미 있습니다.",
   "spaces.title": "공간",
   "sticky.caption": "Sticky 윈도우는 모든 공간에서 계속 표시됩니다(%2$@의 ‘%1$@’).",

@@ -1353,6 +1353,7 @@
   "spaces.preview.count_hint": "仅改变此预览，不会保存。",
   "spaces.preview.none": "此草稿中尚无空间。",
   "spaces.preview.title": "此空间的布局",
+  "spaces.rename.empty": "请输入名称，否则将恢复为“%1$@”。",
   "spaces.rename.taken": "已存在名为“%1$@”的空间。",
   "spaces.title": "空间",
   "sticky.caption": "Sticky 窗口会在所有空间保持可见（%2$@中的“%1$@”）。",
