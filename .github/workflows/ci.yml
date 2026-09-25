@@ -45,9 +45,12 @@ on:
         default: false
         type: boolean
 
+# A superseded PR run is cancelled; a push to main always finishes,
+# so every merged commit gets a verdict and the README badge
+# (main's pushes only) never reads a cancelled run as failing.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   changes:
