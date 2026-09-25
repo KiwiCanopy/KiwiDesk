@@ -190,9 +190,13 @@ struct ShelfStripPreview: View {
         _ slot: ShelfArrangement.Slot?
     ) -> some View {
         if let spec, let slot {
+            // Drawn at `run(_:in:)`, the range the plate is built
+            // from, so the drawing and its arithmetic are one.
+            let range = run(spec, in: slot)
+            let length = range.upperBound - range.lowerBound
             let cut = overflows(spec, slot)
             BarStripView(
-                spec: seated(spec, at: cut ? .start : slot.alignment),
+                spec: seated(spec, at: .start),
                 edge: edge,
                 vertical: vertical,
                 scale: scale,
@@ -200,15 +204,15 @@ struct ShelfStripPreview: View {
             )
             .fixedSize(horizontal: !vertical && cut, vertical: vertical && cut)
             .frame(
-                width: vertical ? thickness : slot.length,
-                height: vertical ? slot.length : thickness,
+                width: vertical ? thickness : length,
+                height: vertical ? length : thickness,
                 alignment: .topLeading
             )
             .clipped()
-            .mask(fade(cut ? slot.length : 0, along: slot.length))
+            .mask(fade(cut ? length : 0, along: length))
             .offset(
-                x: vertical ? 0 : slot.offset,
-                y: vertical ? slot.offset : 0
+                x: vertical ? 0 : range.lowerBound,
+                y: vertical ? range.lowerBound : 0
             )
         }
     }

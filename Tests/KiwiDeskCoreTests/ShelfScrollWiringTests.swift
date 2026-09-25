@@ -13,12 +13,16 @@ struct ShelfScrollWiringTests {
     init() { LiquidGlassGate.override = { false } }
 
     /// A real scroll event, as a mouse wheel reports `lines`
-    /// notches down (negative) or up.
-    private func wheel(_ lines: Int32) throws -> NSEvent {
+    /// notches down (negative) or up — or, `precise`, a trackpad
+    /// reporting that many points.
+    private func wheel(
+        _ lines: Int32,
+        precise: Bool = false
+    ) throws -> NSEvent {
         let cg = try #require(
             CGEvent(
                 scrollWheelEvent2Source: nil,
-                units: .line,
+                units: precise ? .pixel : .line,
                 wheelCount: 1,
                 wheel1: lines,
                 wheel2: 0,
@@ -79,5 +83,46 @@ struct ShelfScrollWiringTests {
         let delta = ShelfScrollInput.Delta(x: 0, y: -3, precise: false)
         #expect(!overlay.root.onScroll(delta))
         #expect(overlay.scrollOffset == 0)
+    }
+
+    /// A wheel notch travels about an item, a trackpad exactly its
+    /// points: the root hands `ShelfScrollInput` the event's own
+    /// precision.
+    @Test("A notch travels an item, a trackpad its points")
+    func notchAndTrackpad() throws {
+        let manager = SpaceBarManager()
+        manager.sync([paintedSpaceBar(front: nil, spaces: 60)])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let step = try #require(overlay.scrollGeom).step
+        let item = try #require(overlay.itemViews.first)
+        item.scrollWheel(with: try wheel(-1))
+        #expect(abs(overlay.scrollOffset - step) < 0.01)
+        item.scrollWheel(with: try wheel(-7, precise: true))
+        #expect(abs(overlay.scrollOffset - step - 7) < 0.01)
+    }
+
+    /// A parent that records the scrolls reaching it.
+    private final class Spy: NSView {
+        var scrolls = 0
+        override func scrollWheel(with event: NSEvent) { scrolls += 1 }
+    }
+
+    /// A section with nothing hidden passes the event up the
+    /// responder chain rather than swallowing it; one that takes it
+    /// passes nothing.
+    @Test("A declined scroll bubbles up; a taken one stops")
+    func declinedScrollBubbles() throws {
+        let spaces = SpaceBarManager()
+        spaces.sync([paintedSpaceBar(front: nil, spaces: 3)])
+        let short = try #require(spaces.overlayForTesting(barTitleDisplay))
+        let spy = Spy()
+        spy.addSubview(short.root)
+        short.root.scrollWheel(with: try wheel(-1))
+        #expect(spy.scrolls == 1)
+        spaces.sync([paintedSpaceBar(front: nil, spaces: 60)])
+        short.root.scrollWheel(with: try wheel(-1))
+        #expect(spy.scrolls == 1)
     }
 }

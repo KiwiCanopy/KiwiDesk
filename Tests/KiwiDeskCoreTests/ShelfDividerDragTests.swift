@@ -136,8 +136,15 @@ struct ShelfDividerDragTests {
         handle.onMinimum = { reports.append(($0, $1)) }
         handle.onReset = { resets += 1 }
         handle.mouseDown(with: try mouse(.leftMouseDown, x: 300))
+        // The layout moving under the drag moves no reference: the
+        // drag measures against the range its press found.
+        let found = try #require(handle.range)
+        var moved = found
+        moved.spaceLength = 500
+        handle.range = moved
         handle.mouseDragged(with: try mouse(.leftMouseDragged, x: 350))
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 400))
+        handle.range = found
         #expect(reports.map(\.0) == [35, 40])
         #expect(reports.map(\.1) == [false, true])
         handle.mouseDown(with: try mouse(.leftMouseDown, x: 400, clicks: 2))

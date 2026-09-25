@@ -63,6 +63,13 @@ struct ShelfCountTests {
                 parts.first { $0 is NSImageView }
             ).frame
             #expect(chevron.width > 0 && chevron.height > 0)
+            #expect(
+                view.drawnSymbol
+                    == ShelfCountView.glyph(
+                        side: side,
+                        horizontal: horizontal
+                    ).symbol
+            )
             let gap = ShelfCountView.partGap - 0.5
             // Flipped: a smaller y is higher on screen.
             switch (side, horizontal) {

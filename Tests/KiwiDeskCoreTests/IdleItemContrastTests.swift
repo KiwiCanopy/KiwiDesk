@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -83,5 +84,24 @@ struct IdleItemContrastTests {
         #expect(idle(0x80) != idle(255))
         shelf.itemColor = "not a colour"
         #expect(shelf.idleItemColor == "not a colour")
+    }
+
+    /// The consumer: an idle text identifier on the live bar is
+    /// drawn in `idleItemColor`, the active one is not.
+    @Test("The live bar draws an idle identifier in the idle ink")
+    @MainActor
+    func liveBarDrawsTheIdleInk() throws {
+        LiquidGlassGate.override = { false }
+        let manager = SpaceBarManager()
+        manager.sync([paintedSpaceBar(front: nil, spaces: 3)])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let idle = try #require(
+            overlay.itemViews.first { !$0.isActive && $0.space != nil }
+        )
+        let expected = NSColor(kiwiHex: idle.style.idleItemColor)
+        let drawn = try #require(idle.identifierLabel.textColor)
+        #expect(drawn == expected)
     }
 }

@@ -16,6 +16,8 @@ final class ShelfCountView: NSView {
     private let chevron = NSImageView()
     private var horizontal = true
     private var count = 0
+    /// The SF Symbol `configure` drew, for the placement guard.
+    private(set) var drawnSymbol: String?
     private var isDragHovered = false
     private var ink: NSColor = .labelColor
     private var hoverInk: NSColor = .labelColor
@@ -58,6 +60,7 @@ final class ShelfCountView: NSView {
         label.stringValue = "\(count)"
         label.font = .systemFont(ofSize: fontSize, weight: .semibold)
         let glyph = Self.glyph(side: side, horizontal: horizontal)
+        drawnSymbol = glyph.symbol
         chevron.image = NSImage(
             systemSymbolName: glyph.symbol,
             accessibilityDescription: nil

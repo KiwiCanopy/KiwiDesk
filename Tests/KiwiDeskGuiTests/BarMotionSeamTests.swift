@@ -309,10 +309,24 @@ struct BarMotionSeamTests {
         guard
             let args = SourceScan.callArguments(of: decision, in: body)
         else { return false }
+        // A whole argument, never a prefix: `isReduced || true`
+        // names the read and gates nothing.
+        let ends = { (text: String, needle: String, allowed: Set<Character>) in
+            guard let hit = text.range(of: needle) else { return false }
+            guard let next = text[hit.upperBound...].first else {
+                return true
+            }
+            return allowed.contains(next)
+        }
         let handed = squash(args)
-        if handed.contains("reduceMotion:isReduced") { return true }
-        return handed.contains("reduceMotion:reduceMotion")
-            && squash(body).contains("letreduceMotion=isReduced")
+        if ends(handed, "reduceMotion:isReduced", [",", ")"]) {
+            return true
+        }
+        let letters = Set(
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+        )
+        return handed == "reduceMotion:reduceMotion"
+            && ends(squash(body), "letreduceMotion=isReduced", letters)
     }
 
     /// Whether a member's body reaches a motion starter.

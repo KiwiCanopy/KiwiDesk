@@ -58,4 +58,13 @@ struct ShelfFollowRuleTests {
         follow.scrolledByHand()
         #expect(render(&follow, 1))
     }
+
+    /// With no active entry at all, the first render still
+    /// follows: nothing was followed before it to hold against.
+    @Test("The first render follows even with no active entry")
+    func firstRenderFollowsNil() {
+        var follow = ShelfFollow<Int>()
+        follow.scrolledByHand()
+        #expect(render(&follow, nil))
+    }
 }

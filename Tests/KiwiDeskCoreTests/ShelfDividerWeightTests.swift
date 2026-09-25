@@ -100,4 +100,23 @@ struct ShelfDividerWeightTests {
         )
         overlay.hide()
     }
+
+    /// The rule's consumers draw at the rule alpha: the in-item
+    /// rule, and the front-app and layer breaks — never the section
+    /// divider's heavier ink.
+    @Test("The rules and breaks take the rule alpha")
+    @MainActor
+    func rulesTakeTheRuleAlpha() throws {
+        LiquidGlassGate.override = { false }
+        let manager = SpaceBarManager()
+        manager.sync([paintedSpaceBar(front: WindowID(1), spaces: 3)])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let item = try #require(overlay.itemViews.first)
+        let rule = try #require(item.identifierDivider.layer?.backgroundColor)
+        #expect(rule.alpha == BarDivider.ruleAlpha)
+        let front = try #require(overlay.frontDivider.layer?.backgroundColor)
+        #expect(front.alpha == BarDivider.ruleAlpha)
+    }
 }

@@ -226,6 +226,7 @@ struct SpaceBarLayerOverlayTests {
         let first = overlay.itemViews[1].frame
         let gap = SpaceBarLook().itemGap
         #expect(rule.frame.width == BarDivider.sectionThickness)
+        #expect(rule.layer?.backgroundColor?.alpha == BarDivider.ruleAlpha)
         // The section breaks' share of the depth, never all of it
         // (#1517 ladder).
         #expect(
