@@ -33,7 +33,7 @@ final class ShelfOverlay {
     /// Whether the grip is hovered or dragged, and the shelf the
     /// divider was last painted for.
     var dividerHovered = false
-    var dividerStyle: (shelf: KiwiShelf, horizontal: Bool)?
+    var dividerShelf: KiwiShelf?
 
     var isVisible: Bool { panel?.isVisible == true }
 
