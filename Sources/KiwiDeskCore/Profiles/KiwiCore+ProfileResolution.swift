@@ -24,6 +24,11 @@ extension KiwiCore {
         // answer whether this apply is a profile CHANGE — which
         // gates the session clear, the prune below and the
         // restore after it.
+        // A held number this profile claims moves off it first.
+        reclaimHeldNames(
+            declared: profile.declaredSpaces,
+            into: .profile(profile.name)
+        )
         let switching = recordOutgoingPartitioning(before: profile)
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
@@ -112,8 +117,14 @@ extension KiwiCore {
         fallbackSpace = profile.fallbackSpace.flatMap {
             declared.contains($0) ? $0 : nil
         }
-        // After the pins, which a held Space's home pin joins.
-        refileHeldSpaces(declared: declared)
+        // After the pins, which a held Space's home pin joins; one
+        // back under its own name takes this profile's mode.
+        for id in refileHeldSpaces(
+            declared: declared,
+            into: .profile(profile.name)
+        ) {
+            setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
+        }
         // Per-profile override tiers — keybindings (#55 phase
         // 6) and app rules (#109): register THIS profile's
         // overrides (base survives unmentioned). Passed
@@ -193,6 +204,10 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         supersedeMonitorSettle()
+        reclaimHeldNames(
+            declared: Set(composed.spaces),
+            into: .standard(composed.sourceName)
+        )
         // #1230: a Standard is not a profile — file whatever
         // profile was live before the compose rearranges it, or
         // its arrangement is what gets recorded under that
@@ -219,7 +234,10 @@ extension KiwiCore {
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
         adoptComposedPlacement(composed)
-        refileHeldSpaces(declared: Set(composed.spaces))
+        refileHeldSpaces(
+            declared: Set(composed.spaces),
+            into: .standard(composed.sourceName)
+        )
         fallbackSpace = nil
         // A transient Standard has no keybinding or app-rule
         // override — revert to the base gui.json config

@@ -141,13 +141,7 @@ extension KiwiCore {
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop).
     func liveMonitorSet() -> MonitorSet {
-        MonitorSet(
-            monitors: liveFingerprints,
-            // A held Space's home pin is not the arrangement's (#1507).
-            spaceMonitorMap: spacePins.filter {
-                state.heldSpaces[$0.key] == nil
-            }
-        )
+        MonitorSet(monitors: liveFingerprints, spaceMonitorMap: capturedPins)
     }
 
     /// Snapshot of the current configuration as a new profile
@@ -163,8 +157,10 @@ extension KiwiCore {
         modes overrides: [SpaceID: LayoutMode]?
     ) -> Profile {
         let liveSpaces = capturedSpaces.map(\.id)
+        // A caller's modes are filtered to the captured Spaces
+        // here, so no capture site can save a held one (#1507).
         let modes =
-            overrides
+            overrides?.filter { liveSpaces.contains($0.key) }
             ?? Dictionary(
                 uniqueKeysWithValues:
                     capturedSpaces.map {

@@ -75,6 +75,7 @@ extension KiwiCore {
                 spacePins =
                     profile.set(matching: fingerprints)?
                     .spaceMonitorMap ?? [:]
+                returnHeldSpacesWithoutApply(to: profile)
             }
         case .countDefault(let profile):
             if profile.name != profiles.currentName {
@@ -83,6 +84,8 @@ extension KiwiCore {
                     "monitor change: loaded default profile "
                         + "'\(profile.name)' (dirty)"
                 )
+            } else {
+                returnHeldSpacesWithoutApply(to: profile)
             }
             profiles.markDirty()
         case .none:

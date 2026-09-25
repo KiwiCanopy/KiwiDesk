@@ -4520,25 +4520,36 @@ The record is per session and is not written to disk.
 
 :::unreleased
 **A monitor change holds a gone screen's spaces.** When a monitor
-change resolves a different profile, a space pinned to a monitor
-that is no longer connected, and still holding windows on any
-Desktop, is *held* instead of pruned: it stays live on a
-remaining monitor under its own name, or under the next number
-past the highest live or declared one where the incoming profile
-declares that name. It keeps its icon and mode, and wears an
-asterisk badge in the Space Bar
+change resolves a different profile, a space that lived on a
+monitor no longer connected — pinned there, or placed there by
+the Main role or by KiwiDesk — and still holds windows on any
+Desktop is *held* instead of pruned: it stays live on a remaining
+monitor under its own name, or under the next number past the
+highest live one where the incoming profile declares that name. A
+profile or Standard that later applies and declares a held
+space's current number moves it past the highest live number
+again. A held space keeps its icon and mode — `reload_config`
+does not reset its mode — and wears an asterisk badge in the
+Space Bar
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
-Once its monitor is back and the profile or Standard then applied
-declares its original name, everything in it moves into that
-space and the hold ends; with the name undeclared, it stays held,
-pinned back to its monitor.
+
+Once its monitor is back, a held space goes home when the
+arrangement then live is the one it left — the same profile, or
+the same Standard — and declares its original name: everything in
+it moves into that space, which takes the returning arrangement's
+mode, and the hold ends. This includes a reconnect that keeps the
+live profile. With a different arrangement, or the name
+undeclared, it stays held, pinned back to its monitor. With a
+hand-written `init.lua` and no profile for the connected
+monitors, a reconnect only places spaces, and a held space stays
+held.
 
 A held space is dropped once no window is left in it on any
-Desktop, and on an explicit `load_profile`, whose prune forwards
-it to the fallback space like any undeclared space.
-`save_profile`, the `gui.json` space list and the per-profile
-record above never include one. A Desktop binding switch holds
-nothing, and held spaces do not survive a restart
+Desktop, by `delete_space`, and on an explicit `load_profile`,
+whose prune forwards it to the fallback space like any undeclared
+space. `save_profile`, the `gui.json` space list and pins and the
+per-profile record above never include one. A Desktop binding
+switch holds nothing, and held spaces do not survive a restart
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
 :::
 

@@ -10,12 +10,19 @@ public struct HeldOrigin: Equatable, Sendable {
     public let screen: String
     /// The identifier icon it carried there.
     public let icon: String?
+    /// The arrangement it left — it goes home only into that one
+    /// (#1230: arrangements never merge by name). Nil where no
+    /// profile or Standard was live.
+    public let arrangement: Arrangement?
+
+    /// A saved profile or a composed Standard, by name.
+    public enum Arrangement: Equatable, Sendable {
+        case profile(String)
+        case standard(String)
+    }
 
     /// The screen's own name, for the sentence the bar announces.
     public var screenName: String {
-        guard let colon = screen.lastIndex(of: ":") else {
-            return screen
-        }
-        return String(screen[..<colon])
+        Display.fingerprintParts(screen).name
     }
 }

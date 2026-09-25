@@ -57,6 +57,7 @@ extension KiwiCore {
         deferred.cancel(.monitorSettle)
         retireOrphanedHealSeeds()
         handleMonitorChange()
+        state.settlingScreens = [:]
         emitMonitorChange()
         if !defersEventRetiles { retile() }
     }
@@ -67,6 +68,20 @@ extension KiwiCore {
     func supersedeMonitorSettle() {
         guard monitorSettlePending else { return }
         deferred.cancel(.monitorSettle)
+        state.settlingScreens = [:]
         emitMonitorChange()
+    }
+
+    /// Each Space's screen fingerprint before a display report
+    /// folds — only a report pays for the read.
+    func spaceScreens(for event: KiwiEvent) -> [SpaceID: String] {
+        guard case .displaysChanged = event else { return [:] }
+        var screens: [SpaceID: String] = [:]
+        for display in state.workspaces.allDisplays {
+            for space in state.workspaces.spaces(on: display.id) {
+                screens[space] = display.fingerprint
+            }
+        }
+        return screens
     }
 }

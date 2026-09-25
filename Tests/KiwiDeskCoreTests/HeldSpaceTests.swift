@@ -101,7 +101,8 @@ struct HeldSpaceTests {
                 == HeldOrigin(
                     name: SpaceID(3),
                     screen: dell.fingerprint,
-                    icon: nil
+                    icon: nil,
+                    arrangement: .profile("desk")
                 )
         )
         #expect(core.state.heldSpaces[SpaceID(4)]?.name == SpaceID(4))
@@ -192,6 +193,85 @@ struct HeldSpaceTests {
         core.handle(.displaysChanged([builtIn]))
         #expect(core.state.heldSpaces[SpaceID(5)]?.icon == nil)
         #expect(core.state.heldSpaces[SpaceID(4)]?.icon == "book")
+    }
+
+    @Test("an unpinned Space of the gone screen is held too")
+    func unpinnedSpaceIsHeld() throws {
+        let core = try docked()
+        // Main-role and auto-placed Spaces carry no pin; the
+        // report-time screen record is what names their screen.
+        core.spacePins[SpaceID(4)] = nil
+        core.handle(.displaysChanged([builtIn]))
+        #expect(
+            core.state.heldSpaces[SpaceID(4)]?.screen == dell.fingerprint
+        )
+        #expect(members(core, 4) == ids([12]))
+        #expect(core.state.settlingScreens.isEmpty)
+    }
+
+    @Test("an arrangement claiming a held number moves the held Space off it")
+    func claimedHeldNumberIsReclaimed() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        var wide = try core.profiles.read(name: "solo")
+        wide.spaces += [SpaceID(4), SpaceID(5)]
+        wide.spaceModes[SpaceID(4)] = .bsp
+        wide.spaceModes[SpaceID(5)] = .bsp
+        core.apply(profile: wide, cause: .event)
+        #expect(core.state.heldSpaces[SpaceID(4)] == nil)
+        #expect(core.state.heldSpaces[SpaceID(5)] == nil)
+        let held = core.state.heldSpaces
+        #expect(held.count == 2)
+        #expect(Set(held.values.map(\.name)) == [SpaceID(3), SpaceID(4)])
+        for id in held.keys {
+            #expect(!members(core, Int(id.raw)!).isEmpty)
+        }
+    }
+
+    @Test("a held Space goes home only into the arrangement it left")
+    func refileOnlyIntoTheOrigin() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        var other = try core.profiles.read(name: "desk")
+        other.name = "other"
+        core.state.workspaces.upsertDisplay(dell)
+        core.apply(profile: other, cause: .event)
+        #expect(core.state.heldSpaces[SpaceID(5)] != nil)
+        #expect(core.spacePins[SpaceID(5)] == dell.fingerprint)
+    }
+
+    @Test("a config reload keeps a held Space's mode")
+    func reloadKeepsHeldMode() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        core.setSpaceMode(SpaceID(5), .monocle)
+        core.execute("reload_config")
+        #expect(core.state.workspaces[SpaceID(5)]?.mode == .monocle)
+    }
+
+    @Test("delete_space ends a hold")
+    func deleteEndsHold() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        core.execute("delete_space", args: [.string("5")])
+        #expect(core.state.heldSpaces[SpaceID(5)] == nil)
+        #expect(core.state.heldSpaces[SpaceID(4)] != nil)
+    }
+
+    @Test("the Settings draft never lists a held Space")
+    func draftExcludesHeld() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        core.spacePins[SpaceID(5)] = dell.fingerprint
+        let draft = core.loadGuiConfig()
+        #expect(!draft.spaces.contains(SpaceID(4)))
+        #expect(!draft.spaces.contains(SpaceID(5)))
+        #expect(draft.spacePins[SpaceID(5)] == nil)
+        let kept = core.buildProfile(
+            name: "kept",
+            modes: [SpaceID(5): .grid, SpaceID(1): .bsp]
+        )
+        #expect(kept.spaceModes[SpaceID(5)] == nil)
     }
 
     @Test("a Settings Save keeps a held Space it never listed")
