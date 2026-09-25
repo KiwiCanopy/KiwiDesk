@@ -587,7 +587,17 @@ because the bundle carries `[ColorPalette]` inline — and it
 must also rule the exported-palette SIDECAR deliberately: a
 bare `ColorPalette` file has no shape marker, sits outside the
 migration census by ruling (#945), and like a backup is never
-rewritten.
+rewritten. #1517 was the first such change and is the worked
+ruling: `palettes.json` and a bundle's inline palettes cross
+through a `ConfigMigration` step that asks `stampBelow` for its
+floor, while an imported sidecar is shelved IN MEMORY by the same
+pure step (`ConfigMigration.shelvedPaletteColors`, called from
+`PaletteStore.importPalette`), since there is no file stamp to
+end on, and the import's filter to `ColorPaletteKeys.all` would
+drop an unshelved file's bar colours whole (`KiwiShelfPaletteMigrationTests`
+▸ `libraryCrossesOnce`, ▸ `bundlePalettesCross`, ▸
+`sidecarImportShelves`). The next breaking palette change takes
+the same three answers or argues a different one.
 Nothing can guard this, and it is the obligation the format
 integers rest on: `<=` is decoder tolerance rather than a
 compatibility shim, so an older config or backup is accepted — which is

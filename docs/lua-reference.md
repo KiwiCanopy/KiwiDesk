@@ -67,11 +67,15 @@ the GUI** instead. Settings are:
 - Any namespaced layout setter — `bsp.set_ratio_h`,
   `stack.set_master_ratio`, `scroll.set_slot_size`,
   `grid.set_type`, `monocle.*`, `track.*`, `drag.*`, `border.*`,
-  `app_bar.*`, `animations.*`, `mouse.*`, `quit.*` — plus
-  `border.fit_gaps`.
+  `app_bar.*`, `space_bar.*`, `animations.*`, `mouse.*`,
+  `quit.*` — plus `border.fit_gaps`.
 - Window-rule tables — `app_rules`, `float_rules`, `ignore_rules`.
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_desktop`.
+
+:::unreleased
+A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
+:::
 
 ```lua
 -- Any one of these makes init.lua the config owner:
@@ -1788,25 +1792,34 @@ track.set_overflow_style_override("code", "cascade_overflow")
 **KiwiShelf** is the one screen edge both bars sit on — the
 [App Bar](#app-bar) and the [Space Bar](#space-bar).
 `kiwishelf.set_*` sets where the shelf hangs, how the two bars
-share it and the look they share; each bar keeps its own plate,
-colours and content. The shelf reserves its edge in every layout
-whenever any bar can show, so switching a Space to a layout with
-or without an App Bar never moves a window. Monocle and
-scrolling show an App Bar by default, so the shelf reserves its
-edge even with the Space Bar off until both
-`monocle.set_app_bar_enabled(false)` and
-`scroll.set_app_bar_enabled(false)` are set. Stored as
-`settings.kiwishelf` in a profile.
+share it, and the look, colours and app symbol style they share;
+each bar keeps its own content and the shape of its active
+indicator. Stored as `settings.kiwishelf` in a profile.
 
-A lone bar spans the edge and sits where `set_alignment` puts
-it. With both bars shown they take opposite ends of the edge, in
-`set_order`, each at the length its items need, `set_item_gap`
-apart. When the two need more than the edge holds, a bar needing
-less than its [share](#kiwishelfset_share) keeps its need and the
-other takes the rest; only when each needs more than its share
-does `set_share` decide the split. Each bar scrolls on its own when its items
-overflow, with a clickable arrow at each end that still hides
-items.
+The shelf reserves its edge in a layout where a bar draws: in
+every layout while the Space Bar is on, and otherwise only in
+the layouts whose App Bar is on (monocle and scrolling show one
+by default). With the Space Bar off, switching a Space between a
+layout that shows an App Bar and one that does not moves its
+windows by the strip.
+
+While both bars show they are one plate with two sections, in
+the order `set_order` gives them, placed along the edge as one
+run by `set_alignment`, `set_item_gap` apart with a thin divider
+between them. Each section is as long as its items need while
+both fit. When they need more than the edge holds, the Space Bar
+shrinks, never below its [minimum](#kiwishelfset_minimum), and
+the App Bar takes the rest.
+
+A section whose items overflow fades its content on each side
+that cuts an item, with a count of the items not wholly shown
+there; click the count to page, and a side at its end shows
+nothing. The mouse wheel (either axis, tilt or shift-wheel) and
+the trackpad scroll a section along the edge, natural scrolling
+respected; a scroll or a page holds until the active Space or
+the focus changes. While the shelf is full, drag the divider to
+change the Space Bar minimum, as `set_minimum` does, and
+double-click it to restore the default.
 :::
 
 ### kiwishelf.set_edge
@@ -1832,15 +1845,15 @@ kiwishelf.set_edge("bottom")
 **Expects:** `"start"`, `"center"`, or `"end"`
 (default `"center"`).
 
-**Does:** places a bar along the edge while it is the only one
-shown. Values are edge-relative: a left edge's `start` is its
-top, a top edge's `start` its left. Once a bar's items overflow
-and scroll, all three values behave the same.
+**Does:** places the shelf's run along the edge — a lone bar, or
+both bars as one run. Values are edge-relative: a left edge's
+`start` is its top, a top edge's `start` its left. Once the run
+overflows, all three values behave the same.
 
-While both bars show they take the ends `set_order` gives them,
-so an App Bar appearing moves the Space Bar to its end unless
-the alignment already put it there: `start` under
-`spaces_first`, `end` under `apps_first`.
+When an App Bar section appears or leaves, the run grows or
+shrinks, so the Space Bar moves unless the alignment anchors the
+run at the Space Bar's end: `start` under `spaces_first`, `end`
+under `apps_first`.
 
 **Example:**
 
@@ -1855,9 +1868,8 @@ kiwishelf.set_alignment("start")
 **Expects:** `"spaces_first"` or `"apps_first"` (default
 `"spaces_first"`).
 
-**Does:** sets which bar takes the start of the edge while both
-show; the other takes the end. Edge-relative, like
-`set_alignment`.
+**Does:** sets which bar's section comes first in the run while
+both show. Edge-relative, like `set_alignment`.
 
 **Example:**
 
@@ -1866,21 +1878,24 @@ kiwishelf.set_order("apps_first")
 ```
 :::
 
-### kiwishelf.set_share
+### kiwishelf.set_minimum
 
 :::unreleased
-**Expects:** a percentage, 20–80 (default `40`); values outside
-the range are clamped.
+**Expects:** a percentage of the edge, 20–80 (default `30`);
+values outside the range are clamped.
 
-**Does:** sets the Space Bar's share of the edge once each bar
-needs more than its share; the App Bar takes the rest, and each
-scrolls inside its own. A bar that needs less than its share
-keeps its need and gives the rest back.
+**Does:** sets how much of the edge the Space Bar keeps once both
+bars together need more than the edge holds: the Space Bar
+shrinks to it and no further, and the App Bar scrolls instead.
+A floor on shrinking, never a length the Space Bar is padded up
+to — a Space Bar needing less keeps its own length and the App
+Bar gets the rest. Whatever the minimum, the Space Bar keeps its
+active Space and a fade each side in view.
 
 **Example:**
 
 ```lua
-kiwishelf.set_share(50)
+kiwishelf.set_minimum(40)
 ```
 :::
 
@@ -1962,7 +1977,8 @@ kiwishelf.set_background_style("plain")
 
 **Does:** lays a macOS 26 Liquid Glass material over both bars'
 item backgrounds (the boxes or the plate); it combines with
-either shape. Each bar's `fill_color` tints its glass: a solid
+either shape. The shelf's
+[`fill_color`](#kiwishelf-colours) tints the glass: a solid
 colored layer sits behind the glass and the glass refracts it.
 The material's light or dark variant follows the fill too: a
 dark `fill_color` pins the dark glass. A light `fill_color` pins
@@ -2000,13 +2016,11 @@ kiwishelf.set_liquid_glass(true)
 :::unreleased
 **Expects:** `"full"` or `"hug"` (default `"hug"`).
 
-**Does:** sets how far the plate reaches under `plain` (and the
-Liquid Glass finish over it). `hug` gives each bar its own plate
-in its own `fill_color`, wrapping its item run plus one item gap
-per end. `full` spans each bar's plate across that bar's whole
-part of the edge, so two bars' plates meet one item gap apart.
-While a bar's items overflow and scroll, its plate spans that
-bar instead of hugging.
+**Does:** sets how far the one plate reaches under `plain` (and
+the Liquid Glass finish over it). `hug` wraps the run — both
+sections while both show — plus one item gap per end. `full`
+spans the whole edge. A section whose items overflow fills its
+part of the edge, so the plate reaches across it either way.
 Inert under `boxed` (the Settings control greys there).
 
 **Example:**
@@ -2063,6 +2077,96 @@ kiwishelf.set_font_size(0)
 ```
 :::
 
+### kiwishelf.set_icon_source
+
+:::unreleased
+**Expects:** `"app_image"` or `"app_font"` (default
+`"app_image"`).
+
+**Does:** sets how app icons are drawn on both bars and in the
+shortcuts panel's Apps band. `app_image` shows the app's icon as
+macOS provides it, which follows the system-wide Icon & widget
+style the user picked; the system's Dark, Clear and Tinted looks
+are not separate choices
+([Accepted limitations](accepted-limitations.md)). `app_font`
+shows a monochrome glyph from the bundled [SketchyBar App
+Font](https://github.com/kvndrsslr/sketchybar-app-font) instead,
+colored by the shelf's item colours; apps without a glyph keep
+their icon. On the Space Bar, an app with no image falls back to
+the App Font either way.
+
+**Example:**
+
+```lua
+kiwishelf.set_icon_source("app_font")
+```
+:::
+
+### kiwishelf.set_dim_factor
+
+:::unreleased
+**Expects:** a number 0.05–1 (default `0.4`); out-of-range
+values clamp.
+
+**Does:** sets the opacity of untinted idle content on both bars
+— an emoji identifier or app image on a Space you are not on, an
+inactive App Bar item's icon; tinted content takes the item
+colour instead. The Space Bar's middle tier is
+[`space_bar.set_active_dim_factor`](#space_barset_active_dim_factor).
+Lua-only (no GUI).
+
+**Example:**
+
+```lua
+kiwishelf.set_dim_factor(0.4)
+```
+:::
+
+### KiwiShelf colours
+
+:::unreleased
+Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
+setting. One set of colours serves both bars; only the colour of
+the focused window's glyph is the Space Bar's own
+([`space_bar.set_focused_item_color`](#space_barset_focused_item_color)).
+
+- `kiwishelf.set_fill_color` — the plate's one fill, or each
+  item's box under `boxed` (default `#14201CB3`, dark moss at 70%
+  opacity; every bundled palette's fill carries that same alpha).
+  With the `liquid_glass` finish on it tints the glass, and a
+  dark fill selects the dark glass variant
+  ([Liquid Glass](#kiwishelfset_liquid_glass)). Under glass the
+  backdrop's opacity is held under a ceiling: a fill below it
+  renders as you picked it, a more opaque one is capped, and the
+  stored value is unchanged either way (Boxed/Plain use it in
+  full). While macOS's Reduce transparency is on, Boxed/Plain
+  draw it at full alpha instead.
+- `kiwishelf.set_item_color` — the items' text and glyphs
+  (default `#EAF3EE`). An identifier on a Space you are not on
+  draws it at 60% of its own alpha, and the divider between the
+  two bars draws it at a fixed alpha of its own.
+- `kiwishelf.set_active_item_color` — the active item: the
+  current Space's identifier and glyphs, the focused window's
+  App Bar item (default `#8DB354`, kiwi green).
+- `kiwishelf.set_highlight_color` — both bars' active indicator,
+  the outline or the edge mark (default `#8DB354`).
+- `kiwishelf.set_hover_fill_color` /
+  `kiwishelf.set_hover_item_color` — hover feedback on clickable
+  items (defaults `#AACB5D80` and `#EAF3EE`); the App Bar's
+  active item shows no hover and ignores clicks.
+- `kiwishelf.set_group_badge_color` /
+  `kiwishelf.set_group_badge_text_color` — the count and `+n`
+  overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
+  you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
+
+**Example:**
+
+```lua
+kiwishelf.set_fill_color("#14201CB3")
+kiwishelf.set_active_item_color("#8DB354")
+```
+:::
+
 ### Retired bar verbs
 
 :::unreleased
@@ -2077,8 +2181,11 @@ content`.
   `monocle.set_app_bar_<field>` and `scroll.set_app_bar_<field>`
   for `edge`, `alignment`, `thickness`, `outer_margin`,
   `inner_margin`, `background_style`, `liquid_glass`,
-  `background_fit`, `corner_roundness`, `item_gap` and
-  `font_size` → `kiwishelf.set_<field>`.
+  `background_fit`, `corner_roundness`, `item_gap`, `font_size`,
+  `icon_source`, `dim_factor`, and the colours `item_color`,
+  `active_item_color`, `highlight_color`, `hover_fill_color`,
+  `hover_item_color`, `fill_color`, `group_badge_color` and
+  `group_badge_text_color` → `kiwishelf.set_<field>`.
 - `app_bar.set_item_size`, `monocle.set_app_bar_item_size` and
   `scroll.set_app_bar_item_size` → that bar's `title_cap`
   ([`app_bar.set_title_cap`](#app_barset_title_cap)): an App Bar
@@ -2089,14 +2196,26 @@ content`.
 - `space_bar.set_title_cap` →
   [`space_bar.set_front_app_title_cap`](#space_barset_front_app_title_cap).
 
+The `gap` active indicator is removed: `set_active_indicator`
+and its per-layout twins refuse it, naming the values that
+remain.
+
 `init.lua` is not rewritten; a saved profile is, once, the first
-time 2.0 reads it: the shelf takes the Space Bar's values — the
-App Bar's where the Space Bar is off, keeping the App Bar's old
-`bottom` edge where it stored none — and every other copy is
-dropped, as is every stored `item_size`; the Space Bar's stored
-`title_cap` becomes its `front_app_title_cap`. A profile or
-bundle 2.0 has written is left as it is, and no longer opens in
-1.x.
+time 2.0 reads it: the shelf takes the Space Bar's values,
+colours and app symbol style included — the App Bar's where the
+Space Bar is off, keeping the App Bar's old `bottom` edge where
+it stored none — and every other copy is dropped, per-layout
+App Bar colours with them, as is every stored `item_size`. Where
+the Space Bar's item colour is the App Bar's at a lower alpha,
+the shelf takes the App Bar's full colour, since an idle Space
+identifier now dims it for you. A stored `gap` indicator becomes
+`outline`, and an App Bar that names no indicator is given
+`outline`, so only a fresh setup starts on the App Bar's new
+`edge_mark` default. The Space Bar's stored `title_cap` becomes
+its `front_app_title_cap`. Saved palettes are rewritten the same
+way, and a palette file exported before 2.0 is converted as it
+is imported. A profile, bundle or palette library 2.0 has
+written is left as it is, and no longer opens in 1.x.
 :::
 
 ## App Bar
@@ -2111,29 +2230,32 @@ space.
 
 :::unreleased
 The bar sits on [KiwiShelf](#kiwishelf), which sets its edge,
-thickness, margins and background. Everything else about it is
-**global**: `app_bar.set_*` styles every layout's bar. Each
-layout decides whether it shows one and may override the App
-Bar's own fields for itself ([Per-Layout App Bar
-Overrides](#per-layout-app-bar-overrides)).
+thickness, margins, background, colours and app symbol style.
+Everything else about it is **global**: `app_bar.set_*` sets
+every layout's bar. Each layout decides whether it shows one and
+may override the App Bar's own fields for itself ([Per-Layout
+App Bar Overrides](#per-layout-app-bar-overrides)).
 :::
 
 ### app_bar.set_active_indicator
 
-**Expects:** `"outline"`, `"edge_mark"`, or `"gap"`.
+:::unreleased
+**Expects:** `"outline"` or `"edge_mark"` (default
+`"edge_mark"`).
 
-**Does:** how the focused window is marked. It combines freely
-with `background_style`:
+**Does:** how the focused window is marked, in KiwiShelf's
+[`highlight_color`](#kiwishelf-colours). It combines freely with
+`background_style`:
 - **outline** — an outlined border around the active item.
 - **edge_mark** — an accent bar on the active item's
   window-facing edge.
-- **gap** — the active item's slot is left empty.
 
 **Example:**
 
 ```lua
 app_bar.set_active_indicator("outline")
 ```
+:::
 
 ### app_bar.set_content
 
@@ -2182,40 +2304,6 @@ not fit scroll instead of shrinking.
 app_bar.set_title_cap(25)
 ```
 
-### app_bar.set_icon_source
-
-**Expects:** `"app_image"` or `"app_font"` (default
-`"app_image"`).
-
-**Does:** sets how app icons are drawn. `app_image` shows the
-app's icon as macOS provides it, which follows the system-wide
-Icon & widget style the user picked; the system's Dark, Clear
-and Tinted looks are not separate choices
-([Accepted limitations](accepted-limitations.md)). `app_font`
-shows a monochrome glyph from the bundled [SketchyBar App
-Font](https://github.com/kvndrsslr/sketchybar-app-font)
-instead, colored by the bar's item colors (Item / Active item /
-Hover item); apps without a glyph keep their icon.
-
-**Example:**
-
-```lua
-app_bar.set_icon_source("app_font")
-```
-
-### app_bar.set_dim_factor
-
-**Expects:** a number 0.05–1 (default 0.4).
-
-**Does:** sets the opacity of an inactive item's untinted icon.
-Lua-only (no GUI); out-of-range values clamp.
-
-**Example:**
-
-```lua
-app_bar.set_dim_factor(0.4)
-```
-
 ### app_bar.set_group_adjacent_windows
 
 **Expects:** `true` or `false` (default `true`).
@@ -2232,137 +2320,23 @@ collapses it again.
 app_bar.set_group_adjacent_windows(true)
 ```
 
-### app_bar.set_item_color
-
-**Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`).
-
-**Does:** sets the item's text and glyph color (default
-`#EAF3EE`).
-
-**Example:**
-
-```lua
-app_bar.set_item_color("#EAF3EE")
-```
-
-### app_bar.set_fill_color
-
-**Expects:** a hex color.
-
-**Does:** sets the fill under the items — a box per item
-(`boxed`) or one shared plate (`plain`). Default `#14201CB3`,
-dark moss at 70% opacity; every bundled palette's bar fill
-carries that same alpha. With the `liquid_glass` finish on, it
-also tints the glass, and a dark fill selects the dark glass
-variant (see [Liquid Glass](#kiwishelfset_liquid_glass)). Under glass the
-backdrop's opacity is held under a ceiling: a fill below it
-renders as you picked it, a more opaque
-one is capped, and the stored value is unchanged either way
-(Boxed/Plain use it in full).
-
-While macOS's Reduce transparency is on, Boxed/Plain draw it at
-full alpha instead
-([Liquid Glass](#kiwishelfset_liquid_glass)).
-
-**Example:**
-
-```lua
-app_bar.set_fill_color("#14201CB3")
-```
-
-### app_bar.set_active_item_color
-
-**Expects:** a hex color.
-
-**Does:** sets the text and glyph color of the active item — the
-focused item (default `#8DB354`, kiwi green).
-
-**Example:**
-
-```lua
-app_bar.set_active_item_color("#8DB354")
-```
-
-### app_bar.set_highlight_color
-
-**Expects:** a hex color.
-
-**Does:** sets the highlight color of the active indicator (the
-outline or the edge mark).
-
-**Example:**
-
-```lua
-app_bar.set_highlight_color("#8DB354")
-```
-
-### app_bar.set_hover_fill_color
-
-**Expects:** a hex color.
-
-**Does:** sets the hover feedback on clickable items (default
-`#AACB5D80`, light translucent green). The active item shows no
-hover and ignores clicks.
-
-**Example:**
-
-```lua
-app_bar.set_hover_fill_color("#AACB5D80")
-```
-
-### app_bar.set_hover_item_color
-
-**Expects:** a hex color.
-
-**Does:** sets the text color during hover.
-
-**Example:**
-
-```lua
-app_bar.set_hover_item_color("#EAF3EE")
-```
-
-### app_bar.set_group_badge_color
-
-**Expects:** a hex color.
-
-**Does:** sets the count badge background color.
-
-**Example:**
-
-```lua
-app_bar.set_group_badge_color("#636366")
-```
-
-### app_bar.set_group_badge_text_color
-
-**Expects:** a hex color.
-
-**Does:** sets the count badge text color.
-
-**Example:**
-
-```lua
-app_bar.set_group_badge_text_color("#FFFFFF")
-```
-
 ### Per-Layout App Bar Overrides
 
 :::unreleased
 Each bar-hosting layout (monocle, scrolling) can override the
 App Bar's own fields for itself — `enabled`, `active_indicator`,
-`content`, `title_cap`, `icon_source`, `group_adjacent_windows`,
-`dim_factor` and the colours. Only these two layouts show a bar,
-so only they expose `set_app_bar_*`. Unset fields inherit the
-global value. [KiwiShelf](#kiwishelf)'s fields take no
-per-layout override. The overrides are the same setters prefixed
-with the layout name:
+`content`, `title_cap` and `group_adjacent_windows`. Only these
+two layouts show a bar, so only they expose `set_app_bar_*`.
+Unset fields inherit the global value.
+[KiwiShelf](#kiwishelf)'s fields — its colours, symbol style and
+`dim_factor` included — take no per-layout override. The
+overrides are the same setters prefixed with the layout name:
 
 - `monocle.set_app_bar_enabled`, `monocle.set_app_bar_content`,
   `monocle.set_app_bar_title_cap`, etc.
 - `scroll.set_app_bar_enabled`,
   `scroll.set_app_bar_active_indicator`,
-  `scroll.set_app_bar_fill_color`, etc.
+  `scroll.set_app_bar_group_adjacent_windows`, etc.
 
 **Example:**
 
@@ -2390,9 +2364,9 @@ section covers the badges and the drag-onto-a-Space gesture.
 
 :::unreleased
 The bar is layout-independent and sits on
-[KiwiShelf](#kiwishelf), which sets its edge, thickness, margins
-and background; every `space_bar.*` setting is global, with no
-per-layout override. While a native-fullscreen app holds the
+[KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,
+background, colours and app symbol style; every `space_bar.*`
+setting is global, with no per-layout override. While a native-fullscreen app holds the
 screen the bar hides; it returns with the Desktop.
 :::
 
@@ -2403,8 +2377,9 @@ screen the bar hides; it returns with the Desktop.
 **Does:** shows or hides the Space Bar.
 
 :::unreleased
-With the Space Bar off and no layout showing an App Bar,
-[KiwiShelf](#kiwishelf) reserves no area.
+With the Space Bar off, [KiwiShelf](#kiwishelf) reserves its
+edge only in the layouts whose App Bar is on, and nowhere when
+none is.
 :::
 
 **Example:**
@@ -2430,60 +2405,35 @@ limits glyphs per Space only, not how many Spaces the bar shows.
 space_bar.set_glyph_cap(8)
 ```
 
-### space_bar.set_icon_source
-
-**Expects:** `"app_image"` or `"app_font"` (default
-`"app_image"`).
-
-**Does:** how app glyphs are drawn — the native app image, or a
-monochrome App Font glyph following the bar's item colors. An
-app with no image falls back to the App Font either way.
-
-**Example:**
-
-```lua
-space_bar.set_icon_source("app_font")
-```
-
 ### space_bar.set_active_indicator
 
-**Expects:** `"outline"`, `"edge_mark"`, or `"gap"` (default
+:::unreleased
+**Expects:** `"outline"` or `"edge_mark"` (default
 `"outline"`).
 
-**Does:** how the active Space is marked. `gap` draws no shape
-marker (colors alone carry the state); the active Space's item
-is never hidden.
+**Does:** how the active Space is marked, in KiwiShelf's
+[`highlight_color`](#kiwishelf-colours).
 
 **Example:**
 
 ```lua
 space_bar.set_active_indicator("outline")
 ```
-
-### space_bar.set_dim_factor
-
-**Expects:** a number 0.05–1 (default 0.4).
-
-**Does:** sets the opacity of untinted content on an **inactive**
-Space — an emoji identifier, a native app image; tinted content
-takes `item_color` instead — the outer dim tier. Lua-only (no
-GUI), clamped to a legible range.
-
-**Example:**
-
-```lua
-space_bar.set_dim_factor(0.4)
-```
+:::
 
 ### space_bar.set_active_dim_factor
 
 **Expects:** a number 0.05–1 (default 0.6).
 
+:::unreleased
 **Does:** sets the opacity of an **unfocused window's glyph on the
 active Space** — the middle dim tier, between the focused window
-(1.0) and inactive Spaces (`set_dim_factor`). Lua-only, clamped.
-Independent of `set_dim_factor`: no ordering is enforced, so a
-value below the outer tier inverts the ladder.
+(1.0) and inactive Spaces
+([`kiwishelf.set_dim_factor`](#kiwishelfset_dim_factor)).
+Lua-only, clamped. Independent of the shelf's `dim_factor`: no
+ordering is enforced, so a value below the outer tier inverts
+the ladder.
+:::
 
 **Example:**
 
@@ -2583,36 +2533,27 @@ over the same duration.
 space_bar.set_spring_delay(1000)
 ```
 
-### Space Bar colors
+### space_bar.set_focused_item_color
 
-Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
-setting. The three-state ladder is the bar's signature:
+:::unreleased
+**Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`).
 
-- `space_bar.set_item_color` — inactive Spaces (default
-  `#EAF3EE66`).
-- `space_bar.set_active_item_color` — the active Space's
-  identifier and glyphs (default `#8DB354`).
-- `space_bar.set_focused_item_color` — the focused window
-  wherever it shows: its glyph inside the active Space and the
-  front-app segment (default `#C2790A`, a different hue **and a
-  step darker** than the active-Space green). If you retune it,
-  keep a lightness gap from `active_item_color`; a lighter amber
-  loses the distinction.
-- `space_bar.set_hover_fill_color` / `space_bar.set_hover_item_color`
-  — hover tint on non-active items.
-- `space_bar.set_fill_color` / `space_bar.set_highlight_color` —
-  as the App Bar (`fill_color` is the box / plate / glass tint).
-- `space_bar.set_group_badge_color` /
-  `space_bar.set_group_badge_text_color` — the count and `+n`
-  overflow badges (active Space; inactive Spaces mute them
-  from `item_color`).
+**Does:** sets the color of the focused window wherever the
+Space Bar shows it: its glyph inside the active Space and the
+front-app segment (default `#C2790A`, a different hue **and a
+step darker** than the active-Space green). The rest of the
+bar's three-state ladder is [KiwiShelf's](#kiwishelf-colours):
+a Space you are not on draws `item_color` dimmed, the active
+Space `active_item_color`. If you retune this, keep a lightness
+gap from `active_item_color`; a lighter amber loses the
+distinction.
 
 **Example:**
 
 ```lua
-space_bar.set_active_item_color("#8DB354")
 space_bar.set_focused_item_color("#C2790A")
 ```
+:::
 
 ## Where New Windows Land
 
@@ -4028,7 +3969,7 @@ What the `delta` adjusts depends on the layout:
 :::unreleased
 The area a layout fills, which every bound above is taken
 within, is the display minus the [KiwiShelf](#kiwishelf) strip
-while any bar can show, in every layout alike (#1517).
+wherever a bar draws in that layout (#1517).
 :::
 
 :::unreleased

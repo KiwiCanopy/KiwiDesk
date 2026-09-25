@@ -356,8 +356,13 @@ to stop, so the escape is ranked too. Take the first that fits.
    preset card's own button reaching past the word it wanted
    ("Voir les dispositions", "Раскладки набора"); restoring the
    qualifier let each button collapse to the bare noun.
+   `destination.bars` is qualified the same way — "KiwiShelf &
+   Bars" (owner ruling, #1517) — so a catalog that renders it as a
+   bare *Bars* has this step's defect, and the bare noun stays
+   free for ordinary sites; *KiwiShelf* itself stays Latin
+   (Family A).
 2. **Where English's own destination IS the bare noun** —
-   Profiles, Spaces, Bars, Shortcuts — the shortage is real.
+   Profiles, Spaces, Shortcuts — the shortage is real.
    Then **the ordinary site qualifies and the destination never
    moves.** The destination label is the name the user learns
    (rule 3); moving it spends the one string that has to stay

@@ -96,10 +96,10 @@ editing here:
   map is the exemption list** — which files may call it, and
   why — so add the entry there rather than a note here.
 - A layout **span** reads one hook further in:
-  `TilingEngine.layoutBounds(on:)` (#537), which reserves the
-  KiwiShelf strip while any bar can show (#293, #1517; the one
-  reservation is bars.md's) so a resize divides its delta by the
-  region the layout filled, not the whole display. Routing
+  `TilingEngine.layoutBounds(on:for:)` (#537), which reserves the
+  KiwiShelf strip where a bar draws in that Space's layout (#293,
+  #1517; the one reservation is bars.md's) so a resize divides its
+  delta by the region the layout filled, not the whole display. Routing
   through `visibleBounds` and then dividing by the display
   passes the guard above and is still the bug —
   `LayoutBoundsRoutingTests` is the second net, and its
@@ -108,6 +108,15 @@ editing here:
   not place: no span, no midpoint, and the painted-strip clamp
   (#242) owns its relationship to a bar. Which files qualify
   lives in that map, not here.
+- **A per-space override never carries `appBar`.** The shelf's
+  reservation is answered per layout MODE (`shelfShows(in:)`), and
+  the App Bar a Space draws is its mode's; a per-space `appBar`
+  would draw a bar where the reservation left the windows, or
+  reserve a strip nothing draws on. `MonocleOverrideTests` and
+  `ScrollingOverrideTests` list `appBar` in `notOverridable`, so
+  their parity check reds an override that gains it until the
+  entry leaves that list too; taking it out is the one edit that
+  unlocks the move, and it owes a per-space reservation first.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 - A retile may **promise** that every window it touches is

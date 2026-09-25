@@ -43,7 +43,7 @@ folds per-option text into the ONE field-level popover (option
 name bold, one line each) — never a `?` per segment. Two scope
 guards: help is optional reading (must-know information never
 lives only in the popover), and a field already taught by its
-live preview or schematic (App Bar colors, a layout card's
+live preview or schematic (the bar colours, a layout card's
 geometry) gets no `?` at all.
 
 **A concept goes in the `?`; a live fact goes in the flow.** A
@@ -100,9 +100,9 @@ activation, focus ring and accessibility child, which a
 
 A pointer whose sentence names a **location** takes a
 breadcrumb headed by the destination's own title
-("Bars ▸ App Bar"), not the section name alone: a link reading
-"App Bar" names no card Home shows, and only a `▸`-shaped value
-enters `SidebarCrossReferenceTests`. A pointer whose sentence
+("KiwiShelf & Bars ▸ App Bar"), not the section name alone: a
+link reading "App Bar" names no card Home shows, and only a
+`▸`-shaped value enters `SidebarCrossReferenceTests`. A pointer whose sentence
 names the **feature itself** — a sentence turning on whether
 the Space Bar is on, say — links that mention and stays one
 segment, since a breadcrumb there would be a second mention.
@@ -1313,8 +1313,8 @@ dimmed, not only from whether a live label exists (#1310): a
 header `?` scopes the CARD, so it answers for a greyed block,
 while ONE greyed row inside a live card takes a
 `CrossReferenceRow` directly beneath its grid, outside the
-dimmed subtree — the Space Bar colours card's *Focused window*
-row, whose picker lives on Bars, draws
+dimmed subtree — the KiwiShelf colours card's *Focused window*
+row, whose gating picker lives on KiwiShelf & Bars, draws
 `AdvancedColorsHelp.focusedItemReference` there, and the Border
 colours card's *Unfocused windows* row draws
 `unfocusedReference` the same way while the ring is on, each
@@ -1323,7 +1323,7 @@ answers only for the ring being off. The argument is
 `docs/design-decisions.md` ▸ *a dim is not a sentence*.
 
 A control whose *only* consumer is off may still have a second
-one. The App Bar's "App symbol style" stays live even when no
+one. KiwiShelf's "App symbol style" stays live even when no
 bar shows, because `iconSource` also drives the shortcuts
 panel's Apps band — check for a second reader before dimming.
 
