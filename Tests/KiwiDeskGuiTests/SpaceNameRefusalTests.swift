@@ -84,6 +84,23 @@ struct SpaceNameRefusalTests {
         #expect(refused?.contains("announce(refusal.sentence)") == true)
     }
 
+    @Test("the caption is danger with its shape cue")
+    func captionCarriesTheWarningShape() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/SpaceNameNotice.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let caption = try #require(
+            SourceScan.declarationBody(
+                after: "struct SpaceNameNoticeCaption",
+                in: source
+            )
+        )
+        #expect(caption.contains("exclamationmark.triangle.fill"))
+        #expect(caption.contains(".foregroundStyle(SettingsTheme.danger)"))
+    }
+
     @Test("the row draws what its field reports")
     func rowDrawsTheReportedNotice() throws {
         let file = SourceScan.repoRoot(from: #filePath)
