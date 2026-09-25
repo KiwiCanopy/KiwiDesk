@@ -992,9 +992,11 @@ costs every other user a second thing to understand (#1279). The
 list itself reaches one folder deep, so browsing is the rare
 fallback.
 
-Only the app shortcuts row has a refusal today (#1235); the app
-rules row still drops a duplicate silently, and owes the same
-channel.
+The Space name field is the same channel for a typed edit
+(#1623): while the draft names another Space or is empty, a
+caption with a warning triangle under the row says why the edit
+will not stick, and a refused name's revert is announced. The app rules row
+still drops a duplicate silently, and owes the same channel.
 
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,

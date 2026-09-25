@@ -1337,6 +1337,8 @@
   "spaces.preview.count_hint": "Ändert nur diese Vorschau; sie wird nicht gespeichert.",
   "spaces.preview.none": "Noch keine Spaces in diesem Entwurf.",
   "spaces.preview.title": "Layout dieses Spaces",
+  "spaces.rename.empty": "Gib einen Namen ein, sonst bleibt es bei „%1$@“.",
+  "spaces.rename.taken": "Ein Space namens „%1$@“ existiert bereits.",
   "spaces.title": "Spaces",
   "sticky.caption": "Sticky-Fenster bleiben auf jedem Space sichtbar (%1$@, in %2$@).",
   "sticky.color": "Sticky",

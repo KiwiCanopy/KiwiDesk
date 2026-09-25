@@ -1337,6 +1337,8 @@
   "spaces.preview.count_hint": "Muda apenas esta pré-visualização; não é salvo.",
   "spaces.preview.none": "Ainda não há espaços neste rascunho.",
   "spaces.preview.title": "Layout deste espaço",
+  "spaces.rename.empty": "Digite um nome, ou ele voltará a ser “%1$@”.",
+  "spaces.rename.taken": "Já existe um espaço chamado “%1$@”.",
   "spaces.title": "Espaços",
   "sticky.caption": "As janelas Sticky permanecem visíveis em todos os espaços (“%1$@”, em %2$@).",
   "sticky.color": "Sticky",

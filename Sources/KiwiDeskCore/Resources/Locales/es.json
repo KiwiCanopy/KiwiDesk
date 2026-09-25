@@ -1337,6 +1337,8 @@
   "spaces.preview.count_hint": "Solo cambia esta vista previa; no se guarda.",
   "spaces.preview.none": "Aún no hay espacios en este borrador.",
   "spaces.preview.title": "Diseño de este espacio",
+  "spaces.rename.empty": "Escribe un nombre o volverá a «%1$@».",
+  "spaces.rename.taken": "Ya existe un espacio llamado «%1$@».",
   "spaces.title": "Espacios",
   "sticky.caption": "Las ventanas Sticky permanecen visibles en todos los espacios («%1$@», en %2$@).",
   "sticky.color": "Sticky",
