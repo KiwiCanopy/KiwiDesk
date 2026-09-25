@@ -18,10 +18,12 @@ struct GlassTintCensusTests {
     /// `memberBodies` returns the members that open a body, which
     /// is the same residue `BarMotionSeamTests` states.
     private static let members: [String: [String]] = [
-        "rendered": ["maxAlpha", "drawsGlass"],
+        "rendered": ["maxAlpha", "floorShare", "drawsGlass"],
+        // Pure direction: reaches no colour, so it names none.
+        "fade": [],
         "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
         "sits": ["subviews"],
-        "apply": ["rendered(", "pinnedAppearance(", "sits("],
+        "apply": ["rendered(", "fade(", "pinnedAppearance(", "sits("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body
@@ -29,6 +31,7 @@ struct GlassTintCensusTests {
     /// is painting a colour the cap never saw.
     private static let painters = [
         "backgroundColor", "tintColor", "setFill", "fillColor",
+        "colors",
     ]
 
     /// A literal painting site per `painters` entry, spelled out
@@ -45,6 +48,7 @@ struct GlassTintCensusTests {
         (site: "glass.tintColor = NSColor.red", entry: "tintColor"),
         (site: "NSColor.red.setFill()", entry: "setFill"),
         (site: "let hex = style.fillColor", entry: "fillColor"),
+        (site: "gradient.colors = [c.cgColor]", entry: "colors"),
     ]
 
     /// A body that paints nothing — the negative control that
@@ -118,6 +122,65 @@ struct GlassTintCensusTests {
             apply takes a colour, so a call site can substitute \
             one for the capped Fill: \(signature)
             """
+        )
+        // The fade's anchor is the shelf's edge, stated at every
+        // call site (#1622): a default — or an optional one a nil
+        // default stands in for — draws a shelf on any other edge
+        // fading from the top, silently. So the parameter is read
+        // WHOLE, never as a substring (guard-prover: `AppBarEdge?
+        // = nil` passed a `contains` check).
+        #expect(
+            Self.parameter("edge", in: signature) == "edge: AppBarEdge",
+            "apply's fade edge is not a required AppBarEdge: \(signature)"
+        )
+    }
+
+    /// The parameter labelled `label` in a parsed signature, as
+    /// spelled up to the next top-level comma; nil when absent.
+    private static func parameter(
+        _ label: String,
+        in signature: String
+    ) -> String? {
+        signature.split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { $0.hasPrefix("\(label):") }
+    }
+
+    /// The parameter reader, proved on the shapes it must tell
+    /// apart — the clause above expects the one good spelling, so
+    /// only these can show it refusing the others.
+    @Test("The edge reader refuses a default and an optional")
+    func edgeReaderRefusesDefaults() {
+        let good = "_ b: V, hex: String, edge: AppBarEdge, x: Bool = false"
+        #expect(Self.parameter("edge", in: good) == "edge: AppBarEdge")
+        for bad in ["edge: AppBarEdge = .top", "edge: AppBarEdge? = nil"] {
+            #expect(
+                Self.parameter("edge", in: "hex: String, \(bad)")
+                    != "edge: AppBarEdge",
+                "the reader accepts \(bad)"
+            )
+        }
+        #expect(Self.parameter("edge", in: "hex: String") == nil)
+    }
+
+    /// **The backdrop view paints nothing** (#1622). It lives in
+    /// its own file, which the member census above does not scan
+    /// and `GlassTintSeamTests` reaches only for files naming the
+    /// glass, so a colour added here would be #1297 one file over.
+    @Test("GlassBackdrop paints no colour of its own")
+    func backdropPaintsNothing() throws {
+        let file = GlassTintSeamTests.coreRoot
+            .appendingPathComponent("Bar/GlassBackdrop.swift")
+        let source = try SourceScan.strippedSource(at: file)
+        // Present, so the negative below cannot pass on a moved
+        // or emptied file.
+        try #require(
+            source.contains("makeBackingLayer"),
+            "GlassBackdrop no longer builds its backing layer"
+        )
+        #expect(
+            !Self.painters.contains(where: source.contains),
+            "GlassBackdrop paints a colour beside GlassTint.apply"
         )
     }
 

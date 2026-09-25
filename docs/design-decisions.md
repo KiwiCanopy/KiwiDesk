@@ -11332,7 +11332,7 @@ glass view **per box** (grouped in an
 plate. So the model is now shape (`boxed` | `plain`) × a separate
 `liquid_glass: Bool` finish that lays over either. **`fill_color`
 still tints the glass (#408)** — not through `tintColor`, which
-carries none of the hue, but by placing a solid colored view
+carries none of the hue, but by placing a colored view
 *behind* the glass, which the glass refracts into its hue (the way
 the Dock and Control Center tint their glass). That backdrop is
 the **only** channel a Fill reaches the glass on: driving
@@ -11348,6 +11348,34 @@ supplying a hue for it to sample — never a replacement for the
 content. A fully transparent `fill_color` leaves the glass clear.
 One seam owns the five hosting modes (`GlassHosting` /
 `GlassTint`, #407).
+
+:::unreleased
+**On glass the Fill FADES: its capped alpha at the shelf's screen
+edge, an eighth of that toward the windows.** (#1622, owner
+rulings 2026-09-24/25.) A flat tint at `GlassTint.maxAlpha` is
+what made a glass shelf read as a coloured plate, so the fade is
+how a Fill tints glass rather than a second style beside it — a
+choice between the two would be a setting whose only job is to
+undo the glass. Both ends are relative to the Fill: the anchor
+is its alpha capped at `maxAlpha`, the floor
+`GlassTint.floorShare` of that, so a transparency choice still
+means how much colour the glass carries and a transparent Fill
+still draws none. The floor is never zero, so a hint of the
+colour runs the whole surface. It runs from the SHELF's edge
+because the shelf has one Fill and one plate (#1517), and a
+boxed item fades the same way. For a dark Fill, legibility at
+the clear end rests on the #1308 pin below rather than on the
+alpha: the pin holds the whole glass dark (unmeasured at the
+clear end; #1622's device check). For a light Fill nothing is
+pinned and the clear end carries an eighth of the tint, so the
+#1308 residue's "the bright tint dominates" holds at the anchor
+edge only; at the clear end it is unmeasured. With the finish
+off, or Reduce transparency on (#1374), the Fill renders flat. **No config migration
+is owed**: no stored value or key changed and the Fill still
+means the colour, now at the anchor edge — a rendering change,
+not a meaning moved under a key (#1354) or a default flipped
+(#1369).
+:::
 
 The finish is ON by default on every surface (owner ruling
 2026-09-10: the bars are the app's face, and a fresh install or a

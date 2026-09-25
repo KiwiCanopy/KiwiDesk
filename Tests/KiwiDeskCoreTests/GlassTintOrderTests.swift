@@ -105,7 +105,7 @@ struct GlassTintOrderTests {
         let parent = NSView(frame: Self.frame)
         let other = NSView(frame: Self.frame)
         let glass = NSView(frame: Self.frame)
-        let backdrop = NSView(frame: Self.frame)
+        let backdrop = GlassBackdrop(frame: Self.frame)
         parent.addSubview(other)
         parent.addSubview(glass)
         Self.apply(backdrop, below: glass)
@@ -143,7 +143,7 @@ struct GlassTintOrderTests {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let parent = Spy(frame: Self.frame)
         let glass = NSView(frame: Self.frame)
-        let backdrop = NSView(frame: Self.frame)
+        let backdrop = GlassBackdrop(frame: Self.frame)
         parent.watched = backdrop
         parent.addSubview(glass)
         Self.apply(backdrop, below: glass)
@@ -156,13 +156,17 @@ struct GlassTintOrderTests {
         )
     }
 
-    private static func apply(_ backdrop: NSView, below glass: NSView) {
+    private static func apply(
+        _ backdrop: GlassBackdrop,
+        below glass: NSView
+    ) {
         GlassTint.apply(
             backdrop,
             below: glass,
             frame: frame,
             cornerRadius: 4,
-            hex: "#14201CB3"
+            hex: "#14201CB3",
+            edge: .top
         )
     }
 }

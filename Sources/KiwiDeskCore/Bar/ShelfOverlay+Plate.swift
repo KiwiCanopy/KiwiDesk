@@ -37,6 +37,7 @@ extension ShelfOverlay {
                 frame: frame,
                 cornerRadius: radius,
                 hex: shelf.fillColor,
+                edge: shelf.edge,
                 animated: animated
             )
             return

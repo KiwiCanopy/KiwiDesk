@@ -392,6 +392,16 @@ Obligations:
   The pinned arm's plate move is order-guarded the same way, and
   its ORDER half is `GlassTintOrderTests`' index pin; its
   no-reparent half has no counting clause — stated, fails OPEN.
+- **Build the fade in `GlassTint.apply`, from an edge every call
+  site hands it — never a default** (#1622). The
+  backdrop is a `GlassBackdrop`, whose BACKING layer is the
+  gradient so it rides the plate glide; a sublayer would jump to
+  the final size. A call site that dropped the shelf's edge
+  for a constant draws every shelf as a top shelf — which only a
+  fixture on another edge can see (`GlassTintFadeTests`,
+  `GlassTintCensusTests` ▸ `applyTakesAFillNotAColour`), and the
+  backdrop paints nothing of its own (`GlassTintCensusTests` ▸
+  `backdropPaintsNothing`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —
@@ -411,7 +421,10 @@ Obligations:
   shows no refraction at any alpha, so it cannot answer the
   question it looks like it is answering; and what actually binds
   the cap is the bar's own ink, which is fixed palette hex with
-  no vibrancy path, so the plate is its legibility floor.
+  no vibrancy path, so the plate is its legibility floor at the
+  fade's anchor edge; at the clear end, where it runs at
+  `GlassTint.floorShare` of the cap, the #1308 dark pin carries
+  the ink, so a retune measures the ink at both ends.
 - **The glass's light/dark variant is PINNED from the Fill in
   `GlassTint.apply`, never left to the OS per view.** macOS
   decides a Liquid Glass view's variant from the backdrop that

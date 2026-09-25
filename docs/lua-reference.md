@@ -1978,8 +1978,10 @@ kiwishelf.set_background_style("plain")
 **Does:** lays a macOS 26 Liquid Glass material over both bars'
 item backgrounds (the boxes or the plate); it combines with
 either shape. The shelf's
-[`fill_color`](#kiwishelf-colours) tints the glass: a solid
-colored layer sits behind the glass and the glass refracts it.
+[`fill_color`](#kiwishelf-colours) tints the glass: a colored
+layer sits behind the glass and the glass refracts it, strongest
+at the shelf's screen edge and fading to an eighth of that
+strength toward your windows.
 The material's light or dark variant follows the fill too: a
 dark `fill_color` pins the dark glass. A light `fill_color` pins
 nothing — only the dark variant can be pinned — and the glass
@@ -2135,12 +2137,12 @@ the focused window's glyph is the Space Bar's own
   opacity; every bundled palette's fill carries that same alpha).
   With the `liquid_glass` finish on it tints the glass, and a
   dark fill selects the dark glass variant
-  ([Liquid Glass](#kiwishelfset_liquid_glass)). Under glass the
-  backdrop's opacity is held under a ceiling: a fill below it
-  renders as you picked it, a more opaque one is capped, and the
-  stored value is unchanged either way (Boxed/Plain use it in
-  full). While macOS's Reduce transparency is on, Boxed/Plain
-  draw it at full alpha instead.
+  ([Liquid Glass](#kiwishelfset_liquid_glass)). Under glass its
+  opacity at the shelf's edge is held under a ceiling: a fill
+  below it renders as you picked it, a more opaque one is capped,
+  and the stored value is unchanged either way (Boxed/Plain use
+  it in full, flat). While macOS's Reduce transparency is on,
+  Boxed/Plain draw it at full alpha instead.
 - `kiwishelf.set_item_color` — the items' text and glyphs
   (default `#EAF3EE`). An identifier on a Space you are not on
   draws it at 60% of its own alpha, and the divider between the

@@ -35,7 +35,8 @@ extension SpaceBarOverlay {
                     below: glass,
                     frame: frames[i],
                     cornerRadius: radius,
-                    hex: style.fillColor
+                    hex: style.fillColor,
+                    edge: style.edge
                 )
             }
         }
@@ -52,7 +53,7 @@ extension SpaceBarOverlay {
             guard let glass = GlassPlate.make() else { break }
             itemContainer.addSubview(glass)
             boxGlasses.append(glass)
-            boxTints.append(NSView())
+            boxTints.append(GlassBackdrop())
         }
     }
 
@@ -86,14 +87,15 @@ extension SpaceBarOverlay {
             frame: rect,
             cornerRadius: radius
         )
-        let tint = frontTint ?? NSView()
+        let tint = frontTint ?? GlassBackdrop()
         frontTint = tint
         GlassTint.apply(
             tint,
             below: glass,
             frame: rect,
             cornerRadius: radius,
-            hex: style.fillColor
+            hex: style.fillColor,
+            edge: style.edge
         )
     }
 

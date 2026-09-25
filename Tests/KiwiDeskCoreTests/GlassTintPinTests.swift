@@ -28,25 +28,26 @@ struct GlassTintPinTests {
     private static let frame = CGRect(x: 0, y: 0, width: 80, height: 24)
 
     /// A host with a superview, which `apply` needs to insert into.
-    private static func host() -> (glass: NSView, backdrop: NSView) {
+    private static func host() -> (glass: NSView, backdrop: GlassBackdrop) {
         let parent = NSView(frame: frame)
         let glass = NSView(frame: frame)
         parent.addSubview(glass)
-        return (glass, NSView(frame: frame))
+        return (glass, GlassBackdrop(frame: frame))
     }
 
     /// Applies `hex` to `glass` and reads the pin it left.
     private static func pin(
         _ hex: String,
         on glass: NSView,
-        backdrop: NSView
+        backdrop: GlassBackdrop
     ) -> NSAppearance.Name? {
         GlassTint.apply(
             backdrop,
             below: glass,
             frame: frame,
             cornerRadius: 4,
-            hex: hex
+            hex: hex,
+            edge: .top
         )
         return glass.appearance?.name
     }

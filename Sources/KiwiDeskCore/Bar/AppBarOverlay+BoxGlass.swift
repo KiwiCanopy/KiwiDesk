@@ -39,6 +39,7 @@ extension AppBarOverlay {
                     frame: frames[i],
                     cornerRadius: radius,
                     hex: style.fillColor,
+                    edge: style.edge,
                     animated: animated
                 )
             }
@@ -57,7 +58,7 @@ extension AppBarOverlay {
             guard let glass = GlassPlate.make() else { break }
             itemContainer.addSubview(glass)
             boxGlasses.append(glass)
-            boxTints.append(NSView())
+            boxTints.append(GlassBackdrop())
         }
     }
 
