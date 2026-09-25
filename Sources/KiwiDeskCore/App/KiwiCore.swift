@@ -222,13 +222,8 @@ public final class KiwiCore {
     /// The in-flight boot's phase, spans and timestamps (#801).
     let boot = BootRun()
 
-    /// Adoption-heal timings (#675); tests assign milliseconds.
-    /// 5 s: a healthy tick is one ~1 ms census, so the cadence only
-    /// bounds worst-case latency. 750 ms outlasts a Dock zoom, a
-    /// fade-in or a close's teardown (#1157).
-    var adoptionHealInterval: Duration = KiwiCore.adoptionHealDefault
-    var transientRetrackDelay: Duration = .milliseconds(750)
-    var monitorSettleDelay: Duration? = KiwiCore.monitorSettleDefault
+    /// The tunable waits; tests assign milliseconds.
+    var timings = CoreTimings()
 
     /// Four intent ledgers, each type doc carrying its argument:
     /// the move latch (#482/#483), the follow focus debt (#1007),
@@ -329,6 +324,7 @@ public final class KiwiCore {
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
+
     public let socket: SocketServer
 
     public init(

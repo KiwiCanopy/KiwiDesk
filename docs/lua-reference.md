@@ -4120,8 +4120,8 @@ event stream the key is `bundle_id`, JSON `null` when unknown.
 
 :::unreleased
 When the number of screens changes, `monitor_change` fires once
-the screens have stopped changing for a second, with the count
-they settled on. macOS briefly reports an in-between layout on
+the screens have stopped changing for a second (at most five
+seconds after the first change), with the count they settled on. macOS briefly reports an in-between layout on
 some changes, such as disconnecting an Apple Vision Pro, and the
 profile is chosen only for the settled one.
 :::

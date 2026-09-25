@@ -13,7 +13,7 @@ extension EventLoop {
     /// permanently mismatched app (#1157). The expected-absence
     /// arms (#1145, #1215, #1272) spend the SAME arms
     /// census-blind, so their budget is two
-    /// `KiwiCore.transientRetrackDelay` passes: ~1.5 s, past the
+    /// `KiwiCore.timings.transientRetrackDelay` passes: ~1.5 s, past the
     /// ~1 s switch transition measured on device (2026-09-01,
     /// macOS 26.6.2) in which a carried window is on no reading,
     /// past the ~0.5 s a fullscreen transition orders a window

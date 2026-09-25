@@ -253,7 +253,7 @@ editing AX code:
   (#308's safe direction) — so a TRUE close still compositing
   at sweep time converges instead of polling. The re-queue
   bound is argued on `EventLoop.removalRecheckCap`, the delay
-  on `KiwiCore.transientRetrackDelay`. The gate also stands
+  on `KiwiCore.timings.transientRetrackDelay`. The gate also stands
   down inside the Desktop-switch grace, where the census is
   double-exposed (#1023) and would refuse every departed
   window. Residue, accepted — and recorded in

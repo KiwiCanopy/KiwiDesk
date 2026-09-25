@@ -130,7 +130,7 @@ func makeTestCore(
     core.eventLoop.displayWatch.readDrawnMenuBars = { [] }
     // A screen-count change settles on a timer in production
     // (#1612); a fixture's reports are final, so it decides now.
-    core.monitorSettleDelay = nil
+    core.timings.monitorSettleDelay = nil
     // Same class, ninth time (#1103) — but PRECAUTIONARY, not
     // load-bearing like the eighth: `wireDrag` also makes the
     // drop-target cursor read live and a run reaches it, yet no

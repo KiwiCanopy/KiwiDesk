@@ -73,6 +73,26 @@ extension KiwiCore {
         }
     }
 
+    /// Drops an EMPTY heal seed whose screen is gone: an
+    /// in-between report seeds one for a screen that never
+    /// settles, and an apply that keeps the profile prunes nothing.
+    func retireOrphanedHealSeeds() {
+        let live = Set(liveFingerprints)
+        for (fingerprint, seed) in healedSpaces
+        where !live.contains(fingerprint) {
+            guard state.workspaces[seed]?.windows.isEmpty ?? true,
+                let other = state.workspaces.allSpaces.first(where: {
+                    $0.id != seed
+                })?.id
+            else { continue }
+            healedSpaces[fingerprint] = nil
+            spacePins[seed] = nil
+            tiler.settings.removeSpace(seed)
+            // Nothing to forward: the one Space drop (#1177).
+            forwardWindows(of: seed, to: other)
+        }
+    }
+
     private enum EarlierSeed {
         case absent
         case reusable(SpaceID)

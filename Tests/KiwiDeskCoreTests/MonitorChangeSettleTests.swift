@@ -38,7 +38,7 @@ struct MonitorChangeSettleTests {
         core.handle(.displaysChanged([builtIn]))
         core.execute("save_profile", args: [.string("solo")])
         #expect(core.profiles.currentName == "solo")
-        core.monitorSettleDelay = .milliseconds(100)
+        core.timings.monitorSettleDelay = .milliseconds(100)
         core.onLog = { log.lines.append($0) }
         return core
     }
@@ -54,6 +54,33 @@ struct MonitorChangeSettleTests {
         let core = makeCore(log: log)
         core.handle(.displaysChanged([builtIn, headset]))
         core.handle(.displaysChanged([builtIn]))
+        await settle(core)
+        #expect(core.profiles.currentName == "solo")
+        #expect(!log.lines.contains { $0.contains("'pair'") })
+    }
+
+    @Test("an in-between round trip leaves the Space set as it was")
+    func roundTripKeepsTheSpaces() async {
+        let log = SettleLog()
+        let core = makeCore(log: log)
+        let before = core.state.workspaces.allSpaces.map(\.id)
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.handle(.displaysChanged([builtIn]))
+        await settle(core)
+        // The heal seeded a Space for the headset in between; the
+        // settle retires it rather than keeping a stray (#1612).
+        #expect(core.state.workspaces.allSpaces.map(\.id) == before)
+        #expect(core.healedSpaces.isEmpty)
+    }
+
+    @Test("a profile loaded inside the wait is not undone")
+    func loadInsideTheWaitStands() async {
+        let log = SettleLog()
+        let core = makeCore(log: log)
+        core.handle(.displaysChanged([builtIn, headset]))
+        #expect(core.monitorSettlePending)
+        core.execute("load_profile", args: [.string("solo")])
+        #expect(!core.monitorSettlePending)
         await settle(core)
         #expect(core.profiles.currentName == "solo")
         #expect(!log.lines.contains { $0.contains("'pair'") })
@@ -90,6 +117,21 @@ struct MonitorChangeSettleTests {
         }
     }
 
+    @Test("a gone screen's Spaces re-home without waiting")
+    func disconnectResolvesNow() {
+        let log = SettleLog()
+        let core = makeCore(log: log)
+        core.execute("load_profile", args: [.string("pair")])
+        core.handle(.displaysChanged([builtIn, headset]))
+        #expect(core.profiles.currentName == "pair")
+        core.handle(.displaysChanged([builtIn]))
+        #expect(core.monitorSettlePending)
+        #expect(core.profiles.currentName == "pair")
+        for space in core.state.workspaces.allSpaces {
+            #expect(core.state.workspaces.display(of: space.id) == builtIn.id)
+        }
+    }
+
     @Test("a same-count re-report decides at once")
     func sameCountIsImmediate() {
         let log = SettleLog()
@@ -112,7 +154,7 @@ struct MonitorChangeSettleTests {
                     "kiwi-1612-boot-\(UUID().uuidString)"
                 )
         )
-        core.monitorSettleDelay = .milliseconds(100)
+        core.timings.monitorSettleDelay = .milliseconds(100)
         core.handle(.displaysChanged([builtIn]))
         #expect(!core.deferred.isScheduled(.monitorSettle))
     }

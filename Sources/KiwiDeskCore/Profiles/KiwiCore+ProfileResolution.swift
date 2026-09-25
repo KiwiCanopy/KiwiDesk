@@ -37,6 +37,7 @@ extension KiwiCore {
         pruneStaleSpaces: Bool = false,
         forceRetile: Bool
     ) {
+        supersedeMonitorSettle()
         // #1230: file the OUTGOING profile's partitioning before
         // anything rebuilds the space set, and learn in one
         // answer whether this apply is a profile CHANGE — which
@@ -195,6 +196,7 @@ extension KiwiCore {
         composed: ProfileComposition.Composed,
         forceRetile: Bool
     ) {
+        supersedeMonitorSettle()
         // #1230: a Standard is not a profile — file whatever
         // profile was live before the compose rearranges it, or
         // its arrangement is what gets recorded under that
