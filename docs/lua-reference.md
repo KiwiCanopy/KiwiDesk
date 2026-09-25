@@ -73,9 +73,7 @@ the GUI** instead. Settings are:
 - Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_layer`,
   `KiwiDesk.bind_profile_to_desktop`.
 
-:::unreleased
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
-:::
 
 ```lua
 -- Any one of these makes init.lua the config owner:
@@ -252,14 +250,12 @@ gone with `reason: vanished`, the value a Desktop swipe
 produces. When that Desktop is next shown the window rejoins
 the **KiwiDesk Space it was in**.
 
-:::unreleased
 That Space is not always the one you arrive on: `focus_desktop`
 opens a Desktop on the Space it remembers for it, and when that
 Space is empty a focused-window verb refuses by name —
 `the active Space 2 is empty; the focused window (Finder) is in
 Space 1 — focus_space 1 first` — the window being parked in its
 own Space until you focus that Space.
-:::
 
 When that Desktop lives on **another screen**, the window
 instead joins the KiwiDesk Space that screen is showing when
@@ -414,7 +410,6 @@ settings. Refuses to delete the only space. Runtime only: a
 space still declared in `init.lua` or the active profile
 reappears on the next config load.
 
-:::unreleased
 **Returns** `nil` for a space nothing declares (and for a refused
 delete, which is logged). When the space comes back on the next
 config load, it returns a table whose `declared_in` array names
@@ -423,7 +418,6 @@ profile — save it to make the removal last), `standard:<name>`
 (the built-in layout resolving while no saved profile fits —
 save a profile), `init.lua` (a verb there references it — remove
 the call). Test the return, not the status (#1509).
-:::
 
 A screen this leaves with no space is seeded one — see
 [Profile Monitor Sets](#profile-monitor-sets).
@@ -573,7 +567,6 @@ KiwiDesk.set_resize_step(75)
 
 ### reset_layout_sizing
 
-:::unreleased
 **Expects:** optionally a space id, or `"all"`. Nothing means
 the active space.
 
@@ -605,7 +598,6 @@ end)
 KiwiDesk.reset_layout_sizing("mail")
 KiwiDesk.reset_layout_sizing("all")
 ```
-:::
 
 ### set_swap_skips_cascade
 
@@ -714,12 +706,10 @@ Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
 ([Liquid Glass](#kiwishelfset_liquid_glass)).
 
-:::unreleased
 The GUI twin is the one **Liquid Glass** switch on Colours
 &amp; Animations;
 [kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass) says
 what it writes.
-:::
 
 **Example:**
 
@@ -1787,7 +1777,6 @@ track.set_overflow_style_override("code", "cascade_overflow")
 
 ## KiwiShelf
 
-:::unreleased
 **KiwiShelf** is the one screen edge both bars sit on — the
 [App Bar](#app-bar) and the [Space Bar](#space-bar).
 `kiwishelf.set_*` sets where the shelf hangs, how the two bars
@@ -1819,11 +1808,9 @@ respected; a scroll or a page holds until the active Space or
 the focus changes. While the shelf is full, drag the divider to
 change the Space Bar minimum, as `set_minimum` does, and
 double-click it to restore the default.
-:::
 
 ### kiwishelf.set_edge
 
-:::unreleased
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
 (default `"top"`).
 
@@ -1836,11 +1823,9 @@ layout's orientation (#293).
 ```lua
 kiwishelf.set_edge("bottom")
 ```
-:::
 
 ### kiwishelf.set_alignment
 
-:::unreleased
 **Expects:** `"start"`, `"center"`, or `"end"`
 (default `"center"`).
 
@@ -1859,11 +1844,9 @@ under `apps_first`.
 ```lua
 kiwishelf.set_alignment("start")
 ```
-:::
 
 ### kiwishelf.set_order
 
-:::unreleased
 **Expects:** `"spaces_first"` or `"apps_first"` (default
 `"spaces_first"`).
 
@@ -1875,11 +1858,9 @@ both show. Edge-relative, like `set_alignment`.
 ```lua
 kiwishelf.set_order("apps_first")
 ```
-:::
 
 ### kiwishelf.set_minimum
 
-:::unreleased
 **Expects:** a percentage of the edge, 20–80 (default `30`);
 values outside the range are clamped.
 
@@ -1896,11 +1877,9 @@ active Space and a fade each side in view.
 ```lua
 kiwishelf.set_minimum(40)
 ```
-:::
 
 ### kiwishelf.set_thickness
 
-:::unreleased
 **Expects:** thickness in points (default `40`; anything below
 `20` is raised to it).
 
@@ -1912,11 +1891,9 @@ the layout.
 ```lua
 kiwishelf.set_thickness(32)
 ```
-:::
 
 ### kiwishelf.set_outer_margin
 
-:::unreleased
 **Expects:** points (default `0`; a negative value is raised to
 it).
 
@@ -1929,11 +1906,9 @@ margin, then the windows' own outer gap.
 ```lua
 kiwishelf.set_outer_margin(10)
 ```
-:::
 
 ### kiwishelf.set_inner_margin
 
-:::unreleased
 **Expects:** points (default `0`; a negative value is raised to
 it).
 
@@ -1946,11 +1921,9 @@ clearance, so `0` means the gap governs.
 ```lua
 kiwishelf.set_inner_margin(4)
 ```
-:::
 
 ### kiwishelf.set_background_style
 
-:::unreleased
 **Expects:** `"boxed"` or `"plain"` (default `"plain"`).
 
 **Does:** sets WHERE the background is drawn, for both bars:
@@ -1967,11 +1940,9 @@ Liquid Glass is a separate finish toggle, `set_liquid_glass`
 ```lua
 kiwishelf.set_background_style("plain")
 ```
-:::
 
 ### kiwishelf.set_liquid_glass
 
-:::unreleased
 **Expects:** a boolean (default `true`).
 
 **Does:** lays a macOS 26 Liquid Glass material over both bars'
@@ -2014,11 +1985,9 @@ Settings switch then reads off and says so in its `?`.
 ```lua
 kiwishelf.set_liquid_glass(true)
 ```
-:::
 
 ### kiwishelf.set_background_fit
 
-:::unreleased
 **Expects:** `"full"` or `"hug"` (default `"hug"`).
 
 **Does:** sets how far the one plate reaches under `plain` (and
@@ -2033,11 +2002,9 @@ Inert under `boxed` (the Settings control greys there).
 ```lua
 kiwishelf.set_background_fit("full")
 ```
-:::
 
 ### kiwishelf.set_corner_roundness
 
-:::unreleased
 **Expects:** a number 0–100 (percentage; default `50`).
 
 **Does:** sets the corner rounding of the plates and item boxes
@@ -2049,11 +2016,9 @@ of both bars, where 0 = square and 100 = a full capsule
 ```lua
 kiwishelf.set_corner_roundness(50)
 ```
-:::
 
 ### kiwishelf.set_item_gap
 
-:::unreleased
 **Expects:** points (default `6`; a negative value is raised to
 `0`).
 
@@ -2065,11 +2030,9 @@ items alike, and between the two bars while both show.
 ```lua
 kiwishelf.set_item_gap(6)
 ```
-:::
 
 ### kiwishelf.set_font_size
 
-:::unreleased
 **Expects:** points; `0` (default) means auto.
 
 **Does:** if `0`, each bar's text scales with the thickness; any
@@ -2080,11 +2043,9 @@ positive value pins the font size for both bars.
 ```lua
 kiwishelf.set_font_size(0)
 ```
-:::
 
 ### kiwishelf.set_icon_source
 
-:::unreleased
 **Expects:** `"app_image"` or `"app_font"` (default
 `"app_image"`).
 
@@ -2105,11 +2066,9 @@ the App Font either way.
 ```lua
 kiwishelf.set_icon_source("app_font")
 ```
-:::
 
 ### kiwishelf.set_dim_factor
 
-:::unreleased
 **Expects:** a number 0.05–1 (default `0.4`); out-of-range
 values clamp.
 
@@ -2125,11 +2084,9 @@ Lua-only (no GUI).
 ```lua
 kiwishelf.set_dim_factor(0.4)
 ```
-:::
 
 ### KiwiShelf colours
 
-:::unreleased
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
 setting. One set of colours serves both bars; only the colour of
 the focused window's glyph is the Space Bar's own
@@ -2170,11 +2127,9 @@ the focused window's glyph is the Space Bar's own
 kiwishelf.set_fill_color("#14201CB3")
 kiwishelf.set_active_item_color("#8DB354")
 ```
-:::
 
 ### Retired bar verbs
 
-:::unreleased
 These verbs are retired. A call in `init.lua` is reported in
 Config Issues, naming what replaces it where something does;
 over the CLI it fails with
@@ -2221,7 +2176,6 @@ its `front_app_title_cap`. Saved palettes are rewritten the same
 way, and a palette file exported before 2.0 is converted as it
 is imported. A profile, bundle or palette library 2.0 has
 written is left as it is, and no longer opens in 1.x.
-:::
 
 ## App Bar
 
@@ -2233,18 +2187,15 @@ monitors each display shows its own bar, on that display, for the
 space it is showing, and dragging an item reorders that display's
 space.
 
-:::unreleased
 The bar sits on [KiwiShelf](#kiwishelf), which sets its edge,
 thickness, margins, background, colours and app symbol style.
 Everything else about it is **global**: `app_bar.set_*` sets
 every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
-:::
 
 ### app_bar.set_active_indicator
 
-:::unreleased
 **Expects:** `"outline"` or `"edge_mark"` (default
 `"edge_mark"`).
 
@@ -2260,7 +2211,6 @@ App Bar Overrides](#per-layout-app-bar-overrides)).
 ```lua
 app_bar.set_active_indicator("outline")
 ```
-:::
 
 ### app_bar.set_content
 
@@ -2296,12 +2246,10 @@ longer titles are cut at the end and marked with an ellipsis. A
 title is also cut where it does not fit its slot; with
 `icon_and_title` only the title shrinks, never the icon.
 
-:::unreleased
 Every slot is as wide as the widest item, at least the icon
 square and at most a quarter of the whole KiwiShelf edge, so
 the cap is the App Bar's one size control; items that then do
 not fit scroll instead of shrinking.
-:::
 
 **Example:**
 
@@ -2327,7 +2275,6 @@ app_bar.set_group_adjacent_windows(true)
 
 ### Per-Layout App Bar Overrides
 
-:::unreleased
 Each bar-hosting layout (monocle, scrolling) can override the
 App Bar's own fields for itself — `enabled`, `active_indicator`,
 `content`, `title_cap` and `group_adjacent_windows`. Only these
@@ -2350,7 +2297,6 @@ monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
 scroll.set_app_bar_content("icon")  -- override for scrolling
 ```
-:::
 
 ## Space Bar
 
@@ -2367,13 +2313,11 @@ holding the focused window stays collapsed and takes the focused
 accent. The user guide's [Space Bar](user-guide.md#space-bar)
 section covers the badges and the drag-onto-a-Space gesture.
 
-:::unreleased
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,
 background, colours and app symbol style; every `space_bar.*`
 setting is global, with no per-layout override. While a native-fullscreen app holds the
 screen the bar hides; it returns with the Desktop.
-:::
 
 ### space_bar.set_enabled
 
@@ -2381,11 +2325,9 @@ screen the bar hides; it returns with the Desktop.
 
 **Does:** shows or hides the Space Bar.
 
-:::unreleased
 With the Space Bar off, [KiwiShelf](#kiwishelf) reserves its
 edge only in the layouts whose App Bar is on, and nowhere when
 none is.
-:::
 
 **Example:**
 
@@ -2412,7 +2354,6 @@ space_bar.set_glyph_cap(8)
 
 ### space_bar.set_active_indicator
 
-:::unreleased
 **Expects:** `"outline"` or `"edge_mark"` (default
 `"outline"`).
 
@@ -2424,13 +2365,11 @@ space_bar.set_glyph_cap(8)
 ```lua
 space_bar.set_active_indicator("outline")
 ```
-:::
 
 ### space_bar.set_active_dim_factor
 
 **Expects:** a number 0.05–1 (default 0.6).
 
-:::unreleased
 **Does:** sets the opacity of an **unfocused window's glyph on the
 active Space** — the middle dim tier, between the focused window
 (1.0) and inactive Spaces
@@ -2438,7 +2377,6 @@ active Space** — the middle dim tier, between the focused window
 Lua-only, clamped. Independent of the shelf's `dim_factor`: no
 ordering is enforced, so a value below the outer tier inverts
 the ladder.
-:::
 
 **Example:**
 
@@ -2458,9 +2396,7 @@ title yet falls back to its app's name. On vertical (left/right)
 bars the segment is icon-only and the divider flips to a
 horizontal rule.
 
-:::unreleased
 The segment shows only while no App Bar is shown on that screen.
-:::
 
 **Example:**
 
@@ -2470,7 +2406,6 @@ space_bar.set_show_front_app(false)
 
 ### space_bar.set_front_app_title_cap
 
-:::unreleased
 **Expects:** a character count, 8–80 (default `10`). Values
 outside the range are clamped.
 
@@ -2487,7 +2422,6 @@ title.
 ```lua
 space_bar.set_front_app_title_cap(25)
 ```
-:::
 
 ### space_bar.set_hide_empty
 
@@ -2540,7 +2474,6 @@ space_bar.set_spring_delay(1000)
 
 ### space_bar.set_focused_item_color
 
-:::unreleased
 **Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`).
 
 **Does:** sets the color of the focused window wherever the
@@ -2558,7 +2491,6 @@ distinction.
 ```lua
 space_bar.set_focused_item_color("#C2790A")
 ```
-:::
 
 ## Where New Windows Land
 
@@ -2817,7 +2749,6 @@ drag.set_corner_radius(16)
 
 ### drag.set_liquid_glass
 
-:::unreleased
 **Expects:** a boolean (default `true`).
 
 **Does:** draws the ghost and the drop zone as macOS 26 Liquid
@@ -2837,7 +2768,6 @@ switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 ```lua
 drag.set_liquid_glass(false)
 ```
-:::
 
 ## Focus Border
 
@@ -3061,12 +2991,10 @@ monocle, and a master zone lined up along the split — see
 [Accepted limitations](accepted-limitations.md)) animate back into
 place. Floating windows resize freely.
 
-:::unreleased
 In Master/Stack a drag along the zone's own axis — a stack
 window's height beside a left or right stack, its width beside a
 top or bottom one — moves the dragged window's share of its zone,
 as `resize` does.
-:::
 
 Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and
@@ -3256,7 +3184,6 @@ An app is named by its bundle identifier (case-insensitive), not
 its display name. See [Finding a bundle
 identifier](#finding-a-bundle-identifier).
 
-:::unreleased
 Opening a listed app takes you with it: when you launch it,
 reopen it with no window showing, or restore its minimized
 window yourself — a Dock click, Spotlight, `pull_or_spawn` —
@@ -3267,14 +3194,11 @@ showing, the windows macOS reopens at login or KiwiDesk finds
 when it starts, and the windows a Desktop switch shows you stay
 in their space
 ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599)).
-:::
 
-:::unreleased
 A popup menu the app opens — a window above the normal window
 layer — is not filed by the rule: it opens in the space you are
 in. The app's dialogs and panels follow the rule like its other
 windows.
-:::
 
 **Example:**
 
@@ -3584,10 +3508,8 @@ mark is a neutral glyph on glass that flips black/white with
 light and dark mode. Any non-empty value must parse as a hex
 color.
 
-:::unreleased
 On [Liquid Glass](#stickyset_liquid_glass) the color tints the
 mark's glass instead, and the disc goes.
-:::
 
 **Example:**
 
@@ -3616,7 +3538,6 @@ sticky.set_desktop_reach(false)
 
 ### sticky.set_liquid_glass
 
-:::unreleased
 **Expects:** a boolean (default `true`).
 
 **Does:** draws the on-window sticky mark as macOS 26 Liquid
@@ -3636,7 +3557,6 @@ through the one **Liquid Glass** switch
 ```lua
 sticky.set_liquid_glass(false)
 ```
-:::
 
 ### floating.set_color
 
@@ -4024,13 +3944,10 @@ What the `delta` adjusts depends on the layout:
   never touched. A stack column's per-window weights keep only
   the write-time clamp (see the accepted limitations).
 
-:::unreleased
 The area a layout fills, which every bound above is taken
 within, is the display minus the [KiwiShelf](#kiwishelf) strip
 wherever a bar draws in that layout (#1517).
-:::
 
-:::unreleased
 **Where the ratio write lands (#458):** in a **session layer
 scoped to that space** — never the shared global, so resizing
 one space does not visibly resize every other space, and never
@@ -4051,7 +3968,6 @@ twin on that space — so an explicit write always shows. This
 covers the BSP split ratios, the stack master ratio, and the
 scrolling slot size — the three interactive-resize knobs —
 consistently.
-:::
 
 **Example:**
 
@@ -4078,12 +3994,10 @@ icon shows the first two characters of its name there,
 uppercased. The default layer (`KiwiDesk.bind`) never takes an
 icon — the status item shows the standard KiwiDesk glyph.
 
-:::unreleased
 With the Space Bar off, the status item shows the Space each
 screen is showing instead ([User Guide ▸ Space
 Bar](user-guide.md#space-bar)), led by the layer's icon — or
 the two-character cut of its name — the way the bar is.
-:::
 
 **Example:**
 
@@ -4122,13 +4036,11 @@ The override is **sparse and soft**:
   vocabulary detection are silently unregistered on every reload
   while GUI-managed.
 
-:::unreleased
 A profile can also leave a base binding out: its layer entry
 lists the combo under `"removed"`, and that base row is not
 registered while the profile is loaded. That includes your
 profile-switch shortcut — leave it in, or switch from the menu
 bar.
-:::
 
 Profiles re-resolve their bindings whenever they apply: on
 `load_profile`, on a monitor change, and on a Desktop binding
@@ -4174,13 +4086,11 @@ locale-dependent. It is the trailing Lua argument (skip it if
 you don't need it), `""` for unbundled processes; in the CLI
 event stream the key is `bundle_id`, JSON `null` when unknown.
 
-:::unreleased
 When the number of screens changes, `monitor_change` fires once
 the screens have stopped changing for a second (at most five
 seconds after the first change), with the count they settled on. macOS briefly reports an in-between layout on
 some changes, such as disconnecting an Apple Vision Pro, and the
 profile is chosen only for the settled one.
-:::
 
 `window_moved_to_space` fires on an explicit `move_to_space`
 (with or without follow) when the target differs from the
@@ -4413,12 +4323,10 @@ end)
 - `set_default_profile` marks a profile as the fallback for its
   monitor count.
 
-:::unreleased
 `save_profile` and `load_profile` also hand the connected monitor
 set to that profile, and `set_default_profile` refuses a profile
 that holds no set (see [Profile Monitor
 Sets](#profile-monitor-sets)).
-:::
 
 **Example:**
 
@@ -4513,7 +4421,6 @@ KiwiDesk.bind_profile_to_desktop(3, "Laptop")
 KiwiDesk.bind_profile_to_desktop(3, "Dual")
 ```
 
-:::unreleased
 **Screen arguments bind a profile for one screen setup.** After
 the profile, pass the fingerprint of every screen in that setup,
 as `list_monitors` prints them; the binding then loads only while
@@ -4531,7 +4438,6 @@ KiwiDesk.bind_profile_to_desktop(3, "Dual")
 KiwiDesk.bind_profile_to_desktop(3, "Studio",
   "Built-in Retina Display:1512x982", "LG UltraFine:2560x1440")
 ```
-:::
 
 **The number names the Desktop; it does not key the binding.**
 KiwiDesk resolves the number you pass to the Desktop it
@@ -4576,7 +4482,6 @@ that lands on the same profile leaves your layout alone.
 
 The record is per session and is not written to disk.
 
-:::unreleased
 **A monitor change holds a gone screen's spaces.** When a monitor
 change resolves a different profile, a space that lived on a
 monitor no longer connected — pinned there, or placed there by
@@ -4609,7 +4514,6 @@ space. `save_profile`, the `gui.json` space list and pins and the
 per-profile record above never include one. A Desktop binding
 switch holds nothing, and held spaces do not survive a restart
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
-:::
 
 ### Profile Monitor Sets
 
@@ -4637,10 +4541,8 @@ in this order:
    your Lua-declared tiling stays authoritative and the Standard
    merely steers the space→screen placement.
 
-:::unreleased
 Within the binding rung, a profile bound for exactly the connected
 screen setup comes before one bound for all screen setups.
-:::
 
 Every space always resolves to a screen: an explicit fingerprint pin
 wins, then the **Main** role (the space follows whatever display is
@@ -4658,7 +4560,6 @@ Explicitly loading a profile whose stored sets don't cover the
 connected monitors works, but the state loads *dirty* until you
 update the profile on this hardware or return to a covered set.
 
-:::unreleased
 A monitor set belongs to one profile. `save_profile` (unless
 another profile owns the set), `load_profile` of a profile saved
 for as many screens, and creating a profile hand the connected set
@@ -4680,7 +4581,6 @@ never picked by its screens (a Desktop binding still loads it), it
 still loads by name, and it takes a set back on its next load. A
 dormant profile loses its default flag; the profile that took its
 set becomes the default unless the count already has another.
-:::
 
 ### Profile JSON Format
 

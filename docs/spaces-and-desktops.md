@@ -44,7 +44,6 @@ windows it held move to the profile's fallback Space
 (`set_fallback_space`). Re-applying the profile that is already
 live changes nothing, so a monitor reconnect is harmless.
 
-:::unreleased
 **Unplugging a screen holds its Spaces.** When unplugging a
 screen makes a different profile live, each Space that was on
 that screen and still has windows in it is carried onto a
@@ -74,7 +73,6 @@ profile yourself ends every hold, and the held windows move to
 that profile's fallback Space like those of any Space it does not
 define. A Desktop binding holds nothing, and held Spaces do not
 survive quitting KiwiDesk.
-:::
 
 Every Space sits on a screen. In Settings the **Monitors**
 section is a picture of your desk: drag a Space chip onto the
@@ -148,14 +146,12 @@ only to a one-screen profile stands aside on two, and KiwiDesk
 picks by your screens ([Which Profile
 Loads](user-guide.md#which-profile-loads)).
 
-:::unreleased
 **A binding can also be for one screen setup.** Within a screen
 count, a Desktop can hold a profile for each particular set of
 screens you name, beside the one for all its other setups: with
 exactly those screens connected, that set's profile loads; any
 other setup of the count loads the one for all setups. Either
 loads over a profile saved for exactly those screens.
-:::
 
 ## A binding follows its Desktop, not its number
 

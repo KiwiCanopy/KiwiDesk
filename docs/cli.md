@@ -338,15 +338,12 @@ exports nothing.
 Desktop, for all screen setups: a second profile of another count
 adds beside the first, the same count replaces it.
 
-:::unreleased
 Screen fingerprints after the profile, as `list_monitors` prints
 them, scope the binding to that one screen setup ([Lua
 reference](lua-reference.md#bind_profile_to_desktop)).
-:::
 
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
-:::unreleased
 `reset_layout_sizing` clears what `resize` accumulated on the
 active space — or the space named, or every space for `all` —
 the session layer and the stack and track weights — so it
@@ -354,7 +351,6 @@ lands on what its profile authored (an override's size field
 stays; the global only where nothing was authored), and leaves
 structure alone
 ([Lua reference](lua-reference.md#reset_layout_sizing)).
-:::
 
 Every layout global has a per-space `_override` twin (e.g.
 `bsp.set_ratio_h_override`, `scroll.set_slot_size_override`) that
@@ -398,7 +394,6 @@ one.
 
 `delete_space` succeeds whether or not the removal lasts.
 
-:::unreleased
 When the space is still declared somewhere, the response says
 where:
 
@@ -418,7 +413,6 @@ removed from the live layout but still in saved profile "Work" — save the prof
 still composed by the built-in "Developer" standard — save a profile to make this durable
 still created by init.lua — remove the call that creates it
 ```
-:::
 
 ### Applying Ignore Rules
 
@@ -534,12 +528,10 @@ lifecycle; the `reason` field says why the set changed:
   window, where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
 
-:::unreleased
 A window re-shown after a `closed` destroy — an app whose close
 hides the window and shows the same one again — comes back as
 `new` and is placed like one; `returned` is a Desktop return, an
 unhide or a session restore.
-:::
 
 A macOS Desktop switch thus fires a burst of `vanished`
 destroys and a burst of `returned` creates — filter on
