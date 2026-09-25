@@ -15,12 +15,14 @@ struct ConfigMigrationGlassRoutingTests {
             .appendingPathComponent("Sources/KiwiDeskCore")
     }
 
-    /// The glass fill (#1369) and the track-limit lift (#1354)
-    /// land on a profile root's `settings` and a bundle root's
-    /// `profiles[].settings` by PATH: one CodingKey declares
+    /// The glass fill (#1369), the track-limit lift (#1354) and
+    /// the overlay glass fill (#1620/#1621, which reaches the path
+    /// through #1369's `glassSettingsKey` rather than a literal of
+    /// its own) land on a profile root's `settings` and a bundle
+    /// root's `profiles[].settings` by PATH: one CodingKey declares
     /// `settings` as a top-level key, plus each step's own
-    /// literal. A second CodingKey declarer is a parent neither
-    /// step was scoped to.
+    /// literal. A second CodingKey declarer is a parent no step
+    /// was scoped to.
     @Test("The settings-path steps have one declarer")
     func glassFillStaysScoped() throws {
         let root = coreRoot

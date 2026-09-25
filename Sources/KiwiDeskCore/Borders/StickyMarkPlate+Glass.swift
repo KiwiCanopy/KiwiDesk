@@ -3,21 +3,18 @@ import AppKit
 /// The sticky mark as tinted Liquid Glass (#1621): the colour tints
 /// the glass through `GlassTint`, fading downward, instead of
 /// filling a disc, and the glyphs ride inside the glass so they
-/// take the variant `GlassTint` pins from the colour (#1308). The
+/// take the dark variant `GlassTint` pins from a dark colour, the
+/// app's appearance otherwise (#1308). The
 /// plate's own clip carries the corner shape, pill morph included.
 extension StickyMarkPlate {
-    /// A colour `GlassTint` reads as none: clear glass.
-    static let clearTint = "#00000000"
-
     /// Switches between the `.hudWindow` badge and glass; the
-    /// glyphs move host only when the mode changes (#1315).
+    /// glyphs move host only when the mode changes (#1315). A
+    /// steady state repaints nothing: `setMarkColor`, which every
+    /// sync calls next, applies the tint.
     func setGlass(_ on: Bool) {
         let plate = on ? glassView() : nil
         let glassNow = plate != nil
-        guard glassNow != isGlass else {
-            if glassNow { applyGlass() }
-            return
-        }
+        guard glassNow != isGlass else { return }
         isGlass = glassNow
         if let plate {
             hud.isHidden = true
@@ -48,7 +45,7 @@ extension StickyMarkPlate {
             below: glass,
             frame: bounds,
             cornerRadius: 0,
-            hex: markHex.isEmpty ? Self.clearTint : markHex,
+            hex: markHex,
             edge: .top
         )
     }

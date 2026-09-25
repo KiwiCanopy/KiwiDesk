@@ -30,6 +30,11 @@ import Foundation
 ///   borderless utility panels and non-key overlays before
 ///   tracking, which is also what keeps the ⌃⌥K panel out of both
 ///   bars.
+///   Under Liquid Glass the drag markers sit at the NORMAL level
+///   (#1620), so the layer-0 census the heal and the bulk
+///   prefilter read sees them — bounded: one own-process
+///   reconcile per panel before the heal hushes it, and the drop
+///   still happens here.
 ///
 /// A new own window is unmarked, and therefore chrome, by
 /// DEFAULT — the failure direction that costs a stray float

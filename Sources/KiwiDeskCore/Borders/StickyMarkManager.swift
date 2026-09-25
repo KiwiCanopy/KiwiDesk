@@ -22,7 +22,7 @@ public final class StickyMarkManager {
             frame: CGRect,
             color: String = "",
             symbolName: String = StickyStyle.symbolName,
-            glass: Bool = false
+            glass: Bool
         ) {
             self.window = window
             self.frame = frame

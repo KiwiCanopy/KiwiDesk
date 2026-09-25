@@ -18,10 +18,9 @@ extension SettingsModel {
             },
             set: { on in
                 var next = self.config.settings
-                next.kiwishelf.liquidGlass = on
-                next.shortcutPanelLiquidGlass = on
-                next.dragLiquidGlass = on
-                next.stickyStyle.liquidGlass = on
+                for leaf in LiquidGlassAgreement.leaves {
+                    next[keyPath: leaf] = on
+                }
                 self.config.settings = next
             }
         )
@@ -36,13 +35,19 @@ extension SettingsModel {
 struct LiquidGlassAgreement {
     let settings: TilingSettings
 
-    private var leaves: [Bool] {
+    /// Every stored leaf the switch owns — the one list the setter
+    /// writes and the agreement reads, so the two cannot drift.
+    static var leaves: [WritableKeyPath<TilingSettings, Bool>] {
         [
-            settings.kiwishelf.liquidGlass,
-            settings.shortcutPanelLiquidGlass,
-            settings.dragLiquidGlass,
-            settings.stickyStyle.liquidGlass,
+            \.kiwishelf.liquidGlass,
+            \.shortcutPanelLiquidGlass,
+            \.dragLiquidGlass,
+            \.stickyStyle.liquidGlass,
         ]
+    }
+
+    private var leaves: [Bool] {
+        Self.leaves.map { settings[keyPath: $0] }
     }
 
     /// Every surface carries glass.

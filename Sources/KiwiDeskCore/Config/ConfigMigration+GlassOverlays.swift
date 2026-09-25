@@ -6,12 +6,12 @@ import Foundation
 /// already carries (`GlassOverlayMigrationTests`). Absent, they
 /// would decode ON beside a shelf or panel the user set off, so
 /// the switch would open reading "differ" on a plain upgrade
-/// (profiles.md ▸ absence was a stored value).
+/// (profiles.md ▸ a stored value's ABSENCE is a value too).
 extension ConfigMigration {
     /// Spelled here rather than derived: a historical step keeps
     /// naming what it was written to name.
     static let overlayGlassGroups = ["drag", "sticky"]
-    static let overlayGlassSources = ["kiwishelf", "shortcut_panel"]
+    static let overlayGlassSources = [shelfKey, glassPanelGroup]
     /// The formats this step introduced, a profile's and a bundle's.
     static let overlayGlassProfileFormat = 9
     static let overlayGlassBundleFormat = 13
@@ -121,7 +121,7 @@ extension ConfigMigration {
         }
         let value = on ? "true" : "false"
         let opener = "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)(\\s*\\})?"
-        let openers = matches(opener, in: text).count
+        let openers = captures(opener, in: text).count
         guard openers == objects.count, openers > 0 else { return nil }
         var out = text
         var absent: [String] = []
@@ -136,11 +136,11 @@ extension ConfigMigration {
                 !present.contains(where: {
                     ($0[group] as? [String: Any])?[glassLeafKey] != nil
                 }),
-                matches(pattern, in: out).count == openers
+                captures(pattern, in: out).count == openers
             else { return nil }
-            out = inserting(
+            out = insertingAfterEach(
                 "\"\(glassLeafKey)\":\(value)",
-                afterEach: pattern,
+                pattern: pattern,
                 in: out
             )
         }
@@ -148,7 +148,7 @@ extension ConfigMigration {
             let entries = absent.map {
                 "\"\($0)\":{\"\(glassLeafKey)\":\(value)}"
             }.joined(separator: ",")
-            out = inserting(entries, afterEach: opener, in: out)
+            out = insertingAfterEach(entries, pattern: opener, in: out)
         }
         return out == text ? nil : out.data(using: .utf8)
     }
@@ -169,41 +169,4 @@ extension ConfigMigration {
         return out
     }
 
-    /// `entries` after every match of `pattern`'s opener, back to
-    /// front: an empty object takes them alone, a populated one
-    /// takes them ahead of what it holds.
-    private static func inserting(
-        _ entries: String,
-        afterEach pattern: String,
-        in text: String
-    ) -> String {
-        guard let regex = try? NSRegularExpression(pattern: pattern)
-        else { return text }
-        var out = text
-        let whole = NSRange(text.startIndex..., in: text)
-        for match in regex.matches(in: text, range: whole).reversed() {
-            guard let opener = Range(match.range(at: 1), in: out),
-                let full = Range(match.range, in: out)
-            else { continue }
-            let empty = match.range(at: 2).location != NSNotFound
-            out.replaceSubrange(
-                full,
-                with: out[opener] + entries + (empty ? "}" : ",")
-            )
-        }
-        return out
-    }
-
-    /// Every first capture of `pattern` in `text`.
-    private static func matches(
-        _ pattern: String,
-        in text: String
-    ) -> [String] {
-        guard let regex = try? NSRegularExpression(pattern: pattern)
-        else { return [] }
-        let whole = NSRange(text.startIndex..., in: text)
-        return regex.matches(in: text, range: whole).compactMap {
-            Range($0.range(at: 1), in: text).map { String(text[$0]) }
-        }
-    }
 }

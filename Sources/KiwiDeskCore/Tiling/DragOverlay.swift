@@ -32,43 +32,68 @@ public final class DragOverlay {
     }
 
     /// Marks the dragged window's home slot in AX coordinates.
-    /// Under glass both markers sit directly BELOW `below` — the
-    /// dragged window — and above every other window, so their
-    /// glass never blurs the window in hand (#1620).
+    /// `glassBeneath` is the dragged window when the marker is
+    /// glass, nil when it is flat: ONE argument, so a glass marker
+    /// cannot exist without the window it sits directly beneath,
+    /// at that window's level — the glass never blurs the window
+    /// in hand (#1620). Flat markers keep the floating level.
     public func showGhost(
         at frame: CGRect,
         style: DragVisual,
         cornerRadius: CGFloat,
-        glass: Bool = false,
-        below window: CGWindowID? = nil
+        glassBeneath window: CGWindowID?
     ) {
         let marker = ghost ?? Marker(panel: makePanel())
         ghost = marker
-        place(
-            marker.panel,
-            at: adjustedFrame(frame, style: style),
-            below: glass ? window : nil
+        show(
+            marker,
+            at: frame,
+            style: style,
+            radius: cornerRadius,
+            beneath: window
         )
-        apply(style, radius: cornerRadius, glass: glass, to: marker)
     }
 
-    /// Marks the swap target's slot in AX coordinates, ordered
-    /// like the ghost.
+    /// Marks the swap target's slot in AX coordinates, glass and
+    /// ordered like the ghost.
     public func showDropZone(
         at frame: CGRect,
         style: DragVisual,
         cornerRadius: CGFloat,
-        glass: Bool = false,
-        below window: CGWindowID? = nil
+        glassBeneath window: CGWindowID?
     ) {
         let marker = dropZone ?? Marker(panel: makePanel())
         dropZone = marker
+        show(
+            marker,
+            at: frame,
+            style: style,
+            radius: cornerRadius,
+            beneath: window
+        )
+        marker.glass?.alphaValue = Self.dropZoneGlassOpacity
+    }
+
+    /// The drop zone's glass is thinned: it lies over the window a
+    /// drop swaps with, which should stay readable through it
+    /// (owner, device 2026-09-25). Opacity is the one public
+    /// strength the material takes; `.clear` is already its
+    /// lightest style.
+    static let dropZoneGlassOpacity: CGFloat = 0.6
+
+    private func show(
+        _ marker: Marker,
+        at frame: CGRect,
+        style: DragVisual,
+        radius: CGFloat,
+        beneath window: CGWindowID?
+    ) {
         place(
             marker.panel,
             at: adjustedFrame(frame, style: style),
-            below: glass ? window : nil
+            below: window
         )
-        apply(style, radius: cornerRadius, glass: glass, to: marker)
+        apply(style, radius: radius, glass: window != nil, to: marker)
     }
 
     private func adjustedFrame(
@@ -112,14 +137,20 @@ public final class DragOverlay {
             ),
             display: true
         )
-        let level: NSWindow.Level = window == nil ? .floating : .normal
-        guard !panel.isVisible || panel.level != level else { return }
-        panel.level = level
         if let window {
+            // Every show, not only on a change: a window raised
+            // mid-drag would otherwise bury the marker, which the
+            // floating level could never be (the sticky mark's
+            // re-order is the same shape).
+            panel.level = .normal
             panel.order(.below, relativeTo: Int(window))
-        } else {
-            panel.orderFrontRegardless()
+            return
         }
+        guard !panel.isVisible || panel.level != .floating else {
+            return
+        }
+        panel.level = .floating
+        panel.orderFrontRegardless()
     }
 
     private func apply(
@@ -149,7 +180,7 @@ public final class DragOverlay {
                 below: plate,
                 frame: container.bounds,
                 cornerRadius: radius,
-                hex: style.fill ? style.fillColor : Self.clearFill,
+                hex: style.fill ? style.fillColor : "",
                 edge: .top
             )
             return
@@ -161,9 +192,6 @@ public final class DragOverlay {
             ? color(style.fillColor).cgColor
             : NSColor.clear.cgColor
     }
-
-    /// A Fill `GlassTint` reads as no colour: clear glass.
-    private static let clearFill = "#00000000"
 
     /// The marker's glass, hosted once; nil below macOS 26.
     private func glassView(for marker: Marker) -> NSView? {

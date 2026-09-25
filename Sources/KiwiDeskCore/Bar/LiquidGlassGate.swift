@@ -53,7 +53,8 @@ enum LiquidGlassGate {
 
     /// A surface's stored glass leaf as drawn — the drag markers'
     /// and the sticky mark's (#1620/#1621): off while transparency
-    /// is reduced, their flat look being today's, fills and all.
+    /// is reduced, their flat look keeping its stored fill, never
+    /// made opaque (design-decisions ▸ Reduce transparency).
     static func rendered(glass stored: Bool) -> Bool {
         stored && drawsGlass
     }

@@ -9380,12 +9380,15 @@ pushpin family is off-limits — `SpaceAssignmentChip` uses
 **On Liquid Glass the mark's disc goes** (#1621). It existed
 because `.hudWindow` carries no colour; tinted glass carries the
 colour itself, through `GlassTint.apply`, fading downward. The
-glyph then takes `.labelColor` under the light or dark variant
-`GlassTint` pins from that colour (#1308), never
-`contrastingGlyph` of the hex: the glass shows the colour at a
-capped alpha over whatever lies behind it, so a black/white pick
-made from the hex judges a colour that is never on screen. With
-the finish off, or Reduce transparency on, the disc returns.
+glyph then takes `.labelColor` — under the dark variant
+`GlassTint` pins from a dark colour (#1308), under the app's
+appearance otherwise — never `contrastingGlyph` of the hex: the
+glass shows the colour at a capped alpha over whatever lies
+behind it, so a black/white pick made from the hex judges a
+colour that is never on screen. The two surfaces still read as
+one mark through the one `sticky.color`: a disc on the Space Bar
+badge, the glass's tint on the mark. With the finish off, or
+Reduce transparency on, the disc returns.
 :::
 
 **Overrides are visible-but-inherited, never hidden.** A
@@ -10662,8 +10665,8 @@ reaches by exactly that — and the style is one Settings row
 beside the font size. Every per-bar and per-layout setter of a
 shared colour retires the same way, each naming its
 `kiwishelf.set_*` replacement. Liquid Glass is one leaf for both bars,
-so the one switch writes two leaves — the shelf's and the
-panel's — and no per-layout glass can disagree with it.
+so the one switch writes the shelf's leaf beside each other glass
+surface's, and no per-layout glass can disagree with it.
 
 *No Gap indicator.* Gap marked the active item by leaving the
 plate out around it. On one plate that hole reads as the seam
@@ -11239,32 +11242,9 @@ draws it.** (#1307, 2026-09-07; #1517.) Three surfaces — the two
 bars and the ⌃⌥K shortcuts panel (#1295) — under two
 independent per-bar settings and a constant is the shape one row
 on Colours & Animations replaces: it writes every glass leaf —
-the shelf's, which both bars read, and the panel's — stored side
-by side in the profile.
-:::
-
-:::unreleased
-**The drag visuals and the sticky mark join that switch as leaves
-of their own, filled from its reading on upgrade.** (#1620,
-#1621.) Each takes its own colour through `GlassTint.apply`,
-fading DOWNWARD, since neither sits on a screen edge the way the
-shelf does (#1622). A file written before them carries neither
-leaf, and absent they decode on — beside a shelf and panel the
-user may have set off, so the one row would open reading
-"differ" on a plain upgrade. The step therefore fills both from
-the switch's own reading over the leaves the file does carry,
-off where those disagree, as the panel's leaf was filled from the
-bars' (#1369).
-
-**Glass drag markers sit directly beneath the window being
-dragged, at its level; flat ones float above everything.** At the
-floating level the glass would blur the window in hand whenever
-it crossed its home slot or hovered the target, which is exactly
-when the drop zone shows. Beneath it, both markers still sit
-above every other window, and the home slot is empty for the
-drag. The flat markers keep the level they shipped with. The
-drag preview in Settings stays flat until a tinted preview glass
-is ruled (#1645).
+the shelf's, which both bars read, the panel's, and (below) the
+drag visuals' and the sticky mark's — stored side by side in the
+profile.
 :::
 
 **Profile-scoped, and the alternative was not merely riskier but
@@ -11289,8 +11269,8 @@ bound to another profile and the panel's material follows it.
 :::unreleased
 **The switch means ALL of them, and its `?` carries what a
 boolean cannot.** Owner ruling: `off` is a true statement
-whenever they are not all on, and a flip writes both leaves
-either way. That leaves one-of-two indistinguishable from none,
+whenever they are not all on, and a flip writes every leaf
+either way. That leaves some-on indistinguishable from none,
 so a divergence sentence appears in the help while they disagree —
 reachable only from hand-written Lua or an imported profile, never
 from the row. Both the switch's value and that sentence read the
@@ -11335,14 +11315,49 @@ drawing leaves a flip that changes nothing on screen with no
 in-app word why.
 
 :::unreleased
-**The panel's key did not merge with the bars'**: two leaves,
-one row, through `SettingKey.masterWrites`. The bars share one
-leaf because a field both bars read is the shelf's (▸ one shelf,
-above), which leaves no per-layout glass for the switch to
-explain; the panel is a different surface with its own
+**The drag visuals and the sticky mark keep their flat look under
+it, not made opaque** (#1620, #1621). A marker exists to be seen
+through: an opaque drop zone would hide the window a drop swaps
+with, and an opaque ghost the slot the displaced window moves
+into. So under the setting each draws exactly what it draws with
+the finish off — the markers their border over the stored fill,
+the mark its `.hudWindow` badge with its disc.
+:::
+
+:::unreleased
+**The panel's key did not merge with the bars'**: separate
+leaves, one row, through `SettingKey.masterWrites`. The bars
+share one leaf because a field both bars read is the shelf's
+(▸ one shelf, above), which leaves no per-layout glass for the
+switch to explain; the panel is a different surface with its own
 `set_shortcut_panel_liquid_glass`, so the row ADDS Lua reach
 rather than capping it. `icon_source` and `dim_factor` left the
 per-layout chain the same way, both bars reading them alike.
+:::
+
+:::unreleased
+**The drag visuals and the sticky mark join that switch as leaves
+of their own, filled from its reading on upgrade.** (#1620,
+#1621.) Each takes its own colour through `GlassTint.apply`,
+fading DOWNWARD, since neither sits on a screen edge the way the
+shelf does (#1622). A file written before them carries neither
+leaf, and absent they decode on — beside a shelf and panel the
+user may have set off, so the one row would open reading off
+with its `?` saying the surfaces differ, on a plain upgrade. The
+step therefore fills both from the switch's own reading over the
+leaves the file does carry, off where those disagree, as the
+panel's leaf was filled from the bars' (#1369).
+
+**Glass drag markers sit directly beneath the window being
+dragged, at its level; flat ones keep the floating level.** At
+the floating level the glass would blur the window in hand
+whenever it crossed its home slot or hovered the target, which
+is exactly when the drop zone shows. Beneath it, both markers
+still sit above the windows below it, and the home slot is empty
+for the drag. The drag preview in Settings stays flat: this tree's glass is
+untinted by ruling (#1295), and untinted glass would show a
+marker no drag draws, so a tinted preview waits on its own
+ruling (#1645).
 :::
 
 **Liquid Glass is an orthogonal finish toggle, not a third

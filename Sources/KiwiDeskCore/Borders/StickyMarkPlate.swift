@@ -23,7 +23,7 @@ final class StickyMarkPlate: NSView {
     static let collapsedRadius: CGFloat = size / 4
     static let expandedRadius: CGFloat = size / 2
 
-    /// Today's backing; hidden while the mark is glass.
+    /// The `.hudWindow` backing; hidden while the mark is glass.
     let hud = NSVisualEffectView()
     /// The glyphs, hosted by the plate or by the glass (#1621).
     let content = NSView()

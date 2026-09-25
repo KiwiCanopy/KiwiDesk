@@ -465,15 +465,15 @@ overrides](lua-reference.md#per-layout-app-bar-overrides)).
 :::unreleased
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
-(**Colours & Animations**). The bars are tinted by KiwiShelf's
-Fill, the drag visuals and the sticky mark by their own colors;
-on macOS before 26 each draws its flat look instead.
+(**Colours & Animations**); on macOS before 26 each draws its
+flat look instead.
 :::
 
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
-the Boxed or Plain shape draws instead, with its Fill fully
-opaque, and the switch stays as you set it.
+each surface draws its look without glass — the bars their Boxed
+or Plain shape with the Fill fully opaque — and the switch stays
+as you set it.
 
 ### Space Bar
 

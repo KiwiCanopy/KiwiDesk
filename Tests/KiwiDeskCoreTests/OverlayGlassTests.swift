@@ -27,23 +27,42 @@ struct OverlayGlassTests {
 
     private static let slot = CGRect(x: 200, y: 200, width: 300, height: 200)
 
+    /// A real window to stand in for the one being dragged: glass
+    /// markers exist only beneath one.
+    private static func draggedWindow() -> NSWindow {
+        let window = NSWindow(
+            contentRect: slot,
+            styleMask: [.borderless],
+            backing: .buffered,
+            defer: false
+        )
+        window.isReleasedWhenClosed = false
+        window.orderFrontRegardless()
+        return window
+    }
+
     @Test("Both drag markers are glass tinted by their fill, fading down")
     func markersAreTintedGlass() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let overlay = DragOverlay()
-        defer { overlay.hideAll() }
+        let dragged = Self.draggedWindow()
+        defer {
+            overlay.hideAll()
+            dragged.orderOut(nil)
+        }
+        let id = CGWindowID(dragged.windowNumber)
         let style = DragVisual.ghostDefault
         overlay.showGhost(
             at: Self.slot,
             style: style,
             cornerRadius: 8,
-            glass: true
+            glassBeneath: id
         )
         overlay.showDropZone(
             at: Self.slot,
             style: DragVisual.dropZoneDefault,
             cornerRadius: 8,
-            glass: true
+            glassBeneath: id
         )
         for marker in [overlay.ghost, overlay.dropZone] {
             let marker = try #require(marker)
@@ -53,9 +72,8 @@ struct OverlayGlassTests {
             #expect(marker.tint.gradient?.startPoint == Self.top)
             // The border stays on the container, above the glass.
             let layer = try #require(marker.panel.contentView?.layer)
-            #expect(
-                layer.borderWidth == (style.border ? style.borderWidth : 0)
-            )
+            let width = style.border ? style.borderWidth : 0
+            #expect(layer.borderWidth == width)
             #expect(layer.backgroundColor?.alpha == 0)
         }
     }
@@ -64,20 +82,24 @@ struct OverlayGlassTests {
     func finishOffIsFlat() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let overlay = DragOverlay()
-        defer { overlay.hideAll() }
+        let dragged = Self.draggedWindow()
+        defer {
+            overlay.hideAll()
+            dragged.orderOut(nil)
+        }
         var style = DragVisual.ghostDefault
         style.fill = true
         overlay.showGhost(
             at: Self.slot,
             style: style,
             cornerRadius: 8,
-            glass: true
+            glassBeneath: CGWindowID(dragged.windowNumber)
         )
         overlay.showGhost(
             at: Self.slot,
             style: style,
             cornerRadius: 8,
-            glass: false
+            glassBeneath: nil
         )
         let marker = try #require(overlay.ghost)
         #expect(marker.glass?.isHidden == true)
@@ -87,45 +109,64 @@ struct OverlayGlassTests {
         #expect(abs((alpha ?? -1) - fill.alpha) < 0.01)
     }
 
-    /// Under glass both markers sit at the dragged window's level,
-    /// directly beneath it, so their glass never blurs the window
-    /// in hand; flat, they float above everything as before.
-    @Test("Glass markers drop below the dragged window; flat ones float")
+    /// Under glass both markers sit BENEATH the dragged window in
+    /// the actual stacking, so their glass never blurs the window
+    /// in hand — read off the window list, since a level alone is
+    /// satisfied by a marker ordered in front at that level.
+    @Test("Glass markers stack below the dragged window; flat ones float")
     func glassMarkersSitBelowTheDraggedWindow() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let overlay = DragOverlay()
-        defer { overlay.hideAll() }
-        let dragged = NSWindow(
-            contentRect: Self.slot,
-            styleMask: [.borderless],
-            backing: .buffered,
-            defer: false
-        )
-        dragged.orderFrontRegardless()
-        defer { dragged.orderOut(nil) }
+        let dragged = Self.draggedWindow()
+        defer {
+            overlay.hideAll()
+            dragged.orderOut(nil)
+        }
         let id = CGWindowID(dragged.windowNumber)
         overlay.showGhost(
             at: Self.slot,
             style: .ghostDefault,
             cornerRadius: 8,
-            glass: true,
-            below: id
+            glassBeneath: id
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
             cornerRadius: 8,
-            glass: true,
-            below: id
+            glassBeneath: id
         )
-        #expect(overlay.ghost?.panel.level == .normal)
-        #expect(overlay.dropZone?.panel.level == .normal)
+        // Raised again after the markers, as a window raised
+        // mid-drag would be; the next show re-orders beneath it.
+        dragged.orderFrontRegardless()
         overlay.showGhost(
             at: Self.slot,
             style: .ghostDefault,
             cornerRadius: 8,
-            glass: false,
-            below: id
+            glassBeneath: id
+        )
+        overlay.showDropZone(
+            at: Self.slot,
+            style: .dropZoneDefault,
+            cornerRadius: 8,
+            glassBeneath: id
+        )
+        let order = NSWindow.windowNumbers(options: []) ?? []
+        let draggedAt = try #require(
+            order.firstIndex(of: NSNumber(value: dragged.windowNumber))
+        )
+        for marker in [overlay.ghost, overlay.dropZone] {
+            let panel = try #require(marker?.panel)
+            let at = try #require(
+                order.firstIndex(of: NSNumber(value: panel.windowNumber))
+            )
+            #expect(at > draggedAt, "a glass marker is above the window")
+            #expect(panel.level == .normal)
+        }
+        overlay.showGhost(
+            at: Self.slot,
+            style: .ghostDefault,
+            cornerRadius: 8,
+            glassBeneath: nil
         )
         #expect(overlay.ghost?.panel.level == .floating)
     }
@@ -139,7 +180,10 @@ struct OverlayGlassTests {
         let glass = try #require(plate.glass, "no glass hosted")
         #expect(plate.hud.isHidden)
         #expect(!glass.isHidden)
-        #expect(plate.content.superview !== plate, "glyphs not in glass")
+        #expect(
+            plate.content.isDescendant(of: glass),
+            "glyphs not in glass"
+        )
         #expect(plate.roundel.isHidden, "the disc stayed on glass")
         #expect(!plate.tint.isHidden)
         #expect(plate.tint.gradient?.startPoint == Self.top)
@@ -164,8 +208,9 @@ struct OverlayGlassTests {
 
     @Test("Reduce transparency stands the overlays' glass down")
     func gateStandsDown() {
+        let saved = LiquidGlassGate.override
+        defer { LiquidGlassGate.override = saved }
         LiquidGlassGate.override = { true }
-        defer { LiquidGlassGate.override = { false } }
         #expect(!LiquidGlassGate.rendered(glass: true))
         #expect(!LiquidGlassGate.rendered(glass: false))
         LiquidGlassGate.override = { false }

@@ -169,11 +169,32 @@ struct GlassOverlayMigrationTests {
             JSONSerialization.jsonObject(with: out) as? [String: Any]
         )
         let profiles = try #require(root["profiles"] as? [[String: Any]])
-        let read = profiles.map { profile in
-            ((profile["settings"] as? [String: Any])?["drag"]
-                as? [String: Any])?["liquid_glass"] as? Bool
+        for group in Self.groups {
+            let read = profiles.map { profile in
+                ((profile["settings"] as? [String: Any])?[group]
+                    as? [String: Any])?["liquid_glass"] as? Bool
+            }
+            #expect(read == [true, false], "\(group)")
         }
-        #expect(read == [true, false])
+    }
+
+    /// The whole chain from before KiwiShelf (#1517): this step
+    /// reads the shelf's leaf, so it must run AFTER the step that
+    /// creates it — run earlier, it would read the missing shelf
+    /// as on and turn both new leaves on beside bars the user had
+    /// off.
+    @Test("a pre-shelf profile's off switch reaches the new leaves")
+    func runsAfterTheShelfMove() throws {
+        let data = Data(
+            """
+            {"format":7,"monitor_sets":[],"name":"Old",\
+            "settings":{"app_bar":{"liquid_glass":false},\
+            "space_bar":{"liquid_glass":false},\
+            "shortcut_panel":{"liquid_glass":false}}}
+            """.utf8
+        )
+        let out = try #require(ConfigMigration.migrated(data))
+        #expect(try Self.leaves(out) == [false, false])
     }
 
     /// Not idempotent by construction — a leaf a user set is a
@@ -190,5 +211,57 @@ struct GlassOverlayMigrationTests {
         root["format"] = ConfigMigration.overlayGlassProfileFormat
         let data = try JSONSerialization.data(withJSONObject: root)
         #expect(ConfigMigration.migratingAbsentOverlayGlass(data) == nil)
+    }
+
+    /// A source leaf the file never wrote reads as its default,
+    /// on: a hand-written profile carrying only the shelf's `false`
+    /// disagrees with a panel that is on by default.
+    @Test("an absent source leaf reads as on")
+    func absentSourceReadsOn() throws {
+        var settings = try Self.settings(shelf: false, panel: true)
+        settings["shortcut_panel"] = nil
+        let out = try #require(
+            ConfigMigration.migrated(Self.profile(settings))
+        )
+        #expect(try Self.leaves(out) == [false, false])
+        settings = try Self.settings(shelf: true, panel: true)
+        settings["shortcut_panel"] = nil
+        let on = try #require(
+            ConfigMigration.migrated(Self.profile(settings))
+        )
+        #expect(try Self.leaves(on) == [true, true])
+    }
+
+    /// Through `migrated`, not the step: a bundle reaches the step
+    /// only if its format was bumped, which nothing else pins.
+    @Test("a bundle below the floor is migrated end to end")
+    func bundleRunsTheStep() throws {
+        let bundle = try JSONSerialization.data(
+            withJSONObject: [
+                "format": ConfigMigration.overlayGlassBundleFormat - 1,
+                "writtenBy": "KiwiDesk",
+                "profiles": [
+                    [
+                        "name": "Off",
+                        "settings": try Self.settings(
+                            shelf: false,
+                            panel: false
+                        ),
+                    ]
+                ],
+            ] as [String: Any]
+        )
+        let out = try #require(ConfigMigration.migrated(bundle))
+        let root = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        let profile = try #require(
+            (root["profiles"] as? [[String: Any]])?.first
+        )
+        let settings = try #require(profile["settings"] as? [String: Any])
+        for group in Self.groups {
+            let leaf = (settings[group] as? [String: Any])?["liquid_glass"]
+            #expect(leaf as? Bool == false, "\(group)")
+        }
     }
 }

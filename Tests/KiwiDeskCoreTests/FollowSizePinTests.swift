@@ -65,7 +65,8 @@ struct FollowSizePinTests {
                     y: 0,
                     width: 400,
                     height: 300
-                )
+                ),
+                glass: false
             )
         ])
         manager.isAnimating = { _ in true }

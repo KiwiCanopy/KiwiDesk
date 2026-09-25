@@ -14,7 +14,8 @@ struct StickyMarkManagerTests {
     private func spec(_ id: UInt32) -> StickyMarkManager.Spec {
         StickyMarkManager.Spec(
             window: WindowID(id),
-            frame: CGRect(x: 0, y: 0, width: 400, height: 300)
+            frame: CGRect(x: 0, y: 0, width: 400, height: 300),
+            glass: false
         )
     }
 

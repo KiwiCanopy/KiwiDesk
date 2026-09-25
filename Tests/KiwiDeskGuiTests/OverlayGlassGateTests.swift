@@ -65,4 +65,39 @@ struct OverlayGlassGateTests {
             )
         }
     }
+
+    /// Every Core file that mints glass, and the suite that gates
+    /// its render — the one copy. Derived from `GlassPlate.make(`
+    /// callers, so a new glass host reds until it names its gate.
+    private static let minters: [String: String] = [
+        "AppBarOverlay+BoxGlass.swift":
+            "ReduceTransparencySeamTests (GlassHosting.resolve)",
+        "SpaceBarOverlay+BoxGlass.swift":
+            "ReduceTransparencySeamTests (GlassHosting.resolve)",
+        "ShelfOverlay.swift": "ShelfPlateGlassGateTests",
+        "DragOverlay.swift": "OverlayGlassGateTests",
+        "StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
+    ]
+
+    @Test("every glass host in Core names the gate that covers it")
+    func everyGlassHostIsGated() throws {
+        var found: Set<String> = []
+        for file in try SourceScan.swiftSources(under: Self.core) {
+            let text = Array(try SourceScan.strippedSource(at: file))
+            guard
+                !SourceScan.callSites(in: text, for: "GlassPlate.make")
+                    .isEmpty
+            else { continue }
+            found.insert(file.lastPathComponent)
+        }
+        #expect(found.count >= 3, "the scan found \(found)")
+        #expect(
+            found == Set(Self.minters.keys),
+            """
+            glass hosts and their gates disagree — a new host owes \
+            a gate read where it renders and an entry here: \
+            \(found.symmetricDifference(Self.minters.keys))
+            """
+        )
+    }
 }
