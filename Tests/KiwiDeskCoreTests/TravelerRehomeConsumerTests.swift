@@ -113,9 +113,9 @@ struct TravelerRehomeConsumerTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.spaceBarStyle.enabled = true
-        f.core.tiler.settings.spaceBarStyle.edge = .top
-        f.core.tiler.settings.spaceBarStyle.thickness = 40
-        f.core.updateSpaceBar()
+        f.core.tiler.settings.kiwishelf.edge = .top
+        f.core.tiler.settings.kiwishelf.thickness = 40
+        f.core.updateBars()
         let strip = try #require(
             f.core.spaceBars.shownStrips.first?.1,
             "no bar painted — the clause would pass vacuously"
@@ -147,10 +147,10 @@ struct TravelerRehomeConsumerTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.spaceBarStyle.enabled = true
-        f.core.tiler.settings.spaceBarStyle.edge = .top
-        f.core.tiler.settings.spaceBarStyle.thickness = 40
+        f.core.tiler.settings.kiwishelf.edge = .top
+        f.core.tiler.settings.kiwishelf.thickness = 40
         f.core.tiler.settings.floatScaleOnDisplayChange = false
-        f.core.updateSpaceBar()
+        f.core.updateBars()
         _ = try #require(f.core.spaceBars.shownStrips.first?.1)
         let region = try #require(f.core.floatBounds(on: SpaceID("2")))
         let tall = CGRect(

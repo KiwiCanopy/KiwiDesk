@@ -21,6 +21,9 @@ extension KiwiCore {
         // failing command returns before that retile and would
         // otherwise leave it raised for the next dispatch.
         commandSizing = .mayInstantSize
+        if let retired = APIReference.retirement(of: command) {
+            return .fail(retired)
+        }
         let response: CommandResponse
         if command.hasPrefix("animations.") {
             response = animationsCommand(command, args)
@@ -40,6 +43,8 @@ extension KiwiCore {
             response = barCommand(command, args)
         } else if command.hasPrefix("space_bar.") {
             response = spaceBarCommand(command, args)
+        } else if command.hasPrefix("kiwishelf.") {
+            response = kiwishelfCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)
         } else if command.hasPrefix("border.") {

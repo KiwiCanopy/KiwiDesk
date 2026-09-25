@@ -18,7 +18,6 @@ struct BarPlateTests {
                 strip: strip,
                 runStart: 120,
                 runTotal: 100,
-                inset: 0,
                 gap: 6,
                 horizontal: true,
                 fit: .full
@@ -33,7 +32,6 @@ struct BarPlateTests {
                 strip: strip,
                 runStart: 120,
                 runTotal: 100,
-                inset: 0,
                 gap: 6,
                 horizontal: true,
                 fit: .hug
@@ -48,7 +46,6 @@ struct BarPlateTests {
                 strip: strip,
                 runStart: 2,
                 runTotal: 396,
-                inset: 0,
                 gap: 6,
                 horizontal: true,
                 fit: .hug
@@ -58,13 +55,13 @@ struct BarPlateTests {
 
     @Test("Hug falls back to full while scrolling or empty")
     func hugFallsBack() {
-        // Overflowing (arrow inset reserved): nothing to hug.
+        // Overflowing: the run passes both ends, so the plate
+        // clamps to the whole strip.
         #expect(
             BarPlate.frame(
                 strip: strip,
-                runStart: 0,
+                runStart: -200,
                 runTotal: 900,
-                inset: 30,
                 gap: 6,
                 horizontal: true,
                 fit: .hug
@@ -77,7 +74,6 @@ struct BarPlateTests {
                 strip: strip,
                 runStart: 200,
                 runTotal: 0,
-                inset: 0,
                 gap: 6,
                 horizontal: true,
                 fit: .hug
@@ -93,7 +89,6 @@ struct BarPlateTests {
                 strip: vertical,
                 runStart: 50,
                 runTotal: 80,
-                inset: 0,
                 gap: 4,
                 horizontal: false,
                 fit: .hug

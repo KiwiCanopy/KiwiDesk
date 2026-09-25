@@ -39,21 +39,18 @@ enum HomeCardContent {
                 inner
             )
         case .bars:
-            let appBarEdge = edgeName(
-                settings.appBarStyle.edge
-            )
+            let edge = edgeName(settings.kiwishelf.edge)
             if settings.spaceBarStyle.enabled {
                 return L(
-                    "home.card.bars.subtitle",
-                    "Space Bar %1$@ · App Bar %2$@",
-                    edgeName(settings.spaceBarStyle.edge),
-                    appBarEdge
+                    "home.card.bars.shelf_subtitle",
+                    "KiwiShelf · %1$@",
+                    edge
                 )
             }
             return L(
-                "home.card.bars.subtitle_space_off",
-                "Space Bar off · App Bar %1$@",
-                appBarEdge
+                "home.card.bars.shelf_subtitle_space_off",
+                "KiwiShelf · %1$@ · Space Bar off",
+                edge
             )
         case .colors:
             if settings.animations.anyEnabled {

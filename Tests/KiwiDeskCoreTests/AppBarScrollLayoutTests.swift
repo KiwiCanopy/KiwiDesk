@@ -12,7 +12,7 @@ struct AppBarScrollLayoutTests {
     func autoWidthMeasures() {
         let short = [item("Hi")]
         let long = [item("A Much Longer Window Title")]
-        let style = AppBarStyle()
+        let style = AppBarLook()
         let shortW = AppBarOverlay.autoSlotWidth(
             items: short,
             style: style,

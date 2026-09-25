@@ -64,36 +64,47 @@ extension PaletteSceneThumbnail {
     // MARK: - The two bars
 
     private var spaceBarStrip: some View {
-        barPlate(fill: color("space_bar.fill_color")) {
-            item(color("space_bar.item_color"))
+        // Both strips draw the shelf's one set (#1517); an idle
+        // Space identifier is its item colour at the idle alpha.
+        barPlate(fill: color("kiwishelf.fill_color")) {
+            item(idleInk)
             item(
-                color("space_bar.active_item_color"),
-                highlight: color("space_bar.highlight_color")
+                color("kiwishelf.active_item_color"),
+                highlight: color("kiwishelf.highlight_color")
             )
             .overlay(alignment: .topTrailing) {
                 badge(
-                    color("space_bar.group_badge_color"),
-                    ink: color("space_bar.group_badge_text_color")
+                    color("kiwishelf.group_badge_color"),
+                    ink: color("kiwishelf.group_badge_text_color")
                 )
             }
             item(color("space_bar.focused_item_color"))
         }
     }
 
+    /// The idle Space ink, from the one home the live bar reads
+    /// (`KiwiShelf.idleItemColor`).
+    private var idleInk: Color {
+        var shelf = KiwiShelf()
+        shelf.itemColor =
+            palette.colors["kiwishelf.item_color"] ?? shelf.itemColor
+        return Color(kiwiHex: shelf.idleItemColor)
+    }
+
     private var appBarStrip: some View {
-        barPlate(fill: color("app_bar.fill_color")) {
-            item(color("app_bar.item_color"))
+        barPlate(fill: color("kiwishelf.fill_color")) {
+            item(color("kiwishelf.item_color"))
             item(
-                color("app_bar.active_item_color"),
-                highlight: color("app_bar.highlight_color")
+                color("kiwishelf.active_item_color"),
+                highlight: color("kiwishelf.highlight_color")
             )
             .overlay(alignment: .topTrailing) {
                 badge(
-                    color("app_bar.group_badge_color"),
-                    ink: color("app_bar.group_badge_text_color")
+                    color("kiwishelf.group_badge_color"),
+                    ink: color("kiwishelf.group_badge_text_color")
                 )
             }
-            item(color("app_bar.item_color").opacity(0.55))
+            item(color("kiwishelf.item_color").opacity(0.55))
         }
     }
 

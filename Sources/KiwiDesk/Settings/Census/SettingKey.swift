@@ -9,6 +9,7 @@ enum SettingKey: Hashable, CaseIterable {
     case colours(ColoursKey)
     case gaps(GapsKey)
     case general(GeneralKey)
+    case kiwishelf(KiwiShelfKey)
     case layout(LayoutKey)
     case layoutAppBar(LayoutAppBarKey)
     case macChecklist(MacChecklistKey)
@@ -26,6 +27,7 @@ enum SettingKey: Hashable, CaseIterable {
             + ColoursKey.allCases.map(Self.colours)
             + GapsKey.allCases.map(Self.gaps)
             + GeneralKey.allCases.map(Self.general)
+            + KiwiShelfKey.allCases.map(Self.kiwishelf)
             + LayoutKey.allCases.map(Self.layout)
             + LayoutAppBarKey.allCases.map(Self.layoutAppBar)
             + MacChecklistKey.allCases.map(Self.macChecklist)
@@ -46,6 +48,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .colours(let k): return k.rawValue
         case .gaps(let k): return k.rawValue
         case .general(let k): return k.rawValue
+        case .kiwishelf(let k): return k.rawValue
         case .layout(let k): return k.rawValue
         case .layoutAppBar(let k): return k.rawValue
         case .macChecklist(let k): return k.rawValue
@@ -66,6 +69,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .colours(let k): return k.placement
         case .gaps(let k): return k.placement
         case .general(let k): return k.placement
+        case .kiwishelf(let k): return k.placement
         case .layout(let k): return k.placement
         case .layoutAppBar(let k): return k.placement
         case .macChecklist(let k): return k.placement
@@ -86,6 +90,7 @@ enum SettingKey: Hashable, CaseIterable {
         case .colours(let k): return k.text
         case .gaps(let k): return k.text
         case .general(let k): return k.text
+        case .kiwishelf(let k): return k.text
         case .layout(let k): return k.text
         case .layoutAppBar(let k): return k.text
         case .macChecklist(let k): return k.text

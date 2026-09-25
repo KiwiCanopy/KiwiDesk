@@ -1,64 +1,55 @@
 /// Display order for the Bars settings area (#678, `BarsCensusRenderTests`).
 enum BarsRowOrder {
-    /// Space Bar card, at rest.
-    static let spaceBarAtRest: [SettingKey] = [
+    /// KiwiShelf card, Show group: which bars the shelf carries.
+    static let kiwishelfShow: [SettingKey] = [
         .spaceBar(.spaceBarEnabled),
-        .spaceBar(.spaceBarEdge),
-        .spaceBar(.spaceBarThickness),
-        .spaceBar(.spaceBarShowFrontApp),
-        .spaceBar(.spaceBarHideEmpty),
+        .layoutAppBar(.monocleAppBarEnabled),
+        .layoutAppBar(.scrollingAppBarEnabled),
     ]
 
-    /// Space Bar card, behind the Style disclosure.
-    static let spaceBarStyle: [SettingKey] = [
-        .spaceBar(.spaceBarBackground),
-        .spaceBar(.spaceBarBackgroundFit),
-        .spaceBar(.spaceBarAlignment),
-        .spaceBar(.spaceBarActiveIndicator),
-        .spaceBar(.spaceBarIconSource),
-        .spaceBar(.spaceBarCornerRoundness),
-        .spaceBar(.spaceBarOuterMargin),
-        .spaceBar(.spaceBarInnerMargin),
-        .spaceBar(.spaceBarItemSizeAuto),
-        .spaceBar(.spaceBarItemSize),
-        .spaceBar(.spaceBarItemGap),
-        .spaceBar(.spaceBarFontSizeAuto),
-        .spaceBar(.spaceBarFontSize),
+    /// KiwiShelf card, at rest below the Show group.
+    static let kiwishelfAtRest: [SettingKey] = [
+        .kiwishelf(.edge),
+        .kiwishelf(.thickness),
+        .kiwishelf(.alignment),
+        .kiwishelf(.order),
+        .kiwishelf(.minimum),
+    ]
+
+    /// KiwiShelf card, behind the Style disclosure.
+    static let kiwishelfStyle: [SettingKey] = [
+        .kiwishelf(.background),
+        .kiwishelf(.backgroundFit),
+        .kiwishelf(.cornerRoundness),
+        .kiwishelf(.itemGap),
+        .kiwishelf(.fontSizeAuto),
+        .kiwishelf(.fontSize),
+        .kiwishelf(.iconSource),
+    ]
+
+    /// KiwiShelf card, behind the Margins disclosure.
+    static let kiwishelfMargins: [SettingKey] = [
+        .kiwishelf(.outerMargin),
+        .kiwishelf(.innerMargin),
+    ]
+
+    /// Space Bar card — every row shown, each gate directly
+    /// above what it gates (#1517).
+    static let spaceBar: [SettingKey] = [
+        .spaceBar(.spaceBarHideEmpty),
         .spaceBar(.spaceBarGlyphCap),
-        .spaceBar(.spaceBarTitleCap),
+        .spaceBar(.spaceBarShowFrontApp),
+        .spaceBar(.spaceBarFrontAppTitleCap),
+        .spaceBar(.spaceBarActiveIndicator),
         .spaceBar(.spaceBarSpringDelay),
     ]
 
-    /// App Bar card, at rest.
-    static let appBarAtRest: [SettingKey] = [
-        .appBar(.appBarEdge),
-        .appBar(.appBarThickness),
-        .appBar(.appBarGroupAdjacentWindows),
-        .spaceBar(.copyAppearance),
-    ]
-
-    /// App Bar card, behind the Style disclosure.
-    static let appBarStyle: [SettingKey] = [
-        .appBar(.appBarBackground),
-        .appBar(.appBarBackgroundFit),
-        .appBar(.appBarAlignment),
-        .appBar(.appBarActiveIndicator),
+    /// App Bar card — every row shown, each gate directly above
+    /// what it gates (#1517).
+    static let appBar: [SettingKey] = [
         .appBar(.appBarContent),
         .appBar(.appBarTitleCap),
-        .appBar(.appBarIconSource),
-        .appBar(.appBarCornerRoundness),
-        .appBar(.appBarOuterMargin),
-        .appBar(.appBarInnerMargin),
-        .appBar(.appBarItemSizeAuto),
-        .appBar(.appBarItemSize),
-        .appBar(.appBarItemGap),
-        .appBar(.appBarFontSizeAuto),
-        .appBar(.appBarFontSize),
-    ]
-
-    /// App Bar layout toggles ("Show it in").
-    static let appBarShowIn: [SettingKey] = [
-        .layoutAppBar(.monocleAppBarEnabled),
-        .layoutAppBar(.scrollingAppBarEnabled),
+        .appBar(.appBarGroupAdjacentWindows),
+        .appBar(.appBarActiveIndicator),
     ]
 }

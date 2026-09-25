@@ -16,11 +16,7 @@ extension ScrollingLayout {
         guard !fillsAlone(windows, context: context) else {
             return context.scrollRest ?? ScrollRest(offset: 0)
         }
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let area = context.usable
         let horizontal = context.scrolling.axisIsHorizontal
         let metrics = metrics(
             for: windows,
@@ -87,11 +83,7 @@ extension ScrollingLayout {
         in context: LayoutContext
     ) -> Bool {
         guard windows.count > 1 else { return false }
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let area = context.usable
         let horizontal = context.scrolling.axisIsHorizontal
         let m = metrics(
             for: windows,

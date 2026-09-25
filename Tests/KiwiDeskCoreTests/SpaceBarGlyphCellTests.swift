@@ -23,19 +23,19 @@ import Testing
 /// pixel by pixel, and for one real `SpaceBarManager.sync`. The
 /// display is the fixture's: every geometry here is the strip
 /// handed to `sync` (#531), the thickness is the slider's floor
-/// read from `AppBarStyle.minThickness` (#1359), and the font is
+/// read from `KiwiShelf.minThickness` (#1359), and the font is
 /// the bundled App Font, required per test rather than assumed.
 @Suite("Space Bar glyph cell at the thickness floor (#1529)")
 @MainActor
 struct SpaceBarGlyphCellTests {
-    static let depth = AppBarStyle.minThickness
+    static let depth = KiwiShelf.minThickness
     static let cell = max(depth - SpaceBarItemView.pad * 2, 8)
     static let glyph = ":safari:"
 
     /// Explicit, above the cell: `identifierFontSize` clamps it
     /// to the cell and the glyph ladder takes 0.9 of that.
-    static var style: SpaceBarStyle {
-        var style = SpaceBarStyle()
+    static var style: SpaceBarLook {
+        var style = SpaceBarLook()
         style.fontSize = 14
         return style
     }

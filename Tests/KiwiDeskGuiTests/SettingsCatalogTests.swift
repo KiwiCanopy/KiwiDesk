@@ -98,7 +98,14 @@ struct SettingsCatalogTests {
         // Style drawer.
         // 132 since #1608: App Rules is two cards, one per store.
         // 131 since #1393: the Profile shortcuts banner left.
-        #expect(allEntries.count == 131)
+        // 120 since #1517: the bars' Style drawers keep only
+        // their own 9 rows; the KiwiShelf card, its two drawers
+        // and its 8 drawer rows join.
+        // 108 since the #1517 redesign: the bar cards' two
+        // Style drawers and nine children left, the two colour
+        // groups and drawers became the shelf's one of each, and
+        // the shelf's Style drawer gained the symbol style.
+        #expect(allEntries.count == 108)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
@@ -250,7 +257,7 @@ struct SettingsCatalogTests {
         #expect(!perEdge.shouldExpand(revealing: nil))
         // A leaf drawer never expands for anything.
         #expect(
-            !SettingsCatalog.advancedColors.spaceBarMore
+            !SettingsCatalog.advancedColors.kiwishelfMore
                 .shouldExpand(revealing: "gaps.top")
         )
     }
@@ -275,33 +282,16 @@ struct SettingsCatalogTests {
         #expect(gapsCard?.parent == nil)
     }
 
-    /// The co-mounted drawer declarations must stay distinct —
-    /// both Style drawers render on the one Bars page and both
-    /// "More colors" drawers on the one Advanced Colours page, so
-    /// collapsing either pair back to one shared id is exactly
-    /// the `scrollTo`-undefined shape the instance tag exists to
-    /// prevent.
-    @Test("co-mounted drawer instances have distinct ids")
+    /// Drawers sharing a label key stay distinct by instance —
+    /// the shelf's Style drawer against a future bar drawer, its
+    /// "More colors" against another card's — so no two resolve
+    /// to one `scrollTo` id (#1517 left one of each).
+    @Test("shared-label drawers carry an instance id")
     func instanceIdsAreDistinct() {
-        let spaceStyle = SettingsCatalog.bars.spaceBarStyle
-        let appStyle = SettingsCatalog.bars.appBarStyle
-        #expect(spaceStyle.control.id == "space_bar/bars.style")
-        #expect(appStyle.control.id == "app_bar/bars.style")
-        #expect(spaceStyle.control.key == appStyle.control.key)
-
-        let spaceColors =
-            SettingsCatalog.advancedColors.spaceBarMore
-        let appColors =
-            SettingsCatalog.advancedColors.appBarMore
-        #expect(
-            spaceColors.control.id
-                == "space_bar/colors.more"
-        )
-        #expect(
-            appColors.control.id == "app_bar/colors.more"
-        )
-        #expect(
-            spaceColors.control.key == appColors.control.key
-        )
+        let style = SettingsCatalog.bars.kiwishelfStyle
+        #expect(style.control.id == "kiwishelf/bars.style")
+        let colors = SettingsCatalog.advancedColors.kiwishelfMore
+        #expect(colors.control.id == "kiwishelf/colors.more")
+        #expect(colors.control.key == "colors.more")
     }
 }

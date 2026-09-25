@@ -8,11 +8,21 @@ struct BarStripView: View {
     let edge: AppBarEdge
     let vertical: Bool
     let scale: CGFloat
+    /// False where the shelf draws one plate under both bars and
+    /// this strip draws only its run (`ShelfStripPreview`).
+    var drawsPlate = true
     @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         Group {
-            if spec.spans {
+            if !drawsPlate && !spec.boxed {
+                seated {
+                    run.padding(
+                        vertical ? .vertical : .horizontal,
+                        spec.gap
+                    )
+                }
+            } else if spec.spans {
                 plate
                     .overlay(seated { run })
             } else if spec.boxed {
@@ -108,13 +118,7 @@ struct BarStripView: View {
     private func pip(
         _ item: HomeCardBarsTile.BarItem
     ) -> some View {
-        if item.active, spec.indicator == .gap {
-            Color.clear
-                .frame(
-                    width: vertical ? pipCross : item.length,
-                    height: vertical ? item.length : pipCross
-                )
-        } else if spec.boxed {
+        if spec.boxed {
             // Boxed: each item wears its own box in the fill
             // colour — the shared plate the style refuses is
             // paid back per item (owner 2026-08-10).
@@ -220,8 +224,6 @@ struct BarStripView: View {
                         maxHeight: .infinity,
                         alignment: windowFacing
                     )
-            case .gap:
-                EmptyView()
             }
         }
     }

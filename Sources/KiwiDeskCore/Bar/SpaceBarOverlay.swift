@@ -1,6 +1,8 @@
 import AppKit
 
-/// Space Bar overlay panel for one display in AX coordinates (#293, #385).
+/// The Space Bar's section of one display's shelf (#293, #385,
+/// #1517): it draws into `root`, which `ShelfOverlay` places on
+/// the shelf's one panel over the shelf's one plate.
 @MainActor
 public final class SpaceBarOverlay {
     /// One Space's resolved content — or the active shortcut
@@ -50,16 +52,22 @@ public final class SpaceBarOverlay {
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
     public var onSelect: @MainActor (SpaceID) -> Void = { _ in }
 
-    var panel: NSPanel?
+    /// The section's view; the shelf sets its origin, the
+    /// section its size.
+    let root = ShelfSectionRoot()
+    /// The plate this section's run asks for, in `root`'s
+    /// coordinates — the shelf unions it with the other section's.
+    var plateFrame: CGRect = .zero
+    /// Fires after every render, so the shelf re-lays its plate.
+    var onRendered: @MainActor () -> Void = {}
     var itemViews: [SpaceBarItemView] = []
     /// Clipping item viewport (#385).
     let itemContainer = AppBarOverlay.FlippedView()
-    let backArrow = BarArrowView()
-    let forwardArrow = BarArrowView()
+    /// Hidden-entry counts on each fading end (#1517).
+    let backCount = ShelfCountView(side: .before)
+    let forwardCount = ShelfCountView(side: .after)
     /// Host view for front-app segment (#409).
     weak var frontHost: NSView?
-    /// Liquid Glass plate for material background (#390).
-    var glassPlate: NSView?
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
     /// Colored backdrops behind per-box glass (#408).
@@ -68,16 +76,10 @@ public final class SpaceBarOverlay {
     var frontGlass: NSView?
     /// Colored backdrop behind front segment glass (#408).
     var frontTint: NSView?
-    /// Colored backdrop behind single glass plate (#408).
-    var glassTint: NSView?
-    /// Backdrop filler view for glass hosting (#409).
-    let glassBackdropFiller = NSView()
-    /// Flipped run wrapper for plain + glass without overflow.
-    var glassRun: AppBarOverlay.FlippedView?
-    /// Shared fill plate for plain style (`background_fit`, QA 2026-07-19).
-    var plainPlate: NSView?
     /// Whole-bar scroll offset (#385).
     var scrollOffset: CGFloat = 0
+    /// Follows the active Space unless a manual scroll holds.
+    var follow = ShelfFollow<SpaceID>()
     /// Cached scroll geometry for hit-testing and autoscroll (#385).
     var scrollGeom: ScrollGeom?
     /// Running drag-autoscroll task when dwelling on an arrow
@@ -85,7 +87,7 @@ public final class SpaceBarOverlay {
     /// `@Sendable` block cannot weak-capture this non-`Sendable`
     /// `@MainActor` type in a release build.
     var autoScrollTask: Task<Void, Never>?
-    var autoScrollDirection: ScrollArrow?
+    var autoScrollDirection: ScrollDirection?
     /// Last-rendered strip in AX coordinates and the per-item
     /// frames within it (strip-local, top-left), for the #372
     /// drag-drop hit test. Kept in lockstep with what `render()`
@@ -116,20 +118,26 @@ public final class SpaceBarOverlay {
             items: [Item],
             frontApp: SpaceBarItemView.App?,
             strip: CGRect,
-            style: SpaceBarStyle,
+            style: SpaceBarLook,
             stateMarkColors: StateMarkColors
         )?
 
-    public init() {}
+    public init() {
+        configureRoot()
+    }
 
-    public var isVisible: Bool { panel?.isVisible ?? false }
+    public var isVisible: Bool { lastShown != nil && !root.isHidden }
+
+    /// The slot this section last drew into (AX coordinates) — the
+    /// one the shelf places it at.
+    var shownStrip: CGRect? { lastShown?.strip }
 
     /// Renders `items` into `strip` in AX coordinates.
     func show(
         items: [Item],
         frontApp: SpaceBarItemView.App? = nil,
         strip: CGRect,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         stateMarkColors: StateMarkColors
     ) {
         guard !items.isEmpty,
@@ -139,27 +147,27 @@ public final class SpaceBarOverlay {
             return
         }
         lastShown = (items, frontApp, strip, style, stateMarkColors)
-        render(followingActive: true)
+        let active = items.first(where: \.active)?.space
+        render(followingActive: follow.follows(active))
     }
 
     public func hide() {
+        follow.reset()
         lastShown = nil
         hitStrip = .zero
         hitFrames = []
         scrollOffset = 0
         scrollGeom = nil
         cancelDragAutoScroll()
-        panel?.orderOut(nil)
+        root.isHidden = true
+        onRendered()
     }
-
-    /// True if overlay panel is visible on screen.
-    var isPanelVisible: Bool { panel?.isVisible == true }
 
     /// Content run start for given alignment (#293 QA, #385).
     nonisolated static func contentStart(
         total: CGFloat,
         axis: CGFloat,
-        alignment: SpaceBarStyle.Alignment,
+        alignment: KiwiShelf.Alignment,
         pad: CGFloat
     ) -> CGFloat {
         switch alignment {

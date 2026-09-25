@@ -199,11 +199,11 @@ struct UnsolicitedResizeTests {
         let space = try #require(core.state.workspaces.space(of: w))
         core.state.workspaces.setMode(space, .floating)
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.spaceBarStyle.edge = .top
-        core.tiler.settings.spaceBarStyle.thickness = 40
+        core.tiler.settings.kiwishelf.edge = .top
+        core.tiler.settings.kiwishelf.thickness = 40
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
-        core.updateSpaceBar()
+        core.updateBars()
         let strip = try #require(core.spaceBars.shownStrips.first?.1)
         var log: [String] = []
         core.onLog = { log.append($0) }

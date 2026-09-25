@@ -14,6 +14,21 @@ import Testing
 struct GlassDefaultMigrationTests {
     private func json(_ text: String) -> Data { Data(text.utf8) }
 
+    /// The crossing as far as this step: the gate, the fill and
+    /// the stamp. Since #1517 a later step moves the bars' leaves
+    /// onto the shelf, so the full chain no longer shows the
+    /// leaves this suite asserts on — `KiwiShelfMigrationTests`
+    /// holds where they go.
+    private func migratedThroughGlass(_ data: Data) -> Data? {
+        guard ConfigMigration.needsMigration(data) else {
+            return nil
+        }
+        let filled =
+            ConfigMigration.migratingAbsentGlassLeaves(data) ?? data
+        let out = ConfigMigration.stamped(filled)
+        return out == data ? nil : out
+    }
+
     /// A PROFILE-shaped root at the floor the flip crossed: the
     /// leaves reach disk in a profile and in the bundle carrying
     /// profiles inline, never in gui.json.
@@ -59,7 +74,7 @@ struct GlassDefaultMigrationTests {
                 "space_bar":{"liquid_glass":\(bars)}}
                 """
             )
-            let out = try #require(ConfigMigration.migrated(data))
+            let out = try #require(migratedThroughGlass(data))
             let s = try settings(out)
             #expect(leaf(s, "shortcut_panel") == bars)
             #expect(leaf(s, "app_bar") == bars)
@@ -84,7 +99,7 @@ struct GlassDefaultMigrationTests {
             "space_bar":{"liquid_glass":false}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         #expect(leaf(try settings(out), "shortcut_panel") == false)
     }
 
@@ -98,7 +113,7 @@ struct GlassDefaultMigrationTests {
             #"{}"#,
         ] {
             let out = try #require(
-                ConfigMigration.migrated(profile(body))
+                migratedThroughGlass(profile(body))
             )
             let s = try settings(out)
             #expect(leaf(s, "app_bar") == false)
@@ -118,7 +133,7 @@ struct GlassDefaultMigrationTests {
             "shortcut_panel":{"liquid_glass":false}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let s = try settings(out)
         #expect(leaf(s, "app_bar") == true)
         #expect(leaf(s, "space_bar") == true)
@@ -137,7 +152,7 @@ struct GlassDefaultMigrationTests {
             "layout":{"monocle":{"app_bar":{"thickness":40}}}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let s = try settings(out)
         let layout = try #require(s["layout"] as? [String: Any])
         let monocle = try #require(
@@ -158,7 +173,7 @@ struct GlassDefaultMigrationTests {
             #"{"app_bar":{"liquid_glass":false},"space_bar":{}}"#,
             format: Profile.currentFormat
         )
-        #expect(ConfigMigration.migrated(data) == nil)
+        #expect(migratedThroughGlass(data) == nil)
     }
 
     private func inline(_ name: String, settings: String) -> String {
@@ -192,7 +207,7 @@ struct GlassDefaultMigrationTests {
             "profiles":[\(off),\(on)],"palettes":[]}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let profiles = try #require(
             root(out)["profiles"] as? [[String: Any]]
         )

@@ -54,7 +54,7 @@ struct BarsPanelPreviewLabelTests {
                 .text("4", tinted: true),
             ]
         )
-        .spaceItems(settings.spaceBarStyle)
+        .spaceItems(settings.kiwishelf)
         #expect(items.count == 3)
         #expect(items[0].glyph == "book")
         #expect(items[0].label == nil)

@@ -110,8 +110,9 @@ struct ScrollingColumnCapTests {
             settings.scrollingColumnCap(bounds: visible, space: SpaceID("2"))
                 == 3
         )
-        // The app bar's strip is carved too: 100 pt off the left
-        // takes the horizontal count from six to five.
+        // The shelf's strip comes off the bounds the door is
+        // handed (#1517): 100 pt off the left takes the
+        // horizontal count from six to five.
         settings.scrolling.orientation = .horizontal
         settings.gapsGlobal.outer = Gaps.Outer(
             top: 0,
@@ -120,11 +121,16 @@ struct ScrollingColumnCapTests {
             right: 0
         )
         settings.scrolling.appBar.enabled = true
-        settings.appBarStyle.edge = .left
-        settings.appBarStyle.thickness = 100
+        settings.kiwishelf.edge = .left
+        settings.kiwishelf.thickness = 100
         #expect(
-            settings.scrollingColumnCap(bounds: visible, space: SpaceID("1"))
-                == 5
+            settings.scrollingColumnCap(
+                bounds: settings.layoutBounds(
+                    from: visible,
+                    mode: .scrolling
+                ),
+                space: SpaceID("1")
+            ) == 5
         )
         settings.scrolling.appBar.enabled = false
         settings.gapsGlobal.outer = Gaps.Outer(

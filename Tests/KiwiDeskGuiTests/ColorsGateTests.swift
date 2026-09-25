@@ -28,8 +28,8 @@ struct ColorsGateTests {
         // half is exercised with a key that actually carries it.
         // None is in this area yet — which is the point: the
         // resolver has to be right BEFORE the first one lands.
-        let exempt = SettingKey.spaceBar(.spaceBarEnabled)
-        let plain = SettingKey.spaceBar(.spaceBarFocusedItemColor)
+        let exempt = SettingKey.borders(.borderEnabled)
+        let plain = SettingKey.kiwishelf(.itemColor)
         #expect(exempt.placement.exemptFromContainerGate)
         #expect(!plain.placement.exemptFromContainerGate)
 
@@ -149,7 +149,7 @@ struct ColorsGateTests {
         // the bar is on — off, the header's outer reason covers
         // the row — and stands down once the picker is Glyphs.
         settings.spaceBarStyle.enabled = false
-        settings.spaceBarStyle.iconSource = .appImage
+        settings.kiwishelf.iconSource = .appImage
         settings.spaceBarStyle.showFrontApp = false
         #expect(
             !AdvancedColorsGates(settings: settings)
@@ -160,7 +160,7 @@ struct ColorsGateTests {
             AdvancedColorsGates(settings: settings)
                 .focusedItemNeedsReference
         )
-        settings.spaceBarStyle.iconSource = .appFont
+        settings.kiwishelf.iconSource = .appFont
         #expect(
             !AdvancedColorsGates(settings: settings)
                 .focusedItemNeedsReference

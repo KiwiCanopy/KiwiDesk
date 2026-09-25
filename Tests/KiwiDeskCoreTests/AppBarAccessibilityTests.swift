@@ -14,7 +14,7 @@ struct AppBarAccessibilityTests {
         name: String = "Safari",
         text: String = "Downloads",
         count: Int = 1,
-        style: AppBarStyle = AppBarStyle()
+        style: AppBarLook = AppBarLook()
     ) -> AppBarItemView {
         LocalizationManager.shared.select("en")
         let view = AppBarItemView(
@@ -71,7 +71,7 @@ struct AppBarAccessibilityTests {
     /// is why the content case is pinned at the label itself.
     @Test("Icon-only content still announces the window title")
     func iconOnlyContentAnnouncesTitle() {
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.content = .icon
         let view = makeView(style: style)
         #expect(

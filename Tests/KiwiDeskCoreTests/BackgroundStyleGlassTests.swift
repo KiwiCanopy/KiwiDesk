@@ -12,7 +12,7 @@ import Testing
 struct BackgroundStyleGlassTests {
     @Test("glassEnabled gates the finish on OS capability")
     func glassGate() {
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.liquidGlass = false
         #expect(style.glassEnabled == false)
         style.liquidGlass = true
@@ -22,7 +22,7 @@ struct BackgroundStyleGlassTests {
 
     @Test("hasBox is the Boxed shape without the glass finish")
     func hasBox() {
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.backgroundStyle = .boxed
         #expect(style.hasBox == !style.glassEnabled)
         style.backgroundStyle = .plain
@@ -31,42 +31,39 @@ struct BackgroundStyleGlassTests {
 
     @Test("liquid_glass round-trips through JSON")
     func roundTrip() throws {
-        var style = AppBarStyle()
-        style.liquidGlass = true
-        style.backgroundStyle = .plain
-        let data = try JSONEncoder().encode(style)
-        let back = try JSONDecoder().decode(
-            AppBarStyle.self,
-            from: data
-        )
-        #expect(back.liquidGlass == true)
-        #expect(back.backgroundStyle == .plain)
+        var shelf = KiwiShelf()
+        shelf.liquidGlass = false
+        shelf.backgroundStyle = .boxed
+        let data = try JSONEncoder().encode(shelf)
+        let back = try JSONDecoder().decode(KiwiShelf.self, from: data)
+        #expect(back.liquidGlass == false)
+        #expect(back.backgroundStyle == .boxed)
     }
 
-    @Test("both bar parsers accept liquid_glass")
+    @Test("the shelf parser takes liquid_glass; the bars' do not")
     func parseGlass() {
-        let app = AppBarCommandSetting.parse(
+        let shelf = KiwiShelfCommandSetting.parse(
             field: "liquid_glass",
-            args: [.bool(true)]
+            args: [.bool(false)]
         )
-        guard case .success(let appSetting) = app else {
-            Issue.record("app bar rejected liquid_glass")
+        guard case .success(let setting) = shelf else {
+            Issue.record("the shelf rejected liquid_glass")
             return
         }
-        var appStyle = AppBarStyle()
-        appSetting.apply(to: &appStyle)
-        #expect(appStyle.liquidGlass == true)
-
-        let space = SpaceBarCommandSetting.parse(
-            field: "liquid_glass",
-            args: [.bool(true)]
+        var value = KiwiShelf()
+        setting.apply(to: &value)
+        #expect(value.liquidGlass == false)
+        #expect(
+            (try? AppBarCommandSetting.parse(
+                field: "liquid_glass",
+                args: [.bool(true)]
+            ).get()) == nil
         )
-        guard case .success(let spaceSetting) = space else {
-            Issue.record("space bar rejected liquid_glass")
-            return
-        }
-        var spaceStyle = SpaceBarStyle()
-        spaceSetting.apply(to: &spaceStyle)
-        #expect(spaceStyle.liquidGlass == true)
+        #expect(
+            (try? SpaceBarCommandSetting.parse(
+                field: "liquid_glass",
+                args: [.bool(true)]
+            ).get()) == nil
+        )
     }
 }

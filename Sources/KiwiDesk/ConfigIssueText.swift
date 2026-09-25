@@ -43,6 +43,21 @@ enum ConfigIssueText {
                 name,
                 suggestion
             )
+        case .retiredCall(let name, let replacement):
+            guard let replacement else {
+                return L(
+                    "config_issues.retired_call",
+                    "'%1$@' was retired and has no "
+                        + "replacement.",
+                    name
+                )
+            }
+            return L(
+                "config_issues.retired_call_replacement",
+                "'%1$@' was retired — use '%2$@'.",
+                name,
+                replacement
+            )
         }
     }
 }

@@ -438,25 +438,35 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 [`sticky.set_color`](lua-reference.md#stickyset_color),
 [`floating.set_color`](lua-reference.md#floatingset_color).)
 
-## Bars
+## KiwiShelf & Bars
 
-**Thickness** runs 20–80 pt in both cards; Lua
-([`app_bar.set_thickness`](lua-reference.md#app_barset_thickness),
-[`space_bar.set_thickness`](lua-reference.md#space_barset_thickness))
+:::unreleased
+**Thickness** runs 20–80 pt on the **KiwiShelf** card; Lua
+([`kiwishelf.set_thickness`](lua-reference.md#kiwishelfset_thickness))
 takes any value from 20 up.
+:::
 
 ### App Bar
 
-The App Bar renders only in **Monocle** and **Scrolling**; its
-card has no on/off row, the two **Show it in** switches are its
-visibility. Drag an item to reorder the windows;
-a grouped item expands into its members on click. Styling it
-differently per layout is Lua-only: every `app_bar.*` field has a
-`monocle.set_app_bar_*` / `scroll.set_app_bar_*` twin ([Per-layout
-App Bar overrides](lua-reference.md#per-layout-app-bar-overrides)).
+The App Bar renders only in **Monocle** and **Scrolling**, and
+its card has no on/off row.
+
+:::unreleased
+The KiwiShelf card's **App Bar in Monocle** and **App Bar in
+Scrolling** switches are its visibility.
+:::
+
+Drag an item to reorder the windows; a grouped item expands into
+its members on click. Styling it differently per layout is
+Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
+`scroll.set_app_bar_*` twin ([Per-layout App Bar
+overrides](lua-reference.md#per-layout-app-bar-overrides)).
+
+:::unreleased
 **Liquid Glass** is one switch for both bars and the shortcuts
-panel (**Colours & Animations**), tinted by each bar's Fill; on
+panel (**Colours & Animations**), tinted by KiwiShelf's Fill; on
 macOS before 26 the Boxed or Plain shape draws underneath.
+:::
 
 On by default, on all three surfaces. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
@@ -513,8 +523,11 @@ toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
   half-second, then appears whole for the rest of the hold.
 
 Dropping onto the Space a window is already on does nothing.
-While dragging, hold over a chevron to autoscroll a bar that
-overflows.
+
+:::unreleased
+While dragging, hold over a bar's faded end to autoscroll a bar
+that overflows.
+:::
 
 ## Behavior
 

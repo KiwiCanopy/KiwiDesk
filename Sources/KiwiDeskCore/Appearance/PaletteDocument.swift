@@ -6,7 +6,7 @@ import Foundation
 /// `SetupBundle`, where the bundle's own format governs (#945).
 struct PaletteDocument: Codable {
     /// Format version of palettes.json schema (0 = legacy bare array, #939).
-    static let currentFormat = 1
+    static let currentFormat = 2
 
     /// Decoded format version preserved without normalization (#945).
     var format: Int

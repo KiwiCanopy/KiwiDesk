@@ -2,11 +2,13 @@ import CoreGraphics
 import KiwiDeskCore
 import SwiftUI
 
-/// Schematic preview of configured App Bar and Space Bar strips
-/// (#793, owner 2026-08-10). Not modelled: the bar margins and
-/// the outer gap (#1516) — a few points draw as nothing at this
-/// scale, so the strips sit flush by construction — and the
-/// identifier tint flag, a schematic dims nothing (#1538).
+/// Schematic preview of the shelf and the bars on it (#793, owner
+/// 2026-08-10, #1517): one strip on the shelf's edge, the bars
+/// placed by Core's `ShelfArrangement`. Not modelled: the margins
+/// and the outer gap (#1516) — a few points draw as nothing at
+/// this scale — the identifier tint
+/// flag, a schematic dims nothing (#1538), and a second host's
+/// own App Bar look: the frame draws the first host's.
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
     /// Real space count from draft (owner 2026-08-10).
@@ -16,6 +18,9 @@ struct HomeCardBarsTile: View {
     /// Space identifiers for panel scale rendering — Core's own
     /// verdict per Space (#1538).
     var spaceLabels: [SpaceGlyph] = []
+    /// Whether this frame draws the App Bar — false for the
+    /// layouts that host none, where the Space Bar is alone.
+    var showsAppBar = true
     @Environment(\.schematicPalette) private var palette
 
     struct BarItem {
@@ -36,6 +41,7 @@ struct HomeCardBarsTile: View {
         var items: [BarItem]
         var alignment: AppBarStyle.BarAlignment
         var spans: Bool
+        /// Boxes per item and no plate: `KiwiShelf.drawsPlate`.
         var boxed: Bool
         var thickness: CGFloat
         var corner: CGFloat
@@ -45,17 +51,12 @@ struct HomeCardBarsTile: View {
         var fontSize: CGFloat
     }
 
-    /// Distinct edges of enabled App Bar hosts (#708; review 2026-08-10).
-    private var appBarEdges: Set<AppBarEdge> {
-        Set(
-            settings.appBarHosts
-                .filter(\.enabled)
-                .map {
-                    $0.resolved(
-                        with: settings.appBarStyle
-                    ).edge
-                }
-        )
+    /// The App Bar the preview draws: the first layout that
+    /// shows one, or nil when none does.
+    private var appBarLook: AppBarLook? {
+        settings.appBarHosts.first(where: \.enabled).map {
+            settings.appBarLook(for: $0)
+        }
     }
 
     var body: some View {
@@ -98,64 +99,92 @@ struct HomeCardBarsTile: View {
 
     @ViewBuilder
     private func rowBars(_ edge: AppBarEdge) -> some View {
-        if edge == .top {
-            spaceStrip(on: edge)
-            appStrip(on: edge)
-        } else {
-            appStrip(on: edge)
-            spaceStrip(on: edge)
-        }
+        shelfStrip(on: edge, vertical: false)
     }
 
     @ViewBuilder
     private func columnBars(_ edge: AppBarEdge) -> some View {
-        if edge == .left {
-            spaceStrip(on: edge, vertical: true)
-            appStrip(on: edge, vertical: true)
-        } else {
-            appStrip(on: edge, vertical: true)
-            spaceStrip(on: edge, vertical: true)
-        }
+        shelfStrip(on: edge, vertical: true)
     }
 
+    /// The shelf's one strip, each shown bar in the segment
+    /// Core's `ShelfArrangement` gives it — the preview never
+    /// places a bar the engine would not (#702, #1517).
     @ViewBuilder
-    private func spaceStrip(
+    private func shelfStrip(
         on edge: AppBarEdge,
-        vertical: Bool = false
+        vertical: Bool
     ) -> some View {
-        let style = settings.spaceBarStyle
-        if style.enabled, style.edge == edge {
-            let cross = crossSize(style.thickness)
-            BarStripView(
-                spec: BarSpec(
-                    fill: style.fillColor,
-                    highlight: style.highlightColor,
-                    items: spaceItems(style),
-                    alignment: style.alignment,
-                    spans: style.plateSpans,
-                    boxed: style.hasBox,
-                    thickness: cross,
-                    corner: style.resolvedCornerRadius(
-                        forThickness: cross
-                    ),
-                    itemCorner: style.resolvedCornerRadius(
-                        forThickness: cross * 0.56
-                    ),
-                    gap: gapSpacing(style.itemGap),
-                    indicator: style.activeIndicator,
-                    fontSize: style.identifierFontSize(
-                        forDepth: cross
-                    )
-                ),
-                edge: edge,
-                vertical: vertical,
-                scale: scale
-            )
+        if settings.kiwishelf.edge == edge {
+            let space = spaceSpecIfShown
+            let app =
+                showsAppBar
+                ? appBarLook.map { appSpec($0, vertical: vertical) }
+                : nil
+            if space != nil || app != nil {
+                ShelfStripPreview(
+                    shelf: settings.kiwishelf,
+                    space: space,
+                    app: app,
+                    edge: edge,
+                    vertical: vertical,
+                    scale: scale
+                )
+            }
         }
     }
 
+    private var spaceSpecIfShown: BarSpec? {
+        settings.spaceBarStyle.enabled
+            ? spaceSpec(settings.spaceBarLook) : nil
+    }
+
+    private func spaceSpec(_ style: SpaceBarLook) -> BarSpec {
+        let cross = crossSize(style.thickness)
+        return BarSpec(
+            fill: style.fillColor,
+            highlight: style.highlightColor,
+            items: spaceItems(style.shelf),
+            alignment: style.alignment,
+            spans: style.plateSpans,
+            boxed: !style.shelf.drawsPlate,
+            thickness: cross,
+            corner: style.resolvedCornerRadius(forThickness: cross),
+            itemCorner: style.resolvedCornerRadius(
+                forThickness: cross * 0.56
+            ),
+            gap: gapSpacing(style.itemGap),
+            indicator: style.activeIndicator,
+            fontSize: style.identifierFontSize(forDepth: cross)
+        )
+    }
+
+    private func appSpec(
+        _ style: AppBarLook,
+        vertical: Bool
+    ) -> BarSpec {
+        let cross = crossSize(style.thickness)
+        return BarSpec(
+            fill: style.fillColor,
+            highlight: style.highlightColor,
+            items: appItems(style, vertical: vertical),
+            alignment: style.alignment,
+            spans: style.plateSpans,
+            boxed: !style.shelf.drawsPlate,
+            thickness: cross,
+            corner: style.resolvedCornerRadius(forThickness: cross),
+            itemCorner: style.resolvedCornerRadius(
+                forThickness: cross * 0.56
+            ),
+            gap: gapSpacing(style.itemGap),
+            indicator: style.activeIndicator,
+            fontSize: style.resolvedFontSize(forThickness: cross)
+        )
+    }
+
+    /// Idle Spaces draw the shelf's idle ink, as the live bar does.
     func spaceItems(
-        _ style: SpaceBarStyle
+        _ shelf: KiwiShelf
     ) -> [BarItem] {
         let count = min(max(spaceCount, 1), 8)
         var items: [BarItem] = []
@@ -163,8 +192,8 @@ struct HomeCardBarsTile: View {
             let active = index == 0
             var item = BarItem(
                 color: active
-                    ? style.activeItemColor
-                    : style.itemColor,
+                    ? shelf.activeItemColor
+                    : shelf.idleItemColor,
                 length: 12 * scale
             )
             if spaceLabels.indices.contains(index) {
@@ -182,45 +211,9 @@ struct HomeCardBarsTile: View {
         return items
     }
 
-    @ViewBuilder
-    private func appStrip(
-        on edge: AppBarEdge,
-        vertical: Bool = false
-    ) -> some View {
-        let style = settings.appBarStyle
-        if appBarEdges.contains(edge) {
-            let cross = crossSize(style.thickness)
-            BarStripView(
-                spec: BarSpec(
-                    fill: style.fillColor,
-                    highlight: style.highlightColor,
-                    items: appItems(style, vertical: vertical),
-                    alignment: style.alignment,
-                    spans: style.plateSpans,
-                    boxed: style.hasBox,
-                    thickness: cross,
-                    corner: style.resolvedCornerRadius(
-                        forThickness: cross
-                    ),
-                    itemCorner: style.resolvedCornerRadius(
-                        forThickness: cross * 0.56
-                    ),
-                    gap: gapSpacing(style.itemGap),
-                    indicator: style.activeIndicator,
-                    fontSize: style.resolvedFontSize(
-                        forThickness: cross
-                    )
-                ),
-                edge: edge,
-                vertical: vertical,
-                scale: scale
-            )
-        }
-    }
-
     /// Mock window items at panel scale (owner 2026-08-10).
     private func appItems(
-        _ style: AppBarStyle,
+        _ style: AppBarLook,
         vertical: Bool
     ) -> [BarItem] {
         let mocks: [(glyph: String, title: String)] = [
@@ -231,7 +224,7 @@ struct HomeCardBarsTile: View {
                 L("bars_scene.title_files", "Downloads")
             ),
         ]
-        let content = style.content.rendered(
+        let content = style.bar.content.rendered(
             horizontal: !vertical
         )
         var items: [BarItem] = []

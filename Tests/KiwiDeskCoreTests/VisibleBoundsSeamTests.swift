@@ -40,16 +40,20 @@ struct VisibleBoundsSeamTests {
             )
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in bounds }
-        // Zero gaps and no Space Bar, so the injected rect IS
-        // the layout rect: the reservations are real defaults
-        // (a 32pt left strip) with their own coverage, and
-        // leaving them on here would only blur what these
-        // assertions are about.
+        // Zero gaps and no bar, so the injected rect IS the
+        // layout rect: the shelf's reservation is a real default
+        // with its own coverage, taken in every layout while any
+        // bar can show (#1517), and leaving it on here would
+        // only blur what these assertions are about.
         core.execute("set_gap_global", args: [.number(0)])
-        core.execute(
+        for verb in [
             "space_bar.set_enabled",
-            args: [.bool(false)]
-        )
+            "monocle.set_app_bar_enabled",
+            "scroll.set_app_bar_enabled",
+        ] {
+            core.execute(verb, args: [.bool(false)])
+        }
+        #expect(!core.tiler.settings.shelfShows)
         // Pin the default this fixture reasons from, the rule
         // this change set wrote into §5: the pile threshold
         // below is 2 * min.

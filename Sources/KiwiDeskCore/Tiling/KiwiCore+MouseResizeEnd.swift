@@ -86,7 +86,7 @@ extension KiwiCore {
         // slot against its midpoint, and both belong to the region
         // the layout filled — the keyboard path's own span now
         // resolves the same way.
-        let bounds = tiler.layoutBounds(on: screen)
+        let bounds = tiler.layoutBounds(on: screen, for: space)
         let adjustment = MouseResize.translate(
             mode: space.mode,
             isMaster: isMaster,

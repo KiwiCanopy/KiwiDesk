@@ -95,9 +95,11 @@ struct VisibleBoundsRoutingTests {
         // `allScreenBounds` seam since #1352.
         "Tiling/TilingEngine+StashRestore.swift": 1,
         // The bar strips are drawn ON a screen; a fabricated rect
-        // would place real chrome nowhere.
-        "App/KiwiCore+AppBar.swift": 2,
-        "App/KiwiCore+SpaceBar.swift": 1,
+        // would place real chrome nowhere. The shelf plan reads it
+        // once per display for both bars (#1517); the App Bar's
+        // cold-start fallback once for the main screen.
+        "App/KiwiCore+Shelf.swift": 1,
+        "App/KiwiCore+AppBar.swift": 1,
         // DO NOT ROUTE. Re-anchor resolves the source AND the
         // destination screen and early-returns when they are
         // equal — under a one-rect hook they always are, so

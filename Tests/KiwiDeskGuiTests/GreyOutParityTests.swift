@@ -172,13 +172,13 @@ struct GreyOutParityTests {
             "GreyOut(active: ownPredicateLive && inert",
             1
         ),
-        // The one row-gate predicate the census cannot express:
-        // the Gap indicator hides the active item outright, so
-        // neither ink is painted.
+        // The shelf's symbol style greys when no bar draws an
+        // app icon — a predicate over two bars' state the census
+        // cannot express (#1517).
         (
-            "AdvancedColorRow+Bars.swift",
-            "gates.bars.gapOnly",
-            2
+            "KiwiShelfCard+Rows.swift",
+            "active: gates.noBarDrawsIcon",
+            1
         ),
         // Not a GreyOut site — a plain `.disabled` with its own
         // reason-bearing help — but the same convention, and

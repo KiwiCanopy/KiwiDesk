@@ -66,6 +66,7 @@ struct CommandDispatchReachTests {
         "unknown command: ",
         "unknown bar setting: ",
         "unknown space bar setting: ",
+        "unknown kiwishelf setting: ",
         "unknown drag setting: ",
     ]
 
@@ -232,6 +233,7 @@ struct CommandDispatchReachTests {
             "no_such_verb",
             "app_bar.set_no_such_field",
             "space_bar.set_no_such_field",
+            "kiwishelf.set_no_such_field",
             "drag.set_ghost_no_such_field",
         ]
         var seen: Set<String> = []

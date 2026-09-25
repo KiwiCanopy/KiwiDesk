@@ -23,7 +23,8 @@ struct AppBarManagerTests {
             ],
             activeIndex: 0,
             strip: CGRect(x: 0, y: 0, width: 100, height: 32),
-            style: AppBarStyle()
+            style: AppBarLook(),
+            capAxis: 100
         )
     }
 
@@ -67,7 +68,8 @@ struct AppBarManagerTests {
             items: [],
             activeIndex: nil,
             strip: .zero,
-            style: AppBarStyle()
+            style: AppBarLook(),
+            capAxis: 0
         )
         manager.sync([empty])
         #expect(manager.shownDisplays.isEmpty)
@@ -79,7 +81,7 @@ struct AppBarManagerTests {
         edge: AppBarEdge,
         strip: CGRect
     ) -> AppBarManager.Bar {
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.edge = edge
         return AppBarManager.Bar(
             display: DisplayID(display),
@@ -93,7 +95,8 @@ struct AppBarManagerTests {
             ],
             activeIndex: 0,
             strip: strip,
-            style: style
+            style: style,
+            capAxis: strip.width
         )
     }
 

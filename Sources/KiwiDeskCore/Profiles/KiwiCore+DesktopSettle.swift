@@ -64,8 +64,7 @@ extension KiwiCore {
         // handler skipped its retile on the nil number, so
         // this sync is what retires them (review 2026-08-03).
         guard NativeSpaces.activeSpaceIsUser() else {
-            updateAppBar()
-            updateSpaceBar()
+            updateBars()
             return
         }
         retile(animated: false, pass: .reissue)

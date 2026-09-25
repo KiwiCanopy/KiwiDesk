@@ -23,52 +23,6 @@ extension SettingsValueReadout {
                     new: onOff(n.enabled)
                 )
             ]
-        case .monocleAppBarEdge, .scrollingAppBarEdge:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarEdge,
-                layoutBarChoice(o.edge, AppBarOptions.edge),
-                layoutBarChoice(n.edge, AppBarOptions.edge)
-            )
-        case .monocleAppBarAlignment, .scrollingAppBarAlignment:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarAlignment,
-                layoutBarChoice(o.alignment, AppBarOptions.alignment),
-                layoutBarChoice(n.alignment, AppBarOptions.alignment)
-            )
-        case .monocleAppBarBackgroundStyle,
-            .scrollingAppBarBackgroundStyle:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarBackground,
-                layoutBarChoice(
-                    o.backgroundStyle,
-                    AppBarOptions.backgroundStyle
-                ),
-                layoutBarChoice(
-                    n.backgroundStyle,
-                    AppBarOptions.backgroundStyle
-                )
-            )
-        case .monocleAppBarBackgroundFit,
-            .scrollingAppBarBackgroundFit:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarBackgroundFit,
-                layoutBarChoice(
-                    o.backgroundFit,
-                    AppBarOptions.backgroundFit
-                ),
-                layoutBarChoice(
-                    n.backgroundFit,
-                    AppBarOptions.backgroundFit
-                )
-            )
         case .monocleAppBarActiveIndicator,
             .scrollingAppBarActiveIndicator:
             return layoutBarRow(
@@ -100,20 +54,6 @@ extension SettingsValueReadout {
                 layoutBarChoice(o.content, AppBarOptions.content),
                 layoutBarChoice(n.content, AppBarOptions.content)
             )
-        case .monocleAppBarIconSource, .scrollingAppBarIconSource:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarIconSource,
-                layoutBarChoice(
-                    o.iconSource,
-                    AppBarOptions.iconSource
-                ),
-                layoutBarChoice(
-                    n.iconSource,
-                    AppBarOptions.iconSource
-                )
-            )
         case .monocleAppBarGroupAdjacentWindows,
             .scrollingAppBarGroupAdjacentWindows:
             return layoutBarRow(
@@ -122,150 +62,6 @@ extension SettingsValueReadout {
                 .appBarGroupAdjacentWindows,
                 layoutBarOnOff(o.groupAdjacentWindows),
                 layoutBarOnOff(n.groupAdjacentWindows)
-            )
-        case .monocleAppBarLiquidGlass,
-            .scrollingAppBarLiquidGlass:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarLiquidGlass,
-                layoutBarOnOff(o.liquidGlass),
-                layoutBarOnOff(n.liquidGlass)
-            )
-        case .monocleAppBarThickness, .scrollingAppBarThickness:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarThickness,
-                layoutBarPoints(o.thickness),
-                layoutBarPoints(n.thickness)
-            )
-        case .monocleAppBarItemSize, .scrollingAppBarItemSize:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarItemSize,
-                layoutBarAutoPoints(o.itemSize),
-                layoutBarAutoPoints(n.itemSize)
-            )
-        case .monocleAppBarItemGap, .scrollingAppBarItemGap:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarItemGap,
-                layoutBarPoints(o.itemGap),
-                layoutBarPoints(n.itemGap)
-            )
-        case .monocleAppBarOuterMargin, .scrollingAppBarOuterMargin:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarOuterMargin,
-                layoutBarPoints(o.outerMargin),
-                layoutBarPoints(n.outerMargin)
-            )
-        case .monocleAppBarInnerMargin, .scrollingAppBarInnerMargin:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarInnerMargin,
-                layoutBarPoints(o.innerMargin),
-                layoutBarPoints(n.innerMargin)
-            )
-        case .monocleAppBarFontSize, .scrollingAppBarFontSize:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarFontSize,
-                layoutBarAutoPoints(o.fontSize),
-                layoutBarAutoPoints(n.fontSize)
-            )
-        case .monocleAppBarCornerRoundness,
-            .scrollingAppBarCornerRoundness:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarCornerRoundness,
-                layoutBarRoundness(o.cornerRoundness),
-                layoutBarRoundness(n.cornerRoundness)
-            )
-        case .monocleAppBarDimFactor, .scrollingAppBarDimFactor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarDimFactor,
-                layoutBarNumber(o.dimFactor),
-                layoutBarNumber(n.dimFactor)
-            )
-        case .monocleAppBarFillColor, .scrollingAppBarFillColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarFillColor,
-                layoutBarHex(o.fillColor),
-                layoutBarHex(n.fillColor)
-            )
-        case .monocleAppBarHighlightColor,
-            .scrollingAppBarHighlightColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarHighlightColor,
-                layoutBarHex(o.highlightColor),
-                layoutBarHex(n.highlightColor)
-            )
-        case .monocleAppBarItemColor, .scrollingAppBarItemColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarItemColor,
-                layoutBarHex(o.itemColor),
-                layoutBarHex(n.itemColor)
-            )
-        case .monocleAppBarActiveItemColor,
-            .scrollingAppBarActiveItemColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarActiveItemColor,
-                layoutBarHex(o.activeItemColor),
-                layoutBarHex(n.activeItemColor)
-            )
-        case .monocleAppBarHoverFillColor,
-            .scrollingAppBarHoverFillColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarHoverFillColor,
-                layoutBarHex(o.hoverFillColor),
-                layoutBarHex(n.hoverFillColor)
-            )
-        case .monocleAppBarHoverItemColor,
-            .scrollingAppBarHoverItemColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarHoverItemColor,
-                layoutBarHex(o.hoverItemColor),
-                layoutBarHex(n.hoverItemColor)
-            )
-        case .monocleAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarGroupBadgeColor,
-                layoutBarHex(o.groupBadgeColor),
-                layoutBarHex(n.groupBadgeColor)
-            )
-        case .monocleAppBarGroupBadgeTextColor,
-            .scrollingAppBarGroupBadgeTextColor:
-            return layoutBarRow(
-                census,
-                mode,
-                .appBarGroupBadgeTextColor,
-                layoutBarHex(o.groupBadgeTextColor),
-                layoutBarHex(n.groupBadgeTextColor)
             )
         }
     }
@@ -286,46 +82,13 @@ extension SettingsValueReadout {
         _ key: LayoutAppBarKey
     ) -> LayoutMode {
         switch key {
-        case .monocleAppBarEnabled, .monocleAppBarEdge,
-            .monocleAppBarAlignment, .monocleAppBarBackgroundStyle,
-            .monocleAppBarBackgroundFit,
-            .monocleAppBarActiveIndicator, .monocleAppBarContent,
-            .monocleAppBarTitleCap,
-            .monocleAppBarGroupAdjacentWindows,
-            .monocleAppBarThickness, .monocleAppBarItemSize,
-            .monocleAppBarOuterMargin, .monocleAppBarInnerMargin,
-            .monocleAppBarItemGap, .monocleAppBarFontSize,
-            .monocleAppBarCornerRoundness, .monocleAppBarFillColor,
-            .monocleAppBarHighlightColor, .monocleAppBarItemColor,
-            .monocleAppBarActiveItemColor,
-            .monocleAppBarHoverFillColor,
-            .monocleAppBarHoverItemColor,
-            .monocleAppBarGroupBadgeColor,
-            .monocleAppBarGroupBadgeTextColor,
-            .monocleAppBarLiquidGlass, .monocleAppBarIconSource,
-            .monocleAppBarDimFactor:
+        case .monocleAppBarEnabled, .monocleAppBarActiveIndicator,
+            .monocleAppBarContent, .monocleAppBarTitleCap,
+            .monocleAppBarGroupAdjacentWindows:
             return .monocle
-        case .scrollingAppBarEnabled, .scrollingAppBarEdge,
-            .scrollingAppBarAlignment,
-            .scrollingAppBarBackgroundStyle,
-            .scrollingAppBarBackgroundFit,
-            .scrollingAppBarActiveIndicator,
+        case .scrollingAppBarEnabled, .scrollingAppBarActiveIndicator,
             .scrollingAppBarContent, .scrollingAppBarTitleCap,
-            .scrollingAppBarGroupAdjacentWindows,
-            .scrollingAppBarThickness, .scrollingAppBarItemSize,
-            .scrollingAppBarOuterMargin, .scrollingAppBarInnerMargin,
-            .scrollingAppBarItemGap, .scrollingAppBarFontSize,
-            .scrollingAppBarCornerRoundness,
-            .scrollingAppBarFillColor,
-            .scrollingAppBarHighlightColor,
-            .scrollingAppBarItemColor,
-            .scrollingAppBarActiveItemColor,
-            .scrollingAppBarHoverFillColor,
-            .scrollingAppBarHoverItemColor,
-            .scrollingAppBarGroupBadgeColor,
-            .scrollingAppBarGroupBadgeTextColor,
-            .scrollingAppBarLiquidGlass,
-            .scrollingAppBarIconSource, .scrollingAppBarDimFactor:
+            .scrollingAppBarGroupAdjacentWindows:
             return .scrolling
         }
     }

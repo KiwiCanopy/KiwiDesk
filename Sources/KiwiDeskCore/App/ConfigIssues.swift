@@ -20,6 +20,9 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
         /// Unknown API function call with optional fuzzy match
         /// suggestion (#39).
         case unknownCall(name: String, suggestion: String?)
+        /// A verb a release retired, and what replaces it — nil
+        /// where nothing does (#1517, `APIReference.retired`).
+        case retiredCall(name: String, replacement: String?)
     }
 
     /// Source filename (`init.lua`, `gui.json`, or `<profile>.json`).

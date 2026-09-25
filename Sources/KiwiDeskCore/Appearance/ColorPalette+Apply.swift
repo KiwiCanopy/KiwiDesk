@@ -32,9 +32,10 @@ extension ColorPalette {
     ) {
         let parts = path.split(separator: ".").map(String.init)
         switch parts.first {
-        case "app_bar" where parts.count == 2:
-            AppBarCommandSetting.colorFields[parts[1]]?(hex)
-                .apply(to: &settings.appBarStyle)
+        case "kiwishelf" where parts.count == 2:
+            if let field = KiwiShelfCommandSetting.colorFields[parts[1]] {
+                settings.kiwishelf[keyPath: field] = hex
+            }
         case "space_bar" where parts.count == 2:
             SpaceBarCommandSetting.colorFields[parts[1]]?(hex)
                 .apply(to: &settings.spaceBarStyle)

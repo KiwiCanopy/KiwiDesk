@@ -11,7 +11,7 @@ extension KiwiCore {
     /// start must not collapse the strip).
     func spaceBarItems(
         display: DisplayID,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> [SpaceBarOverlay.Item] {
         // SHOWN, not focused: which Space this screen is
         // displaying. The presence and focus questions below
@@ -59,7 +59,7 @@ extension KiwiCore {
     /// badge).
     func spaceBarApps(
         in space: Space,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> (
         apps: [SpaceBarItemView.App],
         overflow: Int,
@@ -123,7 +123,7 @@ extension KiwiCore {
     func spaceBarApp(
         group: [WindowID],
         space: Space,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> SpaceBarItemView.App? {
         guard let first = group.first,
             let member = state.windows[first]

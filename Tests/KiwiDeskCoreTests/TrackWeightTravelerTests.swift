@@ -100,7 +100,10 @@ struct TrackWeightTravelerTests {
             for: space,
             in: core.state
         )!
-        let bounds = core.tiler.layoutBounds(on: screen)
+        let bounds = core.tiler.layoutBounds(
+            on: screen,
+            for: core.state.workspaces[space]!
+        )
         let gaps = core.tiler.settings.gaps(for: space)
         func limit(_ count: Int) -> Double {
             StackLayout.maxColumnTotal(

@@ -141,18 +141,18 @@ struct StatusSpaceMarkTests {
         let core = makeCore()
         var published: [StatusSpaceMark] = []
         core.onStatusSpaceMarkChange = { published.append($0) }
-        core.updateSpaceBar()
+        core.updateBars()
         #expect(published.count == 1)
         #expect(published.last?.screens.first?.space == SpaceID("main"))
         #expect(core.spaceBars.statusMark == published.last)
-        core.updateSpaceBar()
+        core.updateBars()
         #expect(published.count == 1)
         core.state.workspaces.activate(SpaceID("2"))
-        core.updateSpaceBar()
+        core.updateBars()
         #expect(published.count == 2)
         #expect(published.last?.screens.first?.space == SpaceID("2"))
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.updateSpaceBar()
+        core.updateBars()
         #expect(published.count == 3)
         #expect(published.last?.screens.isEmpty == true)
     }

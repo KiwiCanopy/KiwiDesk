@@ -53,7 +53,7 @@ struct SpaceBarOverlayFilterTests {
         // The cap is pinned rather than inherited (#660): the
         // `overflow == 0` below reasons from it, so a retuned
         // default would silently re-derive this expectation.
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.glyphCap = 5
         core.state.apply(.windowCreated(window(1, app: "Chat")))
         core.state.apply(.windowCreated(window(2, app: "Mail")))
@@ -88,7 +88,7 @@ struct SpaceBarOverlayFilterTests {
     @Test("An overlay neither splits a run nor eats a cap slot")
     func groupingAndCapRunAfterTheFilter() throws {
         let core = seededCore()
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.glyphCap = 2
         // Flat order: Web, overlay(Web), Web, Mail — pinned
         // rather than left to spawn placement, since the claim
@@ -120,7 +120,7 @@ struct SpaceBarOverlayFilterTests {
     @Test("The +n badge never counts an undrawn overlay")
     func overflowCountsDrawnWindowsOnly() throws {
         let core = seededCore()
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.glyphCap = 1
         core.state.apply(.windowCreated(window(1, app: "Web")))
         core.state.apply(.windowCreated(window(2, app: "Mail")))
@@ -146,7 +146,7 @@ struct SpaceBarOverlayFilterTests {
     @Test("An overlay is front-app, but tints no glyph")
     func focusWhileAnOverlayHoldsIt() throws {
         let core = seededCore()
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.showFrontApp = true
         core.state.apply(.windowCreated(window(1, app: "Chat")))
         core.state.apply(.windowFocused(WindowID(1)))
@@ -176,7 +176,7 @@ struct SpaceBarOverlayFilterTests {
     func hideEmptySeesThroughOverlays() throws {
         let core = seededCore()
         core.state.workspaces.assign(SpaceID("2"), to: display)
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.hideEmpty = true
         core.state.apply(.windowCreated(window(1, app: "Web")))
         core.state.workspaces.activate(SpaceID("2"))

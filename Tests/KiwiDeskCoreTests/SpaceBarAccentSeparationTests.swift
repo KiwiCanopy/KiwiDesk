@@ -39,7 +39,7 @@ import Testing
 /// don't read a green pass here as the rule being satisfied.
 @Suite("Space Bar accent separation")
 struct SpaceBarAccentSeparationTests {
-    private var style: SpaceBarStyle { SpaceBarStyle() }
+    private var style: SpaceBarLook { SpaceBarLook() }
 
     /// Both accents must be opaque for any of this to mean
     /// anything: `parseHex` accepts `#RRGGBBAA`, and the Lua
@@ -127,7 +127,7 @@ struct SpaceBarAccentSeparationTests {
             // regression would report as one.
             guard
                 let active =
-                    palette.colors["space_bar.active_item_color"],
+                    palette.colors["kiwishelf.active_item_color"],
                 let focused =
                     palette.colors["space_bar.focused_item_color"]
             else {
@@ -207,7 +207,7 @@ struct SpaceBarAccentSeparationTests {
                 == style.focusedItemColor
         )
         #expect(
-            palette.colors["space_bar.active_item_color"]
+            palette.colors["kiwishelf.active_item_color"]
                 == style.activeItemColor
         )
     }

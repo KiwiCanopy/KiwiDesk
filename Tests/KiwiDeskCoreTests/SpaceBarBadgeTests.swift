@@ -59,7 +59,7 @@ struct SpaceBarBadgeTests {
         core.state.setFloating(WindowID(3), true)
         let items = core.spaceBarItems(
             display: display,
-            style: SpaceBarStyle()
+            style: SpaceBarLook()
         )
         let first = try #require(items.first)
         // Flat order Web, Mail, Web — adjacent runs only, so
@@ -84,7 +84,7 @@ struct SpaceBarBadgeTests {
         let split = try #require(
             core.spaceBarItems(
                 display: display,
-                style: SpaceBarStyle()
+                style: SpaceBarLook()
             ).first
         )
         #expect(split.apps.map(\.name) == ["Web", "Web"])
@@ -101,7 +101,7 @@ struct SpaceBarBadgeTests {
         let home = try #require(
             core.spaceBarItems(
                 display: display,
-                style: SpaceBarStyle()
+                style: SpaceBarLook()
             ).first { $0.space == SpaceID("1") }
         )
         #expect(home.apps.map(\.name) == ["Web", "Mail"])
@@ -112,7 +112,7 @@ struct SpaceBarBadgeTests {
         core.state.workspaces.activate(SpaceID("2"))
         let items = core.spaceBarItems(
             display: display,
-            style: SpaceBarStyle()
+            style: SpaceBarLook()
         )
         let second = try #require(
             items.first { $0.space == SpaceID("2") }
@@ -127,7 +127,7 @@ struct SpaceBarBadgeTests {
         core.state.setSticky(WindowID(1), .none)
         let after = core.spaceBarItems(
             display: display,
-            style: SpaceBarStyle()
+            style: SpaceBarLook()
         )
         let empty = try #require(
             after.first { $0.space == SpaceID("2") }
@@ -159,7 +159,7 @@ struct SpaceBarBadgeTests {
         core.state.apply(.windowCreated(window(5, app: "Zed")))
         core.state.apply(.windowFocused(WindowID(4)))
         core.state.apply(.windowFocused(WindowID(3)))
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.glyphCap = 2
         let item = try #require(
             core.spaceBarItems(display: display, style: style)
@@ -188,7 +188,7 @@ struct SpaceBarBadgeTests {
         let item = try #require(
             core.spaceBarItems(
                 display: display,
-                style: SpaceBarStyle()
+                style: SpaceBarLook()
             ).first
         )
         #expect(item.apps.map(\.name) == ["Web", "Mail"])

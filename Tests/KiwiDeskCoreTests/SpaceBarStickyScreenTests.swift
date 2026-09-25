@@ -63,7 +63,7 @@ struct SpaceBarStickyScreenTests {
         _ core: KiwiCore,
         _ display: DisplayID,
         _ space: String,
-        _ style: SpaceBarStyle = SpaceBarStyle()
+        _ style: SpaceBarLook = SpaceBarLook()
     ) throws -> SpaceBarOverlay.Item {
         try #require(
             core.spaceBarItems(display: display, style: style)
@@ -141,7 +141,7 @@ struct SpaceBarStickyScreenTests {
         core.state.apply(.windowCreated(window(5, app: "Term")))
         core.state.apply(.windowFocused(WindowID(5)))
         core.state.workspaces.activate(SpaceID("1"))
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.glyphCap = 1
         let away = try item(core, dell, "3", style)
         #expect(away.overflow == 1)

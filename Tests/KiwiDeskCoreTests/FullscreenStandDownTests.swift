@@ -155,7 +155,7 @@ struct FullscreenStandDownTests {
         defer { NativeSpaces.activeSpaceIsUserOverride = nil }
         // Bars painted on the desktop we are leaving.
         NativeSpaces.activeSpaceIsUserOverride = true
-        core.updateAppBar()
+        core.updateBars()
         #expect(!core.appBars.shownStrips.isEmpty)
         // Arriving on a fullscreen space, nothing retiles (the
         // nil number skips the switch handler's retile), so the
@@ -234,11 +234,11 @@ struct FullscreenStandDownTests {
         // stand-down below must be the gate, not a bar that
         // never rendered.
         NativeSpaces.activeSpaceIsUserOverride = true
-        core.updateAppBar()
+        core.updateBars()
         #expect(!core.appBars.shownStrips.isEmpty)
 
         NativeSpaces.activeSpaceIsUserOverride = false
-        core.updateAppBar()
+        core.updateBars()
         #expect(core.appBars.shownStrips.isEmpty)
     }
 
@@ -262,14 +262,12 @@ struct FullscreenStandDownTests {
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
 
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateAppBar()
-        core.updateSpaceBar()
+        core.updateBars()
         #expect(!core.appBars.shownStrips.isEmpty)
         #expect(!core.spaceBars.shownDisplays.isEmpty)
 
         NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        core.updateAppBar()
-        core.updateSpaceBar()
+        core.updateBars()
         #expect(core.appBars.shownStrips.isEmpty)
         #expect(core.spaceBars.shownDisplays.isEmpty)
     }

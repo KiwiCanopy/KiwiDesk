@@ -101,6 +101,9 @@ struct CoreLocalizationBoundaryTests {
         "Bar/AppBarItemView.swift": 3,
         "Bar/SpaceBarItemView.swift": 4,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,
+        // The shelf's overflow counts, a button each for VoiceOver
+        // (#1517): before and after.
+        "Bar/ShelfCountView.swift": 2,
     ]
 
     /// `L(` preceded by an identifier character is a different

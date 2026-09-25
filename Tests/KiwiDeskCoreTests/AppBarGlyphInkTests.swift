@@ -40,7 +40,7 @@ struct AppBarGlyphInkTests {
             count: 1,
             active: false,
             horizontal: horizontal,
-            style: AppBarStyle()
+            style: AppBarLook()
         )
         view.layout()
         return view

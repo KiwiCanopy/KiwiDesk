@@ -4,34 +4,78 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The pure whole-bar scroll geometry (#385): the arrow-zone
-/// viewport inset, the active-item scroll follow over
-/// variable-length items, the click/autoscroll step, and the
-/// arrow-zone hit test. All nonisolated, so pinned without AppKit.
+/// The pure whole-bar scroll geometry (#385, #1517): the fades at
+/// the run's hidden ends, the active-item scroll follow over
+/// variable-length items, the autoscroll step, and the fade-zone
+/// hit test. All nonisolated, so pinned without AppKit.
 @Suite("Space bar scroll geometry")
 struct SpaceBarScrollTests {
-    private let zone = BarArrowView.zone  // 24
+    /// Both ends fading 30 pt, an entry hidden on each side.
+    private let both = ShelfOverflow.Fades(
+        leading: 30,
+        trailing: 30,
+        before: 1,
+        after: 1
+    )
 
-    @Test("A run that fits reserves no arrow zone")
-    func viewportFits() {
-        let (inset, viewport) = SpaceBarOverlay.scrollViewport(
-            axis: 200,
-            total: 150,
-            gap: 6
+    @Test("A run that fits fades nowhere")
+    func fitsFadesNowhere() {
+        #expect(
+            ShelfOverflow.fades(
+                lengths: [50, 50],
+                gap: 6,
+                total: 106,
+                offset: 0,
+                viewport: 200,
+                depth: 40
+            ) == .none
         )
-        #expect(inset == 0)
-        #expect(viewport == 200)
     }
 
-    @Test("An overflowing run insets an arrow zone plus a gap")
-    func viewportOverflows() {
-        let (inset, viewport) = SpaceBarOverlay.scrollViewport(
-            axis: 200,
-            total: 300,
-            gap: 6
+    /// Only the side that hides an entry fades, and it counts
+    /// what it hides.
+    @Test("An overflowing run fades only its hidden side")
+    func overflowFadesItsHiddenSide() {
+        let lengths: [CGFloat] = Array(repeating: 100, count: 5)
+        let start = ShelfOverflow.fades(
+            lengths: lengths,
+            gap: 0,
+            total: 500,
+            offset: 0,
+            viewport: 300,
+            depth: 40
         )
-        #expect(inset == zone + 6)
-        #expect(viewport == 200 - (zone + 6) * 2)
+        #expect(start.leading == 0 && start.before == 0)
+        #expect(start.trailing > 0 && start.after == 2)
+        // Half an entry cut at the end still fades and counts.
+        let cut = ShelfOverflow.fades(
+            lengths: lengths,
+            gap: 0,
+            total: 500,
+            offset: 150,
+            viewport: 300,
+            depth: 40
+        )
+        #expect(cut.trailing > 0 && cut.after == 1)
+        // A sub-point overhang at the end draws nothing.
+        let rounding = ShelfOverflow.fades(
+            lengths: lengths,
+            gap: 0,
+            total: 500,
+            offset: 199.5,
+            viewport: 300,
+            depth: 40
+        )
+        #expect(rounding.trailing == 0 && rounding.after == 0)
+    }
+
+    @Test("The clear view is the viewport less its fades")
+    func clearView() {
+        let frame = CGRect(x: 10, y: 0, width: 200, height: 32)
+        #expect(
+            both.clear(of: frame, horizontal: true)
+                == CGRect(x: 40, y: 0, width: 140, height: 32)
+        )
     }
 
     @Test("A fitting run needs no scroll offset")
@@ -102,7 +146,7 @@ struct SpaceBarScrollTests {
         #expect(under == 0)
     }
 
-    @Test("The scroll step is the average item length plus a gap")
+    @Test("The autoscroll step is the average item length plus a gap")
     func step() {
         let step = SpaceBarOverlay.scrollStep(
             lengths: [10, 20, 30],
@@ -111,32 +155,32 @@ struct SpaceBarScrollTests {
         #expect(step == 24)
     }
 
-    @Test("Arrow hit maps the ends of an overflowing strip")
-    func arrowHitHorizontal() {
+    @Test("A fade hit maps the ends of an overflowing strip")
+    func fadeHitHorizontal() {
         let strip = CGRect(x: 0, y: 0, width: 200, height: 32)
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 10, y: 16),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 200,
                 horizontal: true
             ) == .back
         )
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 195, y: 16),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 200,
                 horizontal: true
             ) == .forward
         )
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 100, y: 16),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 200,
                 horizontal: true
             ) == nil
@@ -146,77 +190,77 @@ struct SpaceBarScrollTests {
     @Test(
         "Forward zone tracks the pinned front band, not the rim"
     )
-    func arrowHitPinnedFrontBand() {
+    func fadeHitPinnedFrontBand() {
         // The front segment holds the trailing 60pt; the Spaces
-        // region (and its forward arrow) ends at trailingAxis 140.
+        // region (and its forward fade) ends at trailingAxis 140.
         let strip = CGRect(x: 0, y: 0, width: 200, height: 32)
         // A point in the pinned band past trailingAxis is inert.
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 180, y: 16),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 140,
                 horizontal: true
             ) == nil
         )
-        // The forward arrow now sits just inside trailingAxis.
+        // The forward fade sits just inside trailingAxis.
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 135, y: 16),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 140,
                 horizontal: true
             ) == .forward
         )
     }
 
-    @Test("Arrow hit is inert while the run fits (inset 0)")
-    func arrowHitNoOverflow() {
+    @Test("A fade hit is inert while nothing fades")
+    func fadeHitNoOverflow() {
         let strip = CGRect(x: 0, y: 0, width: 200, height: 32)
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 10, y: 16),
                 strip: strip,
-                inset: 0,
+                fades: .none,
                 trailingAxis: 200,
                 horizontal: true
             ) == nil
         )
     }
 
-    @Test("Arrow hit ignores points off the strip's cross axis")
-    func arrowHitOffCross() {
+    @Test("A fade hit ignores points off the strip's cross axis")
+    func fadeHitOffCross() {
         let strip = CGRect(x: 0, y: 0, width: 200, height: 32)
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 10, y: 40),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 200,
                 horizontal: true
             ) == nil
         )
     }
 
-    @Test("Arrow hit maps the ends of a vertical strip")
-    func arrowHitVertical() {
+    @Test("A fade hit maps the ends of a vertical strip")
+    func fadeHitVertical() {
         let strip = CGRect(x: 0, y: 0, width: 32, height: 200)
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 16, y: 10),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 200,
                 horizontal: false
             ) == .back
         )
         #expect(
-            SpaceBarOverlay.arrowHit(
+            SpaceBarOverlay.fadeHit(
                 at: CGPoint(x: 16, y: 195),
                 strip: strip,
-                inset: zone + 6,
+                fades: both,
                 trailingAxis: 200,
                 horizontal: false
             ) == .forward

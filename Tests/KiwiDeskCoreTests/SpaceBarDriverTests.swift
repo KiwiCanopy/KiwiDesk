@@ -55,7 +55,7 @@ struct SpaceBarDriverTests {
         let core = seededCore()
         let items = core.spaceBarItems(
             display: display,
-            style: SpaceBarStyle()
+            style: SpaceBarLook()
         )
         #expect(
             items.map(\.space) == [
@@ -73,7 +73,7 @@ struct SpaceBarDriverTests {
     @Test("hide_empty drops empty spaces except the current one")
     func hideEmpty() {
         let core = seededCore()
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.hideEmpty = true
         // Active space "1" has windows: "2"/"3" are empty and
         // not current → dropped.
@@ -107,7 +107,7 @@ struct SpaceBarDriverTests {
         core.state.apply(.windowFocused(WindowID(1)))
         let (apps, overflow, _) = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
-            style: SpaceBarStyle()
+            style: SpaceBarLook()
         )
         #expect(overflow == 0)
         #expect(apps.map(\.name) == ["Zed", "Finder", "Zed"])
@@ -140,7 +140,7 @@ struct SpaceBarDriverTests {
         )
         let (apps, overflow, _) = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
-            style: SpaceBarStyle()
+            style: SpaceBarLook()
         )
         #expect(apps.count == 5)
         #expect(overflow == 4)
@@ -160,20 +160,20 @@ struct SpaceBarDriverTests {
         let space = core.state.workspaces[SpaceID("1")]!
         // A lower cap shows fewer glyphs, hides the rest as
         // WINDOWS in the +n badge.
-        var low = SpaceBarStyle()
+        var low = SpaceBarLook()
         low.glyphCap = 2
         let capped = core.spaceBarApps(in: space, style: low)
         #expect(capped.apps.count == 2)
         #expect(capped.overflow == 4)
         // An out-of-range cap clamps via resolvedGlyphCap: 0 → 1,
         // and a cap past the group count shows all with no badge.
-        var floored = SpaceBarStyle()
+        var floored = SpaceBarLook()
         floored.glyphCap = 0
         #expect(
             core.spaceBarApps(in: space, style: floored)
                 .apps.count == 1
         )
-        var wide = SpaceBarStyle()
+        var wide = SpaceBarLook()
         wide.glyphCap = 99
         let all = core.spaceBarApps(in: space, style: wide)
         #expect(all.apps.count == 6)
@@ -187,11 +187,11 @@ struct SpaceBarDriverTests {
         #expect(
             core.frontApp(
                 display: display,
-                style: SpaceBarStyle()
+                style: SpaceBarLook()
             ) == nil
         )
         // Toggle on → the focused window's app ("Mail").
-        var style = SpaceBarStyle()
+        var style = SpaceBarLook()
         style.showFrontApp = true
         let front = core.frontApp(display: display, style: style)
         #expect(front?.app.name == "Mail")
@@ -253,83 +253,57 @@ struct SpaceBarDriverTests {
     }
 }
 
-/// The same-edge info-row predicate (#293): true only while
-/// the Space Bar and at least one ENABLED layout App Bar
-/// resolve to the same edge — per-layout enablement and edge
-/// overrides both count.
-@Suite("Space bar same-edge predicate")
+/// The both-bars predicate (#1517): the two bars split the shelf
+/// exactly when the Space Bar and at least one ENABLED layout App
+/// Bar can show.
+@Suite("Space bar both-bars predicate")
 struct SpaceBarSameEdgeTests {
-    @Test("Predicate honors enablement and overrides")
+    @Test("Predicate honors each bar's enablement")
     func predicate() {
         var settings = TilingSettings()
-        // Space Bar off → never.
-        #expect(!settings.spaceBarSharesEdgeWithAppBar)
         settings.spaceBarStyle.enabled = true
-        // Both edges are pinned rather than inherited: this suite
-        // is about the predicate, not about which edges happen to
-        // ship, and #660 moved both defaults.
-        settings.spaceBarStyle.edge = .left
-        settings.appBarStyle.edge = .top
-        // Diverging → no.
-        #expect(!settings.spaceBarSharesEdgeWithAppBar)
-        // Global App Bar moves to left → yes.
-        settings.appBarStyle.edge = .left
-        #expect(settings.spaceBarSharesEdgeWithAppBar)
-        // Both layout bars disabled → the App Bar exists
-        // nowhere, so no.
+        #expect(settings.bothBarsCanShow)
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = false
-        #expect(!settings.spaceBarSharesEdgeWithAppBar)
-        // One layout re-enabled with a DIVERGING override → no;
-        // override matching the space edge → yes.
+        #expect(!settings.bothBarsCanShow)
         settings.monocle.appBar.enabled = true
-        settings.monocle.appBar.edge = .top
-        #expect(!settings.spaceBarSharesEdgeWithAppBar)
-        settings.monocle.appBar.edge = .left
-        #expect(settings.spaceBarSharesEdgeWithAppBar)
+        #expect(settings.bothBarsCanShow)
+        settings.spaceBarStyle.enabled = false
+        #expect(!settings.bothBarsCanShow)
     }
 }
 
-/// Stacked top strips (#293): the float clamp composes — the
-/// space bar strip pushes first, the app bar strip (carved
-/// below it) pushes further.
-@Suite("Combined top-strip float clamp")
+/// Both bars on one strip (#1517): each takes a segment of it, so
+/// the float clamp composes to the one strip's depth.
+@Suite("Combined shelf float clamp")
 struct CombinedClampTests {
-    @Test("A float clears both stacked strips")
-    func stackedStrips() {
+    @Test("A float clears both bars' segments on the one strip")
+    func sharedStrip() {
         let visible = CGRect(x: 0, y: 0, width: 1920, height: 1080)
-        var space = SpaceBarStyle()
-        space.enabled = true
-        space.edge = .top
-        // Pinned (#660): the combined inset reasons from it.
-        space.thickness = 32
-        let spaceStrip = SpaceBarGeometry.strip(
-            in: visible,
-            style: space
-        )!
-        let remaining = SpaceBarGeometry.remainingFrame(
-            in: visible,
-            style: space
+        var shelf = KiwiShelf()
+        shelf.edge = .top
+        // Pinned (#660): the inset reasons from it.
+        shelf.thickness = 32
+        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let arrangement = ShelfArrangement.arrange(
+            length: strip.width,
+            spaceNeed: 300,
+            appNeed: 500,
+            spaceFloor: 0,
+            shelf: shelf
         )
-        let appStrip = AppBarGeometry.barFrame(
-            in: remaining,
-            edge: .top,
-            thickness: 32,
-            outer: 0
-        )
-        let float = CGRect(x: 10, y: 5, width: 400, height: 300)
-        var clamped = AppBarGeometry.clampClear(
-            float,
-            of: spaceStrip,
-            edge: .top
-        )
-        clamped = AppBarGeometry.clampClear(
-            clamped,
-            of: appStrip,
-            edge: .top
-        )
-        // Below the combined reservation: 32 + 32.
-        #expect(clamped.minY == 64)
-        #expect(clamped.size == float.size)
+        let segments = [arrangement.space, arrangement.app]
+            .compactMap { $0?.rect(in: strip, horizontal: true) }
+        #expect(segments.count == 2)
+        var clamped = CGRect(x: 10, y: 5, width: 400, height: 300)
+        for segment in segments {
+            clamped = AppBarGeometry.clampClear(
+                clamped,
+                of: segment,
+                edge: .top
+            )
+        }
+        #expect(clamped.minY == 32)
+        #expect(clamped.size.width == 400)
     }
 }

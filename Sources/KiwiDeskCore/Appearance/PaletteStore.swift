@@ -155,7 +155,8 @@ public final class PaletteStore {
     /// envelope, no format — and deliberately outside the
     /// migration census (#945 review): a breaking `ColorPalette`
     /// schema change must rule the sidecar deliberately
-    /// (profiles.md's bump paragraph).
+    /// (profiles.md's bump paragraph) — #1517's shelf keys are
+    /// rewritten here, in memory, since the file never is.
     public func importPalette(from url: URL) throws -> ColorPalette {
         guard let data = try? Data(contentsOf: url),
             let raw = try? JSONDecoder().decode(
@@ -166,7 +167,8 @@ public final class PaletteStore {
             throw StoreError.invalidFile
         }
         let known = Set(ColorPaletteKeys.all)
-        let colors = raw.colors.filter { known.contains($0.key) }
+        let colors = ConfigMigration.shelvedPaletteColors(raw.colors)
+            .filter { known.contains($0.key) }
         return ColorPalette(name: raw.name, colors: colors)
     }
 

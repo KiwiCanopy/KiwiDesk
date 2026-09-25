@@ -27,12 +27,12 @@ import Testing
 /// before it was pinned here.
 @Suite("Palette highlight role")
 struct PaletteHighlightRoleTests {
+    /// One pair since #1517: both bars draw the shelf's colours.
     private static let accentPairs = [
-        ("app_bar.active_item_color", "app_bar.highlight_color"),
         (
-            "space_bar.active_item_color",
-            "space_bar.highlight_color"
-        ),
+            "kiwishelf.active_item_color",
+            "kiwishelf.highlight_color"
+        )
     ]
 
     /// No exemptions, in either bar. An absolute rule, so this
@@ -73,22 +73,19 @@ struct PaletteHighlightRoleTests {
                 measured += 1
             }
         }
-        #expect(measured == PaletteCatalog.bundled().count * 2)
+        #expect(
+            measured
+                == PaletteCatalog.bundled().count
+                * Self.accentPairs.count
+        )
     }
 
     /// The shipped defaults obey it too — they are the palette
     /// every sparse one falls back to.
-    @Test("The shipped defaults carry one accent per bar")
+    @Test("The shipped defaults carry one accent")
     func shippedDefaultsAgree() {
-        let settings = TilingSettings()
-        #expect(
-            settings.appBarStyle.highlightColor
-                == settings.appBarStyle.activeItemColor
-        )
-        #expect(
-            settings.spaceBarStyle.highlightColor
-                == settings.spaceBarStyle.activeItemColor
-        )
+        let shelf = TilingSettings().kiwishelf
+        #expect(shelf.highlightColor == shelf.activeItemColor)
     }
 
     /// The instrument, before the measurement that uses it.
@@ -198,9 +195,13 @@ struct PaletteHighlightRoleTests {
                 }
             }
         }
-        // Nine palettes, two bars, two wallpaper extremes — a
+        // Every palette, one shelf, two wallpaper extremes — a
         // scan that measured nothing would pass for having found
         // no violations.
-        #expect(measured == PaletteCatalog.bundled().count * 4)
+        #expect(
+            measured
+                == PaletteCatalog.bundled().count
+                * Self.accentPairs.count * 2
+        )
     }
 }

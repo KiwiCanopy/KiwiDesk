@@ -23,11 +23,9 @@ import Testing
 /// them.
 @Suite("Palette bar fill")
 struct PaletteBarFillTests {
-    /// The two bar-fill paths, named once.
-    private static let fillPaths = [
-        "app_bar.fill_color",
-        "space_bar.fill_color",
-    ]
+    /// The bar-fill path, named once — the shelf's one plate
+    /// since #1517.
+    private static let fillPaths = ["kiwishelf.fill_color"]
 
     private func alpha(_ hex: String) -> Double? {
         DragVisual.parseHex(hex)?.alpha
@@ -38,16 +36,8 @@ struct PaletteBarFillTests {
     @Test("The shipped bar fill is 70% opaque")
     func shippedDefaultAlpha() throws {
         let settings = TilingSettings()
-        let app = try #require(
-            alpha(settings.appBarStyle.fillColor)
-        )
-        #expect(abs(app - Double(0xB3) / 255) < 0.001)
-        // Both bars are one surface to the eye, so they carry
-        // one fill outright — not merely one alpha.
-        #expect(
-            settings.spaceBarStyle.fillColor
-                == settings.appBarStyle.fillColor
-        )
+        let fill = try #require(alpha(settings.kiwishelf.fillColor))
+        #expect(abs(fill - Double(0xB3) / 255) < 0.001)
     }
 
     /// Every bundled palette that sets a bar fill sets it at the
@@ -56,7 +46,7 @@ struct PaletteBarFillTests {
     @Test("Every bundled bar fill carries the shipped alpha")
     func bundledFillsShareTheAlpha() throws {
         let target = try #require(
-            alpha(TilingSettings().appBarStyle.fillColor)
+            alpha(TilingSettings().kiwishelf.fillColor)
         )
         // The catalog has to have loaded at all: a broken
         // resource lookup leaves `bundled()` holding only the
@@ -84,34 +74,29 @@ struct PaletteBarFillTests {
             }
         }
         // A scan that read nothing passes for having found no
-        // violations. Nine palettes, two bars each.
-        #expect(seen == PaletteCatalog.bundled().count * 2)
+        // violations. One shelf fill per palette.
+        #expect(
+            seen == PaletteCatalog.bundled().count * Self.fillPaths.count
+        )
     }
 
-    /// Within a palette the two bars are the same surface, so
-    /// they carry the same fill — an alpha-only agreement would
-    /// let one bar drift to another hue unnoticed.
-    @Test("A palette's two bar fills are one colour")
-    func bothBarsAgreeWithinAPalette() throws {
+    /// The two bars are one plate (#1517): a bundled palette
+    /// carries the shelf's fill and no bar-scoped copy that could
+    /// drift from it.
+    @Test("A palette carries one fill, the shelf's")
+    func oneFillPerPalette() {
         #expect(!PaletteCatalog.authored().isEmpty)
         for palette in PaletteCatalog.bundled() {
-            let app = try #require(
-                palette.colors["app_bar.fill_color"],
-                Comment(rawValue: palette.name)
-            )
-            let space = try #require(
-                palette.colors["space_bar.fill_color"],
-                Comment(rawValue: palette.name)
-            )
-            // As colours, not as spellings — `#2c2c2eb3` is the
-            // same plate as `#2C2C2EB3` and must not read as a
-            // second one.
             #expect(
-                ColorPalette.sameColor(app, space),
-                Comment(
-                    rawValue: "\(palette.name): \(app) / \(space)"
-                )
+                palette.colors["kiwishelf.fill_color"] != nil,
+                Comment(rawValue: palette.name)
             )
+            for bar in ["app_bar", "space_bar"] {
+                #expect(
+                    palette.colors["\(bar).fill_color"] == nil,
+                    Comment(rawValue: "\(palette.name) \(bar)")
+                )
+            }
         }
     }
 }

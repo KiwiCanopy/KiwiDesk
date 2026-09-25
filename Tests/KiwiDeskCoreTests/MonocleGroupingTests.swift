@@ -29,7 +29,7 @@ private func groups(
     core.barGroups(
         in: space,
         grouping: core.tiler.settings.monocle
-            .resolvedBar(global: core.tiler.settings.appBarStyle)
+            .resolvedBar(global: core.tiler.settings.appBarGlobalLook)
             .groupAdjacentWindows
     )
 }

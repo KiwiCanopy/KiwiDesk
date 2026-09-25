@@ -111,7 +111,7 @@ struct LayerChangeSeamTests {
         // the bus, keyed on the event, calling the one refresh.
         #expect(driver.occurrences(of: "bus.addSink{") == 1)
         #expect(driver.contains(".layerChange"))
-        #expect(driver.contains("self?.updateSpaceBar()"))
+        #expect(driver.contains("self?.updateBars()"))
         #expect(!driver.contains("onLayerChange"))
         let bootstrap = try squashed(
             "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"

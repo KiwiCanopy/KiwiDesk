@@ -30,6 +30,7 @@ extension TilingSettings {
             placementOverride,
             forKey: .placementOverride
         )
+        try container.encode(kiwishelf, forKey: .kiwishelf)
         try container.encode(appBarStyle, forKey: .appBar)
         try container.encode(spaceBarStyle, forKey: .spaceBar)
         try container.encode(borderStyle, forKey: .border)

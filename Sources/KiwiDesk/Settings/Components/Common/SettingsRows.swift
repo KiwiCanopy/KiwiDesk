@@ -109,6 +109,8 @@ struct RatioRow: View {
     let label: String
     @Binding var value: Double
     var help: String? = nil
+    /// The share's legal band — a split's by default.
+    var range: ClosedRange<Double> = 0.1...0.9
 
     var body: some View {
         SettingsRowShape {
@@ -118,7 +120,7 @@ struct RatioRow: View {
                 HStack {
                     SettingsSlider(
                         value: $value,
-                        range: 0.1...0.9,
+                        range: range,
                         step: 0.01,
                         label: label,
                         spokenValue: readoutText

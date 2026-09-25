@@ -1,6 +1,7 @@
 import KiwiDeskCore
 
-/// Shared App Bar option value/label pairs (#291, #819).
+/// Shared bar and shelf option value/label pairs (#291, #819,
+/// #1517).
 ///
 /// Every list is COMPUTED: a localized value stored for the life
 /// of the process keeps the locale it was first read in (#1311).
@@ -65,7 +66,7 @@ enum AppBarOptions {
                 .full,
                 L(
                     "app_bar.background_fit.full",
-                    "Full width"
+                    "Full"
                 )
             ),
         ]
@@ -85,7 +86,6 @@ enum AppBarOptions {
                     "Edge mark"
                 )
             ),
-            (.gap, L("app_bar.active_indicator.gap", "Gap")),
         ]
     }
 
@@ -100,6 +100,21 @@ enum AppBarOptions {
             (
                 .appFont,
                 L("app_bar.icon_source.app_font", "Glyphs")
+            ),
+        ]
+    }
+
+    /// The shelf's bar order while both show (#1517).
+    @MainActor
+    static var order: [(KiwiShelf.Order, String)] {
+        [
+            (
+                .spacesFirst,
+                L("kiwishelf.order.spaces_first", "Spaces · Apps")
+            ),
+            (
+                .appsFirst,
+                L("kiwishelf.order.apps_first", "Apps · Spaces")
             ),
         ]
     }

@@ -27,21 +27,27 @@ enum LiquidGlassGate {
     /// The style a bar renders: the stored one, glass stood down
     /// and both fills at full alpha while transparency is reduced
     /// — the setting asks for opaque backgrounds.
-    static func rendered(_ style: AppBarStyle) -> AppBarStyle {
-        guard reducesTransparency else { return style }
+    static func rendered(_ style: AppBarLook) -> AppBarLook {
         var copy = style
-        copy.liquidGlass = false
-        copy.fillColor = opaque(style.fillColor)
-        copy.hoverFillColor = opaque(style.hoverFillColor)
+        copy.shelf = rendered(style.shelf)
         return copy
     }
 
-    static func rendered(_ style: SpaceBarStyle) -> SpaceBarStyle {
-        guard reducesTransparency else { return style }
+    static func rendered(_ style: SpaceBarLook) -> SpaceBarLook {
         var copy = style
+        copy.shelf = rendered(style.shelf)
+        return copy
+    }
+
+    /// The shelf as drawn: every field the stand-down touches is
+    /// the shelf's (#1517), so the looks' overloads route here and
+    /// the list has one copy.
+    static func rendered(_ shelf: KiwiShelf) -> KiwiShelf {
+        guard reducesTransparency else { return shelf }
+        var copy = shelf
         copy.liquidGlass = false
-        copy.fillColor = opaque(style.fillColor)
-        copy.hoverFillColor = opaque(style.hoverFillColor)
+        copy.fillColor = opaque(shelf.fillColor)
+        copy.hoverFillColor = opaque(shelf.hoverFillColor)
         return copy
     }
 

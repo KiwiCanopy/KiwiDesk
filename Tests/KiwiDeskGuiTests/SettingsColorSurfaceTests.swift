@@ -38,7 +38,7 @@ struct SettingsColorSurfaceTests {
     /// declares the type rather than using it.
     private let allowed: [String: String] = [
         "AdvancedColorRow+Bars.swift":
-            "the two bar groups' swatches",
+            "the shelf's and the Space Bar's swatches",
         "AdvancedColorRow+Structure.swift":
             "the border, mark and drag swatches",
         "ColorField.swift":
@@ -78,7 +78,7 @@ struct SettingsColorSurfaceTests {
         // at nothing. Fewer call sites than census rows is
         // correct: the four drag tints share one builder, since
         // both columns edit the same `DragVisual` shape.
-        #expect(found >= 20)
+        #expect(found >= 14)
     }
 
     /// An allow-list entry for a file that no longer exists is a
@@ -125,9 +125,9 @@ struct SettingsColorSurfaceTests {
         let placed = SettingKey.allCases.filter {
             $0.placement.area == .advancedColours
         }
-        // 25 rows: the 23 a palette carried before this phase,
-        // plus the two mark tints it gained with it.
-        #expect(placed.count == 25)
+        // 17 rows since #1517: the shelf's eight colours replaced
+        // the two bars' seventeen.
+        #expect(placed.count == 17)
         #expect(placed.count == ColorPaletteKeys.all.count)
     }
 

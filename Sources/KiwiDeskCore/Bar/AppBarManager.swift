@@ -12,7 +12,11 @@ public final class AppBarManager {
         public let activeIndex: Int?
         public let strip: CGRect
         /// The resolved style with absolute bar edge (#293).
-        public let style: AppBarStyle
+        public let style: AppBarLook
+        /// The length a slot's quarter cap is measured on — the
+        /// whole shelf's, so sharing the shelf with the Space
+        /// Bar does not shrink the slots (#1517).
+        public let capAxis: CGFloat
 
         public init(
             display: DisplayID,
@@ -20,7 +24,8 @@ public final class AppBarManager {
             items: [AppBarOverlay.Item],
             activeIndex: Int?,
             strip: CGRect,
-            style: AppBarStyle
+            style: AppBarLook,
+            capAxis: CGFloat
         ) {
             self.display = display
             self.space = space
@@ -28,6 +33,7 @@ public final class AppBarManager {
             self.activeIndex = activeIndex
             self.strip = strip
             self.style = style
+            self.capAxis = capAxis
         }
     }
 
@@ -115,9 +121,18 @@ public final class AppBarManager {
                 items: bar.items,
                 activeIndex: bar.activeIndex,
                 strip: bar.strip,
-                style: bar.style
+                style: bar.style,
+                capAxis: bar.capAxis
             )
         }
+    }
+
+    /// The section a display's shelf places, while it shows
+    /// (#1517).
+    func shownOverlay(on display: DisplayID) -> AppBarOverlay? {
+        guard let overlay = overlays[display], overlay.isVisible
+        else { return nil }
+        return overlay
     }
 
     #if DEBUG

@@ -98,8 +98,7 @@ extension KiwiCore {
         // modes never write `scrollRest`, so this is a no-op
         // for them.
         persistScrollRest()
-        updateAppBar()
-        updateSpaceBar()
+        updateBars()
         // Rings ride the same freshness as the bar: every
         // structural / focus / mode / settings retile. Runs after
         // the layout above so it reads the just-updated state
@@ -125,7 +124,7 @@ extension KiwiCore {
         // Floats sit outside the layout loop above, so a bar just
         // switched on (or a window just turned floating) can leave
         // one hidden under a top strip; correct it here. Must run
-        // after `updateAppBar()`: the clamp reads the strips it
+        // after `updateBars()`: the clamp reads the strips it
         // just painted (#242).
         clampFloatsClearOfBars()
         // A tiled sticky traveler on a floating-mode space of

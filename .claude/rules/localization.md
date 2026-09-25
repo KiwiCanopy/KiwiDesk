@@ -319,8 +319,9 @@ everywhere, as an `-ing`-weld sub-rule once did — German
 The **feature-name pair** is the remaining group, and
 `docs/localization-naming.md` is their one copy — read it before
 touching either. In short: `dropped_product_names` requires
-"App Bar" / "Space Bar" **present** in every locale, script
-irrelevant (deliberately *not* the residue rule's mirror);
+every name in `PRODUCT_NAMES` — the register; do not list its
+members here — **present** in every locale, script irrelevant
+(deliberately *not* the residue rule's mirror);
 `untranslated_mode_names` requires the English mode name
 **absent** in the three CJK locales, which render them natively,
 and skips the seven that keep the English word. A new name joins

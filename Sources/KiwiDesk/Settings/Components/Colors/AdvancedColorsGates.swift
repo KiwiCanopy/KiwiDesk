@@ -51,9 +51,10 @@ struct AdvancedColorsGates {
     /// In-chip glyphs are native images and no front-app name renders
     /// (`SpaceBarOverlay+FrontApp`).
     var focusedItemInert: Bool {
-        let style = settings.spaceBarStyle
-        return style.iconSource == .appImage
-            && !(style.showFrontApp && style.edge.isHorizontal)
+        let style = settings.spaceBarLook
+        return !style.enabled
+            || style.iconSource == .appImage
+                && !(style.showFrontApp && style.edge.isHorizontal)
     }
 
     /// Whether the focused-item row draws its remote reason as a
@@ -61,7 +62,9 @@ struct AdvancedColorsGates {
     /// off, the header carries the outer reason and the row is
     /// greyed for that.
     var focusedItemNeedsReference: Bool {
-        bars.containerReason(for: .spaceBar) == nil && focusedItemInert
+        bars.containerReason(for: .spaceBar) == nil
+            && bars.containerReason(for: .kiwishelf) == nil
+            && focusedItemInert
     }
 }
 
@@ -119,15 +122,6 @@ enum AdvancedColorsHelp {
         )
     }
 
-    static var spaceBarOff: String {
-        L(
-            "colors.space_bar_off.help",
-            "The Space Bar is off, so its colors aren't drawn. "
-                + "Turn it on in %1$@.",
-            SettingsDestination.bars.title
-        )
-    }
-
     /// The unfocused row's remote gate, as the sentence a
     /// `CrossReferenceRow` links to Gaps & Borders (#1310): the
     /// row and the switch by their own keys (#818); `%3$@` is the
@@ -157,22 +151,22 @@ enum AdvancedColorsHelp {
                 + "\u{201C}%2$@\u{201D} is \u{201C}%3$@\u{201D} — set "
                 + "it to \u{201C}%4$@\u{201D} in %5$@.",
             L("space_bar.color.focused_item", "Focused window"),
-            L("space_bar.icon_source.label", "App symbol style"),
+            L("kiwishelf.icon_source.label", "App symbol style"),
             L("app_bar.icon_source.app_image", "System default"),
             L("app_bar.icon_source.app_font", "Glyphs"),
             CrossReferenceRow.linkSlot
         )
     }
 
-    /// App Bar off explanatory string (#705, #818).
-    static var appBarOff: String {
+    /// No bar shows, so the shelf draws no colour (#705, #818).
+    static var kiwishelfOff: String {
         L(
-            "colors.app_bar_off.help",
-            "No layout shows an App Bar, so its colors aren't "
-                + "drawn. In %1$@, turn a layout's App Bar on "
-                + "under “%2$@”.",
+            "colors.kiwishelf_off.help",
+            "No bar shows, so these colors aren't drawn. In %1$@, "
+                + "turn one on under “%2$@” in %3$@.",
             SettingsDestination.bars.title,
-            L("bars.show_in.title", "Show it in")
+            L("kiwishelf.show.label", "Show"),
+            L("bars.switch.kiwishelf", "KiwiShelf")
         )
     }
 }

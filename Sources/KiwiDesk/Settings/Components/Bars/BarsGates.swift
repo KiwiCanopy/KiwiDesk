@@ -13,8 +13,13 @@ struct BarsGates {
         case noBarShown
         /// The Space Bar is switched off.
         case spaceBarOff
-        /// The active indicator is Gap — active items are hidden.
-        case gapOnly
+        /// No shown bar draws an app icon: the Space Bar is off and
+        /// every shown App Bar is title-only.
+        case noAppIcon
+        /// No bar shows, so the shelf draws nothing to shape.
+        case shelfEmpty
+        /// Boxed draws a box per item — no plate to size.
+        case boxedShelf
     }
 
     /// Resolves container gate to an inert reason, or nil if active.
@@ -27,6 +32,8 @@ struct BarsGates {
         case .spaceBar:
             return settings.spaceBarStyle.enabled
                 ? nil : .spaceBarOff
+        case .kiwishelf:
+            return shelfShows ? nil : .shelfEmpty
         default:
             return nil
         }
@@ -38,43 +45,48 @@ struct BarsGates {
         settings.appBarHosts.filter(\.enabled)
     }
 
-    var anyBarShown: Bool { !shownBars.isEmpty }
+    var anyBarShown: Bool { settings.anyAppBarCanShow }
 
-    /// True when NO shown bar draws a shared plate to size.
-    var everyShownBarBoxed: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                $0.resolved(with: settings.appBarStyle)
-                    .backgroundStyle == .boxed
-            }
+    /// True when the Space Bar and an App Bar both show, so the
+    /// shelf's order and share apply (#1517).
+    var bothBarsShow: Bool { settings.bothBarsCanShow }
+
+    /// Why order and share are inert: whichever of the two bars
+    /// is missing, so the sentence names only that one.
+    /// Nil while no bar shows: the card's block grey answers then.
+    var bothBarsReason: InertReason? {
+        guard settings.shelfShows else { return nil }
+        if !settings.spaceBarStyle.enabled { return .spaceBarOff }
+        return anyBarShown ? nil : .noBarShown
+    }
+
+    /// True while any bar can show — Core's one predicate — so
+    /// the shelf has something to place and shape.
+    var shelfShows: Bool { settings.shelfShows }
+
+    /// True when the shelf draws a box per item, so no plate is
+    /// there for the background size to fit.
+    var boxedShelf: Bool {
+        settings.kiwishelf.backgroundStyle == .boxed
     }
 
     /// True when EVERY shown bar renders on a vertical edge.
     var everyShownBarVertical: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                !$0.resolved(with: settings.appBarStyle)
-                    .edge.isHorizontal
-            }
+        anyBarShown && !settings.kiwishelf.edge.isHorizontal
     }
 
     /// True when no shown bar renders an icon at all.
     var everyShownBarTitleOnly: Bool {
         anyBarShown
             && shownBars.allSatisfy {
-                let bar = $0.resolved(with: settings.appBarStyle)
-                return bar.renderedContent == .title
+                settings.appBarLook(for: $0).renderedContent == .title
             }
     }
 
-    /// True when active indicator hides active items outright
-    /// (`AppBarOverlay`, `AppBarItemView`).
-    var gapOnly: Bool {
-        anyBarShown
-            && shownBars.allSatisfy {
-                $0.resolved(with: settings.appBarStyle)
-                    .activeIndicator == .gap
-            }
+    /// True when a bar shows but none draws an app icon, so the
+    /// shelf's symbol style has nothing to style.
+    var noBarDrawsIcon: Bool {
+        !settings.spaceBarStyle.enabled && everyShownBarTitleOnly
     }
 }
 
@@ -86,25 +98,44 @@ enum BarsGateHelp {
         case .noBarShown:
             // Points to the block holding the switches (#705, #818).
             return L(
-                "app_bar.no_layout.help",
-                "No layout shows an App Bar — turn a layout's "
-                    + "App Bar on under “%1$@”.",
-                L("bars.show_in.title", "Show it in")
+                "app_bar.no_layout.shelf_help",
+                "No layout shows an App Bar — turn one on under "
+                    + "“%1$@” in %2$@.",
+                L("kiwishelf.show.label", "Show"),
+                L("bars.switch.kiwishelf", "KiwiShelf")
             )
         case .spaceBarOff:
             return L(
-                "space_bar.disabled.help",
-                "Turn on %1$@ to edit these settings.",
-                L("space_bar.enabled", "Show Space Bar")
+                "space_bar.disabled.shelf_help",
+                "Turn on the Space Bar under “%1$@” in %2$@ to edit "
+                    + "these settings.",
+                L("kiwishelf.show.label", "Show"),
+                L("bars.switch.kiwishelf", "KiwiShelf")
             )
-        case .gapOnly:
+        case .shelfEmpty:
+            return L(
+                "kiwishelf.empty.help",
+                "Turn on a bar under \u{201C}%1$@\u{201D} to edit "
+                    + "these settings.",
+                L("kiwishelf.show.label", "Show")
+            )
+        case .boxedShelf:
+            return L(
+                "kiwishelf.background_fit.boxed_only",
+                "\u{201C}%1$@\u{201D} draws a box per item, "
+                    + "not a shared plate, so there is "
+                    + "nothing to size.",
+                L("app_bar.background_style.boxed", "Boxed")
+            )
+        case .noAppIcon:
             // Interpolated from picker entry (#818).
             return L(
-                "app_bar.color.gap_only",
-                "The \u{201C}%1$@\u{201D} indicator hides the "
-                    + "active item instead of marking it, so "
-                    + "these colors aren't drawn.",
-                L("app_bar.active_indicator.gap", "Gap")
+                "kiwishelf.icon_source.no_icon",
+                "The Space Bar is off and the App Bar's "
+                    + "\u{201C}%1$@\u{201D} is \u{201C}%2$@\u{201D}, "
+                    + "so no app icon is drawn.",
+                L("app_bar.content.label", "Content"),
+                L("app_bar.content.title", "Title")
             )
         }
     }

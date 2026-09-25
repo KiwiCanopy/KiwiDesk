@@ -28,7 +28,7 @@ struct AppBarItemTextTests {
     private func text(
         _ core: KiwiCore,
         _ group: [UInt32],
-        style: AppBarStyle = AppBarStyle()
+        style: AppBarLook = AppBarLook()
     ) -> String {
         core.barItem(
             for: group.map(WindowID.init),
@@ -77,7 +77,7 @@ struct AppBarItemTextTests {
                     "TanStack Start: Full-Stack React Framework"
             )
         ])
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.titleCap = 10
         #expect(text(core, [1], style: style) == "TanStack S…")
     }
@@ -96,7 +96,7 @@ struct AppBarItemTextTests {
         let core = seeded([
             titledWindow(1, title: "Downloads and more")
         ])
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.titleCap = 0
         let drawn = text(core, [1], style: style)
         #expect(
@@ -121,7 +121,7 @@ struct AppBarItemTextTests {
                 title: ""
             )
         ])
-        var style = AppBarStyle()
+        var style = AppBarLook()
         style.titleCap = 8
         #expect(
             text(core, [1], style: style)
@@ -144,7 +144,7 @@ struct AppBarItemTextTests {
     @Test("The item draws the title, not the app name")
     func itemDrawsTheTitle() {
         let core = seeded([titledWindow(1, title: "Downloads")])
-        let item = core.barItem(for: [WindowID(1)], style: AppBarStyle())
+        let item = core.barItem(for: [WindowID(1)], style: AppBarLook())
         #expect(item.text == "Downloads")
         #expect(item.text != "Finder")
     }
@@ -169,10 +169,10 @@ struct SpaceBarFrontTitleTests {
         return core
     }
 
-    private func style(cap: Int = 25) -> SpaceBarStyle {
-        var style = SpaceBarStyle()
+    private func style(cap: Int = 25) -> SpaceBarLook {
+        var style = SpaceBarLook()
         style.showFrontApp = true
-        style.titleCap = cap
+        style.frontAppTitleCap = cap
         return style
     }
 

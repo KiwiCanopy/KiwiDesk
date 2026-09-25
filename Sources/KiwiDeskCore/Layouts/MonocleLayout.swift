@@ -11,11 +11,7 @@ public struct MonocleLayout: LayoutSystem {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
-        let frame = context.monocle.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let frame = context.usable
         // Center size-bound window in slot (#677).
         func effective(_ window: WindowID) -> CGRect {
             context.sizeBounds[window]?
@@ -43,7 +39,6 @@ public struct MonocleLayout: LayoutSystem {
         let corner = TilingEngine.optimalHideCorner(
             neighbors: context.screenNeighbors
         )
-        let bounds = parkBounds(in: context)
         var result: [WindowID: CGRect] = [:]
         for window in windows {
             let own = effective(window)
@@ -52,7 +47,7 @@ public struct MonocleLayout: LayoutSystem {
                 ? own
                 : TilingEngine.stashFrame(
                     own,
-                    in: bounds,
+                    in: context.bounds,
                     corner: corner
                 )
         }
@@ -68,25 +63,5 @@ public struct MonocleLayout: LayoutSystem {
         anchor.flatMap {
             members.contains($0) ? $0 : nil
         } ?? members.first
-    }
-
-    /// Park anchor bounds: the layout bounds clear of the PAINTED
-    /// bar strip (#293, #881) — the one `regionClear` carve the
-    /// float region takes, since the park places no window.
-    private func parkBounds(
-        in context: LayoutContext
-    ) -> CGRect {
-        guard
-            let strip = context.monocle.barFrame(
-                in: context.bounds,
-                global: context.appBarStyle
-            )
-        else { return context.bounds }
-        return AppBarGeometry.regionClear(
-            context.bounds,
-            of: strip,
-            edge: context.monocle
-                .resolvedBar(global: context.appBarStyle).edge
-        )
     }
 }

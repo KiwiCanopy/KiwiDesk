@@ -1,167 +1,38 @@
 import AppKit
 
-/// Panel plumbing and view hierarchy for SpaceBarOverlay (`BarPanel`, #407).
+/// View plumbing for SpaceBarOverlay (#407, #1517): the section
+/// draws into `root`; the plate beneath it is the shelf's.
 extension SpaceBarOverlay {
-    /// Configures base panel container styling.
-    func styleContainer(
-        _ panel: NSPanel,
-        style: SpaceBarStyle,
-        strip: CGRect
-    ) {
-        guard let layer = panel.contentView?.layer else {
-            return
-        }
-        layer.masksToBounds = true
-        layer.cornerRadius = 0
-        layer.backgroundColor = NSColor.clear.cgColor
-    }
-
-    /// Updates or hides solid plain background plate (`SpaceBarStyle`).
-    func updatePlainPlate(
-        _ panel: NSPanel,
-        style: SpaceBarStyle,
-        strip: CGRect,
-        plateFrame: CGRect
-    ) {
-        guard style.backgroundStyle == .plain, !style.glassEnabled,
-            let content = panel.contentView
-        else {
-            plainPlate?.isHidden = true
-            return
-        }
-        let plate = plainPlate ?? NSView()
-        plainPlate = plate
-        plate.wantsLayer = true
-        if plate.superview !== content {
-            content.addSubview(
-                plate,
-                positioned: .below,
-                relativeTo: nil
-            )
-        }
-        plate.isHidden = false
-        plate.frame = plateFrame
-        let depth =
-            style.edge.isHorizontal ? strip.height : strip.width
-        plate.layer?.cornerRadius =
-            style.resolvedCornerRadius(forThickness: depth)
-        plate.layer?.backgroundColor =
-            NSColor(kiwiHex: style.fillColor).cgColor
-    }
-
-    /// Resolves glass hosting mode for current render pass (#407).
-    func glassHosting(
-        _ style: SpaceBarStyle,
-        overflow: Bool
-    ) -> GlassHosting {
+    /// Resolves the section's own glass hosting (#407).
+    func glassHosting(_ style: SpaceBarLook) -> GlassHosting {
         GlassHosting.resolve(
             available: AppBarStyle.glassAvailable,
             glassEnabled: style.glassEnabled,
-            boxed: style.backgroundStyle == .boxed,
-            overflow: overflow
+            boxed: style.backgroundStyle == .boxed
         )
     }
 
-    /// Prepares view hierarchy for target glass hosting mode before
-    /// layout (#407), and picks the front segment's host with it:
-    /// the panel content while pinned, the glass run while it
-    /// hugs, else the item container — one arm creates the run
-    /// and names it host, so a steady render reparents nothing
-    /// (#1315).
+    /// Prepares the hierarchy for `mode` before layout, and picks
+    /// the front segment's host with it: the root while pinned,
+    /// else the item container — so a steady render reparents
+    /// nothing (#1315).
     func prepareGlassHosting(
         _ mode: GlassHosting,
-        panel: NSPanel,
-        style: SpaceBarStyle,
-        strip: CGRect,
-        plateFrame: CGRect,
-        viewport: CGRect,
         pinnedFront: Bool
     ) {
-        updatePlainPlate(
-            panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame
-        )
-        guard let content = panel.contentView else { return }
-        let plainHost = pinnedFront ? content : itemContainer
-        switch mode {
-        case .boxGlass:
-            restoreItemContainer(to: content, viewport: viewport)
-            teardownGlassRun()
-            glassPlate?.isHidden = true
-            glassTint?.isHidden = true
-            frontHost = plainHost
-        case .plainGlassHug:
-            teardownBoxGlasses()
-            // A pinned front overflows, and overflow resolves to
-            // `.plainGlassSpan`, so the hug's host is the run.
-            let run = glassRun ?? AppBarOverlay.FlippedView()
-            glassRun = run
-            frontHost = run
-        case .plainGlassSpan:
-            teardownBoxGlasses()
-            frontHost = plainHost
-        case .plainPlate, .none:
-            teardownBoxGlasses()
-            restoreItemContainer(to: content, viewport: viewport)
-            teardownGlassRun()
-            glassPlate?.isHidden = true
-            glassTint?.isHidden = true
-            frontHost = plainHost
-        }
+        if mode != .boxGlass { teardownBoxGlasses() }
+        frontHost = pinnedFront ? root : itemContainer
     }
 
-    /// Installs glass views after item layout passes (#407).
+    /// Installs per-item glass after item layout (#407).
     func installGlassHosting(
         _ mode: GlassHosting,
-        panel: NSPanel,
         frames: [CGRect],
-        viewport: CGRect,
-        plateFrame: CGRect,
-        pinnedFront: Bool,
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         depth: CGFloat
     ) {
-        switch mode {
-        case .boxGlass:
-            updateBoxGlasses(
-                frames: frames,
-                style: style,
-                depth: depth
-            )
-        case .plainGlassHug, .plainGlassSpan:
-            updatePlainGlass(
-                panel: panel,
-                viewport: viewport,
-                plateFrame: plateFrame,
-                overflow: mode == .plainGlassSpan,
-                pinnedFront: pinnedFront,
-                style: style,
-                depth: depth
-            )
-        case .plainPlate, .none:
-            break
-        }
-    }
-
-    /// Reparents the item viewport out of a glass plate back to
-    /// the panel content, below the arrows, at its viewport frame.
-    /// No-op unless it currently rides the glass.
-    private func restoreItemContainer(
-        to content: NSView,
-        viewport: CGRect
-    ) {
-        guard let plate = glassPlate,
-            GlassPlate.holds(plate, itemContainer)
-        else { return }
-        GlassPlate.detach(plate)
-        content.addSubview(
-            itemContainer,
-            positioned: .below,
-            relativeTo: backArrow
-        )
-        itemContainer.frame = viewport
+        guard mode == .boxGlass else { return }
+        updateBoxGlasses(frames: frames, style: style, depth: depth)
     }
 
     func syncItemViewCount(_ count: Int) {
@@ -175,19 +46,20 @@ extension SpaceBarOverlay {
         }
     }
 
-    func makePanel() -> NSPanel {
-        let panel = BarPanel.makeNonActivating()
-        let view = AppBarOverlay.FlippedView()
-        view.wantsLayer = true
-        panel.contentView = view
-        // Clipping viewport prevents scrolled items sliding under arrows
-        // (#385).
+    /// Builds the section's view once.
+    func configureRoot() {
+        root.wantsLayer = true
+        root.isHidden = true
+        root.layer?.masksToBounds = true
+        root.layer?.backgroundColor = NSColor.clear.cgColor
+        // Clipping viewport: the run fades at its hidden ends
+        // (#385, #1517).
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
         itemContainer.addSubview(layerDivider)
-        view.addSubview(itemContainer)
-        view.addSubview(backArrow)
-        view.addSubview(forwardArrow)
-        return panel
+        root.addSubview(itemContainer)
+        root.addSubview(backCount)
+        root.addSubview(forwardCount)
+        root.onScroll = { [weak self] in self?.scroll($0) ?? false }
     }
 }

@@ -68,7 +68,7 @@ struct SpaceBarAwayTests {
         park(core, 7, in: "2", rank: 0)
         let (apps, overflow, _) = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
-            style: core.tiler.settings.spaceBarStyle
+            style: core.tiler.settings.spaceBarLook
         )
         // Same app name: a merged away member would group with
         // the present one and read `count == 2` here.
@@ -92,7 +92,7 @@ struct SpaceBarAwayTests {
         park(core, 2, app: "Mail", in: "2", rank: 1)
         let (apps, _, _) = core.spaceBarApps(
             in: core.state.workspaces["2"]!,
-            style: core.tiler.settings.spaceBarStyle
+            style: core.tiler.settings.spaceBarLook
         )
         #expect(apps.map(\.name) == ["Safari"])
         #expect(apps.map(\.count) == [2])
@@ -102,9 +102,8 @@ struct SpaceBarAwayTests {
     func hideEmptyDrops() {
         let core = makeCore()
         core.state.workspaces.ensureSpace("3")
-        var style = core.tiler.settings.spaceBarStyle
-        style.hideEmpty = true
-        core.tiler.settings.spaceBarStyle = style
+        core.tiler.settings.spaceBarStyle.hideEmpty = true
+        let style = core.tiler.settings.spaceBarLook
         let display = Display(
             id: DisplayID(1),
             name: "Main",
