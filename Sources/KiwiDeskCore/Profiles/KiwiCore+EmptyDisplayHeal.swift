@@ -46,7 +46,9 @@ extension KiwiCore {
                 seed = earlier
                 setSpaceMode(seed, lead)
             case .absent:
-                seed = nextFreeSpaceNumber()
+                seed = SpaceID.smallestFreeNumber(
+                    among: state.workspaces.allSpaces.map(\.id)
+                )
                 state.workspaces.ensureSpace(seed, mode: lead)
                 healedSpaces[display.fingerprint] = seed
             }
@@ -102,15 +104,5 @@ extension KiwiCore {
         default:
             return .absent
         }
-    }
-
-    /// The smallest positive number no live space is called.
-    private func nextFreeSpaceNumber() -> SpaceID {
-        let taken = Set(
-            state.workspaces.allSpaces.compactMap { Int($0.id.raw) }
-        )
-        var number = 1
-        while taken.contains(number) { number += 1 }
-        return SpaceID(number)
     }
 }

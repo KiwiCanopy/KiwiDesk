@@ -77,7 +77,10 @@ struct SpaceNameField: View {
         }
         if let refusal = notice(for: draft), refusal.isRefusal {
             draft = space.raw
-            announce(refusal.sentence)
+            announcement?.cancel()
+            announcement = DelayedAnnouncement.schedule(
+                refusal.sentence
+            )
             return
         }
         guard !target.raw.isEmpty else {
@@ -85,20 +88,5 @@ struct SpaceNameField: View {
             return
         }
         onRename(target)
-    }
-
-    /// Speaks a refusal once, after `SettingsFooter`'s measured
-    /// delay — a post landing with the control's own
-    /// announcement is dropped (#812).
-    private func announce(_ sentence: String) {
-        announcement?.cancel()
-        let work = DispatchWorkItem {
-            AccessibilityNotification.Announcement(sentence).post()
-        }
-        announcement = work
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + SettingsFooter.announceDelay,
-            execute: work
-        )
     }
 }

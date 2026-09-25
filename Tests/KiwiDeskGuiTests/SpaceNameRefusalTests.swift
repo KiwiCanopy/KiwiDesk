@@ -81,7 +81,10 @@ struct SpaceNameRefusalTests {
             after: "if let refusal = notice(for: draft), refusal.isRefusal",
             in: commit
         )
-        #expect(refused?.contains("announce(refusal.sentence)") == true)
+        #expect(
+            refused?.contains("DelayedAnnouncement.schedule(") == true
+        )
+        #expect(refused?.contains("refusal.sentence") == true)
     }
 
     @Test("the caption is danger with its shape cue")

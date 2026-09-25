@@ -10,23 +10,10 @@ import Testing
 struct SpaceAddNameTests {
     private let spaces = [SpaceID(1), SpaceID("Work"), SpaceID(3)]
 
-    @Test("an empty field takes the count plus one")
-    func emptyTakesNextNumber() {
-        #expect(SpaceAddName.resolve("  ", among: spaces) == .add(4))
+    @Test("an empty field takes the smallest free number")
+    func emptyTakesSmallestFree() {
+        #expect(SpaceAddName.resolve("  ", among: spaces) == .add(2))
         #expect(SpaceAddName.resolve("", among: []) == .add(1))
-    }
-
-    @Test("a taken number is suffixed until free")
-    func takenNumberIsSuffixed() {
-        #expect(
-            SpaceAddName.nextNumber(among: [SpaceID(1), SpaceID(3)])
-                == SpaceID("3 (1)")
-        )
-        #expect(
-            SpaceAddName.nextNumber(
-                among: [SpaceID(3), SpaceID("3 (1)")]
-            ) == SpaceID("3 (2)")
-        )
     }
 
     @Test("a typed name is kept trimmed, a taken one refused")
@@ -54,10 +41,27 @@ struct SpaceAddNameTests {
         return try SourceScan.strippedSource(at: file)
     }
 
+    private func sectionSource() throws -> String {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/SpacesSection.swift"
+            )
+        return try SourceScan.strippedSource(at: file)
+    }
+
     @Test("+ adds what the rule resolves, greyed only on a refusal")
     func buttonWiresTheRule() throws {
         let source = try rowSource()
-        #expect(source.contains(".disabled(resolved.space == nil)"))
+        let button = try #require(
+            source.range(of: "Button(action: add)")
+                .map { String(source[$0.lowerBound...]) }
+        )
+        let untilHelp = try #require(
+            button.range(of: ".help(").map {
+                String(button[..<$0.lowerBound])
+            }
+        )
+        #expect(untilHelp.contains(".disabled(resolved.space == nil)"))
         let add = try #require(
             SourceScan.declarationBody(
                 after: "private func add()",
@@ -68,7 +72,7 @@ struct SpaceAddNameTests {
         #expect(add.contains("onAdd(space)"))
     }
 
-    @Test("Return adds only a typed name and speaks a refusal")
+    @Test("Return adds a typed name, speaks a refusal, never stale")
     func returnWiresTheRule() throws {
         let source = try rowSource()
         #expect(source.contains(".onSubmit(submit)"))
@@ -79,7 +83,28 @@ struct SpaceAddNameTests {
             )
         )
         #expect(submit.contains("guard !typed.trimmed.isEmpty"))
-        #expect(submit.contains("announce(notice.sentence)"))
+        #expect(submit.contains("DelayedAnnouncement.schedule("))
+        #expect(submit.contains("add()"))
+        let edited = SourceScan.declarationBody(
+            after: ".onChange(of: typed)",
+            in: source
+        )
+        #expect(edited?.contains("announcement?.cancel()") == true)
+        let gone = SourceScan.declarationBody(
+            after: ".onDisappear",
+            in: source
+        )
+        #expect(gone?.contains("announcement?.cancel()") == true)
+    }
+
+    @Test("the section appends what the row adds")
+    func sectionWiresTheRow() throws {
+        let source = try sectionSource()
+        let row = SourceScan.declarationBody(
+            after: "SpaceAddRow(spaces: model.config.spaces)",
+            in: source
+        )
+        #expect(row?.contains("model.config.spaces.append($0)") == true)
     }
 
     @Test("the row draws the rule's refusal")

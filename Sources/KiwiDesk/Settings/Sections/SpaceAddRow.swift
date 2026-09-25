@@ -28,6 +28,8 @@ struct SpaceAddRow: View {
                 )
                 .textFieldStyle(.roundedBorder)
                 .onSubmit(submit)
+                // A queued refusal is about text no longer there.
+                .onChange(of: typed) { announcement?.cancel() }
                 Button(action: add) {
                     Image(systemName: "plus")
                 }
@@ -47,6 +49,7 @@ struct SpaceAddRow: View {
 
     private func add() {
         guard let space = resolved.space else { return }
+        announcement?.cancel()
         onAdd(space)
         typed = ""
     }
@@ -54,23 +57,12 @@ struct SpaceAddRow: View {
     private func submit() {
         guard !typed.trimmed.isEmpty else { return }
         if let notice = resolved.notice {
-            announce(notice.sentence)
+            announcement?.cancel()
+            announcement = DelayedAnnouncement.schedule(
+                notice.sentence
+            )
             return
         }
         add()
-    }
-
-    /// `SettingsFooter`'s measured delay, as the rename field's
-    /// refusal takes it (#812).
-    private func announce(_ sentence: String) {
-        announcement?.cancel()
-        let work = DispatchWorkItem {
-            AccessibilityNotification.Announcement(sentence).post()
-        }
-        announcement = work
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + SettingsFooter.announceDelay,
-            execute: work
-        )
     }
 }
