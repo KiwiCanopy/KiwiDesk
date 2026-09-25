@@ -135,8 +135,12 @@ struct OverlayGlassTests {
             cornerRadius: 8,
             glassBeneath: id
         )
-        // Raised again after the markers, as a window raised
-        // mid-drag would be; the next show re-orders beneath it.
+        // Another window comes up over everything, then the dragged
+        // one is raised past it — so the markers, left where they
+        // were, would sit beneath `other`. The next show must
+        // re-order them to directly beneath the dragged window.
+        let other = Self.draggedWindow()
+        defer { other.orderOut(nil) }
         dragged.orderFrontRegardless()
         overlay.showGhost(
             at: Self.slot,
@@ -154,12 +158,16 @@ struct OverlayGlassTests {
         let draggedAt = try #require(
             order.firstIndex(of: NSNumber(value: dragged.windowNumber))
         )
+        let otherAt = try #require(
+            order.firstIndex(of: NSNumber(value: other.windowNumber))
+        )
         for marker in [overlay.ghost, overlay.dropZone] {
             let panel = try #require(marker?.panel)
             let at = try #require(
                 order.firstIndex(of: NSNumber(value: panel.windowNumber))
             )
             #expect(at > draggedAt, "a glass marker is above the window")
+            #expect(at < otherAt, "a glass marker stayed buried")
             #expect(panel.level == .normal)
         }
         overlay.showGhost(
@@ -169,6 +177,38 @@ struct OverlayGlassTests {
             glassBeneath: nil
         )
         #expect(overlay.ghost?.panel.level == .floating)
+    }
+
+    /// The drop zone's glass is thinned and the ghost's is not;
+    /// the shape, not the number (#1021).
+    @Test("Only the drop zone's glass is thinned")
+    func dropZoneGlassIsThinned() throws {
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        let overlay = DragOverlay()
+        let dragged = Self.draggedWindow()
+        defer {
+            overlay.hideAll()
+            dragged.orderOut(nil)
+        }
+        let id = CGWindowID(dragged.windowNumber)
+        overlay.showGhost(
+            at: Self.slot,
+            style: .ghostDefault,
+            cornerRadius: 8,
+            glassBeneath: id
+        )
+        overlay.showDropZone(
+            at: Self.slot,
+            style: .dropZoneDefault,
+            cornerRadius: 8,
+            glassBeneath: id
+        )
+        try #require(DragOverlay.dropZoneGlassOpacity < 1)
+        #expect(overlay.ghost?.glass?.alphaValue == 1)
+        #expect(
+            overlay.dropZone?.glass?.alphaValue
+                == DragOverlay.dropZoneGlassOpacity
+        )
     }
 
     @Test("The sticky mark turns tinted glass and back")
@@ -208,8 +248,7 @@ struct OverlayGlassTests {
 
     @Test("Reduce transparency stands the overlays' glass down")
     func gateStandsDown() {
-        let saved = LiquidGlassGate.override
-        defer { LiquidGlassGate.override = saved }
+        defer { LiquidGlassGate.override = { false } }
         LiquidGlassGate.override = { true }
         #expect(!LiquidGlassGate.rendered(glass: true))
         #expect(!LiquidGlassGate.rendered(glass: false))

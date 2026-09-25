@@ -11,6 +11,8 @@ extension ConfigMigration {
     /// Spelled here rather than derived: a historical step keeps
     /// naming what it was written to name.
     static let overlayGlassGroups = ["drag", "sticky"]
+    /// The switch's older leaves, named by the steps' own
+    /// historical constants rather than a second spelling.
     static let overlayGlassSources = [shelfKey, glassPanelGroup]
     /// The formats this step introduced, a profile's and a bundle's.
     static let overlayGlassProfileFormat = 9

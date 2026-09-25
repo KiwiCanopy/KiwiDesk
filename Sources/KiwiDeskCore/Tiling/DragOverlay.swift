@@ -34,9 +34,10 @@ public final class DragOverlay {
     /// Marks the dragged window's home slot in AX coordinates.
     /// `glassBeneath` is the dragged window when the marker is
     /// glass, nil when it is flat: ONE argument, so a glass marker
-    /// cannot exist without the window it sits directly beneath,
-    /// at that window's level — the glass never blurs the window
-    /// in hand (#1620). Flat markers keep the floating level.
+    /// cannot exist without the window it sits directly beneath —
+    /// at the normal level, re-ordered there on every show — so the
+    /// glass never blurs the window in hand (#1620). Flat markers
+    /// keep the floating level.
     public func showGhost(
         at frame: CGRect,
         style: DragVisual,
@@ -124,7 +125,7 @@ public final class DragOverlay {
     }
 
     /// Sets the frame and orders the panel in: above everything,
-    /// or directly beneath `window` at its level.
+    /// or directly beneath `window` at the normal level.
     private func place(
         _ panel: NSPanel,
         at frame: CGRect,

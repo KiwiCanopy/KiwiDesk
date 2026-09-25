@@ -181,8 +181,9 @@ struct GlassOverlayMigrationTests {
     /// The whole chain from before KiwiShelf (#1517): this step
     /// reads the shelf's leaf, so it must run AFTER the step that
     /// creates it — run earlier, it would read the missing shelf
-    /// as on and turn both new leaves on beside bars the user had
-    /// off.
+    /// as on and, beside a panel that is on, turn both new leaves
+    /// on beside bars the user had off. Hand-written by necessity:
+    /// this build's encoder cannot write the pre-shelf shape.
     @Test("a pre-shelf profile's off switch reaches the new leaves")
     func runsAfterTheShelfMove() throws {
         let data = Data(
@@ -190,7 +191,7 @@ struct GlassOverlayMigrationTests {
             {"format":7,"monitor_sets":[],"name":"Old",\
             "settings":{"app_bar":{"liquid_glass":false},\
             "space_bar":{"liquid_glass":false},\
-            "shortcut_panel":{"liquid_glass":false}}}
+            "shortcut_panel":{"liquid_glass":true}}}
             """.utf8
         )
         let out = try #require(ConfigMigration.migrated(data))

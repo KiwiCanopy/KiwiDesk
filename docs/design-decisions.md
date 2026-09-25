@@ -11321,7 +11321,8 @@ through: an opaque drop zone would hide the window a drop swaps
 with, and an opaque ghost the slot the displaced window moves
 into. So under the setting each draws exactly what it draws with
 the finish off — the markers their border over the stored fill,
-the mark its `.hudWindow` badge with its disc.
+the mark its `.hudWindow` badge — a disc in the colour, or the
+bare glyph on Automatic.
 :::
 
 :::unreleased
@@ -11348,8 +11349,9 @@ step therefore fills both from the switch's own reading over the
 leaves the file does carry, off where those disagree, as the
 panel's leaf was filled from the bars' (#1369).
 
-**Glass drag markers sit directly beneath the window being
-dragged, at its level; flat ones keep the floating level.** At
+**Glass drag markers sit at the normal level, ordered directly
+beneath the window being dragged and re-ordered there on every
+move; flat ones keep the floating level.** At
 the floating level the glass would blur the window in hand
 whenever it crossed its home slot or hovered the target, which
 is exactly when the drop zone shows. Beneath it, both markers

@@ -136,6 +136,10 @@ enum GlassTint {
     /// and pins the glass's variant from the same Fill (#1308). It
     /// takes the Fill rather than a colour so the cap cannot be
     /// walked around at a call site (#1297).
+    /// An EMPTY Fill is no colour — clear glass, nothing pinned —
+    /// while any other string resolves through `NSColor(kiwiHex:)`
+    /// as before; the setters refuse both an empty and an
+    /// unparseable bar Fill, so only a hand edit reaches either.
     @MainActor
     static func apply(
         _ backdrop: GlassBackdrop,
