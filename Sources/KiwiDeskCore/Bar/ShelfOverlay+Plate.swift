@@ -79,44 +79,18 @@ extension ShelfOverlay {
         }
         divider.isHidden = false
         dividerStyle = (shelf, horizontal)
-        BarMotion.setFrame(
-            divider,
-            to: hoveredFrame(frame, horizontal: horizontal),
-            animated: animated
-        )
+        BarMotion.setFrame(divider, to: frame, animated: animated)
         paintDivider()
     }
 
     /// The draggable divider under the pointer (#1517): the same
-    /// line, thicker and in the hover ink; instant, so Reduce
-    /// Motion has nothing to gate.
+    /// line in the hover ink — the resize cursor carries the rest
+    /// (owner 2026-09-25); instant, so Reduce Motion has nothing
+    /// to gate.
     func setDividerHovered(_ hovered: Bool) {
         guard dividerHovered != hovered else { return }
         dividerHovered = hovered
-        guard let style = dividerStyle, !divider.isHidden else { return }
-        let middle =
-            style.horizontal ? divider.frame.midX : divider.frame.midY
-        let depth =
-            style.horizontal
-            ? stripView.bounds.height : stripView.bounds.width
-        divider.frame = BarDivider.sectionFrame(
-            at: middle,
-            depth: depth,
-            horizontal: style.horizontal,
-            hovered: hovered
-        )
         paintDivider()
-    }
-
-    private func hoveredFrame(_ frame: CGRect, horizontal: Bool) -> CGRect {
-        guard dividerHovered else { return frame }
-        return BarDivider.sectionFrame(
-            at: horizontal ? frame.midX : frame.midY,
-            depth: horizontal
-                ? stripView.bounds.height : stripView.bounds.width,
-            horizontal: horizontal,
-            hovered: true
-        )
     }
 
     private func paintDivider() {

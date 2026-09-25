@@ -10587,9 +10587,8 @@ a fade and an item gap, so the Space the user is on is never
 cut or half-faded — and the Space Bar's natural length. The
 divider is a plain line while everything fits and nothing hovers
 on it; only while the shelf is full does its hit area take the
-resize cursor along the edge and the line its hover ink and a
-heavier stroke, since an accessory app's cursor alone went
-unseen on the device, a drag writing the minimum and a
+resize cursor along the edge and the line its hover ink, a drag
+writing the minimum and a
 double-click resetting it — a handle that moves nothing while
 nothing is hidden is chrome with no job. The drag re-lays the
 bars as it moves and commits on release through the same setter

@@ -121,8 +121,9 @@ struct ShelfDividerWeightTests {
     }
 
     /// Owner 2026-09-25: a draggable divider must show it can be
-    /// grabbed. Hovering the live grip draws the line thicker, in
-    /// the hover ink at full strength; leaving restores the ladder.
+    /// grabbed. Hovering the live grip draws the line in the hover
+    /// ink at full strength, at its resting weight; leaving
+    /// restores the ladder's ink.
     @Test("The draggable divider shows its hover")
     @MainActor
     func draggableDividerHovers() throws {
@@ -159,11 +160,9 @@ struct ShelfDividerWeightTests {
         let rest = overlay.divider.frame
         #expect(rest.width == BarDivider.sectionThickness)
         overlay.handle.setHovered(true)
-        #expect(
-            overlay.divider.frame.width == BarDivider.sectionHoverThickness
-        )
-        #expect(abs(overlay.divider.frame.midX - rest.midX) < 0.01)
-        #expect(overlay.divider.frame.height == rest.height)
+        // Ink only: the resize cursor carries the rest (owner
+        // 2026-09-25), so the line keeps its weight.
+        #expect(overlay.divider.frame == rest)
         let ink = try #require(overlay.divider.layer?.backgroundColor)
         #expect(ink.alpha == 1)
         #expect(

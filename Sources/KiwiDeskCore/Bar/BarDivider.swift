@@ -18,9 +18,6 @@ public enum BarDivider {
     /// the 1 pt in-chip rule so the boundary reads as a bigger
     /// separation (QA 2026-07-19).
     static let sectionThickness: CGFloat = 2
-    /// The draggable section divider under the pointer (#1517):
-    /// thicker, in the hover ink at full strength, same length.
-    static let sectionHoverThickness: CGFloat = 3
 
     /// The divider ladder's lengths, as a share of the depth
     /// (#1517, ui-designer): the rule inside a Space item is the
@@ -43,15 +40,13 @@ public enum BarDivider {
     public static func sectionFrame(
         at middle: CGFloat,
         depth: CGFloat,
-        horizontal: Bool,
-        hovered: Bool = false
+        horizontal: Bool
     ) -> CGRect {
-        let thickness = hovered ? sectionHoverThickness : sectionThickness
-        return frame(
-            at: middle - thickness / 2,
+        frame(
+            at: middle - sectionThickness / 2,
             depth: depth,
             horizontal: horizontal,
-            thickness: thickness,
+            thickness: sectionThickness,
             lengthShare: sectionLengthShare
         )
     }
