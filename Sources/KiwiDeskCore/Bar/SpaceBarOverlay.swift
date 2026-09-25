@@ -16,6 +16,8 @@ public final class SpaceBarOverlay {
         let overflow: Int
         /// Focused window is hidden past the cap (#376).
         let focusInOverflow: Bool
+        /// Where a held Space came from (#1507).
+        var held: SpaceBarItemView.Held?
 
         init(
             space: SpaceID,

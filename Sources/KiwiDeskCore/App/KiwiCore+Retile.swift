@@ -33,6 +33,13 @@ extension KiwiCore {
         stashAnimated: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
+        // A held Space retires the moment it empties (#1507) —
+        // every membership change retiles, so this is its one
+        // choke point too, ahead of anything that lays it out.
+        if retireEmptiedHeldSpaces() {
+            resolveSpaceDisplays()
+            emitSpaceChange()
+        }
         // Session weights are validated at WRITE time against
         // the membership at press time; a membership or span
         // change afterwards can leave them infeasible, and the

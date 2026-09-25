@@ -58,6 +58,7 @@ extension KiwiCore {
             return .fail("cannot delete the only space")
         }
         forwardWindows(of: space, to: target)
+        endHold(of: space)
         tiler.settings.removeSpace(space)
         // The sidecar's list mirrors live (#77), so the delete
         // keeps it faithful or the cold-boot seed re-injects

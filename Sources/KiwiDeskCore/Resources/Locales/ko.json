@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "빈 공간 가리기",
   "space_bar.hide_empty.help": "윈도우가 없는 공간은 바에서 가려집니다. 다만 현재 있는 공간은 예외입니다. 가려진 공간으로 이동하려면 단축키를 사용하십시오.",
   "space_bar.item.ax.current": "%1$@, 현재 위치",
+  "space_bar.item.ax.held": "공간 %1$@, 화면 ‘%2$@’에서 가져옴, 저장되지 않음, %3$d 개의 앱",
+  "space_bar.item.ax.held_renumbered": "공간 %1$@, 화면 ‘%2$@’에서 가져옴(원래 공간 %3$@), 저장되지 않음, %4$d 개의 앱",
   "space_bar.item.ax.layer": "단축키 레이어 %1$@",
   "space_bar.item.ax.not_current": "%1$@, 선택 안 됨",
   "space_bar.item.ax.space": "공간 %1$@, %2$d 개의 앱",

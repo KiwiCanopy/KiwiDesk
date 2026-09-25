@@ -101,19 +101,19 @@ struct AwayProfileSpaceTests {
         live(core, [1])
 
         // Under A, w1 sits in Space 1.
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         // Under B, the user moves it to Space 2, so B's
         // partitioning records it there when B goes inactive.
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
 
         // It goes away to another Desktop, then the profile
         // switches to B while it is gone.
         sendAway(core, WindowID(1))
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
 
         // Re-filed to B's Space, and still a WATCHED departure:
         // the other kind is `.restored`, and promoting or
@@ -150,21 +150,21 @@ struct AwayProfileSpaceTests {
         live(core, [1])
 
         // A puts w1 in Space 2; B puts it in Space 1.
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "2") == [WindowID(1)])
 
         // Away it goes, and stays away across both switches.
         sendAway(core, WindowID(1))
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         #expect(
             core.state.rememberedSpace(of: WindowID(1)) == "1",
             "B's record should have re-filed it to Space 1"
         )
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
 
         bringBack(core, WindowID(1))
         // Only A's record — taken while the window was away —
@@ -186,7 +186,7 @@ struct AwayProfileSpaceTests {
         let b = profile("B", spaces: ["1", "2"])
         live(core, [1, 2, 3])
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         for id in [1, 2, 3] {
             core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
         }
@@ -197,8 +197,8 @@ struct AwayProfileSpaceTests {
 
         // Both profiles record it in Space 1, so neither switch
         // has anything to re-point.
-        core.apply(profile: b, forceRetile: false)
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: b, cause: .event)
+        core.apply(profile: a, cause: .event)
         #expect(core.state.departedSlots[WindowID(2)] == rank)
 
         bringBack(core, WindowID(2))
@@ -227,9 +227,9 @@ struct AwayProfileSpaceTests {
         live(core, [1])
 
         // Give B a record placing w1 in Space 2.
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
 
         // Now the boot-seed shape: away, filed `.restored` in
         // Space 1, with no watched departure behind it.
@@ -245,7 +245,7 @@ struct AwayProfileSpaceTests {
             isUp: true
         )
 
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         #expect(
             core.state.rememberedSpaces[WindowID(1)]
                 == .restored("2"),
@@ -269,9 +269,9 @@ struct AwayProfileSpaceTests {
         live(core, [1, 2])
 
         // B remembers w1 in Space 2; A leaves it in Space 1.
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "1")
         sendAway(core, WindowID(1))
@@ -279,7 +279,7 @@ struct AwayProfileSpaceTests {
 
         // B re-files it into Space 2 — a different Space, so the
         // rank it took in Space 1 no longer means anything.
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         #expect(
             core.state.rememberedSpace(of: WindowID(1)) == "2"
         )
@@ -299,7 +299,7 @@ struct AwayProfileSpaceTests {
         let b = profile("B", spaces: ["1", "2"])
         live(core, [1])
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
         // The switch captures A's record while w1 is still LIVE,
         // so the record names it. Only then does it go away and
@@ -308,14 +308,14 @@ struct AwayProfileSpaceTests {
         // remembered Space for, which is the state the guard is
         // about, and it is unreachable if the memory is retired
         // before the record is taken (measured 2026-09-08).
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         sendAway(core, WindowID(1))
         core.state.forgetAway(WindowID(1))
         #expect(
             core.state.rememberedSpaces[WindowID(1)] == nil
         )
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(
             core.state.rememberedSpaces[WindowID(1)] == nil,
             "a profile switch minted a departure nothing observed"

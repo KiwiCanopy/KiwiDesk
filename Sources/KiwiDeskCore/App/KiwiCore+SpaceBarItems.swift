@@ -31,7 +31,7 @@ extension KiwiCore {
                 {
                     return nil
                 }
-                return SpaceBarOverlay.Item(
+                var item = SpaceBarOverlay.Item(
                     space: id,
                     spaceGlyph: spaceIdentifier(for: id),
                     apps: apps,
@@ -46,6 +46,13 @@ extension KiwiCore {
                     focusInOverflow: id == activeSpace?.id
                         && focusHidden
                 )
+                item.held = state.heldSpaces[id].map {
+                    SpaceBarItemView.Held(
+                        screenName: $0.screenName,
+                        originName: $0.name == id ? nil : $0.name
+                    )
+                }
+                return item
             }
     }
 
@@ -183,6 +190,7 @@ extension KiwiCore {
         Self.spaceIdentifier(
             id: id,
             icon: tiler.settings.spaceIcons[id]
+                ?? state.heldSpaces[id]?.icon
         )
     }
 

@@ -213,7 +213,7 @@ struct MonitorSetHandOverTests {
         // Starter lands on V the way a binding puts it there.
         core.apply(
             profile: try core.profiles.read(name: "Starter"),
-            forceRetile: false
+            cause: .event
         )
         let released = try core.persistProfile(
             named: "Starter",

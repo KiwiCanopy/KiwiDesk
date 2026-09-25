@@ -42,6 +42,7 @@ final class SpaceBarItemView: NSView {
     var stickyBadgeViews: [StateBadgeView] = []
     var floatingBadgeViews: [StateBadgeView] = []
     let overflowBadge = SpaceBarItemView.makeBadge()
+    let heldBadge = StateBadgeView(symbolName: SpaceBarItemView.heldSymbol)
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = NSView()
@@ -60,6 +61,7 @@ final class SpaceBarItemView: NSView {
     private(set) var overflow = 0
     /// True if focused window is in overflow (#376).
     private(set) var focusInOverflow = false
+    private(set) var held: Held?
     private(set) var isActive = false
     private(set) var isHovered = false
     /// Drag hover state (#372).
@@ -84,6 +86,7 @@ final class SpaceBarItemView: NSView {
         addSubview(identifierLabel)
         addSubview(identifierDivider)
         addSubview(overflowBadge)
+        addSubview(heldBadge)
         addSubview(accentClip)
         accentClip.addSubview(accent)
         springRing.fillColor = nil
@@ -167,7 +170,8 @@ final class SpaceBarItemView: NSView {
         style: SpaceBarLook,
         stateMarkColors: StateMarkColors,
         overflow: Int = 0,
-        focusInOverflow: Bool = false
+        focusInOverflow: Bool = false,
+        held: Held? = nil
     ) {
         if self.identity != identity {
             cancelSpringSweep()
@@ -181,6 +185,7 @@ final class SpaceBarItemView: NSView {
         self.apps = apps
         self.overflow = overflow
         self.focusInOverflow = focusInOverflow
+        self.held = held
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
@@ -209,12 +214,7 @@ final class SpaceBarItemView: NSView {
         }
         let windows =
             apps.reduce(0) { $0 + $1.count } + overflow
-        let name = L(
-            "space_bar.item.ax.space",
-            "Space %1$@, %2$d applications",
-            space.raw,
-            windows
-        )
+        let name = spaceName(space, windows: windows)
         return isActive
             ? L(
                 "space_bar.item.ax.current",

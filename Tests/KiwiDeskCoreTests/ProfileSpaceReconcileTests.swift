@@ -44,8 +44,7 @@ struct ProfileSpaceReconcileTests {
                 "two",
                 spaces: [SpaceID("1"), SpaceID("2")]
             ),
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         // Space 3 (not in the profile) is gone; 1 and 2 survive.
         #expect(core.state.workspaces[SpaceID("3")] == nil)
@@ -68,8 +67,7 @@ struct ProfileSpaceReconcileTests {
                 "p",
                 spaces: [SpaceID("1"), SpaceID("2")]
             ),
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         // "1" survives by name -> its window stays put; "old" is
         // pruned -> its window forwards to the first space (1).
@@ -93,8 +91,7 @@ struct ProfileSpaceReconcileTests {
         // guard skips pruning rather than wiping every space.
         core.apply(
             profile: profile("empty", spaces: []),
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         #expect(core.state.workspaces[SpaceID("1")] != nil)
         #expect(core.state.workspaces[SpaceID("2")] != nil)
@@ -110,8 +107,7 @@ struct ProfileSpaceReconcileTests {
         // one.
         core.apply(
             profile: profile("p", spaces: [SpaceID("1")]),
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         #expect(core.state.workspaces[SpaceID("stale")] == nil)
         #expect(core.state.workspaces.activeSpace == SpaceID("1"))
@@ -141,8 +137,7 @@ struct ProfileSpaceReconcileTests {
         )
         core.apply(
             profile: p,
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         // "old" pruned; its window rehomes to "2" (first in
         // stored order), not "1" (first in numeric order).
@@ -172,8 +167,7 @@ struct ProfileSpaceReconcileTests {
         )
         core.apply(
             profile: p,
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         // "old" pruned; its window rehomes to the designated
         // fallback "2", not the order's first entry "1" (#68).
@@ -204,8 +198,7 @@ struct ProfileSpaceReconcileTests {
         )
         core.apply(
             profile: p,
-            pruneStaleSpaces: true,
-            forceRetile: true
+            cause: .explicit
         )
         // The explicit target isn't a survivor — the stored
         // order's first entry decides, as before #68.
@@ -228,7 +221,7 @@ struct ProfileSpaceReconcileTests {
         // to bsp (the dense reset), never keeping the stale grid.
         core.apply(
             profile: profile("p", spaces: [SpaceID("1")]),
-            forceRetile: false
+            cause: .event
         )
         #expect(
             core.state.workspaces[SpaceID("keepme")]?.mode == .bsp

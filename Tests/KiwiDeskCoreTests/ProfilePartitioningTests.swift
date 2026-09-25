@@ -81,7 +81,7 @@ struct ProfilePartitioningTests {
         live(core, [1, 2, 3, 4, 5, 6, 7, 8])
         let a = profile("A", spaces: ["1", "2", "3"])
         let b = profile("B", spaces: ["1", "Work"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         for id in [1, 2, 3, 4, 5] {
             core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
         }
@@ -89,10 +89,10 @@ struct ProfilePartitioningTests {
             core.state.workspaces.add(WindowID(UInt32(id)), to: "3")
         }
 
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         #expect(core.state.workspaces["3"] == nil)
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(
             members(core, "1")
                 == [1, 2, 3, 4, 5].map { WindowID(UInt32($0)) }
@@ -110,14 +110,14 @@ struct ProfilePartitioningTests {
         live(core, [1, 2])
         let a = profile("A", spaces: ["1", "2"])
         let b = profile("B", spaces: ["1"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
 
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         #expect(members(core, "1") == [WindowID(1), WindowID(2)])
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
     }
@@ -139,13 +139,13 @@ struct ProfilePartitioningTests {
         var b = profile("B", spaces: ["1", "Work"])
         b.fallbackSpace = "Work"
         let a = profile("A", spaces: ["1", "2"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         // Opened while B was up, in a Space A does NOT declare.
         core.state.workspaces.add(WindowID(9), to: "Work")
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1").contains(WindowID(1)))
         #expect(core.state.workspaces["Work"] == nil)
         // The landing itself, which the title names: A's prune
@@ -163,12 +163,12 @@ struct ProfilePartitioningTests {
         var b = profile("B", spaces: ["1", "Work"])
         b.fallbackSpace = "Work"
         let a = profile("A", spaces: ["1", "2"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(9), to: "1")
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1").contains(WindowID(9)))
     }
 
@@ -182,14 +182,14 @@ struct ProfilePartitioningTests {
         live(core, [1, 2])
         let a = profile("A", spaces: ["1", "2"])
         let b = profile("B", spaces: ["1"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.windows.remove(WindowID(2))
         core.state.workspaces.remove(WindowID(2))
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(!members(core, "2").contains(WindowID(2)))
         #expect(!members(core, "1").contains(WindowID(2)))
     }
@@ -204,12 +204,12 @@ struct ProfilePartitioningTests {
         live(core, [1])
         let a = profile("A", spaces: ["1", "2"])
         let b = profile("B", spaces: ["1"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "2")
         core.state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         #expect(core.state.workspaces["2"] == nil)
 
         core.state.apply(
@@ -235,11 +235,11 @@ struct ProfilePartitioningTests {
         live(core, [1, 2])
         let a = profile("A", spaces: ["1", "2"])
         let b = profile("B", spaces: ["1", "2"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
 
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         // In B the user moves w1 across and works in it, so it
         // holds the focus at the moment A's restore moves it
         // back — which is when `add`'s `remove` half would nil
@@ -249,7 +249,7 @@ struct ProfilePartitioningTests {
         core.state.workspaces.focus(WindowID(1), in: "2")
         #expect(core.state.workspaces.lastFocused == WindowID(1))
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(core.state.workspaces.lastFocused == WindowID(1))
         #expect(
             core.state.workspaces.focusReturnCandidate
@@ -266,7 +266,7 @@ struct ProfilePartitioningTests {
         live(core, [1, 2])
         let a = profile("A", spaces: ["1", "2"])
         let b = profile("B", spaces: ["1", "2"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
 
@@ -283,8 +283,8 @@ struct ProfilePartitioningTests {
         // The Standard rearranges what is on screen.
         core.state.workspaces.add(WindowID(2), to: "1")
 
-        core.apply(profile: b, forceRetile: false)
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: b, cause: .event)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
     }

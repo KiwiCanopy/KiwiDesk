@@ -42,9 +42,7 @@ extension KiwiCore {
     func syncGuiSpacesToLive() {
         guard isGuiManaged, var config = guiConfigStore.load()
         else { return }
-        let live = SpaceID.deduplicated(
-            state.workspaces.allSpaces.map(\.id)
-        )
+        let live = SpaceID.deduplicated(capturedSpaces.map(\.id))
         guard config.spaces != live else { return }
         config.spaces = live
         try? guiConfigStore.save(config)

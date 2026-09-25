@@ -20,7 +20,7 @@ extension KiwiCore {
     /// that has applied nothing, has no partitioning of its own.
     func recordLivePartitioning() {
         state.profilePartitioning.record(
-            state.workspaces.allSpaces.map {
+            capturedSpaces.map {
                 Space(
                     id: $0.id,
                     windows: withAwayMembers($0.windows, of: $0.id)

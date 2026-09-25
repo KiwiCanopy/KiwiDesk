@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "隱藏空的空間",
   "space_bar.hide_empty.help": "沒有視窗的空間會從列中隱藏，但你目前所在的空間除外。請用快速鍵跳到隱藏的空間。",
   "space_bar.item.ax.current": "%1$@，目前",
+  "space_bar.item.ax.held": "空間 %1$@，保留自螢幕「%2$@」，未儲存，%3$d 個應用程式",
+  "space_bar.item.ax.held_renumbered": "空間 %1$@，保留自螢幕「%2$@」（原為空間 %3$@），未儲存，%4$d 個應用程式",
   "space_bar.item.ax.layer": "快速鍵層 %1$@",
   "space_bar.item.ax.not_current": "%1$@，非目前",
   "space_bar.item.ax.space": "空間 %1$@，%2$d 個應用程式",

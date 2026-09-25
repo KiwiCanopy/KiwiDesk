@@ -75,7 +75,7 @@ extension KiwiCore {
         // keeps its live mode rather than being read as `.bsp`
         // and then written as one (code review, 2026-08-31).
         let saved = savedProfileModes()
-        for space in state.workspaces.allSpaces {
+        for space in capturedSpaces {
             live.append(space.id)
             let mode = saved?[space.id] ?? space.mode
             if mode != .bsp {
@@ -93,7 +93,7 @@ extension KiwiCore {
         // only in `gui.json` is seeded into live at boot
         // (`seedGuiSpaces`, #77), so it is present here too.
         config.spaces = SpaceID.deduplicated(live)
-        config.spacePins = spacePins
+        config.spacePins = capturedPins
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
     }
@@ -113,7 +113,7 @@ extension KiwiCore {
     ) {
         var known = Set(seed)
         known.formUnion(config.spaces)
-        for space in state.workspaces.allSpaces
+        for space in capturedSpaces
         where !known.contains(space.id) {
             config.spaces.append(space.id)
             if space.mode != .bsp {
@@ -175,7 +175,7 @@ extension KiwiCore {
         var config = GuiConfig()
         config.settings = tiler.settings
         config.appRules = globalAppRuleBase
-        config.spacePins = spacePins
+        config.spacePins = capturedPins
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
         config.layers = recoverKeybindings()
@@ -183,7 +183,7 @@ extension KiwiCore {
         config.ignoreRules = globalIgnoreRuleBase
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
-        for space in state.workspaces.allSpaces {
+        for space in capturedSpaces {
             defined.append(space.id)
             if space.mode != .bsp { modes[space.id] = space.mode }
         }

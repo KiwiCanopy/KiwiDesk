@@ -70,7 +70,7 @@ struct ProfileRestoreOrderTests {
         a.spaceModes["1"] = mode
         var b = profile("B", spaces: ["1", "2"])
         b.spaceModes["1"] = mode
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         for id in [1, 2, 3] {
             core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
         }
@@ -78,13 +78,13 @@ struct ProfileRestoreOrderTests {
             mode == .track ? [WindowID(1), WindowID(2), WindowID(3)] : []
         core.state.workspaces.withSpace("1") { $0.trackBreaks = breaks }
 
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         // Opened while B is up: A has never seen it.
         core.state.workspaces.withSpace("1") {
             $0.insert(WindowID(4), placement: .last)
         }
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(
             members(core, "1")
                 == [1, 2, 3, 4].map { WindowID(UInt32($0)) }
@@ -102,15 +102,15 @@ struct ProfileRestoreOrderTests {
         live(core, [1, 2, 3])
         let a = profile("A", spaces: ["1"])
         let b = profile("B", spaces: ["1"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         for id in [1, 2, 3] {
             core.state.workspaces.add(WindowID(UInt32(id)), to: "1")
         }
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.withSpace("1") {
             $0.windows = [WindowID(3), WindowID(1), WindowID(2)]
         }
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(
             members(core, "1") == [WindowID(3), WindowID(1), WindowID(2)]
         )

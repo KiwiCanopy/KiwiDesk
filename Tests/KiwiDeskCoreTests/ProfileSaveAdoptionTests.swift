@@ -83,11 +83,11 @@ struct ProfileSaveAdoptionTests {
         let b = try core.profiles.read(name: "B")
         let a = try core.profiles.read(name: "A")
 
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         // The user rearranges while B is up.
         core.state.workspaces.add(WindowID(3), to: "1")
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2), WindowID(3)])
     }
@@ -107,7 +107,7 @@ struct ProfileSaveAdoptionTests {
         try core.persistProfile(named: "A", modes: nil)
         try core.persistProfile(named: "B", modes: nil)
         let a = try core.profiles.read(name: "A")
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         // The user rearranges while A is up, then saves over B.
         core.state.workspaces.add(WindowID(2), to: "1")
         try core.persistProfile(named: "B", modes: nil)
@@ -188,10 +188,10 @@ struct ProfileSaveAdoptionTests {
         try core.persistProfile(named: "B", modes: nil)
         let b = try core.profiles.read(name: "B")
         let a = try core.profiles.read(name: "A")
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(2), to: "1")
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
     }
@@ -215,7 +215,7 @@ struct ProfileSaveAdoptionTests {
         let fitting = try core.profiles.read(name: "A")
 
         core.profiles.markDirty()
-        core.apply(profile: fitting, forceRetile: false)
+        core.apply(profile: fitting, cause: .event)
         #expect(!core.profiles.isDirty)
 
         // A profile naming a screen this Mac does not have never
@@ -224,7 +224,7 @@ struct ProfileSaveAdoptionTests {
         misfit.name = "B"
         misfit.upsert(MonitorSet(monitors: ["Nowhere:640x480"]))
         misfit.release(fitting.monitorSets[0].monitors)
-        core.apply(profile: misfit, forceRetile: false)
+        core.apply(profile: misfit, cause: .event)
         #expect(core.profiles.currentName == "B")
         #expect(core.profiles.isDirty)
     }
@@ -302,7 +302,7 @@ struct ProfileSaveAdoptionTests {
         // "A" != "B" and take the switch arm. Re-applying A
         // instead answers "not a switch" under both shapes, so
         // the fixture saw nothing (`guard-prover`, 2026-09-07).
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         // No prune, so the boot-restored space survives...
         #expect(core.state.workspaces["restored"] != nil)
         #expect(members(core, "restored") == [WindowID(1)])
