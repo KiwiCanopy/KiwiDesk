@@ -4,12 +4,14 @@ extension ShelfArrangement {
     /// What the section divider's drag moves (#1517, ruling 15),
     /// present only while the shelf is full: the room both
     /// sections share, the Space section's drawn length, the
-    /// length the App section's need leaves it (`free`), the range
+    /// length the App section's need leaves it (`free`), the
+    /// minimum configured when it was laid out (percent), the range
     /// `minimumRange` lets it take, and which section leads.
     public struct Divider: Equatable, Sendable {
         public var room: CGFloat
         public var spaceLength: CGFloat
         public var free: CGFloat
+        public var configured: CGFloat
         public var bounds: ClosedRange<CGFloat>
         public var spacesFirst: Bool
 
@@ -17,23 +19,27 @@ extension ShelfArrangement {
             room: CGFloat,
             spaceLength: CGFloat,
             free: CGFloat,
+            configured: CGFloat,
             bounds: ClosedRange<CGFloat>,
             spacesFirst: Bool
         ) {
             self.room = room
             self.spaceLength = spaceLength
             self.free = free
+            self.configured = configured
             self.bounds = bounds
             self.spacesFirst = spacesFirst
         }
 
         /// The Space Bar minimum, in percent, that puts the
         /// divider `delta` points further along the edge than it
-        /// sat when the drag began — or nil where that minimum
-        /// would not move the line: a bound, or the App section's
-        /// need, holds it, and a drag that moves nothing writes
-        /// nothing. The minimum's own range is the setting's one
-        /// clamp (`KiwiShelfCommandSetting`).
+        /// sat when the drag began. Where that would not move the
+        /// line — a bound, or the App section's need, holds it —
+        /// the answer is the minimum configured at the press, so a
+        /// drag that moves nothing, or comes back to where it
+        /// began, leaves the setting as it found it. The minimum's
+        /// own range is the setting's one clamp
+        /// (`KiwiShelfCommandSetting`); nil on an empty shelf.
         public func minimum(afterDragging delta: CGFloat) -> CGFloat? {
             guard room > 0 else { return nil }
             let signed = spacesFirst ? delta : -delta
@@ -43,7 +49,7 @@ extension ShelfArrangement {
             )
             // The length the layout draws for a floor of `target`.
             let drawn = max(target, free)
-            guard abs(drawn - spaceLength) >= 0.5 else { return nil }
+            guard abs(drawn - spaceLength) >= 0.5 else { return configured }
             return target / room * 100
         }
     }

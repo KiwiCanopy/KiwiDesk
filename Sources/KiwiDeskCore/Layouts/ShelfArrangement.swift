@@ -133,6 +133,7 @@ public struct ShelfArrangement: Equatable, Sendable {
                     room: room,
                     spaceLength: spaceLength,
                     free: room - appNeed,
+                    configured: shelf.resolvedMinimum,
                     bounds: bounds,
                     spacesFirst: spacesFirst
                 )

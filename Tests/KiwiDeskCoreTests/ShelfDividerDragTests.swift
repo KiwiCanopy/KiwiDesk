@@ -67,12 +67,12 @@ struct ShelfDividerDragTests {
         #expect(divider.minimum(afterDragging: -900) == 10)
     }
 
-    /// A drag writes only where the minimum it writes would move
-    /// the line. A short App Bar holds the line past the floor
-    /// (the section draws `room − appNeed`), and a bound — the
-    /// Space Bar's need or the hard floor — stops it: a drag
-    /// against either leaves the configured minimum alone.
-    @Test("A drag that cannot move the line writes nothing")
+    /// A drag moves the minimum only where it moves the line. A
+    /// short App Bar holds the line past the floor (the section
+    /// draws `room − appNeed`), and a bound — the Space Bar's need
+    /// or the hard floor — stops it: a drag against either answers
+    /// the minimum configured at the press.
+    @Test("A drag that cannot move the line keeps the minimum")
     func stuckLineWritesNothing() throws {
         var shelf = KiwiShelf()
         shelf.itemGap = 0
@@ -90,20 +90,20 @@ struct ShelfDividerDragTests {
         // Held by the App Bar's need: 800 drawn, floor 300.
         let held = try arrange(1200, 200)
         #expect(held.spaceLength == 800 && held.free == 800)
-        #expect(held.minimum(afterDragging: 0) == nil)
-        #expect(held.minimum(afterDragging: -50) == nil)
+        #expect(held.minimum(afterDragging: 0) == 30)
+        #expect(held.minimum(afterDragging: -50) == 30)
         #expect(held.minimum(afterDragging: 50) == 85)
         // At the Space Bar's need: growing moves nothing.
         shelf.minimum = 60
         let ceiling = try arrange(400, 900)
         #expect(ceiling.spaceLength == 400)
-        #expect(ceiling.minimum(afterDragging: 50) == nil)
+        #expect(ceiling.minimum(afterDragging: 50) == 60)
         #expect(ceiling.minimum(afterDragging: -50) == 35)
         // At the hard floor: shrinking moves nothing.
         shelf.minimum = 20
         let floor = try arrange(700, 900)
         #expect(floor.spaceLength == 250)
-        #expect(floor.minimum(afterDragging: -50) == nil)
+        #expect(floor.minimum(afterDragging: -50) == 20)
         #expect(floor.minimum(afterDragging: 50) == 30)
     }
 
@@ -145,6 +145,14 @@ struct ShelfDividerDragTests {
         // A drag after a reset needs a fresh press.
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 500))
         #expect(reports.count == 2)
+        // Out and back to the press: the release restores the
+        // minimum the press found, not the step's.
+        handle.mouseDown(with: try mouse(.leftMouseDown, x: 300))
+        handle.mouseDragged(with: try mouse(.leftMouseDragged, x: 360))
+        handle.mouseUp(with: try mouse(.leftMouseUp, x: 300))
+        #expect(reports.suffix(2).map(\.0) == [36, 30])
+        #expect(reports.last?.1 == true)
+        reports.removeLast(2)
         // A click that never moves commits nothing.
         handle.mouseDown(with: try mouse(.leftMouseDown, x: 400))
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 400))

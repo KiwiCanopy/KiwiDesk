@@ -66,7 +66,17 @@ struct ShelfStripPreview: View {
         )
         return ShelfArrangement(
             space: placed.space.map { scaled($0, by: u) },
-            app: placed.app.map { scaled($0, by: u) }
+            app: placed.app.map { scaled($0, by: u) },
+            divider: placed.divider.map { divider in
+                var scaled = divider
+                scaled.room *= u
+                scaled.spaceLength *= u
+                scaled.free *= u
+                let low = divider.bounds.lowerBound * u
+                let high = divider.bounds.upperBound * u
+                scaled.bounds = low...high
+                return scaled
+            }
         )
     }
 
