@@ -125,6 +125,9 @@ func makeTestCore(
     // suite return foreign reports to an own window. Pin "not in
     // the strip"; the return suite states the reading itself.
     core.mouse.pointerInMenuBarStrip = { false }
+    // The drawn-menu-bar read (#1386) lists the host's real
+    // WindowServer windows; a test's displays are fake.
+    core.eventLoop.displayWatch.readDrawnMenuBars = { [] }
     // Same class, ninth time (#1103) — but PRECAUTIONARY, not
     // load-bearing like the eighth: `wireDrag` also makes the
     // drop-target cursor read live and a run reaches it, yet no

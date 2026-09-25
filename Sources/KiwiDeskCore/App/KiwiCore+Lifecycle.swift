@@ -116,6 +116,28 @@ extension KiwiCore {
         }
     }
 
+    /// Re-reads the drawn menu bars after the auto-hide pref
+    /// flips (#1386) and retiles where they changed — no monitor
+    /// changed, so this is not a `.displaysChanged`. Two passes:
+    /// the second catches a bar drawn late.
+    func scheduleMenuBarRemeasure(passes: Int = 2) {
+        deferred.schedule(
+            .menuBarRemeasure,
+            after: .milliseconds(600)
+        ) { [weak self] in
+            guard let self, self.eventLoop.isRunning
+            else { return }
+            if DrawnMenuBars.refresh(
+                bars: self.eventLoop.displayWatch.readDrawnMenuBars()
+            ) {
+                self.retile()
+            }
+            if passes > 1 {
+                self.scheduleMenuBarRemeasure(passes: passes - 1)
+            }
+        }
+    }
+
     /// One-shot re-track for windows the transient filters
     /// dropped mid-launch (#675); the stored
     /// `transientRetrackDelay` carries the delay and its

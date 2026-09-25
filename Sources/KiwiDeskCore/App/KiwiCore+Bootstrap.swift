@@ -160,6 +160,11 @@ extension KiwiCore {
         eventLoop.onTransientDrop = { [weak self] in
             self?.scheduleTransientRetrack()
         }
+        eventLoop.displayWatch.readDrawnMenuBars =
+            DisplayWatch.liveMenuBars
+        eventLoop.displayWatch.onMenuBarPrefChange = { [weak self] in
+            self?.scheduleMenuBarRemeasure()
+        }
         eventLoop.onRemovalDistrust = { [weak self] in
             self?.scheduleRemovalRecheck()
         }

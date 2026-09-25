@@ -92,16 +92,8 @@ extension EventLoop {
             launch, terminate, activate, space, hide, unhide,
         ]
 
-        screenToken = NotificationCenter.default.addObserver(
-            forName:
-                NSApplication
-                .didChangeScreenParametersNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.publishDisplays()
-            }
+        displayWatch.start { [weak self] in
+            self?.publishDisplays()
         }
     }
 
@@ -247,6 +239,7 @@ extension EventLoop {
     // MARK: - Displays
 
     func publishDisplays() {
+        DrawnMenuBars.refresh(bars: displayWatch.readDrawnMenuBars())
         let displays = NSScreen.screens.compactMap { screen in
             screen.kiwiDisplay
         }
@@ -325,15 +318,13 @@ extension Notification {
 
 extension NSScreen {
     /// Converts an `NSScreen` into a KiwiDesk display snapshot.
-    var kiwiDisplay: Display? {
-        let key = NSDeviceDescriptionKey("NSScreenNumber")
-        guard let number = deviceDescription[key] as? NSNumber
-        else { return nil }
+    @MainActor var kiwiDisplay: Display? {
+        guard let number = screenNumber else { return nil }
         return Display(
-            id: DisplayID(number.uint32Value),
+            id: DisplayID(number),
             name: localizedName,
             frame: frame,
-            visibleFrame: visibleFrame
+            visibleFrame: GeometryUtils.visibleFrame(of: self)
         )
     }
 }

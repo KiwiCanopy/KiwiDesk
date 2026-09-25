@@ -185,7 +185,7 @@ public final class EventLoop {
     /// its own queue and slot; drained by the scheduled task.
     var pendingRemovalRecheck: Set<pid_t> = []
     var workspaceTokens: [NSObjectProtocol] = []
-    var screenToken: NSObjectProtocol?
+    let displayWatch = DisplayWatch()
     var lastActivePid: pid_t?
     /// When KiwiDesk last COMMANDED a focus onto another window
     /// (`KiwiCore.focusWindow` writes it; `NotificationArmNeedleTests`

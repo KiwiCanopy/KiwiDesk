@@ -35,7 +35,8 @@ extension KiwiCore {
         // never sees events routed to our own windows.
         guard
             let screen = NSScreen.screens.first(where: {
-                $0.visibleFrame.contains(cocoaPoint)
+                GeometryUtils.visibleFrame(of: $0)
+                    .contains(cocoaPoint)
             }),
             let display = screen.kiwiDisplay?.id
         else { return }

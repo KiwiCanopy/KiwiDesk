@@ -30,19 +30,29 @@ struct TravelerRehomeSeamTests {
     }
 
     /// The "screen a frame mostly sits on" rule has ONE home,
-    /// shared by `TilingEngine.screen(containing:)` and the pure
-    /// decision — a second copy is where the two would drift.
+    /// shared by `TilingEngine.screen(containing:)`, the pure
+    /// decision and the drawn-menu-bar filing (#1386) — a second
+    /// copy is where they would drift.
     @Test("the overlap rule has one home")
     func theOverlapRuleHasOneHome() throws {
         let sites = try SourceScan.identifierSites(
             of: "GeometryUtils.rect(",
             under: Self.core
         )
-        let files = Set(sites.map(\.file.lastPathComponent))
+        // Counted per file: a second copy inside a listed file is
+        // a second home all the same.
+        let counts = Dictionary(
+            sites.map { ($0.file.lastPathComponent, 1) },
+            uniquingKeysWith: +
+        )
         #expect(
-            files == ["TilingEngine+Layout.swift", "TravelerRehome.swift"],
+            counts == [
+                "TilingEngine+Layout.swift": 1,
+                "TravelerRehome.swift": 1,
+                "DrawnMenuBars.swift": 1,
+            ],
             .init(
-                rawValue: "expected the two consumers, found "
+                rawValue: "expected one call per consumer, found "
                     + sites.map(\.site).joined(separator: ", ")
             )
         )

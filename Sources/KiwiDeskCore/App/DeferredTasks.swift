@@ -56,6 +56,9 @@ final class DeferredTasks {
         /// a follow and a reach are one keystroke apart, and
         /// cancel-and-replace would drop whichever fired first.
         case awayReachReap
+        /// Re-publishes the displays after the menu-bar
+        /// auto-hide pref flips (#1386).
+        case menuBarRemeasure
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

@@ -51,21 +51,47 @@ public enum GeometryUtils {
         CGPoint(x: point.x, y: primaryHeight - point.y)
     }
 
-    /// A screen's usable area in AX coordinates, reclaiming auto-hidden menu
-    /// bar.
+    /// A screen's usable area in AX coordinates — `visibleFrame(of:)`
+    /// flipped.
     @MainActor
     public static func axVisibleFrame(
         of screen: NSScreen
     ) -> CGRect {
-        var visible = screen.visibleFrame
+        flip(visibleFrame(of: screen), primaryHeight: primaryHeight)
+    }
+
+    /// A screen's usable area in Cocoa coordinates: reclaims an
+    /// auto-hidden menu bar and clears a drawn one AppKit's cached
+    /// `visibleFrame` has not caught up with (#1386). Core reads
+    /// a screen's usable area through here;
+    /// `VisibleFrameReadCensusTests` holds the exceptions.
+    @MainActor
+    static func visibleFrame(of screen: NSScreen) -> CGRect {
         if menuBarAutoHides {
-            visible = reclaimingMenuBar(
-                visible,
+            return reclaimingMenuBar(
+                screen.visibleFrame,
                 screen: screen.frame,
                 safeTop: screen.safeAreaInsets.top
             )
         }
-        return flip(visible, primaryHeight: primaryHeight)
+        return clearingMenuBar(
+            screen.visibleFrame,
+            barBottom: DrawnMenuBars.bottom(of: screen)
+        )
+    }
+
+    /// Lowers `visible`'s top edge to a drawn bar's bottom edge
+    /// when it reaches past it; never raises it (#1386).
+    static func clearingMenuBar(
+        _ visible: CGRect,
+        barBottom: CGFloat?
+    ) -> CGRect {
+        guard let barBottom, visible.maxY > barBottom else {
+            return visible
+        }
+        var result = visible
+        result.size.height -= visible.maxY - barBottom
+        return result
     }
 
     /// True when the macOS menu bar is configured to auto-hide.
