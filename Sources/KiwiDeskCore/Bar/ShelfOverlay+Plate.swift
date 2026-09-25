@@ -78,7 +78,7 @@ extension ShelfOverlay {
             return
         }
         divider.isHidden = false
-        dividerStyle = (shelf, horizontal)
+        dividerShelf = shelf
         BarMotion.setFrame(divider, to: frame, animated: animated)
         paintDivider()
     }
@@ -94,7 +94,7 @@ extension ShelfOverlay {
     }
 
     private func paintDivider() {
-        guard let shelf = dividerStyle?.shelf else { return }
+        guard let shelf = dividerShelf else { return }
         divider.layer?.backgroundColor =
             (dividerHovered
             ? BarDivider.sectionHoverColor(hoverColor: shelf.hoverItemColor)

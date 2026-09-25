@@ -140,21 +140,22 @@ struct ShelfDividerWeightTests {
                 shelf: shelf
             ).divider
         )
+        let sections: [ShelfOverlay.Section] = [
+            .init(
+                view: NSView(),
+                slot: CGRect(x: 0, y: 0, width: 300, height: 30),
+                plate: .zero
+            ),
+            .init(
+                view: NSView(),
+                slot: CGRect(x: 300, y: 0, width: 700, height: 30),
+                plate: .zero
+            ),
+        ]
         overlay.show(
             strip: strip,
             shelf: shelf,
-            sections: [
-                .init(
-                    view: NSView(),
-                    slot: CGRect(x: 0, y: 0, width: 300, height: 30),
-                    plate: .zero
-                ),
-                .init(
-                    view: NSView(),
-                    slot: CGRect(x: 300, y: 0, width: 700, height: 30),
-                    plate: .zero
-                ),
-            ],
+            sections: sections,
             divider: full
         )
         let rest = overlay.divider.frame
@@ -163,6 +164,15 @@ struct ShelfDividerWeightTests {
         // Ink only: the resize cursor carries the rest (owner
         // 2026-09-25), so the line keeps its weight.
         #expect(overlay.divider.frame == rest)
+        // A relayout while hovered keeps the weight too.
+        overlay.show(
+            strip: strip,
+            shelf: shelf,
+            sections: sections,
+            divider: full
+        )
+        #expect(overlay.divider.frame == rest)
+        #expect(overlay.handle.isHovered)
         let ink = try #require(overlay.divider.layer?.backgroundColor)
         #expect(ink.alpha == 1)
         #expect(
