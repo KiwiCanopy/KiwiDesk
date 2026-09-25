@@ -26,7 +26,9 @@ struct DrawnMenuBarsWiringTests {
                 in: text
             )
         )
-        #expect(body.contains("clearingMenuBar("))
+        // RETURNED, not merely called: a dropped result is the
+        // same bug with the needle still present.
+        #expect(body.contains("return clearingMenuBar("))
         #expect(body.contains("DrawnMenuBars.bottom(of: screen)"))
         let ax = try #require(
             SourceScan.declarationBody(
@@ -72,6 +74,16 @@ struct DrawnMenuBarsWiringTests {
         )
         #expect(stop.contains("removeObserver(screenToken)"))
         #expect(stop.contains("prefObserver?.invalidate()"))
+        // The observer registers itself, or it is created and
+        // invalidated without ever hearing a change.
+        let observer = try #require(
+            SourceScan.declarationBody(
+                after: "init(onChange: @escaping @MainActor @Sendable",
+                in: watch
+            )
+        )
+        #expect(observer.contains("addObserver("))
+        #expect(observer.contains("forKeyPath: Self.key"))
         let apps = try source(
             "Sources/KiwiDeskCore/Events/EventLoop+Apps.swift"
         )

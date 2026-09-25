@@ -39,14 +39,20 @@ struct TravelerRehomeSeamTests {
             of: "GeometryUtils.rect(",
             under: Self.core
         )
-        let files = Set(sites.map(\.file.lastPathComponent))
+        // Counted per file: a second copy inside a listed file is
+        // a second home all the same.
+        let counts = Dictionary(
+            sites.map { ($0.file.lastPathComponent, 1) },
+            uniquingKeysWith: +
+        )
         #expect(
-            files == [
-                "TilingEngine+Layout.swift", "TravelerRehome.swift",
-                "DrawnMenuBars.swift",
+            counts == [
+                "TilingEngine+Layout.swift": 1,
+                "TravelerRehome.swift": 1,
+                "DrawnMenuBars.swift": 1,
             ],
             .init(
-                rawValue: "expected the two consumers, found "
+                rawValue: "expected one call per consumer, found "
                     + sites.map(\.site).joined(separator: ", ")
             )
         )
