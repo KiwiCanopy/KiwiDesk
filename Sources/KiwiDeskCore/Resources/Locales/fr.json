@@ -1303,7 +1303,6 @@
   "space_override.slot_size.help": "Définit la taille de chaque fenêtre en défilement le long du sens de défilement : la largeur de colonne quand l'orientation est %1$@, la hauteur de ligne quand elle est %2$@. Comme unité, %3$@ est une part d'une fenêtre plus un écart, donc 50 %% correspond exactement à deux fenêtres, écarts compris (95 %% par défaut) ; %4$@ fixent une taille exacte.",
   "space_override.title": "%1$@ — surcharges de %2$@",
   "spaces.add.help": "Ajouter un espace",
-  "spaces.add.placeholder": "Nom du nouvel espace",
   "spaces.caption": "Chaque espace possède sa propre disposition. Ajoutez des espaces ici ; ils apparaîtront aussi dans la liste des raccourcis et des règles d'application. Faites glisser les rangées pour réordonner.",
   "spaces.context.clear_fallback": "Effacer l'espace de secours",
   "spaces.context.delete": "Supprimer",

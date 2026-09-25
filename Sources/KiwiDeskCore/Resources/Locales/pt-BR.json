@@ -1303,7 +1303,6 @@
   "space_override.slot_size.help": "Define o tamanho de cada janela em rolagem ao longo da direção de rolagem: a largura da coluna quando a orientação é %1$@ e a altura da linha quando é %2$@. Como unidade, %3$@ é uma fração de uma janela mais um espaçamento, então 50%% equivale exatamente a duas janelas, espaçamentos incluídos (95%% de fábrica); %4$@ fixam um tamanho exato.",
   "space_override.title": "%1$@ — Substituições de %2$@",
   "spaces.add.help": "Adicionar espaço",
-  "spaces.add.placeholder": "Nome do novo espaço",
   "spaces.caption": "Cada espaço tem seu próprio layout. Adicione espaços aqui; eles também aparecem nas listas de atalhos e de regras de apps. Arraste as linhas para reordenar.",
   "spaces.context.clear_fallback": "Limpar alternativa",
   "spaces.context.delete": "Excluir",

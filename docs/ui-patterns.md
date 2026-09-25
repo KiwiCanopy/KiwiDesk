@@ -995,7 +995,10 @@ fallback.
 The Space name field is the same channel for a typed edit
 (#1623): while the draft names another Space or is empty, a
 caption with a warning triangle under the row says why the edit
-will not stick, and a refused name's revert is announced. The app rules row
+will not stick, and a refused name's revert is announced. The
+add row takes the same caption for a taken name (#1531) and
+never needs a name at all: + with the field empty makes the next
+number. The app rules row
 still drops a duplicate silently, and owes the same channel.
 
 **Hover confirms custom hit areas; it never creates the only

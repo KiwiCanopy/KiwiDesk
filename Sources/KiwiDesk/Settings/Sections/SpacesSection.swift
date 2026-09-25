@@ -220,35 +220,45 @@ struct SpacesSection: View {
     }
 
     private var addRow: some View {
-        HStack {
-            TextField(
-                L("spaces.add.placeholder", "New Space name"),
-                text: $newSpace
-            )
-            .textFieldStyle(.roundedBorder)
-            Button {
-                addSpace()
-            } label: {
-                Image(systemName: "plus")
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                TextField(
+                    L(
+                        "spaces.add.placeholder_optional",
+                        "New Space (name optional)"
+                    ),
+                    text: $newSpace
+                )
+                .textFieldStyle(.roundedBorder)
+                .onSubmit(addSpace)
+                Button {
+                    addSpace()
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .disabled(addTarget == nil)
+                .settingsActionButton()
+                // Icon-only like its siblings (#94) — and named for
+                // VoiceOver, which `.help` is not.
+                .help(L("spaces.add.help", "Add Space"))
+                .accessibilityLabel(L("spaces.add.help", "Add Space"))
             }
-            .disabled(!canAdd)
-            .settingsActionButton()
-            // Icon-only like its siblings (#94) — and named for
-            // VoiceOver, which `.help` is not.
-            .help(L("spaces.add.help", "Add Space"))
-            .accessibilityLabel(L("spaces.add.help", "Add Space"))
+            // The greyed + says nothing on its own (#1531).
+            if addTarget == nil {
+                SpaceNameNoticeCaption(
+                    notice: .taken(newSpace.trimmed)
+                )
+            }
         }
     }
 
-    private var canAdd: Bool {
-        let name = newSpace.trimmed
-        return !name.isEmpty
-            && !model.config.spaces.contains { $0.raw == name }
+    private var addTarget: SpaceID? {
+        SpaceAddName.resolve(newSpace, among: model.config.spaces)
     }
 
     private func addSpace() {
-        guard canAdd else { return }
-        model.config.spaces.append(SpaceID(newSpace.trimmed))
+        guard let space = addTarget else { return }
+        model.config.spaces.append(space)
         newSpace = ""
     }
 
