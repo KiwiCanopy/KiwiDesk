@@ -26,11 +26,7 @@ extension EventLoop {
         // frontmost reading on restart (#1322).
         lastActivePid = nil
         lastCommandedFocus = nil
-        if let screenToken {
-            NotificationCenter.default
-                .removeObserver(screenToken)
-        }
-        screenToken = nil
+        displayWatch.stop()
         for observer in observers.values {
             observer.invalidate()
         }

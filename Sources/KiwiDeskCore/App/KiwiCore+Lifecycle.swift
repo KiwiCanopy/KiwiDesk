@@ -116,6 +116,25 @@ extension KiwiCore {
         }
     }
 
+    /// Re-publishes the displays after the menu-bar auto-hide
+    /// pref flips (#1386), so the bar and the tiles clear a menu
+    /// bar AppKit's screen cache missed. The WindowServer draws
+    /// or drops the bar within ~0.5 s of the pref (measured on
+    /// the issue); the second pass catches a late one.
+    func scheduleMenuBarRemeasure(passes: Int = 2) {
+        deferred.schedule(
+            .menuBarRemeasure,
+            after: .milliseconds(600)
+        ) { [weak self] in
+            guard let self, self.eventLoop.isRunning
+            else { return }
+            self.eventLoop.publishDisplays()
+            if passes > 1 {
+                self.scheduleMenuBarRemeasure(passes: passes - 1)
+            }
+        }
+    }
+
     /// One-shot re-track for windows the transient filters
     /// dropped mid-launch (#675); the stored
     /// `transientRetrackDelay` carries the delay and its
