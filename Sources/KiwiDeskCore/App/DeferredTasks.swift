@@ -59,6 +59,9 @@ final class DeferredTasks {
         /// Re-publishes the displays after the menu-bar
         /// auto-hide pref flips (#1386).
         case menuBarRemeasure
+        /// The profile choice a screen-count change waits on
+        /// until the reports stop (#1612).
+        case monitorSettle
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

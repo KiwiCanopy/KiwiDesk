@@ -228,6 +228,7 @@ public final class KiwiCore {
     /// fade-in or a close's teardown (#1157).
     var adoptionHealInterval: Duration = KiwiCore.adoptionHealDefault
     var transientRetrackDelay: Duration = .milliseconds(750)
+    var monitorSettleDelay: Duration? = KiwiCore.monitorSettleDefault
 
     /// Four intent ledgers, each type doc carrying its argument:
     /// the move latch (#482/#483), the follow focus debt (#1007),
@@ -328,7 +329,6 @@ public final class KiwiCore {
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
-
     public let socket: SocketServer
 
     public init(
