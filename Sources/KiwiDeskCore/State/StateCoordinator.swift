@@ -82,6 +82,12 @@ public struct StateCoordinator: Sendable {
     /// are a profile deleted, a profile renamed, and #634.
     var profilePartitioning = ProfilePartitioning()
 
+    /// Spaces carried onto a remaining screen when their own was
+    /// unplugged (#1507), by live id — session state that no
+    /// Keep, Save or partitioning record captures; written and
+    /// ended in `KiwiCore+HeldSpaces.swift`.
+    var heldSpaces: [SpaceID: HeldOrigin] = [:]
+
     /// Minimized windows in order (#40, #673; `MinimizeOrderTests`).
     var minimizeOrder: [MinimizedWindow] = []
 

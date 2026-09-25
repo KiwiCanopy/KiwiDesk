@@ -317,7 +317,7 @@ extension KiwiCore {
             guard profile.name != profiles.currentName else {
                 return
             }
-            apply(profile: profile, forceRetile: false)
+            apply(profile: profile, cause: .event)
             onLog(
                 "Desktop \(binding.desktop): loaded profile "
                     + "'\(profile.name)'"

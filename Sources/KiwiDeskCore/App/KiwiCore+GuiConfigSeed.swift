@@ -113,7 +113,7 @@ extension KiwiCore {
     ) {
         var known = Set(seed)
         known.formUnion(config.spaces)
-        for space in state.workspaces.allSpaces
+        for space in capturedSpaces
         where !known.contains(space.id) {
             config.spaces.append(space.id)
             if space.mode != .bsp {

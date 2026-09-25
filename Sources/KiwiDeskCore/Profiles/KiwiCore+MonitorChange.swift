@@ -42,7 +42,7 @@ extension KiwiCore {
         if let binding = mainDesktopBinding(in: desktops) {
             switch boundProfile(of: binding) {
             case .success(let pick):
-                apply(profile: pick.profile, forceRetile: false)
+                apply(profile: pick.profile, cause: .monitorChange)
                 onLog(
                     "monitor change: loaded bound profile "
                         + "'\(pick.profile.name)'"
@@ -59,7 +59,7 @@ extension KiwiCore {
         switch profiles.match(fingerprints: fingerprints) {
         case .exact(let profile):
             if profile.name != profiles.currentName {
-                apply(profile: profile, forceRetile: false)
+                apply(profile: profile, cause: .monitorChange)
                 onLog(
                     "monitor change: loaded profile "
                         + "'\(profile.name)'"
@@ -78,7 +78,7 @@ extension KiwiCore {
             }
         case .countDefault(let profile):
             if profile.name != profiles.currentName {
-                apply(profile: profile, forceRetile: false)
+                apply(profile: profile, cause: .monitorChange)
                 onLog(
                     "monitor change: loaded default profile "
                         + "'\(profile.name)' (dirty)"

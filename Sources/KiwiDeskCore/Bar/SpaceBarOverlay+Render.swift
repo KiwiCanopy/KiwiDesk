@@ -140,7 +140,8 @@ extension SpaceBarOverlay {
                 style: style,
                 stateMarkColors: stateMarkColors,
                 overflow: item.overflow,
-                focusInOverflow: item.focusInOverflow
+                focusInOverflow: item.focusInOverflow,
+                held: item.held
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)

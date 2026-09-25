@@ -181,7 +181,7 @@ struct SessionRatioOverrideTests {
             spaceModes: ["1": .bsp],
             settings: core.tiler.settings
         )
-        core.apply(profile: other, forceRetile: false)
+        core.apply(profile: other, cause: .event)
         #expect(
             core.state.workspaces[SpaceID("1")]?
                 .sessionRatios == SessionRatios()

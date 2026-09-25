@@ -156,12 +156,12 @@ extension KiwiCore {
         name: String,
         modes overrides: [SpaceID: LayoutMode]?
     ) -> Profile {
-        let liveSpaces = state.workspaces.allSpaces.map(\.id)
+        let liveSpaces = capturedSpaces.map(\.id)
         let modes =
             overrides
             ?? Dictionary(
                 uniqueKeysWithValues:
-                    state.workspaces.allSpaces.map {
+                    capturedSpaces.map {
                         ($0.id, $0.mode)
                     }
             )
@@ -287,8 +287,7 @@ extension KiwiCore {
             // monitor-change's no-prune-on-reconnect rule.
             apply(
                 profile: fresh,
-                pruneStaleSpaces: true,
-                forceRetile: true
+                cause: .explicit
             )
         } else {
             handleMonitorChange()

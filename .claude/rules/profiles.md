@@ -900,11 +900,13 @@ this deliberately leaves visible.
 
 ## Applies force or don't, explicitly
 
-`apply(profile:)` / `apply(composed:)` take a **required**
-`forceRetile`, so every new caller must choose. Explicit paths
-force — `load_profile`, an in-effect edit re-apply, the
-post-reload re-apply, preset apply. Monitor-change and
-native-space-binding applies stay un-forced. The wider rule (and
+`apply(profile:)` takes a **required** `ProfileApplyCause` and
+`apply(composed:)` a required `forceRetile`, so every new caller
+must choose. Explicit paths force — `load_profile`, an in-effect
+edit re-apply, the post-reload re-apply, preset apply.
+Monitor-change and native-space-binding applies stay un-forced.
+A new classification of a profile apply is a new CASE of that
+one value, never another Bool beside it (#1507). The wider rule (and
 why the ±2 pt tolerance makes this matter) is in
 [state-and-layout.md](state-and-layout.md).
 

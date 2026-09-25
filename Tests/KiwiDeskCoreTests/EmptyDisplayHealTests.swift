@@ -174,7 +174,7 @@ struct EmptyDisplayHealTests {
         )
         core.state.workspaces.add(WindowID(7), to: "2")
         let solo = try core.profiles.read(name: "Solo")
-        core.apply(profile: solo, forceRetile: false)
+        core.apply(profile: solo, cause: .event)
         #expect(
             core.state.workspaces.allSpaces.map(\.id)
                 == ["1", "work", "2"]
