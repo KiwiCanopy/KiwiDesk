@@ -144,20 +144,22 @@ jobs:
     needs: changes
     if: needs.changes.outputs.run == 'true'
     name: Build, Lint & Test
-    # macos-26 (Tahoe), not macos-15: the tree uses macOS 26 SDK
-    # symbols (NSGlassEffectView, #390). `if #available` gates
-    # execution, not compilation, so the symbol must exist in the
-    # SDK or the file cannot compile at all. The deployment target
-    # is unchanged, so the binary still runs on older macOS.
-    runs-on: macos-26
+    # xcode-27 (macOS 27, Xcode 27 GA — a preview image, #1500):
+    # the toolchain the tree is developed on. The tree needs at
+    # least the macOS 26 SDK (NSGlassEffectView, #390) — `if
+    # #available` gates execution, not compilation — and the
+    # deployment target is unchanged, so the binary still runs on
+    # older macOS.
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v7
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app \
+          sudo xcode-select -s /Applications/Xcode_27.app \
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
+          xcodebuild -version
 
       # The warning ratchet (#1594): swiftc errors on anything
       # but a deprecation, which stays a warning while
@@ -213,15 +215,16 @@ jobs:
     # pay locally: the optimizer turns on concurrency diagnostics
     # (non-Sendable captures in `@Sendable` closures) the debug
     # build silently accepts. #532.
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v7
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app \
+          sudo xcode-select -s /Applications/Xcode_27.app \
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
+          xcodebuild -version
 
       - name: Build (release)
         run: swift build -c release

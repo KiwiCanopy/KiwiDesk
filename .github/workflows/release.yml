@@ -45,7 +45,7 @@ env:
   # Xcode bump that edited one job and not the other would leave
   # both green while the artifact is built by a compiler Verify
   # never ran.
-  XCODE: /Applications/Xcode_26.6.app
+  XCODE: /Applications/Xcode_27.app
 
 jobs:
   # The gate scripts/release.sh runs before it will tag, re-run
@@ -65,10 +65,10 @@ jobs:
   # argument lives in packaging-and-release.md.
   verify:
     name: Verify
-    # macos-26 for the same reason ci.yml pins it: the tree uses
-    # macOS 26 SDK symbols, and `if #available` gates execution,
-    # not compilation.
-    runs-on: macos-26
+    # xcode-27 for the same reason ci.yml pins it: the artifact
+    # is built by the toolchain the tree is developed and vetted
+    # on (#1500).
+    runs-on: xcode-27
     permissions:
       contents: read
       # Read-only, for the milestone gate below.
@@ -191,10 +191,10 @@ jobs:
   release:
     name: Build & draft release
     needs: verify
-    # macos-26 for the same reason ci.yml pins it: the tree uses
-    # macOS 26 SDK symbols, and `if #available` gates execution,
-    # not compilation.
-    runs-on: macos-26
+    # xcode-27 for the same reason ci.yml pins it: the artifact
+    # is built by the toolchain the tree is developed and vetted
+    # on (#1500).
+    runs-on: xcode-27
     permissions:
       # The draft and its assets — the one write this workflow
       # does. Verify above runs with read only.

@@ -88,8 +88,9 @@ the verification block against a real Mach-O for both verdicts.
 other two `swift build -c release` sites — `scripts/release.sh`'s
 gate and `ci.yml`'s release job — are compile gates whose binary
 nothing ships, so they take no override (an override with no
-re-read behind it guards nothing). CI pinned Xcode 26.6 when
-this landed; #1500 moves it.
+re-read behind it guards nothing). CI and the release job build
+with Xcode 27 since #1500 — the toolchain whose SwiftPM stamp this
+guard exists for, so a runner-image bump reaches it here first.
 
 **The plist must declare `CFBundleLocalizations`, derived from
 `Sources/KiwiDeskCore/Resources/Locales`.** A bundle that names
