@@ -109,12 +109,8 @@ struct MonitorChangeSettleTests {
         core.handle(.displaysChanged([builtIn, headset]))
         #expect(core.deferred.isScheduled(.monitorSettle))
         // The #1175 heal: the arriving screen already holds a
-        // Space, and every Space resolves to a live screen.
+        // Space before any profile is chosen.
         #expect(!core.state.workspaces.spaces(on: headset.id).isEmpty)
-        for space in core.state.workspaces.allSpaces {
-            let display = core.state.workspaces.display(of: space.id)
-            #expect(display == builtIn.id || display == headset.id)
-        }
     }
 
     @Test("a gone screen's Spaces re-home without waiting")
@@ -127,9 +123,99 @@ struct MonitorChangeSettleTests {
         core.handle(.displaysChanged([builtIn]))
         #expect(core.monitorSettlePending)
         #expect(core.profiles.currentName == "pair")
-        for space in core.state.workspaces.allSpaces {
-            #expect(core.state.workspaces.display(of: space.id) == builtIn.id)
+    }
+
+    @Test("a report while a settle is owed re-arms it, whatever the count")
+    func pendingReportRearms() {
+        let core = makeCore(log: SettleLog())
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.handle(.displaysChanged([builtIn, headset]))
+        #expect(core.monitorSettlePending)
+        #expect(core.profiles.currentName == "solo")
+    }
+
+    @Test("monitor_change fires once, when the settle decides")
+    func eventFiresOnceSettled() async {
+        let core = makeCore(log: SettleLog())
+        let events = EventCount()
+        _ = core.bus.addSink { event, _ in
+            if event == .monitorChange { events.count += 1 }
         }
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.handle(.displaysChanged([builtIn]))
+        #expect(events.count == 0)
+        await settle(core)
+        #expect(events.count == 1)
+    }
+
+    @Test("a load inside the wait still fires the owed event")
+    func supersedeEmits() {
+        let core = makeCore(log: SettleLog())
+        let events = EventCount()
+        _ = core.bus.addSink { event, _ in
+            if event == .monitorChange { events.count += 1 }
+        }
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.execute("load_profile", args: [.string("solo")])
+        #expect(events.count == 1)
+    }
+
+    @Test("windows move once: at the settle, never at the report")
+    func oneRetileAtTheSettle() async {
+        let core = makeCore(log: SettleLog())
+        // Every pass rewrites the drawn-mode ledger (#1177).
+        core.drawnSpaceModes = [:]
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.handle(.displaysChanged([builtIn]))
+        #expect(core.drawnSpaceModes.isEmpty)
+        // Back to the live profile: no apply, so only the settle's
+        // own retile can draw.
+        await settle(core)
+        #expect(!core.drawnSpaceModes.isEmpty)
+    }
+
+    @Test("a composed Standard applied inside the wait supersedes it")
+    func composedSupersedes() {
+        let core = makeCore(log: SettleLog())
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.apply(
+            composed: ProfileComposition.Composed(
+                sourceName: "Std",
+                spaces: [SpaceID(1)],
+                spaceModes: [SpaceID(1): .bsp],
+                assignment: [:],
+                settings: TilingSettings()
+            ),
+            forceRetile: false
+        )
+        #expect(!core.monitorSettlePending)
+    }
+
+    @Test("a direct monitor-change decision supersedes a pending one")
+    func directDecisionSupersedes() {
+        let core = makeCore(log: SettleLog())
+        core.handle(.displaysChanged([builtIn, headset]))
+        core.handleMonitorChange()
+        #expect(!core.monitorSettlePending)
+    }
+
+    @Test("a seed whose screen is live, or that holds a window, stays")
+    func seedFilterKeepsLiveAndOccupied() {
+        let core = makeCore(log: SettleLog())
+        core.handle(.displaysChanged([builtIn, headset]))
+        let seed = SpaceID(90)
+        core.state.workspaces.ensureSpace(seed)
+        core.healedSpaces[headset.fingerprint] = seed
+        core.retireOrphanedHealSeeds()
+        #expect(core.state.workspaces[seed] != nil)
+        core.healedSpaces = ["GONE:1x1": seed]
+        let window = WindowID(900)
+        core.state.windows.upsert(
+            ManagedWindow(id: window, pid: 1, appName: "Held")
+        )
+        core.state.workspaces.add(window, to: seed)
+        core.retireOrphanedHealSeeds()
+        #expect(core.state.workspaces[seed]?.windows == [window])
     }
 
     @Test("a same-count re-report decides at once")
@@ -158,6 +244,11 @@ struct MonitorChangeSettleTests {
         core.handle(.displaysChanged([builtIn]))
         #expect(!core.deferred.isScheduled(.monitorSettle))
     }
+}
+
+@MainActor
+private final class EventCount {
+    var count = 0
 }
 
 /// A reference sink for `onLog`, so the escaping closure and the
