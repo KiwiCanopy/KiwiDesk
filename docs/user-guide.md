@@ -67,11 +67,9 @@ KiwiDesk checks for updates on its own in the background, and a
 found update shows as a dot on the menu-bar icon and an
 **Update Available…** row, never a pop-up.
 
-:::unreleased
 The quick menu has no check row of its own: ask for a check
 from the foot of Settings Home, which also says when KiwiDesk
 last checked.
-:::
 
 **If you installed with Homebrew**, KiwiDesk keeps itself up to
 date and `brew upgrade` steps aside; to move an older copy onto a
@@ -193,13 +191,11 @@ file with the older single `profile` is rewritten once on load —
 and may also carry `screen`, the name of the screen its Desktop
 was last seen on.
 
-:::unreleased
 An item of `profiles` may instead be an object that binds its
 profile for one screen setup, naming every screen by its
 fingerprint as `list_monitors` prints it:
 `{ "profile": "Studio", "setup": [ "Built-in Retina Display:1512x982", "LG UltraFine:2560x1440" ] }`.
 A bare name binds for all screen setups.
-:::
 
 A hand-edited `layers` list is normalized on load: empty names
 are dropped, a duplicated name keeps its first entry, `default`
@@ -324,10 +320,8 @@ the bare wallpaper. A new window, and a global sticky window,
 appear on that monitor's space. Clicking the menu bar or the Dock
 does not move focus.
 
-:::unreleased
 Opening an app whose [app rule](#app-rules) names a space on
 another monitor moves the focus there with its window.
-:::
 
 ## Gaps & Borders
 
@@ -440,21 +434,17 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 
 ## KiwiShelf & Bars
 
-:::unreleased
 **Thickness** runs 20–80 pt on the **KiwiShelf** card; Lua
 ([`kiwishelf.set_thickness`](lua-reference.md#kiwishelfset_thickness))
 takes any value from 20 up.
-:::
 
 ### App Bar
 
 The App Bar renders only in **Monocle** and **Scrolling**, and
 its card has no on/off row.
 
-:::unreleased
 The KiwiShelf card's **App Bar in Monocle** and **App Bar in
 Scrolling** switches are its visibility.
-:::
 
 Drag an item to reorder the windows; a grouped item expands into
 its members on click. Styling it differently per layout is
@@ -462,12 +452,10 @@ Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
 `scroll.set_app_bar_*` twin ([Per-layout App Bar
 overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
-:::unreleased
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
 (**Colours & Animations**); on macOS before 26 each draws its
 flat look instead.
-:::
 
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
@@ -485,13 +473,11 @@ While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
 ahead of the Spaces ([Shortcut Layers](#shortcut-layers)).
 
-:::unreleased
 With the bar off, the menu bar icon takes its place: the Space
 each screen is showing — its icon, or its name where it has
 none — with the active layer's icon ahead of them, and the
 KiwiDesk logo, or the layer's icon, back as soon as the bar is
 on again.
-:::
 
 The bar shows the Desktop you are looking at: a window on a macOS
 Desktop you are not looking at is not listed, and *Hide empty
@@ -526,10 +512,8 @@ toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 
 Dropping onto the Space a window is already on does nothing.
 
-:::unreleased
 While dragging, hold over a bar's faded end to autoscroll a bar
 that overflows.
-:::
 
 ## Behavior
 
@@ -548,12 +532,10 @@ Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ### Which Profile Loads
 
-:::unreleased
 The card at the top of the Profiles page answers for your
 machine now — *"Right now: 2 screens →
 Desk (it holds this screen setup)"* — naming which rung resolved
 it; its **?** lists the rungs.
-:::
 
 The rungs, in order:
 
@@ -577,7 +559,6 @@ one-screen profiles.
 
 ### The Profile Banner
 
-:::unreleased
 The dropdown at the top of any section picks what your edits
 target. Each profile is listed once: on top what is on screen —
 the loaded profile, or the Standard or temporary layout in its
@@ -597,7 +578,6 @@ shares with the loaded profile ([Per-Profile Space
 Assignments](#per-profile-space-assignments)). **Save a copy…**
 while editing a stored profile duplicates it with your pending
 edits, without touching the running layout.
-:::
 
 ### Saving
 
@@ -608,12 +588,10 @@ no set for is itself an unsaved change, listed as a **Screens**
 row. On a temporary layout or a built-in Standard the slot reads
 **Save as New Profile…**.
 
-:::unreleased
 Loading a profile saved for this many screens moves the connected
 screen setup to it from any other profile, so the next time these
 screens connect, it loads. Saving adds the connected screen setup
 only when no other profile has it.
-:::
 
 While management is **paused** (Accessibility off), KiwiDesk
 detects no displays, so any save that captures the live monitor
@@ -622,11 +600,9 @@ the space list and Desktop bindings carry no monitor set, so
 **Save** still writes `gui.json` for them and keeps counting the
 layout edits until you grant access.
 
-:::unreleased
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
 loaded and edit its Shortcuts section.
-:::
 
 ### Built-in Standards & Presets
 
@@ -640,11 +616,9 @@ editable profile; presets cannot be deleted.
 
 ## App Rules
 
-:::unreleased
 **Windows titled…** is a Power User choice in the Float list's
 menu. Once any rule uses it, the choice stays listed in Simple as
 well.
-:::
 
 **The title match is case-sensitive**, and "Info" also catches
 "Information"; the live window list under the chips shows what
@@ -671,7 +645,6 @@ ignore rule also opts a misbehaving tabbed app out.
 
 ### Per-Profile Space Assignments
 
-:::unreleased
 An App Rules row's **Applies to** menu picks the profiles its
 rule reaches: **All profiles** keeps the rule in `gui.json`, and
 otherwise a ticked profile whose value differs from the shared
@@ -679,7 +652,6 @@ one stores it in its own JSON. A new value reaches only the
 ticked profiles; the others keep theirs, and the trash removes a
 rule.
 Removing a shared rule from one profile stores a `null` there.
-:::
 
 A profile stores a sparse diff: `app_rules` maps apps to spaces,
 while `float_rules` and `ignore_rules` are objects whose `true`
@@ -883,14 +855,12 @@ shortcuts while it is active. Every layer gets its own `⌃⌥K`
 row. Switch layers with `KiwiDesk.switch_layer` ([Lua
 reference](lua-reference.md)).
 
-:::unreleased
 Each binding's **Applies to** says which profiles use it: **All
 profiles**, or the profiles ticked. **Remove from** one profile
 turns a shared shortcut off there and keeps it everywhere else,
 and a profile can put a shared shortcut on another key of its
 own. Ticking a profile that uses the key for something else
 gives the key to this shortcut there.
-:::
 
 A new layer also carries the `⌃⌥,` Open Settings row.
 

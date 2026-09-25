@@ -866,7 +866,6 @@ track is itself automatic, only how many of them exist, so
 value the system *computes* — a fixed built-in default stays
 **"Default"**.
 
-:::unreleased
 **Neither word fits a field that can hold no value at all: that
 is an absence, and it is drawn as one.** Where a field holds no
 value — because the setting then simply is not made — the cell
@@ -879,7 +878,6 @@ reaching for either. A table column is where this bites, having
 no way to render a row that omits the field; App Rules answers
 it with one list per rule, so no row has the absent cell
 ([Design decisions](design-decisions.md) ▸ App rules).
-:::
 
 **A boolean mode flag names the MODE on the wire, even when its
 label names the field it gates (R6/#406).** "Auto track limit"
@@ -962,14 +960,12 @@ work this way. The typed free-text path keeps a commit of its
 own, because every keystroke of an identifier is a prefix of
 that identifier and no moment in it means "this is the one".
 
-:::unreleased
 **Where the list may hold no empty rows, the picker names the
 rule it composes.** App Rules keeps one list per rule, each with
 its own picker — *Open an app in a Space…* and *Float an app…* —
 so a pick lands a complete rule. One picker over a defaulted rule
 authors a choice the user did not make ([Design
 decisions](design-decisions.md) ▸ App rules).
-:::
 
 These pickers exclude the entries that cannot be added, but
 their escape route — one file panel, the same on both rows
@@ -1184,7 +1180,6 @@ fails the build on an ungated path; see
 `docs/design-decisions.md` for why the gate sits at the call
 site and which exceptions are deliberate.
 
-:::unreleased
 **A profile delete asks every time, not only while dirty.**
 Route it through `SettingsModel.confirmingProfileDelete`, never
 `discardingEdits`: it parks behind the same one dialog whether or
@@ -1197,7 +1192,6 @@ reflex keypress deletes nothing. `DiscardGateParityTests` ▸
 that takes the plain gate. *Why* is
 [Design decisions](design-decisions.md) ▸ every edit-dropping
 action routes through one discard gate.
-:::
 
 Greying applied across a whole editor (#520, #527):
 
