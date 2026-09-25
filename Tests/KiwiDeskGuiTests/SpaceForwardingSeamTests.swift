@@ -37,6 +37,7 @@ struct SpaceForwardingSeamTests {
                 "Profiles/KiwiCore+ProfileResolution.swift": 1,
                 "Commands/KiwiCore+SpaceLifecycleCommands.swift": 1,
                 "App/KiwiCore+PlaceholderSpace.swift": 1,
+                "Profiles/KiwiCore+EmptyDisplayHeal.swift": 1,
             ]
         )
     }

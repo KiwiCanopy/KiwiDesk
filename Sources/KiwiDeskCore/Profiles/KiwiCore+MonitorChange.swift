@@ -11,6 +11,7 @@ extension KiwiCore {
     func handleMonitorChange() {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return }
+        supersedeMonitorSettle()
         // No exit may leave a space orphaned (#676): the state
         // fold already ran, and any display id churn (sleep,
         // dock/undock — #676's report was an AirPlay connect

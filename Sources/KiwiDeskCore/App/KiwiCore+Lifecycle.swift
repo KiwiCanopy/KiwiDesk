@@ -88,9 +88,9 @@ extension KiwiCore {
         seedStartupFocus()
     }
 
-    /// The default `adoptionHealInterval`; the #1599 launch
+    /// The default `timings.adoptionHealInterval`; the #1599 launch
     /// follow's bound is derived from it.
-    static let adoptionHealDefault: Duration = .seconds(5)
+    nonisolated static let adoptionHealDefault: Duration = .seconds(5)
 
     /// The steady-state net under the one-shot sweep above
     /// (#675): every event-driven adoption path can go silent
@@ -99,14 +99,14 @@ extension KiwiCore {
     /// itself for the whole session. The work it schedules is
     /// gated — `EventLoop.healSweep` reconciles only where the
     /// WindowServer census names an untracked window — and the
-    /// stored `adoptionHealInterval` carries the cadence and its
+    /// stored `timings.adoptionHealInterval` carries the cadence and its
     /// argument beside the value. `stop()`'s
     /// `deferred.cancelAll()` ends the chain; a later `start()`
     /// re-arms it.
     func scheduleAdoptionHeal() {
         deferred.schedule(
             .adoptionHeal,
-            after: adoptionHealInterval
+            after: timings.adoptionHealInterval
         ) { [weak self] in
             guard let self else { return }
             if self.eventLoop.isRunning {
@@ -140,14 +140,14 @@ extension KiwiCore {
 
     /// One-shot re-track for windows the transient filters
     /// dropped mid-launch (#675); the stored
-    /// `transientRetrackDelay` carries the delay and its
+    /// `timings.transientRetrackDelay` carries the delay and its
     /// argument beside the value. Drains every pid queued since
     /// the fire was armed (`markTransientDrop` arms only from
     /// idle, so a drip of drops cannot push the deadline back).
     func scheduleTransientRetrack() {
         deferred.schedule(
             .transientRetrack,
-            after: transientRetrackDelay
+            after: timings.transientRetrackDelay
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning
             else { return }
@@ -170,7 +170,7 @@ extension KiwiCore {
     func scheduleRemovalRecheck() {
         deferred.schedule(
             .removalRecheck,
-            after: transientRetrackDelay
+            after: timings.transientRetrackDelay
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning
             else { return }

@@ -15,8 +15,8 @@ import Testing
 /// (the `scheduleStartupSweep` precedent).
 ///
 /// The awaits ride millisecond timings assigned through the
-/// stored seams (`adoptionHealInterval`,
-/// `transientRetrackDelay`); production keeps the defaults
+/// stored seams (`timings.adoptionHealInterval`,
+/// `timings.transientRetrackDelay`); production keeps the defaults
 /// declared on `KiwiCore`.
 @MainActor
 @Suite("Adoption heal scheduling (#675)")
@@ -92,7 +92,7 @@ struct AdoptionHealScheduleTests {
             core.deferred.cancelAll()
             core.eventLoop.stop()
         }
-        core.adoptionHealInterval = .milliseconds(1)
+        core.timings.adoptionHealInterval = .milliseconds(1)
         core.scheduleAdoptionHeal()
         let armed = core.deferred.task(for: .adoptionHeal)
         await armed?.value
@@ -112,7 +112,7 @@ struct AdoptionHealScheduleTests {
             core.deferred.cancelAll()
             core.eventLoop.stop()
         }
-        core.transientRetrackDelay = .milliseconds(1)
+        core.timings.transientRetrackDelay = .milliseconds(1)
         // The pid needs its observer (a reconcile of an
         // unobserved pid detaches and returns), so attach the
         // fake first — the drop then queues the pid and fires

@@ -694,6 +694,37 @@ space is healed*. The obligations:
   `SecondarySwitchTests` ▸ `secondaryNeverSelects` does since
   #1175.
 
+## A screen-count change settles before it chooses (#1612)
+
+macOS reports an in-between screen layout on some transitions
+(the Vision Pro disconnect measured on the issue), so a report
+that changes the screen COUNT resolves the Spaces onto the
+reported screens at once and OWES the profile choice to
+`settleMonitorChange`, re-armed per report. The obligations:
+
+- **Resolve now, decide later — and move windows once.** The
+  report's own step is the resolve and the bars (the #1175 heal
+  and the re-home never wait); the profile choice, the
+  `monitor_change` event and the one retile belong to the settle,
+  and the event's trailing retile stands down while it is owed
+  (`MonitorChangeSettleTests`). A Space the in-between report
+  seeded for a screen that never settled is retired there when
+  empty (`retireOrphanedHealSeeds`, in the heal file per the
+  ledger rule above).
+- **Every profile apply supersedes a pending settle.**
+  `apply(profile:)`, `apply(composed:)` and `handleMonitorChange`
+  call `supersedeMonitorSettle()` first, which drops the owed
+  choice and still fires the owed `monitor_change`, so a
+  `load_profile` inside the wait is never undone when it fires
+  (`MonitorChangeSettleTests` ▸ `loadInsideTheWaitStands`). A
+  profile door that reaches none of the three owes the call.
+- **Ask `monitorSettlePending`, never the scheduler slot.**
+- **A fixture settles inline, never skips the step.**
+  `makeTestCore` pins `timings.monitorSettleDelay` to nil, which
+  runs both steps with only the wait removed; a seam that
+  decided at once would test a sequence production no longer
+  takes.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by

@@ -53,6 +53,7 @@ extension KiwiCore {
         // both helpers argue their consumer.
         let preEventFrame = preEventFrame(of: event)
         let goneWindowPID = goneWindowPID(of: event)
+        let priorDisplayCount = state.workspaces.allDisplays.count
         // An exiting app's away entries are gone for good (#1146);
         // read before the fold drops them.
         if case .appTerminated(let pid) = event {
@@ -62,12 +63,21 @@ extension KiwiCore {
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
         var goneReason: WindowGoneReason? = nil
+        // A settled monitor change takes its own one retile (#1612).
+        var settleRetiles = false
         switch event {
         case .displaysChanged:
             tiler.displaysChanged()
             borders.displaysChanged()
-            handleMonitorChange()
-            emitMonitorChange()
+            if monitorChangeSettles(priorCount: priorDisplayCount) {
+                scheduleMonitorSettle()
+                settleRetiles = true
+                // Owed: windows wait for the profile, bars re-home.
+                if monitorSettlePending { updateBars() }
+            } else {
+                handleMonitorChange()
+                emitMonitorChange()
+            }
         case .windowFocused(let id):
             handleWindowFocused(id, effects: effects)
         case .windowCreated(let window):
@@ -303,7 +313,7 @@ extension KiwiCore {
         }
         let willRetile =
             TilingEngine.shouldRetile(after: event)
-            && !defersEventRetiles
+            && !defersEventRetiles && !settleRetiles
         // A paid launch follow's switch retile places the arrival
         // in its Space, so the event retile would only park it.
         let followed = launchFollow.map {
