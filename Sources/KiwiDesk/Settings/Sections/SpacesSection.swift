@@ -6,7 +6,6 @@ import SwiftUI
 /// (#68, #678).
 struct SpacesSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var newSpace = ""
     /// Set only for a space that `carriesOverrides` — a plain
     /// empty space still deletes in one click (#205).
     @State var pendingDelete: SpaceID?
@@ -116,7 +115,9 @@ struct SpacesSection: View {
             ForEach(displayedSpaces, id: \.raw) { space in
                 spaceRow(space)
             }
-            addRow
+            SpaceAddRow(spaces: model.config.spaces) {
+                model.config.spaces.append($0)
+            }
         }
     }
 
@@ -217,49 +218,6 @@ struct SpacesSection: View {
                 )
             }
         )
-    }
-
-    private var addRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                TextField(
-                    L(
-                        "spaces.add.placeholder_optional",
-                        "New Space (name optional)"
-                    ),
-                    text: $newSpace
-                )
-                .textFieldStyle(.roundedBorder)
-                .onSubmit(addSpace)
-                Button {
-                    addSpace()
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .disabled(addTarget == nil)
-                .settingsActionButton()
-                // Icon-only like its siblings (#94) — and named for
-                // VoiceOver, which `.help` is not.
-                .help(L("spaces.add.help", "Add Space"))
-                .accessibilityLabel(L("spaces.add.help", "Add Space"))
-            }
-            // The greyed + says nothing on its own (#1531).
-            if addTarget == nil {
-                SpaceNameNoticeCaption(
-                    notice: .taken(newSpace.trimmed)
-                )
-            }
-        }
-    }
-
-    private var addTarget: SpaceID? {
-        SpaceAddName.resolve(newSpace, among: model.config.spaces)
-    }
-
-    private func addSpace() {
-        guard let space = addTarget else { return }
-        model.config.spaces.append(space)
-        newSpace = ""
     }
 
     private func iconBinding(
