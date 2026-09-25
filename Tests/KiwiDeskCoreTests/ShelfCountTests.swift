@@ -11,19 +11,17 @@ struct ShelfCountTests {
 
     @Test("A count keeps its chevron, pointing where the entries are")
     func countGlyph() {
-        let cases: [(ShelfCountView.Side, Bool, String, Bool)] = [
-            (.before, true, "chevron.left", true),
-            (.after, true, "chevron.right", false),
-            (.before, false, "chevron.up", true),
-            (.after, false, "chevron.down", false),
+        let cases: [(ShelfCountView.Side, Bool, String)] = [
+            (.before, true, "chevron.left"),
+            (.after, true, "chevron.right"),
+            (.before, false, "chevron.up"),
+            (.after, false, "chevron.down"),
         ]
-        for (side, horizontal, symbol, leads) in cases {
-            let glyph = ShelfCountView.glyph(
-                side: side,
-                horizontal: horizontal
+        for (side, horizontal, symbol) in cases {
+            #expect(
+                ShelfCountView.symbol(side: side, horizontal: horizontal)
+                    == symbol
             )
-            #expect(glyph.symbol == symbol)
-            #expect(glyph.leads == leads)
             #expect(
                 NSImage(
                     systemSymbolName: symbol,
@@ -33,57 +31,89 @@ struct ShelfCountTests {
         }
     }
 
-    /// The drawn order: the chevron sits away from the content —
-    /// left of or above the number before, right of or below it
-    /// after — so a vertical shelf stacks the two.
-    @Test("The chevron draws on the side away from the content")
-    func chevronPlacement() throws {
-        for (side, horizontal) in [
-            (ShelfCountView.Side.before, true), (.after, true),
-            (.before, false), (.after, false),
-        ] {
-            let view = ShelfCountView(side: side)
-            view.configure(
-                count: 12,
-                horizontal: horizontal,
-                fontSize: 12,
-                ink: .white,
-                hoverInk: .white
-            )
-            view.frame =
-                horizontal
-                ? CGRect(x: 0, y: 0, width: view.fittingLength, height: 24)
-                : CGRect(x: 0, y: 0, width: 24, height: view.fittingLength)
-            view.layout()
-            let parts = view.subviews
-            let number = try #require(
-                parts.first { $0 is NSTextField }
-            ).frame
-            let chevron = try #require(
-                parts.first { $0 is NSImageView }
-            ).frame
-            #expect(chevron.width > 0 && chevron.height > 0)
+    /// A count configured and placed on a shelf `depth` deep, as
+    /// the sections place it.
+    private func placed(
+        _ side: ShelfCountView.Side,
+        horizontal: Bool,
+        depth: CGFloat = 24
+    ) throws -> (view: ShelfCountView, number: CGRect, chevron: CGRect) {
+        let view = ShelfCountView(side: side)
+        view.configure(
+            count: 12,
+            horizontal: horizontal,
+            fontSize: 14,
+            ink: .white,
+            hoverInk: .red
+        )
+        let container =
+            horizontal
+            ? CGRect(x: 0, y: 0, width: 300, height: depth)
+            : CGRect(x: 0, y: 0, width: depth, height: 300)
+        view.place(in: container, atEnd: side == .after)
+        view.layout()
+        let label = try #require(
+            view.subviews.first { $0 is NSTextField } as? NSTextField
+        )
+        // The digits, not the label's padded cell.
+        let digits = label.attributedStringValue.size()
+        let number = CGRect(
+            x: label.frame.midX - digits.width / 2,
+            y: label.frame.midY - digits.height / 2,
+            width: digits.width,
+            height: digits.height
+        )
+        let chevron = try #require(
+            view.subviews.first { $0 is NSImageView }
+        ).frame
+        return (view, number, chevron)
+    }
+
+    /// Owner 2026-09-25: stacked, number on top, on a horizontal
+    /// shelf; side by side, number first, on a vertical one — and
+    /// either fits a 24 pt shelf.
+    @Test("The count stacks on a horizontal shelf, sits beside on a vertical")
+    func countArrangement() throws {
+        for side in [ShelfCountView.Side.before, .after] {
+            let row = try placed(side, horizontal: true)
+            #expect(row.view.stacks)
             #expect(
-                view.drawnSymbol
-                    == ShelfCountView.glyph(
-                        side: side,
-                        horizontal: horizontal
-                    ).symbol
+                row.chevron.minY
+                    >= row.number.maxY + ShelfCountView.stackGap - 0.5
             )
-            let gap = ShelfCountView.partGap - 0.5
-            // Flipped: a smaller y is higher on screen.
-            switch (side, horizontal) {
-            case (.before, true):
-                #expect(chevron.maxX <= number.minX - gap)
-            case (.after, true):
-                #expect(chevron.minX >= number.maxX + gap)
-            case (.before, false):
-                #expect(chevron.maxY <= number.minY - gap)
-            case (.after, false):
-                #expect(chevron.minY >= number.maxY + gap)
-            }
-            #expect(view.bounds.contains(chevron))
+            #expect(row.view.bounds.contains(row.chevron))
+            #expect(row.number.minY >= 0)
+            #expect(
+                row.view.drawnSymbol
+                    == ShelfCountView.symbol(side: side, horizontal: true)
+            )
+            let column = try placed(side, horizontal: false)
+            #expect(!column.view.stacks)
+            #expect(
+                column.chevron.minX
+                    >= column.number.maxX + ShelfCountView.sideGap - 0.5
+            )
+            #expect(column.view.bounds.contains(column.chevron))
+            #expect(column.number.minX >= 0)
+            #expect(
+                column.view.drawnSymbol
+                    == ShelfCountView.symbol(side: side, horizontal: false)
+            )
         }
+    }
+
+    /// The pointer over a count takes the item hover ink.
+    @Test("A hovered count takes the hover ink")
+    func countHover() throws {
+        let count = try placed(.after, horizontal: true).view
+        let label = try #require(
+            count.subviews.first { $0 is NSTextField } as? NSTextField
+        )
+        #expect(label.textColor == .white)
+        count.setHovered(true)
+        #expect(label.textColor == .red)
+        count.setHovered(false)
+        #expect(label.textColor == .white)
     }
 
     @Test("A count is a button that pages, and hides at zero")

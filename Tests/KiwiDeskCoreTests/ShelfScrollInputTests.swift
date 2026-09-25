@@ -29,8 +29,10 @@ struct ShelfScrollInputTests {
 
     @Test("A trackpad moves by its points on the dominant axis")
     func trackpadPoints() {
-        #expect(travel(-12, 3, precise: true) == 12)
-        #expect(travel(2, -30, precise: true) == 30)
+        let gain = ShelfScrollInput.trackpadGain
+        #expect(gain > 1, "a trackpad scrolls faster than 1:1")
+        #expect(travel(-12, 3, precise: true) == 12 * gain)
+        #expect(travel(2, -30, precise: true) == 30 * gain)
     }
 
     /// `scrollingDelta` already carries the user's natural
@@ -42,7 +44,7 @@ struct ShelfScrollInputTests {
         let natural = travel(0, 20, precise: true)
         let classic = travel(0, -20, precise: true)
         #expect(natural == -classic)
-        #expect(natural == -20)
+        #expect(natural == -20 * ShelfScrollInput.trackpadGain)
     }
 
     @Test("No movement, no travel")

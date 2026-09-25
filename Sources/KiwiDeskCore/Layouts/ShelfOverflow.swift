@@ -5,13 +5,16 @@ import CoreGraphics
 /// the overflow arithmetic both sections read, pure so it is
 /// unit-testable (`ShelfOverflowTests`).
 public enum ShelfOverflow {
-    /// The fade's bounds (pt) and its share of a section's visible
-    /// length it may never exceed, so a short section keeps most
-    /// of its content legible.
-    public static let fadeRange: ClosedRange<CGFloat> = 32...72
-    public static let fadeShareCap: CGFloat = 0.25
+    /// The fade's length per point of shelf thickness, its bounds
+    /// (pt), and its share of a section's visible length it may
+    /// never exceed, so a short section keeps most of its content
+    /// legible. Owner 2026-09-25: the fade starts further in.
+    public static let fadePerThickness: CGFloat = 3
+    public static let fadeRange: ClosedRange<CGFloat> = 40...96
+    public static let fadeShareCap: CGFloat = 0.3
 
-    /// One side's fade length: twice the thickness, clamped to
+    /// One side's fade length: `fadePerThickness` × thickness,
+    /// clamped to
     /// `fadeRange`, capped at `fadeShareCap` of `visible`. With no
     /// `visible` it is the uncapped length — the worst case a
     /// floor must budget for.
@@ -20,7 +23,7 @@ public enum ShelfOverflow {
         visible: CGFloat? = nil
     ) -> CGFloat {
         let scaled = min(
-            max(2 * thickness, fadeRange.lowerBound),
+            max(fadePerThickness * thickness, fadeRange.lowerBound),
             fadeRange.upperBound
         )
         guard let visible else { return scaled }

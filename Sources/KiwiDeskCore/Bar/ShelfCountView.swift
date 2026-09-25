@@ -1,11 +1,12 @@
 import AppKit
 
 /// How many entries a shelf section hides on one side, drawn on
-/// that side's faded end (#1517) — `‹ 3` before, `4 ›` after, the
-/// chevron an SF Symbol at the digits' size and weight, stacked on
-/// a vertical shelf. The chevron stays: a bare number beside a
-/// glyph reads as its badge. A click pages that way; VoiceOver
-/// hears a button that does the same.
+/// that side's faded end (#1517): the number and an SF Symbol
+/// chevron pointing where the entries are — stacked, number on
+/// top, on a horizontal shelf; side by side, number first, on a
+/// vertical one (owner 2026-09-25). The chevron stays: a bare
+/// number beside a glyph reads as its badge. A click pages that
+/// way; VoiceOver hears a button that does the same.
 @MainActor
 final class ShelfCountView: NSView {
     enum Side { case before, after }
@@ -16,11 +17,22 @@ final class ShelfCountView: NSView {
     private let chevron = NSImageView()
     private var horizontal = true
     private var count = 0
+    private var fontSize: CGFloat = 12
     /// The SF Symbol `configure` drew, for the placement guard.
     private(set) var drawnSymbol: String?
+    private(set) var isHovered = false
     private var isDragHovered = false
     private var ink: NSColor = .labelColor
     private var hoverInk: NSColor = .labelColor
+
+    /// The number's size against the shelf's depth, and the
+    /// chevron's against the number's: the stack fits a 24 pt
+    /// shelf with margin (ui-designer, #1517).
+    nonisolated static let numberDepthShare: CGFloat = 0.42
+    nonisolated static let chevronShare: CGFloat = 0.7
+    /// Between the number and the chevron, stacked and side by side.
+    nonisolated static let stackGap: CGFloat = 1
+    nonisolated static let sideGap: CGFloat = 2
 
     init(side: Side) {
         self.side = side
@@ -43,7 +55,8 @@ final class ShelfCountView: NSView {
     }
 
     /// Shows `count` hidden entries, or hides the view at zero —
-    /// a side at its end shows nothing.
+    /// a side at its end shows nothing. The size is settled by
+    /// `place(in:atEnd:)`, which knows the shelf's depth.
     func configure(
         count: Int,
         horizontal: Bool,
@@ -55,22 +68,11 @@ final class ShelfCountView: NSView {
         self.ink = ink
         self.hoverInk = hoverInk
         self.horizontal = horizontal
+        self.fontSize = fontSize
         isHidden = count == 0
         guard count > 0 else { return }
         label.stringValue = "\(count)"
-        label.font = .systemFont(ofSize: fontSize, weight: .semibold)
-        let glyph = Self.glyph(side: side, horizontal: horizontal)
-        drawnSymbol = glyph.symbol
-        chevron.image = NSImage(
-            systemSymbolName: glyph.symbol,
-            accessibilityDescription: nil
-        )?.withSymbolConfiguration(
-            NSImage.SymbolConfiguration(
-                pointSize: fontSize,
-                weight: .semibold,
-                scale: .small
-            )
-        )
+        drawnSymbol = Self.symbol(side: side, horizontal: horizontal)
         applyInk()
         setAccessibilityLabel(
             side == .before
@@ -80,38 +82,57 @@ final class ShelfCountView: NSView {
         needsLayout = true
     }
 
-    /// The chevron pointing where the hidden entries are, and
-    /// whether it leads the number — it sits on the side away
-    /// from the content: left or above before, right or below
-    /// after.
-    nonisolated static func glyph(
-        side: Side,
-        horizontal: Bool
-    ) -> (symbol: String, leads: Bool) {
+    /// The chevron pointing where the hidden entries are.
+    nonisolated static func symbol(side: Side, horizontal: Bool) -> String {
         switch (side, horizontal) {
-        case (.before, true): return ("chevron.left", true)
-        case (.after, true): return ("chevron.right", false)
-        case (.before, false): return ("chevron.up", true)
-        case (.after, false): return ("chevron.down", false)
+        case (.before, true): return "chevron.left"
+        case (.after, true): return "chevron.right"
+        case (.before, false): return "chevron.up"
+        case (.after, false): return "chevron.down"
         }
     }
 
-    /// Between the chevron and the number.
-    nonisolated static let partGap: CGFloat = 2
+    /// Whether the number and chevron stack (a horizontal shelf)
+    /// rather than sit side by side.
+    var stacks: Bool { horizontal }
+
+    /// Sizes the number and chevron for a shelf `depth` deep.
+    private func applyFonts(depth: CGFloat) {
+        let size = min(fontSize, depth * Self.numberDepthShare)
+        label.font = .systemFont(ofSize: size, weight: .semibold)
+        chevron.image = drawnSymbol.flatMap {
+            NSImage(systemSymbolName: $0, accessibilityDescription: nil)
+        }?.withSymbolConfiguration(
+            NSImage.SymbolConfiguration(
+                pointSize: size * Self.chevronShare,
+                weight: .semibold,
+                scale: .small
+            )
+        )
+        label.sizeToFit()
+    }
+
+    /// The digits' own extent: a label's frame carries its cell's
+    /// padding (~8 pt), which a 24 pt side-by-side count cannot
+    /// spare.
+    private var numberSize: CGSize {
+        label.attributedStringValue.size()
+    }
 
     /// The width or height this view needs along the shelf.
     var fittingLength: CGFloat {
-        label.sizeToFit()
+        let number = numberSize
         let glyph = chevron.image?.size ?? .zero
-        return horizontal
-            ? label.frame.width + Self.partGap + glyph.width + 8
-            : label.frame.height + Self.partGap + glyph.height + 4
+        return stacks
+            ? max(number.width, glyph.width) + 8
+            : max(number.height, glyph.height) + 4
     }
 
     /// Sits this count on its fading end of `container` — the one
     /// placement both sections take.
     func place(in container: CGRect, atEnd: Bool) {
         guard !isHidden else { return }
+        applyFonts(depth: horizontal ? container.height : container.width)
         let length = fittingLength
         frame =
             horizontal
@@ -127,12 +148,37 @@ final class ShelfCountView: NSView {
                 width: container.width,
                 height: length
             )
+        needsLayout = true
     }
 
     /// Synthetic hover while a dragged window rests on this end.
     func setDragHover(_ hovered: Bool) {
         guard isDragHovered != hovered else { return }
         isDragHovered = hovered
+        applyInk()
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        for area in trackingAreas { removeTrackingArea(area) }
+        // `.activeAlways`: the shelf's panel never becomes key.
+        addTrackingArea(
+            NSTrackingArea(
+                rect: .zero,
+                options: [
+                    .mouseEnteredAndExited, .activeAlways, .inVisibleRect,
+                ],
+                owner: self
+            )
+        )
+    }
+
+    override func mouseEntered(with event: NSEvent) { setHovered(true) }
+    override func mouseExited(with event: NSEvent) { setHovered(false) }
+
+    func setHovered(_ hovered: Bool) {
+        guard isHovered != hovered else { return }
+        isHovered = hovered
         applyInk()
     }
 
@@ -149,45 +195,41 @@ final class ShelfCountView: NSView {
 
     override func layout() {
         super.layout()
-        label.sizeToFit()
-        let number = label.frame.size
+        let number = numberSize
         let glyph = chevron.image?.size ?? .zero
-        let leads = Self.glyph(side: side, horizontal: horizontal).leads
-        if horizontal {
-            let run = number.width + Self.partGap + glyph.width
-            let start = (bounds.width - run) / 2
-            let numberX = leads ? start + glyph.width + Self.partGap : start
-            let glyphX = leads ? start : start + number.width + Self.partGap
-            label.frame.origin = CGPoint(
-                x: numberX,
-                y: (bounds.height - number.height) / 2
-            )
+        let numberCenter: CGPoint
+        if stacks {
+            let run = number.height + Self.stackGap + glyph.height
+            let top = (bounds.height - run) / 2
+            numberCenter = CGPoint(x: bounds.midX, y: top + number.height / 2)
             chevron.frame = CGRect(
-                x: glyphX,
-                y: (bounds.height - glyph.height) / 2,
+                x: (bounds.width - glyph.width) / 2,
+                y: top + number.height + Self.stackGap,
                 width: glyph.width,
                 height: glyph.height
             )
         } else {
-            let run = number.height + Self.partGap + glyph.height
-            let start = (bounds.height - run) / 2
-            let numberY = leads ? start + glyph.height + Self.partGap : start
-            let glyphY = leads ? start : start + number.height + Self.partGap
-            label.frame.origin = CGPoint(
-                x: (bounds.width - number.width) / 2,
-                y: numberY
-            )
+            let run = number.width + Self.sideGap + glyph.width
+            let lead = (bounds.width - run) / 2
+            numberCenter = CGPoint(x: lead + number.width / 2, y: bounds.midY)
             chevron.frame = CGRect(
-                x: (bounds.width - glyph.width) / 2,
-                y: glyphY,
+                x: lead + number.width + Self.sideGap,
+                y: (bounds.height - glyph.height) / 2,
                 width: glyph.width,
                 height: glyph.height
             )
         }
+        // The label centres its text, so centring the label's frame
+        // on the digits' place puts the digits there.
+        label.frame.origin = CGPoint(
+            x: numberCenter.x - label.frame.width / 2,
+            y: numberCenter.y - label.frame.height / 2
+        )
     }
 
+    /// The item hover ink, as a Space item takes it.
     private func applyInk() {
-        let color = isDragHovered ? hoverInk : ink
+        let color = isHovered || isDragHovered ? hoverInk : ink
         label.textColor = color
         chevron.contentTintColor = color
     }

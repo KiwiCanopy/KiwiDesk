@@ -6,17 +6,24 @@ import Testing
 /// The overflow arithmetic every shelf section reads (#1517).
 @Suite("Shelf overflow")
 struct ShelfOverflowTests {
-    @Test(
-        "The fade scales with thickness inside its bounds",
-        arguments: [
-            (CGFloat(10), CGFloat(32)),
-            (24, 48),
-            (40, 72),
-            (60, 72),
-        ]
-    )
-    func fadeScales(thickness: CGFloat, fade: CGFloat) {
-        #expect(ShelfOverflow.fadeLength(thickness: thickness) == fade)
+    /// Derived from the tuning, so a retune moves no clause: below
+    /// the range's floor, inside it, and past its ceiling.
+    @Test("The fade scales with thickness inside its bounds")
+    func fadeScales() {
+        let per = ShelfOverflow.fadePerThickness
+        let range = ShelfOverflow.fadeRange
+        let inside = (range.lowerBound + range.upperBound) / 2 / per
+        #expect(
+            ShelfOverflow.fadeLength(thickness: inside) == inside * per
+        )
+        #expect(
+            ShelfOverflow.fadeLength(thickness: range.lowerBound / per / 2)
+                == range.lowerBound
+        )
+        #expect(
+            ShelfOverflow.fadeLength(thickness: range.upperBound / per * 2)
+                == range.upperBound
+        )
     }
 
     /// A short section keeps most of its content legible.
@@ -28,7 +35,7 @@ struct ShelfOverflowTests {
         )
         #expect(
             ShelfOverflow.fadeLength(thickness: 40, visible: 1000)
-                == 72
+                == ShelfOverflow.fadeLength(thickness: 40)
         )
         #expect(
             ShelfOverflow.fadeLength(thickness: 40, visible: -5) == 0

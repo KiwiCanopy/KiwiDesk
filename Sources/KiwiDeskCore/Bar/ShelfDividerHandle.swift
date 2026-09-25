@@ -13,6 +13,9 @@ final class ShelfDividerHandle: NSView {
     }
     /// A double-click: restore the default minimum.
     var onReset: () -> Void = {}
+    /// The pointer over the grip, or a drag holding it.
+    var onHover: (Bool) -> Void = { _ in }
+    private(set) var isHovered = false
     /// Set while the shelf is full; the handle hides otherwise.
     var range: ShelfArrangement.Divider?
     var horizontal = true
@@ -37,7 +40,7 @@ final class ShelfDividerHandle: NSView {
             NSTrackingArea(
                 rect: bounds,
                 options: [
-                    .mouseEnteredAndExited, .cursorUpdate,
+                    .mouseEnteredAndExited, .mouseMoved, .cursorUpdate,
                     .activeAlways, .inVisibleRect,
                 ],
                 owner: self
@@ -51,11 +54,25 @@ final class ShelfDividerHandle: NSView {
 
     override func mouseEntered(with event: NSEvent) {
         cursor.set()
+        setHovered(true)
+    }
+
+    /// Re-asserted while the pointer moves: the shelf's app is
+    /// never frontmost, and the frontmost app may set its own.
+    override func mouseMoved(with event: NSEvent) {
+        cursor.set()
     }
 
     override func mouseExited(with event: NSEvent) {
         guard dragStart == nil else { return }
         NSCursor.arrow.set()
+        setHovered(false)
+    }
+
+    func setHovered(_ hovered: Bool) {
+        guard isHovered != hovered else { return }
+        isHovered = hovered
+        onHover(hovered)
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -80,6 +97,7 @@ final class ShelfDividerHandle: NSView {
         // the cursor.
         if !bounds.contains(convert(event.locationInWindow, from: nil)) {
             NSCursor.arrow.set()
+            setHovered(false)
         }
         dragStart = nil
         dragRange = nil

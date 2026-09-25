@@ -30,6 +30,10 @@ final class ShelfOverlay {
     let divider = NSView()
     /// The divider's grip, live only while the shelf is full.
     let handle = ShelfDividerHandle()
+    /// Whether the grip is hovered or dragged, and the shelf the
+    /// divider was last painted for.
+    var dividerHovered = false
+    var dividerStyle: (shelf: KiwiShelf, horizontal: Bool)?
 
     var isVisible: Bool { panel?.isVisible == true }
 
@@ -112,6 +116,7 @@ final class ShelfOverlay {
         handle.horizontal = horizontal
         guard range != nil, let target else {
             handle.isHidden = true
+            handle.setHovered(false)
             return
         }
         handle.isHidden = false
@@ -260,6 +265,7 @@ final class ShelfOverlay {
         divider.isHidden = true
         stripView.addSubview(divider)
         handle.isHidden = true
+        handle.onHover = { [weak self] in self?.setDividerHovered($0) }
         stripView.addSubview(handle)
         return panel
     }

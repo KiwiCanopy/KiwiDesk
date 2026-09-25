@@ -10587,7 +10587,9 @@ a fade and an item gap, so the Space the user is on is never
 cut or half-faded — and the Space Bar's natural length. The
 divider is a plain line while everything fits and nothing hovers
 on it; only while the shelf is full does its hit area take the
-resize cursor along the edge, a drag writing the minimum and a
+resize cursor along the edge and the line its hover ink and a
+heavier stroke, since an accessory app's cursor alone went
+unseen on the device, a drag writing the minimum and a
 double-click resetting it — a handle that moves nothing while
 nothing is hidden is chrome with no job. The drag re-lays the
 bars as it moves and commits on release through the same setter
@@ -10598,8 +10600,10 @@ one clamp.
 own. A hidden side fades the content itself — a mask on the
 items, not a gradient laid over them, which would paint a
 colour over Liquid Glass that the glass does not have —
-starting well before the edge, and a count (`‹3`, `4›`) sits on
-the faded end; clicking it pages, and a side already at its end
+starting well before the edge, and a count sits on the faded
+end — the number with a chevron pointing where the entries are,
+stacked below it on a horizontal shelf and beside it on a
+vertical one, taking the hover ink under the pointer; clicking it pages, and a side already at its end
 shows nothing. A side fades and counts as soon as its edge cuts
 any entry, not only once a whole one is hidden: a clipped entry
 with no fade beside it reads as the end of the list. A page lands

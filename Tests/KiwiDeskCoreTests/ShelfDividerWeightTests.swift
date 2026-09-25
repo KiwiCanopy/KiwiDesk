@@ -119,4 +119,62 @@ struct ShelfDividerWeightTests {
         let front = try #require(overlay.frontDivider.layer?.backgroundColor)
         #expect(front.alpha == BarDivider.ruleAlpha)
     }
+
+    /// Owner 2026-09-25: a draggable divider must show it can be
+    /// grabbed. Hovering the live grip draws the line thicker, in
+    /// the hover ink at full strength; leaving restores the ladder.
+    @Test("The draggable divider shows its hover")
+    @MainActor
+    func draggableDividerHovers() throws {
+        var shelf = KiwiShelf()
+        shelf.hoverItemColor = "#FF0000"
+        let overlay = ShelfOverlay()
+        let strip = CGRect(x: 0, y: 0, width: 1000, height: 30)
+        let full = try #require(
+            ShelfArrangement.arrange(
+                length: 1000,
+                spaceNeed: 700,
+                appNeed: 900,
+                spaceFloor: 100,
+                shelf: shelf
+            ).divider
+        )
+        overlay.show(
+            strip: strip,
+            shelf: shelf,
+            sections: [
+                .init(
+                    view: NSView(),
+                    slot: CGRect(x: 0, y: 0, width: 300, height: 30),
+                    plate: .zero
+                ),
+                .init(
+                    view: NSView(),
+                    slot: CGRect(x: 300, y: 0, width: 700, height: 30),
+                    plate: .zero
+                ),
+            ],
+            divider: full
+        )
+        let rest = overlay.divider.frame
+        #expect(rest.width == BarDivider.sectionThickness)
+        overlay.handle.setHovered(true)
+        #expect(
+            overlay.divider.frame.width == BarDivider.sectionHoverThickness
+        )
+        #expect(abs(overlay.divider.frame.midX - rest.midX) < 0.01)
+        #expect(overlay.divider.frame.height == rest.height)
+        let ink = try #require(overlay.divider.layer?.backgroundColor)
+        #expect(ink.alpha == 1)
+        #expect(
+            NSColor(cgColor: ink)?.usingColorSpace(.sRGB)?.redComponent == 1
+        )
+        overlay.handle.setHovered(false)
+        #expect(overlay.divider.frame == rest)
+        #expect(
+            overlay.divider.layer?.backgroundColor?.alpha
+                == BarDivider.sectionAlpha
+        )
+        overlay.hide()
+    }
 }

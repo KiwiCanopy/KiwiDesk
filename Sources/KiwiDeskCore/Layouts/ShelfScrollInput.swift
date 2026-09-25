@@ -21,10 +21,15 @@ public enum ShelfScrollInput {
         }
     }
 
+    /// Travel per point a trackpad reports: a trackpad's points
+    /// felt slow at 1:1 (owner 2026-09-25).
+    public static let trackpadGain: CGFloat = 2
+
     /// Points to move the section's offset — positive toward its
     /// end. The dominant axis wins, whichever way the shelf lies:
     /// a vertical wheel scrolls a horizontal shelf, a sideways
-    /// swipe a vertical one. A wheel notch moves `itemStep`.
+    /// swipe a vertical one. A wheel notch moves `itemStep`; a
+    /// trackpad moves `trackpadGain` × its points.
     public static func travel(
         _ delta: Delta,
         itemStep: CGFloat
@@ -32,7 +37,8 @@ public enum ShelfScrollInput {
         let dominant = abs(delta.x) >= abs(delta.y) ? delta.x : delta.y
         // Content follows the finger: a positive delta pulls the
         // run toward its start, which is a smaller offset.
-        let points = delta.precise ? dominant : dominant * itemStep
+        let points =
+            delta.precise ? dominant * trackpadGain : dominant * itemStep
         return -points
     }
 }

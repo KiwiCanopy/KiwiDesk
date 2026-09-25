@@ -100,7 +100,11 @@ struct ShelfScrollWiringTests {
         item.scrollWheel(with: try wheel(-1))
         #expect(abs(overlay.scrollOffset - step) < 0.01)
         item.scrollWheel(with: try wheel(-7, precise: true))
-        #expect(abs(overlay.scrollOffset - step - 7) < 0.01)
+        #expect(
+            abs(
+                overlay.scrollOffset - step - 7 * ShelfScrollInput.trackpadGain
+            ) < 0.01
+        )
     }
 
     /// A parent that records the scrolls reaching it.
