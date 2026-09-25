@@ -5,9 +5,8 @@ import SwiftUI
 /// focus leaves; reverts to the current name if the new one is
 /// empty or already taken, so a bad edit never renames. The
 /// field reports its draft's `SpaceNameNotice` through `onNotice`
-/// for the row to draw, outlines itself in `danger` while the
-/// name is refused, and speaks a refusal once when the revert
-/// lands (#1623).
+/// for the row to draw, and speaks a refusal once when the
+/// revert lands (#1623).
 struct SpaceNameField: View {
     let space: SpaceID
     let isAvailable: (SpaceID) -> Bool
@@ -42,16 +41,6 @@ struct SpaceNameField: View {
             )
             .fontWeight(.medium)
             .focused($focused)
-            .overlay {
-                if notice?.isRefusal == true {
-                    RoundedRectangle(cornerRadius: 5)
-                        .strokeBorder(
-                            SettingsTheme.danger,
-                            lineWidth: 1.5
-                        )
-                        .allowsHitTesting(false)
-                }
-            }
             .frame(width: 180, alignment: .leading)
             .onSubmit(commit)
             .onChange(of: focused) { _, isFocused in

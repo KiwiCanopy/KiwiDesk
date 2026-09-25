@@ -5,8 +5,8 @@ import Testing
 @testable import KiwiDesk
 
 /// A rename to a taken Space name is said, not only refused
-/// (#1623): the field derives its notice from the draft, outlines
-/// itself while refused, and the row draws what it reports.
+/// (#1623): the field derives its notice from the draft, and the
+/// row draws what it reports.
 @Suite("Space rename refusal caption (#1623)", .serialized)
 @MainActor
 struct SpaceNameRefusalTests {
@@ -82,20 +82,6 @@ struct SpaceNameRefusalTests {
             in: commit
         )
         #expect(refused?.contains("announce(refusal.sentence)") == true)
-    }
-
-    @Test("the field outlines itself only while refused")
-    func outlineFollowsTheRefusal() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Sections/SpaceNameField.swift"
-            )
-        let source = try SourceScan.strippedSource(at: file)
-        let outline = SourceScan.declarationBody(
-            after: "if notice?.isRefusal == true",
-            in: source
-        )
-        #expect(outline?.contains("SettingsTheme.danger") == true)
     }
 
     @Test("the row draws what its field reports")

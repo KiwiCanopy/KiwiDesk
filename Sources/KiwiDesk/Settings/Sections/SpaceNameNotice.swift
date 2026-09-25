@@ -38,32 +38,27 @@ enum SpaceNameNotice: Equatable {
         }
     }
 
-    /// A refusal is drawn in `danger` with a shape cue beside the
-    /// text (WCAG 1.4.1); a hint stays secondary.
+    /// Only a refusal is spoken on the revert; the empty hint
+    /// describes the revert itself.
     var isRefusal: Bool {
         if case .taken = self { return true }
         return false
     }
 }
 
-/// The caption a row draws under itself for its field's notice.
+/// The caption a row draws under itself for its field's notice:
+/// `danger` with a shape cue beside the text (WCAG 1.4.1).
 struct SpaceNameNoticeCaption: View {
     let notice: SpaceNameNotice
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 4) {
-            if notice.isRefusal {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .accessibilityHidden(true)
-            }
+            Image(systemName: "exclamationmark.triangle.fill")
+                .accessibilityHidden(true)
             Text(notice.sentence)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .font(.caption)
-        .foregroundStyle(
-            notice.isRefusal
-                ? AnyShapeStyle(SettingsTheme.danger)
-                : AnyShapeStyle(.secondary)
-        )
+        .foregroundStyle(SettingsTheme.danger)
     }
 }

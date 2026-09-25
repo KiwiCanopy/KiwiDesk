@@ -993,11 +993,9 @@ list itself reaches one folder deep, so browsing is the rare
 fallback.
 
 The Space name field is the same channel for a typed edit
-(#1623): while the draft names another Space, the field is
-outlined in the danger colour, a caption with a warning triangle
-under the row says so, and the revert is announced. An emptied
-field gets a quiet hint naming the name it will keep instead —
-nothing is wrong yet. The app rules row
+(#1623): while the draft names another Space or is empty, a
+caption with a warning triangle under the row says why the edit
+will not stick, and a refused name's revert is announced. The app rules row
 still drops a duplicate silently, and owes the same channel.
 
 **Hover confirms custom hit areas; it never creates the only
