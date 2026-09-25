@@ -6,7 +6,6 @@ import SwiftUI
 /// (#68, #678).
 struct SpacesSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var newSpace = ""
     /// Set only for a space that `carriesOverrides` — a plain
     /// empty space still deletes in one click (#205).
     @State var pendingDelete: SpaceID?
@@ -116,7 +115,9 @@ struct SpacesSection: View {
             ForEach(displayedSpaces, id: \.raw) { space in
                 spaceRow(space)
             }
-            addRow
+            SpaceAddRow(spaces: model.config.spaces) {
+                model.config.spaces.append($0)
+            }
         }
     }
 
@@ -217,39 +218,6 @@ struct SpacesSection: View {
                 )
             }
         )
-    }
-
-    private var addRow: some View {
-        HStack {
-            TextField(
-                L("spaces.add.placeholder", "New Space name"),
-                text: $newSpace
-            )
-            .textFieldStyle(.roundedBorder)
-            Button {
-                addSpace()
-            } label: {
-                Image(systemName: "plus")
-            }
-            .disabled(!canAdd)
-            .settingsActionButton()
-            // Icon-only like its siblings (#94) — and named for
-            // VoiceOver, which `.help` is not.
-            .help(L("spaces.add.help", "Add Space"))
-            .accessibilityLabel(L("spaces.add.help", "Add Space"))
-        }
-    }
-
-    private var canAdd: Bool {
-        let name = newSpace.trimmed
-        return !name.isEmpty
-            && !model.config.spaces.contains { $0.raw == name }
-    }
-
-    private func addSpace() {
-        guard canAdd else { return }
-        model.config.spaces.append(SpaceID(newSpace.trimmed))
-        newSpace = ""
     }
 
     private func iconBinding(

@@ -131,14 +131,7 @@ extension ApplicationsGroup {
         guard let sentence = allBoundNotice(about: app) else {
             return
         }
-        let work = DispatchWorkItem {
-            AccessibilityNotification.Announcement(sentence).post()
-        }
-        refusalAnnouncement = work
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + SettingsFooter.announceDelay,
-            execute: work
-        )
+        refusalAnnouncement = DelayedAnnouncement.schedule(sentence)
     }
 
     /// Retires a refusal, cancelling a post that has not landed —

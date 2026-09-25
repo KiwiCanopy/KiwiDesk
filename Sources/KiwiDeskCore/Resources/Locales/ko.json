@@ -1303,7 +1303,7 @@
   "space_override.slot_size.help": "스크롤 방향을 따라 각 스크롤 윈도우의 크기를 정합니다. 방향이 %1$@일 때는 열 너비가, %2$@일 때는 행 높이가 기준입니다. 단위로는 %3$@ 방식이 윈도우 하나에 간격 하나를 더한 길이에 대한 비율이어서, 50%%면 간격을 포함해 정확히 윈도우 두 개가 됩니다(기본값 95%%). %4$@ 방식은 정확한 크기를 고정합니다.",
   "space_override.title": "%1$@ — %2$@ 오버라이드",
   "spaces.add.help": "공간 추가",
-  "spaces.add.placeholder": "새 공간 이름",
+  "spaces.add.placeholder_optional": "새 공간 (이름 선택)",
   "spaces.caption": "공간마다 고유한 레이아웃이 있습니다. 여기서 공간을 추가하면 단축키 목록과 앱 규칙 목록에도 나타납니다. 행을 드래그하여 순서를 변경하십시오.",
   "spaces.context.clear_fallback": "폴백 해제",
   "spaces.context.delete": "삭제",

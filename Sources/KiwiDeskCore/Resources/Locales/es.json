@@ -1303,7 +1303,7 @@
   "space_override.slot_size.help": "Establece el tamaño de cada ventana en desplazamiento a lo largo de la dirección de desplazamiento: la anchura de columna cuando la orientación es %1$@ y la altura de fila cuando es %2$@. Como unidad, %3$@ es una fracción de una ventana más un espaciado, así que el 50%% equivale exactamente a dos ventanas, espaciados incluidos (95%% de fábrica); %4$@ fijan un tamaño exacto.",
   "space_override.title": "%1$@ — anulaciones de %2$@",
   "spaces.add.help": "Añadir espacio",
-  "spaces.add.placeholder": "Nombre del nuevo espacio",
+  "spaces.add.placeholder_optional": "Nuevo espacio (nombre opcional)",
   "spaces.caption": "Cada espacio tiene su propio diseño. Añade espacios aquí; aparecerán también en la lista de atajos y reglas de aplicación. Arrastra las filas para reordenar.",
   "spaces.context.clear_fallback": "Limpiar espacio de reserva",
   "spaces.context.delete": "Eliminar",
