@@ -124,7 +124,7 @@ final class AppBarItemView: NSView {
             NSTrackingArea(
                 rect: bounds,
                 options: [
-                    .mouseEnteredAndExited, .activeAlways,
+                    .mouseEnteredAndExited, .mouseMoved, .activeAlways,
                 ],
                 owner: self
             )
@@ -132,13 +132,25 @@ final class AppBarItemView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        guard !isInert else { return }
-        isHovered = true
-        applyColors()
+        refreshHover(event)
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        refreshHover(event)
     }
 
     override func mouseExited(with event: NSEvent) {
+        guard isHovered else { return }
         isHovered = false
+        applyColors()
+    }
+
+    /// Hovered only while the pointer is on THIS view — a count
+    /// drawn over the faded end takes the pointer there (#1517).
+    private func refreshHover(_ event: NSEvent) {
+        let hovered = !isInert && BarHoverHit.owns(self, event)
+        guard hovered != isHovered else { return }
+        isHovered = hovered
         applyColors()
     }
 

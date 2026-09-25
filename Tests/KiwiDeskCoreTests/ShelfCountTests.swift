@@ -109,11 +109,18 @@ struct ShelfCountTests {
         let label = try #require(
             count.subviews.first { $0 is NSTextField } as? NSTextField
         )
+        let chip = try #require(count.subviews.first)
         #expect(label.textColor == .white)
+        #expect(chip.isHidden)
         count.setHovered(true)
         #expect(label.textColor == .red)
+        // The chip makes the hover visible where the two inks
+        // match (owner 2026-09-25).
+        #expect(!chip.isHidden)
+        #expect(count.bounds.contains(chip.frame))
         count.setHovered(false)
         #expect(label.textColor == .white)
+        #expect(chip.isHidden)
     }
 
     @Test("A count is a button that pages, and hides at zero")

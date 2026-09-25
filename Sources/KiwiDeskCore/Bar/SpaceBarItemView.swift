@@ -126,7 +126,7 @@ final class SpaceBarItemView: NSView {
             NSTrackingArea(
                 rect: bounds,
                 options: [
-                    .mouseEnteredAndExited, .activeAlways,
+                    .mouseEnteredAndExited, .mouseMoved, .activeAlways,
                 ],
                 owner: self
             )
@@ -134,14 +134,27 @@ final class SpaceBarItemView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        // The hover fill promises a click; a layer item has none.
-        guard !isActive, space != nil else { return }
-        isHovered = true
-        restyle()
+        refreshHover(event)
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        refreshHover(event)
     }
 
     override func mouseExited(with event: NSEvent) {
+        guard isHovered else { return }
         isHovered = false
+        restyle()
+    }
+
+    /// Hovered only while the pointer is on THIS view — a count
+    /// drawn over the faded end takes the pointer there (#1517);
+    /// the hover fill promises a click, and a layer item has none.
+    private func refreshHover(_ event: NSEvent) {
+        let hovered =
+            !isActive && space != nil && BarHoverHit.owns(self, event)
+        guard hovered != isHovered else { return }
+        isHovered = hovered
         restyle()
     }
 

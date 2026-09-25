@@ -29,6 +29,10 @@ extension AppBarOverlay {
         let font = style.resolvedFontSize(forThickness: depth) * 0.9
         let ink = NSColor(kiwiHex: style.itemColor)
         let hoverInk = NSColor(kiwiHex: style.hoverItemColor)
+        let hoverFill = NSColor(kiwiHex: style.hoverFillColor)
+        let chipRadius = style.resolvedCornerRadius(
+            forThickness: depth - 2 * ShelfCountView.chipInset
+        )
         for (view, hidden) in [
             (backCount, fades.before), (forwardCount, fades.after),
         ] {
@@ -37,7 +41,9 @@ extension AppBarOverlay {
                 horizontal: m.horizontal,
                 fontSize: font,
                 ink: ink,
-                hoverInk: hoverInk
+                hoverInk: hoverInk,
+                hoverFill: hoverFill,
+                chipRadius: chipRadius
             )
             view.place(in: itemContainer.frame, atEnd: view === forwardCount)
         }

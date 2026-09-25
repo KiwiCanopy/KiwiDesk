@@ -13,6 +13,10 @@ final class ShelfCountView: NSView {
 
     var onPage: () -> Void = {}
     let side: Side
+    /// The hover chip — the Space items' hover fill, only under
+    /// the pointer, so the count reads as clickable (ui-designer).
+    private let chip = NSView()
+    private var chipRadius: CGFloat = 0
     private let label = NSTextField(labelWithString: "")
     private let chevron = NSImageView()
     private var horizontal = true
@@ -33,6 +37,10 @@ final class ShelfCountView: NSView {
     /// Between the number and the chevron, stacked and side by side.
     nonisolated static let stackGap: CGFloat = 1
     nonisolated static let sideGap: CGFloat = 2
+    /// The chip's inset from the shelf's depth (a Space item
+    /// cell's) and its padding around the count along the shelf.
+    nonisolated static let chipInset: CGFloat = 4
+    nonisolated static let chipPad: CGFloat = 4
 
     init(side: Side) {
         self.side = side
@@ -43,6 +51,9 @@ final class ShelfCountView: NSView {
         label.setAccessibilityElement(false)
         chevron.setAccessibilityElement(false)
         chevron.imageScaling = .scaleNone
+        chip.wantsLayer = true
+        chip.isHidden = true
+        addSubview(chip)
         addSubview(label)
         addSubview(chevron)
         setAccessibilityElement(true)
@@ -62,8 +73,12 @@ final class ShelfCountView: NSView {
         horizontal: Bool,
         fontSize: CGFloat,
         ink: NSColor,
-        hoverInk: NSColor
+        hoverInk: NSColor,
+        hoverFill: NSColor = .clear,
+        chipRadius: CGFloat = 0
     ) {
+        chip.layer?.backgroundColor = hoverFill.cgColor
+        self.chipRadius = chipRadius
         self.count = count
         self.ink = ink
         self.hoverInk = hoverInk
@@ -124,8 +139,8 @@ final class ShelfCountView: NSView {
         let number = numberSize
         let glyph = chevron.image?.size ?? .zero
         return stacks
-            ? max(number.width, glyph.width) + 8
-            : max(number.height, glyph.height) + 4
+            ? max(number.width, glyph.width) + 2 * Self.chipPad + 8
+            : max(number.height, glyph.height) + 2 * Self.chipPad + 4
     }
 
     /// Sits this count on its fading end of `container` — the one
@@ -219,6 +234,11 @@ final class ShelfCountView: NSView {
                 height: glyph.height
             )
         }
+        chip.frame = Self.chipFrame(in: bounds, horizontal: horizontal)
+        chip.layer?.cornerRadius = min(
+            chipRadius,
+            min(chip.frame.width, chip.frame.height) / 2
+        )
         // The label centres its text, so centring the label's frame
         // on the digits' place puts the digits there.
         label.frame.origin = CGPoint(
@@ -227,9 +247,23 @@ final class ShelfCountView: NSView {
         )
     }
 
-    /// The item hover ink, as a Space item takes it.
+    /// The chip: the view's own length along the shelf less its
+    /// edge slack, a Space item cell's depth across it.
+    nonisolated static func chipFrame(
+        in bounds: CGRect,
+        horizontal: Bool
+    ) -> CGRect {
+        horizontal
+            ? bounds.insetBy(dx: 2, dy: chipInset)
+            : bounds.insetBy(dx: chipInset, dy: 2)
+    }
+
+    /// The item hover ink over the hover chip, as a Space item
+    /// takes them.
     private func applyInk() {
-        let color = isHovered || isDragHovered ? hoverInk : ink
+        let hovered = isHovered || isDragHovered
+        chip.isHidden = !hovered
+        let color = hovered ? hoverInk : ink
         label.textColor = color
         chevron.contentTintColor = color
     }

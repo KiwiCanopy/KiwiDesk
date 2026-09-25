@@ -84,4 +84,31 @@ struct ShelfWiringSeamTests {
         )
         #expect(boot.contains("dragShelfMinimum(percent,committed:committed)"))
     }
+
+    /// Both item views take hover only where they own the pointer,
+    /// so the overflow count drawn over an item takes it there.
+    @Test("Bar items gate hover on owning the pointer")
+    func itemsGateHover() throws {
+        for file in [
+            "Bar/SpaceBarItemView.swift", "Bar/AppBarItemView.swift",
+        ] {
+            let body = Self.squash(
+                try Self.body(of: "func refreshHover(", in: file)
+            )
+            #expect(
+                body.contains("BarHoverHit.owns(self,event)"),
+                Comment(rawValue: file)
+            )
+            let source = Self.squash(
+                try SourceScan.strippedSource(
+                    at: Self.core.appendingPathComponent(file)
+                )
+            )
+            // Every hover-on path runs through the one refresh.
+            #expect(
+                source.components(separatedBy: "isHovered=true").count == 1,
+                Comment(rawValue: file)
+            )
+        }
+    }
 }

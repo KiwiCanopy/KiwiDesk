@@ -44,19 +44,27 @@ extension SpaceBarOverlay {
         let font = style.identifierFontSize(forDepth: depth) * 0.8
         let ink = NSColor(kiwiHex: style.itemColor)
         let hoverInk = NSColor(kiwiHex: style.hoverItemColor)
+        let hoverFill = NSColor(kiwiHex: style.hoverFillColor)
+        let chipRadius = style.resolvedCornerRadius(
+            forThickness: depth - 2 * ShelfCountView.chipInset
+        )
         backCount.configure(
             count: fades.before,
             horizontal: horizontal,
             fontSize: font,
             ink: ink,
-            hoverInk: hoverInk
+            hoverInk: hoverInk,
+            hoverFill: hoverFill,
+            chipRadius: chipRadius
         )
         forwardCount.configure(
             count: fades.after,
             horizontal: horizontal,
             fontSize: font,
             ink: ink,
-            hoverInk: hoverInk
+            hoverInk: hoverInk,
+            hoverFill: hoverFill,
+            chipRadius: chipRadius
         )
         let container = itemContainer.frame
         backCount.place(in: container, atEnd: false)

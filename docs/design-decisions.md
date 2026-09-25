@@ -10603,7 +10603,10 @@ colour over Liquid Glass that the glass does not have —
 starting well before the edge, and a count sits on the faded
 end — the number with a chevron pointing where the entries are,
 stacked below it on a horizontal shelf and beside it on a
-vertical one, taking the hover ink under the pointer; clicking it pages, and a side already at its end
+vertical one, showing the Space items' hover chip under the
+pointer — the item beneath it stands its own hover down there —
+and keeping the arrow cursor, since macOS keeps the pointing hand
+for links; clicking it pages, and a side already at its end
 shows nothing. A side fades and counts as soon as its edge cuts
 any entry, not only once a whole one is hidden: a clipped entry
 with no fade beside it reads as the end of the list. A page lands
