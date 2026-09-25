@@ -46,6 +46,16 @@ reaches people who did not ask to read anything.
    summary. The types, their order and the "Before you update"
    paragraph are ruled in `packaging-and-release.md` and the
    design-decisions entry above.
+   **A bullet announces the change, never the state.** It reads
+   as what is different after the update — "now …", "no longer
+   …", "New: …" — because the reader holds the version they had
+   against it; "KiwiDesk has its own update window" reads as a
+   description a returning user skims past, "KiwiDesk now has
+   its own update window" as news. And a thing that did not
+   exist before goes under New even where it arrives inside an
+   improved surface — the Discord community joining Settings
+   Home was New in 2.0.0, not an Improved Home page (owner,
+   2026-09-25).
 4. **Draft into the parser's form**, then validate every time —
    `python3 scripts/changelog-sync --body <file>`. It refuses
    rather than half-rendering, so a green run is the floor, not
