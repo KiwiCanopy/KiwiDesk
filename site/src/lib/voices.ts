@@ -48,7 +48,7 @@ export const voices: Voice[] = [
   },
   {
     name: "Josh",
-    role: null,
+    role: "Engineer & vintage restorer",
     quote:
       "This is where people should start with macOS tiling " +
       "managers. While I love Rift and Amethyst — had I known this " +
