@@ -5,8 +5,8 @@ import Testing
 @testable import KiwiDesk
 
 /// A rename to a taken Space name is said, not only refused
-/// (#1623): the field derives the caption from its draft, and the
-/// row draws what the field reports beneath it.
+/// (#1623): the field derives its notice from the draft, outlines
+/// itself while refused, and the row draws what it reports.
 @Suite("Space rename refusal caption (#1623)", .serialized)
 @MainActor
 struct SpaceNameRefusalTests {
@@ -15,31 +15,43 @@ struct SpaceNameRefusalTests {
         SpaceID("Mail"), SpaceID("Work"), SpaceID(2),
     ]
 
-    private func notice(_ draft: String) -> String? {
-        SpaceNameField.takenNotice(
+    private func notice(_ draft: String) -> SpaceNameNotice? {
+        SpaceNameNotice.of(
             draft: draft,
             space: SpaceID("Mail"),
             isAvailable: { !taken.contains($0) }
         )
     }
 
-    @Test("a taken name earns the sentence, naming the draft")
-    func takenNameIsSaid() {
+    @Test("a taken name is a refusal naming the draft")
+    func takenNameIsRefused() {
         LocalizationManager.shared.select("xx-not-a-real-locale")
         defer { LocalizationManager.shared.select(nil) }
+        #expect(notice("  Work ") == .taken("Work"))
+        #expect(notice("2") == .taken("2"))
+        #expect(notice("Work")?.isRefusal == true)
         #expect(
-            notice("  Work ") == "A Space named “Work” already exists."
+            notice("Work")?.sentence
+                == "A Space named “Work” already exists."
         )
-        #expect(notice("2") == "A Space named “2” already exists.")
     }
 
-    @Test("free, unchanged and empty drafts earn no sentence")
-    func otherDraftsAreSilent() {
+    @Test("an empty draft is a hint naming the name it keeps")
+    func emptyDraftIsAHint() {
         LocalizationManager.shared.select("xx-not-a-real-locale")
         defer { LocalizationManager.shared.select(nil) }
+        #expect(notice("   ") == .empty(keeping: "Mail"))
+        #expect(notice("")?.isRefusal == false)
+        #expect(
+            notice("")?.sentence
+                == "Type a name, or it goes back to “Mail”."
+        )
+    }
+
+    @Test("free and unchanged drafts earn nothing")
+    func otherDraftsAreSilent() {
         #expect(notice("Music") == nil)
         #expect(notice("Mail") == nil)
-        #expect(notice("   ") == nil)
     }
 
     @Test("the field reports its notice, retires it, and speaks it")
@@ -66,10 +78,24 @@ struct SpaceNameRefusalTests {
             )
         )
         let refused = SourceScan.declarationBody(
-            after: "if let refusal = takenNotice(for: draft)",
+            after: "if let refusal = notice(for: draft), refusal.isRefusal",
             in: commit
         )
-        #expect(refused?.contains("announce(refusal)") == true)
+        #expect(refused?.contains("announce(refusal.sentence)") == true)
+    }
+
+    @Test("the field outlines itself only while refused")
+    func outlineFollowsTheRefusal() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/SpaceNameField.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let outline = SourceScan.declarationBody(
+            after: "if notice?.isRefusal == true",
+            in: source
+        )
+        #expect(outline?.contains("SettingsTheme.danger") == true)
     }
 
     @Test("the row draws what its field reports")

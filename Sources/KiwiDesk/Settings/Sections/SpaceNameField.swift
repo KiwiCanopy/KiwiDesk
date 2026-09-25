@@ -3,15 +3,16 @@ import SwiftUI
 
 /// An editable space name. Commits the rename on Return or when
 /// focus leaves; reverts to the current name if the new one is
-/// empty or already taken, so a bad edit never renames. A taken
-/// name is said, not only refused (#1623): the field reports the
-/// caption its draft earns through `onNotice` for the row to draw,
-/// and speaks it once when the revert lands.
+/// empty or already taken, so a bad edit never renames. The
+/// field reports its draft's `SpaceNameNotice` through `onNotice`
+/// for the row to draw, outlines itself in `danger` while the
+/// name is refused, and speaks a refusal once when the revert
+/// lands (#1623).
 struct SpaceNameField: View {
     let space: SpaceID
     let isAvailable: (SpaceID) -> Bool
     let onRename: (SpaceID) -> Void
-    let onNotice: (String?) -> Void
+    let onNotice: (SpaceNameNotice?) -> Void
 
     @State private var draft: String
     @State private var announcement: DispatchWorkItem?
@@ -21,7 +22,7 @@ struct SpaceNameField: View {
         space: SpaceID,
         isAvailable: @escaping (SpaceID) -> Bool,
         onRename: @escaping (SpaceID) -> Void,
-        onNotice: @escaping (String?) -> Void
+        onNotice: @escaping (SpaceNameNotice?) -> Void
     ) {
         self.space = space
         self.isAvailable = isAvailable
@@ -41,6 +42,16 @@ struct SpaceNameField: View {
             )
             .fontWeight(.medium)
             .focused($focused)
+            .overlay {
+                if notice?.isRefusal == true {
+                    RoundedRectangle(cornerRadius: 5)
+                        .strokeBorder(
+                            SettingsTheme.danger,
+                            lineWidth: 1.5
+                        )
+                        .allowsHitTesting(false)
+                }
+            }
             .frame(width: 180, alignment: .leading)
             .onSubmit(commit)
             .onChange(of: focused) { _, isFocused in
@@ -56,35 +67,16 @@ struct SpaceNameField: View {
             }
     }
 
-    /// The caption while the focused draft names another Space.
     /// Derived per render, so it clears as the draft changes.
-    private var notice: String? {
-        focused ? takenNotice(for: draft) : nil
+    private var notice: SpaceNameNotice? {
+        focused ? notice(for: draft) : nil
     }
 
-    private func takenNotice(for draft: String) -> String? {
-        Self.takenNotice(
+    private func notice(for draft: String) -> SpaceNameNotice? {
+        SpaceNameNotice.of(
             draft: draft,
             space: space,
             isAvailable: isAvailable
-        )
-    }
-
-    /// The refusal a draft earns: a name another Space holds.
-    /// Empty and unchanged drafts revert without a sentence.
-    static func takenNotice(
-        draft: String,
-        space: SpaceID,
-        isAvailable: (SpaceID) -> Bool
-    ) -> String? {
-        let target = SpaceID(draft.trimmed)
-        guard target != space, !target.raw.isEmpty,
-            !isAvailable(target)
-        else { return nil }
-        return L(
-            "spaces.rename.taken",
-            "A Space named “%1$@” already exists.",
-            target.raw
         )
     }
 
@@ -94,9 +86,9 @@ struct SpaceNameField: View {
             draft = space.raw
             return
         }
-        if let refusal = takenNotice(for: draft) {
+        if let refusal = notice(for: draft), refusal.isRefusal {
             draft = space.raw
-            announce(refusal)
+            announce(refusal.sentence)
             return
         }
         guard !target.raw.isEmpty else {
