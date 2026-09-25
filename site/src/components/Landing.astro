@@ -41,7 +41,7 @@ import {
   downloadVersion,
   downloadIsPrerelease,
 } from "../lib/download";
-import { voices, monogram, shortLink } from "../lib/voices";
+import { voices, monogram } from "../lib/voices";
 import { formatStars } from "../lib/stars";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
@@ -423,15 +423,8 @@ const jsonLd = [
           {/* Docs + GitHub live in the DOM always but are hidden in
                Simple mode (dev-only, via .dev-only). */}
           <a class="nav__link dev-only" href="/docs/">{t.nav_docs}</a>
-          <a class="nav__link nav__link--gh dev-only" href={repo}
-            target="_blank" rel="noopener">
-            {t.nav_github}
-            <span class="gh-count">
-              <Icon name="lucide:star" width={12}
-                height={12} aria-hidden="true" />
-              {stars}<span class="visually-hidden">, {starsLabel}</span>
-            </span>
-          </a>
+          <a class="nav__link dev-only" href={repo} target="_blank"
+            rel="noopener">{t.nav_github}</a>
 
           {/* Signature mode toggle — now two LINKS, since the
                mode is the URL (owner + SEO consult, 2026-08-26).
@@ -878,10 +871,10 @@ const jsonLd = [
                   <span class="voice__meta">
                     <a class="voice__name" href={v.link}
                       target="_blank" rel="noopener">{v.name}</a>
-                    <span class="voice__role" lang="en">{v.role}</span>
-                    <span class="voice__src">
-                      {isDev ? shortLink(v.link) : v.source}
-                    </span>
+                    {v.role && (
+                      <span class="voice__role" lang="en">{v.role}</span>
+                    )}
+                    <span class="voice__src">{v.source}</span>
                   </span>
                 </figcaption>
               </figure>

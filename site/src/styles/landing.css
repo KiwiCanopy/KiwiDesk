@@ -1401,9 +1401,8 @@ section {
 }
 
 /* ---- GitHub star count (read at build, lib/stars.ts) ----
-   A fact beside the links that already go to GitHub, never an
-   ask. The nav neither wraps nor scrolls, so its count is the
-   first thing the nav sheds. */
+   A fact on the hero links that already go to GitHub, never an
+   ask. */
 .gh-count {
   display: inline-flex;
   align-items: center;
@@ -1415,20 +1414,6 @@ section {
 .hero__stars svg {
   flex: none;
   color: var(--accent);
-}
-:root[data-mode="dev"] .nav__link--gh {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-.nav__link--gh .gh-count {
-  font-size: 0.85em;
-  color: var(--text-faint);
-}
-@media (max-width: 880px) {
-  .nav__link--gh .gh-count {
-    display: none;
-  }
 }
 .btn--split {
   gap: 0;
@@ -1622,7 +1607,6 @@ section {
   margin-top: 0.2rem;
   overflow-wrap: anywhere;
 }
-:root[data-mode="dev"] .voice__src,
 :root[data-mode="dev"] .voice__mono {
   font-family: var(--mono);
 }

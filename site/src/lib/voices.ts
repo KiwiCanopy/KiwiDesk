@@ -13,7 +13,8 @@ import jeffMoore from "../assets/voices/jeff-moore.jpg";
  */
 export interface Voice {
   name: string;
-  role: string;
+  /** What they do; `null` when there is nothing to say. */
+  role: string | null;
   quote: string;
   avatar: ImageMetadata | null;
   link: string;
@@ -47,7 +48,7 @@ export const voices: Voice[] = [
   },
   {
     name: "Josh",
-    role: "on r/MacOS",
+    role: null,
     quote:
       "This is where people should start with macOS tiling " +
       "managers. While I love Rift and Amethyst — had I known this " +
@@ -67,12 +68,3 @@ export const monogram = (name: string): string =>
     .join("")
     .slice(0, 2)
     .toUpperCase();
-
-/** The link as a short path for Nerd mode: `github.com/christefano`. */
-export const shortLink = (url: string): string => {
-  const u = new URL(url);
-  const parts = u.pathname.split("/").filter(Boolean);
-  const keep = u.hostname.endsWith("reddit.com") ? 2 : parts.length;
-  return [u.hostname.replace(/^www\./, ""), ...parts.slice(0, keep)]
-    .join("/");
-};
