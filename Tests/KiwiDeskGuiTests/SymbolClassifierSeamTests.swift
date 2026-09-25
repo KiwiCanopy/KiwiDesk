@@ -40,6 +40,10 @@ struct SymbolClassifierSeamTests {
             "builds the refusal pill's image from `pillSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
             "asserts every pill symbol RESOLVES; classifies nothing",
+        "Sources/KiwiDeskCore/Bar/ShelfCountView.swift":
+            "builds the overflow count's chevron from a fixed name",
+        "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":
+            "asserts every count chevron RESOLVES; classifies nothing",
     ]
 
     @Test("Every symbol lookup is classified, and the classifier has one home")
@@ -103,6 +107,8 @@ struct SymbolClassifierSeamTests {
             "the one classifier, `KiwiCore.iconIsSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
             "asserts every pill symbol resolves",
+        "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":
+            "asserts every count chevron resolves",
     ]
 
     @Test("A nil-compared lookup lives in the classifier alone")

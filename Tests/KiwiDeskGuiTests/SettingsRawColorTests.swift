@@ -217,6 +217,10 @@ struct SettingsRawColorTests {
             "the search tile glyph on the destination tints — "
             + "retunes with the tiles in the responsive pass's "
             + "eyeball round",
+        "HomeCardPlate+ShelfStrip.swift":
+            "the preview's fade is a MASK — only its alpha "
+            + "reaches the screen, black is 'opaque' and never "
+            + "drawn",
         "SegmentedPicker.swift":
             "retired by the dark pass — entry lives only so a "
             + "white pill returning reds the stale-exemption "

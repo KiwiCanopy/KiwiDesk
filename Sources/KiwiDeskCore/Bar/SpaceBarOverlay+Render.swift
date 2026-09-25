@@ -71,7 +71,7 @@ extension SpaceBarOverlay {
             viewport: viewport,
             depth: depth
         )
-        let viewportRect = placeItemContainer(
+        _ = placeItemContainer(
             inset: inset,
             viewport: viewport,
             strip: strip,

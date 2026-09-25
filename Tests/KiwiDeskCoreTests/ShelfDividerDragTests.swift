@@ -130,7 +130,8 @@ struct ShelfDividerDragTests {
     @Test("The grip reports each step, then the release, then resets")
     func gripReports() throws {
         let handle = ShelfDividerHandle()
-        handle.range = try #require(full().divider)
+        let range = try #require(full().divider)
+        handle.range = range
         var reports: [(CGFloat, Bool)] = []
         var resets = 0
         handle.onMinimum = { reports.append(($0, $1)) }
@@ -173,7 +174,8 @@ struct ShelfDividerDragTests {
     func verticalGrip() throws {
         let handle = ShelfDividerHandle()
         handle.horizontal = false
-        handle.range = try #require(full().divider)
+        let range = try #require(full().divider)
+        handle.range = range
         var reports: [CGFloat] = []
         handle.onMinimum = { value, _ in reports.append(value) }
         let at = { (y: CGFloat, type: NSEvent.EventType) in
@@ -219,7 +221,7 @@ struct ShelfDividerDragTests {
             strip: strip,
             shelf: KiwiShelf(),
             sections: sections,
-            divider: try #require(full().divider)
+            divider: full().divider
         )
         #expect(!overlay.handle.isHidden)
         #expect(overlay.handle.frame.midX == overlay.divider.frame.midX)
