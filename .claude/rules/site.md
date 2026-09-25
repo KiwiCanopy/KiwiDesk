@@ -3,6 +3,7 @@ paths:
   - "site/**"
   # The Node version would be restated here, not in site/.
   - ".github/workflows/site.yml"
+  - ".github/workflows/site-daily.yml"
   # The scripts this file constrains hardest — the published
   # body as an input contract, the appcast written from released
   # bytes, the release-time retirement of the docs markers. They
@@ -349,6 +350,18 @@ below are the whole of its enforcement:
 
 Excludes are evaluated before includes, so an exclude added later
 cannot be reasoned about from the include line alone.
+
+### The daily deploy hook is a credential, not a setting (#1659)
+
+`.github/workflows/site-daily.yml` rebuilds the site once a day
+by POSTing to a Pages deploy hook, so values read at build time —
+the star count — stay fresh on days nothing merges. Cloudflare
+mints hooks only in the dashboard, and the URL is a credential:
+**keep it in the `CF_PAGES_DEPLOY_HOOK` secret, never in a
+committed file.** A rotated hook moves the secret in the same
+sitting, and the workflow must red without the secret rather than
+skip, so a missing one is seen instead of a count that quietly
+freezes.
 
 ## The 404 is a user page, so withdraw Starlight's (#635)
 
