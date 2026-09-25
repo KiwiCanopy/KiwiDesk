@@ -164,6 +164,5 @@ enum GlassTint {
         gradient.endPoint = direction.end
         gradient.colors = [ends.anchor.cgColor, ends.floor.cgColor]
         gradient.cornerRadius = cornerRadius
-        gradient.masksToBounds = true
     }
 }

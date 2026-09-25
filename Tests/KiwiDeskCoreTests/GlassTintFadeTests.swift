@@ -88,7 +88,9 @@ struct GlassTintFadeTests {
     @Test("The shelf plate fades from the shelf's own edge")
     func shelfPlateTakesTheEdge() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
-        let edge = AppBarEdge.bottom
+        // Not `.bottom`: its anchor is `CAGradientLayer`'s default
+        // `startPoint`, which an unpainted backdrop also carries.
+        let edge = AppBarEdge.right
         let spaces = SpaceBarManager()
         spaces.sync([
             paintedSpaceBar(edge: edge, front: nil, spaces: 3, glass: true)
@@ -96,13 +98,14 @@ struct GlassTintFadeTests {
         let section = try #require(spaces.shownOverlay(on: barTitleDisplay))
         var shelf = KiwiShelf()
         shelf.edge = edge
+        shelf.fillColor = "#14201CB3"
         shelf.liquidGlass = true
         shelf.backgroundStyle = .plain
         let shelves = ShelfManager()
         shelves.sync([
             ShelfManager.Shelf(
                 display: barTitleDisplay,
-                strip: barTitleStrip,
+                strip: Self.strip(edge),
                 shelf: shelf,
                 space: section,
                 app: nil
@@ -111,8 +114,9 @@ struct GlassTintFadeTests {
         let overlay = try #require(
             shelves.overlayForTesting(barTitleDisplay)
         )
-        let gradient = try #require(overlay.glassTint?.gradient)
-        #expect(gradient.startPoint == Self.anchor(edge))
+        let tint = try #require(overlay.glassTint)
+        try #require(!tint.isHidden, "the shelf's tint was not painted")
+        #expect(tint.gradient?.startPoint == Self.anchor(edge))
     }
 
     @Test("A boxed Space Bar's boxes and front segment fade from the edge")

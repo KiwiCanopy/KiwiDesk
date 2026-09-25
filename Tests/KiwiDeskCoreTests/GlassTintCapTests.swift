@@ -135,7 +135,15 @@ struct GlassTintCapTests {
             "a floor share outside (0, 1) is no fade"
         )
         // 1.0 × the cap reaches it from ABOVE (a fully opaque
-        // Fill), 0.5 stays under it; both ends must agree.
+        // Fill), 0.5 stays under it; both ends must agree. Only
+        // the first tells a share of the CAP from a share of the
+        // raw Fill, and only while those differ by more than the
+        // tolerance below — so a retune that closes the gap reds
+        // here rather than leaving the case blind (guard-prover).
+        try #require(
+            (1 - GlassTint.maxAlpha) * GlassTint.floorShare > 0.02,
+            "the cap and the raw Fill no longer floor apart"
+        )
         let fill = ofCap == 1 ? 1 : GlassTint.maxAlpha * ofCap
         let hex = String(
             format: "#14201C%02X",

@@ -124,15 +124,63 @@ struct GlassTintCensusTests {
             """
         )
         // The fade's anchor is the shelf's edge, stated at every
-        // call site (#1622): a default would draw a shelf on any
-        // other edge fading from the top, silently.
+        // call site (#1622): a default — or an optional one a nil
+        // default stands in for — draws a shelf on any other edge
+        // fading from the top, silently. So the parameter is read
+        // WHOLE, never as a substring (guard-prover: `AppBarEdge?
+        // = nil` passed a `contains` check).
         #expect(
-            signature.contains("edge: AppBarEdge"),
-            "apply no longer takes the fade's edge: \(signature)"
+            Self.parameter("edge", in: signature) == "edge: AppBarEdge",
+            "apply's fade edge is not a required AppBarEdge: \(signature)"
+        )
+    }
+
+    /// The parameter labelled `label` in a parsed signature, as
+    /// spelled up to the next top-level comma; nil when absent.
+    private static func parameter(
+        _ label: String,
+        in signature: String
+    ) -> String? {
+        signature.split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { $0.hasPrefix("\(label):") }
+    }
+
+    /// The parameter reader, proved on the shapes it must tell
+    /// apart — the clause above expects the one good spelling, so
+    /// only these can show it refusing the others.
+    @Test("The edge reader refuses a default and an optional")
+    func edgeReaderRefusesDefaults() {
+        let good = "_ b: V, hex: String, edge: AppBarEdge, x: Bool = false"
+        #expect(Self.parameter("edge", in: good) == "edge: AppBarEdge")
+        for bad in ["edge: AppBarEdge = .top", "edge: AppBarEdge? = nil"] {
+            #expect(
+                Self.parameter("edge", in: "hex: String, \(bad)")
+                    != "edge: AppBarEdge",
+                "the reader accepts \(bad)"
+            )
+        }
+        #expect(Self.parameter("edge", in: "hex: String") == nil)
+    }
+
+    /// **The backdrop view paints nothing** (#1622). It lives in
+    /// its own file, which the member census above does not scan
+    /// and `GlassTintSeamTests` reaches only for files naming the
+    /// glass, so a colour added here would be #1297 one file over.
+    @Test("GlassBackdrop paints no colour of its own")
+    func backdropPaintsNothing() throws {
+        let file = GlassTintSeamTests.coreRoot
+            .appendingPathComponent("Bar/GlassBackdrop.swift")
+        let source = try SourceScan.strippedSource(at: file)
+        // Present, so the negative below cannot pass on a moved
+        // or emptied file.
+        try #require(
+            source.contains("makeBackingLayer"),
+            "GlassBackdrop no longer builds its backing layer"
         )
         #expect(
-            !signature.contains("edge: AppBarEdge ="),
-            "apply defaults the fade's edge: \(signature)"
+            !Self.painters.contains(where: source.contains),
+            "GlassBackdrop paints a colour beside GlassTint.apply"
         )
     }
 

@@ -11332,7 +11332,7 @@ glass view **per box** (grouped in an
 plate. So the model is now shape (`boxed` | `plain`) × a separate
 `liquid_glass: Bool` finish that lays over either. **`fill_color`
 still tints the glass (#408)** — not through `tintColor`, which
-carries none of the hue, but by placing a solid colored view
+carries none of the hue, but by placing a colored view
 *behind* the glass, which the glass refracts into its hue (the way
 the Dock and Control Center tint their glass). That backdrop is
 the **only** channel a Fill reaches the glass on: driving
@@ -11363,14 +11363,14 @@ means how much colour the glass carries and a transparent Fill
 still draws none. The floor is never zero, so a hint of the
 colour runs the whole surface. It runs from the SHELF's edge
 because the shelf has one Fill and one plate (#1517), and a
-boxed item fades the same way. The gradient is the backdrop's
-own backing layer (`GlassBackdrop`), so it rides the plate
-glide, and it is built in `GlassTint.apply`, which every call
-site hands the edge without a default (`GlassTintFadeTests`,
-`GlassTintCensusTests`). Legibility at the clear end rests on
-the #1308 pin below, not on the alpha: a dark Fill keeps the
-whole glass dark. With the finish off, or Reduce transparency on
-(#1374), the Fill renders flat as before. **No config migration
+boxed item fades the same way. For a dark Fill, legibility at
+the clear end rests on the #1308 pin below rather than on the
+alpha: the pin holds the whole glass dark (unmeasured at the
+clear end; #1622's device check). For a light Fill nothing is
+pinned and the clear end carries an eighth of the tint, so the
+#1308 residue's "the bright tint dominates" holds at the anchor
+edge only; at the clear end it is unmeasured. With the finish
+off, or Reduce transparency on (#1374), the Fill renders flat. **No config migration
 is owed**: no stored value or key changed and the Fill still
 means the colour, now at the anchor edge — a rendering change,
 not a meaning moved under a key (#1354) or a default flipped

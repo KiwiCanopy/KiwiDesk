@@ -2,15 +2,15 @@ import AppKit
 import QuartzCore
 
 /// The coloured view `GlassTint.apply` places beneath a glass
-/// surface (#1622). Its BACKING layer is the gradient, so the
-/// fade resizes with the view's own frame animation — the shelf
-/// plate's glide included — rather than as a sublayer that would
-/// jump to the final size. It paints nothing itself: the colours
-/// are `GlassTint`'s alone (#1297).
+/// surface (#1622). Its BACKING layer is the gradient, so the fade
+/// follows the view's own frame animation (bars.md). It paints
+/// nothing itself — the colours are `GlassTint`'s alone (#1297,
+/// `GlassTintCensusTests` ▸ `backdropPaintsNothing`).
 final class GlassBackdrop: NSView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
+        clipsToBounds = true
     }
 
     convenience init() { self.init(frame: .zero) }
