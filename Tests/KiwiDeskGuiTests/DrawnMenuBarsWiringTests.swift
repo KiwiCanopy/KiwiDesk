@@ -22,15 +22,19 @@ struct DrawnMenuBarsWiringTests {
         )
         let body = try #require(
             SourceScan.declarationBody(
+                after: "static func visibleFrame(of screen: NSScreen)",
+                in: text
+            )
+        )
+        #expect(body.contains("clearingMenuBar("))
+        #expect(body.contains("DrawnMenuBars.bottom(of: screen)"))
+        let ax = try #require(
+            SourceScan.declarationBody(
                 after: "public static func axVisibleFrame(",
                 in: text
             )
         )
-        let orElse = try #require(
-            SourceScan.declarationBody(after: "} else", in: body)
-        )
-        #expect(orElse.contains("clearingMenuBar("))
-        #expect(orElse.contains("DrawnMenuBars.bottom(of: screen)"))
+        #expect(ax.contains("visibleFrame(of: screen)"))
     }
 
     @Test("publishing the displays refreshes the drawn bars first")
@@ -84,8 +88,8 @@ struct DrawnMenuBarsWiringTests {
         #expect(loopStop.contains("displayWatch.stop()"))
     }
 
-    @Test("the core re-publishes on a pref change")
-    func coreRepublishes() throws {
+    @Test("a pref change re-reads the bars and retiles, live-wired")
+    func coreRemeasures() throws {
         let bootstrap = try source(
             "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
         )
@@ -96,6 +100,9 @@ struct DrawnMenuBarsWiringTests {
             )
         )
         #expect(wire.contains("scheduleMenuBarRemeasure()"))
+        #expect(
+            bootstrap.contains("DisplayWatch.liveMenuBars")
+        )
         let lifecycle = try source(
             "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
         )
@@ -105,7 +112,23 @@ struct DrawnMenuBarsWiringTests {
                 in: lifecycle
             )
         )
-        #expect(schedule.contains("eventLoop.publishDisplays()"))
+        // No monitor changed: never a `.displaysChanged`.
+        #expect(!schedule.contains("publishDisplays"))
+        let changed = try #require(
+            SourceScan.declarationBody(
+                after: "if DrawnMenuBars.refresh(",
+                in: schedule
+            )
+        )
+        #expect(changed.contains("retile()"))
+        let watch = try source(
+            "Sources/KiwiDeskCore/Events/DisplayWatch.swift"
+        )
+        #expect(
+            watch.contains(
+                "var readDrawnMenuBars: () -> [CGRect] = { [] }"
+            )
+        )
     }
 
     @Test("both makeTestCore twins pin the drawn-bar read")

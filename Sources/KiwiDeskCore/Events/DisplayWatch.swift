@@ -7,11 +7,10 @@ import AppKit
 /// holds the drawn-menu-bar read the re-measure takes.
 @MainActor
 final class DisplayWatch {
-    /// The WindowServer's drawn menu bars, CG coordinates. Live
-    /// by default, pinned empty by `makeTestCore`.
-    var readDrawnMenuBars: () -> [CGRect] = {
-        DrawnMenuBars.liveBars()
-    }
+    /// The WindowServer's drawn menu bars, CG coordinates. Empty
+    /// until `KiwiCore` wires `liveMenuBars`, so a bare loop in a
+    /// test never files the host's bars.
+    var readDrawnMenuBars: () -> [CGRect] = { [] }
     /// Fired when the auto-hide pref flips; the core re-measures
     /// once the bar has settled (`scheduleMenuBarRemeasure`).
     var onMenuBarPrefChange: () -> Void = {}
@@ -33,6 +32,29 @@ final class DisplayWatch {
         }
         prefObserver = MenuBarPrefObserver { [weak self] in
             self?.onMenuBarPrefChange()
+        }
+    }
+
+    /// Every menu-bar-level window the WindowServer itself lists
+    /// on screen, CG coordinates — matched by owner and level,
+    /// never by window name, which reads nil without Screen
+    /// Recording.
+    static func liveMenuBars() -> [CGRect] {
+        let level = Int(CGWindowLevelForKey(.mainMenuWindow))
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        return list.compactMap { info in
+            guard
+                info[kCGWindowOwnerName as String] as? String
+                    == "Window Server",
+                info[kCGWindowLayer as String] as? Int == level,
+                let bounds =
+                    info[kCGWindowBounds as String] as? NSDictionary
+            else { return nil }
+            return CGRect(dictionaryRepresentation: bounds)
         }
     }
 

@@ -116,11 +116,10 @@ extension KiwiCore {
         }
     }
 
-    /// Re-publishes the displays after the menu-bar auto-hide
-    /// pref flips (#1386), so the bar and the tiles clear a menu
-    /// bar AppKit's screen cache missed. The WindowServer draws
-    /// or drops the bar within ~0.5 s of the pref (measured on
-    /// the issue); the second pass catches a late one.
+    /// Re-reads the drawn menu bars after the auto-hide pref
+    /// flips (#1386) and retiles where they changed — no monitor
+    /// changed, so this is not a `.displaysChanged`. Two passes:
+    /// the second catches a bar drawn late.
     func scheduleMenuBarRemeasure(passes: Int = 2) {
         deferred.schedule(
             .menuBarRemeasure,
@@ -128,7 +127,11 @@ extension KiwiCore {
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning
             else { return }
-            self.eventLoop.publishDisplays()
+            if DrawnMenuBars.refresh(
+                bars: self.eventLoop.displayWatch.readDrawnMenuBars()
+            ) {
+                self.retile()
+            }
             if passes > 1 {
                 self.scheduleMenuBarRemeasure(passes: passes - 1)
             }

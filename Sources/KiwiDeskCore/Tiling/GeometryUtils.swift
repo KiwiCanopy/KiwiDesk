@@ -51,27 +51,33 @@ public enum GeometryUtils {
         CGPoint(x: point.x, y: primaryHeight - point.y)
     }
 
-    /// A screen's usable area in AX coordinates, reclaiming an
-    /// auto-hidden menu bar and clearing a drawn one AppKit's
-    /// cached `visibleFrame` has not caught up with (#1386).
+    /// A screen's usable area in AX coordinates — `visibleFrame(of:)`
+    /// flipped.
     @MainActor
     public static func axVisibleFrame(
         of screen: NSScreen
     ) -> CGRect {
-        var visible = screen.visibleFrame
+        flip(visibleFrame(of: screen), primaryHeight: primaryHeight)
+    }
+
+    /// A screen's usable area in Cocoa coordinates: reclaims an
+    /// auto-hidden menu bar and clears a drawn one AppKit's cached
+    /// `visibleFrame` has not caught up with (#1386). Core reads
+    /// a screen's usable area through here;
+    /// `VisibleFrameReadCensusTests` holds the exceptions.
+    @MainActor
+    static func visibleFrame(of screen: NSScreen) -> CGRect {
         if menuBarAutoHides {
-            visible = reclaimingMenuBar(
-                visible,
+            return reclaimingMenuBar(
+                screen.visibleFrame,
                 screen: screen.frame,
                 safeTop: screen.safeAreaInsets.top
             )
-        } else {
-            visible = clearingMenuBar(
-                visible,
-                barBottom: DrawnMenuBars.bottom(of: screen)
-            )
         }
-        return flip(visible, primaryHeight: primaryHeight)
+        return clearingMenuBar(
+            screen.visibleFrame,
+            barBottom: DrawnMenuBars.bottom(of: screen)
+        )
     }
 
     /// Lowers `visible`'s top edge to a drawn bar's bottom edge

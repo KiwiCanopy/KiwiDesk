@@ -43,6 +43,29 @@ struct DrawnMenuBarsTests {
         #expect(bottoms[3] == nil)
     }
 
+    @Test("only a bar on a screen's top edge, and short, is filed")
+    func onlyTopEdgeBarsFile() {
+        let lowered = CGRect(x: 1728, y: 400, width: 2560, height: 30)
+        let tall = CGRect(x: 1728, y: -159, width: 2560, height: 400)
+        let bottoms = DrawnMenuBars.bottoms(
+            of: [lowered, tall],
+            screens: [(1, builtIn), (3, dell)],
+            primaryHeight: 1117
+        )
+        #expect(bottoms.isEmpty)
+    }
+
+    @Test("the deepest of two bars on one screen wins")
+    func deepestBarWins() {
+        let deeper = CGRect(x: 1728, y: -159, width: 2560, height: 40)
+        let bottoms = DrawnMenuBars.bottoms(
+            of: [bars[0], deeper],
+            screens: [(1, builtIn), (3, dell)],
+            primaryHeight: 1117
+        )
+        #expect(bottoms[3] == 1236)
+    }
+
     @Test("a stale hidden-bar top is lowered under the drawn bar")
     func staleTopIsLowered() {
         // The cache after the missed notification: no band.

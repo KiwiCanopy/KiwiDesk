@@ -2,17 +2,17 @@ import AppKit
 import CoreGraphics
 
 /// The menu bars the WindowServer DRAWS, as each screen's bar
-/// bottom edge in Cocoa y (#1386). `NSScreen.visibleFrame` is
-/// AppKit's cache, refreshed only alongside
-/// `didChangeScreenParameters` — which macOS skips on some
-/// auto-hide toggles, leaving the hidden bar's top for good.
-/// `GeometryUtils.axVisibleFrame` clears the band this records;
-/// empty means "no correction", the state before the first
-/// `EventLoop.publishDisplays` and in every test.
+/// bottom edge in Cocoa y (#1386) — what `GeometryUtils
+/// .visibleFrame(of:)` clears when AppKit's cached frame has not
+/// caught up. Empty means no correction.
 @MainActor
 public enum DrawnMenuBars {
     /// Bar bottom edges keyed by screen number.
     static var bottoms: [CGDirectDisplayID: CGFloat] = [:]
+
+    /// The deepest bar a screen's top may carry; a taller window
+    /// at the menu-bar level is not a menu bar.
+    static let maxBarHeight: CGFloat = 60
 
     /// The bottom edge of the bar drawn on `screen`, if any.
     static func bottom(of screen: NSScreen) -> CGFloat? {
@@ -20,39 +20,16 @@ public enum DrawnMenuBars {
         return bottoms[number]
     }
 
-    /// Every menu-bar-level window the WindowServer itself lists
-    /// on screen, in CG coordinates (origin top-left of the
-    /// primary). Matched by owner and level, never by window
-    /// name, which reads nil without Screen Recording.
-    static func liveBars() -> [CGRect] {
-        let level = Int(CGWindowLevelForKey(.mainMenuWindow))
-        let list =
-            CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
-        return list.compactMap { info in
-            guard
-                info[kCGWindowOwnerName as String] as? String
-                    == "Window Server",
-                info[kCGWindowLayer as String] as? Int == level,
-                let bounds =
-                    info[kCGWindowBounds as String] as? NSDictionary,
-                let rect = CGRect(dictionaryRepresentation: bounds)
-            else { return nil }
-            return rect
-        }
-    }
-
-    /// Files `bars` (CG coordinates) under the screen each one
-    /// mostly covers. Pure over its inputs.
+    /// Files `bars` (CG coordinates) under the screen whose TOP
+    /// edge each one sits on; the deepest wins where several do.
+    /// Pure over its inputs.
     static func bottoms(
         of bars: [CGRect],
         screens: [(id: CGDirectDisplayID, frame: CGRect)],
         primaryHeight: CGFloat
     ) -> [CGDirectDisplayID: CGFloat] {
         var result: [CGDirectDisplayID: CGFloat] = [:]
-        for bar in bars {
+        for bar in bars where bar.height <= maxBarHeight {
             let cocoa = GeometryUtils.flip(
                 bar,
                 primaryHeight: primaryHeight
@@ -62,24 +39,32 @@ public enum DrawnMenuBars {
                     mostlyContaining: cocoa,
                     among: screens.map(\.frame)
                 ),
+                abs(cocoa.maxY - frame.maxY) <= 1,
                 let screen = screens.first(where: {
                     $0.frame == frame
                 })
             else { continue }
-            result[screen.id] = cocoa.minY
+            result[screen.id] = min(
+                result[screen.id] ?? cocoa.minY,
+                cocoa.minY
+            )
         }
         return result
     }
 
-    /// Re-reads the drawn bars against the live screens.
-    static func refresh(bars: [CGRect]) {
-        bottoms = bottoms(
+    /// Re-reads the drawn bars against the live screens; returns
+    /// whether the answer changed.
+    @discardableResult
+    static func refresh(bars: [CGRect]) -> Bool {
+        let fresh = bottoms(
             of: bars,
             screens: NSScreen.screens.compactMap { screen in
                 screen.screenNumber.map { ($0, screen.frame) }
             },
             primaryHeight: GeometryUtils.primaryHeight
         )
+        defer { bottoms = fresh }
+        return fresh != bottoms
     }
 }
 

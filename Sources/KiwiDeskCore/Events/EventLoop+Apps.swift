@@ -318,13 +318,13 @@ extension Notification {
 
 extension NSScreen {
     /// Converts an `NSScreen` into a KiwiDesk display snapshot.
-    var kiwiDisplay: Display? {
+    @MainActor var kiwiDisplay: Display? {
         guard let number = screenNumber else { return nil }
         return Display(
             id: DisplayID(number),
             name: localizedName,
             frame: frame,
-            visibleFrame: visibleFrame
+            visibleFrame: GeometryUtils.visibleFrame(of: self)
         )
     }
 }

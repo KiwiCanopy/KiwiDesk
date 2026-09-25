@@ -95,6 +95,16 @@ editing here:
   target and fails on an unlisted direct call; **its `allowed`
   map is the exemption list** — which files may call it, and
   why — so add the entry there rather than a note here.
+- **A screen's usable area is read through
+  `GeometryUtils.visibleFrame(of:)`** (or its flipped
+  `axVisibleFrame`), never a bare `NSScreen.visibleFrame` (#1386).
+  That member is AppKit's cache, refreshed only alongside
+  `didChangeScreenParameters`, which macOS skips on some menu-bar
+  auto-hide toggles — a bare read then keeps the hidden bar's top
+  and puts what it places under the menu bar. The derivation
+  clears the bar the WindowServer draws (`DrawnMenuBars`).
+  `VisibleFrameReadCensusTests` reds an unrouted member read in
+  `KiwiDeskCore`; its `allowed` map is the exemption list.
 - A layout **span** reads one hook further in:
   `TilingEngine.layoutBounds(on:for:)` (#537), which reserves the
   KiwiShelf strip where a bar draws in that Space's layout (#293,
