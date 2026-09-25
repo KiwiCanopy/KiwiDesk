@@ -268,7 +268,7 @@ exports nothing.
 | | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
 | | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
-| | `bind_profile_to_desktop` | Desktop number, profile (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
+| | `bind_profile_to_desktop` | Desktop number, profile, screen fingerprints… (optional; scopes the binding to that setup) (fires when that Desktop becomes current on the main screen and the profile is saved for the connected screen count) |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | [message] |

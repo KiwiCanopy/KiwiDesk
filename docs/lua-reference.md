@@ -4482,6 +4482,8 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
 - A Desktop number, as Mission Control counts them (1-based;
   fullscreen apps don't count).
 - A profile name.
+- Optionally, the fingerprint of every screen in one screen
+  setup, as `list_monitors` prints them.
 
 **Does:** when that Desktop becomes current **on the main
 display** (the screen with the menu bar), KiwiDesk loads the
