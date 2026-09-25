@@ -1303,6 +1303,7 @@
   "space_override.slot_size.help": "Legt die Größe jedes scrollenden Fensters entlang der Scroll-Richtung fest — die Spaltenbreite, wenn die Ausrichtung %1$@ ist, die Zeilenhöhe, wenn sie %2$@ ist. Als Einheit bedeutet %3$@ einen Anteil von einem Fenster plus einem Abstand: 50 %% ergeben also genau zwei Fenster, Abstände eingeschlossen (ab Werk 95 %%); %4$@ legen eine exakte Größe fest.",
   "space_override.title": "%1$@ — %2$@ Überschreibungen",
   "spaces.add.help": "Space hinzufügen",
+  "spaces.add.placeholder_optional": "Neuer Space (Name optional)",
   "spaces.caption": "Jeder Space kann ein eigenes Layout haben. Neue Spaces tauchen automatisch bei den Tastenkürzeln und App-Regeln auf. Ziehe Zeilen, um sie zu sortieren.",
   "spaces.context.clear_fallback": "Fallback entfernen",
   "spaces.context.delete": "Löschen",

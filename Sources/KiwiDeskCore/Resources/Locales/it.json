@@ -1303,6 +1303,7 @@
   "space_override.slot_size.help": "Imposta la dimensione di ogni finestra a scorrimento lungo la direzione di scorrimento: la larghezza della colonna quando l'orientamento è %1$@, l'altezza della riga quando è %2$@. Come unità, %3$@ è una quota di una finestra più una spaziatura, quindi il 50%% equivale esattamente a due finestre, spaziature comprese (95%% di serie); %4$@ fissano una dimensione esatta.",
   "space_override.title": "%1$@ — Personalizzazioni di %2$@",
   "spaces.add.help": "Aggiungi spazio",
+  "spaces.add.placeholder_optional": "Nuovo spazio (nome facoltativo)",
   "spaces.caption": "Ogni spazio ha il suo layout. Aggiungi qui gli spazi: compaiono anche negli elenchi delle scorciatoie e delle regole app. Trascina le righe per riordinarle.",
   "spaces.context.clear_fallback": "Cancella fallback",
   "spaces.context.delete": "Elimina",

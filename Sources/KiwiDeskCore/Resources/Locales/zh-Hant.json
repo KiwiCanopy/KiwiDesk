@@ -1303,6 +1303,7 @@
   "space_override.slot_size.help": "沿捲動方向設定每個捲動視窗的大小：方向為 %1$@ 時取欄寬，為 %2$@ 時取列高。單位方面，%3$@ 是相對於一個視窗加一個間距的比例，因此 50%% 就是正好兩個視窗，間距計算在內（出廠預設 95%%）；%4$@ 則固定為精確尺寸。",
   "space_override.title": "%1$@ — %2$@ 覆寫項目",
   "spaces.add.help": "加入空間",
+  "spaces.add.placeholder_optional": "新空間（名稱選填）",
   "spaces.caption": "每個空間都有自己的佈局。請在此加入空間；它們也會出現在快速鍵與 App 規則的列表中。拖移各列即可重新排序。",
   "spaces.context.clear_fallback": "清除備援",
   "spaces.context.delete": "刪除",
