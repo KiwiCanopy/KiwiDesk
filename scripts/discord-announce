@@ -10,7 +10,8 @@ person installing*). One Discord embed: the version as its title
 linking the release, the summary, the Before you update
 paragraph, then each section with its count and bullets. A body
 past Discord's embed limit is cut at a section boundary and closes
-on a line pointing at the full notes, never mid-sentence.
+on a line naming what was cut, with its counts, and pointing at the
+full notes, never mid-sentence.
 
     scripts/discord-announce --release <tag> [--releases FILE]
         [--dry-run]
@@ -81,11 +82,26 @@ def clip(text: str, budget: int) -> str:
     return cut.rsplit(" ", 1)[0] + "…"
 
 
+def pointer(entry: dict, rest: list[dict]) -> str:
+    """The closing line: plain where nothing was cut, else naming
+    each cut section and its count so a reader knows what is
+    behind the link."""
+    url = entry["url"]
+    if not rest:
+        return f"Full notes: {url}"
+    names = " · ".join(
+        f"{s['title']} {len(s['items'])}" if s.get("type") else s["title"]
+        for s in rest
+    )
+    return f"**Also in this release:** {names} — full notes: {url}"
+
+
 def description(entry: dict) -> str:
     """The embed body, cut at a section boundary to fit. The head
     — summary, Before you update, the download — is clipped first
-    if it alone would not leave room for the pointer."""
-    more = f"Full notes: {entry['url']}"
+    if it alone would not leave room for the longest pointer."""
+    sections = entry.get("sections") or []
+    more = pointer(entry, sections)
     head: list[str] = []
     if entry.get("summary"):
         head.append(entry["summary"])
@@ -101,16 +117,18 @@ def description(entry: dict) -> str:
         longest = max(range(len(head)), key=lambda i: len(head[i]))
         head[longest] = clip(head[longest], len(head[longest]) - over)
     parts = list(head)
-    for section in entry.get("sections") or []:
+    for index, section in enumerate(sections):
         block = section_block(section)
+        rest = sections[index + 1 :]
+        tail = pointer(entry, rest) if rest else ""
         candidate = "\n\n".join(parts + [block])
-        if len(candidate) + len(more) + 2 > DESCRIPTION_BUDGET:
-            parts.append(more)
+        if len(candidate) + (len(tail) + 2 if tail else 0) > DESCRIPTION_BUDGET:
+            parts.append(pointer(entry, sections[index:]))
             return "\n\n".join(parts)
         parts.append(block)
     # A clipped head says so, as a cut section list does.
     if clipped:
-        parts.append(more)
+        parts.append(pointer(entry, []))
     return "\n\n".join(parts)
 
 
