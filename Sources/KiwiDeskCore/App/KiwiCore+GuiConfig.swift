@@ -174,13 +174,17 @@ extension KiwiCore {
         // rewrites gui.json when the space list changed
         // (`globalsChanged`) — so the cold-boot seed can't re-add
         // the dropped space; this path needs no direct mirror.
+        // A held Space is never in the draft (#1507 ruling 5), so
+        // the Save must not read its absence as a deletion.
         pruneSpaces(
-            keeping: inList.union(extra),
+            keeping: inList.union(extra).union(state.heldSpaces.keys),
             orderedBy: config.spaces,
             preferring: config.fallbackSpace
         )
         for space in state.workspaces.allSpaces
-        where scope?.contains(space.id) ?? true {
+        where (scope?.contains(space.id) ?? true)
+            && state.heldSpaces[space.id] == nil
+        {
             setSpaceMode(
                 space.id,
                 config.spaceModes[space.id] ?? .bsp

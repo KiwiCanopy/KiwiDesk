@@ -141,7 +141,7 @@ extension KiwiCore {
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop).
     func liveMonitorSet() -> MonitorSet {
-        MonitorSet(monitors: liveFingerprints, spaceMonitorMap: spacePins)
+        MonitorSet(monitors: liveFingerprints, spaceMonitorMap: capturedPins)
     }
 
     /// Snapshot of the current configuration as a new profile
@@ -156,12 +156,14 @@ extension KiwiCore {
         name: String,
         modes overrides: [SpaceID: LayoutMode]?
     ) -> Profile {
-        let liveSpaces = state.workspaces.allSpaces.map(\.id)
+        let liveSpaces = capturedSpaces.map(\.id)
+        // A caller's modes are filtered to the captured Spaces
+        // here, so no capture site can save a held one (#1507).
         let modes =
-            overrides
+            overrides?.filter { liveSpaces.contains($0.key) }
             ?? Dictionary(
                 uniqueKeysWithValues:
-                    state.workspaces.allSpaces.map {
+                    capturedSpaces.map {
                         ($0.id, $0.mode)
                     }
             )
@@ -287,8 +289,7 @@ extension KiwiCore {
             // monitor-change's no-prune-on-reconnect rule.
             apply(
                 profile: fresh,
-                pruneStaleSpaces: true,
-                forceRetile: true
+                cause: .explicit
             )
         } else {
             handleMonitorChange()

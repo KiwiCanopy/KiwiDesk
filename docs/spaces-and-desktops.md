@@ -44,6 +44,38 @@ windows it held move to the profile's fallback Space
 (`set_fallback_space`). Re-applying the profile that is already
 live changes nothing, so a monitor reconnect is harmless.
 
+:::unreleased
+**Unplugging a screen holds its Spaces.** When unplugging a
+screen makes a different profile live, each Space that was on
+that screen and still has windows in it is carried onto a
+remaining screen instead of being dropped. It keeps its name
+unless the new profile has a Space of that name; then it takes
+the next number past the highest one in use, so a held `3` beside
+your own `1`–`5` becomes `6`, and a held `Mail` beside your own
+`Mail` becomes a number too. Where KiwiDesk manages your config,
+it gets a digit shortcut if one of the ten is free. A held Space
+moves to a new number again whenever a profile that loads uses
+its current one.
+
+The Space Bar draws an asterisk badge on a held Space's
+identifier, and VoiceOver reads the screen it came from, its old
+name when it was renumbered, and that it is not saved: saving a
+profile never includes a held Space.
+
+Plug the screen back in and a held Space goes back to it with
+everything in it, windows opened while it was held included, when
+what comes back is the profile (or built-in Standard) it left and
+that has a Space of the held one's original name. Otherwise it
+moves back onto its screen and stays held.
+
+A held Space goes away once no window is left in it; a window on
+another Desktop, or hidden with its app, still counts. Loading a
+profile yourself ends every hold, and the held windows move to
+that profile's fallback Space like those of any Space it does not
+define. A Desktop binding holds nothing, and held Spaces do not
+survive quitting KiwiDesk.
+:::
+
 Every Space sits on a screen. In Settings the **Monitors**
 section is a picture of your desk: drag a Space chip onto the
 display it belongs to, or leave it outlined and KiwiDesk places

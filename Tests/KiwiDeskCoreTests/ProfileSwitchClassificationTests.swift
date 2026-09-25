@@ -77,13 +77,13 @@ struct ProfileSwitchClassificationTests {
         let core = makeCore()
         live(core, [1, 2])
         let a = profile("A", spaces: ["1", "2"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
         // The user then moves w2 across.
         core.state.workspaces.add(WindowID(2), to: "1")
 
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1), WindowID(2)])
         #expect(members(core, "2").isEmpty)
     }
@@ -100,7 +100,7 @@ struct ProfileSwitchClassificationTests {
         core.state.workspaces.add(WindowID(1), to: "restored")
         core.apply(
             profile: profile("A", spaces: ["1", "2"]),
-            forceRetile: false
+            cause: .event
         )
         #expect(core.state.workspaces["restored"] != nil)
         #expect(members(core, "restored") == [WindowID(1)])
@@ -116,10 +116,10 @@ struct ProfileSwitchClassificationTests {
         live(core, [1, 2])
         let a = profile("A", spaces: ["1", "2"])
         let b = profile("B", spaces: ["1", "2"])
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         core.state.workspaces.add(WindowID(1), to: "1")
         core.state.workspaces.add(WindowID(2), to: "2")
-        core.apply(profile: b, forceRetile: false)
+        core.apply(profile: b, cause: .event)
         core.state.workspaces.add(WindowID(2), to: "1")
         // A Standard composes in between — a preset apply, or the
         // monitor-change fallback.
@@ -133,7 +133,7 @@ struct ProfileSwitchClassificationTests {
             ),
             forceRetile: false
         )
-        core.apply(profile: a, forceRetile: false)
+        core.apply(profile: a, cause: .event)
         #expect(members(core, "1") == [WindowID(1)])
         #expect(members(core, "2") == [WindowID(2)])
     }

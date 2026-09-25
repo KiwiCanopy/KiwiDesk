@@ -63,6 +63,7 @@ extension TilingSettings {
             dragCornerRadius,
             forKey: .cornerRadius
         )
+        try drag.encode(dragLiquidGlass, forKey: .liquidGlass)
         try drag.encode(dragGhost, forKey: .ghost)
         try drag.encode(dragDropZone, forKey: .dropZone)
         var space = container.nestedContainer(

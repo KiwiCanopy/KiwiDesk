@@ -72,6 +72,11 @@ extension APIReference {
                 + "points.",
             .number("radius")
         ),
+        "set_liquid_glass": APIRecord(
+            "Draws both drag visuals as macOS 26 Liquid Glass, "
+                + "tinted by their fill colors.",
+            .boolean("enabled")
+        ),
     ]
 
     static let borderRecords: [String: APIRecord] = [
@@ -133,6 +138,11 @@ extension APIReference {
         "set_desktop_reach": APIRecord(
             "Carries sticky windows with each macOS Desktop switch "
                 + "(needs the window-management bridge).",
+            .boolean("enabled")
+        ),
+        "set_liquid_glass": APIRecord(
+            "Draws the sticky mark as macOS 26 Liquid Glass, "
+                + "tinted by its color.",
             .boolean("enabled")
         ),
     ]

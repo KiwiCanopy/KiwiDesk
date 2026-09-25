@@ -15,6 +15,9 @@ extension KiwiCore {
         }
         let sticky = state.windows.all.filter(\.isSticky)
         let color = tiler.settings.stickyStyle.color
+        let glass = LiquidGlassGate.rendered(
+            glass: tiler.settings.stickyStyle.liquidGlass
+        )
         stickyMarks.sync(
             sticky.map {
                 StickyMarkManager.Spec(
@@ -23,7 +26,8 @@ extension KiwiCore {
                     color: color,
                     symbolName: StickyStyle.symbolName(
                         for: $0.stickyScope
-                    ) ?? StickyStyle.symbolName
+                    ) ?? StickyStyle.symbolName,
+                    glass: glass
                 )
             }
         )

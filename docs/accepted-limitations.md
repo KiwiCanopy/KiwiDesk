@@ -143,3 +143,7 @@ Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to 
 :::unreleased
 With the **Space Bar off**, switching a Space between a layout that shows an App Bar (Monocle, Scrolling) and one that does not moves its windows by the bar strip's depth: [KiwiShelf](lua-reference.md#kiwishelf) reserves its edge only in a layout where a bar draws ([#1517](https://github.com/KiwiCanopy/KiwiDesk/issues/1517); the ruling is in [design decisions](design-decisions.md)). Reserving it in every layout instead would leave an empty strip on screen in every layout that draws nothing there. With the Space Bar on, the strip is reserved in every layout and no switch moves a window.
 :::
+
+:::unreleased
+The light-`fill_color` glass row above also reaches surfaces that are not bars: the **sticky mark** on its default **Automatic** color, and a sticky or drag color light enough to pin nothing, are unpinned glass too. Over dark window content macOS may draw such a mark's glass dark while its glyph — the system label color under KiwiDesk's Appearance — stays dark. Not observed; reasoned from the mechanism ([#1621](https://github.com/KiwiCanopy/KiwiDesk/issues/1621)). A dark `sticky.set_color` pins the glass dark with a light glyph; `sticky.set_liquid_glass(false)` returns the badge with its disc.
+:::

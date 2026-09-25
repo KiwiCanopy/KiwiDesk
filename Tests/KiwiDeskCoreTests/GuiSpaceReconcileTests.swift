@@ -170,8 +170,7 @@ struct GuiSpaceReconcileTests {
         try core.profiles.save(profile)
         core.apply(
             profile: profile,
-            pruneStaleSpaces: true,
-            forceRetile: false
+            cause: .explicit
         )
         // The edit session drops "3"; write it and hot-reload.
         try core.overwriteProfile(
@@ -247,8 +246,7 @@ struct GuiSpaceReconcileTests {
         // Activate "two" and delete the shared space "A" from it.
         core.apply(
             profile: two,
-            pruneStaleSpaces: true,
-            forceRetile: false
+            cause: .explicit
         )
         core.applyProfileScopedState(
             from: config(spaces: [SpaceID("C")])

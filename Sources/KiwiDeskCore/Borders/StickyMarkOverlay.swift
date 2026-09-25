@@ -53,6 +53,12 @@ final class StickyMarkOverlay {
         plate.setMarkColor(hex)
     }
 
+    /// Draws the mark as tinted glass or the `.hudWindow` badge
+    /// (#1621).
+    func setGlass(_ on: Bool) {
+        plate.setGlass(on)
+    }
+
     /// Sets scope glyph symbol name (#445).
     func setSymbol(_ name: String) {
         guard name != symbolName else { return }

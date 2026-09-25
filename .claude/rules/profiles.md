@@ -725,6 +725,103 @@ reported screens at once and OWES the profile choice to
   decided at once would test a sequence production no longer
   takes.
 
+## A gone screen's Spaces are held, not forwarded (#1507)
+
+A monitor change that switches profile carries each Space that
+lived on a screen no longer connected, and still holds windows,
+as a **held** Space rather than letting the prune forward it; the
+argument is `docs/design-decisions.md` ▸ Profiles ▸ *An unplugged
+screen's Spaces are held, not forwarded*. The obligations:
+
+- **The hold's machinery has one home.** Holding, reclaiming,
+  re-filing, retiring and ending live in
+  `KiwiCore+HeldSpaces.swift`; write `StateCoordinator.heldSpaces`
+  there alone, and add a new way into or out of a hold to that
+  file — a caller elsewhere calls it, as the #634 reset
+  (`forgetHeldSpaces`) and `delete_space` (`endHold`) do
+  (`HeldSpaceTests` ▸ `deleteEndsHold`). Nothing scans for a
+  second writer; review is the check.
+- **Hold for the screen a Space LIVED on, on a switching
+  `.monitorChange` apply only.** That screen is its pin, else
+  `StateCoordinator.settlingScreens` — recorded by the event arm
+  at the first report of a screen-count change, before that
+  report's resolve moves an unpinned Space, and cleared by the
+  settle and by `supersedeMonitorSettle` — so a Main-role or
+  auto-placed Space is held too (`HeldSpaceTests` ▸
+  `unpinnedSpaceIsHeld`). The hold runs ahead of the prune, while
+  `spacePins`, the icons and `liveArrangement` are still the
+  departing arrangement's (`HeldSpaceTests` ▸ `unplugHolds`,
+  `HeldSpaceTests` ▸ `heldIconIsTheDepartingOne`). A Desktop
+  binding's `.event` apply holds nothing (`HeldSpaceTests` ▸
+  `bindingSwitchDoesNotHold`), an `.explicit` apply forgets every
+  hold before its prune (`HeldSpaceTests` ▸
+  `explicitLoadEndsHolds`), and an unplug into a composed
+  Standard holds nothing: `apply(composed:)` does not prune, so
+  the gone screen's Spaces stay live as ordinary Spaces. Which
+  apply is which is `ProfileApplyCause`'s — see *Applies force or
+  don't, explicitly*.
+- **A held id is never a declared one.** Every door that makes a
+  Space set authoritative — `apply(profile:)`,
+  `apply(composed:)`, `returnHeldSpacesWithoutApply` — calls
+  `reclaimHeldNames` FIRST, which moves a held Space the set
+  declares to a fresh number unless it is about to go home under
+  that very name (`HeldSpaceTests` ▸
+  `claimedHeldNumberIsReclaimed`); a new such door owes the call.
+- **A renumber takes `SpaceID.nextNumber(past:)` over every live
+  id, never `smallestFreeNumber(among:)` and never the declared
+  set alone.** A Space the prune is about to drop still exists,
+  and numbering into it merges. `HeldSpaceTests` ▸ `unplugHolds`
+  and `HeldSpaceTests` ▸ `claimedHeldNumberIsReclaimed` pin
+  renumbers, but on fixtures whose live set has no gap, where the
+  rules agree — a swap between them is review's to refuse.
+- **A held Space goes home only into the arrangement it left.**
+  `returnsHome` asks for its screen back, the incoming
+  arrangement equal to `HeldOrigin.arrangement` (#1230:
+  arrangements never merge by name) and that arrangement
+  declaring the origin name; otherwise it stays held, pinned to
+  its screen (`HeldSpaceTests` ▸ `replugRefiles`,
+  `HeldSpaceTests` ▸ `refileOnlyIntoTheOrigin`). One back under
+  its own name takes the returning profile's mode. Both apply
+  doors call `refileHeldSpaces` after their pins, and the
+  monitor-change arms that keep the live profile (`.exact`,
+  `.countDefault`) run no apply and call
+  `returnHeldSpacesWithoutApply` instead; the Lua-owned `.none`
+  arm only places Spaces and returns nothing, by ruling. A new
+  door owes the call. The composed door and the no-apply arms
+  have no clause.
+- **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
+  runs there because a membership change retiles; a path that
+  empties a held Space without a retile owes the call
+  (`HeldSpaceTests` ▸ `emptiedRetires`, which empties it of a
+  live member only — the away and remembered-window clauses that
+  keep a Space held have no test).
+- **A reload leaves a held Space's mode alone.**
+  `resetDeclarativeState` skips it, since no config redeclares it
+  (`HeldSpaceTests` ▸ `reloadKeepsHeldMode`); the same holds for
+  any other mode reset that walks the live Spaces.
+- **An arrangement WRITE reads `capturedSpaces` and
+  `capturedPins`, never `state.workspaces.allSpaces` or
+  `spacePins`.** A write recording which Spaces exist, what they
+  hold, their modes or their pins — Keep and `save_profile`
+  through `buildProfile` (which also drops a caller's modes for a
+  Space it did not capture), the #1230 record, the sidecar
+  mirror, the Settings draft (`overlayLiveProfileState`),
+  `guiConfigSeed`, a Settings Save's live net and its modes —
+  must not capture a held Space, and a new capture site owes the
+  same routing (`HeldSpaceTests` ▸ `captureExcludesHeld`,
+  `HeldSpaceTests` ▸ `draftExcludesHeld`, `HeldSpaceTests` ▸
+  `keepDropsHeldPins`). The Settings Save's own prune keeps held
+  Spaces it never listed (`HeldSpaceTests` ▸
+  `settingsSaveKeepsHeld`). `CapturedSpacesCensusTests` is the
+  census: it counts every `workspaces.allSpaces` read in Core's
+  `Profiles/`, the `App/KiwiCore+Gui*` files and
+  `Sources/KiwiDesk/Settings` against a reasoned register, so a
+  new reader there reds until it is classified — and it cannot
+  see a capture site outside those roots, nor one that reads
+  `spacePins` raw. `topUpDigitShortcuts` reads `allSpaces` by
+  ruling: it writes a chord, not an arrangement, and a held
+  Space's chord is how it stays reachable.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
@@ -900,12 +997,14 @@ this deliberately leaves visible.
 
 ## Applies force or don't, explicitly
 
-`apply(profile:)` / `apply(composed:)` take a **required**
-`forceRetile`, so every new caller must choose. Explicit paths
-force — `load_profile`, an in-effect edit re-apply, the
-post-reload re-apply, preset apply. Monitor-change and
-native-space-binding applies stay un-forced. The wider rule (and
-why the ±2 pt tolerance makes this matter) is in
+`apply(profile:)` takes a **required** `ProfileApplyCause` and
+`apply(composed:)` a required `forceRetile`, so every new caller
+must choose. Explicit paths force — `load_profile`, an in-effect
+edit re-apply, the post-reload re-apply, preset apply.
+Monitor-change and native-space-binding applies stay un-forced.
+A new classification of a profile apply is a new CASE of that
+one value, never another Bool beside it (#1507). The wider rule
+(and why the ±2 pt tolerance makes this matter) is in
 [state-and-layout.md](state-and-layout.md).
 
 ## Vocabulary

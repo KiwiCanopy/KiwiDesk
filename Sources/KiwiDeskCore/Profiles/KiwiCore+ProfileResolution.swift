@@ -6,44 +6,33 @@ import Foundation
 extension KiwiCore {
     // MARK: - Applying
 
-    /// Applies a profile to live state and retiles. An explicit
-    /// user load passes `pruneStaleSpaces: true` so the profile's
-    /// space set becomes authoritative (see `pruneSpaces`);
-    /// hardware-driven applies (monitor change, native-space
-    /// binding) leave it false to avoid shuffling windows on a
-    /// reconnect.
-    ///
-    /// `forceRetile` has no default so every caller classifies
-    /// itself (AGENTS.md §5): explicit applies — load_profile,
-    /// an in-effect edit re-apply, the post-reload re-apply —
-    /// force past the engine's ±2 pt tolerance so a small
-    /// settings change can't be swallowed; event-driven applies
-    /// (monitor change, native-space binding) stay un-forced so
-    /// AX-echo lag can't wobble windows.
-    ///
-    /// Growth threshold (review 2026-07): two classification
-    /// Bools is the ceiling, and #1230 reached it without adding
-    /// one — the prune now has two independent causes
-    /// (`pruneStaleSpaces || switching`) while only the flag
-    /// syncs the sidecar, and `switching` itself answers three
-    /// states. Read the threshold as SPENT: the next
-    /// classification folds these into one apply-intent value
-    /// (.userExplicit / .hardwareEvent) rather than joining
-    /// them. The session ratio-layer clear rides both — an
-    /// explicit apply OR a profile change (#458, #764) — so an
-    /// eventual fold carries two causes.
+    /// Applies a profile to live state and retiles. `cause` has
+    /// no default so every caller classifies itself (AGENTS.md
+    /// §5) — `ProfileApplyCause` states what each one implies.
+    /// The prune has two independent causes (`cause.prunesStale
+    /// || switching`), and the session ratio-layer clear rides
+    /// both an explicit apply and a profile change (#458, #764).
     func apply(
         profile: Profile,
-        pruneStaleSpaces: Bool = false,
-        forceRetile: Bool
+        cause: ProfileApplyCause
     ) {
+        let pruneStaleSpaces = cause.prunesStale
+        let forceRetile = cause.forcesRetile
         supersedeMonitorSettle()
         // #1230: file the OUTGOING profile's partitioning before
         // anything rebuilds the space set, and learn in one
         // answer whether this apply is a profile CHANGE — which
         // gates the session clear, the prune below and the
         // restore after it.
+        // A held number this profile claims moves off it first.
+        reclaimHeldNames(
+            declared: profile.declaredSpaces,
+            into: .profile(profile.name)
+        )
         let switching = recordOutgoingPartitioning(before: profile)
+        // A held Space keeps the icon it had where it lived (#1507),
+        // read before the incoming settings replace them.
+        let outgoingIcons = tiler.settings.spaceIcons
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
@@ -77,9 +66,16 @@ extension KiwiCore {
         // made two profiles' `1` the same Space, and merged an
         // arrangement away for good. Derived, not a third
         // classification Bool — the growth threshold above stands.
+        // #1507: an unplug holds the gone screen's Spaces; an
+        // explicit load ends every hold and prunes them like any
+        // undeclared Space.
+        if cause == .monitorChange, switching {
+            holdDepartingSpaces(declared: declared, icons: outgoingIcons)
+        }
+        if pruneStaleSpaces { forgetHeldSpaces() }
         if pruneStaleSpaces || switching {
             pruneSpaces(
-                keeping: declared,
+                keeping: declared.union(state.heldSpaces.keys),
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
@@ -101,7 +97,8 @@ extension KiwiCore {
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
-        for space in state.workspaces.allSpaces {
+        for space in state.workspaces.allSpaces
+        where state.heldSpaces[space.id] == nil {
             setSpaceMode(
                 space.id,
                 profile.spaceModes[space.id] ?? .bsp
@@ -120,6 +117,14 @@ extension KiwiCore {
         fallbackSpace = profile.fallbackSpace.flatMap {
             declared.contains($0) ? $0 : nil
         }
+        // After the pins, which a held Space's home pin joins; one
+        // back under its own name takes this profile's mode.
+        for id in refileHeldSpaces(
+            declared: declared,
+            into: .profile(profile.name)
+        ) {
+            setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
+        }
         // Per-profile override tiers — keybindings (#55 phase
         // 6) and app rules (#109): register THIS profile's
         // overrides (base survives unmentioned). Passed
@@ -131,6 +136,8 @@ extension KiwiCore {
             profileFloatRules: profile.floatRules,
             profileIgnoreRules: profile.ignoreRules
         )
+        // A renumbered held Space owes its ⌃⌥N (#485's top-up).
+        if !state.heldSpaces.isEmpty { topUpDigitShortcuts() }
         resolveSpaceDisplays()
         retile(pass: forceRetile ? .apply : .event)
         emitSpaceChange()
@@ -197,6 +204,10 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         supersedeMonitorSettle()
+        reclaimHeldNames(
+            declared: Set(composed.spaces),
+            into: .standard(composed.sourceName)
+        )
         // #1230: a Standard is not a profile — file whatever
         // profile was live before the compose rearranges it, or
         // its arrangement is what gets recorded under that
@@ -223,6 +234,10 @@ extension KiwiCore {
         // five-per-display plan is NOT the count's Standard, so its
         // blocks would otherwise scatter into the Standard's slots.
         adoptComposedPlacement(composed)
+        refileHeldSpaces(
+            declared: Set(composed.spaces),
+            into: .standard(composed.sourceName)
+        )
         fallbackSpace = nil
         // A transient Standard has no keybinding or app-rule
         // override — revert to the base gui.json config
@@ -310,7 +325,7 @@ extension KiwiCore {
         {
             // Explicit: reloads follow a config/profile edit
             // whose deltas may sit inside the tolerance.
-            apply(profile: profile, forceRetile: true)
+            apply(profile: profile, cause: .reapply)
         } else if profiles.currentStandard != nil,
             let composed = composeMonitorChangeFallback(
                 displays: state.workspaces.allDisplays

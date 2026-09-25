@@ -69,8 +69,9 @@ struct GlassCard: View {
     private var caption: String {
         L(
             "colors.glass.caption",
-            "A translucent material over both bars and the "
-                + "shortcuts panel."
+            "A translucent material over both bars, the "
+                + "shortcuts panel, the drag ghost and drop zone, "
+                + "and the sticky mark."
         )
     }
 
@@ -83,24 +84,26 @@ struct GlassCard: View {
         L(
             "colors.liquid_glass.help",
             "Lays macOS's translucent material over the Space "
-                + "Bar, the App Bar and the shortcuts panel. "
-                + "KiwiShelf's %1$@ color tints the bars' one "
-                + "material; the shortcuts panel stays "
-                + "untinted.",
+                + "Bar, the App Bar, the shortcuts panel, the drag "
+                + "ghost and drop zone, and the sticky mark. "
+                + "KiwiShelf's %1$@ color tints the bars, fading "
+                + "from its screen edge; the drag ghost, drop zone "
+                + "and sticky mark take their own colors, fading "
+                + "downward; the shortcuts panel stays untinted.",
             L("kiwishelf.color.fill", "Fill")
         )
     }
 
-    /// Owed only while the three disagree, which only Lua or an
-    /// imported profile can produce: a boolean cannot show "two
-    /// of three", so this sentence carries what the switch
-    /// cannot, and both read the ONE `LiquidGlassAgreement`.
+    /// Owed only while the surfaces disagree, which only Lua or an
+    /// imported profile can produce: a boolean cannot show "some
+    /// of them", so this sentence carries what the switch cannot,
+    /// and both read the ONE `LiquidGlassAgreement`.
     private var differHelp: String {
         L(
             "colors.liquid_glass.differ.help",
-            "The two bars and the panel are set differently "
-                + "right now. Turning this on switches it on for "
-                + "all three."
+            "These surfaces are set differently right now. "
+                + "Turning this on switches it on for all of "
+                + "them."
         )
     }
 }

@@ -124,13 +124,13 @@ struct FloatGatherRepartitionTests {
             modes: ["1": .floating, "2": .scrolling],
             settings: settings
         )
-        core.apply(profile: a, forceRetile: true)
+        core.apply(profile: a, cause: .reapply)
         // A re-apply of the live profile re-files nothing.
-        core.apply(profile: a, forceRetile: true)
+        core.apply(profile: a, cause: .reapply)
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
         core.apply(
             profile: profile("B", modes: ["1": .floating], settings: settings),
-            forceRetile: true
+            cause: .reapply
         )
         #expect(core.state.workspaces.space(of: Self.parked) == "1")
         expectGathered(core)
@@ -150,13 +150,13 @@ struct FloatGatherRepartitionTests {
         let a = profile("A", modes: modes, settings: settings)
         let b = profile("B", modes: modes, settings: settings)
         // A held both windows in its floating `1`.
-        core.apply(profile: a, forceRetile: true)
+        core.apply(profile: a, cause: .reapply)
         for id in Self.members {
             core.state.workspaces.add(id, to: "1")
         }
         core.retile(pass: .apply)
         // In B they live in monocle `2`, drawn there.
-        core.apply(profile: b, forceRetile: true)
+        core.apply(profile: b, cause: .reapply)
         for id in Self.members {
             core.state.workspaces.add(id, to: "2")
         }
@@ -164,7 +164,7 @@ struct FloatGatherRepartitionTests {
         #expect(core.tiler.stashOriginal(Self.parked) == nil)
         // Back to A: its record puts them in `1`, which was drawn
         // floating all along.
-        core.apply(profile: a, forceRetile: true)
+        core.apply(profile: a, cause: .reapply)
         #expect(core.state.workspaces.space(of: Self.parked) == "1")
         expectGathered(core)
     }
@@ -267,11 +267,11 @@ struct FloatGatherRepartitionTests {
             settings: settings
         )
         // A: the pair in monocle `2`, the bystander in floating `1`.
-        core.apply(profile: a, forceRetile: true)
+        core.apply(profile: a, cause: .reapply)
         core.state.workspaces.add(bystander, to: "1")
         core.retile(pass: .apply)
         // B: the pair moved by hand into its bsp `3`.
-        core.apply(profile: b, forceRetile: true)
+        core.apply(profile: b, cause: .reapply)
         for id in Self.members {
             core.state.workspaces.add(id, to: "3")
         }
@@ -279,7 +279,7 @@ struct FloatGatherRepartitionTests {
         // Back to A: `3` is pruned into the fallback `1`, and A's
         // own record then moves the pair on to `2` — `1` was only
         // passed through.
-        core.apply(profile: a, forceRetile: true)
+        core.apply(profile: a, cause: .reapply)
         #expect(core.state.workspaces.space(of: Self.parked) == "2")
         #expect(core.state.workspaces.space(of: bystander) == "1")
         // Unshown `1` parks it and captures its own state frame,

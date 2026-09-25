@@ -13,17 +13,22 @@ public final class StickyMarkManager {
         public let color: String
         /// SF Symbol name for sticky scope (`infinity` / `pin.fill`, #445).
         public let symbolName: String
+        /// Liquid Glass as drawn — the stored leaf through
+        /// `LiquidGlassGate` (#1621).
+        public let glass: Bool
 
         public init(
             window: WindowID,
             frame: CGRect,
             color: String = "",
-            symbolName: String = StickyStyle.symbolName
+            symbolName: String = StickyStyle.symbolName,
+            glass: Bool
         ) {
             self.window = window
             self.frame = frame
             self.color = color
             self.symbolName = symbolName
+            self.glass = glass
         }
     }
 
@@ -74,6 +79,7 @@ public final class StickyMarkManager {
                     window: spec.window.raw
                 )
             overlays[spec.window] = overlay
+            overlay.setGlass(spec.glass)
             overlay.setMarkColor(spec.color)
             overlay.setSymbol(spec.symbolName)
             overlay.update(

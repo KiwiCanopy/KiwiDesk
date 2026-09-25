@@ -8,6 +8,8 @@ extension SettingKey {
         .colours(.liquidGlassMaster): [
             "settings.kiwishelf.liquidGlass",
             "settings.shortcutPanelLiquidGlass",
+            "settings.dragLiquidGlass",
+            "settings.stickyStyle.liquidGlass",
         ],
         .borders(.borderWidthMaster): [
             "settings.borderStyle.width",
