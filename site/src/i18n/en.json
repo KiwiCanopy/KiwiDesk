@@ -459,5 +459,15 @@
   "what_compare": "Already using something else?",
   "what_eyebrow": "New here? Start here",
   "what_learn": "Learn the basics",
-  "what_title": "What is KiwiDesk, really?"
+  "what_title": "What is KiwiDesk, really?",
+  "stars_on_github": "{n} stars on GitHub",
+  "voices_eyebrow_simple": "In their words",
+  "voices_eyebrow_dev": "Field reports",
+  "voices_title_simple": "Kind words from people who use it",
+  "voices_title_dev": "Ran it. Kept it.",
+  "voices_sub_simple": "A few notes from people who hand their windows to KiwiDesk — picked ripe, never squeezed.",
+  "voices_sub_dev": "100% juice, no filler.",
+  "voices_track_aria": "Voices, scrollable",
+  "voices_prev_aria": "Previous voices",
+  "voices_next_aria": "Next voices"
 }

@@ -41,6 +41,8 @@ import {
   downloadVersion,
   downloadIsPrerelease,
 } from "../lib/download";
+import { voices, monogram } from "../lib/voices";
+import { formatStars } from "../lib/stars";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
 
@@ -91,6 +93,8 @@ const oq = lang === "de" ? "„" : lang === "ja" ? "「" : "“";
 const cq = lang === "de" ? "“" : lang === "ja" ? "」" : "”";
 
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
+const stars = formatStars(lang);
+const starsLabel = t.stars_on_github.replace("{n}", stars);
 const kofi = "https://ko-fi.com/kiwicanopy";
 const kiwiCanopyUrl = "https://kiwicanopy.com";
 // The maker's personal GitHub profile — distinct from the project
@@ -588,6 +592,16 @@ const jsonLd = [
               {t.download_req}
             </p>
           )}
+          {/* A fact, never an ask — the star ask stays in the
+               closing band. Outside #heroReq so the download's
+               description stays the requirements alone. */}
+          <p class="req req--center hero__stars">
+            <a href={repo} target="_blank" rel="noopener">
+              <Icon name="lucide:star" width={13}
+                height={13} aria-hidden="true" />
+              {starsLabel}
+            </a>
+          </p>
           {/* The badge states the version, read from the release
                the download actually points at. It used to read
                "Public beta — available now" — a hand-maintained
@@ -647,13 +661,21 @@ const jsonLd = [
                  at this point is the code, so the button offers
                  that; the star ask moved to the closing band,
                  where the reader has a reason. */}
-            <a class="btn btn--ghost btn--ghost-light" href={repo}
-              target="_blank" rel="noopener">
-              <svg width="17" height="17" viewBox="0 0 24 24"
-                fill="currentColor" aria-hidden="true">
-                <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.2-3.1-.12-.29-.52-1.46.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.82 0c2.22-1.49 3.2-1.18 3.2-1.18.63 1.59.23 2.76.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.07.78 2.15v3.19c0 .31.2.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
-              </svg>
-              {t.hero_dev_cta_github}
+            <a class="btn btn--ghost btn--ghost-light btn--split"
+              href={repo} target="_blank" rel="noopener">
+              <span class="btn__main">
+                <svg width="17" height="17" viewBox="0 0 24 24"
+                  fill="currentColor" aria-hidden="true">
+                  <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.2-3.1-.12-.29-.52-1.46.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.82 0c2.22-1.49 3.2-1.18 3.2-1.18.63 1.59.23 2.76.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.07.78 2.15v3.19c0 .31.2.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+                </svg>
+                {t.hero_dev_cta_github}
+              </span>
+              <span class="gh-count">
+                <Icon name="lucide:star" width={14}
+                  height={14} aria-hidden="true" />
+                <span aria-hidden="true">{stars}</span>
+                <span class="visually-hidden">{starsLabel}</span>
+              </span>
             </a>
           </div>
           {downloadHref && (
@@ -812,6 +834,69 @@ const jsonLd = [
             {t.quote_byline_demo}
           </footer>
         </blockquote>
+      </div>
+    </section>
+
+    {/* ============ Voices (both modes) ============
+         People only — the star count lives in the heroes. Quotes
+         stay English on every locale, and carry no quote marks:
+         the card's own mark and <blockquote> already say it. */}
+    <section id="voices" aria-labelledby="voicesTitle">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">
+            {isDev ? t.voices_eyebrow_dev : t.voices_eyebrow_simple}
+          </span>
+          <h2 id="voicesTitle">
+            {isDev ? t.voices_title_dev : t.voices_title_simple}
+          </h2>
+          <p>{isDev ? t.voices_sub_dev : t.voices_sub_simple}</p>
+        </div>
+        <ul class="voices__track" id="voicesTrack" role="list"
+          data-track-label={t.voices_track_aria}>
+          {voices.map((v) => (
+            <li>
+              <figure class="voice">
+                <blockquote lang="en">
+                  <p>{v.quote}</p>
+                </blockquote>
+                <figcaption>
+                  {v.avatar ? (
+                    <Image class="voice__avatar" src={v.avatar}
+                      alt="" width={88} height={88} />
+                  ) : (
+                    <span class="voice__mono" aria-hidden="true">
+                      {monogram(v.name)}
+                    </span>
+                  )}
+                  <span class="voice__meta">
+                    <a class="voice__name" href={v.link}
+                      target="_blank" rel="noopener">{v.name}</a>
+                    {v.role && (
+                      <span class="voice__role" lang="en">{v.role}</span>
+                    )}
+                    <span class="voice__src">{v.source}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+        <div class="voices__controls" id="voicesControls" hidden>
+          <button class="voices__btn" type="button" id="voicesPrev"
+            aria-controls="voicesTrack"
+            aria-label={t.voices_prev_aria}>
+            <Icon name="lucide:chevron-left" width={18} height={18}
+              aria-hidden="true" />
+          </button>
+          <span class="voices__status" id="voicesStatus"></span>
+          <button class="voices__btn" type="button" id="voicesNext"
+            aria-controls="voicesTrack"
+            aria-label={t.voices_next_aria}>
+            <Icon name="lucide:chevron-right" width={18} height={18}
+              aria-hidden="true" />
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1450,6 +1535,89 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
         );
         els.forEach((el) => io.observe(el));
+      }
+
+      // ---- Voices: prev/next only while the row overflows ----
+      const track = document.getElementById("voicesTrack");
+      const controls = document.getElementById("voicesControls");
+      const vPrev = document.getElementById("voicesPrev");
+      const vNext = document.getElementById("voicesNext");
+      const vStatus = document.getElementById("voicesStatus");
+      if (track && controls && vPrev && vNext && vStatus) {
+        const geometry = () => {
+          const first = track.firstElementChild;
+          if (!first) return null;
+          const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+          const step = first.getBoundingClientRect().width + gap;
+          const perView = Math.max(
+            1,
+            Math.floor((track.clientWidth + gap + 2) / step)
+          );
+          return { step, perView, total: track.children.length };
+        };
+        const update = () => {
+          const g = geometry();
+          if (!g || controls.hidden) return;
+          const first = Math.round(track.scrollLeft / g.step);
+          const last = Math.min(g.total, first + g.perView);
+          vStatus.textContent =
+            g.perView === 1
+              ? `${first + 1} / ${g.total}`
+              : `${first + 1}–${last} / ${g.total}`;
+          // aria-disabled, not `disabled`: a disabled button drops
+          // keyboard focus to <body> at the end of the row.
+          vPrev.setAttribute(
+            "aria-disabled",
+            String(track.scrollLeft <= 2)
+          );
+          vNext.setAttribute(
+            "aria-disabled",
+            String(
+              track.scrollLeft + track.clientWidth >=
+                track.scrollWidth - 2
+            )
+          );
+        };
+        const layout = () => {
+          delete track.dataset.fits;
+          const overflow = track.scrollWidth > track.clientWidth + 2;
+          controls.hidden = !overflow;
+          if (overflow) {
+            track.tabIndex = 0;
+            track.setAttribute(
+              "aria-label",
+              track.dataset.trackLabel ?? ""
+            );
+          } else {
+            track.dataset.fits = "";
+            track.removeAttribute("tabindex");
+            track.removeAttribute("aria-label");
+          }
+          update();
+        };
+        const page = (dir: number) => {
+          const btn = dir < 0 ? vPrev : vNext;
+          if (btn.getAttribute("aria-disabled") === "true") return;
+          const g = geometry();
+          if (!g) return;
+          track.scrollBy({
+            left: dir * g.step * g.perView,
+            behavior: reduce ? "auto" : "smooth",
+          });
+        };
+        vPrev.addEventListener("click", () => page(-1));
+        vNext.addEventListener("click", () => page(1));
+        let raf = 0;
+        track.addEventListener(
+          "scroll",
+          () => {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(update);
+          },
+          { passive: true }
+        );
+        layout();
+        new ResizeObserver(layout).observe(track);
       }
 
       // ---- Card cursor-follow glow ----

@@ -1400,6 +1400,265 @@ section {
   color: var(--text-dim);
 }
 
+/* ---- GitHub star count (read at build, lib/stars.ts) ----
+   A fact on the hero links that already go to GitHub, never an
+   ask. */
+.gh-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.gh-count svg,
+.hero__stars svg {
+  flex: none;
+  color: var(--accent);
+}
+.btn--split {
+  gap: 0;
+  padding-right: 0;
+}
+.btn--split .btn__main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.btn--split .gh-count {
+  align-self: stretch;
+  margin-left: 1.1rem;
+  padding: 0 1.1rem;
+  border-left: 1px solid var(--ghost-border);
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+.btn--split:hover .gh-count {
+  border-left-color: var(--ghost-hover-border);
+  color: var(--text);
+}
+.hero__stars {
+  font-size: 0.82rem;
+}
+.req + .hero__stars {
+  margin-top: 0.35rem;
+}
+.hero__stars a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease;
+}
+.hero__stars a:hover {
+  color: var(--text-dim);
+}
+.hero__stars svg {
+  opacity: 0.8;
+}
+
+/* ---- Voices ----
+   Borrows .quote-card's surface but not its kiwi badge: the kiwi
+   marks the maker's voice, the avatar a user's. One row that
+   snaps card by card; prev/next appear only on overflow. */
+.voices__track {
+  --gap: clamp(1rem, 2.2vw, 1.4rem);
+  --col: calc(100% - 2.75rem);
+  list-style: none;
+  margin: 0;
+  /* Side padding clears the 3px hover ring when the row scrolls. */
+  padding: 0.35rem 4px 0.6rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--col);
+  grid-template-rows: auto auto;
+  gap: var(--gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.voices__track::-webkit-scrollbar {
+  display: none;
+}
+.voices__track:focus-visible {
+  outline-offset: 4px;
+  border-radius: var(--radius-lg);
+}
+@media (min-width: 640px) {
+  .voices__track {
+    --col: calc((100% - var(--gap)) / 2);
+  }
+}
+@media (min-width: 980px) {
+  .voices__track {
+    --col: calc((100% - 2 * var(--gap)) / 3);
+  }
+}
+.voices__track[data-fits] {
+  overflow-x: visible;
+}
+/* Each card spans the track's two rows through subgrid, so every
+   byline rule sits on one line whatever the quote or role wraps
+   to. */
+.voices__track > li,
+.voice {
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+}
+.voice {
+  scroll-snap-align: start;
+  position: relative;
+  margin: 0;
+  padding: clamp(1.4rem, 3vw, 1.8rem);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.voice:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm), 0 0 0 3px var(--card-glow);
+}
+.voice::before {
+  content: "\201C";
+  position: absolute;
+  top: 0.2rem;
+  left: 1.1rem;
+  font: 4.5rem/1 Georgia, "Times New Roman", serif;
+  color: var(--accent);
+  opacity: 0.18;
+  pointer-events: none;
+}
+.voice blockquote {
+  margin: 0 0 1.4rem;
+  position: relative;
+}
+.voice blockquote p {
+  margin: 0.9rem 0 0;
+  font-size: 1.04rem;
+  line-height: 1.55;
+  font-weight: 520;
+  color: var(--text);
+  text-wrap: pretty;
+}
+.voice figcaption {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.voice__avatar,
+.voice__mono {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+}
+.voice__avatar {
+  object-fit: cover;
+  background: var(--tile-fill-ghost);
+}
+.voice__mono {
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  background: var(--tile-fill-accent);
+}
+.voice__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.voice__name {
+  font-weight: 650;
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+  width: fit-content;
+}
+.voice__name:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.voice__name::after {
+  content: " \2197" / "";
+  font-size: 0.8em;
+  color: var(--text-faint);
+}
+.voice__role {
+  color: var(--text-dim);
+  font-size: 0.86rem;
+  margin-top: 0.15rem;
+}
+.voice__src {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  margin-top: 0.2rem;
+  overflow-wrap: anywhere;
+}
+:root[data-mode="dev"] .voice__mono {
+  font-family: var(--mono);
+}
+.voices__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 1.1rem;
+}
+.voices__controls[hidden] {
+  display: none;
+}
+.voices__btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  background: var(--ghost-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.voices__btn:hover:not([aria-disabled="true"]) {
+  background: var(--ghost-hover-bg);
+  border-color: var(--accent);
+}
+.voices__btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+.voices__status {
+  min-width: 5.5ch;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .voices__track {
+    scroll-behavior: auto;
+  }
+  .voice,
+  .hero__stars a {
+    transition: none;
+  }
+}
+
 /* The terminal block stays dark in both themes — a familiar
    terminal look, and it self-contains its own light-on-dark
    text tokens (below) so it needs no per-theme text vars. */
