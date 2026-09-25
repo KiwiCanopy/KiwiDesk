@@ -179,6 +179,46 @@ struct HeldSpaceTests {
         #expect(record?[SpaceID(5)] == nil)
     }
 
+    @Test("a held Space keeps the icon it had there, not the incoming one")
+    func heldIconIsTheDepartingOne() throws {
+        let core = try docked()
+        // The incoming profile gives ITS 3 an icon (the device
+        // repro: Glyphs' 3 wore headphones); the DELL's 3 had none.
+        var solo = try core.profiles.read(name: "solo")
+        solo.settings.spaceIcons[SpaceID(3)] = "headphones"
+        try core.profiles.save(solo)
+        core.execute("load_profile", args: [.string("desk")])
+        core.tiler.settings.spaceIcons[SpaceID(4)] = "book"
+        core.handle(.displaysChanged([builtIn]))
+        #expect(core.state.heldSpaces[SpaceID(5)]?.icon == nil)
+        #expect(core.state.heldSpaces[SpaceID(4)]?.icon == "book")
+    }
+
+    @Test("a Settings Save keeps a held Space it never listed")
+    func settingsSaveKeepsHeld() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        core.setSpaceMode(SpaceID(5), .monocle)
+        // The draft lists the captured Spaces only (ruling 5).
+        var config = GuiConfig()
+        config.spaces = core.capturedSpaces.map(\.id)
+        core.applyProfileScopedState(from: config)
+        #expect(core.state.heldSpaces[SpaceID(5)] != nil)
+        #expect(members(core, 5) == ids([10, 11]))
+        #expect(core.state.workspaces[SpaceID(5)]?.mode == .monocle)
+    }
+
+    @Test("Keep never saves a held Space's home pin")
+    func keepDropsHeldPins() throws {
+        let core = try docked()
+        core.handle(.displaysChanged([builtIn]))
+        core.spacePins[SpaceID(5)] = dell.fingerprint
+        let kept = core.buildProfile(name: "kept", modes: nil)
+        #expect(
+            kept.monitorSets.first?.spaceMonitorMap[SpaceID(5)] == nil
+        )
+    }
+
     @Test("the bar marks a held Space and says where it came from")
     func barMarksHeld() throws {
         LocalizationManager.shared.select("en")

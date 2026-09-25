@@ -11,8 +11,13 @@ extension KiwiCore {
     /// — live or away — is held under its own name, or under the
     /// next number past the live set's last where the incoming
     /// profile declares that name. Runs before the prune, while
-    /// `spacePins` is still the departing arrangement's.
-    func holdDepartingSpaces(declared: Set<SpaceID>) {
+    /// `spacePins` is still the departing arrangement's; `icons` is
+    /// the departing arrangement's too, the incoming settings being
+    /// live by then.
+    func holdDepartingSpaces(
+        declared: Set<SpaceID>,
+        icons: [SpaceID: String]
+    ) {
         let live = Set(liveFingerprints)
         var taken = Set(state.workspaces.allSpaces.map(\.id))
             .union(declared)
@@ -25,7 +30,7 @@ extension KiwiCore {
             let origin = HeldOrigin(
                 name: space.id,
                 screen: pin,
-                icon: tiler.settings.spaceIcons[space.id]
+                icon: icons[space.id]
             )
             var id = space.id
             if declared.contains(space.id) {

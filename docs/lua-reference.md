@@ -4518,6 +4518,30 @@ that lands on the same profile leaves your layout alone.
 
 The record is per session and is not written to disk.
 
+:::unreleased
+**A monitor change holds a gone screen's spaces.** When a monitor
+change resolves a different profile, a space pinned to a monitor
+that is no longer connected, and still holding windows on any
+Desktop, is *held* instead of pruned: it stays live on a
+remaining monitor under its own name, or under the next number
+past the highest live or declared one where the incoming profile
+declares that name. It keeps its icon and mode, and wears an
+asterisk badge in the Space Bar
+([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
+Once its monitor is back and the profile or Standard then applied
+declares its original name, everything in it moves into that
+space and the hold ends; with the name undeclared, it stays held,
+pinned back to its monitor.
+
+A held space is dropped once no window is left in it on any
+Desktop, and on an explicit `load_profile`, whose prune forwards
+it to the fallback space like any undeclared space.
+`save_profile`, the `gui.json` space list and the per-profile
+record above never include one. A Desktop binding switch holds
+nothing, and held spaces do not survive a restart
+([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
+:::
+
 ### Profile Monitor Sets
 
 A profile covers concrete **monitor sets** of one screen count — each a list

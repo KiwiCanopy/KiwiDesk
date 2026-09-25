@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "Nascondi spazi vuoti",
   "space_bar.hide_empty.help": "Gli spazi senza finestre vengono nascosti dalla barra, tranne quello in cui ti trovi. Usa una scorciatoia per passare a uno spazio nascosto.",
   "space_bar.item.ax.current": "%1$@, posizione attuale",
+  "space_bar.item.ax.held": "Spazio %1$@, conservato dallo schermo %2$@, non salvato, %3$d app",
+  "space_bar.item.ax.held_renumbered": "Spazio %1$@, conservato dallo schermo %2$@, dove era lo Spazio %3$@, non salvato, %4$d app",
   "space_bar.item.ax.layer": "Livello scorciatoie %1$@",
   "space_bar.item.ax.not_current": "%1$@, non selezionato",
   "space_bar.item.ax.space": "Spazio %1$@, %2$d app",

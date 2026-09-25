@@ -25,6 +25,9 @@ extension KiwiCore {
         // gates the session clear, the prune below and the
         // restore after it.
         let switching = recordOutgoingPartitioning(before: profile)
+        // A held Space keeps the icon it had where it lived (#1507),
+        // read before the incoming settings replace them.
+        let outgoingIcons = tiler.settings.spaceIcons
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
@@ -62,7 +65,7 @@ extension KiwiCore {
         // explicit load ends every hold and prunes them like any
         // undeclared Space.
         if cause == .monitorChange, switching {
-            holdDepartingSpaces(declared: declared)
+            holdDepartingSpaces(declared: declared, icons: outgoingIcons)
         }
         if pruneStaleSpaces { forgetHeldSpaces() }
         if pruneStaleSpaces || switching {

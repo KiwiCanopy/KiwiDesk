@@ -1273,6 +1273,8 @@
   "space_bar.hide_empty": "隐藏空空间",
   "space_bar.hide_empty.help": "没有窗口的空间会从栏中隐藏，但你当前所在的空间除外。请用快捷键跳转到已隐藏的空间。",
   "space_bar.item.ax.current": "%1$@，当前",
+  "space_bar.item.ax.held": "空间 %1$@，保留自显示器“%2$@”，未存储，%3$d 个 App",
+  "space_bar.item.ax.held_renumbered": "空间 %1$@，保留自显示器“%2$@”（原为空间 %3$@），未存储，%4$d 个 App",
   "space_bar.item.ax.layer": "快捷键层 %1$@",
   "space_bar.item.ax.not_current": "%1$@，非当前",
   "space_bar.item.ax.space": "空间 %1$@，%2$d 个 App",

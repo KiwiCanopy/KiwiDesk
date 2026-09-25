@@ -11927,6 +11927,99 @@ screen set re-seats the seed in its opening layout, so a layout
 you set on it by hand does not survive that re-dock, where a
 declared space's would.
 
+:::unreleased
+**[Principle]**
+
+**An unplugged screen's Spaces are held, not forwarded
+([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).** A
+monitor change that switches profile makes the incoming profile's
+Space set the authority, and its prune forwarded every window of a
+Space it did not declare into its fallback Space: a second
+screen's arrangement collapsed into one Space on the laptop.
+Plugging back in could not undo that where the docked arrangement
+is a composed Standard — as it is on a Mac whose saved profiles
+are all single-screen — because a Standard has no file for #1230's
+record to live in. And nothing needed destroying: a Space pinned
+to an absent screen already resolves onto a remaining one, and
+only the prune dropped it. So a departing Space that still holds
+windows — live, or on another Desktop — is carried as a **held**
+Space, its origin (its name there, the screen, its icon) kept
+beside it. An empty one is dropped as before: holding nothing
+would only take a number and a chord.
+
+**A name collision renumbers, past the live set.** The incoming
+profile's own Space keeps the name — it is that profile's declared
+arrangement — and a name is a Space's identity (*Spaces, profiles
+& config ownership*), so the two cannot share it. The held one
+takes the next number past the highest live or declared one, so
+live `1–5` holding another screen's `3, 4, 5` numbers them `6, 7,
+8`, and the #485 digit top-up gives each a chord in order where
+KiwiDesk manages the config. One rule for every name: a colliding
+`Mail` becomes a number too. A suffix grammar (`3'`, `Mail
+(DELL)`) is refused because it mints names nobody types into
+`focus_space`, and every reader of a name would have to learn it.
+The namesake adopting the windows is refused because it merges two
+arrangements into one Space, the merge #1230 ruled out; the
+resident keeping the name with the held Space reachable by a bar
+click alone is refused because it leaves a Space with no shortcut,
+and no next/previous-Space verb exists to reach it by.
+
+**A drawn badge, never a name change.** Identity stays the bare
+name, so `focus_space 6` and the digit chord work unchanged. What
+the user needs — this Space is held, from which screen, what it
+was called there, and that nothing saves it — rides an asterisk
+badge on the identifier and the sentence the item announces. The
+badge is a held Space's whole visible affordance, so
+`space_bar.set_sticky_badge(false)`, which hides the window-state
+badges, does not hide it.
+
+**Invisible to every arrangement write.** Keep is a whole-live
+snapshot; a held `6` written into the laptop-only profile would
+become a declared Space there, never retiring, and sit beside a
+new held `7` at the next undock with nobody told. The same holds
+for the Settings Save's live-space net and the `gui.json` space
+list, whose Spaces cold boot seeds back into live, and for #1230's
+record, which is the incoming profile's own arrangement and not
+the one the held Space came from. This is the opposite of the
+#1175 heal's seed, which every save captures: a seed is the
+screen's own Space for the user to adopt, while a held Space
+belongs to an arrangement that is coming back. The badge and its
+"not saved" sentence stand in for a promote verb, which can come
+later if it is asked for.
+
+**It ends by going home, by emptying, or by an explicit load.** On
+reconnect a held Space goes home by its ORIGIN, never by its live
+name, taking everything inside — windows opened while it was held
+included. Where the returning arrangement does not declare the
+origin name, it stays held, pinned back to its own screen: it is
+still not that arrangement's to save. It retires the moment
+nothing is left in it; a window on another Desktop or of a hidden
+app still counts, since it comes back to that Space. An explicit
+`load_profile` is the user making a profile's set the authority,
+so it forgets every hold and its prune forwards them like any
+undeclared Space.
+
+**A monitor change holds; a Desktop binding does not.** A hold
+answers a screen that LEFT, which only a monitor change reports. A
+binding switch fires on a Desktop activation: the user is choosing
+the bound profile's arrangement, and #1230's record brings the
+departing one back on the return.
+
+**A window moved out of a held Space is #1230's to place on
+replug.** Where the returning arrangement is a saved profile, its
+record still files that window under its own Space, so the restore
+moves it back: each profile is its own arrangement of the windows,
+and a move made while another profile was live is that profile's.
+Where it is a composed Standard there is no record, and the window
+stays where the user put it. No ledger is added to make the saved
+case stick — the model decides it, and one move after the replug
+overrides it. What is inside the held Space goes back in both
+cases.
+
+A held Space is session state; surviving a restart is
+[#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646).
+:::
+
 ### Monitors
 
 **[Rationale]**

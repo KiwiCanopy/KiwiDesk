@@ -725,6 +725,60 @@ reported screens at once and OWES the profile choice to
   decided at once would test a sequence production no longer
   takes.
 
+## A gone screen's Spaces are held, not forwarded (#1507)
+
+A monitor change that switches profile carries each Space pinned
+to a screen no longer connected, and still holding windows, as a
+**held** Space rather than letting the prune forward it; the
+argument is `docs/design-decisions.md` ▸ Profiles ▸ *An unplugged
+screen's Spaces are held, not forwarded*. The obligations:
+
+- **The hold's machinery has one home.** Holding, re-filing,
+  retiring and forgetting live in `KiwiCore+HeldSpaces.swift`;
+  write `StateCoordinator.heldSpaces` there alone, and add a new
+  way into or out of a hold to that file. Nothing scans
+  for a second writer; review is the check.
+- **Hold on a switching `.monitorChange` apply, and nowhere
+  else.** The hold runs ahead of the prune, while `spacePins` is
+  still the departing arrangement's, since the apply's pin write
+  replaces them (`HeldSpaceTests` ▸ `unplugHolds`). A Desktop
+  binding's `.event` apply holds nothing (`HeldSpaceTests` ▸
+  `bindingSwitchDoesNotHold`), and an `.explicit` apply forgets
+  every hold before its prune (`HeldSpaceTests` ▸
+  `explicitLoadEndsHolds`). Which apply is which is
+  `ProfileApplyCause`'s — see *Applies force or don't,
+  explicitly*.
+- **A renumber takes `SpaceID.nextNumber(past:)`, never
+  `smallestFreeNumber(among:)`.** The heal fills a gap; a held
+  Space goes past the live set so the digit chords read in
+  order. `HeldSpaceTests` ▸ `unplugHolds` pins the renumber, but
+  on a fixture whose live set has no gap, where the two rules
+  agree — a swap between them is review's to refuse.
+- **Every apply door re-files.** `apply(profile:)` and
+  `apply(composed:)` each call `refileHeldSpaces(declared:)` with
+  the set they make authoritative, after their pins; a new apply
+  door owes the call. `HeldSpaceTests` ▸ `replugRefiles` holds
+  the profile door; the composed door has no clause.
+- **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
+  runs there because a membership change retiles; a path that
+  empties a held Space without a retile owes the call
+  (`HeldSpaceTests` ▸ `emptiedRetires`, which empties it of a
+  live member only — the away and remembered-window clauses that
+  keep a Space held have no test).
+- **An arrangement WRITE reads `capturedSpaces`, never
+  `state.workspaces.allSpaces`.** A write recording which Spaces
+  exist or what they hold — Keep and `save_profile` through
+  `buildProfile`, the #1230 record through
+  `recordLivePartitioning`, the sidecar mirror through
+  `syncGuiSpacesToLive`, a Settings Save's live net through
+  `mergeLiveSpaces` — must not capture a held Space, and a new
+  capture site owes the same routing. `HeldSpaceTests` ▸
+  `captureExcludesHeld` holds the first two; the sidecar pair has
+  no clause, and nothing scans for a new capture site reading
+  `allSpaces`. `topUpDigitShortcuts` reads `allSpaces` on
+  purpose: it writes a chord, not an arrangement, and a held
+  Space's chord is how it stays reachable.
+
 ## Resolve before layout, and merge per-field first
 
 Settings that layer (global → layout → space) merge field by
@@ -906,8 +960,8 @@ must choose. Explicit paths force — `load_profile`, an in-effect
 edit re-apply, the post-reload re-apply, preset apply.
 Monitor-change and native-space-binding applies stay un-forced.
 A new classification of a profile apply is a new CASE of that
-one value, never another Bool beside it (#1507). The wider rule (and
-why the ±2 pt tolerance makes this matter) is in
+one value, never another Bool beside it (#1507). The wider rule
+(and why the ±2 pt tolerance makes this matter) is in
 [state-and-layout.md](state-and-layout.md).
 
 ## Vocabulary
