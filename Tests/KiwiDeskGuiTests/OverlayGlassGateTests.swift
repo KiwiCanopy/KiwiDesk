@@ -70,13 +70,11 @@ struct OverlayGlassGateTests {
     /// its render — the one copy. Derived from `GlassPlate.make(`
     /// callers, so a new glass host reds until it names its gate.
     private static let minters: [String: String] = [
-        "AppBarOverlay+BoxGlass.swift":
-            "ReduceTransparencySeamTests (GlassHosting.resolve)",
-        "SpaceBarOverlay+BoxGlass.swift":
-            "ReduceTransparencySeamTests (GlassHosting.resolve)",
-        "ShelfOverlay.swift": "ShelfPlateGlassGateTests",
-        "DragOverlay.swift": "OverlayGlassGateTests",
-        "StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
+        "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
+        "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
+        "Bar/ShelfOverlay.swift": "ShelfPlateGlassGateTests",
+        "Tiling/DragOverlay.swift": "OverlayGlassGateTests",
+        "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
     ]
 
     @Test("every glass host in Core names the gate that covers it")
@@ -88,7 +86,9 @@ struct OverlayGlassGateTests {
                 !SourceScan.callSites(in: text, for: "GlassPlate.make")
                     .isEmpty
             else { continue }
-            found.insert(file.lastPathComponent)
+            let path = file.standardizedFileURL.path
+            let root = Self.core.standardizedFileURL.path + "/"
+            found.insert(String(path.dropFirst(root.count)))
         }
         #expect(found.count >= 3, "the scan found \(found)")
         #expect(
@@ -99,5 +99,15 @@ struct OverlayGlassGateTests {
             \(found.symmetricDifference(Self.minters.keys))
             """
         )
+        // A named gate is a suite that exists, not free text.
+        let tests = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Tests/KiwiDeskGuiTests")
+        for suite in Set(Self.minters.values) {
+            let file = tests.appendingPathComponent("\(suite).swift")
+            #expect(
+                FileManager.default.fileExists(atPath: file.path),
+                "no gate suite \(suite)"
+            )
+        }
     }
 }

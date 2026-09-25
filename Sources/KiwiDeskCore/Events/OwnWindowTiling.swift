@@ -32,9 +32,8 @@ import Foundation
 ///   bars.
 ///   Under Liquid Glass the drag markers sit at the NORMAL level
 ///   (#1620), so the layer-0 census the heal and the bulk
-///   prefilter read sees them — bounded: one own-process
-///   reconcile per panel before the heal hushes it, and the drop
-///   still happens here.
+///   prefilter read lists them too; the drop above is still what
+///   keeps them untracked.
 ///
 /// A new own window is unmarked, and therefore chrome, by
 /// DEFAULT — the failure direction that costs a stray float
