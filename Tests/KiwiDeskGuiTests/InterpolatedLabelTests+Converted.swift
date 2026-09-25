@@ -161,8 +161,7 @@ extension InterpolatedLabelTests {
         // #1517: the KiwiShelf card's frames, authored
         // interpolating from the start.
         "kiwishelf.alignment.label.help": 2,
-        "kiwishelf.alignment.note.start": 1,
-        "kiwishelf.alignment.note.end": 1,
+        "kiwishelf.alignment.note": 2,
         "kiwishelf.background_style.label.help": 2,
         "kiwishelf.background_fit.label.help": 2,
         "app_bar.content.vertical_only.shelf": 2,

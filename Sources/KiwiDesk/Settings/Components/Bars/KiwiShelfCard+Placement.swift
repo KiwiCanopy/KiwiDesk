@@ -66,7 +66,8 @@ extension KiwiShelfCard {
             options: AppBarOptions.alignment.map { ($0.1, $0.0) },
             help: L(
                 "kiwishelf.alignment.label.help",
-                "Where a bar sits while it is the only one shown. "
+                "Where the bars sit along the edge — a lone bar, or "
+                    + "both as one run. "
                     + "\u{201C}%1$@\u{201D} and \u{201C}%2$@\u{201D} "
                     + "follow the edge, so on a left edge the start "
                     + "is the top.",
@@ -79,31 +80,25 @@ extension KiwiShelfCard {
         }
     }
 
-    /// The accepted trade-off, said where it is chosen: with both
-    /// bars at opposite ends, a Space Bar aligned elsewhere moves
-    /// when the App Bar appears — Core's own verdict (#1517).
+    /// The accepted trade-off, said where it is chosen: once the
+    /// App Bar joins the Space Bar into one run, a Space Bar
+    /// aligned anywhere but the run's own end moves — Core's own
+    /// verdict names the alignment that holds it still (#1517).
     private var alignmentNote: String? {
-        guard gates.bothBarsShow else { return nil }
-        switch ShelfArrangement.spaceBarMoves(shelf: shelf.wrappedValue) {
-        case .start:
-            return L(
-                "kiwishelf.alignment.note.start",
-                "While the App Bar shows, the two bars sit at "
-                    + "opposite ends, so the Space Bar moves to the "
-                    + "start. \u{201C}%1$@\u{201D} keeps it still.",
-                L("app_bar.alignment.start", "Start")
+        guard gates.bothBarsShow,
+            let steady = ShelfArrangement.spaceBarMoves(
+                shelf: shelf.wrappedValue
             )
-        case .end:
-            return L(
-                "kiwishelf.alignment.note.end",
-                "While the App Bar shows, the two bars sit at "
-                    + "opposite ends, so the Space Bar moves to the "
-                    + "end. \u{201C}%1$@\u{201D} keeps it still.",
-                L("app_bar.alignment.end", "End")
-            )
-        case .center, nil:
-            return nil
-        }
+        else { return nil }
+        return L(
+            "kiwishelf.alignment.note",
+            "When the App Bar shows, the two bars join into one "
+                + "run, so the Space Bar moves. \u{201C}%1$@\u{201D} "
+                + "keeps it still.",
+            steady == .start
+                ? L("app_bar.alignment.start", "Start")
+                : L("app_bar.alignment.end", "End")
+        )
     }
 
     var orderRow: some View {
@@ -113,8 +108,8 @@ extension KiwiShelfCard {
             options: AppBarOptions.order.map { ($0.1, $0.0) },
             help: L(
                 "kiwishelf.order.label.help",
-                "While both bars show, they take opposite ends of "
-                    + "the edge in this order."
+                "While both bars show, they join into one run in "
+                    + "this order."
             )
         )
         .modifier(

@@ -8,11 +8,21 @@ struct BarStripView: View {
     let edge: AppBarEdge
     let vertical: Bool
     let scale: CGFloat
+    /// False where the shelf draws one plate under both bars and
+    /// this strip draws only its run (`ShelfStripPreview`).
+    var drawsPlate = true
     @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         Group {
-            if spec.spans {
+            if !drawsPlate && !spec.boxed {
+                seated {
+                    run.padding(
+                        vertical ? .vertical : .horizontal,
+                        spec.gap
+                    )
+                }
+            } else if spec.spans {
                 plate
                     .overlay(seated { run })
             } else if spec.boxed {
