@@ -93,7 +93,7 @@ jobs:
     name: Re-vendor and open a PR
     # Same runner and Xcode as ci.yml: the drop is validated by the
     # real suite, on the SDK the tree is built against.
-    runs-on: macos-26
+    runs-on: xcode-27
     env:
       TAG: ${{ needs.check.outputs.tag }}
     steps:
@@ -101,7 +101,7 @@ jobs:
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_26.6.app \
+          sudo xcode-select -s /Applications/Xcode_27.app \
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
 
