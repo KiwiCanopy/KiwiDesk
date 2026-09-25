@@ -75,6 +75,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// Corner radius for drag overlay visuals.
     public var dragCornerRadius = GeometryUtils
         .systemWindowCornerRadius
+    /// Liquid Glass on the drag ghost and drop zone (#1620) — one
+    /// leaf for both markers, written by the one Liquid Glass row
+    /// beside the shelf's and the panel's (#1307).
+    public var dragLiquidGlass = true
     /// Per-trigger animation settings (`animations.*`).
     public var animations = AnimationSettings()
     /// Mouse drag resize mode for tiled windows.

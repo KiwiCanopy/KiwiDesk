@@ -20,6 +20,18 @@ extension SettingsValueReadout {
                 old.settings.shortcutPanelLiquidGlass,
                 new.settings.shortcutPanelLiquidGlass
             )
+        case .dragLiquidGlass:
+            return coloursOnOffRow(
+                census,
+                old.settings.dragLiquidGlass,
+                new.settings.dragLiquidGlass
+            )
+        case .stickyLiquidGlass:
+            return coloursOnOffRow(
+                census,
+                old.settings.stickyStyle.liquidGlass,
+                new.settings.stickyStyle.liquidGlass
+            )
         case .liquidGlassMaster:
             // Derived, like the animations master beside it: the
             // one `LiquidGlassAgreement` reading the row shows.

@@ -35,8 +35,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 11 = a shortcut override's left-out combo (#1393), on
     /// `[Profile]` alone;
     /// 12 = the bars' shared fields moved to `kiwishelf` (#1517),
-    /// on `[Profile]` alone.
-    public static let currentFormat = 12
+    /// on `[Profile]` alone;
+    /// 13 = the drag markers' and sticky mark's Liquid Glass
+    /// leaves filled (#1620/#1621), on `[Profile]` alone.
+    public static let currentFormat = 13
 
     public let format: Int
 

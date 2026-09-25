@@ -9376,6 +9376,18 @@ pushpin family is off-limits — `SpaceAssignmentChip` uses
 `pin.fill` for the opposite idea (a window bound to one space).
 (#429)
 
+:::unreleased
+**On Liquid Glass the mark's disc goes** (#1621). It existed
+because `.hudWindow` carries no colour; tinted glass carries the
+colour itself, through `GlassTint.apply`, fading downward. The
+glyph then takes `.labelColor` under the light or dark variant
+`GlassTint` pins from that colour (#1308), never
+`contrastingGlyph` of the hex: the glass shows the colour at a
+capped alpha over whatever lies behind it, so a black/white pick
+made from the hex judges a colour that is never on screen. With
+the finish off, or Reduce transparency on, the disc returns.
+:::
+
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
 with the inherited global value until its checkbox unlocks
@@ -11229,6 +11241,30 @@ independent per-bar settings and a constant is the shape one row
 on Colours & Animations replaces: it writes every glass leaf —
 the shelf's, which both bars read, and the panel's — stored side
 by side in the profile.
+:::
+
+:::unreleased
+**The drag visuals and the sticky mark join that switch as leaves
+of their own, filled from its reading on upgrade.** (#1620,
+#1621.) Each takes its own colour through `GlassTint.apply`,
+fading DOWNWARD, since neither sits on a screen edge the way the
+shelf does (#1622). A file written before them carries neither
+leaf, and absent they decode on — beside a shelf and panel the
+user may have set off, so the one row would open reading
+"differ" on a plain upgrade. The step therefore fills both from
+the switch's own reading over the leaves the file does carry,
+off where those disagree, as the panel's leaf was filled from the
+bars' (#1369).
+
+**Glass drag markers sit directly beneath the window being
+dragged, at its level; flat ones float above everything.** At the
+floating level the glass would blur the window in hand whenever
+it crossed its home slot or hovered the target, which is exactly
+when the drop zone shows. Beneath it, both markers still sit
+above every other window, and the home slot is empty for the
+drag. The flat markers keep the level they shipped with. The
+drag preview in Settings stays flat until a tinted preview glass
+is ruled (#1645).
 :::
 
 **Profile-scoped, and the alternative was not merely riskier but

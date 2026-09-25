@@ -5,6 +5,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.kiwishelf.liquidGlass (master)"
     case shortcutPanelLiquidGlass =
         "settings.shortcutPanelLiquidGlass"
+    case dragLiquidGlass = "settings.dragLiquidGlass"
+    case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
     case animationsMaster = "settings.animations (master)"
     case animationsOnSpaceChange = "settings.animations.onSpaceChange"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
@@ -37,9 +39,10 @@ extension ColoursKey {
                 .atRest,
                 gate: .runtime(.liquidGlassUnavailable)
             )
-        case .shortcutPanelLiquidGlass:
+        case .shortcutPanelLiquidGlass, .dragLiquidGlass,
+            .stickyLiquidGlass:
             // Written by the master row, never its own row —
-            // and reachable from Lua like the two bar leaves.
+            // and reachable from Lua like the shelf's leaf.
             return .luaOnly
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
@@ -89,7 +92,8 @@ extension ColoursKey {
 extension ColoursKey {
     var text: SettingRowText {
         switch self {
-        case .shortcutPanelLiquidGlass:
+        case .shortcutPanelLiquidGlass, .dragLiquidGlass,
+            .stickyLiquidGlass:
             return .none
         case .liquidGlassMaster:
             return .text(

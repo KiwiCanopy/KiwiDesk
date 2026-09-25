@@ -1999,12 +1999,15 @@ stored values are untouched, so the glass and the alpha return
 the moment the setting goes off (#1374).
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
-Glass** switch on Colours &amp; Animations writes this leaf and
-the shortcuts panel's
-([set_shortcut_panel_liquid_glass](#set_shortcut_panel_liquid_glass))
-together, and shows on only when both are on. This verb sets the
-bars alone; setting one and not the other is a Lua-only state,
-and the Settings switch then reads off and says so in its `?`.
+Glass** switch on Colours &amp; Animations writes this leaf, the
+shortcuts panel's
+([set_shortcut_panel_liquid_glass](#set_shortcut_panel_liquid_glass)),
+the drag visuals' ([drag.set_liquid_glass](#dragset_liquid_glass))
+and the sticky mark's
+([sticky.set_liquid_glass](#stickyset_liquid_glass)) together,
+and shows on only when all of them are on. This verb sets the
+bars alone; setting them apart is a Lua-only state, and the
+Settings switch then reads off and says so in its `?`.
 
 **Example:**
 
@@ -2812,6 +2815,27 @@ segment then sets both.
 drag.set_corner_radius(16)
 ```
 
+### drag.set_liquid_glass
+
+:::unreleased
+**Expects:** a boolean (default `true`).
+
+**Does:** draws the ghost and the drop zone as macOS 26 Liquid
+Glass. Each is tinted by its own fill color, strongest at the top
+and fading downward, and keeps its border solid on top; with the
+fill off the glass is clear. While you drag, both sit just below
+the window you are holding, so the glass never covers it. Off,
+below macOS 26, or while macOS's Reduce transparency is on, they
+draw flat as before. Settings writes this through the one
+**Liquid Glass** switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+
+**Example:**
+
+```lua
+drag.set_liquid_glass(false)
+```
+:::
+
 ## Focus Border
 
 KiwiDesk draws a thin border around the focused window. It is
@@ -3581,6 +3605,28 @@ there. Inert on a macOS without the window-management bridge.
 ```lua
 sticky.set_desktop_reach(false)
 ```
+
+### sticky.set_liquid_glass
+
+:::unreleased
+**Expects:** a boolean (default `true`).
+
+**Does:** draws the on-window sticky mark as macOS 26 Liquid
+Glass, tinted by [`sticky.set_color`](#stickyset_color),
+strongest at the top and fading downward; with no color it is
+clear glass. The glyph takes the glass's own light or dark ink
+instead of sitting on a filled disc. Off, below macOS 26, or
+while macOS's Reduce transparency is on, the mark is the dark
+badge described under `sticky.set_color`. Settings writes this
+through the one **Liquid Glass** switch
+([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+
+**Example:**
+
+```lua
+sticky.set_liquid_glass(false)
+```
+:::
 
 ### floating.set_color
 

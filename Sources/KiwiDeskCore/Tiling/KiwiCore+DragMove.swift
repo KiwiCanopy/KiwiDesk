@@ -153,11 +153,16 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
+        let glass = LiquidGlassGate.rendered(
+            glass: settings.dragLiquidGlass
+        )
         if settings.dragGhost.enabled {
             dragOverlay.showGhost(
                 at: slot,
                 style: settings.dragGhost,
-                cornerRadius: settings.dragCornerRadius
+                cornerRadius: settings.dragCornerRadius,
+                glass: glass,
+                below: id.raw
             )
         }
         // Target the slot under the CURSOR, not the dragged
@@ -181,7 +186,9 @@ extension KiwiCore {
             dragOverlay.showDropZone(
                 at: targetSlot,
                 style: settings.dragDropZone,
-                cornerRadius: settings.dragCornerRadius
+                cornerRadius: settings.dragCornerRadius,
+                glass: glass,
+                below: id.raw
             )
         } else {
             dragOverlay.hideDropZone()

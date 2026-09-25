@@ -34,6 +34,11 @@ public struct StickyStyle: Sendable, Equatable {
     /// per-window override outranks it.
     public var desktopReach = true
 
+    /// Liquid Glass on the sticky mark (#1621), written by the one
+    /// Liquid Glass row (#1307); the mark then takes `color` as a
+    /// tint on glass rather than a disc.
+    public var liquidGlass = true
+
     public init() {}
 }
 
@@ -42,6 +47,7 @@ extension StickyStyle: Codable {
         case mark
         case color
         case desktopReach = "desktop_reach"
+        case liquidGlass = "liquid_glass"
     }
 
     public init(from decoder: Decoder) throws {
@@ -64,5 +70,10 @@ extension StickyStyle: Codable {
                 Bool.self,
                 forKey: .desktopReach
             ) ?? defaults.desktopReach
+        liquidGlass =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .liquidGlass
+            ) ?? defaults.liquidGlass
     }
 }

@@ -6,9 +6,12 @@ public enum SpaceMark: Equatable {
     case text(String)
 }
 
-/// Visual plate displaying sticky indicator glyph and space pill (#414, #421).
+/// Visual plate displaying sticky indicator glyph and space pill
+/// (#414, #421). A clipping container: the `.hudWindow` backing or,
+/// under Liquid Glass, tinted glass (#1621, `+Glass`), with the
+/// glyphs in `content` above either.
 @MainActor
-final class StickyMarkPlate: NSVisualEffectView {
+final class StickyMarkPlate: NSView {
     /// Collapsed badge square dimension.
     static let size: CGFloat = 20
     /// Padding and gap metrics.
@@ -20,6 +23,18 @@ final class StickyMarkPlate: NSVisualEffectView {
     static let collapsedRadius: CGFloat = size / 4
     static let expandedRadius: CGFloat = size / 2
 
+    /// Today's backing; hidden while the mark is glass.
+    let hud = NSVisualEffectView()
+    /// The glyphs, hosted by the plate or by the glass (#1621).
+    let content = NSView()
+    /// The glass, hosted once asked for; nil below macOS 26.
+    var glass: NSView?
+    let tint = GlassBackdrop()
+    /// Whether the mark draws as glass (`setGlass`).
+    var isGlass = false
+    /// The stored colour, kept for the glass tint.
+    var markHex = ""
+
     let symbol = NSImageView()
     let name = NSTextField(labelWithString: "")
     /// Background disc behind mark glyph (#429).
@@ -28,7 +43,7 @@ final class StickyMarkPlate: NSVisualEffectView {
     static let roundelSize: CGFloat = 15
 
     /// Resolved tint color (#429).
-    private var markColor: NSColor = .labelColor
+    var markColor: NSColor = .labelColor
 
     init() {
         super.init(
@@ -40,10 +55,14 @@ final class StickyMarkPlate: NSVisualEffectView {
             )
         )
         wantsLayer = true
-        material = .hudWindow
-        state = .active
         layer?.cornerRadius = Self.collapsedRadius
         layer?.masksToBounds = true
+        hud.material = .hudWindow
+        hud.state = .active
+        for view in [hud, content, tint] as [NSView] {
+            view.frame = bounds
+            view.autoresizingMask = [.width, .height]
+        }
 
         symbol.symbolConfiguration =
             NSImage.SymbolConfiguration(
@@ -66,9 +85,11 @@ final class StickyMarkPlate: NSVisualEffectView {
         roundel.layer?.cornerRadius = Self.roundelSize / 2
         roundel.isHidden = true
 
-        addSubview(name)
-        addSubview(roundel)
-        addSubview(symbol)
+        addSubview(hud)
+        addSubview(content)
+        content.addSubview(name)
+        content.addSubview(roundel)
+        content.addSubview(symbol)
     }
 
     @available(*, unavailable)
@@ -76,6 +97,11 @@ final class StickyMarkPlate: NSVisualEffectView {
 
     /// Sets mark tint hex color and updates roundel appearance (#429).
     func setMarkColor(_ hex: String) {
+        markHex = hex
+        guard !isGlass else {
+            applyGlass()
+            return
+        }
         if hex.isEmpty {
             markColor = .labelColor
             roundel.isHidden = true

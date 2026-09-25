@@ -210,7 +210,7 @@ public enum APIReference {
             "set_drop_zone_border_color",
             "set_drop_zone_fill",
             "set_drop_zone_fill_color",
-            "set_corner_radius",
+            "set_corner_radius", "set_liquid_glass",
         ],
         "border": [
             "set_enabled", "set_width", "set_focused_color",
@@ -221,6 +221,7 @@ public enum APIReference {
         ],
         "sticky": [
             "set_mark", "set_color", "set_desktop_reach",
+            "set_liquid_glass",
         ],
         "floating": [
             "set_color"

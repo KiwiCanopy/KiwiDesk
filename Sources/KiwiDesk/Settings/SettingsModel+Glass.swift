@@ -1,11 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The one Liquid Glass switch, over the bars' shelf and the ⌃⌥K
-/// shortcuts panel (#1307, #1517, `SettingKey.masterWrites`).
+/// The one Liquid Glass switch, over the bars' shelf, the ⌃⌥K
+/// shortcuts panel, the drag markers and the sticky mark (#1307,
+/// #1517, #1620, #1621, `SettingKey.masterWrites`).
 extension SettingsModel {
-    /// On only when BOTH stored leaves carry glass; a flip writes
-    /// both. Owner ruling 2026-09-07: the switch means "all of
+    /// On only when EVERY stored leaf carries glass; a flip writes
+    /// them all. Owner ruling 2026-09-07: the switch means "all of
     /// them", so `off` stays a true statement while they
     /// disagree, and the `?` carries what a boolean cannot.
     var liquidGlassMaster: Binding<Bool> {
@@ -19,6 +20,8 @@ extension SettingsModel {
                 var next = self.config.settings
                 next.kiwishelf.liquidGlass = on
                 next.shortcutPanelLiquidGlass = on
+                next.dragLiquidGlass = on
+                next.stickyStyle.liquidGlass = on
                 self.config.settings = next
             }
         )
@@ -37,6 +40,8 @@ struct LiquidGlassAgreement {
         [
             settings.kiwishelf.liquidGlass,
             settings.shortcutPanelLiquidGlass,
+            settings.dragLiquidGlass,
+            settings.stickyStyle.liquidGlass,
         ]
     }
 

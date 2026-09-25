@@ -63,6 +63,7 @@ extension TilingSettings: Codable {
         case cornerRadius = "corner_radius"
         case dropZone = "drop_zone"
         case ghost
+        case liquidGlass = "liquid_glass"
     }
 
     enum GapKeys: String, CodingKey {
@@ -317,32 +318,5 @@ extension TilingSettings: Codable {
                 TrackParams.self,
                 forKey: .track
             ) ?? TrackParams()
-    }
-
-    private mutating func decodeDrag(
-        from container: Container
-    ) throws {
-        guard container.contains(.drag) else { return }
-        let drag = try container.nestedContainer(
-            keyedBy: DragKeys.self,
-            forKey: .drag
-        )
-        dragCornerRadius =
-            try drag.decodeIfPresent(
-                CGFloat.self,
-                forKey: .cornerRadius
-            ) ?? 16
-        if drag.contains(.ghost) {
-            dragGhost = try DragVisual(
-                from: drag.superDecoder(forKey: .ghost),
-                defaults: .ghostDefault
-            )
-        }
-        if drag.contains(.dropZone) {
-            dragDropZone = try DragVisual(
-                from: drag.superDecoder(forKey: .dropZone),
-                defaults: .dropZoneDefault
-            )
-        }
     }
 }

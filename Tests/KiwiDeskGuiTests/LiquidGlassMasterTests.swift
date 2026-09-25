@@ -34,14 +34,23 @@ struct LiquidGlassMasterTests {
         )
     }
 
+    /// Every stored leaf the master writes — the shelf, the panel,
+    /// the drag markers (#1620) and the sticky mark (#1621).
+    private static let leaves: [WritableKeyPath<TilingSettings, Bool>] =
+        [
+            \.kiwishelf.liquidGlass,
+            \.shortcutPanelLiquidGlass,
+            \.dragLiquidGlass,
+            \.stickyStyle.liquidGlass,
+        ]
+
     /// The shipped default, pinned ONCE (#1369): the migration's
     /// premise is that absence now means on, so a revert of the
     /// flip reds here and nowhere else.
     @Test("the shipped default is on")
     func shippedDefaultIsOn() {
         let settings = TilingSettings()
-        #expect(settings.kiwishelf.liquidGlass)
-        #expect(settings.shortcutPanelLiquidGlass)
+        for leaf in Self.leaves { #expect(settings[keyPath: leaf]) }
     }
 
     @Test("the master writes every surface")
@@ -51,12 +60,14 @@ struct LiquidGlassMasterTests {
             // Seed the OPPOSITE first, or the `false` pass
             // starts where it means to end and a setter that
             // writes nothing passes it.
-            model.config.settings.kiwishelf.liquidGlass = !on
-            model.config.settings.shortcutPanelLiquidGlass = !on
+            for leaf in Self.leaves {
+                model.config.settings[keyPath: leaf] = !on
+            }
             model.liquidGlassMaster.wrappedValue = on
             let settings = model.config.settings
-            #expect(settings.kiwishelf.liquidGlass == on)
-            #expect(settings.shortcutPanelLiquidGlass == on)
+            for leaf in Self.leaves {
+                #expect(settings[keyPath: leaf] == on, "\(leaf)")
+            }
         }
     }
 
@@ -65,14 +76,21 @@ struct LiquidGlassMasterTests {
     /// a master that reads one of them.
     @Test("the master shows on only when every leaf is on")
     func masterShowsEveryLeaf() {
-        let model = makeTestModel()
-        model.liquidGlassMaster.wrappedValue = true
-        #expect(model.liquidGlassMaster.wrappedValue)
-        model.config.settings.shortcutPanelLiquidGlass = false
-        #expect(model.liquidGlassMaster.wrappedValue == false)
-        model.config.settings.shortcutPanelLiquidGlass = true
-        model.config.settings.kiwishelf.liquidGlass = false
-        #expect(model.liquidGlassMaster.wrappedValue == false)
+        for leaf in Self.leaves {
+            let model = makeTestModel()
+            model.liquidGlassMaster.wrappedValue = true
+            #expect(model.liquidGlassMaster.wrappedValue)
+            model.config.settings[keyPath: leaf] = false
+            #expect(
+                model.liquidGlassMaster.wrappedValue == false,
+                "\(leaf)"
+            )
+            #expect(
+                LiquidGlassAgreement(settings: model.config.settings)
+                    .differ,
+                "\(leaf)"
+            )
+        }
     }
 
     /// The `?` predicate, at both its answers — and it is the

@@ -15,6 +15,14 @@ extension KiwiCore {
             tiler.settings.dragCornerRadius = max(0, radius)
             return .ok()
         }
+        if command == "drag.set_liquid_glass" {
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            // Read when a marker shows, so no retile (#1620).
+            tiler.settings.dragLiquidGlass = on
+            return .ok()
+        }
         let prefix = "drag.set_"
         guard command.hasPrefix(prefix) else {
             return .fail("unknown command: \(command)")
