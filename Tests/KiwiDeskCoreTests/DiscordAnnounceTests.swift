@@ -105,10 +105,13 @@ struct DiscordAnnounceTests {
     }
 
     /// Past the embed limit the post ends on a whole section and a
-    /// pointer to the full notes, never a cut sentence.
+    /// line naming the cut sections with their counts and pointing
+    /// at the full notes, never a cut sentence.
     @Test("a long body is cut at a section boundary")
     func longBodyCutAtSection() throws {
-        let bullet = "- **A change** " + String(repeating: "word ", count: 60)
+        // One section fits with room for the naming pointer; the
+        // next does not, so the cut lands after it.
+        let bullet = "- **A change** " + String(repeating: "word ", count: 50)
         let section = (1...12).map { _ in bullet }.joined(separator: "\n")
         let body = """
             ## Highlights
@@ -131,9 +134,18 @@ struct DiscordAnnounceTests {
         #expect(result.status == 0, "\(result.stderr)")
         let text = try #require(try embed(result)["description"] as? String)
         #expect(text.count <= 4096)
-        #expect(text.hasSuffix("Full notes: \(Self.url)"))
         #expect(text.contains("**New · 12**"))
         #expect(!text.contains("**Fixed · 12**"))
+        // The closing line names exactly what was cut, with counts,
+        // so a reader knows what is behind the link.
+        let last = try #require(text.components(separatedBy: "\n\n").last)
+        #expect(last.hasPrefix("**Also in this release:** "))
+        #expect(last.hasSuffix("— full notes: \(Self.url)"))
+        #expect(last.contains("Fixed 12"))
+        for shownSection in ["New", "Improved"]
+        where text.contains("**\(shownSection) · 12**") {
+            #expect(!last.contains("\(shownSection) 12"))
+        }
         // Whole sections only: every bullet shown is complete.
         let shown = text.components(separatedBy: "- **A change**").count - 1
         #expect(shown % 12 == 0)
