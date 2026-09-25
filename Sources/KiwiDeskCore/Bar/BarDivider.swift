@@ -12,12 +12,12 @@ public enum BarDivider {
     /// The shelf's section divider alpha: above the rule, below
     /// idle ink, so the boundary between two bars outranks a
     /// detail inside one item without reading as an item.
-    public static let sectionAlpha: CGFloat = 0.5
+    static let sectionAlpha: CGFloat = 0.5
 
     /// Width of front-app section break divider — heavier than
     /// the 1 pt in-chip rule so the boundary reads as a bigger
     /// separation (QA 2026-07-19).
-    public static let sectionThickness: CGFloat = 2
+    static let sectionThickness: CGFloat = 2
 
     /// The divider ladder's lengths, as a share of the depth
     /// (#1517, ui-designer): the rule inside a Space item is the
@@ -26,12 +26,29 @@ public enum BarDivider {
     /// (`ShelfDividerWeightTests`). Never full depth — a full-height
     /// line splits the plate it stands on.
     static let ruleLengthShare: CGFloat = 0.5
-    public static let sectionLengthShare: CGFloat = 0.7
+    static let sectionLengthShare: CGFloat = 0.7
 
     /// The shelf's section divider colour (#1517).
-    static func sectionColor(textColor: String) -> NSColor {
+    public static func sectionColor(textColor: String) -> NSColor {
         NSColor(kiwiHex: textColor)
             .withAlphaComponent(sectionAlpha)
+    }
+
+    /// The shelf's section divider centred on `middle` along the
+    /// edge, at the section break's weight — the live shelf's and
+    /// the Settings preview's one geometry (#1517).
+    public static func sectionFrame(
+        at middle: CGFloat,
+        depth: CGFloat,
+        horizontal: Bool
+    ) -> CGRect {
+        frame(
+            at: middle - sectionThickness / 2,
+            depth: depth,
+            horizontal: horizontal,
+            thickness: sectionThickness,
+            lengthShare: sectionLengthShare
+        )
     }
 
     /// The rule's and the breaks' colour.

@@ -48,21 +48,45 @@ struct ShelfStripPreview: View {
     /// the gutter is the preview's strip spacing, and the Space
     /// section's floor is the engine's, for the active Space.
     func arrangement(length: CGFloat) -> ShelfArrangement {
-        var scaled = shelf
-        scaled.itemGap = gutter
-        return ShelfArrangement.arrange(
-            length: length,
-            spaceNeed: space.map(need),
-            appNeed: app.map(need),
+        let u = unit
+        var live = shelf
+        live.itemGap = gutter / u
+        let placed = ShelfArrangement.arrange(
+            length: length / u,
+            spaceNeed: space.map { need($0) / u },
+            appNeed: app.map { need($0) / u },
             spaceFloor: space.map {
                 ShelfArrangement.hardFloor(
-                    activeExtent: $0.items.first?.length ?? 0,
-                    thickness: thickness,
-                    gap: $0.gap
+                    activeExtent: ($0.items.first?.length ?? 0) / u,
+                    thickness: shelf.thickness,
+                    gap: $0.gap / u
                 )
             } ?? 0,
-            shelf: scaled
+            shelf: live
         )
+        return ShelfArrangement(
+            space: placed.space.map { scaled($0, by: u) },
+            app: placed.app.map { scaled($0, by: u) },
+            divider: placed.divider
+        )
+    }
+
+    /// Preview units per real point: the drawn thickness against
+    /// the shelf's own, so Core's point-valued rules — the fade's
+    /// bounds, the hard floor — apply at the scale they are for.
+    var unit: CGFloat {
+        shelf.thickness > 0 && thickness > 0
+            ? thickness / shelf.thickness : 1
+    }
+
+    private func scaled(
+        _ slot: ShelfArrangement.Slot,
+        by u: CGFloat
+    ) -> ShelfArrangement.Slot {
+        var slot = slot
+        slot.offset *= u
+        slot.length *= u
+        return slot
     }
 
     private func need(_ spec: HomeCardBarsTile.BarSpec) -> CGFloat {
@@ -95,25 +119,21 @@ struct ShelfStripPreview: View {
         need(spec) > slot.length + 0.5
     }
 
-    /// The one plate's span along the edge: none while every item
-    /// draws its own box, the whole strip under Full, else the
-    /// union of the runs.
+    /// The one plate's span along the edge: Core's
+    /// `ShelfArrangement.plateSpan` over the runs.
     func plateSpan(
         _ placed: ShelfArrangement,
         length: CGFloat
     ) -> ClosedRange<CGFloat>? {
-        let runs = [
-            space.flatMap { spec in placed.space.map { run(spec, in: $0) } },
-            app.flatMap { spec in placed.app.map { run(spec, in: $0) } },
-        ].compactMap { $0 }
-        guard shelf.drawsPlate, let first = runs.first else { return nil }
-        if shelf.plateSpans { return 0...length }
-        return runs.dropFirst().reduce(first) {
-            min(
-                $0.lowerBound,
-                $1.lowerBound
-            )...max($0.upperBound, $1.upperBound)
-        }
+        ShelfArrangement.plateSpan(
+            asks: [
+                space.flatMap { spec in placed.space.map { run(spec, in: $0) }
+                },
+                app.flatMap { spec in placed.app.map { run(spec, in: $0) } },
+            ].compactMap { $0 },
+            length: length,
+            shelf: shelf
+        )
     }
 
     @ViewBuilder
@@ -189,7 +209,10 @@ struct ShelfStripPreview: View {
     private func fade(_ hidden: CGFloat, along length: CGFloat) -> some View {
         let fade =
             hidden > 0
-            ? ShelfOverflow.fadeLength(thickness: thickness, visible: length)
+            ? ShelfOverflow.fadeLength(
+                thickness: shelf.thickness,
+                visible: length / unit
+            ) * unit
             : 0
         let stop = length > 0 ? max(1 - fade / length, 0) : 1
         return LinearGradient(
@@ -203,30 +226,26 @@ struct ShelfStripPreview: View {
         )
     }
 
-    /// The section divider, centred in the gutter between two
-    /// bars, at the live divider's share of the depth and alpha.
+    /// The section divider: Core's geometry and colour, centred
+    /// in the gutter between two bars.
     @ViewBuilder
     private func divider(_ placed: ShelfArrangement) -> some View {
-        if let first = [placed.space, placed.app].compactMap({ $0 })
-            .min(by: { $0.offset < $1.offset }),
-            placed.space != nil, placed.app != nil
-        {
-            let middle = first.offset + first.length + gutter / 2
-            let width = BarDivider.sectionThickness
-            let span = thickness * BarDivider.sectionLengthShare
+        if let middle = placed.dividerMiddle {
+            let frame = BarDivider.sectionFrame(
+                at: middle,
+                depth: thickness,
+                horizontal: !vertical
+            )
             Capsule()
                 .fill(
-                    Color(kiwiHex: shelf.itemColor)
-                        .opacity(BarDivider.sectionAlpha)
+                    Color(
+                        nsColor: BarDivider.sectionColor(
+                            textColor: shelf.itemColor
+                        )
+                    )
                 )
-                .frame(
-                    width: vertical ? span : width,
-                    height: vertical ? width : span
-                )
-                .offset(
-                    x: vertical ? (thickness - span) / 2 : middle - width / 2,
-                    y: vertical ? middle - width / 2 : (thickness - span) / 2
-                )
+                .frame(width: frame.width, height: frame.height)
+                .offset(x: frame.minX, y: frame.minY)
         }
     }
 }

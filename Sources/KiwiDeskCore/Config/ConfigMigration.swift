@@ -68,10 +68,9 @@ public enum ConfigMigration {
     /// Whether `data`'s stamp is below the floor a step introduced
     /// for its shape — a bundle's `bundle`, any other root's
     /// `file` (a profile's, or `palettes.json`'s). A `gui.json`
-    /// root reads the profile floor, which is harmless only while
-    /// no format-gated step reaches it: each gates on `settings`,
-    /// which a `gui.json` never carries. An unreadable root stands
-    /// down.
+    /// root reads the same `file` floor, so a step asking this
+    /// must also gate on a key `gui.json` never carries
+    /// (`settings`, `palettes`). An unreadable root stands down.
     static func stampBelow(
         _ data: Data,
         file: Int,

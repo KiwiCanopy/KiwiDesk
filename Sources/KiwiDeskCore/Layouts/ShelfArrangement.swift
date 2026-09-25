@@ -44,6 +44,16 @@ public struct ShelfArrangement: Equatable, Sendable {
     /// Set only while both bars need more than the edge holds.
     public var divider: Divider?
 
+    /// The middle of the gutter between two bars, along the edge;
+    /// nil unless both show.
+    public var dividerMiddle: CGFloat? {
+        guard let space, let app else { return nil }
+        let (first, second) =
+            space.offset < app.offset
+            ? (space, app) : (app, space)
+        return (first.offset + first.length + second.offset) / 2
+    }
+
     public init(
         space: Slot? = nil,
         app: Slot? = nil,
@@ -112,6 +122,7 @@ public struct ShelfArrangement: Equatable, Sendable {
                 ? Divider(
                     room: room,
                     spaceLength: spaceLength,
+                    minimumLength: minimum,
                     bounds: bounds,
                     spacesFirst: spacesFirst
                 )

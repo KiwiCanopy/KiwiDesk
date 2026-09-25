@@ -76,7 +76,15 @@ final class ShelfOverlay {
                 animated: glides
             )
         }
-        layoutHandle(range: range, horizontal: horizontal)
+        layoutHandle(
+            range: range,
+            divider: Self.dividerFrame(
+                slots: sections.map(\.slot),
+                strip: strip,
+                horizontal: horizontal
+            ),
+            horizontal: horizontal
+        )
         panel.setFrame(
             GeometryUtils.flip(
                 strip,
@@ -93,19 +101,22 @@ final class ShelfOverlay {
 
     /// Lays the grip over the divider line while the shelf is
     /// full (`range`); otherwise the line is plain, with no hover.
+    /// Placed at the line's TARGET frame — the line itself may be
+    /// mid-glide, reporting where it was.
     private func layoutHandle(
         range: ShelfArrangement.Divider?,
+        divider target: CGRect?,
         horizontal: Bool
     ) {
         handle.range = range
         handle.horizontal = horizontal
-        guard range != nil, !divider.isHidden else {
+        guard range != nil, let target else {
             handle.isHidden = true
             return
         }
         handle.isHidden = false
         handle.frame = Self.handleFrame(
-            divider: divider.frame,
+            divider: target,
             depth: horizontal
                 ? stripView.bounds.height : stripView.bounds.width,
             horizontal: horizontal
@@ -135,27 +146,44 @@ final class ShelfOverlay {
             )
     }
 
-    /// The one plate under both sections, in strip coordinates:
-    /// none while every item draws its own box, the whole strip
-    /// under Full, else the union of what each section's run
-    /// asks for — one joined plate.
+    /// The one plate under both sections, in strip coordinates,
+    /// the shelf's whole depth over `ShelfArrangement.plateSpan`
+    /// of what each section's run asks for.
     nonisolated static func plateFrame(
         sections: [Section],
         strip: CGRect,
         shelf: KiwiShelf
     ) -> CGRect? {
-        guard shelf.drawsPlate else { return nil }
-        let bounds = CGRect(origin: .zero, size: strip.size)
-        guard !shelf.plateSpans else { return bounds }
-        let asks = sections.compactMap { section -> CGRect? in
+        let horizontal = shelf.edge.isHorizontal
+        let asks = sections.compactMap { section -> ClosedRange<CGFloat>? in
             guard !section.plate.isEmpty else { return nil }
-            return section.plate.offsetBy(
+            let ask = section.plate.offsetBy(
                 dx: section.slot.minX - strip.minX,
                 dy: section.slot.minY - strip.minY
             )
+            return horizontal ? ask.minX...ask.maxX : ask.minY...ask.maxY
         }
-        guard let first = asks.first else { return nil }
-        return asks.dropFirst().reduce(first) { $0.union($1) }
+        guard
+            let span = ShelfArrangement.plateSpan(
+                asks: asks,
+                length: horizontal ? strip.width : strip.height,
+                shelf: shelf
+            )
+        else { return nil }
+        let extent = span.upperBound - span.lowerBound
+        return horizontal
+            ? CGRect(
+                x: span.lowerBound,
+                y: 0,
+                width: extent,
+                height: strip.height
+            )
+            : CGRect(
+                x: 0,
+                y: span.lowerBound,
+                width: strip.width,
+                height: extent
+            )
     }
 
     /// Adds each section's view once and sets its origin; a view

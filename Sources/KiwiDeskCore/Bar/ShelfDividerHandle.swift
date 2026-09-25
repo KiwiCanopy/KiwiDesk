@@ -21,6 +21,8 @@ final class ShelfDividerHandle: NSView {
 
     private var dragStart: CGPoint?
     private var dragRange: ShelfArrangement.Divider?
+    /// Whether the press has moved: a click commits nothing.
+    private var moved = false
 
     override var isFlipped: Bool { true }
 
@@ -64,16 +66,24 @@ final class ShelfDividerHandle: NSView {
         }
         dragStart = event.locationInWindow
         dragRange = range
+        moved = false
     }
 
     override func mouseDragged(with event: NSEvent) {
+        moved = true
         report(event, committed: false)
     }
 
     override func mouseUp(with event: NSEvent) {
-        report(event, committed: true)
+        if moved { report(event, committed: true) }
+        // A release off the grip gets no `mouseExited` to restore
+        // the cursor.
+        if !bounds.contains(convert(event.locationInWindow, from: nil)) {
+            NSCursor.arrow.set()
+        }
         dragStart = nil
         dragRange = nil
+        moved = false
     }
 
     /// The drag's travel along the shelf, measured from where it
@@ -85,6 +95,9 @@ final class ShelfDividerHandle: NSView {
         // Window coordinates grow upward; the shelf's run grows
         // downward on a vertical edge.
         let delta = horizontal ? now.x - start.x : start.y - now.y
-        onMinimum(range.minimum(afterDragging: delta), committed)
+        guard let minimum = range.minimum(afterDragging: delta) else {
+            return
+        }
+        onMinimum(minimum, committed)
     }
 }

@@ -111,11 +111,16 @@ struct ShelfStripPreviewTests {
         let preview = Self.preview(spaces: 30, windows: 40, shelf: shelf)
         let placed = preview.arrangement(length: 300)
         let space = try #require(placed.space)
-        let floor = ShelfArrangement.hardFloor(
-            activeExtent: 22,
-            thickness: 25,
-            gap: 5
-        )
+        // Core's floor is in points; the preview draws it at its
+        // own scale.
+        let unit = preview.unit
+        #expect(unit == 25 / shelf.thickness)
+        let floor =
+            ShelfArrangement.hardFloor(
+                activeExtent: 22 / unit,
+                thickness: shelf.thickness,
+                gap: 5 / unit
+            ) * unit
         #expect(space.length >= floor - 0.01)
     }
 }

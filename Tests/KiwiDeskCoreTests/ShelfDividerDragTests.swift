@@ -62,11 +62,32 @@ struct ShelfDividerDragTests {
         let divider = try #require(full().divider)
         // Past the Space Bar's need (700 of 1000).
         #expect(divider.minimum(afterDragging: 900) == 70)
-        // Below the hard floor (100) → then the range's 20 %.
-        #expect(divider.minimum(afterDragging: -900) == 20)
-        var narrow = divider
-        narrow.bounds = 100...950
-        #expect(narrow.minimum(afterDragging: 900) == 80)
+        // Below the hard floor (100): the raw share; the setting's
+        // own clamp takes it to 20 % (managerWritesTheSetting).
+        #expect(divider.minimum(afterDragging: -900) == 10)
+    }
+
+    /// A short App Bar holds the divider past the minimum: the
+    /// Space section draws `room − appNeed`, not the floor. A drag
+    /// that cannot move the line leaves the minimum as configured;
+    /// one that lengthens the Space section writes where it lands.
+    @Test("Where the App Bar's need holds the line, the minimum stays")
+    func heldLineKeepsTheMinimum() throws {
+        var shelf = KiwiShelf()
+        shelf.itemGap = 0
+        let placed = ShelfArrangement.arrange(
+            length: 1000,
+            spaceNeed: 1200,
+            appNeed: 200,
+            spaceFloor: 100,
+            shelf: shelf
+        )
+        let divider = try #require(placed.divider)
+        #expect(divider.spaceLength == 800)
+        #expect(divider.minimumLength == 300)
+        #expect(divider.minimum(afterDragging: 0) == 30)
+        #expect(divider.minimum(afterDragging: -50) == 30)
+        #expect(divider.minimum(afterDragging: 50) == 85)
     }
 
     private func mouse(
@@ -107,6 +128,40 @@ struct ShelfDividerDragTests {
         // A drag after a reset needs a fresh press.
         handle.mouseUp(with: try mouse(.leftMouseUp, x: 500))
         #expect(reports.count == 2)
+        // A click that never moves commits nothing.
+        handle.mouseDown(with: try mouse(.leftMouseDown, x: 400))
+        handle.mouseUp(with: try mouse(.leftMouseUp, x: 400))
+        #expect(reports.count == 2)
+    }
+
+    /// On a vertical shelf the run grows downward while window
+    /// coordinates grow upward: dragging down lengthens a leading
+    /// Space section.
+    @Test("A vertical grip grows the Space section downward")
+    func verticalGrip() throws {
+        let handle = ShelfDividerHandle()
+        handle.horizontal = false
+        handle.range = try #require(full().divider)
+        var reports: [CGFloat] = []
+        handle.onMinimum = { value, _ in reports.append(value) }
+        let at = { (y: CGFloat, type: NSEvent.EventType) in
+            try #require(
+                NSEvent.mouseEvent(
+                    with: type,
+                    location: CGPoint(x: 10, y: y),
+                    modifierFlags: [],
+                    timestamp: 0,
+                    windowNumber: 0,
+                    context: nil,
+                    eventNumber: 0,
+                    clickCount: 1,
+                    pressure: 1
+                )
+            )
+        }
+        handle.mouseDown(with: try at(500, .leftMouseDown))
+        handle.mouseDragged(with: try at(400, .leftMouseDragged))
+        #expect(reports == [40])
     }
 
     @Test("The grip shows over the line only while the shelf is full")
@@ -180,6 +235,9 @@ struct ShelfDividerDragTests {
         #expect(core.tiler.settings.kiwishelf.minimum == 45)
         core.shelves.onMinimum(55, true)
         #expect(core.tiler.settings.kiwishelf.minimum == 55)
+        // The setting's own clamp: a raw share past the range.
+        core.shelves.onMinimum(10, true)
+        #expect(core.tiler.settings.kiwishelf.minimum == 20)
         core.shelves.onMinimum(KiwiShelf.resetMinimum, true)
         #expect(core.tiler.settings.kiwishelf.minimum == 30)
     }

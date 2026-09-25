@@ -102,12 +102,10 @@ extension ShelfOverlay {
             horizontal
             ? (ordered[0].maxX + ordered[1].minX) / 2 - strip.minX
             : (ordered[0].maxY + ordered[1].minY) / 2 - strip.minY
-        return BarDivider.frame(
-            at: middle - BarDivider.sectionThickness / 2,
+        return BarDivider.sectionFrame(
+            at: middle,
             depth: horizontal ? strip.height : strip.width,
-            horizontal: horizontal,
-            thickness: BarDivider.sectionThickness,
-            lengthShare: BarDivider.sectionLengthShare
+            horizontal: horizontal
         )
     }
 
