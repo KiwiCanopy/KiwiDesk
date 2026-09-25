@@ -106,7 +106,11 @@ struct StickyMarkSteadySyncTests {
         let stale = CGRect(x: 5, y: 5, width: 400, height: 300)
         let tick = CGRect(x: 200, y: 200, width: 400, height: 300)
         marks.sync([
-            StickyMarkManager.Spec(window: WindowID(1), frame: start)
+            StickyMarkManager.Spec(
+                window: WindowID(1),
+                frame: start,
+                glass: false
+            )
         ])
         marks.isAnimating = { _ in true }
         marks.follow(
@@ -117,12 +121,20 @@ struct StickyMarkSteadySyncTests {
         )
         #expect(marks.lastFrame(WindowID(1)) == tick)
         marks.sync([
-            StickyMarkManager.Spec(window: WindowID(1), frame: stale)
+            StickyMarkManager.Spec(
+                window: WindowID(1),
+                frame: stale,
+                glass: false
+            )
         ])
         #expect(marks.lastFrame(WindowID(1)) == tick)
         marks.isAnimating = { _ in false }
         marks.sync([
-            StickyMarkManager.Spec(window: WindowID(1), frame: stale)
+            StickyMarkManager.Spec(
+                window: WindowID(1),
+                frame: stale,
+                glass: false
+            )
         ])
         #expect(marks.lastFrame(WindowID(1)) == stale)
     }
@@ -133,7 +145,11 @@ struct StickyMarkSteadySyncTests {
         let start = CGRect(x: 0, y: 0, width: 400, height: 300)
         let stale = CGRect(x: 5, y: 5, width: 400, height: 300)
         marks.sync([
-            StickyMarkManager.Spec(window: WindowID(1), frame: start)
+            StickyMarkManager.Spec(
+                window: WindowID(1),
+                frame: start,
+                glass: false
+            )
         ])
         // The one live guard against a plausible future
         // "harmonization": making `sync` also stand down while
@@ -156,7 +172,11 @@ struct StickyMarkSteadySyncTests {
         marks.isWindowServerTracked = { _ in true }
         marks.isAnimating = { _ in false }
         marks.sync([
-            StickyMarkManager.Spec(window: WindowID(1), frame: stale)
+            StickyMarkManager.Spec(
+                window: WindowID(1),
+                frame: stale,
+                glass: false
+            )
         ])
         #expect(marks.lastFrame(WindowID(1)) == stale)
     }

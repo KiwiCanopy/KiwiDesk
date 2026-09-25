@@ -125,7 +125,7 @@ struct ReduceTransparencySeamTests {
     /// a handler that skipped it leaves the bars on stale glass
     /// until their next unrelated retile. Named, so
     /// `ReduceTransparencyTests` drives it.
-    @Test("the handler re-renders both bars")
+    @Test("the handler re-renders both bars and the sticky marks")
     func handlerRerendersBothBars() throws {
         let source = try SourceScan.strippedSource(
             at: Self.core.appendingPathComponent(
@@ -139,7 +139,7 @@ struct ReduceTransparencySeamTests {
             ),
             "the handler is gone"
         )
-        for update in ["updateBars()"] {
+        for update in ["updateBars()", "updateStickyMarks()"] {
             #expect(
                 handler.contains(update),
                 Comment(rawValue: "the handler skips \(update)")

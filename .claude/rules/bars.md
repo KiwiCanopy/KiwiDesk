@@ -25,6 +25,14 @@ paths:
   - "Sources/KiwiDeskCore/Layouts/AppBarStyle*.swift"
   - "Sources/KiwiDeskCore/Layouts/LayoutAppBar*.swift"
   - "Sources/KiwiDeskCore/Commands/Reference/APIReference+Retired.swift"
+  # Glass hosts outside Bar/ (#1620, #1621): they take their tint
+  # through GlassTint.apply and their stand-down through the gate,
+  # whose obligations live here.
+  - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
+  - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
+  # ...and the two sites that decide their glass through the gate.
+  - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)
@@ -144,7 +152,18 @@ render content into it (#1517). Obligations:
   `shelfPlateTakesTheGate`). The plate reaches no
   `GlassHosting.resolve(`, so the derived roster in the
   Reduce-transparency obligation below cannot see it — this suite
-  is its only net.
+  holds its gate. **Every Core glass host names the suite that
+  gates it** in `OverlayGlassGateTests` ▸ `everyGlassHostIsGated`,
+  derived from `GlassPlate.make(` callers — the one copy of who
+  hosts glass, so a new host reds until it has a gate. The drag
+  markers and the sticky mark host
+  glass the same way and take the same rule where each is
+  rendered — `handleDragMove` when a marker shows,
+  `updateStickyMarks`, which the flip re-runs — handing the gate
+  the stored leaf once (`OverlayGlassGateTests` ▸
+  `overlaysTakeTheGate`, `OverlayGlassTests` ▸ `gateStandsDown`).
+  Their stood-down look is their flat one, not made opaque
+  (`docs/design-decisions.md` ▸ Reduce transparency).
 - **Every rule a bar draws takes its geometry and ink from
   `BarDivider`** — the in-item rule, the layer and front-app
   breaks and the section divider: the boundary between two bars
@@ -393,7 +412,9 @@ Obligations:
   its ORDER half is `GlassTintOrderTests`' index pin; its
   no-reparent half has no counting clause — stated, fails OPEN.
 - **Build the fade in `GlassTint.apply`, from an edge every call
-  site hands it — never a default** (#1622). The
+  site hands it — never a default** (#1622). A surface on no
+  screen edge — the drag markers, the sticky mark — hands `.top`
+  by ruling, a fade downward (#1620, #1621). The
   backdrop is a `GlassBackdrop`, whose BACKING layer is the
   gradient so it rides the plate glide; a sublayer would jump to
   the final size. A call site that dropped the shelf's edge
@@ -401,7 +422,18 @@ Obligations:
   fixture on another edge can see (`GlassTintFadeTests`,
   `GlassTintCensusTests` ▸ `applyTakesAFillNotAColour`), and the
   backdrop paints nothing of its own (`GlassTintCensusTests` ▸
-  `backdropPaintsNothing`).
+  `backdropPaintsNothing`). An EMPTY Fill is no colour there —
+  clear glass, nothing pinned — which the drag marker's fill-off
+  and the sticky mark's Automatic both hand it
+  (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
+- **A glass surface is thinned only by a ruling, and only on its
+  own view's opacity.** Both drag markers' glass sits at
+  `DragOverlay.glassOpacity` so the window a drop swaps with stays
+  readable (owner, device 2026-09-25); there the
+  `maxAlpha` premise — a floor on how much refraction survives —
+  does not hold, by that ruling. A second thinned surface argues
+  its own entry in `docs/design-decisions.md` first
+  (`OverlayGlassTests` ▸ `markerGlassIsThinned`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

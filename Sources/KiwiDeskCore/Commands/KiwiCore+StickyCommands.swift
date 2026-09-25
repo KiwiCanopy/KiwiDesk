@@ -40,6 +40,12 @@ extension KiwiCore {
             return setMarkColor(args) {
                 tiler.settings.stickyStyle.color = $0
             }
+        case "liquid_glass":
+            guard let flag = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.stickyStyle.liquidGlass = flag
+            return .ok()
         default:
             return .fail("unknown command: \(command)")
         }

@@ -51,6 +51,14 @@ enum LiquidGlassGate {
         return copy
     }
 
+    /// A surface's stored glass leaf as drawn — the drag markers'
+    /// and the sticky mark's (#1620/#1621): off while transparency
+    /// is reduced, their flat look keeping its stored fill, never
+    /// made opaque (design-decisions ▸ Reduce transparency).
+    static func rendered(glass stored: Bool) -> Bool {
+        stored && drawsGlass
+    }
+
     /// A Fill at full alpha, keeping its hue. A fully transparent
     /// Fill stays so: it asked for no plate, and none is opaque.
     static func opaque(_ hex: String) -> String {

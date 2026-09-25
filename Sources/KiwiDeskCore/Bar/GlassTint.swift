@@ -3,7 +3,8 @@ import AppKit
 /// Colored backdrop behind Liquid Glass surfaces (`NSGlassEffectView`,
 /// #408), and the one place a stored Fill becomes a rendered colour on
 /// glass (#1297) — a fade from the shelf's screen edge toward the
-/// windows (#1622).
+/// windows (#1622), or downward on a surface on no edge (#1620,
+/// #1621).
 enum GlassTint {
     /// Ceiling on the backdrop's alpha at the fade's ANCHOR edge
     /// — a floor on how much refraction survives, not a legibility
@@ -65,7 +66,9 @@ enum GlassTint {
         // The one drawing authority, not a second `#available`
         // beside it: nothing here touches a macOS 26 API, so the
         // check is policy rather than the compiler's (#1374).
-        guard LiquidGlassGate.drawsGlass else { return nil }
+        guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
+            return nil
+        }
         let fill = NSColor(kiwiHex: hex)
         guard fill.alphaComponent > 0 else { return nil }
         let anchor = min(fill.alphaComponent, maxAlpha)
@@ -76,7 +79,8 @@ enum GlassTint {
     }
 
     /// The fade's direction in the layer's unit space (y up):
-    /// from the shelf's screen `edge` toward the windows.
+    /// from the shelf's screen `edge` toward the windows; `.top`
+    /// is downward, a surface on no edge's by ruling (#1620).
     nonisolated static func fade(
         from edge: AppBarEdge
     ) -> (start: CGPoint, end: CGPoint) {
@@ -100,7 +104,9 @@ enum GlassTint {
     private static func pinnedAppearance(
         _ hex: String
     ) -> NSAppearance? {
-        guard LiquidGlassGate.drawsGlass else { return nil }
+        guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
+            return nil
+        }
         let fill = NSColor(kiwiHex: hex)
         guard fill.alphaComponent > 0, fill.wantsLightInk else {
             return nil
@@ -124,11 +130,14 @@ enum GlassTint {
     }
 
     /// Positions and colors the backdrop beneath the target glass,
-    /// fading from `edge` — the shelf's screen edge — toward the
-    /// windows (#1622), hiding it where the Fill reaches no colour,
+    /// fading from `edge` — the shelf's screen edge, or `.top` for
+    /// a surface on none (#1620, #1621) — toward the windows
+    /// (#1622), hiding it where the Fill reaches no colour,
     /// and pins the glass's variant from the same Fill (#1308). It
     /// takes the Fill rather than a colour so the cap cannot be
     /// walked around at a call site (#1297).
+    /// An EMPTY Fill is no colour — clear glass, nothing pinned —
+    /// while any other string resolves through `NSColor(kiwiHex:)`.
     @MainActor
     static func apply(
         _ backdrop: GlassBackdrop,

@@ -177,44 +177,12 @@ extension ConfigMigration {
             let leaf = group == glassPanelGroup ? value : "false"
             return "\"\(group)\":{\"\(glassLeafKey)\":\(leaf)}"
         }.joined(separator: ",")
-        out = insertingAfterSettingsOpeners(entries, in: out)
+        out = insertingAfterEach(
+            entries,
+            pattern: "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)(\\s*\\})?",
+            in: out
+        )
         return out == text ? nil : out.data(using: .utf8)
     }
 
-    /// One pass over every `settings` opener, back to front so the
-    /// ranges stay valid: an empty object takes `entries` alone, a
-    /// populated one takes them ahead of what it holds.
-    private static func insertingAfterSettingsOpeners(
-        _ entries: String,
-        in text: String
-    ) -> String {
-        let pattern = "(\"\(glassSettingsKey)\"\\s*:\\s*\\{)(\\s*\\})?"
-        guard let regex = try? NSRegularExpression(pattern: pattern)
-        else { return text }
-        var out = text
-        let whole = NSRange(text.startIndex..., in: text)
-        for match in regex.matches(in: text, range: whole).reversed() {
-            guard let opener = Range(match.range(at: 1), in: out),
-                let full = Range(match.range, in: out)
-            else { continue }
-            let empty = match.range(at: 2).location != NSNotFound
-            let replacement =
-                out[opener] + entries + (empty ? "}" : ",")
-            out.replaceSubrange(full, with: replacement)
-        }
-        return out
-    }
-
-    /// Every first capture of `pattern` in `text`.
-    private static func captures(
-        _ pattern: String,
-        in text: String
-    ) -> [String] {
-        guard let regex = try? NSRegularExpression(pattern: pattern)
-        else { return [] }
-        let whole = NSRange(text.startIndex..., in: text)
-        return regex.matches(in: text, range: whole).compactMap {
-            Range($0.range(at: 1), in: text).map { String(text[$0]) }
-        }
-    }
 }

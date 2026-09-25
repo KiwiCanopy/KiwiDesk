@@ -75,9 +75,11 @@ struct SettingsCodingTests {
         let sticky = try object(root["sticky"])
         #expect(
             Set(sticky.keys)
-                == ["mark", "color", "desktop_reach"]
+                == ["mark", "color", "desktop_reach", "liquid_glass"]
         )
         #expect(sticky["mark"] as? Bool == true)
+        // `sticky.set_liquid_glass` (#1621), on by default.
+        #expect(sticky["liquid_glass"] as? Bool == true)
         #expect(sticky["color"] as? String == "")
         // `sticky.set_desktop_reach` → `sticky.desktop_reach`
         // (#1145); default ON — the sticky promise spans
@@ -218,9 +220,11 @@ struct SettingsCodingTests {
         let drag = try object(root["drag"])
         #expect(
             Set(drag.keys) == [
-                "corner_radius", "drop_zone", "ghost",
+                "corner_radius", "drop_zone", "ghost", "liquid_glass",
             ]
         )
+        // `drag.set_liquid_glass` (#1620), on by default.
+        #expect(drag["liquid_glass"] as? Bool == true)
         let ghost = try object(drag["ghost"])
         #expect(
             Set(ghost.keys) == [

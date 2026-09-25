@@ -715,11 +715,10 @@ stored value untouched
 ([Liquid Glass](#kiwishelfset_liquid_glass)).
 
 :::unreleased
-The GUI twin is the **Liquid Glass** switch on Colours &amp;
-Animations, which writes this leaf together with
-`kiwishelf.liquid_glass` and shows on only when both are on;
-with one set and not the other, the switch reads off and says so
-in its `?`.
+The GUI twin is the one **Liquid Glass** switch on Colours
+&amp; Animations;
+[kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass) says
+what it writes.
 :::
 
 **Example:**
@@ -1992,19 +1991,23 @@ bright tint normally holds at light. A fully transparent
 where the Settings toggle is hidden; the stored value still
 round-trips so a profile stays portable.
 
-Stood down, live, while macOS's Reduce transparency is on: every
-glass surface draws its Boxed or Plain shape with the
-`fill_color` at full alpha (the panel its plain material). The
-stored values are untouched, so the glass and the alpha return
-the moment the setting goes off (#1374).
+Stood down, live, while macOS's Reduce transparency is on: the
+bars draw their Boxed or Plain shape with the `fill_color` at
+full alpha, the panel its plain material, and the drag visuals
+and the sticky mark their flat look. The stored values are
+untouched, so the glass and the alpha return the moment the
+setting goes off (#1374).
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
-Glass** switch on Colours &amp; Animations writes this leaf and
-the shortcuts panel's
-([set_shortcut_panel_liquid_glass](#set_shortcut_panel_liquid_glass))
-together, and shows on only when both are on. This verb sets the
-bars alone; setting one and not the other is a Lua-only state,
-and the Settings switch then reads off and says so in its `?`.
+Glass** switch on Colours &amp; Animations writes this leaf, the
+shortcuts panel's
+([set_shortcut_panel_liquid_glass](#set_shortcut_panel_liquid_glass)),
+the drag visuals' ([drag.set_liquid_glass](#dragset_liquid_glass))
+and the sticky mark's
+([sticky.set_liquid_glass](#stickyset_liquid_glass)) together,
+and shows on only when all of them are on. This verb sets the
+bars alone; setting them apart is a Lua-only state, and the
+Settings switch then reads off and says so in its `?`.
 
 **Example:**
 
@@ -2812,6 +2815,30 @@ segment then sets both.
 drag.set_corner_radius(16)
 ```
 
+### drag.set_liquid_glass
+
+:::unreleased
+**Expects:** a boolean (default `true`).
+
+**Does:** draws the ghost and the drop zone as macOS 26 Liquid
+Glass. Each is tinted by its own fill color, strongest at the top
+and fading downward, and keeps its border solid on top; with the
+fill off the glass is clear. Both use a thinner glass, so the
+window a drop would swap with stays readable through it.
+While you drag, both sit just below the window you are holding,
+so the glass never covers it. Off,
+below macOS 26, or while macOS's Reduce transparency is on, they
+draw flat: the border over the fill color, floating above the
+windows. Settings writes this through the one **Liquid Glass**
+switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+
+**Example:**
+
+```lua
+drag.set_liquid_glass(false)
+```
+:::
+
 ## Focus Border
 
 KiwiDesk draws a thin border around the focused window. It is
@@ -3557,6 +3584,11 @@ mark is a neutral glyph on glass that flips black/white with
 light and dark mode. Any non-empty value must parse as a hex
 color.
 
+:::unreleased
+On [Liquid Glass](#stickyset_liquid_glass) the color tints the
+mark's glass instead, and the disc goes.
+:::
+
 **Example:**
 
 ```lua
@@ -3581,6 +3613,30 @@ there. Inert on a macOS without the window-management bridge.
 ```lua
 sticky.set_desktop_reach(false)
 ```
+
+### sticky.set_liquid_glass
+
+:::unreleased
+**Expects:** a boolean (default `true`).
+
+**Does:** draws the on-window sticky mark as macOS 26 Liquid
+Glass, tinted by [`sticky.set_color`](#stickyset_color),
+strongest at the top and fading downward; with no color it is
+clear glass. The glyph drops its filled disc and takes the
+system label color: light on a dark color, which pins the glass
+dark, and otherwise as KiwiDesk's Appearance sets it. Off, below
+macOS 26, or while macOS's Reduce transparency is on, the mark
+is the badge `sticky.set_color` describes: a filled disc in the
+color, or the bare glyph on Automatic. Settings writes this
+through the one **Liquid Glass** switch
+([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+
+**Example:**
+
+```lua
+sticky.set_liquid_glass(false)
+```
+:::
 
 ### floating.set_color
 

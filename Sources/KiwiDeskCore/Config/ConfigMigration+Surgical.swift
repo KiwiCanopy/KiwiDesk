@@ -50,4 +50,40 @@ extension ConfigMigration {
             options: [.sortedKeys]
         )
     }
+
+    /// `entries` after every match of `pattern`'s first group — an
+    /// object opener — back to front so the ranges stay valid: an
+    /// empty object (the optional second group) takes `entries`
+    /// alone, a populated one takes them ahead of what it holds.
+    static func insertingAfterEach(
+        _ entries: String,
+        pattern: String,
+        in text: String
+    ) -> String {
+        guard let regex = try? NSRegularExpression(pattern: pattern)
+        else { return text }
+        var out = text
+        let whole = NSRange(text.startIndex..., in: text)
+        for match in regex.matches(in: text, range: whole).reversed() {
+            guard let opener = Range(match.range(at: 1), in: out),
+                let full = Range(match.range, in: out)
+            else { continue }
+            let empty = match.range(at: 2).location != NSNotFound
+            out.replaceSubrange(
+                full,
+                with: out[opener] + entries + (empty ? "}" : ",")
+            )
+        }
+        return out
+    }
+
+    /// Every first capture of `pattern` in `text`.
+    static func captures(_ pattern: String, in text: String) -> [String] {
+        guard let regex = try? NSRegularExpression(pattern: pattern)
+        else { return [] }
+        let whole = NSRange(text.startIndex..., in: text)
+        return regex.matches(in: text, range: whole).compactMap {
+            Range($0.range(at: 1), in: text).map { String(text[$0]) }
+        }
+    }
 }
