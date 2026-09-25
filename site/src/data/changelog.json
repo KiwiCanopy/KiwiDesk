@@ -2,6 +2,77 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "2.0.0",
+      "tag": "v2.0.0",
+      "date": "2026-09-25",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v2.0.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v2.0.0/KiwiDesk-2.0.0.dmg",
+      "summary": "KiwiDesk 2.0.0 puts the Space Bar and the App Bar on one shelf, KiwiShelf: one edge, one look, one set of colours. It declutters the interface — settings the two bars each carried are now one — for a simpler, more consistent experience. Profiles take a firmer hold on your screens and Desktops — unplugging a screen keeps its Spaces until it comes back, a Desktop can load a profile for one particular screen setup, and App Rules and shortcuts say which profiles they apply to. KiwiDesk also brings its own update window, more Liquid Glass, a reworked App Rules page and a round of fixes.",
+      "heads": "Your settings carry over on their own. The two bars now share one edge and one style, and where they differed the shelf takes the Space Bar's — so with the usual setup, the App Bar in a Monocle or Scrolling Space moves up to the top beside the Space Bar. Settings ▸ KiwiShelf & Bars moves the shelf.",
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**KiwiShelf now puts both bars on one shelf** — one plate with a divider between them, and when the shelf is full, drag the divider to give the Space Bar more room; double-click resets it.",
+            "**A bar with more than fits now fades at its edge and shows a count** you can click to page; the mouse wheel and the trackpad scroll it.",
+            "**New outer and inner margins** set how far the shelf sits from the screen edge and from your windows.",
+            "**Unplugging a screen now keeps its Spaces** on the screen that remains, windows and layouts included, marked ✱ — plug it back in and they go home. A held Space is never saved into a profile.",
+            "**A Desktop can now load a profile for one screen setup** — your desk's monitors, say — ahead of the profile bound to it for every setup with that many screens.",
+            "**App Rules and shortcuts now say which profiles they apply to:** All profiles, or the ones you tick, and a profile can leave a shared shortcut out.",
+            "**Opening an app whose App Rule sends it to another Space now takes you there** with its window.",
+            "**KiwiDesk now has its own update window**, listing everything changed since your version as New, Improved, Fixed and Lua & CLI; after an update, What's New shows the same.",
+            "**New: Install updates automatically**, under Settings ▸ General, installs a downloaded update the next time KiwiDesk quits. It is off by default and never restarts KiwiDesk by itself.",
+            "**KiwiDesk now has a Discord community**, and Settings Home now ends in the community links — Discord, GitHub and Ko-fi — with the version, the update state and About below. Check for Updates… moved there from the menu bar menu, which shows Update Available… only when an update was found.",
+            "**With the Space Bar off, the menu bar icon now shows the Space** each screen is on, and the active layer when it isn't the default one.",
+            "**With Liquid Glass on, the drag markers and the sticky mark are now glass too**, each tinted by its own colour."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**On Liquid Glass, the shelf's colour now fades from the screen edge** toward your windows, so the glass reads lighter.",
+            "**Each screen setup now belongs to one profile** — the last one you saved or loaded with it — so connecting those screens loads the profile you expect.",
+            "**App Rules is now two lists, Open in a Space and Float**, and adding a rule starts by choosing which; a rule can no longer be one that does nothing.",
+            "**The Profiles page now counts screens and Spaces** instead of drawing them, deleting a profile asks first, and \"make default\" names the screen count it is for.",
+            "**In Settings ▸ Spaces, + with an empty name now adds the next free number**, and a name another Space already has now says so instead of silently reverting.",
+            "**A window you close and bring back now opens where you are**, and focused, like a new window — a deliberate choice: a window manager opens windows in front of you, and you can move them from there.",
+            "**In Stack, dragging a window's edge along its column now resizes it** instead of snapping back, as the keyboard does.",
+            "**KiwiDesk now stays smooth while a browser or terminal retitles its window** on every page load or command."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**The bar no longer stays under the menu bar** after turning the menu bar's auto-hide back off.",
+            "**Disconnecting a screen or a Vision Pro no longer briefly loads the wrong profile** before the right one.",
+            "**A window set to stay visible across Desktops now follows a trackpad swipe** to another Desktop.",
+            "**An app's right-click menu no longer closes on its own** when an App Rule puts that app in another Space.",
+            "**With the menu bar on auto-hide, reaching the top edge no longer takes focus** away from the Settings window.",
+            "**⌘W now closes the Settings window.**",
+            "**A Space 1 you had renamed or deleted no longer comes back** on every launch.",
+            "**App icons now sit centred and whole in the bars**, a thin Space Bar included, and Adobe apps and others with a version in their name get their icon again."
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** the bars' shared setters — edge, alignment, thickness, background style and fit, Liquid Glass, corner roundness, item gap, font size, icon source, dim factor and the colours — move from `space_bar.set_*`, `app_bar.set_*`, `monocle.set_app_bar_*` and `scroll.set_app_bar_*` to `kiwishelf.set_*`. `init.lua` is not rewritten; each old call is reported in Config Issues with its replacement.",
+            "**`item_size` is retired** — an App Bar's width follows its `title_cap`, a Space Bar item fits its content — `space_bar.set_title_cap` is now `space_bar.set_front_app_title_cap`, and the `gap` active indicator is gone.",
+            "**New shelf setters:** `kiwishelf.set_minimum`, `kiwishelf.set_order`, `kiwishelf.set_outer_margin` and `kiwishelf.set_inner_margin`; `drag.set_liquid_glass` and `sticky.set_liquid_glass` join the Liquid Glass switch.",
+            "**`reset_layout_sizing` now returns** the active Space, one Space or `all` to the sizes your profile set.",
+            "**`bind_profile_to_desktop` now takes screens** to scope a binding to one setup, and `save_profile` and `load_profile` say when they took a screen setup from another profile.",
+            "**`delete_space` now names what would bring the Space back** — a profile, `init.lua` or your Settings.",
+            "**`monitor_change` now fires once the screens have settled**, rather than for each in-between report."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "1.4.0",
       "tag": "v1.4.0",
       "date": "2026-09-16",

@@ -111,39 +111,23 @@ class — see
 | Two connected displays of the **same model at the same resolution** are one identity to KiwiDesk: a space pinned to one may open on the other, both draw the same chips in Settings ▸ Monitors, and only one of them can carry the "main" badge. | A display is recognised by `name:WxH` because the identity has to be stable across sessions and macOS's `CGDirectDisplayID` is reassigned across reconnects and reboots, EDID serial numbers are unreliable in exactly the population that needs them (zeros for virtual, AirPlay and projector displays, missing on real panels), and every stored pin is keyed by that string, so changing the identity is a config-shape change. | `Display.fingerprint` (`Sources/KiwiDeskCore/Models/DisplayModel.swift`) is `name:WxH`; the Monitors picture, the pin map and the main badge all key off it, and `MonitorsFamilyRows.hasAmbiguousDisplays` is what detects the collision. | The picture **says so** rather than letting it read as a bug — a note appears under the arrangement whenever two connected displays share a fingerprint. Real fix planned in [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734): a display identity that survives reconnects without colliding. Changing it re-keys every stored pin, so the change owes a one-shot `ConfigMigration` step (AGENTS.md §5), and the changelog says so. The open question is which field is both stable and distinct, which needs a device test with two identical panels. |
 | The Monocle focus flip turns a **plate carrying the two apps' icons**, never the windows' own pixels — and cycling between two windows of the **same app** turns one icon into the same icon; the direction of the turn is the only tell. | A live-image flip needs the window's pixels, which reach no process without the Screen Recording permission, and the owner ruled no new permission prompt ([#1391](https://github.com/KiwiCanopy/KiwiDesk/issues/1391); the ruling is in [design decisions](design-decisions.md)); the plate shows icons alone because the turn is below reading time. | `MonocleFlipPlate` draws a `CALayer` wash with the app icon over the compositor's own behind-window blur (`NSVisualEffectView`); `SLSSetWindowTransform`/`SLSSetWindowAlpha` on another app's window perform and apply nothing from an ordinary connection. | None planned — closed, not deferred. `animations.set_on_monocle_focus(false)` turns the flip off. |
 
-:::unreleased
 The sticky-window row above covers the *gesture* switch too: a
 sticky window whose app drops its Accessibility element before
 KiwiDesk hears of a swipe is carried onto the arriving Desktop
 with its slot, sticky scope and reach pin kept
 ([#1215](https://github.com/KiwiCanopy/KiwiDesk/issues/1215)),
 rather than staying on the Desktop you left until you return.
-:::
 
-:::unreleased
 A window you closed and then reopened — an app whose close hides the window and whose reopen shows the same one again, Telegram's main window for one — comes back like a new window: to the Space its app rule names, else the Space you are on, taking the focus there in every layout, rather than to the Space you closed it in with the slot it had there ([#1414](https://github.com/KiwiCanopy/KiwiDesk/issues/1414), [#1561](https://github.com/KiwiCanopy/KiwiDesk/issues/1561); the ruling is in [design decisions](design-decisions.md)); the [#1161](https://github.com/KiwiCanopy/KiwiDesk/issues/1161) row's bounce no longer reaches it. What remains: an app that re-shows a closed window on its own, with nothing you did behind it, takes the focus once, where you are.
-:::
 
-:::unreleased
 On macOS 27 the focus that a menu-bar reveal moves to the previous app comes back: KiwiDesk returns it to its own window once per reveal, and the previous app's bar stays revealed above the still-key Settings window until the pointer leaves the edge ([#1532](https://github.com/KiwiCanopy/KiwiDesk/issues/1532); the ruling is in [design decisions](design-decisions.md)). What remains: a deliberate ⌘-Tab away from a KiwiDesk window while the pointer is parked at the top edge is returned the same way — only a second one within about a second goes through — so move the pointer off the edge first; a click is honored as choosing that app.
-:::
 
-:::unreleased
 The rejection in the row above has a second form. Issued while the Space KiwiDesk shows is **empty** — after `move_to_desktop` and a `focus_desktop` to that Desktop ([Lua reference ▸ move_to_desktop](lua-reference.md#move_to_desktop)) — a focused-window shortcut is rejected, and the refusal names it: `the active Space 2 is empty; the focused window (Finder) is in Space 1 — focus_space 1 first`, which the log carries too ([#1336](https://github.com/KiwiCanopy/KiwiDesk/issues/1336); the ruling is in [design decisions](design-decisions.md#an-empty-active-space-refuses-by-name-1336)). What remains: the verb acts only on the Space you are on, so the window that `get_state` marks focused in another Space is parked, not focused, until `focus_space` brings its Space back.
-:::
 
-:::unreleased
 Dragging a **stack** window's edge along its zone's own axis — a height drag beside a left or right stack, a width drag beside a top or bottom one — moves the dragged window's share of its zone, as the keyboard `resize` does ([#941](https://github.com/KiwiCanopy/KiwiDesk/issues/941); the ruling is in [design decisions](design-decisions.md#layout-and-resize-behavior)). What remains: a master zone lined up *along* the split has no cross-axis share to move, by the row above on masters' shares, so that drag snaps back.
-:::
 
-:::unreleased
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `pull_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `pull_or_spawn` (`open -a`, say), or one that takes longer than that second to come forward, leaves you where you are, and so does a first window that appears more than about ten seconds after the launch. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
-:::
 
-:::unreleased
 With the **Space Bar off**, switching a Space between a layout that shows an App Bar (Monocle, Scrolling) and one that does not moves its windows by the bar strip's depth: [KiwiShelf](lua-reference.md#kiwishelf) reserves its edge only in a layout where a bar draws ([#1517](https://github.com/KiwiCanopy/KiwiDesk/issues/1517); the ruling is in [design decisions](design-decisions.md)). Reserving it in every layout instead would leave an empty strip on screen in every layout that draws nothing there. With the Space Bar on, the strip is reserved in every layout and no switch moves a window.
-:::
 
-:::unreleased
 The light-`fill_color` glass row above also reaches surfaces that are not bars: the **sticky mark** on its default **Automatic** color, and a sticky or drag color light enough to pin nothing, are unpinned glass too. Over dark window content macOS may draw such a mark's glass dark while its glyph — the system label color under KiwiDesk's Appearance — stays dark. Not observed; reasoned from the mechanism ([#1621](https://github.com/KiwiCanopy/KiwiDesk/issues/1621)). A dark `sticky.set_color` pins the glass dark with a light glyph; `sticky.set_liquid_glass(false)` returns the badge with its disc.
-:::
