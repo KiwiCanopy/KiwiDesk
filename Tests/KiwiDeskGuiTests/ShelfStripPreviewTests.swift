@@ -58,7 +58,7 @@ struct ShelfStripPreviewTests {
         let placed = preview.arrangement(length: 480)
         let space = try #require(placed.space)
         let app = try #require(placed.app)
-        #expect(placed.divider != nil, "the fixture must be full")
+        #expect(space.length + app.length < 480, "the fixture must be full")
         let spaceRun = preview.run(try #require(preview.space), in: space)
         let appRun = preview.run(try #require(preview.app), in: app)
         #expect(spaceRun.lowerBound >= space.offset)

@@ -95,13 +95,12 @@ extension ShelfOverlay {
         horizontal: Bool
     ) -> CGRect? {
         guard slots.count == 2 else { return nil }
-        let ordered = slots.sorted {
-            horizontal ? $0.minX < $1.minX : $0.minY < $1.minY
-        }
-        let middle =
+        let ranges = slots.map { slot in
             horizontal
-            ? (ordered[0].maxX + ordered[1].minX) / 2 - strip.minX
-            : (ordered[0].maxY + ordered[1].minY) / 2 - strip.minY
+                ? (slot.minX - strip.minX)...(slot.maxX - strip.minX)
+                : (slot.minY - strip.minY)...(slot.maxY - strip.minY)
+        }
+        let middle = ShelfArrangement.gutterMiddle(ranges[0], ranges[1])
         return BarDivider.sectionFrame(
             at: middle,
             depth: horizontal ? strip.height : strip.width,

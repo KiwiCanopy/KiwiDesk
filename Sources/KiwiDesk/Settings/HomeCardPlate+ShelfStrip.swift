@@ -66,8 +66,7 @@ struct ShelfStripPreview: View {
         )
         return ShelfArrangement(
             space: placed.space.map { scaled($0, by: u) },
-            app: placed.app.map { scaled($0, by: u) },
-            divider: placed.divider
+            app: placed.app.map { scaled($0, by: u) }
         )
     }
 

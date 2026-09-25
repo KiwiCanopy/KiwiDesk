@@ -67,27 +67,44 @@ struct ShelfDividerDragTests {
         #expect(divider.minimum(afterDragging: -900) == 10)
     }
 
-    /// A short App Bar holds the divider past the minimum: the
-    /// Space section draws `room − appNeed`, not the floor. A drag
-    /// that cannot move the line leaves the minimum as configured;
-    /// one that lengthens the Space section writes where it lands.
-    @Test("Where the App Bar's need holds the line, the minimum stays")
-    func heldLineKeepsTheMinimum() throws {
+    /// A drag writes only where the minimum it writes would move
+    /// the line. A short App Bar holds the line past the floor
+    /// (the section draws `room − appNeed`), and a bound — the
+    /// Space Bar's need or the hard floor — stops it: a drag
+    /// against either leaves the configured minimum alone.
+    @Test("A drag that cannot move the line writes nothing")
+    func stuckLineWritesNothing() throws {
         var shelf = KiwiShelf()
         shelf.itemGap = 0
-        let placed = ShelfArrangement.arrange(
-            length: 1000,
-            spaceNeed: 1200,
-            appNeed: 200,
-            spaceFloor: 100,
-            shelf: shelf
-        )
-        let divider = try #require(placed.divider)
-        #expect(divider.spaceLength == 800)
-        #expect(divider.minimumLength == 300)
-        #expect(divider.minimum(afterDragging: 0) == 30)
-        #expect(divider.minimum(afterDragging: -50) == 30)
-        #expect(divider.minimum(afterDragging: 50) == 85)
+        let arrange = { (spaceNeed: CGFloat, appNeed: CGFloat) in
+            try #require(
+                ShelfArrangement.arrange(
+                    length: 1000,
+                    spaceNeed: spaceNeed,
+                    appNeed: appNeed,
+                    spaceFloor: 250,
+                    shelf: shelf
+                ).divider
+            )
+        }
+        // Held by the App Bar's need: 800 drawn, floor 300.
+        let held = try arrange(1200, 200)
+        #expect(held.spaceLength == 800 && held.free == 800)
+        #expect(held.minimum(afterDragging: 0) == nil)
+        #expect(held.minimum(afterDragging: -50) == nil)
+        #expect(held.minimum(afterDragging: 50) == 85)
+        // At the Space Bar's need: growing moves nothing.
+        shelf.minimum = 60
+        let ceiling = try arrange(400, 900)
+        #expect(ceiling.spaceLength == 400)
+        #expect(ceiling.minimum(afterDragging: 50) == nil)
+        #expect(ceiling.minimum(afterDragging: -50) == 35)
+        // At the hard floor: shrinking moves nothing.
+        shelf.minimum = 20
+        let floor = try arrange(700, 900)
+        #expect(floor.spaceLength == 250)
+        #expect(floor.minimum(afterDragging: -50) == nil)
+        #expect(floor.minimum(afterDragging: 50) == 30)
     }
 
     private func mouse(

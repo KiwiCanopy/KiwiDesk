@@ -48,10 +48,20 @@ public struct ShelfArrangement: Equatable, Sendable {
     /// nil unless both show.
     public var dividerMiddle: CGFloat? {
         guard let space, let app else { return nil }
-        let (first, second) =
-            space.offset < app.offset
-            ? (space, app) : (app, space)
-        return (first.offset + first.length + second.offset) / 2
+        return Self.gutterMiddle(
+            space.offset...(space.offset + space.length),
+            app.offset...(app.offset + app.length)
+        )
+    }
+
+    /// The middle of the gap between two segments along an edge —
+    /// where the section divider sits, live and in the preview.
+    public static func gutterMiddle(
+        _ a: ClosedRange<CGFloat>,
+        _ b: ClosedRange<CGFloat>
+    ) -> CGFloat {
+        let (first, second) = a.lowerBound < b.lowerBound ? (a, b) : (b, a)
+        return (first.upperBound + second.lowerBound) / 2
     }
 
     public init(
@@ -122,7 +132,7 @@ public struct ShelfArrangement: Equatable, Sendable {
                 ? Divider(
                     room: room,
                     spaceLength: spaceLength,
-                    minimumLength: minimum,
+                    free: room - appNeed,
                     bounds: bounds,
                     spacesFirst: spacesFirst
                 )
