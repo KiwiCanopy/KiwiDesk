@@ -72,15 +72,14 @@ public final class DragOverlay {
             radius: cornerRadius,
             beneath: window
         )
-        marker.glass?.alphaValue = Self.dropZoneGlassOpacity
     }
 
-    /// The drop zone's glass is thinned: it lies over the window a
-    /// drop swaps with, which should stay readable through it
-    /// (owner, device 2026-09-25). Opacity is the one public
-    /// strength the material takes; `.clear` is already its
-    /// lightest style.
-    static let dropZoneGlassOpacity: CGFloat = 0.6
+    /// Both markers' glass is thinned: the drop zone lies over the
+    /// window a drop swaps with, which should stay readable through
+    /// it, and the ghost matches it (owner, device 2026-09-25).
+    /// Opacity is the one public strength the material takes;
+    /// `.clear` is already its lightest style.
+    static let glassOpacity: CGFloat = 0.6
 
     private func show(
         _ marker: Marker,
@@ -95,6 +94,7 @@ public final class DragOverlay {
             below: window
         )
         apply(style, radius: radius, glass: window != nil, to: marker)
+        marker.glass?.alphaValue = Self.glassOpacity
     }
 
     private func adjustedFrame(

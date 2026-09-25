@@ -2823,8 +2823,8 @@ drag.set_corner_radius(16)
 **Does:** draws the ghost and the drop zone as macOS 26 Liquid
 Glass. Each is tinted by its own fill color, strongest at the top
 and fading downward, and keeps its border solid on top; with the
-fill off the glass is clear. The drop zone's glass is thinner, so
-the window a drop would swap with stays readable through it.
+fill off the glass is clear. Both use a thinner glass, so the
+window a drop would swap with stays readable through it.
 While you drag, both sit just below the window you are holding,
 so the glass never covers it. Off,
 below macOS 26, or while macOS's Reduce transparency is on, they

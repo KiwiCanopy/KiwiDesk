@@ -179,10 +179,10 @@ struct OverlayGlassTests {
         #expect(overlay.ghost?.panel.level == .floating)
     }
 
-    /// The drop zone's glass is thinned and the ghost's is not;
-    /// the shape, not the number (#1021).
-    @Test("Only the drop zone's glass is thinned")
-    func dropZoneGlassIsThinned() throws {
+    /// Both markers' glass is thinned alike; the shape, not the
+    /// number (#1021).
+    @Test("Both drag markers' glass is thinned alike")
+    func markerGlassIsThinned() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let overlay = DragOverlay()
         let dragged = Self.draggedWindow()
@@ -203,12 +203,12 @@ struct OverlayGlassTests {
             cornerRadius: 8,
             glassBeneath: id
         )
-        try #require(DragOverlay.dropZoneGlassOpacity < 1)
-        #expect(overlay.ghost?.glass?.alphaValue == 1)
-        #expect(
-            overlay.dropZone?.glass?.alphaValue
-                == DragOverlay.dropZoneGlassOpacity
-        )
+        try #require(DragOverlay.glassOpacity < 1)
+        for marker in [overlay.ghost, overlay.dropZone] {
+            #expect(
+                marker?.glass?.alphaValue == DragOverlay.glassOpacity
+            )
+        }
     }
 
     @Test("The sticky mark turns tinted glass and back")

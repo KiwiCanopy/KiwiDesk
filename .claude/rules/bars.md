@@ -427,13 +427,13 @@ Obligations:
   and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
 - **A glass surface is thinned only by a ruling, and only on its
-  own view's opacity.** The drop zone's glass sits at
-  `DragOverlay.dropZoneGlassOpacity` so the window a drop swaps
-  with stays readable (owner, device 2026-09-25); there the
+  own view's opacity.** Both drag markers' glass sits at
+  `DragOverlay.glassOpacity` so the window a drop swaps with stays
+  readable (owner, device 2026-09-25); there the
   `maxAlpha` premise — a floor on how much refraction survives —
   does not hold, by that ruling. A second thinned surface argues
   its own entry in `docs/design-decisions.md` first
-  (`OverlayGlassTests` ▸ `dropZoneGlassIsThinned`).
+  (`OverlayGlassTests` ▸ `markerGlassIsThinned`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

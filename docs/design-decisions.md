@@ -11349,11 +11349,12 @@ step therefore fills both from the switch's own reading over the
 leaves the file does carry, off where those disagree, as the
 panel's leaf was filled from the bars' (#1369).
 
-**The drop zone's glass is thinned (owner, device 2026-09-25).**
-It lies over the window a drop would swap with, which should stay
-readable through it; `.clear` is already the material's lightest
-style, so the view's own opacity is the one public strength left.
-The ghost keeps full glass, its slot being empty for the drag.
+**Both drag markers' glass is thinned (owner, device 2026-09-25).**
+The drop zone lies over the window a drop would swap with, which
+should stay readable through it, and the ghost matches it so the
+pair reads as one kind of marker; `.clear` is already the
+material's lightest style, so the view's own opacity is the one
+public strength left.
 
 **Glass drag markers sit at the normal level, ordered directly
 beneath the window being dragged and re-ordered there on every
