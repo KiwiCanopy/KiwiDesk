@@ -673,7 +673,8 @@ const jsonLd = [
               <span class="gh-count">
                 <Icon name="lucide:star" width={14}
                   height={14} aria-hidden="true" />
-                {stars}<span class="visually-hidden">, {starsLabel}</span>
+                <span aria-hidden="true">{stars}</span>
+                <span class="visually-hidden">{starsLabel}</span>
               </span>
             </a>
           </div>
@@ -856,7 +857,7 @@ const jsonLd = [
           {voices.map((v) => (
             <li>
               <figure class="voice">
-                <blockquote lang="en" cite={v.link}>
+                <blockquote lang="en">
                   <p>{v.quote}</p>
                 </blockquote>
                 <figcaption>
@@ -1539,12 +1540,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       // ---- Voices: prev/next only while the row overflows ----
       const track = document.getElementById("voicesTrack");
       const controls = document.getElementById("voicesControls");
-      const vPrev = document.getElementById(
-        "voicesPrev"
-      ) as HTMLButtonElement | null;
-      const vNext = document.getElementById(
-        "voicesNext"
-      ) as HTMLButtonElement | null;
+      const vPrev = document.getElementById("voicesPrev");
+      const vNext = document.getElementById("voicesNext");
       const vStatus = document.getElementById("voicesStatus");
       if (track && controls && vPrev && vNext && vStatus) {
         const geometry = () => {
@@ -1567,10 +1564,19 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             g.perView === 1
               ? `${first + 1} / ${g.total}`
               : `${first + 1}–${last} / ${g.total}`;
-          vPrev.disabled = track.scrollLeft <= 2;
-          vNext.disabled =
-            track.scrollLeft + track.clientWidth >=
-            track.scrollWidth - 2;
+          // aria-disabled, not `disabled`: a disabled button drops
+          // keyboard focus to <body> at the end of the row.
+          vPrev.setAttribute(
+            "aria-disabled",
+            String(track.scrollLeft <= 2)
+          );
+          vNext.setAttribute(
+            "aria-disabled",
+            String(
+              track.scrollLeft + track.clientWidth >=
+                track.scrollWidth - 2
+            )
+          );
         };
         const layout = () => {
           delete track.dataset.fits;
@@ -1590,6 +1596,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           update();
         };
         const page = (dir: number) => {
+          const btn = dir < 0 ? vPrev : vNext;
+          if (btn.getAttribute("aria-disabled") === "true") return;
           const g = geometry();
           if (!g) return;
           track.scrollBy({
@@ -1608,6 +1616,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           },
           { passive: true }
         );
+        layout();
         new ResizeObserver(layout).observe(track);
       }
 

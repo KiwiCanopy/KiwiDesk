@@ -1437,8 +1437,10 @@ section {
   color: var(--text);
 }
 .hero__stars {
-  margin-top: 0.35rem;
   font-size: 0.82rem;
+}
+.req + .hero__stars {
+  margin-top: 0.35rem;
 }
 .hero__stars a {
   display: inline-flex;
@@ -1451,7 +1453,6 @@ section {
 }
 .hero__stars a:hover {
   color: var(--text-dim);
-  text-decoration: underline;
 }
 .hero__stars svg {
   opacity: 0.8;
@@ -1466,7 +1467,8 @@ section {
   --col: calc(100% - 2.75rem);
   list-style: none;
   margin: 0;
-  padding: 0.35rem 0.1rem 0.6rem;
+  /* Side padding clears the 3px hover ring when the row scrolls. */
+  padding: 0.35rem 4px 0.6rem;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: var(--col);
@@ -1592,7 +1594,7 @@ section {
   text-decoration-color: var(--accent);
 }
 .voice__name::after {
-  content: " \2197";
+  content: " \2197" / "";
   font-size: 0.8em;
   color: var(--text-faint);
 }
@@ -1632,11 +1634,11 @@ section {
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
-.voices__btn:hover:not(:disabled) {
+.voices__btn:hover:not([aria-disabled="true"]) {
   background: var(--ghost-hover-bg);
   border-color: var(--accent);
 }
-.voices__btn:disabled {
+.voices__btn[aria-disabled="true"] {
   opacity: 0.4;
   cursor: default;
 }
