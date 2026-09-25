@@ -39,7 +39,7 @@ struct ColorPaletteMatchTests {
     func handEditDropsTheMark() {
         var settings = TilingSettings()
         let palette = PaletteCatalog.defaultPalette()
-        settings.appBarStyle.fillColor = "#123456FF"
+        settings.kiwishelf.fillColor = "#123456FF"
         #expect(!palette.isApplied(to: settings))
     }
 
@@ -65,13 +65,13 @@ struct ColorPaletteMatchTests {
         var settings = TilingSettings()
         let sparse = ColorPalette(
             name: "S",
-            colors: ["app_bar.fill_color": "#101010B3"]
+            colors: ["kiwishelf.fill_color": "#101010B3"]
         )
         #expect(!sparse.isApplied(to: settings))
         sparse.apply(to: &settings)
         #expect(sparse.isApplied(to: settings))
         // An unrelated colour moving leaves the claim intact.
-        settings.spaceBarStyle.itemColor = "#ABCDEF"
+        settings.kiwishelf.itemColor = "#ABCDEF"
         #expect(sparse.isApplied(to: settings))
     }
 
@@ -81,10 +81,10 @@ struct ColorPaletteMatchTests {
     @Test("Spelling of a hex does not change the answer")
     func hexSpellingIsNotAColour() {
         var settings = TilingSettings()
-        settings.appBarStyle.fillColor = "#8db354ff"
+        settings.kiwishelf.fillColor = "#8db354ff"
         let palette = ColorPalette(
             name: "C",
-            colors: ["app_bar.fill_color": "#8DB354"]
+            colors: ["kiwishelf.fill_color": "#8DB354"]
         )
         #expect(palette.isApplied(to: settings))
     }
@@ -155,7 +155,7 @@ struct ColorPaletteMatchTests {
         let mixed = ColorPalette(
             name: "M",
             colors: [
-                "app_bar.fill_color": settings.appBarStyle
+                "kiwishelf.fill_color": settings.kiwishelf
                     .fillColor,
                 "app_bar.made_up_color": "#123456",
             ]

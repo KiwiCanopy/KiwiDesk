@@ -112,6 +112,8 @@ struct BarMotionSeamTests {
         "isReduced": [],
         "runLayout": ["duration(", "isReduced"],
         "duration": [],
+        "runPlateGlide": ["plateGlideDuration(", "isReduced"],
+        "plateGlideDuration": [],
         "setFrame": ["travels(", "isReduced"],
         "travels": [],
         "springSweep": ["springAnimation(", "isReduced"],
@@ -279,6 +281,12 @@ struct BarMotionSeamTests {
                     "\(name) does not name \(needle)"
                 )
             }
+            if needles.contains("isReduced"), let decision = needles.first {
+                #expect(
+                    Self.handsOnTheRead(body, to: decision),
+                    "\(name) hands \(decision) something other than isReduced"
+                )
+            }
             guard needles.isEmpty, Self.startsMotion(body) else {
                 continue
             }
@@ -286,6 +294,39 @@ struct BarMotionSeamTests {
                 "\(name) starts motion, censused as gateless"
             )
         }
+    }
+
+    /// Whether the gated decision is handed the live read: naming
+    /// `isReduced` beside a constant argument gates nothing
+    /// (guard-prover, #1517).
+    private static func handsOnTheRead(
+        _ body: String,
+        to decision: String
+    ) -> Bool {
+        let squash = { (text: String) in
+            text.split(whereSeparator: \.isWhitespace).joined()
+        }
+        guard
+            let args = SourceScan.callArguments(of: decision, in: body)
+        else { return false }
+        // A whole argument, never a prefix: `isReduced || true`
+        // names the read and gates nothing.
+        let ends = { (text: String, needle: String, allowed: Set<Character>) in
+            guard let hit = text.range(of: needle) else { return false }
+            guard let next = text[hit.upperBound...].first else {
+                return true
+            }
+            return allowed.contains(next)
+        }
+        let handed = squash(args)
+        if ends(handed, "reduceMotion:isReduced", [",", ")"]) {
+            return true
+        }
+        let letters = Set(
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+        )
+        return handed == "reduceMotion:reduceMotion"
+            && ends(squash(body), "letreduceMotion=isReduced", letters)
     }
 
     /// Whether a member's body reaches a motion starter.

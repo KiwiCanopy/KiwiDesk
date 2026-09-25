@@ -14,7 +14,12 @@ enum SettingsCensusLabel {
         guard case .key(let labelKey) = key.text.label else {
             return nil
         }
-        return string(labelKey)
+        guard let mode = key.labelMode else { return string(labelKey) }
+        return L(
+            labelKey,
+            english[labelKey] ?? labelKey,
+            mode.displayName
+        )
     }
 
     /// Resolves localized string for key, falling back to English manifest

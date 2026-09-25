@@ -6,7 +6,7 @@ import Testing
 /// The pure geometry that keeps a floating window from hiding
 /// under a bar (#242; these are the top-edge cases of
 /// `clampClear` — the other edges are covered in
-/// `SpaceBarGeometryTests`). AX coordinates: y grows downward,
+/// `ShelfGeometryTests`). AX coordinates: y grows downward,
 /// `minY` is the top edge.
 @Suite("Float bar clamp, top edge")
 struct FloatClampTests {

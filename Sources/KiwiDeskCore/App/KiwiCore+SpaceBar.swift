@@ -1,79 +1,45 @@
 import AppKit
 
-/// Keeps the Space Bars in sync with workspace state (#293).
-/// Driven from `retile()` — which already fires on every
-/// structural, focus, mode, settings, space, and profile
-/// change — plus the one change that retiles nothing, a
-/// shortcut-layer switch (`wireSpaceBarLayerRefresh`). One bar
-/// per display, listing that display's Spaces in profile
-/// order. Everything is read from snapshotted state: no AX
-/// calls in bar building.
+/// The Space Bar half of the bar refresh (`updateBars`,
+/// `KiwiCore+Shelf`, #293): one bar per display, listing that
+/// display's Spaces in profile order. Everything is read from
+/// snapshotted state: no AX calls in bar building.
 extension KiwiCore {
     /// The bar follows the active layer off the `layer_change`
     /// bus event — never a hook on the manager, which keeps one
     /// seam (#1169, #1168) — and its refresh carries the menu
-    /// bar's mark with it (#1413).
+    /// bar's mark with it (#1413). The layer item changes the
+    /// Space Bar's need, so both bars refresh together.
     func wireSpaceBarLayerRefresh() {
         bus.addSink { [weak self] event, _ in
             guard event == .layerChange else { return }
-            self?.updateSpaceBar()
+            self?.updateBars()
         }
     }
 
-    func updateSpaceBar() {
-        // The menu bar's stand-in rides the same refresh (#1413).
-        defer { publishStatusSpaceMark() }
-        let style = tiler.settings.spaceBarStyle
-        guard style.enabled else {
-            spaceBars.sync([])
-            return
-        }
-        // No main-screen cold-start fallback (unlike the App
-        // Bar): the display list seeds on the first event loop
-        // tick and the bar appears with it.
-        let bars = state.workspaces.allDisplays.compactMap {
-            spaceBar(for: $0, style: style)
-        }
-        spaceBars.sync(bars)
-    }
-
-    /// One display's bar, or nil when it has no screen or no
-    /// visible items.
-    private func spaceBar(
-        for display: Display,
-        style: SpaceBarStyle
+    /// One display's bar in the segment the shelf gives it
+    /// (#1517). The front app hides while an App Bar shares the
+    /// shelf: that bar already names every window.
+    func placedSpaceBar(
+        _ items: [SpaceBarOverlay.Item],
+        display: DisplayID,
+        plan: ShelfPlan,
+        sharesWithAppBar: Bool,
+        style: SpaceBarLook
     ) -> SpaceBarManager.Bar? {
-        // Same fullscreen-space stand-down as the App Bar
-        // (#670): the panel joins every space by construction,
-        // so the per-display verdict gates the build and nil
-        // retires the overlay through the manager.
-        guard
-            NativeSpaces.currentSpaceIsUser(display: display.id),
-            let screen = screen(for: display.id)
-        else { return nil }
-        var items = spaceBarItems(
-            display: display.id,
-            style: style
-        )
-        guard !items.isEmpty,
-            let strip = SpaceBarGeometry.strip(
-                in: GeometryUtils.axVisibleFrame(of: screen),
-                style: style
-            )
-        else { return nil }
-        // After the emptiness guard: a layer never draws a bar
-        // on a screen with no Space item to lead.
-        if let layer = spaceBarLayerItem() {
-            items.insert(layer, at: 0)
-        }
-        let front = frontApp(display: display.id, style: style)
+        guard let slot = plan.arrangement.space else { return nil }
+        var placed = style
+        placed.alignment = slot.alignment
+        let front =
+            sharesWithAppBar
+            ? nil : frontApp(display: display, style: style)
         return SpaceBarManager.Bar(
-            display: display.id,
+            display: display,
             items: items,
             frontApp: front?.app,
             frontWindow: front?.window,
-            strip: strip,
-            style: style,
+            strip: plan.segment(slot),
+            style: placed,
             stateMarkColors: StateMarkColors(
                 sticky: tiler.settings.stickyStyle.color,
                 floating: tiler.settings.floatingStyle.color
@@ -112,7 +78,7 @@ extension KiwiCore {
     /// this guard chain (`SpaceBarManager.showsTitle(of:)`).
     func frontApp(
         display: DisplayID,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> (window: WindowID, app: SpaceBarItemView.App)? {
         guard style.showFrontApp,
             // SHOWN, not focused (#1214): the segment names
@@ -154,7 +120,7 @@ extension KiwiCore {
             ? nil
             : AppBarStyle.cappedTitle(
                 title,
-                to: style.resolvedTitleCap
+                to: style.resolvedFrontAppTitleCap
             )
         return (window: focused, app: app)
     }

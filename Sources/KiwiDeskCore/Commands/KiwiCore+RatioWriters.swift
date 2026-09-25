@@ -46,7 +46,7 @@ extension KiwiCore {
     /// already takes it.
     func layoutSpan(of space: Space, horizontal: Bool) -> Double {
         let bounds = TilingEngine.screen(for: space.id, in: state)
-            .map { tiler.layoutBounds(on: $0) }
+            .map { tiler.layoutBounds(on: $0, for: space) }
         return horizontal
             ? Double(bounds?.width ?? 1920)
             : Double(bounds?.height ?? 1080)
@@ -200,7 +200,7 @@ extension KiwiCore {
             BspSplit.sides(
                 of: tiled,
                 slots: slots,
-                bounds: tiler.layoutBounds(on: screen),
+                bounds: tiler.layoutBounds(on: screen, for: space),
                 horizontal: horizontal
             )
         }
@@ -238,7 +238,7 @@ extension KiwiCore {
             let across = BspSplit.sides(
                 of: tiled,
                 slots: slots,
-                bounds: tiler.layoutBounds(on: screen),
+                bounds: tiler.layoutBounds(on: screen, for: space),
                 horizontal: !horizontal
             )
             if !across.first.isEmpty || !across.second.isEmpty {

@@ -29,7 +29,7 @@ extension SpaceBarOverlay {
         gap: CGFloat,
         strip: CGRect,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) -> [CGRect] {
         guard leads, let slot = frames.first else {
             layerDivider.isHidden = true
@@ -43,17 +43,15 @@ extension SpaceBarOverlay {
             item.size.height = max(slot.height - extent, 0)
         }
         let depth = horizontal ? strip.height : strip.width
-        let cell = max(depth - SpaceBarItemView.pad * 2, 8)
         layerDivider.isHidden = false
         layerDivider.layer?.backgroundColor =
             BarDivider.color(textColor: style.itemColor).cgColor
         layerDivider.frame = BarDivider.frame(
             at: (horizontal ? item.maxX : item.maxY) + gap,
             depth: depth,
-            cell: cell,
             horizontal: horizontal,
             thickness: BarDivider.sectionThickness,
-            fullDepth: true
+            lengthShare: BarDivider.sectionLengthShare
         )
         var trimmed = frames
         trimmed[0] = item

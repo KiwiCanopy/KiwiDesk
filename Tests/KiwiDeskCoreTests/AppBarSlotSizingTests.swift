@@ -7,12 +7,11 @@ import Testing
 
 @Suite("App bar slot sizing math")
 struct AppBarSlotSizingTests {
-    @Test("item_size 0 uses the measured auto width, clamped")
+    @Test("The measured auto width is the slot, clamped")
     func autoSlot() {
         // The measured auto width passes through when sane.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 0,
                 content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
@@ -23,7 +22,6 @@ struct AppBarSlotSizingTests {
         // tiny (icons never clip).
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 0,
                 content: .iconAndTitle,
                 thickness: 32,
                 axis: 1000,
@@ -33,7 +31,6 @@ struct AppBarSlotSizingTests {
         // Clamped down to a quarter of the bar when it's huge.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 0,
                 content: .title,
                 thickness: 32,
                 axis: 1000,
@@ -42,43 +39,10 @@ struct AppBarSlotSizingTests {
         )
     }
 
-    @Test("Explicit item_size wins, clamped on both sides")
-    func explicitSlot() {
-        // The user's size as-is while it is sane.
+    @Test("A tiny bar keeps the icon minimum over the quarter cap")
+    func tinyBarKeepsIcon() {
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 80,
-                content: .iconAndTitle,
-                thickness: 32,
-                axis: 1000,
-                autoWidth: 140
-            ) == 80
-        )
-        // Too small: icons must survive — at least the
-        // icon square.
-        #expect(
-            AppBarOverlay.slotLength(
-                itemSize: 10,
-                content: .iconAndTitle,
-                thickness: 32,
-                axis: 1000,
-                autoWidth: 140
-            ) == 32
-        )
-        // Too big: capped at a quarter of the bar.
-        #expect(
-            AppBarOverlay.slotLength(
-                itemSize: 900,
-                content: .iconAndTitle,
-                thickness: 32,
-                axis: 1000,
-                autoWidth: 140
-            ) == 250
-        )
-        // Tiny bar: the icon minimum beats the quarter cap.
-        #expect(
-            AppBarOverlay.slotLength(
-                itemSize: 80,
                 content: .iconAndTitle,
                 thickness: 32,
                 axis: 60,
@@ -115,7 +79,7 @@ struct AppBarSlotSizingTests {
         // The ladder lives on the STYLE (one resolution site
         // shared with the slot measurement and the GUI scene);
         // the default style's `fontSize` 0 is the auto arm.
-        let auto = AppBarStyle()
+        let auto = AppBarLook()
         #expect(auto.fontSize == 0)
         let slim = auto.resolvedFontSize(forThickness: 20)
         let fat = auto.resolvedFontSize(forThickness: 48)
@@ -124,7 +88,7 @@ struct AppBarSlotSizingTests {
         #expect(auto.resolvedFontSize(forThickness: 4) == 9)
         #expect(auto.resolvedFontSize(forThickness: 400) == 28)
         // An explicit `font_size` wins over the ladder.
-        var pinned = AppBarStyle()
+        var pinned = AppBarLook()
         pinned.fontSize = 13
         #expect(
             pinned.resolvedFontSize(forThickness: 48) == 13

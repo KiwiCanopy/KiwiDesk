@@ -8,13 +8,22 @@ import KiwiDeskCore
 enum BarSliderBands {
     /// Both bars' Thickness rows: the Core floor up to 80 pt.
     static let thickness: ClosedRange<Double> =
-        Double(AppBarStyle.minThickness)...80
+        Double(KiwiShelf.minThickness)...80
 
     /// Both bars' margin rows (#1516): the Core floor up to a
     /// curated 60 pt — past the default outer gap by a wide
     /// margin, since the value is extra room.
     static let margin: ClosedRange<Double> =
-        Double(AppBarStyle.minMargin)...60
+        Double(KiwiShelf.minMargin)...60
+
+    /// The Space Bar minimum row, in percent: both edges are
+    /// Core's, which clamps the stored value to them (#1517).
+    static let minimum: ClosedRange<Double> =
+        Double(
+            KiwiShelf.minimumRange.lowerBound
+        )...Double(
+            KiwiShelf.minimumRange.upperBound
+        )
 
     /// The Space Bar's Spring delay row, in the seconds the row
     /// shows; `springDelayRange` is the milliseconds it stores.

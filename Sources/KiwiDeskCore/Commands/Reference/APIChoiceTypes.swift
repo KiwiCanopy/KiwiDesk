@@ -28,9 +28,11 @@ extension MonocleParams.HideStyle: APIChoiceType {}
 extension TrackParams.Axis: APIChoiceType {}
 extension TrackParams.NewWindowTrack: APIChoiceType {}
 
-// `SpaceBarStyle` spells its vocabulary as typealiases of these,
-// so conforming the `AppBarStyle` types covers both bars.
+// `SpaceBarStyle` and `KiwiShelf` spell their vocabulary as
+// typealiases of these, so conforming the `AppBarStyle` types
+// covers all three.
 extension AppBarEdge: APIChoiceType {}
+extension KiwiShelf.Order: APIChoiceType {}
 extension AppBarStyle.BarAlignment: APIChoiceType {}
 extension AppBarStyle.BackgroundStyle: APIChoiceType {}
 extension AppBarStyle.BackgroundFit: APIChoiceType {}

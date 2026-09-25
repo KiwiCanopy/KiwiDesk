@@ -105,8 +105,8 @@ enum HomeCardPlate {
     static func palette(
         _ settings: TilingSettings
     ) -> SchematicPalette {
-        let accent = settings.spaceBarStyle.activeItemColor
-        let ink = settings.appBarStyle.itemColor
+        let accent = settings.kiwishelf.activeItemColor
+        let ink = settings.kiwishelf.itemColor
         return SchematicPalette(
             accent: plateLegible(accent)
                 ? Color(kiwiHex: accent)

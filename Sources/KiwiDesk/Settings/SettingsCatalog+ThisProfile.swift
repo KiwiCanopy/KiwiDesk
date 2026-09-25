@@ -119,23 +119,14 @@ struct AdvancedColorsControls: Sendable {
         "colors.drag.title",
         "Drag colors"
     )
-    let spaceBarGroup = SettingsControl(
-        "space_bar.colors.title",
-        "Space Bar colors"
+    let kiwishelfGroup = SettingsControl(
+        "kiwishelf.colors.title",
+        "KiwiShelf colors"
     )
-    let spaceBarMore = SettingsDrawer(
+    let kiwishelfMore = SettingsDrawer(
         "colors.more",
         "More colors",
-        instance: "space_bar"
-    )
-    let appBarGroup = SettingsControl(
-        "app_bar.global_colors.title",
-        "App Bar colors"
-    )
-    let appBarMore = SettingsDrawer(
-        "colors.more",
-        "More colors",
-        instance: "app_bar"
+        instance: "kiwishelf"
     )
     /// Detail panel full-palette preview (#793).
     let everyColorScene = SettingsControl(

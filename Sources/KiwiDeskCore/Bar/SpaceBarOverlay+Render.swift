@@ -9,29 +9,13 @@ extension SpaceBarOverlay {
         // The one place the stored style becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
-        let panel = self.panel ?? makePanel()
-        self.panel = panel
-        styleContainer(panel, style: style, strip: strip)
         syncItemViewCount(items.count)
         let horizontal = style.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
         let axis = horizontal ? strip.width : strip.height
         let gap = style.itemGap
         let leadsWithLayer = Self.leadsWithLayer(items)
-        let lengths = items.enumerated().map { index, item in
-            let length =
-                style.itemSize > 0
-                ? style.itemSize
-                : SpaceBarItemView.autoLength(
-                    appCount: item.apps.count,
-                    overflow: item.overflow,
-                    depth: depth
-                )
-            // The layer item's slot carries its section rule.
-            return index == 0 && leadsWithLayer
-                ? length + Self.layerDividerExtent(gap: gap)
-                : length
-        }
+        let lengths = Self.itemLengths(items, depth: depth, gap: gap)
         let front = frontExtent(
             frontApp,
             depth: depth,
@@ -47,10 +31,10 @@ extension SpaceBarOverlay {
         // real viewport; a pathological near-full-width app name
         // falls back to scrolling with the run rather than
         // collapsing the Spaces to nothing (#409).
-        let arrowRoom = 2 * (BarArrowView.zone + gap)
+        let fadeRoom = ShelfArrangement.fadeRoom(thickness: depth, gap: gap)
         let pinFront =
             total > axis && frontApp != nil
-            && front < axis - arrowRoom
+            && front < axis - fadeRoom
         let scrolledFront = pinFront ? 0 : front
         let spacesAxis = pinFront ? axis - front : axis
         let scrolledTotal = Self.runTotal(
@@ -58,11 +42,10 @@ extension SpaceBarOverlay {
             gap: gap,
             frontExtent: scrolledFront
         )
-        let (inset, viewport) = Self.scrollViewport(
-            axis: spacesAxis,
-            total: scrolledTotal,
-            gap: gap
-        )
+        // No arrow zones: the run fills its section and fades on
+        // a side that hides entries (#1517).
+        let inset: CGFloat = 0
+        let viewport = spacesAxis
         scrollOffset = Self.scrollOffset(
             current: scrollOffset,
             lengths: lengths,
@@ -70,9 +53,25 @@ extension SpaceBarOverlay {
             frontExtent: scrolledFront,
             activeIndex: followingActive ? activeIndex(items) : nil,
             viewport: viewport,
-            margin: gap
+            margin: ShelfOverflow.followMargin(
+                gap: gap,
+                depth: depth,
+                viewport: viewport
+            )
         )
-        let viewportRect = placeItemContainer(
+        // The front segment scrolls with the run unless pinned, so
+        // it is an entry the fades count and a page reaches.
+        let runEntries =
+            scrolledFront > 0 ? lengths + [scrolledFront] : lengths
+        let fades = ShelfOverflow.fades(
+            lengths: runEntries,
+            gap: gap,
+            total: scrolledTotal,
+            offset: scrollOffset,
+            viewport: viewport,
+            depth: depth
+        )
+        _ = placeItemContainer(
             inset: inset,
             viewport: viewport,
             strip: strip,
@@ -107,21 +106,13 @@ extension SpaceBarOverlay {
                 strip: strip,
                 runStart: runStart,
                 runTotal: total,
-                inset: inset,
                 gap: gap,
                 horizontal: horizontal,
                 fit: style.backgroundFit
             )
-        let hosting = glassHosting(style, overflow: inset > 0)
-        prepareGlassHosting(
-            hosting,
-            panel: panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame,
-            viewport: viewportRect,
-            pinnedFront: pinFront
-        )
+        self.plateFrame = plateFrame
+        let hosting = glassHosting(style)
+        prepareGlassHosting(hosting, pinnedFront: pinFront)
         let itemFrames = layoutLayerDivider(
             frames: metrics.itemFrames,
             leads: leadsWithLayer,
@@ -133,7 +124,9 @@ extension SpaceBarOverlay {
         recordHitFrames(
             items: items,
             frames: itemFrames,
-            strip: strip
+            strip: strip,
+            fades: fades,
+            horizontal: horizontal
         )
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
@@ -166,35 +159,23 @@ extension SpaceBarOverlay {
         )
         installGlassHosting(
             hosting,
-            panel: panel,
             frames: itemFrames,
-            viewport: viewportRect,
-            plateFrame: plateFrame,
-            pinnedFront: pinFront,
             style: style,
             depth: horizontal ? strip.height : strip.width
         )
-        layoutArrows(
+        layoutOverflow(
+            fades,
             strip: strip,
-            inset: inset,
             viewport: viewport,
             total: scrolledTotal,
-            trailingAxis: spacesAxis,
-            lengths: lengths,
+            lengths: runEntries,
             gap: gap,
             horizontal: horizontal,
-            style: style
+            style: style,
+            depth: depth
         )
-        panel.setFrame(
-            GeometryUtils.flip(
-                strip,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: true
-        )
-        if !panel.isVisible {
-            panel.orderFrontRegardless()
-        }
+        root.isHidden = false
+        onRendered()
     }
 
     /// Index of the active Space for scroll-follow navigation.

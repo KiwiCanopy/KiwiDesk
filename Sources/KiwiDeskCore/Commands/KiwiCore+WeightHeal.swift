@@ -64,7 +64,7 @@ extension KiwiCore {
                 in: state
             )
         else { return }
-        let bounds = tiler.layoutBounds(on: screen)
+        let bounds = tiler.layoutBounds(on: screen, for: space)
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.localTiledMembers(of: space)
         guard !tiled.isEmpty else { return }

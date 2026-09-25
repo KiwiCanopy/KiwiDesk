@@ -32,9 +32,13 @@ struct LayoutCard: View {
         {
             CrossReferenceRow(
                 prose: appBarProse,
+                // The switch is on the KiwiShelf card; both segments
+                // are their own labels (#818).
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
-                    "Bars ▸ App Bar"
+                    "%1$@ ▸ %2$@",
+                    SettingsDestination.bars.title,
+                    L("bars.switch.kiwishelf", "KiwiShelf")
                 ),
                 destination: .bars
             )

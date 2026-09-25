@@ -3,14 +3,12 @@ import CoreGraphics
 /// Shared background plate frame math for bar background_fit.
 enum BarPlate {
     /// Computes plate frame for `full` or `hug` background fit.
-    /// Hug falls back to full while the run overflows and
-    /// scrolls (`inset > 0` — content fills the strip, nothing
-    /// to hug) and for an empty run.
+    /// Hug clamps to the strip, so an overflowing run's plate
+    /// fills it; an empty run falls back to full.
     nonisolated static func frame(
         strip: CGRect,
         runStart: CGFloat,
         runTotal: CGFloat,
-        inset: CGFloat,
         gap: CGFloat,
         horizontal: Bool,
         fit: AppBarStyle.BackgroundFit
@@ -21,7 +19,7 @@ enum BarPlate {
             width: strip.width,
             height: strip.height
         )
-        guard fit == .hug, inset == 0, runTotal > 0 else {
+        guard fit == .hug, runTotal > 0 else {
             return full
         }
         let axis = horizontal ? strip.width : strip.height

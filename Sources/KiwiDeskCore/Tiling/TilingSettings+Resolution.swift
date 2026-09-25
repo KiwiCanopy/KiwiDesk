@@ -83,14 +83,53 @@ extension TilingSettings {
         return params
     }
 
-    /// True if Space Bar and an enabled layout App Bar share an edge (#293).
-    public var spaceBarSharesEdgeWithAppBar: Bool {
-        guard spaceBarStyle.enabled else { return false }
-        return appBarHosts.contains {
-            $0.enabled
-                && $0.resolved(with: appBarStyle).edge
-                    == spaceBarStyle.edge
-        }
+    /// Whether the KiwiShelf carries any bar in some layout — the
+    /// Space Bar or any layout's App Bar is on. The Settings gates
+    /// ask it; the reservation asks `shelfShows(in:)`.
+    public var shelfShows: Bool {
+        spaceBarStyle.enabled || anyAppBarCanShow
+    }
+
+    /// Whether a bar draws on the shelf of a space laid out in
+    /// `mode` — the Space Bar, which draws in every layout, or
+    /// that layout's own App Bar — and so whether the strip is
+    /// reserved there (#1517). A layout that draws no bar keeps
+    /// the whole screen; the price is that with the Space Bar off,
+    /// a switch into a layout whose App Bar shows moves windows
+    /// by the strip.
+    public func shelfShows(in mode: LayoutMode) -> Bool {
+        spaceBarStyle.enabled
+            || appBarHost(for: mode)?.appBar.enabled == true
+    }
+
+    /// True if any layout's App Bar is switched on.
+    public var anyAppBarCanShow: Bool {
+        appBarHosts.contains { $0.enabled }
+    }
+
+    /// True if the Space Bar and a layout's App Bar can both show,
+    /// splitting the shelf between them (`ShelfArrangement`).
+    public var bothBarsCanShow: Bool {
+        spaceBarStyle.enabled && anyAppBarCanShow
+    }
+
+    /// What the Space Bar draws from: the shelf and its own style.
+    public var spaceBarLook: SpaceBarLook {
+        SpaceBarLook(shelf: kiwishelf, bar: spaceBarStyle)
+    }
+
+    /// The shelf and the App Bar's global style, before any
+    /// layout's overrides — what `AppBarHosting.resolvedBar`
+    /// resolves from.
+    public var appBarGlobalLook: AppBarLook {
+        AppBarLook(shelf: kiwishelf, bar: appBarStyle)
+    }
+
+    /// What a layout's App Bar draws from: the shelf and the App
+    /// Bar's style after that layout's overrides — the one body,
+    /// which `AppBarHosting.resolvedBar` calls too.
+    public func appBarLook(for bar: LayoutAppBar) -> AppBarLook {
+        bar.look(on: appBarGlobalLook)
     }
 
     /// The bar-hosting layout for a mode — the ONE place that
@@ -116,16 +155,21 @@ extension TilingSettings {
         }
     }
 
-    /// Insets visible bounds by the Space Bar reservation (#293).
+    /// Insets visible bounds by the shelf's reservation wherever a
+    /// bar draws in `mode` (#293, #1517).
     /// Deliberately NOT public: it takes a raw frame the caller
     /// obtained some other way — the unsafe half. Callers with a
     /// screen want `TilingEngine.layoutBounds(on:)` (#537), and
     /// the routing guards scan only this module, so a cross-module
     /// caller would be invisible to them.
-    func layoutBounds(from visible: CGRect) -> CGRect {
-        SpaceBarGeometry.remainingFrame(
+    func layoutBounds(
+        from visible: CGRect,
+        mode: LayoutMode
+    ) -> CGRect {
+        guard shelfShows(in: mode) else { return visible }
+        return ShelfGeometry.remainingFrame(
             in: visible,
-            style: spaceBarStyle
+            shelf: kiwishelf
         )
     }
 
@@ -142,11 +186,7 @@ extension TilingSettings {
     ) -> Int {
         let gaps = space.map(gaps(for:)) ?? gapsGlobal
         let params = space.map(resolvedScrolling(for:)) ?? scrolling
-        let area = params.windowFrame(
-            in: bounds,
-            outer: gaps.outer,
-            global: appBarStyle
-        )
+        let area = LayoutContext.usable(bounds, outer: gaps.outer)
         let horizontal = params.axisIsHorizontal
         return ScrollSize.maxCount(
             along: horizontal ? area.width : area.height,
@@ -188,8 +228,7 @@ extension TilingSettings {
             scrolling: resolvedScrolling(for: space),
             grid: resolvedGrid(for: space.id),
             monocle: resolvedMonocle(for: space.id),
-            track: resolvedTrack(for: space.id),
-            appBarStyle: appBarStyle
+            track: resolvedTrack(for: space.id)
         )
     }
 

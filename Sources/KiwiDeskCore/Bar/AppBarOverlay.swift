@@ -1,8 +1,8 @@
 import AppKit
 
-/// Non-activating overlay panel displaying window items in AX
-/// coordinates; the style's `edge` is the stored absolute edge
-/// the bar sits on (#293).
+/// The App Bar's section of one display's shelf (#293, #1517): it
+/// draws into `root`, which `ShelfOverlay` places on the shelf's
+/// one panel over the shelf's one plate.
 @MainActor
 public final class AppBarOverlay {
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
@@ -17,61 +17,55 @@ public final class AppBarOverlay {
         _ in
     }
 
-    /// Depth of scroll-arrow zones at strip ends (`BarArrowView.zone`, #385).
-    nonisolated static let arrowZone = BarArrowView.zone
-
     /// Cached inputs from last `show()` for manual arrow scrolling.
     private struct RenderState {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
-        let style: AppBarStyle
+        let style: AppBarLook
+        let capAxis: CGFloat?
     }
 
-    private var panel: NSPanel?
+    /// The section's view; the shelf sets its origin, the
+    /// section its size.
+    let root = ShelfSectionRoot()
+    /// The plate this section's run asks for, in `root`'s
+    /// coordinates — the shelf unions it with the other section's.
+    var plateFrame: CGRect = .zero
+    /// Fires after every render, so the shelf re-lays its plate.
+    var onRendered: @MainActor () -> Void = {}
     var itemViews: [AppBarItemView] = []
     let itemContainer = FlippedView()
-    let backArrow = BarArrowView()
-    let forwardArrow = BarArrowView()
-    /// Liquid Glass plate under items for material background (#390).
-    var glassPlate: NSView?
+    /// Hidden-entry counts on each fading end (#1517).
+    let backCount = ShelfCountView(side: .before)
+    let forwardCount = ShelfCountView(side: .after)
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).
     var boxTints: [NSView] = []
-    /// Scroll arrows frosted backdrop boxes.
-    var backArrowGlass: NSView?
-    var forwardArrowGlass: NSView?
-    /// Tinted backdrops behind arrow glasses (#408).
-    var backArrowTint: NSView?
-    var forwardArrowTint: NSView?
-    /// Colored backdrop behind single glass plate (#408).
-    var glassTint: NSView?
-    /// Shared fill plate for plain style (`background_fit`, QA 2026-07-19).
-    var plainPlate: NSView?
-    /// Flipped run wrapper for plain + glass without overflow.
-    var glassRun: AppBarOverlay.FlippedView?
-    /// Hugging plate span geometry for reorder drag transitions.
-    struct GlassDragSpan {
-        let viewport: CGRect
-        let radius: CGFloat
-        let tint: String
-    }
-    var glassDragSpan: GlassDragSpan?
     var scrollOffset: CGFloat = 0
+    /// Follows the focused window unless a manual scroll holds.
+    var follow = ShelfFollow<WindowID>()
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
-    public init() {}
+    public init() {
+        configureRoot()
+    }
 
-    public var isVisible: Bool { panel?.isVisible ?? false }
+    public var isVisible: Bool { lastShown != nil && !root.isHidden }
+
+    /// The slot this section last drew into (AX coordinates) — the
+    /// one the shelf places it at.
+    var shownStrip: CGRect? { lastShown?.strip }
 
     /// Renders `items` into `strip` (AX coordinates).
     public func show(
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
-        style: AppBarStyle
+        style: AppBarLook,
+        capAxis: CGFloat? = nil
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -83,15 +77,21 @@ public final class AppBarOverlay {
             items: items,
             activeIndex: activeIndex,
             strip: strip,
-            style: style
+            style: style,
+            capAxis: capAxis
         )
-        render(followingFocus: true)
+        let focus = activeIndex.flatMap {
+            items.indices.contains($0) ? items[$0].id : nil
+        }
+        render(followingFocus: follow.follows(focus))
     }
 
     public func hide() {
+        follow.reset()
         lastShown = nil
         scrollOffset = 0
-        panel?.orderOut(nil)
+        root.isHidden = true
+        onRendered()
     }
 
     // MARK: - Rendering
@@ -109,22 +109,13 @@ public final class AppBarOverlay {
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
         let edge = style.edge
-        let panel = self.panel ?? makePanel()
-        self.panel = panel
-        // The plain strip rounds against its real (clamped) cross
-        // depth, not the configured thickness, so a strip squeezed
-        // by a small usable area can't over-round.
-        styleContainer(
-            panel,
-            style: style,
-            depth: edge.isHorizontal ? strip.height : strip.width
-        )
         syncItemViewCount(items.count)
         let m = metrics(
             strip: strip,
             count: items.count,
             style: style,
-            items: items
+            items: items,
+            capAxis: state.capAxis
         )
         lastMetrics = m
         scrollOffset = Self.scrollOffset(
@@ -134,7 +125,11 @@ public final class AppBarOverlay {
             gap: m.gap,
             count: items.count,
             axis: m.viewport,
-            margin: m.gap
+            margin: ShelfOverflow.followMargin(
+                gap: m.gap,
+                depth: edge.isHorizontal ? strip.height : strip.width,
+                viewport: m.viewport
+            )
         )
         let viewport =
             m.horizontal
@@ -172,26 +167,14 @@ public final class AppBarOverlay {
             strip: strip,
             runStart: runStart,
             runTotal: m.total,
-            inset: m.inset,
             gap: m.gap,
             horizontal: m.horizontal,
             fit: style.backgroundFit
         )
         let depth = edge.isHorizontal ? strip.height : strip.width
-        let hosting = glassHosting(style, overflow: m.inset > 0)
+        self.plateFrame = plateFrame
+        let hosting = glassHosting(style)
         BarMotion.runLayout {
-            prepareGlassHosting(
-                hosting,
-                panel: panel,
-                style: style,
-                strip: strip,
-                plateFrame: plateFrame,
-                viewport: viewport,
-                animated: true
-            )
-            // Items hosted in a glass wrapper are placed by the
-            // glass path; animating them here in container coords
-            // would fight that and flicker.
             for (index, view) in itemViews.enumerated()
             where view.superview === itemContainer {
                 BarMotion.setFrame(
@@ -204,9 +187,7 @@ public final class AppBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex
-            // "gap" indicator: focused window slot stays empty.
-            view.isHidden =
-                active && style.activeIndicator == .gap
+            view.isHidden = false
             view.configure(
                 id: item.id,
                 name: item.name,
@@ -233,25 +214,14 @@ public final class AppBarOverlay {
         // Single dispatch for glass hosting mode (#407).
         installGlassHosting(
             hosting,
-            panel: panel,
             frames: frames,
-            viewport: viewport,
-            plateFrame: plateFrame,
             style: style,
             depth: depth,
             animated: true
         )
-        layoutArrows(strip: strip, m: m, style: style)
-        panel.setFrame(
-            GeometryUtils.flip(
-                strip,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: true
-        )
-        if !panel.isVisible {
-            panel.orderFrontRegardless()
-        }
+        layoutOverflow(strip: strip, m: m, style: style)
+        root.isHidden = false
+        onRendered()
     }
 
 }

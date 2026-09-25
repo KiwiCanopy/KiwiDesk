@@ -4,7 +4,8 @@ import Foundation
 extension APIReference {
     /// Closest known command for a typo — dispatchable names
     /// only: this path is reached from the CLI/IPC socket too,
-    /// where a Lua-only name would be a dead-end hint.
+    /// where a Lua-only name would be a dead-end hint. A RETIRED
+    /// name is not a typo and is answered by `retired` instead.
     public static func suggestion(
         for unknown: String
     ) -> String? {

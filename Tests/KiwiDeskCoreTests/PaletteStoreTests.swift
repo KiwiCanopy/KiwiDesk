@@ -17,7 +17,7 @@ struct PaletteStoreTests {
 
     private let sample = ColorPalette(
         name: "Mine",
-        colors: ["app_bar.fill_color": "#112233"]
+        colors: ["kiwishelf.fill_color": "#112233"]
     )
 
     @Test("Built-ins are the catalog; no user palettes at first")
@@ -128,13 +128,13 @@ struct PaletteStoreTests {
         let alien = ColorPalette(
             name: "Alien",
             colors: [
-                "app_bar.fill_color": "#010203",
+                "kiwishelf.fill_color": "#010203",
                 "totally.made.up": "#FFFFFF",
             ]
         )
         try JSONEncoder().encode(alien).write(to: url)
         let cleaned = try store.importPalette(from: url)
-        #expect(cleaned.colors == ["app_bar.fill_color": "#010203"])
+        #expect(cleaned.colors == ["kiwishelf.fill_color": "#010203"])
     }
 
     @Test("Importing a non-palette file throws")
@@ -162,7 +162,7 @@ struct PaletteStoreTests {
         )
         let legacy =
             """
-            [{"colors":{"app_bar.fill_color":"#112233"},"name":"Mine"}]
+            [{"colors":{"kiwishelf.fill_color":"#112233"},"name":"Mine"}]
             """
         try Data(legacy.utf8).write(to: store.url)
         let initial = try Data(contentsOf: store.url)

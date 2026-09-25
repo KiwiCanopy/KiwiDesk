@@ -241,7 +241,8 @@ struct BarStripAbsorptionTests {
                     width: 800,
                     height: 32
                 ),
-                style: AppBarStyle()
+                style: AppBarLook(),
+                capAxis: 800
             )
         ])
         // The same point now sits inside the painted strip —
@@ -301,7 +302,7 @@ struct BarStripAbsorptionTests {
                     width: 800,
                     height: 40
                 ),
-                style: SpaceBarStyle(),
+                style: SpaceBarLook(),
                 stateMarkColors: StateMarkColors(
                     sticky: "",
                     floating: ""

@@ -11,8 +11,7 @@ struct AdvancedColorsSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 BorderColorCard(model: model)
                 DragColorCard(model: model)
-                SpaceBarColorCard(model: model)
-                AppBarColorCard(model: model)
+                KiwiShelfColorCard(model: model)
             }
             .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
         }

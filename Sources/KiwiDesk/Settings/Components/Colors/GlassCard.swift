@@ -84,10 +84,10 @@ struct GlassCard: View {
             "colors.liquid_glass.help",
             "Lays macOS's translucent material over the Space "
                 + "Bar, the App Bar and the shortcuts panel. "
-                + "Each bar's %1$@ color tints its own "
+                + "KiwiShelf's %1$@ color tints the bars' one "
                 + "material; the shortcuts panel stays "
                 + "untinted.",
-            L("app_bar.color.fill", "Fill")
+            L("kiwishelf.color.fill", "Fill")
         )
     }
 

@@ -23,48 +23,40 @@ struct AppBarOverrideTests {
     @Test("Unset fields inherit the global style")
     func inheritance() {
         var global = AppBarStyle()
-        global.thickness = 20
-        global.backgroundStyle = .plain
-        global.itemColor = "#010203"
-        let bar = LayoutAppBar()
-        let resolved = bar.resolved(with: global)
-        #expect(resolved.thickness == 20)
-        #expect(resolved.backgroundStyle == .plain)
-        #expect(resolved.itemColor == "#010203")
+        global.content = .icon
+        global.titleCap = 7
+        let resolved = LayoutAppBar().resolved(with: global)
+        #expect(resolved.content == .icon)
+        #expect(resolved.titleCap == 7)
     }
 
     @Test("Set fields override just themselves")
     func overrideOne() {
         var global = AppBarStyle()
-        global.thickness = 20
-        global.backgroundStyle = .plain
+        global.content = .icon
+        global.titleCap = 7
         var bar = LayoutAppBar()
-        bar.thickness = 50
+        bar.content = .title
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
-        #expect(resolved.thickness == 50)
-        #expect(resolved.backgroundStyle == .plain)
+        #expect(resolved.content == .title)
+        #expect(resolved.titleCap == 7)
     }
 
-    @Test("Stored edge is absolute; override beats global")
+    @Test("The shelf's edge is absolute, orientation aside")
     func edgeResolves() {
         var scroll = ScrollingParams()
         // No override: the global edge wins, orientation is
         // irrelevant (#293 — the edge is stored absolute).
-        var global = AppBarStyle()
+        var global = AppBarLook()
         global.edge = .bottom
         scroll.orientation = .vertical
         #expect(
             scroll.resolvedBar(global: global).edge == .bottom
         )
-        // A per-layout override beats the global on any axis.
-        scroll.appBar.edge = .right
-        #expect(
-            scroll.resolvedBar(global: global).edge == .right
-        )
         scroll.orientation = .horizontal
         #expect(
-            scroll.resolvedBar(global: global).edge == .right
+            scroll.resolvedBar(global: global).edge == .bottom
         )
     }
 
@@ -99,35 +91,39 @@ struct ScrollingBarGeometryTests {
 
     private func context(
         orientation: ScrollingParams.Orientation = .horizontal,
-        barEnabled: Bool = true,
-        edge: AppBarEdge = .top
+        barEnabled: Bool = true
     ) -> LayoutContext {
         var context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             gaps: .uniform(10)
         )
-        // Pinned (#660): the strip arithmetic reasons from it.
-        context.appBarStyle.thickness = 32
         context.scrolling.orientation = orientation
         context.scrolling.appBar.enabled = barEnabled
-        context.scrolling.appBar.edge = edge
         return context
     }
 
-    @Test("Horizontal bar carves a top strip by default")
-    func horizontalStrip() throws {
-        let context = context()
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        let usable = context.usable
-        let window = try #require(frames[w1])
-        // The pinned 32pt top strip, cut from the usable area;
-        // the outer gap is the window side (#1516).
-        #expect(window.minY == usable.minY + 32)
-        #expect(window.height == usable.height - 32)
-        #expect(window.width == usable.width)
+    /// The shelf reserves the bar's room before the layout runs
+    /// (#1517), so the layout places the same frames with the
+    /// App Bar on or off, on either axis.
+    @Test(
+        "The App Bar's switch moves no window",
+        arguments: [
+            ScrollingParams.Orientation.horizontal, .vertical,
+        ]
+    )
+    func barSwitchMovesNothing(
+        orientation: ScrollingParams.Orientation
+    ) throws {
+        var on = context(orientation: orientation)
+        var off = context(orientation: orientation, barEnabled: false)
+        on.scrolling.slotSize = .points(300)
+        off.scrolling.slotSize = .points(300)
+        let shown = layout.calculateGeometry(for: [w1, w2], in: on)
+        let hidden = layout.calculateGeometry(for: [w1, w2], in: off)
+        #expect(shown == hidden)
+        let first = try #require(shown[w1])
+        #expect(first.minX == on.usable.minX)
+        #expect(first.minY == on.usable.minY)
     }
 
     @Test("Vertical orientation stacks windows into rows")
@@ -149,72 +145,6 @@ struct ScrollingBarGeometryTests {
         #expect(second.minY > first.minY)
         #expect(first.minX == context.usable.minX)
     }
-
-    @Test("A left edge carves a left strip")
-    func verticalStrip() throws {
-        // The edge is absolute (#293): a left bar eats window
-        // *width*, not height, on any orientation.
-        let context = context(orientation: .vertical, edge: .left)
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        let usable = context.usable
-        let window = try #require(frames[w1])
-        #expect(window.minX == usable.minX + 32)
-        #expect(window.width == usable.width - 32)
-        #expect(window.height == usable.height)
-    }
-
-    @Test("A disabled bar leaves the full usable area")
-    func disabledBar() throws {
-        let context = context(barEnabled: false)
-        let frames = layout.calculateGeometry(
-            for: [w1],
-            in: context
-        )
-        #expect(frames[w1] == context.usable)
-    }
-
-    // The decoupled combos are the point of #293: the strip may
-    // now carve along OR across the scroll axis.
-
-    @Test("Vertical scrolling under a top bar loses height")
-    func verticalScrollTopBar() throws {
-        // The new default for vertical scrolling: a top strip
-        // carves the same axis the rows scroll along.
-        var context = context(orientation: .vertical, edge: .top)
-        context.scrolling.slotSize = .points(300)
-        let frames = layout.calculateGeometry(
-            for: [w1, w2],
-            in: context
-        )
-        let usable = context.usable
-        let first = try #require(frames[w1])
-        // Rows keep full width and start below strip + gap.
-        #expect(first.width == usable.width)
-        #expect(first.minY == usable.minY + 32)
-        #expect(first.height == 300)
-    }
-
-    @Test("Horizontal scrolling beside a left bar loses width")
-    func horizontalScrollLeftBar() throws {
-        var context = context(
-            orientation: .horizontal,
-            edge: .left
-        )
-        context.scrolling.slotSize = .points(500)
-        let frames = layout.calculateGeometry(
-            for: [w1, w2],
-            in: context
-        )
-        let usable = context.usable
-        let first = try #require(frames[w1])
-        // Columns keep full height, shifted right of the strip.
-        #expect(first.height == usable.height)
-        #expect(first.minX == usable.minX + 32)
-        #expect(first.width == 500)
-    }
 }
 
 @Suite("App bar commands", .serialized)
@@ -225,19 +155,19 @@ struct AppBarCommandTests {
         let core = makeCore()
         #expect(
             core.execute(
-                "app_bar.set_thickness",
+                "kiwishelf.set_thickness",
                 args: [.number(44)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.appBarStyle.thickness == 44)
+        #expect(core.tiler.settings.kiwishelf.thickness == 44)
         #expect(
             core.execute(
-                "app_bar.set_background_style",
+                "kiwishelf.set_background_style",
                 args: [.string("plain")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.appBarStyle.backgroundStyle
+            core.tiler.settings.kiwishelf.backgroundStyle
                 == .plain
         )
     }
@@ -257,18 +187,16 @@ struct AppBarCommandTests {
         )
         #expect(
             core.execute(
-                "scroll.set_app_bar_background_style",
-                args: [.string("plain")]
+                "scroll.set_app_bar_content",
+                args: [.string("icon")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.backgroundStyle
-                == .plain
+            core.tiler.settings.scrolling.appBar.content == .icon
         )
         // Untouched fields stay nil (inherit the global look).
         #expect(
-            core.tiler.settings.scrolling.appBar.thickness
-                == nil
+            core.tiler.settings.scrolling.appBar.titleCap == nil
         )
     }
 
@@ -323,13 +251,13 @@ struct AppBarCommandTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "app_bar.set_background_style",
+                "kiwishelf.set_background_style",
                 args: [.string("triangles")]
             ).isSuccess
         )
         #expect(
             !core.execute(
-                "app_bar.set_thickness",
+                "kiwishelf.set_thickness",
                 args: [.string("thick")]
             ).isSuccess
         )

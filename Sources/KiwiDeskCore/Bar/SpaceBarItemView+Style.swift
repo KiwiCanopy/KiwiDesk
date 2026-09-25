@@ -147,7 +147,7 @@ extension SpaceBarItemView {
         if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverItemColor)
         }
-        return NSColor(kiwiHex: style.itemColor)
+        return NSColor(kiwiHex: style.idleItemColor)
     }
 
     private func styleIdentifier() {
@@ -224,8 +224,6 @@ extension SpaceBarItemView {
             accent.layer?.borderWidth = 0
             accent.layer?.cornerRadius = 0
             accent.layer?.backgroundColor = highlight.cgColor
-        case .gap:
-            accent.isHidden = true
         }
     }
 

@@ -31,12 +31,11 @@ struct SettingsCatalogDrawerTests {
         "shortcuts.tracks.move",
         // Raw Lua bindings: rows are the user's own bindings.
         "shortcuts.advanced.title",
-        // Advanced Colours' two "More colors" drawers are ruled
-        // OUT of the #277 fill: colour selection is a browse
+        // Advanced Colours' "More colors" drawer is ruled OUT of
+        // the #277 fill: colour selection is a browse
         // interaction, not a name search (the issue's tier
-        // audit, 2026-08-27).
-        "space_bar/colors.more",
-        "app_bar/colors.more",
+        // audit, 2026-08-27; one drawer since #1517).
+        "kiwishelf/colors.more",
     ]
 
     /// The declared set matches the register above — derived

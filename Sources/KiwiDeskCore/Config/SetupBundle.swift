@@ -33,8 +33,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 10 = a Desktop binding entry scoped to one screen setup
     /// (#1609), which reaches a bundle the way 4 and 8 did;
     /// 11 = a shortcut override's left-out combo (#1393), on
-    /// `[Profile]` alone.
-    public static let currentFormat = 11
+    /// `[Profile]` alone;
+    /// 12 = the bars' shared fields moved to `kiwishelf` (#1517),
+    /// on `[Profile]` alone.
+    public static let currentFormat = 12
 
     public let format: Int
 

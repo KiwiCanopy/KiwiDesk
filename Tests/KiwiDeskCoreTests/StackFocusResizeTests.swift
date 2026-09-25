@@ -38,7 +38,11 @@ struct StackFocusResizeTests {
         // re-pinned to an edge: this suite is about stack resize
         // maths, and a bar on any edge is one more thing for it to
         // be quietly wrong about.
+        // Every bar off: the shelf reserves in every layout while
+        // any can show (#1517), App Bars included.
         core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.monocle.appBar.enabled = false
+        core.tiler.settings.scrolling.appBar.enabled = false
         return core
     }
 

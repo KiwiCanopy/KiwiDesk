@@ -16,7 +16,7 @@ public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
 public enum AppBarGeometry {
     /// The strip the bar occupies in AX coordinates, `outer`
     /// points in from its edge (#1516) — every caller chooses,
-    /// the floor being the style's (`AppBarStyle.minMargin`).
+    /// the floor being the style's (`KiwiShelf.minMargin`).
     public static func barFrame(
         in bounds: CGRect,
         edge: AppBarEdge,
@@ -113,13 +113,8 @@ public enum AppBarGeometry {
     }
 
     /// Carves `strip` from `region` for float bounding (#1091).
-    /// Its sibling is `AppBarHosting.windowFrame(in:outer:global:)`
-    /// over `remaining(_:edge:reserving:)`, NOT `clampClear`
-    /// (architect review 2026-08-29): a new caller takes
-    /// `windowFrame` if the layout is placing the window and this
-    /// if it is not — the monocle park takes this. Monotonic, and
-    /// never a negative extent — an inside-out rect reads as
-    /// enormous free space.
+    /// Monotonic, and never a negative extent — an inside-out
+    /// rect reads as enormous free space.
     public static func regionClear(
         _ region: CGRect,
         of strip: CGRect,
@@ -153,7 +148,10 @@ public enum AppBarGeometry {
 
 }
 
-/// Protocol for layouts supporting an indicator bar.
+/// Protocol for layouts supporting an indicator bar. The bar
+/// sits on the KiwiShelf, which reserves its room in every
+/// layout (`TilingSettings.layoutBounds(from:)`, #1517), so a
+/// hosting layout places its windows exactly as any other does.
 public protocol AppBarHosting {
     var appBar: LayoutAppBar { get }
 }
@@ -161,47 +159,8 @@ public protocol AppBarHosting {
 extension AppBarHosting {
     /// Resolves layout bar overrides against global style.
     public func resolvedBar(
-        global: AppBarStyle
-    ) -> AppBarStyle {
-        appBar.resolved(with: global)
-    }
-
-    /// The bar's strip in `bounds` — the layout bounds BEFORE
-    /// the windows' outer gap, since the bar's outer margin is
-    /// measured from the screen edge (#1516) — or nil when
-    /// disabled.
-    public func barFrame(
-        in bounds: CGRect,
-        global: AppBarStyle
-    ) -> CGRect? {
-        guard appBar.enabled else { return nil }
-        let style = resolvedBar(global: global)
-        return AppBarGeometry.barFrame(
-            in: bounds,
-            edge: style.edge,
-            thickness: style.thickness,
-            outer: style.outerMargin
-        )
-    }
-
-    /// Window area: the same `bounds` `barFrame` takes, less the
-    /// windows' outer gap and the bar's reservation — outer
-    /// margin, strip and inner margin. Both doors read one rect
-    /// so no caller can hand one the other's; the outer gap
-    /// stays the windows' own, so the bar's window side is
-    /// `innerMargin` PLUS that gap (#1516).
-    public func windowFrame(
-        in bounds: CGRect,
-        outer: Gaps.Outer,
-        global: AppBarStyle
-    ) -> CGRect {
-        let usable = LayoutContext.usable(bounds, outer: outer)
-        guard appBar.enabled else { return usable }
-        let style = resolvedBar(global: global)
-        return AppBarGeometry.remaining(
-            usable,
-            edge: style.edge,
-            reserving: style.reservation
-        )
+        global: AppBarLook
+    ) -> AppBarLook {
+        appBar.look(on: global)
     }
 }

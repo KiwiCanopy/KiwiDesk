@@ -2,15 +2,15 @@ import Foundation
 
 /// Dotted color key definitions for theme palettes (#375,
 /// #678). The dotted namespace is load-bearing — bare wire keys
-/// like `fill_color` collide between the two bars — and the
+/// like `fill_color` collide between groups — and the
 /// surface is reflection-derived from each struct's color
 /// CodingKeys, so a new color key auto-joins.
 public enum ColorPaletteKeys {
     /// Every settable color path, in a stable order.
     public static var all: [String] {
         colorPaths(
-            AppBarStyle.CodingKeys.allCases,
-            prefix: "app_bar"
+            KiwiShelf.CodingKeys.allCases,
+            prefix: "kiwishelf"
         )
             + colorPaths(
                 SpaceBarStyle.CodingKeys.allCases,

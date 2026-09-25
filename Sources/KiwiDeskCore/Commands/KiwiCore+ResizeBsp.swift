@@ -73,7 +73,7 @@ extension KiwiCore {
         return Double(
             BspSplit.side(
                 slot: slot,
-                bounds: tiler.layoutBounds(on: screen),
+                bounds: tiler.layoutBounds(on: screen, for: space),
                 horizontal: axis == "x"
             )
         )

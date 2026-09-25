@@ -125,7 +125,10 @@ struct SplitFloorHealWiringTests {
         // Bar's default strip (#660 — pinned, since the fixture
         // reasons from it), the outer gaps and the inner gap.
         let screen = try #require(NSScreen.main)
-        let bounds = core.tiler.layoutBounds(on: screen)
+        let bounds = core.tiler.layoutBounds(
+            on: screen,
+            for: try #require(core.state.workspaces[space])
+        )
         let gaps = core.tiler.settings.gaps(for: space)
         let span =
             bounds.height - gaps.outer.top - gaps.outer.bottom

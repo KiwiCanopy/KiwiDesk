@@ -96,7 +96,7 @@ struct SettingsSearchTests {
     func caseInsensitiveSubstring() {
         pinEnglish()
         defer { reset() }
-        let results = settings("pP bAr cOlo")
+        let results = settings("wIsHeLf cOlo")
         #expect(!results.isEmpty)
         #expect(
             results.allSatisfy {

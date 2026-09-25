@@ -1,66 +1,61 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Advanced color swatch rows for App Bar and Space Bar.
+/// Advanced color swatch rows for the shelf and the Space Bar.
 extension AdvancedColorRow {
-    @ViewBuilder func appBarRow(_ key: AppBarKey) -> some View {
-        let style = settings.appBarStyle
+    @ViewBuilder func kiwishelfRow(_ key: KiwiShelfKey) -> some View {
+        let shelf = settings.kiwishelf
         switch key {
-        case .appBarFillColor:
+        case .fillColor:
             HexColorField(
-                label: L("app_bar.color.fill", "Fill"),
-                hex: style.fillColor
+                label: L("kiwishelf.color.fill", "Fill"),
+                hex: shelf.fillColor
             )
-        case .appBarHighlightColor:
+        case .itemColor:
             HexColorField(
-                label: L("app_bar.color.highlight", "Highlight"),
-                hex: style.highlightColor
+                label: L("kiwishelf.color.item", "Item"),
+                hex: shelf.itemColor
             )
-            .modifier(
-                gated(
-                    gates.bars.gapOnly,
-                    BarsGateHelp.sentence(for: .gapOnly)
+            .help(
+                L(
+                    "kiwishelf.color.item.help",
+                    "Text and glyphs on both bars. A Space you are "
+                        + "not on draws it dimmed."
                 )
             )
-        case .appBarItemColor:
+        case .activeItemColor:
             HexColorField(
-                label: L("app_bar.color.item", "Item"),
-                hex: style.itemColor
+                label: L("kiwishelf.color.active_item", "Active item"),
+                hex: shelf.activeItemColor
             )
-        case .appBarActiveItemColor:
+        case .highlightColor:
             HexColorField(
-                label: L("app_bar.color.active_item", "Active item"),
-                hex: style.activeItemColor
+                label: L("kiwishelf.color.highlight", "Highlight"),
+                hex: shelf.highlightColor
             )
-            .modifier(
-                gated(
-                    gates.bars.gapOnly,
-                    BarsGateHelp.sentence(for: .gapOnly)
-                )
-            )
-        case .appBarHoverFillColor:
+        case .hoverFillColor:
             HexColorField(
-                label: L("app_bar.color.hover_fill", "Hover fill"),
-                hex: style.hoverFillColor
+                label: L("kiwishelf.color.hover_fill", "Hover fill"),
+                hex: shelf.hoverFillColor
             )
-        case .appBarHoverItemColor:
+        case .hoverItemColor:
             HexColorField(
-                label: L("app_bar.color.hover_item", "Hover item"),
-                hex: style.hoverItemColor
+                label: L("kiwishelf.color.hover_item", "Hover item"),
+                hex: shelf.hoverItemColor
             )
-        case .appBarGroupBadgeColor:
+        case .groupBadgeColor:
             HexColorField(
-                label: L("app_bar.color.group_badge", "Group badge"),
-                hex: style.groupBadgeColor
+                label: L("kiwishelf.color.group_badge", "Group badge"),
+                hex: shelf.groupBadgeColor
             )
-        case .appBarGroupBadgeTextColor:
+        case .groupBadgeTextColor:
             HexColorField(
-                label: L("app_bar.color.badge_text", "Badge text"),
-                hex: style.groupBadgeTextColor
+                label: L("kiwishelf.color.badge_text", "Badge text"),
+                hex: shelf.groupBadgeTextColor
             )
         default:
             let _ = assertionFailure(
-                "non-colour App Bar key in Advanced Colours: "
+                "non-colour KiwiShelf key in Advanced Colours: "
                     + key.rawValue
             )
             EmptyView()
@@ -70,26 +65,6 @@ extension AdvancedColorRow {
     @ViewBuilder func spaceBarRow(_ key: SpaceBarKey) -> some View {
         let style = settings.spaceBarStyle
         switch key {
-        case .spaceBarItemColor:
-            HexColorField(
-                label: L("space_bar.color.item", "Item"),
-                hex: style.itemColor
-            )
-        case .spaceBarActiveItemColor:
-            HexColorField(
-                label: L(
-                    "space_bar.color.active_space",
-                    "Active Space"
-                ),
-                hex: style.activeItemColor
-            )
-            .help(
-                L(
-                    "space_bar.color.active_space.help",
-                    "Tints the active Space's identifier and "
-                        + "its app glyphs."
-                )
-            )
         case .spaceBarFocusedItemColor:
             HexColorField(
                 label: L(
@@ -100,48 +75,6 @@ extension AdvancedColorRow {
             )
             .modifier(
                 gated(gates.focusedItemInert, focusedItemHelp)
-            )
-        case .spaceBarFillColor:
-            HexColorField(
-                label: L("space_bar.color.fill", "Fill"),
-                hex: style.fillColor
-            )
-        case .spaceBarHighlightColor:
-            HexColorField(
-                label: L("space_bar.color.highlight", "Highlight"),
-                hex: style.highlightColor
-            )
-        case .spaceBarHoverFillColor:
-            HexColorField(
-                label: L("space_bar.color.hover_fill", "Hover fill"),
-                hex: style.hoverFillColor
-            )
-        case .spaceBarHoverItemColor:
-            HexColorField(
-                label: L("space_bar.color.hover_item", "Hover item"),
-                hex: style.hoverItemColor
-            )
-        case .spaceBarGroupBadgeColor:
-            HexColorField(
-                label: L(
-                    "space_bar.color.group_badge",
-                    "Group badge"
-                ),
-                hex: style.groupBadgeColor
-            )
-            .help(
-                L(
-                    "space_bar.color.group_badge.help",
-                    "Count and overflow badges on the active "
-                        + "Space; inactive Spaces mute them "
-                        + "from the item color. Grouping is "
-                        + "always on."
-                )
-            )
-        case .spaceBarGroupBadgeTextColor:
-            HexColorField(
-                label: L("space_bar.color.badge_text", "Badge text"),
-                hex: style.groupBadgeTextColor
             )
         default:
             let _ = assertionFailure(
@@ -164,7 +97,7 @@ extension AdvancedColorRow {
                 + "needs \u{201C}%2$@\u{201D} set to "
                 + "\u{201C}%1$@\u{201D}.",
             L("app_bar.icon_source.app_font", "Glyphs"),
-            L("space_bar.icon_source.label", "App symbol style")
+            L("kiwishelf.icon_source.label", "App symbol style")
         )
     }
 }

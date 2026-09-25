@@ -99,11 +99,8 @@ struct ScrollingSlotCeilingTests {
         // store stops at exactly the area the layout draws into,
         // asserted against that area rather than a number.
         // Capping at the raw display bounds instead would bank
-        // the outer gaps here; note the bar strip is NOT visible
-        // on this axis — `usable` already has the gaps off, and
-        // a horizontal bar carves the height, so
-        // `verticalCeilingClearsTheBarStrip` is the only net on
-        // the strip half.
+        // the outer gaps here; the shelf's strip on the height
+        // axis is `verticalCeilingClearsTheBarStrip`'s.
         #expect(try slotPoints(core, space) == areaExtent(core))
         // ...and it got there by GROWING. Without this a
         // ceiling that binds too low — or a writer that refuses
@@ -126,11 +123,7 @@ struct ScrollingSlotCeilingTests {
             core.tiler.layoutInput(state: core.state)
         )
         let context = input.context
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let area = context.usable
         return horizontal ? area.width : area.height
     }
 
@@ -179,12 +172,12 @@ struct ScrollingSlotCeilingTests {
 
     @Test("The vertical ceiling clears the bar on its own axis")
     func verticalCeilingClearsTheBarStrip() throws {
-        // The case the rule leads with and no fixture covered
-        // (code-reviewer, 2026-08-27): with a vertical scroll
-        // axis the App Bar's strip is carved off the SAME axis,
-        // so a ceiling taken from the layout region banks the
-        // bar's whole thickness rather than the 20pt of outer
-        // gaps a horizontal fixture would show.
+        // The case the rule leads with (code-reviewer,
+        // 2026-08-27): with a vertical scroll axis the shelf's
+        // strip is reserved off the SAME axis (#1517), so a
+        // ceiling taken from the display rather than the layout
+        // bounds banks the bar's whole thickness rather than
+        // the 20pt of outer gaps a horizontal fixture shows.
         let (core, space) = makeCore()
         core.execute(
             "scroll.set_orientation",

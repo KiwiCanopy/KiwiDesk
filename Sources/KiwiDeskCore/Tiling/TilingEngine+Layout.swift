@@ -26,8 +26,11 @@ extension TilingEngine {
     /// division, and the scrolling seed, off by the outer gap.
     /// Much smaller than the strip this fixed, and not a
     /// licence to assume the seam is exact.
-    func layoutBounds(on screen: NSScreen) -> CGRect {
-        settings.layoutBounds(from: visibleBounds(screen))
+    func layoutBounds(on screen: NSScreen, for space: Space) -> CGRect {
+        settings.layoutBounds(
+            from: visibleBounds(screen),
+            mode: space.mode
+        )
     }
 
     /// The FOCUSED display's active-space layout inputs — the
@@ -58,10 +61,9 @@ extension TilingEngine {
         space: Space,
         screen: NSScreen
     ) -> (space: Space, tiled: [WindowID], context: LayoutContext) {
-        // Space-first reservation (#293): the Space Bar strip
-        // comes off the visible frame before any layout — or
-        // the App Bar — sees its bounds.
-        let bounds = layoutBounds(on: screen)
+        // The shelf's reservation (#293, #1517) comes off the
+        // visible frame before any layout sees its bounds.
+        let bounds = layoutBounds(on: screen, for: space)
         let tiled = state.effectiveTiledMembers(of: space)
         var context = settings.context(
             bounds: bounds,
@@ -194,7 +196,7 @@ extension TilingEngine {
         guard let screen = Self.screen(for: space.id, in: state)
         else { return .max }
         let context = settings.context(
-            bounds: layoutBounds(on: screen),
+            bounds: layoutBounds(on: screen, for: space),
             space: space,
             sticky: []
         )

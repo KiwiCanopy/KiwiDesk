@@ -1,130 +1,64 @@
 import AppKit
 
-/// Keeps the indicator bars in sync with the spaces on screen.
-/// Driven from `retile()`, which already fires on every
-/// structural, focus, mode, and settings change. One bar per
-/// display (#16): each display shows the bar of the space
-/// currently visible on it, resolved through the total
-/// space→display assignment (`resolveSpaceDisplays`). Any layout
-/// that hosts a bar (monocle, scrolling) drives its display's
-/// overlay; the bar's look is the global `AppBarStyle` overlaid
-/// by that layout's own overrides.
+/// The App Bar half of the bar refresh (`updateBars`,
+/// `KiwiCore+Shelf`). One bar per display (#16): each display
+/// shows the bar of the space currently visible on it, resolved
+/// through the total space→display assignment
+/// (`resolveSpaceDisplays`). Any layout that hosts a bar
+/// (monocle, scrolling) drives its display's overlay; the bar's
+/// look is the global `AppBarStyle` overlaid by that layout's own
+/// overrides, and its place is the segment of the KiwiShelf it is
+/// given (#1517).
 extension KiwiCore {
-    func updateAppBar() {
-        let settings = tiler.settings
-        let displays = state.workspaces.allDisplays
-        // Cold start: `loadConfig()` can apply a profile and
-        // retile before `eventLoop.start()` publishes the
-        // displays, so `allDisplays` is briefly empty while a
-        // bar-hosting space is already active. Fall back to the
-        // active space on the main screen — the pre-#16
-        // single-bar behavior — until the display list seeds.
-        // Once seeded, an active space that resolves to no
-        // display (so `resolveSpaceDisplays` never assigned it)
-        // shows no bar; in the normal flow resolution always
-        // assigns it first.
-        guard !displays.isEmpty else {
-            appBars.sync(mainScreenFallback(settings: settings))
-            return
-        }
-        let bars = displays.compactMap {
-            bar(for: $0, settings: settings)
-        }
-        appBars.sync(bars)
-    }
-
-    /// The bar for the space currently shown on `display`, or nil
-    /// when that space hosts no enabled, non-empty bar.
-    private func bar(
-        for display: Display,
-        settings: TilingSettings
-    ) -> AppBarManager.Bar? {
-        guard
-            // A fullscreen space hosts the panels by
-            // construction (`.canJoinAllSpaces` +
-            // `.fullScreenAuxiliary`), so the stand-down (#670)
-            // gates here: nil retires the overlay through the
-            // manager, keeping `shownStrips` consistent with
-            // `clampFloatsClearOfBars` — a panel-level-only
-            // hide would not.
-            NativeSpaces.currentSpaceIsUser(display: display.id),
-            let id = state.workspaces.currentSpace(on: display.id),
-            let space = state.workspaces[id],
-            let host = barHost(for: space),
-            host.appBar.enabled,
-            let screen = screen(for: display.id)
-        else { return nil }
-        return buildBar(
-            space: space,
-            display: display.id,
-            bounds: GeometryUtils.axVisibleFrame(of: screen),
-            host: host,
-            settings: settings
-        )
-    }
-
     /// Single bar for the active space on the main screen, used
-    /// only until the display list is populated.
-    private func mainScreenFallback(
+    /// only until the display list is populated — no Space Bar
+    /// shows before it, so the App Bar has the shelf alone.
+    /// Cold start: `loadConfig()` can apply a profile and retile
+    /// before `eventLoop.start()` publishes the displays; once
+    /// seeded, an active space that resolves to no display shows
+    /// no bar.
+    func appBarFallback(
         settings: TilingSettings
     ) -> [AppBarManager.Bar] {
         guard NativeSpaces.activeSpaceIsUser(),
             let space = activeSpace,
-            let host = barHost(for: space),
-            host.appBar.enabled,
+            let app = appBarContent(space: space, settings: settings),
             let screen = NSScreen.main ?? NSScreen.screens.first,
-            let bar = buildBar(
-                space: space,
+            let bar = placedBar(
+                app,
                 display: screen.kiwiDisplay?.id
                     ?? DisplayID(CGMainDisplayID()),
-                bounds: GeometryUtils.axVisibleFrame(of: screen),
-                host: host,
-                settings: settings
+                plan: shelfPlan(
+                    visible: GeometryUtils.axVisibleFrame(of: screen),
+                    settings: settings,
+                    spaceItems: nil,
+                    app: app
+                )
             )
         else { return [] }
         return [bar]
     }
 
-    /// Assembles one display's bar from its space and usable
-    /// bounds; nil when the space has no items or the bar is off.
-    private func buildBar(
-        space: Space,
+    /// Assembles one display's bar in its shelf segment.
+    func placedBar(
+        _ app: AppBarContent,
         display: DisplayID,
-        bounds: CGRect,
-        host: AppBarHosting,
-        settings: TilingSettings
+        plan: ShelfPlan
     ) -> AppBarManager.Bar? {
-        let style = host.resolvedBar(
-            global: settings.appBarStyle
-        )
-        // Space-first reservation (#293): the App Bar carves
-        // inside the frame the Space Bar already inset — same
-        // rule the retile path applies, reached through
-        // `layoutBounds(from:)` rather than the engine's
-        // `layoutBounds(on:)` seam because chrome is drawn on a
-        // REAL screen: this is one of the deliberate
-        // `visibleBounds` exemptions, and the reason lives in
-        // `VisibleBoundsRoutingTests.allowed` (#537 review).
-        let groups = barGroups(
-            in: space,
-            grouping: style.groupAdjacentWindows
-        )
-        guard !groups.isEmpty,
-            let strip = host.barFrame(
-                in: settings.layoutBounds(from: bounds),
-                global: settings.appBarStyle
-            )
-        else { return nil }
+        guard let slot = plan.arrangement.app else { return nil }
+        var style = app.style
+        style.alignment = slot.alignment
         return AppBarManager.Bar(
             display: display,
-            space: space.id,
-            items: groups.map { barItem(for: $0, style: style) },
-            activeIndex: groups.firstIndex { group in
-                appBarFocused(of: space).map(group.contains)
+            space: app.space.id,
+            items: app.items,
+            activeIndex: app.groups.firstIndex { group in
+                appBarFocused(of: app.space).map(group.contains)
                     ?? false
             },
-            strip: strip,
-            style: style
+            strip: plan.segment(slot),
+            style: style,
+            capAxis: plan.length
         )
     }
 
@@ -170,7 +104,7 @@ extension KiwiCore {
             let host = barHost(for: space.mode)
         else { return }
         let style = host.resolvedBar(
-            global: tiler.settings.appBarStyle
+            global: tiler.settings.appBarGlobalLook
         )
         var groups = barGroups(
             in: space,

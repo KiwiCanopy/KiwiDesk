@@ -24,61 +24,49 @@ struct BarsCensusRenderTests {
         )
     }
 
-    @Test("Space Bar at-rest rows are the census's")
-    func spaceBarAtRest() {
-        #expect(
-            Set(BarsRowOrder.spaceBarAtRest)
-                == censusRows(.spaceBar, .atRest)
-        )
-        #expect(
-            BarsRowOrder.spaceBarAtRest.count
-                == Set(BarsRowOrder.spaceBarAtRest).count
-        )
-    }
-
-    @Test("Space Bar Style rows are the census's show-more set")
-    func spaceBarStyle() {
-        #expect(
-            Set(BarsRowOrder.spaceBarStyle)
-                == censusRows(.spaceBar, .showMore)
-        )
-        #expect(
-            BarsRowOrder.spaceBarStyle.count
-                == Set(BarsRowOrder.spaceBarStyle).count
-        )
-    }
-
-    @Test("App Bar at-rest rows are the census's")
-    func appBarAtRest() {
+    @Test("KiwiShelf at-rest rows are the census's")
+    func kiwishelfAtRest() {
         let rendered =
-            BarsRowOrder.appBarAtRest + BarsRowOrder.appBarShowIn
-        #expect(Set(rendered) == censusRows(.appBar, .atRest))
+            BarsRowOrder.kiwishelfShow + BarsRowOrder.kiwishelfAtRest
+        #expect(Set(rendered) == censusRows(.kiwishelf, .atRest))
         #expect(rendered.count == Set(rendered).count)
     }
 
-    @Test("App Bar Style rows are the census's show-more set")
-    func appBarStyle() {
-        #expect(
-            Set(BarsRowOrder.appBarStyle)
-                == censusRows(.appBar, .showMore)
-        )
-        #expect(
-            BarsRowOrder.appBarStyle.count
-                == Set(BarsRowOrder.appBarStyle).count
-        )
+    @Test("KiwiShelf drawer rows are the census's show-more set")
+    func kiwishelfDrawers() {
+        let rendered =
+            BarsRowOrder.kiwishelfStyle
+            + BarsRowOrder.kiwishelfMargins
+        #expect(Set(rendered) == censusRows(.kiwishelf, .showMore))
+        #expect(rendered.count == Set(rendered).count)
     }
 
-    /// The area's render knows exactly two containers; a third
-    /// would mount nowhere, so it must fail loud here rather
-    /// than ship an unreachable row.
-    @Test("the Bars area holds only the two bar containers")
-    func onlyTwoContainers() {
+    /// The bar cards have no drawer (#1517): every row is at
+    /// rest, and the card draws exactly the census's set.
+    @Test(
+        "A bar card draws every census row at rest",
+        arguments: [
+            (SettingsContainer.spaceBar, BarsRowOrder.spaceBar),
+            (.appBar, BarsRowOrder.appBar),
+        ]
+    )
+    func barCardRows(container: SettingsContainer, rows: [SettingKey]) {
+        #expect(Set(rows) == censusRows(container, .atRest))
+        #expect(censusRows(container, .showMore).isEmpty)
+        #expect(rows.count == Set(rows).count)
+    }
+
+    /// The area's render knows exactly three containers; a
+    /// fourth would mount nowhere, so it must fail loud here
+    /// rather than ship an unreachable row.
+    @Test("the Bars area holds the shelf and the two bar cards")
+    func onlyThreeContainers() {
         let containers = Set(
             SettingKey.allCases
                 .filter { $0.placement.area == .bars }
                 .compactMap { $0.placement.container }
         )
-        #expect(containers == [.spaceBar, .appBar])
+        #expect(containers == [.kiwishelf, .spaceBar, .appBar])
     }
 
     /// Each bar container's block gate resolves to a reason
@@ -108,32 +96,28 @@ struct BarsCensusRenderTests {
         #expect(gates.containerReason(for: .appBar) == nil)
     }
 
-    /// The rows the census exempts from their container's gate
-    /// are exactly the ones that must stay live. The gate
-    /// owners' half is DERIVED (each container gate's own
-    /// setting rows must escape it, or the lockout is
-    /// permanent); only the two argued-for riders — the
-    /// symbol-style picker the ⌃⌥K panel reads, and the copy
-    /// action gated on the *other* bar — are hand-listed, so a
-    /// red here asks the real question: is this new exemption a
-    /// rider with an argument?
-    @Test("the exempt set is the gate owners plus the two riders")
+    /// The bar cards' gate owners — the Show rows — live on the
+    /// KiwiShelf card, which has no gate, so none of them needs
+    /// an exemption to stay live (#1517); the one rider is the
+    /// symbol-style picker the ⌃⌥K panel reads. A red here asks
+    /// the real question: is this new exemption a rider with an
+    /// argument?
+    @Test("gate owners sit on the ungated shelf; one rider")
     func exemptSet() {
+        let owners = [SettingsContainer.spaceBar, .appBar]
+            .flatMap { $0.gate?.settings ?? [] }
+        #expect(!owners.isEmpty)
+        for owner in owners {
+            #expect(owner.placement.container == .kiwishelf)
+        }
+        #expect(SettingsContainer.kiwishelf.gate == nil)
         let exempt = Set(
             SettingKey.allCases.filter {
                 $0.placement.area == .bars
                     && $0.placement.exemptFromContainerGate
             }
         )
-        let owners = Set(
-            [SettingsContainer.spaceBar, .appBar]
-                .flatMap { $0.gate?.settings ?? [] }
-        )
-        let riders: Set<SettingKey> = [
-            .appBar(.appBarIconSource),
-            .spaceBar(.copyAppearance),
-        ]
-        #expect(exempt == owners.union(riders))
+        #expect(exempt.isEmpty)
     }
 
     /// Core's `appBarHost(for:)` is "the one place that decides
@@ -142,10 +126,8 @@ struct BarsCensusRenderTests {
     /// Pin the two together, derived from Core: a third hosting
     /// layout added in Core must red here until the census
     /// `.appBar` gate's owners learn it — otherwise that layout's
-    /// own Show-it-in toggle is not exempt from the container
-    /// grey (`exemptSet` derives the exempt owners from these
-    /// same gate settings) and greys along with the card it
-    /// controls, the #527 failure.
+    /// own Show toggle is missing from the KiwiShelf card and no
+    /// row can switch that layout's bar on (#527's failure).
     @Test("the App Bar gate's owners are Core's hosting set")
     func appBarGateOwnersMatchCoreHosting() {
         let owners = Set(

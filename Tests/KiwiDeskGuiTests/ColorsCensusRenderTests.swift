@@ -210,49 +210,31 @@ struct ColorsCensusRenderTests {
         #expect(!ColorsRowOrder.dragDropZoneColumn.isEmpty)
     }
 
-    @Test("the Space Bar group's two tiers are the census's")
-    func spaceBarGroup() {
+    @Test("the KiwiShelf group's two tiers are the census's")
+    func kiwishelfGroup() {
         pin(
-            ColorsRowOrder.spaceBarAtRest,
+            ColorsRowOrder.kiwishelfAtRest,
             .advancedColours,
-            .spaceBar,
+            .kiwishelf,
             .atRest,
-            "space bar accents"
+            "shelf inks"
         )
         pin(
-            ColorsRowOrder.spaceBarMore,
+            ColorsRowOrder.kiwishelfMore,
             .advancedColours,
-            .spaceBar,
+            .kiwishelf,
             .showMore,
-            "space bar drawer"
+            "shelf drawer"
         )
     }
 
-    @Test("the App Bar group's two tiers are the census's")
-    func appBarGroup() {
-        pin(
-            ColorsRowOrder.appBarAtRest,
-            .advancedColours,
-            .appBar,
-            .atRest,
-            "app bar inline inks"
-        )
-        pin(
-            ColorsRowOrder.appBarMore,
-            .advancedColours,
-            .appBar,
-            .showMore,
-            "app bar drawer"
-        )
-    }
-
-    /// Four groups, matching the four things on screen. A fifth
-    /// container placed in this area would render nowhere.
-    @Test("Advanced Colours holds exactly the four groups")
+    /// Three groups, matching the three things on screen. A
+    /// fourth container placed in this area would render nowhere.
+    @Test("Advanced Colours holds exactly the three groups")
     func advancedColoursContainers() {
         #expect(
             containers(of: .advancedColours)
-                == [.borders, .dragAndDrop, .spaceBar, .appBar]
+                == [.borders, .dragAndDrop, .kiwishelf]
         )
     }
 

@@ -12,11 +12,200 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
+  # The one shelf (#1517): where a bar field lives, the one
+  # reservation, the one placement rule, the retired verbs.
+  - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
+  # The Settings preview asks ShelfArrangement and the hard floor
+  # like the live plan does; a hand placement there is this
+  # file's defect, not gui.md's.
+  - "Sources/KiwiDesk/Settings/HomeCardPlate+ShelfStrip.swift"
+  - "Sources/KiwiDeskCore/Layouts/KiwiShelf*.swift"
+  - "Sources/KiwiDeskCore/Layouts/Shelf*.swift"
+  - "Sources/KiwiDeskCore/Layouts/SpaceBarStyle*.swift"
+  - "Sources/KiwiDeskCore/Layouts/AppBarStyle*.swift"
+  - "Sources/KiwiDeskCore/Layouts/LayoutAppBar*.swift"
+  - "Sources/KiwiDeskCore/Commands/Reference/APIReference+Retired.swift"
 ---
 
 # Bars (App Bar & Space Bar overlays)
 
 Canonical for this subsystem (AGENTS.md §5 indexes it).
+
+## Both bars sit on ONE KiwiShelf (#1517)
+
+The Space Bar and the App Bar share one screen edge, KiwiShelf
+(`TilingSettings.kiwishelf`). Two bars on independent edges each
+carved a reservation, and the App Bar's came and went with the
+layout, so a layout switch reflowed every window; a field both
+bars read, stored twice, was a question the user answered twice.
+The argument is `docs/design-decisions.md` ▸ One shelf holds both
+bars. Obligations:
+
+- **Store a bar field in exactly one of `KiwiShelf`,
+  `SpaceBarStyle` and `AppBarStyle`.** A value both bars must
+  agree on — where they hang, the strip's depth and look, the
+  item gap, the font size — is the shelf's; a value each bar may
+  set for itself is that bar's style, even where both bars spell
+  it alike (an indicator, a colour). A shelf field takes **no
+  per-layout override**: `LayoutAppBar` mirrors `AppBarStyle`
+  and nothing else. `KiwiShelfParityTests` ▸ `looksAreDisjoint`
+  reds a name on the shelf and on either style, and
+  `AppBarParityTests` ▸ `propertyParity` a `LayoutAppBar` field
+  that is not `AppBarStyle`'s; whether a NEW field is shared or
+  a bar's own is review's, since no guard can tell.
+- **Retire a bar verb by adding it to `APIReference.retired`**,
+  naming its replacement or nil, and never by an alias (AGENTS.md
+  §5). A field the shelf migration moves joins
+  `ConfigMigration.shelfMovedKeys`, which the retired list
+  derives its setter spellings from, so a verb and its stored key
+  retire together. `KiwiShelfRetiredVerbTests` holds the list:
+  ▸ `replacementsAreLive` that every replacement is dispatchable,
+  ▸ `retiredAreUnregistered` that no retired name is still
+  registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
+  one as its own Config Issue.
+- **Reserve the shelf ONCE, through
+  `TilingSettings.layoutBounds(from:mode:)`, in exactly the
+  layouts where a bar draws** — every layout while the Space Bar
+  is on, else only the layouts whose own App Bar is on — asking
+  the one `shelfShows(in:)`, never a layout, a bar or a mode
+  carving a strip of its own, and never a second "does a bar draw
+  here" predicate beside it. A switch between two layouts that
+  both draw a bar moves no window; a switch into or out of the
+  one layout that draws is the ruled price
+  (`docs/design-decisions.md` ▸ One shelf holds both bars).
+  `ShelfGeometryTests` ▸ `reservesWhereABarDraws` holds the
+  per-mode answer, `ShelfDriverTests` ▸
+  `layoutSwitchReflowsNothing` the no-reflow half, and
+  `LayoutBoundsRoutingTests` the route (#537). The answer is per
+  MODE, so a per-space `appBar` would draw a bar where nothing is
+  reserved — [state-and-layout.md](state-and-layout.md) owns that
+  half, since the override types are its files.
+- **Place every bar along the edge through the one
+  `ShelfArrangement`** — the live drivers through
+  `KiwiCore.shelfPlan`, and the Settings preview and the
+  alignment note by asking it too
+  (`ShelfArrangement.spaceBarMoves`), never by arithmetic of
+  their own: a picture that places the bars by hand can claim a
+  placement the engine does not make (gui.md, #702). The Space
+  Bar's front-app segment stands down on the same App Bar content
+  the plan is built from. `ShelfArrangementTests` holds the rule,
+  `ShelfDriverTests` ▸ `bothBarsShareTheStrip` the disjoint
+  segments and ▸ `frontAppYieldsToTheAppBar` the stand-down; no
+  suite scans the Settings tree for a hand placement, so the GUI
+  callers are review's.
+- **Refresh both bars through the one `KiwiCore.updateBars()`,
+  never a single-bar sync.** It builds each display's plan once
+  from both bars' content and syncs both managers from it, so a
+  change to either bar's need moves the other in the same pass;
+  a path refreshing one bar leaves the other in a segment the
+  plan no longer gives it. `BarsRefreshSeamTests` holds both
+  managers' `sync(` to `KiwiCore+Shelf.swift`, and
+  `ShelfDriverTests` drives the pair through it.
+- **Keep a bar's `naturalLength` equal to what its render
+  draws** — the need the plan hands `ShelfArrangement` restates
+  the render's padding, so a change to either side moves both:
+  handed a segment exactly that long, the run fits with no fade
+  and its plate reaches the segment's GUTTER-side end, the Space
+  run's outer `pad` the one slack allowed where `item_gap` is
+  below it. `ShelfNeedParityTests` holds both bars to it, both
+  placements, a gap each side of the pad.
+
+## One shelf panel per display draws the plate; the bars draw sections
+
+Two panels each painting a plate put two fills and a seam on one
+strip, and a plate a bar drew for itself could not know where the
+other section ended. So the surface is the shelf's and the bars
+render content into it (#1517). Obligations:
+
+- **The panel, the ONE plate and the section divider are
+  `ShelfOverlay`'s, one per display; a bar overlay renders its
+  section into its `root` and paints no plate.** Whether a plate
+  draws at all is the one `KiwiShelf.drawsPlate`: Boxed paints a
+  box per item — glass per item where Liquid Glass is on — and no
+  plate beneath, solid or glass. The glass plate is a backdrop
+  BEHIND the section strip and never hosts a view, so the
+  no-reparent obligation below holds for it by construction.
+  `ShelfOverlayTests` holds the joined plate, ▸ `plateModes` Full
+  and Boxed, and ▸ `dividerInTheGutter` the divider; no suite
+  scans a bar overlay for a plate of its own, so a section growing
+  one is review's.
+- **Wire a section's `onRendered` in `ShelfManager.sync` alone,
+  and place each section at the slot it drew into
+  (`shownStrip`)**, never at a plan slot read beside it: a
+  section re-renders on its own — a page, a wheel, a drag — and
+  a slot derived elsewhere leaves the plate trailing what the
+  section drew. `ShelfFollowTests` ▸ `relayoutHeld` holds the one
+  ordering hazard (no relayout against the old plan while
+  `updateBars` syncs); the single wiring site is review's.
+- **Reduce transparency stands the shelf plate down in
+  `ShelfManager.relayout`**, which hands the overlay the gated
+  shelf from one `LiquidGlassGate.rendered` call and reads the
+  stored one nowhere beside it (`ShelfPlateGlassGateTests` ▸
+  `shelfPlateTakesTheGate`). The plate reaches no
+  `GlassHosting.resolve(`, so the derived roster in the
+  Reduce-transparency obligation below cannot see it — this suite
+  is its only net.
+- **Every rule a bar draws takes its geometry and ink from
+  `BarDivider`** — the in-item rule, the layer and front-app
+  breaks and the section divider: the boundary between two bars
+  outranks a detail inside one item, sits below idle ink, and no
+  rule runs the full depth. The values live there and nowhere
+  else; `ShelfDividerWeightTests` holds the ordering, a contrast
+  floor on every bundled palette and ▸
+  `drawnDividerTakesTheLadder` the drawn divider.
+- **An idle Space identifier's ink is `KiwiShelf.idleItemColor`**,
+  read by the live bar and the Settings preview alike, never an
+  alpha applied to the item colour beside it.
+  `IdleItemContrastTests` holds the value and its legibility; the
+  routing is review's.
+
+## Overflow fades, follows and pages through one home each
+
+Arrows cost a box at each end of every overflowing section and
+read as items; the argument for fades is
+`docs/design-decisions.md` ▸ One shelf holds both bars.
+Obligations:
+
+- **A section's overflow arithmetic — fade length, offset, hidden
+  counts, the page target — is `ShelfOverflow`'s; the fade is
+  `ShelfFadeMask`, a mask on the item container so it holds on
+  glass; the count is `ShelfCountView`. A section draws no arrow
+  and does no overflow arithmetic of its own.**
+  `ShelfOverflowTests` and `ShelfOverflowPagingTests` hold the
+  arithmetic (a side counts any entry its edge cuts; a page lands
+  on an entry boundary and reaches the end), `ShelfCountTests` the
+  count and mask, and `ShelfDropTargetTests` that a scrolled Space
+  Bar's drop targets stay on their items under a fade, which is
+  the drag autoscroll's zone.
+- **Whether a render follows its active entry is the one
+  `ShelfFollow`, an instance per section.** A manual scroll — a
+  page, the wheel or trackpad, a drag autoscroll — holds the
+  offset until the active entry changes or the section hides.
+  `ShelfFollowRuleTests` holds the rule, `ShelfFollowTests` both
+  sections through it, and `ShelfScrollWiringTests` the wheel.
+- **Scroll input maps to travel through `ShelfScrollInput`**,
+  whose deltas arrive already corrected for natural scrolling
+  and are never flipped again (`ShelfScrollInputTests`).
+- **Every `ShelfArrangement.arrange` caller hands it the Space
+  section's floor from `ShelfArrangement.hardFloor`** — the live
+  plan and the Settings preview alike. The argument is required,
+  so it cannot be forgotten, only passed wrong:
+  `ShelfFloorWiringTests` ▸ `planHonoursTheFloor` holds the live
+  plan and `ShelfStripPreviewTests` ▸ `spaceKeepsItsFloor` the
+  preview.
+- **The divider drag writes the Space Bar minimum through
+  `execute("kiwishelf.set_minimum")` on release** — the door Lua
+  and the CLI take — while a step re-lays the bars alone. The
+  length it may reach is `ShelfArrangement.Divider`'s, the
+  arrangement's own, the percentage takes the setter's one clamp
+  (`KiwiShelfCommandSetting`), and the grip exists only while the
+  shelf is full. `ShelfDividerDragTests`
+  ▸ `onlyFullDrags` holds the full-only half, ▸ `dragClamps` the
+  range, ▸ `managerWiresTheGrip` that
+  a drag and a double-click both reach the manager's one report,
+  and ▸ `managerWritesTheSetting` that the report reaches the live
+  setting; that the release takes `execute` rather than a direct
+  write is review's, since both land the same value.
 
 ## A bar item's title is SHOWN on two channels: drawn and announced
 

@@ -25,6 +25,7 @@ extension APIReference {
         "scroll": scrollRecords,
         "space_bar": spaceBarRecords,
         "app_bar": appBarRecords,
+        "kiwishelf": kiwishelfRecords,
         "grid": gridRecords,
         "monocle": monocleRecords,
         "track": trackRecords,

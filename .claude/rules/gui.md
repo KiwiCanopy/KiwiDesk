@@ -39,9 +39,9 @@ clamps or rejects only genuinely-broken / unrenderable values (an
 invisible alpha, a >1 factor, a malformed color) — never to
 enforce taste or a ratio the GUI keeps tidy. Risky-but-valid knob
 → hide it from the GUI, expose it Lua-only, and don't add a guard
-that second-guesses the power user (the bars' `dim_factor` /
-`active_dim_factor`: Lua-only, clamped to a legible range yet free
-to invert the dim ladder).
+that second-guesses the power user (KiwiShelf's `dim_factor` and
+the Space Bar's `active_dim_factor`: Lua-only, clamped to a
+legible range yet free to invert the dim ladder).
 
 **A slider edge Core also clamps is DERIVED from the Core
 constant; only the edge the GUI curates is the GUI's own

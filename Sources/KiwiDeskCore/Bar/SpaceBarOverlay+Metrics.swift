@@ -11,9 +11,62 @@ extension SpaceBarOverlay {
     }
 
     /// Scroll direction for whole-bar scrolling (#385).
-    enum ScrollArrow {
+    enum ScrollDirection {
         case back
         case forward
+    }
+
+    /// Each item's length along the bar; the layer item's slot
+    /// carries its section rule. The one derivation `render` and
+    /// `naturalLength` share.
+    static func itemLengths(
+        _ items: [Item],
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> [CGFloat] {
+        let leadsWithLayer = leadsWithLayer(items)
+        return items.enumerated().map { index, item in
+            let length = SpaceBarItemView.autoLength(
+                appCount: item.apps.count,
+                overflow: item.overflow,
+                depth: depth
+            )
+            return index == 0 && leadsWithLayer
+                ? length + layerDividerExtent(gap: gap)
+                : length
+        }
+    }
+
+    /// The Space run's natural length along the shelf — the
+    /// `pad` `contentStart` sets it in from the end it hugs, the
+    /// run, and past it the plate's one gap, or the `pad` an
+    /// `.end` placement keeps where that is larger: what
+    /// `ShelfArrangement` hands this bar before it has to share
+    /// (#1517). No front-app segment: it hides while an App Bar
+    /// shares the shelf, the one case a need is read.
+    static func naturalLength(
+        items: [Item],
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        let lengths = itemLengths(items, depth: depth, gap: gap)
+        return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
+            + SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
+    }
+
+    /// The active Space item's length — what the shelf's hard
+    /// floor keeps in view (#1517); the longest item where none is
+    /// active.
+    static func activeExtent(
+        items: [Item],
+        depth: CGFloat,
+        gap: CGFloat
+    ) -> CGFloat {
+        let lengths = itemLengths(items, depth: depth, gap: gap)
+        if let index = items.firstIndex(where: \.active) {
+            return lengths[index]
+        }
+        return lengths.max() ?? 0
     }
 
     /// Calculates item frames and front segment start coordinate.
@@ -24,7 +77,7 @@ extension SpaceBarOverlay {
         strip: CGRect,
         viewport: CGFloat,
         horizontal: Bool,
-        alignment: SpaceBarStyle.Alignment,
+        alignment: KiwiShelf.Alignment,
         pad: CGFloat,
         scrollOffset: CGFloat
     ) -> RunMetrics {
@@ -79,17 +132,9 @@ extension SpaceBarOverlay {
             + frontExtent
     }
 
-    /// Computes scroll arrow insets and viewport size (#385).
-    nonisolated static func scrollViewport(
-        axis: CGFloat,
-        total: CGFloat,
-        gap: CGFloat
-    ) -> (inset: CGFloat, viewport: CGFloat) {
-        let inset = total > axis ? BarArrowView.zone + gap : 0
-        return (inset, max(axis - inset * 2, 0))
-    }
-
-    /// Calculates clamped scroll offset keeping active item in view.
+    /// The scroll offset keeping the active item in view, in
+    /// this bar's measures — `ShelfOverflow.offset` does the
+    /// arithmetic (#1517).
     nonisolated static func scrollOffset(
         current: CGFloat,
         lengths: [CGFloat],
@@ -99,28 +144,19 @@ extension SpaceBarOverlay {
         viewport: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
-        let total = runTotal(
+        ShelfOverflow.offset(
+            current: current,
             lengths: lengths,
             gap: gap,
-            frontExtent: frontExtent
+            total: runTotal(
+                lengths: lengths,
+                gap: gap,
+                frontExtent: frontExtent
+            ),
+            activeIndex: activeIndex,
+            viewport: viewport,
+            margin: margin
         )
-        guard total > viewport, viewport > 0 else { return 0 }
-        var offset = current
-        if let index = activeIndex,
-            index >= 0, index < lengths.count
-        {
-            let lower = lengths[..<index].reduce(0) {
-                $0 + $1 + gap
-            }
-            let upper = lower + lengths[index]
-            if lower < offset + margin {
-                offset = lower - margin
-            }
-            if upper > offset + viewport - margin {
-                offset = upper - viewport + margin
-            }
-        }
-        return min(max(offset, 0), total - viewport)
     }
 
     /// Calculates shift distance per scroll arrow tick (#385).
@@ -133,24 +169,26 @@ extension SpaceBarOverlay {
         return avg + gap
     }
 
-    /// Evaluates whether point falls inside scroll arrow zones (#385, #409).
-    nonisolated static func arrowHit(
+    /// Which fading end a point rests on, for the drag
+    /// autoscroll (#385, #1517): nil in the clear view, where the
+    /// items are drop targets instead.
+    nonisolated static func fadeHit(
         at local: CGPoint,
         strip: CGRect,
-        inset: CGFloat,
+        fades: ShelfOverflow.Fades,
         trailingAxis: CGFloat,
         horizontal: Bool
-    ) -> ScrollArrow? {
-        guard inset > 0 else { return nil }
+    ) -> ScrollDirection? {
         let axisPos = horizontal ? local.x : local.y
         let crossPos = horizontal ? local.y : local.x
         let crossLen = horizontal ? strip.height : strip.width
         guard crossPos >= 0, crossPos <= crossLen,
             axisPos >= 0, axisPos <= trailingAxis
         else { return nil }
-        let zone = BarArrowView.zone
-        if axisPos < zone { return .back }
-        if axisPos > trailingAxis - zone { return .forward }
+        if fades.leading > 0, axisPos < fades.leading { return .back }
+        if fades.trailing > 0, axisPos > trailingAxis - fades.trailing {
+            return .forward
+        }
         return nil
     }
 }

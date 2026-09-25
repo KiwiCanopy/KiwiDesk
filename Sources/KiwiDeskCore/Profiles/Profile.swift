@@ -11,13 +11,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// beside its `monitor_count` (#1530), 7 since a shortcut
     /// override may leave a shared combo out (#1393) — no step
     /// for either: an older reader refuses the shape, and the
-    /// stamp says why. The bump
+    /// stamp says why — 8 since the bars' shared fields moved to
+    /// `kiwishelf` (#1517). The bump
     /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 7
+    public static let currentFormat = 8
 
     public var format: Int
     public var name: String

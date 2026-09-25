@@ -13,6 +13,21 @@ import Testing
 struct GlassDefaultMigrationEditTests {
     private func json(_ text: String) -> Data { Data(text.utf8) }
 
+    /// The crossing as far as this step: the gate, the fill and
+    /// the stamp. Since #1517 a later step moves the bars' leaves
+    /// onto the shelf, so the full chain no longer shows the
+    /// leaves this suite asserts on — `KiwiShelfMigrationTests`
+    /// holds where they go.
+    private func migratedThroughGlass(_ data: Data) -> Data? {
+        guard ConfigMigration.needsMigration(data) else {
+            return nil
+        }
+        let filled =
+            ConfigMigration.migratingAbsentGlassLeaves(data) ?? data
+        let out = ConfigMigration.stamped(filled)
+        return out == data ? nil : out
+    }
+
     private func profile(_ settings: String, format: Int = 3)
         -> Data
     {
@@ -68,7 +83,7 @@ struct GlassDefaultMigrationEditTests {
             "space_bar":{"liquid_glass":false,"thickness":20}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(text.contains("\n"))
         #expect(leaf(try settings(out), "shortcut_panel") == false)
@@ -84,7 +99,7 @@ struct GlassDefaultMigrationEditTests {
             "space_bar":{"liquid_glass":false}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(!text.contains("\n"))
         #expect(!text.contains("0.40000000000000002"))
@@ -101,7 +116,7 @@ struct GlassDefaultMigrationEditTests {
             "space_bar":{"liquid_glass":true}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(!text.contains("\n"))
         #expect(leaf(try settings(out), "shortcut_panel") == true)
@@ -118,7 +133,7 @@ struct GlassDefaultMigrationEditTests {
             "space_bar":{"liquid_glass":false}}
             """
         )
-        let out = try #require(ConfigMigration.migrated(data))
+        let out = try #require(migratedThroughGlass(data))
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(
             text.components(separatedBy: "\"liquid_glass\"").count
@@ -133,7 +148,7 @@ struct GlassDefaultMigrationEditTests {
     @Test("an empty settings object takes each group once")
     func emptySettingsTakesEachGroupOnce() throws {
         let out = try #require(
-            ConfigMigration.migrated(profile("{}"))
+            migratedThroughGlass(profile("{}"))
         )
         for group in ["app_bar", "space_bar", "shortcut_panel"] {
             #expect(try spellings(out, of: group) == 1)
@@ -149,7 +164,7 @@ struct GlassDefaultMigrationEditTests {
     @Test("a missing bar leaf beside glass on stands the edit down")
     func missingLeafBesideOnStandsDown() throws {
         let out = try #require(
-            ConfigMigration.migrated(
+            migratedThroughGlass(
                 profile(
                     """
                     {"app_bar":{"liquid_glass":true},\
@@ -171,7 +186,7 @@ struct GlassDefaultMigrationEditTests {
     @Test("a brace inside a string stands the edit down")
     func braceInStringStandsDown() throws {
         let out = try #require(
-            ConfigMigration.migrated(
+            migratedThroughGlass(
                 profile(
                     """
                     {"app_bar":{"item_color":"#a}b","liquid_glass":false},\
@@ -216,7 +231,7 @@ struct GlassDefaultMigrationEditTests {
     @Test("an empty bar group takes the leaf without a comma")
     func emptyGroupTakesNoComma() throws {
         let out = try #require(
-            ConfigMigration.migrated(
+            migratedThroughGlass(
                 profile(
                     #"{"app_bar":{},"space_bar":{"liquid_glass":false}}"#
                 )

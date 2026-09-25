@@ -169,8 +169,7 @@ extension KiwiCore {
             let before = state.workspaces.activeSpace
             moveSwitchedDisplaySpaces(diff, in: snapshot)
             retile(animated: false, pass: .reissue)
-            updateAppBar()
-            updateSpaceBar()
+            updateBars()
             // Swiping the display that HOLDS the active Space
             // moves it, and a silent active-Space change is one
             // Lua and the CLI cannot see — the main arm emits for
@@ -215,8 +214,7 @@ extension KiwiCore {
                 // secondary user space skipped both branches
                 // and left the bars painted over the
                 // fullscreen app.
-                updateAppBar()
-                updateSpaceBar()
+                updateBars()
             }
         }
         // #1145: carry the sticky windows onto the Desktop this

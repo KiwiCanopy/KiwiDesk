@@ -90,11 +90,7 @@ struct ScrollingFreshLedgerPressTests {
             core.tiler.layoutInput(state: core.state)
         )
         let context = input.context
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let area = context.usable
         let ask = min(
             area.width,
             max(

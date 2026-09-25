@@ -96,9 +96,10 @@ editing here:
   map is the exemption list** — which files may call it, and
   why — so add the entry there rather than a note here.
 - A layout **span** reads one hook further in:
-  `TilingEngine.layoutBounds(on:)` (#537), which reserves the
-  Space Bar's strip (#293) so a resize divides its delta by the
-  region the layout filled, not the whole display. Routing
+  `TilingEngine.layoutBounds(on:for:)` (#537), which reserves the
+  KiwiShelf strip where a bar draws in that Space's layout (#293,
+  #1517; the one reservation is bars.md's) so a resize divides its
+  delta by the region the layout filled, not the whole display. Routing
   through `visibleBounds` and then dividing by the display
   passes the guard above and is still the bug —
   `LayoutBoundsRoutingTests` is the second net, and its
@@ -107,6 +108,15 @@ editing here:
   not place: no span, no midpoint, and the painted-strip clamp
   (#242) owns its relationship to a bar. Which files qualify
   lives in that map, not here.
+- **A per-space override never carries `appBar`.** The shelf's
+  reservation is answered per layout MODE (`shelfShows(in:)`), and
+  the App Bar a Space draws is its mode's; a per-space `appBar`
+  would draw a bar where the reservation left the windows, or
+  reserve a strip nothing draws on. `MonocleOverrideTests` and
+  `ScrollingOverrideTests` list `appBar` in `notOverridable`, so
+  their parity check reds an override that gains it until the
+  entry leaves that list too; taking it out is the one edit that
+  unlocks the move, and it owes a per-space reservation first.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 - A retile may **promise** that every window it touches is
@@ -1197,16 +1207,16 @@ editing here:
   property of a slot and an ABSOLUTE-LENGTH maximum is a
   property of the screen (`maxFraction` is rightly in the type:
   a fraction is unitless). It is the area the layout DRAWS,
-  taken from the same `windowFrame` carve
+  taken from the same `LayoutContext.usable` carve
   `ScrollingLayout.metrics` caps against, never the layout
-  region it is carved from — on a vertical axis the difference
-  is the App Bar's own thickness, the same defect in miniature.
+  region it is carved from — the difference is the outer gaps,
+  the same defect in miniature.
   And it never reduces a CONFIGURED LENGTH: an explicit
   `scroll.set_slot_size` above the ceiling is a deliberate
   statement that survives undocking, so a grow refuses rather
   than rewrites. An `auto`/`%` store is deliberately NOT covered
   — it resolves against the region, so leaving it alone would
-  re-bank the strip on the first press; that trim is the rule
+  re-bank the outer gaps on the first press; that trim is the rule
   working, not a defect to fix back.
   The focused window's learned app MAXIMUM joins the same
   write-site ceiling (#1055): believed only under the floor's

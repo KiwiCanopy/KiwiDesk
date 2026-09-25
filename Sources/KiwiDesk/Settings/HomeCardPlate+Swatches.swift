@@ -29,9 +29,9 @@ struct HomeCardColorsTile: View {
         [
             settings.borderStyle.focusedColor,
             settings.spaceBarStyle.focusedItemColor,
-            settings.spaceBarStyle.activeItemColor,
-            settings.appBarStyle.hoverFillColor,
-            settings.appBarStyle.itemColor,
+            settings.kiwishelf.activeItemColor,
+            settings.kiwishelf.hoverFillColor,
+            settings.kiwishelf.itemColor,
         ]
     }
 
@@ -75,14 +75,14 @@ struct HomeCardSwatchGridTile: View {
     /// the defaults.
     private var hexes: [String] {
         [
-            settings.spaceBarStyle.activeItemColor,
-            settings.appBarStyle.hoverFillColor,
+            settings.kiwishelf.activeItemColor,
+            settings.kiwishelf.hoverFillColor,
             settings.spaceBarStyle.focusedItemColor,
-            settings.appBarStyle.itemColor,
-            settings.spaceBarStyle.fillColor,
+            settings.kiwishelf.itemColor,
+            settings.kiwishelf.fillColor,
             settings.borderStyle.focusedColor,
-            settings.spaceBarStyle.groupBadgeColor,
-            settings.spaceBarStyle.itemColor,
+            settings.kiwishelf.groupBadgeColor,
+            settings.kiwishelf.idleItemColor,
         ]
     }
 

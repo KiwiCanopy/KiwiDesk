@@ -49,27 +49,28 @@ struct BarHelpLabelReferenceTests {
     // frame goes back to literal text.
     //
     // The check below stays because it is a genuinely different
-    // obligation: the Space Bar twin names its colours by the
-    // shared NOUN rather than by listing the rows, so there is
-    // no label to interpolate and text-matching is the only
-    // thing that can hold it.
+    // obligation: the shelf's symbol-style help (#1517, once the
+    // Space Bar's) names its colours by the shared NOUN rather
+    // than by listing the rows, so there is no label to
+    // interpolate and text-matching is the only thing that can
+    // hold it.
 
-    /// The Space Bar twin names its colours generically rather
+    /// The symbol-style help names its colours generically rather
     /// than listing them, so only the shared noun is pinned —
     /// but it is pinned against the same row label, so a rename
     /// of "Item" still surfaces here.
-    @Test("Space Bar symbol-style help uses the row's noun")
+    @Test("Symbol-style help uses the row's noun")
     func spaceBarIconSourceHelpUsesRowNoun() throws {
         let catalog = try english
         let help = try #require(
-            catalog["space_bar.icon_source.help"]
+            catalog["kiwishelf.icon_source.help"]
         )
-        let item = try #require(catalog["space_bar.color.item"])
+        let item = try #require(catalog["kiwishelf.color.item"])
         #expect(
             help.lowercased().contains(item.lowercased()),
             Comment(
                 rawValue:
-                    "space_bar.icon_source.help does not use "
+                    "kiwishelf.icon_source.help does not use "
                     + "the \"\(item)\" vocabulary"
             )
         )

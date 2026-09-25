@@ -74,10 +74,6 @@ struct BarSettingChoiceTests {
         // makes the derivation itself the only way to be green.
         let fields: [(String, String)] = [
             (
-                "edge",
-                expectedMessage(AppBarEdge.self)
-            ),
-            (
                 "content",
                 expectedMessage(AppBarStyle.Content.self)
             ),
@@ -104,7 +100,7 @@ struct BarSettingChoiceTests {
 
     @Test("a legal value still decodes")
     func legalValueDecodes() {
-        let result = AppBarCommandSetting.parse(
+        let result = KiwiShelfCommandSetting.parse(
             field: "edge",
             args: [.string("left")]
         )

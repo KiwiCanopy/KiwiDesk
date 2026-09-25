@@ -40,95 +40,6 @@ struct SpaceBarParityTests {
         #expect(decoded == style)
     }
 
-    /// The copy-appearance contract (#293): every CodingKey
-    /// the two styles share — minus the two named exclusions —
-    /// is copied, and nothing else moves. Discovery is by key
-    /// intersection, never a hand list, so a field added to
-    /// both styles joins the copy or turns this red.
-    /// The REVERSED direction (owner flip 2026-08-10): the
-    /// App Bar card's button pulls Space Bar → App Bar. Same
-    /// contract surface — `SpaceBarStyle.copyAppearanceKeys`
-    /// is deliberately the one key set for both directions —
-    /// so this is the twin of the test above: every shared
-    /// key must change a field on the App Bar target too, or
-    /// the mirrored switch silently skipped one.
-    @Test("copy appearance fills every shared field reversed")
-    func copyAppearanceParityReversed() {
-        // A source Space Bar differing from App Bar defaults
-        // on every copyable field: seed it through the proven
-        // forward copy from the every-field fixture.
-        var source = SpaceBarStyle()
-        source.copyAppearance(
-            from: AppBarFixtures.everyGlobalField()
-        )
-        var target = AppBarStyle()
-        target.copyAppearance(from: source)
-        let changed = changedFields(target, from: AppBarStyle())
-        let expected = Set(
-            SpaceBarStyle.copyAppearanceKeys.compactMap {
-                key -> String? in
-                fieldNames(AppBarStyle()).first {
-                    snakeCased($0) == key
-                }
-            }
-        )
-        #expect(changed == expected)
-        // The exclusions stay untouched.
-        #expect(target.edge == AppBarStyle().edge)
-    }
-
-    @Test("Copy-appearance covers exactly the shared keys")
-    func copyAppearanceParity() {
-        // Source differs from the default target on EVERY
-        // field, so an uncopied shared field is visible.
-        let source = AppBarFixtures.everyGlobalField()
-        var target = SpaceBarStyle()
-        target.copyAppearance(from: source)
-        let changed = changedFields(target, from: SpaceBarStyle())
-        let expected = Set(
-            SpaceBarStyle.copyAppearanceKeys.map { key in
-                SpaceBarStyle.CodingKeys.allCases.first {
-                    $0.stringValue == key
-                }
-            }
-            .compactMap { key -> String? in
-                guard let key else { return nil }
-                return fieldNames(SpaceBarStyle()).first {
-                    snakeCased($0) == key.stringValue
-                }
-            }
-        )
-        #expect(changed == expected)
-        // The exclusions stay untouched.
-        #expect(target.enabled == SpaceBarStyle().enabled)
-        #expect(target.edge == SpaceBarStyle().edge)
-        // Sanity: the intersection is non-trivial, and the
-        // colour class is excluded wholesale (owner ruling
-        // 2026-08-02: a colours-copy, if any, belongs to
-        // Advanced Colours) — derived by suffix, so a new
-        // shared colour field stays out automatically.
-        #expect(
-            SpaceBarStyle.copyAppearanceKeys.contains(
-                "thickness"
-            )
-        )
-        #expect(!SpaceBarStyle.sharedColorKeys.isEmpty)
-        #expect(
-            SpaceBarStyle.copyAppearanceKeys.isDisjoint(
-                with: SpaceBarStyle.sharedColorKeys
-            )
-        )
-        #expect(
-            SpaceBarStyle.sharedColorKeys.contains("item_color")
-        )
-        // The space-only fields never join either set.
-        #expect(
-            !SpaceBarStyle.sharedColorKeys.contains(
-                "focused_item_color"
-            )
-        )
-    }
-
     @Test("Missing keys decode to defaults")
     func sparseDecode() throws {
         let decoded = try JSONDecoder().decode(
@@ -147,24 +58,14 @@ struct SpaceBarCommandParityTests {
     /// One representative setting per case, each value chosen
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
-        .enabled(false), .edge(.bottom), .alignment(.end),
-        .thickness(44), .outerMargin(4), .innerMargin(6),
-        .itemSize(120), .itemGap(3), .fontSize(15),
-        .glyphCap(8), .titleCap(40),
-        .iconSource(.appFont), .backgroundStyle(.boxed),
-        .liquidGlass(false),
-        .backgroundFit(.full),
-        .activeIndicator(.gap), .cornerRoundness(5),
-        .dimFactor(0.3), .activeDimFactor(0.7),
+        .enabled(false),
+        .glyphCap(8), .frontAppTitleCap(40),
+        .activeIndicator(.edgeMark),
+        .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
         .stickyBadge(false),
         .springDelay(1000),
-        .itemColor("#010101"), .activeItemColor("#020202"),
-        .focusedItemColor("#030303"), .hoverFillColor("#040404"),
-        .hoverItemColor("#050505"), .fillColor("#060606"),
-        .highlightColor("#080808"),
-        .groupBadgeColor("#0A0A0A"),
-        .groupBadgeTextColor("#0B0B0B"),
+        .focusedItemColor("#030303"),
     ]
 
     @Test("Each command sets exactly one field")
@@ -208,7 +109,7 @@ struct SpaceBarCommandParityTests {
         )
         #expect(
             (try? SpaceBarCommandSetting.parse(
-                field: "edge",
+                field: "icon_source",
                 args: [.string("start")]
             ).get()) == nil
         )
@@ -231,22 +132,14 @@ struct SpaceBarCommandParityTests {
         for key: SpaceBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .enabled, .showFrontApp, .hideEmpty,
-            .stickyBadge, .liquidGlass:
+        case .enabled, .showFrontApp, .hideEmpty, .stickyBadge:
             return [.bool(true)]
-        case .edge: return [.string("bottom")]
-        case .alignment: return [.string("end")]
-        case .iconSource: return [.string("app_font")]
-        case .backgroundStyle: return [.string("boxed")]
-        case .backgroundFit: return [.string("full")]
-        case .activeIndicator: return [.string("gap")]
-        case .thickness, .outerMargin, .innerMargin, .itemSize,
-            .itemGap, .fontSize, .cornerRoundness, .dimFactor,
-            .activeDimFactor:
-            return [.number(10)]
+        case .activeIndicator: return [.string("edge_mark")]
+        case .activeDimFactor:
+            return [.number(0.5)]
         case .springDelay: return [.number(1000)]
         case .glyphCap: return [.number(8)]
-        case .titleCap: return [.number(40)]
+        case .frontAppTitleCap: return [.number(40)]
         default:
             return [.string("#123456")]
         }

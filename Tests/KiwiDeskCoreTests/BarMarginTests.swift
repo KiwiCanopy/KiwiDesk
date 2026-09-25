@@ -4,14 +4,13 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// One placement rule for both bars (#1516): from the screen
-/// edge inwards, the bar's OUTER margin (absolute; 0 is flush),
-/// the strip, the bar's INNER margin, then the windows' own
-/// outer gap — which alone keeps the focus ring's room, so the
-/// inner margin is extra and needs no floor. Both strips are cut
-/// from the raw visible bounds; on a shared edge the Space Bar is
-/// carved first and each bar owns its margins, so between them
-/// the two add.
+/// One placement rule for the shelf (#1516, #1517): from the
+/// screen edge inwards, the shelf's OUTER margin (absolute; 0 is
+/// flush), the strip, the shelf's INNER margin, then the
+/// windows' own outer gap — which alone keeps the focus ring's
+/// room, so the inner margin is extra and needs no floor. Both
+/// bars share the one strip, so the reservation is taken once
+/// whichever bars show.
 @Suite("Bar margins")
 struct BarMarginTests {
     // Pinned (#531): every number below reasons from it.
@@ -22,189 +21,110 @@ struct BarMarginTests {
         height: 1055
     )
 
-    private func spaceBar(
-        edge: AppBarEdge,
-        outer: CGFloat,
-        inner: CGFloat
-    ) -> SpaceBarStyle {
-        var style = SpaceBarStyle()
-        style.edge = edge
-        // Pinned (#660): the sums below reason from it.
-        style.thickness = 32
-        style.outerMargin = outer
-        style.innerMargin = inner
-        return style
-    }
-
-    private func context(
-        bounds: CGRect,
-        gaps: Gaps,
+    private func shelf(
         edge: AppBarEdge,
         outer: CGFloat = 0,
         inner: CGFloat = 0
-    ) -> LayoutContext {
-        var context = LayoutContext(bounds: bounds, gaps: gaps)
+    ) -> KiwiShelf {
+        var shelf = KiwiShelf()
+        shelf.edge = edge
         // Pinned (#660): the sums below reason from it.
-        context.appBarStyle.thickness = 32
-        context.appBarStyle.edge = edge
-        context.appBarStyle.outerMargin = outer
-        context.appBarStyle.innerMargin = inner
-        context.scrolling.appBar.enabled = true
-        return context
+        shelf.thickness = 32
+        shelf.outerMargin = outer
+        shelf.innerMargin = inner
+        return shelf
     }
 
-    @Test("The Space Bar strip sits its outer margin in from the edge")
-    func spaceBarOuterMarginInsetsTheStrip() throws {
-        let style = spaceBar(edge: .top, outer: 8, inner: 0)
-        let strip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: style)
-        )
+    /// Settings carrying `shelf`, with only the scrolling App Bar
+    /// on unless `spaceBar` is.
+    private func settings(
+        _ shelf: KiwiShelf,
+        spaceBar: Bool = false
+    ) -> TilingSettings {
+        var settings = TilingSettings()
+        settings.kiwishelf = shelf
+        settings.spaceBarStyle.enabled = spaceBar
+        settings.monocle.appBar.enabled = false
+        settings.scrolling.appBar.enabled = true
+        return settings
+    }
+
+    @Test("The shelf strip sits its outer margin in from the edge")
+    func outerMarginInsetsTheStrip() {
+        let shelf = shelf(edge: .top, outer: 8)
+        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
         #expect(strip.minY == visible.minY + 8)
         #expect(strip.height == 32)
         #expect(strip.width == visible.width)
-        let remaining = SpaceBarGeometry.remainingFrame(
+        let remaining = ShelfGeometry.remainingFrame(
             in: visible,
-            style: style
+            shelf: shelf
         )
         #expect(remaining.minY == visible.minY + 8 + 32)
     }
 
-    @Test("The Space Bar inner margin reserves room, moving no strip")
-    func spaceBarInnerMarginIsAdditive() throws {
-        let style = spaceBar(edge: .bottom, outer: 0, inner: 6)
-        let strip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: style)
-        )
+    @Test("The inner margin reserves room, moving no strip")
+    func innerMarginIsAdditive() {
+        let shelf = shelf(edge: .bottom, inner: 6)
+        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
         #expect(strip.maxY == visible.maxY)
-        let remaining = SpaceBarGeometry.remainingFrame(
+        let remaining = ShelfGeometry.remainingFrame(
             in: visible,
-            style: style
+            shelf: shelf
         )
         #expect(remaining.maxY == visible.maxY - 32 - 6)
-        #expect(style.reservation == 38)
+        #expect(shelf.reservation == 38)
     }
 
-    /// The App Bar's strip is measured from the layout bounds
-    /// and the windows keep their outer gap — so the bar stops
-    /// reading the inner gap, and at the defaults it is flush.
-    @Test("The App Bar is flush by default; windows keep the outer gap")
-    func appBarIsFlushAndWindowsKeepTheOuterGap() throws {
-        let context = context(
-            bounds: visible,
-            gaps: Gaps(
-                outer: Gaps.Outer(
-                    top: 10,
-                    bottom: 10,
-                    left: 10,
-                    right: 10
-                ),
-                inner: Gaps.Inner(horizontal: 6, vertical: 6)
-            ),
-            edge: .bottom
+    /// The windows keep their outer gap beyond the shelf — never
+    /// the inner gap — and at the default margins it is flush.
+    @Test("The shelf is flush by default; windows keep the outer gap")
+    func flushAndWindowsKeepTheOuterGap() {
+        let settings = settings(shelf(edge: .bottom))
+        let outer = Gaps.Outer(top: 10, bottom: 10, left: 10, right: 10)
+        let area = LayoutContext.usable(
+            settings.layoutBounds(from: visible, mode: .scrolling),
+            outer: outer
         )
-        let strip = try #require(
-            context.scrolling.barFrame(
-                in: context.bounds,
-                global: context.appBarStyle
-            )
-        )
-        #expect(strip.maxY == visible.maxY)
-        #expect(strip.minX == visible.minX)
-        #expect(strip.width == visible.width)
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
-        // Window side: thickness, then the 10 pt OUTER gap —
-        // never the 6 pt inner one.
         #expect(area.maxY == visible.maxY - 32 - 10)
     }
 
-    @Test("App Bar margins move the strip in and the windows further")
-    func appBarMarginsApply() throws {
-        let context = context(
-            bounds: visible,
-            gaps: .uniform(10),
-            edge: .bottom,
-            outer: 5,
-            inner: 7
-        )
-        let strip = try #require(
-            context.scrolling.barFrame(
-                in: context.bounds,
-                global: context.appBarStyle
-            )
-        )
+    @Test("Shelf margins move the strip in and the windows further")
+    func marginsApply() {
+        let shelf = shelf(edge: .bottom, outer: 5, inner: 7)
+        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
         #expect(strip.maxY == visible.maxY - 5)
         #expect(strip.height == 32)
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
+        let area = LayoutContext.usable(
+            settings(shelf).layoutBounds(from: visible, mode: .scrolling),
+            outer: Gaps.uniform(10).outer
         )
         #expect(area.maxY == visible.maxY - 5 - 32 - 7 - 10)
     }
 
-    @Test("A per-layout override moves the margins")
-    func layoutOverrideResolves() {
-        var global = AppBarStyle()
-        global.outerMargin = 3
-        var bar = LayoutAppBar()
-        bar.innerMargin = 9
-        let resolved = bar.resolved(with: global)
-        #expect(resolved.outerMargin == 3)
-        #expect(resolved.innerMargin == 9)
-        bar.outerMargin = -4
-        #expect(bar.resolved(with: global).outerMargin == 0)
-    }
-
-    /// The issue's stacking picture, both bars on one edge:
-    /// |SB outer|Space Bar|SB inner|AB outer|App Bar|AB inner|gap|.
-    @Test("Both bars on one edge stack outermost-first, margins adding")
-    func sameEdgeStacking() throws {
-        let space = spaceBar(edge: .top, outer: 2, inner: 3)
-        let spaceStrip = try #require(
-            SpaceBarGeometry.strip(in: visible, style: space)
-        )
-        let remaining = SpaceBarGeometry.remainingFrame(
-            in: visible,
-            style: space
-        )
-        let context = context(
-            bounds: remaining,
-            gaps: .uniform(10),
-            edge: .top,
-            outer: 4,
-            inner: 5
-        )
-        let appStrip = try #require(
-            context.scrolling.barFrame(
-                in: context.bounds,
-                global: context.appBarStyle
-            )
-        )
-        #expect(spaceStrip.minY == visible.minY + 2)
-        #expect(appStrip.minY == spaceStrip.maxY + 3 + 4)
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
-        #expect(area.minY == appStrip.maxY + 5 + 10)
+    /// Both bars sit on the one strip (#1517): showing the Space
+    /// Bar beside the App Bar reserves nothing more.
+    @Test("Both bars share one reservation")
+    func bothBarsReserveOnce() {
+        let shelf = shelf(edge: .top, outer: 2, inner: 3)
+        let one = settings(shelf).layoutBounds(from: visible, mode: .scrolling)
+        let both = settings(shelf, spaceBar: true)
+            .layoutBounds(from: visible, mode: .scrolling)
+        #expect(both == one)
+        #expect(both.minY == visible.minY + 2 + 32 + 3)
     }
 
     @Test("Absent keys decode to 0 and a negative one is floored")
     func decodingDefaultsAndFloors() throws {
         let decoder = JSONDecoder()
         let bare = try decoder.decode(
-            AppBarStyle.self,
+            KiwiShelf.self,
             from: Data("{}".utf8)
         )
         #expect(bare.outerMargin == 0)
         #expect(bare.innerMargin == 0)
         let negative = try decoder.decode(
-            SpaceBarStyle.self,
+            KiwiShelf.self,
             from: Data(
                 #"{"outer_margin": -3, "inner_margin": -1}"#.utf8
             )
@@ -232,59 +152,55 @@ struct BarMarginCommandTests {
         let core = makeCore()
         #expect(
             core.execute(
-                "app_bar.set_outer_margin",
+                "kiwishelf.set_outer_margin",
                 args: [.number(12)]
             ).isSuccess
         )
         #expect(
             core.execute(
-                "app_bar.set_inner_margin",
+                "kiwishelf.set_inner_margin",
                 args: [.number(4)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.appBarStyle.outerMargin == 12)
-        #expect(core.tiler.settings.appBarStyle.innerMargin == 4)
+        #expect(core.tiler.settings.kiwishelf.outerMargin == 12)
+        #expect(core.tiler.settings.kiwishelf.innerMargin == 4)
         #expect(
             core.execute(
-                "space_bar.set_outer_margin",
+                "kiwishelf.set_outer_margin",
                 args: [.number(6)]
             ).isSuccess
         )
         #expect(
             core.execute(
-                "space_bar.set_inner_margin",
+                "kiwishelf.set_inner_margin",
                 args: [.number(-2)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.spaceBarStyle.outerMargin == 6)
-        #expect(core.tiler.settings.spaceBarStyle.innerMargin == 0)
+        #expect(core.tiler.settings.kiwishelf.outerMargin == 6)
+        #expect(core.tiler.settings.kiwishelf.innerMargin == 0)
         #expect(
             !core.execute(
-                "app_bar.set_outer_margin",
+                "kiwishelf.set_outer_margin",
                 args: [.string("x")]
             ).isSuccess
         )
     }
 
-    @Test("scroll and monocle override the App Bar's margins")
-    func layoutOverrides() {
+    @Test("The margins have no per-layout override (#1517)")
+    func layoutOverridesRetired() {
         let core = makeCore()
         #expect(
-            core.execute(
+            !core.execute(
                 "scroll.set_app_bar_outer_margin",
                 args: [.number(9)]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.outerMargin == 9
-        )
-        #expect(
-            core.execute(
+            !core.execute(
                 "monocle.set_app_bar_inner_margin",
                 args: [.number(3)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.monocle.appBar.innerMargin == 3)
-        #expect(core.tiler.settings.appBarStyle.outerMargin == 0)
+        #expect(core.tiler.settings.kiwishelf.outerMargin == 0)
     }
 }

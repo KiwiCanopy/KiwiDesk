@@ -56,7 +56,7 @@ extension ShortcutsPanelController {
         _ reference: ShortcutsReference,
         settings: TilingSettings
     ) -> ShortcutsReference {
-        let source = settings.appBarStyle.iconSource
+        let source = settings.kiwishelf.iconSource
         // Allocation early-out only — the authoritative gate
         // lives in the resolver; mapping through it with an
         // image source would just write nils.

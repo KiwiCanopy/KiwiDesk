@@ -16,6 +16,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case glass
     case grid
     case habits
+    case kiwishelf
     case appliesImmediately
     case layers
     case luaBindings
@@ -66,7 +67,7 @@ enum SettingsContainer: CaseIterable, Hashable {
         case .advanced, .borders, .bsp, .cues,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .generalKeys, .grid,
-            .habits, .appliesImmediately, .layers, .luaBindings,
+            .habits, .kiwishelf, .appliesImmediately, .layers, .luaBindings,
             .monitorFingerprints, .monocle, .mouse,
             .moveWindows, .onQuit, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,

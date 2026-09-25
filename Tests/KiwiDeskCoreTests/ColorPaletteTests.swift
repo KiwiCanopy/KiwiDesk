@@ -18,10 +18,12 @@ struct ColorPaletteTests {
         )
     }
 
-    @Test("The color surface is the 25 namespaced color paths")
+    /// 17 since #1517: the shelf's 8 replace the bars' 17, the
+    /// Space Bar keeping its focused-window ink.
+    @Test("The color surface is the 17 namespaced color paths")
     func colorSurface() {
         let all = ColorPaletteKeys.all
-        #expect(all.count == 25)
+        #expect(all.count == 17)
         #expect(all.allSatisfy { $0.contains(".") })
         // Every path is a color key: `_color`-suffixed, or the
         // bare `color` of a struct that IS one mark.
@@ -30,9 +32,11 @@ struct ColorPaletteTests {
                 $0.hasSuffix("_color") || $0.hasSuffix(".color")
             }
         )
-        // A colliding wire key appears once per bar, disambiguated.
-        #expect(all.contains("app_bar.fill_color"))
-        #expect(all.contains("space_bar.fill_color"))
+        // The bars' shared colours are the shelf's (#1517); no
+        // bar-scoped copy remains to collide.
+        #expect(all.contains("kiwishelf.fill_color"))
+        #expect(!all.contains("space_bar.fill_color"))
+        #expect(!all.contains("app_bar.fill_color"))
         // Space-only key present; border + both drag elements too.
         #expect(all.contains("space_bar.focused_item_color"))
         #expect(all.contains("border.focused_color"))
@@ -85,12 +89,12 @@ struct ColorPaletteTests {
     @Test("An empty hex is skipped on a non-mark path")
     func emptyHexSkippedElsewhere() {
         var settings = TilingSettings()
-        let before = settings.appBarStyle.fillColor
+        let before = settings.kiwishelf.fillColor
         ColorPalette(
             name: "E",
-            colors: ["app_bar.fill_color": ""]
+            colors: ["kiwishelf.fill_color": ""]
         ).apply(to: &settings)
-        #expect(settings.appBarStyle.fillColor == before)
+        #expect(settings.kiwishelf.fillColor == before)
         #expect(!before.isEmpty)
     }
 
@@ -126,21 +130,21 @@ struct ColorPaletteTests {
                     from: TilingSettings()
                 )
         )
-        #expect(def.colors.count == 25)
+        #expect(def.colors.count == ColorPaletteKeys.all.count)
     }
 
     @Test("Applying the default palette restores default colors")
     func defaultPaletteRestores() {
         var settings = TilingSettings()
-        settings.appBarStyle.fillColor = "#123456"
-        settings.spaceBarStyle.itemColor = "#654321"
+        settings.kiwishelf.fillColor = "#123456"
+        settings.kiwishelf.itemColor = "#654321"
         settings.borderStyle.focusedColor = "#ABCDEF"
         PaletteCatalog.defaultPalette().apply(to: &settings)
         let fresh = TilingSettings()
-        #expect(settings.appBarStyle.fillColor == fresh.appBarStyle.fillColor)
+        #expect(settings.kiwishelf.fillColor == fresh.kiwishelf.fillColor)
         #expect(
-            settings.spaceBarStyle.itemColor
-                == fresh.spaceBarStyle.itemColor
+            settings.kiwishelf.itemColor
+                == fresh.kiwishelf.itemColor
         )
         #expect(
             settings.borderStyle.focusedColor
@@ -151,29 +155,29 @@ struct ColorPaletteTests {
     @Test("A sparse palette leaves absent colors untouched")
     func sparseApply() {
         var settings = TilingSettings()
-        let before = settings.spaceBarStyle.itemColor
+        let before = settings.kiwishelf.itemColor
         ColorPalette(
             name: "S",
-            colors: ["app_bar.fill_color": "#111111"]
+            colors: ["kiwishelf.fill_color": "#111111"]
         ).apply(to: &settings)
-        #expect(settings.appBarStyle.fillColor == "#111111")
+        #expect(settings.kiwishelf.fillColor == "#111111")
         // An untouched key keeps its value.
-        #expect(settings.spaceBarStyle.itemColor == before)
+        #expect(settings.kiwishelf.itemColor == before)
     }
 
     @Test("An invalid hex or unknown path is skipped, not fatal")
     func skipsBadInput() {
         var settings = TilingSettings()
-        let before = settings.appBarStyle.fillColor
+        let before = settings.kiwishelf.fillColor
         ColorPalette(
             name: "X",
             colors: [
-                "app_bar.fill_color": "not-a-hex",
+                "kiwishelf.fill_color": "not-a-hex",
                 "app_bar.nonsense_color": "#222222",
                 "made_up.path.deep": "#333333",
             ]
         ).apply(to: &settings)
-        #expect(settings.appBarStyle.fillColor == before)
+        #expect(settings.kiwishelf.fillColor == before)
     }
 
     @Test("The bundled catalog is 9 palettes, default first, unique")

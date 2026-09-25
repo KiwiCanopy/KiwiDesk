@@ -14,11 +14,7 @@ public struct ScrollingLayout: LayoutSystem {
     ) -> [WindowID: CGRect] {
         guard !windows.isEmpty else { return [:] }
 
-        let area = context.scrolling.windowFrame(
-            in: context.bounds,
-            outer: context.gaps.outer,
-            global: context.appBarStyle
-        )
+        let area = context.usable
         let horizontal = context.scrolling.axisIsHorizontal
 
         // A single window fills the whole area (#1389 lets the

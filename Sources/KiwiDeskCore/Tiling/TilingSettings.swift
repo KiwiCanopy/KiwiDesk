@@ -45,7 +45,10 @@ public struct TilingSettings: Sendable, Equatable {
     public var grid = GridParams()
     public var monocle = MonocleParams()
     public var track = TrackParams()
-    /// Global indicator bar style for layouts with a bar.
+    /// The shelf both bars sit on (`kiwishelf.*`, #1517).
+    public var kiwishelf = KiwiShelf()
+    /// The App Bar's own style (`app_bar.*`); per layout,
+    /// `LayoutAppBar` overrides it.
     public var appBarStyle = AppBarStyle()
     /// Space Bar overview settings (`space_bar.*`, #293).
     public var spaceBarStyle = SpaceBarStyle()

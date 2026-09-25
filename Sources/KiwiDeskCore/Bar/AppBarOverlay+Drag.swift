@@ -8,9 +8,6 @@ extension AppBarOverlay {
         to windowPoint: CGPoint
     ) {
         guard let m = lastMetrics else { return }
-        // Leave glass hug mode so the mover and its siblings share
-        // `itemContainer`'s coordinate space.
-        spanPlainGlassForDrag()
         let mover = draggableView(for: view)
         let point = itemContainer.convert(windowPoint, from: nil)
         if itemContainer.subviews.last !== mover {

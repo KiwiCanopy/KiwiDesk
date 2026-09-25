@@ -2612,6 +2612,14 @@ thing to have done, so a grow press refuses to go further rather
 than quietly rewriting it. The clamp exists to stop growth
 running away, not to overrule a value someone chose.
 
+:::unreleased
+On KiwiShelf the bar strip is reserved in `layoutBounds` before
+any layout runs, so no layout carves a bar of its own and the
+difference between the drawn area and the region is the outer
+gaps alone; the argument is unchanged, only the bankable width
+shrinks.
+:::
+
 **Scrolling at a screen seam: a blocked edge is a hard stop
 (#878).** A scrolling edge is *open* or *blocked*, decided per
 edge from the screen arrangement. Open edges keep the #142
@@ -2778,7 +2786,7 @@ it.
 **A resize span is the layout region, not the display
 (#537).** Anything that divides a delta by a span — or
 compares a slot against a midpoint — reads
-`TilingEngine.layoutBounds(on:)`: the visible frame with the
+`TilingEngine.layoutBounds(on:for:)`: the visible frame with the
 Space Bar's strip already reserved (#293), which is the region
 the layout actually filled. A resize path reading the raw
 display instead (the keyboard span, the BSP focus sign, the
@@ -2798,6 +2806,14 @@ than the strips config would reserve. Which files that
 covers, and why each qualifies, is the allowlist in
 `LayoutBoundsRoutingTests` — the exemption list, and the only
 copy of it.
+
+:::unreleased
+The reserved strip is KiwiShelf's, taken in a layout exactly
+where a bar draws there — every layout while the Space Bar is
+on, else only the layouts whose App Bar is on — so the region is
+the one the Space's own layout filled, and a span is measured
+against it whatever the other layouts reserve (#1517).
+:::
 
 **Interactive resizes are session-scoped per space; the config
 layers never move underneath them (#458).** A resize on a
@@ -5722,8 +5738,8 @@ and the line is drawn where the harm is:
   the reveal is shaped, scroll the row to the top edge with its
   heading off (`docs/ui-patterns.md` ▸ a revealed target). A
   wash on a control already in view is coverage for its own
-  sake, and it costs the heading. (The App Bar's two Show-it-in
-  toggles predate the ruling and stay as shipped.)
+  sake, and it costs the heading. (The two per-layout App Bar
+  show toggles predate the ruling and stay as shipped.)
 - Advanced Colours' rows take none whatever their tier. Colour
   selection is a browse, not a name search: nobody types
   "group badge text colour", they open the page and look.
@@ -9378,7 +9394,10 @@ still holds exactly). First: Simple mode withholds only the
 *offer* to create a first override; once any override exists,
 the column shows on every peer row in both modes, because an
 existing thing that ran yesterday must never be invisible
-today. Second: a field class whose GUI cost is a **duplicated
+today.
+
+:::unreleased
+Second: a field class whose GUI cost is a **duplicated
 card** may live Lua-only entirely. The per-layout App Bar
 styling rows are the ruling case (GUI_REMOVED_2026-08): each
 override doesn't just add a row, it adds a resolution question
@@ -9394,10 +9413,14 @@ render no row. What breaks if this is ignored: either the Bars
 page grows back its three near-identical cards, or someone
 "fixes" the Lua chain's GUI-lessness by hiding the fields —
 both worse than the boundary. The two per-layout **enabled**
-toggles are not styling and keep their GUI ("Show it in"): they
-are the only way a layout carries a bar at all, and they own
-the App Bar editor's grey. (#678 Phase 2, supersedes the
-GUI half of #68 §3.4's scope; owner sign-off 2026-08-02)
+toggles are not styling and keep their GUI (the KiwiShelf card's
+**App Bar in Monocle** / **App Bar in Scrolling**): they are the
+only way a layout carries a bar at all, and they own the App Bar
+editor's grey. The class reaches the App Bar's own fields alone;
+the shelf's take no per-layout value (App Bar ▸ one shelf).
+(#678 Phase 2, supersedes the GUI half of #68 §3.4's scope;
+owner sign-off 2026-08-02)
+:::
 
 **A per-space override is eligible only when it is
 layout-local.** A field belongs in the Spaces → `Customize…`
@@ -10312,16 +10335,17 @@ outward pair is one call away for whoever wants it.
 
 **[Rationale]**
 
-**The two bars ship where macOS already puts a persistent
-strip.** (#660; the fill number retuned by #755.) Space Bar on
-**top**, App Bar on **bottom**, both in the **plain** design
-language, both filled at the one opacity every bundled palette's
-bar also carries — `PaletteBarFillTests` owns the number.
+:::unreleased
+**The bars ship where macOS already puts a persistent strip.**
+(#660, #1517; the fill number retuned by #755.) KiwiShelf on
+**top**, both bars in the **plain** design language, both filled
+at the one opacity every bundled palette's bar also carries —
+`PaletteBarFillTests` owns the number.
 
-Each half of that is the same argument. Top and bottom are where
-the menu bar and the Dock have already taught the eye to look for
-something permanent, so a new user reads the bars as part of the
-system rather than as two panels someone stuck on; the previous
+Each half of that is the same argument. The top edge is where
+the menu bar has already taught the eye to look for something
+permanent, so a new user reads the bars as part of the system
+rather than as two panels someone stuck on; the previous
 left-edge Space Bar competed with nothing and matched nothing.
 `plain` — one shared plate rather than a box per item — is what
 the menu bar itself does, and a boxed strip reads as a widget
@@ -10330,6 +10354,7 @@ the user's wallpaper: the 40 % fill #660 chose was legible on the
 dark ones it was chosen against and a guess everywhere else, while
 opacity is the one axis where the safe default costs the confident
 user a single setting.
+:::
 
 **Where the fill landed is a separate decision (#755).** Read side
 by side, the nine bundled palettes' fills spread from 40 % to 85 %
@@ -10342,8 +10367,8 @@ Bar. Re-applying a palette is the only migration (a palette
 paints one-shot, so a config already carrying an old alpha keeps
 it until then).
 
-None of this narrows anything — all six values stay reachable
-from Lua and from Settings. It is a claim about which starting
+None of this narrows anything — every one of these values stays
+reachable from Lua and from Settings. It is a claim about which starting
 point is right when we know nothing about the desktop, which is
 exactly the "approachable by default" clause: the default is for
 the user who never opens the editor.
@@ -10429,15 +10454,18 @@ Bar slots are **uniform and measured from the widest item**
 (`AppBarOverlay.autoSlotWidth`). On that same sample the app
 names ran 6–20 characters and the titles to 57. One long title
 therefore widens *every* slot until `slotLength`'s
-quarter-of-the-bar clamp bites and the rest of the bar scrolls —
-so the cap is what keeps auto item sizing usable at all, and
-`item_size` is not a substitute (it answers a different
-question, and only for users who go looking). The Space Bar's
-own cap exists for a different reason and is kept as a separate
-knob for that reason: its front segment already ellipsizes at
-the panel edge and cannot clip, but its estimated length feeds
-the bar's alignment total, so under `center` or `end` an
-uncapped title slides the whole run of Space items sideways.
+quarter-of-the-bar clamp bites and the rest of the bar scrolls.
+
+:::unreleased
+So the cap is what keeps automatic slot sizing usable at all,
+and with no pinned item size it is the App Bar's one size
+control. The Space Bar's own cap, `front_app_title_cap`, exists
+for a different reason and is kept as a separate knob for that
+reason: its front segment already ellipsizes at the panel edge
+and cannot clip, but its estimated length feeds the bar's
+alignment total, so under `center` or `end` an uncapped title
+slides the whole run of Space items sideways.
+:::
 
 The refresh path is the subtler half. The bars are driven from
 `retile()`, and `TilingEngine.shouldRetile` returns false for
@@ -10453,43 +10481,257 @@ like every other settle (#48), and gated on the **rendered**
 content, so a vertical bar (which collapses to icon-only)
 schedules nothing.
 
-**App Bar edge is absolute.** (#293, supersedes the #228
+:::unreleased
+**[Principle] One shelf holds both bars on one plate, and a
+field both bars read is stored once, on it.**
+([#1517](https://github.com/KiwiCanopy/KiwiDesk/issues/1517).)
+The Space Bar and the App Bar sit on **KiwiShelf**, one screen
+edge. Where they hang and the plate they share — edge,
+alignment, order, the Space Bar minimum, thickness, margins,
+background style and fit, Liquid Glass, corner roundness, item
+gap, font size, the app symbol style, the idle opacity of
+untinted content (`dim_factor`) and every colour the two bars
+share — is `kiwishelf`'s. A field each bar may set for
+itself stays on that bar, whether or not the other bar has one
+like it: the active indicator's shape, the App Bar's content and
+title cap, the Space Bar's glyph cap, spring delay, front-app
+title cap, its active-Space dim and the colour of the focused
+window's glyph inside a Space item are examples, not the list.
+
+*One plate, two sections.* While both bars show they are one
+plate with two sections, Space and App, placed as one unit by
+`alignment`; `order` picks which section comes first. The plate
+is one surface rather than two painted to match: one panel per
+display carries it, the divider and both sections, and each bar
+renders only its content into that panel — two panels each
+painting a plate is the seam this removes. Under Liquid Glass the
+plate is a backdrop behind the sections, never a view that hosts
+them, so no item is ever reparented into glass as the shelf
+changes (the churn #1315 names). A fill
+both bars draw side by side is a value two bars must agree on:
+two plates in two fills on one strip read as two bars
+competing for the edge, and a user who matched them by hand had
+answered one question twice. The same holds one step further
+for every colour drawn on that plate — item, active item,
+highlight, hover, badge — and the bundled palettes already said
+so, giving both bars the same value for each; the one exception,
+the Space Bar's dimmer item colour, was the same hue at a lower
+alpha, which is a rule rather than a colour. So the shelf has
+one set of colours: idle Space identifiers are dimmed from the
+shelf's item colour at a fixed alpha, and the divider between
+the sections is derived from it the same way rather than being
+a palette role of its own. That divider is the top rung of one
+ladder with every other rule a bar draws (`BarDivider` holds the
+values): heavier than the rule inside a Space item and quieter
+than idle ink, so the boundary between two bars outranks a detail
+inside one without reading as an item — and no rung runs the full
+depth, since a full-height line splits the one plate back into
+two. Under Boxed there is no plate to split: the divider is the
+same thin line in the gap between the last Space box and the
+first App box, with no box of its own. What separates the sections is what
+each bar shows, not a second surface or a second palette: the
+active indicator stays per bar in SHAPE, in the shelf's one
+highlight colour, and differs by default — Outline on the Space
+Bar, Edge mark on the App Bar — so the two kinds of "current"
+never read as one. The seam
+sits where the two needs put it. A seam held on the centre was
+refused: it holds a line still by padding the shorter section
+with empty plate, which is a cost paid on every screen to
+steady a mark nobody navigates by.
+
+*Reserved where a bar draws.* The strip is carved from the
+display's visible frame in every layout while the Space Bar is
+on, and only in the layouts whose App Bar is on while it is
+off; the remainder is the bounds the layout operates inside,
+and layouts still never learn a bar exists (resolution before
+layout; layout functions stay pure over the flat array). With
+the Space Bar off, switching a Space between BSP and Monocle
+therefore moves its windows by the strip's depth. That is
+accepted: the move is the bar the user turned on for that
+layout appearing, while reserving everywhere left an empty
+strip — permanently, in every layout that draws nothing there —
+to spare it.
+
+*One placement rule, asked by every picture of it.* Where each
+section sits along the edge is decided in ONE pure function,
+`ShelfArrangement`, which both live bars take their segments
+from and which the Settings preview and the alignment note ask
+too. A second copy — a preview laying the bars out by its own
+arithmetic, a note deriving "the Space Bar moves" by hand — is
+a picture that can claim a placement the engine does not make,
+the schematic rule's defect (#702) on the one surface where the
+user decides where the bars go. When an App Bar section appears
+or leaves under a centred or far-end alignment the plate grows
+or shrinks and slides to its new place over a short decelerating
+ease with no overshoot, a little longer than an item's slide so
+the plate reads as one surface moving, through `BarMotion` — a
+re-placement the user did not ask for must be seen to travel,
+never snap — and under Reduce Motion it arrives without
+travelling. Under Boxed there is no plate to glide; each box
+slides on its own.
+
+*A minimum, not a share.* Each section is as long as its items
+while both fit. Once the shelf is full the Space section
+shrinks, never below the **Space Bar minimum**, and the App
+section takes the rest and scrolls. A split would tax a bar
+that fits to make room for one that does not; a minimum names
+the one guarantee a user asks for — how much of the Space Bar
+stays visible — and leaves every other length to the content.
+It is a floor on shrinking and never a length the section is
+padded up to: a Space Bar needing less keeps its own length and
+the App Bar gets the rest. The Space Bar is the one guaranteed
+because its items are a short set navigated by position, where
+the App Bar's are the list built to scroll. The minimum is
+clamped between a hard floor — the active item and, each side,
+a fade and an item gap, so the Space the user is on is never
+cut or half-faded — and the Space Bar's natural length. The
+divider is a plain line while everything fits and nothing hovers
+on it; only while the shelf is full does its hit area take the
+resize cursor along the edge and the line its hover ink and a
+heavier stroke, since an accessory app's cursor alone went
+unseen on the device, a drag writing the minimum and a
+double-click resetting it — a handle that moves nothing while
+nothing is hidden is chrome with no job. The drag re-lays the
+bars as it moves and commits on release through the same setter
+Lua and the CLI call, so there is one writer of the minimum and
+one clamp.
+
+*Overflow fades; it has no arrows.* Each section scrolls on its
+own. A hidden side fades the content itself — a mask on the
+items, not a gradient laid over them, which would paint a
+colour over Liquid Glass that the glass does not have —
+starting well before the edge, and a count sits on the faded
+end — the number with a chevron pointing where the entries are,
+stacked below it on a horizontal shelf and beside it on a
+vertical one, showing the Space items' hover chip under the
+pointer — the item beneath it stands its own hover down there —
+and keeping the arrow cursor, since macOS keeps the pointing hand
+for links; clicking it pages, and a side already at its end
+shows nothing. A side fades and counts as soon as its edge cuts
+any entry, not only once a whole one is hidden: a clipped entry
+with no fade beside it reads as the end of the list. A page lands
+on an entry boundary — the first entry not wholly clear of the
+far fade becomes the first clear of the near one — and goes to
+the end where less than an entry would remain, so paging never
+stops a sliver short of an end; the wheel and trackpad stay
+fluid, since only a click has a step to align. Arrows cost a fixed box at both ends of every
+section that overflows and draw chrome that reads as items; a
+fade costs no room and says the same thing. The fade scales
+with thickness, clamped, and never takes more than a fraction
+of what the section shows. The count keeps its chevron because
+a bare number beside a glyph reads as that glyph's badge. The
+wheel scrolls along the shelf on either axis, a trackpad
+smoothly with momentum, natural scrolling respected, and a
+manual scroll — a page, the wheel, a drag's autoscroll — holds
+until the active Space or focus changes or the section hides:
+a section that followed the active entry on every refresh would
+undo the scroll the moment anything redrew.
+The front-app segment hides while an App Bar shares the shelf:
+the App Bar already marks the focused window, and two marks of
+one fact on one plate is one too many.
+
+*A shared field is stored once.* A value two bars must agree
+on, stored twice, is a question the user answers twice and can
+answer inconsistently — two thicknesses on one strip is not a
+look but a conflict the layout would have to arbitrate. The copy
+action ("Copy sizes and style from Space Bar…") existed to keep
+those copies in step and went with them. The same reasoning
+takes the per-layout overrides of shared fields: a Monocle bar
+at 44 pt beside a BSP bar at 32 is a shelf whose depth changes
+with the layout. `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
+keep `enabled` and the App Bar's own fields, which is the #678
+Phase 2 boundary intact for everything that is a bar's own. The
+symbol style joins the shelf for the same reason one step
+further: one app drawn in two icon styles on one plate is a
+mismatch, not a choice, so the four `set_*icon_source` verbs
+retire — the per-layout two included, which narrows what Lua
+reaches by exactly that — and the style is one Settings row
+beside the font size. Every per-bar and per-layout setter of a
+shared colour retires the same way, each naming its
+`kiwishelf.set_*` replacement. Liquid Glass is one leaf for both bars,
+so the one switch writes two leaves — the shelf's and the
+panel's — and no per-layout glass can disagree with it.
+
+*No Gap indicator.* Gap marked the active item by leaving the
+plate out around it. On one plate that hole reads as the seam
+between the sections, and on glass as a rendering fault, so it
+is a defect rather than a style and is removed: a stored `gap`
+becomes `outline` once, and Lua refuses `gap` naming the values
+that remain.
+
+*No item size.* A Space item sizes to its content and an App
+Bar slot to the widest title, between the icon square and a
+quarter of the whole shelf edge — measured on the edge rather
+than the App section, so a slot does not shrink when the Space
+Bar joins. A pinned item size answered only what the title cap
+already answers, and a second size knob beside the cap doubles
+the question "why is this slot this wide", so it is retired and
+the cap is the App Bar's one size control. The Space Bar's cap
+measures a different string — the front-app segment's title,
+inert whenever that segment is hidden — so it is named for it:
+`front_app_title_cap`.
+
+*The crossing.* A saved profile or bundle is rewritten once
+(`KiwiShelfMigrationTests`): the shelf takes the Space Bar's
+values — its colours and symbol style included — because it is
+the bar shown in every layout and so the one the user was
+looking at; the App Bar's where the Space Bar is off, since then
+the App Bar was the only bar there was. One colour reads the
+other way: where the Space Bar's item colour is the App Bar's at
+a lower alpha, the shelf takes the App Bar's full colour, since
+the dimming is now the rule's and keeping the dimmed value would
+dim twice. The other copies drop, per-layout App Bar colour
+overrides with them, and a palette is rewritten the same way
+(a `palettes.json` format bump, and the bundle's). An exported
+palette file carries no format stamp and, like a backup, is
+never rewritten, so its import runs the same pure step in memory
+instead: refusing it would strand every palette a user exported
+before the shelf, and importing it untouched would drop its bar
+colours at the key filter, since those keys no longer exist. Where the Space Bar is on, an App Bar that sat on its own
+edge moves to the Space Bar's. Where the App Bar is the source
+and never stored an edge, the step writes its old default,
+`bottom`: absence meant bottom when the file was written, and
+reading it as the shelf's new default would move the one bar the
+user had to the top. That reading of absence is true only of a
+file older than the shelf, so the step stands down on any file
+stamped at the formats it introduced — profile 8, bundle 12 —
+where an absent `kiwishelf.edge` means the new top. The App
+Bar's default indicator flips to Edge mark, and the same step
+writes `outline` into any stored App Bar that names none, so the
+flip reaches a fresh setup and never an existing one.
+The Space Bar share was never released and is renamed to the
+minimum outright.
+`init.lua` is user code and is not rewritten; a retired verb
+fails loudly with its replacement named, which is its migration,
+and there is no alias (AGENTS.md §5), because an alias is the
+crossing that never ends. In `init.lua` that failure is its own
+Config Issue, never the unknown-call issue's "did you mean":
+the call is spelled right, so a nearest-spelling guess would
+send the user to the wrong fix, where the retired list knows the
+replacement (or that none exists) for certain.
+
+**The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
-edges (`top` / `bottom` / `left` / `right`, default bottom) and
-the bar renders exactly there in every layout. Axis-relative
+edges (`top` / `bottom` / `left` / `right`, default top) and the
+shelf renders exactly there in every layout. Axis-relative
 `start`/`end` values, resolved against the layout's orientation,
 prevented an edge/axis mismatch while the edge was derived per
-layout; the Space Bar's free four-edge placement for both bars
-removes the derivation and its rationale with it. The Settings
-preview is edge-aware and draws a left- or right-edge bar
-vertical.
-
-**The Space Bar reserves space-first.** (#293.) The Space
-Bar's strip is carved from the display's original visible frame,
-and the remainder becomes the bounds every layout — and the App
-Bar's own reservation — operates inside. Layouts never learn the
-Space Bar exists (resolution before layout; layout functions
-stay pure over the flat array). Two rules fall out for free:
-same-edge stacking (Space Bar screen-facing, App Bar
-window-facing, insets add) and perpendicular corners that
-cannot overlap (the App Bar strip spans the already-inset
-frame).
+layout; free four-edge placement removes the derivation and its
+rationale with it. The Settings preview is edge-aware and draws
+a left- or right-edge shelf vertical.
+:::
 
 :::unreleased
-**Both bars are placed by ONE rule, and each owns two margins.**
+**The shelf is placed by ONE rule, and owns two margins.**
 ([#1516](https://github.com/KiwiCanopy/KiwiDesk/issues/1516),
-owner ruling 2026-09-18.) From the screen edge inwards: the bar's
-**outer margin**, the strip, the bar's **inner margin**, then the
+owner ruling 2026-09-18.) From the screen edge inwards: the
+shelf's **outer margin**, the strip, its **inner margin**, then the
 windows' own outer gap, then the windows. The outer margin is
 absolute — nothing else lives on that side, so the value *is* the
 distance and 0 is flush. The inner margin is *added* to the
 windows' outer gap, which alone keeps the focus ring's clearance,
 so 0 means "the gap governs" and no floor is needed. Both default
-to 0, both bars on one edge stack outermost-first with the Space
-Bar carved first, and between the two the Space Bar's inner and
-the App Bar's outer both count — each bar owns its margins, so
-they add, and at the defaults the bars touch. Under the pair of
-rules this replaces —
+to 0. Under the pair of rules this replaces —
 the Space Bar flush with the windows' outer gap following it, the
 App Bar carved *inside* that outer gap with the windows' *inner*
 gap separating it from the windows — raising the outer gap moves
@@ -10507,18 +10749,12 @@ windows follow it by the same distance — 10 pt at the defaults,
 the window side now being the outer gap alone where it was the
 outer gap plus the inner — and the strip spans the whole edge
 rather than stopping at the side gaps. A user who wants the old
-look sets the App Bar's outer margin to the outer gap, which
+look sets the shelf's outer margin to the outer gap, which
 restores both. The Bars preview does not model the margins: at a
 thumbnail's scale a few points draw as nothing, and a caption that
 names a fact the frame does not draw is the schematic rule's own
 defect (`LayoutSchematicCaptionTests`).
 :::
-
-**Same-edge bar stacking is a supported layout, not an error.**
-(#293.) Both bars on one edge is a reversible, deliberate
-choice: no conflict dialog, no automatic relocation, no blocked
-picker. The GUI explains the resulting order inline; profile
-load/import accepts it silently.
 
 **The Space Bar always groups; there is no knob.** (#293.)
 Adjacent same-app runs collapse into one glyph + count badge
@@ -10705,17 +10941,17 @@ load-bearing details:
   (`move_to_space_and_follow` already models following).
   Option-held-drop → follow is a deferred second gear.
 
-**Bar alignment is edge-relative, one shared default.** (#293 QA.)
-Both bars place their content run via `alignment` — `start` /
-`center` / `end`, values edge-relative (a left bar's `start` is
+:::unreleased
+**Bar alignment is edge-relative, one default.** (#293 QA.)
+`alignment` places a lone bar along the shelf — `start` /
+`center` / `end`, values edge-relative (a left edge's `start` is
 its top) for the same reason `edge` is absolute: correct on every
-edge without a per-edge remap. One default (`center`) for both
-bars and every edge — never per-edge defaults. Once an App Bar
-group overflows and scrolls, the three alignments deliberately
-collapse to the scroll offset; the control is not greyed for it (a
-static preview can't know real overflow). Copy-appearance copies
-alignment (arrangement is appearance); `edge` stays excluded
-(placement is not).
+edge without a per-edge remap. One default (`center`) for every
+edge — never per-edge defaults. Once a bar's items overflow and
+scroll, the three alignments deliberately collapse to the scroll
+offset; the control is not greyed for it (a static preview can't
+know real overflow).
+:::
 
 **The Space Bar scrolls the whole bar when the Spaces overflow.**
 (#385; a 100-Space case retires #293's "spaces are a small,
@@ -10752,31 +10988,28 @@ Bar (`BarArrowView`, style-agnostic — each bar hands it resolved
 window drag delivers no `mouseEntered`, so the arrow would
 otherwise go dark during the one gesture it exists for.
 
-**The two bar cards share one canonical row order.** (#374,
-re-cut by the #678 Phase 2 census render.) At rest: existence
-(the Show toggle / the Show-it-in switches), Position (with the
-same-edge note under it, in both cards), Thickness, the content
-toggles; the Style disclosure then runs background → indicator
-→ symbol style → sizes, and colors live in the colour cards —
-signature colors inline, the rest behind a shut "Advanced
-colors" disclosure in both. Differences remain only where the
-bars genuinely differ (front-app segment, glyph cap, spring
-delay, the copy action). A new bar row must slot into this
-order on both sides — in the census order lists
-(`BarsRowOrder`), not a per-card invention.
+:::unreleased
+On KiwiShelf the arrows are gone (▸ One shelf holds both bars):
+the fading ends are the drag's autoscroll zones, and every item's
+hit frame stops at them, so the autoscroll and the drop-spring
+still govern disjoint zones and the argument above holds with a
+fade where it says arrow.
+:::
 
-**The copy action copies structure, never colours.** "Copy
-sizes and style to Space Bar…" takes the shared structural
-fields (thickness, background, indicator, sizes, roundness,
-symbol style) and deliberately excludes the `*_color` class —
-derived by suffix, so a new shared colour field stays excluded
-automatically (`SpaceBarParityTests.copyAppearanceParity`).
-Colours are the palette's and the Advanced Colours area's
-concern; a colours-copy, if it ever ships, lives there — a
-copy that also painted colors would silently overwrite a
-palette the user applied on purpose, the same category of
-surprise the palette entry below bans in the other direction.
-(Owner ruling 2026-08-02, during Phase 2 device review.)
+:::unreleased
+**The bar cards share one canonical row order.** (#374, re-cut
+by the #678 Phase 2 census render and by #1517.) The KiwiShelf
+card owns existence and placement: the Show group, then
+Position, Thickness, Alignment, Order and Space Bar minimum, then
+its Style and Margins drawers. Each bar's card shows every row,
+with no drawer, each gate directly above what it gates. Colours
+live in the one KiwiShelf colour card — signature colours
+inline, the rest behind a shut disclosure, the Space Bar's
+focused-window colour among them. A new bar row slots into this
+order — in the census
+order lists (`BarsRowOrder`), not a per-card invention — and a
+row both bars would read belongs on the shelf card, not twice.
+:::
 
 **The bars ship one thickness, 40 pt, on every screen, and the
 slider's floor is the Core floor by derivation.** (#1359, owner
@@ -10784,8 +11017,8 @@ ruling 2026-09-13.) With a Core default of 32, a laptop starter of
 28 and a GUI band beginning at 30 — the shape this replaces — the
 starter's own value sat below the slider, and one touch of the
 slider lost it for good. A stored value the GUI cannot reach is a
-defect, not a curation, so the band's floor is
-`AppBarStyle.minThickness` rather than a number beside it
+defect, not a curation, so the band's floor is Core's own
+minimum-thickness constant rather than a number beside it
 (`BarSliderBandTests`); the ceiling of 80 stays the GUI's, Lua
 open above it, the same split the glow slider takes. The default
 is one number because the reason for a thinner laptop bar — "a
@@ -10794,12 +11027,20 @@ well on every class, and a per-class thickness is a second default
 a user has to know about before the slider's number means anything
 (`BarThicknessDefaultTests`). No migration is owed, and the reason
 is specific rather than borrowable: both bars' `thickness` predate
-the first tag (v0.9.0), and the settings encoder writes both bar
-groups whole (`AppBarParityTests`, `SpaceBarParityTests` hold each
-field encoded), so every file the app ever wrote carries its own
-number and only a fresh seed takes the new one — a leaf younger
-than a shipped release, or one a group elides, owes the #1369
-crossing instead.
+the first tag (v0.9.0), and the settings encoder writes the group
+holding the field whole, so every file the app ever wrote carries
+its own number and only a fresh seed takes the new one — a leaf
+younger than a shipped release, or one a group elides, owes the
+#1369 crossing instead.
+
+:::unreleased
+On the shelf the floor is `KiwiShelf.minThickness` and the group
+holding `thickness` is `kiwishelf`, whose every field
+`KiwiShelfParityTests` holds encoded; the #1517 crossing moves a
+stored bar's number onto the shelf rather than letting the
+default in, so the argument that no migration is owed carries
+over unchanged.
+:::
 
 **"Which palette am I on" is computed, never remembered.**
 (#757.) The shelf marks the card whose colors the config it is
@@ -10834,15 +11075,16 @@ hex in lower case does not read as leaving the theme.
 overwrite the active profile's colors; a Profile is the
 persistent, addressable configuration — tiling, layout, and sparse
 behavior overrides — that owns those colors afterward. So the
-palette shelf is a **colors-only, one-shot paint** (the
-`copyAppearance` model — never a live link), and the palette
+palette shelf is a **colors-only, one-shot paint** (never a
+live link), and the palette
 *library* is **global**, not profile-scoped: scoping the recipe
 book per-profile would fragment a palette you saved while editing
 one profile away from the next, for no gain, since profiles
 already own the color *state* a palette writes into. A palette is
 a sparse map keyed by the same fully-qualified color paths the
-profile JSON uses (`app_bar.fill_color` vs `space_bar.fill_color`
-— bare wire keys collide between the two bars), so it is **not** a
+profile JSON uses (`drag.ghost.fill_color` vs
+`drag.drop_zone.fill_color` — bare wire keys collide between
+groups), so it is **not** a
 `TilingSettings` field and never widens the profile schema; it
 lives in its own global `palettes.json` plus a bundled resource.
 This colors-only scope is **strict: no palette carries a non-color
@@ -10936,17 +11178,20 @@ both bars (options unchanged: Boxed / Plain), wire
 picker the same way. The rejected alternative was "Item background
 everywhere", which reads correctly under Boxed and is a lie under
 Plain — that asymmetry is the whole reason the name moved, so do
-not restore it. Item *geometry* is "Item size" / "Item gap"
-(`box_size` → `item_size`, `box_gap` → `item_gap`): those stay
-true under either style, because items have size and spacing in
-Plain too, they simply draw no box of their own.
+not restore it.
+
+:::unreleased
+Item *geometry* is "Item gap" (`box_gap` → `item_gap`): it stays
+true under either style, because items have spacing in Plain too,
+they simply draw no box of their own.
+:::
 
 **A bar entry is an "item", not a "tab".** (R6/#406, owner
 rulings 2026-07-25 and 2026-09-22.) An App Bar entry is a window
 or a same-app group; it has none of a browser tab's semantics,
 and the Space Bar's entries were already items. The colors are
-`item_color` / `active_item_color` and the geometry `item_size`
-/ `item_gap`, so **item is the model noun** — labels, help
+`item_color` / `active_item_color` and the geometry `item_gap`,
+so **item is the model noun** — labels, help
 strings, captions, enum doc comments, the Lua reference and the
 user guide all use it. Note this is unrelated to **macOS native
 tabs** (`TabReconciler`, §5), which keep the word because they
@@ -10966,12 +11211,24 @@ hug. Inert under `boxed` (no shared plate): the GUI greys the
 control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
+:::unreleased
+On the shelf the two bars share ONE plate in ONE Fill (▸ One
+shelf holds both bars): `hug` wraps the union of both sections'
+runs and `full` spans the whole edge. The objection to one plate
+— that it would need a third fill kept in step with two others —
+fell away once every shared colour moved onto the shelf, since
+the shelf's Fill is then the only one there is.
+:::
+
+:::unreleased
 **One Liquid Glass switch governs every KiwiDesk surface that
-draws it.** (#1307, 2026-09-07.) Three surfaces — the two bars and
-the ⌃⌥K shortcuts panel (#1295) — under two independent per-bar
-settings and a constant is the shape one row on Colours &
-Animations replaces: it writes all three, and the panel's leaf is
-stored beside the bars' in the profile.
+draws it.** (#1307, 2026-09-07; #1517.) Three surfaces — the two
+bars and the ⌃⌥K shortcuts panel (#1295) — under two
+independent per-bar settings and a constant is the shape one row
+on Colours & Animations replaces: it writes every glass leaf —
+the shelf's, which both bars read, and the panel's — stored side
+by side in the profile.
+:::
 
 **Profile-scoped, and the alternative was not merely riskier but
 unbuildable.** Moving the value app-wide into `gui.json` needed a
@@ -10992,15 +11249,17 @@ wrote, where this is a row a user ticked. So the panel follows the
 active profile. The cost is real and accepted: switch to a Desktop
 bound to another profile and the panel's material follows it.
 
-**The switch means ALL THREE, and its `?` carries what a boolean
-cannot.** Owner ruling: `off` is a true statement whenever they
-are not all on, and a flip writes all three either way. That
-leaves two-of-three indistinguishable from none-of-three, so a
-divergence sentence appears in the help while they disagree —
+:::unreleased
+**The switch means ALL of them, and its `?` carries what a
+boolean cannot.** Owner ruling: `off` is a true statement
+whenever they are not all on, and a flip writes both leaves
+either way. That leaves one-of-two indistinguishable from none,
+so a divergence sentence appears in the help while they disagree —
 reachable only from hand-written Lua or an imported profile, never
 from the row. Both the switch's value and that sentence read the
 one `LiquidGlassAgreement`, so the control and its explanation
 cannot contradict; the same discipline as `agreedCornerStyle`.
+:::
 
 **Glass OFF for the panel is `.regularMaterial`** — the material
 its pre-macOS-26 branch already draws, promoted to the designed
@@ -11038,25 +11297,16 @@ above, and a row reading On over glass the machine is not
 drawing leaves a flip that changes nothing on screen with no
 in-app word why.
 
-**The per-layout override is deliberately outside the switch's
-reading.** `monocle.set_app_bar_liquid_glass` and
-`scroll.set_app_bar_liquid_glass` still shadow the global, and the
-row neither clears them nor reports them. That is the behaviour
-every per-layout override already has — the App Bar thickness
-slider says nothing about `monocle.set_app_bar_thickness` either —
-and the master could not clear one if it tried, so reporting it
-would state a disagreement while withholding the control that ends
-it. The divergence sentence is therefore about the three GLOBAL
-leaves only.
-
-**The stored keys did NOT merge**, which is why there is no
-migration at all: three leaves, one row, through
-`SettingKey.masterWrites`. Both `set_liquid_glass` verbs and the
-per-layout `liquid_glass` field keep working, so this entry does
-not disturb #678 Phase 2's per-layout precedent, and
-`icon_source` / `dim_factor` keep the grounding they take from it.
-A new top-level `set_shortcut_panel_liquid_glass` reaches the
-panel's leaf — the change ADDS Lua reach rather than capping it.
+:::unreleased
+**The panel's key did not merge with the bars'**: two leaves,
+one row, through `SettingKey.masterWrites`. The bars share one
+leaf because a field both bars read is the shelf's (▸ one shelf,
+above), which leaves no per-layout glass for the switch to
+explain; the panel is a different surface with its own
+`set_shortcut_panel_liquid_glass`, so the row ADDS Lua reach
+rather than capping it. `icon_source` and `dim_factor` left the
+per-layout chain the same way, both bars reading them alike.
+:::
 
 **Liquid Glass is an orthogonal finish toggle, not a third
 `background_style`.** (#390; revised 2026-07-20.) A third
@@ -11138,9 +11388,10 @@ every KiwiDesk input identical on both (hosting mode, plate/tint
 visibility, tint alpha, z-order) and one thing different:
 `NSGlassEffectView`'s adaptive content colour scheme, which the OS
 decides PER VIEW from the backdrop that view samples and then
-holds until a far brighter backdrop flips it. Either bar can be
-the dark one — the App Bar usually is, because the bottom edge
-launches over the darker band of a wallpaper — so a reading that
+holds until a far brighter backdrop flips it. Either bar could be
+the dark one — in that measurement the App Bar usually was, since
+it sat on the bottom edge, which launches over the darker band of
+a wallpaper — so a reading that
 names one bar as "the dark one" is reading the state, not the
 cause; the fix is a rule both bars follow, never a correction to
 whichever bar looked wrong. The ruling: the variant is DECIDED,
@@ -11237,6 +11488,13 @@ Decisions folded in (ui-designer consult and owner direction,
   Glyphs active its Apps band leads with the same ligatures. The
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.
+
+:::unreleased
+On KiwiShelf the style is the shelf's (`kiwishelf.icon_source`)
+and no layout overrides it (▸ One shelf holds both bars), so the
+per-layout depth in the first bullet and the chip's count of it
+are gone; the one row sits in the KiwiShelf card's Style drawer.
+:::
 
 ### Profiles
 

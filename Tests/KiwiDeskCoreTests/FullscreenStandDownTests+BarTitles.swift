@@ -26,7 +26,7 @@ extension FullscreenStandDownTests {
     /// The title-refresh gate stands down with the bars — and
     /// does so BECAUSE they did, not by re-deciding it.
     ///
-    /// This is where the gate and the drivers meet: `updateAppBar`
+    /// This is where the gate and the drivers meet: `updateBars`
     /// runs for real under each verdict, and the gate is then
     /// asked what the painted record says
     /// (`AppBarManager.showsTitle(of:)`). The predecessor asked
@@ -49,20 +49,20 @@ extension FullscreenStandDownTests {
             args: [.string(spaceID.raw), .string("monocle")]
         )
         core.tiler.settings.appBarStyle.content = .iconAndTitle
-        core.tiler.settings.appBarStyle.edge = .top
+        core.tiler.settings.kiwishelf.edge = .top
         core.tiler.settings.spaceBarStyle.showFrontApp = false
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
 
         // A user desktop schedules, so the negative below cannot
         // pass by the fixture simply never qualifying.
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateAppBar()
+        core.updateBars()
         core.deferred.cancel(.barTitleRefresh)
         core.handleTitleChangedForBars(barWindow)
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
 
         NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        core.updateAppBar()
+        core.updateBars()
         core.deferred.cancel(.barTitleRefresh)
         core.handleTitleChangedForBars(barWindow)
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
@@ -78,7 +78,7 @@ extension FullscreenStandDownTests {
     /// (mutation, 2026-08-20).
     ///
     /// It lives here rather than beside the gate's suite because
-    /// driving the real `updateSpaceBar` reaches
+    /// driving the real `updateBars` reaches
     /// `currentSpaceIsUser`, and a test that pins that override
     /// belongs to this one serialized suite — unpinned, it reds
     /// on a dev machine whenever a fullscreen window is front.
@@ -96,13 +96,13 @@ extension FullscreenStandDownTests {
         core.tiler.settings.spaceBarStyle.showFrontApp = true
         // Since #937 `.icon` no longer stands the App Bar
         // down; it stays silent here only because no App Bar
-        // is ever painted in this fixture (`updateAppBar` is
+        // is ever painted in this fixture (`updateBars` is
         // not called), so the arm below is the Space Bar's.
         core.tiler.settings.appBarStyle.content = .icon
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
 
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
-        core.updateSpaceBar()
+        core.updateBars()
         core.deferred.cancel(.barTitleRefresh)
         core.handleTitleChangedForBars(barWindow)
         #expect(core.deferred.task(for: .barTitleRefresh) != nil)
@@ -113,7 +113,7 @@ extension FullscreenStandDownTests {
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)
 
         NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        core.updateSpaceBar()
+        core.updateBars()
         core.deferred.cancel(.barTitleRefresh)
         core.handleTitleChangedForBars(barWindow)
         #expect(core.deferred.task(for: .barTitleRefresh) == nil)

@@ -90,7 +90,7 @@ struct SettingsSearchAnchorTests {
             // is the destination alone — not "Bars › App Bar ›
             // App Bar".
             #expect(
-                row?.path == ["Bars"],
+                row?.path == ["KiwiShelf & Bars"],
                 Comment(rawValue: query)
             )
         }
@@ -116,19 +116,17 @@ struct SettingsSearchAnchorTests {
         )
     }
 
-    /// The twice-mounted shape (both bar cards mount a "Style"
-    /// drawer, co-rendered on the one Bars page): each mount has
-    /// its own catalog declaration, so a hit's id is
-    /// instance-qualified and `scrollTo` is well-defined — and
-    /// BOTH instances are results now that the per-destination
-    /// cap is gone.
+    /// A drawer whose label key other drawers may share is
+    /// declared per instance, so a hit's id is instance-qualified
+    /// and `scrollTo` is well-defined (the shelf's Style drawer
+    /// since #1517 left it the only one on its page).
     @Test("per-instance drawer hits carry their instance ids")
     func instanceQualifiedHits() {
         pinEnglish()
         defer { reset() }
         let anchors = rows("Style").compactMap(\.anchor.anchor)
-        #expect(anchors.contains("space_bar/bars.style"))
-        #expect(anchors.contains("app_bar/bars.style"))
+        #expect(anchors.contains("kiwishelf/bars.style"))
+        #expect(!anchors.contains("bars.style"))
     }
 
     /// A destination-title hit has no finer target than the tab,

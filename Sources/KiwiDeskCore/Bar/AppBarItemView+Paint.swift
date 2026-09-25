@@ -83,9 +83,7 @@ extension AppBarItemView {
     enum AccentMode { case none, outline, edgeMark }
 
     var accentMode: AccentMode {
-        guard isActive, style.activeIndicator != .gap else {
-            return .none
-        }
+        guard isActive else { return .none }
         return style.activeIndicator == .outline
             ? .outline : .edgeMark
     }

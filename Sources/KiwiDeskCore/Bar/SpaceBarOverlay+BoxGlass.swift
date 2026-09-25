@@ -4,14 +4,14 @@ import AppKit
 /// (`GlassPlate`, #408).
 extension SpaceBarOverlay {
     /// Checks if style requires per-box glass rendering.
-    func wantsBoxGlass(_ style: SpaceBarStyle) -> Bool {
+    func wantsBoxGlass(_ style: SpaceBarLook) -> Bool {
         style.glassEnabled && style.backgroundStyle == .boxed
     }
 
     /// Hosts each Space item in its own glass box with backdrop tint.
     func updateBoxGlasses(
         frames: [CGRect],
-        style: SpaceBarStyle,
+        style: SpaceBarLook,
         depth: CGFloat
     ) {
         let n = min(frames.count, itemViews.count)
@@ -60,7 +60,7 @@ extension SpaceBarOverlay {
     func updateFrontGlass(
         _ rect: CGRect?,
         radius: CGFloat,
-        style: SpaceBarStyle
+        style: SpaceBarLook
     ) {
         guard let rect else {
             frontGlass?.isHidden = true

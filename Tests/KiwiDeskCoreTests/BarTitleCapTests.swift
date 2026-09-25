@@ -84,9 +84,9 @@ struct BarTitleCapTests {
     @Test("Both bars default to the same cap")
     func bothBarsDefaultAlike() {
         #expect(AppBarStyle().titleCap == 10)
-        #expect(SpaceBarStyle().titleCap == 10)
+        #expect(SpaceBarStyle().frontAppTitleCap == 10)
         #expect(
-            AppBarStyle().titleCap == SpaceBarStyle().titleCap,
+            AppBarStyle().titleCap == SpaceBarStyle().frontAppTitleCap,
             "the same window must not read two lengths"
         )
         // ...and the default is inside the range it clamps to,
@@ -102,22 +102,22 @@ struct BarTitleCapTests {
     /// two lengths on one screen.
     @Test("Both bars clamp to the same range")
     func bothBarsShareOneRange() {
-        var app = AppBarStyle()
-        var space = SpaceBarStyle()
+        var app = AppBarLook()
+        var space = SpaceBarLook()
         app.titleCap = 5_000
-        space.titleCap = 5_000
+        space.frontAppTitleCap = 5_000
         #expect(
             app.resolvedTitleCap
                 == AppBarStyle.titleCapRange.upperBound
         )
-        #expect(space.resolvedTitleCap == app.resolvedTitleCap)
+        #expect(space.resolvedFrontAppTitleCap == app.resolvedTitleCap)
         app.titleCap = 0
-        space.titleCap = 0
+        space.frontAppTitleCap = 0
         #expect(
             app.resolvedTitleCap
                 == AppBarStyle.titleCapRange.lowerBound
         )
-        #expect(space.resolvedTitleCap == app.resolvedTitleCap)
+        #expect(space.resolvedFrontAppTitleCap == app.resolvedTitleCap)
     }
 }
 

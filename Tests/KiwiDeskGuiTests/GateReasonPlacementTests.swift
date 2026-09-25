@@ -67,14 +67,13 @@ struct GateReasonPlacementTests {
                 // sidecar to file into — is visible nowhere on
                 // this page.
                 .profiles(.profileBindings),
-                // Found BY the derivation: the copy action sits
-                // on the App Bar card while the switch that
-                // kills it is on the Space Bar card, so nothing
-                // beside it says why it is dead.
-                .spaceBar(.copyAppearance),
                 // The same shape since #1360: Fit layout gaps
                 // sits on the Gaps card and reads the focus
                 // border switch on the Focus Border card.
+                // Since #1517 the App Bar's Content row is inert on
+                // a vertical edge, and the edge is the KiwiShelf
+                // card's — another card, so the reason is drawn.
+                .appBar(.appBarContent),
                 .borders(.borderFitGaps),
                 .borders(.borderFitGapsExtraSpacing),
             ]
@@ -86,19 +85,19 @@ struct GateReasonPlacementTests {
     /// satisfy the test above only by also emptying these.
     @Test("adjacency and remoteness are still distinguished")
     func theOtherChannelsHoldMembers() {
-        // Both inside the App Bar's Style disclosure: the reader
-        // opens one thing and sees the cause beside the effect.
+        // Both inside the KiwiShelf card: the reader opens one
+        // thing and sees the cause beside the effect.
         #expect(
-            channel(.appBar(.appBarBackgroundFit)) == .adjacent
+            channel(.kiwishelf(.backgroundFit)) == .adjacent
         )
         // Advanced Colours: its bar-colour rows are gated by
         // switches that live on the Bars destination, which is
         // the case `AdvancedColorsHelp`'s anchors answer.
         #expect(
-            channel(.appBar(.appBarActiveItemColor)) == .remote
+            channel(.kiwishelf(.activeItemColor)) == .remote
         )
         // A row with no gate has no channel at all.
-        #expect(channel(.appBar(.appBarThickness)) == nil)
+        #expect(channel(.spaceBar(.spaceBarEnabled)) == nil)
     }
 
     /// `SpacesGateHelp.remote` agrees with the census.
@@ -216,53 +215,6 @@ struct GateReasonPlacementTests {
                 )
             )
         }
-    }
-
-    /// The one row the derivation found is actually drawn, and
-    /// drawn OUTSIDE the dim — a sentence inside the greyed
-    /// subtree is the dead end the rule exists to remove.
-    @Test("the found row draws its reason outside the dim")
-    func theFoundRowDrawsItsReason() throws {
-        let path = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Bars/"
-                    + "AppBarCard.swift"
-            )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: path, encoding: .utf8)
-        )
-        .split(whereSeparator: \.isWhitespace)
-        .joined()
-        // The GreyOut closes BEFORE the sentence opens: the
-        // dimmed subtree is the inner stack, and the `if` is its
-        // sibling. Both ranges are FIRST occurrences, so a
-        // second dim block later in this file wrapping the
-        // sentence would compare against the first and pass —
-        // stated rather than chased, the file having one.
-        let dim = try #require(
-            source.range(of: "GreyOut(active:sourceBarOff")
-        )
-        let sentence = try #require(
-            source.range(
-                of: "ifsourceBarOff,owesInlineGateReason{"
-                    + "Text(BarsGateHelp.sentence("
-            )
-        )
-        #expect(
-            dim.upperBound < sentence.lowerBound,
-            "the reason must be a sibling of the dimmed stack"
-        )
-        // And it is DRAWN off the derivation rather than off a
-        // hand-rolled copy of it: a comment claiming the census
-        // decides this, over an `if` that re-derives it, is the
-        // dead-resolver shape (`gui.md`), and it would leave
-        // this type answering for nobody.
-        #expect(
-            source.contains(
-                "GateReasonPlacement.owesInlineReason("
-                    + ".spaceBar(.copyAppearance))"
-            )
-        )
     }
 
     /// The second found row (#1360): the Fit action draws its

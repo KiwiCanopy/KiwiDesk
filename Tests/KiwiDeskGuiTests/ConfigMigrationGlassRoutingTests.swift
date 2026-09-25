@@ -29,6 +29,7 @@ struct ConfigMigrationGlassRoutingTests {
             "Profiles/Profile.swift",
             "Config/ConfigMigration+GlassDefault.swift",
             "Config/ConfigMigration+TrackLimit.swift",
+            "Config/ConfigMigration+KiwiShelf.swift",
         ]
         var declarers: Set<String> = []
         for file in try SourceScan.swiftSources(under: root) {

@@ -31,7 +31,11 @@ struct StackWeightDragTests {
             )
         let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in Self.display }
+        // Every bar off: the shelf reserves in every layout while
+        // any can show (#1517), App Bars included.
         core.tiler.settings.spaceBarStyle.enabled = false
+        core.tiler.settings.monocle.appBar.enabled = false
+        core.tiler.settings.scrolling.appBar.enabled = false
         #expect(core.tiler.settings.minWindowSize == 300)
         return core
     }

@@ -16,29 +16,24 @@ extension AppBarOverlay {
     func metrics(
         strip: CGRect,
         count: Int,
-        style: AppBarStyle,
-        items: [Item]
+        style: AppBarLook,
+        items: [Item],
+        capAxis: CGFloat? = nil
     ) -> Metrics {
         let horizontal = style.edge.isHorizontal
         let axis = horizontal ? strip.width : strip.height
         let thickness = horizontal ? strip.height : strip.width
         let gap = style.itemGap
-        let slot = Self.slotLength(
-            itemSize: style.itemSize,
-            content: style.renderedContent,
+        let slot = Self.slot(
+            items: items,
+            style: style,
             thickness: thickness,
-            axis: axis,
-            autoWidth: Self.autoSlotWidth(
-                items: items,
-                style: style,
-                horizontal: horizontal,
-                thickness: thickness
-            )
+            capAxis: capAxis ?? axis
         )
-        let total =
-            slot * CGFloat(count)
-            + gap * CGFloat(max(count - 1, 0))
-        let inset = total > axis ? Self.arrowZone + gap : 0
+        let total = Self.runLength(slot: slot, count: count, gap: gap)
+        // No arrow zones: the run fills its section and fades on a
+        // side that hides entries (#1517).
+        let inset: CGFloat = 0
         return Metrics(
             horizontal: horizontal,
             slot: slot,
@@ -50,6 +45,59 @@ extension AppBarOverlay {
         )
     }
 
+    /// The run's natural length along the shelf — every slot at
+    /// its size, gaps between, and the plate's pad on the side
+    /// away from the end it hugs (`frames` sets the run flush at
+    /// its end, `BarPlate.frame` pads by one gap): what
+    /// `ShelfArrangement` hands this bar before it has to share
+    /// (#1517).
+    @MainActor
+    static func naturalLength(
+        items: [Item],
+        style: AppBarLook,
+        thickness: CGFloat,
+        capAxis: CGFloat
+    ) -> CGFloat {
+        let slot = slot(
+            items: items,
+            style: style,
+            thickness: thickness,
+            capAxis: capAxis
+        )
+        let gap = style.itemGap
+        return runLength(slot: slot, count: items.count, gap: gap)
+            + gap
+    }
+
+    /// One slot's length, its quarter cap measured on `capAxis`.
+    @MainActor
+    static func slot(
+        items: [Item],
+        style: AppBarLook,
+        thickness: CGFloat,
+        capAxis: CGFloat
+    ) -> CGFloat {
+        slotLength(
+            content: style.renderedContent,
+            thickness: thickness,
+            axis: capAxis,
+            autoWidth: autoSlotWidth(
+                items: items,
+                style: style,
+                horizontal: style.edge.isHorizontal,
+                thickness: thickness
+            )
+        )
+    }
+
+    nonisolated static func runLength(
+        slot: CGFloat,
+        count: Int,
+        gap: CGFloat
+    ) -> CGFloat {
+        slot * CGFloat(count) + gap * CGFloat(max(count - 1, 0))
+    }
+
     /// Measures automatic slot width across items. Measure
     /// EXACTLY as the item view draws: `.center` alignment alone
     /// widens an NSTextField cell by ~4 pt, so a raw string
@@ -58,7 +106,7 @@ extension AppBarOverlay {
     @MainActor
     static func autoSlotWidth(
         items: [Item],
-        style: AppBarStyle,
+        style: AppBarLook,
         horizontal: Bool,
         thickness: CGFloat
     ) -> CGFloat {
@@ -103,15 +151,13 @@ extension AppBarOverlay {
 
     /// Shared slot length for bar layout pass.
     nonisolated static func slotLength(
-        itemSize: CGFloat,
         content: AppBarStyle.Content,
         thickness: CGFloat,
         axis: CGFloat,
         autoWidth: CGFloat
     ) -> CGFloat {
-        let requested = itemSize > 0 ? itemSize : autoWidth
         return max(
-            min(requested, axis / 4),
+            min(autoWidth, axis / 4),
             minimumSlot(thickness: thickness, content: content)
         )
     }
@@ -129,7 +175,9 @@ extension AppBarOverlay {
             : thickness
     }
 
-    /// Scroll offset calculation ensuring focused item remains visible.
+    /// The scroll offset keeping the focused item in view, in
+    /// equal slots — `ShelfOverflow.offset` does the arithmetic
+    /// (#1517).
     nonisolated static func scrollOffset(
         current: CGFloat,
         activeIndex: Int?,
@@ -139,22 +187,15 @@ extension AppBarOverlay {
         axis: CGFloat,
         margin: CGFloat
     ) -> CGFloat {
-        let total =
-            slot * CGFloat(count)
-            + gap * CGFloat(max(count - 1, 0))
-        guard total > axis, axis > 0 else { return 0 }
-        var offset = current
-        if let index = activeIndex {
-            let lower = CGFloat(index) * (slot + gap)
-            let upper = lower + slot
-            if lower < offset + margin {
-                offset = lower - margin
-            }
-            if upper > offset + axis - margin {
-                offset = upper - axis + margin
-            }
-        }
-        return min(max(offset, 0), total - axis)
+        ShelfOverflow.offset(
+            current: current,
+            lengths: Array(repeating: slot, count: max(count, 0)),
+            gap: gap,
+            total: runLength(slot: slot, count: count, gap: gap),
+            activeIndex: activeIndex,
+            viewport: axis,
+            margin: margin
+        )
     }
 
     /// Computes item frames along the bar axis (#293 QA).

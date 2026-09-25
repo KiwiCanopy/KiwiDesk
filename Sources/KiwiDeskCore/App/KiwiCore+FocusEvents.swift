@@ -291,7 +291,7 @@ extension KiwiCore {
         // The Space Bar's focused-glyph accent follows the
         // same rule (#293): layout-independent, so it can't
         // ride the focus-driven retile alone.
-        updateSpaceBar()
+        updateBars()
         // Warp only for focus changes KiwiDesk did not
         // make itself (cmd+tab, app-driven focus): a
         // self-raise already warped at intent time in

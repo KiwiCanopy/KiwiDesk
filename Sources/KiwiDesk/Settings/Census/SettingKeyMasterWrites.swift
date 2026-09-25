@@ -6,8 +6,7 @@
 extension SettingKey {
     static let masterWrites: [SettingKey: [String]] = [
         .colours(.liquidGlassMaster): [
-            "settings.appBarStyle.liquidGlass",
-            "settings.spaceBarStyle.liquidGlass",
+            "settings.kiwishelf.liquidGlass",
             "settings.shortcutPanelLiquidGlass",
         ],
         .borders(.borderWidthMaster): [

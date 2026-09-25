@@ -118,18 +118,32 @@ synonym:
 - **chip** — a Settings-app token widget (`Settings/Chips.swift`:
   `SpaceChip`, `BadgeChip`, `SpaceAssignmentChip`). Live and
   correct; retired only as a name for the sticky mark.
+- **KiwiShelf** / **shelf** — **KiwiShelf** is the product name
+  of the one screen edge both bars sit on (Lua `kiwishelf.*`,
+  JSON `settings.kiwishelf`, #1517). Write **KiwiShelf** in UI
+  copy and never the common noun *shelf*, which the owner struck
+  from labels and captions; `docs/` prose and doc comments may
+  say *the shelf* once KiwiShelf is named. As a product name it
+  appears verbatim in every catalog —
+  `scripts/localization_guards.py`'s `PRODUCT_NAMES` is the
+  register. It is not the palette picker's source-only
+  `PaletteShelf` type: do not name a bar concept after that type,
+  or a palette concept after KiwiShelf.
 - **item** — one entry in a bar (a window, a same-app group, a
-  space). Its geometry is `item_size` / `item_gap`. Never "tab":
-  that word belongs to macOS **native tabs** (§5) and to the
-  user guide's gesture prose alone — see
+  space). Its geometry is `item_gap`, and its length follows its
+  content: give it no size knob of its own, since the App Bar's
+  `title_cap` is the one width control (#1517,
+  `docs/design-decisions.md` ▸ One shelf holds both bars). Never
+  "tab": that word belongs to macOS **native tabs** (§5) and to
+  the user guide's gesture prose alone — see
   [state-and-layout.md](state-and-layout.md).
 - **title** vs **name** — a *title* is the text a window itself
   reports (`app_bar.set_content`'s `title` / `icon_and_title`,
-  `app_bar.set_title_cap`, `space_bar.set_title_cap`, the app
-  rules' "Title contains…"); a *name* is the label of the app
-  that owns the window, which a bar draws only where a title
-  cannot speak. Name a new drawn-text knob after the *title*,
-  and coin no third word for either; the ruling is
+  `app_bar.set_title_cap`, `space_bar.set_front_app_title_cap`,
+  the app rules' "Title contains…"); a *name* is the label of
+  the app that owns the window, which a bar draws only where a
+  title cannot speak. Name a new drawn-text knob after the
+  *title*, and coin no third word for either; the ruling is
   `docs/design-decisions.md` ▸ The bars name the WINDOW, not
   its app.
 - **space** vs **Desktop** — a *space* is one of KiwiDesk's own
@@ -242,14 +256,15 @@ synonym:
   where *Bewegung* is macOS's own word for it.
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
-  thickness (`app_bar.set_thickness`).
+  thickness (`kiwishelf.set_thickness`).
 - **gap** vs **margin** — a *gap* is room between the things a
   surface lays out: windows (`set_gap_global`'s outer and inner
-  gaps) or a bar's items (`item_gap`); a *margin* is a BAR's own
-  clearance from what it sits beside (`app_bar.set_outer_margin`
-  to the screen edge, `set_inner_margin` on its window side,
-  #1516). Both reuse the `inner` / `outer` adjectives rather
-  than coining a third pair.
+  gaps) or the shelf's items and bars (`kiwishelf.set_item_gap`);
+  a *margin* is the shelf's own clearance from what it sits
+  beside (`kiwishelf.set_outer_margin` to the screen edge,
+  `kiwishelf.set_inner_margin` on its window side, #1516). Both
+  reuse the `inner` / `outer` adjectives rather than coining a
+  third pair.
 - **limit** / **cap** / **count** — a `limit` is a user-set
   maximum (`track.set_limit`); `cap` is the same idea where it
   already reads better (`space_bar.set_glyph_cap`, and
@@ -261,7 +276,7 @@ synonym:
   the BSP and stack ratios, the scrolling slot size and the
   stack/track weights — what `resize` writes and
   `reset_layout_sizing` clears (#764, `ResetLayoutSizingTests`).
-  A single extent stays a *size* (`slot_size`, `item_size`,
+  A single extent stays a *size* (`slot_size`,
   `min_window_size`), and a *count* (`master_count`,
   `track.set_limit`, grid `columns`/`rows`) is structure rather
   than sizing; the ruling is `docs/design-decisions.md` ▸ A

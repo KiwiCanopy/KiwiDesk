@@ -13,7 +13,7 @@ public final class SpaceBarManager {
         /// (`showsTitle(of:)`).
         let frontWindow: WindowID?
         public let strip: CGRect
-        public let style: SpaceBarStyle
+        public let style: SpaceBarLook
         /// Mark indicator colors (#429, `StickyStyle`, `FloatingStyle`).
         let stateMarkColors: StateMarkColors
 
@@ -23,7 +23,7 @@ public final class SpaceBarManager {
             frontApp: SpaceBarItemView.App? = nil,
             frontWindow: WindowID? = nil,
             strip: CGRect,
-            style: SpaceBarStyle,
+            style: SpaceBarLook,
             stateMarkColors: StateMarkColors
         ) {
             self.display = display
@@ -163,6 +163,14 @@ public final class SpaceBarManager {
     /// Cancels active drag autoscroll across all overlays.
     public func endDragAutoScroll() {
         overlays.values.forEach { $0.cancelDragAutoScroll() }
+    }
+
+    /// The section a display's shelf places, while it shows
+    /// (#1517).
+    func shownOverlay(on display: DisplayID) -> SpaceBarOverlay? {
+        guard let overlay = overlays[display], overlay.isVisible
+        else { return nil }
+        return overlay
     }
 
     #if DEBUG

@@ -11,6 +11,11 @@ extension APIReference {
             return .ok(listingJSON)
         }
         guard let entry = entry(named: name) else {
+            // A retired verb is not a typo: name what replaced it
+            // rather than whatever is spelled closest (#1517).
+            if let retired = retirement(of: name) {
+                return .fail(retired)
+            }
             guard let hint = helpSuggestion(for: name) else {
                 return .fail("unknown command: \(name)")
             }

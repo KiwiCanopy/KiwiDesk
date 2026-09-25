@@ -43,6 +43,8 @@ public enum ConfigMigration {
         migratingAbsentGlassLeaves,
         migratingTrackLimitCount,
         migratingProfileBindingLists,
+        migratingBarsOntoShelf,
+        migratingPalettesOntoShelf,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).
@@ -61,6 +63,27 @@ public enum ConfigMigration {
             return PaletteDocument.currentFormat
         }
         return GuiConfig.currentFormat
+    }
+
+    /// Whether `data`'s stamp is below the floor a step introduced
+    /// for its shape — a bundle's `bundle`, any other root's
+    /// `file` (a profile's, or `palettes.json`'s). A `gui.json`
+    /// root reads the same `file` floor, so a step asking this
+    /// must also gate on a key `gui.json` never carries
+    /// (`settings`, `palettes`). An unreadable root stands down.
+    static func stampBelow(
+        _ data: Data,
+        file: Int,
+        bundle: Int
+    ) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        let floor =
+            root[SetupBundle.shapeMarker] != nil ? bundle : file
+        return format < floor
     }
 
     /// Whether `data` is below current format version (#902).

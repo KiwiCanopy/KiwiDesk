@@ -73,28 +73,29 @@ extension KiwiCore {
         return typoIssues ?? []
     }
 
-    /// Logs the did-you-mean hint; during a config load (see
-    /// `typoIssues` in KiwiCore) additionally records the typo
-    /// as a ConfigIssue, deduped so a typo'd call inside a
-    /// loop reports once.
+    /// Logs the did-you-mean hint — or, for a retired verb, what
+    /// replaces it; during a config load (see `typoIssues` in
+    /// KiwiCore) additionally records it as a ConfigIssue,
+    /// deduped so a call inside a loop reports once.
     private func reportUnknownCall(table: String, key: String) {
         let qualified =
             table == "KiwiDesk" ? key : "\(table).\(key)"
-        let suggestion = APIReference.suggestion(for: qualified)
-        let hint =
-            suggestion.map { " — did you mean '\($0)'?" } ?? ""
-        onLog(
-            "unknown \(table) function '\(key)'\(hint)"
-                + " — see KiwiDesk.help()"
-        )
-        guard typoIssues != nil else { return }
-        let issue = ConfigIssue(
-            source: "init.lua",
-            kind: .unknownCall(
-                name: qualified,
-                suggestion: suggestion
+        let kind: ConfigIssue.Kind
+        if let retired = APIReference.retired[qualified] {
+            onLog(APIReference.retirement(of: qualified) ?? qualified)
+            kind = .retiredCall(name: qualified, replacement: retired)
+        } else {
+            let suggestion = APIReference.suggestion(for: qualified)
+            let hint =
+                suggestion.map { " — did you mean '\($0)'?" } ?? ""
+            onLog(
+                "unknown \(table) function '\(key)'\(hint)"
+                    + " — see KiwiDesk.help()"
             )
-        )
+            kind = .unknownCall(name: qualified, suggestion: suggestion)
+        }
+        guard typoIssues != nil else { return }
+        let issue = ConfigIssue(source: "init.lua", kind: kind)
         if typoIssues?.contains(issue) == false {
             typoIssues?.append(issue)
         }

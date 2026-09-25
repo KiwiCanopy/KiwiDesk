@@ -67,7 +67,7 @@ struct LayoutBoundsRoutingTests {
     /// same-named files cannot pool counts.
     ///
     /// **This map is the exemption list**; the prose in
-    /// `SpaceBarGeometry` and the state-and-layout rule point here
+    /// `ShelfGeometry` and the state-and-layout rule point here
     /// instead of
     /// keeping a copy, because three prose copies of the sibling's
     /// list drifted apart on their first outing.

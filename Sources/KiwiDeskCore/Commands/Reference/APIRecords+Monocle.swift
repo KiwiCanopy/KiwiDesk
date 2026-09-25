@@ -36,44 +36,6 @@ extension APIReference {
             "Shows or hides the App Bar in the monocle layout.",
             .boolean("enabled")
         ),
-        "set_app_bar_edge": APIRecord(
-            "Overrides the App Bar's screen edge for this layout.",
-            .choice("edge", AppBarEdge.self)
-        ),
-        "set_app_bar_alignment": APIRecord(
-            "Overrides the App Bar's item alignment for this "
-                + "layout.",
-            .choice("alignment", AppBarStyle.BarAlignment.self)
-        ),
-        "set_app_bar_thickness": APIRecord(
-            "Overrides the App Bar's thickness for this layout.",
-            .number("thickness")
-        ),
-        "set_app_bar_outer_margin": APIRecord(
-            "Overrides the App Bar's distance from the screen "
-                + "border for this layout.",
-            .number("margin")
-        ),
-        "set_app_bar_inner_margin": APIRecord(
-            "Overrides the App Bar's extra window-side room for "
-                + "this layout.",
-            .number("margin")
-        ),
-        "set_app_bar_background_style": APIRecord(
-            "Overrides where the App Bar's background is drawn "
-                + "for this layout.",
-            .choice("style", AppBarStyle.BackgroundStyle.self)
-        ),
-        "set_app_bar_liquid_glass": APIRecord(
-            "Overrides the App Bar's Liquid Glass finish for "
-                + "this layout.",
-            .boolean("enabled")
-        ),
-        "set_app_bar_background_fit": APIRecord(
-            "Overrides how far the App Bar's plate reaches for "
-                + "this layout.",
-            .choice("fit", AppBarStyle.BackgroundFit.self)
-        ),
         "set_app_bar_active_indicator": APIRecord(
             "Overrides the App Bar's focus marker for this "
                 + "layout.",
@@ -81,14 +43,6 @@ extension APIReference {
                 "indicator",
                 AppBarStyle.ActiveIndicator.self
             )
-        ),
-        "set_app_bar_item_size": APIRecord(
-            "Overrides the App Bar's item size for this layout.",
-            .number("size")
-        ),
-        "set_app_bar_item_gap": APIRecord(
-            "Overrides the App Bar's item gap for this layout.",
-            .number("gap")
         ),
         "set_app_bar_content": APIRecord(
             "Overrides what the App Bar's items draw for this "
@@ -100,66 +54,10 @@ extension APIReference {
                 + "layout.",
             .integer("characters")
         ),
-        "set_app_bar_icon_source": APIRecord(
-            "Overrides where the App Bar's icons come from for "
-                + "this layout.",
-            .choice("source", BarAppIconSource.self)
-        ),
-        "set_app_bar_font_size": APIRecord(
-            "Overrides the App Bar's font size for this layout.",
-            .number("size")
-        ),
-        "set_app_bar_corner_roundness": APIRecord(
-            "Overrides the App Bar's corner rounding for this "
-                + "layout.",
-            .number("percent")
-        ),
-        "set_app_bar_dim_factor": APIRecord(
-            "Overrides the App Bar's inactive-icon opacity for "
-                + "this layout.",
-            .number("factor")
-        ),
         "set_app_bar_group_adjacent_windows": APIRecord(
             "Overrides same-app window grouping in the App Bar "
                 + "for this layout.",
             .boolean("enabled")
-        ),
-        "set_app_bar_item_color": APIRecord(
-            "Overrides the App Bar's item color for this layout.",
-            .color("hex")
-        ),
-        "set_app_bar_fill_color": APIRecord(
-            "Overrides the App Bar's fill color for this layout.",
-            .color("hex")
-        ),
-        "set_app_bar_active_item_color": APIRecord(
-            "Overrides the App Bar's focused-item color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_highlight_color": APIRecord(
-            "Overrides the App Bar's indicator color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_hover_fill_color": APIRecord(
-            "Overrides the App Bar's hover fill for this layout.",
-            .color("hex")
-        ),
-        "set_app_bar_hover_item_color": APIRecord(
-            "Overrides the App Bar's hover text color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_group_badge_color": APIRecord(
-            "Overrides the App Bar's count badge color for this "
-                + "layout.",
-            .color("hex")
-        ),
-        "set_app_bar_group_badge_text_color": APIRecord(
-            "Overrides the App Bar's badge text color for this "
-                + "layout.",
-            .color("hex")
         ),
     ]
 }
