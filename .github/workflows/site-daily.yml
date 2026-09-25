@@ -1,0 +1,47 @@
+name: Site Daily Rebuild
+
+# Rebuilds the site once a day so values read at BUILD time stay
+# fresh on quiet days — today the GitHub star count
+# (site/src/lib/stars.ts), which the CSP and the privacy policy keep
+# out of the visitor's browser (#1659). A push to main already
+# rebuilds; this only covers the days without one.
+#
+# Cloudflare Pages builds through its own Git integration, not from
+# this repo's workflows, so the rebuild is a POST to a Pages deploy
+# hook. The hook is a CREDENTIAL, not configuration — anyone holding
+# the URL can trigger builds — so it lives in the
+# CF_PAGES_DEPLOY_HOOK secret. Cloudflare mints hooks only in its
+# dashboard (Pages project ▸ Settings ▸ Builds ▸ Deploy hooks, branch
+# main): the one dashboard-held piece of the site, by necessity.
+on:
+  schedule:
+    # Daily, 05:23 UTC. Off the hour so the run is not queued behind
+    # everyone else's :00 cron.
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: site-daily
+  cancel-in-progress: true
+
+jobs:
+  rebuild:
+    name: Trigger Pages build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Fails loudly without the secret: a silent skip would leave the
+      # count frozen with nothing saying so.
+      - name: Call the deploy hook
+        env:
+          HOOK: ${{ secrets.CF_PAGES_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::error::CF_PAGES_DEPLOY_HOOK is not set."
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --max-time 30 \
+            -X POST "$HOOK"
