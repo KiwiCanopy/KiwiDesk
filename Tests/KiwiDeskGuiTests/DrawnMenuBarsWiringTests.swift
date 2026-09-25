@@ -112,8 +112,13 @@ struct DrawnMenuBarsWiringTests {
             )
         )
         #expect(wire.contains("scheduleMenuBarRemeasure()"))
+        // ASSIGNED to the seam, not merely named in the file.
         #expect(
-            bootstrap.contains("DisplayWatch.liveMenuBars")
+            bootstrap.range(
+                of: #"displayWatch\.readDrawnMenuBars\s*=\s*"#
+                    + #"DisplayWatch\.liveMenuBars"#,
+                options: .regularExpression
+            ) != nil
         )
         let lifecycle = try source(
             "Sources/KiwiDeskCore/App/KiwiCore+Lifecycle.swift"
@@ -133,6 +138,16 @@ struct DrawnMenuBarsWiringTests {
             )
         )
         #expect(changed.contains("retile()"))
+        // The retile's condition is the refresh's answer alone —
+        // neither forced on nor off beside it.
+        let head = try #require(
+            schedule.range(of: "if DrawnMenuBars.refresh(")
+        )
+        let condition = schedule[head.lowerBound...]
+            .prefix { $0 != "{" }
+        for operand in ["||", "&&", "true", "false", "!"] {
+            #expect(!condition.contains(operand))
+        }
         let watch = try source(
             "Sources/KiwiDeskCore/Events/DisplayWatch.swift"
         )

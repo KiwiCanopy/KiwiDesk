@@ -21,28 +21,42 @@ struct VisibleFrameReadCensusTests {
             "measures the strip AppKit reserves, auto-hide only",
     ]
 
+    /// Member reads of `.visibleFrame` in `text` — a routed
+    /// `GeometryUtils.visibleFrame(of:)` call is not one. Blind to
+    /// an implicit-`self` read inside an `NSScreen` extension, which
+    /// `kiwiDisplayIsCorrected` holds for the one extension there is.
+    private static func rawReads(in text: String) -> Int {
+        var count = 0
+        var cursor = text.startIndex
+        while let hit = text.range(
+            of: ".visibleFrame",
+            range: cursor..<text.endIndex
+        ) {
+            cursor = hit.upperBound
+            if text[hit.upperBound...].hasPrefix("(") { continue }
+            count += 1
+        }
+        return count
+    }
+
+    private func coreSources() throws -> [URL] {
+        let files = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore"
+            )
+        )
+        #expect(!files.isEmpty)
+        return files
+    }
+
     @Test("no unrouted .visibleFrame read in Core")
     func noUnroutedRead() throws {
-        let core = Self.root.appendingPathComponent(
-            "Sources/KiwiDeskCore"
-        )
         var offenders: [String] = []
-        for file in try SourceScan.swiftSources(under: core) {
+        for file in try coreSources() {
             let name = file.lastPathComponent
             guard Self.allowed[name] == nil else { continue }
             let text = try SourceScan.strippedSource(at: file)
-            var cursor = text.startIndex
-            while let hit = text.range(
-                of: ".visibleFrame",
-                range: cursor..<text.endIndex
-            ) {
-                cursor = hit.upperBound
-                let rest = text[hit.upperBound...]
-                if rest.hasPrefix("(") { continue }
-                let lead = text[..<hit.lowerBound].suffix(13)
-                if lead == "GeometryUtils" { continue }
-                offenders.append(name)
-            }
+            if Self.rawReads(in: text) > 0 { offenders.append(name) }
         }
         #expect(
             offenders.isEmpty,
@@ -50,22 +64,41 @@ struct VisibleFrameReadCensusTests {
         )
     }
 
-    @Test("every allowed file still reads it")
+    @Test("every allowed file still reads it raw")
     func allowedIsLive() throws {
-        let core = Self.root.appendingPathComponent(
-            "Sources/KiwiDeskCore"
-        )
-        let files = try SourceScan.swiftSources(under: core)
+        let files = try coreSources()
         for name in Self.allowed.keys {
             let file = try #require(
                 files.first { $0.lastPathComponent == name }
             )
             let text = try SourceScan.strippedSource(at: file)
             #expect(
-                text.contains(".visibleFrame")
-                    || text.contains("visibleFrame ="),
+                Self.rawReads(in: text) > 0,
                 .init(rawValue: "\(name) no longer reads it")
             )
         }
+    }
+
+    /// The Display snapshot the quit grid reads is filled from the
+    /// derivation, not the bare member it would read by default.
+    @Test("the Display snapshot takes the corrected frame")
+    func kiwiDisplayIsCorrected() throws {
+        let file = try #require(
+            coreSources().first {
+                $0.lastPathComponent == "EventLoop+Apps.swift"
+            }
+        )
+        let text = try SourceScan.strippedSource(at: file)
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "var kiwiDisplay: Display?",
+                in: text
+            )
+        )
+        #expect(
+            body.contains(
+                "visibleFrame: GeometryUtils.visibleFrame(of: self)"
+            )
+        )
     }
 }

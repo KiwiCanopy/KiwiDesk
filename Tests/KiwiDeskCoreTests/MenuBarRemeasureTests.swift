@@ -7,7 +7,8 @@ import Testing
 /// The #1386 re-measure after an auto-hide pref flip: two passes,
 /// the second catching a bar the WindowServer draws late, and
 /// none once the loop has stopped. Counted through the read seam;
-/// the reads return nothing, so no shared cache is written.
+/// the reads return nothing, so the shared `DrawnMenuBars` cache
+/// only ever receives an empty map from here.
 @Suite("Menu-bar re-measure passes (#1386)", .serialized)
 @MainActor
 struct MenuBarRemeasureTests {

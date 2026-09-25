@@ -58,12 +58,15 @@ struct DrawnMenuBarsTests {
     @Test("the deepest of two bars on one screen wins")
     func deepestBarWins() {
         let deeper = CGRect(x: 1728, y: -159, width: 2560, height: 40)
-        let bottoms = DrawnMenuBars.bottoms(
-            of: [bars[0], deeper],
-            screens: [(1, builtIn), (3, dell)],
-            primaryHeight: 1117
-        )
-        #expect(bottoms[3] == 1236)
+        // Both orders: a last-listed-wins filing passes one.
+        for listed in [[bars[0], deeper], [deeper, bars[0]]] {
+            let bottoms = DrawnMenuBars.bottoms(
+                of: listed,
+                screens: [(1, builtIn), (3, dell)],
+                primaryHeight: 1117
+            )
+            #expect(bottoms[3] == 1236)
+        }
     }
 
     @Test("a stale hidden-bar top is lowered under the drawn bar")
