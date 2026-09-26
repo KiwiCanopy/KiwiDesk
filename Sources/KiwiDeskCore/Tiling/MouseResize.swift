@@ -13,7 +13,7 @@ public enum ResizeAdjustment: Equatable, Sendable {
     case bspRatioH(CGFloat)
     case bspRatioV(CGFloat)
     case masterRatio(CGFloat)
-    case scrollWidth(CGFloat)
+    case scrollSlot(CGFloat)
     /// The dragged window's share of its stack zone along the
     /// zone's own axis, in points (#941) — the `.trackAlong`
     /// shape for the stack layout.
@@ -111,6 +111,9 @@ public enum MouseResize {
         // discriminator lets a new call site silently classify a
         // horizontal-track drag with the vertical mapping.
         trackAxisVertical: Bool,
+        // The scroll axis, required for the same reason: the slot
+        // size runs along it, so a vertical row reads `dh`.
+        scrollVertical: Bool,
         slot: CGRect,
         frame: CGRect,
         bounds: CGRect
@@ -155,8 +158,9 @@ public enum MouseResize {
             }
             return nil
         case .scrolling:
-            guard abs(dw) > threshold else { return nil }
-            return .scrollWidth(dw)
+            let along = scrollVertical ? dh : dw
+            guard abs(along) > threshold else { return nil }
+            return .scrollSlot(along)
         case .track:
             if trackAxisVertical {
                 if abs(dw) >= abs(dh), abs(dw) > threshold {

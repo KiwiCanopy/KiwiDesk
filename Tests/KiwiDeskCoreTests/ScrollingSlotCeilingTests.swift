@@ -13,7 +13,7 @@ import Testing
 /// STORED slot while the drawn one stood still, and every
 /// invisible step then cost one press on the way back down. The
 /// ceiling lives beside the floor in `writeCappedScrollSlot`, so
-/// the keyboard verb and the mouse `.scrollWidth` drag inherit
+/// the keyboard verb and the mouse `.scrollSlot` drag inherit
 /// it together (#933).
 ///
 /// Requires a screen, and says so with a trait rather than an

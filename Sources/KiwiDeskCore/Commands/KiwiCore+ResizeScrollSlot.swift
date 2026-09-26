@@ -16,7 +16,7 @@ import Foundation
 extension KiwiCore {
     /// Clamped scrolling slot-size write plus the shrink cue —
     /// shared by the keyboard `resize` and the mouse
-    /// `.scrollWidth` adjustment (which previously wrote
+    /// `.scrollSlot` adjustment (which previously wrote
     /// unclamped, letting a drag cross the floor the keyboard
     /// path refused).
     ///

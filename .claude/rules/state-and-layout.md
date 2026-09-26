@@ -1319,7 +1319,7 @@ editing here:
   `dragMatchesTheKeyboardVerb`) — never a raw `writeSlotSize`,
   `writeSplitRatio*`, `writeMasterRatio`, `stackWeights` or
   `trackWeights` write beside a resize call site, which is
-  exactly how the mouse `.scrollWidth` drag crossed the floor
+  exactly how the mouse `.scrollSlot` drag crossed the floor
   the keyboard path refused. The writers clamp each side at its
   members'
   effective minimums (`min_window_size`, raised by a #677
