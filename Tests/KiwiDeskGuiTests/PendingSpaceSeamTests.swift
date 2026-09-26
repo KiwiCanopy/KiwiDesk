@@ -117,4 +117,29 @@ struct PendingSpaceSeamTests {
         #expect(relocate?.contains("reanchorFloat(") == false)
         #expect(relocate?.contains("fileMembership(") == false)
     }
+
+    /// The drop re-file takes the drop-commit and nothing that
+    /// re-anchors or warps beside it (#1686).
+    @Test("the drop re-file takes the drop-commit alone")
+    func dropRefileTakesTheDropCommit() throws {
+        let file = Self.core.appendingPathComponent(
+            "Tiling/KiwiCore+DragRelocate.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func relocateDroppedFloat(",
+                in: source
+            )
+        )
+        #expect(
+            body.components(separatedBy: "relocateAcrossDisplay(")
+                .count == 2
+        )
+        for route in ["fileMembership(", "reanchorFloat(", "moveWindow("] {
+            #expect(!body.contains(route), "\(route)")
+        }
+    }
 }

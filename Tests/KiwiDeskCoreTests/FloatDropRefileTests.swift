@@ -8,10 +8,14 @@ import Testing
 /// A flag float dropped by hand on another display joins that
 /// display's active Space at the drop (#1686), through the real
 /// `handleDragEnd`. Displays are faked through `displayAt`, the
-/// `DragCrossingTests` fixture shape; with fake displays no screen
-/// resolves, so a re-anchor would stand down on its own and this
-/// suite cannot see one — `PendingSpaceSeamTests` ▸
-/// `dropCommitNeverReanchors` is that net.
+/// `DragCrossingTests` fixture shape. Both fake displays fall back
+/// to the one host screen, so a re-anchor stands down on
+/// `source == dest` and this suite cannot see one —
+/// `PendingSpaceSeamTests` ▸ `dropCommitNeverReanchors` and
+/// `dropRefileTakesTheDropCommit` are that net. Nor can it see
+/// the relocate's order against the drop's bar clamp: the
+/// relocate's own retile clamps against the destination's strips
+/// from the folded frame either way.
 @Suite("A float dropped on another display (#1686)", .serialized)
 @MainActor
 struct FloatDropRefileTests {
@@ -128,5 +132,44 @@ struct FloatDropRefileTests {
         dropFloat(core)
         #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
         #expect(core.state.windows[float]?.isFloating == false)
+    }
+
+    /// A flag float counts as landing unmanaged in any Space, so
+    /// the origin is the window's own Space, never the active one.
+    @Test("a float from a Space that is not active still joins")
+    func inactiveHomeJoins() {
+        let core = makeCore()
+        core.state.setFloating(float, true)
+        core.state.workspaces.activate("2")
+        dropFloat(core)
+        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
+    }
+
+    @Test("the drop appends to a Space that holds windows")
+    func appendsToAPopulatedSpace() {
+        let core = makeCore()
+        core.state.setFloating(float, true)
+        core.state.workspaces.add(WindowID(2), to: "2")
+        dropFloat(core)
+        #expect(
+            core.state.workspaces["2"]?.windows
+                == [WindowID(2), float]
+        )
+    }
+
+    @Test("the drop reports the move once, from 1 to 2")
+    func dropEmitsTheMove() {
+        let core = makeCore()
+        core.state.setFloating(float, true)
+        var moves: [JSONValue] = []
+        core.bus.addSink { event, data in
+            if event == .windowMovedToSpace { moves.append(data) }
+        }
+        dropFloat(core)
+        #expect(moves.count == 1)
+        if case .object(let payload)? = moves.first {
+            #expect(payload["from_space_id"] == .string("1"))
+            #expect(payload["to_space_id"] == .string("2"))
+        }
     }
 }
