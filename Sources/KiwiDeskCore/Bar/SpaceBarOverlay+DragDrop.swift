@@ -50,5 +50,17 @@ extension SpaceBarOverlay {
             view.setDragHover(false)
             view.cancelSpringSweep()
         }
+        // A render during the drag may have hovered the chip under
+        // the pointer, and another app's drag sends us no exit.
+        syncHoverToPointer()
+    }
+
+    /// Re-reads every hover this section draws from the resting
+    /// pointer (#1665); `ShelfManager.relayout` calls it once the
+    /// section is placed.
+    func syncHoverToPointer() {
+        for view in itemViews { view.syncHoverToPointer() }
+        backCount.syncHoverToPointer()
+        forwardCount.syncHoverToPointer()
     }
 }

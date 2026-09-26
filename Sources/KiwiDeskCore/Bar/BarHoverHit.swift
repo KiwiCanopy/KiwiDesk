@@ -11,6 +11,8 @@ enum BarHoverHit {
         /// Test seam over the resting pointer, in window points;
         /// nil reads the machine.
         static var pointerOverride: ((NSWindow) -> CGPoint)?
+        /// A window point no bar item covers, for the pin.
+        static let offWindow = CGPoint(x: -100_000, y: -100_000)
     #endif
 
     static func owns(_ view: NSView, _ event: NSEvent) -> Bool {

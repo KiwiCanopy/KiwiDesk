@@ -157,8 +157,8 @@ final class SpaceBarItemView: NSView {
         applyHover(BarHoverHit.owns(self, event))
     }
 
-    /// Re-reads the hover from where the pointer rests, after a
-    /// render that may have moved this chip without an exit (#1665).
+    /// Re-reads the hover from where the pointer rests (#1665) —
+    /// the shelf's placement moves a chip without an exit event.
     func syncHoverToPointer() {
         applyHover(BarHoverHit.ownsPointer(self))
     }

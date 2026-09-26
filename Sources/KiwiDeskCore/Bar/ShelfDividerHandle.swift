@@ -81,6 +81,13 @@ final class ShelfDividerHandle: NSView {
         onHover(hovered)
     }
 
+    /// Re-reads the hover from where the pointer rests (#1665); a
+    /// drag in flight keeps it, as the exit does.
+    func syncHoverToPointer() {
+        guard dragStart == nil else { return }
+        setHovered(BarHoverHit.ownsPointer(self))
+    }
+
     override func mouseDown(with event: NSEvent) {
         if event.clickCount >= 2 {
             dragStart = nil

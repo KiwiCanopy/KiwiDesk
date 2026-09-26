@@ -148,7 +148,16 @@ final class AppBarItemView: NSView {
     /// Hovered only while the pointer is on THIS view — a count
     /// drawn over the faded end takes the pointer there (#1517).
     private func refreshHover(_ event: NSEvent) {
-        let hovered = !isInert && BarHoverHit.owns(self, event)
+        applyHover(BarHoverHit.owns(self, event))
+    }
+
+    /// Re-reads the hover from where the pointer rests (#1665).
+    func syncHoverToPointer() {
+        applyHover(BarHoverHit.ownsPointer(self))
+    }
+
+    private func applyHover(_ ownsPointer: Bool) {
+        let hovered = !isInert && ownsPointer
         guard hovered != isHovered else { return }
         isHovered = hovered
         applyColors()

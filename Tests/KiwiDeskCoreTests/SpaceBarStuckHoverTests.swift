@@ -4,18 +4,30 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A Space Bar chip's hover follows the pointer across renders
-/// (#1665): a click re-lays the bar, the chip moves out from under
-/// the resting pointer, AppKit sends no exit, and the hover fill
-/// stayed on the chip until the pointer crossed it again. Rendered
-/// through `SpaceBarManager.sync`, the production arm.
+/// A bar item's hover follows the resting pointer across renders
+/// and shelf placements (#1665): a click re-lays the bar, a chip
+/// moves out from under a resting pointer, AppKit sends no exit,
+/// and the hover fill stayed until the pointer crossed the chip
+/// again. Driven in `updateBars`' own order — the Space Bar
+/// renders with the shelf's relayout held, then the shelf places
+/// the section in its panel.
 @Suite("Space Bar stuck hover (#1665)", .serialized)
 @MainActor
 struct SpaceBarStuckHoverTests {
-    private func bars(active: String) -> [SpaceBarManager.Bar] {
+    private let spaceBars = SpaceBarManager()
+    private let shelves = ShelfManager()
+
+    init() {
+        LiquidGlassGate.override = { false }
+        BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
+    }
+
+    /// One render and placement, as `updateBars` runs them; the
+    /// Space Bar draws into `strip`, the shelf spans the fixture.
+    private func update(active: String, strip: CGRect = barTitleStrip) {
         var style = SpaceBarLook()
         style.liquidGlass = false
-        let items = ["1", "2"].map {
+        let items = ["1", "2", "3"].map {
             SpaceBarOverlay.Item(
                 space: SpaceID($0),
                 spaceGlyph: .text($0, tinted: true),
@@ -25,52 +37,41 @@ struct SpaceBarStuckHoverTests {
                 focusInOverflow: false
             )
         }
-        return [
-            SpaceBarManager.Bar(
-                display: barTitleDisplay,
-                items: items,
-                strip: barTitleStrip,
-                style: style,
-                stateMarkColors: StateMarkColors(
-                    sticky: "#ffffff",
-                    floating: "#ffffff"
+        shelves.holdingRelayout {
+            spaceBars.sync([
+                SpaceBarManager.Bar(
+                    display: barTitleDisplay,
+                    items: items,
+                    strip: strip,
+                    style: style,
+                    stateMarkColors: StateMarkColors(
+                        sticky: "#ffffff",
+                        floating: "#ffffff"
+                    )
                 )
+            ])
+        }
+        shelves.sync([
+            .init(
+                display: barTitleDisplay,
+                strip: barTitleStrip,
+                shelf: KiwiShelf(),
+                space: spaceBars.overlayForTesting(barTitleDisplay),
+                app: nil
             )
-        ]
+        ])
     }
 
-    private func chip(
-        _ space: String,
-        in manager: SpaceBarManager
-    ) throws -> SpaceBarItemView {
+    private func chip(_ space: String) throws -> SpaceBarItemView {
         let overlay = try #require(
-            manager.overlayForTesting(barTitleDisplay)
+            spaceBars.overlayForTesting(barTitleDisplay)
         )
-        return try #require(
+        let view = try #require(
             overlay.itemViews.first { $0.space == SpaceID(space) }
         )
-    }
-
-    /// Shows the bar and hosts its section in a window, the part
-    /// `ShelfOverlay` plays in production.
-    private func hosted() throws -> (SpaceBarManager, NSWindow) {
-        let manager = SpaceBarManager()
-        manager.sync(bars(active: "1"))
-        let overlay = try #require(
-            manager.overlayForTesting(barTitleDisplay)
-        )
-        let window = NSWindow(
-            contentRect: barTitleStrip,
-            styleMask: .borderless,
-            backing: .buffered,
-            defer: true
-        )
-        let content = NSView(frame: barTitleStrip)
-        window.contentView = content
-        content.addSubview(overlay.root)
-        overlay.root.frame = content.bounds
-        manager.sync(bars(active: "1"))
-        return (manager, window)
+        // Placed in the shelf's panel, or the hit test has no tree.
+        try #require(view.window != nil)
+        return view
     }
 
     /// The chip's centre in its window's points.
@@ -81,28 +82,27 @@ struct SpaceBarStuckHoverTests {
         )
     }
 
-    @Test("a render re-reads the hover from where the pointer rests")
-    func renderFollowsThePointer() throws {
-        LiquidGlassGate.override = { false }
-        defer { BarHoverHit.pointerOverride = nil }
-        let (manager, window) = try hosted()
-        let two = try chip("2", in: manager)
-        #expect(two.window === window)
-        let over = centre(of: two)
-        BarHoverHit.pointerOverride = { _ in over }
-        manager.sync(bars(active: "1"))
-        // The positive arm: the render finds the chip under the
-        // pointer, so the negative one below is not vacuous.
+    private func rest(at point: CGPoint) {
+        BarHoverHit.pointerOverride = { _ in point }
+    }
+
+    @Test("a placement re-reads the hover from where the pointer rests")
+    func placementFollowsThePointer() throws {
+        defer { rest(at: BarHoverHit.offWindow) }
+        update(active: "1")
+        let two = try chip("2")
+        rest(at: centre(of: two))
+        update(active: "1")
+        // The positive arm, so the negative ones are not vacuous.
         #expect(two.isHovered)
     }
 
-    @Test("a chip the pointer left without an exit loses its hover")
+    @Test("an inactive chip the pointer left without an exit unhovers")
     func leftWithoutAnExit() throws {
-        LiquidGlassGate.override = { false }
-        defer { BarHoverHit.pointerOverride = nil }
-        let (manager, window) = try hosted()
-        let two = try chip("2", in: manager)
-        #expect(two.window === window)
+        defer { rest(at: BarHoverHit.offWindow) }
+        update(active: "1")
+        let two = try chip("2")
+        let window = try #require(two.window)
         let moved = try #require(
             NSEvent.mouseEvent(
                 with: .mouseMoved,
@@ -118,11 +118,47 @@ struct SpaceBarStuckHoverTests {
         )
         two.mouseMoved(with: moved)
         #expect(two.isHovered)
-        // The click switches to 2 and the bar re-lays; the pointer
-        // ends up off every chip, and no exit event arrives.
-        BarHoverHit.pointerOverride = { _ in CGPoint(x: -500, y: -500) }
-        manager.sync(bars(active: "2"))
-        manager.sync(bars(active: "1"))
+        // A click on 3 re-lays the bar and the pointer ends off
+        // every chip with no exit; 2 stays inactive throughout.
+        rest(at: BarHoverHit.offWindow)
+        update(active: "3")
+        #expect(!two.isHovered)
+    }
+
+    @Test("a shelf-only move re-reads the hover")
+    func shelfMoveFollowsThePointer() throws {
+        defer { rest(at: BarHoverHit.offWindow) }
+        update(active: "1")
+        let two = try chip("2")
+        rest(at: centre(of: two))
+        update(active: "1")
+        #expect(two.isHovered)
+        // The same render placed further along the shelf: the
+        // chip moves on screen, the pointer does not.
+        update(active: "1", strip: barTitleStrip.offsetBy(dx: 600, dy: 0))
+        #expect(!two.isHovered)
+    }
+
+    @Test("an active chip never hovers")
+    func activeChipNeverHovers() throws {
+        defer { rest(at: BarHoverHit.offWindow) }
+        update(active: "1")
+        let two = try chip("2")
+        rest(at: centre(of: two))
+        update(active: "2")
+        #expect(!two.isHovered)
+    }
+
+    @Test("clearing a drag re-reads the hover")
+    func dragClearFollowsThePointer() throws {
+        defer { rest(at: BarHoverHit.offWindow) }
+        update(active: "1")
+        let two = try chip("2")
+        rest(at: centre(of: two))
+        update(active: "1")
+        #expect(two.isHovered)
+        rest(at: BarHoverHit.offWindow)
+        spaceBars.clearDragFeedback()
         #expect(!two.isHovered)
     }
 }

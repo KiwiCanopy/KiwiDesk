@@ -104,7 +104,24 @@ struct ShelfWiringSeamTests {
                     at: Self.core.appendingPathComponent(file)
                 )
             )
-            // Every hover-on path runs through the one refresh.
+            // Both hover paths — the event and the resting-pointer
+            // re-read (#1665) — share the one gate.
+            for entry in ["func refreshHover(", "func syncHoverToPointer("] {
+                let entryBody = Self.squash(
+                    try Self.body(of: entry, in: file)
+                )
+                #expect(
+                    entryBody.contains("applyHover("),
+                    Comment(rawValue: "\(file) \(entry)")
+                )
+            }
+            #expect(
+                Self.squash(
+                    try Self.body(of: "func syncHoverToPointer(", in: file)
+                ).contains("BarHoverHit.ownsPointer(self)"),
+                Comment(rawValue: file)
+            )
+            // Every hover-on path runs through the one gate.
             #expect(
                 source.components(separatedBy: "isHovered=true").count == 1,
                 Comment(rawValue: file)

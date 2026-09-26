@@ -145,6 +145,11 @@ func makeTestCore(
     // suite return foreign reports to an own window. Pin "not in
     // the strip"; the return suite states the reading itself.
     core.mouse.pointerInMenuBarStrip = { false }
+    // Same class again (#1665): a bar item's hover is re-read from
+    // the resting pointer at every shelf relayout, and a fixture's
+    // bar sits at the top of the primary screen, where a hand on
+    // the menu bar rests. Pin "off every window".
+    BarHoverHit.pointerOverride = { _ in BarHoverHit.offWindow }
     // The drawn-menu-bar read (#1386) lists the host's real
     // WindowServer windows; a test's displays are fake.
     core.eventLoop.displayWatch.readDrawnMenuBars = { [] }
