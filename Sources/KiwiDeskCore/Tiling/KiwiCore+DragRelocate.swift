@@ -17,7 +17,9 @@ import Foundation
 ///   moveWindow(follow:)   yes+warp   yes*    —         yes*
 ///   Space-Bar spring      none       none    none      yes
 ///   live crossing (#504)  none       none    yes       yes
-///   drop-commit (below)   no-warp    yes     yes       no
+///   drop-commit (below)   no-warp    yes     tiled*    no
+///
+///   *a float joining changes no tiled overlap (#674).
 ///
 /// The drop-commit also takes a float dropped on another display
 /// (#1686, `relocateDroppedFloat`), and must never re-anchor, or
@@ -86,8 +88,7 @@ extension KiwiCore {
     func relocateAcrossDisplay(
         _ id: WindowID,
         onto target: WindowID?,
-        from origin: Space,
-        restoresZOrder: Bool = true
+        from origin: Space
     ) -> Bool {
         guard
             let destID = dropDestination(),
@@ -102,6 +103,20 @@ extension KiwiCore {
             focusWindow(id, warp: false)
             return true
         }
+        commitCrossDisplayDrop(id, onto: target, from: origin, into: destID)
+        return true
+    }
+
+    /// The drop-commit's filing, past every gate: it has no
+    /// refusal of its own, so a caller that writes state ahead of
+    /// it (the float re-file's flag) writes only for a move that
+    /// happens.
+    func commitCrossDisplayDrop(
+        _ id: WindowID,
+        onto target: WindowID?,
+        from origin: Space,
+        into destID: SpaceID
+    ) {
         // The drop lands on the destination display, so the
         // dropped window keeps OS focus there once we follow;
         // captured before the retile/focus below for the #463
@@ -149,21 +164,23 @@ extension KiwiCore {
         // dispatches the mode-correct restore; a non-overlapping
         // destination mode falls through to a no-op. A float
         // joining changes no tiled overlap, so it arms none (#674).
-        if restoresZOrder { scheduleZOrderRestore() }
+        if state.windows[id]?.isFloating != true {
+            scheduleZOrderRestore()
+        }
         emitSpaceChange()
         // The follow hands focus to a space that was already
         // visible; re-assert once so a dropped cooperative activate
         // (#463) can't leave the destination showing the wrong key
         // window.
         scheduleSpaceSettle(destID, priorFrontmost: priorFrontmost)
-        return true
     }
 
     /// The active Space of the display under the drop's cursor —
-    /// the one lookup the float re-file and the relocate share,
-    /// so the flag the re-file writes is for the Space the window
-    /// lands in. The display resolution is the live crossing's
-    /// (#504), injected so drag tests can fake a topology.
+    /// the lookup the float re-file and the drop-commit relocate
+    /// share, so the flag the re-file writes is for the Space the
+    /// window lands in. The live crossing asks it of a display it
+    /// already holds; the resolution is its (#504), injected so
+    /// drag tests can fake a topology.
     func dropDestination() -> SpaceID? {
         dragCrossing.displayAt(drag.cursorLocation()).flatMap {
             state.workspaces.activeSpace(on: $0)
@@ -191,11 +208,11 @@ extension KiwiCore {
         if !window.isFloating, dest.mode != .floating {
             state.setFloating(id, true)
         }
-        _ = relocateAcrossDisplay(
+        commitCrossDisplayDrop(
             id,
             onto: nil,
             from: origin,
-            restoresZOrder: false
+            into: destID
         )
     }
 

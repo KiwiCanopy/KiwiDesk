@@ -48,10 +48,12 @@
 /// changes — a member arriving on another screen follows the
 /// screen, its home having no frame to bring it over. The hand
 /// DROP onto another display (#1686, `relocateDroppedFloat`)
-/// stays on the flag the other way round: a flag float joins
-/// that display's Space, while a floating-mode member stays home,
-/// since filing it into a tiled Space would tile it
-/// (`FloatDropRefileTests`). Every other reader is the flag's own
+/// re-files every float, flag or floating-mode, and reads the
+/// flag only to decide whether one is owed: a floating-mode
+/// member landing on a TILED Space takes the float verb's manual
+/// override, or the layout would tile it; onto a floating Space
+/// it takes none (owner rulings 2026-09-26,
+/// `FloatDropRefileTests`). Every other reader is the flag's own
 /// identity, a net already routed here, or a "tiled member"
 /// question — the negation below — and
 /// `FloatFlagReaderCensusTests` holds that census per file, so a
