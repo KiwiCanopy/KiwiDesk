@@ -42,6 +42,7 @@ extension KiwiCore {
         // to drop still exists, and numbering into it would merge.
         let taken = declared.union(state.heldSpaces.keys)
             .union(state.workspaces.allSpaces.map(\.id))
+            .union(state.rememberedSpaces.values.map(\.space))
         let names = Self.orderedHeldNames(
             candidates.map(\.0.id),
             taken: taken,
@@ -108,6 +109,7 @@ extension KiwiCore {
             return !goesHome
         }
         var taken = declared.union(state.heldSpaces.keys).union(live)
+            .union(state.rememberedSpaces.values.map(\.space))
         let names = held.map { id -> SpaceID in
             guard declared.contains(id) else { return id }
             let fresh = SpaceID.nextNumber(past: taken)
@@ -244,7 +246,7 @@ extension KiwiCore {
         state.heldSpaces = [:]
     }
 
-    /// Moves a Space's members, live and away, into a new one.
+    /// Moves a Space's members, live and remembered, into a new one.
     private func moveMembers(
         of source: SpaceID,
         to target: SpaceID,
@@ -257,9 +259,9 @@ extension KiwiCore {
             // Its frame is the other Space's layout's (#1177).
             refiledWindows.insert(window)
         }
-        for window in awayMembers(of: source) {
-            state.refileAway(of: window, to: target)
-        }
+        // Every remembered window, up or not — a hidden app's
+        // included — or it returns to the old number (#1669).
+        state.renameRememberedSpace(source, to: target)
     }
 
     /// `WorkspaceManager.add` nils the focus trackers of a window
