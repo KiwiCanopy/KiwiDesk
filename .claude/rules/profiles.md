@@ -781,7 +781,10 @@ screen's Spaces are held, not forwarded*. The obligations:
   `namedSpaceFollowsTheBatch`). Only the hold renumbers for the
   order, where the prune drops the old numbers; a reclaim
   renumbers a declared id alone, since nothing there would drop
-  an undeclared one.
+  an undeclared one — and the Space drop has one home
+  (`SpaceForwardingSeamTests` ▸ `removeSpaceHasOneHome`), so a
+  reclaim that renumbers more routes through
+  `forwardWindows(of:to:)`, never a retire beside it.
 - **A renumber takes `SpaceID.nextNumber(past:)` over every live
   id, never `smallestFreeNumber(among:)` and never the declared
   set alone.** A Space the prune is about to drop still exists,

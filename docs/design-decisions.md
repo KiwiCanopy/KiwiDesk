@@ -11977,8 +11977,10 @@ and the digit chords would then read the screen backwards. A later
 reclaim renumbers only the Space the arrangement claims and keeps
 the bar's order, so its numbers may then not ascend. Renumbering
 the rest there too is refused: the old number is pruned at a hold
-but not at a reclaim, so every one would need a live rename across
-each store keyed by a Space, for a case an unplug does not reach.
+but not at a reclaim, and dropping a Space is `forwardWindows`'
+alone (#1177), so each would need a live rename across every store
+keyed by a Space — for a case only a later arrangement declaring a
+held number reaches.
 :::
 
 **Accepted: the chord outlives the Space.** The top-up writes the
