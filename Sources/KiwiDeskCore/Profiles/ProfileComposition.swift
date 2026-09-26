@@ -14,7 +14,7 @@ public enum ProfileComposition {
         public let assignment: [SpaceID: DisplayID]
         public let settings: TilingSettings
         /// The starter's title when composed from it (#1662).
-        public var sourceTitle: StarterTitle? = nil
+        public let sourceTitle: StarterTitle?
     }
 
     /// Builds fallback composition for connected displays from closest
@@ -73,14 +73,13 @@ public enum ProfileComposition {
             modes[space] = .monocle
             assignment[space] = ordered[position].id
         }
-        var composed = Composed(
+        return Composed(
             sourceName: layout.name,
             spaces: spaces,
             spaceModes: modes,
             assignment: assignment,
-            settings: layout.settings
+            settings: layout.settings,
+            sourceTitle: layout.starterTitle
         )
-        composed.sourceTitle = layout.starterTitle
-        return composed
     }
 }

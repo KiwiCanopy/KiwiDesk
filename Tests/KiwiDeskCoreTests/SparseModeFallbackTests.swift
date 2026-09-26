@@ -187,6 +187,10 @@ struct SparseModeFallbackTests {
             isStandard: false,
             settings: TilingSettings()
         )
+        // Whatever the fallback, it is a layout the class offers.
+        for shape in ScreenClass.allCases {
+            #expect(shape.layouts.contains(shape.presetFallback))
+        }
         for shape in [ScreenClass.ultrawide, .superUltrawide] {
             #expect(layout.mode(of: SpaceID("2"), on: shape) == .track)
             #expect(shape.layouts.first == .stack)

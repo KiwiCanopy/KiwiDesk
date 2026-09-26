@@ -129,7 +129,8 @@ struct ProfileSwitchClassificationTests {
                 spaces: ["1", "2"],
                 spaceModes: ["1": .bsp, "2": .bsp],
                 assignment: [:],
-                settings: TilingSettings()
+                settings: TilingSettings(),
+                sourceTitle: nil
             ),
             forceRetile: false
         )

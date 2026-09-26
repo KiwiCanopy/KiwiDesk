@@ -128,6 +128,13 @@ struct StarterRescaleTests {
         let title = StarterTitle(shape: .laptop, otherScreens: 1)
         #expect(core.profiles.currentStandardTitle == title)
         #expect(core.liveStarterTitle() == title)
+        // The which-loads verdict names it by the same title.
+        let verdict = core.profileVerdict(activeBinding: nil).verdict
+        guard case .builtInStandard(_, let named) = verdict else {
+            Issue.record("expected the built-in Starter: \(verdict)")
+            return
+        }
+        #expect(named == title)
         #expect(core.state.workspaces.allSpaces.count == 5)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .scrolling

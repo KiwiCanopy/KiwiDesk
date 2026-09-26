@@ -100,7 +100,7 @@ struct ProfileVerdictTests {
         #expect(core.isGuiManaged)
         #expect(
             core.profileVerdict(activeBinding: nil).verdict
-                == .builtInStandard(name: "Developer")
+                == .builtInStandard(name: "Developer", title: nil)
         )
     }
 
@@ -119,7 +119,8 @@ struct ProfileVerdictTests {
             core.profileVerdict(activeBinding: nil).verdict
                 == .placementOnlyStandard(
                     name: "Developer",
-                    activeProfile: nil
+                    activeProfile: nil,
+                    title: nil
                 )
         )
     }

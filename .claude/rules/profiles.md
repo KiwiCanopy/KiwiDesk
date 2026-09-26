@@ -107,8 +107,10 @@ is in `docs/design-decisions.md`. The obligations that fall on a
 change here:
 
 - **The tuning is ONE `TilingSettings`: each layout's facet is
-  the screen it first lands on, gaps and the minimum window size
-  the MAIN screen's** (#1662). `StarterSetup.settings(sizes:)`
+  the screen `StarterSetup.hosts` names — its first slot, and for
+  Scrolling `scrollingHost` (the widest screen that leads it) —
+  gaps and the minimum window
+  size the MAIN screen's** (#1662). `StarterSetup.settings(sizes:)`
   hands `StarterTuning.settings(mainShape:hosts:)` the hosts from
   `StarterSetup.hosts`, derived from the one walk; take that
   door, never a bare `StarterTuning` call with hand-made hosts.
@@ -124,8 +126,9 @@ change here:
   monitor-change rescale key on the name, so a shape-derived
   string never replaces it: `applyStandard` saves the starter
   under its title and the profile carries `isStarterSetup`, and
-  a reader asking for the title takes `liveStarterTitle()` or
-  `currentStandardTitle` — adoption state, never the file
+  a reader asking what the live setup is titled takes
+  `liveStarterTitle()`, one asking about the resolving Standard
+  alone `currentStandardTitle` — adoption state, never the file
   (`StarterShapeTests`, `StarterRescaleTests`).
 - **Which entry point a call site takes is a rule, not a
   preference.** `StandardProfiles.workflows` is the
@@ -147,6 +150,14 @@ change here:
   genuinely is not knowable, and the historic `bsp` stands there;
   a caller that CAN know and passes nil makes the preview and the
   apply disagree. `SparseModeFallbackTests` holds both arms.
+- **Beside an ultrawide, Scrolling lives on the ultrawides
+  alone** (#1662): with an ultrawide among several screens,
+  `StarterAllocation.ultrawideModes` replaces the ladder — every
+  other screen leads Monocle and draws from
+  `companionLayouts`, three spaces a screen, each ending in its
+  own Floating space. A change to the lead or the Floating rule
+  below says which of the two allocations it binds
+  (`StarterUltrawideAllocationTests`).
 - **A screen's FIRST space is the lead, and the lead may
   repeat.** `StarterAllocation.lead(_:of:)` decides it before the
   screen's own list is read — Scrolling everywhere but the

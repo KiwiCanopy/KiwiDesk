@@ -19,6 +19,9 @@ struct StarterLeadTests {
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let pivoted = CGSize(width: 1440, height: 2560)
     private let small = CGSize(width: 1024, height: 768)
+    /// A widescreen wider than a 27": an ultrawide among several
+    /// screens leads the #1662 allocation instead.
+    private let bigDesk = CGSize(width: 2880, height: 1620)
 
     @Test("#1018's worked example lands exactly")
     func workedExample() {
@@ -59,7 +62,7 @@ struct StarterLeadTests {
         // others lead Scrolling — the repeat that the no-layout-
         // twice rule is carved out for.
         let modes = StarterAllocation.modes(
-            sizes: [screen27, laptop, ultrawide]
+            sizes: [screen27, laptop, bigDesk]
         )
         #expect(modes[1].first == .monocle, "\(modes[1])")
         #expect(modes[0].first == .scrolling, "\(modes[0])")

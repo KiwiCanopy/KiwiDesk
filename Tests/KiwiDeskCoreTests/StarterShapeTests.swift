@@ -98,13 +98,14 @@ struct StarterShapeTests {
             StarterSetup.settings(sizes: [ultrawide, superWide])
                 .stack.masterCount == 3
         )
-        // Stack lands twice across three screens; the FIRST slot
-        // (the 32:9 main) tunes it, never the later portrait.
-        let three = StarterSetup.settings(
-            sizes: [superWide, screen27, portrait]
+        // Stack lands twice across four screens — three 27"s draw
+        // Grid, Stack and BSP, and the portrait's second space is
+        // a forced repeat of Stack. The FIRST slot (a 27") tunes
+        // it, never the later portrait.
+        let four = StarterSetup.settings(
+            sizes: [screen27, screen27, screen27, portrait]
         )
-        #expect(three.stack.masterCount == 3)
-        #expect(three.stack.stackPosition == .right)
+        #expect(four.stack.stackPosition == .right)
     }
 
     @Test("Scrolling on a portrait secondary scrolls vertically")
@@ -131,7 +132,7 @@ struct StarterShapeTests {
     /// A portrait main narrower than its landscape secondary leads
     /// Monocle, so Scrolling first lands on the landscape screen
     /// and is tuned for it — never the portrait's vertical.
-    @Test("Scrolling is tuned by the screen it first lands on")
+    @Test("Scrolling is tuned by the screen that leads it")
     func scrollingFollowsItsHost() {
         for secondary in [screen27, ultrawide] {
             let sizes = [portrait, secondary]
@@ -147,9 +148,8 @@ struct StarterShapeTests {
             StarterSetup.settings(sizes: [portrait, ultrawide])
                 .scrolling.anchor == .center
         )
-        // A laptop main beside an ultrawide leads Monocle and may
-        // draw Scrolling as a forced repeat AHEAD of the ultrawide's
-        // lead; the ultrawide still tunes Scrolling.
+        // A laptop main beside an ultrawide leads Monocle and never
+        // scrolls; the ultrawide tunes Scrolling.
         let mixed = [CGSize(width: 1512, height: 982), ultrawide]
         #expect(StarterSetup.scrollingHost(mixed) == .ultrawide)
         let tuned = StarterSetup.settings(sizes: mixed).scrolling

@@ -74,6 +74,9 @@ public enum StarterAllocation {
     /// still JOINS `used` after, so no screen draws it twice).
     public static func modes(sizes: [CGSize]) -> [[LayoutMode]] {
         guard !sizes.isEmpty else { return [] }
+        if hasUltrawideCompanion(sizes) {
+            return ultrawideModes(sizes: sizes)
+        }
         let widths = sizes.map(\.width)
         let share = shares(
             widths: widths,
@@ -153,7 +156,7 @@ public enum StarterAllocation {
     /// repeat while this screen still has an unheld entry, and
     /// when the budget forces a repeat, rotate PAST the held one
     /// so the duplicate is never adjacent to its twin.
-    private static func take(
+    static func take(
         _ quota: Int,
         from list: [LayoutMode],
         used: inout Set<LayoutMode>,

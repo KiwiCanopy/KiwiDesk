@@ -24,7 +24,7 @@ public enum ProfileVerdict: Equatable, Sendable {
     /// Carries its stable English `StandardLayout.name`, which
     /// the GUI localizes, and the starter's title when it is the
     /// starter (#1662).
-    case builtInStandard(name: String, title: StarterTitle? = nil)
+    case builtInStandard(name: String, title: StarterTitle?)
     /// No saved profile matches, and the config is Lua-owned, so
     /// nothing is adopted: a built-in layout steers PLACEMENT
     /// while `activeProfile` (when any) keeps owning the tiling.
@@ -33,7 +33,7 @@ public enum ProfileVerdict: Equatable, Sendable {
     case placementOnlyStandard(
         name: String,
         activeProfile: String?,
-        title: StarterTitle? = nil
+        title: StarterTitle?
     )
     /// Nothing matches and no built-in plans for this many
     /// screens.

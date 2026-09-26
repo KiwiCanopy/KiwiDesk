@@ -51,6 +51,11 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
         of(display.frame.size)
     }
 
+    /// Either ultrawide class (#1662).
+    public var isUltrawide: Bool {
+        self == .ultrawide || self == .superUltrawide
+    }
+
     /// The layout a sparse preset's unlisted space takes here: the
     /// class's best, except that the ultrawides keep Track — Stack
     /// first is the STARTER's ruling, and presets stay

@@ -725,6 +725,15 @@ scrolls the way its own screen faces — vertically on a portrait
 screen.
 :::
 
+:::unreleased
+With an ultrawide beside other screens, scrolling lives on the
+ultrawide alone: every other screen opens in monocle, and each
+screen gets three spaces ending in its own floating one — a
+widescreen monocle · bsp · floating, a portrait screen monocle ·
+grid (one column of three) · floating, a laptop monocle · grid
+(two across) · floating.
+:::
+
 While you are still on the starter setup, connecting or removing
 a monitor re-derives it and the `⌃⌥N` space shortcuts extend to
 new spaces (up to ten).

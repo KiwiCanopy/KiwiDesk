@@ -4533,6 +4533,20 @@ to recall, not screen area. And we run out of keys before we run
 out of spaces: past ⌥1–9 and ⌥0 there are no default go-to keys
 left.
 
+**Beside an ultrawide, Scrolling lives on the ultrawide alone.**
+With an ultrawide or super ultrawide among several screens, the
+ladder below gives way: the ultrawides lead Scrolling, every
+other screen leads Monocle and never scrolls, and each screen
+gets three spaces ending in its own Floating space — a
+widescreen Monocle · BSP · Floating, a portrait screen Monocle ·
+Grid (one column of three) · Floating, a laptop Monocle · Grid
+(two across) · Floating. A Scrolling row belongs where it has
+width to run; beside one, the other screen's job is to hold
+whole windows. The total is three a screen, capped at ten, and
+each screen has its own Floating space — the one place the
+budget and the one-Floating rule below do not bind. (Owner
+ruling, #1662.)
+
 **Every screen opens in Scrolling but the smallest, which opens
 in Monocle.** The shape rule above decides what a screen is good
 for; it does not decide what the user should be shown FIRST.
@@ -4592,9 +4606,9 @@ question has an answer that is not a guess: the screen it sits
 on, so a Stack on a portrait secondary puts its stack along the
 bottom (owner ruling, #1662). Scrolling leads several screens
 and can be forced onto the narrowest one as a repeat, so it
-takes the main screen where the main LEADS it, else the widest
-screen that does — a narrow portrait or laptop main leads
-Monocle, and its neighbour tunes Scrolling. What stays the main
+takes the widest screen that LEADS it — the ultrawide wherever
+one is connected, and past a narrow portrait or laptop main,
+which leads Monocle, its neighbour. What stays the main
 screen's is what no layout owns — gaps and the minimum window
 size. It is still one
 `TilingSettings`, never a per-display config behind the values

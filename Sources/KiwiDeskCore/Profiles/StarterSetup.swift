@@ -104,18 +104,16 @@ public enum StarterSetup {
     }
 
     /// Scrolling leads several screens and can be forced onto the
-    /// narrowest as a repeat, so it is tuned for the main where the
-    /// main LEADS it, else for the widest screen that does.
+    /// narrowest as a repeat, so it is tuned for the widest screen
+    /// that LEADS it — the ultrawide wherever one is connected.
     static func scrollingHost(_ sizes: [CGSize]) -> ScreenClass? {
         var leads: [Int: LayoutMode] = [:]
         for slot in slots(sizes) where leads[slot.screen] == nil {
             leads[slot.screen] = slot.mode
         }
         let leading = leads.filter { $0.value == .scrolling }.keys
-        let host =
-            leading.contains(0)
-            ? 0 : leading.max { sizes[$0].width < sizes[$1].width }
-        return host.map { ScreenClass.of(sizes[$0]) }
+        return leading.max { sizes[$0].width < sizes[$1].width }
+            .map { ScreenClass.of(sizes[$0]) }
     }
 
     /// The starter's only per-space overrides (#1662): a Scrolling

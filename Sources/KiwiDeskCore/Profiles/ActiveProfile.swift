@@ -63,5 +63,5 @@ struct ActiveStandard {
     let name: String
     let spaces: Set<SpaceID>
     /// The starter's title when this Standard is the starter.
-    var title: StarterTitle? = nil
+    let title: StarterTitle?
 }

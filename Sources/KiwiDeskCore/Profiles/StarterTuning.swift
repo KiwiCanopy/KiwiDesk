@@ -36,9 +36,10 @@ public enum StarterTuning {
     static let ultrawideSlot = 0.3
 
     /// Settings for a setup whose main screen is `mainShape`, each
-    /// layout in `hosts` tuned for the screen it first lands on (a
+    /// layout in `hosts` tuned for the screen `StarterSetup.hosts`
+    /// names for it (a
     /// layout absent from `hosts` takes the main's).
-    public static func settings(
+    static func settings(
         mainShape: ScreenClass,
         hosts: [LayoutMode: ScreenClass]
     ) -> TilingSettings {
@@ -122,8 +123,16 @@ public enum StarterTuning {
             settings.grid.columns = 2
             settings.grid.rows = 2
         case .pivoted:
+            // One column of three, top/bottom first (#1662).
             settings.grid.splitDirection = .vertical
-        case .laptop, .superUltrawide, .ultrawide:
+            settings.grid.columns = 1
+            settings.grid.rows = 3
+        case .laptop:
+            // Two side by side — only ever hosted beside an
+            // ultrawide (#1662).
+            settings.grid.columns = 2
+            settings.grid.rows = 1
+        case .superUltrawide, .ultrawide:
             break
         }
     }
