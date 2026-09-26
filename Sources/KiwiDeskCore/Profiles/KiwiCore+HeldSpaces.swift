@@ -87,8 +87,9 @@ extension KiwiCore {
     /// A held id is never a declared one: every apply door calls
     /// this FIRST with the set it makes authoritative, and a held
     /// Space whose number that set claims moves to the next free
-    /// number — and any held after it moves too, keeping their
-    /// order (#1664). A Space about to go home is left alone.
+    /// number — unless it is about to go home under that very name.
+    /// The walk and the batch follow the bar, never the dictionary
+    /// (#1664); a Space the set does not claim keeps its number.
     func reclaimHeldNames(
         declared: Set<SpaceID>,
         into arrangement: HeldOrigin.Arrangement
@@ -101,13 +102,18 @@ extension KiwiCore {
             }
         let held = (live + orphans).filter { id in
             guard let origin = state.heldSpaces[id] else { return false }
-            return !returnsHome(origin, declared: declared, into: arrangement)
+            let goesHome =
+                origin.name == id
+                && returnsHome(origin, declared: declared, into: arrangement)
+            return !goesHome
         }
-        let names = Self.orderedHeldNames(
-            held,
-            taken: declared.union(state.heldSpaces.keys).union(live),
-            mustMove: declared.contains
-        )
+        var taken = declared.union(state.heldSpaces.keys).union(live)
+        let names = held.map { id -> SpaceID in
+            guard declared.contains(id) else { return id }
+            let fresh = SpaceID.nextNumber(past: taken)
+            taken.insert(fresh)
+            return fresh
+        }
         guard names != held else { return }
         var focus = heldFocusTrackers()
         for (id, fresh) in zip(held, names) where fresh != id {
@@ -117,15 +123,9 @@ extension KiwiCore {
             moveMembers(of: id, to: fresh, mode: mode)
             state.heldSpaces[id] = nil
             state.heldSpaces[fresh] = origin
-            if !declared.contains(id) {
-                focus.spaceFocus[id] = nil
-                retireRenumberedSource(id, into: fresh)
-            }
             onLog(
                 "held space \(id.raw) renumbered \(fresh.raw): "
-                    + (declared.contains(id)
-                        ? "the arrangement declares \(id.raw)"
-                        : "keeping the held order")
+                    + "the arrangement declares \(id.raw)"
             )
         }
         focus.restore(into: &state.workspaces)

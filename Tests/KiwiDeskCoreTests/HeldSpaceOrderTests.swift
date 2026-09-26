@@ -35,9 +35,11 @@ struct HeldSpaceOrderTests {
         #expect(heldInOrder(core) == ["5←3", "6←4"])
     }
 
-    /// Six held Spaces, so a walk in the dictionary's hash order
-    /// cannot pass by luck (1 in 720).
-    @Test("a reclaim renumbers in bar order and leaves no empty Space")
+    /// Six held Spaces, so a batch placed in the dictionary's hash
+    /// order cannot pass by luck (1 in 720). A reclaim renumbers
+    /// only the Space the set claims; the bar keeps the origin
+    /// order even where the numbers then do not ascend.
+    @Test("a reclaim keeps the bar in the order the screen had")
     func reclaimKeepsTheOrder() throws {
         let dell = (3...8).map { SpaceID($0) }
         let core = try desk.docked(dellSpaces: dell)
@@ -49,12 +51,9 @@ struct HeldSpaceOrderTests {
         try reapply(core, declaring: [SpaceID(9)])
         #expect(
             heldInOrder(core)
-                == ["15←3", "16←4", "17←5", "18←6", "19←7", "20←8"]
+                == ["15←3", "10←4", "11←5", "12←6", "13←7", "14←8"]
         )
-        for old in 10...14 {
-            #expect(core.state.workspaces[SpaceID(old)] == nil)
-        }
-        #expect(desk.members(core, 20) == desk.ids([105]))
+        #expect(desk.members(core, 14) == desk.ids([105]))
     }
 
     @Test("a named Space the walk keeps sits after a renumbered one")

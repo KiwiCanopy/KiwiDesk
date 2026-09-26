@@ -11973,10 +11973,12 @@ the old `3` renumbered to `5` sitting after the old `4`, which kept
 its name. A named Space keeps its name wherever it falls, and the
 batch sits in the bar in the order the screen had it, behind the
 resident Spaces. Keeping more numbers is refused because the bar
-and the digit chords would then read the screen backwards. A held
-Space renumbered only for the order leaves nothing under its old
-number: no apply door prunes an undeclared held Space, so the
-reclaim hands its pin, settings and screen on and drops it.
+and the digit chords would then read the screen backwards. A later
+reclaim renumbers only the Space the arrangement claims and keeps
+the bar's order, so its numbers may then not ascend. Renumbering
+the rest there too is refused: the old number is pruned at a hold
+but not at a reclaim, so every one would need a live rename across
+each store keyed by a Space, for a case an unplug does not reach.
 :::
 
 **Accepted: the chord outlives the Space.** The top-up writes the

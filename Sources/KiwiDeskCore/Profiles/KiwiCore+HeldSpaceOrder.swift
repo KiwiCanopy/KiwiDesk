@@ -39,22 +39,4 @@ extension KiwiCore {
             .filter { !members.contains($0) }
         state.workspaces.reorder(matching: rest + batch)
     }
-
-    /// A Space renumbered only for the order is nobody's once its
-    /// members left: it hands its pin, settings, screen and focus
-    /// to the new number and goes, since no apply door prunes it.
-    func retireRenumberedSource(
-        _ id: SpaceID,
-        into fresh: SpaceID
-    ) {
-        spacePins[fresh] = spacePins[id]
-        spacePins[id] = nil
-        tiler.settings.renameSpace(from: id, to: fresh)
-        if let display = state.workspaces.display(of: id) {
-            state.workspaces.assign(fresh, to: display)
-        }
-        let wasActive = state.workspaces.activeSpace == id
-        state.workspaces.removeSpace(id)
-        if wasActive { state.workspaces.activate(fresh) }
-    }
 }

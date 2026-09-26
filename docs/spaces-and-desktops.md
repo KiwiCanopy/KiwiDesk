@@ -57,9 +57,11 @@ moves to a new number again whenever a profile that loads uses
 its current one.
 
 :::unreleased
-Held Spaces keep the order they had: a numbered Space after a
-renumbered one is renumbered after it too, so the Space Bar and
-the digit shortcuts list them in the order the screen had them.
+Held Spaces keep the order they had: when a screen's Spaces are
+held, a numbered Space after a renumbered one is renumbered after
+it too, so the Space Bar and the digit shortcuts list them in the
+order the screen had them. A later renumber keeps the Space Bar in
+that order.
 :::
 
 The Space Bar draws an asterisk badge on a held Space's

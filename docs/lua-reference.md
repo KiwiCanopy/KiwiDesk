@@ -4497,9 +4497,10 @@ Space Bar
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
 
 :::unreleased
-Held spaces keep their order: a numbered held space after a
-renumbered one is renumbered past it too, even where its own name
-is free
+Held spaces keep their order: when a monitor change holds them, a
+numbered held space after a renumbered one is renumbered past it
+too, even where its own name is free, and a later renumber keeps
+the Space Bar in that order
 ([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
 :::
 
