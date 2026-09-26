@@ -607,8 +607,8 @@ loaded and edit its Shortcuts section.
 ### Built-in Standards & Presets
 
 One workflow layout per screen count is the *Standard* that
-resolves silently when no saved profile matches; **Starter** is
-derived from the screens you have ([Your first
+resolves silently when no saved profile matches; the starter
+setup is derived from the screens you have ([Your first
 run](#your-first-run)) and is offered for that count alone. Where
 a preset does not name a layout for a space, the space takes the
 layout its screen suits. Applying a preset saves it as a real,
@@ -689,16 +689,22 @@ layout.)
 
 A fresh install seeds a setup chosen for the screens you have.
 **Every screen opens in scrolling**, except the smallest, which
-opens in monocle. The slot is just under half the screen; on an
-ultrawide main screen it is 30%, a profile-wide value read from
-the main screen.
+opens in monocle.
+
+:::unreleased
+The slot is 80% of the screen, so the next window peeks in and
+KiwiDesk's own Settings window opens wide enough for its preview;
+on an ultrawide main screen it is 30%, a profile-wide value read
+from the main screen.
+:::
 
 | Your screen | Gets, best first |
 | --- | --- |
 | Laptop (under 1900 pt wide) | scrolling · monocle |
 | 2K / 4K desktop (1900–3000 pt) | grid · stack · bsp · scrolling |
-| Ultrawide (3000 pt +, or wider than 2.1:1) | track · grid · stack |
-| Pivoted (taller than wide) | stack · grid · monocle |
+| Ultrawide (3000 pt +, or 2.1:1 up to 3:1) | stack · track · grid |
+| Super ultrawide (3:1 and wider, e.g. 32:9) | stack · track · grid |
+| Portrait (taller than wide) | stack · grid · monocle |
 
 Screens are measured in points, so a 5K 27" and a 1440p 27" get
 the same answer. Every setup gets exactly one Floating space, on
@@ -708,16 +714,25 @@ each screen's share proportional to its width. "Smallest" is
 read from width alone, so a 27" beside an ultrawide opens in
 monocle.
 
-The tuning follows the main screen: a laptop main gets 6 pt
-gaps, an ultrawide two stack masters and a larger minimum window
-size, a pivoted one the stack at the bottom and scrolling
-vertical.
+:::unreleased
+A layout is tuned for the screen it sits on, and the rest
+follows the main screen. A laptop main gets 6 pt gaps. A stack
+gets two mains side by side on an ultrawide and three on a super
+ultrawide; on a portrait screen its stack runs along the bottom.
+On an ultrawide main, scrolling centres the focused window and
+keeps a lone window at its slot rather than filling the screen;
+on a portrait screen it scrolls vertically.
+:::
 
-While you are still on the Starter layout, connecting or removing
+While you are still on the starter setup, connecting or removing
 a monitor re-derives it and the `⌃⌥N` space shortcuts extend to
-new spaces (up to ten). It is saved as an ordinary profile named
-**Starter**, and the same setup is always available as the
-**Starter** preset.
+new spaces (up to ten).
+
+:::unreleased
+It is saved as an ordinary profile named after your main screen
+— **Ultrawide**, say, or **Widescreen + 1** across two screens —
+and the same setup is always available as a preset.
+:::
 
 ### Default Shortcuts
 

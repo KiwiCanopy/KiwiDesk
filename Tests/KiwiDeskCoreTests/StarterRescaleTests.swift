@@ -66,10 +66,12 @@ struct StarterRescaleTests {
     @Test("the seeded ladder profile is the starter baseline")
     func seededProfileIsBaseline() throws {
         let core = try onStarterBaseline()
-        #expect(core.profiles.currentName == "Starter")
-        #expect(
-            try core.profiles.read(name: "Starter").isStarterSetup
-        )
+        // Saved under the setup's TITLE (#1662); the identity the
+        // rescale keys on is the flag, never the file name.
+        let name = StarterTitle(shape: .laptop, otherScreens: 0)
+            .profileName
+        #expect(core.profiles.currentName == name)
+        #expect(try core.profiles.read(name: name).isStarterSetup)
         #expect(core.isOnStarterBaseline)
     }
 

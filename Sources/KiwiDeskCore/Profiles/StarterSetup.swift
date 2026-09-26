@@ -90,22 +90,67 @@ public enum StarterSetup {
         return screens
     }
 
+    /// The class of the screen each layout first lands on; the
+    /// tuning reads a single-screen layout's from here (#1662).
+    static func hosts(_ sizes: [CGSize]) -> [LayoutMode: ScreenClass] {
+        let sizes = floored(sizes)
+        var hosts: [LayoutMode: ScreenClass] = [:]
+        for slot in slots(sizes) where hosts[slot.mode] == nil {
+            hosts[slot.mode] = ScreenClass.of(sizes[slot.screen])
+        }
+        return hosts
+    }
+
+    /// The starter's ONE per-space override (#1662): Scrolling on a
+    /// portrait screen that is not the main one scrolls vertically,
+    /// where every other Scrolling space takes the main's direction.
+    static func scrollingOverrides(
+        _ sizes: [CGSize]
+    ) -> [SpaceID: ScrollingOverride] {
+        let sizes = floored(sizes)
+        guard ScreenClass.of(sizes[0]) != .pivoted else { return [:] }
+        var overrides: [SpaceID: ScrollingOverride] = [:]
+        for slot in slots(sizes)
+        where slot.mode == .scrolling && slot.screen > 0
+            && ScreenClass.of(sizes[slot.screen]) == .pivoted
+        {
+            var vertical = ScrollingOverride()
+            vertical.orientation = .vertical
+            overrides[SpaceID(slot.number)] = vertical
+        }
+        return overrides
+    }
+
+    /// The tuning for these screens, overrides included.
+    static func settings(sizes: [CGSize]) -> TilingSettings {
+        let sizes = floored(sizes)
+        var settings = StarterTuning.settings(
+            mainShape: ScreenClass.of(sizes[0]),
+            hosts: hosts(sizes)
+        )
+        settings.scrolling.override = scrollingOverrides(sizes)
+        return settings
+    }
+
     /// Starter setup packaged as a `StandardLayout` model.
     public static func standardLayout(
         sizes: [CGSize]
     ) -> StandardLayout {
         let sizes = floored(sizes)
-        return StandardLayout(
+        var layout = StandardLayout(
             name: name,
             screenCount: sizes.count,
             spaceCount: spaceCount(sizes: sizes),
             spaceModes: spaceModes(sizes: sizes),
             spaceScreens: spaceScreens(sizes: sizes),
             isStandard: false,
-            settings: StarterTuning.settings(
-                mainShape: ScreenClass.of(sizes[0])
-            )
+            settings: settings(sizes: sizes)
         )
+        layout.starterTitle = StarterTitle(
+            shape: ScreenClass.of(sizes[0]),
+            otherScreens: sizes.count - 1
+        )
+        return layout
     }
 
     /// Constructs standard layout from live display collection.

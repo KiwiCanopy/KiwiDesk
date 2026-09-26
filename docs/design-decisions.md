@@ -4500,9 +4500,14 @@ come from each screen's shape, in
 points (`ScreenClass`): a laptop under 1900 pt gets Scrolling and
 Monocle and never Track, which has no width to work in; a screen
 at or past 3000 pt — or past a 2.1 aspect, which catches a short
-ultrawide the width test misses — wants Track first among its
-tiled layouts, and BSP exists only in the middle class,
-producing absurd windows above it and unusable ones below.
+ultrawide the width test misses — is an ultrawide, and past a
+3.0 aspect a super ultrawide (32:9), while a screen taller than
+wide is a portrait one, a rotated ultrawide included. Both
+ultrawides lead their tiled layouts with Stack — two mains side
+by side on 21:9, three on 32:9, equal by the accepted #222
+limitation — and BSP exists only in the middle class, producing
+absurd windows above it and unusable ones below. (Owner ruling,
+#1662, which retired "an ultrawide leads with Track".)
 Points and not pixels, because a 5K 27" and a 1440p 27" both
 report 2560 pt and want the same answer, while a Retina laptop
 reports 1728 and wants laptop layouts despite having more pixels
@@ -4556,23 +4561,36 @@ repeat is still a bug, this one is the feature.
 resolves near-full — one window with a sliver of the next — which
 reads as "my windows were squashed into one" rather than "the
 neighbours are one keystroke away", and the mode's whole argument
-is the second reading. Just under half the axis puts two windows
-side by side with the gap visible, which is the picture that
-teaches the mode; an ultrawide takes 30% for three readable
+is the second reading. 80% of the axis leaves the next window
+peeking in, and is wide enough that KiwiDesk's own Settings
+window — the first thing tiled after onboarding — keeps its
+preview column on a 14" laptop; at the earlier just-under-half
+it opened cramped, its preview folded away, which read as
+broken (owner ruling, #1662, replacing #1018's two-side-by-side
+picture). An ultrawide takes 30% for three readable
 columns, the case `ScrollSize.auto` already documented as wanting
-an explicit size. One profile-wide value and no per-space
-overrides: a first-run profile full of overrides is a second
-config the user has to understand before changing the first.
-(Owner ruling.)
+an explicit size — centred, and a lone window kept at its slot
+rather than stretched across 21:9 or 32:9 (#1662). One
+profile-wide value and no per-space overrides: a first-run
+profile full of overrides is a second config the user has to
+understand before changing the first. (Owner ruling.) The one
+exception is direction: Scrolling on a portrait screen that is
+not the main one scrolls vertically through a per-space
+override, since sideways on a tall screen is the mode at its
+worst (owner ruling, #1662).
 
-**One tuning per profile, and it is the main screen's.** This is
-not a preference — `TilingSettings` is profile-wide, so a laptop
-beside a 27" has exactly one gap value and one stack ratio to
-give, and the only question is which screen names them.
-Per-space overrides express the rest. Do not read the
-`StarterTuning` seam as a per-display one waiting to be built:
-making it one would put a second config behind every value the
-Settings window shows.
+**One tuning per profile: a layout's is its screen's, the rest
+is the main screen's.** `TilingSettings` is profile-wide, so a
+laptop beside a 27" has exactly one gap value to give, and the
+only question is which screen names it. For a layout the
+allocator places on ONE screen — Stack, Grid, Track — that
+question has an answer that is not a guess: the screen it sits
+on, so a Stack on a portrait secondary puts its stack along the
+bottom (owner ruling, #1662). What stays the main screen's is
+what no one screen owns — gaps, the minimum window size, and
+Scrolling, which leads several screens. It is still one
+`TilingSettings`, never a per-display config behind the values
+the Settings window shows.
 
 **An unlisted mode in a sparse preset follows the screen it lands
 on, not a fixed `bsp`.** The workflow presets predate the
@@ -4590,7 +4608,13 @@ historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
 
 **There is one Starter preset, and it is for the screens you
-have.** Three presets, one per screen count, plan for a count
+have.** It is titled by its main screen's class — Laptop,
+Widescreen, Ultrawide, Super Ultrawide, Portrait, "+ N" for more
+screens, and never "Desktop", which names macOS's Mission Control
+Desktop a profile can be bound to — and a fresh install saves it under that title, while
+its identity stays `Starter`: held spaces and the monitor-change
+rescale key on it, and a title would change under them the
+moment a monitor did (#1662). Three presets, one per screen count, plan for a count
 in the abstract. A setup derived from screen shapes cannot
 answer "which two screens?", so a count you are not running
 offers the workflow layouts alone — that is what "For other

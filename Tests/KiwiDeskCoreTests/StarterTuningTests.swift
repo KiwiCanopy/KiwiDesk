@@ -56,14 +56,12 @@ struct StarterTuningTests {
         )
         #expect(settings.scrolling.slotSize != .auto)
         #expect(wide.scrolling.slotSize != settings.scrolling.slotSize)
-        // Derived, not restated: pinning `.fraction(0.48)` would
-        // move the copy rather than guard it — it agrees with
-        // whatever the source holds. What the values have to MEAN
-        // is that two windows fit side by side, and that the
-        // ultrawide column comes out narrower IN POINTS than the
-        // standard one does on a 27" — 0.48 × 3440 is 1651 pt
-        // against 1229, which is the whole reason it differs.
-        #expect(StarterTuning.standardSlot < 0.5)
+        // Derived, not restated: pinning the fraction would move
+        // the copy rather than guard it. What the standard slot
+        // has to MEAN is `StarterSlotSettingsFitTests`' (#1662);
+        // here, that the ultrawide column comes out narrower IN
+        // POINTS than the standard one does on a 27", which is the
+        // whole reason it differs.
         #expect(
             StarterTuning.ultrawideSlot * 3440
                 < StarterTuning.standardSlot * 2560

@@ -251,14 +251,10 @@ struct StarterAllocationTests {
         // other's layouts and asserted the wider one kept its
         // head. That is now unreachable: every screen spends its
         // first slot on a lead, so a screen draws ONE item from
-        // its own list unless its share is three. A screen CAN
-        // hold three without being the widest — [1728, 1920,
-        // 1024] apportions [3, 3, 1] — so the reason is not that
-        // the Floating host monopolises it: it is that with one
-        // draw each, the four shapes' first picks (grid, track,
-        // stack, monocle) are all distinct and cannot collide,
-        // and a screen drawing two is drawing them from a list
-        // no other screen of a different shape shares.
+        // its own list unless its share is three. Where two
+        // shapes DO share a first pick — both ultrawides and a
+        // portrait lead their lists with Stack (#1662) — the
+        // wider screen draws first, `ultrawideTakesStackFirst`.
         //
         // `fillOrder`'s DIRECTION is still guarded, one rule
         // over: `smallestScreen` reads its far end, so reversing
@@ -270,7 +266,9 @@ struct StarterAllocationTests {
             sizes: [ultrawide, screen27, screen27]
         )
         #expect(modes[1].dropFirst().first == .grid, "\(modes[1])")
-        #expect(modes[2].dropFirst().first == .stack, "\(modes[2])")
+        // Stack went to the ultrawide, which drew first.
+        #expect(modes[0].dropFirst().first == .stack, "\(modes[0])")
+        #expect(modes[2].dropFirst().first == .bsp, "\(modes[2])")
         // Vacuity: they really do share a contested list, or
         // "draws first" decides nothing.
         #expect(ScreenClass.of(screen27).layouts.count >= 2)

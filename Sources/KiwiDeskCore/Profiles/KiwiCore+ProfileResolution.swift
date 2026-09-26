@@ -302,7 +302,9 @@ extension KiwiCore {
         // a stale profile, and `buildProfile` tags the starter
         // setup from `currentStandard` (#485).
         apply(composed: composed, forceRetile: true)
-        let name = profiles.freeName(base: layout.name)
+        let name = profiles.freeName(
+            base: layout.starterTitle?.profileName ?? layout.name
+        )
         // Capture-live: the standard was just adopted onto
         // live above, so live IS what this profile records.
         try saveProfile(

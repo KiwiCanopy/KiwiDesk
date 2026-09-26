@@ -36,6 +36,17 @@ extension KiwiCore {
         return profile.isStarterSetup
     }
 
+    /// The starter setup's title for the live screens, or nil when
+    /// the live layout is not the starter (#1662). Reads the
+    /// profile file, so a caller asks once rather than per render.
+    public var liveStarterTitle: StarterTitle? {
+        guard isOnStarterBaseline else { return nil }
+        return StarterSetup.standardLayout(
+            displays: state.workspaces.allDisplays,
+            mainID: PositionalDisplays.liveMainID
+        ).starterTitle
+    }
+
     /// The fallback layout for a monitor change no stored set
     /// covers (#53): the starter setup scaled to the live
     /// display count while on the Starter baseline (#485),

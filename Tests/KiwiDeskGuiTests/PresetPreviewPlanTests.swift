@@ -46,6 +46,7 @@ struct PresetPreviewPlanTests {
     private static let sizes: [ScreenClass: CGSize] = [
         .laptop: CGSize(width: 1728, height: 1117),
         .desktop: CGSize(width: 2560, height: 1440),
+        .superUltrawide: CGSize(width: 5120, height: 1440),
         .ultrawide: CGSize(width: 3440, height: 1440),
         .pivoted: CGSize(width: 1440, height: 2560),
     ]

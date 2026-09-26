@@ -104,16 +104,23 @@ argument, and why it superseded #466's five-per-display ladder,
 is in `docs/design-decisions.md`. The obligations that fall on a
 change here:
 
-- **The tuning is profile-wide and named by the MAIN screen.**
-  `TilingSettings` has one gap value and one stack ratio to give,
-  so a laptop beside a 27" gets one answer and the only question
-  is which screen names it. Per-space overrides express the rest.
-  `StarterTuning.settings(mainShape:)` takes ONE `ScreenClass`,
-  so a per-display answer cannot be expressed without changing
-  the signature — do not change it into a per-display seam, which
-  would put a second config behind every value the Settings
-  window shows. `StarterSetupSeedTests` holds the tuning against
-  each class.
+- **The tuning is ONE `TilingSettings`: a single-screen layout's
+  facet is its host screen's, everything else the MAIN screen's**
+  (#1662). `StarterTuning.settings(mainShape:hosts:)` reads the
+  host of Stack, Grid and Track from `StarterSetup.hosts`, derived
+  from the one walk; gaps, the minimum window size and Scrolling
+  stay the main's. Do not grow it into a per-display config — the
+  output is one value behind every setting the Settings window
+  shows. The starter's ONE per-space override is Scrolling's
+  direction on a portrait secondary
+  (`StarterSetup.scrollingOverrides`); a second is a ruling, not
+  a tweak. `StarterTuningTests` and `StarterShapeTests` hold it.
+- **The starter's identity is `StarterSetup.name`; its title is
+  `StarterTitle`.** Held spaces, `currentStandard` and the
+  monitor-change rescale key on the name, so a shape-derived
+  string never replaces it — a fresh install SAVES under the
+  title and the saved profile carries `isStarterSetup`
+  (`StarterShapeTests`, `StarterRescaleTests`).
 - **Which entry point a call site takes is a rule, not a
   preference.** `StandardProfiles.workflows` is the
   hardware-agnostic list; `all(sizes:)` / `layouts(for:sizes:)`

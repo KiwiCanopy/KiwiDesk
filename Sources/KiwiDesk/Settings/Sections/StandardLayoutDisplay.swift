@@ -4,6 +4,7 @@ import KiwiDeskCore
 /// Resolution is keyed by canonical English `name`.
 extension StandardLayout {
     @MainActor var displayName: String {
+        if let starterTitle { return starterTitle.displayName }
         switch name {
         case "Developer":
             return L("presets.developer.name", "Developer")

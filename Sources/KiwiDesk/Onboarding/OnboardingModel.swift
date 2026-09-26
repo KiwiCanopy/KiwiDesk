@@ -78,6 +78,8 @@ final class OnboardingModel {
     /// The seeded spaces, in order, each with its layout and the
     /// screen it landed on.
     var starterSpaces: () -> [OnboardingSpaceCard] = { [] }
+    /// The starter setup's title, read once at wiring (#1662).
+    var starterTitle: StarterTitle?
     /// The live tuning the schematics draw, so the picture on day
     /// one is the picture Settings shows.
     var tilingSettings: () -> TilingSettings = { TilingSettings() }

@@ -264,9 +264,14 @@ struct StarterSetupSeedTests {
         #expect(core.tiler.settings.track.newWindow == .ownTrack)
         #expect(core.tiler.settings.grid.columns == 2)
 
-        // Persisted and adopted, so a reload re-applies it.
-        #expect(core.profiles.currentName == "Starter")
-        let saved = try core.profiles.read(name: "Starter")
+        // Persisted and adopted under the setup's title (#1662),
+        // so a reload re-applies it.
+        let name = StarterTitle(shape: .desktop, otherScreens: 1)
+            .profileName
+        #expect(name == "Widescreen + 1")
+        #expect(core.profiles.currentName == name)
+        let saved = try core.profiles.read(name: name)
+        #expect(saved.isStarterSetup)
         #expect(saved.spaceModes[SpaceID("2")] == .grid)
         #expect(saved.spaceModes[SpaceID("4")] == .monocle)
         // The saved profile carries a real monitor set — both
@@ -288,7 +293,9 @@ struct StarterSetupSeedTests {
         // non-empty monitor set; on a headless runner it logs and
         // skips. Either way it never saves an empty-monitor
         // profile that a monitor change would discard.
-        if let saved = try? core.profiles.read(name: "Starter") {
+        if let name = core.profiles.currentName,
+            let saved = try? core.profiles.read(name: name)
+        {
             #expect(
                 saved.monitorSets.first?.monitors.isEmpty == false
             )
