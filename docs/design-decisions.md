@@ -4105,7 +4105,9 @@ floating-mode membership is the SPACE's, and is exactly what the
 re-file rewrites. So a floating-mode member follows the screen
 by ruling — standing down would keep a home whose layout
 assigns no frame on a display the window is not on, which is
-this issue's strand by another door.
+this issue's strand by another door. This answers ARRIVALS; a
+hand DROP on another display re-files every float, flag or
+floating-mode, at the drop (#1686, below beside #492).
 
 **Floating a tiled window centres it at a derived size
 (#1674).** [Principle] The frame a window
@@ -10143,6 +10145,32 @@ highlight never promises a slot the drop won't act on" therefore
 still holds: where the landing is rule-based, no slot is
 promised. Same-display track drops swap positionally, so their
 highlight stays.
+
+**[Principle] A float dropped on another display joins that
+display's Space too, at the drop (#1686).** A float's Space is
+where it parks and returns, and where its bars and region are
+judged, so one left behind on the screen it came from was owned
+by one display while drawn on another — tiling it again sent it
+back across, and switching the old display's Space parked it out
+from under the user. The drop is the moment the user says where
+the window belongs, so the re-file is taken there, through the
+drop-commit relocate above, and it is the exception to #502's
+scale-and-re-anchor on a crossing: the pointer placed the window,
+so its frame is the drop's — the bar clamp aside — and the drop's
+live frame is folded before the relocate's retile, whose nets
+would otherwise judge a lagging echo. Re-filing later, when the
+window is tiled again, was refused: it leaves the window
+mis-owned in between. A floating-mode member — floating only
+because of its Space — joins too, and onto a tiled Space takes
+the float flag, since the layout would otherwise tile it: it was
+floating and stays floating, and the flag it never set is the
+price (owner ruling 2026-09-26, over leaving it home and over
+tiling it). The flag is the float verb's MANUAL override, so
+detection cannot re-tile the window later and it reopens floating
+— a window that tiled itself minutes after a drop is the worse
+surprise, and `make_auto` undoes it. A sticky window is not re-filed by the drop at all:
+its home is #445's to move, and that gate's refusal cue on a
+window the user just visibly moved would mislead.
 
 **[Principle] A float crossing displays scales to fit by default;
 keeping the exact size is the opt-out.** (#502, supersedes

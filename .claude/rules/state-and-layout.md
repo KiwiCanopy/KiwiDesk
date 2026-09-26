@@ -179,7 +179,11 @@ editing here:
   space does that screen show for a window landing on it" joins
   the predicate rather than re-deriving it; the stand-downs —
   float, sticky, same display, nothing shown — live on it,
-  once. The product ruling is `docs/design-decisions.md`'s.
+  once. A hand DROP is not that question: it is a verb resolved
+  from the cursor, not an arrival resolved from the frame, so
+  `relocateDroppedFloat` (#1686) answers it beside the predicate
+  and never through it. The product ruling is
+  `docs/design-decisions.md`'s.
 - **Resolve the arriving frame's screen ABOVE the pure core,
   and let the fold decide from it** (#1010). `KiwiCore.handle`
   writes `StateCoordinator.arrivalDisplay` inside the
@@ -251,7 +255,13 @@ editing here:
   never a hand copy of that list, which is how the re-anchor went
   missing once; no fixture can see a float cross fake screens, so
   `PendingSpaceSeamTests` counts the callers and pins the
-  re-anchor inside the helper. The ledger is bounded and per window,
+  re-anchor inside the helper. The ONE ruled exception is the
+  #492 drop-commit (`relocateAcrossDisplay`), which files where
+  the POINTER placed the window — a float since #1686 — and so
+  must never re-anchor; routing it through `fileMembership`
+  would move the float off the drop, and
+  `PendingSpaceSeamTests` ▸ `dropCommitNeverReanchors` holds its
+  body free of both. The ledger is bounded and per window,
   rekeyed on a tab switch; a new route that produces a departure
   claims through the gone handler rather than beside it, and
   `PendingSpaceSeamTests` is the register of those wirings.

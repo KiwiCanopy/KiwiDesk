@@ -46,8 +46,14 @@
 /// float keeps its home wherever it lands, while floating-mode
 /// membership is the SPACE's and is exactly what a re-file
 /// changes — a member arriving on another screen follows the
-/// screen, its home having no frame to bring it over. Every
-/// other reader is the flag's own
+/// screen, its home having no frame to bring it over. The hand
+/// DROP onto another display (#1686, `relocateDroppedFloat`)
+/// re-files every float, flag or floating-mode, and reads the
+/// flag only to decide whether one is owed: a floating-mode
+/// member landing on a TILED Space takes the float verb's manual
+/// override, or the layout would tile it; onto a floating Space
+/// it takes none (owner rulings 2026-09-26,
+/// `FloatDropRefileTests`). Every other reader is the flag's own
 /// identity, a net already routed here, or a "tiled member"
 /// question — the negation below — and
 /// `FloatFlagReaderCensusTests` holds that census per file, so a

@@ -74,6 +74,14 @@ struct FloatFlagReaderCensusTests {
         // follows the screen, since a floating-mode home assigns
         // no frame that could bring it over.
         "State/StateCoordinator+ScreenHome.swift": [.ruledToStay: 1],
+        // Ruled to stay (#1686): a hand drop re-files a float onto
+        // the display it lands on, and the flag decides whether a
+        // floating-mode member owes one there so it is not tiled.
+        // And its drop-commit arms the tiled z-order restore for a
+        // window that is not a float — a "tiled member" question.
+        "Tiling/KiwiCore+DragRelocate.swift": [
+            .ruledToStay: 1, .tiledMember: 1,
+        ],
         "Commands/KiwiCore+SpaceCommands.swift": [.tiledMember: 2],
         "Commands/KiwiCore+TrackNavigate.swift": [.tiledMember: 2],
         "Commands/KiwiCore+TrackSwap.swift": [.tiledMember: 2],

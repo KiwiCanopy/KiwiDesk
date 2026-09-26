@@ -96,4 +96,67 @@ struct PendingSpaceSeamTests {
             )
         }
     }
+
+    /// The drop-commit files where the POINTER placed the window,
+    /// so neither its gate nor its filing may take
+    /// `fileMembership`'s re-anchor — a float crossing fake screens
+    /// is invisible to every fixture, so the bodies are the guard
+    /// (#1686).
+    @Test("the drop-commit relocate never re-anchors")
+    func dropCommitNeverReanchors() throws {
+        let source = try Self.dragRelocate()
+        let gate = try #require(
+            SourceScan.declarationBody(
+                after: "func relocateAcrossDisplay(",
+                in: source
+            )
+        )
+        let filing = try #require(
+            SourceScan.declarationBody(
+                after: "func commitCrossDisplayDrop(",
+                in: source
+            )
+        )
+        #expect(gate.contains("commitCrossDisplayDrop("))
+        #expect(filing.contains("insertDropped("))
+        for body in [gate, filing] {
+            #expect(!body.contains("reanchorFloat("))
+            #expect(!body.contains("fileMembership("))
+        }
+    }
+
+    /// The drop re-file writes its flag past every gate, then takes
+    /// the drop-commit's filing and nothing that re-anchors or
+    /// warps beside it (#1686).
+    @Test("the drop re-file takes the drop-commit alone")
+    func dropRefileTakesTheDropCommit() throws {
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func relocateDroppedFloat(",
+                in: try Self.dragRelocate()
+            )
+        )
+        #expect(
+            body.components(separatedBy: "commitCrossDisplayDrop(")
+                .count == 2
+        )
+        let routes = [
+            "fileMembership(", "reanchorFloat(", "moveWindow(",
+            "relocateAcrossDisplay(",
+        ]
+        for route in routes {
+            #expect(!body.contains(route), "\(route)")
+        }
+    }
+
+    private static func dragRelocate() throws -> String {
+        SourceScan.stripComments(
+            try String(
+                contentsOf: core.appendingPathComponent(
+                    "Tiling/KiwiCore+DragRelocate.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+    }
 }

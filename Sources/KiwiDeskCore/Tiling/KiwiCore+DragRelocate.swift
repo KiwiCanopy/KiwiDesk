@@ -17,7 +17,14 @@ import Foundation
 ///   moveWindow(follow:)   yes+warp   yes*    —         yes*
 ///   Space-Bar spring      none       none    none      yes
 ///   live crossing (#504)  none       none    yes       yes
-///   drop-commit (below)   no-warp    yes     yes       no
+///   drop-commit (below)   no-warp    yes     tiled*    no
+///
+///   *a float joining changes no tiled overlap (#674).
+///
+/// The drop-commit also takes a float dropped on another display
+/// (#1686, `relocateDroppedFloat`), and must never re-anchor, or
+/// the float would not stay where the pointer left it
+/// (`PendingSpaceSeamTests` ▸ `dropCommitNeverReanchors`).
 ///
 ///   *follow only: `spaceSwitchRetile` (forced) + the #463
 ///    settle. The no-follow branch retiles un-forced, runs the
@@ -83,13 +90,8 @@ extension KiwiCore {
         onto target: WindowID?,
         from origin: Space
     ) -> Bool {
-        let cocoaCursor = drag.cursorLocation()
         guard
-            // Same display resolution the live crossing uses
-            // (#504) — injected, so drag tests can fake a
-            // topology; wired to NSScreen in wireDragCrossing.
-            let display = dragCrossing.displayAt(cocoaCursor),
-            let destID = state.workspaces.activeSpace(on: display),
+            let destID = dropDestination(),
             destID != origin.id,
             state.workspaces[destID] != nil
         else { return false }
@@ -101,6 +103,20 @@ extension KiwiCore {
             focusWindow(id, warp: false)
             return true
         }
+        commitCrossDisplayDrop(id, onto: target, from: origin, into: destID)
+        return true
+    }
+
+    /// The drop-commit's filing, past every gate: it has no
+    /// refusal of its own, so a caller that writes state ahead of
+    /// it (the float re-file's flag) writes only for a move that
+    /// happens.
+    func commitCrossDisplayDrop(
+        _ id: WindowID,
+        onto target: WindowID?,
+        from origin: Space,
+        into destID: SpaceID
+    ) {
         // The drop lands on the destination display, so the
         // dropped window keeps OS focus there once we follow;
         // captured before the retile/focus below for the #463
@@ -146,15 +162,58 @@ extension KiwiCore {
         // twin of the same-space drop's z-order restores). Keyed on
         // the just-activated destination, so `runPendingZOrderRestore`
         // dispatches the mode-correct restore; a non-overlapping
-        // destination mode falls through to a no-op.
-        scheduleZOrderRestore()
+        // destination mode falls through to a no-op. A float
+        // joining changes no tiled overlap, so it arms none (#674).
+        if state.windows[id]?.isFloating != true {
+            scheduleZOrderRestore()
+        }
         emitSpaceChange()
         // The follow hands focus to a space that was already
         // visible; re-assert once so a dropped cooperative activate
         // (#463) can't leave the destination showing the wrong key
         // window.
         scheduleSpaceSettle(destID, priorFrontmost: priorFrontmost)
-        return true
+    }
+
+    /// The active Space of the display under the drop's cursor —
+    /// the lookup the float re-file and the drop-commit relocate
+    /// share, so the flag the re-file writes is for the Space the
+    /// window lands in. The live crossing asks it of a display it
+    /// already holds; the resolution is its (#504), injected so
+    /// drag tests can fake a topology.
+    func dropDestination() -> SpaceID? {
+        dragCrossing.displayAt(drag.cursorLocation()).flatMap {
+            state.workspaces.activeSpace(on: $0)
+        }
+    }
+
+    /// A float dropped on another display joins that display's
+    /// active Space at the drop (#1686), through the drop-commit
+    /// above. A floating-mode member keeps floating there: onto a
+    /// tiled Space it takes the flag, or the layout would tile it
+    /// — as a MANUAL override, the float verb's, so detection
+    /// cannot re-tile it and it reopens floating (owner ruling
+    /// 2026-09-26). A sticky is not re-filed by the
+    /// drop at all — its home is #445's to move, and a refusal
+    /// cue on a window the user just visibly moved would mislead.
+    func relocateDroppedFloat(_ id: WindowID) {
+        guard let window = state.windows[id],
+            !window.isSticky,
+            let originID = state.workspaces.space(of: id),
+            let origin = state.workspaces[originID],
+            let destID = dropDestination(),
+            destID != originID,
+            let dest = state.workspaces[destID]
+        else { return }
+        if !window.isFloating, dest.mode != .floating {
+            state.setFloating(id, true)
+        }
+        commitCrossDisplayDrop(
+            id,
+            onto: nil,
+            from: origin,
+            into: destID
+        )
     }
 
     /// Files a dragged window into `destID` — the ONE placement
