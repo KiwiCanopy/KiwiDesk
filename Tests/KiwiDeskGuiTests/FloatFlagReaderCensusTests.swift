@@ -74,6 +74,10 @@ struct FloatFlagReaderCensusTests {
         // follows the screen, since a floating-mode home assigns
         // no frame that could bring it over.
         "State/StateCoordinator+ScreenHome.swift": [.ruledToStay: 1],
+        // Ruled to stay (#1686): a hand drop re-files a FLAG float
+        // onto the display it lands on; a floating-mode member
+        // stays home, or the other display's layout would tile it.
+        "Tiling/KiwiCore+DragRelocate.swift": [.ruledToStay: 1],
         "Commands/KiwiCore+SpaceCommands.swift": [.tiledMember: 2],
         "Commands/KiwiCore+TrackNavigate.swift": [.tiledMember: 2],
         "Commands/KiwiCore+TrackSwap.swift": [.tiledMember: 2],

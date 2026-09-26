@@ -19,6 +19,10 @@ import Foundation
 ///   live crossing (#504)  none       none    yes       yes
 ///   drop-commit (below)   no-warp    yes     yes       no
 ///
+/// The drop-commit also takes a flag float dropped on another
+/// display (#1686, `relocateDroppedFloat`); it never re-anchors,
+/// so the float stays where the pointer left it.
+///
 ///   *follow only: `spaceSwitchRetile` (forced) + the #463
 ///    settle. The no-follow branch retiles un-forced, runs the
 ///    conditional #482 `moveLatch` / `scheduleMoveSettle` pair
@@ -155,6 +159,22 @@ extension KiwiCore {
         // window.
         scheduleSpaceSettle(destID, priorFrontmost: priorFrontmost)
         return true
+    }
+
+    /// A flag float dropped on another display joins that
+    /// display's active Space at the drop (#1686), through the
+    /// drop-commit above. A sticky keeps #445's rules, and a
+    /// floating-mode member — floating only because of its Space
+    /// — stays home, since filing it into a tiled Space would
+    /// tile it.
+    func relocateDroppedFloat(_ id: WindowID) {
+        guard let window = state.windows[id],
+            window.isFloating,
+            !window.isSticky,
+            let originID = state.workspaces.space(of: id),
+            let origin = state.workspaces[originID]
+        else { return }
+        _ = relocateAcrossDisplay(id, onto: nil, from: origin)
     }
 
     /// Files a dragged window into `destID` — the ONE placement

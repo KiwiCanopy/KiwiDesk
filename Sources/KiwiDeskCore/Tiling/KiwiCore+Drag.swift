@@ -100,6 +100,9 @@ extension KiwiCore {
         // hides its title bar and makes it ungrabbable — clamp it
         // back below the strip (#242, #1178).
         if dropLandsUnmanaged(id) {
+            // Ahead of the clamp, so it judges the strips of the
+            // Space the window now belongs to.
+            relocateDroppedFloat(id)
             let frame = liveDropFrame(id, fallback: frame)
             let clamped = floatFrameClampedClearOfBars(
                 id,

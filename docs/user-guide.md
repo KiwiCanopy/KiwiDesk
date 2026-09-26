@@ -389,6 +389,11 @@ display snaps the window back. Floating windows show no overlay
 and cannot be dropped onto a tiled slot; use *make tiled* first
 ([Accepted limitations](accepted-limitations.md)).
 
+:::unreleased
+A floating window dropped on another display moves into the Space
+that display shows, and stays where you let go of it.
+:::
+
 ### Sticky Windows
 
 A **sticky** window stays visible on every space. Two scopes,

@@ -10144,6 +10144,23 @@ still holds: where the landing is rule-based, no slot is
 promised. Same-display track drops swap positionally, so their
 highlight stays.
 
+**A flag float dropped on another display joins that display's
+Space too, at the drop (#1686).** A float's Space is where it
+parks and returns, and where its bars and region are judged, so
+one left behind on the screen it came from was owned by one
+display while drawn on another — tiling it again sent it back
+across, and switching the old display's Space parked it out from
+under the user. The drop is the moment the user says where the
+window belongs, so the re-file is taken there, through the
+drop-commit relocate above, which never re-anchors: the pointer
+placed the window and its size stays whatever the drop left.
+Re-filing later, when the window is tiled again, was refused — it
+leaves the window mis-owned in between. A sticky window keeps
+#445's rules, and a floating-mode member — floating only because
+of its Space — stays home, since filing it into the other
+display's tiled Space would tile it. `screenHome`'s float
+stand-down (#1362) is unchanged: it answers arrivals, not drops.
+
 **[Principle] A float crossing displays scales to fit by default;
 keeping the exact size is the opt-out.** (#502, supersedes
 #444/#493.) *Rationale:* "size is the user's choice" — #444/#493's
