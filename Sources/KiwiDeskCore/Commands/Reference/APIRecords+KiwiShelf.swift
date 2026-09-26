@@ -77,7 +77,7 @@ extension APIReference {
         ),
         "set_icon_source": APIRecord(
             "Sets whether both bars draw app icons from the app "
-                + "image or the bundled glyph font.",
+                + "image or the bundled App Font's symbols.",
             .choice("source", BarAppIconSource.self)
         ),
         "set_dim_factor": APIRecord(

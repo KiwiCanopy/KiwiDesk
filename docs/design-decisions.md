@@ -11623,7 +11623,8 @@ roundness to sit flush inside the curve.
 
 **App icon rendering is one global choice with two honest
 options.** (#294.) `icon_source` — GUI label "App symbol style" —
-offers `app_image` (System default) and `app_font` (Glyphs).
+offers `app_image` (the app's own icon) and `app_font` (a
+monochrome symbol).
 Decisions folded in (ui-designer consult and owner direction,
 2026-07-17/18):
 
@@ -11638,12 +11639,12 @@ Decisions folded in (ui-designer consult and owner direction,
   shows no row for it — the chip discovers fields by reflection
   on purpose, and hiding Lua-only depth from it would be the
   bigger lie.
-- **Glyphs follow the bar's state text colors** (normal / active
-  / hover) — one color system with the labels. Glyph-less apps
-  keep their native image.
+- **Symbols follow the bar's state text colors** (normal / active
+  / hover) — one color system with the labels. Apps without a
+  symbol keep their native image.
 - **A synthesized Tinted mode is rejected** (with its
   `tint_appearance` sub-setting): the system-wide Icon & widget
-  style already covers the want for System default icons, and a
+  style already covers the want for tinted app icons, and a
   luminance-ramp approximation misrepresents Apple's
   plate-regenerated styles. Dark / Clear / Tinted as true in-app
   choices remain API-blocked — see [Accepted limitations](accepted-limitations.md);
@@ -11662,7 +11663,7 @@ Decisions folded in (ui-designer consult and owner direction,
   not third-party trademark rights in the depicted app marks —
   accepted deliberately.
 - **The shortcuts panel follows the GLOBAL symbol style**: with
-  Glyphs active its Apps band leads with the same ligatures. The
+  `app_font` active its Apps band leads with the same ligatures. The
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.
 

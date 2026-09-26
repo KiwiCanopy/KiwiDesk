@@ -2087,9 +2087,9 @@ macOS provides it, which follows the system-wide Icon & widget
 style the user picked; the system's Dark, Clear and Tinted looks
 are not separate choices
 ([Accepted limitations](accepted-limitations.md)). `app_font`
-shows a monochrome glyph from the bundled [SketchyBar App
+shows a monochrome symbol from the bundled [SketchyBar App
 Font](https://github.com/kvndrsslr/sketchybar-app-font) instead,
-colored by the shelf's item colours; apps without a glyph keep
+colored by the shelf's item colours; apps without a symbol keep
 their icon. On the Space Bar, an app with no image falls back to
 the App Font either way.
 

@@ -96,7 +96,7 @@ extension AdvancedColorRow {
                 + "Space and the front-app segment. Glyph tint "
                 + "needs \u{201C}%2$@\u{201D} set to "
                 + "\u{201C}%1$@\u{201D}.",
-            L("app_bar.icon_source.app_font", "Glyphs"),
+            L("app_bar.icon_source.app_font", "Symbols"),
             L("kiwishelf.icon_source.label", "App symbol style")
         )
     }

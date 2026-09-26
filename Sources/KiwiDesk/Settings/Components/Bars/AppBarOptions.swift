@@ -95,11 +95,11 @@ enum AppBarOptions {
         [
             (
                 .appImage,
-                L("app_bar.icon_source.app_image", "System default")
+                L("app_bar.icon_source.app_image", "App icons")
             ),
             (
                 .appFont,
-                L("app_bar.icon_source.app_font", "Glyphs")
+                L("app_bar.icon_source.app_font", "Symbols")
             ),
         ]
     }
