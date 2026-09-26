@@ -150,6 +150,13 @@ struct StarterShapeTests {
         )
         // A laptop main beside an ultrawide leads Monocle and never
         // scrolls; the ultrawide tunes Scrolling.
+        // Two screens lead Scrolling — a laptop main and a wider
+        // 27" — and the WIDER one tunes it, never the main.
+        let pair = [
+            CGSize(width: 1512, height: 982), screen27,
+            CGSize(width: 1024, height: 768),
+        ]
+        #expect(StarterSetup.scrollingHost(pair) == .desktop)
         let mixed = [CGSize(width: 1512, height: 982), ultrawide]
         #expect(StarterSetup.scrollingHost(mixed) == .ultrawide)
         let tuned = StarterSetup.settings(sizes: mixed).scrolling
