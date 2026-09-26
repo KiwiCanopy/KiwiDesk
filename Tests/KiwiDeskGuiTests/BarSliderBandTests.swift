@@ -67,6 +67,27 @@ struct BarSliderBandTests {
         #expect(declared.contains("KiwiShelf.minMargin"))
     }
 
+    /// The two gap rows sit beside each other and stop alike
+    /// (#1695): each floor is Core's, the top the one curated
+    /// `gapCeiling` — read off both declarations, since a
+    /// restated `40` in either matches today's value.
+    @Test("the gap bands derive their floors and share one ceiling")
+    func gapBandsShareOneCeiling() throws {
+        let item = BarSliderBands.itemGap
+        let glyph = BarSliderBands.glyphGap
+        #expect(item.lowerBound == Double(KiwiShelf.minItemGap))
+        #expect(glyph.lowerBound == Double(SpaceBarStyle.minGlyphGap))
+        #expect(item.upperBound == glyph.upperBound)
+        #expect(item.contains(Double(KiwiShelf().itemGap)))
+        #expect(glyph.contains(Double(SpaceBarStyle().glyphGap)))
+        let itemDeclared = try declaration(of: "itemGap")
+        #expect(itemDeclared.contains("KiwiShelf.minItemGap"))
+        #expect(itemDeclared.contains("gapCeiling"))
+        let glyphDeclared = try declaration(of: "glyphGap")
+        #expect(glyphDeclared.contains("SpaceBarStyle.minGlyphGap"))
+        #expect(glyphDeclared.contains("gapCeiling"))
+    }
+
     /// Which band each Core-clamped bar row reads, keyed by the
     /// suffix of its census model path — a third band joins by
     /// data (#1516).
@@ -74,6 +95,8 @@ struct BarSliderBandTests {
         ("kiwishelf.thickness", "thickness"),
         ("kiwishelf.outerMargin", "margin"),
         ("kiwishelf.innerMargin", "margin"),
+        ("kiwishelf.itemGap", "itemGap"),
+        ("spaceBarStyle.glyphGap", "glyphGap"),
     ]
 
     /// The census keys whose model path ends in `suffix` — the
@@ -82,6 +105,8 @@ struct BarSliderBandTests {
         SettingKey.allCases.compactMap { key in
             switch key {
             case .kiwishelf(let k) where k.rawValue.hasSuffix(suffix):
+                return String(describing: k)
+            case .spaceBar(let k) where k.rawValue.hasSuffix(suffix):
                 return String(describing: k)
             default:
                 return nil
