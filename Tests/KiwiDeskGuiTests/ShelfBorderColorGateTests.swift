@@ -113,4 +113,36 @@ struct ShelfBorderPreviewTests {
             #expect(spec.borderWidth == 0)
         }
     }
+
+    /// The edge the strips draw strokes the spec's border, and
+    /// the hairline only while there is none.
+    @Test("The plate edge strokes the spec's border")
+    func edgeStrokesTheBorder() throws {
+        let on = try #require(Self.specs(Self.tile(border: true)).first)
+        let edge = try #require(PreviewPlateEdge(spec: on, corner: 4).border)
+        #expect(edge.hex == on.borderColor)
+        #expect(edge.width == on.borderWidth)
+        let off = try #require(Self.specs(Self.tile(border: false)).first)
+        #expect(PreviewPlateEdge(spec: off, corner: 4).border == nil)
+    }
+
+    /// The strips draw that edge on every plate and box they
+    /// paint: the bar strip's plate and box, the shelf strip's one
+    /// plate. A site that goes back to a bare hairline reds here.
+    @Test(
+        "Every preview plate and box takes the edge",
+        arguments: [
+            ("HomeCardPlate+BarStrip.swift", 2),
+            ("HomeCardPlate+ShelfStrip.swift", 1),
+        ]
+    )
+    func stripsTakeTheEdge(file: String, sites: Int) throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent(file)
+        let source = try SourceScan.strippedSource(at: url)
+        let pieces = source.components(separatedBy: "PreviewPlateEdge(")
+        let count = pieces.count - 1
+        #expect(count == sites, "\(file): \(count)")
+    }
 }

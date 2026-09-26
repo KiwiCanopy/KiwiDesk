@@ -17,6 +17,10 @@ struct PaletteSceneThumbnail: View {
     /// Which roles this drawing shows (#793, `PaletteSceneRoles`).
     var scene: PaletteSceneScale = .tile
 
+    /// Whether the draft draws the shelf's border (#1679): the
+    /// panel rims its bar plates only then, as the live shelf does.
+    var drawsBorder = false
+
     private static let fallback = ColorPaletteKeys.extract(
         from: TilingSettings()
     )

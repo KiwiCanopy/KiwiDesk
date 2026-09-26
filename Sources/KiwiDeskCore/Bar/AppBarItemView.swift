@@ -78,6 +78,7 @@ final class AppBarItemView: NSView {
         badge.wantsLayer = true
         badge.alignment = .center
         badge.setAccessibilityElement(false)
+        boxBorder.autoresizingMask = [.width, .height]
         addSubview(boxBorder)
         addSubview(iconView)
         addSubview(glyphLabel)

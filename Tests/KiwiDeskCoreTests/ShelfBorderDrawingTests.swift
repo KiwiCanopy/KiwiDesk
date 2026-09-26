@@ -229,6 +229,36 @@ struct ShelfBorderDrawingTests {
         #expect(rim < (try #require(order.firstIndex(of: overlay.stripView))))
     }
 
+    /// Under Liquid Glass the rim strokes over the glass plate, so
+    /// the material never covers it.
+    @Test("The plate's rim sits above the glass plate")
+    func plateRimAboveGlass() throws {
+        guard #available(macOS 26, *) else { return }
+        var shelf = Self.bordered()
+        shelf.liquidGlass = true
+        let overlay = try plateOverlay(shelf)
+        let glass = try #require(overlay.glassPlate)
+        #expect(!glass.isHidden)
+        expectStroke(overlay.plateBorder, frame: glass.frame)
+        let order = overlay.content.subviews
+        let rim = try #require(order.firstIndex(of: overlay.plateBorder))
+        #expect(try #require(order.firstIndex(of: glass)) < rim)
+    }
+
+    /// Reduce transparency stands the glass down, never the rim:
+    /// the border is not glass (#1374).
+    @Test("Reduce transparency keeps the plate's rim")
+    func reduceTransparencyKeepsTheRim() throws {
+        LiquidGlassGate.override = { true }
+        defer { LiquidGlassGate.override = { false } }
+        var shelf = Self.bordered()
+        shelf.liquidGlass = true
+        let overlay = try plateOverlay(shelf)
+        let plate = try #require(overlay.solidPlate)
+        #expect(!plate.isHidden)
+        expectStroke(overlay.plateBorder, frame: plate.frame)
+    }
+
     @Test("No plate, or the border off, draws no plate rim")
     func noPlateRim() throws {
         var boxed = Self.bordered(Self.boxed(glass: false))

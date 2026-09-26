@@ -24,7 +24,8 @@ enum PaletteSceneRoles {
 
     /// The sixteen roles drawn by the detail panel (#231).
     static let panel: Set<String> = [
-        // The shelf: plate and its border (#1679), the accent
+        // The shelf: plate and its border — drawn while the
+        // draft's border is on (#1679) — the accent
         // ladder, the badge pair, and the Space Bar's own
         // focused-window ink (#1517).
         "kiwishelf.fill_color",

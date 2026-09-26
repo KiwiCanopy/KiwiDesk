@@ -14,8 +14,8 @@ extension SpaceBarItemView {
         ShelfBorder.paint(
             boxBorder,
             shelf: style.shelf,
-            cornerRadius: cornerRadius,
-            shows: style.backgroundStyle == .boxed
+            surface: .box,
+            cornerRadius: cornerRadius
         )
         styleIdentifier()
         styleApps()

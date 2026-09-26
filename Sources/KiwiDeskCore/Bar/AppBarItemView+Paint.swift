@@ -37,8 +37,8 @@ extension AppBarItemView {
         ShelfBorder.paint(
             boxBorder,
             shelf: style.shelf,
-            cornerRadius: radius,
-            shows: style.backgroundStyle == .boxed
+            surface: .box,
+            cornerRadius: radius
         )
     }
 

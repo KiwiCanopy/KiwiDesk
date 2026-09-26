@@ -139,11 +139,12 @@ extension InterpolatedLabelTests {
         "colors.unfocused_off.xref": 2,
         "colors.unfocused_off.help": 1,
         // #1679: the shelf border's switch by its key, the Bars
-        // and Advanced Colours titles by their destinations; the
-        // xref's second slot is the link.
+        // and Advanced Colours titles by their destinations, the
+        // More colors drawer by its key; the xref's second slot
+        // is the link.
         "colors.kiwishelf_border_off.help": 2,
         "colors.kiwishelf_border_off.xref": 1,
-        "kiwishelf.border.help": 2,
+        "kiwishelf.border.help": 3,
         "kiwishelf.border_width.border_off": 1,
         "layout_defaults.spaces_using.none": 1,
         // The `i18n/residue-round` batch (#830), in three

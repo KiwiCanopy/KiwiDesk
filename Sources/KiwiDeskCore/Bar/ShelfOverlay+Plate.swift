@@ -15,7 +15,12 @@ extension ShelfOverlay {
             return
         }
         BarMotion.setFrame(plateBorder, to: frame, animated: animated)
-        ShelfBorder.paint(plateBorder, shelf: shelf, cornerRadius: radius)
+        ShelfBorder.paint(
+            plateBorder,
+            shelf: shelf,
+            surface: .plate,
+            cornerRadius: radius
+        )
         if shelf.glassEnabled, let glass = glassPlateView() {
             solidPlateView().isHidden = true
             if glass.superview !== content {

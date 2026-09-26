@@ -23,6 +23,15 @@ struct ShelfBorderTests {
         #expect(decoded == shelf)
     }
 
+    /// The default border colour is the default item colour at
+    /// alpha 0x59 — a hand-spelled hex, so the relation is held
+    /// here rather than trusted.
+    @Test("The default border is the item colour at 0x59")
+    func defaultColourIsTheItemColour() {
+        let shelf = KiwiShelf()
+        #expect(shelf.borderColor == shelf.itemColor + "59")
+    }
+
     /// The width is the user's while the switch is off: turning
     /// the border back on draws the width they left.
     @Test("The width is kept while the border is off")

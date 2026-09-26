@@ -68,7 +68,7 @@ struct KiwiShelfColorCard: View {
     private var summary: String {
         L(
             "colors.more.kiwishelf.summary",
-            "Hover, badges, focused window"
+            "Border, hover, badges, focused window"
         )
     }
 }

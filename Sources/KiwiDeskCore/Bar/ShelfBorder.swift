@@ -6,18 +6,37 @@ import AppKit
 /// border, which CALayer draws inside the bounds flush with the
 /// edge: on the plate's edge, never inset from it.
 enum ShelfBorder {
-    /// Paints `view` as the border of the surface whose frame it
+    /// What a rim sits on. Which of the two the shelf rims is
+    /// decided here, from `KiwiShelf.drawsPlate`, never by a caller.
+    enum Surface {
+        /// The one plate under Plain.
+        case plate
+        /// An item's box, or the front-app chip, under Boxed.
+        case box
+    }
+
+    /// Whether `shelf` rims `surface` at all: the plate while it
+    /// draws one, a box while it draws boxes instead.
+    static func rims(_ surface: Surface, on shelf: KiwiShelf) -> Bool {
+        switch surface {
+        case .plate: return shelf.drawsPlate
+        case .box: return !shelf.drawsPlate
+        }
+    }
+
+    /// Paints `view` as the border of the `surface` whose frame it
     /// already holds: `KiwiShelf.drawnBorderWidth` in the shelf's
-    /// border colour on `cornerRadius`, hidden where `shows` is
-    /// false or the border is off.
+    /// border colour on `cornerRadius`, hidden where the shelf
+    /// does not rim that surface or the border is off.
     @MainActor
     static func paint(
         _ view: NSView,
         shelf: KiwiShelf,
-        cornerRadius: CGFloat,
-        shows: Bool = true
+        surface: Surface,
+        cornerRadius: CGFloat
     ) {
-        let width = shows ? shelf.drawnBorderWidth : 0
+        let width =
+            rims(surface, on: shelf) ? shelf.drawnBorderWidth : 0
         view.wantsLayer = true
         view.isHidden = width == 0
         guard let layer = view.layer else { return }

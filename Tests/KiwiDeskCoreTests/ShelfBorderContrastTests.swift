@@ -4,13 +4,17 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Every bundled palette's border colour reads (#1679, #1684): a
-/// border earns its keep where the plate's own edge is weakest, so
-/// it is measured against the palette's HOME wallpaper — the
-/// extreme its composited plate contrasts least with — and never
-/// against the plate, which it rims rather than sits on.
+/// border earns its keep where the plate's own edge is weakest —
+/// the palette's HOME wallpaper, the extreme its composited plate
+/// contrasts least with. It is measured as DRAWN: `ShelfBorder`
+/// strokes inside the plate's bounds, so the border composites
+/// over the plate over home, and that ink is held against home,
+/// the ground the edge has to separate from.
 @Suite("Shelf border contrast")
 struct ShelfBorderContrastTests {
-    /// The idle-ink and ring floor (`IdleItemContrastTests`).
+    /// The ring suite's own-contrast floor, which
+    /// `IdleItemContrastTests` also holds — a literal because that
+    /// suite's copy is private (`BorderRingSeparationTests`).
     private static let floor = 2.2
     private static let wallpapers = ["#FFFFFF", "#000000"]
 
@@ -48,8 +52,12 @@ struct ShelfBorderContrastTests {
                 name
             )
             let home = try #require(Self.home(fill: fill), name)
+            let plate = try #require(
+                ColorVision.composite(fill, over: home),
+                name
+            )
             let drawn = try #require(
-                ColorVision.composite(border, over: home),
+                ColorVision.composite(border, over: plate),
                 name
             )
             let contrast = try #require(

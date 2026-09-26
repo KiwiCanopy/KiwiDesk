@@ -13,9 +13,11 @@ extension KiwiShelfCard {
                 "kiwishelf.border.help",
                 "A thin line around the plate, or around each box "
                     + "when the background is \u{201C}%1$@\u{201D}. "
-                    + "Its color is set in %2$@.",
+                    + "Its color is in %2$@, under "
+                    + "\u{201C}%3$@\u{201D}.",
                 L("app_bar.background_style.boxed", "Boxed"),
-                SettingsDestination.advancedColors.title
+                SettingsDestination.advancedColors.title,
+                L("colors.more", "More colors")
             )
         )
         .searchAnchored(

@@ -10,12 +10,18 @@ struct PreviewPlateEdge: View {
     let corner: CGFloat
     @Environment(\.schematicPalette) private var palette
 
+    /// The border this edge strokes — its hex and width — or nil
+    /// where the draft draws none and the hairline stands in.
+    var border: (hex: String, width: CGFloat)? {
+        spec.borderWidth > 0 ? (spec.borderColor, spec.borderWidth) : nil
+    }
+
     var body: some View {
-        if spec.borderWidth > 0 {
+        if let border {
             RoundedRectangle(cornerRadius: corner)
                 .strokeBorder(
-                    Color(kiwiHex: spec.borderColor),
-                    lineWidth: spec.borderWidth
+                    Color(kiwiHex: border.hex),
+                    lineWidth: border.width
                 )
         } else {
             RoundedRectangle(cornerRadius: corner)

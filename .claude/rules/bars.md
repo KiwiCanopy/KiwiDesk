@@ -598,20 +598,31 @@ mark the current Space or focused window reads it.
 box — both bars' items and the Space Bar's front-app chip — under
 Boxed.
 
-- **Every rim goes through `ShelfBorder.paint`**, which reads
-  `KiwiShelf.drawnBorderWidth` (0 while the switch is off, the
-  clamped width otherwise) and `borderColor`, never the stored
-  width. The rim is its own fill-less, click-through view framed
-  to the surface, so it strokes on the edge, never inset: above
-  the plate or the chip's glass, and beneath an item's active
-  outline, which strokes over it. `ShelfBorderDrawingTests`
-  builds the plate, both bars' boxes and the chip and holds the
-  stroke, its place in the order, and its absence while off; a
-  new rimmed surface owes that suite a clause. The Settings Bars
-  preview draws the draft's border from its `BarSpec`
+- **Every rim goes through `ShelfBorder.paint`**, handed the
+  SURFACE it rims (`.plate` or `.box`) and never a verdict: which
+  surface the shelf rims is `ShelfBorder.rims`, from
+  `KiwiShelf.drawsPlate`. It reads `KiwiShelf.drawnBorderWidth`
+  (0 while the switch is off, the clamped width otherwise) and
+  `borderColor`, never the stored width. The rim is its own
+  fill-less, click-through view framed to the surface, so it
+  strokes on the edge, never inset: above the plate or the
+  chip's glass, and beneath an item's active outline, which
+  strokes over it. `ShelfBorderSeamTests` holds the one home:
+  only the painter reads the drawn width in Core, and in `Bar/`
+  the only layer-border colour written beside it is the active
+  indicator's. `ShelfBorderDrawingTests` builds the plate (solid,
+  glass, under Reduce transparency), both bars' boxes and the
+  chip and holds the stroke, its place in the order, and its
+  absence while off; a new rimmed surface owes that suite a
+  clause.
+- **A preview of the shelf draws the draft's border**: the
+  Settings Bars preview through `PreviewPlateEdge` on every
+  plate and box, from its `BarSpec`, and the palette panel scene
+  only while the draft's switch is on
   (`ShelfBorderPreviewTests`).
 - **Every bundled palette carries `kiwishelf.border_color`**,
-  measured against the palette's HOME wallpaper — the extreme its
-  composited plate contrasts least with — at the idle floor
+  measured as drawn — composited over the plate over the
+  palette's HOME wallpaper, the extreme its plate contrasts least
+  with — against that wallpaper, at the idle floor
   (`ShelfBorderContrastTests`). The switch and the width are not
   palette keys (#375).

@@ -53,6 +53,7 @@ extension SpaceBarOverlay {
         ShelfBorder.paint(
             frontBorder,
             shelf: style.shelf,
+            surface: .box,
             cornerRadius: radius
         )
         if boxed {

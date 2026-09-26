@@ -85,6 +85,7 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
+        boxBorder.autoresizingMask = [.width, .height]
         addSubview(boxBorder)
         addSubview(identifierImage)
         addSubview(identifierLabel)

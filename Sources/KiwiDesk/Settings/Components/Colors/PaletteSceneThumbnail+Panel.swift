@@ -108,22 +108,23 @@ extension PaletteSceneThumbnail {
         }
     }
 
-    /// A bar plate rimmed in the palette's border colour — drawn
-    /// whether or not the draft's border is on, since the scene
-    /// shows what the palette carries (#1679).
+    /// A bar plate, rimmed in the palette's border colour while
+    /// the draft's border is on (#1679).
     private func barPlate<C: View>(
         fill: Color,
         @ViewBuilder items: () -> C
     ) -> some View {
         RoundedRectangle(cornerRadius: 4 * scale)
             .fill(fill)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4 * scale)
-                    .strokeBorder(
-                        color("kiwishelf.border_color"),
-                        lineWidth: scale
-                    )
-            )
+            .overlay {
+                if drawsBorder {
+                    RoundedRectangle(cornerRadius: 4 * scale)
+                        .strokeBorder(
+                            color("kiwishelf.border_color"),
+                            lineWidth: scale
+                        )
+                }
+            }
             .frame(height: 20 * scale)
             .overlay(
                 HStack(spacing: 5 * scale) {

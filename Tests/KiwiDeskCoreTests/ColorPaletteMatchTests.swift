@@ -162,4 +162,26 @@ struct ColorPaletteMatchTests {
         )
         #expect(!mixed.isApplied(to: settings))
     }
+
+    /// A colour key a bundled palette gains after a config was
+    /// saved unmarks that config's palette until it is applied
+    /// again — the ruled price, not a migration
+    /// (`docs/design-decisions.md`, #1679).
+    @Test("A new palette key unmarks an older config until re-apply")
+    func newKeyUnmarksAnOlderConfig() throws {
+        let palette = try #require(
+            PaletteCatalog.authored().first {
+                $0.colors["kiwishelf.border_color"]
+                    != KiwiShelf().borderColor
+            }
+        )
+        var settings = TilingSettings()
+        palette.apply(to: &settings)
+        // The config as saved before the key existed: the
+        // shipped default where the palette now sets a colour.
+        settings.kiwishelf.borderColor = KiwiShelf().borderColor
+        #expect(!palette.isApplied(to: settings))
+        palette.apply(to: &settings)
+        #expect(palette.isApplied(to: settings))
+    }
 }

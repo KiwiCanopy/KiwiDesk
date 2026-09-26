@@ -79,9 +79,10 @@ public struct KiwiShelf: Sendable, Equatable {
     /// The plate's one fill (#660, retuned by #755;
     /// `PaletteBarFillTests`).
     public var fillColor = "#14201CB3"
-    /// The border's colour (#1679): the item colour at a
-    /// quarter-plus alpha, so it reads against the wallpaper the
-    /// plate blends into (`ShelfBorderContrastTests`).
+    /// The border's colour (#1679): `itemColor`'s hex at alpha
+    /// 0x59, spelled out (`ShelfBorderTests` pins the relation) and
+    /// held against the wallpaper the plate blends into
+    /// (`ShelfBorderContrastTests`).
     public var borderColor = "#EAF3EE59"
     /// Group count badge colours (#955).
     public var groupBadgeColor = "#636366"
