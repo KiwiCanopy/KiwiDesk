@@ -157,6 +157,9 @@ extension KiwiCore {
         // a window that was no EFFECTIVE float — a floating-mode
         // member's frame is already the user's (`EffectiveFloat`).
         let wasFloating = isEffectiveFloatForPlacement(focused)
+        if !floating, wasFloating {
+            rememberFloatFrame(focused)
+        }
         state.setFloating(focused, floating)
         retile()
         // Float direction only: `make_tiled` already animates a

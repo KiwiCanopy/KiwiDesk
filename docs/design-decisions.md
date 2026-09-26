@@ -4140,6 +4140,20 @@ next tiled space draws the window that small.
 The numbers live in `FloatPlacement` and are the owner's to
 retune.
 
+*A re-float returns to its last floating frame (#1675).* The
+derived size answers a window with no floating frame of its own;
+one that was floating a moment ago has one the user chose, so
+tiling it remembers that frame and floating it again consumes it
+— where its centre still lies in the float region of the Space it
+floats onto, since a frame from another screen is the #502
+crossing's question and not this one's. The memory is SESSION
+state by owner ruling: it lives beside the float overrides, is
+dropped on a close and an app's exit and never written to a
+snapshot, so it is bounded by the live windows rather than by
+uptime, and a restart starts empty with nothing on disk to prune.
+Persisting it was refused as overkill — a reopened window rarely
+carries the same id, title or screen.
+
 *Who is placed.* The verb is ruled onto `EffectiveFloat`, judged
 on the space the window RENDERS on — a sticky traveler's, not its
 home's, for the gate and the region alike: a window already an

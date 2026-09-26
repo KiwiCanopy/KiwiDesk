@@ -37,26 +37,24 @@ extension KiwiCore {
             let region = floatGrowBounds(on: space)
         else { return }
         let bound = tiler.sizeBound(for: id)
-        let target = FloatPlacement.centered(
-            in: region,
-            minimum: CGSize(
-                width: bound?.minWidth ?? 0,
-                height: bound?.minHeight ?? 0
-            ),
-            maximum: CGSize(
-                width: bound?.maxWidth ?? .infinity,
-                height: bound?.maxHeight ?? .infinity
+        // The frame it floated at last, where it still lies on this
+        // Space's screen (#1675); consumed either way.
+        let remembered = state.floatFrames.removeValue(forKey: id)
+            .flatMap { FloatPlacement.restored($0, in: region) }
+        let target =
+            remembered
+            ?? FloatPlacement.centered(
+                in: region,
+                minimum: CGSize(
+                    width: bound?.minWidth ?? 0,
+                    height: bound?.minHeight ?? 0
+                ),
+                maximum: CGSize(
+                    width: bound?.maxWidth ?? .infinity,
+                    height: bound?.maxHeight ?? .infinity
+                )
             )
-        )
-        // The commanded frame outranks the echo-fed state one:
-        // the retile just before may have issued a move already.
-        let base =
-            tiler.animation.commandedFrame(
-                window: id,
-                includingHeldGlide: false
-            )
-            ?? tiler.recentInstantTarget(id)
-            ?? window.frame
+        let base = currentFrame(of: id, fallback: window.frame)
         tiler.applyFrame(
             id,
             from: base,
@@ -67,5 +65,26 @@ extension KiwiCore {
         // must not read as the app refusing the last tiled ask, or
         // the next tiled space places the float's size as residue.
         tiler.forgetSizeBound(id)
+    }
+
+    /// Remembers where a float sits as it is tiled (#1675), for
+    /// `placeFloating` to return it there.
+    func rememberFloatFrame(_ id: WindowID) {
+        guard let frame = state.windows[id]?.frame else { return }
+        state.floatFrames[id] = currentFrame(of: id, fallback: frame)
+    }
+
+    /// The commanded frame outranks the echo-fed state one: a
+    /// retile just before may have issued a move already.
+    private func currentFrame(
+        of id: WindowID,
+        fallback: CGRect
+    ) -> CGRect {
+        tiler.animation.commandedFrame(
+            window: id,
+            includingHeldGlide: false
+        )
+            ?? tiler.recentInstantTarget(id)
+            ?? fallback
     }
 }

@@ -104,6 +104,13 @@ public struct StateCoordinator: Sendable {
     /// state, dropped on destroy — old ids can be recycled.
     var stickyReachOverrides: [WindowID: Bool] = [:]
 
+    /// The frame each window last had while floating, written when
+    /// it is tiled and consumed when it floats again (#1675).
+    /// Session state by ruling: `StateSnapshot` never carries it,
+    /// and it is dropped on a close or an app's exit, as the reach
+    /// pins are — bounded by the live windows, not by uptime.
+    var floatFrames: [WindowID: CGRect] = [:]
+
     /// Manual float intent remembered across close/reopen (#160).
     /// Keyed by app + title, not `WindowID`: a reopened window
     /// gets a fresh id, and old ids can be recycled onto unrelated
@@ -182,6 +189,9 @@ public struct StateCoordinator: Sendable {
         ) {
             stickyReachOverrides[new] = reach
         }
+        if let frame = floatFrames.removeValue(forKey: old) {
+            floatFrames[new] = frame
+        }
     }
 
     /// Folds an event into state and returns side-effect facts (#166).
@@ -202,6 +212,7 @@ public struct StateCoordinator: Sendable {
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
                 stickyReachOverrides[id] = nil
+                floatFrames[id] = nil
             }
             forgetMinimized(pid: pid)
             // The app's exit ends its away entries for good
@@ -224,6 +235,7 @@ public struct StateCoordinator: Sendable {
             // below as a destroy — keeps its window.
             if !wasMinimized {
                 stickyReachOverrides[id] = nil
+                floatFrames[id] = nil
             }
 
         // Hides fold as non-minimized destroys to remember space (#913).

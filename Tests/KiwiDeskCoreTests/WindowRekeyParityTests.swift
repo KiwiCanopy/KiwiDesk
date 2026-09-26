@@ -66,6 +66,7 @@ private func trackedFixture() -> StateCoordinator {
         height: 4
     )
     state.stickyReachOverrides[old] = true
+    state.floatFrames[old] = CGRect(x: 5, y: 6, width: 7, height: 8)
     state.departedSlots[old] = .init(rank: 0)
     state.closedDepartures.insert(old)
     // A bare id inside a record VALUE (#1387) — the scan's net,
@@ -84,7 +85,8 @@ private func trackedFixture() -> StateCoordinator {
 /// The number of WindowID-keyed containers `trackedFixture`
 /// populates: `WindowManager.windows`, `rememberedSpaces`,
 /// `restoredFrames` (#1362), `manualFloatOverrides`,
-/// `stickyReachOverrides` (#1145), `departedSlots` (#1207),
+/// `stickyReachOverrides` (#1145), `floatFrames` (#1675),
+/// `departedSlots` (#1207),
 /// `awayWindows` (#1146), `closedDepartures` (#1414), plus
 /// each space's `windows`, `stackWeights`, `trackBreaks`,
 /// `handedBreaks` (#1387), `trackWeights`. Bumping the fixture
@@ -93,7 +95,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 13
+private let expectedContainerCount = 14
 
 /// `String(describing:)` of every non-empty dictionary, set, or
 /// array whose keys/elements are `WindowID`, reachable by recursing
