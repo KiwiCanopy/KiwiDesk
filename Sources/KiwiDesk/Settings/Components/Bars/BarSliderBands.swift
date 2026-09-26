@@ -16,6 +16,15 @@ enum BarSliderBands {
     static let margin: ClosedRange<Double> =
         Double(KiwiShelf.minMargin)...60
 
+    /// The shelf's Highlight width row (#1680): both edges are
+    /// Core's, which clamps the stored value to them.
+    static let highlightWidth: ClosedRange<Double> =
+        Double(
+            KiwiShelf.highlightWidthRange.lowerBound
+        )...Double(
+            KiwiShelf.highlightWidthRange.upperBound
+        )
+
     /// The Space Bar minimum row, in percent: both edges are
     /// Core's, which clamps the stored value to them (#1517).
     static let minimum: ClosedRange<Double> =

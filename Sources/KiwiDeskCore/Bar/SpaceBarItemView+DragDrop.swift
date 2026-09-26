@@ -22,6 +22,8 @@ extension SpaceBarItemView {
         // 2026-07-19 — a square sweep would poke past the hug
         // plate's corners exactly like the old square accent).
         let boxed = style.hasBox
+        // The ring morphs into the outline, so it strokes alike.
+        springRing.lineWidth = style.resolvedHighlightWidth
         var inset = springRing.lineWidth / 2
         if !boxed { inset += BarAccent.capsuleInset }
         let rect = bounds.insetBy(dx: inset, dy: inset)

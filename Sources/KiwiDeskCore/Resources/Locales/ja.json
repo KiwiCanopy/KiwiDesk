@@ -648,6 +648,8 @@
   "kiwishelf.font_size": "フォントサイズ",
   "kiwishelf.font_size.auto": "自動フォントサイズ",
   "kiwishelf.font_size.help": "両方のバーで共通のサイズです。スペース番号とApp Barのタイトルがそろいます。自動にすると厚みに合わせて変わります。",
+  "kiwishelf.highlight_width": "ハイライトの太さ",
+  "kiwishelf.highlight_width.help": "現在のスペースとフォーカス中のウインドウを示すマークの太さです。アウトラインはこの太さで、エッジマークはそれに比例して描画されます。",
   "kiwishelf.icon_source.help": "両方のバーでのアプリアイコンの描き方です。「%1$@」は、%2$@で設定するKiwiShelfの項目カラーで色付けしたモノクロのシンボルを表示します。シンボルのないアプリはアプリアイコンのままです。",
   "kiwishelf.icon_source.label": "アプリシンボル スタイル",
   "kiwishelf.icon_source.no_icon": "Space Barがオフで、App Barの「%1$@」が「%2$@」のため、アプリアイコンは描画されません。",

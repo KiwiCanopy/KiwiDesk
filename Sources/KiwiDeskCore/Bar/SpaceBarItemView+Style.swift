@@ -216,7 +216,7 @@ extension SpaceBarItemView {
         case .outline:
             accent.layer?.backgroundColor = nil
             accent.layer?.borderColor = highlight.cgColor
-            accent.layer?.borderWidth = 2
+            accent.layer?.borderWidth = style.resolvedHighlightWidth
             accent.layer?.cornerRadius =
                 style.hasBox
                 ? cornerRadius

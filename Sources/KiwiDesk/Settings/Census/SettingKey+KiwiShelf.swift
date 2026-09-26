@@ -12,6 +12,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case background = "settings.kiwishelf.backgroundStyle"
     case backgroundFit = "settings.kiwishelf.backgroundFit"
     case cornerRoundness = "settings.kiwishelf.cornerRoundness"
+    case highlightWidth = "settings.kiwishelf.highlightWidth"
     case itemGap = "settings.kiwishelf.itemGap"
     case fontSizeAuto = "settings.kiwishelf.fontSize (auto)"
     case fontSize = "settings.kiwishelf.fontSize"
@@ -44,7 +45,8 @@ extension KiwiShelfKey {
         switch self {
         case .edge, .thickness, .alignment, .order, .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
-        case .background, .cornerRoundness, .itemGap, .fontSizeAuto,
+        case .background, .cornerRoundness, .highlightWidth, .itemGap,
+            .fontSizeAuto,
             .outerMargin, .innerMargin, .iconSource:
             return .row(
                 .bars,
@@ -130,6 +132,11 @@ extension KiwiShelfKey {
             return .text(
                 "kiwishelf.corner_roundness",
                 help: "kiwishelf.corner_roundness.help"
+            )
+        case .highlightWidth:
+            return .text(
+                "kiwishelf.highlight_width",
+                help: "kiwishelf.highlight_width.help"
             )
         case .itemGap:
             return .text(

@@ -56,6 +56,10 @@ struct KiwiShelfStyleControls: Sendable {
         "kiwishelf.corner_roundness",
         "Corner roundness"
     )
+    let kiwishelfStyleHighlightWidth = SettingsControl(
+        "kiwishelf.highlight_width",
+        "Highlight width"
+    )
     let kiwishelfStyleItemGap = SettingsControl(
         "kiwishelf.item_gap",
         "Item gap"

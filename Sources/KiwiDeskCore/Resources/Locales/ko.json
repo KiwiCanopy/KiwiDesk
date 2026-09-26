@@ -648,6 +648,8 @@
   "kiwishelf.font_size": "서체 크기",
   "kiwishelf.font_size.auto": "자동 서체 크기",
   "kiwishelf.font_size.help": "두 바에 같은 크기를 써서 공간 번호와 App Bar 제목이 나란히 맞춰집니다. 자동으로 두면 두께를 따릅니다.",
+  "kiwishelf.highlight_width": "하이라이트 두께",
+  "kiwishelf.highlight_width.help": "현재 공간과 포커스된 윈도우를 표시하는 마크의 두께입니다 — 아웃라인은 이 두께로, 모서리 마크는 그에 비례해 그려집니다.",
   "kiwishelf.icon_source.help": "두 바에서 앱 아이콘을 그리는 방식입니다. ‘%1$@’은(는) %2$@에서 설정한 KiwiShelf 항목 색상으로 칠한 단색 심볼을 표시하며, 심볼이 없는 앱은 앱 아이콘을 유지합니다.",
   "kiwishelf.icon_source.label": "앱 심볼 스타일",
   "kiwishelf.icon_source.no_icon": "Space Bar가 꺼져 있고 App Bar의 ‘%1$@’이(가) ‘%2$@’(으)로 설정되어 있어 앱 아이콘이 그려지지 않습니다.",

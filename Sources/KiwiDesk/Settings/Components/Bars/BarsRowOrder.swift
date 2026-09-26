@@ -21,6 +21,7 @@ enum BarsRowOrder {
         .kiwishelf(.background),
         .kiwishelf(.backgroundFit),
         .kiwishelf(.cornerRoundness),
+        .kiwishelf(.highlightWidth),
         .kiwishelf(.itemGap),
         .kiwishelf(.fontSizeAuto),
         .kiwishelf(.fontSize),

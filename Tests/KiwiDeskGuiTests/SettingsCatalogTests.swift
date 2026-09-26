@@ -105,7 +105,9 @@ struct SettingsCatalogTests {
         // Style drawers and nine children left, the two colour
         // groups and drawers became the shelf's one of each, and
         // the shelf's Style drawer gained the symbol style.
-        #expect(allEntries.count == 108)
+        // 109 since #1680: the shelf's Style drawer gained the
+        // highlight width.
+        #expect(allEntries.count == 109)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

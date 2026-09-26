@@ -648,6 +648,8 @@
   "kiwishelf.font_size": "Schriftgröße",
   "kiwishelf.font_size.auto": "Automatische Schriftgröße",
   "kiwishelf.font_size.help": "Eine Größe für beide Leisten, damit Space-Nummern und App-Bar-Titel auf einer Linie liegen. Automatisch folgt sie der Dicke.",
+  "kiwishelf.highlight_width": "Hervorhebungsbreite",
+  "kiwishelf.highlight_width.help": "Wie kräftig die Markierung auf dem aktuellen Space und dem fokussierten Fenster gezeichnet wird — der Umriss oder, anteilig, die Kantenmarkierung.",
   "kiwishelf.icon_source.help": "Wie App-Symbole auf beiden Leisten gezeichnet werden. „%1$@“ zeigt eine einfarbige Glyphe in den Elementfarben von KiwiShelf, festgelegt in %2$@; Apps ohne Glyphe behalten ihr App-Symbol.",
   "kiwishelf.icon_source.label": "App-Symbolstil",
   "kiwishelf.icon_source.no_icon": "Die Space Bar ist aus und „%1$@“ der App Bar steht auf „%2$@“, daher wird kein App-Symbol gezeichnet.",

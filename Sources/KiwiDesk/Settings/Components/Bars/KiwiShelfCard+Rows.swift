@@ -59,6 +59,8 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfStyle.children
                     .kiwishelfStyleCornerRoundness
             )
+        case .highlightWidth:
+            highlightWidthRow
         case .itemGap:
             PtSlider(
                 label: L("kiwishelf.item_gap", "Item gap"),

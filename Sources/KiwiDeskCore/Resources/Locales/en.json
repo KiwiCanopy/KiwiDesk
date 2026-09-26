@@ -648,6 +648,8 @@
   "kiwishelf.font_size": "Font size",
   "kiwishelf.font_size.auto": "Auto font size",
   "kiwishelf.font_size.help": "One size for both bars, so Space numbers and App Bar titles line up. Automatic follows the thickness.",
+  "kiwishelf.highlight_width": "Highlight width",
+  "kiwishelf.highlight_width.help": "How heavy the mark on the current Space and the focused window draws — the outline, or the edge mark in proportion.",
   "kiwishelf.icon_source.help": "How app icons are drawn on both bars. “%1$@” shows a monochrome symbol colored by KiwiShelf's item colors, set in %2$@; apps without a symbol keep their app icon.",
   "kiwishelf.icon_source.label": "App symbol style",
   "kiwishelf.icon_source.no_icon": "The Space Bar is off and the App Bar's “%1$@” is “%2$@”, so no app icon is drawn.",

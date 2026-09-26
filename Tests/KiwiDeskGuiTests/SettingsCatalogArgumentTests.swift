@@ -193,7 +193,8 @@ struct SettingsCatalogArgumentTests {
         // set on the KiwiShelf card, not one per bar.
         // 78 since the #1517 redesign: the bar cards' Style
         // drawers and their nine anchored rows left.
-        #expect(direct.values.reduce(0, +) == 78)
+        // 79 since #1680: the highlight width row's anchor.
+        #expect(direct.values.reduce(0, +) == 79)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from
