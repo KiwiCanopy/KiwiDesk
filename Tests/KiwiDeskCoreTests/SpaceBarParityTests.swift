@@ -59,7 +59,7 @@ struct SpaceBarCommandParityTests {
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false),
-        .glyphCap(8), .frontAppTitleCap(40),
+        .glyphCap(8), .glyphGap(3), .frontAppTitleCap(40),
         .activeIndicator(.edgeMark),
         .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
@@ -139,6 +139,7 @@ struct SpaceBarCommandParityTests {
             return [.number(0.5)]
         case .springDelay: return [.number(1000)]
         case .glyphCap: return [.number(8)]
+        case .glyphGap: return [.number(3)]
         case .frontAppTitleCap: return [.number(40)]
         default:
             return [.string("#123456")]

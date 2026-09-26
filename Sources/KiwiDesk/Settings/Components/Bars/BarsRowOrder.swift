@@ -39,6 +39,7 @@ enum BarsRowOrder {
     static let spaceBar: [SettingKey] = [
         .spaceBar(.spaceBarHideEmpty),
         .spaceBar(.spaceBarGlyphCap),
+        .spaceBar(.spaceBarGlyphGap),
         .spaceBar(.spaceBarShowFrontApp),
         .spaceBar(.spaceBarFrontAppTitleCap),
         .spaceBar(.spaceBarActiveIndicator),

@@ -25,6 +25,15 @@ enum BarSliderBands {
             KiwiShelf.highlightWidthRange.upperBound
         )
 
+    /// The Space Bar's Glyph gap row (#1689): both edges are
+    /// Core's, which clamps the stored value to them.
+    static let glyphGap: ClosedRange<Double> =
+        Double(
+            SpaceBarStyle.glyphGapRange.lowerBound
+        )...Double(
+            SpaceBarStyle.glyphGapRange.upperBound
+        )
+
     /// The Space Bar minimum row, in percent: both edges are
     /// Core's, which clamps the stored value to them (#1517).
     static let minimum: ClosedRange<Double> =

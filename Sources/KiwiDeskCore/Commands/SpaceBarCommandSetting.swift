@@ -7,6 +7,7 @@ import Foundation
 enum SpaceBarCommandSetting {
     case enabled(Bool)
     case glyphCap(Int)
+    case glyphGap(CGFloat)
     case frontAppTitleCap(Int)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
     case activeDimFactor(CGFloat)
@@ -76,7 +77,8 @@ enum SpaceBarCommandSetting {
         [String: (CGFloat) -> SpaceBarCommandSetting]
     {
         [
-            "active_dim_factor": Self.activeDimFactor
+            "active_dim_factor": Self.activeDimFactor,
+            "glyph_gap": Self.glyphGap,
         ]
     }
 
@@ -169,6 +171,8 @@ enum SpaceBarCommandSetting {
         switch self {
         case .enabled(let value): style.enabled = value
         case .glyphCap(let value): style.glyphCap = value
+        case .glyphGap(let value):
+            style.glyphGap = SpaceBarStyle.clampGlyphGap(value)
         case .frontAppTitleCap(let value):
             style.frontAppTitleCap = value
         case .activeIndicator(let value):

@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "Simboli per spazio",
   "space_bar.glyph_cap.help": "Quanti simboli di app mostra uno spazio prima che i restanti si raggruppino in un badge +n. Le finestre adiacenti della stessa app contano come un solo simbolo.",
   "space_bar.glyph_cap.summary": "Fino a %1$d gruppi di app per spazio; gli altri si raggruppano in un badge +n.",
+  "space_bar.glyph_gap": "Spaziatura tra simboli",
+  "space_bar.glyph_gap.help": "Distanza tra i simboli di app all'interno di uno spazio; con 0 sono affiancati.",
   "space_bar.hide_empty": "Nascondi spazi vuoti",
   "space_bar.hide_empty.help": "Gli spazi senza finestre vengono nascosti dalla barra, tranne quello in cui ti trovi. Usa una scorciatoia per passare a uno spazio nascosto.",
   "space_bar.item.ax.current": "%1$@, posizione attuale",

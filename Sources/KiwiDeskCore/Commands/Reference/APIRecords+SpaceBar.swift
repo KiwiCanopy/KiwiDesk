@@ -16,6 +16,11 @@ extension APIReference {
             "Sets how many app-group glyphs a Space item shows.",
             .integer("glyphs")
         ),
+        "set_glyph_gap": APIRecord(
+            "Sets the room in points between app glyphs inside a "
+                + "Space item; 0 abuts them.",
+            .number("gap")
+        ),
         "set_active_indicator": APIRecord(
             "Sets how the active Space is marked.",
             .choice(

@@ -12,15 +12,19 @@ extension SpaceBarItemView {
     }
 
     /// Computes requested slot length for given app count and overflow badge.
+    /// `glyphGap` is the style's `resolvedGlyphGap`, taken with
+    /// no default so a caller cannot measure without it (#1689).
     static func autoLength(
         appCount: Int,
         overflow: Int = 0,
-        depth: CGFloat
+        depth: CGFloat,
+        glyphGap: CGFloat
     ) -> CGFloat {
         let cell = max(depth - pad * 2, 8)
         let slots = appCount + (overflow > 0 ? 1 : 0)
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
-        return pad * 2 + cell + divider + CGFloat(slots) * cell
+        let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
+        return pad * 2 + cell + divider + CGFloat(slots) * cell + gaps
     }
 
     override func layout() {
@@ -56,7 +60,9 @@ extension SpaceBarItemView {
             )
             cursor += 1 + Self.pad
         }
+        let glyphGap = style.resolvedGlyphGap
         for (index, view) in appViews.enumerated() {
+            if index > 0 { cursor += glyphGap }
             place(view, at: cursor, cell: cell)
             if index < badgeViews.count {
                 layoutBadge(
@@ -73,6 +79,7 @@ extension SpaceBarItemView {
             cursor += cell
         }
         if overflow > 0 {
+            if !appViews.isEmpty { cursor += glyphGap }
             layoutBadge(
                 overflowBadge,
                 onCellAt: cursor,

@@ -13,6 +13,10 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Max app-group glyphs per Space item before "+n" badge (#376).
     /// Default 5.
     public var glyphCap = 5
+    /// Extra room (pt) between app glyph cells inside a Space
+    /// item, and before its `+n` badge (#1689); 0 abuts them. A
+    /// drawing reads `resolvedGlyphGap`.
+    public var glyphGap: CGFloat = 0
     public var activeIndicator: ActiveIndicator = .outline
     /// Opacity (0.05–1) of unfocused glyph on active space.
     public var activeDimFactor: CGFloat =

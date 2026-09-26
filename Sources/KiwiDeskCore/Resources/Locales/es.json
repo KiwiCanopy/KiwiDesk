@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "Glifos por Espacio",
   "space_bar.glyph_cap.help": "Cuántos glifos de aplicación muestra un Espacio antes de agrupar el resto en una insignia +n. Las ventanas adyacentes de la misma aplicación cuentan como un solo glifo.",
   "space_bar.glyph_cap.summary": "Hasta %1$d grupos de aplicación por Espacio; más se agrupan en una insignia +n.",
+  "space_bar.glyph_gap": "Espaciado entre glifos",
+  "space_bar.glyph_gap.help": "Separación entre los glifos de aplicación dentro de un Espacio; con 0 quedan uno junto a otro.",
   "space_bar.hide_empty": "Ocultar espacios vacíos",
   "space_bar.hide_empty.help": "Los espacios sin ventanas se ocultan de la barra, excepto el espacio en el que te encuentras. Usa un atajo para ir a un espacio oculto.",
   "space_bar.item.ax.current": "%1$@, actual",
