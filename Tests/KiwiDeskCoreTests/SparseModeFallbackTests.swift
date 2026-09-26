@@ -162,7 +162,7 @@ struct SparseModeFallbackTests {
             spaceModes: ["1": .grid],
             spaceScreens: [:],
             isStandard: false,
-            settings: TilingSettings()
+            tuning: .preset(PresetTuning())
         )
         #expect(layout.mode(of: SpaceID("2"), on: nil) == .bsp)
         #expect(
@@ -173,11 +173,10 @@ struct SparseModeFallbackTests {
         )
     }
 
-    /// The starter leads the ultrawides with Stack (#1662); a
-    /// sparse preset keeps its Track there, presets staying
-    /// shape-agnostic until #1663.
-    @Test("an ultrawide keeps Track for a sparse preset")
-    func ultrawideKeepsTrack() {
+    /// A sparse preset follows the starter's order (#1663): Stack
+    /// first on both ultrawides, where it once kept Track.
+    @Test("an ultrawide gives a sparse preset Stack")
+    func ultrawideFollowsTheStarter() {
         let layout = StandardLayout(
             name: "T",
             screenCount: 1,
@@ -185,15 +184,16 @@ struct SparseModeFallbackTests {
             spaceModes: ["1": .grid],
             spaceScreens: [:],
             isStandard: false,
-            settings: TilingSettings()
+            tuning: .preset(PresetTuning())
         )
-        // Whatever the fallback, it is a layout the class offers.
         for shape in ScreenClass.allCases {
-            #expect(shape.layouts.contains(shape.presetFallback))
+            #expect(
+                layout.mode(of: SpaceID("2"), on: shape)
+                    == shape.layouts.first
+            )
         }
         for shape in [ScreenClass.ultrawide, .superUltrawide] {
-            #expect(layout.mode(of: SpaceID("2"), on: shape) == .track)
-            #expect(shape.layouts.first == .stack)
+            #expect(layout.mode(of: SpaceID("2"), on: shape) == .stack)
         }
     }
 }

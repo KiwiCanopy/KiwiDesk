@@ -27,7 +27,7 @@ struct StandardLayoutScreensTests {
             spaceModes: modes,
             spaceScreens: screensBySpace,
             isStandard: false,
-            settings: TilingSettings()
+            tuning: .preset(PresetTuning())
         )
     }
 

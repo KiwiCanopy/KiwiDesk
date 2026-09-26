@@ -10,17 +10,16 @@ extension StandardLayout {
     }
 
     /// Layout mode for space. Where the sparse map says nothing,
-    /// the answer is the SCREEN's own best layout, not a fixed
-    /// `bsp` (owner ruling 2026-08-11): sparse presets on a laptop
-    /// silently handed it BSP, the one layout `ScreenClass` rules
-    /// out there. `shape` nil (a preset card drawn for a screen
-    /// COUNT) keeps the historic `bsp`.
+    /// the answer is the SCREEN's own best layout, the starter's
+    /// order (owner rulings 2026-08-11, #1663), never a fixed
+    /// `bsp`. `shape` nil (a preset card drawn for a screen COUNT)
+    /// keeps the historic `bsp`.
     public func mode(
         of space: SpaceID,
         on shape: ScreenClass?
     ) -> LayoutMode {
         if let declared = spaceModes[space] { return declared }
-        return shape?.presetFallback ?? .bsp
+        return shape?.layouts.first ?? .bsp
     }
 
     /// Positional screen index for space, clamped to screen count bounds.

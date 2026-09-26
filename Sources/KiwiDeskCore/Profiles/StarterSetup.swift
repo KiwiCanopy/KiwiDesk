@@ -95,11 +95,21 @@ public enum StarterSetup {
     /// earlier screen's tuning — except Scrolling, `scrollingHost`.
     static func hosts(_ sizes: [CGSize]) -> [LayoutMode: ScreenClass] {
         let sizes = floored(sizes)
+        var hosts = firstHosts(of: slots(sizes), sizes: sizes)
+        hosts[.scrolling] = scrollingHost(sizes)
+        return hosts
+    }
+
+    /// Each layout's host by its first slot in position order,
+    /// Scrolling included — a preset's whole rule (#1663).
+    private static func firstHosts(
+        of slots: [Slot],
+        sizes: [CGSize]
+    ) -> [LayoutMode: ScreenClass] {
         var hosts: [LayoutMode: ScreenClass] = [:]
-        for slot in slots(sizes) where hosts[slot.mode] == nil {
+        for slot in slots where hosts[slot.mode] == nil {
             hosts[slot.mode] = ScreenClass.of(sizes[slot.screen])
         }
-        hosts[.scrolling] = scrollingHost(sizes)
         return hosts
     }
 
@@ -125,11 +135,23 @@ public enum StarterSetup {
         _ sizes: [CGSize]
     ) -> [SpaceID: ScrollingOverride] {
         let sizes = floored(sizes)
+        return scrollingOverrides(
+            of: slots(sizes),
+            sizes: sizes,
+            hosts: hosts(sizes)
+        )
+    }
+
+    private static func scrollingOverrides(
+        of slots: [Slot],
+        sizes: [CGSize],
+        hosts: [LayoutMode: ScreenClass]
+    ) -> [SpaceID: ScrollingOverride] {
         let tuned = StarterTuning.scrollingOrientation(
-            for: hosts(sizes)[.scrolling] ?? ScreenClass.of(sizes[0])
+            for: hosts[.scrolling] ?? ScreenClass.of(sizes[0])
         )
         var overrides: [SpaceID: ScrollingOverride] = [:]
-        for slot in slots(sizes) where slot.mode == .scrolling {
+        for slot in slots where slot.mode == .scrolling {
             let own = StarterTuning.scrollingOrientation(
                 for: ScreenClass.of(sizes[slot.screen])
             )
@@ -144,11 +166,43 @@ public enum StarterSetup {
     /// The tuning for these screens, overrides included.
     static func settings(sizes: [CGSize]) -> TilingSettings {
         let sizes = floored(sizes)
-        var settings = StarterTuning.settings(
-            mainShape: ScreenClass.of(sizes[0]),
+        return settings(
+            slots: slots(sizes),
+            sizes: sizes,
             hosts: hosts(sizes)
         )
-        settings.scrolling.override = scrollingOverrides(sizes)
+    }
+
+    /// A preset's shape tuning: `slots` is its plan on `sizes`,
+    /// each layout hosted by its first slot (#1663). `sizes` is
+    /// non-empty and covers every slot's screen.
+    static func presetSettings(
+        slots: [Slot],
+        sizes: [CGSize]
+    ) -> TilingSettings {
+        settings(
+            slots: slots,
+            sizes: sizes,
+            hosts: firstHosts(of: slots, sizes: sizes)
+        )
+    }
+
+    /// The one door to `StarterTuning`, the starter's and every
+    /// preset's; each entry above picks its host rule.
+    private static func settings(
+        slots: [Slot],
+        sizes: [CGSize],
+        hosts: [LayoutMode: ScreenClass]
+    ) -> TilingSettings {
+        var settings = StarterTuning.settings(
+            mainShape: ScreenClass.of(sizes[0]),
+            hosts: hosts
+        )
+        settings.scrolling.override = scrollingOverrides(
+            of: slots,
+            sizes: sizes,
+            hosts: hosts
+        )
         return settings
     }
 
@@ -164,12 +218,9 @@ public enum StarterSetup {
             spaceModes: spaceModes(sizes: sizes),
             spaceScreens: spaceScreens(sizes: sizes),
             isStandard: false,
-            settings: settings(sizes: sizes)
+            tuning: .resolved(settings(sizes: sizes))
         )
-        layout.starterTitle = StarterTitle(
-            shape: ScreenClass.of(sizes[0]),
-            otherScreens: sizes.count - 1
-        )
+        layout.starterTitle = StarterTitle(sizes: sizes)
         return layout
     }
 
