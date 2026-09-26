@@ -4487,14 +4487,22 @@ change resolves a different profile, a space that lived on a
 monitor no longer connected — pinned there, or placed there by
 the Main role or by KiwiDesk — and still holds windows on any
 Desktop is *held* instead of pruned: it stays live on a remaining
-monitor under its own name, or under the next number past the
-highest live one where the incoming profile declares that name. A
+monitor, and where the incoming profile declares its name it takes
+the next number past the highest live one. A
 profile or Standard that later applies and declares a held
 space's current number moves it past the highest live number
 again. A held space keeps its icon and mode — `reload_config`
 does not reset its mode — and wears an asterisk badge in the
 Space Bar
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
+
+:::unreleased
+Held spaces keep their order: when a monitor change holds them, a
+numbered held space after a renumbered one is renumbered past it
+too, even where its own name is free, and a later renumber keeps
+the Space Bar in that order
+([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
+:::
 
 Once its monitor is back, a held space goes home when the
 arrangement then live is the one it left — the same profile, or

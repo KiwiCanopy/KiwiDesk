@@ -765,10 +765,12 @@ argument is `docs/design-decisions.md` ▸ Profiles ▸ *An unplugged
 screen's Spaces are held, not forwarded*. The obligations:
 
 - **The hold's machinery has one home.** Holding, reclaiming,
-  re-filing, retiring and ending live in
-  `KiwiCore+HeldSpaces.swift`; write `StateCoordinator.heldSpaces`
-  there alone, and add a new way into or out of a hold to that
-  file — a caller elsewhere calls it, as the #634 reset
+  re-filing, retiring and ending live in the `KiwiCore+HeldSpace*`
+  files — `KiwiCore+HeldSpaceOrder.swift` holds the naming walk
+  and the batch's placement, and writes no hold; write
+  `StateCoordinator.heldSpaces` in `KiwiCore+HeldSpaces.swift`
+  alone, and add a new way into or out of a hold there — a caller
+  elsewhere calls it, as the #634 reset
   (`forgetHeldSpaces`) and `delete_space` (`endHold`) do
   (`HeldSpaceTests` ▸ `deleteEndsHold`). Nothing scans for a
   second writer; review is the check.
@@ -798,6 +800,22 @@ screen's Spaces are held, not forwarded*. The obligations:
   declares to a fresh number unless it is about to go home under
   that very name (`HeldSpaceTests` ▸
   `claimedHeldNumberIsReclaimed`); a new such door owes the call.
+- **A hold and a reclaim keep the held Spaces' order (#1664).**
+  Both walk in bar order — never over the `heldSpaces`
+  dictionary, whose order is the hash's — the hold naming through
+  the one `KiwiCore.orderedHeldNames`, and both place the batch
+  with
+  `placeHeldBatchLast`, which a named Space kept behind a
+  renumbered one needs (`HeldSpaceOrderTests` ▸
+  `holdKeepsTheOrder`, `HeldSpaceOrderTests` ▸
+  `reclaimKeepsTheOrder`, `HeldSpaceOrderTests` ▸
+  `namedSpaceFollowsTheBatch`). Only the hold renumbers for the
+  order, where the prune drops the old numbers; a reclaim
+  renumbers a declared id alone, since nothing there would drop
+  an undeclared one — and the Space drop has one home
+  (`SpaceForwardingSeamTests` ▸ `removeSpaceHasOneHome`), so a
+  reclaim that renumbers more routes through
+  `forwardWindows(of:to:)`, never a retire beside it.
 - **A renumber takes `SpaceID.nextNumber(past:)` over every live
   id, never `smallestFreeNumber(among:)` and never the declared
   set alone.** A Space the prune is about to drop still exists,
@@ -824,8 +842,26 @@ screen's Spaces are held, not forwarded*. The obligations:
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call
   (`HeldSpaceTests` ▸ `emptiedRetires`, which empties it of a
-  live member only — the away and remembered-window clauses that
-  keep a Space held have no test).
+  live member; `HeldSpaceMemoryTests` ▸
+  `holdCarriesTheHiddenWindow` keeps one held by a hidden window
+  alone — the away clause has no test). The retire's remembered
+  clause only KEEPS a hold: begin a hold only for a Space with live
+  or up-away members, since a remembered-only Space may hold
+  nothing but a stale `.restored` filing and would sit empty in
+  the bar (`HeldSpaceMemoryTests` ▸ `rememberedOnlySpaceIsNotHeld`).
+- **A renumber carries every remembered window (#1669).**
+  `moveMembers` re-points each `rememberedSpaces` entry naming the
+  old id through `renameRememberedSpace` — up or not, a hidden
+  app's included — keeping the kind and the #1207 rank and
+  resetting the break provenance, never through `refileAway`,
+  which spends the rank on a one-window move; and both renumbers
+  count remembered ids as taken, so the new number names no
+  remembered row (`HeldSpaceMemoryTests` ▸
+  `holdCarriesTheHiddenWindow`, `HeldSpaceMemoryTests` ▸
+  `reclaimCarriesTheHiddenWindow`, `HeldSpaceMemoryTests` ▸
+  `upAwayWindowKeepsItsRank`, `HeldSpaceMemoryTests` ▸
+  `renumberSkipsARememberedNumber`, `HeldSpaceMemoryTests` ▸
+  `reclaimSkipsARememberedNumber`).
 - **A reload leaves a held Space's mode alone.**
   `resetDeclarativeState` skips it, since no config redeclares it
   (`HeldSpaceTests` ▸ `reloadKeepsHeldMode`); the same holds for
