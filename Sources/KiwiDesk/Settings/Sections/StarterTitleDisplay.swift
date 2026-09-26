@@ -51,12 +51,13 @@ extension StarterTitle {
         case .ultrawide:
             L(
                 "onboarding.starter_spaces.title.ultrawide",
-                "Your Spaces are ready for your ultrawide"
+                "Your Spaces are ready for your ultrawide screen"
             )
         case .superUltrawide:
             L(
                 "onboarding.starter_spaces.title.super_ultrawide",
-                "Your Spaces are ready for your super ultrawide"
+                "Your Spaces are ready for your super ultrawide "
+                    + "screen"
             )
         case .pivoted:
             L(
