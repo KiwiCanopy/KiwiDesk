@@ -13,7 +13,7 @@ public enum PaletteCatalog {
     /// (`ColorPaletteTests`).
     public static let neonName = "Kiwi Neon"
 
-    /// All nine built-ins, default first.
+    /// Every built-in, default first.
     public static func bundled() -> [ColorPalette] {
         [defaultPalette()] + authored()
     }
@@ -27,7 +27,7 @@ public enum PaletteCatalog {
         )
     }
 
-    /// The eight authored palettes from `Resources/Palettes`.
+    /// The authored palettes from `Resources/Palettes`.
     static func authored() -> [ColorPalette] {
         guard
             let url = Bundle.kiwiDeskCore.url(

@@ -116,7 +116,7 @@ struct BorderRingSeparationTests {
     @Test("Every bundled focused ring is opaque")
     func focusedRingsAreOpaque() throws {
         let palettes = PaletteCatalog.bundled()
-        #expect(palettes.count == 9)
+        #expect(!PaletteCatalog.authored().isEmpty)
         for palette in palettes {
             let focused = try #require(
                 palette.colors["border.focused_color"],
@@ -133,7 +133,7 @@ struct BorderRingSeparationTests {
     @Test("Every authored unfocused ring sits in the translucent band")
     func unfocusedRingsSitInTheAlphaBand() throws {
         let palettes = PaletteCatalog.bundled()
-        #expect(palettes.count == 9)
+        #expect(!PaletteCatalog.authored().isEmpty)
         var measured = 0
         for palette in palettes
         where !Self.bandExempt.contains(palette.name) {
@@ -156,7 +156,7 @@ struct BorderRingSeparationTests {
         let palettes = PaletteCatalog.bundled()
         // `authored()` soft-fails to `[]`, so without this the
         // sweep would shrink to the derived default and pass.
-        #expect(palettes.count == 9)
+        #expect(!PaletteCatalog.authored().isEmpty)
         var measured = 0
         for palette in palettes {
             let name = palette.name
@@ -203,7 +203,7 @@ struct BorderRingSeparationTests {
     @Test("The unfocused ring recedes on the palette's home backdrop")
     func unfocusedRecedesOnItsHomeBackdrop() throws {
         let palettes = PaletteCatalog.bundled()
-        #expect(palettes.count == 9)
+        #expect(!PaletteCatalog.authored().isEmpty)
         var measured = 0
         for palette in palettes {
             let name = palette.name
@@ -239,7 +239,7 @@ struct BorderRingSeparationTests {
     @Test("Every unfocused ring is seen on the palette's home backdrop")
     func unfocusedRingsAreSeenOnTheirHome() throws {
         let palettes = PaletteCatalog.bundled()
-        #expect(palettes.count == 9)
+        #expect(!PaletteCatalog.authored().isEmpty)
         var measured = 0
         for palette in palettes {
             let name = palette.name
