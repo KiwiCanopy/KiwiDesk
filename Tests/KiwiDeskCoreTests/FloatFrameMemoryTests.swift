@@ -1,0 +1,209 @@
+import AppKit
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// Re-floating a window returns it to the frame it last floated
+/// at (#1675): remembered when it is tiled, consumed when it
+/// floats again, and dropped on a close — session state only.
+@Suite("Float frame memory (#1675)", .serialized)
+@MainActor
+struct FloatFrameMemoryTests {
+    private let float = WindowID(2)
+    private let placed = CGRect(x: 300, y: 200, width: 700, height: 500)
+
+    /// Two windows on space 1 in bsp, w2 focused. The engine is
+    /// disabled so a placement lands on the observable hook.
+    private func setup(
+        applied: @escaping @MainActor (WindowID, CGRect) -> Void
+    ) -> KiwiCore {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwidesk-tests-\(UUID().uuidString)")
+        let core = makeTestCore(configDirectory: dir)
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        }
+        // Two screens side by side through the seam the restore
+        // asks (#531): the float's own, and one to its right.
+        core.tiler.allScreenBounds = {
+            [
+                CGRect(x: 0, y: 0, width: 1600, height: 1000),
+                CGRect(x: 1600, y: 0, width: 1600, height: 1000),
+            ]
+        }
+        core.execute("set_mode", args: [.string("1"), .string("bsp")])
+        for index in 1...2 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(index)),
+                        pid: 1,
+                        appName: "A",
+                        title: "W\(index)"
+                    )
+                )
+            )
+        }
+        core.state.apply(.windowFocused(float))
+        core.tiler.settings.animations.onRelayout = true
+        core.tiler.animation.isEnabled = false
+        core.tiler.animation.apply = { id, frame, _ in
+            applied(id, frame)
+        }
+        return core
+    }
+
+    /// Floats w2, moves it by hand to `frame`, then tiles it.
+    private func floatMoveAndTile(_ core: KiwiCore, to frame: CGRect) {
+        #expect(core.execute("make_floating").isSuccess)
+        core.state.apply(.windowMoved(float, frame))
+        #expect(core.execute("make_tiled").isSuccess)
+    }
+
+    @Test("floating again returns to the last floating frame")
+    func returnsToTheLastFrame() {
+        var frames: [WindowID: CGRect] = [:]
+        let core = setup { frames[$0] = $1 }
+        floatMoveAndTile(core, to: placed)
+        #expect(core.state.floatFrames[float]?.frame == placed)
+        frames = [:]
+        #expect(core.execute("toggle_floating").isSuccess)
+        #expect(frames[float] == placed)
+        // Consumed: the next float without one takes the default.
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    @Test("a frame on another screen falls back to the derived size")
+    func otherScreenTakesTheDefault() {
+        var frames: [WindowID: CGRect] = [:]
+        let core = setup { frames[$0] = $1 }
+        let elsewhere = placed.offsetBy(dx: 1600, dy: 0)
+        floatMoveAndTile(core, to: elsewhere)
+        frames = [:]
+        #expect(core.execute("make_floating").isSuccess)
+        #expect(frames[float] != elsewhere)
+        #expect(frames[float]?.width == FloatPlacement.longFloor)
+        // Consumed on the fallback path too.
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    /// Through the real gone handler: only its `closed` verdict
+    /// ends the memory, since a minimize, a hide or a Desktop
+    /// departure comes back under the same id.
+    @Test("a close drops the memory; a minimize keeps it")
+    func closeDropsMinimizeKeeps() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        core.handle(.windowDestroyed(float, wasMinimized: true))
+        #expect(core.state.floatFrames[float]?.frame == placed)
+        core.state.floatFrames[float] = .init(pid: 1, frame: placed)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: float, pid: 1, appName: "A", title: "W2")
+            )
+        )
+        core.handle(.windowDestroyed(float, wasMinimized: false))
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    @Test("an away window's retirement drops the memory")
+    func awayRetirementDrops() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        core.state.forgetAway(float)
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    /// A hidden window leaves the fold's list, so the exit prunes
+    /// by the pid the entry carries.
+    @Test("an app's exit drops the memory, hidden windows included")
+    func appExitDrops() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        core.state.apply(.windowHidden(float))
+        #expect(core.state.floatFrames[float] != nil)
+        core.state.apply(.appTerminated(pid: 1))
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    /// In a floating-mode Space, `make_tiled` leaves the window a
+    /// float, so nothing is tiled and nothing is remembered.
+    @Test("a floating-mode member made tiled remembers nothing")
+    func floatingModeRemembersNothing() {
+        let core = setup { _, _ in }
+        core.execute("set_mode", args: [.string("1"), .string("floating")])
+        core.state.setFloating(float, true)
+        core.state.apply(.windowMoved(float, placed))
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    @Test("a parked frame is never remembered")
+    func parkedFrameIsRefused() {
+        let core = setup { _, _ in }
+        let screen = CGRect(x: 0, y: 0, width: 1600, height: 1000)
+        core.tiler.allScreenBounds = { [screen] }
+        #expect(core.execute("make_floating").isSuccess)
+        let parked = CGRect(
+            x: screen.maxX - TilingEngine.stashPeekX,
+            y: screen.maxY - TilingEngine.stashPeekY,
+            width: 700,
+            height: 500
+        )
+        #expect(core.tiler.looksStashed(parked))
+        core.state.apply(.windowMoved(float, parked))
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    @Test("keep leaves the window where it is, memory or not")
+    func keepIgnoresTheMemory() {
+        var frames: [WindowID: CGRect] = [:]
+        let core = setup { frames[$0] = $1 }
+        floatMoveAndTile(core, to: placed)
+        core.execute("set_float_placement", args: [.string("keep")])
+        frames = [:]
+        #expect(core.execute("make_floating").isSuccess)
+        #expect(frames[float] == nil)
+    }
+
+    @Test("a hide keeps the memory")
+    func hideKeeps() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        core.state.apply(.windowHidden(float))
+        #expect(core.state.floatFrames[float]?.frame == placed)
+    }
+
+    @Test("tiling a window that is already tiled remembers nothing")
+    func tiledWindowRemembersNothing() {
+        let core = setup { _, _ in }
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    /// With relayout animation off the placement is an instant set
+    /// whose echo has not reached state, so the commanded frame is
+    /// the one the window really has — and the one remembered.
+    @Test("the remembered frame is the commanded one, not the echo")
+    func remembersTheCommandedFrame() throws {
+        let core = setup { _, _ in }
+        core.tiler.settings.animations.onRelayout = false
+        #expect(core.execute("make_floating").isSuccess)
+        let commanded = try #require(core.tiler.recentInstantTarget(float))
+        #expect(core.state.windows[float]?.frame != commanded)
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(core.state.floatFrames[float]?.frame == commanded)
+    }
+
+    @Test("a tab re-key carries the remembered frame's value")
+    func rekeyCarriesTheValue() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        let new = WindowID(77)
+        core.state.rekey(float, to: new)
+        #expect(core.state.floatFrames[new]?.frame == placed)
+        #expect(core.state.floatFrames[float] == nil)
+    }
+}

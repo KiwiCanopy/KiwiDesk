@@ -4140,6 +4140,26 @@ next tiled space draws the window that small.
 The numbers live in `FloatPlacement` and are the owner's to
 retune.
 
+*A re-float returns to its last floating frame (#1675).* The
+derived size answers a window with no floating frame of its own;
+one that was floating a moment ago has one the user chose, so
+tiling it remembers that frame and floating it again consumes it
+— where it still lies on the screen of the Space it floats onto,
+since a frame from another screen is the #502 crossing's question
+and not this one's; it is shrunk into the float region there,
+never under a learned app minimum, and a parked corner frame is
+never recorded (#1352). It is recorded only where the flip really
+tiles the window: a floating-mode member made tiled still floats,
+and `make_auto`, whose flip is detection's, records nothing. The
+memory is SESSION state by owner ruling: it lives beside the float
+overrides, never in a snapshot, and ends where the window ends — a
+close, an away window's retirement, its app's exit — while a
+minimize, a hide or a Desktop departure, which come back under the
+same id, keep it. So it is bounded by the live windows rather than
+by uptime, and a restart starts empty with nothing on disk to
+prune. Persisting it was refused as overkill — a reopened window
+rarely carries the same id, title or screen.
+
 *Who is placed.* The verb is ruled onto `EffectiveFloat`, judged
 on the space the window RENDERS on — a sticky traveler's, not its
 home's, for the gate and the region alike: a window already an
