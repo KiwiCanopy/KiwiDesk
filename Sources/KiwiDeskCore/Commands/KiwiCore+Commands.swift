@@ -156,7 +156,7 @@ extension KiwiCore {
         // Snapshot before the flip: the placement fires only for
         // a window that was no EFFECTIVE float — a floating-mode
         // member's frame is already the user's (`EffectiveFloat`).
-        let wasFloating = isEffectiveFloatOnActiveSpace(focused)
+        let wasFloating = isEffectiveFloatForPlacement(focused)
         state.setFloating(focused, floating)
         retile()
         // Float direction only: `make_tiled` already animates a

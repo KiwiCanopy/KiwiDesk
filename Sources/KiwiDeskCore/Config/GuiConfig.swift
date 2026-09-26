@@ -11,8 +11,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// the previous release refuse one this build wrote. That note
     /// is the ruling `SetupBundle.currentFormat` cites, and the
     /// one the `resize.feedback` retirement took again (#1255,
-    /// `RefusalSoundMigrationTests`) — `settings` is still
-    /// absent, so that key was never here either.
+    /// `RefusalSoundMigrationTests`) and the `float_nudge` one
+    /// (#1674, `FloatPlacementMigrationTests`) — `settings` is
+    /// still absent, so neither key was ever here.
     ///
     /// **2 (#1147)**: `profile_bindings` values became objects,
     /// which IS a `CodingKeys` key of this file, so the step is

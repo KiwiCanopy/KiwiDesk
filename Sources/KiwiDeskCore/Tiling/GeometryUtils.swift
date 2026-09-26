@@ -165,4 +165,22 @@ extension GeometryUtils {
         guard let screen else { return false }
         return pointer.y >= screen.frame.maxY - screen.band
     }
+
+    /// Confines the origin so `frame` stays inside `visible`; an
+    /// oversized frame pins at the region's leading edges.
+    static func confine(
+        _ frame: CGRect,
+        to visible: CGRect
+    ) -> CGRect {
+        let maxX = max(visible.minX, visible.maxX - frame.width)
+        let maxY = max(visible.minY, visible.maxY - frame.height)
+        let x = min(max(frame.minX, visible.minX), maxX)
+        let y = min(max(frame.minY, visible.minY), maxY)
+        return CGRect(
+            x: x,
+            y: y,
+            width: frame.width,
+            height: frame.height
+        )
+    }
 }

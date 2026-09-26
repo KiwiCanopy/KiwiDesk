@@ -52,6 +52,7 @@ struct FloatFlagReaderCensusTests {
         "Commands/KiwiCore+Commands.swift": [.identity: 1],
         "Commands/KiwiCore+Diagnostics.swift": [.identity: 1],
         "App/KiwiCore+FloatClamp.swift": [.routed: 1],
+        "App/KiwiCore+FloatPlacement.swift": [.routed: 1],
         "App/KiwiCore+FloatRecovery.swift": [.routed: 1],
         "App/KiwiCore+TravelerRehome.swift": [.routed: 1],
         // The delivery choice inside the net asks which ARM

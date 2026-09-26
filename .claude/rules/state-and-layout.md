@@ -86,7 +86,7 @@ editing here:
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through
   `TilingEngine.visibleBounds` (#531) — layout slots, track
-  capacity, the resize spans in `Commands/` and the float nudge
+  capacity, the resize spans in `Commands/` and the float region
   in `App/` all read it, never `GeometryUtils.axVisibleFrame`
   directly. A direct call re-imports the host's real screen,
   which is what made identical code build different arrangements
@@ -1715,7 +1715,7 @@ editing here:
   re-deriving a boundary beside a call site. It carves painted
   chrome rather than routing through `layoutBounds` for the
   reason `LayoutBoundsRoutingTests`' `allowed` map records
-  against the float nudge: an empty bar is suppressed while
+  against the float region: an empty bar is suppressed while
   `layoutBounds` still reserves its strip, so routing would bound
   a float out of a region no bar occupies. Fold both strip lists
   — a space shows one bar or two, on any edge — and rely on
@@ -1838,7 +1838,7 @@ AX window.
 ---
 
 `Commands/**` and `App/**` are in scope because they resolve the
-same geometry the layout does (the resize spans, the float nudge
+same geometry the layout does (the resize spans, the float region
 and the bar strips). The bounds, flat-array and space-id rules
 apply there as written; the **pure-function** rule does not —
 both are `@MainActor` and legitimately call AppKit. That rule

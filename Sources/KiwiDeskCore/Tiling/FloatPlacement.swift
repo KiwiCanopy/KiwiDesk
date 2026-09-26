@@ -27,27 +27,32 @@ extension FloatPlacement {
     /// coordinates). Measured on the region's short and long
     /// axes, so a portrait region gets the landscape one's
     /// shape turned. `minimum` is an app floor learned by the
-    /// size-bound ledger and outranks the derived size; the
-    /// result is confined to `region` wherever it fits.
+    /// size-bound ledger and outranks the derived size, as a
+    /// learned `maximum` caps it; the result is confined to
+    /// `region` wherever it fits.
     public static func centered(
         in region: CGRect,
-        minimum: CGSize = .zero
+        minimum: CGSize = .zero,
+        maximum: CGSize = CGSize(
+            width: CGFloat.infinity,
+            height: CGFloat.infinity
+        )
     ) -> CGRect {
         let landscape = region.width >= region.height
         let short = min(region.width, region.height)
         let long = max(region.width, region.height)
         let shortSpan = short * shortShare
+        // Never past `long`: the cap is under 5/6 of `short`.
         let longSpan = min(
             max(long * longShare, longFloor),
-            shortSpan * longCap,
-            long
+            shortSpan * longCap
         )
         let width = max(
-            landscape ? longSpan : shortSpan,
+            min(landscape ? longSpan : shortSpan, maximum.width),
             minimum.width
         )
         let height = max(
-            landscape ? shortSpan : longSpan,
+            min(landscape ? shortSpan : longSpan, maximum.height),
             minimum.height
         )
         let frame = CGRect(
@@ -56,24 +61,6 @@ extension FloatPlacement {
             width: width,
             height: height
         )
-        return confine(frame, to: region)
-    }
-
-    /// Confines the origin so the frame stays inside `visible`;
-    /// an oversized frame pins at the region's leading edges.
-    static func confine(
-        _ frame: CGRect,
-        to visible: CGRect
-    ) -> CGRect {
-        let maxX = max(visible.minX, visible.maxX - frame.width)
-        let maxY = max(visible.minY, visible.maxY - frame.height)
-        let x = min(max(frame.minX, visible.minX), maxX)
-        let y = min(max(frame.minY, visible.minY), maxY)
-        return CGRect(
-            x: x,
-            y: y,
-            width: frame.width,
-            height: frame.height
-        )
+        return GeometryUtils.confine(frame, to: region)
     }
 }

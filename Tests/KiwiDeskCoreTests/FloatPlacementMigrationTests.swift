@@ -102,25 +102,66 @@ struct FloatPlacementMigrationTests {
         }
     }
 
-    /// The textual path: the rest of the user's file is left
-    /// byte for byte, so its Doubles keep their spelling.
+    /// The textual path. The fixture is one the walk's
+    /// re-serialization cannot reproduce — four-space indent,
+    /// unsorted keys, `0.40` — so an exact match proves the edit
+    /// touched only the retired entry.
     @Test("the edit touches only the retired entry")
     func surgicalEdit() throws {
         let text = """
             {
-              "format" : 9,
-              "monitor_sets" : {},
-              "settings" : {
-                "float_nudge" : false,
-                "ratio" : 0.4
-              }
+                "settings": { "ratio": 0.40, "float_nudge": false },
+                "monitor_sets": {},
+                "format": 9
             }
             """
         let out = try #require(
             ConfigMigration.migrated(Data(text.utf8))
         )
         let result = try #require(String(data: out, encoding: .utf8))
-        #expect(result.contains("\"float_placement\" : \"keep\""))
-        #expect(result.contains("\"ratio\" : 0.4"))
+        let expected = text.replacingOccurrences(
+            of: #""float_nudge": false"#,
+            with: #""float_placement": "keep""#
+        )
+        #expect(stampless(result) == stampless(expected))
+    }
+
+    /// The textual drop of a stored `true`, mid-object and last,
+    /// on the same unreproducible fixture shape.
+    @Test("a stored true is deleted in place, its commas with it")
+    func surgicalDrop() throws {
+        for (body, kept) in [
+            (#""float_nudge": true, "ratio": 0.40"#, #""ratio": 0.40"#),
+            (#""ratio": 0.40, "float_nudge": true"#, #""ratio": 0.40"#),
+        ] {
+            let text = """
+                {
+                    "settings": { \(body) },
+                    "monitor_sets": {},
+                    "format": 9
+                }
+                """
+            let out = try #require(
+                ConfigMigration.migrated(Data(text.utf8))
+            )
+            let result = try #require(
+                String(data: out, encoding: .utf8)
+            )
+            let expected = text.replacingOccurrences(
+                of: body,
+                with: kept
+            )
+            #expect(stampless(result) == stampless(expected))
+        }
+    }
+
+    /// The text with its format stamp removed: the stamp is the
+    /// envelope's to rewrite, not this step's.
+    private func stampless(_ text: String) -> String {
+        text.replacingOccurrences(
+            of: #""format"\s*:\s*\d+"#,
+            with: "",
+            options: .regularExpression
+        )
     }
 }

@@ -58,9 +58,24 @@ struct FloatPlacementTests {
     }
 
     @Test("A region under the floor keeps the window inside it")
-    func smallRegionConfined() {
+    func smallRegionFits() {
         let region = CGRect(x: 100, y: 50, width: 500, height: 400)
         let frame = FloatPlacement.centered(in: region)
         #expect(region.contains(frame))
+    }
+
+    /// The one case the centring cannot fit by itself: a minimum
+    /// larger than the region pins at its leading edges rather
+    /// than hanging off both sides.
+    @Test("A minimum past the region pins at its leading edges")
+    func oversizedMinimumPins() {
+        let region = CGRect(x: 100, y: 50, width: 500, height: 400)
+        let frame = FloatPlacement.centered(
+            in: region,
+            minimum: CGSize(width: 800, height: 600)
+        )
+        #expect(frame.size == CGSize(width: 800, height: 600))
+        #expect(frame.minX == region.minX)
+        #expect(frame.minY == region.minY)
     }
 }

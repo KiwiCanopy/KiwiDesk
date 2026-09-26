@@ -335,8 +335,9 @@ exports nothing.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
-`set_float_placement` replaces `set_float_nudge`. A config that
-turned the nudge off keeps its window in place (`keep`).
+`set_float_placement` replaces `set_float_nudge`: a saved setting
+that had the nudge off becomes `keep`, and a call to
+`set_float_nudge` fails naming its replacement.
 :::
 
 `bind_profile_to_desktop` files one profile per screen count on a

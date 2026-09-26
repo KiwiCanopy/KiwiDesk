@@ -3884,8 +3884,7 @@ once.* `KiwiCore.floatBounds` is the one answer to "where may a
 float sit": the display's visible bounds with every painted strip
 carved off its own edge. It carves the strips the bar managers
 actually **painted** rather than routing through `layoutBounds`,
-for the reason the float nudge already does — an empty bar is
-suppressed while `layoutBounds` still reserves its strip, so
+because an empty bar is suppressed while `layoutBounds` still reserves its strip, so
 routing would bound a float out of a region no bar occupies.
 Bars vary per space (one or two, on any edge), so it folds both
 strip lists; two strips on one edge leave the deeper carve
@@ -4108,17 +4107,17 @@ by ruling — standing down would keep a home whose layout
 assigns no frame on a display the window is not on, which is
 this issue's strand by another door.
 
-**Floating a tiled window centres it at a derived size (#1674,
-superseding the fixed nudge).** [Principle] The frame a window
+**Floating a tiled window centres it at a derived size
+(#1674).** [Principle] The frame a window
 has when an explicit float verb fires — `make_floating`, or a
 `toggle_floating` that lands on floating — is the layout's SLOT,
 which the user never chose. So #1091's "a float's position is the
 user's" has nothing to protect at that moment, and holds again
 from the moment it lands. Keeping the slot's frame left a float
 taken from a narrow stack slot or a full-height column in exactly
-that awkward shape, to be resized by hand every time; the 24 pt
-nudge that preceded this only acknowledged the flip. A real move
-acknowledges it and is useful too, and it is what i3 and sway do.
+that awkward shape, to be resized by hand every time, and a
+shove of a few points only acknowledges the flip. A real move
+acknowledges it and is useful too.
 
 *The size is measured on the region's short and long axes*, not
 on width and height, so one rule serves landscape and portrait:
@@ -4129,13 +4128,16 @@ since a third of an ultrawide is a banner. A landscape screen
 gets a tall window, a portrait one a wide one. The region is
 `floatGrowBounds`, a placement nothing else will correct, and a
 corroborated app minimum from the size-bound ledger outranks the
-derived size, so the window is centred on the size it can take.
+derived size and a corroborated maximum caps it, so the window
+is centred on the size it can take.
 The numbers live in `FloatPlacement` and are the owner's to
 retune.
 
-*Who is placed.* The verb is ruled onto `EffectiveFloat`: a
-window already an effective float — its flag, or a floating-mode
-member whose frame is the user's — keeps it. `make_auto` stays
+*Who is placed.* The verb is ruled onto `EffectiveFloat`, judged
+on the space the window RENDERS on — a sticky traveler's, not its
+home's, for the gate and the region alike: a window already an
+effective float there — its flag, or a floating-mode member whose
+frame is the user's — keeps it. `make_auto` stays
 out (its flip is detection, not a deliberate float), as do app
 rules floating a window at creation and floating-mode entry,
 which #1177's quit grid owns.
@@ -4148,7 +4150,10 @@ it without another rename. The retired `float_nudge` crossed by
 migration: a stored `false` was a choice and became `keep`; a
 stored `true` was written by every save under the old default, so
 it records a save rather than a choice and was dropped onto the
-new default (the #1255 reading, owner ruling 2026-09-26).
+new default (the #1255 reading, owner ruling 2026-09-26). An
+`init.lua` call is the user's script and is not migrated (the
+`ConfigMigration` carve-out): `set_float_nudge` joins
+`APIReference.retired`, so the call fails naming its replacement.
 
 **`resize` reads the *effective* float, so a floating-mode space
 resizes like a flag-float

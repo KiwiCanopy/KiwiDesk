@@ -155,6 +155,11 @@ struct KiwiShelfRetiredVerbTests {
     func retiredAreUnregistered() {
         for verb in APIReference.retired.keys {
             let parts = verb.split(separator: ".", maxSplits: 1)
+            guard parts.count == 2 else {
+                // A top-level verb (#1674's `set_float_nudge`).
+                #expect(!APIReference.dispatchable.contains(verb))
+                continue
+            }
             let table = APIReference.namespaces[String(parts[0])] ?? []
             #expect(!table.contains(String(parts[1])), "\(verb)")
         }

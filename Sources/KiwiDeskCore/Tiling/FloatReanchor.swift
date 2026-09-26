@@ -5,7 +5,7 @@ import CoreGraphics
 /// question, not this type's (#1178).
 public enum FloatReanchor {
     /// Computes target frame proportionally repositioned and optionally scaled
-    /// (`FloatPlacement.confine`,
+    /// (`GeometryUtils.confine`,
     /// `TilingSettings.floatScaleOnDisplayChange`, #502).
     public static func target(
         frame: CGRect,
@@ -35,6 +35,6 @@ public enum FloatReanchor {
             width: width,
             height: height
         )
-        return FloatPlacement.confine(moved, to: target)
+        return GeometryUtils.confine(moved, to: target)
     }
 }

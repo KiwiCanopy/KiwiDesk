@@ -625,18 +625,19 @@ KiwiDesk.set_swap_skips_cascade(true)
 
 **Does:** where a window lands when `make_floating` or a
 `toggle_floating` that lands on floating turns it from tiled to
-floating. `"center"`: it is centered on its screen at a size
-measured from the screen, two thirds of the short side by a third
-of the long side, never under 600 pt nor over 1.25 times the
-first span along the long side. A landscape screen gets a tall
-window; a portrait one gets a wide one. An app that refuses to go
-that small keeps its own minimum. `"keep"`: the window keeps the
-frame it had in the layout. Either way the window stays clear of
-the menu bar and any App/Space Bar. Never fires on `make_tiled`,
+floating. `"center"`: it is centered in the area of its screen
+clear of the menu bar and any App/Space Bar, at a size measured
+from that area: two thirds of the short side, and along the long
+side a third, at least 600 pt but never more than 1.25 times the
+short-side span (so under 600 pt on a short screen). A landscape
+screen gets a tall window; a portrait one gets a wide one. An app
+that will not go that small, or that large, keeps its own limit.
+`"keep"`: the window keeps the frame it had in the layout. Never fires on `make_tiled`,
 `make_auto`, or a window already floating, including one on a
 floating-mode Space. Global (per profile, all spaces); no Settings
-toggle. Replaces `set_float_nudge`; a config that had turned the
-nudge off migrates to `"keep"`.
+toggle. Replaces `set_float_nudge`: a saved setting that had the
+nudge off becomes `"keep"`, while an `init.lua` call to
+`set_float_nudge` fails naming this verb and must be renamed.
 
 **Example:**
 
