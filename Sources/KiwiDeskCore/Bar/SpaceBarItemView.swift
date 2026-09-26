@@ -154,8 +154,17 @@ final class SpaceBarItemView: NSView {
     /// drawn over the faded end takes the pointer there (#1517);
     /// the hover fill promises a click, and a layer item has none.
     private func refreshHover(_ event: NSEvent) {
-        let hovered =
-            !isActive && space != nil && BarHoverHit.owns(self, event)
+        applyHover(BarHoverHit.owns(self, event))
+    }
+
+    /// Re-reads the hover from where the pointer rests (#1665) —
+    /// the shelf's placement moves a chip without an exit event.
+    func syncHoverToPointer() {
+        applyHover(BarHoverHit.ownsPointer(self))
+    }
+
+    private func applyHover(_ ownsPointer: Bool) {
+        let hovered = !isActive && space != nil && ownsPointer
         guard hovered != isHovered else { return }
         isHovered = hovered
         restyle()

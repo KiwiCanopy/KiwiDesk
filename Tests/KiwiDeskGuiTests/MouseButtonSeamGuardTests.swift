@@ -87,6 +87,42 @@ struct MouseButtonSeamGuardTests {
         )
     }
 
+    /// The window-relative pointer read (#1665), a second API for
+    /// the fact `NSEvent.mouseLocation` names, so the census above
+    /// cannot see it: the bar hover seam, and the Settings caption
+    /// asking whether a link sits under the pointer at a redraw.
+    private static let windowPointerHomes = [
+        "BarHoverHit.swift",
+        "CaptionTextView.swift",
+    ]
+
+    @Test("the window pointer read stays in its seam homes")
+    func windowPointerReadHomes() throws {
+        let sites = try Self.productionTrees.flatMap {
+            try SourceScan.identifierSites(
+                of: "mouseLocationOutsideOfEventStream",
+                under: $0
+            )
+        }
+        for home in Self.windowPointerHomes {
+            let reads = sites.filter {
+                $0.file.lastPathComponent == home
+            }
+            #expect(
+                reads.count == 1,
+                "\(home) reads the pointer \(reads.count) times"
+            )
+        }
+        let strays = sites.filter {
+            !Self.windowPointerHomes.contains($0.file.lastPathComponent)
+        }
+        let listed = strays.map(\.site).joined(separator: ", ")
+        #expect(
+            strays.isEmpty,
+            "live window pointer read outside a seam: \(listed)"
+        )
+    }
+
     @Test("the button mask is read in exactly its two homes")
     func buttonsReadOnlyBehindTheSeam() throws {
         let sites = try Self.productionTrees.flatMap {
@@ -156,6 +192,10 @@ struct MouseButtonSeamGuardTests {
                     )
                     && source.contains(
                         "mouse.pointerInMenuBarStrip = { false }"
+                    )
+                    && source.contains(
+                        "BarHoverHit.pointerOverride = { _ in"
+                            + " BarHoverHit.offWindow }"
                     ),
                 .init(rawValue: "\(target) misses a pin")
             )

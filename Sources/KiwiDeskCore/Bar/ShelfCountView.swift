@@ -197,6 +197,11 @@ final class ShelfCountView: NSView {
         applyInk()
     }
 
+    /// Re-reads the hover from where the pointer rests (#1665).
+    func syncHoverToPointer() {
+        setHovered(BarHoverHit.ownsPointer(self))
+    }
+
     override func mouseDown(with event: NSEvent) {
         onPage()
     }

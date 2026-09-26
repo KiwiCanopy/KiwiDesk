@@ -31,6 +31,54 @@ struct ShelfWiringSeamTests {
         text.split(whereSeparator: \.isWhitespace).joined()
     }
 
+    /// Every hover-bearing bar view is re-read at the tail of the
+    /// shelf's relayout (#1665): both sections, their two counts,
+    /// and the divider grip. A new such view joins this list.
+    @Test("the relayout re-reads every bar hover")
+    func relayoutSweepsEveryHover() throws {
+        let relayout = Self.squash(
+            try Self.body(
+                of: "func relayout(",
+                in: "Bar/ShelfManager.swift"
+            )
+        )
+        for call in [
+            "shelf.space?.syncHoverToPointer()",
+            "shelf.app?.syncHoverToPointer()",
+            "overlay.handle.syncHoverToPointer()",
+        ] {
+            #expect(relayout.contains(call), Comment(rawValue: call))
+        }
+        for file in [
+            "Bar/SpaceBarOverlay+DragDrop.swift",
+            "Bar/AppBarOverlay+Overflow.swift",
+        ] {
+            let sweep = Self.squash(
+                try Self.body(of: "func syncHoverToPointer(", in: file)
+            )
+            for call in [
+                "view.syncHoverToPointer()",
+                "backCount.syncHoverToPointer()",
+                "forwardCount.syncHoverToPointer()",
+            ] {
+                #expect(
+                    sweep.contains(call),
+                    Comment(rawValue: "\(file) \(call)")
+                )
+            }
+        }
+        for file in [
+            "Bar/ShelfCountView.swift", "Bar/ShelfDividerHandle.swift",
+        ] {
+            #expect(
+                Self.squash(
+                    try Self.body(of: "func syncHoverToPointer(", in: file)
+                ).contains("BarHoverHit.ownsPointer(self)"),
+                Comment(rawValue: file)
+            )
+        }
+    }
+
     /// Every bar sync in `updateBars` sits inside a
     /// `holdingRelayout` scope: a sync outside it re-lays the
     /// shelf against the previous plan mid-refresh.
@@ -104,7 +152,37 @@ struct ShelfWiringSeamTests {
                     at: Self.core.appendingPathComponent(file)
                 )
             )
-            // Every hover-on path runs through the one refresh.
+            // Both hover paths — the event and the resting-pointer
+            // re-read (#1665) — share the one gate.
+            for entry in ["func refreshHover(", "func syncHoverToPointer("] {
+                let entryBody = Self.squash(
+                    try Self.body(of: entry, in: file)
+                )
+                #expect(
+                    entryBody.contains("applyHover("),
+                    Comment(rawValue: "\(file) \(entry)")
+                )
+            }
+            #expect(
+                Self.squash(
+                    try Self.body(of: "func syncHoverToPointer(", in: file)
+                ).contains("BarHoverHit.ownsPointer(self)"),
+                Comment(rawValue: file)
+            )
+            // The gate itself: an active Space chip and an inert
+            // App Bar item never hover, whichever path asks.
+            let gate = Self.squash(
+                try Self.body(of: "func applyHover(", in: file)
+            )
+            #expect(
+                gate.contains(
+                    file.hasPrefix("Bar/SpaceBar")
+                        ? "!isActive&&space!=nil&&ownsPointer"
+                        : "!isInert&&ownsPointer"
+                ),
+                Comment(rawValue: file)
+            )
+            // Every hover-on path runs through the one gate.
             #expect(
                 source.components(separatedBy: "isHovered=true").count == 1,
                 Comment(rawValue: file)

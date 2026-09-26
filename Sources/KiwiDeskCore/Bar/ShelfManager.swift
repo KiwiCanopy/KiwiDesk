@@ -92,6 +92,12 @@ final class ShelfManager {
             sections: sections,
             divider: shelf.divider
         )
+        // Placement moves views under a resting pointer and AppKit
+        // sends no exit for it: every hover is re-read here, the
+        // one point where both sections and the panel are placed.
+        shelf.space?.syncHoverToPointer()
+        shelf.app?.syncHoverToPointer()
+        overlay.handle.syncHoverToPointer()
     }
 
     #if DEBUG

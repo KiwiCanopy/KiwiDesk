@@ -145,6 +145,17 @@ render content into it (#1517). Obligations:
   section drew. `ShelfFollowTests` ▸ `relayoutHeld` holds the one
   ordering hazard (no relayout against the old plan while
   `updateBars` syncs); the single wiring site is review's.
+- **Re-read every bar view's hover from the resting pointer at
+  the tail of `ShelfManager.relayout`** (#1665), through the one
+  `BarHoverHit.ownsPointer`, never trust an enter/exit pair alone:
+  a render or a placement moves a view out from under a resting
+  pointer and AppKit sends no exit, so the hover fill stayed on a
+  chip after a click re-laid the bar. The relayout's tail is the
+  one point where both sections and the panel are placed, so a
+  new hover-bearing bar view joins that sweep, and its event path
+  and the re-read share one gate (`SpaceBarStuckHoverTests`,
+  `ShelfWiringSeamTests` ▸ `itemsGateHover`); the pointer read is
+  a seam `makeTestCore` pins (`MouseButtonSeamGuardTests`).
 - **Reduce transparency stands the shelf plate down in
   `ShelfManager.relayout`**, which hands the overlay the gated
   shelf from one `LiquidGlassGate.rendered` call and reads the
