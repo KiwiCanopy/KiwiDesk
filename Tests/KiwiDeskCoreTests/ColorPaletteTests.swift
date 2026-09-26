@@ -187,7 +187,7 @@ struct ColorPaletteTests {
         #expect(all.first?.name == PaletteCatalog.defaultName)
         let names = all.map(\.name)
         #expect(Set(names).count == 10)
-        // The nine authored palettes decoded from the resource.
+        // Every authored palette decoded from the resource.
         #expect(PaletteCatalog.authored().count == 9)
         // The neon showcase palette exists under its shared name —
         // the GUI keys its swatch's "pair with Glow" link on it

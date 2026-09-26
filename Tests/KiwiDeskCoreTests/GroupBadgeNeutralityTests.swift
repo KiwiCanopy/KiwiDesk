@@ -23,7 +23,7 @@ struct GroupBadgeNeutralityTests {
 
     /// The ones that picked a badge of their own, each with the
     /// reason it is exempt. Listed rather than implied: the two
-    /// lists PARTITION the catalog below, so a ninth bundled
+    /// lists PARTITION the catalog below, so a new bundled
     /// palette cannot join without its author saying which kind
     /// it is. A membership list whose complement lives only in a
     /// comment fails open, which is the one thing a guard about
