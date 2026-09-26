@@ -80,6 +80,33 @@ struct HeldSpaceDesk {
         return core
     }
 
+    /// Docked on a `wide` desk whose DELL carries `dellSpaces`,
+    /// one window each (100, 101, …), beside `solo`'s 1–3.
+    func docked(dellSpaces: [SpaceID]) throws -> KiwiCore {
+        let core = try docked()
+        let dellPin = dell.fingerprint
+        var pins: [SpaceID: String] = [:]
+        for space in dellSpaces { pins[space] = dellPin }
+        try core.profiles.save(
+            profile(
+                "wide",
+                screens: [builtIn.fingerprint, dellPin],
+                spaces: [SpaceID(1), SpaceID(2)] + dellSpaces,
+                pins: pins
+            )
+        )
+        core.execute("load_profile", args: [.string("wide")])
+        for (offset, space) in dellSpaces.enumerated() {
+            let window = WindowID(UInt32(100 + offset))
+            core.state.windows.upsert(
+                ManagedWindow(id: window, pid: 1, appName: "W\(offset)")
+            )
+            core.state.workspaces.add(window, to: space)
+        }
+        #expect(core.profiles.currentName == "wide")
+        return core
+    }
+
     func members(_ core: KiwiCore, _ space: Int) -> [WindowID] {
         core.state.workspaces[SpaceID(space)]?.windows ?? []
     }

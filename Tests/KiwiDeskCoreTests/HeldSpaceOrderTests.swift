@@ -4,49 +4,79 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Held Spaces keep the order they left with (#1664), in number
-/// and in the bar: the DELL's 3 and 4 held beside `solo`'s 1–3.
+/// and in the bar.
 @Suite("Held Space order (#1664)", .serialized)
 @MainActor
 struct HeldSpaceOrderTests {
     private let desk = HeldSpaceDesk()
 
-    /// The held Spaces in bar order, each with its origin name.
-    private func heldInOrder(_ core: KiwiCore) -> [[Int]] {
+    /// The held Spaces in bar order, each as "id←origin".
+    private func heldInOrder(_ core: KiwiCore) -> [String] {
         core.state.workspaces.allSpaces.compactMap { space in
             core.state.heldSpaces[space.id].map {
-                [Int(space.id.raw)!, Int($0.name.raw)!]
+                "\(space.id.raw)←\($0.name.raw)"
             }
         }
+    }
+
+    private func reapply(_ core: KiwiCore, declaring extra: [SpaceID])
+        throws
+    {
+        var solo = try core.profiles.read(name: "solo")
+        solo.spaces += extra
+        for id in extra { solo.spaceModes[id] = .bsp }
+        core.apply(profile: solo, cause: .event)
     }
 
     @Test("an unplug that renumbers one held Space keeps the rest after it")
     func holdKeepsTheOrder() throws {
         let core = try desk.docked()
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(heldInOrder(core) == [[5, 3], [6, 4]])
+        #expect(heldInOrder(core) == ["5←3", "6←4"])
     }
 
-    @Test("a reclaim renumbers in bar order, never the dictionary's")
+    /// Six held Spaces, so a walk in the dictionary's hash order
+    /// cannot pass by luck (1 in 720).
+    @Test("a reclaim renumbers in bar order and leaves no empty Space")
     func reclaimKeepsTheOrder() throws {
-        let core = try desk.docked()
+        let dell = (3...8).map { SpaceID($0) }
+        let core = try desk.docked(dellSpaces: dell)
         core.handle(.displaysChanged([desk.builtIn]))
-        var wide = try core.profiles.read(name: "solo")
-        wide.spaces.append(SpaceID(5))
-        wide.spaceModes[SpaceID(5)] = .bsp
-        core.apply(profile: wide, cause: .event)
-        #expect(heldInOrder(core) == [[7, 3], [8, 4]])
-        #expect(desk.members(core, 7) == desk.ids([10, 11]))
-        #expect(desk.members(core, 8) == desk.ids([12]))
+        #expect(
+            heldInOrder(core)
+                == ["9←3", "10←4", "11←5", "12←6", "13←7", "14←8"]
+        )
+        try reapply(core, declaring: [SpaceID(9)])
+        #expect(
+            heldInOrder(core)
+                == ["15←3", "16←4", "17←5", "18←6", "19←7", "20←8"]
+        )
+        for old in 10...14 {
+            #expect(core.state.workspaces[SpaceID(old)] == nil)
+        }
+        #expect(desk.members(core, 20) == desk.ids([105]))
+    }
+
+    @Test("a named Space the walk keeps sits after a renumbered one")
+    func namedSpaceFollowsTheBatch() throws {
+        let core = try desk.docked(dellSpaces: [SpaceID(3), SpaceID("Mail")])
+        core.handle(.displaysChanged([desk.builtIn]))
+        #expect(heldInOrder(core) == ["4←3", "Mail←Mail"])
+        try reapply(core, declaring: [SpaceID(4)])
+        #expect(heldInOrder(core) == ["5←3", "Mail←Mail"])
     }
 
     @Test("a held Space whose name is free and in order keeps it")
     func freeNameInOrderIsKept() throws {
         let core = try desk.docked()
         for window in [10, 11] {
-            core.state.workspaces.add(WindowID(UInt32(window)), to: SpaceID(1))
+            core.state.workspaces.add(
+                WindowID(UInt32(window)),
+                to: SpaceID(1)
+            )
         }
         core.handle(.displaysChanged([desk.builtIn]))
-        #expect(heldInOrder(core) == [[4, 4]])
+        #expect(heldInOrder(core) == ["4←4"])
         let item = try #require(
             core.spaceBarItems(
                 display: desk.builtIn.id,

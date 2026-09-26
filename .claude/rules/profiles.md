@@ -734,10 +734,12 @@ argument is `docs/design-decisions.md` ▸ Profiles ▸ *An unplugged
 screen's Spaces are held, not forwarded*. The obligations:
 
 - **The hold's machinery has one home.** Holding, reclaiming,
-  re-filing, retiring and ending live in
-  `KiwiCore+HeldSpaces.swift`; write `StateCoordinator.heldSpaces`
-  there alone, and add a new way into or out of a hold to that
-  file — a caller elsewhere calls it, as the #634 reset
+  re-filing, retiring and ending live in the `KiwiCore+HeldSpace*`
+  files — `KiwiCore+HeldSpaceOrder.swift` holds the naming walk
+  and the batch's placement, and writes no hold; write
+  `StateCoordinator.heldSpaces` in `KiwiCore+HeldSpaces.swift`
+  alone, and add a new way into or out of a hold there — a caller
+  elsewhere calls it, as the #634 reset
   (`forgetHeldSpaces`) and `delete_space` (`endHold`) do
   (`HeldSpaceTests` ▸ `deleteEndsHold`). Nothing scans for a
   second writer; review is the check.
@@ -769,10 +771,16 @@ screen's Spaces are held, not forwarded*. The obligations:
   `claimedHeldNumberIsReclaimed`); a new such door owes the call.
 - **A hold and a reclaim keep the held Spaces' order (#1664).**
   Both name through the one `KiwiCore.orderedHeldNames`, walking
-  in bar order, and place the batch with `placeHeldBatchLast` —
-  never a walk over the `heldSpaces` dictionary, whose order is
-  the hash's (`HeldSpaceOrderTests` ▸ `holdKeepsTheOrder`,
-  `HeldSpaceOrderTests` ▸ `reclaimKeepsTheOrder`).
+  in bar order — never over the `heldSpaces` dictionary, whose
+  order is the hash's — and place the batch with
+  `placeHeldBatchLast`, which a named Space kept behind a
+  renumbered one needs (`HeldSpaceOrderTests` ▸
+  `holdKeepsTheOrder`, `HeldSpaceOrderTests` ▸
+  `reclaimKeepsTheOrder`, `HeldSpaceOrderTests` ▸
+  `namedSpaceFollowsTheBatch`). A reclaim that renumbers a held
+  Space the set does NOT declare drops the old number through
+  `retireRenumberedSource`, since no apply door prunes it
+  (`HeldSpaceOrderTests` ▸ `reclaimKeepsTheOrder`).
 - **A renumber takes `SpaceID.nextNumber(past:)` over every live
   id, never `smallestFreeNumber(among:)` and never the declared
   set alone.** A Space the prune is about to drop still exists,

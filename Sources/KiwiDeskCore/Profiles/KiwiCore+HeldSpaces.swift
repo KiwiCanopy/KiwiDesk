@@ -87,29 +87,25 @@ extension KiwiCore {
     /// A held id is never a declared one: every apply door calls
     /// this FIRST with the set it makes authoritative, and a held
     /// Space whose number that set claims moves to the next free
-    /// number — unless it is about to go home under that very name
-    /// — and any held after it moves too, keeping their order.
+    /// number — and any held after it moves too, keeping their
+    /// order (#1664). A Space about to go home is left alone.
     func reclaimHeldNames(
         declared: Set<SpaceID>,
         into arrangement: HeldOrigin.Arrangement
     ) {
-        // A Space going home under its own name leaves the walk:
-        // renumbering it would cost it the return.
+        let live = state.workspaces.allSpaces.map(\.id)
         let orphans = state.heldSpaces.keys
             .filter { state.workspaces[$0] == nil }
-            .sorted { $0.raw < $1.raw }
-        let walk = state.workspaces.allSpaces.map(\.id) + orphans
-        let held = walk.filter { id in
+            .sorted {
+                (Int($0.raw) ?? .max, $0.raw) < (Int($1.raw) ?? .max, $1.raw)
+            }
+        let held = (live + orphans).filter { id in
             guard let origin = state.heldSpaces[id] else { return false }
-            let goesHome =
-                origin.name == id
-                && returnsHome(origin, declared: declared, into: arrangement)
-            return !goesHome
+            return !returnsHome(origin, declared: declared, into: arrangement)
         }
         let names = Self.orderedHeldNames(
             held,
-            taken: declared.union(state.heldSpaces.keys)
-                .union(state.workspaces.allSpaces.map(\.id)),
+            taken: declared.union(state.heldSpaces.keys).union(live),
             mustMove: declared.contains
         )
         guard names != held else { return }
@@ -117,10 +113,14 @@ extension KiwiCore {
         for (id, fresh) in zip(held, names) where fresh != id {
             guard let origin = state.heldSpaces[id] else { continue }
             let mode = state.workspaces[id]?.mode ?? .bsp
-            focus.spaceFocus[fresh] = state.workspaces[id]?.focused
+            focus.spaceFocus[fresh] = focus.spaceFocus[id]
             moveMembers(of: id, to: fresh, mode: mode)
             state.heldSpaces[id] = nil
             state.heldSpaces[fresh] = origin
+            if !declared.contains(id) {
+                focus.spaceFocus[id] = nil
+                retireRenumberedSource(id, into: fresh)
+            }
             onLog(
                 "held space \(id.raw) renumbered \(fresh.raw): "
                     + (declared.contains(id)

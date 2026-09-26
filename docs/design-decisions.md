@@ -11950,14 +11950,7 @@ held one takes the next number past the highest live one, a Space
 the prune is about to drop included, since numbering into it would
 merge; so live `1–5` holding another screen's `3, 4, 5` numbers
 them `6, 7, 8`, and the #485 digit top-up gives each a chord in
-order where KiwiDesk manages the config. **The held Spaces keep
-their order** ([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)):
-where only some names collide, a held Space keeps its own name
-only while it numbers above every held Space before it, so a
-screen's `3, 4` beside a declared `3` become `5, 6` — never `4`
-and a `5` after it — and they sit in the bar in that order.
-Keeping more names is refused because the bar and the digit
-chords would then read the screen backwards. The same holds later: a
+order where KiwiDesk manages the config. The same holds later: a
 held id is never a declared one, so an arrangement that applies
 declaring a held Space's number moves the held Space on first,
 unless it is going home under that very name. One rule for every
@@ -11969,6 +11962,22 @@ merges two arrangements into one Space, the merge #1230 ruled out;
 the resident keeping the name with the held Space reachable by a
 bar click alone is refused because it leaves a Space with no
 shortcut, and no next/previous-Space verb exists to reach it by.
+
+:::unreleased
+**The held Spaces keep their order**
+([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
+Where only some names collide, a numbered held Space keeps its own
+name only while it numbers above every held Space before it, so a
+screen's `3, 4` beside a declared `3` become `5, 6` rather than
+the old `3` renumbered to `5` sitting after the old `4`, which kept
+its name. A named Space keeps its name wherever it falls, and the
+batch sits in the bar in the order the screen had it, behind the
+resident Spaces. Keeping more numbers is refused because the bar
+and the digit chords would then read the screen backwards. A held
+Space renumbered only for the order leaves nothing under its old
+number: no apply door prunes an undeclared held Space, so the
+reclaim hands its pin, settings and screen on and drops it.
+:::
 
 **Accepted: the chord outlives the Space.** The top-up writes the
 renumbered Space's digit chord into `gui.json`, and nothing takes
