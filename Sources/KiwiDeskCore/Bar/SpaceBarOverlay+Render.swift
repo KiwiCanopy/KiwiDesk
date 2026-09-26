@@ -128,9 +128,25 @@ extension SpaceBarOverlay {
             fades: fades,
             horizontal: horizontal
         )
+        let expanded = activeIndex(items).flatMap { items[$0].space }
+        let glides = Self.itemsGlide(
+            content: style.inactiveContent,
+            from: shownExpanded,
+            to: expanded
+        )
+        shownExpanded = expanded
+        BarMotion.runLayout {
+            for (index, view) in itemViews.enumerated()
+            where index < itemFrames.count {
+                BarMotion.setFrame(
+                    view,
+                    to: itemFrames[index],
+                    animated: glides
+                )
+            }
+        }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
-            view.frame = itemFrames[index]
             view.configure(
                 identity: item.identity,
                 spaceGlyph: item.spaceGlyph,
@@ -141,7 +157,8 @@ extension SpaceBarOverlay {
                 stateMarkColors: stateMarkColors,
                 overflow: item.overflow,
                 focusInOverflow: item.focusInOverflow,
-                held: item.held
+                held: item.held,
+                collapse: item.collapse
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
@@ -177,6 +194,18 @@ extension SpaceBarOverlay {
         )
         root.isHidden = false
         onRendered()
+    }
+
+    /// Whether a render's items glide to their frames (#1683):
+    /// only where the Space its screen shows changed under a
+    /// content that collapses the others, the one render whose
+    /// run re-sizes because of the switch. Every other lands.
+    nonisolated static func itemsGlide(
+        content: SpaceBarStyle.InactiveContent,
+        from shown: SpaceID?,
+        to expanded: SpaceID?
+    ) -> Bool {
+        content != .apps && shown != nil && shown != expanded
     }
 
     /// Index of the active Space for scroll-follow navigation.

@@ -30,6 +30,17 @@ final class SpaceBarItemView: NSView {
         var stickyScope: StickyScope = .none
     }
 
+    /// How a collapsed Space item draws (#1683,
+    /// `SpaceBarOverlay.Item.collapsed(to:)`).
+    enum Collapse: Equatable {
+        /// The identifier and the window count, in the overflow
+        /// badge's cell.
+        case count
+        /// The identifier alone; `windows` is still announced,
+        /// and none draws it in `emptyItemColor`.
+        case identifier(windows: Int)
+    }
+
     let identifierImage = NSImageView()
     let identifierLabel: NSTextField = {
         let tf = NSTextField(labelWithString: "")
@@ -65,6 +76,8 @@ final class SpaceBarItemView: NSView {
     /// True if focused window is in overflow (#376).
     private(set) var focusInOverflow = false
     private(set) var held: Held?
+    /// What this item draws in place of its glyphs (#1683).
+    private(set) var collapse: Collapse?
     private(set) var isActive = false
     private(set) var isHovered = false
     /// Drag hover state (#372).
@@ -184,7 +197,8 @@ final class SpaceBarItemView: NSView {
         stateMarkColors: StateMarkColors,
         overflow: Int = 0,
         focusInOverflow: Bool = false,
-        held: Held? = nil
+        held: Held? = nil,
+        collapse: Collapse? = nil
     ) {
         if self.identity != identity {
             cancelSpringSweep()
@@ -199,6 +213,7 @@ final class SpaceBarItemView: NSView {
         self.overflow = overflow
         self.focusInOverflow = focusInOverflow
         self.held = held
+        self.collapse = collapse
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
@@ -225,9 +240,14 @@ final class SpaceBarItemView: NSView {
         case .space(let id):
             space = id
         }
-        let windows =
-            apps.reduce(0) { $0 + $1.count } + overflow
-        let name = spaceName(space, windows: windows)
+        let drawn = apps.reduce(0) { $0 + $1.count } + overflow
+        let count: Int
+        if case .identifier(let windows) = collapse {
+            count = windows
+        } else {
+            count = drawn
+        }
+        let name = spaceName(space, windows: count)
         return isActive
             ? L(
                 "space_bar.item.ax.current",

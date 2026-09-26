@@ -35,6 +35,13 @@ extension SettingsValueReadout {
                 spaceBarSeconds(o.springDelay),
                 spaceBarSeconds(n.springDelay)
             )
+        case .spaceBarInactiveContent:
+            return spaceBarChoiceRow(
+                census,
+                o.inactiveContent,
+                n.inactiveContent,
+                AppBarOptions.inactiveContent
+            )
         case .spaceBarGlyphCap:
             return spaceBarRow(
                 census,

@@ -17,6 +17,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// item, and before its `+n` badge (#1689); 0 abuts them. A
     /// drawing reads `resolvedGlyphGap`.
     public var glyphGap: CGFloat = 0
+    /// What a Space its screen does not show draws (#1683); the
+    /// default keeps every Space's glyphs.
+    public var inactiveContent: InactiveContent = .apps
     public var activeIndicator: ActiveIndicator = .outline
     /// Opacity (0.05–1) of unfocused glyph on active space.
     public var activeDimFactor: CGFloat =
@@ -39,6 +42,19 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var focusedItemColor = "#C2790A"
 
     public init() {}
+
+    /// A Space item's content while its screen shows another
+    /// Space (#1683). Glyph cap still caps the shown Space.
+    public enum InactiveContent: String, Sendable, Codable,
+        CaseIterable
+    {
+        /// Its app glyphs, as the shown Space draws them.
+        case apps
+        /// Its identifier and its window count.
+        case count
+        /// Its identifier alone.
+        case identifier
+    }
 }
 
 /// Synthesized Codable conformance must stay in the type's own

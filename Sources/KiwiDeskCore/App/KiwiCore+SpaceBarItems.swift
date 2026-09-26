@@ -52,7 +52,9 @@ extension KiwiCore {
                         originName: $0.name == id ? nil : $0.name
                     )
                 }
-                return item
+                // After the `hide_empty` verdict, which reads
+                // the glyphs the collapse drops.
+                return item.collapsed(to: style.inactiveContent)
             }
     }
 

@@ -61,6 +61,22 @@ extension SpaceBarCard {
                 options: AppBarOptions.activeIndicator
                     .map { ($0.1, $0.0) }
             )
+        case .spaceBarInactiveContent:
+            SegmentedPicker(
+                L("space_bar.inactive_content", "Other Spaces"),
+                selection: style.inactiveContent,
+                options: AppBarOptions.inactiveContent
+                    .map { ($0.1, $0.0) },
+                help: L(
+                    "space_bar.inactive_content.help",
+                    "What the Spaces not on screen show. Apps — "
+                        + "their app glyphs. Window count — how many "
+                        + "windows each holds. Minimal — just each "
+                        + "Space's number, name or icon; an empty one "
+                        + "draws dimmer, except a colour emoji icon, "
+                        + "which cannot dim."
+                )
+            )
         case .spaceBarGlyphCap:
             glyphCapRow
         case .spaceBarGlyphGap:
