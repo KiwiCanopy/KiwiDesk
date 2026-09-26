@@ -3327,6 +3327,12 @@ state and it is purged for good.) Use it when a window "sticks"
 floating or tiled after a `make_floating`/`make_tiled` you no
 longer want.
 
+:::unreleased
+Dragging a window out of a floating-layout Space onto a tiled
+Space on another display sets the same manual override, so it
+stays floating there; `make_auto` clears it too.
+:::
+
 **Example:**
 
 ```lua
