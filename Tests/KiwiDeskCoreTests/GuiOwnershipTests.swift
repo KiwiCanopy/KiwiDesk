@@ -111,11 +111,14 @@ struct GuiOwnershipTests {
         core.tiler.settings.gapsGlobal = .uniform(30)
 
         core.handleMonitorChange()
-        // The composed Standard is applied (Developer: 8 pt
-        // uniform gaps), overriding the hand-set 30 pt gap.
+        // The composed Standard is applied — Developer, tuned
+        // for this screen (#1663) — overriding the 30 pt gap.
         #expect(core.profiles.currentStandard != nil)
+        let standard = StandardProfiles.standard(for: 1)?
+            .settings(sizes: [CGSize(width: 100, height: 100)])
+        #expect(core.tiler.settings.gapsGlobal != .uniform(30))
         #expect(
-            core.tiler.settings.gapsGlobal == .uniform(8)
+            core.tiler.settings.gapsGlobal == standard?.gapsGlobal
         )
     }
 

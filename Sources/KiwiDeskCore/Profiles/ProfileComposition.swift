@@ -78,7 +78,9 @@ public enum ProfileComposition {
             spaces: spaces,
             spaceModes: modes,
             assignment: assignment,
-            settings: layout.settings,
+            settings: layout.settings(
+                sizes: ordered.map(\.frame.size)
+            ),
             sourceTitle: layout.starterTitle
         )
     }

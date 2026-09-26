@@ -14,6 +14,16 @@ public struct StarterTitle: Sendable, Equatable {
         self.otherScreens = max(0, otherScreens)
     }
 
+    /// The title of screens in positional order: the main
+    /// screen's class, plus how many others (#1662).
+    public init(sizes: [CGSize]) {
+        let sizes = StarterSetup.floored(sizes)
+        self.init(
+            shape: ScreenClass.of(sizes[0]),
+            otherScreens: sizes.count - 1
+        )
+    }
+
     /// The English name a saved starter profile takes, like every
     /// shipped preset's: "Ultrawide", "Widescreen + 1".
     public var profileName: String {

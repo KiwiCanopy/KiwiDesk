@@ -190,7 +190,8 @@ struct StarterSetupSeedTests {
                 == StarterSetup.spaceScreens(sizes: live)
         )
         #expect(
-            two?.settings == StarterSetup.settings(sizes: live)
+            two?.settings(sizes: live)
+                == StarterSetup.settings(sizes: live)
         )
     }
 

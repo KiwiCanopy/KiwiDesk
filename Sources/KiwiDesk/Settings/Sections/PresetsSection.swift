@@ -68,12 +68,31 @@ struct PresetsSection: View {
         } else {
             SettingsGroupHeader(liveHeading)
                 .padding(.top, 4)
+            Text(Self.shapeCaption(sizes: liveSizes))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(presets, id: \.name) {
                     presetCard($0, sizes: liveSizes)
                 }
             }
         }
+    }
+
+    /// The shapes the live group's presets are tuned for (#1663):
+    /// every connected screen in position order, named as the
+    /// Starter names a shape — a list, never a count.
+    static func shapeCaption(sizes: [CGSize]) -> String {
+        L(
+            "presets.tuned_for",
+            "Tuned for: %1$@",
+            LocalizedList.join(
+                sizes.map {
+                    StarterTitle.displayName(of: ScreenClass.of($0))
+                }
+            )
+        )
     }
 
     private var liveHeading: String {
