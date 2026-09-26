@@ -36,13 +36,27 @@ struct ShelfNeedParityTests {
             layer: "L",
             glyph: .text("L", tinted: false)
         )
+        // Glyphs and a glyph gap, so a length input the two halves
+        // read apart would show (#1689).
+        var look = SpaceBarLook()
+        look.itemGap = gap
+        look.glyphGap = 3
+        let apps = ["A", "B"].map {
+            SpaceBarItemView.App(
+                name: $0,
+                icon: nil,
+                glyph: nil,
+                focused: false,
+                count: 1
+            )
+        }
         let items =
             [layer]
             + (1...3).map {
                 SpaceBarOverlay.Item(
                     space: SpaceID("\($0)"),
                     spaceGlyph: .text("\($0)", tinted: false),
-                    apps: [],
+                    apps: apps,
                     active: $0 == 1,
                     overflow: 0,
                     focusInOverflow: false
@@ -51,14 +65,12 @@ struct ShelfNeedParityTests {
         let need = SpaceBarOverlay.naturalLength(
             items: items,
             depth: depth,
-            gap: gap,
-            glyphGap: 0
+            look: look
         )
         let lengths = SpaceBarOverlay.itemLengths(
             items,
             depth: depth,
-            gap: gap,
-            glyphGap: 0
+            look: look
         )
         let total = SpaceBarOverlay.runTotal(
             lengths: lengths,
@@ -186,8 +198,7 @@ struct ShelfFloorWiringTests {
             activeExtent: SpaceBarOverlay.activeExtent(
                 items: spaces,
                 depth: depth,
-                gap: settings.kiwishelf.itemGap,
-                glyphGap: settings.spaceBarStyle.resolvedGlyphGap
+                look: settings.spaceBarLook
             ),
             thickness: depth,
             gap: settings.kiwishelf.itemGap

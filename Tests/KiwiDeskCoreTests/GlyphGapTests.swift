@@ -66,7 +66,9 @@ struct GlyphGapTests {
             depth: 32,
             glyphGap: 5
         )
-        #expect(spaced - flush == 15)
+        // Three glyphs and the badge: four slots, three gaps.
+        let gaps: CGFloat = 3 * 5
+        #expect(spaced - flush == gaps)
         #expect(
             SpaceBarItemView.autoLength(
                 appCount: 1,
@@ -163,6 +165,90 @@ struct GlyphGapDrawingTests {
     }
 }
 
+/// The live render: `SpaceBarManager.sync` lays each item out at
+/// the length its glyphs and gaps need, and the walk inside ends
+/// where that length says — the render's own `itemLengths` call.
+@Suite("Glyph gap reaches the rendered Space Bar", .serialized)
+@MainActor
+struct GlyphGapRenderTests {
+    private static let gap: CGFloat = 5
+
+    @Test("Each rendered item is as long as its glyphs and gaps")
+    func renderedLengths() throws {
+        LiquidGlassGate.override = { false }
+        var style = SpaceBarLook()
+        style.glyphGap = Self.gap
+        style.liquidGlass = false
+        let apps = ["A", "B", "C"].map {
+            SpaceBarItemView.App(
+                name: $0,
+                icon: nil,
+                glyph: nil,
+                focused: false,
+                count: 1
+            )
+        }
+        let items = [
+            SpaceBarOverlay.Item(
+                space: SpaceID("1"),
+                spaceGlyph: .text("1", tinted: true),
+                apps: apps,
+                active: true,
+                overflow: 2,
+                focusInOverflow: false
+            ),
+            SpaceBarOverlay.Item(
+                space: SpaceID("2"),
+                spaceGlyph: .text("2", tinted: true),
+                apps: [],
+                active: false,
+                overflow: 0,
+                focusInOverflow: false
+            ),
+        ]
+        let manager = SpaceBarManager()
+        manager.sync([
+            SpaceBarManager.Bar(
+                display: barTitleDisplay,
+                items: items,
+                strip: barTitleStrip,
+                style: style,
+                stateMarkColors: StateMarkColors(
+                    sticky: "#ffffff",
+                    floating: "#ffffff"
+                )
+            )
+        ])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let depth = barTitleStrip.height
+        for (index, item) in items.enumerated() {
+            let view = overlay.itemViews[index]
+            #expect(
+                view.frame.width
+                    == SpaceBarItemView.autoLength(
+                        appCount: item.apps.count,
+                        overflow: item.overflow,
+                        depth: depth,
+                        glyphGap: Self.gap
+                    )
+            )
+        }
+        // The walk ends where the length says: the badge's cell
+        // closes one pad short of the item's far end.
+        let first = overlay.itemViews[0]
+        // AppKit lays a resized view out on the next pass; run it.
+        first.layoutSubtreeIfNeeded()
+        let badge = first.overflowBadge
+        #expect(!badge.isHidden)
+        let slack =
+            badge.frame.midX + first.cellLength / 2
+            + SpaceBarItemView.pad - first.bounds.width
+        #expect(abs(slack) < 0.5, "badge cell ends \(slack) off")
+    }
+}
+
 /// The shelf plans the Space Bar's length with the same gap its
 /// items draw (`KiwiCore.shelfPlan`).
 @Suite("Glyph gap reaches the shelf plan")
@@ -219,6 +305,7 @@ struct GlyphGapPlanTests {
     /// Two Spaces of three glyphs: two gaps each.
     @Test("The planned length grows by the items' gaps")
     func planCountsGaps() {
-        #expect(spaceSegment(gap: 5) - spaceSegment(gap: 0) == 20)
+        let gaps: CGFloat = 2 * 2 * 5
+        #expect(spaceSegment(gap: 5) - spaceSegment(gap: 0) == gaps)
     }
 }
