@@ -37,6 +37,7 @@ struct GroupBadgeNeutralityTests {
         "Sunset": "a warm badge echoing the palette temperature",
         "Ultraviolet": "a cool badge, same reason",
         "Kiwi Neon": "the neon showcase's own accent",
+        "Nightfall": "a slate badge from its own blue-grey family",
     ]
 
     /// Being LISTED as a chooser is a claim about the palette,

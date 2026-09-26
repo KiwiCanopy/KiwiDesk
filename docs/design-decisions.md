@@ -9869,6 +9869,22 @@ grey's own home contrast — the lightness half of the vanish, which
 a near-black grey at in-band alpha would otherwise clear on every
 pair clause.
 
+:::unreleased
+**Nightfall's focused accent is orange, not its theme's magenta.**
+Nightfall borrows the night-blue family of a well-known editor
+theme under its own name. It uses no credit line, since colour
+values name no one and a borrowed name would read as an
+endorsement. The theme's signature pair is blue with a magenta.
+Under protanopia that magenta measures 0.16 against the blue, so a
+protanope would see the focused window and the active Space as
+one colour. The focused accent is the theme's orange (`#FF9E64`)
+instead, the one hue in the family that clears the two-accent rule
+(`SpaceBarAccentSeparationTests`). Its idle identifier and its
+section divider are the palette's tight margins (2.43:1 and
+2.14:1 over white). A later darkening of its fill has to re-clear
+them rather than assume them.
+:::
+
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
 reason — ink contrast on a dark pane — and that is a *lightness*
@@ -11218,7 +11234,7 @@ effect **links to its control** instead of writing it — Neon's
 swatch carries a link that reveals the Glow toggle — and a future
 palette that genuinely needs to recommend non-color settings takes
 a schema-level "recommended settings" sidecar, never a magic-name
-side-effect. The nine built-ins are read-only with reserved names
+side-effect. The built-ins are read-only with reserved names
 (a user palette can't shadow one — rename/delete are *omitted*,
 not greyed, because the constraint is
 never-meaningful-for-this-kind, not mode-inert); "Kiwi (Default)"

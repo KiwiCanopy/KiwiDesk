@@ -159,7 +159,7 @@ struct DragPairSeparationTests {
         // `PaletteCatalog.authored()` soft-fails to `[]`, so
         // without this the sweep silently shrinks to the derived
         // default and still passes.
-        #expect(palettes.count == 9)
+        #expect(palettes.count == 10)
         for palette in palettes {
             let name = palette.name
             // Every palette carries drag keys, the derived default

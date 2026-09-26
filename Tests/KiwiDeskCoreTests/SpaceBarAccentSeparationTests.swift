@@ -119,7 +119,7 @@ struct SpaceBarAccentSeparationTests {
         // the derived default — so without this the sweep would
         // silently shrink to one palette and still pass, which is
         // the "guard that cannot fail" this suite exists to avoid.
-        #expect(palettes.count == 9)
+        #expect(palettes.count == 10)
         for palette in palettes {
             let name = palette.name
             // `#expect`, not `#require`: a require here aborts the
