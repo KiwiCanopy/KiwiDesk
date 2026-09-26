@@ -66,6 +66,12 @@ extension SettingsValueReadout {
                 percent(Double(o.cornerRoundness) / 100),
                 percent(Double(n.cornerRoundness) / 100)
             )
+        case .highlightWidth:
+            return spaceBarPointsRow(
+                census,
+                o.highlightWidth,
+                n.highlightWidth
+            )
         case .itemGap:
             return spaceBarPointsRow(census, o.itemGap, n.itemGap)
         case .fontSizeAuto:

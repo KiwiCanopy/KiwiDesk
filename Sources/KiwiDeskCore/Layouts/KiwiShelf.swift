@@ -46,6 +46,10 @@ public struct KiwiShelf: Sendable, Equatable {
     public var backgroundFit: BackgroundFit = .hug
     /// Corner rounding percentage (0–100) of thickness / 2.
     public var cornerRoundness: CGFloat = 50
+    /// The active indicator's weight (pt): the outline's stroke,
+    /// the edge mark at `edgeMarkRatio` of it (#1680). Clamped to
+    /// `highlightWidthRange` at decode and set.
+    public var highlightWidth: CGFloat = 2
     /// Spacing between items in pt — one rhythm for both bars.
     public var itemGap: CGFloat = 6
     /// Font size in pt; 0 = auto, each bar scaling with thickness.
@@ -82,6 +86,11 @@ public struct KiwiShelf: Sendable, Equatable {
     public static let minThickness: CGFloat = 20
     /// A margin's floor (#1516): flush.
     public static let minMargin: CGFloat = 0
+    /// Bounds of `highlightWidth` in pt (#1680).
+    public static let highlightWidthRange: ClosedRange<CGFloat> = 1...6
+    /// The edge mark's thickness per point of `highlightWidth`:
+    /// the default 2 draws today's 3 pt mark beside the 2 pt ring.
+    public static let edgeMarkRatio: CGFloat = 1.5
     /// Bounds of `minimum` in percent.
     public static let minimumRange: ClosedRange<CGFloat> = 20...80
     /// Alpha of `itemColor` on an idle Space identifier — a rule,
@@ -136,6 +145,20 @@ public struct KiwiShelf: Sendable, Equatable {
             body.count == 8 ? Int(body.suffix(2), radix: 16) ?? 255 : 255
         let idle = Int((CGFloat(alpha) * Self.idleItemAlpha).rounded())
         return "#" + body.prefix(6) + String(format: "%02X", idle)
+    }
+
+    /// `highlightWidth` clamped to `highlightWidthRange`.
+    public static func clampHighlightWidth(_ width: CGFloat) -> CGFloat {
+        min(
+            max(width, highlightWidthRange.lowerBound),
+            highlightWidthRange.upperBound
+        )
+    }
+
+    /// The edge mark's thickness in pt — the one derivation both
+    /// bars' layouts read.
+    public var edgeMarkThickness: CGFloat {
+        highlightWidth * Self.edgeMarkRatio
     }
 
     /// Concrete corner radius in pt for a given thickness.

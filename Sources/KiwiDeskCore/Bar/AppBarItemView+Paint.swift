@@ -96,7 +96,7 @@ extension AppBarItemView {
             accent.isHidden = true
         case .outline:
             accent.isHidden = false
-            accent.layer?.borderWidth = 2
+            accent.layer?.borderWidth = style.highlightWidth
             accent.layer?.borderColor =
                 NSColor(kiwiHex: style.highlightColor).cgColor
             accent.layer?.backgroundColor =

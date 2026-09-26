@@ -648,6 +648,8 @@
   "kiwishelf.font_size": "Dimensione carattere",
   "kiwishelf.font_size.auto": "Dimensione carattere automatica",
   "kiwishelf.font_size.help": "Una sola dimensione per entrambe le barre, così i numeri degli spazi e i titoli della App Bar sono allineati. Quella automatica segue lo spessore.",
+  "kiwishelf.highlight_width": "Spessore dell'evidenziazione",
+  "kiwishelf.highlight_width.help": "Quanto è spesso il segno sullo spazio attuale e sulla finestra con focus — il contorno oppure, in proporzione, il segno sul bordo.",
   "kiwishelf.icon_source.help": "Come vengono disegnate le icone delle app su entrambe le barre. «%1$@» mostra un simbolo monocromatico colorato con i colori degli elementi di KiwiShelf, impostati in %2$@; le app senza simbolo mantengono la propria icona.",
   "kiwishelf.icon_source.label": "Stile simboli app",
   "kiwishelf.icon_source.no_icon": "La Space Bar è disattivata e il «%1$@» della App Bar è «%2$@», quindi non viene disegnata alcuna icona di app.",

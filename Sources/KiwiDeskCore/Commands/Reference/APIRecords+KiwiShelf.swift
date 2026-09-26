@@ -58,6 +58,11 @@ extension APIReference {
                 + "0–100 percent of half the thickness.",
             .number("percent")
         ),
+        "set_highlight_width": APIRecord(
+            "Sets the active indicator's width in points, 1–6; "
+                + "the edge mark scales with it.",
+            .number("width")
+        ),
         "set_item_gap": APIRecord(
             "Sets the spacing between items in points, both bars "
                 + "alike.",

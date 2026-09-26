@@ -241,7 +241,7 @@ extension SpaceBarItemView {
                 )
         case .edgeMark:
             // Positions edge indicator on window-facing side of slot.
-            let mark: CGFloat = 3
+            let mark = style.edgeMarkThickness
             switch style.edge {
             case .top:
                 accent.frame = CGRect(

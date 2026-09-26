@@ -81,7 +81,8 @@ struct SettingsCatalogSiteTests {
         // the KiwiShelf card, one row per field.
         // 102 since the #1517 redesign: the bar Style drawers
         // and their rows, and one of the two colour groups, left.
-        #expect(names.count == 102)
+        // 103 since #1680: the highlight width row.
+        #expect(names.count == 103)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
