@@ -14,8 +14,8 @@ public struct StandardLayout: Sendable, Equatable {
     public let spaceScreens: [SpaceID: Int]
     /// Whether this is the default standard layout for its screen count.
     public let isStandard: Bool
-    /// Associated tiling settings.
-    public let settings: TilingSettings
+    /// Read only through `settings(sizes:)` (#1663).
+    let tuning: Tuning
     /// The starter setup's title; nil for every shipped preset.
     public internal(set) var starterTitle: StarterTitle? = nil
 }
@@ -26,7 +26,7 @@ public enum StandardProfiles {
     public static let workflows: [StandardLayout] = [
         developer, minimalist, focusStack,
         dualDeveloper, coderAndMonitor,
-        commandCenter, visualCreative,
+        commandCenter, designStudio,
     ]
 
     /// Layout catalog for live screens, leading with the hardware
@@ -79,7 +79,7 @@ public enum StandardProfiles {
         ],
         spaceScreens: [:],
         isStandard: true,
-        settings: flavored(gap: 8)
+        tuning: .preset(PresetTuning())
     )
 
     /// Spacious, distraction-free writing or reading.
@@ -90,9 +90,9 @@ public enum StandardProfiles {
         spaceModes: ["1": .scrolling, "3": .monocle, "4": .floating],
         spaceScreens: [:],
         isStandard: false,
-        settings: flavored(gap: 20) { settings in
-            settings.scrolling.anchor = .center
-        }
+        tuning: .preset(
+            PresetTuning(gap: 20, scrollingAnchor: .center)
+        )
     )
 
     /// Heavy multitasking on stacked panels.
@@ -103,7 +103,7 @@ public enum StandardProfiles {
         spaceModes: ["1": .stack, "2": .stack, "4": .monocle],
         spaceScreens: [:],
         isStandard: false,
-        settings: flavored(gap: 10)
+        tuning: .preset(PresetTuning(gap: 10))
     )
 
     // MARK: - 2 monitors (8 spaces, 1–4 main / 5–8 second)
@@ -120,7 +120,7 @@ public enum StandardProfiles {
         ],
         spaceScreens: secondaryRange(5...8, screen: 1),
         isStandard: true,
-        settings: flavored(gap: 8)
+        tuning: .preset(PresetTuning())
     )
 
     /// Build logs, metrics, and database viewers on screen two.
@@ -135,7 +135,7 @@ public enum StandardProfiles {
         ],
         spaceScreens: secondaryRange(5...8, screen: 1),
         isStandard: false,
-        settings: flavored(gap: 8)
+        tuning: .preset(PresetTuning())
     )
 
     // MARK: - 3 monitors (10 spaces, 1–4 / 5–7 / 8–10)
@@ -155,12 +155,12 @@ public enum StandardProfiles {
                 secondaryRange(8...10, screen: 2)
             ) { first, _ in first },
         isStandard: true,
-        settings: flavored(gap: 8)
+        tuning: .preset(PresetTuning())
     )
 
     /// Design and frontend engineering pipelines.
-    static let visualCreative = StandardLayout(
-        name: "Visual Creative & Developer",
+    static let designStudio = StandardLayout(
+        name: "Design Studio",
         screenCount: 3,
         spaceCount: 10,
         spaceModes: [
@@ -173,20 +173,10 @@ public enum StandardProfiles {
                 secondaryRange(8...10, screen: 2)
             ) { first, _ in first },
         isStandard: false,
-        settings: flavored(gap: 10)
+        tuning: .preset(PresetTuning(gap: 10))
     )
 
     // MARK: - Helpers
-
-    private static func flavored(
-        gap: Double,
-        tune: (inout TilingSettings) -> Void = { _ in }
-    ) -> TilingSettings {
-        var settings = TilingSettings()
-        settings.gapsGlobal = .uniform(gap)
-        tune(&settings)
-        return settings
-    }
 
     private static func secondaryRange(
         _ spaces: ClosedRange<Int>,

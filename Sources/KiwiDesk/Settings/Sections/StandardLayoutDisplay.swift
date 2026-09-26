@@ -27,11 +27,8 @@ extension StandardLayout {
                 "presets.command_center.name",
                 "Command Center"
             )
-        case "Visual Creative & Developer":
-            return L(
-                "presets.visual_creative.name",
-                "Visual Creative & Developer"
-            )
+        case "Design Studio":
+            return L("presets.design_studio.name", "Design Studio")
         default:
             return name
         }
@@ -81,9 +78,9 @@ extension StandardLayout {
                 "Work and docs center, communication "
                     + "left, logs and monitoring right."
             )
-        case "Visual Creative & Developer":
+        case "Design Studio":
             return L(
-                "presets.visual_creative.summary",
+                "presets.design_studio.summary",
                 "Frontend IDE and previews center, design "
                     + "canvas left, inspectors right."
             )

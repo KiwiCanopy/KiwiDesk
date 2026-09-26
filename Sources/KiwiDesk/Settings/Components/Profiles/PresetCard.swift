@@ -19,6 +19,11 @@ struct PresetCard: View {
         VStack(alignment: .leading, spacing: 8) {
             counters
             titleRow
+            if let caption = Self.shapeCaption(layout, sizes: sizes) {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             Text(layout.displaySummary)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -58,6 +63,27 @@ struct PresetCard: View {
                 )
             }
         }
+    }
+
+    /// The shape the preset is tuned for on the connected screens
+    /// (#1663), named as the Starter is; nil off the live group
+    /// and on the Starter, whose title already says it.
+    static func shapeCaption(
+        _ layout: StandardLayout,
+        sizes: [CGSize]?
+    ) -> String? {
+        guard let sizes, let main = sizes.first,
+            layout.starterTitle == nil
+        else { return nil }
+        let shape = StarterTitle(
+            shape: ScreenClass.of(main),
+            otherScreens: sizes.count - 1
+        )
+        return L(
+            "presets.tuned_for",
+            "Tuned for %1$@",
+            shape.displayName
+        )
     }
 
     /// Opens layout preview sheet (#859).

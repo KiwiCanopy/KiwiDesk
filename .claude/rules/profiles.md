@@ -140,14 +140,27 @@ change here:
   lookup takes `workflows` — asking the live catalog builds a
   whole setup to read a name.
   (`StarterSetupSeedTests` pins which face carries the Starter.)
+- **A preset's settings are merged ONCE (#1663).** A preset
+  carries a sparse `PresetTuning` — the leaves it chose on
+  purpose — and `StandardLayout.settings(sizes:)` lays it over
+  the shape tuning `StarterSetup.settings(slots:sizes:hosts:)`
+  derives from the preset's OWN plan, each layout's host the
+  screen its first space sits on (`firstHosts`), Scrolling
+  included — the starter's widest-lead rule stays the starter's.
+  Read a layout's settings through that one function, never its
+  `tuning`, and reach `StarterTuning` only through
+  `StarterSetup` (`PresetShapeTuningSeamTests`,
+  `PresetShapeTuningTests`). A leaf joins `PresetTuning` only
+  when a preset sets it on purpose; a value equal to the
+  tuning's base is not a choice.
 - **An unlisted mode in a sparse preset follows the screen.**
   `StandardLayout.mode(of:on:)` answers a space the map does not
-  declare with that screen's `ScreenClass.presetFallback`, never
-  a fixed `bsp` — the layout `ScreenClass` rules out on a laptop,
-  which owns that threshold — and that fallback is NOT the
-  starter's lead order, which moved to Stack on the ultrawides
-  while presets kept Track (#1663). Pass `nil` only where the hardware
-  genuinely is not knowable, and the historic `bsp` stands there;
+  declare with that screen's best layout, `ScreenClass.layouts`'
+  first — the starter's order, Stack first on the ultrawides
+  (#1663) — never a fixed `bsp`, the layout `ScreenClass` rules
+  out on a laptop, which owns that threshold. Pass `nil` only
+  where the hardware genuinely is not knowable, and the historic
+  `bsp` stands there;
   a caller that CAN know and passes nil makes the preview and the
   apply disagree. `SparseModeFallbackTests` holds both arms.
 - **Beside an ultrawide, Scrolling lives on the ultrawides

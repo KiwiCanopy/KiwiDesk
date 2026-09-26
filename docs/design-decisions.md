@@ -4626,14 +4626,33 @@ one-screen presets, so applying either on a laptop with a fixed
 `bsp` fallback silently hands it the one layout `ScreenClass`
 rules out there: below 1900 pt a three-window BSP is already
 under the minimum in one axis. The unlisted mode resolves to
-that screen's own best layout — `ScreenClass.presetFallback`,
-which keeps Track on the ultrawides: leading with Stack is the
-starter's ruling, and presets stay shape-agnostic until #1663.
-Where the hardware genuinely is
+that screen's own best layout, in the starter's order — Stack
+first on the ultrawides, where presets kept Track until they
+took the shape tuning too (#1663). Where the hardware genuinely is
 not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
+
+**A preset is its own choices over the screen's tuning, and it
+names the workflow, never the hardware** (owner ruling, #1663).
+A preset declares only what it chose on purpose — Minimalist's
+wide gap and centred column, the gap of a denser setup — and
+every other setting comes from the same shape tuning the starter
+takes, each layout tuned for the screen it sits on in that
+preset's plan. So Minimalist on a portrait screen scrolls down
+rather than across, and a Stack on an ultrawide gets that
+screen's several mains. A value a preset happened to carry
+because a full `TilingSettings` had to say something is not a
+choice, and it is not kept: the old gap of 8 on three presets
+was the default, so a laptop now gives them its own. The merge
+is one function, so the Presets card, the apply and the
+monitor-change fallback cannot come to disagree about what a
+preset is. Its NAME does not follow the screen — "Developer" is
+how you work, and the shape is what the preset adapts to; only
+the Starter is named by its screen. The card for the connected
+screens says which shape it is tuned for instead, in the
+starter's own words, and nothing stores it.
 
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,

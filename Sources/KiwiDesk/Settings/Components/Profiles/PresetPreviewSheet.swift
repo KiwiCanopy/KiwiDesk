@@ -138,7 +138,7 @@ struct PresetPreviewSheet: View {
         VStack(spacing: 4) {
             LayoutSchematicView(
                 mode: slot.mode,
-                settings: layout.settings,
+                settings: layout.settings(sizes: liveSizes),
                 windows: LayoutSchematic.defaultWindowCount,
                 scale: .tile
             )

@@ -56,17 +56,6 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
         self == .ultrawide || self == .superUltrawide
     }
 
-    /// The layout a sparse preset's unlisted space takes here: the
-    /// class's best, except that the ultrawides keep Track — Stack
-    /// first is the STARTER's ruling, and presets stay
-    /// shape-agnostic until #1663 (`SparseModeFallbackTests`).
-    public var presetFallback: LayoutMode {
-        switch self {
-        case .superUltrawide, .ultrawide: .track
-        case .laptop, .desktop, .pivoted: layouts[0]
-        }
-    }
-
     /// Candidate layouts for this shape, best first. The ABSENCES
     /// are as deliberate as the entries: `track` is out of
     /// desktop/laptop, `monocle` out of desktop and both
