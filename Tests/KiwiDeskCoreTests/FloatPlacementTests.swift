@@ -96,21 +96,24 @@ struct FloatPlacementTests {
         #expect(FloatPlacement.restored(frame, in: region) == frame)
     }
 
-    @Test("A remembered frame on another screen is not restored")
-    func restoredElsewhere() {
-        let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
-        let frame = CGRect(x: 2000, y: 100, width: 700, height: 500)
-        #expect(FloatPlacement.restored(frame, in: region) == nil)
-    }
-
     @Test("A remembered frame past the region is shrunk and confined")
-    func restoredConfined() throws {
+    func restoredConfined() {
         let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
-        let frame = CGRect(x: -100, y: 100, width: 1800, height: 500)
-        let restored = try #require(
-            FloatPlacement.restored(frame, in: region)
-        )
+        let frame = CGRect(x: 1200, y: 100, width: 1800, height: 500)
+        let restored = FloatPlacement.restored(frame, in: region)
         #expect(restored.width == region.width)
         #expect(region.contains(restored))
+    }
+
+    @Test("A restored frame is never shrunk under the app's minimum")
+    func restoredFloorsAtTheMinimum() {
+        let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
+        let frame = CGRect(x: 0, y: 30, width: 1800, height: 500)
+        let restored = FloatPlacement.restored(
+            frame,
+            in: region,
+            minimum: CGSize(width: 1700, height: 0)
+        )
+        #expect(restored.width == 1700)
     }
 }

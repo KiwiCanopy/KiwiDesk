@@ -37,18 +37,29 @@ extension KiwiCore {
             let region = floatGrowBounds(on: space)
         else { return }
         let bound = tiler.sizeBound(for: id)
+        let minimum = CGSize(
+            width: bound?.minWidth ?? 0,
+            height: bound?.minHeight ?? 0
+        )
         // The frame it floated at last, where it still lies on this
         // Space's screen (#1675); consumed either way.
         let remembered = state.floatFrames.removeValue(forKey: id)
-            .flatMap { FloatPlacement.restored($0, in: region) }
+            .flatMap { saved -> CGRect? in
+                guard
+                    TilingEngine.screen(containing: saved.frame)
+                        == TilingEngine.screen(for: space, in: state)
+                else { return nil }
+                return FloatPlacement.restored(
+                    saved.frame,
+                    in: region,
+                    minimum: minimum
+                )
+            }
         let target =
             remembered
             ?? FloatPlacement.centered(
                 in: region,
-                minimum: CGSize(
-                    width: bound?.minWidth ?? 0,
-                    height: bound?.minHeight ?? 0
-                ),
+                minimum: minimum,
                 maximum: CGSize(
                     width: bound?.maxWidth ?? .infinity,
                     height: bound?.maxHeight ?? .infinity
@@ -67,11 +78,16 @@ extension KiwiCore {
         tiler.forgetSizeBound(id)
     }
 
-    /// Remembers where a float sits as it is tiled (#1675), for
-    /// `placeFloating` to return it there.
-    func rememberFloatFrame(_ id: WindowID) {
-        guard let frame = state.windows[id]?.frame else { return }
-        state.floatFrames[id] = currentFrame(of: id, fallback: frame)
+    /// Where a float sits as it is about to be tiled (#1675), for
+    /// `placeFloating` to return it there — never a parked frame,
+    /// since a corner is never a float's original (#1352).
+    func floatFrameToRemember(
+        _ id: WindowID
+    ) -> StateCoordinator.FloatFrame? {
+        guard let window = state.windows[id] else { return nil }
+        let frame = currentFrame(of: id, fallback: window.frame)
+        guard !tiler.looksStashed(frame) else { return nil }
+        return .init(pid: window.pid, frame: frame)
     }
 
     /// The commanded frame outranks the echo-fed state one: a

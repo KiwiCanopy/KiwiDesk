@@ -157,10 +157,16 @@ extension KiwiCore {
         // a window that was no EFFECTIVE float — a floating-mode
         // member's frame is already the user's (`EffectiveFloat`).
         let wasFloating = isEffectiveFloatForPlacement(focused)
-        if !floating, wasFloating {
-            rememberFloatFrame(focused)
-        }
+        // Read before the flip's retile moves it; kept only where
+        // the flip really tiles it — a floating-mode member made
+        // tiled still floats (#1675).
+        let floatFrame = !floating ? floatFrameToRemember(focused) : nil
         state.setFloating(focused, floating)
+        if let floatFrame, wasFloating,
+            !isEffectiveFloatForPlacement(focused)
+        {
+            state.floatFrames[focused] = floatFrame
+        }
         retile()
         // Float direction only: `make_tiled` already animates a
         // real move back into the layout.

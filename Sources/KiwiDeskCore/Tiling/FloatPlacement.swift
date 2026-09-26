@@ -67,19 +67,21 @@ extension FloatPlacement {
         return GeometryUtils.confine(frame, to: region)
     }
 
-    /// A remembered float frame placed back in `region` (#1675):
-    /// nil where its centre no longer lies in the region — another
-    /// screen's frame, which the derived size answers instead —
-    /// else no larger than the region and confined inside it.
+    /// A remembered float frame placed back in `region` (#1675),
+    /// the caller having judged it is on the region's screen: no
+    /// larger than the region, no smaller than a learned app
+    /// `minimum`, and confined inside it wherever it fits.
     public static func restored(
         _ frame: CGRect,
-        in region: CGRect
-    ) -> CGRect? {
-        guard region.contains(CGPoint(x: frame.midX, y: frame.midY))
-        else { return nil }
+        in region: CGRect,
+        minimum: CGSize = .zero
+    ) -> CGRect {
         let size = CGSize(
-            width: min(frame.width, region.width),
-            height: min(frame.height, region.height)
+            width: max(min(frame.width, region.width), minimum.width),
+            height: max(
+                min(frame.height, region.height),
+                minimum.height
+            )
         )
         return GeometryUtils.confine(
             CGRect(origin: frame.origin, size: size),

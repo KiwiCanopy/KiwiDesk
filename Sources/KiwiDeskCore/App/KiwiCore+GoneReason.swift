@@ -54,6 +54,9 @@ extension KiwiCore {
             // The departure's provenance, read at the return
             // (#1414): a re-shown window takes the focus.
             state.rememberClosedDeparture(id)
+            // A close ends the re-float memory (#1675); a vanish
+            // or a hide comes back under the same id and keeps it.
+            state.floatFrames[id] = nil
         }
         if reason == .vanished,
             case .hosted(let space, _) = presence

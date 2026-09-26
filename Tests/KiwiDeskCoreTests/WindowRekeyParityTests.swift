@@ -66,7 +66,10 @@ private func trackedFixture() -> StateCoordinator {
         height: 4
     )
     state.stickyReachOverrides[old] = true
-    state.floatFrames[old] = CGRect(x: 5, y: 6, width: 7, height: 8)
+    state.floatFrames[old] = .init(
+        pid: 7,
+        frame: CGRect(x: 5, y: 6, width: 7, height: 8)
+    )
     state.departedSlots[old] = .init(rank: 0)
     state.closedDepartures.insert(old)
     // A bare id inside a record VALUE (#1387) — the scan's net,

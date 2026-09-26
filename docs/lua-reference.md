@@ -634,7 +634,8 @@ screen gets a tall window; a portrait one gets a wide one. An app
 that will not go that small, or that large, keeps its own limit.
 A window floated again after you tiled it returns to the frame it
 last floated at, while that frame is still on the same screen;
-KiwiDesk forgets it when the window closes or KiwiDesk quits.
+KiwiDesk forgets it when the window closes, its app quits or
+KiwiDesk quits.
 `"keep"`: the window keeps the frame it had in the layout. Never fires on `make_tiled`,
 `make_auto`, or a window already floating, including one on a
 floating-mode Space. Global (per profile, all spaces); no Settings

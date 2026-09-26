@@ -212,6 +212,7 @@ extension StateCoordinator {
         rememberedSpaces[id] = nil
         closedDepartures.remove(id)
         restoredFrames[id] = nil
+        floatFrames[id] = nil
         retireDepartureRecord(of: id)
     }
 
