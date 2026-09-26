@@ -586,6 +586,8 @@ mark the current Space or focused window reads it.
   drop ring and holds their strokes to the width.
 - **A preview of the bar draws the draft's width**, scaled from
   those two readings: the Settings Bars preview carries them on
-  its `BarSpec` (`HighlightWidthPreviewTests`). A new indicator
-  surface owes one of those suites a clause, since neither reads
-  a list of sites.
+  its `BarSpec` (`HighlightWidthPreviewTests` holds the spec).
+  That the strip then strokes with the spec's widths rather
+  than a literal is review's — no clause renders it. A new
+  indicator surface owes one of those suites a clause, since
+  neither reads a list of sites.
