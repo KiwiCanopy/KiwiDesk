@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "Espaços escolhidos para suas telas, cada um com seu próprio layout.",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "Começar a partir de uma predefinição",
-  "presets.tuned_for": "Ajustado para %1$@",
+  "presets.tuned_for": "Sob medida para: %1$@",
   "profile_header.dismiss": "Ignorar",
   "profile_header.menu.ax": "Perfil para editar",
   "profile_header.menu.help": "Escolha um perfil salvo para editar — editá-lo não troca o seu layout.",

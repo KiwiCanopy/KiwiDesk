@@ -91,6 +91,44 @@ struct PresetShapeTuningTests {
         #expect(settings.gapsGlobal == .uniform(6))
     }
 
+    /// An undeclared Space on an ultrawide second screen takes
+    /// that screen's Stack, and so hosts Stack there.
+    @Test("an undeclared Space's mode is its own screen's")
+    func undeclaredModeHostsOnItsScreen() {
+        let layout = StandardLayout(
+            name: "T",
+            screenCount: 2,
+            spaceCount: 2,
+            spaceModes: ["1": .scrolling],
+            spaceScreens: ["2": 1],
+            isStandard: false,
+            tuning: .preset(PresetTuning())
+        )
+        let settings = layout.settings(sizes: [laptop, ultrawide])
+        #expect(settings.stack.masterCount == 2)
+    }
+
+    /// Stack on the laptop main: the starter hosts it on the
+    /// ultrawide it allocates it to, the preset on the laptop.
+    @Test("a preset's Stack is hosted where the preset puts it")
+    func stackHostIsThePlans() {
+        let layout = StandardLayout(
+            name: "T",
+            screenCount: 2,
+            spaceCount: 2,
+            spaceModes: ["1": .stack, "2": .grid],
+            spaceScreens: ["2": 1],
+            isStandard: false,
+            tuning: .preset(PresetTuning())
+        )
+        let sizes = [laptop, ultrawide]
+        #expect(StarterSetup.hosts(sizes)[.stack] == .ultrawide)
+        #expect(
+            layout.settings(sizes: sizes).stack.masterCount
+                == TilingSettings().stack.masterCount
+        )
+    }
+
     /// Scrolling on a laptop main and an ultrawide second: the
     /// starter would tune it for the ultrawide it leads, a preset
     /// for its first space's screen, the laptop (ruling 6).

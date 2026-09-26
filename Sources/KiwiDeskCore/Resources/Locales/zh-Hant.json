@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "為你螢幕精選的空間，每個空間都有各自的佈局。",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "從預置組合開始",
-  "presets.tuned_for": "針對%1$@最佳化",
+  "presets.tuned_for": "最佳化對象：%1$@",
   "profile_header.dismiss": "關閉",
   "profile_header.menu.ax": "要編輯的描述檔",
   "profile_header.menu.help": "挑選一個已儲存的描述檔來編輯 — 編輯它不會切換你的佈局。",

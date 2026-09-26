@@ -4651,9 +4651,11 @@ is one function, so a preset's **Layouts** sheet, the apply and the
 monitor-change fallback cannot come to disagree about what a
 preset is. Its NAME does not follow the screen — "Developer" is
 how you work, and the shape is what the preset adapts to; only
-the Starter is named by its screen. The card for the connected
-screens says which shape it is tuned for instead, in the
-starter's own words, and nothing stores it.
+the Starter is named by its screen. The group of presets for
+the connected screens says ONCE which shape they are tuned for,
+in the starter's own words — the same for every card in it, so a
+per-card copy would say nothing about any one preset — and
+nothing stores it.
 
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,

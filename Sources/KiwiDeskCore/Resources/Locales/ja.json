@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "お使いの画面に合わせて選ばれたスペース。それぞれにレイアウトが設定されます。",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "プリセットから開始",
-  "presets.tuned_for": "%1$@向けに調整",
+  "presets.tuned_for": "最適化の対象: %1$@",
   "profile_header.dismiss": "閉じる",
   "profile_header.menu.ax": "編集するプロファイル",
   "profile_header.menu.help": "編集する保存済みプロファイルを選んでください。編集してもレイアウトは切り替わりません。",

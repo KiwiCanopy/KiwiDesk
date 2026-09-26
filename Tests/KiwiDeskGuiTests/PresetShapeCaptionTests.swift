@@ -5,60 +5,44 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// A preset card for the connected screens says which shape the
-/// preset is tuned for (#1663); the Starter, named by its shape,
-/// and a card for other setups say nothing.
+/// The live preset group says once which shape its presets are
+/// tuned for (#1663), in the Starter's own words.
 @Suite("Preset shape caption (#1663)")
 struct PresetShapeCaptionTests {
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let screen27 = CGSize(width: 2560, height: 1440)
 
-    private func developer() throws -> StandardLayout {
-        try #require(
-            StandardProfiles.workflows.first { $0.name == "Developer" }
-        )
-    }
-
-    @Test("a live preset names its screen's shape")
-    @MainActor func livePresetIsCaptioned() throws {
+    @Test("the caption names the connected screens' shape")
+    @MainActor func captionNamesTheShape() {
         LocalizationManager.shared.select("en")
-        let caption = PresetCard.shapeCaption(
-            try developer(),
-            sizes: [ultrawide]
-        )
-        #expect(caption == "Tuned for Ultrawide")
         #expect(
-            PresetCard.shapeCaption(
-                try developer(),
-                sizes: [ultrawide, screen27]
-            ) == "Tuned for Ultrawide + 1"
+            PresetsSection.shapeCaption(sizes: [ultrawide])
+                == "Tuned for: Ultrawide"
+        )
+        #expect(
+            PresetsSection.shapeCaption(sizes: [ultrawide, screen27])
+                == "Tuned for: Ultrawide + 1"
         )
     }
 
-    @Test("other setups and the Starter carry no caption")
-    @MainActor func noCaption() throws {
-        LocalizationManager.shared.select("en")
-        #expect(PresetCard.shapeCaption(try developer(), sizes: nil) == nil)
-        let starter = StarterSetup.standardLayout(sizes: [ultrawide])
-        #expect(
-            PresetCard.shapeCaption(starter, sizes: [ultrawide]) == nil
-        )
-    }
-
-    @Test("the card draws the caption")
-    func cardDrawsIt() throws {
+    /// Drawn in the live group, under its heading and from the
+    /// LIVE sizes — the other-setups drawer has none to name.
+    @Test("the live group draws the caption once")
+    func liveGroupDrawsIt() throws {
         let root = SourceScan.repoRoot(from: #filePath)
-        let file = root.appendingPathComponent(
-            "Sources/KiwiDesk/Settings/Components/Profiles/"
-                + "PresetCard.swift"
-        )
-        let body = try SourceScan.strippedSource(at: file)
-            .filter { !$0.isWhitespace }
-        #expect(
-            body.contains(
-                "ifletcaption=Self.shapeCaption(layout,sizes:sizes){"
-                    + "Text(caption)"
+        let text = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "PresetsSection.swift"
             )
+        ).filter { !$0.isWhitespace }
+        let needle =
+            "SettingsGroupHeader(liveHeading).padding(.top,4)"
+            + "Text(Self.shapeCaption(sizes:liveSizes))"
+        #expect(text.components(separatedBy: needle).count == 2)
+        #expect(
+            text.components(separatedBy: "Self.shapeCaption(").count
+                == 2
         )
     }
 }

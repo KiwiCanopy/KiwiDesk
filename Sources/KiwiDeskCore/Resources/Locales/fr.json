@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "Des espaces choisis pour vos écrans, chacun avec sa propre disposition.",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "Partir d'un préréglage",
-  "presets.tuned_for": "Ajusté pour %1$@",
+  "presets.tuned_for": "Optimisé pour : %1$@",
   "profile_header.dismiss": "Fermer",
   "profile_header.menu.ax": "Profil à modifier",
   "profile_header.menu.help": "Choisissez un profil enregistré à modifier — le modifier ne remplacera pas votre disposition actuelle.",

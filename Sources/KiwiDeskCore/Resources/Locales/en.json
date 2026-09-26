@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "Spaces chosen for your screens, each with its own layout.",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "Start from a preset",
-  "presets.tuned_for": "Tuned for %1$@",
+  "presets.tuned_for": "Tuned for: %1$@",
   "profile_header.dismiss": "Dismiss",
   "profile_header.menu.ax": "Profile to edit",
   "profile_header.menu.help": "Pick a saved profile to edit — editing it won't switch your layout.",

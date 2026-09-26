@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "Ausgewählte Spaces für deine Bildschirme, jeder mit seinem eigenen Layout.",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "Mit einer Voreinstellung starten",
-  "presets.tuned_for": "Abgestimmt auf %1$@",
+  "presets.tuned_for": "Abgestimmt auf: %1$@",
   "profile_header.dismiss": "Schließen",
   "profile_header.menu.ax": "Profil zum Bearbeiten",
   "profile_header.menu.help": "Wähle ein Profil aus, um es zu bearbeiten — das aktive Layout ändert sich dadurch noch nicht.",

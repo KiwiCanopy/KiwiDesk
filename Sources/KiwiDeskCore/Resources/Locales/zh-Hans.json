@@ -1039,7 +1039,7 @@
   "presets.starter.summary": "根据你的显示器精选的空间，每个空间都有各自的布局。",
   "presets.starter.title.more_screens": "%1$@ + %2$@",
   "presets.title": "从预设开始",
-  "presets.tuned_for": "针对%1$@优化",
+  "presets.tuned_for": "优化对象：%1$@",
   "profile_header.dismiss": "忽略",
   "profile_header.menu.ax": "要编辑的描述文件",
   "profile_header.menu.help": "选择要编辑的已存储描述文件 — 编辑它不会切换你的布局。",
