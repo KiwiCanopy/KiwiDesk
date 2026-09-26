@@ -48,7 +48,27 @@ struct HomeCardBarsTile: View {
         var itemCorner: CGFloat
         var gap: CGFloat
         var indicator: AppBarStyle.ActiveIndicator
+        /// The outline's stroke and the edge mark's thickness at
+        /// the frame's scale (`indicatorWidths`, #1680).
+        var outlineWidth: CGFloat
+        var edgeMarkWidth: CGFloat
         var fontSize: CGFloat
+    }
+
+    /// Schematic points per live point of an indicator: the
+    /// frame draws the shipped 2 pt ring at one `scale`.
+    static let indicatorPerPoint: CGFloat = 0.5
+
+    /// The indicator's two weights for this frame, read off the
+    /// shelf's own width and Core's edge-mark derivation (#1680).
+    func indicatorWidths(
+        _ shelf: KiwiShelf
+    ) -> (outline: CGFloat, edgeMark: CGFloat) {
+        let unit = Self.indicatorPerPoint * scale
+        return (
+            max(1, shelf.resolvedHighlightWidth * unit),
+            shelf.edgeMarkThickness * unit
+        )
     }
 
     /// The App Bar the preview draws: the first layout that
@@ -139,8 +159,9 @@ struct HomeCardBarsTile: View {
             ? spaceSpec(settings.spaceBarLook) : nil
     }
 
-    private func spaceSpec(_ style: SpaceBarLook) -> BarSpec {
+    func spaceSpec(_ style: SpaceBarLook) -> BarSpec {
         let cross = crossSize(style.thickness)
+        let widths = indicatorWidths(style.shelf)
         return BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
@@ -155,15 +176,18 @@ struct HomeCardBarsTile: View {
             ),
             gap: gapSpacing(style.itemGap),
             indicator: style.activeIndicator,
+            outlineWidth: widths.outline,
+            edgeMarkWidth: widths.edgeMark,
             fontSize: style.identifierFontSize(forDepth: cross)
         )
     }
 
-    private func appSpec(
+    func appSpec(
         _ style: AppBarLook,
         vertical: Bool
     ) -> BarSpec {
         let cross = crossSize(style.thickness)
+        let widths = indicatorWidths(style.shelf)
         return BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
@@ -178,6 +202,8 @@ struct HomeCardBarsTile: View {
             ),
             gap: gapSpacing(style.itemGap),
             indicator: style.activeIndicator,
+            outlineWidth: widths.outline,
+            edgeMarkWidth: widths.edgeMark,
             fontSize: style.resolvedFontSize(forThickness: cross)
         )
     }

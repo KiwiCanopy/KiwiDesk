@@ -33,6 +33,8 @@ struct ShelfStripPreviewTests {
             itemCorner: 4,
             gap: 5,
             indicator: .edgeMark,
+            outlineWidth: 1.8,
+            edgeMarkWidth: 2.7,
             fontSize: 12
         )
     }

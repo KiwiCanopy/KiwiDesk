@@ -47,8 +47,8 @@ public struct KiwiShelf: Sendable, Equatable {
     /// Corner rounding percentage (0–100) of thickness / 2.
     public var cornerRoundness: CGFloat = 50
     /// The active indicator's weight (pt): the outline's stroke,
-    /// the edge mark at `edgeMarkRatio` of it (#1680). Clamped to
-    /// `highlightWidthRange` at decode and set.
+    /// the edge mark at `edgeMarkRatio` of it (#1680). A drawing
+    /// reads `resolvedHighlightWidth`, whatever wrote this.
     public var highlightWidth: CGFloat = 2
     /// Spacing between items in pt — one rhythm for both bars.
     public var itemGap: CGFloat = 6
@@ -155,10 +155,16 @@ public struct KiwiShelf: Sendable, Equatable {
         )
     }
 
+    /// `highlightWidth` inside `highlightWidthRange` — what every
+    /// indicator stroke draws.
+    public var resolvedHighlightWidth: CGFloat {
+        Self.clampHighlightWidth(highlightWidth)
+    }
+
     /// The edge mark's thickness in pt — the one derivation both
     /// bars' layouts read.
     public var edgeMarkThickness: CGFloat {
-        highlightWidth * Self.edgeMarkRatio
+        resolvedHighlightWidth * Self.edgeMarkRatio
     }
 
     /// Concrete corner radius in pt for a given thickness.

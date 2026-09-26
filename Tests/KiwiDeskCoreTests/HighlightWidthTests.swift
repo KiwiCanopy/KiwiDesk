@@ -25,6 +25,16 @@ struct HighlightWidthTests {
         #expect(shelf.edgeMarkThickness == 4 * KiwiShelf.edgeMarkRatio)
     }
 
+    /// A writer that skips the clamp still draws inside the range:
+    /// drawings read the resolved width, never the stored one.
+    @Test("A drawing reads the width clamped, whoever wrote it")
+    func readersClamp() {
+        var shelf = KiwiShelf()
+        shelf.highlightWidth = 20
+        #expect(shelf.resolvedHighlightWidth == 6)
+        #expect(shelf.edgeMarkThickness == 6 * KiwiShelf.edgeMarkRatio)
+    }
+
     @Test(
         "Decode clamps to the range",
         arguments: [(0.2, 1.0), (40.0, 6.0), (3.5, 3.5)]
@@ -61,20 +71,24 @@ struct HighlightWidthDrawingTests {
     private static let width: CGFloat = 4
 
     private func spaceItem(
-        _ indicator: AppBarStyle.ActiveIndicator
+        _ indicator: AppBarStyle.ActiveIndicator,
+        edge: AppBarEdge = .top
     ) -> SpaceBarItemView {
         var look = SpaceBarLook()
         look.highlightWidth = Self.width
         look.activeIndicator = indicator
+        look.edge = edge
         let view = SpaceBarItemView(
-            frame: CGRect(x: 0, y: 0, width: 80, height: 40)
+            frame: edge.isHorizontal
+                ? CGRect(x: 0, y: 0, width: 80, height: 40)
+                : CGRect(x: 0, y: 0, width: 40, height: 80)
         )
         view.configure(
             identity: .space(SpaceID("1")),
             spaceGlyph: .text("1", tinted: true),
             apps: [],
             active: true,
-            horizontal: true,
+            horizontal: edge.isHorizontal,
             style: look,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
@@ -86,13 +100,17 @@ struct HighlightWidthDrawingTests {
     }
 
     private func appItem(
-        _ indicator: AppBarStyle.ActiveIndicator
+        _ indicator: AppBarStyle.ActiveIndicator,
+        edge: AppBarEdge = .top
     ) -> AppBarItemView {
         var look = AppBarLook()
         look.highlightWidth = Self.width
         look.activeIndicator = indicator
+        look.edge = edge
         let view = AppBarItemView(
-            frame: NSRect(x: 0, y: 0, width: 120, height: 40)
+            frame: edge.isHorizontal
+                ? NSRect(x: 0, y: 0, width: 120, height: 40)
+                : NSRect(x: 0, y: 0, width: 40, height: 120)
         )
         view.configure(
             id: WindowID(1),
@@ -101,7 +119,7 @@ struct HighlightWidthDrawingTests {
             glyph: nil,
             count: 1,
             active: true,
-            horizontal: true,
+            horizontal: edge.isHorizontal,
             style: look
         )
         view.layout()
@@ -114,13 +132,29 @@ struct HighlightWidthDrawingTests {
         #expect(view.accent.layer?.borderWidth == Self.width)
     }
 
-    @Test("The Space Bar's edge mark takes the derived thickness")
-    func spaceEdgeMark() {
-        let view = spaceItem(.edgeMark)
+    /// The mark's cross extent: its height on a top or bottom
+    /// shelf, its width on a side one.
+    private func markDepth(_ frame: CGRect, _ edge: AppBarEdge) -> CGFloat {
+        edge.isHorizontal ? frame.height : frame.width
+    }
+
+    @Test(
+        "The Space Bar's edge mark takes the derived thickness",
+        arguments: [AppBarEdge.top, .bottom, .left, .right]
+    )
+    func spaceEdgeMark(edge: AppBarEdge) {
+        let view = spaceItem(.edgeMark, edge: edge)
         #expect(
-            view.accent.frame.height
+            markDepth(view.accent.frame, edge)
                 == Self.width * KiwiShelf.edgeMarkRatio
         )
+    }
+
+    @Test("The Space Bar's drop ring strokes at the width")
+    func spaceDropRing() {
+        let view = spaceItem(.outline)
+        view.beginSpringSweep(duration: 0.1, delay: 0)
+        #expect(view.springRing.lineWidth == Self.width)
     }
 
     @Test("The App Bar's outline strokes at the width")
@@ -129,11 +163,14 @@ struct HighlightWidthDrawingTests {
         #expect(view.accent.layer?.borderWidth == Self.width)
     }
 
-    @Test("The App Bar's edge mark takes the derived thickness")
-    func appEdgeMark() {
-        let view = appItem(.edgeMark)
+    @Test(
+        "The App Bar's edge mark takes the derived thickness",
+        arguments: [AppBarEdge.top, .bottom, .left, .right]
+    )
+    func appEdgeMark(edge: AppBarEdge) {
+        let view = appItem(.edgeMark, edge: edge)
         #expect(
-            view.accent.frame.height
+            markDepth(view.accent.frame, edge)
                 == Self.width * KiwiShelf.edgeMarkRatio
         )
     }

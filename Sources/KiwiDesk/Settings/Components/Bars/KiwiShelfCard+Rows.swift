@@ -60,21 +60,7 @@ extension KiwiShelfCard {
                     .kiwishelfStyleCornerRoundness
             )
         case .highlightWidth:
-            PtSlider(
-                label: L("kiwishelf.highlight_width", "Highlight width"),
-                value: shelf.highlightWidth,
-                range: BarSliderBands.highlightWidth,
-                help: L(
-                    "kiwishelf.highlight_width.help",
-                    "How heavy the mark on the current Space and the "
-                        + "focused window draws — the outline, or "
-                        + "the edge mark in proportion."
-                )
-            )
-            .searchAnchored(
-                SettingsCatalog.bars.kiwishelfStyle.children
-                    .kiwishelfStyleHighlightWidth
-            )
+            highlightWidthRow
         case .itemGap:
             PtSlider(
                 label: L("kiwishelf.item_gap", "Item gap"),

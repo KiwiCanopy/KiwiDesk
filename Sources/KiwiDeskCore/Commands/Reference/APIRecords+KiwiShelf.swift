@@ -59,7 +59,9 @@ extension APIReference {
             .number("percent")
         ),
         "set_highlight_width": APIRecord(
-            "Sets the active indicator's width in points, 1–6; "
+            "Sets the active indicator's width in points, "
+                + "\(Int(KiwiShelf.highlightWidthRange.lowerBound))–"
+                + "\(Int(KiwiShelf.highlightWidthRange.upperBound)); "
                 + "the edge mark scales with it.",
             .number("width")
         ),
