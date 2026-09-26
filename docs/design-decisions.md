@@ -4627,8 +4627,8 @@ one-screen presets, so applying either on a laptop with a fixed
 rules out there: below 1900 pt a three-window BSP is already
 under the minimum in one axis. The unlisted mode resolves to
 that screen's own best layout, in the starter's order — Stack
-first on the ultrawides, where presets kept Track until they
-took the shape tuning too (#1663). Where the hardware genuinely is
+first on the ultrawides — since a preset takes the screen's
+shape tuning as the starter does (#1663). Where the hardware genuinely is
 not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
@@ -4642,11 +4642,12 @@ every other setting comes from the same shape tuning the starter
 takes, each layout tuned for the screen it sits on in that
 preset's plan. So Minimalist on a portrait screen scrolls down
 rather than across, and a Stack on an ultrawide gets that
-screen's several mains. A value a preset happened to carry
-because a full `TilingSettings` had to say something is not a
-choice, and it is not kept: the old gap of 8 on three presets
-was the default, so a laptop now gives them its own. The merge
-is one function, so the Presets card, the apply and the
+screen's several mains. A value a preset carries only
+because a full `TilingSettings` has to say something is not a
+choice, so a preset never declares one: a gap equal to the
+shape tuning's own base of 8 is left to the screen, and a
+laptop gives it 6. The merge
+is one function, so a preset's **Layouts** sheet, the apply and the
 monitor-change fallback cannot come to disagree about what a
 preset is. Its NAME does not follow the screen — "Developer" is
 how you work, and the shape is what the preset adapts to; only

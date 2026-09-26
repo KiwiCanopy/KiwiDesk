@@ -143,12 +143,13 @@ change here:
 - **A preset's settings are merged ONCE (#1663).** A preset
   carries a sparse `PresetTuning` — the leaves it chose on
   purpose — and `StandardLayout.settings(sizes:)` lays it over
-  the shape tuning `StarterSetup.settings(slots:sizes:hosts:)`
+  the shape tuning `StarterSetup.presetSettings(slots:sizes:)`
   derives from the preset's OWN plan, each layout's host the
-  screen its first space sits on (`firstHosts`), Scrolling
-  included — the starter's widest-lead rule stays the starter's.
+  screen its first space sits on, Scrolling included — the
+  starter's widest-lead rule stays the starter's, and the host
+  rule is chosen by that entry, never by its caller.
   Read a layout's settings through that one function, never its
-  `tuning`, and reach `StarterTuning` only through
+  `tuning`, and reach `StarterTuning.settings` only through
   `StarterSetup` (`PresetShapeTuningSeamTests`,
   `PresetShapeTuningTests`). A leaf joins `PresetTuning` only
   when a preset sets it on purpose; a value equal to the

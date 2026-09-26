@@ -3,8 +3,8 @@ import Testing
 
 /// A preset's settings are merged in ONE place (#1663):
 /// `StandardLayout.settings(sizes:)` lays the preset's own leaves
-/// over the shape tuning, and `StarterSetup.settings(slots:…)` is
-/// the one door to `StarterTuning`. A caller that reads the raw
+/// over the shape tuning, and `StarterSetup` is the one door to
+/// `StarterTuning.settings`. A caller that reads the raw
 /// tuning or calls `StarterTuning` itself is a second merge.
 @Suite("Preset shape tuning seam (#1663)")
 struct PresetShapeTuningSeamTests {
@@ -37,7 +37,14 @@ struct PresetShapeTuningSeamTests {
     func tuningHasOneReader() throws {
         let files = try core()
         #expect(files.contains { $0.lastPathComponent == Self.home })
-        let readers = try count(".tuning", in: files)
+        var readers = try count(".tuning", in: files)
+        // A second merge in another extension reads it bare.
+        for needle in ["switch tuning", "case .preset", "case .resolved"] {
+            for (file, n) in try count(needle, in: files)
+            where file != Self.home {
+                readers[file, default: 0] += n
+            }
+        }
         #expect(readers.isEmpty, .init(rawValue: "\(readers)"))
         let home = try #require(
             files.first { $0.lastPathComponent == Self.home }

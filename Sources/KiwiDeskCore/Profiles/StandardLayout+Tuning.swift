@@ -44,6 +44,8 @@ extension StandardLayout {
     public func settings(sizes: [CGSize]?) -> TilingSettings {
         switch tuning {
         case .resolved(let settings):
+            // Derived for the screens it was built for; the
+            // starter is rebuilt per screen set, never re-sized.
             return settings
         case .preset(let own):
             var settings = shapeTuning(sizes: sizes)
@@ -65,10 +67,6 @@ extension StandardLayout {
                 mode: mode(of: space, on: ScreenClass.of(sizes[screen]))
             )
         }
-        return StarterSetup.settings(
-            slots: slots,
-            sizes: sizes,
-            hosts: StarterSetup.firstHosts(of: slots, sizes: sizes)
-        )
+        return StarterSetup.presetSettings(slots: slots, sizes: sizes)
     }
 }

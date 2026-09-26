@@ -91,6 +91,30 @@ struct PresetShapeTuningTests {
         #expect(settings.gapsGlobal == .uniform(6))
     }
 
+    /// Scrolling on a laptop main and an ultrawide second: the
+    /// starter would tune it for the ultrawide it leads, a preset
+    /// for its first space's screen, the laptop (ruling 6).
+    @Test("a preset tunes Scrolling for its first space's screen")
+    func scrollingHostIsTheFirstSpace() {
+        let layout = StandardLayout(
+            name: "T",
+            screenCount: 2,
+            spaceCount: 2,
+            spaceModes: ["1": .scrolling, "2": .scrolling],
+            spaceScreens: ["2": 1],
+            isStandard: false,
+            tuning: .preset(PresetTuning())
+        )
+        let sizes = [laptop, ultrawide]
+        #expect(StarterSetup.scrollingHost(sizes) == .ultrawide)
+        let scrolling = layout.settings(sizes: sizes).scrolling
+        #expect(
+            scrolling.slotSize
+                == .fraction(clamping: StarterTuning.standardSlot)
+        )
+        #expect(scrolling.anchor != .center)
+    }
+
     /// Command Center scrolls on space 3 (main) and space 9 (the
     /// third screen): a portrait third screen turns space 9 alone.
     @Test("a Scrolling space on a turned screen takes its direction")

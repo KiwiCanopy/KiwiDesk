@@ -102,7 +102,7 @@ public enum StarterSetup {
 
     /// Each layout's host by its first slot in position order,
     /// Scrolling included — a preset's whole rule (#1663).
-    static func firstHosts(
+    private static func firstHosts(
         of slots: [Slot],
         sizes: [CGSize]
     ) -> [LayoutMode: ScreenClass] {
@@ -173,10 +173,23 @@ public enum StarterSetup {
         )
     }
 
-    /// The shape tuning of `slots` on `sizes` — the one door to
-    /// `StarterTuning`, the starter's and every preset's (#1663).
-    /// `sizes` is non-empty and covers every slot's screen.
-    static func settings(
+    /// A preset's shape tuning: `slots` is its plan on `sizes`,
+    /// each layout hosted by its first slot (#1663). `sizes` is
+    /// non-empty and covers every slot's screen.
+    static func presetSettings(
+        slots: [Slot],
+        sizes: [CGSize]
+    ) -> TilingSettings {
+        settings(
+            slots: slots,
+            sizes: sizes,
+            hosts: firstHosts(of: slots, sizes: sizes)
+        )
+    }
+
+    /// The one door to `StarterTuning`, the starter's and every
+    /// preset's; each entry above picks its host rule.
+    private static func settings(
         slots: [Slot],
         sizes: [CGSize],
         hosts: [LayoutMode: ScreenClass]
@@ -207,10 +220,7 @@ public enum StarterSetup {
             isStandard: false,
             tuning: .resolved(settings(sizes: sizes))
         )
-        layout.starterTitle = StarterTitle(
-            shape: ScreenClass.of(sizes[0]),
-            otherScreens: sizes.count - 1
-        )
+        layout.starterTitle = StarterTitle(sizes: sizes)
         return layout
     }
 

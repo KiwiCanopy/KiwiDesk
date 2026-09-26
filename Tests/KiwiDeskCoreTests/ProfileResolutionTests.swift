@@ -124,10 +124,12 @@ struct MonitorChangeTests {
         #expect(
             core.state.workspaces[SpaceID(2)]?.mode == .stack
         )
-        // Its settings are the merge for this screen (#1663).
-        let developer = StandardProfiles.standard(for: 1)?
-            .settings(sizes: [CGSize(width: 100, height: 100)])
+        let developer = try #require(
+            StandardProfiles.standard(for: 1)
+        ).settings(sizes: [CGSize(width: 100, height: 100)])
         #expect(core.tiler.settings == developer)
+        // Tuned for the 100 pt laptop screen (#1663).
+        #expect(core.tiler.settings.gapsGlobal == .uniform(6))
         #expect(
             core.state.workspaces.display(of: SpaceID(1))
                 == DisplayID(1)

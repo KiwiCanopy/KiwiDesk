@@ -72,13 +72,9 @@ struct PresetCard: View {
         _ layout: StandardLayout,
         sizes: [CGSize]?
     ) -> String? {
-        guard let sizes, let main = sizes.first,
-            layout.starterTitle == nil
+        guard let sizes, !sizes.isEmpty, layout.starterTitle == nil
         else { return nil }
-        let shape = StarterTitle(
-            shape: ScreenClass.of(main),
-            otherScreens: sizes.count - 1
-        )
+        let shape = StarterTitle(sizes: sizes)
         return L(
             "presets.tuned_for",
             "Tuned for %1$@",
