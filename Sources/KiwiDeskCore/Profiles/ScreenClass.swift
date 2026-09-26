@@ -51,6 +51,17 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
         of(display.frame.size)
     }
 
+    /// The layout a sparse preset's unlisted space takes here: the
+    /// class's best, except that the ultrawides keep Track — Stack
+    /// first is the STARTER's ruling, and presets stay
+    /// shape-agnostic until #1663 (`SparseModeFallbackTests`).
+    public var presetFallback: LayoutMode {
+        switch self {
+        case .superUltrawide, .ultrawide: .track
+        case .laptop, .desktop, .pivoted: layouts[0]
+        }
+    }
+
     /// Candidate layouts for this shape, best first. The ABSENCES
     /// are as deliberate as the entries: `track` is out of
     /// desktop/laptop, `monocle` out of desktop and both
@@ -58,9 +69,9 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
     /// unusable at 1728 pt). Both ultrawides lead with Stack, its
     /// several mains side by side (#1662). `floating` is in NO
     /// list — one Floating space per setup is a rule about the
-    /// SETUP, owned end to end by
-    /// `StarterAllocation` (architect review, 2026-08-11), which
-    /// also owns each screen's LEAD before this list is read.
+    /// SETUP, owned end to end by `StarterAllocation` (architect
+    /// review, 2026-08-11), which also owns each screen's LEAD
+    /// before this list is read.
     public var layouts: [LayoutMode] {
         switch self {
         case .laptop:

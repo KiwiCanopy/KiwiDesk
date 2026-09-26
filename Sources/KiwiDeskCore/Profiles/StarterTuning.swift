@@ -3,10 +3,11 @@ import Foundation
 
 /// Starter layout parameter defaults tuned for screen shape (#678).
 ///
-/// Still ONE `TilingSettings` per profile: a layout the allocator
-/// places on one screen takes that screen's tuning, and everything
-/// profile-wide — gaps, the minimum window size, Scrolling, which
-/// leads several screens — takes the MAIN screen's (#1662).
+/// Still ONE `TilingSettings` per profile: each layout takes the
+/// tuning of the screen it first lands on (Scrolling's is the
+/// main's wherever the main leads it), and what no layout owns —
+/// gaps, the minimum window size — takes the MAIN screen's
+/// (#1662).
 public enum StarterTuning {
     /// Baseline tuning for starter profiles.
     static func base() -> TilingSettings {
@@ -23,29 +24,27 @@ public enum StarterTuning {
     /// Starter Scrolling slot fraction on standard displays
     /// (#1018, #1662). Explicit rather than `.auto`, and wide
     /// enough that the Settings window, tiled right after
-    /// onboarding, keeps its preview column on a 14" laptop
-    /// (`StarterSlotSettingsFitTests`); the next window peeks in.
-    static let standardSlot = 0.8
-    /// Starter Scrolling slot fraction on ultrawide displays
-    /// (#1018) — 48% of 3440 pt is a 1650 pt column. Read from the
-    /// MAIN screen, so the two mixed setups are ruled: an
-    /// ultrawide SECONDARY keeps `standardSlot` (and that wide
-    /// column); an ultrawide MAIN imposes 30% on a laptop
-    /// secondary (~518 pt — tight, above the 420 pt minimum this
-    /// branch sets). One `slotSize` per profile; per-space
-    /// overrides are the other answer's home.
+    /// onboarding, keeps its preview column on every MacBook's
+    /// default resolution (`StarterSlotSettingsFitTests`); the next
+    /// window peeks in.
+    static let standardSlot = 0.85
+    /// Starter Scrolling slot fraction on both ultrawides (#1018):
+    /// three readable columns. Read from the screen Scrolling first
+    /// lands on, so an ultrawide hosting it imposes 30% on a laptop
+    /// that also scrolls (~518 pt — tight, above the 420 pt
+    /// minimum this branch sets). One `slotSize` per profile.
     static let ultrawideSlot = 0.3
 
     /// Settings for a setup whose main screen is `mainShape`, each
-    /// single-screen layout in `hosts` tuned for the screen it
-    /// sits on (a layout absent from `hosts` takes the main's).
+    /// layout in `hosts` tuned for the screen it first lands on (a
+    /// layout absent from `hosts` takes the main's).
     public static func settings(
         mainShape: ScreenClass,
-        hosts: [LayoutMode: ScreenClass] = [:]
+        hosts: [LayoutMode: ScreenClass]
     ) -> TilingSettings {
         var settings = base()
         tuneProfileWide(&settings, for: mainShape)
-        tuneScrolling(&settings, for: mainShape)
+        tuneScrolling(&settings, for: hosts[.scrolling] ?? mainShape)
         tuneStack(&settings, for: hosts[.stack] ?? mainShape)
         tuneGrid(&settings, for: hosts[.grid] ?? mainShape)
         tuneTrack(&settings, for: hosts[.track] ?? mainShape)
@@ -82,11 +81,18 @@ public enum StarterTuning {
             )
             settings.scrolling.anchor = .center
             settings.scrolling.fillWhenAlone = false
-        case .pivoted:
-            settings.scrolling.orientation = .vertical
-        case .laptop, .desktop:
+        case .pivoted, .laptop, .desktop:
             break
         }
+        settings.scrolling.orientation = scrollingOrientation(for: shape)
+    }
+
+    /// The one answer to which way a screen of `shape` scrolls; the
+    /// per-space direction overrides read it too.
+    static func scrollingOrientation(
+        for shape: ScreenClass
+    ) -> ScrollingParams.Orientation {
+        shape == .pivoted ? .vertical : .horizontal
     }
 
     /// Several mains sit side by side beside a right stack; their

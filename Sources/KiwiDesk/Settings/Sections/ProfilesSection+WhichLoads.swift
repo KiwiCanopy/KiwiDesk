@@ -114,7 +114,10 @@ extension ProfilesSection {
                 "Right now: %1$@ → the built-in %2$@ (no saved "
                     + "profile matches).",
                 screens,
-                standardDisplayName(name)
+                standardDisplayName(
+                    name,
+                    title: model.activeStandardTitle
+                )
             )
         case .placementOnlyStandard(let name, let active):
             // A Lua-owned config keeps owning the tiling, so the
@@ -129,7 +132,10 @@ extension ProfilesSection {
                         + "layout; the built-in %2$@ only places "
                         + "Spaces on screens.",
                     screens,
-                    standardDisplayName(name)
+                    standardDisplayName(
+                        name,
+                        title: model.activeStandardTitle
+                    )
                 )
             }
             return L(
@@ -139,7 +145,10 @@ extension ProfilesSection {
                     + "screens.",
                 screens,
                 active,
-                standardDisplayName(name)
+                standardDisplayName(
+                    name,
+                    title: model.activeStandardTitle
+                )
             )
         case .none:
             return L(

@@ -53,7 +53,9 @@ extension AppDelegate {
         onboardingModel.starterSpaces = { [weak self] in
             self?.starterSpaceCards() ?? []
         }
-        onboardingModel.starterTitle = core.liveStarterTitle
+        onboardingModel.starterTitle = { [weak self] in
+            self?.core.liveStarterTitle()
+        }
         onboardingModel.tilingSettings = { [weak self] in
             self?.core.tiler.settings ?? TilingSettings()
         }

@@ -96,7 +96,9 @@ because two real clients now remove drift — see
 
 ## The starter setup is derived, and its tuning is profile-wide
 
-A fresh install's `Starter` profile is **chosen from the screens
+A fresh install's starter profile — identity
+`StarterSetup.name`, saved under its `StarterTitle` — is
+**chosen from the screens
 that are connected** — `ScreenClass` (shape, in points) →
 `StarterAllocation` (how many spaces, and which layouts) →
 `StarterTuning` (the settings) → `StarterSetup` (assembles). The
@@ -104,22 +106,26 @@ argument, and why it superseded #466's five-per-display ladder,
 is in `docs/design-decisions.md`. The obligations that fall on a
 change here:
 
-- **The tuning is ONE `TilingSettings`: a single-screen layout's
-  facet is its host screen's, everything else the MAIN screen's**
-  (#1662). `StarterTuning.settings(mainShape:hosts:)` reads the
-  host of Stack, Grid and Track from `StarterSetup.hosts`, derived
-  from the one walk; gaps, the minimum window size and Scrolling
-  stay the main's. Do not grow it into a per-display config — the
-  output is one value behind every setting the Settings window
-  shows. The starter's ONE per-space override is Scrolling's
-  direction on a portrait secondary
-  (`StarterSetup.scrollingOverrides`); a second is a ruling, not
-  a tweak. `StarterTuningTests` and `StarterShapeTests` hold it.
+- **The tuning is ONE `TilingSettings`: each layout's facet is
+  the screen it first lands on, gaps and the minimum window size
+  the MAIN screen's** (#1662). `StarterSetup.settings(sizes:)`
+  hands `StarterTuning.settings(mainShape:hosts:)` the hosts from
+  `StarterSetup.hosts`, derived from the one walk; take that
+  door, never a bare `StarterTuning` call with hand-made hosts.
+  Do not grow it into a per-display config — the output is one
+  value behind every setting the Settings window shows.
+- **The starter's per-space overrides are Scrolling DIRECTION
+  alone** (`StarterSetup.scrollingOverrides`, one orientation
+  home in `StarterTuning.scrollingOrientation(for:)`); adding any
+  other per-space override to the starter is a ruling, not a
+  tweak (`StarterShapeTests` ▸ `onlyDirectionOverrides`).
 - **The starter's identity is `StarterSetup.name`; its title is
   `StarterTitle`.** Held spaces, `currentStandard` and the
   monitor-change rescale key on the name, so a shape-derived
-  string never replaces it — a fresh install SAVES under the
-  title and the saved profile carries `isStarterSetup`
+  string never replaces it: `applyStandard` saves the starter
+  under its title and the profile carries `isStarterSetup`, and
+  a reader asking for the title takes `liveStarterTitle()` or
+  `currentStandardTitle` — adoption state, never the file
   (`StarterShapeTests`, `StarterRescaleTests`).
 - **Which entry point a call site takes is a rule, not a
   preference.** `StandardProfiles.workflows` is the
@@ -133,9 +139,11 @@ change here:
   (`StarterSetupSeedTests` pins which face carries the Starter.)
 - **An unlisted mode in a sparse preset follows the screen.**
   `StandardLayout.mode(of:on:)` answers a space the map does not
-  declare with that screen's own best layout, never a fixed
-  `bsp` — the layout `ScreenClass` rules out on a laptop, which
-  owns that threshold. Pass `nil` only where the hardware
+  declare with that screen's `ScreenClass.presetFallback`, never
+  a fixed `bsp` — the layout `ScreenClass` rules out on a laptop,
+  which owns that threshold — and that fallback is NOT the
+  starter's lead order, which moved to Stack on the ultrawides
+  while presets kept Track (#1663). Pass `nil` only where the hardware
   genuinely is not knowable, and the historic `bsp` stands there;
   a caller that CAN know and passes nil makes the preview and the
   apply disagree. `SparseModeFallbackTests` holds both arms.

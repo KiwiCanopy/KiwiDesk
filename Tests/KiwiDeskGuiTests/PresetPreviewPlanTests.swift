@@ -97,7 +97,7 @@ struct PresetPreviewPlanTests {
     /// something other than `bsp` whenever a shape is known, and
     /// to `bsp` exactly when it is not. No class can satisfy that
     /// by accident, `bsp` leading none of the four lists. The
-    /// equality against `shape.layouts.first` beside it is a
+    /// equality against `shape.presetFallback` beside it is a
     /// precision check and would pass on a mirror by itself —
     /// which is why it is not alone.
     @Test("an undeclared mode follows the screen, never bsp")
@@ -116,7 +116,7 @@ struct PresetPreviewPlanTests {
                 drawn.slots.first { $0.space == "1" }
             )
             #expect(undeclared.mode != .bsp)
-            #expect(undeclared.mode == shape.layouts.first)
+            #expect(undeclared.mode == shape.presetFallback)
             // The declared one is untouched by the shape.
             #expect(
                 drawn.slots.first { $0.space == "2" }?.mode == .grid

@@ -136,7 +136,7 @@ extension OnboardingView {
     /// Names the screen the setup was chosen for when it is the
     /// starter (#1662), the plain heading otherwise.
     private var spacesTitle: String {
-        model.starterTitle?.onboardingTitle
+        model.starterTitle()?.onboardingTitle
             ?? L(
                 "onboarding.starter_spaces.title",
                 "Your Spaces are ready"

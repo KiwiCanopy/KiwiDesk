@@ -49,6 +49,10 @@ public final class ProfileManager {
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
     public var currentStandard: String? { standard?.name }
+    /// The live Standard's starter title, nil for a workflow (#1662).
+    public var currentStandardTitle: StarterTitle? { standard?.title }
+    /// Whether the active profile is the starter setup.
+    var activeIsStarterSetup: Bool { active?.isStarterSetup ?? false }
     /// The resolving Standard as one value, `currentStandard`'s
     /// source (#1509).
     private(set) var standard: ActiveStandard?

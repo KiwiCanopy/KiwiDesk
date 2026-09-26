@@ -91,7 +91,9 @@ public enum StarterSetup {
     }
 
     /// The class of the screen each layout first lands on; the
-    /// tuning reads a single-screen layout's from here (#1662).
+    /// tuning reads each layout's from here (#1662). First slot
+    /// wins: the allocator places Stack, Grid and Track once, and
+    /// Scrolling's first slot is the main's wherever it leads.
     static func hosts(_ sizes: [CGSize]) -> [LayoutMode: ScreenClass] {
         let sizes = floored(sizes)
         var hosts: [LayoutMode: ScreenClass] = [:]
@@ -101,22 +103,25 @@ public enum StarterSetup {
         return hosts
     }
 
-    /// The starter's ONE per-space override (#1662): Scrolling on a
-    /// portrait screen that is not the main one scrolls vertically,
-    /// where every other Scrolling space takes the main's direction.
+    /// The starter's only per-space overrides (#1662): a Scrolling
+    /// Space on a screen facing the other way from the one that
+    /// tunes Scrolling takes that screen's direction.
     static func scrollingOverrides(
         _ sizes: [CGSize]
     ) -> [SpaceID: ScrollingOverride] {
         let sizes = floored(sizes)
-        guard ScreenClass.of(sizes[0]) != .pivoted else { return [:] }
+        let tuned = StarterTuning.scrollingOrientation(
+            for: hosts(sizes)[.scrolling] ?? ScreenClass.of(sizes[0])
+        )
         var overrides: [SpaceID: ScrollingOverride] = [:]
-        for slot in slots(sizes)
-        where slot.mode == .scrolling && slot.screen > 0
-            && ScreenClass.of(sizes[slot.screen]) == .pivoted
-        {
-            var vertical = ScrollingOverride()
-            vertical.orientation = .vertical
-            overrides[SpaceID(slot.number)] = vertical
+        for slot in slots(sizes) where slot.mode == .scrolling {
+            let own = StarterTuning.scrollingOrientation(
+                for: ScreenClass.of(sizes[slot.screen])
+            )
+            guard own != tuned else { continue }
+            var direction = ScrollingOverride()
+            direction.orientation = own
+            overrides[SpaceID(slot.number)] = direction
         }
         return overrides
     }

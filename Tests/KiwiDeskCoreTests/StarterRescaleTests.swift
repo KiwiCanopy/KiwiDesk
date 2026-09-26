@@ -75,6 +75,28 @@ struct StarterRescaleTests {
         #expect(core.isOnStarterBaseline)
     }
 
+    /// The onboarding heading and Settings title ask this after the
+    /// seed, from adoption state rather than the file (#1662,
+    /// #1245), and a workflow preset answers nothing.
+    @Test("the live starter title comes from adoption state")
+    func liveStarterTitle() throws {
+        let core = try onStarterBaseline()
+        #expect(
+            core.liveStarterTitle()
+                == StarterTitle(shape: .laptop, otherScreens: 0)
+        )
+        let name = try #require(core.profiles.currentName)
+        try FileManager.default.removeItem(
+            at: core.profiles.fileURL(name: name)
+        )
+        #expect(core.liveStarterTitle() != nil)
+        let workflow = try #require(
+            StandardProfiles.workflows.first { $0.screenCount == 1 }
+        )
+        try core.applyStandard(workflow)
+        #expect(core.liveStarterTitle() == nil)
+    }
+
     @Test("a workflow preset is not the starter baseline")
     func workflowPresetNotBaseline() throws {
         let core = makeGuiManagedCore()

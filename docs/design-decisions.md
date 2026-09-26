@@ -4313,8 +4313,8 @@ included, and a secondary swipe moves that screen onto its own
 Desktop's Space without touching the profile. Shared mode and a
 single display are degenerate cases — the main screen's Desktop
 IS the global one — so their behavior is unchanged, and the
-precedent was already in the tree: the starter setup is "named
-by the main screen".
+precedent was already in the tree: the starter setup's
+profile-wide tuning is the main screen's.
 
 It supersedes #8's recommendation to turn the option off, which
 was wrong-by-default twice over: every multi-display user met
@@ -4505,9 +4505,11 @@ ultrawide the width test misses — is an ultrawide, and past a
 wide is a portrait one, a rotated ultrawide included. Both
 ultrawides lead their tiled layouts with Stack — two mains side
 by side on 21:9, three on 32:9, equal by the accepted #222
-limitation — and BSP exists only in the middle class, producing
-absurd windows above it and unusable ones below. (Owner ruling,
-#1662, which retired "an ultrawide leads with Track".)
+limitation — because the mains keep the work in the middle of
+the screen and the rest in one column, where Track divides the
+whole width among whatever is open. BSP exists only in the
+middle class, producing absurd windows above it and unusable
+ones below. (Owner ruling, #1662.)
 Points and not pixels, because a 5K 27" and a 1440p 27" both
 report 2560 pt and want the same answer, while a Retina laptop
 reports 1728 and wants laptop layouts despite having more pixels
@@ -4535,7 +4537,7 @@ left.
 in Monocle.** The shape rule above decides what a screen is good
 for; it does not decide what the user should be shown FIRST.
 Best-first — a 2560 pt desktop leading with Grid, an ultrawide
-with Track — makes the first thing most new users see their
+with Stack — makes the first thing most new users see their
 windows cut into halves or thirds, the impression that makes
 people close a tiling manager on day one.
 Scrolling is the one mode where nothing is squashed: each window
@@ -4561,12 +4563,13 @@ repeat is still a bug, this one is the feature.
 resolves near-full — one window with a sliver of the next — which
 reads as "my windows were squashed into one" rather than "the
 neighbours are one keystroke away", and the mode's whole argument
-is the second reading. 80% of the axis leaves the next window
+is the second reading. 85% of the axis leaves the next window
 peeking in, and is wide enough that KiwiDesk's own Settings
 window — the first thing tiled after onboarding — keeps its
-preview column on a 14" laptop; at the earlier just-under-half
-it opened cramped, its preview folded away, which read as
-broken (owner ruling, #1662, replacing #1018's two-side-by-side
+preview column at every MacBook's default resolution, the 13"
+Air's 1470 pt included; at the earlier just-under-half it
+opened cramped, its preview folded away, which read as broken
+(owner ruling, #1662, replacing #1018's two-side-by-side
 picture). An ultrawide takes 30% for three readable
 columns, the case `ScrollSize.auto` already documented as wanting
 an explicit size — centred, and a lone window kept at its slot
@@ -4574,9 +4577,10 @@ rather than stretched across 21:9 or 32:9 (#1662). One
 profile-wide value and no per-space overrides: a first-run
 profile full of overrides is a second config the user has to
 understand before changing the first. (Owner ruling.) The one
-exception is direction: Scrolling on a portrait screen that is
-not the main one scrolls vertically through a per-space
-override, since sideways on a tall screen is the mode at its
+exception is direction: a Scrolling space on a screen facing
+the other way from the one that tunes Scrolling takes its own
+screen's direction through a per-space override, since sideways
+on a tall screen — or down a wide one — is the mode at its
 worst (owner ruling, #1662).
 
 **One tuning per profile: a layout's is its screen's, the rest
@@ -4586,9 +4590,12 @@ only question is which screen names it. For a layout the
 allocator places on ONE screen — Stack, Grid, Track — that
 question has an answer that is not a guess: the screen it sits
 on, so a Stack on a portrait secondary puts its stack along the
-bottom (owner ruling, #1662). What stays the main screen's is
-what no one screen owns — gaps, the minimum window size, and
-Scrolling, which leads several screens. It is still one
+bottom (owner ruling, #1662). Scrolling leads several screens,
+so it takes the screen its FIRST space lands on — the main's
+wherever the main leads Scrolling, the wider screen's where a
+narrow portrait main leads Monocle instead. What stays the main
+screen's is what no layout owns — gaps and the minimum window
+size. It is still one
 `TilingSettings`, never a per-display config behind the values
 the Settings window shows.
 
@@ -4601,7 +4608,10 @@ one-screen presets, so applying either on a laptop with a fixed
 `bsp` fallback silently hands it the one layout `ScreenClass`
 rules out there: below 1900 pt a three-window BSP is already
 under the minimum in one axis. The unlisted mode resolves to
-that screen's own best layout. Where the hardware genuinely is
+that screen's own best layout — `ScreenClass.presetFallback`,
+which keeps Track on the ultrawides: leading with Stack is the
+starter's ruling, and presets stay shape-agnostic until #1663.
+Where the hardware genuinely is
 not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
@@ -4609,12 +4619,13 @@ answer than the old one. (Owner ruling.)
 
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,
-Widescreen, Ultrawide, Super Ultrawide, Portrait, "+ N" for more
-screens, and never "Desktop", which names macOS's Mission Control
-Desktop a profile can be bound to — and a fresh install saves it under that title, while
-its identity stays `Starter`: held spaces and the monitor-change
-rescale key on it, and a title would change under them the
-moment a monitor did (#1662). Three presets, one per screen count, plan for a count
+Widescreen, Ultrawide, Super Ultrawide, Portrait, "+ N" for
+more screens, and never "Desktop", which names the Mission
+Control Desktop a profile can be bound to — and saved under
+that title, while its identity stays `Starter`: held spaces and
+the monitor-change rescale key on it, and a title would change
+under them the moment a monitor did (owner ruling, #1662).
+Three presets, one per screen count, plan for a count
 in the abstract. A setup derived from screen shapes cannot
 answer "which two screens?", so a count you are not running
 offers the workflow layouts alone — that is what "For other
@@ -7944,9 +7955,9 @@ Move windows, and it settles two things the first did not have
 to. The offer's condition is "the layout is in play" — a Track
 space in the config this window edits, or a Track verb bound in
 any layer — because the concept the user has met is the LAYOUT
-rather than a binding, and the starter setup seeds a Track space
-on a wide screen, so that user must meet the drawer open without
-ever having chosen the word. And it ranks BELOW Desktop: Desktop
+rather than a binding, and a user can meet a Track space without
+ever having chosen the word, so that user must meet the drawer
+open. And it ranks BELOW Desktop: Desktop
 rows apply to everyone with macOS Spaces, Track rows to one
 layout, so the group reads from the widest audience down. (The
 alternative — Track above Desktop, since Track is KiwiDesk's own
@@ -8665,12 +8676,13 @@ load-bearing whatever the layouts are:
 
 Because the per-space modes, monitor pins, and tuning are
 **profile-scoped** while `gui.json` carries only globals, the
-setup is materialized as a real, adopted **Starter** profile at
+setup is materialized as a real, adopted starter profile — saved
+under its title and flagged `Profile.isStarterSetup` — at
 first run (`seedFirstRunStarterProfile`, after the event loop
 reconciles displays) — the same durable store any saved profile
 uses, so a reload re-applies it and the user owns and edits it
 like any other. The identical setup is also offered as the
-**Starter** preset (`StandardProfiles`), sharing one pure
+starter preset (`StandardProfiles`), sharing one pure
 generator (`StarterSetup`) with the seed so the two never drift.
 It is deliberately **not** the silent `isStandard` fallback:
 landing in a hardware-derived setup on a monitor change would be
@@ -10167,8 +10179,8 @@ bounds and to a step the standard lands on.
 **[Rationale]**
 
 **A short scrolling row does not stretch to fill its axis.**
-(#1356, owner ruling 2026-09-09.) Two windows at the starter
-setup's just-under-half slot leave the last few percent of the
+(#1356, owner ruling 2026-09-09.) Two windows at a
+just-under-half slot leave the last few percent of the
 axis empty, and that remainder reads, from close up, as
 unfinished work: the obvious
 "fix" is to stretch a row shorter than the axis until it fills

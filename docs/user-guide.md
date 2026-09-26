@@ -692,11 +692,8 @@ A fresh install seeds a setup chosen for the screens you have.
 opens in monocle.
 
 :::unreleased
-The slot is 80% of the screen, so the next window peeks in and
-KiwiDesk's own Settings window opens wide enough for its preview;
-on an ultrawide main screen it is 30%, a profile-wide value read
-from the main screen.
-:::
+The slot is 85% of the screen; on an ultrawide or super
+ultrawide it is 30%.
 
 | Your screen | Gets, best first |
 | --- | --- |
@@ -705,6 +702,7 @@ from the main screen.
 | Ultrawide (3000 pt +, or 2.1:1 up to 3:1) | stack · track · grid |
 | Super ultrawide (3:1 and wider, e.g. 32:9) | stack · track · grid |
 | Portrait (taller than wide) | stack · grid · monocle |
+:::
 
 Screens are measured in points, so a 5K 27" and a 1440p 27" get
 the same answer. Every setup gets exactly one Floating space, on
@@ -715,13 +713,16 @@ read from width alone, so a 27" beside an ultrawide opens in
 monocle.
 
 :::unreleased
-A layout is tuned for the screen it sits on, and the rest
-follows the main screen. A laptop main gets 6 pt gaps. A stack
-gets two mains side by side on an ultrawide and three on a super
-ultrawide; on a portrait screen its stack runs along the bottom.
-On an ultrawide main, scrolling centres the focused window and
-keeps a lone window at its slot rather than filling the screen;
-on a portrait screen it scrolls vertically.
+Each layout is tuned for the screen it first lands on, and gaps
+and the minimum window size follow the main screen. A laptop
+main gets 6 pt gaps; an ultrawide or super ultrawide main a
+larger minimum window size. A stack gets two mains side by side
+on an ultrawide and three on a super ultrawide; on a portrait
+screen its stack runs along the bottom. Scrolling on an
+ultrawide or super ultrawide centres the focused window and
+keeps a lone window at its slot size, and each scrolling space
+scrolls the way its own screen faces — vertically on a portrait
+screen.
 :::
 
 While you are still on the starter setup, connecting or removing
@@ -731,7 +732,7 @@ new spaces (up to ten).
 :::unreleased
 It is saved as an ordinary profile named after your main screen
 — **Ultrawide**, say, or **Widescreen + 1** across two screens —
-and the same setup is always available as a preset.
+and the same setup is always available as a preset of that name.
 :::
 
 ### Default Shortcuts

@@ -17,7 +17,10 @@ import Testing
 struct StarterTuningTests {
     @Test("tuning follows the MAIN screen's class")
     func tuningFollowsMainScreen() {
-        let settings = StarterTuning.settings(mainShape: .desktop)
+        let settings = StarterTuning.settings(
+            mainShape: .desktop,
+            hosts: [:]
+        )
         #expect(settings.stack.masterRatio == 0.8)
         #expect(settings.track.newWindow == .ownTrack)
         // At 2560 pt a three-column grid gives 850 pt cells.
@@ -25,15 +28,24 @@ struct StarterTuningTests {
         #expect(settings.grid.rows == 2)
         // A laptop tightens the gaps; its bars keep the one
         // default (#1359, `BarThicknessDefaultTests`).
-        let small = StarterTuning.settings(mainShape: .laptop)
+        let small = StarterTuning.settings(
+            mainShape: .laptop,
+            hosts: [:]
+        )
         #expect(small.gapsGlobal == .uniform(6))
         // Everything that assumes width has to flip.
-        let tall = StarterTuning.settings(mainShape: .pivoted)
+        let tall = StarterTuning.settings(
+            mainShape: .pivoted,
+            hosts: [:]
+        )
         #expect(tall.stack.stackPosition == .bottom)
         #expect(tall.scrolling.orientation == .vertical)
         #expect(tall.grid.splitDirection == .vertical)
         // One master on a 3440 pt screen is an absurd pane.
-        let wide = StarterTuning.settings(mainShape: .ultrawide)
+        let wide = StarterTuning.settings(
+            mainShape: .ultrawide,
+            hosts: [:]
+        )
         #expect(wide.stack.masterCount == 2)
         #expect(wide.track.autoTracks)
         #expect(wide.minWindowSize == 420)

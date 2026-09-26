@@ -17,7 +17,7 @@ public struct StandardLayout: Sendable, Equatable {
     /// Associated tiling settings.
     public let settings: TilingSettings
     /// The starter setup's title; nil for every shipped preset.
-    public var starterTitle: StarterTitle? = nil
+    public internal(set) var starterTitle: StarterTitle? = nil
 }
 
 /// Catalog of shipped standard layouts and live hardware presets (#53, #485).

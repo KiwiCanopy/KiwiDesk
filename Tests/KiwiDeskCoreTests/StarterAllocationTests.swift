@@ -254,7 +254,8 @@ struct StarterAllocationTests {
         // its own list unless its share is three. Where two
         // shapes DO share a first pick — both ultrawides and a
         // portrait lead their lists with Stack (#1662) — the
-        // wider screen draws first, `ultrawideTakesStackFirst`.
+        // wider screen draws first (`StarterShapeTests` ▸
+        // `tuningFollowsHost`).
         //
         // `fillOrder`'s DIRECTION is still guarded, one rule
         // over: `smallestScreen` reads its far end, so reversing

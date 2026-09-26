@@ -36,11 +36,12 @@ extension KiwiCore {
         return profile.isStarterSetup
     }
 
-    /// The starter setup's title for the live screens, or nil when
-    /// the live layout is not the starter (#1662). Reads the
-    /// profile file, so a caller asks once rather than per render.
-    public var liveStarterTitle: StarterTitle? {
-        guard isOnStarterBaseline else { return nil }
+    /// The starter setup's title, or nil when the live layout is
+    /// not the starter (#1662) — answered from adoption state,
+    /// never the profile file (#1245).
+    public func liveStarterTitle() -> StarterTitle? {
+        if let title = profiles.currentStandardTitle { return title }
+        guard profiles.activeIsStarterSetup else { return nil }
         return StarterSetup.standardLayout(
             displays: state.workspaces.allDisplays,
             mainID: PositionalDisplays.liveMainID

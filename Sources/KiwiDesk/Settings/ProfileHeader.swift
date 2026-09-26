@@ -124,7 +124,10 @@ struct ProfileEditTargetMenu: View {
             return L(
                 "profile_header.title.standard",
                 "Standard: %1$@",
-                standardDisplayName(standard)
+                standardDisplayName(
+                    standard,
+                    title: model.activeStandardTitle
+                )
             )
         }
         return L(

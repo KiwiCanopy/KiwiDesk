@@ -90,6 +90,8 @@ final class SettingsModel: ObservableObject {
     @Published var activeProfile: String?
     /// Built-in Standard resolving when no saved profile covers screens (#53).
     @Published var activeStandard: String?
+    /// The live Standard's starter title (#1662).
+    @Published var activeStandardTitle: StarterTitle?
     /// True when live state diverged from saved profile.
     @Published var profileDirty = false
     /// Dashboard edit target: live config or stored profile (#18, #64).

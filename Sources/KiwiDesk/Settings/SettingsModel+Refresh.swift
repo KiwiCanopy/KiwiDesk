@@ -9,6 +9,7 @@ extension SettingsModel {
         sidecarExists = core.guiConfigStore.exists
         activeProfile = core.profiles.currentName
         activeStandard = core.profiles.currentStandard
+        activeStandardTitle = core.profiles.currentStandardTitle
         profileDirty = core.profiles.isDirty
         duplicateDefaultCounts =
             core.profiles.duplicateDefaultCounts()

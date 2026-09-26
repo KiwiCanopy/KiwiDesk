@@ -6,29 +6,32 @@ import Testing
 
 /// The starter Scrolling slot is sized so KiwiDesk's own Settings
 /// window, tiled right after onboarding, keeps its preview column
-/// (#1662). Derived from both constants, so retuning either side
-/// re-asks the question rather than restating an answer.
+/// (#1662). Derived from both constants and the tuned gaps, so
+/// retuning any of them re-asks the question.
 @Suite("Starter slot fits the Settings preview")
 struct StarterSlotSettingsFitTests {
-    /// A 14" MacBook Pro — the narrowest screen the ruling names —
-    /// and the 1080p screen that is the Widescreen class's floor.
+    /// Default point widths: the 13" MacBook Air — the narrowest
+    /// the ruling covers — the 14" MacBook Pro, and a 1080p screen,
+    /// the Widescreen class's floor.
     @Test("a starter slot keeps the Settings preview docked")
     func slotFitsPreview() {
-        for (shape, width) in [
-            (ScreenClass.laptop, CGFloat(1728)),
-            (ScreenClass.desktop, CGFloat(1920)),
-        ] {
-            let settings = StarterTuning.settings(mainShape: shape)
-            let gap: CGFloat = shape == .laptop ? 6 : 8
-            #expect(settings.gapsGlobal == .uniform(gap))
+        for width: CGFloat in [1470, 1512, 1920] {
+            let shape = ScreenClass.of(
+                CGSize(width: width, height: width * 0.62)
+            )
+            let settings = StarterTuning.settings(
+                mainShape: shape,
+                hosts: [:]
+            )
+            let gaps = settings.gapsGlobal
             let slot = settings.scrolling.slotSize.resolved(
-                along: width - 2 * gap,
-                gap: gap,
+                along: width - gaps.outer.left - gaps.outer.right,
+                gap: gaps.inner.horizontal,
                 horizontal: true
             )
             #expect(
                 slot >= SettingsWidthClass.panelBreakpoint,
-                "\(shape): \(slot) pt"
+                "\(width) pt (\(shape)): \(slot) pt"
             )
         }
     }

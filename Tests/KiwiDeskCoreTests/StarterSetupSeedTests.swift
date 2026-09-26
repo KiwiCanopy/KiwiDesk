@@ -190,10 +190,7 @@ struct StarterSetupSeedTests {
                 == StarterSetup.spaceScreens(sizes: live)
         )
         #expect(
-            two?.settings
-                == StarterTuning.settings(
-                    mainShape: ScreenClass.of(live[0])
-                )
+            two?.settings == StarterSetup.settings(sizes: live)
         )
     }
 
@@ -288,7 +285,13 @@ struct StarterSetupSeedTests {
         // profile isn't saved with an empty monitor set.
         let core = makeCore()
         #expect(core.state.workspaces.allDisplays.isEmpty)
+        let screens = core.firstRunDisplays()
         core.seedFirstRunStarterProfile()
+        // A host WITH a screen must author the profile; only a
+        // headless one may skip, or a broken seed reads as headless.
+        if !screens.isEmpty {
+            #expect(core.profiles.currentName != nil)
+        }
         // On any real display this authors the profile with a
         // non-empty monitor set; on a headless runner it logs and
         // skips. Either way it never saves an empty-monitor

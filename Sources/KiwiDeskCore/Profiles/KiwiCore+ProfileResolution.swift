@@ -260,7 +260,8 @@ extension KiwiCore {
         profiles.standardIsLive(
             ActiveStandard(
                 name: composed.sourceName,
-                spaces: Set(composed.spaces)
+                spaces: Set(composed.spaces),
+                title: composed.sourceTitle
             )
         )
     }

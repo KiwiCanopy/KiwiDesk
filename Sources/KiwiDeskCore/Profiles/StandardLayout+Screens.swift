@@ -20,7 +20,7 @@ extension StandardLayout {
         on shape: ScreenClass?
     ) -> LayoutMode {
         if let declared = spaceModes[space] { return declared }
-        return shape?.layouts.first ?? .bsp
+        return shape?.presetFallback ?? .bsp
     }
 
     /// Positional screen index for space, clamped to screen count bounds.

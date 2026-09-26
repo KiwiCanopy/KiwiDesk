@@ -49,17 +49,26 @@ struct StarterShapeTests {
 
     @Test("the ultrawides centre, keep a lone window, and widen")
     func ultrawideTuning() {
-        let wide = StarterTuning.settings(mainShape: .superUltrawide)
+        let wide = StarterTuning.settings(
+            mainShape: .superUltrawide,
+            hosts: [:]
+        )
         #expect(wide.scrolling.anchor == .center)
         #expect(!wide.scrolling.fillWhenAlone)
         #expect(wide.stack.masterCount == 3)
         #expect(wide.stack.stackPosition == .right)
-        let ultra = StarterTuning.settings(mainShape: .ultrawide)
+        let ultra = StarterTuning.settings(
+            mainShape: .ultrawide,
+            hosts: [:]
+        )
         #expect(ultra.scrolling.anchor == .center)
         #expect(!ultra.scrolling.fillWhenAlone)
         #expect(ultra.stack.masterCount == 2)
         // A 16:9 keeps the defaults the ruling left alone.
-        let desk = StarterTuning.settings(mainShape: .desktop)
+        let desk = StarterTuning.settings(
+            mainShape: .desktop,
+            hosts: [:]
+        )
         #expect(desk.scrolling.anchor == .follow)
         #expect(desk.scrolling.fillWhenAlone)
         #expect(desk.stack.masterCount == 1)
@@ -74,14 +83,28 @@ struct StarterShapeTests {
         let settings = StarterSetup.settings(sizes: sizes)
         #expect(settings.stack.masterCount == 2)
         #expect(settings.stack.stackPosition == .right)
-        // Reversed roles: a portrait main hosting Stack beside a
-        // smaller laptop tunes Stack for portrait.
+        // A portrait main beside a WIDER laptop (1728 against
+        // 1440 pt) is the narrowest screen and leads Monocle, then
+        // draws Stack — which is tuned for portrait.
         let tall = [portrait, laptop]
         #expect(StarterSetup.hosts(tall)[.stack] == .pivoted)
         #expect(
             StarterSetup.settings(sizes: tall).stack.stackPosition
                 == .bottom
         )
+        // Host differs from main: a 32:9 secondary draws the Stack
+        // beside a 21:9 main, and gets three mains, not two.
+        #expect(
+            StarterSetup.settings(sizes: [ultrawide, superWide])
+                .stack.masterCount == 3
+        )
+        // Stack lands twice across three screens; the FIRST slot
+        // (the 32:9 main) tunes it, never the later portrait.
+        let three = StarterSetup.settings(
+            sizes: [superWide, screen27, portrait]
+        )
+        #expect(three.stack.masterCount == 3)
+        #expect(three.stack.stackPosition == .right)
     }
 
     @Test("Scrolling on a portrait secondary scrolls vertically")
@@ -101,13 +124,77 @@ struct StarterShapeTests {
             StarterSetup.settings(sizes: sizes).scrolling
                 .override[space]?.orientation == .vertical
         )
-        // The main's Scrolling carries no override, and a portrait
-        // MAIN needs none: its direction is already profile-wide.
+        // The main's Scrolling carries no override.
         #expect(StarterSetup.scrollingOverrides([screen27]).isEmpty)
+    }
+
+    /// A portrait main narrower than its landscape secondary leads
+    /// Monocle, so Scrolling first lands on the landscape screen
+    /// and is tuned for it — never the portrait's vertical.
+    @Test("Scrolling is tuned by the screen it first lands on")
+    func scrollingFollowsItsHost() {
+        for secondary in [screen27, ultrawide] {
+            let sizes = [portrait, secondary]
+            #expect(
+                StarterSetup.hosts(sizes)[.scrolling]
+                    == ScreenClass.of(secondary)
+            )
+            let settings = StarterSetup.settings(sizes: sizes)
+            #expect(settings.scrolling.orientation == .horizontal)
+            #expect(settings.scrolling.override.isEmpty)
+        }
         #expect(
-            StarterSetup.scrollingOverrides([portrait, screen27])
-                .isEmpty
+            StarterSetup.settings(sizes: [portrait, ultrawide])
+                .scrolling.anchor == .center
         )
+    }
+
+    /// The starter's per-space overrides are Scrolling DIRECTION
+    /// only; any other override in any setup is a new ruling.
+    @Test("the starter overrides nothing but scroll direction")
+    func onlyDirectionOverrides() {
+        let shapes = [laptop, screen27, ultrawide, superWide, portrait]
+        var setups = shapes.map { [$0] }
+        for main in shapes {
+            for other in shapes { setups.append([main, other]) }
+        }
+        setups.append([screen27, portrait, CGSize(width: 1280, height: 800)])
+        // A portrait MAIN that leads Scrolling (the 1280 pt laptop is
+        // narrower, so it leads Monocle): vertical is profile-wide,
+        // and the laptop's own Scrolling, if any, turns back.
+        setups.append([portrait, CGSize(width: 1280, height: 800)])
+        for sizes in setups {
+            let settings = StarterSetup.settings(sizes: sizes)
+            // Every Scrolling space scrolls the way its screen faces.
+            for slot in StarterSetup.slots(sizes)
+            where slot.mode == .scrolling {
+                let own = StarterTuning.scrollingOrientation(
+                    for: ScreenClass.of(sizes[slot.screen])
+                )
+                let drawn =
+                    settings.scrolling.override[SpaceID(slot.number)]?
+                    .orientation ?? settings.scrolling.orientation
+                #expect(drawn == own, "\(slot) in \(sizes)")
+            }
+            #expect(settings.bsp.override.isEmpty, "\(sizes)")
+            #expect(settings.stack.override.isEmpty, "\(sizes)")
+            #expect(settings.grid.override.isEmpty, "\(sizes)")
+            #expect(settings.monocle.override.isEmpty, "\(sizes)")
+            for (_, override) in settings.scrolling.override {
+                var direction = ScrollingOverride()
+                direction.orientation = override.orientation
+                #expect(override == direction, "\(sizes)")
+            }
+            // `hosts` keeps the first slot; the tuned single-screen
+            // layouts must really appear once for that to be exact.
+            let slots = StarterSetup.slots(sizes)
+            for mode in [LayoutMode.stack, .grid, .track] {
+                #expect(
+                    slots.filter { $0.mode == mode }.count <= 1,
+                    "\(mode) twice in \(sizes)"
+                )
+            }
+        }
     }
 
     @Test("the setup is titled by its main screen, named Starter")

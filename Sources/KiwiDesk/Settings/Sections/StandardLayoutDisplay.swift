@@ -106,9 +106,15 @@ extension StandardLayout {
     }
 }
 
-/// Resolves standard profile English name to localized display string.
-@MainActor func standardDisplayName(_ name: String) -> String {
-    StandardProfiles.workflows.first { $0.name == name }?
+/// Resolves standard profile English name to localized display
+/// string; the starter answers with its `title` (#1662), never its
+/// identity.
+@MainActor func standardDisplayName(
+    _ name: String,
+    title: StarterTitle?
+) -> String {
+    if name == StarterSetup.name, let title { return title.displayName }
+    return StandardProfiles.workflows.first { $0.name == name }?
         .displayName ?? name
 }
 
