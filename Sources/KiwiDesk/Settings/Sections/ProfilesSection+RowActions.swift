@@ -59,6 +59,15 @@ extension ProfilesSection {
         .font(.caption)
         .linkHover()
         .disabled(summary.isDormant)
+        .help(
+            summary.isDormant
+                ? L(
+                    "profiles.make_default.dormant_help",
+                    "Load this profile once so it has a screen "
+                        + "setup; then it can be the default."
+                )
+                : ""
+        )
     }
 
     /// A default is per screen count, so the link names its count
