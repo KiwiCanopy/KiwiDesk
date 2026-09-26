@@ -85,7 +85,16 @@ final class ShelfDividerHandle: NSView {
     /// drag in flight keeps it, as the exit does.
     func syncHoverToPointer() {
         guard dragStart == nil else { return }
-        setHovered(BarHoverHit.ownsPointer(self))
+        let hovered = BarHoverHit.ownsPointer(self)
+        guard hovered != isHovered else { return }
+        // The cursor follows the ink, as the enter and exit set it.
+        if hovered {
+            _ = Self.backgroundCursor
+            cursor.set()
+        } else {
+            NSCursor.arrow.set()
+        }
+        setHovered(hovered)
     }
 
     override func mouseDown(with event: NSEvent) {

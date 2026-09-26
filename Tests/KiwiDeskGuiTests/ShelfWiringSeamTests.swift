@@ -31,6 +31,54 @@ struct ShelfWiringSeamTests {
         text.split(whereSeparator: \.isWhitespace).joined()
     }
 
+    /// Every hover-bearing bar view is re-read at the tail of the
+    /// shelf's relayout (#1665): both sections, their two counts,
+    /// and the divider grip. A new such view joins this list.
+    @Test("the relayout re-reads every bar hover")
+    func relayoutSweepsEveryHover() throws {
+        let relayout = Self.squash(
+            try Self.body(
+                of: "func relayout(",
+                in: "Bar/ShelfManager.swift"
+            )
+        )
+        for call in [
+            "shelf.space?.syncHoverToPointer()",
+            "shelf.app?.syncHoverToPointer()",
+            "overlay.handle.syncHoverToPointer()",
+        ] {
+            #expect(relayout.contains(call), Comment(rawValue: call))
+        }
+        for file in [
+            "Bar/SpaceBarOverlay+DragDrop.swift",
+            "Bar/AppBarOverlay+Overflow.swift",
+        ] {
+            let sweep = Self.squash(
+                try Self.body(of: "func syncHoverToPointer(", in: file)
+            )
+            for call in [
+                "view.syncHoverToPointer()",
+                "backCount.syncHoverToPointer()",
+                "forwardCount.syncHoverToPointer()",
+            ] {
+                #expect(
+                    sweep.contains(call),
+                    Comment(rawValue: "\(file) \(call)")
+                )
+            }
+        }
+        for file in [
+            "Bar/ShelfCountView.swift", "Bar/ShelfDividerHandle.swift",
+        ] {
+            #expect(
+                Self.squash(
+                    try Self.body(of: "func syncHoverToPointer(", in: file)
+                ).contains("BarHoverHit.ownsPointer(self)"),
+                Comment(rawValue: file)
+            )
+        }
+    }
+
     /// Every bar sync in `updateBars` sits inside a
     /// `holdingRelayout` scope: a sync outside it re-lays the
     /// shelf against the previous plan mid-refresh.
