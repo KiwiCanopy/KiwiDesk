@@ -17,8 +17,11 @@ extension FloatPlacement {
     /// Share of the region's LONG axis, before the bounds below.
     static let longShare: CGFloat = 1.0 / 3.0
     /// The long-axis floor: a third of a laptop's width is
-    /// narrower than most apps draw usefully.
-    static let longFloor: CGFloat = 600
+    /// narrower than most apps draw usefully, and at 600 pt a
+    /// browser still takes its compact layout (device QA,
+    /// 2026-09-26). The short axis takes no floor: two thirds
+    /// is already most of a short screen.
+    static let longFloor: CGFloat = 800
     /// The long-axis cap, as a multiple of the short-axis span:
     /// a third of an ultrawide is a banner, not a window.
     static let longCap: CGFloat = 1.25

@@ -4122,8 +4122,9 @@ acknowledges it and is useful too.
 *The size is measured on the region's short and long axes*, not
 on width and height, so one rule serves landscape and portrait:
 two thirds of the short axis, and a third of the long axis
-floored at 600 pt — a third of a laptop is narrower than most
-apps draw usefully — and capped at 1.25 × the short-axis span,
+floored at 800 pt — a third of a laptop is narrower than most
+apps draw usefully, and at 600 pt a browser still takes its
+compact layout — and capped at 1.25 × the short-axis span,
 since a third of an ultrawide is a banner. A landscape screen
 gets a tall window, a portrait one a wide one. The region is
 `floatGrowBounds`, a placement nothing else will correct, and a
