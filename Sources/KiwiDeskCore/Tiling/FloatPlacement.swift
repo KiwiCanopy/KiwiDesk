@@ -66,4 +66,43 @@ extension FloatPlacement {
         )
         return GeometryUtils.confine(frame, to: region)
     }
+
+    /// A remembered float frame placed back in `region` (#1675),
+    /// the caller having judged it is on the region's screen: no
+    /// larger than the region, no smaller than a learned app
+    /// `minimum`, and confined inside it wherever it fits.
+    public static func restored(
+        _ frame: CGRect,
+        in region: CGRect,
+        minimum: CGSize = .zero
+    ) -> CGRect {
+        let size = CGSize(
+            width: max(min(frame.width, region.width), minimum.width),
+            height: max(
+                min(frame.height, region.height),
+                minimum.height
+            )
+        )
+        return GeometryUtils.confine(
+            CGRect(origin: frame.origin, size: size),
+            to: region
+        )
+    }
+
+    /// Whether a remembered `frame` lies on the screen `region`
+    /// sits on (#1675), each judged by the screen it overlaps most
+    /// among `screens` — the engine's `allScreenBounds` seam. A
+    /// frame or region on no screen is refused, never matched.
+    public static func onSameScreen(
+        _ frame: CGRect,
+        as region: CGRect,
+        among screens: [CGRect]
+    ) -> Bool {
+        func screen(of rect: CGRect) -> CGRect? {
+            GeometryUtils.rect(mostlyContaining: rect, among: screens)
+        }
+        guard let home = screen(of: frame), let target = screen(of: region)
+        else { return false }
+        return home == target
+    }
 }

@@ -31,8 +31,9 @@ struct TravelerRehomeSeamTests {
 
     /// The "screen a frame mostly sits on" rule has ONE home,
     /// shared by `TilingEngine.screen(containing:)`, the pure
-    /// decision and the drawn-menu-bar filing (#1386) — a second
-    /// copy is where they would drift.
+    /// decision, the drawn-menu-bar filing (#1386) and the float
+    /// memory's same-screen verdict (#1675) — a second copy is
+    /// where they would drift.
     @Test("the overlap rule has one home")
     func theOverlapRuleHasOneHome() throws {
         let sites = try SourceScan.identifierSites(
@@ -50,6 +51,7 @@ struct TravelerRehomeSeamTests {
                 "TilingEngine+Layout.swift": 1,
                 "TravelerRehome.swift": 1,
                 "DrawnMenuBars.swift": 1,
+                "FloatPlacement.swift": 1,
             ],
             .init(
                 rawValue: "expected one call per consumer, found "
