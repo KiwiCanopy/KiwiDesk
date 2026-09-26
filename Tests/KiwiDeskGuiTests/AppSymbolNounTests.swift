@@ -12,33 +12,55 @@ import Testing
 ///
 /// Like `ShortcutsPanelNounTests`, this pairs strings ONE catalog
 /// already ships rather than reading a vocabulary, so it is not
-/// the content-guard predicate Family C rules out. It holds
-/// containment only: the option's label, lowercased, must not
-/// appear inside either glyph label. An INFLECTED reuse passes —
-/// `ru`'s nominative option against the genitive its cap label
-/// takes — and stays with review; so does the option colliding
-/// with the catalog's app-icon word, which the glossary row
-/// also forbids.
+/// the content-guard predicate Family C rules out. The glyph rows
+/// are DERIVED: every key whose English value says "glyph", so a
+/// new row joins by being written in the general word.
+///
+/// What it holds is containment of the option's label, lowercased,
+/// inside each glyph row. Its blind spots, the same list the
+/// glossary row names, are review's:
+///
+/// - ONE direction only: a glyph word inside the option's phrase
+///   ("Monochrome glyphs") passes;
+/// - an English plural escape: "Symbols" is not inside a future
+///   "Symbol gap";
+/// - inflection: `ru`'s nominative option against the genitive a
+///   row takes passes;
+/// - the option colliding with the catalog's app-icon word.
 ///
 /// A key a catalog lacks is read from `en.json`, since that is
 /// what the user then sees beside the translated rows.
 @Suite("The symbol option is not named with the glyph word")
 struct AppSymbolNounTests {
     static let option = "app_bar.icon_source.app_font"
-    static let glyphLabels = [
-        "space_bar.glyph_cap", "space_bar.glyph_gap",
-    ]
+
+    /// Every key whose ENGLISH value uses the general glyph word.
+    static func glyphRows(_ english: [String: String]) -> [String] {
+        english
+            .filter {
+                $0.key != option
+                    && $0.value.lowercased().contains("glyph")
+            }
+            .map(\.key)
+            .sorted()
+    }
 
     @Test("no catalog names the symbol option with its glyph word")
     func optionIsNotTheGlyphWord() throws {
         let english = try Self.catalog("en")
+        let rows = Self.glyphRows(english)
+        // The derivation must find the rows #1690 swept, or a
+        // reworded English empties the comparison silently.
+        #expect(rows.contains("space_bar.glyph_cap"))
+        #expect(rows.count > 2)
+        let locales = try Self.catalogNames()
         var compared = 0
-        for locale in try Self.catalogNames() {
+        for locale in locales {
             let catalog = try Self.catalog(locale)
             let name = try #require(
                 catalog[Self.option] ?? english[Self.option]
             ).lowercased()
-            for key in Self.glyphLabels {
+            for key in rows {
                 let label = try #require(
                     catalog[key] ?? english[key]
                 ).lowercased()
@@ -50,14 +72,15 @@ struct AppSymbolNounTests {
                     "\(name)" and \(key) reads "\(label)" — the \
                     general glyph word names the one option \
                     (#1690). Give the option this catalog's \
-                    word for a symbol.
+                    word for a symbol, or the row its glyph word.
                     """
                 )
             }
         }
-        // Counts comparisons, not files: a catalog directory
-        // that decoded to nothing must not pass.
-        #expect(compared > Self.glyphLabels.count)
+        // Derived from the set, not a constant: every row in every
+        // catalog was actually compared.
+        #expect(locales.count > 1)
+        #expect(compared == rows.count * locales.count)
     }
 
     private static func catalogNames() throws -> [String] {

@@ -146,14 +146,22 @@ synonym:
 - **glyph** vs **symbol** — a *glyph* is ANY app mark a bar
   draws, image or App Font ("Glyphs per Space", "Glyph gap",
   "Text and glyphs on both bars"); a *symbol* is the App Font's
-  monochrome mark alone, the `app_font` option of "App symbol
-  style" (#1690, owner ruling 2026-09-26). Never label the
-  option with the glyph word, or a count of glyphs reads as a
-  count of symbols. In a catalog, the two words are the
-  translator's own under `docs/localization-naming.md` ▸
-  Family C, and must differ from each other and from the
-  catalog's word for an app icon — `AppSymbolNounTests` holds
-  the glyph half, by containment.
+  monochrome mark, the `app_font` option of "App symbol style"
+  (#1690, owner ruling 2026-09-26). Never label the option with
+  the glyph word, or a count of glyphs reads as a count of
+  symbols. The one other sanctioned "Symbols" is the icon
+  picker's SF Symbols tab (`icon_picker.symbols`) — the same kind
+  of monochrome mark; a third use of the word owes this row an
+  entry. In a catalog, the two words are the translator's own
+  under `docs/localization-naming.md` ▸ Family C, and must differ
+  from each other and from the catalog's word for an app icon.
+  `AppSymbolNounTests` holds one half: the option's label must
+  not appear inside any row whose English says "glyph". Its
+  residue is review's — containment runs one direction (a glyph
+  word inside the option's phrase passes), an English plural
+  slips past a singular row ("Symbols" against a "Symbol gap"),
+  an inflected reuse passes (`ru`), and the option matching the
+  app-icon word is not compared at all.
 - **title** vs **name** — a *title* is the text a window itself
   reports (`app_bar.set_content`'s `title` / `icon_and_title`,
   `app_bar.set_title_cap`, `space_bar.set_front_app_title_cap`,

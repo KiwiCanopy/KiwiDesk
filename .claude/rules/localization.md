@@ -452,7 +452,10 @@ why they are here rather than beside the views:
   named on another, paired within one catalog (#1316) — so a
   further pairing is buildable rather than ruled out; what the
   page forecloses is the vocabulary register, not a comparison
-  the catalog already contains.
+  the catalog already contains. `AppSymbolNounTests` is the
+  third (#1690): an option whose label must stay out of every
+  row naming the general concept, the rows derived from the
+  English.
 
 ## Registering a new locale
 
