@@ -93,6 +93,9 @@ extension KiwiCore {
             stackSplitHorizontal: stack.stackPosition
                 .splitsHorizontally,
             trackAxisVertical: track.axis == .vertical,
+            scrollVertical: !tiler.settings
+                .resolvedScrolling(for: space.id)
+                .axisIsHorizontal,
             slot: slot,
             frame: frame,
             bounds: bounds
@@ -212,7 +215,7 @@ extension KiwiCore {
                 focused: window,
                 deltaSign: inMaster ? delta : -delta
             )
-        case .scrollWidth(let delta):
+        case .scrollSlot(let delta):
             // Resize grows the slot by a pt delta; the shared
             // writer clamps at the effective minimum, which the
             // mouse path previously skipped.

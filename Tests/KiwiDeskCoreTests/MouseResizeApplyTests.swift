@@ -144,8 +144,8 @@ struct MouseResizeApplyTests {
         #expect(abs(stack.masterRatio - 0.7) < 1e-9)
     }
 
-    @Test("scrollWidth adjusts the slot from the given bounds")
-    func scrollWidthApplies() {
+    @Test("scrollSlot adjusts the slot from the given bounds")
+    func scrollSlotApplies() {
         let core = makeCore()
         let space = space(core, mode: "scrolling")
         // The one case that consumes the extracted `bounds`
@@ -154,7 +154,7 @@ struct MouseResizeApplyTests {
         // delta shrinks because the seed is 95% of that axis —
         // a grow would land on the ceiling (#966) and stop
         // saying anything about the seed, which is this test's
-        // subject; `scrollWidthGrowStopsAtTheAxis` below owns
+        // subject; `scrollSlotGrowStopsAtTheAxis` below owns
         // the other end.
         let gap = core.tiler.settings.gaps(for: space.id)
             .inner.horizontal
@@ -165,7 +165,7 @@ struct MouseResizeApplyTests {
                 horizontal: true
             )
         core.applyResizeAdjustment(
-            .scrollWidth(-100),
+            .scrollSlot(-100),
             for: nil,
             in: space,
             bounds: bounds
@@ -181,8 +181,8 @@ struct MouseResizeApplyTests {
         #expect(abs(after - before + 100) < 0.5)
     }
 
-    @Test("scrollWidth grows stop, like the verb's do")
-    func scrollWidthGrowStopsAtTheAxis() {
+    @Test("scrollSlot grows stop, like the verb's do")
+    func scrollSlotGrowStopsAtTheAxis() {
         // #933's parity claim at the ceiling end (#966): the
         // drag and the keyboard verb share one writer, so a
         // drag cannot bank slot the keyboard path refuses.
@@ -206,7 +206,7 @@ struct MouseResizeApplyTests {
             // holds however the writer behaves (guard-prover).
             let live = core.state.workspaces[SpaceID("1")]!
             core.applyResizeAdjustment(
-                .scrollWidth(400),
+                .scrollSlot(400),
                 for: nil,
                 in: live,
                 bounds: bounds

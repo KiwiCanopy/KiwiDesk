@@ -171,7 +171,9 @@ extension KiwiCore {
             // All deltas are measured from the start frame
             // (where the window really was), not the slot.
             let effective =
-                MouseResize.keepingInnerEdgeChanges(
+                !MouseResize.tradesWithNeighbors(space.mode)
+                ? frame
+                : MouseResize.keepingInnerEdgeChanges(
                     slot: start,
                     frame: frame,
                     neighbors:

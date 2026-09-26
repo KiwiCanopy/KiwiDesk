@@ -54,6 +54,7 @@ struct MouseResizeTests {
             isMaster: true,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: 100),
             bounds: bounds
@@ -69,6 +70,7 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: 100),
             bounds: bounds
@@ -84,6 +86,7 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dh: 100),
             bounds: bounds
@@ -101,6 +104,7 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: 40, dh: -90),
             bounds: bounds
@@ -111,6 +115,7 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: 100, dh: 100),
             bounds: bounds
@@ -121,6 +126,7 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: 4, dh: 6),
             bounds: bounds
@@ -136,6 +142,7 @@ struct MouseResizeTests {
             isMaster: true,
             stackSplitHorizontal: false,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dh: 80),
             bounds: bounds
@@ -151,6 +158,7 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: false,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: 100),
             bounds: bounds
@@ -167,6 +175,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: true,
+                scrollVertical: false,
                 slot: left,
                 frame: grown(left, dw: 100),
                 bounds: bounds
@@ -179,6 +188,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: true,
+                scrollVertical: false,
                 slot: right,
                 frame: grown(right, dw: 100),
                 bounds: bounds
@@ -197,6 +207,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: true,
+                scrollVertical: false,
                 slot: top,
                 frame: grown(top, dh: 80),
                 bounds: bounds
@@ -215,6 +226,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: true,
+                scrollVertical: false,
                 slot: bottom,
                 frame: grown(bottom, dh: 80),
                 bounds: bounds
@@ -230,11 +242,12 @@ struct MouseResizeTests {
             isMaster: false,
             stackSplitHorizontal: true,
             trackAxisVertical: true,
+            scrollVertical: false,
             slot: slot,
             frame: grown(slot, dw: -150),
             bounds: bounds
         )
-        #expect(adjustment == .scrollWidth(-150))
+        #expect(adjustment == .scrollSlot(-150))
     }
 
     @Test("Track translates width/height drag by axis")
@@ -246,6 +259,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: true,
+                scrollVertical: false,
                 slot: slot,
                 frame: grown(slot, dw: 50),
                 bounds: bounds
@@ -257,6 +271,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: true,
+                scrollVertical: false,
                 slot: slot,
                 frame: grown(slot, dh: 80),
                 bounds: bounds
@@ -268,6 +283,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: false,
+                scrollVertical: false,
                 slot: slot,
                 frame: grown(slot, dh: 50),
                 bounds: bounds
@@ -279,6 +295,7 @@ struct MouseResizeTests {
                 isMaster: false,
                 stackSplitHorizontal: true,
                 trackAxisVertical: false,
+                scrollVertical: false,
                 slot: slot,
                 frame: grown(slot, dw: 80),
                 bounds: bounds
@@ -296,6 +313,7 @@ struct MouseResizeTests {
                     isMaster: false,
                     stackSplitHorizontal: true,
                     trackAxisVertical: true,
+                    scrollVertical: false,
                     slot: slot,
                     frame: grown(slot, dw: 100),
                     bounds: bounds

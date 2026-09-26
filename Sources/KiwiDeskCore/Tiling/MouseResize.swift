@@ -13,7 +13,7 @@ public enum ResizeAdjustment: Equatable, Sendable {
     case bspRatioH(CGFloat)
     case bspRatioV(CGFloat)
     case masterRatio(CGFloat)
-    case scrollWidth(CGFloat)
+    case scrollSlot(CGFloat)
     /// The dragged window's share of its stack zone along the
     /// zone's own axis, in points (#941) — the `.trackAlong`
     /// shape for the stack layout.
@@ -36,7 +36,23 @@ public enum MouseResize {
             || abs(frame.height - slot.height) > threshold
     }
 
-    /// Drops size changes from dragging an outer edge lacking neighbors.
+    /// Whether a drop in `mode` trades size with a neighbour, so
+    /// an outer edge (nobody to trade with) must snap back.
+    /// Scrolling trades with nobody: one slot length serves the
+    /// row, so any edge resizes it. Exhaustive on purpose — a new
+    /// mode decides here, beside its `translate` case.
+    public static func tradesWithNeighbors(
+        _ mode: LayoutMode
+    ) -> Bool {
+        switch mode {
+        case .bsp, .stack, .track: return true
+        case .scrolling: return false
+        case .monocle, .grid, .floating: return true
+        }
+    }
+
+    /// Drops size changes from dragging an outer edge lacking
+    /// neighbors — for modes that `tradesWithNeighbors` only.
     public static func keepingInnerEdgeChanges(
         slot: CGRect,
         frame: CGRect,
@@ -111,6 +127,9 @@ public enum MouseResize {
         // discriminator lets a new call site silently classify a
         // horizontal-track drag with the vertical mapping.
         trackAxisVertical: Bool,
+        // The scroll axis, required for the same reason: the slot
+        // size runs along it, so a vertical row reads `dh`.
+        scrollVertical: Bool,
         slot: CGRect,
         frame: CGRect,
         bounds: CGRect
@@ -155,8 +174,9 @@ public enum MouseResize {
             }
             return nil
         case .scrolling:
-            guard abs(dw) > threshold else { return nil }
-            return .scrollWidth(dw)
+            let along = scrollVertical ? dh : dw
+            guard abs(along) > threshold else { return nil }
+            return .scrollSlot(along)
         case .track:
             if trackAxisVertical {
                 if abs(dw) >= abs(dh), abs(dw) > threshold {
