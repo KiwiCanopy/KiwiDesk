@@ -176,6 +176,7 @@ extension SpaceBarOverlay {
             depth: depth
         )
         root.isHidden = false
+        for view in itemViews { view.syncHoverToPointer() }
         onRendered()
     }
 
