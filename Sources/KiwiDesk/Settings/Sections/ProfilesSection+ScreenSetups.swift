@@ -45,7 +45,8 @@ extension ProfilesSection {
             )
             : L(
                 "profiles.sets.dormant",
-                "No screen setup yet — takes one when you load it."
+                "No screen setup yet — load it once to give it one; "
+                    + "then it can be the default."
             )
     }
 
