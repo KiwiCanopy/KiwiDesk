@@ -91,6 +91,30 @@ struct HeldSpaceMemoryTests {
         #expect(core.state.heldSpaces[SpaceID(6)]?.name == SpaceID(3))
     }
 
+    @Test("a reclaim skips a number a stale memory still names")
+    func reclaimSkipsARememberedNumber() throws {
+        let core = try desk.docked()
+        core.handle(.displaysChanged([desk.builtIn]))
+        core.state.remember(WindowID(24), in: SpaceID(7))
+        var solo = try core.profiles.read(name: "solo")
+        solo.spaces.append(SpaceID(5))
+        solo.spaceModes[SpaceID(5)] = .bsp
+        core.apply(profile: solo, cause: .event)
+        #expect(core.state.heldSpaces[SpaceID(7)] == nil)
+        #expect(core.state.heldSpaces[SpaceID(8)]?.name == SpaceID(3))
+    }
+
+    @Test("a Space holding only a remembered window is not held")
+    func rememberedOnlySpaceIsNotHeld() throws {
+        let core = try desk.docked()
+        core.state.workspaces.add(WindowID(12), to: SpaceID(1))
+        core.state.remember(WindowID(25), in: SpaceID(4))
+        core.handle(.displaysChanged([desk.builtIn]))
+        #expect(
+            !core.state.heldSpaces.values.contains { $0.name == SpaceID(4) }
+        )
+    }
+
     @Test("a restored filing keeps its kind across the renumber")
     func restoredFilingKeepsItsKind() throws {
         let core = try desk.docked()

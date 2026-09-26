@@ -845,10 +845,10 @@ screen's Spaces are held, not forwarded*. The obligations:
   live member; `HeldSpaceMemoryTests` ▸
   `holdCarriesTheHiddenWindow` keeps one held by a hidden window
   alone — the away clause has no test). The retire's remembered
-  clause only KEEPS a hold: a hold begins for a Space with live or
-  up-away members alone (`holdDepartingSpaces`), since a
-  remembered-only Space may hold nothing but a stale `.restored`
-  filing and would sit empty in the bar.
+  clause only KEEPS a hold: begin a hold only for a Space with live
+  or up-away members, since a remembered-only Space may hold
+  nothing but a stale `.restored` filing and would sit empty in
+  the bar (`HeldSpaceMemoryTests` ▸ `rememberedOnlySpaceIsNotHeld`).
 - **A renumber carries every remembered window (#1669).**
   `moveMembers` re-points each `rememberedSpaces` entry naming the
   old id through `renameRememberedSpace` — up or not, a hidden
@@ -858,7 +858,10 @@ screen's Spaces are held, not forwarded*. The obligations:
   count remembered ids as taken, so the new number names no
   remembered row (`HeldSpaceMemoryTests` ▸
   `holdCarriesTheHiddenWindow`, `HeldSpaceMemoryTests` ▸
-  `reclaimCarriesTheHiddenWindow`).
+  `reclaimCarriesTheHiddenWindow`, `HeldSpaceMemoryTests` ▸
+  `upAwayWindowKeepsItsRank`, `HeldSpaceMemoryTests` ▸
+  `renumberSkipsARememberedNumber`, `HeldSpaceMemoryTests` ▸
+  `reclaimSkipsARememberedNumber`).
 - **A reload leaves a held Space's mode alone.**
   `resetDeclarativeState` skips it, since no config redeclares it
   (`HeldSpaceTests` ▸ `reloadKeepsHeldMode`); the same holds for
