@@ -61,6 +61,36 @@ struct HeldSpaceMemoryTests {
         #expect(core.state.rememberedSpaces[hidden] == .departed(held))
     }
 
+    @Test("an up away window keeps its rank and loses its break")
+    func upAwayWindowKeepsItsRank() throws {
+        let core = try desk.docked()
+        let away = WindowID(22)
+        core.state.awayWindows[away] = AwayWindow(
+            id: away,
+            pid: 3,
+            appName: "Away",
+            appBundleID: "app.away",
+            nativeSpace: 4
+        )
+        core.state.rememberedSpaces[away] = .departed(SpaceID(3))
+        core.state.departedSlots[away] = .init(rank: 2, trackBreak: .head)
+        core.handle(.displaysChanged([desk.builtIn]))
+        #expect(core.state.rememberedSpaces[away] == .departed(SpaceID(5)))
+        #expect(core.state.departedSlots[away]?.rank == 2)
+        // The move drops the live members' breaks; a returning head
+        // must not rebuild half of them.
+        #expect(core.state.departedSlots[away]?.trackBreak == .member)
+    }
+
+    @Test("a renumber skips a number a stale memory still names")
+    func renumberSkipsARememberedNumber() throws {
+        let core = try desk.docked()
+        core.state.remember(WindowID(23), in: SpaceID(5))
+        core.handle(.displaysChanged([desk.builtIn]))
+        #expect(core.state.heldSpaces[SpaceID(5)] == nil)
+        #expect(core.state.heldSpaces[SpaceID(6)]?.name == SpaceID(3))
+    }
+
     @Test("a restored filing keeps its kind across the renumber")
     func restoredFilingKeepsItsKind() throws {
         let core = try desk.docked()

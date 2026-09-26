@@ -87,10 +87,9 @@ extension StateCoordinator {
 
     /// Re-files a departure the destroy fold just recorded under
     /// the Space an explicit Desktop-move target named (#1150).
-    /// A writer of `rememberedSpaces` OUTSIDE a fold — `refileAway`
-    /// (#1248) and `renameRememberedSpace` (#1669) are the others —
-    /// and safe as one because it runs in
-    /// the same synchronous arm as that fold, before any reader:
+    /// It writes `rememberedSpaces` outside a fold, and is safe as
+    /// one because it runs in the same synchronous arm as that
+    /// fold, before any reader:
     /// `forgetGoneWindow` reads nothing of it, and the away
     /// ledger files the NATIVE Space.
     /// The `.departed` memory takes the name and the slot rank is
@@ -126,8 +125,8 @@ extension StateCoordinator {
     /// window to where it already is would spend its #1207 return
     /// slot for nothing, on every switch.
     ///
-    /// `redirectDeparture` is the other writer and stays separate:
-    /// it answers #1150's explicit Desktop-move target, is
+    /// `redirectDeparture` stays separate: it answers #1150's
+    /// explicit Desktop-move target, is
     /// `.departed`-only by ruling, and runs in the destroy fold's
     /// own arm.
     @discardableResult
@@ -170,9 +169,11 @@ extension StateCoordinator {
 
     /// Re-points every remembered window of `old` at `new` — a
     /// held Space renumbered whole (#1669), including a window that
-    /// is not up, such as a hidden app's. Kind and #1207 rank both
-    /// stay: the row moves intact, so a rank still names its slot,
-    /// where `refileAway` moves one window into another row.
+    /// is not up, such as a hidden app's. The kind and the #1207
+    /// rank stay, since the row's ORDER moves with it; the break
+    /// provenance resets, since the move drops the live members'
+    /// breaks too. `new` must name no remembered row, or two rank
+    /// families merge — the renumber counts remembered ids taken.
     mutating func renameRememberedSpace(
         _ old: SpaceID,
         to new: SpaceID
@@ -182,6 +183,8 @@ extension StateCoordinator {
             case .departed: rememberedSpaces[id] = .departed(new)
             case .restored: rememberedSpaces[id] = .restored(new)
             }
+            departedSlots[id]?.trackBreak = .member
+            departedSlots[id]?.handedTo = nil
         }
     }
 

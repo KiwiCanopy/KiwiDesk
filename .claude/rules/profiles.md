@@ -842,8 +842,23 @@ screen's Spaces are held, not forwarded*. The obligations:
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call
   (`HeldSpaceTests` ▸ `emptiedRetires`, which empties it of a
-  live member only — the away and remembered-window clauses that
-  keep a Space held have no test).
+  live member; `HeldSpaceMemoryTests` ▸
+  `holdCarriesTheHiddenWindow` keeps one held by a hidden window
+  alone — the away clause has no test). The retire's remembered
+  clause only KEEPS a hold: a hold begins for a Space with live or
+  up-away members alone (`holdDepartingSpaces`), since a
+  remembered-only Space may hold nothing but a stale `.restored`
+  filing and would sit empty in the bar.
+- **A renumber carries every remembered window (#1669).**
+  `moveMembers` re-points each `rememberedSpaces` entry naming the
+  old id through `renameRememberedSpace` — up or not, a hidden
+  app's included — keeping the kind and the #1207 rank and
+  resetting the break provenance, never through `refileAway`,
+  which spends the rank on a one-window move; and both renumbers
+  count remembered ids as taken, so the new number names no
+  remembered row (`HeldSpaceMemoryTests` ▸
+  `holdCarriesTheHiddenWindow`, `HeldSpaceMemoryTests` ▸
+  `reclaimCarriesTheHiddenWindow`).
 - **A reload leaves a held Space's mode alone.**
   `resetDeclarativeState` skips it, since no config redeclares it
   (`HeldSpaceTests` ▸ `reloadKeepsHeldMode`); the same holds for
