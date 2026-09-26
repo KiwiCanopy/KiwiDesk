@@ -28,9 +28,9 @@ extension APIReference {
             "Sets whether swapping from a pile steps past it.",
             .boolean("enabled")
         ),
-        "set_float_nudge": APIRecord(
-            "Shoves a window inward when toggled to floating.",
-            .boolean("enabled")
+        "set_float_placement": APIRecord(
+            "Sets where a window lands when toggled to floating.",
+            .choice("placement", FloatPlacement.self)
         ),
         "set_float_scale_on_display_change": APIRecord(
             "Scales floating windows when moved across screens.",

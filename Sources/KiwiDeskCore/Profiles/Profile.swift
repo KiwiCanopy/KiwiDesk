@@ -13,13 +13,15 @@ public struct Profile: Codable, Sendable, Equatable {
     /// for either: an older reader refuses the shape, and the
     /// stamp says why — 8 since the bars' shared fields moved to
     /// `kiwishelf` (#1517), 9 since the drag markers' and sticky
-    /// mark's Liquid Glass leaves are filled (#1620/#1621). The bump
+    /// mark's Liquid Glass leaves are filled (#1620/#1621), 10
+    /// since `float_nudge` retired for `float_placement` (#1674).
+    /// The bump
     /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 9
+    public static let currentFormat = 10
 
     public var format: Int
     public var name: String

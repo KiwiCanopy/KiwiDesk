@@ -46,6 +46,7 @@ public enum ConfigMigration {
         migratingBarsOntoShelf,
         migratingPalettesOntoShelf,
         migratingAbsentOverlayGlass,
+        migratingRetiredFloatNudge,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939).

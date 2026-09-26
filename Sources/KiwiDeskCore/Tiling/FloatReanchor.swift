@@ -1,11 +1,11 @@
 import CoreGraphics
 
 /// Proportional re-anchoring for floating windows crossing displays
-/// (`FloatNudge`, #444). Who is eligible is `EffectiveFloat`'s
+/// (#444). Who is eligible is `EffectiveFloat`'s
 /// question, not this type's (#1178).
 public enum FloatReanchor {
     /// Computes target frame proportionally repositioned and optionally scaled
-    /// (`FloatNudge.confine`,
+    /// (`FloatPlacement.confine`,
     /// `TilingSettings.floatScaleOnDisplayChange`, #502).
     public static func target(
         frame: CGRect,
@@ -35,6 +35,6 @@ public enum FloatReanchor {
             width: width,
             height: height
         )
-        return FloatNudge.confine(moved, to: target)
+        return FloatPlacement.confine(moved, to: target)
     }
 }

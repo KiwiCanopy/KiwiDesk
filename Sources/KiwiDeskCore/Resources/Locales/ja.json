@@ -278,7 +278,6 @@
   "diff.drift.screens": "画面",
   "diff.drift.screens.unsaved": "この画面構成はまだ「%1$@」に保存されていません。",
   "diff.label.fallback_space": "フォールバックスペース",
-  "diff.label.float_nudge": "フローティング時の微移動",
   "diff.label.float_scale_on_display_change": "ディスプレイ間でフローティングのサイズを調整",
   "diff.label.gap_override": "ギャップのオーバーライド",
   "diff.label.ignore_rule": "除外ルール",

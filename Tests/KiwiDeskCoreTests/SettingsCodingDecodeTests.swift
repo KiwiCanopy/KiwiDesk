@@ -31,7 +31,7 @@ struct SettingsCodingDecodeTests {
         settings.track.wrapFocus = true
         settings.minWindowSize = 200
         settings.swapSkipsCascade = false
-        settings.floatNudge = false
+        settings.floatPlacement = .keep
         settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
         settings.refusalSound = true

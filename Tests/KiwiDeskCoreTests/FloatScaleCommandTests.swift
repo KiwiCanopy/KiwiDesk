@@ -16,7 +16,7 @@ private func makeCore() -> KiwiCore {
 /// size scaling knob (ON by default). Pins its dispatch —
 /// storage, bool validation, and the on default. The scaling math
 /// itself lives in `FloatReanchorTests`. Flat verb beside
-/// `float_nudge`, dispatched with no retile (the flag is read only
+/// `float_placement`, dispatched with no retile (the flag is read only
 /// at a future re-anchor).
 @Suite("set_float_scale_on_display_change (#502)", .serialized)
 @MainActor

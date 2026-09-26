@@ -278,7 +278,6 @@
   "diff.drift.screens": "Telas",
   "diff.drift.screens.unsaved": "Esta configuração de telas ainda não está salva em “%1$@”.",
   "diff.label.fallback_space": "Espaço alternativo",
-  "diff.label.float_nudge": "Deslocamento ao flutuar",
   "diff.label.float_scale_on_display_change": "Redimensionar flutuantes entre telas",
   "diff.label.gap_override": "Substituição de espaçamento",
   "diff.label.ignore_rule": "Regra de exclusão",

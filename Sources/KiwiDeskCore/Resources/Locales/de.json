@@ -278,7 +278,6 @@
   "diff.drift.screens": "Bildschirme",
   "diff.drift.screens.unsaved": "Dieses Bildschirm-Setup ist noch nicht in „%1$@“ gespeichert.",
   "diff.label.fallback_space": "Fallback-Space",
-  "diff.label.float_nudge": "Schubs beim Schweben",
   "diff.label.float_scale_on_display_change": "Schwebende Fenster über Displays skalieren",
   "diff.label.gap_override": "Abstands-Überschreibung",
   "diff.label.ignore_rule": "Ignorier-Regel",

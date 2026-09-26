@@ -12,6 +12,7 @@ extension StickyReachOverride: APIChoiceType {}
 extension LayoutMode: APIChoiceType {}
 extension SpawnPlacement: APIChoiceType {}
 extension MouseResizeMode: APIChoiceType {}
+extension FloatPlacement: APIChoiceType {}
 extension SizePolicy: APIChoiceType {}
 extension QuitLayoutStyle: APIChoiceType {}
 

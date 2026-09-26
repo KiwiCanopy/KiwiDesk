@@ -253,7 +253,7 @@ exports nothing.
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
-| | `set_float_nudge` | true\|false (default `true`) — shove a window toward center when it toggles to floating |
+| | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating |
 | | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows follow you across macOS Desktops (needs the window-management bridge) |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
@@ -333,6 +333,11 @@ exports nothing.
 | | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`set_float_placement` replaces `set_float_nudge`. A config that
+turned the nudge off keeps its window in place (`keep`).
+:::
 
 `bind_profile_to_desktop` files one profile per screen count on a
 Desktop, for all screen setups: a second profile of another count

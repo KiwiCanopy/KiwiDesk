@@ -19,8 +19,8 @@ extension TilingSettings {
             forKey: .swapSkipsCascade
         )
         try container.encode(
-            floatNudge,
-            forKey: .floatNudge
+            floatPlacement,
+            forKey: .floatPlacement
         )
         try container.encode(
             floatScaleOnDisplayChange,

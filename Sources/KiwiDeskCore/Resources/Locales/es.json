@@ -278,7 +278,6 @@
   "diff.drift.screens": "Pantallas",
   "diff.drift.screens.unsaved": "Esta configuración de pantallas aún no está guardada en «%1$@».",
   "diff.label.fallback_space": "Espacio de reserva",
-  "diff.label.float_nudge": "Empujón al flotar",
   "diff.label.float_scale_on_display_change": "Escalar ventanas flotantes entre pantallas",
   "diff.label.gap_override": "Anulación de espaciado",
   "diff.label.ignore_rule": "Regla de exclusión",
