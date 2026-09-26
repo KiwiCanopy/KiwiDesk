@@ -244,7 +244,7 @@ extension KiwiCore {
         state.heldSpaces = [:]
     }
 
-    /// Moves a Space's members, live and away, into a new one.
+    /// Moves a Space's members, live and remembered, into a new one.
     private func moveMembers(
         of source: SpaceID,
         to target: SpaceID,
@@ -257,9 +257,9 @@ extension KiwiCore {
             // Its frame is the other Space's layout's (#1177).
             refiledWindows.insert(window)
         }
-        for window in awayMembers(of: source) {
-            state.refileAway(of: window, to: target)
-        }
+        // Every remembered window, up or not — a hidden app's
+        // included — or it returns to the old number (#1669).
+        state.renameRememberedSpace(source, to: target)
     }
 
     /// `WorkspaceManager.add` nils the focus trackers of a window

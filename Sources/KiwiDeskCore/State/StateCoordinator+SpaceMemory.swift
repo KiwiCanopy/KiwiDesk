@@ -88,7 +88,8 @@ extension StateCoordinator {
     /// Re-files a departure the destroy fold just recorded under
     /// the Space an explicit Desktop-move target named (#1150).
     /// A writer of `rememberedSpaces` OUTSIDE a fold — `refileAway`
-    /// is the other (#1248) — and safe as one because it runs in
+    /// (#1248) and `renameRememberedSpace` (#1669) are the others —
+    /// and safe as one because it runs in
     /// the same synchronous arm as that fold, before any reader:
     /// `forgetGoneWindow` reads nothing of it, and the away
     /// ledger files the NATIVE Space.
@@ -164,6 +165,23 @@ extension StateCoordinator {
             }
         } else if departedSlots[holder]?.trackBreak == .handed {
             departedSlots[holder]?.trackBreak = .head
+        }
+    }
+
+    /// Re-points every remembered window of `old` at `new` — a
+    /// held Space renumbered whole (#1669), including a window that
+    /// is not up, such as a hidden app's. Kind and #1207 rank both
+    /// stay: the row moves intact, so a rank still names its slot,
+    /// where `refileAway` moves one window into another row.
+    mutating func renameRememberedSpace(
+        _ old: SpaceID,
+        to new: SpaceID
+    ) {
+        for (id, memory) in rememberedSpaces where memory.space == old {
+            switch memory {
+            case .departed: rememberedSpaces[id] = .departed(new)
+            case .restored: rememberedSpaces[id] = .restored(new)
+            }
         }
     }
 
