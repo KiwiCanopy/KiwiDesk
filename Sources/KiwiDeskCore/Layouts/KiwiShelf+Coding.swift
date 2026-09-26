@@ -21,6 +21,7 @@ extension KiwiShelf {
         case liquidGlass = "liquid_glass"
         case backgroundFit = "background_fit"
         case cornerRoundness = "corner_roundness"
+        case highlightWidth = "highlight_width"
         case itemGap = "item_gap"
         case fontSize = "font_size"
         case iconSource = "icon_source"
@@ -84,6 +85,12 @@ extension KiwiShelf {
                 CGFloat.self,
                 forKey: .cornerRoundness
             ) ?? d.cornerRoundness
+        highlightWidth = Self.clampHighlightWidth(
+            try c.decodeIfPresent(
+                CGFloat.self,
+                forKey: .highlightWidth
+            ) ?? d.highlightWidth
+        )
         itemGap =
             try c.decodeIfPresent(CGFloat.self, forKey: .itemGap)
             ?? d.itemGap

@@ -648,6 +648,8 @@
   "kiwishelf.font_size": "字体大小",
   "kiwishelf.font_size.auto": "自动字体大小",
   "kiwishelf.font_size.help": "两个栏使用同一字体大小，使空间编号与 App Bar 标题对齐。自动大小会跟随厚度。",
+  "kiwishelf.highlight_width": "高亮粗细",
+  "kiwishelf.highlight_width.help": "当前空间和聚焦窗口上标记的粗细——轮廓直接采用此值，边缘标记则按比例绘制。",
   "kiwishelf.icon_source.help": "App 图标在两个栏上的绘制方式。“%1$@”显示单色符号，用 KiwiShelf 的项目颜色着色（在%2$@中设置）；没有符号的 App 保留其 App 图标。",
   "kiwishelf.icon_source.label": "App 符号样式",
   "kiwishelf.icon_source.no_icon": "Space Bar 已关闭，且 App Bar 的“%1$@”为“%2$@”，因此不会绘制 App 图标。",

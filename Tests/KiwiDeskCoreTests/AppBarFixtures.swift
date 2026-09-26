@@ -46,6 +46,7 @@ enum AppBarFixtures {
         shelf.liquidGlass = false
         shelf.backgroundFit = .full
         shelf.cornerRoundness = 5
+        shelf.highlightWidth = 4
         shelf.itemGap = 3
         shelf.fontSize = 15
         shelf.iconSource = .appFont

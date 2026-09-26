@@ -90,7 +90,6 @@ final class SpaceBarItemView: NSView {
         addSubview(accentClip)
         accentClip.addSubview(accent)
         springRing.fillColor = nil
-        springRing.lineWidth = 2
         springRing.strokeEnd = 0
         springRing.isHidden = true
         layer?.addSublayer(springRing)

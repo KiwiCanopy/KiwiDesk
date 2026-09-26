@@ -16,6 +16,7 @@ enum KiwiShelfCommandSetting {
     case liquidGlass(Bool)
     case backgroundFit(KiwiShelf.BackgroundFit)
     case cornerRoundness(CGFloat)
+    case highlightWidth(CGFloat)
     case itemGap(CGFloat)
     case fontSize(CGFloat)
     case iconSource(BarAppIconSource)
@@ -104,6 +105,7 @@ enum KiwiShelfCommandSetting {
             "outer_margin": Self.outerMargin,
             "inner_margin": Self.innerMargin,
             "corner_roundness": Self.cornerRoundness,
+            "highlight_width": Self.highlightWidth,
             "item_gap": Self.itemGap,
             "font_size": Self.fontSize,
         ]
@@ -146,6 +148,8 @@ enum KiwiShelfCommandSetting {
         case .liquidGlass(let value): shelf.liquidGlass = value
         case .backgroundFit(let value): shelf.backgroundFit = value
         case .cornerRoundness(let value): shelf.cornerRoundness = value
+        case .highlightWidth(let value):
+            shelf.highlightWidth = KiwiShelf.clampHighlightWidth(value)
         case .itemGap(let value): shelf.itemGap = value
         case .fontSize(let value): shelf.fontSize = value
         case .iconSource(let value): shelf.iconSource = value

@@ -2026,6 +2026,25 @@ of both bars, where 0 = square and 100 = a full capsule
 kiwishelf.set_corner_roundness(50)
 ```
 
+### kiwishelf.set_highlight_width
+
+:::unreleased
+**Expects:** points, 1–6 (default `2`); values outside the range
+are clamped.
+
+**Does:** sets how heavy both bars' active indicator draws, in
+the [`highlight_color`](#kiwishelf-colours): the outline's stroke
+width, and the edge mark in proportion (half as thick again, so
+the default draws a 3 pt mark). Which of the two each bar uses is
+its own `set_active_indicator`.
+
+**Example:**
+
+```lua
+kiwishelf.set_highlight_width(3)
+```
+:::
+
 ### kiwishelf.set_item_gap
 
 **Expects:** points (default `6`; a negative value is raised to

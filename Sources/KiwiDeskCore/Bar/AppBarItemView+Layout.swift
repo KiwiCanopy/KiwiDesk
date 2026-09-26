@@ -203,7 +203,7 @@ extension AppBarItemView {
     /// Edge mark layout (owner call 2026-07-20).
     private func layoutEdgeMark() {
         accent.layer?.cornerRadius = 0
-        let thickness: CGFloat = 3
+        let thickness = style.edgeMarkThickness
         switch edge {
         case .top:
             accent.frame = CGRect(
