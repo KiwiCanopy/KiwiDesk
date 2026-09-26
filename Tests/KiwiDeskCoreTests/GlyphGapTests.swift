@@ -91,6 +91,10 @@ struct GlyphGapTests {
 struct GlyphGapDrawingTests {
     private static let depth: CGFloat = 32
     private static let gap: CGFloat = 5
+    /// The badge snaps to the backing grid — whole points on a
+    /// 1x screen (CI), half points on 2x — so its centre may sit
+    /// up to half a point either way.
+    private static let onePoint: CGFloat = 1
 
     init() { LiquidGlassGate.override = { false } }
 
@@ -160,7 +164,7 @@ struct GlyphGapDrawingTests {
             abs(
                 view.overflowBadge.frame.midX - last.frame.midX
                     - (view.cellLength + Self.gap)
-            ) < 0.5
+            ) < Self.onePoint
         )
     }
 }
@@ -245,7 +249,9 @@ struct GlyphGapRenderTests {
         let slack =
             badge.frame.midX + first.cellLength / 2
             + SpaceBarItemView.pad - first.bounds.width
-        #expect(abs(slack) < 0.5, "badge cell ends \(slack) off")
+        // One point: the badge snaps to the backing grid, whole
+        // points on a 1x screen (CI) and half points on 2x.
+        #expect(abs(slack) < 1, "badge cell ends \(slack) off")
     }
 }
 
