@@ -169,6 +169,19 @@ struct ShelfWiringSeamTests {
                 ).contains("BarHoverHit.ownsPointer(self)"),
                 Comment(rawValue: file)
             )
+            // The gate itself: an active Space chip and an inert
+            // App Bar item never hover, whichever path asks.
+            let gate = Self.squash(
+                try Self.body(of: "func applyHover(", in: file)
+            )
+            #expect(
+                gate.contains(
+                    file.hasPrefix("Bar/SpaceBar")
+                        ? "!isActive&&space!=nil&&ownsPointer"
+                        : "!isInert&&ownsPointer"
+                ),
+                Comment(rawValue: file)
+            )
             // Every hover-on path runs through the one gate.
             #expect(
                 source.components(separatedBy: "isHovered=true").count == 1,
