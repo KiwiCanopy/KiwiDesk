@@ -12,7 +12,7 @@ struct PresetShapeCaptionTests {
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let screen27 = CGSize(width: 2560, height: 1440)
 
-    @Test("the caption names the connected screens' shape")
+    @Test("the caption names every connected screen's shape")
     @MainActor func captionNamesTheShape() {
         LocalizationManager.shared.select("en")
         #expect(
@@ -21,7 +21,7 @@ struct PresetShapeCaptionTests {
         )
         #expect(
             PresetsSection.shapeCaption(sizes: [ultrawide, screen27])
-                == "Tuned for: Ultrawide + 1"
+                == "Tuned for: Ultrawide and Widescreen"
         )
     }
 

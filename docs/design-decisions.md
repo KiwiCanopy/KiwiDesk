@@ -4655,8 +4655,9 @@ monitor-change fallback cannot come to disagree about what a
 preset is. Its NAME does not follow the screen — "Developer" is
 how you work, and the shape is what the preset adapts to; only
 the Starter is named by its screen. The group of presets for
-the connected screens says ONCE which shape they are tuned for,
-in the starter's own words — the same for every card in it, so a
+the connected screens says ONCE which shapes they are tuned for,
+naming every screen in the starter's own words rather than
+counting the others — the same for every card in it, so a
 per-card copy would say nothing about any one preset — and
 nothing stores it.
 :::

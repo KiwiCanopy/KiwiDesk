@@ -80,13 +80,18 @@ struct PresetsSection: View {
         }
     }
 
-    /// The shape every preset in the live group is tuned for
-    /// (#1663): once for the group, named as the Starter is.
+    /// The shapes the live group's presets are tuned for (#1663):
+    /// every connected screen in position order, named as the
+    /// Starter names a shape — a list, never a count.
     static func shapeCaption(sizes: [CGSize]) -> String {
         L(
             "presets.tuned_for",
             "Tuned for: %1$@",
-            StarterTitle(sizes: sizes).displayName
+            LocalizedList.join(
+                sizes.map {
+                    StarterTitle.displayName(of: ScreenClass.of($0))
+                }
+            )
         )
     }
 
