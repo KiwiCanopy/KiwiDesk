@@ -7,6 +7,15 @@ import Foundation
 /// and the forget/rekey lifecycle. The learning ladder stays
 /// in `SizeBoundLearner.swift`.
 extension SizeBoundLearner {
+    /// Retires the window's open layout ask without touching what
+    /// was learned (#1694): a park holds the window at the stash
+    /// frame, so no reading until the next layout ask answers it —
+    /// a cancelled ask left standing reads every parked echo as a
+    /// refusal and confirms a false bound.
+    mutating func supersedeAsk(_ id: WindowID) {
+        lastAsks[id] = nil
+    }
+
     /// Drops everything learned about a window: it resized for
     /// a reason that was not our ask (user, or the app
     /// re-bounding itself), so the ledger describes a window

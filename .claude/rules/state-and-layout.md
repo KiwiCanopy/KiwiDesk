@@ -1103,7 +1103,12 @@ editing here:
   it. And only the layout loop
   **records asks** — a stash park or float restore is not a
   layout ask, and learning from one keys a bound to a frame no
-  layout re-issues. Rendering may
+  layout re-issues. The converse holds too: a park RETIRES the
+  open ask (`supersedeAsk`, from `stash`), since a parked window
+  holds the corner frame and every reading until the next
+  layout ask would answer a question it was never sent — the
+  boot race that confirmed half-screen maxima on a parked
+  monocle Space (#1694, `StashSupersedesAskTests`). Rendering may
   additionally trust an UNCONFIRMED candidate (the overlay pin's
   fallback — cosmetic, self-correcting); geometry never may.
   The ladder is `SizeBoundLearnerTests`; the

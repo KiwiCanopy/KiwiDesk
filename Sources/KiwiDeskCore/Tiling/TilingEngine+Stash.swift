@@ -217,6 +217,9 @@ extension TilingEngine {
             in: bounds,
             corner: corner
         )
+        // A park is not a layout ask (#1694): whatever the loop
+        // last asked, parked or already there, goes unanswered.
+        boundLearner.supersedeAsk(window.id)
         if !force, Self.close(window.frame, to: target) {
             return
         }
