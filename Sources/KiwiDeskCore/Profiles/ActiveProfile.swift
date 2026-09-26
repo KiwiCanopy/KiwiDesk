@@ -21,21 +21,27 @@ struct ActiveProfile {
     /// binding door asks about the profile ALREADY live (#1436),
     /// so it never re-reads the file to learn it (#1245).
     let monitorCount: Int
+    /// Whether it is the starter setup — what the onboarding and
+    /// Settings title ask without re-reading the file (#1662).
+    let isStarterSetup: Bool
 
     init(_ profile: Profile) {
         name = profile.name
         declaredSpaces = profile.declaredSpaces
         monitorCount = profile.monitorCount
+        isStarterSetup = profile.isStarterSetup
     }
 
     private init(
         name: String,
         declaredSpaces: Set<SpaceID>,
-        monitorCount: Int
+        monitorCount: Int,
+        isStarterSetup: Bool
     ) {
         self.name = name
         self.declaredSpaces = declaredSpaces
         self.monitorCount = monitorCount
+        self.isStarterSetup = isStarterSetup
     }
 
     /// A rename moves the name; the Spaces are unchanged by it.
@@ -43,7 +49,8 @@ struct ActiveProfile {
         ActiveProfile(
             name: new,
             declaredSpaces: declaredSpaces,
-            monitorCount: monitorCount
+            monitorCount: monitorCount,
+            isStarterSetup: isStarterSetup
         )
     }
 }
@@ -55,4 +62,6 @@ struct ActiveProfile {
 struct ActiveStandard {
     let name: String
     let spaces: Set<SpaceID>
+    /// The starter's title when this Standard is the starter.
+    let title: StarterTitle?
 }

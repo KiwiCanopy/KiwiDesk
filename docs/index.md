@@ -52,7 +52,7 @@ the cask additionally puts the `kiwidesk` CLI on your `PATH`,
 which [the CLI page](cli.md) shows how to link after a `.dmg`
 install. Either way KiwiDesk checks for updates itself.
 
-The [User Guide](user-guide.md) covers the Starter setup,
+The [User Guide](user-guide.md) covers the starter setup,
 **Start at login**, and the Accessibility permission under
 [Troubleshooting](user-guide.md#troubleshooting). If windows stop
 being managed after an upgrade, re-approve KiwiDesk in **System

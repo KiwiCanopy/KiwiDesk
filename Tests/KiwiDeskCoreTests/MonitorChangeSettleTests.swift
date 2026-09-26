@@ -184,7 +184,8 @@ struct MonitorChangeSettleTests {
                 spaces: [SpaceID(1)],
                 spaceModes: [SpaceID(1): .bsp],
                 assignment: [:],
-                settings: TilingSettings()
+                settings: TilingSettings(),
+                sourceTitle: nil
             ),
             forceRetile: false
         )

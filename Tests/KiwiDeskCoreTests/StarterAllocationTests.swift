@@ -12,6 +12,10 @@ struct StarterAllocationTests {
     private let screen27 = CGSize(width: 2560, height: 1440)
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let pivoted = CGSize(width: 1440, height: 2560)
+    /// A widescreen wider than a 27" — the ladder's own widest
+    /// screen, since an ultrawide among several screens takes the
+    /// #1662 allocation (`StarterUltrawideAllocationTests`).
+    private let bigDesk = CGSize(width: 2880, height: 1620)
 
     // MARK: - Budget
 
@@ -181,7 +185,7 @@ struct StarterAllocationTests {
 
     @Test("exactly one Floating space, on the largest screen")
     func oneFloatingOnTheLargest() {
-        let sizes = [laptop, ultrawide, screen27]
+        let sizes = [laptop, bigDesk, screen27]
         let modes = StarterAllocation.modes(sizes: sizes)
         let floats = modes.flatMap { $0 }.filter { $0 == .floating }
         #expect(floats.count == 1)
@@ -220,7 +224,7 @@ struct StarterAllocationTests {
     @Test("no layout twice, the deliberate lead excepted")
     func noRepeatsWhenAvoidable() {
         let modes = StarterAllocation.modes(
-            sizes: [laptop, screen27, ultrawide]
+            sizes: [laptop, screen27, bigDesk]
         )
         // Within one screen there is still no repeat: two
         // identical spaces on one screen is a wasted space
@@ -251,14 +255,7 @@ struct StarterAllocationTests {
         // other's layouts and asserted the wider one kept its
         // head. That is now unreachable: every screen spends its
         // first slot on a lead, so a screen draws ONE item from
-        // its own list unless its share is three. A screen CAN
-        // hold three without being the widest — [1728, 1920,
-        // 1024] apportions [3, 3, 1] — so the reason is not that
-        // the Floating host monopolises it: it is that with one
-        // draw each, the four shapes' first picks (grid, track,
-        // stack, monocle) are all distinct and cannot collide,
-        // and a screen drawing two is drawing them from a list
-        // no other screen of a different shape shares.
+        // its own list unless its share is three.
         //
         // `fillOrder`'s DIRECTION is still guarded, one rule
         // over: `smallestScreen` reads its far end, so reversing
@@ -267,10 +264,13 @@ struct StarterAllocationTests {
         // among equals — the two 27"s share one list, and the
         // earlier index draws first.
         let modes = StarterAllocation.modes(
-            sizes: [ultrawide, screen27, screen27]
+            sizes: [bigDesk, screen27, screen27]
         )
-        #expect(modes[1].dropFirst().first == .grid, "\(modes[1])")
-        #expect(modes[2].dropFirst().first == .stack, "\(modes[2])")
+        // Grid went to the widest; the earlier 27" draws Stack,
+        // the later one BSP.
+        #expect(modes[0].dropFirst().first == .grid, "\(modes[0])")
+        #expect(modes[1].dropFirst().first == .stack, "\(modes[1])")
+        #expect(modes[2].dropFirst().first == .bsp, "\(modes[2])")
         // Vacuity: they really do share a contested list, or
         // "draws first" decides nothing.
         #expect(ScreenClass.of(screen27).layouts.count >= 2)
@@ -281,17 +281,22 @@ struct StarterAllocationTests {
         let setups: [[CGSize]] = [
             [laptop],
             [laptop, screen27],
+            [screen27, bigDesk, pivoted],
+            [laptop, screen27, bigDesk, pivoted],
             [screen27, ultrawide, pivoted],
             [laptop, screen27, ultrawide, pivoted],
         ]
         for sizes in setups {
             let modes = StarterAllocation.modes(sizes: sizes)
             let total = modes.reduce(0) { $0 + $1.count }
+            let budget =
+                StarterAllocation.hasUltrawideCompanion(sizes)
+                ? StarterAllocation.ultrawideBudget(
+                    screenCount: sizes.count
+                )
+                : StarterAllocation.budget(screenCount: sizes.count)
             #expect(
-                total
-                    == StarterAllocation.budget(
-                        screenCount: sizes.count
-                    ),
+                total == budget,
                 "\(sizes.count) screens produced \(total) spaces"
             )
             #expect(

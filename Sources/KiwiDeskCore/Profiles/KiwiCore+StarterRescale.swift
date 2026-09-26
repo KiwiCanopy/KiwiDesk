@@ -30,10 +30,19 @@ extension KiwiCore {
         if profiles.currentStandard == StarterSetup.name {
             return true
         }
-        guard let name = profiles.currentName,
-            let profile = try? profiles.read(name: name)
-        else { return false }
-        return profile.isStarterSetup
+        return profiles.activeIsStarterSetup
+    }
+
+    /// The starter setup's title, or nil when the live layout is
+    /// not the starter (#1662) — answered from adoption state,
+    /// never the profile file (#1245).
+    public func liveStarterTitle() -> StarterTitle? {
+        if let title = profiles.currentStandardTitle { return title }
+        guard profiles.activeIsStarterSetup else { return nil }
+        return StarterSetup.standardLayout(
+            displays: state.workspaces.allDisplays,
+            mainID: PositionalDisplays.liveMainID
+        ).starterTitle
     }
 
     /// The fallback layout for a monitor change no stored set

@@ -74,6 +74,9 @@ public enum StarterAllocation {
     /// still JOINS `used` after, so no screen draws it twice).
     public static func modes(sizes: [CGSize]) -> [[LayoutMode]] {
         guard !sizes.isEmpty else { return [] }
+        if hasUltrawideCompanion(sizes) {
+            return ultrawideModes(sizes: sizes)
+        }
         let widths = sizes.map(\.width)
         let share = shares(
             widths: widths,

@@ -13,6 +13,8 @@ public enum ProfileComposition {
         /// Screen per space (dense over `spaces`).
         public let assignment: [SpaceID: DisplayID]
         public let settings: TilingSettings
+        /// The starter's title when composed from it (#1662).
+        public let sourceTitle: StarterTitle?
     }
 
     /// Builds fallback composition for connected displays from closest
@@ -76,7 +78,8 @@ public enum ProfileComposition {
             spaces: spaces,
             spaceModes: modes,
             assignment: assignment,
-            settings: layout.settings
+            settings: layout.settings,
+            sourceTitle: layout.starterTitle
         )
     }
 }

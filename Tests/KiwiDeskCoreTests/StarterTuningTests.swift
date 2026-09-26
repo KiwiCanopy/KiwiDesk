@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// How a starter setup's layouts are tuned for the hardware —
-/// the per-class census of `StarterTuning.settings(mainShape:)`.
+/// the per-class census of `StarterTuning.settings(mainShape:hosts:)`.
 ///
 /// Split from `StarterSetupSeedTests`, which owns the generator,
 /// the preset face and the first-run seed: adding the Scrolling
@@ -17,7 +17,10 @@ import Testing
 struct StarterTuningTests {
     @Test("tuning follows the MAIN screen's class")
     func tuningFollowsMainScreen() {
-        let settings = StarterTuning.settings(mainShape: .desktop)
+        let settings = StarterTuning.settings(
+            mainShape: .desktop,
+            hosts: [:]
+        )
         #expect(settings.stack.masterRatio == 0.8)
         #expect(settings.track.newWindow == .ownTrack)
         // At 2560 pt a three-column grid gives 850 pt cells.
@@ -25,15 +28,24 @@ struct StarterTuningTests {
         #expect(settings.grid.rows == 2)
         // A laptop tightens the gaps; its bars keep the one
         // default (#1359, `BarThicknessDefaultTests`).
-        let small = StarterTuning.settings(mainShape: .laptop)
+        let small = StarterTuning.settings(
+            mainShape: .laptop,
+            hosts: [:]
+        )
         #expect(small.gapsGlobal == .uniform(6))
         // Everything that assumes width has to flip.
-        let tall = StarterTuning.settings(mainShape: .pivoted)
+        let tall = StarterTuning.settings(
+            mainShape: .pivoted,
+            hosts: [:]
+        )
         #expect(tall.stack.stackPosition == .bottom)
         #expect(tall.scrolling.orientation == .vertical)
         #expect(tall.grid.splitDirection == .vertical)
         // One master on a 3440 pt screen is an absurd pane.
-        let wide = StarterTuning.settings(mainShape: .ultrawide)
+        let wide = StarterTuning.settings(
+            mainShape: .ultrawide,
+            hosts: [:]
+        )
         #expect(wide.stack.masterCount == 2)
         #expect(wide.track.autoTracks)
         #expect(wide.minWindowSize == 420)
@@ -56,14 +68,12 @@ struct StarterTuningTests {
         )
         #expect(settings.scrolling.slotSize != .auto)
         #expect(wide.scrolling.slotSize != settings.scrolling.slotSize)
-        // Derived, not restated: pinning `.fraction(0.48)` would
-        // move the copy rather than guard it — it agrees with
-        // whatever the source holds. What the values have to MEAN
-        // is that two windows fit side by side, and that the
-        // ultrawide column comes out narrower IN POINTS than the
-        // standard one does on a 27" — 0.48 × 3440 is 1651 pt
-        // against 1229, which is the whole reason it differs.
-        #expect(StarterTuning.standardSlot < 0.5)
+        // Derived, not restated: pinning the fraction would move
+        // the copy rather than guard it. What the standard slot
+        // has to MEAN is `StarterSlotSettingsFitTests`' (#1662);
+        // here, that the ultrawide column comes out narrower IN
+        // POINTS than the standard one does on a 27", which is the
+        // whole reason it differs.
         #expect(
             StarterTuning.ultrawideSlot * 3440
                 < StarterTuning.standardSlot * 2560

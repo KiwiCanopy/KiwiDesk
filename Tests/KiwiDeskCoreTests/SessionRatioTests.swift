@@ -202,7 +202,8 @@ struct SessionRatioTests {
             spaces: ["1"],
             spaceModes: ["1": .bsp],
             assignment: [:],
-            settings: core.tiler.settings
+            settings: core.tiler.settings,
+            sourceTitle: nil
         )
         core.apply(composed: composed, forceRetile: false)
         #expect(

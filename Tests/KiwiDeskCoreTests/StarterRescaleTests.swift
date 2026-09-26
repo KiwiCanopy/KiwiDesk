@@ -66,11 +66,35 @@ struct StarterRescaleTests {
     @Test("the seeded ladder profile is the starter baseline")
     func seededProfileIsBaseline() throws {
         let core = try onStarterBaseline()
-        #expect(core.profiles.currentName == "Starter")
-        #expect(
-            try core.profiles.read(name: "Starter").isStarterSetup
-        )
+        // Saved under the setup's TITLE (#1662); the identity the
+        // rescale keys on is the flag, never the file name.
+        let name = StarterTitle(shape: .laptop, otherScreens: 0)
+            .profileName
+        #expect(core.profiles.currentName == name)
+        #expect(try core.profiles.read(name: name).isStarterSetup)
         #expect(core.isOnStarterBaseline)
+    }
+
+    /// The onboarding heading and Settings title ask this after the
+    /// seed, from adoption state rather than the file (#1662,
+    /// #1245), and a workflow preset answers nothing.
+    @Test("the live starter title comes from adoption state")
+    func liveStarterTitle() throws {
+        let core = try onStarterBaseline()
+        #expect(
+            core.liveStarterTitle()
+                == StarterTitle(shape: .laptop, otherScreens: 0)
+        )
+        let name = try #require(core.profiles.currentName)
+        try FileManager.default.removeItem(
+            at: core.profiles.fileURL(name: name)
+        )
+        #expect(core.liveStarterTitle() != nil)
+        let workflow = try #require(
+            StandardProfiles.workflows.first { $0.screenCount == 1 }
+        )
+        try core.applyStandard(workflow)
+        #expect(core.liveStarterTitle() == nil)
     }
 
     @Test("a workflow preset is not the starter baseline")
@@ -99,6 +123,18 @@ struct StarterRescaleTests {
         // fixtures are 100 pt wide, so both screens are
         // `ScreenClass.laptop` and take that class's list.
         #expect(core.profiles.currentStandard == "Starter")
+        // The recomposed Standard carries its title (#1662), and
+        // the live title reads it.
+        let title = StarterTitle(shape: .laptop, otherScreens: 1)
+        #expect(core.profiles.currentStandardTitle == title)
+        #expect(core.liveStarterTitle() == title)
+        // The which-loads verdict names it by the same title.
+        let verdict = core.profileVerdict(activeBinding: nil).verdict
+        guard case .builtInStandard(_, let named) = verdict else {
+            Issue.record("expected the built-in Starter: \(verdict)")
+            return
+        }
+        #expect(named == title)
         #expect(core.state.workspaces.allSpaces.count == 5)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .scrolling
