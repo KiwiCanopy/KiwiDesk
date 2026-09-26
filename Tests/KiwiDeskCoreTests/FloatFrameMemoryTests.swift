@@ -76,6 +76,8 @@ struct FloatFrameMemoryTests {
         #expect(core.execute("make_floating").isSuccess)
         #expect(frames[float] != elsewhere)
         #expect(frames[float]?.width == FloatPlacement.longFloor)
+        // Consumed on the fallback path too.
+        #expect(core.state.floatFrames[float] == nil)
     }
 
     /// Through the real gone handler: only its `closed` verdict
@@ -156,5 +158,44 @@ struct FloatFrameMemoryTests {
         frames = [:]
         #expect(core.execute("make_floating").isSuccess)
         #expect(frames[float] == nil)
+    }
+
+    @Test("a hide keeps the memory")
+    func hideKeeps() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        core.state.apply(.windowHidden(float))
+        #expect(core.state.floatFrames[float]?.frame == placed)
+    }
+
+    @Test("tiling a window that is already tiled remembers nothing")
+    func tiledWindowRemembersNothing() {
+        let core = setup { _, _ in }
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(core.state.floatFrames[float] == nil)
+    }
+
+    /// With relayout animation off the placement is an instant set
+    /// whose echo has not reached state, so the commanded frame is
+    /// the one the window really has — and the one remembered.
+    @Test("the remembered frame is the commanded one, not the echo")
+    func remembersTheCommandedFrame() throws {
+        let core = setup { _, _ in }
+        core.tiler.settings.animations.onRelayout = false
+        #expect(core.execute("make_floating").isSuccess)
+        let commanded = try #require(core.tiler.recentInstantTarget(float))
+        #expect(core.state.windows[float]?.frame != commanded)
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(core.state.floatFrames[float]?.frame == commanded)
+    }
+
+    @Test("a tab re-key carries the remembered frame's value")
+    func rekeyCarriesTheValue() {
+        let core = setup { _, _ in }
+        floatMoveAndTile(core, to: placed)
+        let new = WindowID(77)
+        core.state.rekey(float, to: new)
+        #expect(core.state.floatFrames[new]?.frame == placed)
+        #expect(core.state.floatFrames[float] == nil)
     }
 }

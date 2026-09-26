@@ -116,4 +116,13 @@ struct FloatPlacementTests {
         )
         #expect(restored.width == 1700)
     }
+
+    @Test("A remembered frame too tall for the region is shrunk too")
+    func restoredShrinksHeight() {
+        let region = CGRect(x: 0, y: 30, width: 1600, height: 1000)
+        let frame = CGRect(x: 200, y: 0, width: 500, height: 1400)
+        let restored = FloatPlacement.restored(frame, in: region)
+        #expect(restored.height == region.height)
+        #expect(region.contains(restored))
+    }
 }
