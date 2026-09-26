@@ -4617,6 +4617,7 @@ size. It is still one
 `TilingSettings`, never a per-display config behind the values
 the Settings window shows.
 
+:::unreleased
 **An unlisted mode in a sparse preset follows the screen it lands
 on, not a fixed `bsp`.** The workflow presets predate the
 screen-shape theory and several declare a mode for only some of
@@ -4633,7 +4634,9 @@ not knowable — a preset's **Layouts** sheet draws a plan for a screen COUNT,
 and a three-screen preset is drawn on a one-screen Mac — the
 historic `bsp` stands, because inventing a shape is a worse
 answer than the old one. (Owner ruling.)
+:::
 
+:::unreleased
 **A preset is its own choices over the screen's tuning, and it
 names the workflow, never the hardware** (owner ruling, #1663).
 A preset declares only what it chose on purpose — Minimalist's
@@ -4656,6 +4659,7 @@ the connected screens says ONCE which shape they are tuned for,
 in the starter's own words — the same for every card in it, so a
 per-card copy would say nothing about any one preset — and
 nothing stores it.
+:::
 
 **There is one Starter preset, and it is for the screens you
 have.** It is titled by its main screen's class — Laptop,
