@@ -32,8 +32,6 @@ struct ScrollingEdgeDropTests {
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }
         core.tiler.settings.scrolling.anchor = .center
-        core.tiler.settings.scrolling.orientation =
-            vertical ? .vertical : .horizontal
         for index in 1...3 {
             core.state.apply(
                 .windowCreated(
@@ -46,6 +44,13 @@ struct ScrollingEdgeDropTests {
             )
         }
         let space = core.state.workspaces.space(of: WindowID(1))!
+        // Per Space, never the global: the drop resolves the
+        // axis through that Space's own override.
+        if vertical {
+            var override = ScrollingOverride()
+            override.orientation = .vertical
+            core.tiler.settings.scrolling.override[space] = override
+        }
         core.execute(
             "set_mode",
             args: [.string(space.raw), .string(mode)]
@@ -85,6 +90,19 @@ struct ScrollingEdgeDropTests {
         core.state.workspaces[space]?.sessionRatios.slotSize
     }
 
+    /// The drawn extent after the drop, along the row's axis.
+    private func drawnExtent(
+        _ core: KiwiCore,
+        _ id: WindowID,
+        vertical: Bool = false
+    ) throws -> CGFloat {
+        core.retile()
+        let frame = try #require(
+            core.tiler.calculatedFrames(state: core.state)[id]
+        )
+        return vertical ? frame.height : frame.width
+    }
+
     @Test("the last column's trailing edge resizes the row")
     func trailingEdgeOfLastColumn() throws {
         let (core, space) = makeCore(mode: "scrolling")
@@ -98,6 +116,9 @@ struct ScrollingEdgeDropTests {
         #expect(slotStore(core, space) == nil)
         core.handleDragEnd(id, start: slot, frame: frame)
         #expect(slotStore(core, space) != nil)
+        // The row is drawn at the dropped width, not back at
+        // the start (or pushed the other way).
+        #expect(abs(try drawnExtent(core, id) - frame.width) <= 2)
     }
 
     @Test("the first column's leading edge resizes the row")
@@ -117,28 +138,39 @@ struct ScrollingEdgeDropTests {
     }
 
     /// A vertical row's slot runs along the HEIGHT: the last
-    /// row's bottom edge writes it, and a width-only drag —
-    /// across the scroll axis — writes nothing.
+    /// row's bottom edge writes it...
     @Test("a vertical row resizes along its height")
     func verticalRowReadsTheHeight() throws {
         let (core, space) = makeCore(
             mode: "scrolling",
             vertical: true
         )
-        let (id, slot) = try endWindow(
-            core,
-            space,
-            last: true
-        )
-        var across = slot
-        across.size.width -= 200
-        core.handleDragEnd(id, start: slot, frame: across)
-        #expect(slotStore(core, space) == nil)
-
+        let (id, slot) = try endWindow(core, space, last: true)
         var along = slot
         along.size.height -= 200
         core.handleDragEnd(id, start: slot, frame: along)
         #expect(slotStore(core, space) != nil)
+        #expect(
+            abs(
+                try drawnExtent(core, id, vertical: true)
+                    - along.height
+            ) <= 2
+        )
+    }
+
+    /// ...and a width-only drag, across the scroll axis, writes
+    /// nothing. Its own core, so neither half rides the other.
+    @Test("a vertical row ignores a width drag")
+    func verticalRowIgnoresTheWidth() throws {
+        let (core, space) = makeCore(
+            mode: "scrolling",
+            vertical: true
+        )
+        let (id, slot) = try endWindow(core, space, last: true)
+        var across = slot
+        across.size.width -= 200
+        core.handleDragEnd(id, start: slot, frame: across)
+        #expect(slotStore(core, space) == nil)
     }
 
     /// The pure half: `translate` reads the scroll axis's delta.
