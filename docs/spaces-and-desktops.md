@@ -56,6 +56,12 @@ it gets a digit shortcut if one of the ten is free. A held Space
 moves to a new number again whenever a profile that loads uses
 its current one.
 
+:::unreleased
+Held Spaces keep the order they had: a Space after a renumbered
+one is renumbered after it too, so the Space Bar and the digit
+shortcuts list them in the order the screen had them.
+:::
+
 The Space Bar draws an asterisk badge on a held Space's
 identifier, and VoiceOver reads the screen it came from, its old
 name when it was renumbered, and that it is not saved: saving a

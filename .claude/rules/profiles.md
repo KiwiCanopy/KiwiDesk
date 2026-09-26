@@ -767,6 +767,12 @@ screen's Spaces are held, not forwarded*. The obligations:
   declares to a fresh number unless it is about to go home under
   that very name (`HeldSpaceTests` ▸
   `claimedHeldNumberIsReclaimed`); a new such door owes the call.
+- **A hold and a reclaim keep the held Spaces' order (#1664).**
+  Both name through the one `KiwiCore.orderedHeldNames`, walking
+  in bar order, and place the batch with `placeHeldBatchLast` —
+  never a walk over the `heldSpaces` dictionary, whose order is
+  the hash's (`HeldSpaceOrderTests` ▸ `holdKeepsTheOrder`,
+  `HeldSpaceOrderTests` ▸ `reclaimKeepsTheOrder`).
 - **A renumber takes `SpaceID.nextNumber(past:)` over every live
   id, never `smallestFreeNumber(among:)` and never the declared
   set alone.** A Space the prune is about to drop still exists,

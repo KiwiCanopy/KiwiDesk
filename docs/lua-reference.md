@@ -4496,6 +4496,12 @@ does not reset its mode — and wears an asterisk badge in the
 Space Bar
 ([#1507](https://github.com/KiwiCanopy/KiwiDesk/issues/1507)).
 
+:::unreleased
+Held spaces keep their order: a held space after a renumbered one
+is renumbered past it too, even where its own name is free
+([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
+:::
+
 Once its monitor is back, a held space goes home when the
 arrangement then live is the one it left — the same profile, or
 the same Standard — and declares its original name: everything in
