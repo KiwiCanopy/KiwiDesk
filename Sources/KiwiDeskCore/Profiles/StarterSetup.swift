@@ -90,17 +90,32 @@ public enum StarterSetup {
         return screens
     }
 
-    /// The class of the screen each layout first lands on; the
-    /// tuning reads each layout's from here (#1662). First slot
-    /// wins: the allocator places Stack, Grid and Track once, and
-    /// Scrolling's first slot is the main's wherever it leads.
+    /// The class of the screen each layout is tuned for (#1662):
+    /// its first slot in position order, a forced repeat taking the
+    /// earlier screen's tuning — except Scrolling, `scrollingHost`.
     static func hosts(_ sizes: [CGSize]) -> [LayoutMode: ScreenClass] {
         let sizes = floored(sizes)
         var hosts: [LayoutMode: ScreenClass] = [:]
         for slot in slots(sizes) where hosts[slot.mode] == nil {
             hosts[slot.mode] = ScreenClass.of(sizes[slot.screen])
         }
+        hosts[.scrolling] = scrollingHost(sizes)
         return hosts
+    }
+
+    /// Scrolling leads several screens and can be forced onto the
+    /// narrowest as a repeat, so it is tuned for the main where the
+    /// main LEADS it, else for the widest screen that does.
+    static func scrollingHost(_ sizes: [CGSize]) -> ScreenClass? {
+        var leads: [Int: LayoutMode] = [:]
+        for slot in slots(sizes) where leads[slot.screen] == nil {
+            leads[slot.screen] = slot.mode
+        }
+        let leading = leads.filter { $0.value == .scrolling }.keys
+        let host =
+            leading.contains(0)
+            ? 0 : leading.max { sizes[$0].width < sizes[$1].width }
+        return host.map { ScreenClass.of(sizes[$0]) }
     }
 
     /// The starter's only per-space overrides (#1662): a Scrolling

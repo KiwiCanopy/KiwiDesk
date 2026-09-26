@@ -104,7 +104,7 @@ extension ProfilesSection {
                 screens,
                 name
             )
-        case .builtInStandard(let name):
+        case .builtInStandard(let name, let title):
             // Named, not "a built-in layout": the name is what
             // the Presets card offers, so the two surfaces say
             // the same word. Core carries the stable English
@@ -116,10 +116,10 @@ extension ProfilesSection {
                 screens,
                 standardDisplayName(
                     name,
-                    title: model.activeStandardTitle
+                    title: title
                 )
             )
-        case .placementOnlyStandard(let name, let active):
+        case .placementOnlyStandard(let name, let active, let title):
             // A Lua-owned config keeps owning the tiling, so the
             // built-in only steers WHERE spaces sit. Saying "the
             // built-in X loads" here would claim it replaced a
@@ -134,7 +134,7 @@ extension ProfilesSection {
                     screens,
                     standardDisplayName(
                         name,
-                        title: model.activeStandardTitle
+                        title: title
                     )
                 )
             }
@@ -147,7 +147,7 @@ extension ProfilesSection {
                 active,
                 standardDisplayName(
                     name,
-                    title: model.activeStandardTitle
+                    title: title
                 )
             )
         case .none:

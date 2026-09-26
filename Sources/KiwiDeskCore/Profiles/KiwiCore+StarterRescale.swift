@@ -30,10 +30,7 @@ extension KiwiCore {
         if profiles.currentStandard == StarterSetup.name {
             return true
         }
-        guard let name = profiles.currentName,
-            let profile = try? profiles.read(name: name)
-        else { return false }
-        return profile.isStarterSetup
+        return profiles.activeIsStarterSetup
     }
 
     /// The starter setup's title, or nil when the live layout is

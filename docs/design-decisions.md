@@ -4590,10 +4590,11 @@ only question is which screen names it. For a layout the
 allocator places on ONE screen — Stack, Grid, Track — that
 question has an answer that is not a guess: the screen it sits
 on, so a Stack on a portrait secondary puts its stack along the
-bottom (owner ruling, #1662). Scrolling leads several screens,
-so it takes the screen its FIRST space lands on — the main's
-wherever the main leads Scrolling, the wider screen's where a
-narrow portrait main leads Monocle instead. What stays the main
+bottom (owner ruling, #1662). Scrolling leads several screens
+and can be forced onto the narrowest one as a repeat, so it
+takes the main screen where the main LEADS it, else the widest
+screen that does — a narrow portrait or laptop main leads
+Monocle, and its neighbour tunes Scrolling. What stays the main
 screen's is what no layout owns — gaps and the minimum window
 size. It is still one
 `TilingSettings`, never a per-display config behind the values

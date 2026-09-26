@@ -147,6 +147,14 @@ struct StarterShapeTests {
             StarterSetup.settings(sizes: [portrait, ultrawide])
                 .scrolling.anchor == .center
         )
+        // A laptop main beside an ultrawide leads Monocle and may
+        // draw Scrolling as a forced repeat AHEAD of the ultrawide's
+        // lead; the ultrawide still tunes Scrolling.
+        let mixed = [CGSize(width: 1512, height: 982), ultrawide]
+        #expect(StarterSetup.scrollingHost(mixed) == .ultrawide)
+        let tuned = StarterSetup.settings(sizes: mixed).scrolling
+        #expect(tuned.anchor == .center)
+        #expect(!tuned.fillWhenAlone)
     }
 
     /// The starter's per-space overrides are Scrolling DIRECTION
@@ -185,8 +193,9 @@ struct StarterShapeTests {
                 direction.orientation = override.orientation
                 #expect(override == direction, "\(sizes)")
             }
-            // `hosts` keeps the first slot; the tuned single-screen
-            // layouts must really appear once for that to be exact.
+            // On one or two screens the allocator places each tuned
+            // layout once; three or more may force a repeat, which
+            // takes the first screen's tuning (`tuningFollowsHost`).
             let slots = StarterSetup.slots(sizes)
             for mode in [LayoutMode.stack, .grid, .track] {
                 #expect(

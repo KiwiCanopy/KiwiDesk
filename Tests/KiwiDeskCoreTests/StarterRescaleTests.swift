@@ -123,6 +123,11 @@ struct StarterRescaleTests {
         // fixtures are 100 pt wide, so both screens are
         // `ScreenClass.laptop` and take that class's list.
         #expect(core.profiles.currentStandard == "Starter")
+        // The recomposed Standard carries its title (#1662), and
+        // the live title reads it.
+        let title = StarterTitle(shape: .laptop, otherScreens: 1)
+        #expect(core.profiles.currentStandardTitle == title)
+        #expect(core.liveStarterTitle() == title)
         #expect(core.state.workspaces.allSpaces.count == 5)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .scrolling

@@ -4,8 +4,8 @@ import Foundation
 /// Starter layout parameter defaults tuned for screen shape (#678).
 ///
 /// Still ONE `TilingSettings` per profile: each layout takes the
-/// tuning of the screen it first lands on (Scrolling's is the
-/// main's wherever the main leads it), and what no layout owns —
+/// tuning of the screen `StarterSetup.hosts` names for it, and
+/// what no layout owns —
 /// gaps, the minimum window size — takes the MAIN screen's
 /// (#1662).
 public enum StarterTuning {

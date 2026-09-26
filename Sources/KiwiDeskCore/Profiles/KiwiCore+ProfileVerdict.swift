@@ -22,14 +22,19 @@ public enum ProfileVerdict: Equatable, Sendable {
     case countDefault(name: String)
     /// No saved profile matches; a built-in layout composes.
     /// Carries its stable English `StandardLayout.name`, which
-    /// the GUI localizes.
-    case builtInStandard(name: String)
+    /// the GUI localizes, and the starter's title when it is the
+    /// starter (#1662).
+    case builtInStandard(name: String, title: StarterTitle? = nil)
     /// No saved profile matches, and the config is Lua-owned, so
     /// nothing is adopted: a built-in layout steers PLACEMENT
     /// while `activeProfile` (when any) keeps owning the tiling.
     /// A distinct promise from `builtInStandard`, and the GUI
     /// must not say "the built-in X loads" about it.
-    case placementOnlyStandard(name: String, activeProfile: String?)
+    case placementOnlyStandard(
+        name: String,
+        activeProfile: String?,
+        title: StarterTitle? = nil
+    )
     /// Nothing matches and no built-in plans for this many
     /// screens.
     case none
@@ -174,9 +179,13 @@ extension KiwiCore {
         guard isGuiManaged else {
             return .placementOnlyStandard(
                 name: composed.sourceName,
-                activeProfile: profiles.currentName
+                activeProfile: profiles.currentName,
+                title: composed.sourceTitle
             )
         }
-        return .builtInStandard(name: composed.sourceName)
+        return .builtInStandard(
+            name: composed.sourceName,
+            title: composed.sourceTitle
+        )
     }
 }

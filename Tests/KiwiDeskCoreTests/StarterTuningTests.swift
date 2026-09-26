@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// How a starter setup's layouts are tuned for the hardware —
-/// the per-class census of `StarterTuning.settings(mainShape:)`.
+/// the per-class census of `StarterTuning.settings(mainShape:hosts:)`.
 ///
 /// Split from `StarterSetupSeedTests`, which owns the generator,
 /// the preset face and the first-run seed: adding the Scrolling
