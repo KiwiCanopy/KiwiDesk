@@ -65,8 +65,8 @@ struct SpaceBarFrontViewChurnTests {
         _ overlay: SpaceBarOverlay
     ) -> [NSView] {
         [
-            overlay.frontBox, overlay.frontDivider, overlay.frontIcon,
-            overlay.frontGlyph, overlay.frontName,
+            overlay.frontBox, overlay.frontBorder, overlay.frontDivider,
+            overlay.frontIcon, overlay.frontGlyph, overlay.frontName,
         ]
     }
 

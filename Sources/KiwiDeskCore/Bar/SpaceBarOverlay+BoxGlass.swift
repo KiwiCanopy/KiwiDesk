@@ -77,7 +77,7 @@ extension SpaceBarOverlay {
             host.addSubview(
                 glass,
                 positioned: .below,
-                relativeTo: frontDivider
+                relativeTo: frontBorder
             )
             GlassPlate.setContent(glass, NSView())
         }

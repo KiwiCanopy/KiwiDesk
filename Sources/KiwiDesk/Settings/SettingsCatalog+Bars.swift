@@ -56,6 +56,14 @@ struct KiwiShelfStyleControls: Sendable {
         "kiwishelf.corner_roundness",
         "Corner roundness"
     )
+    let kiwishelfStyleBorder = SettingsControl(
+        "kiwishelf.border",
+        "Border"
+    )
+    let kiwishelfStyleBorderWidth = SettingsControl(
+        "kiwishelf.border_width",
+        "Border width"
+    )
     let kiwishelfStyleHighlightWidth = SettingsControl(
         "kiwishelf.highlight_width",
         "Highlight width"

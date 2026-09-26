@@ -20,6 +20,9 @@ final class AppBarItemView: NSView {
         return tf
     }()
     let accent = NSView()
+    /// The box's border under Boxed (#1679): the bottom subview,
+    /// so the active outline strokes over it.
+    let boxBorder = ShelfBorder.make()
     /// Clips active accent indicator to item bounds (owner 2026-07-20).
     let accentClip = AppBarOverlay.FlippedView()
     let badge: NSTextField = {
@@ -75,6 +78,7 @@ final class AppBarItemView: NSView {
         badge.wantsLayer = true
         badge.alignment = .center
         badge.setAccessibilityElement(false)
+        addSubview(boxBorder)
         addSubview(iconView)
         addSubview(glyphLabel)
         addSubview(label)

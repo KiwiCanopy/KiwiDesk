@@ -2030,6 +2030,42 @@ of both bars, where 0 = square and 100 = a full capsule
 kiwishelf.set_corner_roundness(50)
 ```
 
+### kiwishelf.set_border
+
+:::unreleased
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** strokes a line around the plate, or around each item's
+box under `boxed` (the Space Bar's front-app segment included),
+on the same rounded corners. It sits exactly on the edge, never
+inset, so under Liquid Glass it strengthens the glass's own rim;
+it takes no tint and stays under Reduce transparency. The width
+and the [`border_color`](#kiwishelf-colours) are kept while it is
+off.
+
+**Example:**
+
+```lua
+kiwishelf.set_border(true)
+```
+:::
+
+### kiwishelf.set_border_width
+
+:::unreleased
+**Expects:** points, 1–4 (default `1`); values outside the range
+are clamped.
+
+**Does:** sets the width of the
+[border](#kiwishelfset_border).
+
+**Example:**
+
+```lua
+kiwishelf.set_border_width(2)
+```
+:::
+
 ### kiwishelf.set_highlight_width
 
 :::unreleased
@@ -2152,6 +2188,12 @@ the focused window's glyph is the Space Bar's own
   `kiwishelf.set_group_badge_text_color` — the count and `+n`
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
+
+:::unreleased
+`kiwishelf.set_border_color` sets the
+[border](#kiwishelfset_border)'s colour (default `#EAF3EE59`, the
+item colour at 35% opacity). Every bundled palette carries one.
+:::
 
 **Example:**
 

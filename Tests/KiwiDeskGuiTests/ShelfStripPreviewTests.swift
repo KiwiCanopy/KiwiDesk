@@ -35,6 +35,8 @@ struct ShelfStripPreviewTests {
             indicator: .edgeMark,
             outlineWidth: 1.8,
             edgeMarkWidth: 2.7,
+            borderWidth: 0,
+            borderColor: "#FFFFFF",
             fontSize: 12
         )
     }

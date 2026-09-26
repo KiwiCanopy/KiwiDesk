@@ -13,8 +13,11 @@ extension SpaceBarOverlay {
         horizontal: Bool
     ) {
         guard let app else {
-            [frontBox, frontDivider, frontIcon, frontGlyph, frontName]
-                .forEach { $0.isHidden = true }
+            [
+                frontBox, frontBorder, frontDivider, frontIcon,
+                frontGlyph, frontName,
+            ]
+            .forEach { $0.isHidden = true }
             frontGlass?.isHidden = true
             return
         }
@@ -104,7 +107,8 @@ extension SpaceBarOverlay {
         // to a glass subtree (#1315).
         let content = frontHost ?? itemContainer
         for view in [
-            frontBox, frontDivider, frontIcon, frontGlyph, frontName,
+            frontBox, frontBorder, frontDivider, frontIcon, frontGlyph,
+            frontName,
         ] where view.superview !== content {
             content.addSubview(
                 view,

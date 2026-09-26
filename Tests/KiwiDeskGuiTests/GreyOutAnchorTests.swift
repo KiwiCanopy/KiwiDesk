@@ -68,6 +68,13 @@ struct GreyOutAnchorTests {
             "prose: AdvancedColorsHelp.focusedItemReference",
             1
         ),
+        // So does the border row's, while the border is off
+        // (#1679).
+        (
+            "BarColorCards.swift",
+            "prose: AdvancedColorsHelp.shelfBorderReference",
+            1
+        ),
         (
             "StructureColorCards.swift",
             "help: gates.bordersHeaderHelp",

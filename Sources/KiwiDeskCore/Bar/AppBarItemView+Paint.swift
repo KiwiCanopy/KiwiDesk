@@ -33,6 +33,13 @@ extension AppBarItemView {
         accentClip.layer?.masksToBounds = true
         accentClip.layer?.cornerRadius = radius
         accentClip.layer?.maskedCorners = maskedCorners
+        boxBorder.frame = bounds
+        ShelfBorder.paint(
+            boxBorder,
+            shelf: style.shelf,
+            cornerRadius: radius,
+            shows: style.backgroundStyle == .boxed
+        )
     }
 
     /// Masked corners for item background rounding.

@@ -591,3 +591,27 @@ mark the current Space or focused window reads it.
   than a literal is review's — no clause renders it. A new
   indicator surface owes one of those suites a clause, since
   neither reads a list of sites.
+
+## The shelf's border is painted in one place
+
+`kiwishelf.border` (#1679) rims the plate under Plain, and each
+box — both bars' items and the Space Bar's front-app chip — under
+Boxed.
+
+- **Every rim goes through `ShelfBorder.paint`**, which reads
+  `KiwiShelf.drawnBorderWidth` (0 while the switch is off, the
+  clamped width otherwise) and `borderColor`, never the stored
+  width. The rim is its own fill-less, click-through view framed
+  to the surface, so it strokes on the edge, never inset: above
+  the plate or the chip's glass, and beneath an item's active
+  outline, which strokes over it. `ShelfBorderDrawingTests`
+  builds the plate, both bars' boxes and the chip and holds the
+  stroke, its place in the order, and its absence while off; a
+  new rimmed surface owes that suite a clause. The Settings Bars
+  preview draws the draft's border from its `BarSpec`
+  (`ShelfBorderPreviewTests`).
+- **Every bundled palette carries `kiwishelf.border_color`**,
+  measured against the palette's HOME wallpaper — the extreme its
+  composited plate contrasts least with — at the idle floor
+  (`ShelfBorderContrastTests`). The switch and the width are not
+  palette keys (#375).

@@ -65,6 +65,7 @@ enum ColorsRowOrder {
         .kiwishelf(.hoverItemColor),
         .kiwishelf(.groupBadgeColor),
         .kiwishelf(.groupBadgeTextColor),
+        .kiwishelf(.borderColor),
         .spaceBar(.spaceBarFocusedItemColor),
         .borders(.floatingColor),
     ]

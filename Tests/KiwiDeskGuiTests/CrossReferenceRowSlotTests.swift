@@ -118,11 +118,11 @@ struct CrossReferenceRowSlotTests {
         "SpaceOverrideRows+ModeRows.swift:prose",
         "BarColorCards.swift:AdvancedColorsHelp.focusedItemReference",
         "StructureColorCards.swift:AdvancedColorsHelp.unfocusedReference",
-        // Asserted in sibling suites, this file being at the
-        // ceiling: MacChecklistCrossReferenceTests (#1365),
-        // AppRulePinTests (#1022).
+        // Siblings assert these (at the ceiling): AppRulePinTests,
+        // MacChecklistCrossReferenceTests, ShelfBorderColorGateTests.
         "MacHabitRow.swift:prose",
         "AppRulesSection+Lists.swift:Self.noSpacesProse",
+        "BarColorCards.swift:AdvancedColorsHelp.shelfBorderReference",
     ]
 
     // MARK: - The values

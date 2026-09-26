@@ -82,7 +82,8 @@ struct SettingsCatalogSiteTests {
         // 102 since the #1517 redesign: the bar Style drawers
         // and their rows, and one of the two colour groups, left.
         // 103 since #1680: the highlight width row.
-        #expect(names.count == 103)
+        // 105 since #1679: the border and border width rows.
+        #expect(names.count == 105)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

@@ -53,6 +53,21 @@ extension AdvancedColorRow {
                 label: L("kiwishelf.color.badge_text", "Badge text"),
                 hex: shelf.groupBadgeTextColor
             )
+        case .borderColor:
+            HexColorField(
+                label: L("kiwishelf.color.border", "Border"),
+                a11yLabel: L(
+                    "kiwishelf.color.border.a11y",
+                    "KiwiShelf border color"
+                ),
+                hex: shelf.borderColor
+            )
+            .modifier(
+                gated(
+                    gates.shelfBorderOff,
+                    AdvancedColorsHelp.shelfBorderOff
+                )
+            )
         default:
             let _ = assertionFailure(
                 "non-colour KiwiShelf key in Advanced Colours: "
