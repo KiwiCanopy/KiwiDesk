@@ -54,13 +54,22 @@ struct StandardLayoutDisplayTests {
     func standardDisplayNameLocalizes() {
         reset()
         LocalizationManager.shared.select("en")
-        #expect(standardDisplayName("Command Center") == "Command Center")
+        #expect(
+            standardDisplayName("Command Center", title: nil)
+                == "Command Center"
+        )
         LocalizationManager.shared.select("de")
         defer { reset() }
         // Shipped German translates the Standard names; assert it
         // resolved away from English, not the exact wording.
-        #expect(standardDisplayName("Command Center") != "Command Center")
-        #expect(standardDisplayName("Coder & Monitor") != "Coder & Monitor")
+        #expect(
+            standardDisplayName("Command Center", title: nil)
+                != "Command Center"
+        )
+        #expect(
+            standardDisplayName("Coder & Monitor", title: nil)
+                != "Coder & Monitor"
+        )
     }
 
     @Test("an unknown name passes through unchanged")
@@ -69,8 +78,41 @@ struct StandardLayoutDisplayTests {
         LocalizationManager.shared.select("de")
         defer { reset() }
         #expect(
-            standardDisplayName("A Hand-Edited Profile")
+            standardDisplayName("A Hand-Edited Profile", title: nil)
                 == "A Hand-Edited Profile"
+        )
+    }
+
+    /// One screen is named; several are not, since no one class
+    /// describes them (#1662).
+    @Test("the onboarding heading names a single screen only")
+    func onboardingHeading() {
+        reset()
+        LocalizationManager.shared.select("en")
+        defer { reset() }
+        #expect(
+            StarterTitle(shape: .ultrawide, otherScreens: 0)
+                .onboardingTitle
+                == "Your Spaces are ready for your ultrawide screen"
+        )
+        #expect(
+            StarterTitle(shape: .ultrawide, otherScreens: 1)
+                .onboardingTitle
+                == "Your Spaces are ready for all your screens"
+        )
+    }
+
+    /// The starter answers with its title, never its identity
+    /// (#1662): the header and which-loads read this path.
+    @Test("the starter's name resolves to its title")
+    func starterNameShowsTitle() {
+        reset()
+        LocalizationManager.shared.select("en")
+        defer { reset() }
+        let title = StarterTitle(shape: .ultrawide, otherScreens: 1)
+        #expect(
+            standardDisplayName(StarterSetup.name, title: title)
+                == "Ultrawide + 1"
         )
     }
 }

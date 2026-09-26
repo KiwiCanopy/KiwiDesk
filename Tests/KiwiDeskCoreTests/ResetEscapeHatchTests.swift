@@ -155,7 +155,10 @@ struct ResetEscapeHatchTests {
         )
         #expect(
             core.tiler.settings.gapsGlobal
-                == StarterTuning.settings(mainShape: seededShape)
+                == StarterTuning.settings(
+                    mainShape: seededShape,
+                    hosts: [:]
+                )
                 .gapsGlobal
         )
         #expect(

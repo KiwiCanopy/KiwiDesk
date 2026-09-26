@@ -62,7 +62,7 @@ struct MonitorChangeTests {
         )
         core.execute("load_profile", args: [.string("desk")])
         core.profiles.standardIsLive(
-            ActiveStandard(name: "x", spaces: [])
+            ActiveStandard(name: "x", spaces: [], title: nil)
         )
 
         core.handleMonitorChange()

@@ -190,7 +190,7 @@ struct DesktopFirstVisitTests {
                 "standardIsLive",
                 {
                     $0.standardIsLive(
-                        ActiveStandard(name: "Std", spaces: [])
+                        ActiveStandard(name: "Std", spaces: [], title: nil)
                     )
                 }
             ),

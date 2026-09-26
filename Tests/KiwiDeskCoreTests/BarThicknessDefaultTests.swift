@@ -21,7 +21,10 @@ struct BarThicknessDefaultTests {
     @Test("no screen class thins the starter's shelf")
     func starterKeepsTheDefault() {
         for shape in ScreenClass.allCases {
-            let tuned = StarterTuning.settings(mainShape: shape)
+            let tuned = StarterTuning.settings(
+                mainShape: shape,
+                hosts: [:]
+            )
             #expect(
                 tuned.kiwishelf.thickness == KiwiShelf().thickness,
                 "\(shape)"

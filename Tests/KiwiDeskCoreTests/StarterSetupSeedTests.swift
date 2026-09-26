@@ -190,10 +190,7 @@ struct StarterSetupSeedTests {
                 == StarterSetup.spaceScreens(sizes: live)
         )
         #expect(
-            two?.settings
-                == StarterTuning.settings(
-                    mainShape: ScreenClass.of(live[0])
-                )
+            two?.settings == StarterSetup.settings(sizes: live)
         )
     }
 
@@ -264,9 +261,14 @@ struct StarterSetupSeedTests {
         #expect(core.tiler.settings.track.newWindow == .ownTrack)
         #expect(core.tiler.settings.grid.columns == 2)
 
-        // Persisted and adopted, so a reload re-applies it.
-        #expect(core.profiles.currentName == "Starter")
-        let saved = try core.profiles.read(name: "Starter")
+        // Persisted and adopted under the setup's title (#1662),
+        // so a reload re-applies it.
+        let name = StarterTitle(shape: .desktop, otherScreens: 1)
+            .profileName
+        #expect(name == "Widescreen + 1")
+        #expect(core.profiles.currentName == name)
+        let saved = try core.profiles.read(name: name)
+        #expect(saved.isStarterSetup)
         #expect(saved.spaceModes[SpaceID("2")] == .grid)
         #expect(saved.spaceModes[SpaceID("4")] == .monocle)
         // The saved profile carries a real monitor set — both
@@ -283,12 +285,20 @@ struct StarterSetupSeedTests {
         // profile isn't saved with an empty monitor set.
         let core = makeCore()
         #expect(core.state.workspaces.allDisplays.isEmpty)
+        let screens = core.firstRunDisplays()
         core.seedFirstRunStarterProfile()
+        // A host WITH a screen must author the profile; only a
+        // headless one may skip, or a broken seed reads as headless.
+        if !screens.isEmpty {
+            #expect(core.profiles.currentName != nil)
+        }
         // On any real display this authors the profile with a
         // non-empty monitor set; on a headless runner it logs and
         // skips. Either way it never saves an empty-monitor
         // profile that a monitor change would discard.
-        if let saved = try? core.profiles.read(name: "Starter") {
+        if let name = core.profiles.currentName,
+            let saved = try? core.profiles.read(name: name)
+        {
             #expect(
                 saved.monitorSets.first?.monitors.isEmpty == false
             )

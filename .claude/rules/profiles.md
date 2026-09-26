@@ -96,7 +96,9 @@ because two real clients now remove drift — see
 
 ## The starter setup is derived, and its tuning is profile-wide
 
-A fresh install's `Starter` profile is **chosen from the screens
+A fresh install's starter profile — identity
+`StarterSetup.name`, saved under its `StarterTitle` — is
+**chosen from the screens
 that are connected** — `ScreenClass` (shape, in points) →
 `StarterAllocation` (how many spaces, and which layouts) →
 `StarterTuning` (the settings) → `StarterSetup` (assembles). The
@@ -104,16 +106,30 @@ argument, and why it superseded #466's five-per-display ladder,
 is in `docs/design-decisions.md`. The obligations that fall on a
 change here:
 
-- **The tuning is profile-wide and named by the MAIN screen.**
-  `TilingSettings` has one gap value and one stack ratio to give,
-  so a laptop beside a 27" gets one answer and the only question
-  is which screen names it. Per-space overrides express the rest.
-  `StarterTuning.settings(mainShape:)` takes ONE `ScreenClass`,
-  so a per-display answer cannot be expressed without changing
-  the signature — do not change it into a per-display seam, which
-  would put a second config behind every value the Settings
-  window shows. `StarterSetupSeedTests` holds the tuning against
-  each class.
+- **The tuning is ONE `TilingSettings`: each layout's facet is
+  the screen `StarterSetup.hosts` names — its first slot, and for
+  Scrolling `scrollingHost` (the widest screen that leads it) —
+  gaps and the minimum window
+  size the MAIN screen's** (#1662). `StarterSetup.settings(sizes:)`
+  hands `StarterTuning.settings(mainShape:hosts:)` the hosts from
+  `StarterSetup.hosts`, derived from the one walk; take that
+  door, never a bare `StarterTuning` call with hand-made hosts.
+  Do not grow it into a per-display config — the output is one
+  value behind every setting the Settings window shows.
+- **The starter's per-space overrides are Scrolling DIRECTION
+  alone** (`StarterSetup.scrollingOverrides`, one orientation
+  home in `StarterTuning.scrollingOrientation(for:)`); adding any
+  other per-space override to the starter is a ruling, not a
+  tweak (`StarterShapeTests` ▸ `onlyDirectionOverrides`).
+- **The starter's identity is `StarterSetup.name`; its title is
+  `StarterTitle`.** Held spaces, `currentStandard` and the
+  monitor-change rescale key on the name, so a shape-derived
+  string never replaces it: `applyStandard` saves the starter
+  under its title and the profile carries `isStarterSetup`, and
+  a reader asking what the live setup is titled takes
+  `liveStarterTitle()`, one asking about the resolving Standard
+  alone `currentStandardTitle` — adoption state, never the file
+  (`StarterShapeTests`, `StarterRescaleTests`).
 - **Which entry point a call site takes is a rule, not a
   preference.** `StandardProfiles.workflows` is the
   hardware-agnostic list; `all(sizes:)` / `layouts(for:sizes:)`
@@ -126,14 +142,29 @@ change here:
   (`StarterSetupSeedTests` pins which face carries the Starter.)
 - **An unlisted mode in a sparse preset follows the screen.**
   `StandardLayout.mode(of:on:)` answers a space the map does not
-  declare with that screen's own best layout, never a fixed
-  `bsp` — the layout `ScreenClass` rules out on a laptop, which
-  owns that threshold. Pass `nil` only where the hardware
+  declare with that screen's `ScreenClass.presetFallback`, never
+  a fixed `bsp` — the layout `ScreenClass` rules out on a laptop,
+  which owns that threshold — and that fallback is NOT the
+  starter's lead order, which moved to Stack on the ultrawides
+  while presets kept Track (#1663). Pass `nil` only where the hardware
   genuinely is not knowable, and the historic `bsp` stands there;
   a caller that CAN know and passes nil makes the preview and the
   apply disagree. `SparseModeFallbackTests` holds both arms.
+- **Beside an ultrawide, Scrolling lives on the ultrawides
+  alone** (#1662): with an ultrawide among several screens,
+  `StarterAllocation.ultrawideModes` replaces the ladder — every
+  other screen leads Monocle and draws from
+  `companionLayouts`, three spaces a screen, each ending in its
+  own Floating space and each companion its ruled layout,
+  independent of what the others drew. That walk owns its own
+  lead and its Floating; the ladder's lead is `lead(_:of:)`
+  below and its one Floating `floatingHost`. A change to either
+  rule names the allocation it binds — a new lead or Floating
+  rule in one is not in the other
+  (`StarterUltrawideAllocationTests`).
 - **A screen's FIRST space is the lead, and the lead may
-  repeat.** `StarterAllocation.lead(_:of:)` decides it before the
+  repeat.** On the ladder, `StarterAllocation.lead(_:of:)`
+  decides it before the
   screen's own list is read — Scrolling everywhere but the
   narrowest screen, which leads Monocle — so it is appended
   WITHOUT consulting `used` and joins it afterwards. A change

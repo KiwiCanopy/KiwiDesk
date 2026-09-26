@@ -172,4 +172,28 @@ struct SparseModeFallbackTests {
             layout.mode(of: SpaceID("2"), on: .desktop) == .grid
         )
     }
+
+    /// The starter leads the ultrawides with Stack (#1662); a
+    /// sparse preset keeps its Track there, presets staying
+    /// shape-agnostic until #1663.
+    @Test("an ultrawide keeps Track for a sparse preset")
+    func ultrawideKeepsTrack() {
+        let layout = StandardLayout(
+            name: "T",
+            screenCount: 1,
+            spaceCount: 2,
+            spaceModes: ["1": .grid],
+            spaceScreens: [:],
+            isStandard: false,
+            settings: TilingSettings()
+        )
+        // Whatever the fallback, it is a layout the class offers.
+        for shape in ScreenClass.allCases {
+            #expect(shape.layouts.contains(shape.presetFallback))
+        }
+        for shape in [ScreenClass.ultrawide, .superUltrawide] {
+            #expect(layout.mode(of: SpaceID("2"), on: shape) == .track)
+            #expect(shape.layouts.first == .stack)
+        }
+    }
 }

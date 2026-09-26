@@ -1,7 +1,13 @@
 import CoreGraphics
 import Foundation
 
-/// Starter layout parameter defaults tuned for the main screen's shape (#678).
+/// Starter layout parameter defaults tuned for screen shape (#678).
+///
+/// Still ONE `TilingSettings` per profile: each layout takes the
+/// tuning of the screen `StarterSetup.hosts` names for it, and
+/// what no layout owns —
+/// gaps, the minimum window size — takes the MAIN screen's
+/// (#1662).
 public enum StarterTuning {
     /// Baseline tuning for starter profiles.
     static func base() -> TilingSettings {
@@ -16,50 +22,130 @@ public enum StarterTuning {
     }
 
     /// Starter Scrolling slot fraction on standard displays
-    /// (#1018). Explicit rather than `.auto` (which resolves
-    /// near-full and reads as "my windows were squashed into
-    /// one"): just under a half puts two slots side by side with
-    /// the gap visible — the picture that teaches the mode.
-    static let standardSlot = 0.48
-    /// Starter Scrolling slot fraction on ultrawide displays
-    /// (#1018) — 48% of 3440 pt is a 1650 pt column. Read from the
-    /// MAIN screen, so the two mixed setups are ruled: an
-    /// ultrawide SECONDARY keeps `standardSlot` (and that wide
-    /// column); an ultrawide MAIN imposes 30% on a laptop
-    /// secondary (~518 pt — tight, above the 420 pt minimum this
-    /// branch sets). One `slotSize` per profile; per-space
-    /// overrides are the other answer's home.
+    /// (#1018, #1662). Explicit rather than `.auto`, and wide
+    /// enough that the Settings window, tiled right after
+    /// onboarding, keeps its preview column on every MacBook's
+    /// default resolution (`StarterSlotSettingsFitTests`); the next
+    /// window peeks in.
+    static let standardSlot = 0.85
+    /// Starter Scrolling slot fraction on both ultrawides (#1018):
+    /// three readable columns. Read from the screen Scrolling first
+    /// lands on, so an ultrawide hosting it imposes 30% on a laptop
+    /// that also scrolls (~518 pt — tight, above the 420 pt
+    /// minimum this branch sets). One `slotSize` per profile.
     static let ultrawideSlot = 0.3
 
-    /// Generates settings tuned for `mainShape` screen class.
-    public static func settings(
-        mainShape: ScreenClass
+    /// Settings for a setup whose main screen is `mainShape`, each
+    /// layout in `hosts` tuned for the screen `StarterSetup.hosts`
+    /// names for it (a
+    /// layout absent from `hosts` takes the main's).
+    static func settings(
+        mainShape: ScreenClass,
+        hosts: [LayoutMode: ScreenClass]
     ) -> TilingSettings {
         var settings = base()
-        switch mainShape {
+        tuneProfileWide(&settings, for: mainShape)
+        tuneScrolling(&settings, for: hosts[.scrolling] ?? mainShape)
+        tuneStack(&settings, for: hosts[.stack] ?? mainShape)
+        tuneGrid(&settings, for: hosts[.grid] ?? mainShape)
+        tuneTrack(&settings, for: hosts[.track] ?? mainShape)
+        return settings
+    }
+
+    private static func tuneProfileWide(
+        _ settings: inout TilingSettings,
+        for shape: ScreenClass
+    ) {
+        switch shape {
+        // No App Bar switch here: `LayoutAppBar` already defaults
+        // it on for monocle and scrolling, per LAYOUT, so setting
+        // it would be a no-op that reads like a decision.
         case .laptop:
             settings.gapsGlobal = .uniform(6)
-        // Nothing here turns the App Bar on, though the design
-        // card says to: `LayoutAppBar` already defaults enabled
-        // for monocle and scrolling — this class's two layouts —
-        // and it is a per-LAYOUT switch. Setting it here would be
-        // a no-op that reads like a decision, implying a 27"
-        // running Monocle should go without the bar.
-        case .desktop:
-            settings.grid.columns = 2
-            settings.grid.rows = 2
-        case .ultrawide:
-            settings.stack.masterCount = 2
-            settings.track.autoTracks = true
+        case .superUltrawide, .ultrawide:
             settings.minWindowSize = 420
+        case .desktop, .pivoted:
+            break
+        }
+    }
+
+    /// Both ultrawides centre the focused column and keep a lone
+    /// window at its slot rather than filling 32:9 (#1662).
+    private static func tuneScrolling(
+        _ settings: inout TilingSettings,
+        for shape: ScreenClass
+    ) {
+        switch shape {
+        case .superUltrawide, .ultrawide:
             settings.scrolling.slotSize = .fraction(
                 clamping: ultrawideSlot
             )
+            settings.scrolling.anchor = .center
+            settings.scrolling.fillWhenAlone = false
+        case .pivoted, .laptop, .desktop:
+            break
+        }
+        settings.scrolling.orientation = scrollingOrientation(for: shape)
+    }
+
+    /// The one answer to which way a screen of `shape` scrolls; the
+    /// per-space direction overrides read it too.
+    static func scrollingOrientation(
+        for shape: ScreenClass
+    ) -> ScrollingParams.Orientation {
+        shape == .pivoted ? .vertical : .horizontal
+    }
+
+    /// Several mains sit side by side beside a right stack; their
+    /// shares are equal by the accepted #222 limitation.
+    private static func tuneStack(
+        _ settings: inout TilingSettings,
+        for shape: ScreenClass
+    ) {
+        switch shape {
+        case .superUltrawide:
+            settings.stack.masterCount = 3
+        case .ultrawide:
+            settings.stack.masterCount = 2
         case .pivoted:
             settings.stack.stackPosition = .bottom
-            settings.scrolling.orientation = .vertical
-            settings.grid.splitDirection = .vertical
+        case .laptop, .desktop:
+            break
         }
-        return settings
+    }
+
+    private static func tuneGrid(
+        _ settings: inout TilingSettings,
+        for shape: ScreenClass
+    ) {
+        switch shape {
+        case .desktop:
+            settings.grid.columns = 2
+            settings.grid.rows = 2
+        case .pivoted:
+            // One column of three, top/bottom first (#1662).
+            settings.grid.splitDirection = .vertical
+            settings.grid.columns = 1
+            settings.grid.rows = 3
+        case .laptop:
+            // Two side by side — only ever hosted beside an
+            // ultrawide (#1662).
+            settings.grid.columns = 2
+            settings.grid.rows = 1
+        case .superUltrawide, .ultrawide:
+            break
+        }
+    }
+
+    private static func tuneTrack(
+        _ settings: inout TilingSettings,
+        for shape: ScreenClass
+    ) {
+        switch shape {
+        case .superUltrawide, .ultrawide:
+            settings.track.autoTracks = true
+        case .laptop, .desktop, .pivoted:
+            break
+        }
     }
 }

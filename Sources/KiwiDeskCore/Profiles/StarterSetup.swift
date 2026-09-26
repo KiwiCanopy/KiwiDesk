@@ -90,22 +90,87 @@ public enum StarterSetup {
         return screens
     }
 
+    /// The class of the screen each layout is tuned for (#1662):
+    /// its first slot in position order, a forced repeat taking the
+    /// earlier screen's tuning — except Scrolling, `scrollingHost`.
+    static func hosts(_ sizes: [CGSize]) -> [LayoutMode: ScreenClass] {
+        let sizes = floored(sizes)
+        var hosts: [LayoutMode: ScreenClass] = [:]
+        for slot in slots(sizes) where hosts[slot.mode] == nil {
+            hosts[slot.mode] = ScreenClass.of(sizes[slot.screen])
+        }
+        hosts[.scrolling] = scrollingHost(sizes)
+        return hosts
+    }
+
+    /// Scrolling leads several screens and can be forced onto the
+    /// narrowest as a repeat, so it is tuned for the widest screen
+    /// that LEADS it — the ultrawide wherever one is connected —
+    /// ties broken by the allocator's own `fillOrder`.
+    static func scrollingHost(_ sizes: [CGSize]) -> ScreenClass? {
+        let sizes = floored(sizes)
+        var leads: [Int: LayoutMode] = [:]
+        for slot in slots(sizes) where leads[slot.screen] == nil {
+            leads[slot.screen] = slot.mode
+        }
+        return StarterAllocation.fillOrder(widths: sizes.map(\.width))
+            .first { leads[$0] == .scrolling }
+            .map { ScreenClass.of(sizes[$0]) }
+    }
+
+    /// The starter's only per-space overrides (#1662): a Scrolling
+    /// Space on a screen facing the other way from the one that
+    /// tunes Scrolling takes that screen's direction.
+    static func scrollingOverrides(
+        _ sizes: [CGSize]
+    ) -> [SpaceID: ScrollingOverride] {
+        let sizes = floored(sizes)
+        let tuned = StarterTuning.scrollingOrientation(
+            for: hosts(sizes)[.scrolling] ?? ScreenClass.of(sizes[0])
+        )
+        var overrides: [SpaceID: ScrollingOverride] = [:]
+        for slot in slots(sizes) where slot.mode == .scrolling {
+            let own = StarterTuning.scrollingOrientation(
+                for: ScreenClass.of(sizes[slot.screen])
+            )
+            guard own != tuned else { continue }
+            var direction = ScrollingOverride()
+            direction.orientation = own
+            overrides[SpaceID(slot.number)] = direction
+        }
+        return overrides
+    }
+
+    /// The tuning for these screens, overrides included.
+    static func settings(sizes: [CGSize]) -> TilingSettings {
+        let sizes = floored(sizes)
+        var settings = StarterTuning.settings(
+            mainShape: ScreenClass.of(sizes[0]),
+            hosts: hosts(sizes)
+        )
+        settings.scrolling.override = scrollingOverrides(sizes)
+        return settings
+    }
+
     /// Starter setup packaged as a `StandardLayout` model.
     public static func standardLayout(
         sizes: [CGSize]
     ) -> StandardLayout {
         let sizes = floored(sizes)
-        return StandardLayout(
+        var layout = StandardLayout(
             name: name,
             screenCount: sizes.count,
             spaceCount: spaceCount(sizes: sizes),
             spaceModes: spaceModes(sizes: sizes),
             spaceScreens: spaceScreens(sizes: sizes),
             isStandard: false,
-            settings: StarterTuning.settings(
-                mainShape: ScreenClass.of(sizes[0])
-            )
+            settings: settings(sizes: sizes)
         )
+        layout.starterTitle = StarterTitle(
+            shape: ScreenClass.of(sizes[0]),
+            otherScreens: sizes.count - 1
+        )
+        return layout
     }
 
     /// Constructs standard layout from live display collection.

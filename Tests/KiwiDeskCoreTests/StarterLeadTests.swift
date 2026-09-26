@@ -19,6 +19,9 @@ struct StarterLeadTests {
     private let ultrawide = CGSize(width: 3440, height: 1440)
     private let pivoted = CGSize(width: 1440, height: 2560)
     private let small = CGSize(width: 1024, height: 768)
+    /// A widescreen wider than a 27": an ultrawide among several
+    /// screens leads the #1662 allocation instead.
+    private let bigDesk = CGSize(width: 2880, height: 1620)
 
     @Test("#1018's worked example lands exactly")
     func workedExample() {
@@ -59,7 +62,7 @@ struct StarterLeadTests {
         // others lead Scrolling — the repeat that the no-layout-
         // twice rule is carved out for.
         let modes = StarterAllocation.modes(
-            sizes: [screen27, laptop, ultrawide]
+            sizes: [screen27, laptop, bigDesk]
         )
         #expect(modes[1].first == .monocle, "\(modes[1])")
         #expect(modes[0].first == .scrolling, "\(modes[0])")
@@ -83,16 +86,16 @@ struct StarterLeadTests {
 
     @Test("the smallest screen leads Monocle even when wide")
     func smallestLeadsMonocleEvenWhenWide() {
-        // The size rule is unconditional, and this is the case
-        // where that bites: a 27" beside an ultrawide is "the
-        // smallest", so it opens in Monocle although
+        // The ladder's size rule is unconditional, and this is the
+        // case where that bites: a 27" beside a wider widescreen
+        // is "the smallest", so it opens in Monocle although
         // `ScreenClass.desktop` lists Monocle nowhere — that
         // class is one of the two the layout list calls least in
         // need of it. Pinned so it stays a ruling rather than a
         // surprise; the alternative reading is that the Monocle
         // lead should also require a genuinely small screen.
         let modes = StarterAllocation.modes(
-            sizes: [ultrawide, screen27]
+            sizes: [bigDesk, screen27]
         )
         #expect(modes[1].first == .monocle)
         #expect(!ScreenClass.of(screen27).layouts.contains(.monocle))
