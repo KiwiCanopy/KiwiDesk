@@ -98,15 +98,10 @@ extension FloatPlacement {
         as region: CGRect,
         among screens: [CGRect]
     ) -> Bool {
-        guard
-            let home = GeometryUtils.rect(
-                mostlyContaining: frame,
-                among: screens
-            ),
-            let target = GeometryUtils.rect(
-                mostlyContaining: region,
-                among: screens
-            )
+        func screen(of rect: CGRect) -> CGRect? {
+            GeometryUtils.rect(mostlyContaining: rect, among: screens)
+        }
+        guard let home = screen(of: frame), let target = screen(of: region)
         else { return false }
         return home == target
     }
