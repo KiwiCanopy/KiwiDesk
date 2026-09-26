@@ -32,8 +32,8 @@ enum ColorVision {
     ///
     /// One number on purpose, and the structural reason comes
     /// first: **the two families share hexes.** The drop-zone
-    /// amber *is* `SpaceBarStyle.focusedItemColor`, and six of
-    /// the nine palettes tie target to the focused accent — so
+    /// amber *is* `SpaceBarStyle.focusedItemColor`, and most
+    /// palettes tie target to the focused accent — so
     /// one hex is routinely measured in both families at once.
     /// Two thresholds over one colour is a latent contradiction:
     /// a retune could clear the drag floor and fail the accent
