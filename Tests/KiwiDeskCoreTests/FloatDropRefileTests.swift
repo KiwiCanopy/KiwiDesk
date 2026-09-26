@@ -12,10 +12,10 @@ import Testing
 /// to the one host screen, so a re-anchor stands down on
 /// `source == dest` and this suite cannot see one —
 /// `PendingSpaceSeamTests` ▸ `dropCommitNeverReanchors` and
-/// `dropRefileTakesTheDropCommit` are that net. Nor can it see
-/// the relocate's order against the drop's bar clamp: the
-/// relocate's own retile clamps against the destination's strips
-/// from the folded frame either way.
+/// `dropRefileTakesTheDropCommit` are that net. Nor can it see the
+/// ORDER of fold, re-file and clamp in `handleDragEnd`, which no
+/// fake display paints a strip for — `FloatDropOrderSeamTests`
+/// pins it.
 @Suite("A float dropped on another display (#1686)", .serialized)
 @MainActor
 struct FloatDropRefileTests {
@@ -122,6 +122,10 @@ struct FloatDropRefileTests {
         dropFloat(core)
         #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
         #expect(core.state.windows[float]?.isFloating == true)
+        // A MANUAL override, as the float verb writes: detection
+        // cannot re-tile it, and it reopens floating (owner
+        // ruling 2026-09-26).
+        #expect(core.state.manualFloatOverrides[float] == true)
     }
 
     @Test("a floating-mode member joins a floating Space unflagged")
@@ -132,6 +136,7 @@ struct FloatDropRefileTests {
         dropFloat(core)
         #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
         #expect(core.state.windows[float]?.isFloating == false)
+        #expect(core.state.manualFloatOverrides[float] == nil)
     }
 
     /// A flag float counts as landing unmanaged in any Space, so

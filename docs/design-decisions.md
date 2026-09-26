@@ -10165,7 +10165,10 @@ because of its Space — joins too, and onto a tiled Space takes
 the float flag, since the layout would otherwise tile it: it was
 floating and stays floating, and the flag it never set is the
 price (owner ruling 2026-09-26, over leaving it home and over
-tiling it). A sticky window is not re-filed by the drop at all:
+tiling it). The flag is the float verb's MANUAL override, so
+detection cannot re-tile the window later and it reopens floating
+— a window that tiled itself minutes after a drop is the worse
+surprise, and `make_auto` undoes it. A sticky window is not re-filed by the drop at all:
 its home is #445's to move, and that gate's refusal cue on a
 window the user just visibly moved would mislead.
 

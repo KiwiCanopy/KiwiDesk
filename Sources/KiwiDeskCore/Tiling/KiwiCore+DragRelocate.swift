@@ -89,13 +89,8 @@ extension KiwiCore {
         from origin: Space,
         restoresZOrder: Bool = true
     ) -> Bool {
-        let cocoaCursor = drag.cursorLocation()
         guard
-            // Same display resolution the live crossing uses
-            // (#504) — injected, so drag tests can fake a
-            // topology; wired to NSScreen in wireDragCrossing.
-            let display = dragCrossing.displayAt(cocoaCursor),
-            let destID = state.workspaces.activeSpace(on: display),
+            let destID = dropDestination(),
             destID != origin.id,
             state.workspaces[destID] != nil
         else { return false }
@@ -164,11 +159,24 @@ extension KiwiCore {
         return true
     }
 
+    /// The active Space of the display under the drop's cursor —
+    /// the one lookup the float re-file and the relocate share,
+    /// so the flag the re-file writes is for the Space the window
+    /// lands in. The display resolution is the live crossing's
+    /// (#504), injected so drag tests can fake a topology.
+    func dropDestination() -> SpaceID? {
+        dragCrossing.displayAt(drag.cursorLocation()).flatMap {
+            state.workspaces.activeSpace(on: $0)
+        }
+    }
+
     /// A float dropped on another display joins that display's
     /// active Space at the drop (#1686), through the drop-commit
     /// above. A floating-mode member keeps floating there: onto a
     /// tiled Space it takes the flag, or the layout would tile it
-    /// (owner ruling 2026-09-26). A sticky is not re-filed by the
+    /// — as a MANUAL override, the float verb's, so detection
+    /// cannot re-tile it and it reopens floating (owner ruling
+    /// 2026-09-26). A sticky is not re-filed by the
     /// drop at all — its home is #445's to move, and a refusal
     /// cue on a window the user just visibly moved would mislead.
     func relocateDroppedFloat(_ id: WindowID) {
@@ -176,8 +184,7 @@ extension KiwiCore {
             !window.isSticky,
             let originID = state.workspaces.space(of: id),
             let origin = state.workspaces[originID],
-            let display = dragCrossing.displayAt(drag.cursorLocation()),
-            let destID = state.workspaces.activeSpace(on: display),
+            let destID = dropDestination(),
             destID != originID,
             let dest = state.workspaces[destID]
         else { return }
