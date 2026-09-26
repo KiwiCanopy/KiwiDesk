@@ -3366,10 +3366,11 @@ KiwiDesk.make_auto()
 **Expects:** nothing.
 
 **Does:** flips the focused window's own float setting in one
-verb — a floating window becomes tiled, and vice versa. On a
+verb — a window set to float is set to tile, and vice versa. On a
 floating-layout Space every window floats whatever its setting, so
-nothing visible changes there; the setting decides whether the
-window keeps floating once it moves to a tiled Space or the Space
+the window does not move there (its Space Bar glyph still shows
+the float badge or loses it); the setting decides whether it keeps
+floating once a command moves it to a tiled Space or the Space
 changes layout. Like `make_floating`/`make_tiled`, it writes an
 explicit manual override (which survives close/reopen); it never
 produces the `auto` state, so `make_auto` stays the way back to
