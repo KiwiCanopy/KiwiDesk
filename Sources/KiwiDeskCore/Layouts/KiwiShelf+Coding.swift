@@ -21,6 +21,8 @@ extension KiwiShelf {
         case liquidGlass = "liquid_glass"
         case backgroundFit = "background_fit"
         case cornerRoundness = "corner_roundness"
+        case border
+        case borderWidth = "border_width"
         case highlightWidth = "highlight_width"
         case itemGap = "item_gap"
         case fontSize = "font_size"
@@ -32,6 +34,7 @@ extension KiwiShelf {
         case hoverFillColor = "hover_fill_color"
         case hoverItemColor = "hover_item_color"
         case fillColor = "fill_color"
+        case borderColor = "border_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
     }
@@ -85,6 +88,13 @@ extension KiwiShelf {
                 CGFloat.self,
                 forKey: .cornerRoundness
             ) ?? d.cornerRoundness
+        border =
+            try c.decodeIfPresent(Bool.self, forKey: .border)
+            ?? d.border
+        borderWidth = Self.clampBorderWidth(
+            try c.decodeIfPresent(CGFloat.self, forKey: .borderWidth)
+                ?? d.borderWidth
+        )
         highlightWidth = Self.clampHighlightWidth(
             try c.decodeIfPresent(
                 CGFloat.self,
@@ -127,6 +137,7 @@ extension KiwiShelf {
         hoverFillColor = try color(.hoverFillColor, d.hoverFillColor)
         hoverItemColor = try color(.hoverItemColor, d.hoverItemColor)
         fillColor = try color(.fillColor, d.fillColor)
+        borderColor = try color(.borderColor, d.borderColor)
         groupBadgeColor = try color(.groupBadgeColor, d.groupBadgeColor)
         groupBadgeTextColor = try color(
             .groupBadgeTextColor,

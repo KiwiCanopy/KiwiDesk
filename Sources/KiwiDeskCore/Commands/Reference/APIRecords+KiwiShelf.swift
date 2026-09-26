@@ -58,6 +58,17 @@ extension APIReference {
                 + "0–100 percent of half the thickness.",
             .number("percent")
         ),
+        "set_border": APIRecord(
+            "Strokes the plate's edge, or each box under Boxed; "
+                + "off by default.",
+            .boolean("enabled")
+        ),
+        "set_border_width": APIRecord(
+            "Sets the border's width in points, "
+                + "\(Int(KiwiShelf.borderWidthRange.lowerBound))–"
+                + "\(Int(KiwiShelf.borderWidthRange.upperBound)).",
+            .number("width")
+        ),
         "set_highlight_width": APIRecord(
             "Sets the active indicator's width in points, "
                 + "\(Int(KiwiShelf.highlightWidthRange.lowerBound))–"
@@ -108,6 +119,10 @@ extension APIReference {
         ),
         "set_fill_color": APIRecord(
             "Sets the plate's one fill, or the glass tint.",
+            .color("hex")
+        ),
+        "set_border_color": APIRecord(
+            "Sets the color of the border.",
             .color("hex")
         ),
         "set_group_badge_color": APIRecord(
