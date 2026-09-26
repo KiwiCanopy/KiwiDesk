@@ -42,6 +42,8 @@ extension SettingsValueReadout {
             )
         case .thickness:
             return spaceBarPointsRow(census, o.thickness, n.thickness)
+        case .itemPadding:
+            return spaceBarPointsRow(census, o.itemPadding, n.itemPadding)
         case .outerMargin:
             return spaceBarPointsRow(census, o.outerMargin, n.outerMargin)
         case .innerMargin:

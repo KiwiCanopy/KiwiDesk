@@ -88,6 +88,30 @@ struct BarSliderBandTests {
         #expect(glyphDeclared.contains("gapCeiling"))
     }
 
+    /// The ceiling is the padding past which the thickest shelf
+    /// this card offers holds its content at Core's floor (#1682).
+    @Test("the item padding band derives from Core and the thickness")
+    func itemPaddingIsDerived() throws {
+        let band = BarSliderBands.itemPadding
+        #expect(band.lowerBound == Double(KiwiShelf.minItemPadding))
+        #expect(band.contains(Double(KiwiShelf().itemPadding)))
+        var shelf = KiwiShelf()
+        shelf.itemPadding = CGFloat(band.upperBound)
+        let thickest = CGFloat(BarSliderBands.thickness.upperBound)
+        #expect(
+            shelf.contentDepth(forDepth: thickest)
+                == KiwiShelf.minThickness
+        )
+        shelf.itemPadding -= 1
+        #expect(
+            shelf.contentDepth(forDepth: thickest)
+                > KiwiShelf.minThickness
+        )
+        let declared = try declaration(of: "itemPadding")
+        #expect(declared.contains("KiwiShelf.minItemPadding"))
+        #expect(declared.contains("KiwiShelf.minThickness"))
+    }
+
     /// Which band each Core-clamped bar row reads, keyed by the
     /// suffix of its census model path — a third band joins by
     /// data (#1516).

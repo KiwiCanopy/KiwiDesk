@@ -25,6 +25,7 @@ extension KiwiShelf {
         case borderWidth = "border_width"
         case highlightWidth = "highlight_width"
         case itemGap = "item_gap"
+        case itemPadding = "item_padding"
         case fontSize = "font_size"
         case iconSource = "icon_source"
         case dimFactor = "dim_factor"
@@ -105,6 +106,11 @@ extension KiwiShelf {
             Self.minItemGap,
             try c.decodeIfPresent(CGFloat.self, forKey: .itemGap)
                 ?? d.itemGap
+        )
+        itemPadding = max(
+            Self.minItemPadding,
+            try c.decodeIfPresent(CGFloat.self, forKey: .itemPadding)
+                ?? d.itemPadding
         )
         fontSize =
             try c.decodeIfPresent(CGFloat.self, forKey: .fontSize)

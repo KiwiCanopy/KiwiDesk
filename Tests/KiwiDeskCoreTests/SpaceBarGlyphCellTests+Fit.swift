@@ -63,7 +63,7 @@ extension SpaceBarGlyphCellTests {
         let map = try #require(AppFontGlyphMap.loadBundled())
         let ligatures = map.ligatures
         try #require(ligatures.count > 100)
-        let size = Self.style.glyphFontSize(forDepth: Self.depth)
+        let size = Self.style.glyphFontSize(forContentDepth: Self.depth)
         let cell = CGRect(x: 0, y: 0, width: Self.cell, height: Self.cell)
         var scaled = 0
         for ligature in ligatures {

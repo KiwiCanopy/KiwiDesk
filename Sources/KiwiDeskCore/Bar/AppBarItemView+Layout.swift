@@ -17,13 +17,7 @@ extension AppBarItemView {
     /// Group-count badge layout (QA 2026-07-19, owner 2026-07-20, #411).
     private func layoutBadge() {
         guard !badge.isHidden else { return }
-        let baseHeight = min(
-            max(
-                min(bounds.width, bounds.height) * 0.32,
-                9
-            ),
-            14
-        )
+        let baseHeight = Self.badgeSide(contentSide: contentSide)
         badge.font = .systemFont(
             ofSize: baseHeight * 0.9,
             weight: .bold
@@ -66,10 +60,26 @@ extension AppBarItemView {
     /// Slot leading/trailing inset (manual QA 2026-07-18).
     nonisolated static let edgePadding: CGFloat = 6
 
+    /// The group-count badge's side for a content side — the one
+    /// derivation the layout and the slot measurement share.
+    nonisolated static func badgeSide(contentSide: CGFloat) -> CGFloat {
+        min(max(contentSide * 0.32, 9), 14)
+    }
+
+    /// The square the content is laid in: the shelf's content
+    /// depth (#1682), never longer than the slot.
+    var contentSide: CGFloat {
+        min(
+            style.shelf.contentDepth(forDepth: crossThickness),
+            horizontal ? bounds.width : bounds.height
+        )
+    }
+
     private var effectiveFontSize: CGFloat {
         style.resolvedFontSize(
-            forThickness: horizontal
-                ? bounds.height : bounds.width
+            forContentDepth: style.shelf.contentDepth(
+                forDepth: crossThickness
+            )
         )
     }
 
@@ -85,12 +95,7 @@ extension AppBarItemView {
         label.lineBreakMode = .byTruncatingTail
         label.stringValue = text
         let side =
-            iconSlotHidden
-            ? 0
-            : max(
-                min(bounds.height, bounds.width) - pad * 2,
-                0
-            )
+            iconSlotHidden ? 0 : max(contentSide - pad * 2, 0)
         let showText = style.content.showsText
         var textSize =
             showText
@@ -102,8 +107,7 @@ extension AppBarItemView {
             side > 0 && showText ? pad / 2 : 0
         let badgeReserve: CGFloat =
             count >= 2 && showText
-            ? min(max(min(bounds.height, bounds.width) * 0.32, 9), 14)
-                + pad
+            ? Self.badgeSide(contentSide: contentSide) + pad
             : 0
         textSize.width = min(
             textSize.width,
@@ -154,12 +158,7 @@ extension AppBarItemView {
         label.isHidden = true
         let pad = Self.contentPadding
         let side =
-            iconSlotHidden
-            ? 0
-            : max(
-                min(bounds.width, bounds.height) - pad * 2,
-                0
-            )
+            iconSlotHidden ? 0 : max(contentSide - pad * 2, 0)
         guard side > 0 else { return }
         layoutIconSlot(
             in: CGRect(

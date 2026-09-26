@@ -30,6 +30,8 @@ extension KiwiShelfCard {
                         + "font size follows it."
                 )
             )
+        case .itemPadding:
+            itemPaddingRow
         case .alignment:
             alignmentRow
         case .order:

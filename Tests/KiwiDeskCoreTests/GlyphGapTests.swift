@@ -68,13 +68,13 @@ struct GlyphGapTests {
         let flush = SpaceBarItemView.autoLength(
             appCount: 3,
             overflow: 2,
-            depth: 32,
+            contentDepth: 32,
             glyphGap: 0
         )
         let spaced = SpaceBarItemView.autoLength(
             appCount: 3,
             overflow: 2,
-            depth: 32,
+            contentDepth: 32,
             glyphGap: 5
         )
         // Three glyphs and the badge: four slots, three gaps.
@@ -83,12 +83,12 @@ struct GlyphGapTests {
         #expect(
             SpaceBarItemView.autoLength(
                 appCount: 1,
-                depth: 32,
+                contentDepth: 32,
                 glyphGap: 5
             )
                 == SpaceBarItemView.autoLength(
                     appCount: 1,
-                    depth: 32,
+                    contentDepth: 32,
                     glyphGap: 0
                 )
         )
@@ -132,7 +132,7 @@ struct GlyphGapDrawingTests {
         let length = SpaceBarItemView.autoLength(
             appCount: apps.count,
             overflow: 2,
-            depth: Self.depth,
+            contentDepth: Self.depth,
             glyphGap: look.resolvedGlyphGap
         )
         let view = SpaceBarItemView(
@@ -245,7 +245,7 @@ struct GlyphGapRenderTests {
                     == SpaceBarItemView.autoLength(
                         appCount: item.apps.count,
                         overflow: item.overflow,
-                        depth: depth,
+                        contentDepth: depth,
                         glyphGap: Self.gap
                     )
             )

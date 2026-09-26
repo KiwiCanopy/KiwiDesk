@@ -665,6 +665,8 @@
   "kiwishelf.inner_margin.help": "Marge supplémentaire côté fenêtres, ajoutée à l’écart déjà présent ; à 0, cet écart seul s’applique.",
   "kiwishelf.item_gap": "Écart entre éléments",
   "kiwishelf.item_gap.help": "Écart entre les éléments — ceux des espaces comme ceux de l'App Bar, pour que les deux barres gardent un même rythme.",
+  "kiwishelf.item_padding": "Remplissage des éléments",
+  "kiwishelf.item_padding.help": "Espace entre l'épaisseur et le contenu de chaque élément. Les icônes, les glyphes et une taille de police automatique rétrécissent avec lui ; KiwiShelf garde son épaisseur.",
   "kiwishelf.margins": "Marges",
   "kiwishelf.margins.summary": "Marge extérieure et intérieure",
   "kiwishelf.minimum": "Minimum de la Space Bar",

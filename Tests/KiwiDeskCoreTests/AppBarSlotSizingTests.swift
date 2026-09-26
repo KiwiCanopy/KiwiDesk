@@ -13,7 +13,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 content: .iconAndTitle,
-                thickness: 32,
+                contentDepth: 32,
                 axis: 1000,
                 autoWidth: 88
             ) == 88
@@ -23,7 +23,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 content: .iconAndTitle,
-                thickness: 32,
+                contentDepth: 32,
                 axis: 1000,
                 autoWidth: 10
             ) == 32
@@ -32,7 +32,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 content: .title,
-                thickness: 32,
+                contentDepth: 32,
                 axis: 1000,
                 autoWidth: 900
             ) == 250
@@ -44,7 +44,7 @@ struct AppBarSlotSizingTests {
         #expect(
             AppBarOverlay.slotLength(
                 content: .iconAndTitle,
-                thickness: 32,
+                contentDepth: 32,
                 axis: 60,
                 autoWidth: 140
             ) == 32
@@ -55,20 +55,20 @@ struct AppBarSlotSizingTests {
     func iconMinimum() {
         #expect(
             AppBarOverlay.minimumSlot(
-                thickness: 32,
+                contentDepth: 32,
                 content: .iconAndTitle
             ) == 32
         )
         #expect(
             AppBarOverlay.minimumSlot(
-                thickness: 32,
+                contentDepth: 32,
                 content: .icon
             ) == 32
         )
         // Text-only bars keep just a sliver of legibility.
         #expect(
             AppBarOverlay.minimumSlot(
-                thickness: 32,
+                contentDepth: 32,
                 content: .title
             ) < 32
         )
@@ -81,17 +81,17 @@ struct AppBarSlotSizingTests {
         // the default style's `fontSize` 0 is the auto arm.
         let auto = AppBarLook()
         #expect(auto.fontSize == 0)
-        let slim = auto.resolvedFontSize(forThickness: 20)
-        let fat = auto.resolvedFontSize(forThickness: 48)
+        let slim = auto.resolvedFontSize(forContentDepth: 20)
+        let fat = auto.resolvedFontSize(forContentDepth: 48)
         #expect(slim < fat)
         // Extremes stay readable and inside the strip.
-        #expect(auto.resolvedFontSize(forThickness: 4) == 9)
-        #expect(auto.resolvedFontSize(forThickness: 400) == 28)
+        #expect(auto.resolvedFontSize(forContentDepth: 4) == 9)
+        #expect(auto.resolvedFontSize(forContentDepth: 400) == 28)
         // An explicit `font_size` wins over the ladder.
         var pinned = AppBarLook()
         pinned.fontSize = 13
         #expect(
-            pinned.resolvedFontSize(forThickness: 48) == 13
+            pinned.resolvedFontSize(forContentDepth: 48) == 13
         )
     }
 

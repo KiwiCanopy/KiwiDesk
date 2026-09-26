@@ -32,7 +32,9 @@ extension SpaceBarOverlay {
                 ? content.frame.maxX : frontName.frame.maxX)
             : content.frame.maxY
         let length = max(end - start, cell) + pad * 2
-        let cross = cell + pad * 2
+        // The chip spans the strip like an item's box; padding
+        // shrinks only the content in it (#1682).
+        let cross = max(cell + pad * 2, depth)
         let crossOrigin = max((depth - cross) / 2, 0)
         let rect =
             horizontal

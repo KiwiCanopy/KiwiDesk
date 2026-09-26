@@ -665,6 +665,8 @@
   "kiwishelf.inner_margin.help": "Margine aggiuntivo sul lato delle finestre, oltre alla spaziatura già presente; con 0 vale solo quella spaziatura.",
   "kiwishelf.item_gap": "Spaziatura tra elementi",
   "kiwishelf.item_gap.help": "Distanza tra gli elementi — sia quelli degli spazi sia quelli della App Bar, così entrambe le barre mantengono lo stesso ritmo.",
+  "kiwishelf.item_padding": "Riempimento degli elementi",
+  "kiwishelf.item_padding.help": "Spazio tra lo spessore e il contenuto di ogni elemento. Icone, simboli e la dimensione carattere automatica si riducono di conseguenza; KiwiShelf mantiene il suo spessore.",
   "kiwishelf.margins": "Margini",
   "kiwishelf.margins.summary": "Margine esterno e interno",
   "kiwishelf.minimum": "Minimo della Space Bar",

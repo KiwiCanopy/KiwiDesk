@@ -630,3 +630,21 @@ Boxed.
   with — against that wallpaper, at the idle floor
   (`ShelfBorderContrastTests`). The switch and the width are not
   palette keys (#375).
+
+## An item's content is sized to the content depth, never the thickness
+
+`kiwishelf.item_padding` (#1682) shrinks what an item draws
+inside the thickness while the thickness stays the reservation,
+so a content size read off the strip's depth draws the unpadded
+size beside padded neighbours.
+
+- **Size an item's content from `KiwiShelf.contentDepth(forDepth:)`
+  and nowhere beside it** — a glyph cell, an icon, a badge, an
+  automatic font size — while a BOX (an item, the front-app chip,
+  a plate, a corner radius) keeps the full depth. The look's font
+  ladders take the content depth by their argument label
+  (`forContentDepth:`), so a call site cannot hand them the
+  thickness by accident. `ItemPaddingSpaceBarTests` and
+  `ItemPaddingAppBarTests` render both bars at a padding and hold
+  every content consumer they reach; a new consumer owes one of
+  them a clause, since neither reads a list of sites.

@@ -50,9 +50,10 @@ struct BarStripView: View {
         )
     }
 
-    /// Computed cross dimension for bar pips.
+    /// Computed cross dimension for bar pips — content, so it
+    /// follows the item padding (#1682).
     private var pipCross: CGFloat {
-        spec.thickness * 0.56
+        spec.thickness * 0.56 * spec.contentShare
     }
 
     // MARK: - Plate & run

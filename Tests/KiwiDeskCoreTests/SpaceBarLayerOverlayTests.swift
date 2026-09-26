@@ -241,7 +241,7 @@ struct SpaceBarLayerOverlayTests {
             layer.width
                 == SpaceBarItemView.autoLength(
                     appCount: 0,
-                    depth: barTitleStrip.height,
+                    contentDepth: barTitleStrip.height,
                     glyphGap: 0
                 )
         )
@@ -266,7 +266,7 @@ struct SpaceBarLayerOverlayTests {
             layer.height
                 == SpaceBarItemView.autoLength(
                     appCount: 0,
-                    depth: 28,
+                    contentDepth: 28,
                     glyphGap: 0
                 )
         )

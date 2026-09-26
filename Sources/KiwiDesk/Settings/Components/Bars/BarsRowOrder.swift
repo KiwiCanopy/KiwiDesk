@@ -11,6 +11,7 @@ enum BarsRowOrder {
     static let kiwishelfAtRest: [SettingKey] = [
         .kiwishelf(.edge),
         .kiwishelf(.thickness),
+        .kiwishelf(.itemPadding),
         .kiwishelf(.alignment),
         .kiwishelf(.order),
         .kiwishelf(.minimum),

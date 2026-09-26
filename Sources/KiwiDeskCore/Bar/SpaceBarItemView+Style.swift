@@ -236,14 +236,10 @@ extension SpaceBarItemView {
     }
 
     var identifierFont: CGFloat {
-        style.identifierFontSize(
-            forDepth: horizontal ? bounds.height : bounds.width
-        )
+        style.identifierFontSize(forContentDepth: contentDepth)
     }
 
     var glyphSize: CGFloat {
-        style.glyphFontSize(
-            forDepth: horizontal ? bounds.height : bounds.width
-        )
+        style.glyphFontSize(forContentDepth: contentDepth)
     }
 }

@@ -79,7 +79,7 @@ extension AppBarOverlay {
     ) -> CGFloat {
         slotLength(
             content: style.renderedContent,
-            thickness: thickness,
+            contentDepth: style.shelf.contentDepth(forDepth: thickness),
             axis: capAxis,
             autoWidth: autoSlotWidth(
                 items: items,
@@ -110,16 +110,15 @@ extension AppBarOverlay {
         horizontal: Bool,
         thickness: CGFloat
     ) -> CGFloat {
-        guard horizontal else { return thickness }
+        let depth = style.shelf.contentDepth(forDepth: thickness)
+        guard horizontal else { return depth }
         let pad = AppBarItemView.contentPadding
         let font = NSFont.systemFont(
-            ofSize: style.resolvedFontSize(
-                forThickness: thickness
-            )
+            ofSize: style.resolvedFontSize(forContentDepth: depth)
         )
         let iconSide =
             style.content == .title
-            ? 0 : max(thickness - pad * 2, 0)
+            ? 0 : max(depth - pad * 2, 0)
         let measure = NSTextField(labelWithString: "")
         measure.alignment = .center
         measure.font = font
@@ -140,7 +139,7 @@ extension AppBarOverlay {
                 iconSide > 0 && text > 0 ? pad / 2 : 0
             let badge =
                 item.count >= 2 && text > 0
-                ? min(max(thickness * 0.32, 9), 14) + pad
+                ? AppBarItemView.badgeSide(contentSide: depth) + pad
                 : 0
             let natural =
                 iconSide + spacing + text + badge
@@ -152,27 +151,27 @@ extension AppBarOverlay {
     /// Shared slot length for bar layout pass.
     nonisolated static func slotLength(
         content: AppBarStyle.Content,
-        thickness: CGFloat,
+        contentDepth: CGFloat,
         axis: CGFloat,
         autoWidth: CGFloat
     ) -> CGFloat {
         return max(
             min(autoWidth, axis / 4),
-            minimumSlot(thickness: thickness, content: content)
+            minimumSlot(contentDepth: contentDepth, content: content)
         )
     }
 
     /// Minimum usable slot size based on content mode. Icon
-    /// slots floor at `thickness` so measurement's icon side
-    /// equals layout's — the slot-fits-widest-title invariant
-    /// leans on it.
+    /// slots floor at the content depth (#1682) so measurement's
+    /// icon side equals layout's — the slot-fits-widest-title
+    /// invariant leans on it.
     nonisolated static func minimumSlot(
-        thickness: CGFloat,
+        contentDepth: CGFloat,
         content: AppBarStyle.Content
     ) -> CGFloat {
         content == .title
             ? AppBarItemView.contentPadding * 4
-            : thickness
+            : contentDepth
     }
 
     /// The scroll offset keeping the focused item in view, in

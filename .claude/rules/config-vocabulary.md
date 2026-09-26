@@ -295,6 +295,14 @@ synonym:
   `kiwishelf.set_inner_margin` on its window side, #1516). Both
   reuse the `inner` / `outer` adjectives rather than coining a
   third pair.
+- **padding** — room INSIDE a thing, between its own edge and
+  its content (`kiwishelf.set_item_padding`, #1682): the third
+  of the set, since a gap sits between things and a margin
+  outside one. It shrinks the content and never the thing, which
+  is why it is not an *inset* of the thickness. A locale keeps
+  it apart from its gap and margin words — where the obvious
+  word is taken (`zh-Hans` 内边距 is its inner margin) it names
+  the effect instead.
 - **limit** / **cap** / **count** — a `limit` is a user-set
   maximum (`track.set_limit`); `cap` is the same idea where it
   already reads better (`space_bar.set_glyph_cap`, and
