@@ -88,4 +88,26 @@ extension FloatPlacement {
             to: region
         )
     }
+
+    /// Whether a remembered `frame` lies on the screen `region`
+    /// sits on (#1675), each judged by the screen it overlaps most
+    /// among `screens` — the engine's `allScreenBounds` seam. A
+    /// frame or region on no screen is refused, never matched.
+    public static func onSameScreen(
+        _ frame: CGRect,
+        as region: CGRect,
+        among screens: [CGRect]
+    ) -> Bool {
+        guard
+            let home = GeometryUtils.rect(
+                mostlyContaining: frame,
+                among: screens
+            ),
+            let target = GeometryUtils.rect(
+                mostlyContaining: region,
+                among: screens
+            )
+        else { return false }
+        return home == target
+    }
 }

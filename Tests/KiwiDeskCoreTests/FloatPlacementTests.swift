@@ -125,4 +125,35 @@ struct FloatPlacementTests {
         #expect(restored.height == region.height)
         #expect(region.contains(restored))
     }
+
+    private let screens = [
+        CGRect(x: 0, y: 0, width: 1600, height: 1000),
+        CGRect(x: 1600, y: 0, width: 1600, height: 1000),
+    ]
+    private let region = CGRect(x: 5, y: 35, width: 1590, height: 960)
+
+    @Test("A frame on the region's own screen is on the same screen")
+    func sameScreen() {
+        let frame = CGRect(x: 200, y: 100, width: 700, height: 500)
+        #expect(FloatPlacement.onSameScreen(frame, as: region, among: screens))
+    }
+
+    @Test("A frame mostly on the other screen is not")
+    func otherScreen() {
+        let frame = CGRect(x: 1400, y: 100, width: 700, height: 500)
+        #expect(
+            !FloatPlacement.onSameScreen(frame, as: region, among: screens)
+        )
+    }
+
+    @Test("A frame on no screen is refused, never matched")
+    func noScreen() {
+        let frame = CGRect(x: 9000, y: 100, width: 700, height: 500)
+        #expect(
+            !FloatPlacement.onSameScreen(frame, as: region, among: screens)
+        )
+        #expect(
+            !FloatPlacement.onSameScreen(frame, as: region, among: [])
+        )
+    }
 }

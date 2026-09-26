@@ -24,6 +24,14 @@ struct FloatFrameMemoryTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }
+        // Two screens side by side through the seam the restore
+        // asks (#531): the float's own, and one to its right.
+        core.tiler.allScreenBounds = {
+            [
+                CGRect(x: 0, y: 0, width: 1600, height: 1000),
+                CGRect(x: 1600, y: 0, width: 1600, height: 1000),
+            ]
+        }
         core.execute("set_mode", args: [.string("1"), .string("bsp")])
         for index in 1...2 {
             core.state.apply(
@@ -70,7 +78,7 @@ struct FloatFrameMemoryTests {
     func otherScreenTakesTheDefault() {
         var frames: [WindowID: CGRect] = [:]
         let core = setup { frames[$0] = $1 }
-        let elsewhere = placed.offsetBy(dx: 3000, dy: 0)
+        let elsewhere = placed.offsetBy(dx: 1600, dy: 0)
         floatMoveAndTile(core, to: elsewhere)
         frames = [:]
         #expect(core.execute("make_floating").isSuccess)

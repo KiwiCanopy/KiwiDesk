@@ -46,8 +46,11 @@ extension KiwiCore {
         let remembered = state.floatFrames.removeValue(forKey: id)
             .flatMap { saved -> CGRect? in
                 guard
-                    TilingEngine.screen(containing: saved.frame)
-                        == TilingEngine.screen(for: space, in: state)
+                    FloatPlacement.onSameScreen(
+                        saved.frame,
+                        as: region,
+                        among: tiler.allScreenBounds()
+                    )
                 else { return nil }
                 return FloatPlacement.restored(
                     saved.frame,
