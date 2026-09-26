@@ -156,7 +156,7 @@ public enum StarterAllocation {
     /// repeat while this screen still has an unheld entry, and
     /// when the budget forces a repeat, rotate PAST the held one
     /// so the duplicate is never adjacent to its twin.
-    static func take(
+    private static func take(
         _ quota: Int,
         from list: [LayoutMode],
         used: inout Set<LayoutMode>,

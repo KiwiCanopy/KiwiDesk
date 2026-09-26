@@ -73,10 +73,10 @@ public enum ScreenClass: String, Sendable, CaseIterable, Codable {
     /// ultrawides, `bsp` only under desktop (absurd at 3440 pt,
     /// unusable at 1728 pt). Both ultrawides lead with Stack, its
     /// several mains side by side (#1662). `floating` is in NO
-    /// list — one Floating space per setup is a rule about the
-    /// SETUP, owned end to end by `StarterAllocation` (architect
-    /// review, 2026-08-11), which also owns each screen's LEAD
-    /// before this list is read.
+    /// list — where Floating goes is a rule about the SETUP, owned
+    /// end to end by `StarterAllocation` (architect review,
+    /// 2026-08-11) in both its allocations, which also own each
+    /// screen's LEAD before this list is read.
     public var layouts: [LayoutMode] {
         switch self {
         case .laptop:

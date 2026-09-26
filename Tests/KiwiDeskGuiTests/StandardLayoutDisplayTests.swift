@@ -83,6 +83,25 @@ struct StandardLayoutDisplayTests {
         )
     }
 
+    /// One screen is named; several are not, since no one class
+    /// describes them (#1662).
+    @Test("the onboarding heading names a single screen only")
+    func onboardingHeading() {
+        reset()
+        LocalizationManager.shared.select("en")
+        defer { reset() }
+        #expect(
+            StarterTitle(shape: .ultrawide, otherScreens: 0)
+                .onboardingTitle
+                == "Your Spaces are ready for your ultrawide screen"
+        )
+        #expect(
+            StarterTitle(shape: .ultrawide, otherScreens: 1)
+                .onboardingTitle
+                == "Your Spaces are ready for all your screens"
+        )
+    }
+
     /// The starter answers with its title, never its identity
     /// (#1662): the header and which-loads read this path.
     @Test("the starter's name resolves to its title")

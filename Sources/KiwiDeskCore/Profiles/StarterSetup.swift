@@ -105,14 +105,16 @@ public enum StarterSetup {
 
     /// Scrolling leads several screens and can be forced onto the
     /// narrowest as a repeat, so it is tuned for the widest screen
-    /// that LEADS it — the ultrawide wherever one is connected.
+    /// that LEADS it — the ultrawide wherever one is connected —
+    /// ties broken by the allocator's own `fillOrder`.
     static func scrollingHost(_ sizes: [CGSize]) -> ScreenClass? {
+        let sizes = floored(sizes)
         var leads: [Int: LayoutMode] = [:]
         for slot in slots(sizes) where leads[slot.screen] == nil {
             leads[slot.screen] = slot.mode
         }
-        let leading = leads.filter { $0.value == .scrolling }.keys
-        return leading.max { sizes[$0].width < sizes[$1].width }
+        return StarterAllocation.fillOrder(widths: sizes.map(\.width))
+            .first { leads[$0] == .scrolling }
             .map { ScreenClass.of(sizes[$0]) }
     }
 

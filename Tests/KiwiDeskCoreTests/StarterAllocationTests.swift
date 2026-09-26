@@ -281,6 +281,8 @@ struct StarterAllocationTests {
         let setups: [[CGSize]] = [
             [laptop],
             [laptop, screen27],
+            [screen27, bigDesk, pivoted],
+            [laptop, screen27, bigDesk, pivoted],
             [screen27, ultrawide, pivoted],
             [laptop, screen27, ultrawide, pivoted],
         ]

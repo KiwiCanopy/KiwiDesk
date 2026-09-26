@@ -155,11 +155,16 @@ change here:
   `StarterAllocation.ultrawideModes` replaces the ladder — every
   other screen leads Monocle and draws from
   `companionLayouts`, three spaces a screen, each ending in its
-  own Floating space. A change to the lead or the Floating rule
-  below says which of the two allocations it binds
+  own Floating space and each companion its ruled layout,
+  independent of what the others drew. That walk owns its own
+  lead and its Floating; the ladder's lead is `lead(_:of:)`
+  below and its one Floating `floatingHost`. A change to either
+  rule names the allocation it binds — a new lead or Floating
+  rule in one is not in the other
   (`StarterUltrawideAllocationTests`).
 - **A screen's FIRST space is the lead, and the lead may
-  repeat.** `StarterAllocation.lead(_:of:)` decides it before the
+  repeat.** On the ladder, `StarterAllocation.lead(_:of:)`
+  decides it before the
   screen's own list is read — Scrolling everywhere but the
   narrowest screen, which leads Monocle — so it is appended
   WITHOUT consulting `used` and joins it afterwards. A change

@@ -4535,7 +4535,7 @@ left.
 
 **Beside an ultrawide, Scrolling lives on the ultrawide alone.**
 With an ultrawide or super ultrawide among several screens, the
-ladder below gives way: the ultrawides lead Scrolling, every
+budget and lead rules around this paragraph give way: the ultrawides lead Scrolling, every
 other screen leads Monocle and never scrolls, and each screen
 gets three spaces ending in its own Floating space — a
 widescreen Monocle · BSP · Floating, a portrait screen Monocle ·
@@ -4544,7 +4544,7 @@ Grid (one column of three) · Floating, a laptop Monocle · Grid
 width to run; beside one, the other screen's job is to hold
 whole windows. The total is three a screen, capped at ten, and
 each screen has its own Floating space — the one place the
-budget and the one-Floating rule below do not bind. (Owner
+budget and the one-Floating rule above do not bind. (Owner
 ruling, #1662.)
 
 **Every screen opens in Scrolling but the smallest, which opens
@@ -4568,7 +4568,10 @@ because both look like bugs from close up. The rule is
 unconditional, so a 27" beside an ultrawide is "the smallest" and
 leads Monocle although its own class lists none — being smallest
 is a fact about the setup, and a per-class qualification would
-make the answer depend on two things instead of one. And
+make the answer depend on two things instead of one. That holds
+on the ladder; beside an ultrawide the lead is per class by
+ruling (#1662) — the ultrawides Scrolling, every other screen
+Monocle — the one per-class exception. And
 Scrolling leads several screens at once, which the
 no-layout-twice rule carves out explicitly: an accidental
 repeat is still a bug, this one is the feature.

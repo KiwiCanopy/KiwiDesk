@@ -35,9 +35,16 @@ extension StarterTitle {
     }
 
     /// The onboarding Spaces page's heading for this setup — one
-    /// key per class, since the noun inflects in some locales.
+    /// key per class, since the noun inflects in some locales; a
+    /// setup across several screens names none of them (#1662).
     @MainActor var onboardingTitle: String {
-        switch shape {
+        guard otherScreens == 0 else {
+            return L(
+                "onboarding.starter_spaces.title.several_screens",
+                "Your Spaces are ready for all your screens"
+            )
+        }
+        return switch shape {
         case .laptop:
             L(
                 "onboarding.starter_spaces.title.laptop",

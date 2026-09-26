@@ -713,7 +713,8 @@ read from width alone, so a 27" beside an ultrawide opens in
 monocle.
 
 :::unreleased
-Each layout is tuned for the screen it first lands on, and gaps
+Each layout is tuned for the screen it sits on, scrolling for
+the widest screen that opens in it, and gaps
 and the minimum window size follow the main screen. A laptop
 main gets 6 pt gaps; an ultrawide or super ultrawide main a
 larger minimum window size. A stack gets two mains side by side

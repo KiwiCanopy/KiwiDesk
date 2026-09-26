@@ -86,16 +86,16 @@ struct StarterLeadTests {
 
     @Test("the smallest screen leads Monocle even when wide")
     func smallestLeadsMonocleEvenWhenWide() {
-        // The size rule is unconditional, and this is the case
-        // where that bites: a 27" beside an ultrawide is "the
-        // smallest", so it opens in Monocle although
+        // The ladder's size rule is unconditional, and this is the
+        // case where that bites: a 27" beside a wider widescreen
+        // is "the smallest", so it opens in Monocle although
         // `ScreenClass.desktop` lists Monocle nowhere — that
         // class is one of the two the layout list calls least in
         // need of it. Pinned so it stays a ruling rather than a
         // surprise; the alternative reading is that the Monocle
         // lead should also require a genuinely small screen.
         let modes = StarterAllocation.modes(
-            sizes: [ultrawide, screen27]
+            sizes: [bigDesk, screen27]
         )
         #expect(modes[1].first == .monocle)
         #expect(!ScreenClass.of(screen27).layouts.contains(.monocle))
