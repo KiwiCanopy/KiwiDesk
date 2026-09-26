@@ -19,9 +19,10 @@ import Foundation
 ///   live crossing (#504)  none       none    yes       yes
 ///   drop-commit (below)   no-warp    yes     yes       no
 ///
-/// The drop-commit also takes a flag float dropped on another
-/// display (#1686, `relocateDroppedFloat`); it never re-anchors,
-/// so the float stays where the pointer left it.
+/// The drop-commit also takes a float dropped on another display
+/// (#1686, `relocateDroppedFloat`), and must never re-anchor, or
+/// the float would not stay where the pointer left it
+/// (`PendingSpaceSeamTests` ▸ `dropCommitNeverReanchors`).
 ///
 ///   *follow only: `spaceSwitchRetile` (forced) + the #463
 ///    settle. The no-follow branch retiles un-forced, runs the
@@ -85,7 +86,8 @@ extension KiwiCore {
     func relocateAcrossDisplay(
         _ id: WindowID,
         onto target: WindowID?,
-        from origin: Space
+        from origin: Space,
+        restoresZOrder: Bool = true
     ) -> Bool {
         let cocoaCursor = drag.cursorLocation()
         guard
@@ -150,8 +152,9 @@ extension KiwiCore {
         // twin of the same-space drop's z-order restores). Keyed on
         // the just-activated destination, so `runPendingZOrderRestore`
         // dispatches the mode-correct restore; a non-overlapping
-        // destination mode falls through to a no-op.
-        scheduleZOrderRestore()
+        // destination mode falls through to a no-op. A float
+        // joining changes no tiled overlap, so it arms none (#674).
+        if restoresZOrder { scheduleZOrderRestore() }
         emitSpaceChange()
         // The follow hands focus to a space that was already
         // visible; re-assert once so a dropped cooperative activate
@@ -161,20 +164,32 @@ extension KiwiCore {
         return true
     }
 
-    /// A flag float dropped on another display joins that
-    /// display's active Space at the drop (#1686), through the
-    /// drop-commit above. A sticky keeps #445's rules, and a
-    /// floating-mode member — floating only because of its Space
-    /// — stays home, since filing it into a tiled Space would
-    /// tile it.
+    /// A float dropped on another display joins that display's
+    /// active Space at the drop (#1686), through the drop-commit
+    /// above. A floating-mode member keeps floating there: onto a
+    /// tiled Space it takes the flag, or the layout would tile it
+    /// (owner ruling 2026-09-26). A sticky is not re-filed by the
+    /// drop at all — its home is #445's to move, and a refusal
+    /// cue on a window the user just visibly moved would mislead.
     func relocateDroppedFloat(_ id: WindowID) {
         guard let window = state.windows[id],
-            window.isFloating,
             !window.isSticky,
             let originID = state.workspaces.space(of: id),
-            let origin = state.workspaces[originID]
+            let origin = state.workspaces[originID],
+            let display = dragCrossing.displayAt(drag.cursorLocation()),
+            let destID = state.workspaces.activeSpace(on: display),
+            destID != originID,
+            let dest = state.workspaces[destID]
         else { return }
-        _ = relocateAcrossDisplay(id, onto: nil, from: origin)
+        if !window.isFloating, dest.mode != .floating {
+            state.setFloating(id, true)
+        }
+        _ = relocateAcrossDisplay(
+            id,
+            onto: nil,
+            from: origin,
+            restoresZOrder: false
+        )
     }
 
     /// Files a dragged window into `destID` — the ONE placement

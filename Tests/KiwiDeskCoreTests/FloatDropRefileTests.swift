@@ -10,8 +10,8 @@ import Testing
 /// `handleDragEnd`. Displays are faked through `displayAt`, the
 /// `DragCrossingTests` fixture shape; with fake displays no screen
 /// resolves, so a re-anchor would stand down on its own and this
-/// suite cannot see one — the drop-commit relocate calling none is
-/// the guarantee, stated on `relocateDroppedFloat`.
+/// suite cannot see one — `PendingSpaceSeamTests` ▸
+/// `dropCommitNeverReanchors` is that net.
 @Suite("A float dropped on another display (#1686)", .serialized)
 @MainActor
 struct FloatDropRefileTests {
@@ -73,8 +73,18 @@ struct FloatDropRefileTests {
         // The display follows the drop, as a tiled one's does.
         #expect(core.activeSpace?.id == SpaceID("2"))
         #expect(core.state.windows[float]?.isFloating == true)
-        // The pointer placed it: no capture seeded to move it.
-        #expect(core.tiler.stashOriginal(float) == nil)
+    }
+
+    /// The retile the re-file runs judges the state frame, so the
+    /// drop's real frame is folded first — never a lagging echo.
+    @Test("the drop's own frame is what state holds")
+    func dropFrameIsFolded() {
+        let core = makeCore()
+        core.state.setFloating(float, true)
+        let stale = CGRect(x: 100, y: 50, width: 400, height: 400)
+        core.state.apply(.windowMoved(float, stale))
+        dropFloat(core)
+        #expect(core.state.windows[float]?.frame == drop)
     }
 
     @Test("a drop on the same display keeps its Space")
@@ -85,22 +95,38 @@ struct FloatDropRefileTests {
         #expect(core.state.workspaces.space(of: float) == SpaceID(1))
     }
 
-    @Test("a sticky float keeps its own rules")
+    @Test("a sticky float is not re-filed, either scope")
     func stickyStays() {
-        let core = makeCore(sticky: .display)
-        core.state.setFloating(float, true)
-        dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID(1))
+        for scope in [StickyScope.display, .global] {
+            let core = makeCore(sticky: scope)
+            core.state.setFloating(float, true)
+            dropFloat(core)
+            #expect(
+                core.state.workspaces.space(of: float) == SpaceID(1)
+            )
+        }
     }
 
-    /// Floating only because of its Space: filing it into the
-    /// other display's tiled Space would tile it, so it stays.
-    @Test("a floating-mode member stays home")
-    func floatingModeMemberStays() {
+    /// Floating only because of its Space, onto a tiled Space: it
+    /// joins and takes the flag, so the layout does not tile it
+    /// (owner ruling 2026-09-26).
+    @Test("a floating-mode member joins a tiled Space as a float")
+    func floatingModeMemberJoinsTiled() {
         let core = makeCore()
         core.state.workspaces.setMode(SpaceID(1), .floating)
         #expect(core.state.windows[float]?.isFloating == false)
         dropFloat(core)
-        #expect(core.state.workspaces.space(of: float) == SpaceID(1))
+        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
+        #expect(core.state.windows[float]?.isFloating == true)
+    }
+
+    @Test("a floating-mode member joins a floating Space unflagged")
+    func floatingModeMemberJoinsFloating() {
+        let core = makeCore()
+        core.state.workspaces.setMode(SpaceID(1), .floating)
+        core.state.workspaces.setMode("2", .floating)
+        dropFloat(core)
+        #expect(core.state.workspaces.space(of: float) == SpaceID("2"))
+        #expect(core.state.windows[float]?.isFloating == false)
     }
 }

@@ -96,4 +96,25 @@ struct PendingSpaceSeamTests {
             )
         }
     }
+
+    /// The drop-commit files where the POINTER placed the window,
+    /// so it must not take `fileMembership`'s re-anchor — a float
+    /// crossing fake screens is invisible to every fixture, so the
+    /// body is the guard (#1686).
+    @Test("the drop-commit relocate never re-anchors")
+    func dropCommitNeverReanchors() throws {
+        let file = Self.core.appendingPathComponent(
+            "Tiling/KiwiCore+DragRelocate.swift"
+        )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        let relocate = SourceScan.declarationBody(
+            after: "func relocateAcrossDisplay(",
+            in: source
+        )
+        #expect(relocate?.contains("insertDropped(") == true)
+        #expect(relocate?.contains("reanchorFloat(") == false)
+        #expect(relocate?.contains("fileMembership(") == false)
+    }
 }
