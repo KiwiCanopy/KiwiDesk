@@ -53,16 +53,16 @@ extension SettingsValueReadout {
                     new: after.swapSkipsCascade
                 )
             ]
-        case .floatNudge:
+        case .floatPlacement:
             return [
-                behaviourToggleRow(
+                .change(
                     census,
                     label: L(
-                        "diff.label.float_nudge",
-                        "Float nudge"
+                        "diff.label.float_placement",
+                        "Float placement"
                     ),
-                    old: before.floatNudge,
-                    new: after.floatNudge
+                    old: behaviourFloatPlacement(before.floatPlacement),
+                    new: behaviourFloatPlacement(after.floatPlacement)
                 )
             ]
         case .floatScaleOnDisplayChange:
@@ -198,6 +198,17 @@ extension SettingsValueReadout {
         switch style {
         case .grid:
             return L("diff.value.quit_layout.grid", "Grid")
+        }
+    }
+
+    private static func behaviourFloatPlacement(
+        _ placement: FloatPlacement
+    ) -> String {
+        switch placement {
+        case .center:
+            return L("diff.value.float_placement.center", "Centered")
+        case .keep:
+            return L("diff.value.float_placement.keep", "Kept in place")
         }
     }
 

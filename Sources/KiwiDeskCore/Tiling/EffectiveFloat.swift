@@ -32,7 +32,11 @@
 /// (`KiwiCore+ZOrderFloats.raiseFloatsAbove`, `floatRaiseFloor`,
 /// `FloatingModeRaiseTests`) while its TARGETS stay the flag's,
 /// there being no tiled plane in a floating-mode space to lift
-/// over. Ruled to STAY on the flag: the Space Bar float badge and
+/// over. The float PLACEMENT of `make_floating` /
+/// `toggle_floating` (#1674) is ruled onto it: a window already
+/// an effective float keeps its frame, since a floating-mode
+/// member's frame is the user's (`FloatPlacementCommandTests`).
+/// Ruled to STAY on the flag: the Space Bar float badge and
 /// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
 /// mark the exception to a space's layout and in a floating-mode
 /// space have none to mark (owner ruling 2026-09-13,

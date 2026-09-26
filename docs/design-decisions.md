@@ -3884,8 +3884,7 @@ once.* `KiwiCore.floatBounds` is the one answer to "where may a
 float sit": the display's visible bounds with every painted strip
 carved off its own edge. It carves the strips the bar managers
 actually **painted** rather than routing through `layoutBounds`,
-for the reason the float nudge already does — an empty bar is
-suppressed while `layoutBounds` still reserves its strip, so
+because an empty bar is suppressed while `layoutBounds` still reserves its strip, so
 routing would bound a float out of a region no bar occupies.
 Bars vary per space (one or two, on any edge), so it folds both
 strip lists; two strips on one edge leave the deeper carve
@@ -4108,34 +4107,57 @@ by ruling — standing down would keep a home whose layout
 assigns no frame on a display the window is not on, which is
 this issue's strand by another door.
 
-**The tiled→floating toggle nudges the window, and the nudge is a
-fixed magnitude, not proportional.** A window keeps its exact
-frame the instant it turns floating, so `make_floating` /
-`toggle_floating` would look like they did nothing — no
-acknowledgement of the state change. The float direction gives
-the window a small shove toward its screen's visible-frame center
-(the tiled direction already animates a real move back into the
-layout, so it needs none). The magnitude is deliberately
-**fixed** — `min(24 pt, distance to center)` along the unit
-vector to the center — rather than proportional to the window
-size: a size-scaled nudge (longest-side × 0.2, say) teleports a
-maximized window clear across the screen while barely moving a
-small one. The fixed form self-tapers instead — a window already
-near the center has a short distance term and so moves less,
-reaching zero with no edge special-casing; a dead-centered window
-(direction undefined) shoves straight down. The target is clamped
-fully inside the visible frame, exactly like tiled placement, so
-it can never land under the menu bar / a reserved bar strip or
-partly off-screen, and it rides the existing relayout animation
-so the motion reads as a deliberate move, not a jump. Fires on
-the explicit float verbs only — `make_floating` and a
-`toggle_floating` that lands on floating — once per
-tiled→floating flip, never on an already-floating window.
-`make_auto` is deliberately excluded: its flip is
-detection-driven, not a deliberate user float, so it gets no
-acknowledging nudge. Fixed, not proportional, is the whole point.
-A niche polish behavior, so the disable knob (`set_float_nudge`,
-default on) is Lua-only with no Settings toggle.
+**Floating a tiled window centres it at a derived size
+(#1674).** [Principle] The frame a window
+has when an explicit float verb fires — `make_floating`, or a
+`toggle_floating` that lands on floating — is the layout's SLOT,
+which the user never chose. So #1091's "a float's position is the
+user's" has nothing to protect at that moment, and holds again
+from the moment it lands. Keeping the slot's frame left a float
+taken from a narrow stack slot or a full-height column in exactly
+that awkward shape, to be resized by hand every time, and a
+shove of a few points only acknowledges the flip. A real move
+acknowledges it and is useful too.
+
+*The size is measured on the region's short and long axes*, not
+on width and height, so one rule serves landscape and portrait:
+two thirds of the short axis, and a third of the long axis
+floored at 600 pt — a third of a laptop is narrower than most
+apps draw usefully — and capped at 1.25 × the short-axis span,
+since a third of an ultrawide is a banner. A landscape screen
+gets a tall window, a portrait one a wide one. The region is
+`floatGrowBounds`, a placement nothing else will correct, and a
+corroborated app minimum from the size-bound ledger outranks the
+derived size and a corroborated maximum caps it, so the window
+is centred on the size it can take. The placement then forgets the
+window's size-bound ledger, as the traveler re-home does: its
+resize is no layout ask, and read against the last tiled ask it
+teaches the learner the float's size as the app's bound, so the
+next tiled space draws the window that small.
+The numbers live in `FloatPlacement` and are the owner's to
+retune.
+
+*Who is placed.* The verb is ruled onto `EffectiveFloat`, judged
+on the space the window RENDERS on — a sticky traveler's, not its
+home's, for the gate and the region alike: a window already an
+effective float there — its flag, or a floating-mode member whose
+frame is the user's — keeps it. `make_auto` stays
+out (its flip is detection, not a deliberate float), as do app
+rules floating a window at creation and floating-mode entry,
+which #1177's quit grid owns.
+
+*The knob.* `set_float_placement("center" | "keep")`, Lua-only
+like the other float polish knobs (#502); `keep` is the exact
+frame with no nudge, since whoever asks for it asked for no
+motion. An enum rather than a boolean so a later placement joins
+it without another rename. The retired `float_nudge` crossed by
+migration: a stored `false` was a choice and became `keep`; a
+stored `true` was written by every save under the old default, so
+it records a save rather than a choice and was dropped onto the
+new default (the #1255 reading, owner ruling 2026-09-26). An
+`init.lua` call is the user's script and is not migrated (the
+`ConfigMigration` carve-out): `set_float_nudge` joins
+`APIReference.retired`, so the call fails naming its replacement.
 
 **`resize` reads the *effective* float, so a floating-mode space
 resizes like a flag-float
@@ -10142,7 +10164,7 @@ the edge. *Map:* the escape hatch stays **Lua-only, no GUI**
 (`set_float_scale_on_display_change(false)`) — the OFF state
 ("keep my float's exact pixels, accept the overflow") is a
 narrow, technical ask (screen recording, pixel-matched capture),
-the same GUI-curates/Lua-open call as `float_nudge` and the bar
+the same GUI-curates/Lua-open call as `float_placement` and the bar
 `dim_factor` knobs; a GUI toggle would need a paragraph of caveats
 in its caption, which is contextual-help/Lua-reference work, not a
 Settings control. A future contributor must not re-derive "size is

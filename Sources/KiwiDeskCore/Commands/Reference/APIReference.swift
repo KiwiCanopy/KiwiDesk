@@ -48,7 +48,7 @@ public enum APIReference {
                 "set_swap_skips_cascade",
                 "set_swap_skips_cascade"
             ),
-            ("set_float_nudge", "set_float_nudge"),
+            ("set_float_placement", "set_float_placement"),
             (
                 "set_float_scale_on_display_change",
                 "set_float_scale_on_display_change"

@@ -7,8 +7,8 @@ import Testing
 /// re-imports the host's real screen, and a fixture that pins
 /// the hook then silently stops pinning that path.
 ///
-/// Some routed sites carry a behavioural test of their own; the
-/// float nudge carries only this guard. Either way its job is
+/// Some routed sites carry a behavioural test of their own,
+/// others only this guard. Either way its job is
 /// the *next* call site, which arrives before its test does —
 /// two went in routed but uncovered, and reverting either left
 /// the whole behavioural suite green.

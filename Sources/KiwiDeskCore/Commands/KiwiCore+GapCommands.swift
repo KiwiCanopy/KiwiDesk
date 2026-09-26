@@ -93,16 +93,17 @@ extension KiwiCore {
         return .ok()
     }
 
-    func setFloatNudge(
+    func setFloatPlacement(
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard let on = args.first?.boolValue else {
-            return .fail("expected boolean")
+        guard let raw = args.first?.stringValue,
+            let placement = FloatPlacement(rawValue: raw)
+        else {
+            return .expected(FloatPlacement.self)
         }
-        tiler.settings.floatNudge = on
-        // No retile: the flag is read only at the moment a
-        // tiled→floating toggle fires, never by layout math, so
-        // flipping it can't move any window here.
+        tiler.settings.floatPlacement = placement
+        // No retile: read only when a float verb fires, never by
+        // layout math, so setting it moves no window here.
         return .ok()
     }
 
@@ -113,7 +114,7 @@ extension KiwiCore {
             return .fail("expected boolean")
         }
         tiler.settings.floatScaleOnDisplayChange = on
-        // No retile (like `set_float_nudge`): the flag is read
+        // No retile (like `set_float_placement`): the flag is read
         // only by `FloatReanchor.target` at a display-crossing
         // re-anchor, never by layout math, so flipping it moves
         // nothing here.

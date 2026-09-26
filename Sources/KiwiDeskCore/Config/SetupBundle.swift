@@ -37,8 +37,10 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 12 = the bars' shared fields moved to `kiwishelf` (#1517),
     /// on `[Profile]` alone;
     /// 13 = the drag markers' and sticky mark's Liquid Glass
-    /// leaves filled (#1620/#1621), on `[Profile]` alone.
-    public static let currentFormat = 13
+    /// leaves filled (#1620/#1621), on `[Profile]` alone;
+    /// 14 = `float_nudge` retired for `float_placement` (#1674),
+    /// on `[Profile]` alone.
+    public static let currentFormat = 14
 
     public let format: Int
 

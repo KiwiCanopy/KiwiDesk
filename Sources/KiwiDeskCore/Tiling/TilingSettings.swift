@@ -30,8 +30,9 @@ public struct TilingSettings: Sendable, Equatable {
     /// Directional swap in cascade targets outer neighbor
     /// (`swap.skips_cascade`, #172).
     public var swapSkipsCascade = true
-    /// Nudge float toward screen center on float toggle (`float.nudge`).
-    public var floatNudge = true
+    /// Where an explicit float verb lands a window
+    /// (`float_placement`); read only when one fires.
+    public var floatPlacement: FloatPlacement = .center
     /// Scale float size proportionally on display change (#502,
     /// superseding #444/#493's keep-the-size). Read only by
     /// `FloatReanchor.target` at a display-crossing re-anchor,

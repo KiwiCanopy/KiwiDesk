@@ -5,7 +5,7 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case resizeStep = "settings.resizeStep"
     case refusalSound = "settings.refusalSound"
     case swapSkipsCascade = "settings.swapSkipsCascade"
-    case floatNudge = "settings.floatNudge"
+    case floatPlacement = "settings.floatPlacement"
     case floatScaleOnDisplayChange = "settings.floatScaleOnDisplayChange"
     case placementOverride = "settings.placementOverride[space]"
     case quitLayout = "settings.quitLayout"
@@ -19,7 +19,7 @@ extension BehaviourKey {
         switch self {
         case .minWindowSize:
             return .row(.layoutDefaults, .general, .atRest)
-        case .resizeStep, .swapSkipsCascade, .floatNudge,
+        case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride, .quitLayout:
             return .luaOnly
         case .refusalSound:
@@ -39,7 +39,7 @@ extension BehaviourKey {
         switch self {
         case .minWindowSize:
             return .text("layout_defaults.min_window_size")
-        case .resizeStep, .swapSkipsCascade, .floatNudge,
+        case .resizeStep, .swapSkipsCascade, .floatPlacement,
             .floatScaleOnDisplayChange, .placementOverride, .quitLayout:
             return .none
         case .refusalSound:

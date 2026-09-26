@@ -86,20 +86,7 @@ struct LayoutBoundsRoutingTests {
         // would falsely open an edge whose neighbor abuts the
         // strip's side.
         "Tiling/TilingEngine+Layout.swift": 2,
-        // A float nudge measures NO span: it is a capped 24 pt
-        // direction vector plus a `confine`, with no
-        // delta-over-span and no midpoint classification, so the
-        // arithmetic this guard protects does not occur there.
-        // Nor may it reserve the strip itself — float geometry
-        // follows PAINTED chrome, and `SpaceBarManager.sync`
-        // drops an empty bar while `layoutBounds` still reserves
-        // its strip, so routing would confine a float out of a
-        // region no bar occupies. The authoritative bar clamp
-        // (`floatFrameClampedClearOfBars`, #242) runs on the very
-        // next statement and owns that edge.
-        "App/KiwiCore+FloatNudge.swift": 1,
-        // The float REGION (#1091), on the same two grounds as
-        // the nudge above. It measures no span and classifies no
+        // The float REGION (#1091). It measures no span and classifies no
         // midpoint — it is a containment box for a window the
         // layout never places, and the resize divides its delta
         // between two EDGES rather than over a span. And it must

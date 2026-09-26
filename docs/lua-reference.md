@@ -618,24 +618,33 @@ affected. No Settings toggle.
 KiwiDesk.set_swap_skips_cascade(true)
 ```
 
-### set_float_nudge
+### set_float_placement
 
-**Expects:** `true` or `false` (default `true`).
+:::unreleased
+**Expects:** `"center"` (default) or `"keep"`.
 
-**Does:** whether toggling a window from tiled to floating
-nudges it toward the screen center: up to 24 pt, tapering to
-zero for a window already near the center, the same for every
-window size. A window keeps its exact frame when it floats.
-Fires on `make_floating` and a `toggle_floating` that lands on
-floating, never on `make_tiled`. The target stays fully on
-screen and clear of the menu bar and any App/Space Bar. Global
-(per profile, all spaces); no Settings toggle.
+**Does:** where a window lands when `make_floating` or a
+`toggle_floating` that lands on floating turns it from tiled to
+floating. `"center"`: it is centered in the area of its screen
+clear of the menu bar and any App/Space Bar, at a size measured
+from that area: two thirds of the short side, and along the long
+side a third, at least 600 pt but never more than 1.25 times the
+short-side span (so under 600 pt on a short screen). A landscape
+screen gets a tall window; a portrait one gets a wide one. An app
+that will not go that small, or that large, keeps its own limit.
+`"keep"`: the window keeps the frame it had in the layout. Never fires on `make_tiled`,
+`make_auto`, or a window already floating, including one on a
+floating-mode Space. Global (per profile, all spaces); no Settings
+toggle. Replaces `set_float_nudge`: a saved setting that had the
+nudge off becomes `"keep"`, while an `init.lua` call to
+`set_float_nudge` fails naming this verb and must be renamed.
 
 **Example:**
 
 ```lua
-KiwiDesk.set_float_nudge(true)
+KiwiDesk.set_float_placement("keep")
 ```
+:::
 
 ### set_float_scale_on_display_change
 

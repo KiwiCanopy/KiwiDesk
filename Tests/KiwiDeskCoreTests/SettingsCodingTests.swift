@@ -28,7 +28,7 @@ struct SettingsCodingTests {
         #expect(
             Set(root.keys) == [
                 "animations", "app_bar", "border", "drag", "kiwishelf",
-                "float_nudge", "float_scale_on_display_change",
+                "float_placement", "float_scale_on_display_change",
                 "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
@@ -105,10 +105,9 @@ struct SettingsCodingTests {
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
         #expect(root["swap_skips_cascade"] as? Bool == true)
-        // `set_float_nudge` → top-level `float_nudge`, on by
-        // default: a tiled→floating toggle shoves the window
-        // toward center so the state change is visible.
-        #expect(root["float_nudge"] as? Bool == true)
+        // `set_float_placement` → top-level `float_placement`
+        // (#1674), `center` by default.
+        #expect(root["float_placement"] as? String == "center")
         // `set_float_scale_on_display_change` → top-level
         // `float_scale_on_display_change` (#502), ON by default:
         // a cross-display float scales to fit unless opted out
