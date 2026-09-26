@@ -4129,7 +4129,11 @@ gets a tall window, a portrait one a wide one. The region is
 `floatGrowBounds`, a placement nothing else will correct, and a
 corroborated app minimum from the size-bound ledger outranks the
 derived size and a corroborated maximum caps it, so the window
-is centred on the size it can take.
+is centred on the size it can take. The placement then forgets the
+window's size-bound ledger, as the traveler re-home does: its
+resize is no layout ask, and read against the last tiled ask it
+teaches the learner the float's size as the app's bound, so the
+next tiled space draws the window that small.
 The numbers live in `FloatPlacement` and are the owner's to
 retune.
 

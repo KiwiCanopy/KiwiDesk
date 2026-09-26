@@ -199,4 +199,20 @@ struct FloatPlacementCommandTests {
         #expect(core.state.windows[traveler]?.isFloating == true)
         #expect(frames[traveler] == nil)
     }
+
+    /// The placement resizes outside the layout's asks, so the
+    /// learner must hold no ask to judge its echo against — or it
+    /// learns the float's size as the app's bound and the next
+    /// tiled space draws the window that small (device, #1674).
+    @Test("the placement leaves the learner no stale ask")
+    func placementForgetsTheLedger() {
+        let core = setup(mode: "monocle") { _, _ in }
+        core.tiler.boundLearner.recordAsk(
+            WindowID(2),
+            size: CGSize(width: 1600, height: 1000)
+        )
+        #expect(core.tiler.boundLearner.lastAsks[WindowID(2)] != nil)
+        #expect(core.execute("toggle_floating").isSuccess)
+        #expect(core.tiler.boundLearner.lastAsks[WindowID(2)] == nil)
+    }
 }
