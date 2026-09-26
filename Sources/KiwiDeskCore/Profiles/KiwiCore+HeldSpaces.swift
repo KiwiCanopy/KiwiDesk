@@ -19,7 +19,8 @@ extension KiwiCore {
     /// reaches a Main-role or auto-placed Space — and holds windows
     /// (live or away) is held under its own name, or under the
     /// next number past every live one where the incoming
-    /// profile declares that name. Runs before the prune, while
+    /// profile declares that name or the held order needs it
+    /// (#1664). Runs before the prune, while
     /// `spacePins`, `icons` and `liveArrangement` are still the
     /// departing arrangement's.
     func holdDepartingSpaces(
@@ -39,20 +40,22 @@ extension KiwiCore {
             }
         // Every live number is taken — a Space the prune is about
         // to drop still exists, and numbering into it would merge.
-        var taken = declared.union(state.heldSpaces.keys)
+        let taken = declared.union(state.heldSpaces.keys)
             .union(state.workspaces.allSpaces.map(\.id))
+        let names = Self.orderedHeldNames(
+            candidates.map(\.0.id),
+            taken: taken,
+            mustMove: declared.contains
+        )
         var focus = heldFocusTrackers()
-        for (space, screen) in candidates {
+        for ((space, screen), id) in zip(candidates, names) {
             let origin = HeldOrigin(
                 name: space.id,
                 screen: screen,
                 icon: icons[space.id],
                 arrangement: liveArrangement
             )
-            var id = space.id
-            if declared.contains(space.id) {
-                id = SpaceID.nextNumber(past: taken)
-                taken.insert(id)
+            if id != space.id {
                 moveMembers(of: space.id, to: id, mode: space.mode)
                 focus.spaceFocus[id] = space.focused
             }
@@ -64,6 +67,7 @@ extension KiwiCore {
             )
         }
         focus.restore(into: &state.workspaces)
+        placeHeldBatchLast(names)
     }
 
     /// Whether a held Space goes home at this apply: its screen is
@@ -84,22 +88,38 @@ extension KiwiCore {
     /// this FIRST with the set it makes authoritative, and a held
     /// Space whose number that set claims moves to the next free
     /// number — unless it is about to go home under that very name.
+    /// The walk and the batch follow the bar, never the dictionary
+    /// (#1664); a Space the set does not claim keeps its number.
     func reclaimHeldNames(
         declared: Set<SpaceID>,
         into arrangement: HeldOrigin.Arrangement
     ) {
-        var taken = declared.union(state.heldSpaces.keys)
-            .union(state.workspaces.allSpaces.map(\.id))
-        var focus = heldFocusTrackers()
-        for (id, origin) in state.heldSpaces
-        where declared.contains(id)
-            && !(origin.name == id
-                && returnsHome(origin, declared: declared, into: arrangement))
-        {
+        let live = state.workspaces.allSpaces.map(\.id)
+        let orphans = state.heldSpaces.keys
+            .filter { state.workspaces[$0] == nil }
+            .sorted {
+                (Int($0.raw) ?? .max, $0.raw) < (Int($1.raw) ?? .max, $1.raw)
+            }
+        let held = (live + orphans).filter { id in
+            guard let origin = state.heldSpaces[id] else { return false }
+            let goesHome =
+                origin.name == id
+                && returnsHome(origin, declared: declared, into: arrangement)
+            return !goesHome
+        }
+        var taken = declared.union(state.heldSpaces.keys).union(live)
+        let names = held.map { id -> SpaceID in
+            guard declared.contains(id) else { return id }
             let fresh = SpaceID.nextNumber(past: taken)
             taken.insert(fresh)
+            return fresh
+        }
+        guard names != held else { return }
+        var focus = heldFocusTrackers()
+        for (id, fresh) in zip(held, names) where fresh != id {
+            guard let origin = state.heldSpaces[id] else { continue }
             let mode = state.workspaces[id]?.mode ?? .bsp
-            focus.spaceFocus[fresh] = state.workspaces[id]?.focused
+            focus.spaceFocus[fresh] = focus.spaceFocus[id]
             moveMembers(of: id, to: fresh, mode: mode)
             state.heldSpaces[id] = nil
             state.heldSpaces[fresh] = origin
@@ -109,6 +129,7 @@ extension KiwiCore {
             )
         }
         focus.restore(into: &state.workspaces)
+        placeHeldBatchLast(names)
     }
 
     /// Sends home every held Space `returnsHome` allows: everything

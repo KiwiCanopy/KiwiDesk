@@ -47,14 +47,22 @@ live changes nothing, so a monitor reconnect is harmless.
 **Unplugging a screen holds its Spaces.** When unplugging a
 screen makes a different profile live, each Space that was on
 that screen and still has windows in it is carried onto a
-remaining screen instead of being dropped. It keeps its name
-unless the new profile has a Space of that name; then it takes
-the next number past the highest one in use, so a held `3` beside
+remaining screen instead of being dropped. Where the new profile
+has a Space of its name, it takes the next number past the
+highest one in use, so a held `3` beside
 your own `1`–`5` becomes `6`, and a held `Mail` beside your own
 `Mail` becomes a number too. Where KiwiDesk manages your config,
 it gets a digit shortcut if one of the ten is free. A held Space
 moves to a new number again whenever a profile that loads uses
 its current one.
+
+:::unreleased
+Held Spaces keep the order they had: when a screen's Spaces are
+held, a numbered Space after a renumbered one is renumbered after
+it too, so the Space Bar and the digit shortcuts list them in the
+order the screen had them. A later renumber keeps the Space Bar in
+that order.
+:::
 
 The Space Bar draws an asterisk badge on a held Space's
 identifier, and VoiceOver reads the screen it came from, its old

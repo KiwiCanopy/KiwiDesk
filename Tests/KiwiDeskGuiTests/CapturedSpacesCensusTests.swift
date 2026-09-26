@@ -24,6 +24,8 @@ struct CapturedSpacesCensusTests {
             (2, "the mode loop skips held; the prune keeps them"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaces.swift":
             (6, "the held machinery itself"),
+        "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceOrder.swift":
+            (1, "the held batch's bar placement; captures nothing"),
         "KiwiDeskCore/Profiles/KiwiCore+SpaceDisplays.swift":
             (3, "the display resolve places held Spaces too"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileSpaces.swift":

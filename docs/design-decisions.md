@@ -12017,6 +12017,26 @@ the resident keeping the name with the held Space reachable by a
 bar click alone is refused because it leaves a Space with no
 shortcut, and no next/previous-Space verb exists to reach it by.
 
+:::unreleased
+**The held Spaces keep their order**
+([#1664](https://github.com/KiwiCanopy/KiwiDesk/issues/1664)).
+Where only some names collide, a numbered held Space keeps its own
+name only while it numbers above every held Space before it, so a
+screen's `3, 4` beside a declared `3` become `5, 6` rather than
+the old `3` renumbered to `5` sitting after the old `4`, which kept
+its name. A named Space keeps its name wherever it falls, and the
+batch sits in the bar in the order the screen had it, behind the
+resident Spaces. Keeping more numbers is refused because the bar
+and the digit chords would then read the screen backwards. A later
+reclaim renumbers only the Space the arrangement claims and keeps
+the bar's order, so its numbers may then not ascend. Renumbering
+the rest there too is refused: the old number is pruned at a hold
+but not at a reclaim, and dropping a Space is `forwardWindows`'
+alone (#1177), so each would need a live rename across every store
+keyed by a Space — for a case only a later arrangement declaring a
+held number reaches.
+:::
+
 **Accepted: the chord outlives the Space.** The top-up writes the
 renumbered Space's digit chord into `gui.json`, and nothing takes
 it back when the hold ends. The ruling asks for the top-up, since
