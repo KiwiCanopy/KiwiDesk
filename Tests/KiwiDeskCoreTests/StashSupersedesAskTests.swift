@@ -111,6 +111,66 @@ struct StashSupersedesAskTests {
         #expect(engine.boundLearner.bound(for: window.id) == nil)
     }
 
+    /// The frame-set doors retire the ask for every caller that
+    /// is not the layout loop — a float seed's restore, a boot
+    /// snapshot restore — so the fix does not live in `stash`
+    /// alone.
+    @Test(
+        "Any non-layout frame retires the ask",
+        arguments: [false, true]
+    )
+    func frameDoorsRetire(animated: Bool) {
+        let engine = TilingEngine()
+        let window = Self.window()
+        engine.boundLearner.recordAsk(window.id, size: Self.asked)
+        let seeded = CGRect(origin: .zero, size: Self.parked)
+        if animated {
+            engine.applyFrame(
+                window.id,
+                from: window.frame,
+                to: seeded,
+                animated: false
+            )
+        } else {
+            engine.setFrame(window.id, seeded)
+        }
+        for _ in 0..<2 {
+            _ = engine.observeEchoAnswer(
+                window.id,
+                size: Self.parked,
+                settledRead: true
+            )
+        }
+        #expect(engine.candidateSizeBound(for: window.id) == nil)
+        #expect(engine.boundLearner.bound(for: window.id) == nil)
+    }
+
+    /// The loop's own order — frame, then ask — keeps learning:
+    /// the door retires the OLD ask before the loop records the
+    /// new one.
+    @Test("A layout ask after its frame still learns")
+    func layoutAskStillLearns() {
+        let engine = TilingEngine()
+        let window = Self.window()
+        engine.applyFrame(
+            window.id,
+            from: window.frame,
+            to: CGRect(origin: .zero, size: Self.asked),
+            animated: false
+        )
+        engine.boundLearner.recordAsk(window.id, size: Self.asked)
+        var confirmed = false
+        for _ in 0..<2 {
+            confirmed =
+                engine.observeEchoAnswer(
+                    window.id,
+                    size: Self.parked,
+                    settledRead: true
+                ).confirmed || confirmed
+        }
+        #expect(confirmed)
+    }
+
     /// Learned entries survive a park: only the question retires.
     @Test("A park keeps what was learned")
     func learnedSurvives() {
@@ -134,5 +194,42 @@ struct StashSupersedesAskTests {
             capturesOriginal: false
         )
         #expect(engine.boundLearner.bound(for: window.id) == learned)
+    }
+
+    /// A park inside a corroboration probe's grace (#1439) hands
+    /// its issue back, so the return re-sends the probe instead
+    /// of waiting forever on an answer no parked echo can give.
+    @Test(
+        "A park hands an in-flight probe's issue back",
+        arguments: [true, false]
+    )
+    func parkUnissuesProbe(parks: Bool) throws {
+        let w = WindowID(7)
+        let held = CGSize(width: 720, height: 800)
+        let ask = CGSize(width: 500, height: 800)
+        var learner = SizeBoundLearner()
+        learner.recordAsk(w, size: ask, settledFrom: held)
+        learner.observe(w, currentSize: held, settledRead: true)
+        let taken = learner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: ask
+        )
+        let first = try #require(taken)
+        learner.recordAsk(w, size: first.size)
+        if parks {
+            learner.parkRetiresAsk(w)
+        } else {
+            learner.supersedeAsk(w)
+        }
+        // The Space returns: the loop asks the anchor's size.
+        let again = learner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: ask
+        )
+        // Parked, the probe is re-sent; a plain retire (the
+        // control) leaves it issued and unanswered, so nothing is.
+        #expect((again != nil) == parks)
     }
 }

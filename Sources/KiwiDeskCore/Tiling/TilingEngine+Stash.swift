@@ -217,9 +217,11 @@ extension TilingEngine {
             in: bounds,
             corner: corner
         )
-        // A park is not a layout ask (#1694): whatever the loop
-        // last asked, parked or already there, goes unanswered.
-        boundLearner.supersedeAsk(window.id)
+        // A park is not a layout ask (#1694). The frame-set doors
+        // retire the ask themselves; this covers the early return
+        // below, where the window is already parked and no frame
+        // is set.
+        boundLearner.parkRetiresAsk(window.id)
         if !force, Self.close(window.frame, to: target) {
             return
         }
