@@ -4,103 +4,50 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A collapsed Space item as the live bar draws it (#1683): the
-/// render measures the item it is handed rather than deciding a
-/// collapse of its own, so its lengths are the plan's
-/// `itemLengths`; the count reads as a whole count; Minimal still
-/// announces the windows; an empty identifier takes the empty
-/// ink. Driven through `SpaceBarManager.sync`.
+/// A collapsed Space item as the live bar draws it (#1683): its
+/// count cell fits the length the plan measured; the count reads
+/// as a whole count; Minimal still announces the windows; an
+/// empty identifier takes the empty ink. Driven through
+/// `SpaceBarManager.sync`. The glide's wiring is
+/// `SpaceBarGlideWiringTests`.
 @Suite("Space bar collapsed render", .serialized)
 @MainActor
 struct SpaceBarCollapsedRenderTests {
-    private func app(_ name: String, count: Int = 1)
-        -> SpaceBarItemView.App
-    {
-        SpaceBarItemView.App(
-            name: name,
-            icon: nil,
-            glyph: "a",
-            focused: false,
-            count: count,
-            sticky: true,
-            floating: true
-        )
-    }
-
-    /// Space 1 shown; Space 2 holds three windows, Space 3 none.
-    private func items(
-        _ content: SpaceBarStyle.InactiveContent
-    ) -> [SpaceBarOverlay.Item] {
-        let apps: [[SpaceBarItemView.App]] = [
-            [app("Notes")], [app("Mail", count: 2), app("Web")], [],
-        ]
-        return apps.enumerated().map { index, apps in
-            SpaceBarOverlay.Item(
-                space: SpaceID("\(index + 1)"),
-                spaceGlyph: .text("\(index + 1)", tinted: true),
-                apps: apps,
-                active: index == 0,
-                overflow: 0,
-                focusInOverflow: false
-            ).collapsed(to: content)
-        }
-    }
-
     private func render(
         _ content: SpaceBarStyle.InactiveContent
-    ) throws -> (SpaceBarOverlay, [SpaceBarOverlay.Item]) {
+    ) throws -> SpaceBarOverlay {
         LiquidGlassGate.override = { false }
-        let items = items(content)
-        var bar = paintedSpaceBar(front: nil)
-        bar = SpaceBarManager.Bar(
-            display: bar.display,
-            items: items,
-            frontApp: nil,
-            frontWindow: nil,
-            strip: bar.strip,
-            style: bar.style,
-            stateMarkColors: bar.stateMarkColors
-        )
         let manager = SpaceBarManager()
-        manager.sync([bar])
-        let overlay = try #require(
-            manager.overlayForTesting(barTitleDisplay)
-        )
-        return (overlay, items)
+        manager.sync([collapsedBar(content)])
+        return try #require(manager.overlayForTesting(barTitleDisplay))
     }
 
-    @Test(
-        "The render draws the lengths the plan measures",
-        arguments: SpaceBarStyle.InactiveContent.allCases
-    )
-    func renderedLengthsAreThePlans(
-        content: SpaceBarStyle.InactiveContent
-    ) throws {
-        let (overlay, items) = try render(content)
+    /// The count cell is reserved by the length and drawn by the
+    /// view's layout, which read one input (`badgeCount`): a
+    /// length measuring the cleared `overflow` instead leaves the
+    /// badge hanging past the item's end.
+    @Test("A collapsed count's cell fits the planned length")
+    func countCellFitsThePlan() throws {
+        let overlay = try render(.count)
+        let view = overlay.itemViews[1]
+        view.layoutSubtreeIfNeeded()
         let depth = barTitleStrip.height
-        let planned = SpaceBarOverlay.itemLengths(
-            items,
+        let bare = SpaceBarItemView.autoLength(
+            appCount: 0,
             depth: depth,
-            look: overlay.lastShown?.style ?? SpaceBarLook()
+            glyphGap: 0
         )
-        let drawn = overlay.itemViews.prefix(items.count)
-            .map(\.frame.width)
-        #expect(drawn == planned)
-        // Collapsing shortens the run it collapses.
-        if content != .apps {
-            let full = SpaceBarOverlay.itemLengths(
-                self.items(.apps),
-                depth: depth,
-                look: overlay.lastShown?.style ?? SpaceBarLook()
-            )
-            #expect(planned[1] < full[1])
-            #expect(planned[0] == full[0])
-        }
+        #expect(view.frame.width > bare)
+        #expect(!view.overflowBadge.isHidden)
+        #expect(view.overflowBadge.frame.maxX <= view.bounds.width)
+        // Minimal reserves nothing past the identifier.
+        let minimal = try render(.identifier)
+        #expect(minimal.itemViews[1].frame.width == bare)
     }
 
     @Test("Window count draws the whole count, unprefixed")
     func countReadsWhole() throws {
-        let (overlay, _) = try render(.count)
+        let overlay = try render(.count)
         let other = overlay.itemViews[1]
         #expect(!other.overflowBadge.isHidden)
         #expect(other.overflowBadge.stringValue == "3")
@@ -113,18 +60,22 @@ struct SpaceBarCollapsedRenderTests {
     @Test("Minimal announces the windows it does not draw")
     func identifierAnnouncesTheCount() throws {
         LocalizationManager.shared.select("en")
-        let (collapsed, _) = try render(.identifier)
-        let (expanded, _) = try render(.apps)
+        let collapsed = try render(.identifier)
+        let expanded = try render(.apps)
         #expect(collapsed.itemViews[1].overflowBadge.isHidden)
         #expect(
             collapsed.itemViews[1].accessibilityLabel()
                 == expanded.itemViews[1].accessibilityLabel()
         )
+        #expect(
+            collapsed.itemViews[1].accessibilityLabel()
+                == "Space 2, windows: 3, not current"
+        )
     }
 
     @Test("Minimal draws an empty identifier in the empty ink")
     func emptyIdentifierDims() throws {
-        let (overlay, _) = try render(.identifier)
+        let overlay = try render(.identifier)
         let style = try #require(overlay.lastShown?.style)
         #expect(style.shelf.emptyItemAlpha != nil)
         let occupied = try #require(
@@ -138,26 +89,67 @@ struct SpaceBarCollapsedRenderTests {
         #expect(empty != occupied)
     }
 
-    /// The glide's input: the render records the Space it
-    /// expanded, and a hide forgets it, so a bar that reappears
-    /// lands rather than gliding from a stale Space.
-    @Test("The render records the Space it expanded")
-    func renderRecordsTheExpandedSpace() throws {
-        let (overlay, _) = try render(.identifier)
-        #expect(overlay.shownExpanded == SpaceID("1"))
-        overlay.hide()
-        #expect(overlay.shownExpanded == nil)
-    }
-
     /// The cue is Minimal's: under Window count an empty Space
     /// already shows no count.
     @Test("Only Minimal dims an empty identifier")
     func onlyMinimalDims() throws {
-        let (overlay, _) = try render(.count)
+        let overlay = try render(.count)
         let style = try #require(overlay.lastShown?.style)
         #expect(
             overlay.itemViews[2].identifierLabel.textColor
                 == NSColor(kiwiHex: style.idleItemColor)
         )
     }
+}
+
+/// Space 1 shown unless `active` says otherwise; Space 2 holds
+/// three windows, Space 3 none, each collapsed to `content`.
+@MainActor
+func collapsedBar(
+    _ content: SpaceBarStyle.InactiveContent,
+    active: Int = 1,
+    boxedGlass: Bool = false
+) -> SpaceBarManager.Bar {
+    let app = { (name: String, count: Int) in
+        SpaceBarItemView.App(
+            name: name,
+            icon: nil,
+            glyph: "a",
+            focused: false,
+            count: count,
+            sticky: true,
+            floating: true
+        )
+    }
+    let apps = [
+        [app("Notes", 1)], [app("Mail", 2), app("Web", 1)], [],
+    ]
+    let items = apps.enumerated().map { index, apps in
+        SpaceBarOverlay.Item(
+            space: SpaceID("\(index + 1)"),
+            spaceGlyph: .text("\(index + 1)", tinted: true),
+            apps: apps,
+            active: index + 1 == active,
+            overflow: 0,
+            focusInOverflow: false
+        ).collapsed(to: content)
+    }
+    var style = paintedSpaceBar(front: nil).style
+    style.inactiveContent = content
+    if boxedGlass {
+        style.backgroundStyle = .boxed
+        style.liquidGlass = true
+    }
+    return SpaceBarManager.Bar(
+        display: barTitleDisplay,
+        items: items,
+        frontApp: nil,
+        frontWindow: nil,
+        strip: barTitleStrip,
+        style: style,
+        stateMarkColors: StateMarkColors(
+            sticky: "#ffffff",
+            floating: "#ffffff"
+        )
+    )
 }

@@ -9,7 +9,9 @@ import Testing
 /// the palette by `KiwiShelf.emptyItemAlpha`, never picked. The
 /// derivation runs on Core's own maths; this suite measures its
 /// answer on `ColorVision`, the repo instrument, the way
-/// `IdleItemContrastTests` measures the idle ink.
+/// `IdleItemContrastTests` measures the idle ink. The two are
+/// separate implementations on purpose: a slip in Core's copy
+/// shows here as a disagreement rather than agreeing with itself.
 @Suite("Empty item ink")
 struct EmptyItemInkTests {
     private static let grounds = ["#FFFFFF", "#000000"]

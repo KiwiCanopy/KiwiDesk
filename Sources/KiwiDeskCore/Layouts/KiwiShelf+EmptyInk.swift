@@ -18,7 +18,7 @@ extension KiwiShelf {
     public static let emptyInkStep = 1.3
 
     /// The wallpaper extremes every ink is measured over.
-    static let inkGrounds = ["#FFFFFF", "#000000"]
+    private static let inkGrounds = ["#FFFFFF", "#000000"]
 
     /// The share of `itemColor`'s own alpha an empty identifier
     /// draws at, or nil where no share holds both
@@ -69,7 +69,10 @@ extension KiwiShelf {
 
     /// `top` over an opaque `bottom`, mixed on the sRGB bytes the
     /// window server blends, as an opaque hex.
-    static func composite(_ top: String, over bottom: String) -> String? {
+    private static func composite(
+        _ top: String,
+        over bottom: String
+    ) -> String? {
         guard let over = DragVisual.parseHex(top),
             let under = DragVisual.parseHex(bottom)
         else { return nil }
@@ -83,7 +86,7 @@ extension KiwiShelf {
     }
 
     /// WCAG contrast ratio of two opaque colours, 1...21.
-    static func contrast(_ a: String, _ b: String) -> Double? {
+    private static func contrast(_ a: String, _ b: String) -> Double? {
         guard let x = luminance(a), let y = luminance(b) else {
             return nil
         }

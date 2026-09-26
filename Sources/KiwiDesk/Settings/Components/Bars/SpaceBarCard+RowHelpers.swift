@@ -39,6 +39,22 @@ extension SpaceBarCard {
         )
     }
 
+    /// The Other Spaces `?` (#1683): each segment's own label
+    /// interpolated, so the prose cannot drift from it (#818).
+    var inactiveContentHelp: String {
+        L(
+            "space_bar.inactive_content.help",
+            "What the Spaces not on screen show. %1$@ — their app "
+                + "glyphs. %2$@ — how many windows each holds. "
+                + "%3$@ — just each Space's number, name or icon; an "
+                + "empty one draws dimmer, except a color emoji "
+                + "icon, which cannot dim.",
+            L("space_bar.inactive_content.apps", "Apps"),
+            L("space_bar.inactive_content.count", "Window count"),
+            L("space_bar.inactive_content.identifier", "Minimal")
+        )
+    }
+
     /// Glyphs per Space stepper and live summary (#94). The
     /// anchor sits on the stepper alone: the row is two views,
     /// and an anchor on the pair would mount one id twice.

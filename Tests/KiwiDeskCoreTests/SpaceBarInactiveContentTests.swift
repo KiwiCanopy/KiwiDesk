@@ -88,13 +88,15 @@ struct SpaceBarInactiveContentTests {
     func countCollapsesTheOthers() throws {
         let built = items(seededCore(), .count)
         let other = try #require(built[SpaceID("2")])
-        #expect(other.collapse == .count)
+        #expect(other.collapse == .count(windows: 3))
         // The glyphs and their state badges go; the count is the
-        // `+n` badge's unit, windows.
+        // `+n` badge's unit, windows, and `overflow` keeps its
+        // one meaning.
         #expect(other.apps.isEmpty)
-        #expect(other.overflow == 3)
+        #expect(other.overflow == 0)
+        #expect(other.badgeCount == 3)
         let empty = try #require(built[SpaceID("3")])
-        #expect(empty.overflow == 0)
+        #expect(empty.badgeCount == 0)
         let shown = try #require(built[SpaceID("1")])
         #expect(shown.collapse == nil)
         #expect(shown.apps.map(\.name) == ["Notes"])
@@ -153,25 +155,28 @@ struct SpaceBarInactiveContentTests {
     func glideDecision() {
         let one = SpaceID("1")
         let two = SpaceID("2")
-        #expect(
-            SpaceBarOverlay.itemsGlide(content: .count, from: one, to: two)
-        )
-        #expect(
+        let glide = {
+            (
+                content: SpaceBarStyle.InactiveContent,
+                from: SpaceID?,
+                to: SpaceID?,
+                same: Bool
+            ) in
             SpaceBarOverlay.itemsGlide(
-                content: .identifier,
-                from: one,
-                to: two
+                content: content,
+                from: from,
+                to: to,
+                sameItems: same
             )
-        )
-        #expect(
-            !SpaceBarOverlay.itemsGlide(content: .apps, from: one, to: two)
-        )
-        #expect(
-            !SpaceBarOverlay.itemsGlide(content: .count, from: one, to: one)
-        )
+        }
+        #expect(glide(.count, one, two, true))
+        #expect(glide(.identifier, one, two, true))
+        #expect(!glide(.apps, one, two, true))
+        #expect(!glide(.count, one, one, true))
         // A first render appears rather than moving.
-        #expect(
-            !SpaceBarOverlay.itemsGlide(content: .count, from: nil, to: two)
-        )
+        #expect(!glide(.count, nil, two, true))
+        // Other items drawn: pooled views would slide between
+        // different Spaces' slots.
+        #expect(!glide(.identifier, one, two, false))
     }
 }

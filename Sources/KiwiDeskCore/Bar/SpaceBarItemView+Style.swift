@@ -51,10 +51,10 @@ extension SpaceBarItemView {
             badge.stringValue = "\(app.count)"
             applyBadge(badge, appFocused: app.focused)
         }
-        overflowBadge.isHidden = overflow < 1
+        overflowBadge.isHidden = badgeCount < 1
         // A collapsed count is the whole count, not "more".
         overflowBadge.stringValue =
-            collapse == .count ? "\(overflow)" : "+\(overflow)"
+            collapse == nil ? "+\(overflow)" : "\(badgeCount)"
         applyBadge(overflowBadge, appFocused: focusInOverflow)
         styleStateBadges()
     }

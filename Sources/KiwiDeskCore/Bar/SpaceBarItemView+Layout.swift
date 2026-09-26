@@ -90,7 +90,7 @@ extension SpaceBarItemView {
             )
             cursor += cell
         }
-        if overflow > 0 {
+        if badgeCount > 0 {
             if !appViews.isEmpty { cursor += glyphGap }
             layoutBadge(
                 overflowBadge,

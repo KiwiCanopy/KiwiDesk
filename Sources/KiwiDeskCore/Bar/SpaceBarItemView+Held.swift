@@ -61,7 +61,7 @@ extension SpaceBarItemView {
         guard let held else {
             return L(
                 "space_bar.item.ax.space",
-                "Space %1$@, %2$d applications",
+                "Space %1$@, windows: %2$d",
                 space.raw,
                 windows
             )
@@ -70,7 +70,7 @@ extension SpaceBarItemView {
             return L(
                 "space_bar.item.ax.held",
                 "Space %1$@, held from %2$@, not saved, "
-                    + "%3$d applications",
+                    + "windows: %3$d",
                 space.raw,
                 held.screenName,
                 windows
@@ -79,7 +79,7 @@ extension SpaceBarItemView {
         return L(
             "space_bar.item.ax.held_renumbered",
             "Space %1$@, held from %2$@, where it was Space %3$@, "
-                + "not saved, %4$d applications",
+                + "not saved, windows: %4$d",
             space.raw,
             held.screenName,
             origin.raw,

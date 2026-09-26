@@ -30,17 +30,6 @@ final class SpaceBarItemView: NSView {
         var stickyScope: StickyScope = .none
     }
 
-    /// How a collapsed Space item draws (#1683,
-    /// `SpaceBarOverlay.Item.collapsed(to:)`).
-    enum Collapse: Equatable {
-        /// The identifier and the window count, in the overflow
-        /// badge's cell.
-        case count
-        /// The identifier alone; `windows` is still announced,
-        /// and none draws it in `emptyItemColor`.
-        case identifier(windows: Int)
-    }
-
     let identifierImage = NSImageView()
     let identifierLabel: NSTextField = {
         let tf = NSTextField(labelWithString: "")
@@ -224,41 +213,6 @@ final class SpaceBarItemView: NSView {
         setAccessibilityElement(true)
         setAccessibilityRole(space == nil ? .image : .button)
         setAccessibilityLabel(axLabel)
-    }
-
-    /// Announced whatever the glyph draws (bars.md): a layer
-    /// item names its layer, a Space item its Space and count.
-    private var axLabel: String {
-        let space: SpaceID
-        switch identity {
-        case .layer(let layer):
-            return L(
-                "space_bar.item.ax.layer",
-                "Shortcut layer %1$@",
-                layer
-            )
-        case .space(let id):
-            space = id
-        }
-        let drawn = apps.reduce(0) { $0 + $1.count } + overflow
-        let count: Int
-        if case .identifier(let windows) = collapse {
-            count = windows
-        } else {
-            count = drawn
-        }
-        let name = spaceName(space, windows: count)
-        return isActive
-            ? L(
-                "space_bar.item.ax.current",
-                "%1$@, current",
-                name
-            )
-            : L(
-                "space_bar.item.ax.not_current",
-                "%1$@, not current",
-                name
-            )
     }
 
     private func syncAppViews() {

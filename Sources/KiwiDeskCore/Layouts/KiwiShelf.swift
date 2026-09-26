@@ -131,8 +131,8 @@ public struct KiwiShelf: Sendable, Equatable {
     public static let minimumRange: ClosedRange<CGFloat> = 20...80
     /// Alpha of `itemColor` on an idle Space identifier — a rule,
     /// not a colour (#1517): at it every bundled palette's idle
-    /// identifier holds 2.2:1 on its plate over white and black
-    /// wallpaper (`IdleItemContrastTests`).
+    /// identifier holds `idleInkFloor` on its plate over white and
+    /// black wallpaper (`IdleItemContrastTests`).
     public static let idleItemAlpha: CGFloat = 0.6
 
     /// The depth the shelf reserves off its edge — outer margin,
