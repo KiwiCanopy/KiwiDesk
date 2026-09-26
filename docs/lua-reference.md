@@ -2986,7 +2986,7 @@ way the `resize` command does, applied when you release: neighbors
 give or take the difference. What changes depends on the layout —
 Master/Stack maps a drag along the split to the master ratio, BSP
 steers its split ratio toward the dragged side, Scrolling adjusts
-the column width. Axes a layout has no parameter for (grid,
+the slot size. Axes a layout has no parameter for (grid,
 monocle, and a master zone lined up along the split — see
 [Accepted limitations](accepted-limitations.md)) animate back into
 place. Floating windows resize freely.
@@ -2999,6 +2999,12 @@ as `resize` does.
 Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and
 snaps back.
+
+:::unreleased
+Scrolling is the exception: one slot size serves the whole row,
+so any edge of a column resizes it, including the outer edge of
+the first or last column.
+:::
 
 The layout follows the size the window actually reached when you
 release. If you flick faster than a slow app resizes its window

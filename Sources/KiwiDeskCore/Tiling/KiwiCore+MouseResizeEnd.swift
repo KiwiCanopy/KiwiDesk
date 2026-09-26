@@ -93,9 +93,9 @@ extension KiwiCore {
             stackSplitHorizontal: stack.stackPosition
                 .splitsHorizontally,
             trackAxisVertical: track.axis == .vertical,
-            scrollVertical: tiler.settings
+            scrollVertical: !tiler.settings
                 .resolvedScrolling(for: space.id)
-                .orientation == .vertical,
+                .axisIsHorizontal,
             slot: slot,
             frame: frame,
             bounds: bounds

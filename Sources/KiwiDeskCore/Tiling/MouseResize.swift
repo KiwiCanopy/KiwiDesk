@@ -36,7 +36,23 @@ public enum MouseResize {
             || abs(frame.height - slot.height) > threshold
     }
 
-    /// Drops size changes from dragging an outer edge lacking neighbors.
+    /// Whether a drop in `mode` trades size with a neighbour, so
+    /// an outer edge (nobody to trade with) must snap back.
+    /// Scrolling trades with nobody: one slot length serves the
+    /// row, so any edge resizes it. Exhaustive on purpose — a new
+    /// mode decides here, beside its `translate` case.
+    public static func tradesWithNeighbors(
+        _ mode: LayoutMode
+    ) -> Bool {
+        switch mode {
+        case .bsp, .stack, .track: return true
+        case .scrolling: return false
+        case .monocle, .grid, .floating: return true
+        }
+    }
+
+    /// Drops size changes from dragging an outer edge lacking
+    /// neighbors — for modes that `tradesWithNeighbors` only.
     public static func keepingInnerEdgeChanges(
         slot: CGRect,
         frame: CGRect,

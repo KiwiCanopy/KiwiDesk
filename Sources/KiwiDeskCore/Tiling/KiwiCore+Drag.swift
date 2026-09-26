@@ -168,12 +168,10 @@ extension KiwiCore {
             // Only edges shared with a neighbor trade space;
             // pulling an outer (screen-side) edge snaps back
             // instead of growing windows on the far side.
-            // Scrolling trades with nobody — one slot length
-            // serves the row — so any edge resizes it.
             // All deltas are measured from the start frame
             // (where the window really was), not the slot.
             let effective =
-                space.mode == .scrolling
+                !MouseResize.tradesWithNeighbors(space.mode)
                 ? frame
                 : MouseResize.keepingInnerEdgeChanges(
                     slot: start,

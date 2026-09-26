@@ -5,18 +5,22 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A mouse resize of a scrolling row's END column, dropped
-/// through the real `handleDragEnd`.
+/// through the real `handleDragEnd`: one slot length serves the
+/// row, so no edge trades with a neighbour and either edge of
+/// any column resizes it (`MouseResize.tradesWithNeighbors`).
+/// The bsp case is the control that the outer-edge filter still
+/// binds where a neighbour trade exists. The display is pinned
+/// (#531).
 ///
-/// The scrolling store is one slot length the whole row shares,
-/// so no edge trades space with a neighbour and either edge of
-/// any column resizes it. The outer-edge filter the split
-/// layouts need dropped the last column's trailing edge (and the
-/// first's leading one) and snapped it back — reachable under
-/// the `center` anchor, which rests the last column mid-screen
-/// (device, 2026-09-26). The bsp case is the control that the
-/// filter still binds where a neighbour trade exists. The
-/// display is pinned (#531).
-@Suite("Scrolling end-column edge drops", .serialized)
+/// Requires a screen, as a trait: `handleResizeEnd` writes
+/// nothing when no screen resolves, so headless the two cases
+/// asserting "nothing written" would pass without testing
+/// anything. A SKIP says that; a green would not.
+@Suite(
+    "Scrolling end-column edge drops",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct ScrollingEdgeDropTests {
     private func makeCore(
