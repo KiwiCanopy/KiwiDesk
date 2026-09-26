@@ -91,9 +91,11 @@ extension KiwiShelf {
                 forKey: .highlightWidth
             ) ?? d.highlightWidth
         )
-        itemGap =
+        itemGap = max(
+            Self.minItemGap,
             try c.decodeIfPresent(CGFloat.self, forKey: .itemGap)
-            ?? d.itemGap
+                ?? d.itemGap
+        )
         fontSize =
             try c.decodeIfPresent(CGFloat.self, forKey: .fontSize)
             ?? d.fontSize

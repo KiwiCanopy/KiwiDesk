@@ -150,7 +150,8 @@ enum KiwiShelfCommandSetting {
         case .cornerRoundness(let value): shelf.cornerRoundness = value
         case .highlightWidth(let value):
             shelf.highlightWidth = KiwiShelf.clampHighlightWidth(value)
-        case .itemGap(let value): shelf.itemGap = value
+        case .itemGap(let value):
+            shelf.itemGap = max(KiwiShelf.minItemGap, value)
         case .fontSize(let value): shelf.fontSize = value
         case .iconSource(let value): shelf.iconSource = value
         case .dimFactor(let value):

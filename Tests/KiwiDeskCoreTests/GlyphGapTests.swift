@@ -19,7 +19,7 @@ struct GlyphGapTests {
         "Decode floors at 0 and sets no ceiling",
         arguments: [(-4.0, 0.0), (40.0, 40.0), (90.0, 90.0), (5.0, 5.0)]
     )
-    func decodeClamps(stored: Double, drawn: Double) throws {
+    func decodeFloors(stored: Double, drawn: Double) throws {
         let json = #"{"glyph_gap": \#(stored)}"#
         let style = try JSONDecoder().decode(
             SpaceBarStyle.self,
@@ -32,7 +32,7 @@ struct GlyphGapTests {
         "The setter floors at 0 and sets no ceiling",
         arguments: [(-4.0, 0.0), (40.0, 40.0), (90.0, 90.0), (5.0, 5.0)]
     )
-    func setterClamps(value: Double, stored: Double) throws {
+    func setterFloors(value: Double, stored: Double) throws {
         let setting = try SpaceBarCommandSetting.parse(
             field: "glyph_gap",
             args: [.number(value)]
