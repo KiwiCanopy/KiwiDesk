@@ -628,8 +628,8 @@ KiwiDesk.set_swap_skips_cascade(true)
 floating. `"center"`: it is centered in the area of its screen
 clear of the menu bar and any App/Space Bar, at a size measured
 from that area: two thirds of the short side, and along the long
-side a third, at least 600 pt but never more than 1.25 times the
-short-side span (so under 600 pt on a short screen). A landscape
+side a third, at least 800 pt but never more than 1.25 times the
+short-side span (so under 800 pt on a short screen). A landscape
 screen gets a tall window; a portrait one gets a wide one. An app
 that will not go that small, or that large, keeps its own limit.
 `"keep"`: the window keeps the frame it had in the layout. Never fires on `make_tiled`,

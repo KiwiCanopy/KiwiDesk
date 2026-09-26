@@ -14,12 +14,22 @@ struct FloatPlacementTests {
 
     @Test("A landscape region: two thirds tall, a floored third wide")
     func landscapeLaptop() {
+        // A 14" MacBook's float region.
+        let region = CGRect(x: 0, y: 30, width: 1718, height: 1035)
+        let frame = FloatPlacement.centered(in: region)
+        #expect(frame.height == 690)
+        // 1718 / 3 is under the floor, and the cap is above it.
+        #expect(frame.width == FloatPlacement.longFloor)
+        #expect(isCentered(frame, in: region))
+    }
+
+    @Test("A short region's cap outranks the floor")
+    func capOutranksFloor() {
         let region = CGRect(x: 0, y: 30, width: 1440, height: 870)
         let frame = FloatPlacement.centered(in: region)
         #expect(frame.height == 580)
-        // 1440 / 3 = 480 is under the floor.
-        #expect(frame.width == FloatPlacement.longFloor)
-        #expect(isCentered(frame, in: region))
+        #expect(frame.width == 580 * FloatPlacement.longCap)
+        #expect(frame.width < FloatPlacement.longFloor)
     }
 
     @Test("A wide region's long axis is capped, not a third")
