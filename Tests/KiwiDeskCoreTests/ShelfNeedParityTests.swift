@@ -37,10 +37,12 @@ struct ShelfNeedParityTests {
             glyph: .text("L", tinted: false)
         )
         // Glyphs and a glyph gap, so a length input the two halves
-        // read apart would show (#1689).
+        // read apart would show (#1689). Three Spaces of two glyphs
+        // make 3 × 8 of gap, past the check's own slack (pad plus
+        // the larger of gap and pad) at every placement.
         var look = SpaceBarLook()
         look.itemGap = gap
-        look.glyphGap = 3
+        look.glyphGap = 8
         let apps = ["A", "B"].map {
             SpaceBarItemView.App(
                 name: $0,
