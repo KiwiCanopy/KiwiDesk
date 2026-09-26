@@ -125,12 +125,15 @@ struct StashSupersedesAskTests {
         engine.boundLearner.recordAsk(window.id, size: Self.asked)
         let seeded = CGRect(origin: .zero, size: Self.parked)
         if animated {
+            // Truly animated: this path never reaches `setFrame`,
+            // so `applyFrame`'s own retire is what it measures.
             engine.applyFrame(
                 window.id,
                 from: window.frame,
                 to: seeded,
-                animated: false
+                animated: true
             )
+            engine.animation.cancel(window: window.id)
         } else {
             engine.setFrame(window.id, seeded)
         }
@@ -231,5 +234,48 @@ struct StashSupersedesAskTests {
         // Parked, the probe is re-sent; a plain retire (the
         // control) leaves it issued and unanswered, so nothing is.
         #expect((again != nil) == parks)
+    }
+
+    /// The engine wiring of the probe hand-back: `stash` must take
+    /// the probe-aware door, not the plain retire.
+    @Test("A park through the engine re-sends the in-flight probe")
+    func stashUnissuesProbe() throws {
+        let engine = TilingEngine()
+        let w = WindowID(7)
+        let held = CGSize(width: 720, height: 800)
+        let ask = CGSize(width: 500, height: 800)
+        engine.boundLearner.recordAsk(w, size: ask, settledFrom: held)
+        engine.boundLearner.observe(
+            w,
+            currentSize: held,
+            settledRead: true
+        )
+        let taken = engine.boundLearner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: ask
+        )
+        let first = try #require(taken)
+        engine.boundLearner.recordAsk(w, size: first.size)
+        let window = ManagedWindow(
+            id: w,
+            pid: 100,
+            appName: "App",
+            title: "Doc",
+            frame: CGRect(origin: CGPoint(x: 200, y: 200), size: held)
+        )
+        engine.stash(
+            window,
+            in: Self.bounds,
+            corner: .bottomLeft,
+            force: true,
+            capturesOriginal: false
+        )
+        let again = engine.boundLearner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: ask
+        )
+        #expect(again != nil)
     }
 }
