@@ -2380,6 +2380,24 @@ limits glyphs per Space only, not how many Spaces the bar shows.
 space_bar.set_glyph_cap(8)
 ```
 
+### space_bar.set_glyph_gap
+
+:::unreleased
+**Expects:** points, 0–24 (default `0`); values outside the range
+are clamped.
+
+**Does:** sets the room between app glyphs inside a Space item,
+and before its `+n` badge. `0` sets them side by side. The gap
+between Space items themselves is the shelf's
+[`item_gap`](#kiwishelfset_item_gap).
+
+**Example:**
+
+```lua
+space_bar.set_glyph_gap(4)
+```
+:::
+
 ### space_bar.set_active_indicator
 
 **Expects:** `"outline"` or `"edge_mark"` (default

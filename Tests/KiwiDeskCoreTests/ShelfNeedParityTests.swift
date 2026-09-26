@@ -51,12 +51,14 @@ struct ShelfNeedParityTests {
         let need = SpaceBarOverlay.naturalLength(
             items: items,
             depth: depth,
-            gap: gap
+            gap: gap,
+            glyphGap: 0
         )
         let lengths = SpaceBarOverlay.itemLengths(
             items,
             depth: depth,
-            gap: gap
+            gap: gap,
+            glyphGap: 0
         )
         let total = SpaceBarOverlay.runTotal(
             lengths: lengths,
@@ -184,7 +186,8 @@ struct ShelfFloorWiringTests {
             activeExtent: SpaceBarOverlay.activeExtent(
                 items: spaces,
                 depth: depth,
-                gap: settings.kiwishelf.itemGap
+                gap: settings.kiwishelf.itemGap,
+                glyphGap: settings.spaceBarStyle.resolvedGlyphGap
             ),
             thickness: depth,
             gap: settings.kiwishelf.itemGap

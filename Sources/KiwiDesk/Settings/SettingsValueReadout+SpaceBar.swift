@@ -41,6 +41,8 @@ extension SettingsValueReadout {
                 trimmed(Double(o.glyphCap)),
                 trimmed(Double(n.glyphCap))
             )
+        case .spaceBarGlyphGap:
+            return spaceBarPointsRow(census, o.glyphGap, n.glyphGap)
         case .spaceBarFrontAppTitleCap:
             return spaceBarRow(
                 census,

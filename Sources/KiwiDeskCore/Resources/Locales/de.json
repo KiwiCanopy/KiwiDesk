@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "Glyphen pro Space",
   "space_bar.glyph_cap.help": "Wie viele App-Glyphen ein Space anzeigt, bevor der Rest zu einem +n Badge zusammengefasst wird. Benachbarte Fenster derselben App zählen als eine Glyphe.",
   "space_bar.glyph_cap.summary": "Bis zu %1$d App-Gruppen pro Space; mehr werden zu einem +n Badge zusammengefasst.",
+  "space_bar.glyph_gap": "Glyphenabstand",
+  "space_bar.glyph_gap.help": "Abstand zwischen den App-Glyphen innerhalb eines Space; 0 setzt sie direkt nebeneinander.",
   "space_bar.hide_empty": "Leere Spaces ausblenden",
   "space_bar.hide_empty.help": "Spaces ohne Fenster werden in der Leiste ausgeblendet, außer der Space, auf dem du dich befindest. Verwende ein Tastenkürzel, um zu einem ausgeblendeten Space zu springen.",
   "space_bar.item.ax.current": "%1$@, aktuell",

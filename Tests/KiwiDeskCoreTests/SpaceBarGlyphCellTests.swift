@@ -78,7 +78,8 @@ struct SpaceBarGlyphCellTests {
         ]
         let length = SpaceBarItemView.autoLength(
             appCount: apps.count,
-            depth: depth
+            depth: depth,
+            glyphGap: 0
         )
         let view = SpaceBarItemView(
             frame: horizontal

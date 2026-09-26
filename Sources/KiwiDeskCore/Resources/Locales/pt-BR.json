@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "Símbolos por espaço",
   "space_bar.glyph_cap.help": "Quantos símbolos de app um espaço mostra antes que os demais sejam reunidos em um selo +n. Janelas vizinhas do mesmo app contam como um único símbolo.",
   "space_bar.glyph_cap.summary": "Até %1$d grupos de apps por espaço; os demais são reunidos em um selo +n.",
+  "space_bar.glyph_gap": "Espaçamento entre símbolos",
+  "space_bar.glyph_gap.help": "Distância entre os símbolos de app dentro de um espaço; 0 os coloca lado a lado.",
   "space_bar.hide_empty": "Ocultar espaços vazios",
   "space_bar.hide_empty.help": "Os espaços sem janelas ficam ocultos na barra, exceto o espaço em que você está. Use um atalho para ir até um espaço oculto.",
   "space_bar.item.ax.current": "%1$@, posição atual",

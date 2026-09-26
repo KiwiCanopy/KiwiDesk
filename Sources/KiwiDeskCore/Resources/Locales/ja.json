@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "スペースごとのグリフ上限",
   "space_bar.glyph_cap.help": "1つのスペースに表示するアプリグリフの数です。これを超えた分は +n バッジにまとまります。同じアプリの隣接ウインドウは1つのグリフとして数えます。",
   "space_bar.glyph_cap.summary": "1つのスペースにつきアプリグループは最大%1$d個。これを超えた分は +n バッジにまとまります。",
+  "space_bar.glyph_gap": "グリフ間のギャップ",
+  "space_bar.glyph_gap.help": "スペース内のアプリグリフどうしの間隔です。0 にすると隣り合わせに並びます。",
   "space_bar.hide_empty": "空のスペースを非表示",
   "space_bar.hide_empty.help": "ウインドウのないスペースをバーから隠します。ただし現在いるスペースは表示されたままです。隠れているスペースへはショートカットで移動できます。",
   "space_bar.item.ax.current": "%1$@、現在地",

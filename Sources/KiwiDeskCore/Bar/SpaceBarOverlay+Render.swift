@@ -15,7 +15,12 @@ extension SpaceBarOverlay {
         let axis = horizontal ? strip.width : strip.height
         let gap = style.itemGap
         let leadsWithLayer = Self.leadsWithLayer(items)
-        let lengths = Self.itemLengths(items, depth: depth, gap: gap)
+        let lengths = Self.itemLengths(
+            items,
+            depth: depth,
+            gap: gap,
+            glyphGap: style.resolvedGlyphGap
+        )
         let front = frontExtent(
             frontApp,
             depth: depth,

@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "每個空間的符號數",
   "space_bar.glyph_cap.help": "一個空間會顯示多少個 App 符號，之後其餘的便收合成 +n 徽章。同一個 App 的相鄰視窗算作一個符號。",
   "space_bar.glyph_cap.summary": "每個空間最多 %1$d 個 App 群組；更多則收合成 +n 徽章。",
+  "space_bar.glyph_gap": "符號間距",
+  "space_bar.glyph_gap.help": "空間內 App 符號之間的距離；設為 0 時緊鄰排列。",
   "space_bar.hide_empty": "隱藏空的空間",
   "space_bar.hide_empty.help": "沒有視窗的空間會從列中隱藏，但你目前所在的空間除外。請用快速鍵跳到隱藏的空間。",
   "space_bar.item.ax.current": "%1$@，目前",

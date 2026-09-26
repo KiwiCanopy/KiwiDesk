@@ -8,6 +8,7 @@ extension SpaceBarStyle {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case glyphCap = "glyph_cap"
+        case glyphGap = "glyph_gap"
         case frontAppTitleCap = "front_app_title_cap"
         case activeIndicator = "active_indicator"
         case activeDimFactor = "active_dim_factor"
@@ -34,6 +35,12 @@ extension SpaceBarStyle {
                 Int.self,
                 forKey: .glyphCap
             ) ?? defaults.glyphCap
+        glyphGap = Self.clampGlyphGap(
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .glyphGap
+            ) ?? defaults.glyphGap
+        )
         frontAppTitleCap =
             try container.decodeIfPresent(
                 Int.self,

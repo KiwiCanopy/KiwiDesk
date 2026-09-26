@@ -63,6 +63,17 @@ extension SpaceBarCard {
             )
         case .spaceBarGlyphCap:
             glyphCapRow
+        case .spaceBarGlyphGap:
+            PtSlider(
+                label: L("space_bar.glyph_gap", "Glyph gap"),
+                value: style.glyphGap,
+                range: BarSliderBands.glyphGap,
+                help: L(
+                    "space_bar.glyph_gap.help",
+                    "Room between the app glyphs inside a Space; 0 "
+                        + "sets them side by side."
+                )
+            )
         case .spaceBarFrontAppTitleCap:
             titleCapRow
         case .spaceBarSpringDelay:

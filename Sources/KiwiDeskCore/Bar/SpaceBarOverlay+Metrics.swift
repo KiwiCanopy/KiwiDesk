@@ -22,14 +22,16 @@ extension SpaceBarOverlay {
     static func itemLengths(
         _ items: [Item],
         depth: CGFloat,
-        gap: CGFloat
+        gap: CGFloat,
+        glyphGap: CGFloat
     ) -> [CGFloat] {
         let leadsWithLayer = leadsWithLayer(items)
         return items.enumerated().map { index, item in
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
                 overflow: item.overflow,
-                depth: depth
+                depth: depth,
+                glyphGap: glyphGap
             )
             return index == 0 && leadsWithLayer
                 ? length + layerDividerExtent(gap: gap)
@@ -47,9 +49,15 @@ extension SpaceBarOverlay {
     static func naturalLength(
         items: [Item],
         depth: CGFloat,
-        gap: CGFloat
+        gap: CGFloat,
+        glyphGap: CGFloat
     ) -> CGFloat {
-        let lengths = itemLengths(items, depth: depth, gap: gap)
+        let lengths = itemLengths(
+            items,
+            depth: depth,
+            gap: gap,
+            glyphGap: glyphGap
+        )
         return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
             + SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
     }
@@ -60,9 +68,15 @@ extension SpaceBarOverlay {
     static func activeExtent(
         items: [Item],
         depth: CGFloat,
-        gap: CGFloat
+        gap: CGFloat,
+        glyphGap: CGFloat
     ) -> CGFloat {
-        let lengths = itemLengths(items, depth: depth, gap: gap)
+        let lengths = itemLengths(
+            items,
+            depth: depth,
+            gap: gap,
+            glyphGap: glyphGap
+        )
         if let index = items.firstIndex(where: \.active) {
             return lengths[index]
         }

@@ -205,11 +205,13 @@ extension KiwiCore {
         let horizontal = shelf.edge.isHorizontal
         let length = horizontal ? strip.width : strip.height
         let depth = horizontal ? strip.height : strip.width
+        let glyphGap = settings.spaceBarStyle.resolvedGlyphGap
         let spaceNeed = spaceItems.map {
             SpaceBarOverlay.naturalLength(
                 items: $0,
                 depth: depth,
-                gap: shelf.itemGap
+                gap: shelf.itemGap,
+                glyphGap: glyphGap
             )
         }
         let spaceFloor =
@@ -218,7 +220,8 @@ extension KiwiCore {
                     activeExtent: SpaceBarOverlay.activeExtent(
                         items: $0,
                         depth: depth,
-                        gap: shelf.itemGap
+                        gap: shelf.itemGap,
+                        glyphGap: glyphGap
                     ),
                     thickness: depth,
                     gap: shelf.itemGap

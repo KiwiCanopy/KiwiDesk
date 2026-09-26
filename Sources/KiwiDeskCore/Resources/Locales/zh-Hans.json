@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "每个空间符号上限",
   "space_bar.glyph_cap.help": "一个空间最多显示多少个 App 符号，其余的会收拢为一个 +n 徽标。同一个 App 的相邻窗口算作一个符号。",
   "space_bar.glyph_cap.summary": "每个空间最多 %1$d 个 App 分组；其余的会收拢为一个 +n 徽标。",
+  "space_bar.glyph_gap": "符号间距",
+  "space_bar.glyph_gap.help": "空间内 App 符号之间的距离；设为 0 时紧挨着排列。",
   "space_bar.hide_empty": "隐藏空空间",
   "space_bar.hide_empty.help": "没有窗口的空间会从栏中隐藏，但你当前所在的空间除外。请用快捷键跳转到已隐藏的空间。",
   "space_bar.item.ax.current": "%1$@，当前",

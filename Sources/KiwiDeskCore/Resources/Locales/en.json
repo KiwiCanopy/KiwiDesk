@@ -1288,6 +1288,8 @@
   "space_bar.glyph_cap": "Glyphs per Space",
   "space_bar.glyph_cap.help": "How many app glyphs a Space shows before the rest collapse into a +n badge. Adjacent windows of the same app count as one glyph.",
   "space_bar.glyph_cap.summary": "Up to %1$d app groups per Space; more collapse into a +n badge.",
+  "space_bar.glyph_gap": "Glyph gap",
+  "space_bar.glyph_gap.help": "Room between the app glyphs inside a Space; 0 sets them side by side.",
   "space_bar.hide_empty": "Hide empty Spaces",
   "space_bar.hide_empty.help": "Spaces with no windows are hidden from the bar, except the Space you're currently on. Use a shortcut to jump to a hidden Space.",
   "space_bar.item.ax.current": "%1$@, current",

@@ -15,6 +15,19 @@ extension SpaceBarStyle {
     /// would break the bar's uniform model.
     public static let glyphCapRange = 1...12
 
+    /// Bounds of `glyphGap` in pt (#1689).
+    public static let glyphGapRange: ClosedRange<CGFloat> = 0...24
+
+    /// `glyphGap` clamped to `glyphGapRange`.
+    public static func clampGlyphGap(_ gap: CGFloat) -> CGFloat {
+        min(max(gap, glyphGapRange.lowerBound), glyphGapRange.upperBound)
+    }
+
+    /// The glyph gap every Space item's layout and length read.
+    public var resolvedGlyphGap: CGFloat {
+        Self.clampGlyphGap(glyphGap)
+    }
+
     /// Clamped glyph cap value (`glyphCapRange`).
     public var resolvedGlyphCap: Int {
         min(
