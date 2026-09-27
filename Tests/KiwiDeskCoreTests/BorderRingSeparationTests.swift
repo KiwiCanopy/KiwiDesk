@@ -74,7 +74,7 @@ struct BorderRingSeparationTests {
     /// (`aGreyLiftedInAlphaAloneIsNoRing`) — so the weakest shipped
     /// ring, Clean Light at 2.64:1 on white, keeps a step of
     /// headroom to move without billing a prover run.
-    private static let ownContrastFloor = 2.2
+    static let ownContrastFloor = 2.2
 
     /// The palette's home backdrop, DERIVED from its own fill the
     /// way design-decisions says the base is set (`fill_color`

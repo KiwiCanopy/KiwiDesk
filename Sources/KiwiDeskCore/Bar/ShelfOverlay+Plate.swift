@@ -14,13 +14,20 @@ extension ShelfOverlay {
             hidePlates()
             return
         }
+        BarMotion.setFrame(plateBorder, to: frame, animated: animated)
+        ShelfBorder.paint(
+            plateBorder,
+            shelf: shelf,
+            surface: .plate,
+            cornerRadius: radius
+        )
         if shelf.glassEnabled, let glass = glassPlateView() {
             solidPlateView().isHidden = true
             if glass.superview !== content {
                 content.addSubview(
                     glass,
                     positioned: .below,
-                    relativeTo: stripView
+                    relativeTo: plateBorder
                 )
             }
             glass.isHidden = false
@@ -49,7 +56,7 @@ extension ShelfOverlay {
             content.addSubview(
                 plate,
                 positioned: .below,
-                relativeTo: stripView
+                relativeTo: plateBorder
             )
         }
         plate.isHidden = false
@@ -131,5 +138,6 @@ extension ShelfOverlay {
         solidPlate?.isHidden = true
         glassPlate?.isHidden = true
         glassTint?.isHidden = true
+        plateBorder.isHidden = true
     }
 }

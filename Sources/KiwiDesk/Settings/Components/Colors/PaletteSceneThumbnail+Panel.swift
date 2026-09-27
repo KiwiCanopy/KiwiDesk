@@ -108,12 +108,20 @@ extension PaletteSceneThumbnail {
         }
     }
 
+    /// A bar plate, rimmed in the palette's border colour while
+    /// the draft's border is on (#1679).
     private func barPlate<C: View>(
         fill: Color,
         @ViewBuilder items: () -> C
     ) -> some View {
         RoundedRectangle(cornerRadius: 4 * scale)
             .fill(fill)
+            .overlay {
+                if let borderRim {
+                    RoundedRectangle(cornerRadius: 4 * scale)
+                        .strokeBorder(borderRim, lineWidth: scale)
+                }
+            }
             .frame(height: 20 * scale)
             .overlay(
                 HStack(spacing: 5 * scale) {

@@ -46,6 +46,9 @@ final class SpaceBarItemView: NSView {
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = NSView()
+    /// The box's border under Boxed (#1679): the bottom subview,
+    /// so the active outline strokes over it.
+    let boxBorder = ShelfBorder.make()
     /// Active mark corner clip (owner 2026-07-20).
     let accentClip = AppBarOverlay.FlippedView()
     var isFirstInRun = false
@@ -82,6 +85,8 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
+        boxBorder.autoresizingMask = [.width, .height]
+        addSubview(boxBorder)
         addSubview(identifierImage)
         addSubview(identifierLabel)
         addSubview(identifierDivider)

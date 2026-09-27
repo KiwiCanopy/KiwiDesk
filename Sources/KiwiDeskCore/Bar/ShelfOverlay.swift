@@ -24,6 +24,9 @@ final class ShelfOverlay {
     var solidPlate: NSView?
     var glassPlate: NSView?
     var glassTint: GlassBackdrop?
+    /// The plate's border (#1679), above whichever plate draws
+    /// and below the strip; hidden with the plates.
+    let plateBorder = ShelfBorder.make()
     /// The glass shows through behind the sections rather than
     /// hosting them, so nothing is ever reparented into it.
     let glassFiller = NSView()
@@ -261,6 +264,11 @@ final class ShelfOverlay {
         panel.contentView = content
         stripView.wantsLayer = true
         content.addSubview(stripView)
+        content.addSubview(
+            plateBorder,
+            positioned: .below,
+            relativeTo: stripView
+        )
         divider.wantsLayer = true
         divider.isHidden = true
         stripView.addSubview(divider)

@@ -17,6 +17,17 @@ struct PaletteSceneThumbnail: View {
     /// Which roles this drawing shows (#793, `PaletteSceneRoles`).
     var scene: PaletteSceneScale = .tile
 
+    /// Whether the draft draws the shelf's border (#1679): the
+    /// panel rims its bar plates only then, as the live shelf does.
+    /// No default, so a call site cannot drop the draft's switch.
+    let drawsBorder: Bool
+
+    /// The panel's bar-plate rim: the palette's border colour
+    /// while the draft draws a border, else none.
+    var borderRim: Color? {
+        drawsBorder ? color("kiwishelf.border_color") : nil
+    }
+
     private static let fallback = ColorPaletteKeys.extract(
         from: TilingSettings()
     )

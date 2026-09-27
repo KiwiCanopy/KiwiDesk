@@ -25,6 +25,15 @@ enum BarSliderBands {
             KiwiShelf.highlightWidthRange.upperBound
         )
 
+    /// The shelf's Border width row (#1679): both edges are
+    /// Core's, which clamps the stored value to them.
+    static let borderWidth: ClosedRange<Double> =
+        Double(
+            KiwiShelf.borderWidthRange.lowerBound
+        )...Double(
+            KiwiShelf.borderWidthRange.upperBound
+        )
+
     /// The curated top of both gap rows, one number so the two
     /// sliders beside each other stop alike (#1695).
     static let gapCeiling: Double = 40

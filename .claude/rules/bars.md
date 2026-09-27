@@ -591,3 +591,42 @@ mark the current Space or focused window reads it.
   than a literal is review's — no clause renders it. A new
   indicator surface owes one of those suites a clause, since
   neither reads a list of sites.
+
+## The shelf's border is painted in one place
+
+`kiwishelf.border` (#1679) rims the plate under Plain, and each
+box — both bars' items and the Space Bar's front-app chip — under
+Boxed.
+
+- **Every rim goes through `ShelfBorder.paint`**, handed the
+  SURFACE it rims (`.plate` or `.box`) and never a verdict: which
+  surface the shelf rims is `ShelfBorder.rims`, from
+  `KiwiShelf.drawsPlate`. It reads `KiwiShelf.drawnBorderWidth`
+  (0 while the switch is off, the clamped width otherwise) and
+  `borderColor`, never the stored width. The rim is its own
+  fill-less, click-through view framed to the surface, so it
+  strokes on the edge, never inset: above the plate or the
+  chip's glass, and beneath an item's active outline, which
+  strokes over it. `ShelfBorderSeamTests` holds the one home:
+  only the painter reads the drawn width in Core, and in `Bar/`
+  the only layer-border colour written beside it is the active
+  indicator's. `ShelfBorderDrawingTests` builds the plate (solid,
+  glass, under Reduce transparency), both bars' boxes and the
+  chip and holds the stroke, its place in the order, and its
+  absence while off; a new rimmed surface owes that suite a
+  clause.
+- **A preview of the shelf draws the draft's border**: the
+  Settings Bars preview through `PreviewPlateEdge` on every
+  plate and box, from its `BarSpec` (`ShelfBorderPreviewTests` ▸
+  `edgeStrokesTheBorder` and `ShelfBorderPreviewTests` ▸
+  `stripsTakeTheEdge`), and the palette scene only while the
+  draft's switch is on — `drawsBorder` has no default, and every
+  scene hands it the draft's switch (`ShelfBorderPreviewTests` ▸
+  `sceneRimFollowsTheSwitch` and `ShelfBorderPreviewTests` ▸
+  `scenesReadTheSwitch`).
+- **Every bundled palette carries `kiwishelf.border_color`**,
+  measured as drawn — composited over the plate over the
+  palette's HOME wallpaper, the extreme its plate contrasts least
+  with — against that wallpaper, at the idle floor
+  (`ShelfBorderContrastTests`). The switch and the width are not
+  palette keys (#375).

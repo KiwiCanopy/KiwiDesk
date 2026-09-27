@@ -46,6 +46,18 @@ struct AdvancedColorsGates {
             ? nil : reasons.joined(separator: "\n")
     }
 
+    // MARK: - KiwiShelf
+
+    /// The shelf draws no border, so its colour is inert (#1679).
+    var shelfBorderOff: Bool { !settings.kiwishelf.border }
+
+    /// Whether the border row draws its remote reason as a link
+    /// beneath the grid (#1310): only while a bar shows — with
+    /// none, the header carries the outer reason.
+    var shelfBorderNeedsReference: Bool {
+        bars.containerReason(for: .kiwishelf) == nil && shelfBorderOff
+    }
+
     // MARK: - Space Bar
 
     /// In-chip glyphs are native images and no front-app name renders
@@ -154,6 +166,32 @@ enum AdvancedColorsHelp {
             L("kiwishelf.icon_source.label", "App glyph style"),
             L("app_bar.icon_source.app_image", "App icons"),
             L("app_bar.icon_source.app_font", "Symbols"),
+            CrossReferenceRow.linkSlot
+        )
+    }
+
+    /// The border row's hover reason (#1679): the switch by its
+    /// own key, on the page that holds it (#818).
+    static var shelfBorderOff: String {
+        L(
+            "colors.kiwishelf_border_off.help",
+            "The border is off, so its color isn't drawn. Turn on "
+                + "\u{201C}%1$@\u{201D} in %2$@.",
+            L("kiwishelf.border", "Border"),
+            SettingsDestination.bars.title
+        )
+    }
+
+    /// The border row's remote gate, as the sentence a
+    /// `CrossReferenceRow` links to Bars (#1310): the switch by
+    /// its own key (#818); `%2$@` is the link slot.
+    static var shelfBorderReference: String {
+        L(
+            "colors.kiwishelf_border_off.xref",
+            "The border color isn't drawn while "
+                + "\u{201C}%1$@\u{201D} is off — turn it on in "
+                + "%2$@.",
+            L("kiwishelf.border", "Border"),
             CrossReferenceRow.linkSlot
         )
     }

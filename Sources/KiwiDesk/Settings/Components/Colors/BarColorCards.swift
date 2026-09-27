@@ -47,6 +47,13 @@ struct KiwiShelfColorCard: View {
                 // One greyed ROW in a live card takes its reason
                 // beneath it as a live link, outside the dimmed
                 // subtree — a header `?` scopes the card (#1310).
+                if gates.shelfBorderNeedsReference {
+                    CrossReferenceRow(
+                        prose: AdvancedColorsHelp.shelfBorderReference,
+                        linkTitle: SettingsDestination.bars.title,
+                        destination: .bars
+                    )
+                }
                 if gates.focusedItemNeedsReference {
                     CrossReferenceRow(
                         prose: AdvancedColorsHelp.focusedItemReference,
@@ -61,7 +68,7 @@ struct KiwiShelfColorCard: View {
     private var summary: String {
         L(
             "colors.more.kiwishelf.summary",
-            "Hover, badges, focused window"
+            "Border, hover, badges, focused window"
         )
     }
 }

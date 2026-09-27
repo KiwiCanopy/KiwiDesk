@@ -17,7 +17,6 @@ struct ShelfStripPreview: View {
     let edge: AppBarEdge
     let vertical: Bool
     let scale: CGFloat
-    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         GeometryReader { geometry in
@@ -155,13 +154,7 @@ struct ShelfStripPreview: View {
         {
             RoundedRectangle(cornerRadius: spec.corner)
                 .fill(Color(kiwiHex: spec.fill))
-                .overlay(
-                    RoundedRectangle(cornerRadius: spec.corner)
-                        .strokeBorder(
-                            palette?.frame
-                                ?? SettingsTheme.plateInk.opacity(0.3)
-                        )
-                )
+                .overlay(PreviewPlateEdge(spec: spec, corner: spec.corner))
                 .frame(
                     width: vertical
                         ? thickness : span.upperBound - span.lowerBound,

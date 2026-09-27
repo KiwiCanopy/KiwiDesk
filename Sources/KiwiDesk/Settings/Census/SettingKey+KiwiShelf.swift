@@ -12,6 +12,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case background = "settings.kiwishelf.backgroundStyle"
     case backgroundFit = "settings.kiwishelf.backgroundFit"
     case cornerRoundness = "settings.kiwishelf.cornerRoundness"
+    case border = "settings.kiwishelf.border"
+    case borderWidth = "settings.kiwishelf.borderWidth"
     case highlightWidth = "settings.kiwishelf.highlightWidth"
     case itemGap = "settings.kiwishelf.itemGap"
     case fontSizeAuto = "settings.kiwishelf.fontSize (auto)"
@@ -22,6 +24,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case iconSource = "settings.kiwishelf.iconSource"
     case dimFactor = "settings.kiwishelf.dimFactor"
     case fillColor = "settings.kiwishelf.fillColor"
+    case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
     case activeItemColor = "settings.kiwishelf.activeItemColor"
     case highlightColor = "settings.kiwishelf.highlightColor"
@@ -45,8 +48,8 @@ extension KiwiShelfKey {
         switch self {
         case .edge, .thickness, .alignment, .order, .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
-        case .background, .cornerRoundness, .highlightWidth, .itemGap,
-            .fontSizeAuto,
+        case .background, .cornerRoundness, .border, .highlightWidth,
+            .itemGap, .fontSizeAuto,
             .outerMargin, .innerMargin, .iconSource:
             return .row(
                 .bars,
@@ -68,6 +71,13 @@ extension KiwiShelfKey {
                 .showMore,
                 gate: .setting(.kiwishelf(.fontSizeAuto))
             )
+        case .borderWidth:
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: .setting(.kiwishelf(.border))
+            )
         case .liquidGlass:
             // Written by the one Liquid Glass row (#1307).
             return .luaOnly
@@ -87,6 +97,16 @@ extension KiwiShelfKey {
                 .kiwishelf,
                 .showMore,
                 gate: Self.showGate
+            )
+        case .borderColor:
+            // Inert while no bar shows or the border is off (#1679).
+            return .row(
+                .advancedColours,
+                .kiwishelf,
+                .showMore,
+                gate: .anyOf(
+                    Self.showGate.settings + [.kiwishelf(.border)]
+                )
             )
         }
     }
@@ -133,6 +153,13 @@ extension KiwiShelfKey {
                 "kiwishelf.corner_roundness",
                 help: "kiwishelf.corner_roundness.help"
             )
+        case .border:
+            return .text(
+                "kiwishelf.border",
+                help: "kiwishelf.border.help"
+            )
+        case .borderWidth:
+            return .text("kiwishelf.border_width")
         case .highlightWidth:
             return .text(
                 "kiwishelf.highlight_width",
@@ -169,6 +196,8 @@ extension KiwiShelfKey {
             )
         case .fillColor:
             return .text("kiwishelf.color.fill")
+        case .borderColor:
+            return .text("kiwishelf.color.border")
         case .itemColor:
             return .text(
                 "kiwishelf.color.item",

@@ -18,7 +18,8 @@ struct PaletteScenePanel: View {
                         from: model.config.settings
                     )
                 ),
-                scene: .panel
+                scene: .panel,
+                drawsBorder: model.config.settings.kiwishelf.border
             )
             .frame(maxWidth: .infinity)
         }

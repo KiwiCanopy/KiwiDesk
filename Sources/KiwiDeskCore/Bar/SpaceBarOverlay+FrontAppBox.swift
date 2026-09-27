@@ -20,6 +20,7 @@ extension SpaceBarOverlay {
         let glass = wantsBoxGlass(style)
         guard boxed || glass else {
             frontBox.isHidden = true
+            frontBorder.isHidden = true
             updateFrontGlass(nil, radius: 0, style: style)
             return
         }
@@ -48,6 +49,13 @@ extension SpaceBarOverlay {
                 height: length
             )
         let radius = style.resolvedCornerRadius(forThickness: depth)
+        frontBorder.frame = rect
+        ShelfBorder.paint(
+            frontBorder,
+            shelf: style.shelf,
+            surface: .box,
+            cornerRadius: radius
+        )
         if boxed {
             frontBox.isHidden = false
             frontBox.wantsLayer = true

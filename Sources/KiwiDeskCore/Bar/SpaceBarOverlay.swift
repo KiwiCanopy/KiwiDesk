@@ -106,6 +106,8 @@ public final class SpaceBarOverlay {
     }()
     // Optional trailing front-app segment (#293).
     let frontBox = NSView()
+    /// The chip's border (#1679), above its box or glass.
+    let frontBorder = ShelfBorder.make()
     let frontDivider = NSView()
     let frontIcon = NSImageView()
     let frontGlyph: NSTextField = {

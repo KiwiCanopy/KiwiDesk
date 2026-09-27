@@ -66,6 +66,14 @@ extension SettingsValueReadout {
                 percent(Double(o.cornerRoundness) / 100),
                 percent(Double(n.cornerRoundness) / 100)
             )
+        case .border:
+            return spaceBarOnOffRow(census, o.border, n.border)
+        case .borderWidth:
+            return spaceBarPointsRow(
+                census,
+                o.borderWidth,
+                n.borderWidth
+            )
         case .highlightWidth:
             return spaceBarPointsRow(
                 census,
@@ -97,7 +105,7 @@ extension SettingsValueReadout {
                 trimmed(o.dimFactor),
                 trimmed(n.dimFactor)
             )
-        case .fillColor, .itemColor, .activeItemColor,
+        case .fillColor, .borderColor, .itemColor, .activeItemColor,
             .highlightColor, .hoverFillColor, .hoverItemColor,
             .groupBadgeColor, .groupBadgeTextColor:
             let path = Self.shelfColor(key)
@@ -111,6 +119,7 @@ extension SettingsValueReadout {
     ) -> KeyPath<KiwiShelf, String> {
         switch key {
         case .fillColor: return \.fillColor
+        case .borderColor: return \.borderColor
         case .itemColor: return \.itemColor
         case .activeItemColor: return \.activeItemColor
         case .highlightColor: return \.highlightColor

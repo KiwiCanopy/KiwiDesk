@@ -11209,6 +11209,25 @@ of their own palettes is not the colors they are looking at.
 parsed color rather than by spelling, so re-typing a palette's own
 hex in lower case does not read as leaving the theme.
 
+**A colour key added to a bundled palette costs the mark once,
+not a migration.** The same computed answer has a price when the
+colour surface grows. Suppose a bundled palette gains a colour
+key, such as #1679's `kiwishelf.border_color`. A config saved
+before the upgrade still holds the shipped default there, so a
+palette it was wearing stops matching. The applied mark, and the
+Save sheet's "already saved as" notice, both go quiet until that
+palette is applied again. A `ConfigMigration` could write the
+palette's colour into the old config. It is refused, because it
+would have to guess which palette the user meant: a config
+carries colours, never a palette name. And that is exactly the
+stored note the computed mark exists to avoid. What the user
+loses is a checkmark, and nothing on screen changes. A key whose
+colour is invisible by default, like a border that ships off,
+makes that a price worth paying. A new key whose colour DRAWS by
+default is the case that could not pay it, and that change owes
+the question again rather than inheriting this answer
+(`ColorPaletteMatchTests` ▸ `newKeyUnmarksAnOlderConfig`).
+
 **A palette is a color recipe; a Profile owns the colors.**
 (#375.) A palette is a named color recipe you apply once to
 overwrite the active profile's colors; a Profile is the

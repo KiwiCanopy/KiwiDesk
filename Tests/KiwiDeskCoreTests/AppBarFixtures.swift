@@ -46,6 +46,8 @@ enum AppBarFixtures {
         shelf.liquidGlass = false
         shelf.backgroundFit = .full
         shelf.cornerRoundness = 5
+        shelf.border = true
+        shelf.borderWidth = 3
         shelf.highlightWidth = 4
         shelf.itemGap = 3
         shelf.fontSize = 15
@@ -53,6 +55,7 @@ enum AppBarFixtures {
         shelf.dimFactor = 0.3
         shelf.itemColor = "#010101"
         shelf.fillColor = "#020202"
+        shelf.borderColor = "#080808"
         shelf.activeItemColor = "#030303"
         shelf.highlightColor = "#050505"
         shelf.hoverFillColor = "#060606"

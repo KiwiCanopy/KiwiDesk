@@ -16,6 +16,8 @@ enum KiwiShelfCommandSetting {
     case liquidGlass(Bool)
     case backgroundFit(KiwiShelf.BackgroundFit)
     case cornerRoundness(CGFloat)
+    case border(Bool)
+    case borderWidth(CGFloat)
     case highlightWidth(CGFloat)
     case itemGap(CGFloat)
     case fontSize(CGFloat)
@@ -92,6 +94,11 @@ enum KiwiShelfCommandSetting {
                 return .failure("expected boolean")
             }
             return .success(.liquidGlass(flag))
+        case "border":
+            guard let flag = args.first?.boolValue else {
+                return .failure("expected boolean")
+            }
+            return .success(.border(flag))
         default:
             return nil
         }
@@ -105,6 +112,7 @@ enum KiwiShelfCommandSetting {
             "outer_margin": Self.outerMargin,
             "inner_margin": Self.innerMargin,
             "corner_roundness": Self.cornerRoundness,
+            "border_width": Self.borderWidth,
             "highlight_width": Self.highlightWidth,
             "item_gap": Self.itemGap,
             "font_size": Self.fontSize,
@@ -121,6 +129,7 @@ enum KiwiShelfCommandSetting {
             "hover_fill_color": \.hoverFillColor,
             "hover_item_color": \.hoverItemColor,
             "fill_color": \.fillColor,
+            "border_color": \.borderColor,
             "group_badge_color": \.groupBadgeColor,
             "group_badge_text_color": \.groupBadgeTextColor,
         ]
@@ -148,6 +157,9 @@ enum KiwiShelfCommandSetting {
         case .liquidGlass(let value): shelf.liquidGlass = value
         case .backgroundFit(let value): shelf.backgroundFit = value
         case .cornerRoundness(let value): shelf.cornerRoundness = value
+        case .border(let value): shelf.border = value
+        case .borderWidth(let value):
+            shelf.borderWidth = KiwiShelf.clampBorderWidth(value)
         case .highlightWidth(let value):
             shelf.highlightWidth = KiwiShelf.clampHighlightWidth(value)
         case .itemGap(let value):

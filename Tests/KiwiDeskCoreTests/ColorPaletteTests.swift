@@ -19,11 +19,12 @@ struct ColorPaletteTests {
     }
 
     /// 17 since #1517: the shelf's 8 replace the bars' 17, the
-    /// Space Bar keeping its focused-window ink.
-    @Test("The color surface is the 17 namespaced color paths")
+    /// Space Bar keeping its focused-window ink; 18 since #1679,
+    /// the shelf's border.
+    @Test("The color surface is the 18 namespaced color paths")
     func colorSurface() {
         let all = ColorPaletteKeys.all
-        #expect(all.count == 17)
+        #expect(all.count == 18)
         #expect(all.allSatisfy { $0.contains(".") })
         // Every path is a color key: `_color`-suffixed, or the
         // bare `color` of a struct that IS one mark.

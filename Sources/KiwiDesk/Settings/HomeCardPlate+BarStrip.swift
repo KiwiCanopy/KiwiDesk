@@ -11,7 +11,6 @@ struct BarStripView: View {
     /// False where the shelf draws one plate under both bars and
     /// this strip draws only its run (`ShelfStripPreview`).
     var drawsPlate = true
-    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         Group {
@@ -61,14 +60,7 @@ struct BarStripView: View {
     private var plate: some View {
         RoundedRectangle(cornerRadius: spec.corner)
             .fill(Color(kiwiHex: spec.fill))
-            .overlay(
-                RoundedRectangle(cornerRadius: spec.corner)
-                    .strokeBorder(
-                        palette?.frame
-                            ?? SettingsTheme.plateInk
-                            .opacity(0.3)
-                    )
-            )
+            .overlay(PreviewPlateEdge(spec: spec, corner: spec.corner))
     }
 
     private var run: some View {
@@ -130,13 +122,9 @@ struct BarStripView: View {
                     )
                     .fill(Color(kiwiHex: spec.fill))
                     .overlay(
-                        RoundedRectangle(
-                            cornerRadius: spec.itemCorner
-                        )
-                        .strokeBorder(
-                            palette?.frame
-                                ?? SettingsTheme.plateInk
-                                .opacity(0.3)
+                        PreviewPlateEdge(
+                            spec: spec,
+                            corner: spec.itemCorner
                         )
                     )
                 )

@@ -10,6 +10,13 @@ extension SpaceBarItemView {
         accentClip.layer?.masksToBounds = true
         accentClip.layer?.cornerRadius = cornerRadius
         accentClip.layer?.maskedCorners = maskedCorners
+        boxBorder.frame = bounds
+        ShelfBorder.paint(
+            boxBorder,
+            shelf: style.shelf,
+            surface: .box,
+            cornerRadius: cornerRadius
+        )
         styleIdentifier()
         styleApps()
         styleBadges()

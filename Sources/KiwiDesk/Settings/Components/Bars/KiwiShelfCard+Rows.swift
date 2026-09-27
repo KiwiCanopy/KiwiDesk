@@ -59,6 +59,10 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfStyle.children
                     .kiwishelfStyleCornerRoundness
             )
+        case .border:
+            borderRow
+        case .borderWidth:
+            borderWidthRow
         case .highlightWidth:
             highlightWidthRow
         case .itemGap:
@@ -112,7 +116,7 @@ extension KiwiShelfCard {
         case .iconSource:
             iconSourceRow
         case .fontSize, .liquidGlass, .dimFactor, .fillColor,
-            .itemColor, .activeItemColor, .highlightColor,
+            .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,
             .groupBadgeTextColor:
             EmptyView()

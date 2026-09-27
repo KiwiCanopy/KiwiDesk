@@ -46,6 +46,11 @@ public struct KiwiShelf: Sendable, Equatable {
     public var backgroundFit: BackgroundFit = .hug
     /// Corner rounding percentage (0–100) of thickness / 2.
     public var cornerRoundness: CGFloat = 50
+    /// A stroke on the plate's edge — each box's under Boxed —
+    /// off by default (#1679). A drawing reads `drawnBorderWidth`.
+    public var border = false
+    /// The border's stroke (pt), kept while `border` is off.
+    public var borderWidth: CGFloat = 1
     /// The active indicator's weight (pt): the outline's stroke,
     /// the edge mark at `edgeMarkRatio` of it (#1680). A drawing
     /// reads `resolvedHighlightWidth`, whatever wrote this.
@@ -74,6 +79,11 @@ public struct KiwiShelf: Sendable, Equatable {
     /// The plate's one fill (#660, retuned by #755;
     /// `PaletteBarFillTests`).
     public var fillColor = "#14201CB3"
+    /// The border's colour (#1679): `itemColor`'s hex at alpha
+    /// 0x59, spelled out (`ShelfBorderTests` pins the relation) and
+    /// held against the wallpaper the plate blends into
+    /// (`ShelfBorderContrastTests`).
+    public var borderColor = "#EAF3EE59"
     /// Group count badge colours (#955).
     public var groupBadgeColor = "#636366"
     public var groupBadgeTextColor = "#FFFFFF"
@@ -94,6 +104,8 @@ public struct KiwiShelf: Sendable, Equatable {
     /// The edge mark's thickness per point of `highlightWidth`:
     /// the default 2 draws today's 3 pt mark beside the 2 pt ring.
     public static let edgeMarkRatio: CGFloat = 1.5
+    /// Bounds of `borderWidth` in pt (#1679).
+    public static let borderWidthRange: ClosedRange<CGFloat> = 1...4
     /// Bounds of `minimum` in percent.
     public static let minimumRange: ClosedRange<CGFloat> = 20...80
     /// Alpha of `itemColor` on an idle Space identifier — a rule,
@@ -168,6 +180,20 @@ public struct KiwiShelf: Sendable, Equatable {
     /// bars' layouts read.
     public var edgeMarkThickness: CGFloat {
         resolvedHighlightWidth * Self.edgeMarkRatio
+    }
+
+    /// `borderWidth` clamped to `borderWidthRange`.
+    public static func clampBorderWidth(_ width: CGFloat) -> CGFloat {
+        min(
+            max(width, borderWidthRange.lowerBound),
+            borderWidthRange.upperBound
+        )
+    }
+
+    /// The border stroke every surface draws: 0 while `border` is
+    /// off, else `borderWidth` inside its range.
+    public var drawnBorderWidth: CGFloat {
+        border ? Self.clampBorderWidth(borderWidth) : 0
     }
 
     /// Concrete corner radius in pt for a given thickness.

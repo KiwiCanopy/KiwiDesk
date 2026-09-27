@@ -52,6 +52,10 @@ struct HomeCardBarsTile: View {
         /// the frame's scale (`indicatorWidths`, #1680).
         var outlineWidth: CGFloat
         var edgeMarkWidth: CGFloat
+        /// The shelf's border at the frame's scale, 0 while off
+        /// (`borderWidth(_:)`, #1679), and its colour.
+        var borderWidth: CGFloat
+        var borderColor: String
         var fontSize: CGFloat
     }
 
@@ -69,6 +73,13 @@ struct HomeCardBarsTile: View {
             max(1, shelf.resolvedHighlightWidth * unit),
             shelf.edgeMarkThickness * unit
         )
+    }
+
+    /// The border's stroke for this frame: the shelf's drawn
+    /// width at the indicators' scale, so a live 1 pt border
+    /// reads beside the 2 pt ring as it does on the bar (#1679).
+    func borderWidth(_ shelf: KiwiShelf) -> CGFloat {
+        shelf.drawnBorderWidth * Self.indicatorPerPoint * scale
     }
 
     /// The App Bar the preview draws: the first layout that
@@ -178,6 +189,8 @@ struct HomeCardBarsTile: View {
             indicator: style.activeIndicator,
             outlineWidth: widths.outline,
             edgeMarkWidth: widths.edgeMark,
+            borderWidth: borderWidth(style.shelf),
+            borderColor: style.borderColor,
             fontSize: style.identifierFontSize(forDepth: cross)
         )
     }
@@ -204,6 +217,8 @@ struct HomeCardBarsTile: View {
             indicator: style.activeIndicator,
             outlineWidth: widths.outline,
             edgeMarkWidth: widths.edgeMark,
+            borderWidth: borderWidth(style.shelf),
+            borderColor: style.borderColor,
             fontSize: style.resolvedFontSize(forThickness: cross)
         )
     }
