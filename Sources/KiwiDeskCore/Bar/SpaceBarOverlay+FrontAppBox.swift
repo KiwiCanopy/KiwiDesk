@@ -60,7 +60,8 @@ extension SpaceBarOverlay {
             frontBorder,
             shelf: style.shelf,
             surface: .box,
-            cornerRadius: radius
+            cornerRadius: radius,
+            sheen: style.sheen
         )
         if boxed {
             frontBox.isHidden = false

@@ -1523,6 +1523,12 @@ Obligations:
   `ReduceTransparencySeamTests`' allowed map with its reason,
   and a second gate on the branch cannot. The bars' half is
   bars.md's, at `LiquidGlassGate`.
+- **A hosted Core overlay view is an engine picture, not
+  chrome** (#1645): a preview may host one — glass and tint
+  included — rather than re-draw it, and the host draws no shape
+  of its own over the marker. Which hosted views may carry glass
+  is `HostedEnginePictureTests`' register, keyed by the view's
+  name, since the SwiftUI scan above cannot see inside one.
 
 ## The Reduce Motion gate
 

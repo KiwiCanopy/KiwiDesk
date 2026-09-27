@@ -115,14 +115,22 @@ extension TilingSettings {
 
     /// What the Space Bar draws from: the shelf and its own style.
     public var spaceBarLook: SpaceBarLook {
-        SpaceBarLook(shelf: kiwishelf, bar: spaceBarStyle)
+        SpaceBarLook(
+            shelf: kiwishelf,
+            bar: spaceBarStyle,
+            sheen: borderStyle.sheen
+        )
     }
 
     /// The shelf and the App Bar's global style, before any
     /// layout's overrides — what `AppBarHosting.resolvedBar`
     /// resolves from.
     public var appBarGlobalLook: AppBarLook {
-        AppBarLook(shelf: kiwishelf, bar: appBarStyle)
+        AppBarLook(
+            shelf: kiwishelf,
+            bar: appBarStyle,
+            sheen: borderStyle.sheen
+        )
     }
 
     /// What a layout's App Bar draws from: the shelf and the App

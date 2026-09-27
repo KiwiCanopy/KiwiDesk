@@ -53,7 +53,8 @@ struct ReduceTransparencyTests {
     func renderedStyleDropsGlassOnly() {
         var app = AppBarLook(
             shelf: AppBarFixtures.everyShelfField(),
-            bar: AppBarFixtures.everyGlobalField()
+            bar: AppBarFixtures.everyGlobalField(),
+            sheen: 0
         )
         app.liquidGlass = true
         app.fillColor = "#020202B3"
@@ -149,6 +150,7 @@ struct ReduceTransparencyTests {
                         display: barTitleDisplay,
                         strip: barTitleStrip,
                         shelf: shelf,
+                        sheen: 0,
                         space: section,
                         app: nil
                     )

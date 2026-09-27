@@ -135,16 +135,29 @@ extension SkyLightBorderOverlay {
         geometry: BorderGeometry,
         colorHex: String
     ) {
+        let path = CGPath(
+            roundedRect: pathRect,
+            cornerWidth: geometry.cornerRadius,
+            cornerHeight: geometry.cornerRadius,
+            transform: nil
+        )
+        // The sheen's ramp (#1644): the window context is y-up
+        // Quartz space, so maxY is the ring's top.
+        if geometry.sheen != 0 {
+            let half = geometry.lineWidth / 2
+            BorderSheen.draw(
+                path,
+                lineWidth: geometry.lineWidth,
+                extent: pathRect.insetBy(dx: -half, dy: -half),
+                hex: colorHex,
+                strength: geometry.sheen,
+                in: context
+            )
+            return
+        }
         context.setLineWidth(geometry.lineWidth)
         context.setStrokeColor(NSColor(kiwiHex: colorHex).cgColor)
-        context.addPath(
-            CGPath(
-                roundedRect: pathRect,
-                cornerWidth: geometry.cornerRadius,
-                cornerHeight: geometry.cornerRadius,
-                transform: nil
-            )
-        )
+        context.addPath(path)
         context.strokePath()
     }
 

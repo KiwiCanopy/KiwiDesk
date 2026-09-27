@@ -37,12 +37,14 @@ struct FocusBorderPreview: View {
                     color: style.focusedColor,
                     ringed: true,
                     glow: style.glow,
+                    sheen: style.sheen,
                     mark: stickyMark
                 )
                 window(
                     color: style.unfocusedColor,
                     ringed: style.unfocusedEnabled,
                     glow: false,
+                    sheen: 0,
                     mark: displayStickyMark
                 )
             }
@@ -77,6 +79,7 @@ struct FocusBorderPreview: View {
         color: String,
         ringed: Bool,
         glow: Bool,
+        sheen: CGFloat,
         mark: (symbol: String, tint: Color)?
     ) -> some View {
         let width = BorderPreviewScale.width(
@@ -104,7 +107,7 @@ struct FocusBorderPreview: View {
                 if ringed {
                     RoundedRectangle(cornerRadius: radius)
                         .stroke(
-                            Color(kiwiHex: color),
+                            SheenPaint.style(color, sheen: sheen),
                             lineWidth: width
                         )
                         .shadow(

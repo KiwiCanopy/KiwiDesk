@@ -11574,6 +11574,65 @@ step therefore fills both from the switch's own reading over the
 leaves the file does carry, off where those disagree, as the
 panel's leaf was filled from the bars' (#1369).
 
+:::unreleased
+**The sheen is its own setting beside the Liquid Glass switch,
+never one of its surfaces.** (#1644, owner rulings 2026-09-27,
+after the device sitting.) The switch governs "every KiwiDesk
+surface that draws glass" (#1307, above), and the sheen draws
+none: it is a lightness ramp on the coloured stroke — the focused
+ring, the shelf's highlight and border, the drag borders —
+because a 2 pt glass stroke refracts nothing and carries no hue
+(#1297), so real glass there would weaken the one "this is
+active" signal. Being no glass, it takes none of glass's gates:
+it draws with the switch off, under Reduce transparency, and
+before macOS 26, and a leaf of `LiquidGlassAgreement` would have
+made the switch read off with its `?` whenever a user wanted
+glass without the sheen. The row stays on a Mac below macOS 26,
+where the switch above it is hidden.
+
+**One signed number, and no coupling to the switch.** (Owner
+amendment 2026-09-27.) `border.sheen` is a strength in −1…1: a
+positive value lightens the top toward white, a negative one
+darkens it toward black, and 0 draws none — every surface's flat
+path. The top moves by 0.9 × the strength, so the 0.5 default is
+the 0.45 lift the owner approved at the sitting and a full 1
+stops short of white or black, where the stroke's own hue would
+be gone. One number rather than a switch and an amount, because
+"off" is simply the middle of the range; one centre-origin
+slider, because a direction is part of the value. The earlier
+one-way coupling (switching glass on ticked the sheen) is gone:
+with a strength to choose, the switch would have had to pick one,
+and the two are independent looks. The master writes nothing to
+it (`SheenCouplingTests`).
+
+**Default 0.5, and existing files take it on upgrade.** (Owner
+ruling 2026-09-27.) A file written before the key carries no
+`sheen` and decodes the default, so every existing user's focus
+ring, bar highlight and border, and drag borders gain the sheen
+on upgrade, whether or not Liquid Glass is on. That visible
+change is the owner's accepted cost rather than something a
+#1369 crossing was needed to prevent: absence never meant a
+sheen a user had turned off, since no release before this one
+drew one.
+
+**The flat band carries #578's contrast; the ends may pass it.**
+(Owner ruling 2026-09-27, over a cap.) The ramp's middle band is
+the configured colour itself, untouched, on every surface — the
+focused ring, the bar highlight, the shelf border, the drag
+borders — so wherever that colour meets #578's 3:1, the band
+does (`BorderSheenFlatBandTests`). Only the lifted top is free to
+go past it: the band runs to the bottom edge, which keeps the
+colour rather than darkening (owner 2026-09-27 — a shaded bottom
+read as a different colour on a short outline, and the lift alone
+carries the look). #578's purpose is finding the
+focused window, and a ring whose flat band holds 3:1 on three
+sides stays findable when its top edge fades toward a white
+wallpaper. The cap this replaced held every stop at 3:1 and so
+took nearly all the lift from the default green ring, which is
+the one most people see; it traded the look the owner approved
+at the sitting for a guarantee the band already gives.
+:::
+
 **Both drag markers' glass is thinned (owner, device 2026-09-25).**
 The drop zone lies over the window a drop would swap with, which
 should stay readable through it, and the ghost matches it so the
@@ -11588,10 +11647,18 @@ the floating level the glass would blur the window in hand
 whenever it crossed its home slot or hovered the target, which
 is exactly when the drop zone shows. Beneath it, both markers
 still sit above the windows below it, and the home slot is empty
-for the drag. The drag preview in Settings stays flat: this tree's glass is
-untinted by ruling (#1295), and untinted glass would show a
-marker no drag draws, so a tinted preview waits on its own
-ruling (#1645).
+for the drag.
+
+:::unreleased
+**The Settings drag preview hosts Core's marker, tinted glass
+and all.** (#1645.) It draws the engine's own `DragMarkerView`,
+so the picture is the drag rather than a re-drawing of it
+(#702). That does not breach #1295's "this tree's glass is
+untinted": that ruling governs Settings *chrome* — a surface
+the window draws for itself — while a hosted engine view is a
+picture of a surface the product draws on screen, and a picture
+that dropped the tint would show a marker no drag draws.
+:::
 
 **Liquid Glass is an orthogonal finish toggle, not a third
 `background_style`.** (#390; revised 2026-07-20.) A third

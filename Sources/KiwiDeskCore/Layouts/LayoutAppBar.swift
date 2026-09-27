@@ -37,6 +37,10 @@ public struct LayoutAppBar: Sendable, Equatable {
     /// these overrides — the ONE body every reader of "this
     /// layout's App Bar" takes (#1517).
     public func look(on base: AppBarLook) -> AppBarLook {
-        AppBarLook(shelf: base.shelf, bar: resolved(with: base.bar))
+        AppBarLook(
+            shelf: base.shelf,
+            bar: resolved(with: base.bar),
+            sheen: base.sheen
+        )
     }
 }

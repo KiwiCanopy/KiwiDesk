@@ -56,13 +56,15 @@ struct OverlayGlassTests {
             at: Self.slot,
             style: style,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: DragVisual.dropZoneDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         for marker in [overlay.ghost, overlay.dropZone] {
             let marker = try #require(marker)
@@ -93,13 +95,15 @@ struct OverlayGlassTests {
             at: Self.slot,
             style: style,
             cornerRadius: 8,
-            glassBeneath: CGWindowID(dragged.windowNumber)
+            glassBeneath: CGWindowID(dragged.windowNumber),
+            sheen: 0
         )
         overlay.showGhost(
             at: Self.slot,
             style: style,
             cornerRadius: 8,
-            glassBeneath: nil
+            glassBeneath: nil,
+            sheen: 0
         )
         let marker = try #require(overlay.ghost)
         #expect(marker.glass?.isHidden == true)
@@ -127,13 +131,15 @@ struct OverlayGlassTests {
             at: Self.slot,
             style: .ghostDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         // Another window comes up over everything, then the dragged
         // one is raised past it — so the markers, left where they
@@ -146,13 +152,15 @@ struct OverlayGlassTests {
             at: Self.slot,
             style: .ghostDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         let order = NSWindow.windowNumbers(options: []) ?? []
         let draggedAt = try #require(
@@ -174,7 +182,8 @@ struct OverlayGlassTests {
             at: Self.slot,
             style: .ghostDefault,
             cornerRadius: 8,
-            glassBeneath: nil
+            glassBeneath: nil,
+            sheen: 0
         )
         #expect(overlay.ghost?.panel.level == .floating)
     }
@@ -195,18 +204,20 @@ struct OverlayGlassTests {
             at: Self.slot,
             style: .ghostDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
             cornerRadius: 8,
-            glassBeneath: id
+            glassBeneath: id,
+            sheen: 0
         )
-        try #require(DragOverlay.glassOpacity < 1)
+        try #require(DragMarkerView.glassOpacity < 1)
         for marker in [overlay.ghost, overlay.dropZone] {
             #expect(
-                marker?.glass?.alphaValue == DragOverlay.glassOpacity
+                marker?.glass?.alphaValue == DragMarkerView.glassOpacity
             )
         }
     }

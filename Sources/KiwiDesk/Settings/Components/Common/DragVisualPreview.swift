@@ -5,6 +5,10 @@ import SwiftUI
 struct DragVisualPreview: View {
     let visual: DragVisual
     let cornerRadius: CGFloat
+    /// The stored `dragLiquidGlass` leaf; Core gates it.
+    let glass: Bool
+    /// `border.sheen` (#1644).
+    let sheen: CGFloat
 
     var body: some View {
         ZStack {
@@ -22,41 +26,28 @@ struct DragVisualPreview: View {
         .frame(maxWidth: .infinity)
     }
 
+    /// The marker as Core draws it, at the preview's scale: the
+    /// engine's own view, so glass, tint and fade are the drag's
+    /// (#702, #1645).
     private var mock: some View {
-        let radius = scale(cornerRadius, from: 0...40, to: 0...20)
-        let width = scale(
+        var scaled = visual
+        scaled.borderWidth = scale(
             visual.borderWidth,
             from: 0...20,
             to: 0...10
         )
-        return RoundedRectangle(cornerRadius: radius)
-            .fill(
-                visual.fill
-                    ? Color(kiwiHex: visual.fillColor) : .clear
-            )
-            .overlay { border(radius: radius, width: width) }
-            .opacity(visual.enabled ? 1 : 0.25)
-    }
-
-    /// Renders inside/outside border alignment preview
-    /// (`DragOverlay.adjustedFrame`, #231).
-    @ViewBuilder private func border(
-        radius: CGFloat,
-        width: CGFloat
-    ) -> some View {
-        if visual.border {
-            let color = Color(kiwiHex: visual.borderColor)
-            switch visual.borderAlignment {
-            case .inside:
-                RoundedRectangle(cornerRadius: radius)
-                    .strokeBorder(color, lineWidth: width)
-            case .outside:
-                // Parallel offset corner radius R + width / 2.
-                RoundedRectangle(cornerRadius: radius + width / 2)
-                    .stroke(color, lineWidth: width)
-                    .padding(-width / 2)
-            }
-        }
+        let radius = scale(cornerRadius, from: 0...40, to: 0...20)
+        // `DragOverlay.adjustedFrame`: the border straddles the
+        // slot edge by half its width, inward or outward (#231).
+        let half = visual.border ? scaled.borderWidth / 2 : 0
+        return DragMarkerHost(
+            style: scaled,
+            cornerRadius: radius,
+            glass: glass,
+            sheen: sheen
+        )
+        .padding(visual.borderAlignment == .inside ? half : -half)
+        .opacity(visual.enabled ? 1 : 0.25)
     }
 
     /// Linear interpolation of value across source/destination ranges
@@ -71,5 +62,27 @@ struct DragVisualPreview: View {
         let t = min(max((value - src.lowerBound) / span, 0), 1)
         return dst.lowerBound
             + t * (dst.upperBound - dst.lowerBound)
+    }
+}
+
+/// Hosts Core's `DragMarkerView`, which resolves the glass leaf
+/// through its own gate.
+private struct DragMarkerHost: NSViewRepresentable {
+    let style: DragVisual
+    let cornerRadius: CGFloat
+    let glass: Bool
+    let sheen: CGFloat
+
+    func makeNSView(context: Context) -> DragMarkerView {
+        DragMarkerView()
+    }
+
+    func updateNSView(_ view: DragMarkerView, context: Context) {
+        view.showPreview(
+            style,
+            cornerRadius: cornerRadius,
+            storedGlass: glass,
+            sheen: sheen
+        )
     }
 }

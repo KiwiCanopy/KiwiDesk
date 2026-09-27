@@ -5,10 +5,13 @@ import Testing
 /// the block is dimmed — `.disabled` is cumulative, so every
 /// `HelpButton` inside the gated subtree is dead. Each
 /// block-gated editor therefore renders a live anchor OUTSIDE
-/// the gate: the section header's `help:` or a disclosure
-/// label. Split from `GreyOutParityTests` (§5: split suites
-/// early); same lens — exact expressions, so losing one is a
-/// conscious edit, never silent.
+/// the gate: the section header's `help:`, a disclosure label,
+/// or — for the Liquid Glass switch (#1644) — a caption rendered
+/// as a SIBLING of the greyed row, never inside it. Split from
+/// `GreyOutParityTests` (§5: split suites early); same lens —
+/// exact expressions, so losing one is a conscious edit, never
+/// silent, and a position clause where a spelling would pass
+/// inside the grey.
 @Suite("Block-gate help anchors")
 struct GreyOutAnchorTests {
     private var settingsDir: URL {
@@ -117,12 +120,14 @@ struct GreyOutAnchorTests {
             "help: reduceMotion ? reduceMotionHelp : nil",
             1
         ),
-        // Reduce transparency greys the Liquid Glass card the
-        // same way (#1418): the `.glass` container's `.runtime`
-        // gate, its reason on the header `?`.
+        // Reduce transparency greys the Liquid Glass switch
+        // (#1418): the `.glass` container's `.runtime` gate. Its
+        // reason is a caption under the switch, outside the grey
+        // and off the header, whose `?` would claim it for the
+        // un-greyed Sheen row too (#1644).
         (
             "GlassCard.swift",
-            "help: reduceTransparency ? reduceTransparencyHelp : nil",
+            "reasonCaption(for: key)",
             1
         ),
     ]
@@ -153,5 +158,38 @@ struct GreyOutAnchorTests {
                 )
             )
         }
+    }
+
+    /// The Glass card's reason caption sits OUTSIDE the grey: a
+    /// statement of the `ForEach` body beside the greyed row, and
+    /// nowhere in `row(_:)`, whose output the grey wraps. A needle
+    /// on the spelling alone passes with the call moved inside.
+    @Test("the glass reason caption is a sibling of the grey")
+    func glassReasonOutsideTheGrey() throws {
+        let file = try #require(
+            try SourceScan.swiftSources(under: settingsDir).first {
+                $0.lastPathComponent == "GlassCard.swift"
+            }
+        )
+        let source = try SourceScan.strippedSource(at: file)
+        let loop = try #require(
+            SourceScan.declarationBody(
+                after: "ForEach(Self.rows",
+                in: source
+            )
+        )
+        let statements = loop.split(separator: "\n").map {
+            $0.trimmingCharacters(in: .whitespaces)
+        }
+        #expect(
+            statements.contains(
+                "row(key).modifier(GreyOut(active: greyed(key)))"
+            )
+        )
+        #expect(statements.contains("reasonCaption(for: key)"))
+        let row = try #require(
+            SourceScan.declarationBody(after: "func row(", in: source)
+        )
+        #expect(!row.contains("reasonCaption"))
     }
 }

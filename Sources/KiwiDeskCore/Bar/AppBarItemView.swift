@@ -19,7 +19,7 @@ final class AppBarItemView: NSView {
         tf.setAccessibilityElement(false)
         return tf
     }()
-    let accent = NSView()
+    let accent = SheenRimView()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.make()

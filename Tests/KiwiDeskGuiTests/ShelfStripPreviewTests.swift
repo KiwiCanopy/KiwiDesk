@@ -38,7 +38,8 @@ struct ShelfStripPreviewTests {
             borderWidth: 0,
             borderColor: "#FFFFFF",
             fontSize: 12,
-            shelf: KiwiShelf()
+            shelf: KiwiShelf(),
+            sheen: 0
         )
     }
 

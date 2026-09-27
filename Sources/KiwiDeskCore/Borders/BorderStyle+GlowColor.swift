@@ -24,7 +24,7 @@ extension BorderStyle {
         )
     }
 
-    private static func rgbToHSL(
+    static func rgbToHSL(
         r: CGFloat,
         g: CGFloat,
         b: CGFloat
@@ -46,7 +46,7 @@ extension BorderStyle {
         return (h * 60, s, l)
     }
 
-    private static func hslToRGB(
+    static func hslToRGB(
         h: CGFloat,
         s: CGFloat,
         l: CGFloat
