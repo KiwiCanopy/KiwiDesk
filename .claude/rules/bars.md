@@ -30,6 +30,7 @@ paths:
   # through GlassTint.apply and their stand-down through the gate,
   # whose obligations live here.
   - "Sources/KiwiDeskCore/Tiling/DragOverlay.swift"
+  - "Sources/KiwiDeskCore/Tiling/DragMarkerView.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
   # ...and the two sites that decide their glass through the gate.
   - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
@@ -458,7 +459,7 @@ Obligations:
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** Both drag markers' glass sits at
-  `DragOverlay.glassOpacity` so the window a drop swaps with stays
+  `DragMarkerView.glassOpacity` so the window a drop swaps with stays
   readable (owner, device 2026-09-25); there the
   `maxAlpha` premise — a floor on how much refraction survives —
   does not hold, by that ruling. A second thinned surface argues
