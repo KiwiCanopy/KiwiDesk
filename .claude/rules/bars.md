@@ -684,7 +684,7 @@ reaches.
 - **A bar text site asks `KiwiShelf.textFont(ofSize:)`, and a
   count `badgeFont(ofSize:emphasis:)`**, handed the size the
   section above derives (the look's `forDepth:` ladders, the
-  content depth) — size from the padding, face from the shelf —
+  content depth) — size from the glyph size, face from the shelf —
   and never `systemFont` or a
   family of its own; an App Font glyph and an app icon never ask
   either. A site that MEASURES text (a slot width, a segment's

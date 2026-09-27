@@ -45,14 +45,16 @@ struct GlyphSizePreviewTests {
         let tile = Self.tile(glyphSize: 28)
         let shelf = tile.settings.kiwishelf
         let share = shelf.contentDepth(forDepth: 40) / 40
-        #expect(share < 1)
+        // Pinned, not only read back: a wrong Core formula would
+        // agree with itself here (guard-prover, #1713).
+        #expect(share == CGFloat(28) / 40)
         for spec in Self.specs(tile) {
             #expect(spec.contentShare == share)
         }
     }
 
     /// The strip's pips are content: they shrink by the share.
-    @Test("A padded shelf draws shorter pips")
+    @Test("A smaller glyph size draws shorter pips")
     func pipsShrink() {
         func pips(_ glyphSize: CGFloat) -> [CGFloat] {
             Self.specs(Self.tile(glyphSize: glyphSize)).map {

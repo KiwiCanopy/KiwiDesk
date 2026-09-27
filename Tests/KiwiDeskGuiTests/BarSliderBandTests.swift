@@ -117,6 +117,18 @@ struct BarSliderBandTests {
         )
     }
 
+    /// Glyph size sits directly above Font size in the Style
+    /// drawer, since an automatic font size follows it (#1713).
+    @Test("the glyph size rows sit directly above the font size")
+    func glyphSizeSitsAboveFontSize() throws {
+        let order = BarsRowOrder.kiwishelfStyle
+        let auto = try #require(
+            order.firstIndex(of: .kiwishelf(.glyphSizeAuto))
+        )
+        #expect(order[auto + 1] == .kiwishelf(.glyphSize))
+        #expect(order[auto + 2] == .kiwishelf(.fontSizeAuto))
+    }
+
     /// The slider runs to the DRAFT's thickness: the group reads
     /// it once and hands that one value to the band and to the
     /// restore, so a literal or the band's widest thickness in

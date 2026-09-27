@@ -30,12 +30,13 @@ struct GlyphSizeTests {
 
     /// Content never goes thinner than the thinnest shelf draws
     /// it, nor deeper than the strip it sits in.
-    @Test("Content floors at the thickness floor")
-    func contentFloors() {
+    @Test("Content floors at the thickness floor", arguments: [30.0, 60.0])
+    func contentFloors(depth: Double) {
         var shelf = KiwiShelf()
         shelf.glyphSize = KiwiShelf.minContentDepth - 8
         #expect(
-            shelf.contentDepth(forDepth: 40) == KiwiShelf.minContentDepth
+            shelf.contentDepth(forDepth: CGFloat(depth))
+                == KiwiShelf.minContentDepth
         )
     }
 
