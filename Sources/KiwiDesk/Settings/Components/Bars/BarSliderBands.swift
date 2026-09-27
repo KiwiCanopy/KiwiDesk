@@ -26,6 +26,15 @@ enum BarSliderBands {
         return floor...max(Double(thickness), floor + 1)
     }
 
+    /// The shelf's Font size row (#1713): a curated legible floor
+    /// up to the draft's thickness, so the size an automatic font
+    /// draws always sits inside it. Core clamps neither edge, so
+    /// Lua stays open beyond both.
+    static func fontSize(thickness: CGFloat) -> ClosedRange<Double> {
+        let floor = 6.0
+        return floor...max(Double(thickness), floor + 1)
+    }
+
     /// The shelf's Highlight width row (#1680): both edges are
     /// Core's, which clamps the stored value to them.
     static let highlightWidth: ClosedRange<Double> =

@@ -245,7 +245,9 @@ extension KiwiShelfCard {
             PtSlider(
                 label: L("kiwishelf.font_size", "Font size"),
                 value: shelf.fontSize,
-                range: 1...32,
+                range: BarSliderBands.fontSize(
+                    thickness: shelf.thickness.wrappedValue
+                ),
                 autoAtZero: true,
                 autoValue: auto
             )

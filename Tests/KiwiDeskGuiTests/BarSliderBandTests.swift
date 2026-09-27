@@ -117,6 +117,26 @@ struct BarSliderBandTests {
         )
     }
 
+    /// The font size slider holds whatever Auto draws, on every
+    /// thickness the card offers, so the greyed thumb never pins
+    /// at an end and a switch-off never lands outside (#1713).
+    @Test("the font size band holds the automatic size")
+    func fontSizeBandHoldsAuto() {
+        let floor = Double(KiwiShelf.minThickness)
+        let top = BarSliderBands.thickness.upperBound
+        for thickness in stride(from: floor, through: top, by: 1) {
+            let depth = CGFloat(thickness)
+            let band = BarSliderBands.fontSize(thickness: depth)
+            var shelf = KiwiShelf()
+            shelf.thickness = depth
+            let auto = SpaceBarLook(shelf: shelf)
+                .identifierFontSize(forDepth: depth)
+                .rounded()
+            #expect(band.contains(Double(auto)), "\(thickness) pt")
+            #expect(band.upperBound >= thickness)
+        }
+    }
+
     /// Glyph size sits directly above Font size in the Style
     /// drawer, since an automatic font size follows it (#1713).
     @Test("the glyph size rows sit directly above the font size")
@@ -157,6 +177,10 @@ struct BarSliderBandTests {
         #expect(font.contains("identifierFontSize(forDepth:"))
         #expect(font.contains("restore: auto"))
         #expect(font.contains("autoValue: auto"))
+        #expect(
+            font.contains("BarSliderBands.fontSize(")
+                && font.contains("thickness: shelf.thickness.wrappedValue")
+        )
     }
 
     /// Which band each Core-clamped bar row reads, keyed by the
