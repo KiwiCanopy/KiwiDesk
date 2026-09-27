@@ -4764,8 +4764,16 @@ Desktop, by `delete_space`, and on an explicit `load_profile`,
 whose prune forwards it to the fallback space like any undeclared
 space. `save_profile`, the `gui.json` space list and pins and the
 per-profile record above never include one. A Desktop binding
-switch holds nothing, and held spaces do not survive a restart
+switch holds nothing.
+
+:::unreleased
+Held spaces survive a KiwiDesk restart, an update and a crash:
+every session snapshot records them, and a held space whose
+monitor is connected at launch goes home at once by the rule
+above. One none of whose windows is open at launch is not
+restored, and a restart of the Mac ends every hold
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
+:::
 
 ### Profile Monitor Sets
 

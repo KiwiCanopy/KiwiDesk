@@ -781,7 +781,8 @@ screen's Spaces are held, not forwarded*. The obligations:
 - **The hold's machinery has one home.** Holding, reclaiming,
   re-filing, retiring and ending live in the `KiwiCore+HeldSpace*`
   files — `KiwiCore+HeldSpaceOrder.swift` holds the naming walk
-  and the batch's placement, and writes no hold; write
+  and the batch's placement and `KiwiCore+HeldSpaceBoot.swift`
+  the restart's plan (#1646), and neither writes a hold; write
   `StateCoordinator.heldSpaces` in `KiwiCore+HeldSpaces.swift`
   alone, and add a new way into or out of a hold there — a caller
   elsewhere calls it, as the #634 reset
@@ -876,6 +877,32 @@ screen's Spaces are held, not forwarded*. The obligations:
   `upAwayWindowKeepsItsRank`, `HeldSpaceMemoryTests` ▸
   `renumberSkipsARememberedNumber`, `HeldSpaceMemoryTests` ▸
   `reclaimSkipsARememberedNumber`).
+- **A hold crosses a restart in every snapshot, and boot
+  re-creates it ahead of the replay (#1646).** The record rides
+  `StateSnapshot.held`, which `StateCoordinator.snapshot()`
+  writes, so a quit, the crash autosave and an in-place restart
+  all carry it — a new capture of the snapshot keeps the field
+  rather than rebuilding the value without it
+  (`HeldSpaceRestartTests` ▸ `everyCaptureCarriesHolds`). Each
+  record decodes on its own, a stored cross-version shape as
+  state-and-layout.md states for the #930 payload
+  (`HeldSpaceRestartTests` ▸ `unreadableRecordCostsOnlyItself`).
+  `arrangeBootDesk` runs `restoreHeldSpaces` BEFORE `restore` —
+  the one Space a restore creates, through `restoreHolds` — and
+  `settleHeldSpacesAtBoot` after it, which re-files through
+  `refileHeldSpaces` like a reconnect (`HeldSpaceRestartTests` ▸
+  `plainRestartKeepsHolds`, `HeldSpaceRestartTests` ▸
+  `bootDockedRefiles`, `InPlaceRestartNoMotionTests` ▸
+  `heldSpace`). The boot renumber is the reclaim's rule on a
+  record — a held id a live Space takes moves past every live
+  number unless it goes home under that name, keeping that
+  Space's mode (`HeldSpaceRestartTests` ▸
+  `declaredHeldIDIsRenumbered`, `HeldSpaceRestartTests` ▸
+  `ownNameGoesHome`) — and a record none of whose windows the
+  scan found is dropped, the hold's live-member rule
+  (`HeldSpaceRestartTests` ▸ `goneWindowsDropTheHold`). The #634
+  discard deletes the files and keeps the live holds
+  (`HeldSpaceRestartTests` ▸ `tierOneKeepsLiveHolds`).
 - **A reload leaves a held Space's mode alone.**
   `resetDeclarativeState` skips it, since no config redeclares it
   (`HeldSpaceTests` ▸ `reloadKeepsHeldMode`); the same holds for
