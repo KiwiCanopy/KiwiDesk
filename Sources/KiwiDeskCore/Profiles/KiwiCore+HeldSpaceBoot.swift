@@ -110,10 +110,13 @@ extension KiwiCore {
     /// one closed while KiwiDesk was down — so its filing is
     /// dropped and #1507's retire ends a hold left with nothing.
     /// The per-window read, not the Desktop census, which lists
-    /// user Desktops only: a hidden, away, fullscreen or
-    /// still-launching window is hosted and keeps it. An
-    /// unanswered read judges nothing (absent, never faked), and
-    /// the snapshot then stops carrying the unjudged filings.
+    /// user Desktops only. Measured 2026-09-28 on macOS 27.0 with
+    /// this selector (0x7): a window of a hidden app and a
+    /// minimized one read hosted, a closed one reads no Space.
+    /// Away, fullscreen and still-launching windows are reasoned
+    /// to read hosted, not measured. An unanswered read judges
+    /// nothing (absent, never faked) and marks the filing, which
+    /// the snapshot then does not carry again.
     func retireGoneHeldMembers() {
         let filed = state.rememberedSpaces.compactMap { entry in
             guard case .restored(let space) = entry.value,
@@ -128,10 +131,10 @@ extension KiwiCore {
             switch desktopMemory.readWindowSpace(id) {
             case .gone: gone.append(id)
             case .hosted: break
-            case .unavailable: state.heldFilingsUnjudged = true
+            case .unavailable: state.unjudgedFilings.insert(id)
             }
         }
-        if state.heldFilingsUnjudged {
+        if !state.unjudgedFilings.isEmpty {
             onLog("restart: held windows could not be judged")
         }
         guard !gone.isEmpty else { return }

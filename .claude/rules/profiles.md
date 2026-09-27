@@ -911,16 +911,20 @@ screen's Spaces are held, not forwarded*. The obligations:
   and `retireGoneHeldMembers`, AFTER the away seed, drops only
   the filings the per-window `readWindowSpace` reads as `.gone`,
   leaving the end to the retire — never the Desktop census,
-  which lists user Desktops alone, so a hidden, away, fullscreen
-  or launching window keeps it (`HeldSpaceRestartJudgeTests` ▸
+  which lists user Desktops alone. Measured 2026-09-28 on macOS
+  27.0 (`SLSCopySpacesForWindows`, selector 0x7): a hidden app's
+  window and a minimized one read hosted, a closed one reads no
+  Space; that away, fullscreen and still-launching windows read
+  hosted is reasoned, not measured (`HeldSpaceRestartJudgeTests` ▸
   `hiddenMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
   `awayMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
   `lateMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
   `fullscreenMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
-  `goneWindowsRetireAfterBoot`). An unanswered read sets
-  `heldFilingsUnjudged`, and the snapshot then carries no
-  restored filing, so a closed window holds a Space across one
-  restart at most (`HeldSpaceRestartJudgeTests` ▸
+  `goneWindowsRetireAfterBoot`). An unanswered read marks that
+  filing in `unjudgedFilings`, and the snapshot does not carry a
+  marked filing again, so a closed window holds a Space across
+  one restart at most — a filing the judge never read, a later
+  hold's included, still rides (`HeldSpaceRestartJudgeTests` ▸
   `unjudgedFilingIsNotCarriedAgain`). A return that is not in
   place re-points EVERY window remembered in the held Space —
   not only the away ledger's — at the origin, or an arrival
@@ -928,7 +932,18 @@ screen's Spaces are held, not forwarded*. The obligations:
   (`HeldSpaceRestartJudgeTests` ▸
   `homeReturnRepointsTheHiddenWindow`; a live replug into a saved
   profile is re-filed by #1230's record as well, and one into a
-  Standard has no clause).
+  Standard has no clause). Those re-pointed windows return
+  UNORDERED: `refileAway` drops the slot rank, since a rank means
+  something only in the Space it was taken in and two Spaces'
+  rank families must not merge (`renameRememberedSpace`, #1669).
+  A snapshot records the arrangement it was captured under
+  (`StateSnapshot.arrangement`), and a replay under ANOTHER leaves
+  the modes of the Spaces the live one declares: a record's mode
+  was the other arrangement's Space of that name, the #1230 merge
+  in a single field (`HeldSpaceRestartTests` ▸
+  `foreignSnapshotKeepsDeclaredModes`); under the same one a
+  runtime mode still survives (#633, `HeldSpaceRestartTests` ▸
+  `sameArrangementReplaysModes`).
   `livingRememberedSpace` keeps not gating a `.restored` target
   by ruling (#1010): the replay files before Spaces exist. The
   #634 discard deletes the files and keeps the live holds

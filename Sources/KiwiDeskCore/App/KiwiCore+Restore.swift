@@ -22,9 +22,17 @@ extension KiwiCore {
         // would wipe the restored partition with the seed.
         // Same existence gate as `adopt`: never a new space (a
         // held one boot created first counts as existing, #1646).
+        // Captured under another arrangement, a Space the live one
+        // declares keeps the mode it declares: that record's mode
+        // was another arrangement's Space of the same name (#1646).
+        let foreign =
+            snapshot.arrangement.map { $0 != liveArrangement } ?? false
+        let declaredHere = foreign ? liveHome?.declared ?? [] : []
         for record in snapshot.spaces {
             let space = SpaceID(record.id)
-            guard state.workspaces[space] != nil else {
+            guard state.workspaces[space] != nil,
+                !declaredHere.contains(space)
+            else {
                 continue
             }
             setSpaceMode(space, record.mode)

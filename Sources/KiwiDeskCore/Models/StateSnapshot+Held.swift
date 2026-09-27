@@ -66,7 +66,9 @@ extension StateCoordinator {
                 !closedDepartures.contains($0.key)
             else { return false }
             // An unjudged restored filing is not carried again.
-            if case .restored = $0.value { return !heldFilingsUnjudged }
+            if case .restored = $0.value {
+                return !unjudgedFilings.contains($0.key)
+            }
             return true
         }.keys.sorted { $0.raw < $1.raw }
         return StateSnapshot.HeldRecord(

@@ -127,17 +127,42 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     public var spaces: [SpaceRecord]
     public var activeSpace: String?
     public var capturedAt: Date
+    /// The arrangement live at the capture (#1646): a replay under
+    /// another one leaves the modes of the Spaces it declares.
+    public var arrangement: HeldOrigin.Arrangement?
 
     public init(
         windows: [WindowRecord],
         spaces: [SpaceRecord],
         activeSpace: String?,
-        capturedAt: Date = .now
+        capturedAt: Date = .now,
+        arrangement: HeldOrigin.Arrangement? = nil
     ) {
         self.windows = windows
         self.spaces = spaces
         self.activeSpace = activeSpace
         self.capturedAt = capturedAt
+        self.arrangement = arrangement
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case windows, spaces, activeSpace, capturedAt, arrangement
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        windows = try c.decode([WindowRecord].self, forKey: .windows)
+        spaces = try c.decode([SpaceRecord].self, forKey: .spaces)
+        activeSpace = try c.decodeIfPresent(
+            String.self,
+            forKey: .activeSpace
+        )
+        capturedAt = try c.decode(Date.self, forKey: .capturedAt)
+        // On its own: an unreadable one replays as an older file.
+        arrangement = try? c.decodeIfPresent(
+            HeldOrigin.Arrangement.self,
+            forKey: .arrangement
+        )
     }
 }
 

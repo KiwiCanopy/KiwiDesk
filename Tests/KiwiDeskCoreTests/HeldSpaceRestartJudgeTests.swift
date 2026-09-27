@@ -121,9 +121,15 @@ struct HeldSpaceRestartJudgeTests {
         b.desktopMemory.readWindowSpace = { _ in .unavailable }
         b.retireGoneHeldMembers()
         #expect(b.state.heldSpaces[SpaceID(5)] != nil)
-        let record = b.sessionSnapshot().spaces.first { $0.id == "5" }
+        // A filing the judge never read — here one made later in
+        // the session — still rides: the mark is per filing.
+        b.state.remember(WindowID(30), in: SpaceID(6))
+        let spaces = b.sessionSnapshot().spaces
+        let record = spaces.first { $0.id == "5" }
         #expect(record?.held != nil)
         #expect(record?.held?.remembered == [])
+        let later = spaces.first { $0.id == "6" }
+        #expect(later?.held?.remembered == [30])
         let c = t.boot(
             from: b,
             screens: [desk.builtIn],

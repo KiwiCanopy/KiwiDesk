@@ -8,6 +8,7 @@ extension StateCoordinator {
     ) {
         // Forget record to test if window was minimized (#40, #673).
         effects.appearedWasMinimized = forgetMinimized(window.id)
+        unjudgedFilings.remove(window.id)
         // A close return is placed as NEW (#1414/#1561): memory,
         // slot and any restore filed over it dropped FIRST, so
         // every reader below sees one fact; consumed on every arrival.

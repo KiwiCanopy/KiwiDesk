@@ -203,4 +203,47 @@ struct HeldSpaceRestartTests {
         #expect(b.state.workspaces.allSpaces.map(\.id) == order)
     }
 
+    /// Quit under `solo` (3 floating, 1 stack), boot docked under
+    /// `desk` (3 scrolling, 1 bsp): the device sitting of
+    /// 2026-09-28 came back with 3 floating, the snapshot's mode.
+    @Test("a boot under another arrangement keeps its declared modes")
+    func foreignSnapshotKeepsDeclaredModes() throws {
+        let core = try desk.docked()
+        var solo = try core.profiles.read(name: "solo")
+        solo.spaceModes[SpaceID(3)] = .floating
+        solo.spaceModes[SpaceID(1)] = .stack
+        try core.profiles.save(solo)
+        var deskProfile = try core.profiles.read(name: "desk")
+        deskProfile.spaceModes[SpaceID(3)] = .scrolling
+        try core.profiles.save(deskProfile)
+        core.handle(.displaysChanged([desk.builtIn]))
+        #expect(core.state.workspaces[SpaceID(3)]?.mode == .floating)
+        let session = try crossed(core.sessionSnapshot())
+        #expect(session.arrangement == .profile("solo"))
+        let b = boot(
+            from: core,
+            screens: [desk.builtIn, desk.dell],
+            profile: "desk",
+            session: session
+        )
+        #expect(b.state.heldSpaces.isEmpty)
+        #expect(desk.members(b, 3) == desk.ids([10, 11]))
+        #expect(b.state.workspaces[SpaceID(3)]?.mode == .scrolling)
+        #expect(b.state.workspaces[SpaceID(1)]?.mode == .bsp)
+    }
+
+    /// The negative control: under the SAME arrangement a runtime
+    /// mode still survives the restart (#633).
+    @Test("a boot under the same arrangement replays its modes")
+    func sameArrangementReplaysModes() throws {
+        let a = try unplugged()
+        a.setSpaceMode(SpaceID(1), .monocle)
+        let b = boot(
+            from: a,
+            screens: [desk.builtIn],
+            profile: "solo",
+            session: try crossed(a.sessionSnapshot())
+        )
+        #expect(b.state.workspaces[SpaceID(1)]?.mode == .monocle)
+    }
 }

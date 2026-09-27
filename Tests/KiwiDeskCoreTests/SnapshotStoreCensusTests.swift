@@ -94,6 +94,8 @@ struct SnapshotStoreCensusTests {
             (.behind, "the replay's own debt, written by it"),
         "state.departedSlots":
             (.behind, "a Desktop departure's slot (#1207)"),
+        "state.unjudgedFilings":
+            (.behind, "a boot's unanswered judge; ends the carry (#1646)"),
         "state.closedDepartures":
             (.behind, "a close's mark, consumed at the next arrival"),
         "state.awayWindows":

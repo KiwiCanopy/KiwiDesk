@@ -222,12 +222,14 @@ extension StateCoordinator {
         guard case .restored? = rememberedSpaces[id] else { return }
         rememberedSpaces[id] = nil
         restoredFrames[id] = nil
+        unjudgedFilings.remove(id)
     }
 
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]
         closedDepartures = []
+        unjudgedFilings = []
         restoredFrames = [:]
         departedSlots = [:]
         awayWindows = [:]

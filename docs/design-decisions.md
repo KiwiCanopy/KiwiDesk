@@ -12488,15 +12488,19 @@ it while any of them may return. Whether one may is the
 WindowServer's to say, window by window, and only after the away
 seed: a window it hosts on no Space at all was closed, or
 belonged to an app that relaunched under new windows, so its
-filing is dropped and a hold left with nothing ends. The
+filing is dropped and a hold left with nothing ends. Measured on
+macOS 27.0 (2026-09-28): a hidden app's window and a minimized one
+read hosted, a closed one reads no Space; that a window away on
+another Desktop, on a fullscreen Space or still launching reads
+hosted is reasoned from the same read, not measured. The
 per-Desktop census cannot say it, since it lists user Desktops
-only and would read a fullscreen window as closed. Dropping a hold at the replay instead,
-for want of a live member, would have ended every hold whose
+only and would read a fullscreen window as closed. Dropping a
+hold at the replay instead, for want of a live member, would have ended every hold whose
 windows are hidden, away or still launching — the very windows
 #1507 keeps a hold for. Without that reading nothing is judged,
-absent and never faked; the snapshot then stops carrying the
-unjudged filings, so a closed window keeps a hold across one
-restart and not forever. A hold that goes home into its origin
+absent and never faked; the snapshot then stops carrying those
+unjudged filings — each one marked, never the session's — so a
+closed window keeps a hold across one restart and not forever. A hold that goes home into its origin
 under another number takes every window it remembers along, a
 hidden app's too, or that window's return would re-create the
 retired number as an ordinary Space the next save captures. A hold whose Space no longer exists names nothing
@@ -12505,6 +12509,16 @@ Mac ends every hold without a separate store: macOS gives every
 reopened window a new identity, so a hold kept across it would
 hold nothing. The residue is in
 [accepted limitations](accepted-limitations.md).
+
+**A replay under another arrangement keeps its declared modes.**
+A snapshot names the arrangement it was captured under. Quit
+undocked and launch docked, and the docked profile's `3` is not
+the laptop's `3`: replaying the record's mode onto it is the
+merge by name #1230 refuses, and a device sitting (2026-09-28)
+came back with the docked Space floating because the laptop's was.
+So a replay under another arrangement leaves the modes of the
+Spaces the live one declares, as a reconnect's apply would; under
+the same one a mode set at runtime still survives (#633).
 
 **Discarding the saved arrangement deletes the record, not the
 hold.** The #634 discard removes the snapshot files that carry
