@@ -44,20 +44,58 @@ public struct SpaceBarLook: Sendable, Equatable {
         dynamicMember path: KeyPath<SpaceBarStyle, T>
     ) -> T { bar[keyPath: path] }
 
-    /// Space identifier font size for a bar depth: the shelf's
-    /// size, or half the depth when auto, kept 8 pt inside it.
+    /// The depth an item's content is sized to on a strip `depth`
+    /// deep — the shelf's one derivation (#1682).
+    public func contentDepth(forDepth depth: CGFloat) -> CGFloat {
+        shelf.contentDepth(forDepth: depth)
+    }
+
+    /// Space identifier font size on a strip `depth` deep, the
+    /// item padding taken off inside (#1682).
+    public func identifierFontSize(forDepth depth: CGFloat) -> CGFloat {
+        identifierFontSize(forContentDepth: contentDepth(forDepth: depth))
+    }
+
+    /// App glyph size on a strip `depth` deep.
+    public func glyphFontSize(forDepth depth: CGFloat) -> CGFloat {
+        glyphFontSize(forContentDepth: contentDepth(forDepth: depth))
+    }
+
+    /// Front-app title size on a strip `depth` deep.
+    public func titleFontSize(forDepth depth: CGFloat) -> CGFloat {
+        titleFontSize(forContentDepth: contentDepth(forDepth: depth))
+    }
+
+    /// Space identifier font size for a depth that is ALREADY
+    /// content — a schematic's; a live bar takes `forDepth:`. The
+    /// shelf's size, or half the content when auto, kept 8 pt
+    /// inside it.
     public func identifierFontSize(
-        forDepth depth: CGFloat
+        forContentDepth content: CGFloat
     ) -> CGFloat {
-        let base = shelf.fontSize > 0 ? shelf.fontSize : depth * 0.5
-        return min(base, max(depth - 8, 8))
+        let base =
+            shelf.fontSize > 0 ? shelf.fontSize : content * 0.5
+        return min(base, max(content - 8, 8))
     }
 
     /// App glyph size — a ratio of ONE ladder, so item glyphs,
     /// front-app glyph and identifier never desync (QA
     /// 2026-07-19).
-    public func glyphFontSize(forDepth depth: CGFloat) -> CGFloat {
-        identifierFontSize(forDepth: depth) * 0.9
+    public func glyphFontSize(
+        forContentDepth content: CGFloat
+    ) -> CGFloat {
+        identifierFontSize(forContentDepth: content) * 0.9
+    }
+
+    /// The front-app segment's title size for a content depth:
+    /// the shelf's, or auto at `KiwiShelf.autoTitleShare`,
+    /// unclamped — the App Bar's title clamps, this one does not
+    /// (#1682).
+    public func titleFontSize(
+        forContentDepth content: CGFloat
+    ) -> CGFloat {
+        shelf.fontSize > 0
+            ? shelf.fontSize : content * KiwiShelf.autoTitleShare
     }
 
     /// The shelf's corner radius for a thickness.
@@ -107,13 +145,26 @@ public struct AppBarLook: Sendable, Equatable {
         dynamicMember path: KeyPath<AppBarStyle, T>
     ) -> T { bar[keyPath: path] }
 
-    /// Title font size: the shelf's, or auto-scaled with
-    /// thickness (`SpaceBarLook.identifierFontSize`).
+    /// The depth an item's content is sized to on a strip `depth`
+    /// deep — the shelf's one derivation (#1682).
+    public func contentDepth(forDepth depth: CGFloat) -> CGFloat {
+        shelf.contentDepth(forDepth: depth)
+    }
+
+    /// Title font size on a strip `depth` deep, the item padding
+    /// taken off inside (#1682).
+    public func resolvedFontSize(forDepth depth: CGFloat) -> CGFloat {
+        resolvedFontSize(forContentDepth: contentDepth(forDepth: depth))
+    }
+
+    /// Title font size for a depth that is ALREADY content — a
+    /// schematic's; a live bar takes `forDepth:`. The shelf's, or
+    /// auto at `KiwiShelf.autoTitleShare`, clamped 9–28.
     public func resolvedFontSize(
-        forThickness thickness: CGFloat
+        forContentDepth content: CGFloat
     ) -> CGFloat {
         if shelf.fontSize > 0 { return shelf.fontSize }
-        return min(max(thickness * 0.42, 9), 28)
+        return min(max(content * KiwiShelf.autoTitleShare, 9), 28)
     }
 
     /// Content folded for the shelf's edge: a vertical bar draws

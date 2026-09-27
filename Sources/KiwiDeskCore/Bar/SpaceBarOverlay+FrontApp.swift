@@ -23,7 +23,9 @@ extension SpaceBarOverlay {
         }
         attachFrontViewsIfNeeded()
         let depth = horizontal ? strip.height : strip.width
-        let cell = max(depth - SpaceBarItemView.pad * 2, 8)
+        let cell = SpaceBarItemView.cell(
+            contentDepth: style.contentDepth(forDepth: depth)
+        )
         let accent = NSColor(kiwiHex: style.focusedItemColor)
         var offset = cursor
         offset += layoutDivider(
@@ -71,7 +73,9 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         guard let app else { return 0 }
         let pad = SpaceBarItemView.pad
-        let cell = max(depth - pad * 2, 8)
+        let cell = SpaceBarItemView.cell(
+            contentDepth: style.contentDepth(forDepth: depth)
+        )
         let chip = style.hasBox || wantsBoxGlass(style)
         let inset = chip ? pad : 0
         var extent =
@@ -79,9 +83,7 @@ extension SpaceBarOverlay {
             + style.itemGap + inset + cell + inset
         if horizontal {
             extent += pad
-            let size =
-                style.fontSize > 0
-                ? style.fontSize : depth * 0.42
+            let size = style.titleFontSize(forDepth: depth)
             extent +=
                 ceil(
                     // What is DRAWN, not the app name: measuring
@@ -236,9 +238,7 @@ extension SpaceBarOverlay {
         }
         frontName.isHidden = false
         frontName.stringValue = app.title ?? app.name
-        let size =
-            style.fontSize > 0
-            ? style.fontSize : depth * 0.42
+        let size = style.titleFontSize(forDepth: depth)
         frontName.font = .systemFont(ofSize: size)
         frontName.textColor = accent
         frontName.lineBreakMode = .byTruncatingTail

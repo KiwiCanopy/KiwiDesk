@@ -81,6 +81,11 @@ extension APIReference {
                 + "alike.",
             .number("gap")
         ),
+        "set_item_padding": APIRecord(
+            "Sets the points between the thickness and each "
+                + "item's content, which shrinks into the rest.",
+            .number("padding")
+        ),
         "set_font_size": APIRecord(
             "Pins the font size in points for both bars; 0 scales "
                 + "with thickness.",

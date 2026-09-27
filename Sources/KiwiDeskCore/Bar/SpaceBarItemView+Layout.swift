@@ -5,22 +5,32 @@ extension SpaceBarItemView {
     /// Cross-axis padding inside the slot.
     static let pad: CGFloat = 4
 
+    /// The item's depth across the shelf.
+    var depth: CGFloat { horizontal ? bounds.height : bounds.width }
+
+    /// The depth this item's content is sized to (#1682).
+    var contentDepth: CGFloat { style.contentDepth(forDepth: depth) }
+
     /// Cell dimension for glyphs along the bar axis.
-    var cellLength: CGFloat {
-        let depth = horizontal ? bounds.height : bounds.width
-        return max(depth - Self.pad * 2, 8)
+    var cellLength: CGFloat { Self.cell(contentDepth: contentDepth) }
+
+    /// A glyph cell's side for a content depth — the one
+    /// derivation the items and the front-app segment share.
+    static func cell(contentDepth: CGFloat) -> CGFloat {
+        max(contentDepth - pad * 2, 8)
     }
 
     /// Computes requested slot length for given app count and overflow badge.
     /// `glyphGap` is the style's `resolvedGlyphGap`, taken with
-    /// no default so a caller cannot measure without it (#1689).
+    /// no default so a caller cannot measure without it (#1689);
+    /// `contentDepth` is the shelf's for the strip (#1682).
     static func autoLength(
         appCount: Int,
         overflow: Int = 0,
-        depth: CGFloat,
+        contentDepth: CGFloat,
         glyphGap: CGFloat
     ) -> CGFloat {
-        let cell = max(depth - pad * 2, 8)
+        let cell = cell(contentDepth: contentDepth)
         let slots = appCount + (overflow > 0 ? 1 : 0)
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
@@ -51,12 +61,14 @@ extension SpaceBarItemView {
         cursor += cell
         if !identifierDivider.isHidden {
             cursor += Self.pad
-            let depth =
-                horizontal ? bounds.height : bounds.width
+            // An in-item rule is content: centred on the full
+            // depth, as long as the content allows (#1682).
             identifierDivider.frame = BarDivider.frame(
                 at: cursor,
                 depth: depth,
-                horizontal: horizontal
+                horizontal: horizontal,
+                lengthShare: BarDivider.ruleLengthShare
+                    * contentDepth / max(depth, 1)
             )
             cursor += 1 + Self.pad
         }

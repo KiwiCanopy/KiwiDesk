@@ -4,8 +4,8 @@ import AppKit
 extension SpaceBarOverlay {
     /// Lays out Boxed fill or per-box glass for the front chip.
     /// Mirrors `SpaceBarItemView`'s box — keep the two in step on
-    /// any fill/corner change; the radius here resolves from
-    /// `depth`, the chip's from `min(width, height)`.
+    /// any fill change; both boxes round through
+    /// `SpaceBarItemView.boxRadius` (#1682).
     func layoutFrontBox(
         _ app: SpaceBarItemView.App,
         from start: CGFloat,
@@ -32,7 +32,9 @@ extension SpaceBarOverlay {
                 ? content.frame.maxX : frontName.frame.maxX)
             : content.frame.maxY
         let length = max(end - start, cell) + pad * 2
-        let cross = cell + pad * 2
+        // The chip spans the strip like an item's box; padding
+        // shrinks only the content in it (#1682).
+        let cross = max(cell + pad * 2, depth)
         let crossOrigin = max((depth - cross) / 2, 0)
         let rect =
             horizontal
@@ -48,7 +50,11 @@ extension SpaceBarOverlay {
                 width: cross,
                 height: length
             )
-        let radius = style.resolvedCornerRadius(forThickness: depth)
+        let radius = SpaceBarItemView.boxRadius(
+            look: style,
+            depth: depth,
+            size: rect.size
+        )
         frontBorder.frame = rect
         ShelfBorder.paint(
             frontBorder,

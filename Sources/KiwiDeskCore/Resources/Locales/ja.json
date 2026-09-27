@@ -665,6 +665,8 @@
   "kiwishelf.inner_margin.help": "ウインドウ側の追加の余白です。そこにあるギャップに加算され、0 にするとそのギャップだけが適用されます。",
   "kiwishelf.item_gap": "項目間のギャップ",
   "kiwishelf.item_gap.help": "項目どうしの間隔です。スペースの項目にもApp Barの項目にも適用されるため、両方のバーが同じリズムになります。",
+  "kiwishelf.item_padding": "項目のパディング",
+  "kiwishelf.item_padding.help": "厚みの内側、KiwiShelfの縁と各項目の内容とのあいだのパディングです。アイコン、グリフ、自動フォントサイズはこれに合わせて小さくなり、厚みは変わりません。",
   "kiwishelf.margins": "マージン",
   "kiwishelf.margins.summary": "外側と内側のマージン",
   "kiwishelf.minimum": "Space Barの最小長",

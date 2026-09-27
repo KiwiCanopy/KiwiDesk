@@ -665,6 +665,8 @@
   "kiwishelf.inner_margin.help": "Zusätzlicher Rand auf der Fensterseite, zusätzlich zu dem Abstand, der dort ohnehin liegt; bei 0 gilt allein dieser Abstand.",
   "kiwishelf.item_gap": "Elementabstand",
   "kiwishelf.item_gap.help": "Abstand zwischen Elementen — für Space-Elemente wie für App-Bar-Elemente, damit beide Leisten einen gemeinsamen Rhythmus halten.",
+  "kiwishelf.item_padding": "Elementeinzug",
+  "kiwishelf.item_padding.help": "Raum innerhalb der Dicke, zwischen der Kante von KiwiShelf und dem, was jedes Element zeigt. Symbole, Glyphen und eine automatische Schriftgröße werden damit kleiner; die Dicke bleibt.",
   "kiwishelf.margins": "Ränder",
   "kiwishelf.margins.summary": "Äußerer und innerer Rand",
   "kiwishelf.minimum": "Space-Bar-Minimum",

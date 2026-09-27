@@ -20,6 +20,7 @@ enum KiwiShelfCommandSetting {
     case borderWidth(CGFloat)
     case highlightWidth(CGFloat)
     case itemGap(CGFloat)
+    case itemPadding(CGFloat)
     case fontSize(CGFloat)
     case iconSource(BarAppIconSource)
     case dimFactor(CGFloat)
@@ -115,6 +116,7 @@ enum KiwiShelfCommandSetting {
             "border_width": Self.borderWidth,
             "highlight_width": Self.highlightWidth,
             "item_gap": Self.itemGap,
+            "item_padding": Self.itemPadding,
             "font_size": Self.fontSize,
         ]
     }
@@ -164,6 +166,8 @@ enum KiwiShelfCommandSetting {
             shelf.highlightWidth = KiwiShelf.clampHighlightWidth(value)
         case .itemGap(let value):
             shelf.itemGap = max(KiwiShelf.minItemGap, value)
+        case .itemPadding(let value):
+            shelf.itemPadding = max(KiwiShelf.minItemPadding, value)
         case .fontSize(let value): shelf.fontSize = value
         case .iconSource(let value): shelf.iconSource = value
         case .dimFactor(let value):

@@ -630,3 +630,27 @@ Boxed.
   with — against that wallpaper, at the idle floor
   (`ShelfBorderContrastTests`). The switch and the width are not
   palette keys (#375).
+
+## An item's content is sized to the content depth, never the thickness
+
+`kiwishelf.item_padding` (#1682) shrinks what an item draws
+inside the thickness while the thickness stays the reservation,
+so a content size read off the strip's depth draws the unpadded
+size beside padded neighbours.
+
+- **Size an item's content through the look's strip-depth
+  readings** — `contentDepth(forDepth:)` for a cell, an icon or a
+  badge, and the `forDepth:` font ladders, which take the padding
+  off once inside. Hand them the STRIP depth; the
+  `forContentDepth:` ladders are for a caller already holding a
+  content depth (the Settings preview's schematic), and a live
+  bar passing them the strip depth compiles and draws unpadded.
+- **A box keeps the full depth**: an item, the front-app chip, a
+  plate, a corner radius. A RULE inside an item is content — the
+  identifier divider runs the content's share, centred on the full
+  depth — while a section or layer divider between runs keeps the
+  full depth.
+- **A new consumer owes a clause** in `ItemPaddingSpaceBarTests`
+  or `ItemPaddingAppBarTests`, which render both bars at a padding
+  and read no list of sites; the preview's own guard is
+  `ItemPaddingPreviewTests`.

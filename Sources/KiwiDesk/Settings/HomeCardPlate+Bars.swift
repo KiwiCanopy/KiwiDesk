@@ -57,6 +57,18 @@ struct HomeCardBarsTile: View {
         var borderWidth: CGFloat
         var borderColor: String
         var fontSize: CGFloat
+        /// The share of the thickness the content fills
+        /// (`contentShare`, #1682).
+        var contentShare: CGFloat = 1
+    }
+
+    /// The share of the thickness an item's content fills, read
+    /// off Core's `contentDepth(forDepth:)` (#1682), so the
+    /// frame's glyphs shrink with the padding as the live bar's.
+    func contentShare(_ shelf: KiwiShelf) -> CGFloat {
+        guard shelf.thickness > 0 else { return 1 }
+        return shelf.contentDepth(forDepth: shelf.thickness)
+            / shelf.thickness
     }
 
     /// Schematic points per live point of an indicator: the
@@ -173,6 +185,7 @@ struct HomeCardBarsTile: View {
     func spaceSpec(_ style: SpaceBarLook) -> BarSpec {
         let cross = crossSize(style.thickness)
         let widths = indicatorWidths(style.shelf)
+        let share = contentShare(style.shelf)
         return BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
@@ -191,7 +204,10 @@ struct HomeCardBarsTile: View {
             edgeMarkWidth: widths.edgeMark,
             borderWidth: borderWidth(style.shelf),
             borderColor: style.borderColor,
-            fontSize: style.identifierFontSize(forDepth: cross)
+            fontSize: style.identifierFontSize(
+                forContentDepth: cross * share
+            ),
+            contentShare: share
         )
     }
 
@@ -201,6 +217,7 @@ struct HomeCardBarsTile: View {
     ) -> BarSpec {
         let cross = crossSize(style.thickness)
         let widths = indicatorWidths(style.shelf)
+        let share = contentShare(style.shelf)
         return BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
@@ -219,7 +236,10 @@ struct HomeCardBarsTile: View {
             edgeMarkWidth: widths.edgeMark,
             borderWidth: borderWidth(style.shelf),
             borderColor: style.borderColor,
-            fontSize: style.resolvedFontSize(forThickness: cross)
+            fontSize: style.resolvedFontSize(
+                forContentDepth: cross * share
+            ),
+            contentShare: share
         )
     }
 

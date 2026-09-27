@@ -16,6 +16,16 @@ enum BarSliderBands {
     static let margin: ClosedRange<Double> =
         Double(KiwiShelf.minMargin)...60
 
+    /// The shelf's Item padding row (#1682): Core's floor up to
+    /// the most padding that still moves content on the thickest
+    /// shelf this card offers — past it `contentDepth` holds the
+    /// content at `minContentDepth` whatever the value.
+    static let itemPadding: ClosedRange<Double> = {
+        let floor = Double(KiwiShelf.minItemPadding)
+        let content = Double(KiwiShelf.minContentDepth)
+        return floor...((thickness.upperBound - content) / 2)
+    }()
+
     /// The shelf's Highlight width row (#1680): both edges are
     /// Core's, which clamps the stored value to them.
     static let highlightWidth: ClosedRange<Double> =

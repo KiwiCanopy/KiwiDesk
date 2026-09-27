@@ -17,7 +17,7 @@ struct SpaceBarSizingTests {
         #expect(
             SpaceBarItemView.autoLength(
                 appCount: 0,
-                depth: 32,
+                contentDepth: 32,
                 glyphGap: 0
             ) == CGFloat(8 + 24)
         )
@@ -30,7 +30,7 @@ struct SpaceBarSizingTests {
         #expect(
             SpaceBarItemView.autoLength(
                 appCount: 2,
-                depth: 32,
+                contentDepth: 32,
                 glyphGap: 0
             ) == CGFloat(8 + 24 + 9 + 48)
         )
@@ -39,7 +39,7 @@ struct SpaceBarSizingTests {
             SpaceBarItemView.autoLength(
                 appCount: 2,
                 overflow: 3,
-                depth: 32,
+                contentDepth: 32,
                 glyphGap: 0
             ) == CGFloat(8 + 24 + 9 + 72)
         )
@@ -50,24 +50,24 @@ struct SpaceBarSizingTests {
         var style = SpaceBarLook()
         // Auto: half depth, clamped to depth - 8, then ×0.9.
         #expect(
-            style.glyphFontSize(forDepth: 32) == 14.4
+            style.glyphFontSize(forContentDepth: 32) == 14.4
         )
         // The identifier is the same ladder without the step.
         #expect(
-            style.identifierFontSize(forDepth: 32) == 16
+            style.identifierFontSize(forContentDepth: 32) == 16
         )
         // Thin bar: the depth-minus-padding clamp bites.
         #expect(
-            style.identifierFontSize(forDepth: 20) == 10
+            style.identifierFontSize(forContentDepth: 20) == 10
         )
         // Explicit font_size wins (still clamped).
         style.fontSize = 12
         #expect(
-            style.glyphFontSize(forDepth: 32) == 10.8
+            style.glyphFontSize(forContentDepth: 32) == 10.8
         )
         style.fontSize = 100
         #expect(
-            style.identifierFontSize(forDepth: 32) == 24
+            style.identifierFontSize(forContentDepth: 32) == 24
         )
     }
 }

@@ -75,7 +75,8 @@ struct KiwiShelfCommandParityTests {
             .innerMargin(6), .backgroundStyle(.boxed),
             .liquidGlass(false), .backgroundFit(.full),
             .cornerRoundness(5), .border(true), .borderWidth(3),
-            .highlightWidth(4), .itemGap(3), .fontSize(15),
+            .highlightWidth(4), .itemGap(3), .itemPadding(5),
+            .fontSize(15),
             .iconSource(.appFont), .dimFactor(0.3),
         ]
     }
@@ -143,6 +144,7 @@ struct KiwiShelfCommandParityTests {
         case .dimFactor: return [.number(0.3)]
         case .minimum, .thickness, .outerMargin, .innerMargin,
             .cornerRoundness, .borderWidth, .highlightWidth, .itemGap,
+            .itemPadding,
             .fontSize:
             return [.number(30)]
         case .itemColor, .activeItemColor, .highlightColor,

@@ -106,8 +106,22 @@ extension SpaceBarItemView {
     }
 
     var cornerRadius: CGFloat {
-        style.resolvedCornerRadius(
-            forThickness: min(bounds.width, bounds.height)
+        Self.boxRadius(look: style, depth: depth, size: bounds.size)
+    }
+
+    /// A Space item box's radius — the one derivation its layer
+    /// and its glass read: from the full `depth`, as every item's,
+    /// so a glyphless item shorter than the depth under item
+    /// padding rounds like its neighbours; never past half the
+    /// box's shorter side (#1682).
+    static func boxRadius(
+        look: SpaceBarLook,
+        depth: CGFloat,
+        size: CGSize
+    ) -> CGFloat {
+        min(
+            look.resolvedCornerRadius(forThickness: depth),
+            min(size.width, size.height) / 2
         )
     }
 
@@ -236,14 +250,10 @@ extension SpaceBarItemView {
     }
 
     var identifierFont: CGFloat {
-        style.identifierFontSize(
-            forDepth: horizontal ? bounds.height : bounds.width
-        )
+        style.identifierFontSize(forDepth: depth)
     }
 
     var glyphSize: CGFloat {
-        style.glyphFontSize(
-            forDepth: horizontal ? bounds.height : bounds.width
-        )
+        style.glyphFontSize(forDepth: depth)
     }
 }

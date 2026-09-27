@@ -26,7 +26,7 @@ extension AppBarOverlay {
             trailing: fades.trailing,
             horizontal: m.horizontal
         )
-        let font = style.resolvedFontSize(forThickness: depth) * 0.9
+        let font = style.resolvedFontSize(forDepth: depth) * 0.9
         let ink = NSColor(kiwiHex: style.itemColor)
         let hoverInk = NSColor(kiwiHex: style.hoverItemColor)
         let hoverFill = NSColor(kiwiHex: style.hoverFillColor)

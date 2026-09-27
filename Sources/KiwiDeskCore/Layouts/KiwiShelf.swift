@@ -57,6 +57,10 @@ public struct KiwiShelf: Sendable, Equatable {
     public var highlightWidth: CGFloat = 2
     /// Spacing between items in pt — one rhythm for both bars.
     public var itemGap: CGFloat = 6
+    /// Room (pt) between the thickness and an item's content, on
+    /// each side across the shelf (#1682): 0 draws content at the
+    /// full thickness. A drawing reads `contentDepth(forDepth:)`.
+    public var itemPadding: CGFloat = 0
     /// Font size in pt; 0 = auto, each bar scaling with thickness.
     public var fontSize: CGFloat = 0
     /// App icon rendering: native image or App Font glyph (#294).
@@ -99,6 +103,15 @@ public struct KiwiShelf: Sendable, Equatable {
     /// The item gap's floor: flush. Decode and setter apply it;
     /// no ceiling (#1695).
     public static let minItemGap: CGFloat = 0
+    /// The thinnest content an item draws (#1682): what the
+    /// thinnest shelf draws unpadded, so padding never takes a
+    /// glyph below a size QA already ruled readable.
+    public static let minContentDepth: CGFloat = minThickness
+    /// An automatic title's size per point of content depth, both
+    /// bars' (#1682).
+    public static let autoTitleShare: CGFloat = 0.42
+    /// Floor of `itemPadding` (#1682): content at the thickness.
+    public static let minItemPadding: CGFloat = 0
     /// Bounds of `highlightWidth` in pt (#1680).
     public static let highlightWidthRange: ClosedRange<CGFloat> = 1...6
     /// The edge mark's thickness per point of `highlightWidth`:
@@ -194,6 +207,19 @@ public struct KiwiShelf: Sendable, Equatable {
     /// off, else `borderWidth` inside its range.
     public var drawnBorderWidth: CGFloat {
         border ? Self.clampBorderWidth(borderWidth) : 0
+    }
+
+    /// The depth an item's content is sized to on a strip `depth`
+    /// deep (#1682): the depth less `itemPadding` on each side,
+    /// never thinner than `minContentDepth` nor deeper than the
+    /// strip. That floor is the ceiling on the padding, so the
+    /// stored value needs none.
+    public func contentDepth(forDepth depth: CGFloat) -> CGFloat {
+        let padding = max(itemPadding, Self.minItemPadding)
+        return max(
+            depth - 2 * padding,
+            min(depth, Self.minContentDepth)
+        )
     }
 
     /// Concrete corner radius in pt for a given thickness.

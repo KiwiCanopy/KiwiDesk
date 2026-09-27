@@ -6,6 +6,7 @@
 enum KiwiShelfKey: String, CaseIterable, Hashable {
     case edge = "settings.kiwishelf.edge"
     case thickness = "settings.kiwishelf.thickness"
+    case itemPadding = "settings.kiwishelf.itemPadding"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
     case minimum = "settings.kiwishelf.minimum"
@@ -46,7 +47,8 @@ extension KiwiShelfKey {
 
     var placement: SettingPlacement {
         switch self {
-        case .edge, .thickness, .alignment, .order, .minimum:
+        case .edge, .thickness, .itemPadding, .alignment, .order,
+            .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .fontSizeAuto,
@@ -122,6 +124,11 @@ extension KiwiShelfKey {
             return .text(
                 "kiwishelf.thickness",
                 help: "kiwishelf.thickness.help"
+            )
+        case .itemPadding:
+            return .text(
+                "kiwishelf.item_padding",
+                help: "kiwishelf.item_padding.help"
             )
         case .alignment:
             return .text(

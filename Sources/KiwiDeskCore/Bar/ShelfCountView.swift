@@ -21,7 +21,7 @@ final class ShelfCountView: NSView {
     private let chevron = NSImageView()
     private var horizontal = true
     private var count = 0
-    private var fontSize: CGFloat = 12
+    private(set) var fontSize: CGFloat = 12
     /// The SF Symbol `configure` drew, for the placement guard.
     private(set) var drawnSymbol: String?
     private(set) var isHovered = false

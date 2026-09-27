@@ -665,6 +665,8 @@
   "kiwishelf.inner_margin.help": "윈도우 쪽의 추가 여백으로, 그 자리에 이미 있는 간격에 더해집니다. 0이면 그 간격만 적용됩니다.",
   "kiwishelf.item_gap": "항목 간격",
   "kiwishelf.item_gap.help": "항목 사이의 간격입니다 — 공간 항목과 App Bar 항목 모두에 적용되어 두 바가 같은 리듬을 유지합니다.",
+  "kiwishelf.item_padding": "항목 패딩",
+  "kiwishelf.item_padding.help": "두께 안쪽, KiwiShelf의 가장자리와 각 항목의 내용 사이의 패딩입니다. 아이콘, 글리프, 자동 서체 크기가 이에 맞춰 작아지며 두께는 그대로입니다.",
   "kiwishelf.margins": "여백",
   "kiwishelf.margins.summary": "바깥쪽 및 안쪽 여백",
   "kiwishelf.minimum": "Space Bar 최소 길이",
