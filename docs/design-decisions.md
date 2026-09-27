@@ -11498,6 +11498,16 @@ from the row. Both the switch's value and that sentence read the
 one `LiquidGlassAgreement`, so the control and its explanation
 cannot contradict; the same discipline as `agreedCornerStyle`.
 
+**A control's own finish is not a surface the switch governs.**
+(#1527, 2026-09-27.) The Settings slider knob turns clear glass
+while it is dragged, and the switch does not reach it: the switch
+is a preference about what KiwiDesk draws over the user's
+desktop, and a Settings control behaving the way the system's
+own macOS 26 controls do is not one of those surfaces. Tying the
+knob to it would give the switch a second meaning. Reduce
+transparency still stands the knob down to its white thumb,
+since that setting is the user's about every surface.
+
 **Glass OFF for the panel is `.regularMaterial`** — the material
 its pre-macOS-26 branch already draws, promoted to the designed
 off state rather than a new surface being invented for it. Each
