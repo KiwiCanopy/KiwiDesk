@@ -6,9 +6,9 @@ import Testing
 /// The sheen's contrast rule (#1644, owner 2026-09-27): the ramp's
 /// FLAT band is the configured colour itself, untouched, on every
 /// surface — so wherever that colour meets #578's 3:1, the band
-/// does, and the focused window stays findable by it. The lifted
-/// top and shaded bottom may pass the bar. The configured colours'
-/// own contrast is measured where it always was
+/// does, and the focused window stays findable by it. Only the
+/// lifted top may pass the bar; the band runs to the bottom. The
+/// configured colours' own contrast is measured where it always was
 /// (`BorderRingSeparationTests`, `DragPairSeparationTests`); this
 /// suite pins the SHAPE that carries it over, never a number
 /// (#1021).
@@ -45,12 +45,11 @@ struct BorderSheenFlatBandTests {
         ].map { Int(($0 * 255).rounded()) }
     }
 
-    /// The stops inside the flat band, read off the locations
-    /// rather than assumed to be the middle two.
+    /// The stops inside the flat band — every one below the lifted
+    /// top, the bottom included — read off the locations.
     private static var flatStops: [Int] {
         BorderSheen.locations.indices.filter {
-            let at = BorderSheen.locations[$0]
-            return at > 0 && at < 1
+            BorderSheen.locations[$0] > 0
         }
     }
 
@@ -70,25 +69,20 @@ struct BorderSheenFlatBandTests {
         }
     }
 
-    /// The ends are the sheen, at full strength: the top lifts and
-    /// the bottom shades, each ruled constant untouched by any cap.
-    @Test("the ends lift and shade in full")
-    func endsMoveInFull() throws {
+    /// The top is the sheen, at full strength, untouched by any
+    /// cap.
+    @Test("the top lifts in full")
+    func topLiftsInFull() throws {
         let hex = BorderStyle().focusedColor
         let c = try #require(DragVisual.parseHex(hex))
         let l = BorderStyle.rgbToHSL(r: c.red, g: c.green, b: c.blue).2
-        let ramp = BorderSheen.colors(hex: hex)
-        let lightness = { (color: NSColor) -> CGFloat in
-            let x = color.usingColorSpace(.sRGB) ?? color
-            return BorderStyle.rgbToHSL(
-                r: x.redComponent,
-                g: x.greenComponent,
-                b: x.blueComponent
-            ).2
-        }
-        #expect(
-            abs(lightness(ramp[0]) - (l + (1 - l) * BorderSheen.lift)) < 0.01
-        )
-        #expect(abs(lightness(ramp[3]) - l * BorderSheen.shade) < 0.01)
+        let top = try #require(BorderSheen.colors(hex: hex).first)
+        let x = top.usingColorSpace(.sRGB) ?? top
+        let topL = BorderStyle.rgbToHSL(
+            r: x.redComponent,
+            g: x.greenComponent,
+            b: x.blueComponent
+        ).2
+        #expect(abs(topL - (l + (1 - l) * BorderSheen.lift)) < 0.01)
     }
 }

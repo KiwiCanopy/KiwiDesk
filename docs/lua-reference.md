@@ -3124,13 +3124,13 @@ border.set_glow_size(0)   -- back to automatic
 **Does:** paints a sheen on the focused border, the shelf's
 [highlight](#kiwishelfset_highlight_width) and
 [border](#kiwishelfset_border), and the drag borders: a lighter
-top edge fading into the colour and a slight shade at the
-bottom. Only the lightness moves, so each keeps its own colour;
+top edge fading into the colour, which holds to the bottom. Only
+the lightness moves, so each keeps its own colour;
 it is a painted highlight, not glass, so it draws whether or not
 Liquid Glass is on, under Reduce transparency, and on any macOS.
-The middle of each stroke keeps its colour exactly, so the
-colour's own contrast still holds there; the top and bottom may
-be lighter and darker than it. The unfocused border never takes
+Below the top, each stroke keeps its colour exactly, so the
+colour's own contrast still holds there; only the top may be
+lighter than it. The unfocused border never takes
 it.
 
 Settings shows it as **Sheen**, beneath the **Liquid Glass**

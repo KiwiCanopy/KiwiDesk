@@ -20,16 +20,16 @@ struct BorderSheenTests {
         )
     }
 
-    @Test("the top lifts, the bottom shades, the hue and alpha stay")
+    @Test("the top lifts, the bottom keeps the colour, hue and alpha stay")
     func rampMovesOnlyLightness() throws {
         let hex = "#D9A521CC"
         let ramp = BorderSheen.colors(hex: hex)
         try #require(ramp.count == BorderSheen.locations.count)
         let (h, _, l) = hsl(NSColor(kiwiHex: hex))
         let (topH, _, topL) = hsl(ramp[0])
-        let (bottomH, _, bottomL) = hsl(ramp[3])
+        let (bottomH, _, bottomL) = hsl(try #require(ramp.last))
         #expect(abs(topL - (l + (1 - l) * BorderSheen.lift)) < 0.01)
-        #expect(abs(bottomL - l * BorderSheen.shade) < 0.01)
+        #expect(abs(bottomL - l) < 0.01)
         #expect(abs(topH - h) < 1)
         #expect(abs(bottomH - h) < 1)
         for color in ramp {

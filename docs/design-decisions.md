@@ -11609,8 +11609,11 @@ user had turned off, since no build before this one drew one.
 the configured colour itself, untouched, on every surface — the
 focused ring, the bar highlight, the shelf border, the drag
 borders — so wherever that colour meets #578's 3:1, the band
-does (`BorderSheenFlatBandTests`). The lifted top and the shaded
-bottom are free to go past it. #578's purpose is finding the
+does (`BorderSheenFlatBandTests`). Only the lifted top is free to
+go past it: the band runs to the bottom edge, which keeps the
+colour rather than darkening (owner 2026-09-27 — a shaded bottom
+read as a different colour on a short outline, and the lift alone
+carries the look). #578's purpose is finding the
 focused window, and a ring whose flat band holds 3:1 on three
 sides stays findable when its top edge fades toward a white
 wallpaper. The cap this replaced held every stop at 3:1 and so

@@ -1,7 +1,7 @@
 import AppKit
 
 /// The painted sheen (#1644): a lighter top edge fading into the
-/// colour and a slight shade at the bottom, on the focused ring,
+/// colour, which holds to the bottom, on the focused ring,
 /// the shelf's highlight and border, and the drag markers'
 /// borders. Only HSL lightness moves — hue, saturation and alpha
 /// stay the stroke's — so it is never real glass on a thin line
@@ -11,15 +11,14 @@ public enum BorderSheen {
     /// How far the top lifts toward white, as a share of the
     /// headroom above the colour's lightness (owner-eyeballed).
     static let lift: CGFloat = 0.45
-    /// The bottom's lightness as a share of the colour's.
-    static let shade: CGFloat = 0.8
     /// Stop locations, top (0) to bottom (1).
-    public static let locations: [CGFloat] = [0, 0.35, 0.8, 1]
+    public static let locations: [CGFloat] = [0, 0.35, 1]
     /// The ramp's colours for `locations`, top to bottom; the plain
     /// colour throughout for a hex that does not parse. The FLAT
-    /// band (the two middle stops) is the configured colour itself,
-    /// which carries the ring's #578 contrast; the lifted top and
-    /// the shaded bottom may pass it (owner 2026-09-27).
+    /// band (every stop below the top) is the configured colour
+    /// itself, which carries the ring's #578 contrast; the lifted
+    /// top may pass it, and the bottom never darkens (owner
+    /// 2026-09-27).
     public static func colors(hex: String) -> [NSColor] {
         let base = NSColor(kiwiHex: hex)
         guard let c = DragVisual.parseHex(hex) else {
@@ -34,7 +33,7 @@ public enum BorderSheen {
             let (r, g, b) = BorderStyle.hslToRGB(h: h, s: s, l: lightness)
             return NSColor(srgbRed: r, green: g, blue: b, alpha: c.alpha)
         }
-        return [color(l + (1 - l) * lift), base, base, color(l * shade)]
+        return [color(l + (1 - l) * lift), base, base]
     }
 
     /// The ramp as one `CGGradient`.
