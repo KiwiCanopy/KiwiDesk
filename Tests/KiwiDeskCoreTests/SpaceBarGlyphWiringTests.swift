@@ -193,6 +193,20 @@ struct SpaceBarGlyphWiringTests {
         #expect(core.state.workspaces.lastFocused == WindowID(1))
     }
 
+    @Test("A glyph the raise gate refuses still hands the Space over")
+    func refusedGlyphFallsBackToTheSwitch() {
+        let core = seededCore()
+        core.state.workspaces.activate(two)
+        core.state.apply(.windowCreated(window(5, app: "Term")))
+        core.state.apply(.windowFocused(WindowID(5)))
+        core.state.workspaces.activate(one)
+        core.state.apply(.windowFocused(WindowID(1)))
+        core.windowIsOnScreen = { $0 == WindowID(4) ? false : nil }
+        core.focusFromSpaceBar(WindowID(4), on: two)
+        #expect(core.activeSpace?.id == two)
+        #expect(core.state.workspaces.lastFocused == WindowID(5))
+    }
+
     @Test("A row the focus door would refuse is greyed, not hidden")
     func refusedRowIsGreyed() {
         let core = seededCore()

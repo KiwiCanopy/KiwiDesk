@@ -33,7 +33,9 @@ extension KiwiCore {
     /// Switches to `space` landing on `window` through the one
     /// follow-shaped switch, or focuses it where `space` is already
     /// active. A menu row picked after its window left `space` —
-    /// the menu is modal, the loop keeps running — is dropped.
+    /// the menu is modal, the loop keeps running — is dropped; a
+    /// window the raise gate refuses (#1345) takes the chip's plain
+    /// switch instead, so the Space still hands focus over.
     func focusFromSpaceBar(_ window: WindowID, on space: SpaceID) {
         guard let members = state.workspaces[space],
             state.effectiveMembers(of: members).contains(window)
@@ -42,7 +44,16 @@ extension KiwiCore {
             focusWithMonocleFlip(window, step: nil)
             return
         }
+        guard !raiseCrossesDesktops(window) else {
+            _ = focusSpace([.string(space.raw)])
+            return
+        }
         followSwitch(to: space, focusing: window)
+        // The float layer comes back above the tiled plane as on a
+        // chip click (#412), which `followSwitch` does not do.
+        if !floatLayerTargets().isEmpty {
+            raiseFloatsAndSticky(thenFocus: window)
+        }
     }
 
     func spaceBarMenuRows(

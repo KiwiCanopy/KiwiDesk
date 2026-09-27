@@ -41,8 +41,14 @@ extension SpaceBarItemView {
         let wanted =
             collapse == nil && !overflowWindows.isEmpty
             ? overflowWindows : []
+        let label = L(
+            "space_bar.overflow.ax",
+            "Windows not shown: %1$d",
+            wanted.count
+        )
         if let kept = overflowTarget, kept.space == space,
-            kept.members == wanted
+            kept.members == wanted,
+            kept.accessibilityLabel() == label
         {
             kept.actions = glyphActions
             return
@@ -54,11 +60,7 @@ extension SpaceBarItemView {
             space: space,
             windows: wanted,
             kind: .overflow,
-            label: L(
-                "space_bar.overflow.ax",
-                "Windows not shown: %1$d",
-                wanted.count
-            )
+            label: label
         )
     }
 
