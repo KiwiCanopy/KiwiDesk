@@ -129,10 +129,12 @@ extension SpaceBarItemView {
             emphasis: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
-        let diameter = min(
-            max(base, textWidth + 2),
-            cell + 2
-        )
+        // Below the held asterisk the disc keeps clear of it.
+        let ceiling =
+            lowerCorner
+            ? max(cell - StateBadgeMetrics.side(cell: cell), base)
+            : cell + 2
+        let diameter = min(max(base, textWidth + 2), ceiling)
         let cellRect =
             horizontal
             ? CGRect(

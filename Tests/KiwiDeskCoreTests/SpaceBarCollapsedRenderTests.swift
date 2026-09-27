@@ -15,11 +15,14 @@ import Testing
 struct SpaceBarCollapsedRenderTests {
     private func render(
         _ content: SpaceBarStyle.InactiveContent,
-        held: Bool = false
+        held: Bool = false,
+        windows: Int = 3
     ) throws -> SpaceBarOverlay {
         LiquidGlassGate.override = { false }
         let manager = SpaceBarManager()
-        manager.sync([collapsedBar(content, held: held)])
+        manager.sync([
+            collapsedBar(content, held: held, windows: windows)
+        ])
         return try #require(manager.overlayForTesting(barTitleDisplay))
     }
 
@@ -40,21 +43,48 @@ struct SpaceBarCollapsedRenderTests {
         let disc = view.overflowBadge.frame
         #expect(!view.overflowBadge.isHidden)
         #expect(disc.maxX <= view.bounds.width)
-        // A corner disc, smaller than the cell, on its top half.
+        // A corner disc of the badge family's size, on the
+        // identifier cell's top-trailing corner.
         let cell = view.cellLength
+        let identifier = CGRect(
+            x: SpaceBarItemView.pad,
+            y: (view.bounds.height - cell) / 2,
+            width: cell,
+            height: cell
+        )
+        #expect(disc.width >= StateBadgeMetrics.side(cell: cell) - 1)
         #expect(disc.width < cell)
+        #expect(disc.intersects(identifier))
+        #expect(abs(disc.maxX - (identifier.maxX + 1)) <= 1)
         #expect(disc.midY < view.bounds.midY)
     }
 
     /// The held asterisk owns the top corner (#1507), so the disc
     /// takes the bottom one rather than covering it.
-    @Test("A held Space's disc takes the bottom corner")
-    func heldDiscMovesDown() throws {
-        let view = try render(.count, held: true).itemViews[1]
+    @Test(
+        "A held Space's disc takes the bottom corner",
+        arguments: [3, 12]
+    )
+    func heldDiscMovesDown(windows: Int) throws {
+        let view = try render(.count, held: true, windows: windows)
+            .itemViews[1]
         view.layoutSubtreeIfNeeded()
         #expect(!view.heldBadge.isHidden)
         #expect(view.overflowBadge.frame.midY > view.bounds.midY)
         #expect(!view.overflowBadge.frame.intersects(view.heldBadge.frame))
+    }
+
+    /// Past nine the disc reads "9+" and stays a disc, while the
+    /// label announces the exact count.
+    @Test("A crowded Space's disc reads 9+")
+    func crowdedDiscCaps() throws {
+        LocalizationManager.shared.select("en")
+        let view = try render(.count, windows: 12).itemViews[1]
+        #expect(view.overflowBadge.stringValue == "9+")
+        #expect(
+            view.accessibilityLabel()
+                == "Space 2, windows: 12, not current"
+        )
     }
 
     @Test("Window count draws the whole count, unprefixed")
@@ -118,7 +148,8 @@ func collapsedBar(
     _ content: SpaceBarStyle.InactiveContent,
     active: Int = 1,
     boxedGlass: Bool = false,
-    held: Bool = false
+    held: Bool = false,
+    windows: Int = 3
 ) -> SpaceBarManager.Bar {
     let app = { (name: String, count: Int) in
         SpaceBarItemView.App(
@@ -132,7 +163,8 @@ func collapsedBar(
         )
     }
     let apps = [
-        [app("Notes", 1)], [app("Mail", 2), app("Web", 1)], [],
+        [app("Notes", 1)], [app("Mail", windows - 1), app("Web", 1)],
+        [],
     ]
     let items = apps.enumerated().map { index, apps in
         var item = SpaceBarOverlay.Item(

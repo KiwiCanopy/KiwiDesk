@@ -56,8 +56,8 @@ public final class SpaceBarOverlay {
         /// does not show draws `content`, so the length the
         /// shelf plans and the one the render draws both read
         /// the result. The shown item, a layer item and `.apps`
-        /// pass unchanged. The count is the unit of the `+n`
-        /// badge and the accessibility label; the state badges
+        /// pass unchanged. The count is what the corner disc
+        /// draws and the label announces; the state badges
         /// go with the glyphs, and `overflow` keeps meaning the
         /// windows hidden past the cap.
         func collapsed(

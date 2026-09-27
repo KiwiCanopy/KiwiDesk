@@ -22,8 +22,8 @@ extension APIReference {
             .number("gap")
         ),
         "set_inactive_content": APIRecord(
-            "Sets what a Space off screen shows: its apps, its "
-                + "window count, or its identifier alone.",
+            "Sets what a Space off screen shows: its apps, or its "
+                + "identifier with a window count.",
             .choice(
                 "content",
                 SpaceBarStyle.InactiveContent.self
