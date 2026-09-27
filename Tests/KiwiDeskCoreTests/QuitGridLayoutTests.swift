@@ -23,9 +23,11 @@ private func ids(_ range: Range<UInt32>) -> [WindowID] {
     range.map { WindowID($0) }
 }
 
-/// The standard density target (#281): most suites pin the
-/// default behavior; the custom-target tests pass their own.
-private let depth = QuitGridLayout.defaultTargetDepth
+/// The density target the tables below reason from, pinned as a
+/// literal (#660) so a retune of `defaultTargetDepth` leaves the
+/// ladder's clauses standing; the custom-target tests pass their
+/// own.
+private let depth = 5
 
 private func frames(
     _ count: UInt32,
@@ -76,6 +78,19 @@ struct QuitGridShapeTests {
         for (index, shape) in expected.enumerated() {
             #expect(dims(index + 1, in: region) == shape)
         }
+    }
+
+    /// Exact ties: four on 2:1 score 4×1 and 2×2 alike (cells 1:2
+    /// and 2:1), two on a square score 2×1 and 1×2 alike. The tie
+    /// takes fewer splits across the short axis.
+    @Test("an exact tie takes fewer splits across the short axis")
+    func tieTakesFewerAcross() {
+        let wide = frame(0, 0, 2000, 1000)
+        let tall = frame(0, 0, 1000, 2000)
+        let square = frame(0, 0, 1000, 1000)
+        #expect(dims(4, in: wide) == [4, 1])
+        #expect(dims(4, in: tall) == [1, 4])
+        #expect(dims(2, in: square) == [2, 1])
     }
 
     @Test("the ladder at depth 5: 3×2, 4×2, 4×3, then 4×4")

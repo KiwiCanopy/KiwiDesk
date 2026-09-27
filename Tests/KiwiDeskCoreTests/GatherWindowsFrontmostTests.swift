@@ -155,7 +155,7 @@ struct GatherWindowsFrontmostTests {
             placingLast: WindowID(2)
         )
         let group = try #require(groups.first)
-        let depth = QuitGridLayout.defaultTargetDepth
+        let depth = 5  // the depth these counts assume (#660)
         let grid = QuitGridLayout.shape(
             tiles: group.windows.count,
             in: group.axFrame,
@@ -196,7 +196,7 @@ struct GatherWindowsFrontmostTests {
         let circle = QuitGridLayout.raiseOrder(
             for: group.windows,
             in: group.axFrame,
-            targetDepth: QuitGridLayout.defaultTargetDepth
+            targetDepth: 5  // the depth these counts assume (#660)
         )
         #expect(circle.count == 4)
         #expect(circle.last == WindowID(2))
@@ -214,7 +214,7 @@ struct GatherWindowsFrontmostTests {
             primaryHeight: primaryH,
             style: .grid,
             minSize: 300,
-            targetDepth: QuitGridLayout.defaultTargetDepth,
+            targetDepth: 5,  // the depth these counts assume (#660)
             placingLast: WindowID(2)
         )
         #expect(

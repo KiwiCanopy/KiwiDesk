@@ -13,7 +13,8 @@ private let portraitFrame = CGRect(
     height: 1895
 )
 private let minSize: CGFloat = 300
-private let depth = QuitGridLayout.defaultTargetDepth
+// The density target these counts reason from, pinned (#660).
+private let depth = 5
 
 private func ids(_ range: Range<UInt32>) -> [WindowID] {
     range.map { WindowID($0) }

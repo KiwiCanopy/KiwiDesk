@@ -76,7 +76,7 @@ private func targets(
         primaryHeight: primaryH,
         style: .grid,
         minSize: minSize,
-        targetDepth: QuitGridLayout.defaultTargetDepth
+        targetDepth: 5  // the depth these counts assume (#660)
     )
 }
 
