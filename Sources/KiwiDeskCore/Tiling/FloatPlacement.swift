@@ -74,29 +74,47 @@ extension FloatPlacement {
 
     /// `frame` stepped down and right by `cascadeStep` until no
     /// frame in `others` shares its centre, within half a step, or
-    /// piles with it by `FloatGather.isPiled` either way (#1708);
-    /// `frame` itself where the next step would leave `region`.
+    /// piles with it by `FloatGather.isPiled` either way (#1708).
+    /// Where no such step fits `region` — a float larger than the
+    /// walk can leave — the shared centre alone decides, and
+    /// `frame` itself where even that finds no step.
     public static func cascaded(
         _ frame: CGRect,
         avoiding others: [CGRect],
         in region: CGRect
     ) -> CGRect {
         let reach = cascadeStep / 2
-        func taken(_ candidate: CGRect) -> Bool {
+        func sharesCentre(_ candidate: CGRect) -> Bool {
             others.contains {
-                (abs($0.midX - candidate.midX) < reach
-                    && abs($0.midY - candidate.midY) < reach)
-                    || FloatGather.isPiled(candidate, among: [$0])
+                abs($0.midX - candidate.midX) < reach
+                    && abs($0.midY - candidate.midY) < reach
+            }
+        }
+        func piles(_ candidate: CGRect) -> Bool {
+            others.contains {
+                FloatGather.isPiled(candidate, among: [$0])
                     || FloatGather.isPiled($0, among: [candidate])
             }
         }
+        return walk(frame, in: region) { sharesCentre($0) || piles($0) }
+            ?? walk(frame, in: region, while: sharesCentre)
+            ?? frame
+    }
+
+    /// The first diagonal step from `frame` that `taken` refuses
+    /// not, inside `region`; nil where the walk leaves it first.
+    private static func walk(
+        _ frame: CGRect,
+        in region: CGRect,
+        while taken: (CGRect) -> Bool
+    ) -> CGRect? {
         var candidate = frame
         while taken(candidate) {
             candidate = candidate.offsetBy(
                 dx: cascadeStep,
                 dy: cascadeStep
             )
-            guard region.contains(candidate) else { return frame }
+            guard region.contains(candidate) else { return nil }
         }
         return candidate
     }

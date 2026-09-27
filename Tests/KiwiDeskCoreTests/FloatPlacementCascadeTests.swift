@@ -72,6 +72,21 @@ struct FloatPlacementCascadeTests {
         )
     }
 
+    /// A float too large to walk out of must not switch the
+    /// cascade off: the shared centre still steps the new window.
+    @Test("a float too large to leave still lets a centre step")
+    func largeFloatKeepsTheCentreStep() {
+        let frame = CGRect(x: 400, y: 170, width: 800, height: 660)
+        // Maximised: every step inside the region stays inside it.
+        let big = region
+        let placed = FloatPlacement.cascaded(
+            frame,
+            avoiding: [big, frame],
+            in: region
+        )
+        #expect(placed == frame.offsetBy(dx: step, dy: step))
+    }
+
     @Test("a step off the region prices the pile at the centre")
     func stepOffRegionStays() {
         let frame = CGRect(x: 400, y: 380, width: 800, height: 600)

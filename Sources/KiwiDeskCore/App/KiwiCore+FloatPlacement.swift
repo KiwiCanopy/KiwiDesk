@@ -118,15 +118,23 @@ extension KiwiCore {
         )
     }
 
-    /// The frames the other effective floats drawn on `space` show
-    /// or will show — a sticky traveler included, a parked one's
-    /// pending capture first.
+    /// The frames the other effective floats on `space` show or
+    /// will show, a parked one's pending capture first: its own
+    /// members, the travelers it draws now, and every ∞ window,
+    /// which an unshown Space draws once it activates.
     private func otherFloatFrames(
         on space: SpaceID,
         besides id: WindowID
     ) -> [CGRect] {
         guard let workspace = state.workspaces[space] else { return [] }
-        return state.effectiveMembers(of: workspace).compactMap { other in
+        let global = state.windows.all
+            .filter { $0.stickyScope == .global }.map(\.id)
+        var seen = Set<WindowID>()
+        let candidates =
+            (workspace.windows
+            + state.effectiveMembers(of: workspace) + global)
+            .filter { seen.insert($0).inserted }
+        return candidates.compactMap { other in
             guard other != id,
                 let window = state.windows[other],
                 !window.isFullscreen,

@@ -4195,10 +4195,16 @@ either direction — a smaller window centred on a larger one sits
 inside it, which a centre test alone steps past without leaving —
 the new one steps down and right by a fixed step until the spot
 is free, the float verbs and the move alike (owner ruling
-2026-09-27). Where the next step would leave the region,
-the centred frame stands: past that point a pile is accepted
-rather than pushed off the screen. A remembered frame (#1675)
-never cascades, because it is the user's.
+2026-09-27). A float the walk cannot leave inside the region —
+a near-maximised one contains every step — must not switch the
+cascade off for the rest, so where no step fits, the shared centre
+alone decides; where even that finds none, the centred frame
+stands, a pile accepted rather than pushed off the screen. The
+floats counted are every one the Space will draw where the window
+lands: its own members, the travelers it draws now, and, for a
+Space not yet shown, every all-Spaces window that arrives with the
+switch. A remembered frame (#1675) never cascades, because it is
+the user's.
 
 *The knob.* `set_float_placement("center" | "keep")`, Lua-only
 like the other float polish knobs (#502); `keep` is the exact
