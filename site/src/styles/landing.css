@@ -1442,6 +1442,15 @@ section {
 .req + .hero__stars {
   margin-top: 0.35rem;
 }
+.hero__ph {
+  margin: 0.9rem 0 0;
+  text-align: center;
+}
+.hero__ph img {
+  display: inline-block;
+  width: 250px;
+  height: 54px;
+}
 .hero__stars a {
   display: inline-flex;
   align-items: center;

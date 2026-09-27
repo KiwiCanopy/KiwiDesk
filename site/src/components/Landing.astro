@@ -602,6 +602,16 @@ const jsonLd = [
               {starsLabel}
             </a>
           </p>
+          {/* Self-hosted copy of Product Hunt's review badge, so a
+               visit sends no request to their servers. */}
+          <p class="hero__ph">
+            <a href="https://www.producthunt.com/products/kiwidesk/reviews/new?utm_source=badge-product_review&utm_medium=badge"
+              target="_blank" rel="noopener">
+              <img src="/badges/producthunt-review.svg"
+                alt={t.producthunt_review_alt} width="250" height="54"
+                decoding="async" />
+            </a>
+          </p>
           {/* The badge states the version, read from the release
                the download actually points at. It used to read
                "Public beta — available now" — a hand-maintained
