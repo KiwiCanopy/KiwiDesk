@@ -279,7 +279,7 @@ struct HeldSpaceTests {
         #expect(
             view.accessibilityLabel()
                 == "Space 5, held from DELL, where it was Space 3, "
-                + "not saved, 0 applications, not current"
+                + "not saved, windows: 0, not current"
         )
     }
 }

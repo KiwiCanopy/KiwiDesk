@@ -65,6 +65,8 @@ final class SpaceBarItemView: NSView {
     /// True if focused window is in overflow (#376).
     private(set) var focusInOverflow = false
     private(set) var held: Held?
+    /// What this item draws in place of its glyphs (#1683).
+    private(set) var collapse: Collapse?
     private(set) var isActive = false
     private(set) var isHovered = false
     /// Drag hover state (#372).
@@ -184,7 +186,8 @@ final class SpaceBarItemView: NSView {
         stateMarkColors: StateMarkColors,
         overflow: Int = 0,
         focusInOverflow: Bool = false,
-        held: Held? = nil
+        held: Held? = nil,
+        collapse: Collapse? = nil
     ) {
         if self.identity != identity {
             cancelSpringSweep()
@@ -199,6 +202,7 @@ final class SpaceBarItemView: NSView {
         self.overflow = overflow
         self.focusInOverflow = focusInOverflow
         self.held = held
+        self.collapse = collapse
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
@@ -209,36 +213,6 @@ final class SpaceBarItemView: NSView {
         setAccessibilityElement(true)
         setAccessibilityRole(space == nil ? .image : .button)
         setAccessibilityLabel(axLabel)
-    }
-
-    /// Announced whatever the glyph draws (bars.md): a layer
-    /// item names its layer, a Space item its Space and count.
-    private var axLabel: String {
-        let space: SpaceID
-        switch identity {
-        case .layer(let layer):
-            return L(
-                "space_bar.item.ax.layer",
-                "Shortcut layer %1$@",
-                layer
-            )
-        case .space(let id):
-            space = id
-        }
-        let windows =
-            apps.reduce(0) { $0 + $1.count } + overflow
-        let name = spaceName(space, windows: windows)
-        return isActive
-            ? L(
-                "space_bar.item.ax.current",
-                "%1$@, current",
-                name
-            )
-            : L(
-                "space_bar.item.ax.not_current",
-                "%1$@, not current",
-                name
-            )
     }
 
     private func syncAppViews() {

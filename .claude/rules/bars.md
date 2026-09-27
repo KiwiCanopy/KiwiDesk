@@ -10,6 +10,7 @@ paths:
   # drivers and in the item builders they call.
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarRun.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
   # The one shelf (#1517): where a bar field lives, the one
@@ -117,6 +118,19 @@ bars. Obligations:
   run's outer `pad` the one slack allowed where `item_gap` is
   below it. `ShelfNeedParityTests` holds both bars to it, both
   placements, a gap each side of the pad.
+- **Collapse a Space item once, in
+  `SpaceBarOverlay.Item.collapsed(to:)`, applied by the item
+  builder after the `hide_empty` verdict** (#1683) — never in a
+  render or a preview, since the plan measures the builder's
+  items and a collapse decided anywhere else draws a run the plan
+  did not reserve. A collapsed item's count is a disc on the
+  identifier's cell and adds no length, so the length and the
+  layout both measure the identifier alone.
+  `SpaceBarCollapsedRenderTests` ▸ `discRidesTheIdentifier`
+  holds the disc inside the planned length; that no other site
+  collapses is review's. The run's glide on a
+  switch goes through `BarMotion` like every bar motion, its box
+  glass travelling with its item (`SpaceBarGlideWiringTests`).
 
 ## One shelf panel per display draws the plate; the bars draw sections
 
@@ -188,6 +202,11 @@ render content into it (#1517). Obligations:
   alpha applied to the item colour beside it.
   `IdleItemContrastTests` holds the value and its legibility; the
   routing is review's.
+- **An empty Space's identifier, on a Space its screen does not
+  show, is `KiwiShelf.emptyItemColor` under either content,
+  derived from the palette and never picked** (#1683): the idle floor and the occupied-to-empty step
+  both hold, or the cue drops rather than the floor.
+  `EmptyItemInkTests` measures every bundled palette's answer.
 
 ## Overflow fades, follows and pages through one home each
 

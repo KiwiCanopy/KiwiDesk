@@ -21,6 +21,14 @@ extension APIReference {
                 + "Space item; 0 abuts them.",
             .number("gap")
         ),
+        "set_inactive_content": APIRecord(
+            "Sets what a Space off screen shows: its apps, or its "
+                + "identifier with a window count.",
+            .choice(
+                "content",
+                SpaceBarStyle.InactiveContent.self
+            )
+        ),
         "set_active_indicator": APIRecord(
             "Sets how the active Space is marked.",
             .choice(

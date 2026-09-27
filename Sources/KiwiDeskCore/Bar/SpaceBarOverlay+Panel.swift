@@ -29,10 +29,16 @@ extension SpaceBarOverlay {
         _ mode: GlassHosting,
         frames: [CGRect],
         style: SpaceBarLook,
-        depth: CGFloat
+        depth: CGFloat,
+        animated: Bool
     ) {
         guard mode == .boxGlass else { return }
-        updateBoxGlasses(frames: frames, style: style, depth: depth)
+        updateBoxGlasses(
+            frames: frames,
+            style: style,
+            depth: depth,
+            animated: animated
+        )
     }
 
     func syncItemViewCount(_ count: Int) {

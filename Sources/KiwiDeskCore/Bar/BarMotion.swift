@@ -24,8 +24,8 @@ enum BarMotion {
     /// short enough not to lag a focus change.
     static let slide: TimeInterval = 0.15
 
-    /// Runs `body` in the animation group every App Bar relayout
-    /// uses.
+    /// Runs `body` in the bars' item-slide animation group: every
+    /// App Bar relayout, and the Space run's glide (#1683).
     @MainActor
     static func runLayout(_ body: () -> Void) {
         let reduceMotion = isReduced
