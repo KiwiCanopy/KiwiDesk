@@ -40,7 +40,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     }
 
     public struct SpaceRecord: Codable, Sendable, Equatable {
-        public let id: String
+        public private(set) var id: String
         public let mode: LayoutMode
         public let windows: [UInt32]
         public let focused: UInt32?
@@ -104,23 +104,51 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                 forKey: .session
             )
         }
+
+        /// This record under another id (#1646's boot renumber).
+        func renamed(to id: String) -> SpaceRecord {
+            var copy = self
+            copy.id = id
+            return copy
+        }
     }
 
     public var windows: [WindowRecord]
     public var spaces: [SpaceRecord]
     public var activeSpace: String?
     public var capturedAt: Date
+    /// The held Spaces (#1646), in every snapshot.
+    public var held: [HeldRecord]
 
     public init(
         windows: [WindowRecord],
         spaces: [SpaceRecord],
         activeSpace: String?,
-        capturedAt: Date = .now
+        capturedAt: Date = .now,
+        held: [HeldRecord] = []
     ) {
         self.windows = windows
         self.spaces = spaces
         self.activeSpace = activeSpace
         self.capturedAt = capturedAt
+        self.held = held
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case windows, spaces, activeSpace, capturedAt, held
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        windows = try c.decode([WindowRecord].self, forKey: .windows)
+        spaces = try c.decode([SpaceRecord].self, forKey: .spaces)
+        activeSpace = try c.decodeIfPresent(
+            String.self,
+            forKey: .activeSpace
+        )
+        capturedAt = try c.decode(Date.self, forKey: .capturedAt)
+        // Each record on its own, as the in-place payloads (#930).
+        held = Self.decodeHeld(from: c, forKey: .held)
     }
 }
 
@@ -193,7 +221,8 @@ extension StateCoordinator {
             spaces: workspaces.allSpaces.map {
                 StateSnapshot.SpaceRecord(space: $0)
             },
-            activeSpace: workspaces.activeSpace?.raw
+            activeSpace: workspaces.activeSpace?.raw,
+            held: heldRecords
         )
     }
 }

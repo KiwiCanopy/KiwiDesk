@@ -89,7 +89,7 @@ struct SnapshotStoreCensusTests {
                     + "the active one; a residue"
             ),
         "state.heldSpaces":
-            (.behind, "held Spaces (#1507) — a residue until #1646"),
+            (.always, "held Spaces, re-created at boot (#1646)"),
         "state.restoredFrames":
             (.behind, "the replay's own debt, written by it"),
         "state.departedSlots":
@@ -158,6 +158,12 @@ struct SnapshotStoreCensusTests {
         core.state.departedSlots[WindowID(9)] = .init(rank: 0)
         core.state.closedDepartures.insert(WindowID(9))
         core.tiler.monocleShownMembers[shown] = WindowID(1)
+        core.state.heldSpaces[hidden] = HeldOrigin(
+            name: hidden,
+            screen: "DELL:1920x1080",
+            icon: nil,
+            arrangement: nil
+        )
         _ = F.settle(core)
         return core
     }
@@ -177,6 +183,7 @@ struct SnapshotStoreCensusTests {
         for named in [
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.manualFloatOverrides", "tiler.monocleShownMembers",
+            "state.heldSpaces",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

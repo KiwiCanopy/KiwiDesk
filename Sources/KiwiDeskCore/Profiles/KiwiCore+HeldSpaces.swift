@@ -74,7 +74,7 @@ extension KiwiCore {
     /// Whether a held Space goes home at this apply: its screen is
     /// back, the incoming arrangement is the one it left, and that
     /// arrangement declares its name.
-    private func returnsHome(
+    func returnsHome(
         _ origin: HeldOrigin,
         declared: Set<SpaceID>,
         into arrangement: HeldOrigin.Arrangement
@@ -187,6 +187,23 @@ extension KiwiCore {
         ) {
             setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
         }
+    }
+
+    /// Boot's way into a hold (#1646): re-creates each held Space
+    /// a snapshot recorded, under the id `restoreHeldSpaces` gave it,
+    /// ahead of the replay that files its windows — the one Space
+    /// a restore creates (#633), since no config declares it.
+    func restoreHolds(_ holds: [(id: SpaceID, origin: HeldOrigin)]) {
+        for (id, origin) in holds {
+            state.workspaces.ensureSpace(id)
+            state.heldSpaces[id] = origin
+            onLog(
+                "restart: held space \(id.raw) from "
+                    + "'\(origin.screenName)'"
+                    + (id == origin.name ? "" : " (was \(origin.name.raw))")
+            )
+        }
+        placeHeldBatchLast(holds.map(\.id))
     }
 
     /// Ends one Space's hold — `delete_space` removed it.

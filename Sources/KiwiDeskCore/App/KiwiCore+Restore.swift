@@ -123,7 +123,10 @@ extension KiwiCore {
         }
         let signposter = BootSignpost.signposter
         let span = signposter.beginInterval("sessionRestore")
-        restore(session)
+        // Held Spaces first, so the replay files into them (#1646).
+        let holds = restoreHeldSpaces(from: session)
+        restore(holds.snapshot)
+        settleHeldSpacesAtBoot(holds)
         activateSpaceOfFocusedWindow()
         seedStartupFocus()
         spaceSwitchRetile()
