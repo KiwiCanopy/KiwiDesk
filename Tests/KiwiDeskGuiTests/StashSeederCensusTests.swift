@@ -26,6 +26,12 @@ struct StashSeederCensusTests {
         "App/KiwiCore+FloatReanchor.swift": 1,
         // The strand net's centred capture (#1352).
         "App/KiwiCore+FloatRecovery.swift": 1,
+        // The float placement of a window a move verb files into
+        // a floating Space (#1708): a centred, cascaded or
+        // remembered frame in the grow bound — never a corner —
+        // seeded ahead of the move's own retile, whose #1177
+        // gather outranks it by overwriting where it trips.
+        "App/KiwiCore+FloatPlacement.swift": 1,
         // The entry-into-floating gather (#1177).
         "App/KiwiCore+FloatGather.swift": 1,
         // The clamp correcting a pending capture in place, so

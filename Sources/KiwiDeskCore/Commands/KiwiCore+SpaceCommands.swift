@@ -127,8 +127,9 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The ONE membership filing (#1150): add, the #444 float
-    /// re-anchor, the #22 focus stamp, `window_moved_to_space` —
+    /// The ONE membership filing (#1150): add, the #1708 float
+    /// placement or else the #444 re-anchor, the #22 focus stamp,
+    /// `window_moved_to_space` —
     /// callers keep their own focus policy and retile. A
     /// same-space re-file is geometry-neutral and emits nothing:
     /// the window may sit on another display than its membership
@@ -138,8 +139,13 @@ extension KiwiCore {
         into target: SpaceID,
         from: SpaceID?
     ) {
+        // Read before the filing: only a window that was no
+        // effective float where it left ENTERS floating (#1708).
+        let wasFloat = isEffectiveFloatForPlacement(window)
         addFocusedToSpace(window, to: target)
-        if from != target {
+        if from != target,
+            !placeEnteringFloat(window, wasFloat: wasFloat)
+        {
             reanchorFloat(window, to: target)
         }
         state.workspaces.focus(window, in: target)

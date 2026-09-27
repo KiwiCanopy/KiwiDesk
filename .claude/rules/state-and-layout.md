@@ -251,7 +251,8 @@ editing here:
   it takes `stickyMoveRefused` before anything moves, and every
   membership filing — this route, `moveWindow`, the #1010
   re-home, the Space Bar spring drop — goes through the one
-  `fileMembership` (add, float re-anchor, focus stamp, emit),
+  `fileMembership` (add, float placement or else re-anchor,
+  focus stamp, emit),
   never a hand copy of that list, which is how the re-anchor went
   missing once; no fixture can see a float cross fake screens, so
   `PendingSpaceSeamTests` counts the callers and pins the
@@ -1690,7 +1691,12 @@ editing here:
   away re-file) are named (`FloatGatherRepartitionTests`
   drives the doors, the receiver-only scope and the transit; a
   float parked half-off by hand beside a re-filed window is
-  gathered with it, the priced trade). A member's frame
+  gathered with it, the priced trade). The move verb's entry is
+  the float PLACEMENT's instead (#1708): a tiled window a verb
+  files into a floating Space is placed, cascaded, inside the one
+  `fileMembership`, so a membership route filing beside it owes
+  the same placement (`FloatMovePlacementTests`,
+  `PendingSpaceSeamTests` ▸ `filingReanchors`). A member's frame
   is the one it WOULD show, `wouldBeFrame`'s four rungs, stated
   there once. And `clampFloatsClearOfBars` judges a pending
   capture rather than the state frame the window is leaving,

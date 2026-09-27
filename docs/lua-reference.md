@@ -625,13 +625,20 @@ KiwiDesk.set_swap_skips_cascade(true)
 
 **Does:** where a window lands when `make_floating` or a
 `toggle_floating` that lands on floating turns it from tiled to
-floating. `"center"`: it is centered in the area of its screen
+floating, or when a move command (`move_to_space`, a quick drop
+on the Space Bar, a Desktop move that re-files it) moves a tiled
+window into a floating-mode Space; a window still being dragged
+lands where you drop it. `"center"`: it
+is centered in the area of its screen
 clear of the menu bar and any App/Space Bar, at a size measured
 from that area: two thirds of the short side, and along the long
 side a third, at least 800 pt but never more than 1.25 times the
 short-side span (so under 800 pt on a short screen). A landscape
 screen gets a tall window; a portrait one gets a wide one. An app
 that will not go that small, or that large, keeps its own limit.
+Where another floating window on that Space already sits at the
+center, the new one steps down and to the right, like a stack of
+cards, as long as the step still fits on the screen.
 A window floated again after you tiled it returns to the frame it
 last floated at, while that frame is still on the same screen;
 KiwiDesk forgets it when the window closes, its app quits or

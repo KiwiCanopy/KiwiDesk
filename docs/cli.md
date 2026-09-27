@@ -253,7 +253,7 @@ exports nothing.
 | | `reset_layout_sizing` | `[space\|all]` returns the active space's ratios, slot size and weights to what the profile set — or one space's, or every space's; structure stays |
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
-| | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating |
+| | `set_float_placement` | `center` (default) \| `keep` — where a window lands when it toggles to floating or moves into a floating Space |
 | | `sticky.set_desktop_reach` | true\|false (default `true`) — sticky windows follow you across macOS Desktops (needs the window-management bridge) |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |

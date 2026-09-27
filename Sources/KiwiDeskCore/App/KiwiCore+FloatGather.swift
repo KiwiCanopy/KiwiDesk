@@ -91,8 +91,9 @@ extension KiwiCore {
 
     /// The frame a member would show: its pending capture, then
     /// the commanded frame, then the recent instant target, then
-    /// state — every rung, since this site meets every float kind.
-    private func wouldBeFrame(of window: ManagedWindow) -> CGRect {
+    /// state — every rung, since this site meets every float kind
+    /// (the gather's and the placement's cascade, #1708).
+    func wouldBeFrame(of window: ManagedWindow) -> CGRect {
         tiler.stashOriginal(window.id)
             ?? tiler.animation.commandedFrame(
                 window: window.id,

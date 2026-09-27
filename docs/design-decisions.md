@@ -4202,8 +4202,45 @@ home's, for the gate and the region alike: a window already an
 effective float there — its flag, or a floating-mode member whose
 frame is the user's — keeps it. `make_auto` stays
 out (its flip is detection, not a deliberate float), as do app
-rules floating a window at creation and floating-mode entry,
-which #1177's quit grid owns.
+rules floating a window at creation and a Space's own entry into
+floating mode, which #1177's quit grid owns.
+
+*A move into a floating Space is placed the same way (#1708).* A
+tiled window a move verb files into a floating-mode Space —
+`move_to_space`, a Space Bar drop, a Desktop move that re-files
+it — brings the same layout slot, and from a scrolling row that
+is often a scrolled-out column's, partly off the screen. So the
+filing places it as the float verbs do, delivered through the
+stash seed so an unshown Space receives it at its activation. It
+is not the #1177 gather: the user chose the destination and the
+Space's other floats are theirs, so only the arriving window
+moves. A window that was already an effective float keeps its
+frame and takes the #502 crossing, and a dragged one keeps the
+pointer's placement. A sticky window keeps the re-anchor: the
+only sticky the filing reaches is a display sticky crossing
+displays (#445 refuses the rest), and it never parks, so a
+seeded placement would wait for a delivery that never comes
+while the window stays visible on the wrong screen.
+
+*A centred placement cascades.* Several windows floated or moved
+in one after another would all land on the same frame, a pile
+#1177 reads as unreachable. So where another effective float drawn
+on that Space shares the centred frame's centre, within half a
+step, or would pile with it by #1177's own containment test in
+either direction — a smaller window centred on a larger one sits
+inside it, which a centre test alone steps past without leaving —
+the new one steps down and right by a fixed step until the spot
+is free, the float verbs and the move alike (owner ruling
+2026-09-27). A float the walk cannot leave inside the region —
+a near-maximised one contains every step — must not switch the
+cascade off for the rest, so where no step fits, the shared centre
+alone decides; where even that finds none, the centred frame
+stands, a pile accepted rather than pushed off the screen. The
+floats counted are every one the Space will draw where the window
+lands: its own members, the travelers it draws now, and, for a
+Space not yet shown, every all-Spaces window that arrives with the
+switch. A remembered frame (#1675) never cascades, because it is
+the user's.
 
 *The knob.* `set_float_placement("center" | "keep")`, Lua-only
 like the other float polish knobs (#502); `keep` is the exact
