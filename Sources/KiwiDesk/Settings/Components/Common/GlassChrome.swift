@@ -80,6 +80,13 @@ enum GlassChromeVariant {
     case regular
     case clear
 
+    /// Whether this macOS can draw glass at all — the platform
+    /// half of the branch, for a caller that must know which
+    /// side it is on.
+    static var drawable: Bool {
+        if #available(macOS 26, *) { true } else { false }
+    }
+
     @available(macOS 26, *)
     fileprivate var glass: Glass {
         switch self {

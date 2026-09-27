@@ -15,13 +15,15 @@ struct SettingsSlider: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
     @FocusState private var focused: Bool
     /// True for the gesture's lifetime; resets on cancel too.
     @GestureState private var dragging = false
 
     private static let knobWidth: CGFloat = 30
     private static let knobHeight: CGFloat = 20
-    private static let trackHeight: CGFloat = 6
+    private static let trackHeight: CGFloat = 8
     private static let height: CGFloat = 24
     /// Visual only — layout keeps the resting size (#1527).
     private static let dragScale: CGFloat = 1.25
@@ -143,12 +145,17 @@ struct SettingsSlider: View {
         value = snapped(range.lowerBound + Double(t) * span)
     }
 
-    /// White knob thumb, clear glass while dragged (#1527). The
-    /// glass is Settings' own control finish, so it ignores the
-    /// overlays' Liquid Glass switch; Reduce transparency and
-    /// pre-26 keep the white knob through `glassChrome`, so the
-    /// rim and shadow stay in both states — they are that
-    /// knob's only edge.
+    /// True while the knob draws as glass rather than its white
+    /// fallback — the branch `glassChrome` takes (#1374).
+    private var knobIsGlass: Bool {
+        dragging && !reduceTransparency && GlassChromeVariant.drawable
+    }
+
+    /// White knob thumb, fully clear glass while dragged (#1527).
+    /// The glass is Settings' own control finish, so it ignores
+    /// the overlays' Liquid Glass switch. The rim and shadow are
+    /// the white knob's only edge and stand down only where the
+    /// glass draws, since both read as frost through it.
     private var knob: some View {
         Color.clear
             .glassChrome(
@@ -159,12 +166,12 @@ struct SettingsSlider: View {
             )
             .overlay(
                 Capsule().strokeBorder(
-                    Color.black.opacity(0.1),
+                    Color.black.opacity(knobIsGlass ? 0 : 0.1),
                     lineWidth: 0.5
                 )
             )
             .shadow(
-                color: .black.opacity(0.25),
+                color: .black.opacity(knobIsGlass ? 0 : 0.25),
                 radius: 2,
                 y: 1
             )
