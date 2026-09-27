@@ -39,6 +39,7 @@ struct EchoClockSeamTests {
         "FrameApplier.swift": 1,
         "KiwiCore+ZOrderFloats.swift": 1,
         "KiwiCore+TeardownRaise.swift": 2,
+        "KiwiCore+InPlaceRestart.swift": 1,
     ]
 
     @Test("the host uptime is read only as a seam's default")

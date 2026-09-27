@@ -187,6 +187,11 @@ extension KiwiCore {
     }
 
     public func stop() {
+        // An announced in-place restart gathers NOTHING, parked
+        // windows included (#930 ruling 2): the next process
+        // re-adopts them where they are. A failed relaunch leaves
+        // the desk as a crash does, and its snapshot restores it.
+        let inPlace = takeInPlaceRestart()
         // Retire focus rings first: the gather below moves windows
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
@@ -196,7 +201,11 @@ extension KiwiCore {
         retireFontSet()
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
-        gatherWindows()
+        if inPlace {
+            onLog("stop: in-place restart — windows left in place")
+        } else {
+            gatherWindows()
+        }
         // exec children are fire-and-forget: we do not
         // terminate or wait for them. They are re-parented to
         // launchd and finish naturally after the app exits.
@@ -230,7 +239,9 @@ extension KiwiCore {
             crash.shutdownCleanly(preservingSession: true)
             onLog("stopped before ready; previous session kept")
         } else {
-            crash.shutdownCleanly()
+            // In place, the session memory a relaunch otherwise
+            // starts fresh rides along (#930 ruling 5).
+            crash.shutdownCleanly(inPlace: inPlace)
         }
         // #1230: which Space each Desktop was showing is the one
         // record here that has to outlive the process, and the

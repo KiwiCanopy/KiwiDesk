@@ -247,6 +247,7 @@ public enum APIReference {
             }
         }
         names.insert(socketOnlyCommand)
+        names.formUnion(cliOnly)
         return names.sorted()
     }
 

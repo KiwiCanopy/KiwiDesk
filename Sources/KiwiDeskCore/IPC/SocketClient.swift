@@ -62,6 +62,17 @@ public final class SocketClient {
         Darwin.close(fd)
     }
 
+    /// Bounds every later send and read to `seconds`; a read that
+    /// times out ends like EOF. For a caller that must not hang
+    /// on an app that does not answer (#930).
+    public func setTimeout(seconds: Int) {
+        var limit = timeval(tv_sec: seconds, tv_usec: 0)
+        let size = socklen_t(MemoryLayout<timeval>.size)
+        for option in [SO_RCVTIMEO, SO_SNDTIMEO] {
+            setsockopt(fd, SOL_SOCKET, option, &limit, size)
+        }
+    }
+
     public func send(_ request: CommandRequest) throws {
         var data = try JSONEncoder().encode(request)
         data.append(0x0A)

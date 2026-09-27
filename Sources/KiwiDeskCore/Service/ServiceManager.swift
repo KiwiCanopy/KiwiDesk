@@ -116,10 +116,47 @@ public enum ServiceManager {
             return Outcome(failure, ok: false)
         }
         let wasLoaded = isLoaded()
+        // Only a loaded service is being REPLACED; the app is told
+        // before the bootout, whose SIGTERM a stop sends too (#930).
+        if wasLoaded { announceInPlaceRestart() }
         _ = launchctl(["bootout", domain, agentURL.path])
         let started = bootstrap()
         guard started.ok else { return started }
         return Outcome(restartMessage(wasLoaded: wasLoaded), ok: true)
+    }
+
+    /// Tells the running app the stop that follows is an
+    /// in-place restart (`prepare_restart`). Bounded, and any
+    /// failure is ignored: an app told nothing gathers, as a
+    /// stop does.
+    static func announceInPlaceRestart() {
+        guard
+            let client = try? SocketClient(
+                path: KiwiCore.defaultSocketPath
+            )
+        else { return }
+        client.setTimeout(seconds: 2)
+        _ = try? client.roundTrip(
+            CommandRequest(command: prepareRestartCommand, args: nil)
+        )
+    }
+
+    /// The verb `announceInPlaceRestart` sends.
+    public static let prepareRestartCommand = "prepare_restart"
+
+    /// The program the service's plist starts — what launchd will
+    /// launch at the next bootstrap, and what an in-place restart's
+    /// identity gate checks (#930). Nil without a readable plist.
+    public static func programURL() -> URL? {
+        guard let data = try? Data(contentsOf: agentURL),
+            let plist = try? PropertyListSerialization.propertyList(
+                from: data,
+                format: nil
+            ) as? [String: Any],
+            let arguments = plist["ProgramArguments"] as? [String],
+            let program = arguments.first
+        else { return nil }
+        return URL(fileURLWithPath: program)
     }
 
     /// Returns human-readable status outcome for CLI (#328, #341).

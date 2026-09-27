@@ -91,6 +91,10 @@ extension APIReference {
         "reload_config": APIRecord(
             "Reloads the configuration file from disk."
         ),
+        "prepare_restart": APIRecord(
+            "Makes the next stop an in-place restart if the service "
+                + "program passes the identity check."
+        ),
         "help": APIRecord(
             "Describes one command, or lists the whole API "
                 + "surface.",
