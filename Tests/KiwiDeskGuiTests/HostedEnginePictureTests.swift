@@ -8,6 +8,11 @@ import Testing
 /// because it IS the surface the product draws. The SwiftUI glass
 /// scan cannot see inside a hosted view, so this suite is the
 /// register of which ones may.
+///
+/// **Stated limit:** a hosted type is read off each `makeNSView`'s
+/// declared return type. A representable that returns a generic
+/// `NSView` built by a helper in another file hides the Core view
+/// it wraps, and this scan cannot follow that helper.
 @Suite("Hosted engine pictures (#1645)")
 struct HostedEnginePictureTests {
     /// Core views this tree may host that draw glass, each with its
@@ -21,16 +26,34 @@ struct HostedEnginePictureTests {
         SourceScan.repoRoot(from: #filePath)
     }
 
-    /// The Core type a representable's `makeNSView` returns.
-    private static func hostedType(in source: String) -> String? {
-        guard
-            let hit = source.range(of: "func makeNSView(context: Context) -> ")
-        else { return nil }
-        return String(
-            source[hit.upperBound...].prefix {
-                $0.isLetter || $0.isNumber
-            }
-        )
+    /// The Core types every `makeNSView` in `source` returns.
+    static func hostedTypes(in source: String) -> [String] {
+        let needle = "func makeNSView(context: Context) -> "
+        var types: [String] = []
+        var rest = source[...]
+        while let hit = rest.range(of: needle) {
+            types.append(
+                String(
+                    rest[hit.upperBound...].prefix {
+                        $0.isLetter || $0.isNumber
+                    }
+                )
+            )
+            rest = rest[hit.upperBound...]
+        }
+        return types
+    }
+
+    /// Whether `source` declares `type` as a whole word — a class
+    /// or an extension of it, never a longer name that starts with
+    /// it.
+    static func declares(_ type: String, in source: String) -> Bool {
+        let pattern =
+            "\\b(class|extension)\\s+"
+            + NSRegularExpression.escapedPattern(for: type)
+            + "\\b"
+        return source.range(of: pattern, options: .regularExpression)
+            != nil
     }
 
     /// Core files declaring `type`.
@@ -41,9 +64,7 @@ struct HostedEnginePictureTests {
             under: repo.appendingPathComponent("Sources/KiwiDeskCore")
         )
         .map { try SourceScan.strippedSource(at: $0) }
-        .filter {
-            $0.contains("class \(type)") || $0.contains("extension \(type)")
-        }
+        .filter { declares(type, in: $0) }
     }
 
     @Test("every hosted Core view that draws glass is registered")
@@ -53,25 +74,45 @@ struct HostedEnginePictureTests {
             under: Self.repo.appendingPathComponent("Sources/KiwiDesk")
         ) {
             let source = try SourceScan.strippedSource(at: file)
-            guard source.contains("NSViewRepresentable"),
-                let type = Self.hostedType(in: source)
-            else { continue }
-            let core = try Self.coreSources(declaring: type)
-            guard core.contains(where: { $0.contains("GlassPlate.make(") })
-            else { continue }
-            hosted.insert(type)
-            #expect(
-                Self.glassHosts[type] != nil,
-                Comment(
-                    rawValue:
-                        "\(file.lastPathComponent) hosts \(type), which "
-                        + "draws glass, outside the register"
+            guard source.contains("NSViewRepresentable") else { continue }
+            for type in Self.hostedTypes(in: source) {
+                let core = try Self.coreSources(declaring: type)
+                guard
+                    core.contains(where: { $0.contains("GlassPlate.make(") })
+                else { continue }
+                hosted.insert(type)
+                #expect(
+                    Self.glassHosts[type] != nil,
+                    Comment(
+                        rawValue:
+                            "\(file.lastPathComponent) hosts \(type), "
+                            + "which draws glass, outside the register"
+                    )
                 )
-            )
+            }
         }
         #expect(
             Set(Self.glassHosts.keys).isSubset(of: hosted),
             "a register entry hosts nothing: \(Self.glassHosts.keys)"
+        )
+    }
+
+    /// The reading itself: every representable in a file counts,
+    /// and a class name matches as a whole word only.
+    @Test("every makeNSView in a file is read, names as whole words")
+    func readsEveryHost() {
+        let two = """
+            func makeNSView(context: Context) -> NSTextField { x }
+            func makeNSView(context: Context) -> DragMarkerView { y }
+            """
+        #expect(
+            Self.hostedTypes(in: two) == ["NSTextField", "DragMarkerView"]
+        )
+        #expect(
+            Self.declares("DragMarker", in: "final class DragMarker: A {}")
+        )
+        #expect(
+            !Self.declares("DragMarker", in: "final class DragMarkerView {}")
         )
     }
 
