@@ -93,6 +93,10 @@ struct BorderSheenSurfaceTests {
     func spaceIndicator(_ indicator: AppBarStyle.ActiveIndicator) {
         let on = spaceItem(indicator, sheen: true)
         #expect(on.accent.paint != nil)
+        #expect(
+            on.accent.paint?.grounds
+                == BorderSheen.grounds(plate: on.style.fillColor)
+        )
         #expect(flatInkIsClear(on.accent, indicator))
         let off = spaceItem(indicator, sheen: false)
         #expect(off.accent.paint == nil)
@@ -109,6 +113,10 @@ struct BorderSheenSurfaceTests {
     )
     func appIndicator(_ indicator: AppBarStyle.ActiveIndicator) {
         let on = appItem(indicator, sheen: true)
+        #expect(
+            on.accent.paint?.grounds
+                == BorderSheen.grounds(plate: on.style.fillColor)
+        )
         #expect(
             on.accent.paint?.width
                 == (indicator == .outline
@@ -133,8 +141,11 @@ struct BorderSheenSurfaceTests {
             cornerRadius: 6,
             sheen: true
         )
-        let rim = view as? SheenRimView
-        #expect(rim?.paint?.width == shelf.drawnBorderWidth)
+        #expect(view.paint?.width == shelf.drawnBorderWidth)
+        #expect(
+            view.paint?.grounds
+                == BorderSheen.grounds(plate: shelf.fillColor)
+        )
         #expect(view.layer?.borderWidth == 0)
         ShelfBorder.paint(
             view,
@@ -143,7 +154,7 @@ struct BorderSheenSurfaceTests {
             cornerRadius: 6,
             sheen: false
         )
-        #expect(rim?.paint == nil)
+        #expect(view.paint == nil)
         #expect(view.layer?.borderWidth == shelf.drawnBorderWidth)
     }
 

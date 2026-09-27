@@ -39,7 +39,11 @@ struct BarFontSiteTests {
             apps: [app],
             active: true,
             horizontal: true,
-            style: SpaceBarLook(shelf: Self.shelf),
+            style: SpaceBarLook(
+                shelf: Self.shelf,
+                bar: SpaceBarStyle(),
+                sheen: false
+            ),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
                 floating: "#ffffff"
@@ -62,7 +66,11 @@ struct BarFontSiteTests {
             count: count,
             active: true,
             horizontal: true,
-            style: AppBarLook(shelf: Self.shelf)
+            style: AppBarLook(
+                shelf: Self.shelf,
+                bar: AppBarStyle(),
+                sheen: false
+            )
         )
         view.layout()
         return view
@@ -123,7 +131,11 @@ struct BarFontSiteTests {
         func width(_ shelf: KiwiShelf) -> CGFloat {
             AppBarOverlay.autoSlotWidth(
                 items: items,
-                style: AppBarLook(shelf: shelf),
+                style: AppBarLook(
+                    shelf: shelf,
+                    bar: AppBarStyle(),
+                    sheen: false
+                ),
                 horizontal: true,
                 thickness: 40
             )
@@ -146,7 +158,11 @@ struct BarFontSiteTests {
     func frontAppName() throws {
         try #require(BarFont.isInstalled(Self.family))
         func bar(_ shelf: KiwiShelf) -> SpaceBarManager.Bar {
-            var style = SpaceBarLook(shelf: shelf)
+            var style = SpaceBarLook(
+                shelf: shelf,
+                bar: SpaceBarStyle(),
+                sheen: false
+            )
             style.showFrontApp = true
             return SpaceBarManager.Bar(
                 display: barTitleDisplay,
@@ -177,7 +193,11 @@ struct BarFontSiteTests {
         )
         #expect(overlay.frontName.font?.familyName == Self.family)
         func extent(_ shelf: KiwiShelf) -> CGFloat {
-            var style = SpaceBarLook(shelf: shelf)
+            var style = SpaceBarLook(
+                shelf: shelf,
+                bar: SpaceBarStyle(),
+                sheen: false
+            )
             style.showFrontApp = true
             return overlay.frontExtent(
                 Self.frontApp,

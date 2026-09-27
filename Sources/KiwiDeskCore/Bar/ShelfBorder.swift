@@ -32,7 +32,7 @@ enum ShelfBorder {
     /// stroke.
     @MainActor
     static func paint(
-        _ view: NSView,
+        _ view: SheenRimView,
         shelf: KiwiShelf,
         surface: Surface,
         cornerRadius: CGFloat,
@@ -50,7 +50,7 @@ enum ShelfBorder {
             width > 0
             ? NSColor(kiwiHex: shelf.borderColor).cgColor : nil
         layer.cornerRadius = cornerRadius
-        (view as? SheenRimView)?.paint =
+        view.paint =
             ramp
             ? SheenRimView.Paint(
                 hex: shelf.borderColor,
@@ -63,7 +63,7 @@ enum ShelfBorder {
     /// A border view: layer-backed, fill-less, blind to the
     /// pointer so the surface beneath keeps its clicks.
     @MainActor
-    static func make() -> NSView {
+    static func make() -> SheenRimView {
         let view = PassThroughView()
         view.wantsLayer = true
         view.isHidden = true

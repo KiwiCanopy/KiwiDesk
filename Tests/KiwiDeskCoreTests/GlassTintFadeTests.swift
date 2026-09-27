@@ -107,6 +107,7 @@ struct GlassTintFadeTests {
                 display: barTitleDisplay,
                 strip: Self.strip(edge),
                 shelf: shelf,
+                sheen: false,
                 space: section,
                 app: nil
             )

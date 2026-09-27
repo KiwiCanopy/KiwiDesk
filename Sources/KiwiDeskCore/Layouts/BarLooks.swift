@@ -17,14 +17,16 @@ public struct SpaceBarLook: Sendable, Equatable {
     /// shelf's border.
     public var sheen: Bool
 
-    public init(
-        shelf: KiwiShelf = KiwiShelf(),
-        bar: SpaceBarStyle = SpaceBarStyle(),
-        sheen: Bool = false
-    ) {
+    public init(shelf: KiwiShelf, bar: SpaceBarStyle, sheen: Bool) {
         self.shelf = shelf
         self.bar = bar
         self.sheen = sheen
+    }
+
+    /// A placeholder until a view is handed its look: defaults,
+    /// no sheen.
+    public init() {
+        self.init(shelf: KiwiShelf(), bar: SpaceBarStyle(), sheen: false)
     }
 
     public subscript<T>(
@@ -123,14 +125,16 @@ public struct AppBarLook: Sendable, Equatable {
     /// shelf's border.
     public var sheen: Bool
 
-    public init(
-        shelf: KiwiShelf = KiwiShelf(),
-        bar: AppBarStyle = AppBarStyle(),
-        sheen: Bool = false
-    ) {
+    public init(shelf: KiwiShelf, bar: AppBarStyle, sheen: Bool) {
         self.shelf = shelf
         self.bar = bar
         self.sheen = sheen
+    }
+
+    /// A placeholder until a view is handed its look: defaults,
+    /// no sheen.
+    public init() {
+        self.init(shelf: KiwiShelf(), bar: AppBarStyle(), sheen: false)
     }
 
     public subscript<T>(

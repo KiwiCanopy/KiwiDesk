@@ -122,6 +122,7 @@ public final class DragMarkerView: NSView {
         layer.borderWidth = style.border && !ramp ? style.borderWidth : 0
         layer.borderColor = Self.color(style.borderColor).cgColor
         rim.layer?.cornerRadius = radius
+        rim.needsDisplay = true
         rim.paint =
             ramp
             ? SheenRimView.Paint(

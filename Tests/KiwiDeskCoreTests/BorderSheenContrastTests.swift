@@ -86,28 +86,50 @@ struct BorderSheenContrastTests {
     }
 
     /// The cap binds where it must: uncapped, the owner-eyeballed
-    /// lift takes the default ring under the bar on white.
+    /// lift takes the default ring under the bar on white, and the
+    /// capped top sits above that uncapped reading.
     @Test("The default ring's top is capped, not lifted in full")
     func defaultRingIsCapped() throws {
         let hex = BorderStyle().focusedColor
+        let rgba = try #require(DragVisual.parseHex(hex))
+        let (h, s, l) = BorderStyle.rgbToHSL(
+            r: rgba.red,
+            g: rgba.green,
+            b: rgba.blue
+        )
+        let full = BorderStyle.hslToRGB(
+            h: h,
+            s: s,
+            l: l + (1 - l) * BorderSheen.lift
+        )
+        let uncapped = Self.hex(
+            NSColor(srgbRed: full.0, green: full.1, blue: full.2, alpha: 1)
+        )
+        let uncappedOnWhite = try #require(
+            ColorVision.contrast(uncapped, "#FFFFFF")
+        )
         let top = Self.hex(BorderSheen.colors(hex: hex)[0])
         let onWhite = try #require(ColorVision.contrast(top, "#FFFFFF"))
-        let flat = try #require(ColorVision.contrast(hex, "#FFFFFF"))
-        #expect(onWhite < flat)
+        #expect(uncappedOnWhite < Self.floor)
+        #expect(onWhite > uncappedOnWhite)
         #expect(onWhite >= Self.floor)
     }
 
-    /// The bar highlight against the bundled palettes' own plates
+    /// The bar highlight and the shelf border against the bundled
+    /// palettes' own plates
     /// (`IdleItemContrastTests`' instrument), capped over the
     /// grounds the live bar hands it: the sheen may not take a
     /// highlight that reads against its plate under the bar at any
     /// stop. Uncapped, Clean Light, Monochrome and Ultraviolet fell
     /// under it (2.78, 2.87 and 2.64:1).
-    @Test("The highlight keeps the bar against its plates")
-    func highlightOnPlates() throws {
+    @Test(
+        "The highlight and the border keep the bar against their plates",
+        arguments: ["kiwishelf.highlight_color", "kiwishelf.border_color"]
+    )
+    func strokesOnPlates(_ key: String) throws {
         var measured = 0
         for palette in PaletteCatalog.bundled() {
-            guard let highlight = palette.colors["kiwishelf.highlight_color"],
+            guard let highlight = palette.colors[key],
                 let fill = palette.colors["kiwishelf.fill_color"]
             else { continue }
             let ramp = BorderSheen.colors(
