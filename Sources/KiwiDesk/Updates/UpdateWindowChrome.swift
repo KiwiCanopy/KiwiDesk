@@ -63,11 +63,17 @@ enum UpdateWindowChrome {
 @MainActor
 final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     let offer: UpdateOffer
+    private let narration: BootNarration?
     private let done: () -> Void
     private var window: NSWindow?
 
-    init(offer: UpdateOffer, done: @escaping () -> Void) {
+    init(
+        offer: UpdateOffer,
+        narration: BootNarration? = nil,
+        done: @escaping () -> Void
+    ) {
         self.offer = offer
+        self.narration = narration
         self.done = done
         super.init()
     }
@@ -85,7 +91,9 @@ final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     func makeWindow() -> NSWindow {
         let window = UpdateWindowChrome.window(
             offer: offer,
-            mode: .whatsNew { [weak self] in self?.finish() }
+            mode: .whatsNew(narration: narration) { [weak self] in
+                self?.finish()
+            }
         )
         window.delegate = self
         self.window = window

@@ -85,8 +85,8 @@ final class UpdateSession: ObservableObject {
     var hide: () -> Void = {}
     /// Closes the window: Later answered the offer.
     var end: () -> Void = {}
-    /// The user pressed Install: the notes were read here, so no
-    /// "What's new" is owed after it.
+    /// The user pressed Install: the notes were read here, so the
+    /// relaunch narrates itself rather than owing them (#1667).
     var onInstall: () -> Void = {}
     /// Speaks a phase Sparkle moved to on its own — never one the
     /// user's own press caused.

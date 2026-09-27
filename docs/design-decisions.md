@@ -648,6 +648,23 @@ defaults rather than the config folder: it describes this Mac,
 and a backup restored elsewhere must neither replay nor swallow
 it.
 
+:::unreleased
+**After the window's own Install, "What's new" narrates the
+relaunch (#1667).** The user has read the notes but has not seen
+the relaunch, in which windows move and re-tile with nothing on
+screen saying why. So the relaunched KiwiDesk re-opens the window,
+and while boot is still going through the open apps its header
+carries one line — the count the tour's grant screen reads
+([the wait is narrated](#boot-the-wait-is-narrated-never-hidden)),
+in the same words, never a count of its own — which drops once
+boot is ready, leaving the notes. It opens whatever the launch
+looks like, since Sparkle starts it rather than the user, and
+still never over the permission tour. The install carries the
+notes it merged across the relaunch, because the fetch a normal
+"What's new" waits on usually returns after boot has finished,
+and the line would then narrate nothing.
+:::
+
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates
 this window keeps Sparkle's; the window first appears for the

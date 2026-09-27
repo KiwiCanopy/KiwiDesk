@@ -21,6 +21,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
+    /// Boot's count for a relaunched "What's new" (#1667).
+    let bootNarration = BootNarration()
     /// Cached dashboard controller to avoid constructing on refresh.
     private var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -167,6 +169,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onBootPhaseChange = { [weak self] phase in
             self?.statusItem?.setBootPhase(phase)
             self?.onboardingModel.bootPhase = phase
+            self?.bootNarration.phase = phase
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
@@ -233,15 +236,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // tour owns — the permission grant or a resuming discovery;
         // otherwise the mark.
         if let whatsNew = updater.whatsNew {
-            let opensWindow =
-                origin == .user && trusted
-                && !OnboardingDiscovery.shouldResume(isTrusted: trusted)
+            let tourOwns = OnboardingDiscovery.shouldResume(
+                isTrusted: trusted
+            )
+            let opensWindow = origin == .user && trusted && !tourOwns
             let existingUser = OnboardingDiscovery.hasShown()
-            Task {
-                await whatsNew.launched(
-                    opensWindow: opensWindow,
-                    existingUser: existingUser
-                )
+            // After the window's own Install: open before boot
+            // starts, whatever the launch looks like (#1667).
+            bootNarration.phase = core.bootPhase
+            let narrated = whatsNew.relaunched(
+                opensWindow: trusted && !tourOwns,
+                narration: bootNarration
+            )
+            if !narrated {
+                Task {
+                    await whatsNew.launched(
+                        opensWindow: opensWindow,
+                        existingUser: existingUser
+                    )
+                }
             }
         }
         if trusted {

@@ -49,8 +49,14 @@ extension UpdatePromptDriver {
         session.startCheck = { [weak self] in self?.startCheck() }
         session.hide = { [weak window] in window?.hide() }
         session.end = { [weak self] in self?.closeWindow() }
+        let relaunch = Self.relaunch(
+            installing: item,
+            loaded: loadedItems,
+            host: Bundle.main
+        )
         session.onInstall = { [record = seenRecord] in
             record?.markSeen(item.versionString)
+            record?.markRelaunch(relaunch)
         }
         self.window = window
     }
@@ -76,5 +82,28 @@ extension UpdatePromptDriver {
     func closeWindow() {
         window?.close()
         window = nil
+    }
+
+    /// What the relaunch narrates (#1667): the items the window
+    /// merged, so "What's new" opens without waiting on the feed.
+    static func relaunch(
+        installing item: SUAppcastItem,
+        loaded: [SUAppcastItem],
+        host: Bundle
+    ) -> WhatsNewRecord.Relaunch {
+        WhatsNewRecord.Relaunch(
+            version: item.versionString,
+            since: host.object(forInfoDictionaryKey: "CFBundleVersion")
+                as? String ?? "",
+            items: (loaded + [item]).map {
+                WhatsNewFeed.Item(
+                    version: $0.versionString,
+                    shown: $0.displayVersionString,
+                    released: $0.date,
+                    notes: $0.propertiesDictionary[ReleaseNotes.element]
+                        as? String
+                )
+            }
+        )
     }
 }

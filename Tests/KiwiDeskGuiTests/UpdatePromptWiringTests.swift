@@ -212,12 +212,16 @@ struct UpdatePromptWiringTests {
                     + ".currentAppleEvent\n"
             )
         )
-        #expect(body.contains("origin == .user && trusted"))
         #expect(
             body.contains(
-                "!OnboardingDiscovery.shouldResume(isTrusted: trusted)"
+                "let tourOwns = OnboardingDiscovery.shouldResume(\n"
+                    + "                isTrusted: trusted"
             )
         )
+        #expect(body.contains("origin == .user && trusted && !tourOwns"))
         #expect(body.contains("opensWindow: opensWindow"))
+        // A relaunch after the window's own Install opens whatever
+        // the origin, but never over the tour (#1667).
+        #expect(body.contains("opensWindow: trusted && !tourOwns"))
     }
 }
