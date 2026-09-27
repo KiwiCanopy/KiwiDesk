@@ -399,15 +399,18 @@ are equal-width across the track (full-bleed, like a native
 window-toolbar switcher), a deliberate trade against
 content-sized segments. One control, one look.
 
-**Sliders share the pill design.** Every value adjuster
-(ratios, gaps, sizes) is a `SettingsSlider`: the same capsule
-track as the segmented picker, a native-style solid white
-thumb that overhangs the track by 2 pt per edge, and a
-full-strength accent fill up to the knob — a translucent fill
-reads as disabled, and a clear Liquid Glass knob refracts the
-accent fill beneath it and turns blue. Accessibility is
-delegated to a native `Slider` representation, so assistive
-tech sees exactly the control it replaces.
+**Sliders follow the system slider.** Every value adjuster
+(ratios, gaps, sizes) is a `SettingsSlider`: a thin capsule
+track, a full-strength accent fill up to the knob's centre — a
+translucent fill reads as disabled — and a solid white capsule
+knob wider than the track is tall. While dragged the knob grows
+and turns clear Liquid Glass, the fill visibly running under it;
+that glass is Settings' own control finish, so the overlays'
+Liquid Glass switch does not reach it, and Reduce transparency
+keeps the white knob (#1527). A glass knob at rest was tried and
+dropped: it read as a blue knob. Accessibility is delegated to a
+native `Slider` representation, so assistive tech sees exactly
+the control it replaces.
 
 **Buttons take a native style, and semantic role chooses the
 class.** No gradients or shadows on buttons — the crisp shadow

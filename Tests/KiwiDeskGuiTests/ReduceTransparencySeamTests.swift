@@ -277,8 +277,11 @@ struct ReduceTransparencySeamTests {
                 in: source
             )
         )
+        // Squashed: the call wraps once it carries the #1527
+        // variant and fallback.
         #expect(
-            entry.contains("modifier(GlassChrome("),
+            entry.split(whereSeparator: \.isWhitespace).joined()
+                .contains("modifier(GlassChrome("),
             "glassChrome no longer applies the GlassChrome modifier"
         )
         #expect(

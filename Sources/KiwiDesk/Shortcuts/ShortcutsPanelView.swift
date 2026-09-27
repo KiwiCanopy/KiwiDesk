@@ -35,7 +35,11 @@ struct ShortcutsPanelView: View {
                 cornerRadius: 12,
                 style: .continuous
             ),
-            enabled: liquidGlass
+            // `.regular` for its dense text; off is the shipped
+            // material, which the #1307 switch's leaf returns to.
+            enabled: liquidGlass,
+            variant: .regular,
+            fallback: AnyShapeStyle(.regularMaterial)
         )
     }
 

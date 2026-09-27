@@ -1493,9 +1493,11 @@ Obligations:
   a SwiftUI surface's `.primary` / `.secondary` are vibrant
   against the composite backdrop and so need no fill the way a
   bar's fixed-hex ink does.
-- **The variant is a legibility decision, per surface.** This
-  tree draws `.regular`, the bars draw `.clear`, and that is
-  ruled rather than drifted: the two are visually identical in
+- **The variant is a legibility decision, per surface**, and so
+  is the fallback, both named at the call. Glass carrying text
+  draws `.regular` (the ⌃⌥K panel), a surface with nothing to
+  read may take `.clear` (the dragged slider knob, #1527), the
+  bars draw `.clear`, and that is ruled rather than drifted: the two are visually identical in
   AppKit (#390) and 59/255 apart in SwiftUI, so there is no one
   finish to be consistent about. Moving either is a device
   sitting, not a tidy-up.

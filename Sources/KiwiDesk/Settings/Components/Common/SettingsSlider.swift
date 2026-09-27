@@ -13,10 +13,18 @@ struct SettingsSlider: View {
     let spokenValue: String
 
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     @FocusState private var focused: Bool
+    /// True for the gesture's lifetime; resets on cancel too.
+    @GestureState private var dragging = false
 
-    private static let knobWidth: CGFloat = 26
-    private static let height: CGFloat = 20
+    private static let knobWidth: CGFloat = 30
+    private static let knobHeight: CGFloat = 20
+    private static let trackHeight: CGFloat = 6
+    private static let height: CGFloat = 24
+    /// Visual only — layout keeps the resting size (#1527).
+    private static let dragScale: CGFloat = 1.25
 
     var body: some View {
         GeometryReader { geo in
@@ -81,26 +89,32 @@ struct SettingsSlider: View {
         let center = knobCenter(in: width)
         return ZStack(alignment: .leading) {
             Capsule()
-                .fill(Color.primary.opacity(0.08))
+                .fill(Color.primary.opacity(0.12))
+                .frame(height: Self.trackHeight)
+            // To the knob's CENTRE, so a glass knob shows the
+            // fill running under it (#1527).
             Capsule()
                 .fill(fill)
-                .frame(width: center + Self.knobWidth / 2)
+                .frame(width: center, height: Self.trackHeight)
             knob
                 .frame(
                     width: Self.knobWidth,
-                    height: Self.height + 4
+                    height: Self.knobHeight
+                )
+                .scaleEffect(dragging ? Self.dragScale : 1)
+                .animation(
+                    reduceMotion ? nil : .spring(duration: 0.25),
+                    value: dragging
                 )
                 .offset(x: center - Self.knobWidth / 2)
         }
-        .overlay(
-            Capsule().strokeBorder(
-                Color.primary.opacity(0.08),
-                lineWidth: 0.5
-            )
-        )
-        .contentShape(Capsule())
+        .frame(maxHeight: .infinity)
+        .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 0)
+                .updating($dragging) { _, state, _ in
+                    state = isEnabled
+                }
                 .onChanged { drag in
                     guard isEnabled else { return }
                     set(at: drag.location.x, in: width)
@@ -129,18 +143,26 @@ struct SettingsSlider: View {
         value = snapped(range.lowerBound + Double(t) * span)
     }
 
-    /// Opaque white knob thumb (`SettingsTheme.onAccentKnob`).
+    /// White knob thumb, clear glass while dragged (#1527). The
+    /// glass is Settings' own control finish, so it ignores the
+    /// overlays' Liquid Glass switch; Reduce transparency and
+    /// pre-26 keep the white knob through `glassChrome`.
     private var knob: some View {
-        Capsule()
-            .fill(.white)
+        Color.clear
+            .glassChrome(
+                in: Capsule(),
+                enabled: dragging,
+                variant: .clear,
+                fallback: AnyShapeStyle(.white)
+            )
             .overlay(
                 Capsule().strokeBorder(
-                    Color.black.opacity(0.1),
+                    Color.black.opacity(dragging ? 0 : 0.1),
                     lineWidth: 0.5
                 )
             )
             .shadow(
-                color: .black.opacity(0.25),
+                color: .black.opacity(dragging ? 0 : 0.25),
                 radius: 2,
                 y: 1
             )

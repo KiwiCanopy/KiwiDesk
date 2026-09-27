@@ -2,7 +2,7 @@ import SwiftUI
 
 extension View {
     /// Draws `shape` as this view's chrome — Liquid Glass on
-    /// macOS 26, `.regularMaterial` below — and clips to it.
+    /// macOS 26, `fallback` below — and clips to it.
     ///
     /// The one home for this tree's `#available` branch, and the
     /// clip sits OUTSIDE it: `glassEffect(_:in:)` draws in a
@@ -10,34 +10,41 @@ extension View {
     /// the two halves disagree on an axis no caller can see
     /// (`GlassChromeSeamTests`).
     ///
-    /// `.regular` because this tree's glass carries dense text —
-    /// NOT a default, and not the bars' `.clear`. Untinted by
-    /// ruling rather than by capability; both arguments are in
-    /// `docs/design-decisions.md` ▸ the shortcuts panel (#1295).
-    /// `enabled` is the #1307 switch's third leaf. Off takes the
-    /// SAME `.regularMaterial` the pre-26 branch already draws,
-    /// which `docs/design-decisions.md` rules to be today's
-    /// design — so the off state is a shipped one rather than a
-    /// new surface to design. Reduce transparency takes that
-    /// same branch, read live from the environment (#1374); the
-    /// stored value is untouched.
+    /// `variant` is each surface's legibility decision (gui.md):
+    /// `.regular` under dense text, `.clear` where nothing is
+    /// read. Untinted by ruling rather than by capability
+    /// (`docs/design-decisions.md` ▸ the shortcuts panel, #1295).
+    /// `fallback` is the surface's shipped design, drawn when
+    /// `enabled` is off, below macOS 26, and under Reduce
+    /// transparency, read live from the environment (#1374).
     func glassChrome(
         in shape: some Shape,
-        enabled: Bool
+        enabled: Bool,
+        variant: GlassChromeVariant,
+        fallback: AnyShapeStyle
     ) -> some View {
-        modifier(GlassChrome(shape: shape, enabled: enabled))
-            .clipShape(shape)
+        modifier(
+            GlassChrome(
+                shape: shape,
+                enabled: enabled,
+                variant: variant,
+                fallback: fallback
+            )
+        )
+        .clipShape(shape)
     }
 
     @ViewBuilder
     fileprivate func glassGround(
         in shape: some Shape,
-        enabled: Bool
+        enabled: Bool,
+        variant: GlassChromeVariant,
+        fallback: AnyShapeStyle
     ) -> some View {
         if #available(macOS 26, *), enabled {
-            glassEffect(.regular, in: shape)
+            glassEffect(variant.glass, in: shape)
         } else {
-            background(.regularMaterial)
+            background(fallback)
         }
     }
 }
@@ -51,11 +58,30 @@ private struct GlassChrome<S: Shape>: ViewModifier {
 
     let shape: S
     let enabled: Bool
+    let variant: GlassChromeVariant
+    let fallback: AnyShapeStyle
 
     func body(content: Content) -> some View {
         content.glassGround(
             in: shape,
-            enabled: enabled && !reduceTransparency
+            enabled: enabled && !reduceTransparency,
+            variant: variant,
+            fallback: fallback
         )
+    }
+}
+
+/// The glass finish, a legibility decision per surface (gui.md):
+/// `.regular` under dense text, `.clear` where nothing is read.
+enum GlassChromeVariant {
+    case regular
+    case clear
+
+    @available(macOS 26, *)
+    fileprivate var glass: Glass {
+        switch self {
+        case .regular: .regular
+        case .clear: .clear
+        }
     }
 }
