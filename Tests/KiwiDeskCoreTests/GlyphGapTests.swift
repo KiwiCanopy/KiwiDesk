@@ -42,6 +42,15 @@ struct GlyphGapTests {
         #expect(style.glyphGap == CGFloat(stored))
     }
 
+    /// The parser already raises every number to 0, so this
+    /// builds the setting past it: the floor `apply` owns.
+    @Test("Applying a negative setting stores the floor")
+    func applyFloors() {
+        var style = SpaceBarStyle()
+        SpaceBarCommandSetting.glyphGap(-4).apply(to: &style)
+        #expect(style.glyphGap == SpaceBarStyle.minGlyphGap)
+    }
+
     @Test("A reader floors whatever wrote the value")
     func readerFloors() {
         var style = SpaceBarStyle()

@@ -35,4 +35,13 @@ struct ItemGapFloorTests {
         setting.apply(to: &shelf)
         #expect(shelf.itemGap == CGFloat(stored))
     }
+
+    /// The parser already raises every number to 0, so this
+    /// builds the setting past it: the floor `apply` owns.
+    @Test("Applying a negative setting stores the floor")
+    func applyFloors() {
+        var shelf = KiwiShelf()
+        KiwiShelfCommandSetting.itemGap(-5).apply(to: &shelf)
+        #expect(shelf.itemGap == KiwiShelf.minItemGap)
+    }
 }
