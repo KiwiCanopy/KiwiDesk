@@ -206,5 +206,19 @@ struct SpaceBarGlyphTargetTests {
         )
         #expect(item.glyphTargets.map(\.members) == [[WindowID(4)]])
         #expect(item.subviews.filter { $0 is SpaceBarGlyphTarget }.count == 1)
+        // Same app and count, another window: a new target.
+        item.configure(
+            identity: .space(SpaceID("2")),
+            spaceGlyph: .text("2", tinted: true),
+            apps: [app("Web", [6])],
+            active: true,
+            horizontal: true,
+            style: SpaceBarLook(),
+            stateMarkColors: StateMarkColors(
+                sticky: "#ffffff",
+                floating: "#ffffff"
+            )
+        )
+        #expect(item.glyphTargets.map(\.members) == [[WindowID(6)]])
     }
 }

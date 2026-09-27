@@ -86,6 +86,14 @@ struct SpaceBarGlyphClickTests {
         )
     }
 
+    /// Fires a row's action through its own target and selector:
+    /// `performActionForItem` needs an `NSApplication`, which a
+    /// suite run alone has not made.
+    private func pickRow(_ menu: NSMenu, at index: Int) {
+        let row = menu.items[index]
+        _ = (row.target as? NSObject)?.perform(row.action, with: row)
+    }
+
     /// Captures the menu a pick presents instead of popping it.
     private func capturingMenus(_ core: KiwiCore) -> () -> NSMenu? {
         var shown: NSMenu?
@@ -107,9 +115,20 @@ struct SpaceBarGlyphClickTests {
 
     @Test("+n carries the windows past the cap, in row order")
     func overflowCarriesItsWindows() throws {
-        let built = try item(seededCore(), two, cap: 1)
-        #expect(built.overflowWindows == [WindowID(4)])
-        #expect(built.overflow == 1)
+        let core = seededCore()
+        core.state.workspaces.activate(two)
+        core.state.apply(.windowCreated(window(5, app: "Term")))
+        core.state.apply(.windowCreated(window(6, app: "Term")))
+        core.state.workspaces.activate(one)
+        // New windows land after the focused Mail 2, so the row
+        // is Mail 2 · Term 5 6 · Mail 3 · Web 4: three hidden
+        // groups past the cap, the first of several windows.
+        let built = try item(core, two, cap: 1)
+        #expect(
+            built.overflowWindows
+                == [WindowID(5), WindowID(6), WindowID(3), WindowID(4)]
+        )
+        #expect(built.overflow == 4)
     }
 
     @Test("A glyph on an inactive Space switches and lands on it")
@@ -144,7 +163,7 @@ struct SpaceBarGlyphClickTests {
                 == ["Mail — Inbox", "Mail — Draft"]
         )
         #expect(shown.items.allSatisfy { $0.isEnabled })
-        shown.performActionForItem(at: 1)
+        pickRow(shown, at: 1)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(3))
     }
@@ -157,7 +176,7 @@ struct SpaceBarGlyphClickTests {
         #expect(core.activeSpace?.id == one)
         let shown = try #require(menu())
         #expect(shown.items.count == 1)
-        shown.performActionForItem(at: 0)
+        pickRow(shown, at: 0)
         #expect(core.activeSpace?.id == two)
         #expect(core.state.workspaces[two]?.focused == WindowID(4))
     }
@@ -195,6 +214,18 @@ struct SpaceBarGlyphClickTests {
         #expect(short.items[0].isEnabled)
         #expect(short.items[0].title == "Web")
         #expect(short.items[0].toolTip == nil)
+        let titled = SpaceBarWindowMenu.make(
+            [
+                .init(
+                    window: WindowID(9),
+                    app: "Web",
+                    title: "Inbox",
+                    icon: nil,
+                    enabled: true
+                )
+            ]
+        ) { _ in }
+        #expect(titled.items[0].toolTip == nil)
     }
 
     @Test("The hover title is the app, then each window's title")
