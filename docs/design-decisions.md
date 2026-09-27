@@ -11710,6 +11710,33 @@ and no layout overrides it (▸ One shelf holds both bars), so the
 per-layout depth in the first bullet and the chip's count of it
 are gone; the one row sits in the KiwiShelf card's Style drawer.
 
+**[Principle] The bar font's weight is stored as asked and
+resolved when drawn
+([#1681](https://github.com/KiwiCanopy/KiwiDesk/issues/1681)).**
+`kiwishelf.font_weight` keeps the number the user chose, 100–900,
+whatever family is set, and `BarFont` decides at render time what
+that family can draw: a variable family draws the exact value on
+its `wght` axis, one without an axis draws its nearest installed
+face, and a family that is not installed draws System. Resolving
+on write instead would round 540 to Menlo's Regular the moment
+Menlo was picked, so a switch to Menlo and back would quietly
+lose the choice; kept as asked, the family is the only thing that
+changed. The same holds for the family itself: a missing one is
+kept by name and reported, so installing it brings the look back
+with no edit.
+
+The system face is drawn through `NSFont.systemFont(ofSize:weight:)`
+only at one of its named weights. Between them that call snaps
+to the nearest named weight (measured 2026-09-26, #1681), which
+would make every in-between slider position a lie; the `wght`
+axis draws the value itself. At the default 400 the call is the
+one the bars always made, so a profile without the keys draws its
+text — counts included — exactly as it was saved. A chosen family
+draws its counts with digits of one width, so a badge keeps its
+size as its count changes; the system pair keeps its own figures,
+since widening a count on an untouched profile would break that
+promise.
+
 ### Profiles
 
 **[Principle]**

@@ -91,6 +91,18 @@ extension APIReference {
                 + "with thickness.",
             .number("size")
         ),
+        "set_font_family": APIRecord(
+            "Sets the font family of both bars' text; a family "
+                + "that is not installed draws System.",
+            .text("family")
+        ),
+        "set_font_weight": APIRecord(
+            "Sets the weight of both bars' text, "
+                + "\(KiwiShelf.fontWeightRange.lowerBound)–"
+                + "\(KiwiShelf.fontWeightRange.upperBound) or a name "
+                + "such as \(BarFontWeight.semibold.rawValue).",
+            .number("weight")
+        ),
         "set_icon_source": APIRecord(
             "Sets whether both bars draw app icons from the app "
                 + "image or the bundled App Font's symbols.",

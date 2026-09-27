@@ -22,6 +22,8 @@ enum KiwiShelfCommandSetting {
     case itemGap(CGFloat)
     case itemPadding(CGFloat)
     case fontSize(CGFloat)
+    case fontFamily(String)
+    case fontWeight(Int)
     case iconSource(BarAppIconSource)
     case dimFactor(CGFloat)
     case color(WritableKeyPath<KiwiShelf, String>, String)
@@ -90,6 +92,13 @@ enum KiwiShelfCommandSetting {
                 args,
                 KiwiShelf.BackgroundFit.self
             ).map(Self.backgroundFit)
+        case "font_family":
+            guard let name = args.first?.stringValue,
+                !name.trimmingCharacters(in: .whitespaces).isEmpty
+            else { return .failure("expected a font family name") }
+            return .success(.fontFamily(name))
+        case "font_weight":
+            return fontWeight(args.first)
         case "liquid_glass":
             guard let flag = args.first?.boolValue else {
                 return .failure("expected boolean")
@@ -103,6 +112,22 @@ enum KiwiShelfCommandSetting {
         default:
             return nil
         }
+    }
+
+    /// A weight as a number (100–900) or a name (#1681).
+    private static func fontWeight(
+        _ arg: JSONValue?
+    ) -> Result<KiwiShelfCommandSetting, AppBarSettingError> {
+        if let value = arg?.numberValue, value.isFinite {
+            return .success(.fontWeight(KiwiShelf.clampFontWeight(value)))
+        }
+        if let name = arg?.stringValue.flatMap(BarFontWeight.named) {
+            return .success(.fontWeight(name.value))
+        }
+        let names = BarFontWeight.expectedList
+        let low = KiwiShelf.fontWeightRange.lowerBound
+        let high = KiwiShelf.fontWeightRange.upperBound
+        return .failure("expected a weight (\(low)–\(high)) or \(names)")
     }
 
     private static var numberFields:
@@ -169,6 +194,8 @@ enum KiwiShelfCommandSetting {
         case .itemPadding(let value):
             shelf.itemPadding = max(KiwiShelf.minItemPadding, value)
         case .fontSize(let value): shelf.fontSize = value
+        case .fontFamily(let value): shelf.fontFamily = value
+        case .fontWeight(let value): shelf.fontWeight = value
         case .iconSource(let value): shelf.iconSource = value
         case .dimFactor(let value):
             shelf.dimFactor = AppBarStyle.clampDim(value)

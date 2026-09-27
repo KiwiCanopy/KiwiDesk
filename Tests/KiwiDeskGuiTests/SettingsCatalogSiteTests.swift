@@ -83,7 +83,8 @@ struct SettingsCatalogSiteTests {
         // and their rows, and one of the two colour groups, left.
         // 103 since #1680: the highlight width row.
         // 105 since #1679: the border and border width rows.
-        #expect(names.count == 105)
+        // 107 since #1681: the font family and weight rows.
+        #expect(names.count == 107)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

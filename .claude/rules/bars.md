@@ -654,3 +654,57 @@ size beside padded neighbours.
   or `ItemPaddingAppBarTests`, which render both bars at a padding
   and read no list of sites; the preview's own guard is
   `ItemPaddingPreviewTests`.
+
+## Bar text takes its face from `BarFont`, never a system call
+
+`kiwishelf.font_family` and `font_weight` (#1681) are the face of
+both bars' text — Space identifiers, titles, counts — so a site
+that builds a system font of its own draws text the setting never
+reaches.
+
+- **A bar text site asks `KiwiShelf.textFont(ofSize:)`, and a
+  count `badgeFont(ofSize:emphasis:)`**, handed the size the
+  section above derives (the look's `forDepth:` ladders, the
+  content depth) — size from the padding, face from the shelf —
+  and never `systemFont` or a
+  family of its own; an App Font glyph and an app icon never ask
+  either. A site that MEASURES text (a slot width, a segment's
+  extent) asks the same, or it sizes for a face it does not
+  draw. `BarFontSeamTests` counts every system-font spelling in
+  `Bar/` and `Layouts/`, by path, against its `allowed` map —
+  the one copy of who is exempt — and `BarFontSiteTests` builds
+  each site and holds its face to the shelf's; a new site owes
+  the latter a clause, since it reads no site list.
+- **Resolve the weight in `BarFont` at render time, never on
+  write**: the stored weight is the user's number whatever the
+  family, and a missing family is kept by name and reported
+  (`ConfigIssue.Kind.missingFontFamily`). What a family has is
+  memoized inside `BarFont` and forgotten only by the one
+  font-set observer (`KiwiCore+FontSet.swift`, wiring pinned by
+  `BarFontSeamTests` ▸ `fontSetObserverIsWired`); the one copy
+  beside it is the Settings picker's list and row faces, read
+  when it opens and kept for that open only. The argument is
+  `docs/design-decisions.md` ▸ The bar font's weight is stored as
+  asked. `BarFontTests` ▸ `familyRoundTripKeepsWeight` holds the
+  round trip and ▸ `variableFamilyIsExact` the in-between
+  weights.
+- **Derive the missing-family issue at `updateBars()`, never in
+  a writer**: every settings landing — a load, a profile apply, a
+  Desktop binding, a monitor change, a Settings Save, a verb —
+  reaches the one bar refresh, and `setConfigIssues` re-derives
+  the font issue on every publish, so no writer hands it in or
+  owes a call. A writer-side refresh is the shape that left the
+  issue stale after `load_profile`. `BarFontIssueTests` ▸
+  `followsProfileSwitch` and ▸ `fontSetChangeRederives` hold it.
+- **A face whose line box outgrows a cell-high frame is framed on
+  its ink** — for the Space Bar fields `BarTextGlyph.frame`
+  places (the identifier, the front-app glyph): Zapfino set its
+  digit below the frame and was clipped.
+  `SpaceBarGlyphCellTests` ▸ `identifierInFaceIsWholeAndCentred`
+  renders a tall and a mono face. The App Bar title, the
+  front-app name, the count badges and `ShelfCountView` size
+  from their own cell and are NOT framed this way; a tall face
+  there is a device check, not a guarded claim.
+- **A preview of the bar draws the draft's face** through the
+  same resolver (`BarSpec.textFont`); that the strip then draws
+  with it is review's — no clause renders the text.

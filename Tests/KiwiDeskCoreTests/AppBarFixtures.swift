@@ -52,6 +52,8 @@ enum AppBarFixtures {
         shelf.itemGap = 3
         shelf.itemPadding = 5
         shelf.fontSize = 15
+        shelf.fontFamily = "Menlo"
+        shelf.fontWeight = 540
         shelf.iconSource = .appFont
         shelf.dimFactor = 0.3
         shelf.itemColor = "#010101"

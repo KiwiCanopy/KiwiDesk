@@ -40,6 +40,7 @@ extension AppBarOverlay {
                 count: hidden,
                 horizontal: m.horizontal,
                 fontSize: font,
+                shelf: style.shelf,
                 ink: ink,
                 hoverInk: hoverInk,
                 hoverFill: hoverFill,

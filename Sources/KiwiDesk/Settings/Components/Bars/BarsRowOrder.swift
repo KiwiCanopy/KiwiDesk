@@ -28,6 +28,8 @@ enum BarsRowOrder {
         .kiwishelf(.itemGap),
         .kiwishelf(.fontSizeAuto),
         .kiwishelf(.fontSize),
+        .kiwishelf(.fontFamily),
+        .kiwishelf(.fontWeight),
         .kiwishelf(.iconSource),
     ]
 

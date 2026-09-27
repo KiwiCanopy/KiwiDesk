@@ -76,7 +76,7 @@ struct KiwiShelfCommandParityTests {
             .liquidGlass(false), .backgroundFit(.full),
             .cornerRoundness(5), .border(true), .borderWidth(3),
             .highlightWidth(4), .itemGap(3), .itemPadding(5),
-            .fontSize(15),
+            .fontSize(15), .fontFamily("Menlo"), .fontWeight(540),
             .iconSource(.appFont), .dimFactor(0.3),
         ]
     }
@@ -142,6 +142,8 @@ struct KiwiShelfCommandParityTests {
         case .backgroundFit: return [.string("full")]
         case .iconSource: return [.string("app_font")]
         case .dimFactor: return [.number(0.3)]
+        case .fontFamily: return [.string("Menlo")]
+        case .fontWeight: return [.string("semibold")]
         case .minimum, .thickness, .outerMargin, .innerMargin,
             .cornerRoundness, .borderWidth, .highlightWidth, .itemGap,
             .itemPadding,

@@ -113,29 +113,16 @@ struct RatioRow: View {
     var range: ClosedRange<Double> = 0.1...0.9
 
     var body: some View {
-        SettingsRowShape {
-            SettingsRowLabel(label: label, help: help)
-        } control: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    SettingsSlider(
-                        value: $value,
-                        range: range,
-                        step: 0.01,
-                        label: label,
-                        spokenValue: readoutText
-                    )
-                    Text(readoutText)
-                        .settingsReadout()
-                        .frame(
-                            width: SettingsMetrics.readoutColumn,
-                            alignment: .trailing
-                        )
-                        .foregroundStyle(.secondary)
-                        .font(.body.monospacedDigit())
-                }
-                FractionChips(value: $value, label: label)
-            }
+        SliderPresetRow(
+            label: label,
+            help: help,
+            value: $value,
+            range: range,
+            step: 0.01,
+            readout: readoutText,
+            spokenValue: readoutText
+        ) {
+            FractionChips(value: $value, label: label)
         }
     }
 

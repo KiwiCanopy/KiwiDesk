@@ -115,9 +115,45 @@ enum BarTextGlyph {
         if height > 0, height < rect.height {
             rect.origin.y += (rect.height - height) / 2
             rect.size.height = height
+        } else if let rows = inkRows(of: field, height: height),
+            rows.top < 0 || rows.bottom > rect.height
+        {
+            // A tall face (Zapfino, #1681) sets its ink below a
+            // cell-high frame: take the whole line box, ink centred.
+            let mid = (rows.top + rows.bottom) / 2
+            let flipped = field.superview?.isFlipped ?? true
+            rect.origin.y =
+                flipped ? rect.midY - mid : rect.midY - (height - mid)
+            rect.size.height = height
         }
         return rect
     }
+
+    /// The ink's top and bottom, in points down from the top of
+    /// `field` laid out `height` tall: the cell draws its title
+    /// from the top, one baseline offset above the line origin.
+    @MainActor
+    static func inkRows(
+        of field: NSTextField,
+        height: CGFloat
+    ) -> (top: CGFloat, bottom: CGFloat)? {
+        guard let font = field.font, let cell = field.cell, height > 0
+        else { return nil }
+        let bounds = CGRect(
+            x: 0,
+            y: 0,
+            width: max(ceil(cell.cellSize.width), 1),
+            height: height
+        )
+        let baseline =
+            cell.titleRect(forBounds: bounds).minY
+            + layout.defaultBaselineOffset(for: font)
+        let ink = metrics(field.stringValue, font: font).ink
+        guard ink.height > 0 else { return nil }
+        return (baseline - ink.maxY, baseline - ink.minY)
+    }
+
+    @MainActor private static let layout = NSLayoutManager()
 
     /// Scales the font down until the ink fits `width`: a few of
     /// the bundled ligatures overshoot their em, and along the

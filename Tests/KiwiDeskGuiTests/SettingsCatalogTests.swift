@@ -108,7 +108,8 @@ struct SettingsCatalogTests {
         // 109 since #1680: the shelf's Style drawer gained the
         // highlight width.
         // 111 since #1679: it gained the border and its width.
-        #expect(allEntries.count == 111)
+        // 113 since #1681: its font family and font weight.
+        #expect(allEntries.count == 113)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

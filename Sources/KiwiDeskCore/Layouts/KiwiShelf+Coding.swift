@@ -27,6 +27,8 @@ extension KiwiShelf {
         case itemGap = "item_gap"
         case itemPadding = "item_padding"
         case fontSize = "font_size"
+        case fontFamily = "font_family"
+        case fontWeight = "font_weight"
         case iconSource = "icon_source"
         case dimFactor = "dim_factor"
         case itemColor = "item_color"
@@ -115,6 +117,13 @@ extension KiwiShelf {
         fontSize =
             try c.decodeIfPresent(CGFloat.self, forKey: .fontSize)
             ?? d.fontSize
+        fontFamily =
+            try c.decodeIfPresent(String.self, forKey: .fontFamily)
+            ?? d.fontFamily
+        // A number, as Lua may write 540.5: rounded, never refused.
+        fontWeight =
+            try c.decodeIfPresent(Double.self, forKey: .fontWeight)
+            .map(Self.clampFontWeight) ?? d.fontWeight
         iconSource =
             try c.decodeIfPresent(
                 BarAppIconSource.self,

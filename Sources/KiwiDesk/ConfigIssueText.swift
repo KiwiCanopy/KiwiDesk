@@ -58,6 +58,14 @@ enum ConfigIssueText {
                 name,
                 replacement
             )
+        case .missingFontFamily(let name):
+            return L(
+                "config_issues.missing_font_family",
+                "The bar font “%1$@” isn't installed, so the "
+                    + "bars draw in %2$@.",
+                name,
+                BarFontText.familyName(KiwiShelf.systemFontFamily)
+            )
         }
     }
 }

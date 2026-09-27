@@ -16,6 +16,7 @@ extension KiwiCore {
     /// menu bar's stand-in rides the same refresh (#1413).
     func updateBars() {
         defer { publishStatusSpaceMark() }
+        syncFontIssue()
         let settings = tiler.settings
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else {
