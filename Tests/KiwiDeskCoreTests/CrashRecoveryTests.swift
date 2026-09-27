@@ -45,6 +45,34 @@ struct CrashRecoveryTests {
         )
     }
 
+    /// A failed relaunch leaves an in-place snapshot for whatever
+    /// launch comes next (#930): past the bound its session
+    /// memory is dropped, the arrangement kept. Clock pinned.
+    @Test("An old in-place snapshot keeps its arrangement, not sizing")
+    func oldInPlaceSessionIsDropped() throws {
+        let captured = Date(timeIntervalSince1970: 5000)
+        var record = snapshot(at: captured)
+        record.windows[0].session = StateSnapshot.WindowSession(
+            floating: true,
+            sticky: .global,
+            stickyReach: nil
+        )
+        let bound = CrashRecovery.inPlaceSessionBound
+        for (age, keeps) in [(bound, true), (bound + 1, false)] {
+            let (recovery, dir) = try makeRecovery()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            recovery.captureInPlaceState = { record }
+            recovery.shutdownCleanly(inPlace: true)
+            let next = CrashRecovery(directory: dir)
+            next.onLog = { _ in }
+            next.bootTime = { .distantPast }
+            next.now = { captured.addingTimeInterval(age) }
+            let taken = try #require(next.takeBootSnapshot())
+            #expect(taken.carriesSessions == keeps)
+            #expect(taken.windows.map(\.id) == record.windows.map(\.id))
+        }
+    }
+
     @Test("Clean shutdown writes the session; consume is one-shot")
     func sessionRoundTrip() throws {
         let (recovery, dir) = try makeRecovery()

@@ -100,50 +100,10 @@ private func trackedFixture() -> StateCoordinator {
 /// never renders it here (see the limitations above).
 private let expectedContainerCount = 14
 
-/// `String(describing:)` of every non-empty dictionary, set, or
-/// array whose keys/elements are `WindowID`, reachable by recursing
-/// structs, classes, optionals, and dictionary *values* (so the
-/// per-space maps inside `WorkspaceManager` are found). Empty
-/// containers are skipped — their element type cannot be read.
-private func windowContainers(
-    _ value: Any,
-    depth: Int = 8
-) -> [String] {
-    guard depth > 0 else { return [] }
-    let mirror = Mirror(reflecting: value)
-    switch mirror.displayStyle {
-    case .dictionary:
-        var found: [String] = []
-        if firstKeyIsWindowID(mirror) {
-            found.append(String(describing: value))
-        }
-        for child in mirror.children {
-            let pair = Array(Mirror(reflecting: child.value).children)
-            if let entryValue = pair.last?.value {
-                found += windowContainers(entryValue, depth: depth - 1)
-            }
-        }
-        return found
-    case .set, .collection:
-        return firstElementIsWindowID(mirror)
-            ? [String(describing: value)] : []
-    case .optional, .struct, .class, .tuple, .enum:
-        return mirror.children.flatMap {
-            windowContainers($0.value, depth: depth - 1)
-        }
-    default:
-        return []
-    }
-}
-
-private func firstKeyIsWindowID(_ mirror: Mirror) -> Bool {
-    guard let first = mirror.children.first else { return false }
-    let pair = Mirror(reflecting: first.value)
-    return pair.children.first?.value is WindowID
-}
-
-private func firstElementIsWindowID(_ mirror: Mirror) -> Bool {
-    mirror.children.first?.value is WindowID
+/// The renderings of every WindowID-keyed container the shared
+/// walker (`idContainers`) finds.
+private func windowContainers(_ value: Any) -> [String] {
+    idContainers(value).map(\.rendered)
 }
 
 @Suite("Window re-key map parity (#308)")

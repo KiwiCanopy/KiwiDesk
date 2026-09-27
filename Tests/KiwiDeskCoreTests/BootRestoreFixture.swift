@@ -61,8 +61,12 @@ enum BootRestoreFixture {
 
     /// Process A's desk: `windows` filed in their Spaces in
     /// order. The caller sets modes and sizing, then `settle`s.
-    static func processA(_ windows: [Window]) -> KiwiCore? {
+    static func processA(
+        _ windows: [Window],
+        configure: (KiwiCore) -> Void = { _ in }
+    ) -> KiwiCore? {
         guard let core = makeCore() else { return nil }
+        configure(core)
         for window in windows {
             core.state.apply(.windowCreated(managed(window)))
             core.state.workspaces.add(window.id, to: window.space)
@@ -119,9 +123,11 @@ enum BootRestoreFixture {
     static func processB(
         _ windows: [Window],
         left: [WindowID: CGRect],
-        session: StateSnapshot
+        session: StateSnapshot,
+        configure: (KiwiCore) -> Void = { _ in }
     ) -> (KiwiCore, [(WindowID, CGRect)])? {
         guard let core = makeCore() else { return nil }
+        configure(core)
         let issued = record(core) {
             core.defersEventRetiles = true
             for window in scanOrder(windows) {

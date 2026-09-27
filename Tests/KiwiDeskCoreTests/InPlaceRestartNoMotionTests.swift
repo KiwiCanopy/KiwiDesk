@@ -120,6 +120,56 @@ struct InPlaceRestartNoMotionTests {
     @Test("Monocle", .enabled(if: NSScreen.main != nil))
     func monocle() throws { try proveNoMotion(.monocle) }
 
+    /// Monocle with a float holding the focus: the member shown is
+    /// the one the engine held (#881), not the focus, so the
+    /// carried hold decides a frame.
+    @Test(
+        "Monocle under a float focus",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func monocleUnderAFloatFocus() throws {
+        let float = WindowID(5)
+        var windows = Self.windows
+        windows.append(
+            .init(id: float, space: F.shown, frame: Self.frame(8))
+        )
+        let park: (KiwiCore) -> Void = {
+            $0.tiler.settings.monocle.hideStyle = .park
+        }
+        let a = try #require(F.processA(windows, configure: park))
+        a.state.setFloating(float, true)
+        a.state.setFloating(WindowID(13), true)
+        a.setSpaceMode(F.shown, .monocle)
+        a.state.workspaces.focus(WindowID(3), in: F.shown)
+        _ = F.settle(a)
+        a.state.workspaces.focus(float, in: F.shown)
+        let left = F.settle(a)
+        #expect(a.tiler.monocleShownMembers[F.shown] == WindowID(3))
+        let session = try F.crossed(a.sessionSnapshot(inPlace: true))
+        // Both hand floats are scanned as the tiles they look like.
+        let scanned = windows.map { window -> F.Window in
+            var found = window
+            found.floating = false
+            return found
+        }
+        let (b, issued) = try #require(
+            F.processB(
+                scanned,
+                left: left,
+                session: session,
+                configure: park
+            )
+        )
+        #expect(!issued.isEmpty)
+        for (id, frame) in issued {
+            #expect(
+                frame == left[id],
+                "w\(id.raw) issued \(frame), left at \(left[id]!)"
+            )
+        }
+        #expect(b.tiler.monocleShownMembers[F.shown] == WindowID(3))
+    }
+
     @Test("a floating Space", .enabled(if: NSScreen.main != nil))
     func floating() throws { try proveNoMotion(.floating) }
 

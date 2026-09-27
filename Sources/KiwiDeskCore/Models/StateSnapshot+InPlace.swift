@@ -14,10 +14,10 @@ extension StateSnapshot {
         public var stackWeights: [UInt32: Double]
         public var scrollRest: ScrollRest?
         /// `TilingEngine.monocleShownMembers` (#881): the member
-        /// shown while a float holds the focus. Filled by Core.
+        /// shown while a float holds the focus.
         public var monocleShown: UInt32?
 
-        public init(space: Space) {
+        public init(space: Space, monocleShown: WindowID?) {
             ratios = space.sessionRatios
             stackWeights = Dictionary(
                 uniqueKeysWithValues: space.stackWeights.map {
@@ -25,7 +25,7 @@ extension StateSnapshot {
                 }
             )
             scrollRest = space.scrollRest
-            monocleShown = nil
+            self.monocleShown = monocleShown?.raw
         }
 
         private enum CodingKeys: String, CodingKey {
@@ -61,13 +61,43 @@ extension StateSnapshot {
     }
 }
 
+extension StateSnapshot {
+    /// This snapshot with every in-place payload removed: the
+    /// arrangement without the session memory.
+    public func droppingSessions() -> StateSnapshot {
+        var copy = self
+        for index in copy.spaces.indices {
+            copy.spaces[index].session = nil
+        }
+        for index in copy.windows.indices {
+            copy.windows[index].session = nil
+        }
+        return copy
+    }
+
+    /// Whether any record carries an in-place payload.
+    public var carriesSessions: Bool {
+        spaces.contains { $0.session != nil }
+            || windows.contains { $0.session != nil }
+    }
+}
+
 extension StateCoordinator {
     /// The in-place stop's capture (#930): `snapshot()` plus each
-    /// Space's and each window's session memory.
-    public func inPlaceSnapshot() -> StateSnapshot {
+    /// Space's and each window's session memory. `monocleShown`
+    /// is the engine's hold, which state does not own.
+    public func inPlaceSnapshot(
+        monocleShown: [SpaceID: WindowID]
+    ) -> StateSnapshot {
         var snapshot = snapshot()
         snapshot.spaces = workspaces.allSpaces.map {
-            StateSnapshot.SpaceRecord(space: $0, inPlace: true)
+            StateSnapshot.SpaceRecord(
+                space: $0,
+                session: StateSnapshot.SpaceSession(
+                    space: $0,
+                    monocleShown: monocleShown[$0.id]
+                )
+            )
         }
         snapshot.windows = snapshot.windows.map { record in
             var record = record

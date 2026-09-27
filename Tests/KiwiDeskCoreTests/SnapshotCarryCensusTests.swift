@@ -45,10 +45,32 @@ struct SnapshotCarryCensusTests {
     ]
 
     private func fields(_ value: Any) -> [String: String] {
+        leaves(value, prefix: "")
+    }
+
+    /// Every stored leaf, recursing into the nested session value
+    /// types (`SessionRatios`, `ScrollRest` and its slot) so a
+    /// field added to one of them is held like a top-level one —
+    /// their coding is hand-written (parity-tests.md).
+    private func leaves(_ value: Any, prefix: String) -> [String: String] {
         var out: [String: String] = [:]
         for child in Mirror(reflecting: value).children {
-            if let label = child.label {
-                out[label] = String(describing: child.value)
+            guard let label = child.label else { continue }
+            let key = prefix + label
+            let nested: Any?
+            if let ratios = child.value as? SessionRatios {
+                nested = ratios
+            } else if let rest = child.value as? ScrollRest {
+                nested = rest
+            } else if let slot = child.value as? ScrollRest.Slot {
+                nested = slot
+            } else {
+                nested = nil
+            }
+            if let nested {
+                out.merge(leaves(nested, prefix: key + ".")) { a, _ in a }
+            } else {
+                out[key] = String(describing: child.value)
             }
         }
         return out
@@ -147,8 +169,13 @@ struct SnapshotCarryCensusTests {
         let b = try processB(from: a)
         let before = fields(try #require(a.state.windows[w1]))
         let after = fields(try #require(b.state.windows[w1]))
+        let fresh = fields(ManagedWindow(id: w1, pid: 7, appName: "App"))
         for (label, value) in before
         where windowLeftBehind[label] == nil && label != "id" {
+            #expect(
+                fresh[label] != value,
+                "fixture leaves \(label) at its default"
+            )
             #expect(
                 after[label] == value,
                 "\(label) did not survive an in-place restart"
@@ -161,6 +188,53 @@ struct SnapshotCarryCensusTests {
         #expect(b.state.manualFloatOverrides[w1] == true)
         #expect(b.state.stickyReachOverrides[w1] == false)
         #expect(b.tiler.monocleShownMembers[spaceID] == w2)
+    }
+
+    /// Build N writes, build N+1 reads (#930): a session payload
+    /// this build cannot decode costs only itself. The fixture is
+    /// the real encoder's output, damaged where another build's
+    /// shape would differ — never hand-written JSON.
+    @Test("an unreadable session payload costs only itself")
+    func unreadablePayloadKeepsTheArrangement() throws {
+        let a = processA()
+        let snapshot = a.sessionSnapshot(inPlace: true)
+        let data = try JSONEncoder().encode(snapshot)
+        var json = try #require(
+            try JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        )
+        var spaces = try #require(json["spaces"] as? [[String: Any]])
+        for index in spaces.indices {
+            spaces[index]["session"] = ["session_ratios": "wider"]
+        }
+        json["spaces"] = spaces
+        var windows = try #require(json["windows"] as? [[String: Any]])
+        for index in windows.indices {
+            windows[index]["session"] = ["sticky": "everywhere"]
+        }
+        json["windows"] = windows
+        let damaged = try JSONSerialization.data(withJSONObject: json)
+        let decoded = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: damaged
+        )
+        #expect(!decoded.carriesSessions)
+        // The capture time crossed `JSONSerialization` too; the
+        // arrangement is the claim.
+        var expected = snapshot.droppingSessions()
+        expected.capturedAt = decoded.capturedAt
+        #expect(decoded == expected)
+        // And the arrangement restores from it.
+        let b = makeTestCore()
+        b.state.workspaces.ensureSpace(spaceID)
+        b.state.workspaces.activate(spaceID)
+        tracked(b, w1)
+        tracked(b, w2)
+        b.restore(decoded)
+        let space = try #require(b.state.workspaces[spaceID])
+        #expect(space.windows == [w2, w1])
+        #expect(space.mode == .track)
+        #expect(space.sessionRatios == SessionRatios())
     }
 
     @Test("a plain capture carries no session memory")

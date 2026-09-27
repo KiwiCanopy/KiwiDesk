@@ -35,7 +35,6 @@ struct APIRecordCensusTests {
     @Test("every dispatcher verb has a record, and vice versa")
     func dispatcherVerbs() {
         let verbs = Set(APIReference.commands.map(\.command))
-            .union([APIReference.socketOnlyCommand])
             .union(APIReference.cliOnly)
         let records = Set(APIReference.coreRecords.keys)
         let message = difference(

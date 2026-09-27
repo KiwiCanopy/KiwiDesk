@@ -246,7 +246,6 @@ public enum APIReference {
                 names.insert("\(table).\(function)")
             }
         }
-        names.insert(socketOnlyCommand)
         names.formUnion(cliOnly)
         return names.sorted()
     }

@@ -12,16 +12,17 @@ public enum InPlaceRestartSource: String, Sendable {
 /// The one home of the in-place restart intent (#930): SENT,
 /// never inferred — a stop and a restart reach the app as the
 /// same SIGTERM, so only an announcement tells them apart. Held
-/// in memory only, consumed by the next `stop()`, and honoured
-/// only within `bound` of its announcement, so an intent whose
-/// stop never came can never make a later Quit skip the gather.
+/// in memory only, consumed by the next `stop()` alone, and
+/// honoured only within `bound` of its announcement, so an intent
+/// whose stop never came can never make a later Quit skip the
+/// gather. A new path that relaunches KiwiDesk announces through
+/// `announceUpdateRelaunch` or `prepare_restart`, or it gathers.
 struct InPlaceRestartState {
     /// Long enough for Sparkle's quit (its watch waits 10 s),
     /// far shorter than any later, unrelated Quit.
     static let bound: TimeInterval = 30
 
     var announcedAt: TimeInterval?
-    var source: InPlaceRestartSource?
     /// The clock the bound is measured on (tests.md, #1456).
     var now: () -> TimeInterval = {
         ProcessInfo.processInfo.systemUptime
@@ -66,14 +67,16 @@ extension KiwiCore {
     /// Consumes the intent: true only for one announced within
     /// the bound. `stop()`'s one question.
     func takeInPlaceRestart() -> Bool {
-        defer {
-            inPlaceRestart.announcedAt = nil
-            inPlaceRestart.source = nil
+        defer { inPlaceRestart.announcedAt = nil }
+        guard let at = inPlaceRestart.announcedAt else {
+            return false
         }
-        guard let at = inPlaceRestart.announcedAt else { return false }
         let age = inPlaceRestart.now() - at
         guard age <= InPlaceRestartState.bound else {
-            onLog("in-place restart: announced \(Int(age))s ago; gathering")
+            onLog(
+                "in-place restart: announced \(Int(age))s ago; "
+                    + "gathering"
+            )
             return false
         }
         return true
@@ -81,13 +84,11 @@ extension KiwiCore {
 
     private func arm(_ source: InPlaceRestartSource) {
         inPlaceRestart.announcedAt = inPlaceRestart.now()
-        inPlaceRestart.source = source
         onLog("in-place restart announced (\(source.rawValue))")
     }
 
     private func disarm(_ reason: String) {
         inPlaceRestart.announcedAt = nil
-        inPlaceRestart.source = nil
         onLog("in-place restart refused: \(reason); will gather")
     }
 }

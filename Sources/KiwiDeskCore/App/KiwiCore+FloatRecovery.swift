@@ -57,15 +57,12 @@ extension KiwiCore {
     /// carries (#930, `StateSnapshot+InPlace`), the Monocle hold
     /// included.
     func sessionSnapshot(inPlace: Bool = false) -> StateSnapshot {
-        var snapshot =
-            inPlace ? state.inPlaceSnapshot() : state.snapshot()
-        if inPlace {
-            for index in snapshot.spaces.indices {
-                let space = SpaceID(snapshot.spaces[index].id)
-                snapshot.spaces[index].session?.monocleShown =
-                    tiler.monocleShownMembers[space]?.raw
-            }
-        }
+        let snapshot =
+            inPlace
+            ? state.inPlaceSnapshot(
+                monocleShown: tiler.monocleShownMembers
+            )
+            : state.snapshot()
         return StateSnapshot(
             windows: snapshot.windows.map { record in
                 guard

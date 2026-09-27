@@ -16,6 +16,15 @@ public final class CrashRecovery {
 
     /// Boot time provider to discard stale pre-boot window IDs (#633).
     public var bootTime: () -> Date = SystemBoot.time
+    /// The clock `inPlaceSessionBound` is measured on.
+    public var now: () -> Date = { Date() }
+
+    /// How long after its stop an in-place snapshot's session
+    /// memory is still the relaunch's (#930): a relaunch arrives
+    /// within its boot scan, seconds; a snapshot a failed relaunch
+    /// left for a much later launch restores the arrangement and
+    /// starts sizing fresh, as any launch after a quit does.
+    public static let inPlaceSessionBound: TimeInterval = 120
 
     private let fileURL: URL
     private let sessionURL: URL
@@ -100,7 +109,14 @@ public final class CrashRecovery {
     /// stop wrote, or the autosave an unclean one left — the newer
     /// when both survive. Both files are consumed.
     public func takeBootSnapshot() -> StateSnapshot? {
-        let session = consumeSession()
+        var session = consumeSession()
+        if let taken = session, taken.carriesSessions,
+            now().timeIntervalSince(taken.capturedAt)
+                > Self.inPlaceSessionBound
+        {
+            onLog("in-place session memory too old; dropped")
+            session = taken.droppingSessions()
+        }
         let crashed = readSnapshot()
         try? FileManager.default.removeItem(at: fileURL)
         guard let crashed,

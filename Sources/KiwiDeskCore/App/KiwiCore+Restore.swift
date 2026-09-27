@@ -108,10 +108,9 @@ extension KiwiCore {
     /// Boot's first arrangement: the previous session's — a clean
     /// stop's or a crash's autosave — REPLAYED BEFORE any pass
     /// draws, so every scanned window is filed in its remembered
-    /// Space and slot before a frame is issued (#930). Tiling the
-    /// scan's AX order first pulled inactive Spaces' windows onto
-    /// the screen and parked them again. With no session, the
-    /// scan's order is the arrangement.
+    /// Space and slot before a frame is issued (#930,
+    /// accessibility.md). With no session, the scan's order is the
+    /// arrangement.
     ///
     /// Settles like any other space switch — forced past the
     /// tolerance check, the space-switch animation respected

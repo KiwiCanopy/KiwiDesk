@@ -43,21 +43,32 @@ struct BootArrangeWiringTests {
         )
     }
 
-    @Test("the boot tail issues no pass ahead of the arrangement")
-    func tailDrawsNothingFirst() throws {
+    /// The POSITION, not a list of forbidden spellings (tests.md,
+    /// #1021): the arrangement is the tail's first statement
+    /// after the scan's clock stamp and the deferral's release,
+    /// so no pass — however spelled, or hidden in a callee — can
+    /// run ahead of it.
+    @Test("the arrangement is the tail's first act")
+    func arrangementComesFirst() throws {
         let body = try finishBootBody()
         let arrange = try #require(
             body.range(of: "arrangeBootDesk(")
         )
-        let before = String(body[..<arrange.lowerBound])
-        let pass = #"\b(retile|spaceSwitchRetile)\("#
+        let open = try #require(body.range(of: "{"))
+        let statements = body[open.upperBound..<arrange.lowerBound]
+            .split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
         #expect(
-            before.range(of: pass, options: .regularExpression)
-                == nil,
+            statements == [
+                "boot.scanDone = ContinuousClock.now",
+                "defersEventRetiles = false",
+            ],
             """
-            A retile ahead of arrangeBootDesk tiles the scan's \
-            AX order — a hidden Space's windows on screen — \
-            before the session files them (#930).
+            Something runs ahead of arrangeBootDesk in the boot \
+            tail: \(statements). A pass there tiles the scan's AX \
+            order — a hidden Space's windows on screen — before \
+            the session files them (#930).
             """
         )
     }

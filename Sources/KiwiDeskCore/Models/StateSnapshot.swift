@@ -19,6 +19,23 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             self.session = session
         }
 
+        private enum CodingKeys: String, CodingKey {
+            case id, frame, session
+        }
+
+        /// The in-place payload decodes on its own: one this build
+        /// cannot read (another build's shape) costs only itself,
+        /// never the record or the file (#930).
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            id = try c.decode(UInt32.self, forKey: .id)
+            frame = try c.decode(CGRect.self, forKey: .frame)
+            session = try? c.decodeIfPresent(
+                WindowSession.self,
+                forKey: .session
+            )
+        }
+
         public var windowID: WindowID { WindowID(id) }
     }
 
@@ -28,16 +45,17 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         public let windows: [UInt32]
         public let focused: UInt32?
         /// Track breaks and weights preserved across restore
-        /// (#128). The per-window `stackWeights` are deliberately
-        /// NOT carried: an even re-split degrades gracefully,
-        /// while a lost partition restructures the space.
+        /// (#128). The per-window `stackWeights` ride only the
+        /// in-place `session` (#930): an even re-split degrades
+        /// gracefully, while a lost partition restructures the
+        /// space.
         public let trackBreaks: [UInt32]
         public let trackWeights: [UInt32: Double]
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: SpaceSession?
 
-        public init(space: Space, inPlace: Bool = false) {
-            self.session = inPlace ? SpaceSession(space: space) : nil
+        public init(space: Space, session: SpaceSession? = nil) {
+            self.session = session
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
@@ -80,7 +98,8 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                     [UInt32: Double].self,
                     forKey: .trackWeights
                 ) ?? [:]
-            session = try c.decodeIfPresent(
+            // On its own, as `WindowRecord`'s (#930).
+            session = try? c.decodeIfPresent(
                 SpaceSession.self,
                 forKey: .session
             )
