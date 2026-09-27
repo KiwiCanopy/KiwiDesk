@@ -29,7 +29,9 @@ extension BehaviourKey {
         case .quitGridTargetDepth:
             return .row(.behaviour, .onQuit, .atRest)
         case .mouseResize, .mouseFollowsFocus:
-            return .row(.behaviour, .mouse, .atRest)
+            // Moved from Behavior with #1726: the Mouse &
+            // trackpad drawer explains the gestures they tune.
+            return .row(.shortcuts, .gestures, .showMore)
         }
     }
 }

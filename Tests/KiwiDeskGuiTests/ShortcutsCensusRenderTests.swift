@@ -175,6 +175,21 @@ struct ShortcutsCensusRenderTests {
         )
     }
 
+    /// The Mouse & trackpad drawer's settings (#1726), behind the
+    /// drawer and so `.showMore`; its explainer entries are not
+    /// settings and carry no census row.
+    /// Bespoke container — membership only (see the suite note).
+    @Test("Mouse & trackpad renders the census's show-more rows")
+    func gesturesTier() {
+        pin(
+            ShortcutsRowOrder.gesturesMore,
+            .gestures,
+            .showMore,
+            "mouse & trackpad drawer"
+        )
+        #expect(censusRows(.gestures, .atRest).isEmpty)
+    }
+
     /// Restore Defaults is the container's only row, at rest.
     /// A container of one, because the set it restores spans
     /// four others — declaring it under any of them would file a
@@ -212,13 +227,13 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the eight rendered containers")
+    @Test("Shortcuts holds exactly the nine rendered containers")
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
                 .focus, .moveWindows, .sizeAndFloat,
                 .openApplications, .generalKeys, .layers,
-                .luaBindings, .defaultShortcuts,
+                .luaBindings, .defaultShortcuts, .gestures,
             ]
         )
     }

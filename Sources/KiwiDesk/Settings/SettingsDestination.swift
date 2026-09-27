@@ -60,7 +60,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .behavior: return L("destination.behavior", "Behavior")
         case .profiles: return L("destination.profiles", "Profiles")
         case .shortcuts:
-            return L("destination.shortcuts", "Shortcuts")
+            return L("destination.shortcuts", "Shortcuts & Gestures")
         case .appRules:
             return L("destination.app_rules", "App Rules")
         case .general: return L("destination.general", "General")
@@ -79,7 +79,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
         case .bars: return "menubar.rectangle"
-        case .behavior: return "cursorarrow.motionlines"
+        case .behavior: return "switch.2"
         case .profiles: return "square.stack.3d.up"
         case .shortcuts: return "keyboard"
         case .appRules: return "app.badge.checkmark"

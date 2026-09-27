@@ -23,7 +23,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case monitorFingerprints
     case monocle
     case motion
-    case mouse
+    case gestures
     case cues
     case moveWindows
     case onQuit
@@ -68,7 +68,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .generalKeys, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers, .luaBindings,
-            .monitorFingerprints, .monocle, .mouse,
+            .monitorFingerprints, .monocle, .gestures,
             .moveWindows, .onQuit, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedMonitors, .presets,

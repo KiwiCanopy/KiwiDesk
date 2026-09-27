@@ -7,6 +7,14 @@ enum ShortcutsRowOrder {
         .layers,
         .luaBindings,
         .defaultShortcuts,
+        .gestures,
+    ]
+
+    /// The Mouse & trackpad drawer's settings, in entry order
+    /// (#1726); the drawer's explainer entries are not settings.
+    static let gesturesMore: [SettingKey] = [
+        .behaviour(.mouseResize),
+        .behaviour(.mouseFollowsFocus),
     ]
 
     /// Focus group order: directions, then live spaces.

@@ -126,68 +126,58 @@ struct HomeCardMonitorsTile: View {
     }
 }
 
-/// Behavior home card tile previewing mouse divider resize style
-/// (`TilingSettings`).
+/// Behavior home card tile: the quit grid, laid out by the
+/// engine's own `QuitGridLayout` for the draft's target depth —
+/// a readout, never a sketch (#1726 took the mouse divider away).
 struct HomeCardBehaviorTile: View {
     let settings: TilingSettings
     @Environment(\.schematicPalette) private var palette
 
-    private var resizes: Bool {
-        settings.mouseResize == .layout
-    }
+    /// Sample windows the readout gathers; enough that a
+    /// shallow target depth visibly piles.
+    static let sampleCount = 12
 
     var body: some View {
-        // Equal panes on purpose: the prototype's 6/4 split was
-        // tried via `idealWidth`, which an HStack's concrete
-        // proposal never consults — a dead input claiming a
-        // ratio the layout ignored (code review, 2026-08-09) —
-        // and the divider, not the ratio, is the fact this
-        // tile answers with.
-        HStack(spacing: 4) {
-            pane
-            divider
-            pane
+        GeometryReader { proxy in
+            let frames = Self.frames(in: proxy.size, settings: settings)
+            ZStack(alignment: .topLeading) {
+                ForEach(frames.indices, id: \.self) { index in
+                    pane(frames[index])
+                }
+            }
         }
     }
 
-    private var pane: some View {
-        RoundedRectangle(cornerRadius: 5)
+    /// The engine's placement of the sample, in the tile's space.
+    static func frames(
+        in size: CGSize,
+        settings: TilingSettings
+    ) -> [CGRect] {
+        let ids = (1...sampleCount).map { WindowID(UInt32($0)) }
+        let placed = QuitGridLayout.frames(
+            for: ids,
+            in: CGRect(origin: .zero, size: size),
+            minSize: 6,
+            targetDepth: settings.quitGridTargetDepth
+        )
+        return ids.compactMap { placed[$0] }
+    }
+
+    private func pane(_ rect: CGRect) -> some View {
+        RoundedRectangle(cornerRadius: 3)
             .fill(
                 palette?.ghostFill
                     ?? SettingsTheme.ink2.opacity(0.08)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 5)
+                RoundedRectangle(cornerRadius: 3)
                     .strokeBorder(
                         palette?.frame
                             ?? SettingsTheme.ink2.opacity(0.3),
-                        lineWidth: 1.5
+                        lineWidth: 1
                     )
             )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var divider: some View {
-        let accent =
-            resizes
-            ? palette?.accent ?? SettingsTheme.accent
-            : palette?.ghostStroke
-                ?? SettingsTheme.ink2.opacity(0.4)
-        return RoundedRectangle(cornerRadius: 1)
-            .fill(accent)
-            .frame(width: 2)
-            .padding(.vertical, 6)
-            .overlay(alignment: .top) {
-                if resizes { handle(accent) }
-            }
-            .overlay(alignment: .bottom) {
-                if resizes { handle(accent) }
-            }
-    }
-
-    private func handle(_ accent: Color) -> some View {
-        Circle()
-            .fill(accent)
-            .frame(width: 7, height: 7)
+            .frame(width: rect.width, height: rect.height)
+            .offset(x: rect.minX, y: rect.minY)
     }
 }

@@ -89,6 +89,26 @@ struct ShortcutsControls: Sendable {
         "shortcuts.advanced.title",
         "Lua bindings"
     )
+    /// The Mouse & trackpad drawer (#1726), declared with its
+    /// settings so a search hit on either opens it.
+    let gestures = SettingsDrawer(
+        "shortcuts.gestures.title",
+        "Mouse & trackpad",
+        children: GesturesControls()
+    )
+}
+
+/// Shortcuts ▸ Mouse & trackpad rows, keyed on their census label
+/// keys (moved from Behavior ▸ Mouse with #1726).
+struct GesturesControls: Sendable {
+    let mouseResize = SettingsControl(
+        "behavior.mouse.resize_action",
+        "Mouse resize action"
+    )
+    let followsFocus = SettingsControl(
+        "behavior.mouse.follows_focus",
+        "Move mouse to focused window"
+    )
 }
 
 /// Shortcuts ▸ General rows, keyed on their census label keys

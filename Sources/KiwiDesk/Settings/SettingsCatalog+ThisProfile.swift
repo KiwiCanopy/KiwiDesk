@@ -169,10 +169,6 @@ struct GapsAndBordersControls: Sendable {
 }
 
 struct BehaviorControls: Sendable {
-    let mouseCard = SettingsControl(
-        "behavior.mouse.title",
-        "Mouse"
-    )
     let quitCard = SettingsControl("behavior.quit.title", "On quit")
     /// Cues a blocked action gives back (#1255).
     let cuesCard = SettingsControl(

@@ -214,6 +214,12 @@ restated `20...80` satisfies on the day it is written.
     words held to the predicate at every length and the
     predicate to the drawing by
     `LayoutSchematicCenterCaptionTests`.
+- **A gesture picture is not a schematic.** The Shortcuts &
+  Gestures page's Mouse & trackpad entries teach a gesture rather
+  than a rest state, so each picture animates on hover and rests
+  on its key frame, which is all Reduce Motion shows — never a
+  bundled clip, never autoplay, and the gate still named per call
+  (#1726; `docs/design-decisions.md` ▸ Shortcuts carries why).
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by
   skipping the drawing rather than leaving it to the frame's

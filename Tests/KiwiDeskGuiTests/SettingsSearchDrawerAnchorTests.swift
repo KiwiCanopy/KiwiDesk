@@ -61,8 +61,12 @@ struct SettingsSearchDrawerAnchorTests {
                 [SettingsCatalog.colors.motionMore]
             ),
             (
-                .shortcuts, "Shortcuts", .generalKeys,
+                .shortcuts, "Shortcuts & Gestures", .generalKeys,
                 [SettingsCatalog.shortcuts.generalKeys]
+            ),
+            (
+                .shortcuts, "Shortcuts & Gestures", .gestures,
+                [SettingsCatalog.shortcuts.gestures]
             ),
         ]
     }

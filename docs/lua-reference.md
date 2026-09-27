@@ -3287,7 +3287,8 @@ settle, for the window focus finally landed on. When focus lands
 on a window in an inactive space (cmd+tab into a stashed window),
 the warp waits until KiwiDesk follows focus and pulls that space
 forward. Clicking an app-bar item warps too. Also togglable in
-the Settings app under **Behavior ▸ Mouse**.
+the Settings app under **Shortcuts & Gestures ▸ Mouse &
+trackpad**.
 
 **Example:**
 

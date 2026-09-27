@@ -9374,6 +9374,60 @@ everything just slid. Fixed behavior, no setting: no peer WM
 ships a knob here, and if demand materializes it becomes a
 Lua-only setting later. `CloseFocusReturnTests` pins all of it.
 
+**The page is "Shortcuts & Gestures", and what the mouse does is
+explained at its top** (#1726, owner and ui-designer 2026-09-27/28).
+A new user never discovers a mouse control from a window of
+keyboard rows, and the scroll gestures that follow (#1656, #1519)
+need a home for their modifiers, which are input bindings like
+every chord here. So the page names both inputs, the way "Gaps &
+Borders" pairs two nouns; *Controls* was refused because every row
+in Settings is a control, and *gesture* is Apple's own word for
+trackpad and mouse input.
+
+**The Mouse & trackpad drawer sits above the layer header, and is
+collapsed on every visit.** Everything under "Editing the X layer"
+reads as belonging to that layer; the drawer's settings do not, so
+it cannot sit there — which amends the 2026-08-04 ruling that the
+layers card leads the page. It opens shut every time because a
+drawer that opens on a first visit needs a stored "seen" flag and
+then changes shape on the second; search opens it on a hit, and its
+summary does the telling while it is shut.
+
+**Its entries are grouped by where the hand is** — on your
+windows, on the KiwiShelf, anywhere holding a modifier — never by
+gesture type, which is grouping by widget. That grouping is also
+what keeps a plain scroll over the shelf apart from a modifier
+scroll anywhere.
+
+**An entry is one drawn picture and one sentence, and the picture
+animates on hover.** This is the one place the one-frame rule
+above does not bind, and the difference is the subject: a layout
+schematic teaches a REST state and sits in a strip built for
+comparison, while an entry here teaches a GESTURE, alone on its
+row, which no rest state denotes. It is still not a clip. A bundled
+video cannot follow the user's palette or appearance, cannot be
+localized, and goes stale on the next shelf redesign; the drawing
+is built from the same shapes as the rest of the window and rests
+on its key frame, which is all Reduce Motion ever shows. It plays
+only while pointed at, so the page never moves on its own.
+
+**An entry lands with its feature, and greys where its surface is
+off.** Describing #1528's clicks before they ship teaches what the
+app does not do — the channel-not-yet-existing case, removed
+rather than dimmed. An entry for a bar that is switched off stays,
+dimmed, with one sentence pointing where it turns on; an entry's
+own checkbox is never greyed for being off, since a greyed control
+says "you cannot change this".
+
+**Behavior ▸ Mouse moved here, and scope does not stop it.** The
+two rows are profile values, and this page shows the header's
+profile chip like every page but General and the Mac Checklist, so
+they edit the profile the chip names, exactly as they did on
+Behavior. The pointer-follow is its own entry rather than a row in
+the Focus card: it fires on every focus change KiwiDesk sees — a
+Space switch, a closed window, ⌘-Tab — not only on focus
+shortcuts, and that card sits under the layer header.
+
 ### Overrides & appearance
 
 **[Principle]**
