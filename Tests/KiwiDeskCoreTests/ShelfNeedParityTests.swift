@@ -43,9 +43,9 @@ struct ShelfNeedParityTests {
         var look = SpaceBarLook()
         look.itemGap = gap
         look.glyphGap = 8
-        // Padded, so both halves must read the content depth
-        // (#1682).
-        look.itemPadding = 6
+        // A glyph size under the depth, so both halves must read
+        // the content depth (#1682, #1713).
+        look.glyphSize = depth - 12
         let apps = ["A", "B"].map {
             SpaceBarItemView.App(
                 name: $0,
@@ -112,7 +112,7 @@ struct ShelfNeedParityTests {
         var style = AppBarLook()
         style.itemGap = gap
         style.alignment = alignment
-        style.itemPadding = 6
+        style.glyphSize = depth - 12
         let items = ["Mail", "A much longer window title", "Notes"]
             .enumerated().map {
                 AppBarOverlay.Item(

@@ -6,7 +6,6 @@
 enum KiwiShelfKey: String, CaseIterable, Hashable {
     case edge = "settings.kiwishelf.edge"
     case thickness = "settings.kiwishelf.thickness"
-    case itemPadding = "settings.kiwishelf.itemPadding"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
     case minimum = "settings.kiwishelf.minimum"
@@ -17,6 +16,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case borderWidth = "settings.kiwishelf.borderWidth"
     case highlightWidth = "settings.kiwishelf.highlightWidth"
     case itemGap = "settings.kiwishelf.itemGap"
+    case glyphSizeAuto = "settings.kiwishelf.glyphSize (auto)"
+    case glyphSize = "settings.kiwishelf.glyphSize"
     case fontSizeAuto = "settings.kiwishelf.fontSize (auto)"
     case fontSize = "settings.kiwishelf.fontSize"
     case fontFamily = "settings.kiwishelf.fontFamily"
@@ -49,11 +50,10 @@ extension KiwiShelfKey {
 
     var placement: SettingPlacement {
         switch self {
-        case .edge, .thickness, .itemPadding, .alignment, .order,
-            .minimum:
+        case .edge, .thickness, .alignment, .order, .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
         case .background, .cornerRoundness, .border, .highlightWidth,
-            .itemGap, .fontSizeAuto, .fontFamily,
+            .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
             .outerMargin, .innerMargin, .iconSource:
             return .row(
                 .bars,
@@ -82,6 +82,13 @@ extension KiwiShelfKey {
                 .kiwishelf,
                 .showMore,
                 gate: .setting(.kiwishelf(.fontSizeAuto))
+            )
+        case .glyphSize:
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: .setting(.kiwishelf(.glyphSizeAuto))
             )
         case .borderWidth:
             return .row(
@@ -135,11 +142,13 @@ extension KiwiShelfKey {
                 "kiwishelf.thickness",
                 help: "kiwishelf.thickness.help"
             )
-        case .itemPadding:
+        case .glyphSizeAuto:
             return .text(
-                "kiwishelf.item_padding",
-                help: "kiwishelf.item_padding.help"
+                "kiwishelf.glyph_size.auto",
+                help: "kiwishelf.glyph_size.help"
             )
+        case .glyphSize:
+            return .text("kiwishelf.glyph_size")
         case .alignment:
             return .text(
                 "kiwishelf.alignment.label",

@@ -27,11 +27,9 @@ extension KiwiShelfCard {
                 help: L(
                     "kiwishelf.thickness.help",
                     "One thickness for both bars. An automatic "
-                        + "font size follows it."
+                        + "glyph size follows it."
                 )
             )
-        case .itemPadding:
-            itemPaddingRow
         case .alignment:
             alignmentRow
         case .order:
@@ -83,6 +81,8 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfStyle.children
                     .kiwishelfStyleItemGap
             )
+        case .glyphSizeAuto:
+            glyphSizeGroup
         case .fontSizeAuto:
             fontSizeGroup
         case .fontFamily:
@@ -121,7 +121,7 @@ extension KiwiShelfCard {
             )
         case .iconSource:
             iconSourceRow
-        case .fontSize, .liquidGlass, .dimFactor, .fillColor,
+        case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,
             .groupBadgeTextColor:
@@ -234,7 +234,7 @@ extension KiwiShelfCard {
                 "kiwishelf.font_size.help",
                 "One size for both bars, so Space numbers and App "
                     + "Bar titles line up. Automatic follows the "
-                    + "thickness."
+                    + "glyph size."
             )
         ) {
             PtSlider(

@@ -72,6 +72,14 @@ struct KiwiShelfStyleControls: Sendable {
         "kiwishelf.item_gap",
         "Item gap"
     )
+    let kiwishelfStyleGlyphSizeAuto = SettingsControl(
+        "kiwishelf.glyph_size.auto",
+        "Auto glyph size"
+    )
+    let kiwishelfStyleGlyphSize = SettingsControl(
+        "kiwishelf.glyph_size",
+        "Glyph size"
+    )
     let kiwishelfStyleFontSizeAuto = SettingsControl(
         "kiwishelf.font_size.auto",
         "Auto font size"

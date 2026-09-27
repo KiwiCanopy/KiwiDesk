@@ -9,13 +9,13 @@ import Testing
 /// from the content it leaves, never the full thickness.
 @Suite("Item padding in the Bars preview")
 @MainActor
-struct ItemPaddingPreviewTests {
+struct GlyphSizePreviewTests {
     private static let scale: CGFloat = 1.8
 
     private static func tile(padding: CGFloat) -> HomeCardBarsTile {
         var settings = TilingSettings()
         settings.kiwishelf.thickness = 40
-        settings.kiwishelf.itemPadding = padding
+        settings.kiwishelf.glyphSize = padding == 0 ? 0 : 40 - 2 * padding
         return HomeCardBarsTile(settings: settings, scale: scale)
     }
 

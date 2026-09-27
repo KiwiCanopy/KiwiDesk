@@ -88,42 +88,29 @@ struct BarSliderBandTests {
         #expect(glyphDeclared.contains("gapCeiling"))
     }
 
-    /// The ceiling is the padding past which the thickest shelf
-    /// this card offers holds its content at Core's floor (#1682).
-    @Test("the item padding band derives from Core and the thickness")
-    func itemPaddingIsDerived() throws {
-        let band = BarSliderBands.itemPadding
-        #expect(band.lowerBound == Double(KiwiShelf.minItemPadding))
-        #expect(band.contains(Double(KiwiShelf().itemPadding)))
+    /// The floor is Core's content floor and the ceiling the
+    /// draft's thickness, past which `contentDepth` draws the
+    /// thickness whatever the value (#1713).
+    @Test("the glyph size band derives from Core and the thickness")
+    func glyphSizeIsDerived() throws {
+        for thickness: CGFloat in [KiwiShelf.minThickness, 40, 80] {
+            let band = BarSliderBands.glyphSize(thickness: thickness)
+            #expect(band.lowerBound == Double(KiwiShelf.minContentDepth))
+            #expect(band.upperBound >= Double(thickness))
+            var shelf = KiwiShelf()
+            shelf.glyphSize = CGFloat(band.upperBound)
+            #expect(shelf.contentDepth(forDepth: thickness) == thickness)
+        }
+        let band = BarSliderBands.glyphSize(thickness: 40)
         var shelf = KiwiShelf()
-        shelf.itemPadding = CGFloat(band.upperBound)
-        let thickest = CGFloat(BarSliderBands.thickness.upperBound)
+        shelf.glyphSize = CGFloat(band.upperBound) - 1
+        #expect(shelf.contentDepth(forDepth: 40) < 40)
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(Self.bars)
+            .appendingPathComponent("BarSliderBands.swift")
+        let text = try SourceScan.strippedSource(at: file)
         #expect(
-            shelf.contentDepth(forDepth: thickest)
-                == KiwiShelf.minContentDepth
-        )
-        shelf.itemPadding -= 1
-        #expect(
-            shelf.contentDepth(forDepth: thickest)
-                > KiwiShelf.minContentDepth
-        )
-        let declared = try declaration(of: "itemPadding")
-        // The ceiling's expression itself reads the content floor,
-        // not a name left lying in the declaration.
-        #expect(
-            declared.contains(
-                "let floor = Double(KiwiShelf.minItemPadding)"
-            )
-        )
-        #expect(
-            declared.contains(
-                "let content = Double(KiwiShelf.minContentDepth)"
-            )
-        )
-        #expect(
-            declared.contains(
-                "floor...((thickness.upperBound - content) / 2)"
-            )
+            text.contains("let floor = Double(KiwiShelf.minContentDepth)")
         )
     }
 
@@ -137,7 +124,7 @@ struct BarSliderBandTests {
         ("kiwishelf.itemGap", "itemGap"),
         ("spaceBarStyle.glyphGap", "glyphGap"),
         ("kiwishelf.highlightWidth", "highlightWidth"),
-        ("kiwishelf.itemPadding", "itemPadding"),
+        ("kiwishelf.glyphSize (auto)", "glyphSize"),
     ]
 
     /// The body of `var <name>: some View {` in the card sources:

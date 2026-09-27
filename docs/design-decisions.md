@@ -10840,6 +10840,19 @@ measures a different string — the front-app segment's title,
 inert whenever that segment is hidden — so it is named for it:
 `front_app_title_cap`.
 
+:::unreleased
+*The content's size is named for what it produces.* How large
+an item's glyphs, counts and automatic text draw across the
+shelf is `glyph_size` (#1713), automatic by default and never
+larger than the thickness, and not the `item_padding` it
+replaced before shipping: a padding names the mechanism, so a
+user who wanted smaller icons did not look for it. It is not an
+*item size* either — that is the length-along-the-edge knob
+retired above — and it moves nothing along the edge. The stored
+value is kept as typed and clamped where it draws, so a thicker
+shelf brings a larger typed size back.
+:::
+
 *The crossing.* A saved profile or bundle is rewritten once
 (`KiwiShelfMigrationTests`): the shelf takes the Space Bar's
 values — its colours and glyph style included — because it is

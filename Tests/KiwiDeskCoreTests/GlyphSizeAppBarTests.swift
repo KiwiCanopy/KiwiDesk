@@ -9,7 +9,7 @@ import Testing
 /// content depth, while the item keeps the full depth.
 @Suite("Item padding reaches the App Bar", .serialized)
 @MainActor
-struct ItemPaddingAppBarTests {
+struct GlyphSizeAppBarTests {
     private static let depth: CGFloat = 40
     private static let padding: CGFloat = 6
     private static let content: CGFloat = 28
@@ -29,7 +29,7 @@ struct ItemPaddingAppBarTests {
         content: AppBarStyle.Content = .iconAndTitle
     ) -> AppBarLook {
         var look = AppBarLook()
-        look.itemPadding = padding
+        look.glyphSize = Self.content
         look.liquidGlass = false
         look.edge = edge
         look.content = content

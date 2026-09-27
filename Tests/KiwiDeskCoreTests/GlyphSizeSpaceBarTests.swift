@@ -10,7 +10,7 @@ import Testing
 /// the full depth.
 @Suite("Item padding reaches the rendered Space Bar", .serialized)
 @MainActor
-struct ItemPaddingSpaceBarTests {
+struct GlyphSizeSpaceBarTests {
     private static let depth: CGFloat = 40
     private static let padding: CGFloat = 6
     private static let content: CGFloat = 28
@@ -30,7 +30,7 @@ struct ItemPaddingSpaceBarTests {
         roundness: CGFloat = 50
     ) -> SpaceBarLook {
         var look = SpaceBarLook()
-        look.itemPadding = padding
+        look.glyphSize = Self.content
         look.cornerRoundness = roundness
         look.liquidGlass = false
         look.backgroundStyle = boxed ? .boxed : .plain

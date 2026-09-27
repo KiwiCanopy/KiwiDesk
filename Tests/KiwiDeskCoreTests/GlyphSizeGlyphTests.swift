@@ -9,7 +9,7 @@ import Testing
 /// and the segment's measured extent is what its title draws.
 @Suite("Item padding reaches the Space Bar's glyphs", .serialized)
 @MainActor
-struct ItemPaddingGlyphTests {
+struct GlyphSizeGlyphTests {
     private static let depth: CGFloat = 40
     private static let content: CGFloat = 28
     private static let glyph = ":safari:"
@@ -18,7 +18,7 @@ struct ItemPaddingGlyphTests {
 
     private static func look(padding: CGFloat) -> SpaceBarLook {
         var look = SpaceBarLook()
-        look.itemPadding = padding
+        look.glyphSize = padding == 0 ? 0 : depth - 2 * padding
         look.liquidGlass = false
         look.backgroundStyle = .plain
         look.showFrontApp = true

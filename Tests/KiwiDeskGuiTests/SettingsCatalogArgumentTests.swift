@@ -196,7 +196,8 @@ struct SettingsCatalogArgumentTests {
         // 79 since #1680: the highlight width row's anchor.
         // 81 since #1679: the border and border width rows'.
         // 83 since #1681: the font family and weight anchors.
-        #expect(direct.values.reduce(0, +) == 83)
+        // 85 since #1713: the glyph size toggle and slider's.
+        #expect(direct.values.reduce(0, +) == 85)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from
