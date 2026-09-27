@@ -11,13 +11,13 @@ extension PaletteSceneThumbnail {
             }
             HStack(spacing: 7 * scale) {
                 windowTile(
-                    ring: color("border.focused_color"),
+                    ring: sheened("border.focused_color"),
                     ringWidth: 2.5 * scale,
                     mark: color("sticky.color"),
                     symbol: StickyStyle.symbolName(for: .global)
                 )
                 windowTile(
-                    ring: color("border.unfocused_color"),
+                    ring: AnyShapeStyle(color("border.unfocused_color")),
                     ringWidth: 1.5 * scale,
                     mark: color("floating.color"),
                     symbol: FloatingStyle.symbolName
@@ -26,12 +26,12 @@ extension PaletteSceneThumbnail {
             HStack(spacing: 7 * scale) {
                 dragTile(
                     fill: color("drag.ghost.fill_color"),
-                    border: color("drag.ghost.border_color"),
+                    border: sheened("drag.ghost.border_color"),
                     dashed: false
                 )
                 dragTile(
                     fill: color("drag.drop_zone.fill_color"),
-                    border: color("drag.drop_zone.border_color"),
+                    border: sheened("drag.drop_zone.border_color"),
                     dashed: true
                 )
             }
@@ -70,7 +70,10 @@ extension PaletteSceneThumbnail {
             item(idleInk)
             item(
                 color("kiwishelf.active_item_color"),
-                highlight: color("kiwishelf.highlight_color")
+                highlight: sheened(
+                    "kiwishelf.highlight_color",
+                    plate: "kiwishelf.fill_color"
+                )
             )
             .overlay(alignment: .topTrailing) {
                 badge(
@@ -96,7 +99,10 @@ extension PaletteSceneThumbnail {
             item(color("kiwishelf.item_color"))
             item(
                 color("kiwishelf.active_item_color"),
-                highlight: color("kiwishelf.highlight_color")
+                highlight: sheened(
+                    "kiwishelf.highlight_color",
+                    plate: "kiwishelf.fill_color"
+                )
             )
             .overlay(alignment: .topTrailing) {
                 badge(
@@ -117,9 +123,15 @@ extension PaletteSceneThumbnail {
         RoundedRectangle(cornerRadius: 4 * scale)
             .fill(fill)
             .overlay {
-                if let borderRim {
+                if borderRim != nil {
                     RoundedRectangle(cornerRadius: 4 * scale)
-                        .strokeBorder(borderRim, lineWidth: scale)
+                        .strokeBorder(
+                            sheened(
+                                "kiwishelf.border_color",
+                                plate: "kiwishelf.fill_color"
+                            ),
+                            lineWidth: scale
+                        )
                 }
             }
             .frame(height: 20 * scale)
@@ -134,7 +146,7 @@ extension PaletteSceneThumbnail {
 
     private func item(
         _ fill: Color,
-        highlight: Color? = nil
+        highlight: AnyShapeStyle? = nil
     ) -> some View {
         RoundedRectangle(cornerRadius: 2 * scale)
             .fill(fill)
@@ -162,7 +174,7 @@ extension PaletteSceneThumbnail {
     // MARK: - Windows and drag visuals
 
     private func windowTile(
-        ring: Color,
+        ring: AnyShapeStyle,
         ringWidth: CGFloat,
         mark: Color,
         symbol: String?
@@ -190,7 +202,7 @@ extension PaletteSceneThumbnail {
     /// Ghost and drop zone comparison tile (#231).
     private func dragTile(
         fill: Color,
-        border: Color,
+        border: AnyShapeStyle,
         dashed: Bool
     ) -> some View {
         RoundedRectangle(cornerRadius: 4 * scale)

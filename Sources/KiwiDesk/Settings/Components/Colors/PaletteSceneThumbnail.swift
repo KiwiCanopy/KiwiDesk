@@ -22,6 +22,33 @@ struct PaletteSceneThumbnail: View {
     /// No default, so a call site cannot drop the draft's switch.
     let drawsBorder: Bool
 
+    /// The draft's `border.sheen` (#1644). No default, like
+    /// `drawsBorder`.
+    let drawsSheen: Bool
+
+    /// Whether this drawing paints the sheen: the draft's switch,
+    /// at `.panel` only. A 1–2 pt ramp on a 72 pt tile is under a
+    /// pixel of lift, so it is a fact the thumbnail cannot render
+    /// and is left undrawn there (gui.md ▸ #753).
+    var sheens: Bool { drawsSheen && scene == .panel }
+
+    /// A stroke's paint for `path`: Core's ramp (#702, via
+    /// `SheenPaint`) while `sheens`, capped against the plate at
+    /// `plate` where it sits on one, else the flat colour.
+    func sheened(_ path: String, plate: String? = nil) -> AnyShapeStyle {
+        guard sheens else { return AnyShapeStyle(color(path)) }
+        return SheenPaint.style(
+            hex(path),
+            sheen: true,
+            plate: plate.map(hex)
+        )
+    }
+
+    /// The palette's hex for `path`, the shipped default beneath.
+    func hex(_ path: String) -> String {
+        palette.colors[path] ?? Self.fallback[path] ?? ""
+    }
+
     /// The panel's bar-plate rim: the palette's border colour
     /// while the draft draws a border, else none.
     var borderRim: Color? {

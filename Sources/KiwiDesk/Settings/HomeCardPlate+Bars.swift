@@ -66,7 +66,7 @@ struct HomeCardBarsTile: View {
         var shelf: KiwiShelf
         /// Whether the sheen paints the indicator and the border
         /// (#1644) — its own value, no other gate.
-        var sheen = false
+        var sheen: Bool
     }
 
     /// The share of the thickness an item's content fills, read

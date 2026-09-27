@@ -141,7 +141,8 @@ struct PaletteSceneRoleTests {
         let tile = PaletteSceneThumbnail(
             palette: ColorPalette(name: "", colors: [:]),
             scene: .tile,
-            drawsBorder: false
+            drawsBorder: false,
+            drawsSheen: false
         )
         #expect(tile.scale == 1)
     }
