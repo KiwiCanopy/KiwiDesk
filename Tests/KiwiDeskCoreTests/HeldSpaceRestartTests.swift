@@ -192,6 +192,7 @@ struct HeldSpaceRestartTests {
             try JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
         var held = try #require(json["held"] as? [[String: Any]])
+        try #require(held.count == 2)
         var origin = try #require(held[0]["origin"] as? [String: Any])
         origin["arrangement"] = ["kind": "galaxy", "name": "desk"]
         held[0]["origin"] = origin
@@ -228,6 +229,9 @@ struct HeldSpaceRestartTests {
         #expect(a.state.heldSpaces.count == 2)
     }
 
+    /// The outcome only: the reset's prune empties every held
+    /// Space, which the retire ends on its own, so this does not
+    /// pin the reset's own `forgetHeldSpaces`.
     @Test("Reset All Settings ends every hold, so no snapshot carries one")
     func tierTwoForgetsHolds() throws {
         let a = try unplugged()
