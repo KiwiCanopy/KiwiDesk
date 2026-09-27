@@ -4166,8 +4166,34 @@ home's, for the gate and the region alike: a window already an
 effective float there — its flag, or a floating-mode member whose
 frame is the user's — keeps it. `make_auto` stays
 out (its flip is detection, not a deliberate float), as do app
-rules floating a window at creation and floating-mode entry,
-which #1177's quit grid owns.
+rules floating a window at creation and a Space's own entry into
+floating mode, which #1177's quit grid owns.
+
+*A move into a floating Space is placed the same way (#1708).* A
+tiled window a move verb files into a floating-mode Space —
+`move_to_space`, a Space Bar drop, a Desktop move that re-files
+it — brings the same layout slot, and from a scrolling row that
+is often a scrolled-out column's, partly off the screen. So the
+filing places it as the float verbs do, delivered through the
+stash seed so an unshown Space receives it at its activation. It
+is not the #1177 gather: the user chose the destination and the
+Space's other floats are theirs, so only the arriving window
+moves. A window that was already an effective float keeps its
+frame and takes the #502 crossing, a sticky window keeps its #445
+re-anchor, and a dragged one keeps the pointer's placement.
+
+*A centred placement cascades.* Several windows floated or moved
+in one after another would all land on the same frame, a pile
+#1177 reads as unreachable. So where another effective float of
+that Space already has its centre within half a step of the
+centred frame's — the centre and not the origin, since a smaller
+window centred on a larger one sits inside it — the new one steps
+down and right by a fixed step until the spot is free, the float verbs and the move alike (owner
+ruling 2026-09-27). Where the next step would leave the region,
+the centred frame stands: past that point a pile is accepted
+rather than pushed off the screen. The check reads frames already
+in memory, with no AX read. A remembered frame (#1675) never
+cascades, because it is the user's.
 
 *The knob.* `set_float_placement("center" | "keep")`, Lua-only
 like the other float polish knobs (#502); `keep` is the exact

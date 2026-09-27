@@ -138,8 +138,13 @@ extension KiwiCore {
         into target: SpaceID,
         from: SpaceID?
     ) {
+        // Read before the filing: only a window that was no
+        // effective float where it left ENTERS floating (#1708).
+        let wasFloat = isEffectiveFloatForPlacement(window)
         addFocusedToSpace(window, to: target)
-        if from != target {
+        if from != target,
+            !placeEnteringFloat(window, wasFloat: wasFloat)
+        {
             reanchorFloat(window, to: target)
         }
         state.workspaces.focus(window, in: target)

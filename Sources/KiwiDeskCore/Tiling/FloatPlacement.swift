@@ -1,6 +1,7 @@
 import CoreGraphics
 
-/// Where a window lands when an explicit float verb floats it
+/// Where a window lands when an explicit float verb floats it,
+/// or a move verb files it into a floating Space (#1708)
 /// (`float_placement`, `docs/design-decisions.md` ▸ the float
 /// placement entry). Read only at that moment, never by layout
 /// math.
@@ -25,6 +26,10 @@ extension FloatPlacement {
     /// The long-axis cap, as a multiple of the short-axis span:
     /// a third of an ultrawide is a banner, not a window.
     static let longCap: CGFloat = 1.25
+
+    /// The diagonal step a centred placement takes off a spot
+    /// another float already holds (#1708).
+    static let cascadeStep: CGFloat = 28
 
     /// The centred frame for a window floated in `region` (AX
     /// coordinates). Measured on the region's short and long
@@ -65,6 +70,36 @@ extension FloatPlacement {
             height: height
         )
         return GeometryUtils.confine(frame, to: region)
+    }
+
+    /// `frame` stepped down and right by `cascadeStep` until no
+    /// frame in `others` has its CENTRE within half a step
+    /// (#1708) — the float verbs and a move into a floating Space
+    /// alike. The centre, not the origin: a smaller window centred
+    /// on a larger one sits inside it, the #1177 pile. Where the
+    /// next step would leave `region`, `frame` itself: a pile is
+    /// priced rather than pushed off-screen.
+    public static func cascaded(
+        _ frame: CGRect,
+        avoiding others: [CGRect],
+        in region: CGRect
+    ) -> CGRect {
+        let reach = cascadeStep / 2
+        func taken(_ candidate: CGRect) -> Bool {
+            others.contains {
+                abs($0.midX - candidate.midX) < reach
+                    && abs($0.midY - candidate.midY) < reach
+            }
+        }
+        var candidate = frame
+        while taken(candidate) {
+            candidate = candidate.offsetBy(
+                dx: cascadeStep,
+                dy: cascadeStep
+            )
+            guard region.contains(candidate) else { return frame }
+        }
+        return candidate
     }
 
     /// A remembered float frame placed back in `region` (#1675),
