@@ -428,7 +428,7 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
+it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
 Layouts, Profiles, Monitors, Behaviour and the Mac Checklist
 render from it now** (#678 Phases 2-3; #1365): each

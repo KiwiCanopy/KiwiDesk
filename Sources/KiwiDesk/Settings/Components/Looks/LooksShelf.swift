@@ -12,6 +12,9 @@ struct LooksShelf: View {
     /// per mount, never a stored preference, so the colors row
     /// offers only what this visit did.
     @State var justApplied: AppliedLook?
+    /// Why the last save or import wrote nothing, until the next
+    /// one succeeds.
+    @State var failure: String?
 
     var store: LookStore { model.lookStore }
 
@@ -81,6 +84,11 @@ struct LooksShelf: View {
                 }
                 addTile
             }
+            if let failure {
+                Text(failure)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink2)
+            }
             if model.userLooks.isEmpty {
                 Text(
                     L(
@@ -136,7 +144,13 @@ struct LooksShelf: View {
     /// Paints `look` with its colors, remembering the colors it
     /// replaced so the row below can hand them back.
     func apply(_ look: ShelfLook) {
-        let before = ColorPaletteKeys.extract(from: model.config.settings)
+        let before = LookColorsOffer.before(
+            clicking: justApplied.map { ($0.look, $0.before) },
+            previousPalette: justApplied.flatMap {
+                model.palette(of: $0.look)
+            },
+            settings: model.config.settings
+        )
         model.applyLook(look, withColors: true)
         justApplied = AppliedLook(look: look, before: before)
     }

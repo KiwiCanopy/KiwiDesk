@@ -117,9 +117,8 @@ extension PaletteShelf {
     func renamePalette(_ typed: String, from oldName: String) {
         let name = trimmed(typed)
         guard canRename(name, from: oldName) else { return }
-        try? store.rename(from: oldName, to: name)
-        // A look names its palette; the rename keeps it drawn in it.
-        try? model.lookStore.repointPalette(from: oldName, to: name)
+        // Core's door re-points the looks drawn in it (#1684).
+        try? model.core.renamePalette(from: oldName, to: name)
         model.refreshLooks()
         renameRequest = nil
         reload()

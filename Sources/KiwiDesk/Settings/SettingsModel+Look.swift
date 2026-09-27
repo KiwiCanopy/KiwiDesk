@@ -4,7 +4,8 @@ import KiwiDeskCore
 extension SettingsModel {
     var lookStore: LookStore { core.lookLibrary }
 
-    /// Every palette a look may name, bundled first.
+    /// Every palette a look may name, bundled first, from the
+    /// model's copy of the user library (#805).
     var allPalettes: [ColorPalette] {
         paletteStore.builtins() + userPalettes
     }

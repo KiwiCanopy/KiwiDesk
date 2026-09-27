@@ -26,7 +26,7 @@ enum HomeCardPlate {
                     spaceCount: model.config.spaces.count
                 )
             }
-        case .colors:
+        case .looks:
             return tile(padding: 11, settings: settings) {
                 HomeCardColorsTile(settings: settings)
             }

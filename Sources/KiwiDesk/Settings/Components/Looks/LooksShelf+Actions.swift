@@ -3,11 +3,12 @@ import KiwiDeskCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Look shelf mutation and file actions (#1684, `LookStore`). A
-/// look names a palette, so saving and importing one files its
-/// colors in the ONE palette library — never over a palette of
-/// the user's.
+/// Look shelf actions (#1684). Every write touching both the look
+/// and the palette library goes through Core's one door
+/// (`KiwiCore+Looks`); this file narrates.
 extension LooksShelf {
+    var core: KiwiCore { model.core }
+
     func reload() {
         model.refreshLooks()
         model.refreshPalettes()
@@ -41,7 +42,9 @@ extension LooksShelf {
             )
         }
         guard !name.isEmpty else { return nil }
-        if let matching = matchingPalette() {
+        if let matching = core.palette(
+            reproducing: model.config.settings
+        ) {
             return L(
                 "looks.colors_use",
                 "Colors: uses the palette “%1$@”.",
@@ -51,70 +54,41 @@ extension LooksShelf {
         return L(
             "looks.colors_new",
             "Colors: will be saved as a new palette “%1$@”.",
-            newPaletteName(for: name)
+            core.newPaletteName(for: name)
         )
     }
 
+    /// Saves the draft's look; a refusal keeps the popover open.
     func saveCurrent(_ typed: String) {
         let name = trimmed(typed)
         guard canSave(name) else { return }
-        let paletteName: String
-        if let matching = matchingPalette() {
-            paletteName = matching.name
-        } else {
-            paletteName = newPaletteName(for: name)
-            try? model.paletteStore.save(
-                ColorPalette(name: paletteName, colors: liveColors)
-            )
+        do {
+            try core.saveLook(named: name, from: model.config.settings)
+            failure = nil
+        } catch {
+            failure = libraryFailure
         }
-        try? store.save(
-            ShelfLook(
-                name: name,
-                palette: paletteName,
-                style: LookKeys.extract(from: model.config.settings)
-            )
-        )
         saveRequest = nil
         reload()
     }
 
-    private var liveColors: [String: String] {
-        ColorPaletteKeys.extract(from: model.config.settings)
-    }
-
-    /// A saved palette the draft's colors already read as.
-    private func matchingPalette() -> ColorPalette? {
-        let live = liveColors
-        return model.allPalettes.first { $0.isApplied(matching: live) }
-    }
-
-    /// A free palette name for a look called `name`.
-    private func newPaletteName(for name: String) -> String {
-        let palettes = model.paletteStore
-        return Self.uniqueName(base: name) {
-            palettes.isBuiltinName($0) || palettes.hasUserPalette($0)
-        }
-    }
-
     func nextUserName() -> String {
-        uniqueLookName(base: L("looks.default_name", "My Look"))
-    }
-
-    func uniqueLookName(base: String) -> String {
-        Self.uniqueName(base: base) {
+        KiwiCore.uniqueName(base: defaultName) {
             store.isBuiltinName($0) || store.hasUserLook($0)
         }
     }
 
-    /// `base`, then `base 2`, `base 3`, … skipping taken names.
-    static func uniqueName(
-        base: String,
-        taken: (String) -> Bool
-    ) -> String {
-        guard taken(base) else { return base }
-        var n = 2
-        while taken("\(base) \(n)") { n += 1 }
-        return "\(base) \(n)"
+    /// A write refused by an unreadable or newer library.
+    private var libraryFailure: String {
+        L(
+            "looks.save_failed",
+            "KiwiDesk can't write your saved looks — they may come "
+                + "from a newer KiwiDesk."
+        )
+    }
+
+    private var defaultName: String {
+        L("looks.default_name", "My Look")
     }
 
     // MARK: - Rename / delete
@@ -171,31 +145,18 @@ extension LooksShelf {
         panel.allowedContentTypes = [.json]
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
-        guard panel.runModal() == .OK, let url = panel.url,
-            let imported = try? store.importLook(from: url)
-        else { return }
-        var look = imported.look
-        look.name = uniqueLookName(base: look.name)
-        if let palette = imported.palette {
-            look.palette = fileImported(palette)
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try core.importLook(from: url, fallbackName: defaultName)
+            failure = nil
+        } catch LookStore.StoreError.invalidFile {
+            failure = L(
+                "looks.import_failed",
+                "That file isn't a KiwiDesk look."
+            )
+        } catch {
+            failure = libraryFailure
         }
-        try? store.save(look)
         reload()
-    }
-
-    /// The palette name an imported palette lands under: an
-    /// identical saved one is reused, anything else takes a free
-    /// name rather than shadowing one.
-    private func fileImported(_ palette: ColorPalette) -> String {
-        if let same = model.allPalettes.first(where: {
-            $0.name == palette.name && $0.colors == palette.colors
-        }) {
-            return same.name
-        }
-        let name = newPaletteName(for: palette.name)
-        try? model.paletteStore.save(
-            ColorPalette(name: name, colors: palette.colors)
-        )
-        return name
     }
 }

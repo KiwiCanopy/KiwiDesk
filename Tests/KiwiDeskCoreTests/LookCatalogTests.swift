@@ -36,13 +36,23 @@ struct LookCatalogTests {
         )
     }
 
-    @Test("every bundled look names the whole register")
+    /// Whatever look came before, a bundled look draws the same
+    /// shelf: nothing of the previous one leaks through.
+    @Test("a bundled look never inherits the previous look's styling")
     func bundledLooksAreTotal() {
         for look in bundled {
-            #expect(
-                Set(look.style.keys) == Set(LookKeys.all),
-                "\(look.name) leaves styling to the previous look"
-            )
+            var fresh = TilingSettings()
+            look.apply(to: &fresh)
+            for previous in bundled where previous.name != look.name {
+                var settings = TilingSettings()
+                previous.apply(to: &settings)
+                look.apply(to: &settings)
+                #expect(
+                    LookKeys.extract(from: settings)
+                        == LookKeys.extract(from: fresh),
+                    "\(look.name) after \(previous.name)"
+                )
+            }
         }
     }
 

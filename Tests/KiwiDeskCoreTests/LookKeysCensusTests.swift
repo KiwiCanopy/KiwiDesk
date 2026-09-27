@@ -8,23 +8,30 @@ import Testing
 /// classified so a new one reds until someone rules it.
 @Suite("Look keys census")
 struct LookKeysCensusTests {
-    @Test("every KiwiShelf key is a look's, a palette's or left out")
-    func everyShelfKeyIsClassified() {
-        let colours = Set(
-            ColorPaletteKeys.all.filter { $0.hasPrefix("kiwishelf.") }
-                .map { String($0.dropFirst("kiwishelf.".count)) }
-        )
-        let looks = Set(LookKeys.shelfFields)
-        let leftOut = Set(LookKeys.leftOut.keys)
-        for key in KiwiShelf.CodingKeys.allCases.map(\.stringValue) {
-            let homes = [looks, colours, leftOut].filter {
-                $0.contains(key)
+    @Test("every field a look reaches is a look's, a palette's or left out")
+    func everyFieldIsClassified() {
+        let paths =
+            KiwiShelf.CodingKeys.allCases.map { "kiwishelf.\($0.stringValue)" }
+            + SpaceBarStyle.CodingKeys.allCases.map {
+                "space_bar.\($0.stringValue)"
             }
-            #expect(
-                homes.count == 1,
-                "kiwishelf.\(key) is in \(homes.count) homes; rule it"
-            )
+            + AppBarStyle.CodingKeys.allCases.map {
+                "app_bar.\($0.stringValue)"
+            }
+            + BorderStyle.CodingKeys.allCases.map {
+                "border.\($0.stringValue)"
+            }
+        #expect(paths.count > 40)
+        let homes = [
+            Set(LookKeys.all), Set(ColorPaletteKeys.all),
+            Set(LookKeys.leftOut.keys),
+        ]
+        for path in paths {
+            let count = homes.filter { $0.contains(path) }.count
+            #expect(count == 1, "\(path) is in \(count) homes; rule it")
         }
+        // Every entry names a real field, so none outlives its field.
+        #expect(Set(LookKeys.leftOut.keys).isSubset(of: Set(paths)))
     }
 
     @Test("functionality and colour never join the register")

@@ -217,7 +217,7 @@ struct SettingsSearchIndexTests {
                 // 8: #1644's Sheen row, on every macOS; 13 since
                 // #1684: the look shelf's five labelled actions,
                 // anchor-less like the palette shelf's.
-                .colors: 13,
+                .looks: 13,
                 // 17 since #1517 (one shelf set); 18: #1679's border.
                 .advancedColors: 18,
                 // 4 since #1255: the refusal sound moved here

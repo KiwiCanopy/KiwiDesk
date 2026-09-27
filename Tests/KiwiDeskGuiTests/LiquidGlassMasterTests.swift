@@ -220,7 +220,7 @@ struct LiquidGlassMasterTests {
     func rowConsultsTheAgreement() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors/"
+                "Sources/KiwiDesk/Settings/Components/Looks/"
                     + "GlassCard.swift"
             )
         let source = SourceScan.stripComments(

@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Profile Looks & Animations settings section (#678 Phase 3,
 /// #1684): the look shelf directly above the palette shelf.
-struct ColorsMotionSection: View {
+struct LooksSection: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {

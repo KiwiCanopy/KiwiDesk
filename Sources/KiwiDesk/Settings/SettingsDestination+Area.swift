@@ -10,7 +10,7 @@ extension SettingsDestination {
         case .spaces: return .spacesAndLayouts
         case .layoutDefaults: return .layoutDefaults
         case .monitors: return .monitors
-        case .colors: return .coloursAndMotion
+        case .looks: return .coloursAndMotion
         case .advancedColors: return .advancedColours
         case .gapsAndBorders: return .gapsAndBorders
         case .bars: return .bars
@@ -30,7 +30,7 @@ extension SettingsDestination {
         case .spacesAndLayouts: self = .spaces
         case .layoutDefaults: self = .layoutDefaults
         case .monitors: self = .monitors
-        case .coloursAndMotion: self = .colors
+        case .coloursAndMotion: self = .looks
         case .advancedColours: self = .advancedColors
         case .gapsAndBorders: self = .gapsAndBorders
         case .bars: self = .bars

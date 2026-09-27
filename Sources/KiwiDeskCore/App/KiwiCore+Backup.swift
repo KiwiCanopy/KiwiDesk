@@ -194,7 +194,7 @@ extension KiwiCore {
             let config = try? encoder.encode(bundle.config),
             let profiles = try? encoder.encode(bundle.profiles),
             let palettes = try? encoder.encode(bundle.palettes),
-            let looks = try? encoder.encode(bundle.looks ?? [])
+            let looks = try? encoder.encode(bundle.looks)
         else { return nil }
 
         // The header's own braces come off; its two lines lead.

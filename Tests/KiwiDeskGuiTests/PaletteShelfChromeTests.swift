@@ -17,7 +17,7 @@ struct PaletteShelfChromeTests {
     private var colorsDir: URL {
         SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors"
+                "Sources/KiwiDesk/Settings/Components/Looks"
             )
     }
 

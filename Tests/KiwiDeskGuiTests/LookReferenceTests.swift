@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -9,6 +10,7 @@ import Testing
 struct LookReferenceTests {
     @Test("the look reference places its link")
     func placesItsLink() {
+        LocalizationManager.shared.select("en")
         #expect(
             KiwiShelfCard.lookReference.contains(
                 CrossReferenceRow.linkSlot

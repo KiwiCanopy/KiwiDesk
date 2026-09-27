@@ -49,6 +49,14 @@ struct LookRestoreTests {
         #expect(core.lookLibrary.userLooks().map(\.name) == ["Here"])
     }
 
+    @Test("an empty looks list replaces the library with none")
+    func emptyReplaces() throws {
+        let core = makeTestCore()
+        try core.lookLibrary.save(look("Here"))
+        try core.restoreSetup(from: bundle(looks: []), trash: hardDelete)
+        #expect(core.lookLibrary.userLooks().isEmpty)
+    }
+
     @Test("an exported backup reads back with its looks")
     func roundTrip() throws {
         let core = makeTestCore()

@@ -1,37 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The colors row under the bundled looks (#1684): offered only for
-/// the look a click just applied, its tick COMPUTED from the draft
-/// — checked while the look's palette reads applied — and gone
-/// once the user's own edits supersede the choice, so a tick can
-/// never restore over them.
+/// The colors row under the bundled looks (#1684): what it shows
+/// is `LookColorsOffer`'s, its tick computed from the draft.
 extension LooksShelf {
-    /// What the row offers, or nil while there is nothing to say.
-    enum ColorsOffer {
-        case tick(palette: ColorPalette, before: ColorPalette)
-        case paletteGone(String)
-    }
-
-    var colorsOffer: ColorsOffer? {
-        guard let applied = justApplied,
-            applied.look.isApplied(to: model.config.settings),
-            let name = applied.look.palette
-        else { return nil }
-        guard let palette = model.palette(of: applied.look) else {
-            return .paletteGone(name)
-        }
-        let before = ColorPalette(name: "", colors: applied.before)
-        // Already this palette before the click: nothing to undo.
-        guard !palette.isApplied(matching: applied.before) else {
-            return nil
-        }
-        let live = ColorPaletteKeys.extract(from: model.config.settings)
-        guard
-            palette.isApplied(matching: live)
-                || before.isApplied(matching: live)
-        else { return nil }
-        return .tick(palette: palette, before: before)
+    var colorsOffer: LookColorsOffer? {
+        guard let applied = justApplied else { return nil }
+        return LookColorsOffer.decide(
+            look: applied.look,
+            before: applied.before,
+            palette: model.palette(of: applied.look),
+            settings: model.config.settings
+        )
     }
 
     @ViewBuilder var colorsRow: some View {

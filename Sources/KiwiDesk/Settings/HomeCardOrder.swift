@@ -5,7 +5,7 @@
 enum HomeCardOrder {
     /// THIS PROFILE, full (Power User) order.
     static let thisProfile: [SettingsDestination] = [
-        .spaces, .gapsAndBorders, .bars, .colors,
+        .spaces, .gapsAndBorders, .bars, .looks,
         .layoutDefaults, .monitors, .behavior, .advancedColors,
     ]
 

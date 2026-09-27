@@ -140,6 +140,9 @@ synonym:
   Never a *theme* or *skin* in English copy, and never a
   *preset*, which names a layout arrangement. A locale settles
   its own word under `docs/localization-naming.md` ▸ Family C.
+  Code already says "look" for a bar's resolved drawing inputs
+  (`SpaceBarLook`, `AppBarLook`, `LayoutAppBar.look(on:)`);
+  that is a contributor-only sense and never reaches copy.
 - **item** — one entry in a bar (a window, a same-app group, a
   space). Its geometry is `item_gap`, and its length follows its
   content: give it no size knob of its own, since the App Bar's

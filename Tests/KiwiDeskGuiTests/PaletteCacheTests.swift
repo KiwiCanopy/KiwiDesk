@@ -52,7 +52,7 @@ struct PaletteCacheTests {
         }
         #expect(place.kind == .palette)
         #expect(place.name == "Sunset Desk")
-        #expect(place.anchor.destination == .colors)
+        #expect(place.anchor.destination == .looks)
         #expect(place.anchor.anchor == nil)
     }
 
@@ -116,7 +116,7 @@ struct PaletteCacheTests {
 
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors/"
+                "Sources/KiwiDesk/Settings/Components/Looks/"
             )
         let shelf = SourceScan.stripComments(
             try String(

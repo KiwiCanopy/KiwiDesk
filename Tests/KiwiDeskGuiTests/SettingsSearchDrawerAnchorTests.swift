@@ -57,7 +57,7 @@ struct SettingsSearchDrawerAnchorTests {
                 ]
             ),
             (
-                .colors, "Looks & Animations", .motion,
+                .looks, "Looks & Animations", .motion,
                 [SettingsCatalog.colors.motionMore]
             ),
             (

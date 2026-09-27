@@ -26,8 +26,8 @@ struct KiwiShelfCard: View {
             // A look writes this card's style in one click (#1684).
             CrossReferenceRow(
                 prose: Self.lookReference,
-                linkTitle: SettingsDestination.colors.title,
-                destination: .colors
+                linkTitle: SettingsDestination.looks.title,
+                destination: .looks
             )
             showGroup
             VStack(alignment: .leading, spacing: 8) {

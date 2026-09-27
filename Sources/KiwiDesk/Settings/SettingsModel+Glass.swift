@@ -18,11 +18,7 @@ extension SettingsModel {
                 ).allOn
             },
             set: { on in
-                var next = self.config.settings
-                for leaf in LiquidGlassAgreement.leaves {
-                    next[keyPath: leaf] = on
-                }
-                self.config.settings = next
+                self.config.settings.setLiquidGlass(on)
             }
         )
     }
@@ -36,15 +32,10 @@ extension SettingsModel {
 struct LiquidGlassAgreement {
     let settings: TilingSettings
 
-    /// Every stored leaf the switch owns — the one list the setter
-    /// writes and the agreement reads, so the two cannot drift.
+    /// Every stored leaf the switch owns — Core's one list, which
+    /// the setter writes and the agreement reads.
     static var leaves: [WritableKeyPath<TilingSettings, Bool>] {
-        [
-            \.kiwishelf.liquidGlass,
-            \.shortcutPanelLiquidGlass,
-            \.dragLiquidGlass,
-            \.stickyStyle.liquidGlass,
-        ]
+        TilingSettings.liquidGlassLeaves
     }
 
     private var leaves: [Bool] {
@@ -55,8 +46,8 @@ struct LiquidGlassAgreement {
     var allOn: Bool { leaves.allSatisfy { $0 } }
 
     /// The leaves disagree — reachable from hand-written Lua or
-    /// an imported profile, never from this row, which writes
-    /// every leaf at once. The bars have one leaf since #1517, so
-    /// no per-layout override can disagree with it.
+    /// an imported profile, never from this row or a look, which
+    /// write every leaf at once. The bars have one leaf since
+    /// #1517, so no per-layout override can disagree with it.
     var differ: Bool { Set(leaves).count > 1 }
 }

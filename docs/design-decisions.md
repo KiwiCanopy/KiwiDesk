@@ -11380,11 +11380,9 @@ side-effect. The built-ins are read-only with reserved names
 not greyed, because the constraint is
 never-meaningful-for-this-kind, not mode-inert); "Kiwi (Default)"
 is derived from the shipped struct defaults at load, so it never
-drifts and doubles as a reset. Escalating to a full design-package
-(bundling geometry, fonts, icon source with colors, or a tab
-restructure) waits on a real signal that people want to share the
-*whole look* as one artifact — not merely "more palettes," which
-save/export/import already answers. Every bundled
+drifts and doubles as a reset. The whole look as one artifact
+is the look's, not a palette's — A look is KiwiShelf's styling
+that names a palette (#1684), below. Every bundled
 palette keeps `space_bar.focused_item_color` a **different hue**
 from its active accent (the two-accent rule, QA 2026-07-19) —
 Monochrome included: color is the only channel the focused-window
@@ -11397,9 +11395,8 @@ the numbers, the two green-primary siblings' cool focused accent
 its bundled-only scope; the shelf curates, Lua is open.
 
 :::unreleased
-**A look is KiwiShelf's styling that names a palette (#1684).**
-The signal #375's deferral waited for arrived — a tester asked
-for the bars to look "like Barik or something slicker" — so a
+**[Principle] A look is KiwiShelf's styling that names a palette
+(#1684).** The signal #375's deferral waited for arrived, so a
 look is its own one-shot paint beside the palette, never folded
 into it. Palettes colour every surface (ring, drag visuals,
 marks, bars); a look is the shelf's shape plus a palette NAME,
@@ -11412,7 +11409,16 @@ functionality if it changes which items exist, what they show
 or say, or what they do — so App Bar content, Other Spaces and
 a bar's on/off never join, and a preview draws the user's own
 sections under the look. `LookKeys` is the register and
-classifies every KiwiShelf field (`LookKeysCensusTests`). **A
+classifies every field of the shelf, both bar styles and the
+focus border (`LookKeysCensusTests`). Two writes reach past the
+shelf, both by ruling rather than by accident: the **sheen**,
+because the shelf's border and indicator draw it and the focus
+ring shares the one value (the page's caption and the Bars
+card's pointer name it, so picking a look never flips a border
+setting unannounced — #578's lesson); and **Liquid Glass**,
+which a look writes on every surface the switch owns, since
+glass is one switch (#1307) and a shelf-only write would leave
+it disagreeing with itself. **A
 bundled look is total**: authored sparse, it is resolved over
 Glass — itself derived from the shipped defaults, as "Kiwi
 (Default)" is, so it doubles as the shape reset — so each writes

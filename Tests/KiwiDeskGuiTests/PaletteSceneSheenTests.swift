@@ -105,15 +105,15 @@ struct PaletteSceneSheenTests {
     @Test(
         "every palette scene reads the draft's sheen",
         arguments: [
-            "AdvancedColorsPanel.swift",
-            "PaletteScenePanel.swift",
-            "PaletteShelf.swift",
+            "Colors/AdvancedColorsPanel.swift",
+            "Looks/PaletteScenePanel.swift",
+            "Looks/PaletteShelf.swift",
         ]
     )
     func scenesReadTheSheen(file: String) throws {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors"
+                "Sources/KiwiDesk/Settings/Components"
             )
             .appendingPathComponent(file)
         let source = try SourceScan.strippedSource(at: url)
