@@ -75,9 +75,9 @@ extension TilingEngine {
             // clamp echoes within grace, and the retry would
             // loop forever. Consume; the OS-relocated frame is
             // the best remaining truth (the user can move it).
-            if !NSScreen.screens.contains(where: {
-                GeometryUtils.axVisibleFrame(of: $0)
-                    .intersects(original)
+            // Read over the screen seam the park uses (#878).
+            if !allScreenBounds().contains(where: {
+                $0.intersects(original)
             }) {
                 stashedFrames[id] = nil
                 continue
