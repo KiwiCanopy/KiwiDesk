@@ -73,18 +73,26 @@ public enum FloatGather {
     /// takes the correctness bound, or a float flush with a bare
     /// screen edge — where no clamp ever pushes — would trip it.
     /// `minSize` and `targetDepth` are the quit grid's own knobs,
-    /// read from the same settings.
+    /// read from the same settings. `placingLast`, the space's
+    /// focused window, is dealt last as at quit, so it takes the
+    /// stretched tile or the front of its pile (#1709).
     public static func targets(
         members: [WindowID],
         frames: [WindowID: CGRect],
         region: CGRect,
         grid: CGRect? = nil,
         minSize: CGFloat,
-        targetDepth: Int
+        targetDepth: Int,
+        placingLast: WindowID? = nil
     ) -> [WindowID: CGRect] {
-        let framed = members.filter { frames[$0] != nil }
+        var framed = members.filter { frames[$0] != nil }
         guard trips(framed.map { frames[$0]! }, region: region)
         else { return [:] }
+        if let placingLast,
+            let at = framed.firstIndex(of: placingLast)
+        {
+            framed.append(framed.remove(at: at))
+        }
         return QuitGridLayout.frames(
             for: framed,
             in: grid ?? region,

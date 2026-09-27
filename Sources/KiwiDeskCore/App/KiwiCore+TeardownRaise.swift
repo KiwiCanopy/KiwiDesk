@@ -61,6 +61,7 @@ extension KiwiCore {
                 display: group.display.raw,
                 order: QuitGridLayout.raiseOrder(
                     for: group.windows,
+                    in: group.axFrame,
                     targetDepth: targetDepth
                 )
                 .filter { frames[$0] != nil }

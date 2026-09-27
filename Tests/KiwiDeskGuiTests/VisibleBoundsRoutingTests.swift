@@ -90,10 +90,6 @@ struct VisibleBoundsRoutingTests {
         // same bounds. Its corner scan's rect list reads the
         // `allScreenBounds` topology seam instead (#878).
         "Tiling/TilingEngine+Stash.swift": 2,
-        // The display-gone consumption alone: the corner test
-        // that used to enumerate screens here reads the
-        // `allScreenBounds` seam since #1352.
-        "Tiling/TilingEngine+StashRestore.swift": 1,
         // The bar strips are drawn ON a screen; a fabricated rect
         // would place real chrome nowhere. The shelf plan reads it
         // once per display for both bars (#1517); the App Bar's

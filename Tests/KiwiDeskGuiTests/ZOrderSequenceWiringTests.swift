@@ -289,11 +289,32 @@ struct ZOrderSequenceWiringTests {
                 separatedBy: "trustedFrontmostFocusedWindowID()"
             ).count == 2
         )
-        // Both consumers, and both off that one local.
+        // Both consumers, and both off that one local: it is
+        // placed by the one `collect`, whose groups the frames and
+        // the circle both read (#1709), and exempted by the circle.
         #expect(
             source.components(separatedBy: "placingLast: frontmost")
+                .count == 2
+        )
+        #expect(
+            source.components(separatedBy: "groups: groups")
                 .count == 3
         )
         #expect(source.contains("unbeatable: frontmost"))
+    }
+
+    /// The circle partitions the groups `gatherWindows` collected
+    /// ONCE — never a second `collect`, which would drop the
+    /// `placingLast` the frames were dealt with (#688, #1709).
+    @Test("The restack reads the handed groups, never re-collects")
+    func restackReadsTheHandedGroups() throws {
+        let source = try body(
+            of: "restackForTeardown",
+            in: "KiwiCore+TeardownRaise.swift",
+            under: "App"
+        )
+        #expect(!source.isEmpty)
+        #expect(!source.contains("collect("))
+        #expect(source.contains("groups"))
     }
 }

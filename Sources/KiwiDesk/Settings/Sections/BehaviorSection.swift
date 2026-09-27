@@ -113,8 +113,8 @@ struct BehaviorSection: View {
 
     /// On quit (#281): the quit grid's density target
     /// (`quit.grid_target_depth`). Grid dimensions stay
-    /// automatic (2×2…4×4); no layout picker while `grid` is
-    /// the only strategy.
+    /// automatic (`QuitGridLayout.shape`, #1709); no layout
+    /// picker while `grid` is the only strategy.
     private var quitSection: some View {
         SettingsSection(
             SettingsCatalog.behavior.quitCard,
@@ -135,32 +135,12 @@ struct BehaviorSection: View {
                 in: QuitGridLayout.targetDepthRange,
                 help: L(
                     "behavior.quit.target_depth.help",
-                    "The grid adds a row and column when "
-                        + "cells would exceed this target. It "
-                        + "stays between 2×2 and 4×4; "
-                        + "after 4×4, additional windows keep "
-                        + "cascading in its cells."
+                    "Windows tile the display until they "
+                        + "outnumber the grid's cells, then pile "
+                        + "up in them; the grid grows, up to 4×4, "
+                        + "when a pile would pass this target."
                 )
             )
-            gridSummary
         }
-    }
-
-    /// Neutral live summary of the thresholds the current
-    /// target produces: dimension grows past 4T and 9T.
-    private var gridSummary: some View {
-        let target = model.config.settings
-            .quitGridTargetDepth
-        return Text(
-            L(
-                "behavior.quit.summary",
-                "2×2 up to %1$d windows · 3×3 up to %2$d · "
-                    + "4×4 above %2$d",
-                4 * target,
-                9 * target
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
     }
 }

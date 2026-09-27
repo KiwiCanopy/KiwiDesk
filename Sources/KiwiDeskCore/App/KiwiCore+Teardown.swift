@@ -57,10 +57,11 @@ public enum WindowGather {
     /// slot where being in front is the right answer. Last in
     /// the list is last in its cell's cascade, which is the slot
     /// `raiseOrder` raises last and therefore means to be
-    /// frontmost. Placed anywhere else it covers the pile-mates
-    /// the circle wanted above it, which is the one arrangement
-    /// defect a quit could still show (owner device QA,
-    /// 2026-08-03).
+    /// frontmost — and, while the windows tile, the tile a short
+    /// row's fill stretches (#1709). Placed anywhere else it
+    /// covers the pile-mates the circle wanted above it, which is
+    /// the one arrangement defect a quit could still show (owner
+    /// device QA, 2026-08-03).
     ///
     /// It reorders rather than re-slots, so `frames` and
     /// `raiseOrder` keep seeing one list and cannot partition
@@ -129,12 +130,29 @@ public enum WindowGather {
         targetDepth: Int,
         placingLast: WindowID? = nil
     ) -> [WindowID: CGRect] {
+        targets(
+            groups: collect(
+                state: state,
+                primaryHeight: primaryHeight,
+                placingLast: placingLast
+            ),
+            style: style,
+            minSize: minSize,
+            targetDepth: targetDepth
+        )
+    }
+
+    /// The gather targets for already-collected `groups` — the
+    /// quit path hands in the SAME groups its raise circle reads,
+    /// so both halves partition one `Group` value (#688).
+    public static func targets(
+        groups: [Group],
+        style: QuitLayoutStyle,
+        minSize: CGFloat,
+        targetDepth: Int
+    ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
-        for group in collect(
-            state: state,
-            primaryHeight: primaryHeight,
-            placingLast: placingLast
-        ) {
+        for group in groups {
             switch style {
             case .grid:
                 result.merge(
@@ -179,8 +197,9 @@ extension KiwiCore {
         guard eventLoop.isRunning else { return }
         let primaryH = GeometryUtils.primaryHeight
         // Snapshot once: frames and the raise circle below MUST
-        // partition identically (shared `buckets`), so both read
-        // this local, not the settings, making the invariant
+        // partition identically (shared `partition`), so both
+        // read this local and the one `groups` value below, not
+        // the settings or a second `collect`, making the invariant
         // structural rather than relying on nothing mutating
         // between the two reads.
         let targetDepth = tiler.settings.quitGridTargetDepth
@@ -208,12 +227,10 @@ extension KiwiCore {
                 }.joined(separator: "; ")
         )
         let frames = WindowGather.targets(
-            state: state,
-            primaryHeight: primaryH,
+            groups: groups,
             style: tiler.settings.quitLayout,
             minSize: tiler.settings.minWindowSize,
-            targetDepth: targetDepth,
-            placingLast: frontmost
+            targetDepth: targetDepth
         )
         guard !frames.isEmpty else { return }
         // Bound every AX call in BOTH passes — EUI reads, EUI

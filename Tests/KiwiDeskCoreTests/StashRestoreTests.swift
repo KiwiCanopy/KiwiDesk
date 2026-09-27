@@ -186,6 +186,44 @@ struct StashRestoreTests {
         #expect(engine.stashedFrames[WindowID(1)] == nil)
     }
 
+    /// Whether an original is still reachable is judged over the
+    /// screen seam, never a raw screen list: a fixture pinning its
+    /// screens read an unpinned host's and lost the seed (#1709).
+    @Test("Reachability reads the screen seam")
+    func reachabilityReadsTheSeam() {
+        let engine = TilingEngine()
+        let state = makeState()
+        let far = CGRect(x: 100_000, y: 0, width: 2_000, height: 1_000)
+        let original = CGRect(
+            x: far.minX + 100,
+            y: 100,
+            width: 300,
+            height: 200
+        )
+        engine.allScreenBounds = { [far] }
+        engine.stashedFrames[WindowID(1)] = original
+        engine.restoreStashed(state: state, frames: [:])
+        #expect(engine.stashedFrames[WindowID(1)] == original)
+        engine.allScreenBounds = {
+            [CGRect(x: 0, y: 0, width: 1_000, height: 1_000)]
+        }
+        engine.restoreStashed(state: state, frames: [:])
+        #expect(engine.stashedFrames[WindowID(1)] == nil)
+    }
+
+    /// No screen known — a display sleeping or reconfiguring — is
+    /// no proof the original is unreachable: the capture stays.
+    @Test("An empty screen list keeps the capture")
+    func emptyScreenListKeepsTheCapture() {
+        let engine = TilingEngine()
+        let state = makeState()
+        let original = CGRect(x: 100_100, y: 100, width: 300, height: 200)
+        engine.allScreenBounds = { [] }
+        engine.stashedFrames[WindowID(1)] = original
+        engine.restoreStashed(state: state, frames: [:])
+        #expect(engine.stashedFrames[WindowID(1)] == original)
+    }
+
     @Test("A user move consumes the capture (forgetStash)")
     func userMoveForgets() {
         let engine = TilingEngine()

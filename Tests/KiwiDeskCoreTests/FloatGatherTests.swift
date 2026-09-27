@@ -212,4 +212,27 @@ struct FloatGatherTests {
         )
         #expect(targets.isEmpty)
     }
+
+    /// The focused member is dealt last, as at quit (#1709): of
+    /// five on this region (3 + 2) it takes the stretched tile.
+    @Test("The focused member takes the stretched tile")
+    func focusedTakesTheStretchedTile() {
+        let members = (1...5).map { WindowID(UInt32($0)) }
+        let outside = CGRect(x: 2100, y: 100, width: 800, height: 600)
+        let targets = FloatGather.targets(
+            members: members,
+            frames: Dictionary(
+                uniqueKeysWithValues: members.map { ($0, outside) }
+            ),
+            region: Self.region,
+            minSize: 100,
+            targetDepth: 5,
+            placingLast: WindowID(2)
+        )
+        #expect(
+            targets[WindowID(2)]
+                == CGRect(x: 640, y: 552.5, width: 1280, height: 527.5)
+        )
+        #expect(targets[WindowID(5)]?.width == 640)
+    }
 }

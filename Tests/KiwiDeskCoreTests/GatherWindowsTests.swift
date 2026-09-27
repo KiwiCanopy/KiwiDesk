@@ -76,7 +76,7 @@ private func targets(
         primaryHeight: primaryH,
         style: .grid,
         minSize: minSize,
-        targetDepth: QuitGridLayout.defaultTargetDepth
+        targetDepth: 5  // the depth these counts assume (#660)
     )
 }
 
@@ -84,22 +84,14 @@ private func targets(
 
 @Suite("WindowGather — targets")
 struct GatherTargetsTests {
-    @Test("a lone tiled window fills the top-left grid cell")
+    @Test("a lone tiled window fills the display")
     func tiledWindowInFirstCell() throws {
         var state = makeState()
         addWindow(&state, id: 42)
         let frames = targets(state)
         let frame = try #require(frames[WindowID(42)])
-        // 2×2 grid over axVisible → 960 × 527.5 cells.
-        #expect(
-            frame
-                == CGRect(
-                    x: 0,
-                    y: 25,
-                    width: 960,
-                    height: 527.5
-                )
-        )
+        // One tile: the whole visible frame (#1709).
+        #expect(frame == axVisible)
     }
 
     @Test("windows are resized to the cell, not kept")
@@ -112,8 +104,8 @@ struct GatherTargetsTests {
         )
         let frames = targets(state)
         let frame = try #require(frames[WindowID(1)])
-        #expect(frame.width == 960)
-        #expect(frame.height == 527.5)
+        #expect(frame.width == 1920)
+        #expect(frame.height == 1055)
     }
 
     @Test("floating windows are excluded")
@@ -175,18 +167,17 @@ struct GatherTargetsTests {
         #expect(frame.maxX <= axVisible.maxX)
     }
 
-    @Test("collect merges all of a display's spaces: 6+2 = one 8")
+    @Test("collect merges all of a display's spaces: 6+6 = one 12")
     func collectMergesSpacesPerDisplay() throws {
-        // The 3-3-1-1 regression shape: 6 windows on one
-        // virtual space and 2 on another, same display, must
-        // form ONE group of 8 (→ 2-2-2-2 round-robin), never
-        // two separately-gridded batches.
+        // 6 windows on one virtual space and 6 on another,
+        // same display, must form ONE group of 12 (→ 2 per
+        // cell of 3×2), never two separately-gridded batches.
         var state = makeState()
         state.workspaces.assign(SpaceID(2), to: DisplayID(1))
         for id in UInt32(1)...6 {
             addWindow(&state, id: id)
         }
-        for id in UInt32(7)...8 {
+        for id in UInt32(7)...12 {
             let w = ManagedWindow(
                 id: WindowID(id),
                 pid: 99,
@@ -208,19 +199,19 @@ struct GatherTargetsTests {
         )
         #expect(groups.count == 1)
         let group = try #require(groups.first)
-        #expect(group.windows.count == 8)
+        #expect(group.windows.count == 12)
         // And the grid over it fills every cell twice.
         let frames = targets(state)
         var counts: [String: Int] = [:]
         for frame in frames.values {
             // Bucket by cell column/row, ignoring cascade
             // offsets within the cell.
-            let col = Int(frame.minX / 960)
+            let col = Int(frame.minX / 640)
             let row = Int((frame.minY - 25) / 527.5)
             counts["\(col),\(row)", default: 0] += 1
         }
         #expect(counts.values.allSatisfy { $0 == 2 })
-        #expect(counts.count == 4)
+        #expect(counts.count == 6)
     }
 
     @Test("windows across spaces share one display-wide grid")
@@ -247,7 +238,7 @@ struct GatherTargetsTests {
         let frames = targets(state)
         let f1 = try #require(frames[WindowID(1)])
         let f2 = try #require(frames[WindowID(2)])
-        // Cell 0 and cell 1 — no overlap, same row.
+        // Two halves — no overlap, same row.
         #expect(f1.origin == CGPoint(x: 0, y: 25))
         #expect(f2.origin == CGPoint(x: 960, y: 25))
     }

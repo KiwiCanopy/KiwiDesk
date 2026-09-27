@@ -90,7 +90,7 @@ private func targets(
         primaryHeight: pH,
         style: .grid,
         minSize: minSize,
-        targetDepth: QuitGridLayout.defaultTargetDepth
+        targetDepth: 5  // the depth these counts assume (#660)
     )
 }
 
@@ -106,47 +106,46 @@ struct GatherMultiDisplayTests {
         let frames = targets(state)
         let f1 = try #require(frames[WindowID(1)])
         let f2 = try #require(frames[WindowID(2)])
-        // Both are lone → top-left 2×2 cell of their display.
+        // Both are lone → each fills its own display.
         // No cross-monitor pull.
-        #expect(f1.origin == axVisible1.origin)
-        #expect(f2.origin == axVisible2.origin)
-        #expect(f1.width == 960)
-        #expect(f2.width == 960)
+        #expect(f1 == axVisible1)
+        #expect(f2 == axVisible2)
     }
 
     @Test("displays size their grids independently")
     func independentGridSizing() throws {
         var state = makeState()
-        // 41 windows on display 1 → 3×3; one on display 2
-        // stays 2×2.
-        for id in UInt32(1)...41 {
+        // 31 windows on display 1 → 4×2 piles; one on
+        // display 2 fills it.
+        for id in UInt32(1)...31 {
             addWindow(&state, id: id, space: SpaceID(1))
         }
         addWindow(&state, id: 100, space: SpaceID(2))
         let frames = targets(state)
-        // Display 1's second window sits at a third of its
-        // width; display 2's lone window fills a half-width
-        // cell.
+        // Display 1's second window sits a quarter across and
+        // its fifth opens row two; display 2's lone window
+        // fills the display.
         let f2 = try #require(frames[WindowID(2)])
-        #expect(f2.minX == 640)
+        #expect(f2.minX == 480)
+        let f5 = try #require(frames[WindowID(5)])
+        #expect(f5.origin == CGPoint(x: 0, y: 25 + 527.5))
         let f100 = try #require(frames[WindowID(100)])
-        #expect(f100.width == 960)
-        #expect(f100.minX == 1920)
+        #expect(f100 == axVisible2)
     }
 
     @Test("round-robin wraps into a cascade per display")
     func roundRobinCascades() throws {
         var state = makeState()
-        for id in UInt32(1)...5 {
+        for id in UInt32(1)...7 {
             addWindow(&state, id: id, space: SpaceID(1))
         }
         let frames = targets(state)
         let f1 = try #require(frames[WindowID(1)])
-        let f5 = try #require(frames[WindowID(5)])
-        // Window 5 wraps back onto window 1's cell, offset
-        // down by the cascade step.
-        #expect(f5.minX == f1.minX)
-        #expect(f5.minY == f1.minY + OverlapStack.offset)
+        let f7 = try #require(frames[WindowID(7)])
+        // Past the six 3×2 tiles, window 7 wraps back onto
+        // window 1's cell, offset down by the cascade step.
+        #expect(f7.minX == f1.minX)
+        #expect(f7.minY == f1.minY + OverlapStack.offset)
     }
 
     @Test("unassigned space falls back to lowest-ID display")
