@@ -11588,10 +11588,18 @@ the floating level the glass would blur the window in hand
 whenever it crossed its home slot or hovered the target, which
 is exactly when the drop zone shows. Beneath it, both markers
 still sit above the windows below it, and the home slot is empty
-for the drag. The drag preview in Settings stays flat: this tree's glass is
-untinted by ruling (#1295), and untinted glass would show a
-marker no drag draws, so a tinted preview waits on its own
-ruling (#1645).
+for the drag.
+
+:::unreleased
+**The Settings drag preview hosts Core's marker, tinted glass
+and all.** (#1645.) It draws the engine's own `DragMarkerView`,
+so the picture is the drag rather than a re-drawing of it
+(#702). That does not breach #1295's "this tree's glass is
+untinted": that ruling governs Settings *chrome* — a surface
+the window draws for itself — while a hosted engine view is a
+picture of a surface the product draws on screen, and a picture
+that dropped the tint would show a marker no drag draws.
+:::
 
 **Liquid Glass is an orthogonal finish toggle, not a third
 `background_style`.** (#390; revised 2026-07-20.) A third
