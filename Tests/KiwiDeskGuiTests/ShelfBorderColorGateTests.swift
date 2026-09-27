@@ -204,31 +204,71 @@ struct ShelfBorderPreviewTests {
         #expect(off.borderRim == nil)
     }
 
-    /// The rim is DRAWN, not only decided: the panel scene renders
-    /// differently with the switch on than off, all else equal.
+    /// The rim is DRAWN, not only decided. The palette's border
+    /// is a magenta nothing else in the scene uses. Rendered at
+    /// 1x and read back as sRGB, the scene has a band of magenta
+    /// pixels where the plates are rimmed while the switch is on,
+    /// and none while it is off. Counting the rim's own colour,
+    /// not "any difference", keeps renderer noise out of it.
     @Test("The palette panel draws its rim only with the switch on")
     func sceneDrawsTheRim() throws {
-        let palette = try #require(
-            PaletteCatalog.bundled().first {
-                $0.colors["kiwishelf.border_color"] != nil
-            }
-        )
-        func pixels(_ on: Bool) throws -> Data {
-            let renderer = ImageRenderer(
-                content: PaletteSceneThumbnail(
-                    palette: palette,
-                    scene: .panel,
-                    drawsBorder: on
-                )
-                .frame(width: 320)
+        let on = try Self.rimPixels(drawsBorder: true)
+        let off = try Self.rimPixels(drawsBorder: false)
+        // Two plates, each rimmed about 2 px wide round a
+        // 300-odd-pt strip: well over a thousand pixels.
+        #expect(on > 500, "rim pixels with the switch on: \(on)")
+        #expect(off == 0, "rim pixels with the switch off: \(off)")
+    }
+
+    private static let rimHex = "#FF00FF"
+
+    /// How many pixels of the rendered panel scene read as the
+    /// rim's magenta.
+    private static func rimPixels(drawsBorder: Bool) throws -> Int {
+        var colors = PaletteCatalog.defaultPalette().colors
+        colors["kiwishelf.border_color"] = rimHex
+        let renderer = ImageRenderer(
+            content: PaletteSceneThumbnail(
+                palette: ColorPalette(name: "", colors: colors),
+                scene: .panel,
+                drawsBorder: drawsBorder
             )
-            let image = try #require(renderer.cgImage)
-            let data = try #require(image.dataProvider?.data)
-            return data as Data
+            .frame(width: 320)
+        )
+        renderer.scale = 1
+        let image = try #require(renderer.cgImage)
+        let width = image.width
+        let height = image.height
+        var bytes = [UInt8](repeating: 0, count: width * height * 4)
+        let space = try #require(CGColorSpace(name: CGColorSpace.sRGB))
+        let drawn = bytes.withUnsafeMutableBytes { buffer -> Bool in
+            guard
+                let context = CGContext(
+                    data: buffer.baseAddress,
+                    width: width,
+                    height: height,
+                    bitsPerComponent: 8,
+                    bytesPerRow: width * 4,
+                    space: space,
+                    bitmapInfo: CGImageAlphaInfo.premultipliedLast
+                        .rawValue
+                )
+            else { return false }
+            context.draw(
+                image,
+                in: CGRect(x: 0, y: 0, width: width, height: height)
+            )
+            return true
         }
-        let off = try pixels(false)
-        #expect(try pixels(false) == off, "the render is not stable")
-        #expect(try pixels(true) != off)
+        try #require(drawn)
+        var count = 0
+        for pixel in stride(from: 0, to: bytes.count, by: 4)
+        where bytes[pixel] > 200 && bytes[pixel + 1] < 60
+            && bytes[pixel + 2] > 200 && bytes[pixel + 3] > 200
+        {
+            count += 1
+        }
+        return count
     }
 
     /// Every scene hands the draft's switch in — the argument has
