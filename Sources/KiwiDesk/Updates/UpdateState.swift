@@ -91,6 +91,8 @@ final class UpdateCycleObserver: NSObject, @MainActor SPUUpdaterDelegate {
     var onAppcast: ([SUAppcastItem]) -> Void = { _ in }
     /// Each cycle's end — when Try Again's check may start.
     var onCycleFinished: () -> Void = {}
+    /// Sparkle is about to relaunch into an update (#930).
+    var onWillRelaunch: () -> Void = {}
 
     init(store: UpdateStateStore) {
         self.store = store
@@ -131,6 +133,12 @@ final class UpdateCycleObserver: NSObject, @MainActor SPUUpdaterDelegate {
     ) {
         fold(.finished(error), updater)
         onCycleFinished()
+    }
+
+    /// Sparkle calls this only when it relaunches, ahead of the
+    /// quit it asks for — the in-place restart's hand-off (#930).
+    func updaterWillRelaunchApplication(_ updater: SPUUpdater) {
+        onWillRelaunch()
     }
 
     private func fold(_ outcome: UpdateCycleOutcome, _ updater: SPUUpdater) {

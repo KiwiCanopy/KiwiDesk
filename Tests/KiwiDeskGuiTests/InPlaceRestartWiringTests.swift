@@ -55,6 +55,39 @@ struct InPlaceRestartWiringTests {
         #expect(stop.contains("shutdownCleanly(inPlace: inPlace)"))
     }
 
+    /// The update half (#930 ruling 1): Sparkle's relaunch
+    /// delegate call reaches the core through the one hook, and
+    /// the app wires the hook to the announcement. A delegate
+    /// method Sparkle stops calling, or a hook left at its no-op
+    /// default, gathers every update — invisible to any suite.
+    @Test("Sparkle's relaunch announces an in-place restart")
+    func sparkleRelaunchIsWired() throws {
+        let observer = try body(
+            of: #"func updaterWillRelaunchApplication\(_ updater: "#
+                + #"SPUUpdater\) \{"#,
+            in: "Sources/KiwiDesk/Updates/UpdateState.swift"
+        )
+        #expect(observer.contains("onWillRelaunch()"))
+        let live = try body(
+            of: #"var onWillRelaunch: \(\) -> Void \{\n"#,
+            in: "Sources/KiwiDesk/Updates/AppUpdater.swift"
+        )
+        #expect(live.contains("observer.onWillRelaunch = newValue"))
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/AppDelegate.swift")
+        let delegate = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        let wiring =
+            #"updater\.onWillRelaunch = \{[^}]*"#
+            + #"core\.announceUpdateRelaunch\(\)"#
+        #expect(
+            delegate.range(of: wiring, options: .regularExpression)
+                != nil,
+            "the app no longer announces Sparkle's relaunch to Core"
+        )
+    }
+
     @Test("service restart announces before its bootout, when loaded")
     func restartAnnouncesFirst() throws {
         let path = "Sources/KiwiDeskCore/Service/ServiceManager.swift"

@@ -171,6 +171,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             self?.onboardingModel.bootPhase = phase
             self?.bootNarration.phase = phase
         }
+        // Sparkle's relaunch is an in-place restart (#930).
+        updater.onWillRelaunch = { [weak self] in
+            self?.core.announceUpdateRelaunch()
+        }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
         }
