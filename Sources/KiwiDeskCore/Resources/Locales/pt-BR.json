@@ -1342,7 +1342,7 @@
   "space_bar.item.ax.not_current": "%1$@, não selecionado",
   "space_bar.item.ax.space": "Espaço %1$@, janelas: %2$d",
   "space_bar.item_label": "Rótulo do espaço",
-  "space_bar.item_label.help": "O que identifica cada espaço na barra. %1$@ — seu ícone ou, sem ele, seu número ou nome. %2$@ — o símbolo do layout que ele usa agora, como a barra de menus mostra. O VoiceOver continua lendo o nome do espaço.",
+  "space_bar.item_label.help": "O que identifica cada espaço na barra. %1$@ — seu ícone ou, sem ele, seu número ou as duas primeiras letras do nome. %2$@ — o símbolo do layout que ele usa agora.",
   "space_bar.item_label.identifier": "Nome ou ícone",
   "space_bar.item_label.layout": "Layout",
   "space_bar.show_front_app": "Mostrar app em primeiro plano",

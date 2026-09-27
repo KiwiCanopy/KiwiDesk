@@ -1342,7 +1342,7 @@
   "space_bar.item.ax.not_current": "%1$@, nicht aktuell",
   "space_bar.item.ax.space": "Space %1$@, Fenster: %2$d",
   "space_bar.item_label": "Space-Beschriftung",
-  "space_bar.item_label.help": "Was jeden Space auf der Leiste benennt. %1$@ — sein Symbol, sonst seine Nummer oder sein Name. %2$@ — das Piktogramm des Layouts, das er gerade verwendet, wie es die Menüleiste zeigt. VoiceOver liest weiterhin den Namen des Space.",
+  "space_bar.item_label.help": "Was jeden Space auf der Leiste benennt. %1$@ — sein Symbol, sonst seine Nummer oder die ersten zwei Buchstaben seines Namens. %2$@ — das Piktogramm des Layouts, das er gerade verwendet.",
   "space_bar.item_label.identifier": "Name oder Symbol",
   "space_bar.item_label.layout": "Layout",
   "space_bar.show_front_app": "Vordergrund-App anzeigen",

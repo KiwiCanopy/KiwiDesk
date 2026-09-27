@@ -1,6 +1,7 @@
 /// Each layout's SF Symbol — the one home the Layout menu, the
 /// Settings tabs and the Space Bar's layout label share (#204,
-/// #1535). `LayoutModeSymbolTests` resolves every case.
+/// #1535). `SpaceBarItemLabelTests` ▸ `everyModeSymbolResolves`
+/// resolves every case.
 extension LayoutMode {
     public var symbol: String {
         switch self {

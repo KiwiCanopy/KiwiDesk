@@ -1342,7 +1342,7 @@
   "space_bar.item.ax.not_current": "%1$@，非目前",
   "space_bar.item.ax.space": "空間 %1$@，視窗：%2$d",
   "space_bar.item_label": "空間標籤",
-  "space_bar.item_label.help": "列上用什麼標示每個空間。%1$@ — 顯示其圖像，沒有圖像時顯示編號或名稱。%2$@ — 顯示它目前所用佈局的符號，與選單列中顯示的一致。螢幕閱讀器仍會讀出空間的名稱。",
+  "space_bar.item_label.help": "列上用什麼標示每個空間。%1$@ — 顯示其圖像，沒有圖像時顯示編號或名稱的前兩個字。%2$@ — 顯示它目前所用佈局的符號。",
   "space_bar.item_label.identifier": "名稱或圖像",
   "space_bar.item_label.layout": "佈局",
   "space_bar.show_front_app": "顯示前景 App",

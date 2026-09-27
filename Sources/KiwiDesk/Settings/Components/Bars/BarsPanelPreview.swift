@@ -100,7 +100,8 @@ struct BarsPanelPreview: View {
 
     /// Each Space's label as the bar draws it — Core's own
     /// ladder, never a reading of the preview's own (#1538,
-    /// #1535).
+    /// #1535). A layout label reads the DRAFT's modes, so a
+    /// temporary layout the bar shows is not drawn (#1179).
     static func spaceLabels(of config: GuiConfig) -> [SpaceGlyph] {
         let modes = config.modes(for: config.spaces)
         let label = config.settings.spaceBarStyle.itemLabel

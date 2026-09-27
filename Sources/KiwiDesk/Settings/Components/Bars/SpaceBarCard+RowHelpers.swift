@@ -60,9 +60,9 @@ extension SpaceBarCard {
         L(
             "space_bar.item_label.help",
             "What names each Space on the bar. %1$@ — its icon, "
-                + "else its number or name. %2$@ — the symbol of "
-                + "the layout it uses now, as the menu bar shows "
-                + "it. VoiceOver still reads the Space's name.",
+                + "else its number or the first two letters of its "
+                + "name. %2$@ — the symbol of the layout it uses "
+                + "now.",
             L("space_bar.item_label.identifier", "Name or icon"),
             L("space_bar.item_label.layout", "Layout")
         )
