@@ -24,7 +24,7 @@ struct LooksShelf: View {
     }
 
     private let columns = [
-        GridItem(.adaptive(minimum: 132), spacing: 12)
+        GridItem(.adaptive(minimum: 132), spacing: 12, alignment: .top)
     ]
 
     var body: some View {
