@@ -23,7 +23,8 @@ struct SpaceBarGlideWiringTests {
         _ content: SpaceBarStyle.InactiveContent,
         from: Int,
         to: Int,
-        boxedGlass: Bool = false
+        boxedGlass: Bool = false,
+        dropEmpty: Bool = false
     ) throws -> (
         writes: [(view: NSView, travels: Bool)],
         overlay: SpaceBarOverlay
@@ -40,9 +41,23 @@ struct SpaceBarGlideWiringTests {
         overlay.moveFrame = { view, _, travels in
             writes.append((view, travels))
         }
-        manager.sync([
-            collapsedBar(content, active: to, boxedGlass: boxedGlass)
-        ])
+        var second = collapsedBar(
+            content,
+            active: to,
+            boxedGlass: boxedGlass
+        )
+        if dropEmpty {
+            second = SpaceBarManager.Bar(
+                display: second.display,
+                items: Array(second.items.dropLast()),
+                frontApp: nil,
+                frontWindow: nil,
+                strip: second.strip,
+                style: second.style,
+                stateMarkColors: second.stateMarkColors
+            )
+        }
+        manager.sync([second])
         return (writes, overlay)
     }
 
@@ -64,6 +79,21 @@ struct SpaceBarGlideWiringTests {
         #expect(!steady.contains { $0.travels })
     }
 
+    /// A switch that also changes which items draw — a
+    /// `hide_empty` drop — lands: pooled views would otherwise
+    /// slide between different Spaces' slots.
+    @Test("A changed item set lands")
+    func changedItemsLand() throws {
+        let writes = try secondPass(
+            .identifier,
+            from: 1,
+            to: 2,
+            dropEmpty: true
+        ).writes
+        #expect(!writes.isEmpty)
+        #expect(!writes.contains { $0.travels })
+    }
+
     /// A hidden bar forgets what it expanded, so it reappears
     /// rather than gliding from a stale Space.
     @Test("A hide forgets the expanded Space")
@@ -75,7 +105,8 @@ struct SpaceBarGlideWiringTests {
     }
 
     /// Hosted items ride their glass: the render moves none of
-    /// them, and the glass pass is asked to travel with the run.
+    /// them, and each glass and its backdrop are written to
+    /// travel on a switch and to land on a steady pass.
     @Test("Box glass travels with its item")
     func boxGlassTravels() throws {
         try #require(Self.platformGlass)
@@ -86,14 +117,21 @@ struct SpaceBarGlideWiringTests {
             boxedGlass: true
         )
         #expect(overlay.boxGlasses.count == 3)
-        #expect(writes.isEmpty)
-        #expect(overlay.boxGlassGlided)
+        #expect(!writes.contains { $0.view is SpaceBarItemView })
+        let glass = writes.filter { write in
+            overlay.boxGlasses.contains { $0 === write.view }
+        }
+        let backdrops = writes.filter { $0.view is GlassBackdrop }
+        #expect(glass.count == 3)
+        #expect(backdrops.count == 3)
+        #expect((glass + backdrops).allSatisfy { $0.travels })
         let steady = try secondPass(
             .identifier,
             from: 2,
             to: 2,
             boxedGlass: true
-        ).overlay
-        #expect(!steady.boxGlassGlided)
+        ).writes
+        #expect(steady.count == 6)
+        #expect(!steady.contains { $0.travels })
     }
 }

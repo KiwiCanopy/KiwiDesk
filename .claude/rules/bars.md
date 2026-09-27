@@ -124,7 +124,7 @@ bars. Obligations:
   render or a preview, since the plan measures the builder's
   items and a collapse decided anywhere else draws a run the plan
   did not reserve. The length and the item view's layout read the
-  one `badgeCount`. `SpaceBarCollapsedRenderTests` ▸
+  one `Collapse.badgeCount(_:overflow:)`. `SpaceBarCollapsedRenderTests` ▸
   `countCellFitsThePlan` holds the cell against the length; that
   no other site collapses is review's. The run's glide on a
   switch goes through `BarMotion` like every bar motion, its box

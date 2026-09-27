@@ -160,13 +160,15 @@ extension SpaceBarOverlay {
             style: style,
             horizontal: horizontal
         )
-        installGlassHosting(
-            hosting,
-            frames: itemFrames,
-            style: style,
-            depth: horizontal ? strip.height : strip.width,
-            animated: glides
-        )
+        BarMotion.runLayout {
+            installGlassHosting(
+                hosting,
+                frames: itemFrames,
+                style: style,
+                depth: horizontal ? strip.height : strip.width,
+                animated: glides
+            )
+        }
         layoutOverflow(
             fades,
             strip: strip,

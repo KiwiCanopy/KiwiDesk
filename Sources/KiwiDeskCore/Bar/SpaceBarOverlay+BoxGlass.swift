@@ -15,7 +15,6 @@ extension SpaceBarOverlay {
         depth: CGFloat,
         animated: Bool
     ) {
-        boxGlassGlided = animated
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
         for i in 0..<n {
@@ -31,7 +30,8 @@ extension SpaceBarOverlay {
                 glass,
                 frame: frames[i],
                 cornerRadius: radius,
-                animated: animated
+                animated: animated,
+                move: moveFrame
             )
             let tint = boxTints[i]
             if itemViews[i].isHidden {
@@ -44,7 +44,8 @@ extension SpaceBarOverlay {
                     cornerRadius: radius,
                     hex: style.fillColor,
                     edge: style.edge,
-                    animated: animated
+                    animated: animated,
+                    move: moveFrame
                 )
             }
         }

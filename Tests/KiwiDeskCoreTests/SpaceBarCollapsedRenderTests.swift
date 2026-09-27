@@ -90,15 +90,19 @@ struct SpaceBarCollapsedRenderTests {
     }
 
     /// The cue is Minimal's: under Window count an empty Space
-    /// already shows no count.
-    @Test("Only Minimal dims an empty identifier")
-    func onlyMinimalDims() throws {
-        let overlay = try render(.count)
+    /// already shows no count, and under Apps no glyphs.
+    @Test(
+        "Only Minimal dims an empty identifier",
+        arguments: [
+            SpaceBarStyle.InactiveContent.count, .apps,
+        ]
+    )
+    func onlyMinimalDims(content: SpaceBarStyle.InactiveContent) throws {
+        let overlay = try render(content)
         let style = try #require(overlay.lastShown?.style)
-        #expect(
-            overlay.itemViews[2].identifierLabel.textColor
-                == NSColor(kiwiHex: style.idleItemColor)
-        )
+        let drawn = overlay.itemViews[2].identifierLabel.textColor
+        #expect(drawn == NSColor(kiwiHex: style.idleItemColor))
+        #expect(drawn != NSColor(kiwiHex: style.emptyItemColor))
     }
 }
 

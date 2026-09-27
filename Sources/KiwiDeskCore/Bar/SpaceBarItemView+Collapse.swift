@@ -25,11 +25,20 @@ extension SpaceBarItemView {
             if case .count(let windows) = self { return windows }
             return 0
         }
+
+        /// The number an item's badge cell draws — a collapsed
+        /// count, else the windows hidden past the cap. The one
+        /// formula the length (`Item.badgeCount`) and the view's
+        /// layout and style read.
+        static func badgeCount(_ collapse: Self?, overflow: Int) -> Int {
+            collapse?.countCell ?? overflow
+        }
     }
 
-    /// The number the item's badge cell draws: a collapsed
-    /// count, else the windows hidden past the cap.
-    var badgeCount: Int { collapse?.countCell ?? overflow }
+    /// This item's badge cell, through the one formula.
+    var badgeCount: Int {
+        Collapse.badgeCount(collapse, overflow: overflow)
+    }
 
     /// Announced whatever the glyph draws (bars.md): a layer
     /// item names its layer, a Space item its Space and count.

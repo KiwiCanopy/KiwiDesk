@@ -52,9 +52,14 @@ public final class SpaceBarOverlay {
 
         var space: SpaceID? { identity.space }
 
-        /// What the badge cell draws — the one input a length
-        /// and the item view's layout both read.
-        var badgeCount: Int { collapse?.countCell ?? overflow }
+        /// What the badge cell draws — the input a length reads,
+        /// through the view's one formula.
+        var badgeCount: Int {
+            SpaceBarItemView.Collapse.badgeCount(
+                collapse,
+                overflow: overflow
+            )
+        }
 
         /// The one collapse decision (#1683): an item its screen
         /// does not show draws `content`, so the length the
@@ -67,7 +72,9 @@ public final class SpaceBarOverlay {
         func collapsed(
             to content: SpaceBarStyle.InactiveContent
         ) -> Self {
-            guard !active, space != nil else { return self }
+            guard !active, space != nil, collapse == nil else {
+                return self
+            }
             let windows =
                 apps.reduce(0) { $0 + $1.count } + overflow
             var item = self
@@ -119,13 +126,10 @@ public final class SpaceBarOverlay {
     /// (#1683), so a switch is told from a render that keeps it.
     var shownExpanded: SpaceID?
     var shownIdentities: [SpaceBarItemView.Identity] = []
-    /// The one frame write a run item takes; a test swaps it to
-    /// see whether a pass asked to travel.
-    var moveFrame: @MainActor (NSView, CGRect, Bool) -> Void = {
-        BarMotion.setFrame($0, to: $1, animated: $2)
-    }
-    /// Whether the last box-glass pass asked its glass to travel.
-    var boxGlassGlided = false
+    /// The one frame write a run item, its box glass and that
+    /// glass's backdrop take; a test swaps it to see whether a
+    /// pass asked to travel.
+    var moveFrame: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     /// Follows the active Space unless a manual scroll holds.
     var follow = ShelfFollow<SpaceID>()
     /// Cached scroll geometry for hit-testing and autoscroll (#385).

@@ -114,6 +114,25 @@ struct SpaceBarInactiveContentTests {
         #expect(try #require(built[SpaceID("1")]).collapse == nil)
     }
 
+    /// A second collapse keeps the first's count rather than
+    /// recounting the glyphs the first one dropped.
+    @Test(
+        "Collapsing twice is collapsing once",
+        arguments: [
+            SpaceBarStyle.InactiveContent.count, .identifier,
+        ]
+    )
+    func collapseIsIdempotent(
+        content: SpaceBarStyle.InactiveContent
+    ) throws {
+        let built = items(seededCore(), content)
+        let once = try #require(built[SpaceID("2")])
+        let twice = once.collapsed(to: content)
+        #expect(twice.collapse == once.collapse)
+        #expect(twice.collapse?.windows == 3)
+        #expect(twice.badgeCount == once.badgeCount)
+    }
+
     /// The layer item is never a Space, so it never collapses.
     @Test("A layer item passes unchanged")
     func layerPasses() {
