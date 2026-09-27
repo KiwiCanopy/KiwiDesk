@@ -13,9 +13,9 @@ extension KiwiCore {
     /// echoes, so a successful payment often leaves the arm).
     static let wakeFocusHealWindow: TimeInterval = 30
 
-    /// The wake/unlock leg of the restore contract — the crash
-    /// leg keeps `restoreAndSettle`, whose settle trio this
-    /// inlines: a GONE remembered focus is re-seeded BEFORE the
+    /// The wake/unlock leg of the restore contract — boot's leg
+    /// is `arrangeBootDesk`, whose settle trio this inlines: a
+    /// GONE remembered focus is re-seeded BEFORE the
     /// settle (the #442 launch shape), so the retile and bars
     /// lay out for the focus that stays; a tracked one is paid
     /// as a real focus after it.

@@ -78,12 +78,12 @@ struct WakeFocusRestoreTests {
         #expect(core.wakeFocusHealArmedAt != nil)
     }
 
-    @Test("The crash leg stays a bare replay: no heal armed")
+    @Test("The boot leg arms no wake heal")
     func crashLegDoesNotArm() {
         let core = makeCore()
         addWindow(core, 1)
         let snapshot = core.state.snapshot()
-        core.crash.restoreState(snapshot)
+        core.arrangeBootDesk(session: snapshot)
         #expect(core.wakeFocusHealArmedAt == nil)
     }
 
