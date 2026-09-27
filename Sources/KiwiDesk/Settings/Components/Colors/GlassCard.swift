@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
 /// shortcuts panel (#1307), and the sheen's own row beneath it
-/// (#1644).
+/// (#1644), which alone shows below macOS 26.
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -17,38 +17,51 @@ struct GlassCard: View {
     }
 
     var body: some View {
-        // Hidden below macOS 26, never greyed: an OS-capability
-        // gate is an absence (#390), and the census records it
-        // in the HIDES group.
-        if AppBarStyle.glassAvailable {
-            // The header `?` carries the gate's reason so it
-            // survives the dim (#527) — the `.glass` container's
-            // `.runtime` census gate.
-            SettingsSection(
-                SettingsCatalog.colors.glassCard,
-                caption: caption,
-                help: reduceTransparency ? reduceTransparencyHelp : nil
-            ) {
-                // The grey is per row, honoring the census's
-                // exemption: the sheen is not glass and never
-                // greys (#1644) — parallel `GreyOut`s, never
-                // nested (gui.md).
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(
-                        ColorsRowOrder.glassAtRest,
-                        id: \.id
-                    ) { key in
-                        row(key)
-                            .modifier(
-                                GreyOut(
-                                    active: reduceTransparency
-                                        && !key.placement
-                                            .exemptFromContainerGate
-                                )
-                            )
-                    }
+        SettingsSection(
+            SettingsCatalog.colors.glassCard,
+            caption: AppBarStyle.glassAvailable ? caption : nil
+        ) {
+            // The grey is per row, honoring the census's
+            // exemption: the sheen is not glass and never greys
+            // (#1644) — parallel `GreyOut`s, never nested
+            // (gui.md).
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Self.rows, id: \.id) { key in
+                    row(key).modifier(GreyOut(active: greyed(key)))
+                    reasonCaption(for: key)
                 }
             }
+        }
+    }
+
+    /// The card's rows as this Mac draws them: the switch is
+    /// hidden below macOS 26, never greyed — an OS-capability gate
+    /// is an absence (#390), which the census records in the HIDES
+    /// group — while the sheen, which is not glass, stays (#1644).
+    static var rows: [SettingKey] {
+        ColorsRowOrder.glassAtRest.filter {
+            AppBarStyle.glassAvailable
+                || !($0.placement.gate?.runtimeConditions
+                    .contains(.liquidGlassUnavailable) ?? false)
+        }
+    }
+
+    /// Whether Reduce transparency greys `key`: the card's gate,
+    /// less the census's exemption.
+    private func greyed(_ key: SettingKey) -> Bool {
+        reduceTransparency && !key.placement.exemptFromContainerGate
+    }
+
+    /// The Reduce-transparency reason, under the switch it greys
+    /// and outside that grey so it survives the dim (#527) — never
+    /// on the header, which would claim it for the sheen too.
+    @ViewBuilder private func reasonCaption(
+        for key: SettingKey
+    ) -> some View {
+        if reduceTransparency, key == .colours(.liquidGlassMaster) {
+            Text(reduceTransparencyHelp)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -71,8 +84,8 @@ struct GlassCard: View {
                         "colors.sheen.caption",
                         "A light top edge on the focus border, the "
                             + "bars' highlight and border, and the "
-                            + "drag borders. Pairs well with the glass "
-                            + "above."
+                            + "drag borders. Pairs well with %1$@.",
+                        Self.title
                     )
                 )
                 .font(.caption)

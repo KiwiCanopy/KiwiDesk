@@ -46,10 +46,10 @@ struct SheenCouplingTests {
         )
     }
 
-    /// Its own row in the Glass card, beneath the switch, and the
-    /// census's escape from the card's Reduce-transparency grey;
-    /// its one gate is the card's pre-26 HIDE, which greys nothing.
-    @Test("the row sits beneath the switch and never greys")
+    /// Its own row in the Glass card, beneath the switch, the
+    /// census's escape from the card's Reduce-transparency grey,
+    /// and no gate at all: it shows below macOS 26 too.
+    @Test("the row sits beneath the switch, never greys or hides")
     func rowPlacement() {
         #expect(
             ColorsRowOrder.glassAtRest == [
@@ -60,7 +60,19 @@ struct SheenCouplingTests {
         let placement = SettingKey.colours(.borderSheen).placement
         #expect(placement.container == .glass)
         #expect(placement.exemptFromContainerGate)
-        #expect(placement.gate == .runtime(.liquidGlassUnavailable))
-        #expect(!SettingRuntimeGate.liquidGlassUnavailable.greys)
+        #expect(placement.gate == nil)
+        #expect(GlassCard.rows.contains(.colours(.borderSheen)))
+        #expect(
+            GlassCard.rows.contains(.colours(.liquidGlassMaster))
+                == AppBarStyle.glassAvailable
+        )
+    }
+
+    /// The row is a search hit on every macOS, the pre-26 one
+    /// included: the index drops only rows the census hides.
+    @Test("the row is searchable on every macOS")
+    func rowIsSearchable() {
+        let indexed = Set(SettingsSearchIndex.rows().compactMap(\.key))
+        #expect(indexed.contains(.colours(.borderSheen)))
     }
 }

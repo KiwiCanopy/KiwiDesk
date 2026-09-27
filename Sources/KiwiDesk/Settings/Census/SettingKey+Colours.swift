@@ -46,15 +46,13 @@ extension ColoursKey {
             // and reachable from Lua like the shelf's leaf.
             return .luaOnly
         case .borderSheen:
-            // Its own row beneath the master, never greyed: the
-            // sheen is not glass (#1644, owner 2026-09-27). It
-            // rides the card, which hides below macOS 26, so it
-            // takes the master's HIDE — a gate that greys nothing.
+            // Its own row beneath the master, never greyed and
+            // never hidden: the sheen is not glass, so it draws
+            // below macOS 26 too (#1644, owner 2026-09-27).
             return .row(
                 .coloursAndMotion,
                 .glass,
                 .atRest,
-                gate: .runtime(.liquidGlassUnavailable),
                 exemptFromContainerGate: true
             )
         case .animationsMaster:

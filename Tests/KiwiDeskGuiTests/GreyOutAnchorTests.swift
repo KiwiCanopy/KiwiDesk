@@ -117,12 +117,14 @@ struct GreyOutAnchorTests {
             "help: reduceMotion ? reduceMotionHelp : nil",
             1
         ),
-        // Reduce transparency greys the Liquid Glass card the
-        // same way (#1418): the `.glass` container's `.runtime`
-        // gate, its reason on the header `?`.
+        // Reduce transparency greys the Liquid Glass switch
+        // (#1418): the `.glass` container's `.runtime` gate. Its
+        // reason is a caption under the switch, outside the grey
+        // and off the header, whose `?` would claim it for the
+        // un-greyed Sheen row too (#1644).
         (
             "GlassCard.swift",
-            "help: reduceTransparency ? reduceTransparencyHelp : nil",
+            "reasonCaption(for: key)",
             1
         ),
     ]
