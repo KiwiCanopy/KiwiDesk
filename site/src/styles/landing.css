@@ -1442,14 +1442,27 @@ section {
 .req + .hero__stars {
   margin-top: 0.35rem;
 }
-.hero__ph {
-  margin: 0.9rem 0 0;
-  text-align: center;
+.hero__pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }
-.hero__ph img {
-  display: inline-block;
-  width: 250px;
-  height: 54px;
+.pill--link {
+  gap: 0.4rem;
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.pill--link:hover,
+.pill--link:focus-visible {
+  border-color: var(--accent);
+}
+.pill--link svg:last-child {
+  opacity: 0.6;
+}
+.pill__ph {
+  flex: none;
+  color: var(--accent);
 }
 .hero__stars a {
   display: inline-flex;
