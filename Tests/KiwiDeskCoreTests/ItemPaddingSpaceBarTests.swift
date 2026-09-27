@@ -160,6 +160,12 @@ struct ItemPaddingSpaceBarTests {
         empty.layoutSubtreeIfNeeded()
         #expect(empty.frame.width < Self.depth)
         #expect(empty.cornerRadius == empty.frame.width / 2)
+        // What the layers draw, not only the computed value.
+        #expect(empty.layer?.cornerRadius == empty.frame.width / 2)
+        #expect(
+            empty.accentClip.layer?.cornerRadius
+                == empty.frame.width / 2
+        )
         #expect(
             SpaceBarItemView.boxRadius(
                 look: Self.look(roundness: 100),
