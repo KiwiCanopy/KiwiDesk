@@ -36,6 +36,10 @@ struct SessionRatioSeamTests {
         "Models/SpaceModel.swift": 2,
         // The mode-change reseed (#458).
         "State/WorkspaceManager.swift": 1,
+        // An in-place restart's replay of the layer the stop
+        // captured (#930): a restore, not a resize, so no field
+        // an explicit write set is shadowed by it.
+        "Models/StateSnapshot+InPlace.swift": 1,
     ]
 
     /// Writes per line; a read (`space.sessionRatios.splitRatioH`

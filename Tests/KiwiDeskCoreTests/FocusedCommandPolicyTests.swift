@@ -45,6 +45,8 @@ struct FocusedCommandPolicyTests {
         "reset_layout_sizing",
         "subscribe",
         "border.fit_gaps",
+        // Announces the next stop, touching no window (#930).
+        "prepare_restart",
     ]
 
     /// A command that does not act on the implicit focused window:
