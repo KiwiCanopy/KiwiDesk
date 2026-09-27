@@ -133,7 +133,7 @@
   "behavior.mouse.title": "Mouse",
   "behavior.quit.caption": "Prima di arrestarsi, KiwiDesk dispone le finestre gestite su ogni schermo in modo che le barre del titolo restino raggiungibili.",
   "behavior.quit.target_depth": "Finestre per cella desiderate",
-  "behavior.quit.target_depth.help": "Fino a sei finestre si affiancano sullo schermo; le altre si sovrappongono nelle celle, e la griglia cresce, fino a 4×4, quando una pila supererebbe questo valore.",
+  "behavior.quit.target_depth.help": "Le finestre si affiancano sullo schermo finché non superano le celle della griglia, poi si sovrappongono al loro interno; la griglia cresce, fino a 4×4, quando una pila supererebbe questo valore.",
   "behavior.quit.title": "All'uscita",
   "border.caption": "Disegna un bordo attorno alla finestra con focus, così da farla risaltare in un layout con spaziatura.",
   "border.color.focused": "Finestra con focus",

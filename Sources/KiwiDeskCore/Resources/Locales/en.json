@@ -133,7 +133,7 @@
   "behavior.mouse.title": "Mouse",
   "behavior.quit.caption": "Before KiwiDesk stops, it arranges managed windows on each display so their title bars remain reachable.",
   "behavior.quit.target_depth": "Target windows per cell",
-  "behavior.quit.target_depth.help": "Up to six windows tile the display; more pile up in the cells, and the grid grows, up to 4×4, when a pile would pass this target.",
+  "behavior.quit.target_depth.help": "Windows tile the display until they outnumber the grid's cells, then pile up in them; the grid grows, up to 4×4, when a pile would pass this target.",
   "behavior.quit.title": "On quit",
   "border.caption": "Outlines the focused window so it stands out in a gapped layout.",
   "border.color.focused": "Focused window",

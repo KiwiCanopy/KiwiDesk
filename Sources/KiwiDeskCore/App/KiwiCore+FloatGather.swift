@@ -65,7 +65,8 @@ extension KiwiCore {
             region: region,
             grid: grid,
             minSize: tiler.settings.minWindowSize,
-            targetDepth: tiler.settings.quitGridTargetDepth
+            targetDepth: tiler.settings.quitGridTargetDepth,
+            placingLast: space.focused
         )
         for (id, target) in targets {
             tiler.seedStash(id, frame: target)

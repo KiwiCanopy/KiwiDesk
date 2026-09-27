@@ -22,8 +22,9 @@ public enum QuitGridLayout {
     /// Teardown dimension ceiling (4 per axis), a safety boundary
     /// and deliberately not configurable. The tile cap, the
     /// ladder and its thresholds are restated as prose in
-    /// `docs/lua-reference.md` and `BehaviorSection`'s help —
-    /// changing any of them updates those sites too.
+    /// `docs/lua-reference.md` and `BehaviorSection`'s
+    /// `behavior.quit.target_depth.help` — changing any of them
+    /// updates those sites too.
     public static let maxDimension = 4
     /// The stack grids, smallest first, as (splits along the
     /// region's long axis, splits across it): 3×2 → 4×2 → 4×3 →
@@ -117,7 +118,7 @@ public enum QuitGridLayout {
             in: region,
             gapH: 0,
             gapV: 0,
-            columnFirst: !isPortrait(region),
+            rowMajor: !isPortrait(region),  // portrait: column-first
             fillLast: !stacks
         )
         var piles = Array(repeating: [WindowID](), count: cells.count)
@@ -161,8 +162,9 @@ public enum QuitGridLayout {
     /// the caller's: `restackForTeardown` drops one member (the
     /// unbeatable key window) and is wall-clock bounded, so read
     /// the guarantees as properties of the circle, not of every
-    /// quit (#688). `axFrame` is the one `frames` lays in: the
-    /// region's orientation shapes the partition.
+    /// quit (#688). `axFrame` is the one `frames` lays in, so the
+    /// one partition reads identical inputs; it does not change
+    /// the order, which is cell by cell in the fill order.
     public static func raiseOrder(
         for windows: [WindowID],
         in axFrame: CGRect,

@@ -135,10 +135,10 @@ struct BehaviorSection: View {
                 in: QuitGridLayout.targetDepthRange,
                 help: L(
                     "behavior.quit.target_depth.help",
-                    "Up to six windows tile the display; more "
-                        + "pile up in the cells, and the grid "
-                        + "grows, up to 4×4, when a pile would "
-                        + "pass this target."
+                    "Windows tile the display until they "
+                        + "outnumber the grid's cells, then pile "
+                        + "up in them; the grid grows, up to 4×4, "
+                        + "when a pile would pass this target."
                 )
             )
         }

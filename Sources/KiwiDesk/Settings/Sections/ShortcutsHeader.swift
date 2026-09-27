@@ -109,7 +109,8 @@ struct ShortcutsHeader: View {
             )
         }
         // "·" never a comma — six locales use the comma as a
-        // decimal separator.
+        // decimal separator, so "restored: 12, and" reads as a
+        // number.
         // Naming Save as literal text is the #818 violation, and
         // interpolating it reds `InterpolatedLabelTests`; filed —
         // the staged-ness beat returns once the frame can say it.

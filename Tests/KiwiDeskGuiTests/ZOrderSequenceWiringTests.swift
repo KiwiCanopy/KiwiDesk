@@ -289,9 +289,15 @@ struct ZOrderSequenceWiringTests {
                 separatedBy: "trustedFrontmostFocusedWindowID()"
             ).count == 2
         )
-        // Both consumers, and both off that one local.
+        // Both consumers, and both off that one local: it is
+        // placed by the one `collect`, whose groups the frames and
+        // the circle both read (#1709), and exempted by the circle.
         #expect(
             source.components(separatedBy: "placingLast: frontmost")
+                .count == 2
+        )
+        #expect(
+            source.components(separatedBy: "groups: groups")
                 .count == 3
         )
         #expect(source.contains("unbeatable: frontmost"))

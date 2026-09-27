@@ -62,8 +62,10 @@ struct QuitGridRaiseTests {
         region: CGRect
     ) throws {
         // Every pile in raise order descends by exactly one
-        // offset per member: `frames` and `raiseOrder` share one
-        // partition (#688), pinned on both orientations.
+        // offset per member, and the piles come in the fill
+        // order the frames draw — row by row on a landscape
+        // region, column by column on a portrait one: `frames`
+        // and `raiseOrder` share one partition (#688).
         let placed = QuitGridLayout.frames(
             for: ids(0..<count),
             in: region,
@@ -102,6 +104,15 @@ struct QuitGridRaiseTests {
                 #expect(next.minX == top.minX)
                 #expect(next.minY == top.minY + OverlapStack.offset)
             }
+        }
+        let columnFirst = region.height > region.width
+        let tops = order.compactMap { placed[$0] }.filter(isPileTop)
+        for (earlier, later) in zip(tops, tops.dropFirst()) {
+            let (a, b) =
+                columnFirst
+                ? ((earlier.minX, earlier.minY), (later.minX, later.minY))
+                : ((earlier.minY, earlier.minX), (later.minY, later.minX))
+            #expect(a < b)
         }
     }
 }

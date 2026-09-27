@@ -133,7 +133,7 @@
   "behavior.mouse.title": "Souris",
   "behavior.quit.caption": "Avant de s'arrêter, KiwiDesk dispose les fenêtres gérées sur chaque écran pour que leurs barres de titre restent accessibles.",
   "behavior.quit.target_depth": "Fenêtres visées par cellule",
-  "behavior.quit.target_depth.help": "Jusqu’à six fenêtres se partagent l’écran en mosaïque ; les suivantes se superposent dans les cellules, et la grille s’agrandit, jusqu’à 4×4, lorsqu’une pile dépasserait cette valeur.",
+  "behavior.quit.target_depth.help": "Les fenêtres se partagent l’écran en mosaïque jusqu’à dépasser le nombre de cellules de la grille, puis se superposent dans celles-ci ; la grille s’agrandit, jusqu’à 4×4, lorsqu’une pile dépasserait cette valeur.",
   "behavior.quit.title": "À la fermeture",
   "border.caption": "Entoure la fenêtre ciblée d'un contour pour qu'elle ressorte dans une disposition avec des écarts.",
   "border.color.focused": "Fenêtre ciblée",

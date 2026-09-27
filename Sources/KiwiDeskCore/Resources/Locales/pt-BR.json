@@ -133,7 +133,7 @@
   "behavior.mouse.title": "Mouse",
   "behavior.quit.caption": "Antes de parar, o KiwiDesk organiza as janelas gerenciadas em cada tela para que suas barras de título continuem acessíveis.",
   "behavior.quit.target_depth": "Janelas por célula desejadas",
-  "behavior.quit.target_depth.help": "Até seis janelas se dividem lado a lado na tela; as demais se sobrepõem nas células, e a grade cresce, até 4×4, quando uma pilha ultrapassaria esse valor.",
+  "behavior.quit.target_depth.help": "As janelas se dividem lado a lado na tela até superarem as células da grade; depois se sobrepõem nelas, e a grade cresce, até 4×4, quando uma pilha ultrapassaria esse valor.",
   "behavior.quit.title": "Ao encerrar",
   "border.caption": "Desenha uma borda ao redor da janela com foco para que ela se destaque em um layout com espaçamento.",
   "border.color.focused": "Janela com foco",

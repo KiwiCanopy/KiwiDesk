@@ -133,7 +133,7 @@
   "behavior.mouse.title": "マウス",
   "behavior.quit.caption": "KiwiDeskは終了する前に、管理中のウインドウを各ディスプレイ上に配置し、タイトルバーに手が届く状態にします。",
   "behavior.quit.target_depth": "セルあたりの目標ウインドウ数",
-  "behavior.quit.target_depth.help": "6個までのウインドウはディスプレイに並べて配置されます。それ以上はセル内で重なり、重なりがこの目標を超える場合はグリッドが最大4×4まで広がります。",
+  "behavior.quit.target_depth.help": "ウインドウはグリッドのセル数を超えるまでディスプレイに並べて配置され、超えるとセル内で重なります。重なりがこの目標を超える場合はグリッドが最大4×4まで広がります。",
   "behavior.quit.title": "終了時",
   "border.caption": "フォーカス中のウインドウを枠で囲み、ギャップのあるレイアウトで目立つようにします。",
   "border.color.focused": "フォーカス中のウインドウ",

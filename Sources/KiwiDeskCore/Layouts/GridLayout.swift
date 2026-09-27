@@ -58,7 +58,7 @@ public struct GridLayout: LayoutSystem {
                 in: usable,
                 gapH: gapH,
                 gapV: gapV,
-                columnFirst: true,
+                rowMajor: true,
                 fillLast: false
             )
             // Sticky windows preserve a fully-tiled cell (#414 v2).
@@ -90,7 +90,7 @@ public struct GridLayout: LayoutSystem {
             in: usable,
             gapH: gapH,
             gapV: gapV,
-            columnFirst: params.splitDirection == .horizontal,
+            rowMajor: params.splitDirection == .horizontal,
             fillLast: params.type == .dynamic
                 && params.fillEmptyCells
         )
@@ -118,18 +118,18 @@ public struct GridLayout: LayoutSystem {
 
     /// The first `count` cells of a `columns`×`rows` grid over
     /// `region`, in arrangement order — row by row when
-    /// `columnFirst`, else column by column — the last spanning
+    /// `rowMajor`, else column by column — the last spanning
     /// the rest of its row (column) when `fillLast`
     /// (`fill_empty_cells`). The quit grid lays its cells
     /// through this too, so the two shapes cannot drift (#1709).
-    public static func cellFrames(
+    static func cellFrames(
         count: Int,
         columns: Int,
         rows: Int,
         in region: CGRect,
         gapH: CGFloat,
         gapV: CGFloat,
-        columnFirst: Bool,
+        rowMajor: Bool,
         fillLast: Bool
     ) -> [CGRect] {
         let size = cellSize(
@@ -140,11 +140,11 @@ public struct GridLayout: LayoutSystem {
             gapV: gapV
         )
         return (0..<count).map { index in
-            let col = columnFirst ? index % columns : index / rows
-            let row = columnFirst ? index / columns : index % rows
+            let col = rowMajor ? index % columns : index / rows
+            let row = rowMajor ? index / columns : index % rows
             let fills = fillLast && index == count - 1
-            let colSpan = fills && columnFirst ? columns - col : 1
-            let rowSpan = fills && !columnFirst ? rows - row : 1
+            let colSpan = fills && rowMajor ? columns - col : 1
+            let rowSpan = fills && !rowMajor ? rows - row : 1
             return CGRect(
                 x: region.minX
                     + CGFloat(col) * (size.width + gapH),

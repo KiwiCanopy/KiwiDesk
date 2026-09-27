@@ -133,7 +133,7 @@
   "behavior.mouse.title": "Ratón",
   "behavior.quit.caption": "Antes de detenerse, KiwiDesk coloca las ventanas gestionadas en cada pantalla para que sus barras de título sigan siendo accesibles.",
   "behavior.quit.target_depth": "Ventanas por celda deseadas",
-  "behavior.quit.target_depth.help": "Hasta seis ventanas se reparten la pantalla en mosaico; las demás se escalonan dentro de las celdas, y la cuadrícula crece, hasta 4×4, cuando una pila superaría este valor.",
+  "behavior.quit.target_depth.help": "Las ventanas se reparten la pantalla en mosaico hasta superar las celdas de la cuadrícula; luego se escalonan dentro de ellas, y la cuadrícula crece, hasta 4×4, cuando una pila superaría este valor.",
   "behavior.quit.title": "Al salir",
   "border.caption": "Dibuja un borde alrededor de la ventana enfocada para que destaque en un diseño con espaciado.",
   "border.color.focused": "Ventana enfocada",

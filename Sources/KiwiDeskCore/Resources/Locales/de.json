@@ -133,7 +133,7 @@
   "behavior.mouse.title": "Maus",
   "behavior.quit.caption": "Bevor KiwiDesk beendet wird, ordnet es verwaltete Fenster auf jedem Display so an, dass ihre Titelleisten erreichbar bleiben.",
   "behavior.quit.target_depth": "Ziel-Fenster pro Zelle",
-  "behavior.quit.target_depth.help": "Bis zu sechs Fenster füllen das Display nebeneinander; weitere werden in den Zellen gestapelt, und das Raster wächst bis 4×4, wenn ein Stapel dieses Ziel überschreiten würde.",
+  "behavior.quit.target_depth.help": "Fenster füllen das Display nebeneinander, bis sie die Zellen des Rasters übersteigen, dann werden sie darin gestapelt; das Raster wächst bis 4×4, wenn ein Stapel dieses Ziel überschreiten würde.",
   "behavior.quit.title": "Beim Beenden",
   "border.caption": "Umrandet das fokussierte Fenster, damit es in einem Layout mit Abständen hervorsticht.",
   "border.color.focused": "Fokussiertes Fenster",
