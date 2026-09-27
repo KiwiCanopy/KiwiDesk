@@ -56,14 +56,16 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 3
+            readers.count == 4
                 && files == [
                     "KiwiCore+AwayWindows.swift",
                     "KiwiCore+LaunchReach.swift",
+                    // Boot's judge of a restored hold (#1646).
+                    "KiwiCore+HeldSpaceBoot.swift",
                 ],
             .init(
-                rawValue: "expected the refresh, the boot seed "
-                    + "and the reach, found "
+                rawValue: "expected the refresh, the boot seed, "
+                    + "the reach and the held judge, found "
                     + readers.map(\.site).joined(separator: ", ")
             )
         )
