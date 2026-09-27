@@ -129,9 +129,13 @@ struct BarSliderBandTests {
             let band = BarSliderBands.fontSize(thickness: depth)
             var shelf = KiwiShelf()
             shelf.thickness = depth
-            let auto = SpaceBarLook(shelf: shelf)
-                .identifierFontSize(forDepth: depth)
-                .rounded()
+            let auto = SpaceBarLook(
+                shelf: shelf,
+                bar: SpaceBarStyle(),
+                sheen: false
+            )
+            .identifierFontSize(forDepth: depth)
+            .rounded()
             #expect(band.contains(Double(auto)), "\(thickness) pt")
             #expect(band.upperBound >= thickness)
         }
