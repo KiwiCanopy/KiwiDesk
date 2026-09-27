@@ -173,15 +173,26 @@ struct SpaceBarGlyphClickTests {
             window: WindowID(9),
             app: "Web",
             title: long,
-            icon: nil
+            icon: nil,
+            enabled: false
         )
         let menu = SpaceBarWindowMenu.make([row]) { _ in }
         let item = menu.items[0]
         #expect(item.title.hasSuffix("…"))
         #expect(item.toolTip == long)
+        #expect(!item.isEnabled)
         let short = SpaceBarWindowMenu.make(
-            [.init(window: WindowID(9), app: "Web", title: "", icon: nil)]
+            [
+                .init(
+                    window: WindowID(9),
+                    app: "Web",
+                    title: "",
+                    icon: nil,
+                    enabled: true
+                )
+            ]
         ) { _ in }
+        #expect(short.items[0].isEnabled)
         #expect(short.items[0].title == "Web")
         #expect(short.items[0].toolTip == nil)
     }

@@ -10,6 +10,7 @@ enum SpaceBarWindowMenu {
         let app: String
         let title: String
         let icon: NSImage?
+        let enabled: Bool
     }
 
     /// A row's title past this many characters is cut, the whole
@@ -45,7 +46,7 @@ enum SpaceBarWindowMenu {
             // `target` is weak: the rows keep the handler alive
             // for as long as the menu is.
             item.representedObject = Pick(row.window, handler)
-            item.isEnabled = true
+            item.isEnabled = row.enabled
             if row.title.count > titleCap { item.toolTip = row.title }
             item.image = row.icon.map(scaled)
             menu.addItem(item)

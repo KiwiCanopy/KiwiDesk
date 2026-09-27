@@ -8,11 +8,11 @@ extension SpaceBarItemView {
     /// change is kept, so a render under a resting pointer does not
     /// restart its tooltip.
     func syncTargets() {
-        overflowTarget?.removeFromSuperview()
-        overflowTarget = nil
         guard let space else {
             glyphTargets.forEach { $0.removeFromSuperview() }
             glyphTargets = []
+            overflowTarget?.removeFromSuperview()
+            overflowTarget = nil
             return
         }
         let kept =
@@ -32,18 +32,34 @@ extension SpaceBarItemView {
             }
         }
         glyphTargets.forEach { $0.actions = glyphActions }
-        if collapse == nil, overflow > 0, !overflowWindows.isEmpty {
-            overflowTarget = makeTarget(
-                space: space,
-                windows: overflowWindows,
-                kind: .overflow,
-                label: L(
-                    "space_bar.overflow.ax",
-                    "Windows not shown: %1$d",
-                    overflowWindows.count
-                )
-            )
+        syncOverflowTarget(space: space)
+    }
+
+    /// The `+n` target, kept like the glyphs' while its windows
+    /// hold, so a render does not re-insert it (#1315).
+    private func syncOverflowTarget(space: SpaceID) {
+        let wanted =
+            collapse == nil && !overflowWindows.isEmpty
+            ? overflowWindows : []
+        if let kept = overflowTarget, kept.space == space,
+            kept.members == wanted
+        {
+            kept.actions = glyphActions
+            return
         }
+        overflowTarget?.removeFromSuperview()
+        overflowTarget = nil
+        guard !wanted.isEmpty else { return }
+        overflowTarget = makeTarget(
+            space: space,
+            windows: wanted,
+            kind: .overflow,
+            label: L(
+                "space_bar.overflow.ax",
+                "Windows not shown: %1$d",
+                wanted.count
+            )
+        )
     }
 
     /// A target wins wherever it lies, whatever order a re-render

@@ -30,20 +30,19 @@ extension KiwiCore {
         spaceBars.glyphActions.present(menu, pick.anchor)
     }
 
-    /// Switches to `space` landing on `window`, or focuses it where
-    /// `space` is already active. The landing focus is seeded where
-    /// the window is a member — a traveler's home, not the Space it
-    /// renders on — so the switch's own handoff raises it, once.
+    /// Switches to `space` landing on `window` through the one
+    /// follow-shaped switch, or focuses it where `space` is already
+    /// active. A menu row picked after its window left `space` —
+    /// the menu is modal, the loop keeps running — is dropped.
     func focusFromSpaceBar(_ window: WindowID, on space: SpaceID) {
-        guard state.windows[window] != nil else { return }
+        guard let members = state.workspaces[space],
+            state.effectiveMembers(of: members).contains(window)
+        else { return }
         guard space != activeSpace?.id else {
             focusWithMonocleFlip(window, step: nil)
             return
         }
-        if let home = state.workspaces.space(of: window) {
-            state.workspaces.focus(window, in: home)
-        }
-        _ = focusSpace([.string(space.raw)])
+        followSwitch(to: space, focusing: window)
     }
 
     func spaceBarMenuRows(
@@ -57,7 +56,10 @@ extension KiwiCore {
                 title: window.title,
                 icon: NSRunningApplication(
                     processIdentifier: window.pid
-                )?.icon
+                )?.icon,
+                // The focus door's own refusal (#1345): a row it
+                // would refuse is greyed, never hidden (#802).
+                enabled: !raiseCrossesDesktops(id)
             )
         }
     }

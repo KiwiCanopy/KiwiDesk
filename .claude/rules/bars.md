@@ -292,6 +292,30 @@ Obligations:
   pre-filtering on content — the old `showsText` gate was that
   pre-filter, and it is what dropped the announced channel.
 
+## A Space Bar glyph is a click target the item owns (#1528)
+
+Every app glyph and the `+n` badge carry a `SpaceBarGlyphTarget`;
+what a click does is Core's (`KiwiCore+SpaceBarClick.swift`).
+Obligations:
+
+- **A hover title is read when it shows, through the one
+  `SpaceBarGlyphActions.tooltip`, and never stored on a view.**
+  It is a third title channel, and it owes the refresh gate
+  above no arm only because nothing caches it; a target that
+  keeps the string brings back the stale title with no gate
+  watching (`SpaceBarGlyphWiringTests` ▸ `tooltipIsReadAtHover`).
+- **A clickable piece of an item joins the item's `hitTest`
+  target list**, or subview order decides who takes the click —
+  a render re-adds the glyph views above kept targets
+  (`SpaceBarGlyphTargetTests` ▸ `hitTestPrefersTheTarget`).
+- **A menu a bar click opens is built by `SpaceBarWindowMenu`
+  and shown through `SpaceBarGlyphActions.present`**, which both
+  `makeTestCore` twins pin, since a modal menu hangs a run. Its
+  rows' enablement is the focus door's own refusal, greyed and
+  never hidden (`SpaceBarGlyphWiringTests` ▸
+  `refusedRowIsGreyed`); that no second builder exists is
+  review's.
+
 ## A per-display bar answers the SHOWN question, never the render one
 
 A bar is built per display, so a per-display value sits in easy

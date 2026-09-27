@@ -10994,17 +10994,21 @@ Adjacent same-app runs collapse into one glyph + count badge
 unconditionally — unlike the App Bar's `group_adjacent_windows`
 toggle. The glyph cap depends on grouping running **first**: an
 ungrouped mode would burn the cap on duplicates while conveying
-less. Nor would it buy reach. A group glyph is a click target
-whose menu lists its windows (#1528), so each member is one pick
-away; every slot an ungrouped mode spent on a duplicate would
-push another app behind `+n`, whose menu costs the same pick and
-drops that app's glyph from the overview. That ordering is the
-settled part; the cap's *value* is a knob
-(`space_bar.set_glyph_cap`, default 5, range 1–12, #376) — group
-first, then cap, whatever the cap is. The overflow badge's `+n`
-counts hidden **windows**, not slots — the same unit as the
+less. That ordering is the settled part; the cap's *value* is a
+knob (`space_bar.set_glyph_cap`, default 5, range 1–12, #376) —
+group first, then cap, whatever the cap is. The overflow badge's
+`+n` counts hidden **windows**, not slots — the same unit as the
 per-glyph count badges and the item's accessibility label.
 
+:::unreleased
+Nor would an ungrouped mode buy reach. A group glyph is a click
+target whose menu lists its windows (#1528), so each member is
+one pick away; every slot an ungrouped mode spent on a duplicate
+would push another app behind `+n`, whose menu costs the same
+pick and drops that app's glyph from the overview.
+:::
+
+:::unreleased
 **[Principle] A Space Bar glyph reaches its window; a list never
 switches by itself.** (#1528, owner rulings 2026-09-20 and
 2026-09-27.) On every Space, a glyph standing for one window
@@ -11017,10 +11021,10 @@ nothing until a row is picked.
 The glyph is the only thing on screen naming a window on a Space
 you are not looking at, so it is where a click can say which
 window it means; one target per item left an overview the user
-could read and not act on. Every glyph click still switches,
-because a window on another Space cannot take the focus while
-its Space stays hidden — the glyph refines only which window the
-switch lands on. A target standing for several windows must not
+could read and not act on. Every glyph click on another Space
+still switches, because a window on another Space cannot take
+the focus while its Space stays hidden — the glyph refines only
+which window the switch lands on. A target standing for several windows must not
 choose for the user: any guess (the most recent, the first) is
 wrong often enough to teach distrust of the click, and a switch
 fired before the choice moves the screen under a menu the user
@@ -11030,6 +11034,7 @@ pointer settles rather than drawn into the render, so it is
 current without the bar re-rendering on every title change. A
 setting to turn glyph clicks off waits for misclicks measured on
 a device (#1514).
+:::
 
 **The Space Bar's two-accent model.** (#293.) Three tinted states,
 all GUI-exposed inline (never behind a disclosure — the system is
