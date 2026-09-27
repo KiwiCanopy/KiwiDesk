@@ -27,9 +27,18 @@ struct InPlaceRestartTests {
         return path as URL?
     }
 
+    /// Whether the test process is validly signed — read without
+    /// `CodeIdentity`, so a regression there reds the tests this
+    /// gates rather than skipping them.
     nonisolated static var selfIsSigned: Bool {
-        guard let path = selfPath else { return false }
-        return CodeIdentity.running().admits(path) == .admitted
+        var staticCode: SecStaticCode?
+        guard let path = selfPath,
+            SecStaticCodeCreateWithPath(path as CFURL, [], &staticCode)
+                == errSecSuccess,
+            let staticCode
+        else { return false }
+        return SecStaticCodeCheckValidity(staticCode, [], nil)
+            == errSecSuccess
     }
 
     private func core(at clock: TimeInterval = 100) -> KiwiCore {

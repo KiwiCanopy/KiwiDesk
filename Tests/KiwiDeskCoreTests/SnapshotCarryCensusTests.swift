@@ -92,7 +92,7 @@ struct SnapshotCarryCensusTests {
             $0.sessionRatios.splitRatioH = 0.31
             $0.sessionRatios.splitRatioV = 0.62
             $0.sessionRatios.masterRatio = 0.44
-            $0.sessionRatios.slotSize = .fraction(0.7123)
+            $0.sessionRatios.slotSize = .fraction(0.712345678)
         }
         core.state.setFloating(w1, true)
         core.state.setSticky(w1, .display)

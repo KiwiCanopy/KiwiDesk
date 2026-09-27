@@ -88,6 +88,30 @@ struct InPlaceRestartWiringTests {
         )
     }
 
+    /// `cliOnlyIsNeverLua` reads the command table; Lua also
+    /// registers functions by hand, which it cannot see. A config
+    /// calling the announcement would turn its next Quit into an
+    /// in-place restart.
+    @Test("no Lua file registers the announcement by hand")
+    func luaNeverSpellsTheAnnouncement() throws {
+        let lua = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDeskCore/Lua")
+        let files = try SourceScan.swiftSources(under: lua)
+        try #require(!files.isEmpty)
+        for file in files {
+            let text = try SourceScan.strippedSource(at: file)
+            for spelling in [
+                "prepare_restart", "prepareRestartCommand",
+                "prepareServiceRestart", "announceUpdateRelaunch",
+            ] {
+                #expect(
+                    !text.contains(spelling),
+                    "\(file.lastPathComponent) spells \(spelling)"
+                )
+            }
+        }
+    }
+
     @Test("service restart announces before its bootout, when loaded")
     func restartAnnouncesFirst() throws {
         let path = "Sources/KiwiDeskCore/Service/ServiceManager.swift"

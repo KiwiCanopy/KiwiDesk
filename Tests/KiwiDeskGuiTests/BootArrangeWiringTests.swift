@@ -50,7 +50,7 @@ struct BootArrangeWiringTests {
             body.range(of: "arrangeBootDesk(")
         )
         let before = String(body[..<arrange.lowerBound])
-        let pass = #"(?<![A-Za-z_.])(retile|spaceSwitchRetile)\("#
+        let pass = #"\b(retile|spaceSwitchRetile)\("#
         #expect(
             before.range(of: pass, options: .regularExpression)
                 == nil,
