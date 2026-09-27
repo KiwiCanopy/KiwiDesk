@@ -4,15 +4,14 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The live Space Bar: `SpaceBarManager.sync` on a 40 pt strip at
-/// 6 pt of padding draws every content size at the 28 pt content
+/// a 28 pt glyph size draws every content size at that content
 /// depth — the items' cells and length, the identifier, the
 /// front-app segment and the overflow count — while boxes keep
 /// the full depth.
-@Suite("Item padding reaches the rendered Space Bar", .serialized)
+@Suite("Glyph size reaches the rendered Space Bar", .serialized)
 @MainActor
-struct ItemPaddingSpaceBarTests {
+struct GlyphSizeSpaceBarTests {
     private static let depth: CGFloat = 40
-    private static let padding: CGFloat = 6
     private static let content: CGFloat = 28
 
     init() { LiquidGlassGate.override = { false } }
@@ -30,7 +29,7 @@ struct ItemPaddingSpaceBarTests {
         roundness: CGFloat = 50
     ) -> SpaceBarLook {
         var look = SpaceBarLook()
-        look.itemPadding = padding
+        look.glyphSize = Self.content
         look.cornerRoundness = roundness
         look.liquidGlass = false
         look.backgroundStyle = boxed ? .boxed : .plain
@@ -130,7 +129,7 @@ struct ItemPaddingSpaceBarTests {
     }
 
     /// An empty Space's item is shorter than the depth under
-    /// padding; its box still rounds from the full depth.
+    /// glyph size; its box still rounds from the full depth.
     @Test("A glyphless item rounds like a glyph-bearing one")
     func glyphlessRadius() throws {
         let manager = SpaceBarManager()
@@ -148,7 +147,7 @@ struct ItemPaddingSpaceBarTests {
     }
 
     /// A full capsule's radius is half the depth, past half a
-    /// glyphless item's length under padding: the box caps it.
+    /// glyphless item's length under a glyph size: the box caps it.
     @Test("A short item's radius caps at half its length")
     func radiusCapped() throws {
         let manager = SpaceBarManager()

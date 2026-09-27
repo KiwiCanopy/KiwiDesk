@@ -14,7 +14,13 @@ struct PtSlider: View {
     /// range — a 1-floored slider without a sentinel must keep
     /// printing its number (QA 2026-07-19).
     var autoAtZero: Bool = false
+    /// What Auto draws right now, where the caller can say: the
+    /// slider then sits at it and the readout shows it, so the
+    /// user sees the size before taking it over (#1713).
+    var autoValue: CGFloat? = nil
     var help: String? = nil
+
+    private var isAuto: Bool { autoAtZero && value == 0 }
 
     var body: some View {
         SettingsRowShape {
@@ -23,23 +29,41 @@ struct PtSlider: View {
             HStack {
                 SettingsSlider(
                     value: Binding(
-                        get: { Double(value) },
+                        get: { sliderPosition },
                         set: { value = CGFloat($0) }
                     ),
                     range: range,
                     step: 1,
                     label: label,
-                    spokenValue: readoutText
+                    spokenValue: spokenText
                 )
                 readout
             }
         }
     }
 
-    private var readoutText: String {
-        autoAtZero && value == 0
-            ? L("settings.readout.auto", "Automatic")
-            : "\(Int(value)) \(unit)"
+    /// Where the slider sits: under Auto, the size Auto draws.
+    var sliderPosition: Double {
+        Double(isAuto ? autoValue ?? 0 : value)
+    }
+
+    private func points(_ size: CGFloat) -> String {
+        "\(Int(size.rounded())) \(unit)"
+    }
+
+    var readoutText: String {
+        guard isAuto else { return points(value) }
+        return autoValue.map(points)
+            ?? L("settings.readout.auto", "Automatic")
+    }
+
+    var spokenText: String {
+        guard isAuto, let autoValue else { return readoutText }
+        return L(
+            "settings.readout.auto_value",
+            "Automatic, %1$@",
+            points(autoValue)
+        )
     }
 
     private var readout: some View {

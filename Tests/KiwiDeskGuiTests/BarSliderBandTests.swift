@@ -21,14 +21,18 @@ import Testing
 struct BarSliderBandTests {
     private static let bars = "Sources/KiwiDesk/Settings/Components/Bars"
 
-    /// The `static let <name>` declaration in `BarSliderBands`,
-    /// through the end of its initializer.
-    private func declaration(of name: String) throws -> String {
+    /// The `static let <name>` (or `static func <name>`)
+    /// declaration in `BarSliderBands`, through the end of its
+    /// initializer or body.
+    private func declaration(
+        of name: String,
+        keyword: String = "let"
+    ) throws -> String {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(Self.bars)
             .appendingPathComponent("BarSliderBands.swift")
         let text = try SourceScan.strippedSource(at: file)
-        let needle = "static let \(name)"
+        let needle = "static \(keyword) \(name)"
         let start = try #require(text.range(of: needle))
         let rest = text[start.lowerBound...]
         let end =
@@ -88,42 +92,94 @@ struct BarSliderBandTests {
         #expect(glyphDeclared.contains("gapCeiling"))
     }
 
-    /// The ceiling is the padding past which the thickest shelf
-    /// this card offers holds its content at Core's floor (#1682).
-    @Test("the item padding band derives from Core and the thickness")
-    func itemPaddingIsDerived() throws {
-        let band = BarSliderBands.itemPadding
-        #expect(band.lowerBound == Double(KiwiShelf.minItemPadding))
-        #expect(band.contains(Double(KiwiShelf().itemPadding)))
+    /// The floor is Core's content floor and the ceiling the
+    /// draft's thickness, past which `contentDepth` draws the
+    /// thickness whatever the value (#1713).
+    @Test("the glyph size band derives from Core and the thickness")
+    func glyphSizeIsDerived() throws {
+        for thickness: CGFloat in [KiwiShelf.minThickness, 40, 80] {
+            let band = BarSliderBands.glyphSize(thickness: thickness)
+            #expect(band.lowerBound == Double(KiwiShelf.minContentDepth))
+            #expect(band.upperBound >= Double(thickness))
+            var shelf = KiwiShelf()
+            shelf.glyphSize = CGFloat(band.upperBound)
+            #expect(shelf.contentDepth(forDepth: thickness) == thickness)
+        }
+        let band = BarSliderBands.glyphSize(thickness: 40)
         var shelf = KiwiShelf()
-        shelf.itemPadding = CGFloat(band.upperBound)
-        let thickest = CGFloat(BarSliderBands.thickness.upperBound)
-        #expect(
-            shelf.contentDepth(forDepth: thickest)
-                == KiwiShelf.minContentDepth
-        )
-        shelf.itemPadding -= 1
-        #expect(
-            shelf.contentDepth(forDepth: thickest)
-                > KiwiShelf.minContentDepth
-        )
-        let declared = try declaration(of: "itemPadding")
-        // The ceiling's expression itself reads the content floor,
-        // not a name left lying in the declaration.
+        shelf.glyphSize = CGFloat(band.upperBound) - 1
+        #expect(shelf.contentDepth(forDepth: 40) < 40)
+        let declared = try declaration(of: "glyphSize", keyword: "func")
         #expect(
             declared.contains(
-                "let floor = Double(KiwiShelf.minItemPadding)"
+                "let floor = Double(KiwiShelf.minContentDepth)"
             )
         )
+    }
+
+    /// The font size slider holds whatever Auto draws, on every
+    /// thickness the card offers, so the greyed thumb never pins
+    /// at an end and a switch-off never lands outside (#1713).
+    @Test("the font size band holds the automatic size")
+    func fontSizeBandHoldsAuto() {
+        let floor = Double(KiwiShelf.minThickness)
+        let top = BarSliderBands.thickness.upperBound
+        for thickness in stride(from: floor, through: top, by: 1) {
+            let depth = CGFloat(thickness)
+            let band = BarSliderBands.fontSize(thickness: depth)
+            var shelf = KiwiShelf()
+            shelf.thickness = depth
+            let auto = SpaceBarLook(shelf: shelf)
+                .identifierFontSize(forDepth: depth)
+                .rounded()
+            #expect(band.contains(Double(auto)), "\(thickness) pt")
+            #expect(band.upperBound >= thickness)
+        }
+    }
+
+    /// Glyph size sits directly above Font size in the Style
+    /// drawer, since an automatic font size follows it (#1713).
+    @Test("the glyph size rows sit directly above the font size")
+    func glyphSizeSitsAboveFontSize() throws {
+        let order = BarsRowOrder.kiwishelfStyle
+        let auto = try #require(
+            order.firstIndex(of: .kiwishelf(.glyphSizeAuto))
+        )
+        #expect(order[auto + 1] == .kiwishelf(.glyphSize))
+        #expect(order[auto + 2] == .kiwishelf(.fontSizeAuto))
+    }
+
+    /// The slider runs to the DRAFT's thickness: the group reads
+    /// it once and hands that one value to the band and to the
+    /// restore, so a literal or the band's widest thickness in
+    /// either place reds here (#1713).
+    @Test("the glyph size slider runs to the draft's thickness")
+    func glyphSizeReadsTheDraftThickness() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(Self.bars)
+        let sources = try SourceScan.swiftSources(under: root)
+        let body = try rowProperty("glyphSizeGroup", in: sources)
+        #expect(!body.isEmpty, "glyphSizeGroup moved")
         #expect(
-            declared.contains(
-                "let content = Double(KiwiShelf.minContentDepth)"
-            )
+            body.contains("let thickness = shelf.thickness.wrappedValue")
         )
         #expect(
-            declared.contains(
-                "floor...((thickness.upperBound - content) / 2)"
+            body.contains(
+                "BarSliderBands.glyphSize(thickness: thickness)"
             )
+        )
+        #expect(body.contains("restore: thickness"))
+        #expect(body.contains("autoValue: thickness"))
+        // Font size: the one automatic value is what the slider
+        // shows under Auto and what a switch-off starts from.
+        let font = try rowProperty("fontSizeGroup", in: sources)
+        #expect(!font.isEmpty, "fontSizeGroup moved")
+        #expect(font.contains("identifierFontSize(forDepth:"))
+        #expect(font.contains("restore: auto"))
+        #expect(font.contains("autoValue: auto"))
+        #expect(
+            font.contains("BarSliderBands.fontSize(")
+                && font.contains("thickness: shelf.thickness.wrappedValue")
         )
     }
 
@@ -137,7 +193,7 @@ struct BarSliderBandTests {
         ("kiwishelf.itemGap", "itemGap"),
         ("spaceBarStyle.glyphGap", "glyphGap"),
         ("kiwishelf.highlightWidth", "highlightWidth"),
-        ("kiwishelf.itemPadding", "itemPadding"),
+        ("kiwishelf.glyphSize (auto)", "glyphSize"),
     ]
 
     /// The body of `var <name>: some View {` in the card sources:

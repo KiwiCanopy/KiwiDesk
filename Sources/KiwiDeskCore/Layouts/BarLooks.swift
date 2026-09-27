@@ -51,7 +51,7 @@ public struct SpaceBarLook: Sendable, Equatable {
     }
 
     /// Space identifier font size on a strip `depth` deep, the
-    /// item padding taken off inside (#1682).
+    /// glyph size taken inside (#1713).
     public func identifierFontSize(forDepth depth: CGFloat) -> CGFloat {
         identifierFontSize(forContentDepth: contentDepth(forDepth: depth))
     }
@@ -151,8 +151,8 @@ public struct AppBarLook: Sendable, Equatable {
         shelf.contentDepth(forDepth: depth)
     }
 
-    /// Title font size on a strip `depth` deep, the item padding
-    /// taken off inside (#1682).
+    /// Title font size on a strip `depth` deep, the glyph size
+    /// taken inside (#1713).
     public func resolvedFontSize(forDepth depth: CGFloat) -> CGFloat {
         resolvedFontSize(forContentDepth: contentDepth(forDepth: depth))
     }

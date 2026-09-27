@@ -51,7 +51,7 @@ struct BarStripView: View {
     }
 
     /// Computed cross dimension for bar pips — content, so it
-    /// follows the item padding (#1682).
+    /// follows the glyph size (#1713).
     var pipCross: CGFloat {
         spec.thickness * 0.56 * spec.contentShare
     }

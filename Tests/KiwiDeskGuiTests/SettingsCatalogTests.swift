@@ -109,7 +109,8 @@ struct SettingsCatalogTests {
         // highlight width.
         // 111 since #1679: it gained the border and its width.
         // 113 since #1681: its font family and font weight.
-        #expect(allEntries.count == 113)
+        // 115 since #1713: its glyph size toggle and slider.
+        #expect(allEntries.count == 115)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil
