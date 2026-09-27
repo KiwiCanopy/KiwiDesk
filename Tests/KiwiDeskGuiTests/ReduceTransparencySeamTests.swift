@@ -192,6 +192,10 @@ struct ReduceTransparencySeamTests {
         // value — a grey, not a second gate on the branch
         // (#1418).
         "GlassCard.swift": "greys the Liquid Glass row with its reason",
+        // Drops the white knob's rim and shadow only where the
+        // glass draws — its edge, not a gate on the branch
+        // (#1527).
+        "SettingsSlider.swift": "stands the knob's edge down under glass",
     ]
 
     @Test("the OS flag has one home per tree")
@@ -277,8 +281,11 @@ struct ReduceTransparencySeamTests {
                 in: source
             )
         )
+        // Squashed: the call wraps once it carries the #1527
+        // variant and fallback.
         #expect(
-            entry.contains("modifier(GlassChrome("),
+            entry.split(whereSeparator: \.isWhitespace).joined()
+                .contains("modifier(GlassChrome("),
             "glassChrome no longer applies the GlassChrome modifier"
         )
         #expect(

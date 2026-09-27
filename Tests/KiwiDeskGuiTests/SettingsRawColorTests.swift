@@ -210,8 +210,9 @@ struct SettingsRawColorTests {
             + "appearance — the scheme is a parameter, not a "
             + "branch, and both swatches are always drawn",
         "SettingsSlider.swift":
-            "the thumb is ruled white in both modes (its "
-            + "docstring rejects onAccentKnob); the black rim "
+            "the thumb is ruled white in both modes "
+            + "(SettingsThemeWiringTests' deferred onAccentKnob "
+            + "entry); the black rim "
             + "is its only edge in dark",
         "SidebarTile.swift":
             "the search tile glyph on the destination tints — "

@@ -13,10 +13,24 @@ struct SettingsSlider: View {
     let spokenValue: String
 
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency)
+    private var reduceTransparency
     @FocusState private var focused: Bool
+    /// The pointer's unsnapped track fraction while dragging; the
+    /// knob follows it and settles on the snapped value when it
+    /// resets, which it does on cancel too (#1527).
+    @GestureState private var dragFraction: CGFloat?
 
-    private static let knobWidth: CGFloat = 26
-    private static let height: CGFloat = 20
+    private var dragging: Bool { dragFraction != nil }
+
+    private static let knobWidth: CGFloat = 28
+    private static let knobHeight: CGFloat = 18
+    private static let trackHeight: CGFloat = 10
+    private static let height: CGFloat = 24
+    /// Visual only — layout keeps the resting size (#1527).
+    private static let dragScale: CGFloat = 1.25
 
     var body: some View {
         GeometryReader { geo in
@@ -81,36 +95,48 @@ struct SettingsSlider: View {
         let center = knobCenter(in: width)
         return ZStack(alignment: .leading) {
             Capsule()
-                .fill(Color.primary.opacity(0.08))
+                .fill(Color.primary.opacity(0.12))
+                .frame(height: Self.trackHeight)
+            // To the knob's CENTRE, so a glass knob shows the
+            // fill running under it (#1527).
             Capsule()
                 .fill(fill)
-                .frame(width: center + Self.knobWidth / 2)
+                .frame(width: center, height: Self.trackHeight)
             knob
                 .frame(
                     width: Self.knobWidth,
-                    height: Self.height + 4
+                    height: Self.knobHeight
                 )
+                .scaleEffect(dragging ? Self.dragScale : 1)
                 .offset(x: center - Self.knobWidth / 2)
         }
-        .overlay(
-            Capsule().strokeBorder(
-                Color.primary.opacity(0.08),
-                lineWidth: 0.5
-            )
+        // Press and release only: the drag itself tracks the
+        // pointer unanimated, and the release settles the knob
+        // onto the snapped value.
+        .animation(
+            reduceMotion ? nil : .spring(duration: 0.25),
+            value: dragging
         )
-        .contentShape(Capsule())
+        .frame(maxHeight: .infinity)
+        .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 0)
+                .updating($dragFraction) { drag, state, _ in
+                    guard isEnabled else { return }
+                    state = trackFraction(at: drag.location.x, in: width)
+                }
                 .onChanged { drag in
                     guard isEnabled else { return }
-                    set(at: drag.location.x, in: width)
+                    let t = trackFraction(at: drag.location.x, in: width)
+                    let span = range.upperBound - range.lowerBound
+                    value = snapped(range.lowerBound + Double(t) * span)
                 }
         )
     }
 
     private func knobCenter(in width: CGFloat) -> CGFloat {
         let usable = max(width - Self.knobWidth, 1)
-        let t = min(max(fraction, 0), 1)
+        let t = min(max(dragFraction ?? fraction, 0), 1)
         return Self.knobWidth / 2 + usable * t
     }
 
@@ -122,25 +148,41 @@ struct SettingsSlider: View {
         )
     }
 
-    private func set(at x: CGFloat, in width: CGFloat) {
+    private func trackFraction(
+        at x: CGFloat,
+        in width: CGFloat
+    ) -> CGFloat {
         let usable = max(width - Self.knobWidth, 1)
-        let t = min(max((x - Self.knobWidth / 2) / usable, 0), 1)
-        let span = range.upperBound - range.lowerBound
-        value = snapped(range.lowerBound + Double(t) * span)
+        return min(max((x - Self.knobWidth / 2) / usable, 0), 1)
     }
 
-    /// Opaque white knob thumb (`SettingsTheme.onAccentKnob`).
+    /// True while the knob draws as glass rather than its white
+    /// fallback — the branch `glassChrome` takes (#1374).
+    private var knobIsGlass: Bool {
+        dragging && !reduceTransparency && GlassChromeVariant.drawable
+    }
+
+    /// White knob thumb, fully clear glass while dragged (#1527).
+    /// The glass is Settings' own control finish, so it ignores
+    /// the overlays' Liquid Glass switch. The rim and shadow are
+    /// the white knob's only edge and stand down only where the
+    /// glass draws, since both read as frost through it.
     private var knob: some View {
-        Capsule()
-            .fill(.white)
+        Color.clear
+            .glassChrome(
+                in: Capsule(),
+                enabled: dragging,
+                variant: .clear,
+                fallback: AnyShapeStyle(.white)
+            )
             .overlay(
                 Capsule().strokeBorder(
-                    Color.black.opacity(0.1),
+                    Color.black.opacity(knobIsGlass ? 0 : 0.1),
                     lineWidth: 0.5
                 )
             )
             .shadow(
-                color: .black.opacity(0.25),
+                color: .black.opacity(knobIsGlass ? 0 : 0.25),
                 radius: 2,
                 y: 1
             )

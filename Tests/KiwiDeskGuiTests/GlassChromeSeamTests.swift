@@ -160,6 +160,16 @@ struct GlassChromeSeamTests {
             one half promises a clip the other does not: \(branch)
             """
         )
+        // The caller's variant and fallback reach the branch
+        // (#1527): a hard-coded finish would stay green above.
+        #expect(
+            branch.contains("glassEffect(variant.glass"),
+            "glassGround no longer draws the caller's variant"
+        )
+        #expect(
+            branch.contains("background(fallback)"),
+            "glassGround no longer draws the caller's fallback"
+        )
         // And the branch is still there to be shared: a file that
         // stopped branching would satisfy both clauses trivially.
         #expect(
