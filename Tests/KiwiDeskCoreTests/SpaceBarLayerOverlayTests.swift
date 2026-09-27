@@ -30,7 +30,7 @@ struct SpaceBarLayerOverlayTests {
                 spaceGlyph: .text("1", tinted: true),
                 apps: [],
                 active: true,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             ),
             SpaceBarOverlay.Item(
@@ -38,7 +38,7 @@ struct SpaceBarLayerOverlayTests {
                 spaceGlyph: .text("2", tinted: true),
                 apps: [],
                 active: false,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             ),
         ]

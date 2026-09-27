@@ -113,7 +113,7 @@ struct IdleItemContrastTests {
                         )
                     ],
                     active: item.active,
-                    overflow: 0,
+                    overflow: [],
                     focusInOverflow: false
                 )
             },

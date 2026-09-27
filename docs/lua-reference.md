@@ -2465,10 +2465,10 @@ window. Adjacent windows of the same app share one glyph with a
 count badge (non-adjacent duplicates stay separate); past the
 glyph cap (`space_bar.set_glyph_cap`, default 5, range 1–12) the
 rest fold into a `+n` badge counting the hidden windows. Clicking
-a Space switches to it; glyphs are not click targets, and a group
-holding the focused window stays collapsed and takes the focused
-accent. The user guide's [Space Bar](user-guide.md#space-bar)
-section covers the badges and the drag-onto-a-Space gesture.
+a Space switches to it, and a group holding the focused window
+stays collapsed and takes the focused accent. The user guide's
+[Space Bar](user-guide.md#space-bar) section covers the badges,
+what a click on a glyph does and the drag-onto-a-Space gesture.
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,

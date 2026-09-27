@@ -12,8 +12,10 @@ public final class SpaceBarOverlay {
         let spaceGlyph: SpaceGlyph
         private(set) var apps: [SpaceBarItemView.App]
         let active: Bool
-        /// Windows hidden past the glyph cap ("+n" badge).
-        private(set) var overflow: Int
+        /// Windows hidden past the glyph cap, in row order: the
+        /// "+n" badge counts them and its menu lists them (#1528).
+        private(set) var overflowWindows: [WindowID]
+        var overflow: Int { overflowWindows.count }
         /// Focused window is hidden past the cap (#376).
         private(set) var focusInOverflow: Bool
         /// Set only by `collapsed(to:)` (#1683).
@@ -26,14 +28,14 @@ public final class SpaceBarOverlay {
             spaceGlyph: SpaceGlyph,
             apps: [SpaceBarItemView.App],
             active: Bool,
-            overflow: Int,
+            overflow: [WindowID],
             focusInOverflow: Bool
         ) {
             identity = .space(space)
             self.spaceGlyph = spaceGlyph
             self.apps = apps
             self.active = active
-            self.overflow = overflow
+            self.overflowWindows = overflow
             self.focusInOverflow = focusInOverflow
         }
 
@@ -46,7 +48,7 @@ public final class SpaceBarOverlay {
             spaceGlyph = glyph
             apps = []
             active = false
-            overflow = 0
+            overflowWindows = []
             focusInOverflow = false
         }
 
@@ -70,7 +72,7 @@ public final class SpaceBarOverlay {
                 apps.reduce(0) { $0 + $1.count } + overflow
             var item = self
             item.apps = []
-            item.overflow = 0
+            item.overflowWindows = []
             item.focusInOverflow = false
             switch content {
             case .apps:
@@ -84,6 +86,8 @@ public final class SpaceBarOverlay {
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
     public var onSelect: @MainActor (SpaceID) -> Void = { _ in }
+    /// The glyph targets' answers, the manager's one instance.
+    var glyphActions: SpaceBarGlyphActions?
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.

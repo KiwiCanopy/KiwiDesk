@@ -63,7 +63,7 @@ struct ShelfNeedParityTests {
                     spaceGlyph: .text("\($0)", tinted: false),
                     apps: apps,
                     active: $0 == 1,
-                    overflow: 0,
+                    overflow: [],
                     focusInOverflow: false
                 )
             }
@@ -176,7 +176,7 @@ struct ShelfFloorWiringTests {
                 spaceGlyph: .text("Space \($0)", tinted: false),
                 apps: [],
                 active: $0 == 12,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             )
         }

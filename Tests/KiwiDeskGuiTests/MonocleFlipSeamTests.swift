@@ -18,15 +18,17 @@ struct MonocleFlipSeamTests {
     private static let door = "KiwiCore+MonocleFlip.swift"
 
     /// The commanded sites: `navigate`'s Monocle cycle, the App
-    /// Bar click, and `pull_or_spawn`'s focus of a window in the
-    /// active Space — the ruling's list, and nothing reported.
+    /// Bar click, `pull_or_spawn`'s focus of a window in the
+    /// active Space, and a Space Bar glyph click on the active
+    /// Space (#1528) — the ruling's list, and nothing reported.
     private static let sites: Set<String> = [
         "KiwiCore+MonocleCommands.swift",
         "KiwiCore+Bootstrap.swift",
         "KiwiCore+LaunchCycle.swift",
+        "KiwiCore+SpaceBarClick.swift",
     ]
 
-    @Test("The three commanded sites take the door, and no other")
+    @Test("The four commanded sites take the door, and no other")
     func commandedSitesTakeTheDoor() throws {
         let hits = try SourceScan.identifierSites(
             of: "focusWithMonocleFlip(",
@@ -34,7 +36,7 @@ struct MonocleFlipSeamTests {
         ).filter { $0.file.lastPathComponent != Self.door }
         let files = hits.map { $0.file.lastPathComponent }
         #expect(
-            Set(files) == Self.sites && files.count == 3,
+            Set(files) == Self.sites && files.count == 4,
             "door callers: \(hits.map(\.site))"
         )
     }

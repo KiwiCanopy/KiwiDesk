@@ -49,7 +49,7 @@ struct GlyphSizeGlyphTests {
                         spaceGlyph: .text("1", tinted: true),
                         apps: [Self.app("A")],
                         active: true,
-                        overflow: 0,
+                        overflow: [],
                         focusInOverflow: false
                     )
                 ],
