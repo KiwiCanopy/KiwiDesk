@@ -75,10 +75,12 @@ extension TilingEngine {
             // clamp echoes within grace, and the retry would
             // loop forever. Consume; the OS-relocated frame is
             // the best remaining truth (the user can move it).
-            // Read over the screen seam the park uses (#878).
-            if !allScreenBounds().contains(where: {
-                $0.intersects(original)
-            }) {
+            // Read over the screen seam the park uses (#878); no
+            // screens known is no proof, so it keeps the capture.
+            let screens = allScreenBounds()
+            if !screens.isEmpty,
+                !screens.contains(where: { $0.intersects(original) })
+            {
                 stashedFrames[id] = nil
                 continue
             }

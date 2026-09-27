@@ -211,6 +211,19 @@ struct StashRestoreTests {
         #expect(engine.stashedFrames[WindowID(1)] == nil)
     }
 
+    /// No screen known — a display sleeping or reconfiguring — is
+    /// no proof the original is unreachable: the capture stays.
+    @Test("An empty screen list keeps the capture")
+    func emptyScreenListKeepsTheCapture() {
+        let engine = TilingEngine()
+        let state = makeState()
+        let original = CGRect(x: 100_100, y: 100, width: 300, height: 200)
+        engine.allScreenBounds = { [] }
+        engine.stashedFrames[WindowID(1)] = original
+        engine.restoreStashed(state: state, frames: [:])
+        #expect(engine.stashedFrames[WindowID(1)] == original)
+    }
+
     @Test("A user move consumes the capture (forgetStash)")
     func userMoveForgets() {
         let engine = TilingEngine()
