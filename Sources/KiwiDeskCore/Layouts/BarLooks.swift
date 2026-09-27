@@ -25,7 +25,7 @@ public struct SpaceBarLook: Sendable, Equatable {
 
     /// A placeholder until a view is handed its look: defaults,
     /// no sheen.
-    public init() {
+    init() {
         self.init(shelf: KiwiShelf(), bar: SpaceBarStyle(), sheen: false)
     }
 
@@ -133,7 +133,7 @@ public struct AppBarLook: Sendable, Equatable {
 
     /// A placeholder until a view is handed its look: defaults,
     /// no sheen.
-    public init() {
+    init() {
         self.init(shelf: KiwiShelf(), bar: AppBarStyle(), sheen: false)
     }
 

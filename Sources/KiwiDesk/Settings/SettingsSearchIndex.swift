@@ -83,8 +83,7 @@ enum SettingsSearchIndex {
         else { return false }
         let conditions =
             placement.gate?.runtimeConditions ?? []
-        let gated = conditions.contains(.liquidGlassUnavailable)
-        if gated, !AppBarStyle.glassAvailable { return false }
+        if placement.hiddenWithoutGlass { return false }
         // Bridge-gated rows hide with their surface (#1145) — a
         // result for one would land on a row nothing draws.
         if conditions.contains(.desktopBridgeAbsent),

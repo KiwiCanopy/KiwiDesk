@@ -40,9 +40,7 @@ struct GlassCard: View {
     /// group — while the sheen, which is not glass, stays (#1644).
     static var rows: [SettingKey] {
         ColorsRowOrder.glassAtRest.filter {
-            AppBarStyle.glassAvailable
-                || !($0.placement.gate?.runtimeConditions
-                    .contains(.liquidGlassUnavailable) ?? false)
+            !$0.placement.hiddenWithoutGlass
         }
     }
 
@@ -79,17 +77,8 @@ struct GlassCard: View {
                     label: L("colors.sheen", "Sheen"),
                     isOn: $model.config.settings.borderStyle.sheen
                 )
-                Text(
-                    L(
-                        "colors.sheen.caption",
-                        "A light top edge on the focus border, the "
-                            + "bars' highlight and border, and the "
-                            + "drag borders. Pairs well with %1$@.",
-                        Self.title
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(sheenCaption)
+                    .foregroundStyle(.secondary)
             }
         default:
             let _ = assertionFailure(
@@ -97,6 +86,26 @@ struct GlassCard: View {
             )
             EmptyView()
         }
+    }
+
+    /// What the sheen does, and — only where the switch above is
+    /// drawn — that it pairs with it (#1644): below macOS 26 the
+    /// pairing would point at a row this Mac does not show.
+    private var sheenCaption: String {
+        guard AppBarStyle.glassAvailable else {
+            return L(
+                "colors.sheen.caption",
+                "A light top edge on the focus border, the bars' "
+                    + "highlight and border, and the drag borders."
+            )
+        }
+        return L(
+            "colors.sheen.caption_paired",
+            "A light top edge on the focus border, the bars' "
+                + "highlight and border, and the drag borders. Pairs "
+                + "well with %1$@.",
+            Self.title
+        )
     }
 
     /// Quotes Apple's own control (config-vocabulary.md) so the
