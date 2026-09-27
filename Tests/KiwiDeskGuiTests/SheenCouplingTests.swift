@@ -112,6 +112,41 @@ struct SheenCouplingTests {
             SourceScan.callArguments(of: "SettingsSlider(", in: source)
         )
         #expect(slider.contains("origin: 0"))
-        #expect(slider.contains("range: -1...1"))
+        // The band is Core's, read rather than restated (gui.md
+        // #1359): both ends name `sheenRange`, no literal.
+        let range = try #require(
+            slider.components(separatedBy: "range:").dropFirst().first?
+                .components(separatedBy: "step:").first
+        )
+        #expect(
+            range.components(separatedBy: "BorderStyle.sheenRange").count == 3
+        )
+        #expect(!range.contains { $0.isNumber })
+    }
+
+    /// The track draws the origin fill it computes: `fillSpan` is
+    /// handed the drag-following knob centre and the origin, so the
+    /// geometry clause above is what the slider renders.
+    @Test("the track fills from its origin to the live knob")
+    func trackPassesTheOrigin() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "SettingsSlider.swift"
+            )
+        let source = try SourceScan.strippedSource(at: file)
+        let track = try #require(
+            SourceScan.declarationBody(after: "func track(", in: source)
+        )
+        let call = try #require(
+            SourceScan.callArguments(of: "Self.fillSpan(", in: track)
+        )
+        #expect(call.contains("knob: center"))
+        #expect(call.contains("origin: origin.map"))
+        #expect(track.contains("let center = knobCenter(in: width)"))
+        let center = try #require(
+            SourceScan.declarationBody(after: "func knobCenter(", in: source)
+        )
+        #expect(center.contains("dragFraction"))
     }
 }

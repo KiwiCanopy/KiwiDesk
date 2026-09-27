@@ -62,6 +62,8 @@ struct BorderSheenTests {
         #expect(BorderStyle.clampSheen(3) == 1)
         #expect(BorderStyle.clampSheen(-3) == -1)
         #expect(BorderStyle.clampSheen(1e-12) == 0)
+        #expect(BorderStyle.clampSheen(0.00004) == 0)
+        #expect(BorderStyle.clampSheen(0.0001) == 0.0001)
         #expect(BorderStyle.clampSheen(-0.35) == -0.35)
     }
 

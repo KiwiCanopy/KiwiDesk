@@ -54,15 +54,20 @@ public struct BorderStyle: Sendable, Equatable {
     /// The sheen's range; every writer clamps into it.
     public static let sheenRange: ClosedRange<CGFloat> = -1...1
 
-    /// `value` clamped into `sheenRange`, a hair from 0 snapped to
-    /// 0 so a slider's float grid lands on Off.
+    /// `value` clamped into `sheenRange`, anything under half the
+    /// readout's last digit (0.01%) snapped to 0: a slider's float
+    /// grid lands on Off, and a value the readout would print as
+    /// "+0%" draws nothing either, so the two agree.
     public static func clampSheen(_ value: CGFloat) -> CGFloat {
         let clamped = min(
             sheenRange.upperBound,
             max(sheenRange.lowerBound, value)
         )
-        return abs(clamped) < 1e-9 ? 0 : clamped
+        return abs(clamped) < sheenSnap ? 0 : clamped
     }
+
+    /// Half the readout's resolution, as a strength.
+    static let sheenSnap: CGFloat = 0.00005
 
     public init() {}
 

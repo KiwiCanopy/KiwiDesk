@@ -25,7 +25,9 @@ struct SheenRow: View {
                                 )
                             }
                         ),
-                        range: -1...1,
+                        range: Double(
+                            BorderStyle.sheenRange.lowerBound
+                        )...Double(BorderStyle.sheenRange.upperBound),
                         step: 0.05,
                         label: Self.label,
                         spokenValue: SettingsValueReadout.sheenSpoken(

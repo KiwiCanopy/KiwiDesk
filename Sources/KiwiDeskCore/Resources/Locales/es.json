@@ -206,7 +206,7 @@
   "colors.scene.caption": "Ambas barras con sus elementos activos, los bordes enfocado y sin foco con sus marcas de estado, y la silueta junto a su zona de destino.",
   "colors.scene.title": "Colores actuales",
   "colors.sheen": "Reflejo",
-  "colors.sheen.caption": "Aclara el borde superior del borde de foco, del resaltado y el borde de las barras y de los bordes al arrastrar; desliza a la izquierda para oscurecerlo.",
+  "colors.sheen.caption": "Aclara la parte superior del borde de foco, del resaltado y el borde de las barras y de los bordes al arrastrar; desliza a la izquierda para oscurecerla.",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "Más oscuro en %1$@",

@@ -86,7 +86,11 @@ extension KiwiCore {
             // border magnitudes; only a wrong type fails.
             guard let value = args.first?.numberValue, value.isFinite
             else {
-                return .fail("expected a sheen from -1 to 1")
+                let range = BorderStyle.sheenRange
+                return .fail(
+                    "expected a sheen from \(range.lowerBound.formatted()) "
+                        + "to \(range.upperBound.formatted())"
+                )
             }
             tiler.settings.borderStyle.sheen = BorderStyle.clampSheen(value)
             return .ok()
