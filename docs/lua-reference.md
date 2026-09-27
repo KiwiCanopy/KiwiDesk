@@ -4770,8 +4770,9 @@ switch holds nothing.
 Held spaces survive a KiwiDesk restart, an update and a crash:
 every session snapshot records them, and a held space whose
 monitor is connected at launch goes home at once by the rule
-above. One none of whose windows is open at launch is not
-restored, and a restart of the Mac ends every hold
+above. A held space whose windows were all closed meanwhile
+ends by the rule above once macOS confirms they are gone, and a
+restart of the Mac ends every hold
 ([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).
 :::
 

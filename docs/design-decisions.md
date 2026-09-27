@@ -12467,24 +12467,37 @@ by no config, so without an exception its windows would be filed
 nowhere. The exception is safe for the reason the hold is: no
 arrangement write captures a held Space. It runs ahead of the
 replay, so its windows are filed into it before any pass draws. A
-held number the booting arrangement already uses is renumbered
-past every live number, in the batch's order — a profile loaded
-while KiwiDesk was down may declare it, as a reclaim would find —
-except for a Space about to go home under that very name, which
-is filed straight into its home and keeps that Space's own mode.
+held number the booting arrangement declares, a live Space
+takes or the snapshot records for another Space is renumbered
+past all of them, in the batch's order — a profile loaded while
+KiwiDesk was down may declare it, as a reclaim would find, and a
+recorded one would merge two records' windows — except for a
+Space about to go home under that very name, which is filed
+straight into its home and keeps that Space's own mode.
 One whose screen is connected at boot then goes home by the
 reconnect's rule.
 
-**It returns only with a window.** A record none of whose windows
-the boot scan found is dropped, as a hold never begins for a
-Space that only remembers windows: a remembered id may be a
-window that is gone for good, and it would keep an empty Space
-in the bar. The cost is a held Space whose windows are all
-hidden, on another Desktop or still starting at launch; they
-arrive later like any other window. A restart of the Mac drops
-every hold the same way and needs no separate store: macOS gives
-every reopened window a new identity, so a held Space kept
-across it would hold nothing. The residue is in
+**It ends by the same rule as ever, judged once the desk is
+known.** A held Space's record rides its own Space record, with
+the windows it holds that are not members — a hidden app's, one
+on another Desktop — since the membership list cannot name them.
+At boot every recorded hold comes back, and each window it holds
+that the scan did not find is remembered there, as the replay
+remembers any late window; the retire (#1507 ruling 4) then keeps
+it while any of them may return. Whether one may is the
+WindowServer's to say, and only after the away seed: a window it
+no longer hosts was closed, or belonged to an app that
+relaunched under new windows, so its filing is dropped and a hold
+left with nothing ends. Dropping a hold at the replay instead,
+for want of a live member, would have ended every hold whose
+windows are hidden, away or still launching — the very windows
+#1507 keeps a hold for. Without that reading nothing is judged,
+absent and never faked, and such a hold stays until an explicit
+act ends it. A hold whose Space no longer exists names nothing
+the snapshot records, so it ends at a restart. A restart of the
+Mac ends every hold without a separate store: macOS gives every
+reopened window a new identity, so a hold kept across it would
+hold nothing. The residue is in
 [accepted limitations](accepted-limitations.md).
 
 **Discarding the saved arrangement deletes the record, not the

@@ -83,8 +83,9 @@ define. A Desktop binding holds nothing.
 
 :::unreleased
 Held Spaces come back when KiwiDesk quits and reopens, updates or
-crashes, and go home at once, as above, if their screen is back by
-then. A restart of the Mac ends them, since macOS reopens every
+crashes — a window hidden, on another Desktop or still opening
+included — and go home at once, as above, if their screen is back
+by then. A restart of the Mac ends them, since macOS reopens every
 window as a new one.
 :::
 

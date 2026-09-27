@@ -1733,7 +1733,10 @@ editing here:
   (#930).** Build N writes the session file and build N+1 reads
   it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
   coding, `ScrollRest`'s and `StickyScope`'s raw values are
-  stored values in AGENTS.md §5's sense. Each record decodes its
+  stored values in AGENTS.md §5's sense — and so are the held
+  record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
+  `HeldOrigin.Arrangement` keys, which every snapshot carries
+  (#1646, profiles.md). Each record decodes its
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores
   (`SnapshotCarryCensusTests` ▸
