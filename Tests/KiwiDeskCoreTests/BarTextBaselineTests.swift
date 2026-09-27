@@ -19,20 +19,35 @@ struct BarTextBaselineTests {
     init() { LiquidGlassGate.override = { false } }
 
     /// The rows of `field`'s render that carry ink, in points
-    /// down from its frame's top edge.
+    /// down from its frame's top edge. Rendered at 2× whatever the
+    /// host's backing, and only near-solid pixels count: at 1× a
+    /// CI runner's antialiased edge row read as a point of ink
+    /// below the baseline, where a 2× dev machine read half one.
     static func inkRows(
         of field: NSTextField
     ) -> ClosedRange<CGFloat>? {
+        let scale: CGFloat = 2
+        let size = field.bounds.size
         guard
-            let rep = field.bitmapImageRepForCachingDisplay(
-                in: field.bounds
+            size.width > 0, size.height > 0,
+            let rep = NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: Int(ceil(size.width * scale)),
+                pixelsHigh: Int(ceil(size.height * scale)),
+                bitsPerSample: 8,
+                samplesPerPixel: 4,
+                hasAlpha: true,
+                isPlanar: false,
+                colorSpaceName: .deviceRGB,
+                bytesPerRow: 0,
+                bitsPerPixel: 0
             )
         else { return nil }
+        rep.size = size
         field.cacheDisplay(in: field.bounds, to: rep)
-        let scale = CGFloat(rep.pixelsHigh) / field.bounds.height
         let inked = (0..<rep.pixelsHigh).filter { y in
             (0..<rep.pixelsWide).contains { x in
-                (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05
+                (rep.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.5
             }
         }
         guard let first = inked.first, let last = inked.last else {
