@@ -145,6 +145,7 @@ synonym:
   [state-and-layout.md](state-and-layout.md).
 - **glyph** vs **symbol** — a *glyph* is ANY app mark a bar
   draws, image or App Font ("Glyphs per Space", "Glyph gap",
+  "Glyph size",
   "Text and glyphs on both bars", and the picker itself, "App
   glyph style"); a *symbol* is the App Font's monochrome mark,
   the `app_font` option of that picker, whose sibling is "App
@@ -296,13 +297,13 @@ synonym:
   reuse the `inner` / `outer` adjectives rather than coining a
   third pair.
 - **padding** — room INSIDE a thing, between its own edge and
-  its content (`kiwishelf.set_item_padding`, #1682): the third
-  of the set, since a gap sits between things and a margin
-  outside one. It shrinks the content and never the thing, which
-  is why it is not an *inset* of the thickness. A locale keeps
-  it apart from its gap and margin words, and from its colour
-  *fill* noun — where the obvious word is taken, it names the
-  effect instead.
+  its content: the third of the set, since a gap sits between
+  things and a margin outside one. A locale keeps it apart from
+  its gap and margin words, and from its colour *fill* noun. Name
+  a shelf knob for what it produces, never for padding: #1682's
+  `kiwishelf.set_item_padding` became `kiwishelf.set_glyph_size`
+  before shipping (#1713, `GlyphSizeTests`) — and never an *item
+  size*, which the **item** row rules out.
 - **limit** / **cap** / **count** — a `limit` is a user-set
   maximum (`track.set_limit`); `cap` is the same idea where it
   already reads better (`space_bar.set_glyph_cap`, and

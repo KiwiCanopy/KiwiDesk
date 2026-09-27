@@ -16,7 +16,7 @@ extension SpaceBarGlyphCellTests {
         let view = Self.item(horizontal: true)
         let field = try #require(view.appViews[2] as? NSTextField)
         let font = try Self.requireAppFont(field)
-        #expect(font.pointSize < view.glyphSize)
+        #expect(font.pointSize < view.glyphFontSize)
         let ink = BarTextGlyph.metrics(field.stringValue, font: font).ink
         #expect(ink.width <= Self.cell + 0.01)
     }

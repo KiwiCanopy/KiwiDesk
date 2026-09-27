@@ -68,7 +68,7 @@ struct HomeCardBarsTile: View {
 
     /// The share of the thickness an item's content fills, read
     /// off Core's `contentDepth(forDepth:)` (#1682), so the
-    /// frame's glyphs shrink with the padding as the live bar's.
+    /// frame's glyphs follow the glyph size as the live bar's.
     func contentShare(_ shelf: KiwiShelf) -> CGFloat {
         guard shelf.thickness > 0 else { return 1 }
         return shelf.contentDepth(forDepth: shelf.thickness)

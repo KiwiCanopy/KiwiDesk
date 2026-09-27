@@ -3,22 +3,22 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Item padding reaches the Space Bar's TEXT glyphs and the
+/// Glyph size reaches the Space Bar's TEXT glyphs and the
 /// front-app segment's measure (#1682): App Font glyphs in the
 /// items and the segment draw at the content depth's glyph size,
 /// and the segment's measured extent is what its title draws.
-@Suite("Item padding reaches the Space Bar's glyphs", .serialized)
+@Suite("Glyph size reaches the Space Bar's glyphs", .serialized)
 @MainActor
-struct ItemPaddingGlyphTests {
+struct GlyphSizeGlyphTests {
     private static let depth: CGFloat = 40
     private static let content: CGFloat = 28
     private static let glyph = ":safari:"
 
     init() { LiquidGlassGate.override = { false } }
 
-    private static func look(padding: CGFloat) -> SpaceBarLook {
+    private static func look(glyphSize: CGFloat) -> SpaceBarLook {
         var look = SpaceBarLook()
-        look.itemPadding = padding
+        look.glyphSize = glyphSize
         look.liquidGlass = false
         look.backgroundStyle = .plain
         look.showFrontApp = true
@@ -37,7 +37,7 @@ struct ItemPaddingGlyphTests {
     }
 
     private func overlay(
-        padding: CGFloat,
+        glyphSize: CGFloat,
         in manager: SpaceBarManager
     ) throws -> SpaceBarOverlay {
         manager.sync([
@@ -56,7 +56,7 @@ struct ItemPaddingGlyphTests {
                 frontApp: Self.app("Front"),
                 frontWindow: WindowID(1),
                 strip: CGRect(x: 0, y: 0, width: 1440, height: Self.depth),
-                style: Self.look(padding: padding),
+                style: Self.look(glyphSize: glyphSize),
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
                     floating: "#ffffff"
@@ -67,10 +67,10 @@ struct ItemPaddingGlyphTests {
     }
 
     private func glyphSizes(
-        padding: CGFloat
+        glyphSize: CGFloat
     ) throws -> (item: CGFloat, front: CGFloat) {
         let manager = SpaceBarManager()
-        let overlay = try overlay(padding: padding, in: manager)
+        let overlay = try overlay(glyphSize: glyphSize, in: manager)
         let view = try #require(overlay.itemViews.first)
         view.layoutSubtreeIfNeeded()
         let field = try #require(view.appViews.first as? NSTextField)
@@ -83,9 +83,9 @@ struct ItemPaddingGlyphTests {
 
     @Test("Item and front-app glyphs draw at the content depth")
     func glyphsFollowContent() throws {
-        let plain = try glyphSizes(padding: 0)
-        let padded = try glyphSizes(padding: 6)
-        let size = Self.look(padding: 6)
+        let plain = try glyphSizes(glyphSize: 0)
+        let padded = try glyphSizes(glyphSize: 28)
+        let size = Self.look(glyphSize: 28)
             .glyphFontSize(forContentDepth: Self.content)
         #expect(padded.item == size)
         #expect(padded.front == size)
@@ -98,8 +98,8 @@ struct ItemPaddingGlyphTests {
     @Test("The front-app segment measures the title it draws")
     func frontExtentMeasuresTheDrawnTitle() throws {
         let manager = SpaceBarManager()
-        let overlay = try overlay(padding: 6, in: manager)
-        let look = Self.look(padding: 6)
+        let overlay = try overlay(glyphSize: 28, in: manager)
+        let look = Self.look(glyphSize: 28)
         let drawn = try #require(overlay.frontName.font)
         #expect(
             drawn.pointSize

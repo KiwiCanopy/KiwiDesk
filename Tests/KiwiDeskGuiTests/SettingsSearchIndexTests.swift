@@ -206,10 +206,9 @@ struct SettingsSearchIndexTests {
                 // lost their Style drawers, so every bar row is
                 // at rest and anchor-less by the same ruling
                 // (#277 anchors, first #1517 split — both moot).
-                // 17 since #1689, 18 since #1682, 19 since #1683:
-                // Glyph gap, Item padding and Other Spaces, at
-                // rest like their neighbours.
-                .bars: 19,
+                // 18: Glyph gap (#1689) and Other Spaces (#1683),
+                // at rest; #1713 took the glyph size to Style.
+                .bars: 18,
                 // 7 since #277: the Animations drawer's five
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to

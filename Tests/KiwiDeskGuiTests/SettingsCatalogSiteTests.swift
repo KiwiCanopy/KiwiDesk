@@ -84,7 +84,8 @@ struct SettingsCatalogSiteTests {
         // 103 since #1680: the highlight width row.
         // 105 since #1679: the border and border width rows.
         // 107 since #1681: the font family and weight rows.
-        #expect(names.count == 107)
+        // 109 since #1713: the glyph size toggle and slider.
+        #expect(names.count == 109)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
