@@ -39,9 +39,22 @@ extension SpaceBarCard {
         )
     }
 
-    /// Glyphs per Space stepper and live summary (#94). The
-    /// anchor sits on the stepper alone: the row is two views,
-    /// and an anchor on the pair would mount one id twice.
+    /// The Other Spaces `?` (#1683): each segment's own label
+    /// interpolated, so the prose cannot drift from it (#818).
+    var inactiveContentHelp: String {
+        L(
+            "space_bar.inactive_content.help",
+            "What the Spaces not on screen show. %1$@ — their app "
+                + "glyphs. %2$@ — just each Space's number, name or "
+                + "icon, with how many windows it holds on its "
+                + "corner. Either way an empty Space draws dimmer, "
+                + "except a color emoji icon, which cannot dim.",
+            L("space_bar.inactive_content.apps", "Apps"),
+            L("space_bar.inactive_content.count", "Window count")
+        )
+    }
+
+    /// Glyphs per Space stepper (#94).
     @ViewBuilder var glyphCapRow: some View {
         StepperRow(
             label: L("space_bar.glyph_cap", "Glyphs per Space"),
@@ -54,15 +67,5 @@ extension SpaceBarCard {
                     + "windows of the same app count as one glyph."
             )
         )
-        Text(
-            L(
-                "space_bar.glyph_cap.summary",
-                "Up to %1$d app groups per Space; more collapse "
-                    + "into a +n badge.",
-                style.wrappedValue.resolvedGlyphCap
-            )
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
     }
 }

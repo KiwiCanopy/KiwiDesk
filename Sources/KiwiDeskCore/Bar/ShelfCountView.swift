@@ -248,11 +248,13 @@ final class ShelfCountView: NSView {
             chipRadius,
             min(chip.frame.width, chip.frame.height) / 2
         )
-        // The label centres its text, so centring the label's frame
-        // on the digits' place puts the digits there.
         label.frame.origin = CGPoint(
             x: numberCenter.x - label.frame.width / 2,
-            y: numberCenter.y - label.frame.height / 2
+            y: BarTextGlyph.originY(
+                capsCentredOn: numberCenter.y,
+                for: label,
+                height: label.frame.height
+            )
         )
     }
 

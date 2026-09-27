@@ -5,9 +5,8 @@ import Testing
 
 /// The shelf's font family (#1681) against the one framing: a
 /// tall face (Zapfino, whose ascenders dwarf its em) and a mono
-/// face (Menlo) still draw the identifier whole and ink-centred
-/// on its cell, since `BarTextGlyph.frame` measures the ink of
-/// whatever face the label carries.
+/// face (Menlo) still draw the identifier whole, ink-centred
+/// along the bar and on the one baseline across it (#1707).
 extension SpaceBarGlyphCellTests {
     /// The rows of `field`'s own render that carry ink, in points
     /// from its frame's bottom edge.

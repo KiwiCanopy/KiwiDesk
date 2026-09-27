@@ -212,13 +212,15 @@ public final class AppBarOverlay {
             }
         }
         // Single dispatch for glass hosting mode (#407).
-        installGlassHosting(
-            hosting,
-            frames: frames,
-            style: style,
-            depth: depth,
-            animated: true
-        )
+        BarMotion.runLayout {
+            installGlassHosting(
+                hosting,
+                frames: frames,
+                style: style,
+                depth: depth,
+                animated: true
+            )
+        }
         layoutOverflow(strip: strip, m: m, style: style)
         root.isHidden = false
         onRendered()

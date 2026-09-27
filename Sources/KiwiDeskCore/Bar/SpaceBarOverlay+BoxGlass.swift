@@ -12,7 +12,8 @@ extension SpaceBarOverlay {
     func updateBoxGlasses(
         frames: [CGRect],
         style: SpaceBarLook,
-        depth: CGFloat
+        depth: CGFloat,
+        animated: Bool
     ) {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
@@ -28,7 +29,9 @@ extension SpaceBarOverlay {
             GlassPlate.update(
                 glass,
                 frame: frames[i],
-                cornerRadius: radius
+                cornerRadius: radius,
+                animated: animated,
+                move: moveFrame
             )
             let tint = boxTints[i]
             if itemViews[i].isHidden {
@@ -40,7 +43,9 @@ extension SpaceBarOverlay {
                     frame: frames[i],
                     cornerRadius: radius,
                     hex: style.fillColor,
-                    edge: style.edge
+                    edge: style.edge,
+                    animated: animated,
+                    move: moveFrame
                 )
             }
         }

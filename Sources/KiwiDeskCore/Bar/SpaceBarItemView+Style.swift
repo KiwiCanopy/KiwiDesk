@@ -51,8 +51,10 @@ extension SpaceBarItemView {
             badge.stringValue = "\(app.count)"
             applyBadge(badge, appFocused: app.focused)
         }
-        overflowBadge.isHidden = overflow < 1
-        overflowBadge.stringValue = "+\(overflow)"
+        overflowBadge.isHidden = (collapse?.windows ?? overflow) < 1
+        // A collapsed count is the whole count, not "more".
+        overflowBadge.stringValue =
+            collapse?.discText ?? "+\(overflow)"
         applyBadge(overflowBadge, appFocused: focusInOverflow)
         styleStateBadges()
     }
@@ -168,6 +170,10 @@ extension SpaceBarItemView {
         }
         if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverItemColor)
+        }
+        // An empty Space dims under either content (#1683).
+        if heldWindows == 0 {
+            return NSColor(kiwiHex: style.emptyItemColor)
         }
         return NSColor(kiwiHex: style.idleItemColor)
     }

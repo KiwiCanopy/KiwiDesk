@@ -40,15 +40,17 @@ enum BarsRowOrder {
     ]
 
     /// Space Bar card — every row shown, each gate directly
-    /// above what it gates (#1517).
+    /// above what it gates (#1517); rows on the label axis
+    /// first, the checkbox tier last (ui-patterns ▸ Row layout).
     static let spaceBar: [SettingKey] = [
-        .spaceBar(.spaceBarHideEmpty),
+        .spaceBar(.spaceBarInactiveContent),
         .spaceBar(.spaceBarGlyphCap),
         .spaceBar(.spaceBarGlyphGap),
-        .spaceBar(.spaceBarShowFrontApp),
-        .spaceBar(.spaceBarFrontAppTitleCap),
         .spaceBar(.spaceBarActiveIndicator),
         .spaceBar(.spaceBarSpringDelay),
+        .spaceBar(.spaceBarHideEmpty),
+        .spaceBar(.spaceBarShowFrontApp),
+        .spaceBar(.spaceBarFrontAppTitleCap),
     ]
 
     /// App Bar card — every row shown, each gate directly above
@@ -56,7 +58,7 @@ enum BarsRowOrder {
     static let appBar: [SettingKey] = [
         .appBar(.appBarContent),
         .appBar(.appBarTitleCap),
-        .appBar(.appBarGroupAdjacentWindows),
         .appBar(.appBarActiveIndicator),
+        .appBar(.appBarGroupAdjacentWindows),
     ]
 }

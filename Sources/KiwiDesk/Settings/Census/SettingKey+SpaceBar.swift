@@ -6,6 +6,8 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarHideEmpty = "settings.spaceBarStyle.hideEmpty"
     case spaceBarShowFrontApp = "settings.spaceBarStyle.showFrontApp"
     case spaceBarSpringDelay = "settings.spaceBarStyle.springDelay"
+    case spaceBarInactiveContent =
+        "settings.spaceBarStyle.inactiveContent"
     case spaceBarGlyphCap = "settings.spaceBarStyle.glyphCap"
     case spaceBarGlyphGap = "settings.spaceBarStyle.glyphGap"
     case spaceBarFrontAppTitleCap =
@@ -24,7 +26,8 @@ extension SpaceBarKey {
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
             .spaceBarActiveIndicator, .spaceBarSpringDelay,
-            .spaceBarGlyphCap, .spaceBarGlyphGap:
+            .spaceBarGlyphCap, .spaceBarGlyphGap,
+            .spaceBarInactiveContent:
             return .row(.bars, .spaceBar, .atRest)
         case .spaceBarFrontAppTitleCap:
             // Inert while front segment is off.
@@ -74,6 +77,11 @@ extension SpaceBarKey {
             return .text(
                 "space_bar.spring_delay",
                 help: "space_bar.spring_delay.help"
+            )
+        case .spaceBarInactiveContent:
+            return .text(
+                "space_bar.inactive_content",
+                help: "space_bar.inactive_content.help"
             )
         case .spaceBarGlyphCap:
             return .text(
