@@ -233,10 +233,19 @@ struct UpdatePromptWiringTests {
         #expect(
             whatsNew.contains("origin == .user && trusted && !tourOwns")
         )
-        #expect(whatsNew.contains("opensWindow: opensWindow"))
-        // A relaunch after the window's own Install opens whatever
-        // the origin, never over the tour, and owes nothing else.
-        #expect(whatsNew.contains("opensWindow: trusted && !tourOwns"))
+        // Each gate on its own call: a relaunch after the window's
+        // own Install opens whatever the origin, never over the
+        // tour, and owes nothing else.
+        #expect(
+            whatsNew.contains(
+                "launched(\n                    opensWindow: opensWindow"
+            )
+        )
+        #expect(
+            whatsNew.contains(
+                "relaunched(\n            opensWindow: trusted && !tourOwns"
+            )
+        )
         #expect(whatsNew.contains("if !narrated {"))
     }
 }

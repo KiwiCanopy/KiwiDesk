@@ -133,6 +133,12 @@ struct WhatsNewRelaunchTests {
             )
         )
         #expect(grant.contains("BootCountText.line(for: model.bootPhase)"))
+        let narration = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Updates/BootNarration.swift"
+            )
+        )
+        #expect(narration.contains("BootCountText.line(for: phase)"))
         #expect(!grant.contains("onboarding.grant.arranging.count"))
         let chrome = try SourceScan.strippedSource(
             at: root.appendingPathComponent(
