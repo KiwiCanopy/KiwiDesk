@@ -43,6 +43,7 @@ struct ShelfCountTests {
             count: 12,
             horizontal: horizontal,
             fontSize: 14,
+            shelf: KiwiShelf(),
             ink: .white,
             hoverInk: .red
         )
@@ -132,6 +133,7 @@ struct ShelfCountTests {
             count: 4,
             horizontal: true,
             fontSize: 12,
+            shelf: KiwiShelf(),
             ink: .white,
             hoverInk: .white
         )
@@ -144,6 +146,7 @@ struct ShelfCountTests {
             count: 0,
             horizontal: true,
             fontSize: 12,
+            shelf: KiwiShelf(),
             ink: .white,
             hoverInk: .white
         )

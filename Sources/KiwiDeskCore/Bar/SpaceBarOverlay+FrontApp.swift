@@ -92,7 +92,7 @@ extension SpaceBarOverlay {
                     // alignment.
                     ((app.title ?? app.name) as NSString).size(
                         withAttributes: [
-                            .font: NSFont.systemFont(
+                            .font: style.shelf.textFont(
                                 ofSize: size
                             )
                         ]
@@ -239,7 +239,7 @@ extension SpaceBarOverlay {
         frontName.isHidden = false
         frontName.stringValue = app.title ?? app.name
         let size = style.titleFontSize(forDepth: depth)
-        frontName.font = .systemFont(ofSize: size)
+        frontName.font = style.shelf.textFont(ofSize: size)
         frontName.textColor = accent
         frontName.lineBreakMode = .byTruncatingTail
         frontName.sizeToFit()

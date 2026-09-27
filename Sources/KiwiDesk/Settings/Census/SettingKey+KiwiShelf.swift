@@ -19,6 +19,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case itemGap = "settings.kiwishelf.itemGap"
     case fontSizeAuto = "settings.kiwishelf.fontSize (auto)"
     case fontSize = "settings.kiwishelf.fontSize"
+    case fontFamily = "settings.kiwishelf.fontFamily"
+    case fontWeight = "settings.kiwishelf.fontWeight"
     case outerMargin = "settings.kiwishelf.outerMargin"
     case innerMargin = "settings.kiwishelf.innerMargin"
     case liquidGlass = "settings.kiwishelf.liquidGlass"
@@ -51,7 +53,7 @@ extension KiwiShelfKey {
             .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
         case .background, .cornerRoundness, .border, .highlightWidth,
-            .itemGap, .fontSizeAuto,
+            .itemGap, .fontSizeAuto, .fontFamily,
             .outerMargin, .innerMargin, .iconSource:
             return .row(
                 .bars,
@@ -65,6 +67,14 @@ extension KiwiShelfKey {
                 .kiwishelf,
                 .showMore,
                 gate: .setting(.kiwishelf(.background))
+            )
+        case .fontWeight:
+            // Greyed while the family is not installed.
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: .setting(.kiwishelf(.fontFamily))
             )
         case .fontSize:
             return .row(
@@ -184,6 +194,16 @@ extension KiwiShelfKey {
             )
         case .fontSize:
             return .text("kiwishelf.font_size")
+        case .fontFamily:
+            return .text(
+                "kiwishelf.font_family",
+                help: "kiwishelf.font_family.help"
+            )
+        case .fontWeight:
+            return .text(
+                "kiwishelf.font_weight",
+                help: "kiwishelf.font_weight.help"
+            )
         case .outerMargin:
             return .text(
                 "kiwishelf.outer_margin",

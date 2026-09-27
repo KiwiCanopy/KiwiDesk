@@ -52,6 +52,9 @@ public final class AppBarManager {
     /// `start()` for BOTH bars (#1374); homed here rather than on
     /// `KiwiCore`, whose file sits at the §2.1 ceiling.
     var transparencyObserver: NSObjectProtocol?
+    /// The font-set observer (#1681), homed here for the same
+    /// reason.
+    var fontSetObserver: NSObjectProtocol?
     private var spaceOfDisplay: [DisplayID: SpaceID] = [:]
     /// The bars actually painted after `sync`'s filter — the one
     /// source for anything that must sit clear of a bar (#242).

@@ -193,6 +193,7 @@ extension KiwiCore {
         borders.stop()
         stickyMarks.clear()
         retireReduceTransparency()
+        retireFontSet()
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()

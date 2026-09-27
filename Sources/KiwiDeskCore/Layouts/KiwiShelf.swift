@@ -63,6 +63,14 @@ public struct KiwiShelf: Sendable, Equatable {
     public var itemPadding: CGFloat = 0
     /// Font size in pt; 0 = auto, each bar scaling with thickness.
     public var fontSize: CGFloat = 0
+    /// Bar text's family (#1681): an installed family's name, or
+    /// `systemFontFamily` / `systemMonospacedFontFamily`. Resolved
+    /// at render time (`BarFont`), so a missing one draws System.
+    public var fontFamily = KiwiShelf.systemFontFamily
+    /// Bar text's weight, 100–900 (#1681). Stored as asked and
+    /// resolved at render time, never on write, so a family
+    /// switch keeps it.
+    public var fontWeight = BarFontWeight.regular.value
     /// App icon rendering: native image or App Font glyph (#294).
     public var iconSource: BarAppIconSource = .appImage
     /// Opacity (0.05–1) of UNTINTED idle content — emoji and app

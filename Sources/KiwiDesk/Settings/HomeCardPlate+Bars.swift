@@ -60,6 +60,10 @@ struct HomeCardBarsTile: View {
         /// The share of the thickness the content fills
         /// (`contentShare`, #1682).
         var contentShare: CGFloat = 1
+        /// The shelf the text is drawn from (#1681): the strip asks
+        /// its own `textFont`, as the live bar does
+        /// (`HomeCardPlate+BarFont.swift`).
+        var shelf: KiwiShelf
     }
 
     /// The share of the thickness an item's content fills, read
@@ -207,7 +211,8 @@ struct HomeCardBarsTile: View {
             fontSize: style.identifierFontSize(
                 forContentDepth: cross * share
             ),
-            contentShare: share
+            contentShare: share,
+            shelf: style.shelf
         )
     }
 
@@ -239,7 +244,8 @@ struct HomeCardBarsTile: View {
             fontSize: style.resolvedFontSize(
                 forContentDepth: cross * share
             ),
-            contentShare: share
+            contentShare: share,
+            shelf: style.shelf
         )
     }
 

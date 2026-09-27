@@ -41,7 +41,7 @@ extension SpaceBarItemView {
         super.layout()
         let cell = cellLength
         if case .text = spaceGlyph {
-            identifierLabel.font = .systemFont(
+            identifierLabel.font = style.shelf.textFont(
                 ofSize: identifierFont
             )
         }
@@ -114,9 +114,9 @@ extension SpaceBarItemView {
         let base =
             centered
             ? cell * 0.8 : StateBadgeMetrics.side(cell: cell)
-        badge.font = .systemFont(
+        badge.font = style.shelf.badgeFont(
             ofSize: base * (centered ? 0.5 : 0.72),
-            weight: .bold
+            emphasis: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
         let diameter = min(

@@ -85,6 +85,10 @@ extension KiwiShelfCard {
             )
         case .fontSizeAuto:
             fontSizeGroup
+        case .fontFamily:
+            fontFamilyRow
+        case .fontWeight:
+            fontWeightRow
         case .outerMargin:
             PtSlider(
                 label: L("kiwishelf.outer_margin", "Outer margin"),

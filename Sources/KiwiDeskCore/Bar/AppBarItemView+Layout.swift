@@ -18,9 +18,9 @@ extension AppBarItemView {
     private func layoutBadge() {
         guard !badge.isHidden else { return }
         let baseHeight = Self.badgeSide(contentSide: contentSide)
-        badge.font = .systemFont(
+        badge.font = style.shelf.badgeFont(
             ofSize: baseHeight * 0.9,
-            weight: .bold
+            emphasis: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
         let diameter = max(baseHeight, textWidth + 2)
@@ -84,7 +84,7 @@ extension AppBarItemView {
     private func layoutHorizontal() {
         let pad = Self.contentPadding
         let edge = Self.edgePadding
-        let font = NSFont.systemFont(ofSize: effectiveFontSize)
+        let font = style.shelf.textFont(ofSize: effectiveFontSize)
         label.font = font
         label.usesSingleLineMode = true
         label.maximumNumberOfLines = 1

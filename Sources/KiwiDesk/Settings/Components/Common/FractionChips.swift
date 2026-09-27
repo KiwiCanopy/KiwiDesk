@@ -21,8 +21,9 @@ struct FractionChips: View {
     var body: some View {
         HStack(spacing: ChipMetrics.spacing) {
             ForEach(Self.shares, id: \.glyph) { share in
-                FractionChip(
-                    glyph: share.glyph,
+                PresetChip(
+                    title: share.glyph,
+                    font: .callout.monospacedDigit(),
                     selected: Self.matches(value, share.value)
                 ) {
                     value = share.value
@@ -45,10 +46,12 @@ struct FractionChips: View {
     }
 }
 
-/// One fraction chip, drawn like `ShortcutLayerChip`: selection
-/// is its rest affordance.
-private struct FractionChip: View {
-    let glyph: String
+/// One preset chip under a slider — a fraction or a named weight
+/// — drawn like `ShortcutLayerChip`: selection is its rest
+/// affordance. The title is its spoken name.
+struct PresetChip: View {
+    let title: String
+    let font: Font
     let selected: Bool
     let action: () -> Void
     @State private var hovering = false
@@ -58,8 +61,8 @@ private struct FractionChip: View {
 
     var body: some View {
         Button(action: action) {
-            Text(glyph)
-                .font(.callout.monospacedDigit())
+            Text(title)
+                .font(font)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background(Capsule().fill(fill))
@@ -70,7 +73,7 @@ private struct FractionChip: View {
         .onChange(of: isEnabled) { _, now in
             if !now { hovering = false }
         }
-        .accessibilityLabel(glyph)
+        .accessibilityLabel(title)
         .accessibilityAddTraits(selected ? [.isSelected] : [])
     }
 

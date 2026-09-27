@@ -2134,6 +2134,51 @@ positive value pins the font size for both bars.
 kiwishelf.set_font_size(0)
 ```
 
+### kiwishelf.set_font_family
+
+:::unreleased
+**Expects:** a font family name (default `"System"`).
+`"System"` and `"System Monospaced"` name the system's own faces;
+any other name is an installed family, as Font Book lists it.
+
+**Does:** sets the typeface of both bars' text — Space
+identifiers, window titles and counts. App icons and App Font
+glyphs keep their own. A chosen family draws counts with digits
+of one width where it has them; the system families keep their
+own figures. A
+family that is not installed draws `"System"` and is reported in
+Config Issues; the stored name is kept, so installing the family
+brings it back.
+
+**Example:**
+
+```lua
+kiwishelf.set_font_family("Menlo")
+```
+:::
+
+### kiwishelf.set_font_weight
+
+:::unreleased
+**Expects:** a weight from `100` to `900` (default `400`), or one
+of the names `"ultralight"` (100), `"thin"`, `"light"`,
+`"regular"`, `"medium"`, `"semibold"`, `"bold"`, `"heavy"` and
+`"black"` (900), in any case; a number outside the range is
+clamped.
+
+**Does:** sets how heavy both bars' text draws. A variable family
+(the system's own among them) draws the exact weight; one without
+a weight axis draws its installed face nearest to it. The weight
+is kept as set, so switching to another family and back restores
+it.
+
+**Example:**
+
+```lua
+kiwishelf.set_font_weight("semibold")
+```
+:::
+
 ### kiwishelf.set_icon_source
 
 **Expects:** `"app_image"` or `"app_font"` (default

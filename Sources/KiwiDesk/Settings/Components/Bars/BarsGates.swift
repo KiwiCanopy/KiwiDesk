@@ -20,6 +20,9 @@ struct BarsGates {
         case shelfEmpty
         /// Boxed draws a box per item — no plate to size.
         case boxedShelf
+        /// The shelf's font family is not installed, so System
+        /// draws and the family has no weights to offer (#1681).
+        case fontMissing(family: String)
     }
 
     /// Resolves container gate to an inert reason, or nil if active.
@@ -88,6 +91,13 @@ struct BarsGates {
     var noBarDrawsIcon: Bool {
         !settings.spaceBarStyle.enabled && everyShownBarTitleOnly
     }
+
+    /// Why the font weight is inert: the family is not installed.
+    @MainActor var fontWeightReason: InertReason? {
+        let family = settings.kiwishelf.fontFamily
+        return BarFont.isInstalled(family)
+            ? nil : .fontMissing(family: family)
+    }
 }
 
 /// Explanatory hover/help text for bar gate reasons (#678).
@@ -136,6 +146,13 @@ enum BarsGateHelp {
                     + "so no app glyph is drawn.",
                 L("app_bar.content.label", "Content"),
                 L("app_bar.content.title", "Title")
+            )
+        case .fontMissing(let family):
+            return L(
+                "kiwishelf.font_weight.missing_family",
+                "“%1$@” isn't installed, so there is no weight "
+                    + "of its own to choose.",
+                family
             )
         }
     }

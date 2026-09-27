@@ -92,6 +92,18 @@ extension SettingsValueReadout {
             )
         case .fontSize:
             return spaceBarAutoPointsRow(census, o.fontSize, n.fontSize)
+        case .fontFamily:
+            return spaceBarRow(
+                census,
+                BarFontText.familyName(o.fontFamily),
+                BarFontText.familyName(n.fontFamily)
+            )
+        case .fontWeight:
+            return spaceBarRow(
+                census,
+                String(o.fontWeight),
+                String(n.fontWeight)
+            )
         case .liquidGlass:
             return spaceBarOnOffRow(census, o.liquidGlass, n.liquidGlass)
         case .iconSource:

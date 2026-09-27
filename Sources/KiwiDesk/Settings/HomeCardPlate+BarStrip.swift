@@ -161,12 +161,7 @@ struct BarStripView: View {
                 }
                 if let text = item.label {
                     Text(text)
-                        .font(
-                            .system(
-                                size: spec.fontSize,
-                                weight: .semibold
-                            )
-                        )
+                        .font(spec.textFont(size: spec.fontSize))
                         .lineLimit(1)
                 }
             }

@@ -22,6 +22,8 @@ final class ShelfCountView: NSView {
     private var horizontal = true
     private var count = 0
     private(set) var fontSize: CGFloat = 12
+    /// The shelf whose family the number draws in (#1681).
+    private var shelf = KiwiShelf()
     /// The SF Symbol `configure` drew, for the placement guard.
     private(set) var drawnSymbol: String?
     private(set) var isHovered = false
@@ -72,6 +74,7 @@ final class ShelfCountView: NSView {
         count: Int,
         horizontal: Bool,
         fontSize: CGFloat,
+        shelf: KiwiShelf,
         ink: NSColor,
         hoverInk: NSColor,
         hoverFill: NSColor = .clear,
@@ -84,6 +87,7 @@ final class ShelfCountView: NSView {
         self.hoverInk = hoverInk
         self.horizontal = horizontal
         self.fontSize = fontSize
+        self.shelf = shelf
         isHidden = count == 0
         guard count > 0 else { return }
         label.stringValue = "\(count)"
@@ -114,7 +118,7 @@ final class ShelfCountView: NSView {
     /// Sizes the number and chevron for a shelf `depth` deep.
     private func applyFonts(depth: CGFloat) {
         let size = min(fontSize, depth * Self.numberDepthShare)
-        label.font = .systemFont(ofSize: size, weight: .semibold)
+        label.font = shelf.badgeFont(ofSize: size, emphasis: .semibold)
         chevron.image = drawnSymbol.flatMap {
             NSImage(systemSymbolName: $0, accessibilityDescription: nil)
         }?.withSymbolConfiguration(

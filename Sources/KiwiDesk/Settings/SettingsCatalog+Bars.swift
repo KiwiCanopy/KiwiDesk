@@ -80,6 +80,14 @@ struct KiwiShelfStyleControls: Sendable {
         "kiwishelf.font_size",
         "Font size"
     )
+    let kiwishelfStyleFontFamily = SettingsControl(
+        "kiwishelf.font_family",
+        "Font"
+    )
+    let kiwishelfStyleFontWeight = SettingsControl(
+        "kiwishelf.font_weight",
+        "Font weight"
+    )
     let kiwishelfStyleIconSource = SettingsControl(
         "kiwishelf.icon_source.label",
         "App glyph style"
