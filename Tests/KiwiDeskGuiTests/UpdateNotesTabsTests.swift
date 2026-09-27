@@ -56,7 +56,7 @@ struct UpdateNotesTabsTests {
     }
 
     @Test("no strip when Highlights is the only tab")
-    func loneHighlightsDrawsNoStrip() {
+    func loneHighlightsDrawsNoStrip() throws {
         #expect(!UpdateNotesTabs.showsStrip(Self.digest([])))
         #expect(
             !UpdateNotesTabs.showsStrip(
@@ -64,6 +64,16 @@ struct UpdateNotesTabsTests {
             )
         )
         #expect(UpdateNotesTabs.showsStrip(Self.digest([Self.group("new")])))
+        let source = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath).appendingPathComponent(
+                "Sources/KiwiDesk/Updates/UpdateNotesScroll.swift"
+            )
+        )
+        #expect(
+            source.contains(
+                "if let digest = offer.digest, UpdateNotesTabs.showsStrip("
+            )
+        )
     }
 
     @Test("a segment names its group and its count")

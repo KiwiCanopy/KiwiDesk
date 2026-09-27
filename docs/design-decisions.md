@@ -583,7 +583,7 @@ costs nothing to ignore.
 From 2.0.0 a found update opens KiwiDesk's own window rather
 than Sparkle's: the offered version's summary in one panel, then
 every change grouped as New, Improved, Fixed and Lua & CLI, each
-group a disclosure with its count. Sparkle's window renders the
+group with its count. Sparkle's window renders the
 notes as one block of HTML, which is readable and answers
 neither question a reader arrives with ("what's new?", "was my
 bug fixed?") at a glance — the grouping
