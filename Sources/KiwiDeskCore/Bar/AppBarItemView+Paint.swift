@@ -114,5 +114,16 @@ extension AppBarItemView {
             accent.layer?.backgroundColor =
                 NSColor(kiwiHex: style.highlightColor).cgColor
         }
+        applySheen()
+    }
+
+    /// The ring's sheen on the indicator (#1644).
+    func applySheen() {
+        BarSheen.apply(
+            to: accent,
+            hex: style.highlightColor,
+            outline: accentMode == .outline,
+            shelf: style.shelf
+        )
     }
 }

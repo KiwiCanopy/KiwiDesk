@@ -36,6 +36,7 @@ final class BorderOverlay {
     private var lastColorHex = ""
     /// Resolved glow blur (`0` = no glow, #358, #551).
     private var lastGlowBlur: CGFloat = 0
+    private var lastSheen = false
     private weak var lastScreen: NSScreen?
     private var targetWindow: CGWindowID
     private var lastCornerRadius: CGFloat =
@@ -140,6 +141,7 @@ final class BorderOverlay {
         colorHex: String,
         screen: NSScreen?,
         glowBlur: CGFloat = 0,
+        sheen: Bool = false,
         restoreVisibility: Bool = false
     ) {
         lastFrame = frame
@@ -149,6 +151,7 @@ final class BorderOverlay {
         lastColorHex = colorHex
         lastScreen = screen
         lastGlowBlur = glowBlur
+        lastSheen = sheen
         let swapped = ensureBackend(glow: glowBlur > 0)
         let shouldRestore = restoreVisibility && isHidden
         guard
@@ -212,7 +215,8 @@ final class BorderOverlay {
             cornerStyle: lastCornerStyle,
             order: backend.orderMode,
             systemRadius: lastCornerRadius,
-            glowBlur: lastGlowBlur
+            glowBlur: lastGlowBlur,
+            sheen: lastSheen
         )
     }
 

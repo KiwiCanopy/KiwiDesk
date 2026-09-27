@@ -59,6 +59,13 @@ enum LiquidGlassGate {
         stored && drawsGlass
     }
 
+    /// Whether the painted sheen draws (#1644 prototype): on the
+    /// focus ring and the bar highlight alike, riding the shelf's
+    /// stored glass leaf so one verdict answers both surfaces.
+    static func drawsSheen(_ shelf: KiwiShelf) -> Bool {
+        rendered(glass: shelf.liquidGlass)
+    }
+
     /// A Fill at full alpha, keeping its hue. A fully transparent
     /// Fill stays so: it asked for no plate, and none is opaque.
     static func opaque(_ hex: String) -> String {

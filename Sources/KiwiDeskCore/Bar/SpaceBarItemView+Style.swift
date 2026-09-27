@@ -253,6 +253,17 @@ extension SpaceBarItemView {
             accent.layer?.cornerRadius = 0
             accent.layer?.backgroundColor = highlight.cgColor
         }
+        applySheen()
+    }
+
+    /// The ring's sheen on the indicator (#1644).
+    func applySheen() {
+        BarSheen.apply(
+            to: accent,
+            hex: style.highlightColor,
+            outline: style.activeIndicator == .outline,
+            shelf: style.shelf
+        )
     }
 
     var identifierFont: CGFloat {

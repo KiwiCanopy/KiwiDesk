@@ -19,6 +19,10 @@ struct BorderGeometry: Equatable {
     /// layout gaps and the float inset clear the bloom on the
     /// focused side, while a hand-set gap may still let it bleed.
     let glowMargin: CGFloat
+    /// Paint the stroke with `BorderSheen`'s ramp (#1644). A
+    /// paint flag, not geometry, carried here so both backends'
+    /// redraw checks see it.
+    var sheen = false
 
     /// Below-order cushion to close the squircle corner seam
     /// (#361). Kept to a sliver because a below-order ring lingers
@@ -54,7 +58,8 @@ struct BorderGeometry: Equatable {
         order: Order = .below,
         systemRadius: CGFloat = GeometryUtils
             .systemWindowCornerRadius,
-        glowBlur: CGFloat = 0
+        glowBlur: CGFloat = 0,
+        sheen: Bool = false
     ) -> BorderGeometry {
         let visible = Self.clamp(width)
         let overlap = overlap(
@@ -78,7 +83,8 @@ struct BorderGeometry: Equatable {
             ),
             lineWidth: stroke,
             cornerRadius: radius,
-            glowMargin: margin
+            glowMargin: margin,
+            sheen: sheen
         )
     }
 

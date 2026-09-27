@@ -27,7 +27,8 @@ struct BorderSpecsTests {
         slots: [(id: WindowID, frame: CGRect)],
         overlays: Set<WindowID> = [],
         fullscreen: Set<WindowID> = [],
-        monocle: Bool = false
+        monocle: Bool = false,
+        sheen: Bool = false
     ) -> [BorderManager.Spec] {
         KiwiCore.borderSpecs(
             style: style,
@@ -36,8 +37,23 @@ struct BorderSpecsTests {
             overlays: overlays,
             fullscreen: fullscreen,
             isMonocle: monocle,
-            focusedRingSuppressed: false
+            focusedRingSuppressed: false,
+            sheen: sheen
         )
+    }
+
+    @Test("The sheen rides the focused ring alone (#1644)")
+    func sheenFocusedOnly() {
+        var style = BorderStyle()
+        style.unfocusedEnabled = true
+        let result = specs(
+            style,
+            focused: w1,
+            slots: disjoint,
+            sheen: true
+        )
+        #expect(result.count == 2)
+        #expect(result.filter(\.sheen).map(\.window) == [w1])
     }
 
     @Test("Disabled borders yield nothing")

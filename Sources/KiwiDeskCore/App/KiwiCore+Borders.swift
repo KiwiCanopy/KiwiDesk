@@ -131,7 +131,10 @@ extension KiwiCore {
             overlays: overlays,
             fullscreen: fullscreen,
             isMonocle: space.mode == .monocle,
-            focusedRingSuppressed: suppressed
+            focusedRingSuppressed: suppressed,
+            sheen: LiquidGlassGate.drawsSheen(
+                tiler.settings.kiwishelf
+            )
         )
         // Draw each ring around the window's REAL frame (its
         // actual on-screen size, which an app may have clamped
@@ -145,7 +148,8 @@ extension KiwiCore {
                 colorHex: spec.colorHex,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
-                glowBlur: spec.glowBlur
+                glowBlur: spec.glowBlur,
+                sheen: spec.sheen
             )
         }
     }
@@ -276,7 +280,9 @@ extension KiwiCore {
         // caller must answer whether an own untracked key window
         // holds the real focus, or it silently restores the
         // stale-anchor ring with every suite green.
-        focusedRingSuppressed: Bool
+        focusedRingSuppressed: Bool,
+        // The focused ring alone wears it, as with glow (#1644).
+        sheen: Bool
     ) -> [BorderManager.Spec] {
         guard style.enabled, let focused,
             let focusedFrame = slots.first(where: {
@@ -302,7 +308,8 @@ extension KiwiCore {
                     colorHex: style.focusedColor,
                     width: width,
                     cornerStyle: style.cornerStyle,
-                    glowBlur: style.glowBlur(focused: true)
+                    glowBlur: style.glowBlur(focused: true),
+                    sheen: sheen
                 )
             )
         }

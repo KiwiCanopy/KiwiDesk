@@ -145,7 +145,25 @@ extension SkyLightBorderOverlay {
                 transform: nil
             )
         )
-        context.strokePath()
+        guard geometry.sheen,
+            let ramp = BorderSheen.gradient(hex: colorHex)
+        else {
+            context.strokePath()
+            return
+        }
+        // The ramp clipped to the stroke (#1644); the context is
+        // y-up, so maxY is the ring's top.
+        context.saveGState()
+        context.replacePathWithStrokedPath()
+        context.clip()
+        let half = geometry.lineWidth / 2
+        context.drawLinearGradient(
+            ramp,
+            start: CGPoint(x: pathRect.midX, y: pathRect.maxY + half),
+            end: CGPoint(x: pathRect.midX, y: pathRect.minY - half),
+            options: []
+        )
+        context.restoreGState()
     }
 
     func makeRegion(_ rect: CGRect) -> CFTypeRef? {
