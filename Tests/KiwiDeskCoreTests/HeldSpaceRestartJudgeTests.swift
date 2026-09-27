@@ -156,16 +156,4 @@ struct HeldSpaceRestartJudgeTests {
         #expect(b.state.workspaces[SpaceID(5)] == nil)
         #expect(!b.capturedSpaces.map(\.id).contains(SpaceID(5)))
     }
-
-    @Test("a replug takes a held Space's hidden window home too")
-    func replugRepointsTheHiddenWindow() throws {
-        let a = try t.unplugged()
-        a.handle(.windowHidden(WindowID(10)))
-        a.handle(.displaysChanged([desk.builtIn, desk.dell]))
-        #expect(a.state.heldSpaces.isEmpty)
-        #expect(a.state.rememberedSpace(of: WindowID(10)) == SpaceID(3))
-        a.handle(.windowCreated(desk.window(10)))
-        #expect(a.state.workspaces.space(of: WindowID(10)) == SpaceID(3))
-        #expect(a.state.workspaces[SpaceID(5)] == nil)
-    }
 }

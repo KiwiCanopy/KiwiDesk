@@ -926,8 +926,9 @@ screen's Spaces are held, not forwarded*. The obligations:
   not only the away ledger's — at the origin, or an arrival
   re-creates the retired id as an ordinary Space a save captures
   (`HeldSpaceRestartJudgeTests` ▸
-  `homeReturnRepointsTheHiddenWindow`,
-  `HeldSpaceRestartJudgeTests` ▸ `replugRepointsTheHiddenWindow`).
+  `homeReturnRepointsTheHiddenWindow`; a live replug into a saved
+  profile is re-filed by #1230's record as well, and one into a
+  Standard has no clause).
   `livingRememberedSpace` keeps not gating a `.restored` target
   by ruling (#1010): the replay files before Spaces exist. The
   #634 discard deletes the files and keeps the live holds
