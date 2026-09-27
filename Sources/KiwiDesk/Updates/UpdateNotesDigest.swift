@@ -46,7 +46,10 @@ struct UpdateNotesDigest: Equatable {
     /// spanning more than one version needs it.
     var spansVersions: Bool { versions.count > 1 }
 
-    var total: Int { groups.reduce(0) { $0 + $1.entries.count } }
+    /// The group a tab opens.
+    func group(_ id: String) -> Group? {
+        groups.first { $0.id == id }
+    }
 
     /// Merges every source newer than `installed` up to `offered`.
     /// Nil when the offered version's own notes cannot be read —
@@ -147,18 +150,30 @@ struct UpdateNotesDigest: Equatable {
     }
 }
 
-/// Which groups start open (#1542 ruling). An open group shows
-/// every entry: the disclosure is the one budget, and a second
-/// "Show more" inside it hid what the user had just opened
-/// (owner, 2026-09-24).
-enum UpdateNotesDisclosure {
-    /// The first group opens unless it is Lua & CLI, which always
-    /// starts collapsed; the rest start collapsed.
-    static func initiallyOpen(
-        _ groups: [UpdateNotesDigest.Group]
-    ) -> Set<String> {
-        guard let first = groups.first, first.kind != .scripting
-        else { return [] }
-        return [first.id]
+/// One tab of the notes (#1666 ruling): Highlights, then a
+/// type's changes.
+enum UpdateNotesTab: Hashable {
+    case highlights
+    case group(String)
+}
+
+/// Which tabs exist and which one opens (#1666 ruling).
+enum UpdateNotesTabs {
+    /// Highlights, then one per non-empty group in digest order:
+    /// a tab with nothing in it promises nothing.
+    static func tabs(_ digest: UpdateNotesDigest) -> [UpdateNotesTab] {
+        [.highlights]
+            + digest.groups.filter { !$0.entries.isEmpty }.map {
+                .group($0.id)
+            }
     }
+
+    /// No strip when Highlights is the only tab.
+    static func showsStrip(_ digest: UpdateNotesDigest) -> Bool {
+        tabs(digest).count > 1
+    }
+
+    /// Highlights in both modes: the "Before you update" cautions
+    /// live there and must be seen before Install.
+    static let initial = UpdateNotesTab.highlights
 }

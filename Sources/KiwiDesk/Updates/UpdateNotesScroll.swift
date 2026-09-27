@@ -1,77 +1,62 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The notes between the pinned header and footer: Highlights,
-/// then every change grouped by type (#1542 ruling ▸ Window).
+/// The notes between the pinned header and footer: a pinned tab
+/// strip over one scrolling list — Highlights, or one type's
+/// changes (#1666 ruling).
 struct UpdateNotesScroll: View {
     let offer: UpdateOffer
     /// The Failed state steps the Highlights gold back.
     let failed: Bool
     /// After the update: the cautions are past advice.
     let whatsNew: Bool
+    /// Lays every tab out at once, unscrolled, so the window's
+    /// height is the tallest tab's and a switch does not jump it.
     let measuring: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var open: Set<String>
+    @State private var selection = UpdateNotesTabs.initial
     @State private var moreBelow = false
-    /// Where a per-type link sends VoiceOver: the group it opened.
-    @AccessibilityFocusState private var focusedGroup: String?
-
-    init(
-        offer: UpdateOffer,
-        failed: Bool,
-        whatsNew: Bool,
-        measuring: Bool
-    ) {
-        self.whatsNew = whatsNew
-        self.offer = offer
-        self.failed = failed
-        self.measuring = measuring
-        _open = State(
-            initialValue: UpdateNotesDisclosure.initiallyOpen(
-                offer.digest?.groups ?? []
-            )
-        )
-    }
 
     var body: some View {
-        ScrollViewReader { proxy in
+        VStack(spacing: 0) {
+            if let digest = offer.digest, UpdateNotesTabs.showsStrip(digest) {
+                UpdateNotesTabStrip(digest: digest, selection: $selection)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, UpdateWindowMetrics.inset)
+                    .padding(.bottom, 14)
+            }
             if measuring {
-                padded(proxy)
+                padded
             } else {
-                ScrollView { padded(proxy) }
+                ScrollView { padded }
+                    // A switch opens the new tab at its top.
+                    .id(selection)
                     .modifier(UpdateNotesScrollCues(moreBelow: $moreBelow))
+                    .overlay(alignment: .bottom) { fade }
             }
         }
-        .overlay(alignment: .bottom) { fade }
     }
 
-    private func padded(_ proxy: ScrollViewProxy) -> some View {
-        content(proxy)
-            .padding(.horizontal, 20)
+    private var padded: some View {
+        content
+            .padding(.horizontal, UpdateWindowMetrics.inset)
             .padding(.bottom, 18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .tint(SettingsTheme.ink)
     }
 
-    @ViewBuilder
-    private func content(_ proxy: ScrollViewProxy) -> some View {
+    private var content: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let digest = offer.digest {
-                UpdateHighlightsPanel(
-                    digest: digest,
-                    failed: failed,
-                    whatsNew: whatsNew
-                )
-                UpdateNotesTally(digest: digest) { jump(to: $0, proxy) }
-                ForEach(digest.groups) { group in
-                    UpdateNotesGroupCard(
-                        group: group,
-                        labelled: digest.spansVersions,
-                        open: binding(open: group.id)
-                    )
-                    .id(group.id)
-                    .accessibilityFocused($focusedGroup, equals: group.id)
+                if measuring {
+                    ZStack(alignment: .topLeading) {
+                        ForEach(UpdateNotesTabs.tabs(digest), id: \.self) {
+                            tab($0, digest)
+                        }
+                    }
+                } else {
+                    tab(selection, digest)
                 }
                 ForEach(digest.unreadable, id: \.self) { version in
                     UpdateNotesLink(
@@ -100,6 +85,28 @@ struct UpdateNotesScroll: View {
         }
     }
 
+    @ViewBuilder
+    private func tab(
+        _ tab: UpdateNotesTab,
+        _ digest: UpdateNotesDigest
+    ) -> some View {
+        switch tab {
+        case .highlights:
+            UpdateHighlightsPanel(
+                digest: digest,
+                failed: failed,
+                whatsNew: whatsNew
+            )
+        case .group(let id):
+            if let group = digest.group(id) {
+                UpdateNotesGroupList(
+                    group: group,
+                    labelled: digest.spansVersions
+                )
+            }
+        }
+    }
+
     /// Soft edge while more is below (#1542 ruling).
     private var fade: some View {
         LinearGradient(
@@ -115,22 +122,6 @@ struct UpdateNotesScroll: View {
         )
         .allowsHitTesting(false)
         .accessibilityHidden(true)
-    }
-
-    /// A per-type link opens its group and scrolls to it.
-    private func jump(to id: String, _ proxy: ScrollViewProxy) {
-        open.insert(id)
-        focusedGroup = id
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
-            proxy.scrollTo(id, anchor: .top)
-        }
-    }
-
-    private func binding(open id: String) -> Binding<Bool> {
-        Binding(
-            get: { open.contains(id) },
-            set: { if $0 { open.insert(id) } else { open.remove(id) } }
-        )
     }
 }
 

@@ -136,6 +136,13 @@ them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
 
+:::unreleased
+The update window's notes tabs are one such strip (#1666): how
+many there are is set by the release feed rather than by us, so
+the strip falls back to a menu on the same selection wherever it
+does not fit.
+:::
+
 Every shipped segmented strip fits a full-width row at the
 720 pt minimum (`SettingsWidthClass.minimum`), measured against
 all ten locales (#95): the widest is Mouse resize action at
