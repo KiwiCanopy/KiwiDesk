@@ -11595,12 +11595,14 @@ the owner wants to arrive together, off is not a statement about
 the sheen. The row stays on a Mac below macOS 26, where the
 switch above it is hidden.
 
-**Default on; the upgrade is pending the owner.** The owner ruled
-default on (2026-09-27). A file written before the key carries no
-`sheen` and decodes it on, so as built every existing user's focus
-ring, bar highlight and border, and drag borders gain the sheen on
-upgrade; whether existing files take the sheen on upgrade — or a
-#1369 crossing writes it off into them — is pending the owner.
+**Default on, and existing files take it on upgrade.** (Owner
+ruling 2026-09-27.) A file written before the key carries no
+`sheen` and decodes it on, so every existing user's focus ring,
+bar highlight and border, and drag borders gain the sheen on
+upgrade, whether or not Liquid Glass is on. That visible change
+is the owner's accepted cost rather than something a #1369
+crossing was needed to prevent: absence never meant a sheen a
+user had turned off, since no build before this one drew one.
 
 **The flat band carries #578's contrast; the ends may pass it.**
 (Owner ruling 2026-09-27, over a cap.) The ramp's middle band is
