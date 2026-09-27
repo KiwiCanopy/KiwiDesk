@@ -23,7 +23,7 @@ struct GroupBadgeNeutralityTests {
 
     /// The ones that picked a badge of their own, each with the
     /// reason it is exempt. Listed rather than implied: the two
-    /// lists PARTITION the catalog below, so a ninth bundled
+    /// lists PARTITION the catalog below, so a new bundled
     /// palette cannot join without its author saying which kind
     /// it is. A membership list whose complement lives only in a
     /// comment fails open, which is the one thing a guard about
@@ -37,6 +37,7 @@ struct GroupBadgeNeutralityTests {
         "Sunset": "a warm badge echoing the palette temperature",
         "Ultraviolet": "a cool badge, same reason",
         "Kiwi Neon": "the neon showcase's own accent",
+        "Nightfall": "a slate badge from its own blue-grey family",
     ]
 
     /// Being LISTED as a chooser is a claim about the palette,

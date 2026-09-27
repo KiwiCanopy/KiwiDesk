@@ -9827,9 +9827,9 @@ don't assume from tone.
   accents** (#511, `DragPairSeparationTests`; **enforced**),
   because origin and target are the only two overlays on screen at
   once. **Target tracks `space_bar.focused_item_color`** — true
-  for the shipped default and six of the nine palettes;
-  Monochrome, Sunset and Ultraviolet keep a third colour and clear
-  the floor anyway. Origin is a green darkened for stroke duty,
+  for the shipped default and every bundled palette but
+  Monochrome, Sunset and Ultraviolet, which keep a third colour and
+  clear the floor anyway. Origin is a green darkened for stroke duty,
   but *not* necessarily the ring's green: see the overlay note
   below for why the shipped ghost had to leave the hue family.
 
@@ -9868,6 +9868,25 @@ dominance derived from each palette's own fill, and a floor on the
 grey's own home contrast — the lightness half of the vanish, which
 a near-black grey at in-band alpha would otherwise clear on every
 pair clause.
+
+:::unreleased
+**Nightfall's focused accent is orange, not its theme's magenta.**
+Nightfall borrows the night-blue family of a well-known editor
+theme under its own name. It uses no credit line, since colour
+values name no one and a borrowed name would read as an
+endorsement. The theme's signature pair is blue with a magenta.
+Under protanopia that magenta separates from the blue by 0.16/441
+against a floor of 60, so a protanope would see the focused window
+and the active Space as one colour. The focused accent is the
+theme's orange (`#FF9E64`) instead: its cyan misses the floor as
+well, its red reads as an alert the focused window does not carry,
+and orange is what every other blue-accent palette (Clean Light,
+Slate, True Dark) pairs its blue with
+(`SpaceBarAccentSeparationTests`). Its tightest margins are the
+idle identifier and the section divider over a white wallpaper;
+`IdleItemContrastTests` and `ShelfDividerWeightTests` hold both
+over every bundled palette.
+:::
 
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
@@ -9986,8 +10005,8 @@ therefore green-but-not-*the*-green, which is the cost, and the
 alternative (`#2F4A0C`, a yellow-green at 85/441) was rejected for
 falling to 2.11:1 on near-black — that would have traded a
 colour-vision defect for a contrast one. Bundled palettes follow
-the same rule: target tracks `space_bar.focused_item_color` in six
-of the nine, without which Clean Light, Slate and True Dark ship
+the same rule: target tracks `space_bar.focused_item_color` in all
+but those three, without which Clean Light, Slate and True Dark ship
 origin and target as the *same hex* (separation 0, for every
 viewer, not only CVD). Monochrome, Sunset and Ultraviolet keep a
 third colour and already clear the floor.
@@ -11218,7 +11237,7 @@ effect **links to its control** instead of writing it — Neon's
 swatch carries a link that reveals the Glow toggle — and a future
 palette that genuinely needs to recommend non-color settings takes
 a schema-level "recommended settings" sidecar, never a magic-name
-side-effect. The nine built-ins are read-only with reserved names
+side-effect. The built-ins are read-only with reserved names
 (a user palette can't shadow one — rename/delete are *omitted*,
 not greyed, because the constraint is
 never-meaningful-for-this-kind, not mode-inert); "Kiwi (Default)"
@@ -11226,8 +11245,8 @@ is derived from the shipped struct defaults at load, so it never
 drifts and doubles as a reset. Escalating to a full design-package
 (bundling geometry, fonts, icon source with colors, or a tab
 restructure) waits on a real signal that people want to share the
-*whole look* as one artifact — not merely "more than nine
-palettes," which save/export/import already answers. Every bundled
+*whole look* as one artifact — not merely "more palettes," which
+save/export/import already answers. Every bundled
 palette keeps `space_bar.focused_item_color` a **different hue**
 from its active accent (the two-accent rule, QA 2026-07-19) —
 Monochrome included: color is the only channel the focused-window

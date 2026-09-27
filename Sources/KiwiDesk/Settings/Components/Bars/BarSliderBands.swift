@@ -25,14 +25,19 @@ enum BarSliderBands {
             KiwiShelf.highlightWidthRange.upperBound
         )
 
-    /// The Space Bar's Glyph gap row (#1689): both edges are
-    /// Core's, which clamps the stored value to them.
+    /// The curated top of both gap rows, one number so the two
+    /// sliders beside each other stop alike (#1695).
+    static let gapCeiling: Double = 40
+
+    /// The shelf's Item gap row: the Core floor up to
+    /// `gapCeiling`.
+    static let itemGap: ClosedRange<Double> =
+        Double(KiwiShelf.minItemGap)...gapCeiling
+
+    /// The Space Bar's Glyph gap row (#1689): the Core floor up
+    /// to `gapCeiling`.
     static let glyphGap: ClosedRange<Double> =
-        Double(
-            SpaceBarStyle.glyphGapRange.lowerBound
-        )...Double(
-            SpaceBarStyle.glyphGapRange.upperBound
-        )
+        Double(SpaceBarStyle.minGlyphGap)...gapCeiling
 
     /// The Space Bar minimum row, in percent: both edges are
     /// Core's, which clamps the stored value to them (#1517).

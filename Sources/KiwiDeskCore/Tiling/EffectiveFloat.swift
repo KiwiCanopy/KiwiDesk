@@ -53,7 +53,14 @@
 /// member landing on a TILED Space takes the float verb's manual
 /// override, or the layout would tile it; onto a floating Space
 /// it takes none (owner rulings 2026-09-26,
-/// `FloatDropRefileTests`). Every other reader is the flag's own
+/// `FloatDropRefileTests`). `toggle_floating` is ruled to STAY on
+/// the flag (#1697): in a floating-mode Space every member is an
+/// effective float and none can tile, so reading the effective
+/// state would make every press write the same no-op, while the
+/// flag is the window's own intent that travels with it — whether
+/// it keeps floating once it leaves the Space or the Space leaves
+/// floating mode (`ToggleFloatingFlagTests`). Every other reader
+/// is the flag's own
 /// identity, a net already routed here, or a "tiled member"
 /// question — the negation below — and
 /// `FloatFlagReaderCensusTests` holds that census per file, so a

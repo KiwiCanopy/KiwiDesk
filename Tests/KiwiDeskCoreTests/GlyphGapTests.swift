@@ -5,9 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `space_bar.glyph_gap` (#1689): room between a Space item's app
-/// glyph cells and before its `+n` badge, clamped at decode and
-/// set, and read by the item's layout, its measured length and
-/// the shelf's plan alike.
+/// glyph cells and before its `+n` badge, floored at decode and
+/// set with no ceiling (#1695), and read by the item's layout,
+/// its measured length and the shelf's plan alike.
 @Suite("Space Bar glyph gap")
 struct GlyphGapTests {
     @Test("The default abuts the cells, as before the setting")
@@ -16,10 +16,10 @@ struct GlyphGapTests {
     }
 
     @Test(
-        "Decode clamps to the range",
-        arguments: [(-4.0, 0.0), (40.0, 24.0), (5.0, 5.0)]
+        "Decode floors at 0 and sets no ceiling",
+        arguments: [(-4.0, 0.0), (40.0, 40.0), (90.0, 90.0), (5.0, 5.0)]
     )
-    func decodeClamps(stored: Double, drawn: Double) throws {
+    func decodeFloors(stored: Double, drawn: Double) throws {
         let json = #"{"glyph_gap": \#(stored)}"#
         let style = try JSONDecoder().decode(
             SpaceBarStyle.self,
@@ -29,10 +29,10 @@ struct GlyphGapTests {
     }
 
     @Test(
-        "The setter clamps to the range",
-        arguments: [(-4.0, 0.0), (40.0, 24.0), (5.0, 5.0)]
+        "The setter floors at 0 and sets no ceiling",
+        arguments: [(-4.0, 0.0), (40.0, 40.0), (90.0, 90.0), (5.0, 5.0)]
     )
-    func setterClamps(value: Double, stored: Double) throws {
+    func setterFloors(value: Double, stored: Double) throws {
         let setting = try SpaceBarCommandSetting.parse(
             field: "glyph_gap",
             args: [.number(value)]
@@ -42,11 +42,22 @@ struct GlyphGapTests {
         #expect(style.glyphGap == CGFloat(stored))
     }
 
-    @Test("A reader clamps whatever wrote the value")
-    func readerClamps() {
+    /// The parser already raises every number to 0, so this
+    /// builds the setting past it: the floor `apply` owns.
+    @Test("Applying a negative setting stores the floor")
+    func applyFloors() {
         var style = SpaceBarStyle()
+        SpaceBarCommandSetting.glyphGap(-4).apply(to: &style)
+        #expect(style.glyphGap == SpaceBarStyle.minGlyphGap)
+    }
+
+    @Test("A reader floors whatever wrote the value")
+    func readerFloors() {
+        var style = SpaceBarStyle()
+        style.glyphGap = -3
+        #expect(style.resolvedGlyphGap == 0)
         style.glyphGap = 90
-        #expect(style.resolvedGlyphGap == 24)
+        #expect(style.resolvedGlyphGap == 90)
     }
 
     /// One gap between each pair of neighbouring slots — three

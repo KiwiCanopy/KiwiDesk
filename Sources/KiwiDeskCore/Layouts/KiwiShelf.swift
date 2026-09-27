@@ -86,6 +86,9 @@ public struct KiwiShelf: Sendable, Equatable {
     public static let minThickness: CGFloat = 20
     /// A margin's floor (#1516): flush.
     public static let minMargin: CGFloat = 0
+    /// The item gap's floor: flush. Decode and setter apply it;
+    /// no ceiling (#1695).
+    public static let minItemGap: CGFloat = 0
     /// Bounds of `highlightWidth` in pt (#1680).
     public static let highlightWidthRange: ClosedRange<CGFloat> = 1...6
     /// The edge mark's thickness per point of `highlightWidth`:

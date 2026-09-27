@@ -2387,8 +2387,8 @@ space_bar.set_glyph_cap(8)
 ### space_bar.set_glyph_gap
 
 :::unreleased
-**Expects:** points, 0–24 (default `0`); values outside the range
-are clamped.
+**Expects:** points (default `0`; a negative value is raised to
+`0`).
 
 **Does:** sets the room between app glyphs inside a Space item,
 and before its `+n` badge. `0` sets them side by side. The gap
@@ -3365,9 +3365,13 @@ KiwiDesk.make_auto()
 
 **Expects:** nothing.
 
-**Does:** flips the focused window between floating and tiled in
-one verb — if it is effectively floating it becomes tiled, and
-vice versa. Like `make_floating`/`make_tiled`, it writes an
+**Does:** flips the focused window's own float setting in one
+verb — a window set to float is set to tile, and vice versa. On a
+floating-layout Space every window floats whatever its setting, so
+the window does not move there (its Space Bar glyph still shows
+the float badge or loses it); the setting decides whether it keeps
+floating once a command moves it to a tiled Space or the Space
+changes layout. Like `make_floating`/`make_tiled`, it writes an
 explicit manual override (which survives close/reopen); it never
 produces the `auto` state, so `make_auto` stays the way back to
 detection control. It is bound to `control+option+f` by default
