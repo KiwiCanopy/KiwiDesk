@@ -88,13 +88,42 @@ struct IdleItemContrastTests {
     }
 
     /// The consumer: an idle text identifier on the live bar is
-    /// drawn in `idleItemColor`, the active one is not.
+    /// drawn in `idleItemColor`, the active one is not. The idle
+    /// Space holds a window: an empty one takes the empty ink
+    /// (`SpaceBarCollapsedRenderTests`).
     @Test("The live bar draws an idle identifier in the idle ink")
     @MainActor
     func liveBarDrawsTheIdleInk() throws {
         LiquidGlassGate.override = { false }
         let manager = SpaceBarManager()
-        manager.sync([paintedSpaceBar(front: nil, spaces: 3)])
+        let painted = paintedSpaceBar(front: nil, spaces: 3)
+        let bar = SpaceBarManager.Bar(
+            display: painted.display,
+            items: painted.items.map { item in
+                SpaceBarOverlay.Item(
+                    space: item.space ?? SpaceID("1"),
+                    spaceGlyph: item.spaceGlyph,
+                    apps: [
+                        SpaceBarItemView.App(
+                            name: "Mail",
+                            icon: nil,
+                            glyph: nil,
+                            focused: false,
+                            count: 1
+                        )
+                    ],
+                    active: item.active,
+                    overflow: 0,
+                    focusInOverflow: false
+                )
+            },
+            frontApp: painted.frontApp,
+            frontWindow: painted.frontWindow,
+            strip: painted.strip,
+            style: painted.style,
+            stateMarkColors: painted.stateMarkColors
+        )
+        manager.sync([bar])
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )
