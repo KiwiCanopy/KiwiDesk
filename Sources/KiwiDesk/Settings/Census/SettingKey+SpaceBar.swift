@@ -8,6 +8,7 @@ enum SpaceBarKey: String, CaseIterable, Hashable {
     case spaceBarSpringDelay = "settings.spaceBarStyle.springDelay"
     case spaceBarInactiveContent =
         "settings.spaceBarStyle.inactiveContent"
+    case spaceBarItemLabel = "settings.spaceBarStyle.itemLabel"
     case spaceBarGlyphCap = "settings.spaceBarStyle.glyphCap"
     case spaceBarGlyphGap = "settings.spaceBarStyle.glyphGap"
     case spaceBarFrontAppTitleCap =
@@ -27,7 +28,7 @@ extension SpaceBarKey {
         case .spaceBarHideEmpty, .spaceBarShowFrontApp,
             .spaceBarActiveIndicator, .spaceBarSpringDelay,
             .spaceBarGlyphCap, .spaceBarGlyphGap,
-            .spaceBarInactiveContent:
+            .spaceBarInactiveContent, .spaceBarItemLabel:
             return .row(.bars, .spaceBar, .atRest)
         case .spaceBarFrontAppTitleCap:
             // Inert while front segment is off.
@@ -82,6 +83,11 @@ extension SpaceBarKey {
             return .text(
                 "space_bar.inactive_content",
                 help: "space_bar.inactive_content.help"
+            )
+        case .spaceBarItemLabel:
+            return .text(
+                "space_bar.item_label",
+                help: "space_bar.item_label.help"
             )
         case .spaceBarGlyphCap:
             return .text(

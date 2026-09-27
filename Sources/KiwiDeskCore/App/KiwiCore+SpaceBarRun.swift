@@ -33,7 +33,11 @@ extension KiwiCore {
                 }
                 var item = SpaceBarOverlay.Item(
                     space: id,
-                    spaceGlyph: spaceIdentifier(for: id),
+                    spaceGlyph: Self.spaceBarLabel(
+                        identifier: spaceIdentifier(for: id),
+                        mode: space.mode,
+                        label: style.itemLabel
+                    ),
                     apps: apps,
                     active: id == current,
                     overflow: overflow,
@@ -56,5 +60,19 @@ extension KiwiCore {
                 // the glyphs the collapse drops.
                 return item.collapsed(to: style.inactiveContent)
             }
+    }
+
+    /// What names a Space item (#1535): its identifier, or its
+    /// layout's symbol. Pure — the bar and the Bars preview both
+    /// take it, so the preview cannot label a Space its own way.
+    public static func spaceBarLabel(
+        identifier: SpaceGlyph,
+        mode: LayoutMode,
+        label: SpaceBarStyle.ItemLabel
+    ) -> SpaceGlyph {
+        switch label {
+        case .identifier: return identifier
+        case .layout: return .symbol(mode.symbol)
+        }
     }
 }

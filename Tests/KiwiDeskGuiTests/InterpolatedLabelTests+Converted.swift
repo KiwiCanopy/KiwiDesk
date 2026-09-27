@@ -96,6 +96,8 @@ extension InterpolatedLabelTests {
         "monocle.hide_style.help": 2,
         // #1683: the Other Spaces `?` names its three segments.
         "space_bar.inactive_content.help": 2,
+        // #1535: the Space label `?` names both segments.
+        "space_bar.item_label.help": 2,
         "space_override.slot_size.help": 4,
         "space_bar.title_cap.front_app_only": 1,
         "lua_editor.adopt_help.body": 1,

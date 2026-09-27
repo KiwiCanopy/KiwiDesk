@@ -64,7 +64,7 @@ extension SpaceOverrideRows {
                 ForEach(dormant, id: \.mode) { entry in
                     Label(
                         dormantLine(entry.mode, entry.count),
-                        systemImage: entry.mode.glyph
+                        systemImage: entry.mode.symbol
                     )
                     .font(.callout)
                     .foregroundStyle(.secondary)

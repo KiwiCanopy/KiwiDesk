@@ -2550,6 +2550,26 @@ space_bar.set_inactive_content("count")
 ```
 :::
 
+### space_bar.set_item_label
+
+:::unreleased
+**Expects:** `"identifier"` or `"layout"` (default
+`"identifier"`).
+
+**Does:** sets what names each Space item. `"identifier"` draws
+the Space's icon, else its number or the first two letters of its
+name. `"layout"` draws the symbol of the layout the Space uses
+now — the one the Layout menu shows — and changes with it. The
+app glyphs are unaffected, and VoiceOver still reads the Space's
+name.
+
+**Example:**
+
+```lua
+space_bar.set_item_label("layout")
+```
+:::
+
 ### space_bar.set_active_indicator
 
 **Expects:** `"outline"` or `"edge_mark"` (default

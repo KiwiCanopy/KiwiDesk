@@ -103,7 +103,7 @@ extension StatusItemController {
                 keyEquivalent: ""
             )
             entry.target = self
-            entry.image = symbol(mode.glyph)
+            entry.image = symbol(mode.symbol)
             entry.representedObject = LayoutMenuTarget(
                 mode: mode,
                 scope: scope

@@ -13,7 +13,7 @@ struct LayoutCard: View {
     var body: some View {
         SettingsSection(
             SettingsCatalog.layoutMode(mode),
-            symbol: mode.glyph,
+            symbol: mode.symbol,
             caption: LayoutCardText.blurb(mode)
         ) {
             rows(LayoutDefaultsRowOrder.rows(for: mode))
