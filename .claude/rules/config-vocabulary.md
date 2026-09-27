@@ -145,23 +145,28 @@ synonym:
   [state-and-layout.md](state-and-layout.md).
 - **glyph** vs **symbol** — a *glyph* is ANY app mark a bar
   draws, image or App Font ("Glyphs per Space", "Glyph gap",
-  "Text and glyphs on both bars"); a *symbol* is the App Font's
-  monochrome mark, the `app_font` option of "App symbol style"
-  (#1690, owner ruling 2026-09-26). Never label the option with
-  the glyph word, or a count of glyphs reads as a count of
-  symbols. The one other sanctioned "Symbols" is the icon
-  picker's SF Symbols tab (`icon_picker.symbols`) — the same kind
-  of monochrome mark; a third use of the word owes this row an
-  entry. In a catalog, the two words are the translator's own
-  under `docs/localization-naming.md` ▸ Family C, and must differ
-  from each other and from the catalog's word for an app icon.
-  `AppSymbolNounTests` holds one half: the option's label must
-  not appear inside any row whose English says "glyph". Its
-  residue is review's — containment runs one direction (a glyph
-  word inside the option's phrase passes), an English plural
-  slips past a singular row ("Symbols" against a "Symbol gap"),
-  an inflected reuse passes (`ru`), and the option matching the
-  app-icon word is not compared at all.
+  "Text and glyphs on both bars", and the picker itself, "App
+  glyph style"); a *symbol* is the App Font's monochrome mark,
+  the `app_font` option of that picker, whose sibling is "App
+  icons" (#1690, owner rulings 2026-09-26/27). Never label the
+  option, or anything naming marks of either kind, with the
+  other's word: a count of glyphs must not read as a count of
+  symbols, and a sentence about every mark must not read as one
+  about app icons. The one other sanctioned "Symbols" is the
+  icon picker's SF Symbols tab (`icon_picker.symbols`) — the
+  same kind of monochrome mark; a third use of the word owes
+  this row an entry. In a catalog, the two words are the
+  translator's own under `docs/localization-naming.md` ▸
+  Family C, and must differ from each other and from the
+  catalog's word for an app icon. `AppSymbolNounTests` holds
+  one half: the option's label must not appear inside any row
+  whose English says "glyph" and not "symbol". Its residue is
+  review's — containment runs one direction (a glyph word
+  inside the option's phrase passes), an English plural slips
+  past a singular row ("Symbols" against a "Symbol gap"), an
+  inflected reuse passes (`ru`), a row naming both kinds is not
+  compared, and the option matching the app-icon word is not
+  compared at all.
 - **title** vs **name** — a *title* is the text a window itself
   reports (`app_bar.set_content`'s `title` / `icon_and_title`,
   `app_bar.set_title_cap`, `space_bar.set_front_app_title_cap`,

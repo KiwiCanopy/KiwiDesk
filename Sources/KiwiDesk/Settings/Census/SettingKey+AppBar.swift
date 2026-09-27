@@ -1,5 +1,5 @@
 /// The global App Bar (`AppBarStyle`) slice of the census. Its
-/// colours, symbol style and dim are the shelf's (#1517).
+/// colours, glyph style and dim are the shelf's (#1517).
 
 enum AppBarKey: String, CaseIterable, Hashable {
     case appBarActiveIndicator = "settings.appBarStyle.activeIndicator"

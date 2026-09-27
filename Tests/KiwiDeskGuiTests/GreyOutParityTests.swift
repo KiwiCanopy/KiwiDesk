@@ -172,7 +172,7 @@ struct GreyOutParityTests {
             "GreyOut(active: ownPredicateLive && inert",
             1
         ),
-        // The shelf's symbol style greys when no bar draws an
+        // The shelf's glyph style greys when no bar draws an
         // app icon — a predicate over two bars' state the census
         // cannot express (#1517).
         (

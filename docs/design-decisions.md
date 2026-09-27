@@ -10619,7 +10619,7 @@ The Space Bar and the App Bar sit on **KiwiShelf**, one screen
 edge. Where they hang and the plate they share — edge,
 alignment, order, the Space Bar minimum, thickness, margins,
 background style and fit, Liquid Glass, corner roundness, item
-gap, font size, the app symbol style, the idle opacity of
+gap, font size, the app glyph style, the idle opacity of
 untinted content (`dim_factor`) and every colour the two bars
 share — is `kiwishelf`'s. A field each bar may set for
 itself stays on that bar, whether or not the other bar has one
@@ -10772,7 +10772,7 @@ at 44 pt beside a BSP bar at 32 is a shelf whose depth changes
 with the layout. `monocle.set_app_bar_*` / `scroll.set_app_bar_*`
 keep `enabled` and the App Bar's own fields, which is the #678
 Phase 2 boundary intact for everything that is a bar's own. The
-symbol style joins the shelf for the same reason one step
+glyph style joins the shelf for the same reason one step
 further: one app drawn in two icon styles on one plate is a
 mismatch, not a choice, so the four `set_*icon_source` verbs
 retire — the per-layout two included, which narrows what Lua
@@ -10804,7 +10804,7 @@ inert whenever that segment is hidden — so it is named for it:
 
 *The crossing.* A saved profile or bundle is rewritten once
 (`KiwiShelfMigrationTests`): the shelf takes the Space Bar's
-values — its colours and symbol style included — because it is
+values — its colours and glyph style included — because it is
 the bar shown in every layout and so the one the user was
 looking at; the App Bar's where the Space Bar is off, since then
 the App Bar was the only bar there was. One colour reads the
@@ -11622,7 +11622,7 @@ plain boxless); boxed edge mark insets its ends by the corner
 roundness to sit flush inside the curve.
 
 **App icon rendering is one global choice with two honest
-options.** (#294.) `icon_source` — GUI label "App symbol style" —
+options.** (#294.) `icon_source` — GUI label "App glyph style" —
 offers `app_image` (the app's own icon) and `app_font` (a
 monochrome symbol).
 Decisions folded in (ui-designer consult and owner direction,
@@ -11662,7 +11662,7 @@ Decisions folded in (ui-designer consult and owner direction,
   the upstream release in `UPSTREAM.md`. CC0 waives copyright but
   not third-party trademark rights in the depicted app marks —
   accepted deliberately.
-- **The shortcuts panel follows the GLOBAL symbol style**: with
+- **The shortcuts panel follows the GLOBAL glyph style**: with
   `app_font` active its Apps band leads with the same ligatures. The
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.

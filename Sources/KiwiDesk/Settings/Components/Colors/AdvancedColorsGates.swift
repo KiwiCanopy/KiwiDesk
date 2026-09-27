@@ -151,7 +151,7 @@ enum AdvancedColorsHelp {
                 + "\u{201C}%2$@\u{201D} is \u{201C}%3$@\u{201D} — set "
                 + "it to \u{201C}%4$@\u{201D} in %5$@.",
             L("space_bar.color.focused_item", "Focused window"),
-            L("kiwishelf.icon_source.label", "App symbol style"),
+            L("kiwishelf.icon_source.label", "App glyph style"),
             L("app_bar.icon_source.app_image", "App icons"),
             L("app_bar.icon_source.app_font", "Symbols"),
             CrossReferenceRow.linkSlot

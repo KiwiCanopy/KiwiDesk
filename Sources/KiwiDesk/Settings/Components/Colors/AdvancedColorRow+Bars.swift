@@ -97,7 +97,7 @@ extension AdvancedColorRow {
                 + "needs \u{201C}%2$@\u{201D} set to "
                 + "\u{201C}%1$@\u{201D}.",
             L("app_bar.icon_source.app_font", "Symbols"),
-            L("kiwishelf.icon_source.label", "App symbol style")
+            L("kiwishelf.icon_source.label", "App glyph style")
         )
     }
 }

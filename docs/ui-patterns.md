@@ -1322,7 +1322,7 @@ answers only for the ring being off. The argument is
 `docs/design-decisions.md` ▸ *a dim is not a sentence*.
 
 A control whose *only* consumer is off may still have a second
-one. KiwiShelf's "App symbol style" stays live even when no
+one. KiwiShelf's "App glyph style" stays live even when no
 bar shows, because `iconSource` also drives the shortcuts
 panel's Apps band — check for a second reader before dimming.
 

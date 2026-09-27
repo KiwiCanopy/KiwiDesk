@@ -124,14 +124,14 @@ extension KiwiShelfCard {
     /// no bar draws an app icon.
     private var iconSourceRow: some View {
         DropdownRow(
-            label: L("kiwishelf.icon_source.label", "App symbol style"),
+            label: L("kiwishelf.icon_source.label", "App glyph style"),
             spokenValue: AppBarOptions.iconSourceTitle(
                 shelf.iconSource.wrappedValue
             ),
             // Interpolated labels (#818).
             help: L(
                 "kiwishelf.icon_source.help",
-                "How app icons are drawn on both bars. "
+                "How app glyphs are drawn on both bars. "
                     + "\u{201C}%1$@\u{201D} shows a monochrome "
                     + "symbol colored by KiwiShelf's item colors, "
                     + "set in %2$@; apps without a symbol keep "
@@ -141,7 +141,7 @@ extension KiwiShelfCard {
             )
         ) {
             Picker(
-                L("kiwishelf.icon_source.label", "App symbol style"),
+                L("kiwishelf.icon_source.label", "App glyph style"),
                 selection: shelf.iconSource
             ) {
                 ForEach(AppBarOptions.iconSource, id: \.0) { option in
