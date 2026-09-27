@@ -1,10 +1,14 @@
 import Foundation
 
-/// One-shot application of a ShelfLook (#1684). Every shelf and bar
-/// value routes through the setter its `set_*` command uses, and the
-/// sheen through the one `BorderStyle.sheen(from:)` its command
-/// shares, so a look can never set a value a command couldn't; an
-/// unknown path or a refused value is skipped, never fatal.
+/// One-shot application of a ShelfLook (#1684). Every value is
+/// PARSED by the parser its `set_*` command uses — the sheen by the
+/// one `BorderStyle.sheen(from:)` its command shares — so a look can
+/// never set a value a command couldn't; an unknown path or a
+/// refused value is skipped, never fatal. Two writes reach further
+/// than their command, by ruling (`docs/design-decisions.md` ▸ A
+/// look is KiwiShelf's styling): glass writes every glass leaf
+/// (#1307), and the App Bar indicator clears the per-layout
+/// overrides that would hide it.
 extension ShelfLook {
     /// Overwrites the styling this look names, in place (sparse),
     /// then `palette`'s colours when one is handed in. Only the
@@ -21,8 +25,10 @@ extension ShelfLook {
         palette?.apply(to: &settings)
     }
 
-    /// True when applying this look's styling would change nothing
-    /// — computed, never stored (the palette rule, #757).
+    /// True when a click would change nothing — computed, never
+    /// stored (the palette rule, #757). So a look saved from glass
+    /// leaves that disagree, or under a per-layout indicator, reads
+    /// unapplied until clicked, since the click would converge them.
     public func isApplied(to settings: TilingSettings) -> Bool {
         guard style.keys.contains(where: LookKeys.all.contains) else {
             return false

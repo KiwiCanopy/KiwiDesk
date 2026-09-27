@@ -29,17 +29,33 @@ extension KiwiCore {
     public func palette(reproducing settings: TilingSettings)
         -> ColorPalette?
     {
+        Self.palette(reproducing: settings, in: allPalettes)
+    }
+
+    /// The first of `palettes` reproducing `settings`' colours — the
+    /// pure half, which the Settings window hands its in-memory
+    /// copy of the library (#805) rather than reading the file.
+    public static func palette(
+        reproducing settings: TilingSettings,
+        in palettes: [ColorPalette]
+    ) -> ColorPalette? {
         let live = ColorPaletteKeys.extract(from: settings)
-        return allPalettes.first { $0.reproduces(live) }
+        return palettes.first { $0.reproduces(live) }
     }
 
     /// The palette name a new look `name` would file its colours
     /// under: `name`, else the next free `name N`.
     public func newPaletteName(for name: String) -> String {
-        let palettes = paletteLibrary
-        return Self.uniqueName(base: name) {
-            palettes.isBuiltinName($0) || palettes.hasUserPalette($0)
-        }
+        Self.newPaletteName(for: name, among: allPalettes)
+    }
+
+    /// `newPaletteName(for:)` over a given library — its pure half.
+    public static func newPaletteName(
+        for name: String,
+        among palettes: [ColorPalette]
+    ) -> String {
+        let taken = Set(palettes.map(\.name))
+        return uniqueName(base: name) { taken.contains($0) }
     }
 
     /// Saves `settings`' styling as look `name`, naming the palette

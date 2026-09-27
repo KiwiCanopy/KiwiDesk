@@ -137,6 +137,22 @@ struct ShelfLookApplyTests {
         }
     }
 
+    /// A look saved while the glass leaves disagree reads unapplied
+    /// until clicked: "applied" means a click changes nothing.
+    @Test("applied means a click would change nothing")
+    func appliedMeansNoChange() {
+        var settings = TilingSettings()
+        settings.dragLiquidGlass = false
+        let saved = ShelfLook(
+            name: "T",
+            palette: nil,
+            style: LookKeys.extract(from: settings)
+        )
+        #expect(!saved.isApplied(to: settings))
+        saved.apply(to: &settings)
+        #expect(saved.isApplied(to: settings))
+    }
+
     @Test("glass is one switch over every surface (#1307)")
     func glassWritesEveryLeaf() {
         var settings = TilingSettings()

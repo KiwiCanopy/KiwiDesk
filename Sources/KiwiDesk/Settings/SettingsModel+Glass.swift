@@ -32,14 +32,9 @@ extension SettingsModel {
 struct LiquidGlassAgreement {
     let settings: TilingSettings
 
-    /// Every stored leaf the switch owns — Core's one list, which
-    /// the setter writes and the agreement reads.
-    static var leaves: [WritableKeyPath<TilingSettings, Bool>] {
-        TilingSettings.liquidGlassLeaves
-    }
-
+    /// The switch's stored leaves, read off Core's one list.
     private var leaves: [Bool] {
-        Self.leaves.map { settings[keyPath: $0] }
+        TilingSettings.liquidGlassLeaves.map { settings[keyPath: $0] }
     }
 
     /// Every surface carries glass.

@@ -658,10 +658,11 @@ look carries owes the `ConfigMigration` crossing a stored value
 owes (§5), reaching `looks.json` and a bundle's looks — since
 `ShelfLook.apply` and `LookStore`'s filter skip a path they do
 not know, an unmigrated rename drops the user's styling
-silently. `LookKeysCensusTests` reds the rename; the crossing is
-review's.
-Nothing can guard this, and it is the obligation the format
-integers rest on: `<=` is decoder tolerance rather than a
+silently. `LookKeysCensusTests` reds the rename; the migration
+crossing is review's.
+
+Nothing can guard the format bumps above, and they are the
+obligation the format integers rest on: `<=` is decoder tolerance rather than a
 compatibility shim, so an older config or backup is accepted — which is
 right, and which silently becomes a lie the first time a
 `GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5

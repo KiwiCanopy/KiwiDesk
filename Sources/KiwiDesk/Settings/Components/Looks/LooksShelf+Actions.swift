@@ -42,8 +42,10 @@ extension LooksShelf {
             )
         }
         guard !name.isEmpty else { return nil }
-        if let matching = core.palette(
-            reproducing: model.config.settings
+        // Asked of the model's copy (#805): this runs per keystroke.
+        if let matching = KiwiCore.palette(
+            reproducing: model.config.settings,
+            in: model.allPalettes
         ) {
             return L(
                 "looks.colors_use",
@@ -54,7 +56,7 @@ extension LooksShelf {
         return L(
             "looks.colors_new",
             "Colors: will be saved as a new palette “%1$@”.",
-            core.newPaletteName(for: name)
+            KiwiCore.newPaletteName(for: name, among: model.allPalettes)
         )
     }
 
