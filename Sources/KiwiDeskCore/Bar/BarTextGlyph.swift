@@ -96,7 +96,9 @@ enum BarTextGlyph {
     /// carries ~8 pt of padding around the advance — wider than
     /// a thin bar's cell for every glyph. The ink is centred
     /// rather than the advance, since the cell's neighbours are
-    /// image cells whose pixels centre.
+    /// image cells whose pixels centre. Vertically an App Font
+    /// ligature centres its line box and text sets its baseline
+    /// through `originY(capsCentredOn:for:height:)`.
     @MainActor
     static func frame(
         for field: NSTextField,
@@ -112,45 +114,47 @@ enum BarTextGlyph {
             frameWidth: rect.width
         )
         let height = ceil(size.height)
-        if height > 0, height < rect.height {
-            rect.origin.y += (rect.height - height) / 2
-            rect.size.height = height
-        } else if let rows = inkRows(of: field, height: height),
-            rows.top < 0 || rows.bottom > rect.height
-        {
-            // A tall face (Zapfino, #1681) sets its ink below a
-            // cell-high frame: take the whole line box, ink centred.
-            let mid = (rows.top + rows.bottom) / 2
-            let flipped = field.superview?.isFlipped ?? true
-            rect.origin.y =
-                flipped ? rect.midY - mid : rect.midY - (height - mid)
-            rect.size.height = height
-        }
+        guard height > 0 else { return rect }
+        rect.size.height = height
+        rect.origin.y =
+            field.font?.fontName == AppFont.fontName
+            ? cell.midY - height / 2
+            : originY(
+                capsCentredOn: cell.midY,
+                for: field,
+                height: height
+            )
         return rect
     }
 
-    /// The ink's top and bottom, in points down from the top of
-    /// `field` laid out `height` tall: the cell draws its title
-    /// from the top, one baseline offset above the line origin.
+    /// The frame origin's y for `field` laid out `height` tall
+    /// whose baseline centres the font's cap height on `mid`: one
+    /// baseline per font whatever a string's own ink, so an
+    /// old-style 3 and a 1 line up and a tall face's ascent does
+    /// not lift its text (#1707). The frame may pass the cell.
     @MainActor
-    static func inkRows(
-        of field: NSTextField,
+    static func originY(
+        capsCentredOn mid: CGFloat,
+        for field: NSTextField,
         height: CGFloat
-    ) -> (top: CGFloat, bottom: CGFloat)? {
-        guard let font = field.font, let cell = field.cell, height > 0
-        else { return nil }
+    ) -> CGFloat {
+        guard let font = field.font, let cell = field.cell else {
+            return mid - height / 2
+        }
         let bounds = CGRect(
             x: 0,
             y: 0,
             width: max(ceil(cell.cellSize.width), 1),
             height: height
         )
+        // The cell draws its title from the top, flipped.
         let baseline =
             cell.titleRect(forBounds: bounds).minY
             + layout.defaultBaselineOffset(for: font)
-        let ink = metrics(field.stringValue, font: font).ink
-        guard ink.height > 0 else { return nil }
-        return (baseline - ink.maxY, baseline - ink.minY)
+        let cap = font.capHeight
+        return field.superview?.isFlipped ?? true
+            ? mid + cap / 2 - baseline
+            : mid - cap / 2 - (height - baseline)
     }
 
     @MainActor private static let layout = NSLayoutManager()

@@ -122,7 +122,6 @@ extension AppBarOverlay {
         let measure = NSTextField(labelWithString: "")
         measure.alignment = .center
         measure.font = font
-        measure.usesSingleLineMode = true
         measure.maximumNumberOfLines = 1
         measure.lineBreakMode = .byTruncatingTail
         return items.reduce(0) { widest, item in
