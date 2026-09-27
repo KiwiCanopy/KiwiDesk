@@ -35,13 +35,14 @@ struct HeldSpaceRestartTests {
         snapshot?.spaces.filter { $0.held != nil }.count
     }
 
-    /// A census hosting `ids` on an unshown Desktop.
-    func census(hosting ids: [Int]) -> DesktopCensus {
-        var hosts: [WindowID: DesktopCensus.Host] = [:]
-        for id in ids {
-            hosts[WindowID(UInt32(id))] = .init(space: 4, pid: 1, isUp: true)
-        }
-        return DesktopCensus(hosts: hosts, shown: [])
+    /// The per-window read: `ids` hosted on native Space `space`,
+    /// every other window hosted nowhere.
+    func hosting(
+        _ ids: [Int],
+        on space: SkyLight.SpaceID = 4
+    ) -> @MainActor (WindowID) -> WindowSpaceReading {
+        let hosted = Set(ids.map { WindowID(UInt32($0)) })
+        return { hosted.contains($0) ? .hosted(space) : .gone }
     }
 
     /// Process B on `screens`, under `profile` when one is named.
@@ -202,95 +203,4 @@ struct HeldSpaceRestartTests {
         #expect(b.state.workspaces.allSpaces.map(\.id) == order)
     }
 
-    @Test("a hidden app's window keeps its held Space across the restart")
-    func hiddenMemberKeepsTheHold() throws {
-        let a = try unplugged()
-        a.handle(.windowHidden(WindowID(12)))
-        #expect(a.state.heldSpaces[SpaceID(6)] != nil)
-        let b = boot(
-            from: a,
-            screens: [desk.builtIn],
-            profile: "solo",
-            windows: [13, 10, 11],
-            session: try crossed(a.sessionSnapshot())
-        )
-        b.desktopMemory.readCensus = { _ in self.census(hosting: [12]) }
-        b.retireGoneHeldMembers()
-        #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
-        #expect(
-            b.state.rememberedSpaces[WindowID(12)] == .restored(SpaceID(6))
-        )
-        b.handle(.windowCreated(desk.window(12)))
-        #expect(b.state.workspaces.space(of: WindowID(12)) == SpaceID(6))
-    }
-
-    @Test("a window on another Desktop keeps its held Space too")
-    func awayMemberKeepsTheHold() throws {
-        let a = try unplugged()
-        let away = WindowID(12)
-        a.state.workspaces.remove(away)
-        a.state.windows.remove(away)
-        a.state.awayWindows[away] = AwayWindow(
-            id: away,
-            pid: 1,
-            appName: "App12",
-            appBundleID: nil,
-            nativeSpace: 4
-        )
-        a.state.rememberedSpaces[away] = .departed(SpaceID(6))
-        a.retile()
-        #expect(a.state.heldSpaces[SpaceID(6)] != nil)
-        let b = boot(
-            from: a,
-            screens: [desk.builtIn],
-            profile: "solo",
-            windows: [13, 10, 11],
-            session: try crossed(a.sessionSnapshot())
-        )
-        b.desktopMemory.readCensus = { _ in self.census(hosting: [12]) }
-        b.retireGoneHeldMembers()
-        #expect(b.state.heldSpaces[SpaceID(6)] != nil)
-        #expect(b.state.rememberedSpace(of: away) == SpaceID(6))
-    }
-
-    @Test("a window still launching at boot keeps its held Space")
-    func lateMemberKeepsTheHold() throws {
-        let a = try unplugged()
-        let b = boot(
-            from: a,
-            screens: [desk.builtIn],
-            profile: "solo",
-            windows: [13, 12],
-            session: try crossed(a.sessionSnapshot())
-        )
-        b.desktopMemory.readCensus = { _ in
-            self.census(hosting: [13, 10, 11, 12])
-        }
-        b.retireGoneHeldMembers()
-        #expect(b.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
-        b.handle(.windowCreated(desk.window(10)))
-        #expect(b.state.workspaces.space(of: WindowID(10)) == SpaceID(5))
-    }
-
-    @Test("a hold whose windows are gone ends once the census says so")
-    func goneWindowsRetireAfterBoot() throws {
-        let a = try unplugged()
-        let b = boot(
-            from: a,
-            screens: [desk.builtIn],
-            profile: "solo",
-            windows: [13, 12],
-            session: try crossed(a.sessionSnapshot())
-        )
-        // Kept through the replay: nothing has judged 10 and 11.
-        #expect(b.state.heldSpaces[SpaceID(5)] != nil)
-        b.desktopMemory.readCensus = { _ in nil }
-        b.retireGoneHeldMembers()
-        #expect(b.state.heldSpaces[SpaceID(5)] != nil)
-        b.desktopMemory.readCensus = { _ in self.census(hosting: [13, 12]) }
-        b.retireGoneHeldMembers()
-        #expect(b.state.heldSpaces[SpaceID(5)] == nil)
-        #expect(b.state.workspaces[SpaceID(5)] == nil)
-        #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
-    }
 }

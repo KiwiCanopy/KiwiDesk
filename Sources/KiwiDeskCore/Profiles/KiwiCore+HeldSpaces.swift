@@ -143,7 +143,13 @@ extension KiwiCore {
             ) {
                 inPlace.append(id)
             } else {
-                for window in awayMembers(of: id) {
+                // Every window remembered there, up or not — a
+                // hidden app's, a restored filing — or its arrival
+                // re-creates the retired id (#1646, #128).
+                let remembered = state.rememberedSpaces
+                    .filter { $0.value.space == id }.keys
+                    .sorted { $0.raw < $1.raw }
+                for window in remembered {
                     state.refileAway(of: window, to: origin.name)
                 }
                 forwardWindows(of: id, to: origin.name)

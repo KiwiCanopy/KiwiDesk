@@ -56,16 +56,14 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 4
+            readers.count == 3
                 && files == [
                     "KiwiCore+AwayWindows.swift",
                     "KiwiCore+LaunchReach.swift",
-                    // Boot's judge of a restored hold (#1646).
-                    "KiwiCore+HeldSpaceBoot.swift",
                 ],
             .init(
-                rawValue: "expected the refresh, the boot seed, "
-                    + "the reach and the held judge, found "
+                rawValue: "expected the refresh, the boot seed "
+                    + "and the reach, found "
                     + readers.map(\.site).joined(separator: ", ")
             )
         )
@@ -73,7 +71,8 @@ struct DesktopCensusSeamTests {
 
     /// The per-window door: the raw read lives behind the seam's
     /// default alone, and production asks the seam in exactly the
-    /// two places that classify or remember a window's Space.
+    /// places that classify or remember a window's Space, and in
+    /// boot's judge of a restored hold (#1646).
     @Test("production reads a window's Space through the seam")
     func windowSpaceReadsThroughTheSeam() throws {
         // Unqualified: the one call sits inside the extension.
@@ -91,14 +90,16 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 2
+            readers.count == 3
                 && files == [
                     "KiwiCore+GoneReason.swift",
                     "KiwiCore+DesktopFocusMemory.swift",
+                    // Boot's judge of a restored hold (#1646).
+                    "KiwiCore+HeldSpaceBoot.swift",
                 ],
             .init(
-                rawValue: "expected the classifier and the focus "
-                    + "memory, found "
+                rawValue: "expected the classifier, the focus "
+                    + "memory and the held judge, found "
                     + readers.map(\.site).joined(separator: ", ")
             )
         )

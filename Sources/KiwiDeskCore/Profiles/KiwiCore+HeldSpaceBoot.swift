@@ -105,12 +105,15 @@ extension KiwiCore {
     }
 
     /// Boot's last word on the restored holds, after the away seed:
-    /// a window a held Space remembers that the WindowServer no
-    /// longer hosts is gone for good — a relaunched app's, one
-    /// closed while KiwiDesk was down — so its filing is dropped
-    /// and #1507's retire ends a hold left with nothing. Hidden,
-    /// away and still-launching windows are hosted and keep it.
-    /// Without a census nothing is judged (absent, never faked).
+    /// a window a held Space remembers that the WindowServer hosts
+    /// on no Space at all is gone for good — a relaunched app's,
+    /// one closed while KiwiDesk was down — so its filing is
+    /// dropped and #1507's retire ends a hold left with nothing.
+    /// The per-window read, not the Desktop census, which lists
+    /// user Desktops only: a hidden, away, fullscreen or
+    /// still-launching window is hosted and keeps it. An
+    /// unanswered read judges nothing (absent, never faked), and
+    /// the snapshot then stops carrying the unjudged filings.
     func retireGoneHeldMembers() {
         let filed = state.rememberedSpaces.compactMap { entry in
             guard case .restored(let space) = entry.value,
@@ -120,15 +123,17 @@ extension KiwiCore {
             return entry.key
         }
         guard !filed.isEmpty else { return }
-        guard
-            let census = desktopMemory.readCensus(
-                NativeSpaces.allSpaces()
-            )
-        else {
-            onLog("restart: no census; held windows not judged")
-            return
+        var gone: [WindowID] = []
+        for id in filed.sorted(by: { $0.raw < $1.raw }) {
+            switch desktopMemory.readWindowSpace(id) {
+            case .gone: gone.append(id)
+            case .hosted: break
+            case .unavailable: state.heldFilingsUnjudged = true
+            }
         }
-        let gone = filed.filter { census.hosts[$0] == nil }
+        if state.heldFilingsUnjudged {
+            onLog("restart: held windows could not be judged")
+        }
         guard !gone.isEmpty else { return }
         for id in gone { state.forgetRestoredFiling(of: id) }
         onLog("restart: \(gone.count) held window(s) did not come back")

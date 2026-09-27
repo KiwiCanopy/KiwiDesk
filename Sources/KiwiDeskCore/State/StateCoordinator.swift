@@ -87,6 +87,11 @@ public struct StateCoordinator: Sendable {
     /// Keep, Save or partitioning record captures; written and
     /// ended in `KiwiCore+HeldSpaces.swift`.
     var heldSpaces: [SpaceID: HeldOrigin] = [:]
+    /// Whether boot could not ask the WindowServer which restored
+    /// held windows still exist (#1646): the snapshot then carries
+    /// no restored filing into the next boot, so a closed window
+    /// holds a Space across one restart at most.
+    var heldFilingsUnjudged = false
     /// Each Space's screen fingerprint as the first report of a
     /// screen-count change found it (#1507) — the one fact the
     /// report's own resolve erases for an unpinned Space. Written
