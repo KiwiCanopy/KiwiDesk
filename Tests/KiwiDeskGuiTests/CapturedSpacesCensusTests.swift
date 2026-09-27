@@ -26,6 +26,8 @@ struct CapturedSpacesCensusTests {
             (6, "the held machinery itself"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceOrder.swift":
             (1, "the held batch's bar placement; captures nothing"),
+        "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceBoot.swift":
+            (1, "boot's renumber takes every live number (#1646)"),
         "KiwiDeskCore/Profiles/KiwiCore+SpaceDisplays.swift":
             (3, "the display resolve places held Spaces too"),
         "KiwiDeskCore/Profiles/KiwiCore+ProfileSpaces.swift":

@@ -31,6 +31,16 @@ extension StateSnapshot {
         return (list ?? []).compactMap(\.value)
     }
 
+    /// This snapshot with each window record transformed and
+    /// every other field as captured.
+    func mappingWindowRecords(
+        _ transform: (WindowRecord) -> WindowRecord
+    ) -> StateSnapshot {
+        var copy = self
+        copy.windows = windows.map(transform)
+        return copy
+    }
+
     /// This snapshot with Space ids renamed — records, the active
     /// Space and the held list alike.
     func renamingSpaces(_ renames: [SpaceID: SpaceID]) -> StateSnapshot {
