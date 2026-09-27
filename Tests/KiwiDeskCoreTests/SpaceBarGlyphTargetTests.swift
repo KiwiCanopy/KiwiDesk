@@ -158,6 +158,34 @@ struct SpaceBarGlyphTargetTests {
         #expect(view(overflow: [5], collapsed: true).overflowTarget == nil)
     }
 
+    @Test("A render with the same +n windows keeps its target")
+    func sameOverflowKeepsTheTarget() throws {
+        LocalizationManager.shared.select("en")
+        let item = view(overflow: [5])
+        let before = try #require(item.overflowTarget)
+        let rerender = { (overflow: [UInt32]) in
+            item.configure(
+                identity: .space(SpaceID("2")),
+                spaceGlyph: .text("2", tinted: true),
+                apps: [app("Mail", [2, 3]), app("Web", [4])],
+                active: false,
+                horizontal: true,
+                style: SpaceBarLook(),
+                stateMarkColors: StateMarkColors(
+                    sticky: "#ffffff",
+                    floating: "#ffffff"
+                ),
+                overflow: overflow.count,
+                overflowWindows: overflow.map(WindowID.init)
+            )
+        }
+        rerender([5])
+        #expect(item.overflowTarget === before)
+        rerender([6])
+        #expect(item.overflowTarget !== before)
+        #expect(item.overflowTarget?.members == [WindowID(6)])
+    }
+
     @Test("Every target is a VoiceOver button named by its app")
     func targetsSpeak() throws {
         LocalizationManager.shared.select("en")
