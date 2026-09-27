@@ -259,8 +259,8 @@ public final class KiwiCore {
     /// layout's frame; the next pass gathers the floating space
     /// it SITS in, never one it merely passed through (#1177).
     /// Ruled OUT: a move VERB (`fileMembership`), where the user
-    /// chose the destination and the frame a window takes on
-    /// entering a floating space by a verb is #493's; and a
+    /// chose the destination and a window entering a floating
+    /// space by a verb takes the float placement (#1708); and a
     /// window re-filed while AWAY (`refileAway`), whose return
     /// carries the frame macOS kept for it on that Desktop.
     var refiledWindows: Set<WindowID> = []

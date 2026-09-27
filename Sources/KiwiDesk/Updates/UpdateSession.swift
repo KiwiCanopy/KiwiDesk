@@ -85,9 +85,13 @@ final class UpdateSession: ObservableObject {
     var hide: () -> Void = {}
     /// Closes the window: Later answered the offer.
     var end: () -> Void = {}
-    /// The user pressed Install: the notes were read here, so no
-    /// "What's new" is owed after it.
+    /// The user pressed Install: the notes were read here, so the
+    /// relaunch narrates itself rather than owing them (#1667).
     var onInstall: () -> Void = {}
+    /// The installer took over — the one point a relaunch is
+    /// actually coming, unlike a press whose download may still
+    /// fail or be put off (#1667).
+    var onInstalling: () -> Void = {}
     /// Speaks a phase Sparkle moved to on its own — never one the
     /// user's own press caused.
     var announce: (UpdateWindowPhase) -> Void = { _ in }
@@ -157,6 +161,7 @@ final class UpdateSession: ObservableObject {
 
     /// The installer sent its quit, or the relaunch is under way.
     func installing(retryTermination: (() -> Void)?) {
+        onInstalling()
         self.retryTermination = retryTermination
         phase = .installing
         announce(phase)

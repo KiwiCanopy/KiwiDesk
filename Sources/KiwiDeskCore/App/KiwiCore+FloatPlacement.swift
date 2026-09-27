@@ -1,8 +1,9 @@
 import CoreGraphics
 
-/// The float placement: a window an explicit float verb floats
-/// is centred at the derived `FloatPlacement` size, since the
-/// frame it leaves was the layout's slot and never the user's
+/// The float placement: a window an explicit float verb floats,
+/// or a move verb files into a floating Space (#1708), is centred
+/// at the derived `FloatPlacement` size, since the frame it
+/// leaves was the layout's slot and never the user's
 /// (`docs/design-decisions.md` ▸ the float placement entry).
 extension KiwiCore {
     /// The space the placement plays out on: the one a sticky
@@ -29,13 +30,56 @@ extension KiwiCore {
     /// gate the transition on `isEffectiveFloatForPlacement`
     /// read before the flip; the setting gate lives here.
     func placeFloating(_ id: WindowID) {
-        guard tiler.settings.floatPlacement == .center,
+        guard let window = state.windows[id],
+            let target = floatPlacementTarget(for: id)
+        else { return }
+        let base = currentFrame(of: id, fallback: window.frame)
+        tiler.applyFrame(
+            id,
+            from: base,
+            to: target,
+            animated: tiler.settings.animations.onRelayout
+        )
+        // A size change outside the layout's asks (#677): its echo
+        // must not read as the app refusing the last tiled ask, or
+        // the next tiled space places the float's size as residue.
+        tiler.forgetSizeBound(id)
+    }
+
+    /// Places a window a move verb just filed into a floating
+    /// Space where it was no effective float before (#1708):
+    /// the frame it brings is the layout's slot, as at the float
+    /// verbs. Seeded as its pending capture, so the restore
+    /// delivers it — at once where the Space shows, at the
+    /// activation where it is parked. Returns whether it placed;
+    /// a sticky and a dragged window keep the re-anchor.
+    func placeEnteringFloat(_ id: WindowID, wasFloat: Bool) -> Bool {
+        guard !wasFloat,
             let window = state.windows[id],
+            !window.isSticky,
+            // Its own macOS Space (#670): nothing parks it, so a
+            // seed would be re-delivered every retile.
+            !window.isFullscreen,
+            tiler.dragExemptWindow != id,
+            isEffectiveFloatForPlacement(id),
+            let target = floatPlacementTarget(for: id)
+        else { return false }
+        tiler.seedStash(id, frame: target)
+        tiler.forgetSizeBound(id)
+        return true
+    }
+
+    /// Where `id` floats on its placement space: its remembered
+    /// frame, else centred at the derived size and cascaded off
+    /// the other floats there (#1708); nil under `keep`.
+    private func floatPlacementTarget(for id: WindowID) -> CGRect? {
+        guard tiler.settings.floatPlacement == .center,
+            state.windows[id] != nil,
             let space = floatPlacementSpace(of: id),
             // The grow bound: a placement nothing will correct
             // lays its frame clear of the ring too (#1091).
             let region = floatGrowBounds(on: space)
-        else { return }
+        else { return nil }
         let bound = tiler.sizeBound(for: id)
         let minimum = CGSize(
             width: bound?.minWidth ?? 0,
@@ -58,27 +102,49 @@ extension KiwiCore {
                     minimum: minimum
                 )
             }
-        let target =
-            remembered
-            ?? FloatPlacement.centered(
-                in: region,
-                minimum: minimum,
-                maximum: CGSize(
-                    width: bound?.maxWidth ?? .infinity,
-                    height: bound?.maxHeight ?? .infinity
-                )
+        if let remembered { return remembered }
+        let centred = FloatPlacement.centered(
+            in: region,
+            minimum: minimum,
+            maximum: CGSize(
+                width: bound?.maxWidth ?? .infinity,
+                height: bound?.maxHeight ?? .infinity
             )
-        let base = currentFrame(of: id, fallback: window.frame)
-        tiler.applyFrame(
-            id,
-            from: base,
-            to: target,
-            animated: tiler.settings.animations.onRelayout
         )
-        // A size change outside the layout's asks (#677): its echo
-        // must not read as the app refusing the last tiled ask, or
-        // the next tiled space places the float's size as residue.
-        tiler.forgetSizeBound(id)
+        return FloatPlacement.cascaded(
+            centred,
+            avoiding: otherFloatFrames(on: space, besides: id),
+            in: region
+        )
+    }
+
+    /// The frames the other effective floats on `space` show or
+    /// will show, a parked one's pending capture first: its own
+    /// members, the travelers it draws now, and every ∞ window,
+    /// which an unshown Space draws once it activates.
+    private func otherFloatFrames(
+        on space: SpaceID,
+        besides id: WindowID
+    ) -> [CGRect] {
+        guard let workspace = state.workspaces[space] else { return [] }
+        let global = state.windows.all
+            .filter { $0.stickyScope == .global }.map(\.id)
+        var seen = Set<WindowID>()
+        let candidates =
+            (workspace.windows
+            + state.effectiveMembers(of: workspace) + global)
+            .filter { seen.insert($0).inserted }
+        return candidates.compactMap { other in
+            guard other != id,
+                let window = state.windows[other],
+                !window.isFullscreen,
+                EffectiveFloat.applies(
+                    isFloating: window.isFloating,
+                    mode: workspace.mode
+                )
+            else { return nil }
+            return wouldBeFrame(of: window)
+        }
     }
 
     /// Where a float sits as it is about to be tiled (#1675), for
@@ -94,7 +160,9 @@ extension KiwiCore {
     }
 
     /// The commanded frame outranks the echo-fed state one: a
-    /// retile just before may have issued a move already.
+    /// retile just before may have issued a move already. No
+    /// stash rung, unlike `wouldBeFrame`: this is where the window
+    /// SITS, the base an animation starts from.
     private func currentFrame(
         of id: WindowID,
         fallback: CGRect

@@ -75,6 +75,9 @@ struct PendingSpaceSeamTests {
         )
         #expect(filing != nil)
         #expect(filing?.contains("reanchorFloat(") == true)
+        // The move entry's placement (#1708) rides the same one
+        // filing, or the Desktop routes lose it.
+        #expect(filing?.contains("placeEnteringFloat(") == true)
     }
 
     @Test("each wiring exists exactly once per named file")

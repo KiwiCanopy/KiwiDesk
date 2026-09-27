@@ -373,8 +373,14 @@ composited once, its words picked by rank — a waiting update
 outranks the notes of one already installed — and its row exists
 only while it waits (`UpdateReminderReadNotStoredTests`,
 `WhatsNewSurfaceTests`). The window opens only on a launch the
-USER started and the permission tour does not own: the origin is
-read from the open-application Apple event at the top of
+USER started and the permission tour does not own — with ONE
+exception, the relaunch after the update window's own Install,
+which Sparkle starts rather than the user: it opens whatever the
+origin, still never over the tour, before boot so it can narrate
+it, and only once the installer took over, since a press whose
+download fails relaunches nothing (#1667,
+`WhatsNewRelaunchTests`, `UpdatePromptWiringTests` ▸ the launch
+origin). The origin is read from the open-application Apple event at the top of
 `applicationDidFinishLaunching`, where it is current (nil in
 `applicationWillFinishLaunching`, measured 2026-09-24), and a
 launch with no event to read is unknown and takes the mark, never

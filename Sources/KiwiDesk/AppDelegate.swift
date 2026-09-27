@@ -17,10 +17,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// no reader decides whether it starts, and handed to the
     /// status item and the dashboard alike (#1536,
     /// `UpdaterSeamGuardTests` pins both hand-overs).
-    private let updater: any AppUpdating = AppUpdaterFactory.make()
+    let updater: any AppUpdating = AppUpdaterFactory.make()
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
+    /// Boot's count for a relaunched "What's new" (#1667).
+    let bootNarration = BootNarration()
     /// Cached dashboard controller to avoid constructing on refresh.
     private var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
@@ -167,6 +169,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.onBootPhaseChange = { [weak self] phase in
             self?.statusItem?.setBootPhase(phase)
             self?.onboardingModel.bootPhase = phase
+            self?.bootNarration.phase = phase
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
@@ -229,21 +232,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         permissions.start()
 
         let trusted = permissions.isTrusted
-        // The window only for a launch the user started and no
-        // tour owns — the permission grant or a resuming discovery;
-        // otherwise the mark.
-        if let whatsNew = updater.whatsNew {
-            let opensWindow =
-                origin == .user && trusted
-                && !OnboardingDiscovery.shouldResume(isTrusted: trusted)
-            let existingUser = OnboardingDiscovery.hasShown()
-            Task {
-                await whatsNew.launched(
-                    opensWindow: opensWindow,
-                    existingUser: existingUser
-                )
-            }
-        }
+        offerWhatsNew(origin: origin, trusted: trusted)
         if trusted {
             startManaging()
             if OnboardingDiscovery.shouldResume(

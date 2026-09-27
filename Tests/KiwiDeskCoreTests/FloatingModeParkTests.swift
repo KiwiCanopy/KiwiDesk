@@ -39,6 +39,9 @@ struct FloatingModeParkTests {
             height: 600
         )
         core.state.apply(.windowMoved(WindowID(1), frame))
+        // `keep`: a tiled window entering by a verb is otherwise
+        // placed (#1708), and this suite pins the park's capture.
+        core.execute("set_float_placement", args: [.string("keep")])
         // The move parks space 2's member on the retile; the
         // NON-flagged window must capture its original like a
         // float would — no layout will ever place it back.

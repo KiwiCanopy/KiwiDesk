@@ -1,6 +1,7 @@
 import CoreGraphics
 
-/// Where a window lands when an explicit float verb floats it
+/// Where a window lands when an explicit float verb floats it,
+/// or a move verb files it into a floating Space (#1708)
 /// (`float_placement`, `docs/design-decisions.md` ▸ the float
 /// placement entry). Read only at that moment, never by layout
 /// math.
@@ -25,6 +26,10 @@ extension FloatPlacement {
     /// The long-axis cap, as a multiple of the short-axis span:
     /// a third of an ultrawide is a banner, not a window.
     static let longCap: CGFloat = 1.25
+
+    /// The diagonal step a centred placement takes off a spot
+    /// another float already holds (#1708).
+    static let cascadeStep: CGFloat = 28
 
     /// The centred frame for a window floated in `region` (AX
     /// coordinates). Measured on the region's short and long
@@ -65,6 +70,53 @@ extension FloatPlacement {
             height: height
         )
         return GeometryUtils.confine(frame, to: region)
+    }
+
+    /// `frame` stepped down and right by `cascadeStep` until no
+    /// frame in `others` shares its centre, within half a step, or
+    /// piles with it by `FloatGather.isPiled` either way (#1708).
+    /// Where no such step fits `region` — a float larger than the
+    /// walk can leave — the shared centre alone decides, and
+    /// `frame` itself where even that finds no step.
+    public static func cascaded(
+        _ frame: CGRect,
+        avoiding others: [CGRect],
+        in region: CGRect
+    ) -> CGRect {
+        let reach = cascadeStep / 2
+        func sharesCentre(_ candidate: CGRect) -> Bool {
+            others.contains {
+                abs($0.midX - candidate.midX) < reach
+                    && abs($0.midY - candidate.midY) < reach
+            }
+        }
+        func piles(_ candidate: CGRect) -> Bool {
+            others.contains {
+                FloatGather.isPiled(candidate, among: [$0])
+                    || FloatGather.isPiled($0, among: [candidate])
+            }
+        }
+        return walk(frame, in: region) { sharesCentre($0) || piles($0) }
+            ?? walk(frame, in: region, while: sharesCentre)
+            ?? frame
+    }
+
+    /// The first diagonal step from `frame` that `taken` refuses
+    /// not, inside `region`; nil where the walk leaves it first.
+    private static func walk(
+        _ frame: CGRect,
+        in region: CGRect,
+        while taken: (CGRect) -> Bool
+    ) -> CGRect? {
+        var candidate = frame
+        while taken(candidate) {
+            candidate = candidate.offsetBy(
+                dx: cascadeStep,
+                dy: cascadeStep
+            )
+            guard region.contains(candidate) else { return nil }
+        }
+        return candidate
     }
 
     /// A remembered float frame placed back in `region` (#1675),

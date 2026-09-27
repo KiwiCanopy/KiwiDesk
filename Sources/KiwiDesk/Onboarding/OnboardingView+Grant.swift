@@ -81,13 +81,7 @@ extension OnboardingView {
 
     var grantHintForPhase: String? {
         guard model.isTrusted else { return grantHint }
-        guard let count = grantHintCount else { return nil }
-        return L(
-            "onboarding.grant.arranging.count",
-            "Going through your open apps: %1$d of %2$d",
-            count.scanned,
-            count.total
-        )
+        return BootCountText.line(for: model.bootPhase)
     }
 
     private var grantHintCount: (scanned: Int, total: Int)? {

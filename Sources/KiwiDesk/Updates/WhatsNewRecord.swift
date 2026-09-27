@@ -13,6 +13,19 @@ struct WhatsNewRecord {
     /// its notes were read there, so none are owed after it.
     static let seenKey = "updates.notesSeenVersion"
 
+    /// The notes of an update installed from the window, carried
+    /// across its relaunch so "What's new" can narrate it without
+    /// waiting on the feed (#1667).
+    static let relaunchKey = "updates.relaunchNotes"
+
+    /// What the relaunch reads: the version installed, the one it
+    /// replaced, and the feed items the window merged.
+    struct Relaunch: Codable, Equatable {
+        let version: String
+        let since: String
+        let items: [WhatsNewFeed.Item]
+    }
+
     let defaults: UserDefaults
 
     init(_ defaults: UserDefaults = .standard) {
@@ -24,6 +37,20 @@ struct WhatsNewRecord {
 
     func markSeen(_ version: String) {
         defaults.set(version, forKey: Self.seenKey)
+    }
+
+    func markRelaunch(_ relaunch: Relaunch) {
+        let data = try? JSONEncoder().encode(relaunch)
+        defaults.set(data, forKey: Self.relaunchKey)
+    }
+
+    /// The relaunch record, read once: a launch that does not
+    /// narrate it leaves nothing for a later one.
+    func takeRelaunch() -> Relaunch? {
+        defer { defaults.removeObject(forKey: Self.relaunchKey) }
+        guard let data = defaults.data(forKey: Self.relaunchKey)
+        else { return nil }
+        return try? JSONDecoder().decode(Relaunch.self, from: data)
     }
 
     /// The owed range is answered: this version's notes are done.
