@@ -57,10 +57,10 @@ public struct KiwiShelf: Sendable, Equatable {
     public var highlightWidth: CGFloat = 2
     /// Spacing between items in pt — one rhythm for both bars.
     public var itemGap: CGFloat = 6
-    /// Room (pt) between the thickness and an item's content, on
-    /// each side across the shelf (#1682): 0 draws content at the
-    /// full thickness. A drawing reads `contentDepth(forDepth:)`.
-    public var itemPadding: CGFloat = 0
+    /// How large an item's content draws across the shelf, in pt
+    /// (#1713): 0 = automatic, the full thickness. Stored as typed;
+    /// a drawing reads `contentDepth(forDepth:)`, which clamps it.
+    public var glyphSize: CGFloat = 0
     /// Font size in pt; 0 = auto, each bar scaling with thickness.
     public var fontSize: CGFloat = 0
     /// Bar text's family (#1681): an installed family's name, or
@@ -112,14 +112,12 @@ public struct KiwiShelf: Sendable, Equatable {
     /// no ceiling (#1695).
     public static let minItemGap: CGFloat = 0
     /// The thinnest content an item draws (#1682): what the
-    /// thinnest shelf draws unpadded, so padding never takes a
-    /// glyph below a size QA already ruled readable.
+    /// thinnest shelf draws, so a glyph size never takes a glyph
+    /// below a size QA already ruled readable.
     public static let minContentDepth: CGFloat = minThickness
     /// An automatic title's size per point of content depth, both
     /// bars' (#1682).
     public static let autoTitleShare: CGFloat = 0.42
-    /// Floor of `itemPadding` (#1682): content at the thickness.
-    public static let minItemPadding: CGFloat = 0
     /// Bounds of `highlightWidth` in pt (#1680).
     public static let highlightWidthRange: ClosedRange<CGFloat> = 1...6
     /// The edge mark's thickness per point of `highlightWidth`:
@@ -224,16 +222,13 @@ public struct KiwiShelf: Sendable, Equatable {
     }
 
     /// The depth an item's content is sized to on a strip `depth`
-    /// deep (#1682): the depth less `itemPadding` on each side,
-    /// never thinner than `minContentDepth` nor deeper than the
-    /// strip. That floor is the ceiling on the padding, so the
-    /// stored value needs none.
+    /// deep (#1682, #1713): the strip's own depth while the glyph
+    /// size is automatic, else the glyph size — never thinner than
+    /// `minContentDepth` nor deeper than the strip, so a stored
+    /// size above a later thickness waits rather than being lost.
     public func contentDepth(forDepth depth: CGFloat) -> CGFloat {
-        let padding = max(itemPadding, Self.minItemPadding)
-        return max(
-            depth - 2 * padding,
-            min(depth, Self.minContentDepth)
-        )
+        guard glyphSize > 0 else { return depth }
+        return min(depth, max(glyphSize, Self.minContentDepth))
     }
 
     /// Concrete corner radius in pt for a given thickness.

@@ -3,15 +3,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Item padding reaches the App Bar (#1682): at 6 pt on a 40 pt
-/// strip the icon, the title's automatic size, the group badge,
+/// Glyph size reaches the App Bar (#1682, #1713): at 28 pt on a
+/// 40 pt strip the icon, the title's automatic size, the group badge,
 /// the slot measurement and the overflow count all read the 28 pt
 /// content depth, while the item keeps the full depth.
-@Suite("Item padding reaches the App Bar", .serialized)
+@Suite("Glyph size reaches the App Bar", .serialized)
 @MainActor
-struct ItemPaddingAppBarTests {
+struct GlyphSizeAppBarTests {
     private static let depth: CGFloat = 40
-    private static let padding: CGFloat = 6
     private static let content: CGFloat = 28
 
     init() { LiquidGlassGate.override = { false } }
@@ -29,7 +28,7 @@ struct ItemPaddingAppBarTests {
         content: AppBarStyle.Content = .iconAndTitle
     ) -> AppBarLook {
         var look = AppBarLook()
-        look.itemPadding = padding
+        look.glyphSize = Self.content
         look.liquidGlass = false
         look.edge = edge
         look.content = content

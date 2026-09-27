@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 
 /// The bar cards' slider bands where Core clamps one edge
@@ -16,15 +17,23 @@ enum BarSliderBands {
     static let margin: ClosedRange<Double> =
         Double(KiwiShelf.minMargin)...60
 
-    /// The shelf's Item padding row (#1682): Core's floor up to
-    /// the most padding that still moves content on the thickest
-    /// shelf this card offers — past it `contentDepth` holds the
-    /// content at `minContentDepth` whatever the value.
-    static let itemPadding: ClosedRange<Double> = {
-        let floor = Double(KiwiShelf.minItemPadding)
-        let content = Double(KiwiShelf.minContentDepth)
-        return floor...((thickness.upperBound - content) / 2)
-    }()
+    /// The shelf's Glyph size row (#1713): Core's content floor
+    /// up to the draft's thickness — past it `contentDepth` draws
+    /// the thickness whatever the value, so the slider has no
+    /// stretch that does nothing. Lua is open beyond it.
+    static func glyphSize(thickness: CGFloat) -> ClosedRange<Double> {
+        let floor = Double(KiwiShelf.minContentDepth)
+        return floor...max(Double(thickness), floor + 1)
+    }
+
+    /// The shelf's Font size row (#1713): a curated legible floor
+    /// up to the draft's thickness, so the size an automatic font
+    /// draws always sits inside it. Core clamps neither edge, so
+    /// Lua stays open beyond both.
+    static func fontSize(thickness: CGFloat) -> ClosedRange<Double> {
+        let floor = 6.0
+        return floor...max(Double(thickness), floor + 1)
+    }
 
     /// The shelf's Highlight width row (#1680): both edges are
     /// Core's, which clamps the stored value to them.

@@ -27,11 +27,9 @@ extension KiwiShelfCard {
                 help: L(
                     "kiwishelf.thickness.help",
                     "One thickness for both bars. An automatic "
-                        + "font size follows it."
+                        + "glyph size follows it."
                 )
             )
-        case .itemPadding:
-            itemPaddingRow
         case .alignment:
             alignmentRow
         case .order:
@@ -83,6 +81,8 @@ extension KiwiShelfCard {
                 SettingsCatalog.bars.kiwishelfStyle.children
                     .kiwishelfStyleItemGap
             )
+        case .glyphSizeAuto:
+            glyphSizeGroup
         case .fontSizeAuto:
             fontSizeGroup
         case .fontFamily:
@@ -121,7 +121,7 @@ extension KiwiShelfCard {
             )
         case .iconSource:
             iconSourceRow
-        case .fontSize, .liquidGlass, .dimFactor, .fillColor,
+        case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,
             .groupBadgeTextColor:
@@ -227,21 +227,29 @@ extension KiwiShelfCard {
     }
 
     private var fontSizeGroup: some View {
-        AutoGatedGroup(
+        // What Auto draws for a Space number: the value the
+        // slider shows and a switch-off starts from (#1713).
+        let auto = SpaceBarLook(shelf: shelf.wrappedValue)
+            .identifierFontSize(forDepth: shelf.thickness.wrappedValue)
+            .rounded()
+        return AutoGatedGroup(
             title: L("kiwishelf.font_size.auto", "Auto font size"),
-            isOn: AutoSentinel.binding(shelf.fontSize, restore: 14),
+            isOn: AutoSentinel.binding(shelf.fontSize, restore: auto),
             caption: L(
                 "kiwishelf.font_size.help",
                 "One size for both bars, so Space numbers and App "
                     + "Bar titles line up. Automatic follows the "
-                    + "thickness."
+                    + "glyph size."
             )
         ) {
             PtSlider(
                 label: L("kiwishelf.font_size", "Font size"),
                 value: shelf.fontSize,
-                range: 1...32,
-                autoAtZero: true
+                range: BarSliderBands.fontSize(
+                    thickness: shelf.thickness.wrappedValue
+                ),
+                autoAtZero: true,
+                autoValue: auto
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfStyle.children

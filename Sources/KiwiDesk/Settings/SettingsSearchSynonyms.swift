@@ -47,8 +47,8 @@ enum SettingsSearchSynonyms {
             return ["neon", "shadow"]
         case .kiwishelf(.thickness):
             return ["height", "size"]
-        case .kiwishelf(.itemPadding):
-            return ["icon size", "inset"]
+        case .kiwishelf(.glyphSizeAuto), .kiwishelf(.glyphSize):
+            return ["icon size", "item size", "padding"]
         case .kiwishelf(.minimum):
             return ["share", "split", "divider"]
         // "Glyphs" and "System default" were the two options'

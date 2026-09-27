@@ -160,7 +160,7 @@ public enum APIReference {
             "set_background_fit", "set_corner_roundness",
             "set_border", "set_border_width",
             "set_highlight_width", "set_item_gap",
-            "set_item_padding", "set_font_size",
+            "set_glyph_size", "set_font_size",
             "set_font_family", "set_font_weight", "set_icon_source",
             "set_dim_factor", "set_item_color",
             "set_active_item_color", "set_highlight_color",

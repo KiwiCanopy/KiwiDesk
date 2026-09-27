@@ -1912,25 +1912,28 @@ the layout.
 kiwishelf.set_thickness(32)
 ```
 
-### kiwishelf.set_item_padding
+### kiwishelf.set_glyph_size
 
 :::unreleased
-**Expects:** points (default `0`; a negative value is raised to
-it).
+**Expects:** points; `0` (default) means auto. A negative value
+is raised to `0`.
 
-**Does:** sets the room inside the thickness between the shelf
-and each item's content, on both sides across the shelf. The
-thickness stays what the shelf reserves; the icons, glyphs and
-Space identifiers of both bars shrink into what is left, and so
-does an automatic [`font_size`](#kiwishelfset_font_size). Item
-boxes and plates keep the full thickness. The content never
-draws thinner than a `20` pt shelf's, so past that point a larger
-value changes nothing.
+**Does:** sets how large both bars' content draws across the
+shelf — app icons and glyphs, Space identifiers and counts. `0`
+fills the thickness. A positive value draws that size and leaves
+the rest of the thickness as room around each item; the thickness
+stays what the shelf reserves, and item boxes and plates keep it.
+The content never draws thinner than a `20` pt shelf's nor
+thicker than the shelf, and the stored value is kept, so a thicker
+shelf later brings back a larger size. An automatic
+[`font_size`](#kiwishelfset_font_size) follows it. Automatic
+equals the thickness, so `thickness − 2 × room` leaves that room
+on each side: `28` on a `40` pt shelf leaves `6` pt.
 
 **Example:**
 
 ```lua
-kiwishelf.set_item_padding(6)
+kiwishelf.set_glyph_size(16)
 ```
 :::
 
@@ -2134,6 +2137,12 @@ kiwishelf.set_item_gap(6)
 
 **Does:** if `0`, each bar's text scales with the thickness; any
 positive value pins the font size for both bars.
+
+:::unreleased
+An automatic font size follows the
+[`glyph_size`](#kiwishelfset_glyph_size) where one is set: Space
+numbers draw at about half of it and titles at about 0.42 of it.
+:::
 
 **Example:**
 
