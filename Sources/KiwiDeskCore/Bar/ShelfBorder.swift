@@ -36,14 +36,14 @@ enum ShelfBorder {
         shelf: KiwiShelf,
         surface: Surface,
         cornerRadius: CGFloat,
-        sheen: Bool
+        sheen: CGFloat
     ) {
         let width =
             rims(surface, on: shelf) ? shelf.drawnBorderWidth : 0
         view.wantsLayer = true
         view.isHidden = width == 0
         guard let layer = view.layer else { return }
-        let ramp = sheen && width > 0
+        let ramp = sheen != 0 && width > 0
         layer.backgroundColor = nil
         layer.borderWidth = ramp ? 0 : width
         layer.borderColor =
@@ -52,7 +52,11 @@ enum ShelfBorder {
         layer.cornerRadius = cornerRadius
         view.paint =
             ramp
-            ? SheenRimView.Paint(hex: shelf.borderColor, width: width)
+            ? SheenRimView.Paint(
+                hex: shelf.borderColor,
+                width: width,
+                strength: sheen
+            )
             : nil
     }
 

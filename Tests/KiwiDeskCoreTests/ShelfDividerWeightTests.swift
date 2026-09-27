@@ -78,7 +78,7 @@ struct ShelfDividerWeightTests {
         overlay.show(
             strip: strip,
             shelf: KiwiShelf(),
-            sheen: false,
+            sheen: 0,
             sections: [
                 .init(
                     view: NSView(),
@@ -156,7 +156,7 @@ struct ShelfDividerWeightTests {
         overlay.show(
             strip: strip,
             shelf: shelf,
-            sheen: false,
+            sheen: 0,
             sections: sections,
             divider: full
         )
@@ -170,7 +170,7 @@ struct ShelfDividerWeightTests {
         overlay.show(
             strip: strip,
             shelf: shelf,
-            sheen: false,
+            sheen: 0,
             sections: sections,
             divider: full
         )

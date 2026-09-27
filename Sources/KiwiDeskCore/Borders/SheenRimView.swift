@@ -13,6 +13,8 @@ class SheenRimView: NSView {
     struct Paint: Equatable {
         let hex: String
         let width: CGFloat?
+        /// The signed sheen strength, never 0 (0 paints nothing).
+        let strength: CGFloat
     }
 
     /// Nil draws nothing. Every write re-draws, since the host may
@@ -56,6 +58,7 @@ class SheenRimView: NSView {
             lineWidth: paint.width,
             extent: bounds,
             hex: paint.hex,
+            strength: paint.strength,
             in: context
         )
     }

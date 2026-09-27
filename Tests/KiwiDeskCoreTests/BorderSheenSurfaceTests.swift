@@ -3,11 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The sheen reaches every surface the one leaf names (#1644) —
+/// The sheen reaches every surface the one setting names (#1644) —
 /// the bars' indicator, the shelf's border, the drag markers'
-/// border — built through their real views, and each surface
-/// clears its flat stroke or fill while the ramp paints it, or a
-/// translucent colour would stack twice.
+/// border — built through their real views, at the signed strength
+/// either way; each surface clears its flat stroke or fill while
+/// the ramp paints it, or a translucent colour would stack twice,
+/// and a strength of 0 draws every one flat.
 @Suite("Border sheen reaches every surface (#1644)")
 @MainActor
 struct BorderSheenSurfaceTests {
@@ -15,7 +16,7 @@ struct BorderSheenSurfaceTests {
 
     private func spaceItem(
         _ indicator: AppBarStyle.ActiveIndicator,
-        sheen: Bool
+        sheen: CGFloat
     ) -> SpaceBarItemView {
         var look = SpaceBarLook()
         look.activeIndicator = indicator
@@ -43,7 +44,7 @@ struct BorderSheenSurfaceTests {
 
     private func appItem(
         _ indicator: AppBarStyle.ActiveIndicator,
-        sheen: Bool
+        sheen: CGFloat
     ) -> AppBarItemView {
         var look = AppBarLook()
         look.activeIndicator = indicator
@@ -91,10 +92,10 @@ struct BorderSheenSurfaceTests {
         arguments: [AppBarStyle.ActiveIndicator.outline, .edgeMark]
     )
     func spaceIndicator(_ indicator: AppBarStyle.ActiveIndicator) {
-        let on = spaceItem(indicator, sheen: true)
-        #expect(on.accent.paint != nil)
+        let on = spaceItem(indicator, sheen: -0.5)
+        #expect(on.accent.paint?.strength == -0.5)
         #expect(flatInkIsClear(on.accent, indicator))
-        let off = spaceItem(indicator, sheen: false)
+        let off = spaceItem(indicator, sheen: 0)
         #expect(off.accent.paint == nil)
         let ink =
             indicator == .outline
@@ -108,14 +109,15 @@ struct BorderSheenSurfaceTests {
         arguments: [AppBarStyle.ActiveIndicator.outline, .edgeMark]
     )
     func appIndicator(_ indicator: AppBarStyle.ActiveIndicator) {
-        let on = appItem(indicator, sheen: true)
+        let on = appItem(indicator, sheen: 0.5)
+        #expect(on.accent.paint?.strength == 0.5)
         #expect(
             on.accent.paint?.width
                 == (indicator == .outline
                     ? on.style.resolvedHighlightWidth : nil)
         )
         #expect(flatInkIsClear(on.accent, indicator))
-        let off = appItem(indicator, sheen: false)
+        let off = appItem(indicator, sheen: 0)
         #expect(off.accent.paint == nil)
         #expect(!flatInkIsClear(off.accent, indicator))
     }
@@ -131,16 +133,17 @@ struct BorderSheenSurfaceTests {
             shelf: shelf,
             surface: .plate,
             cornerRadius: 6,
-            sheen: true
+            sheen: -1
         )
         #expect(view.paint?.width == shelf.drawnBorderWidth)
+        #expect(view.paint?.strength == -1)
         #expect(view.layer?.borderWidth == 0)
         ShelfBorder.paint(
             view,
             shelf: shelf,
             surface: .plate,
             cornerRadius: 6,
-            sheen: false
+            sheen: 0
         )
         #expect(view.paint == nil)
         #expect(view.layer?.borderWidth == shelf.drawnBorderWidth)
@@ -152,10 +155,11 @@ struct BorderSheenSurfaceTests {
             frame: CGRect(x: 0, y: 0, width: 80, height: 60)
         )
         let style = DragVisual.ghostDefault
-        view.render(style, radius: 8, glass: false, sheen: true)
+        view.render(style, radius: 8, glass: false, sheen: 0.5)
         #expect(view.rim.paint?.width == style.borderWidth)
+        #expect(view.rim.paint?.strength == 0.5)
         #expect(view.layer?.borderWidth == 0)
-        view.render(style, radius: 8, glass: false, sheen: false)
+        view.render(style, radius: 8, glass: false, sheen: 0)
         #expect(view.rim.paint == nil)
         #expect(view.layer?.borderWidth == style.borderWidth)
     }
@@ -174,14 +178,14 @@ struct BorderSheenSurfaceTests {
             .ghostDefault,
             cornerRadius: 8,
             storedGlass: true,
-            sheen: true
+            sheen: 0.5
         )
         #expect(view.rim.paint != nil)
         view.showPreview(
             .ghostDefault,
             cornerRadius: 8,
             storedGlass: true,
-            sheen: false
+            sheen: 0
         )
         #expect(view.rim.paint == nil)
     }

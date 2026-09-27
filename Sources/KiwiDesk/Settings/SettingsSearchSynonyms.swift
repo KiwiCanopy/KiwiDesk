@@ -56,7 +56,7 @@ enum SettingsSearchSynonyms {
         case .kiwishelf(.iconSource):
             return ["icon", "glyph", "system default", "app font"]
         case .colours(.borderSheen):
-            return ["gloss", "shine", "gradient"]
+            return ["gloss", "shine", "gradient", "highlight", "shade"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):

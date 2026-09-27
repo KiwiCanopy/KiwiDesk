@@ -42,7 +42,7 @@ struct BarFontSiteTests {
             style: SpaceBarLook(
                 shelf: Self.shelf,
                 bar: SpaceBarStyle(),
-                sheen: false
+                sheen: 0
             ),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
@@ -69,7 +69,7 @@ struct BarFontSiteTests {
             style: AppBarLook(
                 shelf: Self.shelf,
                 bar: AppBarStyle(),
-                sheen: false
+                sheen: 0
             )
         )
         view.layout()
@@ -134,7 +134,7 @@ struct BarFontSiteTests {
                 style: AppBarLook(
                     shelf: shelf,
                     bar: AppBarStyle(),
-                    sheen: false
+                    sheen: 0
                 ),
                 horizontal: true,
                 thickness: 40
@@ -161,7 +161,7 @@ struct BarFontSiteTests {
             var style = SpaceBarLook(
                 shelf: shelf,
                 bar: SpaceBarStyle(),
-                sheen: false
+                sheen: 0
             )
             style.showFrontApp = true
             return SpaceBarManager.Bar(
@@ -196,7 +196,7 @@ struct BarFontSiteTests {
             var style = SpaceBarLook(
                 shelf: shelf,
                 bar: SpaceBarStyle(),
-                sheen: false
+                sheen: 0
             )
             style.showFrontApp = true
             return overlay.frontExtent(

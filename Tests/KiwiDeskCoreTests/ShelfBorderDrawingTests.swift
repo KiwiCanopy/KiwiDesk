@@ -61,7 +61,7 @@ struct ShelfBorderDrawingTests {
             style: SpaceBarLook(
                 shelf: shelf,
                 bar: SpaceBarStyle(),
-                sheen: false
+                sheen: 0
             ),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
@@ -87,7 +87,7 @@ struct ShelfBorderDrawingTests {
             style: AppBarLook(
                 shelf: shelf,
                 bar: AppBarStyle(),
-                sheen: false
+                sheen: 0
             )
         )
         view.layout()
@@ -213,7 +213,7 @@ struct ShelfBorderDrawingTests {
                 display: barTitleDisplay,
                 strip: barTitleStrip,
                 shelf: shelf,
-                sheen: false,
+                sheen: 0,
                 space: section,
                 app: nil
             )
@@ -284,7 +284,7 @@ struct ShelfBorderDrawingTests {
                     display: barTitleDisplay,
                     strip: barTitleStrip,
                     shelf: shelf,
-                    sheen: false,
+                    sheen: 0,
                     space: section,
                     app: nil
                 )

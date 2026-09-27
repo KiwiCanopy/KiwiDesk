@@ -11576,7 +11576,7 @@ panel's leaf was filled from the bars' (#1369).
 
 :::unreleased
 **The sheen is its own setting beside the Liquid Glass switch,
-never one of its surfaces.** (#1644, owner ruling 2026-09-27,
+never one of its surfaces.** (#1644, owner rulings 2026-09-27,
 after the device sitting.) The switch governs "every KiwiDesk
 surface that draws glass" (#1307, above), and the sheen draws
 none: it is a lightness ramp on the coloured stroke — the focused
@@ -11587,22 +11587,33 @@ active" signal. Being no glass, it takes none of glass's gates:
 it draws with the switch off, under Reduce transparency, and
 before macOS 26, and a leaf of `LiquidGlassAgreement` would have
 made the switch read off with its `?` whenever a user wanted
-glass without the sheen. So it is one leaf, `border.sheen` (under
-`border` because the ring is where it started), with its own row
-beneath the switch that never greys, coupled ONE way: switching
-glass on ticks it, switching glass off leaves it — on is the pair
-the owner wants to arrive together, off is not a statement about
-the sheen. The row stays on a Mac below macOS 26, where the
-switch above it is hidden.
+glass without the sheen. The row stays on a Mac below macOS 26,
+where the switch above it is hidden.
 
-**Default on, and existing files take it on upgrade.** (Owner
+**One signed number, and no coupling to the switch.** (Owner
+amendment 2026-09-27.) `border.sheen` is a strength in −1…1: a
+positive value lightens the top toward white, a negative one
+darkens it toward black, and 0 draws none — every surface's flat
+path. The top moves by 0.9 × the strength, so the 0.5 default is
+the 0.45 lift the owner approved at the sitting and a full 1
+stops short of white or black, where the stroke's own hue would
+be gone. One number rather than a switch and an amount, because
+"off" is simply the middle of the range; one centre-origin
+slider, because a direction is part of the value. The earlier
+one-way coupling (switching glass on ticked the sheen) is gone:
+with a strength to choose, the switch would have had to pick one,
+and the two are independent looks. The master writes nothing to
+it (`SheenCouplingTests`).
+
+**Default 0.5, and existing files take it on upgrade.** (Owner
 ruling 2026-09-27.) A file written before the key carries no
-`sheen` and decodes it on, so every existing user's focus ring,
-bar highlight and border, and drag borders gain the sheen on
-upgrade, whether or not Liquid Glass is on. That visible change
-is the owner's accepted cost rather than something a #1369
-crossing was needed to prevent: absence never meant a sheen a
-user had turned off, since no build before this one drew one.
+`sheen` and decodes the default, so every existing user's focus
+ring, bar highlight and border, and drag borders gain the sheen
+on upgrade, whether or not Liquid Glass is on. That visible
+change is the owner's accepted cost rather than something a
+#1369 crossing was needed to prevent: absence never meant a
+sheen a user had turned off, since no release before this one
+drew one.
 
 **The flat band carries #578's contrast; the ends may pass it.**
 (Owner ruling 2026-09-27, over a cap.) The ramp's middle band is

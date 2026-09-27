@@ -57,7 +57,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         // Under the sheen the ramp is the stroke: a second one
         // beneath would stack a translucent colour's alpha.
         shape.strokeColor =
-            geometry.sheen
+            geometry.sheen != 0
             ? NSColor.clear.cgColor
             : NSColor(kiwiHex: colorHex).cgColor
         shape.fillColor = NSColor.clear.cgColor
@@ -115,8 +115,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         rect: CGRect,
         colorHex: String
     ) {
-        sheen.isHidden = !geometry.sheen
-        guard geometry.sheen else { return }
+        sheen.isHidden = geometry.sheen == 0
+        guard geometry.sheen != 0 else { return }
         let half = geometry.lineWidth / 2
         sheen.frame = rect.insetBy(dx: -half, dy: -half)
         sheen.contentsScale = shape.contentsScale
@@ -135,7 +135,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         sheenMask.fillColor = nil
         sheenMask.contentsScale = shape.contentsScale
         sheen.mask = sheenMask
-        BorderSheen.paint(sheen, hex: colorHex)
+        BorderSheen.paint(
+            sheen,
+            hex: colorHex,
+            strength: geometry.sheen
+        )
     }
 
     /// Stacks ring directly behind target window in WindowServer hierarchy.

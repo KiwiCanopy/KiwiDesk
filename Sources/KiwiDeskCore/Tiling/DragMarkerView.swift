@@ -20,7 +20,7 @@ public final class DragMarkerView: NSView {
         let style: DragVisual
         let radius: CGFloat
         let storedGlass: Bool
-        let sheen: Bool
+        let sheen: CGFloat
     }
 
     /// Both markers' glass is thinned: the drop zone lies over the
@@ -51,7 +51,7 @@ public final class DragMarkerView: NSView {
         _ style: DragVisual,
         cornerRadius: CGFloat,
         storedGlass: Bool,
-        sheen: Bool
+        sheen: CGFloat
     ) {
         preview = PreviewInput(
             style: style,
@@ -111,14 +111,14 @@ public final class DragMarkerView: NSView {
         _ style: DragVisual,
         radius: CGFloat,
         glass: Bool,
-        sheen: Bool
+        sheen: CGFloat
     ) {
         guard let layer else { return }
         layer.cornerRadius = radius
         // A layer's border draws above its sublayers, so it stays
         // solid over the glass (`DragPairSeparationTests`, #511);
         // the sheen's rim takes its place, above the glass too.
-        let ramp = sheen && style.border
+        let ramp = sheen != 0 && style.border
         layer.borderWidth = style.border && !ramp ? style.borderWidth : 0
         layer.borderColor = Self.color(style.borderColor).cgColor
         rim.layer?.cornerRadius = radius
@@ -127,7 +127,8 @@ public final class DragMarkerView: NSView {
             ramp
             ? SheenRimView.Paint(
                 hex: style.borderColor,
-                width: style.borderWidth
+                width: style.borderWidth,
+                strength: sheen
             )
             : nil
         if glass, let plate = glassView() {

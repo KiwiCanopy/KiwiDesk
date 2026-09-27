@@ -109,9 +109,9 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_sheen": APIRecord(
-            "Paints a light top edge on the focused border, bar "
-                + "highlight and border, and drag borders.",
-            .boolean("enabled")
+            "Lightens (to 1) or darkens (to -1) the top of the "
+                + "border, highlight and drag borders; 0 is off.",
+            .number("strength")
         ),
         "set_glow_size": APIRecord(
             "Sets the glow blur radius in points; 0 is "

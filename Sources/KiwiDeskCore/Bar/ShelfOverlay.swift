@@ -47,7 +47,7 @@ final class ShelfOverlay {
     func show(
         strip: CGRect,
         shelf: KiwiShelf,
-        sheen: Bool,
+        sheen: CGFloat,
         sections: [Section],
         divider range: ShelfArrangement.Divider? = nil
     ) {

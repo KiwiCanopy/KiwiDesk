@@ -54,7 +54,7 @@ struct ReduceTransparencyTests {
         var app = AppBarLook(
             shelf: AppBarFixtures.everyShelfField(),
             bar: AppBarFixtures.everyGlobalField(),
-            sheen: false
+            sheen: 0
         )
         app.liquidGlass = true
         app.fillColor = "#020202B3"
@@ -150,7 +150,7 @@ struct ReduceTransparencyTests {
                         display: barTitleDisplay,
                         strip: barTitleStrip,
                         shelf: shelf,
-                        sheen: false,
+                        sheen: 0,
                         space: section,
                         app: nil
                     )

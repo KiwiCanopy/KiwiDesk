@@ -83,7 +83,7 @@ struct BarFontSettingsTests {
             borderColor: "#FFFFFF",
             fontSize: 14,
             shelf: shelf,
-            sheen: false
+            sheen: 0
         )
         let renderer = ImageRenderer(
             content: BarStripView(

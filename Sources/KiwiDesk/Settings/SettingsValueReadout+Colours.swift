@@ -33,10 +33,10 @@ extension SettingsValueReadout {
                 new.settings.stickyStyle.liquidGlass
             )
         case .borderSheen:
-            return coloursOnOffRow(
+            return coloursRow(
                 census,
-                old.settings.borderStyle.sheen,
-                new.settings.borderStyle.sheen
+                sheen(old.settings.borderStyle.sheen),
+                sheen(new.settings.borderStyle.sheen)
             )
         case .liquidGlassMaster:
             // Derived, like the animations master beside it: the

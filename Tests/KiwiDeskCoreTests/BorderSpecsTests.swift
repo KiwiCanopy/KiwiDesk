@@ -28,7 +28,7 @@ struct BorderSpecsTests {
         overlays: Set<WindowID> = [],
         fullscreen: Set<WindowID> = [],
         monocle: Bool = false,
-        sheen: Bool = false
+        sheen: CGFloat = 0
     ) -> [BorderManager.Spec] {
         KiwiCore.borderSpecs(
             style: style,
@@ -50,10 +50,10 @@ struct BorderSpecsTests {
             style,
             focused: w1,
             slots: disjoint,
-            sheen: true
+            sheen: 0.5
         )
         #expect(result.count == 2)
-        #expect(result.filter(\.sheen).map(\.window) == [w1])
+        #expect(result.filter { $0.sheen != 0 }.map(\.window) == [w1])
     }
 
     @Test("Disabled borders yield nothing")

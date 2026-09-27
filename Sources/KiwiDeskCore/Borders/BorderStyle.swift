@@ -46,9 +46,23 @@ public struct BorderStyle: Sendable, Equatable {
     /// Stacking order (#367).
     public var drawOrder: DrawOrder = .behind
     /// The painted sheen (#1644) on the focused ring, the shelf's
-    /// highlight and border, and the drag markers' borders; on by
-    /// default like the Liquid Glass leaves.
-    public var sheen = true
+    /// highlight and border, and the drag markers' borders: a signed
+    /// strength in `sheenRange` — positive lightens the top,
+    /// negative darkens it, 0 draws none.
+    public var sheen: CGFloat = 0.5
+
+    /// The sheen's range; every writer clamps into it.
+    public static let sheenRange: ClosedRange<CGFloat> = -1...1
+
+    /// `value` clamped into `sheenRange`, a hair from 0 snapped to
+    /// 0 so a slider's float grid lands on Off.
+    public static func clampSheen(_ value: CGFloat) -> CGFloat {
+        let clamped = min(
+            sheenRange.upperBound,
+            max(sheenRange.lowerBound, value)
+        )
+        return abs(clamped) < 1e-9 ? 0 : clamped
+    }
 
     public init() {}
 
@@ -172,10 +186,11 @@ extension BorderStyle: Codable {
                 DrawOrder.self,
                 forKey: .drawOrder
             ) ?? defaults.drawOrder
-        sheen =
+        sheen = Self.clampSheen(
             try container.decodeIfPresent(
-                Bool.self,
+                CGFloat.self,
                 forKey: .sheen
             ) ?? defaults.sheen
+        )
     }
 }

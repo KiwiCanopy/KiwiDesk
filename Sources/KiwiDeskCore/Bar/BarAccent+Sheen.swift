@@ -7,18 +7,26 @@ extension BarAccent {
     /// sheen draws it, which would otherwise stack a translucent
     /// highlight twice.
     @MainActor
-    static func flatInk(_ hex: String, sheen: Bool) -> CGColor {
-        sheen ? NSColor.clear.cgColor : NSColor(kiwiHex: hex).cgColor
+    static func flatInk(_ hex: String, sheen: CGFloat) -> CGColor {
+        sheen != 0
+            ? NSColor.clear.cgColor : NSColor(kiwiHex: hex).cgColor
     }
 
     /// The indicator's sheen: a rim of `outline` width, or the
-    /// edge mark's fill when nil; nil unless `drawn`.
+    /// edge mark's fill when nil, at `strength`; nil where the
+    /// indicator is not drawn or the strength is 0.
     @MainActor
     static func sheen(
         _ hex: String,
         outline: CGFloat?,
+        strength: CGFloat,
         drawn: Bool
     ) -> SheenRimView.Paint? {
-        drawn ? SheenRimView.Paint(hex: hex, width: outline) : nil
+        guard drawn, strength != 0 else { return nil }
+        return SheenRimView.Paint(
+            hex: hex,
+            width: outline,
+            strength: strength
+        )
     }
 }

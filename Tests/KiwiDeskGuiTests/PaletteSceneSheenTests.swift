@@ -19,7 +19,7 @@ struct PaletteSceneSheenTests {
     /// The ramp's top stop for the ring — what only a sheened
     /// ring draws.
     private static var lifted: (UInt8, UInt8, UInt8) {
-        let top = BorderSheen.colors(hex: ring)[0]
+        let top = BorderSheen.colors(hex: ring, strength: 0.5)[0]
             .usingColorSpace(.sRGB)!
         return (
             UInt8((top.redComponent * 255).rounded()),
@@ -30,7 +30,7 @@ struct PaletteSceneSheenTests {
 
     private static func scene(
         _ scale: PaletteSceneScale,
-        sheen: Bool
+        sheen: CGFloat
     ) -> PaletteSceneThumbnail {
         var colors = PaletteCatalog.defaultPalette().colors
         colors["border.focused_color"] = ring
@@ -44,9 +44,9 @@ struct PaletteSceneSheenTests {
 
     @Test("the sheen draws at panel scale only, from the switch")
     func sheensAtPanelOnly() {
-        #expect(Self.scene(.panel, sheen: true).sheens)
-        #expect(!Self.scene(.panel, sheen: false).sheens)
-        #expect(!Self.scene(.tile, sheen: true).sheens)
+        #expect(Self.scene(.panel, sheen: 0.5).sheens)
+        #expect(!Self.scene(.panel, sheen: 0).sheens)
+        #expect(!Self.scene(.tile, sheen: 0.5).sheens)
     }
 
     /// Rendered and read back: the ring's lifted top colour shows
@@ -54,13 +54,13 @@ struct PaletteSceneSheenTests {
     /// decides it.
     @Test("the panel paints the ring's lifted top")
     func panelDrawsTheRamp() throws {
-        let on = try Self.liftedPixels(sheen: true)
-        let off = try Self.liftedPixels(sheen: false)
+        let on = try Self.liftedPixels(sheen: 0.5)
+        let off = try Self.liftedPixels(sheen: 0)
         #expect(on > 20, "lifted pixels with the sheen on: \(on)")
         #expect(off == 0, "lifted pixels with the sheen off: \(off)")
     }
 
-    private static func liftedPixels(sheen: Bool) throws -> Int {
+    private static func liftedPixels(sheen: CGFloat) throws -> Int {
         let renderer = ImageRenderer(
             content: scene(.panel, sheen: sheen).frame(width: 320)
         )

@@ -44,7 +44,7 @@ struct FocusBorderPreview: View {
                     color: style.unfocusedColor,
                     ringed: style.unfocusedEnabled,
                     glow: false,
-                    sheen: false,
+                    sheen: 0,
                     mark: displayStickyMark
                 )
             }
@@ -79,7 +79,7 @@ struct FocusBorderPreview: View {
         color: String,
         ringed: Bool,
         glow: Bool,
-        sheen: Bool,
+        sheen: CGFloat,
         mark: (symbol: String, tint: Color)?
     ) -> some View {
         let width = BorderPreviewScale.width(

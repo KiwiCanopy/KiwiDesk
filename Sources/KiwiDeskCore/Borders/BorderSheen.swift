@@ -8,18 +8,24 @@ import AppKit
 /// (owner 2026-09-26). The one ramp every surface and preview
 /// draws, so none can drift.
 public enum BorderSheen {
-    /// How far the top lifts toward white, as a share of the
-    /// headroom above the colour's lightness (owner-eyeballed).
-    static let lift: CGFloat = 0.45
+    /// How far a full-strength sheen moves the top: toward white,
+    /// as a share of the headroom above the colour's lightness, or
+    /// toward black, as a share of the lightness itself. A strength
+    /// of 0.5 is the owner-eyeballed 0.45 lift (#1644).
+    static let scale: CGFloat = 0.9
     /// Stop locations, top (0) to bottom (1).
     public static let locations: [CGFloat] = [0, 0.35, 1]
-    /// The ramp's colours for `locations`, top to bottom; the plain
-    /// colour throughout for a hex that does not parse. The FLAT
-    /// band (every stop below the top) is the configured colour
-    /// itself, which carries the ring's #578 contrast; the lifted
-    /// top may pass it, and the bottom never darkens (owner
-    /// 2026-09-27).
-    public static func colors(hex: String) -> [NSColor] {
+    /// The ramp's colours for `locations`, top to bottom, at the
+    /// signed `strength` (clamped into `BorderStyle.sheenRange`);
+    /// the plain colour throughout for a hex that does not parse.
+    /// The FLAT band (every stop below the top) is the configured
+    /// colour itself, which carries the ring's #578 contrast; the
+    /// top may pass it either way, and the bottom never moves
+    /// (owner 2026-09-27).
+    public static func colors(
+        hex: String,
+        strength: CGFloat
+    ) -> [NSColor] {
         let base = NSColor(kiwiHex: hex)
         guard let c = DragVisual.parseHex(hex) else {
             return Array(repeating: base, count: locations.count)
@@ -33,14 +39,21 @@ public enum BorderSheen {
             let (r, g, b) = BorderStyle.hslToRGB(h: h, s: s, l: lightness)
             return NSColor(srgbRed: r, green: g, blue: b, alpha: c.alpha)
         }
-        return [color(l + (1 - l) * lift), base, base]
+        let amount = BorderStyle.clampSheen(strength) * scale
+        let top =
+            amount >= 0 ? l + (1 - l) * amount : l * (1 + amount)
+        return [color(top), base, base]
     }
 
     /// The ramp as one `CGGradient`.
-    static func gradient(hex: String) -> CGGradient? {
+    static func gradient(
+        hex: String,
+        strength: CGFloat
+    ) -> CGGradient? {
         CGGradient(
             colorsSpace: CGColorSpace(name: CGColorSpace.sRGB),
-            colors: colors(hex: hex).map(\.cgColor) as CFArray,
+            colors: colors(hex: hex, strength: strength).map(\.cgColor)
+                as CFArray,
             locations: locations
         )
     }
@@ -53,9 +66,12 @@ public enum BorderSheen {
         lineWidth: CGFloat?,
         extent: CGRect,
         hex: String,
+        strength: CGFloat,
         in context: CGContext
     ) {
-        guard let ramp = gradient(hex: hex) else { return }
+        guard let ramp = gradient(hex: hex, strength: strength) else {
+            return
+        }
         context.saveGState()
         context.addPath(path)
         if let lineWidth {
@@ -75,8 +91,12 @@ public enum BorderSheen {
     /// Fills `layer` with the ramp, top to bottom (unit space is
     /// y-up, `GlassTint.fade`'s convention).
     @MainActor
-    static func paint(_ layer: CAGradientLayer, hex: String) {
-        layer.colors = colors(hex: hex).map(\.cgColor)
+    static func paint(
+        _ layer: CAGradientLayer,
+        hex: String,
+        strength: CGFloat
+    ) {
+        layer.colors = colors(hex: hex, strength: strength).map(\.cgColor)
         layer.locations = locations.map { NSNumber(value: $0) }
         layer.startPoint = CGPoint(x: 0.5, y: 1)
         layer.endPoint = CGPoint(x: 0.5, y: 0)

@@ -72,40 +72,13 @@ struct GlassCard: View {
                 help: agreement.differ ? differHelp : baseHelp
             )
         case .colours(.borderSheen):
-            VStack(alignment: .leading, spacing: 2) {
-                ToggleRow(
-                    label: L("colors.sheen", "Sheen"),
-                    isOn: $model.config.settings.borderStyle.sheen
-                )
-                Text(sheenCaption)
-                    .foregroundStyle(.secondary)
-            }
+            SheenRow(strength: $model.config.settings.borderStyle.sheen)
         default:
             let _ = assertionFailure(
                 "unrendered Glass census key: \(key.id)"
             )
             EmptyView()
         }
-    }
-
-    /// What the sheen does, and — only where the switch above is
-    /// drawn — that it pairs with it (#1644): below macOS 26 the
-    /// pairing would point at a row this Mac does not show.
-    private var sheenCaption: String {
-        guard AppBarStyle.glassAvailable else {
-            return L(
-                "colors.sheen.caption",
-                "A light top edge on the focus border, the bars' "
-                    + "highlight and border, and the drag borders."
-            )
-        }
-        return L(
-            "colors.sheen.caption_paired",
-            "A light top edge on the focus border, the bars' "
-                + "highlight and border, and the drag borders. Pairs "
-                + "well with %1$@.",
-            Self.title
-        )
     }
 
     /// Quotes Apple's own control (config-vocabulary.md) so the

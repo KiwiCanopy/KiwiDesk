@@ -132,7 +132,7 @@ struct BarSliderBandTests {
             let auto = SpaceBarLook(
                 shelf: shelf,
                 bar: SpaceBarStyle(),
-                sheen: false
+                sheen: 0
             )
             .identifierFontSize(forDepth: depth)
             .rounded()

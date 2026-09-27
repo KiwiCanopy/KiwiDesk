@@ -58,31 +58,18 @@ struct BorderSheenFlatBandTests {
         #expect(!PaletteCatalog.authored().isEmpty)
         #expect(Self.flatStops.count >= 2)
         for (name, hex) in Self.strokes {
-            let ramp = BorderSheen.colors(hex: hex)
             let base = Self.rgba(NSColor(kiwiHex: hex))
-            for stop in Self.flatStops {
-                #expect(
-                    Self.rgba(ramp[stop]) == base,
-                    Comment(rawValue: "\(name) stop \(stop)")
-                )
+            for strength: CGFloat in [1, 0.5, -0.5, -1] {
+                let ramp = BorderSheen.colors(hex: hex, strength: strength)
+                for stop in Self.flatStops {
+                    #expect(
+                        Self.rgba(ramp[stop]) == base,
+                        Comment(
+                            rawValue: "\(name) at \(strength) stop \(stop)"
+                        )
+                    )
+                }
             }
         }
-    }
-
-    /// The top is the sheen, at full strength, untouched by any
-    /// cap.
-    @Test("the top lifts in full")
-    func topLiftsInFull() throws {
-        let hex = BorderStyle().focusedColor
-        let c = try #require(DragVisual.parseHex(hex))
-        let l = BorderStyle.rgbToHSL(r: c.red, g: c.green, b: c.blue).2
-        let top = try #require(BorderSheen.colors(hex: hex).first)
-        let x = top.usingColorSpace(.sRGB) ?? top
-        let topL = BorderStyle.rgbToHSL(
-            r: x.redComponent,
-            g: x.greenComponent,
-            b: x.blueComponent
-        ).2
-        #expect(abs(topL - (l + (1 - l) * BorderSheen.lift)) < 0.01)
     }
 }

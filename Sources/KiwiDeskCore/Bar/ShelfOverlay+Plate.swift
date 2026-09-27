@@ -7,7 +7,7 @@ extension ShelfOverlay {
     func layoutPlate(
         _ frame: CGRect?,
         shelf: KiwiShelf,
-        sheen: Bool,
+        sheen: CGFloat,
         radius: CGFloat,
         animated: Bool
     ) {

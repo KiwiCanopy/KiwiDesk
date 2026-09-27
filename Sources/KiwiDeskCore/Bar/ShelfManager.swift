@@ -14,7 +14,7 @@ final class ShelfManager {
         let strip: CGRect
         let shelf: KiwiShelf
         /// `border.sheen` (#1644), the plate border's ramp.
-        let sheen: Bool
+        let sheen: CGFloat
         /// The sections shown here; each is placed at the slot it
         /// drew into (`shownStrip`), so the two cannot disagree.
         let space: SpaceBarOverlay?

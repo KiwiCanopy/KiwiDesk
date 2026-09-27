@@ -82,9 +82,14 @@ extension KiwiCore {
                 tiler.settings.borderStyle.glow = $0
             }
         case "sheen":
-            return setBool(args) {
-                tiler.settings.borderStyle.sheen = $0
+            // A signed strength, clamped into -1...1 like the other
+            // border magnitudes; only a wrong type fails.
+            guard let value = args.first?.numberValue, value.isFinite
+            else {
+                return .fail("expected a sheen from -1 to 1")
             }
+            tiler.settings.borderStyle.sheen = BorderStyle.clampSheen(value)
+            return .ok()
         case "glow_size":
             // 0 = automatic (the width-scaled formula, #551);
             // an explicit size clamps only at the renderable

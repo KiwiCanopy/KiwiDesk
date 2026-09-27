@@ -280,7 +280,7 @@ extension KiwiCore {
         // stale-anchor ring with every suite green.
         focusedRingSuppressed: Bool,
         // The focused ring alone wears it, as with glow (#1644).
-        sheen: Bool
+        sheen: CGFloat
     ) -> [BorderManager.Spec] {
         guard style.enabled, let focused,
             let focusedFrame = slots.first(where: {

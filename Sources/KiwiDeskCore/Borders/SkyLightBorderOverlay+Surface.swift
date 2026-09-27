@@ -143,13 +143,14 @@ extension SkyLightBorderOverlay {
         )
         // The sheen's ramp (#1644): the window context is y-up
         // Quartz space, so maxY is the ring's top.
-        if geometry.sheen {
+        if geometry.sheen != 0 {
             let half = geometry.lineWidth / 2
             BorderSheen.draw(
                 path,
                 lineWidth: geometry.lineWidth,
                 extent: pathRect.insetBy(dx: -half, dy: -half),
                 hex: colorHex,
+                strength: geometry.sheen,
                 in: context
             )
             return

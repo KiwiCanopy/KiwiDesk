@@ -36,7 +36,7 @@ struct BorderOwnKeyWindowTests {
             fullscreen: [],
             isMonocle: false,
             focusedRingSuppressed: true,
-            sheen: false
+            sheen: 0
         )
         #expect(result.isEmpty)
     }
@@ -53,7 +53,7 @@ struct BorderOwnKeyWindowTests {
             fullscreen: [],
             isMonocle: false,
             focusedRingSuppressed: true,
-            sheen: false
+            sheen: 0
         )
         #expect(result.count == 2)
         #expect(

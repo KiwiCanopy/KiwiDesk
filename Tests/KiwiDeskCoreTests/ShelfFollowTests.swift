@@ -151,7 +151,7 @@ struct ShelfFollowTests {
                     display: barTitleDisplay,
                     strip: barTitleStrip,
                     shelf: KiwiShelf(),
-                    sheen: false,
+                    sheen: 0,
                     space: section,
                     app: nil
                 )

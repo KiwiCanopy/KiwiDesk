@@ -142,7 +142,7 @@ struct PaletteSceneRoleTests {
             palette: ColorPalette(name: "", colors: [:]),
             scene: .tile,
             drawsBorder: false,
-            drawsSheen: false
+            drawsSheen: 0
         )
         #expect(tile.scale == 1)
     }

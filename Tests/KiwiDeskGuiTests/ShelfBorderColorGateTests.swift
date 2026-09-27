@@ -194,14 +194,14 @@ struct ShelfBorderPreviewTests {
             palette: palette,
             scene: .panel,
             drawsBorder: true,
-            drawsSheen: false
+            drawsSheen: 0
         )
         #expect(on.borderRim == on.color("kiwishelf.border_color"))
         let off = PaletteSceneThumbnail(
             palette: palette,
             scene: .panel,
             drawsBorder: false,
-            drawsSheen: false
+            drawsSheen: 0
         )
         #expect(off.borderRim == nil)
     }
@@ -234,7 +234,7 @@ struct ShelfBorderPreviewTests {
                 palette: ColorPalette(name: "", colors: colors),
                 scene: .panel,
                 drawsBorder: drawsBorder,
-                drawsSheen: false
+                drawsSheen: 0
             )
             .frame(width: 320)
         )

@@ -242,7 +242,8 @@ extension SpaceBarItemView {
             style.highlightColor,
             outline: style.activeIndicator == .outline
                 ? style.resolvedHighlightWidth : nil,
-            drawn: style.sheen && isActive
+            strength: style.sheen,
+            drawn: isActive
         )
         guard isActive else { return }
         let ink = BarAccent.flatInk(style.highlightColor, sheen: style.sheen)

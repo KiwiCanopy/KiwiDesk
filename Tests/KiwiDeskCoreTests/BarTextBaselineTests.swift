@@ -148,7 +148,7 @@ struct BarTextBaselineTests {
             count: 1,
             active: true,
             horizontal: true,
-            style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: false)
+            style: AppBarLook(shelf: shelf, bar: AppBarStyle(), sheen: 0)
         )
         view.layout()
         let field = view.label
