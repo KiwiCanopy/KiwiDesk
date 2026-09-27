@@ -2387,8 +2387,8 @@ space_bar.set_glyph_cap(8)
 ### space_bar.set_glyph_gap
 
 :::unreleased
-**Expects:** points, 0–24 (default `0`); values outside the range
-are clamped.
+**Expects:** points (default `0`; a negative value is raised to
+`0`).
 
 **Does:** sets the room between app glyphs inside a Space item,
 and before its `+n` badge. `0` sets them side by side. The gap

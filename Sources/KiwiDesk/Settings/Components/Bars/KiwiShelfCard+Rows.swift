@@ -65,7 +65,7 @@ extension KiwiShelfCard {
             PtSlider(
                 label: L("kiwishelf.item_gap", "Item gap"),
                 value: shelf.itemGap,
-                range: 0...40,
+                range: BarSliderBands.itemGap,
                 help: L(
                     "kiwishelf.item_gap.help",
                     "Room between items — Space items and App Bar "

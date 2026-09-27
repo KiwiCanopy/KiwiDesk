@@ -95,7 +95,7 @@ public struct ShelfArrangement: Equatable, Sendable {
         case (nil, .some):
             return ShelfArrangement(app: lone(whole, shelf))
         case (.some(let spaceNeed), .some(let appNeed)):
-            let gutter = max(shelf.itemGap, 0)
+            let gutter = max(shelf.itemGap, KiwiShelf.minItemGap)
             let room = max(whole - gutter, 0)
             let bounds = minimumRange(
                 hardFloor: spaceFloor,

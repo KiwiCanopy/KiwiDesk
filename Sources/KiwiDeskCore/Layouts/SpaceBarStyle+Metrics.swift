@@ -15,12 +15,13 @@ extension SpaceBarStyle {
     /// would break the bar's uniform model.
     public static let glyphCapRange = 1...12
 
-    /// Bounds of `glyphGap` in pt (#1689).
-    public static let glyphGapRange: ClosedRange<CGFloat> = 0...24
+    /// Floor of `glyphGap` in pt: flush. No ceiling, as with the
+    /// shelf's item gap (#1695).
+    public static let minGlyphGap: CGFloat = 0
 
-    /// `glyphGap` clamped to `glyphGapRange`.
+    /// `glyphGap` raised to `minGlyphGap`.
     public static func clampGlyphGap(_ gap: CGFloat) -> CGFloat {
-        min(max(gap, glyphGapRange.lowerBound), glyphGapRange.upperBound)
+        max(gap, minGlyphGap)
     }
 
     /// The glyph gap every Space item's layout and length read.
