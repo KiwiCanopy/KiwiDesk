@@ -263,6 +263,11 @@ extension TilingEngine {
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize
     ) {
+        // Every engine frame retires the open size ask (#1694);
+        // the layout loop re-opens one with `recordAsk` right
+        // after its own `applyFrame`, so only a LAYOUT frame is
+        // ever asked.
+        boundLearner.supersedeAsk(id)
         placements.stamp(id, target: target)
         if animated,
             let screen = Self.screen(containing: target)

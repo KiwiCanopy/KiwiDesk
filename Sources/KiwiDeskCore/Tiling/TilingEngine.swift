@@ -343,6 +343,7 @@ public final class TilingEngine {
     /// cleanly instead of triggering the app's own move
     /// animation (which stutters on slow-AX apps).
     public func setFrame(_ id: WindowID, _ frame: CGRect) {
+        boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
         applier.applyInstant(id, frame)
     }
