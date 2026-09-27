@@ -86,7 +86,8 @@ extension AppBarItemView {
         let edge = Self.edgePadding
         let font = style.shelf.textFont(ofSize: effectiveFontSize)
         label.font = font
-        label.usesSingleLineMode = true
+        // Not `usesSingleLineMode`: it draws a tall face above its
+        // own ascent, clipping the title (#1707).
         label.maximumNumberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.stringValue = text
@@ -136,7 +137,11 @@ extension AppBarItemView {
         }
         label.frame = CGRect(
             x: x,
-            y: (bounds.height - textSize.height) / 2,
+            y: BarTextGlyph.originY(
+                capsCentredOn: bounds.midY,
+                for: label,
+                height: textSize.height
+            ),
             width: textSize.width,
             height: textSize.height
         )
