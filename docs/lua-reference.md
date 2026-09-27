@@ -5231,6 +5231,20 @@ teardown placement: windows stay on their own display, and
 nothing is managed afterwards. Profile JSON key: `quit.layout`.
 Default: `grid`.
 
+:::unreleased
+The grid now fills before it stacks. Up to six windows each take
+a tile, split so the tiles come nearest square on that display:
+on 16:9 one window fills it, two sit side by side, three share a
+row, four take 2×2, five and six 3×2. When the last row is short,
+its last window stretches across the rest — the window you were
+last working in, since it is placed last. A portrait display
+mirrors this and fills column by column. Past six, windows pile
+round-robin on a 3×2 grid (2×3 on a portrait display), which
+grows to 4×2, 4×3 and then 4×4 once a pile would pass the density
+target `T` — at the standard 5: up to 30 windows 3×2, up to 40
+4×2, up to 60 4×3, beyond that 4×4.
+:::
+
 **Example:**
 
 ```lua
@@ -5249,6 +5263,13 @@ display's window count, and stay hard-clamped between 2×2 and
 `4×T` windows, 3×3 through `9×T`, 4×4 above). It is not a hard
 maximum: past 4×4, additional windows keep cascading in its
 cells. Profile JSON key: `quit.grid_target_depth`. Default: `5`.
+
+:::unreleased
+The target now moves the thresholds of the 3×2 → 4×2 → 4×3 → 4×4
+ladder instead: 3×2 through `6×T` windows, 4×2 through `8×T`, 4×3
+through `12×T`, 4×4 above. Up to six windows tile whatever the
+target.
+:::
 
 **Example:**
 

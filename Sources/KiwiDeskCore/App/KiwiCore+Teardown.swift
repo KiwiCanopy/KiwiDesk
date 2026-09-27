@@ -57,10 +57,11 @@ public enum WindowGather {
     /// slot where being in front is the right answer. Last in
     /// the list is last in its cell's cascade, which is the slot
     /// `raiseOrder` raises last and therefore means to be
-    /// frontmost. Placed anywhere else it covers the pile-mates
-    /// the circle wanted above it, which is the one arrangement
-    /// defect a quit could still show (owner device QA,
-    /// 2026-08-03).
+    /// frontmost — and, while the windows tile, the tile a short
+    /// row's fill stretches (#1709). Placed anywhere else it
+    /// covers the pile-mates the circle wanted above it, which is
+    /// the one arrangement defect a quit could still show (owner
+    /// device QA, 2026-08-03).
     ///
     /// It reorders rather than re-slots, so `frames` and
     /// `raiseOrder` keep seeing one list and cannot partition

@@ -142,12 +142,13 @@ struct GatherWindowsFrontmostTests {
     /// when the count fills the grid evenly (see the test below);
     /// when it does not, the cells raised after it do not touch it.
     ///
-    /// Asserted through the shipped `raiseOrder` and `dimension`
+    /// Asserted through the shipped `raiseOrder` and `shape`
     /// rather than a restatement of the partition.
     @Test("The window placed last is raised after its cell-mates")
     func placedLastIsRaisedAfterItsCellMates() throws {
         var state = makeState()
-        addWindows(&state, [1, 2, 3, 4, 5])
+        // Eight windows overflow the 3×2 tiles into piles.
+        addWindows(&state, [1, 2, 3, 4, 5, 6, 7, 8])
         let groups = WindowGather.collect(
             state: state,
             primaryHeight: primaryH,
@@ -155,11 +156,12 @@ struct GatherWindowsFrontmostTests {
         )
         let group = try #require(groups.first)
         let depth = QuitGridLayout.defaultTargetDepth
-        let dim = QuitGridLayout.dimension(
-            for: group.windows.count,
+        let grid = QuitGridLayout.shape(
+            tiles: group.windows.count,
+            in: group.axFrame,
             targetDepth: depth
         )
-        let cells = dim * dim
+        let cells = grid.columns * grid.rows
         // Its cell-mates are the entries sharing its index modulo
         // the cell count — the round-robin `frames` and
         // `raiseOrder` both fill from.
@@ -171,6 +173,7 @@ struct GatherWindowsFrontmostTests {
         #expect(mates.last == WindowID(2))
         let circle = QuitGridLayout.raiseOrder(
             for: group.windows,
+            in: group.axFrame,
             targetDepth: depth
         )
         let positions = mates.compactMap(circle.firstIndex(of:))
@@ -192,9 +195,35 @@ struct GatherWindowsFrontmostTests {
         let group = try #require(groups.first)
         let circle = QuitGridLayout.raiseOrder(
             for: group.windows,
+            in: group.axFrame,
             targetDepth: QuitGridLayout.defaultTargetDepth
         )
         #expect(circle.count == 4)
         #expect(circle.last == WindowID(2))
+    }
+
+    /// Placed last, the frontmost window is the one the short row's
+    /// fill stretches (#1709): five windows on this display lay
+    /// 3 + 2, and its slot is the double-width one in row two.
+    @Test("The frontmost window takes the stretched tile")
+    func frontmostTakesTheStretchedTile() throws {
+        var state = makeState()
+        addWindows(&state, [1, 2, 3, 4, 5])
+        let frames = WindowGather.targets(
+            state: state,
+            primaryHeight: primaryH,
+            style: .grid,
+            minSize: 300,
+            targetDepth: QuitGridLayout.defaultTargetDepth,
+            placingLast: WindowID(2)
+        )
+        #expect(
+            frames[WindowID(2)]
+                == CGRect(x: 640, y: 552.5, width: 1280, height: 527.5)
+        )
+        // Every other window keeps a single cell's width.
+        for id in [1, 3, 4, 5].map(WindowID.init) {
+            #expect(frames[id]?.width == 640)
+        }
     }
 }
