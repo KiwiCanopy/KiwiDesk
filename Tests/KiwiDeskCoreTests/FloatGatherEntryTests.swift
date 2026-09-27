@@ -34,13 +34,18 @@ struct FloatGatherEntryTests {
         partly: CGRect(x: 1500, y: 100, width: 800, height: 600),
     ]
 
-    private static var expected: [WindowID: CGRect] {
+    /// The grid entry seeds: the focused member dealt last, as
+    /// the seed deals it (#1709).
+    private static func expected(
+        _ core: KiwiCore
+    ) -> [WindowID: CGRect] {
         FloatGather.targets(
             members: [inside, scrolledOut, partly],
             frames: frames,
             region: bounds,
             minSize: TilingSettings().minWindowSize,
-            targetDepth: TilingSettings().quitGridTargetDepth
+            targetDepth: TilingSettings().quitGridTargetDepth,
+            placingLast: core.state.workspaces[space]?.focused
         )
     }
 
@@ -89,7 +94,7 @@ struct FloatGatherEntryTests {
         core.settleDrawnSpaceModes()
         core.setSpaceMode(Self.space, .floating)
         core.retile(pass: .apply)
-        let expected = Self.expected
+        let expected = Self.expected(core)
         #expect(expected.count == 3)
         #expect(
             core.tiler.stashOriginal(Self.inside) == expected[Self.inside]
@@ -132,7 +137,8 @@ struct FloatGatherEntryTests {
             ),
             region: Self.bounds,
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
+            targetDepth: core.tiler.settings.quitGridTargetDepth,
+            placingLast: core.state.workspaces[Self.space]?.focused
         )
         #expect(grid.count == 3)
         for id in members {
@@ -168,7 +174,8 @@ struct FloatGatherEntryTests {
             ),
             region: Self.bounds,
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
+            targetDepth: core.tiler.settings.quitGridTargetDepth,
+            placingLast: core.state.workspaces[Self.space]?.focused
         )
         let centred = FloatRecovery.centred(Self.size, in: Self.bounds)
         for id in members {
