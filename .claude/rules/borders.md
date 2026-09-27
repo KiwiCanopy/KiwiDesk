@@ -211,6 +211,21 @@ the three already in it, which an entry exempts wholesale. So
 the obligation above is the net for the inside of those files,
 and the map is the net for the next one.
 
+## The sheen is one ramp, painted by the surface that owns the stroke
+
+`border.sheen` (#1644) reaches the focused ring, the shelf's
+highlight and border, and the drag borders. **A surface paints it
+from `BorderSheen`'s colours** — `SheenRimView` for a view, the
+shared `BorderSheen.draw` for a context, a Settings picture
+through `SheenPaint` — never a ramp of its own, and reads the
+leaf as its only gate: the sheen is not glass, so it takes
+neither `LiquidGlassGate` nor the platform floor. **While the ramp paints, the surface clears its flat
+stroke or fill**, or a translucent colour stacks twice
+(`BorderSheenSurfaceTests`). **A surface hands the ramp the
+grounds it sits on** — a bar surface its Fill's plate — because
+the #578 cap is only as good as the grounds it is told about
+(`BorderSheenContrastTests`).
+
 ## Exercising the fallback path
 
 `KIWIDESK_NO_WS_TRACKING=<anything>` keeps `skyLightActive` false

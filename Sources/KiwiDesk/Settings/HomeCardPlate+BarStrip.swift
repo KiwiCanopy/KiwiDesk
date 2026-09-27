@@ -191,12 +191,22 @@ struct BarStripView: View {
             case .outline:
                 RoundedRectangle(cornerRadius: spec.itemCorner)
                     .strokeBorder(
-                        Color(kiwiHex: spec.highlight),
+                        SheenPaint.style(
+                            spec.highlight,
+                            sheen: spec.sheen,
+                            plate: spec.fill
+                        ),
                         lineWidth: spec.outlineWidth
                     )
             case .edgeMark:
                 Rectangle()
-                    .fill(Color(kiwiHex: spec.highlight))
+                    .fill(
+                        SheenPaint.style(
+                            spec.highlight,
+                            sheen: spec.sheen,
+                            plate: spec.fill
+                        )
+                    )
                     .frame(
                         width: vertical
                             ? spec.edgeMarkWidth : nil,

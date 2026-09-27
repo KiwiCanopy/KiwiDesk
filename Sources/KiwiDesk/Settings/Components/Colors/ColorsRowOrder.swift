@@ -9,10 +9,11 @@ enum ColorsRowOrder {
         .colours(.paletteDelete),
     ]
 
-    /// The Glass card's one row: the #1307 master over the
-    /// two bars and the shortcuts panel.
+    /// The Glass card's rows: the #1307 master, and the sheen's
+    /// own row directly beneath it (#1644).
     static let glassAtRest: [SettingKey] = [
-        .colours(.liquidGlassMaster)
+        .colours(.liquidGlassMaster),
+        .colours(.borderSheen),
     ]
 
     /// The Motion card's one at-rest row: the master switch.

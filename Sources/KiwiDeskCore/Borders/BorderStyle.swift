@@ -45,6 +45,10 @@ public struct BorderStyle: Sendable, Equatable {
     public var glowSize: CGFloat = 0
     /// Stacking order (#367).
     public var drawOrder: DrawOrder = .behind
+    /// The painted sheen (#1644) on the focused ring, the shelf's
+    /// highlight and border, and the drag markers' borders; on by
+    /// default like the Liquid Glass leaves.
+    public var sheen = true
 
     public init() {}
 
@@ -115,6 +119,7 @@ extension BorderStyle: Codable {
         case glow
         case glowSize = "glow_size"
         case drawOrder = "draw_order"
+        case sheen
     }
 
     public init(from decoder: Decoder) throws {
@@ -167,5 +172,10 @@ extension BorderStyle: Codable {
                 DrawOrder.self,
                 forKey: .drawOrder
             ) ?? defaults.drawOrder
+        sheen =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .sheen
+            ) ?? defaults.sheen
     }
 }

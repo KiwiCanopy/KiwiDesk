@@ -7,6 +7,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
         "settings.shortcutPanelLiquidGlass"
     case dragLiquidGlass = "settings.dragLiquidGlass"
     case stickyLiquidGlass = "settings.stickyStyle.liquidGlass"
+    case borderSheen = "settings.borderStyle.sheen"
     case animationsMaster = "settings.animations (master)"
     case animationsOnSpaceChange = "settings.animations.onSpaceChange"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
@@ -44,6 +45,18 @@ extension ColoursKey {
             // Written by the master row, never its own row —
             // and reachable from Lua like the shelf's leaf.
             return .luaOnly
+        case .borderSheen:
+            // Its own row beneath the master, never greyed: the
+            // sheen is not glass (#1644, owner 2026-09-27). It
+            // rides the card, which hides below macOS 26, so it
+            // takes the master's HIDE — a gate that greys nothing.
+            return .row(
+                .coloursAndMotion,
+                .glass,
+                .atRest,
+                gate: .runtime(.liquidGlassUnavailable),
+                exemptFromContainerGate: true
+            )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
         case .animationsOnSpaceChange, .animationsOnWindowResize,
@@ -95,6 +108,8 @@ extension ColoursKey {
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
             .stickyLiquidGlass:
             return .none
+        case .borderSheen:
+            return .text("colors.sheen", caption: "colors.sheen.caption")
         case .liquidGlassMaster:
             return .text(
                 "colors.liquid_glass",

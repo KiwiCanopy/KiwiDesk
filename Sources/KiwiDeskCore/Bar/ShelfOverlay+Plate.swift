@@ -7,6 +7,7 @@ extension ShelfOverlay {
     func layoutPlate(
         _ frame: CGRect?,
         shelf: KiwiShelf,
+        sheen: Bool,
         radius: CGFloat,
         animated: Bool
     ) {
@@ -19,7 +20,8 @@ extension ShelfOverlay {
             plateBorder,
             shelf: shelf,
             surface: .plate,
-            cornerRadius: radius
+            cornerRadius: radius,
+            sheen: sheen
         )
         if shelf.glassEnabled, let glass = glassPlateView() {
             solidPlateView().isHidden = true

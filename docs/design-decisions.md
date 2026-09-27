@@ -11574,6 +11574,44 @@ step therefore fills both from the switch's own reading over the
 leaves the file does carry, off where those disagree, as the
 panel's leaf was filled from the bars' (#1369).
 
+:::unreleased
+**The sheen is its own setting beside the Liquid Glass switch,
+never one of its surfaces.** (#1644, owner ruling 2026-09-27,
+after the device sitting.) The switch governs "every KiwiDesk
+surface that draws glass" (#1307, above), and the sheen draws
+none: it is a lightness ramp on the coloured stroke — the focused
+ring, the shelf's highlight and border, the drag borders —
+because a 2 pt glass stroke refracts nothing and carries no hue
+(#1297), so real glass there would weaken the one "this is
+active" signal. Being no glass, it takes none of glass's gates:
+it draws with the switch off, under Reduce transparency, and
+before macOS 26, and a leaf of `LiquidGlassAgreement` would have
+made the switch read off with its `?` whenever a user wanted
+glass without the sheen. So it is one leaf, `border.sheen` (under
+`border` because the ring is where it started), with its own row
+beneath the switch that never greys, coupled ONE way: switching
+glass on ticks it, switching glass off leaves it — on is the pair
+the owner wants to arrive together, off is not a statement about
+the sheen.
+
+**Default on, and no migration owed.** A #1369 crossing writes
+the OLD meaning of an absent key, and this key has none a user
+could have chosen: every path through the ruled row starts at
+on, and only unticking it moves it. So absence decoding to on is
+the value every older file would carry had the row existed.
+
+**The ramp is capped at the #578 bar, not tuned by eye.** A stroke
+clearing 3:1 on a ground keeps 3:1 at every stop: the ring and the
+drag borders against the wallpaper extremes, the bar surfaces
+against those and their Fill composited over each
+(`BorderSheenContrastTests`). The eyeballed lift took the default
+ring from 3.6:1 to 1.5:1 on white, so the default ring's top lift
+is capped to about a ninth of it; bright rings, already under the
+bar on white, lift in full. The alternative — one smaller lift for
+every colour — would have spent the sheen on the palettes that can
+carry it to protect the one that cannot.
+:::
+
 **Both drag markers' glass is thinned (owner, device 2026-09-25).**
 The drop zone lies over the window a drop would swap with, which
 should stay readable through it, and the ghost matches it so the

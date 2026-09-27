@@ -132,9 +132,7 @@ extension KiwiCore {
             fullscreen: fullscreen,
             isMonocle: space.mode == .monocle,
             focusedRingSuppressed: suppressed,
-            sheen: LiquidGlassGate.drawsSheen(
-                tiler.settings.kiwishelf
-            )
+            sheen: style.sheen
         )
         // Draw each ring around the window's REAL frame (its
         // actual on-screen size, which an app may have clamped

@@ -161,7 +161,8 @@ extension KiwiCore {
                 at: slot,
                 style: settings.dragGhost,
                 cornerRadius: settings.dragCornerRadius,
-                glassBeneath: glass ? id.raw : nil
+                glassBeneath: glass ? id.raw : nil,
+                sheen: settings.borderStyle.sheen
             )
         }
         // Target the slot under the CURSOR, not the dragged
@@ -186,7 +187,8 @@ extension KiwiCore {
                 at: targetSlot,
                 style: settings.dragDropZone,
                 cornerRadius: settings.dragCornerRadius,
-                glassBeneath: glass ? id.raw : nil
+                glassBeneath: glass ? id.raw : nil,
+                sheen: settings.borderStyle.sheen
             )
         } else {
             dragOverlay.hideDropZone()

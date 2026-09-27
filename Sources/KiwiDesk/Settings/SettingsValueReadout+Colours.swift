@@ -32,6 +32,12 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.liquidGlass,
                 new.settings.stickyStyle.liquidGlass
             )
+        case .borderSheen:
+            return coloursOnOffRow(
+                census,
+                old.settings.borderStyle.sheen,
+                new.settings.borderStyle.sheen
+            )
         case .liquidGlassMaster:
             // Derived, like the animations master beside it: the
             // one `LiquidGlassAgreement` reading the row shows.

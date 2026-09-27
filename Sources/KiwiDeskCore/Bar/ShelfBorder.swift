@@ -27,25 +27,37 @@ enum ShelfBorder {
     /// Paints `view` as the border of the `surface` whose frame it
     /// already holds: `KiwiShelf.drawnBorderWidth` in the shelf's
     /// border colour on `cornerRadius`, hidden where the shelf
-    /// does not rim that surface or the border is off.
+    /// does not rim that surface or the border is off. With `sheen`
+    /// (#1644) the rim draws its ramp in place of the layer's flat
+    /// stroke.
     @MainActor
     static func paint(
         _ view: NSView,
         shelf: KiwiShelf,
         surface: Surface,
-        cornerRadius: CGFloat
+        cornerRadius: CGFloat,
+        sheen: Bool
     ) {
         let width =
             rims(surface, on: shelf) ? shelf.drawnBorderWidth : 0
         view.wantsLayer = true
         view.isHidden = width == 0
         guard let layer = view.layer else { return }
+        let ramp = sheen && width > 0
         layer.backgroundColor = nil
-        layer.borderWidth = width
+        layer.borderWidth = ramp ? 0 : width
         layer.borderColor =
             width > 0
             ? NSColor(kiwiHex: shelf.borderColor).cgColor : nil
         layer.cornerRadius = cornerRadius
+        (view as? SheenRimView)?.paint =
+            ramp
+            ? SheenRimView.Paint(
+                hex: shelf.borderColor,
+                width: width,
+                grounds: BorderSheen.grounds(plate: shelf.fillColor)
+            )
+            : nil
     }
 
     /// A border view: layer-backed, fill-less, blind to the
@@ -60,7 +72,7 @@ enum ShelfBorder {
 
     /// Hit-tests to nothing: a rim above an item must not take
     /// the item's clicks, hover or drag.
-    final class PassThroughView: NSView {
+    final class PassThroughView: SheenRimView {
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
 }

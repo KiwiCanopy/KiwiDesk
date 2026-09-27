@@ -47,7 +47,7 @@ struct SettingsCodingTests {
                 "enabled", "width", "focused_color",
                 "unfocused_enabled", "unfocused_color",
                 "corner_style", "glow", "glow_size",
-                "draw_order",
+                "draw_order", "sheen",
             ]
         )
         // 0 is the automatic sentinel (#551): the width-scaled

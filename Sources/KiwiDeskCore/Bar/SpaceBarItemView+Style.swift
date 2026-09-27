@@ -15,7 +15,8 @@ extension SpaceBarItemView {
             boxBorder,
             shelf: style.shelf,
             surface: .box,
-            cornerRadius: cornerRadius
+            cornerRadius: cornerRadius,
+            sheen: style.sheen
         )
         styleIdentifier()
         styleApps()
@@ -237,12 +238,19 @@ extension SpaceBarItemView {
 
     private func styleAccent() {
         accent.isHidden = !isActive
+        accent.paint = BarAccent.sheen(
+            style.highlightColor,
+            outline: style.activeIndicator == .outline
+                ? style.resolvedHighlightWidth : nil,
+            fill: style.fillColor,
+            drawn: style.sheen && isActive
+        )
         guard isActive else { return }
-        let highlight = NSColor(kiwiHex: style.highlightColor)
+        let ink = BarAccent.flatInk(style.highlightColor, sheen: style.sheen)
         switch style.activeIndicator {
         case .outline:
             accent.layer?.backgroundColor = nil
-            accent.layer?.borderColor = highlight.cgColor
+            accent.layer?.borderColor = ink
             accent.layer?.borderWidth = style.resolvedHighlightWidth
             accent.layer?.cornerRadius =
                 style.hasBox
@@ -251,19 +259,8 @@ extension SpaceBarItemView {
         case .edgeMark:
             accent.layer?.borderWidth = 0
             accent.layer?.cornerRadius = 0
-            accent.layer?.backgroundColor = highlight.cgColor
+            accent.layer?.backgroundColor = ink
         }
-        applySheen()
-    }
-
-    /// The ring's sheen on the indicator (#1644).
-    func applySheen() {
-        BarSheen.apply(
-            to: accent,
-            hex: style.highlightColor,
-            outline: style.activeIndicator == .outline,
-            shelf: style.shelf
-        )
     }
 
     var identifierFont: CGFloat {

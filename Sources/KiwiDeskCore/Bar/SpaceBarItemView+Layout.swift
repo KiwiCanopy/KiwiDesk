@@ -305,6 +305,5 @@ extension SpaceBarItemView {
                 )
             }
         }
-        applySheen()
     }
 }

@@ -81,6 +81,10 @@ extension KiwiCore {
             return setBool(args) {
                 tiler.settings.borderStyle.glow = $0
             }
+        case "sheen":
+            return setBool(args) {
+                tiler.settings.borderStyle.sheen = $0
+            }
         case "glow_size":
             // 0 = automatic (the width-scaled formula, #551);
             // an explicit size clamps only at the renderable

@@ -205,6 +205,8 @@
   "colors.more.kiwishelf.summary": "Borda, passagem do mouse, selos, janela em foco",
   "colors.scene.caption": "As duas barras com seus itens ativos, as bordas em foco e sem foco com suas marcas de estado, e a silhueta ao lado da sua zona de destino.",
   "colors.scene.title": "Cores atuais",
+  "colors.sheen": "Brilho",
+  "colors.sheen.caption": "Um filete claro no topo da borda de foco, do destaque e da borda das barras e das bordas ao arrastar. Combina bem com o vidro acima.",
   "colors.unfocused_off.help": "Janelas fora de foco não recebem borda, então esta cor não é desenhada. Ative-a em %1$@.",
   "colors.unfocused_off.xref": "“%1$@” não é desenhada enquanto “%2$@” estiver desativado — ative-a em %3$@.",
   "common.done": "OK",

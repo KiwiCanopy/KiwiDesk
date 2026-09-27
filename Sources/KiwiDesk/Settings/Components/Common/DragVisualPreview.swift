@@ -7,6 +7,8 @@ struct DragVisualPreview: View {
     let cornerRadius: CGFloat
     /// The stored `dragLiquidGlass` leaf; Core gates it.
     let glass: Bool
+    /// `border.sheen` (#1644).
+    let sheen: Bool
 
     var body: some View {
         ZStack {
@@ -41,7 +43,8 @@ struct DragVisualPreview: View {
         return DragMarkerHost(
             style: scaled,
             cornerRadius: radius,
-            glass: glass
+            glass: glass,
+            sheen: sheen
         )
         .padding(visual.borderAlignment == .inside ? half : -half)
         .opacity(visual.enabled ? 1 : 0.25)
@@ -68,6 +71,7 @@ private struct DragMarkerHost: NSViewRepresentable {
     let style: DragVisual
     let cornerRadius: CGFloat
     let glass: Bool
+    let sheen: Bool
 
     func makeNSView(context: Context) -> DragMarkerView {
         DragMarkerView()
@@ -77,7 +81,8 @@ private struct DragMarkerHost: NSViewRepresentable {
         view.showPreview(
             style,
             cornerRadius: cornerRadius,
-            storedGlass: glass
+            storedGlass: glass,
+            sheen: sheen
         )
     }
 }

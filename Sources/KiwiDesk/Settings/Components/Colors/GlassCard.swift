@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
-/// shortcuts panel (#1307).
+/// shortcuts panel (#1307), and the sheen's own row beneath it
+/// (#1644).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -28,23 +29,60 @@ struct GlassCard: View {
                 caption: caption,
                 help: reduceTransparency ? reduceTransparencyHelp : nil
             ) {
-                // One view, not a bare `ForEach`: the grey is
-                // applied to the run, never per child (gui.md).
+                // The grey is per row, honoring the census's
+                // exemption: the sheen is not glass and never
+                // greys (#1644) — parallel `GreyOut`s, never
+                // nested (gui.md).
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(
                         ColorsRowOrder.glassAtRest,
                         id: \.id
-                    ) { _ in
-                        ToggleRow(
-                            label: Self.title,
-                            isOn: model.liquidGlassMaster,
-                            help: agreement.differ
-                                ? differHelp : baseHelp
-                        )
+                    ) { key in
+                        row(key)
+                            .modifier(
+                                GreyOut(
+                                    active: reduceTransparency
+                                        && !key.placement
+                                            .exemptFromContainerGate
+                                )
+                            )
                     }
                 }
-                .modifier(GreyOut(active: reduceTransparency))
             }
+        }
+    }
+
+    @ViewBuilder private func row(_ key: SettingKey) -> some View {
+        switch key {
+        case .colours(.liquidGlassMaster):
+            ToggleRow(
+                label: Self.title,
+                isOn: model.liquidGlassMaster,
+                help: agreement.differ ? differHelp : baseHelp
+            )
+        case .colours(.borderSheen):
+            VStack(alignment: .leading, spacing: 2) {
+                ToggleRow(
+                    label: L("colors.sheen", "Sheen"),
+                    isOn: $model.config.settings.borderStyle.sheen
+                )
+                Text(
+                    L(
+                        "colors.sheen.caption",
+                        "A light top edge on the focus border, the "
+                            + "bars' highlight and border, and the "
+                            + "drag borders. Pairs well with the glass "
+                            + "above."
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        default:
+            let _ = assertionFailure(
+                "unrendered Glass census key: \(key.id)"
+            )
+            EmptyView()
         }
     }
 

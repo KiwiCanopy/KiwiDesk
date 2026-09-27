@@ -9,6 +9,9 @@ import AppKit
 public final class DragMarkerView: NSView {
     private(set) var glass: NSView?
     let tint = GlassBackdrop()
+    /// The border's sheen (#1644), above the glass like the flat
+    /// border it replaces.
+    let rim = SheenRimView()
     private var preview: PreviewInput?
     private var gateToken: NSObjectProtocol?
 
@@ -17,6 +20,7 @@ public final class DragMarkerView: NSView {
         let style: DragVisual
         let radius: CGFloat
         let storedGlass: Bool
+        let sheen: Bool
     }
 
     /// Both markers' glass is thinned: the drop zone lies over the
@@ -29,6 +33,8 @@ public final class DragMarkerView: NSView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
+        rim.autoresizingMask = [.width, .height]
+        addSubview(rim)
     }
 
     public convenience init() { self.init(frame: .zero) }
@@ -39,16 +45,19 @@ public final class DragMarkerView: NSView {
     /// Draws `style` the way a drag draws it. `storedGlass` is the
     /// `dragLiquidGlass` leaf, resolved through the gate at each
     /// draw and re-drawn live when Reduce transparency flips
-    /// (#1374).
+    /// (#1374); `sheen` is `border.sheen`, which no gate touches
+    /// (#1644).
     public func showPreview(
         _ style: DragVisual,
         cornerRadius: CGFloat,
-        storedGlass: Bool
+        storedGlass: Bool,
+        sheen: Bool
     ) {
         preview = PreviewInput(
             style: style,
             radius: cornerRadius,
-            storedGlass: storedGlass
+            storedGlass: storedGlass,
+            sheen: sheen
         )
         observeGate()
         redrawPreview()
@@ -59,7 +68,8 @@ public final class DragMarkerView: NSView {
         render(
             input.style,
             radius: input.radius,
-            glass: LiquidGlassGate.rendered(glass: input.storedGlass)
+            glass: LiquidGlassGate.rendered(glass: input.storedGlass),
+            sheen: input.sheen
         )
     }
 
@@ -97,13 +107,28 @@ public final class DragMarkerView: NSView {
     }
 
     /// Paints the marker; `glass` is already resolved by the gate.
-    func render(_ style: DragVisual, radius: CGFloat, glass: Bool) {
+    func render(
+        _ style: DragVisual,
+        radius: CGFloat,
+        glass: Bool,
+        sheen: Bool
+    ) {
         guard let layer else { return }
         layer.cornerRadius = radius
         // A layer's border draws above its sublayers, so it stays
-        // solid over the glass (`DragPairSeparationTests`, #511).
-        layer.borderWidth = style.border ? style.borderWidth : 0
+        // solid over the glass (`DragPairSeparationTests`, #511);
+        // the sheen's rim takes its place, above the glass too.
+        let ramp = sheen && style.border
+        layer.borderWidth = style.border && !ramp ? style.borderWidth : 0
         layer.borderColor = Self.color(style.borderColor).cgColor
+        rim.layer?.cornerRadius = radius
+        rim.paint =
+            ramp
+            ? SheenRimView.Paint(
+                hex: style.borderColor,
+                width: style.borderWidth
+            )
+            : nil
         if glass, let plate = glassView() {
             layer.backgroundColor = NSColor.clear.cgColor
             plate.isHidden = false
@@ -133,7 +158,7 @@ public final class DragMarkerView: NSView {
         guard let plate = GlassPlate.make() else { return nil }
         plate.autoresizingMask = [.width, .height]
         tint.autoresizingMask = [.width, .height]
-        addSubview(plate)
+        addSubview(plate, positioned: .below, relativeTo: rim)
         GlassPlate.setContent(plate, NSView())
         glass = plate
         return plate

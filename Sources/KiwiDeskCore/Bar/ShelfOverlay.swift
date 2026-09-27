@@ -42,10 +42,12 @@ final class ShelfOverlay {
 
     /// Lays the shelf out over `strip` (AX coordinates) with
     /// `shelf` as rendered — glass already gated by
-    /// `LiquidGlassGate` — and shows it.
+    /// `LiquidGlassGate` — and shows it; `sheen` paints the plate's
+    /// border with the ramp (#1644).
     func show(
         strip: CGRect,
         shelf: KiwiShelf,
+        sheen: Bool = false,
         sections: [Section],
         divider range: ShelfArrangement.Divider? = nil
     ) {
@@ -72,6 +74,7 @@ final class ShelfOverlay {
             layoutPlate(
                 plate,
                 shelf: shelf,
+                sheen: sheen,
                 radius: shelf.resolvedCornerRadius(forThickness: depth),
                 animated: glides
             )

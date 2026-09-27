@@ -93,6 +93,7 @@ extension KiwiCore {
                     display: display,
                     strip: strip,
                     shelf: settings.kiwishelf,
+                    sheen: settings.borderStyle.sheen,
                     space: spaceBars.shownOverlay(on: display),
                     app: appBars.shownOverlay(on: display),
                     divider: dividers[display]

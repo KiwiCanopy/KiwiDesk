@@ -13,6 +13,8 @@ final class ShelfManager {
         let display: DisplayID
         let strip: CGRect
         let shelf: KiwiShelf
+        /// `border.sheen` (#1644), the plate border's ramp.
+        var sheen = false
         /// The sections shown here; each is placed at the slot it
         /// drew into (`shownStrip`), so the two cannot disagree.
         let space: SpaceBarOverlay?
@@ -89,6 +91,7 @@ final class ShelfManager {
         overlay.show(
             strip: shelf.strip,
             shelf: LiquidGlassGate.rendered(shelf.shelf),
+            sheen: shelf.sheen,
             sections: sections,
             divider: shelf.divider
         )

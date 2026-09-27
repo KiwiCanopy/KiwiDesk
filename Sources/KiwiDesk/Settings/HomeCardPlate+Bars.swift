@@ -64,6 +64,9 @@ struct HomeCardBarsTile: View {
         /// its own `textFont`, as the live bar does
         /// (`HomeCardPlate+BarFont.swift`).
         var shelf: KiwiShelf
+        /// Whether the sheen paints the indicator and the border
+        /// (#1644) — its own value, no other gate.
+        var sheen = false
     }
 
     /// The share of the thickness an item's content fills, read
@@ -212,7 +215,8 @@ struct HomeCardBarsTile: View {
                 forContentDepth: cross * share
             ),
             contentShare: share,
-            shelf: style.shelf
+            shelf: style.shelf,
+            sheen: style.sheen
         )
     }
 
@@ -245,7 +249,8 @@ struct HomeCardBarsTile: View {
                 forContentDepth: cross * share
             ),
             contentShare: share,
-            shelf: style.shelf
+            shelf: style.shelf,
+            sheen: style.sheen
         )
     }
 

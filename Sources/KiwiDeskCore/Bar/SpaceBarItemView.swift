@@ -45,7 +45,7 @@ final class SpaceBarItemView: NSView {
     let heldBadge = StateBadgeView(symbolName: SpaceBarItemView.heldSymbol)
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
-    let accent = NSView()
+    let accent = SheenRimView()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.make()

@@ -44,18 +44,14 @@ struct ShelfBorderSeamTests {
     /// is ruled. The width is counted on its own: CALayer's default
     /// border colour is opaque black, so a width alone draws a rim.
     /// The App Bar item's width count includes its own layer's
-    /// reset to 0, which draws nothing. `BarSheen` writes both on
-    /// a MASK copying the outline's stroke, which paints nothing
-    /// of its own (#1644).
+    /// reset to 0, which draws nothing.
     private static let allowedColor: [String: Int] = [
         "AppBarItemView+Paint.swift": 1,
         "SpaceBarItemView+Style.swift": 1,
-        "BarSheen.swift": 1,
     ]
     private static let allowedWidth: [String: Int] = [
         "AppBarItemView+Paint.swift": 3,
         "SpaceBarItemView+Style.swift": 2,
-        "BarSheen.swift": 1,
     ]
 
     /// Per `Bar/` file, how many assignments to `property` it

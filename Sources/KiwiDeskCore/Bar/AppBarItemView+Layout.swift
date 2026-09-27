@@ -178,7 +178,6 @@ extension AppBarItemView {
         case .edgeMark: layoutEdgeMark()
         case .none: break
         }
-        applySheen()
     }
 
     /// Outline selection ring (ui-designer 2026-07-14, owner 2026-07-20).

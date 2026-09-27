@@ -108,6 +108,11 @@ extension APIReference {
             "Wraps the focused border in a soft colored bloom.",
             .boolean("enabled")
         ),
+        "set_sheen": APIRecord(
+            "Paints a light top edge on the focused border, bar "
+                + "highlight and border, and drag borders.",
+            .boolean("enabled")
+        ),
         "set_glow_size": APIRecord(
             "Sets the glow blur radius in points; 0 is "
                 + "automatic.",

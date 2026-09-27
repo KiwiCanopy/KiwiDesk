@@ -3,7 +3,8 @@ import SwiftUI
 
 /// The one Liquid Glass switch, over the bars' shelf, the ⌃⌥K
 /// shortcuts panel, the drag markers and the sticky mark (#1307,
-/// #1517, #1620, #1621, `SettingKey.masterWrites`).
+/// #1517, #1620, #1621, `SettingKey.masterWrites`). The sheen is
+/// not one of its leaves (#1644).
 extension SettingsModel {
     /// On only when EVERY stored leaf carries glass; a flip writes
     /// them all. Owner ruling 2026-09-07: the switch means "all of
@@ -21,6 +22,9 @@ extension SettingsModel {
                 for leaf in LiquidGlassAgreement.leaves {
                     next[keyPath: leaf] = on
                 }
+                // One-way (#1644, owner 2026-09-27): glass on
+                // ticks the sheen; glass off leaves it be.
+                if on { next.borderStyle.sheen = true }
                 self.config.settings = next
             }
         )

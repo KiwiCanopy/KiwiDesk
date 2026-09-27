@@ -13,13 +13,18 @@ import Foundation
 public struct SpaceBarLook: Sendable, Equatable {
     public var shelf: KiwiShelf
     public var bar: SpaceBarStyle
+    /// `border.sheen` (#1644), which paints the highlight and the
+    /// shelf's border.
+    public var sheen: Bool
 
     public init(
         shelf: KiwiShelf = KiwiShelf(),
-        bar: SpaceBarStyle = SpaceBarStyle()
+        bar: SpaceBarStyle = SpaceBarStyle(),
+        sheen: Bool = false
     ) {
         self.shelf = shelf
         self.bar = bar
+        self.sheen = sheen
     }
 
     public subscript<T>(
@@ -114,13 +119,18 @@ public struct SpaceBarLook: Sendable, Equatable {
 public struct AppBarLook: Sendable, Equatable {
     public var shelf: KiwiShelf
     public var bar: AppBarStyle
+    /// `border.sheen` (#1644), which paints the highlight and the
+    /// shelf's border.
+    public var sheen: Bool
 
     public init(
         shelf: KiwiShelf = KiwiShelf(),
-        bar: AppBarStyle = AppBarStyle()
+        bar: AppBarStyle = AppBarStyle(),
+        sheen: Bool = false
     ) {
         self.shelf = shelf
         self.bar = bar
+        self.sheen = sheen
     }
 
     public subscript<T>(

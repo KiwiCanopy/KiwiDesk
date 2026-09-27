@@ -24,6 +24,7 @@ struct BorderStyleParityTests {
         style.glow = true
         style.glowSize = 9
         style.drawOrder = .front
+        style.sheen = false
         return style
     }
 
