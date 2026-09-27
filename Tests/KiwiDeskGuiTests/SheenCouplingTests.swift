@@ -95,7 +95,7 @@ struct SheenCouplingTests {
         let atOrigin = SettingsSlider.fillSpan(knob: 100, origin: 100)
         #expect(atOrigin.width == 0)
         let plain = SettingsSlider.fillSpan(knob: 40, origin: nil)
-        #expect(plain.x == 0 && plain.width > 40)
+        #expect(plain.x == 0 && plain.width == 40)
     }
 
     /// The Sheen row hands its slider the origin — the wiring half,

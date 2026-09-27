@@ -412,7 +412,9 @@ Liquid Glass switch does not reach it, and Reduce transparency
 keeps the white knob (#1527). A glass knob at rest was tried and
 dropped: it read as a blue knob. Accessibility is delegated to a
 native `Slider` representation, so assistive tech sees exactly
-the control it replaces.
+the control it replaces. A signed value fills from its origin: the
+accent runs from the origin to the knob in either direction, and
+a hairline tick marks the origin.
 
 **Buttons take a native style, and semantic role chooses the
 class.** No gradients or shadows on buttons — the crisp shadow
