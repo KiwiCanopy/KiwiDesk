@@ -99,7 +99,7 @@ struct CoreLocalizationBoundaryTests {
         // App Bar's a11y labels (#901), drawn by Core; one Space
         // Bar call is the layer item's label (#1169).
         "Bar/AppBarItemView.swift": 3,
-        "Bar/SpaceBarItemView.swift": 3,
+        "Bar/SpaceBarItemView+Collapse.swift": 3,
         // The Space's announced name, held frames beside it (#1507).
         "Bar/SpaceBarItemView+Held.swift": 3,
         "Bar/SpaceBarOverlay+FrontApp.swift": 2,

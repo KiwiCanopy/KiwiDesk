@@ -186,8 +186,9 @@ struct UpdateWindowRoutingTests {
         #expect(session.phase == .installing)
     }
 
-    /// Never "What's new" after a clicked Install (#1542): the
-    /// driver's own Install records the offered version as read.
+    /// A clicked Install records the offered version as read
+    /// (#1542) and carries its notes across the relaunch, which
+    /// "What's new" narrates (#1667).
     @Test("the window's Install records its notes as read")
     func installRecordsSeen() throws {
         let (driver, log) = driver()
@@ -199,6 +200,16 @@ struct UpdateWindowRoutingTests {
         #expect(driver.seenRecord?.seen == nil)
         try #require(driver.window?.session).install()
         #expect(driver.seenRecord?.seen == "9999.1.0")
+        // The press alone narrates nothing: the download may still
+        // fail or be put off.
+        #expect(driver.seenRecord?.takeRelaunch() == nil)
+        driver.showInstallingUpdate(
+            withApplicationTerminated: false,
+            retryTerminatingApplication: {}
+        )
+        let relaunch = try #require(driver.seenRecord?.takeRelaunch())
+        #expect(relaunch.version == "9999.1.0")
+        #expect(relaunch.items.map(\.version).contains("9999.1.0"))
     }
 
     /// A download Sparkle already fetched: Install goes straight

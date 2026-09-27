@@ -128,9 +128,10 @@ extension SpaceBarOverlay {
             fades: fades,
             horizontal: horizontal
         )
+        let glides = recordGlide(items, content: style.inactiveContent)
+        placeItems(itemFrames, glides: glides)
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
-            view.frame = itemFrames[index]
             view.configure(
                 identity: item.identity,
                 spaceGlyph: item.spaceGlyph,
@@ -141,7 +142,8 @@ extension SpaceBarOverlay {
                 stateMarkColors: stateMarkColors,
                 overflow: item.overflow,
                 focusInOverflow: item.focusInOverflow,
-                held: item.held
+                held: item.held,
+                collapse: item.collapse
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
@@ -158,12 +160,15 @@ extension SpaceBarOverlay {
             style: style,
             horizontal: horizontal
         )
-        installGlassHosting(
-            hosting,
-            frames: itemFrames,
-            style: style,
-            depth: horizontal ? strip.height : strip.width
-        )
+        BarMotion.runLayout {
+            installGlassHosting(
+                hosting,
+                frames: itemFrames,
+                style: style,
+                depth: horizontal ? strip.height : strip.width,
+                animated: glides
+            )
+        }
         layoutOverflow(
             fades,
             strip: strip,
@@ -180,7 +185,7 @@ extension SpaceBarOverlay {
     }
 
     /// Index of the active Space for scroll-follow navigation.
-    private func activeIndex(_ items: [Item]) -> Int? {
+    func activeIndex(_ items: [Item]) -> Int? {
         items.firstIndex(where: \.active)
     }
 }

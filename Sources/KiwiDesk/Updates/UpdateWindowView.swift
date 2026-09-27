@@ -6,7 +6,8 @@ import SwiftUI
 /// the update).
 enum UpdateWindowMode {
     case offer(UpdateSession)
-    case whatsNew(done: () -> Void)
+    /// `narration` is set after the window's own Install (#1667).
+    case whatsNew(narration: BootNarration?, done: () -> Void)
 }
 
 /// KiwiDesk's own update window (#1542 ruling ▸ Window): a pinned
@@ -26,11 +27,12 @@ struct UpdateWindowView: View {
                 session: session,
                 measuring: measuring
             )
-        case .whatsNew(let done):
+        case .whatsNew(let narration, let done):
             UpdateWindowLayout(
                 offer: offer,
                 whatsNew: true,
                 failed: false,
+                narration: narration,
                 measuring: measuring
             ) {
                 WhatsNewFooter(done: done)
@@ -67,12 +69,17 @@ private struct UpdateWindowLayout<Footer: View>: View {
     let offer: UpdateOffer
     let whatsNew: Bool
     let failed: Bool
+    var narration: BootNarration?
     let measuring: Bool
     @ViewBuilder let footer: () -> Footer
 
     var body: some View {
         VStack(spacing: 0) {
-            UpdateWindowHeader(offer: offer, whatsNew: whatsNew)
+            if let narration {
+                NarratedHeader(offer: offer, narration: narration)
+            } else {
+                UpdateWindowHeader(offer: offer, whatsNew: whatsNew)
+            }
             UpdateNotesScroll(
                 offer: offer,
                 failed: failed,
@@ -104,9 +111,26 @@ enum UpdateWindowMetrics {
     }
 }
 
+/// The relaunched "What's new" header, re-drawn as boot moves.
+private struct NarratedHeader: View {
+    let offer: UpdateOffer
+    @ObservedObject var narration: BootNarration
+
+    var body: some View {
+        UpdateWindowHeader(
+            offer: offer,
+            whatsNew: true,
+            narration: narration.line
+        )
+    }
+}
+
 private struct UpdateWindowHeader: View {
     let offer: UpdateOffer
     let whatsNew: Bool
+    /// Boot's line after the window's own Install; it takes the
+    /// subtitle slot until boot is ready (#1667).
+    var narration: String?
 
     var body: some View {
         HStack(spacing: 16) {
@@ -148,6 +172,7 @@ private struct UpdateWindowHeader: View {
     }
 
     private var subtitle: String {
+        if let narration { return narration }
         if whatsNew {
             guard let released = offer.released else { return "" }
             return L(

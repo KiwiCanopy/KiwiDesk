@@ -10,6 +10,7 @@ paths:
   # drivers and in the item builders they call.
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarItems.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+SpaceBarRun.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBar.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+AppBarGroups.swift"
   # The one shelf (#1517): where a bar field lives, the one
@@ -117,6 +118,19 @@ bars. Obligations:
   run's outer `pad` the one slack allowed where `item_gap` is
   below it. `ShelfNeedParityTests` holds both bars to it, both
   placements, a gap each side of the pad.
+- **Collapse a Space item once, in
+  `SpaceBarOverlay.Item.collapsed(to:)`, applied by the item
+  builder after the `hide_empty` verdict** (#1683) — never in a
+  render or a preview, since the plan measures the builder's
+  items and a collapse decided anywhere else draws a run the plan
+  did not reserve. A collapsed item's count is a disc on the
+  identifier's cell and adds no length, so the length and the
+  layout both measure the identifier alone.
+  `SpaceBarCollapsedRenderTests` ▸ `discRidesTheIdentifier`
+  holds the disc inside the planned length; that no other site
+  collapses is review's. The run's glide on a
+  switch goes through `BarMotion` like every bar motion, its box
+  glass travelling with its item (`SpaceBarGlideWiringTests`).
 
 ## One shelf panel per display draws the plate; the bars draw sections
 
@@ -188,6 +202,11 @@ render content into it (#1517). Obligations:
   alpha applied to the item colour beside it.
   `IdleItemContrastTests` holds the value and its legibility; the
   routing is review's.
+- **An empty Space's identifier, on a Space its screen does not
+  show, is `KiwiShelf.emptyItemColor` under either content,
+  derived from the palette and never picked** (#1683): the idle floor and the occupied-to-empty step
+  both hold, or the cue drops rather than the floor.
+  `EmptyItemInkTests` measures every bundled palette's answer.
 
 ## Overflow fades, follows and pages through one home each
 
@@ -696,15 +715,26 @@ reaches.
   owes a call. A writer-side refresh is the shape that left the
   issue stale after `load_profile`. `BarFontIssueTests` ▸
   `followsProfileSwitch` and ▸ `fontSetChangeRederives` hold it.
-- **A face whose line box outgrows a cell-high frame is framed on
-  its ink** — for the Space Bar fields `BarTextGlyph.frame`
-  places (the identifier, the front-app glyph): Zapfino set its
-  digit below the frame and was clipped.
-  `SpaceBarGlyphCellTests` ▸ `identifierInFaceIsWholeAndCentred`
-  renders a tall and a mono face. The App Bar title, the
-  front-app name, the count badges and `ShelfCountView` size
-  from their own cell and are NOT framed this way; a tall face
-  there is a device check, not a guarded claim.
+- **Set every bar text's baseline through `BarTextGlyph` — the
+  font's cap height centred on the item, one baseline per font —
+  never by centring its line box and never by a string's own
+  ink** (#1707): an old-style 3 descends where a 1 does not, so
+  per-string ink centring gave each digit its own baseline, and
+  a tall face's ascent lifted a centred line box off its item. A
+  cell site takes `frame`, free-running text (the App Bar title,
+  the front-app name, `ShelfCountView`'s number) `originY`, and a
+  badge cell `lineTop`; an App Font ligature is an icon and
+  centres its line box. Never set `usesSingleLineMode` on bar
+  text: it draws a tall face above its own ascent, clipping it.
+  `BarTextBaselineTests` and `BarTextBaselineSiteTests` render
+  each site in Apple Chancery, and `SpaceBarGlyphCellTests` ▸
+  `identifierInFaceIsWholeAndCentred` a tall and a mono face; a
+  new site owes one of them a clause, and `BarTextFieldCensusTests`
+  holds every bar text field to a named door. The Settings
+  preview draws SwiftUI `Text`, which centres its line box, so it
+  is not baseline-faithful for a tall face — residue, stated; so
+  is `ShelfCountView`'s stacked arm, whose number takes the same
+  `originY` line as the side-by-side arm the suite renders.
 - **A preview of the bar draws the draft's face** through the
   same resolver (`BarSpec.textFont`); that the strip then draws
   with it is review's — no clause renders the text.

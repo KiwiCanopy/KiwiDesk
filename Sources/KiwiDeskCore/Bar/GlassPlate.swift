@@ -1,5 +1,10 @@
 import AppKit
 
+/// A bar view's frame write: the view, its target, whether it
+/// may travel. `BarMotion.setFrame` in production; a test hands
+/// a recorder to see what a pass asked for.
+typealias BarFrameMove = @MainActor (NSView, CGRect, Bool) -> Void
+
 /// macOS 26 Liquid Glass plate wrapper for bar backgrounds
 /// (`NSGlassEffectView`, #390).
 enum GlassPlate {
@@ -23,12 +28,13 @@ enum GlassPlate {
         _ view: NSView,
         frame: CGRect,
         cornerRadius: CGFloat,
-        animated: Bool = false
+        animated: Bool = false,
+        move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView
         else { return }
-        BarMotion.setFrame(glass, to: frame, animated: animated)
+        move(glass, frame, animated)
         glass.cornerRadius = cornerRadius
     }
 

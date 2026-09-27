@@ -15,6 +15,7 @@ enum SpaceBarFixtures {
         style.enabled = false
         style.glyphCap = 8
         style.glyphGap = 3
+        style.inactiveContent = .count
         style.frontAppTitleCap = 40
         style.activeIndicator = .edgeMark
         style.activeDimFactor = 0.7

@@ -5,7 +5,7 @@ import Foundation
 /// written after the build and never ship inside it).
 enum WhatsNewFeed {
     /// One item of the feed, as much as "What's new" needs.
-    struct Item: Equatable {
+    struct Item: Equatable, Codable {
         /// `sparkle:version` — what versions compare on.
         let version: String
         /// `sparkle:shortVersionString`, or the version.

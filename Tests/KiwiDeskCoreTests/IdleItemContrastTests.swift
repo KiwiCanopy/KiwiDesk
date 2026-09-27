@@ -14,8 +14,9 @@ import Testing
 struct IdleItemContrastTests {
     /// The ring suite's own-contrast floor, which the idle alpha
     /// was chosen against (ui-designer, #1517): at 0.4 five
-    /// palettes fell to about 2:1 or below.
-    private static let floor = 2.2
+    /// palettes fell to about 2:1 or below. Core's one copy, which
+    /// The collapsed empty ink keeps too (#1683).
+    private static let floor = KiwiShelf.idleInkFloor
 
     private func idleContrast(
         item: String,
@@ -87,13 +88,42 @@ struct IdleItemContrastTests {
     }
 
     /// The consumer: an idle text identifier on the live bar is
-    /// drawn in `idleItemColor`, the active one is not.
+    /// drawn in `idleItemColor`, the active one is not. The idle
+    /// Space holds a window: an empty one takes the empty ink
+    /// (`SpaceBarCollapsedRenderTests`).
     @Test("The live bar draws an idle identifier in the idle ink")
     @MainActor
     func liveBarDrawsTheIdleInk() throws {
         LiquidGlassGate.override = { false }
         let manager = SpaceBarManager()
-        manager.sync([paintedSpaceBar(front: nil, spaces: 3)])
+        let painted = paintedSpaceBar(front: nil, spaces: 3)
+        let bar = SpaceBarManager.Bar(
+            display: painted.display,
+            items: painted.items.map { item in
+                SpaceBarOverlay.Item(
+                    space: item.space ?? SpaceID("1"),
+                    spaceGlyph: item.spaceGlyph,
+                    apps: [
+                        SpaceBarItemView.App(
+                            name: "Mail",
+                            icon: nil,
+                            glyph: nil,
+                            focused: false,
+                            count: 1
+                        )
+                    ],
+                    active: item.active,
+                    overflow: 0,
+                    focusInOverflow: false
+                )
+            },
+            frontApp: painted.frontApp,
+            frontWindow: painted.frontWindow,
+            strip: painted.strip,
+            style: painted.style,
+            stateMarkColors: painted.stateMarkColors
+        )
+        manager.sync([bar])
         let overlay = try #require(
             manager.overlayForTesting(barTitleDisplay)
         )

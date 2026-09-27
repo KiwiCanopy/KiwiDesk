@@ -89,6 +89,18 @@ enum AppBarOptions {
         ]
     }
 
+    /// What a Space its screen does not show draws (#1683).
+    @MainActor
+    static var inactiveContent: [(SpaceBarStyle.InactiveContent, String)] {
+        [
+            (.apps, L("space_bar.inactive_content.apps", "Apps")),
+            (
+                .count,
+                L("space_bar.inactive_content.count", "Window count")
+            ),
+        ]
+    }
+
     /// App icon rendering options (#294, #362).
     @MainActor
     static var iconSource: [(BarAppIconSource, String)] {

@@ -146,7 +146,8 @@ enum GlassTint {
         cornerRadius: CGFloat,
         hex: String,
         edge: AppBarEdge,
-        animated: Bool = false
+        animated: Bool = false,
+        move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         glass.appearance = pinnedAppearance(hex)
         guard let ends = rendered(hex), let gradient = backdrop.gradient
@@ -167,7 +168,7 @@ enum GlassTint {
             )
         }
         backdrop.isHidden = false
-        BarMotion.setFrame(backdrop, to: frame, animated: animated)
+        move(backdrop, frame, animated)
         let direction = fade(from: edge)
         gradient.startPoint = direction.start
         gradient.endPoint = direction.end

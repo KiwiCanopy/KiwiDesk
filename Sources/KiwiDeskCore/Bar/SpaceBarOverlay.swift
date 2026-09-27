@@ -10,12 +10,14 @@ public final class SpaceBarOverlay {
     public struct Item {
         let identity: SpaceBarItemView.Identity
         let spaceGlyph: SpaceGlyph
-        let apps: [SpaceBarItemView.App]
+        private(set) var apps: [SpaceBarItemView.App]
         let active: Bool
         /// Windows hidden past the glyph cap ("+n" badge).
-        let overflow: Int
+        private(set) var overflow: Int
         /// Focused window is hidden past the cap (#376).
-        let focusInOverflow: Bool
+        private(set) var focusInOverflow: Bool
+        /// Set only by `collapsed(to:)` (#1683).
+        private(set) var collapse: SpaceBarItemView.Collapse?
         /// Where a held Space came from (#1507).
         var held: SpaceBarItemView.Held?
 
@@ -49,6 +51,35 @@ public final class SpaceBarOverlay {
         }
 
         var space: SpaceID? { identity.space }
+
+        /// The one collapse decision (#1683): an item its screen
+        /// does not show draws `content`, so the length the
+        /// shelf plans and the one the render draws both read
+        /// the result. The shown item, a layer item and `.apps`
+        /// pass unchanged. The count is what the corner disc
+        /// draws and the label announces; the state badges
+        /// go with the glyphs, and `overflow` keeps meaning the
+        /// windows hidden past the cap.
+        func collapsed(
+            to content: SpaceBarStyle.InactiveContent
+        ) -> Self {
+            guard !active, space != nil, collapse == nil else {
+                return self
+            }
+            let windows =
+                apps.reduce(0) { $0 + $1.count } + overflow
+            var item = self
+            item.apps = []
+            item.overflow = 0
+            item.focusInOverflow = false
+            switch content {
+            case .apps:
+                return self
+            case .count:
+                item.collapse = .init(windows: windows)
+            }
+            return item
+        }
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
@@ -80,6 +111,14 @@ public final class SpaceBarOverlay {
     var frontTint: GlassBackdrop?
     /// Whole-bar scroll offset (#385).
     var scrollOffset: CGFloat = 0
+    /// The Space the last render expanded and the items it drew
+    /// (#1683), so a switch is told from a render that keeps it.
+    var shownExpanded: SpaceID?
+    var shownIdentities: [SpaceBarItemView.Identity] = []
+    /// The one frame write a run item, its box glass and that
+    /// glass's backdrop take; a test swaps it to see whether a
+    /// pass asked to travel.
+    var moveFrame: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     /// Follows the active Space unless a manual scroll holds.
     var follow = ShelfFollow<SpaceID>()
     /// Cached scroll geometry for hit-testing and autoscroll (#385).
@@ -157,6 +196,8 @@ public final class SpaceBarOverlay {
 
     public func hide() {
         follow.reset()
+        shownExpanded = nil
+        shownIdentities = []
         lastShown = nil
         hitStrip = .zero
         hitFrames = []
