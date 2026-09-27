@@ -200,6 +200,13 @@ struct UpdateWindowRoutingTests {
         #expect(driver.seenRecord?.seen == nil)
         try #require(driver.window?.session).install()
         #expect(driver.seenRecord?.seen == "9999.1.0")
+        // The press alone narrates nothing: the download may still
+        // fail or be put off.
+        #expect(driver.seenRecord?.takeRelaunch() == nil)
+        driver.showInstallingUpdate(
+            withApplicationTerminated: false,
+            retryTerminatingApplication: {}
+        )
         let relaunch = try #require(driver.seenRecord?.takeRelaunch())
         #expect(relaunch.version == "9999.1.0")
         #expect(relaunch.items.map(\.version).contains("9999.1.0"))

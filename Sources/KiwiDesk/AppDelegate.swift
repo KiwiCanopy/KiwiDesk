@@ -17,7 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// no reader decides whether it starts, and handed to the
     /// status item and the dashboard alike (#1536,
     /// `UpdaterSeamGuardTests` pins both hand-overs).
-    private let updater: any AppUpdating = AppUpdaterFactory.make()
+    let updater: any AppUpdating = AppUpdaterFactory.make()
 
     var onboardingWindow: NSWindow?
     let onboardingModel = OnboardingModel()
@@ -232,31 +232,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         permissions.start()
 
         let trusted = permissions.isTrusted
-        // The window only for a launch the user started and no
-        // tour owns — the permission grant or a resuming discovery;
-        // otherwise the mark.
-        if let whatsNew = updater.whatsNew {
-            let tourOwns = OnboardingDiscovery.shouldResume(
-                isTrusted: trusted
-            )
-            let opensWindow = origin == .user && trusted && !tourOwns
-            let existingUser = OnboardingDiscovery.hasShown()
-            // After the window's own Install: open before boot
-            // starts, whatever the launch looks like (#1667).
-            bootNarration.phase = core.bootPhase
-            let narrated = whatsNew.relaunched(
-                opensWindow: trusted && !tourOwns,
-                narration: bootNarration
-            )
-            if !narrated {
-                Task {
-                    await whatsNew.launched(
-                        opensWindow: opensWindow,
-                        existingUser: existingUser
-                    )
-                }
-            }
-        }
+        offerWhatsNew(origin: origin, trusted: trusted)
         if trusted {
             startManaging()
             if OnboardingDiscovery.shouldResume(

@@ -29,12 +29,22 @@ struct WhatsNewRelaunchTests {
         )
         record.markSeen("9999.2.0")
         record.markRelaunch(Self.relaunch("9999.2.0"))
+        var shown: WhatsNewWindowController?
+        coordinator.presents = {
+            shown = $0
+            log.presented += 1
+        }
+        let narration = BootNarration(
+            phase: .scanning(scanned: 2, total: 9)
+        )
         let narrated = coordinator.relaunched(
             opensWindow: true,
-            narration: BootNarration(phase: .scanning(scanned: 2, total: 9))
+            narration: narration
         )
         #expect(narrated)
         #expect(log.presented == 1)
+        // The window carries the narration it was handed.
+        #expect(shown?.narration === narration)
         #expect(coordinator.waiting?.digest?.versions == ["9999.2.0"])
         // Read once.
         #expect(record.takeRelaunch() == nil)
@@ -58,10 +68,12 @@ struct WhatsNewRelaunchTests {
         #expect(coordinator.waiting != nil)
     }
 
+    /// The install never happened: the running build is still the
+    /// one the record says it replaced, and the feed lists it.
     @Test("a record for another version narrates nothing, and goes")
     func staleRecordIsDropped() throws {
         let (coordinator, record, log) = try WhatsNewFixture.coordinator(
-            current: "9999.3.0",
+            current: "9999.1.0",
             lastRun: "9999.1.0",
             feed: nil
         )
@@ -83,10 +95,6 @@ struct WhatsNewRelaunchTests {
             phase: .scanning(scanned: 3, total: 9)
         )
         #expect(narration.line == "Going through your open apps: 3 of 9")
-        #expect(
-            narration.line
-                == BootCountText.line(for: .scanning(scanned: 3, total: 9))
-        )
         narration.phase = .ready
         #expect(narration.line == nil)
         narration.phase = .idle
@@ -113,5 +121,24 @@ struct WhatsNewRelaunchTests {
         )
         let first = subtitle.drop { $0 == "{" || $0.isWhitespace }
         #expect(first.hasPrefix("if let narration { return narration }"))
+    }
+
+    /// The grant screen and the header read the one sentence.
+    @Test("the grant screen reads the one author of the count")
+    func grantReadsTheOneAuthor() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+        let grant = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Onboarding/OnboardingView+Grant.swift"
+            )
+        )
+        #expect(grant.contains("BootCountText.line(for: model.bootPhase)"))
+        #expect(!grant.contains("onboarding.grant.arranging.count"))
+        let chrome = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/Updates/UpdateWindowChrome.swift"
+            )
+        )
+        #expect(chrome.contains("mode: .whatsNew(narration: narration)"))
     }
 }

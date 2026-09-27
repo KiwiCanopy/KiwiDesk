@@ -212,16 +212,31 @@ struct UpdatePromptWiringTests {
                     + ".currentAppleEvent\n"
             )
         )
-        #expect(
-            body.contains(
-                "let tourOwns = OnboardingDiscovery.shouldResume(\n"
-                    + "                isTrusted: trusted"
+        // The decision is made before boot starts, so a relaunch's
+        // window is up to narrate it (#1667).
+        let offer = try #require(
+            body.range(of: "offerWhatsNew(origin: origin, trusted: trusted)")
+        )
+        let manage = try #require(body.range(of: "startManaging()"))
+        #expect(offer.lowerBound < manage.lowerBound)
+        let whatsNew = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/AppDelegate+WhatsNew.swift"
             )
         )
-        #expect(body.contains("origin == .user && trusted && !tourOwns"))
-        #expect(body.contains("opensWindow: opensWindow"))
+        #expect(
+            whatsNew.contains(
+                "let tourOwns = OnboardingDiscovery.shouldResume(\n"
+                    + "            isTrusted: trusted"
+            )
+        )
+        #expect(
+            whatsNew.contains("origin == .user && trusted && !tourOwns")
+        )
+        #expect(whatsNew.contains("opensWindow: opensWindow"))
         // A relaunch after the window's own Install opens whatever
-        // the origin, but never over the tour (#1667).
-        #expect(body.contains("opensWindow: trusted && !tourOwns"))
+        // the origin, never over the tour, and owes nothing else.
+        #expect(whatsNew.contains("opensWindow: trusted && !tourOwns"))
+        #expect(whatsNew.contains("if !narrated {"))
     }
 }

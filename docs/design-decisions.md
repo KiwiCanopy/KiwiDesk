@@ -636,8 +636,8 @@ user does not think to check by hand.
 **"What's new" follows an update whose notes nobody saw.** After
 an automatic install, or the jump from 1.x (which has no window
 of its own), the first launch shows the same layout with one
-Done; after the window's own Install it shows nothing, the notes
-having been read. It opens only on a launch the user started — a
+Done; after the window's own Install the notes are not owed
+again, having been read there. It opens only on a launch the user started — a
 login launch is not someone at the keyboard, so there the status
 item carries the reminder's mark and the quick menu a row. The
 notes are fetched from the same feed Sparkle reads rather than

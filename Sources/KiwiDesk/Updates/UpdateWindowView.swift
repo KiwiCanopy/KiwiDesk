@@ -7,7 +7,7 @@ import SwiftUI
 enum UpdateWindowMode {
     case offer(UpdateSession)
     /// `narration` is set after the window's own Install (#1667).
-    case whatsNew(narration: BootNarration? = nil, done: () -> Void)
+    case whatsNew(narration: BootNarration?, done: () -> Void)
 }
 
 /// KiwiDesk's own update window (#1542 ruling ▸ Window): a pinned

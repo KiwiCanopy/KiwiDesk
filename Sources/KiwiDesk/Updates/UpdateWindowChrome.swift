@@ -63,13 +63,14 @@ enum UpdateWindowChrome {
 @MainActor
 final class WhatsNewWindowController: NSObject, NSWindowDelegate {
     let offer: UpdateOffer
-    private let narration: BootNarration?
+    /// Internal so a test sees what the relaunch handed on.
+    let narration: BootNarration?
     private let done: () -> Void
     private var window: NSWindow?
 
     init(
         offer: UpdateOffer,
-        narration: BootNarration? = nil,
+        narration: BootNarration?,
         done: @escaping () -> Void
     ) {
         self.offer = offer

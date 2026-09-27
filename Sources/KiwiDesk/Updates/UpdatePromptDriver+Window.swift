@@ -56,6 +56,8 @@ extension UpdatePromptDriver {
         )
         session.onInstall = { [record = seenRecord] in
             record?.markSeen(item.versionString)
+        }
+        session.onInstalling = { [record = seenRecord] in
             record?.markRelaunch(relaunch)
         }
         self.window = window
