@@ -70,9 +70,13 @@ itself when a sixth is added.
   - **A new command owes a record** in the matching
     `Commands/Reference/APIRecords+*` table — group, arguments,
     one-line summary. `APIRecordCensusTests` holds the record
-    keys against `commands` / `namespaces` / `luaOnly` in both
-    directions, so a command with no record reds, as does a
-    record for a command that does not exist.
+    keys against `commands` / `namespaces` / `luaOnly` /
+    `cliOnly` in both directions, so a command with no record
+    reds, as does a record for a command that does not exist. A
+    verb a config must never call — `prepare_restart`, which
+    announces a stop as an in-place restart (#930) — goes in
+    `cliOnly`: dispatched by `execute`, never registered into Lua
+    (`APIRecordCensusTests` ▸ `cliOnlyIsNeverLua`).
   - **An enum-valued argument names the TYPE, never the values**
     — `.choice("anchor", ScrollingParams.Anchor.self)`.
     `APIChoice` has exactly one initializer and it reads

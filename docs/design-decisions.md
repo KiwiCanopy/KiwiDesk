@@ -12756,6 +12756,70 @@ managed, which is what the census-gated heal
 ([#675](https://github.com/KiwiCanopy/KiwiDesk/issues/675))
 exists to guarantee and what this spares it.
 
+### An in-place restart gathers nothing
+
+:::unreleased
+**[Principle]**
+
+**A restart the user did not ask to see must not be seen.** A
+quit spreads the windows out per `quit.layout` because nothing
+will manage them afterwards; a restart hands them to a new
+process a second later, so the spread and the re-tile that
+undoes it are a flicker with no reader. Two restarts are
+therefore in place: the update window's **Install and
+Relaunch**, announced at Sparkle's relaunch hand-off, and
+`kiwidesk service restart` replacing a loaded service, announced
+over IPC before its bootout
+([#930](https://github.com/KiwiCanopy/KiwiDesk/issues/930)).
+The announcement is **sent, never inferred**: a stop and a
+restart reach the app as the same SIGTERM, so without it every
+guess is a guess about the user's intent. It lives in memory
+only and expires after 30 s, so an announcement whose stop never
+came cannot make a later Quit keep its windows. Everything else —
+Quit, a login-item quit, `service stop`, a permission revoke and
+an automatic install, which Sparkle performs at the user's own
+Quit and never relaunches — still gathers.
+
+**Nothing is gathered, parked windows included.** Un-parking a
+hidden Space's window into the grid is itself visible, and the
+next process parks it again. If the relaunch fails, the desk
+stays as a crash leaves it, and the session snapshot restores
+it at the next good launch — a crash's recovery path, which
+already exists and is already trusted.
+
+**The service path is gated on code identity.** The program the
+service will start must satisfy the designated requirement this
+process launched with — Sparkle's own check, pointed at
+ourselves. A re-signed or ad-hoc development build would likely
+lose the Accessibility grant, and a process that cannot manage
+windows would strand every parked one, so it gathers instead.
+The update path takes no such gate: Sparkle has validated the
+update, and every release carries the same Developer ID. The
+residue of that trade is in
+[accepted limitations](accepted-limitations.md).
+
+**Boot restores before it arranges.** The scan finds windows in
+Accessibility order with no memory of their Spaces, so tiling
+what it found before replaying the session pulled every hidden
+Space's windows onto the screen and parked them again. The
+session — or, after a crash, the newer autosave — is applied
+before the first pass, so each window lands in its remembered
+Space and slot, and a window left in place is set to the frame
+it already has. This holds for every launch, not only an
+in-place one.
+
+**[Trade-off]**
+
+**Sizing survives an in-place restart only.** The in-place
+snapshot also carries the session's resized splits, weights and
+Scrolling rest, the Monocle hold, and the float and sticky flags
+set by hand, since without them the new process lays the desk
+out differently and the restart is visible after all. After a
+quit and relaunch they start fresh, as they always have: a
+relaunch that resets sizing is a behaviour users rely on, and the
+two exits should not start to mean the same thing.
+:::
+
 ### A bulk reconcile asks the WindowServer before it asks Accessibility
 
 **[Principle]**

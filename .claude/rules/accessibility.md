@@ -111,6 +111,20 @@ editing AX code:
   is told while this runs is `BootPhase`'s (#802), and the
   publications no test can drive are needled by
   `BootPhaseWiringTests`.
+- **Boot replays the previous session before its first pass
+  draws (#930).** The scan files what it finds in AX order into
+  the active Space, remembering nothing, so a retile ahead of the
+  replay tiles every hidden Space's windows on screen and parks
+  them again — and the strand net re-centres a parked float
+  before its capture is seeded. So nothing in `finishBoot` ahead
+  of `arrangeBootDesk` issues a pass, and a new boot-time restore
+  source joins `CrashRecovery.takeBootSnapshot` rather than
+  replaying after it, as the crash autosave once did from
+  `crash.start()`. `BootArrangeWiringTests` needles the tail;
+  `BootArrangesAfterRestoreTests` and
+  `InPlaceRestartNoMotionTests` drive `arrangeBootDesk` over a
+  scanned desk and read every frame it issues through
+  `FrameApplier.issued`.
 - **Never assume an installed observer delivers (#675).**
   `AXObserverAddNotification` can refuse a fresh-launch app whose
   AX tree is not ready, and the refusal used to be discarded —

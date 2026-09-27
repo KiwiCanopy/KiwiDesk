@@ -1710,6 +1710,18 @@ editing here:
   order, the unshown arm), `FloatGatherRegionTests` (the two
   regions and the strip), `FloatGatherRepartitionTests` (the
   re-file arm) and `FloatClampPendingCaptureTests`.
+- **A new stored property of `Space` or `ManagedWindow` answers
+  whether an in-place restart carries it (#930).** The in-place
+  snapshot (`StateSnapshot+InPlace`) carries the session memory
+  a relaunch otherwise starts fresh, because a restart that lays
+  the desk out differently is visible after all; it is written
+  by the in-place stop's capture ALONE, so a quit, a crash and a
+  wake still start sizing fresh. A store that changes what a
+  layout draws rides it, or is named with its reason in
+  `SnapshotCarryCensusTests`' registers, which round-trip every
+  property by reflection and red on an unclassified one. A
+  Space's session is adopted AFTER its membership: re-filing a
+  window drops its weight.
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on

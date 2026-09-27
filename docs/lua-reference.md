@@ -4127,7 +4127,7 @@ What the `delta` adjusts depends on the layout:
   (#44). `"y"` grows or shrinks the focused window's vertical
   share of its column via per-window weights — session-scoped,
   never saved to a profile, and reset when a window leaves the
-  space or KiwiDesk restarts. If the focused window is alone in
+  space or KiwiDesk quits. If the focused window is alone in
   its column, `"y"` reports an error.
 
   A bsp ratio or the master ratio that presses moved past an
@@ -4170,7 +4170,7 @@ a per-space override, authored or not, so what
 stays the number you wrote and
 [`reset_layout_sizing`](#reset_layout_sizing) can return to it.
 Session values behave like the stack's per-window weights:
-never saved to a profile, gone on restart, reseeded from config
+never saved to a profile, gone when KiwiDesk quits, reseeded from config
 on a real mode change, `reload_config`, `load_profile` (or any
 other explicit profile/preset/GUI apply), a Desktop switch or
 monitor change that loads a *different* profile, and dropped
@@ -5184,7 +5184,7 @@ that was active at quit. This works within one login session
 are re-tiled fresh). Crashes restore from the last autosave
 (30 s interval) instead.
 
-On quit or restart, KiwiDesk moves each managed tiled window
+On quit, KiwiDesk moves each managed tiled window
 back onto the monitor its space is assigned to and arranges them
 per `quit.layout` (see `quit.set_layout` below). Floating
 windows are left wherever they are. KiwiDesk keeps all managed
@@ -5194,6 +5194,20 @@ Desktop), so every reachable window lands there together.
 Windows on a display's background Desktops cannot be
 repositioned without disabling SIP, which KiwiDesk never does —
 the visible Desktop per display is the arranged scope.
+
+:::unreleased
+Two restarts arrange nothing: an update's **Install and
+Relaunch**, and `kiwidesk service restart` of a running service
+whose new program is signed like the running one. Windows stay
+where they are, hidden spaces' windows included, and the new
+process picks them up in place — along with the session's
+resized splits, weights and scroll positions and the windows you
+floated or made sticky by hand, which a quit and relaunch start
+fresh. Every other stop, `service stop` and an automatic update
+included, arranges per `quit.layout`. If the new process never
+comes up, the windows stay as a crash leaves them, and the next
+launch restores the arrangement.
+:::
 
 ### quit.set_layout
 

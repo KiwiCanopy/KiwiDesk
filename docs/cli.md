@@ -167,6 +167,15 @@ spawns one supervised launch; it finds the instance lock held,
 brings the running copy forward once — taking focus from your
 terminal — and exits cleanly.
 
+:::unreleased
+`restart` of a running service leaves your windows where they
+are: the app is told first, spreads nothing out on its way down,
+and the new process picks the windows up in place, sizes
+included. It does so only when the program the service will start
+is signed like the one running; otherwise, and on `stop`, the
+windows are spread out per `quit.layout` as on any quit.
+:::
+
 **This service is the only way to get crash supervision** (#1071),
 and Settings offers no switch for it. Settings ▸ General's
 **Start at login** is the `SMAppService` login item (visible in

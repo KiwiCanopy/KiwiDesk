@@ -247,7 +247,7 @@ flowchart TD
     Y --> C
     C -->|"an app exceeds its own budget"| D["drop its remaining work,<br/>record the pid"]
     D --> C
-    C -->|"queue empty"| T["tail: one retile · session restore ·<br/>services · sweeps · publish ready"]
+    C -->|"queue empty"| T["tail: session restore · one retile ·<br/>services · sweeps · publish ready"]
     T --> DR["drain deferred apps,<br/>one per turn, unbudgeted"]
 ```
 
@@ -270,9 +270,10 @@ flowchart TD
    chunk overruns by whatever that app costs. Past its own budget
    an app's remaining boot work is dropped and completed after the
    tail (see [Accepted limitations](accepted-limitations.md)).
-5. **the tail** — one `retile` lands the first arrangement, the
-   previous session's layout is restored, and the long-running
-   services and the repair sweeps start. The readiness phase
+5. **the tail** — the previous session's arrangement (a clean
+   stop's, or a crash's newer autosave) is replayed onto what the
+   scan found before any pass draws, one `retile` lands it, and
+   the long-running services and the repair sweeps start. The readiness phase
    becomes `ready`, the signal the dimmed menu-bar mark withholds.
 
 The startup sweep one second later takes the same chunked,
