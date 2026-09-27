@@ -22,8 +22,6 @@ struct BorderSheenTests {
 
     @Test("the top lifts, the bottom shades, the hue and alpha stay")
     func rampMovesOnlyLightness() throws {
-        // A colour the #578 cap does not bind, so both ends move
-        // their full ruled amount.
         let hex = "#D9A521CC"
         let ramp = BorderSheen.colors(hex: hex)
         try #require(ramp.count == BorderSheen.locations.count)

@@ -242,7 +242,6 @@ extension SpaceBarItemView {
             style.highlightColor,
             outline: style.activeIndicator == .outline
                 ? style.resolvedHighlightWidth : nil,
-            fill: style.fillColor,
             drawn: style.sheen && isActive
         )
         guard isActive else { return }

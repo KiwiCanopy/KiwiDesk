@@ -52,11 +52,7 @@ enum ShelfBorder {
         layer.cornerRadius = cornerRadius
         view.paint =
             ramp
-            ? SheenRimView.Paint(
-                hex: shelf.borderColor,
-                width: width,
-                grounds: BorderSheen.grounds(plate: shelf.fillColor)
-            )
+            ? SheenRimView.Paint(hex: shelf.borderColor, width: width)
             : nil
     }
 

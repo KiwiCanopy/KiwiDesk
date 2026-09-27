@@ -221,10 +221,9 @@ through `SheenPaint` — never a ramp of its own, and reads the
 leaf as its only gate: the sheen is not glass, so it takes
 neither `LiquidGlassGate` nor the platform floor. **While the ramp paints, the surface clears its flat
 stroke or fill**, or a translucent colour stacks twice
-(`BorderSheenSurfaceTests`). **A surface hands the ramp the
-grounds it sits on** — a bar surface its Fill's plate — because
-the #578 cap is only as good as the grounds it is told about
-(`BorderSheenContrastTests`).
+(`BorderSheenSurfaceTests`). **The ramp's flat band stays the
+configured colour**, which carries #578's contrast; only the ends
+move (`BorderSheenFlatBandTests`).
 
 ## Exercising the fallback path
 

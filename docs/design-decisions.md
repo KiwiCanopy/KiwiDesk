@@ -11602,16 +11602,19 @@ ring, bar highlight and border, and drag borders gain the sheen on
 upgrade; whether existing files take the sheen on upgrade — or a
 #1369 crossing writes it off into them — is pending the owner.
 
-**The ramp is capped at the #578 bar, not tuned by eye.** A stroke
-clearing 3:1 on a ground keeps 3:1 at every stop: the ring and the
-drag borders against the wallpaper extremes, the bar surfaces
-against those and their Fill composited over each
-(`BorderSheenContrastTests`). The eyeballed lift took the default
-ring from 3.6:1 to 1.5:1 on white, so the default ring's top lift
-is capped to about a ninth of it; bright rings, already under the
-bar on white, lift in full. The alternative — one smaller lift for
-every colour — would have spent the sheen on the palettes that can
-carry it to protect the one that cannot.
+**The flat band carries #578's contrast; the ends may pass it.**
+(Owner ruling 2026-09-27, over a cap.) The ramp's middle band is
+the configured colour itself, untouched, on every surface — the
+focused ring, the bar highlight, the shelf border, the drag
+borders — so wherever that colour meets #578's 3:1, the band
+does (`BorderSheenFlatBandTests`). The lifted top and the shaded
+bottom are free to go past it. #578's purpose is finding the
+focused window, and a ring whose flat band holds 3:1 on three
+sides stays findable when its top edge fades toward a white
+wallpaper. The cap this replaced held every stop at 3:1 and so
+took nearly all the lift from the default green ring, which is
+the one most people see; it traded the look the owner approved
+at the sitting for a guarantee the band already gives.
 :::
 
 **Both drag markers' glass is thinned (owner, device 2026-09-25).**

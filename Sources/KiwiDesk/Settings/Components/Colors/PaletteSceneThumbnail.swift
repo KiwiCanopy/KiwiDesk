@@ -33,15 +33,10 @@ struct PaletteSceneThumbnail: View {
     var sheens: Bool { drawsSheen && scene == .panel }
 
     /// A stroke's paint for `path`: Core's ramp (#702, via
-    /// `SheenPaint`) while `sheens`, capped against the plate at
-    /// `plate` where it sits on one, else the flat colour.
-    func sheened(_ path: String, plate: String? = nil) -> AnyShapeStyle {
+    /// `SheenPaint`) while `sheens`, else the flat colour.
+    func sheened(_ path: String) -> AnyShapeStyle {
         guard sheens else { return AnyShapeStyle(color(path)) }
-        return SheenPaint.style(
-            hex(path),
-            sheen: true,
-            plate: plate.map(hex)
-        )
+        return SheenPaint.style(hex(path), sheen: true)
     }
 
     /// The palette's hex for `path`, the shipped default beneath.

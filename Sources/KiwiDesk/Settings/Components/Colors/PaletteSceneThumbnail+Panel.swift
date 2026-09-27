@@ -70,10 +70,7 @@ extension PaletteSceneThumbnail {
             item(idleInk)
             item(
                 color("kiwishelf.active_item_color"),
-                highlight: sheened(
-                    "kiwishelf.highlight_color",
-                    plate: "kiwishelf.fill_color"
-                )
+                highlight: sheened("kiwishelf.highlight_color")
             )
             .overlay(alignment: .topTrailing) {
                 badge(
@@ -99,10 +96,7 @@ extension PaletteSceneThumbnail {
             item(color("kiwishelf.item_color"))
             item(
                 color("kiwishelf.active_item_color"),
-                highlight: sheened(
-                    "kiwishelf.highlight_color",
-                    plate: "kiwishelf.fill_color"
-                )
+                highlight: sheened("kiwishelf.highlight_color")
             )
             .overlay(alignment: .topTrailing) {
                 badge(
@@ -126,10 +120,7 @@ extension PaletteSceneThumbnail {
                 if borderRim != nil {
                     RoundedRectangle(cornerRadius: 4 * scale)
                         .strokeBorder(
-                            sheened(
-                                "kiwishelf.border_color",
-                                plate: "kiwishelf.fill_color"
-                            ),
+                            sheened("kiwishelf.border_color"),
                             lineWidth: scale
                         )
                 }

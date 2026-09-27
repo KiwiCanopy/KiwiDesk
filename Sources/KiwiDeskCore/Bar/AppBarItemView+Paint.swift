@@ -118,7 +118,6 @@ extension AppBarItemView {
             style.highlightColor,
             outline: accentMode == .outline
                 ? style.resolvedHighlightWidth : nil,
-            fill: style.fillColor,
             drawn: style.sheen && accentMode != .none
         )
     }

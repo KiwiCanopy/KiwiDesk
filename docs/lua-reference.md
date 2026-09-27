@@ -3128,10 +3128,10 @@ top edge fading into the colour and a slight shade at the
 bottom. Only the lightness moves, so each keeps its own colour;
 it is a painted highlight, not glass, so it draws whether or not
 Liquid Glass is on, under Reduce transparency, and on any macOS.
-The lift and the shade stop where they would take a colour that
-reads at 3:1 against a white or black background — or, on a bar,
-against its Fill — under that, so a dark ring gets a subtler top
-edge on purpose. The unfocused border never takes it.
+The middle of each stroke keeps its colour exactly, so the
+colour's own contrast still holds there; the top and bottom may
+be lighter and darker than it. The unfocused border never takes
+it.
 
 Settings shows it as **Sheen**, beneath the **Liquid Glass**
 switch on Colours &amp; Animations. Turning that switch on also

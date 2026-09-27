@@ -20,11 +20,7 @@ struct PreviewPlateEdge: View {
         if let border {
             RoundedRectangle(cornerRadius: corner)
                 .strokeBorder(
-                    SheenPaint.style(
-                        border.hex,
-                        sheen: spec.sheen,
-                        plate: spec.fill
-                    ),
+                    SheenPaint.style(border.hex, sheen: spec.sheen),
                     lineWidth: border.width
                 )
         } else {

@@ -13,8 +13,6 @@ class SheenRimView: NSView {
     struct Paint: Equatable {
         let hex: String
         let width: CGFloat?
-        /// The grounds its contrast is capped against.
-        var grounds = BorderSheen.wallpapers
     }
 
     /// Nil draws nothing. Every write re-draws, since the host may
@@ -58,7 +56,6 @@ class SheenRimView: NSView {
             lineWidth: paint.width,
             extent: bounds,
             hex: paint.hex,
-            over: paint.grounds,
             in: context
         )
     }

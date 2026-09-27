@@ -12,20 +12,13 @@ extension BarAccent {
     }
 
     /// The indicator's sheen: a rim of `outline` width, or the
-    /// edge mark's fill when nil, capped against the plate `fill`
-    /// sits on; nil unless `drawn`.
+    /// edge mark's fill when nil; nil unless `drawn`.
     @MainActor
     static func sheen(
         _ hex: String,
         outline: CGFloat?,
-        fill: String,
         drawn: Bool
     ) -> SheenRimView.Paint? {
-        guard drawn else { return nil }
-        return SheenRimView.Paint(
-            hex: hex,
-            width: outline,
-            grounds: BorderSheen.grounds(plate: fill)
-        )
+        drawn ? SheenRimView.Paint(hex: hex, width: outline) : nil
     }
 }
