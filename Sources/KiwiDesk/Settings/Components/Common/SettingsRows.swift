@@ -29,9 +29,7 @@ struct PtSlider: View {
             HStack {
                 SettingsSlider(
                     value: Binding(
-                        get: {
-                            Double(isAuto ? autoValue ?? 0 : value)
-                        },
+                        get: { sliderPosition },
                         set: { value = CGFloat($0) }
                     ),
                     range: range,
@@ -44,17 +42,22 @@ struct PtSlider: View {
         }
     }
 
+    /// Where the slider sits: under Auto, the size Auto draws.
+    var sliderPosition: Double {
+        Double(isAuto ? autoValue ?? 0 : value)
+    }
+
     private func points(_ size: CGFloat) -> String {
         "\(Int(size.rounded())) \(unit)"
     }
 
-    private var readoutText: String {
+    var readoutText: String {
         guard isAuto else { return points(value) }
         return autoValue.map(points)
             ?? L("settings.readout.auto", "Automatic")
     }
 
-    private var spokenText: String {
+    var spokenText: String {
         guard isAuto, let autoValue else { return readoutText }
         return L(
             "settings.readout.auto_value",
