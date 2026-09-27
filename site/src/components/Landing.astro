@@ -95,6 +95,14 @@ const cq = lang === "de" ? "“" : lang === "ja" ? "」" : "”";
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const stars = formatStars(lang);
 const starsLabel = t.stars_on_github.replace("{n}", stars);
+// Product Hunt's launch day ends at midnight Pacific. The build
+// drops the banner after it; the inline script covers a page built
+// before it and still served.
+const phReviewHref =
+  "https://www.producthunt.com/products/kiwidesk/reviews/new" +
+  "?utm_source=badge-product_review&utm_medium=badge";
+const phLaunchEnds = Date.UTC(2026, 8, 28, 7);
+const phLaunchLive = Date.now() < phLaunchEnds;
 const kofi = "https://ko-fi.com/kiwicanopy";
 const kiwiCanopyUrl = "https://kiwicanopy.com";
 // The maker's personal GitHub profile — distinct from the project
@@ -388,6 +396,26 @@ const jsonLd = [
     {/* Skip link (WCAG 2.4.1): first focusable element, jumps past
          the nav to the page content. Off-screen until focused. */}
     <a class="skip-link" href="#main-content">{t.skip_to_content}</a>
+    {phLaunchLive && (
+      <a class="ph-launch" id="phLaunch" href={phReviewHref}
+        target="_blank" rel="noopener">
+        <svg class="ph-launch__mark" width="22" height="22"
+          viewBox="0 0 31 31" aria-hidden="true">
+          <path fill="currentColor" fill-rule="evenodd"
+            d="M31 15.5a15.5 15.5 0 1 1-31 0 15.5 15.5 0 0 1 31 0ZM17.43 15.96h-4.34v-4.65h4.34a2.31 2.31 0 0 1 0 4.65m0-7.75h-7.4v15.5h3.06v-4.65h4.34a5.42 5.42 0 0 0 0-10.85" />
+        </svg>
+        <span class="ph-launch__text">{t.ph_launch_banner}</span>
+        <span class="ph-launch__cta">
+          {t.ph_launch_cta}
+          <Icon name="lucide:arrow-up-right" width={15} height={15}
+            aria-hidden="true" />
+        </span>
+      </a>
+      <script is:inline define:vars={{ phLaunchEnds }}>
+        if (Date.now() >= phLaunchEnds)
+          document.getElementById("phLaunch")?.remove();
+      </script>
+    )}
     {/* ============ Nav ============ */}
     <nav class="nav" id="nav">
       <div class="wrap nav__inner">
@@ -609,13 +637,27 @@ const jsonLd = [
                1.0 shipped until somebody remembered it. Now the
                beta half appears only while the promoted release
                is flagged one, so it retires itself. */}
-          {downloadVersion && (
-            <span class="pill pill--light">
-              <span class="pill__dot" aria-hidden="true"></span>
-              {t.version_pill} {downloadVersion}
-              {downloadIsPrerelease && ` · ${t.beta_suffix}`}
-            </span>
-          )}
+          <div class="hero__pills">
+            {downloadVersion && (
+              <span class="pill pill--light">
+                <span class="pill__dot" aria-hidden="true"></span>
+                {t.version_pill} {downloadVersion}
+                {downloadIsPrerelease && ` · ${t.beta_suffix}`}
+              </span>
+            )}
+            <a class="pill pill--light pill--link"
+              href={phReviewHref}
+              target="_blank" rel="noopener">
+              <svg class="pill__ph" width="15" height="15"
+                viewBox="0 0 31 31" aria-hidden="true">
+                <path fill="currentColor" fill-rule="evenodd"
+                  d="M31 15.5a15.5 15.5 0 1 1-31 0 15.5 15.5 0 0 1 31 0ZM17.43 15.96h-4.34v-4.65h4.34a2.31 2.31 0 0 1 0 4.65m0-7.75h-7.4v15.5h3.06v-4.65h4.34a5.42 5.42 0 0 0 0-10.85" />
+              </svg>
+              {t.producthunt_review}
+              <Icon name="lucide:arrow-up-right" width={13}
+                height={13} aria-hidden="true" />
+            </a>
+          </div>
         </div>
         )}
 
