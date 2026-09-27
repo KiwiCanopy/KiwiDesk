@@ -199,6 +199,10 @@ struct FloatMovePlacementTests {
             )
         )
         core.state.workspaces.add(WindowID(3), to: SpaceID("2"))
+        // Drawn on the floating Space, so only the sticky gate
+        // stands between it and a seed.
+        core.state.workspaces.activate(SpaceID("2"))
+        #expect(core.isEffectiveFloatForPlacement(WindowID(3)))
         #expect(!core.placeEnteringFloat(WindowID(3), wasFloat: false))
         #expect(core.tiler.stashOriginal(WindowID(3)) == nil)
     }
@@ -225,6 +229,36 @@ struct FloatMovePlacementTests {
     }
 
     // MARK: - The float verbs cascade too
+
+    /// A ∞ float drawn on Space 1 but a member of Space 3 holds the
+    /// centre: the cascade reads what the Space DRAWS.
+    @Test("the cascade steps off a sticky traveler drawn there")
+    func travelerIsAvoided() throws {
+        var frames: [WindowID: CGRect] = [:]
+        let core = setup { frames[$0] = $1 }
+        core.execute("set_mode", args: [.string("1"), .string("bsp")])
+        let region = try #require(core.floatGrowBounds(on: SpaceID("1")))
+        let centre = FloatPlacement.centered(in: region)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(4),
+                    pid: 2,
+                    appName: "Sticky",
+                    frame: centre,
+                    stickyScope: .global
+                )
+            )
+        )
+        core.state.setFloating(WindowID(4), true)
+        core.state.workspaces.ensureSpace(SpaceID("3"))
+        core.state.workspaces.add(WindowID(4), to: SpaceID("3"))
+        core.state.apply(.windowFocused(WindowID(2)))
+        #expect(core.state.workspaces.space(of: WindowID(4)) == SpaceID("3"))
+        #expect(core.execute("toggle_floating").isSuccess)
+        let step = FloatPlacement.cascadeStep
+        #expect(frames[WindowID(2)] == centre.offsetBy(dx: step, dy: step))
+    }
 
     @Test("toggle_floating cascades off a float already at the centre")
     func toggleCascades() throws {

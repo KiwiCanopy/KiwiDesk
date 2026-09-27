@@ -60,6 +60,18 @@ struct FloatPlacementCascadeTests {
         #expect(!FloatGather.isPiled(smaller, among: [placed]))
     }
 
+    /// Neither contains the other, so only the shared centre can
+    /// call the spot taken.
+    @Test("a crossing window sharing the centre is taken")
+    func sharedCentreIsTaken() {
+        let frame = CGRect(x: 400, y: 300, width: 800, height: 400)
+        let crossing = CGRect(x: 600, y: 100, width: 400, height: 800)
+        #expect(
+            FloatPlacement.cascaded(frame, avoiding: [crossing], in: region)
+                == frame.offsetBy(dx: step, dy: step)
+        )
+    }
+
     @Test("a step off the region prices the pile at the centre")
     func stepOffRegionStays() {
         let frame = CGRect(x: 400, y: 380, width: 800, height: 600)
