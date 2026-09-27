@@ -14,13 +14,27 @@ final class IndicatorBarBadgeCell: NSTextFieldCell {
         return titleRect
     }
 
+    /// Draws the line itself: whether AppKit's own interior draw
+    /// asks `titleRect` again differs by macOS release, and a
+    /// second pass would move the line off the disc (#1707).
     override func drawInterior(
         withFrame cellFrame: NSRect,
         in controlView: NSView
     ) {
-        super.drawInterior(
-            withFrame: titleRect(forBounds: cellFrame),
-            in: controlView
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = alignment
+        paragraph.lineBreakMode = .byClipping
+        var attributes: [NSAttributedString.Key: Any] = [
+            .paragraphStyle: paragraph
+        ]
+        if let font { attributes[.font] = font }
+        if let color = (controlView as? NSTextField)?.textColor {
+            attributes[.foregroundColor] = color
+        }
+        (stringValue as NSString).draw(
+            with: titleRect(forBounds: cellFrame),
+            options: [.usesLineFragmentOrigin],
+            attributes: attributes
         )
     }
 }
