@@ -1,5 +1,7 @@
 import CoreGraphics
+import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -45,11 +47,44 @@ struct ShelfBorderColorGateTests {
     /// One branch, one value (`CrossReferenceRowSlotTests`).
     @Test("The border row's prose places its link")
     func prosePlacesItsLink() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
         #expect(
             AdvancedColorsHelp.shelfBorderReference.contains(
                 CrossReferenceRow.linkSlot
             )
         )
+    }
+
+    /// The render sites wire those two values: the colour row
+    /// greys on `shelfBorderOff`, and the link renders under
+    /// `shelfBorderNeedsReference` alone. Whitespace is squashed
+    /// so a re-wrap cannot red it.
+    @Test(
+        "The row greys and the link renders on the gate's values",
+        arguments: [
+            (
+                "AdvancedColorRow+Bars.swift",
+                "gated(gates.shelfBorderOff,"
+                    + "AdvancedColorsHelp.shelfBorderOff)"
+            ),
+            (
+                "BarColorCards.swift",
+                "ifgates.shelfBorderNeedsReference{CrossReferenceRow("
+                    + "prose:AdvancedColorsHelp.shelfBorderReference,"
+            ),
+        ]
+    )
+    func renderSitesTakeTheGate(file: String, needle: String) throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Colors"
+            )
+            .appendingPathComponent(file)
+        let source = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        let pieces = source.components(separatedBy: needle)
+        #expect(pieces.count - 1 == 1, "\(file)")
     }
 
     /// The census gate names the switch, so a search hit and the
@@ -167,6 +202,33 @@ struct ShelfBorderPreviewTests {
             drawsBorder: false
         )
         #expect(off.borderRim == nil)
+    }
+
+    /// The rim is DRAWN, not only decided: the panel scene renders
+    /// differently with the switch on than off, all else equal.
+    @Test("The palette panel draws its rim only with the switch on")
+    func sceneDrawsTheRim() throws {
+        let palette = try #require(
+            PaletteCatalog.bundled().first {
+                $0.colors["kiwishelf.border_color"] != nil
+            }
+        )
+        func pixels(_ on: Bool) throws -> Data {
+            let renderer = ImageRenderer(
+                content: PaletteSceneThumbnail(
+                    palette: palette,
+                    scene: .panel,
+                    drawsBorder: on
+                )
+                .frame(width: 320)
+            )
+            let image = try #require(renderer.cgImage)
+            let data = try #require(image.dataProvider?.data)
+            return data as Data
+        }
+        let off = try pixels(false)
+        #expect(try pixels(false) == off, "the render is not stable")
+        #expect(try pixels(true) != off)
     }
 
     /// Every scene hands the draft's switch in — the argument has

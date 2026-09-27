@@ -51,6 +51,10 @@ struct ShelfBorderTests {
         #expect(
             shelf.drawnBorderWidth == KiwiShelf.borderWidthRange.upperBound
         )
+        shelf.borderWidth = 0.2
+        #expect(
+            shelf.drawnBorderWidth == KiwiShelf.borderWidthRange.lowerBound
+        )
     }
 
     @Test(

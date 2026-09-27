@@ -259,6 +259,36 @@ struct ShelfBorderDrawingTests {
         expectStroke(overlay.plateBorder, frame: plate.frame)
     }
 
+    /// A shelf that switches to Boxed hides the rim it drew under
+    /// Plain — the same overlay, so its earlier rim is on screen.
+    @Test("Switching to Boxed hides the plate's rim")
+    func boxedHidesAnEarlierRim() throws {
+        let spaces = SpaceBarManager()
+        spaces.sync([paintedSpaceBar(front: nil, spaces: 3)])
+        let section = try #require(
+            spaces.shownOverlay(on: barTitleDisplay)
+        )
+        let shelves = ShelfManager()
+        func sync(_ shelf: KiwiShelf) {
+            shelves.sync([
+                ShelfManager.Shelf(
+                    display: barTitleDisplay,
+                    strip: barTitleStrip,
+                    shelf: shelf,
+                    space: section,
+                    app: nil
+                )
+            ])
+        }
+        var plain = Self.bordered()
+        plain.liquidGlass = false
+        sync(plain)
+        let overlay = try #require(shelves.overlayForTesting(barTitleDisplay))
+        #expect(!overlay.plateBorder.isHidden)
+        sync(Self.bordered(Self.boxed(glass: false)))
+        #expect(overlay.plateBorder.isHidden)
+    }
+
     @Test("No plate, or the border off, draws no plate rim")
     func noPlateRim() throws {
         var boxed = Self.bordered(Self.boxed(glass: false))
