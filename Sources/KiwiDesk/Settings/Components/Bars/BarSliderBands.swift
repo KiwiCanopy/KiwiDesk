@@ -19,10 +19,10 @@ enum BarSliderBands {
     /// The shelf's Item padding row (#1682): Core's floor up to
     /// the most padding that still moves content on the thickest
     /// shelf this card offers — past it `contentDepth` holds the
-    /// content at `minThickness` whatever the value.
+    /// content at `minContentDepth` whatever the value.
     static let itemPadding: ClosedRange<Double> = {
         let floor = Double(KiwiShelf.minItemPadding)
-        let content = Double(KiwiShelf.minThickness)
+        let content = Double(KiwiShelf.minContentDepth)
         return floor...((thickness.upperBound - content) / 2)
     }()
 

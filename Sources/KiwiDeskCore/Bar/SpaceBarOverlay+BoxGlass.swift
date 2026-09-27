@@ -16,8 +16,12 @@ extension SpaceBarOverlay {
     ) {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
-        let radius = style.resolvedCornerRadius(forThickness: depth)
         for i in 0..<n {
+            let radius = SpaceBarItemView.boxRadius(
+                look: style,
+                depth: depth,
+                size: frames[i].size
+            )
             let glass = boxGlasses[i]
             glass.isHidden = itemViews[i].isHidden
             GlassPlate.setContent(glass, itemViews[i])

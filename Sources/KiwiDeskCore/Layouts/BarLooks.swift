@@ -88,9 +88,9 @@ public struct SpaceBarLook: Sendable, Equatable {
     }
 
     /// The front-app segment's title size for a content depth:
-    /// the shelf's, or auto at `KiwiShelf.autoTitleShare` —
-    /// unclamped, unlike the App Bar's, so the segment keeps the
-    /// size it drew before the two shared a ratio.
+    /// the shelf's, or auto at `KiwiShelf.autoTitleShare`,
+    /// unclamped — the App Bar's title clamps, this one does not
+    /// (#1682).
     public func titleFontSize(
         forContentDepth content: CGFloat
     ) -> CGFloat {

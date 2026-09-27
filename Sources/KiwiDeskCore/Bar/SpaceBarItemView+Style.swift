@@ -105,13 +105,23 @@ extension SpaceBarItemView {
         badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 
-    /// The box's radius from the full depth, as every item's, so
-    /// a glyphless item shorter than the depth under item padding
-    /// rounds like its neighbours; never past half its length.
     var cornerRadius: CGFloat {
+        Self.boxRadius(look: style, depth: depth, size: bounds.size)
+    }
+
+    /// A Space item box's radius — the one derivation its layer
+    /// and its glass read: from the full `depth`, as every item's,
+    /// so a glyphless item shorter than the depth under item
+    /// padding rounds like its neighbours; never past half the
+    /// box's shorter side (#1682).
+    static func boxRadius(
+        look: SpaceBarLook,
+        depth: CGFloat,
+        size: CGSize
+    ) -> CGFloat {
         min(
-            style.resolvedCornerRadius(forThickness: depth),
-            min(bounds.width, bounds.height) / 2
+            look.resolvedCornerRadius(forThickness: depth),
+            min(size.width, size.height) / 2
         )
     }
 

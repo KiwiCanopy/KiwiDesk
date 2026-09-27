@@ -100,16 +100,16 @@ struct BarSliderBandTests {
         let thickest = CGFloat(BarSliderBands.thickness.upperBound)
         #expect(
             shelf.contentDepth(forDepth: thickest)
-                == KiwiShelf.minThickness
+                == KiwiShelf.minContentDepth
         )
         shelf.itemPadding -= 1
         #expect(
             shelf.contentDepth(forDepth: thickest)
-                > KiwiShelf.minThickness
+                > KiwiShelf.minContentDepth
         )
         let declared = try declaration(of: "itemPadding")
         #expect(declared.contains("KiwiShelf.minItemPadding"))
-        #expect(declared.contains("KiwiShelf.minThickness"))
+        #expect(declared.contains("KiwiShelf.minContentDepth"))
     }
 
     /// Which band each Core-clamped bar row reads, keyed by the
