@@ -123,10 +123,12 @@ bars. Obligations:
   builder after the `hide_empty` verdict** (#1683) — never in a
   render or a preview, since the plan measures the builder's
   items and a collapse decided anywhere else draws a run the plan
-  did not reserve. The length and the item view's layout read the
-  one `Collapse.badgeCount(_:overflow:)`. `SpaceBarCollapsedRenderTests` ▸
-  `countCellFitsThePlan` holds the cell against the length; that
-  no other site collapses is review's. The run's glide on a
+  did not reserve. A collapsed item's count is a disc on the
+  identifier's cell and adds no length, so the length and the
+  layout both measure the identifier alone.
+  `SpaceBarCollapsedRenderTests` ▸ `discRidesTheIdentifier`
+  holds the disc inside the planned length; that no other site
+  collapses is review's. The run's glide on a
   switch goes through `BarMotion` like every bar motion, its box
   glass travelling with its item (`SpaceBarGlideWiringTests`).
 
@@ -200,7 +202,7 @@ render content into it (#1517). Obligations:
   alpha applied to the item colour beside it.
   `IdleItemContrastTests` holds the value and its legibility; the
   routing is review's.
-- **An empty Space's identifier under Minimal is
+- **An empty collapsed Space's identifier is
   `KiwiShelf.emptyItemColor`, derived from the palette and never
   picked** (#1683): the idle floor and the occupied-to-empty step
   both hold, or the cue drops rather than the floor.

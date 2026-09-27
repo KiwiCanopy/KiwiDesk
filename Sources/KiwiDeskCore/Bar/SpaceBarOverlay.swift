@@ -52,15 +52,6 @@ public final class SpaceBarOverlay {
 
         var space: SpaceID? { identity.space }
 
-        /// What the badge cell draws — the input a length reads,
-        /// through the view's one formula.
-        var badgeCount: Int {
-            SpaceBarItemView.Collapse.badgeCount(
-                collapse,
-                overflow: overflow
-            )
-        }
-
         /// The one collapse decision (#1683): an item its screen
         /// does not show draws `content`, so the length the
         /// shelf plans and the one the render draws both read
@@ -85,9 +76,7 @@ public final class SpaceBarOverlay {
             case .apps:
                 return self
             case .count:
-                item.collapse = .count(windows: windows)
-            case .identifier:
-                item.collapse = .identifier(windows: windows)
+                item.collapse = .init(windows: windows)
             }
             return item
         }

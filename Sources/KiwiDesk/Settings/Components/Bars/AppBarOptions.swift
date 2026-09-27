@@ -98,10 +98,6 @@ enum AppBarOptions {
                 .count,
                 L("space_bar.inactive_content.count", "Window count")
             ),
-            (
-                .identifier,
-                L("space_bar.inactive_content.identifier", "Minimal")
-            ),
         ]
     }
 

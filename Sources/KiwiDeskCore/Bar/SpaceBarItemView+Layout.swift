@@ -58,6 +58,15 @@ extension SpaceBarItemView {
             slack: Self.pad
         )
         layoutHeldBadge(onCellAt: cursor, cell: cell)
+        if collapse != nil {
+            // The held asterisk owns the top corner (#1507).
+            layoutBadge(
+                overflowBadge,
+                onCellAt: cursor,
+                cell: cell,
+                lowerCorner: held != nil
+            )
+        }
         cursor += cell
         if !identifierDivider.isHidden {
             cursor += Self.pad
@@ -90,7 +99,7 @@ extension SpaceBarItemView {
             )
             cursor += cell
         }
-        if badgeCount > 0 {
+        if collapse == nil, overflow > 0 {
             if !appViews.isEmpty { cursor += glyphGap }
             layoutBadge(
                 overflowBadge,
@@ -108,7 +117,8 @@ extension SpaceBarItemView {
         _ badge: NSTextField,
         onCellAt offset: CGFloat,
         cell: CGFloat,
-        centered: Bool = false
+        centered: Bool = false,
+        lowerCorner: Bool = false
     ) {
         guard !badge.isHidden else { return }
         let base =
@@ -147,7 +157,8 @@ extension SpaceBarItemView {
             )
             : CGRect(
                 x: cellRect.maxX - diameter + 1,
-                y: cellRect.minY - 1,
+                y: lowerCorner
+                    ? cellRect.maxY - diameter + 1 : cellRect.minY - 1,
                 width: diameter,
                 height: diameter
             )

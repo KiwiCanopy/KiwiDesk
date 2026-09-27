@@ -50,10 +50,8 @@ public struct SpaceBarStyle: Sendable, Equatable {
     {
         /// Its app glyphs, as the shown Space draws them.
         case apps
-        /// Its identifier and its window count.
+        /// Its identifier, its window count a disc on its corner.
         case count
-        /// Its identifier alone.
-        case identifier
     }
 }
 

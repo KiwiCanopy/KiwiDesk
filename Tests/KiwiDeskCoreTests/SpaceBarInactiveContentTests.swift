@@ -5,9 +5,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `space_bar.inactive_content` (#1683): a Space its screen does
-/// not show draws its apps, its window count or its identifier
-/// alone. The collapse is decided once, in the item the builder
-/// returns, so the shelf plan and the render measure one run.
+/// not show draws its apps, or its identifier with its window
+/// count as a corner disc. The collapse is decided once, in the
+/// item the builder returns, so the shelf plan and the render
+/// measure one run.
 @MainActor
 private func makeCore() -> KiwiCore {
     makeTestCore(
@@ -88,49 +89,37 @@ struct SpaceBarInactiveContentTests {
     func countCollapsesTheOthers() throws {
         let built = items(seededCore(), .count)
         let other = try #require(built[SpaceID("2")])
-        #expect(other.collapse == .count(windows: 3))
-        // The glyphs and their state badges go; the count is the
-        // `+n` badge's unit, windows, and `overflow` keeps its
-        // one meaning.
+        #expect(other.collapse == .init(windows: 3))
+        // The glyphs and their state badges go; the count is
+        // windows, and `overflow` keeps its one meaning.
         #expect(other.apps.isEmpty)
         #expect(other.overflow == 0)
-        #expect(other.badgeCount == 3)
         let empty = try #require(built[SpaceID("3")])
-        #expect(empty.badgeCount == 0)
+        #expect(empty.collapse == .init(windows: 0))
         let shown = try #require(built[SpaceID("1")])
         #expect(shown.collapse == nil)
         #expect(shown.apps.map(\.name) == ["Notes"])
     }
 
-    @Test("Minimal keeps the identifier and remembers the count")
-    func identifierCollapsesTheOthers() throws {
-        let built = items(seededCore(), .identifier)
-        let other = try #require(built[SpaceID("2")])
-        #expect(other.collapse == .identifier(windows: 3))
-        #expect(other.apps.isEmpty)
-        #expect(other.overflow == 0)
-        let empty = try #require(built[SpaceID("3")])
-        #expect(empty.collapse == .identifier(windows: 0))
-        #expect(try #require(built[SpaceID("1")]).collapse == nil)
+    /// The disc stays a disc past one digit; the label keeps the
+    /// exact count (`SpaceBarCollapsedRenderTests`).
+    @Test("The disc caps its text at 9+")
+    func discCapsItsText() {
+        typealias Collapse = SpaceBarItemView.Collapse
+        #expect(Collapse(windows: 1).discText == "1")
+        #expect(Collapse(windows: 9).discText == "9")
+        #expect(Collapse(windows: 10).discText == "9+")
     }
 
     /// A second collapse keeps the first's count rather than
     /// recounting the glyphs the first one dropped.
-    @Test(
-        "Collapsing twice is collapsing once",
-        arguments: [
-            SpaceBarStyle.InactiveContent.count, .identifier,
-        ]
-    )
-    func collapseIsIdempotent(
-        content: SpaceBarStyle.InactiveContent
-    ) throws {
-        let built = items(seededCore(), content)
+    @Test("Collapsing twice is collapsing once")
+    func collapseIsIdempotent() throws {
+        let built = items(seededCore(), .count)
         let once = try #require(built[SpaceID("2")])
-        let twice = once.collapsed(to: content)
+        let twice = once.collapsed(to: .count)
         #expect(twice.collapse == once.collapse)
         #expect(twice.collapse?.windows == 3)
-        #expect(twice.badgeCount == once.badgeCount)
     }
 
     /// The layer item is never a Space, so it never collapses.
@@ -140,14 +129,14 @@ struct SpaceBarInactiveContentTests {
             layer: "L",
             glyph: .text("L", tinted: false)
         )
-        #expect(layer.collapsed(to: .identifier).collapse == nil)
+        #expect(layer.collapsed(to: .count).collapse == nil)
     }
 
     /// `hide_empty` reads the glyphs the collapse drops, so it
     /// runs first: an occupied Space stays listed.
     @Test("Hide empty judges before the collapse")
     func hideEmptyJudgesFirst() {
-        let built = items(seededCore(), .identifier, hideEmpty: true)
+        let built = items(seededCore(), .count, hideEmpty: true)
         #expect(built[SpaceID("2")] != nil)
         #expect(built[SpaceID("3")] == nil)
     }
@@ -164,7 +153,7 @@ struct SpaceBarInactiveContentTests {
         core.state.workspaces.activate(SpaceID("1"))
         core.state.apply(.windowCreated(window(1, app: "Web")))
         let away = try #require(
-            items(core, .identifier, display: dell)[SpaceID("3")]
+            items(core, .count, display: dell)[SpaceID("3")]
         )
         #expect(away.collapse == nil)
         #expect(away.apps.map(\.name) == ["Note"])
@@ -189,13 +178,12 @@ struct SpaceBarInactiveContentTests {
             )
         }
         #expect(glide(.count, one, two, true))
-        #expect(glide(.identifier, one, two, true))
         #expect(!glide(.apps, one, two, true))
         #expect(!glide(.count, one, one, true))
         // A first render appears rather than moving.
         #expect(!glide(.count, nil, two, true))
         // Other items drawn: pooled views would slide between
         // different Spaces' slots.
-        #expect(!glide(.identifier, one, two, false))
+        #expect(!glide(.count, one, two, false))
     }
 }

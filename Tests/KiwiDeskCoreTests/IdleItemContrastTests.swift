@@ -15,7 +15,7 @@ struct IdleItemContrastTests {
     /// The ring suite's own-contrast floor, which the idle alpha
     /// was chosen against (ui-designer, #1517): at 0.4 five
     /// palettes fell to about 2:1 or below. Core's one copy, which
-    /// Minimal's empty ink keeps too (#1683).
+    /// The collapsed empty ink keeps too (#1683).
     private static let floor = KiwiShelf.idleInkFloor
 
     private func idleContrast(

@@ -4,30 +4,29 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A collapsed Space item as the live bar draws it (#1683): its
-/// count cell fits the length the plan measured; the count reads
-/// as a whole count; Minimal still announces the windows; an
-/// empty identifier takes the empty ink. Driven through
-/// `SpaceBarManager.sync`. The glide's wiring is
-/// `SpaceBarGlideWiringTests`.
+/// A collapsed Space item as the live bar draws it (#1683): the
+/// count is a disc on the identifier's corner that adds no length
+/// to the item; it reads as a whole count; the label announces
+/// the exact windows; an empty identifier draws no disc and takes
+/// the empty ink. Driven through `SpaceBarManager.sync`. The
+/// glide's wiring is `SpaceBarGlideWiringTests`.
 @Suite("Space bar collapsed render", .serialized)
 @MainActor
 struct SpaceBarCollapsedRenderTests {
     private func render(
-        _ content: SpaceBarStyle.InactiveContent
+        _ content: SpaceBarStyle.InactiveContent,
+        held: Bool = false
     ) throws -> SpaceBarOverlay {
         LiquidGlassGate.override = { false }
         let manager = SpaceBarManager()
-        manager.sync([collapsedBar(content)])
+        manager.sync([collapsedBar(content, held: held)])
         return try #require(manager.overlayForTesting(barTitleDisplay))
     }
 
-    /// The count cell is reserved by the length and drawn by the
-    /// view's layout, which read one input (`badgeCount`): a
-    /// length measuring the cleared `overflow` instead leaves the
-    /// badge hanging past the item's end.
-    @Test("A collapsed count's cell fits the planned length")
-    func countCellFitsThePlan() throws {
+    /// The plan measures the identifier alone, and the disc sits
+    /// inside the identifier's cell rather than a cell of its own.
+    @Test("The count disc rides the identifier's cell")
+    func discRidesTheIdentifier() throws {
         let overlay = try render(.count)
         let view = overlay.itemViews[1]
         view.layoutSubtreeIfNeeded()
@@ -37,12 +36,25 @@ struct SpaceBarCollapsedRenderTests {
             contentDepth: depth,
             glyphGap: 0
         )
-        #expect(view.frame.width > bare)
+        #expect(view.frame.width == bare)
+        let disc = view.overflowBadge.frame
         #expect(!view.overflowBadge.isHidden)
-        #expect(view.overflowBadge.frame.maxX <= view.bounds.width)
-        // Minimal reserves nothing past the identifier.
-        let minimal = try render(.identifier)
-        #expect(minimal.itemViews[1].frame.width == bare)
+        #expect(disc.maxX <= view.bounds.width)
+        // A corner disc, smaller than the cell, on its top half.
+        let cell = view.cellLength
+        #expect(disc.width < cell)
+        #expect(disc.midY < view.bounds.midY)
+    }
+
+    /// The held asterisk owns the top corner (#1507), so the disc
+    /// takes the bottom one rather than covering it.
+    @Test("A held Space's disc takes the bottom corner")
+    func heldDiscMovesDown() throws {
+        let view = try render(.count, held: true).itemViews[1]
+        view.layoutSubtreeIfNeeded()
+        #expect(!view.heldBadge.isHidden)
+        #expect(view.overflowBadge.frame.midY > view.bounds.midY)
+        #expect(!view.overflowBadge.frame.intersects(view.heldBadge.frame))
     }
 
     @Test("Window count draws the whole count, unprefixed")
@@ -57,12 +69,11 @@ struct SpaceBarCollapsedRenderTests {
         #expect(overlay.itemViews[2].overflowBadge.isHidden)
     }
 
-    @Test("Minimal announces the windows it does not draw")
-    func identifierAnnouncesTheCount() throws {
+    @Test("A collapsed Space announces its windows")
+    func collapsedAnnouncesTheCount() throws {
         LocalizationManager.shared.select("en")
-        let collapsed = try render(.identifier)
+        let collapsed = try render(.count)
         let expanded = try render(.apps)
-        #expect(collapsed.itemViews[1].overflowBadge.isHidden)
         #expect(
             collapsed.itemViews[1].accessibilityLabel()
                 == expanded.itemViews[1].accessibilityLabel()
@@ -73,9 +84,9 @@ struct SpaceBarCollapsedRenderTests {
         )
     }
 
-    @Test("Minimal draws an empty identifier in the empty ink")
+    @Test("An empty collapsed identifier takes the empty ink")
     func emptyIdentifierDims() throws {
-        let overlay = try render(.identifier)
+        let overlay = try render(.count)
         let style = try #require(overlay.lastShown?.style)
         #expect(style.shelf.emptyItemAlpha != nil)
         let occupied = try #require(
@@ -89,16 +100,10 @@ struct SpaceBarCollapsedRenderTests {
         #expect(empty != occupied)
     }
 
-    /// The cue is Minimal's: under Window count an empty Space
-    /// already shows no count, and under Apps no glyphs.
-    @Test(
-        "Only Minimal dims an empty identifier",
-        arguments: [
-            SpaceBarStyle.InactiveContent.count, .apps,
-        ]
-    )
-    func onlyMinimalDims(content: SpaceBarStyle.InactiveContent) throws {
-        let overlay = try render(content)
+    /// Under Apps an empty Space already shows no glyphs.
+    @Test("Apps does not dim an empty identifier")
+    func appsDoesNotDim() throws {
+        let overlay = try render(.apps)
         let style = try #require(overlay.lastShown?.style)
         let drawn = overlay.itemViews[2].identifierLabel.textColor
         #expect(drawn == NSColor(kiwiHex: style.idleItemColor))
@@ -112,7 +117,8 @@ struct SpaceBarCollapsedRenderTests {
 func collapsedBar(
     _ content: SpaceBarStyle.InactiveContent,
     active: Int = 1,
-    boxedGlass: Bool = false
+    boxedGlass: Bool = false,
+    held: Bool = false
 ) -> SpaceBarManager.Bar {
     let app = { (name: String, count: Int) in
         SpaceBarItemView.App(
@@ -129,7 +135,7 @@ func collapsedBar(
         [app("Notes", 1)], [app("Mail", 2), app("Web", 1)], [],
     ]
     let items = apps.enumerated().map { index, apps in
-        SpaceBarOverlay.Item(
+        var item = SpaceBarOverlay.Item(
             space: SpaceID("\(index + 1)"),
             spaceGlyph: .text("\(index + 1)", tinted: true),
             apps: apps,
@@ -137,6 +143,10 @@ func collapsedBar(
             overflow: 0,
             focusInOverflow: false
         ).collapsed(to: content)
+        if held, index == 1 {
+            item.held = .init(screenName: "Dell", originName: nil)
+        }
+        return item
     }
     var style = paintedSpaceBar(front: nil).style
     style.inactiveContent = content

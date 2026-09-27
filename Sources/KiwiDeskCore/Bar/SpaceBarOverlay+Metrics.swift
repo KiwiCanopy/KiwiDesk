@@ -30,7 +30,7 @@ extension SpaceBarOverlay {
         return items.enumerated().map { index, item in
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
-                overflow: item.badgeCount,
+                overflow: item.overflow,
                 contentDepth: content,
                 glyphGap: look.resolvedGlyphGap
             )

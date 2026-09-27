@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// The empty Space's identifier ink under the Space Bar's
-/// Minimal content (#1683): derived from the palette, never
+/// Window count content (#1683): derived from the palette, never
 /// picked, and dropped where the palette cannot fit it.
 extension KiwiShelf {
     /// Contrast an idle identifier holds on its plate over white

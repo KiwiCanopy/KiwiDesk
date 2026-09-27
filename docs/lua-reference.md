@@ -2514,15 +2514,15 @@ space_bar.set_glyph_gap(4)
 ### space_bar.set_inactive_content
 
 :::unreleased
-**Expects:** `"apps"`, `"count"` or `"identifier"` (default
-`"apps"`).
+**Expects:** `"apps"` or `"count"` (default `"apps"`).
 
 **Does:** sets what a Space item draws while its screen shows
 another Space. `"apps"` draws its app glyphs, like the shown
-Space. `"count"` draws its identifier and its window count.
-`"identifier"` draws the identifier alone, and an empty Space's
-identifier dimmer than an occupied one's, where the palette leaves
-room for the step; a colour emoji icon keeps its colours. The
+Space. `"count"` draws its identifier alone, with its window
+count in a small disc on the identifier's corner (`9+` past
+nine); an empty Space draws no disc and its identifier dimmer
+than an occupied one's, where the palette leaves room for the
+step, and a colour emoji icon keeps its colours. The
 Space each screen shows always draws its glyphs, capped by
 [`set_glyph_cap`](#space_barset_glyph_cap), and a collapsed Space
 drops its sticky and floating badges.
@@ -2530,7 +2530,7 @@ drops its sticky and floating badges.
 **Example:**
 
 ```lua
-space_bar.set_inactive_content("identifier")
+space_bar.set_inactive_content("count")
 ```
 :::
 

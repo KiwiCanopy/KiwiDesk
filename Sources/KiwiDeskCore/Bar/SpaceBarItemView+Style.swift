@@ -51,10 +51,10 @@ extension SpaceBarItemView {
             badge.stringValue = "\(app.count)"
             applyBadge(badge, appFocused: app.focused)
         }
-        overflowBadge.isHidden = badgeCount < 1
+        overflowBadge.isHidden = (collapse?.windows ?? overflow) < 1
         // A collapsed count is the whole count, not "more".
         overflowBadge.stringValue =
-            collapse == nil ? "+\(overflow)" : "\(badgeCount)"
+            collapse?.discText ?? "+\(overflow)"
         applyBadge(overflowBadge, appFocused: focusInOverflow)
         styleStateBadges()
     }
@@ -171,7 +171,7 @@ extension SpaceBarItemView {
         if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverItemColor)
         }
-        if case .identifier(windows: 0) = collapse {
+        if collapse?.windows == 0 {
             return NSColor(kiwiHex: style.emptyItemColor)
         }
         return NSColor(kiwiHex: style.idleItemColor)

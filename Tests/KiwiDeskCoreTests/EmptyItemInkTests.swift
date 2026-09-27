@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Minimal's empty-Space cue (#1683): an empty Space's
+/// The collapsed empty-Space cue (#1683): an empty Space's
 /// identifier draws dimmer than an occupied one's, DERIVED from
 /// the palette by `KiwiShelf.emptyItemAlpha`, never picked. The
 /// derivation runs on Core's own maths; this suite measures its

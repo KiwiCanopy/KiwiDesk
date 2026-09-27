@@ -61,9 +61,9 @@ struct SpaceBarGlideWiringTests {
         return (writes, overlay)
     }
 
-    @Test("A switch under Minimal asks the run to travel")
+    @Test("A switch under Window count asks the run to travel")
     func switchTravels() throws {
-        let (writes, overlay) = try secondPass(.identifier, from: 1, to: 2)
+        let (writes, overlay) = try secondPass(.count, from: 1, to: 2)
         #expect(writes.count == 3)
         #expect(writes.allSatisfy { $0.travels })
         #expect(overlay.shownExpanded == SpaceID("2"))
@@ -85,7 +85,7 @@ struct SpaceBarGlideWiringTests {
     @Test("A changed item set lands")
     func changedItemsLand() throws {
         let writes = try secondPass(
-            .identifier,
+            .count,
             from: 1,
             to: 2,
             dropEmpty: true
@@ -98,7 +98,7 @@ struct SpaceBarGlideWiringTests {
     /// rather than gliding from a stale Space.
     @Test("A hide forgets the expanded Space")
     func hideForgets() throws {
-        let (_, overlay) = try secondPass(.identifier, from: 1, to: 2)
+        let (_, overlay) = try secondPass(.count, from: 1, to: 2)
         overlay.hide()
         #expect(overlay.shownExpanded == nil)
         #expect(overlay.shownIdentities.isEmpty)
@@ -111,7 +111,7 @@ struct SpaceBarGlideWiringTests {
     func boxGlassTravels() throws {
         try #require(Self.platformGlass)
         let (writes, overlay) = try secondPass(
-            .identifier,
+            .count,
             from: 1,
             to: 2,
             boxedGlass: true
@@ -126,7 +126,7 @@ struct SpaceBarGlideWiringTests {
         #expect(backdrops.count == 3)
         #expect((glass + backdrops).allSatisfy { $0.travels })
         let steady = try secondPass(
-            .identifier,
+            .count,
             from: 2,
             to: 2,
             boxedGlass: true
