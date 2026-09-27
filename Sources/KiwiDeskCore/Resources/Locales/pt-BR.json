@@ -1320,7 +1320,6 @@
   "space_bar.front_window.ax": "App em primeiro plano: %1$@, janela %2$@",
   "space_bar.glyph_cap": "Glifos por espaço",
   "space_bar.glyph_cap.help": "Quantos glifos de app um espaço mostra antes que os demais sejam reunidos em um selo +n. Janelas vizinhas do mesmo app contam como um único glifo.",
-  "space_bar.glyph_cap.summary": "Até %1$d grupos de apps por espaço; os demais são reunidos em um selo +n.",
   "space_bar.glyph_gap": "Espaçamento entre glifos",
   "space_bar.glyph_gap.help": "Distância entre os glifos de app dentro de um espaço; 0 os coloca lado a lado.",
   "space_bar.hide_empty": "Ocultar espaços vazios",

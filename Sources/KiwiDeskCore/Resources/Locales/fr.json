@@ -1320,7 +1320,6 @@
   "space_bar.front_window.ax": "Application au premier plan : %1$@, fenêtre %2$@",
   "space_bar.glyph_cap": "Glyphes par espace",
   "space_bar.glyph_cap.help": "Nombre de glyphes d'applications affichés par espace avant de les regrouper dans un badge +n. Les fenêtres adjacentes de la même application comptent comme un seul glyphe.",
-  "space_bar.glyph_cap.summary": "Jusqu'à %1$d groupes d'applications par espace ; le reste se regroupe dans un badge +n.",
   "space_bar.glyph_gap": "Écart entre glyphes",
   "space_bar.glyph_gap.help": "Écart entre les glyphes d'applications à l'intérieur d'un espace ; 0 les place côte à côte.",
   "space_bar.hide_empty": "Masquer les espaces vides",

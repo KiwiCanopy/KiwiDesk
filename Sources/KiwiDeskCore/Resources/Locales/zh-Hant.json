@@ -1320,7 +1320,6 @@
   "space_bar.front_window.ax": "前景 App：%1$@，視窗 %2$@",
   "space_bar.glyph_cap": "每個空間的圖形數",
   "space_bar.glyph_cap.help": "一個空間會顯示多少個 App 圖形，之後其餘的便收合成 +n 徽章。同一個 App 的相鄰視窗算作一個圖形。",
-  "space_bar.glyph_cap.summary": "每個空間最多 %1$d 個 App 群組；更多則收合成 +n 徽章。",
   "space_bar.glyph_gap": "圖形間距",
   "space_bar.glyph_gap.help": "空間內 App 圖形之間的距離；設為 0 時緊鄰排列。",
   "space_bar.hide_empty": "隱藏空的空間",

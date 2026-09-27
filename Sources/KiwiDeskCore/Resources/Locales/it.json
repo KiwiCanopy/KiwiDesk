@@ -1320,7 +1320,6 @@
   "space_bar.front_window.ax": "App in primo piano: %1$@, finestra %2$@",
   "space_bar.glyph_cap": "Glifi per spazio",
   "space_bar.glyph_cap.help": "Quanti glifi di app mostra uno spazio prima che i restanti si raggruppino in un badge +n. Le finestre adiacenti della stessa app contano come un solo glifo.",
-  "space_bar.glyph_cap.summary": "Fino a %1$d gruppi di app per spazio; gli altri si raggruppano in un badge +n.",
   "space_bar.glyph_gap": "Spaziatura tra glifi",
   "space_bar.glyph_gap.help": "Distanza tra i glifi di app all'interno di uno spazio; con 0 sono affiancati.",
   "space_bar.hide_empty": "Nascondi spazi vuoti",
