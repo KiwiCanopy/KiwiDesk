@@ -46,8 +46,6 @@ struct UpdateNotesDigest: Equatable {
     /// spanning more than one version needs it.
     var spansVersions: Bool { versions.count > 1 }
 
-    var total: Int { groups.reduce(0) { $0 + $1.entries.count } }
-
     /// Merges every source newer than `installed` up to `offered`.
     /// Nil when the offered version's own notes cannot be read —
     /// the window then falls back to the notes link alone.

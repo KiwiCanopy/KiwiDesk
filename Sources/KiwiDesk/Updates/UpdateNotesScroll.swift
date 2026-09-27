@@ -25,7 +25,7 @@ struct UpdateNotesScroll: View {
             {
                 UpdateNotesTabStrip(digest: digest, selection: $selection)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, UpdateWindowMetrics.inset)
                     .padding(.bottom, 14)
             }
             if measuring {
@@ -42,7 +42,7 @@ struct UpdateNotesScroll: View {
 
     private var padded: some View {
         content
-            .padding(.horizontal, 20)
+            .padding(.horizontal, UpdateWindowMetrics.inset)
             .padding(.bottom, 18)
             .frame(maxWidth: .infinity, alignment: .leading)
             .tint(SettingsTheme.ink)

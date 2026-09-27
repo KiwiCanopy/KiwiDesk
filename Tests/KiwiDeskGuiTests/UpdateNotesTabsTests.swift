@@ -64,9 +64,9 @@ struct UpdateNotesTabsTests {
         #expect(titles == ["Highlights", "Fixed"])
     }
 
-    /// The width the ruling was measured at: 560 pt less the
-    /// strip's 20 pt insets.
-    private static let available: CGFloat = 520
+    /// The strip's room: the window less its side insets.
+    private static let available =
+        UpdateWindowMetrics.width - 2 * UpdateWindowMetrics.inset
 
     private static func widths(
         _ digest: UpdateNotesDigest

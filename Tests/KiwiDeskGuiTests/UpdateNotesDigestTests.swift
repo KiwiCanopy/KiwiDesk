@@ -87,7 +87,7 @@ struct UpdateNotesDigestTests {
             digest.groups.map(\.type)
                 == ["new", "improved", "fixed", "scripting"]
         )
-        #expect(digest.total == 5)
+        #expect(digest.groups.flatMap(\.entries).count == 5)
         #expect(!digest.spansVersions)
         #expect(digest.unreadable.isEmpty)
     }
@@ -176,7 +176,7 @@ struct UpdateNotesDigestTests {
                     .init(text: "old fix", version: "2.0.1"),
                 ]
         )
-        #expect(digest.total == 3)
+        #expect(digest.groups.flatMap(\.entries).count == 3)
     }
 
     /// A version the offer is not the newest of stays out: the

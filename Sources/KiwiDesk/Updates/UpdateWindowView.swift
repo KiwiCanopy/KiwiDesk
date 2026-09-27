@@ -91,6 +91,8 @@ private struct UpdateWindowLayout<Footer: View>: View {
 
 enum UpdateWindowMetrics {
     static let width: CGFloat = 560
+    /// The header's, the tab strip's and the notes' side inset.
+    static let inset: CGFloat = 20
     static let minHeight: CGFloat = 420
     static let maxHeight: CGFloat = 640
     /// The transparent title bar the content sits below.
@@ -126,7 +128,7 @@ private struct UpdateWindowHeader: View {
             Spacer(minLength: 0)
         }
         .padding(.top, 4)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, UpdateWindowMetrics.inset)
         .padding(.bottom, 18)
     }
 
