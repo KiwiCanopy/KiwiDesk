@@ -12485,15 +12485,21 @@ At boot every recorded hold comes back, and each window it holds
 that the scan did not find is remembered there, as the replay
 remembers any late window; the retire (#1507 ruling 4) then keeps
 it while any of them may return. Whether one may is the
-WindowServer's to say, and only after the away seed: a window it
-no longer hosts was closed, or belonged to an app that
-relaunched under new windows, so its filing is dropped and a hold
-left with nothing ends. Dropping a hold at the replay instead,
+WindowServer's to say, window by window, and only after the away
+seed: a window it hosts on no Space at all was closed, or
+belonged to an app that relaunched under new windows, so its
+filing is dropped and a hold left with nothing ends. The
+per-Desktop census cannot say it, since it lists user Desktops
+only and would read a fullscreen window as closed. Dropping a hold at the replay instead,
 for want of a live member, would have ended every hold whose
 windows are hidden, away or still launching — the very windows
 #1507 keeps a hold for. Without that reading nothing is judged,
-absent and never faked, and such a hold stays until an explicit
-act ends it. A hold whose Space no longer exists names nothing
+absent and never faked; the snapshot then stops carrying the
+unjudged filings, so a closed window keeps a hold across one
+restart and not forever. A hold that goes home into its origin
+under another number takes every window it remembers along, a
+hidden app's too, or that window's return would re-create the
+retired number as an ordinary Space the next save captures. A hold whose Space no longer exists names nothing
 the snapshot records, so it ends at a restart. A restart of the
 Mac ends every hold without a separate store: macOS gives every
 reopened window a new identity, so a hold kept across it would

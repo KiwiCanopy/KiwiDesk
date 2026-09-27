@@ -909,12 +909,27 @@ screen's Spaces are held, not forwarded*. The obligations:
   `HeldSpaceRestartTests` ▸ `ownNameGoesHome`). Nothing drops a
   hold at the replay: its unscanned windows are remembered there,
   and `retireGoneHeldMembers`, AFTER the away seed, drops only
-  the filings the census no longer hosts, leaving the end to the
-  retire — a hidden, away or launching window keeps it
-  (`HeldSpaceRestartTests` ▸ `hiddenMemberKeepsTheHold`,
-  `HeldSpaceRestartTests` ▸ `awayMemberKeepsTheHold`,
-  `HeldSpaceRestartTests` ▸ `lateMemberKeepsTheHold`,
-  `HeldSpaceRestartTests` ▸ `goneWindowsRetireAfterBoot`). The
+  the filings the per-window `readWindowSpace` reads as `.gone`,
+  leaving the end to the retire — never the Desktop census,
+  which lists user Desktops alone, so a hidden, away, fullscreen
+  or launching window keeps it (`HeldSpaceRestartJudgeTests` ▸
+  `hiddenMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `awayMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `lateMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `fullscreenMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `goneWindowsRetireAfterBoot`). An unanswered read sets
+  `heldFilingsUnjudged`, and the snapshot then carries no
+  restored filing, so a closed window holds a Space across one
+  restart at most (`HeldSpaceRestartJudgeTests` ▸
+  `unjudgedFilingIsNotCarriedAgain`). A return that is not in
+  place re-points EVERY window remembered in the held Space —
+  not only the away ledger's — at the origin, or an arrival
+  re-creates the retired id as an ordinary Space a save captures
+  (`HeldSpaceRestartJudgeTests` ▸
+  `homeReturnRepointsTheHiddenWindow`,
+  `HeldSpaceRestartJudgeTests` ▸ `replugRepointsTheHiddenWindow`).
+  `livingRememberedSpace` keeps not gating a `.restored` target
+  by ruling (#1010): the replay files before Spaces exist. The
   #634 discard deletes the files and keeps the live holds
   (`HeldSpaceRestartRecordTests` ▸ `tierOneKeepsLiveHolds`).
 - **A reload leaves a held Space's mode alone.**
