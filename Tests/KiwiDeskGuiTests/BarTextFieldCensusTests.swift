@@ -18,7 +18,10 @@ import Testing
 @Suite("Bar text field census")
 struct BarTextFieldCensusTests {
     static let root = "Sources/KiwiDeskCore/Bar"
-    static let needle = "NSTextField(labelWithString:"
+    /// Every constructor spelling, not only `labelWithString:`
+    /// (guard-prover): the trade is that a type reference written
+    /// as a call counts too, while a subclass stays invisible.
+    static let needle = "NSTextField("
 
     struct Entry {
         let count: Int
@@ -58,11 +61,14 @@ struct BarTextFieldCensusTests {
         ),
     ]
 
-    /// Where the badge cell sets its line.
-    static let badgeDoor = (
-        needle: "BarTextGlyph.lineTop(",
-        file: "IndicatorBarBadgeCell.swift"
-    )
+    /// Where the badge cell sets its line, and the two sites that
+    /// build a badge on it — the App Bar's builds its own field,
+    /// so no render clause reaches it.
+    static let badgeDoors = [
+        (needle: "BarTextGlyph.lineTop(", file: "IndicatorBarBadgeCell.swift"),
+        (needle: "IndicatorBarBadgeCell(", file: "AppBarItemView.swift"),
+        (needle: "IndicatorBarBadgeCell(", file: "SpaceBarItemView.swift"),
+    ]
 
     static func sources() throws -> [String: String] {
         let base = SourceScan.repoRoot(from: #filePath)
@@ -106,7 +112,7 @@ struct BarTextFieldCensusTests {
     func doorsAreSpelled() throws {
         let sources = try Self.sources()
         let doors =
-            Self.register.values.compactMap(\.door) + [Self.badgeDoor]
+            Self.register.values.compactMap(\.door) + Self.badgeDoors
         for door in doors {
             let text = try #require(sources[door.file], "\(door.file)")
             #expect(

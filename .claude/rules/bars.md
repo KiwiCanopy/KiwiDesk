@@ -713,7 +713,9 @@ reaches.
   new site owes one of them a clause, and `BarTextFieldCensusTests`
   holds every bar text field to a named door. The Settings
   preview draws SwiftUI `Text`, which centres its line box, so it
-  is not baseline-faithful for a tall face — residue, stated.
+  is not baseline-faithful for a tall face — residue, stated; so
+  is `ShelfCountView`'s stacked arm, whose number takes the same
+  `originY` line as the side-by-side arm the suite renders.
 - **A preview of the bar draws the draft's face** through the
   same resolver (`BarSpec.textFont`); that the strip then draws
   with it is review's — no clause renders the text.
