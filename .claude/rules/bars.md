@@ -696,15 +696,24 @@ reaches.
   owes a call. A writer-side refresh is the shape that left the
   issue stale after `load_profile`. `BarFontIssueTests` ▸
   `followsProfileSwitch` and ▸ `fontSetChangeRederives` hold it.
-- **A face whose line box outgrows a cell-high frame is framed on
-  its ink** — for the Space Bar fields `BarTextGlyph.frame`
-  places (the identifier, the front-app glyph): Zapfino set its
-  digit below the frame and was clipped.
-  `SpaceBarGlyphCellTests` ▸ `identifierInFaceIsWholeAndCentred`
-  renders a tall and a mono face. The App Bar title, the
-  front-app name, the count badges and `ShelfCountView` size
-  from their own cell and are NOT framed this way; a tall face
-  there is a device check, not a guarded claim.
+- **Set every bar text's baseline through `BarTextGlyph` — the
+  font's cap height centred on the item, one baseline per font —
+  never by centring its line box and never by a string's own
+  ink** (#1707): an old-style 3 descends where a 1 does not, so
+  per-string ink centring gave each digit its own baseline, and
+  a tall face's ascent lifted a centred line box off its item. A
+  cell site takes `frame`, free-running text (the App Bar title,
+  the front-app name, `ShelfCountView`'s number) `originY`, and a
+  badge cell `lineTop`; an App Font ligature is an icon and
+  centres its line box. Never set `usesSingleLineMode` on bar
+  text: it draws a tall face above its own ascent, clipping it.
+  `BarTextBaselineTests` and `BarTextBaselineSiteTests` render
+  each site in Apple Chancery, and `SpaceBarGlyphCellTests` ▸
+  `identifierInFaceIsWholeAndCentred` a tall and a mono face; a
+  new site owes one of them a clause, and `BarTextFieldCensusTests`
+  holds every bar text field to a named door. The Settings
+  preview draws SwiftUI `Text`, which centres its line box, so it
+  is not baseline-faithful for a tall face — residue, stated.
 - **A preview of the bar draws the draft's face** through the
   same resolver (`BarSpec.textFont`); that the strip then draws
   with it is review's — no clause renders the text.

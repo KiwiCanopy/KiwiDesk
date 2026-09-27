@@ -30,6 +30,12 @@ public enum AppFont {
         return NSFont(name: fontName, size: 12) != nil
     }()
 
+    /// Whether `font` is the App Font — an icon, placed as one
+    /// rather than as text (`BarTextGlyph.frame`).
+    public static func isAppFont(_ font: NSFont?) -> Bool {
+        font?.fontName == fontName
+    }
+
     /// The glyph font at `size`, or nil when registration
     /// failed (callers fall back to the native app image).
     public static func font(size: CGFloat) -> NSFont? {

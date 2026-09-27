@@ -119,9 +119,11 @@ struct BarTextBaselineTests {
         try #require(BarFont.isInstalled(Self.family))
         var shelf = KiwiShelf()
         shelf.fontFamily = Self.family
-        shelf.fontSize = 22
+        // 40 pt: at 22 a centred line box misses the cap band by
+        // under the tolerance (guard-prover, #1707).
+        shelf.fontSize = 40
         let view = AppBarItemView(
-            frame: NSRect(x: 0, y: 0, width: 200, height: 40)
+            frame: NSRect(x: 0, y: 0, width: 300, height: 60)
         )
         view.configure(
             id: WindowID(1),

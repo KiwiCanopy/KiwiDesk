@@ -1,10 +1,13 @@
 import AppKit
 import CoreText
 
-/// Where a bar places a text glyph — an App Font ligature, a
-/// Space's digits or monogram — by its INK (#1529, #1543). The
-/// Space Bar's three fields on `SpaceBarStyle.glyphFontSize`'s one
-/// ladder take `frame`; the App Bar's slot keeps its own
+/// Where bar text goes: along the bar a text glyph — an App Font
+/// ligature, a Space's digits or monogram — is placed by its INK
+/// (#1529, #1543); across it every bar text sits on one baseline
+/// per font, its cap height centred (#1707). The Space Bar's
+/// fields on `SpaceBarStyle.glyphFontSize`'s one ladder take
+/// `frame`; free-running text (a title, a count) takes `originY`
+/// and a badge cell `lineTop`; the App Bar's slot keeps its own
 /// font-scaling and snug rulings (`AppBarItemView+GlyphSlot`) and
 /// anchors through `Metrics`.
 enum BarTextGlyph {
@@ -117,7 +120,7 @@ enum BarTextGlyph {
         guard height > 0 else { return rect }
         rect.size.height = height
         rect.origin.y =
-            field.font?.fontName == AppFont.fontName
+            AppFont.isAppFont(field.font)
             ? cell.midY - height / 2
             : originY(
                 capsCentredOn: cell.midY,
@@ -128,10 +131,9 @@ enum BarTextGlyph {
     }
 
     /// The frame origin's y for `field` laid out `height` tall
-    /// whose baseline centres the font's cap height on `mid`: one
-    /// baseline per font whatever a string's own ink, so an
-    /// old-style 3 and a 1 line up and a tall face's ascent does
-    /// not lift its text (#1707). The frame may pass the cell.
+    /// in a FLIPPED host (every bar view is): its baseline sits
+    /// where `lineTop(capsCentredOn:font:)` puts it. The frame
+    /// may pass the cell.
     @MainActor
     static func originY(
         capsCentredOn mid: CGFloat,
@@ -147,14 +149,20 @@ enum BarTextGlyph {
             width: max(ceil(cell.cellSize.width), 1),
             height: height
         )
-        // The cell draws its title from the top, flipped.
-        let baseline =
-            cell.titleRect(forBounds: bounds).minY
-            + layout.defaultBaselineOffset(for: font)
-        let cap = font.capHeight
-        return field.superview?.isFlipped ?? true
-            ? mid + cap / 2 - baseline
-            : mid - cap / 2 - (height - baseline)
+        return lineTop(capsCentredOn: mid, font: font)
+            - cell.titleRect(forBounds: bounds).minY
+    }
+
+    /// Where a line of `font` starts, flipped, so its baseline
+    /// centres the font's cap height on `mid`: one baseline per
+    /// font whatever a string's own ink, so an old-style 3 and a
+    /// 1 line up and a tall face's ascent does not lift it (#1707).
+    @MainActor
+    static func lineTop(
+        capsCentredOn mid: CGFloat,
+        font: NSFont
+    ) -> CGFloat {
+        mid + font.capHeight / 2 - layout.defaultBaselineOffset(for: font)
     }
 
     @MainActor private static let layout = NSLayoutManager()

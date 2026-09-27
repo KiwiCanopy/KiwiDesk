@@ -1,15 +1,16 @@
 import AppKit
 
-/// A text field cell that centers its text vertically.
+/// A badge's text cell: its line set on the one bar baseline,
+/// the font's caps centred on the disc (#1707).
 final class IndicatorBarBadgeCell: NSTextFieldCell {
     override func titleRect(forBounds rect: NSRect) -> NSRect {
         var titleRect = super.titleRect(forBounds: rect)
-        let minimumHeight = cellSize(forBounds: rect).height
-        if titleRect.size.height > minimumHeight {
-            titleRect.origin.y +=
-                (titleRect.size.height - minimumHeight) / 2
-            titleRect.size.height = minimumHeight
-        }
+        guard let font else { return titleRect }
+        titleRect.origin.y = BarTextGlyph.lineTop(
+            capsCentredOn: rect.midY,
+            font: font
+        )
+        titleRect.size.height = cellSize(forBounds: rect).height
         return titleRect
     }
 
