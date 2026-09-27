@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "Salvataggio delle impostazioni non riuscito: %1$@",
   "settings.permission_paused": "Gestione delle finestre in pausa: KiwiDesk ha bisogno dell'autorizzazione di Accessibilità.",
   "settings.readout.auto": "Automatico",
+  "settings.readout.auto_value": "Automatico, %1$@",
   "shortcuts.add": "Aggiungi",
   "shortcuts.add_application": "Aggiungi applicazione",
   "shortcuts.add_binding": "Aggiungi scorciatoia",

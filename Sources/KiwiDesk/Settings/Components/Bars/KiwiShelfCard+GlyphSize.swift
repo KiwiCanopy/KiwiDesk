@@ -25,7 +25,8 @@ extension KiwiShelfCard {
                 label: L("kiwishelf.glyph_size", "Glyph size"),
                 value: shelf.glyphSize,
                 range: BarSliderBands.glyphSize(thickness: thickness),
-                autoAtZero: true
+                autoAtZero: true,
+                autoValue: thickness
             )
             .searchAnchored(
                 SettingsCatalog.bars.kiwishelfStyle.children

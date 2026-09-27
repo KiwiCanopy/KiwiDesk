@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "Error al guardar ajustes: %1$@",
   "settings.permission_paused": "La gestión de ventanas está pausada — KiwiDesk necesita permiso de Accesibilidad.",
   "settings.readout.auto": "Automático",
+  "settings.readout.auto_value": "Automático, %1$@",
   "shortcuts.add": "Añadir",
   "shortcuts.add_application": "Añadir aplicación",
   "shortcuts.add_binding": "Añadir atajo",

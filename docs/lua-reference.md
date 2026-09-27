@@ -1919,7 +1919,9 @@ stays what the shelf reserves, and item boxes and plates keep it.
 The content never draws thinner than a `20` pt shelf's nor
 thicker than the shelf, and the stored value is kept, so a thicker
 shelf later brings back a larger size. An automatic
-[`font_size`](#kiwishelfset_font_size) follows it.
+[`font_size`](#kiwishelfset_font_size) follows it. Automatic
+equals the thickness, so `thickness − 2 × room` leaves that room
+on each side: `28` on a `40` pt shelf leaves `6` pt.
 
 **Example:**
 
@@ -2131,7 +2133,8 @@ positive value pins the font size for both bars.
 
 :::unreleased
 An automatic font size follows the
-[`glyph_size`](#kiwishelfset_glyph_size) where one is set.
+[`glyph_size`](#kiwishelfset_glyph_size) where one is set: Space
+numbers draw at about half of it and titles at about 0.42 of it.
 :::
 
 **Example:**

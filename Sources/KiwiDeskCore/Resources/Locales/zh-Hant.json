@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "儲存設定失敗：%1$@",
   "settings.permission_paused": "視窗管理已暫停 — KiwiDesk 需要「輔助使用」權限。",
   "settings.readout.auto": "自動",
+  "settings.readout.auto_value": "自動，%1$@",
   "shortcuts.add": "加入",
   "shortcuts.add_application": "加入應用程式",
   "shortcuts.add_binding": "加入快速鍵",

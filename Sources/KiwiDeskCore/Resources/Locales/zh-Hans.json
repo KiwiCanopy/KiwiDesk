@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "设置存储失败：%1$@",
   "settings.permission_paused": "窗口管理已暂停 — KiwiDesk 需要“辅助功能”权限。",
   "settings.readout.auto": "自动",
+  "settings.readout.auto_value": "自动，%1$@",
   "shortcuts.add": "添加",
   "shortcuts.add_application": "添加 App",
   "shortcuts.add_binding": "添加快捷键",

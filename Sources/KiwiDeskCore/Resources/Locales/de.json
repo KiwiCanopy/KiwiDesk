@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "Sichern der Einstellungen fehlgeschlagen: %1$@",
   "settings.permission_paused": "Fensterverwaltung ist pausiert — KiwiDesk benötigt die Berechtigung für Bedienungshilfen.",
   "settings.readout.auto": "Automatisch",
+  "settings.readout.auto_value": "Automatisch, %1$@",
   "shortcuts.add": "Hinzufügen",
   "shortcuts.add_application": "App hinzufügen",
   "shortcuts.add_binding": "Tastenkürzel hinzufügen",

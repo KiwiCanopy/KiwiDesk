@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "Не удалось сохранить настройки: %1$@",
   "settings.permission_paused": "Управление окнами на паузе — KiwiDesk требуется разрешение «Универсальный доступ».",
   "settings.readout.auto": "Автоматически",
+  "settings.readout.auto_value": "Автоматически, %1$@",
   "shortcuts.add": "Добавить",
   "shortcuts.add_application": "Добавить приложение",
   "shortcuts.add_binding": "Добавить сочетание клавиш",

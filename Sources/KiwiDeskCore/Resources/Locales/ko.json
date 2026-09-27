@@ -1235,6 +1235,7 @@
   "settings.globals_save_failed": "설정 저장 실패: %1$@",
   "settings.permission_paused": "윈도우 관리가 일시 정지되었습니다 — KiwiDesk에는 손쉬운 사용 권한이 필요합니다.",
   "settings.readout.auto": "자동",
+  "settings.readout.auto_value": "자동, %1$@",
   "shortcuts.add": "추가",
   "shortcuts.add_application": "앱 추가",
   "shortcuts.add_binding": "단축키 추가",

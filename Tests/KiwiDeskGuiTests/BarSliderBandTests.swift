@@ -149,6 +149,13 @@ struct BarSliderBandTests {
             )
         )
         #expect(body.contains("restore: thickness"))
+        #expect(body.contains("autoValue: thickness"))
+        // Font size: the one automatic value is what the slider
+        // shows under Auto and what a switch-off starts from.
+        let font = try rowProperty("fontSizeGroup", in: sources)
+        #expect(font.contains("identifierFontSize(forDepth:"))
+        #expect(font.contains("restore: auto"))
+        #expect(font.contains("autoValue: auto"))
     }
 
     /// Which band each Core-clamped bar row reads, keyed by the
