@@ -11595,15 +11595,12 @@ the owner wants to arrive together, off is not a statement about
 the sheen. The row stays on a Mac below macOS 26, where the
 switch above it is hidden.
 
-**Default on, with no migration — and the visible change on
-upgrade is the accepted cost.** A file written before the key
-carries no `sheen`, decodes it on, and so every existing user's
-focus ring, bar highlight and border, and drag borders gain the
-sheen the day they upgrade. A #1369 crossing could have written
-off into those files; the owner ruled default on instead, and
-that upgrade-day change is the price of the ruling, not something
-the argument rules out. The row beneath the switch is where a
-user who does not want it turns it off.
+**Default on; the upgrade is pending the owner.** The owner ruled
+default on (2026-09-27). A file written before the key carries no
+`sheen` and decodes it on, so as built every existing user's focus
+ring, bar highlight and border, and drag borders gain the sheen on
+upgrade; whether existing files take the sheen on upgrade — or a
+#1369 crossing writes it off into them — is pending the owner.
 
 **The ramp is capped at the #578 bar, not tuned by eye.** A stroke
 clearing 3:1 on a ground keeps 3:1 at every stop: the ring and the
