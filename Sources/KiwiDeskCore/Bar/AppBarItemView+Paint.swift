@@ -38,7 +38,8 @@ extension AppBarItemView {
             boxBorder,
             shelf: style.shelf,
             surface: .box,
-            cornerRadius: radius
+            cornerRadius: radius,
+            sheen: style.sheen
         )
     }
 
@@ -98,21 +99,27 @@ extension AppBarItemView {
     /// Applies stroke or fill to active indicator layer (`layoutAccent`).
     func applyAccent() {
         layer?.borderWidth = 0
+        let ink = BarAccent.flatInk(style.highlightColor, sheen: style.sheen)
         switch accentMode {
         case .none:
             accent.isHidden = true
         case .outline:
             accent.isHidden = false
             accent.layer?.borderWidth = style.resolvedHighlightWidth
-            accent.layer?.borderColor =
-                NSColor(kiwiHex: style.highlightColor).cgColor
+            accent.layer?.borderColor = ink
             accent.layer?.backgroundColor =
                 NSColor.clear.cgColor
         case .edgeMark:
             accent.isHidden = false
             accent.layer?.borderWidth = 0
-            accent.layer?.backgroundColor =
-                NSColor(kiwiHex: style.highlightColor).cgColor
+            accent.layer?.backgroundColor = ink
         }
+        accent.paint = BarAccent.sheen(
+            style.highlightColor,
+            outline: accentMode == .outline
+                ? style.resolvedHighlightWidth : nil,
+            strength: style.sheen,
+            drawn: accentMode != .none
+        )
     }
 }

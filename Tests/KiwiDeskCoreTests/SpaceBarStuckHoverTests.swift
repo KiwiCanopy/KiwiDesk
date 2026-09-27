@@ -56,6 +56,7 @@ struct SpaceBarStuckHoverTests {
                 display: barTitleDisplay,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),
+                sheen: 0,
                 space: spaceBars.overlayForTesting(barTitleDisplay),
                 app: nil
             )

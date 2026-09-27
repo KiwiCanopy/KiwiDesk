@@ -45,6 +45,29 @@ public struct BorderStyle: Sendable, Equatable {
     public var glowSize: CGFloat = 0
     /// Stacking order (#367).
     public var drawOrder: DrawOrder = .behind
+    /// The painted sheen (#1644) on the focused ring, the shelf's
+    /// highlight and border, and the drag markers' borders: a signed
+    /// strength in `sheenRange` — positive lightens the top,
+    /// negative darkens it, 0 draws none.
+    public var sheen: CGFloat = 0.5
+
+    /// The sheen's range; every writer clamps into it.
+    public static let sheenRange: ClosedRange<CGFloat> = -1...1
+
+    /// `value` clamped into `sheenRange`, anything under half the
+    /// readout's last digit (0.01%) snapped to 0: a slider's float
+    /// grid lands on Off, and a value the readout would print as
+    /// "+0%" draws nothing either, so the two agree.
+    public static func clampSheen(_ value: CGFloat) -> CGFloat {
+        let clamped = min(
+            sheenRange.upperBound,
+            max(sheenRange.lowerBound, value)
+        )
+        return abs(clamped) < sheenSnap ? 0 : clamped
+    }
+
+    /// Half the readout's resolution, as a strength.
+    static let sheenSnap: CGFloat = 0.00005
 
     public init() {}
 
@@ -115,6 +138,7 @@ extension BorderStyle: Codable {
         case glow
         case glowSize = "glow_size"
         case drawOrder = "draw_order"
+        case sheen
     }
 
     public init(from decoder: Decoder) throws {
@@ -167,5 +191,11 @@ extension BorderStyle: Codable {
                 DrawOrder.self,
                 forKey: .drawOrder
             ) ?? defaults.drawOrder
+        sheen = Self.clampSheen(
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .sheen
+            ) ?? defaults.sheen
+        )
     }
 }

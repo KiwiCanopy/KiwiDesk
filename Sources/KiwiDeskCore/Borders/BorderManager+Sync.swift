@@ -40,7 +40,8 @@ extension BorderManager {
                 cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
                 screen: screen(for: frame),
-                glowBlur: spec.glowBlur
+                glowBlur: spec.glowBlur,
+                sheen: spec.sheen
             )
             // Re-assert stacking each sync — the target may have
             // moved in the window order since the ring last
@@ -95,6 +96,7 @@ extension BorderManager {
             colorHex: spec.colorHex,
             screen: screen(for: windowFrame),
             glowBlur: spec.glowBlur,
+            sheen: spec.sheen,
             restoreVisibility: restoreVisibility
         )
     }

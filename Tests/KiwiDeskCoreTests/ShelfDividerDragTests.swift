@@ -214,12 +214,18 @@ struct ShelfDividerDragTests {
                 plate: .zero
             ),
         ]
-        overlay.show(strip: strip, shelf: KiwiShelf(), sections: sections)
+        overlay.show(
+            strip: strip,
+            shelf: KiwiShelf(),
+            sheen: 0,
+            sections: sections
+        )
         #expect(!overlay.divider.isHidden)
         #expect(overlay.handle.isHidden)
         overlay.show(
             strip: strip,
             shelf: KiwiShelf(),
+            sheen: 0,
             sections: sections,
             divider: full().divider
         )
@@ -246,6 +252,7 @@ struct ShelfDividerDragTests {
                 display: barTitleDisplay,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),
+                sheen: 0,
                 space: section,
                 app: nil
             )

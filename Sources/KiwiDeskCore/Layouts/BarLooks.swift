@@ -13,13 +13,20 @@ import Foundation
 public struct SpaceBarLook: Sendable, Equatable {
     public var shelf: KiwiShelf
     public var bar: SpaceBarStyle
+    /// `border.sheen` (#1644), which paints the highlight and the
+    /// shelf's border.
+    public var sheen: CGFloat
 
-    public init(
-        shelf: KiwiShelf = KiwiShelf(),
-        bar: SpaceBarStyle = SpaceBarStyle()
-    ) {
+    public init(shelf: KiwiShelf, bar: SpaceBarStyle, sheen: CGFloat) {
         self.shelf = shelf
         self.bar = bar
+        self.sheen = sheen
+    }
+
+    /// A placeholder until a view is handed its look: defaults,
+    /// no sheen.
+    init() {
+        self.init(shelf: KiwiShelf(), bar: SpaceBarStyle(), sheen: 0)
     }
 
     public subscript<T>(
@@ -114,13 +121,20 @@ public struct SpaceBarLook: Sendable, Equatable {
 public struct AppBarLook: Sendable, Equatable {
     public var shelf: KiwiShelf
     public var bar: AppBarStyle
+    /// `border.sheen` (#1644), which paints the highlight and the
+    /// shelf's border.
+    public var sheen: CGFloat
 
-    public init(
-        shelf: KiwiShelf = KiwiShelf(),
-        bar: AppBarStyle = AppBarStyle()
-    ) {
+    public init(shelf: KiwiShelf, bar: AppBarStyle, sheen: CGFloat) {
         self.shelf = shelf
         self.bar = bar
+        self.sheen = sheen
+    }
+
+    /// A placeholder until a view is handed its look: defaults,
+    /// no sheen.
+    init() {
+        self.init(shelf: KiwiShelf(), bar: AppBarStyle(), sheen: 0)
     }
 
     public subscript<T>(

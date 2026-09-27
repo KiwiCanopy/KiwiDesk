@@ -11,6 +11,10 @@ struct SettingsSlider: View {
     let label: String
     /// Spoken value readout with units for VoiceOver (#812).
     let spokenValue: String
+    /// A signed value's origin: the fill runs from it to the knob,
+    /// either way, and a tick marks it. Nil fills from the leading
+    /// edge.
+    var origin: Double? = nil
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion)
@@ -93,15 +97,27 @@ struct SettingsSlider: View {
 
     private func track(width: CGFloat) -> some View {
         let center = knobCenter(in: width)
+        let span = Self.fillSpan(
+            knob: center,
+            origin: origin.map { restingCenter(at: $0, in: width) }
+        )
         return ZStack(alignment: .leading) {
             Capsule()
                 .fill(Color.primary.opacity(0.12))
                 .frame(height: Self.trackHeight)
             // To the knob's CENTRE, so a glass knob shows the
-            // fill running under it (#1527).
+            // fill running under it (#1527) — from the origin
+            // where the value is signed, following the drag.
             Capsule()
                 .fill(fill)
-                .frame(width: center, height: Self.trackHeight)
+                .frame(width: span.width, height: Self.trackHeight)
+                .offset(x: span.x)
+            if let origin {
+                Rectangle()
+                    .fill(Color.primary.opacity(0.25))
+                    .frame(width: 0.5, height: Self.trackHeight)
+                    .offset(x: restingCenter(at: origin, in: width) - 0.25)
+            }
             knob
                 .frame(
                     width: Self.knobWidth,
@@ -140,12 +156,30 @@ struct SettingsSlider: View {
         return Self.knobWidth / 2 + usable * t
     }
 
-    private var fraction: CGFloat {
+    private var fraction: CGFloat { fraction(of: value) }
+
+    private func fraction(of at: Double) -> CGFloat {
         let span = range.upperBound - range.lowerBound
         guard span > 0 else { return 0 }
-        return CGFloat(
-            (value - range.lowerBound) / span
-        )
+        return CGFloat((at - range.lowerBound) / span)
+    }
+
+    /// Where the knob's centre rests for `at`, drag aside.
+    private func restingCenter(at: Double, in width: CGFloat) -> CGFloat {
+        let usable = max(width - Self.knobWidth, 1)
+        let t = min(max(fraction(of: at), 0), 1)
+        return Self.knobWidth / 2 + usable * t
+    }
+
+    /// The accent fill's leading x and width: from the leading edge
+    /// to the knob's centre, or — with an origin — between the
+    /// origin's centre and the knob's, whichever way the value lies.
+    static func fillSpan(
+        knob: CGFloat,
+        origin: CGFloat?
+    ) -> (x: CGFloat, width: CGFloat) {
+        guard let origin else { return (0, knob) }
+        return (min(origin, knob), abs(knob - origin))
     }
 
     private func trackFraction(

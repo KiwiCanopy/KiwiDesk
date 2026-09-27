@@ -229,9 +229,13 @@ extension KiwiShelfCard {
     private var fontSizeGroup: some View {
         // What Auto draws for a Space number: the value the
         // slider shows and a switch-off starts from (#1713).
-        let auto = SpaceBarLook(shelf: shelf.wrappedValue)
-            .identifierFontSize(forDepth: shelf.thickness.wrappedValue)
-            .rounded()
+        let auto = SpaceBarLook(
+            shelf: shelf.wrappedValue,
+            bar: SpaceBarStyle(),
+            sheen: model.config.settings.borderStyle.sheen
+        )
+        .identifierFontSize(forDepth: shelf.thickness.wrappedValue)
+        .rounded()
         return AutoGatedGroup(
             title: L("kiwishelf.font_size.auto", "Auto font size"),
             isOn: AutoSentinel.binding(shelf.fontSize, restore: auto),

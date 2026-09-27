@@ -220,7 +220,7 @@ public enum APIReference {
             "set_enabled", "set_width", "set_focused_color",
             "set_unfocused_enabled", "set_unfocused_color",
             "set_corner_style", "set_glow", "set_glow_size",
-            "set_draw_order",
+            "set_sheen", "set_draw_order",
             "fit_gaps",
         ],
         "sticky": [

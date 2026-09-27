@@ -213,7 +213,7 @@ struct SettingsSearchIndexTests {
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to
                 // anchor and stay anchor-less by ruling.
-                .colors: 7,
+                .colors: 8,  // 8: #1644's Sheen row, on every macOS
                 // 17 since #1517 (one shelf set); 18: #1679's border.
                 .advancedColors: 18,
                 // 4 since #1255: the refusal sound moved here

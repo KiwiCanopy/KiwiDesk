@@ -12,6 +12,8 @@ public final class BorderManager {
         public let cornerStyle: BorderStyle.CornerStyle
         /// Resolved glow blur radius (0 = none, #358, #551).
         public let glowBlur: CGFloat
+        /// The stroke's sheen strength (#1644), 0 for none.
+        public let sheen: CGFloat
 
         public init(
             window: WindowID,
@@ -19,7 +21,8 @@ public final class BorderManager {
             colorHex: String,
             width: CGFloat,
             cornerStyle: BorderStyle.CornerStyle,
-            glowBlur: CGFloat = 0
+            glowBlur: CGFloat = 0,
+            sheen: CGFloat = 0
         ) {
             self.window = window
             self.frame = frame
@@ -27,6 +30,7 @@ public final class BorderManager {
             self.width = width
             self.cornerStyle = cornerStyle
             self.glowBlur = glowBlur
+            self.sheen = sheen
         }
     }
 

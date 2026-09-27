@@ -55,6 +55,8 @@ enum SettingsSearchSynonyms {
         // labels until #1690; `app_font` is the value Lua writes.
         case .kiwishelf(.iconSource):
             return ["icon", "glyph", "system default", "app font"]
+        case .colours(.borderSheen):
+            return ["gloss", "shine", "gradient", "highlight", "shade"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):

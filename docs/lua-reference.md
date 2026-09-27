@@ -3116,6 +3116,36 @@ border.set_glow_size(8)   -- a fixed, wider bloom
 border.set_glow_size(0)   -- back to automatic
 ```
 
+:::unreleased
+### border.set_sheen
+
+**Expects:** a number from `-1` to `1` (default `0.5`). A value
+outside the range is clamped into it, like the other border
+magnitudes; a non-number fails.
+
+**Does:** paints a sheen on the top of the focused border, the
+shelf's [highlight](#kiwishelfset_highlight_width) and
+[border](#kiwishelfset_border), and the drag borders. A positive
+value lightens the top toward white, a negative one darkens it
+toward black, each fading into the colour, which holds to the
+bottom; `0` draws none. `1` moves the top 90% of the way. Only
+the lightness moves, so each keeps its own colour; it is a
+painted highlight, not glass, so it draws whether or not Liquid
+Glass is on, under Reduce transparency, and on any macOS. Below
+the top each stroke keeps its colour exactly, so the colour's own
+contrast still holds there. The unfocused border never takes it.
+
+Settings shows it as **Sheen**, a slider beneath the **Liquid
+Glass** switch on Colours &amp; Animations, reading `+50%`,
+`−50%` or **Off**. The Liquid Glass switch does not change it.
+
+**Example:**
+
+```lua
+border.set_sheen(-0.3)   -- a slightly darker top
+```
+:::
+
 ### border.set_draw_order
 
 **Expects:** `"behind"` or `"front"`.

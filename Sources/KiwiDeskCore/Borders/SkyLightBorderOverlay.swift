@@ -82,6 +82,7 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
             || previous?.lineWidth != geometry.lineWidth
             || previous?.cornerRadius != geometry.cornerRadius
             || previous?.glowMargin != geometry.glowMargin
+            || previous?.sheen != geometry.sheen
             || self.colorHex != colorHex
 
         if sizeChanged && !reshape(to: geometry.overlayFrame) {

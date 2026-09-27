@@ -46,7 +46,8 @@ public final class DragOverlay {
         at frame: CGRect,
         style: DragVisual,
         cornerRadius: CGFloat,
-        glassBeneath window: CGWindowID?
+        glassBeneath window: CGWindowID?,
+        sheen: CGFloat
     ) {
         let marker = ghost ?? Marker(panel: makePanel())
         ghost = marker
@@ -55,7 +56,8 @@ public final class DragOverlay {
             at: frame,
             style: style,
             radius: cornerRadius,
-            beneath: window
+            beneath: window,
+            sheen: sheen
         )
     }
 
@@ -65,7 +67,8 @@ public final class DragOverlay {
         at frame: CGRect,
         style: DragVisual,
         cornerRadius: CGFloat,
-        glassBeneath window: CGWindowID?
+        glassBeneath window: CGWindowID?,
+        sheen: CGFloat
     ) {
         let marker = dropZone ?? Marker(panel: makePanel())
         dropZone = marker
@@ -74,7 +77,8 @@ public final class DragOverlay {
             at: frame,
             style: style,
             radius: cornerRadius,
-            beneath: window
+            beneath: window,
+            sheen: sheen
         )
     }
 
@@ -83,14 +87,20 @@ public final class DragOverlay {
         at frame: CGRect,
         style: DragVisual,
         radius: CGFloat,
-        beneath window: CGWindowID?
+        beneath window: CGWindowID?,
+        sheen: CGFloat
     ) {
         place(
             marker.panel,
             at: adjustedFrame(frame, style: style),
             below: window
         )
-        marker.view.render(style, radius: radius, glass: window != nil)
+        marker.view.render(
+            style,
+            radius: radius,
+            glass: window != nil,
+            sheen: sheen
+        )
     }
 
     private func adjustedFrame(

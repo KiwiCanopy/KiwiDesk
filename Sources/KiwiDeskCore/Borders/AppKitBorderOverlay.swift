@@ -8,6 +8,10 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// Secondary shadow layer stacked under ring for edge bloom density
     /// (#533).
     private let glowBoost = CAShapeLayer()
+    /// The sheen ramp over the stroke (#1644), masked to it, so
+    /// the bloom below keeps the plain stroke's shadow.
+    private let sheen = CAGradientLayer()
+    private let sheenMask = CAShapeLayer()
 
     /// Stacks below target window to preserve popover occlusion (#320).
     let orderMode: BorderGeometry.Order = .below
@@ -50,10 +54,16 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
             transform: nil
         )
         shape.lineWidth = geometry.lineWidth
-        shape.strokeColor = NSColor(kiwiHex: colorHex).cgColor
+        // Under the sheen the ramp is the stroke: a second one
+        // beneath would stack a translucent colour's alpha.
+        shape.strokeColor =
+            geometry.sheen != 0
+            ? NSColor.clear.cgColor
+            : NSColor(kiwiHex: colorHex).cgColor
         shape.fillColor = NSColor.clear.cgColor
         shape.contentsScale = screen?.backingScaleFactor ?? 2
         applyGlow(geometry: geometry, rect: rect, colorHex: colorHex)
+        applySheen(geometry: geometry, rect: rect, colorHex: colorHex)
         CATransaction.commit()
         if !panel.isVisible {
             panel.orderFrontRegardless()
@@ -99,6 +109,39 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         glowBoost.shadowPath = silhouette
     }
 
+    /// Paints the sheen ramp over the stroke's own extent (#1644).
+    private func applySheen(
+        geometry: BorderGeometry,
+        rect: CGRect,
+        colorHex: String
+    ) {
+        sheen.isHidden = geometry.sheen == 0
+        guard geometry.sheen != 0 else { return }
+        let half = geometry.lineWidth / 2
+        sheen.frame = rect.insetBy(dx: -half, dy: -half)
+        sheen.contentsScale = shape.contentsScale
+        sheenMask.frame = sheen.bounds
+        sheenMask.path = CGPath(
+            roundedRect: rect.offsetBy(
+                dx: half - rect.minX,
+                dy: half - rect.minY
+            ),
+            cornerWidth: geometry.cornerRadius,
+            cornerHeight: geometry.cornerRadius,
+            transform: nil
+        )
+        sheenMask.lineWidth = geometry.lineWidth
+        sheenMask.strokeColor = NSColor.black.cgColor
+        sheenMask.fillColor = nil
+        sheenMask.contentsScale = shape.contentsScale
+        sheen.mask = sheenMask
+        BorderSheen.paint(
+            sheen,
+            hex: colorHex,
+            strength: geometry.sheen
+        )
+    }
+
     /// Stacks ring directly behind target window in WindowServer hierarchy.
     func order(relativeTo windowNumber: CGWindowID) -> Bool {
         panel?.order(.below, relativeTo: Int(windowNumber))
@@ -142,6 +185,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         // over the crisp stroke.
         view.layer?.addSublayer(glowBoost)
         view.layer?.addSublayer(shape)
+        view.layer?.addSublayer(sheen)
         panel.contentView = view
         return panel
     }

@@ -152,7 +152,8 @@ struct PaletteShelf: View {
             ) {
                 PaletteSceneThumbnail(
                     palette: palette,
-                    drawsBorder: model.config.settings.kiwishelf.border
+                    drawsBorder: model.config.settings.kiwishelf.border,
+                    drawsSheen: model.config.settings.borderStyle.sheen
                 )
             }
         }
