@@ -662,7 +662,7 @@
   "kiwishelf.font_family.system": "Sistema",
   "kiwishelf.font_family.system_monospaced": "Sistema monoespaciada",
   "kiwishelf.font_size": "Tamaño de fuente",
-  "kiwishelf.font_size.auto": "Tamaño automático",
+  "kiwishelf.font_size.auto": "Tamaño de fuente automático",
   "kiwishelf.font_size.help": "Un solo tamaño para ambas barras, para que los números de los Espacios y los títulos de la App Bar queden alineados. El automático sigue al tamaño de glifo.",
   "kiwishelf.font_weight": "Peso de fuente",
   "kiwishelf.font_weight.black": "Negra",

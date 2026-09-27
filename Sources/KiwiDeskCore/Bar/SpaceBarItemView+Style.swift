@@ -210,8 +210,8 @@ extension SpaceBarItemView {
             if let glyphField = appViews[index] as? NSTextField {
                 glyphField.stringValue = app.glyph ?? ""
                 glyphField.font =
-                    AppFont.font(size: glyphSize)
-                    ?? .systemFont(ofSize: glyphSize)
+                    AppFont.font(size: glyphFontSize)
+                    ?? .systemFont(ofSize: glyphFontSize)
                 glyphField.textColor =
                     app.focused && isActive
                     ? NSColor(kiwiHex: style.focusedItemColor)
@@ -259,7 +259,7 @@ extension SpaceBarItemView {
         style.identifierFontSize(forDepth: depth)
     }
 
-    var glyphSize: CGFloat {
+    var glyphFontSize: CGFloat {
         style.glyphFontSize(forDepth: depth)
     }
 }

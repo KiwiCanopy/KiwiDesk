@@ -87,8 +87,8 @@ extension APIReference {
             .number("size")
         ),
         "set_font_size": APIRecord(
-            "Pins the font size in points for both bars; 0 scales "
-                + "with thickness.",
+            "Pins the font size in points for both bars; 0 follows "
+                + "the glyph size.",
             .number("size")
         ),
         "set_font_family": APIRecord(

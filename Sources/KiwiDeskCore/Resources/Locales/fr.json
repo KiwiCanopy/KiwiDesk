@@ -662,7 +662,7 @@
   "kiwishelf.font_family.system": "Système",
   "kiwishelf.font_family.system_monospaced": "Système à chasse fixe",
   "kiwishelf.font_size": "Taille de police",
-  "kiwishelf.font_size.auto": "Taille automatique",
+  "kiwishelf.font_size.auto": "Taille de police automatique",
   "kiwishelf.font_size.help": "Une seule taille pour les deux barres, pour que les numéros d'espace et les titres de l'App Bar s'alignent. La taille automatique suit la taille de glyphe.",
   "kiwishelf.font_weight": "Graisse",
   "kiwishelf.font_weight.black": "Noir",

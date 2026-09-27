@@ -1,7 +1,7 @@
 import Foundation
 
 /// Retired verbs: #1517's, when the two bars moved onto one
-/// shelf, and #1674's `set_float_nudge`.
+/// shelf, #1674's `set_float_nudge` and #1713's item padding.
 /// No aliases (AGENTS.md §5): a retired name fails, and the
 /// failure names what replaces it — in Lua as a
 /// `ConfigIssue.Kind.retiredCall`, over IPC through
@@ -33,6 +33,7 @@ extension APIReference {
         map["space_bar.set_title_cap"] =
             "space_bar.set_front_app_title_cap"
         map["set_float_nudge"] = "set_float_placement"
+        map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
         return map
     }()
 

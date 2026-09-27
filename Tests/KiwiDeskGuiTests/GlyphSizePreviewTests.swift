@@ -4,18 +4,18 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Bars preview draws the draft's item padding (#1682): both
+/// The Bars preview draws the draft's glyph size (#1713): both
 /// bars' specs carry Core's content share and size their glyphs
 /// from the content it leaves, never the full thickness.
-@Suite("Item padding in the Bars preview")
+@Suite("Glyph size in the Bars preview")
 @MainActor
 struct GlyphSizePreviewTests {
     private static let scale: CGFloat = 1.8
 
-    private static func tile(padding: CGFloat) -> HomeCardBarsTile {
+    private static func tile(glyphSize: CGFloat) -> HomeCardBarsTile {
         var settings = TilingSettings()
         settings.kiwishelf.thickness = 40
-        settings.kiwishelf.glyphSize = padding == 0 ? 0 : 40 - 2 * padding
+        settings.kiwishelf.glyphSize = glyphSize
         return HomeCardBarsTile(settings: settings, scale: scale)
     }
 
@@ -33,16 +33,16 @@ struct GlyphSizePreviewTests {
         ]
     }
 
-    @Test("No padding draws the full thickness")
+    @Test("An automatic glyph size draws the full thickness")
     func defaultIsFull() {
-        for spec in Self.specs(Self.tile(padding: 0)) {
+        for spec in Self.specs(Self.tile(glyphSize: 0)) {
             #expect(spec.contentShare == 1)
         }
     }
 
     @Test("The share is Core's content depth over the thickness")
     func shareIsCores() {
-        let tile = Self.tile(padding: 6)
+        let tile = Self.tile(glyphSize: 28)
         let shelf = tile.settings.kiwishelf
         let share = shelf.contentDepth(forDepth: 40) / 40
         #expect(share < 1)
@@ -54,8 +54,8 @@ struct GlyphSizePreviewTests {
     /// The strip's pips are content: they shrink by the share.
     @Test("A padded shelf draws shorter pips")
     func pipsShrink() {
-        func pips(_ padding: CGFloat) -> [CGFloat] {
-            Self.specs(Self.tile(padding: padding)).map {
+        func pips(_ glyphSize: CGFloat) -> [CGFloat] {
+            Self.specs(Self.tile(glyphSize: glyphSize)).map {
                 BarStripView(
                     spec: $0,
                     edge: .top,
@@ -64,7 +64,7 @@ struct GlyphSizePreviewTests {
                 ).pipCross
             }
         }
-        for (plain, padded) in zip(pips(0), pips(6)) {
+        for (plain, padded) in zip(pips(0), pips(28)) {
             #expect(padded < plain)
             #expect(
                 abs(padded - plain * (28.0 / 40.0)) < 0.001
@@ -74,8 +74,8 @@ struct GlyphSizePreviewTests {
 
     @Test("A padded shelf draws smaller glyphs")
     func paddedIsSmaller() {
-        let plain = Self.specs(Self.tile(padding: 0))
-        let padded = Self.specs(Self.tile(padding: 6))
+        let plain = Self.specs(Self.tile(glyphSize: 0))
+        let padded = Self.specs(Self.tile(glyphSize: 28))
         for (a, b) in zip(plain, padded) {
             #expect(b.fontSize < a.fontSize)
             #expect(b.thickness == a.thickness)

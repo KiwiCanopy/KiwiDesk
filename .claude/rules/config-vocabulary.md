@@ -299,11 +299,11 @@ synonym:
 - **padding** — room INSIDE a thing, between its own edge and
   its content: the third of the set, since a gap sits between
   things and a margin outside one. A locale keeps it apart from
-  its gap and margin words, and from its colour *fill* noun. The
-  shelf spends no knob on it: `kiwishelf.item_padding` (#1682)
-  was renamed before shipping to `kiwishelf.set_glyph_size`
-  (#1713), named for what it produces — never an *item size*,
-  which the **item** row rules out.
+  its gap and margin words, and from its colour *fill* noun. Name
+  a shelf knob for what it produces, never for padding: #1682's
+  `kiwishelf.set_item_padding` became `kiwishelf.set_glyph_size`
+  before shipping (#1713, `GlyphSizeTests`) — and never an *item
+  size*, which the **item** row rules out.
 - **limit** / **cap** / **count** — a `limit` is a user-set
   maximum (`track.set_limit`); `cap` is the same idea where it
   already reads better (`space_bar.set_glyph_cap`, and

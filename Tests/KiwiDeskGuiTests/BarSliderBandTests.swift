@@ -21,14 +21,18 @@ import Testing
 struct BarSliderBandTests {
     private static let bars = "Sources/KiwiDesk/Settings/Components/Bars"
 
-    /// The `static let <name>` declaration in `BarSliderBands`,
-    /// through the end of its initializer.
-    private func declaration(of name: String) throws -> String {
+    /// The `static let <name>` (or `static func <name>`)
+    /// declaration in `BarSliderBands`, through the end of its
+    /// initializer or body.
+    private func declaration(
+        of name: String,
+        keyword: String = "let"
+    ) throws -> String {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(Self.bars)
             .appendingPathComponent("BarSliderBands.swift")
         let text = try SourceScan.strippedSource(at: file)
-        let needle = "static let \(name)"
+        let needle = "static \(keyword) \(name)"
         let start = try #require(text.range(of: needle))
         let rest = text[start.lowerBound...]
         let end =
@@ -105,13 +109,34 @@ struct BarSliderBandTests {
         var shelf = KiwiShelf()
         shelf.glyphSize = CGFloat(band.upperBound) - 1
         #expect(shelf.contentDepth(forDepth: 40) < 40)
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(Self.bars)
-            .appendingPathComponent("BarSliderBands.swift")
-        let text = try SourceScan.strippedSource(at: file)
+        let declared = try declaration(of: "glyphSize", keyword: "func")
         #expect(
-            text.contains("let floor = Double(KiwiShelf.minContentDepth)")
+            declared.contains(
+                "let floor = Double(KiwiShelf.minContentDepth)"
+            )
         )
+    }
+
+    /// The slider runs to the DRAFT's thickness: the group reads
+    /// it once and hands that one value to the band and to the
+    /// restore, so a literal or the band's widest thickness in
+    /// either place reds here (#1713).
+    @Test("the glyph size slider runs to the draft's thickness")
+    func glyphSizeReadsTheDraftThickness() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(Self.bars)
+        let sources = try SourceScan.swiftSources(under: root)
+        let body = try rowProperty("glyphSizeGroup", in: sources)
+        #expect(!body.isEmpty, "glyphSizeGroup moved")
+        #expect(
+            body.contains("let thickness = shelf.thickness.wrappedValue")
+        )
+        #expect(
+            body.contains(
+                "BarSliderBands.glyphSize(thickness: thickness)"
+            )
+        )
+        #expect(body.contains("restore: thickness"))
     }
 
     /// Which band each Core-clamped bar row reads, keyed by the
