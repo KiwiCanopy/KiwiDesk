@@ -34,7 +34,7 @@ struct SpaceBarCollapsedRenderTests {
         let depth = barTitleStrip.height
         let bare = SpaceBarItemView.autoLength(
             appCount: 0,
-            depth: depth,
+            contentDepth: depth,
             glyphGap: 0
         )
         #expect(view.frame.width > bare)

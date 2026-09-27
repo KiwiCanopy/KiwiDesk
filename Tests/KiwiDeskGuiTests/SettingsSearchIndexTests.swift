@@ -202,16 +202,10 @@ struct SettingsSearchIndexTests {
                 // stay anchor-less by ruling — two census rows
                 // per label key, which the join cannot split.
                 .gapsAndBorders: 18,
-                // 9 since #277: the 27 rows behind the two
-                // Style drawers gained their catalog anchors so
-                // a hit opens the drawer; the at-rest rows stay
-                // anchor-less by ruling (the issue's tier split).
-                // 9 since #1517: the KiwiShelf card's at-rest
-                // rows replace the bars' shared ones, the Space
-                // Bar's Show row anchor-less by ruling.
                 // 16 since the #1517 redesign: the bar cards
                 // lost their Style drawers, so every bar row is
-                // at rest and anchor-less by the same ruling.
+                // at rest and anchor-less by the same ruling
+                // (#277 anchors, first #1517 split — both moot).
                 // 17 since #1689, 18 since #1682, 19 since #1683:
                 // Glyph gap, Item padding and Other Spaces, at
                 // rest like their neighbours.
