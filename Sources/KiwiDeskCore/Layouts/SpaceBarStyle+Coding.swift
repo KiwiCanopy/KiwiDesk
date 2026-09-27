@@ -10,6 +10,7 @@ extension SpaceBarStyle {
         case glyphCap = "glyph_cap"
         case glyphGap = "glyph_gap"
         case inactiveContent = "inactive_content"
+        case itemLabel = "item_label"
         case frontAppTitleCap = "front_app_title_cap"
         case activeIndicator = "active_indicator"
         case activeDimFactor = "active_dim_factor"
@@ -47,6 +48,11 @@ extension SpaceBarStyle {
                 InactiveContent.self,
                 forKey: .inactiveContent
             ) ?? defaults.inactiveContent
+        itemLabel =
+            try container.decodeIfPresent(
+                ItemLabel.self,
+                forKey: .itemLabel
+            ) ?? defaults.itemLabel
         frontAppTitleCap =
             try container.decodeIfPresent(
                 Int.self,

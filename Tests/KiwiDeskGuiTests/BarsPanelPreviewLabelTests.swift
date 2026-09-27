@@ -22,12 +22,20 @@ struct BarsPanelPreviewLabelTests {
         SpaceID("mail"): "",
     ]
 
+    private func config(
+        _ label: SpaceBarStyle.ItemLabel = .identifier
+    ) -> GuiConfig {
+        var config = GuiConfig()
+        config.spaces = spaces
+        config.settings.spaceIcons = icons
+        config.spaceModes = [SpaceID("2"): .monocle]
+        config.settings.spaceBarStyle.itemLabel = label
+        return config
+    }
+
     @Test("Labels are the bar's own ladder: symbol, emoji, digits, monogram")
     func labelsAreTheBarsLadder() {
-        let labels = BarsPanelPreview.spaceLabels(
-            spaces: spaces,
-            icons: icons
-        )
+        let labels = BarsPanelPreview.spaceLabels(of: config())
         #expect(
             labels == [
                 .text("⭐", tinted: false), .symbol("book"),
@@ -40,6 +48,17 @@ struct BarsPanelPreviewLabelTests {
                 == spaces.map {
                     KiwiCore.spaceIdentifier(id: $0, icon: icons[$0])
                 }
+        )
+    }
+
+    @Test("A layout label draws each draft Space's own mode (#1535)")
+    func layoutLabelReadsTheDraftModes() {
+        let labels = BarsPanelPreview.spaceLabels(of: config(.layout))
+        let bsp = SpaceGlyph.symbol(LayoutMode.bsp.symbol)
+        #expect(
+            labels == [
+                bsp, .symbol(LayoutMode.monocle.symbol), bsp, bsp, bsp,
+            ]
         )
     }
 

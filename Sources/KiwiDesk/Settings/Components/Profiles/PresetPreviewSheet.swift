@@ -144,7 +144,7 @@ struct PresetPreviewSheet: View {
             )
             Label(
                 slot.mode.displayName,
-                systemImage: slot.mode.glyph
+                systemImage: slot.mode.symbol
             )
             .font(.caption)
             .labelStyle(.titleAndIcon)

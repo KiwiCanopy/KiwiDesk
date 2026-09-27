@@ -13,7 +13,7 @@ extension SpacesSection {
             ForEach(LayoutMode.allCases, id: \.self) { mode in
                 Label(
                     mode.displayName,
-                    systemImage: mode.glyph
+                    systemImage: mode.symbol
                 )
                 .tag(mode)
             }

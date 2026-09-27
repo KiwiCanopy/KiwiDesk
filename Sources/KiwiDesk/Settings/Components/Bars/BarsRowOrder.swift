@@ -44,6 +44,7 @@ enum BarsRowOrder {
     /// above what it gates (#1517); rows on the label axis
     /// first, the checkbox tier last (ui-patterns ▸ Row layout).
     static let spaceBar: [SettingKey] = [
+        .spaceBar(.spaceBarItemLabel),
         .spaceBar(.spaceBarInactiveContent),
         .spaceBar(.spaceBarGlyphCap),
         .spaceBar(.spaceBarGlyphGap),

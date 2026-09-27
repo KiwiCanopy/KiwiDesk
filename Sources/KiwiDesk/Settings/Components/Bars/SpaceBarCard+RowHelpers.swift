@@ -54,6 +54,20 @@ extension SpaceBarCard {
         )
     }
 
+    /// The Space label `?` (#1535), its segments interpolated
+    /// like the Other Spaces one above.
+    var itemLabelHelp: String {
+        L(
+            "space_bar.item_label.help",
+            "What names each Space on the bar. %1$@ — its icon, "
+                + "else its number or name. %2$@ — the symbol of "
+                + "the layout it uses now, as the menu bar shows "
+                + "it. VoiceOver still reads the Space's name.",
+            L("space_bar.item_label.identifier", "Name or icon"),
+            L("space_bar.item_label.layout", "Layout")
+        )
+    }
+
     /// Glyphs per Space stepper (#94).
     @ViewBuilder var glyphCapRow: some View {
         StepperRow(

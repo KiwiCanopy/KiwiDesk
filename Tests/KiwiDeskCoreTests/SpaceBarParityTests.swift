@@ -60,7 +60,7 @@ struct SpaceBarCommandParityTests {
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false),
         .glyphCap(8), .glyphGap(3), .frontAppTitleCap(40),
-        .inactiveContent(.count),
+        .inactiveContent(.count), .itemLabel(.layout),
         .activeIndicator(.edgeMark),
         .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
@@ -142,6 +142,7 @@ struct SpaceBarCommandParityTests {
         case .glyphCap: return [.number(8)]
         case .glyphGap: return [.number(3)]
         case .inactiveContent: return [.string("count")]
+        case .itemLabel: return [.string("layout")]
         case .frontAppTitleCap: return [.number(40)]
         default:
             return [.string("#123456")]

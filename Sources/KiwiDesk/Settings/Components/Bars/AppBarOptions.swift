@@ -101,6 +101,18 @@ enum AppBarOptions {
         ]
     }
 
+    /// What names a Space item (#1535).
+    @MainActor
+    static var itemLabel: [(SpaceBarStyle.ItemLabel, String)] {
+        [
+            (
+                .identifier,
+                L("space_bar.item_label.identifier", "Name or icon")
+            ),
+            (.layout, L("space_bar.item_label.layout", "Layout")),
+        ]
+    }
+
     /// App icon rendering options (#294, #362).
     @MainActor
     static var iconSource: [(BarAppIconSource, String)] {

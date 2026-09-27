@@ -69,6 +69,14 @@ extension SpaceBarCard {
                     .map { ($0.1, $0.0) },
                 help: inactiveContentHelp
             )
+        case .spaceBarItemLabel:
+            SegmentedPicker(
+                L("space_bar.item_label", "Space label"),
+                selection: style.itemLabel,
+                options: AppBarOptions.itemLabel
+                    .map { ($0.1, $0.0) },
+                help: itemLabelHelp
+            )
         case .spaceBarGlyphCap:
             glyphCapRow
         case .spaceBarGlyphGap:
