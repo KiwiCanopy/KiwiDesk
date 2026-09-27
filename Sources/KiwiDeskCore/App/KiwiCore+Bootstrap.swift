@@ -8,8 +8,8 @@ extension KiwiCore {
         crash.captureState = { [weak self] in
             self?.sessionSnapshot()
         }
-        crash.restoreState = { [weak self] snapshot in
-            self?.restoreAndSettle(snapshot)
+        crash.captureInPlaceState = { [weak self] in
+            self?.sessionSnapshot(inPlace: true)
         }
         // Every diagnostic seam in Core is wired here, together,
         // through one forwarding closure (core-boundaries.md).

@@ -35,7 +35,7 @@ struct APIRecordCensusTests {
     @Test("every dispatcher verb has a record, and vice versa")
     func dispatcherVerbs() {
         let verbs = Set(APIReference.commands.map(\.command))
-            .union([APIReference.socketOnlyCommand])
+            .union(APIReference.cliOnly)
         let records = Set(APIReference.coreRecords.keys)
         let message = difference(
             verbs,
@@ -44,6 +44,23 @@ struct APIRecordCensusTests {
             "records for no verb"
         )
         #expect(verbs == records, "\(message)")
+    }
+
+    /// A CLI-only verb is dispatched but never registered into
+    /// Lua (#930): `prepare_restart` called from a config would
+    /// announce a stop that is no restart.
+    @Test("a CLI-only verb has no Lua spelling")
+    func cliOnlyIsNeverLua() {
+        let lua = Set(
+            APIReference.commands.flatMap {
+                [$0.lua, $0.command]
+            }
+        )
+        let cli = Set(APIReference.cliOnly)
+        #expect(lua.isDisjoint(with: cli))
+        for name in cli {
+            #expect(APIReference.entry(named: name)?.channel == .cli)
+        }
     }
 
     @Test("the two core record files do not overlap")

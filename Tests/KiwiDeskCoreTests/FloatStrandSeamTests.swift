@@ -43,9 +43,9 @@ struct FloatStrandSeamTests {
         let core = try #require(
             F.makeCore(mode: .floating, frame: F.parked())
         )
-        // Boot shape: the scan's retile runs BEFORE the session
-        // restore, so the recovery has already seeded a centred
-        // capture. The record must outrank it.
+        // A retile ahead of the restore (boot's shape before
+        // #930) has the recovery seed a centred capture first.
+        // The record must still outrank it.
         core.retile()
         #expect(core.tiler.stashOriginal(F.window) == F.centred)
         let original = F.original

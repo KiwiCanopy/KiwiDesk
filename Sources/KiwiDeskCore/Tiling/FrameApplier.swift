@@ -16,6 +16,12 @@ final class FrameApplier {
     private let recent = RecentApplies()
     private let instantTargets = InstantTargets()
 
+    /// Every frame issued to a window, at both entry points and
+    /// ahead of the element guard — the one sink every layout,
+    /// stash, restore and `setFrame` frame reaches, so a test can
+    /// see what a pass moved (#930). A no-op in production.
+    var issued: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
+
     /// Grace period for ignoring self-inflicted AX frame echoes.
     private static let echoGrace: TimeInterval = 1.0
 
@@ -82,6 +88,7 @@ final class FrameApplier {
         // like `applyInstant`'s target stamp: the echo must never
         // precede the stamp (#1254).
         recent.record(id, now: clock())
+        issued(id, frame)
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -131,6 +138,7 @@ final class FrameApplier {
         // (#881); a stamp for a gone window expires unread.
         instantTargets.record(id, frame: frame, now: clock())
         recent.record(id, now: clock())  // as `apply`, #1254
+        issued(id, frame)
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)

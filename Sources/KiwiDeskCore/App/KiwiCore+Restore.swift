@@ -33,6 +33,14 @@ extension KiwiCore {
         // gathered when it happened.
         settleDrawnSpaceModes()
         state.adopt(snapshot)
+        // The Monocle hold an in-place restart carried (#930);
+        // the read validates membership.
+        for record in snapshot.spaces {
+            if let held = record.session?.monocleShown {
+                tiler.monocleShownMembers[SpaceID(record.id)] =
+                    WindowID(held)
+            }
+        }
         state.restoredFrames = [:]
         var missing = 0
         for record in snapshot.windows {
@@ -97,18 +105,30 @@ extension KiwiCore {
         )
     }
 
-    /// The crash leg's restore contract: replay, then settle
-    /// like any other space switch — force past the ±2 pt
-    /// tolerance and tell bus subscribers (the bar) where we
-    /// landed (#633). No focus seeding on purpose: it runs
-    /// inside `start()`, whose startup sweep re-runs the
-    /// landing choice and `seedStartupFocus`. The launch-time
-    /// session restore seeds focus itself (`KiwiCore+Lifecycle`)
-    /// and the wake/unlock leg pays the adopted focus for real
-    /// (`restoreAndSettleAfterWake`, #1130).
-    func restoreAndSettle(_ snapshot: StateSnapshot) {
-        restore(snapshot)
+    /// Boot's first arrangement: the previous session's — a clean
+    /// stop's or a crash's autosave — REPLAYED BEFORE any pass
+    /// draws, so every scanned window is filed in its remembered
+    /// Space and slot before a frame is issued (#930,
+    /// accessibility.md). With no session, the scan's order is the
+    /// arrangement.
+    ///
+    /// Settles like any other space switch — forced past the
+    /// tolerance check, the space-switch animation respected
+    /// (#207), the bar told where we landed. Internal so a test
+    /// drives the boot tail; `finishBoot` is not test-drivable.
+    func arrangeBootDesk(session: StateSnapshot?) {
+        guard let session else {
+            retile()
+            return
+        }
+        let signposter = BootSignpost.signposter
+        let span = signposter.beginInterval("sessionRestore")
+        restore(session)
+        activateSpaceOfFocusedWindow()
+        seedStartupFocus()
         spaceSwitchRetile()
         emitSpaceChange()
+        signposter.endInterval("sessionRestore", span)
+        onLog("restored previous session arrangement")
     }
 }

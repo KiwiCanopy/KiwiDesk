@@ -85,6 +85,9 @@ func makeTestCore(
     // already false — but neutralized here so it stays that way
     // if the lever ever gains a second effect.
     core.borders.windowServerTrackingDisabled = false
+    // `prepare_restart` reads the developer's real LaunchAgent
+    // plist otherwise (#930); a suite that means one injects it.
+    core.inPlaceRestart.serviceProgram = { nil }
     // Same class, third time (#673): `openOrFocus`'s four seams
     // default LIVE, and unlike the two above their touch fires on
     // COMMAND EXECUTION, not on init — so a suite that executes

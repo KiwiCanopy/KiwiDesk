@@ -159,30 +159,12 @@ extension KiwiCore {
     private func finishBoot() {
         boot.scanDone = ContinuousClock.now
         defersEventRetiles = false
+        arrangeBootDesk(session: crash.takeBootSnapshot())
         // The per-event #193 pile restore was suppressed with the
         // retiles, so re-arm it once here — it self-gates on
         // track + actual overflow.
-        retile()
         scheduleTrackZOrderRestoreIfOverflowing()
         mouse.start()
-        // The scan discovered windows in AX order; put back the
-        // arrangement of the previous session.
-        let signposter = BootSignpost.signposter
-        let restoreSpan =
-            signposter.beginInterval("sessionRestore")
-        if let session = crash.consumeSession() {
-            restore(session)
-            activateSpaceOfFocusedWindow()
-            seedStartupFocus()
-            // Same contract as every other space switch: force
-            // past the tolerance check, respect the space-switch
-            // animation setting (coordinated out+in, #207), and
-            // tell bus subscribers (the bar) where we landed.
-            spaceSwitchRetile()
-            emitSpaceChange()
-            onLog("restored previous session arrangement")
-        }
-        signposter.endInterval("sessionRestore", restoreSpan)
         crash.start()
         do {
             try socket.start()

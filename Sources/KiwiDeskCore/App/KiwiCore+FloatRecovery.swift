@@ -52,8 +52,17 @@ extension KiwiCore {
     /// in place of its state frame. The state frame of a parked
     /// float is the corner, and a restore replaying it verbatim
     /// put the window back there with nothing left to undo it.
-    func sessionSnapshot() -> StateSnapshot {
-        let snapshot = state.snapshot()
+    ///
+    /// `inPlace` adds the session memory only an in-place restart
+    /// carries (#930, `StateSnapshot+InPlace`), the Monocle hold
+    /// included.
+    func sessionSnapshot(inPlace: Bool = false) -> StateSnapshot {
+        let snapshot =
+            inPlace
+            ? state.inPlaceSnapshot(
+                monocleShown: tiler.monocleShownMembers
+            )
+            : state.snapshot()
         return StateSnapshot(
             windows: snapshot.windows.map { record in
                 guard
@@ -63,7 +72,8 @@ extension KiwiCore {
                 else { return record }
                 return StateSnapshot.WindowRecord(
                     id: record.windowID,
-                    frame: original
+                    frame: original,
+                    session: record.session
                 )
             },
             spaces: snapshot.spaces,

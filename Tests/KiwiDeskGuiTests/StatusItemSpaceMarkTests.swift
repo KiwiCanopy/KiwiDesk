@@ -22,6 +22,7 @@ private final class FakeUpdater: AppUpdating {
     var canCheckForUpdates = true
     var updatePending = false { didSet { onUpdatePendingChanged() } }
     var onUpdatePendingChanged: () -> Void = {}
+    var onWillRelaunch: () -> Void = {}
     func checkForUpdates() {}
 }
 

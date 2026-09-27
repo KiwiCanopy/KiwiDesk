@@ -127,6 +127,10 @@ extension KiwiCore {
                 self?.loadConfig()
             }
             return .ok(.string("reloading"))
+        case ServiceManager.prepareRestartCommand:
+            return .ok(
+                .object(["in_place": .bool(prepareServiceRestart())])
+            )
         case "save_profile", "load_profile",
             "delete_profile", "set_default_profile",
             "list_profiles", "get_profile_status":

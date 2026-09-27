@@ -285,6 +285,8 @@ public final class KiwiCore {
     /// captured back on save. nil falls back to the space
     /// order's first survivor on a profile-switch reconcile.
     var fallbackSpace: SpaceID?
+    /// The announced in-place restart (#930, `KiwiCore+InPlaceRestart`).
+    var inPlaceRestart = InPlaceRestartState()
     /// Profile bound per macOS Desktop, keyed by the Desktop
     /// itself (#1147). Populated by `bind_profile_to_desktop`.
     public internal(set) var desktopBindings: [DesktopKey: DesktopBinding] =

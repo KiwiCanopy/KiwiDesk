@@ -67,17 +67,16 @@ extension APIReference {
                 record: records[command] ?? Self.pendingRecord
             )
         }
-        result.append(
+        result += cliOnly.map { name in
             APIEntry(
                 group: coreGroup,
-                name: socketOnlyCommand,
-                command: socketOnlyCommand,
+                name: name,
+                command: name,
                 aliases: [],
                 channel: .cli,
-                record: records[socketOnlyCommand]
-                    ?? Self.pendingRecord
+                record: records[name] ?? Self.pendingRecord
             )
-        )
+        }
         result += luaOnly.map { name in
             APIEntry(
                 group: coreGroup,
@@ -114,4 +113,15 @@ extension APIReference {
 
     /// Socket-only command without a KiwiDesk table mapping.
     public static let socketOnlyCommand = "subscribe"
+
+    /// The one register of commands Lua never registers — the
+    /// CLI/IPC channel's alone. `subscribe` binds the client to an
+    /// event stream and `SocketServer` answers it ahead of
+    /// dispatch; `prepare_restart` is dispatched by `execute` and
+    /// announces a stop as an in-place restart, which a config
+    /// calling it would do by accident (#930).
+    public static let cliOnly: [String] = [
+        socketOnlyCommand,
+        ServiceManager.prepareRestartCommand,
+    ]
 }

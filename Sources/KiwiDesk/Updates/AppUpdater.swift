@@ -46,6 +46,11 @@ protocol AppUpdating: AnyObject {
     /// in the background and installs when KiwiDesk quits, never
     /// relaunching on its own. Stored by Sparkle, not the profile.
     var autoInstall: AutoInstallSetting { get }
+
+    /// Set by the consumer; called when Sparkle is about to quit
+    /// KiwiDesk and relaunch it into an update (#930). An
+    /// automatic install never relaunches, so never calls it.
+    var onWillRelaunch: () -> Void { get set }
 }
 
 /// Live Sparkle update controller (`UpdatePromptFocusTests`, #1011).
@@ -140,6 +145,11 @@ final class SparkleUpdater: AppUpdating {
         get { policy.onUpdatePendingChanged }
         set { policy.onUpdatePendingChanged = newValue }
     }
+
+    var onWillRelaunch: () -> Void {
+        get { observer.onWillRelaunch }
+        set { observer.onWillRelaunch = newValue }
+    }
 }
 
 /// Inert updater for tests and unbundled runs. The INERT default
@@ -160,6 +170,7 @@ final class NoUpdater: AppUpdating {
     let updates = UpdateStateStore()
     var whatsNew: WhatsNewCoordinator? { nil }
     let autoInstall = AutoInstallSetting.inert()
+    var onWillRelaunch: () -> Void = {}
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).

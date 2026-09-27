@@ -8,12 +8,23 @@ public final class CrashRecovery {
 
     public var captureState: @MainActor () -> StateSnapshot? =
         { nil }
-    public var restoreState: @MainActor (StateSnapshot) -> Void =
-        { _ in }
+    /// The in-place restart's capture (#930): `captureState` plus
+    /// the session memory only an in-place relaunch restores.
+    public var captureInPlaceState: @MainActor () -> StateSnapshot? =
+        { nil }
     public var onLog: @MainActor (String) -> Void = CoreLog.write
 
     /// Boot time provider to discard stale pre-boot window IDs (#633).
     public var bootTime: () -> Date = SystemBoot.time
+    /// The clock `inPlaceSessionBound` is measured on.
+    public var now: () -> Date = { Date() }
+
+    /// How long after its stop an in-place snapshot's session
+    /// memory is still the relaunch's (#930): a relaunch arrives
+    /// within its boot scan, seconds; a snapshot a failed relaunch
+    /// left for a much later launch restores the arrangement and
+    /// starts sizing fresh, as any launch after a quit does.
+    public static let inPlaceSessionBound: TimeInterval = 120
 
     private let fileURL: URL
     private let sessionURL: URL
@@ -28,15 +39,10 @@ public final class CrashRecovery {
         )
     }
 
-    /// Restores after an unclean shutdown, then begins autosaving (#633).
+    /// Begins autosaving (#633). The unclean shutdown's restore is
+    /// `takeBootSnapshot`'s, taken before boot's first retile
+    /// (#930).
     public func start() {
-        if let snapshot = readSnapshot() {
-            onLog(
-                "unclean shutdown detected; restoring "
-                    + "\(snapshot.windows.count) windows"
-            )
-            restoreState(snapshot)
-        }
         guard timer == nil else { return }
         let timer = Timer(
             timeInterval: interval,
@@ -58,13 +64,16 @@ public final class CrashRecovery {
     /// snapshot. `preservingSession: true` skips the save — boot
     /// is the case (#801): a quit mid-scan would write a fraction
     /// of the desk over the arrangement this launch had not
-    /// restored yet. The crash marker still goes.
+    /// restored yet. The crash marker still goes. `inPlace` takes
+    /// `captureInPlaceState` (#930).
     public func shutdownCleanly(
-        preservingSession: Bool = false
+        preservingSession: Bool = false,
+        inPlace: Bool = false
     ) {
         timer?.invalidate()
         timer = nil
-        if !preservingSession, let snapshot = captureState(),
+        let capture = inPlace ? captureInPlaceState : captureState
+        if !preservingSession, let snapshot = capture(),
             let data = try? JSONEncoder().encode(snapshot)
         {
             try? data.write(to: sessionURL, options: .atomic)
@@ -94,6 +103,31 @@ public final class CrashRecovery {
             return nil
         }
         return snapshot
+    }
+
+    /// The arrangement boot restores (#930): the session a clean
+    /// stop wrote, or the autosave an unclean one left — the newer
+    /// when both survive. Both files are consumed.
+    public func takeBootSnapshot() -> StateSnapshot? {
+        var session = consumeSession()
+        if let taken = session, taken.carriesSessions,
+            now().timeIntervalSince(taken.capturedAt)
+                > Self.inPlaceSessionBound
+        {
+            onLog("in-place session memory too old; dropped")
+            session = taken.droppingSessions()
+        }
+        let crashed = readSnapshot()
+        try? FileManager.default.removeItem(at: fileURL)
+        guard let crashed,
+            session.map({ crashed.capturedAt > $0.capturedAt })
+                ?? true
+        else { return session }
+        onLog(
+            "unclean shutdown detected; restoring "
+                + "\(crashed.windows.count) windows"
+        )
+        return crashed
     }
 
     /// Discards saved snapshot files (#634).

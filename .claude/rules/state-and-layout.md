@@ -1710,6 +1710,43 @@ editing here:
   order, the unshown arm), `FloatGatherRegionTests` (the two
   regions and the strip), `FloatGatherRepartitionTests` (the
   re-file arm) and `FloatClampPendingCaptureTests`.
+- **A new stored property of `Space`, of `ManagedWindow`, of
+  the session value types inside them, or a new WindowID- or
+  SpaceID-keyed store on `StateCoordinator`, `TilingEngine` or
+  `KiwiCore` answers whether an in-place restart carries it
+  (#930).** The in-place snapshot (`StateSnapshot+InPlace`)
+  carries the session memory a relaunch otherwise starts fresh,
+  because a restart that lays the desk out differently is
+  visible after all; it is written by the in-place stop's
+  capture ALONE, so a quit, a crash and a wake still start sizing
+  fresh, and a boot more than `CrashRecovery.inPlaceSessionBound`
+  after the capture drops it. A store that changes what a layout
+  draws rides it, or is named with its reason in a register:
+  `SnapshotCarryCensusTests` round-trips every field of `Space`
+  and `ManagedWindow` — `SessionRatios` and `ScrollRest` leaf by
+  leaf — and `SnapshotStoreCensusTests` classifies every
+  id-keyed store the shared `idContainers` walker reaches,
+  `floatFrames` (#1675) and the size-bound learner's ledgers
+  named as left behind. A Space's session is adopted AFTER its
+  membership: re-filing a window drops its weight.
+- **The in-place payload is a stored cross-version shape
+  (#930).** Build N writes the session file and build N+1 reads
+  it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
+  coding, `ScrollRest`'s and `StickyScope`'s raw values are
+  stored values in AGENTS.md §5's sense. Each record decodes its
+  payload on its own and a payload it cannot read costs only
+  itself — sizing starts fresh, the arrangement restores
+  (`SnapshotCarryCensusTests` ▸
+  `unreadablePayloadKeepsTheArrangement`); so a change to these
+  shapes may lose one restart's sizing and nothing else, and a
+  change that must not owes the old spelling a decode.
+- **Any path that makes KiwiDesk relaunch itself announces it
+  through the one door, or it gathers (#930).** The in-place
+  intent is SENT, never inferred — a stop and a restart reach
+  the app as the same SIGTERM — through `announceUpdateRelaunch`
+  (Sparkle's relaunch) or `prepare_restart` (`service restart`,
+  identity-gated), and only `stop()` consumes it, within its
+  bound (`InPlaceRestartTests`, `InPlaceRestartWiringTests`).
 - **A restore pays an untracked window's frame at its arrival
   (#1362).** The replay sets frames on TRACKED windows only; a
   slow app's window adopted later kept the boot scan's tile on

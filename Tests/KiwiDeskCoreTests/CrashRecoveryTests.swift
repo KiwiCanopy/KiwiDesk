@@ -45,6 +45,34 @@ struct CrashRecoveryTests {
         )
     }
 
+    /// A failed relaunch leaves an in-place snapshot for whatever
+    /// launch comes next (#930): past the bound its session
+    /// memory is dropped, the arrangement kept. Clock pinned.
+    @Test("An old in-place snapshot keeps its arrangement, not sizing")
+    func oldInPlaceSessionIsDropped() throws {
+        let captured = Date(timeIntervalSince1970: 5000)
+        var record = snapshot(at: captured)
+        record.windows[0].session = StateSnapshot.WindowSession(
+            floating: true,
+            sticky: .global,
+            stickyReach: nil
+        )
+        let bound = CrashRecovery.inPlaceSessionBound
+        for (age, keeps) in [(bound, true), (bound + 1, false)] {
+            let (recovery, dir) = try makeRecovery()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            recovery.captureInPlaceState = { record }
+            recovery.shutdownCleanly(inPlace: true)
+            let next = CrashRecovery(directory: dir)
+            next.onLog = { _ in }
+            next.bootTime = { .distantPast }
+            next.now = { captured.addingTimeInterval(age) }
+            let taken = try #require(next.takeBootSnapshot())
+            #expect(taken.carriesSessions == keeps)
+            #expect(taken.windows.map(\.id) == record.windows.map(\.id))
+        }
+    }
+
     @Test("Clean shutdown writes the session; consume is one-shot")
     func sessionRoundTrip() throws {
         let (recovery, dir) = try makeRecovery()
@@ -149,11 +177,47 @@ struct CrashRecoveryTests {
         let second = CrashRecovery(directory: dir)
         second.onLog = { _ in }
         second.bootTime = { .distantPast }
-        var restored: StateSnapshot?
-        second.restoreState = { restored = $0 }
-        second.start()
-        #expect(restored == sample)
+        #expect(second.takeBootSnapshot() == sample)
+        // Consumed: the autosave that follows is this launch's.
+        #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
+    }
+
+    /// A crash autosave newer than a session file wins, and the
+    /// older session loses (#930): the newer arrangement is the
+    /// one the user last saw.
+    @Test("The newer of session and crash autosave is restored")
+    func newerBootSnapshotWins() throws {
+        let (recovery, dir) = try makeRecovery()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let older = snapshot(at: Date(timeIntervalSince1970: 1000))
+        let newer = snapshot(at: Date(timeIntervalSince1970: 2000))
+        recovery.captureState = { older }
+        recovery.shutdownCleanly()
+        recovery.captureState = { newer }
+        recovery.autosave()
+        let second = CrashRecovery(directory: dir)
+        second.onLog = { _ in }
+        second.bootTime = { .distantPast }
+        #expect(second.takeBootSnapshot() == newer)
+
+        let (third, thirdDir) = try makeRecovery()
+        defer { try? FileManager.default.removeItem(at: thirdDir) }
+        // The other way round: an older autosave left beside a
+        // newer session file loses to it.
+        third.captureState = { older }
+        third.autosave()
+        third.captureState = { newer }
+        let crashFile = thirdDir.appendingPathComponent(
+            ".state_snapshot"
+        )
+        let kept = try Data(contentsOf: crashFile)
+        third.shutdownCleanly()
+        try kept.write(to: crashFile)
+        let fourth = CrashRecovery(directory: thirdDir)
+        fourth.onLog = { _ in }
+        fourth.bootTime = { .distantPast }
+        #expect(fourth.takeBootSnapshot() == newer)
     }
 
     @Test("Clean shutdown leaves nothing to restore")
@@ -170,10 +234,9 @@ struct CrashRecoveryTests {
         let second = CrashRecovery(directory: dir)
         second.onLog = { _ in }
         second.bootTime = { .distantPast }
-        var restored: StateSnapshot?
-        second.restoreState = { restored = $0 }
-        second.start()
-        #expect(restored == nil)
+        // The session file is the arrangement; no crash replay.
+        #expect(second.takeBootSnapshot() == sample)
+        #expect(second.takeBootSnapshot() == nil)
         second.shutdownCleanly()
     }
 
@@ -192,10 +255,7 @@ struct CrashRecoveryTests {
             Date(timeIntervalSince1970: 2000)
         }
         second.captureState = { nil }
-        var restored = false
-        second.restoreState = { _ in restored = true }
-        second.start()
-        #expect(!restored)
+        #expect(second.takeBootSnapshot() == nil)
         let marker = dir.appendingPathComponent(
             ".state_snapshot"
         )
