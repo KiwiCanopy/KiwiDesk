@@ -48,7 +48,9 @@ extension KiwiCore {
             profiles: ConfigArtifact.profiles.travelsInABackup
                 ? profiles.allProfiles() : [],
             palettes: ConfigArtifact.palettes.travelsInABackup
-                ? try paletteLibrary.libraryPalettes() : []
+                ? try paletteLibrary.libraryPalettes() : [],
+            looks: ConfigArtifact.looks.travelsInABackup
+                ? try lookLibrary.libraryLooks() : nil
         )
     }
 
@@ -150,6 +152,9 @@ extension KiwiCore {
         if (try? paletteLibrary.libraryPalettes()) == nil {
             throw .unreadablePalettes
         }
+        if (try? lookLibrary.libraryLooks()) == nil {
+            throw .unreadableLooks
+        }
         guard let data = encodedBackup() else {
             throw .couldNotWrite(name: url.lastPathComponent)
         }
@@ -188,7 +193,8 @@ extension KiwiCore {
             ),
             let config = try? encoder.encode(bundle.config),
             let profiles = try? encoder.encode(bundle.profiles),
-            let palettes = try? encoder.encode(bundle.palettes)
+            let palettes = try? encoder.encode(bundle.palettes),
+            let looks = try? encoder.encode(bundle.looks ?? [])
         else { return nil }
 
         // The header's own braces come off; its two lines lead.
@@ -201,6 +207,7 @@ extension KiwiCore {
             ("config", config),
             ("profiles", profiles),
             ("palettes", palettes),
+            ("looks", looks),
         ]
         .map { name, data in
             "  \"\(name)\" : \(reindented(data))"

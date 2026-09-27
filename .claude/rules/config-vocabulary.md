@@ -135,6 +135,11 @@ synonym:
   register. It is not the palette picker's source-only
   `PaletteShelf` type: do not name a bar concept after that type,
   or a palette concept after KiwiShelf.
+- **look** — a named set of KiwiShelf STYLING that names a
+  palette (#1684, `LookKeys`); the palette alone is the colours.
+  Never a *theme* or *skin* in English copy, and never a
+  *preset*, which names a layout arrangement. A locale settles
+  its own word under `docs/localization-naming.md` ▸ Family C.
 - **item** — one entry in a bar (a window, a same-app group, a
   space). Its geometry is `item_gap`, and its length follows its
   content: give it no size knob of its own, since the App Bar's

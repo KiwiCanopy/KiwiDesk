@@ -261,7 +261,8 @@ extension KiwiCore {
         }
         return RestoreOutcome(
             skippedProfiles: skipped,
-            refusedPalettes: refused
+            refusedPalettes: refused,
+            refusedLooks: try writeIncomingLooks(bundle)
         )
     }
 }

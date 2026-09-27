@@ -81,7 +81,7 @@ extension KiwiCore {
     public func resetAllSettings(
         trash: (URL) throws -> Void
     ) -> Bool {
-        // The palettes are deliberately NOT in this list — this
+        // The palettes and looks are deliberately NOT in this list — this
         // action's whole name rests on their surviving it, which
         // is why it is "Reset All Settings" rather than a total
         // reset. `restoreSetup` passes a different set to the

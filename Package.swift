@@ -69,6 +69,8 @@ let package = Package(
                 .copy("Resources/AppFont"),
                 // Bundled color palettes (#375).
                 .copy("Resources/Palettes"),
+                // Bundled shelf looks (#1684).
+                .copy("Resources/Looks"),
             ]
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.

@@ -47,7 +47,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .colors:
             return L(
                 "destination.colors",
-                "Colors & Animations"
+                "Looks & Animations"
             )
         case .advancedColors:
             return L(

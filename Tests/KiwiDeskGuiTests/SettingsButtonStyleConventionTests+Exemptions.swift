@@ -32,6 +32,11 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to the row-menu builder the rowActions "
                     + "seam feeds (#845)"
             ),
+            "LooksShelf.swift": (
+                3, "menuItem",
+                "Returned to the row-menu builder the rowActions "
+                    + "seam feeds (#845, #1684)"
+            ),
             "PaletteShelf.swift": (
                 3, "menuItem",
                 "Returned to the row-menu builder the rowActions "

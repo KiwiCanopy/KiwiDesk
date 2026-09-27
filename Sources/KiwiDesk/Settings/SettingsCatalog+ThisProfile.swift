@@ -58,6 +58,7 @@ struct GapAxisControls: Sendable {
 
 /// Colors & Animations catalog controls (#678 Phase 3).
 struct ColorsControls: Sendable {
+    let looksShelf = SettingsControl("looks.title", "Looks")
     let paletteShelf = SettingsControl(
         "palettes.title",
         "Color palette"

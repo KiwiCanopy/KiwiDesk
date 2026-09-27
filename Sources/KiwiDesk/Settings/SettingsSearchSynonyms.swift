@@ -73,6 +73,8 @@ enum SettingsSearchSynonyms {
             return ["speed", "flip speed"]
         case .colours(.paletteSave):
             return ["theme", "color scheme"]
+        case .colours(.lookSave):
+            return ["theme", "design", "skin"]
         case .general(.language):
             return ["locale", "translation"]
         case .general(.appearance):

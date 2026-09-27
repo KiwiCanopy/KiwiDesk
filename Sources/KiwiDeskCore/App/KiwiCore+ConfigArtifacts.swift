@@ -17,6 +17,8 @@ public enum ConfigArtifact: CaseIterable {
     case profiles
     /// The saved colour-palette library.
     case palettes
+    /// The saved look library (#1684).
+    case looks
 
     /// What a backup carries.
     ///
@@ -33,7 +35,7 @@ public enum ConfigArtifact: CaseIterable {
     /// `SetupBundleArtifactTests` holds the two together.
     public var travelsInABackup: Bool {
         switch self {
-        case .guiConfig, .profiles, .palettes: return true
+        case .guiConfig, .profiles, .palettes, .looks: return true
         }
     }
 
@@ -43,7 +45,7 @@ public enum ConfigArtifact: CaseIterable {
     /// exclusion look like an omission instead of a decision.
     public var leftBehindBecause: String? {
         switch self {
-        case .guiConfig, .profiles, .palettes: return nil
+        case .guiConfig, .profiles, .palettes, .looks: return nil
         }
     }
 }
@@ -55,6 +57,7 @@ extension KiwiCore {
         case .guiConfig: return guiConfigStore.url
         case .profiles: return profiles.directory
         case .palettes: return paletteLibrary.url
+        case .looks: return lookLibrary.url
         }
     }
 

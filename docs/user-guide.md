@@ -118,7 +118,8 @@ gives the switch back.
 ## Moving to Another Mac: Backups
 
 **General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
-with your settings, every profile and your saved palettes;
+with your settings, every profile, and your saved palettes and
+looks;
 **Restore from Backup…** puts it back. Not included: `init.lua`
 and the remembered window arrangement. KiwiDesk keeps no backups
 of its own; for continuous sync see [The gui.json
@@ -131,8 +132,8 @@ profile matching the screens connected *here* (a Desktop binding
 still wins). Refused: a file that is not a KiwiDesk backup, one
 from a **newer** KiwiDesk, one that would restore nothing, and
 one carrying settings when this Mac's settings come from
-`init.lua` (profiles and palettes alone restore there). A
-restore that skips a profile or a palette says so.
+`init.lua` (profiles, palettes and looks alone restore there). A
+restore that skips a profile, a palette or a look says so.
 
 ## The gui.json File
 
@@ -257,7 +258,7 @@ What the fields' own notes do not say:
   for individually resizable masters ([Accepted
   limitations](accepted-limitations.md)).
 - **Scrolling** — its focus animation and duration live here,
-  not in Colors & Animations.
+  not in Looks & Animations.
 - **Track** — the track shortcuts sit in Shortcuts ▸ Move
   windows. Previous is the column to the left (or the row
   above), next the column to the right (or the row below),
@@ -277,7 +278,7 @@ track shortcut bound.
 
 **Monocle** — a focus change flips a card from one app's icon
 to the next over a blur; the flip and its duration live here
-too, not in Colors & Animations.
+too, not in Looks & Animations.
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or the shares
@@ -444,6 +445,18 @@ Bar's badge shows *which* windows are sticky either way. (Lua:
 ([`kiwishelf.set_thickness`](lua-reference.md#kiwishelfset_thickness))
 takes any value from 20 up.
 
+:::unreleased
+**Looks** (**Looks & Animations**, above the palettes) restyle
+KiwiShelf in one click — edge, fit, thickness, roundness,
+margins, glass, boxes, border, font, glyph size, both indicators
+and the focus border's sheen — together with the palette each
+look names. Glass is the shipped look; Taskbar, Classic, Tiler
+and Pill are the others. Untick **Use its colors too** right
+after a click to keep your own colors. A look never changes what
+the bars show. Save your own with **Save current look as…**;
+colors no palette holds are saved as a new palette beside it.
+:::
+
 ### App Bar
 
 The App Bar renders only in **Monocle** and **Scrolling**, and
@@ -460,7 +473,7 @@ overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
-(**Colours & Animations**); on macOS before 26 each draws its
+(**Looks & Animations**); on macOS before 26 each draws its
 flat look instead.
 
 On by default, on every surface. While macOS's **Reduce
@@ -998,8 +1011,9 @@ instance forward and exits with `already running`.
 the remembered arrangement without changing settings. **Reset
 All Settings…** below it is the last resort: it deletes every
 profile, your spaces, layouts and keybindings and reseeds the
-defaults, keeping `init.lua`, your palettes, the display language,
-the login item and onboarding; the old files go to the Trash.
+defaults, keeping `init.lua`, your palettes and looks, the
+display language, the login item and onboarding; the old files go
+to the Trash.
 
 **Reporting a bug?**  
 **General ▸ Advanced ▸ Export Log…** saves KiwiDesk's log for a
