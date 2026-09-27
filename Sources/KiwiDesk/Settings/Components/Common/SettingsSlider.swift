@@ -146,7 +146,9 @@ struct SettingsSlider: View {
     /// White knob thumb, clear glass while dragged (#1527). The
     /// glass is Settings' own control finish, so it ignores the
     /// overlays' Liquid Glass switch; Reduce transparency and
-    /// pre-26 keep the white knob through `glassChrome`.
+    /// pre-26 keep the white knob through `glassChrome`, so the
+    /// rim and shadow stay in both states — they are that
+    /// knob's only edge.
     private var knob: some View {
         Color.clear
             .glassChrome(
@@ -157,12 +159,12 @@ struct SettingsSlider: View {
             )
             .overlay(
                 Capsule().strokeBorder(
-                    Color.black.opacity(dragging ? 0 : 0.1),
+                    Color.black.opacity(0.1),
                     lineWidth: 0.5
                 )
             )
             .shadow(
-                color: .black.opacity(dragging ? 0 : 0.25),
+                color: .black.opacity(0.25),
                 radius: 2,
                 y: 1
             )

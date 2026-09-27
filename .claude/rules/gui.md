@@ -1494,13 +1494,16 @@ Obligations:
   against the composite backdrop and so need no fill the way a
   bar's fixed-hex ink does.
 - **The variant is a legibility decision, per surface**, and so
-  is the fallback, both named at the call. Glass carrying text
-  draws `.regular` (the ⌃⌥K panel), a surface with nothing to
-  read may take `.clear` (the dragged slider knob, #1527), the
-  bars draw `.clear`, and that is ruled rather than drifted: the two are visually identical in
-  AppKit (#390) and 59/255 apart in SwiftUI, so there is no one
-  finish to be consistent about. Moving either is a device
-  sitting, not a tidy-up.
+  is the fallback: both are required parameters, never
+  defaulted, so the compiler holds that every call names them.
+  Glass carrying text draws `.regular` (the ⌃⌥K panel), a
+  surface with nothing to read may take `.clear` (the dragged
+  slider knob, #1527), and the bars draw `.clear` — ruled
+  rather than drifted: `.regular` and `.clear` are visually
+  identical in AppKit (#390) and 59/255 apart in SwiftUI, so
+  there is no one finish to be consistent about. Moving either
+  is a device sitting, not a tidy-up; `GlassChromeSeamTests`
+  holds that both parameters reach the branch.
 - **A surface states its `.tint` BELOW its glass**, so the
   ground is not inside the tinted environment. Otherwise
   "untinted" rests on `glassEffect` not reading `.tint`, which
@@ -1510,7 +1513,7 @@ Obligations:
   the environment, in the one `GlassChrome` modifier** (#1374).
   The modifier `glassChrome(in:)` applies hands `glassGround`
   `enabled && !reduceTransparency`, so the setting lands on the
-  same `.regularMaterial` the switch's off state and the pre-26
+  caller's `fallback`, the same one its off state and the pre-26
   branch draw — measured opaque under the setting, 2026-09-13 —
   and the stored `liquid_glass` value is untouched. The glass
   BRANCH has that one gate; the Liquid Glass row reads the same

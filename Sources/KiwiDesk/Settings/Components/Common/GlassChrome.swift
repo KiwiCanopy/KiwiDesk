@@ -14,9 +14,12 @@ extension View {
     /// `.regular` under dense text, `.clear` where nothing is
     /// read. Untinted by ruling rather than by capability
     /// (`docs/design-decisions.md` ▸ the shortcuts panel, #1295).
-    /// `fallback` is the surface's shipped design, drawn when
-    /// `enabled` is off, below macOS 26, and under Reduce
-    /// transparency, read live from the environment (#1374).
+    /// `enabled` is the caller's WHETHER — a Liquid Glass switch
+    /// leaf, or a state such as the slider knob's drag (exempt
+    /// from the switch by ruling, #1527). `fallback` is the
+    /// surface's shipped design, drawn when `enabled` is off,
+    /// below macOS 26, and under Reduce transparency, read live
+    /// from the environment (#1374).
     func glassChrome(
         in shape: some Shape,
         enabled: Bool,
