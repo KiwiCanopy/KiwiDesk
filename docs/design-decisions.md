@@ -11427,8 +11427,11 @@ the whole register and nothing of the previous look leaks through
 draft, and a "use its colors too" tick then offers the colours
 back for that look alone — computed from the draft, and gone
 once the user's own edits supersede it, so it never restores
-over them. The names are ours; the reference lives only in the
-description.
+over them. A look card draws its focus ring with the sheen
+(owner, 2026-09-28) — a deliberate exception to the palette
+thumbnail's rule of leaving a fact it cannot render undrawn at tile
+scale, paid for with a ring wide enough for the ramp to read. The
+names are ours; the reference lives only in the description.
 :::
 
 **"Automatic" is a value; "Auto" is an adjective — and the

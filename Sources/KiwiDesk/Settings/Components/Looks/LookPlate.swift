@@ -4,8 +4,10 @@ import SwiftUI
 /// A look card's picture (#1684): the shelf preview drawn over the
 /// draft with the look applied — the user's own Spaces and bars —
 /// and a focused window wearing the ring the look's palette
-/// colours. The sheen is left undrawn at this scale, as the palette
-/// thumbnail leaves it (gui.md ▸ #753); the detail panel draws it.
+/// colours, its sheen included: the owner ruled the card draws it
+/// (2026-09-28), unlike the palette thumbnail, which leaves it undrawn
+/// at tile scale (gui.md ▸ #753) — so the ring is drawn wide enough
+/// for the ramp to read.
 struct LookPlate: View {
     /// The draft with the look painted on.
     let settings: TilingSettings
@@ -37,15 +39,18 @@ struct LookPlate: View {
 
     /// A window in the desktop's well, ringed in the focus colour.
     private var focusedWindow: some View {
-        RoundedRectangle(cornerRadius: 3)
+        RoundedRectangle(cornerRadius: 4)
             .fill(SettingsTheme.hairline)
             .overlay(
-                RoundedRectangle(cornerRadius: 3)
+                RoundedRectangle(cornerRadius: 4)
                     .stroke(
-                        Color(kiwiHex: settings.borderStyle.focusedColor),
-                        lineWidth: 1.5
+                        SheenPaint.style(
+                            settings.borderStyle.focusedColor,
+                            sheen: settings.borderStyle.sheen
+                        ),
+                        lineWidth: 3
                     )
             )
-            .frame(width: 34, height: 18)
+            .frame(width: 40, height: 22)
     }
 }
