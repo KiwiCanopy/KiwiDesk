@@ -33,8 +33,9 @@ struct LookPlate: View {
         }
         .frame(height: PaletteSceneThumbnail.baseHeight)
         .frame(maxWidth: .infinity)
+        // Hidden from VoiceOver, never from the pointer: the plate is
+        // most of a card's Button label, so a click on it is the click.
         .accessibilityHidden(true)
-        .allowsHitTesting(false)
     }
 
     /// A window in the desktop's well, ringed in the focus colour.

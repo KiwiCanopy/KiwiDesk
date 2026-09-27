@@ -119,6 +119,7 @@ struct LooksShelf: View {
             {
                 LookPlate(settings: preview(look), spaceLabels: spaceLabels)
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(applied ? [.isSelected] : [])
