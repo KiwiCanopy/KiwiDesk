@@ -48,6 +48,37 @@ struct ItemPaddingTests {
         #expect(shelf.contentDepth(forDepth: depth) == depth)
     }
 
+    /// A live bar hands the looks the STRIP depth; the ladders
+    /// take the padding off once, inside.
+    @Test("The looks' strip-depth ladders take the padding off")
+    func laddersTakeThePaddingOff() {
+        var space = SpaceBarLook()
+        space.itemPadding = 6
+        var app = AppBarLook()
+        app.itemPadding = 6
+        #expect(space.contentDepth(forDepth: 40) == 28)
+        #expect(
+            space.identifierFontSize(forDepth: 40)
+                == space.identifierFontSize(forContentDepth: 28)
+        )
+        #expect(
+            space.glyphFontSize(forDepth: 40)
+                == space.glyphFontSize(forContentDepth: 28)
+        )
+        #expect(
+            space.titleFontSize(forDepth: 40)
+                == space.titleFontSize(forContentDepth: 28)
+        )
+        #expect(
+            app.resolvedFontSize(forDepth: 40)
+                == app.resolvedFontSize(forContentDepth: 28)
+        )
+        #expect(
+            app.resolvedFontSize(forDepth: 40)
+                < app.resolvedFontSize(forContentDepth: 40)
+        )
+    }
+
     @Test("A negative padding draws as none, whoever wrote it")
     func readerFloors() {
         var shelf = KiwiShelf()
@@ -146,7 +177,9 @@ struct ItemPaddingSpaceBarTests {
                 SpaceBarOverlay.Item(
                     space: SpaceID(String(n)),
                     spaceGlyph: .text(String(n), tinted: true),
-                    apps: [app("A"), app("B")],
+                    // Every second Space empty: a glyphless item
+                    // beside glyph-bearing ones.
+                    apps: n == 2 ? [] : [app("A"), app("B")],
                     active: n == 1,
                     overflow: 0,
                     focusInOverflow: false
@@ -192,6 +225,43 @@ struct ItemPaddingSpaceBarTests {
             #expect(glyph.frame.size == CGSize(width: cell, height: cell))
             #expect(abs(glyph.frame.midY - Self.depth / 2) <= 0.5)
         }
+    }
+
+    /// The in-item rule is content: as long as the content allows,
+    /// centred on the item's full depth.
+    @Test("The identifier divider sits on the midline at content length")
+    func dividerOnMidline() throws {
+        let manager = SpaceBarManager()
+        let overlay = try overlay(Self.bar(), in: manager)
+        let view = try #require(overlay.itemViews.first)
+        view.layoutSubtreeIfNeeded()
+        let rule = view.identifierDivider
+        #expect(!rule.isHidden)
+        #expect(abs(rule.frame.midY - Self.depth / 2) <= 0.5)
+        #expect(
+            abs(
+                rule.frame.height
+                    - BarDivider.ruleLengthShare * Self.content
+            ) <= 0.5
+        )
+    }
+
+    /// An empty Space's item is shorter than the depth under
+    /// padding; its box still rounds from the full depth.
+    @Test("A glyphless item rounds like a glyph-bearing one")
+    func glyphlessRadius() throws {
+        let manager = SpaceBarManager()
+        let overlay = try overlay(Self.bar(spaces: 2), in: manager)
+        let full = overlay.itemViews[0]
+        let empty = overlay.itemViews[1]
+        full.layoutSubtreeIfNeeded()
+        empty.layoutSubtreeIfNeeded()
+        #expect(empty.frame.width < Self.depth)
+        #expect(empty.cornerRadius == full.cornerRadius)
+        #expect(
+            full.cornerRadius
+                == Self.look().resolvedCornerRadius(forThickness: Self.depth)
+        )
     }
 
     @Test("The identifier's automatic size follows the content depth")

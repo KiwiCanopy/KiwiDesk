@@ -79,7 +79,7 @@ extension AppBarOverlay {
     ) -> CGFloat {
         slotLength(
             content: style.renderedContent,
-            contentDepth: style.shelf.contentDepth(forDepth: thickness),
+            contentDepth: style.contentDepth(forDepth: thickness),
             axis: capAxis,
             autoWidth: autoSlotWidth(
                 items: items,
@@ -110,11 +110,11 @@ extension AppBarOverlay {
         horizontal: Bool,
         thickness: CGFloat
     ) -> CGFloat {
-        let depth = style.shelf.contentDepth(forDepth: thickness)
+        let depth = style.contentDepth(forDepth: thickness)
         guard horizontal else { return depth }
         let pad = AppBarItemView.contentPadding
         let font = NSFont.systemFont(
-            ofSize: style.resolvedFontSize(forContentDepth: depth)
+            ofSize: style.resolvedFontSize(forDepth: thickness)
         )
         let iconSide =
             style.content == .title

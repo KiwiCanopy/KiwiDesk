@@ -41,9 +41,7 @@ extension SpaceBarOverlay {
             trailing: fades.trailing,
             horizontal: horizontal
         )
-        let content = style.shelf.contentDepth(forDepth: depth)
-        let font =
-            style.identifierFontSize(forContentDepth: content) * 0.8
+        let font = style.identifierFontSize(forDepth: depth) * 0.8
         let ink = NSColor(kiwiHex: style.itemColor)
         let hoverInk = NSColor(kiwiHex: style.hoverItemColor)
         let hoverFill = NSColor(kiwiHex: style.hoverFillColor)

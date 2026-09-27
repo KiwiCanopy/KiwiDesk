@@ -9,9 +9,7 @@ extension SpaceBarItemView {
     var depth: CGFloat { horizontal ? bounds.height : bounds.width }
 
     /// The depth this item's content is sized to (#1682).
-    var contentDepth: CGFloat {
-        style.shelf.contentDepth(forDepth: depth)
-    }
+    var contentDepth: CGFloat { style.contentDepth(forDepth: depth) }
 
     /// Cell dimension for glyphs along the bar axis.
     var cellLength: CGFloat { Self.cell(contentDepth: contentDepth) }
@@ -63,10 +61,14 @@ extension SpaceBarItemView {
         cursor += cell
         if !identifierDivider.isHidden {
             cursor += Self.pad
+            // An in-item rule is content: centred on the full
+            // depth, as long as the content allows (#1682).
             identifierDivider.frame = BarDivider.frame(
                 at: cursor,
-                depth: contentDepth,
-                horizontal: horizontal
+                depth: depth,
+                horizontal: horizontal,
+                lengthShare: BarDivider.ruleLengthShare
+                    * contentDepth / max(depth, 1)
             )
             cursor += 1 + Self.pad
         }

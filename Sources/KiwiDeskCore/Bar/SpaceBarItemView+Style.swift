@@ -105,9 +105,13 @@ extension SpaceBarItemView {
         badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 
+    /// The box's radius from the full depth, as every item's, so
+    /// a glyphless item shorter than the depth under item padding
+    /// rounds like its neighbours; never past half its length.
     var cornerRadius: CGFloat {
-        style.resolvedCornerRadius(
-            forThickness: min(bounds.width, bounds.height)
+        min(
+            style.resolvedCornerRadius(forThickness: depth),
+            min(bounds.width, bounds.height) / 2
         )
     }
 
@@ -236,10 +240,10 @@ extension SpaceBarItemView {
     }
 
     var identifierFont: CGFloat {
-        style.identifierFontSize(forContentDepth: contentDepth)
+        style.identifierFontSize(forDepth: depth)
     }
 
     var glyphSize: CGFloat {
-        style.glyphFontSize(forContentDepth: contentDepth)
+        style.glyphFontSize(forDepth: depth)
     }
 }

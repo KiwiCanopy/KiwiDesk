@@ -666,7 +666,7 @@
   "kiwishelf.item_gap": "Item gap",
   "kiwishelf.item_gap.help": "Room between items — Space items and App Bar items alike, so both bars keep one rhythm.",
   "kiwishelf.item_padding": "Item padding",
-  "kiwishelf.item_padding.help": "Room between the thickness and each item's content. Icons, symbols and an automatic font size shrink with it; KiwiShelf keeps its thickness.",
+  "kiwishelf.item_padding.help": "Room inside the thickness, between KiwiShelf's edge and each item's content. Icons, glyphs and an automatic font size shrink with it; the thickness stays.",
   "kiwishelf.margins": "Margins",
   "kiwishelf.margins.summary": "Outer and inner margin",
   "kiwishelf.minimum": "Space Bar minimum",

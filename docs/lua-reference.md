@@ -1913,7 +1913,7 @@ it).
 
 **Does:** sets the room inside the thickness between the shelf
 and each item's content, on both sides across the shelf. The
-thickness stays what the shelf reserves; the icons, symbols and
+thickness stays what the shelf reserves; the icons, glyphs and
 Space identifiers of both bars shrink into what is left, and so
 does an automatic [`font_size`](#kiwishelfset_font_size). Item
 boxes and plates keep the full thickness. The content never

@@ -70,17 +70,13 @@ extension AppBarItemView {
     /// depth (#1682), never longer than the slot.
     var contentSide: CGFloat {
         min(
-            style.shelf.contentDepth(forDepth: crossThickness),
+            style.contentDepth(forDepth: crossThickness),
             horizontal ? bounds.width : bounds.height
         )
     }
 
     private var effectiveFontSize: CGFloat {
-        style.resolvedFontSize(
-            forContentDepth: style.shelf.contentDepth(
-                forDepth: crossThickness
-            )
-        )
+        style.resolvedFontSize(forDepth: crossThickness)
     }
 
     /// Icon and name layout for horizontal bar (manual QA 2026-07-18,

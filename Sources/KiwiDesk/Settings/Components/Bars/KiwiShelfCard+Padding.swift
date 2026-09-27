@@ -10,10 +10,10 @@ extension KiwiShelfCard {
             range: BarSliderBands.itemPadding,
             help: L(
                 "kiwishelf.item_padding.help",
-                "Room between the thickness and each item's "
-                    + "content. Icons, symbols and an automatic "
-                    + "font size shrink with it; KiwiShelf keeps "
-                    + "its thickness."
+                "Room inside the thickness, between KiwiShelf's "
+                    + "edge and each item's content. Icons, glyphs "
+                    + "and an automatic font size shrink with it; "
+                    + "the thickness stays."
             )
         )
     }

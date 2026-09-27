@@ -26,7 +26,7 @@ extension SpaceBarOverlay {
     ) -> [CGFloat] {
         let gap = look.itemGap
         let leadsWithLayer = leadsWithLayer(items)
-        let content = look.shelf.contentDepth(forDepth: depth)
+        let content = look.contentDepth(forDepth: depth)
         return items.enumerated().map { index, item in
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,

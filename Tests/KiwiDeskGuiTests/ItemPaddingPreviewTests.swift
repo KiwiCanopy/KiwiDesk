@@ -51,6 +51,27 @@ struct ItemPaddingPreviewTests {
         }
     }
 
+    /// The strip's pips are content: they shrink by the share.
+    @Test("A padded shelf draws shorter pips")
+    func pipsShrink() {
+        func pips(_ padding: CGFloat) -> [CGFloat] {
+            Self.specs(Self.tile(padding: padding)).map {
+                BarStripView(
+                    spec: $0,
+                    edge: .top,
+                    vertical: false,
+                    scale: Self.scale
+                ).pipCross
+            }
+        }
+        for (plain, padded) in zip(pips(0), pips(6)) {
+            #expect(padded < plain)
+            #expect(
+                abs(padded - plain * (28.0 / 40.0)) < 0.001
+            )
+        }
+    }
+
     @Test("A padded shelf draws smaller glyphs")
     func paddedIsSmaller() {
         let plain = Self.specs(Self.tile(padding: 0))

@@ -121,7 +121,28 @@ struct BarSliderBandTests {
         ("kiwishelf.innerMargin", "margin"),
         ("kiwishelf.itemGap", "itemGap"),
         ("spaceBarStyle.glyphGap", "glyphGap"),
+        ("kiwishelf.highlightWidth", "highlightWidth"),
+        ("kiwishelf.itemPadding", "itemPadding"),
     ]
+
+    /// The body of `var <name>: some View {` in the card sources:
+    /// an arm that delegates its row to a property is scanned
+    /// there (#1682).
+    private func rowProperty(
+        _ name: String,
+        in sources: [URL]
+    ) throws -> String {
+        for file in sources {
+            let text = try SourceScan.strippedSource(at: file)
+            guard let start = text.range(of: "var \(name): some View {")
+            else { continue }
+            let rest = text[start.upperBound...]
+            let end =
+                rest.range(of: "\n    }\n")?.lowerBound ?? rest.endIndex
+            return String(rest[..<end])
+        }
+        return ""
+    }
 
     /// The census keys whose model path ends in `suffix` — the
     /// register the consumer count derives from.
@@ -165,6 +186,14 @@ struct BarSliderBandTests {
                         // one is the restatement the count exists
                         // to catch (guard-prover, 2026-09-21).
                         var body = String(rest[..<end])
+                        let named = body.trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        )
+                        if !body.contains("PtSlider("), !named.isEmpty,
+                            named.allSatisfy({ $0.isLetter || $0.isNumber })
+                        {
+                            body = try rowProperty(named, in: sources)
+                        }
                         while let args = SourceScan.callArguments(
                             of: "PtSlider(",
                             in: body
