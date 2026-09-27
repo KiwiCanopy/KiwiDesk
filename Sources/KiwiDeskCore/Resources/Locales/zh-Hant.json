@@ -206,7 +206,7 @@
   "colors.scene.caption": "兩個列及其作用中項目、焦點與非焦點視窗的邊框及其狀態標記，以及放置區旁的殘影。",
   "colors.scene.title": "目前的顏色",
   "colors.sheen": "光澤",
-  "colors.sheen.caption": "為焦點邊框、列的高亮與邊框，以及拖曳時的邊框加上明亮的上緣。與上方的玻璃效果相得益彰。",
+  "colors.sheen.caption": "為焦點邊框、列的高亮與邊框，以及拖曳時的邊框加上明亮的上緣。與 %1$@ 相得益彰。",
   "colors.unfocused_off.help": "非焦點視窗沒有邊框，因此不會繪製這個顏色。請在「%1$@」中開啟它。",
   "colors.unfocused_off.xref": "「%2$@」關閉時，不會繪製「%1$@」，請在%3$@中開啟它。",
   "common.done": "完成",

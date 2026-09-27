@@ -206,7 +206,7 @@
   "colors.scene.caption": "Entrambe le barre con i loro elementi attivi, il bordo con focus e quello senza focus con i rispettivi marcatori di stato, e la sagoma accanto alla sua zona di rilascio.",
   "colors.scene.title": "Colori attuali",
   "colors.sheen": "Riflesso",
-  "colors.sheen.caption": "Un filo chiaro in alto sul bordo di focus, sull'evidenziazione e sul bordo delle barre e sui bordi di trascinamento. Si abbina bene al vetro qui sopra.",
+  "colors.sheen.caption": "Un filo chiaro in alto sul bordo di focus, sull'evidenziazione e sul bordo delle barre e sui bordi di trascinamento. Si abbina bene a %1$@.",
   "colors.unfocused_off.help": "Le finestre senza focus non hanno bordo, quindi questo colore non viene disegnato. Attivalo in %1$@.",
   "colors.unfocused_off.xref": "«%1$@» non viene disegnato finché «%2$@» è disattivato — attivalo in %3$@.",
   "common.done": "OK",
