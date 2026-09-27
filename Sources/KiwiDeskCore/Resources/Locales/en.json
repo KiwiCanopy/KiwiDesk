@@ -1342,7 +1342,7 @@
   "space_bar.item.ax.not_current": "%1$@, not current",
   "space_bar.item.ax.space": "Space %1$@, windows: %2$d",
   "space_bar.item_label": "Space label",
-  "space_bar.item_label.help": "What names each Space on the bar. %1$@ — its icon, else its number or the first two letters of its name. %2$@ — the symbol of the layout it uses now.",
+  "space_bar.item_label.help": "What names each Space on the bar. %1$@ — its icon, else its name, shortened to fit. %2$@ — the symbol of the layout it uses now.",
   "space_bar.item_label.identifier": "Name or icon",
   "space_bar.item_label.layout": "Layout",
   "space_bar.show_front_app": "Show front app",
