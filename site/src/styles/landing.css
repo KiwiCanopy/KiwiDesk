@@ -361,6 +361,39 @@ body::before {
 /* =========================================================
    Nav
    ========================================================= */
+.ph-launch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem 0.9rem;
+  padding: 0.7rem 16px;
+  background: linear-gradient(180deg, var(--kiwi-flesh), #627d3a);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.16);
+}
+.ph-launch__mark {
+  flex: none;
+}
+.ph-launch__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: background 0.15s ease;
+}
+.ph-launch:hover .ph-launch__cta,
+.ph-launch:focus-visible .ph-launch__cta {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .nav {
   position: sticky;
   top: 0;
