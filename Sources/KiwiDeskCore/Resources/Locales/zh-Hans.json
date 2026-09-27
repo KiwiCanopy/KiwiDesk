@@ -1328,7 +1328,7 @@
   "space_bar.inactive_content": "其他空间",
   "space_bar.inactive_content.apps": "App",
   "space_bar.inactive_content.count": "窗口数",
-  "space_bar.inactive_content.help": "不在屏幕上的空间显示什么。%1$@ — 显示其 App 图形。%2$@ — 显示每个空间有多少个窗口。%3$@ — 只显示每个空间的编号、名称或图标；空的空间会变暗显示，但彩色表情符号图标无法变暗。",
+  "space_bar.inactive_content.help": "不在屏幕上的空间显示什么。%1$@ — 显示其 App 图形。%2$@ — 显示每个空间有多少个窗口。%3$@ — 只显示每个空间的编号、名称或图标；空的空间会变暗显示，但彩色图标无法变暗。",
   "space_bar.inactive_content.identifier": "精简",
   "space_bar.item.ax.current": "%1$@，当前",
   "space_bar.item.ax.held": "空间 %1$@，保留自显示器“%2$@”，未存储，窗口：%3$d",
