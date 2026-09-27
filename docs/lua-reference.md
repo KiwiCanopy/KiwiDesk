@@ -1793,7 +1793,7 @@ track.set_overflow_style_override("code", "cascade_overflow")
 **KiwiShelf** is the one screen edge both bars sit on — the
 [App Bar](#app-bar) and the [Space Bar](#space-bar).
 `kiwishelf.set_*` sets where the shelf hangs, how the two bars
-share it, and the look, colours and app symbol style they share;
+share it, and the look, colours and app glyph style they share;
 each bar keeps its own content and the shape of its active
 indicator. Stored as `settings.kiwishelf` in a profile.
 
@@ -2087,9 +2087,9 @@ macOS provides it, which follows the system-wide Icon & widget
 style the user picked; the system's Dark, Clear and Tinted looks
 are not separate choices
 ([Accepted limitations](accepted-limitations.md)). `app_font`
-shows a monochrome glyph from the bundled [SketchyBar App
+shows a monochrome symbol from the bundled [SketchyBar App
 Font](https://github.com/kvndrsslr/sketchybar-app-font) instead,
-colored by the shelf's item colours; apps without a glyph keep
+colored by the shelf's item colours; apps without a symbol keep
 their icon. On the Space Bar, an app with no image falls back to
 the App Font either way.
 
@@ -2194,7 +2194,7 @@ remain.
 
 `init.lua` is not rewritten; a saved profile is, once, the first
 time 2.0 reads it: the shelf takes the Space Bar's values,
-colours and app symbol style included — the App Bar's where the
+colours and app glyph style included — the App Bar's where the
 Space Bar is off, keeping the App Bar's old `bottom` edge where
 it stored none — and every other copy is dropped, per-layout
 App Bar colours with them, as is every stored `item_size`. Where
@@ -2220,7 +2220,7 @@ space it is showing, and dragging an item reorders that display's
 space.
 
 The bar sits on [KiwiShelf](#kiwishelf), which sets its edge,
-thickness, margins, background, colours and app symbol style.
+thickness, margins, background, colours and app glyph style.
 Everything else about it is **global**: `app_bar.set_*` sets
 every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
@@ -2312,7 +2312,7 @@ App Bar's own fields for itself — `enabled`, `active_indicator`,
 `content`, `title_cap` and `group_adjacent_windows`. Only these
 two layouts show a bar, so only they expose `set_app_bar_*`.
 Unset fields inherit the global value.
-[KiwiShelf](#kiwishelf)'s fields — its colours, symbol style and
+[KiwiShelf](#kiwishelf)'s fields — its colours, glyph style and
 `dim_factor` included — take no per-layout override. The
 overrides are the same setters prefixed with the layout name:
 
@@ -2347,7 +2347,7 @@ section covers the badges and the drag-onto-a-Space gesture.
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,
-background, colours and app symbol style; every `space_bar.*`
+background, colours and app glyph style; every `space_bar.*`
 setting is global, with no per-layout override. While a native-fullscreen app holds the
 screen the bar hides; it returns with the Desktop.
 

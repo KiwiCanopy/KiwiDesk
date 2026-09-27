@@ -3,7 +3,7 @@ import Foundation
 
 /// Per-layout App Bar settings: whether the layout shows one, and
 /// overrides of the bar's OWN fields (`AppBarStyle`). The shelf's
-/// fields — colours, symbol style and dim included — have no
+/// fields — colours, glyph style and dim included — have no
 /// per-layout override (#1517): one shelf, one look, so a layout
 /// switch never changes it.
 public struct LayoutAppBar: Sendable, Equatable {

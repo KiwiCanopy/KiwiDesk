@@ -49,8 +49,10 @@ enum SettingsSearchSynonyms {
             return ["height", "size"]
         case .kiwishelf(.minimum):
             return ["share", "split", "divider"]
+        // "Glyphs" and "System default" were the two options'
+        // labels until #1690; `app_font` is the value Lua writes.
         case .kiwishelf(.iconSource):
-            return ["icon", "glyph"]
+            return ["icon", "glyph", "system default", "app font"]
         case .colours(.liquidGlassMaster):
             return ["glass", "translucent", "transparency"]
         case .colours(.animationsMaster):

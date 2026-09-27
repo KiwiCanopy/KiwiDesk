@@ -99,7 +99,7 @@ struct BarsCensusRenderTests {
     /// The bar cards' gate owners — the Show rows — live on the
     /// KiwiShelf card, which has no gate, so none of them needs
     /// an exemption to stay live (#1517); the one rider is the
-    /// symbol-style picker the ⌃⌥K panel reads. A red here asks
+    /// glyph-style picker the ⌃⌥K panel reads. A red here asks
     /// the real question: is this new exemption a rider with an
     /// argument?
     @Test("gate owners sit on the ungated shelf; one rider")

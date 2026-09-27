@@ -84,7 +84,7 @@ struct BarsGates {
     }
 
     /// True when a bar shows but none draws an app icon, so the
-    /// shelf's symbol style has nothing to style.
+    /// shelf's glyph style has nothing to style.
     var noBarDrawsIcon: Bool {
         !settings.spaceBarStyle.enabled && everyShownBarTitleOnly
     }
@@ -133,7 +133,7 @@ enum BarsGateHelp {
                 "kiwishelf.icon_source.no_icon",
                 "The Space Bar is off and the App Bar's "
                     + "\u{201C}%1$@\u{201D} is \u{201C}%2$@\u{201D}, "
-                    + "so no app icon is drawn.",
+                    + "so no app glyph is drawn.",
                 L("app_bar.content.label", "Content"),
                 L("app_bar.content.title", "Title")
             )

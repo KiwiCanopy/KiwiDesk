@@ -72,7 +72,7 @@ struct BarsGateWiringTests {
     /// Every gate sentence is authored ONCE, in `BarsGateHelp`; a
     /// row that re-authors one is the duplication that let General
     /// describe one status two ways. The two bar cards read the
-    /// help for their block reason; the shelf's symbol-style row
+    /// help for their block reason; the shelf's glyph-style row
     /// reads it for its own. (`BarColorCards` renders the block
     /// sentence from `AdvancedColorsHelp` instead — it must name
     /// the OTHER page — so it is not a `BarsGateHelp` consumer.)

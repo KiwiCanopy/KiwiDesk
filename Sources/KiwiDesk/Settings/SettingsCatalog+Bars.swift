@@ -74,7 +74,7 @@ struct KiwiShelfStyleControls: Sendable {
     )
     let kiwishelfStyleIconSource = SettingsControl(
         "kiwishelf.icon_source.label",
-        "App symbol style"
+        "App glyph style"
     )
 }
 

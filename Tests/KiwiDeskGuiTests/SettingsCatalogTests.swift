@@ -104,7 +104,7 @@ struct SettingsCatalogTests {
         // 108 since the #1517 redesign: the bar cards' two
         // Style drawers and nine children left, the two colour
         // groups and drawers became the shelf's one of each, and
-        // the shelf's Style drawer gained the symbol style.
+        // the shelf's Style drawer gained the glyph style.
         // 109 since #1680: the shelf's Style drawer gained the
         // highlight width.
         #expect(allEntries.count == 109)
