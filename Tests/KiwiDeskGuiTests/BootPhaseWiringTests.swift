@@ -145,6 +145,13 @@ struct BootPhaseWiringTests {
             mid-scan.
             """
         )
+        #expect(
+            text.contains("bootNarration.phase = phase"),
+            """
+            AppDelegate no longer forwards the phase to the \
+            relaunched What's new — its line counts nothing (#1667).
+            """
+        )
     }
 
     /// The link `ClickProvenanceWiringTests` lost when the seams

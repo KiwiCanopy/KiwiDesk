@@ -636,8 +636,8 @@ user does not think to check by hand.
 **"What's new" follows an update whose notes nobody saw.** After
 an automatic install, or the jump from 1.x (which has no window
 of its own), the first launch shows the same layout with one
-Done; after the window's own Install it shows nothing, the notes
-having been read. It opens only on a launch the user started — a
+Done; after the window's own Install the notes are not owed
+again, having been read there. It opens only on a launch the user started — a
 login launch is not someone at the keyboard, so there the status
 item carries the reminder's mark and the quick menu a row. The
 notes are fetched from the same feed Sparkle reads rather than
@@ -647,6 +647,23 @@ record of what was last run and read lives in the app's own
 defaults rather than the config folder: it describes this Mac,
 and a backup restored elsewhere must neither replay nor swallow
 it.
+
+:::unreleased
+**After the window's own Install, "What's new" narrates the
+relaunch (#1667).** The user has read the notes but has not seen
+the relaunch, in which windows move and re-tile with nothing on
+screen saying why. So the relaunched KiwiDesk re-opens the window,
+and while boot is still going through the open apps its header
+carries one line — the count the tour's grant screen reads
+([the wait is narrated](#boot-the-wait-is-narrated-never-hidden)),
+in the same words, never a count of its own — which drops once
+boot is ready, leaving the notes. It opens whatever the launch
+looks like, since Sparkle starts it rather than the user, and
+still never over the permission tour. The install carries the
+notes it merged across the relaunch, because the fetch a normal
+"What's new" waits on usually returns after boot has finished,
+and the line would then narrate nothing.
+:::
 
 **What a 1.x client sees is unchanged.** The feed keeps its HTML
 description beside the structured notes, so a copy that predates

@@ -1,0 +1,31 @@
+import AppKit
+import KiwiDeskCore
+
+extension AppDelegate {
+    /// "What's new" at launch (#1542, #1667): the window only for
+    /// a launch the user started and no tour owns — the permission
+    /// grant or a resuming discovery — otherwise the mark. A
+    /// relaunch after the window's own Install is the exception:
+    /// Sparkle starts it, so it opens whatever the origin, still
+    /// never over the tour, and before boot so it narrates it.
+    func offerWhatsNew(origin: LaunchOrigin, trusted: Bool) {
+        guard let whatsNew = updater.whatsNew else { return }
+        let tourOwns = OnboardingDiscovery.shouldResume(
+            isTrusted: trusted
+        )
+        let opensWindow = origin == .user && trusted && !tourOwns
+        let existingUser = OnboardingDiscovery.hasShown()
+        let narrated = whatsNew.relaunched(
+            opensWindow: trusted && !tourOwns,
+            narration: bootNarration
+        )
+        if !narrated {
+            Task {
+                await whatsNew.launched(
+                    opensWindow: opensWindow,
+                    existingUser: existingUser
+                )
+            }
+        }
+    }
+}

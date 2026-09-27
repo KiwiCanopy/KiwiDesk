@@ -173,7 +173,7 @@ struct UpdateNotesTabsTests {
             return NSHostingView(
                 rootView: UpdateWindowView(
                     offer: offer,
-                    mode: .whatsNew {},
+                    mode: .whatsNew(narration: nil) {},
                     measuring: true
                 )
             ).fittingSize.height

@@ -25,6 +25,8 @@ final class WhatsNewCoordinator {
         didSet { onWaitingChanged() }
     }
     private var window: WhatsNewWindowController?
+    /// The boot line a relaunch narrates; nil on any other launch.
+    private var narration: BootNarration?
 
     init(
         record: WhatsNewRecord,
@@ -39,6 +41,25 @@ final class WhatsNewCoordinator {
     private var current: String {
         host.object(forInfoDictionaryKey: "CFBundleVersion") as? String
             ?? ""
+    }
+
+    /// After an install from the update window (#1667): opens at
+    /// once from the notes the install carried, narrating boot,
+    /// whatever the launch looks like — Sparkle relaunches it. False
+    /// when this launch is no such relaunch; `launched` then runs.
+    func relaunched(opensWindow: Bool, narration: BootNarration) -> Bool {
+        guard let relaunch = record.takeRelaunch(),
+            relaunch.version == current,
+            let offer = UpdateOffer.whatsNew(
+                items: relaunch.items,
+                since: relaunch.since,
+                current: current
+            )
+        else { return false }
+        self.narration = narration
+        waiting = offer
+        if opensWindow { show() }
+        return true
     }
 
     /// Run once per launch. `opensWindow` false — a login launch,
@@ -89,7 +110,10 @@ final class WhatsNewCoordinator {
         guard let offer = waiting else { return }
         let window =
             self.window
-            ?? WhatsNewWindowController(offer: offer) { [weak self] in
+            ?? WhatsNewWindowController(
+                offer: offer,
+                narration: narration
+            ) { [weak self] in
                 self?.answered()
             }
         self.window = window
@@ -99,6 +123,7 @@ final class WhatsNewCoordinator {
     private func answered() {
         record.markAnswered(current)
         window = nil
+        narration = nil
         waiting = nil
     }
 }
