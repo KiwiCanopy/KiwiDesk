@@ -202,9 +202,9 @@ render content into it (#1517). Obligations:
   alpha applied to the item colour beside it.
   `IdleItemContrastTests` holds the value and its legibility; the
   routing is review's.
-- **An empty collapsed Space's identifier is
-  `KiwiShelf.emptyItemColor`, derived from the palette and never
-  picked** (#1683): the idle floor and the occupied-to-empty step
+- **An empty Space's identifier, on a Space its screen does not
+  show, is `KiwiShelf.emptyItemColor` under either content,
+  derived from the palette and never picked** (#1683): the idle floor and the occupied-to-empty step
   both hold, or the cue drops rather than the floor.
   `EmptyItemInkTests` measures every bundled palette's answer.
 

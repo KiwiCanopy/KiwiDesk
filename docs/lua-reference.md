@@ -2520,9 +2520,9 @@ space_bar.set_glyph_gap(4)
 another Space. `"apps"` draws its app glyphs, like the shown
 Space. `"count"` draws its identifier alone, with its window
 count in a small disc on the identifier's corner (`9+` past
-nine); an empty Space draws no disc and its identifier dimmer
-than an occupied one's, where the palette leaves room for the
-step, and a colour emoji icon keeps its colours. The
+nine). Either way an empty Space draws no glyphs or disc, and its
+identifier dimmer than an occupied one's, where the palette
+leaves room for the step; a colour emoji icon keeps its colours. The
 Space each screen shows always draws its glyphs, capped by
 [`set_glyph_cap`](#space_barset_glyph_cap), and a collapsed Space
 drops its sticky and floating badges.

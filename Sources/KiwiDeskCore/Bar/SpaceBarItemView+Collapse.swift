@@ -23,6 +23,12 @@ extension SpaceBarItemView {
         static let discCap = 9
     }
 
+    /// The windows this item's Space holds, collapsed or not —
+    /// what the label announces and the empty ink asks.
+    var heldWindows: Int {
+        collapse?.windows ?? apps.reduce(0) { $0 + $1.count } + overflow
+    }
+
     /// Announced whatever the glyph draws (bars.md): a layer
     /// item names its layer, a Space item its Space and count.
     var axLabel: String {
@@ -37,10 +43,7 @@ extension SpaceBarItemView {
         case .space(let id):
             space = id
         }
-        let windows =
-            collapse?.windows
-            ?? apps.reduce(0) { $0 + $1.count } + overflow
-        let name = spaceName(space, windows: windows)
+        let name = spaceName(space, windows: heldWindows)
         return isActive
             ? L(
                 "space_bar.item.ax.current",

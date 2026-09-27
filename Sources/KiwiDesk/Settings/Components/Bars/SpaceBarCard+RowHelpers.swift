@@ -47,9 +47,8 @@ extension SpaceBarCard {
             "What the Spaces not on screen show. %1$@ — their app "
                 + "glyphs. %2$@ — just each Space's number, name or "
                 + "icon, with how many windows it holds on its "
-                + "corner; an empty one shows no count and draws "
-                + "dimmer, except a color emoji icon, which cannot "
-                + "dim.",
+                + "corner. Either way an empty Space draws dimmer, "
+                + "except a color emoji icon, which cannot dim.",
             L("space_bar.inactive_content.apps", "Apps"),
             L("space_bar.inactive_content.count", "Window count")
         )

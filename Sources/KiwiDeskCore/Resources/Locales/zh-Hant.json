@@ -1327,7 +1327,7 @@
   "space_bar.inactive_content": "其他空間",
   "space_bar.inactive_content.apps": "App",
   "space_bar.inactive_content.count": "視窗數",
-  "space_bar.inactive_content.help": "不在螢幕上的空間顯示什麼。%1$@ — 顯示其 App 圖形。%2$@ — 只顯示每個空間的編號、名稱或圖像，並在其角落顯示它有多少個視窗；空的空間不顯示數量並會變暗顯示，但彩色圖像無法變暗。",
+  "space_bar.inactive_content.help": "不在螢幕上的空間顯示什麼。%1$@ — 顯示其 App 圖形。%2$@ — 只顯示每個空間的編號、名稱或圖像，並在其角落顯示它有多少個視窗。兩種情況下，空的空間都會變暗顯示，但彩色圖像無法變暗。",
   "space_bar.item.ax.current": "%1$@，目前",
   "space_bar.item.ax.held": "空間 %1$@，保留自螢幕「%2$@」，未儲存，視窗：%3$d",
   "space_bar.item.ax.held_renumbered": "空間 %1$@，保留自螢幕「%2$@」（原為空間 %3$@），未儲存，視窗：%4$d",

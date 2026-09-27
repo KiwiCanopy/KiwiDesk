@@ -79,8 +79,10 @@ struct SpaceBarCollapsedRenderTests {
     @Test("A crowded Space's disc reads 9+")
     func crowdedDiscCaps() throws {
         LocalizationManager.shared.select("en")
+        let cap = SpaceBarItemView.Collapse.discCap
         let view = try render(.count, windows: 12).itemViews[1]
-        #expect(view.overflowBadge.stringValue == "9+")
+        try #require(12 > cap)
+        #expect(view.overflowBadge.stringValue == "\(cap)+")
         #expect(
             view.accessibilityLabel()
                 == "Space 2, windows: 12, not current"
@@ -114,9 +116,19 @@ struct SpaceBarCollapsedRenderTests {
         )
     }
 
-    @Test("An empty collapsed identifier takes the empty ink")
-    func emptyIdentifierDims() throws {
-        let overlay = try render(.count)
+    /// Under either content an empty Space's identifier dims: the
+    /// cue says the same thing whether the others draw apps or a
+    /// count (owner, 2026-09-27).
+    @Test(
+        "An empty Space's identifier takes the empty ink",
+        arguments: [
+            SpaceBarStyle.InactiveContent.count, .apps,
+        ]
+    )
+    func emptyIdentifierDims(
+        content: SpaceBarStyle.InactiveContent
+    ) throws {
+        let overlay = try render(content)
         let style = try #require(overlay.lastShown?.style)
         #expect(style.shelf.emptyItemAlpha != nil)
         let occupied = try #require(
@@ -128,16 +140,6 @@ struct SpaceBarCollapsedRenderTests {
         #expect(occupied == NSColor(kiwiHex: style.idleItemColor))
         #expect(empty == NSColor(kiwiHex: style.emptyItemColor))
         #expect(empty != occupied)
-    }
-
-    /// Under Apps an empty Space already shows no glyphs.
-    @Test("Apps does not dim an empty identifier")
-    func appsDoesNotDim() throws {
-        let overlay = try render(.apps)
-        let style = try #require(overlay.lastShown?.style)
-        let drawn = overlay.itemViews[2].identifierLabel.textColor
-        #expect(drawn == NSColor(kiwiHex: style.idleItemColor))
-        #expect(drawn != NSColor(kiwiHex: style.emptyItemColor))
     }
 }
 

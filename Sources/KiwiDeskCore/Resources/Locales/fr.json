@@ -1327,7 +1327,7 @@
   "space_bar.inactive_content": "Autres espaces",
   "space_bar.inactive_content.apps": "Apps",
   "space_bar.inactive_content.count": "Nombre de fenêtres",
-  "space_bar.inactive_content.help": "Ce qu'affichent les espaces qui ne sont pas à l'écran. %1$@ — leurs glyphes d'applications. %2$@ — seulement le numéro, le nom ou l'icône de chaque espace, avec dans son coin le nombre de fenêtres qu'il contient ; un espace vide n'affiche aucun nombre et apparaît atténué, sauf avec une icône emoji en couleur, qui ne peut pas être atténuée.",
+  "space_bar.inactive_content.help": "Ce qu'affichent les espaces qui ne sont pas à l'écran. %1$@ — leurs glyphes d'applications. %2$@ — seulement le numéro, le nom ou l'icône de chaque espace, avec dans son coin le nombre de fenêtres qu'il contient. Dans les deux cas, un espace vide apparaît atténué, sauf avec une icône emoji en couleur, qui ne peut pas être atténuée.",
   "space_bar.item.ax.current": "%1$@, actuel",
   "space_bar.item.ax.held": "Espace %1$@, repris de l'écran %2$@, non enregistré, fenêtres : %3$d",
   "space_bar.item.ax.held_renumbered": "Espace %1$@, repris de l'écran %2$@, où il était l'Espace %3$@, non enregistré, fenêtres : %4$d",

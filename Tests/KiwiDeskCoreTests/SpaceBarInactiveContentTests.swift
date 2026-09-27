@@ -106,9 +106,36 @@ struct SpaceBarInactiveContentTests {
     @Test("The disc caps its text at 9+")
     func discCapsItsText() {
         typealias Collapse = SpaceBarItemView.Collapse
+        let cap = Collapse.discCap
         #expect(Collapse(windows: 1).discText == "1")
-        #expect(Collapse(windows: 9).discText == "9")
-        #expect(Collapse(windows: 10).discText == "9+")
+        #expect(Collapse(windows: cap).discText == "\(cap)")
+        #expect(Collapse(windows: cap + 1).discText == "\(cap)+")
+    }
+
+    /// Windows hidden past the glyph cap count too, and the
+    /// collapsed item keeps none of the overflow's own state.
+    @Test("A collapse counts the overflow and clears it")
+    func collapseCountsOverflow() {
+        let app = { (name: String, count: Int) in
+            SpaceBarItemView.App(
+                name: name,
+                icon: nil,
+                glyph: nil,
+                focused: false,
+                count: count
+            )
+        }
+        let item = SpaceBarOverlay.Item(
+            space: SpaceID("2"),
+            spaceGlyph: .text("2", tinted: true),
+            apps: [app("Mail", 2), app("Web", 1)],
+            active: false,
+            overflow: 2,
+            focusInOverflow: true
+        ).collapsed(to: .count)
+        #expect(item.collapse?.windows == 5)
+        #expect(item.overflow == 0)
+        #expect(!item.focusInOverflow)
     }
 
     /// A second collapse keeps the first's count rather than

@@ -171,7 +171,8 @@ extension SpaceBarItemView {
         if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverItemColor)
         }
-        if collapse?.windows == 0 {
+        // An empty Space dims under either content (#1683).
+        if heldWindows == 0 {
             return NSColor(kiwiHex: style.emptyItemColor)
         }
         return NSColor(kiwiHex: style.idleItemColor)
