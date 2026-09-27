@@ -50,6 +50,7 @@ public final class DragMarkerView: NSView {
             radius: cornerRadius,
             storedGlass: storedGlass
         )
+        observeGate()
         redrawPreview()
     }
 
@@ -64,6 +65,14 @@ public final class DragMarkerView: NSView {
 
     public override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
+        observeGate()
+    }
+
+    /// A preview in a window hears the gate flip; one out of a
+    /// window lets go. Asked on each show too, since a preview
+    /// set after the view is already in its window never moves
+    /// to one.
+    private func observeGate() {
         guard preview != nil else { return }
         if window == nil, let gateToken {
             NSWorkspace.shared.notificationCenter
@@ -78,6 +87,12 @@ public final class DragMarkerView: NSView {
 
     public override func layout() {
         super.layout()
+        redrawPreview()
+    }
+
+    /// A frame-driven host resizes without a layout pass.
+    public override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
         redrawPreview()
     }
 
