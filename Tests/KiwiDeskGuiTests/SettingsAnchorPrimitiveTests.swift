@@ -69,10 +69,6 @@ struct SettingsAnchorPrimitiveTests {
                 // also interpolates a live count, which a
                 // static catalog cannot carry.
                 "SpaceOverrideRows+Footer.swift",
-                // The update window's groups (#1542): not a
-                // Settings destination, so no search or reveal
-                // can target a drawer there.
-                "UpdateNotesGroups.swift",
             ]
         )
         #expect(
@@ -168,8 +164,8 @@ struct SettingsAnchorPrimitiveTests {
         // reveal target either — the card is chrome over the
         // pane, and the panel inside it anchors nothing.
         "SettingsView+Preview.swift": 1,
-        // Scroll identity: the update window's per-type links
-        // scroll to their group (#1542). Not a Settings
+        // Scroll identity: a tab switch in the update window
+        // opens the new tab at its top (#1666). Not a Settings
         // destination, so nothing there is a reveal target.
         "UpdateNotesScroll.swift": 1,
     ]

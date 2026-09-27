@@ -104,86 +104,13 @@ struct UpdateHighlightsPanel: View {
     }
 }
 
-/// "All changes · N" and one link per group that opens it.
-struct UpdateNotesTally: View {
-    let digest: UpdateNotesDigest
-    let jump: (String) -> Void
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 12) {
-            Text(
-                L(
-                    "update.window.all_changes",
-                    "All changes · %1$d",
-                    digest.total
-                )
-            )
-            .textCase(.uppercase)
-            .tracking(0.66)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundStyle(SettingsTheme.groupHeading)
-            .accessibilityAddTraits(.isHeader)
-            Spacer(minLength: 0)
-            // Wraps: a long locale or a feed-titled group must not
-            // truncate the run.
-            FlowLayout(spacing: 12) {
-                ForEach(digest.groups) { group in
-                    Button {
-                        jump(group.id)
-                    } label: {
-                        Text(UpdateNotesNaming.counted(group))
-                            .underline(color: SettingsTheme.hairline)
-                            .foregroundStyle(SettingsTheme.ink2)
-                    }
-                    .buttonStyle(.plain)
-                    .pointingHandCursor()
-                    .accessibilityHint(
-                        L(
-                            "update.window.jump_hint",
-                            "Opens this group of changes."
-                        )
-                    )
-                }
-            }
-            .font(.system(size: 12))
-        }
-        .padding(.top, 6)
-    }
-}
-
-/// One type's changes as a disclosure: symbol and "Name · N", no
-/// hue; an open group shows every entry.
-struct UpdateNotesGroupCard: View {
+/// One type's changes, the body of its tab: every entry, flat.
+struct UpdateNotesGroupList: View {
     let group: UpdateNotesDigest.Group
     /// Entries carry their version when the view spans several.
     let labelled: Bool
-    @Binding var open: Bool
 
     var body: some View {
-        DisclosureGroup(isExpanded: $open) {
-            entries
-        } label: {
-            Label {
-                Text(UpdateNotesNaming.counted(group))
-            } icon: {
-                Image(systemName: UpdateNotesNaming.symbol(group))
-                    .foregroundStyle(SettingsTheme.ink2)
-            }
-        }
-        .disclosureGroupStyle(SettingsDisclosureStyle())
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(SettingsTheme.card)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(SettingsTheme.hairline)
-        )
-    }
-
-    private var entries: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach(
                 Array(group.entries.enumerated()),
@@ -196,6 +123,8 @@ struct UpdateNotesGroupCard: View {
                 )
             }
         }
+        .padding(.top, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -223,7 +152,7 @@ struct UpdateNotesEntryText: View {
     }
 }
 
-/// Names and symbols the window draws for a group.
+/// The name the window draws for a group.
 @MainActor
 enum UpdateNotesNaming {
     /// A known type in the reader's language; any other under the
@@ -238,19 +167,5 @@ enum UpdateNotesNaming {
             return L("update.window.group.scripting", "Lua & CLI")
         case nil: return group.title
         }
-    }
-
-    /// "Name · N" — the count last, so no locale agrees with it.
-    static func counted(_ group: UpdateNotesDigest.Group) -> String {
-        L(
-            "update.window.group_count",
-            "%1$@ · %2$d",
-            name(group),
-            group.entries.count
-        )
-    }
-
-    static func symbol(_ group: UpdateNotesDigest.Group) -> String {
-        group.kind?.symbol ?? ReleaseNoteKind.otherSymbol
     }
 }

@@ -204,25 +204,6 @@ struct UpdateNotesDigestTests {
         #expect(digest.versions == ["2.1.0"])
         #expect(!digest.spansVersions)
     }
-
-    // MARK: - Disclosure
-
-    @Test("the first group opens; Lua & CLI never does")
-    func initialDisclosure() {
-        func group(_ type: String) -> UpdateNotesDigest.Group {
-            .init(type: type, title: type, entries: [])
-        }
-        #expect(
-            UpdateNotesDisclosure.initiallyOpen([
-                group("fixed"), group("scripting"),
-            ]) == ["fixed"]
-        )
-        #expect(
-            UpdateNotesDisclosure.initiallyOpen([group("scripting")])
-                .isEmpty
-        )
-        #expect(UpdateNotesDisclosure.initiallyOpen([]).isEmpty)
-    }
 }
 
 /// Entries carry their version in brackets only when the window

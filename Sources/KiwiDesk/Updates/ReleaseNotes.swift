@@ -51,17 +51,4 @@ enum ReleaseNoteKind: String, CaseIterable {
     case improved
     case fixed
     case scripting
-
-    /// SF Symbol per group — one config, no hue (#1542 ruling).
-    var symbol: String {
-        switch self {
-        case .new: return "sparkles"
-        case .improved: return "arrow.up.circle"
-        case .fixed: return "wrench.and.screwdriver"
-        case .scripting: return "terminal"
-        }
-    }
-
-    /// The symbol for a type this build does not know.
-    static let otherSymbol = "circle.fill"
 }
