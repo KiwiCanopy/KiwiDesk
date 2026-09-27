@@ -145,4 +145,49 @@ struct ShelfBorderPreviewTests {
         let count = pieces.count - 1
         #expect(count == sites, "\(file): \(count)")
     }
+
+    /// The palette scene rims its bar plates in the palette's
+    /// border colour only while the draft's switch is on.
+    @Test("The palette scene's rim follows the switch")
+    func sceneRimFollowsTheSwitch() throws {
+        let palette = try #require(
+            PaletteCatalog.bundled().first {
+                $0.colors["kiwishelf.border_color"] != nil
+            }
+        )
+        let on = PaletteSceneThumbnail(
+            palette: palette,
+            scene: .panel,
+            drawsBorder: true
+        )
+        #expect(on.borderRim == on.color("kiwishelf.border_color"))
+        let off = PaletteSceneThumbnail(
+            palette: palette,
+            scene: .panel,
+            drawsBorder: false
+        )
+        #expect(off.borderRim == nil)
+    }
+
+    /// Every scene hands the draft's switch in — the argument has
+    /// no default, and this holds WHICH value each site reads.
+    @Test(
+        "Every palette scene reads the draft's border switch",
+        arguments: [
+            "AdvancedColorsPanel.swift",
+            "PaletteScenePanel.swift",
+            "PaletteShelf.swift",
+        ]
+    )
+    func scenesReadTheSwitch(file: String) throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Colors"
+            )
+            .appendingPathComponent(file)
+        let source = try SourceScan.strippedSource(at: url)
+        let needle = "drawsBorder: model.config.settings.kiwishelf.border"
+        let pieces = source.components(separatedBy: needle)
+        #expect(pieces.count - 1 == 1, "\(file)")
+    }
 }

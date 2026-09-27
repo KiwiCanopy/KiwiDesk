@@ -617,9 +617,13 @@ Boxed.
   clause.
 - **A preview of the shelf draws the draft's border**: the
   Settings Bars preview through `PreviewPlateEdge` on every
-  plate and box, from its `BarSpec`, and the palette panel scene
-  only while the draft's switch is on
-  (`ShelfBorderPreviewTests`).
+  plate and box, from its `BarSpec` (`ShelfBorderPreviewTests` ▸
+  `edgeStrokesTheBorder` and `ShelfBorderPreviewTests` ▸
+  `stripsTakeTheEdge`), and the palette scene only while the
+  draft's switch is on — `drawsBorder` has no default, and every
+  scene hands it the draft's switch (`ShelfBorderPreviewTests` ▸
+  `sceneRimFollowsTheSwitch` and `ShelfBorderPreviewTests` ▸
+  `scenesReadTheSwitch`).
 - **Every bundled palette carries `kiwishelf.border_color`**,
   measured as drawn — composited over the plate over the
   palette's HOME wallpaper, the extreme its plate contrasts least

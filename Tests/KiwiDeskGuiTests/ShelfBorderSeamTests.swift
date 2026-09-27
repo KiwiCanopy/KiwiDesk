@@ -38,26 +38,30 @@ struct ShelfBorderSeamTests {
         #expect(hits == Self.readers, "\(hits)")
     }
 
+    /// The active indicator's outline, the one other layer border
+    /// `Bar/` strokes: file and write count, so a new write — even
+    /// one spelled like the accent's — reds until it is ruled.
+    private static let allowed: [String: Int] = [
+        "AppBarItemView+Paint.swift": 1,
+        "SpaceBarItemView+Style.swift": 1,
+    ]
+
     /// A layer border in `Bar/` is the active indicator's or the
     /// painter's; any other one is a second rim.
     @Test("Bar/ strokes a layer border only in the painter or accent")
     func noSecondRim() throws {
         let bar = Self.coreRoot.appendingPathComponent("Bar")
-        var strays: [String] = []
-        var painterWrites = false
+        var writes: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: bar) {
-            let name = file.lastPathComponent
             let source = try SourceScan.strippedSource(at: file)
-            for line in source.split(separator: "\n")
-            where line.contains("borderColor =") {
-                if name == Self.home {
-                    painterWrites = true
-                } else if !line.contains("accent.layer?.borderColor") {
-                    strays.append("\(name): \(line)")
-                }
-            }
+            let count = source.split(separator: "\n")
+                .filter { $0.contains("borderColor =") }.count
+            if count > 0 { writes[file.lastPathComponent] = count }
         }
-        #expect(painterWrites, "the painter no longer strokes")
-        #expect(strays.isEmpty, "\(strays)")
+        #expect(
+            writes.removeValue(forKey: Self.home) != nil,
+            "the painter no longer strokes"
+        )
+        #expect(writes == Self.allowed, "\(writes)")
     }
 }

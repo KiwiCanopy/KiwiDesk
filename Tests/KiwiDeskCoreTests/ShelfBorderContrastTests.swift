@@ -12,10 +12,9 @@ import Testing
 /// the ground the edge has to separate from.
 @Suite("Shelf border contrast")
 struct ShelfBorderContrastTests {
-    /// The ring suite's own-contrast floor, which
-    /// `IdleItemContrastTests` also holds — a literal because that
-    /// suite's copy is private (`BorderRingSeparationTests`).
-    private static let floor = 2.2
+    /// The ring suite's own-contrast floor, read from it rather
+    /// than restated.
+    private static let floor = BorderRingSeparationTests.ownContrastFloor
     private static let wallpapers = ["#FFFFFF", "#000000"]
 
     /// The wallpaper extreme the plate blends into: its composite

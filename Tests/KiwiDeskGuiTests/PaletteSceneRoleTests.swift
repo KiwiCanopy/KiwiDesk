@@ -140,7 +140,8 @@ struct PaletteSceneRoleTests {
         // scales are independent, which is the whole fix.
         let tile = PaletteSceneThumbnail(
             palette: ColorPalette(name: "", colors: [:]),
-            scene: .tile
+            scene: .tile,
+            drawsBorder: false
         )
         #expect(tile.scale == 1)
     }

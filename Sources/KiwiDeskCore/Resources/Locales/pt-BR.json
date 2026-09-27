@@ -631,7 +631,7 @@
   "kiwishelf.background_style.label": "Estilo de fundo",
   "kiwishelf.background_style.label.help": "“%1$@” desenha uma placa atrás dos itens de cada barra; “%2$@” desenha uma caixa por item e nenhuma placa.",
   "kiwishelf.border": "Borda",
-  "kiwishelf.border.help": "Uma linha fina em volta da placa ou, quando o fundo é “%1$@”, em volta de cada caixa. A cor fica em %2$@, em “%3$@”.",
+  "kiwishelf.border.help": "Uma linha fina em volta da placa ou, quando o fundo é “%1$@”, em volta de cada caixa. A cor fica em %2$@, dentro de “%3$@”.",
   "kiwishelf.border_width": "Espessura da borda",
   "kiwishelf.border_width.border_off": "Ative “%1$@” para definir a espessura.",
   "kiwishelf.color.active_item": "Item ativo",

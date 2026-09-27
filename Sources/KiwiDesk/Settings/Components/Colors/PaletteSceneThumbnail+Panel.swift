@@ -117,12 +117,9 @@ extension PaletteSceneThumbnail {
         RoundedRectangle(cornerRadius: 4 * scale)
             .fill(fill)
             .overlay {
-                if drawsBorder {
+                if let borderRim {
                     RoundedRectangle(cornerRadius: 4 * scale)
-                        .strokeBorder(
-                            color("kiwishelf.border_color"),
-                            lineWidth: scale
-                        )
+                        .strokeBorder(borderRim, lineWidth: scale)
                 }
             }
             .frame(height: 20 * scale)

@@ -150,7 +150,10 @@ struct PaletteShelf: View {
                     ? L("palettes.builtin", "Built-in") : nil,
                 isApplied: applied
             ) {
-                PaletteSceneThumbnail(palette: palette)
+                PaletteSceneThumbnail(
+                    palette: palette,
+                    drawsBorder: model.config.settings.kiwishelf.border
+                )
             }
         }
         .buttonStyle(.plain)
