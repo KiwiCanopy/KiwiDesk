@@ -68,16 +68,24 @@ struct WhatsNewRelaunchTests {
         #expect(coordinator.waiting != nil)
     }
 
-    /// The install never happened: the running build is still the
-    /// one the record says it replaced, and the feed lists it.
+    /// The install never landed, and another build arrived by
+    /// some other route — one the carried feed happens to list.
     @Test("a record for another version narrates nothing, and goes")
     func staleRecordIsDropped() throws {
         let (coordinator, record, log) = try WhatsNewFixture.coordinator(
             current: "9999.1.0",
-            lastRun: "9999.1.0",
+            lastRun: "9999.0.0",
             feed: nil
         )
-        record.markRelaunch(Self.relaunch("9999.2.0"))
+        record.markRelaunch(
+            .init(
+                version: "9999.2.0",
+                since: "9999.0.0",
+                items: WhatsNewFixture.items(
+                    ["9999.2.0", "9999.1.0", "9999.0.0"]
+                )
+            )
+        )
         #expect(
             !coordinator.relaunched(
                 opensWindow: true,
