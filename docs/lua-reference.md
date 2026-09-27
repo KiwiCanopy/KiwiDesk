@@ -625,8 +625,10 @@ KiwiDesk.set_swap_skips_cascade(true)
 
 **Does:** where a window lands when `make_floating` or a
 `toggle_floating` that lands on floating turns it from tiled to
-floating, or when `move_to_space` (or a drop on the Space Bar)
-moves a tiled window into a floating-mode Space. `"center"`: it
+floating, or when a move command (`move_to_space`, a quick drop
+on the Space Bar, a Desktop move that re-files it) moves a tiled
+window into a floating-mode Space; a window still being dragged
+lands where you drop it. `"center"`: it
 is centered in the area of its screen
 clear of the menu bar and any App/Space Bar, at a size measured
 from that area: two thirds of the short side, and along the long

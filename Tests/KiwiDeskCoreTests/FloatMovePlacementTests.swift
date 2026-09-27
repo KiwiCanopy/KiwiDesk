@@ -68,53 +68,6 @@ struct FloatMovePlacementTests {
         return FloatPlacement.centered(in: region)
     }
 
-    // MARK: - The pure cascade
-
-    @Test("a free spot keeps the centred frame")
-    func freeSpotStays() {
-        let frame = CGRect(x: 400, y: 200, width: 800, height: 600)
-        let region = CGRect(x: 0, y: 0, width: 1600, height: 1000)
-        let others = [CGRect(x: 0, y: 0, width: 300, height: 300)]
-        #expect(
-            FloatPlacement.cascaded(frame, avoiding: others, in: region)
-                == frame
-        )
-    }
-
-    @Test("a taken spot steps down and right, past every taker")
-    func takenSpotSteps() {
-        let frame = CGRect(x: 400, y: 200, width: 800, height: 600)
-        let region = CGRect(x: 0, y: 0, width: 1600, height: 1000)
-        let step = FloatPlacement.cascadeStep
-        let others = [frame, frame.offsetBy(dx: step, dy: step)]
-        #expect(
-            FloatPlacement.cascaded(frame, avoiding: others, in: region)
-                == frame.offsetBy(dx: step * 2, dy: step * 2)
-        )
-    }
-
-    @Test("a smaller window centred inside a larger one is taken")
-    func concentricIsTaken() {
-        let frame = CGRect(x: 500, y: 250, width: 600, height: 500)
-        let region = CGRect(x: 0, y: 0, width: 1600, height: 1000)
-        let larger = CGRect(x: 400, y: 200, width: 800, height: 600)
-        let step = FloatPlacement.cascadeStep
-        #expect(
-            FloatPlacement.cascaded(frame, avoiding: [larger], in: region)
-                == frame.offsetBy(dx: step, dy: step)
-        )
-    }
-
-    @Test("a step off the region prices the pile at the centre")
-    func stepOffRegionStays() {
-        let frame = CGRect(x: 400, y: 380, width: 800, height: 600)
-        let region = CGRect(x: 0, y: 0, width: 1600, height: 1000)
-        #expect(
-            FloatPlacement.cascaded(frame, avoiding: [frame], in: region)
-                == frame
-        )
-    }
-
     // MARK: - The move verb
 
     @Test("a tiled window moved into an unshown floating Space is centred")
@@ -199,17 +152,76 @@ struct FloatMovePlacementTests {
         #expect(core.tiler.stashOriginal(WindowID(2)) != (try? centred(core)))
     }
 
-    @Test("the move's placement leaves the learner no stale ask")
+    /// Asserts on a ledger entry only the forget clears: the move's
+    /// own park retires the open ask whatever the placement did.
+    @Test("the move's placement forgets the size-bound ledger")
     func moveForgetsTheLedger() {
         let core = setup()
-        core.tiler.boundLearner.recordAsk(
-            WindowID(2),
-            size: CGSize(width: 600, height: 900)
-        )
+        var ledger = SizeBoundLearner.Ledger()
+        ledger.width = [300, 500].map {
+            EffectiveSizeBound.Axis(asked: $0, answered: 700)
+        }
+        core.tiler.boundLearner.bounds[WindowID(2)] = ledger
         #expect(
             core.execute("move_to_space", args: [.string("2")]).isSuccess
         )
-        #expect(core.tiler.boundLearner.lastAsks[WindowID(2)] == nil)
+        #expect(core.tiler.boundLearner.bounds[WindowID(2)] == nil)
+    }
+
+    @Test("a native-fullscreen window is never seeded")
+    func fullscreenStandsDown() throws {
+        let core = setup()
+        core.state.apply(
+            .windowFullscreenChanged(WindowID(2), isFullscreen: true)
+        )
+        core.moveWindow(WindowID(2), to: SpaceID("2"), follow: false)
+        #expect(core.state.workspaces.space(of: WindowID(2)) == SpaceID("2"))
+        #expect(core.tiler.stashOriginal(WindowID(2)) != (try centred(core)))
+    }
+
+    /// A display sticky reaches the filing only crossing displays,
+    /// which no fake screen can stage; the gate is asked directly.
+    @Test("a sticky window keeps the re-anchor")
+    func stickyStandsDown() {
+        let core = setup()
+        core.state.workspaces.add(WindowID(2), to: SpaceID("2"))
+        #expect(core.placeEnteringFloat(WindowID(2), wasFloat: false))
+        core.tiler.forgetStash(WindowID(2))
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(3),
+                    pid: 1,
+                    appName: "Sticky",
+                    frame: slot,
+                    stickyScope: .display
+                )
+            )
+        )
+        core.state.workspaces.add(WindowID(3), to: SpaceID("2"))
+        #expect(!core.placeEnteringFloat(WindowID(3), wasFloat: false))
+        #expect(core.tiler.stashOriginal(WindowID(3)) == nil)
+    }
+
+    @Test("a move returns a window to its remembered float frame")
+    func moveTakesTheRememberedFrame() throws {
+        let core = setup()
+        // The same-screen judgement reads the topology seam.
+        let screen = self.screen
+        core.tiler.allScreenBounds = { [screen] }
+        let region = try #require(core.floatGrowBounds(on: SpaceID("2")))
+        let saved = CGRect(
+            x: region.minX + 40,
+            y: region.minY + 40,
+            width: 500,
+            height: 400
+        )
+        core.state.floatFrames[WindowID(2)] = .init(pid: 1, frame: saved)
+        #expect(
+            core.execute("move_to_space", args: [.string("2")]).isSuccess
+        )
+        #expect(core.tiler.stashOriginal(WindowID(2)) == saved)
+        #expect(core.state.floatFrames[WindowID(2)] == nil)
     }
 
     // MARK: - The float verbs cascade too

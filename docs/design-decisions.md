@@ -4179,21 +4179,26 @@ stash seed so an unshown Space receives it at its activation. It
 is not the #1177 gather: the user chose the destination and the
 Space's other floats are theirs, so only the arriving window
 moves. A window that was already an effective float keeps its
-frame and takes the #502 crossing, a sticky window keeps its #445
-re-anchor, and a dragged one keeps the pointer's placement.
+frame and takes the #502 crossing, and a dragged one keeps the
+pointer's placement. A sticky window keeps the re-anchor: the
+only sticky the filing reaches is a display sticky crossing
+displays (#445 refuses the rest), and it never parks, so a
+seeded placement would wait for a delivery that never comes
+while the window stays visible on the wrong screen.
 
 *A centred placement cascades.* Several windows floated or moved
 in one after another would all land on the same frame, a pile
-#1177 reads as unreachable. So where another effective float of
-that Space already has its centre within half a step of the
-centred frame's — the centre and not the origin, since a smaller
-window centred on a larger one sits inside it — the new one steps
-down and right by a fixed step until the spot is free, the float verbs and the move alike (owner
-ruling 2026-09-27). Where the next step would leave the region,
+#1177 reads as unreachable. So where another effective float drawn
+on that Space shares the centred frame's centre, within half a
+step, or would pile with it by #1177's own containment test in
+either direction — a smaller window centred on a larger one sits
+inside it, which a centre test alone steps past without leaving —
+the new one steps down and right by a fixed step until the spot
+is free, the float verbs and the move alike (owner ruling
+2026-09-27). Where the next step would leave the region,
 the centred frame stands: past that point a pile is accepted
-rather than pushed off the screen. The check reads frames already
-in memory, with no AX read. A remembered frame (#1675) never
-cascades, because it is the user's.
+rather than pushed off the screen. A remembered frame (#1675)
+never cascades, because it is the user's.
 
 *The knob.* `set_float_placement("center" | "keep")`, Lua-only
 like the other float polish knobs (#502); `keep` is the exact

@@ -46,30 +46,27 @@ extension KiwiCore {
         tiler.forgetSizeBound(id)
     }
 
-    /// The same placement for a window a move verb filed into a
-    /// floating Space (#1708), seeded as its pending capture so
-    /// the restore delivers it — at once where the Space shows,
-    /// at the activation where it is parked. Returns whether it
-    /// placed, so the caller's re-anchor stands down.
-    func seedFloatPlacement(_ id: WindowID) -> Bool {
-        guard let target = floatPlacementTarget(for: id)
+    /// Places a window a move verb just filed into a floating
+    /// Space where it was no effective float before (#1708):
+    /// the frame it brings is the layout's slot, as at the float
+    /// verbs. Seeded as its pending capture, so the restore
+    /// delivers it — at once where the Space shows, at the
+    /// activation where it is parked. Returns whether it placed;
+    /// a sticky and a dragged window keep the re-anchor.
+    func placeEnteringFloat(_ id: WindowID, wasFloat: Bool) -> Bool {
+        guard !wasFloat,
+            let window = state.windows[id],
+            !window.isSticky,
+            // Its own macOS Space (#670): nothing parks it, so a
+            // seed would be re-delivered every retile.
+            !window.isFullscreen,
+            tiler.dragExemptWindow != id,
+            isEffectiveFloatForPlacement(id),
+            let target = floatPlacementTarget(for: id)
         else { return false }
         tiler.seedStash(id, frame: target)
         tiler.forgetSizeBound(id)
         return true
-    }
-
-    /// Places a window a move verb just filed into a floating
-    /// Space where it was no effective float before (#1708):
-    /// the frame it brings is the layout's slot, as at the float
-    /// verbs. A sticky and a dragged window keep the re-anchor.
-    func placeEnteringFloat(_ id: WindowID, wasFloat: Bool) -> Bool {
-        guard !wasFloat,
-            state.windows[id]?.isSticky == false,
-            tiler.dragExemptWindow != id,
-            isEffectiveFloatForPlacement(id)
-        else { return false }
-        return seedFloatPlacement(id)
     }
 
     /// Where `id` floats on its placement space: its remembered
@@ -121,14 +118,15 @@ extension KiwiCore {
         )
     }
 
-    /// The frames the other effective floats of `space` show or
-    /// will show — a parked one's pending capture first.
+    /// The frames the other effective floats drawn on `space` show
+    /// or will show — a sticky traveler included, a parked one's
+    /// pending capture first.
     private func otherFloatFrames(
         on space: SpaceID,
         besides id: WindowID
     ) -> [CGRect] {
         guard let workspace = state.workspaces[space] else { return [] }
-        return workspace.windows.compactMap { other in
+        return state.effectiveMembers(of: workspace).compactMap { other in
             guard other != id,
                 let window = state.windows[other],
                 !window.isFullscreen,
@@ -154,7 +152,9 @@ extension KiwiCore {
     }
 
     /// The commanded frame outranks the echo-fed state one: a
-    /// retile just before may have issued a move already.
+    /// retile just before may have issued a move already. No
+    /// stash rung, unlike `wouldBeFrame`: this is where the window
+    /// SITS, the base an animation starts from.
     private func currentFrame(
         of id: WindowID,
         fallback: CGRect

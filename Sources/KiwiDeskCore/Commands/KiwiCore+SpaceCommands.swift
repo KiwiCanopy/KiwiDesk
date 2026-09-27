@@ -127,8 +127,9 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The ONE membership filing (#1150): add, the #444 float
-    /// re-anchor, the #22 focus stamp, `window_moved_to_space` —
+    /// The ONE membership filing (#1150): add, the #1708 float
+    /// placement or else the #444 re-anchor, the #22 focus stamp,
+    /// `window_moved_to_space` —
     /// callers keep their own focus policy and retile. A
     /// same-space re-file is geometry-neutral and emits nothing:
     /// the window may sit on another display than its membership

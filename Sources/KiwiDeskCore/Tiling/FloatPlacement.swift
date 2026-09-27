@@ -73,12 +73,9 @@ extension FloatPlacement {
     }
 
     /// `frame` stepped down and right by `cascadeStep` until no
-    /// frame in `others` has its CENTRE within half a step
-    /// (#1708) — the float verbs and a move into a floating Space
-    /// alike. The centre, not the origin: a smaller window centred
-    /// on a larger one sits inside it, the #1177 pile. Where the
-    /// next step would leave `region`, `frame` itself: a pile is
-    /// priced rather than pushed off-screen.
+    /// frame in `others` shares its centre, within half a step, or
+    /// piles with it by `FloatGather.isPiled` either way (#1708);
+    /// `frame` itself where the next step would leave `region`.
     public static func cascaded(
         _ frame: CGRect,
         avoiding others: [CGRect],
@@ -87,8 +84,10 @@ extension FloatPlacement {
         let reach = cascadeStep / 2
         func taken(_ candidate: CGRect) -> Bool {
             others.contains {
-                abs($0.midX - candidate.midX) < reach
-                    && abs($0.midY - candidate.midY) < reach
+                (abs($0.midX - candidate.midX) < reach
+                    && abs($0.midY - candidate.midY) < reach)
+                    || FloatGather.isPiled(candidate, among: [$0])
+                    || FloatGather.isPiled($0, among: [candidate])
             }
         }
         var candidate = frame
