@@ -50,13 +50,21 @@ extension SpaceBarItemView {
             let badge = badgeViews[index]
             badge.isHidden = app.count < 2
             badge.stringValue = "\(app.count)"
-            applyBadge(badge, appFocused: app.focused)
+            applyBadge(
+                badge,
+                appFocused: app.focused,
+                lit: glyphIsHovered(index)
+            )
         }
         overflowBadge.isHidden = (collapse?.windows ?? overflow) < 1
         // A collapsed count is the whole count, not "more".
         overflowBadge.stringValue =
             collapse?.discText ?? "+\(overflow)"
-        applyBadge(overflowBadge, appFocused: focusInOverflow)
+        applyBadge(
+            overflowBadge,
+            appFocused: focusInOverflow,
+            lit: overflowTarget.map { $0 === hoveredTarget } ?? false
+        )
         styleStateBadges()
     }
 
@@ -100,12 +108,17 @@ extension SpaceBarItemView {
 
     /// Group badge styling with 3-tier alpha ladder
     /// (#470, #955, owner 2026-07-20).
-    private func applyBadge(_ badge: NSTextField, appFocused: Bool) {
+    private func applyBadge(
+        _ badge: NSTextField,
+        appFocused: Bool,
+        lit: Bool
+    ) {
         badge.layer?.backgroundColor =
             NSColor(kiwiHex: style.groupBadgeColor).cgColor
         badge.textColor =
             NSColor(kiwiHex: style.groupBadgeTextColor)
-        badge.alphaValue = untintedAppAlpha(focused: appFocused)
+        badge.alphaValue =
+            lit ? 1 : untintedAppAlpha(focused: appFocused)
     }
 
     var cornerRadius: CGFloat {
@@ -208,18 +221,20 @@ extension SpaceBarItemView {
     private func styleApps() {
         for (index, app) in apps.enumerated() {
             guard index < appViews.count else { break }
+            // A hovered glyph takes the focused glyph's look.
+            let lit = glyphIsHovered(index)
             if let glyphField = appViews[index] as? NSTextField {
                 glyphField.stringValue = app.glyph ?? ""
                 glyphField.font =
                     AppFont.font(size: glyphFontSize)
                     ?? .systemFont(ofSize: glyphFontSize)
                 glyphField.textColor =
-                    app.focused && isActive
+                    lit || (app.focused && isActive)
                     ? NSColor(kiwiHex: style.focusedItemColor)
                     : stateColor
             } else {
                 appViews[index].alphaValue =
-                    untintedAppAlpha(focused: app.focused)
+                    lit ? 1 : untintedAppAlpha(focused: app.focused)
             }
         }
     }
@@ -228,7 +243,13 @@ extension SpaceBarItemView {
     private func untintedAppAlpha(
         focused: Bool
     ) -> CGFloat {
-        if isHovered || isDragHovered { return 1 }
+        // A hovered glyph stands out against its dimmed siblings,
+        // so the chip's own hover lifts them only while no glyph
+        // is hovered.
+        if hoveredTarget == nil, isHovered || isDragHovered {
+            return 1
+        }
+        if isDragHovered { return 1 }
         guard isActive else {
             return style.dimFactor
         }

@@ -49,9 +49,23 @@ enum SpaceBarWindowMenu {
             item.isEnabled = row.enabled
             if row.title.count > titleCap { item.toolTip = row.title }
             item.image = row.icon.map(scaled)
+            showImage(item)
             menu.addItem(item)
         }
         return menu
+    }
+
+    /// macOS 27 hides menu-item images unless the item asks
+    /// (`preferredImageVisibility`); the SDK CI builds with lacks
+    /// the symbol, so it is set through the runtime.
+    private static func showImage(_ item: NSMenuItem) {
+        let visible = 1  // NSMenuItemImageVisibilityVisible
+        guard
+            item.responds(
+                to: NSSelectorFromString("setPreferredImageVisibility:")
+            )
+        else { return }
+        item.setValue(visible, forKey: "preferredImageVisibility")
     }
 
     private static func scaled(_ icon: NSImage) -> NSImage {

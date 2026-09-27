@@ -64,13 +64,25 @@ extension SpaceBarItemView {
         )
     }
 
+    /// Every live target, the hover reading's candidates.
+    var targetsForHover: [SpaceBarGlyphTarget] {
+        glyphTargets + [overflowTarget].compactMap { $0 }
+    }
+
+    /// Whether the glyph at `index` is the hovered target.
+    func glyphIsHovered(_ index: Int) -> Bool {
+        guard let hoveredTarget, index < glyphTargets.count else {
+            return false
+        }
+        return glyphTargets[index] === hoveredTarget
+    }
+
     /// A target wins wherever it lies, whatever order a re-render
     /// left the glyph views in.
     override func hitTest(_ point: NSPoint) -> NSView? {
         guard !isHidden else { return nil }
         let local = convert(point, from: superview)
-        let targets = glyphTargets + [overflowTarget].compactMap { $0 }
-        if let hit = targets.first(where: {
+        if let hit = targetsForHover.first(where: {
             !$0.isHidden && $0.frame.contains(local)
         }) {
             return hit
