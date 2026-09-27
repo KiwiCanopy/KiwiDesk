@@ -203,10 +203,10 @@ struct OverlayGlassTests {
             cornerRadius: 8,
             glassBeneath: id
         )
-        try #require(DragOverlay.glassOpacity < 1)
+        try #require(DragMarkerView.glassOpacity < 1)
         for marker in [overlay.ghost, overlay.dropZone] {
             #expect(
-                marker?.glass?.alphaValue == DragOverlay.glassOpacity
+                marker?.glass?.alphaValue == DragMarkerView.glassOpacity
             )
         }
     }

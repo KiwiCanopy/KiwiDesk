@@ -22,6 +22,11 @@ struct OverlayGlassGateTests {
             stored: "glass: settings.dragLiquidGlass"
         ),
         (
+            file: "Tiling/DragMarkerView.swift",
+            function: "func redrawPreview(",
+            stored: "glass: input.storedGlass"
+        ),
+        (
             file: "App/KiwiCore+StickyMarks.swift",
             function: "func updateStickyMarks(",
             stored: "glass: tiler.settings.stickyStyle.liquidGlass"
@@ -73,7 +78,7 @@ struct OverlayGlassGateTests {
         "Bar/AppBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/SpaceBarOverlay+BoxGlass.swift": "ReduceTransparencySeamTests",
         "Bar/ShelfOverlay.swift": "ShelfPlateGlassGateTests",
-        "Tiling/DragOverlay.swift": "OverlayGlassGateTests",
+        "Tiling/DragMarkerView.swift": "OverlayGlassGateTests",
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
     ]
 
