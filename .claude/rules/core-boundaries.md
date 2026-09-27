@@ -75,8 +75,9 @@ itself when a sixth is added.
     reds, as does a record for a command that does not exist. A
     verb a config must never call — `prepare_restart`, which
     announces a stop as an in-place restart (#930) — goes in
-    `cliOnly`: dispatched by `execute`, never registered into Lua
-    (`APIRecordCensusTests` ▸ `cliOnlyIsNeverLua`).
+    `cliOnly`, the one register of commands Lua never registers,
+    `subscribe` beside it (`APIRecordCensusTests` ▸
+    `cliOnlyIsNeverLua`).
   - **An enum-valued argument names the TYPE, never the values**
     — `.choice("anchor", ScrollingParams.Anchor.self)`.
     `APIChoice` has exactly one initializer and it reads

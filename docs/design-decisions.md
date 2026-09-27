@@ -12817,7 +12817,12 @@ set by hand, since without them the new process lays the desk
 out differently and the restart is visible after all. After a
 quit and relaunch they start fresh, as they always have: a
 relaunch that resets sizing is a behaviour users rely on, and the
-two exits should not start to mean the same thing.
+two exits should not start to mean the same thing. For the same
+reason a snapshot a failed relaunch leaves behind gives up its
+session memory two minutes after the stop: the next launch, much
+later, is a launch after a quit, and restores the arrangement
+alone. The payload is one build writing for the next, so a
+payload the reading build cannot decode costs only itself.
 :::
 
 ### A bulk reconcile asks the WindowServer before it asks Accessibility

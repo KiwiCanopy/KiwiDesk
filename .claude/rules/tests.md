@@ -691,7 +691,7 @@ state, so it cannot move a red between runs, and the two
 hold-glide fixtures pin it where it is armed.
 
 Deliberate residue a run does still touch, as audited
-2026-09-06 — a change adding a residue class extends and
+2026-09-27 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -719,7 +719,14 @@ read-only `SLSCopyManagedDisplaySpaces` plist read per
 `NativeSpaces.spacesOverride` — the gone classifier's topology,
 which decides nothing on its own while `makeTestCore` pins the
 per-window read to "no compositor" (`DesktopCensusSeamTests` ▸
-`testCorePinsBothDoors`). **The host text-metric read is
+`testCorePinsBothDoors`); and, since #930 (2026-09-27), the
+test process's own code signature, read once per process when
+the first core is built (`InPlaceRestartState.launchIdentity`:
+`SecCodeCopySelf` and its designated requirement), with
+`CodeIdentityTests` and `InPlaceRestartTests` also reading the
+signed `/System/Applications/Calculator.app` and the test
+runner's own path — read-only, and `makeTestCore` pins the
+LaunchAgent plist read to nil. **The host text-metric read is
 back** — `PresetGridFloorTests` lays out an `NSButton` per
 shipped catalog and calls `sizeToFit()`, so a run takes host
 font metrics once per catalog per measured key (#862, 2026-08-17).
