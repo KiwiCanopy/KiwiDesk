@@ -22,6 +22,33 @@ struct BoxGlassRadiusNeedleTests {
         let body = try body()
         #expect(body.contains("let radius = SpaceBarItemView.boxRadius("))
         #expect(!body.contains("resolvedCornerRadius("))
+        // Each item's own box, not one size for the run.
+        let args = try #require(
+            SourceScan.callArguments(
+                of: "SpaceBarItemView.boxRadius(",
+                in: body
+            )
+        )
+        #expect(args.contains("size: frames[i].size"))
+    }
+
+    /// The front-app chip is a box too: its fill, glass and rim
+    /// round from the same derivation, handed the chip's size.
+    @Test("the front-app chip takes its own box radius")
+    func frontChipTakesIt() throws {
+        let body = try SourceScan.functionBody(
+            of: "layoutFrontBox",
+            in: "SpaceBarOverlay+FrontAppBox.swift",
+            under: "Bar"
+        )
+        let args = try #require(
+            SourceScan.callArguments(
+                of: "SpaceBarItemView.boxRadius(",
+                in: body
+            )
+        )
+        #expect(args.contains("size: rect.size"))
+        #expect(!body.contains("resolvedCornerRadius("))
     }
 
     @Test("the glass and the tint are both handed that radius")
