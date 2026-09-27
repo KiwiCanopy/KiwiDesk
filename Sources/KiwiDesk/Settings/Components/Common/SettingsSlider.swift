@@ -25,8 +25,8 @@ struct SettingsSlider: View {
 
     private var dragging: Bool { dragFraction != nil }
 
-    private static let knobWidth: CGFloat = 30
-    private static let knobHeight: CGFloat = 20
+    private static let knobWidth: CGFloat = 28
+    private static let knobHeight: CGFloat = 18
     private static let trackHeight: CGFloat = 10
     private static let height: CGFloat = 24
     /// Visual only — layout keeps the resting size (#1527).
