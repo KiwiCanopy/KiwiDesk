@@ -20,7 +20,8 @@ extension KiwiCore {
         // pair for a track record, so a captured single track
         // is not left showing the seed). The reverse order
         // would wipe the restored partition with the seed.
-        // Same existence gate as `adopt`: never a new space.
+        // Same existence gate as `adopt`: never a new space (a
+        // held one boot created first counts as existing, #1646).
         for record in snapshot.spaces {
             let space = SpaceID(record.id)
             guard state.workspaces[space] != nil else {

@@ -216,6 +216,14 @@ extension StateCoordinator {
         retireDepartureRecord(of: id)
     }
 
+    /// Drops a `.restored` filing whose window is gone for good
+    /// (#1646): the memory and the frame owed at its arrival.
+    mutating func forgetRestoredFiling(of id: WindowID) {
+        guard case .restored? = rememberedSpaces[id] else { return }
+        rememberedSpaces[id] = nil
+        restoredFrames[id] = nil
+    }
+
     /// Clears all remembered space associations (`CGWindowID`, #634).
     public mutating func forgetRememberedSpaces() {
         rememberedSpaces = [:]

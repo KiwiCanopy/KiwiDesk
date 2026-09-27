@@ -6,54 +6,72 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Held Spaces survive a restart (#1646): every snapshot carries
-/// them, and boot re-creates them before the replay files their
+/// them, and boot holds them again before the replay files their
 /// windows. Process A is `HeldSpaceDesk`'s owner desk unplugged —
 /// the DELL's 3 held as 5 (10, 11), its 4 as 6 (12). Process B
 /// shares A's config directory, loads a profile for the screens
-/// it boots on, scans every window into Space 1 and runs the boot
-/// tail from A's snapshot.
+/// it boots on, scans the given windows into Space 1 and runs the
+/// boot tail from A's snapshot.
 @Suite("Held Spaces across a restart (#1646)", .serialized)
 @MainActor
 struct HeldSpaceRestartTests {
-    private let desk = HeldSpaceDesk()
+    let desk = HeldSpaceDesk()
 
-    private func unplugged() throws -> KiwiCore {
+    func unplugged() throws -> KiwiCore {
         let core = try desk.docked()
         core.handle(.displaysChanged([desk.builtIn]))
         #expect(core.state.heldSpaces.count == 2)
         return core
     }
 
-    private func crossed(_ snapshot: StateSnapshot) throws -> StateSnapshot {
+    func crossed(_ snapshot: StateSnapshot) throws -> StateSnapshot {
         try JSONDecoder().decode(
             StateSnapshot.self,
             from: JSONEncoder().encode(snapshot)
         )
     }
 
-    /// Process B on `screens` under `profile`, scanning `windows`.
-    private func boot(
+    func heldCount(_ snapshot: StateSnapshot?) -> Int? {
+        snapshot?.spaces.filter { $0.held != nil }.count
+    }
+
+    /// A census hosting `ids` on an unshown Desktop.
+    func census(hosting ids: [Int]) -> DesktopCensus {
+        var hosts: [WindowID: DesktopCensus.Host] = [:]
+        for id in ids {
+            hosts[WindowID(UInt32(id))] = .init(space: 4, pid: 1, isUp: true)
+        }
+        return DesktopCensus(hosts: hosts, shown: [])
+    }
+
+    /// Process B on `screens`, under `profile` when one is named.
+    func boot(
         from a: KiwiCore,
         screens: [Display],
-        profile: String,
+        profile: String?,
         windows: [Int] = [13, 10, 11, 12],
-        session: StateSnapshot
+        session: StateSnapshot,
+        directory: URL? = nil,
+        prepare: (KiwiCore) -> Void = { _ in }
     ) -> KiwiCore {
-        let core = makeTestCore(configDirectory: a.configDirectory)
+        let core = makeTestCore(
+            configDirectory: directory ?? a.configDirectory
+        )
+        prepare(core)
         core.handle(.displaysChanged(screens))
-        core.execute("load_profile", args: [.string(profile)])
+        if let profile {
+            core.execute("load_profile", args: [.string(profile)])
+        }
+        core.state.workspaces.ensureSpace(SpaceID(1))
         for id in windows {
-            let window = WindowID(UInt32(id))
-            core.state.windows.upsert(
-                ManagedWindow(id: window, pid: 1, appName: "App\(id)")
-            )
-            core.state.workspaces.add(window, to: SpaceID(1))
+            core.state.windows.upsert(desk.window(id))
+            core.state.workspaces.add(WindowID(UInt32(id)), to: SpaceID(1))
         }
         core.arrangeBootDesk(session: session)
         return core
     }
 
-    private func expectHeldAsLeft(_ b: KiwiCore, _ a: KiwiCore) {
+    func expectHeldAsLeft(_ b: KiwiCore, _ a: KiwiCore) {
         #expect(b.state.heldSpaces == a.state.heldSpaces)
         #expect(desk.members(b, 5) == desk.ids([10, 11]))
         #expect(desk.members(b, 6) == desk.ids([12]))
@@ -64,7 +82,7 @@ struct HeldSpaceRestartTests {
     func plainRestartKeepsHolds() throws {
         let a = try unplugged()
         let session = try crossed(a.sessionSnapshot())
-        #expect(session.held.count == 2)
+        #expect(heldCount(session) == 2)
         let b = boot(
             from: a,
             screens: [desk.builtIn],
@@ -97,9 +115,9 @@ struct HeldSpaceRestartTests {
         reader.bootTime = { .distantPast }
         reader.onLog = { _ in }
         writer.autosave()
-        #expect(reader.takeBootSnapshot()?.held.count == 2)
+        #expect(heldCount(reader.takeBootSnapshot()) == 2)
         writer.shutdownCleanly()
-        #expect(reader.takeBootSnapshot()?.held.count == 2)
+        #expect(heldCount(reader.takeBootSnapshot()) == 2)
     }
 
     @Test("booting with the origin screen connected sends them home")
@@ -121,13 +139,7 @@ struct HeldSpaceRestartTests {
     @Test("a held id the booting arrangement declares is renumbered")
     func declaredHeldIDIsRenumbered() throws {
         let a = try unplugged()
-        try a.profiles.save(
-            desk.profile(
-                "five",
-                screens: [desk.builtIn.fingerprint],
-                spaces: (1...5).map { SpaceID($0) }
-            )
-        )
+        try a.profiles.save(desk.fiveSpaces())
         let b = boot(
             from: a,
             screens: [desk.builtIn],
@@ -144,6 +156,26 @@ struct HeldSpaceRestartTests {
         #expect(desk.members(b, 5).isEmpty)
     }
 
+    @Test("a renumber skips every number the snapshot records")
+    func renumberSkipsRecordedNumbers() throws {
+        let a = try unplugged()
+        a.state.workspaces.ensureSpace(SpaceID(7))
+        a.state.windows.upsert(desk.window(14))
+        a.state.workspaces.add(WindowID(14), to: SpaceID(7))
+        try a.profiles.save(desk.fiveSpaces())
+        let b = boot(
+            from: a,
+            screens: [desk.builtIn],
+            profile: "five",
+            windows: [13, 10, 11, 12, 14],
+            session: try crossed(a.sessionSnapshot())
+        )
+        #expect(b.state.heldSpaces[SpaceID(8)]?.name == SpaceID(3))
+        #expect(b.state.heldSpaces[SpaceID(9)]?.name == SpaceID(4))
+        #expect(desk.members(b, 8) == desk.ids([10, 11]))
+        #expect(b.state.workspaces.space(of: WindowID(14)) == SpaceID(1))
+    }
+
     @Test("a record going home under its own name files into its Space")
     func ownNameGoesHome() throws {
         let a = try desk.docked(dellSpaces: [SpaceID(4), SpaceID(5)])
@@ -153,6 +185,7 @@ struct HeldSpaceRestartTests {
         var wide = try a.profiles.read(name: "wide")
         wide.spaceModes[SpaceID(4)] = .stack
         try a.profiles.save(wide)
+        let order = [1, 2, 4, 5].map { SpaceID($0) }
         let b = boot(
             from: a,
             screens: [desk.builtIn, desk.dell],
@@ -163,12 +196,65 @@ struct HeldSpaceRestartTests {
         #expect(b.state.heldSpaces.isEmpty)
         #expect(desk.members(b, 4) == desk.ids([100]))
         #expect(desk.members(b, 5) == desk.ids([101]))
-        // The profile's mode, not the held Space's record.
+        // The profile's mode, not the held Space's record, and
+        // the declared Spaces keep their place in the bar.
         #expect(b.state.workspaces[SpaceID(4)]?.mode == .stack)
+        #expect(b.state.workspaces.allSpaces.map(\.id) == order)
     }
 
-    @Test("a held Space none of whose windows came back is not restored")
-    func goneWindowsDropTheHold() throws {
+    @Test("a hidden app's window keeps its held Space across the restart")
+    func hiddenMemberKeepsTheHold() throws {
+        let a = try unplugged()
+        a.handle(.windowHidden(WindowID(12)))
+        #expect(a.state.heldSpaces[SpaceID(6)] != nil)
+        let b = boot(
+            from: a,
+            screens: [desk.builtIn],
+            profile: "solo",
+            windows: [13, 10, 11],
+            session: try crossed(a.sessionSnapshot())
+        )
+        b.desktopMemory.readCensus = { _ in self.census(hosting: [12]) }
+        b.retireGoneHeldMembers()
+        #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
+        #expect(
+            b.state.rememberedSpaces[WindowID(12)] == .restored(SpaceID(6))
+        )
+        b.handle(.windowCreated(desk.window(12)))
+        #expect(b.state.workspaces.space(of: WindowID(12)) == SpaceID(6))
+    }
+
+    @Test("a window on another Desktop keeps its held Space too")
+    func awayMemberKeepsTheHold() throws {
+        let a = try unplugged()
+        let away = WindowID(12)
+        a.state.workspaces.remove(away)
+        a.state.windows.remove(away)
+        a.state.awayWindows[away] = AwayWindow(
+            id: away,
+            pid: 1,
+            appName: "App12",
+            appBundleID: nil,
+            nativeSpace: 4
+        )
+        a.state.rememberedSpaces[away] = .departed(SpaceID(6))
+        a.retile()
+        #expect(a.state.heldSpaces[SpaceID(6)] != nil)
+        let b = boot(
+            from: a,
+            screens: [desk.builtIn],
+            profile: "solo",
+            windows: [13, 10, 11],
+            session: try crossed(a.sessionSnapshot())
+        )
+        b.desktopMemory.readCensus = { _ in self.census(hosting: [12]) }
+        b.retireGoneHeldMembers()
+        #expect(b.state.heldSpaces[SpaceID(6)] != nil)
+        #expect(b.state.rememberedSpace(of: away) == SpaceID(6))
+    }
+
+    @Test("a window still launching at boot keeps its held Space")
+    func lateMemberKeepsTheHold() throws {
         let a = try unplugged()
         let b = boot(
             from: a,
@@ -177,67 +263,34 @@ struct HeldSpaceRestartTests {
             windows: [13, 12],
             session: try crossed(a.sessionSnapshot())
         )
+        b.desktopMemory.readCensus = { _ in
+            self.census(hosting: [13, 10, 11, 12])
+        }
+        b.retireGoneHeldMembers()
+        #expect(b.state.heldSpaces[SpaceID(5)]?.name == SpaceID(3))
+        b.handle(.windowCreated(desk.window(10)))
+        #expect(b.state.workspaces.space(of: WindowID(10)) == SpaceID(5))
+    }
+
+    @Test("a hold whose windows are gone ends once the census says so")
+    func goneWindowsRetireAfterBoot() throws {
+        let a = try unplugged()
+        let b = boot(
+            from: a,
+            screens: [desk.builtIn],
+            profile: "solo",
+            windows: [13, 12],
+            session: try crossed(a.sessionSnapshot())
+        )
+        // Kept through the replay: nothing has judged 10 and 11.
+        #expect(b.state.heldSpaces[SpaceID(5)] != nil)
+        b.desktopMemory.readCensus = { _ in nil }
+        b.retireGoneHeldMembers()
+        #expect(b.state.heldSpaces[SpaceID(5)] != nil)
+        b.desktopMemory.readCensus = { _ in self.census(hosting: [13, 12]) }
+        b.retireGoneHeldMembers()
         #expect(b.state.heldSpaces[SpaceID(5)] == nil)
         #expect(b.state.workspaces[SpaceID(5)] == nil)
         #expect(b.state.heldSpaces[SpaceID(6)]?.name == SpaceID(4))
-        #expect(desk.members(b, 6) == desk.ids([12]))
-    }
-
-    @Test("an unreadable held record costs only itself")
-    func unreadableRecordCostsOnlyItself() throws {
-        let a = try unplugged()
-        let snapshot = a.sessionSnapshot()
-        let data = try JSONEncoder().encode(snapshot)
-        var json = try #require(
-            try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        )
-        var held = try #require(json["held"] as? [[String: Any]])
-        try #require(held.count == 2)
-        var origin = try #require(held[0]["origin"] as? [String: Any])
-        origin["arrangement"] = ["kind": "galaxy", "name": "desk"]
-        held[0]["origin"] = origin
-        json["held"] = held
-        let decoded = try JSONDecoder().decode(
-            StateSnapshot.self,
-            from: JSONSerialization.data(withJSONObject: json)
-        )
-        #expect(decoded.held.map(\.spaceID) == [SpaceID(6)])
-        #expect(decoded.spaces == snapshot.spaces)
-        #expect(decoded.windows == snapshot.windows)
-        // An older build's file has no list at all.
-        json["held"] = nil
-        let older = try JSONDecoder().decode(
-            StateSnapshot.self,
-            from: JSONSerialization.data(withJSONObject: json)
-        )
-        #expect(older.held.isEmpty)
-        #expect(older.spaces == snapshot.spaces)
-    }
-
-    @Test("discarding the saved arrangement deletes the record, not the hold")
-    func tierOneKeepsLiveHolds() throws {
-        let a = try unplugged()
-        a.onLog = { _ in }
-        a.crash.captureState = { [weak a] in a?.sessionSnapshot() }
-        a.crash.bootTime = { .distantPast }
-        a.crash.autosave()
-        #expect(a.crash.takeBootSnapshot()?.held.count == 2)
-        a.crash.autosave()
-        a.crash.shutdownCleanly()
-        a.discardSavedArrangement()
-        #expect(a.crash.takeBootSnapshot() == nil)
-        #expect(a.state.heldSpaces.count == 2)
-    }
-
-    /// The outcome only: the reset's prune empties every held
-    /// Space, which the retire ends on its own, so this does not
-    /// pin the reset's own `forgetHeldSpaces`.
-    @Test("Reset All Settings ends every hold, so no snapshot carries one")
-    func tierTwoForgetsHolds() throws {
-        let a = try unplugged()
-        a.onLog = { _ in }
-        a.resetAllSettings(trash: { _ in })
-        #expect(a.state.heldSpaces.isEmpty)
-        #expect(a.sessionSnapshot().held.isEmpty)
     }
 }

@@ -1,111 +1,137 @@
 import Foundation
 
-/// Held Spaces across a restart (#1646): boot re-creates the held
-/// Spaces the session snapshot recorded before the replay files
-/// their windows, and sends home at once those whose screen is
-/// back. Writes no `heldSpaces` — `restoreHolds` and the re-file
-/// are `KiwiCore+HeldSpaces.swift`'s.
+/// Held Spaces across a restart (#1646): boot holds the Spaces the
+/// session snapshot recorded as held before the replay files
+/// their windows, sends home at once those whose screen is back,
+/// and lets #1507's retire end one only once the WindowServer says
+/// its windows are gone. Writes no `heldSpaces` — `restoreHolds`
+/// and the re-file are `KiwiCore+HeldSpaces.swift`'s.
 extension KiwiCore {
     /// What the boot tail owes after the replay.
     struct BootHolds {
         /// The snapshot the replay adopts, held ids renamed.
         var snapshot: StateSnapshot
-        /// The live mode of each declared Space a held record
-        /// went home into, which the replay's record would
+        /// Each held Space's live id and the windows it holds
+        /// that are not members.
+        var remembered: [SpaceID: [WindowID]] = [:]
+        /// The live mode of each declared Space a hold goes home
+        /// into in place, which the replay's record would
         /// otherwise overwrite with the held Space's.
         var homeModes: [SpaceID: LayoutMode] = [:]
         var renumbered = false
     }
 
-    /// The Spaces the live arrangement declares, from adoption
-    /// state (#1245).
-    var liveDeclaredSpaces: Set<SpaceID> {
-        profiles.active?.declaredSpaces ?? profiles.standard?.spaces ?? []
-    }
-
-    /// Re-creates the snapshot's held Spaces, ahead of `restore`.
-    /// A record none of whose windows the scan found is dropped —
-    /// it would hold nothing, and #1507 begins no hold for a
-    /// remembered-only Space. One about to go home under its own
-    /// name is filed straight into the declared Space. A held id a
-    /// live Space already takes is renumbered past every live
-    /// number, keeping the batch's order (#1664), as
-    /// `reclaimHeldNames` does.
+    /// Holds every Space the snapshot recorded as held, ahead of
+    /// `restore`. One going home under its own name keeps it; any
+    /// other whose id a live, declared or recorded Space already
+    /// takes is renumbered past all of them in the batch's order
+    /// (#1664) — the reclaim's rule, applied to the record — so
+    /// the replay never merges two records into one Space.
     func restoreHeldSpaces(from snapshot: StateSnapshot) -> BootHolds {
         var plan = BootHolds(snapshot: snapshot)
-        guard !snapshot.held.isEmpty else { return plan }
-        let arrangement = liveArrangement
-        let declared = liveDeclaredSpaces
-        var members: [String: [UInt32]] = [:]
-        for record in snapshot.spaces { members[record.id] = record.windows }
-        var kept: [StateSnapshot.HeldRecord] = []
-        var dropped: Set<String> = []
-        for record in snapshot.held {
-            let id = record.spaceID
-            let survived = (members[record.id] ?? []).contains {
-                state.windows[WindowID($0)] != nil
-            }
-            guard survived else {
-                dropped.insert(record.id)
-                onLog(
-                    "restart: held space \(id.raw) dropped — none of "
-                        + "its windows came back"
-                )
-                continue
-            }
-            if id == record.origin.name, let arrangement,
-                returnsHome(
-                    record.origin,
-                    declared: declared,
-                    into: arrangement
-                ),
-                let live = state.workspaces[id]
-            {
-                plan.homeModes[id] = live.mode
-                onLog(
-                    "restart: held space \(id.raw) is home on "
-                        + "'\(record.origin.screenName)'"
-                )
-                continue
-            }
-            kept.append(record)
+        let records = snapshot.spaces.compactMap { record in
+            record.held.map { (id: SpaceID(record.id), held: $0) }
         }
-        plan.snapshot.spaces.removeAll { dropped.contains($0.id) }
-        let taken = declared.union(state.workspaces.allSpaces.map(\.id))
-            .union(snapshot.held.map(\.spaceID))
+        guard !records.isEmpty else { return plan }
+        let home = liveHome
+        let declared = home?.declared ?? []
+        let inPlace = records.filter { record in
+            home.map {
+                goesHomeInPlace(
+                    record.id,
+                    record.held.origin,
+                    declared: $0.declared,
+                    into: $0.arrangement
+                )
+            } ?? false
+        }
+        let walked = records.filter { record in
+            !inPlace.contains { $0.id == record.id }
+        }
+        for record in inPlace {
+            plan.homeModes[record.id] = state.workspaces[record.id]?.mode
+        }
+        var taken = declared.union(state.workspaces.allSpaces.map(\.id))
+            .union(snapshot.spaces.map { SpaceID($0.id) })
             .union(state.rememberedSpaces.values.map(\.space))
-        let ids = kept.map(\.spaceID)
+        if let active = snapshot.activeSpace { taken.insert(SpaceID(active)) }
         let names = Self.orderedHeldNames(
-            ids,
+            walked.map(\.id),
             taken: taken,
-            mustMove: { state.workspaces[$0] != nil }
+            mustMove: { declared.contains($0) || state.workspaces[$0] != nil }
         )
         var renames: [SpaceID: SpaceID] = [:]
-        for (id, name) in zip(ids, names) where id != name {
-            renames[id] = name
+        for (record, name) in zip(walked, names) where record.id != name {
+            renames[record.id] = name
         }
         plan.renumbered = !renames.isEmpty
-        plan.snapshot = plan.snapshot.renamingSpaces(renames)
-        restoreHolds(
-            zip(names, kept).map { (id: $0, origin: $1.origin) }
-        )
+        plan.snapshot = snapshot.renamingSpaces(renames)
+        let holds =
+            inPlace.map { (id: $0.id, held: $0.held) }
+            + zip(walked, names).map { (id: $1, held: $0.held) }
+        for hold in holds {
+            plan.remembered[hold.id] = hold.held.remembered.map(WindowID.init)
+        }
+        restoreHolds(holds.map { (id: $0.id, origin: $0.held.origin) })
         return plan
     }
 
-    /// After the replay: the home Spaces' own modes back, every
-    /// held Space whose screen is connected re-filed as a
-    /// reconnect would, and a renumbered one's digit chord owed.
+    /// After the replay: each hold's non-member windows remembered
+    /// there, every held Space whose screen is connected re-filed
+    /// as a reconnect would, one back in place given its own mode
+    /// again, and a renumbered one's digit chord owed.
     func settleHeldSpacesAtBoot(_ plan: BootHolds) {
-        for (id, mode) in plan.homeModes { setSpaceMode(id, mode) }
-        guard !state.heldSpaces.isEmpty || !plan.homeModes.isEmpty
-        else { return }
-        if let arrangement = liveArrangement {
-            refileHeldSpaces(
-                declared: liveDeclaredSpaces,
-                into: arrangement
-            )
+        guard !plan.remembered.isEmpty else { return }
+        for (space, windows) in plan.remembered {
+            for id in windows
+            where state.windows[id] == nil
+                && state.rememberedSpaces[id] == nil
+            {
+                state.remember(id, in: space)
+            }
+        }
+        // With no arrangement live (a hand-written config) nothing
+        // goes home and nothing is pinned, as at a reconnect.
+        if let home = liveHome {
+            for id in refileHeldSpaces(
+                declared: home.declared,
+                into: home.arrangement
+            ) {
+                setSpaceMode(id, plan.homeModes[id] ?? .bsp)
+            }
         }
         if plan.renumbered { topUpDigitShortcuts() }
         resolveSpaceDisplays()
+    }
+
+    /// Boot's last word on the restored holds, after the away seed:
+    /// a window a held Space remembers that the WindowServer no
+    /// longer hosts is gone for good — a relaunched app's, one
+    /// closed while KiwiDesk was down — so its filing is dropped
+    /// and #1507's retire ends a hold left with nothing. Hidden,
+    /// away and still-launching windows are hosted and keep it.
+    /// Without a census nothing is judged (absent, never faked).
+    func retireGoneHeldMembers() {
+        let filed = state.rememberedSpaces.compactMap { entry in
+            guard case .restored(let space) = entry.value,
+                state.heldSpaces[space] != nil,
+                state.windows[entry.key] == nil
+            else { return nil as WindowID? }
+            return entry.key
+        }
+        guard !filed.isEmpty else { return }
+        guard
+            let census = desktopMemory.readCensus(
+                NativeSpaces.allSpaces()
+            )
+        else {
+            onLog("restart: no census; held windows not judged")
+            return
+        }
+        let gone = filed.filter { census.hosts[$0] == nil }
+        guard !gone.isEmpty else { return }
+        for id in gone { state.forgetRestoredFiling(of: id) }
+        onLog("restart: \(gone.count) held window(s) did not come back")
+        retile()
     }
 }

@@ -1,34 +1,33 @@
 import Foundation
 
-/// The held Spaces a snapshot carries (#1646): every capture —
-/// a quit's, the autosave, an in-place restart's — so a restart
-/// and a crash both bring them back. A stored cross-version
-/// shape, decoded record by record.
+/// A held Space's record in the session snapshot (#1646): on its
+/// own Space record, in every capture — a quit's, the crash
+/// autosave, an in-place restart's — so a restart and a crash
+/// both bring the hold back. A stored cross-version shape.
 extension StateSnapshot {
-    /// One held Space: its live id and where it came from.
+    /// Where the Space came from, and the windows it holds that
+    /// are not live members — a hidden app's, one on another
+    /// Desktop — which the record's own `windows` cannot list.
     public struct HeldRecord: Codable, Sendable, Equatable {
-        public let id: String
         public let origin: HeldOrigin
+        public let remembered: [UInt32]
 
-        public init(id: SpaceID, origin: HeldOrigin) {
-            self.id = id.raw
+        public init(origin: HeldOrigin, remembered: [WindowID]) {
             self.origin = origin
+            self.remembered = remembered.map(\.raw)
         }
 
-        public var spaceID: SpaceID { SpaceID(id) }
-    }
+        private enum CodingKeys: String, CodingKey {
+            case origin, remembered
+        }
 
-    /// A record this build cannot read costs only itself, and a
-    /// file with no list (an older build's) reads as none.
-    static func decodeHeld<Key: CodingKey>(
-        from c: KeyedDecodingContainer<Key>,
-        forKey key: Key
-    ) -> [HeldRecord] {
-        let list = try? c.decodeIfPresent(
-            [Lossy<HeldRecord>].self,
-            forKey: key
-        )
-        return (list ?? []).compactMap(\.value)
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            origin = try c.decode(HeldOrigin.self, forKey: .origin)
+            remembered =
+                try c.decodeIfPresent([UInt32].self, forKey: .remembered)
+                ?? []
+        }
     }
 
     /// This snapshot with each window record transformed and
@@ -41,8 +40,8 @@ extension StateSnapshot {
         return copy
     }
 
-    /// This snapshot with Space ids renamed — records, the active
-    /// Space and the held list alike.
+    /// This snapshot with Space ids renamed — the records and the
+    /// active Space.
     func renamingSpaces(_ renames: [SpaceID: SpaceID]) -> StateSnapshot {
         guard !renames.isEmpty else { return self }
         func renamed(_ raw: String) -> String {
@@ -51,29 +50,24 @@ extension StateSnapshot {
         var copy = self
         copy.spaces = spaces.map { $0.renamed(to: renamed($0.id)) }
         copy.activeSpace = activeSpace.map(renamed)
-        copy.held = held.map {
-            HeldRecord(id: SpaceID(renamed($0.id)), origin: $0.origin)
-        }
         return copy
     }
 }
 
-/// A value decoded on its own: nil where it cannot be read.
-private struct Lossy<Value: Decodable>: Decodable {
-    let value: Value?
-
-    init(from decoder: Decoder) throws {
-        value = try? Value(from: decoder)
-    }
-}
-
 extension StateCoordinator {
-    /// The held Spaces a snapshot records, in bar order.
-    var heldRecords: [StateSnapshot.HeldRecord] {
-        workspaces.allSpaces.compactMap { space in
-            heldSpaces[space.id].map {
-                StateSnapshot.HeldRecord(id: space.id, origin: $0)
-            }
-        }
+    /// The hold of live Space `id`, if it is held. A hold with no
+    /// live Space has no record: nothing it names is a member the
+    /// snapshot lists, so it ends at a restart.
+    func heldRecord(of id: SpaceID) -> StateSnapshot.HeldRecord? {
+        guard let origin = heldSpaces[id] else { return nil }
+        let remembered = rememberedSpaces.filter {
+            $0.value.space == id
+                && windows[$0.key] == nil
+                && !closedDepartures.contains($0.key)
+        }.keys.sorted { $0.raw < $1.raw }
+        return StateSnapshot.HeldRecord(
+            origin: origin,
+            remembered: remembered
+        )
     }
 }

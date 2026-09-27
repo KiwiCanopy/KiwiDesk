@@ -53,9 +53,17 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         public let trackWeights: [UInt32: Double]
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: SpaceSession?
+        /// The Space's hold, in every snapshot (#1646,
+        /// `StateSnapshot+Held`).
+        public var held: HeldRecord?
 
-        public init(space: Space, session: SpaceSession? = nil) {
+        public init(
+            space: Space,
+            session: SpaceSession? = nil,
+            held: HeldRecord? = nil
+        ) {
             self.session = session
+            self.held = held
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
@@ -69,7 +77,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, mode, windows, focused, session
+            case id, mode, windows, focused, session, held
             case trackBreaks = "track_breaks"
             case trackWeights = "track_weights"
         }
@@ -103,6 +111,8 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                 SpaceSession.self,
                 forKey: .session
             )
+            // On its own too: an unreadable hold costs itself.
+            held = try? c.decodeIfPresent(HeldRecord.self, forKey: .held)
         }
 
         /// This record under another id (#1646's boot renumber).
@@ -117,38 +127,17 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     public var spaces: [SpaceRecord]
     public var activeSpace: String?
     public var capturedAt: Date
-    /// The held Spaces (#1646), in every snapshot.
-    public var held: [HeldRecord]
 
     public init(
         windows: [WindowRecord],
         spaces: [SpaceRecord],
         activeSpace: String?,
-        capturedAt: Date = .now,
-        held: [HeldRecord] = []
+        capturedAt: Date = .now
     ) {
         self.windows = windows
         self.spaces = spaces
         self.activeSpace = activeSpace
         self.capturedAt = capturedAt
-        self.held = held
-    }
-
-    private enum CodingKeys: String, CodingKey {
-        case windows, spaces, activeSpace, capturedAt, held
-    }
-
-    public init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        windows = try c.decode([WindowRecord].self, forKey: .windows)
-        spaces = try c.decode([SpaceRecord].self, forKey: .spaces)
-        activeSpace = try c.decodeIfPresent(
-            String.self,
-            forKey: .activeSpace
-        )
-        capturedAt = try c.decode(Date.self, forKey: .capturedAt)
-        // Each record on its own, as the in-place payloads (#930).
-        held = Self.decodeHeld(from: c, forKey: .held)
     }
 }
 
@@ -158,7 +147,8 @@ extension StateCoordinator {
     /// config/profile is the space-set authority, and an
     /// `ensureSpace` here resurrected pruned spaces which the next
     /// save persisted — corrupting `gui.json` from a restore
-    /// (#128).
+    /// (#128). A held Space exists here because boot's
+    /// `restoreHeldSpaces` created it ahead of the replay (#1646).
     public mutating func adopt(_ snapshot: StateSnapshot) {
         for record in snapshot.spaces {
             let space = SpaceID(record.id)
@@ -219,10 +209,12 @@ extension StateCoordinator {
                 )
             },
             spaces: workspaces.allSpaces.map {
-                StateSnapshot.SpaceRecord(space: $0)
+                StateSnapshot.SpaceRecord(
+                    space: $0,
+                    held: heldRecord(of: $0.id)
+                )
             },
-            activeSpace: workspaces.activeSpace?.raw,
-            held: heldRecords
+            activeSpace: workspaces.activeSpace?.raw
         )
     }
 }

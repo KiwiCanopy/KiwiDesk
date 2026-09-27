@@ -180,6 +180,8 @@ extension KiwiCore {
         // The full cross-Desktop model (#1146): after the
         // restore filed what the snapshot knows.
         seedAwayWindows()
+        // After the seed, so an away window keeps its hold (#1646).
+        retireGoneHeldMembers()
         drainDeferredBootApps()
         closeBootInterval()
         logBootSummary()
