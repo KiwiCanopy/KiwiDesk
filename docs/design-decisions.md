@@ -583,7 +583,7 @@ costs nothing to ignore.
 From 2.0.0 a found update opens KiwiDesk's own window rather
 than Sparkle's: the offered version's summary in one panel, then
 every change grouped as New, Improved, Fixed and Lua & CLI, each
-group behind a tab. Sparkle's window renders the
+group a disclosure with its count. Sparkle's window renders the
 notes as one block of HTML, which is readable and answers
 neither question a reader arrives with ("what's new?", "was my
 bug fixed?") at a glance — the grouping
@@ -593,12 +593,13 @@ only pays off where something groups on it.
 **The window covers everything since your version, not only the
 offered one.** A user who skipped three releases is about to
 receive all of them, so the groups merge across the skipped
-versions, each entry labelled with its version; the panel keeps
-the newest summary, and
+versions, each entry labelled with its version and the counts
+covering all of them; the panel keeps the newest summary, and
 every skipped version's "Before you update" line is shown, since
 a caution published two versions ago still applies to someone
 crossing it now. One version behind looks like any other offer.
 
+:::unreleased
 **One tab per group, not a disclosure each (#1666).** The window
 first shipped every group as a disclosure beneath a row of
 per-type links that opened one and scrolled to it — two
@@ -608,11 +609,14 @@ is one mechanism, and puts every group one step away. Highlights
 is the tab that opens, in both modes, because the "Before you
 update" cautions live there and must be seen before Install; an
 empty group gets no tab, since a tab with nothing behind it
-promises nothing. A tab carries the group's name and no count:
-the list it opens is the count, and a count that fits in one
-language and not another would make the same strip change shape
-between locales. The window's height is the tallest tab's, so a
-switch never resizes it.
+promises nothing. Each tab keeps its count, which previews what
+changed before a click, and the window is 600 pt wide so that
+the four kinds fit in every shipped language; a kind this build
+does not know carries a title nobody measured, so the strip
+turns into a menu on the same selection wherever it would not
+fit. The window's height is the tallest tab's, so a switch
+never resizes it.
+:::
 
 **What stays Sparkle's:** checking, "you're up to date", and the
 download and install themselves. The window takes over at the

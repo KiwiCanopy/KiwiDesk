@@ -152,7 +152,7 @@ struct UpdateNotesEntryText: View {
     }
 }
 
-/// The name the window draws for a group.
+/// The names the window draws for a group.
 @MainActor
 enum UpdateNotesNaming {
     /// A known type in the reader's language; any other under the
@@ -167,5 +167,15 @@ enum UpdateNotesNaming {
             return L("update.window.group.scripting", "Lua & CLI")
         case nil: return group.title
         }
+    }
+
+    /// "Name · N" — the count last, so no locale agrees with it.
+    static func counted(_ group: UpdateNotesDigest.Group) -> String {
+        L(
+            "update.window.group_count",
+            "%1$@ · %2$d",
+            name(group),
+            group.entries.count
+        )
     }
 }

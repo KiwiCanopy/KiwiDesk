@@ -1457,6 +1457,7 @@
   "update.window.group.improved": "改进",
   "update.window.group.new": "新功能",
   "update.window.group.scripting": "Lua & CLI",
+  "update.window.group_count": "%1$@ · %2$d",
   "update.window.highlights": "亮点",
   "update.window.install": "安装并重新启动",
   "update.window.installed": "当前版本：%1$@",

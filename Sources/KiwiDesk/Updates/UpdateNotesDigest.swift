@@ -46,6 +46,11 @@ struct UpdateNotesDigest: Equatable {
     /// spanning more than one version needs it.
     var spansVersions: Bool { versions.count > 1 }
 
+    /// The group a tab opens.
+    func group(_ id: String) -> Group? {
+        groups.first { $0.id == id }
+    }
+
     /// Merges every source newer than `installed` up to `offered`.
     /// Nil when the offered version's own notes cannot be read —
     /// the window then falls back to the notes link alone.
@@ -161,6 +166,11 @@ enum UpdateNotesTabs {
             + digest.groups.filter { !$0.entries.isEmpty }.map {
                 .group($0.id)
             }
+    }
+
+    /// No strip when Highlights is the only tab.
+    static func showsStrip(_ digest: UpdateNotesDigest) -> Bool {
+        tabs(digest).count > 1
     }
 
     /// Highlights in both modes: the "Before you update" cautions

@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The pinned tab strip above the notes (#1666 ruling): segments
-/// at their natural width, named without counts, and a menu
-/// picker on the same selection when they do not fit — a feed
-/// type this build does not know carries a title nobody sized.
+/// at their natural width, each "Name · N", and a menu picker on
+/// the same selection when they do not fit — a feed type this
+/// build does not know carries a title nobody sized.
 struct UpdateNotesTabStrip: View {
     let digest: UpdateNotesDigest
     @Binding var selection: UpdateNotesTab
@@ -12,9 +12,15 @@ struct UpdateNotesTabStrip: View {
     var body: some View {
         let options = Self.options(digest)
         ViewThatFits(in: .horizontal) {
-            SegmentedPicker(selection: $selection, options: options)
-                .fixedSize()
-                .accessibilityLabel(Self.label)
+            // The selected label draws bolder, so the strip is
+            // judged at its widest selection: a click must not flip
+            // it into the menu.
+            ZStack(alignment: .leading) {
+                widest(options)
+                SegmentedPicker(selection: $selection, options: options)
+                    .fixedSize()
+                    .accessibilityLabel(Self.label)
+            }
             Picker(Self.label, selection: $selection) {
                 ForEach(options, id: \.value) { option in
                     Text(option.title).tag(option.value)
@@ -25,6 +31,22 @@ struct UpdateNotesTabStrip: View {
             .neutralMenuLabel()
             .fixedSize()
         }
+    }
+
+    private func widest(
+        _ options: [(title: String, value: UpdateNotesTab)]
+    ) -> some View {
+        ZStack {
+            ForEach(options, id: \.value) { option in
+                SegmentedPicker(
+                    selection: .constant(option.value),
+                    options: options
+                )
+                .fixedSize()
+            }
+        }
+        .hidden()
+        .accessibilityHidden(true)
     }
 
     @MainActor static var label: String {
@@ -40,8 +62,8 @@ struct UpdateNotesTabStrip: View {
             case .highlights:
                 return (L("update.window.highlights", "Highlights"), tab)
             case .group(let id):
-                let group = digest.groups.first { $0.id == id }
-                return (group.map(UpdateNotesNaming.name) ?? id, tab)
+                let group = digest.group(id)
+                return (group.map(UpdateNotesNaming.counted) ?? id, tab)
             }
         }
     }

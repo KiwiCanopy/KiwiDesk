@@ -123,10 +123,7 @@ would crowd or truncate. A binary is a **toggle**, never two
 segments. Fixed editor-navigation tabs (the icon picker's
 Emoji / Symbol / Glyph strip) may exceed four — they switch the
 visible editor rather than edit a value, and a future
-navigation strip past four segments still qualifies. The
-update window's notes tabs are one (#1666): their count is set
-by the release feed rather than by us, so the strip falls back
-to a menu on the same selection whenever it does not fit. Layout
+navigation strip past four segments still qualifies. Layout
 Defaults' layout selector is a strip of live schematic
 thumbnails, not a segmented control (below). The *same
 semantic field uses the same control on comparable full-width
@@ -138,6 +135,13 @@ drives all three strokes, #754). Menus where the rule keeps
 them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
+
+:::unreleased
+The update window's notes tabs are one such strip (#1666): how
+many there are is set by the release feed rather than by us, so
+the strip falls back to a menu on the same selection wherever it
+does not fit.
+:::
 
 Every shipped segmented strip fits a full-width row at the
 720 pt minimum (`SettingsWidthClass.minimum`), measured against

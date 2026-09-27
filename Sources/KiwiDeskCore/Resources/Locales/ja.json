@@ -1457,6 +1457,7 @@
   "update.window.group.improved": "改善",
   "update.window.group.new": "新機能",
   "update.window.group.scripting": "Lua & CLI",
+  "update.window.group_count": "%1$@ · %2$d",
   "update.window.highlights": "ハイライト",
   "update.window.install": "インストールして再起動",
   "update.window.installed": "現在のバージョン: %1$@",

@@ -90,7 +90,7 @@ private struct UpdateWindowLayout<Footer: View>: View {
 }
 
 enum UpdateWindowMetrics {
-    static let width: CGFloat = 560
+    static let width: CGFloat = 600
     /// The header's, the tab strip's and the notes' side inset.
     static let inset: CGFloat = 20
     static let minHeight: CGFloat = 420

@@ -55,29 +55,51 @@ struct UpdateNotesTabsTests {
         #expect(tabs.first == UpdateNotesTabs.initial)
     }
 
-    @Test("a segment names its group without a count")
-    func segmentsCarryNoCount() {
+    @Test("no strip when Highlights is the only tab")
+    func loneHighlightsDrawsNoStrip() {
+        #expect(!UpdateNotesTabs.showsStrip(Self.digest([])))
+        #expect(
+            !UpdateNotesTabs.showsStrip(
+                Self.digest([Self.group("new", count: 0)])
+            )
+        )
+        #expect(UpdateNotesTabs.showsStrip(Self.digest([Self.group("new")])))
+    }
+
+    @Test("a segment names its group and its count")
+    func segmentsCarryTheirCount() {
         LocalizationManager.shared.select("en")
         let titles = UpdateNotesTabStrip.options(
             Self.digest([Self.group("fixed", count: 8)])
         ).map(\.title)
-        #expect(titles == ["Highlights", "Fixed"])
+        #expect(titles == ["Highlights", "Fixed · 8"])
     }
 
     /// The strip's room: the window less its side insets.
     private static let available =
         UpdateWindowMetrics.width - 2 * UpdateWindowMetrics.inset
 
+    private static func width<V: View>(_ view: V) -> CGFloat {
+        NSHostingController(rootView: view).sizeThatFits(
+            in: CGSize(width: 10_000, height: 10_000)
+        ).width
+    }
+
+    /// The segmented strip at its widest selection, and what the
+    /// window's strip chose at the room it has.
     private static func widths(
         _ digest: UpdateNotesDigest
     ) -> (strip: CGFloat, chosen: CGFloat) {
         let options = UpdateNotesTabStrip.options(digest)
-        let strip = NSHostingController(
-            rootView: SegmentedPicker(
-                selection: .constant(UpdateNotesTab.highlights),
-                options: options
-            ).fixedSize()
-        ).sizeThatFits(in: CGSize(width: 10_000, height: 10_000))
+        let strip =
+            options.map { option in
+                width(
+                    SegmentedPicker(
+                        selection: .constant(option.value),
+                        options: options
+                    ).fixedSize()
+                )
+            }.max() ?? 0
         let chosen = NSHostingController(
             rootView: UpdateNotesTabStrip(
                 digest: digest,
@@ -86,22 +108,24 @@ struct UpdateNotesTabsTests {
         ).sizeThatFits(
             in: CGSize(width: available, height: 10_000)
         )
-        return (strip.width, chosen.width)
+        return (strip, chosen.width)
     }
 
-    @Test("the four kinds fit as segments in the longest locale")
+    @Test("the four kinds fit as segments in every locale")
     func knownKindsFitAsSegments() {
-        LocalizationManager.shared.select("fr")
         defer { LocalizationManager.shared.select("en") }
-        let (strip, chosen) = Self.widths(
-            Self.digest(
-                ["new", "improved", "fixed", "scripting"].map {
-                    Self.group($0, count: 18)
-                }
+        for locale in LocalizationManager.shared.available {
+            LocalizationManager.shared.select(locale)
+            let (strip, chosen) = Self.widths(
+                Self.digest(
+                    ["new", "improved", "fixed", "scripting"].map {
+                        Self.group($0, count: 18)
+                    }
+                )
             )
-        )
-        #expect(strip <= Self.available)
-        #expect(chosen == strip)
+            #expect(strip <= Self.available, "\(locale): \(strip)")
+            #expect(chosen == strip, "\(locale): \(chosen)")
+        }
     }
 
     @Test("an unknown kind that overflows gives way to the menu")
@@ -122,5 +146,28 @@ struct UpdateNotesTabsTests {
         )
         #expect(strip > Self.available)
         #expect(chosen < Self.available)
+    }
+
+    /// The window opens at the tallest tab, not the one showing.
+    @Test("the window is measured over every tab")
+    func heightCoversTheTallestTab() {
+        LocalizationManager.shared.select("en")
+        func height(entries: Int) -> CGFloat {
+            let offer = UpdateOffer(
+                version: "2.1.0",
+                build: "2.1.0",
+                installed: "2.0.0",
+                released: nil,
+                digest: Self.digest([Self.group("fixed", count: entries)])
+            )
+            return NSHostingView(
+                rootView: UpdateWindowView(
+                    offer: offer,
+                    mode: .whatsNew {},
+                    measuring: true
+                )
+            ).fittingSize.height
+        }
+        #expect(height(entries: 30) > height(entries: 1) + 300)
     }
 }

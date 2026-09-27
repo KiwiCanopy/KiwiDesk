@@ -1457,6 +1457,7 @@
   "update.window.group.improved": "Améliorations",
   "update.window.group.new": "Nouveautés",
   "update.window.group.scripting": "Lua & CLI",
+  "update.window.group_count": "%1$@ · %2$d",
   "update.window.highlights": "Points forts",
   "update.window.install": "Installer et relancer",
   "update.window.installed": "Installée : %1$@",

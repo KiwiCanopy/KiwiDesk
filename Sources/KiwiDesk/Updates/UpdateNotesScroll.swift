@@ -20,9 +20,7 @@ struct UpdateNotesScroll: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let digest = offer.digest,
-                UpdateNotesTabs.tabs(digest).count > 1
-            {
+            if let digest = offer.digest, UpdateNotesTabs.showsStrip(digest) {
                 UpdateNotesTabStrip(digest: digest, selection: $selection)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, UpdateWindowMetrics.inset)
@@ -100,7 +98,7 @@ struct UpdateNotesScroll: View {
                 whatsNew: whatsNew
             )
         case .group(let id):
-            if let group = digest.groups.first(where: { $0.id == id }) {
+            if let group = digest.group(id) {
                 UpdateNotesGroupList(
                     group: group,
                     labelled: digest.spansVersions

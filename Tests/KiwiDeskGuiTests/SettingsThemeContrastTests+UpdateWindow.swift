@@ -5,8 +5,9 @@ import SwiftUI
 /// The update window's pairings (#1542), measured by the one
 /// contrast suite and kept here for its length: the Highlights
 /// panel's gold edge and inks over its gold-washed card and the
-/// failed glyph on the footer; a tab's list sits on the page,
-/// whose inks the main list already measures.
+/// failed glyph on the footer, and the tab strip's ink over its
+/// track; a tab's list sits on the page, whose inks the main
+/// list already measures.
 extension SettingsThemeContrastTests {
     private static let highlightWash = (
         color: SettingsTheme.highlight,
@@ -39,6 +40,17 @@ extension SettingsThemeContrastTests {
             SettingsTheme.ink3,
             on: SettingsTheme.card,
             washedWith: highlightWash
+        ),
+        // The tab strip's unselected label over its track, which
+        // sits on the page rather than a card (#1666).
+        Pairing(
+            "ink on the tab strip's track",
+            SettingsTheme.ink,
+            on: SettingsTheme.page,
+            washedWith: (
+                color: Color.primary,
+                alpha: SegmentedPickerMetrics.trackAlpha
+            )
         ),
         Pairing(
             "warningInk glyph on panel",

@@ -1457,6 +1457,7 @@
   "update.window.group.improved": "개선",
   "update.window.group.new": "새로운 기능",
   "update.window.group.scripting": "Lua & CLI",
+  "update.window.group_count": "%1$@ · %2$d",
   "update.window.highlights": "주요 내용",
   "update.window.install": "설치 후 다시 실행",
   "update.window.installed": "현재 버전: %1$@",
