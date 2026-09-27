@@ -76,7 +76,11 @@ enum BootRestoreFixture {
     static func settle(_ core: KiwiCore) -> [WindowID: CGRect] {
         for _ in 0..<4 {
             let issued = record(core) { core.retile() }
-            for (id, frame) in issued {
+            let moved = issued.filter {
+                core.state.windows[$0.0]?.frame != $0.1
+            }
+            if moved.isEmpty { break }
+            for (id, frame) in moved {
                 core.state.apply(.windowMoved(id, frame))
             }
         }
