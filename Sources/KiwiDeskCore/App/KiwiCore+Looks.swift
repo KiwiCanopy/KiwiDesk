@@ -17,8 +17,10 @@ extension KiwiCore {
         paletteLibrary.builtins() + paletteLibrary.userPalettes()
     }
 
-    /// Renames a user palette and re-points the looks naming it.
+    /// Renames a user palette and re-points the looks naming it;
+    /// refuses before either write while a library is unreadable.
     public func renamePalette(from old: String, to new: String) throws {
+        try requireReadableLibraries()
         try paletteLibrary.rename(from: old, to: new)
         try lookLibrary.repointPalette(from: old, to: new)
     }
@@ -42,14 +44,14 @@ extension KiwiCore {
 
     /// Saves `settings`' styling as look `name`, naming the palette
     /// that reproduces its colours or filing them as a new one.
-    /// Refuses before writing anything when the look library is
+    /// Refuses before writing anything while either library is
     /// unreadable, so no orphan palette is left behind.
     @discardableResult
     public func saveLook(
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
-        _ = try lookLibrary.libraryLooks()
+        try requireReadableLibraries()
         let paletteName: String
         if let matching = palette(reproducing: settings) {
             paletteName = matching.name
@@ -72,14 +74,14 @@ extension KiwiCore {
     }
 
     /// Imports a look file under a free name; the palette it
-    /// carries is reused where an identical one is saved, else
-    /// filed under a free name, and the look re-pointed at it.
+    /// carries is reused where one with the same colours is saved,
+    /// else filed under a free name, and the look re-pointed at it.
     @discardableResult
     public func importLook(
         from url: URL,
         fallbackName: String
     ) throws -> ShelfLook {
-        _ = try lookLibrary.libraryLooks()
+        try requireReadableLibraries()
         let file = try lookLibrary.importLook(from: url)
         var look = file.look
         let looks = lookLibrary
@@ -87,7 +89,10 @@ extension KiwiCore {
             base: Self.named(look.name, else: fallbackName)
         ) { looks.isBuiltinName($0) || looks.hasUserLook($0) }
         if let palette = file.palette {
-            look.palette = fileImported(palette, fallbackName: look.name)
+            look.palette = try fileImported(
+                palette,
+                fallbackName: look.name
+            )
         }
         try lookLibrary.save(look)
         return look
@@ -96,18 +101,26 @@ extension KiwiCore {
     private func fileImported(
         _ palette: ColorPalette,
         fallbackName: String
-    ) -> String {
-        let name = Self.named(palette.name, else: fallbackName)
-        if let same = allPalettes.first(where: {
-            $0.name == name && $0.reproduces(Self.painted(palette))
-        }) {
+    ) throws -> String {
+        let painted = Self.painted(palette)
+        if let same = allPalettes.first(where: { $0.reproduces(painted) }) {
             return same.name
         }
-        let free = newPaletteName(for: name)
-        try? paletteLibrary.save(
+        let free = newPaletteName(
+            for: Self.named(palette.name, else: fallbackName)
+        )
+        try paletteLibrary.save(
             ColorPalette(name: free, colors: palette.colors)
         )
         return free
+    }
+
+    /// Throws while either library exists but will not decode — a
+    /// write across both must not land half, nor read an
+    /// unreadable library's names as free.
+    private func requireReadableLibraries() throws {
+        _ = try lookLibrary.libraryLooks()
+        _ = try paletteLibrary.libraryPalettes()
     }
 
     /// The colour map `palette` gives over the shipped colours.

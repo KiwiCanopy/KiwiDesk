@@ -112,7 +112,7 @@ struct ShelfLookApplyTests {
         source.kiwishelf.fontFamily = "Geneva"
         source.kiwishelf.fontWeight = 700
         source.kiwishelf.iconSource = .appFont
-        source.kiwishelf.dimFactor = 0.4
+        source.kiwishelf.dimFactor = 0.7
         source.spaceBarStyle.activeIndicator = .edgeMark
         source.spaceBarStyle.glyphGap = 2
         source.spaceBarStyle.activeDimFactor = 0.5
@@ -129,15 +129,18 @@ struct ShelfLookApplyTests {
             LookKeys.extract(from: settings)
                 == LookKeys.extract(from: source)
         )
-        #expect(
-            LookKeys.extract(from: source)
-                != LookKeys.extract(from: TilingSettings())
-        )
+        // Every path is off its default, so none rides for free.
+        let defaults = LookKeys.extract(from: TilingSettings())
+        let written = LookKeys.extract(from: source)
+        for path in LookKeys.all {
+            #expect(written[path] != defaults[path], "\(path)")
+        }
     }
 
     @Test("glass is one switch over every surface (#1307)")
     func glassWritesEveryLeaf() {
         var settings = TilingSettings()
+        #expect(TilingSettings.liquidGlassLeaves.count > 1)
         look(["kiwishelf.liquid_glass": .bool(false)]).apply(to: &settings)
         for leaf in TilingSettings.liquidGlassLeaves {
             #expect(settings[keyPath: leaf] == false)
@@ -147,6 +150,9 @@ struct ShelfLookApplyTests {
     @Test("the App Bar indicator is not hidden by a layout's")
     func indicatorClearsLayoutOverrides() {
         var settings = TilingSettings()
+        // The two layouts cleared are every host there is; a third
+        // host reds here until the look clears it too.
+        #expect(settings.appBarHosts.count == 2)
         settings.monocle.appBar.activeIndicator = .outline
         settings.scrolling.appBar.activeIndicator = .outline
         let edge = look(["app_bar.active_indicator": .string("edge_mark")])

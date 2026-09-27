@@ -65,10 +65,10 @@ extension LooksShelf {
         do {
             try core.saveLook(named: name, from: model.config.settings)
             failure = nil
+            saveRequest = nil
         } catch {
             failure = libraryFailure
         }
-        saveRequest = nil
         reload()
     }
 

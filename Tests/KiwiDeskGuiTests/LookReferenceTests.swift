@@ -11,6 +11,7 @@ struct LookReferenceTests {
     @Test("the look reference places its link")
     func placesItsLink() {
         LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
         #expect(
             KiwiShelfCard.lookReference.contains(
                 CrossReferenceRow.linkSlot

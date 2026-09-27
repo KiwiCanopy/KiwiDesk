@@ -42,6 +42,15 @@ struct LookColorsOfferTests {
         #expect(
             ColorPaletteKeys.extract(from: unticked) == before
         )
+        // Unticked, the row stays so the colors can come back.
+        #expect(
+            LookColorsOffer.decide(
+                look: taskbar,
+                before: before,
+                palette: slate,
+                settings: unticked
+            ) == .tick(palette: slate, before: prior)
+        )
     }
 
     @Test("no offer once the styling is superseded")

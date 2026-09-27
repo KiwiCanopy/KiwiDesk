@@ -117,10 +117,12 @@ extension PaletteShelf {
     func renamePalette(_ typed: String, from oldName: String) {
         let name = trimmed(typed)
         guard canRename(name, from: oldName) else { return }
-        // Core's door re-points the looks drawn in it (#1684).
-        try? model.core.renamePalette(from: oldName, to: name)
+        // Core's door re-points the looks drawn in it (#1684); a
+        // refusal leaves the popover open on the name typed.
+        if (try? model.core.renamePalette(from: oldName, to: name)) != nil {
+            renameRequest = nil
+        }
         model.refreshLooks()
-        renameRequest = nil
         reload()
     }
 

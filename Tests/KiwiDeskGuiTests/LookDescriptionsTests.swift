@@ -12,6 +12,7 @@ struct LookDescriptionsTests {
     @Test("every bundled look has a caption")
     func everyBundledLookIsDescribed() {
         LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
         for look in LookCatalog.bundled() {
             #expect(
                 LookDescriptions.caption(for: look.name) != nil,
