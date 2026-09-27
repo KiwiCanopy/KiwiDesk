@@ -6,10 +6,17 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     public struct WindowRecord: Codable, Sendable, Equatable {
         public let id: UInt32
         public let frame: CGRect
+        /// In-place restarts only (#930, `StateSnapshot+InPlace`).
+        public var session: WindowSession?
 
-        public init(id: WindowID, frame: CGRect) {
+        public init(
+            id: WindowID,
+            frame: CGRect,
+            session: WindowSession? = nil
+        ) {
             self.id = id.raw
             self.frame = frame
+            self.session = session
         }
 
         public var windowID: WindowID { WindowID(id) }
@@ -26,8 +33,11 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         /// while a lost partition restructures the space.
         public let trackBreaks: [UInt32]
         public let trackWeights: [UInt32: Double]
+        /// In-place restarts only (#930, `StateSnapshot+InPlace`).
+        public var session: SpaceSession?
 
-        public init(space: Space) {
+        public init(space: Space, inPlace: Bool = false) {
+            self.session = inPlace ? SpaceSession(space: space) : nil
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
@@ -41,7 +51,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, mode, windows, focused
+            case id, mode, windows, focused, session
             case trackBreaks = "track_breaks"
             case trackWeights = "track_weights"
         }
@@ -70,6 +80,10 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                     [UInt32: Double].self,
                     forKey: .trackWeights
                 ) ?? [:]
+            session = try c.decodeIfPresent(
+                SpaceSession.self,
+                forKey: .session
+            )
         }
     }
 
@@ -136,6 +150,10 @@ extension StateCoordinator {
                     )
                 }
             }
+            adoptSession(record, in: space)
+        }
+        for record in snapshot.windows {
+            adoptSession(of: record)
         }
         if let active = snapshot.activeSpace,
             workspaces[SpaceID(active)] != nil

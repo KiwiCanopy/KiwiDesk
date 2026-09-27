@@ -30,7 +30,9 @@ public struct AppRef: Sendable, Equatable {
 }
 
 /// Stickiness scope across Spaces (#414, #445).
-public enum StickyScope: String, Sendable, Equatable, CaseIterable {
+public enum StickyScope: String, Sendable, Equatable, CaseIterable,
+    Codable
+{
     case none
     case global
     case display

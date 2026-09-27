@@ -33,6 +33,14 @@ extension KiwiCore {
         // gathered when it happened.
         settleDrawnSpaceModes()
         state.adopt(snapshot)
+        // The Monocle hold an in-place restart carried (#930);
+        // the read validates membership.
+        for record in snapshot.spaces {
+            if let held = record.session?.monocleShown {
+                tiler.monocleShownMembers[SpaceID(record.id)] =
+                    WindowID(held)
+            }
+        }
         state.restoredFrames = [:]
         var missing = 0
         for record in snapshot.windows {

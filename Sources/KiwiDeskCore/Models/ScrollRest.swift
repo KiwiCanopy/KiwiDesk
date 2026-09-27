@@ -33,7 +33,7 @@ public struct ScrollRest: Sendable, Equatable {
     }
 
     /// Viewport border alignment enum.
-    public enum Border: Sendable, Equatable {
+    public enum Border: String, Sendable, Equatable, Codable {
         case leading
         case trailing
     }
@@ -70,5 +70,16 @@ public struct ScrollRest: Sendable, Equatable {
             position: position,
             restingOn: restingOn
         )
+    }
+}
+
+/// The session snapshot's form: an in-place restart carries the
+/// rest across the process swap so the viewport does not pan
+/// (#930).
+extension ScrollRest: Codable {}
+extension ScrollRest.Slot: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case window, position
+        case restingOn = "resting_on"
     }
 }
