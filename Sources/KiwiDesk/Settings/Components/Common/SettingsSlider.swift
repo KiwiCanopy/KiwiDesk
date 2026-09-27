@@ -18,12 +18,16 @@ struct SettingsSlider: View {
     @Environment(\.accessibilityReduceTransparency)
     private var reduceTransparency
     @FocusState private var focused: Bool
-    /// True for the gesture's lifetime; resets on cancel too.
-    @GestureState private var dragging = false
+    /// The pointer's unsnapped track fraction while dragging; the
+    /// knob follows it and settles on the snapped value when it
+    /// resets, which it does on cancel too (#1527).
+    @GestureState private var dragFraction: CGFloat?
+
+    private var dragging: Bool { dragFraction != nil }
 
     private static let knobWidth: CGFloat = 30
     private static let knobHeight: CGFloat = 20
-    private static let trackHeight: CGFloat = 8
+    private static let trackHeight: CGFloat = 10
     private static let height: CGFloat = 24
     /// Visual only — layout keeps the resting size (#1527).
     private static let dragScale: CGFloat = 1.25
@@ -104,29 +108,35 @@ struct SettingsSlider: View {
                     height: Self.knobHeight
                 )
                 .scaleEffect(dragging ? Self.dragScale : 1)
-                .animation(
-                    reduceMotion ? nil : .spring(duration: 0.25),
-                    value: dragging
-                )
                 .offset(x: center - Self.knobWidth / 2)
         }
+        // Press and release only: the drag itself tracks the
+        // pointer unanimated, and the release settles the knob
+        // onto the snapped value.
+        .animation(
+            reduceMotion ? nil : .spring(duration: 0.25),
+            value: dragging
+        )
         .frame(maxHeight: .infinity)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 0)
-                .updating($dragging) { _, state, _ in
-                    state = isEnabled
+                .updating($dragFraction) { drag, state, _ in
+                    guard isEnabled else { return }
+                    state = trackFraction(at: drag.location.x, in: width)
                 }
                 .onChanged { drag in
                     guard isEnabled else { return }
-                    set(at: drag.location.x, in: width)
+                    let t = trackFraction(at: drag.location.x, in: width)
+                    let span = range.upperBound - range.lowerBound
+                    value = snapped(range.lowerBound + Double(t) * span)
                 }
         )
     }
 
     private func knobCenter(in width: CGFloat) -> CGFloat {
         let usable = max(width - Self.knobWidth, 1)
-        let t = min(max(fraction, 0), 1)
+        let t = min(max(dragFraction ?? fraction, 0), 1)
         return Self.knobWidth / 2 + usable * t
     }
 
@@ -138,11 +148,12 @@ struct SettingsSlider: View {
         )
     }
 
-    private func set(at x: CGFloat, in width: CGFloat) {
+    private func trackFraction(
+        at x: CGFloat,
+        in width: CGFloat
+    ) -> CGFloat {
         let usable = max(width - Self.knobWidth, 1)
-        let t = min(max((x - Self.knobWidth / 2) / usable, 0), 1)
-        let span = range.upperBound - range.lowerBound
-        value = snapped(range.lowerBound + Double(t) * span)
+        return min(max((x - Self.knobWidth / 2) / usable, 0), 1)
     }
 
     /// True while the knob draws as glass rather than its white

@@ -403,8 +403,10 @@ content-sized segments. One control, one look.
 (ratios, gaps, sizes) is a `SettingsSlider`: a thin capsule
 track, a full-strength accent fill up to the knob's centre — a
 translucent fill reads as disabled — and a solid white capsule
-knob wider than the track is tall. While dragged the knob grows
-and turns clear Liquid Glass, the fill visibly running under it;
+knob wider than the track is tall. While dragged the knob grows,
+follows the pointer rather than hopping between steps — settling
+onto the step on release — and turns clear Liquid Glass, the
+fill visibly running under it;
 that glass is Settings' own control finish, so the overlays'
 Liquid Glass switch does not reach it, and Reduce transparency
 keeps the white knob (#1527). A glass knob at rest was tried and
