@@ -145,7 +145,21 @@ struct SnapshotCarryCensusTests {
         let b = try processB(from: a)
         let before = fields(try #require(a.state.workspaces[spaceID]))
         let after = fields(try #require(b.state.workspaces[spaceID]))
-        let fresh = fields(Space(id: spaceID))
+        // The baseline carries a default-built scroll rest, so its
+        // nested leaves have a default to be moved off — a nil
+        // rest has none, and every nested clause passed vacuously.
+        var baseline = Space(id: spaceID)
+        baseline.scrollRest = ScrollRest(
+            offset: 0,
+            focus: WindowID(0),
+            position: 0,
+            restingOn: nil
+        )
+        let fresh = fields(baseline)
+        #expect(
+            Set(before.keys).isSubset(of: fresh.keys),
+            "a leaf with no default to compare against"
+        )
         for (label, value) in before {
             #expect(
                 fresh[label] != value || label == "id",
