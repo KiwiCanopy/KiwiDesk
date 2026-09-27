@@ -108,8 +108,23 @@ struct BarSliderBandTests {
                 > KiwiShelf.minContentDepth
         )
         let declared = try declaration(of: "itemPadding")
-        #expect(declared.contains("KiwiShelf.minItemPadding"))
-        #expect(declared.contains("KiwiShelf.minContentDepth"))
+        // The ceiling's expression itself reads the content floor,
+        // not a name left lying in the declaration.
+        #expect(
+            declared.contains(
+                "let floor = Double(KiwiShelf.minItemPadding)"
+            )
+        )
+        #expect(
+            declared.contains(
+                "let content = Double(KiwiShelf.minContentDepth)"
+            )
+        )
+        #expect(
+            declared.contains(
+                "floor...((thickness.upperBound - content) / 2)"
+            )
+        )
     }
 
     /// Which band each Core-clamped bar row reads, keyed by the

@@ -108,6 +108,15 @@ struct ItemPaddingTests {
         #expect(shelf.itemPadding == 0)
     }
 
+    /// Parse floors every length at 0 already, so the apply arm's
+    /// own floor is held by a setting that skips parse.
+    @Test("Apply floors a negative padding itself")
+    func applyFloors() {
+        var shelf = KiwiShelf()
+        KiwiShelfCommandSetting.itemPadding(-3).apply(to: &shelf)
+        #expect(shelf.itemPadding == KiwiShelf.minItemPadding)
+    }
+
     @Test(
         "The setter floors at zero",
         arguments: [(-3.0, 0.0), (7.0, 7.0)]

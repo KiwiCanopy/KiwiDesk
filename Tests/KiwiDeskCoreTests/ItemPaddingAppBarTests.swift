@@ -138,6 +138,30 @@ struct ItemPaddingAppBarTests {
         #expect(slot < Self.depth)
     }
 
+    /// The live render lays each item at the strip's full depth;
+    /// only what it draws inside shrinks.
+    @Test("A rendered App Bar item keeps the full depth")
+    func renderedItemKeepsDepth() throws {
+        let bar = AppBarManager.Bar(
+            display: barTitleDisplay,
+            space: SpaceID("1"),
+            items: (1...3).map { appBarItem(UInt32($0), text: "W\($0)") },
+            activeIndex: 0,
+            strip: CGRect(x: 0, y: 0, width: 1440, height: Self.depth),
+            style: Self.look(),
+            capAxis: 1440
+        )
+        let manager = AppBarManager()
+        manager.sync([bar])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        #expect(!overlay.itemViews.isEmpty)
+        for view in overlay.itemViews where !view.isHidden {
+            #expect(view.frame.height == Self.depth)
+        }
+    }
+
     @Test("The overflow count's automatic size follows the content")
     func countFollowsContent() throws {
         let look = Self.look()
