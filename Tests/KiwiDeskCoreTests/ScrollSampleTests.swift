@@ -88,12 +88,12 @@ struct ScrollTapEventReadingTests {
         event.setIntegerValueField(.scrollWheelEventScrollPhase, value: 2)
         event.setIntegerValueField(
             .scrollWheelEventMomentumPhase,
-            value: 0
+            value: 2
         )
         let sample = ScrollGestureTap.sample(of: event)
         #expect(sample.chord == [.control, .option])
         #expect(sample.phase == .changed)
-        #expect(sample.momentum == .none)
+        #expect(sample.momentum == .changed)
         // A synthetic event is not inverted by the system, so the
         // natural convention negates both axes.
         #expect(sample.delta == CGVector(dx: 3, dy: -7))

@@ -1,7 +1,9 @@
 import AppKit
 
-/// Tracks left-button mouse presses for gesture classification and display
-/// focus (#446, #953).
+/// Pointer input, two jobs: left-button presses for gesture
+/// classification and display focus (#446, #953), and — through
+/// `scroll` — the scroll-gesture tap, whose lifetime follows
+/// this tracker's `start`/`stop` (#1656, #1519).
 @MainActor
 public final class MouseTracker {
     public struct Press {
@@ -23,8 +25,7 @@ public final class MouseTracker {
     }
 
     public private(set) var press: Press?
-    /// Scroll gestures (#1656, #1519): its tap lives and dies with
-    /// this tracker's `start`/`stop`.
+    /// Scroll gestures (#1656, #1519).
     public let scroll = ScrollGestures()
 
     /// Which mouse buttons are down, as a mask — the one home

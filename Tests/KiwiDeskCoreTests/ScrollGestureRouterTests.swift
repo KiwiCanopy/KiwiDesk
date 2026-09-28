@@ -166,6 +166,35 @@ struct ScrollGestureRouterTests {
         #expect(next.events.map(\.chord) == [Self.pan, Self.step])
     }
 
+    @Test("a touch passed through stays the app's once the chord is down")
+    func passedTouchStaysPassed() {
+        var router = router()
+        #expect(!router.route(sample([], .mayBegin), now: 0).consume)
+        let began = router.route(sample(Self.pan, dy: 2, .began), now: 0)
+        #expect(!began.consume)
+        #expect(began.events.isEmpty)
+        #expect(!router.route(sample(Self.pan, .ended), now: 0.1).consume)
+        // The next gesture is the chord's again.
+        #expect(router.route(sample(Self.pan, .began), now: 0.5).consume)
+    }
+
+    @Test("the travel a .began carries is reported, not dropped")
+    func beganTravelIsReported() {
+        var router = router()
+        let began = router.route(sample(Self.pan, dy: 6, .began), now: 0)
+        #expect(began.events.map(\.kind) == [.began, .changed])
+        #expect(began.events.last?.delta.dy == 6)
+    }
+
+    @Test("an expired gesture ends where it last was")
+    func expiryKeepsLocation() {
+        var router = router()
+        var last = sample(Self.pan, dy: 10)
+        last.location = CGPoint(x: 900, y: 40)
+        _ = router.route(last, now: 0)
+        #expect(router.expire(now: 5).first?.location == last.location)
+    }
+
     @Test("a wheel burst ends at a pause")
     func wheelBurstEndsAtPause() {
         var router = router()

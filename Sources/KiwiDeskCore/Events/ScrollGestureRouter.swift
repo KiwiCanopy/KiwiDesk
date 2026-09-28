@@ -44,10 +44,15 @@ struct ScrollGestureRouter {
         var chord: ScrollChord
         var input: ScrollGestureEvent.Input
         var began: Bool
+        /// Where the gesture last was: an expiry ends it there.
+        var location: CGPoint
     }
 
     var chords: Set<ScrollChord> = []
     private var owner: Owner?
+    /// A trackpad gesture passed through at its first touch: its
+    /// `.began` stays the app's even if the chord is pressed since.
+    private var passing = false
     private(set) var deadline: Double?
 
     /// Routes one sample: `consume` says whether the event is
@@ -56,23 +61,30 @@ struct ScrollGestureRouter {
         _ sample: ScrollSample,
         now: Double
     ) -> (consume: Bool, events: [ScrollGestureEvent]) {
+        defer { owner?.location = sample.location }
         if sample.momentum != .none {
             return routeMomentum(sample, now: now)
         }
         switch sample.phase {
         case .mayBegin, .began:
-            var events = end(at: sample.location)
-            guard chords.contains(sample.chord) else {
-                return (false, events)
+            if sample.phase == .began, passing, owner == nil {
+                return (false, [])
             }
+            var events = end(at: sample.location)
+            passing = !chords.contains(sample.chord)
+            guard !passing else { return (false, events) }
             owner = Owner(
                 chord: sample.chord,
                 input: .trackpad,
-                began: false
+                began: false,
+                location: sample.location
             )
             deadline = nil
             if sample.phase == .began {
                 events += begin(sample)
+                if sample.delta != .zero {
+                    events.append(event(.changed, sample))
+                }
             }
             return (true, events)
         case .changed:
@@ -80,21 +92,30 @@ struct ScrollGestureRouter {
             let events = begin(sample) + [event(.changed, sample)]
             return (true, events)
         case .ended:
-            guard owner?.input == .trackpad else { return (false, []) }
+            guard owner?.input == .trackpad else {
+                passing = false
+                return (false, [])
+            }
             deadline = now + Self.momentumGrace
             return (true, [])
         case .cancelled:
-            guard owner?.input == .trackpad else { return (false, []) }
+            guard owner?.input == .trackpad else {
+                passing = false
+                return (false, [])
+            }
             return (true, end(at: sample.location))
         case .none:
             return routeWheel(sample, now: now)
         }
     }
 
-    /// Ends an owned gesture whose deadline has passed.
+    /// Ends an owned gesture whose deadline has passed, where it
+    /// last was.
     mutating func expire(now: Double) -> [ScrollGestureEvent] {
-        guard let deadline, now >= deadline else { return [] }
-        return end(at: .zero)
+        guard let deadline, now >= deadline, let owner else {
+            return []
+        }
+        return end(at: owner.location)
     }
 
     private mutating func routeMomentum(
@@ -121,7 +142,12 @@ struct ScrollGestureRouter {
             guard chords.contains(sample.chord) else {
                 return (false, events)
             }
-            owner = Owner(chord: sample.chord, input: .wheel, began: false)
+            owner = Owner(
+                chord: sample.chord,
+                input: .wheel,
+                began: false,
+                location: sample.location
+            )
             events += begin(sample)
         }
         deadline = now + Self.wheelPause

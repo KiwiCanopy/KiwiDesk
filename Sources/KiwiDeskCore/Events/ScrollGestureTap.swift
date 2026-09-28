@@ -31,7 +31,7 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
     // start semaphore signals and read after it waits.
     private var router = ScrollGestureRouter()
     private var port: CFMachPort?
-    private var timer: CFRunLoopTimer?
+    private var timer: ScrollExpiryTimer?
     private var runLoop: CFRunLoop?
     private var installed = false
 
@@ -55,7 +55,7 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         CFRunLoopPerformBlock(runLoop, CFRunLoopMode.commonModes.rawValue) {
             [self] in
             if let port { CFMachPortInvalidate(port) }
-            if let timer { CFRunLoopTimerInvalidate(timer) }
+            timer?.invalidate()
             CFRunLoopStop(CFRunLoopGetCurrent())
         }
         CFRunLoopWakeUp(runLoop)
@@ -100,18 +100,11 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         self.port = port
         let source = CFMachPortCreateRunLoopSource(nil, port, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
-        let timer = CFRunLoopTimerCreateWithHandler(
-            nil,
-            .greatestFiniteMagnitude,
-            0,
-            0,
-            0
-        ) { [self] _ in
+        timer = ScrollExpiryTimer(on: CFRunLoopGetCurrent()) {
+            [self] in
             send(router.expire(now: CFAbsoluteTimeGetCurrent()))
-            reschedule()
+            timer?.arm(at: router.deadline)
         }
-        CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, .commonModes)
-        self.timer = timer
         return true
     }
 
@@ -132,26 +125,22 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
             }
             return Unmanaged.passUnretained(event)
         }
-        router.chords = chords.withLock { $0 }
-        let routed = router.route(
-            Self.sample(of: event),
-            now: CFAbsoluteTimeGetCurrent()
-        )
-        send(routed.events)
-        reschedule()
-        return routed.consume ? nil : Unmanaged.passUnretained(event)
+        // A raw `Thread` drains no pool of its own until it exits.
+        let consume = autoreleasepool {
+            router.chords = chords.withLock { $0 }
+            let routed = router.route(
+                Self.sample(of: event),
+                now: CFAbsoluteTimeGetCurrent()
+            )
+            send(routed.events)
+            timer?.arm(at: router.deadline)
+            return routed.consume
+        }
+        return consume ? nil : Unmanaged.passUnretained(event)
     }
 
     private func send(_ events: [ScrollGestureEvent]) {
         if !events.isEmpty { deliver(events) }
-    }
-
-    private func reschedule() {
-        guard let timer else { return }
-        CFRunLoopTimerSetNextFireDate(
-            timer,
-            router.deadline ?? .greatestFiniteMagnitude
-        )
     }
 
     static func sample(of event: CGEvent) -> ScrollSample {
