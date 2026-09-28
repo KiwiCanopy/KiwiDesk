@@ -53,6 +53,7 @@ extension SpaceBarOverlay {
 
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
+            // Its item left in this render's `syncItemViewCount`.
             let glass = boxGlasses.removeLast()
             GlassPlate.release(glass)
             glass.removeFromSuperview()

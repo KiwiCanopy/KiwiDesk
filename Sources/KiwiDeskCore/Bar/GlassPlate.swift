@@ -45,15 +45,14 @@ enum GlassPlate {
             let glass = view as? NSGlassEffectView
         else { return }
         if glass.contentView !== content {
+            release(glass)
             glass.contentView = content
         }
     }
 
-    /// Hands the glass's content back as an ordinary frame-laid
-    /// view, returning it: hosting turned its
-    /// `translatesAutoresizingMaskIntoConstraints` off, and left off
-    /// the next layout pass places it at its intrinsic size in the
-    /// corner (#1730). The one way content leaves a glass.
+    /// Takes content out of a glass with frame layout restored,
+    /// which hosting turned off (#1730); every exit through
+    /// `GlassPlate` takes it.
     @MainActor
     @discardableResult
     static func release(_ view: NSView) -> NSView? {
