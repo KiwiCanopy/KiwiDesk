@@ -16,10 +16,10 @@ import Testing
 ///   `makeTestCore` twins — the #565 class: a suite that binds a
 ///   gesture would otherwise take a session-wide tap.
 ///
-/// Residue: the mask clause reads the `CGEventMask(` line, so a
-/// mask built on another line and passed in reads as missing
-/// (fail-closed); and the thread clause pins where `install()` is
-/// CALLED, not what thread `CFRunLoopRun` then serves.
+/// Residue: the thread clause pins where `install()` is CALLED —
+/// inside the closure `start` hands its `Thread` — not what thread
+/// `CFRunLoopRun` then serves; and the pin clause reads the twins'
+/// text, not that `makeTestCore` reaches the line.
 @Suite("The scroll tap stays one, scroll-only and off-main")
 struct ScrollTapSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -41,10 +41,12 @@ struct ScrollTapSeamTests {
 
     @Test("one event tap in the app, in the scroll tap's file")
     func oneTap() throws {
+        // `tapCreate` without its `(` also catches `tapCreateForPid(`
+        // and `tapCreateForPSN(`; `EventTapCreate` the C spelling.
         let sites =
-            try Self.sites(of: "tapCreate(")
-            + Self.sites(of: "CGEventTapCreate(")
-        #expect(sites.map(\.site).count == 1)
+            try Self.sites(of: "tapCreate")
+            + Self.sites(of: "EventTapCreate")
+        #expect(sites.count == 1)
         #expect(
             sites.allSatisfy {
                 $0.file.lastPathComponent == "ScrollGestureTap.swift"
@@ -53,33 +55,50 @@ struct ScrollTapSeamTests {
         )
     }
 
-    @Test("the tap's mask is the scroll wheel alone")
-    func scrollOnlyMask() throws {
+    @Test("the tap is created with the one mask constant")
+    func maskIsTheConstant() throws {
+        // The constant's VALUE is `ScrollSampleTests`' to pin.
         let source = try SourceScan.strippedSource(at: Self.tapFile)
-        let maskLines = source.split(separator: "\n")
-            .filter { $0.contains("CGEventMask(") }
-        #expect(maskLines.count == 1)
-        let line = String(maskLines.first ?? "")
-        #expect(line.contains("CGEventType.scrollWheel.rawValue"))
-        #expect(line.components(separatedBy: "CGEventType.").count == 2)
-        #expect(!line.contains("|"))
-        #expect(source.contains("eventsOfInterest: mask"))
+        #expect(source.contains("eventsOfInterest: Self.mask"))
+        #expect(source.components(separatedBy: "eventsOfInterest:").count == 2)
     }
 
-    @Test("the tap installs on its own thread")
+    @Test("the tap installs inside its own thread's closure")
     func installsOffMain() throws {
         let body = try SourceScan.functionBody(
             of: "start",
             in: "ScrollGestureTap.swift",
             under: "Events"
         )
-        let thread = try #require(body.range(of: "Thread {"))
-        let call = try #require(body.range(of: "install()"))
-        #expect(thread.lowerBound < call.lowerBound)
+        let closure = try #require(Self.closure(after: "Thread {", in: body))
+        #expect(closure.contains("install()"))
         let source = try SourceScan.strippedSource(at: Self.tapFile)
         // One call beside the declaration: a second call site
         // could install on whatever thread it runs on.
         #expect(source.components(separatedBy: "install()").count == 3)
+    }
+
+    /// The brace-balanced body that opens at `marker`'s `{`.
+    private static func closure(
+        after marker: String,
+        in text: String
+    ) -> String? {
+        guard let start = text.range(of: marker) else { return nil }
+        var depth = 0
+        var index = text.index(before: start.upperBound)
+        while index < text.endIndex {
+            switch text[index] {
+            case "{": depth += 1
+            case "}":
+                depth -= 1
+                if depth == 0 {
+                    return String(text[start.upperBound..<index])
+                }
+            default: break
+            }
+            index = text.index(after: index)
+        }
+        return nil
     }
 
     @Test("one live factory, pinned inert in both makeTestCore twins")

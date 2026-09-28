@@ -50,13 +50,14 @@ struct ScrollGesturesTests {
     private func event(
         _ chord: ScrollChord,
         _ kind: ScrollGestureEvent.Kind,
-        dx: Double = 0
+        dx: Double = 0,
+        dy: Double = 0
     ) -> ScrollGestureEvent {
         ScrollGestureEvent(
             chord: chord,
             kind: kind,
             input: .trackpad,
-            delta: CGVector(dx: dx, dy: 0),
+            delta: CGVector(dx: dx, dy: dy),
             momentum: false,
             location: CGPoint(x: 7, y: 9)
         )
@@ -178,6 +179,20 @@ struct ScrollGesturesTests {
         #expect(stepHeard.isEmpty)
     }
 
+    @Test("changing one gesture's chord leaves the other's gesture")
+    func otherGestureSurvivesChange() {
+        let (gestures, _) = front()
+        var heard: [ScrollGestureEvent.Kind] = []
+        gestures.setHandler(.pan) { _ in }
+        gestures.setHandler(.step) { heard.append($0.kind) }
+        gestures.configure(settings())
+        gestures.start()
+        gestures.receive([event(Self.step, .began)])
+        gestures.configure(settings(pan: [.control, .command]))
+        gestures.receive([event(Self.step, .changed)])
+        #expect(heard == [.began, .changed])
+    }
+
     @Test("re-applying the same settings keeps a live gesture")
     func sameSettingsKeepGesture() {
         let (gestures, _) = front()
@@ -195,15 +210,19 @@ struct ScrollGesturesTests {
     @Test("Natural scrolling off flips the delta, once, here")
     func naturalScrollingFlips() {
         let (gestures, _) = front()
-        var deltas: [Double] = []
-        gestures.setHandler(.pan) { deltas.append($0.delta.dx) }
+        var deltas: [CGVector] = []
+        gestures.setHandler(.pan) { deltas.append($0.delta) }
         gestures.configure(settings())
         gestures.start()
         gestures.receive([event(Self.pan, .began)])
-        gestures.receive([event(Self.pan, .changed, dx: 5)])
+        gestures.receive([event(Self.pan, .changed, dx: 5, dy: 3)])
         gestures.configure(settings(natural: false))
-        gestures.receive([event(Self.pan, .changed, dx: 5)])
-        #expect(deltas == [0, 5, -5])
+        gestures.receive([event(Self.pan, .changed, dx: 5, dy: 3)])
+        #expect(
+            deltas == [
+                .zero, CGVector(dx: 5, dy: 3), CGVector(dx: -5, dy: -3),
+            ]
+        )
     }
 
     @Test("what the tap routes reaches the consumer on the main queue")

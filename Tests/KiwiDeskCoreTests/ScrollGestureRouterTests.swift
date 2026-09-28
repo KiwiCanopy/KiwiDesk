@@ -211,9 +211,12 @@ struct ScrollGestureRouterTests {
     @Test("an expired gesture ends where it last was")
     func expiryKeepsLocation() {
         var router = router()
+        var first = sample(Self.pan, dy: 10)
+        first.location = CGPoint(x: 10, y: 10)
         var last = sample(Self.pan, dy: 10)
         last.location = CGPoint(x: 900, y: 40)
-        _ = router.route(last, now: 0)
+        _ = router.route(first, now: 0)
+        _ = router.route(last, now: 0.1)
         #expect(router.expire(now: 5).first?.location == last.location)
     }
 

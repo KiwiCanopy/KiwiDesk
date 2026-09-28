@@ -72,6 +72,12 @@ struct ScrollSampleTests {
 /// 2 is horizontal, axis 1 vertical, phases from their fields.
 @Suite("Scroll tap event reading")
 struct ScrollTapEventReadingTests {
+    @Test("the tap listens to the scroll wheel and nothing else")
+    func maskIsScrollOnly() {
+        #expect(ScrollGestureTap.mask == 1 << 22)
+        #expect(CGEventType.scrollWheel.rawValue == 22)
+    }
+
     @Test("axes, phases and flags come off the event")
     func readsTheEvent() throws {
         let event = try #require(
@@ -85,14 +91,14 @@ struct ScrollTapEventReadingTests {
             )
         )
         event.flags = [.maskControl, .maskAlternate]
-        event.setIntegerValueField(.scrollWheelEventScrollPhase, value: 2)
+        event.setIntegerValueField(.scrollWheelEventScrollPhase, value: 4)
         event.setIntegerValueField(
             .scrollWheelEventMomentumPhase,
             value: 2
         )
         let sample = ScrollGestureTap.sample(of: event)
         #expect(sample.chord == [.control, .option])
-        #expect(sample.phase == .changed)
+        #expect(sample.phase == .ended)
         #expect(sample.momentum == .changed)
         // A synthetic event is not inverted by the system, so the
         // natural convention negates both axes.

@@ -21,7 +21,9 @@ editing here:
   obligations:
   - **One tap, scroll-only.** A second `tapCreate(`, or a mask
     widened past `.scrollWheel`, is where an Input Monitoring
-    prompt would come from (`ScrollTapSeamTests`).
+    prompt would come from (`ScrollTapSeamTests` for the one tap
+    and its one mask constant, `ScrollSampleTests` for the
+    constant's value).
   - **The tap installs on its own thread and decides there.**
     Every scroll on the Mac waits on the callback, and the main
     actor can block on a slow app's AX reply for seconds; the

@@ -77,15 +77,18 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         return installed
     }
 
+    /// The scroll wheel alone: a wider mask is where an Input
+    /// Monitoring prompt would come from (`ScrollSampleTests`).
+    static let mask = CGEventMask(1) << CGEventType.scrollWheel.rawValue
+
     /// On the tap thread: creates the tap and its expiry timer.
     private func install() -> Bool {
-        let mask = CGEventMask(1 << CGEventType.scrollWheel.rawValue)
         guard
             let port = CGEvent.tapCreate(
                 tap: .cgSessionEventTap,
                 place: .headInsertEventTap,
                 options: .defaultTap,
-                eventsOfInterest: mask,
+                eventsOfInterest: Self.mask,
                 callback: { _, type, event, info in
                     guard let info else {
                         return Unmanaged.passUnretained(event)
