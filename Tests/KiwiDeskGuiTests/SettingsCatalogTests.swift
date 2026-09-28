@@ -110,7 +110,13 @@ struct SettingsCatalogTests {
         // 111 since #1679: it gained the border and its width.
         // 113 since #1681: its font family and font weight.
         // 115 since #1713: its glyph size toggle and slider.
-        #expect(allEntries.count == 115)
+        // 116 since #1684: the look shelf.
+        // 118 since #1726: Shortcuts' Mouse & trackpad drawer
+        // and its two rows, less Behavior's Mouse card.
+        // 121 since #1731: Position's Each bar drawer and its two
+        // edge rows.
+        // 119 since #1741: Behavior's Cues and On quit cards left.
+        #expect(allEntries.count == 119)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

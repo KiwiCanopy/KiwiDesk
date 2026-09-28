@@ -20,6 +20,9 @@ struct BarsGates {
         case shelfEmpty
         /// Boxed draws a box per item — no plate to size.
         case boxedShelf
+        /// The bars sit on different edges, so nothing shares one
+        /// (#1731).
+        case barsSplit
         /// The shelf's font family is not installed, so System
         /// draws and the family has no weights to offer (#1681).
         case fontMissing(family: String)
@@ -55,12 +58,14 @@ struct BarsGates {
     var bothBarsShow: Bool { settings.bothBarsCanShow }
 
     /// Why order and share are inert: whichever of the two bars
-    /// is missing, so the sentence names only that one.
-    /// Nil while no bar shows: the card's block grey answers then.
+    /// is missing, so the sentence names only that one, else the
+    /// two sitting on different edges (#1731). Nil while no bar
+    /// shows: the card's block grey answers then.
     var bothBarsReason: InertReason? {
         guard settings.shelfShows else { return nil }
         if !settings.spaceBarStyle.enabled { return .spaceBarOff }
-        return anyBarShown ? nil : .noBarShown
+        guard anyBarShown else { return .noBarShown }
+        return settings.sharedBarEdge == nil ? .barsSplit : nil
     }
 
     /// True while any bar can show — Core's one predicate — so
@@ -73,9 +78,10 @@ struct BarsGates {
         settings.kiwishelf.backgroundStyle == .boxed
     }
 
-    /// True when EVERY shown bar renders on a vertical edge.
-    var everyShownBarVertical: Bool {
-        anyBarShown && !settings.kiwishelf.edge.isHorizontal
+    /// True when an App Bar shows and its edge is vertical, so
+    /// it draws icons only (#1731: the App Bar's own edge).
+    var appBarVertical: Bool {
+        anyBarShown && !settings.appBarStyle.edge.isHorizontal
     }
 
     /// True when no shown bar renders an icon at all.
@@ -103,6 +109,17 @@ struct BarsGates {
 /// Explanatory hover/help text for bar gate reasons (#678).
 @MainActor
 enum BarsGateHelp {
+    /// The Position master's acknowledgement while the bars sit
+    /// on different edges (#1731) — not an `InertReason`: the
+    /// master stays live, and a pick re-fuses them.
+    static var edgesDiffer: String {
+        L(
+            "kiwishelf.edge.differ.help",
+            "The bars sit on different edges right now; choosing "
+                + "here puts both on one."
+        )
+    }
+
     static func sentence(for reason: BarsGates.InertReason) -> String {
         switch reason {
         case .noBarShown:
@@ -146,6 +163,11 @@ enum BarsGateHelp {
                     + "so no app glyph is drawn.",
                 L("app_bar.content.label", "Content"),
                 L("app_bar.content.title", "Title")
+            )
+        case .barsSplit:
+            return L(
+                "kiwishelf.bars_split.help",
+                "Applies while both bars share an edge."
             )
         case .fontMissing(let family):
             return L(

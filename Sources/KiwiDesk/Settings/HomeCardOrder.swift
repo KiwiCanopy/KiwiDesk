@@ -5,8 +5,8 @@
 enum HomeCardOrder {
     /// THIS PROFILE, full (Power User) order.
     static let thisProfile: [SettingsDestination] = [
-        .spaces, .gapsAndBorders, .bars, .colors,
-        .layoutDefaults, .monitors, .behavior, .advancedColors,
+        .spaces, .gapsAndBorders, .bars, .looks,
+        .layoutDefaults, .monitors, .advancedColors,
     ]
 
     /// WHOLE APP, full (Power User) order. The checklist is LAST:

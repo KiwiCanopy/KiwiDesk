@@ -279,15 +279,15 @@ struct ShelfBorderPreviewTests {
     @Test(
         "Every palette scene reads the draft's border switch",
         arguments: [
-            "AdvancedColorsPanel.swift",
-            "PaletteScenePanel.swift",
-            "PaletteShelf.swift",
+            "Colors/AdvancedColorsPanel.swift",
+            "Looks/PaletteScenePanel.swift",
+            "Looks/PaletteShelf.swift",
         ]
     )
     func scenesReadTheSwitch(file: String) throws {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors"
+                "Sources/KiwiDesk/Settings/Components"
             )
             .appendingPathComponent(file)
         let source = try SourceScan.strippedSource(at: url)

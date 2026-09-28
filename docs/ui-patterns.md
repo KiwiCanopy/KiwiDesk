@@ -130,9 +130,8 @@ semantic field uses the same control on comparable full-width
 surfaces*: the two bar cards both render Active indicator as
 segments. Segmented under the
 rule: the App Bar fields, Stack's Master orientation / Stack
-position / Overflow, Track's Overflow, and Corners (which
-drives all three strokes, #754). Menus where the rule keeps
-them: new-window placement (comparative labels), the
+position / Overflow, Track's Overflow, and Corners. Menus where
+the rule keeps them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
 
@@ -214,11 +213,11 @@ is selected.
 
 ## Shared visual language
 
-**A section or disclosure title is sentence case** — "On quit",
-"Drag & drop", "Move windows", not "On Quit" or "Drag & Drop"
-(R5, #406), which is what macOS System Settings uses for its
-own in-pane headers. Three boundaries, because System Settings
-itself draws them:
+**A section or disclosure title is sentence case** —
+"Applies immediately", "Drag & drop", "Move windows", not
+"Applies Immediately" or "Drag & Drop" (R5, #406), which is
+what macOS System Settings uses for its own in-pane headers.
+Three boundaries, because System Settings itself draws them:
 
 - **The rule is scoped to headers** — `SettingsSection` titles
   and the labels of an "Advanced" disclosure. The
@@ -257,7 +256,7 @@ fingerprint anywhere.
 **The qualifier must also be unclaimed by the surface AROUND
 the drawer** (#678). A row tier and a mode depth are never
 spelled with one word: Advanced Colors is the deep-mode twin of
-Colours & Animations (`SettingsArea.minimumMode` is `.powerUser`
+Looks & Animations (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
 hidden*. Its colour drawers are **"More colors"**, with the
@@ -329,6 +328,20 @@ title's far edge, drawn in `ink2` at `.subheadline`, the Mac
 Checklist's "Done: 2 of 4" — and never a control: an accessory
 that acts needs a name and a value of its own, which is the
 drawer accessory's job above.
+
+:::unreleased
+**A collapsible container that stands beside the page's
+sections is a collapsible section, not a drawer.**
+`SettingsCollapsibleSection` draws `SettingsSection`'s
+`.headline` header over the section plate; shut, the plate stays
+and holds the summary (`.callout`, `ink3`), and clicking the
+summary opens it too. A drawer that qualifies a card stays a
+`SettingsDisclosure` at the drawer tier. Both draw their header
+through the one `SettingsDisclosureButton`, so the full-row
+button, chevron, hover, heading trait and expanded value above
+hold for both, and search opens either on a hit for one of its
+catalog children. The ruling is in `docs/design-decisions.md`.
+:::
 
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row
@@ -414,7 +427,12 @@ dropped: it read as a blue knob. Accessibility is delegated to a
 native `Slider` representation, so assistive tech sees exactly
 the control it replaces. A signed value fills from its origin: the
 accent runs from the origin to the knob in either direction, and
-a hairline tick marks the origin.
+a notch marks the origin. A signed value that means darker or
+lighter (the sheen) also carries a moon and a sun at the track's
+ends and a faint dark-to-light ramp on the track, and at Off the
+notch shows just above and below the knob, which covers it
+otherwise. The glyphs are decorative; the spoken value says which
+way.
 
 **Buttons take a native style, and semantic role chooses the
 class.** No gradients or shadows on buttons — the crisp shadow
@@ -633,7 +651,7 @@ drives.
 **The areas that watch their draft do it in a fixed detail
 panel; the rest keep full width.** Which ones is
 `SettingsDetailPanelOffer.offering` and nothing else — Gaps &
-Borders, Bars, Colours & Animations, Layout Defaults, Shortcuts
+Borders, Bars, Looks & Animations, Layout Defaults, Shortcuts
 (its keyboard board), Advanced Colours and Spaces (#793,
 #794). They open as two columns: the controls, then a fixed
 392 pt right panel headed "Live preview · <area>" that redraws
@@ -828,10 +846,8 @@ way and is orthogonal to this GUI↔wire question.
 #406).** The rule above covers the case where the wire term is
 *correct* and the label alone is ambiguous, so only the label
 moves. When the **wire** term is factually wrong for what it
-names, the accurate side stays and the outlier moves. Three
-renames are that case: `drag.set_ghost_border_thickness` →
-`…_border_width` (the GUI says "Width"; a stroke has a width, a
-bar has a thickness), `track.set_count` → `track.set_limit`
+names, the accurate side stays and the outlier moves. Two
+renames are that case: `track.set_count` → `track.set_limit`
 (the GUI says "Track limit"; the value is a cap that
 `auto_tracks` overrides, not a count of what exists), and
 `tab_background` → `background_style` on both bars (the entries
@@ -1280,11 +1296,11 @@ Greying applied across a whole editor (#520, #527):
   ([Design decisions](design-decisions.md), #754). What a
   master owes once the twins are gone is an
   **acknowledgement**: while the values it is about to
-  overwrite disagree it carries a `?` saying so ("The three
-  strokes are set differently right now; choosing here sets
-  all three") and stays live, and a segmented picker whose pill
-  can hide for an unmatched value shows *no answer* rather than
-  asserting one. A *remote* control-scoped gate (the gating
+  overwrite disagree it carries a `?` saying so ("The edges are
+  set differently right now; a value here sets all of them") and
+  stays live, and a segmented picker whose pill can hide for an
+  unmatched value shows *no answer* rather than asserting one. A
+  *remote* control-scoped gate (the gating
   field lives on another **destination**) has no adjacency to
   answer "why", so it takes a **live pointer whose sentence
   names the destination to go to**, in one of two shapes. Where

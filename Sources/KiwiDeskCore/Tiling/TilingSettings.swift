@@ -13,20 +13,6 @@ public struct TilingSettings: Sendable, Equatable {
     /// reads this — the bound row's own literal delta drives an
     /// actual resize.
     public var resizeStep: CGFloat = 50
-    /// Whether a refusal pill also sounds (`refusal.sound`,
-    /// #1255, retiring #184's `resize.feedback`). OFF by
-    /// default (owner ruling 2026-09-05): the pill is the
-    /// primary cue and the sound is an addition you switch on,
-    /// so widening it from one near-unreachable case to every
-    /// refusal makes no upgrade noisier.
-    ///
-    /// The default is what delivers it: the retired
-    /// `resize.feedback` is no longer decoded at all, so a saved
-    /// `true` is an unknown key and every config lands here. The
-    /// migration drops that key as hygiene rather than to change
-    /// the value — a dead entry sitting in a saved file reads as
-    /// a choice nobody made.
-    public var refusalSound = false
     /// Directional swap in cascade targets outer neighbor
     /// (`swap.skips_cascade`, #172).
     public var swapSkipsCascade = true
@@ -73,9 +59,6 @@ public struct TilingSettings: Sendable, Equatable {
     public var dragGhost = DragVisual.ghostDefault
     /// Drag drop zone visual settings (`drag.drop_zone`).
     public var dragDropZone = DragVisual.dropZoneDefault
-    /// Corner radius for drag overlay visuals.
-    public var dragCornerRadius = GeometryUtils
-        .systemWindowCornerRadius
     /// Liquid Glass on the drag ghost and drop zone (#1620) — one
     /// leaf for both markers, written by the one Liquid Glass row
     /// beside the shelf's and the panel's (#1307).
@@ -88,11 +71,6 @@ public struct TilingSettings: Sendable, Equatable {
     public var mouse = MouseSettings()
     /// Optional display icon per space (`space.icon[space_id]`, #68).
     public var spaceIcons: [SpaceID: String] = [:]
-    /// Window placement strategy on app quit (`quit.layout`, #197).
-    public var quitLayout: QuitLayoutStyle = .grid
-    /// Density target depth for quit grid (`quit.grid_target_depth`, #281).
-    public var quitGridTargetDepth =
-        QuitGridLayout.defaultTargetDepth
 
     public init() {}
 }

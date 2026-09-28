@@ -28,6 +28,13 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case paletteDelete = "(action) palette.delete"
     case paletteImport = "(action) palette.import"
     case paletteNeonGlowHint = "(link) palettes.neon_glow_hint"
+    case lookApply = "(action) look.apply"
+    case lookUseColors = "(action) look.use_colors"
+    case lookSave = "(action) look.save"
+    case lookImport = "(action) look.import"
+    case lookRename = "(action) look.rename"
+    case lookExport = "(action) look.export"
+    case lookDelete = "(action) look.delete"
 }
 
 extension ColoursKey {
@@ -89,6 +96,18 @@ extension ColoursKey {
         case .paletteRename, .paletteExport, .paletteDelete:
             // Context menu actions pinned by ColorsCensusRenderTests.
             return .row(.coloursAndMotion, .palettes, .showMore)
+        case .lookApply, .lookSave, .lookImport:
+            return .row(.coloursAndMotion, .looks, .atRest)
+        case .lookUseColors:
+            // Present only for the look a click just applied.
+            return .row(
+                .coloursAndMotion,
+                .looks,
+                .atRest,
+                gate: .runtime(.lookJustApplied)
+            )
+        case .lookRename, .lookExport, .lookDelete:
+            return .row(.coloursAndMotion, .looks, .showMore)
         case .paletteNeonGlowHint:
             return .row(
                 .coloursAndMotion,
@@ -159,6 +178,18 @@ extension ColoursKey {
             return .text("palettes.import")
         case .paletteNeonGlowHint:
             return .text("palettes.neon_glow_hint")
+        case .lookApply, .lookUseColors:
+            return .dynamic
+        case .lookSave:
+            return .text("looks.save_current")
+        case .lookImport:
+            return .text("looks.import")
+        case .lookRename:
+            return .text("looks.rename")
+        case .lookExport:
+            return .text("looks.export")
+        case .lookDelete:
+            return .text("looks.delete")
         }
     }
 }

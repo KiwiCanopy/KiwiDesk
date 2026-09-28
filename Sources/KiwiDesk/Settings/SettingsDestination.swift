@@ -7,11 +7,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case spaces
     case layoutDefaults
     case monitors
-    case colors
+    case looks
     case advancedColors
     case gapsAndBorders
     case bars
-    case behavior
     // Whole App
     case profiles
     case shortcuts
@@ -29,7 +28,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// (`HomeCardOrderTests` pins the shared membership).
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
-        .bars, .colors, .advancedColors, .behavior,
+        .bars, .looks, .advancedColors,
     ]
     /// Destinations scoped globally across the application. The
     /// checklist is LAST here so a search for "Spaces" or "Dock"
@@ -44,10 +43,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return L("destination.spaces", "Spaces")
         case .layoutDefaults: return L("destination.layout", "Layout Defaults")
         case .monitors: return L("destination.monitors", "Monitors")
-        case .colors:
+        case .looks:
             return L(
-                "destination.colors",
-                "Colors & Animations"
+                "destination.looks",
+                "Looks & Animations"
             )
         case .advancedColors:
             return L(
@@ -57,10 +56,9 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .gapsAndBorders:
             return L("destination.gaps_borders", "Gaps & Borders")
         case .bars: return L("destination.bars", "KiwiShelf & Bars")
-        case .behavior: return L("destination.behavior", "Behavior")
         case .profiles: return L("destination.profiles", "Profiles")
         case .shortcuts:
-            return L("destination.shortcuts", "Shortcuts")
+            return L("destination.shortcuts", "Shortcuts & Gestures")
         case .appRules:
             return L("destination.app_rules", "App Rules")
         case .general: return L("destination.general", "General")
@@ -75,11 +73,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return "squares.below.rectangle"
         case .layoutDefaults: return "rectangle.3.group"
         case .monitors: return "display.2"
-        case .colors: return "paintbrush.fill"
+        case .looks: return "paintbrush.fill"
         case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
         case .bars: return "menubar.rectangle"
-        case .behavior: return "cursorarrow.motionlines"
         case .profiles: return "square.stack.3d.up"
         case .shortcuts: return "keyboard"
         case .appRules: return "app.badge.checkmark"
@@ -95,12 +92,11 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .layoutDefaults:
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
-        case .colors: return .purple
+        case .looks: return .purple
         case .advancedColors:
             return Color(red: 0.38, green: 0.20, blue: 0.60)
         case .gapsAndBorders: return .brown
         case .bars: return .pink
-        case .behavior: return .orange
         case .profiles:
             // The brand green ITSELF, read from the theme — this
             // shipped as RGB floats with a "keep in sync" comment,

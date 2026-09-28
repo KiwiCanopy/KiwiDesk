@@ -87,12 +87,13 @@ struct KiwiShelfMigrationTests {
         let out = try #require(ConfigMigration.migrated(data))
         let s = try settings(out)
         let shelf = try #require(group(s, "kiwishelf"))
-        #expect(shelf["edge"] as? String == "left")
+        // Each bar keeps its own edge, and #1731 drops the shelf's.
+        #expect(shelf["edge"] == nil)
         #expect(shelf["thickness"] as? Double == 36)
         #expect(shelf["item_gap"] as? Double == 3)
         #expect(shelf["liquid_glass"] as? Bool == false)
         let space = try #require(group(s, "space_bar"))
-        #expect(space["edge"] == nil)
+        #expect(space["edge"] as? String == "left")
         #expect(space["thickness"] == nil)
         #expect(space["title_cap"] == nil)
         #expect(space["front_app_title_cap"] as? Double == 24)
@@ -108,7 +109,7 @@ struct KiwiShelfMigrationTests {
         // ahead of its default's flip.
         #expect(space["active_indicator"] as? String == "outline")
         let app = try #require(group(s, "app_bar"))
-        #expect(app["edge"] == nil)
+        #expect(app["edge"] as? String == "bottom")
         #expect(app["thickness"] == nil)
         #expect(app["item_size"] == nil)
         #expect(app["content"] as? String == "icon")
@@ -146,8 +147,11 @@ struct KiwiShelfMigrationTests {
             """.utf8
         )
         let out = try #require(ConfigMigration.migrated(data))
-        let shelf = try #require(group(try settings(out), "kiwishelf"))
-        #expect(shelf["edge"] as? String == "bottom")
+        let s = try settings(out)
+        let shelf = try #require(group(s, "kiwishelf"))
+        // Each bar keeps the edge it sat on (#1731).
+        #expect(group(s, "space_bar")?["edge"] as? String == "top")
+        #expect(group(s, "app_bar")?["edge"] as? String == "bottom")
         #expect(shelf["thickness"] as? Double == 30)
     }
 
@@ -175,7 +179,9 @@ struct KiwiShelfMigrationTests {
                 withJSONObject: try settings(out)
             )
         )
-        #expect(decoded.kiwishelf.edge == .left)
+        // A setup split before the shelf stays split (#1731).
+        #expect(decoded.spaceBarStyle.edge == .left)
+        #expect(decoded.appBarStyle.edge == .bottom)
         #expect(decoded.kiwishelf.thickness == 36)
         #expect(decoded.kiwishelf.liquidGlass == false)
         #expect(decoded.spaceBarStyle.frontAppTitleCap == 24)
@@ -207,8 +213,9 @@ struct KiwiShelfMigrationTests {
         let profiles = try #require(
             try root(out)["profiles"] as? [[String: Any]]
         )
+        // Each Space Bar keeps its own edge (#1731).
         let edges = profiles.map {
-            (($0["settings"] as? [String: Any])?["kiwishelf"]
+            (($0["settings"] as? [String: Any])?["space_bar"]
                 as? [String: Any])?["edge"] as? String
         }
         #expect(edges == ["left", "right"])

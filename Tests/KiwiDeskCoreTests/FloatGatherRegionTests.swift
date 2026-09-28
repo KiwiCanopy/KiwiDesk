@@ -83,7 +83,7 @@ struct FloatGatherRegionTests {
         core.tiler.settings.borderStyle.enabled = true
         #expect(core.floatRingInset > 0)
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.kiwishelf.edge = .top
+        core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
         core.updateBars()
         let strip = try #require(
@@ -108,7 +108,7 @@ struct FloatGatherRegionTests {
             region: region,
             grid: grid,
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
+            targetDepth: core.appWide.quitGridTargetDepth
         )
         #expect(seeded == carved[Self.scrolledOut])
         let bare = FloatGather.targets(
@@ -116,7 +116,7 @@ struct FloatGatherRegionTests {
             frames: Self.frames,
             region: try #require(core.floatBounds(on: Self.space)),
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
+            targetDepth: core.appWide.quitGridTargetDepth
         )
         #expect(seeded != bare[Self.scrolledOut])
         // And the pass's own clamp sweep left the capture alone.

@@ -108,6 +108,9 @@ struct SettingsCatalogArgumentTests {
             )
             for needle in [
                 "SettingsSection(", "SettingsDisclosure(",
+                // #1741's collapsible section card mounts a
+                // drawer declaration the same way.
+                "SettingsCollapsibleSection(",
                 // The leaf shape counts too (#573 re-review): a
                 // stray `.searchAnchored(SettingsCatalog.x.y)`
                 // mounts a second view carrying an id the real
@@ -197,7 +200,12 @@ struct SettingsCatalogArgumentTests {
         // 81 since #1679: the border and border width rows'.
         // 83 since #1681: the font family and weight anchors.
         // 85 since #1713: the glyph size toggle and slider's.
-        #expect(direct.values.reduce(0, +) == 85)
+        // 86 since #1684: the look shelf's.
+        // 88 since #1726: the Mouse & trackpad drawer's two row
+        // anchors (the drawer mounts as the Mouse card did).
+        // 91 since #1731: the Each bar drawer and its two rows.
+        // 89 since #1741: Behavior's two cards left.
+        #expect(direct.values.reduce(0, +) == 89)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

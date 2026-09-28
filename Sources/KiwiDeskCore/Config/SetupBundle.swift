@@ -39,8 +39,12 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// 13 = the drag markers' and sticky mark's Liquid Glass
     /// leaves filled (#1620/#1621), on `[Profile]` alone;
     /// 14 = `float_nudge` retired for `float_placement` (#1674),
+    /// on `[Profile]` alone;
+    /// 15 = the look library joined (#1684), so an older build
+    /// refuses a bundle whose looks it would drop.
+    /// 16 = each bar took its edge back from `kiwishelf` (#1731),
     /// on `[Profile]` alone.
-    public static let currentFormat = 14
+    public static let currentFormat = 16
 
     public let format: Int
 
@@ -59,19 +63,25 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     public let config: GuiConfig?
     public let profiles: [Profile]
     public let palettes: [ColorPalette]
+    /// The saved look library, or nil for a bundle written before
+    /// looks travelled — ABSENT, which a restore leaves alone,
+    /// where `[]` replaces the library with none.
+    public let looks: [ShelfLook]?
 
     public init(
         format: Int = SetupBundle.currentFormat,
         writtenBy: String,
         config: GuiConfig?,
         profiles: [Profile],
-        palettes: [ColorPalette]
+        palettes: [ColorPalette],
+        looks: [ShelfLook]? = nil
     ) {
         self.format = format
         self.writtenBy = writtenBy
         self.config = config
         self.profiles = profiles
         self.palettes = palettes
+        self.looks = looks
     }
 
     /// Whether this build can read the bundle format.
@@ -89,12 +99,14 @@ public struct SetupBundle: Codable, Sendable, Equatable {
         switch artifact {
         case .guiConfig: return config != nil
         case .profiles, .palettes: return true
+        case .looks: return looks != nil
         }
     }
 
     /// True when bundle carries no settings, profiles, or palettes.
     public var isEmpty: Bool {
         config == nil && profiles.isEmpty && palettes.isEmpty
+            && (looks ?? []).isEmpty
     }
 }
 
@@ -105,9 +117,12 @@ public struct RestoreOutcome: Equatable, Sendable {
     public let skippedProfiles: [String]
     /// Palettes dropped for shadowing built-ins or duplicate names.
     public let refusedPalettes: Int
+    /// Looks dropped the same way (#1684).
+    public var refusedLooks = 0
 
     public var isClean: Bool {
         skippedProfiles.isEmpty && refusedPalettes == 0
+            && refusedLooks == 0
     }
 }
 
@@ -127,6 +142,8 @@ public enum SetupBundleError: Error, Equatable, Sendable {
     case unreadableSettings
     /// Existing `palettes.json` failed to decode during export (#945).
     case unreadablePalettes
+    /// Existing `looks.json` failed to decode during export (#1684).
+    case unreadableLooks
     /// Target Mac is Lua-owned, so the settings half could not
     /// apply: `loadConfig` never reads the restored rules and
     /// keybindings there while the profile-scoped half applies

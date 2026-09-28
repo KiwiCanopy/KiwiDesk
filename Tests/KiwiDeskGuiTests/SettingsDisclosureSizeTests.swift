@@ -78,7 +78,7 @@ struct SettingsDisclosureSizeTests {
         // green with the regression live (guard-prover,
         // 2026-08-26).
         let chevronRun = try body(
-            of: "privatefuncchevron(expanded:Bool)->someView",
+            of: "privatevarchevron:someView",
             in: style
         )
         #expect(

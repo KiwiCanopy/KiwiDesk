@@ -21,7 +21,7 @@ extension StickyMarkPlate {
             plate.isHidden = false
             GlassPlate.setContent(plate, content)
         } else {
-            if let glass { GlassPlate.detach(glass) }
+            if let glass { GlassPlate.release(glass) }
             glass?.isHidden = true
             tint.isHidden = true
             hud.isHidden = false

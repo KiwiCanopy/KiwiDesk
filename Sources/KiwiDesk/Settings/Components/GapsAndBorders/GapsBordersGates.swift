@@ -60,13 +60,14 @@ struct GapsBordersGates {
     }
 
     /// Masters that answer `followersDiffer` — the census of who
-    /// acknowledges (`BorderMastersDivergenceTests`); a master
+    /// acknowledges (`MasterDivergenceRegisterTests`); a master
     /// here carries no census gate.
     static let acknowledged: Set<SettingKey> = [
         .gaps(.outer),
         .gaps(.inner),
-        .borders(.borderWidthMaster),
-        .borders(.borderCornerMaster),
+        // The KiwiShelf Position master (#1731) takes the same
+        // acknowledging shape, so it answers here too.
+        .kiwishelf(.edge),
     ]
 
     /// Gated rows answered by this resolver (`everyGatedRowIsResolved`).
@@ -103,37 +104,14 @@ struct GapsBordersGates {
             return outerGapsDiffer
         case .gaps(.inner):
             return innerGapsDiffer
-        case .borders(.borderWidthMaster):
-            return widthsDiffer
-        case .borders(.borderCornerMaster):
-            return agreedCornerStyle == nil
+        case .kiwishelf(.edge):
+            return settings.sharedBarEdge == nil
         default:
             return false
         }
     }
 
-    /// Agreed corner shape across ring style and drag radius —
-    /// the ONE copy of that comparison: the master binding reads
-    /// it as its displayed value and `followersDiffer` as the `?`
-    /// predicate, so the blank picker and its explanation cannot
-    /// contradict.
-    var agreedCornerStyle: BorderStyle.CornerStyle? {
-        let fromRadius: BorderStyle.CornerStyle =
-            settings.dragCornerRadius > 0 ? .rounded : .square
-        return settings.borderStyle.cornerStyle == fromRadius
-            ? fromRadius : nil
-    }
-
     // MARK: - Predicates
-
-    /// The three stored stroke widths, compared. The master
-    /// keeps SHOWING the ring's — a slider has no blank state a
-    /// user could act on the way an unselected segment is one.
-    private var widthsDiffer: Bool {
-        let width = settings.borderStyle.width
-        return width != settings.dragGhost.borderWidth
-            || width != settings.dragDropZone.borderWidth
-    }
 
     /// The outer master acknowledges while its four edges
     /// disagree — it shows the top edge and writes all four.

@@ -309,13 +309,15 @@ struct GlyphGapPlanTests {
             groups: windows.map { [$0.id] },
             items: windows
         )
-        let plan = core.shelfPlan(
-            visible: CGRect(x: 0, y: 0, width: 3000, height: 800),
-            settings: settings,
-            spaceItems: items,
-            app: app
-        )
-        guard let slot = plan.arrangement.space else { return -1 }
+        guard
+            let plan = core.shelfPlans(
+                visible: CGRect(x: 0, y: 0, width: 3000, height: 800),
+                settings: settings,
+                spaceItems: items,
+                app: app
+            ).first,
+            let slot = plan.arrangement.space
+        else { return -1 }
         return plan.segment(slot).width
     }
 

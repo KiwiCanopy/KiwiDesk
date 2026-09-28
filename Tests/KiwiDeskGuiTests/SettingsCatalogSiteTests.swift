@@ -85,7 +85,12 @@ struct SettingsCatalogSiteTests {
         // 105 since #1679: the border and border width rows.
         // 107 since #1681: the font family and weight rows.
         // 109 since #1713: the glyph size toggle and slider.
-        #expect(names.count == 109)
+        // 110 since #1684: the look shelf.
+        // 112 since #1726: the Mouse & trackpad drawer and its
+        // two rows, less Behavior's Mouse card.
+        // 115 since #1731: the Each bar drawer and its two rows.
+        // 113 since #1741: Behavior's Cues and On quit cards left.
+        #expect(names.count == 113)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

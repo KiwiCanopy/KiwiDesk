@@ -192,8 +192,8 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// `quit.*` teardown placement (#197). Persists in
-    /// `settings.quitLayout`; read only when the app stops
+    /// `quit.*` teardown placement (#197), app-wide (#1741) and
+    /// session-only from a verb; read only when the app stops
     /// (`gatherWindows`), so the outer dispatcher routes it
     /// past layoutCommand's forced-retile trailer.
     func quitCommand(
@@ -208,7 +208,7 @@ extension KiwiCore {
             else {
                 return .expected(QuitLayoutStyle.self)
             }
-            tiler.settings.quitLayout = style
+            setAppWide(persisting: false) { $0.quitLayout = style }
         case "quit.set_grid_target_depth":
             guard
                 let raw = args.first?.numberValue,
@@ -230,7 +230,9 @@ extension KiwiCore {
                         + "-\(range.upperBound)"
                 )
             }
-            tiler.settings.quitGridTargetDepth = Int(rounded)
+            setAppWide(persisting: false) {
+                $0.quitGridTargetDepth = Int(rounded)
+            }
         default:
             return .fail("unknown command: \(command)")
         }

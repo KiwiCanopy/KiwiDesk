@@ -165,11 +165,9 @@ struct LiquidGlassMasterTests {
     /// MOVED and require it to equal what the census declares —
     /// a hand-typed copy of the same three strings agrees with
     /// the census and with nothing else (`rule-authoring.md`).
-    /// `BorderMastersFanOutTests` owns this shape for the two
-    /// border masters; the glass master needed its own, and
     /// `guard-prover` measured the gap: with the panel leaf
-    /// deleted from `masterWrites`, `SettingsDraftDiffTests` and
-    /// both border suites stayed green.
+    /// deleted from `masterWrites`, `SettingsDraftDiffTests`
+    /// stayed green.
     @Test("the declaration matches what the master writes")
     func declarationMatchesTheWrite() {
         let key = SettingKey.colours(.liquidGlassMaster)
@@ -220,7 +218,7 @@ struct LiquidGlassMasterTests {
     func rowConsultsTheAgreement() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors/"
+                "Sources/KiwiDesk/Settings/Components/Looks/"
                     + "GlassCard.swift"
             )
         let source = SourceScan.stripComments(

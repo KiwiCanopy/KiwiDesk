@@ -21,8 +21,7 @@ enum HomeCardPreview {
         // General's version moved to Home's footer (#1536); its
         // subtitle already says the language and start at login.
         case .spaces, .bars, .layoutDefaults, .monitors,
-            .gapsAndBorders, .colors, .advancedColors,
-            .behavior, .general:
+            .gapsAndBorders, .looks, .advancedColors, .general:
             return nil
         }
     }

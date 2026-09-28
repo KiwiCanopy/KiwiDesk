@@ -10,6 +10,7 @@ extension AppBarStyle {
     /// is load-bearing — `AppBarParityTests` reflects over
     /// `allCases`; do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
+        case edge
         case activeIndicator = "active_indicator"
         case content
         case titleCap = "title_cap"
@@ -22,6 +23,11 @@ extension AppBarStyle {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
+        edge =
+            try container.decodeIfPresent(
+                AppBarEdge.self,
+                forKey: .edge
+            ) ?? defaults.edge
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,

@@ -97,7 +97,6 @@ struct GlassTintFadeTests {
         ])
         let section = try #require(spaces.shownOverlay(on: barTitleDisplay))
         var shelf = KiwiShelf()
-        shelf.edge = edge
         shelf.fillColor = "#14201CB3"
         shelf.liquidGlass = true
         shelf.backgroundStyle = .plain
@@ -105,6 +104,7 @@ struct GlassTintFadeTests {
         shelves.sync([
             ShelfManager.Shelf(
                 display: barTitleDisplay,
+                edge: edge,
                 strip: Self.strip(edge),
                 shelf: shelf,
                 sheen: 0,

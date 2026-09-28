@@ -154,6 +154,7 @@ struct SpaceBarFrontViewChurnTests {
         let shelves = ShelfManager()
         let shelf = ShelfManager.Shelf(
             display: barTitleDisplay,
+            edge: .top,
             strip: barTitleStrip,
             shelf: KiwiShelf(),
             sheen: 0,

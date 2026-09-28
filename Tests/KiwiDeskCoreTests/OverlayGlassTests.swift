@@ -26,6 +26,7 @@ struct OverlayGlassTests {
     private static let top = CGPoint(x: 0.5, y: 1)
 
     private static let slot = CGRect(x: 200, y: 200, width: 300, height: 200)
+    private static let stroke = WindowStroke(width: 5, cornerRadius: 8)
 
     /// A real window to stand in for the one being dragged: glass
     /// markers exist only beneath one.
@@ -55,14 +56,14 @@ struct OverlayGlassTests {
         overlay.showGhost(
             at: Self.slot,
             style: style,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: DragVisual.dropZoneDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
@@ -74,7 +75,7 @@ struct OverlayGlassTests {
             #expect(marker.tint.gradient?.startPoint == Self.top)
             // The border stays on the container, above the glass.
             let layer = try #require(marker.panel.contentView?.layer)
-            let width = style.border ? style.borderWidth : 0
+            let width = style.border ? Self.stroke.width : 0
             #expect(layer.borderWidth == width)
             #expect(layer.backgroundColor?.alpha == 0)
         }
@@ -94,14 +95,14 @@ struct OverlayGlassTests {
         overlay.showGhost(
             at: Self.slot,
             style: style,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: CGWindowID(dragged.windowNumber),
             sheen: 0
         )
         overlay.showGhost(
             at: Self.slot,
             style: style,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: nil,
             sheen: 0
         )
@@ -130,14 +131,14 @@ struct OverlayGlassTests {
         overlay.showGhost(
             at: Self.slot,
             style: .ghostDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
@@ -151,14 +152,14 @@ struct OverlayGlassTests {
         overlay.showGhost(
             at: Self.slot,
             style: .ghostDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
@@ -181,7 +182,7 @@ struct OverlayGlassTests {
         overlay.showGhost(
             at: Self.slot,
             style: .ghostDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: nil,
             sheen: 0
         )
@@ -203,14 +204,14 @@ struct OverlayGlassTests {
         overlay.showGhost(
             at: Self.slot,
             style: .ghostDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )
         overlay.showDropZone(
             at: Self.slot,
             style: .dropZoneDefault,
-            cornerRadius: 8,
+            stroke: Self.stroke,
             glassBeneath: id,
             sheen: 0
         )

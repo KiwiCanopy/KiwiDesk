@@ -15,16 +15,14 @@ extension SettingsView {
             LayoutDefaultsSection(model: model)
         case .monitors:
             MonitorsSection(model: model)
-        case .colors:
-            ColorsMotionSection(model: model)
+        case .looks:
+            LooksSection(model: model)
         case .advancedColors:
             AdvancedColorsSection(model: model)
         case .gapsAndBorders:
             GapsAndBordersSection(model: model)
         case .bars:
             BarsSection(model: model)
-        case .behavior:
-            BehaviorSection(model: model)
         case .profiles:
             ProfilesSection(model: model)
         case .shortcuts:

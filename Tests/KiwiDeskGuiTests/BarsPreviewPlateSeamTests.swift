@@ -15,7 +15,7 @@ struct BarsPreviewPlateSeamTests {
     @Test("Both bar specs box exactly where no plate is drawn")
     func specsRouteThroughDrawsPlate() throws {
         let url = Self.root.appendingPathComponent(
-            "Sources/KiwiDesk/Settings/HomeCardPlate+Bars.swift"
+            "Sources/KiwiDesk/Settings/HomeCardPlate+BarSpecs.swift"
         )
         let source = SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)

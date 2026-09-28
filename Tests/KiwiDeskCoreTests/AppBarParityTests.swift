@@ -14,13 +14,26 @@ import Testing
 /// silent inherit-the-default bug (AGENTS.md §5).
 @Suite("App bar field-list parity")
 struct AppBarParityTests {
+    /// `AppBarStyle.layoutFixedKeys` as property names — the
+    /// fields no layout overrides (#1731).
+    static var layoutFixed: Set<String> {
+        let keys = Set(AppBarStyle.layoutFixedKeys.map(\.stringValue))
+        return fieldNames(AppBarStyle()).filter {
+            keys.contains(snakeCased($0))
+        }
+    }
+
     @Test("LayoutAppBar mirrors every AppBarStyle field")
     func propertyParity() {
         // `enabled` is the one layout-only field; every look
-        // field is an optional override of the global style.
+        // field but the layout-fixed ones is an optional override
+        // of the global style.
+        #expect(
+            Self.layoutFixed.count == AppBarStyle.layoutFixedKeys.count
+        )
         #expect(
             fieldNames(LayoutAppBar()).subtracting(["enabled"])
-                == fieldNames(AppBarStyle())
+                == fieldNames(AppBarStyle()).subtracting(Self.layoutFixed)
         )
     }
 
@@ -49,7 +62,8 @@ struct AppBarParityTests {
         let resolved =
             AppBarFixtures.everyOverrideField().resolved(with: base)
         let baseValues = fieldValues(base)
-        for (field, value) in fieldValues(resolved) {
+        for (field, value) in fieldValues(resolved)
+        where !Self.layoutFixed.contains(field) {
             #expect(
                 value != baseValues[field],
                 "resolved() left \(field) at the base value"
@@ -84,7 +98,7 @@ struct AppBarCommandParityTests {
     /// `applyParity` goes red if this list, either apply switch,
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
-        .activeIndicator(.outline),
+        .edge(.left), .activeIndicator(.outline),
         .content(.title), .titleCap(40),
         .groupAdjacentWindows(false),
     ]
@@ -102,7 +116,11 @@ struct AppBarCommandParityTests {
             let onBar = changedFields(bar, from: LayoutAppBar())
                 .subtracting(["enabled"])
             #expect(onStyle.count == 1)
-            #expect(onStyle == onBar)
+            // A layout-fixed field writes the style alone.
+            #expect(
+                onStyle.isSubset(of: AppBarParityTests.layoutFixed)
+                    ? onBar.isEmpty : onStyle == onBar
+            )
             touched.formUnion(onStyle)
         }
         // Every look field must be reachable by some command. If
@@ -138,6 +156,7 @@ struct AppBarCommandParityTests {
         switch key {
         case .groupAdjacentWindows:
             return [.bool(true)]
+        case .edge: return [.string("left")]
         case .activeIndicator: return [.string("outline")]
         case .content: return [.string("icon")]
         case .titleCap: return [.number(40)]

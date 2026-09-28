@@ -1,13 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Settings card for the shelf both bars sit on (#1517): which
-/// bars it shows, where it hangs, how the two share the edge, and
-/// the look they share. No container gate — the Show rows that
+/// Settings card for the shelf the bars sit on (#1517): which
+/// bars it shows, where each hangs (#1731), how the two share an
+/// edge, and the look they share. No container gate — the Show rows that
 /// switch the bars on live here — so every other row greys as a
 /// block while no bar shows (`BarsGates.shelfShows`).
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
+    @State var edgesExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false
 
@@ -23,6 +24,12 @@ struct KiwiShelfCard: View {
             SettingsCatalog.bars.kiwishelfCard,
             caption: cardCaption
         ) {
+            // A look writes this card's style in one click (#1684).
+            CrossReferenceRow(
+                prose: Self.lookReference,
+                linkTitle: SettingsDestination.looks.title,
+                destination: .looks
+            )
             showGroup
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) {
@@ -89,8 +96,8 @@ struct KiwiShelfCard: View {
     private var cardCaption: String {
         L(
             "bars.kiwishelf.caption",
-            "Where both bars sit — which edge, how deep, and how "
-                + "the two share the room."
+            "One place for both bars: where each sits, how they "
+                + "share an edge, and the style they have in common."
         )
     }
 
@@ -98,6 +105,16 @@ struct KiwiShelfCard: View {
         L(
             "bars.style.kiwishelf.summary",
             "Background, roundness, item gap, font size"
+        )
+    }
+
+    static var lookReference: String {
+        L(
+            "bars.kiwishelf.looks_xref",
+            "A look sets this card's style, both indicators, "
+                + "the focus border's shape and sheen, and the "
+                + "window gaps in one click — in %1$@.",
+            CrossReferenceRow.linkSlot
         )
     }
 

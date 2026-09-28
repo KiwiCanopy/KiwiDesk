@@ -77,6 +77,7 @@ struct ShelfDividerWeightTests {
         let strip = CGRect(x: 0, y: 0, width: 400, height: 30)
         overlay.show(
             strip: strip,
+            edge: .top,
             shelf: KiwiShelf(),
             sheen: 0,
             sections: [
@@ -155,6 +156,7 @@ struct ShelfDividerWeightTests {
         ]
         overlay.show(
             strip: strip,
+            edge: .top,
             shelf: shelf,
             sheen: 0,
             sections: sections,
@@ -169,6 +171,7 @@ struct ShelfDividerWeightTests {
         // A relayout while hovered keeps the weight too.
         overlay.show(
             strip: strip,
+            edge: .top,
             shelf: shelf,
             sheen: 0,
             sections: sections,

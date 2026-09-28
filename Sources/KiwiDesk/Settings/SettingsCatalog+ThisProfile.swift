@@ -58,6 +58,7 @@ struct GapAxisControls: Sendable {
 
 /// Colors & Animations catalog controls (#678 Phase 3).
 struct ColorsControls: Sendable {
+    let looksShelf = SettingsControl("looks.title", "Looks")
     let paletteShelf = SettingsControl(
         "palettes.title",
         "Color palette"
@@ -165,18 +166,5 @@ struct GapsAndBordersControls: Sendable {
     let stickyWindows = SettingsControl(
         "sticky.title",
         "Sticky windows"
-    )
-}
-
-struct BehaviorControls: Sendable {
-    let mouseCard = SettingsControl(
-        "behavior.mouse.title",
-        "Mouse"
-    )
-    let quitCard = SettingsControl("behavior.quit.title", "On quit")
-    /// Cues a blocked action gives back (#1255).
-    let cuesCard = SettingsControl(
-        "behavior.cues.title",
-        "When an action can't apply"
     )
 }

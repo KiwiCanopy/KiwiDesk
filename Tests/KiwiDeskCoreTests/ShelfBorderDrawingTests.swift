@@ -211,6 +211,7 @@ struct ShelfBorderDrawingTests {
         shelves.sync([
             ShelfManager.Shelf(
                 display: barTitleDisplay,
+                edge: .top,
                 strip: barTitleStrip,
                 shelf: shelf,
                 sheen: 0,
@@ -282,6 +283,7 @@ struct ShelfBorderDrawingTests {
             shelves.sync([
                 ShelfManager.Shelf(
                     display: barTitleDisplay,
+                    edge: .top,
                     strip: barTitleStrip,
                     shelf: shelf,
                     sheen: 0,

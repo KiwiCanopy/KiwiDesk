@@ -142,7 +142,7 @@ public enum APIReference {
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": [
-            "set_enabled", "set_glyph_cap", "set_glyph_gap",
+            "set_enabled", "set_edge", "set_glyph_cap", "set_glyph_gap",
             "set_inactive_content", "set_item_label",
             "set_active_indicator",
             "set_active_dim_factor", "set_show_front_app",
@@ -151,11 +151,11 @@ public enum APIReference {
             "set_focused_item_color",
         ],
         "app_bar": [
-            "set_active_indicator", "set_content", "set_title_cap",
+            "set_edge", "set_active_indicator", "set_content", "set_title_cap",
             "set_group_adjacent_windows",
         ],
         "kiwishelf": [
-            "set_edge", "set_alignment", "set_order", "set_minimum",
+            "set_alignment", "set_order", "set_minimum",
             "set_thickness", "set_outer_margin", "set_inner_margin",
             "set_background_style", "set_liquid_glass",
             "set_background_fit", "set_corner_roundness",
@@ -205,17 +205,15 @@ public enum APIReference {
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",
-            "set_ghost_border_width",
             "set_ghost_border_alignment",
             "set_ghost_border_color", "set_ghost_fill",
             "set_ghost_fill_color",
             "set_drop_zone_enabled", "set_drop_zone_border",
-            "set_drop_zone_border_width",
             "set_drop_zone_border_alignment",
             "set_drop_zone_border_color",
             "set_drop_zone_fill",
             "set_drop_zone_fill_color",
-            "set_corner_radius", "set_liquid_glass",
+            "set_liquid_glass",
         ],
         "border": [
             "set_enabled", "set_width", "set_focused_color",

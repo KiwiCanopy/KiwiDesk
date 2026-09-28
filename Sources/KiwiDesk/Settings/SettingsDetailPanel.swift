@@ -11,7 +11,7 @@ import SwiftUI
 /// the extension motion is a case here plus a branch below.
 enum SettingsDetailPanelOffer {
     static let offering: Set<SettingsDestination> = [
-        .gapsAndBorders, .bars, .colors, .layoutDefaults,
+        .gapsAndBorders, .bars, .looks, .layoutDefaults,
         .shortcuts, .advancedColors, .spaces,
     ]
 
@@ -84,7 +84,7 @@ struct SettingsDetailPanel: View {
             GapsBordersPanelPreview(model: model)
         case .bars:
             BarsPanelPreview(model: model)
-        case .colors:
+        case .looks:
             PaletteScenePanel(model: model)
         case .advancedColors:
             AdvancedColorsPanel(model: model)

@@ -21,7 +21,7 @@ struct KiwiShelfRetiredVerbTests {
     func sharedSettersNameTheShelf() {
         let core = makeCore()
         for verb in [
-            "space_bar.set_edge", "app_bar.set_thickness",
+            "space_bar.set_alignment", "app_bar.set_thickness",
             "monocle.set_app_bar_outer_margin",
             "scroll.set_app_bar_liquid_glass",
         ] {
@@ -94,7 +94,7 @@ struct KiwiShelfRetiredVerbTests {
             at: dir,
             withIntermediateDirectories: true
         )
-        try "space_bar.set_edge(\"top\")\nspace_bar.set_item_size(9)"
+        try "kiwishelf.set_edge(\"top\")\nspace_bar.set_item_size(9)"
             .write(
                 to: dir.appendingPathComponent("init.lua"),
                 atomically: true,
@@ -106,8 +106,8 @@ struct KiwiShelfRetiredVerbTests {
         #expect(
             kinds.contains(
                 .retiredCall(
-                    name: "space_bar.set_edge",
-                    replacement: "kiwishelf.set_edge"
+                    name: "kiwishelf.set_edge",
+                    replacement: "space_bar.set_edge"
                 )
             )
         )
@@ -131,9 +131,9 @@ struct KiwiShelfRetiredVerbTests {
     /// the nearest spelling.
     @Test("help on a retired verb names its replacement")
     func helpNamesTheReplacement() {
-        let response = APIReference.helpResponse(for: "space_bar.set_edge")
+        let response = APIReference.helpResponse(for: "kiwishelf.set_edge")
         #expect(!response.isSuccess)
-        #expect(response.error?.contains("kiwishelf.set_edge") == true)
+        #expect(response.error?.contains("space_bar.set_edge") == true)
     }
 
     /// A replacement that is not itself a live verb would send

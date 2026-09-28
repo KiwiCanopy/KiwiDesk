@@ -108,7 +108,7 @@ editing here:
 - A layout **span** reads one hook further in:
   `TilingEngine.layoutBounds(on:for:)` (#537), which reserves the
   KiwiShelf strip where a bar draws in that Space's layout (#293,
-  #1517; the one reservation is bars.md's) so a resize divides its
+  #1517, #1731; the reservation per edge is bars.md's) so a resize divides its
   delta by the region the layout filled, not the whole display. Routing
   through `visibleBounds` and then dividing by the display
   passes the guard above and is still the bug —
@@ -119,7 +119,7 @@ editing here:
   (#242) owns its relationship to a bar. Which files qualify
   lives in that map, not here.
 - **A per-space override never carries `appBar`.** The shelf's
-  reservation is answered per layout MODE (`shelfShows(in:)`), and
+  reservation is answered per layout MODE (`shelfEdges(in:)`), and
   the App Bar a Space draws is its mode's; a per-space `appBar`
   would draw a bar where the reservation left the windows, or
   reserve a strip nothing draws on. `MonocleOverrideTests` and
@@ -1910,3 +1910,7 @@ and the bar strips). The bounds, flat-array and space-id rules
 apply there as written; the **pure-function** rule does not —
 both are `@MainActor` and legitimately call AppKit. That rule
 stays scoped to `Layouts/`.
+
+A new key in the `gap` group owes a look ruling (#1739), as a
+bar field does — the obligation is [bars.md](bars.md)'s, and
+`LookKeysCensusTests` reds an unruled key.

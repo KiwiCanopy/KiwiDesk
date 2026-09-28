@@ -23,6 +23,12 @@ struct GapsEditor: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.gapsAndBorders.gapsCard) {
+            // A look writes the gaps and the ring's shape (#1739).
+            CrossReferenceRow(
+                prose: Self.lookReference,
+                linkTitle: SettingsDestination.looks.title,
+                destination: .looks
+            )
             masterRow(
                 label: L("gaps.outer", "Outer gap"),
                 unified: outerUnified,

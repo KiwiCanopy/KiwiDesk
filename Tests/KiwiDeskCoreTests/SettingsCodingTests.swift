@@ -31,9 +31,9 @@ struct SettingsCodingTests {
                 "float_placement", "float_scale_on_display_change",
                 "gap",
                 "layout", "min_window_size", "mouse",
-                "mouse_resize", "new_window_placement_override", "quit",
+                "mouse_resize", "new_window_placement_override",
                 "shortcut_panel",
-                "floating", "refusal", "resize", "space",
+                "floating", "resize", "space",
                 "space_bar",
                 "sticky", "swap_skips_cascade",
             ]
@@ -91,13 +91,9 @@ struct SettingsCodingTests {
         let floating = try object(root["floating"])
         #expect(Set(floating.keys) == ["color"])
         #expect(floating["color"] as? String == "")
-        // `quit.set_layout` → `quit.layout` (#197); `grid` is
-        // the only strategy today and the default.
-        // `quit.set_grid_target_depth` →
-        // `quit.grid_target_depth` (#281), standard target 5.
-        let quit = try object(root["quit"])
-        #expect(quit["layout"] as? String == "grid")
-        #expect(quit["grid_target_depth"] as? Double == 5)
+        // The `quit` group left for gui.json with #1741
+        // (`AppWideSettingsTests`); the key set above holds its
+        // absence.
         // `mouse.set_follows_focus` → `mouse.follows_focus`
         // (#186), off by default.
         let mouse = try object(root["mouse"])
@@ -123,13 +119,6 @@ struct SettingsCodingTests {
         // `set_resize_step` → `resize.step` (#58).
         let resize = try object(root["resize"])
         #expect(resize["step"] as? Double == 50)
-        // `set_refusal_sound` → `refusal.sound` (#1255): its own
-        // group, the cue having stopped being a resize setting.
-        // Asserted present and Boolean rather than pinned to a
-        // value a ruling may retune (tests.md ▸ a clause pins
-        // the SHAPE).
-        let refusal = try object(root["refusal"])
-        #expect(refusal["sound"] as? Bool != nil)
         // #1307: the panel's leaf is written under its own group.
         // Present and Boolean, never pinned to a value; the three
         // leaves' agreement is `LiquidGlassMasterTests`'.
@@ -219,7 +208,7 @@ struct SettingsCodingTests {
         let drag = try object(root["drag"])
         #expect(
             Set(drag.keys) == [
-                "corner_radius", "drop_zone", "ghost", "liquid_glass",
+                "drop_zone", "ghost", "liquid_glass",
             ]
         )
         // `drag.set_liquid_glass` (#1620), on by default.
@@ -227,7 +216,7 @@ struct SettingsCodingTests {
         let ghost = try object(drag["ghost"])
         #expect(
             Set(ghost.keys) == [
-                "border", "border_color", "border_width",
+                "border", "border_color",
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
@@ -238,12 +227,10 @@ struct SettingsCodingTests {
         // yellow-green (see DragVisual.ghostDefault).
         #expect(ghost["border_color"] as? String == "#347957")
         #expect(ghost["fill_color"] as? String == "#34795740")
-        #expect(ghost["border_width"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
         #expect(zone["border_color"] as? String == "#C2790A")
         #expect(zone["fill_color"] as? String == "#C2790A40")
-        #expect(zone["border_width"] as? Double == 5)
         #expect(zone["border_alignment"] as? String == "inside")
     }
 
@@ -260,6 +247,5 @@ struct SettingsCodingTests {
                 == DragVisual.ghostDefault.borderColor
         )
         #expect(decoded.dragDropZone == .dropZoneDefault)
-        #expect(decoded.dragCornerRadius == 16)
     }
 }

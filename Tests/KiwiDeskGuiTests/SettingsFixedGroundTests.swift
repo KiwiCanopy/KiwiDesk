@@ -50,6 +50,9 @@ struct SettingsFixedGroundTests {
     private let fixedGroundStems = [
         "SettingsFooter", "HomeCardPlate", "KeyboardBoard",
         "KeyboardChrome",
+        // The Mouse & trackpad pictures, drawn wholly on the
+        // plate (#1726); `GestureEntry`'s sentence is not.
+        "GestureInk", "GesturePictures",
     ]
 
     @Test("no hierarchical grey on a fixed-dark ground")

@@ -56,7 +56,7 @@ and this section argues the ones that needed arguing.
 eleven catalogs, so the control every user taps says "Space Bar"
 whatever their language.
 
-**KiwiShelf** (#1517) is the edge both bars sit on, coined on the
+**KiwiShelf** (#1517) is the shelf the bars sit on, coined on the
 product name, and `bars.switch.kiwishelf` is Latin in all eleven
 catalogs from its first translation. The sort question answers
 it directly — no locale ever translated it — and the
@@ -300,6 +300,12 @@ you were editing.
    card counting connected displays; `ja` reaching for Apple's
    own 操作スペース, the term for the macOS Desktop that
    KiwiDesk's Spaces are deliberately not.
+   The English follows it too: the page holding the looks and
+   palettes is **Looks & Animations**, not "Appearance &
+   Animations" (#1684), because *Appearance* already names
+   General ▸ Appearance (`general.appearance`) in every catalog.
+   A catalog picks its word for *look* by the same rung — never
+   its Appearance, Style or palette word.
 2. **Otherwise your catalog's own occurrence count decides.**
    Grep your file for both candidates; the one already carrying
    the concept wins and the other is swept to it. **Your file is

@@ -23,7 +23,7 @@ public enum GeometryUtils {
     }
 
     /// macOS window corner radius constant (`BorderGeometry`,
-    /// `TilingSettings.dragCornerRadius`).
+    /// `TilingSettings.windowStroke`).
     public static let systemWindowCornerRadius: CGFloat = 16
 
     /// Flips a rect between Cocoa and AX coordinate systems.

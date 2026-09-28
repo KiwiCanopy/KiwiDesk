@@ -69,6 +69,14 @@ struct SetupBundleArtifactTests {
             )
         )
 
+        try core.lookLibrary.save(
+            ShelfLook(
+                name: "Mine",
+                palette: nil,
+                style: ["kiwishelf.thickness": .number(30)]
+            )
+        )
+
         let bundle = try core.exportSetup()
         // Assert the loop has something to walk: every artifact
         // travels today, so a `where` that matched nothing would
@@ -86,6 +94,7 @@ struct SetupBundleArtifactTests {
                 case .guiConfig: bundle.config != nil
                 case .profiles: !bundle.profiles.isEmpty
                 case .palettes: !bundle.palettes.isEmpty
+                case .looks: !(bundle.looks ?? []).isEmpty
                 }
             #expect(
                 carried,

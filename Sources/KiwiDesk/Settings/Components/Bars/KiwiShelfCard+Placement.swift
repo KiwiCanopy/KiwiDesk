@@ -66,8 +66,8 @@ extension KiwiShelfCard {
             options: AppBarOptions.alignment.map { ($0.1, $0.0) },
             help: L(
                 "kiwishelf.alignment.label.help",
-                "Where the bars sit along the edge — a lone bar, or "
-                    + "both as one run. "
+                "Where the bars sit along the edge — a lone bar, "
+                    + "both as one run, or each bar on its own edge. "
                     + "\u{201C}%1$@\u{201D} and \u{201C}%2$@\u{201D} "
                     + "follow the edge, so on a left edge the start "
                     + "is the top.",
@@ -85,7 +85,7 @@ extension KiwiShelfCard {
     /// aligned anywhere but the run's own end moves — Core's own
     /// verdict names the alignment that holds it still (#1517).
     private var alignmentNote: String? {
-        guard gates.bothBarsShow,
+        guard gates.bothBarsShow, gates.bothBarsReason == nil,
             let steady = ShelfArrangement.spaceBarMoves(
                 shelf: shelf.wrappedValue
             )

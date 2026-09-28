@@ -120,8 +120,8 @@ enum AdvancedColorsHelp {
     static var dragBorderOff: String {
         L(
             "colors.drag_border_off.help",
-            "This visual draws no border. Turn Border on in "
-                + "%1$@.",
+            "This visual draws no border. Turn %1$@ on in %2$@.",
+            L("drag.border", "Border"),
             SettingsDestination.gapsAndBorders.title
         )
     }
@@ -129,7 +129,8 @@ enum AdvancedColorsHelp {
     static var dragFillOff: String {
         L(
             "colors.drag_fill_off.help",
-            "This visual draws no fill. Turn Fill on in %1$@.",
+            "This visual draws no fill. Turn %1$@ on in %2$@.",
+            L("drag.fill", "Fill"),
             SettingsDestination.gapsAndBorders.title
         )
     }

@@ -7,6 +7,7 @@ extension SpaceBarStyle {
     /// JSON coding keys for SpaceBarStyle (`SpaceBarParityTests`).
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
+        case edge
         case glyphCap = "glyph_cap"
         case glyphGap = "glyph_gap"
         case inactiveContent = "inactive_content"
@@ -32,6 +33,11 @@ extension SpaceBarStyle {
                 Bool.self,
                 forKey: .enabled
             ) ?? defaults.enabled
+        edge =
+            try container.decodeIfPresent(
+                AppBarEdge.self,
+                forKey: .edge
+            ) ?? defaults.edge
         glyphCap =
             try container.decodeIfPresent(
                 Int.self,

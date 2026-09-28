@@ -295,7 +295,7 @@ another screen re-homes it
 ([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445));
 where it refuses, the whole command is refused and the window
 does not change Desktop. The second argument is Lua's and the
-CLI's; the Shortcuts editor's Desktop rows bind the
+CLI's; the Shortcuts & Gestures page's Desktop rows bind the
 one-argument form.
 
 **Example:**
@@ -552,8 +552,8 @@ KiwiDesk.set_min_window_size(300)
 **Expects:** a number (points).
 
 **Does:** sets the magnitude the **Grow** / **Shrink**
-keybindings nudge the layout by (default 50). The Shortcuts
-catalog authors the four per-axis bindings as
+keybindings nudge the layout by (default 50). The Shortcuts &
+Gestures page authors the four per-axis bindings as
 `resize("x"|"y", ±step)` from this value, and importing a
 config reads a recovered magnitude back into it. Moves no
 window on its own; it takes effect the next time such a binding
@@ -586,8 +586,8 @@ scrolling anchor and orientation, the track axis and limit, a
 grid's columns and rows, new-window placement. Where a window's
 own minimum binds, the next retile's floor heal moves the ratio
 back off that value by as much. Retiles at once. Unbound by
-default; bind it from `init.lua` or the Shortcuts ▸ Lua
-bindings drawer.
+default; bind it from `init.lua` or the Shortcuts & Gestures ▸
+Lua bindings drawer.
 
 **Example:**
 
@@ -696,12 +696,26 @@ refusal that could not draw — a sticky mark switched off, a
 window with no overlay — stays silent.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
-silent, and a held chord sounds once per hold. The GUI twin is
-Behaviour ▸ When an action can't apply.
+silent, and a held chord sounds once per hold.
 
-Stored as `refusal.sound`; the retired `resize.feedback` key is
-dropped by the one-shot migration, its value not carried
-across.
+The retired `resize.feedback` key is dropped by the one-shot
+migration, its value not carried across.
+
+:::unreleased
+The GUI twin is **General ▸ Play the alert sound when an action
+can't apply**. The setting is app-wide: it is stored in
+`gui.json` as `refusal.sound`, no profile carries it, and
+loading a profile never changes it. A GUI-managed setup takes
+it once from the first saved profile loaded after the upgrade,
+and then removes it from every profile file
+([#1741](https://github.com/KiwiCanopy/KiwiDesk/issues/1741)).
+
+The verb changes the running value only: it never reaches
+`gui.json`, so the General row's value returns the next time
+KiwiDesk loads its config. In a Lua-owned setup, `init.lua` is
+where it is kept, and the General row is greyed. **Adopt into
+the GUI** keeps the value `init.lua` set.
+:::
 
 **Example:**
 
@@ -1797,10 +1811,11 @@ track.set_overflow_style_override("code", "cascade_overflow")
 
 ## KiwiShelf
 
-**KiwiShelf** is the one screen edge both bars sit on — the
-[App Bar](#app-bar) and the [Space Bar](#space-bar).
-`kiwishelf.set_*` sets where the shelf hangs, how the two bars
-share it, and the look, colours and app glyph style they share;
+**KiwiShelf** is where both bars are managed — the
+[App Bar](#app-bar) and the [Space Bar](#space-bar), on one edge
+or each on its own.
+`kiwishelf.set_*` sets how deep the shelf is, where the bars sit
+along their edge, how the two share one, and the styling, colours and app glyph style they share;
 each bar keeps its own content and the shape of its active
 indicator. Stored as `settings.kiwishelf` in a profile.
 
@@ -1810,6 +1825,23 @@ the layouts whose App Bar is on (monocle and scrolling show one
 by default). With the Space Bar off, switching a Space between a
 layout that shows an App Bar and one that does not moves its
 windows by the strip.
+
+:::unreleased
+Each bar sets its own edge —
+[`space_bar.set_edge`](#space_barset_edge) and
+[`app_bar.set_edge`](#app_barset_edge). On the same edge the two
+share one shelf, as described here; on different edges each bar
+is its own, with its own plate, and `set_order`, `set_minimum` and
+the divider do nothing until they share an edge again. Everything
+else on this page applies to both bars wherever they sit, and
+`set_alignment` places each bar along its own edge. Each edge is
+reserved where its bar draws: the Space Bar's in every layout,
+the App Bar's only in the layouts whose App Bar is on — so with
+the bars split, switching a Space into or out of such a layout
+moves its windows by the App Bar's strip. Where the two edges
+meet at a corner, the Space Bar runs the whole edge and the App
+Bar stops at it.
+:::
 
 While both bars show they are one plate with two sections, in
 the order `set_order` gives them, placed along the edge as one
@@ -1828,21 +1860,6 @@ respected; a scroll or a page holds until the active Space or
 the focus changes. While the shelf is full, drag the divider to
 change the Space Bar minimum, as `set_minimum` does, and
 double-click it to restore the default.
-
-### kiwishelf.set_edge
-
-**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"top"`).
-
-**Does:** sets the screen edge the shelf occupies, for both bars
-and every layout. The edge is absolute — it does not follow a
-layout's orientation (#293).
-
-**Example:**
-
-```lua
-kiwishelf.set_edge("bottom")
-```
 
 ### kiwishelf.set_alignment
 
@@ -2296,7 +2313,7 @@ content`.
 
 - `space_bar.set_<field>`, `app_bar.set_<field>`,
   `monocle.set_app_bar_<field>` and `scroll.set_app_bar_<field>`
-  for `edge`, `alignment`, `thickness`, `outer_margin`,
+  for `alignment`, `thickness`, `outer_margin`,
   `inner_margin`, `background_style`, `liquid_glass`,
   `background_fit`, `corner_roundness`, `item_gap`, `font_size`,
   `icon_source`, `dim_factor`, and the colours `item_color`,
@@ -2312,6 +2329,18 @@ content`.
   follows its content.
 - `space_bar.set_title_cap` →
   [`space_bar.set_front_app_title_cap`](#space_barset_front_app_title_cap).
+
+:::unreleased
+`kiwishelf.set_edge` is retired too → `space_bar.set_edge`: each
+bar sets its own edge again, and `app_bar.set_edge` is the App
+Bar's. `monocle.set_app_bar_edge` and `scroll.set_app_bar_edge`
+stay retired and now name `app_bar.set_edge`, since no layout
+sets the App Bar's edge for itself. A saved profile or backup is
+rewritten once, and every setup keeps its bars where they were: a
+stored KiwiShelf edge becomes both bars' edge, and a profile from
+before KiwiShelf keeps each bar's own edge — the App Bar at the
+bottom where it stored none.
+:::
 
 The `gap` active indicator is removed: `set_active_indicator`
 and its per-layout twins refuse it, naming the values that
@@ -2344,12 +2373,31 @@ monitors each display shows its own bar, on that display, for the
 space it is showing, and dragging an item reorders that display's
 space.
 
-The bar sits on [KiwiShelf](#kiwishelf), which sets its edge,
+The bar sits on [KiwiShelf](#kiwishelf), which sets its
 thickness, margins, background, colours and app glyph style.
 Everything else about it is **global**: `app_bar.set_*` sets
 every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
+
+### app_bar.set_edge
+
+:::unreleased
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
+
+**Does:** sets the screen edge the App Bar sits on, for every
+layout — no layout sets its own. On the Space Bar's edge the two
+share one [KiwiShelf](#kiwishelf); on another edge each bar is
+its own, reserved as KiwiShelf describes. The edge is absolute —
+it does not follow a layout's orientation.
+
+**Example:**
+
+```lua
+app_bar.set_edge("bottom")
+```
+:::
 
 ### app_bar.set_active_indicator
 
@@ -2447,6 +2495,11 @@ overrides are the same setters prefixed with the layout name:
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_group_adjacent_windows`, etc.
 
+:::unreleased
+The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
+no per-layout override either.
+:::
+
 **Example:**
 
 ```lua
@@ -2471,7 +2524,7 @@ stays collapsed and takes the focused accent. The user guide's
 what a click on a glyph does and the drag-onto-a-Space gesture.
 
 The bar is layout-independent and sits on
-[KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,
+[KiwiShelf](#kiwishelf), which sets its thickness, margins,
 background, colours and app glyph style; every `space_bar.*`
 setting is global, with no per-layout override. While a native-fullscreen app holds the
 screen the bar hides; it returns with the Desktop.
@@ -2491,6 +2544,24 @@ none is.
 ```lua
 space_bar.set_enabled(true)
 ```
+
+### space_bar.set_edge
+
+:::unreleased
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
+
+**Does:** sets the screen edge the Space Bar sits on. On the App
+Bar's edge the two share one [KiwiShelf](#kiwishelf); on another
+edge each bar is its own, reserved as KiwiShelf describes. The
+edge is absolute — it does not follow a layout's orientation.
+
+**Example:**
+
+```lua
+space_bar.set_edge("left")
+```
+:::
 
 ### space_bar.set_glyph_cap
 
@@ -2786,21 +2857,6 @@ drag.set_ghost_enabled(true)
 drag.set_ghost_border(true)
 ```
 
-### drag.set_ghost_border_width
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the border width of the ghost. Lua-only per
-stroke: the Settings app's shared **Width** writes this, the
-drop zone's and the focus ring's together, and the three are
-never clamped against each other.
-
-**Example:**
-
-```lua
-drag.set_ghost_border_width(5)
-```
-
 ### drag.set_ghost_border_alignment
 
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
@@ -2878,20 +2934,6 @@ drag.set_drop_zone_enabled(true)
 drag.set_drop_zone_border(true)
 ```
 
-### drag.set_drop_zone_border_width
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the border width of the drop zone. Lua-only per
-stroke: the Settings app's shared **Width** writes this, the
-ghost's and the focus ring's together.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border_width(5)
-```
-
 ### drag.set_drop_zone_border_alignment
 
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
@@ -2944,27 +2986,6 @@ amber with 25% alpha).
 drag.set_drop_zone_fill_color("#C2790A40")
 ```
 
-### drag.set_corner_radius
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the corner rounding of both visuals (default 16,
-the system window radius). The full range is Lua-only: the
-Settings app offers **Square** / **Rounded**, which writes this
-and the focus ring's corner style together. It reads any value
-above zero as Rounded, so a radius set here is displayed rather
-than overwritten, and re-picking Rounded leaves it alone — that
-segment writes the system radius only from 0. Square writes 0.
-Set this to disagree with `border.set_corner_style` and the
-picker shows no segment selected until you choose one; either
-segment then sets both.
-
-**Example:**
-
-```lua
-drag.set_corner_radius(16)
-```
-
 ### drag.set_liquid_glass
 
 **Expects:** a boolean (default `true`).
@@ -2986,6 +3007,23 @@ switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 ```lua
 drag.set_liquid_glass(false)
 ```
+
+:::unreleased
+### Retired drag verbs
+
+These verbs are retired. A call in `init.lua` is reported in
+Config Issues, naming what replaces it; over the CLI it fails
+with `<verb> was retired — use <replacement>`.
+
+- `drag.set_ghost_border_width` and
+  `drag.set_drop_zone_border_width` →
+  [`border.set_width`](#borderset_width).
+- `drag.set_corner_radius` →
+  [`border.set_corner_style`](#borderset_corner_style).
+
+A saved profile's `drag.corner_radius` and each visual's
+`border_width` are no longer read.
+:::
 
 ## Focus Border
 
@@ -3022,6 +3060,11 @@ least as wide as the border so neighbouring borders do not
 touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
+
+:::unreleased
+The drag ghost and the drop zone draw their stroke at this width
+too.
+:::
 
 **Example:**
 
@@ -3077,9 +3120,12 @@ border.set_unfocused_color("#8E8E93CC")
 
 **Does:** `rounded` (default) matches the real macOS window
 corner radius, queried per window; `square` draws sharp corners.
-The Settings app's shared **Corners** control writes this and
-`drag.set_corner_radius` together and reads both back; see that
-verb for how the picker treats a pair that disagrees.
+
+:::unreleased
+The drag ghost and the drop zone take this style too: `rounded`
+draws them at the system window radius, `square` with no
+rounding.
+:::
 
 **Example:**
 
@@ -3286,8 +3332,12 @@ maintenance raises the warp is held, and it fires once they
 settle, for the window focus finally landed on. When focus lands
 on a window in an inactive space (cmd+tab into a stashed window),
 the warp waits until KiwiDesk follows focus and pulls that space
-forward. Clicking an app-bar item warps too. Also togglable in
-the Settings app under **Behavior ▸ Mouse**.
+forward. Clicking an app-bar item warps too.
+
+:::unreleased
+Also togglable in the Settings app under **Shortcuts & Gestures ▸
+Mouse & trackpad**.
+:::
 
 **Example:**
 
@@ -3916,9 +3966,9 @@ at the active layer's bindings — or closes it if it is already
 open. It is the panel behind the menu bar's *View Shortcuts…*
 row; the bound combo shows beside that row and in the panel's
 close hint. Seeded to **⌃⌥K** in the base layer and in every
-layer you create, and offered under **Shortcuts ▸ General**
-("Show shortcuts panel"), where you can rebind or clear it per
-layer.
+layer you create, and offered under **Shortcuts & Gestures ▸
+General** ("Show shortcuts panel"), where you can rebind or clear
+it per layer.
 
 **Example:**
 
@@ -3939,8 +3989,8 @@ opening Settings from the menu bar. Unsaved edits survive that;
 only the place you were reading resets.
 
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
-create in Settings, and offered under **Shortcuts ▸ General**
-("Open Settings"), where you can rebind it per layer.
+create in Settings, and offered under **Shortcuts & Gestures ▸
+General** ("Open Settings"), where you can rebind it per layer.
 
 **Example:**
 
@@ -4010,7 +4060,7 @@ The Settings app's shortcut recorder writes the long forms
 A combo is any set of modifiers plus **exactly one key**.
 Multi-key chords (`cmd+j+k`) are not expressible; a hand-written
 combo that doesn't parse is never registered, and the Shortcuts
-section flags the row with ⚠ *"isn't a recognized shortcut"*.
+& Gestures page flags the row with ⚠ *"isn't a recognized shortcut"*.
 
 ### Shortcut Layers
 
@@ -4890,17 +4940,14 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
     "drag": {
-      "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#347957", "border_width": 5,
-        "border_alignment": "inside",
+        "border_color": "#347957", "border_alignment": "inside",
         "fill": true, "fill_color": "#34795740"
       },
       "drop_zone": {
         "enabled": true, "border": true,
-        "border_color": "#C2790A", "border_width": 5,
-        "border_alignment": "inside",
+        "border_color": "#C2790A", "border_alignment": "inside",
         "fill": true, "fill_color": "#C2790A40"
       }
     },
@@ -5308,10 +5355,16 @@ from spilling into the row below. Each display sizes its own
 grid from its window count `N` and the density target `T` (see
 `quit.set_grid_target_depth` below), never past 4×4. One-shot
 teardown placement: windows stay on their own display, and
-nothing is managed afterwards. Profile JSON key: `quit.layout`.
-Default: `grid`.
+nothing is managed afterwards. Default: `grid`.
 
 :::unreleased
+The setting is app-wide: it is stored in `gui.json` as
+`quit.layout`, no profile carries it, and loading a profile never
+changes it. It has no Settings row while `grid` is its one value.
+The upgrade and a Lua-owned setup are as for
+[`set_refusal_sound`](#set_refusal_sound), and the verb changes
+the running value only, never `gui.json`.
+
 The grid fills before it stacks. Up to six windows each take a
 tile, split so the tiles come nearest square on that display: on
 16:9 one window fills it, two sit side by side, three share a
@@ -5341,10 +5394,16 @@ cell aims for before the grid grows. Grid dimensions stay
 automatic, calculated per display from that display's window
 count, and never pass 4×4; the target only moves the growth
 thresholds. It is not a hard maximum: past 4×4, additional
-windows keep cascading in its cells. Profile JSON key:
-`quit.grid_target_depth`. Default: `5`.
+windows keep cascading in its cells. Default: `5`.
 
 :::unreleased
+The GUI twin is **General ▸ Windows per pile on quit**. The
+setting is app-wide: it is stored in `gui.json` as
+`quit.grid_target_depth`, no profile carries it, and loading a
+profile never changes it. The upgrade, the verb's reach and a
+Lua-owned setup are as for
+[`set_refusal_sound`](#set_refusal_sound).
+
 The thresholds sit on the ladder 3×2 → 4×2 → 4×3 → 4×4: 3×2
 through `6×T` windows, 4×2 through `8×T`, 4×3 through `12×T`,
 4×4 above. Up to six windows tile whatever the target.

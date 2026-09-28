@@ -77,14 +77,6 @@ struct RefusalSoundMigrationTests {
         #expect(
             (settings["refusal"] as? [String: Any]) == nil
         )
-        let bytes = try JSONSerialization.data(
-            withJSONObject: settings
-        )
-        let decoded = try JSONDecoder().decode(
-            TilingSettings.self,
-            from: bytes
-        )
-        #expect(!decoded.refusalSound)
     }
 
     /// A `feedback` key under any other parent is left alone —

@@ -52,17 +52,22 @@ struct SettingsSearchDrawerAnchorTests {
             (
                 .bars, "KiwiShelf & Bars", .kiwishelf,
                 [
+                    SettingsCatalog.bars.kiwishelfEdges,
                     SettingsCatalog.bars.kiwishelfStyle,
                     SettingsCatalog.bars.kiwishelfMargins,
                 ]
             ),
             (
-                .colors, "Colors & Animations", .motion,
+                .looks, "Looks & Animations", .motion,
                 [SettingsCatalog.colors.motionMore]
             ),
             (
-                .shortcuts, "Shortcuts", .generalKeys,
+                .shortcuts, "Shortcuts & Gestures", .generalKeys,
                 [SettingsCatalog.shortcuts.generalKeys]
+            ),
+            (
+                .shortcuts, "Shortcuts & Gestures", .gestures,
+                [SettingsCatalog.shortcuts.gestures]
             ),
         ]
     }

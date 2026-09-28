@@ -102,6 +102,10 @@ extension KiwiCore {
         // arrangement surviving a confirmed replace, which is
         // exactly what the discard exists to prevent.
         discardSavedArrangement()
+        // Before the write, which stamps them (#1741).
+        if bundle.config != nil {
+            takeRestoredAppWide(from: bundle)
+        }
         let outcome = try writeIncoming(bundle)
 
         // Adoption is the one piece of live profile state the
@@ -261,7 +265,8 @@ extension KiwiCore {
         }
         return RestoreOutcome(
             skippedProfiles: skipped,
-            refusedPalettes: refused
+            refusedPalettes: refused,
+            refusedLooks: try writeIncomingLooks(bundle)
         )
     }
 }

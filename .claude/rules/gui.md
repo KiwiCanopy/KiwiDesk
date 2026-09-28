@@ -214,6 +214,14 @@ restated `20...80` satisfies on the day it is written.
     words held to the predicate at every length and the
     predicate to the drawing by
     `LayoutSchematicCenterCaptionTests`.
+- **A gesture picture is not a schematic.** A Mouse & trackpad
+  entry on the Shortcuts & Gestures page teaches a gesture rather
+  than a rest state, so its picture may move — only while hovered,
+  resting on its key frame otherwise and always under Reduce
+  Motion, never a bundled clip, never autoplay, with the gate named
+  per call (`ReduceMotionGateTests`). Whether it actually moves is
+  a device check, since no headless suite sees an animation run
+  (#1726; `docs/design-decisions.md` ▸ Shortcuts carries why).
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by
   skipping the drawing rather than leaving it to the frame's
@@ -428,7 +436,7 @@ never views.
 
 `Settings/Census/` records every setting's redesign placement,
 tier, gate and text keys, and the redesigned GUI renders from
-it. **Bars, Colours & Motion, Advanced Colours, Shortcuts,
+it. **Bars, Looks & Animations, Advanced Colours, Shortcuts,
 Layout Defaults, App Rules, General, Gaps & Borders, Spaces &
 Layouts, Profiles, Monitors, Behaviour and the Mac Checklist
 render from it now** (#678 Phases 2-3; #1365): each
@@ -579,9 +587,20 @@ would be a live control drawn dead. The master stays live over
 a "mixed" readout, answers the resolver's `followersDiffer` —
 `GapsBordersGates.acknowledged` is the one register of who does
 — and hands that answer to its label's `?`, the first edit
-converging every follower (`BorderMastersDivergenceTests` ▸
+converging every follower (`MasterDivergenceRegisterTests` ▸
 `acknowledgedRegisterIsExact`, `GapsAndBordersGateWiringTests`
 ▸ `gapMastersAcknowledgeAtTheLabel`).
+
+The Liquid Glass master is the one ruled exception to that
+register: it answers its `?` from `LiquidGlassAgreement`
+(`Sources/KiwiDesk/Settings/SettingsModel+Glass.swift`), the ONE
+comparison both its binding and its row read, and never joins
+`GapsBordersGates.acknowledged` (`LiquidGlassMasterTests` ▸
+`divergenceSeen`, `LiquidGlassMasterTests` ▸
+`rowConsultsTheAgreement`). A new master answers through one of
+those two homes; a third one is ruled here before it ships, or
+the two registers stop being the whole census of who
+acknowledges.
 
 **Consulting a resolver is not drawing what it answered, and a
 SURFACING gate leaves nothing behind to prove the difference.**

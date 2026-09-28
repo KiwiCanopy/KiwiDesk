@@ -5,6 +5,8 @@ import AppKit
 /// one panel over the shelf's one plate.
 @MainActor
 public final class AppBarOverlay {
+    /// The items' Core answers, the manager's one instance.
+    var itemActions: AppBarItemActions?
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
     public var onSelect: @MainActor (WindowID) -> Void = {
         _ in
@@ -174,6 +176,9 @@ public final class AppBarOverlay {
         let depth = edge.isHorizontal ? strip.height : strip.width
         self.plateFrame = plateFrame
         let hosting = glassHosting(style)
+        // Items leave their glass BEFORE the frame pass, which sets
+        // only the ones the container hosts (#1730).
+        if hosting != .boxGlass { teardownBoxGlasses() }
         BarMotion.runLayout {
             for (index, view) in itemViews.enumerated()
             where view.superview === itemContainer {
@@ -195,10 +200,12 @@ public final class AppBarOverlay {
                 icon: item.icon,
                 glyph: item.glyph,
                 count: item.count,
+                titleCut: item.titleCut,
                 active: active,
                 horizontal: m.horizontal,
                 style: style
             )
+            view.itemActions = itemActions
             view.isFirstInRun = index == 0
             view.isLastInRun = index == items.count - 1
             view.onSelect = { [weak self] id in

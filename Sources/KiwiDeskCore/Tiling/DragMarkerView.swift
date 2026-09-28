@@ -18,7 +18,7 @@ public final class DragMarkerView: NSView {
     /// What a Settings picture asked to draw, kept for re-draws.
     private struct PreviewInput {
         let style: DragVisual
-        let radius: CGFloat
+        let stroke: WindowStroke
         let storedGlass: Bool
         let sheen: CGFloat
     }
@@ -49,13 +49,13 @@ public final class DragMarkerView: NSView {
     /// (#1644).
     public func showPreview(
         _ style: DragVisual,
-        cornerRadius: CGFloat,
+        stroke: WindowStroke,
         storedGlass: Bool,
         sheen: CGFloat
     ) {
         preview = PreviewInput(
             style: style,
-            radius: cornerRadius,
+            stroke: stroke,
             storedGlass: storedGlass,
             sheen: sheen
         )
@@ -67,7 +67,7 @@ public final class DragMarkerView: NSView {
         guard let input = preview else { return }
         render(
             input.style,
-            radius: input.radius,
+            stroke: input.stroke,
             glass: LiquidGlassGate.rendered(glass: input.storedGlass),
             sheen: input.sheen
         )
@@ -109,17 +109,18 @@ public final class DragMarkerView: NSView {
     /// Paints the marker; `glass` is already resolved by the gate.
     func render(
         _ style: DragVisual,
-        radius: CGFloat,
+        stroke: WindowStroke,
         glass: Bool,
         sheen: CGFloat
     ) {
         guard let layer else { return }
+        let radius = stroke.cornerRadius
         layer.cornerRadius = radius
         // A layer's border draws above its sublayers, so it stays
         // solid over the glass (`DragPairSeparationTests`, #511);
         // the sheen's rim takes its place, above the glass too.
         let ramp = sheen != 0 && style.border
-        layer.borderWidth = style.border && !ramp ? style.borderWidth : 0
+        layer.borderWidth = style.border && !ramp ? stroke.width : 0
         layer.borderColor = Self.color(style.borderColor).cgColor
         rim.layer?.cornerRadius = radius
         rim.needsDisplay = true
@@ -127,7 +128,7 @@ public final class DragMarkerView: NSView {
             ramp
             ? SheenRimView.Paint(
                 hex: style.borderColor,
-                width: style.borderWidth,
+                width: stroke.width,
                 strength: sheen
             )
             : nil

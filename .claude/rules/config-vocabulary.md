@@ -125,8 +125,10 @@ synonym:
   `SpaceChip`, `BadgeChip`, `SpaceAssignmentChip`). Live and
   correct; retired only as a name for the sticky mark.
 - **KiwiShelf** / **shelf** — **KiwiShelf** is the product name
-  of the one screen edge both bars sit on (Lua `kiwishelf.*`,
-  JSON `settings.kiwishelf`, #1517). Write **KiwiShelf** in UI
+  of the one place both bars are managed — where each sits, how
+  they share an edge, the style they have in common — not of a
+  strip: the bars may sit on one edge or each on its own (Lua
+  `kiwishelf.*`, JSON `settings.kiwishelf`, #1517, #1731). Write **KiwiShelf** in UI
   copy and never the common noun *shelf*, which the owner struck
   from labels and captions; `docs/` prose and doc comments may
   say *the shelf* once KiwiShelf is named. As a product name it
@@ -135,6 +137,15 @@ synonym:
   register. It is not the palette picker's source-only
   `PaletteShelf` type: do not name a bar concept after that type,
   or a palette concept after KiwiShelf.
+- **look** — a named set of KiwiShelf STYLING that names a
+  palette (#1684, `LookKeys`); the palette alone is the colours.
+  Never a *theme* or *skin*, and never a *preset*, which names
+  a layout arrangement — in English copy and, by owner ruling
+  2026-09-28, in no catalog either, whose word is otherwise
+  settled under `docs/localization-naming.md` ▸ Family C.
+  Code already says "look" for a bar's resolved drawing inputs
+  (`SpaceBarLook`, `AppBarLook`, `LayoutAppBar.look(on:)`);
+  that is a contributor-only sense and never reaches copy.
 - **item** — one entry in a bar (a window, a same-app group, a
   space). Its geometry is `item_gap`, and its length follows its
   content: give it no size knob of its own, since the App Bar's
@@ -288,8 +299,8 @@ synonym:
   read as the accessibility setting, worst of all in German
   where *Bewegung* is macOS's own word for it.
 - **width** vs **thickness** — a *stroke* has a width
-  (`border.set_width`, `drag.…_border_width`); a *bar* has a
-  thickness (`kiwishelf.set_thickness`).
+  (`border.set_width`); a *bar* has a thickness
+  (`kiwishelf.set_thickness`).
 - **gap** vs **margin** — a *gap* is room between the things a
   surface lays out: windows (`set_gap_global`'s outer and inner
   gaps) or the shelf's items and bars (`kiwishelf.set_item_gap`);

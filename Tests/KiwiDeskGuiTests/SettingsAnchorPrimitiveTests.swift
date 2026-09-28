@@ -168,6 +168,15 @@ struct SettingsAnchorPrimitiveTests {
         // opens the new tab at its top (#1666). Not a Settings
         // destination, so nothing there is a reveal target.
         "UpdateNotesScroll.swift": 1,
+        // Animation identity (#1726): a gesture picture's hover
+        // loop ends with the view that ran it, since its rest
+        // frame and the loop's target are one value. Not a reveal
+        // target — the picture is hidden from accessibility.
+        "GestureEntry.swift": 1,
+        // Scroll identity: the tour's palette row scrolls the
+        // live palette into view (#1720). Not a Settings
+        // destination, so nothing there is a reveal target.
+        "OnboardingLooksRows.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")
@@ -209,6 +218,9 @@ struct SettingsAnchorPrimitiveTests {
         "SettingsReveal.swift",
         "SettingsSection.swift",
         "SettingsDisclosure.swift",
+        // #1741: the collapsible section card is a container
+        // shape, the section's plate beside the drawer's reveal.
+        "SettingsCollapsibleSection.swift",
     ]
 
     @Test("the split halves stay inside the container shapes")

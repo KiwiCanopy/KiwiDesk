@@ -39,7 +39,18 @@ enum HomeCardContent {
                 inner
             )
         case .bars:
-            let edge = edgeName(settings.kiwishelf.edge)
+            let edge = edgeName(
+                settings.spaceBarStyle.enabled
+                    ? settings.spaceBarStyle.edge : settings.appBarStyle.edge
+            )
+            if settings.bothBarsCanShow, settings.sharedBarEdge == nil {
+                return L(
+                    "home.card.bars.split_subtitle",
+                    "Space Bar: %1$@ · App Bar: %2$@",
+                    edgeName(settings.spaceBarStyle.edge),
+                    edgeName(settings.appBarStyle.edge)
+                )
+            }
             if settings.spaceBarStyle.enabled {
                 return L(
                     "home.card.bars.shelf_subtitle",
@@ -52,7 +63,7 @@ enum HomeCardContent {
                 "KiwiShelf · %1$@ · Space Bar off",
                 edge
             )
-        case .colors:
+        case .looks:
             if settings.animations.anyEnabled {
                 return L(
                     "home.card.colors.subtitle",
@@ -77,21 +88,6 @@ enum HomeCardContent {
                 "%1$d connected · %2$d Spaces pinned",
                 model.displays.count,
                 model.config.spacePins.count
-            )
-        case .behavior:
-            if settings.mouseResize == .layout {
-                return L(
-                    "home.card.behavior.subtitle_layout",
-                    "Drag resizes neighbours · quit leaves "
-                        + "%1$d windows per grid cell",
-                    settings.quitGridTargetDepth
-                )
-            }
-            return L(
-                "home.card.behavior.subtitle_snap_back",
-                "Drag snaps back · quit leaves %1$d windows "
-                    + "per grid cell",
-                settings.quitGridTargetDepth
             )
         case .advancedColors:
             return L(

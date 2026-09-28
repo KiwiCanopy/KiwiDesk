@@ -5,9 +5,8 @@ import Foundation
 /// (forced) on success, and `updateBorders()` runs inside that
 /// retile, so the trailer IS the apply path.
 ///
-/// Out-of-range width is silently clamped (matching
-/// `drag.set_ghost_border_width`); only a wrong *type* or an
-/// unknown enum string fails.
+/// Every field but the colours parses through the one
+/// `BorderCommandSetting` a look shares (#1739).
 extension KiwiCore {
     func borderCommand(
         _ command: String,
@@ -51,24 +50,19 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("border.set_".count)
         )
+        if let parsed = BorderCommandSetting.parse(
+            field: field,
+            args: args
+        ) {
+            switch parsed {
+            case .success(let setting):
+                setting.apply(to: &tiler.settings.borderStyle)
+                return .ok()
+            case .failure(let refusal):
+                return refusal.response
+            }
+        }
         switch field {
-        case "enabled":
-            return setBool(args) {
-                tiler.settings.borderStyle.enabled = $0
-            }
-        case "unfocused_enabled":
-            return setBool(args) {
-                tiler.settings.borderStyle.unfocusedEnabled = $0
-            }
-        case "width":
-            guard let width = args.first?.numberValue else {
-                return .fail("expected width (pt)")
-            }
-            tiler.settings.borderStyle.width = min(
-                BorderStyle.maxWidth,
-                max(BorderStyle.minWidth, width)
-            )
-            return .ok()
         case "focused_color":
             return setColor(args) {
                 tiler.settings.borderStyle.focusedColor = $0
@@ -77,62 +71,6 @@ extension KiwiCore {
             return setColor(args) {
                 tiler.settings.borderStyle.unfocusedColor = $0
             }
-        case "glow":
-            return setBool(args) {
-                tiler.settings.borderStyle.glow = $0
-            }
-        case "sheen":
-            // A signed strength, clamped into -1...1 like the other
-            // border magnitudes; only a wrong type fails.
-            guard let value = args.first?.numberValue, value.isFinite
-            else {
-                let range = BorderStyle.sheenRange
-                return .fail(
-                    "expected a sheen from \(range.lowerBound.formatted()) "
-                        + "to \(range.upperBound.formatted())"
-                )
-            }
-            tiler.settings.borderStyle.sheen = BorderStyle.clampSheen(value)
-            return .ok()
-        case "glow_size":
-            // 0 = automatic (the width-scaled formula, #551);
-            // an explicit size clamps only at the renderable
-            // ceiling — no floor, Lua may go softer than the
-            // GUI band (curate vs open, AGENTS §2.7). Negative
-            // REJECTS rather than clamping: max(0, …) would
-            // flip the value into the automatic regime, which
-            // can make the glow BIGGER — the opposite of what
-            // probing downward expects. Mode switches only on
-            // an explicit 0.
-            guard
-                let size = args.first?.numberValue,
-                size.isFinite, size >= 0
-            else {
-                return .fail(
-                    "expected size (pt) >= 0, 0 = automatic"
-                )
-            }
-            tiler.settings.borderStyle.glowSize = min(
-                BorderStyle.maxGlowSize,
-                size
-            )
-            return .ok()
-        case "corner_style":
-            guard let raw = args.first?.stringValue,
-                let style = BorderStyle.CornerStyle(rawValue: raw)
-            else {
-                return .expected(BorderStyle.CornerStyle.self)
-            }
-            tiler.settings.borderStyle.cornerStyle = style
-            return .ok()
-        case "draw_order":
-            guard let raw = args.first?.stringValue,
-                let order = BorderStyle.DrawOrder(rawValue: raw)
-            else {
-                return .expected(BorderStyle.DrawOrder.self)
-            }
-            tiler.settings.borderStyle.drawOrder = order
-            return .ok()
         default:
             return .fail("unknown command: \(command)")
         }

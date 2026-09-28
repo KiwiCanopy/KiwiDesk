@@ -12,8 +12,9 @@ covers what those cannot say — how things interact, where a
 setting lives, why a move was refused, and the files behind it.
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while a KiwiDesk window is key. **Shortcuts ▸ General**
-offers a rebindable **Open Settings** row for a global key.
+**⌘,** while a KiwiDesk window is key. **Shortcuts & Gestures ▸
+General** offers a rebindable **Open Settings** row for a global
+key.
 
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.
@@ -115,6 +116,17 @@ reference](cli.md)). While that service runs, **Start at login**
 shows as on and stops being editable; `kiwidesk service stop`
 gives the switch back.
 
+## Wake & Restart
+
+Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
+[Lua reference](lua-reference.md)): after sleep or screen unlock,
+KiwiDesk restores the arrangement captured when the Mac went to
+rest (on by default, after a 1500 ms delay) and puts focus back
+on the window you were in. A wake restore is skipped when the
+display set changed during sleep; the monitor-change profile
+switch takes over. If a restore leaves things wrong, **General ▸
+Advanced ▸ Discard Saved Window Arrangement** clears it.
+
 ## Moving to Another Mac: Backups
 
 **General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
@@ -133,6 +145,15 @@ from a **newer** KiwiDesk, one that would restore nothing, and
 one carrying settings when this Mac's settings come from
 `init.lua` (profiles and palettes alone restore there). A
 restore that skips a profile or a palette says so.
+
+:::unreleased
+Saved looks travel in a backup beside the palettes, and restore
+wherever they do; **Reset All Settings…** keeps them too.
+
+The alert sound and the windows per pile on quit travel in a
+backup. An older backup keeps them in its profiles instead, and
+restoring it takes them from the profile that becomes active.
+:::
 
 ## The gui.json File
 
@@ -185,6 +206,14 @@ hand-written setup, the first time you Save in Settings.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
+:::unreleased
+**`refusal`** holds `sound`, the alert sound when an action
+can't apply, and **`quit`** holds `grid_target_depth`, the
+windows per pile on quit, beside `layout`, how windows are
+spread on quit. The first two are set on **General**; `layout`
+is set from Lua (`quit.set_layout`).
+:::
+
 A `profile_bindings` entry names its profiles as a list,
 `profiles`, one per screen count, each for all screen setups — a
 file with the older single `profile` is rewritten once on load —
@@ -230,6 +259,12 @@ keybindings runs on every reload.
   and per-layout / per-space tuning, space-to-monitor pins, the
   Main role and the fallback space.
 
+:::unreleased
+The alert sound when an action can't apply and the windows per
+pile on quit are global too: they sit in `gui.json`, and loading
+a profile never changes them.
+:::
+
 The General section leaves the grid while you edit a stored
 profile without switching to it.
 
@@ -257,9 +292,9 @@ What the fields' own notes do not say:
   for individually resizable masters ([Accepted
   limitations](accepted-limitations.md)).
 - **Scrolling** — its focus animation and duration live here,
-  not in Colors & Animations.
-- **Track** — the track shortcuts sit in Shortcuts ▸ Move
-  windows. Previous is the column to the left (or the row
+  beside the layout rather than with the other animations.
+- **Track** — the track shortcuts sit in Shortcuts & Gestures ▸
+  Move windows. Previous is the column to the left (or the row
   above), next the column to the right (or the row below),
   whichever way the axis runs.
   Track sizes and in-track shares are session-only.
@@ -271,13 +306,17 @@ track shortcut bound.
 - **Floating** — switching a space to Floating with any window
   partly or fully off the screen (a scrolled-out column, a
   parked Monocle window) or piled behind another (a Monocle
-  stack) arranges the space's windows in the grid **Behavior ▸
-  On quit** uses; with everything already reachable, nothing
-  moves.
+  stack) arranges the space's windows in the grid KiwiDesk uses
+  on quit; with everything already reachable, nothing moves.
+
+:::unreleased
+That grid's windows per pile is set at **General ▸ Windows per
+pile on quit**.
+:::
 
 **Monocle** — a focus change flips a card from one app's icon
 to the next over a blur; the flip and its duration live here
-too, not in Colors & Animations.
+too, beside the layout.
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or the shares
@@ -329,13 +368,10 @@ another monitor moves the focus there with its window.
 
 **Width** and **Corners** at the top set the focus ring, the
 drag ghost and the drop zone together. Keep gaps at least twice
-the width so two neighbouring rings do not touch. Each stroke's
-own width, each overlay's alignment and the drag radius are
-Lua-only and never clamped against each other; [design
-decisions](design-decisions.md) has why the GUI offers no switch,
-the [Lua reference](lua-reference.md) the verbs. A radius set
-from Lua shows as **Rounded** and keeps its value; if the ring
-and the overlays disagree, neither segment is selected.
+the width so two neighbouring rings do not touch. Each overlay's
+alignment is Lua-only; [design decisions](design-decisions.md)
+has why the GUI offers no switch, the [Lua
+reference](lua-reference.md) the verbs.
 
 ### Focus Border
 
@@ -458,9 +494,14 @@ Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
 `scroll.set_app_bar_*` twin ([Per-layout App Bar
 overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
+:::unreleased
+The one exception is the App Bar's edge, which every layout
+shares.
+:::
+
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
-(**Colours & Animations**); on macOS before 26 each draws its
+(its own card in Settings); on macOS before 26 each draws its
 flat look instead.
 
 On by default, on every surface. While macOS's **Reduce
@@ -528,19 +569,6 @@ Dropping onto the Space a window is already on does nothing.
 
 While dragging, hold over a bar's faded end to autoscroll a bar
 that overflows.
-
-## Behavior
-
-### Wake & Restart
-
-Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
-[Lua reference](lua-reference.md)): after sleep or screen unlock,
-KiwiDesk restores the arrangement captured when the Mac went to
-rest (on by default, after a 1500 ms delay) and puts focus back
-on the window you were in. A wake restore is skipped when the
-display set changed during sleep; the monitor-change profile
-switch takes over. If a restore leaves things wrong, **General ▸
-Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ## Profiles
 
@@ -616,7 +644,7 @@ layout edits until you grant access.
 
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
-loaded and edit its Shortcuts section.
+loaded and edit its Shortcuts & Gestures page.
 
 ### Built-in Standards & Presets
 
@@ -882,10 +910,10 @@ the caps print, not which key fires.
 ### Import & Adopt
 
 If `init.lua` holds custom keybindings, **Import from
-init.lua…** (in the Shortcuts header) reads them for review before
-you Save; each binding must be an inline `function() … end` on
-one line. **Adopt into the GUI** imports the whole file's managed
-settings and keeps your custom Lua live.
+init.lua…** (in the Shortcuts & Gestures header) reads them for
+review before you Save; each binding must be an inline
+`function() … end` on one line. **Adopt into the GUI** imports
+the whole file's managed settings and keeps your custom Lua live.
 
 ### Shortcut Layers
 

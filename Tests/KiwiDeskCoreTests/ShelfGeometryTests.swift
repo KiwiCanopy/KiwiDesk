@@ -16,12 +16,8 @@ struct ShelfGeometryTests {
         height: 1055
     )
 
-    private func shelf(
-        edge: AppBarEdge,
-        thickness: CGFloat = 32
-    ) -> KiwiShelf {
+    private func shelf(thickness: CGFloat = 32) -> KiwiShelf {
         var shelf = KiwiShelf()
-        shelf.edge = edge
         shelf.thickness = thickness
         return shelf
     }
@@ -31,10 +27,15 @@ struct ShelfGeometryTests {
         arguments: [AppBarEdge.top, .bottom, .left, .right]
     )
     func reservation(edge: AppBarEdge) {
-        let shelf = shelf(edge: edge)
-        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let shelf = shelf()
+        let strip = ShelfGeometry.strip(
+            in: visible,
+            edge: edge,
+            shelf: shelf
+        )
         let remaining = ShelfGeometry.remainingFrame(
             in: visible,
+            edges: [edge],
             shelf: shelf
         )
         // Strip and remaining frame partition the visible frame:
@@ -69,12 +70,14 @@ struct ShelfGeometryTests {
     @Test("The shelf reserves exactly where a bar draws")
     func reservesWhereABarDraws() {
         var settings = TilingSettings()
-        settings.kiwishelf = shelf(edge: .left)
+        settings.kiwishelf = shelf()
+        settings.barEdge = .left
         settings.spaceBarStyle.enabled = false
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = false
         let reserved = ShelfGeometry.remainingFrame(
             in: visible,
+            edges: [.left],
             shelf: settings.kiwishelf
         )
         func bounds(_ s: TilingSettings, _ mode: LayoutMode) -> CGRect {
@@ -103,7 +106,8 @@ struct ShelfGeometryTests {
     func oversized() {
         let remaining = ShelfGeometry.remainingFrame(
             in: visible,
-            shelf: shelf(edge: .top, thickness: 5000)
+            edges: [.top],
+            shelf: shelf(thickness: 5000)
         )
         #expect(remaining.height == 0)
         #expect(remaining.width == visible.width)
@@ -115,7 +119,8 @@ struct ShelfGeometryTests {
     func floatClamp() {
         let strip = ShelfGeometry.strip(
             in: visible,
-            shelf: shelf(edge: .top)
+            edge: .top,
+            shelf: shelf()
         )
         let float = CGRect(
             x: 100,

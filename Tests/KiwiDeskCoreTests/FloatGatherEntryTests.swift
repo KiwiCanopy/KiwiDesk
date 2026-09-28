@@ -44,7 +44,7 @@ struct FloatGatherEntryTests {
             frames: frames,
             region: bounds,
             minSize: TilingSettings().minWindowSize,
-            targetDepth: TilingSettings().quitGridTargetDepth,
+            targetDepth: AppWideSettings().quitGridTargetDepth,
             placingLast: core.state.workspaces[space]?.focused
         )
     }
@@ -137,7 +137,7 @@ struct FloatGatherEntryTests {
             ),
             region: Self.bounds,
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth,
+            targetDepth: core.appWide.quitGridTargetDepth,
             placingLast: core.state.workspaces[Self.space]?.focused
         )
         #expect(grid.count == 3)
@@ -174,7 +174,7 @@ struct FloatGatherEntryTests {
             ),
             region: Self.bounds,
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth,
+            targetDepth: core.appWide.quitGridTargetDepth,
             placingLast: core.state.workspaces[Self.space]?.focused
         )
         let centred = FloatRecovery.centred(Self.size, in: Self.bounds)

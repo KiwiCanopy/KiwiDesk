@@ -12,6 +12,11 @@ extension APIReference {
             "Shows or hides the Space Bar.",
             .boolean("enabled")
         ),
+        "set_edge": APIRecord(
+            "Sets the Space Bar's screen edge; on the App Bar's "
+                + "edge the two share one KiwiShelf.",
+            .choice("edge", AppBarEdge.self)
+        ),
         "set_glyph_cap": APIRecord(
             "Sets how many app-group glyphs a Space item shows.",
             .integer("glyphs")

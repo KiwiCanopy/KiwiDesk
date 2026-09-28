@@ -494,6 +494,65 @@ holds the secondary-switch decision including its nil case.
   the old number was never what they meant. The scrolling pitch
   share is the precedent (#1382, `ScrollingPitchTests`); a
   re-scale that fails either bound takes the crossing above.
+- **A per-profile value moving app-wide crosses by ADOPTION, a
+  ruled shape beside `ConfigMigration` (#1741).** N profile
+  files → one value is an election, and a byte-level step cannot
+  hold it because it cannot know which profile is live (#1307) —
+  so the crossing is reached at the first `apply(profile:)`,
+  which does. The obligations:
+  - Write `appWideLedger` only in `KiwiCore+AppWide.swift`
+    (`AppWideSeamTests` ▸ `ledgerHasOneHome`).
+  - Run the capture before anything that may rewrite a profile
+    file — first in `loadConfig`, ahead of the #1530 settle —
+    or the rewrite destroys the copy the election reads
+    (`AppWideSeamTests` ▸ `captureBeforeSettle`,
+    `AppWideCrossingEndTests` ▸ `captureBeforeRewrite`).
+  - End the crossing in the FILES: the adoption strips the
+    retired groups from every profile file, so no reader of them
+    is left; never leave a lenient reader to drain them
+    (`AppWideCrossingEndTests` ▸ `adoptionStripsEveryProfile`).
+    Strip surgically, leaving the rest of each file as it was
+    (`AppWideCrossingEndTests` ▸ `stripIsSurgical`), and only
+    after the `gui.json` write has landed — a failed write keeps
+    every profile's copy, the one the next launch crosses from
+    (`AppWideCrossingEndTests` ▸ `failedWriteKeepsTheProfiles`).
+  - Keep a verb's session value out of the file — a `set_*`
+    verb changes the running value alone, and no `gui.json`
+    write, related or not, may stamp it
+    (`AppWideCrossingEndTests` ▸ `verbNeverPersists`). A row
+    write or an adoption builds on the ledger's `settled` value,
+    never on `live`, so a verb's change cannot ride in when
+    nothing was stored yet (`AppWideCrossingEndTests` ▸
+    `rowBeforeStoreSkipsTheVerb`). `setAppWide` takes no
+    default for `persisting:`: a new verb passes `false`, a
+    General row `true`. The one stamp of `live` is the Lua-to-GUI
+    adoption, where the verbs `init.lua` executed ARE the stored
+    config (`AppWideCrossingEndTests` ▸ `luaAdoptionCarries`).
+  - End the crossing through ONE door, `endCrossing`: the first
+    apply and a General row written while it is owed both take
+    it, so neither can end it without adopting and stripping
+    (`AppWideCrossingEndTests` ▸ `rowWhileOwedEndsTheCrossing`).
+    A backup's inline profile values are owed only for the
+    bundle they were read from — pair them by the bundle's value,
+    never by call order
+    (`AppWideBackupTests` ▸ `oldBackupValuesCross`,
+    `AppWideBackupTests` ▸ `otherBundleOwesNothing`).
+  - Owe nothing to a Lua-owned config: `init.lua` is its store,
+    so its load clears any crossing a GUI-managed load left
+    owed, and the apply-time adoption stands down while it owns
+    the setup (`AppWideAdoptionTests` ▸
+    `luaOwnedBesideSidecarAdoptsNothing`).
+  - Give a new member of `AppWideSettings` a crossing of its
+    own: the ledger's crossing is per group of settings, and on
+    an install that has adopted it has already ended, so a
+    member added later inherits nothing from it. The member also
+    joins the census (`SettingKeyModelParityTests` ▸
+    `appWideFieldsAreCensused`).
+
+  The argument, and the trade (the first profile applied
+  decides; a Lua-owned setup crosses nothing), is
+  `docs/design-decisions.md` ▸ *A setting nobody varies per
+  profile is app-wide*.
 
 ## Whose arrangement is live (#1249)
 
@@ -642,9 +701,28 @@ end on, and the import's filter to `ColorPaletteKeys.all` would
 drop an unshelved file's bar colours whole (`KiwiShelfPaletteMigrationTests`
 ▸ `libraryCrossesOnce`, ▸ `bundlePalettesCross`, ▸
 `sidecarImportShelves`). The next breaking palette change takes
-the same three answers or argues a different one.
-Nothing can guard this, and it is the obligation the format
-integers rest on: `<=` is decoder tolerance rather than a
+the same three answers or argues a different one — and a FOURTH
+since #1684, for the look sidecar (`LookExport`) carries a
+`ColorPalette` inline too.
+
+**The look library is the palette library's twin (#1684) and owes
+the same answers.** A breaking `ShelfLook` or `LookDocument`
+change bumps `LookDocument.currentFormat` for `looks.json` AND
+`SetupBundle.currentFormat`, which carries `[ShelfLook]` inline,
+and rules the markerless `LookExport` sidecar deliberately, as
+the palette sidecar above was. **And a look stores setting PATHS
+and their wire spellings as data** (`LookKeys`): renaming a key
+or value a look carries — any path in `LookKeys.all`, and a field
+inside a stored value such as `gap.global`'s `{outer, inner}`
+(#1739) — owes the `ConfigMigration` crossing a stored value
+owes (§5), reaching `looks.json` and a bundle's looks — since
+`ShelfLook.apply` and `LookStore`'s filter skip a path they do
+not know, an unmigrated rename drops the user's styling
+silently. `LookKeysCensusTests` reds the rename; the migration
+crossing is review's.
+
+Nothing can guard the format bumps above, and they are the
+obligation the format integers rest on: `<=` is decoder tolerance rather than a
 compatibility shim, so an older config or backup is accepted — which is
 right, and which silently becomes a lie the first time a
 `GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
@@ -1067,6 +1145,23 @@ write in the same Save, since that write reloads the config,
 which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
 profile never moves `currentName` (#1249).
+
+**The tour's shelf paint is a further write, and it is not Keep
+(#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
+to live AND the live profile's file; the file half reads the
+stored profile, paints the pick and writes it back through the
+non-adopting `ProfileManager.write` — never `persistProfile`'s
+live capture (`ShelfPaintTests` ▸ `fileKeepsItsOwnSettings`) — and
+a restore returns only what a paint can reach
+(`ShelfPaintRoundTripTests` ▸ `revertRoundTripsEveryLook`,
+`ShelfPaintTests` ▸ `restoreTouchesOnlyTheLook`). A restore is
+refused once `currentName` moved (`ShelfPaintTests` ▸
+`restoreSkipsAnotherProfile`). The open draft's debt is paid ON
+the write, through `onShelfPainted` (`ShelfPaintTests` ▸
+`paintsAreAnnounced`), never by a caller; a caller refuses the
+paint while a live-profile draft is dirty (`OnboardingLooksTests`
+▸ `draftBlocks`). The argument is `docs/design-decisions.md` ▸
+*The tour's look is written through, and the tour owns its undo*.
 
 **One draft, one identity, one encoder (#1393).** The page a
 draft resolves and encodes against is `SettingsModel.reachPage`,

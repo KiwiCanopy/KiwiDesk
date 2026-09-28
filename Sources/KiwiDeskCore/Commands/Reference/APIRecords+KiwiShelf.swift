@@ -4,19 +4,14 @@ import Foundation
 /// `KiwiShelfCommandSetting.parse`.
 extension APIReference {
     static let kiwishelfRecords: [String: APIRecord] = [
-        "set_edge": APIRecord(
-            "Sets the screen edge the shelf occupies; it reserves "
-                + "that edge wherever a bar draws.",
-            .choice("edge", AppBarEdge.self)
-        ),
         "set_alignment": APIRecord(
-            "Places the plate along the edge — one bar, or both as "
-                + "one joined plate.",
+            "Places each plate along its edge — one bar, both as "
+                + "one plate, or each bar on its own edge.",
             .choice("alignment", KiwiShelf.Alignment.self)
         ),
         "set_order": APIRecord(
             "Sets which bar's section comes first while both "
-                + "show on the joined plate.",
+                + "share an edge on the joined plate.",
             .choice("order", KiwiShelf.Order.self)
         ),
         "set_minimum": APIRecord(

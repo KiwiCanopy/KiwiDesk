@@ -23,16 +23,20 @@ struct ConfigMigrationShelfRoutingTests {
         let prefix = root.path + "/"
         // Where the keys are STORED: the settings root and the
         // two bar-hosting layouts, then the files that only name
-        // them — the migration steps, the palette apply and the
-        // API namespace tables.
+        // them — the migration steps, the palette and look apply
+        // (#1684) and the API namespace tables.
         let allowed: Set<String> = [
             "Tiling/TilingSettings+Coding.swift",
             "Layouts/MonocleParams.swift",
             "Layouts/LayoutParams.swift",
             "Config/ConfigMigration+GlassDefault.swift",
             "Config/ConfigMigration+KiwiShelf.swift",
+            // #1731's edge step, by path; its textual edit takes
+            // the global groups alone, a layout's App Bar skipped.
+            "Config/ConfigMigration+BarEdges.swift",
             "Appearance/ColorPalette+Apply.swift",
             "Appearance/ColorPaletteKeys.swift",
+            "Appearance/ShelfLook+Apply.swift",
             "Commands/Reference/APIReference.swift",
             "Commands/Reference/APIReference+Records.swift",
         ]

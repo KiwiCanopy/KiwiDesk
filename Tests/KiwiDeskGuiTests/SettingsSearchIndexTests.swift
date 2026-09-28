@@ -214,13 +214,12 @@ struct SettingsSearchIndexTests {
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to
                 // anchor and stay anchor-less by ruling.
-                .colors: 8,  // 8: #1644's Sheen row, on every macOS
+                // 8: #1644's Sheen row, on every macOS; 13 since
+                // #1684: the look shelf's five labelled actions,
+                // anchor-less like the palette shelf's.
+                .looks: 13,
                 // 17 since #1517 (one shelf set); 18: #1679's border.
                 .advancedColors: 18,
-                // 4 since #1255: the refusal sound moved here
-                // from Shortcuts ▸ Size & float, the cue having
-                // stopped being a resize setting.
-                .behavior: 4,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the
@@ -250,8 +249,10 @@ struct SettingsSearchIndexTests {
                 // their catalog anchors so a hit opens the
                 // drawer; language, appearance and the login
                 // item stay anchor-less. 4 since #1542: the
-                // automatic-install row — a new census row.
-                .general: 4,
+                // automatic-install row — a new census row. 6
+                // since #1741: the alert sound and the pile
+                // depth, at rest on the same card as language.
+                .general: 6,
             ]
         )
     }

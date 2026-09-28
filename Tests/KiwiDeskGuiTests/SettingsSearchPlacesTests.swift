@@ -71,7 +71,7 @@ struct SettingsSearchPlacesTests {
             case .space: expected = .spaces
             case .profile: expected = .profiles
             case .appRule: expected = .appRules
-            case .palette: expected = .colors
+            case .palette: expected = .looks
             }
             #expect(
                 byKind[kind]?.anchor.destination == expected,
@@ -147,9 +147,9 @@ struct SettingsSearchPlacesTests {
             notice?.contains("Advanced Colors") == true
         )
         // A second flip supersedes the first.
-        model.noteSearchModeSwitch(.behavior)
+        model.noteSearchModeSwitch(.monitors)
         #expect(
-            model.searchModeNotice?.contains("Behavior") == true
+            model.searchModeNotice?.contains("Monitors") == true
         )
         model.searchNoticeTask?.cancel()
     }

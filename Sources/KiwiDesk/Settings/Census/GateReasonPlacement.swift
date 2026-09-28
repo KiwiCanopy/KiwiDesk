@@ -78,12 +78,13 @@ extension SettingRuntimeGate {
         switch self {
         case .editingStoredProfile, .screenCountMismatch,
             .loginItemServiceStatus, .autoStartServiceLoaded,
-            .automaticInstallUnavailable,
+            .automaticInstallUnavailable, .luaOwnsConfig,
             .spaceHasNoOverrides, .reduceMotion, .reduceTransparency,
             .noBindingStore:
             return true
         case .orphanPinsExist, .monitorsDisconnected,
-            .paletteGlowPairing, .luaImportAvailable,
+            .paletteGlowPairing, .lookJustApplied,
+            .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent, .desktopBindingsExist,
             .trackInUse, .defaultsToRestore,
@@ -100,12 +101,14 @@ extension SettingRuntimeGate {
             return true
         case .reduceMotion, .reduceTransparency,
             .loginItemServiceStatus, .autoStartServiceLoaded,
-            .automaticInstallUnavailable, .noBindingStore:
+            .automaticInstallUnavailable, .noBindingStore,
+            .luaOwnsConfig:
             return false
         case .editingStoredProfile, .screenCountMismatch:
             return true
         case .orphanPinsExist, .monitorsDisconnected,
-            .paletteGlowPairing, .luaImportAvailable,
+            .paletteGlowPairing, .lookJustApplied,
+            .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent, .desktopBindingsExist,
             .trackInUse, .defaultsToRestore,

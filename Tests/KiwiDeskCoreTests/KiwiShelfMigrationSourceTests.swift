@@ -42,6 +42,17 @@ struct KiwiShelfMigrationSourceTests {
         )
     }
 
+    /// The App Bar's migrated edge: it keeps the one it sat on,
+    /// its old bottom where it stored none (#1731).
+    private func barEdge(_ data: Data) throws -> String? {
+        let root = try #require(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        let settings = try #require(root["settings"] as? [String: Any])
+        let app = try #require(settings["app_bar"] as? [String: Any])
+        return app["edge"] as? String
+    }
+
     private func shelf(_ data: Data) throws -> [String: Any] {
         let root = try #require(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -59,7 +70,7 @@ struct KiwiShelfMigrationSourceTests {
         #expect(text.contains("\"kiwishelf\":{"))
         let shelf = try shelf(out)
         #expect(shelf["thickness"] as? Double == 30)
-        #expect(shelf["edge"] as? String == "left")
+        #expect(try barEdge(out) == "left")
     }
 
     @Test("an App Bar source with no edge keeps the bottom it sat on")
@@ -68,7 +79,7 @@ struct KiwiShelfMigrationSourceTests {
         let out = try #require(ConfigMigration.migrated(data))
         let text = try #require(String(data: out, encoding: .utf8))
         #expect(text.contains("\"active_dim_factor\" : 0.4,"))
-        #expect(try shelf(out)["edge"] as? String == "bottom")
+        #expect(try barEdge(out) == "bottom")
     }
 
     /// The walk answers a bundle, whose several `settings` the
@@ -91,8 +102,9 @@ struct KiwiShelfMigrationSourceTests {
         let settings = try #require(
             profiles.first?["settings"] as? [String: Any]
         )
-        let shelf = try #require(settings["kiwishelf"] as? [String: Any])
-        #expect(shelf["edge"] as? String == "bottom")
+        // The App Bar keeps its old bottom (#1731).
+        let app = try #require(settings["app_bar"] as? [String: Any])
+        #expect(app["edge"] as? String == "bottom")
     }
 
     /// Both hosts' shared overrides drop — the scrolling one is

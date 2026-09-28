@@ -32,15 +32,6 @@ extension SettingsValueReadout {
                     new: points(after.resizeStep)
                 )
             ]
-        case .refusalSound:
-            return [
-                behaviourToggleRow(
-                    census,
-                    label: label(for: census),
-                    old: before.refusalSound,
-                    new: after.refusalSound
-                )
-            ]
         case .swapSkipsCascade:
             return [
                 behaviourToggleRow(
@@ -83,31 +74,6 @@ extension SettingsValueReadout {
                 old: before.placementOverride,
                 new: after.placementOverride
             )
-        case .quitLayout:
-            return [
-                .change(
-                    census,
-                    label: L(
-                        "diff.label.quit_layout",
-                        "On-quit layout"
-                    ),
-                    old: behaviourQuitLayout(before.quitLayout),
-                    new: behaviourQuitLayout(after.quitLayout)
-                )
-            ]
-        case .quitGridTargetDepth:
-            return [
-                .change(
-                    census,
-                    label: label(for: census),
-                    old: trimmed(
-                        Double(before.quitGridTargetDepth)
-                    ),
-                    new: trimmed(
-                        Double(after.quitGridTargetDepth)
-                    )
-                )
-            ]
         case .mouseResize:
             return [
                 .change(
@@ -189,15 +155,6 @@ extension SettingsValueReadout {
                 "placement.after_focused",
                 "After focused"
             )
-        }
-    }
-
-    private static func behaviourQuitLayout(
-        _ style: QuitLayoutStyle
-    ) -> String {
-        switch style {
-        case .grid:
-            return L("diff.value.quit_layout.grid", "Grid")
         }
     }
 

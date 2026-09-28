@@ -281,10 +281,13 @@ struct CombinedClampTests {
     func sharedStrip() {
         let visible = CGRect(x: 0, y: 0, width: 1920, height: 1080)
         var shelf = KiwiShelf()
-        shelf.edge = .top
         // Pinned (#660): the inset reasons from it.
         shelf.thickness = 32
-        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let strip = ShelfGeometry.strip(
+            in: visible,
+            edge: .top,
+            shelf: shelf
+        )
         let arrangement = ShelfArrangement.arrange(
             length: strip.width,
             spaceNeed: 300,

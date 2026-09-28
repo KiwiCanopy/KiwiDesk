@@ -4,7 +4,8 @@ import SwiftUI
 /// Window tile mock preview for drag visual styling (`DragVisual`, #231).
 struct DragVisualPreview: View {
     let visual: DragVisual
-    let cornerRadius: CGFloat
+    /// Every window outline's width and corners (#1742).
+    let stroke: WindowStroke
     /// The stored `dragLiquidGlass` leaf; Core gates it.
     let glass: Bool
     /// `border.sheen` (#1644).
@@ -30,19 +31,17 @@ struct DragVisualPreview: View {
     /// engine's own view, so glass, tint and fade are the drag's
     /// (#702, #1645).
     private var mock: some View {
-        var scaled = visual
-        scaled.borderWidth = scale(
-            visual.borderWidth,
-            from: 0...20,
-            to: 0...10
+        let scaled = WindowStroke(
+            width: scale(stroke.width, from: 0...20, to: 0...10),
+            cornerRadius: stroke.cornerRadius > 0
+                ? FocusBorderPreview.roundedRadius : 0
         )
-        let radius = scale(cornerRadius, from: 0...40, to: 0...20)
         // `DragOverlay.adjustedFrame`: the border straddles the
         // slot edge by half its width, inward or outward (#231).
-        let half = visual.border ? scaled.borderWidth / 2 : 0
+        let half = visual.border ? scaled.width / 2 : 0
         return DragMarkerHost(
-            style: scaled,
-            cornerRadius: radius,
+            style: visual,
+            stroke: scaled,
             glass: glass,
             sheen: sheen
         )
@@ -69,7 +68,7 @@ struct DragVisualPreview: View {
 /// through its own gate.
 private struct DragMarkerHost: NSViewRepresentable {
     let style: DragVisual
-    let cornerRadius: CGFloat
+    let stroke: WindowStroke
     let glass: Bool
     let sheen: CGFloat
 
@@ -80,7 +79,7 @@ private struct DragMarkerHost: NSViewRepresentable {
     func updateNSView(_ view: DragMarkerView, context: Context) {
         view.showPreview(
             style,
-            cornerRadius: cornerRadius,
+            stroke: stroke,
             storedGlass: glass,
             sheen: sheen
         )

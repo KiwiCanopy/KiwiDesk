@@ -96,12 +96,12 @@ struct MonocleCommandTests {
     func sharedOverrideRetired() {
         let core = makeCore()
         let response = core.execute(
-            "monocle.set_app_bar_edge",
-            args: [.string("left")]
+            "monocle.set_app_bar_alignment",
+            args: [.string("end")]
         )
         #expect(!response.isSuccess)
         #expect(
-            response.error?.contains("kiwishelf.set_edge")
+            response.error?.contains("kiwishelf.set_alignment")
                 == true
         )
         // Colours are the shelf's too (#1517).

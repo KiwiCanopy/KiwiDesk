@@ -91,6 +91,10 @@ struct AnnouncedValuePinTests {
         // Before you update labels (#1542).
         "UpdateWindowView.swift": 1,
         "UpdateNotesGroups.swift": 2,
+        // The Mouse & trackpad drawer's group headings (#1726).
+        "GestureEntry.swift": 1,
+        // The tour looks step's two row headers (#1720).
+        "OnboardingLooksRows.swift": 1,
     ]
 
     @Test("title components are rotor headings")
@@ -125,6 +129,9 @@ struct AnnouncedValuePinTests {
     private static let nilSpokenValue: [String: Int] = [
         "LoginItemCard.swift": 1,
         "AutoInstallRow.swift": 1,
+        // #1741: the alert-sound switch, a Toggle in the card's
+        // row shape like Start at login.
+        "GeneralSection+AppWide.swift": 1,
     ]
 
     @Test("a nil spoken value is for a Toggle, and enumerated")

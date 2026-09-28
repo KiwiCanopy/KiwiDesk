@@ -19,6 +19,7 @@ extension KiwiCore {
         // the save it feeds, and most callers hand back a config
         // they loaded earlier.
         store.liveDesktopSpaces = persistedDesktopSpaces()
+        store.liveAppWide = appWideStamp
         return store
     }
 
@@ -260,7 +261,10 @@ extension KiwiCore {
                 encoding: .utf8
             )) ?? ""
         let config = guiConfigSeed()
+        // The executed values travel with the rest (#1741).
+        storeLiveAppWide()
         try guiConfigStore.save(config)
+        stripLegacyAppWide()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         let file = ManagedConfig.adopt(

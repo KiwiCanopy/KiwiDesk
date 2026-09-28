@@ -34,11 +34,9 @@ struct SettingsCodingDecodeTests {
         settings.floatPlacement = .keep
         settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
-        settings.refusalSound = true
         settings.shortcutPanelLiquidGlass = true
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"
-        settings.dragCornerRadius = 22
         settings.borderStyle.enabled = false
         settings.borderStyle.width = 6
         settings.borderStyle.focusedColor = "#010203"
@@ -60,7 +58,6 @@ struct SettingsCodingDecodeTests {
         settings.animations.durationMS = 400
         settings.animations.scrollDurationMS = 180
         settings.mouse.followsFocus = true
-        settings.quitGridTargetDepth = 12
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
@@ -71,18 +68,21 @@ struct SettingsCodingDecodeTests {
 
     @Test("quit.grid_target_depth clamps into range on decode")
     func targetDepthDecodeClamp() throws {
-        // A hand-edited profile can't smuggle a value past the
-        // range the command and GUI enforce (#281 review).
+        // A hand-edited gui.json can't smuggle a value past the
+        // range the command and GUI enforce (#281 review; the
+        // setting is app-wide since #1741).
         for (raw, expected) in [(999, 20), (0, 1), (-7, 1)] {
             let json = Data(
                 #"{"quit":{"grid_target_depth":\#(raw)}}"#
                     .utf8
             )
             let decoded = try JSONDecoder().decode(
-                TilingSettings.self,
+                GuiConfig.self,
                 from: json
             )
-            #expect(decoded.quitGridTargetDepth == expected)
+            #expect(
+                decoded.appWide?.quitGridTargetDepth == expected
+            )
         }
     }
 

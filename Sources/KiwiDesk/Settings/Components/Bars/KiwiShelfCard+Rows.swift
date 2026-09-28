@@ -8,17 +8,11 @@ extension KiwiShelfCard {
     @ViewBuilder func kiwishelfRow(_ key: KiwiShelfKey) -> some View {
         switch key {
         case .edge:
-            SegmentedPicker(
-                L("kiwishelf.edge.label", "Position"),
-                selection: shelf.edge,
-                options: AppBarOptions.edge.map { ($0.1, $0.0) },
-                help: L(
-                    "kiwishelf.edge.label.help",
-                    "Which screen edge KiwiShelf occupies. It "
-                        + "reserves that edge in every layout, "
-                        + "whichever bars it shows."
-                )
-            )
+            edgeRows
+        case .spaceBarEdge:
+            spaceBarEdgeRow
+        case .appBarEdge:
+            appBarEdgeRow
         case .thickness:
             PtSlider(
                 label: L("kiwishelf.thickness", "Thickness"),

@@ -2,23 +2,18 @@
 /// `SettingsDraftDiff` books a leaf to the census row owning the longest
 /// model-path prefix, so masters with followers under them need no entry;
 /// masters writing across the model declare writes here so one edit books
-/// as one change (`SettingsDraftDiffTests`, `BorderMastersFanOutTests`).
+/// as one change (`SettingsDraftDiffTests`, `LiquidGlassMasterTests`).
 extension SettingKey {
     static let masterWrites: [SettingKey: [String]] = [
+        .kiwishelf(.edge): [
+            "settings.spaceBarStyle.edge",
+            "settings.appBarStyle.edge",
+        ],
         .colours(.liquidGlassMaster): [
             "settings.kiwishelf.liquidGlass",
             "settings.shortcutPanelLiquidGlass",
             "settings.dragLiquidGlass",
             "settings.stickyStyle.liquidGlass",
-        ],
-        .borders(.borderWidthMaster): [
-            "settings.borderStyle.width",
-            "settings.dragGhost.borderWidth",
-            "settings.dragDropZone.borderWidth",
-        ],
-        .borders(.borderCornerMaster): [
-            "settings.borderStyle.cornerStyle",
-            "settings.dragCornerRadius",
         ],
     ]
 }

@@ -1,8 +1,9 @@
 import CoreGraphics
 import Foundation
 
-/// The one shelf both bars sit on (#1517): which edge, how deep,
-/// how the two share it, and the look they share. Stored as
+/// The shelf the bars sit on (#1517): how deep, how the two share
+/// an edge, and the look they share. Which edge is each bar's own
+/// (#1731) — one edge fuses them onto this shelf, two split it. Stored as
 /// `kiwishelf` in profile JSON; each bar keeps only what is its
 /// own (`SpaceBarStyle`, `AppBarStyle`), and a drawing reads the
 /// two through `SpaceBarLook` / `AppBarLook`.
@@ -17,11 +18,11 @@ public struct KiwiShelf: Sendable, Equatable {
         case appsFirst = "apps_first"
     }
 
-    /// Absolute screen edge the shelf occupies (top, #660).
-    public var edge: AppBarEdge = .top
-    /// Where a lone bar sits along the edge (center, #293 QA).
+    /// Where a bar sits along its edge (center, #293 QA): a lone
+    /// bar, both as one unit on a shared edge, or each bar on its
+    /// own edge while split (#1731).
     public var alignment: Alignment = .center
-    /// Bar order while both show — they take opposite ends.
+    /// Bar order while both show on one edge.
     public var order: Order = .spacesFirst
     /// The Space Bar's floor, in percent of the edge, once the
     /// shelf is full: it shrinks no further, and the App Bar

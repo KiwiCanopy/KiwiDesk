@@ -46,10 +46,10 @@ struct ShortcutsFamilyRowsTests {
         //  - a container the section draws by hand (the layer
         //    strip and the icon row that rides it, the app list,
         //    the raw-Lua list and its Import action);
-        //  - the one row here that is not a shortcut at all —
-        //    the resize-feedback preference, whose census case
-        //    lives in the Behaviour sub-enum and whose control
-        //    the Size & float card draws directly.
+        //  - the rows here that are not shortcuts at all — the
+        //    Mouse & trackpad drawer's two mouse settings (#1726),
+        //    whose census cases live in the Behaviour sub-enum
+        //    and whose controls the drawer's entries draw.
         let handDrawn: Set<SettingKey> = [
             .shortcuts(.layers),
             .shortcuts(.layersIcon),
@@ -57,6 +57,8 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.advanced),
             .shortcuts(.import),
             .shortcuts(.restoreDefaults),
+            .behaviour(.mouseResize),
+            .behaviour(.mouseFollowsFocus),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {
@@ -297,14 +299,12 @@ struct ShortcutsFamilyRowsTests {
     /// rows. Pinned because `nil` here means two different
     /// things — a hand-drawn Shortcuts container, or a key that
     /// was never a shortcut — and only the second is checkable
-    /// by kind. (It used to be pinned through the refusal-sound
-    /// toggle, which shared the Size & float card until #1255
-    /// moved it to Behaviour; the invariant outlived the row.)
+    /// by kind.
     @Test("a key from another area carries no keybinding rows")
     @MainActor
     func foreignKeyIsNotAFamily() {
         #expect(
-            fixture().rows(for: .behaviour(.refusalSound)) == nil
+            fixture().rows(for: .behaviour(.minWindowSize)) == nil
         )
         #expect(fixture().rows(for: .general(.language)) == nil)
     }

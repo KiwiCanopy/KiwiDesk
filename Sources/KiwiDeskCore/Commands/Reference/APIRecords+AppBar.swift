@@ -5,6 +5,11 @@ import Foundation
 /// `.choice` reading its decoder's cases.
 extension APIReference {
     static let appBarRecords: [String: APIRecord] = [
+        "set_edge": APIRecord(
+            "Sets the App Bar's screen edge; on the Space Bar's "
+                + "edge the two share one KiwiShelf.",
+            .choice("edge", AppBarEdge.self)
+        ),
         "set_active_indicator": APIRecord(
             "Sets how the focused window's item is marked.",
             .choice(

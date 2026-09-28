@@ -30,6 +30,7 @@ struct ShelfOverlayTests {
         let plate = ShelfOverlay.plateFrame(
             sections: [space, app],
             strip: Self.strip,
+            horizontal: true,
             shelf: KiwiShelf()
         )
         // One rect from the Space section's start to the App
@@ -50,6 +51,7 @@ struct ShelfOverlayTests {
             ShelfOverlay.plateFrame(
                 sections: [lone],
                 strip: Self.strip,
+                horizontal: true,
                 shelf: full
             ) == CGRect(x: 0, y: 0, width: 1000, height: 40)
         )
@@ -62,6 +64,7 @@ struct ShelfOverlayTests {
                 ShelfOverlay.plateFrame(
                     sections: [lone],
                     strip: Self.strip,
+                    horizontal: true,
                     shelf: boxed
                 ) == nil,
                 Comment(rawValue: "glass: \(glass)")

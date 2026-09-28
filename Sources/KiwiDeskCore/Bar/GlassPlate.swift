@@ -45,17 +45,24 @@ enum GlassPlate {
             let glass = view as? NSGlassEffectView
         else { return }
         if glass.contentView !== content {
+            release(glass)
             glass.contentView = content
         }
     }
 
-    /// Detaches embedded content from glass view.
+    /// Takes content out of a glass with frame layout restored,
+    /// which hosting turned off (#1730); every exit through
+    /// `GlassPlate` takes it.
     @MainActor
-    static func detach(_ view: NSView) {
+    @discardableResult
+    static func release(_ view: NSView) -> NSView? {
         guard #available(macOS 26, *),
-            let glass = view as? NSGlassEffectView
-        else { return }
+            let glass = view as? NSGlassEffectView,
+            let content = glass.contentView
+        else { return nil }
         glass.contentView = nil
+        content.translatesAutoresizingMaskIntoConstraints = true
+        return content
     }
 
     /// Checks if glass view currently hosts the content view as its

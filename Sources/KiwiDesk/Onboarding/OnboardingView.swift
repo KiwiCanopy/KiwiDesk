@@ -15,6 +15,8 @@ struct OnboardingView: View {
                 grant
             case .spaces:
                 spaces
+            case .looks:
+                OnboardingLooksStep(model: model)
             case .keys:
                 keys
             case .done:

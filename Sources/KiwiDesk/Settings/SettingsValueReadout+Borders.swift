@@ -44,18 +44,6 @@ extension SettingsValueReadout {
                 bordersCornerLabel(ob.cornerStyle),
                 bordersCornerLabel(nb.cornerStyle)
             )
-        case .borderWidthMaster:
-            return bordersRow(
-                census,
-                bordersUnifiedWidth(old.settings),
-                bordersUnifiedWidth(new.settings)
-            )
-        case .borderCornerMaster:
-            return bordersRow(
-                census,
-                bordersAgreedCorner(old.settings),
-                bordersAgreedCorner(new.settings)
-            )
         case .borderGlow:
             return bordersOnOffRow(census, ob.glow, nb.glow)
         case .borderGlowSizeAuto:
@@ -98,12 +86,6 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.color,
                 new.settings.stickyStyle.color
             )
-        case .dragCornerRadius:
-            return bordersPointsRow(
-                census,
-                old.settings.dragCornerRadius,
-                new.settings.dragCornerRadius
-            )
         case .dragGhostEnabled:
             return bordersOnOffRow(census, og.enabled, ng.enabled)
         case .dragGhostBorder:
@@ -113,12 +95,6 @@ extension SettingsValueReadout {
                 census,
                 og.borderColor,
                 ng.borderColor
-            )
-        case .dragGhostBorderWidth:
-            return bordersPointsRow(
-                census,
-                og.borderWidth,
-                ng.borderWidth
             )
         case .dragGhostBorderAlignment:
             return bordersRow(
@@ -139,12 +115,6 @@ extension SettingsValueReadout {
                 census,
                 od.borderColor,
                 nd.borderColor
-            )
-        case .dragDropZoneBorderWidth:
-            return bordersPointsRow(
-                census,
-                od.borderWidth,
-                nd.borderWidth
             )
         case .dragDropZoneBorderAlignment:
             return bordersRow(

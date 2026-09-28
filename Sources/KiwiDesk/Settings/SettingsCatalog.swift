@@ -19,7 +19,6 @@ enum SettingsCatalog {
     static let advancedColors = AdvancedColorsControls()
     static let gapsAndBorders = GapsAndBordersControls()
     static let bars = BarsControls()
-    static let behavior = BehaviorControls()
     static let profiles = ProfilesControls()
     static let shortcuts = ShortcutsControls()
     static let appRules = AppRulesControls()
@@ -39,11 +38,10 @@ enum SettingsCatalog {
         case .spaces: return spaces
         case .layoutDefaults: return layoutDefaults
         case .monitors: return monitors
-        case .colors: return colors
+        case .looks: return colors
         case .advancedColors: return advancedColors
         case .gapsAndBorders: return gapsAndBorders
         case .bars: return bars
-        case .behavior: return behavior
         case .profiles: return profiles
         case .shortcuts: return shortcuts
         case .appRules: return appRules

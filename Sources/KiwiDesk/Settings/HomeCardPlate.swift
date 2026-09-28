@@ -26,7 +26,7 @@ enum HomeCardPlate {
                     spaceCount: model.config.spaces.count
                 )
             }
-        case .colors:
+        case .looks:
             return tile(padding: 11, settings: settings) {
                 HomeCardColorsTile(settings: settings)
             }
@@ -46,10 +46,6 @@ enum HomeCardPlate {
         case .monitors:
             return tile(padding: 8, settings: settings) {
                 HomeCardMonitorsTile(model: model)
-            }
-        case .behavior:
-            return tile(padding: 11, settings: settings) {
-                HomeCardBehaviorTile(settings: settings)
             }
         case .advancedColors:
             return tile(padding: 11, settings: settings) {
