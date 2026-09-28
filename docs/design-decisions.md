@@ -11868,10 +11868,10 @@ thumbnail's rule of leaving a fact it cannot render undrawn at tile
 scale, paid for with a ring wide enough for the ramp to read. The
 names are ours; the reference lives only in the description,
 which says what the look does before what it resembles — "Bottom
-bar, like Windows 11" — Glass alone naming itself KiwiDesk's own
-look instead, since the default has no reference to borrow (owner,
-2026-09-29) — because a new user does not know the bar
+bar, like Windows 11" — because a new user does not know the bar
 vocabulary and the thumbnail cannot carry it (owner, 2026-09-28).
+Glass alone names itself KiwiDesk's own look instead, since the
+default has no reference to borrow (owner, 2026-09-29).
 A look has one description, shared by the Settings card and the
 tour, Glass's included (`LookDescriptionsTests`).
 

@@ -3,7 +3,8 @@ import KiwiDeskCore
 /// The bundled looks' one-line descriptions (#1684): our own
 /// names on the cards, the reference only here (owner ruling
 /// 2026-09-26). The references are proper names, interpolated as
-/// values so every locale can translate the frame around them.
+/// values so every locale can translate the frame around them;
+/// Glass, the default, names itself instead (owner, 2026-09-29).
 /// Keyed by the bundled name, which is not localized — like a
 /// palette's (`LookDescriptionsTests` covers every bundled name).
 enum LookDescriptions {
