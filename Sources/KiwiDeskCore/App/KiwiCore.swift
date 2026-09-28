@@ -265,20 +265,18 @@ public final class KiwiCore {
     /// carries the frame macOS kept for it on that Desktop.
     var refiledWindows: Set<WindowID> = []
 
-    /// The live arrangement's space→monitor fingerprint pins,
-    /// adopted from the active profile's matching monitor set
-    /// and edited by the GUI Canvas (#36). Internal: the GUI
-    /// reads placement via `loadGuiConfig` and writes it via
-    /// `applyProfileScopedState`, never directly.
+    /// The live arrangement's space→monitor fingerprint pins, adopted
+    /// from the active profile's matching monitor set and edited by the
+    /// GUI Canvas (#36). Internal: the GUI reads placement via
+    /// `loadGuiConfig` and writes it via `applyProfileScopedState`.
     var spacePins: [SpaceID: String] = [:]
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
-    /// The space the empty-display heal seeded per monitor
-    /// fingerprint (#1175), so a pin reset that did not prune
-    /// re-pins the same seed instead of minting another. Session
-    /// state, retired where a declaration adopts the seed
-    /// (`retireHealedSpaces`) and by the #634 reset.
+    /// The space the empty-display heal seeded per monitor fingerprint
+    /// (#1175), so a pin reset that did not prune re-pins the same seed
+    /// instead of minting another. Session state, retired where a
+    /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
     /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
     var appWideLedger = AppWideLedger()
