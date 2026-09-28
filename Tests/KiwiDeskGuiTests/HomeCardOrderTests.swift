@@ -34,7 +34,8 @@ struct HomeCardOrderTests {
         )
     }
 
-    /// TEN since #1365's Mac Checklist, NINE since Layout Defaults
+    /// TWELVE in Power User since #1741 retired Behavior; TEN
+    /// since #1365's Mac Checklist, NINE since Layout Defaults
     /// moved to `.simple` (owner
     /// ruling 2026-08-04) — those parameters are how people learn
     /// what a tiling manager does, so withholding them teaches
@@ -42,14 +43,15 @@ struct HomeCardOrderTests {
     /// is the conscious-edit tripwire on the size of the
     /// first-week surface, and growing it should cost a
     /// deliberate edit here.
-    @Test("Simple offers ten cards, Power User thirteen")
+    @Test("Simple offers ten cards, Power User twelve")
     func modeCounts() {
         let simple = offered(mode: .simple, displays: 1)
         let powerUser = offered(mode: .powerUser, displays: 1)
         // 10 / 13 since #1365: the Mac Checklist, offered in
-        // Simple — the north-star's own card.
+        // Simple — the north-star's own card. 10 / 12 since
+        // #1741: Behavior, Power User only, retired.
         #expect(simple.count == 10)
-        #expect(powerUser.count == 13)
+        #expect(powerUser.count == 12)
     }
 
     /// Power User INSERTS, never reorders: Simple's sequence is

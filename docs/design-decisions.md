@@ -3280,16 +3280,14 @@ while keeping the stored `true` would have made every existing
 install noisier at limits it currently hits silently. So the
 crossing drops the retired key rather than carrying it.
 
-The setting lives in Behaviour rather than General, and that is a
-STORAGE decision wearing a placement question: every row in
-General is a `UserDefaults` preference, a live service toggle or
-an action, so a draft-and-Save row there would be the only one
-that does not do what it was just told. Keeping it in the draft
-config is what preserves the Lua verb and lets it travel in
-profiles and backups — the GUI curates, Lua is open — and
-Behaviour is where app-wide draft behaviour already lives. The
-cost, stated: Behaviour is Power-User-only, so a Simple user
-gets the pill and not the switch.
+:::unreleased
+Where the switch sits is a STORAGE decision wearing a placement
+question: it is on General because the value is app-wide, in
+`gui.json`, and written the moment it changes. The storage, the
+crossing out of the profiles, and why General's card needs the
+immediate write are argued once, in [Spaces, profiles & config
+ownership](#spaces-profiles--config-ownership) (#1741).
+:::
 
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
@@ -4483,6 +4481,107 @@ tombstone removes), never a second home for the setting. The
 binding rules for adding one — sparse-diff mechanics, parity
 tests, mutation through the `KiwiCore` facade — live in
 `AGENTS.md` §5.
+
+:::unreleased
+**A setting nobody varies per profile is app-wide, and it
+crosses out of the profiles by ADOPTION at the first apply, not
+by a migration step (#1741).** [Rationale] The alert sound when
+an action can't apply (`refusal.sound`), how windows are
+spread on quit (`quit.layout`) and the quit grid's windows per
+pile (`quit.grid_target_depth`) were stored in every profile's
+`TilingSettings`. None answers a question about a desk (owner,
+2026-09-28): nobody wants a different alert sound or a different
+quit arrangement per profile, and the pile depth depends on the
+quit layout. Per-profile storage bought only a way to lose
+them — a Desktop binding switching profile silently changed all
+three. So they live in `gui.json`'s `refusal` and `quit` groups,
+held on `KiwiCore.appWide`, and a profile apply never touches
+them. The Lua verbs keep their names; only where the value is
+stored moved.
+
+The move changes where a stored value lives, so it owes a
+one-shot crossing (`AGENTS.md` §5). N profile files → one value
+is an election, and a byte-level `ConfigMigration` step cannot
+hold it: a step sees one file's bytes and cannot know which
+profile is live. That is #1307's finding, and it stands for
+steps. What it does not show is that the move is unbuildable —
+the election can be held where the live profile is known, in two
+halves. **Capture** runs first in `loadConfig`, ahead of the
+#1530 settle and anything else that may rewrite a profile file:
+`prepareAppWide` reads `gui.json`, its stored values become the
+running ones, and a file readable *without* them owes the
+crossing, so every profile file's retired values are read into
+memory there and then. **Adoption** ends it at the first
+`apply(profile:)`: the incoming profile is the live one, so its
+captured values are adopted — a profile that carried none keeps
+the settled values: the defaults at an upgrade, this Mac's own at
+a restore — `gui.json` is
+written with them, and only once that write has landed are the
+retired groups (`refusal` and `quit`, whole) stripped from every
+profile file by a surgical edit that leaves the rest of each file
+as it was. A write that fails strips nothing, so every profile
+keeps its copy and the next launch can still cross. The crossing
+ends in the files, which is what makes it end at all: once the
+groups are gone, no reader of them is left to retire. The order
+is the whole design — a settle that re-encoded a profile before
+the capture would destroy the only copy the election reads. An
+unreadable `gui.json` owes nothing, since the crossing ends by
+writing into it. While the crossing is owed, no `gui.json` write
+stamps app-wide values at all, so no unrelated save can end it
+with values it never adopted.
+
+The trade, each half stated. **The first profile applied
+decides**, and every other profile's copy is abandoned — a user
+whose profiles disagreed keeps the live one's values, which is
+the one the user was hearing and seeing. A built-in Standard is
+not a stored profile and lends nothing; the crossing waits for
+the first stored one. **A Lua-owned config crosses nothing**:
+`init.lua` is the store there, and writing a `gui.json` would
+hand ownership to a file the user never chose, so loading a
+Lua-owned config clears any crossing a GUI-managed load had left
+owed. The cost is that a value a profile file carried is no
+longer read in such a setup ([Accepted
+limitations](accepted-limitations.md)), and General's two rows
+grey with the reason, since a row there has no store to write.
+`quit.layout` has no row while `grid` is its one value. **A
+backup written before the move crosses the same way**: its
+settings store no app-wide values, but its inline profiles still
+carry them, and a bundle is the second reader of that shape — so
+`readBackup` reads them off the bytes before the decode drops
+them, and the restore owes them to the first profile it applies.
+A backup written after carries them in its settings.
+
+**A verb changes the running value; only a General row or an
+adoption stores one.** `KiwiCore+AppWide` holds them apart —
+what the engine reads, the value no verb has touched, and what
+`gui.json` carries — because every `gui.json` write stamps the
+app-wide values in. A stamp that took the running value would
+persist a `set_refusal_sound` typed at the CLI the next time
+anything unrelated saved, which is the one thing no `set_*` verb
+does. The untouched value is there for the same reason: a row
+write or an adoption before anything was stored builds on it,
+since building on the running value would carry a verb's change
+into the file along with the row's. So a verb changes the
+running value alone, a General row writes `gui.json` at once,
+and moving a Lua-owned setup into the GUI
+(`adoptConfigIntoGui`) stores the values `init.lua` executed,
+since those are what the user was running.
+
+**In Settings, the rows sit on General's "Applies immediately"
+card and write `gui.json` at once, with no Save.** (#1741,
+ui-designer ruling.) Every row on that card does what it was
+just told the moment it is told; a draft-and-Save row there
+would be the only one that does not. That was #1255's argument
+for keeping the alert sound off General, and it still holds —
+what changed is the storage, which made the immediate write
+possible. General is a Simple-mode page, so the switch now
+reaches a Simple user, where Behaviour, Power-User-only, gave
+that user the pill and not the switch. With both rows gone,
+Behaviour held nothing, and the destination is retired rather
+than kept for an empty card: This Profile on Home now holds
+exactly the profile-scoped cards, which is what its heading
+says.
+:::
 
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** A floating window exempt from
@@ -7021,8 +7120,7 @@ the Gaps & Borders tile, `MonitorArrangement.layout`, `BarsGates`'
 own shown-bar predicate. Where no editor maths exists, the picture
 is a readout of the draft, never a decorative sketch: one pane per
 declared space, the colour fan and swatch grid of the config's
-real hexes, the Behaviour divider answering the real mouse-resize
-choice. There is no text-only fallback: a card without editor
+real hexes. There is no text-only fallback: a card without editor
 maths still draws its readout — on the plate (#786), for a This
 Profile card.
 
@@ -7516,6 +7614,31 @@ complaint on the channel no number of points can answer — so
 drawer built outside the wrapper too. (gui.md requires it of a
 title component, and a drawer title is one.)
 
+:::unreleased
+**A collapsible container that is a peer of the page's sections
+is a collapsible SECTION; one that qualifies a card stays a
+drawer.** (#1741, ui-designer ruling.) Shortcuts & Gestures ▸
+Mouse & trackpad is a family of its own beside the page's other
+cards, and drawn as a `.card` drawer — the drawer tier, with no
+section above it — it read as a sub-drawer of nothing. So
+`SettingsCollapsibleSection` wears `SettingsSection`'s
+`.headline` header over the same plate, and while shut the
+plate stays drawn with the summary inside it: the card keeps
+its place in the page instead of shrinking to a bare heading.
+This does not overturn #1021's tier, which is about drawers — a
+drawer qualifies the card it sits in, and a header louder than
+that card's own title inverts the hierarchy the other way. The
+test is the container's relation to the page, never its size or
+how many rows it holds. `GeneralShortcutsGroup` meets it too and
+is still a drawer, left for its own change.
+
+Both kinds draw the one `SettingsDisclosureButton` — chevron,
+full-row button, hover, heading trait, expanded/collapsed value
+and the Reduce Motion gate — so they differ in tier and chrome
+and in nothing the user operates. A second copy of that
+button is how the two would drift apart.
+:::
+
 **The header's accessory is a SIBLING of that button, never its
 child.** A drawer's `accessory:` slot may hold a control — the
 Profiles-per-Desktop drawer puts its `?` there — and wrapping the
@@ -7592,7 +7715,7 @@ way to know a shortcut works is to press it). Everything else
 — sliders, colors, pickers, placement grids — stays staged;
 where a raw value is hard to judge, build an in-window
 preview (the `GapsDiagram` / `DragVisualsEditor`-strip
-pattern), never live-apply. Sweep verdicts: Spaces, Behavior,
+pattern), never live-apply. Sweep verdicts: Spaces,
 App Rules, Shortcuts (minus the recorder), and the
 Desktop→profile bindings are plainly staged. Monitors'
 drag-cards and the icon pickers are **self-previewing** (the
@@ -7602,6 +7725,14 @@ rename/delete/make-default/preset-apply are immediate file
 **actions**, not settings — correctly outside this question.
 The Spaces tab's per-space layout picker stays staged. **No
 control besides the key recorder passes the live-apply bar.**
+
+:::unreleased
+Bar **(a)** is about owning no profile state, not about which
+file a control writes: General's alert-sound and
+windows-per-pile rows clear it while writing `gui.json`, since
+what they write belongs to no profile (#1741, [Spaces, profiles
+& config ownership](#spaces-profiles--config-ownership)).
+:::
 
 **Three save verbs: Revert / Save a copy… / Save.** Seven
 differently-labeled verbs switching on invisible mode state
@@ -9447,12 +9578,12 @@ Borders" pairs two nouns; *Controls* was refused because every row
 in Settings is a control, and *gesture* is Apple's own word for
 trackpad and mouse input.
 
-**The Mouse & trackpad drawer sits above the layer header, and is
+**The Mouse & trackpad card sits above the layer header, and is
 collapsed on every visit.** Everything under "Editing the X layer"
-reads as belonging to that layer; the drawer's settings do not, so
+reads as belonging to that layer; the card's settings do not, so
 it cannot sit there, and the layers card leads only what is
 layer-scoped. It opens shut every time because a
-drawer that opens on a first visit needs a stored "seen" flag and
+card that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
 
@@ -11768,6 +11899,19 @@ does not licence one: it refused to CARRY a value the encoder
 wrote, where this is a row a user ticked. So the panel follows the
 active profile. The cost is real and accepted: switch to a Desktop
 bound to another profile and the panel's material follows it.
+
+:::unreleased
+*"Unbuildable" is true of a migration step, not of the move.*
+#1741 moved three settings app-wide by an adoption at
+`apply(profile:)`, which knows which profile is live and so can
+hold the election a step cannot ([Spaces, profiles & config
+ownership](#spaces-profiles--config-ownership)). The Liquid
+Glass switch was not moved, and this paragraph is no longer a
+verdict on whether it could be: a proposal to make it app-wide
+argues its own case on that path and its trade — the first
+profile applied decides, every other profile's value is
+abandoned.
+:::
 
 **The switch means ALL of them, and its `?` carries what a
 boolean cannot.** Owner ruling: `off` is a true statement

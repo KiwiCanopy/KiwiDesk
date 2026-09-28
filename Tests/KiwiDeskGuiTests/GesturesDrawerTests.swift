@@ -187,28 +187,4 @@ struct GesturesDrawerTests {
             "the drawer mounts exactly once"
         )
     }
-
-    /// No Behavior file draws either moved control any more.
-    @Test("Behavior no longer draws the mouse rows")
-    func behaviorDropsTheMouseRows() throws {
-        let settings = Self.root.appendingPathComponent(
-            "Sources/KiwiDesk/Settings"
-        )
-        var files = try SourceScan.swiftSources(
-            under: settings.appendingPathComponent("Components/Behavior")
-        )
-        files += try SourceScan.swiftSources(
-            under: settings.appendingPathComponent("Sections")
-        ).filter { $0.lastPathComponent.hasPrefix("BehaviorSection") }
-        #expect(files.count >= 2)
-        for file in files {
-            let body = SourceScan.stripComments(
-                try String(contentsOf: file, encoding: .utf8)
-            )
-            #expect(!body.contains("config.settings.mouseResize"))
-            #expect(!body.contains("mouse.followsFocus"))
-            #expect(!body.contains("MouseResizePicker("))
-        }
-    }
-
 }

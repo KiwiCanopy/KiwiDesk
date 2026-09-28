@@ -27,16 +27,9 @@ extension TilingSettings: Codable {
             "new_window_placement_override"
         case mouse
         case mouseResize = "mouse_resize"
-        case quit
-        case refusal
         case shortcutPanel = "shortcut_panel"
         case resize
         case space
-    }
-
-    enum QuitKeys: String, CodingKey {
-        case layout
-        case gridTargetDepth = "grid_target_depth"
     }
 
     enum SpaceKeys: String, CodingKey {
@@ -45,12 +38,6 @@ extension TilingSettings: Codable {
 
     enum ResizeKeys: String, CodingKey {
         case step
-    }
-
-    /// The refusal cue's own group (#1255): the sound is no
-    /// longer a resize setting, so it does not sit under one.
-    enum RefusalKeys: String, CodingKey {
-        case sound
     }
 
     /// The shortcuts panel's own group (#1307) — a surface, so
@@ -162,37 +149,7 @@ extension TilingSettings: Codable {
         try decodeDrag(from: container)
         try decodeSpace(from: container)
         try decodeResize(from: container)
-        try decodeRefusal(from: container)
         try decodeShortcutPanel(from: container)
-        try decodeQuit(from: container)
-    }
-
-    private mutating func decodeQuit(
-        from container: Container
-    ) throws {
-        guard container.contains(.quit) else { return }
-        let quit = try container.nestedContainer(
-            keyedBy: QuitKeys.self,
-            forKey: .quit
-        )
-        quitLayout =
-            try quit.decodeIfPresent(
-                QuitLayoutStyle.self,
-                forKey: .layout
-            ) ?? .grid
-        // Clamp on decode: a hand-edited profile can't smuggle a
-        // value past the range the command and GUI enforce.
-        let range = QuitGridLayout.targetDepthRange
-        quitGridTargetDepth =
-            (try quit.decodeIfPresent(
-                Int.self,
-                forKey: .gridTargetDepth
-            )).map {
-                min(
-                    max($0, range.lowerBound),
-                    range.upperBound
-                )
-            } ?? QuitGridLayout.defaultTargetDepth
     }
 
     private mutating func decodeResize(
@@ -213,21 +170,6 @@ extension TilingSettings: Codable {
             ) ?? 50
         resizeStep =
             rawStep.isFinite ? min(max(rawStep, 1), 10_000) : 50
-    }
-
-    private mutating func decodeRefusal(
-        from container: Container
-    ) throws {
-        guard container.contains(.refusal) else { return }
-        let refusal = try container.nestedContainer(
-            keyedBy: RefusalKeys.self,
-            forKey: .refusal
-        )
-        refusalSound =
-            try refusal.decodeIfPresent(
-                Bool.self,
-                forKey: .sound
-            ) ?? false
     }
 
     private mutating func decodeShortcutPanel(

@@ -14,7 +14,6 @@ extension SettingsDestination {
         case .advancedColors: return .advancedColours
         case .gapsAndBorders: return .gapsAndBorders
         case .bars: return .bars
-        case .behavior: return .behaviour
         case .profiles: return .profiles
         case .shortcuts: return .shortcuts
         case .appRules: return .appRules
@@ -34,7 +33,6 @@ extension SettingsDestination {
         case .advancedColours: self = .advancedColors
         case .gapsAndBorders: self = .gapsAndBorders
         case .bars: self = .bars
-        case .behaviour: self = .behavior
         case .profiles: self = .profiles
         case .shortcuts: self = .shortcuts
         case .appRules: self = .appRules

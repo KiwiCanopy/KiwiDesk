@@ -16,6 +16,8 @@ extension KiwiCore {
         profile: Profile,
         cause: ProfileApplyCause
     ) {
+        // An owed #1741 crossing ends at the first apply.
+        adoptAppWide(from: profile)
         let pruneStaleSpaces = cause.prunesStale
         let forceRetile = cause.forcesRetile
         supersedeMonitorSettle()

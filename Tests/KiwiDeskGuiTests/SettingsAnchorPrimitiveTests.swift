@@ -218,6 +218,9 @@ struct SettingsAnchorPrimitiveTests {
         "SettingsReveal.swift",
         "SettingsSection.swift",
         "SettingsDisclosure.swift",
+        // #1741: the collapsible section card is a container
+        // shape, the section's plate beside the drawer's reveal.
+        "SettingsCollapsibleSection.swift",
     ]
 
     @Test("the split halves stay inside the container shapes")

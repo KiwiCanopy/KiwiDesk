@@ -251,16 +251,16 @@ struct RefusalCueSeamTests {
         // The GUI's one beep is the settings row's own preview —
         // it plays the cue being described, next to no refusal.
         let gui = try Self.tree("KiwiDesk")
-        let behavior = Self.stripped(
+        let general = Self.stripped(
             try String(
                 contentsOf: Self.root.appendingPathComponent(
                     "Sources/KiwiDesk/Settings/Sections/"
-                        + "BehaviorSection.swift"
+                        + "GeneralSection+AppWide.swift"
                 ),
                 encoding: .utf8
             )
         )
-        #expect(behavior.occurrences(of: "NSSound.beep()") == 1)
+        #expect(general.occurrences(of: "NSSound.beep()") == 1)
         #expect(gui.occurrences(of: "NSSound.beep()") == 1)
     }
 }

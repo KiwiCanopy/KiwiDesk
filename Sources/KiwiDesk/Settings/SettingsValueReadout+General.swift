@@ -1,6 +1,8 @@
 import KiwiDeskCore
 
-/// General-area diff readout (non-model keys produce no rows, #606).
+/// General-area diff readout (non-model keys produce no rows, #606;
+/// the `appWide.*` rows write at once, never through the draft,
+/// #1741).
 extension SettingsValueReadout {
     static func generalRows(
         _ key: GeneralKey,
@@ -9,7 +11,8 @@ extension SettingsValueReadout {
     ) -> [SettingsDiffRow] {
         switch key {
         case .language, .appearance, .startAtLogin,
-            .installUpdatesAutomatically,
+            .installUpdatesAutomatically, .refusalSound,
+            .quitGridTargetDepth, .quitLayout,
             .advancedConfigFile,
             .advancedEditLua, .advancedDiscardArrangement,
             .advancedResetAll, .onboardingDiscoveryShown,

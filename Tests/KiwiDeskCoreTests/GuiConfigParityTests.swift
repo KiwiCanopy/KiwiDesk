@@ -32,13 +32,16 @@ struct GuiConfigParityTests {
         // an edited setting, so counting it would light the save
         // pill on every Desktop swipe. It is stamped at the write
         // instead (`GuiConfigStore.liveDesktopSpaces`), which is
-        // why no caller has to carry it.
+        // why no caller has to carry it. `appWide` (#1741) is
+        // stamped the same way (`GuiConfigStore.liveAppWide`)
+        // and read by `applyStructuredConfig`.
         #expect(
             fields == [
                 "format", "settings", "spaces", "spaceModes",
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
+                "appWide",
             ]
         )
     }
@@ -60,6 +63,10 @@ struct GuiConfigParityTests {
             .identity(DesktopIdentity(raw: "RT-STAMP")):
                 SpaceID("b")
         ]
+        var wide = AppWideSettings()
+        wide.refusalSound = true
+        wide.quitGridTargetDepth = 3
+        config.appWide = wide
         config.layers = [
             KeyLayer(
                 name: "default",
@@ -85,6 +92,7 @@ struct GuiConfigParityTests {
         #expect(back.profileBindings == config.profileBindings)
         #expect(back.desktopSpaces == config.desktopSpaces)
         #expect(back.layers == config.layers)
+        #expect(back.appWide == config.appWide)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.
         #expect(back.settings == TilingSettings())

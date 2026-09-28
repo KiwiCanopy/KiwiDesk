@@ -31,9 +31,9 @@ struct SettingsCodingTests {
                 "float_placement", "float_scale_on_display_change",
                 "gap",
                 "layout", "min_window_size", "mouse",
-                "mouse_resize", "new_window_placement_override", "quit",
+                "mouse_resize", "new_window_placement_override",
                 "shortcut_panel",
-                "floating", "refusal", "resize", "space",
+                "floating", "resize", "space",
                 "space_bar",
                 "sticky", "swap_skips_cascade",
             ]
@@ -91,13 +91,9 @@ struct SettingsCodingTests {
         let floating = try object(root["floating"])
         #expect(Set(floating.keys) == ["color"])
         #expect(floating["color"] as? String == "")
-        // `quit.set_layout` → `quit.layout` (#197); `grid` is
-        // the only strategy today and the default.
-        // `quit.set_grid_target_depth` →
-        // `quit.grid_target_depth` (#281), standard target 5.
-        let quit = try object(root["quit"])
-        #expect(quit["layout"] as? String == "grid")
-        #expect(quit["grid_target_depth"] as? Double == 5)
+        // The `quit` group left for gui.json with #1741
+        // (`AppWideSettingsTests`); the key set above holds its
+        // absence.
         // `mouse.set_follows_focus` → `mouse.follows_focus`
         // (#186), off by default.
         let mouse = try object(root["mouse"])
@@ -123,13 +119,6 @@ struct SettingsCodingTests {
         // `set_resize_step` → `resize.step` (#58).
         let resize = try object(root["resize"])
         #expect(resize["step"] as? Double == 50)
-        // `set_refusal_sound` → `refusal.sound` (#1255): its own
-        // group, the cue having stopped being a resize setting.
-        // Asserted present and Boolean rather than pinned to a
-        // value a ruling may retune (tests.md ▸ a clause pins
-        // the SHAPE).
-        let refusal = try object(root["refusal"])
-        #expect(refusal["sound"] as? Bool != nil)
         // #1307: the panel's leaf is written under its own group.
         // Present and Boolean, never pinned to a value; the three
         // leaves' agreement is `LiquidGlassMasterTests`'.
