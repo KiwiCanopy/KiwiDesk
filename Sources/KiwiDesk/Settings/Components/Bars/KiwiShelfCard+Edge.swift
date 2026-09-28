@@ -50,6 +50,8 @@ extension KiwiShelfCard {
             }
             .padding(.top, 8)
         }
+        // Closes the drawer like Gaps' per-edge and per-axis ones.
+        Divider()
     }
 
     var spaceBarEdgeRow: some View {
