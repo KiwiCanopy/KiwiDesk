@@ -109,8 +109,11 @@ struct ShelfPaintTests {
         let taskbar = try look("Taskbar")
         core.paintShelf(look: taskbar, palette: nil)
         _ = core.execute("save_profile", args: [.string("Second")])
+        let second = try core.profiles.read(name: "Second").settings
 
         #expect(!core.restoreShelf(baseline))
+
+        #expect(try core.profiles.read(name: "Second").settings == second)
 
         #expect(taskbar.isApplied(to: core.tiler.settings))
         let first = try core.profiles.read(name: "First").settings
@@ -159,11 +162,19 @@ struct ShelfPaintTests {
     @Test("every paint and restore tells the GUI, on the write")
     func paintsAreAnnounced() throws {
         let core = makeCore()
-        var told = 0
-        core.onShelfPainted = { told += 1 }
+        let taskbar = try look("Taskbar")
+        var told: [Bool] = []
+        core.onShelfPainted = { [unowned core] in
+            let file = try? core.profiles.read(name: "Mine").settings
+            told.append(
+                taskbar.isApplied(to: core.tiler.settings)
+                    && file.map(taskbar.isApplied(to:)) == true
+            )
+        }
         let baseline = core.shelfPaintBaseline()
-        core.paintShelf(look: try look("Taskbar"), palette: nil)
+        core.paintShelf(look: taskbar, palette: nil)
         core.restoreShelf(baseline)
-        #expect(told == 2)
+        // Told after the write landed, live and in the file.
+        #expect(told == [true, false])
     }
 }
