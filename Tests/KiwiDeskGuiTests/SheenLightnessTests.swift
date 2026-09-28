@@ -26,8 +26,10 @@ struct SheenLightnessTests {
     func restsOnOrigin() {
         #expect(slider(0, origin: 0).restsOnOrigin)
         #expect(slider(1e-17, origin: 0).restsOnOrigin)
-        #expect(!slider(0.05, origin: 0).restsOnOrigin)
-        #expect(!slider(-0.05, origin: 0).restsOnOrigin)
+        // One grid step either side, as the slider computes it
+        // (-0.0499…), so a full-step tolerance reds too.
+        #expect(!slider(-1 + 19 * 0.05, origin: 0).restsOnOrigin)
+        #expect(!slider(-1 + 21 * 0.05, origin: 0).restsOnOrigin)
         #expect(!slider(0, origin: nil).restsOnOrigin)
     }
 
