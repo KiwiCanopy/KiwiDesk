@@ -41,6 +41,7 @@ extension AppBarStyle.ActiveIndicator: APIChoiceType {}
 extension AppBarStyle.Content: APIChoiceType {}
 extension BarAppIconSource: APIChoiceType {}
 extension SpaceBarStyle.InactiveContent: APIChoiceType {}
+extension SpaceBarStyle.ItemLabel: APIChoiceType {}
 
 extension BorderStyle.CornerStyle: APIChoiceType {}
 extension BorderStyle.DrawOrder: APIChoiceType {}

@@ -172,7 +172,7 @@ struct BarFontSiteTests {
                         spaceGlyph: .text("1", tinted: true),
                         apps: [],
                         active: true,
-                        overflow: 0,
+                        overflow: [],
                         focusInOverflow: false
                     )
                 ],

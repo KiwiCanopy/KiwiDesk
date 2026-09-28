@@ -155,8 +155,10 @@ synonym:
   symbols, and a sentence about every mark must not read as one
   about app icons. The one other sanctioned "Symbols" is the
   icon picker's SF Symbols tab (`icon_picker.symbols`) — the
-  same kind of monochrome mark; a third use of the word owes
-  this row an entry. In a catalog, the two words are the
+  same kind of monochrome mark — and a layout's symbol, the
+  `LayoutMode.symbol` the Layout menu and the Space Bar's
+  `item_label` draw (#1535), is that same SF Symbol kind; a
+  further use of the word owes this row an entry. In a catalog, the two words are the
   translator's own under `docs/localization-naming.md` ▸
   Family C, and must differ from each other and from the
   catalog's word for an app icon. `AppSymbolNounTests` holds

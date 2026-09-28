@@ -208,7 +208,8 @@ struct SettingsSearchIndexTests {
                 // (#277 anchors, first #1517 split — both moot).
                 // 18: Glyph gap (#1689) and Other Spaces (#1683),
                 // at rest; #1713 took the glyph size to Style.
-                .bars: 18,
+                // 19 since #1535: Space label, at rest.
+                .bars: 19,
                 // 7 since #277: the Animations drawer's five
                 // rows gained anchors; the palette shelf's three
                 // context-menu actions have no rendered row to

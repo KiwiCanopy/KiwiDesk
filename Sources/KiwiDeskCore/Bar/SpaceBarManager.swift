@@ -41,6 +41,10 @@ public final class SpaceBarManager {
         _ in
     }
 
+    /// What a glyph or `+n` click does, and a glyph's tooltip
+    /// (#1528) — Core sets both at bootstrap.
+    let glyphActions = SpaceBarGlyphActions()
+
     /// The menu bar item's layer and Space mark (#1413), fired
     /// on change only since the bar refreshes on every retile.
     /// Internal: `KiwiCore.onStatusSpaceMarkChange` is the one
@@ -190,6 +194,7 @@ public final class SpaceBarManager {
         overlay.onSelect = { [weak self] space in
             self?.onSelectSpace(space)
         }
+        overlay.glyphActions = glyphActions
         overlays[display] = overlay
         return overlay
     }

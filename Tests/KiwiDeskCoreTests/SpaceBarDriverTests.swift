@@ -109,7 +109,7 @@ struct SpaceBarDriverTests {
             in: core.state.workspaces[SpaceID("1")]!,
             style: SpaceBarLook()
         )
-        #expect(overflow == 0)
+        #expect(overflow.isEmpty)
         #expect(apps.map(\.name) == ["Zed", "Finder", "Zed"])
         #expect(apps.map(\.count) == [2, 1, 1])
         #expect(apps.map(\.focused) == [true, false, false])
@@ -143,7 +143,7 @@ struct SpaceBarDriverTests {
             style: SpaceBarLook()
         )
         #expect(apps.count == 5)
-        #expect(overflow == 4)
+        #expect(overflow.count == 4)
     }
 
     @Test("glyph_cap drives the visible/overflow split (#376)")
@@ -164,7 +164,7 @@ struct SpaceBarDriverTests {
         low.glyphCap = 2
         let capped = core.spaceBarApps(in: space, style: low)
         #expect(capped.apps.count == 2)
-        #expect(capped.overflow == 4)
+        #expect(capped.overflow.count == 4)
         // An out-of-range cap clamps via resolvedGlyphCap: 0 → 1,
         // and a cap past the group count shows all with no badge.
         var floored = SpaceBarLook()
@@ -177,7 +177,7 @@ struct SpaceBarDriverTests {
         wide.glyphCap = 99
         let all = core.spaceBarApps(in: space, style: wide)
         #expect(all.apps.count == 6)
-        #expect(all.overflow == 0)
+        #expect(all.overflow.isEmpty)
     }
 
     @Test("Front segment follows the toggle and the focus")

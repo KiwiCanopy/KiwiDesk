@@ -58,6 +58,7 @@ extension KiwiCore {
         spaceBars.onSelectSpace = { [weak self] id in
             _ = self?.focusSpace([.string(id.raw)])
         }
+        wireSpaceBarGlyphs()
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }

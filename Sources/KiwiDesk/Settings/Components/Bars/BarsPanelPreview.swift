@@ -95,18 +95,27 @@ struct BarsPanelPreview: View {
     }
 
     private var spaceLabels: [SpaceGlyph] {
-        Self.spaceLabels(
-            spaces: model.config.spaces,
-            icons: model.config.settings.spaceIcons
-        )
+        Self.spaceLabels(of: model.config)
     }
 
-    /// Each Space's identifier as the bar draws it — Core's own
-    /// ladder, never a reading of the preview's own (#1538).
-    static func spaceLabels(
-        spaces: [SpaceID],
-        icons: [SpaceID: String]
-    ) -> [SpaceGlyph] {
-        spaces.map { KiwiCore.spaceIdentifier(id: $0, icon: icons[$0]) }
+    /// Each Space's label as the bar draws it — Core's own
+    /// ladder, never a reading of the preview's own (#1538,
+    /// #1535). A layout label reads the DRAFT's modes, so a
+    /// temporary layout the bar shows is not drawn (#1179).
+    static func spaceLabels(of config: GuiConfig) -> [SpaceGlyph] {
+        let modes = config.modes(for: config.spaces)
+        let label = config.settings.spaceBarStyle.itemLabel
+        return config.spaces.compactMap { id in
+            modes[id].map { mode in
+                KiwiCore.spaceBarLabel(
+                    identifier: KiwiCore.spaceIdentifier(
+                        id: id,
+                        icon: config.settings.spaceIcons[id]
+                    ),
+                    mode: mode,
+                    label: label
+                )
+            }
+        }
     }
 }

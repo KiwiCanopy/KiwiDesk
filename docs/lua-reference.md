@@ -2465,10 +2465,10 @@ window. Adjacent windows of the same app share one glyph with a
 count badge (non-adjacent duplicates stay separate); past the
 glyph cap (`space_bar.set_glyph_cap`, default 5, range 1–12) the
 rest fold into a `+n` badge counting the hidden windows. Clicking
-a Space switches to it; glyphs are not click targets, and a group
-holding the focused window stays collapsed and takes the focused
-accent. The user guide's [Space Bar](user-guide.md#space-bar)
-section covers the badges and the drag-onto-a-Space gesture.
+a Space switches to it, and a group holding the focused window
+stays collapsed and takes the focused accent. The user guide's
+[Space Bar](user-guide.md#space-bar) section covers the badges,
+what a click on a glyph does and the drag-onto-a-Space gesture.
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,
@@ -2547,6 +2547,26 @@ drops its sticky and floating badges.
 
 ```lua
 space_bar.set_inactive_content("count")
+```
+:::
+
+### space_bar.set_item_label
+
+:::unreleased
+**Expects:** `"identifier"` or `"layout"` (default
+`"identifier"`).
+
+**Does:** sets what names each Space item. `"identifier"` draws
+the Space's icon, else its name, shortened to fit (up to three
+digits of a number, the first two letters of a word). `"layout"` draws the symbol of the layout the Space uses
+now — the one the Layout menu shows — and changes with it. The
+app glyphs are unaffected, and VoiceOver still reads the Space's
+name.
+
+**Example:**
+
+```lua
+space_bar.set_item_label("layout")
 ```
 :::
 

@@ -209,7 +209,7 @@ struct GlyphGapRenderTests {
                 spaceGlyph: .text("1", tinted: true),
                 apps: apps,
                 active: true,
-                overflow: 2,
+                overflow: [WindowID(901), WindowID(902)],
                 focusInOverflow: false
             ),
             SpaceBarOverlay.Item(
@@ -217,7 +217,7 @@ struct GlyphGapRenderTests {
                 spaceGlyph: .text("2", tinted: true),
                 apps: [],
                 active: false,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             ),
         ]
@@ -290,7 +290,7 @@ struct GlyphGapPlanTests {
                 spaceGlyph: .text("\($0)", tinted: false),
                 apps: apps,
                 active: $0 == 1,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             )
         }

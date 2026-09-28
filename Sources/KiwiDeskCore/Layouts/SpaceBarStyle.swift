@@ -20,6 +20,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// What a Space its screen does not show draws (#1683); the
     /// default keeps every Space's glyphs.
     public var inactiveContent: InactiveContent = .apps
+    /// What a Space item names its Space by (#1535); the
+    /// default keeps the identifier.
+    public var itemLabel: ItemLabel = .identifier
     public var activeIndicator: ActiveIndicator = .outline
     /// Opacity (0.05–1) of unfocused glyph on active space.
     public var activeDimFactor: CGFloat =
@@ -52,6 +55,15 @@ public struct SpaceBarStyle: Sendable, Equatable {
         case apps
         /// Its identifier, its window count a disc on its corner.
         case count
+    }
+
+    /// What names a Space item (#1535). An option, never a
+    /// fallback: the identifier ladder stays the default.
+    public enum ItemLabel: String, Sendable, Codable, CaseIterable {
+        /// Its icon, number or name (`spaceIdentifier`).
+        case identifier
+        /// Its current layout's `LayoutMode.symbol`.
+        case layout
     }
 }
 

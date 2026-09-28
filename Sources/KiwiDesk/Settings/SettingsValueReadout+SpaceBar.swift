@@ -42,6 +42,13 @@ extension SettingsValueReadout {
                 n.inactiveContent,
                 AppBarOptions.inactiveContent
             )
+        case .spaceBarItemLabel:
+            return spaceBarChoiceRow(
+                census,
+                o.itemLabel,
+                n.itemLabel,
+                AppBarOptions.itemLabel
+            )
         case .spaceBarGlyphCap:
             return spaceBarRow(
                 census,

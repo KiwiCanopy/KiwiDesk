@@ -28,6 +28,8 @@ final class SpaceBarItemView: NSView {
         var sticky = false
         var floating = false
         var stickyScope: StickyScope = .none
+        /// The windows this glyph stands for, in row order (#1528).
+        var windows: [WindowID] = []
     }
 
     let identifierImage = NSImageView()
@@ -42,6 +44,13 @@ final class SpaceBarItemView: NSView {
     var stickyBadgeViews: [StateBadgeView] = []
     var floatingBadgeViews: [StateBadgeView] = []
     let overflowBadge = SpaceBarItemView.makeBadge()
+    /// Click targets over the glyphs and `+n` (#1528).
+    var glyphTargets: [SpaceBarGlyphTarget] = []
+    var overflowTarget: SpaceBarGlyphTarget?
+    /// The target under the pointer, drawn like the focused glyph
+    /// so a click target reads as one (#1528).
+    var hoveredTarget: SpaceBarGlyphTarget?
+    weak var glyphActions: SpaceBarGlyphActions?
     let heldBadge = StateBadgeView(symbolName: SpaceBarItemView.heldSymbol)
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
@@ -62,6 +71,8 @@ final class SpaceBarItemView: NSView {
     )
     private(set) var apps: [App] = []
     private(set) var overflow = 0
+    /// The windows behind `+n`, which its menu lists (#1528).
+    private(set) var overflowWindows: [WindowID] = []
     /// True if focused window is in overflow (#376).
     private(set) var focusInOverflow = false
     private(set) var held: Held?
@@ -151,8 +162,9 @@ final class SpaceBarItemView: NSView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        guard isHovered else { return }
+        guard isHovered || hoveredTarget != nil else { return }
         isHovered = false
+        hoveredTarget = nil
         restyle()
     }
 
@@ -160,19 +172,33 @@ final class SpaceBarItemView: NSView {
     /// drawn over the faded end takes the pointer there (#1517);
     /// the hover fill promises a click, and a layer item has none.
     private func refreshHover(_ event: NSEvent) {
-        applyHover(BarHoverHit.owns(self, event))
+        applyHover(
+            BarHoverHit.owns(self, event),
+            target: targetsForHover.first {
+                BarHoverHit.owns($0, event)
+            }
+        )
     }
 
     /// Re-reads the hover from where the pointer rests (#1665) —
     /// the shelf's placement moves a chip without an exit event.
     func syncHoverToPointer() {
-        applyHover(BarHoverHit.ownsPointer(self))
+        applyHover(
+            BarHoverHit.ownsPointer(self),
+            target: targetsForHover.first(where: BarHoverHit.ownsPointer)
+        )
     }
 
-    private func applyHover(_ ownsPointer: Bool) {
+    private func applyHover(
+        _ ownsPointer: Bool,
+        target: SpaceBarGlyphTarget?
+    ) {
         let hovered = !isActive && space != nil && ownsPointer
-        guard hovered != isHovered else { return }
+        guard hovered != isHovered || target !== hoveredTarget else {
+            return
+        }
         isHovered = hovered
+        hoveredTarget = target
         restyle()
     }
 
@@ -185,6 +211,7 @@ final class SpaceBarItemView: NSView {
         style: SpaceBarLook,
         stateMarkColors: StateMarkColors,
         overflow: Int = 0,
+        overflowWindows: [WindowID] = [],
         focusInOverflow: Bool = false,
         held: Held? = nil,
         collapse: Collapse? = nil
@@ -200,6 +227,7 @@ final class SpaceBarItemView: NSView {
         self.spaceGlyph = spaceGlyph
         self.apps = apps
         self.overflow = overflow
+        self.overflowWindows = overflowWindows
         self.focusInOverflow = focusInOverflow
         self.held = held
         self.collapse = collapse
@@ -208,6 +236,7 @@ final class SpaceBarItemView: NSView {
         self.style = style
         self.stateMarkColors = stateMarkColors
         syncAppViews()
+        syncTargets()
         restyle()
         needsLayout = true
         setAccessibilityElement(true)

@@ -42,7 +42,7 @@ struct LayoutStrip: View {
                     windows: LayoutSchematic.defaultWindowCount,
                     scale: .tile
                 )
-                Label(mode.displayName, systemImage: mode.glyph)
+                Label(mode.displayName, systemImage: mode.symbol)
                     .font(.subheadline)
                     .labelStyle(.titleAndIcon)
                 Text(usageText(mode))

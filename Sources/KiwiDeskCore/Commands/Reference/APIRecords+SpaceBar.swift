@@ -29,6 +29,11 @@ extension APIReference {
                 SpaceBarStyle.InactiveContent.self
             )
         ),
+        "set_item_label": APIRecord(
+            "Sets what names a Space item: its identifier, or its "
+                + "current layout's symbol.",
+            .choice("label", SpaceBarStyle.ItemLabel.self)
+        ),
         "set_active_indicator": APIRecord(
             "Sets how the active Space is marked.",
             .choice(

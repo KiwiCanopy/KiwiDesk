@@ -74,7 +74,7 @@ struct SpaceBarAwayTests {
         // the present one and read `count == 2` here.
         #expect(apps.map(\.name) == ["Safari"])
         #expect(apps.first?.count == 1)
-        #expect(overflow == 0)
+        #expect(overflow.isEmpty)
     }
 
     @Test("an away member never splits a present run")

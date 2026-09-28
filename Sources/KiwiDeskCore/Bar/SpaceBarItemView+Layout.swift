@@ -85,6 +85,12 @@ extension SpaceBarItemView {
         for (index, view) in appViews.enumerated() {
             if index > 0 { cursor += glyphGap }
             place(view, at: cursor, cell: cell)
+            if index < glyphTargets.count {
+                glyphTargets[index].frame = cellRect(
+                    at: cursor,
+                    cell: cell
+                )
+            }
             if index < badgeViews.count {
                 layoutBadge(
                     badgeViews[index],
@@ -107,6 +113,7 @@ extension SpaceBarItemView {
                 cell: cell,
                 centered: true
             )
+            overflowTarget?.frame = cellRect(at: cursor, cell: cell)
             cursor += cell
         }
         layoutAccent()
@@ -135,32 +142,19 @@ extension SpaceBarItemView {
             ? max(cell - StateBadgeMetrics.side(cell: cell), base)
             : cell + 2
         let diameter = min(max(base, textWidth + 2), ceiling)
-        let cellRect =
-            horizontal
-            ? CGRect(
-                x: offset,
-                y: (bounds.height - cell) / 2,
-                width: cell,
-                height: cell
-            )
-            : CGRect(
-                x: (bounds.width - cell) / 2,
-                y: offset,
-                width: cell,
-                height: cell
-            )
+        let box = cellRect(at: offset, cell: cell)
         let rect =
             centered
             ? CGRect(
-                x: cellRect.midX - diameter / 2,
-                y: cellRect.midY - diameter / 2,
+                x: box.midX - diameter / 2,
+                y: box.midY - diameter / 2,
                 width: diameter,
                 height: diameter
             )
             : CGRect(
-                x: cellRect.maxX - diameter + 1,
+                x: box.maxX - diameter + 1,
                 y: lowerCorner
-                    ? cellRect.maxY - diameter + 1 : cellRect.minY - 1,
+                    ? box.maxY - diameter + 1 : box.minY - 1,
                 width: diameter,
                 height: diameter
             )
@@ -178,28 +172,15 @@ extension SpaceBarItemView {
         cell: CGFloat
     ) {
         let side = StateBadgeMetrics.side(cell: cell)
-        let cellRect =
-            horizontal
-            ? CGRect(
-                x: offset,
-                y: (bounds.height - cell) / 2,
-                width: cell,
-                height: cell
-            )
-            : CGRect(
-                x: (bounds.width - cell) / 2,
-                y: offset,
-                width: cell,
-                height: cell
-            )
+        let box = cellRect(at: offset, cell: cell)
         if index < stickyBadgeViews.count,
             !stickyBadgeViews[index].isHidden
         {
             let badge = stickyBadgeViews[index]
             badge.frame = backingAlignedRect(
                 CGRect(
-                    x: cellRect.minX - 1,
-                    y: cellRect.minY - 1,
+                    x: box.minX - 1,
+                    y: box.minY - 1,
                     width: side,
                     height: side
                 ),
@@ -213,8 +194,8 @@ extension SpaceBarItemView {
             let badge = floatingBadgeViews[index]
             badge.frame = backingAlignedRect(
                 CGRect(
-                    x: cellRect.minX - 1,
-                    y: cellRect.maxY - side + 1,
+                    x: box.minX - 1,
+                    y: box.maxY - side + 1,
                     width: side,
                     height: side
                 ),
@@ -232,20 +213,7 @@ extension SpaceBarItemView {
         cell: CGFloat,
         slack: CGFloat = 0
     ) {
-        var rect =
-            horizontal
-            ? CGRect(
-                x: offset,
-                y: (bounds.height - cell) / 2,
-                width: cell,
-                height: cell
-            )
-            : CGRect(
-                x: (bounds.width - cell) / 2,
-                y: offset,
-                width: cell,
-                height: cell
-            )
+        var rect = cellRect(at: offset, cell: cell)
         if let field = view as? NSTextField {
             rect = BarTextGlyph.frame(
                 for: field,

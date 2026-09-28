@@ -130,7 +130,7 @@ struct SpaceBarInactiveContentTests {
             spaceGlyph: .text("2", tinted: true),
             apps: [app("Mail", 2), app("Web", 1)],
             active: false,
-            overflow: 2,
+            overflow: [WindowID(901), WindowID(902)],
             focusInOverflow: true
         ).collapsed(to: .count)
         #expect(item.collapse?.windows == 5)

@@ -9,6 +9,7 @@ enum SpaceBarCommandSetting {
     case glyphCap(Int)
     case glyphGap(CGFloat)
     case inactiveContent(SpaceBarStyle.InactiveContent)
+    case itemLabel(SpaceBarStyle.ItemLabel)
     case frontAppTitleCap(Int)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
     case activeDimFactor(CGFloat)
@@ -65,6 +66,11 @@ enum SpaceBarCommandSetting {
                 args,
                 SpaceBarStyle.InactiveContent.self
             ).map(Self.inactiveContent)
+        case "item_label":
+            return BarSettingChoice.value(
+                args,
+                SpaceBarStyle.ItemLabel.self
+            ).map(Self.itemLabel)
         default:
             return nil
         }
@@ -181,6 +187,8 @@ enum SpaceBarCommandSetting {
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)
         case .inactiveContent(let value):
             style.inactiveContent = value
+        case .itemLabel(let value):
+            style.itemLabel = value
         case .frontAppTitleCap(let value):
             style.frontAppTitleCap = value
         case .activeIndicator(let value):

@@ -472,8 +472,16 @@ as you set it.
 ### Space Bar
 
 One bar per display, listing that display's Spaces in profile
-order. Click a Space to switch to it; the glyphs are
-informational.
+order. Click a Space to switch to it.
+
+:::unreleased
+Click an app glyph to switch to its Space and focus that window.
+A glyph with a count badge, and the `+n` badge, open a menu of
+the windows they stand for instead; nothing switches until you
+pick a row. With **Other Spaces** set to *Window count*, a
+Space not on screen draws no glyphs, so a click anywhere on it
+switches.
+:::
 
 While a shortcut layer other than `default` is active, its icon
 — or two letters of its name when it has none — leads the bar,
