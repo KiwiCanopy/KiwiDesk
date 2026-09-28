@@ -7,7 +7,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case spaces
     case layoutDefaults
     case monitors
-    case colors
+    case looks
     case advancedColors
     case gapsAndBorders
     case bars
@@ -29,7 +29,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// (`HomeCardOrderTests` pins the shared membership).
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
-        .bars, .colors, .advancedColors, .behavior,
+        .bars, .looks, .advancedColors, .behavior,
     ]
     /// Destinations scoped globally across the application. The
     /// checklist is LAST here so a search for "Spaces" or "Dock"
@@ -44,10 +44,10 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return L("destination.spaces", "Spaces")
         case .layoutDefaults: return L("destination.layout", "Layout Defaults")
         case .monitors: return L("destination.monitors", "Monitors")
-        case .colors:
+        case .looks:
             return L(
-                "destination.colors",
-                "Colors & Animations"
+                "destination.looks",
+                "Looks & Animations"
             )
         case .advancedColors:
             return L(
@@ -75,7 +75,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .spaces: return "squares.below.rectangle"
         case .layoutDefaults: return "rectangle.3.group"
         case .monitors: return "display.2"
-        case .colors: return "paintbrush.fill"
+        case .looks: return "paintbrush.fill"
         case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
         case .bars: return "menubar.rectangle"
@@ -95,7 +95,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .layoutDefaults:
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
-        case .colors: return .purple
+        case .looks: return .purple
         case .advancedColors:
             return Color(red: 0.38, green: 0.20, blue: 0.60)
         case .gapsAndBorders: return .brown

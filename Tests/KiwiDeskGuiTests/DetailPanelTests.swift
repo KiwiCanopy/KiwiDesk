@@ -24,7 +24,7 @@ struct DetailPanelTests {
     func offerSetIsPinned() {
         #expect(
             SettingsDetailPanelOffer.offering == [
-                .gapsAndBorders, .bars, .colors,
+                .gapsAndBorders, .bars, .looks,
                 .layoutDefaults, .shortcuts, .advancedColors,
                 .spaces,
             ]
@@ -81,8 +81,8 @@ struct DetailPanelTests {
                 "case.gapsAndBorders:"
                 + "GapsBordersPanelPreview(model:model)",
             .bars: "case.bars:BarsPanelPreview(model:model)",
-            .colors:
-                "case.colors:PaletteScenePanel(model:model)",
+            .looks:
+                "case.looks:PaletteScenePanel(model:model)",
             .layoutDefaults:
                 "case.layoutDefaults:LayoutPreviewPanel(",
             .shortcuts:
@@ -278,7 +278,7 @@ struct DetailPanelTests {
                 "LayoutSchematicView("
             ),
             (
-                "Sections/ColorsMotionSection.swift",
+                "Sections/LooksSection.swift",
                 "PaletteSceneThumbnail("
             ),
             (

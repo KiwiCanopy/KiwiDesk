@@ -167,7 +167,7 @@ struct PaletteSceneRoleTests {
             "PaletteSceneThumbnail+Panel.swift",
         ] {
             let url = root.appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors/"
+                "Sources/KiwiDesk/Settings/Components/Looks/"
                     + name
             )
             // Comments STRIPPED, like every sibling scan: a

@@ -52,7 +52,7 @@ enum HomeCardContent {
                 "KiwiShelf · %1$@ · Space Bar off",
                 edge
             )
-        case .colors:
+        case .looks:
             if settings.animations.anyEnabled {
                 return L(
                     "home.card.colors.subtitle",

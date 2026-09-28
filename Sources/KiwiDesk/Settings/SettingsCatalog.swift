@@ -39,7 +39,7 @@ enum SettingsCatalog {
         case .spaces: return spaces
         case .layoutDefaults: return layoutDefaults
         case .monitors: return monitors
-        case .colors: return colors
+        case .looks: return colors
         case .advancedColors: return advancedColors
         case .gapsAndBorders: return gapsAndBorders
         case .bars: return bars

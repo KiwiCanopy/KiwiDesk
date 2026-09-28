@@ -27,6 +27,8 @@ enum SettingRuntimeGate: Hashable {
     case monitorsDisconnected
     /// Palettes that carry neon Glow pairing (#578).
     case paletteGlowPairing
+    /// The look a click just applied offers its colors (#1684).
+    case lookJustApplied
     /// Unadopted shortcuts present in init.lua.
     case luaImportAvailable
     /// Restore Defaults appears when unseeded defaults exist.

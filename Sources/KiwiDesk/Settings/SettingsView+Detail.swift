@@ -15,8 +15,8 @@ extension SettingsView {
             LayoutDefaultsSection(model: model)
         case .monitors:
             MonitorsSection(model: model)
-        case .colors:
-            ColorsMotionSection(model: model)
+        case .looks:
+            LooksSection(model: model)
         case .advancedColors:
             AdvancedColorsSection(model: model)
         case .gapsAndBorders:

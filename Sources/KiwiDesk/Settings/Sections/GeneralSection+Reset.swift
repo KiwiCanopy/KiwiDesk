@@ -107,8 +107,8 @@ extension GeneralSection {
                     "Deletes your profiles, Spaces, layouts, "
                         + "and keybindings, then starts fresh "
                         + "with KiwiDesk's defaults. Doesn't "
-                        + "touch init.lua or your color "
-                        + "palettes."
+                        + "touch init.lua, your color "
+                        + "palettes or your looks."
                 )
             )
             .font(.caption)
@@ -165,8 +165,8 @@ extension GeneralSection {
                         + "KiwiDesk remembered — then starts "
                         + "over with its starter defaults, the "
                         + "same state as a first launch. Your "
-                        + "init.lua and color palettes are "
-                        + "kept. The old files go to the "
+                        + "init.lua, color palettes and looks "
+                        + "are kept. The old files go to the "
                         + "Trash."
                 )
             )

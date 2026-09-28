@@ -2,6 +2,13 @@
 enum ColorsRowOrder {
     // MARK: - Colours & Animations (the Simple area)
 
+    /// Context menu for user looks (#1684).
+    static let looksContextMenu: [SettingKey] = [
+        .colours(.lookRename),
+        .colours(.lookExport),
+        .colours(.lookDelete),
+    ]
+
     /// Context menu for user palettes (`ColorsCensusRenderTests`).
     static let palettesContextMenu: [SettingKey] = [
         .colours(.paletteRename),

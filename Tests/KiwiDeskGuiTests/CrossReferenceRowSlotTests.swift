@@ -108,9 +108,8 @@ struct CrossReferenceRowSlotTests {
     /// that binding at a different producer would leave this
     /// comparison identical while
     /// `theAppBarProsePlacesItsLink` went on asserting an
-    /// orphaned `LayoutCardText.appBarState`. Named here rather
-    /// than papered over: the other two entries do carry their
-    /// producer, so only this row has the gap.
+    /// orphaned `LayoutCardText.appBarState`. Named, not papered
+    /// over: the others carry their producer; only this row can't.
     private static let asserted: Set<String> = [
         "MotionCard.swift:Self.scrollingXrefProse",
         "SpacesUsingLayout.swift:Self.overrideProse(overriding)",
@@ -123,6 +122,7 @@ struct CrossReferenceRowSlotTests {
         "MacHabitRow.swift:prose",
         "AppRulesSection+Lists.swift:Self.noSpacesProse",
         "BarColorCards.swift:AdvancedColorsHelp.shelfBorderReference",
+        "KiwiShelfCard.swift:Self.lookReference",
     ]
 
     // MARK: - The values

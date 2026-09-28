@@ -87,6 +87,33 @@ struct ColorsCensusRenderTests {
         )
     }
 
+    /// The look shelf's at-rest half, hand-listed for the palette
+    /// shelf's reason (#1684): a tile grid, the colors row a click
+    /// surfaces, a trailing add-tile and a header button.
+    @Test("the look shelf's at-rest actions are the census's")
+    func looksAtRest() {
+        #expect(
+            censusRows(.coloursAndMotion, .looks, .atRest)
+                == [
+                    .colours(.lookApply),
+                    .colours(.lookUseColors),
+                    .colours(.lookSave),
+                    .colours(.lookImport),
+                ]
+        )
+    }
+
+    @Test("the look context menu is the census's show-more set")
+    func looksContextMenu() {
+        pin(
+            ColorsRowOrder.looksContextMenu,
+            .coloursAndMotion,
+            .looks,
+            .showMore,
+            "look context menu"
+        )
+    }
+
     @Test("the Motion card's two tiers are the census's")
     func motionTiers() {
         pin(
@@ -131,14 +158,14 @@ struct ColorsCensusRenderTests {
         #expect(!SettingRuntimeGate.liquidGlassUnavailable.greys)
     }
 
-    /// The area's render knows exactly two containers; a third
-    /// would mount nowhere, so it must fail loud here rather than
-    /// ship an unreachable row.
-    @Test("Colours & Animations holds only palettes and motion")
+    /// The area's render knows exactly its four containers; a
+    /// fifth would mount nowhere, so it must fail loud here rather
+    /// than ship an unreachable row.
+    @Test("Looks & Animations holds looks, palettes, glass, motion")
     func coloursAndMotionContainers() {
         #expect(
             containers(of: .coloursAndMotion)
-                == [.palettes, .glass, .motion]
+                == [.looks, .palettes, .glass, .motion]
         )
     }
 

@@ -134,6 +134,11 @@ one carrying settings when this Mac's settings come from
 `init.lua` (profiles and palettes alone restore there). A
 restore that skips a profile or a palette says so.
 
+:::unreleased
+Saved looks travel in a backup beside the palettes, and restore
+wherever they do; **Reset All Settings…** keeps them too.
+:::
+
 ## The gui.json File
 
 `~/.config/KiwiDesk/gui.json` holds the global base
@@ -257,7 +262,7 @@ What the fields' own notes do not say:
   for individually resizable masters ([Accepted
   limitations](accepted-limitations.md)).
 - **Scrolling** — its focus animation and duration live here,
-  not in Colors & Animations.
+  beside the layout rather than with the other animations.
 - **Track** — the track shortcuts sit in Shortcuts ▸ Move
   windows. Previous is the column to the left (or the row
   above), next the column to the right (or the row below),
@@ -277,7 +282,7 @@ track shortcut bound.
 
 **Monocle** — a focus change flips a card from one app's icon
 to the next over a blur; the flip and its duration live here
-too, not in Colors & Animations.
+too, beside the layout.
 
 > **A few resize behaviors are accepted limitations, not bugs** —
 > the inner window of a nested BSP pair not growing, or the shares
@@ -460,7 +465,7 @@ overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
-(**Colours & Animations**); on macOS before 26 each draws its
+(its own card in Settings); on macOS before 26 each draws its
 flat look instead.
 
 On by default, on every surface. While macOS's **Reduce

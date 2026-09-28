@@ -257,7 +257,7 @@ fingerprint anywhere.
 **The qualifier must also be unclaimed by the surface AROUND
 the drawer** (#678). A row tier and a mode depth are never
 spelled with one word: Advanced Colors is the deep-mode twin of
-Colours & Animations (`SettingsArea.minimumMode` is `.powerUser`
+Looks & Animations (`SettingsArea.minimumMode` is `.powerUser`
 there), so on that page "advanced" already means *which mode
 you are in* and no drawer may re-use it to mean *which rows are
 hidden*. Its colour drawers are **"More colors"**, with the
@@ -633,7 +633,7 @@ drives.
 **The areas that watch their draft do it in a fixed detail
 panel; the rest keep full width.** Which ones is
 `SettingsDetailPanelOffer.offering` and nothing else — Gaps &
-Borders, Bars, Colours & Animations, Layout Defaults, Shortcuts
+Borders, Bars, Looks & Animations, Layout Defaults, Shortcuts
 (its keyboard board), Advanced Colours and Spaces (#793,
 #794). They open as two columns: the controls, then a fixed
 392 pt right panel headed "Live preview · <area>" that redraws

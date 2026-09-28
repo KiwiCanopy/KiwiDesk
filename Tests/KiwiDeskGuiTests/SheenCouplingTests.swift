@@ -104,7 +104,7 @@ struct SheenCouplingTests {
     func rowPassesTheOrigin() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Colors/"
+                "Sources/KiwiDesk/Settings/Components/Looks/"
                     + "SheenRow.swift"
             )
         let source = try SourceScan.strippedSource(at: file)
