@@ -80,7 +80,12 @@ struct SpaceBarGlyphCellTests {
             appCount: apps.count,
             contentDepth: depth,
             glyphGap: 0,
-            endInset: style.shelf.itemEndInset(forDepth: depth)
+            ends: SpaceBarItemView.ends(
+                look: style,
+                depth: depth,
+                first: false,
+                last: false
+            )
         )
         let view = SpaceBarItemView(
             frame: horizontal

@@ -171,7 +171,7 @@ struct BarStripView: View {
             // Rounded ends pad the axis, as the live item (#1763).
             .padding(
                 vertical ? .vertical : .horizontal,
-                KiwiShelf.cornerCut(radius: spec.itemCorner)
+                spec.pipEndInset(scale: scale)
             )
             .frame(
                 minWidth: vertical ? pipCross : nil,
@@ -229,5 +229,26 @@ struct BarStripView: View {
         case .left: return .trailing
         case .right: return .leading
         }
+    }
+}
+
+extension HomeCardBarsTile.BarSpec {
+    /// The along-axis inset a labelled pip owes each rounded end of
+    /// its box (#1763) — drawn by `BarStripView`, measured by
+    /// `ShelfStripPreview`'s need; the content sits `3 * scale` in
+    /// from the box's long edges. Only a boxed pip draws a box.
+    func pipEndInset(scale: CGFloat) -> CGFloat {
+        guard boxed else { return 0 }
+        return KiwiShelf.endClearance(
+            radius: itemCorner,
+            crossOffset: 3 * scale
+        )
+    }
+
+    /// What a run's pips add along the axis for their rounded
+    /// ends: each pip drawing a label or a glyph, both ends.
+    func pipEndInsets(scale: CGFloat) -> CGFloat {
+        let labelled = items.filter { $0.label != nil || $0.glyph != nil }
+        return CGFloat(labelled.count) * 2 * pipEndInset(scale: scale)
     }
 }

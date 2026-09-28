@@ -129,4 +129,38 @@ struct ShelfStripPreviewTests {
             ) * unit
         #expect(space.length >= floor - 0.01)
     }
+
+    /// A labelled pip draws its rounded ends' clearance (#1763),
+    /// so the need the arrangement is handed carries it too.
+    @Test("A run's need carries the clearance its pips draw")
+    func needCarriesPipClearance() {
+        let preview = Self.preview(spaces: 3, windows: 0)
+        var bare = Self.spec(items: 3, length: 22)
+        bare.boxed = true
+        bare.itemCorner = 7
+        var labelled = bare
+        labelled.items = labelled.items.map {
+            var item = $0
+            item.label = "1"
+            return item
+        }
+        let inset = labelled.pipEndInset(scale: preview.scale)
+        #expect(
+            inset
+                == KiwiShelf.endClearance(
+                    radius: 7,
+                    crossOffset: 3 * preview.scale
+                )
+        )
+        #expect(inset > 0)
+        #expect(
+            abs(preview.need(labelled) - preview.need(bare) - 6 * inset)
+                < 1e-9
+        )
+        // No box, no rounded end to clear.
+        labelled.boxed = false
+        bare.boxed = false
+        #expect(labelled.pipEndInset(scale: preview.scale) == 0)
+        #expect(preview.need(labelled) == preview.need(bare))
+    }
 }

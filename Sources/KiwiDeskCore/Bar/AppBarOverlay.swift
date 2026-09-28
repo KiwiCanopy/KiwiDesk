@@ -206,8 +206,9 @@ public final class AppBarOverlay {
                 style: style
             )
             view.itemActions = itemActions
-            view.isFirstInRun = index == 0
-            view.isLastInRun = index == items.count - 1
+            let place = Self.runPlace(index: index, count: items.count)
+            view.isFirstInRun = place.first
+            view.isLastInRun = place.last
             view.onSelect = { [weak self] id in
                 self?.onSelect(id)
             }

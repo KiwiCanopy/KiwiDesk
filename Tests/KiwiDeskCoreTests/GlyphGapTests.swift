@@ -70,14 +70,14 @@ struct GlyphGapTests {
             overflow: 2,
             contentDepth: 32,
             glyphGap: 0,
-            endInset: 0
+            ends: .zero
         )
         let spaced = SpaceBarItemView.autoLength(
             appCount: 3,
             overflow: 2,
             contentDepth: 32,
             glyphGap: 5,
-            endInset: 0
+            ends: .zero
         )
         // Three glyphs and the badge: four slots, three gaps.
         let gaps: CGFloat = 3 * 5
@@ -87,13 +87,13 @@ struct GlyphGapTests {
                 appCount: 1,
                 contentDepth: 32,
                 glyphGap: 5,
-                endInset: 0
+                ends: .zero
             )
                 == SpaceBarItemView.autoLength(
                     appCount: 1,
                     contentDepth: 32,
                     glyphGap: 0,
-                    endInset: 0
+                    ends: .zero
                 )
         )
     }
@@ -138,7 +138,12 @@ struct GlyphGapDrawingTests {
             overflow: 2,
             contentDepth: Self.depth,
             glyphGap: look.resolvedGlyphGap,
-            endInset: look.shelf.itemEndInset(forDepth: Self.depth)
+            ends: SpaceBarItemView.ends(
+                look: look,
+                depth: Self.depth,
+                first: false,
+                last: false
+            )
         )
         let view = SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: length, height: Self.depth)
@@ -252,9 +257,7 @@ struct GlyphGapRenderTests {
                         overflow: item.overflow,
                         contentDepth: depth,
                         glyphGap: Self.gap,
-                        endInset: style.shelf.itemEndInset(
-                            forDepth: depth
-                        )
+                        ends: view.ends
                     )
             )
         }
@@ -267,7 +270,7 @@ struct GlyphGapRenderTests {
         #expect(!badge.isHidden)
         let slack =
             badge.frame.midX + first.cellLength / 2
-            + SpaceBarItemView.pad + first.endInset
+            + SpaceBarItemView.pad + first.ends.trailing
             - first.bounds.width
         // One point: the badge snaps to the backing grid, whole
         // points on a 1x screen (CI) and half points on 2x.

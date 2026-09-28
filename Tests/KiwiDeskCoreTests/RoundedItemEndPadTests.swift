@@ -3,35 +3,40 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A rounded item's ends pad the axis by what the corner cuts off
-/// a square (#1763): `KiwiShelf.itemEndInset(forDepth:)` is the
-/// one reading, and the length a bar measures is the extent its
-/// items lay out, at every roundness.
+/// A rounded item's ends pad the axis by the exact clearance its
+/// content square needs (#1763): `KiwiShelf.endClearance` is the
+/// one formula, `KiwiShelf.roundsItemEnds` the one predicate for
+/// which ends are drawn rounded, and a Space item measures the
+/// extent it lays out at every roundness and thickness.
 @Suite("Rounded item ends pad the axis", .serialized)
 @MainActor
 struct RoundedItemEndPadTests {
-    private static let depth: CGFloat = 40
-    private static let strip = CGRect(
-        x: 0,
-        y: 0,
-        width: 1440,
-        height: depth
-    )
-    private static let roundnesses: [CGFloat] = [0, 50, 100]
+    static let depth: CGFloat = 40
+    static let roundnesses: [CGFloat] = [0, 50, 100]
 
     init() { LiquidGlassGate.override = { false } }
 
-    private static func shelf(_ roundness: CGFloat) -> KiwiShelf {
+    static func strip(depth: CGFloat = depth) -> CGRect {
+        CGRect(x: 0, y: 0, width: 1440, height: depth)
+    }
+
+    static func shelf(
+        _ roundness: CGFloat,
+        boxed: Bool = true
+    ) -> KiwiShelf {
         var shelf = KiwiShelf()
         shelf.cornerRoundness = roundness
-        shelf.backgroundStyle = .boxed
+        shelf.backgroundStyle = boxed ? .boxed : .plain
         shelf.liquidGlass = false
         return shelf
     }
 
-    private static func spaceLook(_ roundness: CGFloat) -> SpaceBarLook {
+    static func spaceLook(
+        _ roundness: CGFloat,
+        boxed: Bool = true
+    ) -> SpaceBarLook {
         var look = SpaceBarLook(
-            shelf: shelf(roundness),
+            shelf: shelf(roundness, boxed: boxed),
             bar: SpaceBarStyle(),
             sheen: 0
         )
@@ -40,7 +45,7 @@ struct RoundedItemEndPadTests {
         return look
     }
 
-    private static func icon() -> NSImage {
+    static func icon() -> NSImage {
         NSImage(size: NSSize(width: 64, height: 64), flipped: false) {
             NSColor.black.setFill()
             $0.fill()
@@ -48,7 +53,7 @@ struct RoundedItemEndPadTests {
         }
     }
 
-    private static func app(_ name: String) -> SpaceBarItemView.App {
+    static func app(_ name: String) -> SpaceBarItemView.App {
         SpaceBarItemView.App(
             name: name,
             icon: icon(),
@@ -58,240 +63,212 @@ struct RoundedItemEndPadTests {
         )
     }
 
-    private static var items: [SpaceBarOverlay.Item] {
-        [
+    static func items(_ count: Int) -> [SpaceBarOverlay.Item] {
+        (1...count).map { index in
             SpaceBarOverlay.Item(
-                space: SpaceID("1"),
-                spaceGlyph: .text("1", tinted: true),
+                space: SpaceID("\(index)"),
+                spaceGlyph: .text("\(index)", tinted: true),
                 apps: ["Finder", "Mail", "Claude"].map { app($0) },
-                active: true,
+                active: index == 1,
                 overflow: [],
                 focusInOverflow: false
             )
-        ]
+        }
     }
 
-    private func spaceBar(_ roundness: CGFloat) throws -> SpaceBarOverlay {
+    static func spaceBar(
+        _ look: SpaceBarLook,
+        items: [SpaceBarOverlay.Item],
+        depth: CGFloat = depth,
+        front: SpaceBarItemView.App? = nil,
+        width: CGFloat = 1440
+    ) throws -> SpaceBarOverlay {
         let manager = SpaceBarManager()
         manager.sync([
             SpaceBarManager.Bar(
                 display: barTitleDisplay,
-                items: Self.items,
-                frontApp: Self.app("Claude"),
-                frontWindow: WindowID(1),
-                strip: Self.strip,
-                style: Self.spaceLook(roundness),
+                items: items,
+                frontApp: front,
+                frontWindow: front == nil ? nil : WindowID(1),
+                strip: CGRect(x: 0, y: 0, width: width, height: depth),
+                style: look,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
                     floating: "#ffffff"
                 )
             )
         ])
-        return try #require(manager.overlayForTesting(barTitleDisplay))
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        overlay.itemViews.forEach { $0.layoutSubtreeIfNeeded() }
+        return overlay
     }
 
-    // MARK: - The one home
-
-    @Test("The corner cut is r·(1 − 1/√2), and nothing unrounded")
-    func cornerCut() {
-        #expect(KiwiShelf.cornerCut(radius: 0) == 0)
-        #expect(KiwiShelf.cornerCut(radius: -3) == 0)
-        let cut = KiwiShelf.cornerCut(radius: 20)
-        #expect(abs(cut - 20 * (1 - 1 / 2.0.squareRoot())) < 1e-9)
-        // The distance a square's corner sits from the circle it
-        // is inscribed in, along one axis.
-        #expect(abs(cut - (20 - 20 / 2.0.squareRoot())) < 1e-9)
+    /// The Space cell's clearance, from the geometry alone.
+    static func clearance(_ look: SpaceBarLook, depth: CGFloat) -> CGFloat {
+        let cell = max(
+            look.contentDepth(forDepth: depth) - 2 * SpaceBarItemView.pad,
+            8
+        )
+        return KiwiShelf.endClearance(
+            radius: look.resolvedCornerRadius(forThickness: depth),
+            crossOffset: (depth - cell) / 2
+        )
     }
 
-    @Test("The end inset follows the item's corner radius")
-    func endInsetFollowsRadius() {
-        for roundness in Self.roundnesses {
-            let shelf = Self.shelf(roundness)
-            let radius = shelf.resolvedCornerRadius(forThickness: Self.depth)
-            #expect(
-                shelf.itemEndInset(forDepth: Self.depth)
-                    == KiwiShelf.cornerCut(radius: radius)
-            )
+    // MARK: - The one formula and the one predicate
+
+    @Test("The clearance puts the content corner on the arc")
+    func clearanceMeetsTheArc() {
+        #expect(KiwiShelf.endClearance(radius: 0, crossOffset: 4) == 0)
+        // A square starting past the radius never meets the curve.
+        #expect(KiwiShelf.endClearance(radius: 10, crossOffset: 10) == 0)
+        #expect(KiwiShelf.endClearance(radius: 10, crossOffset: 12) == 0)
+        for (r, y) in [(20.0, 4.0), (40.0, 4.0), (14.0, 6.0), (10.0, 1.0)] {
+            let e = KiwiShelf.endClearance(radius: r, crossOffset: y)
+            #expect(e > 0 && e < r)
+            // The corner (e, y) lies on the circle of the end.
+            #expect(abs(hypot(r - e, r - y) - r) < 1e-9)
         }
-        #expect(Self.shelf(0).itemEndInset(forDepth: Self.depth) == 0)
-        let full = Self.shelf(100).itemEndInset(forDepth: Self.depth)
-        #expect(full > 5.8 && full < 5.9)
+    }
+
+    /// The case r·(1 − 1/√2) failed: a thick fully rounded bar.
+    @Test("At 80 pt and full roundness the clearance exceeds the cut")
+    func thickBarNeedsMoreThanTheCut() {
+        let e = KiwiShelf.endClearance(radius: 40, crossOffset: 4)
+        #expect(abs(e - (40 - 304.0.squareRoot())) < 1e-9)
+        #expect(e > KiwiShelf.cornerCut(radius: 40) + 10)
+    }
+
+    @Test("Boxed rounds every item's ends, a plate only the run's")
+    func roundedEndsPredicate() {
+        let boxed = Self.shelf(100)
+        let plate = Self.shelf(100, boxed: false)
+        for first in [false, true] {
+            for last in [false, true] {
+                let b = boxed.roundsItemEnds(first: first, last: last)
+                #expect(b.leading && b.trailing)
+                let p = plate.roundsItemEnds(first: first, last: last)
+                #expect(p.leading == first && p.trailing == last)
+            }
+        }
     }
 
     // MARK: - The Space Bar
 
-    @Test("A Space item's measured length is its laid-out extent")
-    func spaceItemMeasuresWhatItDraws() throws {
+    @Test("A boxed Space item measures the extent it lays out")
+    func boxedItemMeasuresWhatItDraws() throws {
         let pad = SpaceBarItemView.pad
-        for roundness in Self.roundnesses {
-            let look = Self.spaceLook(roundness)
-            let inset = look.shelf.itemEndInset(forDepth: Self.depth)
-            let overlay = try spaceBar(roundness)
-            let view = try #require(overlay.itemViews.first)
-            view.layoutSubtreeIfNeeded()
+        for depth in [Self.depth, 80] {
+            for roundness in Self.roundnesses {
+                let look = Self.spaceLook(roundness)
+                let e = Self.clearance(look, depth: depth)
+                let overlay = try Self.spaceBar(
+                    look,
+                    items: Self.items(1),
+                    depth: depth
+                )
+                let view = try #require(overlay.itemViews.first)
+                let cell = view.cellLength
+                let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
+                #expect(view.frame.width == flat + 2 * e)
+                let first = try #require(view.appViews.first).frame
+                let last = try #require(view.appViews.last).frame
+                let leading = first.minX - (cell + pad + 1 + pad)
+                let trailing = view.bounds.width - last.maxX
+                #expect(abs(leading - (pad + e)) <= 0.5)
+                #expect(
+                    abs(trailing - (pad + e)) <= 0.5,
+                    "depth \(depth), roundness \(roundness)"
+                )
+            }
+        }
+    }
+
+    /// Where r·(1 − 1/√2) left the corner outside the end.
+    @Test("At 80 pt and full roundness every glyph clears the ends")
+    func thickBarGlyphsClearTheCurve() throws {
+        let depth: CGFloat = 80
+        let overlay = try Self.spaceBar(
+            Self.spaceLook(100),
+            items: Self.items(1),
+            depth: depth
+        )
+        let view = try #require(overlay.itemViews.first)
+        let radius = view.cornerRadius
+        #expect(radius == depth / 2)
+        let identifier = view.cellRect(
+            at: view.appViews[0].frame.minX
+                - (view.cellLength + 2 * SpaceBarItemView.pad + 1),
+            cell: view.cellLength
+        )
+        let last = try #require(view.appViews.last).frame
+        let leadCentre = CGPoint(x: radius, y: depth / 2)
+        let trailCentre = CGPoint(
+            x: view.bounds.width - radius,
+            y: depth / 2
+        )
+        for (centre, x) in [
+            (leadCentre, identifier.minX), (trailCentre, last.maxX),
+        ] {
+            for y in [last.minY, last.maxY] {
+                #expect(hypot(x - centre.x, y - centre.y) <= radius + 0.5)
+            }
+        }
+    }
+
+    @Test("On a plate only the run's outer ends take the clearance")
+    func plateItemsPadOnlyTheRunEnds() throws {
+        let pad = SpaceBarItemView.pad
+        let look = Self.spaceLook(100, boxed: false)
+        let e = Self.clearance(look, depth: Self.depth)
+        #expect(e > 0)
+        let overlay = try Self.spaceBar(look, items: Self.items(3))
+        let views = Array(overlay.itemViews.prefix(3))
+        let expected: [ItemEnds] = [
+            ItemEnds(leading: e, trailing: 0),
+            .zero,
+            ItemEnds(leading: 0, trailing: e),
+        ]
+        for (view, ends) in zip(views, expected) {
+            #expect(view.ends == ends)
             let cell = view.cellLength
-            // The measurement: the flat length plus the inset at
-            // both ends, read independently of the render.
             let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
-            #expect(view.frame.width == flat + 2 * inset)
-            // The layout: the identifier cell starts one pad and
-            // the inset in, the last glyph ends as far from the
-            // trailing end.
+            #expect(view.frame.width == flat + ends.total)
             let first = try #require(view.appViews.first).frame
             let last = try #require(view.appViews.last).frame
             let leading = first.minX - (cell + pad + 1 + pad)
-            #expect(abs(leading - (pad + inset)) <= 0.5)
+            #expect(abs(leading - (pad + ends.leading)) <= 0.5)
             #expect(
-                abs(view.bounds.width - last.maxX - (pad + inset))
-                    <= 0.5,
-                "roundness \(roundness)"
+                abs(view.bounds.width - last.maxX - (pad + ends.trailing))
+                    <= 0.5
             )
         }
     }
 
-    @Test("The Space run's need grows by the inset per item end")
-    func spaceNeedCarriesTheInset() {
-        let square = SpaceBarOverlay.naturalLength(
-            items: Self.items,
-            depth: Self.depth,
-            look: Self.spaceLook(0)
-        )
-        for roundness in Self.roundnesses {
-            let look = Self.spaceLook(roundness)
-            let inset = look.shelf.itemEndInset(forDepth: Self.depth)
-            #expect(
-                SpaceBarOverlay.naturalLength(
-                    items: Self.items,
-                    depth: Self.depth,
-                    look: look
-                ) == square + 2 * inset * CGFloat(Self.items.count)
+    @Test("The run's need carries the clearance its items lay out")
+    func needCarriesTheClearance() {
+        let items = Self.items(3)
+        for boxed in [true, false] {
+            let square = SpaceBarOverlay.naturalLength(
+                items: items,
+                depth: Self.depth,
+                look: Self.spaceLook(0, boxed: boxed)
             )
-        }
-    }
-
-    /// The owner's case: at roundness 100 the ends are semicircles
-    /// and the last square cell's outer corners stay inside them.
-    @Test("At full roundness the last glyph clears the rounded end")
-    func lastGlyphClearsTheCurve() throws {
-        let overlay = try spaceBar(100)
-        let view = try #require(overlay.itemViews.first)
-        view.layoutSubtreeIfNeeded()
-        let radius = view.cornerRadius
-        #expect(radius == Self.depth / 2)
-        let last = try #require(view.appViews.last).frame
-        let centre = CGPoint(
-            x: view.bounds.width - radius,
-            y: view.bounds.height / 2
-        )
-        for corner in [
-            CGPoint(x: last.maxX, y: last.minY),
-            CGPoint(x: last.maxX, y: last.maxY),
-        ] {
-            #expect(hypot(corner.x - centre.x, corner.y - centre.y) <= radius)
-        }
-    }
-
-    @Test("The front-app chip pads its rounded ends")
-    func frontChipPadsItsEnds() throws {
-        for roundness in Self.roundnesses {
-            let look = Self.spaceLook(roundness)
-            let end =
-                SpaceBarItemView.pad
-                + look.shelf.itemEndInset(forDepth: Self.depth)
-            let overlay = try spaceBar(roundness)
-            #expect(!overlay.frontBox.isHidden)
-            let box = overlay.frontBox.frame
-            #expect(abs(overlay.frontIcon.frame.minX - box.minX - end) <= 0.5)
-            #expect(abs(box.maxX - overlay.frontName.frame.maxX - end) <= 0.5)
-            #expect(
-                overlay.chipEndPad(look, depth: Self.depth) == end
-            )
-        }
-    }
-
-    // MARK: - The App Bar
-
-    private static func appLook(_ roundness: CGFloat) -> AppBarLook {
-        var look = AppBarLook()
-        look.shelf = shelf(roundness)
-        look.edge = .top
-        look.content = .iconAndTitle
-        return look
-    }
-
-    private func appItem(
-        width: CGFloat,
-        look: AppBarLook
-    ) -> AppBarItemView {
-        let view = AppBarItemView(
-            frame: CGRect(x: 0, y: 0, width: width, height: Self.depth)
-        )
-        view.configure(
-            id: WindowID(1),
-            text: "Downloads",
-            icon: Self.icon(),
-            glyph: nil,
-            count: 1,
-            active: true,
-            horizontal: true,
-            style: look
-        )
-        view.layout()
-        return view
-    }
-
-    @Test("An App Bar slot measures the end padding it lays out")
-    func appSlotMeasuresWhatItDraws() {
-        func slot(_ look: AppBarLook) -> CGFloat {
-            AppBarOverlay.slot(
-                items: [appBarItem(1, text: "Downloads")],
-                style: look,
-                thickness: Self.depth,
-                capAxis: 2000
-            )
-        }
-        let square = slot(Self.appLook(0))
-        for roundness in Self.roundnesses {
-            let look = Self.appLook(roundness)
-            let inset = look.shelf.itemEndInset(forDepth: Self.depth)
-            let end = AppBarItemView.endPadding(
-                look.shelf,
-                depth: Self.depth
-            )
-            #expect(end == AppBarItemView.edgePadding + inset)
-            // The measurement grows by the inset at both ends, read
-            // apart from the layout, which clamps to any width.
-            let slot = slot(look)
-            #expect(abs(slot - square - 2 * inset) < 1e-9)
-            let view = appItem(width: slot, look: look)
-            // Measured wide enough: the title is drawn whole.
-            let title = ceil(view.label.cell?.cellSize.width ?? 0)
-            #expect(view.label.frame.width >= title)
-            #expect(abs(view.iconView.frame.minX - end) <= 0.5)
-            #expect(
-                abs(slot - view.label.frame.maxX - end) <= 0.5,
-                "roundness \(roundness)"
-            )
-        }
-    }
-
-    /// A slot capped short of its title truncates the title at the
-    /// end padding rather than into the rounded end.
-    @Test("A capped App Bar slot keeps the end padding")
-    func cappedAppSlotKeepsThePadding() {
-        for roundness in Self.roundnesses {
-            let look = Self.appLook(roundness)
-            let end = AppBarItemView.endPadding(
-                look.shelf,
-                depth: Self.depth
-            )
-            let view = appItem(width: 96, look: look)
-            #expect(!view.label.isHidden)
-            #expect(abs(view.iconView.frame.minX - end) <= 0.5)
-            #expect(
-                abs(96 - view.label.frame.maxX - end) <= 0.5,
-                "roundness \(roundness)"
-            )
+            for roundness in Self.roundnesses {
+                let look = Self.spaceLook(roundness, boxed: boxed)
+                let e = Self.clearance(look, depth: Self.depth)
+                // Boxed: both ends of each item; a plate: the run's two.
+                let ends = boxed ? 2 * CGFloat(items.count) : 2
+                #expect(
+                    SpaceBarOverlay.naturalLength(
+                        items: items,
+                        depth: Self.depth,
+                        look: look
+                    ) == square + ends * e
+                )
+            }
         }
     }
 }

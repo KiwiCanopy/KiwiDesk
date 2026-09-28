@@ -98,6 +98,16 @@ extension AppBarOverlay {
         slot * CGFloat(count) + gap * CGFloat(max(count - 1, 0))
     }
 
+    /// Whether item `index` of `count` opens or closes the run —
+    /// read by the slot measurement and by `render` for the views'
+    /// run flags, so the measured and laid-out ends agree (#1763).
+    nonisolated static func runPlace(
+        index: Int,
+        count: Int
+    ) -> (first: Bool, last: Bool) {
+        (index == 0, index == count - 1)
+    }
+
     /// Measures automatic slot width across items. Measure
     /// EXACTLY as the item view draws: `.center` alignment alone
     /// widens an NSTextField cell by ~4 pt, so a raw string
@@ -111,12 +121,9 @@ extension AppBarOverlay {
         thickness: CGFloat
     ) -> CGFloat {
         let depth = style.contentDepth(forDepth: thickness)
+        // Vertical circle slots take no end inset (#1763).
         guard horizontal else { return depth }
         let pad = AppBarItemView.contentPadding
-        let edge = AppBarItemView.endPadding(
-            style.shelf,
-            depth: thickness
-        )
         let font = style.shelf.textFont(
             ofSize: style.resolvedFontSize(forDepth: thickness)
         )
@@ -128,7 +135,15 @@ extension AppBarOverlay {
         measure.font = font
         measure.maximumNumberOfLines = 1
         measure.lineBreakMode = .byTruncatingTail
-        return items.reduce(0) { widest, item in
+        return items.enumerated().reduce(0) { widest, entry in
+            let (index, item) = entry
+            let place = runPlace(index: index, count: items.count)
+            let edge = AppBarItemView.endPadding(
+                style,
+                depth: thickness,
+                first: place.first,
+                last: place.last
+            )
             let text: CGFloat
             if !style.content.showsText {
                 text = 0
@@ -146,7 +161,7 @@ extension AppBarOverlay {
                 : 0
             let natural =
                 iconSide + spacing + text + badge
-                + edge * 2
+                + edge.total
             return max(widest, natural)
         }
     }

@@ -97,8 +97,10 @@ struct ShelfStripPreview: View {
         return slot
     }
 
-    private func need(_ spec: HomeCardBarsTile.BarSpec) -> CGFloat {
-        let items = spec.items.map(\.length).reduce(0, +)
+    func need(_ spec: HomeCardBarsTile.BarSpec) -> CGFloat {
+        let items =
+            spec.items.map(\.length).reduce(0, +)
+            + spec.pipEndInsets(scale: scale)
         let gaps = spec.gap * CGFloat(max(spec.items.count - 1, 0))
         return items + gaps + 2 * (spec.gap + 3 * scale)
     }

@@ -69,7 +69,7 @@ extension SpaceBarGlyphCellTests {
         let mid =
             field.frame.minX + (span.lowerBound + span.upperBound) / 2
         let cellMid =
-            SpaceBarItemView.pad + view.endInset + Self.cell / 2
+            SpaceBarItemView.pad + view.ends.leading + Self.cell / 2
         #expect(
             abs(mid - cellMid) <= 1,
             "\(family): ink mid \(mid) vs cell \(cellMid)"

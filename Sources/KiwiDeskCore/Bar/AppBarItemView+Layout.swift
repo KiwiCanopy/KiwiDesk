@@ -60,14 +60,32 @@ extension AppBarItemView {
     /// Slot leading/trailing inset (manual QA 2026-07-18).
     nonisolated static let edgePadding: CGFloat = 6
 
-    /// The slot's leading/trailing inset on a strip `depth` deep:
-    /// `edgePadding` plus the rounded ends' inset (#1763) — the
-    /// one reading the layout and the slot measurement share.
+    /// A horizontal slot's leading and trailing insets on a strip
+    /// `depth` deep, at its place in the run: `edgePadding` plus
+    /// the clearance of each end it draws rounded (#1763) — the one
+    /// reading the layout and the slot measurement share.
     nonisolated static func endPadding(
-        _ shelf: KiwiShelf,
-        depth: CGFloat
-    ) -> CGFloat {
-        edgePadding + shelf.itemEndInset(forDepth: depth)
+        _ look: AppBarLook,
+        depth: CGFloat,
+        first: Bool,
+        last: Bool
+    ) -> ItemEnds {
+        let side = max(
+            look.contentDepth(forDepth: depth) - contentPadding * 2,
+            0
+        )
+        let ends = look.shelf.itemEnds(
+            clearance: KiwiShelf.endClearance(
+                radius: look.resolvedCornerRadius(forThickness: depth),
+                crossOffset: (depth - side) / 2
+            ),
+            first: first,
+            last: last
+        )
+        return ItemEnds(
+            leading: edgePadding + ends.leading,
+            trailing: edgePadding + ends.trailing
+        )
     }
 
     /// The group-count badge's side for a content side — the one
@@ -93,7 +111,12 @@ extension AppBarItemView {
     /// owner 2026-07-20).
     private func layoutHorizontal() {
         let pad = Self.contentPadding
-        let edge = Self.endPadding(style.shelf, depth: crossThickness)
+        let edge = Self.endPadding(
+            style,
+            depth: crossThickness,
+            first: isFirstInRun,
+            last: isLastInRun
+        )
         let font = style.shelf.textFont(ofSize: effectiveFontSize)
         label.font = font
         // Not `usesSingleLineMode`: it draws a tall face above its
@@ -118,7 +141,7 @@ extension AppBarItemView {
             : 0
         textSize.width = min(
             textSize.width,
-            bounds.width - side - spacing - edge * 2 - badgeReserve
+            bounds.width - side - spacing - edge.total - badgeReserve
         )
         if textSize.width < 8 {
             textSize.width = 0
@@ -129,10 +152,12 @@ extension AppBarItemView {
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2
             : 0
+        // Centred between the two ends' insets, which differ where
+        // only one end is drawn rounded (#1763).
         var x = max(
             (bounds.width - side - spacing - textSize.width
-                - badgeExtent) / 2,
-            showText ? edge : pad
+                - badgeExtent + edge.leading - edge.trailing) / 2,
+            showText ? edge.leading : pad
         )
         if !iconSlotHidden {
             layoutIconSlot(

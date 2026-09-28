@@ -146,12 +146,13 @@ extension SpaceBarOverlay {
     }
 
     /// The front chip's end padding — an item's pad plus its
-    /// rounded ends' inset (#1763) — or 0 where no chip draws.
-    /// The extent, the content's start and the box all read it.
+    /// rounded ends' clearance, both ends rounded (#1763) — or 0
+    /// where no chip draws. The extent, the content's start, the
+    /// title's cap and the box all read it.
     func chipEndPad(_ style: SpaceBarLook, depth: CGFloat) -> CGFloat {
         guard style.hasBox || wantsBoxGlass(style) else { return 0 }
         return SpaceBarItemView.pad
-            + style.shelf.itemEndInset(forDepth: depth)
+            + SpaceBarItemView.endClearance(look: style, depth: depth)
     }
 
     /// Focused app glyph or icon layout with accessibility (#160, QA
@@ -252,11 +253,13 @@ extension SpaceBarOverlay {
         frontName.sizeToFit()
         let height = frontName.frame.height
         // Clamp to the viewport's remaining length so a long name
-        // ellipsizes instead of hard-clipping at the panel edge.
-        let available = max(
-            viewport - offset - SpaceBarItemView.pad,
-            0
+        // ellipsizes instead of hard-clipping at the panel edge; a
+        // chip's box runs its end pad past the name (#1763).
+        let trailing = max(
+            SpaceBarItemView.pad,
+            chipEndPad(style, depth: depth)
         )
+        let available = max(viewport - offset - trailing, 0)
         frontName.frame = CGRect(
             x: offset,
             y: BarTextGlyph.originY(

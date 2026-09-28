@@ -72,7 +72,12 @@ struct BarTextBaselineTests {
             appCount: 0,
             contentDepth: depth,
             glyphGap: 0,
-            endInset: style.shelf.itemEndInset(forDepth: depth)
+            ends: SpaceBarItemView.ends(
+                look: style,
+                depth: depth,
+                first: false,
+                last: false
+            )
         )
         let view = SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: length, height: depth)

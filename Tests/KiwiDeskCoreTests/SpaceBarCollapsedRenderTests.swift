@@ -38,7 +38,7 @@ struct SpaceBarCollapsedRenderTests {
             appCount: 0,
             contentDepth: depth,
             glyphGap: 0,
-            endInset: view.endInset
+            ends: view.ends
         )
         #expect(view.frame.width == bare)
         let disc = view.overflowBadge.frame
@@ -48,7 +48,7 @@ struct SpaceBarCollapsedRenderTests {
         // identifier cell's top-trailing corner.
         let cell = view.cellLength
         let identifier = CGRect(
-            x: SpaceBarItemView.pad + view.endInset,
+            x: SpaceBarItemView.pad + view.ends.leading,
             y: (view.bounds.height - cell) / 2,
             width: cell,
             height: cell

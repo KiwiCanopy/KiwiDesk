@@ -240,17 +240,9 @@ public struct KiwiShelf: Sendable, Equatable {
     }
 
     /// What a circle of `radius` cuts off a square's corner along
-    /// one axis, r·(1 − 1/√2) — the one copy of that factor.
+    /// one axis, r·(1 − 1/√2): where a disc hangs in a corner.
     public static func cornerCut(radius: CGFloat) -> CGFloat {
         max(radius, 0) * (1 - 1 / 2.0.squareRoot())
-    }
-
-    /// The extra along-axis end padding an item `depth` deep owes
-    /// at EACH end so a square glyph cell clears its rounded
-    /// corner (#1763): 0 at roundness 0. Measuring and layout
-    /// both read it, so the length and the drawing agree.
-    public func itemEndInset(forDepth depth: CGFloat) -> CGFloat {
-        Self.cornerCut(radius: resolvedCornerRadius(forThickness: depth))
     }
 }
 

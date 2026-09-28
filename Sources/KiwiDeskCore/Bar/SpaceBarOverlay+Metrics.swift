@@ -18,27 +18,50 @@ extension SpaceBarOverlay {
 
     /// Each item's length along the bar; the layer item's slot
     /// carries its section rule. The one derivation `render` and
-    /// `naturalLength` share.
+    /// `naturalLength` share. `frontFollows` is whether the
+    /// front-app segment ends the run (#1763).
     static func itemLengths(
         _ items: [Item],
         depth: CGFloat,
-        look: SpaceBarLook
+        look: SpaceBarLook,
+        frontFollows: Bool
     ) -> [CGFloat] {
         let gap = look.itemGap
         let leadsWithLayer = leadsWithLayer(items)
         let content = look.contentDepth(forDepth: depth)
         return items.enumerated().map { index, item in
+            let place = runPlace(
+                index: index,
+                count: items.count,
+                frontFollows: frontFollows
+            )
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
                 overflow: item.overflow,
                 contentDepth: content,
                 glyphGap: look.resolvedGlyphGap,
-                endInset: look.shelf.itemEndInset(forDepth: depth)
+                ends: SpaceBarItemView.ends(
+                    look: look,
+                    depth: depth,
+                    first: place.first,
+                    last: place.last
+                )
             )
             return index == 0 && leadsWithLayer
                 ? length + layerDividerExtent(gap: gap)
                 : length
         }
+    }
+
+    /// Whether item `index` of `count` opens or closes the run —
+    /// read by `itemLengths` and by `render` for the views' run
+    /// flags, so the measured and laid-out ends agree (#1763).
+    nonisolated static func runPlace(
+        index: Int,
+        count: Int,
+        frontFollows: Bool
+    ) -> (first: Bool, last: Bool) {
+        (index == 0, index == count - 1 && !frontFollows)
     }
 
     /// The Space run's natural length along the shelf — the
@@ -54,7 +77,12 @@ extension SpaceBarOverlay {
         look: SpaceBarLook
     ) -> CGFloat {
         let gap = look.itemGap
-        let lengths = itemLengths(items, depth: depth, look: look)
+        let lengths = itemLengths(
+            items,
+            depth: depth,
+            look: look,
+            frontFollows: false
+        )
         return runTotal(lengths: lengths, gap: gap, frontExtent: 0)
             + SpaceBarItemView.pad + max(gap, SpaceBarItemView.pad)
     }
@@ -67,7 +95,12 @@ extension SpaceBarOverlay {
         depth: CGFloat,
         look: SpaceBarLook
     ) -> CGFloat {
-        let lengths = itemLengths(items, depth: depth, look: look)
+        let lengths = itemLengths(
+            items,
+            depth: depth,
+            look: look,
+            frontFollows: false
+        )
         if let index = items.firstIndex(where: \.active) {
             return lengths[index]
         }

@@ -11,9 +11,6 @@ extension SpaceBarItemView {
     /// The depth this item's content is sized to (#1682).
     var contentDepth: CGFloat { style.contentDepth(forDepth: depth) }
 
-    /// The extra end padding this item's rounded ends owe (#1763).
-    var endInset: CGFloat { style.shelf.itemEndInset(forDepth: depth) }
-
     /// Cell dimension for glyphs along the bar axis.
     var cellLength: CGFloat { Self.cell(contentDepth: contentDepth) }
 
@@ -27,19 +24,19 @@ extension SpaceBarItemView {
     /// `glyphGap` is the style's `resolvedGlyphGap`, taken with
     /// no default so a caller cannot measure without it (#1689);
     /// `contentDepth` is the shelf's for the strip (#1682), and
-    /// `endInset` the shelf's `itemEndInset(forDepth:)` (#1763).
+    /// `ends` the item's `ends(look:depth:first:last:)` (#1763).
     static func autoLength(
         appCount: Int,
         overflow: Int = 0,
         contentDepth: CGFloat,
         glyphGap: CGFloat,
-        endInset: CGFloat
+        ends: ItemEnds
     ) -> CGFloat {
         let cell = cell(contentDepth: contentDepth)
         let slots = appCount + (overflow > 0 ? 1 : 0)
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
-        return (pad + endInset) * 2 + cell + divider
+        return pad * 2 + ends.total + cell + divider
             + CGFloat(slots) * cell + gaps
     }
 
@@ -55,7 +52,7 @@ extension SpaceBarItemView {
         // glyph to center it, and the glyph fonts are set in
         // `restyle`.
         restyle()
-        var cursor = Self.pad + endInset
+        var cursor = Self.pad + ends.leading
         place(identifierImage, at: cursor, cell: cell)
         place(
             identifierLabel,

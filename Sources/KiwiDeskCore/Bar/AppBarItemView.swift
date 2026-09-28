@@ -48,9 +48,14 @@ final class AppBarItemView: NSView {
     var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
-    /// Leading/trailing position within current item run.
-    var isFirstInRun = false
-    var isLastInRun = false
+    /// Leading/trailing position within current item run; they
+    /// set the rounded ends' insets (#1763).
+    var isFirstInRun = false {
+        didSet { if oldValue != isFirstInRun { needsLayout = true } }
+    }
+    var isLastInRun = false {
+        didSet { if oldValue != isLastInRun { needsLayout = true } }
+    }
     var isHovered = false
     var style = AppBarLook()
     var onSelect: (WindowID) -> Void = { _ in }
