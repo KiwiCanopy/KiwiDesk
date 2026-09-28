@@ -5,8 +5,12 @@ import SwiftUI
 /// Reduce Motion shows. Coordinates are the 120 × 72 plate's.
 enum GesturePicture {
     /// Drag a window onto another: the ghost lands on the target.
-    struct Swap: View {
-        let t: CGFloat
+    struct Swap: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {
@@ -23,8 +27,12 @@ enum GesturePicture {
     }
 
     /// Drag an edge: one window grows as its neighbour gives way.
-    struct Edge: View {
-        let t: CGFloat
+    struct Edge: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {
@@ -55,30 +63,41 @@ enum GesturePicture {
         }
     }
 
-    /// The pointer follows focus to the window that took it.
-    struct FollowFocus: View {
-        let t: CGFloat
+    /// Focus moves first; then the pointer jumps to the window
+    /// that took it, in one frame, the way the warp does.
+    struct FollowFocus: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {
             let ink = GestureInk(palette: palette)
+            let focus = gestureStage(t, 0.15, 0.4)
+            let left = CGRect(x: 8, y: 10, width: 50, height: 52)
+            let right = CGRect(x: 62, y: 10, width: 50, height: 52)
             ZStack(alignment: .topLeading) {
-                ink.window(CGRect(x: 8, y: 10, width: 50, height: 52))
-                ink.window(CGRect(x: 62, y: 10, width: 50, height: 52))
-                ink.target(CGRect(x: 62, y: 10, width: 50, height: 52))
+                ink.window(left)
+                ink.window(right)
+                ink.target(left).opacity(1 - focus)
+                ink.target(right).opacity(focus)
                 ink.pointer(
-                    at: CGPoint(
-                        x: gestureLerp(30, 86, t),
-                        y: gestureLerp(44, 34, t)
-                    )
+                    at: t < 0.6
+                        ? CGPoint(x: 30, y: 34) : CGPoint(x: 86, y: 34)
                 )
             }
         }
     }
 
     /// Drag a window up onto a Space item on the shelf.
-    struct DropOnSpace: View {
-        let t: CGFloat
+    struct DropOnSpace: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {
@@ -110,8 +129,12 @@ enum GesturePicture {
     }
 
     /// Hold over the Space: the delay fills, then it opens.
-    struct Spring: View {
-        let t: CGFloat
+    struct Spring: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {
@@ -141,8 +164,12 @@ enum GesturePicture {
     }
 
     /// Scroll over the shelf: the run slides past its edge.
-    struct ShelfScroll: View {
-        let t: CGFloat
+    struct ShelfScroll: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {
@@ -168,8 +195,12 @@ enum GesturePicture {
     }
 
     /// Drag an App Bar item along the bar to reorder it.
-    struct AppBarReorder: View {
-        let t: CGFloat
+    struct AppBarReorder: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
         @Environment(\.schematicPalette) private var palette
 
         var body: some View {

@@ -33,30 +33,28 @@ struct GestureEntry<Picture: View, Control: View>: View {
     }
 
     var body: some View {
-        // The control takes the full row below: squeezed into the
-        // sentence's column, a two-option picker truncates.
-        VStack(alignment: .leading, spacing: 8) {
-            explainer
-                .modifier(GreyOut(active: surface.isOff(settings)))
-            control()
-        }
-        .padding(.vertical, 4)
-    }
-
-    private var explainer: some View {
-        HStack(alignment: .top, spacing: 14) {
+        GestureEntryLayout {
             // A new identity per hover state: a looping animation
             // ends with the view that ran it, since the rest frame
             // and the loop's target are the same value.
             GesturePlate { picture(hovering ? phase : 1) }
                 .id(hovering)
                 .accessibilityHidden(true)
+                .modifier(dim)
             Text(text)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .modifier(dim)
+            control()
         }
+        .padding(.vertical, 6)
         .contentShape(Rectangle())
         .onHover(perform: hover)
+    }
+
+    /// The grey an off surface puts on the picture and the
+    /// sentence — never on the control, which stays live.
+    private var dim: GreyOut {
+        GreyOut(active: surface.isOff(settings))
     }
 
     /// Restarts the gesture from its first frame, then loops it:
@@ -116,6 +114,15 @@ struct GesturePlate<Content: View>: View {
         .clipShape(
             RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
         )
+    }
+}
+
+/// The rule between two entries of one group — never under a
+/// heading, before a group's first entry or after its last, so a
+/// heading stays joined to what it owns.
+struct GestureRule: View {
+    var body: some View {
+        SettingsTheme.hairline.frame(height: 1)
     }
 }
 

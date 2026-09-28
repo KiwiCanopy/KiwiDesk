@@ -6,6 +6,11 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// A name for VoiceOver alone, where the row's own sentence
     /// already names the control and a drawn label would crowd it.
     private let spokenLabel: String?
+    /// Left at its natural width, a strip normally measures its
+    /// labels' sum and shares that equally, which shortens the
+    /// longest. A strip that hugs its content (#1726) sizes every
+    /// segment to the widest label at the selected weight instead.
+    private let hugsLabels: Bool
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
@@ -20,12 +25,14 @@ struct SegmentedPicker<Value: Hashable>: View {
     init(
         _ label: String? = nil,
         spokenLabel: String? = nil,
+        hugsLabels: Bool = false,
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
         help: String? = nil
     ) {
         self.label = label
         self.spokenLabel = spokenLabel
+        self.hugsLabels = hugsLabels
         self._selection = selection
         self.options = options
         self.help = help
@@ -62,8 +69,33 @@ struct SegmentedPicker<Value: Hashable>: View {
         options.firstIndex { $0.value == selection }
     }
 
+    private var segmentsLayout: AnyLayout {
+        hugsLabels
+            ? AnyLayout(EqualSegmentsLayout(spacing: 2))
+            : AnyLayout(HStackLayout(spacing: 2))
+    }
+
+    /// A hugging strip sizes each label by the selected weight
+    /// whatever the state, so picking never changes its width.
+    @ViewBuilder private func labelText(
+        _ title: String,
+        selected: Bool
+    ) -> some View {
+        let label = Text(title)
+            .font(selected ? .body.weight(.semibold) : .callout)
+            .lineLimit(1)
+        if hugsLabels {
+            Text(title)
+                .font(.body.weight(.semibold))
+                .hidden()
+                .overlay { label }
+        } else {
+            label
+        }
+    }
+
     private var track: some View {
-        HStack(spacing: 2) {
+        segmentsLayout {
             ForEach(options.indices, id: \.self) { index in
                 segment(options[index], index: index)
             }
@@ -169,12 +201,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         selected: Bool,
         index: Int
     ) -> some View {
-        Text(title)
-            .font(
-                selected
-                    ? .body.weight(.semibold)
-                    : .callout
-            )
+        labelText(title, selected: selected)
             .foregroundStyle(
                 selected
                     ? SettingsTheme.accentInk

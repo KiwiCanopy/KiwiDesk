@@ -21,6 +21,7 @@ struct GesturesShelfEntries: View {
             surface: .spaceBar,
             settings: settings
         ) { GesturePicture.DropOnSpace(t: $0) }
+        GestureRule()
         GestureEntry(
             springText,
             surface: .spaceBar,
@@ -30,6 +31,7 @@ struct GesturesShelfEntries: View {
         } control: {
             link(Self.springLinkProse)
         }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.glyph_click",
@@ -40,6 +42,7 @@ struct GesturesShelfEntries: View {
             surface: .spaceBar,
             settings: settings
         ) { GesturePicture.GlyphClick(t: $0) }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.overflow_menu",
@@ -49,6 +52,7 @@ struct GesturesShelfEntries: View {
             surface: .spaceBar,
             settings: settings
         ) { GesturePicture.OverflowMenu(t: $0) }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.glyph_hover",
@@ -58,6 +62,7 @@ struct GesturesShelfEntries: View {
             surface: .spaceBar,
             settings: settings
         ) { GesturePicture.GlyphHover(t: $0) }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.shelf_scroll",
@@ -67,6 +72,7 @@ struct GesturesShelfEntries: View {
             surface: .shelf,
             settings: settings
         ) { GesturePicture.ShelfScroll(t: $0) }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.app_bar",

@@ -63,6 +63,7 @@ struct GesturesDrawer: View {
             surface: .windows,
             settings: settings
         ) { GesturePicture.Swap(t: $0) }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.edge",
@@ -81,6 +82,7 @@ struct GesturesDrawer: View {
                     .mouseResize
             )
         }
+        GestureRule()
         GestureEntry(
             L(
                 "shortcuts.gestures.follow_focus",
@@ -121,6 +123,7 @@ struct MouseResizePicker: View {
                 "behavior.mouse.resize_action",
                 "Mouse resize action"
             ),
+            hugsLabels: true,
             selection: $selection,
             options: [
                 (layoutLabel, MouseResizeMode.layout),

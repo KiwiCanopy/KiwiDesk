@@ -1,6 +1,7 @@
 import CoreGraphics
 import Foundation
 import KiwiDeskCore
+import SwiftUI
 import Testing
 
 @testable import KiwiDesk
@@ -138,16 +139,101 @@ struct GesturesDrawerTests {
         let entry = Self.squash(
             try Self.source(Self.gestures + "GestureEntry.swift")
         )
-        // Exactly one grey, on the explainer: a second one outside
-        // it would dim the control as well.
+        // One grey, built once and applied to the picture and the
+        // sentence: never to the control, nor around the whole.
         #expect(entry.components(separatedBy: "GreyOut(").count == 2)
-        let grey = try #require(
-            entry.range(
-                of: "explainer.modifier(GreyOut(active:surface.isOff("
+        #expect(
+            entry.contains(
+                "privatevardim:GreyOut{GreyOut(active:surface.isOff("
             )
         )
-        let control = try #require(entry.range(of: "control()"))
-        #expect(grey.upperBound < control.lowerBound)
+        #expect(entry.components(separatedBy: ".modifier(dim)").count == 3)
+        #expect(!entry.contains("control().modifier(dim)"))
+        let layout = try #require(entry.range(of: "GestureEntryLayout{"))
+        let close = try #require(
+            entry.range(
+                of: "control()}",
+                range: layout.upperBound..<entry.endIndex
+            )
+        )
+        #expect(
+            !entry[close.upperBound...].hasPrefix(".modifier(dim)"),
+            "the grey wraps the whole entry"
+        )
+    }
+
+    /// The control joins the sentence's column only where it
+    /// fits there whole, and the layout asks this decision rather
+    /// than one of its own.
+    @Test("a control sits under the sentence only where it fits")
+    func controlPlacement() throws {
+        let plate = GesturePlate<EmptyView>.size.width
+        #expect(
+            GestureEntryLayout.fitsColumn(
+                control: 360,
+                plate: plate,
+                width: 640,
+                spacing: 14
+            )
+        )
+        #expect(
+            !GestureEntryLayout.fitsColumn(
+                control: 503,
+                plate: plate,
+                width: 600,
+                spacing: 14
+            )
+        )
+        #expect(
+            GestureEntryLayout.fitsColumn(
+                control: 0,
+                plate: plate,
+                width: 0,
+                spacing: 14
+            )
+        )
+        let layout = Self.squash(
+            try Self.source(Self.gestures + "GestureEntryLayout.swift")
+        )
+        #expect(layout.contains("inColumn:Self.fitsColumn("))
+        #expect(layout.contains("m.inColumn?CGPoint(x:columnX,"))
+    }
+
+    /// Lays out real entries, with and without a control, at a
+    /// width that keeps the control in the column and one that
+    /// does not — an entry without a control hands the layout two
+    /// children, not three, which once trapped. `@MainActor` for
+    /// the renderer; four small renders.
+    @Test("entries lay out with and without a control")
+    @MainActor
+    func entriesLayOut() throws {
+        let settings = TilingSettings()
+        for width in [700.0, 380.0] {
+            let bare = GestureEntry(
+                "Bare",
+                surface: .windows,
+                settings: settings
+            ) { GesturePicture.Swap(t: $0) }
+            let controlled = GestureEntry(
+                "With a control",
+                surface: .windows,
+                settings: settings
+            ) {
+                GesturePicture.Edge(t: $0)
+            } control: {
+                MouseResizePicker(selection: .constant(.layout))
+            }
+            for view in [AnyView(bare), AnyView(controlled)] {
+                let renderer = ImageRenderer(
+                    content: view.frame(width: width)
+                )
+                let image = try #require(renderer.nsImage)
+                #expect(abs(image.size.width - width) < 0.5)
+                #expect(
+                    image.size.height >= GesturePlate<EmptyView>.size.height
+                )
+            }
+        }
     }
 
     @Test("the drawer mounts above the layer header")

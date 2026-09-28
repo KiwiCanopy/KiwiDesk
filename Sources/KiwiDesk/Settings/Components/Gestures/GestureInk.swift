@@ -133,6 +133,17 @@ struct GestureInk {
             .offset(x: rect.minX, y: rect.minY)
     }
 
+    /// A click at `point`: a ring that swells and fades while the
+    /// press lasts, then is gone — nothing at rest.
+    func press(at point: CGPoint, _ t: CGFloat) -> some View {
+        let pulse = gestureStage(t, 0.15, 0.4)
+        return Circle()
+            .strokeBorder(accent, lineWidth: 1.5)
+            .frame(width: 8 + 10 * pulse, height: 8 + 10 * pulse)
+            .opacity(pulse > 0 && pulse < 1 ? 1 - pulse : 0)
+            .offset(x: point.x - 4 - 5 * pulse, y: point.y - 4 - 5 * pulse)
+    }
+
     /// A small motion cue, e.g. a scroll direction.
     func cue(_ symbol: String, at point: CGPoint) -> some View {
         Image(systemName: symbol)
@@ -149,4 +160,16 @@ func gestureLerp(
     _ t: CGFloat
 ) -> CGFloat {
     from + (to - from) * t
+}
+
+/// The progress of one stage of a gesture, 0 before `start` and 1
+/// after `end` — so a picture can play steps in order (the ring
+/// moves, then the pointer jumps), which a straight blend cannot.
+/// Pictures are `Animatable`, so this is read every frame.
+func gestureStage(
+    _ t: CGFloat,
+    _ start: CGFloat,
+    _ end: CGFloat
+) -> CGFloat {
+    min(max((t - start) / (end - start), 0), 1)
 }
