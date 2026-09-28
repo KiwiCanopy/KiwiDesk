@@ -188,6 +188,34 @@ struct RoundedItemEndPadChipTests {
         }
     }
 
+    /// The render flags each slot with the run place the slot
+    /// measurement read, so the laid-out ends are the measured ones.
+    @Test("The App Bar render flags the run's ends as it measured")
+    func renderFlagsTheRunEnds() throws {
+        let look = Self.appLook(100, boxed: false)
+        let manager = AppBarManager()
+        manager.sync([
+            AppBarManager.Bar(
+                display: barTitleDisplay,
+                space: SpaceID("1"),
+                items: (1...3).map {
+                    appBarItem(UInt32($0), text: "Downloads")
+                },
+                activeIndex: 0,
+                strip: Fixture.strip(),
+                style: look,
+                capAxis: 1440
+            )
+        ])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let views = overlay.itemViews.filter { !$0.isHidden }
+        #expect(views.count == 3)
+        #expect(views.map(\.isFirstInRun) == [true, false, false])
+        #expect(views.map(\.isLastInRun) == [false, false, true])
+    }
+
     /// On a plate a middle slot draws no rounded end; the run's
     /// first and last carry the clearance at their outer end only.
     @Test("On a plate only the App Bar run's outer ends pad")

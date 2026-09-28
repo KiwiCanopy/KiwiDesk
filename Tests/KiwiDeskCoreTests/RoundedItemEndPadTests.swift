@@ -247,6 +247,27 @@ struct RoundedItemEndPadTests {
         }
     }
 
+    /// The front-app segment ends the run, so on a plate the last
+    /// Space item draws no rounded trailing end and measures none.
+    @Test("On a plate a following front app takes the run's end")
+    func frontAppTakesThePlateRunEnd() throws {
+        let pad = SpaceBarItemView.pad
+        let look = Self.spaceLook(100, boxed: false)
+        let e = Self.clearance(look, depth: Self.depth)
+        let overlay = try Self.spaceBar(
+            look,
+            items: Self.items(1),
+            front: Self.app("Claude")
+        )
+        let view = try #require(overlay.itemViews.first)
+        #expect(view.ends == ItemEnds(leading: e, trailing: 0))
+        let cell = view.cellLength
+        let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
+        #expect(view.frame.width == flat + e)
+        let last = try #require(view.appViews.last).frame
+        #expect(abs(view.bounds.width - last.maxX - pad) <= 0.5)
+    }
+
     @Test("The run's need carries the clearance its items lay out")
     func needCarriesTheClearance() {
         let items = Self.items(3)
