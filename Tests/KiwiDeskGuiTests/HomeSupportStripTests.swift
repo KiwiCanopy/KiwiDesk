@@ -7,8 +7,9 @@ import Testing
 
 /// Home's lower half (#1536): the three community links point at
 /// `SupportLinks`' URLs and nowhere else, the marks ship as
-/// template images, and the footer's About goes through the
-/// shell's action rather than a sheet of the strip's own.
+/// template images, the footer's About goes through the shell's
+/// action rather than a sheet of the strip's own, and the footer
+/// carries the tour's permanent door (#1754).
 ///
 /// `@MainActor` for `BrandAssets`' image loads; nothing else.
 @Suite("Home support strip")
@@ -61,6 +62,22 @@ struct HomeSupportStripTests {
             let image = try #require(mark, Comment(rawValue: name))
             #expect(image.isTemplate, Comment(rawValue: name))
         }
+    }
+
+    /// The banner's door retires after one use, so the footer is
+    /// the tour's permanent one (#1754): it replays the tour where
+    /// the banner does, never through the grant-step door, and it
+    /// sits before About.
+    @Test("The footer carries the tour's permanent door, before About")
+    func footerCarriesTheTourDoor() throws {
+        let source = try strip.split(whereSeparator: \.isWhitespace)
+            .joined()
+        let tour = try #require(
+            source.range(of: "Button(action:{model.onShowTour()})")
+        )
+        let about = try #require(source.range(of: "Button(action:openAbout)"))
+        #expect(tour.upperBound < about.lowerBound)
+        #expect(!source.contains("showAccessibilityHelp"))
     }
 
     @Test("About is the shell's action, not a sheet of the strip's")

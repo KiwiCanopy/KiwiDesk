@@ -271,7 +271,9 @@ extension HomeSurfacingTests {
         ],
         "Settings/Home/HomeSupportStrip.swift": [
             // The footer draws the ONE update-state view (#1536).
-            "UpdateStateRow(store:model.updater.updates"
+            "UpdateStateRow(store:model.updater.updates",
+            // The tour's permanent door, beside About (#1754).
+            "Button(action:{model.onShowTour()})",
         ],
         "Settings/Home/AboutSheet.swift": [
             // …and so does About, so the two cannot drift.
