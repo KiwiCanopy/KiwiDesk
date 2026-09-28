@@ -66,7 +66,8 @@ extension TilingSettings: Codable {
         case liquidGlass = "liquid_glass"
     }
 
-    enum GapKeys: String, CodingKey {
+    /// CaseIterable for `LookKeysCensusTests` (#1739).
+    enum GapKeys: String, CodingKey, CaseIterable {
         case global
         case `override`
     }

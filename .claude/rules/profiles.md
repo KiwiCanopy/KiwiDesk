@@ -652,9 +652,10 @@ change bumps `LookDocument.currentFormat` for `looks.json` AND
 `SetupBundle.currentFormat`, which carries `[ShelfLook]` inline,
 and rules the markerless `LookExport` sidecar deliberately, as
 the palette sidecar above was. **And a look stores setting PATHS
-and their wire spellings as data** (`LookKeys`): renaming a
-`kiwishelf` / `space_bar` / `app_bar` / `border` key or value a
-look carries owes the `ConfigMigration` crossing a stored value
+and their wire spellings as data** (`LookKeys`): renaming a key
+or value a look carries — any path in `LookKeys.all`, and a field
+inside a stored value such as `gap.global`'s `{outer, inner}`
+(#1739) — owes the `ConfigMigration` crossing a stored value
 owes (§5), reaching `looks.json` and a bundle's looks — since
 `ShelfLook.apply` and `LookStore`'s filter skip a path they do
 not know, an unmigrated rename drops the user's styling

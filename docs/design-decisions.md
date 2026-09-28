@@ -11552,16 +11552,30 @@ functionality if it changes which items exist, what they show
 or say, or what they do — so App Bar content, Other Spaces and
 a bar's on/off never join, and a preview draws the user's own
 sections under the look. `LookKeys` is the register and
-classifies every field of the shelf, both bar styles and the
-focus border (`LookKeysCensusTests`). Two writes reach past the
-shelf, both by ruling rather than by accident: the **sheen**,
+classifies every field of the shelf, both bar styles, the
+focus border and the gaps (`LookKeysCensusTests`). Four
+writes reach past the shelf, all by ruling rather than by
+accident: the **sheen**,
 because the shelf's border and indicator draw it and the focus
 ring shares the one value (the page's caption and the Bars
 card's pointer name it, so picking a look never flips a border
-setting unannounced — #578's lesson); and **Liquid Glass**,
+setting unannounced — #578's lesson); **Liquid Glass**,
 which a look writes on every surface the switch owns, since
 glass is one switch (#1307) and a shelf-only write would leave
-it disagreeing with itself. **A
+it disagreeing with itself; and **the focus border's shape and
+the global gaps** (owner, 2026-09-28, #1739): a Tiler
+picture is a thin square ring and tight gaps, so a look that
+stopped at the shelf did not reproduce it. Width, corners, glow
+and glow size are how the ring looks; whether either ring draws,
+and whether it stacks over an app's own chrome, stay
+functionality. The width and corners write every stroke the
+Borders masters own (#754) — the drag ghost and drop zone with
+the ring — so the card reads one value after a look, never a
+mixed `?`. Only the global gaps ride; a Space's own override
+(Lua's) stays. **Gaps move windows**, so a look is the first
+paint that rearranges them — once the draft is saved, as any gap
+edit does, which the page's caption says, and the Gaps card's
+pointer names the look as a writer of both. **A
 bundled look is total**: authored sparse, it is resolved over
 Glass — itself derived from the shipped defaults, as "Kiwi
 (Default)" is, so it doubles as the shape reset — so each writes

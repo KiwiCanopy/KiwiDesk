@@ -111,8 +111,9 @@ struct KiwiShelfCard: View {
     static var lookReference: String {
         L(
             "bars.kiwishelf.looks_xref",
-            "A look sets this card's style, both indicators and "
-                + "the focus border's sheen in one click — in %1$@.",
+            "A look sets this card's style, both indicators, "
+                + "the focus border's shape and sheen, and the "
+                + "window gaps in one click — in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

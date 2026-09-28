@@ -21,6 +21,10 @@ struct HomeCardBarsTile: View {
     /// Whether this frame draws the App Bar — false for the
     /// layouts that host none, where the Space Bar is alone.
     var showsAppBar = true
+    /// Drawn inside the desktop's well, so it sits clear of the
+    /// shelf on any edge and scales with the frame (a look card's
+    /// focused window, #1739).
+    var wellContent: AnyView?
     @Environment(\.schematicPalette) private var palette
 
     struct BarItem {
@@ -172,6 +176,7 @@ struct HomeCardBarsTile: View {
                             ?? SettingsTheme.ink2.opacity(0.3)
                     )
             )
+            .overlay { wellContent }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
