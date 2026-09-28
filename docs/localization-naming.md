@@ -204,9 +204,19 @@ of prose that names layouts owes its own guard.
 
 Some modes name the thing a window sits in after the mode
 itself: a Track holds windows, a Stack has a zone the overflow
-piles into. Read as ordinary vocabulary those look like Family C
-— the English lower-cases them, they never appear alone as a
-label, and every language has a good word of its own for each.
+piles into, a Grid lays windows into its cells. Read as ordinary
+vocabulary those look like Family C — the English lower-cases
+them, they never appear alone as a label, and every language has
+a good word of its own for each.
+
+**Track, Stack and Grid are such units, and each takes its
+mode's name.** The stack inside the Stack layout is your
+`layout.stack.name` word and the grid inside the Grid layout is
+your `layout.grid.name` word (owner ruling 2026-09-28, extending
+the 2026-08-29 Track ruling below). A common noun that does not
+mean the mode's unit stays free — the grid a Space tiles into in
+any layout, the quit arrangement's grid, the overflow pile, a
+verb "stacked".
 
 **Render such a unit with whatever your own `layout.<mode>.name`
 says, and never with a word of your own.** A second word for it
