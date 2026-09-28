@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "ウインドウをmacOSのデスクトップに移動",
   "shortcuts.editing_layer": "「%1$@」レイヤーを編集中",
   "shortcuts.gestures.app_bar": "App Barに沿ってアイテムをドラッグすると、ウインドウを並べ替えられます。",
+  "shortcuts.gestures.app_bar_hover": "タイトルが短縮されたApp Barの項目にポインタを置くと、タイトル全体が表示されます。",
   "shortcuts.gestures.app_bar_off": "どのレイアウトにもApp Barが表示されていません。%1$@でオンにしてください。",
   "shortcuts.gestures.drop_on_space": "ウインドウをKiwiShelf上のスペースにドラッグすると、そのスペースへ移動します。",
   "shortcuts.gestures.edge": "ウインドウの端をドラッグするとサイズを変更できます。",

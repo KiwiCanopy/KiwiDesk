@@ -68,6 +68,19 @@ struct GestureInk {
             .offset(x: rect.minX, y: rect.minY)
     }
 
+    /// The Space the screen is showing: its item outlined in the
+    /// accent at the bar's own weight, never a fill.
+    func activeItem(_ rect: CGRect, label: String) -> some View {
+        item(rect, label: label)
+            .overlay(
+                RoundedRectangle(cornerRadius: 3)
+                    .strokeBorder(accent, lineWidth: 1.2)
+                    .frame(width: rect.width, height: rect.height)
+                    .offset(x: rect.minX, y: rect.minY),
+                alignment: .topLeading
+            )
+    }
+
     /// The pointer, its tip at `point`.
     func pointer(at point: CGPoint) -> some View {
         Image(systemName: "cursorarrow")
@@ -172,4 +185,10 @@ func gestureStage(
     _ end: CGFloat
 ) -> CGFloat {
     min(max((t - start) / (end - start), 0), 1)
+}
+
+/// An eased 0 → 1, for a stage of a `.story` picture to move
+/// smoothly within its own window.
+func gestureEase(_ x: CGFloat) -> CGFloat {
+    x < 0.5 ? 2 * x * x : 1 - pow(-2 * x + 2, 2) / 2
 }

@@ -96,6 +96,7 @@ struct GesturesDrawerTests {
             ("shortcuts.gestures.glyph_hover", "spaceBar"),
             ("shortcuts.gestures.shelf_scroll", "shelf"),
             ("shortcuts.gestures.app_bar", "appBar"),
+            ("shortcuts.gestures.app_bar_hover", "appBar"),
         ]
     )
     func entryNamesItsSurface(key: String, surface: String) throws {
@@ -293,13 +294,31 @@ struct GesturesDrawerTests {
         #expect(a != b, "the target depth changed nothing")
         let ids = (1...HomeCardBehaviorTile.sampleCount)
             .map { WindowID(UInt32($0)) }
+        let screen = HomeCardBehaviorTile.screen
         let engine = QuitGridLayout.frames(
             for: ids,
-            in: CGRect(origin: .zero, size: size),
-            minSize: 6,
+            in: CGRect(origin: .zero, size: screen),
+            minSize: shallow.minWindowSize,
             targetDepth: 1
         )
-        #expect(a == ids.compactMap { engine[$0] })
+        let scaled = ids.compactMap { engine[$0] }.map {
+            CGRect(
+                x: $0.minX * size.width / screen.width,
+                y: $0.minY * size.height / screen.height,
+                width: $0.width * size.width / screen.width,
+                height: $0.height * size.height / screen.height
+            )
+        }
+        #expect(a.count == scaled.count)
+        for (drawn, engine) in zip(a, scaled) {
+            #expect(abs(drawn.minX - engine.minX) < 0.01)
+            #expect(abs(drawn.minY - engine.minY) < 0.01)
+            #expect(abs(drawn.width - engine.width) < 0.01)
+            #expect(abs(drawn.height - engine.height) < 0.01)
+        }
+        // Every window keeps a real height at tile scale — the
+        // shape this readout once lost to screen-point staggers.
+        #expect(a.allSatisfy { $0.height > size.height / 10 })
         let tile = try Self.source(
             "Sources/KiwiDesk/Settings/HomeCardPlate+Desk.swift"
         )

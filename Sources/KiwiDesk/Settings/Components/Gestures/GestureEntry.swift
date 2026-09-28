@@ -12,6 +12,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
     let text: String
     let surface: GestureSurface
     let settings: TilingSettings
+    let pace: GesturePace
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -22,12 +23,14 @@ struct GestureEntry<Picture: View, Control: View>: View {
         _ text: String,
         surface: GestureSurface,
         settings: TilingSettings,
+        pace: GesturePace = .quick,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture,
         @ViewBuilder control: @escaping () -> Control
     ) {
         self.text = text
         self.surface = surface
         self.settings = settings
+        self.pace = pace
         self.picture = picture
         self.control = control
     }
@@ -70,8 +73,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
             withAnimation(
                 reduceMotion
                     ? nil
-                    : .easeInOut(duration: 1.6)
-                        .repeatForever(autoreverses: false)
+                    : pace.animation.repeatForever(autoreverses: false)
             ) {
                 phase = 1
             }
@@ -84,14 +86,32 @@ extension GestureEntry where Control == EmptyView {
         _ text: String,
         surface: GestureSurface,
         settings: TilingSettings,
+        pace: GesturePace = .quick,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture
     ) {
         self.init(
             text,
             surface: surface,
             settings: settings,
+            pace: pace,
             picture: picture
         ) { EmptyView() }
+    }
+}
+
+/// How fast an entry's picture plays one loop.
+enum GesturePace {
+    /// A single motion, eased over the whole loop.
+    case quick
+    /// A story in stages at an even pace: each stage eases itself
+    /// (`gestureEase`), so one curve over the loop would bend them.
+    case story
+
+    var animation: Animation {
+        switch self {
+        case .quick: return .easeInOut(duration: 1.6)
+        case .story: return .linear(duration: 5)
+        }
     }
 }
 

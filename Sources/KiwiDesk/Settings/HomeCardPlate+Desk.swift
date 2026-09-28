@@ -137,6 +137,10 @@ struct HomeCardBehaviorTile: View {
     /// shallow target depth visibly piles.
     static let sampleCount = 12
 
+    /// The screen the readout is laid out on before it is scaled to
+    /// the tile — a common laptop size.
+    static let screen = CGSize(width: 1440, height: 900)
+
     var body: some View {
         GeometryReader { proxy in
             let frames = Self.frames(in: proxy.size, settings: settings)
@@ -154,17 +158,30 @@ struct HomeCardBehaviorTile: View {
         settings: TilingSettings
     ) -> [CGRect] {
         let ids = (1...sampleCount).map { WindowID(UInt32($0)) }
+        // Laid out on a real screen and scaled down: a pile's
+        // stagger is in screen points, so run at tile size it
+        // flattens every window to a line.
+        let screen = CGRect(origin: .zero, size: Self.screen)
+        let sx = size.width / screen.width
+        let sy = size.height / screen.height
         // Switched like the engine's own quit, so a new style is a
         // compile error here too rather than a grid drawn for it.
         switch settings.quitLayout {
         case .grid:
             let placed = QuitGridLayout.frames(
                 for: ids,
-                in: CGRect(origin: .zero, size: size),
-                minSize: 6,
+                in: screen,
+                minSize: settings.minWindowSize,
                 targetDepth: settings.quitGridTargetDepth
             )
-            return ids.compactMap { placed[$0] }
+            return ids.compactMap { placed[$0] }.map {
+                CGRect(
+                    x: $0.minX * sx,
+                    y: $0.minY * sy,
+                    width: $0.width * sx,
+                    height: $0.height * sy
+                )
+            }
         }
     }
 

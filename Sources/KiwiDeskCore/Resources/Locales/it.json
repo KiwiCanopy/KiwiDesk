@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "Sposta finestre su una Scrivania di macOS",
   "shortcuts.editing_layer": "Modifica del livello «%1$@»",
   "shortcuts.gestures.app_bar": "Trascina un elemento lungo la App Bar per riordinarne le finestre.",
+  "shortcuts.gestures.app_bar_hover": "Passa il puntatore su un elemento della App Bar con il titolo accorciato per vederlo per intero.",
   "shortcuts.gestures.app_bar_off": "Nessun layout mostra una App Bar. Attivane una in %1$@.",
   "shortcuts.gestures.drop_on_space": "Trascina una finestra su uno spazio di KiwiShelf per spostarla lì.",
   "shortcuts.gestures.edge": "Trascina il bordo di una finestra per ridimensionarla.",

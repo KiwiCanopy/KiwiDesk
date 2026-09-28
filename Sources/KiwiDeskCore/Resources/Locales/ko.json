@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "윈도우를 macOS 데스크탑으로 이동",
   "shortcuts.editing_layer": "‘%1$@’ 레이어 편집 중",
   "shortcuts.gestures.app_bar": "App Bar를 따라 항목을 드래그하면 윈도우 순서가 바뀝니다.",
+  "shortcuts.gestures.app_bar_hover": "제목이 줄어든 App Bar 항목 위에 포인터를 올리면 전체 제목을 볼 수 있습니다.",
   "shortcuts.gestures.app_bar_off": "App Bar를 표시하는 레이아웃이 없습니다. %1$@에서 켜십시오.",
   "shortcuts.gestures.drop_on_space": "윈도우를 KiwiShelf의 공간 위로 드래그하면 그 공간으로 이동합니다.",
   "shortcuts.gestures.edge": "윈도우 가장자리를 드래그하면 크기가 조절됩니다.",

@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "Déplacer les fenêtres vers un Bureau macOS",
   "shortcuts.editing_layer": "Modification du calque « %1$@ »",
   "shortcuts.gestures.app_bar": "Faites glisser un élément le long de l'App Bar pour réordonner ses fenêtres.",
+  "shortcuts.gestures.app_bar_hover": "Survolez avec le pointeur un élément de l'App Bar dont le titre est raccourci pour le voir en entier.",
   "shortcuts.gestures.app_bar_off": "Aucune disposition n'affiche d'App Bar. Activez-en une dans %1$@.",
   "shortcuts.gestures.drop_on_space": "Faites glisser une fenêtre sur un espace de KiwiShelf pour l'y déplacer.",
   "shortcuts.gestures.edge": "Faites glisser le bord d'une fenêtre pour la redimensionner.",

@@ -19,13 +19,15 @@ struct GesturesShelfEntries: View {
                     + "move it there."
             ),
             surface: .spaceBar,
-            settings: settings
+            settings: settings,
+            pace: .story
         ) { GesturePicture.DropOnSpace(t: $0) }
         GestureRule()
         GestureEntry(
             springText,
             surface: .spaceBar,
-            settings: settings
+            settings: settings,
+            pace: .story
         ) {
             GesturePicture.Spring(t: $0)
         } control: {
@@ -82,6 +84,16 @@ struct GesturesShelfEntries: View {
             surface: .appBar,
             settings: settings
         ) { GesturePicture.AppBarReorder(t: $0) }
+        GestureRule()
+        GestureEntry(
+            L(
+                "shortcuts.gestures.app_bar_hover",
+                "Point at an App Bar item whose title is cut short "
+                    + "to see it in full."
+            ),
+            surface: .appBar,
+            settings: settings
+        ) { GesturePicture.AppBarHover(t: $0) }
         ForEach(offReasons, id: \.self) { prose in
             link(prose)
         }

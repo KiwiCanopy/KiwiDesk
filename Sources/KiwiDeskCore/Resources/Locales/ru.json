@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "Переместить окна на Рабочий стол macOS",
   "shortcuts.editing_layer": "Редактируется слой «%1$@»",
   "shortcuts.gestures.app_bar": "Перетаскивай элемент вдоль App Bar, чтобы изменить порядок её окон.",
+  "shortcuts.gestures.app_bar_hover": "Наведи указатель на элемент App Bar с сокращённым заголовком, чтобы увидеть его полностью.",
   "shortcuts.gestures.app_bar_off": "Ни одна раскладка не показывает App Bar. Включи её для раскладки в разделе %1$@.",
   "shortcuts.gestures.drop_on_space": "Перетащи окно на пространство на KiwiShelf, чтобы перенести его туда.",
   "shortcuts.gestures.edge": "Перетащи край окна, чтобы изменить его размер.",

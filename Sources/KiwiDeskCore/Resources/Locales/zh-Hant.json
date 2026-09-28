@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "將視窗移至 macOS 桌面",
   "shortcuts.editing_layer": "正在編輯「%1$@」層",
   "shortcuts.gestures.app_bar": "沿著 App Bar 拖移項目，即可重新排列它的視窗。",
+  "shortcuts.gestures.app_bar_hover": "將指標懸停在標題被縮短的 App Bar 項目上，即可查看完整標題。",
   "shortcuts.gestures.app_bar_off": "沒有佈局顯示 App Bar。請在 %1$@ 中開啟。",
   "shortcuts.gestures.drop_on_space": "將視窗拖到 KiwiShelf 上的某個空間，即可把它移到那裡。",
   "shortcuts.gestures.edge": "拖移視窗邊緣即可調整它的尺寸。",

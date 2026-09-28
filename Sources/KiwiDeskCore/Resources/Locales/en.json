@@ -1263,6 +1263,7 @@
   "shortcuts.desktops.move": "Move windows to a macOS Desktop",
   "shortcuts.editing_layer": "Editing the “%1$@” layer",
   "shortcuts.gestures.app_bar": "Drag an item along the App Bar to reorder its windows.",
+  "shortcuts.gestures.app_bar_hover": "Point at an App Bar item whose title is cut short to see it in full.",
   "shortcuts.gestures.app_bar_off": "No layout shows an App Bar. Turn one on in %1$@.",
   "shortcuts.gestures.drop_on_space": "Drag a window onto a Space on the KiwiShelf to move it there.",
   "shortcuts.gestures.edge": "Drag a window's edge to resize it.",

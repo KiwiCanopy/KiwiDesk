@@ -100,4 +100,39 @@ extension GesturePicture {
             }
         }
     }
+
+    /// Point at an App Bar item whose title is cut: the pointer
+    /// arrives, and after a beat the whole title shows (#1514).
+    struct AppBarHover: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
+        @Environment(\.schematicPalette) private var palette
+
+        var body: some View {
+            let ink = GestureInk(palette: palette)
+            ZStack(alignment: .topLeading) {
+                ink.window(CGRect(x: 10, y: 6, width: 100, height: 30))
+                ink.shelf(y: 56)
+                ink.item(CGRect(x: 6, y: 59, width: 34, height: 10))
+                ink.item(CGRect(x: 44, y: 59, width: 34, height: 10))
+                ink.label("…", at: CGPoint(x: 70, y: 58))
+                ink.item(CGRect(x: 82, y: 59, width: 30, height: 10))
+                ink.panel(
+                    CGRect(x: 18, y: 38, width: 92, height: 16),
+                    rows: 1,
+                    titled: true
+                )
+                .opacity(gestureStage(t, 0.6, 0.75))
+                ink.pointer(
+                    at: CGPoint(
+                        x: gestureLerp(100, 60, gestureStage(t, 0, 0.35)),
+                        y: 63
+                    )
+                )
+            }
+        }
+    }
 }
