@@ -76,6 +76,63 @@ struct GestureInk {
             .offset(x: point.x - 2, y: point.y - 1)
     }
 
+    /// An app glyph inside a Space item; `focused` takes the
+    /// accent ring, the way the bar marks the focused app.
+    func glyph(at point: CGPoint, focused: Bool = false) -> some View {
+        Circle()
+            .fill(ink.opacity(0.55))
+            .overlay {
+                if focused {
+                    Circle().strokeBorder(accent, lineWidth: 1.5)
+                }
+            }
+            .frame(width: 7, height: 7)
+            .offset(x: point.x - 3.5, y: point.y - 3.5)
+    }
+
+    /// Short text on the shelf, such as a `+n` count.
+    func label(_ text: String, at point: CGPoint) -> some View {
+        Text(text)
+            .font(.system(size: 7, weight: .semibold))
+            .foregroundStyle(ink.opacity(0.85))
+            .offset(x: point.x, y: point.y)
+    }
+
+    /// A menu or tooltip panel with `rows` lines of placeholder
+    /// text, the first one bolder when `titled`.
+    func panel(
+        _ rect: CGRect,
+        rows: Int,
+        titled: Bool = false
+    ) -> some View {
+        RoundedRectangle(cornerRadius: 4)
+            .fill(ink.opacity(0.18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .strokeBorder(ink.opacity(0.4), lineWidth: 1)
+            )
+            .overlay(alignment: .topLeading) {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(0..<rows, id: \.self) { row in
+                        Capsule()
+                            .fill(
+                                ink.opacity(
+                                    titled && row == 0 ? 0.8 : 0.45
+                                )
+                            )
+                            .frame(
+                                width: rect.width
+                                    * (row.isMultiple(of: 2) ? 0.7 : 0.55),
+                                height: 3
+                            )
+                    }
+                }
+                .padding(6)
+            }
+            .frame(width: rect.width, height: rect.height)
+            .offset(x: rect.minX, y: rect.minY)
+    }
+
     /// A small motion cue, e.g. a scroll direction.
     func cue(_ symbol: String, at point: CGPoint) -> some View {
         Image(systemName: symbol)

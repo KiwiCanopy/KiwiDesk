@@ -32,6 +32,34 @@ struct GesturesShelfEntries: View {
         }
         GestureEntry(
             L(
+                "shortcuts.gestures.glyph_click",
+                "Click an app icon to go to its Space and focus it. "
+                    + "An app with several windows there opens a "
+                    + "menu of them."
+            ),
+            surface: .spaceBar,
+            settings: settings
+        ) { GesturePicture.GlyphClick(t: $0) }
+        GestureEntry(
+            L(
+                "shortcuts.gestures.overflow_menu",
+                "Click +n for a menu of the windows it hides. "
+                    + "Nothing switches until you pick one."
+            ),
+            surface: .spaceBar,
+            settings: settings
+        ) { GesturePicture.OverflowMenu(t: $0) }
+        GestureEntry(
+            L(
+                "shortcuts.gestures.glyph_hover",
+                "Point at an app icon to see the app and the "
+                    + "titles of its windows."
+            ),
+            surface: .spaceBar,
+            settings: settings
+        ) { GesturePicture.GlyphHover(t: $0) }
+        GestureEntry(
+            L(
                 "shortcuts.gestures.shelf_scroll",
                 "Scroll over the KiwiShelf to see the Spaces or "
                     + "windows that run past its edge."

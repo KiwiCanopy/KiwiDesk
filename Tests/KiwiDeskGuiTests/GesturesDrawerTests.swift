@@ -67,6 +67,9 @@ struct GesturesDrawerTests {
             ("shortcuts.gestures.edge", "windows"),
             ("shortcuts.gestures.follow_focus", "windows"),
             ("shortcuts.gestures.drop_on_space", "spaceBar"),
+            ("shortcuts.gestures.glyph_click", "spaceBar"),
+            ("shortcuts.gestures.overflow_menu", "spaceBar"),
+            ("shortcuts.gestures.glyph_hover", "spaceBar"),
             ("shortcuts.gestures.shelf_scroll", "shelf"),
             ("shortcuts.gestures.app_bar", "appBar"),
         ]
