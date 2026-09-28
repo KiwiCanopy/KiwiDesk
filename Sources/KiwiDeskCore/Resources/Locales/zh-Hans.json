@@ -832,7 +832,6 @@
   "looks.colors_use": "颜色：使用调色板“%1$@”。",
   "looks.default_name": "我的造型",
   "looks.delete": "删除造型",
-  "looks.description.glass": "KiwiDesk 的默认造型",
   "looks.empty_hint": "保存 KiwiShelf 的当前造型，它就会出现在这里。",
   "looks.export": "导出造型",
   "looks.import": "导入造型",

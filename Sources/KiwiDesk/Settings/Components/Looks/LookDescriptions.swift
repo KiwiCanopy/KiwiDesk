@@ -14,7 +14,10 @@ enum LookDescriptions {
     @MainActor static func caption(for name: String) -> String? {
         switch name {
         case LookCatalog.defaultName:
-            return L("looks.description.glass", "KiwiDesk's default")
+            return L(
+                "looks.description.glass",
+                "Liquid Glass, KiwiDesk's default"
+            )
         case "Taskbar":
             return L(
                 "looks.description.taskbar",

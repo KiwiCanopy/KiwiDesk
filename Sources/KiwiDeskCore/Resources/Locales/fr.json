@@ -832,7 +832,6 @@
   "looks.colors_use": "Couleurs : utilise la palette « %1$@ ».",
   "looks.default_name": "Mon look",
   "looks.delete": "Supprimer le look",
-  "looks.description.glass": "Le look par défaut de KiwiDesk",
   "looks.empty_hint": "Enregistrez le look actuel de KiwiShelf et il apparaîtra ici.",
   "looks.export": "Exporter le look",
   "looks.import": "Importer un look",

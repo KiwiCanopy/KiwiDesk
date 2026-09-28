@@ -33,7 +33,7 @@ struct OnboardingLookRow: View {
         } label: {
             PaletteTile(
                 name: look.name,
-                caption: caption(look),
+                caption: LookDescriptions.caption(for: look.name),
                 isApplied: applied,
                 captionLines: 3
             ) {
@@ -43,12 +43,6 @@ struct OnboardingLookRow: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(applied ? [.isSelected] : [])
-    }
-
-    /// Glass needs none here: it is the look already on screen.
-    private func caption(_ look: ShelfLook) -> String? {
-        guard look.name != LookCatalog.defaultName else { return nil }
-        return LookDescriptions.caption(for: look.name)
     }
 
     private func preview(_ look: ShelfLook) -> TilingSettings {

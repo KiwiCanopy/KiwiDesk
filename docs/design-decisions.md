@@ -11641,8 +11641,7 @@ which says what the look does before what it resembles — "Bottom
 bar, like Windows 11" — because a new user does not know the bar
 vocabulary and the thumbnail cannot carry it (owner, 2026-09-28).
 A look has one description, shared by the Settings card and the
-tour (`LookDescriptionsTests`); the tour leaves Glass uncaptioned,
-since it is the look already on screen.
+tour, Glass's included (`LookDescriptionsTests`).
 :::
 
 **"Automatic" is a value; "Auto" is an adjective — and the

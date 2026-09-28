@@ -832,7 +832,6 @@
   "looks.colors_use": "색상: 팔레트 ‘%1$@’을(를) 사용합니다.",
   "looks.default_name": "나의 디자인",
   "looks.delete": "디자인 삭제",
-  "looks.description.glass": "KiwiDesk 기본값",
   "looks.empty_hint": "KiwiShelf의 현재 디자인을 저장하면 여기에 표시됩니다.",
   "looks.export": "디자인 내보내기",
   "looks.import": "디자인 가져오기",
