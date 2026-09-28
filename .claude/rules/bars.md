@@ -483,6 +483,17 @@ Obligations:
   The pinned arm's plate move is order-guarded the same way, and
   its ORDER half is `GlassTintOrderTests`' index pin; its
   no-reparent half has no counting clause — stated, fails OPEN.
+- **A view a glass hosted leaves it only through
+  `GlassPlate.release`, and a bar tears its per-item glass down
+  BEFORE the frame pass that places the items it hosted** (#1730).
+  Hosting turns `translatesAutoresizingMaskIntoConstraints` off;
+  a hand-back that does not restore it is laid out at its
+  intrinsic size in the corner, and so is an item still inside a
+  glass when a frame pass that frames only the container's
+  subviews runs — `GlassPlate.setContent` releases what it
+  displaces for the same reason (`GlassHandBackTests`;
+  `GlassHandBackSeamTests` reds a glass `contentView =` write
+  outside `GlassPlate`, in either Sources tree).
 - **Build the fade in `GlassTint.apply`, from an edge every call
   site hands it — never a default** (#1622). A surface on no
   screen edge — the drag markers, the sticky mark — hands `.top`

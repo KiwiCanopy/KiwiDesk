@@ -176,6 +176,9 @@ public final class AppBarOverlay {
         let depth = edge.isHorizontal ? strip.height : strip.width
         self.plateFrame = plateFrame
         let hosting = glassHosting(style)
+        // Items leave their glass BEFORE the frame pass, which sets
+        // only the ones the container hosts (#1730).
+        if hosting != .boxGlass { teardownBoxGlasses() }
         BarMotion.runLayout {
             for (index, view) in itemViews.enumerated()
             where view.superview === itemContainer {
