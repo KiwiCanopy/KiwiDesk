@@ -7084,7 +7084,8 @@ splits and another scrolls. So on those two surfaces, and only
 there, the thumbnail plays one short story and rests: a tiling
 layout gains one more window, which the engine places — BSP and
 Grid resting on four, every other layout on three, one ruled
-count both hosts share (`LayoutStoryTests`) — Scrolling steps
+count both hosts share (`LayoutStoryTests`), lowered where the
+Space fits fewer (below) — Scrolling steps
 focus and pans, Monocle's front card turns on the live flip's
 axis (#1391), and a Floating window is dragged and left where it
 lands. Each story plays once when its thumbnail first appears —
@@ -7106,23 +7107,49 @@ holds the hosts to those two, and holds the story's phase and
 its pace to the player, so no compared surface can be handed
 either.
 
-**The frames are the engine's.** Both ends of every tiling story
-are the schematic the other surfaces draw, at two window counts,
-so the picture follows the user's own settings — where BSP
-splits, where Stack puts the newcomer, whether Track opens a new
-track — and a story cannot teach a placement the engine does not
-make (the #702 rule). Only Floating's drag and Monocle's turn
-are drawn by hand: the engine claims no placement for either,
-and the turn takes the live flip's own axis
+**The frames are the engine's arrangement of arriving windows.**
+A tiling story is not the Settings schematic tweened between two
+counts. A schematic draws a count, not a history: it numbers its
+windows afresh at each count and marks where the next would land
+with a `+` slot, so a tween between two of them swapped windows,
+faded one out, and let a pile's cascade — an offset sized for a
+screen — push a window past the thumbnail's frame. A story shows
+what the Space does instead: windows arrive one at a time through
+the Space's own insert, each taking focus as a new window does,
+and `LayoutEngine` lays them out on a screen-sized canvas scaled
+down to the tile and clipped at the screen edge, where a pile
+hangs past on a real screen too (`LayoutStoryArrangement`,
+`LayoutStoryCanvas`). A window keeps its identity across the
+arrival, so only the newcomer and the windows making room move,
+and the newcomer grows out of its own slot. The picture therefore
+follows the user's own settings — where BSP splits, where Stack
+puts the newcomer, whether Track opens a new track — and cannot
+teach a placement the engine does not make (the #702 rule). No
+story draws a `+`, Scrolling's included: a story shows a window
+arriving, and where the next one would go is the chooser's fact,
+not this one's. Only Floating's drag and Monocle's turn are
+drawn by hand: the engine claims no placement for either, and
+the turn takes the live flip's own axis
 (`MonocleFlipPlan.axis(for:)`) rather than a second copy of it.
-The story always ends on the resting frame, which is the whole
-of what Reduce Motion shows. It is still not a clip, for the reasons the
-Shortcuts & Gestures entry gives: it follows the palette and the
-appearance, carries no text to translate, and cannot go stale
-beside a redesign. Motion is never announced, so what VoiceOver
-hears is what the host already says: the tour row speaks the
-layout's behaviour as a sentence, while a preset preview tile
-speaks the schematic's own description.
+
+**A story rests on what its Space fits** (owner ruling
+2026-09-28). The ruled count is a ceiling, lowered to the most
+windows the Space's settings lay out without a pile
+(`LayoutStory.restingWindows(for:settings:)`): a 2 × 1 grid
+tells one window joining another side by side, not a fourth
+window landing on a pile. A pile is the layout out of room, the
+state least like the Space in use, and a story exists to show how
+this Space behaves. So the rest frame on these two hosts is not
+the chooser's frame: the engine's arrangement, no `+`, and
+possibly a lower count. The story always ends on it, and it is
+the whole of what Reduce Motion shows. It is still not a clip,
+for the reasons the Shortcuts & Gestures entry gives: it follows
+the palette and the appearance, carries no text to translate,
+and cannot go stale beside a redesign. Motion is never
+announced, so what VoiceOver hears is what the host already
+says: the tour row speaks the layout's behaviour as a sentence,
+and so does a preset preview tile telling a tiling story, while
+the other preset tiles speak the schematic's own description.
 
 **Floating's picture is scattered, everywhere.** A cascade drew
 the one layout that places nothing as if it placed windows in a

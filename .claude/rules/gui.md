@@ -223,20 +223,27 @@ restated `20...80` satisfies on the day it is written.
   changing draft. A story's phase and pace reach a schematic
   from the player alone: no other `LayoutSchematicView(` call
   is handed `motion:` (`LayoutStoryWiringTests` ▸
-  `motionComesFromThePlayer`), and nothing else writes
-  `\.schematicRestage` (`LayoutStoryWiringTests` ▸
-  `restageComesFromThePlayer`). A story is started only by its
+  `motionComesFromThePlayer`), nothing else writes
+  `\.schematicRestage` or the story flag `\.schematicTellsStory`
+  (`LayoutStoryWiringTests` ▸ `restageComesFromThePlayer`), and
+  nothing else draws `LayoutStoryCanvas`, which clips at its
+  screen edge (`LayoutStoryWiringTests` ▸
+  `canvasComesFromThePlayer`). A story is started only by its
   appearance or a host's replay — the player must never
   schedule its own next run, which is review's, since no scan
   sees a loop — and under Reduce Motion it stays on the rest
   frame, its guard ahead of the jump to the start
   (`LayoutStoryWiringTests` ▸ `reduceMotionStaysAtRest`). Its
-  window counts come from the one
-  `LayoutStory.restingWindows(for:)`, which the player reads
-  itself so two hosts cannot tell different stories
+  resting count comes from the one
+  `LayoutStory.restingWindows(for:settings:)`, which the player
+  reads itself so two hosts cannot tell different stories
   (`LayoutStoryTests` ▸ `restingCounts`, `playerTakesTheCount`),
-  and a tiling story's frames are the schematic's own at two
-  counts, so it asks the engine like any preview.
+  and which never rests on a pile
+  (`LayoutStoryArrangementTests` ▸ `restsWithinWhatFits`). A
+  tiling story's frames are `LayoutEngine`'s over windows
+  arriving through the Space's own insert
+  (`LayoutStoryArrangement`), identities stable across an
+  arrival (`LayoutStoryArrangementTests` ▸ `identitiesAreStable`).
   `docs/design-decisions.md` ▸ *A thumbnail that is read rather
   than compared* carries why.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
