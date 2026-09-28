@@ -4,7 +4,8 @@ import SwiftUI
 /// targets and #1514's hover title). Same contract as
 /// `GesturePicture`: `t` runs 0 → 1 and 1 is the key frame.
 extension GesturePicture {
-    /// Click an app glyph: that app's windows open as a menu.
+    /// Click an app glyph that carries a window count: its
+    /// windows open as a menu (a one-window glyph just focuses).
     struct GlyphClick: View {
         let t: CGFloat
         @Environment(\.schematicPalette) private var palette
@@ -17,7 +18,8 @@ extension GesturePicture {
                 ink.label("2", at: CGPoint(x: 8, y: 3))
                 ink.glyph(at: CGPoint(x: 26, y: 8))
                 ink.glyph(at: CGPoint(x: 38, y: 8), focused: true)
-                ink.glyph(at: CGPoint(x: 50, y: 8))
+                ink.label("3", at: CGPoint(x: 41, y: 1))
+                ink.glyph(at: CGPoint(x: 52, y: 8))
                 ink.panel(
                     CGRect(x: 30, y: 20, width: 64, height: 34),
                     rows: 3

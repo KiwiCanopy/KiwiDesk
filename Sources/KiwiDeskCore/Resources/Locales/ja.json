@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "Space Barはオフです。%1$@でオンにしてください。",
   "shortcuts.gestures.spring": "そのままスペースの上で保持すると、%1$@後に表示がそのスペースに切り替わり、ウインドウはすでにそのレイアウトに入っています。",
   "shortcuts.gestures.spring_link": "遅延は%1$@で変更できます。",
-  "shortcuts.gestures.summary": "ドラッグ、サイズ変更、スクロール、およびポインタがフォーカスに従うかどうか",
+  "shortcuts.gestures.summary": "ドラッグ、クリック、ポインタを置く、スクロール、およびポインタがフォーカスに従うかどうか",
   "shortcuts.gestures.swap": "ウインドウを別のウインドウにドラッグすると入れ替わり、別の画面にドラッグするとその画面へ移動します。",
   "shortcuts.gestures.title": "マウスとトラックパッド",
   "shortcuts.go_to_desktop": "デスクトップへ移動",

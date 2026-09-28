@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "La Space Bar está desactivada. Actívala en %1$@.",
   "shortcuts.gestures.spring": "Si sigues manteniéndola sobre el Espacio, tras %1$@ la vista abre ese Espacio con la ventana ya en su diseño.",
   "shortcuts.gestures.spring_link": "Cambia el retardo en %1$@.",
-  "shortcuts.gestures.summary": "Arrastrar, redimensionar y desplazarse, y si el puntero sigue al foco",
+  "shortcuts.gestures.summary": "Arrastrar, hacer clic, pasar el puntero y desplazarse, y si el puntero sigue al foco",
   "shortcuts.gestures.swap": "Arrastra una ventana sobre otra para intercambiarlas, o a otra pantalla para moverla allí.",
   "shortcuts.gestures.title": "Ratón y trackpad",
   "shortcuts.go_to_desktop": "Ir al Escritorio",

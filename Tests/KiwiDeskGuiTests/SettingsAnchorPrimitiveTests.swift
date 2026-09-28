@@ -168,6 +168,11 @@ struct SettingsAnchorPrimitiveTests {
         // opens the new tab at its top (#1666). Not a Settings
         // destination, so nothing there is a reveal target.
         "UpdateNotesScroll.swift": 1,
+        // Animation identity (#1726): a gesture picture's hover
+        // loop ends with the view that ran it, since its rest
+        // frame and the loop's target are one value. Not a reveal
+        // target — the picture is hidden from accessibility.
+        "GestureEntry.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

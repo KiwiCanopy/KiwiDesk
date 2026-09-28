@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "A Space Bar está desativada. Ative-a em %1$@.",
   "shortcuts.gestures.spring": "Continue segurando-a sobre o espaço e, após %1$@, a visão abre esse espaço com a janela já no layout dele.",
   "shortcuts.gestures.spring_link": "Altere o atraso em %1$@.",
-  "shortcuts.gestures.summary": "Arrastar, redimensionar e rolar, e se o cursor segue o foco",
+  "shortcuts.gestures.summary": "Arrastar, clicar, passar o cursor e rolar, e se o cursor segue o foco",
   "shortcuts.gestures.swap": "Arraste uma janela sobre outra para trocá-las, ou para outra tela para movê-la até lá.",
   "shortcuts.gestures.title": "Mouse e trackpad",
   "shortcuts.go_to_desktop": "Ir para a Mesa",

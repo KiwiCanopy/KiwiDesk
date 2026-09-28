@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "La Space Bar est désactivée. Activez-la dans %1$@.",
   "shortcuts.gestures.spring": "Maintenez-la au-dessus de l'espace et, après %1$@, la vue ouvre cet espace avec la fenêtre déjà dans sa disposition.",
   "shortcuts.gestures.spring_link": "Modifiez le délai dans %1$@.",
-  "shortcuts.gestures.summary": "Glisser, redimensionner et faire défiler, et si le pointeur suit la fenêtre active",
+  "shortcuts.gestures.summary": "Glisser, cliquer, survoler et faire défiler, et si le pointeur suit la fenêtre active",
   "shortcuts.gestures.swap": "Faites glisser une fenêtre sur une autre pour les échanger, ou sur un autre écran pour l'y déplacer.",
   "shortcuts.gestures.title": "Souris et trackpad",
   "shortcuts.go_to_desktop": "Aller au Bureau",

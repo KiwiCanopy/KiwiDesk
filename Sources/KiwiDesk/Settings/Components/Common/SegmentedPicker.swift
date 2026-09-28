@@ -3,6 +3,9 @@ import SwiftUI
 /// Capsule segmented picker with animated sliding accent pill (#68).
 struct SegmentedPicker<Value: Hashable>: View {
     private let label: String?
+    /// A name for VoiceOver alone, where the row's own sentence
+    /// already names the control and a drawn label would crowd it.
+    private let spokenLabel: String?
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
@@ -16,11 +19,13 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     init(
         _ label: String? = nil,
+        spokenLabel: String? = nil,
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
         help: String? = nil
     ) {
         self.label = label
+        self.spokenLabel = spokenLabel
         self._selection = selection
         self.options = options
         self.help = help
@@ -44,8 +49,8 @@ struct SegmentedPicker<Value: Hashable>: View {
     }
 
     @ViewBuilder private var labeledTrack: some View {
-        if let label {
-            track.accessibilityLabel(label)
+        if let name = label ?? spokenLabel {
+            track.accessibilityLabel(name)
         } else {
             track
         }

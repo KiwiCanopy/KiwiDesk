@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "The Space Bar is off. Turn it on in %1$@.",
   "shortcuts.gestures.spring": "Keep holding it over the Space and, after %1$@, the view opens that Space with the window already in its layout.",
   "shortcuts.gestures.spring_link": "Change the wait in %1$@.",
-  "shortcuts.gestures.summary": "Drag, resize and scroll, and whether the pointer follows focus",
+  "shortcuts.gestures.summary": "Drag, click, point and scroll, and whether the pointer follows focus",
   "shortcuts.gestures.swap": "Drag a window onto another to swap them, or onto another screen to move it there.",
   "shortcuts.gestures.title": "Mouse & trackpad",
   "shortcuts.go_to_desktop": "Go to Desktop",

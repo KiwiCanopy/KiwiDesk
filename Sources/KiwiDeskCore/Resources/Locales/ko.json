@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "Space Bar가 꺼져 있습니다. %1$@에서 켜십시오.",
   "shortcuts.gestures.spring": "공간 위에서 계속 누르고 있으면 %1$@ 후 화면이 그 공간으로 전환되고, 윈도우는 이미 그 레이아웃 안에 있습니다.",
   "shortcuts.gestures.spring_link": "지연 시간은 %1$@에서 변경할 수 있습니다.",
-  "shortcuts.gestures.summary": "드래그, 크기 조절, 스크롤 및 포인터가 포커스를 따라갈지 여부",
+  "shortcuts.gestures.summary": "드래그, 클릭, 포인터 올리기, 스크롤 및 포인터가 포커스를 따라갈지 여부",
   "shortcuts.gestures.swap": "윈도우를 다른 윈도우 위로 드래그하면 서로 바뀌고, 다른 화면으로 드래그하면 그 화면으로 이동합니다.",
   "shortcuts.gestures.title": "마우스와 트랙패드",
   "shortcuts.go_to_desktop": "데스크탑으로 이동",

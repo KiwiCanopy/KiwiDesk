@@ -48,8 +48,8 @@ struct GesturesDrawer: View {
     private var summary: String {
         L(
             "shortcuts.gestures.summary",
-            "Drag, resize and scroll, and whether the pointer "
-                + "follows focus"
+            "Drag, click, point and scroll, and whether the "
+                + "pointer follows focus"
         )
     }
 
@@ -117,6 +117,10 @@ struct MouseResizePicker: View {
     /// label key names it for VoiceOver and for the census.
     var body: some View {
         SegmentedPicker(
+            spokenLabel: L(
+                "behavior.mouse.resize_action",
+                "Mouse resize action"
+            ),
             selection: $selection,
             options: [
                 (layoutLabel, MouseResizeMode.layout),
@@ -139,9 +143,6 @@ struct MouseResizePicker: View {
                     "Snap back to slot"
                 )
             )
-        )
-        .accessibilityLabel(
-            L("behavior.mouse.resize_action", "Mouse resize action")
         )
     }
 

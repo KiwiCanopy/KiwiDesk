@@ -45,7 +45,11 @@ struct GestureEntry<Picture: View, Control: View>: View {
 
     private var explainer: some View {
         HStack(alignment: .top, spacing: 14) {
+            // A new identity per hover state: a looping animation
+            // ends with the view that ran it, since the rest frame
+            // and the loop's target are the same value.
             GesturePlate { picture(hovering ? phase : 1) }
+                .id(hovering)
                 .accessibilityHidden(true)
             Text(text)
                 .fixedSize(horizontal: false, vertical: true)

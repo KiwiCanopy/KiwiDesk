@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "Space Bar 已關閉。請在 %1$@ 中開啟。",
   "shortcuts.gestures.spring": "繼續讓它停在該空間上，%1$@後畫面會開啟那個空間，視窗已在它的佈局中。",
   "shortcuts.gestures.spring_link": "可在 %1$@ 中變更延遲。",
-  "shortcuts.gestures.summary": "拖移、調整尺寸和捲動，以及指標是否跟隨焦點",
+  "shortcuts.gestures.summary": "拖移、點按、懸停和捲動，以及指標是否跟隨焦點",
   "shortcuts.gestures.swap": "將視窗拖到另一個視窗上即可互換，拖到另一個螢幕上則會移到那裡。",
   "shortcuts.gestures.title": "滑鼠與觸控式軌跡板",
   "shortcuts.go_to_desktop": "前往桌面",

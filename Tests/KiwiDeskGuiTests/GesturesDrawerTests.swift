@@ -30,6 +30,7 @@ struct GesturesDrawerTests {
     @Test("every pointer sentence places its link")
     @MainActor
     func pointersPlaceTheirLink() {
+        LocalizationManager.shared.select("en")
         let slot = CrossReferenceRow.linkSlot
         #expect(GesturesShelfEntries.springLinkProse.contains(slot))
         for surface in [GestureSurface.spaceBar, .appBar] {
@@ -38,8 +39,30 @@ struct GesturesDrawerTests {
         #expect(GestureSurface.windows.offProse == nil)
     }
 
-    /// The surfaces ask Core's own shelf predicates.
-    @Test("a surface is off exactly when its bar is")
+    /// The surfaces ask Core's own shelf predicates, across every
+    /// pairing of the two bars — the default draft has an App Bar
+    /// on, so without the off fixtures half of this could not fail.
+    @Test(
+        "a surface is off exactly when its bar is",
+        arguments: [
+            (true, true), (true, false), (false, true), (false, false),
+        ]
+    )
+    func surfaceMatrix(spaceBar: Bool, appBar: Bool) {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.enabled = spaceBar
+        settings.monocle.appBar.enabled = appBar
+        settings.scrolling.appBar.enabled = appBar
+        #expect(settings.anyAppBarCanShow == appBar)
+        #expect(!GestureSurface.windows.isOff(settings))
+        #expect(GestureSurface.spaceBar.isOff(settings) == !spaceBar)
+        #expect(GestureSurface.appBar.isOff(settings) == !appBar)
+        #expect(
+            GestureSurface.shelf.isOff(settings) == !(spaceBar || appBar)
+        )
+    }
+
+    @Test("the default draft: the Space Bar on, a surface too")
     func surfacesAskCore() {
         var settings = TilingSettings()
         #expect(!GestureSurface.windows.isOff(settings))
@@ -108,9 +131,16 @@ struct GesturesDrawerTests {
         )
         #expect(!group.contains("GreyOut("))
         #expect(group.contains("ForEach(offReasons"))
+        let drawer = try Self.source(
+            Self.gestures + "GesturesDrawer.swift"
+        )
+        #expect(!drawer.contains("GreyOut("))
         let entry = Self.squash(
             try Self.source(Self.gestures + "GestureEntry.swift")
         )
+        // Exactly one grey, on the explainer: a second one outside
+        // it would dim the control as well.
+        #expect(entry.components(separatedBy: "GreyOut(").count == 2)
         let grey = try #require(
             entry.range(
                 of: "explainer.modifier(GreyOut(active:surface.isOff("

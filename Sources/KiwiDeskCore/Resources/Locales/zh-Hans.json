@@ -1276,7 +1276,7 @@
   "shortcuts.gestures.space_bar_off": "Space Bar 已关闭。请在 %1$@ 中打开它。",
   "shortcuts.gestures.spring": "继续让它停在该空间上，%1$@后画面会打开那个空间，窗口已在其布局中。",
   "shortcuts.gestures.spring_link": "可在 %1$@ 中更改延迟。",
-  "shortcuts.gestures.summary": "拖动、调整大小和滚动，以及指针是否跟随焦点",
+  "shortcuts.gestures.summary": "拖动、点按、悬停和滚动，以及指针是否跟随焦点",
   "shortcuts.gestures.swap": "将窗口拖到另一个窗口上可互换它们，拖到另一个屏幕上则会移到那里。",
   "shortcuts.gestures.title": "鼠标与触控板",
   "shortcuts.go_to_desktop": "前往桌面",
