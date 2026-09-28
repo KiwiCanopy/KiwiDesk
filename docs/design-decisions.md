@@ -7010,6 +7010,13 @@ newly focused window. A still picture cannot show motion.
 GESTURE rather than a rest state — the Shortcuts & Gestures
 drawer's, argued under Shortcuts below — may move.)
 
+:::unreleased
+A thumbnail that is read rather than compared — the welcome
+tour's and the preset preview's — may move too; *A thumbnail that
+is read rather than compared*, below, argues why the Layouts
+chooser still may not.
+:::
+
 The premise is true and the conclusion does not follow. **A pair
 does not show motion either.** It shows two *states* and asks the
 reader to infer the tween — a second inference stacked on the one
