@@ -2,7 +2,7 @@ import Foundation
 
 /// The bundled looks (#1684). Glass is DERIVED from the shipped
 /// defaults with the starter's bar edges (#1528), so it never
-/// drifts and draws what a new user first sees; every other
+/// drifts; every other
 /// bundled look is Glass
 /// with its authored differences laid over it, so each names the
 /// whole of `LookKeys` and reproduces its picture wherever it is

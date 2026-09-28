@@ -175,9 +175,9 @@ public enum StarterSetup {
         return settings
     }
 
-    /// The starter's App Bar edge: the dock under a top Space Bar.
-    /// The starter's alone — a preset keeps the type default,
-    /// `.top`, so no stored profile moves — and Glass's (#1528).
+    /// The starter's App Bar edge — the dock under a top Space Bar
+    /// — which Glass also carries; a preset keeps the type
+    /// default `.top`, so no stored profile moves (#1528).
     public static let appBarEdge = AppBarEdge.bottom
 
     /// A preset's shape tuning: `slots` is its plan on `sizes`,

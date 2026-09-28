@@ -11876,18 +11876,18 @@ tour, Glass's included (`LookDescriptionsTests`).
 **The App Bar is the dock; the Space Bar is the menu bar**
 (owner, 2026-09-28, #1528). The starter splits them — Space Bar
 on top, App Bar at the bottom — and Glass carries the same split
-from the one `StarterSetup.appBarEdge`, because the default look
-must draw what a new user first sees; it stopped being the pure
-defaults, so it is no longer a "shape reset" to the type's fused
-top shelf. Every other look places the bars as its reference
+from the one `StarterSetup.appBarEdge`, so the default look places
+the bars where a new user first meets them; it is no longer the
+pure defaults, so it no longer resets to the type's fused top
+shelf. Every other look places the bars as its reference
 does: split where the reference has a dock apart from its top bar,
 one bar where it has none — Taskbar's bottom bar (Windows 11),
 Classic's, Tiler's and Pill's top bar (Mac OS 9, Hyprland, Barik),
 each stated in the look rather than inherited from Glass
 (`LookCatalogTests` ▸ `barsFollowTheReference`). The cost,
-accepted: a saved profile or preset keeps its fused top shelf, so
-there no bundled look is ticked as applied — the mirror of a
-starter user before this. Presets never carry the split: a preset
+accepted: on a saved profile or preset's fused top shelf, Glass
+is not ticked as applied, and picking it splits the bars. Presets
+never carry the split: a preset
 apply and the monitor-change fallback replace the live settings
 whole, so a preset that split would move an existing user's App
 Bar unasked (`StarterBarEdgeTests`).

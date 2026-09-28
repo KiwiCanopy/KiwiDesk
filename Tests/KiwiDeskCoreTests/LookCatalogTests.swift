@@ -23,8 +23,8 @@ struct LookCatalogTests {
         )
     }
 
-    /// Read off the composed starter, not the constant, so Glass
-    /// and the first-run picture cannot part (#1528).
+    /// Read off the starter's settings, not the constant, so
+    /// Glass and the starter's bars cannot part (#1528).
     @Test("Glass is the shipped defaults with the starter's bars")
     func glassIsTheStartersLook() throws {
         let glass = try #require(look(LookCatalog.defaultName))
@@ -132,19 +132,22 @@ struct LookCatalogTests {
     /// glass, floating and a light or dark plate (issue draft).
     @Test("any two looks are told apart at a glance")
     func distinct() {
-        // The Space Bar's edge stands for where the bars sit: one
-        // axis, however the two edges pair (#1731).
+        // Where the bars sit is ONE axis: the pair of edges, so a
+        // split and a fused shelf differ (#1731, #1528).
         let axes = [
-            "space_bar.edge", "kiwishelf.background_fit",
-            "kiwishelf.background_style", "kiwishelf.liquid_glass",
-            "kiwishelf.outer_margin",
+            "kiwishelf.background_fit", "kiwishelf.background_style",
+            "kiwishelf.liquid_glass", "kiwishelf.outer_margin",
         ]
+        func edges(_ look: ShelfLook) -> [JSONValue?] {
+            [look.style["space_bar.edge"], look.style["app_bar.edge"]]
+        }
         for (i, a) in bundled.enumerated() {
             for b in bundled.dropFirst(i + 1) {
                 let shape = axes.filter { a.style[$0] != b.style[$0] }
+                let place = edges(a) != edges(b) ? 1 : 0
                 let tone = isLight(a) != isLight(b) ? 1 : 0
                 #expect(
-                    shape.count + tone >= 2,
+                    shape.count + place + tone >= 2,
                     "\(a.name) vs \(b.name)"
                 )
             }
