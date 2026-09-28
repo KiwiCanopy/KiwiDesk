@@ -126,12 +126,11 @@ extension InterpolatedLabelTests {
         "scroll_grid.app_bar_xref_link": 2,
         "colors.border_off.help": 1,
         // #1307: the one Liquid Glass row names the Fill it
-        // says tints the glass, rather than quoting the word —
-        // its two drag siblings below still quote theirs, in
-        // step across all ten catalogs today but unheld.
+        // says tints the glass, rather than quoting the word.
         "colors.liquid_glass.help": 1,
-        "colors.drag_border_off.help": 1,
-        "colors.drag_fill_off.help": 1,
+        // #1745: the switch by its own key, then the pane.
+        "colors.drag_border_off.help": 2,
+        "colors.drag_fill_off.help": 2,
         "colors.drag_off.help": 1,
         // #1310: the focused-item row's link sentence names the
         // row, the picker, its current value and the value to
@@ -279,6 +278,11 @@ extension InterpolatedLabelTests {
         // The tour's Spaces step names the window and the pane a
         // layout is changed in, as a breadcrumb (#1534).
         "onboarding.starter_spaces.layouts_differ": 2,
+        // The looks step's draft caption names the save pill's
+        // two buttons; its hint names Settings and the Looks
+        // pane (#1720).
+        "onboarding.looks.draft_pending": 2,
+        "onboarding.looks.hint": 2,
         // The Float card's `?` names the float VALUE it explains
         // (#1022, #1608).
         "app_rules.section.help.titles": 1,

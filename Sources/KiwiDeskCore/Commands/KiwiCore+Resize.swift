@@ -9,14 +9,15 @@ import Foundation
 extension KiwiCore {
     /// `KiwiDesk.set_refusal_sound(bool)` (#184, widened
     /// #1255): mute or restore the sound every refusal pill
-    /// carries. No retile — pure behavior toggle.
+    /// carries. No retile — pure behavior toggle, app-wide
+    /// (#1741).
     func setRefusalSound(
         _ args: [JSONValue]
     ) -> CommandResponse {
         guard let on = args.first?.boolValue else {
             return .fail("expected a boolean")
         }
-        tiler.settings.refusalSound = on
+        setAppWide(persisting: false) { $0.refusalSound = on }
         return .ok()
     }
 

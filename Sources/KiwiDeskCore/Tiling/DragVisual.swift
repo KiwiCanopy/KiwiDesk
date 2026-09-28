@@ -10,13 +10,12 @@ public enum BorderAlignment: String, Sendable, Codable,
 }
 
 /// Visual styling configuration for drag-and-drop ghost and drop-zone
-/// indicators.
+/// indicators. The stroke's width and corners are every window
+/// outline's, `TilingSettings.windowStroke` (#1742).
 public struct DragVisual: Sendable, Equatable, Encodable {
     public var enabled: Bool
     public var border: Bool
     public var borderColor: String
-    /// Stroke width in points (R6, #406).
-    public var borderWidth: CGFloat
     public var borderAlignment: BorderAlignment
     public var fill: Bool
     public var fillColor: String
@@ -31,7 +30,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         enabled: true,
         border: true,
         borderColor: "#347957",
-        borderWidth: 5,
         borderAlignment: .inside,
         fill: true,
         fillColor: "#34795740"
@@ -42,7 +40,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         enabled: true,
         border: true,
         borderColor: "#C2790A",
-        borderWidth: 5,
         borderAlignment: .inside,
         fill: true,
         fillColor: "#C2790A40"
@@ -52,7 +49,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         enabled: Bool,
         border: Bool,
         borderColor: String,
-        borderWidth: CGFloat,
         borderAlignment: BorderAlignment,
         fill: Bool,
         fillColor: String
@@ -60,7 +56,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         self.enabled = enabled
         self.border = border
         self.borderColor = borderColor
-        self.borderWidth = borderWidth
         self.borderAlignment = borderAlignment
         self.fill = fill
         self.fillColor = fillColor
@@ -72,7 +67,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         case enabled
         case border
         case borderColor = "border_color"
-        case borderWidth = "border_width"
         case borderAlignment = "border_alignment"
         case fill
         case fillColor = "fill_color"
@@ -101,11 +95,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
                 String.self,
                 forKey: .borderColor
             ) ?? defaults.borderColor
-        borderWidth =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .borderWidth
-            ) ?? defaults.borderWidth
         borderAlignment =
             try container.decodeIfPresent(
                 BorderAlignment.self,

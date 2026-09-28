@@ -46,6 +46,11 @@ extension APIReference {
             "space_bar.set_front_app_title_cap"
         map["set_float_nudge"] = "set_float_placement"
         map["kiwishelf.set_item_padding"] = "kiwishelf.set_glyph_size"
+        // Every window stroke takes the border's width and
+        // corners (#1742).
+        map["drag.set_ghost_border_width"] = "border.set_width"
+        map["drag.set_drop_zone_border_width"] = "border.set_width"
+        map["drag.set_corner_radius"] = "border.set_corner_style"
         return map
     }()
 

@@ -5,6 +5,8 @@ struct GeneralGates {
     let autoStart: AutoStartStatus
     /// Why Sparkle refuses automatic install, if it does (#1542).
     var autoInstall: AutoInstallSetting.Unavailable? = nil
+    /// Whether `gui.json` owns the config (#1741).
+    var guiManaged = true
 
     /// Reason why a General setting is inert.
     enum InertReason: Hashable {
@@ -16,6 +18,10 @@ struct GeneralGates {
 
         /// Sparkle will not install automatically (#1542).
         case automaticInstall(AutoInstallSetting.Unavailable)
+
+        /// `init.lua` owns the config, so the app-wide rows have no
+        /// store to write (#1741).
+        case luaOwned
     }
 
     /// Evaluates inert reason for setting key. Order matters:
@@ -35,6 +41,8 @@ struct GeneralGates {
                 ? .managedByService : nil
         case .general(.installUpdatesAutomatically):
             return autoInstall.map { .automaticInstall($0) }
+        case .general(.refusalSound), .general(.quitGridTargetDepth):
+            return guiManaged ? nil : .luaOwned
         default:
             assertionFailure(
                 "unhandled General gate: \(key.id)"
@@ -49,6 +57,8 @@ struct GeneralGates {
     static let resolved: Set<SettingKey> = [
         .general(.startAtLogin),
         .general(.installUpdatesAutomatically),
+        .general(.refusalSound),
+        .general(.quitGridTargetDepth),
     ]
 
     /// Gated keys resolved elsewhere in view hierarchy.

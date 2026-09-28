@@ -204,4 +204,21 @@ struct SettingKeyModelParityTests {
             )
         }
     }
+
+    /// `AppWideSettings` (#1741) and the census's `appWide.*` rows
+    /// cover each other field for field: `appWide` is undrafted,
+    /// so the `GuiConfig` walk above skips it.
+    @Test func appWideFieldsAreCensused() {
+        let fields = Set(
+            Mirror(reflecting: AppWideSettings()).children
+                .compactMap(\.label)
+        )
+        #expect(!fields.isEmpty)
+        let rows = Set(
+            SettingKey.allCases.map(\.id)
+                .filter { $0.hasPrefix("appWide.") }
+                .map { String($0.dropFirst("appWide.".count)) }
+        )
+        #expect(rows == fields)
+    }
 }

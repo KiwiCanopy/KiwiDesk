@@ -45,7 +45,7 @@ public final class DragOverlay {
     public func showGhost(
         at frame: CGRect,
         style: DragVisual,
-        cornerRadius: CGFloat,
+        stroke: WindowStroke,
         glassBeneath window: CGWindowID?,
         sheen: CGFloat
     ) {
@@ -55,7 +55,7 @@ public final class DragOverlay {
             marker,
             at: frame,
             style: style,
-            radius: cornerRadius,
+            stroke: stroke,
             beneath: window,
             sheen: sheen
         )
@@ -66,7 +66,7 @@ public final class DragOverlay {
     public func showDropZone(
         at frame: CGRect,
         style: DragVisual,
-        cornerRadius: CGFloat,
+        stroke: WindowStroke,
         glassBeneath window: CGWindowID?,
         sheen: CGFloat
     ) {
@@ -76,7 +76,7 @@ public final class DragOverlay {
             marker,
             at: frame,
             style: style,
-            radius: cornerRadius,
+            stroke: stroke,
             beneath: window,
             sheen: sheen
         )
@@ -86,18 +86,18 @@ public final class DragOverlay {
         _ marker: Marker,
         at frame: CGRect,
         style: DragVisual,
-        radius: CGFloat,
+        stroke: WindowStroke,
         beneath window: CGWindowID?,
         sheen: CGFloat
     ) {
         place(
             marker.panel,
-            at: adjustedFrame(frame, style: style),
+            at: adjustedFrame(frame, style: style, width: stroke.width),
             below: window
         )
         marker.view.render(
             style,
-            radius: radius,
+            stroke: stroke,
             glass: window != nil,
             sheen: sheen
         )
@@ -105,10 +105,11 @@ public final class DragOverlay {
 
     private func adjustedFrame(
         _ frame: CGRect,
-        style: DragVisual
+        style: DragVisual,
+        width: CGFloat
     ) -> CGRect {
         guard style.border else { return frame }
-        let offset = style.borderWidth / 2
+        let offset = width / 2
         switch style.borderAlignment {
         case .inside:
             return frame.insetBy(dx: offset, dy: offset)

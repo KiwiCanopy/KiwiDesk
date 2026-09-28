@@ -587,9 +587,20 @@ would be a live control drawn dead. The master stays live over
 a "mixed" readout, answers the resolver's `followersDiffer` —
 `GapsBordersGates.acknowledged` is the one register of who does
 — and hands that answer to its label's `?`, the first edit
-converging every follower (`BorderMastersDivergenceTests` ▸
+converging every follower (`MasterDivergenceRegisterTests` ▸
 `acknowledgedRegisterIsExact`, `GapsAndBordersGateWiringTests`
 ▸ `gapMastersAcknowledgeAtTheLabel`).
+
+The Liquid Glass master is the one ruled exception to that
+register: it answers its `?` from `LiquidGlassAgreement`
+(`Sources/KiwiDesk/Settings/SettingsModel+Glass.swift`), the ONE
+comparison both its binding and its row read, and never joins
+`GapsBordersGates.acknowledged` (`LiquidGlassMasterTests` ▸
+`divergenceSeen`, `LiquidGlassMasterTests` ▸
+`rowConsultsTheAgreement`). A new master answers through one of
+those two homes; a third one is ruled here before it ships, or
+the two registers stop being the whole census of who
+acknowledges.
 
 **Consulting a resolver is not drawing what it answered, and a
 SURFACING gate leaves nothing behind to prove the difference.**

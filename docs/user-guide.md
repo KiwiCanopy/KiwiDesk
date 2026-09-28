@@ -116,6 +116,17 @@ reference](cli.md)). While that service runs, **Start at login**
 shows as on and stops being editable; `kiwidesk service stop`
 gives the switch back.
 
+## Wake & Restart
+
+Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
+[Lua reference](lua-reference.md)): after sleep or screen unlock,
+KiwiDesk restores the arrangement captured when the Mac went to
+rest (on by default, after a 1500 ms delay) and puts focus back
+on the window you were in. A wake restore is skipped when the
+display set changed during sleep; the monitor-change profile
+switch takes over. If a restore leaves things wrong, **General ▸
+Advanced ▸ Discard Saved Window Arrangement** clears it.
+
 ## Moving to Another Mac: Backups
 
 **General ▸ Advanced ▸ Export KiwiDesk Backup…** writes one file
@@ -138,6 +149,10 @@ restore that skips a profile or a palette says so.
 :::unreleased
 Saved looks travel in a backup beside the palettes, and restore
 wherever they do; **Reset All Settings…** keeps them too.
+
+The alert sound and the windows per pile on quit travel in a
+backup. An older backup keeps them in its profiles instead, and
+restoring it takes them from the profile that becomes active.
 :::
 
 ## The gui.json File
@@ -191,6 +206,14 @@ hand-written setup, the first time you Save in Settings.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
+:::unreleased
+**`refusal`** holds `sound`, the alert sound when an action
+can't apply, and **`quit`** holds `grid_target_depth`, the
+windows per pile on quit, beside `layout`, how windows are
+spread on quit. The first two are set on **General**; `layout`
+is set from Lua (`quit.set_layout`).
+:::
+
 A `profile_bindings` entry names its profiles as a list,
 `profiles`, one per screen count, each for all screen setups — a
 file with the older single `profile` is rewritten once on load —
@@ -236,6 +259,12 @@ keybindings runs on every reload.
   and per-layout / per-space tuning, space-to-monitor pins, the
   Main role and the fallback space.
 
+:::unreleased
+The alert sound when an action can't apply and the windows per
+pile on quit are global too: they sit in `gui.json`, and loading
+a profile never changes them.
+:::
+
 The General section leaves the grid while you edit a stored
 profile without switching to it.
 
@@ -277,9 +306,13 @@ track shortcut bound.
 - **Floating** — switching a space to Floating with any window
   partly or fully off the screen (a scrolled-out column, a
   parked Monocle window) or piled behind another (a Monocle
-  stack) arranges the space's windows in the grid **Behavior ▸
-  On quit** uses; with everything already reachable, nothing
-  moves.
+  stack) arranges the space's windows in the grid KiwiDesk uses
+  on quit; with everything already reachable, nothing moves.
+
+:::unreleased
+That grid's windows per pile is set at **General ▸ Windows per
+pile on quit**.
+:::
 
 **Monocle** — a focus change flips a card from one app's icon
 to the next over a blur; the flip and its duration live here
@@ -335,13 +368,10 @@ another monitor moves the focus there with its window.
 
 **Width** and **Corners** at the top set the focus ring, the
 drag ghost and the drop zone together. Keep gaps at least twice
-the width so two neighbouring rings do not touch. Each stroke's
-own width, each overlay's alignment and the drag radius are
-Lua-only and never clamped against each other; [design
-decisions](design-decisions.md) has why the GUI offers no switch,
-the [Lua reference](lua-reference.md) the verbs. A radius set
-from Lua shows as **Rounded** and keeps its value; if the ring
-and the overlays disagree, neither segment is selected.
+the width so two neighbouring rings do not touch. Each overlay's
+alignment is Lua-only; [design decisions](design-decisions.md)
+has why the GUI offers no switch, the [Lua
+reference](lua-reference.md) the verbs.
 
 ### Focus Border
 
@@ -539,19 +569,6 @@ Dropping onto the Space a window is already on does nothing.
 
 While dragging, hold over a bar's faded end to autoscroll a bar
 that overflows.
-
-## Behavior
-
-### Wake & Restart
-
-Lua-only (`enable_wake_restore`, `set_wake_restore_delay` in the
-[Lua reference](lua-reference.md)): after sleep or screen unlock,
-KiwiDesk restores the arrangement captured when the Mac went to
-rest (on by default, after a 1500 ms delay) and puts focus back
-on the window you were in. A wake restore is skipped when the
-display set changed during sleep; the monitor-change profile
-switch takes over. If a restore leaves things wrong, **General ▸
-Advanced ▸ Discard Saved Window Arrangement** clears it.
 
 ## Profiles
 

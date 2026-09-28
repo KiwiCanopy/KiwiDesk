@@ -14,10 +14,6 @@ extension APIReference {
             "Enables or disables the border on the ghost visual.",
             .boolean("enabled")
         ),
-        "set_ghost_border_width": APIRecord(
-            "Sets the border width of the ghost visual in points.",
-            .number("width")
-        ),
         "set_ghost_border_alignment": APIRecord(
             "Positions the ghost border inside or outside the "
                 + "slot.",
@@ -44,11 +40,6 @@ extension APIReference {
                 + "visual.",
             .boolean("enabled")
         ),
-        "set_drop_zone_border_width": APIRecord(
-            "Sets the border width of the drop zone visual in "
-                + "points.",
-            .number("width")
-        ),
         "set_drop_zone_border_alignment": APIRecord(
             "Positions the drop zone border inside or outside the "
                 + "slot.",
@@ -66,11 +57,6 @@ extension APIReference {
         "set_drop_zone_fill_color": APIRecord(
             "Sets the fill color of the drop zone visual.",
             .color("hex")
-        ),
-        "set_corner_radius": APIRecord(
-            "Sets the corner rounding of both drag visuals in "
-                + "points.",
-            .number("radius")
         ),
         "set_liquid_glass": APIRecord(
             "Draws both drag visuals as macOS 26 Liquid Glass, "

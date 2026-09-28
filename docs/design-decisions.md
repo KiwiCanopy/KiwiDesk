@@ -3280,16 +3280,14 @@ while keeping the stored `true` would have made every existing
 install noisier at limits it currently hits silently. So the
 crossing drops the retired key rather than carrying it.
 
-The setting lives in Behaviour rather than General, and that is a
-STORAGE decision wearing a placement question: every row in
-General is a `UserDefaults` preference, a live service toggle or
-an action, so a draft-and-Save row there would be the only one
-that does not do what it was just told. Keeping it in the draft
-config is what preserves the Lua verb and lets it travel in
-profiles and backups — the GUI curates, Lua is open — and
-Behaviour is where app-wide draft behaviour already lives. The
-cost, stated: Behaviour is Power-User-only, so a Simple user
-gets the pill and not the switch.
+:::unreleased
+Where the switch sits is a STORAGE decision wearing a placement
+question: it is on General because the value is app-wide, in
+`gui.json`, and written the moment it changes. The storage, the
+crossing out of the profiles, and why General's card needs the
+immediate write are argued once, in [Spaces, profiles & config
+ownership](#spaces-profiles--config-ownership) (#1741).
+:::
 
 **An arrow means a resize stopped; a non-arrow means there is
 no resize here (#1260).** [Principle] The pill carries two kinds
@@ -4483,6 +4481,107 @@ tombstone removes), never a second home for the setting. The
 binding rules for adding one — sparse-diff mechanics, parity
 tests, mutation through the `KiwiCore` facade — live in
 `AGENTS.md` §5.
+
+:::unreleased
+**A setting nobody varies per profile is app-wide, and it
+crosses out of the profiles by ADOPTION at the first apply, not
+by a migration step (#1741).** [Rationale] The alert sound when
+an action can't apply (`refusal.sound`), how windows are
+spread on quit (`quit.layout`) and the quit grid's windows per
+pile (`quit.grid_target_depth`) were stored in every profile's
+`TilingSettings`. None answers a question about a desk (owner,
+2026-09-28): nobody wants a different alert sound or a different
+quit arrangement per profile, and the pile depth depends on the
+quit layout. Per-profile storage bought only a way to lose
+them — a Desktop binding switching profile silently changed all
+three. So they live in `gui.json`'s `refusal` and `quit` groups,
+held on `KiwiCore.appWide`, and a profile apply never touches
+them. The Lua verbs keep their names; only where the value is
+stored moved.
+
+The move changes where a stored value lives, so it owes a
+one-shot crossing (`AGENTS.md` §5). N profile files → one value
+is an election, and a byte-level `ConfigMigration` step cannot
+hold it: a step sees one file's bytes and cannot know which
+profile is live. That is #1307's finding, and it stands for
+steps. What it does not show is that the move is unbuildable —
+the election can be held where the live profile is known, in two
+halves. **Capture** runs first in `loadConfig`, ahead of the
+#1530 settle and anything else that may rewrite a profile file:
+`prepareAppWide` reads `gui.json`, its stored values become the
+running ones, and a file readable *without* them owes the
+crossing, so every profile file's retired values are read into
+memory there and then. **Adoption** ends it at the first
+`apply(profile:)`: the incoming profile is the live one, so its
+captured values are adopted — a profile that carried none keeps
+the settled values: the defaults at an upgrade, this Mac's own at
+a restore — `gui.json` is
+written with them, and only once that write has landed are the
+retired groups (`refusal` and `quit`, whole) stripped from every
+profile file by a surgical edit that leaves the rest of each file
+as it was. A write that fails strips nothing, so every profile
+keeps its copy and the next launch can still cross. The crossing
+ends in the files, which is what makes it end at all: once the
+groups are gone, no reader of them is left to retire. The order
+is the whole design — a settle that re-encoded a profile before
+the capture would destroy the only copy the election reads. An
+unreadable `gui.json` owes nothing, since the crossing ends by
+writing into it. While the crossing is owed, no `gui.json` write
+stamps app-wide values at all, so no unrelated save can end it
+with values it never adopted.
+
+The trade, each half stated. **The first profile applied
+decides**, and every other profile's copy is abandoned — a user
+whose profiles disagreed keeps the live one's values, which is
+the one the user was hearing and seeing. A built-in Standard is
+not a stored profile and lends nothing; the crossing waits for
+the first stored one. **A Lua-owned config crosses nothing**:
+`init.lua` is the store there, and writing a `gui.json` would
+hand ownership to a file the user never chose, so loading a
+Lua-owned config clears any crossing a GUI-managed load had left
+owed. The cost is that a value a profile file carried is no
+longer read in such a setup ([Accepted
+limitations](accepted-limitations.md)), and General's two rows
+grey with the reason, since a row there has no store to write.
+`quit.layout` has no row while `grid` is its one value. **A
+backup written before the move crosses the same way**: its
+settings store no app-wide values, but its inline profiles still
+carry them, and a bundle is the second reader of that shape — so
+`readBackup` reads them off the bytes before the decode drops
+them, and the restore owes them to the first profile it applies.
+A backup written after carries them in its settings.
+
+**A verb changes the running value; only a General row or an
+adoption stores one.** `KiwiCore+AppWide` holds them apart —
+what the engine reads, the value no verb has touched, and what
+`gui.json` carries — because every `gui.json` write stamps the
+app-wide values in. A stamp that took the running value would
+persist a `set_refusal_sound` typed at the CLI the next time
+anything unrelated saved, which is the one thing no `set_*` verb
+does. The untouched value is there for the same reason: a row
+write or an adoption before anything was stored builds on it,
+since building on the running value would carry a verb's change
+into the file along with the row's. So a verb changes the
+running value alone, a General row writes `gui.json` at once,
+and moving a Lua-owned setup into the GUI
+(`adoptConfigIntoGui`) stores the values `init.lua` executed,
+since those are what the user was running.
+
+**In Settings, the rows sit on General's "Applies immediately"
+card and write `gui.json` at once, with no Save.** (#1741,
+ui-designer ruling.) Every row on that card does what it was
+just told the moment it is told; a draft-and-Save row there
+would be the only one that does not. That was #1255's argument
+for keeping the alert sound off General, and it still holds —
+what changed is the storage, which made the immediate write
+possible. General is a Simple-mode page, so the switch now
+reaches a Simple user, where Behaviour, Power-User-only, gave
+that user the pill and not the switch. With both rows gone,
+Behaviour held nothing, and the destination is retired rather
+than kept for an empty card: This Profile on Home now holds
+exactly the profile-scoped cards, which is what its heading
+says.
+:::
 
 **Floating windows hide with their space; visible-everywhere
 is Sticky, an explicit flag.** A floating window exempt from
@@ -6355,6 +6454,66 @@ correct failure here — the screen without the sentence is exactly
 the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
+:::unreleased
+### The tour's look is written through, and the tour owns its undo
+
+**[Principle]**
+
+**A click on the tour's Looks step is the whole act: it paints
+KiwiDesk live and writes the same change into the live profile's
+file, and the step carries its own Revert** (#1720, owner rulings
+2026-09-28). Everywhere else in Settings an edit is a draft until
+Save. The tour has no save pill and nothing that narrates a
+draft, and a user who picks Taskbar, watches their windows retile
+above the new bottom bar and clicks Continue has chosen: a draft
+there would ask them to commit a choice they already watched take
+effect, or keep it only until the next reload.
+
+Writing through leaves Settings' Revert nothing to undo, so the
+undo lives where the change was made — one path, which is why a
+"current colours" tile was ruled out as a second. The step's
+Revert is greyed until a click changed something, and returns
+what a paint can reach to where it stood before the first one —
+the look and palette keys, and the glass leaves and per-layout
+indicators a look writes beyond them — and nothing else: a setting
+outside those saved from Settings meanwhile stays, while one inside
+them returns with the rest (`ShelfPaintTests` ▸
+`restoreTouchesOnlyTheLook`, `ShelfPaintRoundTripTests` ▸
+`revertRoundTripsEveryLook`). A pick that
+changes nothing and a step left untouched write nothing
+(`OnboardingLooksTests` ▸ `noOpPickWritesNothing`,
+`OnboardingLooksTests` ▸ `untouchedWritesNothing`).
+
+Three obligations keep the write honest:
+
+- **It writes what the click changed and nothing else.** The file
+  half reads the stored profile, paints it and writes it back,
+  non-adopting, and never snapshots live the way Keep does (#1179;
+  `ShelfPaintTests` ▸ `fileKeepsItsOwnSettings`). A Revert is
+  refused once another profile went live, whose settings the
+  baseline never described (`ShelfPaintTests` ▸
+  `restoreSkipsAnotherProfile`).
+- **An unsaved live-profile Settings draft greys the step**, since
+  its Save would write the old look back over the new one — greyed
+  and never hidden, with a caption naming the buttons that clear
+  it (`OnboardingLooksTests` ▸ `draftBlocks`). A clean draft
+  re-reads after every paint, through Core's `onShelfPainted` on
+  the write (`ShelfPaintTests` ▸ `paintsAreAnnounced`,
+  `OnboardingLooksWiringTests` ▸ `paintFollowsIntoSettings`).
+- **Where no saved profile is live, the click lasts the session**
+  (`ShelfPaintTests` ▸ `noProfileIsLiveOnly`): there is no file to
+  write. A first run always has one, the seeded Starter; only a
+  replay over a built-in layout reaches this, and Settings already
+  narrates that layout as unsaved.
+
+The step has no "use its colours too" tick: a look click paints
+the look's shape and the palette it names, and the palette row
+below then repaints the colours alone and keeps the shape
+(`ShelfPaintTests` ▸ `paletteKeepsTheShape`). The marks are read
+from the live settings on every render, so after hand-tuned
+colours nothing reads selected until a click.
+:::
+
 ### The Mac Checklist counts what macOS can confirm
 
 **[Principle]**
@@ -6961,8 +7120,7 @@ the Gaps & Borders tile, `MonitorArrangement.layout`, `BarsGates`'
 own shown-bar predicate. Where no editor maths exists, the picture
 is a readout of the draft, never a decorative sketch: one pane per
 declared space, the colour fan and swatch grid of the config's
-real hexes, the Behaviour divider answering the real mouse-resize
-choice. There is no text-only fallback: a card without editor
+real hexes. There is no text-only fallback: a card without editor
 maths still draws its readout — on the plate (#786), for a This
 Profile card.
 
@@ -7456,6 +7614,31 @@ complaint on the channel no number of points can answer — so
 drawer built outside the wrapper too. (gui.md requires it of a
 title component, and a drawer title is one.)
 
+:::unreleased
+**A collapsible container that is a peer of the page's sections
+is a collapsible SECTION; one that qualifies a card stays a
+drawer.** (#1741, ui-designer ruling.) Shortcuts & Gestures ▸
+Mouse & trackpad is a family of its own beside the page's other
+cards, and drawn as a `.card` drawer — the drawer tier, with no
+section above it — it read as a sub-drawer of nothing. So
+`SettingsCollapsibleSection` wears `SettingsSection`'s
+`.headline` header over the same plate, and while shut the
+plate stays drawn with the summary inside it: the card keeps
+its place in the page instead of shrinking to a bare heading.
+This does not overturn #1021's tier, which is about drawers — a
+drawer qualifies the card it sits in, and a header louder than
+that card's own title inverts the hierarchy the other way. The
+test is the container's relation to the page, never its size or
+how many rows it holds. `GeneralShortcutsGroup` meets it too and
+is still a drawer, left for its own change.
+
+Both kinds draw the one `SettingsDisclosureButton` — chevron,
+full-row button, hover, heading trait, expanded/collapsed value
+and the Reduce Motion gate — so they differ in tier and chrome
+and in nothing the user operates. A second copy of that
+button is how the two would drift apart.
+:::
+
 **The header's accessory is a SIBLING of that button, never its
 child.** A drawer's `accessory:` slot may hold a control — the
 Profiles-per-Desktop drawer puts its `?` there — and wrapping the
@@ -7532,7 +7715,7 @@ way to know a shortcut works is to press it). Everything else
 — sliders, colors, pickers, placement grids — stays staged;
 where a raw value is hard to judge, build an in-window
 preview (the `GapsDiagram` / `DragVisualsEditor`-strip
-pattern), never live-apply. Sweep verdicts: Spaces, Behavior,
+pattern), never live-apply. Sweep verdicts: Spaces,
 App Rules, Shortcuts (minus the recorder), and the
 Desktop→profile bindings are plainly staged. Monitors'
 drag-cards and the icon pickers are **self-previewing** (the
@@ -7542,6 +7725,14 @@ rename/delete/make-default/preset-apply are immediate file
 **actions**, not settings — correctly outside this question.
 The Spaces tab's per-space layout picker stays staged. **No
 control besides the key recorder passes the live-apply bar.**
+
+:::unreleased
+Bar **(a)** is about owning no profile state, not about which
+file a control writes: General's alert-sound and
+windows-per-pile rows clear it while writing `gui.json`, since
+what they write belongs to no profile (#1741, [Spaces, profiles
+& config ownership](#spaces-profiles--config-ownership)).
+:::
 
 **Three save verbs: Revert / Save a copy… / Save.** Seven
 differently-labeled verbs switching on invisible mode state
@@ -9387,12 +9578,12 @@ Borders" pairs two nouns; *Controls* was refused because every row
 in Settings is a control, and *gesture* is Apple's own word for
 trackpad and mouse input.
 
-**The Mouse & trackpad drawer sits above the layer header, and is
+**The Mouse & trackpad card sits above the layer header, and is
 collapsed on every visit.** Everything under "Editing the X layer"
-reads as belonging to that layer; the drawer's settings do not, so
+reads as belonging to that layer; the card's settings do not, so
 it cannot sit there, and the layers card leads only what is
 layer-scoped. It opens shut every time because a
-drawer that opens on a first visit needs a stored "seen" flag and
+card that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
 
@@ -9721,8 +9912,7 @@ draggable"). Dimmed means "does not accept input" on every channel
 drag, the arrow nudge and focus on the same bit that dims it, so a
 control that greys and still writes on a drag would be a second
 axis invented for one row, and a live control drawn dead is the
-one failure worse than a wrong grey. The gap masters therefore
-take the shape the Borders card's width master already had: the
+one failure worse than a wrong grey. So in the gap masters the
 slider is live, the readout says "mixed" and speaks it, the
 label's `?` carries *the edges are set differently right now; a
 value here sets all of them*, and the first edit converges every
@@ -10372,28 +10562,28 @@ the user's choice" from the old #444/#493 record and revert this.
 
 **Ghost and Drop zone are two side-by-side columns.** (#231.) Each
 column leads with its own live preview and puts its controls
-directly beneath, so tuning a column's border width never scrolls
-that preview off-screen — the failure mode of the earlier
+directly beneath, so toggling a column's border or fill never
+scrolls that preview off-screen — the failure mode of the earlier
 one-strip-then-two-stacked-sections layout. They are a genuine A/B
 pair (same schema, edited by comparison), which is exactly where
 macOS System Settings itself reaches for twin panels (Displays'
 Arrangement, Desktop & Dock's light/dark), so twin columns state
 the pairing once instead of duplicating preview-then-controls
 structure. What a column keeps is what only that column can answer
-— whether its border and its fill are drawn at all; the shared
-corner radius, the border width and the alignment picker belong to
-the page's shared card or to Lua alone (#754). The narrowing that
-lets a half-width row hold a slider (`dragColumnLabelColumn`) and
-the in-group short form it is for ("Border width" → "Width", with
-the full name kept for VoiceOver through `a11yLabel`) travel with
-those rows: they live on in Advanced Colours' twin drag columns,
-which take the width as `AdvancedColorRow`'s `labelWidth:`, and
-this editor no longer pushes the narrow axis in through
+— whether its border and its fill are drawn at all; the stroke's
+width and corners belong to the page's shared card and the
+alignment to Lua alone (#754). The narrowing that lets a
+half-width row hold a colour field (`dragColumnLabelColumn`) and
+the in-group short form it is for ("Border color" → "Border",
+with the full name kept for VoiceOver through `a11yLabel`) travel
+with those rows: they live on in Advanced Colours' twin drag
+columns, which take the width as `AdvancedColorRow`'s
+`labelWidth:`, and this editor no longer pushes the narrow axis in through
 `settingsLabelColumn` at all — what remains here is toggles, which
 draw their own labels. Wherever the ghost and drop zone are drawn
 — the Gaps & Borders panel's composite scene (#793) — the drawing
-shows the alignment, radius and width actually stored, because all
-three are still settable from Lua. Schematic, not pixel-exact, and
+shows the stored alignment, which only Lua sets, and the width and
+corners the markers actually draw. Schematic, not pixel-exact, and
 it remaps the full value range instead of hard-capping halfway.
 The alignment drawing earns its keep twice over, the control
 having been dead before it — SwiftUI `.strokeBorder` always draws
@@ -10467,93 +10657,82 @@ hint — the hint the 95% default exists for is the NEIGHBOUR
 peeking in, and a lone window has none. `ScrollingLayoutTests`
 holds both halves (`singleWindow`, `shortRow`).
 
+:::unreleased
 **[Principle]**
 
-**One width and one corner for all three strokes — the GUI
-removes the decision rather than building a control to protect
-it.** KiwiDesk strokes three things around a window: the focus
-ring, the drag ghost and the drop zone. Asked as three
-independent decisions they were three chances to answer once
-and forget twice, and nobody holds the preference that comes
-out of that — a 3 pt ring beside a 1 pt ghost is an oversight
-wearing the clothes of a setting. So Gaps & Borders asks each
-question exactly once, in a card above the sections that draw
-the strokes, and every per-stroke width, alignment and radius
-control leaves the GUI (GUI_REMOVED_2026-08). The verbs stay
-open and unclamped, per stroke, for whoever genuinely wants
-three different ones.
+**One width and one corner style for every window stroke —
+stored once, never three stores under a master.** KiwiDesk
+strokes three things around a window: the focus ring, the drag
+ghost and the drop zone. Asked as three independent decisions
+they were three chances to answer once and forget twice, and
+nobody holds the preference that comes out of that — a 3 pt ring
+beside a 1 pt ghost is an oversight wearing the clothes of a
+setting. So there is one answer and one place it is kept:
+`border.width` and `border.corner_style` are every window
+stroke's, derived once as `TilingSettings.windowStroke`, and the
+ghost and the drop zone store no width or radius of their own
+(#1742, owner ruling 2026-09-28). Gaps & Borders asks each
+question once, in a card above the sections that draw the
+strokes.
 
 The rejected shape is a **Use one width for all borders** toggle
 over two masters, with the per-stroke sliders left on screen and
 dimmed, and the reason generalises: a toggle that turns a defect
 on is still the defect, shipped with a switch. It asks a new
 question ("do you want them linked?") to protect an old answer
-nobody wanted, it needs a stored pick and a runtime gate and three
-dimmed rows to express, and the state it protects — three strokes
-drawn three ways — is the very state the card exists to end. Where
-the GUI would need a control to keep a bad option reachable,
-delete the option. This is not "grey, don't hide" (#171)
-overruled: that rule covers a control another mode brings back to
-life, and there is no mode here that revives a per-stroke width.
+nobody wanted, it needs a stored pick and a runtime gate and
+three dimmed rows to express, and the state it protects — three
+strokes drawn three ways — is the very state the card exists to
+end. Where the GUI would need a control to keep a bad option
+reachable, delete the option. This is not "grey, don't hide"
+(#171) overruled: that rule covers a control another mode brings
+back to life, and there is no mode here that revives a
+per-stroke width.
 
-**Corners passes the exact test alignment failed, which is why one
-is a control and the other is not.** The test is the entry below:
-can the question be put to all three strokes, or only to two?
-Square/Rounded can — but only as Square/Rounded. The ring stores a
-two-value corner STYLE and the drag pair a 0–40 pt radius, and
-deriving the style from the radius (`> 0` ⇒ rounded) is a slider
-collapsed into one bit: 1 pt and 40 pt drew an identical ring. A
-control whose range the thing it drives cannot represent is not a
-shared control, so the numeric radius left the GUI with the widths
-and the picker reads AND writes both halves — Square is a square
-ring and a 0 radius, Rounded is a rounded ring and any radius
-above zero, defaulting to the system window radius, which is also
-the radius's own shipped default.
+**A GUI master over three stores is that toggle one level down,
+and it went the same way.** The card's first shape (#754) kept
+the three stored widths and the two corner shapes, wrote all of
+them from one Width and one Corners row, and left the per-stroke
+verbs open in Lua. The stores could then disagree — through Lua,
+or through any writer that forgot one of the followers — and the
+card had to answer a state no GUI user could make on purpose: a
+`?` saying the strokes were set differently, a Corners picker
+with no segment selected, and every new writer owing a fan-out
+to all of them. That is the toggle's stored pick and dimmed rows
+paid for in acknowledgement instead. With one store the rows
+write the border directly, a look and `border.set_width` mean
+the same thing, and no divergence exists to explain. The cost is
+a Lua user who wanted three widths or a hand-tuned drag radius;
+"the GUI curates, Lua stays open" keeps Lua open to a decision,
+and a per-stroke width is the oversight above, not a decision.
+The per-stroke verbs are retired through `APIReference.retired`,
+naming the border's verb, and take no alias (AGENTS.md §5).
 
-**The picker READS both halves and WRITES only on a pick**, and
-that asymmetry is deliberate. A profile whose radius Lua set to
-7 pt displays as Rounded — which is what the drag pair actually
-draws there — and stays at 7 pt: the getter never stores, so
-opening the page cannot silently normalise a value the user
-never came here to change. Re-deriving at load is the
-alternative and is worse — it rewrites a saved profile on the
-way past.
+**The shared corner is a style, not a radius.** The ring stores
+a two-value corner STYLE and matches each window's real radius;
+the drag pair stored a 0–40 pt radius. A radius cannot be put to
+all three strokes — the ring's comes from the window, not from
+the user — and deriving a style from a radius (`> 0` ⇒ rounded)
+collapses a slider into one bit, so 1 pt and 40 pt drew an
+identical ring. The style can be put to all three: Square draws
+every stroke with no rounding, and Rounded draws the markers at
+the system window radius and the ring at its window's own.
 
-**Re-affirming a segment must change nothing.** Picking the
-segment already shown is the one interaction where the user
-named no new answer, and treating it as a write is what would
-undo the promise above: a stray tap on Rounded would move that
-7 pt radius to 16 with the same word on screen before and
-after, and the header counting a change. So Rounded writes the
-system radius only where there is no rounding to keep (a zero
-radius); Square writes 0 outright, being the one shape with a
-single radius. This is also the behaviour a segmented control
-has everywhere else on macOS — neither SwiftUI's `Picker` nor
-`NSSegmentedControl` re-fires for an unchanged selection — and
-"the GUI is ours" licenses a different LOOK, never a control
-that acts differently from its twin.
-
-**Where the halves disagree the picker shows no segment at
-all.** The two are stored separately and Lua can move either
-alone, so `border.set_corner_style("square")` against a rounded
-radius is reachable — and the Corners row sits directly above a
-focus-ring preview drawing the ring's own answer. Selecting one
-of the two would make the row contradict the picture beneath
-it; making the preview read the master instead would be worse,
-since a preview that stops showing what the app draws teaches
-the wrong thing about the app rather than about one row. So the
-control asserts neither, which its sliding pill already
-expresses by hiding, and either segment then converges both
-halves. The width row cannot do the same — a slider has no
-blank thumb — so it keeps showing the ring's width.
-
-**Both rows acknowledge a disagreement rather than greying
-on it.** These two have no per-stroke row anywhere on the
-page, so greying them would name the problem and withhold the
-only control that ends it. The acknowledgement is a `?` beside
-a live control — *the three strokes are set differently right
-now; choosing here sets all three* — which is what a master
-owes when it is about to overwrite an answer it did not show.
+**The ring wins, and no migration carries the rest.** A config
+written before the one store may hold drag widths or a radius
+that disagree with the ring. The ruling keeps the ring's values,
+so nothing the drag keys hold survives, and a `ConfigMigration`
+step would have nothing to carry: AGENTS.md §5's crossing exists
+to move a VALUE to its new spelling, and one the ruling
+discards has none. The decoder no longer asks for
+`drag.corner_radius` or either visual's `border_width`, an old
+file stays readable beside them, and the next write of that file
+drops them (`WindowStrokeTests` ▸ `oldDragKeysAreIgnored`). Nor
+is §5's meaning-change crossing (#1354) owed: `border.width` and
+`border.corner_style` keep their unit and scale and only widen
+their reach to every stroke, which is the change the ruling
+decided, so a stored value reads as it did.
+:::
 
 **[Rationale]**
 
@@ -10612,7 +10791,7 @@ authoritative:
 `drag.set_ghost_border_alignment("outside")` would come to mean
 *outside, unless*. It is the objection that already sank the
 shared width as a stored pick in the principle above, arriving
-here at the per-stroke value instead of at the master. The
+here at the per-stroke value instead of at the shared row. The
 verbs stay per
 stroke and unclamped — the GUI curates, Lua stays open — so an
 outward pair is one call away for whoever wants it.
@@ -11568,11 +11747,11 @@ picture is a thin square ring and tight gaps, so a look that
 stopped at the shelf did not reproduce it. Width, corners, glow
 and glow size are how the ring looks; whether either ring draws,
 and whether it stacks over an app's own chrome, stay
-functionality. The width and corners write every stroke the
-Borders masters own (#754) — the drag ghost and drop zone with
-the ring — so the card reads one value after a look, never a
-mixed `?`. Only the global gaps ride; a Space's own override
-(Lua's) stays. **Gaps move windows**, so a look is the first
+functionality. The width and corners are every window
+stroke's (#1742), so a look restyles the drag ghost and drop
+zone with the ring through the same writes `border.set_width`
+and `border.set_corner_style` make. Only the global gaps ride; a
+Space's own override (Lua's) stays. **Gaps move windows**, so a look is the first
 paint that rearranges them — once the draft is saved, as any gap
 edit does, which the page's caption says, and the Gaps card's
 pointer names the look as a writer of both. **A
@@ -11588,7 +11767,12 @@ over them. A look card draws its focus ring with the sheen
 (owner, 2026-09-28) — a deliberate exception to the palette
 thumbnail's rule of leaving a fact it cannot render undrawn at tile
 scale, paid for with a ring wide enough for the ramp to read. The
-names are ours; the reference lives only in the description.
+names are ours; the reference lives only in the description,
+which says what the look does before what it resembles — "Bottom
+bar, like Windows 11" — because a new user does not know the bar
+vocabulary and the thumbnail cannot carry it (owner, 2026-09-28).
+A look has one description, shared by the Settings card and the
+tour, Glass's included (`LookDescriptionsTests`).
 :::
 
 **"Automatic" is a value; "Auto" is an adjective — and the
@@ -11715,6 +11899,19 @@ does not licence one: it refused to CARRY a value the encoder
 wrote, where this is a row a user ticked. So the panel follows the
 active profile. The cost is real and accepted: switch to a Desktop
 bound to another profile and the panel's material follows it.
+
+:::unreleased
+*"Unbuildable" is true of a migration step, not of the move.*
+#1741 moved three settings app-wide by an adoption at
+`apply(profile:)`, which knows which profile is live and so can
+hold the election a step cannot ([Spaces, profiles & config
+ownership](#spaces-profiles--config-ownership)). The Liquid
+Glass switch was not moved, and this paragraph is no longer a
+verdict on whether it could be: a proposal to make it app-wide
+argues its own case on that path and its trade — the first
+profile applied decides, every other profile's value is
+abandoned.
+:::
 
 **The switch means ALL of them, and its `?` carries what a
 boolean cannot.** Owner ruling: `off` is a true statement

@@ -299,14 +299,12 @@ struct ShortcutsFamilyRowsTests {
     /// rows. Pinned because `nil` here means two different
     /// things — a hand-drawn Shortcuts container, or a key that
     /// was never a shortcut — and only the second is checkable
-    /// by kind. (It used to be pinned through the refusal-sound
-    /// toggle, which shared the Size & float card until #1255
-    /// moved it to Behaviour; the invariant outlived the row.)
+    /// by kind.
     @Test("a key from another area carries no keybinding rows")
     @MainActor
     func foreignKeyIsNotAFamily() {
         #expect(
-            fixture().rows(for: .behaviour(.refusalSound)) == nil
+            fixture().rows(for: .behaviour(.minWindowSize)) == nil
         )
         #expect(fixture().rows(for: .general(.language)) == nil)
     }

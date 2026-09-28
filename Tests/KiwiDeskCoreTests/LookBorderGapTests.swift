@@ -92,25 +92,23 @@ struct LookBorderGapTests {
         )
     }
 
-    /// Owner ruling 2026-09-28: one look, one stroke style — the
-    /// width and corners reach the drag strokes the Borders masters
-    /// own, so the card reads one value after a look (#754).
-    @Test("the ring's width and corners reach every stroke")
-    func strokesFanOut() {
+    /// One look, one stroke style (owner ruling 2026-09-28): the
+    /// width and corners are every window stroke's (#1742).
+    @Test("the ring's width and corners are every stroke's")
+    func strokesFollowTheLook() {
         var settings = TilingSettings()
-        let thin = look([
+        look([
             "border.width": .number(2),
             "border.corner_style": .string("square"),
-        ])
-        thin.apply(to: &settings)
-        #expect(settings.dragGhost.borderWidth == 2)
-        #expect(settings.dragDropZone.borderWidth == 2)
-        #expect(settings.dragCornerRadius == 0)
-        #expect(thin.isApplied(to: settings))
+        ]).apply(to: &settings)
+        #expect(
+            settings.windowStroke
+                == WindowStroke(width: 2, cornerRadius: 0)
+        )
         look(["border.corner_style": .string("rounded")])
             .apply(to: &settings)
         #expect(
-            settings.dragCornerRadius
+            settings.windowStroke.cornerRadius
                 == GeometryUtils.systemWindowCornerRadius
         )
     }

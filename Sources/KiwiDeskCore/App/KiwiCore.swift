@@ -265,21 +265,21 @@ public final class KiwiCore {
     /// carries the frame macOS kept for it on that Desktop.
     var refiledWindows: Set<WindowID> = []
 
-    /// The live arrangement's space→monitor fingerprint pins,
-    /// adopted from the active profile's matching monitor set
-    /// and edited by the GUI Canvas (#36). Internal: the GUI
-    /// reads placement via `loadGuiConfig` and writes it via
-    /// `applyProfileScopedState`, never directly.
+    /// The live arrangement's space→monitor fingerprint pins, adopted
+    /// from the active profile's matching monitor set and edited by the
+    /// GUI Canvas (#36). Internal: the GUI reads placement via
+    /// `loadGuiConfig` and writes it via `applyProfileScopedState`.
     var spacePins: [SpaceID: String] = [:]
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
-    /// The space the empty-display heal seeded per monitor
-    /// fingerprint (#1175), so a pin reset that did not prune
-    /// re-pins the same seed instead of minting another. Session
-    /// state, retired where a declaration adopts the seed
-    /// (`retireHealedSpaces`) and by the #634 reset.
+    /// The space the empty-display heal seeded per monitor fingerprint
+    /// (#1175), so a pin reset that did not prune re-pins the same seed
+    /// instead of minting another. Session state, retired where a
+    /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
+    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
+    var appWideLedger = AppWideLedger()
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and
     /// captured back on save. nil falls back to the space
@@ -318,6 +318,8 @@ public final class KiwiCore {
     public var onConfigIssuesChange:
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
+    /// Fired on every tour shelf paint's write (#1720).
+    public var onShelfPainted: @MainActor () -> Void = {}
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
     /// declared and argued as a bundle in `KiwiCore+LuaAPI`,

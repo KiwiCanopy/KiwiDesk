@@ -31,7 +31,6 @@ private func richConfig() -> GuiConfig {
     config.settings.grid.rows = 3
     config.settings.kiwishelf.thickness = 44
     config.settings.monocle.appBar.titleCap = 7
-    config.settings.dragCornerRadius = 12
     config.settings.mouseResize = .snapBack
     config.settings.animations.onSpaceChange = true
     config.settings.animations.onScrolling = false

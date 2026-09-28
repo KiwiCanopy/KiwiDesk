@@ -22,8 +22,8 @@ public enum QuitGridLayout {
     /// Teardown dimension ceiling (4 per axis), a safety boundary
     /// and deliberately not configurable. The tile cap, the
     /// ladder and its thresholds are restated as prose in
-    /// `docs/lua-reference.md` and `BehaviorSection`'s
-    /// `behavior.quit.target_depth.help` — changing any of them
+    /// `docs/lua-reference.md` and `GeneralSection+AppWide`'s
+    /// `general.quit_pile_depth.help` — changing any of them
     /// updates those sites too.
     public static let maxDimension = 4
     /// The stack grids, smallest first, as (splits along the

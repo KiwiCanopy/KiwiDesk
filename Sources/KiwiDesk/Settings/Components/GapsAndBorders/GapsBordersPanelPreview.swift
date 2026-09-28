@@ -41,7 +41,7 @@ struct GapsBordersPanelPreview: View {
             labelled(SettingsCatalog.gapsAndBorders.dragGhost) {
                 DragVisualPreview(
                     visual: settings.dragGhost,
-                    cornerRadius: settings.dragCornerRadius,
+                    stroke: settings.windowStroke,
                     glass: settings.dragLiquidGlass,
                     sheen: settings.borderStyle.sheen
                 )
@@ -49,7 +49,7 @@ struct GapsBordersPanelPreview: View {
             labelled(SettingsCatalog.gapsAndBorders.dragDropZone) {
                 DragVisualPreview(
                     visual: settings.dragDropZone,
-                    cornerRadius: settings.dragCornerRadius,
+                    stroke: settings.windowStroke,
                     glass: settings.dragLiquidGlass,
                     sheen: settings.borderStyle.sheen
                 )

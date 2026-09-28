@@ -7,32 +7,41 @@ import KiwiDeskCore
 /// Keyed by the bundled name, which is not localized — like a
 /// palette's (`LookDescriptionsTests` covers every bundled name).
 enum LookDescriptions {
-    /// What each bundled look is in the style of; Glass is ours.
-    static let references: [String: [String]] = [
-        "Taskbar": ["Windows 11"],
-        "Classic": ["Mac OS 9"],
-        "Tiler": ["Hyprland", "Omarchy"],
-        "Pill": ["Barik"],
-    ]
-
-    /// The caption under a bundled look's card, or nil.
+    /// The caption under a bundled look's card, or nil: what the
+    /// look does, then what it resembles — the picture is too
+    /// small to carry the first half on its own (owner ruling
+    /// 2026-09-28, #1720).
     @MainActor static func caption(for name: String) -> String? {
-        if name == LookCatalog.defaultName {
-            return L("looks.description.glass", "KiwiDesk's default")
-        }
-        switch references[name] ?? [] {
-        case let names where names.count == 1:
+        switch name {
+        case LookCatalog.defaultName:
             return L(
-                "looks.description.style_of",
-                "In the style of %1$@",
-                names[0]
+                "looks.description.glass",
+                "Blurs what's behind, like %1$@",
+                "macOS"
             )
-        case let names where names.count == 2:
+        case "Taskbar":
             return L(
-                "looks.description.style_of_pair",
-                "In the style of %1$@ and %2$@",
-                names[0],
-                names[1]
+                "looks.description.taskbar",
+                "Bottom bar, like %1$@",
+                "Windows 11"
+            )
+        case "Classic":
+            return L(
+                "looks.description.classic",
+                "Thin and flat, like %1$@",
+                "Mac OS 9"
+            )
+        case "Tiler":
+            return L(
+                "looks.description.tiler",
+                "Boxed and monospaced, like %1$@",
+                "Hyprland"
+            )
+        case "Pill":
+            return L(
+                "looks.description.pill",
+                "Rounded and floating, like %1$@",
+                "Barik"
             )
         default:
             return nil

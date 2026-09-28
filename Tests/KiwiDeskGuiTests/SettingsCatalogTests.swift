@@ -115,7 +115,8 @@ struct SettingsCatalogTests {
         // and its two rows, less Behavior's Mouse card.
         // 121 since #1731: Position's Each bar drawer and its two
         // edge rows.
-        #expect(allEntries.count == 121)
+        // 119 since #1741: Behavior's Cues and On quit cards left.
+        #expect(allEntries.count == 119)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

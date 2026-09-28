@@ -89,23 +89,6 @@ enum HomeCardContent {
                 model.displays.count,
                 model.config.spacePins.count
             )
-        case .behavior:
-            // The mouse rows left for Shortcuts & Gestures with
-            // #1726; the card narrates what the page still holds.
-            if settings.refusalSound {
-                return L(
-                    "home.card.behavior.subtitle_sound",
-                    "Alert sound on · windows per pile on quit: "
-                        + "%1$d",
-                    settings.quitGridTargetDepth
-                )
-            }
-            return L(
-                "home.card.behavior.subtitle_silent",
-                "Alert sound off · windows per pile on quit: "
-                    + "%1$d",
-                settings.quitGridTargetDepth
-            )
         case .advancedColors:
             return L(
                 "home.card.advanced_colors.subtitle",

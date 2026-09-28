@@ -214,6 +214,9 @@ struct SettingsRawColorTests {
             + "(SettingsThemeWiringTests' deferred onAccentKnob "
             + "entry); the black rim "
             + "is its only edge in dark",
+        "SettingsSlider+Lightness.swift":
+            "the sheen track's ramp — black IS darker and white "
+            + "IS lighter in both appearances",
         "SidebarTile.swift":
             "the search tile glyph on the destination tints — "
             + "retunes with the tiles in the responsive pass's "

@@ -696,12 +696,26 @@ refusal that could not draw — a sticky mark switched off, a
 window with no overlay — stays silent.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
-silent, and a held chord sounds once per hold. The GUI twin is
-Behaviour ▸ When an action can't apply.
+silent, and a held chord sounds once per hold.
 
-Stored as `refusal.sound`; the retired `resize.feedback` key is
-dropped by the one-shot migration, its value not carried
-across.
+The retired `resize.feedback` key is dropped by the one-shot
+migration, its value not carried across.
+
+:::unreleased
+The GUI twin is **General ▸ Play the alert sound when an action
+can't apply**. The setting is app-wide: it is stored in
+`gui.json` as `refusal.sound`, no profile carries it, and
+loading a profile never changes it. A GUI-managed setup takes
+it once from the first saved profile loaded after the upgrade,
+and then removes it from every profile file
+([#1741](https://github.com/KiwiCanopy/KiwiDesk/issues/1741)).
+
+The verb changes the running value only: it never reaches
+`gui.json`, so the General row's value returns the next time
+KiwiDesk loads its config. In a Lua-owned setup, `init.lua` is
+where it is kept, and the General row is greyed. **Adopt into
+the GUI** keeps the value `init.lua` set.
+:::
 
 **Example:**
 
@@ -2843,21 +2857,6 @@ drag.set_ghost_enabled(true)
 drag.set_ghost_border(true)
 ```
 
-### drag.set_ghost_border_width
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the border width of the ghost. Lua-only per
-stroke: the Settings app's shared **Width** writes this, the
-drop zone's and the focus ring's together, and the three are
-never clamped against each other.
-
-**Example:**
-
-```lua
-drag.set_ghost_border_width(5)
-```
-
 ### drag.set_ghost_border_alignment
 
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
@@ -2935,20 +2934,6 @@ drag.set_drop_zone_enabled(true)
 drag.set_drop_zone_border(true)
 ```
 
-### drag.set_drop_zone_border_width
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the border width of the drop zone. Lua-only per
-stroke: the Settings app's shared **Width** writes this, the
-ghost's and the focus ring's together.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border_width(5)
-```
-
 ### drag.set_drop_zone_border_alignment
 
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
@@ -3001,27 +2986,6 @@ amber with 25% alpha).
 drag.set_drop_zone_fill_color("#C2790A40")
 ```
 
-### drag.set_corner_radius
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the corner rounding of both visuals (default 16,
-the system window radius). The full range is Lua-only: the
-Settings app offers **Square** / **Rounded**, which writes this
-and the focus ring's corner style together. It reads any value
-above zero as Rounded, so a radius set here is displayed rather
-than overwritten, and re-picking Rounded leaves it alone — that
-segment writes the system radius only from 0. Square writes 0.
-Set this to disagree with `border.set_corner_style` and the
-picker shows no segment selected until you choose one; either
-segment then sets both.
-
-**Example:**
-
-```lua
-drag.set_corner_radius(16)
-```
-
 ### drag.set_liquid_glass
 
 **Expects:** a boolean (default `true`).
@@ -3043,6 +3007,23 @@ switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 ```lua
 drag.set_liquid_glass(false)
 ```
+
+:::unreleased
+### Retired drag verbs
+
+These verbs are retired. A call in `init.lua` is reported in
+Config Issues, naming what replaces it; over the CLI it fails
+with `<verb> was retired — use <replacement>`.
+
+- `drag.set_ghost_border_width` and
+  `drag.set_drop_zone_border_width` →
+  [`border.set_width`](#borderset_width).
+- `drag.set_corner_radius` →
+  [`border.set_corner_style`](#borderset_corner_style).
+
+A saved profile's `drag.corner_radius` and each visual's
+`border_width` are no longer read.
+:::
 
 ## Focus Border
 
@@ -3079,6 +3060,11 @@ least as wide as the border so neighbouring borders do not
 touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
+
+:::unreleased
+The drag ghost and the drop zone draw their stroke at this width
+too.
+:::
 
 **Example:**
 
@@ -3134,9 +3120,12 @@ border.set_unfocused_color("#8E8E93CC")
 
 **Does:** `rounded` (default) matches the real macOS window
 corner radius, queried per window; `square` draws sharp corners.
-The Settings app's shared **Corners** control writes this and
-`drag.set_corner_radius` together and reads both back; see that
-verb for how the picker treats a pair that disagrees.
+
+:::unreleased
+The drag ghost and the drop zone take this style too: `rounded`
+draws them at the system window radius, `square` with no
+rounding.
+:::
 
 **Example:**
 
@@ -4951,17 +4940,14 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
     "drag": {
-      "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#347957", "border_width": 5,
-        "border_alignment": "inside",
+        "border_color": "#347957", "border_alignment": "inside",
         "fill": true, "fill_color": "#34795740"
       },
       "drop_zone": {
         "enabled": true, "border": true,
-        "border_color": "#C2790A", "border_width": 5,
-        "border_alignment": "inside",
+        "border_color": "#C2790A", "border_alignment": "inside",
         "fill": true, "fill_color": "#C2790A40"
       }
     },
@@ -5369,10 +5355,16 @@ from spilling into the row below. Each display sizes its own
 grid from its window count `N` and the density target `T` (see
 `quit.set_grid_target_depth` below), never past 4×4. One-shot
 teardown placement: windows stay on their own display, and
-nothing is managed afterwards. Profile JSON key: `quit.layout`.
-Default: `grid`.
+nothing is managed afterwards. Default: `grid`.
 
 :::unreleased
+The setting is app-wide: it is stored in `gui.json` as
+`quit.layout`, no profile carries it, and loading a profile never
+changes it. It has no Settings row while `grid` is its one value.
+The upgrade and a Lua-owned setup are as for
+[`set_refusal_sound`](#set_refusal_sound), and the verb changes
+the running value only, never `gui.json`.
+
 The grid fills before it stacks. Up to six windows each take a
 tile, split so the tiles come nearest square on that display: on
 16:9 one window fills it, two sit side by side, three share a
@@ -5402,10 +5394,16 @@ cell aims for before the grid grows. Grid dimensions stay
 automatic, calculated per display from that display's window
 count, and never pass 4×4; the target only moves the growth
 thresholds. It is not a hard maximum: past 4×4, additional
-windows keep cascading in its cells. Profile JSON key:
-`quit.grid_target_depth`. Default: `5`.
+windows keep cascading in its cells. Default: `5`.
 
 :::unreleased
+The GUI twin is **General ▸ Windows per pile on quit**. The
+setting is app-wide: it is stored in `gui.json` as
+`quit.grid_target_depth`, no profile carries it, and loading a
+profile never changes it. The upgrade, the verb's reach and a
+Lua-owned setup are as for
+[`set_refusal_sound`](#set_refusal_sound).
+
 The thresholds sit on the ladder 3×2 → 4×2 → 4×3 → 4×4: 3×2
 through `6×T` windows, 4×2 through `8×T`, 4×3 through `12×T`,
 4×4 above. Up to six windows tile whatever the target.

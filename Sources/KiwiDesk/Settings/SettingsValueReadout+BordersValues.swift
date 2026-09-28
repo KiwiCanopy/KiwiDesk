@@ -101,34 +101,4 @@ extension SettingsValueReadout {
             )
         }
     }
-
-    /// Shared border width or mixed if strokes differ.
-    static func bordersUnifiedWidth(
-        _ settings: TilingSettings
-    ) -> String {
-        let widths = [
-            settings.borderStyle.width,
-            settings.dragGhost.borderWidth,
-            settings.dragDropZone.borderWidth,
-        ]
-        guard let first = widths.first,
-            widths.allSatisfy({ $0 == first })
-        else {
-            return L("diff.value.mixed", "mixed")
-        }
-        return points(first)
-    }
-
-    /// Unified corner shape across strokes (`GapsBordersGates`).
-    static func bordersAgreedCorner(
-        _ settings: TilingSettings
-    ) -> String {
-        guard
-            let style = GapsBordersGates(settings: settings)
-                .agreedCornerStyle
-        else {
-            return L("diff.value.mixed", "mixed")
-        }
-        return bordersCornerLabel(style)
-    }
 }

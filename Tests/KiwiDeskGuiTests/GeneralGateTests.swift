@@ -253,4 +253,21 @@ struct GeneralGateTests {
         #expect(translocated != managed)
         #expect(notBundled != managed)
     }
+
+    /// The app-wide rows (#1741) store in gui.json, so a
+    /// Lua-owned config greys them with the reason; a GUI-managed
+    /// one leaves them live.
+    @Test("the app-wide rows grey only under a Lua-owned config")
+    func appWideRowsFollowOwnership() {
+        let keys: [SettingKey] = [
+            .general(.refusalSound), .general(.quitGridTargetDepth),
+        ]
+        let gui = GeneralGates(autoStart: status(.off))
+        var lua = GeneralGates(autoStart: status(.off))
+        lua.guiManaged = false
+        for key in keys {
+            #expect(gui.inertReason(for: key) == nil)
+            #expect(lua.inertReason(for: key) == .luaOwned)
+        }
+    }
 }
