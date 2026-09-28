@@ -242,24 +242,31 @@ struct RoundedItemEndPadTests {
 
     @Test("An App Bar slot measures the end padding it lays out")
     func appSlotMeasuresWhatItDraws() {
-        for roundness in Self.roundnesses {
-            let look = Self.appLook(roundness)
-            let end = AppBarItemView.endPadding(
-                look.shelf,
-                depth: Self.depth
-            )
-            #expect(
-                end
-                    == AppBarItemView.edgePadding
-                    + look.shelf.itemEndInset(forDepth: Self.depth)
-            )
-            let slot = AppBarOverlay.slot(
+        func slot(_ look: AppBarLook) -> CGFloat {
+            AppBarOverlay.slot(
                 items: [appBarItem(1, text: "Downloads")],
                 style: look,
                 thickness: Self.depth,
                 capAxis: 2000
             )
+        }
+        let square = slot(Self.appLook(0))
+        for roundness in Self.roundnesses {
+            let look = Self.appLook(roundness)
+            let inset = look.shelf.itemEndInset(forDepth: Self.depth)
+            let end = AppBarItemView.endPadding(
+                look.shelf,
+                depth: Self.depth
+            )
+            #expect(end == AppBarItemView.edgePadding + inset)
+            // The measurement grows by the inset at both ends, read
+            // apart from the layout, which clamps to any width.
+            let slot = slot(look)
+            #expect(abs(slot - square - 2 * inset) < 1e-9)
             let view = appItem(width: slot, look: look)
+            // Measured wide enough: the title is drawn whole.
+            let title = ceil(view.label.cell?.cellSize.width ?? 0)
+            #expect(view.label.frame.width >= title)
             #expect(abs(view.iconView.frame.minX - end) <= 0.5)
             #expect(
                 abs(slot - view.label.frame.maxX - end) <= 0.5,
