@@ -43,6 +43,12 @@ enum LookDescriptions {
                 "Rounded and floating, like %1$@",
                 "Barik"
             )
+        case "Bloom":
+            return L(
+                "looks.description.bloom",
+                "Soft, with a floating dock, like %1$@",
+                "iPadOS"
+            )
         default:
             return nil
         }
