@@ -3,7 +3,6 @@ import os
 
 /// What `ScrollGestures` holds of the machine tap — the seam a
 /// test replaces (#565).
-@MainActor
 protocol ScrollTapHandle: AnyObject {
     /// The chords whose scrolls the tap consumes; read per event
     /// on the tap thread.
@@ -155,7 +154,7 @@ final class ScrollGestureTap: ScrollTapHandle, @unchecked Sendable {
         )
     }
 
-    private static func sample(of event: CGEvent) -> ScrollSample {
+    static func sample(of event: CGEvent) -> ScrollSample {
         ScrollSample(
             flags: event.flags,
             pointDeltaX: event.getDoubleValueField(

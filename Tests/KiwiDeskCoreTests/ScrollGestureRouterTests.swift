@@ -48,6 +48,10 @@ struct ScrollGestureRouterTests {
         router.chords = [Self.pan]
         let routed = router.route(sample(Self.step, dy: 5), now: 0)
         #expect(!routed.consume)
+        let swipe = router.route(sample(Self.step, .began), now: 1)
+        #expect(!swipe.consume)
+        let touch = router.route(sample(Self.step, .mayBegin), now: 2)
+        #expect(!touch.consume)
     }
 
     @Test("a trackpad gesture owns its momentum after the keys lift")
@@ -107,6 +111,48 @@ struct ScrollGestureRouterTests {
         let cancel = router.route(sample(Self.pan, .cancelled), now: 0)
         #expect(cancel.consume)
         #expect(cancel.events.isEmpty)
+        // The cancel released the gesture: a stray change passes.
+        let stray = router.route(sample([], dy: 2, .changed), now: 0.1)
+        #expect(!stray.consume)
+    }
+
+    @Test("a touch that starts moving begins, and so later ends")
+    func mayBeginThenChangedBegins() {
+        var router = router()
+        _ = router.route(sample(Self.pan, .mayBegin), now: 0)
+        let moved = router.route(sample(Self.pan, dy: 3, .changed), now: 0)
+        #expect(moved.events.map(\.kind) == [.began, .changed])
+        let cancel = router.route(sample(Self.pan, .cancelled), now: 0.1)
+        #expect(cancel.events.map(\.kind) == [.ended])
+    }
+
+    @Test("a plain gesture ends the chorded one still gliding, and passes")
+    func plainGestureSupersedes() {
+        var router = router()
+        _ = router.route(sample(Self.pan, .began), now: 0)
+        _ = router.route(sample(Self.pan, .ended), now: 0.1)
+        _ = router.route(sample([], dy: 5, momentum: .began), now: 0.1)
+        let plain = router.route(sample([], .began), now: 0.2)
+        #expect(!plain.consume)
+        #expect(plain.events.map(\.kind) == [.ended])
+        let next = router.route(sample([], dy: 4, .changed), now: 0.3)
+        #expect(!next.consume)
+        #expect(next.events.isEmpty)
+    }
+
+    @Test("a wheel and a trackpad never share one gesture")
+    func inputsNeverMix() {
+        var router = router()
+        _ = router.route(sample(Self.pan, .began), now: 0)
+        let wheel = router.route(sample(Self.pan, dy: 10), now: 0.1)
+        #expect(wheel.events.map(\.kind) == [.ended, .began, .changed])
+        #expect(wheel.events.last?.input == .wheel)
+        let glide = router.route(
+            sample(Self.pan, dy: 3, momentum: .changed),
+            now: 0.15
+        )
+        #expect(!glide.consume)
+        #expect(glide.events.isEmpty)
     }
 
     @Test("a new gesture ends the one still gliding")

@@ -67,3 +67,35 @@ struct ScrollSampleTests {
         }
     }
 }
+
+/// The tap reads a real `CGEvent`'s fields into its sample: axis
+/// 2 is horizontal, axis 1 vertical, phases from their fields.
+@Suite("Scroll tap event reading")
+struct ScrollTapEventReadingTests {
+    @Test("axes, phases and flags come off the event")
+    func readsTheEvent() throws {
+        let event = try #require(
+            CGEvent(
+                scrollWheelEvent2Source: nil,
+                units: .pixel,
+                wheelCount: 2,
+                wheel1: 7,
+                wheel2: -3,
+                wheel3: 0
+            )
+        )
+        event.flags = [.maskControl, .maskAlternate]
+        event.setIntegerValueField(.scrollWheelEventScrollPhase, value: 2)
+        event.setIntegerValueField(
+            .scrollWheelEventMomentumPhase,
+            value: 0
+        )
+        let sample = ScrollGestureTap.sample(of: event)
+        #expect(sample.chord == [.control, .option])
+        #expect(sample.phase == .changed)
+        #expect(sample.momentum == .none)
+        // A synthetic event is not inverted by the system, so the
+        // natural convention negates both axes.
+        #expect(sample.delta == CGVector(dx: 3, dy: -7))
+    }
+}

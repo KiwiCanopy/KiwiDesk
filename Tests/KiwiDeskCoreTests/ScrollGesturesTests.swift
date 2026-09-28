@@ -3,9 +3,9 @@ import Testing
 
 @testable import KiwiDeskCore
 
-@MainActor
 private final class FakeTap: ScrollTapHandle {
     var chords: Set<ScrollChord> = []
+    var deliver: ScrollGestureTap.Deliver?
     var stopped = false
     func setChords(_ chords: Set<ScrollChord>) { self.chords = chords }
     func stop() { stopped = true }
@@ -23,8 +23,9 @@ struct ScrollGesturesTests {
     private func front() -> (ScrollGestures, () -> [FakeTap]) {
         let gestures = ScrollGestures()
         var made: [FakeTap] = []
-        gestures.makeTap = { _ in
+        gestures.makeTap = { deliver in
             let tap = FakeTap()
+            tap.deliver = deliver
             made.append(tap)
             return tap
         }
@@ -85,6 +86,46 @@ struct ScrollGesturesTests {
             )
         ])
         #expect(heard == [Self.pan])
+    }
+
+    @Test("what the tap routes reaches the consumer on the main queue")
+    func tapDeliveryReachesConsumer() async {
+        let (gestures, made) = front()
+        var heard: [ScrollGestureEvent.Kind] = []
+        gestures.bind(Self.pan) { heard.append($0.kind) }
+        gestures.start()
+        made().first?.deliver?([
+            ScrollGestureEvent(
+                chord: Self.pan,
+                kind: .began,
+                input: .trackpad,
+                delta: .zero,
+                momentum: false,
+                location: .zero
+            )
+        ])
+        await withCheckedContinuation { done in
+            DispatchQueue.main.async { done.resume() }
+        }
+        #expect(heard == [.began])
+    }
+
+    @Test("the pointer tracker's start and stop carry the tap")
+    func trackerCarriesTheTap() {
+        let tracker = MouseTracker()
+        var made = 0
+        tracker.scroll.makeTap = { _ in
+            made += 1
+            return FakeTap()
+        }
+        tracker.scroll.onLog = { _ in }
+        tracker.scroll.bind(Self.pan) { _ in }
+        #expect(made == 0)
+        tracker.start()
+        #expect(tracker.scroll.isTapped)
+        tracker.stop()
+        #expect(!tracker.scroll.isTapped)
+        #expect(made == 1)
     }
 
     @Test("a refused tap is retried on the next bind")
