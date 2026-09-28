@@ -27,12 +27,9 @@ private func makeCore() -> KiwiCore {
 /// measured gap 37 s). A broken watchdog costs a run this long.
 let execStarvationGap = 600
 
-/// Every async test here awaits `ExecLauncher.untilIdle()` rather
-/// than polling a wall-clock deadline: under a full run the main
-/// actor's backlog measured a 21 s gap between 20 ms polls, so a
-/// 30 s deadline expired after three turns with the reap queued
-/// behind it (tests.md ▸ Async tests, #344/#791). Behavior is proven
-/// by the gap between a watchdog and its sleep, never by a wait.
+/// Waits await `ExecLauncher.untilIdle()`, never a wall-clock poll;
+/// behavior is proven by the gap between a watchdog and its sleep
+/// (tests.md ▸ Async tests, #344/#791).
 @Suite("External command execution", .serialized)
 @MainActor
 struct ExecTests {
@@ -126,7 +123,6 @@ struct ExecTests {
         #expect(oldVM == nil)
         let lua2 = try #require(core.lua)
         await core.exec.untilIdle()
-        #expect(oldVM == nil)
         #expect(core.exec.runningCount == 0)
         #expect(lua2.global("hit") == .none)
         // The fresh VM is fully functional afterwards.
@@ -219,10 +215,9 @@ struct ExecTests {
     func timeoutChildExitsFirst() async throws {
         let core = makeCore()
         let lua = try #require(core.lua)
-        // The child exits immediately; the long watchdog must
-        // not fire (the normal reap cancels it) and the callback must
-        // run exactly once with the real code. The watchdog is wide so
-        // a load-starved exit callback still lands well before it.
+        // The child exits immediately, so the callback carries its
+        // real code from the normal reap. The watchdog is wide so a
+        // load-starved reap still lands well before it would fire.
         let script = """
             _calls = 0
             KiwiDesk.exec("true",
@@ -234,7 +229,6 @@ struct ExecTests {
         #expect(lua.run(script).succeeded)
         await core.exec.untilIdle()
         #expect(lua.global("_code") == .number(0))
-        // Reaped promptly; the pending watchdog was cancelled.
         #expect(core.exec.runningCount == 0)
         #expect(lua.global("_calls") == .number(1))
     }

@@ -16,4 +16,6 @@ editing the Lua bridge:
 - Lua registry refs (`luaL_ref`) are VM-specific and their slots
   are reused. Never deliver a ref into a different interpreter than
   minted it — capture the owning `LuaInterpreter` weakly, as
-  `KiwiCore+ExecAPI` does.
+  `KiwiCore+ExecAPI` does, so a pending callback never keeps a
+  reloaded-away VM alive (`ExecTests` ▸
+  `reloadDropsPendingCallbacks`).

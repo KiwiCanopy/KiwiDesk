@@ -41,12 +41,13 @@ public final class ExecLauncher {
     public var runningCount: Int { running.count }
 
     #if DEBUG
-        /// Suspends until no child is running, for async test
-        /// synchronization (tests.md ▸ Async tests). Returns only
-        /// after the emptying reap has run its `onExit`. It does NOT
-        /// mean a callback ran — a callback-less or dropped one
-        /// reaps too — and a child that never reaps (no timeout)
-        /// never resumes it; with nothing running it returns at once.
+        /// Tests only — production must not await it. Suspends
+        /// until no child of THIS launcher is running (tests.md ▸
+        /// Async tests); returns after the emptying reap has run its
+        /// `onExit`. It does NOT mean this caller's child, nor that a
+        /// callback ran — a callback-less or dropped one reaps too —
+        /// and a child that never reaps (no timeout) never resumes
+        /// it; with nothing running it returns at once.
         func untilIdle() async {
             guard !running.isEmpty else { return }
             await withCheckedContinuation { idleWaiters.append($0) }

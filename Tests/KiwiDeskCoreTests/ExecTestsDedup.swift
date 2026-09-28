@@ -125,8 +125,9 @@ struct ExecTestsDedup {
         // SIGTERMs the child immediately. A long-lived child proves
         // it by gap: a mis-parsed 0-as-deadline would terminate and
         // reap well within reapGrace (2s), while no-limit keeps it
-        // running. The child outlives any starved poll (#344), so
-        // the check can't flake on a late resume.
+        // running. The long child cannot red a correct parse; only
+        // an isolated run reds a mis-parse, since under full-suite
+        // load the reap may land after this test's check (#344).
         let script =
             "z = KiwiDesk.exec('sleep \(execStarvationGap)', nil, 0)"
         #expect(lua.run(script).succeeded)
