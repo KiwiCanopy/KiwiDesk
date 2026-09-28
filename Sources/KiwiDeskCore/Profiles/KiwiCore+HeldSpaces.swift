@@ -6,13 +6,6 @@ import Foundation
 /// windows into the incoming profile's fallback. The ruling is on
 /// the issue and in `docs/design-decisions.md`.
 extension KiwiCore {
-    /// The arrangement live now, as a held Space's origin names
-    /// it — a Space goes home only into the one it left.
-    var liveArrangement: HeldOrigin.Arrangement? {
-        if let name = profiles.currentName { return .profile(name) }
-        return profiles.currentStandard.map { .standard($0) }
-    }
-
     /// Marks the departing Spaces the prune must keep. A Space
     /// that lived on a screen no longer connected — its pin, else
     /// the screen `settlingScreens` recorded at the report, which
@@ -71,20 +64,6 @@ extension KiwiCore {
         placeHeldBatchLast(names)
     }
 
-    /// Whether a held Space goes home at this apply: its screen is
-    /// back, the incoming arrangement is the one it left, and that
-    /// arrangement declares its name.
-    private func returnsHome(
-        _ origin: HeldOrigin,
-        declared: Set<SpaceID>,
-        into arrangement: HeldOrigin.Arrangement
-    ) -> Bool {
-        liveFingerprints.contains(origin.screen)
-            && (origin.arrangement == nil
-                || origin.arrangement == arrangement)
-            && declared.contains(origin.name)
-    }
-
     /// A held id is never a declared one: every apply door calls
     /// this FIRST with the set it makes authoritative, and a held
     /// Space whose number that set claims moves to the next free
@@ -103,10 +82,12 @@ extension KiwiCore {
             }
         let held = (live + orphans).filter { id in
             guard let origin = state.heldSpaces[id] else { return false }
-            let goesHome =
-                origin.name == id
-                && returnsHome(origin, declared: declared, into: arrangement)
-            return !goesHome
+            return !goesHomeInPlace(
+                id,
+                origin,
+                declared: declared,
+                into: arrangement
+            )
         }
         var taken = declared.union(state.heldSpaces.keys).union(live)
             .union(state.rememberedSpaces.values.map(\.space))
@@ -154,10 +135,21 @@ extension KiwiCore {
                 continue
             }
             state.heldSpaces[id] = nil
-            if id == origin.name {
+            if goesHomeInPlace(
+                id,
+                origin,
+                declared: declared,
+                into: arrangement
+            ) {
                 inPlace.append(id)
             } else {
-                for window in awayMembers(of: id) {
+                // Every window remembered there, up or not — a
+                // hidden app's, a restored filing — or its arrival
+                // re-creates the retired id (#1646, #128).
+                let remembered = state.rememberedSpaces
+                    .filter { $0.value.space == id }.keys
+                    .sorted { $0.raw < $1.raw }
+                for window in remembered {
                     state.refileAway(of: window, to: origin.name)
                 }
                 forwardWindows(of: id, to: origin.name)
@@ -187,6 +179,30 @@ extension KiwiCore {
         ) {
             setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
         }
+    }
+
+    /// Boot's way into a hold (#1646): holds each Space a session
+    /// snapshot recorded as held, under the id
+    /// `restoreHeldSpaces` gave it, ahead of the replay that files
+    /// its windows — creating it where it is missing, the one
+    /// Space a restore creates (#633), since no config declares
+    /// it. Only a created Space joins the bar's held batch; one
+    /// that exists is the declared Space it goes home into.
+    func restoreHolds(_ holds: [(id: SpaceID, origin: HeldOrigin)]) {
+        var created: [SpaceID] = []
+        for (id, origin) in holds {
+            if state.workspaces[id] == nil {
+                state.workspaces.ensureSpace(id)
+                created.append(id)
+            }
+            state.heldSpaces[id] = origin
+            onLog(
+                "restart: held space \(id.raw) from "
+                    + "'\(origin.screenName)'"
+                    + (id == origin.name ? "" : " (was \(origin.name.raw))")
+            )
+        }
+        placeHeldBatchLast(created)
     }
 
     /// Ends one Space's hold — `delete_space` removed it.
@@ -222,21 +238,6 @@ extension KiwiCore {
             retired = true
         }
         return retired
-    }
-
-    /// The live Spaces an arrangement WRITE captures — Keep, a
-    /// Settings Save, the sidecar sync, a profile's partitioning
-    /// record — which a held Space never joins (#1507 ruling 5).
-    public var capturedSpaces: [Space] {
-        state.workspaces.allSpaces.filter {
-            state.heldSpaces[$0.id] == nil
-        }
-    }
-
-    /// The live pins an arrangement write captures — a held
-    /// Space's home pin is not the arrangement's.
-    var capturedPins: [SpaceID: String] {
-        spacePins.filter { state.heldSpaces[$0.key] == nil }
     }
 
     /// Ends every held Space's record without touching the Space —

@@ -40,7 +40,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     }
 
     public struct SpaceRecord: Codable, Sendable, Equatable {
-        public let id: String
+        public private(set) var id: String
         public let mode: LayoutMode
         public let windows: [UInt32]
         public let focused: UInt32?
@@ -53,9 +53,17 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         public let trackWeights: [UInt32: Double]
         /// In-place restarts only (#930, `StateSnapshot+InPlace`).
         public var session: SpaceSession?
+        /// The Space's hold, in every snapshot (#1646,
+        /// `StateSnapshot+Held`).
+        public var held: HeldRecord?
 
-        public init(space: Space, session: SpaceSession? = nil) {
+        public init(
+            space: Space,
+            session: SpaceSession? = nil,
+            held: HeldRecord? = nil
+        ) {
             self.session = session
+            self.held = held
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
@@ -69,7 +77,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         }
 
         private enum CodingKeys: String, CodingKey {
-            case id, mode, windows, focused, session
+            case id, mode, windows, focused, session, held
             case trackBreaks = "track_breaks"
             case trackWeights = "track_weights"
         }
@@ -103,6 +111,15 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
                 SpaceSession.self,
                 forKey: .session
             )
+            // On its own too: an unreadable hold costs itself.
+            held = try? c.decodeIfPresent(HeldRecord.self, forKey: .held)
+        }
+
+        /// This record under another id (#1646's boot renumber).
+        func renamed(to id: String) -> SpaceRecord {
+            var copy = self
+            copy.id = id
+            return copy
         }
     }
 
@@ -110,17 +127,42 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     public var spaces: [SpaceRecord]
     public var activeSpace: String?
     public var capturedAt: Date
+    /// The arrangement live at the capture (#1646): a replay under
+    /// another one leaves the modes of the Spaces it declares.
+    public var arrangement: HeldOrigin.Arrangement?
 
     public init(
         windows: [WindowRecord],
         spaces: [SpaceRecord],
         activeSpace: String?,
-        capturedAt: Date = .now
+        capturedAt: Date = .now,
+        arrangement: HeldOrigin.Arrangement? = nil
     ) {
         self.windows = windows
         self.spaces = spaces
         self.activeSpace = activeSpace
         self.capturedAt = capturedAt
+        self.arrangement = arrangement
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case windows, spaces, activeSpace, capturedAt, arrangement
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        windows = try c.decode([WindowRecord].self, forKey: .windows)
+        spaces = try c.decode([SpaceRecord].self, forKey: .spaces)
+        activeSpace = try c.decodeIfPresent(
+            String.self,
+            forKey: .activeSpace
+        )
+        capturedAt = try c.decode(Date.self, forKey: .capturedAt)
+        // On its own: an unreadable one replays as an older file.
+        arrangement = try? c.decodeIfPresent(
+            HeldOrigin.Arrangement.self,
+            forKey: .arrangement
+        )
     }
 }
 
@@ -130,7 +172,8 @@ extension StateCoordinator {
     /// config/profile is the space-set authority, and an
     /// `ensureSpace` here resurrected pruned spaces which the next
     /// save persisted — corrupting `gui.json` from a restore
-    /// (#128).
+    /// (#128). A held Space exists here because boot's
+    /// `restoreHeldSpaces` created it ahead of the replay (#1646).
     public mutating func adopt(_ snapshot: StateSnapshot) {
         for record in snapshot.spaces {
             let space = SpaceID(record.id)
@@ -191,7 +234,10 @@ extension StateCoordinator {
                 )
             },
             spaces: workspaces.allSpaces.map {
-                StateSnapshot.SpaceRecord(space: $0)
+                StateSnapshot.SpaceRecord(
+                    space: $0,
+                    held: heldRecord(of: $0.id)
+                )
             },
             activeSpace: workspaces.activeSpace?.raw
         )

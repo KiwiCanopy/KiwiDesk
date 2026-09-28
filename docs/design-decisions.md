@@ -12533,8 +12533,91 @@ case stick — the model decides it, and one move after the replug
 overrides it. What is inside the held Space goes back in both
 cases.
 
-A held Space is session state; surviving a restart is
-[#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646).
+:::unreleased
+**It survives a restart, a crash included
+([#1646](https://github.com/KiwiCanopy/KiwiDesk/issues/1646)).**
+Taking the laptop away for a day spans an update, a crash or a
+quit more often than not, and a hold that ended there sent its
+windows into the Space in front of you with nothing going home on
+reconnect. So the held Spaces ride EVERY session snapshot — a
+quit's, the crash autosave and an in-place restart's — and not
+the in-place payload alone: a hold is part of the arrangement,
+like membership, and not session sizing, whose reset at a
+relaunch users rely on (*An in-place restart gathers nothing*).
+The issue asked for the record to be cleared in crash recovery,
+as the other session stores were; since #930 crash recovery
+RESTORES those stores from the autosave, so clearing the hold
+alone would bring its windows back into a Space that no longer
+knew it was held — badgeless, and captured as a declared Space by
+the next Keep, the leak ruling 5 exists to stop. The crash
+therefore restores it too (owner, 2026-09-27).
+
+**Boot re-creates it, the one Space a restore creates.** The
+replay never creates a Space (#633), because a resurrected Space
+used to be written back into `gui.json`; a held Space is declared
+by no config, so without an exception its windows would be filed
+nowhere. The exception is safe for the reason the hold is: no
+arrangement write captures a held Space. It runs ahead of the
+replay, so its windows are filed into it before any pass draws. A
+held number the booting arrangement declares, a live Space
+takes or the snapshot records for another Space is renumbered
+past all of them, in the batch's order — a profile loaded while
+KiwiDesk was down may declare it, as a reclaim would find, and a
+recorded one would merge two records' windows — except for a
+Space about to go home under that very name, which is filed
+straight into its home and keeps that Space's own mode.
+One whose screen is connected at boot then goes home by the
+reconnect's rule.
+
+**It ends by the same rule as ever, judged once the desk is
+known.** A held Space's record rides its own Space record, with
+the windows it holds that are not members — a hidden app's, one
+on another Desktop — since the membership list cannot name them.
+At boot every recorded hold comes back, and each window it holds
+that the scan did not find is remembered there, as the replay
+remembers any late window; the retire (#1507 ruling 4) then keeps
+it while any of them may return. Whether one may is the
+WindowServer's to say, window by window, and only after the away
+seed: a window it hosts on no Space at all was closed, or
+belonged to an app that relaunched under new windows, so its
+filing is dropped and a hold left with nothing ends. Measured on
+macOS 27.0 (2026-09-28): a hidden app's window and a minimized one
+read hosted, a closed one reads no Space; that a window away on
+another Desktop, on a fullscreen Space or still launching reads
+hosted is reasoned from the same read, not measured. The
+per-Desktop census cannot say it, since it lists user Desktops
+only and would read a fullscreen window as closed. Dropping a
+hold at the replay instead, for want of a live member, would have ended every hold whose
+windows are hidden, away or still launching — the very windows
+#1507 keeps a hold for. Without that reading nothing is judged,
+absent and never faked; the snapshot then stops carrying those
+unjudged filings — each one marked, never the session's — so a
+closed window keeps a hold across one restart and not forever. A hold that goes home into its origin
+under another number takes every window it remembers along, a
+hidden app's too, or that window's return would re-create the
+retired number as an ordinary Space the next save captures. A hold whose Space no longer exists names nothing
+the snapshot records, so it ends at a restart. A restart of the
+Mac ends every hold without a separate store: macOS gives every
+reopened window a new identity, so a hold kept across it would
+hold nothing. The residue is in
+[accepted limitations](accepted-limitations.md).
+
+**A replay under another arrangement keeps its declared modes.**
+A snapshot names the arrangement it was captured under. Quit
+undocked and launch docked, and the docked profile's `3` is not
+the laptop's `3`: replaying the record's mode onto it is the
+merge by name #1230 refuses, and a device sitting (2026-09-28)
+came back with the docked Space floating because the laptop's was.
+So a replay under another arrangement leaves the modes of the
+Spaces the live one declares, as a reconnect's apply would; under
+the same one a mode set at runtime still survives (#633).
+
+**Discarding the saved arrangement deletes the record, not the
+hold.** The #634 discard removes the snapshot files that carry
+it; ending the live holds too would turn each into an ordinary
+Space that the next Keep captures. Resetting every setting ends
+them, as before.
+:::
 
 ### Monitors
 

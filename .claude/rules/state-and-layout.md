@@ -1733,11 +1733,17 @@ editing here:
   (#930).** Build N writes the session file and build N+1 reads
   it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
   coding, `ScrollRest`'s and `StickyScope`'s raw values are
-  stored values in AGENTS.md §5's sense. Each record decodes its
+  stored values in AGENTS.md §5's sense — and so are the held
+  record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
+  `HeldOrigin.Arrangement` keys and the snapshot's own
+  `arrangement`, which every snapshot carries (#1646,
+  profiles.md). Each record decodes its
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores
   (`SnapshotCarryCensusTests` ▸
-  `unreadablePayloadKeepsTheArrangement`); so a change to these
+  `unreadablePayloadKeepsTheArrangement`, and for the stamp
+  `HeldSpaceRestartRecordTests` ▸
+  `unreadableArrangementCostsOnlyItself`); so a change to these
   shapes may lose one restart's sizing and nothing else, and a
   change that must not owes the old spelling a decode.
 - **Any path that makes KiwiDesk relaunch itself announces it
