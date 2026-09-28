@@ -214,6 +214,18 @@ restated `20...80` satisfies on the day it is written.
     words held to the predicate at every length and the
     predicate to the drawing by
     `LayoutSchematicCenterCaptionTests`.
+- **A thumbnail that is READ may play its layout once; one that
+  is COMPARED stays at rest** (#1750). The welcome tour and the
+  preset preview host `LayoutStoryThumbnail`, which plays a
+  `LayoutStory` once on first appearance and again on hover,
+  never loops, and never leaves its rest frame under Reduce
+  Motion; the Layouts chooser, its detail panel and the Home
+  cards stay still, since they restage as feedback on a changing
+  draft. A tiling story's frames are the schematic's own at two
+  counts, so it asks the engine like any preview.
+  `LayoutStoryWiringTests`' `hosts` map is the one copy of who
+  may host one; `docs/design-decisions.md` ▸ *A thumbnail that
+  is read rather than compared* carries why.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
   entry on the Shortcuts & Gestures page teaches a gesture rather
   than a rest state, so its picture may move — only while hovered,

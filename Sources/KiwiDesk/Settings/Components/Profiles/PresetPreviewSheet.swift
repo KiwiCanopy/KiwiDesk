@@ -113,7 +113,11 @@ struct PresetPreviewSheet: View {
                 alignment: .leading,
                 spacing: Self.gutter
             ) {
-                ForEach(group.slots) { tile($0) }
+                ForEach(Array(group.slots.enumerated()), id: \.element.id) {
+                    index,
+                    slot in
+                    tile(slot, delay: Double(index) * 0.3)
+                }
             }
         }
     }
@@ -131,16 +135,21 @@ struct PresetPreviewSheet: View {
     }
 
     /// One space: centered schematic canvas and layout mode name
-    /// (`AppRulesCensusRenderTests`).
+    /// (`AppRulesCensusRenderTests`). The schematic plays its
+    /// layout's story once and on hover (#1750): the sheet is
+    /// read, not compared, and nothing in it is edited.
     private func tile(
-        _ slot: PresetPreviewPlan.Slot
+        _ slot: PresetPreviewPlan.Slot,
+        delay: Double
     ) -> some View {
         VStack(spacing: 4) {
-            LayoutSchematicView(
+            LayoutStoryThumbnail(
                 mode: slot.mode,
                 settings: layout.settings(sizes: liveSizes),
                 windows: LayoutSchematic.defaultWindowCount,
-                scale: .tile
+                scale: .tile,
+                delay: delay,
+                replaysOnHover: true
             )
             Label(
                 slot.mode.displayName,

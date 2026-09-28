@@ -17,10 +17,11 @@ struct TrackSchematic: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
 
     /// Restage animation damping gated by Reduce Motion (#1069).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     private var vertical: Bool { axis == .vertical }

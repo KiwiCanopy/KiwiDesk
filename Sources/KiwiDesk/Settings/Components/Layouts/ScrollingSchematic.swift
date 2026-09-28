@@ -13,9 +13,12 @@ struct ScrollingSchematic: View {
     /// Windows in row including incoming window.
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
+    /// Tour story phase (`SchematicMotion.focus`, #1750).
+    var focusStep = 0
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
     /// The along-axis length the strip last laid out at — what the
     /// words are judged on, since the pane's width is the host's
     /// (`LayoutSchematicCenterCaptionTests`).
@@ -23,7 +26,7 @@ struct ScrollingSchematic: View {
 
     /// Restage animation damping gated by Reduce Motion (#1069).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     /// Monitor share of canvas along scroll axis (`LayoutSchematicScaleTests`,
@@ -60,6 +63,23 @@ struct ScrollingSchematic: View {
             (0 - placed.focus)...(total - 1 - placed.focus),
             placed.incoming - placed.focus
         )
+    }
+
+    /// The slot holding focus, `focusStep` windows from the
+    /// resting one; the incoming window is stepped over, and a
+    /// step past the row's end stops at its last window.
+    var focusIndex: Int {
+        let placed = row
+        let direction = focusStep > 0 ? 1 : -1
+        var index = 0
+        var left = abs(focusStep)
+        while left > 0 {
+            let next = index + direction
+            guard placed.slots.contains(next) else { break }
+            index = next
+            if lone || next != placed.incoming { left -= 1 }
+        }
+        return index
     }
 
     /// The canvas's inner gap between slots.
@@ -115,6 +135,7 @@ struct ScrollingSchematic: View {
         var screenStart: CGFloat
         var screenLen: CGFloat
         var focusCenter: CGFloat
+        var focus: Int
         var newIdx: Int
         var low: Int
         var high: Int
@@ -130,13 +151,14 @@ struct ScrollingSchematic: View {
         let low = placed.slots.lowerBound
         let high = placed.slots.upperBound
         let newIdx = placed.incoming
+        let focus = focusIndex
         // Where the row rests is the ENGINE's answer (#776). A
         // static preview has no pan history, so `follow` is asked
         // from a centred one — the engine's own `.center` rest
         // (#753, #1388).
         let count = high - low + 1
         let rowLength = CGFloat(count) * step - gap
-        let focusedPos = CGFloat(-low) * step
+        let focusedPos = CGFloat(focus - low) * step
         let resting = ScrollingLayout.offset(
             anchor: anchor.keepsRowOnScreen ? .center : anchor,
             previous: nil,
@@ -166,6 +188,7 @@ struct ScrollingSchematic: View {
             screenStart: screenStart,
             screenLen: screenLen,
             focusCenter: focusCenter,
+            focus: focus,
             newIdx: newIdx,
             low: low,
             high: high
@@ -198,9 +221,10 @@ struct ScrollingSchematic: View {
         }
     }
 
-    /// Along-axis centre of window `i` (index 0 is the focus).
+    /// Along-axis centre of window `i` (index 0 is the resting
+    /// focus).
     func center(_ i: Int, _ m: Metrics) -> CGFloat {
-        m.focusCenter + CGFloat(i) * m.step
+        m.focusCenter + CGFloat(i - m.focus) * m.step
     }
 
     @ViewBuilder
@@ -214,7 +238,7 @@ struct ScrollingSchematic: View {
         } else if i == m.newIdx, !lone {
             SchematicNewWindow(badgeAlignment: badgeAlignment(i))
         } else if onScreen(i, m) {
-            SchematicTile(active: i == 0)
+            SchematicTile(active: i == m.focus)
         } else {
             SchematicGhostOverflow()
         }

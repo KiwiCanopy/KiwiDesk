@@ -7,6 +7,8 @@ struct LayoutSchematicView: View {
     let settings: TilingSettings
     let windows: Int
     let scale: SchematicScale
+    /// A tour story's phase (#1750); every other surface rests.
+    var motion: SchematicMotion = .rest
     @Environment(\.schematicPalette) private var palette
 
     /// Resolved focus ring highlight color for schematic preview.
@@ -59,7 +61,8 @@ struct LayoutSchematicView: View {
                 placement: settings.scrolling.newWindowPlacement,
                 fillWhenAlone: settings.scrolling.fillWhenAlone,
                 windows: windows,
-                scale: scale
+                scale: scale,
+                focusStep: motion.focus
             )
         case .grid:
             GridSchematic(
@@ -78,7 +81,8 @@ struct LayoutSchematicView: View {
                 orientation: settings.monocle.orientation,
                 hideStyle: settings.monocle.hideStyle,
                 windows: windows,
-                scale: scale
+                scale: scale,
+                turn: motion.turn
             )
         case .track:
             TrackSchematic(
@@ -92,7 +96,11 @@ struct LayoutSchematicView: View {
                 scale: scale
             )
         case .floating:
-            FloatingSchematic(windows: windows, scale: scale)
+            FloatingSchematic(
+                windows: windows,
+                scale: scale,
+                drag: motion.drag
+            )
         }
     }
 }

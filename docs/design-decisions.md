@@ -7006,9 +7006,10 @@ between them — for a fact "inexpressible in one frame at any
 window count", and exactly one claim ever cleared it: Scrolling's
 `follow` anchor, where the viewport pans the minimum to reveal the
 newly focused window. A still picture cannot show motion.
-(The one place this does not bind is a picture that teaches a
+(It binds the FRAME, not motion: a picture that teaches a
 GESTURE rather than a rest state — the Shortcuts & Gestures
-drawer's, argued under Shortcuts below.)
+drawer's, argued under Shortcuts below — and a thumbnail that is
+read rather than compared (#1750, below) may move.)
 
 The premise is true and the conclusion does not follow. **A pair
 does not show motion either.** It shows two *states* and asks the
@@ -7073,6 +7074,52 @@ fact at the size it can be read; at the size it cannot, do not
 draw it at all — leaving it to the frame's clip is not the same
 thing, for the reason `SchematicCanvas.screen` states: the clip
 does not crop where a reader would assume.
+
+**A thumbnail that is read rather than compared plays its layout
+once** (#1750, owner ruling 2026-09-28). The welcome tour's Spaces
+step and the preset preview on Profiles each draw a layout
+thumbnail per Space, and a still frame there could not say what
+the tour's own sentence claims — that one layout splits and
+another scrolls. So on those two surfaces, and only there, the
+thumbnail plays one short story and rests: BSP and Grid gain a
+fourth window, Stack and Track a third, Scrolling steps focus and
+pans, Monocle's front card turns on the live flip's axis (#1391),
+and a Floating window is dragged and left where it lands. Each
+story plays once when its thumbnail first appears — staggered
+down a list — and again on hover, and never loops.
+
+This does not reopen the ruling above, which retired a SECOND
+FRAME: a pair shows two states and leaves the tween to the
+reader, so it bought no motion and cost the strip its
+comparability. A tween does show motion, and it costs no width —
+every tile keeps its size. What separates the surfaces is how
+they are read. The Layouts chooser, its detail panel and the Home
+cards are compared at a glance while a draft changes, and they
+already use motion as feedback — a schematic restages when a
+setting moves — so a tile that plays on its own there would pull
+the eye to whichever one moved and drown that feedback. They stay
+at rest. The tour and the preset preview are read once, edit
+nothing, and name one Space per tile. `LayoutStoryWiringTests`
+holds the hosts to those two.
+
+**The frames are the engine's.** Both ends of every tiling story
+are the schematic the other surfaces draw, at two window counts,
+so the picture follows the user's own settings — where BSP
+splits, where Stack puts the newcomer, whether Track opens a new
+track — and a story cannot teach a placement the engine does not
+make (the #702 rule). Only Floating's drag is drawn by hand,
+because the engine claims no placement there. The story always
+ends on the resting frame, which is the whole of what Reduce
+Motion shows. It is still not a clip, for the reasons the
+Shortcuts & Gestures entry gives: it follows the palette and the
+appearance, carries no text to translate, and cannot go stale
+beside a redesign. VoiceOver hears the behaviour as a sentence on
+the tour row, since motion is never announced.
+
+**Floating's picture is scattered, everywhere.** A cascade drew
+the one layout that places nothing as if it placed windows in a
+tidy diagonal. The scattered frame is what the story ends on, so
+Settings draws it too, and the two can never disagree.
 
 **Home is the only navigator: a card grid, not a sidebar.** (#678
 turn 9, superseding the #68/#297 fixed source list.) A sidebar is

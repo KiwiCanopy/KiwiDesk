@@ -121,13 +121,19 @@ struct ReduceMotionCensusTests {
     /// no motion and cannot be narrowed away, so without a seam
     /// the only escape left is deleting a needle — which
     /// silently un-watches a whole spelling, and is how a census
-    /// guard dies. Empty by design; an entry is a ruling, not a
-    /// silencer — and one that stops firing is deleted, which
+    /// guard dies. Kept short by design; an entry is a ruling,
+    /// not a silencer — and one that stops firing is deleted, which
     /// the clause below makes it red to forget. A key silences
     /// its file/spelling pair FOREVER, so a ruling left behind
     /// after its site is gated or removed also passes the next
     /// real starter at that pair (guard-prover, #1069).
-    private static let ruled: [String: String] = [:]
+    private static let ruled: [String: String] = [
+        // #1750: a suppression — `disablesAnimations` JUMPS to a
+        // story's start frame; the gated `withAnimation` after
+        // it is the one call that moves.
+        "LayoutStoryThumbnail.swift: withTransaction":
+            "a story's jump to its start frame starts no motion"
+    ]
 
     @Test("No uncensused way to start motion ships")
     func everyMotionSpellingIsCensused() throws {
