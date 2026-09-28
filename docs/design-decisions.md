@@ -11868,7 +11868,9 @@ thumbnail's rule of leaving a fact it cannot render undrawn at tile
 scale, paid for with a ring wide enough for the ramp to read. The
 names are ours; the reference lives only in the description,
 which says what the look does before what it resembles — "Bottom
-bar, like Windows 11" — because a new user does not know the bar
+bar, like Windows 11" — Glass alone naming itself KiwiDesk's own
+look instead, since the default has no reference to borrow (owner,
+2026-09-29) — because a new user does not know the bar
 vocabulary and the thumbnail cannot carry it (owner, 2026-09-28).
 A look has one description, shared by the Settings card and the
 tour, Glass's included (`LookDescriptionsTests`).
@@ -11883,7 +11885,8 @@ shelf. Every other look places the bars as its reference
 does: split where the reference has a dock apart from its top bar,
 one bar where it has none — Taskbar's bottom bar (Windows 11),
 Classic's, Tiler's and Pill's top bar (Mac OS 9, Hyprland, Barik),
-each stated in the look rather than inherited from Glass
+Bloom's split (iPadOS), each stated in the look rather than
+inherited from Glass
 (`LookCatalogTests` ▸ `barsFollowTheReference`). The cost,
 accepted: on a saved profile or preset's fused top shelf, Glass
 is not ticked as applied, and picking it splits the bars. Presets

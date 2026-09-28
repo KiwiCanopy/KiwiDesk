@@ -1,9 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The looks step's top row: every bundled look, whole on screen,
-/// drawn like the Settings look cards (#1684) with the look's own
-/// palette painted on.
+/// The looks step's top row: every bundled look, drawn like the
+/// Settings look cards (#1684) with the look's own palette painted
+/// on, scrolled like the palette row so each caption keeps its
+/// width.
 struct OnboardingLookRow: View {
     let looks: [ShelfLook]
     let live: TilingSettings
@@ -14,9 +15,21 @@ struct OnboardingLookRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             OnboardingRowHeader(text: L("looks.title", "Looks"))
-            HStack(alignment: .top, spacing: 8) {
-                ForEach(looks, id: \.name) { look in
-                    tile(look)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    HStack(alignment: .top, spacing: 8) {
+                        ForEach(looks, id: \.name) { look in
+                            tile(look)
+                                .frame(width: 108)
+                                .id(look.name)
+                        }
+                    }
+                    .padding(.bottom, 8)
+                }
+                .onAppear {
+                    let applied = looks.first { $0.isApplied(to: live) }
+                    guard let applied else { return }
+                    proxy.scrollTo(applied.name, anchor: .center)
                 }
             }
         }

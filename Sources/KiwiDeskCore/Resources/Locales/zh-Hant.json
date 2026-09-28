@@ -829,7 +829,6 @@
   "looks.delete": "刪除",
   "looks.description.bloom": "柔和，帶懸浮 Dock，類似 %1$@",
   "looks.description.classic": "纖細扁平，類似 %1$@",
-  "looks.description.glass": "模糊背後內容，類似 %1$@",
   "looks.description.pill": "圓角懸浮，類似 %1$@",
   "looks.description.taskbar": "底部列，類似 %1$@",
   "looks.description.tiler": "方塊加等寬字體，類似 %1$@",

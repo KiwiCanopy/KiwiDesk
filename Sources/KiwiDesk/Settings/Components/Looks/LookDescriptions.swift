@@ -16,8 +16,7 @@ enum LookDescriptions {
         case LookCatalog.defaultName:
             return L(
                 "looks.description.glass",
-                "Blurs what's behind, like %1$@",
-                "macOS"
+                "KiwiDesk's own look, in Liquid Glass"
             )
         case "Taskbar":
             return L(
