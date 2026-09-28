@@ -1,14 +1,17 @@
 import Foundation
 
 /// One-shot application of a ShelfLook (#1684). Every value is
-/// PARSED by the parser its `set_*` command uses — the sheen by the
-/// one `BorderStyle.sheen(from:)` its command shares — so a look can
-/// never set a value a command couldn't; an unknown path or a
-/// refused value is skipped, never fatal. Two writes reach further
-/// than their command, by ruling (`docs/design-decisions.md` ▸ A
-/// look is KiwiShelf's styling): glass writes every glass leaf
-/// (#1307), and the App Bar indicator clears the per-layout
-/// overrides that would hide it.
+/// parsed by its `set_*` command's parser — the border's by
+/// `BorderCommandSetting` (#1739) — except the stored gaps, which
+/// the config's own decoder reads (`Gaps.stored`); either way a
+/// look can never set a value a command couldn't, and an unknown
+/// path or a refused value is skipped, never fatal. Three writes
+/// reach further than their COMMAND, by ruling
+/// (`docs/design-decisions.md` ▸ A look is KiwiShelf's styling):
+/// glass writes every glass leaf (#1307), the ring's width and
+/// corners write every stroke the Borders masters own (#754), and
+/// the App Bar indicator clears the per-layout overrides that
+/// would hide it.
 extension ShelfLook {
     /// Overwrites the styling this look names, in place (sparse),
     /// then `palette`'s colours when one is handed in. Only the
@@ -78,9 +81,23 @@ extension ShelfLook {
                     settings.scrolling.appBar.activeIndicator = nil
                 }
             }
-        case "border" where parts[1] == "sheen":
-            if let sheen = BorderStyle.sheen(from: value) {
-                settings.borderStyle.sheen = sheen
+        case "border":
+            if case .success(let setting)? =
+                BorderCommandSetting
+                .parse(field: parts[1], args: args)
+            {
+                // Every stroke, as the Borders masters write (#754).
+                switch setting {
+                case .width(let width): settings.setStrokeWidth(width)
+                case .cornerStyle(let corner):
+                    settings.setStrokeCorners(corner)
+                default: setting.apply(to: &settings.borderStyle)
+                }
+            }
+        case "gap" where parts[1] == "global":
+            // Only the global gaps; a Space's override stays (#1739).
+            if let gaps = Gaps.stored(value) {
+                settings.gapsGlobal = gaps
             }
         default:
             break

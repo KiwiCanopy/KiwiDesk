@@ -21,6 +21,9 @@ struct LookKeysCensusTests {
             + BorderStyle.CodingKeys.allCases.map {
                 "border.\($0.stringValue)"
             }
+            + TilingSettings.GapKeys.allCases.map {
+                "gap.\($0.stringValue)"
+            }
         #expect(paths.count > 40)
         let homes = [
             Set(LookKeys.all), Set(ColorPaletteKeys.all),
@@ -41,6 +44,8 @@ struct LookKeysCensusTests {
             "app_bar.content", "space_bar.inactive_content",
             "space_bar.enabled", "space_bar.show_front_app",
             "space_bar.hide_empty", "app_bar.title_cap",
+            "border.enabled", "border.unfocused_enabled",
+            "border.draw_order", "gap.override",
         ] {
             #expect(!all.contains(path), "\(path) is functionality")
         }
@@ -60,6 +65,9 @@ struct LookKeysCensusTests {
             "kiwishelf.font_weight", "kiwishelf.glyph_size",
             "space_bar.active_indicator", "app_bar.active_indicator",
             "border.sheen", "kiwishelf.order", "kiwishelf.alignment",
+            // #1739: the focus border's shape and the global gaps.
+            "border.width", "border.corner_style", "border.glow",
+            "border.glow_size", "gap.global",
         ] {
             #expect(all.contains(path), "\(path) is ruled styling")
         }

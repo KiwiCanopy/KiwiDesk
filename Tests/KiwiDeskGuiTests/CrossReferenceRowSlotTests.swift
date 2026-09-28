@@ -117,20 +117,19 @@ struct CrossReferenceRowSlotTests {
         "SpaceOverrideRows+ModeRows.swift:prose",
         "BarColorCards.swift:AdvancedColorsHelp.focusedItemReference",
         "StructureColorCards.swift:AdvancedColorsHelp.unfocusedReference",
-        // Siblings assert these; ShelfBorderColorGateTests the last.
+        // Siblings assert these; ShelfBorderColorGateTests the border.
         "GesturesShelfEntries.swift:prose",  // GesturesDrawerTests
         "MacHabitRow.swift:prose",  // MacChecklistCrossReferenceTests
         "AppRulesSection+Lists.swift:Self.noSpacesProse",  // AppRulePinTests
         "BarColorCards.swift:AdvancedColorsHelp.shelfBorderReference",
-        "KiwiShelfCard.swift:Self.lookReference",
+        "KiwiShelfCard.swift:Self.lookReference",  // LookReferenceTests
+        "GapsEditor.swift:Self.lookReference",  // LookReferenceTests
     ]
 
     // MARK: - The values
 
     @Test func theMotionCardProsePlacesItsLink() {
-        #expect(
-            MotionCard.scrollingXrefProse.contains(Self.slot)
-        )
+        #expect(MotionCard.scrollingXrefProse.contains(Self.slot))
     }
 
     /// The focused-item row's link under the Space Bar colours
