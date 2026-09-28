@@ -33,7 +33,8 @@ struct SheenRow: View {
                         spokenValue: SettingsValueReadout.sheenSpoken(
                             strength
                         ),
-                        origin: 0
+                        origin: 0,
+                        lightness: true
                     )
                     Text(SettingsValueReadout.sheen(strength))
                         .settingsReadout()
