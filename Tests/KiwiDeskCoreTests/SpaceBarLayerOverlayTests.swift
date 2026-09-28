@@ -242,7 +242,10 @@ struct SpaceBarLayerOverlayTests {
                 == SpaceBarItemView.autoLength(
                     appCount: 0,
                     contentDepth: barTitleStrip.height,
-                    glyphGap: 0
+                    glyphGap: 0,
+                    endInset: SpaceBarLook().shelf.itemEndInset(
+                        forDepth: barTitleStrip.height
+                    )
                 )
         )
         #expect(overlay.layerDivider.superview === overlay.itemContainer)
@@ -267,7 +270,10 @@ struct SpaceBarLayerOverlayTests {
                 == SpaceBarItemView.autoLength(
                     appCount: 0,
                     contentDepth: 28,
-                    glyphGap: 0
+                    glyphGap: 0,
+                    endInset: SpaceBarLook().shelf.itemEndInset(
+                        forDepth: 28
+                    )
                 )
         )
         #expect(layer.width == 28)

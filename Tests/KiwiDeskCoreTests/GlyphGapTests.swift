@@ -69,13 +69,15 @@ struct GlyphGapTests {
             appCount: 3,
             overflow: 2,
             contentDepth: 32,
-            glyphGap: 0
+            glyphGap: 0,
+            endInset: 0
         )
         let spaced = SpaceBarItemView.autoLength(
             appCount: 3,
             overflow: 2,
             contentDepth: 32,
-            glyphGap: 5
+            glyphGap: 5,
+            endInset: 0
         )
         // Three glyphs and the badge: four slots, three gaps.
         let gaps: CGFloat = 3 * 5
@@ -84,12 +86,14 @@ struct GlyphGapTests {
             SpaceBarItemView.autoLength(
                 appCount: 1,
                 contentDepth: 32,
-                glyphGap: 5
+                glyphGap: 5,
+                endInset: 0
             )
                 == SpaceBarItemView.autoLength(
                     appCount: 1,
                     contentDepth: 32,
-                    glyphGap: 0
+                    glyphGap: 0,
+                    endInset: 0
                 )
         )
     }
@@ -133,7 +137,8 @@ struct GlyphGapDrawingTests {
             appCount: apps.count,
             overflow: 2,
             contentDepth: Self.depth,
-            glyphGap: look.resolvedGlyphGap
+            glyphGap: look.resolvedGlyphGap,
+            endInset: look.shelf.itemEndInset(forDepth: Self.depth)
         )
         let view = SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: length, height: Self.depth)
@@ -246,7 +251,10 @@ struct GlyphGapRenderTests {
                         appCount: item.apps.count,
                         overflow: item.overflow,
                         contentDepth: depth,
-                        glyphGap: Self.gap
+                        glyphGap: Self.gap,
+                        endInset: style.shelf.itemEndInset(
+                            forDepth: depth
+                        )
                     )
             )
         }
@@ -259,7 +267,8 @@ struct GlyphGapRenderTests {
         #expect(!badge.isHidden)
         let slack =
             badge.frame.midX + first.cellLength / 2
-            + SpaceBarItemView.pad - first.bounds.width
+            + SpaceBarItemView.pad + first.endInset
+            - first.bounds.width
         // One point: the badge snaps to the backing grid, whole
         // points on a 1x screen (CI) and half points on 2x.
         #expect(abs(slack) < 1, "badge cell ends \(slack) off")

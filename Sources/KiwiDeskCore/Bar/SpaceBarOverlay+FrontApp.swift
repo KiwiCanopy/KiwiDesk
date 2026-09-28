@@ -76,8 +76,7 @@ extension SpaceBarOverlay {
         let cell = SpaceBarItemView.cell(
             contentDepth: style.contentDepth(forDepth: depth)
         )
-        let chip = style.hasBox || wantsBoxGlass(style)
-        let inset = chip ? pad : 0
+        let inset = chipEndPad(style, depth: depth)
         var extent =
             style.itemGap + BarDivider.sectionThickness
             + style.itemGap + inset + cell + inset
@@ -142,9 +141,17 @@ extension SpaceBarOverlay {
             thickness: BarDivider.sectionThickness,
             lengthShare: BarDivider.sectionLengthShare
         )
-        let chip = style.hasBox || wantsBoxGlass(style)
         return BarDivider.sectionThickness + style.itemGap
-            + (chip ? SpaceBarItemView.pad : 0)
+            + chipEndPad(style, depth: depth)
+    }
+
+    /// The front chip's end padding — an item's pad plus its
+    /// rounded ends' inset (#1763) — or 0 where no chip draws.
+    /// The extent, the content's start and the box all read it.
+    func chipEndPad(_ style: SpaceBarLook, depth: CGFloat) -> CGFloat {
+        guard style.hasBox || wantsBoxGlass(style) else { return 0 }
+        return SpaceBarItemView.pad
+            + style.shelf.itemEndInset(forDepth: depth)
     }
 
     /// Focused app glyph or icon layout with accessibility (#160, QA

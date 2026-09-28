@@ -32,7 +32,8 @@ extension SpaceBarOverlay {
                 appCount: item.apps.count,
                 overflow: item.overflow,
                 contentDepth: content,
-                glyphGap: look.resolvedGlyphGap
+                glyphGap: look.resolvedGlyphGap,
+                endInset: look.shelf.itemEndInset(forDepth: depth)
             )
             return index == 0 && leadsWithLayer
                 ? length + layerDividerExtent(gap: gap)

@@ -42,9 +42,9 @@ extension AppBarItemView {
         let corner = style.resolvedCornerRadius(
             forThickness: crossThickness
         )
-        let inset =
-            max(0, corner - diameter / 2)
-            * (1 - 1 / 2.0.squareRoot())
+        let inset = KiwiShelf.cornerCut(
+            radius: corner - diameter / 2
+        )
         let maxX = max(0, bounds.width - diameter - inset)
         let maxY = max(0, bounds.height - diameter)
         badge.frame = CGRect(
@@ -59,6 +59,16 @@ extension AppBarItemView {
     nonisolated static let contentPadding: CGFloat = 4
     /// Slot leading/trailing inset (manual QA 2026-07-18).
     nonisolated static let edgePadding: CGFloat = 6
+
+    /// The slot's leading/trailing inset on a strip `depth` deep:
+    /// `edgePadding` plus the rounded ends' inset (#1763) — the
+    /// one reading the layout and the slot measurement share.
+    nonisolated static func endPadding(
+        _ shelf: KiwiShelf,
+        depth: CGFloat
+    ) -> CGFloat {
+        edgePadding + shelf.itemEndInset(forDepth: depth)
+    }
 
     /// The group-count badge's side for a content side — the one
     /// derivation the layout and the slot measurement share.
@@ -83,7 +93,7 @@ extension AppBarItemView {
     /// owner 2026-07-20).
     private func layoutHorizontal() {
         let pad = Self.contentPadding
-        let edge = Self.edgePadding
+        let edge = Self.endPadding(style.shelf, depth: crossThickness)
         let font = style.shelf.textFont(ofSize: effectiveFontSize)
         label.font = font
         // Not `usesSingleLineMode`: it draws a tall face above its

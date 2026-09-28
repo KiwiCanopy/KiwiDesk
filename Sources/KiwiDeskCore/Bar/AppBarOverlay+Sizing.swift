@@ -113,6 +113,10 @@ extension AppBarOverlay {
         let depth = style.contentDepth(forDepth: thickness)
         guard horizontal else { return depth }
         let pad = AppBarItemView.contentPadding
+        let edge = AppBarItemView.endPadding(
+            style.shelf,
+            depth: thickness
+        )
         let font = style.shelf.textFont(
             ofSize: style.resolvedFontSize(forDepth: thickness)
         )
@@ -142,7 +146,7 @@ extension AppBarOverlay {
                 : 0
             let natural =
                 iconSide + spacing + text + badge
-                + AppBarItemView.edgePadding * 2
+                + edge * 2
             return max(widest, natural)
         }
     }

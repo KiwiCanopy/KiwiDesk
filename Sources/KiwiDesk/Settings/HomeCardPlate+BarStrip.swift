@@ -168,6 +168,11 @@ struct BarStripView: View {
             .foregroundStyle(Color(kiwiHex: item.color))
             .padding(.horizontal, 2.5 * scale)
             .padding(.vertical, 1.5 * scale)
+            // Rounded ends pad the axis, as the live item (#1763).
+            .padding(
+                vertical ? .vertical : .horizontal,
+                KiwiShelf.cornerCut(radius: spec.itemCorner)
+            )
             .frame(
                 minWidth: vertical ? pipCross : nil,
                 minHeight: vertical ? nil : pipCross
