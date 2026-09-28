@@ -24,21 +24,6 @@ private func makeCore() -> KiwiCore {
     return core
 }
 
-/// Generous hang-guard, matching `ExecTests` (#344): a passing run
-/// exits the instant the reap lands; the deadline only bounds a hang.
-private let hangGuard: TimeInterval = 30
-
-@MainActor
-private func awaitReaped(
-    _ core: KiwiCore,
-    timeout: TimeInterval = hangGuard
-) async throws {
-    let deadline = Date().addingTimeInterval(timeout)
-    while core.exec.runningCount > 0, Date() < deadline {
-        try await Task.sleep(nanoseconds: 20_000_000)
-    }
-}
-
 /// Named under the `ExecTests` prefix so every suite that spawns
 /// real shell children through the production exec path lands in
 /// the same `--filter ExecTests` / `--skip ExecTests` partition
@@ -73,7 +58,7 @@ struct ExecTestsDedup {
         // A fast child holds the dedup slot only until it reaps;
         // afterwards the same command may launch again.
         core.exec.launch("true", dedup: true)
-        try await awaitReaped(core)
+        await core.exec.untilIdle()
         let again = core.exec.launch("true", dedup: true)
         #expect(again != nil)
     }

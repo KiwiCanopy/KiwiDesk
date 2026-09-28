@@ -21,49 +21,12 @@ private func makeCore() -> KiwiCore {
     return core
 }
 
-/// Generous hang-guard for the async waits below (#344). These
-/// tests spawn real subprocesses and await their callbacks on the
-/// main actor; because swift-testing runs suites concurrently, the
-/// shared main actor can be starved for seconds under full-suite
-/// load, so a tight deadline tripped spuriously (the reported
-/// `code → .none` flake). The happy path exits the instant the
-/// condition holds, so a large value never slows a passing run — it
-/// only bounds a genuine hang. What proves the *behavior* is the gap
-/// between a watchdog and its sleep, not this deadline (see
-/// `execTimeout` / `timeoutChildExitsFirst`).
-private let execHangGuard: TimeInterval = 30
-
-/// Polls the Lua global until it is non-nil or the timeout
-/// elapses (exec callbacks arrive via the main-actor queue).
-@MainActor
-private func awaitGlobal(
-    _ lua: LuaInterpreter,
-    _ name: String,
-    timeout: TimeInterval = execHangGuard
-) async throws -> LuaValue {
-    let deadline = Date().addingTimeInterval(timeout)
-    while Date() < deadline {
-        let value = lua.global(name)
-        if value != .none { return value }
-        try await Task.sleep(nanoseconds: 20_000_000)
-    }
-    return .none
-}
-
-/// Waits for the launcher to reap every child (running count back to
-/// zero) or the hang-guard elapses. Centralizes the reap-wait the
-/// async tests repeat, on the same generous deadline (#344).
-@MainActor
-private func awaitReaped(
-    _ core: KiwiCore,
-    timeout: TimeInterval = execHangGuard
-) async throws {
-    let deadline = Date().addingTimeInterval(timeout)
-    while core.exec.runningCount > 0, Date() < deadline {
-        try await Task.sleep(nanoseconds: 20_000_000)
-    }
-}
-
+/// Every async test here awaits `ExecLauncher.untilIdle()` rather
+/// than polling a wall-clock deadline: under a full run the main
+/// actor's backlog measured a 21 s gap between 20 ms polls, so a
+/// 30 s deadline expired after three turns with the reap queued
+/// behind it (tests.md ▸ Async tests, #344/#791). Behavior is proven
+/// by the gap between a watchdog and its sleep, never by a wait.
 @Suite("External command execution", .serialized)
 @MainActor
 struct ExecTests {
@@ -107,8 +70,8 @@ struct ExecTests {
             """
         )
         #expect(result.succeeded)
-        let code = try await awaitGlobal(lua, "got_code")
-        #expect(code == .number(3))
+        await core.exec.untilIdle()
+        #expect(lua.global("got_code") == .number(3))
         #expect(lua.global("got_out") == .string("hello"))
         #expect(lua.global("got_err") == .string("oops"))
     }
@@ -128,7 +91,7 @@ struct ExecTests {
         }
         #expect(pid > 0)
         // The launcher lets go of the Process once reaped.
-        try await awaitReaped(core)
+        await core.exec.untilIdle()
         #expect(core.exec.runningCount == 0)
     }
 
@@ -149,7 +112,7 @@ struct ExecTests {
         // minted in the old one and must never cross over.
         core.loadConfig()
         let lua2 = try #require(core.lua)
-        try await awaitReaped(core)
+        await core.exec.untilIdle()
         // Child was reaped, but the callback went nowhere:
         // neither VM saw it.
         #expect(core.exec.runningCount == 0)
@@ -205,8 +168,8 @@ struct ExecTests {
                 end)
             """
         #expect(lua.run(script).succeeded)
-        let out = try await awaitGlobal(lua, "cap_out")
-        guard case .string(let text) = out else {
+        await core.exec.untilIdle()
+        guard case .string(let text) = lua.global("cap_out") else {
             Issue.record("expected string output")
             return
         }
@@ -227,7 +190,8 @@ struct ExecTests {
                 end, 0.4)
             """
         #expect(lua.run(script).succeeded)
-        let code = try await awaitGlobal(lua, "timeout_code")
+        await core.exec.untilIdle()
+        let code = lua.global("timeout_code")
         // Prove the 0.4s watchdog terminated the child via its exit
         // code, not wall-clock: a SIGTERM-killed `sleep 30` exits
         // non-zero, whereas a completed one exits 0. This can't be
@@ -236,7 +200,6 @@ struct ExecTests {
         #expect(code != .none)
         #expect(code != .number(0))
         // Process was reaped after termination.
-        try await awaitReaped(core)
         #expect(core.exec.runningCount == 0)
     }
 
@@ -257,10 +220,9 @@ struct ExecTests {
                 end, 30)
             """
         #expect(lua.run(script).succeeded)
-        let code = try await awaitGlobal(lua, "_code")
-        #expect(code == .number(0))
+        await core.exec.untilIdle()
+        #expect(lua.global("_code") == .number(0))
         // Reaped promptly; the pending watchdog was cancelled.
-        try await awaitReaped(core)
         #expect(core.exec.runningCount == 0)
         #expect(lua.global("_calls") == .number(1))
     }

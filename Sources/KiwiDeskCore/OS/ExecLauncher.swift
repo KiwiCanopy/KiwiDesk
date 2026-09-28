@@ -29,10 +29,29 @@ public final class ExecLauncher {
     /// Latch for `warnThreshold` warning (#467).
     private var highWaterWarned = false
 
+    #if DEBUG
+        /// Suspended `untilIdle()` callers, resumed by the reap that
+        /// empties `running`.
+        private var idleWaiters: [CheckedContinuation<Void, Never>] = []
+    #endif
+
     public init() {}
 
     /// Number of children currently active and un-reaped (`exec_running`).
     public var runningCount: Int { running.count }
+
+    #if DEBUG
+        /// Suspends until no child is running, for async test
+        /// synchronization (tests.md ▸ Async tests). Returns only
+        /// after the emptying reap has run its `onExit`. It does NOT
+        /// mean a callback ran — a callback-less or dropped one
+        /// reaps too — and a child that never reaps (no timeout)
+        /// never resumes it; with nothing running it returns at once.
+        func untilIdle() async {
+            guard !running.isEmpty else { return }
+            await withCheckedContinuation { idleWaiters.append($0) }
+        }
+    #endif
 
     /// Starts `command` returning child pid or nil on failure (#467, #489).
     @discardableResult
@@ -212,6 +231,13 @@ public final class ExecLauncher {
             highWaterWarned = false
         }
         onExit?(code, stdout, stderr)
+        #if DEBUG
+            if running.isEmpty {
+                let waiters = idleWaiters
+                idleWaiters = []
+                waiters.forEach { $0.resume() }
+            }
+        #endif
     }
 
     /// Augments environment PATH with Homebrew directories.
