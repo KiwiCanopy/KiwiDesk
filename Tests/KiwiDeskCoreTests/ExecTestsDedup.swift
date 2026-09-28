@@ -127,15 +127,16 @@ struct ExecTestsDedup {
         // reap well within reapGrace (2s), while no-limit keeps it
         // running. The child outlives any starved poll (#344), so
         // the check can't flake on a late resume.
-        #expect(
-            lua.run("z = KiwiDesk.exec('sleep 30', nil, 0)").succeeded
-        )
+        let script =
+            "z = KiwiDesk.exec('sleep \(execStarvationGap)', nil, 0)"
+        #expect(lua.run(script).succeeded)
         #expect(core.exec.runningCount == 1)
-        if case .number(let pid) = lua.global("z") {
-            #expect(pid > 0)
-        } else {
+        guard case .number(let pid) = lua.global("z") else {
             Issue.record("expected a pid for an accepted exec")
+            return
         }
+        #expect(pid > 0)
+        defer { kill(pid_t(pid), SIGTERM) }
         try await Task.sleep(nanoseconds: 2_500_000_000)
         #expect(core.exec.runningCount == 1)
     }

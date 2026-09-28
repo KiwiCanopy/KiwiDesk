@@ -21,6 +21,12 @@ private func makeCore() -> KiwiCore {
     return core
 }
 
+/// Seconds a gap-proof child or watchdog must outlast: longer than
+/// any main-actor starvation, since a 30 s `sleep` exited 0 before
+/// its 0.4 s watchdog got a turn in a full run (2026-09-28, worst
+/// measured gap 37 s). A broken watchdog costs a run this long.
+let execStarvationGap = 600
+
 /// Every async test here awaits `ExecLauncher.untilIdle()` rather
 /// than polling a wall-clock deadline: under a full run the main
 /// actor's backlog measured a 21 s gap between 20 ms polls, so a
@@ -98,23 +104,29 @@ struct ExecTests {
     @Test("config reload drops pending exec callbacks")
     func reloadDropsPendingCallbacks() async throws {
         let core = makeCore()
-        let lua1 = try #require(core.lua)
-        #expect(
-            lua1.run(
-                """
-                KiwiDesk.exec("sleep 0.2", function()
-                    hit = true
-                end)
-                """
-            ).succeeded
-        )
-        // Reload swaps in a fresh VM; the pending ref was
-        // minted in the old one and must never cross over.
+        weak var oldVM: LuaInterpreter?
+        do {
+            let lua1 = try #require(core.lua)
+            oldVM = lua1
+            #expect(
+                lua1.run(
+                    """
+                    KiwiDesk.exec("sleep 0.2", function()
+                        hit = true
+                    end)
+                    """
+                ).succeeded
+            )
+        }
+        // Reload swaps in a fresh VM; the pending ref was minted in
+        // the old one and must never cross over — nor keep it alive:
+        // the callback holds its VM weakly, so the old VM is gone
+        // before the reap and the callback has nowhere to run.
         core.loadConfig()
+        #expect(oldVM == nil)
         let lua2 = try #require(core.lua)
         await core.exec.untilIdle()
-        // Child was reaped, but the callback went nowhere:
-        // neither VM saw it.
+        #expect(oldVM == nil)
         #expect(core.exec.runningCount == 0)
         #expect(lua2.global("hit") == .none)
         // The fresh VM is fully functional afterwards.
@@ -184,7 +196,7 @@ struct ExecTests {
         let lua = try #require(core.lua)
         // Third arg is timeout in seconds.
         let script = """
-            KiwiDesk.exec("sleep 30",
+            KiwiDesk.exec("sleep \(execStarvationGap)",
                 function(code, out, err)
                     timeout_code = code
                 end, 0.4)
@@ -193,7 +205,7 @@ struct ExecTests {
         await core.exec.untilIdle()
         let code = lua.global("timeout_code")
         // Prove the 0.4s watchdog terminated the child via its exit
-        // code, not wall-clock: a SIGTERM-killed `sleep 30` exits
+        // code, not wall-clock: a SIGTERM-killed `sleep` exits
         // non-zero, whereas a completed one exits 0. This can't be
         // tripped by main-actor starvation delaying the callback (a
         // tight `elapsed <` bound could).
@@ -207,7 +219,7 @@ struct ExecTests {
     func timeoutChildExitsFirst() async throws {
         let core = makeCore()
         let lua = try #require(core.lua)
-        // The child exits immediately; the long 30s watchdog must
+        // The child exits immediately; the long watchdog must
         // not fire (the normal reap cancels it) and the callback must
         // run exactly once with the real code. The watchdog is wide so
         // a load-starved exit callback still lands well before it.
@@ -217,7 +229,7 @@ struct ExecTests {
                 function(code, out, err)
                     _calls = _calls + 1
                     _code = code
-                end, 30)
+                end, \(execStarvationGap))
             """
         #expect(lua.run(script).succeeded)
         await core.exec.untilIdle()
