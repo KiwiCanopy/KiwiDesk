@@ -52,9 +52,7 @@ struct OnboardingLookRow: View {
     }
 
     private func preview(_ look: ShelfLook) -> TilingSettings {
-        var settings = live
-        look.apply(to: &settings, palette: palette(look))
-        return settings
+        KiwiCore.painted(live, look: look, palette: palette(look))
     }
 }
 

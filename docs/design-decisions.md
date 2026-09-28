@@ -6377,12 +6377,13 @@ Revert is greyed until a click changed something, and returns
 what a paint can reach to where it stood before the first one —
 the look and palette keys, and the glass leaves and per-layout
 indicators a look writes beyond them — and nothing else: a setting
-saved from Settings meanwhile stays (`ShelfPaintTests` ▸
-`restoreTouchesOnlyTheLook`,
-`restoreKeepsWhatThePaintReachedBeyond`). A pick that
+outside those saved from Settings meanwhile stays, while one inside
+them returns with the rest (`ShelfPaintTests` ▸
+`restoreTouchesOnlyTheLook`, `ShelfPaintRoundTripTests` ▸
+`revertRoundTripsEveryLook`). A pick that
 changes nothing and a step left untouched write nothing
 (`OnboardingLooksTests` ▸ `noOpPickWritesNothing`,
-`untouchedWritesNothing`).
+`OnboardingLooksTests` ▸ `untouchedWritesNothing`).
 
 Three obligations keep the write honest:
 
@@ -6391,14 +6392,15 @@ Three obligations keep the write honest:
   non-adopting, and never snapshots live the way Keep does (#1179;
   `ShelfPaintTests` ▸ `fileKeepsItsOwnSettings`). A Revert is
   refused once another profile went live, whose settings the
-  baseline never described (`restoreSkipsAnotherProfile`).
+  baseline never described (`ShelfPaintTests` ▸
+  `restoreSkipsAnotherProfile`).
 - **An unsaved live-profile Settings draft greys the step**, since
   its Save would write the old look back over the new one — greyed
   and never hidden, with a caption naming the buttons that clear
   it (`OnboardingLooksTests` ▸ `draftBlocks`). A clean draft
   re-reads after every paint, through Core's `onShelfPainted` on
   the write (`ShelfPaintTests` ▸ `paintsAreAnnounced`,
-  `OnboardingLooksWiringTests`).
+  `OnboardingLooksWiringTests` ▸ `paintFollowsIntoSettings`).
 - **Where no saved profile is live, the click lasts the session**
   (`ShelfPaintTests` ▸ `noProfileIsLiveOnly`): there is no file to
   write. A first run always has one, the seeded Starter; only a

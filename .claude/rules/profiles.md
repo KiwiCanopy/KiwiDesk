@@ -1093,17 +1093,16 @@ to live AND the live profile's file; the file half reads the
 stored profile, paints the pick and writes it back through the
 non-adopting `ProfileManager.write` — never `persistProfile`'s
 live capture (`ShelfPaintTests` ▸ `fileKeepsItsOwnSettings`) — and
-a restore returns only what a paint can reach, the glass leaves
-and per-layout indicators `ShelfLook.apply` writes beyond its keys
-included (`restoreTouchesOnlyTheLook`,
-`restoreKeepsWhatThePaintReachedBeyond`). A
-restore is refused once `currentName` moved
-(`restoreSkipsAnotherProfile`). The open draft's debt is paid ON
-the write, through `onShelfPainted` (`paintsAreAnnounced`), never
-by a caller; a caller refuses the paint while a live-profile
-draft is dirty (`OnboardingLooksTests` ▸ `draftBlocks`). The
-argument is `docs/design-decisions.md` ▸ *The tour's look is
-written through, and the tour owns its undo*.
+a restore returns only what a paint can reach
+(`ShelfPaintRoundTripTests` ▸ `revertRoundTripsEveryLook`,
+`ShelfPaintTests` ▸ `restoreTouchesOnlyTheLook`). A restore is
+refused once `currentName` moved (`ShelfPaintTests` ▸
+`restoreSkipsAnotherProfile`). The open draft's debt is paid ON
+the write, through `onShelfPainted` (`ShelfPaintTests` ▸
+`paintsAreAnnounced`), never by a caller; a caller refuses the
+paint while a live-profile draft is dirty (`OnboardingLooksTests`
+▸ `draftBlocks`). The argument is `docs/design-decisions.md` ▸
+*The tour's look is written through, and the tour owns its undo*.
 
 **One draft, one identity, one encoder (#1393).** The page a
 draft resolves and encodes against is `SettingsModel.reachPage`,
