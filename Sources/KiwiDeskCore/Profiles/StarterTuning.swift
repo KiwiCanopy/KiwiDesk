@@ -18,6 +18,9 @@ public enum StarterTuning {
         settings.scrolling.slotSize = .fraction(
             clamping: standardSlot
         )
+        // Space Bar on top, App Bar on the bottom: two shelves.
+        // The type default stays `.top`, so no crossing (#1528).
+        settings.appBarStyle.edge = .bottom
         return settings
     }
 
