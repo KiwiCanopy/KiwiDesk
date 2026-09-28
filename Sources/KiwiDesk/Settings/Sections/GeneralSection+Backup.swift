@@ -46,8 +46,9 @@ extension GeneralSection {
             Text(
                 L(
                     "general.advanced.backup.export.caption",
-                    "Saves your settings, profiles, and color "
-                        + "palettes to a file you choose. Doesn't "
+                    "Saves your settings, profiles, color "
+                        + "palettes and looks to a file you "
+                        + "choose. Doesn't "
                         + "include init.lua."
                 )
             )
@@ -89,7 +90,8 @@ extension GeneralSection {
                         "general.advanced.backup.restore.help",
                         "Replaces everything currently saved — "
                             + "your settings, every profile, and "
-                            + "your color palettes — with what's "
+                            + "your color palettes and looks — "
+                            + "with what's "
                             + "in the chosen file. The versions "
                             + "being replaced go to the Trash. "
                             + "init.lua is never touched."
@@ -103,8 +105,9 @@ extension GeneralSection {
             Text(
                 L(
                     "general.advanced.backup.restore.caption",
-                    "Replaces your settings, profiles, and color "
-                        + "palettes with what's in a backup file. "
+                    "Replaces your settings, profiles, color "
+                        + "palettes and looks with what's in a "
+                        + "backup file. "
                         + "Doesn't touch init.lua."
                 )
             )
@@ -150,7 +153,8 @@ extension GeneralSection {
                     "general.advanced.backup.restore.confirm"
                         + ".message",
                     "This replaces your settings, every profile, "
-                        + "and your color palettes with what's in "
+                        + "and your color palettes and looks with "
+                        + "what's in "
                         + "the backup file — and discards any "
                         + "changes you haven't saved yet. The "
                         + "files being replaced go to the Trash. "

@@ -16,6 +16,8 @@ paths:
   # The one shelf (#1517): where a bar field lives, the one
   # reservation, the one placement rule, the retired verbs.
   - "Sources/KiwiDeskCore/App/KiwiCore+Shelf*.swift"
+  # The looks (#1684): which bar fields a look may set.
+  - "Sources/KiwiDeskCore/Appearance/*Look*.swift"
   # The Settings preview asks ShelfArrangement and the hard floor
   # like the live plan does; a hand placement there is this
   # file's defect, not gui.md's.
@@ -62,7 +64,15 @@ bars. Obligations:
   reds a name on the shelf and on either style, and
   `AppBarParityTests` ▸ `propertyParity` a `LayoutAppBar` field
   that is not `AppBarStyle`'s; whether a NEW field is shared or
-  a bar's own is review's, since no guard can tell.
+  a bar's own is review's, since no guard can tell. **And a new
+  field is ruled for the looks (#1684)**: styling — how the same
+  items look or where they sit — joins `LookKeys.all`,
+  functionality or a field left alone joins `LookKeys.leftOut`
+  with its reason, a colour is the palette's; the owner's test
+  and the argument are `docs/design-decisions.md` ▸ A look is
+  KiwiShelf's styling. `LookKeysCensusTests` reds an unruled
+  field of `KiwiShelf`, `SpaceBarStyle`, `AppBarStyle` or
+  `BorderStyle`; which home is right is review's.
 - **Retire a bar verb by adding it to `APIReference.retired`**,
   naming its replacement or nil, and never by an alias (AGENTS.md
   §5). A field the shelf migration moves joins

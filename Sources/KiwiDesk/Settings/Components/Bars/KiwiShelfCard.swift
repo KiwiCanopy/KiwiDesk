@@ -23,6 +23,12 @@ struct KiwiShelfCard: View {
             SettingsCatalog.bars.kiwishelfCard,
             caption: cardCaption
         ) {
+            // A look writes this card's style in one click (#1684).
+            CrossReferenceRow(
+                prose: Self.lookReference,
+                linkTitle: SettingsDestination.looks.title,
+                destination: .looks
+            )
             showGroup
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(BarsRowOrder.kiwishelfAtRest, id: \.id) {
@@ -98,6 +104,15 @@ struct KiwiShelfCard: View {
         L(
             "bars.style.kiwishelf.summary",
             "Background, roundness, item gap, font size"
+        )
+    }
+
+    static var lookReference: String {
+        L(
+            "bars.kiwishelf.looks_xref",
+            "A look sets this card's style, both indicators and "
+                + "the focus border's sheen in one click — in %1$@.",
+            CrossReferenceRow.linkSlot
         )
     }
 

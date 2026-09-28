@@ -1,0 +1,60 @@
+[
+  {
+    "name": "Taskbar",
+    "palette": "Slate",
+    "style": {
+      "kiwishelf.edge": "bottom",
+      "kiwishelf.background_fit": "full",
+      "kiwishelf.corner_roundness": 0,
+      "kiwishelf.thickness": 44,
+      "kiwishelf.liquid_glass": false,
+      "kiwishelf.order": "apps_first",
+      "kiwishelf.alignment": "center",
+      "space_bar.active_indicator": "edge_mark",
+      "border.sheen": 0
+    }
+  },
+  {
+    "name": "Classic",
+    "palette": "Clean Light",
+    "style": {
+      "kiwishelf.background_fit": "full",
+      "kiwishelf.corner_roundness": 0,
+      "kiwishelf.thickness": 24,
+      "kiwishelf.liquid_glass": false,
+      "kiwishelf.border": true,
+      "kiwishelf.border_width": 1,
+      "kiwishelf.font_family": "Geneva",
+      "border.sheen": 0.25
+    }
+  },
+  {
+    "name": "Tiler",
+    "palette": "Nightfall",
+    "style": {
+      "kiwishelf.background_fit": "full",
+      "kiwishelf.corner_roundness": 0,
+      "kiwishelf.thickness": 28,
+      "kiwishelf.liquid_glass": false,
+      "kiwishelf.background_style": "boxed",
+      "kiwishelf.font_family": "System Monospaced",
+      "kiwishelf.font_weight": 500,
+      "space_bar.active_indicator": "edge_mark",
+      "border.sheen": 0
+    }
+  },
+  {
+    "name": "Pill",
+    "palette": "True Dark",
+    "style": {
+      "kiwishelf.background_fit": "full",
+      "kiwishelf.background_style": "boxed",
+      "kiwishelf.corner_roundness": 100,
+      "kiwishelf.outer_margin": 8,
+      "kiwishelf.border": true,
+      "kiwishelf.border_width": 1,
+      "kiwishelf.font_weight": 500,
+      "border.sheen": 0.5
+    }
+  }
+]

@@ -49,7 +49,8 @@ public enum ConfigMigration {
         migratingRetiredFloatNudge,
     ]
 
-    /// Target format integer for `root`'s shape (#902, #938, #939).
+    /// Target format integer for `root`'s shape (#902, #938, #939,
+    /// #1684).
     static func targetFormat(for root: [String: Any]) -> Int {
         if root[SetupBundle.shapeMarker] != nil {
             return SetupBundle.currentFormat
@@ -63,6 +64,9 @@ public enum ConfigMigration {
             PaletteDocument.CodingKeys.palettes.rawValue
         if root[palettes] != nil {
             return PaletteDocument.currentFormat
+        }
+        if root[LookDocument.CodingKeys.looks.rawValue] != nil {
+            return LookDocument.currentFormat
         }
         return GuiConfig.currentFormat
     }

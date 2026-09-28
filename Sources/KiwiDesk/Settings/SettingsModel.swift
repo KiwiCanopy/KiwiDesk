@@ -116,6 +116,9 @@ final class SettingsModel: ObservableObject {
     /// read per keystroke — and `refreshPalettes` is its one
     /// writer.
     @Published var userPalettes: [ColorPalette] = []
+    /// The user looks, the one in-memory copy of `looks.json`
+    /// (#1684) — `refreshLooks` is its one writer.
+    @Published var userLooks: [ShelfLook] = []
     /// Screen counts where multiple profiles claim default flag.
     @Published var duplicateDefaultCounts: [Int] = []
     /// Confirmation text after search flipped mode

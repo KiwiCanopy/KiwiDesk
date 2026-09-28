@@ -84,15 +84,14 @@ extension KiwiCore {
         case "sheen":
             // A signed strength, clamped into -1...1 like the other
             // border magnitudes; only a wrong type fails.
-            guard let value = args.first?.numberValue, value.isFinite
-            else {
+            guard let sheen = BorderStyle.sheen(from: args.first) else {
                 let range = BorderStyle.sheenRange
                 return .fail(
                     "expected a sheen from \(range.lowerBound.formatted()) "
                         + "to \(range.upperBound.formatted())"
                 )
             }
-            tiler.settings.borderStyle.sheen = BorderStyle.clampSheen(value)
+            tiler.settings.borderStyle.sheen = sheen
             return .ok()
         case "glow_size":
             // 0 = automatic (the width-scaled formula, #551);

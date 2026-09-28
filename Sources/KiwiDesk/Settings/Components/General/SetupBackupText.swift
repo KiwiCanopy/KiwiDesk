@@ -44,6 +44,13 @@ enum SetupBackupText {
                     + "palettes, so a backup would leave them "
                     + "out. They may come from a newer KiwiDesk."
             )
+        case .unreadableLooks:
+            return L(
+                "general.advanced.backup.error.unreadable_looks",
+                "KiwiDesk can't read this Mac's saved looks, so a "
+                    + "backup would leave them out. They may come "
+                    + "from a newer KiwiDesk."
+            )
         case .luaOwnsThisMac:
             return L(
                 "general.advanced.backup.error.lua_owned",
@@ -85,6 +92,16 @@ enum SetupBackupText {
                 )
             )
         }
+        if outcome.refusedLooks > 0 {
+            parts.append(
+                L(
+                    "general.advanced.backup.restore.skipped"
+                        + ".looks",
+                    "Looks skipped: %1$d",
+                    outcome.refusedLooks
+                )
+            )
+        }
         return parts.joined(separator: "\n")
     }
 
@@ -100,7 +117,7 @@ enum SetupBackupText {
     static func title(for error: SetupBundleError) -> String {
         switch error {
         case .couldNotWrite, .unreadableSettings,
-            .unreadablePalettes:
+            .unreadablePalettes, .unreadableLooks:
             return L(
                 "general.advanced.backup.error.export_title",
                 "Couldn't Save the Backup"

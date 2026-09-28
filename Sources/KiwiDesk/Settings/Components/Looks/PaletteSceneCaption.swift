@@ -8,7 +8,8 @@ enum PaletteSceneCaption {
     static var panel: String {
         L(
             "colors.scene.caption",
-            "Both bars with their active items, the focused and "
+            "KiwiShelf's shape, both bars with their active "
+                + "items, the focused and "
                 + "unfocused rings with their state marks, and "
                 + "the drag ghost beside its drop zone."
         )

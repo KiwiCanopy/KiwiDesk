@@ -74,7 +74,7 @@ extension SettingsSearchPlace.Kind {
         case .space: return .spaces
         case .profile: return .profiles
         case .appRule: return .appRules
-        case .palette: return .colors
+        case .palette: return .looks
         }
     }
 }

@@ -71,7 +71,7 @@ struct SettingsSearchPlacesTests {
             case .space: expected = .spaces
             case .profile: expected = .profiles
             case .appRule: expected = .appRules
-            case .palette: expected = .colors
+            case .palette: expected = .looks
             }
             #expect(
                 byKind[kind]?.anchor.destination == expected,

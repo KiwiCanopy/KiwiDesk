@@ -35,7 +35,7 @@ struct ConfigMigrationRoutingTests {
     /// file readers and are not the subject here.
     private let fileShapes = [
         "Profile.self", "SetupBundle.self", "GuiConfig.self",
-        "PaletteDocument.self",
+        "PaletteDocument.self", "LookDocument.self",
     ]
 
     /// Every file that decodes one of those shapes, and whether
@@ -66,6 +66,7 @@ struct ConfigMigrationRoutingTests {
         // deliberately — lives in profiles.md's bump paragraph
         // (#945 review).
         "Appearance/PaletteStore.swift": true,
+        "Appearance/LookStore.swift": true,
     ]
 
     @Test("Every config-file reader routes through the migration")

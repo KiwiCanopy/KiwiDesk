@@ -152,7 +152,7 @@ struct SetupBundleTests {
             Set(top.keys)
                 == [
                     "format", "writtenBy", "config", "profiles",
-                    "palettes",
+                    "palettes", "looks",
                 ]
         )
         let text = String(decoding: data, as: UTF8.self)

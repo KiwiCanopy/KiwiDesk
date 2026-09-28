@@ -66,6 +66,16 @@ public struct BorderStyle: Sendable, Equatable {
         return abs(clamped) < sheenSnap ? 0 : clamped
     }
 
+    /// A sheen argument as the `set_sheen` command and a look
+    /// (#1684) both take it: any finite number, clamped; nil for a
+    /// wrong type.
+    public static func sheen(from value: JSONValue?) -> CGFloat? {
+        guard let number = value?.numberValue, number.isFinite else {
+            return nil
+        }
+        return clampSheen(number)
+    }
+
     /// Half the readout's resolution, as a strength.
     static let sheenSnap: CGFloat = 0.00005
 

@@ -111,7 +111,9 @@ extension SettingsValueReadout {
             )
         case .paletteApply, .paletteSave, .paletteRename,
             .paletteExport, .paletteDelete, .paletteImport,
-            .paletteNeonGlowHint:
+            .paletteNeonGlowHint, .lookApply, .lookUseColors,
+            .lookSave, .lookImport, .lookRename, .lookExport,
+            .lookDelete:
             // Actions and a link: no stored model path, so no
             // value pair to narrate.
             return []

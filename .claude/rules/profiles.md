@@ -642,9 +642,27 @@ end on, and the import's filter to `ColorPaletteKeys.all` would
 drop an unshelved file's bar colours whole (`KiwiShelfPaletteMigrationTests`
 ▸ `libraryCrossesOnce`, ▸ `bundlePalettesCross`, ▸
 `sidecarImportShelves`). The next breaking palette change takes
-the same three answers or argues a different one.
-Nothing can guard this, and it is the obligation the format
-integers rest on: `<=` is decoder tolerance rather than a
+the same three answers or argues a different one — and a FOURTH
+since #1684, for the look sidecar (`LookExport`) carries a
+`ColorPalette` inline too.
+
+**The look library is the palette library's twin (#1684) and owes
+the same answers.** A breaking `ShelfLook` or `LookDocument`
+change bumps `LookDocument.currentFormat` for `looks.json` AND
+`SetupBundle.currentFormat`, which carries `[ShelfLook]` inline,
+and rules the markerless `LookExport` sidecar deliberately, as
+the palette sidecar above was. **And a look stores setting PATHS
+and their wire spellings as data** (`LookKeys`): renaming a
+`kiwishelf` / `space_bar` / `app_bar` / `border` key or value a
+look carries owes the `ConfigMigration` crossing a stored value
+owes (§5), reaching `looks.json` and a bundle's looks — since
+`ShelfLook.apply` and `LookStore`'s filter skip a path they do
+not know, an unmigrated rename drops the user's styling
+silently. `LookKeysCensusTests` reds the rename; the migration
+crossing is review's.
+
+Nothing can guard the format bumps above, and they are the
+obligation the format integers rest on: `<=` is decoder tolerance rather than a
 compatibility shim, so an older config or backup is accepted — which is
 right, and which silently becomes a lie the first time a
 `GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
