@@ -110,7 +110,12 @@ struct WindowStrokeTests {
                     + "GapsBordersPanelPreview.swift", 2
             ),
         ] {
+            // Code only: a needle kept alive in a comment beside a
+            // literal must not count.
             let text = try Self.source(path)
+                .split(separator: "\n", omittingEmptySubsequences: false)
+                .map { $0.components(separatedBy: "//")[0] }
+                .joined(separator: "\n")
             let hits =
                 text.components(
                     separatedBy: "stroke: settings.windowStroke,"
