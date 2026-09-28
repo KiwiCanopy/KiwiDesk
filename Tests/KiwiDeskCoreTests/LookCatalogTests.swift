@@ -6,7 +6,7 @@ import Testing
 /// The bundled looks (#1684): Glass derived from the shipped
 /// defaults and the starter's bars, every look total over the
 /// register, each look's bars its reference's, named palettes
-/// that exist, the ruled Sheen column, and five tellable apart.
+/// that exist, the ruled Sheen column, and six tellable apart.
 @Suite("Look catalog")
 struct LookCatalogTests {
     private var bundled: [ShelfLook] { LookCatalog.bundled() }
@@ -15,11 +15,14 @@ struct LookCatalogTests {
         bundled.first { $0.name == name }
     }
 
-    @Test("the five bundled looks, Glass first")
+    @Test("the six bundled looks, Glass first")
     func names() {
         #expect(
             bundled.map(\.name)
-                == ["Glass", "Taskbar", "Classic", "Tiler", "Pill"]
+                == [
+                    "Glass", "Taskbar", "Classic", "Tiler", "Pill",
+                    "Bloom",
+                ]
         )
     }
 
@@ -50,7 +53,7 @@ struct LookCatalogTests {
         let edges: [String: (space: String, app: String)] = [
             "Glass": ("top", "bottom"), "Taskbar": ("bottom", "bottom"),
             "Classic": ("top", "top"), "Tiler": ("top", "top"),
-            "Pill": ("top", "top"),
+            "Pill": ("top", "top"), "Bloom": ("top", "bottom"),
         ]
         for look in bundled {
             let want = try #require(edges[look.name], "\(look.name)")
@@ -100,7 +103,7 @@ struct LookCatalogTests {
     func sheenColumn() throws {
         let column: [String: Double] = [
             "Glass": 0.5, "Taskbar": 0, "Classic": 0.25,
-            "Tiler": 0, "Pill": 0.5,
+            "Tiler": 0, "Pill": 0.5, "Bloom": 0.6,
         ]
         for (name, sheen) in column {
             let look = try #require(look(name))
