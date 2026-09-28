@@ -68,12 +68,12 @@ struct DesktopRaiseGateTests {
     func focusWindowRefusesWhole() {
         let core = makeCore()
         core.windowIsOnScreen = { $0 == WindowID(1) ? false : true }
-        core.tiler.placements = PlacementLedger()
+        core.tiler.placements.forgetAll()
         var log: [String] = []
         core.onLog = { log.append($0) }
         core.focusWindow(WindowID(1), warp: true)
         #expect(core.activeSpace?.focused == WindowID(2))
-        #expect(core.tiler.placements.recent(WindowID(2), at: Date()) == nil)
+        #expect(core.tiler.placements.recent(WindowID(2)) == nil)
         #expect(log.contains { $0.contains(Self.refusalNeedle) })
     }
 

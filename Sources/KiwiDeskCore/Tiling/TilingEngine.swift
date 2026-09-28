@@ -68,7 +68,7 @@ public final class TilingEngine {
     var unsolicitedCorrections = UnsolicitedResizeMemo()
     /// Where each window was last placed (#1161) — the type doc
     /// carries the argument; stamped in `applyFrame`/`setFrame`.
-    var placements = PlacementLedger()
+    var placements = PlacementLedger.live
 
     /// Test seam for the observe gate above: whether one of our
     /// own frame-sets for this window is recent enough that its

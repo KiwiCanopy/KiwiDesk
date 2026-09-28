@@ -177,5 +177,9 @@ func makeTestCore(
     // echo grace cannot age a stamp out under a starved runner
     // (#1456, tests.md ▸ age-bounded ledgers).
     core.tiler.applier.clock = { 0 }
+    // Same clock class (#1161): the placement ledger's echo
+    // window is measured on its own seam; a test wanting the
+    // expiry moves this clock ahead.
+    core.tiler.placements.clock = { 0 }
     return core
 }

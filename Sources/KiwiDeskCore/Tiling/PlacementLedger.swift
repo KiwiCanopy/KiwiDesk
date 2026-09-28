@@ -28,16 +28,33 @@ struct PlacementLedger {
     /// trade (accepted-limitations.md).
     static let echoWindow: TimeInterval = 2.0
 
+    /// The clock the echo window is measured on, in seconds.
+    /// Required, so a fresh ledger cannot drop a test's freeze
+    /// (#1456, tests.md ▸ age-bounded ledgers).
+    var clock: () -> TimeInterval
+
+    init(clock: @escaping () -> TimeInterval) {
+        self.clock = clock
+    }
+
+    /// The production ledger, on the host uptime — the frame
+    /// applier's base, immune to wall-clock steps. It pauses in
+    /// sleep, so a placement made just before sleep is still live
+    /// for the rest of its window after wake: deliberate.
+    static var live: PlacementLedger {
+        PlacementLedger { ProcessInfo.processInfo.systemUptime }
+    }
+
     private struct Entry {
         var target: CGRect
         /// When KiwiDesk put the window there, or left it.
-        var placed: Date
+        var placed: TimeInterval
         /// `placed`, or the last renewal.
-        var stamped: Date
+        var stamped: TimeInterval
         /// When a focus command last moved focus OFF the window;
         /// kept across a later placement, since the pan that
         /// follows a step is what moves the window.
-        var displaced: Date?
+        var displaced: TimeInterval?
     }
 
     private var entries: [WindowID: Entry] = [:]
@@ -46,9 +63,9 @@ struct PlacementLedger {
     /// that are placed once and never focused cannot accrete.
     mutating func stamp(
         _ id: WindowID,
-        target: CGRect,
-        at now: Date = Date()
+        target: CGRect
     ) {
+        let now = clock()
         prune(at: now)
         entries[id] = Entry(
             target: target,
@@ -63,9 +80,9 @@ struct PlacementLedger {
     /// focus of its own. Restarts the window like a placement.
     mutating func noteDisplaced(
         _ id: WindowID,
-        frame: CGRect,
-        at now: Date = Date()
+        frame: CGRect
     ) {
+        let now = clock()
         prune(at: now)
         entries[id] = Entry(
             target: entries[id]?.target ?? frame,
@@ -75,9 +92,9 @@ struct PlacementLedger {
         )
     }
 
-    private mutating func prune(at now: Date) {
+    private mutating func prune(at now: TimeInterval) {
         entries = entries.filter {
-            now.timeIntervalSince($0.value.stamped) < Self.echoWindow
+            now - $0.value.stamped < Self.echoWindow
         }
     }
 
@@ -87,9 +104,10 @@ struct PlacementLedger {
     /// of renewals ends at most `2 × echoWindow` after KiwiDesk
     /// last placed the window, whoever caused the reports
     /// (#1161, `PlacementLedgerTests`).
-    mutating func renew(_ id: WindowID, at now: Date = Date()) {
+    mutating func renew(_ id: WindowID) {
+        let now = clock()
         guard let entry = entries[id],
-            now.timeIntervalSince(entry.placed) < Self.echoWindow
+            now - entry.placed < Self.echoWindow
         else { return }
         entries[id].map { _ in entries[id]?.stamped = now }
     }
@@ -98,24 +116,31 @@ struct PlacementLedger {
     /// live window — the displacement itself no older than the
     /// renewal ceiling.
     func recentDisplacement(
-        _ id: WindowID,
-        at now: Date = Date()
+        _ id: WindowID
     ) -> Bool {
+        let now = clock()
         guard let entry = entries[id],
             let displaced = entry.displaced,
-            now.timeIntervalSince(entry.stamped) < Self.echoWindow
+            now - entry.stamped < Self.echoWindow
         else { return false }
-        return now.timeIntervalSince(displaced) < 2 * Self.echoWindow
+        return now - displaced < 2 * Self.echoWindow
     }
 
     /// The frame KiwiDesk gave `id` within the echo window of its
     /// placement or last renewal, nil once past it. Read, never
     /// consumed.
-    func recent(_ id: WindowID, at now: Date = Date()) -> CGRect? {
+    func recent(_ id: WindowID) -> CGRect? {
+        let now = clock()
         guard let entry = entries[id],
-            now.timeIntervalSince(entry.stamped) < Self.echoWindow
+            now - entry.stamped < Self.echoWindow
         else { return nil }
         return entry.target
+    }
+
+    /// Empties the ledger and keeps its clock — a test's reset,
+    /// which a fresh ledger would take off the frozen clock.
+    mutating func forgetAll() {
+        entries = [:]
     }
 
     /// Ids are reused: a gone window's placement must not reach

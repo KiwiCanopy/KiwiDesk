@@ -221,8 +221,7 @@ extension KiwiCore {
             reassertAgainstPlacementBounce(
                 id,
                 intended: intended,
-                placed: placed,
-                now: now
+                placed: placed
             )
         {
             return

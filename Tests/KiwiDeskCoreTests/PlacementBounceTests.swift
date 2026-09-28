@@ -52,7 +52,7 @@ private func makeFixture(
         "set_mode",
         args: [.string(space.raw), .string("scrolling")]
     )
-    core.tiler.placements = PlacementLedger()
+    core.tiler.placements.forgetAll()
     core.state.workspaces.focus(other, in: space)
     return (target, other)
 }
@@ -132,25 +132,17 @@ struct PlacementBounceTests {
     func distrustRenewsTheWindow() {
         let core = makeCore()
         let (target, other) = makeFixture(core)
-        let now = Date()
-        // Placed 0.8 s ago and read 1.5 s from now: past the window
-        // without the renewal, inside it with one — and the
-        // renewal is refused only once the placement is 2 s old,
-        // so a slow runner has 1.2 s of headroom (guard-prover and
-        // review, 2026-09-05). Stamped fresh, the read below would
-        // hold with no renewal at all.
-        core.tiler.placements.stamp(
-            target,
-            target: offscreen,
-            at: now.addingTimeInterval(
-                -PlacementLedger.echoWindow + 1.2
-            )
-        )
+        // Bounced 1.2 s after the placement and read 1.5 s later:
+        // past the window without the renewal, inside it with one.
+        // Read at the placement's age, the read would hold with no
+        // renewal at all.
+        core.tiler.placements.stamp(target, target: offscreen)
+        core.tiler.placements.clock = { 1.2 }
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
         // Without the renewal this read would be nil already.
-        let later = now.addingTimeInterval(1.5)
-        #expect(core.tiler.placements.recent(target, at: later) != nil)
+        core.tiler.placements.clock = { 2.7 }
+        #expect(core.tiler.placements.recent(target) != nil)
         core.handle(.windowFocused(target))
         #expect(focused(core) == other)
     }
@@ -183,14 +175,8 @@ struct PlacementBounceTests {
     func expiredPlacementIsHonored() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
-        core.tiler.placements.stamp(
-            target,
-            target: offscreen,
-            at: Date(
-                timeIntervalSinceNow:
-                    -PlacementLedger.echoWindow - 1
-            )
-        )
+        core.tiler.placements.stamp(target, target: offscreen)
+        core.tiler.placements.clock = { PlacementLedger.echoWindow + 1 }
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
     }
