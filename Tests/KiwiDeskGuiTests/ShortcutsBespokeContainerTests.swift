@@ -44,6 +44,8 @@ struct ShortcutsBespokeContainerTests {
             ("luaBindingsMore", .luaBindings),
             ("luaBindingsAtRest", .luaBindings),
             ("defaultShortcutsAtRest", .defaultShortcuts),
+            // The Mouse & trackpad drawer's two settings (#1726).
+            ("gesturesMore", .gestures),
             // Walked by `DesktopShortcutsOffer`, which takes its
             // list as a `keys:` PARAMETER rather than walking it
             // here — so `isWalked` reads the `ForEach` inside

@@ -88,8 +88,11 @@ struct ShortcutsSection: View {
 
     @ViewBuilder private var header: some View {
         KeybindingConflictBanner(model: model)
+        // Above the layer header, so nothing in it reads as
+        // per-layer (#1726, amending the 2026-08-04 ruling that
+        // the layers card leads the section).
+        GesturesDrawer(model: model)
         ShortcutsHeader(model: model, selected: selection)
-        // LayersCard leads section (owner ruling 2026-08-04).
         layersCard
     }
 

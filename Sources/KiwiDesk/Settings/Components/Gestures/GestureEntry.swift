@@ -1,0 +1,166 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// One Mouse & trackpad entry (#1726): a drawn picture, the
+/// sentence that carries the gesture, and the entry's own control
+/// where it has one. The picture moves only while hovered and rests
+/// on its key frame otherwise; under Reduce Motion it never moves.
+/// An entry whose `surface` is off greys its picture and sentence
+/// and never its control — a greyed control says "you cannot
+/// change this", and switching a setting on is always allowed.
+struct GestureEntry<Picture: View, Control: View>: View {
+    let text: String
+    let surface: GestureSurface
+    let settings: TilingSettings
+    let pace: GesturePace
+    @ViewBuilder let picture: (CGFloat) -> Picture
+    @ViewBuilder let control: () -> Control
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var hovering = false
+    @State private var phase: CGFloat = 0
+
+    init(
+        _ text: String,
+        surface: GestureSurface,
+        settings: TilingSettings,
+        pace: GesturePace = .quick,
+        @ViewBuilder picture: @escaping (CGFloat) -> Picture,
+        @ViewBuilder control: @escaping () -> Control
+    ) {
+        self.text = text
+        self.surface = surface
+        self.settings = settings
+        self.pace = pace
+        self.picture = picture
+        self.control = control
+    }
+
+    var body: some View {
+        GestureEntryLayout {
+            // A new identity per hover state: a looping animation
+            // ends with the view that ran it, since the rest frame
+            // and the loop's target are the same value.
+            GesturePlate { picture(hovering ? phase : 1) }
+                .id(hovering)
+                .accessibilityHidden(true)
+                .modifier(dim)
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+                .modifier(dim)
+            control()
+        }
+        .padding(.vertical, 6)
+        .contentShape(Rectangle())
+        .onHover(perform: hover)
+    }
+
+    /// The grey an off surface puts on the picture and the
+    /// sentence — never on the control, which stays live.
+    private var dim: GreyOut {
+        GreyOut(active: surface.isOff(settings))
+    }
+
+    /// Restarts the gesture from its first frame, then loops it:
+    /// two separate updates, since one that moved `phase` straight
+    /// to where the rest frame already is would animate nothing.
+    private func hover(_ inside: Bool) {
+        hovering = inside && !reduceMotion
+        phase = 0
+        guard hovering else { return }
+        DispatchQueue.main.async {
+            // The pointer may have left before this turn.
+            guard hovering else { return }
+            withAnimation(
+                reduceMotion
+                    ? nil
+                    : pace.animation.repeatForever(autoreverses: false)
+            ) {
+                phase = 1
+            }
+        }
+    }
+}
+
+extension GestureEntry where Control == EmptyView {
+    init(
+        _ text: String,
+        surface: GestureSurface,
+        settings: TilingSettings,
+        pace: GesturePace = .quick,
+        @ViewBuilder picture: @escaping (CGFloat) -> Picture
+    ) {
+        self.init(
+            text,
+            surface: surface,
+            settings: settings,
+            pace: pace,
+            picture: picture
+        ) { EmptyView() }
+    }
+}
+
+/// How fast an entry's picture plays one loop.
+enum GesturePace {
+    /// A single motion, eased over the whole loop.
+    case quick
+    /// A short gesture in steps (a press, then a menu), at an even
+    /// pace: its stages keep their timing, which one curve over the
+    /// loop would bend.
+    case steps
+    /// A longer story in stages, at the same even pace; each stage
+    /// eases itself (`gestureEase`).
+    case story
+
+    var animation: Animation {
+        switch self {
+        case .quick: return .easeInOut(duration: 1.6)
+        case .steps: return .linear(duration: 2.4)
+        case .story: return .linear(duration: 5)
+        }
+    }
+}
+
+/// The desktop-dark ground every gesture picture sits on, the
+/// Home cards' plate (`SettingsTheme.previewPlate`), sized once.
+struct GesturePlate<Content: View>: View {
+    static var size: CGSize { CGSize(width: 120, height: 72) }
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            content()
+        }
+        .frame(
+            width: Self.size.width,
+            height: Self.size.height,
+            alignment: .topLeading
+        )
+        .background(SettingsTheme.previewPlate)
+        .clipShape(
+            RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
+        )
+    }
+}
+
+/// The rule between two entries of one group — never under a
+/// heading, before a group's first entry or after its last, so a
+/// heading stays joined to what it owns.
+struct GestureRule: View {
+    var body: some View {
+        SettingsTheme.hairline.frame(height: 1)
+    }
+}
+
+/// A heading inside the drawer, one per place the hand is.
+struct GestureGroupHeading: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(SettingsTheme.groupHeading)
+            .textCase(.uppercase)
+            .padding(.top, 6)
+            .accessibilityAddTraits(.isHeader)
+    }
+}

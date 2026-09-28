@@ -91,6 +91,8 @@ struct AnnouncedValuePinTests {
         // Before you update labels (#1542).
         "UpdateWindowView.swift": 1,
         "UpdateNotesGroups.swift": 2,
+        // The Mouse & trackpad drawer's group headings (#1726).
+        "GestureEntry.swift": 1,
     ]
 
     @Test("title components are rotor headings")

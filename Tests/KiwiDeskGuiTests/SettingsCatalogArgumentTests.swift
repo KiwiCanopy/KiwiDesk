@@ -198,7 +198,9 @@ struct SettingsCatalogArgumentTests {
         // 83 since #1681: the font family and weight anchors.
         // 85 since #1713: the glyph size toggle and slider's.
         // 86 since #1684: the look shelf's.
-        #expect(direct.values.reduce(0, +) == 86)
+        // 88 since #1726: the Mouse & trackpad drawer's two row
+        // anchors (the drawer mounts as the Mouse card did).
+        #expect(direct.values.reduce(0, +) == 88)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

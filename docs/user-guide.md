@@ -12,8 +12,9 @@ covers what those cannot say — how things interact, where a
 setting lives, why a move was refused, and the files behind it.
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
-**⌘,** while a KiwiDesk window is key. **Shortcuts ▸ General**
-offers a rebindable **Open Settings** row for a global key.
+**⌘,** while a KiwiDesk window is key. **Shortcuts & Gestures ▸
+General** offers a rebindable **Open Settings** row for a global
+key.
 
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.
@@ -263,8 +264,8 @@ What the fields' own notes do not say:
   limitations](accepted-limitations.md)).
 - **Scrolling** — its focus animation and duration live here,
   beside the layout rather than with the other animations.
-- **Track** — the track shortcuts sit in Shortcuts ▸ Move
-  windows. Previous is the column to the left (or the row
+- **Track** — the track shortcuts sit in Shortcuts & Gestures ▸
+  Move windows. Previous is the column to the left (or the row
   above), next the column to the right (or the row below),
   whichever way the axis runs.
   Track sizes and in-track shares are session-only.
@@ -621,7 +622,7 @@ layout edits until you grant access.
 
 Neither live save carries a keybinding override: to give a
 profile its own shortcuts, pick it in the banner while it isn't
-loaded and edit its Shortcuts section.
+loaded and edit its Shortcuts & Gestures page.
 
 ### Built-in Standards & Presets
 
@@ -887,10 +888,10 @@ the caps print, not which key fires.
 ### Import & Adopt
 
 If `init.lua` holds custom keybindings, **Import from
-init.lua…** (in the Shortcuts header) reads them for review before
-you Save; each binding must be an inline `function() … end` on
-one line. **Adopt into the GUI** imports the whole file's managed
-settings and keeps your custom Lua live.
+init.lua…** (in the Shortcuts & Gestures header) reads them for
+review before you Save; each binding must be an inline
+`function() … end` on one line. **Adopt into the GUI** imports
+the whole file's managed settings and keeps your custom Lua live.
 
 ### Shortcut Layers
 

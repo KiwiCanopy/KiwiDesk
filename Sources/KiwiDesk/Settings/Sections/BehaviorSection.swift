@@ -9,7 +9,6 @@ struct BehaviorSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                mouseSection
                 cuesSection
                 quitSection
             }
@@ -55,59 +54,6 @@ struct BehaviorSection: View {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
-        }
-    }
-
-    private var mouseSection: some View {
-        SettingsSection(SettingsCatalog.behavior.mouseCard) {
-            SegmentedPicker(
-                L(
-                    "behavior.mouse.resize_action",
-                    "Mouse resize action"
-                ),
-                selection: $model.config.settings
-                    .mouseResize,
-                options: [
-                    (
-                        L(
-                            "behavior.mouse.resize_layout",
-                            "Resize adjacent windows"
-                        ),
-                        MouseResizeMode.layout
-                    ),
-                    (
-                        L(
-                            "behavior.mouse.resize_snap_back",
-                            "Snap back to slot"
-                        ), .snapBack
-                    ),
-                ],
-                help: L(
-                    "behavior.mouse.resize_action.help",
-                    "**%1$@** — Dragging a "
-                        + "window's edge resizes it and reflows "
-                        + "its neighbours in the layout.\n**%2$@**"
-                        + " — The window resizes "
-                        + "freely while you drag, then snaps back "
-                        + "to its tiled size when you release.",
-                    L(
-                        "behavior.mouse.resize_layout",
-                        "Resize adjacent windows"
-                    ),
-                    L(
-                        "behavior.mouse.resize_snap_back",
-                        "Snap back to slot"
-                    )
-                )
-            )
-            Toggle(
-                L(
-                    "behavior.mouse.follows_focus",
-                    "Move mouse to focused window"
-                ),
-                isOn: $model.config.settings.mouse
-                    .followsFocus
-            )
         }
     }
 

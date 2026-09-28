@@ -295,7 +295,7 @@ another screen re-homes it
 ([#445](https://github.com/KiwiCanopy/KiwiDesk/issues/445));
 where it refuses, the whole command is refused and the window
 does not change Desktop. The second argument is Lua's and the
-CLI's; the Shortcuts editor's Desktop rows bind the
+CLI's; the Shortcuts & Gestures page's Desktop rows bind the
 one-argument form.
 
 **Example:**
@@ -552,8 +552,8 @@ KiwiDesk.set_min_window_size(300)
 **Expects:** a number (points).
 
 **Does:** sets the magnitude the **Grow** / **Shrink**
-keybindings nudge the layout by (default 50). The Shortcuts
-catalog authors the four per-axis bindings as
+keybindings nudge the layout by (default 50). The Shortcuts &
+Gestures page authors the four per-axis bindings as
 `resize("x"|"y", ±step)` from this value, and importing a
 config reads a recovered magnitude back into it. Moves no
 window on its own; it takes effect the next time such a binding
@@ -586,8 +586,8 @@ scrolling anchor and orientation, the track axis and limit, a
 grid's columns and rows, new-window placement. Where a window's
 own minimum binds, the next retile's floor heal moves the ratio
 back off that value by as much. Retiles at once. Unbound by
-default; bind it from `init.lua` or the Shortcuts ▸ Lua
-bindings drawer.
+default; bind it from `init.lua` or the Shortcuts & Gestures ▸
+Lua bindings drawer.
 
 **Example:**
 
@@ -3286,8 +3286,12 @@ maintenance raises the warp is held, and it fires once they
 settle, for the window focus finally landed on. When focus lands
 on a window in an inactive space (cmd+tab into a stashed window),
 the warp waits until KiwiDesk follows focus and pulls that space
-forward. Clicking an app-bar item warps too. Also togglable in
-the Settings app under **Behavior ▸ Mouse**.
+forward. Clicking an app-bar item warps too.
+
+:::unreleased
+Also togglable in the Settings app under **Shortcuts & Gestures ▸
+Mouse & trackpad**.
+:::
 
 **Example:**
 
@@ -3916,9 +3920,9 @@ at the active layer's bindings — or closes it if it is already
 open. It is the panel behind the menu bar's *View Shortcuts…*
 row; the bound combo shows beside that row and in the panel's
 close hint. Seeded to **⌃⌥K** in the base layer and in every
-layer you create, and offered under **Shortcuts ▸ General**
-("Show shortcuts panel"), where you can rebind or clear it per
-layer.
+layer you create, and offered under **Shortcuts & Gestures ▸
+General** ("Show shortcuts panel"), where you can rebind or clear
+it per layer.
 
 **Example:**
 
@@ -3939,8 +3943,8 @@ opening Settings from the menu bar. Unsaved edits survive that;
 only the place you were reading resets.
 
 Seeded on **`⌃⌥,`** in the base layer and in every layer you
-create in Settings, and offered under **Shortcuts ▸ General**
-("Open Settings"), where you can rebind it per layer.
+create in Settings, and offered under **Shortcuts & Gestures ▸
+General** ("Open Settings"), where you can rebind it per layer.
 
 **Example:**
 
@@ -4010,7 +4014,7 @@ The Settings app's shortcut recorder writes the long forms
 A combo is any set of modifiers plus **exactly one key**.
 Multi-key chords (`cmd+j+k`) are not expressible; a hand-written
 combo that doesn't parse is never registered, and the Shortcuts
-section flags the row with ⚠ *"isn't a recognized shortcut"*.
+& Gestures page flags the row with ⚠ *"isn't a recognized shortcut"*.
 
 ### Shortcut Layers
 

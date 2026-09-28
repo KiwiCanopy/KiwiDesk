@@ -222,8 +222,10 @@ struct SettingsSearchIndexTests {
                 .advancedColors: 18,
                 // 4 since #1255: the refusal sound moved here
                 // from Shortcuts ▸ Size & float, the cue having
-                // stopped being a resize setting.
-                .behavior: 4,
+                // stopped being a resize setting. 2 since #1726:
+                // the Mouse card's two rows left for Shortcuts &
+                // Gestures, anchored in its drawer there.
+                .behavior: 2,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the
