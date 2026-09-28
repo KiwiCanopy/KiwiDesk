@@ -129,6 +129,9 @@ struct AnnouncedValuePinTests {
     private static let nilSpokenValue: [String: Int] = [
         "LoginItemCard.swift": 1,
         "AutoInstallRow.swift": 1,
+        // #1741: the alert-sound switch, a Toggle in the card's
+        // row shape like Start at login.
+        "GeneralSection+AppWide.swift": 1,
     ]
 
     @Test("a nil spoken value is for a Toggle, and enumerated")

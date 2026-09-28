@@ -8,20 +8,22 @@ extension GeneralSection {
     /// The refusal cue's audible half (#1255). Previews on
     /// switch-on, the way macOS's own alert-sound picker does.
     @ViewBuilder var refusalSoundRow: some View {
-        Toggle(
-            L(
-                "general.refusal_sound",
-                "Play the alert sound when an action can't apply"
-            ),
-            isOn: Binding(
-                get: { model.appWide.refusalSound },
-                set: { on in
-                    model.setAppWide { $0.refusalSound = on }
-                    if on { NSSound.beep() }
-                }
+        // The card's row shape, like Start at login: the label's
+        // column, the switch beside it or under it.
+        DropdownRow(label: refusalLabel, spokenValue: nil) {
+            Toggle(
+                "",
+                isOn: Binding(
+                    get: { model.appWide.refusalSound },
+                    set: { on in
+                        model.setAppWide { $0.refusalSound = on }
+                        if on { NSSound.beep() }
+                    }
+                )
             )
-        )
-        .disabled(appWideReason(.refusalSound) != nil)
+            .labelsHidden()
+            .disabled(appWideReason(.refusalSound) != nil)
+        }
         appWideReasonText(.refusalSound)
         Text(
             L(
@@ -40,27 +42,22 @@ extension GeneralSection {
     /// #281). Grid dimensions stay automatic
     /// (`QuitGridLayout.shape`, #1709).
     @ViewBuilder var quitPileDepthRow: some View {
-        StepperRow(
-            label: L(
-                "general.quit_pile_depth",
-                "Windows per pile on quit"
-            ),
-            value: Binding(
-                get: { model.appWide.quitGridTargetDepth },
-                set: { depth in
-                    model.setAppWide { $0.quitGridTargetDepth = depth }
-                }
-            ),
-            in: QuitGridLayout.targetDepthRange,
-            help: L(
-                "general.quit_pile_depth.help",
-                "Windows tile the display until they "
-                    + "outnumber the grid's cells, then pile "
-                    + "up in them; the grid grows, up to 4×4, "
-                    + "when a pile would pass this number."
+        SettingsRowShape {
+            SettingsRowLabel(label: pileLabel, help: pileHelp)
+        } control: {
+            StepperRow(
+                label: pileLabel,
+                value: Binding(
+                    get: { model.appWide.quitGridTargetDepth },
+                    set: { depth in
+                        model.setAppWide { $0.quitGridTargetDepth = depth }
+                    }
+                ),
+                in: QuitGridLayout.targetDepthRange,
+                labelHidden: true
             )
-        )
-        .disabled(appWideReason(.quitGridTargetDepth) != nil)
+            .disabled(appWideReason(.quitGridTargetDepth) != nil)
+        }
         Text(
             L(
                 "general.quit_pile_depth.caption",
@@ -72,6 +69,27 @@ extension GeneralSection {
         .font(.caption)
         .foregroundStyle(.secondary)
         appWideReasonText(.quitGridTargetDepth)
+    }
+
+    private var refusalLabel: String {
+        L(
+            "general.refusal_sound",
+            "Play the alert sound when an action can't apply"
+        )
+    }
+
+    private var pileLabel: String {
+        L("general.quit_pile_depth", "Windows per pile on quit")
+    }
+
+    private var pileHelp: String {
+        L(
+            "general.quit_pile_depth.help",
+            "Windows tile the display until they "
+                + "outnumber the grid's cells, then pile "
+                + "up in them; the grid grows, up to 4×4, "
+                + "when a pile would pass this number."
+        )
     }
 
     /// The grey and its sentence come from the one resolver
