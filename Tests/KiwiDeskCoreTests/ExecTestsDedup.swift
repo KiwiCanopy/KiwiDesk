@@ -24,21 +24,6 @@ private func makeCore() -> KiwiCore {
     return core
 }
 
-/// Generous hang-guard, matching `ExecTests` (#344): a passing run
-/// exits the instant the reap lands; the deadline only bounds a hang.
-private let hangGuard: TimeInterval = 30
-
-@MainActor
-private func awaitReaped(
-    _ core: KiwiCore,
-    timeout: TimeInterval = hangGuard
-) async throws {
-    let deadline = Date().addingTimeInterval(timeout)
-    while core.exec.runningCount > 0, Date() < deadline {
-        try await Task.sleep(nanoseconds: 20_000_000)
-    }
-}
-
 /// Named under the `ExecTests` prefix so every suite that spawns
 /// real shell children through the production exec path lands in
 /// the same `--filter ExecTests` / `--skip ExecTests` partition
@@ -73,7 +58,7 @@ struct ExecTestsDedup {
         // A fast child holds the dedup slot only until it reaps;
         // afterwards the same command may launch again.
         core.exec.launch("true", dedup: true)
-        try await awaitReaped(core)
+        await core.exec.untilIdle()
         let again = core.exec.launch("true", dedup: true)
         #expect(again != nil)
     }
@@ -140,17 +125,19 @@ struct ExecTestsDedup {
         // SIGTERMs the child immediately. A long-lived child proves
         // it by gap: a mis-parsed 0-as-deadline would terminate and
         // reap well within reapGrace (2s), while no-limit keeps it
-        // running. The child outlives any starved poll (#344), so
-        // the check can't flake on a late resume.
-        #expect(
-            lua.run("z = KiwiDesk.exec('sleep 30', nil, 0)").succeeded
-        )
+        // running. The long child cannot red a correct parse; only
+        // an isolated run reds a mis-parse, since under full-suite
+        // load the reap may land after this test's check (#344).
+        let script =
+            "z = KiwiDesk.exec('sleep \(execStarvationGap)', nil, 0)"
+        #expect(lua.run(script).succeeded)
         #expect(core.exec.runningCount == 1)
-        if case .number(let pid) = lua.global("z") {
-            #expect(pid > 0)
-        } else {
+        guard case .number(let pid) = lua.global("z") else {
             Issue.record("expected a pid for an accepted exec")
+            return
         }
+        #expect(pid > 0)
+        defer { kill(pid_t(pid), SIGTERM) }
         try await Task.sleep(nanoseconds: 2_500_000_000)
         #expect(core.exec.runningCount == 1)
     }

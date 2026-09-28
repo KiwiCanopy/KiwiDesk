@@ -538,8 +538,8 @@ notice it breaking.
 
 ## Async tests: a generous hang-guard, never a tight deadline (#344)
 
-A test that waits on something it holds no handle to — a real
-subprocess (`ExecTests`), a socket connect (`SocketTests`) —
+A test that waits on something it holds no handle to — a socket
+connect (`SocketTests`) —
 and then awaits its **main-actor callback** cannot use a
 sub-second or few-second poll deadline. swift-testing runs suites
 concurrently, so under full-suite load the shared main actor is
@@ -547,7 +547,7 @@ starved for seconds and the tight deadline trips spuriously (the
 callback landed, just late) while the suite passes in isolation.
 
 Each such wait takes one generous hang-guard named in its own
-suite (`execHangGuard`, `socketConnectHangGuard`, 30 s): the poll
+suite (`socketConnectHangGuard`, 30 s): the poll
 exits the instant the condition holds, so a passing run is never
 slowed — the deadline only bounds a genuine hang. Prove the
 *behavior* by the gap (a short watchdog against a much longer
@@ -560,11 +560,15 @@ a full concurrent run one 10 ms `Task.sleep` resumption measured
 65 s (#791), after which the poll exits on a stale deadline
 without giving the pending continuation a turn, and the result
 comes down to which continuation drains first. Reach for a poll
-only when there is nothing to await — a real subprocess
-(`ExecTests`), a `DisplayLink` callback. When a `Task` or a
-`DeferredTasks` slot exists, take it:
-`await core.deferred.task(for: .startupSweep)?.value`,
-`await manager.pendingReplay?.value`. **Expose such a handle with
+only when there is nothing to await — a `DisplayLink` callback.
+When a `Task`, a `DeferredTasks` slot or a reap handle exists,
+take it: `await core.deferred.task(for: .startupSweep)?.value`,
+`await manager.pendingReplay?.value`,
+`await core.exec.untilIdle()` — the last because a 30 s poll
+over a real subprocess expired on a single 21–37 s main-actor
+turn in a full run (2026-09-28, `ExecTests`). A gap proof
+against that backlog sizes its long side past it
+(`execStarvationGap`). **Expose such a handle with
 a doc comment barring production from reading it, and say what it
 does NOT mean.** `pendingReplay` is not an in-flight predicate —
 the task is never cleared — so awaiting it after a leg that
