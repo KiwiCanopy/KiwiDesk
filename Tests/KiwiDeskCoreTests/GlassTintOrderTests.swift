@@ -54,6 +54,7 @@ struct GlassTintOrderTests {
         shelf.liquidGlass = glass
         return ShelfManager.Shelf(
             display: barTitleDisplay,
+            edge: .top,
             strip: barTitleStrip,
             shelf: shelf,
             sheen: 0,

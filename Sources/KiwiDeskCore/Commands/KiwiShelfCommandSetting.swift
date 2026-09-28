@@ -5,7 +5,6 @@ import Foundation
 /// vocabulary and error type (`AppBarSettingError`), so a shared
 /// field's message reads the same as a per-bar one.
 enum KiwiShelfCommandSetting {
-    case edge(AppBarEdge)
     case alignment(KiwiShelf.Alignment)
     case order(KiwiShelf.Order)
     case minimum(CGFloat)
@@ -56,9 +55,6 @@ enum KiwiShelfCommandSetting {
         args: [JSONValue]
     ) -> Result<KiwiShelfCommandSetting, AppBarSettingError>? {
         switch field {
-        case "edge":
-            return BarSettingChoice.value(args, AppBarEdge.self)
-                .map(Self.edge)
         case "alignment":
             return BarSettingChoice.value(
                 args,
@@ -166,7 +162,6 @@ enum KiwiShelfCommandSetting {
     /// has a floor or a range.
     func apply(to shelf: inout KiwiShelf) {
         switch self {
-        case .edge(let value): shelf.edge = value
         case .alignment(let value): shelf.alignment = value
         case .order(let value): shelf.order = value
         case .minimum(let value):

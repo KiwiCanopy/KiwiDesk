@@ -148,6 +148,7 @@ struct ReduceTransparencyTests {
                 shelves.sync([
                     .init(
                         display: barTitleDisplay,
+                        edge: .top,
                         strip: barTitleStrip,
                         shelf: shelf,
                         sheen: 0,

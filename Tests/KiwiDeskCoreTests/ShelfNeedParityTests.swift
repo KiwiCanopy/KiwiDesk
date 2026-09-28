@@ -193,12 +193,14 @@ struct ShelfFloorWiringTests {
             groups: windows.map { [$0.id] },
             items: windows
         )
-        let plan = core.shelfPlan(
+        let plans = core.shelfPlans(
             visible: CGRect(x: 0, y: 0, width: 600, height: 400),
             settings: settings,
             spaceItems: spaces,
             app: app
         )
+        #expect(plans.count == 1)
+        let plan = try #require(plans.first)
         let slot = try #require(plan.arrangement.space)
         let floor = ShelfArrangement.hardFloor(
             activeExtent: SpaceBarOverlay.activeExtent(

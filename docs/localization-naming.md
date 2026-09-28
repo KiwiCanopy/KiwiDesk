@@ -56,7 +56,7 @@ and this section argues the ones that needed arguing.
 eleven catalogs, so the control every user taps says "Space Bar"
 whatever their language.
 
-**KiwiShelf** (#1517) is the edge both bars sit on, coined on the
+**KiwiShelf** (#1517) is the shelf the bars sit on, coined on the
 product name, and `bars.switch.kiwishelf` is Latin in all eleven
 catalogs from its first translation. The sort question answers
 it directly — no locale ever translated it — and the

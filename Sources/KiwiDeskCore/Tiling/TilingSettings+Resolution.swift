@@ -85,21 +85,46 @@ extension TilingSettings {
 
     /// Whether the KiwiShelf carries any bar in some layout — the
     /// Space Bar or any layout's App Bar is on. The Settings gates
-    /// ask it; the reservation asks `shelfShows(in:)`.
+    /// ask it; the reservation asks `shelfEdges(in:)`.
     public var shelfShows: Bool {
         spaceBarStyle.enabled || anyAppBarCanShow
     }
 
-    /// Whether a bar draws on the shelf of a space laid out in
-    /// `mode` — the Space Bar, which draws in every layout, or
-    /// that layout's own App Bar — and so whether the strip is
-    /// reserved there (#1517). A layout that draws no bar keeps
-    /// the whole screen; the price is that with the Space Bar off,
-    /// a switch into a layout whose App Bar shows moves windows
-    /// by the strip.
-    public func shelfShows(in mode: LayoutMode) -> Bool {
-        spaceBarStyle.enabled
-            || appBarHost(for: mode)?.appBar.enabled == true
+    /// The edges a space laid out in `mode` reserves — the Space
+    /// Bar's, which draws in every layout, and that layout's own
+    /// App Bar's where it is on (#1517, #1731). A layout that
+    /// draws no bar keeps the whole screen; the price is that a
+    /// switch into a layout whose App Bar draws on an edge nothing
+    /// else holds moves windows by the strip.
+    public func shelfEdges(in mode: LayoutMode) -> [AppBarEdge] {
+        barEdges(
+            space: spaceBarStyle.enabled,
+            app: appBarHost(for: mode)?.appBar.enabled == true
+        )
+    }
+
+    /// The edges the shown bars sit on — the ONE list the
+    /// reservation and the live plan both take: the Space Bar's
+    /// first, then the App Bar's unless the two share it, so two
+    /// bars are never stacked on one edge
+    /// (`ShelfSplitGeometryTests` ▸ `edgesPerMode`) and
+    /// `ShelfGeometry.strips` measures the Space Bar's whole edge.
+    public func barEdges(space: Bool, app: Bool) -> [AppBarEdge] {
+        var edges: [AppBarEdge] = []
+        if space { edges.append(spaceBarStyle.edge) }
+        if app, !edges.contains(appBarStyle.edge) {
+            edges.append(appBarStyle.edge)
+        }
+        return edges
+    }
+
+    /// The edge both bars sit on while they share one — one fused
+    /// shelf — or nil while they are split, a bar per edge (#1731).
+    /// The one comparison: Settings' Position master shows it and
+    /// asks it for its `?`.
+    public var sharedBarEdge: AppBarEdge? {
+        spaceBarStyle.edge == appBarStyle.edge
+            ? spaceBarStyle.edge : nil
     }
 
     /// True if any layout's App Bar is switched on.
@@ -163,8 +188,8 @@ extension TilingSettings {
         }
     }
 
-    /// Insets visible bounds by the shelf's reservation wherever a
-    /// bar draws in `mode` (#293, #1517).
+    /// Insets visible bounds by the reservation of every edge a
+    /// bar draws on in `mode` (#293, #1517, #1731).
     /// Deliberately NOT public: it takes a raw frame the caller
     /// obtained some other way — the unsafe half. Callers with a
     /// screen want `TilingEngine.layoutBounds(on:)` (#537), and
@@ -174,9 +199,9 @@ extension TilingSettings {
         from visible: CGRect,
         mode: LayoutMode
     ) -> CGRect {
-        guard shelfShows(in: mode) else { return visible }
-        return ShelfGeometry.remainingFrame(
+        ShelfGeometry.remainingFrame(
             in: visible,
+            edges: shelfEdges(in: mode),
             shelf: kiwishelf
         )
     }

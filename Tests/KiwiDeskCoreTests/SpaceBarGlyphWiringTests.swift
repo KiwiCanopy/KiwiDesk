@@ -82,6 +82,7 @@ struct SpaceBarGlyphWiringTests {
         core.shelves.sync([
             .init(
                 display: display,
+                edge: .top,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),
                 sheen: 0,

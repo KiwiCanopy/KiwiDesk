@@ -88,6 +88,13 @@ extension KiwiCore {
             bar.enabled = enabled
             return .ok()
         }
+        if AppBarStyle.layoutFixedKeys.contains(where: {
+            $0.stringValue == field
+        }) {
+            return .fail(
+                "the App Bar's \(field) is global: app_bar.set_\(field)"
+            )
+        }
         switch AppBarCommandSetting.parse(field: field, args: args)
         {
         case .success(let setting):

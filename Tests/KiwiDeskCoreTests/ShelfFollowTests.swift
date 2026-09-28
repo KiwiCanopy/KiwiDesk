@@ -149,6 +149,7 @@ struct ShelfFollowTests {
             shelves.sync([
                 .init(
                     display: barTitleDisplay,
+                    edge: .top,
                     strip: barTitleStrip,
                     shelf: KiwiShelf(),
                     sheen: 0,
@@ -159,7 +160,7 @@ struct ShelfFollowTests {
         }
         #expect(!shelves.holdsRelayout)
         #expect(shelves.overlayForTesting(barTitleDisplay) == nil)
-        shelves.relayout(barTitleDisplay)
+        shelves.relayout(.init(display: barTitleDisplay, edge: .top))
         #expect(shelves.overlayForTesting(barTitleDisplay) != nil)
     }
 }

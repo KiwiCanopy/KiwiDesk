@@ -10779,6 +10779,11 @@ title cap, the Space Bar's glyph cap, spring delay, front-app
 title cap, its active-Space dim and the colour of the focused
 window's glyph inside a Space item are examples, not the list.
 
+:::unreleased
+The edge left that list with #1731: each bar owns its edge, and
+one shelf per edge is what holds them — *Amended* below.
+:::
+
 *One plate, two sections.* While both bars show they are one
 plate with two sections, Space and App, placed as one unit by
 `alignment`; `order` picks which section comes first. The plate
@@ -10832,6 +10837,11 @@ accepted: the move is the bar the user turned on for that
 layout appearing, while reserving everywhere left an empty
 strip — permanently, in every layout that draws nothing there —
 to spare it.
+
+:::unreleased
+A split App Bar pays the same price with the Space Bar on — the
+reflow paragraph of *Amended* below.
+:::
 
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,
@@ -11005,6 +11015,75 @@ the call is spelled right, so a nearest-spelling guess would
 send the user to the wrong fix, where the retired list knows the
 replacement (or that none exists) for certain.
 
+:::unreleased
+*Amended: each bar owns its edge, and one edge fuses them.*
+([#1731](https://github.com/KiwiCanopy/KiwiDesk/issues/1731),
+owner rulings 2026-09-28.) The edge is each bar's —
+`space_bar.edge`, `app_bar.edge` — and "one shelf" means one
+shelf *per edge*. Two bars on the same edge are exactly the shelf
+above: one panel, one plate, `order`, the minimum and the
+divider. Two bars on different edges are two bars, each on its
+own strip with its own panel, placed by the same
+`ShelfArrangement` as a lone bar. Two bars are never stacked on
+one edge: that is a second reservation under another name, the
+cost the shelf exists to remove. Moving one bar's edge while they
+are fused splits them, which is the only way to ask for it.
+Every look stays the shelf's — thickness, margins, colours,
+glass, border, font, item gap, glyph size and alignment —
+because the argument for storing a shared field once does not
+depend on the bars touching: two bars in two fills still read as
+two products. Alignment is one value applied on each bar's own
+edge rather than a value per bar: a second alignment would do
+nothing while the bars are fused, which is how most setups run,
+and would need a precedence rule there; it can be split later
+with one migration step if a setup asks for it.
+
+*The reflow comes back, and is accepted.* The price above —
+windows moving on a switch into the one layout that draws — is
+paid with the Space Bar on too once the App Bar sits on an edge
+of its own: that edge is reserved only in the layouts whose App
+Bar is on, so a Monocle Space is laid out with a strip a BSP
+Space does not have, and switching between them moves the
+windows by the strip. Reserving the App Bar's edge in every
+layout is refused for the reason the fused rule gives: it would
+leave an empty strip, permanently, in every layout that draws
+nothing there, to spare a move that is the bar the user turned on
+appearing. `docs/accepted-limitations.md` carries the row.
+
+*At a corner the Space Bar keeps its edge.* Two bars on adjacent
+edges would overlap in the corner square. The Space Bar draws in
+every layout, so its strip runs the whole edge and the App Bar's
+stops at the Space Bar's reservation; the other order would move
+the Space Bar each time an App Bar appeared. Each strip stopping
+at the other is refused for the same reason. The Settings preview
+gives the corner to the same strip.
+
+*The front app still yields to the App Bar.* While an App Bar
+shows on the display, on the Space Bar's edge or another, the
+Space Bar's front-app segment stays hidden: the App Bar already
+names every window and marks the focused one, and a second name
+for it elsewhere on screen is the duplicate the stand-down
+removed, whatever plate it sits on.
+
+*The App Bar's edge is global only.* No layout overrides it: an
+edge per layout would carry the bar across the screen on a
+layout switch, which is the reflow above made visible.
+
+*The crossing keeps every setup as its owner left it.* A saved
+profile or bundle is rewritten once: a stored `kiwishelf.edge` is
+written into both bars' edges, so a setup the shelf fused lands
+fused where it was, and the key drops (profile format 11, bundle
+16). A file from before the shelf, read for the first time now,
+keeps each bar's own edge instead — the shelf's step leaves a
+global bar's edge in place and writes its pre-shelf default
+(Space Bar top, App Bar bottom) where it stored none, since
+absence meant that default when the file was written — so a
+setup split before the shelf stays split rather than being fused
+by a rule that no longer holds. `kiwishelf.set_edge` retires naming `space_bar.set_edge`;
+the per-layout App Bar edge verbs name `app_bar.set_edge`; and
+the bars' own `set_edge` verbs are live.
+:::
+
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
 edges (`top` / `bottom` / `left` / `right`, default top) and the
@@ -11014,6 +11093,11 @@ prevented an edge/axis mismatch while the edge was derived per
 layout; free four-edge placement removes the derivation and its
 rationale with it. The Settings preview is edge-aware and draws
 a left- or right-edge shelf vertical.
+
+:::unreleased
+The rule is each bar's since #1731: `space_bar.edge` and
+`app_bar.edge` are absolute, one of the four, default top.
+:::
 
 **The shelf is placed by ONE rule, and owns two margins.**
 ([#1516](https://github.com/KiwiCanopy/KiwiDesk/issues/1516),

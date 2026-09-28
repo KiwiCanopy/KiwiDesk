@@ -121,7 +121,7 @@ struct ScrollingColumnCapTests {
             right: 0
         )
         settings.scrolling.appBar.enabled = true
-        settings.kiwishelf.edge = .left
+        settings.barEdge = .left
         settings.kiwishelf.thickness = 100
         #expect(
             settings.scrollingColumnCap(

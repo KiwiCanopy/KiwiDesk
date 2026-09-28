@@ -1,16 +1,18 @@
 import AppKit
 
-/// One `ShelfOverlay` per display (#1517): places the sections the
-/// two bar managers render and draws the plate they share. Synced
+/// One `ShelfOverlay` per display and edge (#1517, #1731): one
+/// while the bars share an edge, placing both sections on the one
+/// plate they share, and one per bar while they are split. Synced
 /// after both bars in `updateBars`, and re-laid whenever a section
 /// renders on its own (a manual scroll, a drag) so the plate never
 /// trails what the section drew.
 @MainActor
 final class ShelfManager {
-    /// One display's shelf: its strip and each shown section's
-    /// overlay and slot, in AX coordinates.
+    /// One shelf: its display, its edge, its strip and each shown
+    /// section's overlay and slot, in AX coordinates.
     struct Shelf {
         let display: DisplayID
+        let edge: AppBarEdge
         let strip: CGRect
         let shelf: KiwiShelf
         /// `border.sheen` (#1644), the plate border's ramp.
@@ -30,7 +32,13 @@ final class ShelfManager {
         _ in
     }
 
-    private var overlays: [DisplayID: ShelfOverlay] = [:]
+    /// Which shelf an overlay draws: a display's, on one edge.
+    struct Key: Hashable {
+        let display: DisplayID
+        let edge: AppBarEdge
+    }
+
+    private var overlays: [Key: ShelfOverlay] = [:]
     /// Set while `updateBars` syncs the two bars: their renders
     /// would otherwise re-lay the shelf against the previous plan
     /// before `sync` hands it the new one.
@@ -42,31 +50,39 @@ final class ShelfManager {
         defer { holdsRelayout = false }
         body()
     }
-    private var last: [DisplayID: Shelf] = [:]
+    private var last: [Key: Shelf] = [:]
 
-    /// Shows `shelves`, retiring the shelf of any display absent.
+    /// Shows `shelves`, retiring every shelf absent from them — a
+    /// display's second one included, once its bars re-fuse.
     func sync(_ shelves: [Shelf]) {
-        let wanted = Set(shelves.map(\.display))
-        for (id, overlay) in overlays where !wanted.contains(id) {
+        let wanted = Set(shelves.map(Self.key))
+        for (key, overlay) in overlays where !wanted.contains(key) {
             overlay.hide()
-            overlays[id] = nil
-            last[id] = nil
+            overlays[key] = nil
+        }
+        for key in last.keys where !wanted.contains(key) {
+            last[key] = nil
         }
         for shelf in shelves {
-            last[shelf.display] = shelf
+            let key = Self.key(shelf)
+            last[key] = shelf
             shelf.space?.onRendered = { [weak self] in
-                self?.relayout(shelf.display)
+                self?.relayout(key)
             }
             shelf.app?.onRendered = { [weak self] in
-                self?.relayout(shelf.display)
+                self?.relayout(key)
             }
-            relayout(shelf.display)
+            relayout(key)
         }
     }
 
-    /// Re-lays one display's shelf from what its sections drew.
-    func relayout(_ display: DisplayID) {
-        guard !holdsRelayout, let shelf = last[display] else { return }
+    private static func key(_ shelf: Shelf) -> Key {
+        Key(display: shelf.display, edge: shelf.edge)
+    }
+
+    /// Re-lays one shelf from what its sections drew.
+    func relayout(_ key: Key) {
+        guard !holdsRelayout, let shelf = last[key] else { return }
         var sections: [ShelfOverlay.Section] = []
         if let space = shelf.space, space.isVisible,
             let slot = space.shownStrip
@@ -80,8 +96,8 @@ final class ShelfManager {
                 .init(view: app.root, slot: slot, plate: app.plateFrame)
             )
         }
-        let overlay = overlays[display] ?? ShelfOverlay()
-        overlays[display] = overlay
+        let overlay = overlays[key] ?? ShelfOverlay()
+        overlays[key] = overlay
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)
         }
@@ -90,6 +106,7 @@ final class ShelfManager {
         }
         overlay.show(
             strip: shelf.strip,
+            edge: shelf.edge,
             shelf: LiquidGlassGate.rendered(shelf.shelf),
             sheen: shelf.sheen,
             sections: sections,
@@ -104,8 +121,17 @@ final class ShelfManager {
     }
 
     #if DEBUG
-        func overlayForTesting(_ display: DisplayID) -> ShelfOverlay? {
-            overlays[display]
+        /// The display's shelf on `edge`, or its one shelf when
+        /// `edge` is nil and it has exactly one.
+        func overlayForTesting(
+            _ display: DisplayID,
+            edge: AppBarEdge? = nil
+        ) -> ShelfOverlay? {
+            if let edge {
+                return overlays[Key(display: display, edge: edge)]
+            }
+            let mine = overlays.filter { $0.key.display == display }
+            return mine.count == 1 ? mine.first?.value : nil
         }
     #endif
 }

@@ -83,7 +83,7 @@ struct FloatGatherRegionTests {
         core.tiler.settings.borderStyle.enabled = true
         #expect(core.floatRingInset > 0)
         core.tiler.settings.spaceBarStyle.enabled = true
-        core.tiler.settings.kiwishelf.edge = .top
+        core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
         core.updateBars()
         let strip = try #require(

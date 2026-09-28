@@ -134,7 +134,7 @@ struct BarsGateWiringTests {
     func eachReasonHasItsOwnSentence() {
         let all: [BarsGates.InertReason] = [
             .noBarShown, .spaceBarOff, .noAppIcon, .shelfEmpty,
-            .boxedShelf,
+            .boxedShelf, .barsSplit,
         ]
         let sentences = all.map(BarsGateHelp.sentence)
         for sentence in sentences { #expect(!sentence.isEmpty) }

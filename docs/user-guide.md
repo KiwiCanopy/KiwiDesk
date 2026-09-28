@@ -464,6 +464,11 @@ Lua-only: every `app_bar.*` field has a `monocle.set_app_bar_*` /
 `scroll.set_app_bar_*` twin ([Per-layout App Bar
 overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
+:::unreleased
+The one exception is the App Bar's edge, which every layout
+shares.
+:::
+
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag ghost and drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its

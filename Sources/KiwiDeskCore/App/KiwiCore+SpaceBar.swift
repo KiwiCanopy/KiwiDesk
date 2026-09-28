@@ -18,20 +18,21 @@ extension KiwiCore {
     }
 
     /// One display's bar in the segment the shelf gives it
-    /// (#1517). The front app hides while an App Bar shares the
-    /// shelf: that bar already names every window.
+    /// (#1517). The front app hides while an App Bar shows on the
+    /// display, on its edge or another (#1731): that bar already
+    /// names every window.
     func placedSpaceBar(
         _ items: [SpaceBarOverlay.Item],
         display: DisplayID,
         plan: ShelfPlan,
-        sharesWithAppBar: Bool,
+        appBarShows: Bool,
         style: SpaceBarLook
     ) -> SpaceBarManager.Bar? {
         guard let slot = plan.arrangement.space else { return nil }
         var placed = style
         placed.alignment = slot.alignment
         let front =
-            sharesWithAppBar
+            appBarShows
             ? nil : frontApp(display: display, style: style)
         return SpaceBarManager.Bar(
             display: display,

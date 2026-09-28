@@ -10,7 +10,6 @@ extension KiwiShelf {
     /// `CaseIterable` is load-bearing — the parity suite reflects
     /// over `allCases`.
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case edge
         case alignment
         case order
         case minimum
@@ -46,9 +45,6 @@ extension KiwiShelf {
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let d = Self()
-        edge =
-            try c.decodeIfPresent(AppBarEdge.self, forKey: .edge)
-            ?? d.edge
         alignment =
             try c.decodeIfPresent(Alignment.self, forKey: .alignment)
             ?? d.alignment

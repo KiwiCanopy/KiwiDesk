@@ -200,7 +200,8 @@ struct SettingsCatalogArgumentTests {
         // 86 since #1684: the look shelf's.
         // 88 since #1726: the Mouse & trackpad drawer's two row
         // anchors (the drawer mounts as the Mouse card did).
-        #expect(direct.values.reduce(0, +) == 88)
+        // 91 since #1731: the Each bar drawer and its two rows.
+        #expect(direct.values.reduce(0, +) == 91)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

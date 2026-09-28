@@ -51,7 +51,8 @@ struct LookKeysCensusTests {
     func ruledFieldsAreIn() {
         let all = Set(LookKeys.all)
         for path in [
-            "kiwishelf.edge", "kiwishelf.background_fit",
+            "space_bar.edge", "app_bar.edge",
+            "kiwishelf.background_fit",
             "kiwishelf.corner_roundness", "kiwishelf.thickness",
             "kiwishelf.outer_margin", "kiwishelf.liquid_glass",
             "kiwishelf.background_style", "kiwishelf.border",

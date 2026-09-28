@@ -10,6 +10,10 @@ public enum LookKeys {
     /// Every settable styling path, in a stable order.
     public static let all: [String] =
         shelfFields.map { "kiwishelf.\($0)" } + [
+            // Each bar's own edge (#1731): a look that places the
+            // bars says where each sits, on/off left alone.
+            "space_bar.edge",
+            "app_bar.edge",
             "space_bar.active_indicator",
             "space_bar.glyph_gap",
             "space_bar.active_dim_factor",
@@ -19,7 +23,7 @@ public enum LookKeys {
 
     /// The shelf's styling fields by wire key.
     static let shelfFields = [
-        "edge", "alignment", "order", "thickness", "outer_margin",
+        "alignment", "order", "thickness", "outer_margin",
         "inner_margin", "background_style", "liquid_glass",
         "background_fit", "corner_roundness", "border",
         "border_width", "highlight_width", "item_gap", "glyph_size",

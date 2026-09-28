@@ -9,6 +9,12 @@ struct BarsControls: Sendable {
         "bars.switch.kiwishelf",
         "KiwiShelf"
     )
+    let kiwishelfEdges = SettingsDrawer(
+        "kiwishelf.each_bar",
+        "Each bar",
+        instance: "kiwishelf",
+        children: KiwiShelfEdgeControls()
+    )
     let kiwishelfStyle = SettingsDrawer(
         "bars.style",
         "Style",
@@ -99,6 +105,19 @@ struct KiwiShelfStyleControls: Sendable {
     let kiwishelfStyleIconSource = SettingsControl(
         "kiwishelf.icon_source.label",
         "App glyph style"
+    )
+}
+
+/// KiwiShelf ▸ Position ▸ Each bar rows (#1731), in
+/// `BarsRowOrder.kiwishelfEdges`' order.
+struct KiwiShelfEdgeControls: Sendable {
+    let kiwishelfSpaceBarEdge = SettingsControl(
+        "kiwishelf.edge.space_bar",
+        "Space Bar"
+    )
+    let kiwishelfAppBarEdge = SettingsControl(
+        "kiwishelf.edge.app_bar",
+        "App Bar"
     )
 }
 

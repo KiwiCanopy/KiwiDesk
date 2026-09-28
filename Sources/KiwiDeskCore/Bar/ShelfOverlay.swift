@@ -1,8 +1,10 @@
 import AppKit
 
-/// One display's shelf (#1517): the ONE panel both sections draw
-/// on, the ONE plate beneath them — solid, or Liquid Glass with
-/// its tint — and the divider between them. The sections render
+/// One shelf on one edge of a display (#1517, #1731): the ONE
+/// panel its sections draw on — both while the bars share the
+/// edge, one while they are split — the ONE plate beneath them,
+/// solid or Liquid Glass with its tint, and the divider between
+/// them. The sections render
 /// into their own views (`SpaceBarOverlay.root`,
 /// `AppBarOverlay.root`); this places them and owns the surface
 /// they share, so there is one fill and no seam.
@@ -40,12 +42,13 @@ final class ShelfOverlay {
 
     var isVisible: Bool { panel?.isVisible == true }
 
-    /// Lays the shelf out over `strip` (AX coordinates) with
-    /// `shelf` as rendered — glass already gated by
+    /// Lays the shelf out over `strip` (AX coordinates) on `edge`
+    /// with `shelf` as rendered — glass already gated by
     /// `LiquidGlassGate` — and shows it; `sheen` paints the plate's
     /// border with the ramp (#1644).
     func show(
         strip: CGRect,
+        edge: AppBarEdge,
         shelf: KiwiShelf,
         sheen: CGFloat,
         sections: [Section],
@@ -62,17 +65,19 @@ final class ShelfOverlay {
         // to its new placement (#1517).
         let glides = panel.isVisible
         stripView.frame = CGRect(origin: .zero, size: strip.size)
-        let horizontal = shelf.edge.isHorizontal
+        let horizontal = edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
         let plate = Self.plateFrame(
             sections: sections,
             strip: strip,
+            horizontal: horizontal,
             shelf: shelf
         )
         BarMotion.runPlateGlide {
             place(sections, in: strip, animated: glides)
             layoutPlate(
                 plate,
+                edge: edge,
                 shelf: shelf,
                 sheen: sheen,
                 radius: shelf.resolvedCornerRadius(forThickness: depth),
@@ -163,9 +168,9 @@ final class ShelfOverlay {
     nonisolated static func plateFrame(
         sections: [Section],
         strip: CGRect,
+        horizontal: Bool,
         shelf: KiwiShelf
     ) -> CGRect? {
-        let horizontal = shelf.edge.isHorizontal
         let asks = sections.compactMap { section -> ClosedRange<CGFloat>? in
             guard !section.plate.isEmpty else { return nil }
             let ask = section.plate.offsetBy(

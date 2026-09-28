@@ -54,6 +54,7 @@ struct SpaceBarStuckHoverTests {
         shelves.sync([
             .init(
                 display: barTitleDisplay,
+                edge: .top,
                 strip: barTitleStrip,
                 shelf: KiwiShelf(),
                 sheen: 0,

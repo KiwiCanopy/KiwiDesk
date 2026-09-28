@@ -22,12 +22,10 @@ struct BarMarginTests {
     )
 
     private func shelf(
-        edge: AppBarEdge,
         outer: CGFloat = 0,
         inner: CGFloat = 0
     ) -> KiwiShelf {
         var shelf = KiwiShelf()
-        shelf.edge = edge
         // Pinned (#660): the sums below reason from it.
         shelf.thickness = 32
         shelf.outerMargin = outer
@@ -39,10 +37,12 @@ struct BarMarginTests {
     /// on unless `spaceBar` is.
     private func settings(
         _ shelf: KiwiShelf,
+        edge: AppBarEdge,
         spaceBar: Bool = false
     ) -> TilingSettings {
         var settings = TilingSettings()
         settings.kiwishelf = shelf
+        settings.barEdge = edge
         settings.spaceBarStyle.enabled = spaceBar
         settings.monocle.appBar.enabled = false
         settings.scrolling.appBar.enabled = true
@@ -51,13 +51,14 @@ struct BarMarginTests {
 
     @Test("The shelf strip sits its outer margin in from the edge")
     func outerMarginInsetsTheStrip() {
-        let shelf = shelf(edge: .top, outer: 8)
-        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let shelf = shelf(outer: 8)
+        let strip = ShelfGeometry.strip(in: visible, edge: .top, shelf: shelf)
         #expect(strip.minY == visible.minY + 8)
         #expect(strip.height == 32)
         #expect(strip.width == visible.width)
         let remaining = ShelfGeometry.remainingFrame(
             in: visible,
+            edges: [.top],
             shelf: shelf
         )
         #expect(remaining.minY == visible.minY + 8 + 32)
@@ -65,11 +66,16 @@ struct BarMarginTests {
 
     @Test("The inner margin reserves room, moving no strip")
     func innerMarginIsAdditive() {
-        let shelf = shelf(edge: .bottom, inner: 6)
-        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let shelf = shelf(inner: 6)
+        let strip = ShelfGeometry.strip(
+            in: visible,
+            edge: .bottom,
+            shelf: shelf
+        )
         #expect(strip.maxY == visible.maxY)
         let remaining = ShelfGeometry.remainingFrame(
             in: visible,
+            edges: [.bottom],
             shelf: shelf
         )
         #expect(remaining.maxY == visible.maxY - 32 - 6)
@@ -80,7 +86,7 @@ struct BarMarginTests {
     /// the inner gap — and at the default margins it is flush.
     @Test("The shelf is flush by default; windows keep the outer gap")
     func flushAndWindowsKeepTheOuterGap() {
-        let settings = settings(shelf(edge: .bottom))
+        let settings = settings(shelf(), edge: .bottom)
         let outer = Gaps.Outer(top: 10, bottom: 10, left: 10, right: 10)
         let area = LayoutContext.usable(
             settings.layoutBounds(from: visible, mode: .scrolling),
@@ -91,12 +97,19 @@ struct BarMarginTests {
 
     @Test("Shelf margins move the strip in and the windows further")
     func marginsApply() {
-        let shelf = shelf(edge: .bottom, outer: 5, inner: 7)
-        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
+        let shelf = shelf(outer: 5, inner: 7)
+        let strip = ShelfGeometry.strip(
+            in: visible,
+            edge: .bottom,
+            shelf: shelf
+        )
         #expect(strip.maxY == visible.maxY - 5)
         #expect(strip.height == 32)
         let area = LayoutContext.usable(
-            settings(shelf).layoutBounds(from: visible, mode: .scrolling),
+            settings(shelf, edge: .bottom).layoutBounds(
+                from: visible,
+                mode: .scrolling
+            ),
             outer: Gaps.uniform(10).outer
         )
         #expect(area.maxY == visible.maxY - 5 - 32 - 7 - 10)
@@ -106,9 +119,12 @@ struct BarMarginTests {
     /// Bar beside the App Bar reserves nothing more.
     @Test("Both bars share one reservation")
     func bothBarsReserveOnce() {
-        let shelf = shelf(edge: .top, outer: 2, inner: 3)
-        let one = settings(shelf).layoutBounds(from: visible, mode: .scrolling)
-        let both = settings(shelf, spaceBar: true)
+        let shelf = shelf(outer: 2, inner: 3)
+        let one = settings(shelf, edge: .top).layoutBounds(
+            from: visible,
+            mode: .scrolling
+        )
+        let both = settings(shelf, edge: .top, spaceBar: true)
             .layoutBounds(from: visible, mode: .scrolling)
         #expect(both == one)
         #expect(both.minY == visible.minY + 2 + 32 + 3)

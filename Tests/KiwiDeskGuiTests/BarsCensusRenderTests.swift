@@ -35,7 +35,8 @@ struct BarsCensusRenderTests {
     @Test("KiwiShelf drawer rows are the census's show-more set")
     func kiwishelfDrawers() {
         let rendered =
-            BarsRowOrder.kiwishelfStyle
+            BarsRowOrder.kiwishelfEdges
+            + BarsRowOrder.kiwishelfStyle
             + BarsRowOrder.kiwishelfMargins
         #expect(Set(rendered) == censusRows(.kiwishelf, .showMore))
         #expect(rendered.count == Set(rendered).count)

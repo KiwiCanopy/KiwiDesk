@@ -5,6 +5,10 @@
 /// as one change (`SettingsDraftDiffTests`, `BorderMastersFanOutTests`).
 extension SettingKey {
     static let masterWrites: [SettingKey: [String]] = [
+        .kiwishelf(.edge): [
+            "settings.spaceBarStyle.edge",
+            "settings.appBarStyle.edge",
+        ],
         .colours(.liquidGlassMaster): [
             "settings.kiwishelf.liquidGlass",
             "settings.shortcutPanelLiquidGlass",

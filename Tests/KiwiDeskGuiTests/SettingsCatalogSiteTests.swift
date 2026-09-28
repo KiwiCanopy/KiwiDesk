@@ -88,7 +88,8 @@ struct SettingsCatalogSiteTests {
         // 110 since #1684: the look shelf.
         // 112 since #1726: the Mouse & trackpad drawer and its
         // two rows, less Behavior's Mouse card.
-        #expect(names.count == 112)
+        // 115 since #1731: the Each bar drawer and its two rows.
+        #expect(names.count == 115)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

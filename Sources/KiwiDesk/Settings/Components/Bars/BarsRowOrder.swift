@@ -16,6 +16,13 @@ enum BarsRowOrder {
         .kiwishelf(.minimum),
     ]
 
+    /// KiwiShelf card, behind Position's Each bar disclosure
+    /// (#1731).
+    static let kiwishelfEdges: [SettingKey] = [
+        .kiwishelf(.spaceBarEdge),
+        .kiwishelf(.appBarEdge),
+    ]
+
     /// KiwiShelf card, behind the Style disclosure.
     static let kiwishelfStyle: [SettingKey] = [
         .kiwishelf(.background),
