@@ -70,7 +70,13 @@ enum LayoutStoryArrangement {
         settings: TilingSettings,
         upTo ruled: Int
     ) -> Int {
-        let canvas = CGSize(width: 128, height: 84)
+        // The thumbnail's drawn screen; the verdict is a count
+        // ceiling's, so any canvas shape answers alike.
+        let inset = 2 * LayoutSchematic.inset
+        let canvas = CGSize(
+            width: (SchematicScale.tile.width ?? 0) - inset,
+            height: SchematicScale.tile.height - inset
+        )
         return stride(from: max(1, ruled), through: 1, by: -1)
             .first { count in
                 let rects = Array(

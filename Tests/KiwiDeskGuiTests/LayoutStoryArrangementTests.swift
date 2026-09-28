@@ -58,10 +58,9 @@ struct LayoutStoryArrangementTests {
         }
     }
 
-    /// A pile's cascade offset is a screen-sized quantity: laid
-    /// out at thumbnail size it shifted a piled window a whole
-    /// canvas-tenth per step; scaled from a screen it steps by a
-    /// few points, so the pile reads inside the cell it fills.
+    /// A pile's cascade step is scaled from a 1280-pt screen, so
+    /// it moves a piled window a few points on the thumbnail and
+    /// the pile reads inside the cell it fills (#1750).
     @Test("a pile cascades by a screen's proportion")
     func pileStepsInProportion() {
         let frames = LayoutStoryArrangement.frames(

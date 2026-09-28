@@ -7146,10 +7146,9 @@ the whole of what Reduce Motion shows. It is still not a clip,
 for the reasons the Shortcuts & Gestures entry gives: it follows
 the palette and the appearance, carries no text to translate,
 and cannot go stale beside a redesign. Motion is never
-announced, so what VoiceOver hears is what the host already
-says: the tour row speaks the layout's behaviour as a sentence,
-and so does a preset preview tile telling a tiling story, while
-the other preset tiles speak the schematic's own description.
+announced, so every story thumbnail speaks the layout's
+behaviour as one sentence — the tour row and every preset
+preview tile alike, one register on one sheet.
 
 **Floating's picture is scattered, everywhere.** A cascade drew
 the one layout that places nothing as if it placed windows in a

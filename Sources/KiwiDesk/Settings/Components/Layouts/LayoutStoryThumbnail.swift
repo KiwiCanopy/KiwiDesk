@@ -40,7 +40,11 @@ struct LayoutStoryThumbnail: View {
     }
 
     var body: some View {
+        // One spoken description for every layout's story: the
+        // behaviour the motion shows, never announced itself.
         picture
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(OnboardingLayoutBehaviour.of(mode))
             .environment(\.schematicRestage, Self.pace)
             .environment(\.schematicTellsStory, true)
             .onAppear {

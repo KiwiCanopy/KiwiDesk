@@ -218,9 +218,13 @@ struct ScrollingSchematic: View {
         _ m: Metrics,
         along: CGFloat
     ) -> some View {
-        if !tellsStory, !onCanvas(i, m, along: along) {
+        if tellsStory {
+            // Every slot a window, hidden by the story's clip: a
+            // branch flipping mid-pan would cross-fade (#1750).
+            SchematicTile(active: i == m.focus)
+        } else if !onCanvas(i, m, along: along) {
             EmptyView()
-        } else if i == m.newIdx, !lone, !tellsStory {
+        } else if i == m.newIdx, !lone {
             SchematicNewWindow(
                 badgeAlignment: badgeAlignment(i - m.focus)
             )
