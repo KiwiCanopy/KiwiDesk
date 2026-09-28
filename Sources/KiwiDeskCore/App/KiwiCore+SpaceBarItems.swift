@@ -12,14 +12,14 @@ extension KiwiCore {
     /// keeps the first `style.resolvedGlyphCap` slots (#376).
     /// Grouping runs first by design so the cap counts app
     /// *groups*, not raw windows. Returns the visible slots and
-    /// the number of *windows* hidden past the cap (the "+n"
-    /// badge).
+    /// the *windows* hidden past the cap, in row order (the "+n"
+    /// badge counts them, its menu lists them, #1528).
     func spaceBarApps(
         in space: Space,
         style: SpaceBarLook
     ) -> (
         apps: [SpaceBarItemView.App],
-        overflow: Int,
+        overflow: [WindowID],
         focusHidden: Bool
     ) {
         // One pass: ids and names stay index-aligned with no
@@ -69,7 +69,7 @@ extension KiwiCore {
             state.workspaces.lastFocused.map { focus in
                 hidden.contains { $0.contains(focus) }
             } ?? false
-        return (apps, hidden.reduce(0) { $0 + $1.count }, focusHidden)
+        return (apps, hidden.flatMap { $0 }, focusHidden)
     }
 
     /// One glyph slot for a same-app run. Internal rather
@@ -126,7 +126,8 @@ extension KiwiCore {
             // The run's first sticky member picks the badge glyph
             // (#445): global → infinity, display → pin.fill.
             stickyScope: members.first(where: \.isSticky)?
-                .stickyScope ?? .none
+                .stickyScope ?? .none,
+            windows: group
         )
     }
 

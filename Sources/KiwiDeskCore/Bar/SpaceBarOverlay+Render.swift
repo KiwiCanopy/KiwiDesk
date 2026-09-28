@@ -132,6 +132,7 @@ extension SpaceBarOverlay {
         placeItems(itemFrames, glides: glides)
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
+            view.glyphActions = glyphActions
             view.configure(
                 identity: item.identity,
                 spaceGlyph: item.spaceGlyph,
@@ -141,6 +142,7 @@ extension SpaceBarOverlay {
                 style: style,
                 stateMarkColors: stateMarkColors,
                 overflow: item.overflow,
+                overflowWindows: item.overflowWindows,
                 focusInOverflow: item.focusInOverflow,
                 held: item.held,
                 collapse: item.collapse

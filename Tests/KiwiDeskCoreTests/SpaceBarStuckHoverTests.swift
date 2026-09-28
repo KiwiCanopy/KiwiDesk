@@ -33,7 +33,7 @@ struct SpaceBarStuckHoverTests {
                 spaceGlyph: .text($0, tinted: true),
                 apps: [],
                 active: $0 == active,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             )
         }

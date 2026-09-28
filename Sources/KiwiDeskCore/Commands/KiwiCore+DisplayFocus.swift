@@ -88,7 +88,9 @@ extension KiwiCore {
     /// re-assert.
     /// (`handFollowFocus` below is this sequence's deliberate
     /// partial twin, #1007 — a step added or reordered here
-    /// likely belongs there too.)
+    /// likely belongs there too. The Space Bar glyph click adds
+    /// the #412 float raise after it, which this sequence lacks
+    /// for every caller — #1727.)
     func followSwitch(
         to target: SpaceID,
         focusing id: WindowID,

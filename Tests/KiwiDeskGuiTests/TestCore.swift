@@ -80,6 +80,8 @@ func makeTestCore(
     // pid itself.
     core.openOrFocus.runningAppPID = { _ in nil }
     core.openOrFocus.openApp = { _, _ in false }
+    // A Space Bar menu pops modally and would hang the run (#1528).
+    core.spaceBars.glyphActions.present = { _, _ in }
     // Same class, fourth time (#878): the per-retile neighbor
     // scan defaults to the real screen list, so on a
     // multi-screen dev Mac an engine fixture would inherit the

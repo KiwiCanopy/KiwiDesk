@@ -37,7 +37,7 @@ struct SpaceBarFrontViewChurnTests {
                 spaceGlyph: .text(String(n), tinted: true),
                 apps: [],
                 active: n == 1,
-                overflow: 0,
+                overflow: [],
                 focusInOverflow: false
             )
         }
