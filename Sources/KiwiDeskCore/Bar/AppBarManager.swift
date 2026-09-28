@@ -39,6 +39,8 @@ public final class AppBarManager {
 
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
     public var onSelect: @MainActor (WindowID) -> Void = { _ in }
+    /// The items' hover title (#1514) — Core sets it at bootstrap.
+    let hoverTitle = AppBarHoverTitle()
     /// Drag reorder hook (space, from slot, to slot); wired to
     /// `KiwiCore.moveBarItem`.
     public var onMove: @MainActor (SpaceID, Int, Int) -> Void = {
@@ -152,6 +154,7 @@ public final class AppBarManager {
     private func overlay(for display: DisplayID) -> AppBarOverlay {
         if let existing = overlays[display] { return existing }
         let overlay = AppBarOverlay()
+        overlay.hoverTitle = hoverTitle
         overlay.onSelect = { [weak self] id in
             self?.onSelect(id)
         }

@@ -38,7 +38,7 @@ final class AppBarItemView: NSView {
         return tf
     }()
 
-    private var windowID = WindowID(0)
+    private(set) var windowID = WindowID(0)
     /// Owner application name for accessibility narration (#901).
     var name = ""
     /// Display text string (`KiwiCore.barItemText`).
@@ -54,6 +54,9 @@ final class AppBarItemView: NSView {
     var isHovered = false
     var style = AppBarLook()
     var onSelect: (WindowID) -> Void = { _ in }
+    /// Core's hover title (#1514), the manager's one instance.
+    weak var hoverTitle: AppBarHoverTitle?
+    var tipTag: NSView.ToolTipTag?
     var onDragMoved: (AppBarItemView, CGPoint) -> Void = { _, _ in }
     var onDragEnded: (AppBarItemView) -> Void = { _ in }
 

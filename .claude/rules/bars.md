@@ -298,12 +298,16 @@ Every app glyph and the `+n` badge carry a `SpaceBarGlyphTarget`;
 what a click does is Core's (`KiwiCore+SpaceBarClick.swift`).
 Obligations:
 
-- **A hover title is read when it shows, through the one
-  `SpaceBarGlyphActions.tooltip`, and never stored on a view.**
-  It is a third title channel, and it owes the refresh gate
-  above no arm only because nothing caches it; a target that
-  keeps the string brings back the stale title with no gate
-  watching (`SpaceBarGlyphWiringTests` ▸ `tooltipIsReadAtHover`).
+- **A hover title is read when it shows — through
+  `SpaceBarGlyphActions.tooltip` on a Space Bar glyph,
+  `AppBarHoverTitle.read` on an App Bar item — and never stored
+  on a view.** It is a third title channel, and it owes the
+  refresh gate above no arm only because nothing caches it; a
+  view that keeps the string brings back the stale title with no
+  gate watching (`SpaceBarGlyphWiringTests` ▸
+  `tooltipIsReadAtHover`, `AppBarHoverTitleTests`). An App Bar
+  item asks only where it hides text — the view reports what it
+  drew in full, Core decides (#1514).
 - **A clickable piece of an item joins the item's `hitTest`
   target list**, or subview order decides who takes the click —
   a render re-adds the glyph views above kept targets
