@@ -58,8 +58,22 @@ struct ScrollGestureRouter {
     private(set) var deadline: Double?
 
     /// Routes one sample: `consume` says whether the event is
-    /// swallowed, `events` what the owning consumer hears.
+    /// swallowed, `events` what the owning consumer hears. A
+    /// gesture whose chord was unbound mid-flight is released, so
+    /// the rest of that scroll reaches the window again.
     mutating func route(
+        _ sample: ScrollSample,
+        now: Double
+    ) -> (consume: Bool, events: [ScrollGestureEvent]) {
+        var released: [ScrollGestureEvent] = []
+        if let owner, !chords.contains(owner.chord) {
+            released = end(at: sample.location)
+        }
+        let routed = routeSample(sample, now: now)
+        return (routed.consume, released + routed.events)
+    }
+
+    private mutating func routeSample(
         _ sample: ScrollSample,
         now: Double
     ) -> (consume: Bool, events: [ScrollGestureEvent]) {

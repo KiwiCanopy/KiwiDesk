@@ -1,20 +1,40 @@
 import Foundation
 
-/// The main-actor front of the scroll-gesture tap (#1656, #1519):
-/// each consumer binds the chord it answers to, and the one
-/// machine tap exists only while something is bound and the core
-/// is started — so a user with both gestures off has no tap.
+/// The resolved scroll-gesture settings (#1656 ruling: a global
+/// base plus a per-profile override, resolved before they get
+/// here). A consumer missing from `chords`, or given an empty
+/// chord, is off: a plain scroll always belongs to the window.
+public struct ScrollGestureSettings: Equatable, Sendable {
+    public var chords: [ScrollGestures.Consumer: ScrollChord]
+    /// KiwiDesk's own Natural scrolling, independent of macOS's.
+    public var naturalScrolling: Bool
+
+    public init(
+        chords: [ScrollGestures.Consumer: ScrollChord] = [:],
+        naturalScrolling: Bool = true
+    ) {
+        self.chords = chords.filter { !$0.value.isEmpty }
+        self.naturalScrolling = naturalScrolling
+    }
+}
+
+/// The main-actor front of the scroll-gesture tap (#1656, #1519).
+/// Two jobs, two doors: `setHandler` wires a consumer once, and
+/// `configure` takes the resolved settings on every apply. The one
+/// machine tap exists only while a wired consumer has a chord and
+/// the core is started — so a user with both gestures off has no
+/// tap.
 ///
-/// Bindings are keyed by CONSUMER, never by chord: a profile
-/// switch can hand the two gestures each other's chords, and
-/// either rebind order must land both.
+/// Chords are keyed by CONSUMER, never the other way round: a
+/// profile switch can hand the two gestures each other's chords,
+/// and one `configure` lands both.
 @MainActor
 public final class ScrollGestures {
     /// The two gestures, in the precedence a shared chord takes.
-    public enum Consumer: CaseIterable, Sendable {
-        /// ⌃⌥ + scroll pans a Scrolling row (#1656).
+    public enum Consumer: CaseIterable, Hashable, Sendable {
+        /// Pans a Scrolling row, or steps a Monocle stack (#1656).
         case pan
-        /// ⌃⌥⌘ + scroll steps between Spaces (#1519).
+        /// Steps between the Spaces of a screen (#1519).
         case step
     }
 
@@ -28,13 +48,10 @@ public final class ScrollGestures {
     /// pins one that touches nothing.
     var makeTap: MakeTap = { ScrollGestureTap.live(deliver: $0) }
 
-    /// KiwiDesk's own Natural scrolling (#1656 ruling), applied
-    /// here once for both gestures: off flips every delta.
-    public var naturalScrolling = true
-
-    private var bindings: [Consumer: (ScrollChord, Handler)] = [:]
+    public private(set) var settings = ScrollGestureSettings()
+    private var handlers: [Consumer: Handler] = [:]
     /// The consumer each chord's in-flight gesture began with, and
-    /// its last event, so a rebind mid-gesture never hands one
+    /// its last event, so a change mid-gesture never hands one
     /// consumer a gesture another began.
     private var inFlight: [ScrollChord: (Consumer, ScrollGestureEvent)] =
         [:]
@@ -46,26 +63,23 @@ public final class ScrollGestures {
     /// Whether the machine tap is live.
     public var isTapped: Bool { tap != nil }
 
-    /// Binds `consumer` to `chord`, or unbinds it with nil or an
-    /// empty chord — a plain scroll always belongs to the window.
-    /// A changed chord ends the consumer's gesture in flight; the
-    /// same chord only replaces the handler, so a re-apply of an
-    /// unchanged binding never cuts a live gesture.
-    public func bind(
+    /// Wires `consumer`'s handler; once, at bootstrap.
+    public func setHandler(
         _ consumer: Consumer,
-        to chord: ScrollChord?,
         _ handler: @escaping Handler
     ) {
-        if let chord, bindings[consumer]?.0 == chord {
-            bindings[consumer] = (chord, handler)
-            return
+        handlers[consumer] = handler
+        sync()
+    }
+
+    /// Applies resolved settings. A consumer whose chord changed has
+    /// its gesture in flight ended; an unchanged chord keeps it.
+    public func configure(_ settings: ScrollGestureSettings) {
+        for consumer in Consumer.allCases
+        where settings.chords[consumer] != self.settings.chords[consumer] {
+            endInFlight(of: consumer)
         }
-        endInFlight(of: consumer)
-        if let chord, !chord.isEmpty {
-            bindings[consumer] = (chord, handler)
-        } else {
-            bindings[consumer] = nil
-        }
+        self.settings = settings
         sync()
     }
 
@@ -84,7 +98,8 @@ public final class ScrollGestures {
         sync()
     }
 
-    /// Hands routed events to the consumer that owns the gesture.
+    /// Hands routed events to the consumer that owns the gesture,
+    /// with Natural scrolling applied — here, once, for both.
     func receive(_ events: [ScrollGestureEvent]) {
         // Events queued before a stop are dropped with the tap.
         guard started else { return }
@@ -96,11 +111,11 @@ public final class ScrollGestures {
                 inFlight[event.chord] = (consumer, event)
             }
             guard let (consumer, _) = inFlight[event.chord],
-                let (_, handler) = bindings[consumer]
+                let handler = handlers[consumer]
             else { continue }
             inFlight[event.chord] =
                 event.kind == .ended ? nil : (consumer, event)
-            if !naturalScrolling {
+            if !settings.naturalScrolling {
                 event.delta.dx = -event.delta.dx
                 event.delta.dy = -event.delta.dy
             }
@@ -108,29 +123,42 @@ public final class ScrollGestures {
         }
     }
 
-    /// The consumer a chord reaches: the first in `Consumer`
-    /// order, so a shared chord is never a coin flip.
+    /// The wired consumers' chords, the set the tap consumes.
+    private var liveChords: Set<ScrollChord> {
+        Set(
+            Consumer.allCases.compactMap { consumer in
+                handlers[consumer].flatMap { _ in
+                    settings.chords[consumer]
+                }
+            }
+        )
+    }
+
+    /// The consumer a chord reaches: the first wired one in
+    /// `Consumer` order, so a shared chord is never a coin flip.
     private func owner(of chord: ScrollChord) -> Consumer? {
-        Consumer.allCases.first { bindings[$0]?.0 == chord }
+        Consumer.allCases.first {
+            handlers[$0] != nil && settings.chords[$0] == chord
+        }
     }
 
     private func endInFlight(of consumer: Consumer) {
         guard
             let (chord, (_, last)) = inFlight.first(where: {
                 $0.value.0 == consumer
-            }),
-            let (_, handler) = bindings[consumer]
+            })
         else { return }
         inFlight[chord] = nil
         var ended = last
         ended.kind = .ended
         ended.delta = .zero
         ended.momentum = false
-        handler(ended)
+        handlers[consumer]?(ended)
     }
 
     private func sync() {
-        guard started, !bindings.isEmpty else {
+        let chords = liveChords
+        guard started, !chords.isEmpty else {
             tap?.stop()
             tap = nil
             return
@@ -147,6 +175,6 @@ public final class ScrollGestures {
                     : "scroll tap: installed"
             )
         }
-        tap?.setChords(Set(bindings.values.map(\.0)))
+        tap?.setChords(chords)
     }
 }

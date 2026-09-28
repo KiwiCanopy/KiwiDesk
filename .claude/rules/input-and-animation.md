@@ -28,14 +28,15 @@ editing here:
     decision is the pure `ScrollGestureRouter`'s, and consumers
     hear it on the main queue (`ScrollTapSeamTests` for the
     thread, `ScrollGestureRouterTests` for the decision).
-  - **A plain scroll is never consumed**: `bind` refuses the
-    empty chord and a chord matches exactly
+  - **A plain scroll is never consumed**: `ScrollGestureSettings`
+    drops an empty chord and a chord matches exactly
     (`ScrollGesturesTests`, `ScrollGestureRouterTests`).
-  - **Bind by CONSUMER, never by chord**: a profile switch can
-    hand the two gestures each other's chords, and either rebind
-    order must land both; and no tap exists while nothing is
-    bound, the live factory pinned inert in both `makeTestCore`
-    twins (`ScrollGesturesTests`, `ScrollTapSeamTests`).
+  - **Key chords by CONSUMER, and set them through the one
+    `configure` door** — handlers are wired once with
+    `setHandler`: a profile switch can hand the two gestures each
+    other's chords, and one resolved settings value lands both;
+    and no tap exists while no wired consumer has a chord, the
+    live factory pinned inert in both `makeTestCore` twins (`ScrollGesturesTests`, `ScrollTapSeamTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

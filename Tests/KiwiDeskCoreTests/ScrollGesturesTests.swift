@@ -12,8 +12,8 @@ private final class FakeTap: ScrollTapHandle {
 }
 
 /// The tap's front (#1656, #1519): the machine tap exists only
-/// while the core is started AND a gesture is bound, and a routed
-/// event reaches the consumer that owns its gesture.
+/// while the core is started AND a wired consumer has a chord,
+/// and a routed event reaches the consumer that owns its gesture.
 @MainActor
 @Suite("Scroll gestures front")
 struct ScrollGesturesTests {
@@ -33,6 +33,20 @@ struct ScrollGesturesTests {
         return (gestures, { made })
     }
 
+    private func settings(
+        pan: ScrollChord? = ScrollGesturesTests.pan,
+        step: ScrollChord? = ScrollGesturesTests.step,
+        natural: Bool = true
+    ) -> ScrollGestureSettings {
+        var chords: [ScrollGestures.Consumer: ScrollChord] = [:]
+        chords[.pan] = pan
+        chords[.step] = step
+        return ScrollGestureSettings(
+            chords: chords,
+            naturalScrolling: natural
+        )
+    }
+
     private func event(
         _ chord: ScrollChord,
         _ kind: ScrollGestureEvent.Kind,
@@ -48,19 +62,20 @@ struct ScrollGesturesTests {
         )
     }
 
-    @Test("no tap until started and bound; none after the last unbind")
-    func tapFollowsBindings() {
+    @Test("no tap until started, wired and given a chord")
+    func tapFollowsSettings() {
         let (gestures, made) = front()
-        gestures.bind(.pan, to: Self.pan) { _ in }
-        #expect(made().isEmpty)
+        gestures.configure(settings(step: nil))
         gestures.start()
+        #expect(made().isEmpty)
+        gestures.setHandler(.pan) { _ in }
         #expect(made().count == 1)
         #expect(made().first?.chords == [Self.pan])
-        gestures.bind(.step, to: Self.step) { _ in }
+        gestures.setHandler(.step) { _ in }
+        gestures.configure(settings())
         #expect(made().count == 1)
         #expect(made().first?.chords == [Self.pan, Self.step])
-        gestures.bind(.pan, to: nil) { _ in }
-        gestures.bind(.step, to: nil) { _ in }
+        gestures.configure(settings(pan: nil, step: nil))
         #expect(made().first?.stopped == true)
         #expect(!gestures.isTapped)
     }
@@ -69,9 +84,9 @@ struct ScrollGesturesTests {
     func stopTearsDown() {
         let (gestures, made) = front()
         var heard = 0
+        gestures.setHandler(.pan) { _ in heard += 1 }
+        gestures.configure(settings(step: nil))
         gestures.start()
-        #expect(made().isEmpty)
-        gestures.bind(.pan, to: Self.pan) { _ in heard += 1 }
         gestures.stop()
         #expect(made().first?.stopped == true)
         #expect(!gestures.isTapped)
@@ -79,71 +94,70 @@ struct ScrollGesturesTests {
         #expect(heard == 0)
     }
 
-    @Test("a plain scroll can never be bound")
+    @Test("a stop ends a gesture in flight")
+    func stopEndsInFlight() {
+        let (gestures, _) = front()
+        var heard: [ScrollGestureEvent.Kind] = []
+        gestures.setHandler(.pan) { heard.append($0.kind) }
+        gestures.configure(settings())
+        gestures.start()
+        gestures.receive([event(Self.pan, .began)])
+        gestures.stop()
+        #expect(heard == [.began, .ended])
+        gestures.start()
+        gestures.receive([event(Self.pan, .changed)])
+        #expect(heard == [.began, .ended])
+    }
+
+    @Test("a plain scroll can never be configured")
     func emptyChordRefused() {
         let (gestures, made) = front()
+        gestures.setHandler(.pan) { _ in }
         gestures.start()
-        gestures.bind(.pan, to: []) { _ in }
+        gestures.configure(settings(pan: [], step: nil))
         #expect(made().isEmpty)
+        #expect(gestures.settings.chords.isEmpty)
     }
 
     @Test("an event reaches its own chord's consumer")
     func routesByChord() {
         let (gestures, _) = front()
         var heard: [ScrollGestures.Consumer] = []
+        gestures.setHandler(.pan) { _ in heard.append(.pan) }
+        gestures.setHandler(.step) { _ in heard.append(.step) }
+        gestures.configure(settings())
         gestures.start()
-        gestures.bind(.pan, to: Self.pan) { _ in heard.append(.pan) }
-        gestures.bind(.step, to: Self.step) { _ in heard.append(.step) }
         gestures.receive([event(Self.pan, .began)])
         gestures.receive([event(Self.step, .began)])
         #expect(heard == [.pan, .step])
     }
 
-    @Test("two gestures trading chords both stay bound, either order")
+    @Test("two gestures trading chords land in one configure")
     func swapKeepsBoth() {
-        for panFirst in [true, false] {
-            let (gestures, made) = front()
-            var heard: [ScrollGestures.Consumer] = []
-            gestures.start()
-            gestures.bind(.pan, to: Self.pan) { _ in heard.append(.pan) }
-            gestures.bind(.step, to: Self.step) { _ in
-                heard.append(.step)
-            }
-            let panToStep = {
-                gestures.bind(.pan, to: Self.step) { _ in
-                    heard.append(.pan)
-                }
-            }
-            let stepToPan = {
-                gestures.bind(.step, to: Self.pan) { _ in
-                    heard.append(.step)
-                }
-            }
-            if panFirst {
-                panToStep()
-                stepToPan()
-            } else {
-                stepToPan()
-                panToStep()
-            }
-            #expect(made().last?.chords == [Self.pan, Self.step])
-            gestures.receive([event(Self.step, .began)])
-            gestures.receive([event(Self.pan, .began)])
-            #expect(heard == [.pan, .step])
-        }
+        let (gestures, made) = front()
+        var heard: [ScrollGestures.Consumer] = []
+        gestures.setHandler(.pan) { _ in heard.append(.pan) }
+        gestures.setHandler(.step) { _ in heard.append(.step) }
+        gestures.configure(settings())
+        gestures.start()
+        gestures.configure(settings(pan: Self.step, step: Self.pan))
+        #expect(made().last?.chords == [Self.pan, Self.step])
+        gestures.receive([event(Self.step, .began)])
+        gestures.receive([event(Self.pan, .began)])
+        #expect(heard == [.pan, .step])
     }
 
-    @Test("a rebind ends the consumer's gesture and strands the rest")
-    func rebindMidGesture() {
+    @Test("a changed chord ends the gesture and strands the rest")
+    func changeMidGesture() {
         let (gestures, _) = front()
         var panHeard: [ScrollGestureEvent] = []
         var stepHeard: [ScrollGestureEvent.Kind] = []
+        gestures.setHandler(.pan) { panHeard.append($0) }
+        gestures.setHandler(.step) { stepHeard.append($0.kind) }
+        gestures.configure(settings())
         gestures.start()
-        gestures.bind(.pan, to: Self.pan) { panHeard.append($0) }
-        gestures.bind(.step, to: Self.step) { stepHeard.append($0.kind) }
         gestures.receive([event(Self.pan, .began)])
-        gestures.bind(.pan, to: Self.step) { panHeard.append($0) }
-        gestures.bind(.step, to: Self.pan) { stepHeard.append($0.kind) }
+        gestures.configure(settings(pan: Self.step, step: Self.pan))
         gestures.receive([
             event(Self.pan, .changed), event(Self.pan, .ended),
         ])
@@ -152,41 +166,30 @@ struct ScrollGesturesTests {
         #expect(stepHeard.isEmpty)
     }
 
-    @Test("a stop ends a gesture in flight")
-    func stopEndsInFlight() {
+    @Test("re-applying the same settings keeps a live gesture")
+    func sameSettingsKeepGesture() {
         let (gestures, _) = front()
         var heard: [ScrollGestureEvent.Kind] = []
+        gestures.setHandler(.pan) { heard.append($0.kind) }
+        gestures.configure(settings())
         gestures.start()
-        gestures.bind(.pan, to: Self.pan) { heard.append($0.kind) }
         gestures.receive([event(Self.pan, .began)])
-        gestures.stop()
-        #expect(heard == [.began, .ended])
-        gestures.start()
+        gestures.configure(settings())
+        gestures.configure(settings(natural: false))
         gestures.receive([event(Self.pan, .changed)])
-        #expect(heard == [.began, .ended])
-    }
-
-    @Test("re-binding the same chord keeps a live gesture")
-    func sameChordRebindKeepsGesture() {
-        let (gestures, _) = front()
-        var heard: [String] = []
-        gestures.start()
-        gestures.bind(.pan, to: Self.pan) { heard.append("old \($0.kind)") }
-        gestures.receive([event(Self.pan, .began)])
-        gestures.bind(.pan, to: Self.pan) { heard.append("new \($0.kind)") }
-        gestures.receive([event(Self.pan, .changed)])
-        #expect(heard == ["old began", "new changed"])
+        #expect(heard == [.began, .changed])
     }
 
     @Test("Natural scrolling off flips the delta, once, here")
     func naturalScrollingFlips() {
         let (gestures, _) = front()
         var deltas: [Double] = []
+        gestures.setHandler(.pan) { deltas.append($0.delta.dx) }
+        gestures.configure(settings())
         gestures.start()
-        gestures.bind(.pan, to: Self.pan) { deltas.append($0.delta.dx) }
         gestures.receive([event(Self.pan, .began)])
         gestures.receive([event(Self.pan, .changed, dx: 5)])
-        gestures.naturalScrolling = false
+        gestures.configure(settings(natural: false))
         gestures.receive([event(Self.pan, .changed, dx: 5)])
         #expect(deltas == [0, 5, -5])
     }
@@ -195,7 +198,8 @@ struct ScrollGesturesTests {
     func tapDeliveryReachesConsumer() async {
         let (gestures, made) = front()
         var heard: [ScrollGestureEvent.Kind] = []
-        gestures.bind(.pan, to: Self.pan) { heard.append($0.kind) }
+        gestures.setHandler(.pan) { heard.append($0.kind) }
+        gestures.configure(settings())
         gestures.start()
         made().first?.deliver?([event(Self.pan, .began)])
         await withCheckedContinuation { done in
@@ -213,7 +217,8 @@ struct ScrollGesturesTests {
             return FakeTap()
         }
         tracker.scroll.onLog = { _ in }
-        tracker.scroll.bind(.pan, to: Self.pan) { _ in }
+        tracker.scroll.setHandler(.pan) { _ in }
+        tracker.scroll.configure(settings())
         #expect(made == 0)
         tracker.start()
         #expect(tracker.scroll.isTapped)
@@ -222,7 +227,7 @@ struct ScrollGesturesTests {
         #expect(made == 1)
     }
 
-    @Test("a refused tap is retried on the next bind")
+    @Test("a refused tap is retried on the next change")
     func refusalRetries() {
         let gestures = ScrollGestures()
         var attempts = 0
@@ -232,8 +237,9 @@ struct ScrollGesturesTests {
         }
         gestures.onLog = { _ in }
         gestures.start()
-        gestures.bind(.pan, to: Self.pan) { _ in }
-        gestures.bind(.step, to: Self.step) { _ in }
+        gestures.setHandler(.pan) { _ in }
+        gestures.configure(settings())
+        gestures.setHandler(.step) { _ in }
         #expect(attempts == 2)
         #expect(!gestures.isTapped)
     }

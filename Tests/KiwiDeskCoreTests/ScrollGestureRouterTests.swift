@@ -236,6 +236,21 @@ struct ScrollGestureRouterTests {
         #expect(other.events.first?.chord == Self.step)
     }
 
+    @Test("a gesture whose chord is unbound mid-flight is released")
+    func unboundMidFlightReleases() {
+        var router = router()
+        _ = router.route(sample(Self.pan, .began), now: 0)
+        router.chords = [Self.step]
+        let next = router.route(sample([], dy: 3, .changed), now: 0.1)
+        #expect(!next.consume)
+        #expect(next.events.map(\.kind) == [.ended])
+        let glide = router.route(
+            sample([], dy: 3, momentum: .changed),
+            now: 0.2
+        )
+        #expect(!glide.consume)
+    }
+
     @Test("orphan momentum and changes pass")
     func orphansPass() {
         var router = router()
