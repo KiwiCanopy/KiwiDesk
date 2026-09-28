@@ -44,8 +44,8 @@ extension AppBarOverlay {
         )
     }
 
-    /// Installs per-item glass after item layout, or tears it
-    /// down in any other mode (#407).
+    /// Installs per-item glass after item layout (#407); any other
+    /// mode tore it down ahead of the frame pass.
     func installGlassHosting(
         _ mode: GlassHosting,
         frames: [CGRect],
@@ -53,10 +53,7 @@ extension AppBarOverlay {
         depth: CGFloat,
         animated: Bool
     ) {
-        guard mode == .boxGlass else {
-            teardownBoxGlasses()
-            return
-        }
+        guard mode == .boxGlass else { return }
         updateBoxGlasses(
             frames: frames,
             style: style,

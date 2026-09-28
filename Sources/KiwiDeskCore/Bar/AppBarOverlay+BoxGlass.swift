@@ -49,8 +49,9 @@ extension AppBarOverlay {
     /// Adjusts size of box glass and tint views pool.
     private func syncBoxGlassCount(_ n: Int) {
         while boxGlasses.count > n {
+            // Its item left in this render's `syncItemViewCount`.
             let glass = boxGlasses.removeLast()
-            GlassPlate.detach(glass)
+            GlassPlate.release(glass)
             glass.removeFromSuperview()
             boxTints.removeLast().removeFromSuperview()
         }
@@ -76,7 +77,7 @@ extension AppBarOverlay {
         guard !boxGlasses.isEmpty else { return }
         for glass in boxGlasses {
             for item in itemViews where GlassPlate.holds(glass, item) {
-                GlassPlate.detach(glass)
+                GlassPlate.release(glass)
                 itemContainer.addSubview(item)
             }
             glass.removeFromSuperview()
