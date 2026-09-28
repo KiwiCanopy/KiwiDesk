@@ -67,6 +67,14 @@ spells, so it raises no collision; the common noun *shelf* is not
 the name and is not UI copy
 (`.claude/rules/config-vocabulary.md` ▸ KiwiShelf).
 
+**Liquid Glass** is Apple's name for the material, and
+`colors.liquid_glass` has been Latin in every catalog since it
+shipped, as Apple ships it in every language; a sentence naming
+it keeps the name and translates around it (owner, 2026-09-29).
+Its tokens join the residue check's allow-list, so a stray
+*glass* in non-Latin prose is no longer caught there — prose
+about glass as a quality takes the catalog's own word.
+
 **Sticky** (#579) is the first **single-word** member, admitted by
 product decision rather than by the sort question: `de`, `ru` and
 `zh-Hant` had rendered it "Fixierung"/"Закреплённое"/"常駐", so

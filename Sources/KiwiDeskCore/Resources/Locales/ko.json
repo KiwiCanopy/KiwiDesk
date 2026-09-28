@@ -829,6 +829,7 @@
   "looks.delete": "디자인 삭제",
   "looks.description.bloom": "부드럽고 Dock이 떠 있는 %1$@ 스타일",
   "looks.description.classic": "얇고 평평한 %1$@ 스타일",
+  "looks.description.glass": "Liquid Glass 소재의 KiwiDesk 고유 디자인",
   "looks.description.pill": "둥글고 떠 있는 %1$@ 스타일",
   "looks.description.taskbar": "바가 아래쪽에 있는 %1$@ 스타일",
   "looks.description.tiler": "박스형에 고정폭인 %1$@ 스타일",
