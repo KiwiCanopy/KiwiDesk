@@ -49,13 +49,21 @@ enum GlassPlate {
         }
     }
 
-    /// Detaches embedded content from glass view.
+    /// Hands the glass's content back as an ordinary frame-laid
+    /// view, returning it: hosting turned its
+    /// `translatesAutoresizingMaskIntoConstraints` off, and left off
+    /// the next layout pass places it at its intrinsic size in the
+    /// corner (#1730). The one way content leaves a glass.
     @MainActor
-    static func detach(_ view: NSView) {
+    @discardableResult
+    static func release(_ view: NSView) -> NSView? {
         guard #available(macOS 26, *),
-            let glass = view as? NSGlassEffectView
-        else { return }
+            let glass = view as? NSGlassEffectView,
+            let content = glass.contentView
+        else { return nil }
         glass.contentView = nil
+        content.translatesAutoresizingMaskIntoConstraints = true
+        return content
     }
 
     /// Checks if glass view currently hosts the content view as its
