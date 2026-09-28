@@ -199,6 +199,8 @@ extension KiwiCore {
         globalAppRuleBase = [:]
         globalFloatRuleBase = []
         globalIgnoreRuleBase = []
+        // `init.lua`'s scroll_gesture verbs declare the base anew.
+        applyScrollGestures(base: .defaults, profile: nil)
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]

@@ -1,9 +1,8 @@
 import Foundation
 
 /// The bundled looks (#1684). Glass is DERIVED from the shipped
-/// defaults with the starter's bar edges (#1528), so it never
-/// drifts; every other
-/// bundled look is Glass
+/// defaults, as the default palette is, so it never drifts and
+/// doubles as the shape reset; every other bundled look is Glass
 /// with its authored differences laid over it, so each names the
 /// whole of `LookKeys` and reproduces its picture wherever it is
 /// applied.
@@ -24,15 +23,12 @@ public enum LookCatalog {
             }
     }
 
-    /// Glass: the shipped styling defaults and the starter's
-    /// split bars, in the default palette.
+    /// Glass: the shipped styling defaults in the default palette.
     public static func defaultLook() -> ShelfLook {
-        var settings = TilingSettings()
-        settings.appBarStyle.edge = StarterSetup.appBarEdge
-        return ShelfLook(
+        ShelfLook(
             name: defaultName,
             palette: PaletteCatalog.defaultName,
-            style: LookKeys.extract(from: settings)
+            style: LookKeys.extract(from: TilingSettings())
         )
     }
 

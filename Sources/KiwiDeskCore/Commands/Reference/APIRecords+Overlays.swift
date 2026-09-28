@@ -154,6 +154,35 @@ extension APIReference {
         )
     ]
 
+    static let scrollGestureRecords: [String: APIRecord] = [
+        "set_pan": APIRecord(
+            "Sets the modifiers that move focus by scrolling, like "
+                + "\"control+option\"; \"\" is off.",
+            .text("modifiers")
+        ),
+        "set_space_step": APIRecord(
+            "Sets the modifiers held with a scroll to step "
+                + "between Spaces; \"\" is off.",
+            .text("modifiers")
+        ),
+        "set_long_swipes": APIRecord(
+            "Lets a long trackpad swipe move one more window every "
+                + "step distance of travel.",
+            .boolean("enabled")
+        ),
+        "set_step_distance": APIRecord(
+            "Sets the travel, in points, per extra window of a long "
+                + "swipe.",
+            .number("points")
+        ),
+        "set_natural_scrolling": APIRecord(
+            "Makes a scroll gesture follow the fingers; an input, "
+                + "trackpad or mouse, sets only that one.",
+            .boolean("enabled"),
+            .choice("input", ScrollInput.self, optional: true)
+        ),
+    ]
+
     static let quitRecords: [String: APIRecord] = [
         "set_layout": APIRecord(
             "Sets how windows are gathered when KiwiDesk quits.",

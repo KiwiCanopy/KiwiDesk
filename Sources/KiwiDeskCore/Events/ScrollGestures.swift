@@ -6,15 +6,24 @@ import Foundation
 /// chord, is off: a plain scroll always belongs to the window.
 public struct ScrollGestureSettings: Equatable, Sendable {
     public private(set) var chords: [ScrollGestures.Consumer: ScrollChord]
-    /// KiwiDesk's own Natural scrolling, independent of macOS's.
-    public var naturalScrolling: Bool
+    /// KiwiDesk's own Natural scrolling per input, independent
+    /// of macOS's.
+    public var naturalTrackpad: Bool
+    public var naturalMouse: Bool
 
     public init(
         chords: [ScrollGestures.Consumer: ScrollChord] = [:],
-        naturalScrolling: Bool = true
+        naturalTrackpad: Bool = true,
+        naturalMouse: Bool = true
     ) {
         self.chords = chords.filter { !$0.value.isEmpty }
-        self.naturalScrolling = naturalScrolling
+        self.naturalTrackpad = naturalTrackpad
+        self.naturalMouse = naturalMouse
+    }
+
+    /// Whether `input`'s scrolls keep the natural direction.
+    func isNatural(_ input: ScrollGestureEvent.Input) -> Bool {
+        input == .wheel ? naturalMouse : naturalTrackpad
     }
 }
 
@@ -49,6 +58,13 @@ public final class ScrollGestures {
     var makeTap: MakeTap = { ScrollGestureTap.live(deliver: $0) }
 
     public private(set) var settings = ScrollGestureSettings()
+    /// The inputs `KiwiCore.applyScrollGestures` resolves from:
+    /// the base a config load or a verb wrote, and the live
+    /// profile's override. Written there alone.
+    var base = ScrollGestureBase.defaults
+    var profileOverride: ScrollGestureOverride?
+    /// The two resolved: what a consumer reads for its stepping.
+    var resolved = ScrollGestureBase.defaults
     private var handlers: [Consumer: Handler] = [:]
     /// The consumer each chord's in-flight gesture began with, and
     /// its last event, so a change mid-gesture never hands one
@@ -115,7 +131,7 @@ public final class ScrollGestures {
             else { continue }
             inFlight[event.chord] =
                 event.kind == .ended ? nil : (consumer, event)
-            if !settings.naturalScrolling {
+            if !settings.isNatural(event.input) {
                 event.delta.dx = -event.delta.dx
                 event.delta.dy = -event.delta.dy
             }

@@ -822,7 +822,7 @@
   "layout_params.stack_position.help": "Welche Bildschirmseite der Stack-Bereich einnimmt; der Hauptbereich erhält die andere Seite. Der Stack richtet sich passend aus: Ein linker oder rechter Stack verläuft von oben nach unten, ein oberer oder unterer nebeneinander.",
   "layout_params.wrap_focus.help": "Wenn aktiv, springt die Fokusbewegung nach dem letzten Fenster zum ersten und nach dem ersten zurück zum letzten, anstatt am Ende zu stoppen.",
   "looks.bundled": "Mitgeliefert",
-  "looks.caption": "Wende einen mitgelieferten oder gespeicherten Look an — wo die Leisten sitzen, Form, Schrift und Indikatoren von KiwiShelf, Form und Glanz des Fokus-Rahmens sowie die Abstände der Fenster. Eine einmalige Übernahme, keine Live-Verknüpfung; was die Leisten anzeigen, gehört nie zu einem Look. Seine Abstände verschieben deine Fenster, sobald du sicherst.",
+  "looks.caption": "Wende einen mitgelieferten oder gespeicherten Look an — Form, Schrift und Indikatoren von KiwiShelf, Form und Glanz des Fokus-Rahmens sowie die Abstände der Fenster. Eine einmalige Übernahme, keine Live-Verknüpfung; was die Leisten anzeigen, gehört nie zu einem Look. Seine Abstände verschieben deine Fenster, sobald du sicherst.",
   "looks.colors_new": "Farben: werden als neue Palette „%1$@“ gesichert.",
   "looks.colors_use": "Farben: nutzt die Palette „%1$@“.",
   "looks.default_name": "Mein Look",

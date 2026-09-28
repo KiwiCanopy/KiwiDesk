@@ -9,8 +9,7 @@ import Foundation
 /// gaps, the minimum window size — takes the MAIN screen's
 /// (#1662).
 public enum StarterTuning {
-    /// Baseline tuning the starter AND every preset build on, so
-    /// a starter-only value never lands here (#1528).
+    /// Baseline tuning for starter profiles.
     static func base() -> TilingSettings {
         var settings = TilingSettings()
         settings.gapsGlobal = .uniform(8)

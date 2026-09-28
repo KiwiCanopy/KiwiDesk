@@ -30,6 +30,7 @@ extension APIReference {
         "monocle": monocleRecords,
         "track": trackRecords,
         "mouse": mouseRecords,
+        "scroll_gesture": scrollGestureRecords,
         "quit": quitRecords,
         "drag": dragRecords,
         "border": borderRecords,

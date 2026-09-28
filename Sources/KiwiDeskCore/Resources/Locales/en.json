@@ -822,7 +822,7 @@
   "layout_params.stack_position.help": "Which side of the screen the stack zone takes; the master zone gets the other side. The stack lines up to fit its strip: a left or right stack runs top to bottom, a top or bottom stack side by side.",
   "layout_params.wrap_focus.help": "When on, moving focus past the last window wraps around to the first, and past the first back to the last, instead of stopping at the end.",
   "looks.bundled": "Bundled",
-  "looks.caption": "Apply a bundled or saved look — where the bars sit, KiwiShelf's shape, font and indicators, the focus border's shape and sheen, and the window gaps. A one-time paint, not a live link; what the bars show is never part of a look. Its gaps move your windows once you save.",
+  "looks.caption": "Apply a bundled or saved look — KiwiShelf's shape, font and indicators, the focus border's shape and sheen, and the window gaps. A one-time paint, not a live link; what the bars show is never part of a look. Its gaps move your windows once you save.",
   "looks.colors_new": "Colors: will be saved as a new palette “%1$@”.",
   "looks.colors_use": "Colors: uses the palette “%1$@”.",
   "looks.default_name": "My Look",

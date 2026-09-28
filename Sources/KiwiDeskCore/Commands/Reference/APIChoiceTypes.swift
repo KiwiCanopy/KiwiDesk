@@ -46,3 +46,4 @@ extension SpaceBarStyle.ItemLabel: APIChoiceType {}
 extension BorderStyle.CornerStyle: APIChoiceType {}
 extension BorderStyle.DrawOrder: APIChoiceType {}
 extension BorderAlignment: APIChoiceType {}
+extension ScrollInput: APIChoiceType {}
