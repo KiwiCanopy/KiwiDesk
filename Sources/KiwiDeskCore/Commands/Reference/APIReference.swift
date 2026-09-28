@@ -205,17 +205,15 @@ public enum APIReference {
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",
-            "set_ghost_border_width",
             "set_ghost_border_alignment",
             "set_ghost_border_color", "set_ghost_fill",
             "set_ghost_fill_color",
             "set_drop_zone_enabled", "set_drop_zone_border",
-            "set_drop_zone_border_width",
             "set_drop_zone_border_alignment",
             "set_drop_zone_border_color",
             "set_drop_zone_fill",
             "set_drop_zone_fill_color",
-            "set_corner_radius", "set_liquid_glass",
+            "set_liquid_glass",
         ],
         "border": [
             "set_enabled", "set_width", "set_focused_color",

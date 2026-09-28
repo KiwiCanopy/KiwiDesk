@@ -296,15 +296,12 @@ exports nothing.
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_ghost_enabled` | true\|false |
 | | `drag.set_ghost_border` / `drag.set_ghost_fill` | true\|false |
-| | `drag.set_ghost_border_width` | pt (default 5, Lua-only per stroke) |
 | | `drag.set_ghost_border_alignment` | `inside\|outside` (default inside, Lua-only) |
 | | `drag.set_ghost_border_color` / `drag.set_ghost_fill_color` | #RRGGBB[AA] |
 | | `drag.set_drop_zone_enabled` | true\|false |
 | | `drag.set_drop_zone_border` / `drag.set_drop_zone_fill` | true\|false |
-| | `drag.set_drop_zone_border_width` | pt (default 5, Lua-only per stroke) |
 | | `drag.set_drop_zone_border_alignment` | `inside\|outside` (default inside, Lua-only) |
 | | `drag.set_drop_zone_border_color` / `drag.set_drop_zone_fill_color` | #RRGGBB[AA] |
-| | `drag.set_corner_radius` | pt (default 16, numeric range Lua-only) |
 | Stack | `stack.promote` / `stack.demote` | — |
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |
@@ -347,6 +344,13 @@ exports nothing.
 `set_float_placement` replaces `set_float_nudge`: a saved setting
 that had the nudge off becomes `keep`, and a call to
 `set_float_nudge` fails naming its replacement.
+:::
+
+:::unreleased
+`drag.set_ghost_border_width` and
+`drag.set_drop_zone_border_width` fail naming `border.set_width`,
+and `drag.set_corner_radius` fails naming
+`border.set_corner_style`.
 :::
 
 `bind_profile_to_desktop` files one profile per screen count on a

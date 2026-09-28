@@ -219,7 +219,7 @@ struct SettingsCodingTests {
         let drag = try object(root["drag"])
         #expect(
             Set(drag.keys) == [
-                "corner_radius", "drop_zone", "ghost", "liquid_glass",
+                "drop_zone", "ghost", "liquid_glass",
             ]
         )
         // `drag.set_liquid_glass` (#1620), on by default.
@@ -227,7 +227,7 @@ struct SettingsCodingTests {
         let ghost = try object(drag["ghost"])
         #expect(
             Set(ghost.keys) == [
-                "border", "border_color", "border_width",
+                "border", "border_color",
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
@@ -238,12 +238,10 @@ struct SettingsCodingTests {
         // yellow-green (see DragVisual.ghostDefault).
         #expect(ghost["border_color"] as? String == "#347957")
         #expect(ghost["fill_color"] as? String == "#34795740")
-        #expect(ghost["border_width"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
         #expect(zone["border_color"] as? String == "#C2790A")
         #expect(zone["fill_color"] as? String == "#C2790A40")
-        #expect(zone["border_width"] as? Double == 5)
         #expect(zone["border_alignment"] as? String == "inside")
     }
 
@@ -260,6 +258,5 @@ struct SettingsCodingTests {
                 == DragVisual.ghostDefault.borderColor
         )
         #expect(decoded.dragDropZone == .dropZoneDefault)
-        #expect(decoded.dragCornerRadius == 16)
     }
 }

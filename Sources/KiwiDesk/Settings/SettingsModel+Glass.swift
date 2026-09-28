@@ -27,8 +27,7 @@ extension SettingsModel {
 /// The ONE comparison across the stored leaves: the master
 /// binding reads it as its displayed value and the row reads it
 /// as the `?` predicate, so the switch and its explanation
-/// cannot contradict (`GapsBordersGates.agreedCornerStyle`'s
-/// discipline).
+/// cannot contradict.
 struct LiquidGlassAgreement {
     let settings: TilingSettings
 

@@ -60,7 +60,6 @@ extension TilingSettings: Codable {
     }
 
     enum DragKeys: String, CodingKey {
-        case cornerRadius = "corner_radius"
         case dropZone = "drop_zone"
         case ghost
         case liquidGlass = "liquid_glass"

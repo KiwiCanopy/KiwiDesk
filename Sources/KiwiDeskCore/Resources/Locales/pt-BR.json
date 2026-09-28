@@ -166,7 +166,6 @@
   "border.preview.ax": "Pré-visualização do contorno: uma janela em foco com seu contorno, ao lado de outra sem foco.",
   "border.preview.ax_sticky": "Pré-visualização do contorno: uma janela em foco com seu contorno e a marca Sticky de todos os espaços, ao lado de outra sem foco com a marca de uma única tela.",
   "border.shared.caption": "O contorno de foco, a silhueta e a zona de destino são traços que o KiwiDesk desenha ao redor de uma janela.",
-  "border.shared.differ.help": "Os três traços estão configurados de formas diferentes agora; o que você escolher aqui vale para os três.",
   "border.shared.title": "Comum a todos os contornos",
   "border.title": "Contorno de foco",
   "border.unfocused_color.a11y": "Cor do contorno das janelas fora de foco",

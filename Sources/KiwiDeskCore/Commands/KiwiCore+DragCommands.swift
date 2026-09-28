@@ -8,13 +8,6 @@ extension KiwiCore {
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        if command == "drag.set_corner_radius" {
-            guard let radius = args.first?.numberValue else {
-                return .fail("expected radius (pt)")
-            }
-            tiler.settings.dragCornerRadius = max(0, radius)
-            return .ok()
-        }
         if command == "drag.set_liquid_glass" {
             guard let on = args.first?.boolValue else {
                 return .fail("expected boolean")
@@ -63,12 +56,6 @@ extension KiwiCore {
             default:
                 tiler.settings[keyPath: visual].fill = flag
             }
-        case "border_width":
-            guard let thickness = args.first?.numberValue else {
-                return .fail("expected thickness (pt)")
-            }
-            tiler.settings[keyPath: visual].borderWidth =
-                max(0, thickness)
         case "border_alignment":
             guard let val = args.first?.stringValue,
                 let alignment = BorderAlignment(rawValue: val)

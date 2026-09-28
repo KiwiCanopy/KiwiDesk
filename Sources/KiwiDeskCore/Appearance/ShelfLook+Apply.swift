@@ -5,13 +5,11 @@ import Foundation
 /// `BorderCommandSetting` (#1739) — except the stored gaps, which
 /// the config's own decoder reads (`Gaps.stored`); either way a
 /// look can never set a value a command couldn't, and an unknown
-/// path or a refused value is skipped, never fatal. Three writes
+/// path or a refused value is skipped, never fatal. Two writes
 /// reach further than their COMMAND, by ruling
 /// (`docs/design-decisions.md` ▸ A look is KiwiShelf's styling):
-/// glass writes every glass leaf (#1307), the ring's width and
-/// corners write every stroke the Borders masters own (#754), and
-/// the App Bar indicator clears the per-layout overrides that
-/// would hide it.
+/// glass writes every glass leaf (#1307), and the App Bar
+/// indicator clears the per-layout overrides that would hide it.
 extension ShelfLook {
     /// Overwrites the styling this look names, in place (sparse),
     /// then `palette`'s colours when one is handed in. Only the
@@ -86,13 +84,7 @@ extension ShelfLook {
                 BorderCommandSetting
                 .parse(field: parts[1], args: args)
             {
-                // Every stroke, as the Borders masters write (#754).
-                switch setting {
-                case .width(let width): settings.setStrokeWidth(width)
-                case .cornerStyle(let corner):
-                    settings.setStrokeCorners(corner)
-                default: setting.apply(to: &settings.borderStyle)
-                }
+                setting.apply(to: &settings.borderStyle)
             }
         case "gap" where parts[1] == "global":
             // Only the global gaps; a Space's override stays (#1739).

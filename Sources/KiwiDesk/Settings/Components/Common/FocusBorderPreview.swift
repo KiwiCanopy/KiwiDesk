@@ -3,6 +3,10 @@ import SwiftUI
 
 /// Preview of focused and unfocused window borders (#678).
 struct FocusBorderPreview: View {
+    /// A rounded window's radius at the preview's scale — the drag
+    /// pictures draw the same stroke (#1742).
+    static let roundedRadius: CGFloat = 12
+
     let style: BorderStyle
     var sticky: StickyStyle? = nil
 
@@ -100,7 +104,7 @@ struct FocusBorderPreview: View {
             to: 1...5
         )
         let radius: CGFloat =
-            style.cornerStyle == .square ? 0 : 12
+            style.cornerStyle == .square ? 0 : Self.roundedRadius
         return RoundedRectangle(cornerRadius: radius)
             .fill(Color.secondary.opacity(0.25))
             .overlay {
