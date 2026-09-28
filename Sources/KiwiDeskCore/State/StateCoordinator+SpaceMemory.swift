@@ -211,6 +211,7 @@ extension StateCoordinator {
         awayWindows[id] = nil
         rememberedSpaces[id] = nil
         closedDepartures.remove(id)
+        unjudgedFilings.remove(id)
         restoredFrames[id] = nil
         floatFrames[id] = nil
         retireDepartureRecord(of: id)

@@ -1741,7 +1741,9 @@ editing here:
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores
   (`SnapshotCarryCensusTests` ▸
-  `unreadablePayloadKeepsTheArrangement`); so a change to these
+  `unreadablePayloadKeepsTheArrangement`, and for the stamp
+  `HeldSpaceRestartRecordTests` ▸
+  `unreadableArrangementCostsOnlyItself`); so a change to these
   shapes may lose one restart's sizing and nothing else, and a
   change that must not owes the old spelling a decode.
 - **Any path that makes KiwiDesk relaunch itself announces it

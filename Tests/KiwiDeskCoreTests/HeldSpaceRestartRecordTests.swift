@@ -172,4 +172,82 @@ struct HeldSpaceRestartRecordTests {
         #expect(desk.members(b, Int(held.key.raw) ?? 0) == desk.ids([10, 11]))
         #expect(b.state.heldSpaces.count == 2)
     }
+
+    /// The snapshot's own arrangement stamp decodes on its own: an
+    /// unreadable one costs only itself, and the replay treats the
+    /// snapshot as unstamped, replaying every mode.
+    @Test("an unreadable arrangement stamp costs only itself")
+    func unreadableArrangementCostsOnlyItself() throws {
+        let a = try t.unplugged()
+        a.setSpaceMode(SpaceID(1), .monocle)
+        let snapshot = a.sessionSnapshot()
+        var json = try #require(
+            try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(snapshot)
+            ) as? [String: Any]
+        )
+        json["arrangement"] = ["kind": "galaxy", "name": "x"]
+        let decoded = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: JSONSerialization.data(withJSONObject: json)
+        )
+        #expect(decoded.arrangement == nil)
+        #expect(decoded.spaces.map(\.id) == snapshot.spaces.map(\.id))
+        let b = t.boot(
+            from: a,
+            screens: [desk.builtIn],
+            profile: "solo",
+            session: decoded
+        )
+        #expect(b.state.workspaces[SpaceID(1)]?.mode == .monocle)
+    }
+
+    /// A snapshot an older build wrote carries no stamp, so its
+    /// modes replay even under another arrangement — the one boot
+    /// after the upgrade keeps the pre-stamp behaviour.
+    @Test("an unstamped snapshot replays its modes")
+    func unstampedSnapshotReplaysModes() throws {
+        let core = try desk.docked()
+        var solo = try core.profiles.read(name: "solo")
+        solo.spaceModes[SpaceID(3)] = .floating
+        try core.profiles.save(solo)
+        var deskProfile = try core.profiles.read(name: "desk")
+        deskProfile.spaceModes[SpaceID(3)] = .scrolling
+        try core.profiles.save(deskProfile)
+        core.handle(.displaysChanged([desk.builtIn]))
+        var json = try #require(
+            try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(core.sessionSnapshot())
+            ) as? [String: Any]
+        )
+        json["arrangement"] = nil
+        let older = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: JSONSerialization.data(withJSONObject: json)
+        )
+        #expect(older.arrangement == nil)
+        let b = t.boot(
+            from: core,
+            screens: [desk.builtIn, desk.dell],
+            profile: "desk",
+            session: older
+        )
+        #expect(b.state.workspaces[SpaceID(3)]?.mode == .floating)
+    }
+
+    /// The unjudged mark ends with the filing it qualifies: at the
+    /// window's arrival and at its close while away.
+    @Test("the unjudged mark ends with its filing")
+    func unjudgedMarkEndsWithItsFiling() {
+        var state = StateCoordinator()
+        let id = WindowID(77)
+        state.unjudgedFilings.insert(id)
+        state.forgetAway(id)
+        #expect(!state.unjudgedFilings.contains(id))
+        state.unjudgedFilings.insert(id)
+        state.apply(
+            .windowCreated(ManagedWindow(id: id, pid: 1, appName: "A"))
+        )
+        #expect(!state.unjudgedFilings.contains(id))
+    }
 }
