@@ -24,16 +24,17 @@ extension KiwiCore {
             let space = activeSpace,
             let app = appBarContent(space: space, settings: settings),
             let screen = NSScreen.main ?? NSScreen.screens.first,
+            let plan = shelfPlans(
+                visible: GeometryUtils.axVisibleFrame(of: screen),
+                settings: settings,
+                spaceItems: nil,
+                app: app
+            ).first,
             let bar = placedBar(
                 app,
                 display: screen.kiwiDisplay?.id
                     ?? DisplayID(CGMainDisplayID()),
-                plan: shelfPlan(
-                    visible: GeometryUtils.axVisibleFrame(of: screen),
-                    settings: settings,
-                    spaceItems: nil,
-                    app: app
-                )
+                plan: plan
             )
         else { return [] }
         return [bar]

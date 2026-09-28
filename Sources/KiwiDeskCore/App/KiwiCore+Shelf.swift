@@ -1,10 +1,12 @@
 import AppKit
 
-/// The KiwiShelf per display (#1517): which bars show there, what
-/// each needs, and the segment `ShelfArrangement` gives it. The
-/// one refresh (`updateBars`) builds it once per display for both
-/// bars, so neither re-derives the other's presence and the two
-/// can never overlap.
+/// The shelves per display (#1517, #1731): which bars show there,
+/// on which edge, what each needs, and the segment
+/// `ShelfArrangement` gives it — one shelf while the bars share an
+/// edge, one per bar while they are split. The one refresh
+/// (`updateBars`) builds them once per display for both bars, so
+/// neither re-derives the other's presence and the two can never
+/// overlap.
 extension KiwiCore {
     /// The ONE bar refresh (#1517): each display's plan built
     /// once from both bars' content, then both managers synced
@@ -27,7 +29,15 @@ extension KiwiCore {
             }
             // A lone bar's slot IS its strip.
             syncShelves(
-                fallback.map { ($0.display, $0.strip) },
+                fallback.map {
+                    ShelfStrip(
+                        display: $0.display,
+                        edge: $0.style.edge,
+                        strip: $0.strip,
+                        carriesSpace: false,
+                        carriesApp: true
+                    )
+                },
                 settings: settings
             )
             return
@@ -35,8 +45,7 @@ extension KiwiCore {
         let look = settings.spaceBarLook
         var appBarsShown: [AppBarManager.Bar] = []
         var spaceBarsShown: [SpaceBarManager.Bar] = []
-        var strips: [(DisplayID, CGRect)] = []
-        var dividers: [DisplayID: ShelfArrangement.Divider] = [:]
+        var strips: [ShelfStrip] = []
         for display in displays {
             let app = appBarContent(on: display.id, settings: settings)
             let items = spaceBarContent(on: display.id, style: look)
@@ -48,25 +57,37 @@ extension KiwiCore {
             // engine's `layoutBounds(on:)` seam: one of the
             // deliberate `visibleBounds` exemptions
             // (`VisibleBoundsRoutingTests.allowed`, #537).
-            let plan = shelfPlan(
+            let plans = shelfPlans(
                 visible: GeometryUtils.axVisibleFrame(of: screen),
                 settings: settings,
                 spaceItems: items,
                 app: app
             )
-            strips.append((display.id, plan.strip))
-            dividers[display.id] = plan.arrangement.divider
+            strips += plans.map {
+                ShelfStrip(
+                    display: display.id,
+                    edge: $0.edge,
+                    strip: $0.strip,
+                    carriesSpace: $0.arrangement.space != nil,
+                    carriesApp: $0.arrangement.app != nil,
+                    divider: $0.arrangement.divider
+                )
+            }
             if let app,
+                let plan = plans.first(where: { $0.arrangement.app != nil }),
                 let bar = placedBar(app, display: display.id, plan: plan)
             {
                 appBarsShown.append(bar)
             }
             if let items,
+                let plan = plans.first(where: {
+                    $0.arrangement.space != nil
+                }),
                 let bar = placedSpaceBar(
                     items,
                     display: display.id,
                     plan: plan,
-                    sharesWithAppBar: app != nil,
+                    appBarShows: app != nil,
                     style: look
                 )
             {
@@ -77,26 +98,39 @@ extension KiwiCore {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
         }
-        syncShelves(strips, dividers: dividers, settings: settings)
+        syncShelves(strips, settings: settings)
     }
 
-    /// Hands each display's shelf the sections its two bars just
-    /// rendered, at the slots the plan gave them.
+    /// One shelf to show: its display, edge and strip, which bars
+    /// its plan placed on it, and the divider its arrangement set.
+    struct ShelfStrip {
+        let display: DisplayID
+        let edge: AppBarEdge
+        let strip: CGRect
+        let carriesSpace: Bool
+        let carriesApp: Bool
+        var divider: ShelfArrangement.Divider? = nil
+    }
+
+    /// Hands each shelf the sections its bars just rendered on its
+    /// edge, at the slots the plan gave them.
     private func syncShelves(
-        _ strips: [(DisplayID, CGRect)],
-        dividers: [DisplayID: ShelfArrangement.Divider] = [:],
+        _ strips: [ShelfStrip],
         settings: TilingSettings
     ) {
         shelves.sync(
-            strips.map { display, strip in
+            strips.map { shelf in
                 ShelfManager.Shelf(
-                    display: display,
-                    strip: strip,
+                    display: shelf.display,
+                    edge: shelf.edge,
+                    strip: shelf.strip,
                     shelf: settings.kiwishelf,
                     sheen: settings.borderStyle.sheen,
-                    space: spaceBars.shownOverlay(on: display),
-                    app: appBars.shownOverlay(on: display),
-                    divider: dividers[display]
+                    space: shelf.carriesSpace
+                        ? spaceBars.shownOverlay(on: shelf.display) : nil,
+                    app: shelf.carriesApp
+                        ? appBars.shownOverlay(on: shelf.display) : nil,
+                    divider: shelf.divider
                 )
             }
         )
@@ -109,23 +143,6 @@ extension KiwiCore {
         let style: AppBarLook
         let groups: [[WindowID]]
         let items: [AppBarOverlay.Item]
-    }
-
-    /// One display's shelf: its strip in AX coordinates and each
-    /// shown bar's slot along it.
-    struct ShelfPlan {
-        let strip: CGRect
-        let horizontal: Bool
-        let arrangement: ShelfArrangement
-
-        /// The strip's length along the edge.
-        var length: CGFloat {
-            horizontal ? strip.width : strip.height
-        }
-
-        func segment(_ slot: ShelfArrangement.Slot) -> CGRect {
-            slot.rect(in: strip, horizontal: horizontal)
-        }
     }
 
     /// The App Bar content for the space shown on `display`, or
@@ -191,60 +208,5 @@ extension KiwiCore {
             items.insert(layer, at: 0)
         }
         return items
-    }
-
-    /// Places the shown bars on the shelf of a screen whose
-    /// visible frame is `visible` — the screen's, never the
-    /// layout bounds, which the shelf has already left.
-    func shelfPlan(
-        visible: CGRect,
-        settings: TilingSettings,
-        spaceItems: [SpaceBarOverlay.Item]?,
-        app: AppBarContent?
-    ) -> ShelfPlan {
-        let shelf = settings.kiwishelf
-        let strip = ShelfGeometry.strip(in: visible, shelf: shelf)
-        let horizontal = shelf.edge.isHorizontal
-        let length = horizontal ? strip.width : strip.height
-        let depth = horizontal ? strip.height : strip.width
-        let look = settings.spaceBarLook
-        let spaceNeed = spaceItems.map {
-            SpaceBarOverlay.naturalLength(
-                items: $0,
-                depth: depth,
-                look: look
-            )
-        }
-        let spaceFloor =
-            spaceItems.map {
-                ShelfArrangement.hardFloor(
-                    activeExtent: SpaceBarOverlay.activeExtent(
-                        items: $0,
-                        depth: depth,
-                        look: look
-                    ),
-                    thickness: depth,
-                    gap: shelf.itemGap
-                )
-            } ?? 0
-        let appNeed = app.map {
-            AppBarOverlay.naturalLength(
-                items: $0.items,
-                style: $0.style,
-                thickness: depth,
-                capAxis: length
-            )
-        }
-        return ShelfPlan(
-            strip: strip,
-            horizontal: horizontal,
-            arrangement: ShelfArrangement.arrange(
-                length: length,
-                spaceNeed: spaceNeed,
-                appNeed: appNeed,
-                spaceFloor: spaceFloor,
-                shelf: shelf
-            )
-        )
     }
 }

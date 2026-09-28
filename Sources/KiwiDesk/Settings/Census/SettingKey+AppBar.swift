@@ -19,7 +19,7 @@ extension AppBarKey {
                 .bars,
                 .appBar,
                 .atRest,
-                gate: .setting(.kiwishelf(.edge))
+                gate: .setting(.kiwishelf(.appBarEdge))
             )
         case .appBarTitleCap:
             // Ungated (#937): accessibility label still announces title.

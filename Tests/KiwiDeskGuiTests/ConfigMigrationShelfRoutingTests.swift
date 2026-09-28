@@ -31,6 +31,9 @@ struct ConfigMigrationShelfRoutingTests {
             "Layouts/LayoutParams.swift",
             "Config/ConfigMigration+GlassDefault.swift",
             "Config/ConfigMigration+KiwiShelf.swift",
+            // #1731's edge step, by path; its textual edit takes
+            // the global groups alone, a layout's App Bar skipped.
+            "Config/ConfigMigration+BarEdges.swift",
             "Appearance/ColorPalette+Apply.swift",
             "Appearance/ColorPaletteKeys.swift",
             "Appearance/ShelfLook+Apply.swift",

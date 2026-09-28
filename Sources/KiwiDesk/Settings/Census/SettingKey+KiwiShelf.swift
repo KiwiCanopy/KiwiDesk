@@ -4,7 +4,11 @@
 /// layout App Bar toggles).
 
 enum KiwiShelfKey: String, CaseIterable, Hashable {
-    case edge = "settings.kiwishelf.edge"
+    /// The Position master: both bars' edges (#1731), which it
+    /// writes through `masterWrites`.
+    case edge = "settings.spaceBarStyle.edge (master)"
+    case spaceBarEdge = "settings.spaceBarStyle.edge"
+    case appBarEdge = "settings.appBarStyle.edge"
     case thickness = "settings.kiwishelf.thickness"
     case alignment = "settings.kiwishelf.alignment"
     case order = "settings.kiwishelf.order"
@@ -50,8 +54,19 @@ extension KiwiShelfKey {
 
     var placement: SettingPlacement {
         switch self {
-        case .edge, .thickness, .alignment, .order, .minimum:
+        case .edge:
+            // A master acknowledges divergence through its `?`
+            // and carries no gate (`GapsBordersGates.acknowledged`).
+            return .row(.bars, .kiwishelf, .atRest)
+        case .thickness, .alignment, .order, .minimum:
             return .row(.bars, .kiwishelf, .atRest, gate: Self.showGate)
+        case .spaceBarEdge, .appBarEdge:
+            return .row(
+                .bars,
+                .kiwishelf,
+                .showMore,
+                gate: Self.showGate
+            )
         case .background, .cornerRoundness, .border, .highlightWidth,
             .itemGap, .glyphSizeAuto, .fontSizeAuto, .fontFamily,
             .outerMargin, .innerMargin, .iconSource:
@@ -137,6 +152,10 @@ extension KiwiShelfKey {
                 "kiwishelf.edge.label",
                 help: "kiwishelf.edge.label.help"
             )
+        case .spaceBarEdge:
+            return .text("kiwishelf.edge.space_bar")
+        case .appBarEdge:
+            return .text("kiwishelf.edge.app_bar")
         case .thickness:
             return .text(
                 "kiwishelf.thickness",

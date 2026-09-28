@@ -6,6 +6,7 @@ import Foundation
 /// one vocabulary and their messages must not drift.
 enum SpaceBarCommandSetting {
     case enabled(Bool)
+    case edge(AppBarEdge)
     case glyphCap(Int)
     case glyphGap(CGFloat)
     case inactiveContent(SpaceBarStyle.InactiveContent)
@@ -56,6 +57,9 @@ enum SpaceBarCommandSetting {
         args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError>? {
         switch field {
+        case "edge":
+            return BarSettingChoice.value(args, AppBarEdge.self)
+                .map(Self.edge)
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -182,6 +186,7 @@ enum SpaceBarCommandSetting {
     func apply(to style: inout SpaceBarStyle) {
         switch self {
         case .enabled(let value): style.enabled = value
+        case .edge(let value): style.edge = value
         case .glyphCap(let value): style.glyphCap = value
         case .glyphGap(let value):
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)

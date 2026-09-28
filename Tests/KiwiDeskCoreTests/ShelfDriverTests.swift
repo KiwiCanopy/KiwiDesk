@@ -52,7 +52,7 @@ struct ShelfDriverTests {
         settings.spaceBarStyle.enabled = true
         settings.spaceBarStyle.showFrontApp = true
         settings.scrolling.appBar.enabled = appBar
-        settings.kiwishelf.edge = .top
+        settings.barEdge = .top
         settings.kiwishelf.thickness = 40
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
@@ -73,6 +73,7 @@ struct ShelfDriverTests {
         let visible = GeometryUtils.axVisibleFrame(of: screen)
         let strip = ShelfGeometry.strip(
             in: visible,
+            edge: .top,
             shelf: core.tiler.settings.kiwishelf
         )
         #expect(strip.contains(space.strip))

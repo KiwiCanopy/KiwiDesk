@@ -23,14 +23,14 @@ struct GateReasonPlacementBarsTests {
         .joined()
         let dim = try #require(
             source.range(
-                of: ".modifier(GreyOut(active:gates.everyShownBarVertical"
+                of: ".modifier(GreyOut(active:gates.appBarVertical"
             )
         )
         // The reason is a SIBLING after the dimmed picker, drawn
         // off the derivation and in the row's note shape.
         let sentence = try #require(
             source.range(
-                of: "ifgates.everyShownBarVertical,"
+                of: "ifgates.appBarVertical,"
                     + "GateReasonPlacement.owesInlineReason("
                     + ".appBar(.appBarContent)){"
                     + "BarNoteRow(text:contentVerticalReason)"

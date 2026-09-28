@@ -43,20 +43,23 @@ paths:
 
 Canonical for this subsystem (AGENTS.md §5 indexes it).
 
-## Both bars sit on ONE KiwiShelf (#1517)
+## The bars sit on KiwiShelf, one shelf per edge (#1517, #1731)
 
-The Space Bar and the App Bar share one screen edge, KiwiShelf
-(`TilingSettings.kiwishelf`). Two bars on independent edges each
-carved a reservation, and the App Bar's came and went with the
-layout, so a layout switch reflowed every window; a field both
-bars read, stored twice, was a question the user answered twice.
-The argument is `docs/design-decisions.md` ▸ One shelf holds both
-bars. Obligations:
+The look both bars share is KiwiShelf's
+(`TilingSettings.kiwishelf`); the EDGE is each bar's own
+(`space_bar.edge`, `app_bar.edge`). On one edge the two are one
+fused shelf; on two edges each bar is its own shelf, and two bars
+are never stacked on one edge (`ShelfSplitGeometryTests` ▸
+`edgesPerMode`). A field both bars read, stored
+twice, was a question the user answered twice. The argument is
+`docs/design-decisions.md` ▸ One shelf holds both bars, and its
+#1731 amendment. Obligations:
 
 - **Store a bar field in exactly one of `KiwiShelf`,
   `SpaceBarStyle` and `AppBarStyle`.** A value both bars must
-  agree on — where they hang, the strip's depth and look, the
-  item gap, the font size — is the shelf's; a value each bar may
+  agree on — the strip's depth and look, the alignment, the item
+  gap, the font size — is the shelf's, and the edge is each
+  bar's own (#1731); a value each bar may
   set for itself is that bar's style, even where both bars spell
   it alike (an indicator, a colour). A shelf field takes **no
   per-layout override**: `LayoutAppBar` mirrors `AppBarStyle`
@@ -83,30 +86,52 @@ bars. Obligations:
   ▸ `retiredAreUnregistered` that no retired name is still
   registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
   one as its own Config Issue.
-- **Reserve the shelf ONCE, through
-  `TilingSettings.layoutBounds(from:mode:)`, in exactly the
-  layouts where a bar draws** — every layout while the Space Bar
-  is on, else only the layouts whose own App Bar is on — asking
-  the one `shelfShows(in:)`, never a layout, a bar or a mode
-  carving a strip of its own, and never a second "does a bar draw
-  here" predicate beside it. A switch between two layouts that
-  both draw a bar moves no window; a switch into or out of the
-  one layout that draws is the ruled price
+- **Reserve each edge a bar draws on through the one
+  `TilingSettings.layoutBounds(from:mode:)`, listed by the one
+  `shelfEdges(in:)`** — itself the one `barEdges(space:app:)`,
+  which the live plan (`KiwiCore.shelfPlans`) takes too, so the
+  strips drawn and the edges reserved are one list — the Space
+  Bar's edge in every layout
+  while it is on, the App Bar's only in the layouts whose own
+  App Bar is on and only where the Space Bar does not already
+  hold it — never a layout, a bar or a mode carving a strip of
+  its own, and never a second "does a bar draw here" predicate
+  beside it. A switch between two layouts that draw on the same
+  edges moves no window; a switch into or out of a layout whose
+  App Bar draws on an edge nothing else holds is the ruled price
   (`docs/design-decisions.md` ▸ One shelf holds both bars).
-  `ShelfGeometryTests` ▸ `reservesWhereABarDraws` holds the
-  per-mode answer, `ShelfDriverTests` ▸
+  `ShelfGeometryTests` ▸ `reservesWhereABarDraws` holds the fused
+  per-mode answer and `ShelfSplitGeometryTests` ▸ `edgesPerMode`
+  the split one, `ShelfDriverTests` ▸
   `layoutSwitchReflowsNothing` the no-reflow half, and
   `LayoutBoundsRoutingTests` the route (#537). The answer is per
   MODE, so a per-space `appBar` would draw a bar where nothing is
   reserved — [state-and-layout.md](state-and-layout.md) owns that
   half, since the override types are its files.
+- **Measure the strips of several edges through the one
+  `ShelfGeometry.strips`, the Space Bar's edge first** — at a
+  corner the earlier strip runs the whole edge and the later one
+  stops at its reservation, so the Space Bar, which draws in
+  every layout, never moves for an App Bar
+  (`ShelfSplitGeometryTests` ▸ `cornerYields`, and ▸
+  `splitIsTwoPlans` through the live plan).
+- **An edge is a bar's own and never a layout's.** The App Bar's
+  is global only — `AppBarStyle.layoutFixedKeys` names it, a
+  layout's override refuses it, and `AppBarParityTests` mirrors
+  every other field, while `APIReference.retired` derives the
+  layouts' refusal from the same register — since an edge per
+  layout carries the bar across the screen on a layout switch
+  (`BarEdgeCommandTests` ▸ `noLayoutEdge`, through `execute`).
 - **Place every bar along the edge through the one
   `ShelfArrangement`** — the live drivers through
-  `KiwiCore.shelfPlan`, and the Settings preview and the
+  `KiwiCore.shelfPlans`, and the Settings preview and the
   alignment note by asking it too
   (`ShelfArrangement.spaceBarMoves`), never by arithmetic of
   their own: a picture that places the bars by hand can claim a
-  placement the engine does not make (gui.md, #702). The Space
+  placement the engine does not make (gui.md, #702). The same
+  holds for the corner of a split pair: the preview gives it to
+  the first of `barEdges(space:app:)`, as `ShelfGeometry.strips`
+  does (`BarsPreviewCornerTests`). The Space
   Bar's front-app segment stands down on the same App Bar content
   the plan is built from. `ShelfArrangementTests` holds the rule,
   `ShelfDriverTests` ▸ `bothBarsShareTheStrip` the disjoint
@@ -143,7 +168,7 @@ bars. Obligations:
   switch goes through `BarMotion` like every bar motion, its box
   glass travelling with its item (`SpaceBarGlideWiringTests`).
 
-## One shelf panel per display draws the plate; the bars draw sections
+## One shelf panel per display and edge draws the plate; the bars draw sections
 
 Two panels each painting a plate put two fills and a seam on one
 strip, and a plate a bar drew for itself could not know where the
@@ -151,8 +176,16 @@ other section ended. So the surface is the shelf's and the bars
 render content into it (#1517). Obligations:
 
 - **The panel, the ONE plate and the section divider are
-  `ShelfOverlay`'s, one per display; a bar overlay renders its
-  section into its `root` and paints no plate.** Whether a plate
+  `ShelfOverlay`'s, one per display and edge — one while the bars
+  share an edge, two while they are split (#1731), keyed by
+  `ShelfManager.Key` and retired when an edge empties; a bar
+  overlay renders its section into its `root` and paints no
+  plate.** `ShelfSplitDriverTests` holds the two shelves and the
+  re-fuse. A shelf carries the sections its plan placed on it
+  (`ShelfStrip.carriesSpace` / `carriesApp`), never a second
+  reading of the bars' edges (`ShelfSplitDriverTests` ▸
+  `splitDrawsTwoShelves`). An edge move need not glide: the
+  panel is keyed by its edge, so a moved shelf arrives. Whether a plate
   draws at all is the one `KiwiShelf.drawsPlate`: Boxed paints a
   box per item — glass per item where Liquid Glass is on — and no
   plate beneath, solid or glass. The glass plate is a backdrop

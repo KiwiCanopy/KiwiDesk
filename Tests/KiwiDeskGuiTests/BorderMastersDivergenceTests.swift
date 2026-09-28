@@ -185,6 +185,7 @@ struct BorderMastersDivergenceTests {
         model.config.settings.borderStyle.cornerStyle = .square
         model.config.settings.gapsGlobal.outer.bottom += 3
         model.config.settings.gapsGlobal.inner.vertical += 3
+        model.config.settings.appBarStyle.edge = .bottom
         return model
     }
 

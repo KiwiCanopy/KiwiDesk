@@ -113,7 +113,7 @@ struct TravelerRehomeConsumerTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.spaceBarStyle.enabled = true
-        f.core.tiler.settings.kiwishelf.edge = .top
+        f.core.tiler.settings.barEdge = .top
         f.core.tiler.settings.kiwishelf.thickness = 40
         f.core.updateBars()
         let strip = try #require(
@@ -147,7 +147,7 @@ struct TravelerRehomeConsumerTests {
         let f = try #require(makeFixture(mode: .floating))
         defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         f.core.tiler.settings.spaceBarStyle.enabled = true
-        f.core.tiler.settings.kiwishelf.edge = .top
+        f.core.tiler.settings.barEdge = .top
         f.core.tiler.settings.kiwishelf.thickness = 40
         f.core.tiler.settings.floatScaleOnDisplayChange = false
         f.core.updateBars()

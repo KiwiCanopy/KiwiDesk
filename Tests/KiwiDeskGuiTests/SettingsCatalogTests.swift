@@ -113,7 +113,9 @@ struct SettingsCatalogTests {
         // 116 since #1684: the look shelf.
         // 118 since #1726: Shortcuts' Mouse & trackpad drawer
         // and its two rows, less Behavior's Mouse card.
-        #expect(allEntries.count == 118)
+        // 121 since #1731: Position's Each bar drawer and its two
+        // edge rows.
+        #expect(allEntries.count == 121)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

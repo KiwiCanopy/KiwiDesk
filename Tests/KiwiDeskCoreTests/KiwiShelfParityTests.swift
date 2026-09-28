@@ -70,7 +70,7 @@ struct KiwiShelfCommandParityTests {
 
     private static var fixedSettings: [KiwiShelfCommandSetting] {
         [
-            .edge(.left), .alignment(.end), .order(.appsFirst),
+            .alignment(.end), .order(.appsFirst),
             .minimum(60), .thickness(44), .outerMargin(4),
             .innerMargin(6), .backgroundStyle(.boxed),
             .liquidGlass(false), .backgroundFit(.full),
@@ -135,7 +135,6 @@ struct KiwiShelfCommandParityTests {
     ) -> [JSONValue] {
         switch key {
         case .liquidGlass, .border: return [.bool(false)]
-        case .edge: return [.string("left")]
         case .alignment: return [.string("end")]
         case .order: return [.string("apps_first")]
         case .backgroundStyle: return [.string("boxed")]

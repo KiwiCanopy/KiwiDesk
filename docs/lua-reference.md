@@ -1797,10 +1797,11 @@ track.set_overflow_style_override("code", "cascade_overflow")
 
 ## KiwiShelf
 
-**KiwiShelf** is the one screen edge both bars sit on — the
-[App Bar](#app-bar) and the [Space Bar](#space-bar).
-`kiwishelf.set_*` sets where the shelf hangs, how the two bars
-share it, and the look, colours and app glyph style they share;
+**KiwiShelf** is where both bars are managed — the
+[App Bar](#app-bar) and the [Space Bar](#space-bar), on one edge
+or each on its own.
+`kiwishelf.set_*` sets how deep the shelf is, where the bars sit
+along their edge, how the two share one, and the styling, colours and app glyph style they share;
 each bar keeps its own content and the shape of its active
 indicator. Stored as `settings.kiwishelf` in a profile.
 
@@ -1810,6 +1811,23 @@ the layouts whose App Bar is on (monocle and scrolling show one
 by default). With the Space Bar off, switching a Space between a
 layout that shows an App Bar and one that does not moves its
 windows by the strip.
+
+:::unreleased
+Each bar sets its own edge —
+[`space_bar.set_edge`](#space_barset_edge) and
+[`app_bar.set_edge`](#app_barset_edge). On the same edge the two
+share one shelf, as described here; on different edges each bar
+is its own, with its own plate, and `set_order`, `set_minimum` and
+the divider do nothing until they share an edge again. Everything
+else on this page applies to both bars wherever they sit, and
+`set_alignment` places each bar along its own edge. Each edge is
+reserved where its bar draws: the Space Bar's in every layout,
+the App Bar's only in the layouts whose App Bar is on — so with
+the bars split, switching a Space into or out of such a layout
+moves its windows by the App Bar's strip. Where the two edges
+meet at a corner, the Space Bar runs the whole edge and the App
+Bar stops at it.
+:::
 
 While both bars show they are one plate with two sections, in
 the order `set_order` gives them, placed along the edge as one
@@ -1828,21 +1846,6 @@ respected; a scroll or a page holds until the active Space or
 the focus changes. While the shelf is full, drag the divider to
 change the Space Bar minimum, as `set_minimum` does, and
 double-click it to restore the default.
-
-### kiwishelf.set_edge
-
-**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"top"`).
-
-**Does:** sets the screen edge the shelf occupies, for both bars
-and every layout. The edge is absolute — it does not follow a
-layout's orientation (#293).
-
-**Example:**
-
-```lua
-kiwishelf.set_edge("bottom")
-```
 
 ### kiwishelf.set_alignment
 
@@ -2296,7 +2299,7 @@ content`.
 
 - `space_bar.set_<field>`, `app_bar.set_<field>`,
   `monocle.set_app_bar_<field>` and `scroll.set_app_bar_<field>`
-  for `edge`, `alignment`, `thickness`, `outer_margin`,
+  for `alignment`, `thickness`, `outer_margin`,
   `inner_margin`, `background_style`, `liquid_glass`,
   `background_fit`, `corner_roundness`, `item_gap`, `font_size`,
   `icon_source`, `dim_factor`, and the colours `item_color`,
@@ -2312,6 +2315,18 @@ content`.
   follows its content.
 - `space_bar.set_title_cap` →
   [`space_bar.set_front_app_title_cap`](#space_barset_front_app_title_cap).
+
+:::unreleased
+`kiwishelf.set_edge` is retired too → `space_bar.set_edge`: each
+bar sets its own edge again, and `app_bar.set_edge` is the App
+Bar's. `monocle.set_app_bar_edge` and `scroll.set_app_bar_edge`
+stay retired and now name `app_bar.set_edge`, since no layout
+sets the App Bar's edge for itself. A saved profile or backup is
+rewritten once, and every setup keeps its bars where they were: a
+stored KiwiShelf edge becomes both bars' edge, and a profile from
+before KiwiShelf keeps each bar's own edge — the App Bar at the
+bottom where it stored none.
+:::
 
 The `gap` active indicator is removed: `set_active_indicator`
 and its per-layout twins refuse it, naming the values that
@@ -2344,12 +2359,31 @@ monitors each display shows its own bar, on that display, for the
 space it is showing, and dragging an item reorders that display's
 space.
 
-The bar sits on [KiwiShelf](#kiwishelf), which sets its edge,
+The bar sits on [KiwiShelf](#kiwishelf), which sets its
 thickness, margins, background, colours and app glyph style.
 Everything else about it is **global**: `app_bar.set_*` sets
 every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
+
+### app_bar.set_edge
+
+:::unreleased
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
+
+**Does:** sets the screen edge the App Bar sits on, for every
+layout — no layout sets its own. On the Space Bar's edge the two
+share one [KiwiShelf](#kiwishelf); on another edge each bar is
+its own, reserved as KiwiShelf describes. The edge is absolute —
+it does not follow a layout's orientation.
+
+**Example:**
+
+```lua
+app_bar.set_edge("bottom")
+```
+:::
 
 ### app_bar.set_active_indicator
 
@@ -2447,6 +2481,11 @@ overrides are the same setters prefixed with the layout name:
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_group_adjacent_windows`, etc.
 
+:::unreleased
+The App Bar's edge ([`app_bar.set_edge`](#app_barset_edge)) takes
+no per-layout override either.
+:::
+
 **Example:**
 
 ```lua
@@ -2471,7 +2510,7 @@ stays collapsed and takes the focused accent. The user guide's
 what a click on a glyph does and the drag-onto-a-Space gesture.
 
 The bar is layout-independent and sits on
-[KiwiShelf](#kiwishelf), which sets its edge, thickness, margins,
+[KiwiShelf](#kiwishelf), which sets its thickness, margins,
 background, colours and app glyph style; every `space_bar.*`
 setting is global, with no per-layout override. While a native-fullscreen app holds the
 screen the bar hides; it returns with the Desktop.
@@ -2491,6 +2530,24 @@ none is.
 ```lua
 space_bar.set_enabled(true)
 ```
+
+### space_bar.set_edge
+
+:::unreleased
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
+
+**Does:** sets the screen edge the Space Bar sits on. On the App
+Bar's edge the two share one [KiwiShelf](#kiwishelf); on another
+edge each bar is its own, reserved as KiwiShelf describes. The
+edge is absolute — it does not follow a layout's orientation.
+
+**Example:**
+
+```lua
+space_bar.set_edge("left")
+```
+:::
 
 ### space_bar.set_glyph_cap
 

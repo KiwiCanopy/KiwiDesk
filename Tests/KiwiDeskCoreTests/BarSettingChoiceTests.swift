@@ -100,7 +100,7 @@ struct BarSettingChoiceTests {
 
     @Test("a legal value still decodes")
     func legalValueDecodes() {
-        let result = KiwiShelfCommandSetting.parse(
+        let result = SpaceBarCommandSetting.parse(
             field: "edge",
             args: [.string("left")]
         )

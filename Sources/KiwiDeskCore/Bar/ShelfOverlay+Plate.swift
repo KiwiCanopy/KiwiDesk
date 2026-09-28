@@ -6,6 +6,7 @@ extension ShelfOverlay {
     /// shelf draws glass, else a solid fill — or none.
     func layoutPlate(
         _ frame: CGRect?,
+        edge: AppBarEdge,
         shelf: KiwiShelf,
         sheen: CGFloat,
         radius: CGFloat,
@@ -46,7 +47,7 @@ extension ShelfOverlay {
                 frame: frame,
                 cornerRadius: radius,
                 hex: shelf.fillColor,
-                edge: shelf.edge,
+                edge: edge,
                 animated: animated
             )
             return

@@ -125,8 +125,10 @@ synonym:
   `SpaceChip`, `BadgeChip`, `SpaceAssignmentChip`). Live and
   correct; retired only as a name for the sticky mark.
 - **KiwiShelf** / **shelf** — **KiwiShelf** is the product name
-  of the one screen edge both bars sit on (Lua `kiwishelf.*`,
-  JSON `settings.kiwishelf`, #1517). Write **KiwiShelf** in UI
+  of the one place both bars are managed — where each sits, how
+  they share an edge, the style they have in common — not of a
+  strip: the bars may sit on one edge or each on its own (Lua
+  `kiwishelf.*`, JSON `settings.kiwishelf`, #1517, #1731). Write **KiwiShelf** in UI
   copy and never the common noun *shelf*, which the owner struck
   from labels and captions; `docs/` prose and doc comments may
   say *the shelf* once KiwiShelf is named. As a product name it

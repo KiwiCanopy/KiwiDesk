@@ -42,7 +42,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// on `[Profile]` alone;
     /// 15 = the look library joined (#1684), so an older build
     /// refuses a bundle whose looks it would drop.
-    public static let currentFormat = 15
+    /// 16 = each bar took its edge back from `kiwishelf` (#1731),
+    /// on `[Profile]` alone.
+    public static let currentFormat = 16
 
     public let format: Int
 

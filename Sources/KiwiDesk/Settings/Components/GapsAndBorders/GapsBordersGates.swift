@@ -67,6 +67,9 @@ struct GapsBordersGates {
         .gaps(.inner),
         .borders(.borderWidthMaster),
         .borders(.borderCornerMaster),
+        // The KiwiShelf Position master (#1731) takes the same
+        // acknowledging shape, so it answers here too.
+        .kiwishelf(.edge),
     ]
 
     /// Gated rows answered by this resolver (`everyGatedRowIsResolved`).
@@ -107,6 +110,8 @@ struct GapsBordersGates {
             return widthsDiffer
         case .borders(.borderCornerMaster):
             return agreedCornerStyle == nil
+        case .kiwishelf(.edge):
+            return settings.sharedBarEdge == nil
         default:
             return false
         }

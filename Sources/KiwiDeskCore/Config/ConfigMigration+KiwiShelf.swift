@@ -7,7 +7,9 @@ import Foundation
 /// copies drop, `item_size` drops everywhere, the Space Bar's
 /// `title_cap` becomes `front_app_title_cap`, a `gap` indicator
 /// becomes `outline`, and an App Bar that names no indicator gets
-/// `outline` ahead of its default's flip. Reaches a profile
+/// `outline` ahead of its default's flip. The edge stays each
+/// global bar's — its pre-shelf default where it stored none —
+/// so a split setup stays split (#1731). Reaches a profile
 /// root's `settings` and a bundle root's `profiles[].settings`,
 /// the per-layout `app_bar` overrides under `layout` included.
 extension ConfigMigration {
@@ -36,19 +38,20 @@ extension ConfigMigration {
     static let shelfIndicatorFallback = "outline"
     static let shelfDroppedKeys = ["item_size"]
     static let shelfEdgeKey = "edge"
-    /// The App Bar's edge default before #1517, which the shelf's
-    /// own (top) replaced: an App Bar source that never stored
-    /// its edge sat there, so the shelf writes it rather than
-    /// letting absence mean the new default.
-    static let shelfAppBarOldEdge = "bottom"
+    /// Each bar's edge before the shelf — the Space Bar's top,
+    /// the App Bar's bottom. A bar keeps the edge it sat on, and
+    /// one that stored none is written the default it sat at,
+    /// never left to mean today's (#1731); a layout's override
+    /// drops its edge.
+    static let shelfOldBarEdges = ["space_bar": "top", "app_bar": "bottom"]
     static let shelfRetiredTitleKey = "title_cap"
     static let shelfFrontTitleKey = "front_app_title_cap"
 
     /// The formats this step introduced — a profile's and a
     /// bundle's — spelled as history. The step reads ABSENCE as
-    /// the old defaults (an App Bar source's edge is its old
-    /// bottom), which is true only below them: a shelf-shaped
-    /// file whose `kiwishelf.edge` is absent MEANS the new top.
+    /// the old defaults (a bar that stored no edge sat at its old
+    /// one), which is true only below them: in a shelf-shaped file
+    /// an absent edge MEANS today's default.
     static let shelfProfileFormat = 8
     static let shelfBundleFormat = 12
 
@@ -131,7 +134,7 @@ extension ConfigMigration {
         let source = settings[sourceKey] as? [String: Any] ?? [:]
         var shelf = settings[shelfKey] as? [String: Any] ?? [:]
         let heldItemColor = shelf[shelfItemColorKey] != nil
-        for key in shelfMovedKeys {
+        for key in shelfMovedKeys where key != shelfEdgeKey {
             guard let value = source[key], shelf[key] == nil
             else { continue }
             shelf[key] = value
@@ -145,18 +148,19 @@ extension ConfigMigration {
         {
             shelf[shelfItemColorKey] = full
         }
-        if sourceKey == shelfAppBarKey, shelf[shelfEdgeKey] == nil {
-            shelf[shelfEdgeKey] = shelfAppBarOldEdge
-            changed = true
-        }
         if !shelf.isEmpty { out[shelfKey] = shelf }
         let stripped = shelfMovedKeys + shelfDroppedKeys
         for group in [shelfSpaceBarKey, shelfAppBarKey] {
             guard var bar = out[group] as? [String: Any] else {
                 continue
             }
-            for key in stripped where bar[key] != nil {
+            for key in stripped
+            where key != shelfEdgeKey && bar[key] != nil {
                 bar[key] = nil
+                changed = true
+            }
+            if bar[shelfEdgeKey] == nil {
+                bar[shelfEdgeKey] = shelfOldBarEdges[group]
                 changed = true
             }
             if retiringGap(&bar) { changed = true }

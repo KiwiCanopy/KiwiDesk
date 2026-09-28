@@ -14,11 +14,11 @@ extension AppBarCard {
         )
         .modifier(
             GreyOut(
-                active: gates.everyShownBarVertical,
+                active: gates.appBarVertical,
                 help: contentVerticalReason
             )
         )
-        if gates.everyShownBarVertical,
+        if gates.appBarVertical,
             GateReasonPlacement.owesInlineReason(
                 .appBar(.appBarContent)
             )

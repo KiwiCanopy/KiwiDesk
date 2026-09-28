@@ -22,13 +22,15 @@ struct ShelfLookApplyTests {
             name: "T",
             palette: "Slate",
             style: [
-                "kiwishelf.edge": .string("bottom"),
+                "space_bar.edge": .string("bottom"),
+                "app_bar.edge": .string("left"),
                 "border.sheen": .number(0),
                 "space_bar.active_indicator": .string("edge_mark"),
             ]
         )
         named.apply(to: &settings)
-        #expect(settings.kiwishelf.edge == .bottom)
+        #expect(settings.spaceBarStyle.edge == .bottom)
+        #expect(settings.appBarStyle.edge == .left)
         #expect(settings.borderStyle.sheen == 0)
         #expect(settings.spaceBarStyle.activeIndicator == .edgeMark)
         #expect(settings.kiwishelf.cornerRoundness == 80)
@@ -38,8 +40,9 @@ struct ShelfLookApplyTests {
             ColorPaletteKeys.extract(from: settings)
                 == ColorPaletteKeys.extract(from: before)
         )
-        // Undo the three named fields: nothing else moved.
-        settings.kiwishelf.edge = before.kiwishelf.edge
+        // Undo the named fields: nothing else moved.
+        settings.spaceBarStyle.edge = before.spaceBarStyle.edge
+        settings.appBarStyle.edge = before.appBarStyle.edge
         settings.borderStyle.sheen = before.borderStyle.sheen
         settings.spaceBarStyle.activeIndicator =
             before.spaceBarStyle.activeIndicator
@@ -66,7 +69,7 @@ struct ShelfLookApplyTests {
     func refusalsAreSkipped() {
         var settings = TilingSettings()
         look([
-            "kiwishelf.edge": .string("diagonal"),
+            "space_bar.edge": .string("diagonal"),
             "kiwishelf.fill_color": .string("#FF0000"),
             "app_bar.content": .string("icon"),
             "nonsense": .bool(true),
@@ -81,10 +84,10 @@ struct ShelfLookApplyTests {
             name: "P",
             colors: ["kiwishelf.fill_color": "#112233"]
         )
-        look(["kiwishelf.edge": .string("left")])
+        look(["app_bar.edge": .string("left")])
             .apply(to: &settings, palette: palette)
         #expect(settings.kiwishelf.fillColor == "#112233")
-        #expect(settings.kiwishelf.edge == .left)
+        #expect(settings.appBarStyle.edge == .left)
     }
 
     /// A saved look captures the config's wire spellings and
@@ -93,7 +96,8 @@ struct ShelfLookApplyTests {
     @Test("a look saved from any styling reproduces it")
     func savedLookRoundTrips() {
         var source = TilingSettings()
-        source.kiwishelf.edge = .left
+        source.spaceBarStyle.edge = .left
+        source.appBarStyle.edge = .bottom
         source.kiwishelf.alignment = .end
         source.kiwishelf.order = .appsFirst
         source.kiwishelf.thickness = 33
@@ -182,10 +186,31 @@ struct ShelfLookApplyTests {
     @Test("applied reads the styling, and an empty look never is")
     func appliedIsComputed() {
         var settings = TilingSettings()
-        let taskbar = look(["kiwishelf.edge": .string("bottom")])
+        let taskbar = look([
+            "space_bar.edge": .string("bottom"),
+            "app_bar.edge": .string("bottom"),
+        ])
         #expect(!taskbar.isApplied(to: settings))
         taskbar.apply(to: &settings)
         #expect(taskbar.isApplied(to: settings))
         #expect(!look([:]).isApplied(to: settings))
+    }
+
+    /// A look places the bars and never switches one: a bar that
+    /// is off takes the look's edge and sits there once it is on
+    /// again (#1731, owner 2026-09-28).
+    @Test("a look sets an off bar's edge without switching it on")
+    func edgesLeaveOnOffAlone() {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.enabled = false
+        settings.monocle.appBar.enabled = false
+        look([
+            "space_bar.edge": .string("left"),
+            "app_bar.edge": .string("bottom"),
+        ]).apply(to: &settings)
+        #expect(!settings.spaceBarStyle.enabled)
+        #expect(!settings.monocle.appBar.enabled)
+        #expect(settings.spaceBarStyle.edge == .left)
+        #expect(settings.appBarStyle.edge == .bottom)
     }
 }

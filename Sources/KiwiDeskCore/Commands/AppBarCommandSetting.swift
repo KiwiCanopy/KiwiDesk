@@ -18,6 +18,7 @@ struct AppBarSettingError: Error, Equatable,
 
 /// Parsed App Bar command setting representation.
 enum AppBarCommandSetting {
+    case edge(AppBarEdge)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case content(AppBarStyle.Content)
     case titleCap(Int)
@@ -40,6 +41,9 @@ enum AppBarCommandSetting {
         args: [JSONValue]
     ) -> Result<AppBarCommandSetting, AppBarSettingError>? {
         switch field {
+        case "edge":
+            return BarSettingChoice.value(args, AppBarEdge.self)
+                .map(Self.edge)
         case "active_indicator":
             return BarSettingChoice.value(
                 args,
@@ -84,6 +88,7 @@ enum AppBarCommandSetting {
     /// Applies concrete setting to AppBarStyle.
     func apply(to style: inout AppBarStyle) {
         switch self {
+        case .edge(let value): style.edge = value
         case .activeIndicator(let value):
             style.activeIndicator = value
         case .content(let value): style.content = value
@@ -93,9 +98,11 @@ enum AppBarCommandSetting {
         }
     }
 
-    /// Writes the value into a layout's bar as an override.
+    /// Writes the value into a layout's bar as an override; a
+    /// field in `AppBarStyle.layoutFixedKeys` has none to write.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
+        case .edge: break
         case .activeIndicator(let value):
             bar.activeIndicator = value
         case .content(let value): bar.content = value

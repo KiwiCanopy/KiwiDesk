@@ -103,8 +103,10 @@ struct LookCatalogTests {
     /// glass, floating and a light or dark plate (issue draft).
     @Test("any two looks are told apart at a glance")
     func distinct() {
+        // The Space Bar's edge stands for where the bars sit: one
+        // axis, however the two edges pair (#1731).
         let axes = [
-            "kiwishelf.edge", "kiwishelf.background_fit",
+            "space_bar.edge", "kiwishelf.background_fit",
             "kiwishelf.background_style", "kiwishelf.liquid_glass",
             "kiwishelf.outer_margin",
         ]

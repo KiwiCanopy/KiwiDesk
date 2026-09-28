@@ -14,10 +14,23 @@ extension SettingsValueReadout {
         let n = new.settings.kiwishelf
         switch key {
         case .edge:
+            return spaceBarRow(
+                census,
+                agreedEdge(old.settings),
+                agreedEdge(new.settings)
+            )
+        case .spaceBarEdge:
             return spaceBarChoiceRow(
                 census,
-                o.edge,
-                n.edge,
+                old.settings.spaceBarStyle.edge,
+                new.settings.spaceBarStyle.edge,
+                AppBarOptions.edge
+            )
+        case .appBarEdge:
+            return spaceBarChoiceRow(
+                census,
+                old.settings.appBarStyle.edge,
+                new.settings.appBarStyle.edge,
                 AppBarOptions.edge
             )
         case .alignment:
@@ -148,5 +161,14 @@ extension SettingsValueReadout {
         case .groupBadgeColor: return \.groupBadgeColor
         default: return \.groupBadgeTextColor
         }
+    }
+
+    /// The Position master's value: the edge both bars share, or
+    /// "mixed" while they are split (`TilingSettings.sharedBarEdge`).
+    static func agreedEdge(_ settings: TilingSettings) -> String {
+        guard let edge = settings.sharedBarEdge else {
+            return L("diff.value.mixed", "mixed")
+        }
+        return AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
     }
 }

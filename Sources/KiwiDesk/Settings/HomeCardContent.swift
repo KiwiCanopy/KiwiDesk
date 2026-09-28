@@ -39,7 +39,18 @@ enum HomeCardContent {
                 inner
             )
         case .bars:
-            let edge = edgeName(settings.kiwishelf.edge)
+            let edge = edgeName(
+                settings.spaceBarStyle.enabled
+                    ? settings.spaceBarStyle.edge : settings.appBarStyle.edge
+            )
+            if settings.bothBarsCanShow, settings.sharedBarEdge == nil {
+                return L(
+                    "home.card.bars.split_subtitle",
+                    "Space Bar: %1$@ · App Bar: %2$@",
+                    edgeName(settings.spaceBarStyle.edge),
+                    edgeName(settings.appBarStyle.edge)
+                )
+            }
             if settings.spaceBarStyle.enabled {
                 return L(
                     "home.card.bars.shelf_subtitle",

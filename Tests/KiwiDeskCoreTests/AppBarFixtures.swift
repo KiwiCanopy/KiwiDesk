@@ -19,6 +19,7 @@ enum AppBarFixtures {
         style.content = .title
         style.titleCap = 40
         style.groupAdjacentWindows = false
+        style.edge = .left
         return style
     }
 
@@ -35,7 +36,6 @@ enum AppBarFixtures {
     /// Every `KiwiShelf` field off its default (`KiwiShelfParityTests`).
     static func everyShelfField() -> KiwiShelf {
         var shelf = KiwiShelf()
-        shelf.edge = .left
         shelf.alignment = .end
         shelf.order = .appsFirst
         shelf.minimum = 60

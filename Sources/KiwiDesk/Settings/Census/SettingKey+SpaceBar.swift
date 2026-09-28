@@ -50,7 +50,7 @@ extension SpaceBarKey {
                     .spaceBar(.spaceBarEnabled),
                     .kiwishelf(.iconSource),
                     .spaceBar(.spaceBarShowFrontApp),
-                    .kiwishelf(.edge),
+                    .kiwishelf(.spaceBarEdge),
                 ])
             )
         }

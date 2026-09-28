@@ -3,13 +3,17 @@ import Foundation
 
 /// The Space Bar's own look and behavior (#293): per-display bar
 /// listing that display's Spaces. Stored as `space_bar` in profile
-/// JSON; where it sits and the look both bars share are
-/// `KiwiShelf`'s (#1517), and a drawing reads `SpaceBarLook`.
+/// JSON; the look both bars share is `KiwiShelf`'s (#1517), and
+/// a drawing reads `SpaceBarLook`.
 public struct SpaceBarStyle: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
 
     /// On by default (QA 2026-07-19) to surface Spaces discoverability.
     public var enabled = true
+    /// The screen edge the bar sits on (top). The App Bar on the
+    /// same edge shares one shelf with it; on another, each bar
+    /// is its own (#1731).
+    public var edge: AppBarEdge = .top
     /// Max app-group glyphs per Space item before "+n" badge (#376).
     /// Default 5.
     public var glyphCap = 5

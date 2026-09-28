@@ -4,8 +4,8 @@ import Foundation
 /// What a Space Bar drawing reads (#1517): the shelf it sits on
 /// and the bar's own style, one value. Member lookup reaches both
 /// — their field sets are disjoint by construction
-/// (`KiwiShelfParityTests` ▸ `looksAreDisjoint`) — so `look.edge`
-/// is the shelf's and `look.showFrontApp` the bar's. A value,
+/// (`KiwiShelfParityTests` ▸ `looksAreDisjoint`) — so
+/// `look.thickness` is the shelf's and `look.edge` the bar's. A value,
 /// never a store: writing through it changes this copy only,
 /// which is what a preview or a fixture wants and why the
 /// settings keep the two apart.
@@ -181,10 +181,10 @@ public struct AppBarLook: Sendable, Equatable {
         return min(max(content * KiwiShelf.autoTitleShare, 9), 28)
     }
 
-    /// Content folded for the shelf's edge: a vertical bar draws
+    /// Content folded for the bar's edge: a vertical bar draws
     /// icons only (`Content.rendered(horizontal:)`).
     public var renderedContent: AppBarStyle.Content {
-        bar.content.rendered(horizontal: shelf.edge.isHorizontal)
+        bar.content.rendered(horizontal: bar.edge.isHorizontal)
     }
 
     /// The shelf's corner radius for a thickness.

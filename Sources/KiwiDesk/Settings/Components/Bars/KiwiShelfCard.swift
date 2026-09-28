@@ -1,13 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Settings card for the shelf both bars sit on (#1517): which
-/// bars it shows, where it hangs, how the two share the edge, and
-/// the look they share. No container gate — the Show rows that
+/// Settings card for the shelf the bars sit on (#1517): which
+/// bars it shows, where each hangs (#1731), how the two share an
+/// edge, and the look they share. No container gate — the Show rows that
 /// switch the bars on live here — so every other row greys as a
 /// block while no bar shows (`BarsGates.shelfShows`).
 struct KiwiShelfCard: View {
     @ObservedObject var model: SettingsModel
+    @State var edgesExpanded = false
     @State private var styleExpanded = false
     @State private var marginsExpanded = false
 
@@ -95,8 +96,8 @@ struct KiwiShelfCard: View {
     private var cardCaption: String {
         L(
             "bars.kiwishelf.caption",
-            "Where both bars sit — which edge, how deep, and how "
-                + "the two share the room."
+            "One place for both bars: where each sits, how they "
+                + "share an edge, and the style they have in common."
         )
     }
 

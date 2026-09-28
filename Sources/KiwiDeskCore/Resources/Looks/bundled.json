@@ -3,7 +3,8 @@
     "name": "Taskbar",
     "palette": "Slate",
     "style": {
-      "kiwishelf.edge": "bottom",
+      "space_bar.edge": "bottom",
+      "app_bar.edge": "bottom",
       "kiwishelf.background_fit": "full",
       "kiwishelf.corner_roundness": 0,
       "kiwishelf.thickness": 44,

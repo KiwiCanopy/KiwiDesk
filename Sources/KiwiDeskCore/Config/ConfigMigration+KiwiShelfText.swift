@@ -74,33 +74,29 @@ extension ConfigMigration {
                 with: shelvedBody(
                     parsed,
                     isSpaceBar: isSpaceBar,
+                    keptEdge: isSpaceBar
+                        ? shelfOldBarEdges[shelfSpaceBarKey]
+                        : isGlobalApp ? shelfOldBarEdges[shelfAppBarKey] : nil,
                     addsIndicator: isGlobalApp && lacksIndicator
                 )
             )
         }
         let fullItem = globalApp?.first { $0.key == shelfItemColorKey }
-        var entries = shelfMovedKeys.compactMap { key in
-            source.first { $0.key == key }.map { pair in
-                var value = pair.value
-                if key == shelfItemColorKey, let fullItem,
-                    isDimmedTwin(
-                        unquoted(pair.value),
-                        of: unquoted(fullItem.value)
-                    )
-                {
-                    value = fullItem.value
+        let entries = shelfMovedKeys.filter { $0 != shelfEdgeKey }
+            .compactMap { key in
+                source.first { $0.key == key }.map { pair in
+                    var value = pair.value
+                    if key == shelfItemColorKey, let fullItem,
+                        isDimmedTwin(
+                            unquoted(pair.value),
+                            of: unquoted(fullItem.value)
+                        )
+                    {
+                        value = fullItem.value
+                    }
+                    return "\"\(key)\":\(value)"
                 }
-                return "\"\(key)\":\(value)"
             }
-        }
-        if !sourceIsSpaceBar,
-            !source.contains(where: { $0.key == shelfEdgeKey })
-        {
-            entries.insert(
-                "\"\(shelfEdgeKey)\":\"\(shelfAppBarOldEdge)\"",
-                at: 0
-            )
-        }
         if !entries.isEmpty {
             let shelf =
                 "\"\(shelfKey)\":{" + entries.joined(separator: ",")
@@ -118,13 +114,16 @@ extension ConfigMigration {
     }
 
     /// A bar body with the moved and dropped pairs gone and the
-    /// Space Bar's title length renamed.
+    /// Space Bar's title length renamed. A global bar keeps its
+    /// edge, stated as `keptEdge` (its old default) where absent.
     static func shelvedBody(
         _ parsed: (pairs: [ShelfPair], tail: String),
         isSpaceBar: Bool,
+        keptEdge: String? = nil,
         addsIndicator: Bool = false
     ) -> String {
-        let stripped = Set(shelfMovedKeys + shelfDroppedKeys)
+        var stripped = Set(shelfMovedKeys + shelfDroppedKeys)
+        if keptEdge != nil { stripped.remove(shelfEdgeKey) }
         var kept = parsed.pairs.filter { !stripped.contains($0.key) }
         for index in kept.indices
         where kept[index].key == shelfIndicatorKey
@@ -145,6 +144,9 @@ extension ConfigMigration {
             }
         }
         var texts = kept.map(\.text)
+        if let keptEdge, !kept.contains(where: { $0.key == shelfEdgeKey }) {
+            texts.append("\"\(shelfEdgeKey)\":\"\(keptEdge)\"")
+        }
         if addsIndicator {
             texts.append(
                 "\"\(shelfIndicatorKey)\":\"\(shelfIndicatorFallback)\""
@@ -225,7 +227,18 @@ extension ConfigMigration {
         )
         guard found.count <= 1 else { return nil }
         guard let opener = found.first else { return .some(nil) }
-        var index = opener.range.location + opener.range.length - 1
+        let brace = opener.range.location + opener.range.length - 1
+        guard let close = closingBrace(from: brace, in: utf16) else {
+            return nil
+        }
+        let start = opener.range.location
+        return .some(NSRange(location: start, length: close - start + 1))
+    }
+
+    /// The UTF-16 offset of the `}` closing the `{` at `open`, by
+    /// depth outside string literals; nil if it never closes.
+    static func closingBrace(from open: Int, in utf16: [UInt16]) -> Int? {
+        var index = open
         var depth = 0
         var inString = false
         while index < utf16.count {
@@ -243,12 +256,7 @@ extension ConfigMigration {
                 depth += 1
             } else if unit == 0x7D {
                 depth -= 1
-                if depth == 0 {
-                    let start = opener.range.location
-                    return .some(
-                        NSRange(location: start, length: index - start + 1)
-                    )
-                }
+                if depth == 0 { return index }
             }
             index += 1
         }
@@ -263,7 +271,7 @@ extension ConfigMigration {
         return String(literal.dropFirst().dropLast())
     }
 
-    private static func count(of needle: String, in text: String) -> Int {
+    static func count(of needle: String, in text: String) -> Int {
         text.components(separatedBy: needle).count - 1
     }
 }
