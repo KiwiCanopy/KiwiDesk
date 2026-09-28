@@ -291,6 +291,19 @@ Obligations:
   debounce (`KiwiCore+BarTitles`), never by consumers
   pre-filtering on content — the old `showsText` gate was that
   pre-filter, and it is what dropped the announced channel.
+- **A hover title is read when it shows — through
+  `SpaceBarGlyphActions.tooltip` on a Space Bar glyph,
+  `AppBarItemActions.tooltip` on an App Bar item — and never
+  stored on a view.** It is a third title channel, and it owes
+  the refresh gate above no arm only because nothing caches it;
+  a view that keeps the string brings back the stale title with
+  no gate watching (`SpaceBarGlyphWiringTests` ▸
+  `tooltipIsReadAtHover`, `AppBarHoverTitleTests` ▸
+  `tooltipIsReadAtHover`). An App Bar item asks only where it
+  hides text — Core's cut verdict (`barItemTitle`, the one
+  branch the item text also takes) or a label it did not draw
+  in full (#1514) — and both bars build the string through the
+  one `KiwiCore.hoverTitle(app:titles:)`.
 
 ## A Space Bar glyph is a click target the item owns (#1528)
 
@@ -298,16 +311,6 @@ Every app glyph and the `+n` badge carry a `SpaceBarGlyphTarget`;
 what a click does is Core's (`KiwiCore+SpaceBarClick.swift`).
 Obligations:
 
-- **A hover title is read when it shows — through
-  `SpaceBarGlyphActions.tooltip` on a Space Bar glyph,
-  `AppBarHoverTitle.read` on an App Bar item — and never stored
-  on a view.** It is a third title channel, and it owes the
-  refresh gate above no arm only because nothing caches it; a
-  view that keeps the string brings back the stale title with no
-  gate watching (`SpaceBarGlyphWiringTests` ▸
-  `tooltipIsReadAtHover`, `AppBarHoverTitleTests`). An App Bar
-  item asks only where it hides text — the view reports what it
-  drew in full, Core decides (#1514).
 - **A clickable piece of an item joins the item's `hitTest`
   target list**, or subview order decides who takes the click —
   a render re-adds the glyph views above kept targets

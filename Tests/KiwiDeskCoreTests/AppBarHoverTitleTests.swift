@@ -5,9 +5,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// An App Bar item's hover title (#1514's ruling): it shows only
-/// where the item hides text — a title cut by the cap or by its
-/// width, or no label drawn — as the app, then the full title,
-/// asked of Core when it shows.
+/// where the item hides text — a title Core cut at the cap, a
+/// label its width truncates, or no label drawn — as the app, then
+/// the full title, asked of Core when it shows.
 @Suite("App Bar hover title", .serialized)
 @MainActor
 struct AppBarHoverTitleTests {
@@ -23,53 +23,55 @@ struct AppBarHoverTitleTests {
         return core
     }
 
-    @Test("Text drawn in full owes no tooltip; hidden text does")
-    func onlyHiddenTextOwesATooltip() {
+    @Test("The hover title is the app, then the full title")
+    func titleShape() {
         let core = core(title: "Downloads")
-        let read = { (count: Int, drawn: String?) in
-            core.appBarHoverTitle(
-                window: WindowID(1),
-                count: count,
-                drawn: drawn
-            )
-        }
-        #expect(read(1, "Downloads") == nil)
-        #expect(read(1, "Downl…") == "Finder\nDownloads")
-        #expect(read(1, nil) == "Finder\nDownloads")
-        // A group's text is its app name.
-        #expect(read(2, "Finder") == nil)
-        #expect(read(2, nil) == "Finder")
         #expect(
-            core.appBarHoverTitle(
-                window: WindowID(99),
-                count: 1,
-                drawn: nil
-            ) == nil
+            core.appBarHoverTitle(window: WindowID(1), count: 1)
+                == "Finder\nDownloads"
+        )
+        // A group's text is its app name.
+        #expect(
+            core.appBarHoverTitle(window: WindowID(1), count: 2)
+                == "Finder"
+        )
+        #expect(
+            core.appBarHoverTitle(window: WindowID(99), count: 1) == nil
         )
     }
 
-    @Test("An untitled window's item draws its app name in full")
-    func untitledWindowNamesItsApp() {
-        let core = core(title: "")
+    @Test("Core marks an item whose title it cut")
+    func coreMarksTheCut() {
+        let core = core(title: String(repeating: "x", count: 80))
+        var style = AppBarLook()
+        style.titleCap = 20
+        #expect(core.barItem(for: [WindowID(1)], style: style).titleCut)
+        style.titleCap = 100
+        #expect(!core.barItem(for: [WindowID(1)], style: style).titleCut)
         #expect(
-            core.appBarHoverTitle(
-                window: WindowID(1),
-                count: 1,
-                drawn: "Finder"
-            ) == nil
+            !core.barItem(for: [WindowID(1), WindowID(1)], style: style)
+                .titleCut
         )
     }
 
     private func item(
         _ core: KiwiCore,
         content: AppBarStyle.Content,
-        edge: AppBarEdge = .top
+        edge: AppBarEdge = .top,
+        titleCut: Bool = false
     ) throws -> AppBarItemView {
         core.appBars.sync([
             paintedAppBar(
                 content: content,
                 edge: edge,
-                items: [appBarItem(1, text: "Downloads")]
+                items: [
+                    AppBarOverlay.Item(
+                        id: WindowID(1),
+                        text: "Downloads",
+                        icon: nil,
+                        titleCut: titleCut
+                    )
+                ]
             )
         ])
         let overlay = try #require(
@@ -84,34 +86,58 @@ struct AppBarHoverTitleTests {
         view.view(view, stringForToolTip: 0, point: .zero, userData: nil)
     }
 
-    @Test("A rendered item asks Core only when its label hides text")
-    func renderedItemAsksCore() throws {
+    @Test("A rendered item registers its tooltip over its bounds")
+    func tooltipIsRegistered() throws {
+        let core = core(title: "Downloads")
+        let view = try item(core, content: .icon)
+        #expect(view.tipTag != nil)
+        #expect(view.bounds.width > 0)
+    }
+
+    @Test("A fully drawn title owes no tooltip; hidden text does")
+    func onlyHiddenTextAsks() throws {
         let core = core(title: "Downloads")
         let shown = try item(core, content: .iconAndTitle)
-        #expect(shown.fullyDrawnText == "Downloads")
+        #expect(shown.drawsTextInFull)
         #expect(tooltip(shown) == "")
+        let cut = try item(core, content: .iconAndTitle, titleCut: true)
+        #expect(tooltip(cut) == "Finder\nDownloads")
         let icon = try item(core, content: .icon)
-        #expect(icon.fullyDrawnText == nil)
+        #expect(!icon.drawsTextInFull)
         #expect(tooltip(icon) == "Finder\nDownloads")
     }
 
     @Test("A vertical bar's item draws no label and owes the title")
     func verticalItemOwesTheTitle() throws {
         let core = core(title: "Downloads")
-        let view = try item(core, content: .iconAndTitle, edge: .left)
-        #expect(view.fullyDrawnText == nil)
+        let view = try item(
+            core,
+            content: .iconAndTitle,
+            edge: .left
+        )
+        #expect(!view.drawsTextInFull)
         #expect(tooltip(view) == "Finder\nDownloads")
     }
 
-    @Test("A label its width truncates is not drawn in full")
-    func widthTruncationHidesText() throws {
+    @Test("A narrow item's layout truncates its label")
+    func narrowItemTruncates() throws {
         let core = core(title: "Downloads")
         let view = try item(core, content: .iconAndTitle)
-        view.label.frame.size.width = 10
-        #expect(view.fullyDrawnText == nil)
+        view.setFrameSize(NSSize(width: 44, height: view.bounds.height))
+        view.layout()
+        #expect(!view.drawsTextInFull)
         // Hidden, whatever its frame still says.
         view.label.frame.size.width = 500
         view.label.isHidden = true
-        #expect(view.fullyDrawnText == nil)
+        #expect(!view.drawsTextInFull)
+    }
+
+    @Test("The tooltip is read when it shows, never stored")
+    func tooltipIsReadAtHover() throws {
+        let core = core(title: "Downloads")
+        let view = try item(core, content: .icon)
+        #expect(tooltip(view) == "Finder\nDownloads")
+        core.state.windows.updateTitle(WindowID(1), title: "Desktop")
+        #expect(tooltip(view) == "Finder\nDesktop")
     }
 }

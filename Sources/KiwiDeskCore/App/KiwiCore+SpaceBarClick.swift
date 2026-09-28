@@ -81,7 +81,9 @@ extension KiwiCore {
     func spaceBarTooltip(_ windows: [WindowID]) -> String? {
         let members = windows.compactMap { state.windows[$0] }
         guard let first = members.first else { return nil }
-        let titles = members.map(\.title).filter { !$0.isEmpty }
-        return ([first.appName] + titles).joined(separator: "\n")
+        return Self.hoverTitle(
+            app: first.appName,
+            titles: members.map(\.title).filter { !$0.isEmpty }
+        )
     }
 }

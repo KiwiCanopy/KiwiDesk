@@ -132,14 +132,24 @@ extension KiwiCore {
         appName: String,
         style: AppBarLook
     ) -> String {
-        guard group.count == 1,
-            let title = window?.title,
-            !title.isEmpty
+        guard let title = barItemTitle(count: group.count, window: window)
         else { return appName }
         return AppBarStyle.cappedTitle(
             title,
             to: style.resolvedTitleCap
         )
+    }
+
+    /// The uncapped title an item stands for — nil for a group or
+    /// an untitled window, whose text is the app name. The one
+    /// branch `barItemText` and the hover title share (#1514).
+    func barItemTitle(
+        count: Int,
+        window: ManagedWindow?
+    ) -> String? {
+        guard count == 1, let title = window?.title, !title.isEmpty
+        else { return nil }
+        return title
     }
 
     func barItem(
@@ -174,7 +184,12 @@ extension KiwiCore {
                 forAppName: name,
                 source: style.iconSource
             ),
-            count: group.count
+            count: group.count,
+            titleCut: barItemTitle(count: group.count, window: window)
+                .map {
+                    AppBarStyle.cappedTitle($0, to: style.resolvedTitleCap)
+                        != $0
+                } ?? false
         )
     }
 }

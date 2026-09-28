@@ -5,8 +5,8 @@ import AppKit
 /// one panel over the shelf's one plate.
 @MainActor
 public final class AppBarOverlay {
-    /// The items' hover title, the manager's one instance.
-    var hoverTitle: AppBarHoverTitle?
+    /// The items' Core answers, the manager's one instance.
+    var itemActions: AppBarItemActions?
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
     public var onSelect: @MainActor (WindowID) -> Void = {
         _ in
@@ -197,11 +197,12 @@ public final class AppBarOverlay {
                 icon: item.icon,
                 glyph: item.glyph,
                 count: item.count,
+                titleCut: item.titleCut,
                 active: active,
                 horizontal: m.horizontal,
                 style: style
             )
-            view.hoverTitle = hoverTitle
+            view.itemActions = itemActions
             view.isFirstInRun = index == 0
             view.isLastInRun = index == items.count - 1
             view.onSelect = { [weak self] id in

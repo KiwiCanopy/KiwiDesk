@@ -13,6 +13,9 @@ extension AppBarOverlay {
         public let glyph: String?
         /// Grouped window count shown as badge.
         public let count: Int
+        /// The title was cut at `title_cap` (Core's verdict, the
+        /// hover title's half of "hides text", #1514).
+        public let titleCut: Bool
 
         public init(
             id: WindowID,
@@ -20,7 +23,8 @@ extension AppBarOverlay {
             text: String,
             icon: NSImage?,
             glyph: String? = nil,
-            count: Int = 1
+            count: Int = 1,
+            titleCut: Bool = false
         ) {
             self.id = id
             self.name = name
@@ -28,6 +32,7 @@ extension AppBarOverlay {
             self.icon = icon
             self.glyph = glyph
             self.count = count
+            self.titleCut = titleCut
         }
     }
 }
