@@ -56,11 +56,14 @@ struct LayoutStoryWiringTests {
     private static let player =
         "Settings/Components/Layouts/LayoutStoryThumbnail.swift"
 
-    /// Every `LayoutSchematicView(` call's argument list in
-    /// `source`, so a needle asks what each call was HANDED.
-    private func schematicCalls(in source: String) -> [String] {
+    /// Every `call`'s argument list in `source`, so a needle
+    /// asks what each call was HANDED.
+    private func schematicCalls(
+        in source: String,
+        of call: String = "LayoutSchematicView("
+    ) -> [String] {
         let text = Array(source)
-        let needle = Array("LayoutSchematicView(")
+        let needle = Array(call)
         var calls: [String] = []
         var i = 0
         while i + needle.count <= text.count {
@@ -102,6 +105,33 @@ struct LayoutStoryWiringTests {
         // surfaces each make one.
         #expect(calls >= 5)
         #expect(handed == [Self.player])
+    }
+
+    /// Beneath the view, each schematic takes its phase input
+    /// from `LayoutSchematicView` alone, so no surface can build
+    /// a schematic directly and hand it a moving frame.
+    @Test("only the shared view hands a schematic its phase input")
+    func phaseInputsComeFromTheView() throws {
+        let inputs = [
+            ("ScrollingSchematic(", "focusStep:"),
+            ("MonocleSchematic(", "turn:"),
+            ("FloatingSchematic(", "drag:"),
+        ]
+        for (call, label) in inputs {
+            var handed: Set<String> = []
+            for url in try ChromeScanRoots.sources(from: #filePath) {
+                let calls = schematicCalls(in: try squashed(url), of: call)
+                if calls.contains(where: { $0.contains(label) }) {
+                    handed.insert(relative(url))
+                }
+            }
+            #expect(
+                handed == [
+                    "Settings/Components/Layouts/LayoutSchematicView.swift"
+                ],
+                "\(call) \(label)"
+            )
+        }
     }
 
     /// The story pace reaches the schematics only from the
