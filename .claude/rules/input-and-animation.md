@@ -11,8 +11,26 @@ Canonical for this subsystem (AGENTS.md §5 indexes it). When
 editing here:
 
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
-  CGEventTap — this avoids the Input Monitoring permission. Event
-  taps are only for mouse drag tracking.
+  CGEventTap — a keyboard tap needs Input Monitoring. Mouse
+  presses are read through `NSEvent` monitors.
+- **Scroll gestures take the ONE active scroll-wheel tap,
+  `ScrollGestureTap`, reached only through `MouseTracker.scroll`
+  (#1656, #1519).** Its creation asks macOS for the
+  Accessibility-class `PostEvent` service alone, never
+  `ListenEvent` (tccd log, device build, 2026-09-28) — so a
+  second tap, or a mask widened to keys, is where an Input
+  Monitoring prompt would come from. Three obligations:
+  - **The callback decides off the main actor.** Every scroll on
+    the Mac waits on it, and the main actor can block on a slow
+    app's AX reply for seconds; the decision is the pure
+    `ScrollGestureRouter`'s, and consumers hear it on the main
+    queue (`ScrollGestureRouterTests`).
+  - **A plain scroll is never consumed**: `bind` refuses the
+    empty chord and a chord matches exactly
+    (`ScrollGesturesTests`).
+  - **No tap while nothing is bound**, so a user with both
+    gestures off pays nothing; `makeTestCore` pins `makeTap` in
+    both twins, since a live one takes a session-wide tap.
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

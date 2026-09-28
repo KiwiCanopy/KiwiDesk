@@ -23,6 +23,9 @@ public final class MouseTracker {
     }
 
     public private(set) var press: Press?
+    /// Scroll gestures (#1656, #1519): its tap lives and dies with
+    /// this tracker's `start`/`stop`.
+    public let scroll = ScrollGestures()
 
     /// Which mouse buttons are down, as a mask — the one home
     /// in Core for `NSEvent.pressedMouseButtons` (#1103/#1199).
@@ -85,6 +88,7 @@ public final class MouseTracker {
     public init() {}
 
     public func start() {
+        scroll.start()
         guard monitors.isEmpty else { return }
         let down = NSEvent.addGlobalMonitorForEvents(
             matching: .leftMouseDown
@@ -182,6 +186,7 @@ public final class MouseTracker {
         }
         monitors = []
         press = nil
+        scroll.stop()
     }
 
     /// The one fan-out (#1281): both arms deliver through it,
