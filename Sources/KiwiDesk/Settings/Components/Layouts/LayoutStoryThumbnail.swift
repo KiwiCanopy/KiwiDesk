@@ -30,27 +30,50 @@ struct LayoutStoryThumbnail: View {
 
     /// The story, resting on the ruled count every host shares.
     var story: LayoutStory {
-        .of(mode, resting: LayoutStory.restingWindows(for: mode))
+        .of(
+            mode,
+            resting: LayoutStory.restingWindows(
+                for: mode,
+                settings: settings
+            )
+        )
     }
 
     var body: some View {
+        picture
+            .environment(\.schematicRestage, Self.pace)
+            .environment(\.schematicTellsStory, true)
+            .onAppear {
+                guard !appeared else { return }
+                appeared = true
+                play(after: delay)
+            }
+            .onChange(of: replay) { _, _ in play(after: 0) }
+            .onHover { inside in
+                if inside && replaysOnHover { play(after: 0) }
+            }
+    }
+
+    /// A tiling story draws the engine's arrangement, a window
+    /// arriving; the others move their own schematic.
+    @ViewBuilder private var picture: some View {
         let frame = atStart ? story.start : story.rest
-        LayoutSchematicView(
-            mode: mode,
-            settings: settings,
-            windows: frame.windows,
-            scale: scale,
-            motion: frame.motion
-        )
-        .environment(\.schematicRestage, Self.pace)
-        .onAppear {
-            guard !appeared else { return }
-            appeared = true
-            play(after: delay)
-        }
-        .onChange(of: replay) { _, _ in play(after: 0) }
-        .onHover { inside in
-            if inside && replaysOnHover { play(after: 0) }
+        if LayoutStoryArrangement.arrives(mode) {
+            LayoutStoryCanvas(
+                mode: mode,
+                settings: settings,
+                count: frame.windows,
+                scale: scale,
+                axLabel: OnboardingLayoutBehaviour.of(mode)
+            )
+        } else {
+            LayoutSchematicView(
+                mode: mode,
+                settings: settings,
+                windows: frame.windows,
+                scale: scale,
+                motion: frame.motion
+            )
         }
     }
 

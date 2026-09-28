@@ -53,14 +53,13 @@ struct LayoutStoryTests {
         }
     }
 
-    /// A count already at its layout's floor has no window to
-    /// add, so it stays still rather than drawing below the band.
-    @Test("a floor count stays still")
-    func floorStaysStill() {
+    /// A lone window has nothing to arrive beside, so it stays
+    /// still; from two windows a story starts on one.
+    @Test("a lone window stays still; two windows play")
+    func loneStaysStill() {
         for mode in [LayoutMode.bsp, .stack, .grid, .track] {
-            let floor = LayoutSchematic.windowCountRange(for: mode)
-                .lowerBound
-            #expect(!LayoutStory.of(mode, resting: floor).plays)
+            #expect(!LayoutStory.of(mode, resting: 1).plays)
+            #expect(LayoutStory.of(mode, resting: 2).start.windows == 1)
         }
     }
 
@@ -69,7 +68,13 @@ struct LayoutStoryTests {
     @Test("the ruled resting counts", arguments: LayoutMode.allCases)
     func restingCounts(mode: LayoutMode) {
         let expected = [LayoutMode.bsp, .grid].contains(mode) ? 4 : 3
-        #expect(LayoutStory.restingWindows(for: mode) == expected)
+        #expect(LayoutStory.ruledWindows(for: mode) == expected)
+        #expect(
+            LayoutStory.restingWindows(
+                for: mode,
+                settings: TilingSettings()
+            ) == expected
+        )
     }
 
     /// The player takes that count itself, so two hosts cannot
@@ -86,7 +91,10 @@ struct LayoutStoryTests {
         )
         #expect(
             player.story.rest.windows
-                == LayoutStory.restingWindows(for: mode)
+                == LayoutStory.restingWindows(
+                    for: mode,
+                    settings: TilingSettings()
+                )
         )
     }
 

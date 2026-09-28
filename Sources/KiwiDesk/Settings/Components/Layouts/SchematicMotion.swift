@@ -22,7 +22,20 @@ private struct SchematicRestageKey: EnvironmentKey {
     static let defaultValue = LayoutSchematic.damping
 }
 
+private struct SchematicTellsStoryKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
 extension EnvironmentValues {
+    /// Whether a schematic draws a story's frame (#1750): no `+`
+    /// slot to step over, and windows past the screen edge drawn
+    /// and clipped there so a pan slides them rather than
+    /// dropping them.
+    var schematicTellsStory: Bool {
+        get { self[SchematicTellsStoryKey.self] }
+        set { self[SchematicTellsStoryKey.self] = newValue }
+    }
+
     /// How a schematic restages a value change: the live-slider
     /// damping by default, the tour's slower story pace (#1750).
     /// Every reader gates it on Reduce Motion itself.

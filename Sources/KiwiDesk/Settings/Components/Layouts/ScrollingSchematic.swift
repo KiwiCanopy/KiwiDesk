@@ -19,6 +19,7 @@ struct ScrollingSchematic: View {
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
     @Environment(\.schematicRestage) private var restage
+    @Environment(\.schematicTellsStory) var tellsStory
     /// The along-axis length the strip last laid out at — what the
     /// words are judged on, since the pane's width is the host's
     /// (`LayoutSchematicCenterCaptionTests`).
@@ -65,23 +66,6 @@ struct ScrollingSchematic: View {
         )
     }
 
-    /// The slot holding focus, `focusStep` windows from the
-    /// resting one; the incoming window is stepped over, and a
-    /// step past the row's end stops at its last window.
-    var focusIndex: Int {
-        let placed = row
-        let direction = focusStep > 0 ? 1 : -1
-        var index = 0
-        var left = abs(focusStep)
-        while left > 0 {
-            let next = index + direction
-            guard placed.slots.contains(next) else { break }
-            index = next
-            if lone || next != placed.incoming { left -= 1 }
-        }
-        return index
-    }
-
     /// The canvas's inner gap between slots.
     static let slotGap: CGFloat = 3
 
@@ -119,6 +103,7 @@ struct ScrollingSchematic: View {
             GeometryReader { geo in
                 strip(geo.size)
             }
+            .modifier(StoryClip(clips: tellsStory))
             .animation(damping, value: anchor)
             .animation(damping, value: orientation)
             .animation(damping, value: slotSize)
@@ -233,9 +218,9 @@ struct ScrollingSchematic: View {
         _ m: Metrics,
         along: CGFloat
     ) -> some View {
-        if !onCanvas(i, m, along: along) {
+        if !tellsStory, !onCanvas(i, m, along: along) {
             EmptyView()
-        } else if i == m.newIdx, !lone {
+        } else if i == m.newIdx, !lone, !tellsStory {
             SchematicNewWindow(
                 badgeAlignment: badgeAlignment(i - m.focus)
             )
