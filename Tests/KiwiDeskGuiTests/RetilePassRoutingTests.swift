@@ -44,6 +44,9 @@ struct RetilePassRoutingTests {
             Site(applies: 1, reissues: 0),
         "KiwiDeskCore/App/KiwiCore+Reset.swift":
             Site(applies: 1, reissues: 0),
+        // The tour's live look (#1720): a paint of the shelf.
+        "KiwiDeskCore/App/KiwiCore+ShelfPaint.swift":
+            Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+Commands.swift":
             Site(applies: 1, reissues: 0),
         "KiwiDeskCore/Commands/KiwiCore+GapCommands.swift":

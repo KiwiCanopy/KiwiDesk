@@ -14,10 +14,11 @@ struct OnboardingSpaceCard: Identifiable, Equatable {
 @MainActor
 @Observable
 final class OnboardingModel {
-    /// Onboarding tour steps (#678, #828, #888).
+    /// Onboarding tour steps (#678, #828, #888, #1720).
     enum Step: Equatable, CaseIterable {
         case grant
         case spaces
+        case looks
         case keys
         case done
 
@@ -25,7 +26,7 @@ final class OnboardingModel {
         /// asks `reachedEnd`, never a list of cases of its own.
         var isClosingBeat: Bool {
             switch self {
-            case .grant, .spaces: false
+            case .grant, .spaces, .looks: false
             case .keys, .done: true
             }
         }
@@ -50,6 +51,7 @@ final class OnboardingModel {
     /// Sets initial `step` and resolves `plannedSteps` for this presentation.
     func beginPresentation(at step: Step) {
         self.step = step
+        looksBaseline = nil
         plannedSteps = OnboardingEntry.plannedSteps(from: step)
     }
 
@@ -88,6 +90,69 @@ final class OnboardingModel {
     /// live layer.
     var keyFamilies: () -> [OnboardingKeyFamily] = { [] }
 
+    // MARK: - Looks step (#1720)
+
+    /// Bumped by every paint and revert, and when a window becomes
+    /// key, so the step re-reads the live settings and the draft.
+    private(set) var looksRevision = 0
+    /// The settings before this presentation's first paint; nil
+    /// until one lands, so a step left untouched writes nothing.
+    private(set) var looksBaseline: KiwiCore.ShelfPaintBaseline?
+    /// The bundled looks, then every palette a look may name.
+    var shelfLooks: () -> [ShelfLook] = { [] }
+    var shelfPalettes: () -> [ColorPalette] = { [] }
+    /// The live Space labels the look pictures draw.
+    var spaceLabels: () -> [SpaceGlyph] = { [] }
+    /// Whether Settings holds an unsaved draft, whose Save would
+    /// overwrite a paint here.
+    var settingsDraftPending: () -> Bool = { false }
+    var captureShelfBaseline: () -> KiwiCore.ShelfPaintBaseline? = {
+        nil
+    }
+    /// Paints a look with its palette, or a palette alone, live
+    /// and into the live profile (`KiwiCore.paintShelf`).
+    var onPaintShelf: (ShelfLook?, ColorPalette?) -> Void = { _, _ in }
+    var onRestoreShelf: (KiwiCore.ShelfPaintBaseline) -> Void = { _ in }
+
+    var hasLookChanges: Bool { looksBaseline != nil }
+
+    /// The palette `look` names, if it is still saved.
+    func palette(of look: ShelfLook) -> ColorPalette? {
+        shelfPalettes().first { $0.name == look.palette }
+    }
+
+    /// Applies `look` — its shape and its palette.
+    func pickLook(_ look: ShelfLook) {
+        paint(look, palette(of: look))
+    }
+
+    /// Repaints the colours alone, keeping the shape.
+    func pickPalette(_ palette: ColorPalette) {
+        paint(nil, palette)
+    }
+
+    /// Puts back what the step's first paint replaced.
+    func revertLooks() {
+        guard let baseline = looksBaseline, !settingsDraftPending()
+        else { return }
+        onRestoreShelf(baseline)
+        looksBaseline = nil
+        looksRevision += 1
+    }
+
+    func refreshLooks() {
+        looksRevision += 1
+    }
+
+    private func paint(_ look: ShelfLook?, _ palette: ColorPalette?) {
+        guard !settingsDraftPending() else { return }
+        if looksBaseline == nil {
+            looksBaseline = captureShelfBaseline()
+        }
+        onPaintShelf(look, palette)
+        looksRevision += 1
+    }
+
     /// Advances to the next step in `plannedSteps`.
     func advance() {
         guard let index = progressIndex,
@@ -100,8 +165,12 @@ final class OnboardingModel {
         advance()
     }
 
-    /// The keys step is always next (#331, #828).
+    /// The looks step is always next (#1720).
     func continueAfterSpaces() {
+        advance()
+    }
+
+    func continueAfterLooks() {
         advance()
     }
 

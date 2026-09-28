@@ -24,7 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// Boot's count for a relaunched "What's new" (#1667).
     let bootNarration = BootNarration()
     /// Cached dashboard controller to avoid constructing on refresh.
-    private var dashboardIfCreated: SettingsWindowController?
+    private(set) var dashboardIfCreated: SettingsWindowController?
     var dashboard: SettingsWindowController {
         if let existing = dashboardIfCreated { return existing }
         let created = SettingsWindowController(core: core)

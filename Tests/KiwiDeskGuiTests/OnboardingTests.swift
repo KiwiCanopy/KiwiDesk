@@ -6,7 +6,8 @@ import Testing
 @Suite("Onboarding flow")
 @MainActor
 struct OnboardingTests {
-    /// The flow since #888: grant → spaces → keys → done, with no
+    /// The flow since #888: grant → spaces → keys → done (looks
+    /// between spaces and keys since #1720), with no
     /// machine-gated step. (#828's separate-Spaces recommendation
     /// retired with the ruling it recommended around — bindings
     /// key to the main display's Desktop now, so they are
@@ -31,11 +32,14 @@ struct OnboardingTests {
     /// again — including from Home's "Show me around", where they
     /// had just asked for it. #331's ruling is untouched, being
     /// about whether an unfinished tour RESUMES there at launch.
-    @Test("the spaces step always leads to the keys step")
+    @Test("the spaces step leads through the looks to the keys")
     func spacesAlwaysLeadToKeys() {
         let model = OnboardingModel()
         model.beginPresentation(at: .spaces)
         model.continueAfterSpaces()
+        #expect(model.step == .looks)
+        #expect(!model.reachedEnd)
+        model.continueAfterLooks()
         #expect(model.step == .keys)
     }
 
@@ -111,6 +115,7 @@ struct OnboardingTests {
         direct.beginPresentation(at: .grant)
         direct.continueAfterAccessibility()
         direct.continueAfterSpaces()
+        direct.continueAfterLooks()
         #expect(direct.step == .keys)
         direct.continueAfterKeys()
         #expect(direct.step == .done)
@@ -123,6 +128,7 @@ struct OnboardingTests {
         closedOnKeys.beginPresentation(at: .grant)
         closedOnKeys.continueAfterAccessibility()
         closedOnKeys.continueAfterSpaces()
+        closedOnKeys.continueAfterLooks()
         #expect(closedOnKeys.step == .keys)
         #expect(closedOnKeys.reachedEnd)
 

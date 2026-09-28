@@ -93,6 +93,8 @@ struct AnnouncedValuePinTests {
         "UpdateNotesGroups.swift": 2,
         // The Mouse & trackpad drawer's group headings (#1726).
         "GestureEntry.swift": 1,
+        // The tour looks step's two row headers (#1720).
+        "OnboardingLooksRows.swift": 1,
     ]
 
     @Test("title components are rotor headings")

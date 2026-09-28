@@ -833,8 +833,6 @@
   "looks.default_name": "Mein Look",
   "looks.delete": "Löschen",
   "looks.description.glass": "Der Standard von KiwiDesk",
-  "looks.description.style_of": "Im Stil von %1$@",
-  "looks.description.style_of_pair": "Im Stil von %1$@ und %2$@",
   "looks.empty_hint": "Sichere den aktuellen Look von KiwiShelf, dann erscheint er hier.",
   "looks.export": "Exportieren…",
   "looks.import": "Importieren…",
