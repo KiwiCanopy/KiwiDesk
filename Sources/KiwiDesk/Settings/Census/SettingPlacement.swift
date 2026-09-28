@@ -15,7 +15,6 @@ enum SettingsArea: CaseIterable, Hashable {
     case bars
     case advancedColours
     case spacesAndLayouts
-    case behaviour
     case monitors
     case profiles
     case appRules
@@ -25,7 +24,7 @@ enum SettingsArea: CaseIterable, Hashable {
     /// The mode an area first appears in.
     var minimumMode: SettingsMode {
         switch self {
-        case .advancedColours, .behaviour, .monitors:
+        case .advancedColours, .monitors:
             return .powerUser
         case .layoutDefaults, .gapsAndBorders, .shortcuts,
             .coloursAndMotion, .bars, .spacesAndLayouts,

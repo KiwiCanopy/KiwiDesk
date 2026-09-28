@@ -84,6 +84,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var desktopSpaces: [DesktopKey: SpaceID] = [:]
     /// Keybinding modes; first is default mode.
     public var layers: [KeyLayer] = [KeyLayer.defaultLayer]
+    /// The settings no profile carries (#1741); nil until this
+    /// file has adopted them. Stamped at the write
+    /// (`GuiConfigStore.liveAppWide`) rather than drafted: General
+    /// writes them the moment they change.
+    public var appWide: AppWideSettings?
 
     /// Fields that ride `gui.json` without being settings the
     /// user DRAFTS — the Settings walk, the census guard and the
@@ -95,8 +100,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Desktop, so counting it as a config change would light the
     /// save pill constantly, and it is stamped at the write
     /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted.
+    /// `appWide` is stamped the same way (#1741).
     public static let undraftedFields: Set<String> = [
-        "format", "desktopSpaces",
+        "format", "desktopSpaces", "appWide",
     ]
 
     public init() {}
@@ -185,6 +191,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case profileBindings = "profile_bindings"
         case desktopSpaces = "desktop_spaces"
         case layers
+        case refusal
+        case quit
     }
 
     public init(from decoder: Decoder) throws {
@@ -245,6 +253,18 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 forKey: .layers
             ) ?? []
         )
+        // Additive since #1741, like `desktopSpaces`: absence is
+        // "not adopted yet", which the adoption reads.
+        appWide = AppWideSettings(
+            refusal: try container.decodeIfPresent(
+                AppWideSettings.Refusal.self,
+                forKey: .refusal
+            ),
+            quit: try container.decodeIfPresent(
+                AppWideSettings.Quit.self,
+                forKey: .quit
+            )
+        )
         dropEmptyNamedSpaces()
     }
 
@@ -288,5 +308,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             forKey: .desktopSpaces
         )
         try container.encode(layers, forKey: .layers)
+        if let appWide {
+            try container.encode(appWide.refusal, forKey: .refusal)
+            try container.encode(appWide.quit, forKey: .quit)
+        }
     }
 }

@@ -47,10 +47,6 @@ enum HomeCardPlate {
             return tile(padding: 8, settings: settings) {
                 HomeCardMonitorsTile(model: model)
             }
-        case .behavior:
-            return tile(padding: 11, settings: settings) {
-                HomeCardBehaviorTile(settings: settings)
-            }
         case .advancedColors:
             return tile(padding: 11, settings: settings) {
                 HomeCardSwatchGridTile(settings: settings)

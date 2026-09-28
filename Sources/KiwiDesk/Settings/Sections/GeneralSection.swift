@@ -75,7 +75,9 @@ struct GeneralSection: View {
             .font(.caption)
             .foregroundStyle(.secondary)
             appearanceRow
+            refusalSoundRow
             LoginItemCard(model: model)
+            quitPileDepthRow
             AutoInstallRow(model: model, setting: model.updater.autoInstall)
         }
     }

@@ -137,7 +137,7 @@ struct SettingsSearchAnchorTests {
         pinEnglish()
         defer { reset() }
         let results = SettingsSearch.results(
-            query: "Behavior",
+            query: "Advanced Colors",
             context: SettingsSearchContext()
         ).settings
         guard
@@ -146,7 +146,7 @@ struct SettingsSearchAnchorTests {
             Issue.record("no destination row for its own title")
             return
         }
-        #expect(destination == .behavior)
+        #expect(destination == .advancedColors)
         let anchor = results.first?.anchor
         #expect(anchor?.anchor == nil)
         #expect(anchor?.surface == .main)

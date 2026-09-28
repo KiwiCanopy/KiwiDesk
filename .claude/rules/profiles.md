@@ -494,6 +494,65 @@ holds the secondary-switch decision including its nil case.
   the old number was never what they meant. The scrolling pitch
   share is the precedent (#1382, `ScrollingPitchTests`); a
   re-scale that fails either bound takes the crossing above.
+- **A per-profile value moving app-wide crosses by ADOPTION, a
+  ruled shape beside `ConfigMigration` (#1741).** N profile
+  files → one value is an election, and a byte-level step cannot
+  hold it because it cannot know which profile is live (#1307) —
+  so the crossing is reached at the first `apply(profile:)`,
+  which does. The obligations:
+  - Write `appWideLedger` only in `KiwiCore+AppWide.swift`
+    (`AppWideSeamTests` ▸ `ledgerHasOneHome`).
+  - Run the capture before anything that may rewrite a profile
+    file — first in `loadConfig`, ahead of the #1530 settle —
+    or the rewrite destroys the copy the election reads
+    (`AppWideSeamTests` ▸ `captureBeforeSettle`,
+    `AppWideCrossingEndTests` ▸ `captureBeforeRewrite`).
+  - End the crossing in the FILES: the adoption strips the
+    retired groups from every profile file, so no reader of them
+    is left; never leave a lenient reader to drain them
+    (`AppWideCrossingEndTests` ▸ `adoptionStripsEveryProfile`).
+    Strip surgically, leaving the rest of each file as it was
+    (`AppWideCrossingEndTests` ▸ `stripIsSurgical`), and only
+    after the `gui.json` write has landed — a failed write keeps
+    every profile's copy, the one the next launch crosses from
+    (`AppWideCrossingEndTests` ▸ `failedWriteKeepsTheProfiles`).
+  - Keep a verb's session value out of the file — a `set_*`
+    verb changes the running value alone, and no `gui.json`
+    write, related or not, may stamp it
+    (`AppWideCrossingEndTests` ▸ `verbNeverPersists`). A row
+    write or an adoption builds on the ledger's `settled` value,
+    never on `live`, so a verb's change cannot ride in when
+    nothing was stored yet (`AppWideCrossingEndTests` ▸
+    `rowBeforeStoreSkipsTheVerb`). `setAppWide` takes no
+    default for `persisting:`: a new verb passes `false`, a
+    General row `true`. The one stamp of `live` is the Lua-to-GUI
+    adoption, where the verbs `init.lua` executed ARE the stored
+    config (`AppWideCrossingEndTests` ▸ `luaAdoptionCarries`).
+  - End the crossing through ONE door, `endCrossing`: the first
+    apply and a General row written while it is owed both take
+    it, so neither can end it without adopting and stripping
+    (`AppWideCrossingEndTests` ▸ `rowWhileOwedEndsTheCrossing`).
+    A backup's inline profile values are owed only for the
+    bundle they were read from — pair them by the bundle's value,
+    never by call order
+    (`AppWideBackupTests` ▸ `oldBackupValuesCross`,
+    `AppWideBackupTests` ▸ `otherBundleOwesNothing`).
+  - Owe nothing to a Lua-owned config: `init.lua` is its store,
+    so its load clears any crossing a GUI-managed load left
+    owed, and the apply-time adoption stands down while it owns
+    the setup (`AppWideAdoptionTests` ▸
+    `luaOwnedBesideSidecarAdoptsNothing`).
+  - Give a new member of `AppWideSettings` a crossing of its
+    own: the ledger's crossing is per group of settings, and on
+    an install that has adopted it has already ended, so a
+    member added later inherits nothing from it. The member also
+    joins the census (`SettingKeyModelParityTests` ▸
+    `appWideFieldsAreCensused`).
+
+  The argument, and the trade (the first profile applied
+  decides; a Lua-owned setup crosses nothing), is
+  `docs/design-decisions.md` ▸ *A setting nobody varies per
+  profile is app-wide*.
 
 ## Whose arrangement is live (#1249)
 

@@ -168,12 +168,3 @@ struct GapsAndBordersControls: Sendable {
         "Sticky windows"
     )
 }
-
-struct BehaviorControls: Sendable {
-    let quitCard = SettingsControl("behavior.quit.title", "On quit")
-    /// Cues a blocked action gives back (#1255).
-    let cuesCard = SettingsControl(
-        "behavior.cues.title",
-        "When an action can't apply"
-    )
-}

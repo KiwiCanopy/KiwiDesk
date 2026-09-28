@@ -1,9 +1,15 @@
 /// App-wide General rows: language, login item, About,
-/// Advanced maintenance actions, app-internal UserDefaults.
+/// Advanced maintenance actions, app-internal UserDefaults, and
+/// the `gui.json` settings no profile carries (`appWide.*`,
+/// #1741).
 
 enum GeneralKey: String, CaseIterable, Hashable {
     case language = "UserDefaults.language"
     case appearance = "UserDefaults.appearance"
+    case refusalSound = "appWide.refusalSound"
+    case quitGridTargetDepth = "appWide.quitGridTargetDepth"
+    /// Lua-only while `grid` is the one strategy (#197).
+    case quitLayout = "appWide.quitLayout"
     case startAtLogin = "AutoStartManager (no stored pref)"
     case installUpdatesAutomatically =
         "UserDefaults.SUAutomaticallyUpdate (Sparkle)"
@@ -30,6 +36,13 @@ extension GeneralKey {
             return .row(.general, .appliesImmediately, .atRest)
         case .appearance:
             return .row(.general, .appliesImmediately, .atRest)
+        case .refusalSound, .quitGridTargetDepth:
+            return .row(
+                .general,
+                .appliesImmediately,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
         case .startAtLogin:
             return .row(
                 .general,
@@ -54,6 +67,8 @@ extension GeneralKey {
             return .row(.general, .advanced, .showMore)
         case .onboardingDiscoveryShown, .iconPickerRecents:
             return .internalOnly
+        case .quitLayout:
+            return .luaOnly
         case .onboardingOpenAtLogin:
             return .outsideSettings
         }
@@ -67,6 +82,17 @@ extension GeneralKey {
             return .text("general.language.display")
         case .appearance:
             return .text("general.appearance")
+        case .refusalSound:
+            return .text(
+                "general.refusal_sound",
+                help: "general.refusal_sound.help"
+            )
+        case .quitGridTargetDepth:
+            return .text(
+                "general.quit_pile_depth",
+                caption: "general.quit_pile_depth.caption",
+                help: "general.quit_pile_depth.help"
+            )
         case .startAtLogin:
             return .text("general.login_item.start")
         case .installUpdatesAutomatically:
@@ -114,7 +140,7 @@ extension GeneralKey {
                 help: "general.advanced.backup.restore.help"
             )
         case .onboardingDiscoveryShown, .iconPickerRecents,
-            .onboardingOpenAtLogin:
+            .onboardingOpenAtLogin, .quitLayout:
             return .none
         }
     }

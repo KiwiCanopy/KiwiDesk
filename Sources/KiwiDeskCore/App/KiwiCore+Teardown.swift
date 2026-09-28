@@ -202,7 +202,7 @@ extension KiwiCore {
         // the settings or a second `collect`, making the invariant
         // structural rather than relying on nothing mutating
         // between the two reads.
-        let targetDepth = tiler.settings.quitGridTargetDepth
+        let targetDepth = appWide.quitGridTargetDepth
         // Diagnostic trail for the one-shot placement: a
         // wrong grid shape at quit is unreproducible after
         // the fact, so log what was grouped where.
@@ -228,7 +228,7 @@ extension KiwiCore {
         )
         let frames = WindowGather.targets(
             groups: groups,
-            style: tiler.settings.quitLayout,
+            style: appWide.quitLayout,
             minSize: tiler.settings.minWindowSize,
             targetDepth: targetDepth
         )

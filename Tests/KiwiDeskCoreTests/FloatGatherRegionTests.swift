@@ -108,7 +108,7 @@ struct FloatGatherRegionTests {
             region: region,
             grid: grid,
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
+            targetDepth: core.appWide.quitGridTargetDepth
         )
         #expect(seeded == carved[Self.scrolledOut])
         let bare = FloatGather.targets(
@@ -116,7 +116,7 @@ struct FloatGatherRegionTests {
             frames: Self.frames,
             region: try #require(core.floatBounds(on: Self.space)),
             minSize: core.tiler.settings.minWindowSize,
-            targetDepth: core.tiler.settings.quitGridTargetDepth
+            targetDepth: core.appWide.quitGridTargetDepth
         )
         #expect(seeded != bare[Self.scrolledOut])
         // And the pass's own clamp sweep left the capture alone.
