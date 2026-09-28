@@ -278,6 +278,11 @@ extension InterpolatedLabelTests {
         // The tour's Spaces step names the window and the pane a
         // layout is changed in, as a breadcrumb (#1534).
         "onboarding.starter_spaces.layouts_differ": 2,
+        // The looks step's draft caption names the save pill's
+        // two buttons; its hint names Settings and the Looks
+        // pane (#1720).
+        "onboarding.looks.draft_pending": 2,
+        "onboarding.looks.hint": 2,
         // The Float card's `?` names the float VALUE it explains
         // (#1022, #1608).
         "app_rules.section.help.titles": 1,

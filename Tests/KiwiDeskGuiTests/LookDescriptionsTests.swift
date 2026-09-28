@@ -21,7 +21,7 @@ struct LookDescriptionsTests {
         }
         #expect(
             LookDescriptions.caption(for: "Taskbar")
-                == "In the style of Windows 11"
+                == "Bottom bar, like Windows 11"
         )
     }
 }

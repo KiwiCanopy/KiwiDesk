@@ -25,6 +25,21 @@ extension KiwiCore {
         try lookLibrary.repointPalette(from: old, to: new)
     }
 
+    /// The palette `look` names, if it is still saved.
+    public func palette(of look: ShelfLook) -> ColorPalette? {
+        Self.palette(of: look, in: allPalettes)
+    }
+
+    /// `palette(of:)` over a given library — its pure half, for
+    /// the Settings window's in-memory copy (#805).
+    public static func palette(
+        of look: ShelfLook,
+        in palettes: [ColorPalette]
+    ) -> ColorPalette? {
+        guard let name = look.palette else { return nil }
+        return palettes.first { $0.name == name }
+    }
+
     /// A saved palette that reproduces `settings`' colours, if any.
     public func palette(reproducing settings: TilingSettings)
         -> ColorPalette?

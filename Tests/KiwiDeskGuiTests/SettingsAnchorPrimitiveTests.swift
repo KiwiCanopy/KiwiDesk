@@ -173,6 +173,10 @@ struct SettingsAnchorPrimitiveTests {
         // frame and the loop's target are one value. Not a reveal
         // target — the picture is hidden from accessibility.
         "GestureEntry.swift": 1,
+        // Scroll identity: the tour's palette row scrolls the
+        // live palette into view (#1720). Not a Settings
+        // destination, so nothing there is a reveal target.
+        "OnboardingLooksRows.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

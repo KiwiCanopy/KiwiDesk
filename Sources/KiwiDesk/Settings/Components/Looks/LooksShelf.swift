@@ -117,8 +117,12 @@ struct LooksShelf: View {
         return Button {
             apply(look)
         } label: {
-            PaletteTile(name: look.name, caption: caption, isApplied: applied)
-            {
+            PaletteTile(
+                name: look.name,
+                caption: caption,
+                isApplied: applied,
+                captionLines: 2
+            ) {
                 LookPlate(settings: preview(look), spaceLabels: spaceLabels)
             }
             .contentShape(Rectangle())
