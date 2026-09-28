@@ -25,8 +25,11 @@ extension AppDelegate {
         onboardingModel.onPaintShelf = { [weak self] look, palette in
             self?.core.paintShelf(look: look, palette: palette)
         }
+        onboardingModel.baselineIsLive = { [weak self] baseline in
+            self?.core.describesLiveProfile(baseline) ?? false
+        }
         onboardingModel.onRestoreShelf = { [weak self] baseline in
-            self?.core.restoreShelf(baseline)
+            self?.core.restoreShelf(baseline) ?? false
         }
     }
 }

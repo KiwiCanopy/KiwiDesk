@@ -5,64 +5,106 @@ import Foundation
 /// profile is live, into that profile's file, non-adopting — so a
 /// click is the whole act. The file half reads the stored settings
 /// and paints them, never `persistProfile`'s live capture (#1179).
-/// Only the look and palette keys move, in both halves.
 extension KiwiCore {
-    /// What a tour Revert paints back: the look and palette keys
-    /// as they stood before the first paint, and whose profile.
+    /// What a tour Revert returns to: the settings live and in the
+    /// file before the first paint, and whose profile they were.
     public struct ShelfPaintBaseline: Equatable, Sendable {
         let profile: String?
-        let look: ShelfLook
-        let colors: ColorPalette
+        let live: TilingSettings
+        let stored: TilingSettings?
     }
 
-    /// Records the keys a later `restoreShelf` paints back.
+    /// Records what a later `restoreShelf` returns to.
     public func shelfPaintBaseline() -> ShelfPaintBaseline {
-        let live = tiler.settings
+        let name = profiles.currentName
         return ShelfPaintBaseline(
-            profile: profiles.currentName,
-            look: ShelfLook(
-                name: "",
-                palette: nil,
-                style: LookKeys.extract(from: live)
-            ),
-            colors: ColorPalette(
-                name: "",
-                colors: ColorPaletteKeys.extract(from: live)
-            )
+            profile: name,
+            live: tiler.settings,
+            stored: name.flatMap { try? profiles.read(name: $0).settings }
         )
     }
 
-    /// Paints `look`'s styling and its palette, or — with no
-    /// look — `palette`'s colours alone, keeping the shape.
-    public func paintShelf(look: ShelfLook?, palette: ColorPalette?) {
-        paintShelfThrough { settings in
-            if let look {
-                look.apply(to: &settings, palette: palette)
-            } else {
-                palette?.apply(to: &settings)
-            }
-        }
+    /// Whether `baseline` still describes the live profile.
+    public func describesLiveProfile(_ baseline: ShelfPaintBaseline) -> Bool {
+        baseline.profile == profiles.currentName
     }
 
-    /// Paints `baseline`'s keys back; refused once another profile
-    /// is live, whose settings the baseline never described.
+    /// `settings` with `look` and its palette painted on, or —
+    /// with no look — `palette`'s colours alone, keeping the shape.
+    public static func painted(
+        _ settings: TilingSettings,
+        look: ShelfLook?,
+        palette: ColorPalette?
+    ) -> TilingSettings {
+        var painted = settings
+        if let look {
+            look.apply(to: &painted, palette: palette)
+        } else {
+            palette?.apply(to: &painted)
+        }
+        return painted
+    }
+
+    /// Paints a pick live and into the live profile's file.
+    public func paintShelf(look: ShelfLook?, palette: ColorPalette?) {
+        let paint: (inout TilingSettings) -> Void = {
+            $0 = Self.painted($0, look: look, palette: palette)
+        }
+        paintShelfThrough(live: paint, stored: paint)
+    }
+
+    /// Returns what a paint can reach to `baseline`, live and in
+    /// the file; refused once another profile is live.
     @discardableResult
     public func restoreShelf(_ baseline: ShelfPaintBaseline) -> Bool {
-        guard baseline.profile == profiles.currentName else {
-            return false
-        }
-        paintShelfThrough {
-            baseline.look.apply(to: &$0, palette: baseline.colors)
-        }
+        guard describesLiveProfile(baseline) else { return false }
+        paintShelfThrough(
+            live: { $0 = Self.unpainted($0, to: baseline.live) },
+            stored: { settings in
+                guard let stored = baseline.stored else { return }
+                settings = Self.unpainted(settings, to: stored)
+            }
+        )
         return true
     }
 
+    /// `current` with everything a paint reaches returned to
+    /// `before` and nothing else: the look's and the palette's keys,
+    /// then the two writes `ShelfLook.apply` makes beyond its keys
+    /// (every glass leaf, the per-layout indicators) put back too.
+    static func unpainted(
+        _ current: TilingSettings,
+        to before: TilingSettings
+    ) -> TilingSettings {
+        var settings = painted(
+            current,
+            look: ShelfLook(
+                name: "",
+                palette: nil,
+                style: LookKeys.extract(from: before)
+            ),
+            palette: ColorPalette(
+                name: "",
+                colors: ColorPaletteKeys.extract(from: before)
+            )
+        )
+        for leaf in TilingSettings.liquidGlassLeaves {
+            settings[keyPath: leaf] = before[keyPath: leaf]
+        }
+        settings.monocle.appBar.activeIndicator =
+            before.monocle.appBar.activeIndicator
+        settings.scrolling.appBar.activeIndicator =
+            before.scrolling.appBar.activeIndicator
+        return settings
+    }
+
     private func paintShelfThrough(
-        _ paint: (inout TilingSettings) -> Void
+        live: (inout TilingSettings) -> Void,
+        stored: (inout TilingSettings) -> Void
     ) {
-        paint(&tiler.settings)
+        live(&tiler.settings)
         if let name = profiles.currentName {
-            writeStoredSettings(name, paint)
+            writeStoredSettings(name, stored)
         }
         // An explicit apply (§5): a look can move the shelf's edge.
         retile(pass: .apply)

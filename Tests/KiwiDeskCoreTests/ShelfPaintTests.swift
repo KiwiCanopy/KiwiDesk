@@ -135,6 +135,27 @@ struct ShelfPaintTests {
         #expect(!(try look("Taskbar")).isApplied(to: core.tiler.settings))
     }
 
+    /// `ShelfLook.apply` writes beyond a look's keys — every glass
+    /// leaf, the per-layout App Bar indicators — so a Revert that
+    /// painted a look back would level the user's own leaves.
+    @Test("a restore keeps what a look writes beyond its keys")
+    func restoreKeepsWhatThePaintReachedBeyond() throws {
+        let core = makeCore(saving: nil)
+        let glass = core.tiler.settings.kiwishelf.liquidGlass
+        core.tiler.settings.stickyStyle.liquidGlass = !glass
+        core.tiler.settings.monocle.appBar.activeIndicator = .outline
+        _ = core.execute("save_profile", args: [.string("Mine")])
+        let baseline = core.shelfPaintBaseline()
+        core.paintShelf(look: nil, palette: try palette(core, "Sunset"))
+
+        core.restoreShelf(baseline)
+
+        for settings in [core.tiler.settings, try stored(core)] {
+            #expect(settings.stickyStyle.liquidGlass == !glass)
+            #expect(settings.monocle.appBar.activeIndicator == .outline)
+        }
+    }
+
     @Test("every paint and restore tells the GUI, on the write")
     func paintsAreAnnounced() throws {
         let core = makeCore()

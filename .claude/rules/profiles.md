@@ -1090,10 +1090,13 @@ profile never moves `currentName` (#1249).
 **The tour's shelf paint is a further write, and it is not Keep
 (#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
 to live AND the live profile's file; the file half reads the
-stored profile, paints only the look and palette keys and writes
-it back through the non-adopting `ProfileManager.write` — never
-`persistProfile`'s live capture (`ShelfPaintTests` ▸
-`fileKeepsItsOwnSettings`, `restoreTouchesOnlyTheLook`). A
+stored profile, paints the pick and writes it back through the
+non-adopting `ProfileManager.write` — never `persistProfile`'s
+live capture (`ShelfPaintTests` ▸ `fileKeepsItsOwnSettings`) — and
+a restore returns only what a paint can reach, the glass leaves
+and per-layout indicators `ShelfLook.apply` writes beyond its keys
+included (`restoreTouchesOnlyTheLook`,
+`restoreKeepsWhatThePaintReachedBeyond`). A
 restore is refused once `currentName` moved
 (`restoreSkipsAnotherProfile`). The open draft's debt is paid ON
 the write, through `onShelfPainted` (`paintsAreAnnounced`), never

@@ -16,6 +16,9 @@ struct OnboardingLooksTests {
         var paints: [(String?, String?)] = []
         var restores = 0
         var captures = 0
+        var restoreLands = true
+        var baselineLive = true
+        var draftPending = false
     }
 
     private func look(_ name: String) throws -> ShelfLook {
@@ -30,7 +33,8 @@ struct OnboardingLooksTests {
         let core = makeTestCore()
         model.tilingSettings = { recorder.live }
         model.shelfPalettes = { core.allPalettes }
-        model.settingsDraftPending = { draftPending }
+        recorder.draftPending = draftPending
+        model.settingsDraftPending = { recorder.draftPending }
         model.captureShelfBaseline = {
             recorder.captures += 1
             return core.shelfPaintBaseline()
@@ -43,7 +47,11 @@ struct OnboardingLooksTests {
                 palette?.apply(to: &recorder.live)
             }
         }
-        model.onRestoreShelf = { _ in recorder.restores += 1 }
+        model.onRestoreShelf = { _ in
+            recorder.restores += 1
+            return recorder.restoreLands
+        }
+        model.baselineIsLive = { _ in recorder.baselineLive }
         model.beginPresentation(at: .looks)
         return (model, recorder, core)
     }
@@ -105,6 +113,30 @@ struct OnboardingLooksTests {
         #expect(recorder.restores == 1)
     }
 
+    /// Refused because another profile went live: the baseline
+    /// no longer describes it, so Revert greys and the next pick
+    /// records a fresh one rather than keeping the stale one.
+    @Test("a baseline of another profile is re-captured")
+    func staleBaselineIsRecaptured() throws {
+        let (model, recorder, core) = makeModel()
+        model.pickLook(try look("Taskbar"))
+        recorder.restoreLands = false
+        recorder.baselineLive = false
+        model.revertLooks()
+        #expect(!model.hasLookChanges)
+        model.pickPalette(try palette(core, "Sunset"))
+        #expect(recorder.captures == 2)
+    }
+
+    @Test("a refused revert keeps its baseline")
+    func refusedRevertKeepsBaseline() throws {
+        let (model, recorder, _) = makeModel()
+        model.pickLook(try look("Taskbar"))
+        recorder.restoreLands = false
+        model.revertLooks()
+        #expect(model.hasLookChanges)
+    }
+
     @Test("an untouched step writes nothing")
     func untouchedWritesNothing() {
         let (model, recorder, _) = makeModel()
@@ -123,6 +155,16 @@ struct OnboardingLooksTests {
         #expect(recorder.paints.isEmpty)
         #expect(recorder.captures == 0)
         #expect(!model.hasLookChanges)
+    }
+
+    @Test("a draft opened after a pick refuses the revert")
+    func draftBlocksRevert() throws {
+        let (model, recorder, _) = makeModel()
+        model.pickLook(try look("Taskbar"))
+        recorder.draftPending = true
+        model.revertLooks()
+        #expect(recorder.restores == 0)
+        #expect(model.hasLookChanges)
     }
 
     @Test("a new presentation starts without a baseline")

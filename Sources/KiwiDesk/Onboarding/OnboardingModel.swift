@@ -109,12 +109,24 @@ final class OnboardingModel {
     var captureShelfBaseline: () -> KiwiCore.ShelfPaintBaseline? = {
         nil
     }
+    /// Whether a baseline still describes the live profile; one
+    /// that does not is re-captured by the next paint.
+    var baselineIsLive: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+        true
+    }
     /// Paints a look with its palette, or a palette alone, live
     /// and into the live profile (`KiwiCore.paintShelf`).
     var onPaintShelf: (ShelfLook?, ColorPalette?) -> Void = { _, _ in }
-    var onRestoreShelf: (KiwiCore.ShelfPaintBaseline) -> Void = { _ in }
+    /// Returns whether the restore landed; it is refused once
+    /// another profile went live (`KiwiCore.restoreShelf`).
+    var onRestoreShelf: (KiwiCore.ShelfPaintBaseline) -> Bool = { _ in
+        false
+    }
 
-    var hasLookChanges: Bool { looksBaseline != nil }
+    var hasLookChanges: Bool {
+        _ = looksRevision
+        return looksBaseline.map(baselineIsLive) ?? false
+    }
 
     /// The palette `look` names, if it is still saved.
     func palette(of look: ShelfLook) -> ColorPalette? {
@@ -135,8 +147,7 @@ final class OnboardingModel {
     func revertLooks() {
         guard let baseline = looksBaseline, !settingsDraftPending()
         else { return }
-        onRestoreShelf(baseline)
-        looksBaseline = nil
+        if onRestoreShelf(baseline) { looksBaseline = nil }
         looksRevision += 1
     }
 
@@ -149,14 +160,9 @@ final class OnboardingModel {
     private func paint(_ look: ShelfLook?, _ palette: ColorPalette?) {
         guard !settingsDraftPending() else { return }
         let live = tilingSettings()
-        var painted = live
-        if let look {
-            look.apply(to: &painted, palette: palette)
-        } else {
-            palette?.apply(to: &painted)
-        }
+        let painted = KiwiCore.painted(live, look: look, palette: palette)
         guard painted != live else { return }
-        if looksBaseline == nil {
+        if looksBaseline.map(baselineIsLive) != true {
             looksBaseline = captureShelfBaseline()
         }
         onPaintShelf(look, palette)

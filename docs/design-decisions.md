@@ -6373,10 +6373,13 @@ effect, or keep it only until the next reload.
 Writing through leaves Settings' Revert nothing to undo, so the
 undo lives where the change was made — one path, which is why a
 "current colours" tile was ruled out as a second. The step's
-Revert is greyed until a click changed something, and paints back
-the look and palette keys as they stood before the first one, and
-nothing else: a setting saved from Settings meanwhile stays
-(`ShelfPaintTests` ▸ `restoreTouchesOnlyTheLook`). A pick that
+Revert is greyed until a click changed something, and returns
+what a paint can reach to where it stood before the first one —
+the look and palette keys, and the glass leaves and per-layout
+indicators a look writes beyond them — and nothing else: a setting
+saved from Settings meanwhile stays (`ShelfPaintTests` ▸
+`restoreTouchesOnlyTheLook`,
+`restoreKeepsWhatThePaintReachedBeyond`). A pick that
 changes nothing and a step left untouched write nothing
 (`OnboardingLooksTests` ▸ `noOpPickWritesNothing`,
 `untouchedWritesNothing`).
