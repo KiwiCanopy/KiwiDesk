@@ -79,9 +79,9 @@ twice, was a question the user answered twice. The argument is
   is review's. **A write `ShelfLook.apply` makes beyond a look's
   keys joins what `KiwiCore.unpainted` returns** (#1720), or the
   tour's Revert leaves it behind: `ShelfPaintRoundTripTests` ▸
-  `revertRoundTripsEveryLook` reds one that reaches a glass leaf,
-  a stroke the Borders masters own or a per-layout App Bar
-  override; a write elsewhere owes that fixture the field.
+  `revertRoundTripsEveryLook` reds one that reaches a glass leaf
+  or a per-layout App Bar override; a write elsewhere owes that
+  fixture the field.
 - **Retire a bar verb by adding it to `APIReference.retired`**,
   naming its replacement or nil, and never by an alias (AGENTS.md
   §5). A field the shelf migration moves joins
