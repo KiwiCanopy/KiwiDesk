@@ -695,7 +695,7 @@ state, so it cannot move a red between runs, and the two
 hold-glide fixtures pin it where it is armed.
 
 Deliberate residue a run does still touch, as audited
-2026-09-27 — a change adding a residue class extends and
+2026-09-28 — a change adding a residue class extends and
 re-dates this list in the same change set: throwaway AF_UNIX
 sockets under temp paths (`SocketTests`), real `CADisplayLink`s
 from animation-keyed suites, repo-script children drained by
@@ -730,7 +730,12 @@ the first core is built (`InPlaceRestartState.launchIdentity`:
 `CodeIdentityTests` and `InPlaceRestartTests` also reading the
 signed `/System/Applications/Calculator.app` and the test
 runner's own path — read-only, and `makeTestCore` pins the
-LaunchAgent plist read to nil. **The host text-metric read is
+LaunchAgent plist read to nil; and, since #1656 (2026-09-28),
+the four listen-only `NSEvent` press monitors one bare
+`MouseTracker().start()` adds for the length of
+`ScrollGesturesTests` ▸ `trackerCarriesTheTap` — no permission,
+removed by its `stop()`, and the scroll tap itself a fake.
+**The host text-metric read is
 back** — `PresetGridFloorTests` lays out an `NSButton` per
 shipped catalog and calls `sizeToFit()`, so a run takes host
 font metrics once per catalog per measured key (#862, 2026-08-17).
