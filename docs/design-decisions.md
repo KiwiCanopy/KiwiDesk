@@ -7008,8 +7008,7 @@ window count", and exactly one claim ever cleared it: Scrolling's
 newly focused window. A still picture cannot show motion.
 (It binds the FRAME, not motion: a picture that teaches a
 GESTURE rather than a rest state — the Shortcuts & Gestures
-drawer's, argued under Shortcuts below — and a thumbnail that is
-read rather than compared (#1750, below) may move.)
+drawer's, argued under Shortcuts below — may move.)
 
 The premise is true and the conclusion does not follow. **A pair
 does not show motion either.** It shows two *states* and asks the
@@ -7075,18 +7074,21 @@ draw it at all — leaving it to the frame's clip is not the same
 thing, for the reason `SchematicCanvas.screen` states: the clip
 does not crop where a reader would assume.
 
+:::unreleased
 **A thumbnail that is read rather than compared plays its layout
 once** (#1750, owner ruling 2026-09-28). The welcome tour's Spaces
 step and the preset preview on Profiles each draw a layout
-thumbnail per Space, and a still frame there could not say what
-the tour's own sentence claims — that one layout splits and
-another scrolls. So on those two surfaces, and only there, the
-thumbnail plays one short story and rests: BSP and Grid gain a
-fourth window, Stack and Track a third, Scrolling steps focus and
-pans, Monocle's front card turns on the live flip's axis (#1391),
-and a Floating window is dragged and left where it lands. Each
-story plays once when its thumbnail first appears — staggered
-down a list — and again on hover, and never loops.
+thumbnail per Space, and a still frame there could not do what
+the tour promises — show how each row's layout behaves, that one
+splits and another scrolls. So on those two surfaces, and only
+there, the thumbnail plays one short story and rests: a tiling
+layout gains one more window, which the engine places — BSP and
+Grid resting on four, every other layout on three, one ruled
+count both hosts share (`LayoutStoryTests`) — Scrolling steps
+focus and pans, Monocle's front card turns on the live flip's
+axis (#1391), and a Floating window is dragged and left where it
+lands. Each story plays once when its thumbnail first appears —
+staggered down a list — and again on hover, and never loops.
 
 This does not reopen the ruling above, which retired a SECOND
 FRAME: a pair shows two states and leaves the tween to the
@@ -7100,26 +7102,33 @@ setting moves — so a tile that plays on its own there would pull
 the eye to whichever one moved and drown that feedback. They stay
 at rest. The tour and the preset preview are read once, edit
 nothing, and name one Space per tile. `LayoutStoryWiringTests`
-holds the hosts to those two.
+holds the hosts to those two, and holds the story's phase and
+its pace to the player, so no compared surface can be handed
+either.
 
 **The frames are the engine's.** Both ends of every tiling story
 are the schematic the other surfaces draw, at two window counts,
 so the picture follows the user's own settings — where BSP
 splits, where Stack puts the newcomer, whether Track opens a new
 track — and a story cannot teach a placement the engine does not
-make (the #702 rule). Only Floating's drag is drawn by hand,
-because the engine claims no placement there. The story always
-ends on the resting frame, which is the whole of what Reduce
-Motion shows. It is still not a clip, for the reasons the
+make (the #702 rule). Only Floating's drag and Monocle's turn
+are drawn by hand: the engine claims no placement for either,
+and the turn takes the live flip's own axis
+(`MonocleFlipPlan.axis(for:)`) rather than a second copy of it.
+The story always ends on the resting frame, which is the whole
+of what Reduce Motion shows. It is still not a clip, for the reasons the
 Shortcuts & Gestures entry gives: it follows the palette and the
 appearance, carries no text to translate, and cannot go stale
-beside a redesign. VoiceOver hears the behaviour as a sentence on
-the tour row, since motion is never announced.
+beside a redesign. Motion is never announced, so what VoiceOver
+hears is what the host already says: the tour row speaks the
+layout's behaviour as a sentence, while a preset preview tile
+speaks the schematic's own description.
 
 **Floating's picture is scattered, everywhere.** A cascade drew
 the one layout that places nothing as if it placed windows in a
 tidy diagonal. The scattered frame is what the story ends on, so
 Settings draws it too, and the two can never disagree.
+:::
 
 **Home is the only navigator: a card grid, not a sidebar.** (#678
 turn 9, superseding the #68/#297 fixed source list.) A sidebar is
@@ -9641,17 +9650,27 @@ what keeps a plain scroll over the shelf apart from a modifier
 scroll anywhere.
 
 **An entry is one drawn picture and one sentence, and the picture
-animates on hover.** This is the one place the one-frame rule
-(▸ Navigation & saving, *A layout gets one frame*) does not
-bind, and the difference is the subject: a layout schematic
-teaches a REST state and sits in a strip built for
-comparison, while an entry here teaches a GESTURE, alone on its
-row, which no rest state denotes. It is still not a clip. A bundled
+animates on hover.** The one-frame rule (▸ Navigation & saving,
+*A layout gets one frame*) does not bind here, and the
+difference is the subject: a layout schematic teaches a REST
+state and sits in a strip built for comparison, while an entry
+here teaches a GESTURE, alone on its row, which no rest state
+denotes. It is still not a clip. A bundled
 video cannot follow the user's palette or appearance, cannot be
 localized, and goes stale on the next shelf redesign; the drawing
 is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 only while pointed at, so the page never moves on its own.
+
+:::unreleased
+The rule's other exception, a layout thumbnail that is read
+rather than compared (▸ Navigation & saving), also plays once as
+it appears, and the difference is the reader. The tour and the
+preset preview are opened in order to be read, so a story
+playing there is the content arriving; this page is a reference
+consulted in the middle of something else, where a gesture
+playing unasked would be motion no one came for.
+:::
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the

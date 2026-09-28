@@ -17,7 +17,7 @@ struct FloatingSchematic: View {
     @Environment(\.schematicRestage) private var restage
 
     /// Restage animation damping gated on Reduce Motion
-    /// (`LayoutSchematic.damping`, #1069).
+    /// (`\.schematicRestage`, #1069).
     private var damping: Animation? {
         reduceMotion ? nil : restage
     }
@@ -89,7 +89,8 @@ struct FloatingSchematic: View {
             .offset(x: rect.minX, y: rect.minY)
     }
 
-    /// The hand dragging the front window, shown only mid-drag.
+    /// The hand dragging the front window: shown at the pick-up,
+    /// fading as the drag lands, gone at rest.
     private func pointer(in size: CGSize) -> some View {
         let rect = frame(drawn - 1, in: size)
         return Image(systemName: "cursorarrow")

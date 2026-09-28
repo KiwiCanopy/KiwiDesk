@@ -146,7 +146,6 @@ struct PresetPreviewSheet: View {
             LayoutStoryThumbnail(
                 mode: slot.mode,
                 settings: layout.settings(sizes: liveSizes),
-                windows: LayoutSchematic.defaultWindowCount,
                 scale: .tile,
                 delay: delay,
                 replaysOnHover: true

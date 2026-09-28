@@ -9,8 +9,6 @@ import SwiftUI
 struct LayoutStoryThumbnail: View {
     let mode: LayoutMode
     let settings: TilingSettings
-    /// The count the thumbnail draws at rest.
-    let windows: Int
     let scale: SchematicScale
     /// Wait before the first play, for a staggered list.
     var delay: Double = 0
@@ -30,7 +28,10 @@ struct LayoutStoryThumbnail: View {
     /// How long the start frame holds before it moves.
     static let lead = 0.35
 
-    var story: LayoutStory { .of(mode, resting: windows) }
+    /// The story, resting on the ruled count every host shares.
+    var story: LayoutStory {
+        .of(mode, resting: LayoutStory.restingWindows(for: mode))
+    }
 
     var body: some View {
         let frame = atStart ? story.start : story.rest

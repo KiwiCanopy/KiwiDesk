@@ -64,20 +64,30 @@ struct LayoutStoryTests {
         }
     }
 
-    /// The tour's rows rest on the counts the owner ruled: BSP and
-    /// Grid take a fourth window, the others a third.
-    @Test("the tour's resting counts")
-    func tourCounts() {
-        let counts = Dictionary(
-            uniqueKeysWithValues: LayoutMode.allCases.map {
-                ($0, OnboardingSpaceRow.restingWindows($0))
-            }
+    /// Every host rests on the counts the owner ruled: BSP and
+    /// Grid take a fourth window, every other layout a third.
+    @Test("the ruled resting counts", arguments: LayoutMode.allCases)
+    func restingCounts(mode: LayoutMode) {
+        let expected = [LayoutMode.bsp, .grid].contains(mode) ? 4 : 3
+        #expect(LayoutStory.restingWindows(for: mode) == expected)
+    }
+
+    /// The player takes that count itself, so two hosts cannot
+    /// tell one layout's story at two different counts.
+    @Test(
+        "the player rests on the ruled count",
+        arguments: LayoutMode.allCases
+    )
+    func playerTakesTheCount(mode: LayoutMode) {
+        let player = LayoutStoryThumbnail(
+            mode: mode,
+            settings: TilingSettings(),
+            scale: .tile
         )
-        #expect(counts[.bsp] == 4)
-        #expect(counts[.grid] == 4)
-        for mode in [LayoutMode.stack, .track, .scrolling] {
-            #expect(counts[mode] == 3)
-        }
+        #expect(
+            player.story.rest.windows
+                == LayoutStory.restingWindows(for: mode)
+        )
     }
 
     private func scrolling(step: Int) -> ScrollingSchematic {

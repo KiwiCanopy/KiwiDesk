@@ -16,7 +16,7 @@ struct MonocleSchematic: View {
     private var reduceMotion
     @Environment(\.schematicRestage) private var restage
 
-    /// Restage animation damping (#1069, `LayoutSchematic.damping`).
+    /// Restage animation damping (#1069, `\.schematicRestage`).
     private var damping: Animation? {
         reduceMotion ? nil : restage
     }
@@ -79,10 +79,13 @@ struct MonocleSchematic: View {
         }
     }
 
-    /// The axis the front card turns about: the focus axis, as
-    /// the live flip does (`MonocleFlipPlan`, #1391).
+    /// The axis the front card turns about: the live flip's own
+    /// (`MonocleFlipPlan.axis(for:)`, #1391).
     private var turnAxis: (x: CGFloat, y: CGFloat, z: CGFloat) {
-        horizontal ? (0, 1, 0) : (1, 0, 0)
+        switch MonocleFlipPlan.axis(for: orientation) {
+        case .vertical: return (0, 1, 0)
+        case .horizontal: return (1, 0, 0)
+        }
     }
 
     /// Parked window pile schematic at bottom corner (#881).

@@ -16,7 +16,7 @@ struct BspSchematic: View {
     @Environment(\.schematicRestage) private var restage
 
     /// Restage animation damping gated on Reduce Motion
-    /// (`LayoutSchematic.damping`, #1069).
+    /// (`\.schematicRestage`, #1069).
     private var damping: Animation? {
         reduceMotion ? nil : restage
     }

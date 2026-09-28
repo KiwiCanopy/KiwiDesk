@@ -18,6 +18,18 @@ struct LayoutStory: Equatable {
     /// still.
     var plays: Bool { start != rest }
 
+    /// The window count a story rests on, on every host: the
+    /// frame each story ends on, which is all Reduce Motion
+    /// shows. BSP's and Grid's newcomer is the fourth window,
+    /// the others' the third (owner ruling, #1750).
+    static func restingWindows(for mode: LayoutMode) -> Int {
+        switch mode {
+        case .bsp, .grid: return 4
+        case .stack, .track, .scrolling, .monocle, .floating:
+            return 3
+        }
+    }
+
     /// `mode`'s story ending on `windows`, the count the surface
     /// draws at rest. Tiling layouts gain a window, which the
     /// engine places; Scrolling steps focus and pans; Monocle

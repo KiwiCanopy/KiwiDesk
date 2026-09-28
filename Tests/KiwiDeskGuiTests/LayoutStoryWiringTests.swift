@@ -8,7 +8,8 @@ import Testing
 /// Layouts chooser, its detail panel and the Home cards stay at
 /// rest, since they restage as feedback on a changing draft and a
 /// playing tile there would pull the eye to whichever one moves
-/// (`docs/design-decisions.md` ▸ *A layout gets one frame*).
+/// (`docs/design-decisions.md` ▸ *A thumbnail that is read
+/// rather than compared*).
 @Suite("Layout story wiring (#1750)")
 struct LayoutStoryWiringTests {
     /// The one copy of who may host a playing thumbnail, each
@@ -52,13 +53,65 @@ struct LayoutStoryWiringTests {
         )
     }
 
-    /// A story phase reaches a schematic only through the player,
-    /// so no surface can hand one a moving frame beside it.
+    private static let player =
+        "Settings/Components/Layouts/LayoutStoryThumbnail.swift"
+
+    /// Every `LayoutSchematicView(` call's argument list in
+    /// `source`, so a needle asks what each call was HANDED.
+    private func schematicCalls(in source: String) -> [String] {
+        let text = Array(source)
+        let needle = Array("LayoutSchematicView(")
+        var calls: [String] = []
+        var i = 0
+        while i + needle.count <= text.count {
+            guard Array(text[i..<(i + needle.count)]) == needle else {
+                i += 1
+                continue
+            }
+            var cursor = i + needle.count - 1
+            if let args = SourceScan.balanced(
+                text,
+                from: &cursor,
+                open: "(",
+                close: ")"
+            ) {
+                calls.append(args)
+            }
+            i += needle.count
+        }
+        return calls
+    }
+
+    /// A story phase reaches a schematic only through the player:
+    /// no other `LayoutSchematicView(` call is handed a `motion:`
+    /// in any spelling, so a compared surface cannot draw a frame
+    /// that is not its rest.
     @Test("only the player hands a schematic a story phase")
     func motionComesFromThePlayer() throws {
+        var handed: Set<String> = []
+        var calls = 0
+        for url in try ChromeScanRoots.sources(from: #filePath) {
+            for args in schematicCalls(in: try squashed(url)) {
+                calls += 1
+                if args.contains("motion:") {
+                    handed.insert(relative(url))
+                }
+            }
+        }
+        // Non-empty first: the player and the four compared
+        // surfaces each make one.
+        #expect(calls >= 5)
+        #expect(handed == [Self.player])
+    }
+
+    /// The story pace reaches the schematics only from the
+    /// player: an ancestor of a compared surface writing the
+    /// restage value would re-pace every schematic under it.
+    @Test("only the player writes the restage pace")
+    func restageComesFromThePlayer() throws {
         #expect(
-            try callers(of: "motion:frame.motion")
-                == ["Settings/Components/Layouts/LayoutStoryThumbnail.swift"]
+            try callers(of: ".environment(\\.schematicRestage")
+                == [Self.player]
         )
     }
 

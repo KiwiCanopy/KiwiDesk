@@ -11,17 +11,6 @@ struct OnboardingSpaceRow: View {
     let delay: Double
     @State private var replay = 0
 
-    /// The window count a row rests on: the frame each story ends
-    /// on, which is all Reduce Motion shows. BSP's and Grid's
-    /// newcomer is the fourth window, the others' the third.
-    static func restingWindows(_ mode: LayoutMode) -> Int {
-        switch mode {
-        case .bsp, .grid: return 4
-        case .stack, .track, .scrolling, .monocle, .floating:
-            return 3
-        }
-    }
-
     private static let thumbHeight: CGFloat = 46
     private static var thumbFactor: CGFloat {
         thumbHeight / SchematicScale.tile.height
@@ -71,7 +60,6 @@ struct OnboardingSpaceRow: View {
         LayoutStoryThumbnail(
             mode: card.mode,
             settings: settings,
-            windows: Self.restingWindows(card.mode),
             scale: .tile,
             delay: delay,
             replay: replay

@@ -236,7 +236,9 @@ struct ScrollingSchematic: View {
         if !onCanvas(i, m, along: along) {
             EmptyView()
         } else if i == m.newIdx, !lone {
-            SchematicNewWindow(badgeAlignment: badgeAlignment(i))
+            SchematicNewWindow(
+                badgeAlignment: badgeAlignment(i - m.focus)
+            )
         } else if onScreen(i, m) {
             SchematicTile(active: i == m.focus)
         } else {
@@ -272,7 +274,11 @@ struct ScrollingSchematic: View {
     /// edge cuts: one showing more than the quantum and less than
     /// its whole (on screen is on canvas, `screenFraction`).
     func cutsWindow(along: CGFloat) -> Bool {
-        let m = metrics(along: along)
+        // Judged on the rest frame: the words describe where the
+        // row rests, not a story's passing start (#1750).
+        var resting = self
+        resting.focusStep = 0
+        let m = resting.metrics(along: along)
         return (m.low...m.high).contains { i in
             let shown = overlap(i, m)
             return shown > Self.cutQuantum
