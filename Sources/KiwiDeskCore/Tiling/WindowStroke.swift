@@ -1,10 +1,10 @@
 import CoreGraphics
 import Foundation
 
-/// The one shape every stroke KiwiDesk draws around a window takes
-/// — the focus ring, the drag ghost and the drop zone (#1742): the
-/// border's width and corner style, derived once and never stored
-/// per stroke.
+/// The drag markers' reading of the border's stroke (#1742): the
+/// ghost and the drop zone draw the focus border's width and
+/// corner style and store none of their own. The ring derives its
+/// own radius per window (`BorderGeometry`).
 public struct WindowStroke: Sendable, Equatable {
     /// Stroke width in points.
     public var width: CGFloat

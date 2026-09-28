@@ -42,10 +42,6 @@ struct WindowStrokeTests {
             from: Data(json.utf8)
         )
         #expect(!decoded.dragGhost.enabled)
-        #expect(
-            decoded.windowStroke
-                == WindowStroke(width: 3, cornerRadius: 0)
-        )
         let written = try JSONEncoder().encode(decoded)
         let root = try #require(
             JSONSerialization.jsonObject(with: written)
@@ -74,5 +70,64 @@ struct WindowStrokeTests {
         #expect(!response.isSuccess)
         #expect(response.error?.contains(replacement) == true)
         #expect(core.tiler.settings == TilingSettings())
+    }
+
+    /// A drag marker stores no stroke of its own, so no path can
+    /// split it from the border again (#754, #1739, #1742).
+    @Test("a drag visual stores no width or radius")
+    func dragVisualStoresNoStroke() {
+        let labels = Mirror(reflecting: DragVisual.ghostDefault)
+            .children.compactMap(\.label)
+        #expect(labels.contains("borderColor"))
+        for label in labels {
+            #expect(
+                !label.localizedCaseInsensitiveContains("width")
+                    && !label.localizedCaseInsensitiveContains("radius"),
+                "DragVisual.\(label) is a per-stroke store"
+            )
+        }
+        let dragLabels = Mirror(reflecting: TilingSettings())
+            .children.compactMap(\.label)
+            .filter { $0.hasPrefix("drag") }
+        #expect(dragLabels.contains("dragGhost"))
+        for label in dragLabels {
+            #expect(
+                !label.localizedCaseInsensitiveContains("radius")
+                    && !label.localizedCaseInsensitiveContains("width"),
+                "TilingSettings.\(label) is a per-stroke store"
+            )
+        }
+    }
+
+    /// Both drag render paths hand the markers the border's
+    /// stroke — the engine's and the Settings picture's.
+    @Test("the drag paths hand over the border's stroke")
+    func dragPathsReadTheStroke() async throws {
+        for (path, count) in [
+            ("Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift", 2),
+            (
+                "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"
+                    + "GapsBordersPanelPreview.swift", 2
+            ),
+        ] {
+            let text = try Self.source(path)
+            let hits =
+                text.components(
+                    separatedBy: "stroke: settings.windowStroke,"
+                ).count - 1
+            #expect(hits == count, "\(path) hands \(hits)")
+        }
+    }
+
+    private static func source(_ path: String) throws -> String {
+        var url = URL(fileURLWithPath: #filePath)
+        while url.lastPathComponent != "Tests" {
+            url.deleteLastPathComponent()
+        }
+        url.deleteLastPathComponent()
+        return try String(
+            contentsOf: url.appendingPathComponent(path),
+            encoding: .utf8
+        )
     }
 }

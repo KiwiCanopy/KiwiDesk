@@ -591,6 +591,17 @@ converging every follower (`MasterDivergenceRegisterTests` ▸
 `acknowledgedRegisterIsExact`, `GapsAndBordersGateWiringTests`
 ▸ `gapMastersAcknowledgeAtTheLabel`).
 
+The Liquid Glass master is the one ruled exception to that
+register: it answers its `?` from `LiquidGlassAgreement`
+(`Sources/KiwiDesk/Settings/SettingsModel+Glass.swift`), the ONE
+comparison both its binding and its row read, and never joins
+`GapsBordersGates.acknowledged` (`LiquidGlassMasterTests` ▸
+`divergenceSeen`, `LiquidGlassMasterTests` ▸
+`rowConsultsTheAgreement`). A new master answers through one of
+those two homes; a third one is ruled here before it ships, or
+the two registers stop being the whole census of who
+acknowledges.
+
 **Consulting a resolver is not drawing what it answered, and a
 SURFACING gate leaves nothing behind to prove the difference.**
 A greying gate ends in a dimmed control a test can find; a

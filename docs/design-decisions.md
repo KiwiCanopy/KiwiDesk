@@ -10371,8 +10371,8 @@ the user's choice" from the old #444/#493 record and revert this.
 
 **Ghost and Drop zone are two side-by-side columns.** (#231.) Each
 column leads with its own live preview and puts its controls
-directly beneath, so tuning a column's border width never scrolls
-that preview off-screen — the failure mode of the earlier
+directly beneath, so toggling a column's border or fill never
+scrolls that preview off-screen — the failure mode of the earlier
 one-strip-then-two-stacked-sections layout. They are a genuine A/B
 pair (same schema, edited by comparison), which is exactly where
 macOS System Settings itself reaches for twin panels (Displays'
@@ -10381,13 +10381,13 @@ the pairing once instead of duplicating preview-then-controls
 structure. What a column keeps is what only that column can answer
 — whether its border and its fill are drawn at all; the stroke's
 width and corners belong to the page's shared card and the
-alignment to Lua alone (#754). The narrowing that
-lets a half-width row hold a slider (`dragColumnLabelColumn`) and
-the in-group short form it is for ("Border width" → "Width", with
-the full name kept for VoiceOver through `a11yLabel`) travel with
-those rows: they live on in Advanced Colours' twin drag columns,
-which take the width as `AdvancedColorRow`'s `labelWidth:`, and
-this editor no longer pushes the narrow axis in through
+alignment to Lua alone (#754). The narrowing that lets a
+half-width row hold a colour field (`dragColumnLabelColumn`) and
+the in-group short form it is for ("Border color" → "Border",
+with the full name kept for VoiceOver through `a11yLabel`) travel
+with those rows: they live on in Advanced Colours' twin drag
+columns, which take the width as `AdvancedColorRow`'s
+`labelWidth:`, and this editor no longer pushes the narrow axis in through
 `settingsLabelColumn` at all — what remains here is toggles, which
 draw their own labels. Wherever the ghost and drop zone are drawn
 — the Gaps & Borders panel's composite scene (#793) — the drawing
@@ -10536,7 +10536,11 @@ to move a VALUE to its new spelling, and one the ruling
 discards has none. The decoder no longer asks for
 `drag.corner_radius` or either visual's `border_width`, an old
 file stays readable beside them, and the next write of that file
-drops them (`WindowStrokeTests` ▸ `oldDragKeysAreIgnored`).
+drops them (`WindowStrokeTests` ▸ `oldDragKeysAreIgnored`). Nor
+is §5's meaning-change crossing (#1354) owed: `border.width` and
+`border.corner_style` keep their unit and scale and only widen
+their reach to every stroke, which is the change the ruling
+decided, so a stored value reads as it did.
 :::
 
 **[Rationale]**
@@ -11555,8 +11559,8 @@ and whether it stacks over an app's own chrome, stay
 functionality. The width and corners are every window
 stroke's (#1742), so a look restyles the drag ghost and drop
 zone with the ring through the same writes `border.set_width`
-and `border.set_corner_style` make. Only the global gaps ride; a Space's own override
-(Lua's) stays. **Gaps move windows**, so a look is the first
+and `border.set_corner_style` make. Only the global gaps ride; a
+Space's own override (Lua's) stays. **Gaps move windows**, so a look is the first
 paint that rearranges them — once the draft is saved, as any gap
 edit does, which the page's caption says, and the Gaps card's
 pointer names the look as a writer of both. **A

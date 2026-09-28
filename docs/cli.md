@@ -347,8 +347,7 @@ that had the nudge off becomes `keep`, and a call to
 :::
 
 :::unreleased
-The ghost and the drop zone draw at the focus border's width and
-corner style. `drag.set_ghost_border_width` and
+`drag.set_ghost_border_width` and
 `drag.set_drop_zone_border_width` fail naming `border.set_width`,
 and `drag.set_corner_radius` fails naming
 `border.set_corner_style`.

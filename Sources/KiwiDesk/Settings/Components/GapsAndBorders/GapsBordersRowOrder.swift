@@ -17,7 +17,7 @@ enum GapsBordersRowOrder {
         .borders(.borderFitGaps),
     ]
 
-    /// Border width and corner master setting keys (#754).
+    /// Every window stroke's width and corners (#754, #1742).
     static let borders: [SettingKey] = [
         .borders(.borderWidth),
         .borders(.borderCorner),

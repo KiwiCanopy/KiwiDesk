@@ -130,9 +130,8 @@ semantic field uses the same control on comparable full-width
 surfaces*: the two bar cards both render Active indicator as
 segments. Segmented under the
 rule: the App Bar fields, Stack's Master orientation / Stack
-position / Overflow, Track's Overflow, and Corners (every
-window stroke's, #754). Menus where the rule keeps
-them: new-window placement (comparative labels), the
+position / Overflow, Track's Overflow, and Corners. Menus where
+the rule keeps them: new-window placement (comparative labels), the
 seven-option Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
 
@@ -828,10 +827,8 @@ way and is orthogonal to this GUI↔wire question.
 #406).** The rule above covers the case where the wire term is
 *correct* and the label alone is ambiguous, so only the label
 moves. When the **wire** term is factually wrong for what it
-names, the accurate side stays and the outlier moves. Three
-renames are that case: `drag.set_ghost_border_thickness` →
-`…_border_width` (the GUI says "Width"; a stroke has a width, a
-bar has a thickness), `track.set_count` → `track.set_limit`
+names, the accurate side stays and the outlier moves. Two
+renames are that case: `track.set_count` → `track.set_limit`
 (the GUI says "Track limit"; the value is a cap that
 `auto_tracks` overrides, not a count of what exists), and
 `tab_background` → `background_style` on both bars (the entries
@@ -1283,7 +1280,8 @@ Greying applied across a whole editor (#520, #527):
   overwrite disagree it carries a `?` saying so ("The edges are
   set differently right now; a value here sets all of them") and
   stays live, and a segmented picker whose pill can hide for an
-  unmatched value shows *no answer* rather than asserting one. A *remote* control-scoped gate (the gating
+  unmatched value shows *no answer* rather than asserting one. A
+  *remote* control-scoped gate (the gating
   field lives on another **destination**) has no adjacency to
   answer "why", so it takes a **live pointer whose sentence
   names the destination to go to**, in one of two shapes. Where

@@ -8,6 +8,10 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
+  # The window stroke below is derived and stored beside the drag
+  # markers, where a per-stroke store would be re-added.
+  - "Sources/KiwiDeskCore/Tiling/WindowStroke.swift"
+  - "Sources/KiwiDeskCore/Tiling/DragVisual.swift"
 ---
 
 # Focus ring & sticky mark overlays
@@ -229,6 +233,22 @@ stroke or fill**, or a translucent colour stacks twice
 (`BorderSheenSurfaceTests`). **The ramp's flat band stays the
 configured colour**, which carries #578's contrast; only the ends
 move (`BorderSheenFlatBandTests`).
+
+## Every window stroke is the border's
+
+**A stroke KiwiDesk draws around a window takes its width and
+corner style from the focus border, and stores none of its
+own** (#1742): the drag markers read them through
+`TilingSettings.windowStroke`, and a new marker surface reads
+the same. Do not re-add a per-stroke width or radius, in the
+model, a verb or a look — the split drifted three times, each
+fix a fan-out to keep the stores agreeing (#754, #1739), and the
+store it drifts in is the defect. `WindowStrokeTests` ▸
+`dragVisualStoresNoStroke` pins the stores and
+`WindowStrokeTests` ▸ `dragPathsReadTheStroke` the two render
+paths. The product
+ruling is `docs/design-decisions.md` ▸ One width and one corner
+style for every window stroke.
 
 ## Exercising the fallback path
 

@@ -299,8 +299,8 @@ synonym:
   read as the accessibility setting, worst of all in German
   where *Bewegung* is macOS's own word for it.
 - **width** vs **thickness** — a *stroke* has a width
-  (`border.set_width`, which every window stroke takes since
-  #1742); a *bar* has a thickness (`kiwishelf.set_thickness`).
+  (`border.set_width`); a *bar* has a thickness
+  (`kiwishelf.set_thickness`).
 - **gap** vs **margin** — a *gap* is room between the things a
   surface lays out: windows (`set_gap_global`'s outer and inner
   gaps) or the shelf's items and bars (`kiwishelf.set_item_gap`);

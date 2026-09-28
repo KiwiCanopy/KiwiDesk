@@ -2997,11 +2997,9 @@ drag.set_liquid_glass(false)
 :::unreleased
 ### Retired drag verbs
 
-The ghost and the drop zone draw their stroke at the focus
-border's width and corner style, so these verbs are retired. A
-call in `init.lua` is reported in Config Issues, naming what
-replaces it; over the CLI it fails with
-`<verb> was retired — use <replacement>`.
+These verbs are retired. A call in `init.lua` is reported in
+Config Issues, naming what replaces it; over the CLI it fails
+with `<verb> was retired — use <replacement>`.
 
 - `drag.set_ghost_border_width` and
   `drag.set_drop_zone_border_width` →
@@ -3010,8 +3008,7 @@ replaces it; over the CLI it fails with
   [`border.set_corner_style`](#borderset_corner_style).
 
 A saved profile's `drag.corner_radius` and each visual's
-`border_width` are no longer read: every stroke takes the
-border's values.
+`border_width` are no longer read.
 :::
 
 ## Focus Border

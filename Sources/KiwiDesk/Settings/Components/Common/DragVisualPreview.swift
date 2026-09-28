@@ -33,11 +33,8 @@ struct DragVisualPreview: View {
     private var mock: some View {
         let scaled = WindowStroke(
             width: scale(stroke.width, from: 0...20, to: 0...10),
-            cornerRadius: scale(
-                stroke.cornerRadius,
-                from: 0...40,
-                to: 0...20
-            )
+            cornerRadius: stroke.cornerRadius > 0
+                ? FocusBorderPreview.roundedRadius : 0
         )
         // `DragOverlay.adjustedFrame`: the border straddles the
         // slot edge by half its width, inward or outward (#231).
