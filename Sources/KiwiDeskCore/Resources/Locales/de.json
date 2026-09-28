@@ -832,7 +832,7 @@
   "looks.description.glass": "Verwischt den Hintergrund, wie %1$@",
   "looks.description.pill": "Abgerundet und schwebend, wie %1$@",
   "looks.description.taskbar": "Leiste unten, wie %1$@",
-  "looks.description.tiler": "In Kästchen, mit Monospace-Schrift, wie %1$@",
+  "looks.description.tiler": "In Kästchen, in Monospace, wie %1$@",
   "looks.empty_hint": "Sichere den aktuellen Look von KiwiShelf, dann erscheint er hier.",
   "looks.export": "Exportieren…",
   "looks.import": "Importieren…",
