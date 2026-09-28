@@ -280,6 +280,8 @@ public final class KiwiCore {
     /// state, retired where a declaration adopts the seed
     /// (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
+    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
+    var appWideLedger = AppWideLedger()
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and
     /// captured back on save. nil falls back to the space

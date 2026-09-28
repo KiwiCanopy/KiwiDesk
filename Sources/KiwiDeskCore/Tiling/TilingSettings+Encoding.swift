@@ -72,11 +72,6 @@ extension TilingSettings {
             forKey: .resize
         )
         try resize.encode(resizeStep, forKey: .step)
-        var refusal = container.nestedContainer(
-            keyedBy: RefusalKeys.self,
-            forKey: .refusal
-        )
-        try refusal.encode(refusalSound, forKey: .sound)
         var shortcutPanel = container.nestedContainer(
             keyedBy: ShortcutPanelKeys.self,
             forKey: .shortcutPanel
@@ -84,15 +79,6 @@ extension TilingSettings {
         try shortcutPanel.encode(
             shortcutPanelLiquidGlass,
             forKey: .liquidGlass
-        )
-        var quit = container.nestedContainer(
-            keyedBy: QuitKeys.self,
-            forKey: .quit
-        )
-        try quit.encode(quitLayout, forKey: .layout)
-        try quit.encode(
-            quitGridTargetDepth,
-            forKey: .gridTargetDepth
         )
     }
 }

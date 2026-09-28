@@ -62,7 +62,8 @@ extension SettingsModel {
     var generalGates: GeneralGates {
         GeneralGates(
             autoStart: autoStart,
-            autoInstall: updater.autoInstall.unavailable
+            autoInstall: updater.autoInstall.unavailable,
+            guiManaged: guiManaged
         )
     }
 }

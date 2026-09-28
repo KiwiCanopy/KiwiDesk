@@ -38,7 +38,7 @@ extension KiwiCore {
     /// than per frame — which is what makes sounding a real
     /// refusal safe where sounding every `.fail` never was.
     func soundRefusal() {
-        guard keys.isFiring, tiler.settings.refusalSound
+        guard keys.isFiring, appWide.refusalSound
         else { return }
         NSSound.beep()
     }

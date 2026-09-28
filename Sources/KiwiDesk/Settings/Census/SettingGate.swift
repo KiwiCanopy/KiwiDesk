@@ -14,6 +14,9 @@ enum SettingRuntimeGate: Hashable {
     /// Sparkle refuses automatic install: no update channel, or
     /// automatic checks are off (#1542).
     case automaticInstallUnavailable
+    /// `init.lua` owns the config, so a General row that stores in
+    /// `gui.json` has no store to write (#1741).
+    case luaOwnsConfig
     /// Space reset is inert when no overrides exist.
     case spaceHasNoOverrides
     /// macOS Reduce Motion greys animations card.

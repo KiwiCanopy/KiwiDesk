@@ -5,7 +5,9 @@ enum GeneralRowOrder {
     static let appliesImmediately: [SettingKey] = [
         .general(.language),
         .general(.appearance),
+        .general(.refusalSound),
         .general(.startAtLogin),
+        .general(.quitGridTargetDepth),
         .general(.installUpdatesAutomatically),
     ]
 

@@ -195,31 +195,6 @@ struct HomeCardContentTests {
         )
     }
 
-    /// The behaviour answer follows the alert-sound cue and the
-    /// quit target — what the page holds since #1726 moved the
-    /// mouse rows away. The frames must differ, or the card gives
-    /// one answer whichever cue the draft holds (the mouse-resize
-    /// branch shipped that way once, guard-prover 2026-08-04).
-    @Test("the behaviour answer follows the cue and the quit depth")
-    func behaviorAnswer() {
-        pinEnglish()
-        let model = model()
-        model.config.settings.refusalSound = true
-        model.config.settings.quitGridTargetDepth = 7
-        let sound = HomeCardContent.subtitle(
-            for: .behavior,
-            model: model
-        )
-        model.config.settings.refusalSound = false
-        let silent = HomeCardContent.subtitle(
-            for: .behavior,
-            model: model
-        )
-        #expect(sound != silent, "alert sound ignored")
-        #expect(sound.hasSuffix(": 7"))
-        #expect(silent.hasSuffix(": 7"))
-    }
-
     @Test("the app-rules answer covers pins and floats")
     func appRulesAnswer() {
         pinEnglish()

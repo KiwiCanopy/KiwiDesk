@@ -61,6 +61,11 @@ struct GateReasonPlacementTests {
                 // refusal, a cause shown nowhere else, so
                 // `AutoInstallRow` draws the sentence under it.
                 .general(.installUpdatesAutomatically),
+                // #1741: the two app-wide rows grey under a
+                // Lua-owned config, a cause shown nowhere on
+                // General, so each draws its sentence.
+                .general(.refusalSound),
+                .general(.quitGridTargetDepth),
                 // Back in the set with #1392: the stored-profile
                 // arm (cause on the surface) retired, and the
                 // one that greys now — a stored Save with no

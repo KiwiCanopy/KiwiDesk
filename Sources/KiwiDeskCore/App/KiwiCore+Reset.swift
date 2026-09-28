@@ -98,6 +98,7 @@ extension KiwiCore {
         healedSpaces = [:]
         forgetHeldSpaces()
         tiler.settings = TilingSettings()
+        resetAppWide()
         // Live spaces down to the first-launch set before the
         // reload's seed reads them; windows are forwarded, so
         // nothing is stranded in a pruned space. The target

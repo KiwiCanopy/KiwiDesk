@@ -108,6 +108,9 @@ extension KiwiCore {
             )
         }
         guard !bundle.isEmpty else { throw .empty }
+        // The inline profiles decode without the retired #1741
+        // groups; their values are read off the bytes instead.
+        noteBackupAppWide(bundle, bytes: payload)
         return bundle
     }
 

@@ -177,7 +177,7 @@ struct SettingsDisclosureHeaderTests {
         #expect(style.contains(".contentShape(Rectangle())"))
         #expect(style.contains("Spacer(minLength:0)"))
         #expect(
-            style.contains("configuration.isExpanded.toggle()")
+            style.contains("isExpanded.toggle()")
         )
     }
 
@@ -221,7 +221,7 @@ struct SettingsDisclosureHeaderTests {
         )
         #expect(
             style.contains(
-                ".rotationEffect(.degrees(expanded?90:0))"
+                ".rotationEffect(.degrees(isExpanded?90:0))"
             )
         )
     }

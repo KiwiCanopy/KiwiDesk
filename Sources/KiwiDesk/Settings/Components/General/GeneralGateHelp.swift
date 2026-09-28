@@ -29,6 +29,12 @@ enum GeneralGateHelp {
                 "general.updates.install_automatically.checks_off",
                 "Available while KiwiDesk checks for updates on its own."
             )
+        case .luaOwned:
+            return L(
+                "general.app_wide.lua_owned",
+                "Your configuration is written in init.lua, so set "
+                    + "this there."
+            )
         case .managedByService:
             // Command string and control label are interpolated (#818, #1071).
             return L(

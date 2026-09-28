@@ -11,7 +11,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case advancedColors
     case gapsAndBorders
     case bars
-    case behavior
     // Whole App
     case profiles
     case shortcuts
@@ -29,7 +28,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// (`HomeCardOrderTests` pins the shared membership).
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .gapsAndBorders,
-        .bars, .looks, .advancedColors, .behavior,
+        .bars, .looks, .advancedColors,
     ]
     /// Destinations scoped globally across the application. The
     /// checklist is LAST here so a search for "Spaces" or "Dock"
@@ -57,7 +56,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .gapsAndBorders:
             return L("destination.gaps_borders", "Gaps & Borders")
         case .bars: return L("destination.bars", "KiwiShelf & Bars")
-        case .behavior: return L("destination.behavior", "Behavior")
         case .profiles: return L("destination.profiles", "Profiles")
         case .shortcuts:
             return L("destination.shortcuts", "Shortcuts & Gestures")
@@ -79,7 +77,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .advancedColors: return "paintpalette.fill"
         case .gapsAndBorders: return "square.dashed.inset.filled"
         case .bars: return "menubar.rectangle"
-        case .behavior: return "switch.2"
         case .profiles: return "square.stack.3d.up"
         case .shortcuts: return "keyboard"
         case .appRules: return "app.badge.checkmark"
@@ -100,7 +97,6 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return Color(red: 0.38, green: 0.20, blue: 0.60)
         case .gapsAndBorders: return .brown
         case .bars: return .pink
-        case .behavior: return .orange
         case .profiles:
             // The brand green ITSELF, read from the theme — this
             // shipped as RGB floats with a "keep in sync" comment,

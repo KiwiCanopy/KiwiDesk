@@ -213,11 +213,11 @@ is selected.
 
 ## Shared visual language
 
-**A section or disclosure title is sentence case** — "On quit",
-"Drag & drop", "Move windows", not "On Quit" or "Drag & Drop"
-(R5, #406), which is what macOS System Settings uses for its
-own in-pane headers. Three boundaries, because System Settings
-itself draws them:
+**A section or disclosure title is sentence case** —
+"Applies immediately", "Drag & drop", "Move windows", not
+"Applies Immediately" or "Drag & Drop" (R5, #406), which is
+what macOS System Settings uses for its own in-pane headers.
+Three boundaries, because System Settings itself draws them:
 
 - **The rule is scoped to headers** — `SettingsSection` titles
   and the labels of an "Advanced" disclosure. The
@@ -328,6 +328,20 @@ title's far edge, drawn in `ink2` at `.subheadline`, the Mac
 Checklist's "Done: 2 of 4" — and never a control: an accessory
 that acts needs a name and a value of its own, which is the
 drawer accessory's job above.
+
+:::unreleased
+**A collapsible container that stands beside the page's
+sections is a collapsible section, not a drawer.**
+`SettingsCollapsibleSection` draws `SettingsSection`'s
+`.headline` header over the section plate; shut, the plate stays
+and holds the summary (`.callout`, `ink3`), and clicking the
+summary opens it too. A drawer that qualifies a card stays a
+`SettingsDisclosure` at the drawer tier. Both draw their header
+through the one `SettingsDisclosureButton`, so the full-row
+button, chevron, hover, heading trait and expanded value above
+hold for both, and search opens either on a hit for one of its
+catalog children. The ruling is in `docs/design-decisions.md`.
+:::
 
 **Weigh every title edit against the search index.** Search
 indexes destination titles, every census-labelled setting row
