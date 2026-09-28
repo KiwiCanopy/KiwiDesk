@@ -62,6 +62,7 @@ extension AppDelegate {
         onboardingModel.keyFamilies = { [weak self] in
             self?.onboardingKeyFamilies() ?? []
         }
+        wireOnboardingLooks()
         // Resolved after wiring so step handlers are in place (#828, #888).
         onboardingModel.beginPresentation(at: entry)
 

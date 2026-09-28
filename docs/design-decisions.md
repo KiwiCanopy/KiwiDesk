@@ -6355,6 +6355,66 @@ correct failure here — the screen without the sentence is exactly
 the screen that shipped before it, while the sentence with a
 rebound keymap behind it teaches someone else's keyboard.
 
+:::unreleased
+### The tour's look is written through, and the tour owns its undo
+
+**[Principle]**
+
+**A click on the tour's Looks step is the whole act: it paints
+KiwiDesk live and writes the same change into the live profile's
+file, and the step carries its own Revert** (#1720, owner rulings
+2026-09-28). Everywhere else in Settings an edit is a draft until
+Save. The tour has no save pill and nothing that narrates a
+draft, and a user who picks Taskbar, watches their windows retile
+above the new bottom bar and clicks Continue has chosen: a draft
+there would ask them to commit a choice they already watched take
+effect, or keep it only until the next reload.
+
+Writing through leaves Settings' Revert nothing to undo, so the
+undo lives where the change was made — one path, which is why a
+"current colours" tile was ruled out as a second. The step's
+Revert is greyed until a click changed something, and returns
+what a paint can reach to where it stood before the first one —
+the look and palette keys, and the glass leaves and per-layout
+indicators a look writes beyond them — and nothing else: a setting
+outside those saved from Settings meanwhile stays, while one inside
+them returns with the rest (`ShelfPaintTests` ▸
+`restoreTouchesOnlyTheLook`, `ShelfPaintRoundTripTests` ▸
+`revertRoundTripsEveryLook`). A pick that
+changes nothing and a step left untouched write nothing
+(`OnboardingLooksTests` ▸ `noOpPickWritesNothing`,
+`OnboardingLooksTests` ▸ `untouchedWritesNothing`).
+
+Three obligations keep the write honest:
+
+- **It writes what the click changed and nothing else.** The file
+  half reads the stored profile, paints it and writes it back,
+  non-adopting, and never snapshots live the way Keep does (#1179;
+  `ShelfPaintTests` ▸ `fileKeepsItsOwnSettings`). A Revert is
+  refused once another profile went live, whose settings the
+  baseline never described (`ShelfPaintTests` ▸
+  `restoreSkipsAnotherProfile`).
+- **An unsaved live-profile Settings draft greys the step**, since
+  its Save would write the old look back over the new one — greyed
+  and never hidden, with a caption naming the buttons that clear
+  it (`OnboardingLooksTests` ▸ `draftBlocks`). A clean draft
+  re-reads after every paint, through Core's `onShelfPainted` on
+  the write (`ShelfPaintTests` ▸ `paintsAreAnnounced`,
+  `OnboardingLooksWiringTests` ▸ `paintFollowsIntoSettings`).
+- **Where no saved profile is live, the click lasts the session**
+  (`ShelfPaintTests` ▸ `noProfileIsLiveOnly`): there is no file to
+  write. A first run always has one, the seeded Starter; only a
+  replay over a built-in layout reaches this, and Settings already
+  narrates that layout as unsaved.
+
+The step has no "use its colours too" tick: a look click paints
+the look's shape and the palette it names, and the palette row
+below then repaints the colours alone and keeps the shape
+(`ShelfPaintTests` ▸ `paletteKeepsTheShape`). The marks are read
+from the live settings on every render, so after hand-tuned
+colours nothing reads selected until a click.
+:::
+
 ### The Mac Checklist counts what macOS can confirm
 
 **[Principle]**
@@ -11576,7 +11636,12 @@ over them. A look card draws its focus ring with the sheen
 (owner, 2026-09-28) — a deliberate exception to the palette
 thumbnail's rule of leaving a fact it cannot render undrawn at tile
 scale, paid for with a ring wide enough for the ramp to read. The
-names are ours; the reference lives only in the description.
+names are ours; the reference lives only in the description,
+which says what the look does before what it resembles — "Bottom
+bar, like Windows 11" — because a new user does not know the bar
+vocabulary and the thumbnail cannot carry it (owner, 2026-09-28).
+A look has one description, shared by the Settings card and the
+tour, Glass's included (`LookDescriptionsTests`).
 :::
 
 **"Automatic" is a value; "Auto" is an adjective — and the

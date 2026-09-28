@@ -75,6 +75,17 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptKeptLayout()
     }
 
+    /// Whether a live-profile draft holds edits a Save would
+    /// write over a tour paint (#1720); a stored profile's cannot.
+    var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
+
+    /// Re-reads a clean draft after the tour painted the shelf
+    /// (#1720), so a later Save writes the new look rather than
+    /// the colours the draft was opened with.
+    func adoptShelfPaint() {
+        if !model.isDirty { model.reload() }
+    }
+
     /// Re-reads saved profiles list without discarding staged edits (#246).
     func refreshProfiles() {
         model.refreshProfiles()

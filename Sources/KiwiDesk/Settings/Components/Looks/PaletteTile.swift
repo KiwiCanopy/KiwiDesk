@@ -7,6 +7,9 @@ struct PaletteTile<Plate: View>: View {
     var caption: String?
     var isApplied = false
     var dashed = false
+    /// Lines the caption wraps to, reserved so a row of tiles
+    /// ends level.
+    var captionLines = 1
     @ViewBuilder var plate: () -> Plate
 
     /// The plate's height matching `PaletteSceneThumbnail.baseHeight`.
@@ -28,7 +31,7 @@ struct PaletteTile<Plate: View>: View {
             Text(caption ?? " ")
                 .font(.caption2)
                 .foregroundStyle(SettingsTheme.ink3)
-                .lineLimit(1)
+                .lineLimit(captionLines, reservesSpace: true)
         }
         .padding(Self.inset)
         .frame(maxWidth: .infinity)
