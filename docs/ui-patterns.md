@@ -727,6 +727,23 @@ tunable layout gets a schematic, Monocle included* — it draws
 the **navigation model** (a fan of full-screen cards +
 `orientation` cycle chevrons), not geometry.
 
+:::unreleased
+**A thumbnail that is read rather than compared plays its layout
+once** — the one exception to the no-idle-animation rule above.
+The setup tour's Spaces step and the preset preview sheet host
+it: it plays one short story as it appears and again on hover,
+never loops, and under Reduce Motion never leaves its resting
+frame. That frame is not the schematic described below: a
+tiling story draws the engine's arrangement of windows arriving
+one at a time, no story draws a `+` slot, and it rests on its
+story's own window count — lowered to what the Space fits
+without a pile — rather than
+`LayoutSchematic.defaultWindowCount`. The Layouts chooser, its
+Live preview and the Home cards stay at rest. Why is
+[design decisions](design-decisions.md) ▸ *A thumbnail that is
+read rather than compared*.
+:::
+
 One schematic serves several surfaces at two scales
 (`SchematicScale`, whose own doc comment is the authority on what
 each scale is *for*): a thumbnail in the "Choose a layout" strip

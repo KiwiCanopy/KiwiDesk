@@ -7,15 +7,25 @@ struct LayoutSchematicView: View {
     let settings: TilingSettings
     let windows: Int
     let scale: SchematicScale
+    /// A tour story's phase (#1750); every other surface rests.
+    var motion: SchematicMotion = .rest
     @Environment(\.schematicPalette) private var palette
 
     /// Resolved focus ring highlight color for schematic preview.
     private var focusStroke: Color? {
+        Self.focusStroke(settings, onPlate: palette != nil)
+    }
+
+    /// The focus ring's colour on a schematic: the configured
+    /// focused colour, or none where borders are off or the
+    /// colour sinks into the plate. Shared with the story canvas.
+    static func focusStroke(
+        _ settings: TilingSettings,
+        onPlate: Bool
+    ) -> Color? {
         let style = settings.borderStyle
         guard style.enabled else { return nil }
-        if palette != nil,
-            !HomeCardPlate.plateLegible(style.focusedColor)
-        {
+        if onPlate, !HomeCardPlate.plateLegible(style.focusedColor) {
             return nil
         }
         return Color(kiwiHex: style.focusedColor)
@@ -59,7 +69,8 @@ struct LayoutSchematicView: View {
                 placement: settings.scrolling.newWindowPlacement,
                 fillWhenAlone: settings.scrolling.fillWhenAlone,
                 windows: windows,
-                scale: scale
+                scale: scale,
+                focusStep: motion.focus
             )
         case .grid:
             GridSchematic(
@@ -78,7 +89,8 @@ struct LayoutSchematicView: View {
                 orientation: settings.monocle.orientation,
                 hideStyle: settings.monocle.hideStyle,
                 windows: windows,
-                scale: scale
+                scale: scale,
+                turn: motion.turn
             )
         case .track:
             TrackSchematic(
@@ -92,7 +104,11 @@ struct LayoutSchematicView: View {
                 scale: scale
             )
         case .floating:
-            FloatingSchematic(windows: windows, scale: scale)
+            FloatingSchematic(
+                windows: windows,
+                scale: scale,
+                drag: motion.drag
+            )
         }
     }
 }

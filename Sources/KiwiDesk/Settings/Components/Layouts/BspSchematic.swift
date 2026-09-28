@@ -13,11 +13,12 @@ struct BspSchematic: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
 
     /// Restage animation damping gated on Reduce Motion
-    /// (`LayoutSchematic.damping`, #1069).
+    /// (`\.schematicRestage`, #1069).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     private var frameWidth: CGFloat? { scale.width }

@@ -18,10 +18,11 @@ struct StackSchematic: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
 
     /// Restage animation damping gated on Reduce Motion (#1069).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     /// Derived stack orientation matching engine

@@ -13,9 +13,13 @@ struct ScrollingSchematic: View {
     /// Windows in row including incoming window.
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
+    /// Tour story phase (`SchematicMotion.focus`, #1750).
+    var focusStep = 0
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
+    @Environment(\.schematicTellsStory) var tellsStory
     /// The along-axis length the strip last laid out at — what the
     /// words are judged on, since the pane's width is the host's
     /// (`LayoutSchematicCenterCaptionTests`).
@@ -23,7 +27,7 @@ struct ScrollingSchematic: View {
 
     /// Restage animation damping gated by Reduce Motion (#1069).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     /// Monitor share of canvas along scroll axis (`LayoutSchematicScaleTests`,
@@ -99,6 +103,7 @@ struct ScrollingSchematic: View {
             GeometryReader { geo in
                 strip(geo.size)
             }
+            .modifier(StoryClip(clips: tellsStory))
             .animation(damping, value: anchor)
             .animation(damping, value: orientation)
             .animation(damping, value: slotSize)
@@ -115,6 +120,7 @@ struct ScrollingSchematic: View {
         var screenStart: CGFloat
         var screenLen: CGFloat
         var focusCenter: CGFloat
+        var focus: Int
         var newIdx: Int
         var low: Int
         var high: Int
@@ -130,13 +136,14 @@ struct ScrollingSchematic: View {
         let low = placed.slots.lowerBound
         let high = placed.slots.upperBound
         let newIdx = placed.incoming
+        let focus = focusIndex
         // Where the row rests is the ENGINE's answer (#776). A
         // static preview has no pan history, so `follow` is asked
         // from a centred one — the engine's own `.center` rest
         // (#753, #1388).
         let count = high - low + 1
         let rowLength = CGFloat(count) * step - gap
-        let focusedPos = CGFloat(-low) * step
+        let focusedPos = CGFloat(focus - low) * step
         let resting = ScrollingLayout.offset(
             anchor: anchor.keepsRowOnScreen ? .center : anchor,
             previous: nil,
@@ -166,6 +173,7 @@ struct ScrollingSchematic: View {
             screenStart: screenStart,
             screenLen: screenLen,
             focusCenter: focusCenter,
+            focus: focus,
             newIdx: newIdx,
             low: low,
             high: high
@@ -198,9 +206,10 @@ struct ScrollingSchematic: View {
         }
     }
 
-    /// Along-axis centre of window `i` (index 0 is the focus).
+    /// Along-axis centre of window `i` (index 0 is the resting
+    /// focus).
     func center(_ i: Int, _ m: Metrics) -> CGFloat {
-        m.focusCenter + CGFloat(i) * m.step
+        m.focusCenter + CGFloat(i - m.focus) * m.step
     }
 
     @ViewBuilder
@@ -209,12 +218,18 @@ struct ScrollingSchematic: View {
         _ m: Metrics,
         along: CGFloat
     ) -> some View {
-        if !onCanvas(i, m, along: along) {
+        if tellsStory {
+            // Every slot a window, hidden by the story's clip: a
+            // branch flipping mid-pan would cross-fade (#1750).
+            SchematicTile(active: i == m.focus)
+        } else if !onCanvas(i, m, along: along) {
             EmptyView()
         } else if i == m.newIdx, !lone {
-            SchematicNewWindow(badgeAlignment: badgeAlignment(i))
+            SchematicNewWindow(
+                badgeAlignment: badgeAlignment(i - m.focus)
+            )
         } else if onScreen(i, m) {
-            SchematicTile(active: i == 0)
+            SchematicTile(active: i == m.focus)
         } else {
             SchematicGhostOverflow()
         }
@@ -248,7 +263,11 @@ struct ScrollingSchematic: View {
     /// edge cuts: one showing more than the quantum and less than
     /// its whole (on screen is on canvas, `screenFraction`).
     func cutsWindow(along: CGFloat) -> Bool {
-        let m = metrics(along: along)
+        // Judged on the rest frame: the words describe where the
+        // row rests, not a story's passing start (#1750).
+        var resting = self
+        resting.focusStep = 0
+        let m = resting.metrics(along: along)
         return (m.low...m.high).contains { i in
             let shown = overlap(i, m)
             return shown > Self.cutQuantum

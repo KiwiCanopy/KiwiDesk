@@ -9,13 +9,16 @@ struct MonocleSchematic: View {
     @Environment(\.schematicPalette) private var palette
     var windows = LayoutSchematic.defaultWindowCount
     var scale: SchematicScale = .tile
+    /// Tour story phase (`SchematicMotion.turn`, #1750).
+    var turn: Double = 0
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
 
-    /// Restage animation damping (#1069, `LayoutSchematic.damping`).
+    /// Restage animation damping (#1069, `\.schematicRestage`).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     private var horizontal: Bool { orientation == .horizontal }
@@ -63,11 +66,25 @@ struct MonocleSchematic: View {
             ) { level in
                 card(front: level == 0)
                     .padding(10)
+                    .rotation3DEffect(
+                        .degrees(level == 0 ? turn * 180 : 0),
+                        axis: turnAxis,
+                        perspective: 0.6
+                    )
                     .offset(
                         x: CGFloat(level) * 5,
                         y: -CGFloat(level) * 5
                     )
             }
+        }
+    }
+
+    /// The axis the front card turns about: the live flip's own
+    /// (`MonocleFlipPlan.axis(for:)`, #1391).
+    private var turnAxis: (x: CGFloat, y: CGFloat, z: CGFloat) {
+        switch MonocleFlipPlan.axis(for: orientation) {
+        case .vertical: return (0, 1, 0)
+        case .horizontal: return (1, 0, 0)
         }
     }
 

@@ -214,6 +214,38 @@ restated `20...80` satisfies on the day it is written.
     words held to the predicate at every length and the
     predicate to the drawing by
     `LayoutSchematicCenterCaptionTests`.
+- **A thumbnail that is READ may play its layout once; one that
+  is COMPARED stays at rest** (#1750). Only a host in
+  `LayoutStoryWiringTests`' `hosts` map mounts
+  `LayoutStoryThumbnail`, and a new host joins that map with its
+  reason — the Layouts chooser, its detail panel and the Home
+  cards stay off it, since they restage as feedback on a
+  changing draft. A story's phase and pace reach a schematic
+  from the player alone: no other `LayoutSchematicView(` call
+  is handed `motion:` (`LayoutStoryWiringTests` ▸
+  `motionComesFromThePlayer`), nothing else writes
+  `\.schematicRestage` or the story flag `\.schematicTellsStory`
+  (`LayoutStoryWiringTests` ▸ `restageComesFromThePlayer`), and
+  nothing else draws `LayoutStoryCanvas`, which clips at its
+  screen edge (`LayoutStoryWiringTests` ▸
+  `canvasComesFromThePlayer`). A story is started only by its
+  appearance or a host's replay — the player must never
+  schedule its own next run, which is review's, since no scan
+  sees a loop — and under Reduce Motion it stays on the rest
+  frame, its guard ahead of the jump to the start
+  (`LayoutStoryWiringTests` ▸ `reduceMotionStaysAtRest`). Its
+  resting count comes from the one
+  `LayoutStory.restingWindows(for:settings:)`, which the player
+  reads itself so two hosts cannot tell different stories
+  (`LayoutStoryTests` ▸ `restingCounts`, `playerTakesTheCount`),
+  and which never rests on a pile
+  (`LayoutStoryArrangementTests` ▸ `restsWithinWhatFits`). A
+  tiling story's frames are `LayoutEngine`'s over windows
+  arriving through the Space's own insert
+  (`LayoutStoryArrangement`), identities stable across an
+  arrival (`LayoutStoryArrangementTests` ▸ `identitiesAreStable`).
+  `docs/design-decisions.md` ▸ *A thumbnail that is read rather
+  than compared* carries why.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
   entry on the Shortcuts & Gestures page teaches a gesture rather
   than a rest state, so its picture may move — only while hovered,
@@ -1626,18 +1658,23 @@ Reduce Motion read at its site, rather than here, where nobody
 editing an overlay would meet it.
 
 **A shared animation constant stays a plain VALUE; the gate is
-spelled at each caller.** Sharing the TUNING is fine — every
-layout schematic reads `LayoutSchematic.damping`, and so does
-the gaps diagram beside them — but folding the ternary into
-that shared accessor puts the gate one indirection past what a
+spelled at each reader.** Sharing the TUNING is fine — as a
+constant (`LayoutSchematic.damping`) or as a plain value
+carried through an environment key (`\.schematicRestage`,
+whose default is that constant) — but folding the ternary into
+the shared accessor puts the gate one indirection past what a
 source scan can follow: deleting it there ungates the lot in
 one line while every call-site
 binding still mentions `reduceMotion`, and the guard stays green
-(guard-prover, #1069). So each schematic spells
-`reduceMotion ? nil : LayoutSchematic.damping` in its own
-`damping` binding. That is duplication the guard can SEE, which
+(guard-prover, #1069). So each reader must spell the ternary in its
+own binding — `reduceMotion ? nil : restage` in a schematic's
+`damping`. That is duplication the guard can SEE, which
 beats an abstraction it cannot — the same trade #989 made in
 rejecting the `if reduceMotion { … } else { … }` spelling. A
+tuning carried through the environment takes a registered
+writer as well, since an ancestor writing it re-paces every
+reader beneath: `LayoutStoryWiringTests` ▸
+`restageComesFromThePlayer` is the one copy of who may. A
 model, having no environment, is the one caller that reaches the
 flag through a parameter instead.
 

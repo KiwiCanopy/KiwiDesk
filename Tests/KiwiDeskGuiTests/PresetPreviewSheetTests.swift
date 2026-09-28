@@ -219,17 +219,16 @@ struct PresetPreviewSheetTests {
     /// `.panel` is 240 pt tall and pane-filling; Command Center
     /// draws ten models, so a sheet of panels would be metres
     /// long. `.tile` at its own size is 1.8× the factor the card
-    /// refused and above the tour's eye-confirmed floor.
-    @Test("the sheet mounts .tile, and states its window count")
+    /// refused and above the tour's eye-confirmed floor. Its
+    /// window count is the story player's ruled one (#1750,
+    /// `LayoutStoryTests`), so the sheet states none of its own.
+    @Test("the sheet mounts .tile through the story player")
     func theSheetMountsTheTileScale() throws {
         let source = try squashed(Self.sheet)
         #expect(source.occurrences(of: "scale:.tile") == 1)
         #expect(source.occurrences(of: "scale:.panel") == 0)
-        #expect(
-            source.occurrences(
-                of: "windows:LayoutSchematic.defaultWindowCount"
-            ) == 1
-        )
+        #expect(source.occurrences(of: "LayoutStoryThumbnail(") == 1)
+        #expect(source.occurrences(of: "windows:") == 0)
     }
 
     // MARK: - How it is presented

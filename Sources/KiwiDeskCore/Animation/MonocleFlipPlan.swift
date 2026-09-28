@@ -81,12 +81,21 @@ public struct MonocleFlipPlan: Equatable, Sendable {
             height: targetSize.height
         )
         return MonocleFlipPlan(
-            axis: orientation == .horizontal ? .vertical : .horizontal,
+            axis: Self.axis(for: orientation),
             sign: sign,
             from: currentFrame,
             to: to,
             duration: TimeInterval(durationMS) / 1000
         )
+    }
+
+    /// The axis the card turns about: the FOCUS axis, so a
+    /// horizontal Monocle turns about the vertical one. The
+    /// Settings schematic's turn reads it too (#1750).
+    public static func axis(
+        for orientation: MonocleParams.Orientation
+    ) -> Axis {
+        orientation == .horizontal ? .vertical : .horizontal
     }
 
     /// When, from the start of the play, the focus swaps: once

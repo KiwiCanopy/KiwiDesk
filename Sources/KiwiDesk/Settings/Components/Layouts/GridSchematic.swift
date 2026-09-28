@@ -16,10 +16,11 @@ struct GridSchematic: View {
 
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.schematicRestage) private var restage
 
     /// Damped animation curve gated on Reduce Motion (#1069).
     private var damping: Animation? {
-        reduceMotion ? nil : LayoutSchematic.damping
+        reduceMotion ? nil : restage
     }
 
     var columnsFirst: Bool {
