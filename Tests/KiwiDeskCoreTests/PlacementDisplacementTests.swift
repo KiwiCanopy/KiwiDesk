@@ -49,7 +49,7 @@ private func makeFixture(
         "set_mode",
         args: [.string(space.raw), .string("scrolling")]
     )
-    core.tiler.placements = PlacementLedger()
+    core.tiler.placements.forgetAll()
     core.state.workspaces.focus(other, in: space)
     return (target, other)
 }
@@ -97,13 +97,10 @@ struct PlacementDisplacementTests {
     func expiredDisplacementIsHonored() {
         let core = makeCore()
         let (target, _) = makeFixture(core)
-        core.tiler.placements.noteDisplaced(
-            target,
-            frame: onscreen,
-            at: Date(
-                timeIntervalSinceNow: -PlacementLedger.echoWindow - 0.1
-            )
-        )
+        core.tiler.placements.noteDisplaced(target, frame: onscreen)
+        core.tiler.placements.clock = {
+            PlacementLedger.echoWindow + 0.1
+        }
         core.handle(.windowFocused(target))
         #expect(focused(core) == target)
     }

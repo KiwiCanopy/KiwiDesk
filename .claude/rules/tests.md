@@ -323,12 +323,14 @@ bite large test PRs:
   covers it, in one of Core's two clock shapes: a `now:`
   PARAMETER threaded from the handler where the write and the
   read share the call chain the test drives (`selfRaiseStamp`,
-  `PlacementLedger.record(at:)` — #1371's stamp-ahead, #1364's
+  `FollowFocusIntent.record(at:)` — #1371's stamp-ahead, #1364's
   backdate), or a CLOSURE on the type where a stamp lands off
   another chain — the applier's post-set stamps on the AX queue
-  (#1254) — as `FrameApplier.clock`, `ZOrderDrain.now` and
-  `TeardownRestack.now` do. `makeTestCore` freezes the applier's
-  (a stamp read in the same test cannot age) and
+  (#1254), the placement stamps at the tiler's leaves (#1161) —
+  as `FrameApplier.clock`, `PlacementLedger.clock`,
+  `ZOrderDrain.now` and `TeardownRestack.now` do. `makeTestCore`
+  freezes the applier's and the ledger's (a stamp read in the
+  same test cannot age) and
   `EchoClockSeamTests` holds the host uptime to those seams'
   defaults and the freeze to both twins. A test that wants the
   EXPIRY moves the clock ahead rather than sleeping past the

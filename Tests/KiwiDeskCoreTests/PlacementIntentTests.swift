@@ -72,7 +72,7 @@ struct PlacementIntentTests {
             "set_mode",
             args: [.string(space.raw), .string("scrolling")]
         )
-        core.tiler.placements = PlacementLedger()
+        core.tiler.placements.forgetAll()
         core.state.workspaces.focus(other, in: space)
         return (core, target, other)
     }

@@ -21,7 +21,7 @@ extension KiwiCore {
     /// REACHES a parked window — the placement lies past the edge
     /// AND the window refused it by origin.
     func placementBounce(_ id: WindowID, now: Date) -> CGRect? {
-        guard let placed = tiler.placements.recent(id, at: now),
+        guard let placed = tiler.placements.recent(id),
             !recentClickReached(id, now: now),
             let actual = state.windows[id]?.frame
         else { return nil }
@@ -88,13 +88,12 @@ extension KiwiCore {
     func reassertAgainstPlacementBounce(
         _ id: WindowID,
         intended: WindowID,
-        placed: CGRect,
-        now: Date
+        placed: CGRect
     ) -> Bool {
         guard !reassertCrossesDesktops(intended, against: id) else {
             return false
         }
-        tiler.placements.renew(id, at: now)
+        tiler.placements.renew(id)
         onLog(
             "focus: w\(id.raw) placement bounce distrusted; "
                 + "re-asserting w\(intended.raw)"

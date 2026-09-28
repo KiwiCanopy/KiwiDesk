@@ -79,7 +79,7 @@ struct DesktopRaiseGateArmTests {
             "set_mode",
             args: [.string(space.raw), .string("scrolling")]
         )
-        core.tiler.placements = PlacementLedger()
+        core.tiler.placements.forgetAll()
         core.state.workspaces.focus(other, in: space)
         core.tiler.placements.stamp(
             target,
@@ -187,7 +187,7 @@ struct DesktopRaiseGateArmTests {
         )
         #expect(core.recentReturns[target] != nil)
         core.state.workspaces.focus(other, in: space)
-        core.tiler.placements = PlacementLedger()
+        core.tiler.placements.forgetAll()
         core.tiler.placements.stamp(
             target,
             target: CGRect(x: 800, y: 100, width: 400, height: 300)

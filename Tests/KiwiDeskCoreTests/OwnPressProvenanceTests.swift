@@ -57,7 +57,7 @@ struct OwnPressProvenanceTests {
             "set_mode",
             args: [.string(space.raw), .string("scrolling")]
         )
-        core.tiler.placements = PlacementLedger()
+        core.tiler.placements.forgetAll()
         core.state.workspaces.focus(other, in: space)
         core.stackingOrderProvider = { [target, other] }
         return (core, target, other)

@@ -10,8 +10,9 @@ import Testing
 ///
 /// Two clauses, the `MouseButtonSeamGuardTests` shape. The host
 /// uptime is read only where a closure seam DEFAULTS to it —
-/// `FrameApplier.clock`, `ZOrderDrain.now`'s and
-/// `TeardownRestack.now`'s live wiring — never inside a ledger,
+/// `FrameApplier.clock`, `PlacementLedger.live` (#1161),
+/// `ZOrderDrain.now`'s and `TeardownRestack.now`'s live
+/// wiring — never inside a ledger,
 /// so a new bound in either tree reds here until it takes a
 /// seam of its own; counted per file, since a total stays green
 /// when a read migrates between homes. And both `makeTestCore`
@@ -37,6 +38,7 @@ struct EchoClockSeamTests {
     /// each site is a closure seam's live default.
     private static let allowed: [String: Int] = [
         "FrameApplier.swift": 1,
+        "PlacementLedger.swift": 1,
         "KiwiCore+ZOrderFloats.swift": 1,
         "KiwiCore+TeardownRaise.swift": 2,
         "KiwiCore+InPlaceRestart.swift": 1,
@@ -75,6 +77,54 @@ struct EchoClockSeamTests {
                 "var clock: @Sendable () -> TimeInterval = {"
             )
         )
+        // The placement ledger's clock takes no default, so a
+        // fresh ledger names its clock; `live` is its one read.
+        let ledger = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/Tiling/PlacementLedger.swift"
+        )
+        let ledgerSource = try SourceScan.strippedSource(at: ledger)
+        #expect(ledgerSource.contains("var clock: () -> TimeInterval\n"))
+        #expect(
+            ledgerSource.contains(
+                "init(clock: @escaping () -> TimeInterval) {"
+            )
+        )
+        #expect(
+            ledgerSource.contains(
+                "PlacementLedger { ProcessInfo.processInfo.systemUptime }"
+            )
+        )
+    }
+
+    @Test("a test resets the placement ledger, never builds one")
+    func testsKeepTheFrozenLedger() throws {
+        // A fresh ledger in a suite takes whatever clock it is
+        // handed — `live` puts the host uptime back — so resets go
+        // through `forgetAll`; the ledger's own suite is the one
+        // builder, and this file spells the needles.
+        let trees = SourceScan.targetTrees(
+            under: Self.root.appendingPathComponent("Tests")
+        )
+        let sites = try [
+            "PlacementLedger(", "PlacementLedger {",
+            "PlacementLedger.live",
+        ]
+        .flatMap { needle in
+            try trees.flatMap {
+                try SourceScan.identifierSites(of: needle, under: $0)
+            }
+        }
+        let exempt: Set = [
+            "PlacementLedgerTests.swift", "EchoClockSeamTests.swift",
+        ]
+        let strays = sites.filter {
+            !exempt.contains($0.file.lastPathComponent)
+        }
+        #expect(!sites.isEmpty)
+        #expect(
+            strays.isEmpty,
+            .init(rawValue: strays.map(\.site).joined(separator: ", "))
+        )
     }
 
     @Test("makeTestCore freezes the clock in both twins")
@@ -89,10 +139,13 @@ struct EchoClockSeamTests {
             let source = try SourceScan.strippedSource(at: twin)
             let target = twin.deletingLastPathComponent()
                 .lastPathComponent
-            let pins = source.occurrences(
-                of: "core.tiler.applier.clock = { 0 }"
-            )
-            #expect(pins == 1, "\(target) pins the clock \(pins)×")
+            for pin in [
+                "core.tiler.applier.clock = { 0 }",
+                "core.tiler.placements.clock = { 0 }",
+            ] {
+                let pins = source.occurrences(of: pin)
+                #expect(pins == 1, "\(target) pins `\(pin)` \(pins)×")
+            }
         }
     }
 }

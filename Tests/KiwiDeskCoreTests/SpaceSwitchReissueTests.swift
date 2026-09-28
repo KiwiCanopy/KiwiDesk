@@ -80,12 +80,11 @@ struct SpaceSwitchReissueTests {
         let core = makeCore()
         core.execute("focus_space", args: [.string("2")])
         core.execute("focus_space", args: [.string("1")])
-        // The ledger is age-bounded on the wall clock and has no
-        // clock seam (tests.md, #1456); the stamp and this read
-        // share one synchronous chain, so the bound cannot pass
-        // between them.
+        // The ledger's clock is frozen by `makeTestCore`, so the
+        // bound cannot pass between the stamp and this read
+        // (tests.md, #1456).
         let issued = { (id: WindowID) in
-            core.tiler.placements.recent(id, at: Date())
+            core.tiler.placements.recent(id)
         }
         let floored = try #require(issued(w1))
         #expect(floored.width >= 700 - 0.5)
@@ -109,11 +108,11 @@ struct SpaceSwitchReissueTests {
         }
         core.execute("focus_space", args: [.string("2")])
         let parked = try #require(
-            core.tiler.placements.recent(w1, at: Date())
+            core.tiler.placements.recent(w1)
         )
         core.execute("focus_space", args: [.string("1")])
         let returned = try #require(
-            core.tiler.placements.recent(w1, at: Date())
+            core.tiler.placements.recent(w1)
         )
         #expect(returned != parked)
         #expect(returned.width >= 700 - 0.5)
@@ -127,10 +126,10 @@ struct SpaceSwitchReissueTests {
         let core = makeCore()
         core.retile(pass: .apply)
         let x2 = try #require(
-            core.tiler.placements.recent(w2, at: Date())?.minX
+            core.tiler.placements.recent(w2)?.minX
         )
         let x3 = try #require(
-            core.tiler.placements.recent(w3, at: Date())?.minX
+            core.tiler.placements.recent(w3)?.minX
         )
         #expect(x2 != x3)
     }
