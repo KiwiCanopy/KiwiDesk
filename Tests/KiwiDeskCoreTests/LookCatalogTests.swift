@@ -4,7 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The bundled looks (#1684): Glass derived from the shipped
-/// defaults, every look total over the register, named palettes
+/// defaults and the starter's bars, every look total over the
+/// register, each look's bars its reference's, named palettes
 /// that exist, the ruled Sheen column, and five tellable apart.
 @Suite("Look catalog")
 struct LookCatalogTests {
@@ -22,18 +23,46 @@ struct LookCatalogTests {
         )
     }
 
-    @Test("Glass is the shipped defaults and resets the shape")
-    func glassIsTheReset() throws {
+    /// Read off the composed starter, not the constant, so Glass
+    /// and the first-run picture cannot part (#1528).
+    @Test("Glass is the shipped defaults with the starter's bars")
+    func glassIsTheStartersLook() throws {
         let glass = try #require(look(LookCatalog.defaultName))
         #expect(glass.palette == PaletteCatalog.defaultName)
+        let laptop = CGSize(width: 1728, height: 1117)
+        var starter = TilingSettings()
+        starter.appBarStyle.edge =
+            StarterSetup.settings(sizes: [laptop]).appBarStyle.edge
         var settings = TilingSettings()
         try #require(look("Tiler")).apply(to: &settings)
         #expect(!glass.isApplied(to: settings))
         glass.apply(to: &settings)
         #expect(
             LookKeys.extract(from: settings)
-                == LookKeys.extract(from: TilingSettings())
+                == LookKeys.extract(from: starter)
         )
+    }
+
+    /// The App Bar is the dock: a look splits the bars where its
+    /// reference has one (owner, 2026-09-28, #1528).
+    @Test("each look's bars sit where its reference's do")
+    func barsFollowTheReference() throws {
+        let edges: [String: (space: String, app: String)] = [
+            "Glass": ("top", "bottom"), "Taskbar": ("bottom", "bottom"),
+            "Classic": ("top", "top"), "Tiler": ("top", "top"),
+            "Pill": ("top", "top"),
+        ]
+        for look in bundled {
+            let want = try #require(edges[look.name], "\(look.name)")
+            #expect(
+                look.style["space_bar.edge"] == .string(want.space),
+                "\(look.name)"
+            )
+            #expect(
+                look.style["app_bar.edge"] == .string(want.app),
+                "\(look.name)"
+            )
+        }
     }
 
     /// Whatever look came before, a bundled look draws the same

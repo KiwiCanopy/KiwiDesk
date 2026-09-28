@@ -822,7 +822,7 @@
   "layout_params.stack_position.help": "Quale lato dello schermo occupa la zona dello Stack; la zona principale prende l'altro. Lo Stack si allinea alla sua striscia: uno Stack a sinistra o a destra va dall'alto in basso, uno in alto o in basso va da un lato all'altro.",
   "layout_params.wrap_focus.help": "Quando è attivo, spostare il focus oltre l'ultima finestra torna alla prima, e oltre la prima torna all'ultima, invece di fermarsi alla fine.",
   "looks.bundled": "Look inclusi",
-  "looks.caption": "Applica un look incluso o salvato: forma, carattere e indicatori di KiwiShelf, forma e riflesso del contorno di focus, e le spaziature delle finestre. Un'applicazione una tantum, non un collegamento attivo; ciò che mostrano le barre non fa mai parte di un look. Le sue spaziature spostano le tue finestre non appena salvi.",
+  "looks.caption": "Applica un look incluso o salvato: dove stanno le barre, forma, carattere e indicatori di KiwiShelf, forma e riflesso del contorno di focus, e le spaziature delle finestre. Un'applicazione una tantum, non un collegamento attivo; ciò che mostrano le barre non fa mai parte di un look. Le sue spaziature spostano le tue finestre non appena salvi.",
   "looks.colors_new": "Colori: verranno salvati come nuova tavolozza “%1$@”.",
   "looks.colors_use": "Colori: usa la tavolozza “%1$@”.",
   "looks.default_name": "Il mio look",

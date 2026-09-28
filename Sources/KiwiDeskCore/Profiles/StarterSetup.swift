@@ -171,12 +171,14 @@ public enum StarterSetup {
             sizes: sizes,
             hosts: hosts(sizes)
         )
-        // The starter's alone: Space Bar top, App Bar bottom. A
-        // preset keeps the type default, which stays `.top`, so
-        // no stored profile moves (#1528).
-        settings.appBarStyle.edge = .bottom
+        settings.appBarStyle.edge = appBarEdge
         return settings
     }
+
+    /// The starter's App Bar edge: the dock under a top Space Bar.
+    /// The starter's alone — a preset keeps the type default,
+    /// `.top`, so no stored profile moves — and Glass's (#1528).
+    public static let appBarEdge = AppBarEdge.bottom
 
     /// A preset's shape tuning: `slots` is its plan on `sizes`,
     /// each layout hosted by its first slot (#1663). `sizes` is

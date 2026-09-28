@@ -92,4 +92,13 @@ struct StarterBarEdgeTests {
         #expect(AppBarStyle().edge == .top)
         #expect(TilingSettings().appBarStyle.edge == .top)
     }
+
+    @Test("a stored App Bar with no edge still loads on top")
+    func storedWithoutEdgeLoadsTop() throws {
+        let decoded = try JSONDecoder().decode(
+            AppBarStyle.self,
+            from: Data(#"{"title_cap": 12}"#.utf8)
+        )
+        #expect(decoded.edge == .top)
+    }
 }
