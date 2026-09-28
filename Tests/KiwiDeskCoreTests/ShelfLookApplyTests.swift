@@ -122,6 +122,14 @@ struct ShelfLookApplyTests {
         source.spaceBarStyle.activeDimFactor = 0.5
         source.appBarStyle.activeIndicator = .outline
         source.borderStyle.sheen = -0.25
+        source.borderStyle.width = 7
+        source.borderStyle.cornerStyle = .square
+        source.borderStyle.glow = true
+        source.borderStyle.glowSize = 12
+        source.gapsGlobal = Gaps(
+            outer: .init(top: 3, bottom: 4, left: 5, right: 6),
+            inner: .init(horizontal: 7, vertical: 8)
+        )
         let saved = ShelfLook(
             name: "T",
             palette: nil,

@@ -1910,3 +1910,7 @@ and the bar strips). The bounds, flat-array and space-id rules
 apply there as written; the **pure-function** rule does not —
 both are `@MainActor` and legitimately call AppKit. That rule
 stays scoped to `Layouts/`.
+
+A new key in the `gap` group owes a look ruling (#1739), as a
+bar field does — the obligation is [bars.md](bars.md)'s, and
+`LookKeysCensusTests` reds an unruled key.

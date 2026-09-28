@@ -4,8 +4,10 @@ import Foundation
 /// if it changes how the same items look or where they sit, and
 /// functionality if it changes which items exist, what they show
 /// or say, or what they do (owner ruling 2026-09-27) — so App Bar
-/// content, Other Spaces and each bar's on/off never join.
-/// Colours are a palette's, never a look's.
+/// content, Other Spaces and each bar's on/off never join. The
+/// focus border's shape and the global gaps join too (#1739), so
+/// a look reproduces its whole picture. Colours are a palette's,
+/// never a look's.
 public enum LookKeys {
     /// Every settable styling path, in a stable order.
     public static let all: [String] =
@@ -19,6 +21,11 @@ public enum LookKeys {
             "space_bar.active_dim_factor",
             "app_bar.active_indicator",
             "border.sheen",
+            "border.width",
+            "border.corner_style",
+            "border.glow",
+            "border.glow_size",
+            "gap.global",
         ]
 
     /// The shelf's styling fields by wire key.
@@ -31,10 +38,10 @@ public enum LookKeys {
         "dim_factor",
     ]
 
-    /// Paths of the four structs a look reaches that it leaves
-    /// alone, and why. `LookKeysCensusTests` reds a field of
-    /// `KiwiShelf`, `SpaceBarStyle`, `AppBarStyle` or `BorderStyle`
-    /// that is in neither `all`, the palette's colours nor here.
+    /// Paths of the stores a look reaches that it leaves alone,
+    /// and why. `LookKeysCensusTests` reds a field of `KiwiShelf`,
+    /// `SpaceBarStyle`, `AppBarStyle`, `BorderStyle` or `gap` that
+    /// is in neither `all`, the palette's colours nor here.
     static let leftOut: [String: String] = [
         "kiwishelf.minimum": "how much of each bar shows once the "
             + "shelf is full — which items are visible",
@@ -50,20 +57,16 @@ public enum LookKeys {
         "app_bar.content": functionality,
         "app_bar.title_cap": functionality,
         "app_bar.group_adjacent_windows": functionality,
-        "border.enabled": focusBorder,
-        "border.width": focusBorder,
-        "border.unfocused_enabled": focusBorder,
-        "border.corner_style": focusBorder,
-        "border.glow": focusBorder,
-        "border.glow_size": focusBorder,
-        "border.draw_order": focusBorder,
+        "border.enabled": functionality,
+        "border.unfocused_enabled": functionality,
+        "border.draw_order": "whether the ring draws over or "
+            + "under the window's own chrome — which one shows",
+        "gap.override": "a Space's own exception to the global "
+            + "gaps, set on that Space and kept through a look",
     ]
 
     private static let functionality =
         "which items exist, what they show or what they do"
-    private static let focusBorder =
-        "the focus border's own; a look reaches only its sheen, "
-        + "which the shelf's border and indicator also draw"
 
     /// Extracts the styling map from settings, every path in `all`.
     public static func extract(

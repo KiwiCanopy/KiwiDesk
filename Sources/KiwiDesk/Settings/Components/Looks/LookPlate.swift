@@ -22,9 +22,9 @@ struct LookPlate: View {
             HomeCardBarsTile(
                 settings: settings,
                 spaceCount: spaceLabels.count,
-                spaceLabels: spaceLabels
+                spaceLabels: spaceLabels,
+                wellContent: AnyView(focusedWindow)
             )
-            .overlay(focusedWindow)
             .padding(4)
             .environment(
                 \.schematicPalette,
@@ -38,20 +38,48 @@ struct LookPlate: View {
         .accessibilityHidden(true)
     }
 
-    /// A window in the desktop's well, ringed in the focus colour.
+    /// A window in the desktop's well, ringed in the focus colour
+    /// at the look's width and corners (#1739). Sized off the well,
+    /// never the plate, so a narrow card's window never covers the
+    /// shelf.
     private var focusedWindow: some View {
-        RoundedRectangle(cornerRadius: 4)
-            .fill(SettingsTheme.hairline)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(
+        GeometryReader { well in
+            let width = well.size.width * Self.windowShare
+            let unit = width / Self.referenceWidth
+            let shape = RoundedRectangle(cornerRadius: ringRadius * unit)
+            shape
+                .fill(SettingsTheme.hairline)
+                .overlay(
+                    shape.stroke(
                         SheenPaint.style(
                             settings.borderStyle.focusedColor,
                             sheen: settings.borderStyle.sheen
                         ),
-                        lineWidth: 3
+                        lineWidth: max(1, ringWidth * unit)
                     )
-            )
-            .frame(width: 40, height: 22)
+                )
+                .frame(
+                    width: width,
+                    height: well.size.height * Self.windowShare
+                )
+                .position(x: well.size.width / 2, y: well.size.height / 2)
+        }
+    }
+
+    /// The window's share of the well on each axis.
+    private static let windowShare: CGFloat = 0.6
+
+    /// The window width the ring and corner below are tuned at.
+    private static let referenceWidth: CGFloat = 40
+
+    /// The ring's width at the reference window, floored so a thin
+    /// ring still reads and capped so the widest leaves the window
+    /// visible; the default 5 pt draws 3.
+    private var ringWidth: CGFloat {
+        min(4, max(1, settings.borderStyle.clampedWidth * 0.6))
+    }
+
+    private var ringRadius: CGFloat {
+        settings.borderStyle.cornerStyle == .square ? 0 : 4
     }
 }

@@ -18,6 +18,11 @@ overlay families — the focus ring (#278) and the sticky mark
 table below lists,
 so they share their decisions rather than mirroring them.
 
+A new `BorderStyle` field owes a look ruling (#1739) — styling
+joins `LookKeys.all`, anything else `LookKeys.leftOut` with its
+reason; the obligation is [bars.md](bars.md)'s and
+`LookKeysCensusTests` reds an unruled field.
+
 The *product* rulings about these overlays (who gets a ring, why
 glow forces the AppKit renderer, why a fullscreen window gets
 none) live in `docs/design-decisions.md`. This file is the

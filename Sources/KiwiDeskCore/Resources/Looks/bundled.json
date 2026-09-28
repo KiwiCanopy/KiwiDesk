@@ -12,7 +12,23 @@
       "kiwishelf.order": "apps_first",
       "kiwishelf.alignment": "center",
       "space_bar.active_indicator": "edge_mark",
-      "border.sheen": 0
+      "border.sheen": 0,
+      "border.width": 3,
+      "border.corner_style": "rounded",
+      "border.glow": false,
+      "border.glow_size": 0,
+      "gap.global": {
+        "outer": {
+          "top": 8,
+          "bottom": 8,
+          "left": 8,
+          "right": 8
+        },
+        "inner": {
+          "horizontal": 8,
+          "vertical": 8
+        }
+      }
     }
   },
   {
@@ -26,7 +42,23 @@
       "kiwishelf.border": true,
       "kiwishelf.border_width": 1,
       "kiwishelf.font_family": "Geneva",
-      "border.sheen": 0.25
+      "border.sheen": 0.25,
+      "border.width": 2,
+      "border.corner_style": "square",
+      "border.glow": false,
+      "border.glow_size": 0,
+      "gap.global": {
+        "outer": {
+          "top": 6,
+          "bottom": 6,
+          "left": 6,
+          "right": 6
+        },
+        "inner": {
+          "horizontal": 6,
+          "vertical": 6
+        }
+      }
     }
   },
   {
@@ -41,7 +73,23 @@
       "kiwishelf.font_family": "System Monospaced",
       "kiwishelf.font_weight": 500,
       "space_bar.active_indicator": "edge_mark",
-      "border.sheen": 0
+      "border.sheen": 0,
+      "border.width": 2,
+      "border.corner_style": "square",
+      "border.glow": false,
+      "border.glow_size": 0,
+      "gap.global": {
+        "outer": {
+          "top": 4,
+          "bottom": 4,
+          "left": 4,
+          "right": 4
+        },
+        "inner": {
+          "horizontal": 4,
+          "vertical": 4
+        }
+      }
     }
   },
   {
@@ -55,7 +103,23 @@
       "kiwishelf.border": true,
       "kiwishelf.border_width": 1,
       "kiwishelf.font_weight": 500,
-      "border.sheen": 0.5
+      "border.sheen": 0.5,
+      "border.width": 4,
+      "border.corner_style": "rounded",
+      "border.glow": true,
+      "border.glow_size": 0,
+      "gap.global": {
+        "outer": {
+          "top": 14,
+          "bottom": 14,
+          "left": 14,
+          "right": 14
+        },
+        "inner": {
+          "horizontal": 14,
+          "vertical": 14
+        }
+      }
     }
   }
 ]

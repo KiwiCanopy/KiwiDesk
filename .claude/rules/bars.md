@@ -74,8 +74,9 @@ twice, was a question the user answered twice. The argument is
   with its reason, a colour is the palette's; the owner's test
   and the argument are `docs/design-decisions.md` ▸ A look is
   KiwiShelf's styling. `LookKeysCensusTests` reds an unruled
-  field of `KiwiShelf`, `SpaceBarStyle`, `AppBarStyle` or
-  `BorderStyle`; which home is right is review's.
+  field of `KiwiShelf`, `SpaceBarStyle`, `AppBarStyle`,
+  `BorderStyle` or the `gap` group (#1739); which home is right
+  is review's.
 - **Retire a bar verb by adding it to `APIReference.retired`**,
   naming its replacement or nil, and never by an alias (AGENTS.md
   §5). A field the shelf migration moves joins
