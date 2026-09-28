@@ -90,11 +90,14 @@ struct OnboardingLooksTests {
         #expect(model.hasLookChanges)
     }
 
-    /// Glass and Kiwi (Default) are what a first run already
-    /// shows, so picking them wakes neither the file nor Revert.
+    /// Picking Glass and Kiwi (Default) over the shipped defaults
+    /// with the starter's split bars (#1528) wakes neither the
+    /// file nor Revert. Not the starter itself: its gaps are
+    /// tuned per screen, which Glass does not carry.
     @Test("a pick that changes nothing writes nothing")
     func noOpPickWritesNothing() throws {
         let (model, recorder, core) = makeModel()
+        recorder.live.appBarStyle.edge = StarterSetup.appBarEdge
         model.pickLook(try look(LookCatalog.defaultName))
         model.pickPalette(try palette(core, PaletteCatalog.defaultName))
         #expect(recorder.paints.isEmpty)

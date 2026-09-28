@@ -2384,7 +2384,7 @@ App Bar Overrides](#per-layout-app-bar-overrides)).
 
 :::unreleased
 **Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"top"`).
+(default `"top"`; the starter setup seeds `"bottom"`).
 
 **Does:** sets the screen edge the App Bar sits on, for every
 layout — no layout sets its own. On the Space Bar's edge the two

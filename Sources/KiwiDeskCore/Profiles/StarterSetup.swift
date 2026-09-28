@@ -166,12 +166,19 @@ public enum StarterSetup {
     /// The tuning for these screens, overrides included.
     static func settings(sizes: [CGSize]) -> TilingSettings {
         let sizes = floored(sizes)
-        return settings(
+        var settings = settings(
             slots: slots(sizes),
             sizes: sizes,
             hosts: hosts(sizes)
         )
+        settings.appBarStyle.edge = appBarEdge
+        return settings
     }
+
+    /// The starter's App Bar edge — the dock under a top Space Bar
+    /// — which Glass also carries; a preset keeps the type
+    /// default `.top`, so no stored profile moves (#1528).
+    public static let appBarEdge = AppBarEdge.bottom
 
     /// A preset's shape tuning: `slots` is its plan on `sizes`,
     /// each layout hosted by its first slot (#1663). `sizes` is

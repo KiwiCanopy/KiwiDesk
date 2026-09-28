@@ -32,8 +32,9 @@ struct LooksShelf: View {
             SettingsCatalog.colors.looksShelf,
             caption: L(
                 "looks.caption",
-                "Apply a bundled or saved look — KiwiShelf's "
-                    + "shape, font and indicators, the focus "
+                "Apply a bundled or saved look — where the bars "
+                    + "sit, KiwiShelf's shape, font and indicators, "
+                    + "the focus "
                     + "border's shape and sheen, and the window "
                     + "gaps. A one-time paint, not a "
                     + "live link; what the bars show is never part "
