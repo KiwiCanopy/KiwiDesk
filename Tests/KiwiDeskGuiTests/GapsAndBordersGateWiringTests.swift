@@ -112,10 +112,9 @@ struct GapsAndBordersGateWiringTests {
             "border.fit_gaps.disabled",
             "border.glow_size.disabled",
             "drag.disabled.help",
-            // Not InertReasons, same authoring rule: a master's
+            // Not an InertReason, same authoring rule: a master's
             // mixed-followers `?` is one sentence, in the help
             // enum, never re-typed beside the card.
-            "border.shared.differ.help",
             "gaps.master.differ.help",
         ] {
             #expect(
@@ -135,48 +134,7 @@ struct GapsAndBordersGateWiringTests {
         }
     }
 
-    /// The two shared masters (#754), keyed on the sites that
-    /// USE them rather than on the model properties that build
-    /// them. A card reaching
-    /// `$model.config.settings.borderStyle.width` directly, or
-    /// `style.cornerStyle` for the picker, would set the ring
-    /// alone — every stroke the card claims to drive would keep
-    /// its old value, and no gate, census or parity guard above
-    /// can see that (the Monitors lesson, gui.md).
-    ///
-    /// The `?` is the same shape of hole one level down: the
-    /// mixed-strokes sentence SURFACES on a predicate, and a
-    /// resolved answer nobody passes to a control leaves
-    /// nothing behind for the resolver's own suite to find. So
-    /// both halves are needled — the consult, and the `help:`
-    /// argument that is the whole point of it.
-    @Test("the shared masters are wired at their use sites")
-    func mastersAreWiredWhereTheyAct() throws {
-        let source = squashed(try read("BordersCard.swift"))
-        for needle in [
-            "value:model.borderWidthMaster,",
-            "selection:model.borderCornersMaster,",
-            "gates.followersDiffer("
-                + "for:.borders(.borderWidthMaster))",
-            "gates.followersDiffer("
-                + "for:.borders(.borderCornerMaster))",
-            "help:widthHelp",
-            "help:cornersHelp",
-        ] {
-            #expect(
-                source.contains(needle),
-                Comment(
-                    rawValue:
-                        "BordersCard no longer uses `\(needle)` — "
-                        + "the master writes one stroke and the "
-                        + "other two silently keep their own, or "
-                        + "it overwrites a disagreement in silence"
-                )
-            )
-        }
-    }
-
-    /// The gap masters take the strokes' shape (#1383): LIVE while
+    /// The gap masters acknowledge (#1383): LIVE while
     /// the edges differ, the acknowledgement on the label's `?`
     /// and nothing on the slider's `.disabled`. The resolver
     /// suite pins `followersDiffer`; this pins that its answer

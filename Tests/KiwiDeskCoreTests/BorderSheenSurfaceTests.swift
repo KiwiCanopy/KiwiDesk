@@ -155,13 +155,14 @@ struct BorderSheenSurfaceTests {
             frame: CGRect(x: 0, y: 0, width: 80, height: 60)
         )
         let style = DragVisual.ghostDefault
-        view.render(style, radius: 8, glass: false, sheen: 0.5)
-        #expect(view.rim.paint?.width == style.borderWidth)
+        let stroke = WindowStroke(width: 5, cornerRadius: 8)
+        view.render(style, stroke: stroke, glass: false, sheen: 0.5)
+        #expect(view.rim.paint?.width == stroke.width)
         #expect(view.rim.paint?.strength == 0.5)
         #expect(view.layer?.borderWidth == 0)
-        view.render(style, radius: 8, glass: false, sheen: 0)
+        view.render(style, stroke: stroke, glass: false, sheen: 0)
         #expect(view.rim.paint == nil)
-        #expect(view.layer?.borderWidth == style.borderWidth)
+        #expect(view.layer?.borderWidth == stroke.width)
     }
 
     /// The Settings picture draws the sheen as the drag does: its
@@ -176,14 +177,14 @@ struct BorderSheenSurfaceTests {
         LiquidGlassGate.override = { true }
         view.showPreview(
             .ghostDefault,
-            cornerRadius: 8,
+            stroke: WindowStroke(width: 5, cornerRadius: 8),
             storedGlass: true,
             sheen: 0.5
         )
         #expect(view.rim.paint != nil)
         view.showPreview(
             .ghostDefault,
-            cornerRadius: 8,
+            stroke: WindowStroke(width: 5, cornerRadius: 8),
             storedGlass: true,
             sheen: 0
         )

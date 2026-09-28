@@ -166,7 +166,6 @@
   "border.preview.ax": "ボーダーのプレビュー: 枠の付いたフォーカス中のウインドウと、その隣にフォーカスされていないウインドウ。",
   "border.preview.ax_sticky": "ボーダーのプレビュー: 枠とすべてのスペース用の Sticky マークが付いたフォーカス中のウインドウと、その隣に1つのディスプレイ用の Sticky マークが付いたフォーカスされていないウインドウ。",
   "border.shared.caption": "フォーカスボーダー、ゴースト、ドロップ先は、KiwiDesk がウインドウの周囲に描く線です。",
-  "border.shared.differ.help": "現在、3 本の線はそれぞれ異なる設定です。ここで選ぶと 3 本すべてに適用されます。",
   "border.shared.title": "すべてのボーダー共通",
   "border.title": "フォーカスボーダー",
   "border.unfocused_color.a11y": "フォーカスされていないウインドウの境界線のカラー",

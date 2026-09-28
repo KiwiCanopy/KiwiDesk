@@ -7,9 +7,6 @@ enum BordersKey: String, CaseIterable, Hashable {
     case borderUnfocusedColor = "settings.borderStyle.unfocusedColor"
     case borderWidth = "settings.borderStyle.width"
     case borderCorner = "settings.borderStyle.cornerStyle"
-    case borderWidthMaster = "settings.borderStyle.width (master)"
-    case borderCornerMaster =
-        "settings.borderStyle.cornerStyle (master)"
     case borderGlow = "settings.borderStyle.glow"
     case borderGlowSizeAuto = "settings.borderStyle.glowSize (auto)"
     case borderGlowSize = "settings.borderStyle.glowSize"
@@ -19,18 +16,15 @@ enum BordersKey: String, CaseIterable, Hashable {
     case stickyMark = "settings.stickyStyle.mark"
     case stickyColor = "settings.stickyStyle.color"
     case stickyDesktopReach = "settings.stickyStyle.desktopReach"
-    case dragCornerRadius = "settings.dragCornerRadius"
     case dragGhostEnabled = "settings.dragGhost.enabled"
     case dragGhostBorder = "settings.dragGhost.border"
     case dragGhostBorderColor = "settings.dragGhost.borderColor"
-    case dragGhostBorderWidth = "settings.dragGhost.borderWidth"
     case dragGhostBorderAlignment = "settings.dragGhost.borderAlignment"
     case dragGhostFill = "settings.dragGhost.fill"
     case dragGhostFillColor = "settings.dragGhost.fillColor"
     case dragDropZoneEnabled = "settings.dragDropZone.enabled"
     case dragDropZoneBorder = "settings.dragDropZone.border"
     case dragDropZoneBorderColor = "settings.dragDropZone.borderColor"
-    case dragDropZoneBorderWidth = "settings.dragDropZone.borderWidth"
     case dragDropZoneBorderAlignment = "settings.dragDropZone.borderAlignment"
     case dragDropZoneFill = "settings.dragDropZone.fill"
     case dragDropZoneFillColor = "settings.dragDropZone.fillColor"
@@ -47,7 +41,8 @@ extension BordersKey {
                 .atRest,
                 exemptFromContainerGate: true
             )
-        case .borderWidthMaster, .borderCornerMaster:
+        case .borderWidth, .borderCorner:
+            // Every window stroke's (#1742).
             return .row(.gapsAndBorders, .borders, .atRest)
         case .borderFitGapsExtraSpacing, .borderFitGaps:
             // In the Gaps card since #1360 — it writes the GAPS —
@@ -153,11 +148,7 @@ extension BordersKey {
                     .borders(.dragGhostFill),
                 ])
             )
-        case .borderWidth, .borderCorner,
-            .dragGhostBorderWidth,
-            .dragDropZoneBorderWidth,
-            .dragCornerRadius,
-            .dragGhostBorderAlignment,
+        case .dragGhostBorderAlignment,
             .dragDropZoneBorderAlignment:
             return .luaOnly
         case .dragDropZoneBorderColor:

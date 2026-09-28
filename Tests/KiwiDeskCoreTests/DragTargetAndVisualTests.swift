@@ -28,10 +28,6 @@ struct DragVisualCommandTests {
             "drag.set_ghost_fill_color",
             args: [.string("#112233")]
         )
-        core.execute(
-            "drag.set_ghost_border_width",
-            args: [.number(4)]
-        )
         // `outside` is the value the ghost does NOT ship with,
         // so the assertion below cannot pass on the default.
         core.execute(
@@ -39,23 +35,13 @@ struct DragVisualCommandTests {
             args: [.string("outside")]
         )
         core.execute(
-            "drag.set_drop_zone_border_width",
-            args: [.number(3)]
-        )
-        core.execute(
             "drag.set_drop_zone_border",
             args: [.bool(false)]
-        )
-        core.execute(
-            "drag.set_corner_radius",
-            args: [.number(26)]
         )
         let settings = core.tiler.settings
         #expect(!settings.dragGhost.enabled)
         #expect(settings.dragGhost.fillColor == "#112233")
-        #expect(settings.dragGhost.borderWidth == 4)
         #expect(settings.dragGhost.borderAlignment == .outside)
-        #expect(settings.dragDropZone.borderWidth == 3)
         // Per stroke, not per pair: the ghost was moved
         // `.outside` above and the drop zone stays on the
         // shipped default, `.inside`.
@@ -63,7 +49,6 @@ struct DragVisualCommandTests {
             settings.dragDropZone.borderAlignment == .inside
         )
         #expect(!settings.dragDropZone.border)
-        #expect(settings.dragCornerRadius == 26)
     }
 
     @Test("Bad colors and unknown settings are rejected")

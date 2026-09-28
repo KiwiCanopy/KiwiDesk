@@ -1,14 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Shared border width and corner style settings card
-/// (`GapsBordersGates`, #754).
+/// The one width and corner style every window stroke takes —
+/// the focus ring, the drag ghost and the drop zone (#754, #1742).
 struct BordersCard: View {
     @ObservedObject var model: SettingsModel
-
-    private var gates: GapsBordersGates {
-        GapsBordersGates(settings: model.config.settings)
-    }
 
     private var caption: String {
         L(
@@ -18,35 +14,24 @@ struct BordersCard: View {
         )
     }
 
-    private var widthHelp: String? {
-        gates.followersDiffer(for: .borders(.borderWidthMaster))
-            ? GapsBordersGateHelp.strokesDiffer : nil
-    }
-
-    private var cornersHelp: String? {
-        gates.followersDiffer(for: .borders(.borderCornerMaster))
-            ? GapsBordersGateHelp.strokesDiffer : nil
-    }
-
     var body: some View {
         SettingsSection(
             SettingsCatalog.gapsAndBorders.bordersCard,
             caption: caption
         ) {
-            masters
+            rows
         }
     }
 
-    @ViewBuilder private var masters: some View {
+    @ViewBuilder private var rows: some View {
         PtSlider(
             label: L("border.width", "Width"),
-            value: model.borderWidthMaster,
-            range: 1...20,
-            help: widthHelp
+            value: $model.config.settings.borderStyle.width,
+            range: 1...20
         )
         SegmentedPicker(
             L("border.corner_style", "Corners"),
-            selection: model.borderCornersMaster,
+            selection: $model.config.settings.borderStyle.cornerStyle,
             options: [
                 (
                     L("border.corner.rounded", "Rounded"),
@@ -56,8 +41,7 @@ struct BordersCard: View {
                     L("border.corner.square", "Square"),
                     BorderStyle.CornerStyle.square
                 ),
-            ],
-            help: cornersHelp
+            ]
         )
     }
 }

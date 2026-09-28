@@ -59,10 +59,6 @@ extension TilingSettings {
             keyedBy: DragKeys.self,
             forKey: .drag
         )
-        try drag.encode(
-            dragCornerRadius,
-            forKey: .cornerRadius
-        )
         try drag.encode(dragLiquidGlass, forKey: .liquidGlass)
         try drag.encode(dragGhost, forKey: .ghost)
         try drag.encode(dragDropZone, forKey: .dropZone)

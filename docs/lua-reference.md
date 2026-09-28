@@ -2843,21 +2843,6 @@ drag.set_ghost_enabled(true)
 drag.set_ghost_border(true)
 ```
 
-### drag.set_ghost_border_width
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the border width of the ghost. Lua-only per
-stroke: the Settings app's shared **Width** writes this, the
-drop zone's and the focus ring's together, and the three are
-never clamped against each other.
-
-**Example:**
-
-```lua
-drag.set_ghost_border_width(5)
-```
-
 ### drag.set_ghost_border_alignment
 
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
@@ -2935,20 +2920,6 @@ drag.set_drop_zone_enabled(true)
 drag.set_drop_zone_border(true)
 ```
 
-### drag.set_drop_zone_border_width
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the border width of the drop zone. Lua-only per
-stroke: the Settings app's shared **Width** writes this, the
-ghost's and the focus ring's together.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border_width(5)
-```
-
 ### drag.set_drop_zone_border_alignment
 
 **Expects:** `"inside"` or `"outside"` (default `"inside"`).
@@ -3001,27 +2972,6 @@ amber with 25% alpha).
 drag.set_drop_zone_fill_color("#C2790A40")
 ```
 
-### drag.set_corner_radius
-
-**Expects:** a non-negative number (points).
-
-**Does:** sets the corner rounding of both visuals (default 16,
-the system window radius). The full range is Lua-only: the
-Settings app offers **Square** / **Rounded**, which writes this
-and the focus ring's corner style together. It reads any value
-above zero as Rounded, so a radius set here is displayed rather
-than overwritten, and re-picking Rounded leaves it alone — that
-segment writes the system radius only from 0. Square writes 0.
-Set this to disagree with `border.set_corner_style` and the
-picker shows no segment selected until you choose one; either
-segment then sets both.
-
-**Example:**
-
-```lua
-drag.set_corner_radius(16)
-```
-
 ### drag.set_liquid_glass
 
 **Expects:** a boolean (default `true`).
@@ -3043,6 +2993,26 @@ switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 ```lua
 drag.set_liquid_glass(false)
 ```
+
+:::unreleased
+### Retired drag verbs
+
+The ghost and the drop zone draw their stroke at the focus
+border's width and corner style, so these verbs are retired. A
+call in `init.lua` is reported in Config Issues, naming what
+replaces it; over the CLI it fails with
+`<verb> was retired — use <replacement>`.
+
+- `drag.set_ghost_border_width` and
+  `drag.set_drop_zone_border_width` →
+  [`border.set_width`](#borderset_width).
+- `drag.set_corner_radius` →
+  [`border.set_corner_style`](#borderset_corner_style).
+
+A saved profile's `drag.corner_radius` and each visual's
+`border_width` are no longer read: every stroke takes the
+border's values.
+:::
 
 ## Focus Border
 
@@ -3079,6 +3049,11 @@ least as wide as the border so neighbouring borders do not
 touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
+
+:::unreleased
+The drag ghost and the drop zone draw their stroke at this width
+too.
+:::
 
 **Example:**
 
@@ -3134,9 +3109,12 @@ border.set_unfocused_color("#8E8E93CC")
 
 **Does:** `rounded` (default) matches the real macOS window
 corner radius, queried per window; `square` draws sharp corners.
-The Settings app's shared **Corners** control writes this and
-`drag.set_corner_radius` together and reads both back; see that
-verb for how the picker treats a pair that disagrees.
+
+:::unreleased
+The drag ghost and the drop zone take this style too: `rounded`
+draws them at the system window radius, `square` with no
+rounding.
+:::
 
 **Example:**
 
@@ -4951,17 +4929,14 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
     "drag": {
-      "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#347957", "border_width": 5,
-        "border_alignment": "inside",
+        "border_color": "#347957", "border_alignment": "inside",
         "fill": true, "fill_color": "#34795740"
       },
       "drop_zone": {
         "enabled": true, "border": true,
-        "border_color": "#C2790A", "border_width": 5,
-        "border_alignment": "inside",
+        "border_color": "#C2790A", "border_alignment": "inside",
         "fill": true, "fill_color": "#C2790A40"
       }
     },

@@ -166,7 +166,6 @@
   "border.preview.ax": "Rahmen-Vorschau: ein fokussiertes Fenster mit seinem Rahmen, daneben ein nicht fokussiertes.",
   "border.preview.ax_sticky": "Rahmen-Vorschau: ein fokussiertes Fenster mit seinem Rahmen und der Sticky-Markierung für jeden Space, daneben ein nicht fokussiertes mit der Markierung für nur ein Display.",
   "border.shared.caption": "Fokus-Rahmen, Ghost und Drop-Zone sind Linien, die KiwiDesk um ein Fenster zeichnet.",
-  "border.shared.differ.help": "Die drei Linien sind gerade unterschiedlich eingestellt; eine Auswahl hier gilt für alle drei.",
   "border.shared.title": "Für alle Rahmen",
   "border.title": "Fokus-Rahmen",
   "border.unfocused_color.a11y": "Rahmenfarbe nicht fokussierter Fenster",

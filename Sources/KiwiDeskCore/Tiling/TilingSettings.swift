@@ -73,9 +73,6 @@ public struct TilingSettings: Sendable, Equatable {
     public var dragGhost = DragVisual.ghostDefault
     /// Drag drop zone visual settings (`drag.drop_zone`).
     public var dragDropZone = DragVisual.dropZoneDefault
-    /// Corner radius for drag overlay visuals.
-    public var dragCornerRadius = GeometryUtils
-        .systemWindowCornerRadius
     /// Liquid Glass on the drag ghost and drop zone (#1620) — one
     /// leaf for both markers, written by the one Liquid Glass row
     /// beside the shelf's and the panel's (#1307).

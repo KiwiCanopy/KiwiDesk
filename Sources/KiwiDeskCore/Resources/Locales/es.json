@@ -166,7 +166,6 @@
   "border.preview.ax": "Vista previa del contorno: una ventana enfocada con su contorno, junto a otra sin foco.",
   "border.preview.ax_sticky": "Vista previa del contorno: una ventana enfocada con su contorno y la marca Sticky de todos los espacios, junto a otra sin foco con la marca de una sola pantalla.",
   "border.shared.caption": "El contorno de foco, la silueta y la zona de destino son trazos que KiwiDesk dibuja alrededor de una ventana.",
-  "border.shared.differ.help": "Ahora mismo los tres trazos están configurados de forma distinta; lo que elijas aquí se aplica a los tres.",
   "border.shared.title": "Común a todos los contornos",
   "border.title": "Contorno de foco",
   "border.unfocused_color.a11y": "Color del contorno de las ventanas sin foco",

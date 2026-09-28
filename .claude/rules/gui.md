@@ -587,7 +587,7 @@ would be a live control drawn dead. The master stays live over
 a "mixed" readout, answers the resolver's `followersDiffer` —
 `GapsBordersGates.acknowledged` is the one register of who does
 — and hands that answer to its label's `?`, the first edit
-converging every follower (`BorderMastersDivergenceTests` ▸
+converging every follower (`MasterDivergenceRegisterTests` ▸
 `acknowledgedRegisterIsExact`, `GapsAndBordersGateWiringTests`
 ▸ `gapMastersAcknowledgeAtTheLabel`).
 

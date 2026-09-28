@@ -160,7 +160,7 @@ extension KiwiCore {
             dragOverlay.showGhost(
                 at: slot,
                 style: settings.dragGhost,
-                cornerRadius: settings.dragCornerRadius,
+                stroke: settings.windowStroke,
                 glassBeneath: glass ? id.raw : nil,
                 sheen: settings.borderStyle.sheen
             )
@@ -186,7 +186,7 @@ extension KiwiCore {
             dragOverlay.showDropZone(
                 at: targetSlot,
                 style: settings.dragDropZone,
-                cornerRadius: settings.dragCornerRadius,
+                stroke: settings.windowStroke,
                 glassBeneath: glass ? id.raw : nil,
                 sheen: settings.borderStyle.sheen
             )

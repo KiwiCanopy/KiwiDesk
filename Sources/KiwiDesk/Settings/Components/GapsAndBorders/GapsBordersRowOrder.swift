@@ -19,8 +19,8 @@ enum GapsBordersRowOrder {
 
     /// Border width and corner master setting keys (#754).
     static let borders: [SettingKey] = [
-        .borders(.borderWidthMaster),
-        .borders(.borderCornerMaster),
+        .borders(.borderWidth),
+        .borders(.borderCorner),
     ]
 
     /// Focus border setting keys (#754).

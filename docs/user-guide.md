@@ -335,13 +335,10 @@ another monitor moves the focus there with its window.
 
 **Width** and **Corners** at the top set the focus ring, the
 drag ghost and the drop zone together. Keep gaps at least twice
-the width so two neighbouring rings do not touch. Each stroke's
-own width, each overlay's alignment and the drag radius are
-Lua-only and never clamped against each other; [design
-decisions](design-decisions.md) has why the GUI offers no switch,
-the [Lua reference](lua-reference.md) the verbs. A radius set
-from Lua shows as **Rounded** and keeps its value; if the ring
-and the overlays disagree, neither segment is selected.
+the width so two neighbouring rings do not touch. Each overlay's
+alignment is Lua-only; [design decisions](design-decisions.md)
+has why the GUI offers no switch, the [Lua
+reference](lua-reference.md) the verbs.
 
 ### Focus Border
 
