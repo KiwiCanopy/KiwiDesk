@@ -827,6 +827,7 @@
   "looks.colors_use": "Цвета: используется палитра «%1$@».",
   "looks.default_name": "Мой облик",
   "looks.delete": "Удалить",
+  "looks.description.bloom": "Мягкий, с плавающим Dock, как %1$@",
   "looks.empty_hint": "Сохрани текущий облик KiwiShelf — и он появится здесь.",
   "looks.export": "Экспортировать…",
   "looks.import": "Импортировать…",

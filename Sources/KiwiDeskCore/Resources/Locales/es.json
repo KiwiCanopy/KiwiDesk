@@ -827,6 +827,7 @@
   "looks.colors_use": "Colores: usa la paleta «%1$@».",
   "looks.default_name": "Mi look",
   "looks.delete": "Eliminar look",
+  "looks.description.bloom": "Suave, con un Dock flotante, como %1$@",
   "looks.empty_hint": "Guarda el look actual de KiwiShelf y aparecerá aquí.",
   "looks.export": "Exportar look",
   "looks.import": "Importar look",

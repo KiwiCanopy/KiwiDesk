@@ -144,7 +144,7 @@ struct LookBorderGapTests {
                 "Classic": (2, .square, false, 6),
                 "Tiler": (2, .square, false, 4),
                 "Pill": (4, .rounded, true, 14),
-                "Bloom": (4, .rounded, true, 12),
+                "Bloom": (5, .rounded, true, 16),
             ]
         let bundled = LookCatalog.bundled()
         #expect(Set(column.keys) == Set(bundled.map(\.name)))

@@ -827,6 +827,7 @@
   "looks.colors_use": "カラー：パレット「%1$@」を使用します。",
   "looks.default_name": "マイデザイン",
   "looks.delete": "デザインを削除",
+  "looks.description.bloom": "柔らかく、Dockが浮かぶ。%1$@風",
   "looks.empty_hint": "KiwiShelfの現在のデザインを保存すると、ここに表示されます。",
   "looks.export": "デザインをエクスポート",
   "looks.import": "デザインをインポート",
