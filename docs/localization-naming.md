@@ -213,7 +213,10 @@ a good word of its own for each.
 2026-08-29 and 2026-09-28). A common noun that does not mean the
 mode's unit stays free — the grid a Space tiles into in any
 layout, the quit arrangement's grid, the overflow pile, a verb
-"stacked".
+"stacked". Where your mode name IS your ordinary noun (ja
+グリッド, ko 격자, zh-Hans 网格), a free noun keeps that same word;
+do not coin a second word to tell them apart (owner ruling
+2026-09-28).
 
 **Render such a unit with whatever your own `layout.<mode>.name`
 says, and never with a word of your own.** A second word for it
