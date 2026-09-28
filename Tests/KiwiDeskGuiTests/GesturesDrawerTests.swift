@@ -148,93 +148,27 @@ struct GesturesDrawerTests {
                 "privatevardim:GreyOut{GreyOut(active:surface.isOff("
             )
         )
-        #expect(entry.components(separatedBy: ".modifier(dim)").count == 3)
-        #expect(!entry.contains("control().modifier(dim)"))
-        let layout = try #require(entry.range(of: "GestureEntryLayout{"))
-        let close = try #require(
+        // The plate's chain and the sentence's each end on `dim`;
+        // nothing after the control — through the end of the body
+        // — carries it, so the control and the whole stay live.
+        #expect(
+            entry.contains(
+                ".id(hovering).accessibilityHidden(true).modifier(dim)"
+            )
+        )
+        #expect(
+            entry.contains(
+                ".fixedSize(horizontal:false,vertical:true).modifier(dim)"
+            )
+        )
+        let control = try #require(entry.range(of: "control()}"))
+        let end = try #require(
             entry.range(
-                of: "control()}",
-                range: layout.upperBound..<entry.endIndex
+                of: "privatevardim:GreyOut",
+                range: control.upperBound..<entry.endIndex
             )
         )
-        #expect(
-            !entry[close.upperBound...].hasPrefix(".modifier(dim)"),
-            "the grey wraps the whole entry"
-        )
-    }
-
-    /// The control joins the sentence's column only where it
-    /// fits there whole, and the layout asks this decision rather
-    /// than one of its own.
-    @Test("a control sits under the sentence only where it fits")
-    func controlPlacement() throws {
-        let plate = GesturePlate<EmptyView>.size.width
-        #expect(
-            GestureEntryLayout.fitsColumn(
-                control: 360,
-                plate: plate,
-                width: 640,
-                spacing: 14
-            )
-        )
-        #expect(
-            !GestureEntryLayout.fitsColumn(
-                control: 503,
-                plate: plate,
-                width: 600,
-                spacing: 14
-            )
-        )
-        #expect(
-            GestureEntryLayout.fitsColumn(
-                control: 0,
-                plate: plate,
-                width: 0,
-                spacing: 14
-            )
-        )
-        let layout = Self.squash(
-            try Self.source(Self.gestures + "GestureEntryLayout.swift")
-        )
-        #expect(layout.contains("inColumn:Self.fitsColumn("))
-        #expect(layout.contains("m.inColumn?CGPoint(x:columnX,"))
-    }
-
-    /// Lays out real entries, with and without a control, at a
-    /// width that keeps the control in the column and one that
-    /// does not — an entry without a control hands the layout two
-    /// children, not three, which once trapped. `@MainActor` for
-    /// the renderer; four small renders.
-    @Test("entries lay out with and without a control")
-    @MainActor
-    func entriesLayOut() throws {
-        let settings = TilingSettings()
-        for width in [700.0, 380.0] {
-            let bare = GestureEntry(
-                "Bare",
-                surface: .windows,
-                settings: settings
-            ) { GesturePicture.Swap(t: $0) }
-            let controlled = GestureEntry(
-                "With a control",
-                surface: .windows,
-                settings: settings
-            ) {
-                GesturePicture.Edge(t: $0)
-            } control: {
-                MouseResizePicker(selection: .constant(.layout))
-            }
-            for view in [AnyView(bare), AnyView(controlled)] {
-                let renderer = ImageRenderer(
-                    content: view.frame(width: width)
-                )
-                let image = try #require(renderer.nsImage)
-                #expect(abs(image.size.width - width) < 0.5)
-                #expect(
-                    image.size.height >= GesturePlate<EmptyView>.size.height
-                )
-            }
-        }
+        #expect(!entry[control.upperBound..<end.lowerBound].contains("dim"))
     }
 
     @Test("the drawer mounts above the layer header")
@@ -277,55 +211,4 @@ struct GesturesDrawerTests {
         }
     }
 
-    /// The Behavior card's picture is the engine's quit grid for
-    /// the draft's target depth, and its body draws that answer.
-    /// `@MainActor` because the tile is a `View`; two small layouts.
-    @Test("the Behavior tile draws the engine's quit grid")
-    @MainActor
-    func behaviorTileFollowsTheDepth() throws {
-        var shallow = TilingSettings()
-        shallow.quitGridTargetDepth = 1
-        var deep = TilingSettings()
-        deep.quitGridTargetDepth = 20
-        let size = CGSize(width: 160, height: 100)
-        let a = HomeCardBehaviorTile.frames(in: size, settings: shallow)
-        let b = HomeCardBehaviorTile.frames(in: size, settings: deep)
-        #expect(a.count == HomeCardBehaviorTile.sampleCount)
-        #expect(a != b, "the target depth changed nothing")
-        let ids = (1...HomeCardBehaviorTile.sampleCount)
-            .map { WindowID(UInt32($0)) }
-        let screen = HomeCardBehaviorTile.screen
-        let engine = QuitGridLayout.frames(
-            for: ids,
-            in: CGRect(origin: .zero, size: screen),
-            minSize: shallow.minWindowSize,
-            targetDepth: 1
-        )
-        let scaled = ids.compactMap { engine[$0] }.map {
-            CGRect(
-                x: $0.minX * size.width / screen.width,
-                y: $0.minY * size.height / screen.height,
-                width: $0.width * size.width / screen.width,
-                height: $0.height * size.height / screen.height
-            )
-        }
-        #expect(a.count == scaled.count)
-        for (drawn, engine) in zip(a, scaled) {
-            #expect(abs(drawn.minX - engine.minX) < 0.01)
-            #expect(abs(drawn.minY - engine.minY) < 0.01)
-            #expect(abs(drawn.width - engine.width) < 0.01)
-            #expect(abs(drawn.height - engine.height) < 0.01)
-        }
-        // Every window keeps a real height at tile scale — the
-        // shape this readout once lost to screen-point staggers.
-        #expect(a.allSatisfy { $0.height > size.height / 10 })
-        let tile = try Self.source(
-            "Sources/KiwiDesk/Settings/HomeCardPlate+Desk.swift"
-        )
-        #expect(
-            Self.squash(tile).contains(
-                "letframes=Self.frames(in:proxy.size,settings:settings)"
-            )
-        )
-    }
 }

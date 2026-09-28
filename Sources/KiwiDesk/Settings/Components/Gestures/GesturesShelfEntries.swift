@@ -42,7 +42,8 @@ struct GesturesShelfEntries: View {
                     + "menu of them."
             ),
             surface: .spaceBar,
-            settings: settings
+            settings: settings,
+            pace: .steps
         ) { GesturePicture.GlyphClick(t: $0) }
         GestureRule()
         GestureEntry(
@@ -52,7 +53,8 @@ struct GesturesShelfEntries: View {
                     + "Nothing switches until you pick one."
             ),
             surface: .spaceBar,
-            settings: settings
+            settings: settings,
+            pace: .steps
         ) { GesturePicture.OverflowMenu(t: $0) }
         GestureRule()
         GestureEntry(
@@ -62,7 +64,8 @@ struct GesturesShelfEntries: View {
                     + "titles of its windows."
             ),
             surface: .spaceBar,
-            settings: settings
+            settings: settings,
+            pace: .steps
         ) { GesturePicture.GlyphHover(t: $0) }
         GestureRule()
         GestureEntry(
@@ -82,7 +85,8 @@ struct GesturesShelfEntries: View {
                     + "windows."
             ),
             surface: .appBar,
-            settings: settings
+            settings: settings,
+            pace: .steps
         ) { GesturePicture.AppBarReorder(t: $0) }
         GestureRule()
         GestureEntry(
@@ -92,7 +96,8 @@ struct GesturesShelfEntries: View {
                     + "to see it in full."
             ),
             surface: .appBar,
-            settings: settings
+            settings: settings,
+            pace: .steps
         ) { GesturePicture.AppBarHover(t: $0) }
         ForEach(offReasons, id: \.self) { prose in
             link(prose)

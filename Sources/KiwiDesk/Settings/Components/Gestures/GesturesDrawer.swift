@@ -90,7 +90,8 @@ struct GesturesDrawer: View {
                     + "switching apps or a closed window."
             ),
             surface: .windows,
-            settings: settings
+            settings: settings,
+            pace: .steps
         ) {
             GesturePicture.FollowFocus(t: $0)
         } control: {

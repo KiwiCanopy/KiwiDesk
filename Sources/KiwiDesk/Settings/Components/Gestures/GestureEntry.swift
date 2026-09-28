@@ -103,13 +103,18 @@ extension GestureEntry where Control == EmptyView {
 enum GesturePace {
     /// A single motion, eased over the whole loop.
     case quick
-    /// A story in stages at an even pace: each stage eases itself
-    /// (`gestureEase`), so one curve over the loop would bend them.
+    /// A short gesture in steps (a press, then a menu), at an even
+    /// pace: its stages keep their timing, which one curve over the
+    /// loop would bend.
+    case steps
+    /// A longer story in stages, at the same even pace; each stage
+    /// eases itself (`gestureEase`).
     case story
 
     var animation: Animation {
         switch self {
         case .quick: return .easeInOut(duration: 1.6)
+        case .steps: return .linear(duration: 2.4)
         case .story: return .linear(duration: 5)
         }
     }

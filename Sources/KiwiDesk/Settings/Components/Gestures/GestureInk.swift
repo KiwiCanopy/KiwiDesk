@@ -69,7 +69,7 @@ struct GestureInk {
     }
 
     /// The Space the screen is showing: its item outlined in the
-    /// accent at the bar's own weight, never a fill.
+    /// accent, never a fill.
     func activeItem(_ rect: CGRect, label: String) -> some View {
         item(rect, label: label)
             .overlay(

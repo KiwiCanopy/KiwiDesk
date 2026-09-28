@@ -16,9 +16,12 @@ struct SegmentedPickerEqualWidthTests {
         ("Short", 1),
     ]
 
-    private func width(selected: Int) throws -> CGFloat {
+    private func width(
+        selected: Int,
+        hugs: Bool = true
+    ) throws -> CGFloat {
         let picker = SegmentedPicker(
-            hugsLabels: true,
+            hugsLabels: hugs,
             selection: .constant(selected),
             options: options
         )
@@ -47,5 +50,16 @@ struct SegmentedPickerEqualWidthTests {
     func segmentsFitTheLongest() throws {
         let longest = textWidth(options[0].0)
         #expect(try width(selected: 1) >= 2 * longest)
+    }
+
+    /// The default leaves every other strip as it was — the update
+    /// window's tabs measure their fit on it — so only a strip that
+    /// asks for hugging widens to equal segments.
+    @Test("the default strip keeps its summed width")
+    func defaultIsUnchanged() throws {
+        let summed = try width(selected: 1, hugs: false)
+        let hugged = try width(selected: 1, hugs: true)
+        #expect(summed < hugged)
+        #expect(summed < 2 * textWidth(options[0].0))
     }
 }
