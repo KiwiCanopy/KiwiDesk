@@ -107,7 +107,7 @@ struct GesturesControls: Sendable {
     )
     let followsFocus = SettingsControl(
         "behavior.mouse.follows_focus",
-        "Move mouse to focused window"
+        "Move the pointer to the window that gets focus"
     )
 }
 

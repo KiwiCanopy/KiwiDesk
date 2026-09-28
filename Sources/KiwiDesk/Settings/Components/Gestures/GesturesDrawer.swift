@@ -6,6 +6,9 @@ import SwiftUI
 /// header, so nothing here reads as per-layer; collapsed on every
 /// visit. An entry lands with its feature, never before, and one
 /// whose surface is off greys with a pointer to where it turns on.
+/// It mounts inside the section's `keybindingLayerName` scope, so a
+/// gesture recorder (#1656, #1519) must never read that value: a
+/// gesture modifier belongs to no layer.
 struct GesturesDrawer: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = false
@@ -45,7 +48,8 @@ struct GesturesDrawer: View {
     private var summary: String {
         L(
             "shortcuts.gestures.summary",
-            "Drag windows, and drag and scroll on the KiwiShelf"
+            "Drag, resize and scroll, and whether the pointer "
+                + "follows focus"
         )
     }
 
@@ -55,13 +59,17 @@ struct GesturesDrawer: View {
                 "shortcuts.gestures.swap",
                 "Drag a window onto another to swap them, or onto "
                     + "another screen to move it there."
-            )
+            ),
+            surface: .windows,
+            settings: settings
         ) { GesturePicture.Swap(t: $0) }
         GestureEntry(
             L(
                 "shortcuts.gestures.edge",
                 "Drag a window's edge to resize it."
-            )
+            ),
+            surface: .windows,
+            settings: settings
         ) {
             GesturePicture.Edge(t: $0)
         } control: {
@@ -76,17 +84,18 @@ struct GesturesDrawer: View {
         GestureEntry(
             L(
                 "shortcuts.gestures.follow_focus",
-                "The pointer can jump to the window that gets "
-                    + "focus — from a shortcut, a Space switch, "
+                "Focus moves with a shortcut, a Space switch, "
                     + "switching apps or a closed window."
-            )
+            ),
+            surface: .windows,
+            settings: settings
         ) {
             GesturePicture.FollowFocus(t: $0)
         } control: {
             Toggle(
                 L(
                     "behavior.mouse.follows_focus",
-                    "Move mouse to focused window"
+                    "Move the pointer to the window that gets focus"
                 ),
                 isOn: $model.config.settings.mouse.followsFocus
             )
@@ -103,9 +112,11 @@ struct GesturesDrawer: View {
 struct MouseResizePicker: View {
     @Binding var selection: MouseResizeMode
 
+    /// No visible label: the entry's sentence names the control,
+    /// and the strip needs the whole row to fit its options. The
+    /// label key names it for VoiceOver and for the census.
     var body: some View {
         SegmentedPicker(
-            L("behavior.mouse.resize_action", "Mouse resize action"),
             selection: $selection,
             options: [
                 (layoutLabel, MouseResizeMode.layout),
@@ -128,6 +139,9 @@ struct MouseResizePicker: View {
                     "Snap back to slot"
                 )
             )
+        )
+        .accessibilityLabel(
+            L("behavior.mouse.resize_action", "Mouse resize action")
         )
     }
 

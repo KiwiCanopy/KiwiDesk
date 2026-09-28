@@ -84,15 +84,15 @@ enum HomeCardContent {
             if settings.refusalSound {
                 return L(
                     "home.card.behavior.subtitle_sound",
-                    "Alert sound on · quit leaves %1$d windows "
-                        + "per grid cell",
+                    "Alert sound on · windows per pile on quit: "
+                        + "%1$d",
                     settings.quitGridTargetDepth
                 )
             }
             return L(
                 "home.card.behavior.subtitle_silent",
-                "Alert sound off · quit leaves %1$d windows "
-                    + "per grid cell",
+                "Alert sound off · windows per pile on quit: "
+                    + "%1$d",
                 settings.quitGridTargetDepth
             )
         case .advancedColors:

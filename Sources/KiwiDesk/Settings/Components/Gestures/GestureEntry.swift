@@ -1,11 +1,17 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// One Mouse & trackpad entry (#1726): a drawn picture, the
 /// sentence that carries the gesture, and the entry's own control
-/// where it has one. The picture plays on hover and rests on its
-/// key frame otherwise; under Reduce Motion it never moves.
+/// where it has one. The picture moves only while hovered and rests
+/// on its key frame otherwise; under Reduce Motion it never moves.
+/// An entry whose `surface` is off greys its picture and sentence
+/// and never its control — a greyed control says "you cannot
+/// change this", and switching a setting on is always allowed.
 struct GestureEntry<Picture: View, Control: View>: View {
     let text: String
+    let surface: GestureSurface
+    let settings: TilingSettings
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -14,10 +20,14 @@ struct GestureEntry<Picture: View, Control: View>: View {
 
     init(
         _ text: String,
+        surface: GestureSurface,
+        settings: TilingSettings,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture,
         @ViewBuilder control: @escaping () -> Control
     ) {
         self.text = text
+        self.surface = surface
+        self.settings = settings
         self.picture = picture
         self.control = control
     }
@@ -26,37 +36,60 @@ struct GestureEntry<Picture: View, Control: View>: View {
         // The control takes the full row below: squeezed into the
         // sentence's column, a two-option picker truncates.
         VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .top, spacing: 14) {
-                GesturePlate { picture(hovering ? phase : 1) }
-                    .animation(
-                        reduceMotion || !hovering
-                            ? nil
-                            : .easeInOut(duration: 1.6)
-                                .repeatForever(autoreverses: false),
-                        value: phase
-                    )
-                    .accessibilityHidden(true)
-                Text(text)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .contentShape(Rectangle())
-            .onHover { inside in
-                hovering = inside && !reduceMotion
-                phase = hovering ? 1 : 0
-            }
+            explainer
+                .modifier(GreyOut(active: surface.isOff(settings)))
             control()
         }
         .padding(.vertical, 4)
+    }
+
+    private var explainer: some View {
+        HStack(alignment: .top, spacing: 14) {
+            GesturePlate { picture(hovering ? phase : 1) }
+                .accessibilityHidden(true)
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .contentShape(Rectangle())
+        .onHover(perform: hover)
+    }
+
+    /// Restarts the gesture from its first frame, then loops it:
+    /// two separate updates, since one that moved `phase` straight
+    /// to where the rest frame already is would animate nothing.
+    private func hover(_ inside: Bool) {
+        hovering = inside && !reduceMotion
+        phase = 0
+        guard hovering else { return }
+        DispatchQueue.main.async {
+            // The pointer may have left before this turn.
+            guard hovering else { return }
+            withAnimation(
+                reduceMotion
+                    ? nil
+                    : .easeInOut(duration: 1.6)
+                        .repeatForever(autoreverses: false)
+            ) {
+                phase = 1
+            }
+        }
     }
 }
 
 extension GestureEntry where Control == EmptyView {
     init(
         _ text: String,
+        surface: GestureSurface,
+        settings: TilingSettings,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture
     ) {
-        self.init(text, picture: picture) { EmptyView() }
+        self.init(
+            text,
+            surface: surface,
+            settings: settings,
+            picture: picture
+        ) { EmptyView() }
     }
 }
 

@@ -13,8 +13,8 @@ setting lives, why a move was refused, and the files behind it.
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
 **⌘,** while a KiwiDesk window is key. **Shortcuts & Gestures ▸
-General**
-offers a rebindable **Open Settings** row for a global key.
+General** offers a rebindable **Open Settings** row for a global
+key.
 
 That row ships on **`⌃⌥,`**, a [default
 shortcut](#default-shortcuts), so Settings opens from anywhere.
@@ -883,10 +883,10 @@ the caps print, not which key fires.
 ### Import & Adopt
 
 If `init.lua` holds custom keybindings, **Import from
-init.lua…** (in the Shortcuts & Gestures header) reads them for review before
-you Save; each binding must be an inline `function() … end` on
-one line. **Adopt into the GUI** imports the whole file's managed
-settings and keeps your custom Lua live.
+init.lua…** (in the Shortcuts & Gestures header) reads them for
+review before you Save; each binding must be an inline
+`function() … end` on one line. **Adopt into the GUI** imports
+the whole file's managed settings and keeps your custom Lua live.
 
 ### Shortcut Layers
 

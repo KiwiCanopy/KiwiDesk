@@ -154,13 +154,18 @@ struct HomeCardBehaviorTile: View {
         settings: TilingSettings
     ) -> [CGRect] {
         let ids = (1...sampleCount).map { WindowID(UInt32($0)) }
-        let placed = QuitGridLayout.frames(
-            for: ids,
-            in: CGRect(origin: .zero, size: size),
-            minSize: 6,
-            targetDepth: settings.quitGridTargetDepth
-        )
-        return ids.compactMap { placed[$0] }
+        // Switched like the engine's own quit, so a new style is a
+        // compile error here too rather than a grid drawn for it.
+        switch settings.quitLayout {
+        case .grid:
+            let placed = QuitGridLayout.frames(
+                for: ids,
+                in: CGRect(origin: .zero, size: size),
+                minSize: 6,
+                targetDepth: settings.quitGridTargetDepth
+            )
+            return ids.compactMap { placed[$0] }
+        }
     }
 
     private func pane(_ rect: CGRect) -> some View {

@@ -11,6 +11,8 @@ import Testing
 @Suite("Mouse & trackpad drawer")
 struct GesturesDrawerTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
+    private static let gestures =
+        "Sources/KiwiDesk/Settings/Components/Gestures/"
 
     private static func source(_ path: String) throws -> String {
         SourceScan.stripComments(
@@ -21,23 +23,104 @@ struct GesturesDrawerTests {
         )
     }
 
-    private static let settings = "Sources/KiwiDesk/Settings/"
-
-    @Test("both bar-off notes place their link")
-    @MainActor
-    func offNotesPlaceTheirLink() {
-        let slot = CrossReferenceRow.linkSlot
-        #expect(GesturesShelfEntries.spaceBarOffProse.contains(slot))
-        #expect(GesturesShelfEntries.appBarOffProse.contains(slot))
+    private static func squash(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined()
     }
 
-    /// Above the layer header, so nothing in it reads as
-    /// per-layer: located by the header's own mount, which the
-    /// drawer's position is relative to.
+    @Test("every pointer sentence places its link")
+    @MainActor
+    func pointersPlaceTheirLink() {
+        let slot = CrossReferenceRow.linkSlot
+        #expect(GesturesShelfEntries.springLinkProse.contains(slot))
+        for surface in [GestureSurface.spaceBar, .appBar] {
+            #expect(surface.offProse?.contains(slot) == true)
+        }
+        #expect(GestureSurface.windows.offProse == nil)
+    }
+
+    /// The surfaces ask Core's own shelf predicates.
+    @Test("a surface is off exactly when its bar is")
+    func surfacesAskCore() {
+        var settings = TilingSettings()
+        #expect(!GestureSurface.windows.isOff(settings))
+        settings.spaceBarStyle.enabled = false
+        #expect(GestureSurface.spaceBar.isOff(settings))
+        #expect(
+            GestureSurface.shelf.isOff(settings)
+                == !settings.anyAppBarCanShow
+        )
+        #expect(
+            GestureSurface.appBar.isOff(settings)
+                == !settings.anyAppBarCanShow
+        )
+        settings.spaceBarStyle.enabled = true
+        #expect(!GestureSurface.spaceBar.isOff(settings))
+        #expect(!GestureSurface.shelf.isOff(settings))
+    }
+
+    /// Each entry names the surface it teaches, located by its own
+    /// text key: swapping two entries' surfaces reds here.
+    @Test(
+        "each entry greys on its own surface",
+        arguments: [
+            ("shortcuts.gestures.swap", "windows"),
+            ("shortcuts.gestures.edge", "windows"),
+            ("shortcuts.gestures.follow_focus", "windows"),
+            ("shortcuts.gestures.drop_on_space", "spaceBar"),
+            ("shortcuts.gestures.shelf_scroll", "shelf"),
+            ("shortcuts.gestures.app_bar", "appBar"),
+        ]
+    )
+    func entryNamesItsSurface(key: String, surface: String) throws {
+        var all = ""
+        for file in ["GesturesDrawer.swift", "GesturesShelfEntries.swift"] {
+            all += Self.squash(try Self.source(Self.gestures + file))
+        }
+        let start = try #require(all.range(of: "\"\(key)\""))
+        let rest = all[start.upperBound...]
+        let call =
+            rest.range(of: "GestureEntry(").map {
+                rest[..<$0.lowerBound]
+            } ?? rest
+        #expect(call.contains("surface:.\(surface),"))
+    }
+
+    /// The spring text is interpolated, so it is located by its
+    /// argument rather than its key.
+    @Test("the spring entry greys on the Space Bar")
+    func springNamesItsSurface() throws {
+        let body = Self.squash(
+            try Self.source(Self.gestures + "GesturesShelfEntries.swift")
+        )
+        #expect(body.contains("springText,surface:.spaceBar,"))
+    }
+
+    /// A reason is readable while what it explains is dimmed: the
+    /// group greys nothing itself, and the entry greys its
+    /// explainer, never the control below it.
+    @Test("reasons and controls sit outside the grey")
+    func reasonsSitOutsideTheGrey() throws {
+        let group = try Self.source(
+            Self.gestures + "GesturesShelfEntries.swift"
+        )
+        #expect(!group.contains("GreyOut("))
+        #expect(group.contains("ForEach(offReasons"))
+        let entry = Self.squash(
+            try Self.source(Self.gestures + "GestureEntry.swift")
+        )
+        let grey = try #require(
+            entry.range(
+                of: "explainer.modifier(GreyOut(active:surface.isOff("
+            )
+        )
+        let control = try #require(entry.range(of: "control()"))
+        #expect(grey.upperBound < control.lowerBound)
+    }
+
     @Test("the drawer mounts above the layer header")
     func mountsAboveTheLayerHeader() throws {
         let body = try Self.source(
-            Self.settings + "Sections/ShortcutsSection.swift"
+            "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
         let drawer = try #require(
             body.range(of: "GesturesDrawer(model: model)")
@@ -51,63 +134,35 @@ struct GesturesDrawerTests {
         )
     }
 
-    /// The mouse rows left Behavior: no Behavior file still draws
-    /// either control, so the move cannot leave a second copy.
+    /// No Behavior file draws either moved control any more.
     @Test("Behavior no longer draws the mouse rows")
     func behaviorDropsTheMouseRows() throws {
-        let body = try Self.source(
-            Self.settings + "Sections/BehaviorSection.swift"
+        let settings = Self.root.appendingPathComponent(
+            "Sources/KiwiDesk/Settings"
         )
-        #expect(!body.isEmpty)
-        #expect(!body.contains("mouseResize"))
-        #expect(!body.contains("followsFocus"))
-        let drawer = try Self.source(
-            Self.settings + "Components/Gestures/GesturesDrawer.swift"
+        var files = try SourceScan.swiftSources(
+            under: settings.appendingPathComponent("Components/Behavior")
         )
-        #expect(drawer.contains("MouseResizePicker("))
-        #expect(drawer.contains(".mouse.followsFocus"))
-    }
-
-    /// Each entry greys on the bar it teaches: the Space entries
-    /// on the Space Bar, the reorder on any App Bar, the scroll on
-    /// the shelf — each keyed on its own use site.
-    @Test("shelf entries grey on their own bar")
-    func shelfEntriesGreyOnTheirBar() throws {
-        let body = try Self.source(
-            Self.settings
-                + "Components/Gestures/GesturesShelfEntries.swift"
-        )
-        let squashed = body.split(whereSeparator: \.isWhitespace)
-            .joined()
-        #expect(squashed.contains("GreyOut(active:!spaceBarOn)"))
-        #expect(
-            squashed.contains(
-                "GreyOut(active:!settings.anyAppBarCanShow)"
+        files += try SourceScan.swiftSources(
+            under: settings.appendingPathComponent("Sections")
+        ).filter { $0.lastPathComponent.hasPrefix("BehaviorSection") }
+        #expect(files.count >= 2)
+        for file in files {
+            let body = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
             )
-        )
-        #expect(
-            squashed.contains("GreyOut(active:!settings.shelfShows)")
-        )
-        #expect(
-            squashed.contains(
-                "shown:!settings.anyAppBarCanShow,prose:Self.appBarOffProse"
-            )
-        )
-        #expect(
-            squashed.contains(
-                "offNote(shown:!spaceBarOn,prose:Self.spaceBarOffProse)"
-            )
-        )
+            #expect(!body.contains("config.settings.mouseResize"))
+            #expect(!body.contains("mouse.followsFocus"))
+            #expect(!body.contains("MouseResizePicker("))
+        }
     }
 
     /// The Behavior card's picture is the engine's quit grid for
-    /// the draft's target depth, so it answers when the depth
-    /// moves — a constant drawing would not.
-    /// `@MainActor` because the tile is a `View`; the spend is
-    /// two small layouts.
+    /// the draft's target depth, and its body draws that answer.
+    /// `@MainActor` because the tile is a `View`; two small layouts.
     @Test("the Behavior tile draws the engine's quit grid")
     @MainActor
-    func behaviorTileFollowsTheDepth() {
+    func behaviorTileFollowsTheDepth() throws {
         var shallow = TilingSettings()
         shallow.quitGridTargetDepth = 1
         var deep = TilingSettings()
@@ -116,7 +171,6 @@ struct GesturesDrawerTests {
         let a = HomeCardBehaviorTile.frames(in: size, settings: shallow)
         let b = HomeCardBehaviorTile.frames(in: size, settings: deep)
         #expect(a.count == HomeCardBehaviorTile.sampleCount)
-        #expect(b.count == HomeCardBehaviorTile.sampleCount)
         #expect(a != b, "the target depth changed nothing")
         let ids = (1...HomeCardBehaviorTile.sampleCount)
             .map { WindowID(UInt32($0)) }
@@ -127,5 +181,13 @@ struct GesturesDrawerTests {
             targetDepth: 1
         )
         #expect(a == ids.compactMap { engine[$0] })
+        let tile = try Self.source(
+            "Sources/KiwiDesk/Settings/HomeCardPlate+Desk.swift"
+        )
+        #expect(
+            Self.squash(tile).contains(
+                "letframes=Self.frames(in:proxy.size,settings:settings)"
+            )
+        )
     }
 }

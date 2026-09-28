@@ -216,8 +216,8 @@ struct HomeCardContentTests {
             model: model
         )
         #expect(sound != silent, "alert sound ignored")
-        #expect(sound.hasSuffix("7 windows per grid cell"))
-        #expect(silent.hasSuffix("7 windows per grid cell"))
+        #expect(sound.hasSuffix(": 7"))
+        #expect(silent.hasSuffix(": 7"))
     }
 
     @Test("the app-rules answer covers pins and floats")

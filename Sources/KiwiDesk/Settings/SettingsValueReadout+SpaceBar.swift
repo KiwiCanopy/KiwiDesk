@@ -145,7 +145,7 @@ extension SettingsValueReadout {
     }
 
     /// Formats seconds with one decimal place.
-    private static func spaceBarSeconds(_ ms: Int) -> String {
+    static func spaceBarSeconds(_ ms: Int) -> String {
         L(
             "diff.value.seconds",
             "%1$@ s",

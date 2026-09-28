@@ -1708,8 +1708,8 @@ Track's own says what the others' do not: that this layout is
 the harder one. Reword it and the guidance goes with it.
 
 The shortcut half of that copy lives in the rows' own drawer —
-Shortcuts ▸ Move windows ▸ **Move windows in the track layout**,
-the #1125 door shape, with a `?` saying what previous and next
+Shortcuts & Gestures ▸ Move windows ▸ **Move windows in the track
+layout**, the #1125 door shape, with a `?` saying what previous and next
 mean in a track (#1440). Nothing is gated, no flag is stored,
 the rows work whether the drawer is open or shut, and a user
 with a Track space or a Track binding meets it open. The title
@@ -6195,8 +6195,8 @@ exclusion would have been dead code asserting a fact the type
 system already holds.
 
 The companion affordance: **"Open Settings" is bindable**
-(`KiwiDesk.open_settings()`, offered under Shortcuts ▸
-General) — a window that lives among the user's tiled windows
+(`KiwiDesk.open_settings()`, offered under Shortcuts & Gestures
+▸ General) — a window that lives among the user's tiled windows
 earns a keyboard road back. Which chord it ships on is the
 seeded ladder's ruling ([Shortcuts](#shortcuts), #1381). It
 opens or raises, never
@@ -6847,6 +6847,9 @@ between them — for a fact "inexpressible in one frame at any
 window count", and exactly one claim ever cleared it: Scrolling's
 `follow` anchor, where the viewport pans the minimum to reveal the
 newly focused window. A still picture cannot show motion.
+(The one place this does not bind is a picture that teaches a
+GESTURE rather than a rest state — the Shortcuts & Gestures
+drawer's, argued under Shortcuts below.)
 
 The premise is true and the conclusion does not follow. **A pair
 does not show motion either.** It shows two *states* and asks the
@@ -8583,9 +8586,9 @@ comma position), so it is reachable on every board; where that
 key prints another character the board shows that character,
 the trade every lettered default already makes. Which
 population has it follows the seed's own rule below: a new
-setup, or an existing one through Shortcuts ▸ Restore
-Defaults…, which lands it in the default layer; a layer made
-before this carries it only by hand.
+setup, or an existing one through Shortcuts & Gestures ▸
+Restore Defaults…, which lands it in the default layer; a layer
+made before this carries it only by hand.
 
 **Swap rides `⌃⌥⌘`, and `⇧` keeps the digits (#1176, owner ruling
 2026-08-31).** `⌃⌥⇧`+arrows is a three-modifier claw on one hand;
@@ -8784,10 +8787,10 @@ an existing install keeps `⌃⌥⌘`+arrows for as long as it lives,
 and `ShortcutsReferenceBuilder` renders the live layer rather
 than the defaults, so its Shortcuts panel stays accurate. The
 cost, accepted rather than discovered: an existing user who
-WANTS the new map takes Shortcuts ▸ Restore Defaults… (#1096,
-the one road a later default has into an existing install), and
-prose that names a chord has to say which population it means —
-which is why the resize workaround in
+WANTS the new map takes Shortcuts & Gestures ▸ Restore
+Defaults… (#1096, the one road a later default has into an
+existing install), and prose that names a chord has to say which
+population it means — which is why the resize workaround in
 [Accepted limitations](accepted-limitations.md) points at the
 `⌃⌥K` panel instead of naming one (`SizeLayerSeedTests`).
 
@@ -9387,8 +9390,8 @@ trackpad and mouse input.
 **The Mouse & trackpad drawer sits above the layer header, and is
 collapsed on every visit.** Everything under "Editing the X layer"
 reads as belonging to that layer; the drawer's settings do not, so
-it cannot sit there — which amends the 2026-08-04 ruling that the
-layers card leads the page. It opens shut every time because a
+it cannot sit there, and the layers card leads only what is
+layer-scoped. It opens shut every time because a
 drawer that opens on a first visit needs a stored "seen" flag and
 then changes shape on the second; search opens it on a hit, and its
 summary does the telling while it is shut.
@@ -9401,8 +9404,9 @@ scroll anywhere.
 
 **An entry is one drawn picture and one sentence, and the picture
 animates on hover.** This is the one place the one-frame rule
-above does not bind, and the difference is the subject: a layout
-schematic teaches a REST state and sits in a strip built for
+(▸ Navigation & saving, *A layout gets one frame*) does not
+bind, and the difference is the subject: a layout schematic
+teaches a REST state and sits in a strip built for
 comparison, while an entry here teaches a GESTURE, alone on its
 row, which no rest state denotes. It is still not a clip. A bundled
 video cannot follow the user's palette or appearance, cannot be
@@ -9419,11 +9423,12 @@ dimmed, with one sentence pointing where it turns on; an entry's
 own checkbox is never greyed for being off, since a greyed control
 says "you cannot change this".
 
-**Behavior ▸ Mouse moved here, and scope does not stop it.** The
-two rows are profile values, and this page shows the header's
-profile chip like every page but General and the Mac Checklist, so
-they edit the profile the chip names, exactly as they did on
-Behavior. The pointer-follow is its own entry rather than a row in
+**A mouse or trackpad setting lives beside the gesture it tunes,
+whatever page that is, and profile scope does not stop it.** The
+mouse resize action and the pointer-follow are profile values, and
+this page shows the header's profile chip like every page but
+General and the Mac Checklist, so they edit the profile the chip
+names. The pointer-follow is its own entry rather than a row in
 the Focus card: it fires on every focus change KiwiDesk sees — a
 Space switch, a closed window, ⌘-Tab — not only on focus
 shortcuts, and that card sits under the layer header.
@@ -13176,8 +13181,8 @@ version appears.
   newly-authored Grow/Shrink bindings and is recovered from
   bindings on import, but changing it does **not** rewrite
   existing bound rows (their literal keeps firing). An in-GUI
-  step control (a slider in Shortcuts ▸ Size & float) and a
-  live-rewrite of already-bound rows are deliberately out of
+  step control (a slider in Shortcuts & Gestures ▸ Size & float)
+  and a live-rewrite of already-bound rows are deliberately out of
   scope for now; the reserved slot is additive, so their later
   arrival won't re-layout the section.
 - **The keyboard preview shows one modifier at a time** (#678
