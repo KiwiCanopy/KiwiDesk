@@ -8,7 +8,7 @@ struct PaletteTile<Plate: View>: View {
     var isApplied = false
     var dashed = false
     /// Lines the caption wraps to, reserved so a row of tiles
-    /// ends level; the Settings shelves keep one.
+    /// ends level.
     var captionLines = 1
     @ViewBuilder var plate: () -> Plate
 

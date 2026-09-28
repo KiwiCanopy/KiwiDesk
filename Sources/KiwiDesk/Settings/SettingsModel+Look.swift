@@ -13,8 +13,7 @@ extension SettingsModel {
     /// The palette `look` names, or nil when it names none or one
     /// no longer saved.
     func palette(of look: ShelfLook) -> ColorPalette? {
-        guard let name = look.palette else { return nil }
-        return allPalettes.first { $0.name == name }
+        KiwiCore.palette(of: look, in: allPalettes)
     }
 
     /// Paints `look` onto the draft — its styling, and its

@@ -75,8 +75,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.adoptKeptLayout()
     }
 
-    /// Whether the draft holds edits a Save would write (#1720).
-    var hasUnsavedDraft: Bool { model.isDirty }
+    /// Whether a live-profile draft holds edits a Save would
+    /// write over a tour paint (#1720); a stored profile's cannot.
+    var hasUnsavedDraft: Bool { model.isDirty && model.target == .live }
 
     /// Re-reads a clean draft after the tour painted the shelf
     /// (#1720), so a later Save writes the new look rather than

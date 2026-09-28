@@ -6,8 +6,7 @@ import Testing
 @Suite("Onboarding flow")
 @MainActor
 struct OnboardingTests {
-    /// The flow since #888: grant → spaces → keys → done (looks
-    /// between spaces and keys since #1720), with no
+    /// The flow: grant → spaces → looks → keys → done, with no
     /// machine-gated step. (#828's separate-Spaces recommendation
     /// retired with the ruling it recommended around — bindings
     /// key to the main display's Desktop now, so they are

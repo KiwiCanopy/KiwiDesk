@@ -201,6 +201,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.profiles.onCapturedLive = { [weak self] _ in
             self?.dashboardIfCreated?.adoptKeptLayout()
         }
+        core.onShelfPainted = { [weak self] in
+            self?.dashboardIfCreated?.adoptShelfPaint()
+        }
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues

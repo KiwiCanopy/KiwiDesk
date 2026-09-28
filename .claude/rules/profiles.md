@@ -1087,6 +1087,21 @@ which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
 profile never moves `currentName` (#1249).
 
+**The tour's shelf paint is a further write, and it is not Keep
+(#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
+to live AND the live profile's file; the file half reads the
+stored profile, paints only the look and palette keys and writes
+it back through the non-adopting `ProfileManager.write` — never
+`persistProfile`'s live capture (`ShelfPaintTests` ▸
+`fileKeepsItsOwnSettings`, `restoreTouchesOnlyTheLook`). A
+restore is refused once `currentName` moved
+(`restoreSkipsAnotherProfile`). The open draft's debt is paid ON
+the write, through `onShelfPainted` (`paintsAreAnnounced`), never
+by a caller; a caller refuses the paint while a live-profile
+draft is dirty (`OnboardingLooksTests` ▸ `draftBlocks`). The
+argument is `docs/design-decisions.md` ▸ *The tour's look is
+written through, and the tour owns its undo*.
+
 **One draft, one identity, one encoder (#1393).** The page a
 draft resolves and encodes against is `SettingsModel.reachPage`,
 pinned by `reload()` once the target settles, and never

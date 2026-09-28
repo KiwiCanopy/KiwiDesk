@@ -102,16 +102,47 @@ struct ShelfPaintTests {
         #expect(core.profiles.list().isEmpty)
     }
 
-    @Test("a restore never writes a profile that went live since")
+    @Test("a restore is refused once another profile went live")
     func restoreSkipsAnotherProfile() throws {
         let core = makeCore(saving: "First")
         let baseline = core.shelfPaintBaseline()
-        core.paintShelf(look: try look("Taskbar"), palette: nil)
+        let taskbar = try look("Taskbar")
+        core.paintShelf(look: taskbar, palette: nil)
         _ = core.execute("save_profile", args: [.string("Second")])
-        let second = try stored(core)
+
+        #expect(!core.restoreShelf(baseline))
+
+        #expect(taskbar.isApplied(to: core.tiler.settings))
+        let first = try core.profiles.read(name: "First").settings
+        #expect(taskbar.isApplied(to: first))
+    }
+
+    /// Revert paints back the look and palette keys alone: a
+    /// setting changed and saved after the first paint stays.
+    @Test("a restore leaves every other setting where it is")
+    func restoreTouchesOnlyTheLook() throws {
+        let core = makeCore()
+        let baseline = core.shelfPaintBaseline()
+        core.paintShelf(look: try look("Taskbar"), palette: nil)
+        core.tiler.settings.resizeStep += 7
+        _ = core.execute("save_profile", args: [.string("Mine")])
+        let step = core.tiler.settings.resizeStep
 
         core.restoreShelf(baseline)
 
-        #expect(try core.profiles.read(name: "Second").settings == second)
+        #expect(core.tiler.settings.resizeStep == step)
+        #expect(try stored(core).resizeStep == step)
+        #expect(!(try look("Taskbar")).isApplied(to: core.tiler.settings))
+    }
+
+    @Test("every paint and restore tells the GUI, on the write")
+    func paintsAreAnnounced() throws {
+        let core = makeCore()
+        var told = 0
+        core.onShelfPainted = { told += 1 }
+        let baseline = core.shelfPaintBaseline()
+        core.paintShelf(look: try look("Taskbar"), palette: nil)
+        core.restoreShelf(baseline)
+        #expect(told == 2)
     }
 }

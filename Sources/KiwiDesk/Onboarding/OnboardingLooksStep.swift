@@ -31,7 +31,7 @@ struct OnboardingLooksStep: View {
                 "Pick a look and KiwiDesk changes as you click: "
                     + "KiwiShelf, the strip along your screen's edge "
                     + "that holds your Spaces and windows, and the "
-                    + "focus border with it. Then pick its colors."
+                    + "focus border with it. Then pick the colors."
             ),
             footnote: blocked ? blockedCaption : nil,
             hint: laterHint
@@ -92,8 +92,8 @@ struct OnboardingLooksStep: View {
     private var blockedCaption: String {
         L(
             "onboarding.looks.draft_pending",
-            "Settings has changes you haven't saved. %1$@ or %2$@ "
-                + "them in Settings to choose here.",
+            "Settings has changes you haven't saved. Choose %1$@ "
+                + "or %2$@ there to pick a look here.",
             L("footer.save", "Save"),
             L("footer.revert", "Revert")
         )

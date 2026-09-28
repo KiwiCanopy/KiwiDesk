@@ -118,7 +118,7 @@ final class OnboardingModel {
 
     /// The palette `look` names, if it is still saved.
     func palette(of look: ShelfLook) -> ColorPalette? {
-        shelfPalettes().first { $0.name == look.palette }
+        KiwiCore.palette(of: look, in: shelfPalettes())
     }
 
     /// Applies `look` — its shape and its palette.
@@ -144,8 +144,18 @@ final class OnboardingModel {
         looksRevision += 1
     }
 
+    /// A pick that would change nothing writes nothing, so
+    /// Revert stays greyed until something changed.
     private func paint(_ look: ShelfLook?, _ palette: ColorPalette?) {
         guard !settingsDraftPending() else { return }
+        let live = tilingSettings()
+        var painted = live
+        if let look {
+            look.apply(to: &painted, palette: palette)
+        } else {
+            palette?.apply(to: &painted)
+        }
+        guard painted != live else { return }
         if looksBaseline == nil {
             looksBaseline = captureShelfBaseline()
         }
