@@ -11,8 +11,36 @@ Canonical for this subsystem (AGENTS.md §5 indexes it). When
 editing here:
 
 - Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
-  CGEventTap — this avoids the Input Monitoring permission. Event
-  taps are only for mouse drag tracking.
+  CGEventTap — a keyboard tap needs Input Monitoring. Mouse
+  presses are read through `NSEvent` monitors.
+- **Scroll gestures take the ONE active scroll-wheel tap,
+  `ScrollGestureTap`, reached only through `MouseTracker.scroll`
+  (#1656, #1519).** Its creation asks macOS for the
+  Accessibility-class `PostEvent` service alone, never
+  `ListenEvent` (tccd log, device build, 2026-09-28). Four
+  obligations:
+  - **One tap, scroll-only.** A second `tapCreate(`, or a mask
+    widened past `.scrollWheel`, is where an Input Monitoring
+    prompt would come from (`ScrollTapSeamTests` for the one tap
+    and its one mask constant, `ScrollSampleTests` for the
+    constant's value).
+  - **The tap installs on its own thread and decides there.**
+    Every scroll on the Mac waits on the callback, and the main
+    actor can block on a slow app's AX reply for seconds; the
+    decision is the pure `ScrollGestureRouter`'s, and consumers
+    hear it on the main queue (`ScrollTapSeamTests` for the
+    thread, `ScrollGestureRouterTests` for the decision).
+  - **A plain scroll is never consumed**: `ScrollGestureSettings`
+    drops an empty chord, the router never owns one whatever it
+    is handed, and a chord matches exactly
+    (`ScrollGesturesTests`, `ScrollGestureRouterTests`).
+  - **Key chords by CONSUMER, and set them through the one
+    `configure` door** — handlers are wired once with
+    `setHandler`: a profile switch can hand the two gestures each
+    other's chords, and one resolved settings value lands both;
+    and no tap exists while no wired consumer has a chord, the
+    live factory pinned inert in both `makeTestCore` twins
+    (`ScrollGesturesTests`, `ScrollTapSeamTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

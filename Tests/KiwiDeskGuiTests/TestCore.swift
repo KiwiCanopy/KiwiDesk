@@ -82,6 +82,10 @@ func makeTestCore(
     core.openOrFocus.openApp = { _, _ in false }
     // A Space Bar menu pops modally and would hang the run (#1528).
     core.spaceBars.glyphActions.present = { _, _ in }
+    // The scroll-gesture tap (#1656): a live one would take a
+    // real session-wide event tap in any suite that binds a
+    // chord. A suite that means the tap injects its own.
+    core.mouse.scroll.makeTap = { _ in nil }
     // Same class, fourth time (#878): the per-retile neighbor
     // scan defaults to the real screen list, so on a
     // multi-screen dev Mac an engine fixture would inherit the
