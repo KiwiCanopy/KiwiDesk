@@ -13600,6 +13600,18 @@ glass, no motion, and the services' marks are template images
 in secondary ink. On this page colour means "this control is
 on", and a brand blue or orange would say that about a link.
 
+:::unreleased
+**The footer line above also carries the tour's permanent door**
+(#1754) — mark, name, version, update state, "Show me around",
+*About KiwiDesk*. The first-run banner retires once dismissed or
+after the first edit, so without it the welcome tour became
+unreachable; a replay of the app's own introduction is one more
+thing asked about the app itself, and Home is where Settings
+opens, so it needs no search entry — About beside it has none
+either. One permanent door only: a second one elsewhere would
+make the reader ask whether they differ.
+:::
+
 **The update state is one component.** What the channel last
 said lands in one store (`UpdateStateStore`, written by the
 updater and its Sparkle delegate) and one view draws it, on
