@@ -42,6 +42,15 @@ struct ScrollGestureRouterTests {
         #expect(!swipe.consume)
     }
 
+    @Test("an empty chord in the set never owns a plain scroll")
+    func emptyChordNeverOwns() {
+        var router = ScrollGestureRouter()
+        router.chords = [[], Self.pan]
+        #expect(!router.route(sample([], dy: 5), now: 0).consume)
+        #expect(!router.route(sample([], .began), now: 1).consume)
+        #expect(!router.route(sample([], .mayBegin), now: 2).consume)
+    }
+
     @Test("a chord matches exactly: ⌃⌥ never answers ⌃⌥⌘")
     func exactMatch() {
         var router = ScrollGestureRouter()

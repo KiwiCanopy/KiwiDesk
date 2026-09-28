@@ -5,7 +5,7 @@ import Foundation
 /// here). A consumer missing from `chords`, or given an empty
 /// chord, is off: a plain scroll always belongs to the window.
 public struct ScrollGestureSettings: Equatable, Sendable {
-    public var chords: [ScrollGestures.Consumer: ScrollChord]
+    public private(set) var chords: [ScrollGestures.Consumer: ScrollChord]
     /// KiwiDesk's own Natural scrolling, independent of macOS's.
     public var naturalScrolling: Bool
 

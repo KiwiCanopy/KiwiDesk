@@ -89,7 +89,7 @@ struct ScrollGestureRouter {
             }
             passing = false
             var events = end(at: sample.location)
-            guard chords.contains(sample.chord) else {
+            guard owns(sample.chord) else {
                 passing = sample.phase == .mayBegin
                 return (false, events)
             }
@@ -129,6 +129,12 @@ struct ScrollGestureRouter {
         }
     }
 
+    /// A bound chord that is not empty: a plain scroll is never
+    /// owned, whatever chord set the tap was handed.
+    private func owns(_ chord: ScrollChord) -> Bool {
+        !chord.isEmpty && chords.contains(chord)
+    }
+
     /// Ends an owned gesture whose deadline has passed, where it
     /// last was.
     mutating func expire(now: Double) -> [ScrollGestureEvent] {
@@ -159,7 +165,7 @@ struct ScrollGestureRouter {
             events = end(at: sample.location)
         }
         if owner == nil {
-            guard chords.contains(sample.chord) else {
+            guard owns(sample.chord) else {
                 return (false, events)
             }
             owner = Owner(

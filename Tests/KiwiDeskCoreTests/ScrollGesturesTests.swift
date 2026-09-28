@@ -132,6 +132,18 @@ struct ScrollGesturesTests {
         #expect(heard == [.pan, .step])
     }
 
+    @Test("a chord both gestures hold reaches the pan, never a coin flip")
+    func sharedChordPrecedence() {
+        let (gestures, _) = front()
+        var heard: [ScrollGestures.Consumer] = []
+        gestures.setHandler(.step) { _ in heard.append(.step) }
+        gestures.setHandler(.pan) { _ in heard.append(.pan) }
+        gestures.configure(settings(step: Self.pan))
+        gestures.start()
+        gestures.receive([event(Self.pan, .began)])
+        #expect(heard == [.pan])
+    }
+
     @Test("two gestures trading chords land in one configure")
     func swapKeepsBoth() {
         let (gestures, made) = front()
