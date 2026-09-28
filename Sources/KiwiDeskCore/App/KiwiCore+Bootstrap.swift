@@ -59,6 +59,7 @@ extension KiwiCore {
             _ = self?.focusSpace([.string(id.raw)])
         }
         wireSpaceBarGlyphs()
+        wireAppBarHoverTitle()
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }

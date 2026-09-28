@@ -38,7 +38,7 @@ final class AppBarItemView: NSView {
         return tf
     }()
 
-    private var windowID = WindowID(0)
+    private(set) var windowID = WindowID(0)
     /// Owner application name for accessibility narration (#901).
     var name = ""
     /// Display text string (`KiwiCore.barItemText`).
@@ -54,6 +54,11 @@ final class AppBarItemView: NSView {
     var isHovered = false
     var style = AppBarLook()
     var onSelect: (WindowID) -> Void = { _ in }
+    /// Core's answers (#1514), the manager's one instance.
+    weak var itemActions: AppBarItemActions?
+    /// Core cut the title at `title_cap` (#1514).
+    private(set) var titleCut = false
+    var tipTag: NSView.ToolTipTag?
     var onDragMoved: (AppBarItemView, CGPoint) -> Void = { _, _ in }
     var onDragEnded: (AppBarItemView) -> Void = { _ in }
 
@@ -176,11 +181,13 @@ final class AppBarItemView: NSView {
         icon: NSImage?,
         glyph: String?,
         count: Int,
+        titleCut: Bool = false,
         active: Bool,
         horizontal: Bool,
         style: AppBarLook
     ) {
         windowID = id
+        self.titleCut = titleCut
         self.name = name
         self.text = text
         self.count = count
