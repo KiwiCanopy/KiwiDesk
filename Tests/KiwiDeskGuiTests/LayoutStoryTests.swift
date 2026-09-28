@@ -84,18 +84,31 @@ struct LayoutStoryTests {
         arguments: LayoutMode.allCases
     )
     func playerTakesTheCount(mode: LayoutMode) {
-        let player = LayoutStoryThumbnail(
-            mode: mode,
-            settings: TilingSettings(),
+        // A grid that fits two: the player must rest where the
+        // Space fits, not on the ruled count.
+        var small = TilingSettings()
+        small.grid.columns = 2
+        small.grid.rows = 1
+        for settings in [TilingSettings(), small] {
+            let player = LayoutStoryThumbnail(
+                mode: mode,
+                settings: settings,
+                scale: .tile
+            )
+            #expect(
+                player.story.rest.windows
+                    == LayoutStory.restingWindows(
+                        for: mode,
+                        settings: settings
+                    )
+            )
+        }
+        let grid = LayoutStoryThumbnail(
+            mode: .grid,
+            settings: small,
             scale: .tile
         )
-        #expect(
-            player.story.rest.windows
-                == LayoutStory.restingWindows(
-                    for: mode,
-                    settings: TilingSettings()
-                )
-        )
+        #expect(grid.story.rest.windows == 2)
     }
 
     private func scrolling(

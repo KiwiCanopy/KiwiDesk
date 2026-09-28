@@ -199,7 +199,12 @@ struct LayoutStoryWiringTests {
                     + "LayoutStoryCanvas.swift"
             )
         )
+        // The clip sits on the whole drawn screen, not a tile.
+        #expect(canvas.contains("tiles(in:geo.size)}.clipped()"))
         #expect(canvas.components(separatedBy: ".clipped()").count == 2)
+        // Windows keep their identity across counts only while the
+        // canvas keys them by id, never by position.
+        #expect(canvas.contains("ForEach(space.windows,id:\\.raw)"))
     }
 
     /// The tour mounts the playing row, lazily, so a row below
@@ -249,6 +254,11 @@ struct LayoutStoryWiringTests {
         // A tiling story draws the canvas at the story's count.
         let canvases = schematicCalls(in: player, of: "LayoutStoryCanvas(")
         #expect(canvases.count == 1)
-        #expect(canvases.first?.contains("count:frame.windows") == true)
+        #expect(canvases.first?.contains("count:frame.windows,") == true)
+        #expect(calls.first?.contains("windows:frame.windows,") == true)
+        // The frame is the story's phase: start while playing.
+        #expect(
+            player.contains("letframe=atStart?story.start:story.rest")
+        )
     }
 }

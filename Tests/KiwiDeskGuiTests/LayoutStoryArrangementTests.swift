@@ -48,6 +48,14 @@ struct LayoutStoryArrangementTests {
                     in: Self.canvas
                 )
                 #expect(frames.count == count, "\(mode) \(count)")
+                // Fills it too: outer gaps are zero, so the union
+                // reaches every edge.
+                let union = frames.values.reduce(CGRect.null) {
+                    $0.union($1)
+                }
+                #expect(abs(union.minX) < 0.5 && abs(union.minY) < 0.5)
+                #expect(abs(union.maxX - Self.canvas.width) < 0.5)
+                #expect(abs(union.maxY - Self.canvas.height) < 0.5)
                 for (id, rect) in frames {
                     #expect(
                         bounds.contains(rect),
@@ -62,7 +70,7 @@ struct LayoutStoryArrangementTests {
     /// it moves a piled window a few points on the thumbnail and
     /// the pile reads inside the cell it fills (#1750).
     @Test("a pile cascades by a screen's proportion")
-    func pileStepsInProportion() {
+    func pileStepsInProportion() throws {
         let frames = LayoutStoryArrangement.frames(
             .grid,
             settings: Self.variants[2],
@@ -71,10 +79,15 @@ struct LayoutStoryArrangementTests {
         )
         let piled = frames.values.filter { $0.minX > 1 }
             .map(\.minY).sorted()
-        #expect(piled.count == 3)
+        try #require(piled.count == 3)
         let step = piled[1] - piled[0]
-        #expect(step > 0)
-        #expect(step < Self.canvas.height / 10)
+        let scaled =
+            OverlapStack.offset * Self.canvas.width
+            / LayoutStoryArrangement.screenWidth
+        #expect(abs(step - scaled) < 0.5)
+        // And the screen is a screen, not the thumbnail: laid out at
+        // thumbnail size the step is the whole unscaled offset.
+        #expect(step < OverlapStack.offset / 4)
     }
 
     /// Windows keep their identity as one arrives: the earlier
@@ -116,8 +129,39 @@ struct LayoutStoryArrangementTests {
         )
         let xs = Set(frames.values.map { Int($0.minX.rounded()) })
         let ys = Set(frames.values.map { Int($0.minY.rounded()) })
+        #expect(frames.count == 4)
         #expect(xs.count == 2)
         #expect(ys.count == 2)
+    }
+
+    /// Each layout's arrival answers to its OWN new-window
+    /// placement: a newcomer placed first leads the array, one
+    /// placed last ends it.
+    @Test(
+        "an arrival takes the layout's own placement",
+        arguments: [LayoutMode.bsp, .stack, .grid]
+    )
+    func arrivalTakesThePlacement(mode: LayoutMode) {
+        for (placement, index) in [(SpawnPlacement.first, 0), (.last, 3)] {
+            var settings = TilingSettings()
+            settings.bsp.newWindowPlacement = .afterFocused
+            settings.stack.newWindowPlacement = .afterFocused
+            settings.grid.newWindowPlacement = .afterFocused
+            switch mode {
+            case .bsp: settings.bsp.newWindowPlacement = placement
+            case .stack: settings.stack.newWindowPlacement = placement
+            default: settings.grid.newWindowPlacement = placement
+            }
+            let space = LayoutStoryArrangement.space(
+                mode,
+                settings: settings,
+                count: 4
+            )
+            #expect(
+                space.windows.firstIndex(of: WindowID(4)) == index,
+                "\(mode) \(placement)"
+            )
+        }
     }
 
     /// A grid tuned to fit two tells its arrival within two —
