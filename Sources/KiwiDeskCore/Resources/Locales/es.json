@@ -829,6 +829,7 @@
   "looks.delete": "Eliminar look",
   "looks.description.bloom": "Suave, con un Dock flotante, como %1$@",
   "looks.description.classic": "Fino y plano, como %1$@",
+  "looks.description.glass": "El look propio de KiwiDesk, en Liquid Glass",
   "looks.description.pill": "Redondeado y flotante, como %1$@",
   "looks.description.taskbar": "Barra inferior, como %1$@",
   "looks.description.tiler": "En caja y monoespaciado, como %1$@",
