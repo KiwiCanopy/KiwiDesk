@@ -107,6 +107,20 @@ struct HeldSpaceDesk {
         return core
     }
 
+    /// Window `id` as the desk's apps show it.
+    func window(_ id: Int) -> ManagedWindow {
+        ManagedWindow(id: WindowID(UInt32(id)), pid: 1, appName: "App\(id)")
+    }
+
+    /// A built-in profile declaring 1–5, so it claims the held 5.
+    func fiveSpaces() -> Profile {
+        profile(
+            "five",
+            screens: [builtIn.fingerprint],
+            spaces: (1...5).map { SpaceID($0) }
+        )
+    }
+
     func members(_ core: KiwiCore, _ space: Int) -> [WindowID] {
         core.state.workspaces[SpaceID(space)]?.windows ?? []
     }

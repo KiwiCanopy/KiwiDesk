@@ -781,7 +781,10 @@ screen's Spaces are held, not forwarded*. The obligations:
 - **The hold's machinery has one home.** Holding, reclaiming,
   re-filing, retiring and ending live in the `KiwiCore+HeldSpace*`
   files — `KiwiCore+HeldSpaceOrder.swift` holds the naming walk
-  and the batch's placement, and writes no hold; write
+  and the batch's placement, `KiwiCore+HeldSpaceReads.swift` the
+  read-only predicates and captured views, and
+  `KiwiCore+HeldSpaceBoot.swift` the restart's plan (#1646), and
+  none of them writes a hold; write
   `StateCoordinator.heldSpaces` in `KiwiCore+HeldSpaces.swift`
   alone, and add a new way into or out of a hold there — a caller
   elsewhere calls it, as the #634 reset
@@ -876,6 +879,75 @@ screen's Spaces are held, not forwarded*. The obligations:
   `upAwayWindowKeepsItsRank`, `HeldSpaceMemoryTests` ▸
   `renumberSkipsARememberedNumber`, `HeldSpaceMemoryTests` ▸
   `reclaimSkipsARememberedNumber`).
+- **A hold crosses a restart in every snapshot, and boot holds
+  it again ahead of the replay (#1646).** The record rides its own
+  `SpaceRecord.held` — the origin and the windows it holds that
+  are not members — which `StateCoordinator.snapshot()` and the
+  in-place capture write, so a quit, the crash autosave and an
+  in-place restart all carry it (`HeldSpaceRestartTests` ▸
+  `everyCaptureCarriesHolds`); a capture that rebuilds a record
+  passes it on. Its keys are a stored cross-version shape
+  (state-and-layout.md; `HeldSpaceRestartRecordTests` ▸
+  `storedKeysArePinned`), decoded on its own
+  (`HeldSpaceRestartRecordTests` ▸
+  `unreadableRecordCostsOnlyItself`). `arrangeBootDesk` runs
+  `restoreHeldSpaces` BEFORE `restore` — the one Space a restore
+  creates, through `restoreHolds` — and `settleHeldSpacesAtBoot`
+  after it, which re-files through `refileHeldSpaces` like a
+  reconnect and, with no arrangement live, pins nothing, as the
+  `.none` arm (`HeldSpaceRestartTests` ▸ `plainRestartKeepsHolds`,
+  `HeldSpaceRestartTests` ▸ `bootDockedRefiles`,
+  `HeldSpaceRestartRecordTests` ▸ `noArrangementKeepsTheHold`,
+  `HeldSpaceRestartRecordTests` ▸ `standardBootPinsTheHold`,
+  `InPlaceRestartNoMotionTests` ▸ `heldSpace`,
+  `HeldSpaceBootWiringTests`). The boot renumber is the reclaim's
+  rule on a record, spared by the one `goesHomeInPlace`: a held id
+  a declared, live or RECORDED Space takes moves past all of them,
+  since a recorded one would merge two records' windows
+  (`HeldSpaceRestartTests` ▸ `declaredHeldIDIsRenumbered`,
+  `HeldSpaceRestartTests` ▸ `renumberSkipsRecordedNumbers`,
+  `HeldSpaceRestartTests` ▸ `ownNameGoesHome`). Nothing drops a
+  hold at the replay: its unscanned windows are remembered there,
+  and `retireGoneHeldMembers`, AFTER the away seed, drops only
+  the filings the per-window `readWindowSpace` reads as `.gone`,
+  leaving the end to the retire — never the Desktop census,
+  which lists user Desktops alone. Measured 2026-09-28 on macOS
+  27.0 (`SLSCopySpacesForWindows`, selector 0x7): a hidden app's
+  window and a minimized one read hosted, a closed one reads no
+  Space; that away, fullscreen and still-launching windows read
+  hosted is reasoned, not measured (`HeldSpaceRestartJudgeTests` ▸
+  `hiddenMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `awayMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `lateMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `fullscreenMemberKeepsTheHold`, `HeldSpaceRestartJudgeTests` ▸
+  `goneWindowsRetireAfterBoot`). An unanswered read marks that
+  filing in `unjudgedFilings`, and the snapshot does not carry a
+  marked filing again, so a closed window holds a Space across
+  one restart at most — a filing the judge never read, a later
+  hold's included, still rides (`HeldSpaceRestartJudgeTests` ▸
+  `unjudgedFilingIsNotCarriedAgain`). A return that is not in
+  place re-points EVERY window remembered in the held Space —
+  not only the away ledger's — at the origin, or an arrival
+  re-creates the retired id as an ordinary Space a save captures
+  (`HeldSpaceRestartJudgeTests` ▸
+  `homeReturnRepointsTheHiddenWindow`; a live replug into a saved
+  profile is re-filed by #1230's record as well, and one into a
+  Standard has no clause). Those re-pointed windows return
+  UNORDERED: `refileAway` drops the slot rank, since a rank means
+  something only in the Space it was taken in and two Spaces'
+  rank families must not merge (`renameRememberedSpace`, #1669).
+  A snapshot records the arrangement it was captured under
+  (`StateSnapshot.arrangement`), and a replay under ANOTHER leaves
+  the modes of the Spaces the live one declares: a record's mode
+  was the other arrangement's Space of that name, the #1230 merge
+  in a single field (`HeldSpaceRestartTests` ▸
+  `foreignSnapshotKeepsDeclaredModes`); under the same one a
+  runtime mode still survives (#633, `HeldSpaceRestartTests` ▸
+  `sameArrangementReplaysModes`).
+  `livingRememberedSpace` keeps not gating a `.restored` target
+  by ruling (#1010): the replay files before Spaces exist. The
+  #634 discard deletes the files and keeps the live holds
+  (`HeldSpaceRestartRecordTests` ▸ `tierOneKeepsLiveHolds`).
 - **A reload leaves a held Space's mode alone.**
   `resetDeclarativeState` skips it, since no config redeclares it
   (`HeldSpaceTests` ▸ `reloadKeepsHeldMode`); the same holds for

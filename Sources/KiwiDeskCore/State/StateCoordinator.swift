@@ -87,6 +87,11 @@ public struct StateCoordinator: Sendable {
     /// Keep, Save or partitioning record captures; written and
     /// ended in `KiwiCore+HeldSpaces.swift`.
     var heldSpaces: [SpaceID: HeldOrigin] = [:]
+    /// Restored held filings boot could not judge (#1646): the
+    /// WindowServer did not answer whether they still exist, so
+    /// the snapshot does not carry them again and a closed window
+    /// holds a Space across one restart at most.
+    var unjudgedFilings: Set<WindowID> = []
     /// Each Space's screen fingerprint as the first report of a
     /// screen-count change found it (#1507) — the one fact the
     /// report's own resolve erases for an unpinned Space. Written
@@ -168,6 +173,9 @@ public struct StateCoordinator: Sendable {
         }
         if closedDepartures.remove(old) != nil {
             closedDepartures.insert(new)
+        }
+        if unjudgedFilings.remove(old) != nil {
+            unjudgedFilings.insert(new)
         }
         if let frame = restoredFrames.removeValue(forKey: old) {
             restoredFrames[new] = frame

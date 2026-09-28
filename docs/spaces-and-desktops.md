@@ -79,8 +79,16 @@ A held Space goes away once no window is left in it; a window on
 another Desktop, or hidden with its app, still counts. Loading a
 profile yourself ends every hold, and the held windows move to
 that profile's fallback Space like those of any Space it does not
-define. A Desktop binding holds nothing, and held Spaces do not
-survive quitting KiwiDesk.
+define. A Desktop binding holds nothing.
+
+:::unreleased
+Held Spaces come back when KiwiDesk quits and reopens, updates or
+crashes — a window hidden, on another Desktop or still opening
+included — and go home at once, as above, if their screen is back
+by then. A restart of the Mac ends them, since macOS reopens every
+window as a new one. A window of a hidden app goes home with its
+held Space too, and comes back there when you show the app.
+:::
 
 Every Space sits on a screen. In Settings the **Monitors**
 section is a picture of your desk: drag a Space chip onto the

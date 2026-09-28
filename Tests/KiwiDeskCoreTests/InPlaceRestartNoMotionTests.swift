@@ -173,6 +173,53 @@ struct InPlaceRestartNoMotionTests {
     @Test("a floating Space", .enabled(if: NSScreen.main != nil))
     func floating() throws { try proveNoMotion(.floating) }
 
+    /// A held Space (#1646): process B has no such Space until the
+    /// boot door re-creates it, so without it the held windows
+    /// would join the Space in front and tile on screen.
+    @Test("a held Space", .enabled(if: NSScreen.main != nil))
+    func heldSpace() throws {
+        let held = SpaceID("7")
+        let origin = HeldOrigin(
+            name: SpaceID("3"),
+            screen: "DELL:2560x1440",
+            icon: nil,
+            arrangement: nil
+        )
+        var windows = Self.windows
+        windows += [
+            .init(id: WindowID(21), space: held, frame: Self.frame(8)),
+            .init(id: WindowID(22), space: held, frame: Self.frame(9)),
+        ]
+        let a = try #require(
+            F.processA(windows) { core in
+                core.state.workspaces.ensureSpace(held)
+                core.state.heldSpaces[held] = origin
+                core.resolveSpaceDisplays()
+            }
+        )
+        let left = F.settle(a)
+        let session = try F.crossed(a.sessionSnapshot(inPlace: true))
+        let (b, issued) = try #require(
+            F.processB(windows, left: left, session: session)
+        )
+        let moved = Set(issued.map(\.0))
+        for id in Self.shownIDs {
+            #expect(moved.contains(id), "w\(id.raw) was never issued")
+        }
+        for (id, frame) in issued {
+            #expect(
+                frame == left[id],
+                "w\(id.raw) issued \(frame), left at \(left[id]!)"
+            )
+        }
+        #expect(b.state.heldSpaces[held] == origin)
+        #expect(
+            b.state.workspaces[held]?.windows
+                == [WindowID(21), WindowID(22)]
+        )
+        #expect(b.state.workspaces[F.shown]?.windows == Self.shownIDs)
+    }
+
     /// The negative control: the same boot from a PLAIN snapshot
     /// — what a quit writes — moves the resized layouts, so the
     /// in-place payload is what holds them.
