@@ -757,10 +757,9 @@ monocle.
 
 :::unreleased
 Each layout is tuned for the screen it sits on, scrolling for
-the widest screen that opens in it, and gaps
-and the minimum window size follow the main screen. A laptop
-main gets 6 pt gaps; an ultrawide or super ultrawide main a
-larger minimum window size. A stack gets two mains side by side
+the widest screen that opens in it, and the minimum window size
+follows the main screen — larger on an ultrawide or super
+ultrawide main. A stack gets two mains side by side
 on an ultrawide and three on a super ultrawide; on a portrait
 screen its stack runs along the bottom. Scrolling on an
 ultrawide or super ultrawide centres the focused window and

@@ -286,7 +286,7 @@ struct StarterSetupSeedTests {
         // profile isn't saved with an empty monitor set.
         let core = makeCore()
         #expect(core.state.workspaces.allDisplays.isEmpty)
-        let screens = core.firstRunDisplays()
+        let screens = core.starterDisplays()
         core.seedFirstRunStarterProfile()
         // A host WITH a screen must author the profile; only a
         // headless one may skip, or a broken seed reads as headless.

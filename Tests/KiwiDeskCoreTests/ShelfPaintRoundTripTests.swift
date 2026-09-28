@@ -35,7 +35,7 @@ struct ShelfPaintRoundTripTests {
     func revertRoundTripsEveryLook() {
         let before = tunedSettings()
         let palettes = makeTestCore().allPalettes
-        let looks = LookCatalog.bundled()
+        let looks = LookCatalog.bundled(sizes: [])
         #expect(!looks.isEmpty && !palettes.isEmpty)
         for look in looks {
             for palette in palettes {

@@ -13,7 +13,7 @@ struct LookDescriptionsTests {
     func everyBundledLookIsDescribed() {
         LocalizationManager.shared.select("en")
         defer { LocalizationManager.shared.select(nil) }
-        for look in LookCatalog.bundled() {
+        for look in LookCatalog.bundled(sizes: []) {
             #expect(
                 LookDescriptions.caption(for: look.name) != nil,
                 "\(look.name) has no description"

@@ -4817,10 +4817,12 @@ screen's direction through a per-space override, since sideways
 on a tall screen — or down a wide one — is the mode at its
 worst (owner ruling, #1662).
 
+:::unreleased
 **One tuning per profile: a layout's is its screen's, the rest
-is the main screen's.** `TilingSettings` is profile-wide, so a
-laptop beside a 27" has exactly one gap value to give, and the
-only question is which screen names it. For a layout the
+is the main screen's or the shipped default's.** `TilingSettings`
+is profile-wide, so a laptop beside a 27" has exactly one minimum
+window size to give, and the only question is which screen names
+it. For a layout the
 allocator places on ONE screen — Stack, Grid, Track — that
 question has an answer that is not a guess: the screen it sits
 on, so a Stack on a portrait secondary puts its stack along the
@@ -4829,10 +4831,14 @@ and can be forced onto the narrowest one as a repeat, so it
 takes the widest screen that LEADS it — the ultrawide wherever
 one is connected, and past a narrow portrait or laptop main,
 which leads Monocle, its neighbour. What stays the main
-screen's is what no layout owns — gaps and the minimum window
-size. It is still one
+screen's is what no layout owns — the minimum window size; the
+gaps stay the shipped default on every screen, since a tighter
+laptop gap let two neighbouring rings touch and made Glass, the
+look a first run shows, move windows (owner, 2026-09-28, #1739).
+It is still one
 `TilingSettings`, never a per-display config behind the values
 the Settings window shows.
+:::
 
 :::unreleased
 **An unlisted mode in a sparse preset follows the screen it lands
@@ -4857,7 +4863,7 @@ answer than the old one. (Owner ruling.)
 **A preset is its own choices over the screen's tuning, and it
 names the workflow, never the hardware** (owner ruling, #1663).
 A preset declares only what it chose on purpose — Minimalist's
-wide gap and centred column, the gap of a denser setup — and
+wide gap and centred column — and
 every other setting comes from the same shape tuning the starter
 takes, each layout tuned for the screen it sits on in that
 preset's plan. So Minimalist on a portrait screen scrolls down
@@ -4865,8 +4871,7 @@ rather than across, and a Stack on an ultrawide gets that
 screen's several mains. A value a preset carries only
 because a full `TilingSettings` has to say something is not a
 choice, so a preset never declares one: a gap equal to the
-shape tuning's own base of 8 is left to the screen, and a
-laptop gives it 6. The merge
+shape tuning's own is left undeclared. The merge
 is one function, so a preset's **Layouts** sheet, the apply and the
 monitor-change fallback cannot come to disagree about what a
 preset is. Its NAME does not follow the screen — "Developer" is
@@ -11855,8 +11860,9 @@ paint that rearranges them — once the draft is saved, as any gap
 edit does, which the page's caption says, and the Gaps card's
 pointer names the look as a writer of both. **A
 bundled look is total**: authored sparse, it is resolved over
-Glass — itself derived from the shipped defaults, as "Kiwi
-(Default)" is, plus the starter's bar edges — so each writes
+Glass — itself derived from the starter's tuning for the
+connected screens, so it is what a first run shows and doubles as
+the shape reset (owner, 2026-09-28, #1739) — so each writes
 the whole register and nothing of the previous look leaks through
 (`LookCatalogTests`). A click applies shape and colours to the
 draft, and a "use its colors too" tick then offers the colours

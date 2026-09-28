@@ -128,8 +128,8 @@ struct MonitorChangeTests {
             StandardProfiles.standard(for: 1)
         ).settings(sizes: [CGSize(width: 100, height: 100)])
         #expect(core.tiler.settings == developer)
-        // Tuned for the 100 pt laptop screen (#1663).
-        #expect(core.tiler.settings.gapsGlobal == .uniform(6))
+        // Tuned for the 100 pt laptop (#1663): Grid one row.
+        #expect(core.tiler.settings.grid.rows == 1)
         #expect(
             core.state.workspaces.display(of: SpaceID(1))
                 == DisplayID(1)

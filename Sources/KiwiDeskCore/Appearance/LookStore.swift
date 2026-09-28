@@ -22,11 +22,6 @@ public final class LookStore {
         fileURL = directory.appendingPathComponent("looks.json")
     }
 
-    /// Read-only built-in looks.
-    public func builtins() -> [ShelfLook] {
-        LookCatalog.bundled()
-    }
-
     /// Decodes the document, running `ConfigMigration` if needed.
     private func readDocument() throws -> LookDocument? {
         guard var data = try? Data(contentsOf: fileURL) else {
@@ -56,7 +51,7 @@ public final class LookStore {
     }
 
     public func isBuiltinName(_ name: String) -> Bool {
-        builtins().contains { $0.name == name }
+        LookCatalog.bundledNames.contains(name)
     }
 
     public func hasUserLook(_ name: String) -> Bool {
