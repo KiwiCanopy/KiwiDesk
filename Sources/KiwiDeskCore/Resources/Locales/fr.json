@@ -822,7 +822,7 @@
   "layout_params.stack_position.help": "Quel côté de l'écran occupe la zone du Stack ; la zone principale prend l'autre. Le Stack s'aligne selon sa bande : un Stack à gauche ou à droite va de haut en bas, un Stack en haut ou en bas va de gauche à droite.",
   "layout_params.wrap_focus.help": "Lorsque cette option est activée, déplacer le focus au-delà de la dernière fenêtre revient à la première, et au-delà de la première revient à la dernière, au lieu de s'arrêter à l'extrémité.",
   "looks.bundled": "Looks intégrés",
-  "looks.caption": "Appliquez un look fourni ou enregistré — la forme, la police et les indicateurs de KiwiShelf, la forme et le reflet de la bordure de focus, et les écarts des fenêtres. Une application unique, pas un lien en direct ; ce qu'affichent les barres ne fait jamais partie d'un look. Ses écarts déplacent vos fenêtres dès que vous enregistrez.",
+  "looks.caption": "Appliquez un look fourni ou enregistré — où se placent les barres, la forme, la police et les indicateurs de KiwiShelf, la forme et le reflet de la bordure de focus, et les écarts des fenêtres. Une application unique, pas un lien en direct ; ce qu'affichent les barres ne fait jamais partie d'un look. Ses écarts déplacent vos fenêtres dès que vous enregistrez.",
   "looks.colors_new": "Couleurs : seront enregistrées comme nouvelle palette « %1$@ ».",
   "looks.colors_use": "Couleurs : utilise la palette « %1$@ ».",
   "looks.default_name": "Mon look",

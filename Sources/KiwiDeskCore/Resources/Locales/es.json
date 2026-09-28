@@ -822,7 +822,7 @@
   "layout_params.stack_position.help": "Qué lado de la pantalla ocupa la zona del Stack; la zona principal se queda con el otro. El Stack se alinea para ajustarse a su franja: un Stack izquierdo o derecho va de arriba abajo, y uno superior o inferior va de lado a lado.",
   "layout_params.wrap_focus.help": "Cuando está activado, mover el foco más allá de la última ventana vuelve a la primera, y más allá de la primera vuelve a la última, en lugar de detenerse al final.",
   "looks.bundled": "Looks integrados",
-  "looks.caption": "Aplica un look incluido o guardado: la forma, la fuente y los indicadores de KiwiShelf, la forma y el reflejo del contorno de foco, y el espaciado de las ventanas. Una aplicación única, no un enlace en vivo; lo que muestran las barras nunca forma parte de un look. Su espaciado mueve tus ventanas en cuanto guardes.",
+  "looks.caption": "Aplica un look incluido o guardado: dónde se sitúan las barras, la forma, la fuente y los indicadores de KiwiShelf, la forma y el reflejo del contorno de foco, y el espaciado de las ventanas. Una aplicación única, no un enlace en vivo; lo que muestran las barras nunca forma parte de un look. Su espaciado mueve tus ventanas en cuanto guardes.",
   "looks.colors_new": "Colores: se guardarán como una nueva paleta «%1$@».",
   "looks.colors_use": "Colores: usa la paleta «%1$@».",
   "looks.default_name": "Mi look",
