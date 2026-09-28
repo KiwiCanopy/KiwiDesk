@@ -48,12 +48,18 @@ public final class ScrollGestures {
 
     /// Binds `consumer` to `chord`, or unbinds it with nil or an
     /// empty chord — a plain scroll always belongs to the window.
-    /// A gesture the consumer had in flight is ended first.
+    /// A changed chord ends the consumer's gesture in flight; the
+    /// same chord only replaces the handler, so a re-apply of an
+    /// unchanged binding never cuts a live gesture.
     public func bind(
         _ consumer: Consumer,
         to chord: ScrollChord?,
         _ handler: @escaping Handler
     ) {
+        if let chord, bindings[consumer]?.0 == chord {
+            bindings[consumer] = (chord, handler)
+            return
+        }
         endInFlight(of: consumer)
         if let chord, !chord.isEmpty {
             bindings[consumer] = (chord, handler)
@@ -69,7 +75,11 @@ public final class ScrollGestures {
         sync()
     }
 
+    /// Ends every gesture in flight first: what the tap still had
+    /// queued is dropped with it.
     func stop() {
+        Consumer.allCases.forEach(endInFlight(of:))
+        inFlight = [:]
         started = false
         sync()
     }

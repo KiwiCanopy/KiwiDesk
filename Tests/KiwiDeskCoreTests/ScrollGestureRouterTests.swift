@@ -178,6 +178,19 @@ struct ScrollGestureRouterTests {
         #expect(router.route(sample(Self.pan, .began), now: 0.5).consume)
     }
 
+    @Test("a quick unchorded swipe leaves the next chorded one alone")
+    func passingIsScopedToOneHandoff() {
+        var router = router()
+        // A plain swipe with no touch phase, its end lost.
+        #expect(!router.route(sample([], .began), now: 0).consume)
+        #expect(router.route(sample(Self.pan, .began), now: 1).consume)
+        // A passed touch hands over one .began, then no more.
+        var fresh = self.router()
+        _ = fresh.route(sample([], .mayBegin), now: 0)
+        #expect(!fresh.route(sample(Self.pan, .began), now: 0).consume)
+        #expect(fresh.route(sample(Self.pan, .began), now: 1).consume)
+    }
+
     @Test("the travel a .began carries is reported, not dropped")
     func beganTravelIsReported() {
         var router = router()

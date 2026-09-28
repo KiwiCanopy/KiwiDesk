@@ -18,8 +18,9 @@ public struct ScrollSample: Equatable, Sendable {
     public var chord: ScrollChord
     /// Delta in points, in the NATURAL-scrolling convention
     /// whatever macOS's own setting says: the system inversion is
-    /// undone here, so a consumer applies KiwiDesk's own toggle
-    /// alone (#1656 ruling, Natural scrolling).
+    /// undone here, so KiwiDesk's own toggle
+    /// (`ScrollGestures.naturalScrolling`) is the only one applied
+    /// (#1656 ruling).
     public var delta: CGVector
     public var phase: Phase
     public var momentum: Momentum

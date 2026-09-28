@@ -152,6 +152,32 @@ struct ScrollGesturesTests {
         #expect(stepHeard.isEmpty)
     }
 
+    @Test("a stop ends a gesture in flight")
+    func stopEndsInFlight() {
+        let (gestures, _) = front()
+        var heard: [ScrollGestureEvent.Kind] = []
+        gestures.start()
+        gestures.bind(.pan, to: Self.pan) { heard.append($0.kind) }
+        gestures.receive([event(Self.pan, .began)])
+        gestures.stop()
+        #expect(heard == [.began, .ended])
+        gestures.start()
+        gestures.receive([event(Self.pan, .changed)])
+        #expect(heard == [.began, .ended])
+    }
+
+    @Test("re-binding the same chord keeps a live gesture")
+    func sameChordRebindKeepsGesture() {
+        let (gestures, _) = front()
+        var heard: [String] = []
+        gestures.start()
+        gestures.bind(.pan, to: Self.pan) { heard.append("old \($0.kind)") }
+        gestures.receive([event(Self.pan, .began)])
+        gestures.bind(.pan, to: Self.pan) { heard.append("new \($0.kind)") }
+        gestures.receive([event(Self.pan, .changed)])
+        #expect(heard == ["old began", "new changed"])
+    }
+
     @Test("Natural scrolling off flips the delta, once, here")
     func naturalScrollingFlips() {
         let (gestures, _) = front()

@@ -15,8 +15,9 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     public var chord: ScrollChord
     public var kind: Kind
     public var input: Input
-    /// Natural-convention points (`ScrollSample.delta`); zero on
-    /// `.began` and `.ended`.
+    /// Points; zero on `.began` and `.ended`. The direction is
+    /// final: `ScrollGestures.naturalScrolling` is applied before a
+    /// consumer hears it.
     public var delta: CGVector
     /// True for the momentum that follows a trackpad lift.
     public var momentum: Bool
@@ -50,8 +51,9 @@ struct ScrollGestureRouter {
 
     var chords: Set<ScrollChord> = []
     private var owner: Owner?
-    /// A trackpad gesture passed through at its first touch: its
-    /// `.began` stays the app's even if the chord is pressed since.
+    /// A touch passed through without moving (`.mayBegin`): the
+    /// `.began` that follows stays the app's even if the chord is
+    /// pressed since. Lives for that one handoff only.
     private var passing = false
     private(set) var deadline: Double?
 
@@ -68,11 +70,15 @@ struct ScrollGestureRouter {
         switch sample.phase {
         case .mayBegin, .began:
             if sample.phase == .began, passing, owner == nil {
+                passing = false
                 return (false, [])
             }
+            passing = false
             var events = end(at: sample.location)
-            passing = !chords.contains(sample.chord)
-            guard !passing else { return (false, events) }
+            guard chords.contains(sample.chord) else {
+                passing = sample.phase == .mayBegin
+                return (false, events)
+            }
             owner = Owner(
                 chord: sample.chord,
                 input: .trackpad,
