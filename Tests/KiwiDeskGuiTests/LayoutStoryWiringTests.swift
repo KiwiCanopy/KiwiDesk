@@ -21,12 +21,16 @@ struct LayoutStoryWiringTests {
             "a read-only preset preview; nothing in it is edited",
     ]
 
+    /// Comments stripped, whitespace squashed, and `X.init(`
+    /// spelled `X(`, so a call scan cannot be passed by the
+    /// explicit initializer spelling.
     private func squashed(_ url: URL) throws -> String {
         SourceScan.stripComments(
             try String(contentsOf: url, encoding: .utf8)
         )
         .split(whereSeparator: \.isWhitespace)
         .joined()
+        .replacingOccurrences(of: ".init(", with: "(")
     }
 
     private func relative(_ url: URL) -> String {
@@ -205,5 +209,17 @@ struct LayoutStoryWiringTests {
         )
         let jump = try #require(player.range(of: "atStart=true"))
         #expect(guardAt.upperBound < jump.lowerBound)
+        // One jump, one suppression: a second path to the start
+        // frame would sit outside the guard's reach.
+        #expect(player.components(separatedBy: "atStart=true").count == 2)
+        #expect(
+            player.components(separatedBy: "withTransaction(").count == 2
+        )
+        // And what the player DRAWS is the story's frame: a
+        // literal count or motion in its call kills the beat.
+        let calls = schematicCalls(in: player)
+        #expect(calls.count == 1)
+        #expect(calls.first?.contains("windows:frame.windows") == true)
+        #expect(calls.first?.contains("motion:frame.motion") == true)
     }
 }

@@ -57,7 +57,7 @@ struct LayoutStoryTests {
     /// add, so it stays still rather than drawing below the band.
     @Test("a floor count stays still")
     func floorStaysStill() {
-        for mode in [LayoutMode.bsp, .grid, .track] {
+        for mode in [LayoutMode.bsp, .stack, .grid, .track] {
             let floor = LayoutSchematic.windowCountRange(for: mode)
                 .lowerBound
             #expect(!LayoutStory.of(mode, resting: floor).plays)
@@ -90,10 +90,13 @@ struct LayoutStoryTests {
         )
     }
 
-    private func scrolling(step: Int) -> ScrollingSchematic {
+    private func scrolling(
+        step: Int,
+        anchor: ScrollingParams.Anchor = .center
+    ) -> ScrollingSchematic {
         ScrollingSchematic(
             orientation: .horizontal,
-            anchor: .center,
+            anchor: anchor,
             slotSize: .fraction(clamping: 0.5),
             placement: .afterFocused,
             windows: 3,
@@ -124,6 +127,29 @@ struct LayoutStoryTests {
         #expect(abs(stepped.center(0, s) - rest.center(0, r)) > 1)
     }
 
+    /// Under a fixed anchor the stepped focus rests exactly
+    /// where the resting one sat: the pan is the row moving
+    /// under a still focus, so window positions must be counted
+    /// from the focus, not from the resting slot. (The focused
+    /// position handed to the engine cancels out of every
+    /// anchor's rest, so it is not what this watches.)
+    @Test(
+        "a fixed anchor rests the stepped focus where rest did",
+        arguments: [ScrollingParams.Anchor.start, .end]
+    )
+    func steppedFocusTakesTheAnchor(anchor: ScrollingParams.Anchor) {
+        let rest = scrolling(step: 0, anchor: anchor)
+        let stepped = scrolling(step: 1, anchor: anchor)
+        let along: CGFloat = 128
+        let r = rest.metrics(along: along)
+        let s = stepped.metrics(along: along)
+        #expect(stepped.focusIndex != 0)
+        #expect(
+            abs(stepped.center(stepped.focusIndex, s) - rest.center(0, r))
+                < 0.5
+        )
+    }
+
     /// The drag moves the front window alone, from its pick-up to
     /// where it rests; the others never move.
     @Test("the floating drag moves the front window only")
@@ -143,6 +169,10 @@ struct LayoutStoryTests {
         #expect(start.size == end.size)
         #expect(
             abs(start.minX - FloatingSchematic.pickUp.x * size.width)
+                < 0.01
+        )
+        #expect(
+            abs(start.minY - FloatingSchematic.pickUp.y * size.height)
                 < 0.01
         )
     }
