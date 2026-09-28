@@ -9,7 +9,8 @@ import Foundation
 /// gaps, the minimum window size — takes the MAIN screen's
 /// (#1662).
 public enum StarterTuning {
-    /// Baseline tuning for starter profiles.
+    /// Baseline tuning the starter AND every preset build on, so
+    /// a starter-only value never lands here (#1528).
     static func base() -> TilingSettings {
         var settings = TilingSettings()
         settings.gapsGlobal = .uniform(8)
@@ -18,9 +19,6 @@ public enum StarterTuning {
         settings.scrolling.slotSize = .fraction(
             clamping: standardSlot
         )
-        // Space Bar on top, App Bar on the bottom: two shelves.
-        // The type default stays `.top`, so no crossing (#1528).
-        settings.appBarStyle.edge = .bottom
         return settings
     }
 

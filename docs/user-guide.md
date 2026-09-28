@@ -496,8 +496,8 @@ overrides](lua-reference.md#per-layout-app-bar-overrides)).
 
 :::unreleased
 The one exception is the App Bar's edge, which every layout
-shares. A new setup puts the App Bar on the bottom edge and the
-Space Bar on top; set both to one edge to share one shelf.
+shares. The starter setup puts the App Bar on the bottom edge and
+the Space Bar on top; set both to one edge to share one shelf.
 :::
 
 **Liquid Glass** is one switch for both bars, the shortcuts

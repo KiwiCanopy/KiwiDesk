@@ -4,11 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A new setup splits the bars: Space Bar on top, App Bar on the
-/// bottom (#1528 item 14). Measured on the composed profile — the
-/// first-run seed's and every preset apply's door — not on
-/// `StarterTuning.base()`, which a caller could stop reaching.
-@Suite("Starter setups seed the App Bar on the bottom (#1528)")
+/// The starter splits the bars — Space Bar on top, App Bar on the
+/// bottom — and nothing else does (#1528 item 14). Measured on the
+/// composed profile, the first-run seed's and a preset apply's
+/// door, never on a tuning helper a caller could stop reaching.
+@Suite("The starter seeds the App Bar on the bottom (#1528)")
 struct StarterBarEdgeTests {
     private let laptop = CGSize(width: 1728, height: 1117)
     private let ultrawide = CGSize(width: 3440, height: 1440)
@@ -52,8 +52,11 @@ struct StarterBarEdgeTests {
         }
     }
 
-    @Test("every preset splits the bars too")
-    func presetsSplit() throws {
+    /// A preset apply and the monitor-change fallback replace the
+    /// live settings whole, so a preset seeding the split would
+    /// move an existing user's App Bar unasked.
+    @Test("a preset keeps both bars on top")
+    func presetsKeepTop() throws {
         for preset in StandardProfiles.workflows {
             for size in [laptop, ultrawide] {
                 let sizes = Array(
@@ -61,12 +64,23 @@ struct StarterBarEdgeTests {
                     count: max(1, preset.screenCount)
                 )
                 let edges = try composedEdges(preset, on: sizes)
-                #expect(edges.space == .top, "\(preset.name) \(size)")
-                #expect(edges.app == .bottom, "\(preset.name) \(size)")
+                #expect(edges.app == .top, "\(preset.name) \(size)")
             }
             // Screens unknown: no shape tuning, the base alone.
             let blind = preset.settings(sizes: nil)
-            #expect(blind.appBarStyle.edge == .bottom, "\(preset.name)")
+            #expect(blind.appBarStyle.edge == .top, "\(preset.name)")
+        }
+        // The fallback a monitor change off the starter takes.
+        for count in 1...2 {
+            let fallback = try #require(
+                ProfileComposition.compose(
+                    displays: displays(
+                        Array(repeating: laptop, count: count)
+                    ),
+                    mainID: DisplayID(1)
+                )
+            )
+            #expect(fallback.settings.appBarStyle.edge == .top)
         }
     }
 

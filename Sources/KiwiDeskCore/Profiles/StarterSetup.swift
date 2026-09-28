@@ -166,11 +166,16 @@ public enum StarterSetup {
     /// The tuning for these screens, overrides included.
     static func settings(sizes: [CGSize]) -> TilingSettings {
         let sizes = floored(sizes)
-        return settings(
+        var settings = settings(
             slots: slots(sizes),
             sizes: sizes,
             hosts: hosts(sizes)
         )
+        // The starter's alone: Space Bar top, App Bar bottom. A
+        // preset keeps the type default, which stays `.top`, so
+        // no stored profile moves (#1528).
+        settings.appBarStyle.edge = .bottom
+        return settings
     }
 
     /// A preset's shape tuning: `slots` is its plan on `sizes`,
