@@ -153,28 +153,53 @@ struct LayoutStoryWiringTests {
     /// restage value would re-pace every schematic under it.
     @Test("only the player writes the restage pace")
     func restageComesFromThePlayer() throws {
-        // Any spelling that is not the schematics' own read — an
+        // Any spelling that is not a schematic's own read — an
         // `.environment(`, a `.transformEnvironment(`, a key path
         // handed elsewhere — marks a writer, and only the player
-        // and the key's declaration may carry one.
-        let read = "@Environment(\\.schematicRestage)"
-        var writers: Set<String> = []
-        var readers = 0
-        for url in try sources() {
-            let source = try squashed(url)
-            readers += source.components(separatedBy: read).count - 1
-            let rest = source.replacingOccurrences(of: read, with: "")
-            if rest.contains("schematicRestage") {
-                writers.insert(relative(url))
+        // and the keys' declaration may carry one. The story flag
+        // is held the same way: set anywhere else it would strip
+        // a chooser's `+` and clip it.
+        let keys = [
+            ("schematicRestage", 7),
+            ("schematicTellsStory", 1),
+        ]
+        for (key, floor) in keys {
+            let read = "@Environment(\\.\(key))"
+            var writers: Set<String> = []
+            var readers = 0
+            for url in try sources() {
+                let source = try squashed(url)
+                readers += source.components(separatedBy: read).count - 1
+                let rest = source.replacingOccurrences(of: read, with: "")
+                if rest.contains(key) {
+                    writers.insert(relative(url))
+                }
             }
+            #expect(readers >= floor, "\(key)")
+            #expect(
+                writers == [
+                    Self.player,
+                    "Settings/Components/Layouts/SchematicMotion.swift",
+                ],
+                "\(key)"
+            )
         }
-        #expect(readers >= 7)
-        #expect(
-            writers == [
-                Self.player,
-                "Settings/Components/Layouts/SchematicMotion.swift",
-            ]
+    }
+
+    /// The engine canvas draws only through the player, and clips
+    /// at its screen edge, where a pile hangs past on a real
+    /// screen too.
+    @Test("only the player draws the story canvas, which clips")
+    func canvasComesFromThePlayer() throws {
+        #expect(try callers(of: "LayoutStoryCanvas(") == [Self.player])
+        let root = SourceScan.repoRoot(from: #filePath)
+        let canvas = try squashed(
+            root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Layouts/"
+                    + "LayoutStoryCanvas.swift"
+            )
         )
+        #expect(canvas.components(separatedBy: ".clipped()").count == 2)
     }
 
     /// The tour mounts the playing row, lazily, so a row below
@@ -221,5 +246,9 @@ struct LayoutStoryWiringTests {
         #expect(calls.count == 1)
         #expect(calls.first?.contains("windows:frame.windows") == true)
         #expect(calls.first?.contains("motion:frame.motion") == true)
+        // A tiling story draws the canvas at the story's count.
+        let canvases = schematicCalls(in: player, of: "LayoutStoryCanvas(")
+        #expect(canvases.count == 1)
+        #expect(canvases.first?.contains("count:frame.windows") == true)
     }
 }
