@@ -3,13 +3,10 @@
 enum BehaviourKey: String, CaseIterable, Hashable {
     case minWindowSize = "settings.minWindowSize"
     case resizeStep = "settings.resizeStep"
-    case refusalSound = "settings.refusalSound"
     case swapSkipsCascade = "settings.swapSkipsCascade"
     case floatPlacement = "settings.floatPlacement"
     case floatScaleOnDisplayChange = "settings.floatScaleOnDisplayChange"
     case placementOverride = "settings.placementOverride[space]"
-    case quitLayout = "settings.quitLayout"
-    case quitGridTargetDepth = "settings.quitGridTargetDepth"
     case mouseResize = "settings.mouseResize"
     case mouseFollowsFocus = "settings.mouse.followsFocus"
 }
@@ -20,14 +17,8 @@ extension BehaviourKey {
         case .minWindowSize:
             return .row(.layoutDefaults, .general, .atRest)
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride, .quitLayout:
+            .floatScaleOnDisplayChange, .placementOverride:
             return .luaOnly
-        case .refusalSound:
-            // Left Shortcuts ▸ Size & float with #1255: the cue
-            // is app-wide now, not a resize setting.
-            return .row(.behaviour, .cues, .atRest)
-        case .quitGridTargetDepth:
-            return .row(.behaviour, .onQuit, .atRest)
         case .mouseResize, .mouseFollowsFocus:
             // Moved from Behavior with #1726: the Mouse &
             // trackpad drawer explains the gestures they tune.
@@ -42,18 +33,8 @@ extension BehaviourKey {
         case .minWindowSize:
             return .text("layout_defaults.min_window_size")
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride, .quitLayout:
+            .floatScaleOnDisplayChange, .placementOverride:
             return .none
-        case .refusalSound:
-            return .text(
-                "behavior.cues.sound",
-                help: "behavior.cues.sound.help"
-            )
-        case .quitGridTargetDepth:
-            return .text(
-                "behavior.quit.target_depth",
-                help: "behavior.quit.target_depth.help"
-            )
         case .mouseResize:
             return .text(
                 "behavior.mouse.resize_action",

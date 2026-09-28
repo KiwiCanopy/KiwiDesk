@@ -13,8 +13,6 @@ enum SettingsDrawerHeader {
 struct SettingsDisclosureStyle<Accessory: View>:
     DisclosureGroupStyle
 {
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
     /// What the drawer hides, shown trailing while shut.
     private let summary: String?
     @ViewBuilder private let accessory: () -> Accessory
@@ -40,37 +38,17 @@ struct SettingsDisclosureStyle<Accessory: View>:
         _ configuration: Configuration
     ) -> some View {
         HStack(spacing: 6) {
-            Button {
-                withAnimation(
-                    reduceMotion
-                        ? nil : .easeOut(duration: 0.18)
-                ) {
-                    configuration.isExpanded.toggle()
+            SettingsDisclosureButton(
+                isExpanded: configuration.$isExpanded
+            ) {
+                configuration.label
+                    .font(SettingsDrawerHeader.tier)
+                    .foregroundStyle(SettingsTheme.ink)
+                Spacer(minLength: 0)
+                if !configuration.isExpanded {
+                    summaryText
                 }
-            } label: {
-                HStack(spacing: 6) {
-                    chevron(expanded: configuration.isExpanded)
-                    configuration.label
-                        .font(SettingsDrawerHeader.tier)
-                        .foregroundStyle(SettingsTheme.ink)
-                    Spacer(minLength: 0)
-                    if !configuration.isExpanded {
-                        summaryText
-                    }
-                }
-                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .rowHoverHighlight(cornerRadius: 6, padding: 4)
-            .accessibilityAddTraits(.isHeader)
-            .accessibilityValue(
-                configuration.isExpanded
-                    ? L("settings.disclosure.ax_expanded", "expanded")
-                    : L(
-                        "settings.disclosure.ax_collapsed",
-                        "collapsed"
-                    )
-            )
             accessory()
         }
     }
@@ -84,20 +62,56 @@ struct SettingsDisclosureStyle<Accessory: View>:
                 .lineLimit(1)
         }
     }
-
-    /// Rotating chevron (`SettingsDisclosureSizeTests`, #956, #1021).
-    private func chevron(expanded: Bool) -> some View {
-        Image(systemName: "chevron.right")
-            .fontWeight(.bold)
-            .foregroundStyle(SettingsTheme.ink2)
-            .rotationEffect(.degrees(expanded ? 90 : 0))
-            .accessibilityHidden(true)
-    }
 }
 
 extension SettingsDisclosureStyle where Accessory == EmptyView {
     /// A drawer with nothing beside its title.
     init() {
         self.init(accessory: { EmptyView() })
+    }
+}
+
+/// The one header button every collapsible container draws — the
+/// drawer style and `SettingsCollapsibleSection` (#1741): chevron,
+/// full-row `.plain` button, hover, header trait, expanded value and
+/// the Reduce Motion gate, in one place so none of them forks.
+struct SettingsDisclosureButton<Label: View>: View {
+    @Binding var isExpanded: Bool
+    @ViewBuilder let label: () -> Label
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+
+    var body: some View {
+        Button {
+            withAnimation(
+                reduceMotion ? nil : .easeOut(duration: 0.18)
+            ) {
+                isExpanded.toggle()
+            }
+        } label: {
+            HStack(spacing: 6) {
+                chevron
+                label()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .rowHoverHighlight(cornerRadius: 6, padding: 4)
+        .accessibilityAddTraits(.isHeader)
+        .accessibilityValue(
+            isExpanded
+                ? L("settings.disclosure.ax_expanded", "expanded")
+                : L("settings.disclosure.ax_collapsed", "collapsed")
+        )
+    }
+
+    /// Rotating chevron (`SettingsDisclosureSizeTests`, #956,
+    /// #1021); inherits the header's font tier.
+    private var chevron: some View {
+        Image(systemName: "chevron.right")
+            .fontWeight(.bold)
+            .foregroundStyle(SettingsTheme.ink2)
+            .rotationEffect(.degrees(isExpanded ? 90 : 0))
+            .accessibilityHidden(true)
     }
 }

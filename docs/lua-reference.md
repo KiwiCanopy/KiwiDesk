@@ -696,12 +696,26 @@ refusal that could not draw — a sticky mark switched off, a
 window with no overlay — stays silent.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
-silent, and a held chord sounds once per hold. The GUI twin is
-Behaviour ▸ When an action can't apply.
+silent, and a held chord sounds once per hold.
 
-Stored as `refusal.sound`; the retired `resize.feedback` key is
-dropped by the one-shot migration, its value not carried
-across.
+The retired `resize.feedback` key is dropped by the one-shot
+migration, its value not carried across.
+
+:::unreleased
+The GUI twin is **General ▸ Play the alert sound when an action
+can't apply**. The setting is app-wide: it is stored in
+`gui.json` as `refusal.sound`, no profile carries it, and
+loading a profile never changes it. A GUI-managed setup takes
+it once from the first saved profile loaded after the upgrade,
+and then removes it from every profile file
+([#1741](https://github.com/KiwiCanopy/KiwiDesk/issues/1741)).
+
+The verb changes the running value only: it never reaches
+`gui.json`, so the General row's value returns the next time
+KiwiDesk loads its config. In a Lua-owned setup, `init.lua` is
+where it is kept, and the General row is greyed. **Adopt into
+the GUI** keeps the value `init.lua` set.
+:::
 
 **Example:**
 
@@ -5341,10 +5355,16 @@ from spilling into the row below. Each display sizes its own
 grid from its window count `N` and the density target `T` (see
 `quit.set_grid_target_depth` below), never past 4×4. One-shot
 teardown placement: windows stay on their own display, and
-nothing is managed afterwards. Profile JSON key: `quit.layout`.
-Default: `grid`.
+nothing is managed afterwards. Default: `grid`.
 
 :::unreleased
+The setting is app-wide: it is stored in `gui.json` as
+`quit.layout`, no profile carries it, and loading a profile never
+changes it. It has no Settings row while `grid` is its one value.
+The upgrade and a Lua-owned setup are as for
+[`set_refusal_sound`](#set_refusal_sound), and the verb changes
+the running value only, never `gui.json`.
+
 The grid fills before it stacks. Up to six windows each take a
 tile, split so the tiles come nearest square on that display: on
 16:9 one window fills it, two sit side by side, three share a
@@ -5374,10 +5394,16 @@ cell aims for before the grid grows. Grid dimensions stay
 automatic, calculated per display from that display's window
 count, and never pass 4×4; the target only moves the growth
 thresholds. It is not a hard maximum: past 4×4, additional
-windows keep cascading in its cells. Profile JSON key:
-`quit.grid_target_depth`. Default: `5`.
+windows keep cascading in its cells. Default: `5`.
 
 :::unreleased
+The GUI twin is **General ▸ Windows per pile on quit**. The
+setting is app-wide: it is stored in `gui.json` as
+`quit.grid_target_depth`, no profile carries it, and loading a
+profile never changes it. The upgrade, the verb's reach and a
+Lua-owned setup are as for
+[`set_refusal_sound`](#set_refusal_sound).
+
 The thresholds sit on the ladder 3×2 → 4×2 → 4×3 → 4×4: 3×2
 through `6×T` windows, 4×2 through `8×T`, 4×3 through `12×T`,
 4×4 above. Up to six windows tile whatever the target.

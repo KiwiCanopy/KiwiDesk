@@ -25,9 +25,7 @@ enum SettingsContainer: CaseIterable, Hashable {
     case monocle
     case motion
     case gestures
-    case cues
     case moveWindows
-    case onQuit
     case openApplications
     case optionalSettings
     case palettes
@@ -65,13 +63,13 @@ enum SettingsContainer: CaseIterable, Hashable {
             return .setting(.borders(.borderEnabled))
         case .motion:
             return .runtime(.reduceMotion)
-        case .advanced, .borders, .bsp, .cues,
+        case .advanced, .borders, .bsp,
             .defaultShortcuts, .dragAndDrop, .essentialSettings,
             .focus, .gaps, .general, .generalKeys, .grid,
             .habits, .kiwishelf, .appliesImmediately, .layers,
             .looks, .luaBindings,
             .monitorFingerprints, .monocle, .gestures,
-            .moveWindows, .onQuit, .openApplications,
+            .moveWindows, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedMonitors, .presets,
             .profilesPerMacOSSpace, .floatRules,

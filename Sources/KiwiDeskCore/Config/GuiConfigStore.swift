@@ -31,6 +31,11 @@ public struct GuiConfigStore {
     /// left the file's copy standing for the next boot to adopt.
     public var liveDesktopSpaces: [DesktopKey: SpaceID]?
 
+    /// The live app-wide settings (#1741), stamped the same way
+    /// and for the same reason. nil while the crossing is owed, so
+    /// no write can end it with values it never adopted.
+    public var liveAppWide: AppWideSettings?
+
     public init(directory: URL) {
         self.url = directory.appendingPathComponent("gui.json")
     }
@@ -60,6 +65,9 @@ public struct GuiConfigStore {
         var config = config
         if let liveDesktopSpaces {
             config.desktopSpaces = liveDesktopSpaces
+        }
+        if let liveAppWide {
+            config.appWide = liveAppWide
         }
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),

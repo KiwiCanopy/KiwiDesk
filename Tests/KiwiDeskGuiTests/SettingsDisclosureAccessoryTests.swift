@@ -58,7 +58,14 @@ struct SettingsDisclosureAccessoryTests {
         // satisfies — the guard was green with the blocker back
         // (code review, 2026-08-24). What has to be true is
         // positional, so the assertion has to be positional.
-        let label = try buttonLabelRun(style)
+        // Since #1741 the button is the shared
+        // `SettingsDisclosureButton`, and its label is the
+        // trailing closure the style hands it.
+        let label = try braced(
+            after: "SettingsDisclosureButton("
+                + "isExpanded:configuration.$isExpanded)",
+            in: style
+        )
         // Non-vacuity: this really is the label's run.
         #expect(label.contains("configuration.label"))
         #expect(label.contains("Spacer(minLength:0)"))
@@ -142,6 +149,30 @@ struct SettingsDisclosureAccessoryTests {
                 close: ")"
             ),
             "`\(marker)` has no argument list"
+        )
+    }
+
+    /// The brace-balanced closure right after `marker`.
+    private func braced(
+        after marker: String,
+        in squashed: String
+    ) throws -> String {
+        let head = try #require(
+            squashed.range(of: marker),
+            "`\(marker)` is gone"
+        )
+        var cursor = squashed.distance(
+            from: squashed.startIndex,
+            to: head.upperBound
+        )
+        return try #require(
+            SourceScan.balanced(
+                Array(squashed),
+                from: &cursor,
+                open: "{",
+                close: "}"
+            ),
+            "`\(marker)` has no trailing closure"
         )
     }
 

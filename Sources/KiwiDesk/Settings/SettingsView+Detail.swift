@@ -23,8 +23,6 @@ extension SettingsView {
             GapsAndBordersSection(model: model)
         case .bars:
             BarsSection(model: model)
-        case .behavior:
-            BehaviorSection(model: model)
         case .profiles:
             ProfilesSection(model: model)
         case .shortcuts:

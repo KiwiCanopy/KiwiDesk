@@ -366,8 +366,6 @@
   "guide_tour_apprules_title": "App Rules & General",
   "guide_tour_bars_body": "Two optional on-screen strips. The Space Bar shows all your Spaces at a glance — click one to jump there, or drag a window onto it to send it over. The App Bar lists every window in the monocle and scrolling layouts, so nothing hides; click a tab to focus it, or drag tabs to reorder. Little badges mark floating windows and sticky ones.",
   "guide_tour_bars_title": "Bars",
-  "guide_tour_behavior_body": "Adjust how things feel: what dragging a window's edge does, whether the pointer follows your focus, where new windows appear, and how KiwiDesk tidies your windows into a reachable grid if you ever quit it.",
-  "guide_tour_behavior_title": "Behavior",
   "guide_tour_colors_body": "Pick a whole color set in one click — every palette shows a small scene painted in its own colors, so you can see the look before you take it, and the scene underneath shows the colors you're running right now. Applying a palette paints once; you're free to change any single color afterwards. Animation lives here too: whether windows animate at all, which moments they animate, and how long each glide takes. And if you ever do want one specific color rather than a whole set, Advanced Colors sits right below with all 25 of them, grouped by where you see them on screen — most people never open it.",
   "guide_tour_colors_title": "Colors & Animations",
   "guide_tour_gapsborders_body": "Set the breathing room between your windows, and the shape of the small visuals — the soft highlight that shows where a window will land as you drag it, the ring around the window you're focused on, and whether a sticky window carries a little mark. Sizes and shapes here; the colors have a section of their own.",

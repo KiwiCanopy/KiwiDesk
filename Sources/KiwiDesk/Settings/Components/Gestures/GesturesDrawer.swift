@@ -3,12 +3,13 @@ import SwiftUI
 
 /// Shortcuts & Gestures ▸ Mouse & trackpad (#1726): what the mouse
 /// and trackpad do, grouped by where the hand is. Above the layer
-/// header, so nothing here reads as per-layer; collapsed on every
-/// visit. An entry lands with its feature, never before, and one
-/// whose surface is off greys with a pointer to where it turns on.
-/// It mounts inside the section's `keybindingLayerName` scope, so a
-/// gesture recorder (#1656, #1519) must never read that value: a
-/// gesture modifier belongs to no layer.
+/// header, so nothing here reads as per-layer; a collapsible
+/// section card (#1741), collapsed on every visit. An entry lands
+/// with its feature, never before, and one whose surface is off
+/// greys with a pointer to where it turns on. It mounts inside the
+/// section's `keybindingLayerName` scope, so a gesture recorder
+/// (#1656, #1519) must never read that value: a gesture modifier
+/// belongs to no layer.
 struct GesturesDrawer: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = false
@@ -16,9 +17,8 @@ struct GesturesDrawer: View {
     private var settings: TilingSettings { model.config.settings }
 
     var body: some View {
-        SettingsDisclosure(
+        SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.gestures,
-            chrome: .card,
             isExpanded: $expanded,
             summary: summary
         ) {

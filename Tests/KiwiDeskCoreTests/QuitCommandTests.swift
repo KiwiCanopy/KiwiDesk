@@ -21,14 +21,14 @@ struct QuitCommandTests {
     @Test("quit.set_layout stores a valid style")
     func storesValidStyle() {
         let core = makeCore()
-        #expect(core.tiler.settings.quitLayout == .grid)
+        #expect(core.appWide.quitLayout == .grid)
         #expect(
             core.execute(
                 "quit.set_layout",
                 args: [.string("grid")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.quitLayout == .grid)
+        #expect(core.appWide.quitLayout == .grid)
     }
 
     @Test("an unknown style fails and lists accepted values")
@@ -40,7 +40,7 @@ struct QuitCommandTests {
         )
         #expect(!response.isSuccess)
         #expect(response.error == "expected grid")
-        #expect(core.tiler.settings.quitLayout == .grid)
+        #expect(core.appWide.quitLayout == .grid)
     }
 
     @Test("a missing argument fails")
@@ -69,7 +69,7 @@ struct QuitCommandTests {
     func storesTargetDepth() {
         let core = makeCore()
         #expect(
-            core.tiler.settings.quitGridTargetDepth
+            core.appWide.quitGridTargetDepth
                 == QuitGridLayout.defaultTargetDepth
         )
         #expect(
@@ -79,7 +79,7 @@ struct QuitCommandTests {
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.quitGridTargetDepth == 8
+            core.appWide.quitGridTargetDepth == 8
         )
     }
 
@@ -95,7 +95,7 @@ struct QuitCommandTests {
             #expect(response.error == "expected 1-20")
         }
         #expect(
-            core.tiler.settings.quitGridTargetDepth
+            core.appWide.quitGridTargetDepth
                 == QuitGridLayout.defaultTargetDepth
         )
     }
@@ -111,7 +111,7 @@ struct QuitCommandTests {
         )
         #expect(!response.isSuccess)
         #expect(
-            core.tiler.settings.quitGridTargetDepth
+            core.appWide.quitGridTargetDepth
                 == QuitGridLayout.defaultTargetDepth
         )
     }
