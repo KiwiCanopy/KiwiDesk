@@ -15,6 +15,10 @@ struct SettingsSlider: View {
     /// either way, and a tick marks it. Nil fills from the leading
     /// edge.
     var origin: Double? = nil
+    /// A darker/lighter scale (the sheen): moon and sun at the
+    /// ends, a ramp on the track, and the origin notch showing
+    /// above and below the knob while the value rests on it.
+    var lightness = false
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion)
@@ -29,16 +33,20 @@ struct SettingsSlider: View {
 
     private var dragging: Bool { dragFraction != nil }
 
-    private static let knobWidth: CGFloat = 28
-    private static let knobHeight: CGFloat = 18
-    private static let trackHeight: CGFloat = 10
+    private static let knobWidth: CGFloat = 24
+    private static let knobHeight: CGFloat = 16
+    private static let trackHeight: CGFloat = 12
     private static let height: CGFloat = 24
     /// Visual only — layout keeps the resting size (#1527).
     private static let dragScale: CGFloat = 1.25
 
     var body: some View {
-        GeometryReader { geo in
-            track(width: geo.size.width)
+        HStack(spacing: Self.endSpacing) {
+            if lightness { endGlyph("moon.fill") }
+            GeometryReader { geo in
+                track(width: geo.size.width)
+            }
+            if lightness { endGlyph("sun.max.fill") }
         }
         .frame(height: Self.height)
         .opacity(isEnabled ? 1 : 0.4)
@@ -104,6 +112,7 @@ struct SettingsSlider: View {
         return ZStack(alignment: .leading) {
             Capsule()
                 .fill(Color.primary.opacity(0.12))
+                .overlay { if lightness && isEnabled { lightnessRamp } }
                 .frame(height: Self.trackHeight)
             // To the knob's CENTRE, so a glass knob shows the
             // fill running under it (#1527) — from the origin
@@ -114,11 +123,22 @@ struct SettingsSlider: View {
                 .offset(x: span.x)
             if let origin {
                 Rectangle()
-                    .fill(Color.primary.opacity(0.25))
-                    .frame(width: 0.5, height: Self.trackHeight)
-                    .offset(x: restingCenter(at: origin, in: width) - 0.25)
+                    .fill(Color.primary.opacity(0.35))
+                    .frame(
+                        width: Self.notchWidth,
+                        height: Self.trackHeight + 4
+                    )
+                    .offset(
+                        x: restingCenter(at: origin, in: width)
+                            - Self.notchWidth / 2
+                    )
             }
             knob
+                .overlay {
+                    if lightness && restsOnOrigin && !dragging {
+                        originMarks(knobHeight: Self.knobHeight)
+                    }
+                }
                 .frame(
                     width: Self.knobWidth,
                     height: Self.knobHeight
@@ -194,6 +214,12 @@ struct SettingsSlider: View {
     /// fallback — the branch `glassChrome` takes (#1374).
     private var knobIsGlass: Bool {
         dragging && !reduceTransparency && GlassChromeVariant.drawable
+    }
+
+    /// Within half a step of `origin`: the grid may miss 0 by an ulp.
+    var restsOnOrigin: Bool {
+        guard let origin else { return false }
+        return abs(value - origin) < max(step, 1e-9) / 2
     }
 
     /// White knob thumb, fully clear glass while dragged (#1527).
