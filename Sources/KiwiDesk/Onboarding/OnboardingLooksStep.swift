@@ -29,9 +29,9 @@ struct OnboardingLooksStep: View {
             body1: L(
                 "onboarding.looks.body",
                 "Pick a look and KiwiDesk changes as you click: "
-                    + "KiwiShelf, the strip along your screen's edge "
-                    + "that holds your Spaces and windows, and the "
-                    + "focus border with it. Then pick the colors."
+                    + "the bars that show your Spaces and windows, "
+                    + "and the border around the focused window. "
+                    + "Then pick the colors."
             ),
             footnote: blocked ? blockedCaption : nil,
             hint: laterHint

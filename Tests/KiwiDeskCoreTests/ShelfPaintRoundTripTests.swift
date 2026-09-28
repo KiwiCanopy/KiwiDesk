@@ -6,8 +6,9 @@ import Testing
 /// A tour Revert returns exactly what a paint reached (#1720), for
 /// every bundled look and every palette, over a user's settings
 /// that differ from the defaults wherever `ShelfLook.apply`
-/// writes beyond a look's keys — every glass leaf apart, every
-/// per-layout App Bar override set. A new write `apply` makes
+/// writes beyond a look's keys — every glass leaf apart, the drag
+/// strokes apart from the ring, every per-layout App Bar override
+/// set. A new write `apply` makes
 /// beyond its keys reds here until `KiwiCore.unpainted` returns
 /// it too.
 @Suite("A tour Revert round-trips every look (#1720)")
@@ -28,6 +29,11 @@ struct ShelfPaintRoundTripTests {
             settings[keyPath: host].titleCap = 17
             settings[keyPath: host].groupAdjacentWindows = false
         }
+        // The strokes the Borders masters write with the ring's
+        // width and corners (#754, #1739), each its own value.
+        settings.dragGhost.borderWidth = 7
+        settings.dragDropZone.borderWidth = 9
+        settings.dragCornerRadius = 3
         return settings
     }
 

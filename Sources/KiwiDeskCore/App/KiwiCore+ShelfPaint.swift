@@ -70,8 +70,10 @@ extension KiwiCore {
 
     /// `current` with everything a paint reaches returned to
     /// `before` and nothing else: the look's and the palette's keys,
-    /// then the two writes `ShelfLook.apply` makes beyond its keys
-    /// (every glass leaf, the per-layout indicators) put back too.
+    /// then the writes `ShelfLook.apply` makes beyond its keys —
+    /// every glass leaf, the drag strokes the Borders masters own,
+    /// the per-layout indicators — put back too
+    /// (`ShelfPaintRoundTripTests`).
     static func unpainted(
         _ current: TilingSettings,
         to before: TilingSettings
@@ -91,6 +93,10 @@ extension KiwiCore {
         for leaf in TilingSettings.liquidGlassLeaves {
             settings[keyPath: leaf] = before[keyPath: leaf]
         }
+        settings.dragGhost.borderWidth = before.dragGhost.borderWidth
+        settings.dragDropZone.borderWidth =
+            before.dragDropZone.borderWidth
+        settings.dragCornerRadius = before.dragCornerRadius
         settings.monocle.appBar.activeIndicator =
             before.monocle.appBar.activeIndicator
         settings.scrolling.appBar.activeIndicator =
