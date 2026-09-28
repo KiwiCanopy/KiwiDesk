@@ -155,8 +155,10 @@ struct BorderSheenSurfaceTests {
             frame: CGRect(x: 0, y: 0, width: 80, height: 60)
         )
         let style = DragVisual.ghostDefault
-        let stroke = WindowStroke(width: 5, cornerRadius: 8)
+        // Off every default, so a hard-coded width or radius reds.
+        let stroke = WindowStroke(width: 3, cornerRadius: 7)
         view.render(style, stroke: stroke, glass: false, sheen: 0.5)
+        #expect(view.layer?.cornerRadius == stroke.cornerRadius)
         #expect(view.rim.paint?.width == stroke.width)
         #expect(view.rim.paint?.strength == 0.5)
         #expect(view.layer?.borderWidth == 0)
