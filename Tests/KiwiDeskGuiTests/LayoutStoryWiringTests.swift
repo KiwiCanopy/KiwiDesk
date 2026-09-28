@@ -35,11 +35,21 @@ struct LayoutStoryWiringTests {
         return String(url.path.dropFirst(root.count + 1))
     }
 
+    /// Every Swift file of the GUI target: these are negative
+    /// guards over "anywhere", so a compared surface in a tree
+    /// no chrome scan lists is watched too.
+    private func sources() throws -> [URL] {
+        let files = try SourceScan.swiftSources(
+            under: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources/KiwiDesk")
+        )
+        #expect(files.count > 50)
+        return files
+    }
+
     private func callers(of needle: String) throws -> Set<String> {
         var found: Set<String> = []
-        let files = try ChromeScanRoots.sources(from: #filePath)
-        #expect(files.count > 50)
-        for url in files where try squashed(url).contains(needle) {
+        for url in try sources() where try squashed(url).contains(needle) {
             found.insert(relative(url))
         }
         return found
@@ -93,7 +103,7 @@ struct LayoutStoryWiringTests {
     func motionComesFromThePlayer() throws {
         var handed: Set<String> = []
         var calls = 0
-        for url in try ChromeScanRoots.sources(from: #filePath) {
+        for url in try sources() {
             for args in schematicCalls(in: try squashed(url)) {
                 calls += 1
                 if args.contains("motion:") {
@@ -119,7 +129,7 @@ struct LayoutStoryWiringTests {
         ]
         for (call, label) in inputs {
             var handed: Set<String> = []
-            for url in try ChromeScanRoots.sources(from: #filePath) {
+            for url in try sources() {
                 let calls = schematicCalls(in: try squashed(url), of: call)
                 if calls.contains(where: { $0.contains(label) }) {
                     handed.insert(relative(url))
@@ -139,9 +149,27 @@ struct LayoutStoryWiringTests {
     /// restage value would re-pace every schematic under it.
     @Test("only the player writes the restage pace")
     func restageComesFromThePlayer() throws {
+        // Any spelling that is not the schematics' own read — an
+        // `.environment(`, a `.transformEnvironment(`, a key path
+        // handed elsewhere — marks a writer, and only the player
+        // and the key's declaration may carry one.
+        let read = "@Environment(\\.schematicRestage)"
+        var writers: Set<String> = []
+        var readers = 0
+        for url in try sources() {
+            let source = try squashed(url)
+            readers += source.components(separatedBy: read).count - 1
+            let rest = source.replacingOccurrences(of: read, with: "")
+            if rest.contains("schematicRestage") {
+                writers.insert(relative(url))
+            }
+        }
+        #expect(readers >= 7)
         #expect(
-            try callers(of: ".environment(\\.schematicRestage")
-                == [Self.player]
+            writers == [
+                Self.player,
+                "Settings/Components/Layouts/SchematicMotion.swift",
+            ]
         )
     }
 
