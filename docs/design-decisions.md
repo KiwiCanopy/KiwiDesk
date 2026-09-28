@@ -13601,9 +13601,10 @@ in secondary ink. On this page colour means "this control is
 on", and a brand blue or orange would say that about a link.
 
 :::unreleased
-**The footer also carries the tour's permanent door** (#1754):
-"Show me around", before *About KiwiDesk*. The first-run banner
-retires after one use, so without it the welcome tour became
+**The footer line above also carries the tour's permanent door**
+(#1754) — mark, name, version, update state, "Show me around",
+*About KiwiDesk*. The first-run banner retires once dismissed or
+after the first edit, so without it the welcome tour became
 unreachable; a replay of the app's own introduction is one more
 thing asked about the app itself, and Home is where Settings
 opens, so it needs no search entry — About beside it has none

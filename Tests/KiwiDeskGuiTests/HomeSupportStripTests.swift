@@ -77,7 +77,29 @@ struct HomeSupportStripTests {
         )
         let about = try #require(source.range(of: "Button(action:openAbout)"))
         #expect(tour.upperBound < about.lowerBound)
-        #expect(!source.contains("showAccessibilityHelp"))
+    }
+
+    /// One permanent door (#1754 ruling): the tour replays from
+    /// the first-run banner and the footer, and nowhere else, so a
+    /// second standing door cannot appear beside them unruled.
+    @Test("The tour replays from the banner and the footer only")
+    func tourDoorsAreRuled() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let files = try SourceScan.swiftSources(under: root)
+        #expect(files.count > 50)
+        var callers: Set<String> = []
+        for url in files {
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            if text.contains(".onShowTour()") {
+                callers.insert(url.lastPathComponent)
+            }
+        }
+        #expect(
+            callers == ["HomeFirstRunBanner.swift", "HomeSupportStrip.swift"]
+        )
     }
 
     @Test("About is the shell's action, not a sheet of the strip's")

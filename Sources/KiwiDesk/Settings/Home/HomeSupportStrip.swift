@@ -96,8 +96,7 @@ struct HomeSupportStrip: View {
                 check: { model.updater.checkForUpdates() }
             )
             Spacer(minLength: 8)
-            // The tour's permanent door: the banner retires after
-            // one use, so this is what keeps the tour reachable.
+            // The tour's permanent door (#1754).
             Button(action: { model.onShowTour() }) {
                 Text(L("home.footer.tour", "Show me around")).underline()
             }
