@@ -37,10 +37,7 @@ struct PaletteScenePanel: View {
             settings: settings,
             spaceCount: model.config.spaces.count,
             scale: 1.8,
-            spaceLabels: BarsPanelPreview.spaceLabels(
-                spaces: model.config.spaces,
-                icons: settings.spaceIcons
-            )
+            spaceLabels: BarsPanelPreview.spaceLabels(of: model.config)
         )
         .padding(12)
         .frame(height: 150)

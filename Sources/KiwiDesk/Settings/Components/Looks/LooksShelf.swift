@@ -136,10 +136,7 @@ struct LooksShelf: View {
     }
 
     private var spaceLabels: [SpaceGlyph] {
-        BarsPanelPreview.spaceLabels(
-            spaces: model.config.spaces,
-            icons: model.config.settings.spaceIcons
-        )
+        BarsPanelPreview.spaceLabels(of: model.config)
     }
 
     /// Paints `look` with its colors, remembering the colors it
