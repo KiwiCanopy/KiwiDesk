@@ -239,11 +239,16 @@ struct BarWindowMenuRowsTests {
     func goneMemberCollapses() {
         let core = seededCore()
         let rows = core.barMenuRows(.glyph([WindowID(2), WindowID(99)]))
-        guard case .action = rows[0].kind else {
-            Issue.record("expected a plain Move row")
-            return
+        for row in rows.prefix(2) {
+            guard case .action = row.kind else {
+                Issue.record("expected a plain \(row.title) row")
+                continue
+            }
         }
-        #expect(rows[1].title == "Float Window")
+        #expect(
+            titles(rows).prefix(2)
+                == ["Move to Current Space", "Float Window"]
+        )
     }
 
     /// The render hands a collapsed group's windows to its item,
