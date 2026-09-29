@@ -14,7 +14,7 @@ extension KiwiCore {
         stickyMarks.sync(specs)
         // Fold marked windows into the ring's WS watch set so the
         // mark gets z-order/frame events even with no border (#414).
-        borders.setStickyTracked(Set(specs.map(\.window)))
+        borders.setMarkTracked(Set(specs.map(\.window)))
     }
 
     /// One spec per marked window, glyphs outermost first.
@@ -52,8 +52,10 @@ extension KiwiCore {
     /// Windows the floating glyph marks (#1799): the FLAG, never
     /// `EffectiveFloat` — a floating-mode member floats by its
     /// space and wears nothing — on a shown space, or sticky and so
-    /// shown everywhere; the ring's overlay and fullscreen
-    /// exclusions hold.
+    /// shown everywhere. A transient overlay is no window the user
+    /// floated, and a native-fullscreen one fills its screen, so
+    /// neither wears it; a sticky glyph beside it keeps its own
+    /// rule.
     private func floatingMarkWindows() -> Set<WindowID> {
         let visible = Set(
             state.workspaces.visibleSpaces.flatMap {

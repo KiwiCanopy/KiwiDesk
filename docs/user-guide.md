@@ -526,6 +526,10 @@ panel, the drag ghost and drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
 flat look instead.
 
+:::unreleased
+It covers the floating mark too.
+:::
+
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
 each surface draws its look without glass — the bars their Boxed
@@ -576,7 +580,7 @@ a 📌 window under the current Space of its own screen.
 | --- | --- | --- |
 | ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every monitor |
 | 📌 mark | On the window, top-right corner | **Display sticky** — every Space of the one monitor it lives on |
-| Floating mark | On the window, top-right corner — left of a sticky mark | A window you set **floating** |
+| Floating mark | On the window, top-right corner — left of a sticky mark | A **floating** window |
 | Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |

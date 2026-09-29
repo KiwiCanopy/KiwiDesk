@@ -9965,7 +9965,6 @@ intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 
 **[Principle]**
 
-:::unreleased
 **Sticky has no native cue, so KiwiDesk gives it two marks
 and ships both on.** A sticky window can look identical to a
 normal one, and unlike focus — which duplicates an OS cue —
@@ -9973,10 +9972,7 @@ there is nothing to fall back to. So it gets an on-window mark
 (top-RIGHT corner — top-left belongs to the traffic lights)
 and a Space Bar badge (top-LEFT of its glyph — the bar
 reserves top-right for the group count; an intentional
-cross-surface difference). Floating gets both marks too, and
-the on-window one for the same reason as sticky's: it is what
-survives the Space Bar being hidden — see the floating mark
-entry below for why floating is not self-evident. Badges are
+cross-surface difference). Badges are
 Space-Bar-only (the per-layout App Bar shows no state badges),
 survive grouping as an "at least one" aggregate, and have no
 GUI toggle.
@@ -9989,10 +9985,14 @@ I act* — and a census `gate:` records the same dependency as
 data, for every surface that reads the census to decide what
 to grey and what to say about it. A declaration that is
 backwards is wrong wherever it is rendered, which is why the
-row carries none on either axis. The floating mark's switch is
-unconditional for the same reason, and so is the **Floating**
-tint beside it: it colours the on-window floating mark as well
-as the Space Bar's badge, so with the bar off it still has
+row carries none on either axis.
+
+:::unreleased
+Floating gets both marks too — the floating mark entry below
+argues why floating is not self-evident — and its switch is
+unconditional for the same reason as sticky's. So is the
+**Floating** tint: it colours the on-window floating mark as
+well as the Space Bar's badge, so with the bar off it still has
 something to paint. A tint that painted ONLY a bar surface would
 earn the gate; neither mark colour does.
 :::
@@ -10106,14 +10106,12 @@ like any other slot), and the rarer array-order case (a track swap
 stepping toward a folded overflow) is left uncued for now rather
 than duplicate the geometric detector against the array-step model.
 
-:::unreleased
 **The sticky/floating marks are a filled state-color pair,
 defaulting to Automatic.** The one sticky glyph reads the one
 `sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
-`floating.color` (a minimal `floating` namespace: the colour and
-the floating mark's switch) tinting its Space Bar badge and its
-on-window mark alike. The color owns the *fill*, and the glyph on top is
+`floating.color` in a minimal `floating` namespace. The color
+owns the *fill*, and the glyph on top is
 auto-contrasted black/white for legibility (a filled disc shows
 its hue far better than a thin glyph stroke at the 7–9 pt badge
 size, and an auto-contrast glyph means any picked fill stays
@@ -10137,6 +10135,10 @@ where `square.stack.3d.up.fill`'s perspective smeared); the
 pushpin family is off-limits — `SpaceAssignmentChip` uses
 `pin.fill` for the opposite idea (a window bound to one space).
 (#429)
+
+:::unreleased
+`floating.color` tints the floating badge and the on-window
+floating mark alike, as `sticky.color` does sticky's pair.
 :::
 
 **On Liquid Glass the mark's disc goes** (#1621). It existed
@@ -10153,8 +10155,8 @@ badge, the glass's tint on the mark. With the finish off, or
 Reduce transparency on, the disc returns.
 
 :::unreleased
-**Floating is not self-evident, so a window set floating wears
-an on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
+**Floating is not self-evident, so a floating window wears an
+on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
 The old reading — a float overlaps a tiled plane, so the window
 itself says it floats — held only while every float sat over
 tiles. On a floating-mode space a window set floating looks
@@ -10183,8 +10185,9 @@ to (#421), the floating glyph sits just inside it, and the pill
 grows from the plate's leading edge so neither glyph moves.
 Stacked would cover a second strip of the window; one combined
 glyph would read as neither. Where the window is too narrow for
-both beside the traffic lights, the floating glyph drops first,
-since sticky has no native cue at all and floating has overlap.
+both beside the traffic lights, the floating glyph drops first:
+sticky owns the outermost square its pills are pinned to, and
+the outermost glyph never drops.
 The glyph is the badge's own `macwindow.on.rectangle`, so the
 bar and the window read as one mark. On Liquid Glass the plate
 carries ONE tint — the outermost glyph's colour, so sticky's

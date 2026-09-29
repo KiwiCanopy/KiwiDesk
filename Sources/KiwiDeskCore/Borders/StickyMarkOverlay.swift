@@ -17,11 +17,11 @@ final class StickyMarkOverlay {
     private static let collapseDuration: TimeInterval = 0.16
 
     private var panel: NSPanel?
-    private let plate = StickyMarkPlate()
+    let plate = StickyMarkPlate()
     private let target: CGWindowID
     /// Outermost first; the plate draws as many as fit (#1799).
     private var glyphs: [StickyMarkManager.Glyph] = [.sticky()]
-    private var currentWidth: CGFloat = size
+    private(set) var currentWidth: CGFloat = size
     private var pillShown = false
     private var expandWork: DispatchWorkItem?
     private var collapseWork: DispatchWorkItem?

@@ -27,7 +27,7 @@ struct StickyChipWindowServerTeeTests {
         // Window 7 wears a mark but no ring — sticky-tracked only.
         // The old top-level overlay guard dropped this event,
         // burying the mark on a re-click; the scoped guard admits it.
-        border.setStickyTracked([WindowID(7)])
+        border.setMarkTracked([WindowID(7)])
         reorder(border, 7)
         #expect(reasserted == [WindowID(7)])
     }
@@ -37,7 +37,7 @@ struct StickyChipWindowServerTeeTests {
         let border = BorderManager()
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
-        border.setStickyTracked([WindowID(3)])
+        border.setMarkTracked([WindowID(3)])
         border.handleSkyLightEvent(.unhide, window: WindowID(3))
         #expect(reasserted == [WindowID(3)])
     }
@@ -56,10 +56,10 @@ struct StickyChipWindowServerTeeTests {
     @Test("markUsesWindowServerTracking follows the watch set")
     func markTrackingReflectsStickySet() {
         let border = BorderManager()
-        border.setStickyTracked([WindowID(7)])
-        #expect(border.stickyTracked == [WindowID(7)])
+        border.setMarkTracked([WindowID(7)])
+        #expect(border.markTracked == [WindowID(7)])
         // The predicate gates on a live stream; force it on AFTER
-        // the mutation (`setStickyTracked` runs the subscription,
+        // the mutation (`setMarkTracked` runs the subscription,
         // which resets `skyLightActive` while the runtime is not
         // started in unit tests).
         border.skyLightActive = true
@@ -71,7 +71,7 @@ struct StickyChipWindowServerTeeTests {
     @Test("A dead stream never claims WS tracking")
     func noTrackingWhenStreamDown() {
         let border = BorderManager()
-        border.setStickyTracked([WindowID(7)])
+        border.setMarkTracked([WindowID(7)])
         // `skyLightActive` false — the mark must keep following AX
         // echoes, never stand down waiting on a stream that is off.
         #expect(!border.markUsesWindowServerTracking(WindowID(7)))

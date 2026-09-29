@@ -136,6 +136,11 @@ The same holds, with the Space Bar on, for an App Bar on an edge of its own: its
 The light-`fill_color` glass row above also reaches surfaces that are not bars: the **sticky mark** on its default **Automatic** color, and a sticky or drag color light enough to pin nothing, are unpinned glass too. Over dark window content macOS may draw such a mark's glass dark while its glyph — the system label color under KiwiDesk's Appearance — stays dark. Not observed; reasoned from the mechanism ([#1621](https://github.com/KiwiCanopy/KiwiDesk/issues/1621)). A dark `sticky.set_color` pins the glass dark with a light glyph; `sticky.set_liquid_glass(false)` returns the badge with its disc.
 
 :::unreleased
+The **floating mark** is unpinned glass on the same terms, with
+`floating.set_color` in place of the sticky color.
+:::
+
+:::unreleased
 An update's **Install and Relaunch** leaves the windows in place without checking who signed the new version, unlike `kiwidesk service restart`, which checks ([#930](https://github.com/KiwiCanopy/KiwiDesk/issues/930)). Sparkle has already validated the update, and every KiwiDesk release is signed with the same Developer ID and notarized. If a future release ever changed that identity, macOS would drop the Accessibility permission across the update: the windows would stay where the old version left them, hidden spaces' windows parked off screen, until the permission is granted again and the next launch restores the arrangement.
 
 An in-place restart brings back every size you set, but not what KiwiDesk **learned** about an app's own minimum or maximum size ([#930](https://github.com/KiwiCanopy/KiwiDesk/issues/930)). A layout that had adjusted to such an app — fewer tracks, a narrower column — may ask for the unadjusted frame once after the restart and settle back when the app refuses it again. A window whose app is still starting when the new process scans comes back as the new process finds it, so a window you had floated or made sticky by hand in such an app may return tiled.

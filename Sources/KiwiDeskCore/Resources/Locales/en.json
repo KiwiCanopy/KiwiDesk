@@ -359,7 +359,7 @@
   "floating.color.a11y": "Floating window mark color",
   "floating.mark": "Show mark on floating windows",
   "floating.mark.ax": "Floating window",
-  "floating.mark.help": "Draws a small mark in the top-right corner of a window you set floating, including one in a floating Space. A window that floats only because its Space does gets no mark.",
+  "floating.mark.help": "Draws a small mark in the top-right corner of a floating window, including one in a Space using the %1$@ layout. A window that floats only because of its Space's layout gets no mark.",
   "footer.cancel": "Cancel",
   "footer.default_profile_name": "My Setup",
   "footer.profile_name": "Profile name",

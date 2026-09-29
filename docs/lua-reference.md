@@ -3821,6 +3821,11 @@ and is the only float verb offered in the Settings shortcut
 list; the explicit `make_*` verbs remain for scripts that need a
 specific direction.
 
+:::unreleased
+The window's on-window floating mark follows the setting as its
+Space Bar float badge does.
+:::
+
 **Example:**
 
 ```lua
@@ -4060,6 +4065,12 @@ color, or the bare glyph on Automatic. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
+:::unreleased
+The floating mark draws the same way, tinted by
+[`floating.set_color`](#floatingset_color) where no sticky glyph
+shares its plate.
+:::
+
 **Example:**
 
 ```lua
@@ -4073,9 +4084,11 @@ sticky.set_liquid_glass(false)
 
 **Does:** shows or hides the on-window floating mark — the
 `macwindow.on.rectangle` glyph at the top-right corner of a
-window set floating (`toggle_float`), including one in a
-floating-mode space. A window that floats only because its
-space is in floating mode gets no mark. A window that is also
+floating window, including one in a floating-mode space: one
+floated by `make_floating` or `toggle_floating`, by a
+`float_rules` entry, or by KiwiDesk's own detection. A window
+that floats only because its space is in floating mode gets no
+mark. A window that is also
 sticky carries both glyphs on one plate, the sticky one
 outermost; on a window too narrow for both, the floating glyph
 is left out. The mark draws as Liquid Glass under

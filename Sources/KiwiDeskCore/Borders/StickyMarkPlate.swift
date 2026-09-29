@@ -124,7 +124,6 @@ final class StickyMarkPlate: NSView {
             innerRoundel,
             hex: slotCount > 1 ? innerHex : ""
         )
-        innerRoundel.isHidden = slotCount < 2 || innerHex.isEmpty
         name.textColor = markColor
     }
 

@@ -59,9 +59,11 @@ struct StickyMarkEditor: View {
         L(
             "floating.mark.help",
             "Draws a small mark in the top-right corner of a "
-                + "window you set floating, including one in a "
-                + "floating Space. A window that floats only "
-                + "because its Space does gets no mark."
+                + "floating window, including one in a Space "
+                + "using the %1$@ layout. A window that floats "
+                + "only because of its Space's layout gets no "
+                + "mark.",
+            L("layout.floating.name", "Floating")
         )
     }
 

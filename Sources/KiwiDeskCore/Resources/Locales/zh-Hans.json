@@ -359,7 +359,7 @@
   "floating.color.a11y": "浮动窗口标记的颜色",
   "floating.mark": "在浮动窗口上显示标记",
   "floating.mark.ax": "浮动窗口",
-  "floating.mark.help": "在你设为浮动的窗口右上角绘制一个小标记，浮动布局空间中的窗口也是如此。仅因所在空间的布局而浮动的窗口不会显示标记。",
+  "floating.mark.help": "在浮动窗口的右上角绘制一个小标记，%1$@布局空间中的窗口也是如此。仅因所在空间的布局而浮动的窗口不会显示标记。",
   "footer.cancel": "取消",
   "footer.default_profile_name": "我的配置",
   "footer.profile_name": "描述文件名称",

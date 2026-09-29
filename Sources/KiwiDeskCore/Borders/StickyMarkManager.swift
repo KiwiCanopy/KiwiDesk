@@ -40,7 +40,8 @@ public final class StickyMarkManager {
     public struct Spec: Equatable {
         public let window: WindowID
         public let frame: CGRect
-        /// Outermost first: sticky, then floating (#1799).
+        /// Outermost first: sticky, then floating (#1799) — the
+        /// init orders them, so no caller can hand them reversed.
         public let glyphs: [Glyph]
         /// Liquid Glass as drawn — the stored leaf through
         /// `LiquidGlassGate` (#1621).
@@ -54,12 +55,14 @@ public final class StickyMarkManager {
         ) {
             self.window = window
             self.frame = frame
-            self.glyphs = glyphs
+            self.glyphs = glyphs.sorted {
+                $0.kind == .sticky && $1.kind != .sticky
+            }
             self.glass = glass
         }
     }
 
-    private var overlays: [WindowID: StickyMarkOverlay] =
+    private(set) var overlays: [WindowID: StickyMarkOverlay] =
         [:]
 
     /// Whether WindowServer stream tracks window
