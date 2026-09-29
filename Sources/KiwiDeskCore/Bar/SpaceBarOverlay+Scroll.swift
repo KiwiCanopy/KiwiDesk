@@ -1,0 +1,102 @@
+import AppKit
+
+/// Wheel, trackpad and drag-autoscroll travel for SpaceBarOverlay
+/// (#385, #1517): a scroll moves `itemRun` alone and re-reads what
+/// depends on the offset, never re-rendering every item and glass.
+extension SpaceBarOverlay {
+    /// The last render's run, as a scroll re-reads it.
+    struct ScrollRun {
+        let items: [Item]
+        /// Item frames in `itemRun` coordinates, as drawn.
+        let frames: [CGRect]
+        let lengths: [CGFloat]
+        /// The entries the fades count: the items, plus the front
+        /// segment while it scrolls with them.
+        let entries: [CGFloat]
+        let front: CGFloat
+        let total: CGFloat
+        let viewport: CGFloat
+        let gap: CGFloat
+        let depth: CGFloat
+        let horizontal: Bool
+        let strip: CGRect
+        let style: SpaceBarLook
+    }
+
+    /// A wheel or trackpad scroll (`ShelfScrollInput`): taken
+    /// while entries are hidden, fluid rather than entry-aligned,
+    /// and a manual scroll only where the offset moved. A trackpad
+    /// moves the run directly, a wheel notch as one glide.
+    func scroll(_ delta: ShelfScrollInput.Delta) -> Bool {
+        guard isVisible, let geom = scrollGeom, geom.maxOffset > 0
+        else { return false }
+        let travel = ShelfScrollInput.travel(delta, itemStep: geom.step)
+        if moveRun(to: scrollOffset + travel, animated: !delta.precise) {
+            follow.scrolledByHand()
+        }
+        return true
+    }
+
+    /// Shifts the bar offset without forcing active follow — the
+    /// drag autoscroll's step.
+    func scroll(by delta: CGFloat) {
+        follow.scrolledByHand()
+        moveRun(to: scrollOffset + delta, animated: false)
+    }
+
+    /// Moves the run to `target`, clamped, and re-reads the drop
+    /// targets, fades, counts and hover at the new offset. Returns
+    /// whether the offset moved.
+    @discardableResult
+    private func moveRun(to target: CGFloat, animated: Bool) -> Bool {
+        guard let run = scrollRun else { return false }
+        let offset = Self.scrollOffset(
+            current: target,
+            lengths: run.lengths,
+            gap: run.gap,
+            frontExtent: run.front,
+            activeIndex: nil,
+            viewport: run.viewport,
+            margin: 0
+        )
+        guard offset != scrollOffset else { return false }
+        scrollOffset = offset
+        let runFrame = AppBarOverlay.runFrame(
+            in: itemContainer.bounds,
+            offset: offset,
+            horizontal: run.horizontal
+        )
+        BarMotion.runLayout {
+            BarMotion.setFrame(itemRun, to: runFrame, animated: animated)
+        }
+        let fades = ShelfOverflow.fades(
+            lengths: run.entries,
+            gap: run.gap,
+            total: run.total,
+            offset: offset,
+            viewport: run.viewport,
+            depth: run.depth
+        )
+        recordHitFrames(
+            items: run.items,
+            frames: run.frames,
+            runOrigin: runFrame.origin,
+            strip: run.strip,
+            fades: fades,
+            horizontal: run.horizontal
+        )
+        layoutOverflow(
+            fades,
+            strip: run.strip,
+            viewport: run.viewport,
+            total: run.total,
+            lengths: run.entries,
+            gap: run.gap,
+            horizontal: run.horizontal,
+            style: run.style,
+            depth: run.depth
+        )
+        syncHoverToPointer()
+        return true
+    }
+}

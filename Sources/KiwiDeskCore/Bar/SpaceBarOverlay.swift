@@ -123,6 +123,12 @@ public final class SpaceBarOverlay {
     var itemViews: [SpaceBarItemView] = []
     /// Clipping item viewport (#385).
     let itemContainer = AppBarOverlay.FlippedView()
+    /// Holds the run — items, their glass, the layer rule and an
+    /// unpinned front segment — inside `itemContainer`; a scroll
+    /// moves this one view, never each item.
+    let itemRun = AppBarOverlay.FlippedView()
+    /// What a scroll re-reads without a render.
+    var scrollRun: ScrollRun?
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -233,6 +239,7 @@ public final class SpaceBarOverlay {
         hitFrames = []
         scrollOffset = 0
         scrollGeom = nil
+        scrollRun = nil
         cancelDragAutoScroll()
         root.isHidden = true
         onRendered()

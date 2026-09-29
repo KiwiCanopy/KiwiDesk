@@ -61,7 +61,7 @@ extension SpaceBarOverlay {
         }
         while boxGlasses.count < n {
             guard let glass = GlassPlate.make() else { break }
-            itemContainer.addSubview(glass)
+            itemRun.addSubview(glass)
             boxGlasses.append(glass)
             boxTints.append(GlassBackdrop())
         }
@@ -82,7 +82,7 @@ extension SpaceBarOverlay {
             return
         }
         frontGlass = glass
-        let host = frontHost ?? itemContainer
+        let host = frontHost ?? itemRun
         if glass.superview !== host {
             host.addSubview(
                 glass,
@@ -109,7 +109,7 @@ extension SpaceBarOverlay {
         )
     }
 
-    /// Restores hosted items to itemContainer and tears down glass boxes.
+    /// Restores hosted items to itemRun and tears down glass boxes.
     func teardownBoxGlasses() {
         frontGlass?.isHidden = true
         frontTint?.isHidden = true
@@ -117,7 +117,7 @@ extension SpaceBarOverlay {
         for glass in boxGlasses {
             for item in itemViews where GlassPlate.holds(glass, item) {
                 GlassPlate.release(glass)
-                itemContainer.addSubview(item)
+                itemRun.addSubview(item)
             }
             glass.removeFromSuperview()
         }

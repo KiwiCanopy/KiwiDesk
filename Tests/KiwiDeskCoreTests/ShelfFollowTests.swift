@@ -40,7 +40,10 @@ struct ShelfFollowTests {
         _ overlay: SpaceBarOverlay,
         active: Int
     ) -> CGRect {
-        overlay.itemViews[active - 1].frame
+        // Item frames are the run's; the run carries the scroll.
+        let run = overlay.itemRun.frame.origin
+        return overlay.itemViews[active - 1].frame
+            .offsetBy(dx: run.x, dy: run.y)
     }
 
     @Test("The followed Space sits clear of the fades")
