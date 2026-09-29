@@ -156,8 +156,8 @@ struct SpaceBarDriverTests {
         #expect(content.after.count == 4)
     }
 
-    @Test("glyph_cap drives the visible/overflow split (#376)")
-    func glyphCapAdjustable() throws {
+    @Test("glyph_span drives the visible/overflow split (#376)")
+    func glyphSpanAdjustable() throws {
         let core = makeCore()
         core.state.workspaces.assign(SpaceID("1"), to: display)
         core.state.workspaces.activate(SpaceID("1"))
@@ -173,21 +173,21 @@ struct SpaceBarDriverTests {
         // span at the row's start (#1528 item 20) — and hides
         // the rest as WINDOWS in the +n badge.
         var low = SpaceBarLook()
-        low.glyphCap = 2
+        low.glyphSpan = 2
         let capped = core.spaceBarApps(in: space, style: low)
         #expect(capped.apps.count == 3)
         #expect(capped.after.count == 3)
-        // An out-of-range span clamps via resolvedGlyphCap:
+        // An out-of-range span clamps via resolvedGlyphSpan:
         // 0 → 1, and a span past the group count shows all with
         // no badge.
         var floored = SpaceBarLook()
-        floored.glyphCap = 0
+        floored.glyphSpan = 0
         #expect(
             core.spaceBarApps(in: space, style: floored)
                 .apps.count == 2
         )
         var wide = SpaceBarLook()
-        wide.glyphCap = 99
+        wide.glyphSpan = 99
         let all = core.spaceBarApps(in: space, style: wide)
         #expect(all.apps.count == 6)
         #expect(all.before.isEmpty && all.after.isEmpty)

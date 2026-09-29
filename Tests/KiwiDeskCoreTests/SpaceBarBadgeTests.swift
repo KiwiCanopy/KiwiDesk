@@ -161,7 +161,7 @@ struct SpaceBarBadgeTests {
         core.state.apply(.windowFocused(WindowID(4)))
         core.state.apply(.windowFocused(WindowID(3)))
         var style = SpaceBarLook()
-        style.glyphCap = 1
+        style.glyphSpan = 1
         let centred = try #require(
             core.spaceBarItems(display: display, style: style)
                 .first { $0.space == SpaceID("2") }

@@ -44,7 +44,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// refuses a bundle whose looks it would drop.
     /// 16 = each bar took its edge back from `kiwishelf` (#1731),
     /// on `[Profile]` alone.
-    public static let currentFormat = 16
+    /// 17 = `space_bar.glyph_cap` became `glyph_span` (#1528),
+    /// on `[Profile]` alone.
+    public static let currentFormat = 17
 
     public let format: Int
 

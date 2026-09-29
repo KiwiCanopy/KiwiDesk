@@ -7,7 +7,7 @@ import Foundation
 enum SpaceBarCommandSetting {
     case enabled(Bool)
     case edge(AppBarEdge)
-    case glyphCap(Int)
+    case glyphSpan(Int)
     case glyphGap(CGFloat)
     case inactiveContent(SpaceBarStyle.InactiveContent)
     case itemLabel(SpaceBarStyle.ItemLabel)
@@ -34,8 +34,8 @@ enum SpaceBarCommandSetting {
         if field == "spring_delay" {
             return springDelay(args)
         }
-        if field == "glyph_cap" {
-            return glyphCap(args)
+        if field == "glyph_span" {
+            return glyphSpan(args)
         }
         if field == "front_app_title_cap" {
             return frontAppTitleCap(args)
@@ -144,7 +144,7 @@ enum SpaceBarCommandSetting {
     }
 
     /// Parses app glyph count cap (#58, #376).
-    private static func glyphCap(
+    private static func glyphSpan(
         _ args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
         guard let value = args.first?.numberValue,
@@ -152,14 +152,14 @@ enum SpaceBarCommandSetting {
         else {
             return .failure("expected a glyph count")
         }
-        let range = SpaceBarStyle.glyphCapRange
+        let range = SpaceBarStyle.glyphSpanRange
         // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps
         // (#58).
         let clamped = min(
             max(value.rounded(), Double(range.lowerBound)),
             Double(range.upperBound)
         )
-        return .success(.glyphCap(Int(clamped)))
+        return .success(.glyphSpan(Int(clamped)))
     }
 
     private static func number(
@@ -187,7 +187,7 @@ enum SpaceBarCommandSetting {
         switch self {
         case .enabled(let value): style.enabled = value
         case .edge(let value): style.edge = value
-        case .glyphCap(let value): style.glyphCap = value
+        case .glyphSpan(let value): style.glyphSpan = value
         case .glyphGap(let value):
             style.glyphGap = SpaceBarStyle.clampGlyphGap(value)
         case .inactiveContent(let value):

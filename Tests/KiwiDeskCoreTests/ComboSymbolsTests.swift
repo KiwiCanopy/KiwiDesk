@@ -77,7 +77,7 @@ struct ComboSymbolsTests {
 /// shares — the recorder, the Shortcuts list, the draft diff rows
 /// and the quick menu all reach it through `render`.
 @Suite("Combo glyph capitalisation")
-struct ComboGlyphCapitalisationTests {
+struct ComboGlyphSpanitalisationTests {
 
     @Test("A key whose capital is two letters keeps its own form")
     func multiCharacterUppercaseIsRefused() {

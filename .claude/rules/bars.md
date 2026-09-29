@@ -386,6 +386,23 @@ Obligations:
   never hidden (`SpaceBarGlyphWiringTests` ▸
   `refusedRowIsGreyed`); that no second builder exists is
   review's.
+- **Which groups a Space item draws is `SpaceBarStrip.window`,
+  and its length reads the same arithmetic** — the builder takes
+  the window, `autoLength` counts the drawn glyphs plus one cell
+  per disc (`SpaceBarOverlay.Item.discs`), so the length the
+  shelf plans is the one the item draws and a focus change never
+  moves it (#1528, `SpaceBarStripTests`,
+  `SpaceBarCentredStripTests` ▸ `lengthIsFixed`). The centring
+  anchor is WHICH app the strip shows, a question of its own:
+  the active Space's system focus, another Space's remembered
+  one — never the `+n` tint's reading, which stays gated on the
+  active Space below.
+- **A strip under the pointer is held by `SpaceBarManager`
+  alone** and released through its one `onStripReleased`, wired
+  to `updateBars()`; the builder keeps a held window only while
+  `SpaceBarStrip.isWindow` says the row still draws it
+  (`SpaceBarCentredStripTests` ▸ `holdKeepsTheStrip`,
+  `staleHoldCentres`).
 
 ## A per-display bar answers the SHOWN question, never the render one
 

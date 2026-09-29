@@ -61,7 +61,7 @@ extension KiwiCore {
             of: pairs.map { $0.1 },
             specials: pairs.map { $0.2 }
         ).map { Array(windows[$0]) }
-        let span = style.resolvedGlyphCap
+        let span = style.resolvedGlyphSpan
         let anchor = stripAnchor(of: space).flatMap { focus in
             groups.firstIndex { $0.contains(focus) }
         }

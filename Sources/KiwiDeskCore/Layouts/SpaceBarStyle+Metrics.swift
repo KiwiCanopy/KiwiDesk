@@ -13,7 +13,7 @@ extension SpaceBarStyle {
     /// "+n", the PR #381 "0 is toggle-only" idiom), ceiling 12. A
     /// fixed clamp, never fit-derived — a display-dependent cap
     /// would break the bar's uniform model.
-    public static let glyphCapRange = 1...12
+    public static let glyphSpanRange = 1...12
 
     /// Floor of `glyphGap` in pt: flush. No ceiling, as with the
     /// shelf's item gap (#1695).
@@ -29,11 +29,11 @@ extension SpaceBarStyle {
         Self.clampGlyphGap(glyphGap)
     }
 
-    /// Clamped glyph cap value (`glyphCapRange`).
-    public var resolvedGlyphCap: Int {
+    /// Clamped glyph cap value (`glyphSpanRange`).
+    public var resolvedGlyphSpan: Int {
         min(
-            max(glyphCap, Self.glyphCapRange.lowerBound),
-            Self.glyphCapRange.upperBound
+            max(glyphSpan, Self.glyphSpanRange.lowerBound),
+            Self.glyphSpanRange.upperBound
         )
     }
 

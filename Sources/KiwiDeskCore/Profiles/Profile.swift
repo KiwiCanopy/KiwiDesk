@@ -16,13 +16,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// mark's Liquid Glass leaves are filled (#1620/#1621), 10
     /// since `float_nudge` retired for `float_placement` (#1674),
     /// 11 since each bar took its edge back from `kiwishelf`
-    /// (#1731). The bump
+    /// (#1731), 12 since `space_bar.glyph_cap` became
+    /// `glyph_span` (#1528). The bump
     /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 11
+    public static let currentFormat = 12
 
     public var format: Int
     public var name: String

@@ -143,7 +143,7 @@ struct SpaceBarStickyScreenTests {
         core.state.apply(.windowFocused(WindowID(5)))
         core.state.workspaces.activate(SpaceID("1"))
         var style = SpaceBarLook()
-        style.glyphCap = 1
+        style.glyphSpan = 1
         // A strip held on the Dell's first two keeps Term behind
         // its trailing badge (#1528 item 21).
         core.spaceBars.stripHover(SpaceID("3"), 0..<2, inside: true)

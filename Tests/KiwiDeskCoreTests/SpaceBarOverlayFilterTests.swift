@@ -54,7 +54,7 @@ struct SpaceBarOverlayFilterTests {
         // `overflow == 0` below reasons from it, so a retuned
         // default would silently re-derive this expectation.
         var style = SpaceBarLook()
-        style.glyphCap = 5
+        style.glyphSpan = 5
         core.state.apply(.windowCreated(window(1, app: "Chat")))
         core.state.apply(.windowCreated(window(2, app: "Mail")))
         let before = try #require(
@@ -89,7 +89,7 @@ struct SpaceBarOverlayFilterTests {
     func groupingAndCapRunAfterTheFilter() throws {
         let core = seededCore()
         var style = SpaceBarLook()
-        style.glyphCap = 2
+        style.glyphSpan = 2
         // Flat order: Web, overlay(Web), Web, Mail — pinned
         // rather than left to spawn placement, since the claim
         // is about an overlay sitting BETWEEN two same-app
@@ -121,7 +121,7 @@ struct SpaceBarOverlayFilterTests {
     func overflowCountsDrawnWindowsOnly() throws {
         let core = seededCore()
         var style = SpaceBarLook()
-        style.glyphCap = 1
+        style.glyphSpan = 1
         core.state.apply(.windowCreated(window(1, app: "Web")))
         core.state.apply(.windowCreated(window(4, app: "Term")))
         core.state.apply(.windowCreated(window(2, app: "Mail")))

@@ -41,7 +41,7 @@ body:
         Quote the current text if it exists; describe the
         actual behavior if the doc contradicts it.
       placeholder: |
-        The doc says `space_bar.set_glyph_cap` accepts 0-10,
+        The doc says `space_bar.set_glyph_span` accepts 0-10,
         but the command clamps to 1-8.
     validations:
       required: true

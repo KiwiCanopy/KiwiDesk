@@ -16,7 +16,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var edge: AppBarEdge = .top
     /// Max app-group glyphs per Space item before "+n" badge (#376).
     /// Default 5.
-    public var glyphCap = 5
+    public var glyphSpan = 5
     /// Extra room (pt) between app glyph cells inside a Space
     /// item, and before its `+n` badge (#1689); 0 abuts them. A
     /// drawing reads `resolvedGlyphGap`.

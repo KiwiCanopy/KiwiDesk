@@ -66,6 +66,7 @@ struct SpaceBarStripViewTests {
 
     @Test("the leading disc sits before the glyphs with its own target")
     func leadingDiscLeads() throws {
+        LocalizationManager.shared.select("en")
         let view = makeView()
         configure(view, drawn: 3...7)
         let leading = try #require(view.leadingTarget)

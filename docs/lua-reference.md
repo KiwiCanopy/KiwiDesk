@@ -2516,8 +2516,9 @@ configured icon, else the plain digits of a numeric id or a
 two-letter monogram of a named one), a divider, then a glyph per
 window. Adjacent windows of the same app share one glyph with a
 count badge (non-adjacent duplicates stay separate); past the
-glyph cap (`space_bar.set_glyph_cap`, default 5, range 1–12) the
-rest fold into a `+n` badge counting the hidden windows. Clicking
+glyph span ([`space_bar.set_glyph_span`](#space_barset_glyph_span))
+the rest fold into a `+n` badge on each side, counting the hidden
+windows. Clicking
 a Space switches to it, and a group holding the focused window
 stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
@@ -2563,22 +2564,29 @@ space_bar.set_edge("left")
 ```
 :::
 
-### space_bar.set_glyph_cap
+### space_bar.set_glyph_span
 
+:::unreleased
 **Expects:** an integer `1`–`12` (default `5`); out-of-range
 values clamp.
 
-**Does:** sets how many app-group glyphs a Space item shows before
-the rest collapse into the trailing `+n` badge. Grouping runs
-first, so the cap counts app *groups* (adjacent same-app windows
-share one glyph), while `+n` counts the hidden *windows*. It
-limits glyphs per Space only, not how many Spaces the bar shows.
+**Does:** sets how many app-group glyphs a Space item shows
+around its focused app — the Space's system focus while it is
+active, else the window it last focused. The rest sit behind a
+`+n` badge on each side, and at either end of the row the badge
+that side does not need becomes one more glyph, so the item keeps
+one length as the focus moves. Grouping runs first, so the span
+counts app *groups* (adjacent same-app windows share one glyph),
+while each `+n` counts its hidden *windows*. It limits glyphs per
+Space only, not how many Spaces the bar shows. Replaces
+`set_glyph_cap`, which now fails naming it.
 
 **Example:**
 
 ```lua
-space_bar.set_glyph_cap(8)
+space_bar.set_glyph_span(8)
 ```
+:::
 
 ### space_bar.set_glyph_gap
 
@@ -2611,7 +2619,7 @@ nine). Either way an empty Space draws no glyphs or disc, and its
 identifier dimmer than an occupied one's, where the palette
 leaves room for the step; a colour emoji icon keeps its colours. The
 Space each screen shows always draws its glyphs, capped by
-[`set_glyph_cap`](#space_barset_glyph_cap), and a collapsed Space
+[`set_glyph_span`](#space_barset_glyph_span), and a collapsed Space
 drops its sticky and floating badges.
 
 **Example:**

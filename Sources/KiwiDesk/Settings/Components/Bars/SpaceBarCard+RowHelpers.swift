@@ -68,16 +68,18 @@ extension SpaceBarCard {
     }
 
     /// Glyphs per Space stepper (#94).
-    @ViewBuilder var glyphCapRow: some View {
+    @ViewBuilder var glyphSpanRow: some View {
         StepperRow(
-            label: L("space_bar.glyph_cap", "Glyphs per Space"),
-            value: style.glyphCap,
-            in: SpaceBarStyle.glyphCapRange,
+            label: L("space_bar.glyph_span", "Glyphs per Space"),
+            value: style.glyphSpan,
+            in: SpaceBarStyle.glyphSpanRange,
             help: L(
-                "space_bar.glyph_cap.help",
-                "How many app glyphs a Space shows before the "
-                    + "rest collapse into a +n badge. Adjacent "
-                    + "windows of the same app count as one glyph."
+                "space_bar.glyph_span.help",
+                "How many app glyphs a Space shows around its "
+                    + "focused app; the rest sit behind a +n on "
+                    + "either side, and at either end of the row "
+                    + "one more glyph fits. Adjacent windows of the "
+                    + "same app count as one glyph."
             )
         )
     }

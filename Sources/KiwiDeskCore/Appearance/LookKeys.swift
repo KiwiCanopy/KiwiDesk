@@ -46,7 +46,7 @@ public enum LookKeys {
         "kiwishelf.minimum": "how much of each bar shows once the "
             + "shelf is full — which items are visible",
         "space_bar.enabled": functionality,
-        "space_bar.glyph_cap": functionality,
+        "space_bar.glyph_span": functionality,
         "space_bar.inactive_content": functionality,
         "space_bar.front_app_title_cap": functionality,
         "space_bar.show_front_app": functionality,
