@@ -56,7 +56,8 @@ struct ShelfPaintTests {
 
         core.paintShelf(look: nil, palette: sunset)
 
-        #expect(taskbar.isApplied(to: core.tiler.settings))
+        // The shape stays; the look now wears colours not its own.
+        #expect(taskbar.match(core.tiler.settings) == .otherColors)
         #expect(sunset.isApplied(to: core.tiler.settings))
         #expect(try stored(core) == core.tiler.settings)
     }

@@ -6,7 +6,8 @@ import Foundation
 /// and doubles as the shape reset (#1739); every other bundled
 /// look is Glass with its authored differences laid over it, so
 /// each names the whole of `LookKeys` and reproduces its picture
-/// wherever it is applied.
+/// wherever it is applied. Its colours are its authored palette's,
+/// resolved at load (#1752).
 public enum LookCatalog {
     /// The always-present default look.
     public static let defaultName = "Glass"
@@ -17,13 +18,15 @@ public enum LookCatalog {
     /// (`LookCatalogSeamTests`).
     public static func bundled(sizes: [CGSize]) -> [ShelfLook] {
         let glass = defaultLook(sizes: sizes)
+        let palettes = PaletteCatalog.bundled()
         return [glass]
-            + authored().map { look in
-                ShelfLook(
-                    name: look.name,
-                    palette: look.palette,
-                    style: glass.style.merging(look.style) { $1 }
+            + authored().map { authored in
+                var look = LookColorCarry.carried(
+                    authored,
+                    palettes: palettes
                 )
+                look.style = glass.style.merging(look.style) { $1 }
+                return look
             }
     }
 
@@ -38,15 +41,16 @@ public enum LookCatalog {
     public static func defaultLook(sizes: [CGSize]) -> ShelfLook {
         ShelfLook(
             name: defaultName,
-            palette: PaletteCatalog.defaultName,
             style: LookKeys.extract(
                 from: StarterSetup.settings(sizes: sizes)
-            )
+            ),
+            colors: PaletteCatalog.defaultPalette().paintedColors
         )
     }
 
-    /// The authored differences from `Resources/Looks`.
-    static func authored() -> [ShelfLook] {
+    /// The authored differences from `Resources/Looks`, each
+    /// naming its bundled palette.
+    static func authored() -> [PaletteNamedLook] {
         guard
             let url = Bundle.kiwiDeskCore.url(
                 forResource: "bundled",
@@ -55,7 +59,7 @@ public enum LookCatalog {
             ),
             let data = try? Data(contentsOf: url),
             let looks = try? JSONDecoder().decode(
-                [ShelfLook].self,
+                [PaletteNamedLook].self,
                 from: data
             )
         else { return [] }

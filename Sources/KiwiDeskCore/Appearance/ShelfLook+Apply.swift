@@ -12,18 +12,11 @@ import Foundation
 /// indicator clears the per-layout overrides that would hide it.
 extension ShelfLook {
     /// Overwrites the styling this look names, in place (sparse),
-    /// then `palette`'s colours when one is handed in. Only the
-    /// caller resolves the palette, so nothing changes that the
-    /// "use its colours too" tick did not say.
-    public func apply(
-        to settings: inout TilingSettings,
-        palette: ColorPalette? = nil
-    ) {
-        for path in LookKeys.all {
-            guard let value = style[path] else { continue }
-            Self.apply(path: path, value: value, to: &settings)
-        }
-        palette?.apply(to: &settings)
+    /// then its colours — every colour path, since a look owns
+    /// them whole (#1752).
+    public func apply(to settings: inout TilingSettings) {
+        applyStyle(to: &settings)
+        ColorPalette(name: name, colors: colors).apply(to: &settings)
     }
 
     /// True when a click would change nothing — computed, never
@@ -31,12 +24,35 @@ extension ShelfLook {
     /// leaves that disagree, or under a per-layout indicator, reads
     /// unapplied until clicked, since the click would converge them.
     public func isApplied(to settings: TilingSettings) -> Bool {
+        guard isStyleApplied(to: settings) else { return false }
+        var painted = settings
+        apply(to: &painted)
+        return painted == settings
+    }
+
+    /// How far this look is live in `settings` (#1752): the one
+    /// reading a look tile marks from, in Settings and the tour.
+    public func match(_ settings: TilingSettings) -> LookMatch {
+        guard isStyleApplied(to: settings) else { return .none }
+        return isApplied(to: settings) ? .applied : .otherColors
+    }
+
+    /// `isApplied` over the styling alone: the look's shape is
+    /// live, whatever colours it wears now (#1752).
+    public func isStyleApplied(to settings: TilingSettings) -> Bool {
         guard style.keys.contains(where: LookKeys.all.contains) else {
             return false
         }
         var painted = settings
-        apply(to: &painted)
+        applyStyle(to: &painted)
         return painted == settings
+    }
+
+    private func applyStyle(to settings: inout TilingSettings) {
+        for path in LookKeys.all {
+            guard let value = style[path] else { continue }
+            Self.apply(path: path, value: value, to: &settings)
+        }
     }
 
     static func apply(
@@ -95,4 +111,13 @@ extension ShelfLook {
             break
         }
     }
+}
+
+/// A look tile's mark (#1752): `otherColors` is the look's shape
+/// wearing colours it does not own — a palette applied since, or
+/// a colour edited.
+public enum LookMatch: Sendable, Equatable {
+    case applied
+    case otherColors
+    case none
 }

@@ -72,8 +72,8 @@ struct SetupBundleArtifactTests {
         try core.lookLibrary.save(
             ShelfLook(
                 name: "Mine",
-                palette: nil,
-                style: ["kiwishelf.thickness": .number(30)]
+                style: ["kiwishelf.thickness": .number(30)],
+                colors: [:]
             )
         )
 

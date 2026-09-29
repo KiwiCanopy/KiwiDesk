@@ -3,12 +3,13 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// One-shot look application (#1684): sparse, routed through the
-/// commands' own setters, colours only when a palette is handed in.
+/// One-shot look application (#1684): sparse styling routed
+/// through the commands' own setters, then the look's own colours
+/// (#1752).
 @Suite("Shelf look apply")
 struct ShelfLookApplyTests {
     private func look(_ style: [String: JSONValue]) -> ShelfLook {
-        ShelfLook(name: "T", palette: nil, style: style)
+        ShelfLook(name: "T", style: style, colors: [:])
     }
 
     @Test("a look sets what it names and nothing else")
@@ -20,13 +21,13 @@ struct ShelfLookApplyTests {
         let before = settings
         let named = ShelfLook(
             name: "T",
-            palette: "Slate",
             style: [
                 "space_bar.edge": .string("bottom"),
                 "app_bar.edge": .string("left"),
                 "border.sheen": .number(0),
                 "space_bar.active_indicator": .string("edge_mark"),
-            ]
+            ],
+            colors: [:]
         )
         named.apply(to: &settings)
         #expect(settings.spaceBarStyle.edge == .bottom)
@@ -34,8 +35,7 @@ struct ShelfLookApplyTests {
         #expect(settings.borderStyle.sheen == 0)
         #expect(settings.spaceBarStyle.activeIndicator == .edgeMark)
         #expect(settings.kiwishelf.cornerRoundness == 80)
-        // Colours move only when a palette is handed in — never
-        // the look's own, which names one.
+        // A look without colours of its own moves none.
         #expect(
             ColorPaletteKeys.extract(from: settings)
                 == ColorPaletteKeys.extract(from: before)
@@ -77,17 +77,31 @@ struct ShelfLookApplyTests {
         #expect(settings == TilingSettings())
     }
 
-    @Test("a handed-in palette paints after the styling")
-    func paletteApplies() {
+    @Test("a look paints its own colours after the styling")
+    func coloursApply() {
         var settings = TilingSettings()
-        let palette = ColorPalette(
-            name: "P",
-            colors: ["kiwishelf.fill_color": "#112233"]
-        )
-        look(["app_bar.edge": .string("left")])
-            .apply(to: &settings, palette: palette)
+        var named = look(["app_bar.edge": .string("left")])
+        named.colors = ["kiwishelf.fill_color": "#112233"]
+        named.apply(to: &settings)
         #expect(settings.kiwishelf.fillColor == "#112233")
         #expect(settings.appBarStyle.edge == .left)
+    }
+
+    /// The tile's three marks (#1752): the shape live in its own
+    /// colours, the shape live in others, the shape not live.
+    @Test("match tells other colours from applied and none")
+    func matchReadsShapeThenColours() {
+        var settings = TilingSettings()
+        let named = ShelfLook(
+            name: "T",
+            style: LookKeys.extract(from: settings),
+            colors: ColorPaletteKeys.extract(from: settings)
+        )
+        #expect(named.match(settings) == .applied)
+        settings.kiwishelf.fillColor = "#010203"
+        #expect(named.match(settings) == .otherColors)
+        settings.spaceBarStyle.edge = .left
+        #expect(named.match(settings) == .none)
     }
 
     /// A saved look captures the config's wire spellings and
@@ -132,8 +146,8 @@ struct ShelfLookApplyTests {
         )
         let saved = ShelfLook(
             name: "T",
-            palette: nil,
-            style: LookKeys.extract(from: source)
+            style: LookKeys.extract(from: source),
+            colors: [:]
         )
         var settings = TilingSettings()
         saved.apply(to: &settings)
@@ -157,8 +171,8 @@ struct ShelfLookApplyTests {
         settings.dragLiquidGlass = false
         let saved = ShelfLook(
             name: "T",
-            palette: nil,
-            style: LookKeys.extract(from: settings)
+            style: LookKeys.extract(from: settings),
+            colors: ColorPaletteKeys.extract(from: settings)
         )
         #expect(!saved.isApplied(to: settings))
         saved.apply(to: &settings)

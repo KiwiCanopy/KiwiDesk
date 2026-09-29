@@ -46,19 +46,25 @@ extension ColorPalette {
 
 extension ColorPalette {
     /// True when this palette, painted over the shipped colours,
-    /// gives exactly `live` on every colour path — a palette a look
-    /// may name for colours it was saved with (#1684). Stricter
+    /// gives exactly `live` on every colour path — the palette
+    /// that reproduces a look's colours (#1684, #1752). Stricter
     /// than `isApplied`, which a sparse palette passes on its few
     /// keys.
     public func reproduces(_ live: [String: String]) -> Bool {
-        var base = TilingSettings()
-        apply(to: &base)
-        let painted = ColorPaletteKeys.extract(from: base)
+        let painted = paintedColors
         return ColorPaletteKeys.all.allSatisfy { path in
             guard let a = painted[path], let b = live[path] else {
                 return painted[path] == live[path]
             }
             return Self.sameColor(a, b)
         }
+    }
+
+    /// Every colour path this palette gives, painted over the
+    /// shipped colours — the complete map a look stores (#1752).
+    public var paintedColors: [String: String] {
+        var base = TilingSettings()
+        apply(to: &base)
+        return ColorPaletteKeys.extract(from: base)
     }
 }

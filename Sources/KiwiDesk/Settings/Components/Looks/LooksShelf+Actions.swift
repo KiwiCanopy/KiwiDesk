@@ -3,9 +3,8 @@ import KiwiDeskCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Look shelf actions (#1684). Every write touching both the look
-/// and the palette library goes through Core's one door
-/// (`KiwiCore+Looks`); this file narrates.
+/// Look shelf actions (#1684). Every library write goes through
+/// Core's one door (`KiwiCore+Looks`); this file narrates.
 extension LooksShelf {
     var core: KiwiCore { model.core }
 
@@ -31,32 +30,12 @@ extension LooksShelf {
             : L("looks.save", "Save")
     }
 
-    /// Where the draft's colors go, said before the save — the one
-    /// notice a save always carries.
+    /// Why a typed name cannot be saved, said before the save.
     func saveNotice(_ typed: String) -> String? {
-        let name = trimmed(typed)
-        if store.isBuiltinName(name) {
-            return L(
-                "looks.reserved",
-                "That name is a built-in look — choose another."
-            )
-        }
-        guard !name.isEmpty else { return nil }
-        // Asked of the model's copy (#805): this runs per keystroke.
-        if let matching = KiwiCore.palette(
-            reproducing: model.config.settings,
-            in: model.allPalettes
-        ) {
-            return L(
-                "looks.colors_use",
-                "Colors: uses the palette “%1$@”.",
-                matching.name
-            )
-        }
+        guard store.isBuiltinName(trimmed(typed)) else { return nil }
         return L(
-            "looks.colors_new",
-            "Colors: will be saved as a new palette “%1$@”.",
-            KiwiCore.newPaletteName(for: name, among: model.allPalettes)
+            "looks.reserved",
+            "That name is a built-in look — choose another."
         )
     }
 
@@ -131,15 +110,14 @@ extension LooksShelf {
 
     // MARK: - Export / import
 
-    /// Writes the look, with its palette's colors when that palette
-    /// is the user's, so the file stands alone on another Mac.
+    /// Writes the look, which owns its colors (#1752), so the file
+    /// stands alone on another Mac.
     func exportLook(_ look: ShelfLook) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "\(look.name).json"
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        let palette = model.userPalettes.first { $0.name == look.palette }
-        try? store.export(LookExport(look: look, palette: palette), to: url)
+        try? store.export(LookExport(look: look), to: url)
     }
 
     func importLook() {

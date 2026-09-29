@@ -6511,9 +6511,9 @@ Three obligations keep the write honest:
   replay over a built-in layout reaches this, and Settings already
   narrates that layout as unsaved.
 
-The step has no "use its colours too" tick: a look click paints
-the look's shape and the palette it names, and the palette row
-below then repaints the colours alone and keeps the shape
+The step has no colours tick: a look click paints the look's
+shape and its own colours, and the palette row below then
+repaints the colours alone and keeps the shape
 (`ShelfPaintTests` ▸ `paletteKeepsTheShape`). The marks are read
 from the live settings on every render, so after hand-tuned
 colours nothing reads selected until a click.
@@ -11935,7 +11935,7 @@ never-meaningful-for-this-kind, not mode-inert); "Kiwi (Default)"
 is derived from the shipped struct defaults at load, so it never
 drifts and doubles as a reset. The whole look as one artifact
 is the look's, not a palette's — A look is KiwiShelf's styling
-that names a palette (#1684), below. Every bundled
+and the colours it wears (#1684, #1752), below. Every bundled
 palette keeps `space_bar.focused_item_color` a **different hue**
 from its active accent (the two-accent rule, QA 2026-07-19) —
 Monochrome included: color is the only channel the focused-window
@@ -11948,14 +11948,24 @@ the numbers, the two green-primary siblings' cool focused accent
 its bundled-only scope; the shelf curates, Lua is open.
 
 :::unreleased
-**[Principle] A look is KiwiShelf's styling that names a palette
-(#1684).** The signal #375's deferral waited for arrived, so a
-look is its own one-shot paint beside the palette, never folded
-into it. Palettes colour every surface (ring, drag visuals,
-marks, bars); a look is the shelf's shape plus a palette NAME,
-never a copy, so there is one colour library: saving a look
-whose colours no palette holds saves them as a new palette and
-never overwrites one of the user's. **A look carries styling,
+**[Principle] A look is KiwiShelf's styling and the colours it
+wears (#1684, #1752).** The signal #375's deferral waited for
+arrived, so a look is its own one-shot paint beside the palette,
+never folded into it. Palettes colour every surface (ring, drag
+visuals, marks, bars); a look is the shelf's shape plus a
+complete copy of those colours, never a palette NAME. A name
+made the look a live link into another library: renaming,
+editing or deleting the palette changed or broke every look
+drawn in it, and a look is what the shared appearance of #1752
+is made of, which has to be one whole thing. So a palette is a
+recipe painted INTO a look — the later pick wins — and a look
+saved from hand-tuned colours carries them without filing a
+palette. A look saved before this, which named one, takes that
+palette's colours once on its library's first read; a palette
+since deleted gives the shipped colours, the one answer the
+library, a backup and an exported file can all give alike, since
+only the running app knows the live ones
+(`LookColorCarryTests`, `LookColorBundleMigrationTests`). **A look carries styling,
 never functionality** (owner, 2026-09-27): a field is styling
 if it changes how the same items look or where they sit, and
 functionality if it changes which items exist, what they show
@@ -11991,11 +12001,21 @@ Glass — itself derived from the starter's tuning for the
 connected screens, so it is what a first run shows and doubles as
 the shape reset (owner, 2026-09-28, #1739) — so each writes
 the whole register and nothing of the previous look leaks through
-(`LookCatalogTests`). A click applies shape and colours to the
-draft, and a "use its colors too" tick then offers the colours
-back for that look alone — computed from the draft, and gone
-once the user's own edits supersede it, so it never restores
-over them. A look card draws its focus ring with the sheen
+(`LookCatalogTests`); a bundled look names its paired palette
+in the authored file and takes its colours at load, so a palette
+retune reaches the look (`LookCatalogTests` ▸ `palettesExist`).
+A click applies shape and colours to the draft. A tile whose
+shape is live in colours it does not own keeps its mark and says
+"Other colors" — re-colouring a look is a choice, not a fault, so
+never ⚠ — and a click on it brings the look's own colours back
+(`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`). The one
+thing a click can lose is hand-tuned colours no saved palette
+reproduces, so for exactly those a "Keep previous colors" row
+offers them back, unticked, since a tick would make the click
+give something other than the tile it shows — computed from the
+draft, kept across a run of look clicks and gone once the colours
+move otherwise, so it never restores over the user's own edits
+(`KeepColorsOfferTests`). A look card draws its focus ring with the sheen
 (owner, 2026-09-28) — a deliberate exception to the palette
 thumbnail's rule of leaving a fact it cannot render undrawn at tile
 scale, paid for with a ring wide enough for the ramp to read. The

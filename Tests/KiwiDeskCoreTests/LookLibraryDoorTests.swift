@@ -3,106 +3,100 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Core's one door over both libraries (#1684): a look's colours
-/// land in a palette without overwriting one, a palette rename
-/// carries its looks, and an import files names it may not shadow.
+/// Core's one door over the look library (#1684): a look owns its
+/// colours (#1752), so a save files no palette and a palette rename
+/// reaches no look, while an import names what it may not shadow
+/// and carries an old file's colours in.
 @Suite("Look library door")
 @MainActor
 struct LookLibraryDoorTests {
-    @Test("saving reuses a palette that reproduces the colours")
-    func saveReusesPalette() throws {
-        let core = makeTestCore()
-        var settings = TilingSettings()
-        let slate = try #require(
-            PaletteCatalog.bundled().first { $0.name == "Slate" }
-        )
-        slate.apply(to: &settings)
-        let look = try core.saveLook(named: "Mine", from: settings)
-        #expect(look.palette == "Slate")
-        #expect(core.paletteLibrary.userPalettes().isEmpty)
-    }
-
-    @Test("a sparse palette whose few keys agree is not reused")
-    func sparseMatchIsNotEnough() throws {
+    @Test("saving keeps the colours whole and files no palette")
+    func saveOwnsColours() throws {
         let core = makeTestCore()
         var settings = TilingSettings()
         settings.kiwishelf.fillColor = "#123456"
+        let look = try core.saveLook(named: "Mine", from: settings)
+        #expect(look.colors == ColorPaletteKeys.extract(from: settings))
+        #expect(core.paletteLibrary.userPalettes().isEmpty)
+        #expect(core.lookLibrary.userLooks() == [look])
+    }
+
+    @Test("a palette rename reaches no look")
+    func renameLeavesLooks() throws {
+        let core = makeTestCore()
         try core.paletteLibrary.save(
             ColorPalette(
-                name: "Sparse",
-                colors: [
-                    "border.focused_color":
-                        TilingSettings().borderStyle.focusedColor
-                ]
+                name: "Mine",
+                colors: ["kiwishelf.fill_color": "#123456"]
             )
         )
-        let look = try core.saveLook(named: "Mine", from: settings)
-        #expect(look.palette == "Mine")
-        #expect(
-            core.paletteLibrary.userPalettes().map(\.name)
-                == ["Sparse", "Mine"]
-        )
-    }
-
-    @Test("new colours never overwrite a user palette")
-    func neverOverwrites() throws {
-        let core = makeTestCore()
-        let theirs = ColorPalette(
-            name: "Mine",
-            colors: ["kiwishelf.fill_color": "#FFFFFF"]
-        )
-        try core.paletteLibrary.save(theirs)
-        var settings = TilingSettings()
-        settings.kiwishelf.fillColor = "#123456"
-        let look = try core.saveLook(named: "Mine", from: settings)
-        #expect(look.palette == "Mine 2")
-        #expect(core.paletteLibrary.userPalettes().first == theirs)
-    }
-
-    @Test("a palette rename carries the looks drawn in it")
-    func renameRepoints() throws {
-        let core = makeTestCore()
-        var settings = TilingSettings()
-        settings.kiwishelf.fillColor = "#123456"
-        try core.saveLook(named: "Mine", from: settings)
+        let settings = TilingSettings()
+        let look = try core.saveLook(named: "Look", from: settings)
         try core.renamePalette(from: "Mine", to: "Ours")
-        #expect(core.lookLibrary.userLooks().first?.palette == "Ours")
-    }
-
-    @Test("a failed rename re-points nothing")
-    func failedRenameKeepsPointer() throws {
-        let core = makeTestCore()
-        var settings = TilingSettings()
-        settings.kiwishelf.fillColor = "#123456"
-        try core.saveLook(named: "Mine", from: settings)
-        #expect(throws: (any Error).self) {
-            try core.renamePalette(from: "Mine", to: "Slate")
-        }
-        #expect(core.lookLibrary.userLooks().first?.palette == "Mine")
+        #expect(core.lookLibrary.userLooks() == [look])
+        #expect(core.paletteLibrary.hasUserPalette("Ours"))
     }
 
     @Test("an import trims names and never shadows")
     func importNames() throws {
         let core = makeTestCore()
         try core.lookLibrary.save(
-            ShelfLook(name: "Mine", palette: nil, style: [:])
+            ShelfLook(name: "Mine", style: [:], colors: [:])
         )
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("look-\(UUID().uuidString).json")
-        try core.lookLibrary.export(
-            LookExport(
-                look: ShelfLook(name: "  Mine ", palette: "P", style: [:]),
-                palette: ColorPalette(
-                    name: " ",
-                    colors: ["kiwishelf.fill_color": "#123456"]
-                )
-            ),
-            to: url
+        let url = try exported(
+            ShelfLook(
+                name: "  Mine ",
+                style: [:],
+                colors: ["kiwishelf.fill_color": "#123456"]
+            )
         )
         let look = try core.importLook(from: url, fallbackName: "My Look")
         #expect(look.name == "Mine 2")
-        #expect(look.palette == "Mine 2")
-        #expect(core.paletteLibrary.hasUserPalette("Mine 2"))
+        #expect(look.colors == ["kiwishelf.fill_color": "#123456"])
+        #expect(core.paletteLibrary.userPalettes().isEmpty)
+    }
+
+    @Test("an old file takes the colours of the palette it carried")
+    func legacyImportCarriesTravelledPalette() throws {
+        let core = makeTestCore()
+        let theirs = ColorPalette(
+            name: "Slate",
+            colors: ["kiwishelf.fill_color": "#123456"]
+        )
+        let url = try legacyExported(
+            PaletteNamedLook(name: "A", palette: "Slate", style: [:]),
+            palette: theirs
+        )
+        let look = try core.importLook(from: url, fallbackName: "My Look")
+        // The file's own palette outranks a bundled one of that name.
+        #expect(look.colors == theirs.paintedColors)
+    }
+
+    @Test("an old file naming a bundled palette takes its colours")
+    func legacyImportResolvesBundled() throws {
+        let core = makeTestCore()
+        let slate = try #require(
+            PaletteCatalog.bundled().first { $0.name == "Slate" }
+        )
+        let url = try legacyExported(
+            PaletteNamedLook(name: "A", palette: "Slate", style: [:]),
+            palette: nil
+        )
+        let look = try core.importLook(from: url, fallbackName: "My Look")
+        #expect(look.colors == slate.paintedColors)
+    }
+
+    @Test("an old file naming no known palette takes the shipped colours")
+    func legacyImportFallsBack() throws {
+        let core = makeTestCore()
+        let url = try legacyExported(
+            PaletteNamedLook(name: "A", palette: "Gone", style: [:]),
+            palette: nil
+        )
+        let look = try core.importLook(from: url, fallbackName: "My Look")
+        #expect(
+            look.colors == PaletteCatalog.defaultPalette().paintedColors
+        )
     }
 
     /// Writes a library file this build refuses (a newer format).
@@ -118,28 +112,16 @@ struct LookLibraryDoorTests {
     func saveRefusesUnreadableLooks() throws {
         let core = makeTestCore()
         try poison(core.lookLibrary.url, key: "looks")
-        var settings = TilingSettings()
-        settings.kiwishelf.fillColor = "#123456"
         #expect(throws: (any Error).self) {
-            try core.saveLook(named: "Mine", from: settings)
+            try core.saveLook(named: "Mine", from: TilingSettings())
         }
-        #expect(core.paletteLibrary.userPalettes().isEmpty)
     }
 
     @Test("an unreadable palette library refuses an import")
     func importRefusesUnreadablePalettes() throws {
         let core = makeTestCore()
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("look-\(UUID().uuidString).json")
-        try core.lookLibrary.export(
-            LookExport(
-                look: ShelfLook(name: "A", palette: "P", style: [:]),
-                palette: ColorPalette(
-                    name: "P",
-                    colors: ["kiwishelf.fill_color": "#123456"]
-                )
-            ),
-            to: url
+        let url = try exported(
+            ShelfLook(name: "A", style: [:], colors: [:])
         )
         try poison(core.paletteLibrary.url, key: "palettes")
         #expect(throws: (any Error).self) {
@@ -148,23 +130,32 @@ struct LookLibraryDoorTests {
         #expect(core.lookLibrary.userLooks().isEmpty)
     }
 
-    @Test("an import reuses a saved palette with the same colours")
-    func importReusesPalette() throws {
-        let core = makeTestCore()
-        let slate = try #require(
-            PaletteCatalog.bundled().first { $0.name == "Slate" }
-        )
-        let url = FileManager.default.temporaryDirectory
+    private func exported(_ look: ShelfLook) throws -> URL {
+        let url = scratchFile()
+        try LookStore(directory: url.deletingLastPathComponent())
+            .export(LookExport(look: look), to: url)
+        return url
+    }
+
+    /// A look file as a build before #1752 wrote it, by its encoder.
+    private func legacyExported(
+        _ look: PaletteNamedLook,
+        palette: ColorPalette?
+    ) throws -> URL {
+        let url = scratchFile()
+        try JSONEncoder().encode(
+            LegacyExport(look: look, palette: palette)
+        ).write(to: url)
+        return url
+    }
+
+    private func scratchFile() -> URL {
+        FileManager.default.temporaryDirectory
             .appendingPathComponent("look-\(UUID().uuidString).json")
-        try core.lookLibrary.export(
-            LookExport(
-                look: ShelfLook(name: "A", palette: "Theirs", style: [:]),
-                palette: ColorPalette(name: "Theirs", colors: slate.colors)
-            ),
-            to: url
-        )
-        let look = try core.importLook(from: url, fallbackName: "My Look")
-        #expect(look.palette == "Slate")
-        #expect(core.paletteLibrary.userPalettes().isEmpty)
+    }
+
+    private struct LegacyExport: Encodable {
+        let look: PaletteNamedLook
+        let palette: ColorPalette?
     }
 }

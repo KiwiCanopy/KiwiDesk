@@ -48,6 +48,7 @@ public enum ConfigMigration {
         migratingAbsentOverlayGlass,
         migratingRetiredFloatNudge,
         migratingShelfEdgeOntoBars,
+        migratingBundleLookColors,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939,
@@ -67,7 +68,7 @@ public enum ConfigMigration {
             return PaletteDocument.currentFormat
         }
         if root[LookDocument.CodingKeys.looks.rawValue] != nil {
-            return LookDocument.currentFormat
+            return LookDocument.stampFloor
         }
         return GuiConfig.currentFormat
     }

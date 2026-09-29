@@ -5,8 +5,21 @@ import Foundation
 /// which also travels inside `SetupBundle` under the bundle's own
 /// format — the palette library's shape (#939, #945).
 struct LookDocument: Codable {
-    /// Format version of the looks.json schema.
-    static let currentFormat = 1
+    /// Format version of the looks.json schema. 2: a look owns
+    /// its colours (#1752), carried by `LookColorCarry` rather than
+    /// a `ConfigMigration` step.
+    static let currentFormat = 2
+
+    /// The format a byte-level step may stamp: the one below the
+    /// carry, which alone writes `currentFormat` — a blind stamp
+    /// would end the crossing with no colours.
+    static let stampFloor = 1
+
+    static var encoder: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        return encoder
+    }
 
     /// Decoded format version preserved without normalization.
     var format: Int
@@ -50,22 +63,19 @@ struct LookDocument: Codable {
     }
 }
 
-/// An exported look (#1684): the look, plus its palette's colours
-/// when that palette is a user one, so the file carries everything
-/// another Mac needs. Bare, like the palette sidecar — a breaking
-/// `ShelfLook` change must rule this file deliberately.
+/// An exported look (#1684): the look alone, which owns its
+/// colours (#1752), so the file carries everything another Mac
+/// needs. Bare, like the palette sidecar — a breaking `ShelfLook`
+/// change must rule this file deliberately; a file from before
+/// #1752 is read by `LookColorCarry.importedLegacy`.
 public struct LookExport: Codable, Sendable, Equatable {
     public var look: ShelfLook
-    /// The named palette, present only when it is not bundled.
-    public var palette: ColorPalette?
 
-    public init(look: ShelfLook, palette: ColorPalette?) {
+    public init(look: ShelfLook) {
         self.look = look
-        self.palette = palette
     }
 
     private enum CodingKeys: String, CodingKey {
         case look
-        case palette
     }
 }
