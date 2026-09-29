@@ -66,7 +66,8 @@ struct PresetCard: View {
             onPreview(
                 PresetPreviewRequest(
                     layout: layout,
-                    liveSizes: sizes
+                    liveSizes: sizes,
+                    sharedLook: model.core.sharedLook
                 )
             )
         }

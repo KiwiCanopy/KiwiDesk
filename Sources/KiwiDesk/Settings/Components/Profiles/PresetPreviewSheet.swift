@@ -6,24 +6,42 @@ struct PresetPreviewRequest: Identifiable {
     let id: UUID
     let layout: StandardLayout
     let liveSizes: [CGSize]?
+    /// The shared look, handed as a value so the sheet stays free
+    /// of the draft (#1752).
+    let sharedLook: LookBody?
 
-    init(layout: StandardLayout, liveSizes: [CGSize]?) {
+    init(
+        layout: StandardLayout,
+        liveSizes: [CGSize]?,
+        sharedLook: LookBody?
+    ) {
         self.id = UUID()
         self.layout = layout
         self.liveSizes = liveSizes
+        self.sharedLook = sharedLook
     }
 }
 
 /// The preset preview sheet (#859).
 ///
 /// Draws preset layouts using `LayoutSchematic` at `.tile` scale (#753, #862).
-/// Rendered from preset's own settings, verified by `PresetPreviewSheetTests`
-/// and `DetailPanelTests`.
+/// Rendered from the preset's own settings wearing the shared look,
+/// never the draft (`PresetPreviewSheetTests`, `DetailPanelTests`).
 struct PresetPreviewSheet: View {
     let layout: StandardLayout
     /// Live screen sizes, or nil when opened from other setups drawer.
     let liveSizes: [CGSize]?
+    /// The look an applied built-in wears (#1752).
+    let sharedLook: LookBody?
     let onDone: () -> Void
+
+    /// What the preset runs with once applied: its own settings
+    /// wearing the shared look, as `KiwiCore.apply(composed:)`
+    /// paints it (`BuiltInLookWearTests`).
+    var drawnSettings: TilingSettings {
+        let own = layout.settings(sizes: liveSizes)
+        return sharedLook?.worn(over: own) ?? own
+    }
 
     private var plan: PresetPreviewPlan {
         PresetPreviewPlan(layout: layout, liveSizes: liveSizes)
@@ -145,7 +163,7 @@ struct PresetPreviewSheet: View {
         VStack(spacing: 4) {
             LayoutStoryThumbnail(
                 mode: slot.mode,
-                settings: layout.settings(sizes: liveSizes),
+                settings: drawnSettings,
                 scale: .tile,
                 delay: delay,
                 replaysOnHover: true

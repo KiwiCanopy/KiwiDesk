@@ -1171,6 +1171,13 @@ leaves a copy or the screen stale (`SharedLookLandTests`). A
 restore takes the bundle's shared look through
 `takeRestoredSharedLook` ahead of its `gui.json` write, as #1741's
 app-wide values do.
+A built-in has no file to keep its own look in, so it always
+wears the shared one: a reader of `StandardLayout.settings(sizes:)`
+for use — the apply, or a picture of what it would apply — paints
+the shared look over it through the one `LookBody.worn(over:)` —
+the apply held by `SharedLookWriteTests` ▸
+`builtInWearsTheSharedLook`, the GUI by `BuiltInLookWearTests`,
+whose `allowed` map is the register of its readers.
 
 **The tour's shelf paint is a further write, and it is not Keep
 (#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
