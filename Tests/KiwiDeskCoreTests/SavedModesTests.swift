@@ -85,8 +85,11 @@ struct SavedModesTests {
         #expect(modes.keys.contains(SpaceID("9")))
     }
 
-    @Test("An unreadable profile answers nothing")
-    func unreadableProfileIsUnknown() throws {
+    /// The menus ask about the profile already live, so the answer
+    /// is what KiwiDesk adopted or wrote, never a re-read of the
+    /// file (#1245, #1518): a file broken since answers the same.
+    @Test("The saved modes come from adoption, not the file")
+    func adoptionAnswersNotTheFile() throws {
         let core = makeTestCore()
         try core.profiles.save(
             profile(named: "p", modes: [SpaceID("1"): .grid])
@@ -101,7 +104,9 @@ struct SavedModesTests {
             encoding: .utf8
         )
 
-        #expect(core.savedModes(for: [SpaceID("1")]).isEmpty)
+        #expect(
+            core.savedModes(for: [SpaceID("1")]) == [SpaceID("1"): .grid]
+        )
     }
 
     @Test("Asking for nothing answers nothing, without reading")
@@ -134,5 +139,26 @@ struct SavedModesTests {
         let modes = core.savedModes(for: spaces)
         #expect(modes.count == spaces.count)
         #expect(modes.values.allSatisfy { $0 == .grid })
+    }
+
+    /// A write of the live profile that is no adoption — a Settings
+    /// Save through `overwriteProfile` — moves the saved modes the
+    /// menus read, since they follow every write, not only an apply.
+    @Test("A rewrite of the live profile moves its saved modes")
+    func rewriteMovesSavedModes() throws {
+        let core = makeTestCore()
+        try core.profiles.save(
+            profile(named: "p", modes: [SpaceID("1"): .grid])
+        )
+        var config = GuiConfig()
+        config.spaceModes = [SpaceID("1"): .stack]
+        try core.overwriteProfile(
+            named: "p",
+            with: config,
+            writingRules: false
+        )
+        #expect(
+            core.savedModes(for: [SpaceID("1")]) == [SpaceID("1"): .stack]
+        )
     }
 }

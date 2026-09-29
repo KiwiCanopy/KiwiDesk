@@ -34,8 +34,7 @@ struct LayoutMenuInfo {
         live: LayoutMode?,
         saved: LayoutMode?
     ) -> Bool {
-        guard let live, let saved else { return false }
-        return live != saved
+        LayoutModeRows.drifted(live: live, saved: saved)
     }
 
     var activeSpaceHasDrifted: Bool {
@@ -52,8 +51,9 @@ struct LayoutMenuInfo {
     /// saying "not saved to profile" above a greyed row that
     /// would have saved it.
     var anyScreenHasDrifted: Bool {
-        activeSpaceHasDrifted
-            || screens.contains(where: \.hasDrifted)
+        LayoutModeRows.keepArmed(
+            drifts: [activeSpaceHasDrifted] + screens.map(\.hasDrifted)
+        )
     }
 
     /// Screens in desk reading order via `DeskOrder` (#752).

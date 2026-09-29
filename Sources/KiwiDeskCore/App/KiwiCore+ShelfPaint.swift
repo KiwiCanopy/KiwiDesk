@@ -99,31 +99,11 @@ extension KiwiCore {
 
     private func paintShelfThrough(
         live: (inout TilingSettings) -> Void,
-        stored: (inout TilingSettings) -> Void
+        stored: @escaping SettingsEdit
     ) {
         live(&tiler.settings)
-        if let name = profiles.currentName {
-            writeStoredSettings(name, stored)
-        }
         // An explicit apply (§5): a look can move the shelf's edge.
         retile(pass: .apply)
-        onShelfPainted()
-    }
-
-    /// Non-adopting, like `overwriteProfile`: `current` and
-    /// `dirty` stay as they were.
-    private func writeStoredSettings(
-        _ name: String,
-        _ paint: (inout TilingSettings) -> Void
-    ) {
-        do {
-            var profile = try profiles.read(name: name)
-            paint(&profile.settings)
-            try profiles.write(profile)
-            recordLookWrite(of: profile)
-            refreshConfigIssues()
-        } catch {
-            onLog("tour look: profile \(name) not written: \(error)")
-        }
+        writeThroughLiveProfile(stored)
     }
 }

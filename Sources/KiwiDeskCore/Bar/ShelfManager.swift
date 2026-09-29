@@ -39,6 +39,9 @@ final class ShelfManager {
     }
 
     private var overlays: [Key: ShelfOverlay] = [:]
+    /// The bars' context menus (#1518) — the one instance; Core
+    /// sets its rows and hands it to both bar managers.
+    let contextMenus = BarContextMenus()
     /// Set while `updateBars` syncs the two bars: their renders
     /// would otherwise re-lay the shelf against the previous plan
     /// before `sync` hands it the new one.
@@ -98,6 +101,7 @@ final class ShelfManager {
         }
         let overlay = overlays[key] ?? ShelfOverlay()
         overlays[key] = overlay
+        overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)
         }

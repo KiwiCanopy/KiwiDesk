@@ -155,16 +155,16 @@ struct SpaceBarStickyScreenTests {
             inside: true
         )
         let away = try item(core, dell, "3", style)
-        #expect(away.overflow == 1)
-        #expect(!away.focusInOverflow)
+        #expect(away.after.windows.count == 1)
+        #expect(!away.after.holdsFocus)
         // Nor does the active screen claim it: the focus is not
         // behind ITS badge either, so neither bar tints.
         let here = try item(core, built, "1", style)
         #expect(here.discs == 1)
-        #expect(!here.focusInOverflow && !here.focusBefore)
+        #expect(!here.after.holdsFocus && !here.before.holdsFocus)
         // Follow the focus back to the Dell: now that Space is
         // the active one and the badge does carry the signal.
         core.state.workspaces.activate(SpaceID("3"))
-        #expect(try item(core, dell, "3", style).focusInOverflow)
+        #expect(try item(core, dell, "3", style).after.holdsFocus)
     }
 }

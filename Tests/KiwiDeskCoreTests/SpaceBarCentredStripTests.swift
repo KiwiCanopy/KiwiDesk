@@ -66,8 +66,8 @@ struct SpaceBarCentredStripTests {
         core.state.apply(.windowFocused(WindowID(5)))
         let built = try item(core, one)
         #expect(drawn(built) == (3...7).map { WindowID($0) })
-        #expect(built.overflowBefore == [WindowID(1), WindowID(2)])
-        #expect(built.overflowWindows == [WindowID(8), WindowID(9)])
+        #expect(built.before.windows == [WindowID(1), WindowID(2)])
+        #expect(built.after.windows == [WindowID(8), WindowID(9)])
         #expect(built.discs == 2)
     }
 
@@ -77,8 +77,8 @@ struct SpaceBarCentredStripTests {
         core.state.apply(.windowFocused(WindowID(9)))
         let built = try item(core, one)
         #expect(drawn(built) == (4...9).map { WindowID($0) })
-        #expect(built.overflowBefore.count == 3)
-        #expect(built.overflowWindows.isEmpty)
+        #expect(built.before.windows.count == 3)
+        #expect(built.after.windows.isEmpty)
         #expect(built.discs == 1)
     }
 
@@ -118,7 +118,7 @@ struct SpaceBarCentredStripTests {
         #expect(core.state.workspaces[one]?.focused == WindowID(8))
         let built = try item(core, one)
         #expect(drawn(built).contains(WindowID(8)))
-        #expect(built.overflowWindows.isEmpty)
+        #expect(built.after.windows.isEmpty)
     }
 
     /// The active Space's system focus can name a window its row
@@ -139,7 +139,7 @@ struct SpaceBarCentredStripTests {
         #expect(core.state.workspaces.lastFocused == WindowID(2))
         let built = try item(core, two)
         #expect(drawn(built).contains(WindowID(17)))
-        #expect(built.overflowWindows.isEmpty)
+        #expect(built.after.windows.isEmpty)
     }
 
     /// The disc tint marks the SYSTEM focus, which only the
@@ -157,11 +157,11 @@ struct SpaceBarCentredStripTests {
             inside: true
         )
         let built = try item(core, one)
-        #expect(built.overflowBefore.contains(WindowID(2)))
-        #expect(!built.focusBefore)
+        #expect(built.before.windows.contains(WindowID(2)))
+        #expect(!built.before.holdsFocus)
         // Active again, the same hidden focus does tint.
         core.state.workspaces.activate(one)
-        #expect(try item(core, one).focusBefore)
+        #expect(try item(core, one).before.holdsFocus)
     }
 
     @Test("a held strip stays until the pointer leaves")

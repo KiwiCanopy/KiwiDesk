@@ -40,6 +40,8 @@ struct SymbolClassifierSeamTests {
             "builds the refusal pill's image from `pillSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
             "asserts every pill symbol RESOLVES; classifies nothing",
+        "Sources/KiwiDeskCore/Bar/BarMenu.swift":
+            "builds a bar menu row's image from a fixed name",
         "Sources/KiwiDeskCore/Bar/ShelfCountView.swift":
             "builds the overflow count's chevron from a fixed name",
         "Tests/KiwiDeskCoreTests/ShelfCountTests.swift":

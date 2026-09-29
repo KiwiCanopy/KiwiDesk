@@ -17,11 +17,6 @@ public final class SpaceBarOverlay {
         private(set) var after: SpaceBarStrip.Disc
         /// The disc before them (#1528 item 17).
         private(set) var before: SpaceBarStrip.Disc = .none
-        var overflowWindows: [WindowID] { after.windows }
-        var overflow: Int { after.windows.count }
-        var focusInOverflow: Bool { after.holdsFocus }
-        var overflowBefore: [WindowID] { before.windows }
-        var focusBefore: Bool { before.holdsFocus }
         /// The groups drawn, which a chip under the pointer holds
         /// (#1528 item 21); nil for a layer item.
         private(set) var drawn: SpaceBarStrip.Drawn?
@@ -53,25 +48,6 @@ public final class SpaceBarOverlay {
             self.drawn = drawn
         }
 
-        /// A chip with no leading disc — the shape every item had
-        /// before the strip centred.
-        init(
-            space: SpaceID,
-            spaceGlyph: SpaceGlyph,
-            apps: [SpaceBarItemView.App],
-            active: Bool,
-            overflow: [WindowID],
-            focusInOverflow: Bool
-        ) {
-            self.init(
-                space: space,
-                spaceGlyph: spaceGlyph,
-                apps: apps,
-                active: active,
-                after: .init(windows: overflow, holdsFocus: focusInOverflow)
-            )
-        }
-
         /// The layer item: one glyph, no apps, never active.
         init(
             layer: String,
@@ -100,8 +76,8 @@ public final class SpaceBarOverlay {
                 return self
             }
             let windows =
-                apps.reduce(0) { $0 + $1.count } + overflow
-                + overflowBefore.count
+                apps.reduce(0) { $0 + $1.count } + after.windows.count
+                + before.windows.count
             var item = self
             item.apps = []
             item.after = .none
@@ -130,6 +106,11 @@ public final class SpaceBarOverlay {
         }
     /// The glyph targets' answers, the manager's one instance.
     var glyphActions: SpaceBarGlyphActions?
+    /// The bars' context menus (#1518): held by the section root,
+    /// which every view in the section finds by walking up.
+    weak var contextMenus: BarContextMenus? {
+        didSet { root.contextMenus = contextMenus }
+    }
 
     /// The section's view; the shelf sets its origin, the
     /// section its size.

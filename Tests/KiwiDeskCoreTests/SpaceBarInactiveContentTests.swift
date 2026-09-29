@@ -93,7 +93,7 @@ struct SpaceBarInactiveContentTests {
         // The glyphs and their state badges go; the count is
         // windows, and `overflow` keeps its one meaning.
         #expect(other.apps.isEmpty)
-        #expect(other.overflow == 0)
+        #expect(other.after.windows.count == 0)
         let empty = try #require(built[SpaceID("3")])
         #expect(empty.collapse == .init(windows: 0))
         let shown = try #require(built[SpaceID("1")])
@@ -138,9 +138,9 @@ struct SpaceBarInactiveContentTests {
             drawn: .init(window: 1..<3, count: 4)
         ).collapsed(to: .count)
         #expect(item.collapse?.windows == 6)
-        #expect(item.overflow == 0)
-        #expect(!item.focusInOverflow)
-        #expect(item.overflowBefore.isEmpty)
+        #expect(item.after.windows.count == 0)
+        #expect(!item.after.holdsFocus)
+        #expect(item.before.windows.isEmpty)
         // A collapsed chip draws no strip, so the pointer on it
         // holds none (#1528 item 21).
         #expect(item.drawn == nil)

@@ -104,6 +104,7 @@ final class AppBarItemView: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
+        guard !openControlClickMenu(event) else { return }
         pressLocation = event.locationInWindow
     }
 
@@ -123,6 +124,8 @@ final class AppBarItemView: NSView {
     }
 
     override func mouseUp(with event: NSEvent) {
+        // No press recorded: a Control-click's menu took it.
+        guard pressLocation != nil else { return }
         defer { pressLocation = nil }
         if isDragging {
             isDragging = false

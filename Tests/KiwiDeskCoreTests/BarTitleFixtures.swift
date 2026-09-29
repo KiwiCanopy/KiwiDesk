@@ -112,8 +112,7 @@ func paintedSpaceBar(
                 spaceGlyph: .text(String(n), tinted: true),
                 apps: [],
                 active: n == 1,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         },
         frontApp: front.map { _ in

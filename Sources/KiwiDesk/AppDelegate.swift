@@ -117,21 +117,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             // the PROFILE rather than the session.
         }
         statusItem.onSaveLayoutToProfile = { [weak self] in
-            guard let self,
-                let name = self.core.profiles.currentName
-            else { return }
-            do {
-                // Capture-live (#1179); the draft's baseline
-                // follows through `profiles.onCapturedLive`,
-                // which `save_profile` reaches too.
-                try self.core.persistProfile(
-                    named: name,
-                    modes: nil
-                )
-            } catch {
-                self.core.onLog("profile save failed: \(error)")
-                self.presentLayoutSaveFailure(error)
-            }
+            self?.keepLayoutInProfile()
         }
         let shortcutsPanel = ShortcutsPanelController(
             core: core
@@ -201,9 +187,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         core.profiles.onCapturedLive = { [weak self] _ in
             self?.dashboardIfCreated?.adoptKeptLayout()
         }
-        core.onShelfPainted = { [weak self] in
-            self?.dashboardIfCreated?.adoptShelfPaint()
+        core.onLiveProfileWritten = { [weak self] edit, persisted in
+            self?.dashboardIfCreated?.adoptLiveWrite(
+                edit,
+                persisted: persisted
+            )
         }
+        wireBarMenus()
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)
             self?.configIssues.model.issues = issues
@@ -294,22 +284,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     private func startManaging() {
         statusItem?.setWarning(false)
         core.start()
-    }
-
-    /// Alerts on layout save failure from quick menu.
-    private func presentLayoutSaveFailure(_ error: Error) {
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = L(
-            "menu.layout.save_failed.title",
-            "Couldn't Save Layout"
-        )
-        alert.informativeText = L(
-            "profiles.save_failed",
-            "Saving failed: %1$@",
-            "\(error)"
-        )
-        NSApp.activate()
-        alert.runModal()
     }
 }

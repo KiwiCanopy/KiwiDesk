@@ -82,7 +82,7 @@ struct SpaceBarOverlayFilterTests {
         #expect(item.apps.map(\.name) == ["Chat", "Mail"])
         // Nor do they earn the floating badge they used to wear.
         #expect(item.apps.map(\.floating) == [false, false])
-        #expect(item.overflow == 0)
+        #expect(item.after.windows.count == 0)
     }
 
     @Test("An overlay neither splits a run nor eats a cap slot")
@@ -114,7 +114,7 @@ struct SpaceBarOverlayFilterTests {
         )
         #expect(item.apps.map(\.name) == ["Web", "Mail"])
         #expect(item.apps.map(\.count) == [2, 1])
-        #expect(item.overflow == 0)
+        #expect(item.after.windows.count == 0)
     }
 
     @Test("The +n badge never counts an undrawn overlay")
@@ -137,7 +137,7 @@ struct SpaceBarOverlayFilterTests {
         #expect(item.apps.map(\.name) == ["Web", "Term"])
         // Mail alone is hidden: the overlay is not a window the
         // "+n" promises the user can reach.
-        #expect(item.overflow == 1)
+        #expect(item.after.windows.count == 1)
     }
 
     /// The two sides of what the filter does to focus, ruled

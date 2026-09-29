@@ -228,6 +228,8 @@ struct SettingsCatalogTests {
                 #expect(
                     LayoutMode.placementTabs.contains(mode)
                 )
+            case .space:
+                #expect(destination == .spaces)
             }
         }
     }

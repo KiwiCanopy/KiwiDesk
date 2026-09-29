@@ -1182,14 +1182,37 @@ a restore returns only what a paint can reach
 (`ShelfPaintRoundTripTests` ▸ `revertRoundTripsEveryLook`,
 `ShelfPaintTests` ▸ `restoreTouchesOnlyTheLook`). A restore is
 refused once `currentName` moved (`ShelfPaintTests` ▸
-`restoreSkipsAnotherProfile`). The open draft's debt is paid ON
-the write, through `onShelfPainted` (`ShelfPaintTests` ▸
-`paintsAreAnnounced`), never by a caller; a paint of a follower
-lands in the shared look (`recordLookWrite`), which re-stamps the
-other followers' files too (#1752); a caller refuses the
-paint while a live-profile draft is dirty (`OnboardingLooksTests`
-▸ `draftBlocks`). The argument is `docs/design-decisions.md` ▸
-*The tour's look is written through, and the tour owns its undo*.
+`restoreSkipsAnotherProfile`). The argument is
+`docs/design-decisions.md` ▸ *The tour's look is written through,
+and the tour owns its undo*.
+
+**A write of the live profile from outside Settings takes the one
+`KiwiCore.writeThroughLiveProfile` door** — the tour's look, a
+bar menu's row (#1518) — which writes the file non-adopting and
+then hands the SAME edit to an open draft through
+`onLiveProfileWritten`, told whether a file took it — never a
+caller's own announcement
+(`ShelfPaintTests` ▸ `paintsAreAnnounced`, `BarMenuRowsTests` ▸
+`discSetsTheSpan`). A follower's look is the shared one, so a
+look the door writes for one lands there through
+`recordLookWrite`, which re-stamps the other followers' files too
+(#1752). The draft policy is ruled here, once
+(`SettingsModel.adoptLiveWrite`): a clean live draft re-reads; a
+dirty one takes the edit on BOTH sides of its diff, so its next
+Save neither writes the old value back nor counts the change as
+the user's, and on a leaf the draft had itself staged the write,
+the newer act, wins (`BarMenuLandingTests`); a stored profile's
+draft is another file and takes nothing. An edit NO file took —
+no profile live, or the write failed — lasts the session, as the
+tour's click does, which means until a Save writes the draft: a
+clean draft still re-reads, the tour's shipped behaviour, while a
+dirty draft takes nothing of it, since taking it on both sides
+would call a session value saved
+(`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
+`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
+more than the leaves it names — the tour's whole look — refuses
+while a live-profile draft is dirty instead
+(`OnboardingLooksTests` ▸ `draftBlocks`).
 
 **One draft, one identity, one encoder (#1393).** The page a
 draft resolves and encodes against is `SettingsModel.reachPage`,

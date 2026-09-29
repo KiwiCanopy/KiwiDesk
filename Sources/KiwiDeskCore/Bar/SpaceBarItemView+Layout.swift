@@ -86,7 +86,7 @@ extension SpaceBarItemView {
             cursor += 1 + Self.pad
         }
         let glyphGap = style.resolvedGlyphGap
-        if collapse == nil, !overflowBefore.isEmpty {
+        if collapse == nil, !before.windows.isEmpty {
             layoutBadge(
                 leadingBadge,
                 onCellAt: cursor,
@@ -119,7 +119,7 @@ extension SpaceBarItemView {
             )
             cursor += cell
         }
-        if collapse == nil, overflow > 0 {
+        if collapse == nil, !after.windows.isEmpty {
             if !appViews.isEmpty { cursor += glyphGap }
             layoutBadge(
                 overflowBadge,

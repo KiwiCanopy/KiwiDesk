@@ -113,8 +113,7 @@ struct IdleItemContrastTests {
                         )
                     ],
                     active: item.active,
-                    overflow: [],
-                    focusInOverflow: false
+                    after: .none
                 )
             },
             frontApp: painted.frontApp,

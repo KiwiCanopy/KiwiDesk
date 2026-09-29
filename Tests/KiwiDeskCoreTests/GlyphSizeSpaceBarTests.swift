@@ -63,8 +63,7 @@ struct GlyphSizeSpaceBarTests {
                     // glyph-bearing ones.
                     apps: n == 2 ? [] : [app("A"), app("B")],
                     active: n == 1,
-                    overflow: [],
-                    focusInOverflow: false
+                    after: .none
                 )
             },
             frontApp: app("Front"),

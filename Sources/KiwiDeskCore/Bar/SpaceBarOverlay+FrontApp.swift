@@ -232,6 +232,7 @@ extension SpaceBarOverlay {
             )
             frontGlyph.setAccessibilityElement(true)
             frontGlyph.setAccessibilityLabel(axLabel)
+            frontGlyph.setAccessibilityCustomActions(shelfActions)
         } else {
             frontGlyph.isHidden = true
             frontGlyph.setAccessibilityElement(false)
@@ -241,6 +242,7 @@ extension SpaceBarOverlay {
             frontIcon.frame = frame
             frontIcon.setAccessibilityElement(true)
             frontIcon.setAccessibilityLabel(axLabel)
+            frontIcon.setAccessibilityCustomActions(shelfActions)
         }
         return cell + SpaceBarItemView.pad
     }
@@ -285,5 +287,12 @@ extension SpaceBarOverlay {
             width: min(frontName.frame.width, available),
             height: height
         )
+    }
+
+    /// The shelf section as VoiceOver actions (#1518): the front-app
+    /// chip is a plain label or image, so it carries them as a list
+    /// rather than answering per query.
+    private var shelfActions: [NSAccessibilityCustomAction] {
+        contextMenus?.accessibilityActions(for: .empty) ?? []
     }
 }

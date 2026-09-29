@@ -98,6 +98,7 @@ final class ShelfDividerHandle: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
+        guard !openControlClickMenu(event) else { return }
         if event.clickCount >= 2 {
             dragStart = nil
             onReset()

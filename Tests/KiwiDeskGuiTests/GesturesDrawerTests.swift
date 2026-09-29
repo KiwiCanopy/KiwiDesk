@@ -95,6 +95,7 @@ struct GesturesDrawerTests {
             ("shortcuts.gestures.overflow_menu", "spaceBar"),
             ("shortcuts.gestures.glyph_hover", "spaceBar"),
             ("shortcuts.gestures.shelf_scroll", "shelf"),
+            ("shortcuts.gestures.context_menu", "shelf"),
             ("shortcuts.gestures.app_bar", "appBar"),
             ("shortcuts.gestures.app_bar_hover", "appBar"),
         ]
