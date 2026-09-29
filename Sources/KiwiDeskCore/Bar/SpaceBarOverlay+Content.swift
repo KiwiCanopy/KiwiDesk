@@ -14,7 +14,6 @@ extension SpaceBarOverlay {
         frontFollows: Bool
     ) -> ItemEnds {
         guard look.shelf.drawsPlate, !items.isEmpty else { return .zero }
-        let pad = SpaceBarItemView.pad
         let last = items.count - 1
         let lead = itemEnds(
             items,
@@ -33,8 +32,9 @@ extension SpaceBarOverlay {
             frontFollows: frontFollows
         )
         return ItemEnds(
-            leading: pad + lead.leading,
-            trailing: closedByRule ? 0 : pad + trail.trailing
+            leading: SpaceBarItemView.contentInset(ends: lead).leading,
+            trailing: closedByRule
+                ? 0 : SpaceBarItemView.contentInset(ends: trail).trailing
         )
     }
 }

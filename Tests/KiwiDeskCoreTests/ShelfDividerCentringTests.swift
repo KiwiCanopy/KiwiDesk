@@ -13,7 +13,57 @@ import Testing
 @Suite("Shelf divider centring", .serialized)
 @MainActor
 struct ShelfDividerCentringTests {
-    private static let strip = CGRect(x: 0, y: 0, width: 1000, height: 28)
+    nonisolated private static let strip = CGRect(
+        x: 0,
+        y: 0,
+        width: 1000,
+        height: 28
+    )
+
+    /// One arrangement to measure: order, finish, App Bar content
+    /// and edge.
+    struct Case: CustomTestStringConvertible, Sendable {
+        let order: KiwiShelf.Order
+        let style: AppBarStyle.BackgroundStyle
+        let content: AppBarStyle.Content
+        let edge: AppBarEdge
+
+        var testDescription: String {
+            "\(order) \(style) \(content) \(edge)"
+        }
+
+        var strip: CGRect {
+            edge.isHorizontal
+                ? ShelfDividerCentringTests.strip
+                : CGRect(x: 0, y: 0, width: 28, height: 1000)
+        }
+
+        static let all: [Case] = [KiwiShelf.Order.spacesFirst, .appsFirst]
+            .flatMap { order in
+                [AppBarStyle.BackgroundStyle.plain, .boxed].flatMap { style in
+                    [
+                        Case(
+                            order: order,
+                            style: style,
+                            content: .icon,
+                            edge: .top
+                        ),
+                        Case(
+                            order: order,
+                            style: style,
+                            content: .iconAndTitle,
+                            edge: .top
+                        ),
+                        Case(
+                            order: order,
+                            style: style,
+                            content: .icon,
+                            edge: .left
+                        ),
+                    ]
+                }
+            }
+    }
     private static let display = DisplayID(17)
 
     init() { LiquidGlassGate.override = { false } }
@@ -53,7 +103,7 @@ struct ShelfDividerCentringTests {
                 id: WindowID(UInt32(10 + n)),
                 text: "App \(n)",
                 icon: image(),
-                count: 1
+                count: 2
             )
         }
     }
@@ -75,21 +125,25 @@ struct ShelfDividerCentringTests {
     /// The two sections drawn onto one shelf as `updateBars`
     /// places them, and that shelf's overlay.
     private func drawn(
-        _ shelf: KiwiShelf
+        _ shelf: KiwiShelf,
+        _ c: Case
     ) throws -> (SpaceBarOverlay, AppBarOverlay, ShelfOverlay) {
-        let depth = Self.strip.height
+        let strip = c.strip
+        let horizontal = c.edge.isHorizontal
+        let depth = horizontal ? strip.height : strip.width
+        let length = horizontal ? strip.width : strip.height
         var spaceLook = SpaceBarLook(
             shelf: shelf,
             bar: SpaceBarStyle(),
             sheen: 0
         )
-        spaceLook.edge = .top
+        spaceLook.edge = c.edge
         var appLook = AppBarLook()
         appLook.shelf = shelf
-        appLook.edge = .top
-        appLook.content = .icon
+        appLook.edge = c.edge
+        appLook.content = c.content
         let placed = ShelfArrangement.arrange(
-            length: Self.strip.width,
+            length: length,
             spaceNeed: SpaceBarOverlay.naturalLength(
                 items: Self.spaceItems(),
                 depth: depth,
@@ -99,7 +153,7 @@ struct ShelfDividerCentringTests {
                 items: Self.appItems(),
                 style: appLook,
                 thickness: depth,
-                capAxis: Self.strip.width
+                capAxis: length
             ),
             spaceFloor: 0,
             shelf: shelf
@@ -111,7 +165,7 @@ struct ShelfDividerCentringTests {
         let space = SpaceBarOverlay()
         space.show(
             items: Self.spaceItems(),
-            strip: spaceSlot.rect(in: Self.strip, horizontal: true),
+            strip: spaceSlot.rect(in: strip, horizontal: horizontal),
             style: spaceLook,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
@@ -122,16 +176,16 @@ struct ShelfDividerCentringTests {
         app.show(
             items: Self.appItems(),
             activeIndex: 0,
-            strip: appSlot.rect(in: Self.strip, horizontal: true),
+            strip: appSlot.rect(in: strip, horizontal: horizontal),
             style: appLook,
-            capAxis: Self.strip.width
+            capAxis: length
         )
         let shelves = ShelfManager()
         shelves.sync([
             .init(
                 display: Self.display,
-                edge: .top,
-                strip: Self.strip,
+                edge: c.edge,
+                strip: strip,
                 shelf: shelf,
                 sheen: 0,
                 space: space,
@@ -139,60 +193,76 @@ struct ShelfDividerCentringTests {
             )
         ])
         let overlay = try #require(
-            shelves.overlayForTesting(Self.display, edge: .top)
+            shelves.overlayForTesting(Self.display, edge: c.edge)
         )
         space.root.layoutSubtreeIfNeeded()
         app.root.layoutSubtreeIfNeeded()
         return (space, app, overlay)
     }
 
-    /// `view`'s along-axis span in the shelf strip's coordinates.
+    /// The along-axis span `views` cover together, in the shelf
+    /// strip's coordinates.
     private func span(
-        _ view: NSView,
-        in overlay: ShelfOverlay
+        _ views: [NSView],
+        in overlay: ShelfOverlay,
+        horizontal: Bool
     ) -> ClosedRange<CGFloat> {
-        let rect = overlay.stripView.convert(view.bounds, from: view)
-        return rect.minX...rect.maxX
+        let rects = views.map {
+            overlay.stripView.convert($0.bounds, from: $0)
+        }
+        return horizontal
+            ? rects.map(\.minX).min()!...rects.map(\.maxX).max()!
+            : rects.map(\.minY).min()!...rects.map(\.maxY).max()!
+    }
+
+    /// What an App item shows: its icon, and on a horizontal
+    /// titled item the title — the count badge hangs off either.
+    private func appInk(_ item: AppBarItemView) -> [NSView] {
+        [item.iconView] + (item.label.isHidden ? [] : [item.label])
     }
 
     @Test(
         "The divider halves the drawn gap, either order, plate or boxed",
-        arguments: [KiwiShelf.Order.spacesFirst, .appsFirst],
-        [AppBarStyle.BackgroundStyle.plain, .boxed]
+        arguments: Case.all
     )
-    func dividerHalvesTheDrawnGap(
-        order: KiwiShelf.Order,
-        style: AppBarStyle.BackgroundStyle
-    ) throws {
+    func dividerHalvesTheDrawnGap(_ c: Case) throws {
         let (space, app, overlay) = try drawn(
-            Self.shelf(order: order, style: style)
+            Self.shelf(order: c.order, style: c.style),
+            c
         )
         #expect(!overlay.divider.isHidden)
-        let spacesFirst = order == .spacesFirst
+        let horizontal = c.edge.isHorizontal
+        let spacesFirst = c.order == .spacesFirst
         let spaceItem = try #require(
             spacesFirst ? space.itemViews.last : space.itemViews.first
         )
         let appItem = try #require(
             spacesFirst ? app.itemViews.first : app.itemViews.last
         )
-        let boxed = style == .boxed
-        let spaceInk: NSView =
+        let boxed = c.style == .boxed
+        let spaceInk: [NSView] =
             boxed
-            ? spaceItem
-            : try #require(
-                spacesFirst
-                    ? spaceItem.appViews.last : spaceItem.identifierImage
-            )
-        let appInk: NSView = boxed ? appItem : appItem.iconView
-        let spaceSpan = span(spaceInk, in: overlay)
-        let appSpan = span(appInk, in: overlay)
-        let line = overlay.divider.frame.midX
-        let before =
-            spacesFirst
-            ? line - spaceSpan.upperBound : line - appSpan.upperBound
-        let after =
-            spacesFirst
-            ? appSpan.lowerBound - line : spaceSpan.lowerBound - line
+            ? [spaceItem]
+            : [
+                try #require(
+                    spacesFirst
+                        ? spaceItem.appViews.last
+                        : spaceItem.identifierImage
+                )
+            ]
+        let spaceSpan = span(spaceInk, in: overlay, horizontal: horizontal)
+        let appSpan = span(
+            boxed ? [appItem] : appInk(appItem),
+            in: overlay,
+            horizontal: horizontal
+        )
+        let line =
+            horizontal
+            ? overlay.divider.frame.midX : overlay.divider.frame.midY
+        let (first, second) =
+            spacesFirst ? (spaceSpan, appSpan) : (appSpan, spaceSpan)
+        let before = line - first.upperBound
+        let after = second.lowerBound - line
         #expect(before > 0 && after > 0)
         #expect(
             abs(before - after) <= 0.5,

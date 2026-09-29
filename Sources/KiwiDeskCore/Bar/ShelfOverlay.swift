@@ -17,7 +17,8 @@ final class ShelfOverlay {
         let view: NSView
         let slot: CGRect
         let plate: CGRect
-        var content: CGRect = .zero
+        /// Zero falls back to the slot, so every site states it.
+        let content: CGRect
     }
 
     private(set) var panel: NSPanel?

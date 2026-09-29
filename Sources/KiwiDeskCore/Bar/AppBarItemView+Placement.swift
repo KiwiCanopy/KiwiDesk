@@ -16,9 +16,11 @@ extension AppBarItemView {
         var badgeExtent: CGFloat
         var showsLabel: Bool
 
-        /// The group's span along the slot.
+        /// The icon and title's span along the slot; the count
+        /// badge hangs off them, sized by its own text, and is not
+        /// part of it (#1779).
         var span: ClosedRange<CGFloat> {
-            x...(x + side + spacing + text.width + badgeExtent)
+            x...(x + side + spacing + text.width)
         }
     }
 
@@ -91,10 +93,25 @@ extension AppBarItemView {
         )
     }
 
+    /// The icon square in a vertical slot of `size`, centred and
+    /// kept `contentPadding` off the leading end; nil where the
+    /// item draws no icon.
+    func verticalIconSquare(in size: CGSize) -> CGRect? {
+        let pad = Self.contentPadding
+        let side = iconSlotHidden ? 0 : max(contentSide(in: size) - pad * 2, 0)
+        guard side > 0 else { return nil }
+        return CGRect(
+            x: (size.width - side) / 2,
+            y: max((size.height - side) / 2, pad),
+            width: side,
+            height: side
+        )
+    }
+
     /// The span this item draws along a slot of `size`: its box on
-    /// a boxed shelf, else its content group — the vertical icon
-    /// centred as `layoutVertical` places it; the whole slot where
-    /// it draws nothing.
+    /// a boxed shelf, else its icon and title; the whole slot where it draws
+    /// nothing. Reads the placements the layout draws, so it sets
+    /// the label's font and text as `horizontalPlacement` does.
     func drawnSpan(in size: CGSize) -> ClosedRange<CGFloat> {
         let length = horizontal ? size.width : size.height
         guard style.shelf.drawsPlate else { return 0...length }
@@ -102,11 +119,9 @@ extension AppBarItemView {
             let span = horizontalPlacement(in: size).span
             return span.upperBound > span.lowerBound ? span : 0...length
         }
-        let side =
-            iconSlotHidden
-            ? 0 : max(contentSide(in: size) - Self.contentPadding * 2, 0)
-        guard side > 0 else { return 0...length }
-        let start = max((length - side) / 2, Self.contentPadding)
-        return start...(start + side)
+        guard let square = verticalIconSquare(in: size) else {
+            return 0...length
+        }
+        return square.minY...square.maxY
     }
 }

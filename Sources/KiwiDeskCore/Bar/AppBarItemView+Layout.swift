@@ -142,18 +142,10 @@ extension AppBarItemView {
     /// BEFORE the `side` guard, which can return early.
     private func layoutVertical() {
         label.isHidden = true
-        let pad = Self.contentPadding
-        let side =
-            iconSlotHidden ? 0 : max(contentSide - pad * 2, 0)
-        guard side > 0 else { return }
-        layoutIconSlot(
-            in: CGRect(
-                x: (bounds.width - side) / 2,
-                y: max((bounds.height - side) / 2, pad),
-                width: side,
-                height: side
-            )
-        )
+        guard let square = verticalIconSquare(in: bounds.size) else {
+            return
+        }
+        layoutIconSlot(in: square)
     }
 
     private func layoutAccent() {

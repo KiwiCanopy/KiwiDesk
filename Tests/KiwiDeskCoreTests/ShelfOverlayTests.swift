@@ -14,7 +14,7 @@ struct ShelfOverlayTests {
         slot: CGRect,
         plate: CGRect
     ) -> ShelfOverlay.Section {
-        .init(view: NSView(), slot: slot, plate: plate)
+        .init(view: NSView(), slot: slot, plate: plate, content: .zero)
     }
 
     @Test("Both sections' asks join into one plate")
