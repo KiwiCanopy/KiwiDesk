@@ -4,12 +4,13 @@ argument-hint: "[optional: app name or window id the report is about]"
 ---
 
 Every KiwiDesk process logs to the unified log under the
-subsystem `com.kiwicanopy.kiwidesk`, category `core`, through
-`CoreLog` (core-boundaries.md owns the seam). The log is not
-noisy; an unfiltered read of it is. A process's log is mostly
-AppKit, LaunchServices and icon-services chatter — 3,876 lines
-for five minutes in the #1787 read, **72** of them KiwiDesk's.
-Take the steps in order; each one removes a class of noise.
+subsystem `com.kiwicanopy.kiwidesk` — Core's `CoreLog` writes
+category `core`, the GUI's loggers `gui`, the boot signposts
+`boot` (core-boundaries.md owns the seam). The log is not noisy;
+an unfiltered read of it is. A process's log is mostly AppKit,
+LaunchServices and icon-services chatter, and KiwiDesk's own
+lines are a few percent of it (the #1787 read, 2026-09-29). Take
+the steps in order; each one removes a class of noise.
 
 ## 1. Pick the process
 
@@ -106,8 +107,11 @@ that most often turn out to be the defect:
   onset; read the `(+age)` column before pairing a burst with the
   event above it.
 - A line that never appears was either never reached or never
-  written: a GUI-side `NSLog` is redacted to `<private>`, and a
-  seam nobody wired never reaches the sink (core-boundaries.md).
+  written: a GUI-side `NSLog` is redacted to `<private>`. A Core
+  `onLog` seam nobody wired still logs through its
+  `CoreLog.write` default, so it DOES appear here — what it
+  misses is `KiwiCore.onLog`, the in-process sink
+  (core-boundaries.md).
 - A reproduction that shows the defect on the unfixed build and
   "not" on the fixed one proves nothing until the unfixed build
   is shown to reproduce it in the same sitting.

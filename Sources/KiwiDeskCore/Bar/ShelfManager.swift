@@ -40,6 +40,13 @@ final class ShelfManager {
         FloatDetection.frontToBackNormalFrames()
     }
 
+    /// Every connected screen's WHOLE frame in AX coordinates —
+    /// what a presentation covers (#1787). Pinned to `[]` by both
+    /// `makeTestCore` twins, for #523's reason.
+    var screenFrames: @MainActor () -> [CGRect] = {
+        NSScreen.screens.map(KiwiCore.axFrame(of:))
+    }
+
     /// Which shelf an overlay draws: a display's, on one edge.
     struct Key: Hashable {
         let display: DisplayID

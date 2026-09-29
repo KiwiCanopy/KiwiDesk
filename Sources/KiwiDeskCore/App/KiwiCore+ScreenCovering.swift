@@ -1,11 +1,10 @@
 import AppKit
 
-/// A window covering an entire screen — a slide show, a
-/// borderless-fullscreen game or player — is PRESENTING there,
-/// and is left where its app put it, the way native fullscreen
-/// is (#1787). Judged on the frame alone: macOS keeps a titled
-/// window below the menu bar, so only a window drawn over it can
-/// cover the whole screen.
+/// A window covering an entire screen edge for edge — a slide
+/// show, a borderless-fullscreen game or player — is PRESENTING
+/// there (#1787): the float fit and the gather leave it where its
+/// app put it, and the shelf stands down behind it. Judged on the
+/// frame alone; the residues that costs are the design entry's.
 extension KiwiCore {
     /// How far short of a screen edge a covering frame may stop.
     /// PowerPoint's slide show overscans by 1 pt on every edge.
@@ -34,11 +33,9 @@ extension KiwiCore {
     }
 
     /// Whether `frame` (AX coordinates) covers any connected
-    /// screen whole.
+    /// screen whole, over the `screenFrames` seam.
     func coversAScreen(_ frame: CGRect) -> Bool {
-        NSScreen.screens.contains {
-            Self.covers(frame, Self.axFrame(of: $0))
-        }
+        shelves.screenFrames().contains { Self.covers(frame, $0) }
     }
 
     /// Whether the shelf stands down on `display`: a native

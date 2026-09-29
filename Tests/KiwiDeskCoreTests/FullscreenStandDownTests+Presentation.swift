@@ -30,10 +30,12 @@ extension FullscreenStandDownTests {
     /// device shape. Nil where the host has no screen.
     private func makeShelfCore(frame: CGRect) -> KiwiCore? {
         guard let screen = NSScreen.main,
-            let display = screen.kiwiDisplay
+            let display = screen.kiwiDisplay,
+            let bounds = screenFrame
         else { return nil }
         let core = makeCore()
         core.tiler.visibleBounds = { _ in screen.frame }
+        core.shelves.screenFrames = { [bounds] }
         core.state.apply(.displaysChanged([display]))
         core.state.apply(
             .windowCreated(
@@ -46,9 +48,22 @@ extension FullscreenStandDownTests {
                 )
             )
         )
+        // A tiled editor beside the show, so the Scrolling App
+        // Bar has an item to paint and its stand-down is visible.
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(2),
+                    pid: 2,
+                    appName: "Editor",
+                    frame: CGRect(x: 100, y: 100, width: 800, height: 600)
+                )
+            )
+        )
         core.resolveSpaceDisplays(mainID: display.id)
         let space = core.state.workspaces.space(of: Self.show)!
         core.state.workspaces.setMode(space, .scrolling)
+        core.tiler.settings.scrolling.appBar.enabled = true
         core.tiler.settings.spaceBarStyle.enabled = true
         core.tiler.settings.barEdge = .top
         core.tiler.settings.kiwishelf.thickness = 40
@@ -96,6 +111,7 @@ extension FullscreenStandDownTests {
         core.shelves.frontWindowFrames = { [editor, screen] }
         core.updateBars()
         #expect(!core.spaceBars.shownStrips.isEmpty)
+        #expect(!core.appBars.shownStrips.isEmpty)
 
         core.shelves.frontWindowFrames = { [screen, editor] }
         core.updateBars()

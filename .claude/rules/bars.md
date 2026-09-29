@@ -153,6 +153,16 @@ twice, was a question the user answered twice. The argument is
   plan no longer gives it. `BarsRefreshSeamTests` holds both
   managers' `sync(` to `KiwiCore+Shelf.swift`, and
   `ShelfDriverTests` drives the pair through it.
+- **Stand a bar down through the one
+  `KiwiCore.shelfStandsDown(on:)`**, read once per display in
+  `updateBars()` for both bars — a native-fullscreen Space
+  (#670) or a window filling that screen in FRONT (#1787) —
+  never a `currentSpaceIsUser(display:` read beside it, which
+  hides on the first and draws over a slide show.
+  `ShelfStandDownSeamTests` holds that read to the stand-down
+  alone; `FullscreenStandDownTests` ▸
+  `presentationInFrontStandsShelfDown` holds both bars through
+  it.
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:

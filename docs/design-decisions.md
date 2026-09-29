@@ -1640,6 +1640,29 @@ indistinguishable from "SkyLight unavailable" — and unavailable
 must keep the single-Desktop fallback fully alive, so a lookup
 miss always counts as a Desktop.
 
+:::unreleased
+**A presentation in front stands the shelf down the same way
+(#1787).** A window filling its whole screen — the float-region
+entry's verdict — is a slide show or a borderless-fullscreen
+game, and a bar painted over it is the defect native fullscreen
+already rules out, so both bars stand down on a screen whose
+FRONT window fills it, through the one `shelfStandsDown(on:)`.
+Front and not focused, because PowerPoint's presenter view keeps
+the focus on one screen while the show fills the other; a window
+is on the screen its midpoint is on, since the presenter view
+overscans a point into its neighbour. The WindowServer's order
+is read only while a tracked window fills that screen, so a desk
+without one pays nothing, and a move or resize crossing the
+verdict re-reads it, since an app may animate its show open past
+the focus report. Layout still reserves the strip — the
+reservation is the config's — so nothing tiled reflows as a show
+starts or ends. Residue, accepted: the order is re-read at an
+honored focus, a retile or a crossing, so a window of an app
+KiwiDesk ignores stepping in front of a show leaves the shelf
+down until the next of those, and a screen-filling window
+KiwiDesk does not track keeps the shelf drawn over it.
+:::
+
 "Without a destroy" is AppKit's transition, not every app's
 ([#1272](https://github.com/KiwiCanopy/KiwiDesk/issues/1272)).
 Zen — Firefox behind it — orders the real window out for the
@@ -3933,30 +3956,6 @@ screen edge, because that net runs for every float on every
 retile and would drag back a window parked half off-screen by
 hand, which macOS allows and this change never asked for.
 
-*A window covering its whole screen is presenting, and is left
-alone (#1787).* A slide show, or a borderless-fullscreen game or
-player, draws over the menu bar, the Dock and the shelf on
-purpose — that is the whole point of it — so pushing it clear of
-a strip breaks the thing the user just started, exactly as a fit
-would break native fullscreen, which the net already skips.
-Judged on the frame alone, over every screen's WHOLE frame:
-macOS keeps a titled window below the menu bar, so only a window
-drawn over it can cover a screen, and no subrole or app list is
-needed to tell a presentation from an ordinary float. The
-exemption is load-bearing twice: the fit's frame write also
-stamps the #1161 placement ledger, so in a Scrolling Space the
-show's own first focus read as an app answering our placement
-and the editor was raised back over it. And the shelf stands
-down on a screen whose FRONT window covers it, as it does on a
-native-fullscreen Space — front, not focused, because a
-presenter view keeps the focus on one screen while the show
-covers the other; a window stepping in front brings the shelf
-back. The WindowServer's order is read only while a tracked
-window covers that screen, so a desk without a presentation
-pays nothing, and a move or resize crossing the cover re-reads
-it, since an app may animate its show open past the focus
-report.
-
 *And the ring is kept clear, not just the window.* A float is
 held the ring's own outward reach off **every** edge of that
 region — bars and screen edges alike. The ring is the window
@@ -3983,6 +3982,35 @@ the point rather than a simplification: one that tracked the
 ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
+
+:::unreleased
+*A window filling its whole screen is presenting, and the float
+nets leave it where its app put it (#1787).* A slide show, or a
+borderless-fullscreen game or player, draws over the menu bar,
+the Dock and the shelf on purpose — that is the point of it — so
+a fit pushing it clear of a strip, or a floating-mode entry
+laying it into the quit grid, breaks the thing the user just
+started, as either would break native fullscreen, which both
+already skip. The verdict is the frame alone: edge for edge with
+a whole screen, within 2 pt, over every screen's WHOLE frame —
+never larger, which is an oversized float the fit still owes.
+The fit's skip is load-bearing twice: its frame write also
+stamps the #1161 placement ledger, and in a Scrolling Space a
+live entry is the whole bounce verdict, so without the skip the
+show's own first focus reads as an app answering our placement
+and the distrust raises the editor back over the show.
+
+What the frame alone costs, accepted: a titled window normally
+stops at the menu bar, but with the menu bar set to auto-hide
+and no Dock on that screen a float maximised by Fill matches the
+screen too, and is read as presenting — left unfitted, and the
+shelf standing down while it is in front. Telling the two apart
+needs the window's AX subrole, which state does not carry; the
+cost is a bar hidden behind a window the user sized to cover it.
+The other float movers — the stash's park and restore, the
+strand recovery, an explicit placement verb — are not yet ruled
+against the verdict one at a time.
+:::
 
 **A resize nobody asked for is corrected on its own event
 (#1358).** [Principle] macOS's title-bar double-click zoom, its
