@@ -144,35 +144,57 @@ public enum DefaultKeybindings {
         )
     }
 
-    /// Additive top-up of missing space digit rows (#485) — a
-    /// combo already bound is left untouched, so the top-up can
-    /// never overwrite. Combo identity is by parsed `KeyCombo`,
-    /// so a hand-authored alias (`ctrl+alt+6`) counts as taken.
+    /// Additive top-up of missing space digit rows (#485): a Space
+    /// verb with no row of its own takes its digit when that combo
+    /// is free, and otherwise stays unbound. It asks per ACTION,
+    /// never per free digit, so a reordered list cannot hand a
+    /// Space a second chord (#1797). Combo identity is by parsed
+    /// `KeyCombo`, so `ctrl+alt+6` counts as taken.
     public static func digitTopUp(
         existing: [KeyBinding],
         spaces: [SpaceID]
     ) -> [KeyBinding] {
-        let taken = Set(
+        var taken = Set(
             existing.compactMap {
                 KeyCombo.parse($0.combo)
             }
         )
-        let isFree: (KeyBinding) -> Bool = { row in
-            guard let combo = KeyCombo.parse(row.combo) else {
-                return false
-            }
-            return !taken.contains(combo)
-        }
+        let bound = Set(
+            existing.compactMap { SpaceLuaArg.target(of: $0.lua) }
+        )
         var rows: [KeyBinding] = []
-        for (digit, space) in numbered(spaces) {
+        for (index, space) in spaces.enumerated() {
+            guard let digit = topUpDigit(of: space, at: index)
+            else { continue }
             let candidates = [
                 focusSpaceRow(digit: digit, space: space),
                 moveSpaceRow(digit: digit, space: space),
                 followSpaceRow(digit: digit, space: space),
             ]
-            rows.append(contentsOf: candidates.filter(isFree))
+            for row in candidates {
+                guard let combo = KeyCombo.parse(row.combo),
+                    let action = SpaceLuaArg.target(of: row.lua),
+                    !bound.contains(action),
+                    taken.insert(combo).inserted
+                else { continue }
+                rows.append(row)
+            }
         }
         return rows
+    }
+
+    /// The digit a top-up gives `space`: its own number when it is
+    /// named 1–10 (`0` for 10), so a reorder cannot move it, and
+    /// otherwise its position within the digit capacity (#1797).
+    private static func topUpDigit(
+        of space: SpaceID,
+        at index: Int
+    ) -> String? {
+        let number = Int(space.raw) ?? (index + 1)
+        guard (1...digitCapacity).contains(number) else {
+            return nil
+        }
+        return number == digitCapacity ? "0" : String(number)
     }
 
     /// Maximum spaces with default digit shortcuts (1...9, 0) (#466).

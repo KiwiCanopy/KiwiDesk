@@ -39,6 +39,7 @@ public enum ConfigMigration {
         migratingRetiredGlyphCap,
         migratingProfileLookOwn,
         migratingRetiredAppBarContent,
+        migratingDuplicateSpaceChords,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939,

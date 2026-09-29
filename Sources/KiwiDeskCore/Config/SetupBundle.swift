@@ -50,7 +50,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// stamped `own` (#1752), on `[Profile]` alone.
     /// 19 = `app_bar.content` retired (#1528), on `[Profile]`
     /// alone.
-    public static let currentFormat = 19
+    /// 20 = a layer holds one chord per navigation action (#1797),
+    /// which reaches a bundle's `config` and its `[Profile]` alike.
+    public static let currentFormat = 20
 
     public let format: Int
 

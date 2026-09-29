@@ -51,10 +51,16 @@ remaining screen instead of being dropped. Where the new profile
 has a Space of its name, it takes the next number past the
 highest one in use, so a held `3` beside
 your own `1`–`5` becomes `6`, and a held `Mail` beside your own
-`Mail` becomes a number too. Where KiwiDesk manages your config,
-it gets a digit shortcut if one of the ten is free. A held Space
-moves to a new number again whenever a profile that loads uses
-its current one.
+`Mail` becomes a number too. A held Space moves to a new number
+again whenever a profile that loads uses its current one.
+
+:::unreleased
+Where KiwiDesk manages your config, a Space with no digit shortcut
+yet gets the one for its own number — a held `6` gets `⌃⌥6` — if
+that key is still free; a Space named otherwise takes the digit of
+its place among the first ten. A Space never gets a second digit
+shortcut, and reordering your Spaces never changes them.
+:::
 
 :::unreleased
 Held Spaces keep the order they had: when a screen's Spaces are

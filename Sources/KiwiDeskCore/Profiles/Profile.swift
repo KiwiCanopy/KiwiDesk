@@ -19,13 +19,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// (#1731), 12 since `space_bar.glyph_cap` became
     /// `glyph_span` (#1528), 13 since a profile states which look
     /// it wears and one from before is stamped `own` (#1752), 14
-    /// since `app_bar.content` retired (#1528). The bump is what
-    /// RUNS a step: `needsMigration`
+    /// since `app_bar.content` retired (#1528), 15 since a layer
+    /// override holds one chord per navigation action (#1797). The
+    /// bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 14
+    public static let currentFormat = 15
 
     public var format: Int
     public var name: String

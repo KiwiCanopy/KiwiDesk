@@ -9245,6 +9245,28 @@ make `apply(composed:)` discard its assignment again — each
 reintroduces
 #485. (#485)
 
+**A Settings-managed layer holds one chord per action; Lua may
+hold more (#1797).** [Rationale] A Shortcuts row is one action in
+one layer, so a second chord for the same action is drawn nowhere —
+yet it stays registered, and it blocks recording its key on the
+row that should own it, naming a Space the user never bound it to.
+The #485 top-up was the one producer: it paired every *free digit*
+with whichever Space sat at that position, so a Space dragged
+behind others took a second chord and its neighbours shifted by
+one. It now asks per action — a Space verb with no row takes a
+digit only if that combo is free — and a Space named 1–10 takes
+its own number rather than its place, so a reorder produces
+nothing. Digits are handed out once and then belong to the Space
+by name (#91); a drag is an arrangement edit and never moves a
+chord. The leftovers were dropped by a one-shot `ConfigMigration`
+step rather than surfaced as rows (#92's "surface, never prune"
+is for a shortcut that can become valid again; an extra chord for
+a live Space never does). **Lua stays uncapped**, because layers
+are modal — activating one deactivates the base — so hjkl beside
+the arrows can only live in one layer, and two chords that do the
+same thing cannot conflict. A duplicate *chord* stays refused
+everywhere (#33/#34/#35). (#1797)
+
 **Orphaned space shortcuts are surfaced, never pruned.** A binding
 that targets a space by name outlives the space's presence in the
 current profile: it stays Carbon-registered (pressing it recreates
