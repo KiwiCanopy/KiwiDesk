@@ -4,9 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The top-up reads the layer that REGISTERS — `gui.json`'s base
-/// under the live profile's override — so a Space verb the override
-/// binds is never given a second chord in the base (#1797).
+/// The top-up counts `gui.json`'s shared base and every stored
+/// profile's override, so a Space verb any profile binds is never
+/// given a second chord, and a row a profile removes is never
+/// appended again (#1797).
 @Suite("Digit top-up reads the resolved layer (#1797)", .serialized)
 @MainActor
 struct DigitTopUpOverrideTests {
@@ -129,5 +130,41 @@ struct DigitTopUpOverrideTests {
             }
         )
         #expect(!rows.contains { $0.lua == goToFour })
+    }
+
+    @Test("another profile's non-Space chord does not block a digit")
+    func otherProfileComboDoesNotBlock() throws {
+        let core = try onStarterBaseline()
+        try core.profiles.write(
+            Profile(
+                name: "Other",
+                monitorSets: [MonitorSet(monitors: ["B:1x1"])],
+                spaceModes: [:],
+                settings: TilingSettings(),
+                layers: KeyLayerOverride(
+                    layers: [
+                        KeyLayer(
+                            name: KeyLayer.defaultName,
+                            bindings: [
+                                KeyBinding(
+                                    combo: "control+option+4",
+                                    lua: "KiwiDesk.toggle_floating()"
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        )
+        core.state.workspaces.ensureSpace(SpaceID("4"))
+
+        core.topUpDigitShortcuts()
+
+        #expect(
+            baseRows(core).contains {
+                $0.combo == "control+option+4"
+                    && $0.lua == "KiwiDesk.focus_space(\"4\")"
+            }
+        )
     }
 }

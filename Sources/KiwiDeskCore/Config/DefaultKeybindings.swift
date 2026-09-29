@@ -162,17 +162,22 @@ public enum DefaultKeybindings {
         let bound = Set(
             existing.compactMap { SpaceLuaArg.target(of: $0.lua) }
         )
+        let slots = topUpDigits(spaces)
+        // A numbered Space's own digit stays its own even when that
+        // Space needs nothing, so a positional Space never takes it.
+        let reserved = Set(
+            slots.filter(\.own).flatMap {
+                candidates(digit: $0.digit, space: $0.space)
+                    .compactMap { KeyCombo.parse($0.combo) }
+            }
+        )
         var rows: [KeyBinding] = []
-        for (digit, space) in topUpDigits(spaces) {
-            let candidates = [
-                focusSpaceRow(digit: digit, space: space),
-                moveSpaceRow(digit: digit, space: space),
-                followSpaceRow(digit: digit, space: space),
-            ]
-            for row in candidates {
+        for slot in slots {
+            for row in candidates(digit: slot.digit, space: slot.space) {
                 guard let combo = KeyCombo.parse(row.combo),
                     let action = SpaceLuaArg.target(of: row.lua),
                     !bound.contains(action),
+                    slot.own || !reserved.contains(combo),
                     taken.insert(combo).inserted
                 else { continue }
                 rows.append(row)
@@ -181,12 +186,23 @@ public enum DefaultKeybindings {
         return rows
     }
 
+    private static func candidates(
+        digit: String,
+        space: SpaceID
+    ) -> [KeyBinding] {
+        [
+            focusSpaceRow(digit: digit, space: space),
+            moveSpaceRow(digit: digit, space: space),
+            followSpaceRow(digit: digit, space: space),
+        ]
+    }
+
     /// The digit each Space tops up on: a Space named 1–10 its own
     /// number (`0` for 10), listed first so no other Space can take
     /// it; any other Space its position within the capacity.
     private static func topUpDigits(
         _ spaces: [SpaceID]
-    ) -> [(String, SpaceID)] {
+    ) -> [(digit: String, space: SpaceID, own: Bool)] {
         let range = 1...digitCapacity
         let own: [(Int, SpaceID)] = spaces.compactMap { space in
             Int(space.raw).flatMap {
@@ -198,9 +214,11 @@ public enum DefaultKeybindings {
             owners.contains($0.element) || !range.contains($0.offset + 1)
                 ? nil : ($0.offset + 1, $0.element)
         }
-        return (own + positional).map { number, space in
-            (number == digitCapacity ? "0" : String(number), space)
+        let digit = { (number: Int) in
+            number == digitCapacity ? "0" : String(number)
         }
+        return own.map { (digit($0.0), $0.1, true) }
+            + positional.map { (digit($0.0), $0.1, false) }
     }
 
     /// Maximum spaces with default digit shortcuts (1...9, 0) (#466).

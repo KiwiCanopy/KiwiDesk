@@ -23,16 +23,23 @@ public enum SpaceLuaArg {
     }
 
     /// Extracts target SpaceID from catalog-authored Lua binding
-    /// (`SpaceID`, #92).
+    /// (`SpaceID`, #92) — a quoted argument only.
     public static func targetSpace(
         of lua: String
     ) -> SpaceID? {
-        target(of: lua)?.space
+        parsed(lua, acceptingNumber: false)?.space
     }
 
-    /// Extracts the verb and Space of a catalog-authored Lua
-    /// binding, or nil for anything else.
+    /// Extracts the verb and Space of a Space binding, its argument
+    /// quoted or a bare number, or nil for anything else.
     public static func target(of lua: String) -> Target? {
+        parsed(lua, acceptingNumber: true)
+    }
+
+    private static func parsed(
+        _ lua: String,
+        acceptingNumber: Bool
+    ) -> Target? {
         guard lua.hasSuffix(")") else { return nil }
         for call in spaceCalls {
             let prefix = "KiwiDesk.\(call)("
@@ -40,9 +47,9 @@ public enum SpaceLuaArg {
             let inner = String(
                 lua.dropFirst(prefix.count).dropLast(1)
             )
-            guard
-                let raw = LuaLiteral.parseString(inner)
-                    ?? Int(inner).map(String.init)
+            let number =
+                acceptingNumber ? Int(inner).map(String.init) : nil
+            guard let raw = LuaLiteral.parseString(inner) ?? number
             else { return nil }
             return Target(verb: call, space: SpaceID(raw))
         }

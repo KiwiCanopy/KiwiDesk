@@ -104,9 +104,11 @@ extension KiwiCore {
         // in ANY profile's override counts: a tombstoned base row
         // still holds its combo, and no profile's resolved layer
         // may end up with a second chord for one verb.
+        // Only an override's Space-verb rows: its other combos
+        // replace the base's in that profile alone.
         let overrides = profiles.allProfiles().flatMap {
             $0.layers?.layers.first { $0.isDefault }?.bindings ?? []
-        }
+        }.filter { SpaceLuaArg.target(of: $0.lua) != nil }
         let added = DefaultKeybindings.digitTopUp(
             existing: base + overrides,
             spaces: spaces

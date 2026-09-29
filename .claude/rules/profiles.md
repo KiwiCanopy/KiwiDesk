@@ -94,6 +94,19 @@ because two real clients now remove drift — see
   the product argument is `docs/design-decisions.md` ▸ "Size is
   not a positional verb" (`SizeLayerSeedTests`).
 
+## A Space verb holds one chord per layer (#1797)
+
+**A GUI writer of layer rows adds no row for a Space verb the
+layer — or any profile's override of it — already binds.** "The
+same verb" is `SpaceLuaArg.target`, the verb plus the Space, never
+the raw Lua string. The digit top-up is held to it by
+`DigitTopUpActionTests` and `DigitTopUpOverrideTests`; the Lua
+import, the adoption into Settings and `GuiConfig.renameSpace` are
+held by no guard, so a change to any of them, or a new writer,
+owes the check and its test. Lua itself is uncapped — the argument
+is `docs/design-decisions.md` ▸ *Nothing KiwiDesk writes may give
+an action a second chord in a layer*.
+
 ## The starter setup is derived, and its tuning is profile-wide
 
 A fresh install's starter profile — identity

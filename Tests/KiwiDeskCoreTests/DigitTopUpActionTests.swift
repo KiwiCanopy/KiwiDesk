@@ -129,4 +129,25 @@ struct DigitTopUpActionTests {
             !added.contains { $0.lua == "KiwiDesk.focus_space(\"5\")" }
         )
     }
+
+    @Test("a named Space never takes a numbered Space's own digit")
+    func ownDigitStaysReserved() {
+        // Space 1 already has a go-to chord elsewhere; ⌃⌥1 is free.
+        let existing = [
+            KeyBinding(
+                combo: "control+option+f1",
+                lua: "KiwiDesk.focus_space(\"1\")"
+            )
+        ]
+        let added = DefaultKeybindings.digitTopUp(
+            existing: existing,
+            spaces: ids(["Mail", "1"])
+        )
+        #expect(
+            !added.contains {
+                $0.combo == "control+option+1"
+                    && $0.lua.contains("\"Mail\"")
+            }
+        )
+    }
 }

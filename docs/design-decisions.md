@@ -9245,7 +9245,7 @@ make `apply(composed:)` discard its assignment again — each
 reintroduces
 #485. (#485)
 
-**Nothing KiwiDesk writes gives an action a second chord in a
+**Nothing KiwiDesk writes may give an action a second chord in a
 layer; Lua may (#1797).** [Rationale] A Shortcuts row is one action
 in one layer, so a second chord for the same action is drawn
 nowhere — yet it stays registered, and it blocks recording its key
@@ -9266,7 +9266,10 @@ predicts. It reads each stored list alone, so an extra split
 between `gui.json` and a profile's override survives it; the
 top-up, which counts every profile's override against the shared
 base, never makes one — so a verb one profile binds on its own
-chord leaves the others without its digit, the lesser harm. A `custom` row is drawn as a row of its
+chord leaves the others without its digit, the lesser harm. The
+rule binds every writer: a Lua import, the Lua-to-Settings
+adoption and a Space rename over leftover rows owe the same check
+the top-up makes. A `custom` row is drawn as a row of its
 own, so the migration leaves it alone. **Lua stays uncapped**,
 because layers are modal — activating one deactivates the base —
 so hjkl beside the arrows can only live in one layer, and two
