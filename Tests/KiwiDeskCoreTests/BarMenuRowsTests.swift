@@ -193,6 +193,18 @@ struct BarMenuRowsTests {
         #expect(told == [false])
     }
 
+    /// With no profile live nothing is known saved, so no Space
+    /// reads as drifted and there is nothing to Keep.
+    @Test("with no profile a chip shows no drift and no Keep")
+    func noProfileNoDrift() throws {
+        LocalizationManager.shared.select("en")
+        let core = seededCore()
+        core.execute("set_mode", args: [.string("1"), .string("grid")])
+        let layout = try submenu(core.barMenuRows(.space(one))[0])
+        #expect(layout.allSatisfy { $0.subtitle == nil })
+        #expect(!layout.contains { $0.title.hasPrefix("Keep Layout") })
+    }
+
     @Test("the divider's reset is greyed at the default")
     func dividerReset() {
         LocalizationManager.shared.select("en")

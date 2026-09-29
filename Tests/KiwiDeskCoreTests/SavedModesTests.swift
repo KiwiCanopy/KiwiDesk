@@ -140,4 +140,25 @@ struct SavedModesTests {
         #expect(modes.count == spaces.count)
         #expect(modes.values.allSatisfy { $0 == .grid })
     }
+
+    /// A write of the live profile that is no adoption — a Settings
+    /// Save through `overwriteProfile` — moves the saved modes the
+    /// menus read, since they follow every write, not only an apply.
+    @Test("A rewrite of the live profile moves its saved modes")
+    func rewriteMovesSavedModes() throws {
+        let core = makeTestCore()
+        try core.profiles.save(
+            profile(named: "p", modes: [SpaceID("1"): .grid])
+        )
+        var config = GuiConfig()
+        config.spaceModes = [SpaceID("1"): .stack]
+        try core.overwriteProfile(
+            named: "p",
+            with: config,
+            writingRules: false
+        )
+        #expect(
+            core.savedModes(for: [SpaceID("1")]) == [SpaceID("1"): .stack]
+        )
+    }
 }
