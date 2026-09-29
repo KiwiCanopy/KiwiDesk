@@ -1,0 +1,108 @@
+import Foundation
+
+/// The shared look's state (#1752).
+struct SharedLookLedger {
+    /// The look `gui.json` carries; nil before one is adopted.
+    var base: LookBody?
+    /// Whether the crossing is owed: a readable, GUI-managed
+    /// `gui.json` that carries no look yet.
+    var owed = false
+}
+
+/// The look every profile without its own wears (#1752) — the one
+/// home of every write to `sharedLookLedger`, and of the one
+/// reading of which settings a profile runs with.
+extension KiwiCore {
+    /// The shared look, or nil before one is adopted or while the
+    /// config is Lua-owned, which has no shared look — the load
+    /// that finds it Lua-owned clears the ledger
+    /// (`prepareSharedLook`), so this never asks `isGuiManaged`,
+    /// whose store read stamps this very value.
+    public var sharedLook: LookBody? { sharedLookLedger.base }
+
+    /// What every `gui.json` write stamps in
+    /// (`GuiConfigStore.liveLook`).
+    var sharedLookStamp: LookBody? { sharedLook }
+
+    /// The settings `profile` runs with: its own, or — while it
+    /// follows the shared look — its own with that look painted
+    /// over (`ShelfLook.admitted`). The one reading of a stored
+    /// profile's look; a Lua-owned config reads the profile alone.
+    public func resolvedSettings(of profile: Profile) -> TilingSettings {
+        guard profile.look == nil, let base = sharedLook else {
+            return profile.settings
+        }
+        var settings = profile.settings
+        base.named("").admitted.apply(to: &settings)
+        return settings
+    }
+
+    /// Reads `gui.json` at a config load, beside the #1741
+    /// crossing and ahead of anything that rewrites a profile: a
+    /// stored look becomes the shared one, and a readable file
+    /// without one owes the crossing. An unreadable file owes
+    /// nothing, and neither does a Lua-owned config.
+    func prepareSharedLook() {
+        guard isGuiManaged, let config = guiConfigStore.load() else {
+            sharedLookLedger = SharedLookLedger()
+            return
+        }
+        sharedLookLedger = SharedLookLedger(
+            base: config.look,
+            owed: config.look == nil
+        )
+    }
+
+    /// Ends an owed crossing at the first apply of a STORED
+    /// profile — a built-in lends nothing: its look becomes the
+    /// shared one, and every stored profile already wearing it
+    /// follows it from then on. `gui.json` is written first, and
+    /// only once that write landed do the profiles change, so a
+    /// failed write leaves the crossing owed and every profile as
+    /// it was (`SharedLookCrossingTests`).
+    func adoptSharedLook(from profile: Profile) {
+        guard sharedLookLedger.owed, isGuiManaged,
+            profiles.list().contains(profile.name)
+        else { return }
+        let base = LookBody(of: profile.settings)
+        sharedLookLedger.base = base
+        guard persistSharedLook() else {
+            sharedLookLedger.base = nil
+            return
+        }
+        sharedLookLedger.owed = false
+        for name in profiles.list() {
+            guard var stored = try? profiles.read(name: name),
+                stored.look == .own, base.isWorn(by: stored.settings)
+            else { continue }
+            stored.look = nil
+            do {
+                try profiles.write(stored)
+            } catch {
+                onLog("shared look: \(name) not rewritten: \(error)")
+            }
+        }
+    }
+
+    /// The #634 reset, which discards `gui.json` itself.
+    func resetSharedLook() {
+        sharedLookLedger = SharedLookLedger()
+    }
+
+    /// Writes `gui.json` with the stamp; false where nothing
+    /// landed.
+    @discardableResult
+    private func persistSharedLook() -> Bool {
+        guard let config = guiConfigStore.load() else {
+            onLog("shared look: gui.json unreadable, not saved")
+            return false
+        }
+        do {
+            try guiConfigStore.save(config)
+            return true
+        } catch {
+            onLog("shared look: gui.json write failed: \(error)")
+            return false
+        }
+    }
+}

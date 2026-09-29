@@ -92,6 +92,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// (`GuiConfigStore.liveAppWide`) rather than drafted: General
     /// writes them the moment they change.
     public var appWide: AppWideSettings?
+    /// The shared look every profile without its own wears
+    /// (#1752); nil until this file has adopted one. Stamped at the
+    /// write (`GuiConfigStore.liveLook`), like `appWide`.
+    public var look: LookBody?
 
     /// Fields that ride `gui.json` without being settings the
     /// user DRAFTS — the Settings walk, the census guard and the
@@ -103,9 +107,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Desktop, so counting it as a config change would light the
     /// save pill constantly, and it is stamped at the write
     /// (`GuiConfigStore.liveDesktopSpaces`) rather than drafted.
-    /// `appWide` is stamped the same way (#1741).
+    /// `appWide` (#1741) and the shared `look` (#1752) are
+    /// stamped the same way.
     public static let undraftedFields: Set<String> = [
-        "format", "desktopSpaces", "appWide",
+        "format", "desktopSpaces", "appWide", "look",
     ]
 
     public init() {}
@@ -197,6 +202,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case scrollGesture = "scroll_gesture"
         case refusal
         case quit
+        case look
     }
 
     public init(from decoder: Decoder) throws {
@@ -275,6 +281,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 forKey: .quit
             )
         )
+        // Additive since #1752: absence is "no shared look adopted
+        // yet", which the crossing reads.
+        look = try container.decodeIfPresent(
+            LookBody.self,
+            forKey: .look
+        )
         dropEmptyNamedSpaces()
     }
 
@@ -323,5 +335,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.refusal, forKey: .refusal)
             try container.encode(appWide.quit, forKey: .quit)
         }
+        try container.encodeIfPresent(look, forKey: .look)
     }
 }

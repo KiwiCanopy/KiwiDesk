@@ -284,10 +284,13 @@ struct ConfigMigrationWiringTests {
             separator: "\n",
             omittingEmptySubsequences: false
         )
+        // A pre-#1752 profile gains its `look: own` line (#1752),
+        // envelope like the stamp, set aside before the count.
         let after = migratedWithFormat0.split(
             separator: "\n",
             omittingEmptySubsequences: false
         )
+        .filter { $0 != #"  "look" : "own","# }
         #expect(before.count == after.count)
         let changed = zip(before, after).filter { $0 != $1 }
         #expect(changed.count == 3)

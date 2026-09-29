@@ -17,13 +17,15 @@ public struct Profile: Codable, Sendable, Equatable {
     /// since `float_nudge` retired for `float_placement` (#1674),
     /// 11 since each bar took its edge back from `kiwishelf`
     /// (#1731), 12 since `space_bar.glyph_cap` became
-    /// `glyph_span` (#1528). The bump
+    /// `glyph_span` (#1528), 13 since a profile states which look
+    /// it wears and one from before is stamped `own` (#1752). The
+    /// bump
     /// is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step that must reach this
     /// shape owes one whatever it rewrites — a retired key
     /// decodes to the default and an absent leaf to the NEW
     /// default, silently, without it.
-    public static let currentFormat = 12
+    public static let currentFormat = 13
 
     public var format: Int
     public var name: String
@@ -65,6 +67,9 @@ public struct Profile: Codable, Sendable, Equatable {
     public var ignoreRules: RuleListOverride?
     /// Sparse scroll-gesture overrides (#1656).
     public var scrollGesture: ScrollGestureOverride?
+    /// Which look this profile wears (#1752): nil is the shared
+    /// look in `gui.json`, `.own` the copy in `settings`.
+    public var look: LookReference?
 
     /// Number of monitors covered by profile sets.
     public var monitorCount: Int {
@@ -98,6 +103,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
         case scrollGesture = "scroll_gesture"
+        case look
     }
 
     public init(
@@ -117,7 +123,8 @@ public struct Profile: Codable, Sendable, Equatable {
         appRules: AppRuleOverride? = nil,
         floatRules: RuleListOverride? = nil,
         ignoreRules: RuleListOverride? = nil,
-        scrollGesture: ScrollGestureOverride? = nil
+        scrollGesture: ScrollGestureOverride? = nil,
+        look: LookReference? = nil
     ) {
         self.format = format
         self.name = name
@@ -137,6 +144,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.floatRules = floatRules
         self.ignoreRules = ignoreRules
         self.scrollGesture = scrollGesture
+        self.look = look
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -246,6 +254,10 @@ public struct Profile: Codable, Sendable, Equatable {
         scrollGesture = try container.decodeIfPresent(
             ScrollGestureOverride.self,
             forKey: .scrollGesture
+        )
+        look = try container.decodeIfPresent(
+            LookReference.self,
+            forKey: .look
         )
     }
 

@@ -16,8 +16,9 @@ extension KiwiCore {
         profile: Profile,
         cause: ProfileApplyCause
     ) {
-        // An owed #1741 crossing ends at the first apply.
+        // Owed #1741 and #1752 crossings end at the first apply.
         adoptAppWide(from: profile)
+        adoptSharedLook(from: profile)
         let pruneStaleSpaces = cause.prunesStale
         let forceRetile = cause.forcesRetile
         supersedeMonitorSettle()
@@ -37,7 +38,7 @@ extension KiwiCore {
         let outgoingIcons = tiler.settings.spaceIcons
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
-        tiler.settings = profile.settings
+        tiler.settings = resolvedSettings(of: profile)
         // The session layer reseeds on an explicit apply, and on
         // any apply that CHANGES the profile — it outranks the
         // incoming authored overrides (#458, #764). A same-

@@ -20,6 +20,7 @@ extension KiwiCore {
         // they loaded earlier.
         store.liveDesktopSpaces = persistedDesktopSpaces()
         store.liveAppWide = appWideStamp
+        store.liveLook = sharedLookStamp
         return store
     }
 

@@ -209,10 +209,13 @@ struct ConfigMigrationTests {
         // number's representation, an escape, a dropped key —
         // belongs in the net. `Profile` is `Equatable`, so the
         // net costs one line.
-        let original = try decoder.decode(
+        var original = try decoder.decode(
             Profile.self,
             from: current
         )
+        // A v0.9.7 profile predates the shared look, so it arrives
+        // wearing its own (#1752).
+        original.look = .own
         #expect(profile == original)
         #expect(
             profile.settings.appBarStyle.content == .iconAndTitle

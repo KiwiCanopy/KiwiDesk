@@ -40,10 +40,9 @@ public final class KiwiCore {
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
 
-    /// Effective structured keybinding sources currently
-    /// installed in `keys`. Kept so a recorder-only live edit
-    /// can capture an in-memory rollback point without reading
-    /// gui.json or a profile again (#123 review).
+    /// Effective structured keybinding sources currently installed in `keys`.
+    /// Kept so a recorder-only live edit can capture an in-memory rollback
+    /// point without reading gui.json or a profile again (#123 review).
     var appliedStructuredLayers: [KeyLayer]?
     /// Changes whenever `loadConfig()` replaces the Lua VM and
     /// hotkey table. Recorder snapshots are valid only within
@@ -278,8 +277,9 @@ public final class KiwiCore {
     /// instead of minting another. Session state, retired where a
     /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
-    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
+    /// No profile carries these (`+AppWide` #1741, `+SharedLook` #1752).
     var appWideLedger = AppWideLedger()
+    var sharedLookLedger = SharedLookLedger()
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and
     /// captured back on save. nil falls back to the space

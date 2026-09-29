@@ -7,6 +7,7 @@ extension KiwiCore {
         // Before the settle, which may rewrite a profile file the
         // #1741 crossing still has to read.
         prepareAppWide()
+        prepareSharedLook()
         // #1530's one-time settle, owed from when the manager was
         // made — before any reader could stamp a file.
         if profiles.owesSetSettle {
