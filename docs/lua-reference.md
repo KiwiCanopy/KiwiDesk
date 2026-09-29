@@ -3366,8 +3366,11 @@ does not move, even with `mouse.follows_focus` on.
   wrapping at the ends.
 
 A swipe on a trackpad or Magic Mouse moves one window, and a
-notch of a mouse wheel moves one; the glide after the fingers
-lift never counts. With
+notch of a mouse wheel moves one — a fast roll or a
+free-spinning wheel moves one for the whole burst, and each notch
+counts again once the wheel pauses between notches; the glide
+after the fingers lift never counts. Where there is no window to
+move to, the focused window's border bumps toward the step. With
 [long swipes](#scroll_gestureset_long_swipes) on, a swipe moves
 its first window as it starts and one more every
 [step distance](#scroll_gestureset_step_distance) of further
@@ -3384,7 +3387,8 @@ Spaces included. A swipe steps one Space, and so does a notch of a
 mouse wheel; a fast roll or a free-spinning wheel steps one for the
 whole burst, and each notch counts again once the wheel pauses
 between notches. It stops at the first and last Space rather than
-wrapping, and the pointer does not move.
+wrapping, where the focused window's border bumps toward the
+step, and the pointer does not move.
 
 The keys must be exactly the ones set: ⌃⌥⌘ + scroll is not
 ⌃⌥ + scroll. While they are held, KiwiDesk takes the scroll on

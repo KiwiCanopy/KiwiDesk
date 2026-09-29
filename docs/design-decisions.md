@@ -9781,12 +9781,15 @@ the rule that a press which does nothing always says why
 (▸ Layout and resize behavior, *A press writes forward, never
 across the store*) — while here there is nothing to refuse,
 since the flat window array gives every Space a well-defined
-next and previous window whatever its geometry. The one place a
-step still lands on nothing — a Scrolling or Monocle row's end
-with `wrap_focus` off, or a Space holding one window — stays
-wordless on purpose: the gesture repeats per notch and per
-swipe, and a cue on each would be noise over the hand's own
-evidence that the row did not move.
+next and previous window whatever its geometry. Where a step
+still lands on nothing — a Scrolling or Monocle row's end with
+`wrap_focus` off, or a Space holding one window — the ring takes
+the arrow keys' own dead-end bump toward the step (#436; owner
+ruling 2026-09-29), once per event and never a pill: the
+gesture should answer a wall the way the keys do, and a worded
+cue would repeat per notch and per swipe where a rubber-band
+simply restarts. A pill is for a refusal whose reason the user
+cannot see; a row end is on the screen.
 
 **One swipe moves one window by default, and long swipes are a
 tick box.** Counting by distance — a window per ~60 pt of finger
@@ -9807,7 +9810,12 @@ gesture's sensitivity apart from it. The glide after a lift
 never counts, on either setting — it is macOS extrapolating a
 flick, not the hand, and a fast flick's glide runs far past any
 swipe, so counting it would race down the row. A wheel notch is one
-window either way, since a notch is already a discrete act.
+window either way, since a notch is already a discrete act — but
+a fast roll or a free-spinning wheel is one window for the whole
+burst: a notch closer than 120 ms to the previous one in the same
+direction moves nothing, so notches clicked one at a time each
+count and a spin cannot race down the row (the Space step's
+paragraph below argues the number).
 
 **The settings are stored like the shortcuts**: a base in
 `gui.json`, a sparse override per profile, and the **Applies to**
@@ -9872,13 +9880,14 @@ proposes: an order the user can see on the bar is one they can
 aim at, and `hide_empty` is a display setting, which must not
 change what a gesture reaches — the Space landed on shows,
 because the bar always draws the current one. It stops at the
-first and last Space, as macOS's own Desktop swipe does, and a
-wrap would only make an overshoot worse. There is no long-swipe
+first and last Space, as macOS's own Desktop swipe does — the
+shown Space's ring bumps there, as a row end does — and a wrap
+would only make an overshoot worse. There is no long-swipe
 option: a Space switch redraws the whole screen, so counting
 distance would repaint it several times for one hand.
 
 **A wheel steps once per notch, and a spinning wheel once per
-spin.** A free-spinning wheel reports a burst of notches after a
+spin, on both scroll gestures.** A free-spinning wheel reports a burst of notches after a
 single flick, and one per notch would carry it to the last
 Space. So a notch closer than 120 ms to the previous one in the
 same direction steps nothing, and the wheel re-arms after that

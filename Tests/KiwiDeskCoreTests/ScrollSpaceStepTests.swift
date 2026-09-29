@@ -49,6 +49,7 @@ struct ScrollSpaceStepTests {
                 ManagedWindow(id: id, pid: pid_t(index + 1), appName: raw)
             )
             core.state.workspaces.add(id, to: SpaceID(raw))
+            core.state.workspaces.focus(id, in: SpaceID(raw))
         }
         core.state.workspaces.activate(SpaceID(shown))
         let session = ScrollSpaceStepSession()
@@ -158,14 +159,28 @@ struct ScrollSpaceStepTests {
         #expect(shown(core) == "3")
     }
 
-    @Test("the first and last Space stop the step")
+    @Test("the first and last Space stop the step, with a bump")
     func stopsAtTheEnds() {
         let (core, session) = makeCore(shown: "3")
+        var bumps: [Direction] = []
+        core.borders.deadEndProbe = { bumps.append($1) }
         swipe(core, session, dx: -80)
         #expect(shown(core) == "3")
+        #expect(bumps == [.right])
         let (first, firstSession) = makeCore(shown: "1")
         swipe(first, firstSession, dx: 80)
         #expect(shown(first) == "1")
+    }
+
+    @Test("an empty Space at the end has no ring, and says nothing")
+    func emptyEndIsSilent() {
+        let (core, session) = makeCore(shown: "3")
+        core.state.apply(.windowDestroyed(WindowID(3), wasMinimized: false))
+        var bumps = 0
+        core.borders.deadEndProbe = { _, _ in bumps += 1 }
+        swipe(core, session, dx: -80)
+        #expect(shown(core) == "3")
+        #expect(bumps == 0)
     }
 
     @Test("it steps the Spaces of the screen under the pointer")

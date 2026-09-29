@@ -14,9 +14,9 @@ final class ScrollSpaceStepSession {
     fileprivate var display: DisplayID?
     fileprivate var meter = ScrollSpaceStepSession.makeMeter()
 
-    /// One per swipe or notch, a spinning wheel latched.
+    /// One per swipe or notch: no long swipes (#1519 ruling).
     fileprivate static func makeMeter() -> ScrollStepMeter {
-        ScrollStepMeter(longSwipes: false, distance: 1, latchesWheel: true)
+        ScrollStepMeter(longSwipes: false, distance: 1)
     }
 
     init() {}
@@ -26,8 +26,9 @@ final class ScrollSpaceStepSession {
 /// previous or next Space in the Space order of the screen under
 /// the pointer — one per trackpad swipe, one per wheel notch, a
 /// fast roll or a spinning wheel once (`ScrollStepMeter`). It
-/// stops at the first and last Space without a word, as a row end
-/// does, and never moves the pointer.
+/// stops at the first and last Space, where the shown Space's
+/// focus bumps its ring toward the step as a row end does (#436),
+/// and never moves the pointer.
 extension KiwiCore {
     /// Wires the consumer; once, at bootstrap.
     func wireScrollSpaceStep() {
@@ -58,9 +59,20 @@ extension KiwiCore {
     private func stepSpace(on display: DisplayID, by step: Int) {
         let order = state.workspaces.spaces(on: display)
         guard let shown = state.workspaces.activeSpace(on: display),
-            let index = order.firstIndex(of: shown),
-            order.indices.contains(index + step)
+            let index = order.firstIndex(of: shown)
         else { return }
+        guard order.indices.contains(index + step) else {
+            // An empty Space has no ring to bump, and says nothing.
+            if let space = state.workspaces[shown],
+                let focused = state.focusAnchor(of: space)
+            {
+                flashDeadEnd(
+                    focused,
+                    direction: Self.direction(step, horizontal: true)
+                )
+            }
+            return
+        }
         switchSpace(to: order[index + step], warp: false)
     }
 }

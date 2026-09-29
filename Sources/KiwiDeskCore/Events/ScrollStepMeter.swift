@@ -1,16 +1,13 @@
 import CoreGraphics
 
-/// How many windows a scroll moves (#1656, ruling 2026-09-29): a
-/// mouse wheel one per notch; a trackpad swipe one, as soon as its
-/// travel passes the latch's threshold — and with `longSwipes`,
-/// one more every `distance` of further travel. The glide after a
-/// lift never counts. Pure.
-///
-/// With `latchesWheel` (#1519, designer and owner 2026-09-29) a
-/// free-spinning wheel cannot race past its target: a notch closer
-/// than `wheelQuiet` to the previous one in the same direction
-/// steps nothing, so notches clicked one at a time each step while
-/// a fast roll or a spin steps once.
+/// How many steps a scroll makes (#1656, #1519, rulings
+/// 2026-09-29): a trackpad swipe one, as soon as its travel passes
+/// the latch's threshold — and with `longSwipes`, one more every
+/// `distance` of further travel; a mouse wheel one per notch,
+/// except that a notch closer than `wheelQuiet` to the previous one
+/// in the same direction steps nothing, so notches clicked one at
+/// a time each step while a fast roll or a free spin steps once.
+/// The glide after a lift never counts. Pure.
 public struct ScrollStepMeter: Sendable {
     /// The quiet that re-arms a latched wheel, in seconds; a
     /// provisional number until a device logs notch intervals.
@@ -18,20 +15,14 @@ public struct ScrollStepMeter: Sendable {
 
     private let longSwipes: Bool
     private let distance: Double
-    private let latchesWheel: Bool
     private var latch = ScrollStepLatch()
     private var fired = false
     private var travel = 0.0
     private var lastNotch: (time: Double, sign: Int)?
 
-    public init(
-        longSwipes: Bool,
-        distance: Double,
-        latchesWheel: Bool = false
-    ) {
+    public init(longSwipes: Bool, distance: Double) {
         self.longSwipes = longSwipes
         self.distance = max(distance, 1)
-        self.latchesWheel = latchesWheel
     }
 
     /// Feeds one event; answers the signed number of steps it
@@ -67,7 +58,7 @@ public struct ScrollStepMeter: Sendable {
         guard along != 0 else { return 0 }
         let sign = along > 0 ? 1 : -1
         defer { lastNotch = (time, sign) }
-        if latchesWheel, let last = lastNotch, last.sign == sign,
+        if let last = lastNotch, last.sign == sign,
             time - last.time < Self.wheelQuiet
         {
             return 0

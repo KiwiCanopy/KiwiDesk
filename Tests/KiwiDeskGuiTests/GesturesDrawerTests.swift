@@ -153,7 +153,7 @@ struct GesturesDrawerTests {
         // — carries it, so the control and the whole stay live.
         #expect(
             entry.contains(
-                ".id(hovering).accessibilityHidden(true).modifier(dim)"
+                ".id(moving).accessibilityHidden(true).modifier(dim)"
             )
         )
         #expect(
