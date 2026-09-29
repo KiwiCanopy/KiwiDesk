@@ -101,89 +101,34 @@ extension AppBarItemView {
 
     /// The square the content is laid in: the shelf's content
     /// depth (#1682), never longer than the slot.
-    var contentSide: CGFloat {
-        min(
-            style.contentDepth(forDepth: crossThickness),
-            horizontal ? bounds.width : bounds.height
-        )
-    }
-
-    private var effectiveFontSize: CGFloat {
-        style.resolvedFontSize(forDepth: crossThickness)
-    }
+    var contentSide: CGFloat { contentSide(in: bounds.size) }
 
     /// Icon and name layout for horizontal bar (manual QA 2026-07-18,
     /// owner 2026-07-20).
     private func layoutHorizontal() {
-        let pad = Self.contentPadding
-        let edge = Self.endPadding(
-            style,
-            depth: crossThickness,
-            first: isFirstInRun,
-            last: isLastInRun
-        )
-        let font = style.shelf.textFont(ofSize: effectiveFontSize)
-        label.font = font
-        // Not `usesSingleLineMode`: it draws a tall face above its
-        // own ascent, clipping the title (#1707).
-        label.maximumNumberOfLines = 1
-        label.lineBreakMode = .byTruncatingTail
-        label.stringValue = text
-        let side =
-            iconSlotHidden ? 0 : max(contentSide - pad * 2, 0)
-        let showText = style.content.showsText
-        var textSize =
-            showText
-            ? (label.cell?.cellSize ?? .zero)
-            : .zero
-        textSize.width = ceil(textSize.width)
-        textSize.height = ceil(textSize.height)
-        var spacing: CGFloat =
-            side > 0 && showText ? pad / 2 : 0
-        let badgeReserve: CGFloat =
-            count >= 2 && showText
-            ? Self.badgeSide(contentSide: contentSide) + pad
-            : 0
-        textSize.width = min(
-            textSize.width,
-            bounds.width - side - spacing - edge.total - badgeReserve
-        )
-        if textSize.width < 8 {
-            textSize.width = 0
-            spacing = 0
-        }
-        label.isHidden = !showText || textSize.width == 0
-        let badgeExtent: CGFloat =
-            badgeReserve > 0 && textSize.width > 0
-            ? badgeReserve - pad + 2
-            : 0
-        // Centred between the two ends' insets, which differ where
-        // only one end is drawn rounded (#1763).
-        var x = max(
-            (bounds.width - side - spacing - textSize.width
-                - badgeExtent + edge.leading - edge.trailing) / 2,
-            showText ? edge.leading : pad
-        )
+        let placed = horizontalPlacement(in: bounds.size)
+        label.isHidden = !placed.showsLabel
+        var x = placed.x
         if !iconSlotHidden {
             layoutIconSlot(
                 in: CGRect(
                     x: x,
-                    y: (bounds.height - side) / 2,
-                    width: side,
-                    height: side
+                    y: (bounds.height - placed.side) / 2,
+                    width: placed.side,
+                    height: placed.side
                 )
             )
-            x += side + spacing
+            x += placed.side + placed.spacing
         }
         label.frame = CGRect(
             x: x,
             y: BarTextGlyph.originY(
                 capsCentredOn: bounds.midY,
                 for: label,
-                height: textSize.height
+                height: placed.text.height
             ),
-            width: textSize.width,
-            height: textSize.height
+            width: placed.text.width,
+            height: placed.text.height
         )
     }
 

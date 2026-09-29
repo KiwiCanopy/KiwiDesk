@@ -72,23 +72,30 @@ struct ShelfOverlayTests {
         }
     }
 
-    @Test("The divider sits centred in the gutter, only for two")
-    func dividerInTheGutter() {
+    @Test("The divider sits centred in the drawn gap, only for two")
+    func dividerInTheDrawnGap() {
         let slots = [
             CGRect(x: 656, y: 0, width: 200, height: 40),
             CGRect(x: 350, y: 0, width: 300, height: 40),
         ]
         let frame = ShelfOverlay.dividerFrame(
             slots: slots,
+            contents: [
+                CGRect(x: 2, y: 0, width: 150, height: 40),
+                CGRect(x: 0, y: 0, width: 292, height: 40),
+            ],
             strip: Self.strip,
             horizontal: true
         )
-        // Gutter 650…656, centre 653, strip-local 553; a section
-        // break thick, 70% of the 40 pt depth.
-        #expect(frame == CGRect(x: 552, y: 6, width: 2, height: 28))
+        // Drawn gap 642…658 (the second section's content ends 8 in
+        // from its slot, the first's starts 2 in), centre 650,
+        // strip-local 550; a section break thick, 70% of the 40 pt
+        // depth (#1779).
+        #expect(frame == CGRect(x: 549, y: 6, width: 2, height: 28))
         #expect(
             ShelfOverlay.dividerFrame(
                 slots: [slots[0]],
+                contents: [.zero],
                 strip: Self.strip,
                 horizontal: true
             ) == nil

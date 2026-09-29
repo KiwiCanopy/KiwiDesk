@@ -227,9 +227,21 @@ render content into it (#1517). Obligations:
   BEHIND the section strip and never hosts a view, so the
   no-reparent obligation below holds for it by construction.
   `ShelfOverlayTests` holds the joined plate, ▸ `plateModes` Full
-  and Boxed, and ▸ `dividerInTheGutter` the divider; no suite
+  and Boxed, and ▸ `dividerInTheDrawnGap` the divider; no suite
   scans a bar overlay for a plate of its own, so a section growing
   one is review's.
+- **Centre the section divider between what the two sections
+  DRAW, never on the slot gutter (#1779)**: each bar insets its
+  run and its items' content by its own amounts, so the gutter
+  middle reads off-centre. A bar reports its drawn span as
+  `contentFrame` — the item boxes on a boxed shelf, else the
+  content inside each end item — read from the same end-inset
+  readings its layout and measurement take
+  (`SpaceBarOverlay.itemEnds`, `AppBarItemView.horizontalPlacement`),
+  never a copy beside them; `ShelfManager` hands it on beside the
+  plate. `ShelfDividerCentringTests` ▸ `dividerHalvesTheDrawnGap`
+  measures the real bars' glyphs and boxes either side, in both
+  orders.
 - **Wire a section's `onRendered` in `ShelfManager.sync` alone,
   and place each section at the slot it drew into
   (`shownStrip`)**, never at a plan slot read beside it: a

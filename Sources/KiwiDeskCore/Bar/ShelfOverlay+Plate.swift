@@ -81,6 +81,7 @@ extension ShelfOverlay {
         guard
             let frame = Self.dividerFrame(
                 slots: sections.map(\.slot),
+                contents: sections.map(\.content),
                 strip: strip,
                 horizontal: horizontal
             )
@@ -113,21 +114,28 @@ extension ShelfOverlay {
     }
 
     /// The divider's frame in strip coordinates: centred in the
-    /// gutter between two slots, `BarDivider.sectionLengthShare` of
-    /// the depth long
-    /// and a section break thick. Never full depth: a full-height
-    /// seam splits the one plate back into two bars. Nil unless
+    /// gap between what the two sections DRAW (#1779) — each
+    /// section's `contents` span in its own coordinates, clamped
+    /// to its slot, the whole slot where it draws nothing — so
+    /// neither bar's inner inset pulls it off-centre;
+    /// `BarDivider.sectionLengthShare` of the depth long and a
+    /// section break thick. Never full depth: a full-height seam
+    /// splits the one plate back into two bars. Nil unless
     /// exactly two sections show.
     nonisolated static func dividerFrame(
         slots: [CGRect],
+        contents: [CGRect],
         strip: CGRect,
         horizontal: Bool
     ) -> CGRect? {
-        guard slots.count == 2 else { return nil }
-        let ranges = slots.map { slot in
-            horizontal
-                ? (slot.minX - strip.minX)...(slot.maxX - strip.minX)
-                : (slot.minY - strip.minY)...(slot.maxY - strip.minY)
+        guard slots.count == 2, contents.count == 2 else { return nil }
+        let ranges = zip(slots, contents).map { slot, content in
+            drawnRange(
+                slot: slot,
+                content: content,
+                strip: strip,
+                horizontal: horizontal
+            )
         }
         let middle = ShelfArrangement.gutterMiddle(ranges[0], ranges[1])
         return BarDivider.sectionFrame(
@@ -135,6 +143,24 @@ extension ShelfOverlay {
             depth: horizontal ? strip.height : strip.width,
             horizontal: horizontal
         )
+    }
+
+    /// A section's drawn span along the strip, in strip
+    /// coordinates, never outside its slot.
+    private nonisolated static func drawnRange(
+        slot: CGRect,
+        content: CGRect,
+        strip: CGRect,
+        horizontal: Bool
+    ) -> ClosedRange<CGFloat> {
+        let low = horizontal ? slot.minX - strip.minX : slot.minY - strip.minY
+        let length = horizontal ? slot.width : slot.height
+        let start = horizontal ? content.minX : content.minY
+        let extent = horizontal ? content.width : content.height
+        guard extent > 0 else { return low...(low + length) }
+        let lower = min(max(start, 0), length)
+        let upper = min(max(start + extent, lower), length)
+        return (low + lower)...(low + upper)
     }
 
     private func hidePlates() {

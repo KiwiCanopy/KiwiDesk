@@ -99,12 +99,22 @@ final class ShelfManager {
             let slot = space.shownStrip
         {
             sections.append(
-                .init(view: space.root, slot: slot, plate: space.plateFrame)
+                .init(
+                    view: space.root,
+                    slot: slot,
+                    plate: space.plateFrame,
+                    content: space.contentFrame
+                )
             )
         }
         if let app = shelf.app, app.isVisible, let slot = app.shownStrip {
             sections.append(
-                .init(view: app.root, slot: slot, plate: app.plateFrame)
+                .init(
+                    view: app.root,
+                    slot: slot,
+                    plate: app.plateFrame,
+                    content: app.contentFrame
+                )
             )
         }
         let overlay = overlays[key] ?? ShelfOverlay()
