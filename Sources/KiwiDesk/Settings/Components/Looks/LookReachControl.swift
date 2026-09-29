@@ -51,7 +51,7 @@ enum LookReachWords {
         edited: String
     ) -> String {
         guard follows[edited] == true else {
-            return L("app_rules.reach.only", "%1$@ only", edited)
+            return L("looks.reach.own", "Own look")
         }
         let users = order.filter { follows[$0] == true }
         if users.count == order.count {

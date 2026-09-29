@@ -83,6 +83,7 @@ extension KiwiCore {
         // A copy touches no global file, so a follower's copy whose
         // look the draft changed keeps that look as its own rather
         // than writing the shared one (#1752).
+        copy.look = lookReference(forNew: copy.look)
         if copy.look == nil, let shared = sharedLook,
             !shared.isWorn(by: copy.settings)
         {
@@ -156,11 +157,11 @@ extension KiwiCore {
                 edited: config.layers
             )
             profile.appRules = AppRuleOverride.diff(
-                base: sidecar?.appRules ?? globalAppRuleBase,
+                base: sidecar?.appRules ?? globalRuleBase.appRules,
                 edited: config.appRules
             )
             profile.floatRules = RuleListOverride.diff(
-                base: sidecar?.floatRules ?? globalFloatRuleBase,
+                base: sidecar?.floatRules ?? globalRuleBase.floatRules,
                 edited: config.floatRules,
                 normalizing: FloatRules.normalizedRule
             )

@@ -284,6 +284,10 @@ extension InterpolatedLabelTests {
         // The looks step's draft caption names the save pill's
         // two buttons; its hint names Settings and the Looks
         // pane (#1720).
+        // The shared look's breadcrumb (#1752): the Looks page's
+        // title (the card's reaches it through the catalog, which
+        // the scan does not count as a label).
+        "looks.shared.xref_link": 1,
         "onboarding.looks.draft_pending": 2,
         "onboarding.looks.hint": 2,
         // The Float card's `?` names the float VALUE it explains

@@ -176,13 +176,13 @@ extension KiwiCore {
     func guiConfigSeed() -> GuiConfig {
         var config = GuiConfig()
         config.settings = tiler.settings
-        config.appRules = globalAppRuleBase
+        config.appRules = globalRuleBase.appRules
         config.spacePins = capturedPins
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
         config.layers = recoverKeybindings()
-        config.floatRules = globalFloatRuleBase
-        config.ignoreRules = globalIgnoreRuleBase
+        config.floatRules = globalRuleBase.floatRules
+        config.ignoreRules = globalRuleBase.ignoreRules
         // The base `init.lua`'s verbs declared (#1656).
         config.scrollGesture = mouse.scroll.base
         var modes: [SpaceID: LayoutMode] = [:]

@@ -20,10 +20,6 @@ extension KiwiCore {
     /// whose store read stamps this very value.
     public var sharedLook: LookBody? { sharedLookLedger.base }
 
-    /// What every `gui.json` write stamps in
-    /// (`GuiConfigStore.liveLook`).
-    var sharedLookStamp: LookBody? { sharedLook }
-
     /// The settings `profile` runs with: its own, or — while it
     /// follows the shared look — its own with that look painted
     /// over (`ShelfLook.admitted`). The one reading of a stored
@@ -41,36 +37,6 @@ extension KiwiCore {
         var worn = settings
         base.named("").admitted.apply(to: &worn)
         return worn
-    }
-
-    /// The live profile's switch, which a Keep or Save as of it
-    /// copies (#1752 ruling): nil for a built-in, which follows.
-    var liveLookReference: LookReference? {
-        profiles.currentName.flatMap { try? profiles.read(name: $0) }?
-            .look
-    }
-
-    /// The one door a write of a FOLLOWER's settings takes: its
-    /// look is the shared one, so that is where the write lands —
-    /// otherwise the next apply would paint the old shared look
-    /// over it. A Keep, a Save as, a stored-profile Settings Save
-    /// (`commitSharedLook`) and the tour's paint reach it; an own
-    /// profile's write is its own, and before the crossing there is
-    /// no shared look to write — the crossing alone seeds it
-    /// (`SharedLookWriteTests`).
-    func recordLookWrite(of profile: Profile) {
-        guard profile.look == nil, sharedLookLedger.base != nil,
-            isGuiManaged
-        else { return }
-        let written = LookBody(of: profile.settings)
-        guard written != sharedLookLedger.base else { return }
-        let before = sharedLookLedger
-        sharedLookLedger.base = written
-        sharedLookLedger.owed = false
-        guard persistSharedLook() else {
-            sharedLookLedger = before
-            return
-        }
     }
 
     /// Reads `gui.json` at a config load, beside the #1741
@@ -91,27 +57,38 @@ extension KiwiCore {
 
     /// Ends an owed crossing at the first apply of a STORED
     /// profile — a built-in lends nothing: its look becomes the
-    /// shared one, and every stored profile already wearing it
-    /// follows it from then on. `gui.json` is written first, and
-    /// only once that write landed do the profiles change, so a
-    /// failed write leaves the crossing owed and every profile as
-    /// it was (`SharedLookCrossingTests`).
+    /// shared one (`crossWith`).
     func adoptSharedLook(from profile: Profile) {
         guard sharedLookLedger.owed, isGuiManaged,
             profiles.list().contains(profile.name)
         else { return }
-        let base = LookBody(of: profile.settings)
+        crossWith(LookBody(of: profile.settings))
+    }
+
+    /// The crossing's election: `base` becomes the shared look, and
+    /// every stored profile follows it exactly where it already
+    /// wears it — an own twin starts following, and a profile born
+    /// following before any shared look existed but wearing another
+    /// keeps its own — so nothing on screen moves. `gui.json` is
+    /// written first, and only once that write landed do the
+    /// profiles change, so a failed write leaves the crossing owed
+    /// and every profile as it was (`SharedLookCrossingTests`).
+    func crossWith(_ base: LookBody) {
+        let before = sharedLookLedger
         sharedLookLedger.base = base
         guard persistSharedLook() else {
-            sharedLookLedger.base = nil
+            sharedLookLedger = before
             return
         }
         sharedLookLedger.owed = false
         for name in profiles.list() {
-            guard var stored = try? profiles.read(name: name),
-                stored.look == .own, base.isWorn(by: stored.settings)
-            else { continue }
-            stored.look = nil
+            guard var stored = try? profiles.read(name: name) else {
+                continue
+            }
+            let follows: LookReference? =
+                base.isWorn(by: stored.settings) ? nil : .own
+            guard stored.look != follows else { continue }
+            stored.look = follows
             do {
                 try profiles.write(stored)
             } catch {
@@ -120,46 +97,17 @@ extension KiwiCore {
         }
     }
 
-    /// A stored-profile Settings Save's look half (#1752): the
-    /// edited profile follows, so the draft's look is the shared
-    /// one. Its own step, beside `overwriteProfile`, which writes
-    /// the profile file alone.
-    public func commitSharedLook(ofProfile name: String) {
-        guard let saved = try? profiles.read(name: name) else { return }
-        recordLookWrite(of: saved)
-    }
-
-    /// The shared look's first value when a profile opts into it
-    /// before any crossing gave one: that profile's own look
-    /// (`saveLookReach`). A failed write leaves none.
-    func seedSharedLook(from settings: TilingSettings) {
-        sharedLookLedger.base = LookBody(of: settings)
-        guard persistSharedLook() else {
-            sharedLookLedger.base = nil
-            return
-        }
-        sharedLookLedger.owed = false
+    /// A restore takes the bundle's shared look, ahead of the
+    /// `gui.json` write that stamps it; a bundle from before #1752
+    /// has none, so the crossing is owed again and elects among its
+    /// profiles, which its step stamped own.
+    func takeRestoredSharedLook(from bundle: SetupBundle) {
+        let look = bundle.config?.look
+        sharedLookLedger = SharedLookLedger(base: look, owed: look == nil)
     }
 
     /// The #634 reset, which discards `gui.json` itself.
     func resetSharedLook() {
         sharedLookLedger = SharedLookLedger()
-    }
-
-    /// Writes `gui.json` with the stamp; false where nothing
-    /// landed.
-    @discardableResult
-    private func persistSharedLook() -> Bool {
-        guard let config = guiConfigStore.load() else {
-            onLog("shared look: gui.json unreadable, not saved")
-            return false
-        }
-        do {
-            try guiConfigStore.save(config)
-            return true
-        } catch {
-            onLog("shared look: gui.json write failed: \(error)")
-            return false
-        }
     }
 }

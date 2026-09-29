@@ -20,7 +20,7 @@ extension KiwiCore {
         // they loaded earlier.
         store.liveDesktopSpaces = persistedDesktopSpaces()
         store.liveAppWide = appWideStamp
-        store.liveLook = sharedLookStamp
+        store.liveLook = sharedLook
         return store
     }
 
@@ -56,18 +56,18 @@ extension KiwiCore {
     /// app-rule sibling (#109), with the same one-definition
     /// and read-once-per-cycle caveats.
     public func baseAppRules() -> [String: SpaceID] {
-        guard isGuiManaged else { return globalAppRuleBase }
+        guard isGuiManaged else { return globalRuleBase.appRules }
         guard let rules = guiConfigStore.load()?.appRules else {
-            return globalAppRuleBase
+            return globalRuleBase.appRules
         }
         return AppRuleOverride.normalized(rules)
     }
 
     /// Global float-rule base for the stored-profile editor.
     public func baseFloatRules() -> [String] {
-        guard isGuiManaged else { return globalFloatRuleBase }
+        guard isGuiManaged else { return globalRuleBase.floatRules }
         guard let rules = guiConfigStore.load()?.floatRules else {
-            return globalFloatRuleBase
+            return globalRuleBase.floatRules
         }
         return FloatRules(rules).rawRules
     }
@@ -75,9 +75,9 @@ extension KiwiCore {
     /// Global ignore-rule base. The GUI has no ignore editor yet,
     /// but stored-profile loads resolve it for preservation parity.
     public func baseIgnoreRules() -> [String] {
-        guard isGuiManaged else { return globalIgnoreRuleBase }
+        guard isGuiManaged else { return globalRuleBase.ignoreRules }
         guard let rules = guiConfigStore.load()?.ignoreRules else {
-            return globalIgnoreRuleBase
+            return globalRuleBase.ignoreRules
         }
         return IgnoreRules(rules).rawRules
     }

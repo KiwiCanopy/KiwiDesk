@@ -104,6 +104,10 @@ extension SettingsModel {
             from: config,
             applyingModesFor: edited
         )
+        // The checklist first (#1752): a profile it unticks keeps
+        // the look from BEFORE this Save's edits, and its writes
+        // precede every gui.json write of the Save.
+        saveLookReach()
         var saved = true
         do {
             try core.persistProfile(
@@ -126,7 +130,6 @@ extension SettingsModel {
         // The files half must land for the base half to: a failed
         // write keeps the stored rules in the globals write too.
         if !saved || saveRuleReach() == .failed { dropRuleHalf() }
-        if saved { saveLookReach() }
         persistGlobalsIfNeeded()
         reload()
         return saved

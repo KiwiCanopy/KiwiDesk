@@ -175,7 +175,7 @@ struct ProfilesSection: View {
             }
             // Only the exception is marked: sharing is the default
             // (#1752), and a Lua-owned config has no shared look.
-            if model.core.isGuiManaged,
+            if model.guiManaged,
                 model.lookReachStored[summary.name] == false
             {
                 BadgeChip(label: L("looks.reach.own", "Own look"))

@@ -66,14 +66,17 @@ struct LookReachTests {
         #expect(core.sharedLook?.isWorn(by: stale.settings) == true)
     }
 
-    @Test("going shared keeps the copy, unread")
+    /// The copy is re-stamped to the shared look it now wears
+    /// (`landSharedLook`'s rule), so an older build or a Lua-owned
+    /// load reads what it shows.
+    @Test("going shared re-stamps the copy")
     func sharedKeepsTheCopy() throws {
         let core = try crossedCore()
         try core.profiles.save(profile("Odd", fill: odd))
         try core.saveLookReach(["Odd": true])
         let odd = try core.profiles.read(name: "Odd")
         #expect(odd.look == nil)
-        #expect(odd.settings.kiwishelf.fillColor == self.odd)
+        #expect(odd.settings.kiwishelf.fillColor != self.odd)
         load("Odd", core)
         #expect(core.tiler.settings.kiwishelf.fillColor != self.odd)
     }

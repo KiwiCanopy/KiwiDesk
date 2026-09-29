@@ -24,7 +24,7 @@ struct SharedLookPointer: View {
     /// Whether the page's profile follows the shared look; nil
     /// where the line says nothing.
     private var follows: Bool? {
-        guard model.core.isGuiManaged,
+        guard model.guiManaged,
             model.profileSummaries.count > 1,
             let edited = model.editingProfile ?? model.activeProfile
         else { return nil }
@@ -34,7 +34,8 @@ struct SharedLookPointer: View {
     static var sharedProse: String {
         L(
             "looks.shared.pointer",
-            "These settings are part of the shared look, set in %1$@.",
+            "These settings are part of the shared look — choose "
+                + "which profiles use it in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }
@@ -42,13 +43,20 @@ struct SharedLookPointer: View {
     static var ownProse: String {
         L(
             "looks.own.pointer",
-            "These settings are part of this profile's own look, set "
-                + "in %1$@.",
+            "These settings are part of this profile's own look — "
+                + "share it in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }
 
+    /// Built from the two titles it names, so neither can go
+    /// stale beside a copy.
     static var linkTitle: String {
-        L("looks.shared.xref_link", "Looks & Animations ▸ Shared look")
+        L(
+            "looks.shared.xref_link",
+            "%1$@ ▸ %2$@",
+            SettingsDestination.looks.title,
+            SettingsCatalog.colors.sharedLook.text
+        )
     }
 }

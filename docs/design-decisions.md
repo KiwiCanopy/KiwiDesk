@@ -11991,8 +11991,8 @@ the question again rather than inheriting this answer
 
 **A palette is a color recipe; a Profile owns the colors.**
 (#375; since #1752 a look owns them, and a profile wears the
-shared look or its own — below.) A palette is a named color recipe you apply once to
-overwrite the active profile's colors; a Profile is the
+shared look or its own — below.) A palette is a named color
+recipe you apply once to overwrite the active profile's colors; a Profile is the
 persistent, addressable configuration — tiling, layout, and sparse
 behavior overrides — that owns those colors afterward. So the
 palette shelf is a **colors-only, one-shot paint** (never a
@@ -12126,24 +12126,58 @@ worth sharing as the picture it draws. The unit is everything a
 look sets, the bar edges and global gaps included: a profile that
 needs other geometry keeps its own look whole. A Space's own gap
 exception stays with its profile, since it belongs to a Space
-rather than to the look. **Absent means shared, so the crossing
-stamps rather than reads** — every profile from before is marked
-own (`ProfileLookOwnMigrationTests`), and at the first apply of a
-stored profile its look seeds the shared one and every profile
-already wearing it follows, `gui.json` written before any profile
-(`SharedLookCrossingTests`); nothing on screen moves. A follower's
-look IS the shared one, so every write of it lands there — a
-Keep, a Save as, a Settings Save, the tour's paint — or the next
-apply would paint the old shared look over it
+rather than to the look. A Lua-owned config has no shared look:
+`init.lua` sets the look, so the switch greys
+(`SharedLookCrossingTests` ▸ `luaOwnedCrossesNothing`).
+
+**Absent means shared, so the crossing stamps rather than
+reads.** Every profile from before is marked own
+(`ProfileLookOwnMigrationTests`); at the first apply of a stored
+profile its look seeds the shared one, and the election lets
+every profile already wearing it follow and moves a follower
+wearing another look to own, `gui.json` written before any
+profile (`SharedLookCrossingTests`, `SharedLookLandTests` ▸
+`electionMovesStrayFollowers`), so nothing on screen moves. A
+profile born while no shared look exists is own for the same
+reason — following would make it wear, at the crossing, a look it
+never did. A restore takes the bundle's shared look ahead of the
+`gui.json` write that stamps it; a bundle from before carries
+none, its step stamps its profiles own, and the crossing is owed
+again and elects among them, the shape #1741's crossing takes.
+
+**The shared look changes through one door, `landSharedLook`:
+`gui.json` first, then every follower's file copy re-stamped,
+then the live screen's look re-resolved** (`SharedLookLandTests`).
+A follower's copy is never read while it follows, but it is what
+an older build and a Lua-owned load read, so a copy left stale
+would resurface a look nobody chose. The re-resolve reaches the
+look alone and never re-applies the whole profile, which would
+reach a standing temporary layout (#1179). A write landed beside
+the door skips one of the two, which is why there is one. A
+follower's look IS the shared one, so every write of it lands
+there — a Keep, a Save as, a Settings Save, the tour's paint — or
+the next apply would paint the old shared look over it
 (`SharedLookWriteTests`). A new profile copies the switch of the
-profile it is saved from; a "Save copy as…" of a follower whose
-draft changed the look keeps it as its own, since a copy touches
-no global file. The switch is the App Rules "Applies to" checklist
-with the look's own tick rules — every box live, no ⚠ on an own
-look, which is a choice rather than a divergence — its ticks
-staged in the draft and written through `saveLookReach`
-(`LookReachTests`). "Shared look" is the noun in copy, never
-"global", which already names a per-Space setting's fallback.
+profile it is saved from; a "Save copy" of a follower whose draft
+changed the look keeps it as its own, since a copy touches no
+global file.
+
+**The switch is the App Rules "Applies to" checklist, read the
+way App Rules' is: on a following profile's page, the profiles
+wearing the look the page shows.** The edited profile's own box
+is locked (owner, 2026-09-29): flipping it would change the
+checklist's subject, the look this page shows, so a profile is
+moved from a page whose look it should wear. On a following
+profile's page the other boxes follow or keep their own; on an
+own profile's page they grey, since an own look is nobody else's
+to join. A profile
+unticked keeps the look it wore before the Save's edits, which is
+why every Save door writes the checklist before the profile or
+`gui.json` write it guards (`SharedLookSeamTests` ▸
+`checklistFirst`), and its save-pill row says so. An own look
+carries no ⚠, since it is a choice rather than a divergence; the
+ticks are staged in the draft and written through
+`saveLookReach` (`LookReachTests`).
 
 **The App Bar is the dock; the Space Bar is the menu bar**
 (owner, 2026-09-28, #1528). The starter splits them — Space Bar

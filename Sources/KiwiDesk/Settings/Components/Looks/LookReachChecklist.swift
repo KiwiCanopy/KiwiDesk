@@ -2,10 +2,11 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The shared look's checklist (#1752): All profiles, then one box
-/// per profile. A tick means that profile follows the shared look;
-/// every box stays live, the edited profile's included — its box is
-/// the switch — and All profiles is ticked exactly when every
-/// profile follows.
+/// per profile — the profiles wearing the look this page shows, as
+/// App Rules' checklist reads. The edited profile's box is ticked
+/// and locked; on a following profile's page the others follow or
+/// keep their own, and on an own profile's page they grey, since
+/// the look shown there is no one else's (owner ruling 2026-09-29).
 struct LookReachChecklist: View {
     @ObservedObject var model: SettingsModel
     let edited: String
@@ -43,6 +44,10 @@ struct LookReachChecklist: View {
         )
     }
 
+    /// Whether this page shows the shared look — else its own,
+    /// which nobody else can join.
+    private var editedFollows: Bool { follows[edited] == true }
+
     private var everyoneFollows: Bool {
         profiles.allSatisfy { follows[$0] == true }
     }
@@ -59,7 +64,7 @@ struct LookReachChecklist: View {
             )
         )
         .toggleStyle(.checkbox)
-        .disabled(everyoneFollows)
+        .disabled(everyoneFollows || !editedFollows)
         .help(
             L(
                 "looks.reach.all_help",
@@ -73,7 +78,8 @@ struct LookReachChecklist: View {
         VStack(alignment: .leading, spacing: 1) {
             Toggle(
                 isOn: Binding(
-                    get: { follows[profile] == true },
+                    // This profile always wears the look shown here.
+                    get: { profile == edited || follows[profile] == true },
                     set: { model.setLookFollows(profile, $0) }
                 )
             ) {
@@ -85,7 +91,8 @@ struct LookReachChecklist: View {
                 }
             }
             .toggleStyle(.checkbox)
-            .help(profile == edited ? editedHelp : "")
+            .disabled(profile == edited || !editedFollows)
+            .help(profile == edited ? lockedHelp : "")
             if follows[profile] == false {
                 Text(L("looks.reach.own", "Own look"))
                     .font(.caption)
@@ -105,40 +112,34 @@ struct LookReachChecklist: View {
         return nil
     }
 
-    private var editedHelp: String {
-        follows[edited] == true
-            ? L(
-                "looks.reach.this_help.shared",
-                "Untick to give this profile its own copy of the look."
-            )
-            : L(
-                "looks.reach.this_help.own",
-                "Tick to use the shared look here instead of this "
-                    + "profile's own."
-            )
+    private var lockedHelp: String {
+        L(
+            "looks.reach.locked_help",
+            "You're editing this profile. To change whether it shares "
+                + "the look, open another profile that does."
+        )
     }
 
     private var notes: [String] {
-        var result: [String] = []
-        if profiles.contains(where: { follows[$0] == false }) {
-            result.append(
+        guard editedFollows else {
+            return [
                 L(
-                    "looks.reach.replace_own_note",
-                    "Ticking a profile with its own look replaces it "
-                        + "with the shared one."
+                    "looks.reach.own_page_note",
+                    "This profile keeps its own look, so no other profile "
+                        + "can share it. To share a look, open a profile "
+                        + "that uses the shared one."
                 )
-            )
+            ]
         }
-        if follows[edited] == false {
-            result.append(
-                L(
-                    "looks.reach.not_this_note",
-                    "This profile has its own look, so a profile you "
-                        + "tick gets the shared look, not the one shown "
-                        + "here."
-                )
-            )
+        guard profiles.contains(where: { follows[$0] == false }) else {
+            return []
         }
-        return result
+        return [
+            L(
+                "looks.reach.replace_own_note",
+                "Ticking a profile with its own look replaces it with "
+                    + "the shared one."
+            )
+        ]
     }
 }

@@ -186,7 +186,7 @@ extension KiwiCore {
             },
             spaceModes: modes,
             settings: tiler.settings,
-            look: liveLookReference
+            look: lookReference(forNew: liveLookReference)
         )
     }
 

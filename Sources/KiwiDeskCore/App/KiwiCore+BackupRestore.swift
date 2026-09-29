@@ -102,9 +102,10 @@ extension KiwiCore {
         // arrangement surviving a confirmed replace, which is
         // exactly what the discard exists to prevent.
         discardSavedArrangement()
-        // Before the write, which stamps them (#1741).
+        // Before the write, which stamps them (#1741, #1752).
         if bundle.config != nil {
             takeRestoredAppWide(from: bundle)
+            takeRestoredSharedLook(from: bundle)
         }
         let outcome = try writeIncoming(bundle)
 

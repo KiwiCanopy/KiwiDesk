@@ -23,28 +23,33 @@ extension KiwiCore {
     /// Writes each switch `follows` names, and only those that
     /// changed: a profile going `own` freezes the look it wears NOW
     /// into its file, so nothing on screen moves; a profile going
-    /// shared keeps its copy, unread while it follows, and with no
-    /// shared look yet its look seeds one. Writes are non-adopting,
-    /// so reaching another profile never moves `currentName`; the
-    /// live profile, if reached, is re-applied (`LookReachTests`).
+    /// shared has its copy re-stamped to the shared look, and with no
+    /// shared look yet its look seeds one through the crossing's
+    /// election. Writes are non-adopting, so reaching another
+    /// profile never moves `currentName`; the live screen's look is
+    /// re-resolved, never the whole profile re-applied
+    /// (`LookReachTests`).
     /// Call it before any `gui.json` write of the same Save.
     public func saveLookReach(_ follows: [String: Bool]) throws {
-        var changedLive = false
-        for (name, follow) in follows {
+        for (name, follow) in follows.sorted(by: { $0.key < $1.key }) {
             let look: LookReference? = follow ? nil : .own
             var profile = try profiles.read(name: name)
             guard profile.look != look else { continue }
+            if look == nil, sharedLook == nil, isGuiManaged {
+                // No shared look yet: this one's look seeds it, and
+                // the election settles every other profile.
+                crossWith(LookBody(of: profile.settings))
+                profile = try profiles.read(name: name)
+                guard profile.look != look else { continue }
+            }
             if look == .own {
                 profile.settings = resolvedSettings(of: profile)
-            } else if sharedLookLedger.base == nil, isGuiManaged {
-                seedSharedLook(from: profile.settings)
+            } else {
+                profile.settings = wearingSharedLook(profile.settings)
             }
             profile.look = look
             try profiles.write(profile)
-            changedLive = changedLive || name == profiles.currentName
         }
-        if changedLive, let live = profiles.currentName {
-            reapplyIfInEffect(live)
-        }
+        reresolveLiveLook()
     }
 }

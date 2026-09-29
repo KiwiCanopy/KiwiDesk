@@ -203,9 +203,9 @@ extension KiwiCore {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
         eventLoop.ignoreRules = IgnoreRules([])
-        globalAppRuleBase = [:]
-        globalFloatRuleBase = []
-        globalIgnoreRuleBase = []
+        globalRuleBase.appRules = [:]
+        globalRuleBase.floatRules = []
+        globalRuleBase.ignoreRules = []
         // `init.lua`'s scroll_gesture verbs declare the base anew;
         // the load's tail configures the tap once.
         resetScrollGestureInputs()

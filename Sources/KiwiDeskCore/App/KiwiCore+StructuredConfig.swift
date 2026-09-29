@@ -150,9 +150,9 @@ extension KiwiCore {
         floatRules: [String],
         ignoreRules: [String]
     ) {
-        globalAppRuleBase = AppRuleOverride.normalized(appRules)
-        globalFloatRuleBase = FloatRules(floatRules).rawRules
-        globalIgnoreRuleBase = IgnoreRules(ignoreRules).rawRules
+        globalRuleBase.appRules = AppRuleOverride.normalized(appRules)
+        globalRuleBase.floatRules = FloatRules(floatRules).rawRules
+        globalRuleBase.ignoreRules = IgnoreRules(ignoreRules).rawRules
     }
 
     /// Re-resolves the window rules and the shortcuts from the
@@ -190,19 +190,19 @@ extension KiwiCore {
         ignoreRules: RuleListOverride?
     ) {
         setResolvedAppRules(
-            base: globalAppRuleBase,
+            base: globalRuleBase.appRules,
             override: appRules
         )
         let resolvedFloat =
             floatRules?.resolved(
-                onto: globalFloatRuleBase,
+                onto: globalRuleBase.floatRules,
                 normalizing: FloatRules.normalizedRule
-            ) ?? globalFloatRuleBase
+            ) ?? globalRuleBase.floatRules
         let resolvedIgnore =
             ignoreRules?.resolved(
-                onto: globalIgnoreRuleBase,
+                onto: globalRuleBase.ignoreRules,
                 normalizing: IgnoreRules.normalizedRule
-            ) ?? globalIgnoreRuleBase
+            ) ?? globalRuleBase.ignoreRules
         eventLoop.floatRules = FloatRules(resolvedFloat)
         eventLoop.ignoreRules = IgnoreRules(resolvedIgnore)
         if mayReconcileWindowRulesNow {

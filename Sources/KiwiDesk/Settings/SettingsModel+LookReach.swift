@@ -57,7 +57,8 @@ extension SettingsModel {
     /// whose switch a Save would change — every reason the pill
     /// shows owes a row (gui.md).
     func lookReachDiffRows() -> [SettingsDiffRow] {
-        lookReachEdits.keys.sorted().compactMap { profile in
+        let edited = editingProfile ?? activeProfile ?? ""
+        return lookReachEdits.keys.sorted().compactMap { profile in
             guard let follows = lookReachEdits[profile] else {
                 return nil
             }
@@ -67,10 +68,14 @@ extension SettingsModel {
                 label: profile,
                 note: follows
                     ? L(
-                        "looks.reach.diff.shared",
-                        "Uses the shared look"
+                        "looks.reach.diff.shares_with",
+                        "Shares the look with %1$@",
+                        edited
                     )
-                    : L("looks.reach.diff.own", "Gets its own look")
+                    : L(
+                        "looks.reach.diff.keeps",
+                        "Keeps its look as it was before these changes"
+                    )
             )
         }
     }

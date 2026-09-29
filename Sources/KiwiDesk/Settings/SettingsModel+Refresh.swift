@@ -6,6 +6,9 @@ extension SettingsModel {
     func refreshProfiles() {
         profiles = core.profiles.list()
         guiManaged = core.isGuiManaged
+        // The switches too (#1752): a Keep, a crossing or a switch
+        // outside Settings moves them; the draft's ticks stay.
+        lookReachStored = core.lookReach()
         sidecarExists = core.guiConfigStore.exists
         activeProfile = core.profiles.currentName
         activeStandard = core.profiles.currentStandard

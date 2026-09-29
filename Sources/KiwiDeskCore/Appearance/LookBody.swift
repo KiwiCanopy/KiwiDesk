@@ -41,10 +41,3 @@ public struct LookBody: Codable, Sendable, Equatable {
         case colors
     }
 }
-
-extension ShelfLook {
-    /// This look without its name.
-    public var body: LookBody {
-        LookBody(style: style, colors: colors)
-    }
-}

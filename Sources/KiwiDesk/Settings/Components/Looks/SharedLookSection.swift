@@ -20,9 +20,9 @@ struct SharedLookSection: View {
             SettingsCatalog.colors.sharedLook,
             caption: L(
                 "looks.shared.caption",
-                "A look is the bars' colors and styling, Liquid Glass, "
-                    + "the focus border's shape and the window gaps. "
-                    + "Animations stay with each profile."
+                "A look is every color, the bars' styling, Liquid "
+                    + "Glass, the focus border's shape and the window "
+                    + "gaps. Animations stay with each profile."
             )
         ) {
             SettingsRowShape {
@@ -50,11 +50,11 @@ struct SharedLookSection: View {
     /// Why the control greys: a Lua-owned config sets its own look,
     /// and a built-in layout has no file to own one in.
     private var greyReason: String? {
-        if !model.core.isGuiManaged {
+        if !model.guiManaged {
             return L(
-                "general.app_wide.lua_owned",
-                "Your configuration is written in init.lua, so set "
-                    + "this there."
+                "looks.reach.lua_owned",
+                "Your configuration is written in init.lua, which sets "
+                    + "the look itself."
             )
         }
         guard edited == nil else { return nil }

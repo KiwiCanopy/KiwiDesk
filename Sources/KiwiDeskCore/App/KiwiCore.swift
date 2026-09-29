@@ -40,22 +40,18 @@ public final class KiwiCore {
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
 
-    /// Effective structured keybinding sources currently installed in `keys`.
-    /// Kept so a recorder-only live edit can capture an in-memory rollback
-    /// point without reading gui.json or a profile again (#123 review).
+    /// Effective structured keybinding sources currently
+    /// installed in `keys`. Kept so a recorder-only live edit
+    /// can capture an in-memory rollback point without reading
+    /// gui.json or a profile again (#123 review).
     var appliedStructuredLayers: [KeyLayer]?
     /// Changes whenever `loadConfig()` replaces the Lua VM and
     /// hotkey table. Recorder snapshots are valid only within
     /// the generation that captured them.
     var keybindingRuntimeGeneration: UInt64 = 0
 
-    /// Global window-rule bases captured from the active config
-    /// owner before any profile sparse diff is applied. Required
-    /// for Lua-managed profiles: live state holds the effective
-    /// rules and therefore cannot serve as the next profile's base.
-    var globalAppRuleBase: [String: SpaceID] = [:]
-    var globalFloatRuleBase: [String] = []
-    var globalIgnoreRuleBase: [String] = []
+    /// The global window-rule bases (`GlobalRuleBase`).
+    var globalRuleBase = GlobalRuleBase()
     /// `loadConfig` installs several candidate rule states before
     /// the active native-Space binding is known. Suppress their AX
     /// reconciles and run one pass after the final profile wins.
@@ -277,8 +273,9 @@ public final class KiwiCore {
     /// instead of minting another. Session state, retired where a
     /// declaration adopts it (`retireHealedSpaces`) and by the #634 reset.
     var healedSpaces: [String: SpaceID] = [:]
-    /// No profile carries these (`+AppWide` #1741, `+SharedLook` #1752).
+    /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
     var appWideLedger = AppWideLedger()
+    /// The shared look's state (#1752, `KiwiCore+SharedLook`).
     var sharedLookLedger = SharedLookLedger()
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and

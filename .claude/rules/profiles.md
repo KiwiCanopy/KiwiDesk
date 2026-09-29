@@ -1160,7 +1160,15 @@ of the same Save (`LookReachTests`). A follower's look itself is
 the shared one, so a write of it lands in `gui.json` through the
 one `recordLookWrite` door (`SharedLookWriteTests`), and a
 reader of a stored profile's settings for use takes
-`resolvedSettings(of:)` rather than `profile.settings`.
+`resolvedSettings(of:)` rather than `profile.settings`
+(`SharedLookSeamTests`). Every change of the shared look lands
+through the one `landSharedLook` — `gui.json` first, then each
+follower's file copy re-stamped, then the live look re-resolved,
+never the whole profile re-applied (#1179) — so a write beside it
+leaves a copy or the screen stale (`SharedLookLandTests`). A
+restore takes the bundle's shared look through
+`takeRestoredSharedLook` ahead of its `gui.json` write, as #1741's
+app-wide values do.
 
 **The tour's shelf paint is a further write, and it is not Keep
 (#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
