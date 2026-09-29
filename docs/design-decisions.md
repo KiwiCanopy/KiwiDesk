@@ -11649,6 +11649,17 @@ thumbnail's scale a few points draw as nothing, and a caption that
 names a fact the frame does not draw is the schematic rule's own
 defect (`LayoutSchematicCaptionTests`).
 
+**The Space Bar always groups; there is no knob.** (#293.)
+Adjacent same-app runs collapse into one glyph + count badge
+unconditionally — unlike the App Bar's `group_adjacent_windows`
+toggle. The glyph span depends on grouping running **first**: an
+ungrouped mode would burn the span on duplicates while conveying
+less. That ordering is the settled part; the span's *value* is a
+knob (`space_bar.set_glyph_span`, default 5, range 1–12, #376,
+#1528) — group first, then span, whatever the span is. A `+n`
+badge counts hidden **windows**, not slots — the same unit as the
+per-glyph count badges and the item's accessibility label.
+
 :::unreleased
 **The Space Bar groups only on request.** (#293, #1725, owner
 ruling 2026-09-28.) `space_bar.set_group_adjacent_windows`, the
@@ -11666,8 +11677,12 @@ A `+n` badge counts hidden **windows**, not slots — the same unit
 as the per-glyph count badges and the item's accessibility label.
 
 A profile saved before the setting existed keeps grouping: its
-Space Bar always grouped, and an upgrade does not change what a
-user's bar draws (`SpaceBarGroupingMigrationTests`).
+Space Bar always grouped, and a saved setup's bar should not
+change under an upgrade (`SpaceBarGroupingMigrationTests`). The
+crossing reaches what a file stores — profiles and a backup's
+inline profiles. A built-in layout has no file and an `init.lua`
+is outside `ConfigMigration`'s charter, so both take the new
+default: the one glyph per window a fresh setup draws.
 :::
 
 :::unreleased

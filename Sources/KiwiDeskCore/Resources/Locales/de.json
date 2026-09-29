@@ -1433,7 +1433,7 @@
   "space_bar.glyph_gap": "Glyphenabstand",
   "space_bar.glyph_gap.help": "Abstand zwischen den App-Glyphen innerhalb eines Space; 0 setzt sie direkt nebeneinander.",
   "space_bar.glyph_span": "Glyphen pro Space",
-  "space_bar.glyph_span.help": "Wie viele App-Glyphen ein Space rund um seine fokussierte App anzeigt; der Rest liegt auf beiden Seiten hinter einem +n, und an jedem Ende der Reihe passt eine Glyphe mehr hinein. Benachbarte Fenster derselben App zählen als eine Glyphe.",
+  "space_bar.glyph_span.help": "Wie viele App-Glyphen ein Space rund um seine fokussierte App anzeigt; der Rest liegt auf beiden Seiten hinter einem +n, und an jedem Ende der Reihe passt eine Glyphe mehr hinein. Bei aktiver Gruppierung zählen benachbarte Fenster derselben App als eine Glyphe.",
   "space_bar.group_adjacent": "Benachbarte Fenster derselben App gruppieren",
   "space_bar.group_adjacent.help": "Führt benachbarte Fenster derselben App in einem Space zu einer Glyphe mit Zähler-Badge zusammen, statt jedem Fenster eine eigene Glyphe zu geben.",
   "space_bar.hide_empty": "Leere Spaces ausblenden",

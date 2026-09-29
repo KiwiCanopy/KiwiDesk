@@ -18,7 +18,7 @@ extension APIReference {
             .choice("edge", AppBarEdge.self)
         ),
         "set_glyph_span": APIRecord(
-            "Sets how many app-group glyphs a Space item shows "
+            "Sets how many glyphs a Space item shows "
                 + "around its focus.",
             .integer("glyphs")
         ),

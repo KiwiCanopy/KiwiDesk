@@ -14,7 +14,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// same edge shares one shelf with it; on another, each bar
     /// is its own (#1731).
     public var edge: AppBarEdge = .top
-    /// Max app-group glyphs per Space item before "+n" badge (#376).
+    /// Max glyphs per Space item before "+n" badge (#376).
     /// Default 5.
     public var glyphSpan = 5
     /// Whether adjacent windows of one app share a glyph and a

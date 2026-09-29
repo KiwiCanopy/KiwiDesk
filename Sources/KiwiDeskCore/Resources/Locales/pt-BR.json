@@ -1433,7 +1433,7 @@
   "space_bar.glyph_gap": "Espaçamento entre glifos",
   "space_bar.glyph_gap.help": "Distância entre os glifos de app dentro de um espaço; 0 os coloca lado a lado.",
   "space_bar.glyph_span": "Glifos por espaço",
-  "space_bar.glyph_span.help": "Quantos glifos de app um espaço mostra ao redor do app com foco; os demais ficam atrás de um +n de cada lado, e em cada ponta da fileira cabe mais um glifo. Janelas vizinhas do mesmo app contam como um único glifo.",
+  "space_bar.glyph_span.help": "Quantos glifos de app um espaço mostra ao redor do app com foco; os demais ficam atrás de um +n de cada lado, e em cada ponta da fileira cabe mais um glifo. Com o agrupamento ativado, janelas vizinhas do mesmo app contam como um único glifo.",
   "space_bar.group_adjacent": "Agrupar janelas vizinhas do mesmo app",
   "space_bar.group_adjacent.help": "Funde as janelas vizinhas do mesmo app em um espaço em um único glifo, marcado com um selo de contagem, em vez de um glifo para cada.",
   "space_bar.hide_empty": "Ocultar espaços vazios",

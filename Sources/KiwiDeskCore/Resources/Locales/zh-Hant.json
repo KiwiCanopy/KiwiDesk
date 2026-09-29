@@ -1433,7 +1433,7 @@
   "space_bar.glyph_gap": "圖形間距",
   "space_bar.glyph_gap.help": "空間內 App 圖形之間的距離；設為 0 時緊鄰排列。",
   "space_bar.glyph_span": "每個空間的圖形數",
-  "space_bar.glyph_span.help": "一個空間會在焦點 App 周圍顯示多少個 App 圖形；其餘的收在兩側的 +n 後面，而在這一列的兩端，還能多放一個圖形。同一個 App 的相鄰視窗算作一個圖形。",
+  "space_bar.glyph_span.help": "一個空間會在焦點 App 周圍顯示多少個 App 圖形；其餘的收在兩側的 +n 後面，而在這一列的兩端，還能多放一個圖形。開啟分組時，同一個 App 的相鄰視窗算作一個圖形。",
   "space_bar.group_adjacent": "將相鄰的同一 App 視窗歸為一組",
   "space_bar.group_adjacent.help": "將空間中同一 App 的相鄰視窗合併為單一圖形，並加上計數徽章，而不是各顯示一個圖形。",
   "space_bar.hide_empty": "隱藏空的空間",

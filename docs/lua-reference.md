@@ -2523,14 +2523,11 @@ scroll.set_app_bar_content("icon")  -- override for scrolling
 
 ## Space Bar
 
-:::unreleased
 The Space Bar (#293) lists, per display, that display's Spaces
 in profile order: each item shows the Space's identifier (its
 configured icon, else the plain digits of a numeric id or a
 two-letter monogram of a named one), a divider, then a glyph per
-window. With
-[`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
-on, adjacent windows of the same app share one glyph with a
+window. Adjacent windows of the same app share one glyph with a
 count badge (non-adjacent duplicates stay separate); past the
 glyph span ([`space_bar.set_glyph_span`](#space_barset_glyph_span))
 the rest fold into a `+n` badge on each side, counting the hidden
@@ -2539,6 +2536,11 @@ a Space switches to it, and a group holding the focused window
 stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
 what a click on a glyph does and the drag-onto-a-Space gesture.
+
+:::unreleased
+Adjacent windows share a glyph only while
+[`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
+is on; by default each window draws its own.
 :::
 
 The bar is layout-independent and sits on
@@ -2586,7 +2588,7 @@ space_bar.set_edge("left")
 **Expects:** an integer `1`–`12` (default `5`); out-of-range
 values clamp.
 
-**Does:** sets how many app-group glyphs a Space item shows
+**Does:** sets how many glyphs a Space item shows
 around its focused app — the Space's system focus while it is
 active, else the window it last focused. The rest sit behind a
 `+n` badge on each side, and at either end of the row the badge
