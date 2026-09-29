@@ -120,26 +120,33 @@ struct ScrollSpaceStepTests {
 
     @Test("a swipe steps one Space, against the fingers")
     func oneSpacePerSwipe() {
-        let (core, session) = makeCore()
+        let (core, session) = makeCore(shown: "1")
+        // Long swipes are the window step's alone (#1519 ruling):
+        // turned on, a long swipe still steps one Space.
+        var base = ScrollGestureBase.defaults
+        base.longSwipes = true
+        base.stepDistance = 10
+        core.applyScrollGestures(base: base, profile: nil)
         // Fingers left: content left, the NEXT Space comes in.
         swipe(core, session, dx: -80, events: 6)
-        #expect(shown(core) == "3")
-        swipe(core, session, dx: 80)
         #expect(shown(core) == "2")
+        swipe(core, session, dx: 80)
+        #expect(shown(core) == "1")
     }
 
     @Test("the glide after a lift never steps")
     func glideNeverCounts() {
         let (core, session) = makeCore(shown: "1")
         core.handleScrollSpaceStep(event(.began), session: session)
-        core.handleScrollSpaceStep(event(.changed, dx: -80), session: session)
+        // Too short to step: only the glide could carry it.
+        core.handleScrollSpaceStep(event(.changed, dx: -5), session: session)
         for _ in 0..<20 {
             core.handleScrollSpaceStep(
                 event(.changed, dx: -900, momentum: true),
                 session: session
             )
         }
-        #expect(shown(core) == "2")
+        #expect(shown(core) == "1")
     }
 
     @Test("a wheel steps once per notch clicked one at a time")
@@ -168,8 +175,11 @@ struct ScrollSpaceStepTests {
         #expect(shown(core) == "3")
         #expect(bumps == [.right])
         let (first, firstSession) = makeCore(shown: "1")
+        var firstBumps: [Direction] = []
+        first.borders.deadEndProbe = { firstBumps.append($1) }
         swipe(first, firstSession, dx: 80)
         #expect(shown(first) == "1")
+        #expect(firstBumps == [.left])
     }
 
     @Test("an empty Space at the end has no ring, and says nothing")

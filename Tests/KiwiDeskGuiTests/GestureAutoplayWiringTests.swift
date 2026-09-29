@@ -93,6 +93,9 @@ struct GestureAutoplayWiringTests {
             )
         )
         #expect(!expand.contains("onToggle"))
+        // Nor one hop away: only the disclosure writes `clicked`.
+        #expect(!expand.contains("clicked"))
+        #expect(source.components(separatedBy: "clicked").count == 3)
     }
 
     /// Per visit: armed only inside the click hook, gated on the
@@ -121,6 +124,8 @@ struct GestureAutoplayWiringTests {
         let appear = try #require(
             SourceScan.declarationBody(after: ".onAppear", in: entry)
         )
+        // Plays only while armed: the read gates the whole body.
+        #expect(appear.hasPrefix("guardplaysOnAppearelse{return}"))
         let spent = try #require(appear.range(of: "playsOnAppear=false"))
         let plays = try #require(appear.range(of: "autoplay()"))
         #expect(spent.lowerBound < plays.lowerBound)

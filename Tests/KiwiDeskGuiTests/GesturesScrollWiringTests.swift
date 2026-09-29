@@ -169,13 +169,16 @@ struct GesturesScrollWiringTests {
         )
         #expect(reveal.contains("model.nav.pendingReveal="))
         #expect(reveal.contains("anchor:control.id"))
-        // The row the other Go to lands on is anchored there.
-        #expect(
-            group.contains(
-                ".searchAnchored(SettingsCatalog.shortcuts.gestures"
-                    + ".children.scrollSpaceStep)"
+        // The rows each Go to lands on are anchored there.
+        for row in ["scrollSpaceStep", "scrollPan"] {
+            #expect(
+                group.contains(
+                    ".searchAnchored(SettingsCatalog.shortcuts.gestures"
+                        + ".children.\(row))"
+                ),
+                "\(row) has no anchor to land on"
             )
-        )
+        }
     }
 
     /// Only the other-gesture refusal carries the link, drawn
