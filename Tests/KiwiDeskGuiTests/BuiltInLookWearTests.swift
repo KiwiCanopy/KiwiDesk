@@ -13,9 +13,10 @@ import Testing
 struct BuiltInLookWearTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
-    /// File → how its read of a built-in's settings wears the look.
+    /// Path under `Sources/KiwiDesk` → how its read of a built-in's
+    /// settings wears the look.
     private static let allowed: [String: String] = [
-        "PresetPreviewSheet.swift":
+        "Settings/Components/Profiles/PresetPreviewSheet.swift":
             "`drawnSettings` wears the handed look, pinned below"
     ]
 
@@ -97,15 +98,16 @@ struct BuiltInLookWearTests {
     /// the look and is given its reason above.
     @Test("every GUI read of a built-in's settings is registered")
     func everyReadIsRegistered() throws {
-        let files = try SourceScan.swiftSources(
-            under: Self.root.appendingPathComponent("Sources/KiwiDesk")
-        )
+        let gui = Self.root.appendingPathComponent("Sources/KiwiDesk")
+        let files = try SourceScan.swiftSources(under: gui)
         #expect(!files.isEmpty)
         var readers: Set<String> = []
         for file in files {
             let text = try SourceScan.strippedSource(at: file)
             if text.firstMatch(of: Self.read) != nil {
-                readers.insert(file.lastPathComponent)
+                readers.insert(
+                    String(file.path.dropFirst(gui.path.count + 1))
+                )
             }
         }
         #expect(readers == Set(Self.allowed.keys))
