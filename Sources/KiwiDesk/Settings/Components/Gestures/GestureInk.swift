@@ -81,6 +81,15 @@ struct GestureInk {
             )
     }
 
+    /// That outline alone, over an item already drawn, so a
+    /// picture can hand it from one item to the next.
+    func activeRing(_ rect: CGRect) -> some View {
+        RoundedRectangle(cornerRadius: 3)
+            .strokeBorder(accent, lineWidth: 1.2)
+            .frame(width: rect.width, height: rect.height)
+            .offset(x: rect.minX, y: rect.minY)
+    }
+
     /// The pointer, its tip at `point`.
     func pointer(at point: CGPoint) -> some View {
         Image(systemName: "cursorarrow")

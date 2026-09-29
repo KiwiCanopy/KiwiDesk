@@ -13,6 +13,9 @@ struct LinkedCaption: NSViewRepresentable {
     let linkTitle: String
     let trailing: String
     let navigate: () -> Void
+    /// VoiceOver's name for the link where its drawn title alone
+    /// names nothing ("Go to").
+    var spokenLink: String?
     var pointSize: CGFloat = NSFont.preferredFont(
         forTextStyle: .caption1
     ).pointSize
@@ -35,7 +38,7 @@ struct LinkedCaption: NSViewRepresentable {
         context: Context
     ) {
         view.onLink = navigate
-        view.linkLabel = linkTitle
+        view.linkLabel = spokenLink ?? linkTitle
         view.isLive = isEnabled
         view.restingInk = ink
         view.setSentence(sentence, linkRange: linkRange)

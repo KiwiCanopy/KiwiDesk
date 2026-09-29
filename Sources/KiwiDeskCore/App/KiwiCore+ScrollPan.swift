@@ -11,14 +11,15 @@ final class ScrollPanSession {
     var spaceAt: @MainActor (CGPoint, StateCoordinator) -> SpaceID? = {
         point,
         state in
+        display(at: point).flatMap(state.workspaces.activeSpace(on:))
+    }
+
+    /// The display whose whole screen holds a point (AX space) —
+    /// the one lookup both scroll gestures take (#1519).
+    static func display(at point: CGPoint) -> DisplayID? {
         let cocoa = GeometryUtils.axPoint(point)
-        guard
-            let screen = NSScreen.screens.first(where: {
-                $0.frame.contains(cocoa)
-            }),
-            let display = screen.kiwiDisplay?.id
-        else { return nil }
-        return state.workspaces.activeSpace(on: display)
+        return NSScreen.screens.first { $0.frame.contains(cocoa) }?
+            .kiwiDisplay?.id
     }
 
     fileprivate var space: SpaceID?

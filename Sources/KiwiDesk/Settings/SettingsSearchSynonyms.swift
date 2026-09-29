@@ -41,6 +41,13 @@ enum SettingsSearchSynonyms {
         // column scroll, and the words a mouse user searches.
         case .shortcuts(.scrollPan):
             return ["pan", "swipe", "wheel", "modifier", "gesture"]
+        // #1519: the words for a Desktop swipe, and macOS's own
+        // name for a Space.
+        case .shortcuts(.scrollSpaceStep):
+            return [
+                "space", "desktop", "switch", "swipe", "wheel",
+                "modifier", "gesture",
+            ]
         case .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse):
             // The rows are labelled by their input; the setting's

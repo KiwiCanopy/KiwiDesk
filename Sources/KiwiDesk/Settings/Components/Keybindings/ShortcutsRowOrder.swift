@@ -16,6 +16,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.scrollPan),
         .shortcuts(.scrollLongSwipes),
         .shortcuts(.scrollStepDistance),
+        .shortcuts(.scrollSpaceStep),
         .shortcuts(.scrollNaturalTrackpad),
         .shortcuts(.scrollNaturalMouse),
         .behaviour(.mouseResize),

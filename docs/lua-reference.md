@@ -3376,6 +3376,16 @@ follows KiwiDesk's own
 [Natural scrolling](#scroll_gestureset_natural_scrolling), per
 input, whatever macOS's is set to.
 
+Hold **⌃⌥⌘** (the default;
+[`set_space_step`](#scroll_gestureset_space_step) changes it) and
+scroll to switch to the next or previous Space on the screen under
+the pointer, in that screen's Space order — the Space Bar's, empty
+Spaces included. A swipe steps one Space, and so does a notch of a
+mouse wheel; a fast roll or a free-spinning wheel steps one for the
+whole burst, and each notch counts again once the wheel pauses
+between notches. It stops at the first and last Space rather than
+wrapping, and the pointer does not move.
+
 The keys must be exactly the ones set: ⌃⌥⌘ + scroll is not
 ⌃⌥ + scroll. While they are held, KiwiDesk takes the scroll on
 every Space, so the window under the pointer does not scroll; a
@@ -3391,8 +3401,8 @@ profile starts with. A profile file may carry a sparse
 single-modifier chord in either file turns that gesture off, a
 `space_step` equal to `pan` turns the Space step off, and a
 `step_distance` outside 10–1000 is clamped to the range. In the
-Settings app all but `space_step` are the **Scroll gestures**
-group under **Shortcuts & Gestures ▸ Mouse & trackpad**, where
+Settings app they are the **Scroll gestures** group under
+**Shortcuts & Gestures ▸ Mouse & trackpad**, where
 each row's **Applies to** checklist writes the base or chosen
 profiles' overrides.
 
@@ -3429,20 +3439,18 @@ scroll_gesture.set_pan("")   -- off
 :::unreleased
 **Expects:** modifiers, as for
 [`set_pan`](#scroll_gestureset_pan) (default
-`"control+option+command"`); `""` frees the chord.
+`"control+option+command"`); `""` turns the gesture off.
 
-**Does:** reserves a chord for stepping between Spaces, which is
-not built yet
-([#1519](https://github.com/KiwiCanopy/KiwiDesk/issues/1519)).
-No gesture reads it, so a scroll with these keys still reaches
-the window; `set_pan` cannot take it. It fails on the same
-chords `set_pan` does, with the pan's chord in place of its
-own.
+**Does:** sets the keys held with a scroll to step between the
+Spaces of the screen under the pointer. It fails on the same
+chords `set_pan` does, with the pan's chord in place of its own;
+`set_pan` cannot take this one.
 
 **Example:**
 
 ```lua
-scroll_gesture.set_space_step("")   -- free ⌃⌥⌘ for set_pan
+scroll_gesture.set_space_step("control+option+shift")
+scroll_gesture.set_space_step("")   -- off
 ```
 :::
 

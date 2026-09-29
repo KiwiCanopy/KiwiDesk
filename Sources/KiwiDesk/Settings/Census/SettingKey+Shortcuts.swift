@@ -30,13 +30,12 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case advanced = "(rows) shortcuts.advanced"
     case `import` = "(action) shortcuts.import"
     case restoreDefaults = "(action) shortcuts.restore_defaults"
-    // The scroll gestures (#1656); ⌃⌥⌘'s row lands with #1519.
+    // The scroll gestures (#1656, #1519).
     case scrollPan = "config.scrollGesture.pan"
     case scrollLongSwipes = "config.scrollGesture.longSwipes"
     case scrollStepDistance = "config.scrollGesture.stepDistance"
     case scrollNaturalTrackpad = "config.scrollGesture.naturalTrackpad"
     case scrollNaturalMouse = "config.scrollGesture.naturalMouse"
-    /// Stored and reserved; its Settings row lands with #1519.
     case scrollSpaceStep = "config.scrollGesture.spaceStep"
 }
 
@@ -101,11 +100,10 @@ extension ShortcutsKey {
                 gate: .runtime(.luaImportAvailable)
             )
         case .scrollPan, .scrollLongSwipes, .scrollStepDistance,
-            .scrollNaturalTrackpad, .scrollNaturalMouse:
+            .scrollSpaceStep, .scrollNaturalTrackpad,
+            .scrollNaturalMouse:
             // The Mouse & trackpad drawer's first group (#1656).
             return .row(.shortcuts, .gestures, .showMore)
-        case .scrollSpaceStep:
-            return .luaOnly
         case .restoreDefaults:
             // Surfaced at rest when unseeded defaults are missing.
             return .row(
@@ -170,7 +168,7 @@ extension ShortcutsKey {
         case .scrollNaturalMouse:
             return .text("shortcuts.gestures.scroll.mouse")
         case .scrollSpaceStep:
-            return .none
+            return .text("shortcuts.gestures.scroll.space_step")
         }
     }
 }

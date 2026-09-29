@@ -3,11 +3,12 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Mouse & trackpad ▸ Scroll gestures (#1656): the group leads the
-/// drawer, the recorder's refusal is Core's, the travel field
-/// greys while the box is off, and every value row carries its
-/// "Applies to" column.
-@Suite("Scroll gestures group wiring (#1656)")
+/// Mouse & trackpad ▸ Scroll gestures (#1656, #1519): the group
+/// leads the drawer, the recorder's refusal is Core's, the travel
+/// field greys while the box is off, every value row carries its
+/// "Applies to" column, and each recorder's Go to reveals the
+/// other's row.
+@Suite("Scroll gestures group wiring (#1656, #1519)")
 struct GesturesScrollWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let dir = "Sources/KiwiDesk/Settings/Components/Gestures/"
@@ -91,7 +92,7 @@ struct GesturesScrollWiringTests {
         let group = try Self.source("GesturesScrollEntries.swift")
         for field in [
             "reachRow(.pan)", "reachRow(.longSwipes)",
-            "reachRow(.stepDistance)",
+            "reachRow(.stepDistance)", "reachRow(.spaceStep)",
         ] {
             #expect(group.contains(field), "\(field) has no column")
         }
@@ -109,5 +110,87 @@ struct GesturesScrollWiringTests {
         )
         #expect(natural.contains("reachRow(field)"))
         #expect(group.contains("family: .scroll"))
+    }
+
+    /// The ⌃⌥⌘ entry follows the ⌃⌥ one's rows and precedes the
+    /// Natural rows both gestures share.
+    @Test("the Space step entry sits between the pan and Natural rows")
+    func spaceStepPlacement() throws {
+        let group = Self.squash(
+            try Self.source("GesturesScrollEntries.swift")
+        )
+        let body = try #require(group.range(of: "varbody:someView{"))
+        let travel = try #require(
+            group.range(
+                of: "reachRow(.stepDistance)",
+                range: body.upperBound..<group.endIndex
+            )
+        )
+        let step = try #require(
+            group.range(
+                of: "spaceStepEntry",
+                range: travel.upperBound..<group.endIndex
+            )
+        )
+        let natural = try #require(
+            group.range(of: "naturalRow(.naturalTrackpad,")
+        )
+        #expect(step.lowerBound < natural.lowerBound)
+    }
+
+    /// Each recorder refuses the OTHER gesture's chord and its Go
+    /// to reveals that gesture's row, never its own.
+    @Test("each recorder's Go to reveals the other row")
+    func goToCrosses() throws {
+        let group = Self.squash(
+            try Self.source("GesturesScrollEntries.swift")
+        )
+        #expect(
+            group.contains(
+                "other:gestures.spaceStep,otherGesture:.step,"
+                    + "goToOther:{reveal(Self.controls.scrollSpaceStep)}"
+            )
+        )
+        #expect(
+            group.contains(
+                "other:gestures.pan,otherGesture:.pan,"
+                    + "goToOther:{reveal(Self.controls.scrollPan)}"
+            )
+        )
+        let reveal = try #require(
+            SourceScan.declarationBody(
+                after: "private func reveal(",
+                in: try Self.source("GesturesScrollEntries.swift")
+            )
+        )
+        #expect(Self.squash(reveal).contains("model.nav.pendingReveal="))
+        #expect(Self.squash(reveal).contains("anchor:control.id"))
+        // The row the other Go to lands on is anchored there.
+        #expect(
+            group.contains(
+                ".searchAnchored(SettingsCatalog.shortcuts.gestures"
+                    + ".children.scrollSpaceStep)"
+            )
+        )
+    }
+
+    /// Only the other-gesture refusal carries the link, drawn
+    /// through `LinkedCaption` at the frame's slot.
+    @Test("the other gesture's refusal draws Go to at its slot")
+    func refusalLinks() throws {
+        let field = try Self.source("ScrollChordRecorderField.swift")
+        let caption = Self.squash(
+            try #require(
+                SourceScan.declarationBody(
+                    after: "private func refusalCaption(",
+                    in: field
+                )
+            )
+        )
+        #expect(caption.contains("ifcase.otherGesture=refusal,letgoToOther"))
+        #expect(
+            caption.contains("CrossReferenceRow.split(Self.frame(refusal))")
+        )
+        #expect(caption.contains("navigate:goToOther"))
     }
 }

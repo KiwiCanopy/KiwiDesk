@@ -9705,16 +9705,24 @@ video cannot follow the user's palette or appearance, cannot be
 localized, and goes stale on the next shelf redesign; the drawing
 is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
-only while pointed at, so the page never moves on its own.
+while pointed at.
 
 :::unreleased
-The rule's other exception, a layout thumbnail that is read
-rather than compared (▸ Navigation & saving), also plays once as
-it appears, and the difference is the reader. The tour and the
-preset preview are opened in order to be read, so a story
-playing there is the content arriving; this page is a reference
-consulted in the middle of something else, where a gesture
-playing unasked would be motion no one came for.
+When the user's own click opens the card, its first picture also
+plays once and rests (owner ruling 2026-09-29), and the
+difference from the rest of this page is the reader. The rule's
+other exception, a layout thumbnail that is read rather than
+compared (▸ Navigation & saving), plays once as it appears
+because the tour and the preset preview are opened in order to
+be read. Opening this card is the same kind of act — a request to
+read what is inside — so one picture playing is the content
+arriving, and it tells the user the pictures move. It stays one
+picture: the card is still a reference consulted in the middle of
+something else, and a column of gestures playing in turn would be
+motion no one came for. So it plays at most once per visit, only
+on the click — a search hit, Go to or a diff jump opens the card
+to reach one row, whose wash is the motion that answers them —
+and never under Reduce Motion.
 :::
 
 **An entry lands with its feature, and greys where its surface is
@@ -9850,8 +9858,37 @@ whichever gesture comes first in the tap's order. The recorder and `set_pan`
 refuse the Space step's chord for that reason, and
 `set_space_step` refuses the pan's. Where a file still gives
 both the same chord, the pan keeps it and the Space step is
-off: the Space step is not built yet, so the pan is the only
-gesture a shared chord could reach.
+off: a file sharing one chord was written before the Space step
+existed, so it was written for the pan. The refusal under either
+recorder offers **Go to** and nothing else — the other gesture's
+row is where the user decides which of the two gives the keys
+up.
+
+**⌃⌥⌘ + scroll steps through the Space order of the screen under
+the pointer, one Space per swipe or notch** (#1519, owner and
+ui-designer rulings 2026-09-28/29). The order is the Space Bar's,
+empty Spaces included, and never the visit history #1655
+proposes: an order the user can see on the bar is one they can
+aim at, and `hide_empty` is a display setting, which must not
+change what a gesture reaches — the Space landed on shows,
+because the bar always draws the current one. It stops at the
+first and last Space, as macOS's own Desktop swipe does, and a
+wrap would only make an overshoot worse. There is no long-swipe
+option: a Space switch redraws the whole screen, so counting
+distance would repaint it several times for one hand.
+
+**A wheel steps once per notch, and a spinning wheel once per
+spin.** A free-spinning wheel reports a burst of notches after a
+single flick, and one per notch would carry it to the last
+Space. So a notch closer than 120 ms to the previous one in the
+same direction steps nothing, and the wheel re-arms after that
+quiet or when it turns the other way: notches clicked one at a
+time each step, while a fast roll or a spin steps once, which is
+what a trackpad's one-per-swipe already does. The rule reads the
+hand's spacing on the tap's own clock, never the main actor's,
+where a busy switch would squash deliberate notches into a
+burst. The number is provisional until a device logs notch
+intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 :::
 
 ### Overrides & appearance

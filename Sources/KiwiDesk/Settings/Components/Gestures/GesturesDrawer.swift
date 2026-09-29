@@ -6,13 +6,18 @@ import SwiftUI
 /// header, so nothing here reads as per-layer; a collapsible
 /// section card (#1741), collapsed on every visit. An entry lands
 /// with its feature, never before, and one whose surface is off
-/// greys with a pointer to where it turns on. It mounts inside the
-/// section's `keybindingLayerName` scope, so a gesture recorder
-/// (#1656, #1519) must never read that value: a gesture modifier
+/// greys with a pointer to where it turns on. The user's own click
+/// open plays the first picture once per visit (owner ruling
+/// 2026-09-29); a search or Go to opens it without. It mounts
+/// inside the section's `keybindingLayerName` scope, so a gesture
+/// recorder (#1656, #1519) must never read that value: a gesture modifier
 /// belongs to no layer.
 struct GesturesDrawer: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = false
+    /// Per visit, like `expanded`: the first click open plays.
+    @State private var played = false
+    @State private var autoplay = false
 
     private var settings: TilingSettings { model.config.settings }
 
@@ -20,7 +25,11 @@ struct GesturesDrawer: View {
         SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.gestures,
             isExpanded: $expanded,
-            summary: summary
+            summary: summary,
+            onToggle: { open in
+                autoplay = open && !played
+                if open { played = true }
+            }
         ) {
             VStack(alignment: .leading, spacing: 10) {
                 GestureGroupHeading(
@@ -29,7 +38,7 @@ struct GesturesDrawer: View {
                         "Scroll gestures — anywhere, holding a modifier"
                     )
                 )
-                GesturesScrollEntries(model: model)
+                GesturesScrollEntries(model: model, autoplay: autoplay)
                 GestureGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.windows",

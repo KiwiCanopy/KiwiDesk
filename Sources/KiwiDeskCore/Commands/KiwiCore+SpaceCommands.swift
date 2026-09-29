@@ -103,12 +103,19 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
+        switchSpace(to: SpaceID(raw), warp: true)
+        return .ok()
+    }
+
+    /// `focus_space`'s switch. `warp: false` is a pointer gesture's
+    /// (#1519): the pointer stays where the hand holds it.
+    func switchSpace(to space: SpaceID, warp: Bool) {
         // Who is frontmost BEFORE the switch: the settle uses it
         // to tell "the handoff's activate never landed" (#463)
         // apart from "the user moved on since".
         let priorFrontmost = frontmostPIDProvider?()
-        state.workspaces.activate(SpaceID(raw))
-        logSpaceContents(SpaceID(raw))
+        state.workspaces.activate(space)
+        logSpaceContents(space)
         spaceSwitchRetile()
         // Floats and sticky windows come back above the
         // tiled plane, then real (AX) focus lands on the
@@ -121,7 +128,7 @@ extension KiwiCore {
         // — and the forced retile above already assigned the
         // slot the warp targets.
         let next = resolveSpaceSwitchFocusTarget()
-        if let next {
+        if warp, let next {
             warpMouseToFocused(next)
         }
         raiseFloatsAndSticky(thenFocus: next)
@@ -130,10 +137,9 @@ extension KiwiCore {
         }
         emitSpaceChange()
         scheduleSpaceSettle(
-            SpaceID(raw),
+            space,
             priorFrontmost: priorFrontmost
         )
-        return .ok()
     }
 
     /// The ONE membership filing (#1150): add, the #1708 float
