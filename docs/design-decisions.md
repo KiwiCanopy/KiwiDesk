@@ -11226,10 +11226,10 @@ hand-edit JSON to get their profiles back is not a migration
 policy.
 
 :::unreleased
-When the whole content setting retired, one step dropping the
-stored `content` superseded the spelling rewrite: a key being
-deleted needs no spelling fixed first, and two crossings over one
-key are two chances to disagree about it.
+A key that is dropped takes one step whatever it held, and an
+earlier value rewrite of that key folds into it: a deleted key
+needs no spelling fixed first, and two crossings over one key
+are two chances to disagree about it.
 :::
 
 `Profile` and `GuiConfig` carry a `format` version integer (#902),
@@ -11839,9 +11839,9 @@ click targets, and it is wrong:
   always visible, in row order. A Space Bar glyph names an app
   and reaches a title only on hover or through a `+n` menu, so it
   tells apps apart and not the windows of one app.
-- **The two bars do not double up.** Where they share a shelf, the
-  Space Bar's front-app segment already stands down for the App
-  Bar.
+- **The two bars do not double up.** The Space Bar's front-app
+  segment stands down wherever an App Bar shows on the display,
+  so the focused window is never marked twice.
 - **Where it lands is the starter's to say, not the type's.** A
   default flip on the type changes what every sparsely-stored file
   means, so it owes a `ConfigMigration` (AGENTS.md §5); a seed in
@@ -12154,7 +12154,7 @@ earlier colour behind (`LookStoreTests`). **A look carries
 styling, never functionality** (owner, 2026-09-27): a field is styling
 if it changes how the same items look or where they sit, and
 functionality if it changes which items exist, what they show
-or say, or what they do — so App Bar content, Other Spaces and
+or say, or what they do — so the App Bar's grouping, Other Spaces and
 a bar's on/off never join, and a preview draws the user's own
 sections under the look. `LookKeys` is the register and
 classifies every field of the shelf, both bar styles, the

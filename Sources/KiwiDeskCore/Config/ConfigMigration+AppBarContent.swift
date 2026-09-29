@@ -4,8 +4,7 @@ import Foundation
 /// `AppBarContentMigrationTests`, `ConfigMigrationRoutingTests`):
 /// the App Bar always draws icon and title, so the stored key
 /// drops from the global `app_bar` and from each layout's
-/// `app_bar` override. One crossing, whatever the value — it
-/// supersedes the v0.9.7 `name` / `icon_and_name` rewrite, since
+/// `app_bar` override. One crossing per key, whatever the value:
 /// a dropped key needs no spelling fixed first.
 ///
 /// Like `resize.feedback`'s (#1255), this step changes no VALUE:
@@ -13,8 +12,8 @@ import Foundation
 /// ignored with or without this run. It ends the file in the new
 /// shape, since a dead entry left in a saved config reads as a
 /// choice somebody made. Reaches a profile's `settings` and a
-/// bundle's inline profiles; `gui.json` and the look and palette
-/// libraries never carried the key (`LookKeys` left it out).
+/// bundle's inline profiles — the readers
+/// `ConfigMigrationRoutingTests` counts.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps
     /// naming what it was written to name.

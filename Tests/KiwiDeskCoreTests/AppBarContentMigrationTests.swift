@@ -120,13 +120,16 @@ struct AppBarContentMigrationTests {
         #expect(migrated["format"] as? Int == SetupBundle.currentFormat)
     }
 
-    /// The textual edit is kept: the file loses exactly its
-    /// `content` lines and every other byte stays as written.
+    /// The textual edit itself, not the envelope: the fixture's
+    /// layout is what the tree fallback writes, so only a direct
+    /// call can tell the edit from the fallback.
     @Test("the drop removes only the retired lines")
     func dropIsSurgical() throws {
         let data = try profile(content: "icon", pretty: true)
         let out = try #require(
-            ConfigMigration.migratingRetiredAppBarContent(data)
+            ConfigMigration.surgicallyDroppedAppBarContent(
+                String(decoding: data, as: UTF8.self)
+            )
         )
         let lines = { (data: Data) in
             String(decoding: data, as: UTF8.self)

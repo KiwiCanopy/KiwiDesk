@@ -2404,7 +2404,6 @@ every layout's bar. Each layout decides whether it shows one and
 may override the App Bar's own fields for itself ([Per-Layout
 App Bar Overrides](#per-layout-app-bar-overrides)).
 
-:::unreleased
 Each item shows its window's icon and **title** — the window's
 own title, not its app name; on a `left` or `right` edge it shows
 the icon alone. The app name appears, never shortened, in two
@@ -2414,7 +2413,6 @@ places:
 - a window whose title is **empty** — some apps (Electron and
   WebKit ones especially) report no title until well after the
   window opens.
-:::
 
 ### app_bar.set_edge
 
