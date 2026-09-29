@@ -244,5 +244,6 @@ extension EventLoop {
             minimized: minimized,
             coalesceTabs: coalesceTabs && !recentSpaceSwitch
         )
+        retireShadowSuspects(pid: pid)
     }
 }

@@ -89,8 +89,12 @@ struct ProcessIdentityWiringTests {
     func parentActivationDefers() {
         let (loop, box) = makeLoop()
         box.logs = []
+        // The parent's own focused window is tracked: without the
+        // deferral the activation would report it.
+        loop.shadows.focusedWindow = { _ in WindowID(1) }
         loop.appActivated(app(parent), launchedAt: nil)
         #expect(loop.lastActivePid == parent)
+        #expect(box.focused.isEmpty)
         #expect(
             box.logs.contains {
                 $0.hasPrefix("activation: pid \(parent) runs beside")

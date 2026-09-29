@@ -179,6 +179,17 @@ extension EventLoop {
         return true
     }
 
+    /// Queues `pid` for the scheduled re-track outside the
+    /// transient ledger — a shadow candidate re-asks until its
+    /// host lists (#1785).
+    func queueRetrack(pid: pid_t) {
+        let wasIdle = pendingRetrack.isEmpty
+        pendingRetrack.insert(pid)
+        if wasIdle {
+            onTransientDrop()
+        }
+    }
+
     /// Hands the pids owed a re-track to the scheduled task and
     /// clears the queue (#675).
     func drainPendingRetrack() -> Set<pid_t> {

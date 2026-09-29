@@ -252,11 +252,70 @@ struct ShadowWindowTests {
         )
         loop.detach(pid: pid, restoreEnhancedUI: false)
         #expect(loop.hostOfShadow(twin.id, pid: pid) == twin.id)
+        #expect(loop.shadows.suspects.isEmpty)
         #expect(
             loop.shadowVerdict(elements[1], id: twin.id, pid: pid) == .shadow
         )
         loop.isRunning = true
+        loop.shadows.suspect(WindowID(9), pid: pid)
         loop.stop()
         #expect(loop.shadows.hosts.isEmpty)
+        #expect(loop.shadows.suspects.isEmpty)
+    }
+
+    @Test("a twin tracked before its host leaves as a hide, not a close")
+    func lateHostRetiresAsAHide() {
+        let host = traits(1, buttons: true, children: 6)
+        let twin = traits(2, buttons: false, children: 0)
+        let (loop, elements, _) = makeLoop([twin, host])
+        var hidden: [WindowID] = []
+        var destroyed = 0
+        loop.onEvent = { event in
+            switch event {
+            case .windowHidden(let id): hidden.append(id)
+            case .windowDestroyed: destroyed += 1
+            default: break
+            }
+        }
+        let all = elements
+        loop.axWindows = { _ in [all[0]] }
+        // Alone twice — the re-track spent — so it tracks.
+        #expect(
+            loop.shadowVerdict(elements[0], id: twin.id, pid: pid) == .deferred
+        )
+        #expect(
+            loop.shadowVerdict(elements[0], id: twin.id, pid: pid) == .window
+        )
+        loop.elements[pid] = [twin.id: elements[0]]
+        loop.retireShadowSuspects(pid: pid)
+        #expect(hidden.isEmpty)
+        // Its host lists: the reconcile's end hands it back.
+        loop.axWindows = { _ in all }
+        loop.retireShadowSuspects(pid: pid)
+        #expect(hidden == [twin.id])
+        #expect(destroyed == 0)
+        #expect(loop.elements[pid]?[twin.id] == nil)
+        #expect(loop.hostOfShadow(twin.id, pid: pid) == host.id)
+    }
+
+    @Test("a suspect that gains content stays a window")
+    func suspectWithContentStays() {
+        let host = traits(1, buttons: true, children: 6)
+        let lone = traits(2, buttons: false, children: 0)
+        let (loop, elements, _) = makeLoop([lone, host])
+        let all = elements
+        loop.axWindows = { _ in [all[0]] }
+        _ = loop.shadowVerdict(elements[0], id: lone.id, pid: pid)
+        #expect(
+            loop.shadowVerdict(elements[0], id: lone.id, pid: pid) == .window
+        )
+        loop.elements[pid] = [lone.id: elements[0]]
+        loop.shadows.childCount = { _ in 5 }
+        loop.axWindows = { _ in all }
+        var hidden = 0
+        loop.onEvent = { if case .windowHidden = $0 { hidden += 1 } }
+        loop.retireShadowSuspects(pid: pid)
+        #expect(hidden == 0)
+        #expect(loop.shadows.suspects[pid]?.isEmpty ?? true)
     }
 }
