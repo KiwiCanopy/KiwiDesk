@@ -195,6 +195,14 @@ KiwiDesk.move_to_space("mail")
 KiwiDesk.move_to_space(3)
 ```
 
+:::unreleased
+Both move verbs take an optional window id from
+[`get_state`](#get_state) after the space, and then move that
+window rather than the focused one:
+`KiwiDesk.move_to_space("mail", 4711)`. An id no managed window
+carries is refused.
+:::
+
 ### move_to_space_and_follow
 
 **Expects:** a space identifier.
@@ -3734,6 +3742,14 @@ identifier (a rare unbundled helper process) cannot be targeted
 by a rule.
 
 ## Making Windows Floating or Tiled
+
+:::unreleased
+`make_floating`, `make_tiled` and `toggle_floating` take an
+optional window id from [`get_state`](#get_state), and then act on
+that window rather than the focused one:
+`KiwiDesk.make_floating(4711)`. An id no managed window carries is
+refused.
+:::
 
 ### make_floating
 

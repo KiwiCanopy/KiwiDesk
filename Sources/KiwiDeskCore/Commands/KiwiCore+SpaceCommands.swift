@@ -182,11 +182,13 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
-        guard let focused = focusedWindowID else {
-            return .fail("no focused window")
+        let command = follow ? "move_to_space_and_follow" : "move_to_space"
+        switch commandTarget(command, args) {
+        case .refused(let response): return response
+        case .window(let window):
+            moveWindow(window, to: SpaceID(raw), follow: follow)
+            return .ok()
         }
-        moveWindow(focused, to: SpaceID(raw), follow: follow)
-        return .ok()
     }
 
     /// Relocates an explicit `window` into `target`. `follow`

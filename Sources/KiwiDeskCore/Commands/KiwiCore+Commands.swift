@@ -14,7 +14,7 @@ extension KiwiCore {
         // is issued while an ignored panel or unmanaged app holds
         // the foreground (#292). Inert until `start()` wires the
         // provider, so this never fires in unit tests.
-        if let denial = focusedCommandDenial(for: command) {
+        if let denial = focusedCommandDenial(for: command, args) {
             return denial
         }
         switch command {
@@ -43,13 +43,13 @@ extension KiwiCore {
         case "delete_space":
             return deleteSpace(args)
         case "make_floating":
-            return setFocusedFloating(true)
+            return setFloating(command, args, true)
         case "make_tiled":
-            return setFocusedFloating(false)
+            return setFloating(command, args, false)
         case "make_auto":
             return setFocusedAuto()
         case "toggle_floating":
-            return toggleFocusedFloating()
+            return toggleFloating(command, args)
         case "make_sticky":
             return setFocusedSticky(.global)
         case "make_display_sticky":
@@ -155,12 +155,23 @@ extension KiwiCore {
 
     // MARK: - Window state
 
-    private func setFocusedFloating(
+    /// `make_floating` / `make_tiled`: the named window, else the
+    /// focused one (#1518).
+    private func setFloating(
+        _ command: String,
+        _ args: [JSONValue],
         _ floating: Bool
     ) -> CommandResponse {
-        guard let focused = focusedWindowID else {
-            return .fail("no focused window")
+        switch commandTarget(command, args) {
+        case .refused(let response): return response
+        case .window(let window): return setFloating(window, floating)
         }
+    }
+
+    private func setFloating(
+        _ focused: WindowID,
+        _ floating: Bool
+    ) -> CommandResponse {
         // Snapshot before the flip: the placement fires only for
         // a window that was no EFFECTIVE float — a floating-mode
         // member's frame is already the user's (`EffectiveFloat`).
@@ -184,21 +195,25 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// `toggle_floating` (#221): flip the focused window between
+    /// `toggle_floating` (#221): flip the window between
     /// floating and tiled in one verb. Reads the window's own FLAG,
     /// ruled onto it in the `EffectiveFloat` roster (#1697), and
     /// writes the explicit opposite as a manual override — like
     /// `make_floating`/`make_tiled`, it never yields `auto` (that
     /// stays `make_auto`'s job), so the #164 tri-state is
     /// preserved by construction.
-    private func toggleFocusedFloating() -> CommandResponse {
-        guard
-            let focused = focusedWindowID,
-            let window = state.windows[focused]
-        else {
-            return .fail("no focused window")
+    private func toggleFloating(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        switch commandTarget(command, args) {
+        case .refused(let response): return response
+        case .window(let id):
+            guard let window = state.windows[id] else {
+                return .fail("no focused window")
+            }
+            return setFloating(id, !window.isFloating)
         }
-        return setFocusedFloating(!window.isFloating)
     }
 
     /// `make_sticky` / `make_display_sticky` / `make_unsticky`

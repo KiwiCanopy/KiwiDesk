@@ -75,6 +75,7 @@ struct CommandDispatchReachTests {
     static let argumentRefusals: [String: String] = [
         "unknown space: ": "a Space id no space carries",
         "unknown mode: ": "a layout mode name no case carries",
+        "unknown window: ": "a window id no tracked window carries",
     ]
 
     /// The one catalogued name `execute` never sees:
