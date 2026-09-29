@@ -6,13 +6,15 @@ extension AppBarItemView {
     /// background layers. The icon's dim is deliberately the full
     /// 0.4, NOT the Space Bar's 0.6 middle tier: a binary signal
     /// with no lower tier to collide with
-    /// (`BarAccent.activeUnfocusedAlpha`).
+    /// (`BarAccent.activeUnfocusedAlpha`). The group-count badge
+    /// dims with the item's focus, as a Space Bar badge does,
+    /// whatever the item draws — a glyph or title is tinted.
     func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
-        iconView.alphaValue =
-            isActive || isHovered
-            ? 1 : style.dimFactor
+        let alpha: CGFloat = isActive || isHovered ? 1 : style.dimFactor
+        iconView.alphaValue = alpha
+        badge.alphaValue = alpha
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()
