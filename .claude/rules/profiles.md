@@ -719,8 +719,8 @@ or value a look carries — any path in `LookKeys.all`, since
 #1752 any colour path in `ColorPaletteKeys.all`, and a field
 inside a stored value such as `gap.global`'s `{outer, inner}`
 (#1739) — owes the `ConfigMigration` crossing a stored value
-owes (§5), reaching `looks.json` and a bundle's looks — since
-`ShelfLook.apply` and `LookStore`'s filter skip a path they do
+owes (§5), reaching every home of a stored look named above — since
+`ShelfLook.apply` and `ShelfLook.admitted` skip a path they do
 not know, an unmigrated rename drops the user's styling
 silently. `LookKeysCensusTests` reds the rename; the migration
 crossing is review's.

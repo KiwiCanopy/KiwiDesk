@@ -33,3 +33,23 @@ public struct ShelfLook: Sendable, Equatable, Codable {
         case colors
     }
 }
+
+extension ShelfLook {
+    /// This look as every reader takes it — a file's, a backup's,
+    /// an import (#1752): styling keys outside `LookKeys` and
+    /// colours outside `ColorPaletteKeys` dropped, then the colours
+    /// completed over the shipped ones, so a colour path added
+    /// since the look was saved never leaves an earlier colour
+    /// behind when it is applied (`LookStoreTests`). A reader of a
+    /// stored look takes this door.
+    public var admitted: ShelfLook {
+        let style = Set(LookKeys.all)
+        let colors = Set(ColorPaletteKeys.all)
+        let known = self.colors.filter { colors.contains($0.key) }
+        return ShelfLook(
+            name: name,
+            style: self.style.filter { style.contains($0.key) },
+            colors: ColorPalette(name: "", colors: known).paintedColors
+        )
+    }
+}

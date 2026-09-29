@@ -17,6 +17,15 @@ extension SettingsModel {
         look.apply(to: &config.settings)
     }
 
+    /// Paints `colors` onto the draft — the "Keep previous colors"
+    /// tick's one write — and answers whether it left the draft
+    /// clean, `isDirty` being recomputed on the write (#1752).
+    @discardableResult
+    func paintColors(_ colors: [String: String]) -> Bool {
+        ColorPalette(name: "", colors: colors).apply(to: &config.settings)
+        return !isDirty
+    }
+
     /// Re-reads the user looks from the store.
     func refreshLooks() {
         userLooks = lookStore.userLooks()

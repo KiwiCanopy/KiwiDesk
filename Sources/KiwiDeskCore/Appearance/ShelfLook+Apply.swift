@@ -26,10 +26,10 @@ extension ShelfLook {
     public func isApplied(to settings: TilingSettings) -> Bool {
         guard isStyleApplied(to: settings) else { return false }
         // By parsed colour, the palette's rule: `#8db354` and
-        // `#8DB354FF` are one answer (`ColorPalette.sameColor`).
-        return colors.isEmpty
-            || ColorPalette(name: name, colors: colors)
-                .isApplied(to: settings)
+        // `#8DB354FF` are one answer (`ColorPalette.sameColor`); a
+        // look read through `admitted` carries every path.
+        return ColorPalette(name: name, colors: colors)
+            .isApplied(to: settings)
     }
 
     /// How far this look is live in `settings` (#1752): the one

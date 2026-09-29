@@ -22,7 +22,8 @@ public final class LookStore {
         fileURL = directory.appendingPathComponent("looks.json")
     }
 
-    /// Decodes the document, running `ConfigMigration` if needed.
+    /// Decodes the document, running `ConfigMigration` if needed;
+    /// every look it yields is `ShelfLook.admitted`.
     private func readDocument() throws -> LookDocument? {
         guard var data = try? Data(contentsOf: fileURL) else {
             return nil
@@ -37,7 +38,10 @@ public final class LookStore {
                 from: data
             )
         else { throw StoreError.unreadableLibrary }
-        return doc
+        return LookDocument(
+            format: doc.format,
+            looks: doc.looks.map(\.admitted)
+        )
     }
 
     /// User looks for mutating paths (throws on an unreadable library).
@@ -84,7 +88,7 @@ public final class LookStore {
             guard !isBuiltinName(look.name),
                 seen.insert(look.name).inserted
             else { continue }
-            admissible.append(Self.filtered(look))
+            admissible.append(look.admitted)
         }
         try write(admissible)
         return looks.count - admissible.count
@@ -116,7 +120,7 @@ public final class LookStore {
         try Self.encoder.encode(file).write(to: url)
     }
 
-    /// Imports a look file, filtering it (`filtered`).
+    /// Imports a look file, admitted (`ShelfLook.admitted`).
     public func importLook(from url: URL) throws -> ShelfLook {
         guard let data = try? Data(contentsOf: url),
             let file = try? JSONDecoder().decode(
@@ -124,23 +128,7 @@ public final class LookStore {
                 from: data
             )
         else { throw StoreError.invalidFile }
-        return Self.filtered(file.look)
-    }
-
-    /// `look` as the library stores it — the one door an untrusted
-    /// look passes (import, restore): styling keys outside
-    /// `LookKeys` and colours outside `ColorPaletteKeys` dropped,
-    /// then the colours completed over the shipped ones, so every
-    /// stored look carries every colour path (`LookStoreTests`).
-    static func filtered(_ look: ShelfLook) -> ShelfLook {
-        let style = Set(LookKeys.all)
-        let colors = Set(ColorPaletteKeys.all)
-        let known = look.colors.filter { colors.contains($0.key) }
-        return ShelfLook(
-            name: look.name,
-            style: look.style.filter { style.contains($0.key) },
-            colors: ColorPalette(name: "", colors: known).paintedColors
-        )
+        return file.look.admitted
     }
 
     private static var encoder: JSONEncoder { LookDocument.encoder }

@@ -8,8 +8,10 @@ import Testing
 /// (#1752).
 @Suite("Shelf look apply")
 struct ShelfLookApplyTests {
+    /// A look as every reader takes it (`ShelfLook.admitted`): the
+    /// named styling in the shipped colours.
     private func look(_ style: [String: JSONValue]) -> ShelfLook {
-        ShelfLook(name: "T", style: style, colors: [:])
+        ShelfLook(name: "T", style: style, colors: [:]).admitted
     }
 
     @Test("a look sets what it names and nothing else")

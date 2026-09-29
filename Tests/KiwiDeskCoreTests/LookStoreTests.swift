@@ -70,6 +70,17 @@ struct LookStoreTests {
         #expect(back.colors["kiwishelf.fill_color"] == "#112233")
     }
 
+    /// A look saved before a colour path existed reads with that
+    /// path completed, whichever door reads it (#1752).
+    @Test("a library read completes a sparse look's colours")
+    func readCompletesColours() throws {
+        let store = store()
+        try store.save(look("A"))
+        let back = try #require(store.userLooks().first)
+        #expect(Set(back.colors.keys) == Set(ColorPaletteKeys.all))
+        #expect(back.colors["kiwishelf.fill_color"] == "#112233")
+    }
+
     /// A stored look carries every colour path (#1752), so a sparse
     /// file cannot leave earlier colours behind when applied.
     @Test("an imported look's colours are completed")

@@ -42,12 +42,9 @@ extension LooksShelf {
                 )
             },
             set: { on in
-                let colors = on ? offer.previous : offer.look
-                ColorPalette(name: "", colors: colors)
-                    .apply(to: &model.config.settings)
-                // `isDirty` is recomputed on the write, so this says
-                // whether the tick itself left the draft clean.
-                keepColorsWrote = !model.isDirty
+                keepColorsWrote = model.paintColors(
+                    on ? offer.previous : offer.look
+                )
             }
         )
     }
