@@ -71,6 +71,33 @@ struct ShelfScrollWiringTests {
         #expect(overlay.scrollOffset == scrolled)
     }
 
+    /// A scroll moves the App Bar's run as one view: every item —
+    /// and so every per-item glass — keeps its frame, and nothing
+    /// re-renders, which re-framed each glass per event.
+    @Test("An App Bar scroll moves the run, never an item")
+    func appBarScrollMovesTheRun() throws {
+        let manager = AppBarManager()
+        manager.sync([
+            paintedAppBar(
+                items: (1...60).map {
+                    appBarItem(UInt32($0), text: "W\($0)")
+                }
+            )
+        ])
+        let overlay = try #require(
+            manager.overlayForTesting(barTitleDisplay)
+        )
+        let frames = overlay.itemViews.map(\.frame)
+        var renders = 0
+        overlay.onRendered = { renders += 1 }
+        let item = try #require(overlay.itemViews.first)
+        item.scrollWheel(with: try wheel(-7, precise: true))
+        #expect(overlay.scrollOffset > 0)
+        #expect(overlay.itemViews.map(\.frame) == frames)
+        #expect(overlay.itemRun.frame.minX == -overlay.scrollOffset)
+        #expect(renders == 0)
+    }
+
     /// Nothing hidden, nothing taken: the section declines, so a
     /// scroll over a short bar is not recorded as a manual one.
     @Test("A section with nothing hidden declines the scroll")

@@ -20,7 +20,7 @@ public final class AppBarOverlay {
     }
 
     /// Cached inputs from last `show()` for manual arrow scrolling.
-    private struct RenderState {
+    struct RenderState {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
@@ -38,6 +38,10 @@ public final class AppBarOverlay {
     var onRendered: @MainActor () -> Void = {}
     var itemViews: [AppBarItemView] = []
     let itemContainer = FlippedView()
+    /// Holds the items and their glass inside the clipping
+    /// `itemContainer`; a scroll moves this one view, never each
+    /// item, so per-item glass redraws nothing per event.
+    let itemRun = FlippedView()
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -54,7 +58,7 @@ public final class AppBarOverlay {
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()
     var lastMetrics: Metrics?
-    private var lastShown: RenderState?
+    private(set) var lastShown: RenderState?
 
     public init() {
         configureRoot()
@@ -153,20 +157,26 @@ public final class AppBarOverlay {
                 height: m.viewport
             )
         itemContainer.frame = viewport
+        let runFrame = Self.runFrame(
+            in: itemContainer.bounds,
+            offset: scrollOffset,
+            horizontal: m.horizontal
+        )
         let frames = Self.frames(
             lengths: Array(
                 repeating: m.slot,
                 count: items.count
             ),
-            in: itemContainer.bounds,
+            in: CGRect(origin: .zero, size: runFrame.size),
             gap: m.gap,
             horizontal: m.horizontal,
-            alignment: m.alignment,
-            scrolledBy: scrollOffset
+            alignment: m.alignment
         )
         let runStart: CGFloat
         if let first = frames.first {
-            runStart = m.horizontal ? first.minX : first.minY
+            runStart =
+                m.horizontal
+                ? first.minX + runFrame.minX : first.minY + runFrame.minY
         } else {
             runStart = 0
         }
@@ -185,8 +195,9 @@ public final class AppBarOverlay {
         // only the ones the container hosts (#1730).
         if hosting != .boxGlass { teardownBoxGlasses() }
         BarMotion.runLayout {
+            BarMotion.setFrame(itemRun, to: runFrame, animated: true)
             for (index, view) in itemViews.enumerated()
-            where view.superview === itemContainer {
+            where view.superview === itemRun {
                 BarMotion.setFrame(
                     view,
                     to: frames[index],

@@ -87,7 +87,7 @@ struct GlassHandBackTests {
             #expect(after.boxGlasses.isEmpty)
             #expect(after.itemViews.count == 2)
             for (item, expected) in zip(after.itemViews, plain.itemViews) {
-                #expect(item.superview === after.itemContainer)
+                #expect(item.superview === after.itemRun)
                 #expect(item.translatesAutoresizingMaskIntoConstraints)
                 #expect(item.frame == expected.frame)
             }

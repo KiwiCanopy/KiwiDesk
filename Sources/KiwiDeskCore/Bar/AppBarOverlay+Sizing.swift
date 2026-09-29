@@ -192,6 +192,18 @@ extension AppBarOverlay {
             : contentDepth
     }
 
+    /// `itemRun`'s frame in the viewport: the viewport's size,
+    /// shifted back along the axis by the scroll offset.
+    nonisolated static func runFrame(
+        in viewport: CGRect,
+        offset: CGFloat,
+        horizontal: Bool
+    ) -> CGRect {
+        horizontal
+            ? viewport.offsetBy(dx: -offset, dy: 0)
+            : viewport.offsetBy(dx: 0, dy: -offset)
+    }
+
     /// The scroll offset keeping the focused item in view, in
     /// equal slots — `ShelfOverflow.offset` does the arithmetic
     /// (#1517).
@@ -215,14 +227,15 @@ extension AppBarOverlay {
         )
     }
 
-    /// Computes item frames along the bar axis (#293 QA).
+    /// Computes item frames along the bar axis (#293 QA), in
+    /// `itemRun` coordinates: an overflowing run starts at zero and
+    /// `runFrame` carries the scroll.
     nonisolated static func frames(
         lengths: [CGFloat],
         in bounds: CGRect,
         gap: CGFloat,
         horizontal: Bool,
-        alignment: AppBarStyle.BarAlignment,
-        scrolledBy offset: CGFloat = 0
+        alignment: AppBarStyle.BarAlignment
     ) -> [CGRect] {
         let total =
             lengths.reduce(0, +)
@@ -230,7 +243,7 @@ extension AppBarOverlay {
         let axis = horizontal ? bounds.width : bounds.height
         var position: CGFloat
         if total > axis {
-            position = -offset
+            position = 0
         } else {
             switch alignment {
             case .start: position = 0

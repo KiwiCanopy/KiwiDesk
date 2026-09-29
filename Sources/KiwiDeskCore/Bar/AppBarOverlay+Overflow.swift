@@ -59,17 +59,44 @@ extension AppBarOverlay {
 
     /// A wheel or trackpad scroll (`ShelfScrollInput`): taken
     /// while entries are hidden, fluid rather than slot-aligned,
-    /// and a manual scroll only where the offset moved.
+    /// and a manual scroll only where the offset moved. It moves
+    /// `itemRun` alone — a trackpad directly, a wheel notch as one
+    /// glide — and never re-renders, which re-framed every glass.
     func scroll(_ delta: ShelfScrollInput.Delta) -> Bool {
-        guard isVisible, let m = lastMetrics, m.total > m.viewport
+        guard isVisible, let m = lastMetrics, m.total > m.viewport,
+            let state = lastShown
         else { return false }
         let before = scrollOffset
-        scrollOffset += ShelfScrollInput.travel(
-            delta,
-            itemStep: m.slot + m.gap
+        scrollOffset = Self.scrollOffset(
+            current: scrollOffset
+                + ShelfScrollInput.travel(delta, itemStep: m.slot + m.gap),
+            activeIndex: nil,
+            slot: m.slot,
+            gap: m.gap,
+            count: itemViews.count,
+            axis: m.viewport,
+            margin: 0
         )
-        render(followingFocus: false)
-        if scrollOffset != before { follow.scrolledByHand() }
+        guard scrollOffset != before else { return true }
+        follow.scrolledByHand()
+        let runFrame = Self.runFrame(
+            in: itemContainer.bounds,
+            offset: scrollOffset,
+            horizontal: m.horizontal
+        )
+        BarMotion.runLayout {
+            BarMotion.setFrame(
+                itemRun,
+                to: runFrame,
+                animated: !delta.precise
+            )
+        }
+        layoutOverflow(
+            strip: state.strip,
+            m: m,
+            style: LiquidGlassGate.rendered(state.style)
+        )
+        syncHoverToPointer()
         return true
     }
 
