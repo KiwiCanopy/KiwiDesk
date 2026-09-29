@@ -22,8 +22,9 @@ public final class LookStore {
         fileURL = directory.appendingPathComponent("looks.json")
     }
 
-    /// Decodes the document, running `ConfigMigration` if needed;
-    /// every look it yields is `ShelfLook.admitted`.
+    /// Decodes the document, running `ConfigMigration` if needed.
+    /// Raw, so a rewrite keeps what a newer build stored; a look
+    /// read for use is admitted in `userLooks`.
     private func readDocument() throws -> LookDocument? {
         guard var data = try? Data(contentsOf: fileURL) else {
             return nil
@@ -38,10 +39,7 @@ public final class LookStore {
                 from: data
             )
         else { throw StoreError.unreadableLibrary }
-        return LookDocument(
-            format: doc.format,
-            looks: doc.looks.map(\.admitted)
-        )
+        return doc
     }
 
     /// User looks for mutating paths (throws on an unreadable library).
@@ -49,9 +47,10 @@ public final class LookStore {
         try readDocument()?.looks ?? []
     }
 
-    /// User looks for read queries (empty on error).
+    /// User looks for read queries (empty on error), each as every
+    /// reader takes it (`ShelfLook.admitted`).
     public func userLooks() -> [ShelfLook] {
-        (try? libraryLooks()) ?? []
+        ((try? libraryLooks()) ?? []).map(\.admitted)
     }
 
     public func isBuiltinName(_ name: String) -> Bool {
