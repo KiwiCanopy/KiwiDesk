@@ -76,7 +76,11 @@ struct BarTextBaselineTests {
                 look: style,
                 depth: depth,
                 first: false,
-                last: false
+                last: false,
+                leadsWithIcon: false,
+                endsInIcon: SpaceBarItemView.endsInIcon(
+                    appCount: 0
+                )
             )
         )
         let view = SpaceBarItemView(

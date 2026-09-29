@@ -84,7 +84,11 @@ struct SpaceBarGlyphCellTests {
                 look: style,
                 depth: depth,
                 first: false,
-                last: false
+                last: false,
+                leadsWithIcon: false,
+                endsInIcon: SpaceBarItemView.endsInIcon(
+                    appCount: apps.count
+                )
             )
         )
         let view = SpaceBarItemView(

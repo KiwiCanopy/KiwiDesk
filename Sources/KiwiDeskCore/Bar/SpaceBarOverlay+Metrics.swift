@@ -44,7 +44,13 @@ extension SpaceBarOverlay {
                     look: look,
                     depth: depth,
                     first: place.first,
-                    last: place.last
+                    last: place.last,
+                    leadsWithIcon: SpaceBarItemView.leadsWithIcon(
+                        item.spaceGlyph
+                    ),
+                    endsInIcon: SpaceBarItemView.endsInIcon(
+                        appCount: item.apps.count
+                    )
                 )
             )
             return index == 0 && leadsWithLayer
