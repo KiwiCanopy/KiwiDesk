@@ -1532,7 +1532,7 @@
   "sticky.mark.ax": "Ventana sticky",
   "sticky.mark.help": "Una ventana sticky puede verse igual que una normal, así que KiwiDesk dibuja una pequeña marca en la esquina superior derecha de la ventana. La marca es también lo que explica un movimiento rechazado, tanto si arrastraste la ventana como si usaste un atajo; al desactivar la marca también silencias esos mensajes. La Space Bar muestra su propia insignia de sticky de todos modos; si además ocultas la barra, no queda ninguna señal de sticky.",
   "sticky.pile.pill": "Las ventanas sticky no se pueden mover a la pila",
-  "sticky.title": "Ventanas sticky",
+  "sticky_floating.title": "Ventanas sticky y flotantes",
   "system_shortcut.app_switcher": "Selector de aplicaciones",
   "system_shortcut.app_windows": "Ventanas de la aplicación",
   "system_shortcut.close_window": "Cerrar ventana",

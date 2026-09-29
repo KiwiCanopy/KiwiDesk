@@ -1532,7 +1532,7 @@
   "sticky.mark.ax": "Sticky 視窗",
   "sticky.mark.help": "Sticky 視窗可能和一般視窗看起來一模一樣，因此 KiwiDesk 會在視窗右上角繪製一個小標記。移動被拒絕時，說明原因的也是這個標記，無論你是拖移視窗還是使用了快速鍵；關閉標記後，這些說明也不會再出現。無論如何，Space Bar 都會顯示它自己的 Sticky 徽章；若連 Space Bar 也隱藏，就再也沒有任何能看出視窗是 Sticky 的跡象。",
   "sticky.pile.pill": "Sticky 視窗無法移到層疊堆中",
-  "sticky.title": "Sticky 視窗",
+  "sticky_floating.title": "Sticky 與浮動視窗",
   "system_shortcut.app_switcher": "App 切換器",
   "system_shortcut.app_windows": "應用程式視窗",
   "system_shortcut.close_window": "關閉視窗",

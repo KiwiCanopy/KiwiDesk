@@ -164,8 +164,10 @@ struct GapsAndBordersControls: Sendable {
         "border.title",
         "Focus border"
     )
+    /// The sticky and floating windows' card: both marks'
+    /// switches and sticky's Desktop reach (#1799).
     let stickyWindows = SettingsControl(
-        "sticky.title",
-        "Sticky windows"
+        "sticky_floating.title",
+        "Sticky & floating windows"
     )
 }

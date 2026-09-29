@@ -1532,7 +1532,7 @@
   "sticky.mark.ax": "Fenêtre sticky",
   "sticky.mark.help": "Une fenêtre sticky peut sembler identique à une fenêtre normale : KiwiDesk dessine donc une petite marque dans le coin supérieur droit de la fenêtre. C'est aussi la marque qui explique un déplacement refusé, que vous ayez fait glisser la fenêtre ou utilisé un raccourci ; désactiver la marque supprime également ces messages. La Space Bar affiche son propre badge sticky dans tous les cas ; si vous masquez aussi la barre, plus aucun signe de sticky ne subsiste.",
   "sticky.pile.pill": "Les fenêtres sticky ne peuvent pas être déplacées vers la pile",
-  "sticky.title": "Fenêtres sticky",
+  "sticky_floating.title": "Fenêtres sticky & flottantes",
   "system_shortcut.app_switcher": "Sélecteur d'applications",
   "system_shortcut.app_windows": "Fenêtres de l'application",
   "system_shortcut.close_window": "Fermer la fenêtre",

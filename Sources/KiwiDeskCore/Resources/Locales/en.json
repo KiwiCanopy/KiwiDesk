@@ -1536,7 +1536,7 @@
   "sticky.mark.ax": "Sticky window",
   "sticky.mark.help": "A sticky window can look identical to a normal one, so KiwiDesk draws a small mark in its top-right corner. The mark is also how a refused move explains itself, whether you dragged the window or used a shortcut, so turning the mark off silences those messages too. The Space Bar shows its own sticky badge either way; hide the bar as well and no sticky signal is left.",
   "sticky.pile.pill": "Sticky windows can't be moved to the pile",
-  "sticky.title": "Sticky windows",
+  "sticky_floating.title": "Sticky & floating windows",
   "system_shortcut.app_switcher": "App Switcher",
   "system_shortcut.app_windows": "App Windows",
   "system_shortcut.close_window": "Close Window",

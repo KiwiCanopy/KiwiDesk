@@ -1532,7 +1532,7 @@
   "sticky.mark.ax": "Sticky 윈도우",
   "sticky.mark.help": "Sticky 윈도우는 일반 윈도우와 똑같아 보일 수 있어서 KiwiDesk가 윈도우 오른쪽 위 모서리에 작은 마크를 그립니다. 거부된 이동을 설명해 주는 것도 이 마크이며, 윈도우를 드래그했든 단축키를 사용했든 마찬가지입니다. 마크를 끄면 그 메시지도 나타나지 않습니다. Space Bar는 어느 경우에나 자체 Sticky 배지를 표시하지만, Space Bar까지 가리면 Sticky임을 알려 주는 표시가 하나도 남지 않습니다.",
   "sticky.pile.pill": "Sticky 윈도우는 겹쳐 쌓인 곳으로 이동할 수 없습니다",
-  "sticky.title": "Sticky 윈도우",
+  "sticky_floating.title": "Sticky 및 플로팅 윈도우",
   "system_shortcut.app_switcher": "앱 전환기",
   "system_shortcut.app_windows": "응용 프로그램 윈도우",
   "system_shortcut.close_window": "윈도우 닫기",
