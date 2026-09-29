@@ -73,4 +73,61 @@ struct DigitTopUpOverrideTests {
         )
         #expect(!rows.contains { $0.lua == goToFour })
     }
+
+    @Test("a base row a profile removes is not added again")
+    func tombstonedRowIsNotReAdded() throws {
+        let core = try onStarterBaseline()
+        let name = try #require(core.profiles.currentName)
+        var profile = try core.profiles.read(name: name)
+        profile.layers = KeyLayerOverride(
+            removed: [KeyLayer.defaultName: ["control+option+3"]]
+        )
+        try core.profiles.write(profile)
+        let before = baseRows(core).count
+
+        core.topUpDigitShortcuts()
+        core.topUpDigitShortcuts()
+
+        #expect(baseRows(core).count == before)
+    }
+
+    @Test("a verb another profile's override binds is not topped up")
+    func otherProfileBoundVerbIsSkipped() throws {
+        let core = try onStarterBaseline()
+        let goToFour = "KiwiDesk.focus_space(\"4\")"
+        try core.profiles.write(
+            Profile(
+                name: "Other",
+                monitorSets: [MonitorSet(monitors: ["B:1x1"])],
+                spaceModes: [:],
+                settings: TilingSettings(),
+                layers: KeyLayerOverride(
+                    layers: [
+                        KeyLayer(
+                            name: KeyLayer.defaultName,
+                            bindings: [
+                                KeyBinding(
+                                    combo: "control+option+f4",
+                                    lua: goToFour,
+                                    kind: .navigation,
+                                    label: "Go to Space 4"
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        )
+        core.state.workspaces.ensureSpace(SpaceID("4"))
+
+        core.topUpDigitShortcuts()
+
+        let rows = baseRows(core)
+        #expect(
+            rows.contains {
+                $0.lua == "KiwiDesk.move_to_space(\"4\")"
+            }
+        )
+        #expect(!rows.contains { $0.lua == goToFour })
+    }
 }

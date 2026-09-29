@@ -9264,7 +9264,9 @@ renamed after the seed can lose the positional chord it learned
 — accepted, since the digit it keeps is the one its name
 predicts. It reads each stored list alone, so an extra split
 between `gui.json` and a profile's override survives it; the
-top-up, which reads the resolved layer, never makes one. **Lua stays uncapped**,
+top-up, which counts every profile's override against the shared
+base, never makes one. A `custom` row is drawn as a row of its
+own, so the migration leaves it alone. **Lua stays uncapped**,
 because layers are modal — activating one deactivates the base —
 so hjkl beside the arrows can only live in one layer, and two
 chords that do the same thing cannot conflict. A duplicate *chord*

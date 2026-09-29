@@ -16,6 +16,7 @@ extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps
     /// naming what it was written to name.
     static let spaceChordBindingsKey = "bindings"
+    static let spaceChordNavigationKind = "navigation"
 
     @Sendable
     static func migratingDuplicateSpaceChords(
@@ -90,10 +91,9 @@ extension ConfigMigration {
         return (node, [])
     }
 
-    /// One layer's rows with each Space verb's extra chords
-    /// removed, and the removed rows. Every kind counts: a `custom`
-    /// row naming a Space verb is reclassified as navigation when
-    /// Settings loads it.
+    /// One layer's rows with each Space verb's extra `navigation`
+    /// chords removed, and the removed rows. A `custom` row is
+    /// drawn as a row of its own, so it is never removed.
     static func dedupedSpaceChords(
         _ rows: [Any]
     ) -> ([Any], [[String: Any]]) {
@@ -127,6 +127,7 @@ extension ConfigMigration {
         _ row: Any
     ) -> SpaceLuaArg.Target? {
         guard let binding = row as? [String: Any],
+            binding["kind"] as? String == spaceChordNavigationKind,
             binding["combo"] is String,
             let lua = binding["lua"] as? String
         else { return nil }

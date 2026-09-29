@@ -194,11 +194,11 @@ public enum DefaultKeybindings {
             }
         }
         let owners = Set(own.map(\.1))
-        let named: [(Int, SpaceID)] = spaces.enumerated().compactMap {
+        let positional: [(Int, SpaceID)] = spaces.enumerated().compactMap {
             owners.contains($0.element) || !range.contains($0.offset + 1)
                 ? nil : ($0.offset + 1, $0.element)
         }
-        return (own + named).map { number, space in
+        return (own + positional).map { number, space in
             (number == digitCapacity ? "0" : String(number), space)
         }
     }
