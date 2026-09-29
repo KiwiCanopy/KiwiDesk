@@ -196,18 +196,30 @@ struct AppBarScrollLayoutTests {
         )
     }
 
-    @Test("Overflowing frames start at the scroll offset")
+    @Test("Overflowing frames start at the run; the run scrolls")
     func scrolledFrames() {
+        let viewport = CGRect(x: 0, y: 0, width: 320, height: 32)
         let frames = AppBarOverlay.frames(
             lengths: Array(repeating: 100, count: 10),
-            in: CGRect(x: 0, y: 0, width: 320, height: 32),
+            in: viewport,
             gap: 0,
             horizontal: true,
-            alignment: .center,
-            scrolledBy: 250
+            alignment: .center
         )
-        #expect(frames[0].minX == -250)
-        #expect(frames[3].minX == 50)
+        #expect(frames[0].minX == 0)
+        let run = ShelfOverflow.runFrame(
+            in: viewport,
+            offset: 250,
+            horizontal: true
+        )
+        #expect(run.minX == -250 && run.width == viewport.width)
+        #expect(frames[3].minX + run.minX == 50)
+        let vertical = ShelfOverflow.runFrame(
+            in: viewport,
+            offset: 40,
+            horizontal: false
+        )
+        #expect(vertical.minY == -40 && vertical.minX == 0)
     }
 
     @Test("Frames line up along the axis, centered as a group")

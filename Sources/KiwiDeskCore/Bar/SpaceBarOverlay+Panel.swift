@@ -14,14 +14,14 @@ extension SpaceBarOverlay {
 
     /// Prepares the hierarchy for `mode` before layout, and picks
     /// the front segment's host with it: the root while pinned,
-    /// else the item container — so a steady render reparents
+    /// else the item run — so a steady render reparents
     /// nothing (#1315).
     func prepareGlassHosting(
         _ mode: GlassHosting,
         pinnedFront: Bool
     ) {
         if mode != .boxGlass { teardownBoxGlasses() }
-        frontHost = pinnedFront ? root : itemContainer
+        frontHost = pinnedFront ? root : itemRun
     }
 
     /// Installs per-item glass after item layout (#407).
@@ -51,7 +51,7 @@ extension SpaceBarOverlay {
         while itemViews.count < count {
             let view = SpaceBarItemView()
             itemViews.append(view)
-            itemContainer.addSubview(view)
+            itemRun.addSubview(view)
         }
     }
 
@@ -65,7 +65,8 @@ extension SpaceBarOverlay {
         // (#385, #1517).
         itemContainer.wantsLayer = true
         itemContainer.layer?.masksToBounds = true
-        itemContainer.addSubview(layerDivider)
+        itemContainer.addSubview(itemRun)
+        itemRun.addSubview(layerDivider)
         root.addSubview(itemContainer)
         root.addSubview(backCount)
         root.addSubview(forwardCount)

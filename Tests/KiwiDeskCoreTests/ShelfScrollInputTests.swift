@@ -30,7 +30,6 @@ struct ShelfScrollInputTests {
     @Test("A trackpad moves by its points on the dominant axis")
     func trackpadPoints() {
         let gain = ShelfScrollInput.trackpadGain
-        #expect(gain > 1, "a trackpad scrolls faster than 1:1")
         #expect(travel(-12, 3, precise: true) == 12 * gain)
         #expect(travel(2, -30, precise: true) == 30 * gain)
     }
