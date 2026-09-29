@@ -27,9 +27,9 @@ struct ProcessIdentityWiringTests {
     private final class Box {
         var census: [pid_t: Set<WindowID>] = [:]
         var alive: [pid_t: RunningApp] = [:]
-        var front: [(id: WindowID, pid: pid_t)] = []
         var focused: [WindowID] = []
         var terminated: [pid_t] = []
+        var logs: [String] = []
     }
 
     private static let bundle = "test.kiwi.browser"
@@ -49,7 +49,7 @@ struct ProcessIdentityWiringTests {
     private func makeLoop() -> (loop: EventLoop, box: Box) {
         let loop = EventLoop()
         let box = Box()
-        loop.onLog = { _ in }
+        loop.onLog = { box.logs.append($0) }
         loop.registersWorkspaceObservers = false
         loop.visiblePIDs = { [] }
         loop.applyAXMessagingTimeout = { _ in }
@@ -68,8 +68,6 @@ struct ProcessIdentityWiringTests {
             }
         }
         loop.processIdentity.appAt = { box.alive[$0] }
-        loop.processIdentity.frontToBack = { box.front }
-        loop.processIdentity.afterReorder = { $0() }
         loop.runningApplications = { [] }
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
@@ -79,7 +77,6 @@ struct ProcessIdentityWiringTests {
         loop.healSweep()
         loop.elements[parent] = [WindowID(1): element(parent)]
         loop.elements[child] = [WindowID(2): element(child)]
-        box.front = [(WindowID(2), child), (WindowID(1), parent)]
         box.focused = []
         return (loop, box)
     }
@@ -88,12 +85,18 @@ struct ProcessIdentityWiringTests {
         AXUIElementCreateApplication(pid)
     }
 
-    @Test("a parent's activation focuses the child's front window")
-    func parentActivationTakesTheFrontWindow() {
+    @Test("a parent's activation defers to the processes' reports")
+    func parentActivationDefers() {
         let (loop, box) = makeLoop()
+        box.logs = []
         loop.appActivated(app(parent), launchedAt: nil)
         #expect(loop.lastActivePid == parent)
-        #expect(box.focused == [WindowID(2)])
+        #expect(box.focused.isEmpty)
+        #expect(
+            box.logs.contains {
+                $0.hasPrefix("activation: pid \(parent) runs beside")
+            }
+        )
     }
 
     @Test("an unnamed activation leaves the gate with no reading")
@@ -122,23 +125,6 @@ struct ProcessIdentityWiringTests {
         #expect(!loop.observes(pid: parent))
         #expect(loop.observes(pid: child))
         #expect(box.terminated == [parent])
-    }
-
-    @Test("an untracked front window never falls back to one behind")
-    func noFallbackPastTheFrontWindow() {
-        let (loop, box) = makeLoop()
-        loop.elements[child] = [:]
-        loop.lastActivePid = parent
-        loop.reportFrontWindow(of: [parent, child])
-        #expect(box.focused.isEmpty)
-    }
-
-    @Test("no active reading during the reorder reports nothing")
-    func nilActiveReadingReportsNothing() {
-        let (loop, box) = makeLoop()
-        loop.lastActivePid = nil
-        loop.reportFrontWindow(of: [parent, child])
-        #expect(box.focused.isEmpty)
     }
 
     @Test("stop forgets the unlisted processes")

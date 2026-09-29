@@ -6,8 +6,9 @@ import AppKit
 /// looked up by its real pid — and its activations are announced
 /// under the PARENT's pid. The WindowServer and AX know the real
 /// pid, so a pid ≤ 0 is never an identity, and an app running as
-/// several processes takes its focus from the window the
-/// WindowServer brought forward rather than the announced pid.
+/// several processes takes its focus from each process's own
+/// report, never from the announced pid — whose windows are the
+/// ones in front at the announcement (device, 2026-09-29).
 struct ProcessIdentity {
     /// The app running under a WindowServer pid, keyed by THAT
     /// pid: a child registration's own `processIdentifier` reads
@@ -22,21 +23,11 @@ struct ProcessIdentity {
         }
     }
 
-    /// On-screen layer-0 windows, front to back.
-    var frontToBack: @MainActor () -> [(id: WindowID, pid: pid_t)] =
-        AXHelper.onScreenNormalWindowsFrontToBack
-
-    /// Runs the sibling activation's front-window read after the
-    /// WindowServer has reordered: at the announcement the
-    /// clicked window is not yet in front (device, 2026-09-29).
-    var afterReorder:
-        @MainActor (@escaping @MainActor () -> Void)
-            -> Void = { work in
-                Task { @MainActor in
-                    try? await Task.sleep(for: .milliseconds(150))
-                    work()
-                }
-            }
+    /// The frontmost app as LaunchServices lists it — pid -1 for
+    /// a child registration.
+    var frontmostApp: @MainActor () -> RunningApp? = {
+        NSWorkspace.shared.frontmostApplication.map(RunningApp.init)
+    }
 
     /// Observed pids the running-app list does not carry, with
     /// their bundle ids — the only processes a sibling can be.
@@ -45,17 +36,22 @@ struct ProcessIdentity {
 
 extension EventLoop {
     /// The frontmost app's pid, the one frontmost chain (#292,
-    /// #1322). An app listed without a pid is named by the owner
-    /// of its front-most on-screen window, since its windows are
-    /// raised above every other app's while it is frontmost.
-    static func frontmostProcess() -> pid_t? {
-        guard let app = NSWorkspace.shared.frontmostApplication
-        else { return nil }
-        let pid = app.processIdentifier
-        guard !isProcessID(pid) else { return pid }
+    /// #1322). An app listed without a pid is its unlisted
+    /// process of that bundle; with several, the one whose
+    /// window is front-most; with none known, no reading.
+    func frontmostProcess() -> pid_t? {
+        guard let app = processIdentity.frontmostApp() else {
+            return nil
+        }
+        guard !Self.isProcessID(app.pid) else { return app.pid }
+        let bundleID = app.ref.bundleID
+        let candidates = Set(
+            processIdentity.unlisted.filter { $0.value == bundleID }
+                .keys
+        )
+        guard candidates.count > 1 else { return candidates.first }
         return AXHelper.onScreenNormalWindowsFrontToBack().first {
-            NSRunningApplication(processIdentifier: $0.pid)?
-                .bundleIdentifier == app.bundleIdentifier
+            candidates.contains($0.pid)
         }?.pid
     }
 
@@ -131,34 +127,16 @@ extension EventLoop {
             ?? processIdentity.appAt(pid)?.ref.bundleID
     }
 
-    /// An activation of an app that runs as several processes:
-    /// the announced pid may be the wrong one, so the focus is
-    /// the front-most window of the family once the WindowServer
-    /// has reordered — tracked, or nothing is reported.
-    func reportFrontWindow(of family: Set<pid_t>) {
-        processIdentity.afterReorder { [weak self] in
-            guard let self, isRunning,
-                let active = lastActivePid, family.contains(active)
-            else { return }
-            let front = processIdentity.frontToBack().first {
-                family.contains($0.pid)
-            }.map { (id: hostOfShadow($0.id, pid: $0.pid), pid: $0.pid) }
-            guard let front,
-                elements[front.pid]?[front.id] != nil
-            else {
-                onLog(
-                    "activation: no tracked front window among "
-                        + "pids \(family.sorted())"
-                )
-                return
-            }
-            onLog(
-                "activation: front window w\(front.id.raw) of pid "
-                    + "\(front.pid) among \(family.sorted())"
-            )
-            // Ungated: the activation is the gate's own source
-            // (#1322, censused in `FocusReportEmitterCensusTests`).
-            onEvent(.windowFocused(front.id))
-        }
+    /// An activation of an app running as several processes
+    /// reports no focus of its own: the announced pid may be a
+    /// sibling's, so each process's own report decides.
+    func defersToSiblingReports(_ pid: pid_t) -> Bool {
+        let siblings = siblingProcesses(of: pid)
+        guard !siblings.isEmpty else { return false }
+        onLog(
+            "activation: pid \(pid) runs beside "
+                + "\(siblings.sorted()) — their own reports decide"
+        )
+        return true
     }
 }

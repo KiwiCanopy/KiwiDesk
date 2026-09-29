@@ -203,11 +203,7 @@ extension EventLoop {
         // the managed-window guard below.
         reconcile(pid: pid, app: app.ref)
         // Several processes: the announced pid may be a sibling's.
-        let siblings = siblingProcesses(of: pid)
-        guard siblings.isEmpty else {
-            reportFrontWindow(of: siblings.union([pid]))
-            return
-        }
+        guard !defersToSiblingReports(pid) else { return }
         // Clicking a window of another app only activates the
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the

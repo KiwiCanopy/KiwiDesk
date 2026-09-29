@@ -21,9 +21,6 @@ struct FocusReportEmitterCensusTests {
     private static let emitters: [String: Bool] = [
         "EventLoop+FocusReport.swift": true,
         "EventLoop+Apps.swift": false,
-        // The sibling activation's front-window read (#1785): the
-        // activation's own reading, like `appActivated`'s.
-        "EventLoop+ProcessIdentity.swift": false,
     ]
 
     private static var eventsRoot: URL {

@@ -417,11 +417,18 @@ editing here:
   at `syncObservation` and `attach` and never read as the active
   app, the heal resolves a census pid the running-app list lacks
   by that pid (`ProcessIdentity.appAt`, never the record's own
-  `processIdentifier`), an app with such a process takes its
-  activation focus from the family's front-most window after the
-  reorder rather than from the announced pid, and the gate counts
-  a sibling process of the active app as active
-  (`ProcessIdentityTests`).
+  `processIdentifier`), the frontmost chain names such an app by
+  its unlisted process, an activation of an app with such a
+  process reports no focus of its own — the announced pid's
+  windows are the ones in front at the announcement, so each
+  process's own report decides — and the gate counts a sibling
+  process of the active app as active (`ProcessIdentityTests`,
+  `ProcessIdentityWiringTests`). **A shadow window is never
+  tracked**: an empty, button-less standard window on the exact
+  frame of a buttoned window of its own process (Orion's "Orion
+  Preview"), whose focus reports name that host — the host is
+  what keeps a frameless real window a window
+  (`ShadowWindowTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

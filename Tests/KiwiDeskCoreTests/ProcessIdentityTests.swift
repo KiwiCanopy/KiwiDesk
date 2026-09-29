@@ -32,7 +32,6 @@ struct ProcessIdentityTests {
         var windowQueries: [pid_t] = []
         var lookups: [pid_t] = []
         var alive: [pid_t: RunningApp] = [:]
-        var front: [(id: WindowID, pid: pid_t)] = []
         var events: [KiwiEvent] = []
         var focused: [WindowID] = []
     }
@@ -89,8 +88,6 @@ struct ProcessIdentityTests {
             box.lookups.append(pid)
             return box.alive[pid]
         }
-        loop.processIdentity.frontToBack = { box.front }
-        loop.processIdentity.afterReorder = { $0() }
         loop.runningApplications = { [] }
         #expect(loop.beginScan())
         loop.scanChunk(budget: nil)
@@ -215,42 +212,19 @@ struct ProcessIdentityTests {
         #expect(loop.reportsFromActiveApp(other))
     }
 
-    @Test("a sibling activation focuses the family's front window")
-    func siblingActivationTakesTheFrontWindow() {
+    @Test("an unnamed frontmost app is its one unlisted process")
+    func frontmostResolvesTheUnlistedProcess() {
         let (loop, box) = makeLoop()
         box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
         loop.healSweep()
-        loop.elements[parent] = [WindowID(1): element(parent)]
-        loop.elements[child] = [WindowID(2): element(child)]
-        loop.lastActivePid = parent
-        // Another app's window above the family is passed over;
-        // the parent's own focused window is not the answer.
-        box.front = [
-            (WindowID(3), other), (WindowID(2), child),
-            (WindowID(1), parent),
-        ]
-        let family = loop.siblingProcesses(of: parent).union([parent])
-        #expect(family == [parent, child])
-        box.focused = []
-        loop.reportFrontWindow(of: family)
-        #expect(box.focused == [WindowID(2)])
-    }
-
-    @Test("an untracked or stale front window reports nothing")
-    func unresolvedFrontWindowReportsNothing() {
-        let (loop, box) = makeLoop()
-        box.census = [parent: [WindowID(1)], child: [WindowID(2)]]
-        loop.healSweep()
-        loop.lastActivePid = parent
-        box.front = [(WindowID(2), child)]
-        box.focused = []
-        loop.reportFrontWindow(of: [parent, child])
-        #expect(box.focused.isEmpty)
-        // Tracked, but another app took over during the reorder.
-        box.focused = []
-        loop.elements[child] = [WindowID(2): element(child)]
-        loop.lastActivePid = other
-        loop.reportFrontWindow(of: [parent, child])
-        #expect(box.focused.isEmpty)
+        loop.processIdentity.frontmostApp = { self.app(-1) }
+        #expect(loop.frontmostProcess() == child)
+        loop.processIdentity.frontmostApp = { self.app(parent) }
+        #expect(loop.frontmostProcess() == parent)
+        // An unnamed app KiwiDesk knows no process of: no reading.
+        loop.processIdentity.frontmostApp = {
+            self.app(-1, bundle: "test.kiwi.unknown")
+        }
+        #expect(loop.frontmostProcess() == nil)
     }
 }

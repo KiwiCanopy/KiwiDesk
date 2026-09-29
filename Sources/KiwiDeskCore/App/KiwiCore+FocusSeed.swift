@@ -72,7 +72,7 @@ extension KiwiCore {
     func trustedFrontmostFocusedWindowID() -> WindowID? {
         guard
             let app = NSWorkspace.shared.frontmostApplication,
-            let pid = EventLoop.frontmostProcess(),
+            let pid = eventLoop.frontmostProcess(),
             !FloatDetection.hasVisibleIgnoredPanel(
                 pid: pid,
                 bundleID: AppRef(app).bundleID,

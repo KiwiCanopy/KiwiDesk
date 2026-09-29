@@ -38,7 +38,7 @@ extension KiwiCore {
                 // now would fly the user back (#414) — the
                 // schedule-time exemption re-checked at fire.
                 !window.isSticky,
-                EventLoop.frontmostProcess() == window.pid,
+                self.eventLoop.frontmostProcess() == window.pid,
                 // An open quick-terminal-style panel makes AX
                 // report the app's main window as focused;
                 // following that report would enforce the main
