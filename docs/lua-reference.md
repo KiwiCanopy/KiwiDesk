@@ -5023,6 +5023,13 @@ hand-written `init.lua` and no profile for the connected
 monitors, a reconnect only places spaces, and a held space stays
 held.
 
+:::unreleased
+A window in a held space stays there even when the incoming
+profile remembers it in one of its own spaces, so what was on the
+monitor goes home together
+([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
+:::
+
 A held space is dropped once no window is left in it on any
 Desktop, by `delete_space`, and on an explicit `load_profile`,
 whose prune forwards it to the fallback space like any undeclared

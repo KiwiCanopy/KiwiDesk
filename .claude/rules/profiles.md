@@ -937,6 +937,13 @@ screen's Spaces are held, not forwarded*. The obligations:
   arm only places Spaces and returns nothing, by ruling. A new
   door owes the call. The composed door and the no-apply arms
   have no clause.
+- **The #1230 restore leaves a held Space's members (#1728).**
+  `restorePartitioning` skips a window in a held Space, live or
+  remembered there, so the incoming profile's record cannot empty
+  a hold the same change made (`HeldSpaceRestoreTests` ▸
+  `holdKeepsRememberedWindows`, `HeldSpaceRestoreTests` ▸
+  `heldWindowsGoHomeTogether`). A new mover of windows across
+  Spaces on a switch owes the same skip.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call
