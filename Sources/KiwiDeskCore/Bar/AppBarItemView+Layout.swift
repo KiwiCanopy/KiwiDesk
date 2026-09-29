@@ -80,7 +80,8 @@ extension AppBarItemView {
                 crossOffset: (depth - side) / 2
             ),
             first: first,
-            last: last
+            last: last,
+            outlined: look.activeIndicator == .outline
         )
         return ItemEnds(
             leading: edgePadding + ends.leading,

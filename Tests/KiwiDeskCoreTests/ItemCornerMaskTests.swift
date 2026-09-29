@@ -54,6 +54,26 @@ struct ItemCornerMaskTests {
         }
     }
 
+    /// The owner's case (2026-09-29): the active Space's outline is
+    /// a capsule on a plate, so every item pads and rounds both
+    /// ends, not only the run's — or the outline's trailing curve
+    /// meets the last glyph.
+    @Test("An outlined plate pads and rounds every Space item's ends")
+    func outlinedPlatePadsEveryItem() throws {
+        let look = Fixture.spaceLook(100, boxed: false, outlined: true)
+        let overlay = try Fixture.spaceBar(look, items: Fixture.items(3))
+        let views = Array(overlay.itemViews.prefix(3))
+        #expect(views.count == 3)
+        for (index, view) in views.enumerated() {
+            view.restyle()
+            let note = Comment(rawValue: "#\(index)")
+            #expect(view.ends.leading > 0, note)
+            #expect(view.ends.trailing > 0, note)
+            let round = try Self.rounds(view.layer)
+            #expect(round.leading && round.trailing, note)
+        }
+    }
+
     @Test("An App Bar item rounds only its run's drawn ends")
     func appItemRoundsWhatItPads() throws {
         for boxed in [true, false] {

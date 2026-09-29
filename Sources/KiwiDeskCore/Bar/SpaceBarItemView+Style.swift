@@ -148,6 +148,7 @@ extension SpaceBarItemView {
             shelf: style.shelf,
             first: isFirstInRun,
             last: isLastInRun,
+            outlined: style.activeIndicator == .outline,
             horizontal: horizontal
         )
     }

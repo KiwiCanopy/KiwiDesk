@@ -9,9 +9,14 @@ enum ItemCornerMask {
         shelf: KiwiShelf,
         first: Bool,
         last: Bool,
+        outlined: Bool,
         horizontal: Bool
     ) -> CACornerMask {
-        let rounds = shelf.roundsItemEnds(first: first, last: last)
+        let rounds = shelf.roundsItemEnds(
+            first: first,
+            last: last,
+            outlined: outlined
+        )
         let leading: CACornerMask =
             horizontal
             ? [.layerMinXMinYCorner, .layerMinXMaxYCorner]

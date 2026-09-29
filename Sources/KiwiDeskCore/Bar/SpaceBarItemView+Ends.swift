@@ -34,7 +34,8 @@ extension SpaceBarItemView {
         look.shelf.itemEnds(
             clearance: endClearance(look: look, depth: depth),
             first: first,
-            last: last
+            last: last,
+            outlined: look.activeIndicator == .outline
         )
     }
 }

@@ -31,13 +31,18 @@ struct RoundedItemEndPadTests {
         return shelf
     }
 
+    /// The edge mark by default: the plate cases read the run's
+    /// ends, which an outline widens to every item (#1763).
     static func spaceLook(
         _ roundness: CGFloat,
-        boxed: Bool = true
+        boxed: Bool = true,
+        outlined: Bool = false
     ) -> SpaceBarLook {
+        var bar = SpaceBarStyle()
+        bar.activeIndicator = outlined ? .outline : .edgeMark
         var look = SpaceBarLook(
             shelf: shelf(roundness, boxed: boxed),
-            bar: SpaceBarStyle(),
+            bar: bar,
             sheen: 0
         )
         look.showFrontApp = true
@@ -141,15 +146,31 @@ struct RoundedItemEndPadTests {
         #expect(e > KiwiShelf.cornerCut(radius: 40) + 10)
     }
 
-    @Test("Boxed rounds every item's ends, a plate only the run's")
+    @Test("Boxed or outlined rounds every item's ends, a plate the run's")
     func roundedEndsPredicate() {
         let boxed = Self.shelf(100)
         let plate = Self.shelf(100, boxed: false)
         for first in [false, true] {
             for last in [false, true] {
-                let b = boxed.roundsItemEnds(first: first, last: last)
-                #expect(b.leading && b.trailing)
-                let p = plate.roundsItemEnds(first: first, last: last)
+                for outlined in [false, true] {
+                    let b = boxed.roundsItemEnds(
+                        first: first,
+                        last: last,
+                        outlined: outlined
+                    )
+                    #expect(b.leading && b.trailing)
+                }
+                let o = plate.roundsItemEnds(
+                    first: first,
+                    last: last,
+                    outlined: true
+                )
+                #expect(o.leading && o.trailing)
+                let p = plate.roundsItemEnds(
+                    first: first,
+                    last: last,
+                    outlined: false
+                )
                 #expect(p.leading == first && p.trailing == last)
             }
         }

@@ -33,23 +33,32 @@ extension KiwiShelf {
     }
 
     /// Which ends of an item DRAW rounded (#1763): every item's
-    /// both while Boxed; on a plate, the run's first item's
-    /// leading end and its last's trailing one. The one predicate
-    /// a bar's measuring and its layout both read.
+    /// both while Boxed or `outlined` — the outline indicator is a
+    /// capsule, and any item may become active, so padding it only
+    /// while active would reflow the run; on a plate otherwise,
+    /// the run's first item's leading end and its last's trailing
+    /// one. The one predicate a bar's measuring, layout and paint
+    /// read.
     public func roundsItemEnds(
         first: Bool,
-        last: Bool
+        last: Bool,
+        outlined: Bool
     ) -> (leading: Bool, trailing: Bool) {
-        drawsPlate ? (first, last) : (true, true)
+        drawsPlate && !outlined ? (first, last) : (true, true)
     }
 
     /// `clearance` at each end `roundsItemEnds` rounds.
     public func itemEnds(
         clearance: CGFloat,
         first: Bool,
-        last: Bool
+        last: Bool,
+        outlined: Bool
     ) -> ItemEnds {
-        let rounds = roundsItemEnds(first: first, last: last)
+        let rounds = roundsItemEnds(
+            first: first,
+            last: last,
+            outlined: outlined
+        )
         return ItemEnds(
             leading: rounds.leading ? clearance : 0,
             trailing: rounds.trailing ? clearance : 0
