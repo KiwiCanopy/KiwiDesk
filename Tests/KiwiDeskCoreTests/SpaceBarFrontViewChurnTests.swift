@@ -37,8 +37,7 @@ struct SpaceBarFrontViewChurnTests {
                 spaceGlyph: .text(String(n), tinted: true),
                 apps: [],
                 active: n == 1,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         }
         return SpaceBarManager.Bar(

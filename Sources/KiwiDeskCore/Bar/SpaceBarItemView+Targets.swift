@@ -40,21 +40,21 @@ extension SpaceBarItemView {
         leadingTarget = discTarget(
             leadingTarget,
             space: space,
-            windows: shown ? overflowBefore.reversed() : [],
+            windows: shown ? before.windows.reversed() : [],
             label: L(
                 "space_bar.overflow.before.ax",
                 "Earlier windows not shown: %1$d",
-                overflowBefore.count
+                before.windows.count
             )
         )
         overflowTarget = discTarget(
             overflowTarget,
             space: space,
-            windows: shown ? overflowWindows : [],
+            windows: shown ? after.windows : [],
             label: L(
                 "space_bar.overflow.after.ax",
                 "Later windows not shown: %1$d",
-                overflowWindows.count
+                after.windows.count
             )
         )
     }

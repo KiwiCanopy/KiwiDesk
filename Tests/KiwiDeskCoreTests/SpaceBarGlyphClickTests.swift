@@ -132,10 +132,10 @@ struct SpaceBarGlyphClickTests {
         let built = try item(core, two, cap: 1)
         #expect(built.apps.map(\.windows) == [[WindowID(3)]])
         #expect(
-            built.overflowBefore
+            built.before.windows
                 == [WindowID(2), WindowID(5), WindowID(6)]
         )
-        #expect(built.overflowWindows == [WindowID(4)])
+        #expect(built.after.windows == [WindowID(4)])
         #expect(built.discs == 2)
     }
 

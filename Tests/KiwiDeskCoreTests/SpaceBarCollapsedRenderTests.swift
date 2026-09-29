@@ -175,8 +175,7 @@ func collapsedBar(
             spaceGlyph: .text("\(index + 1)", tinted: true),
             apps: apps,
             active: index + 1 == active,
-            overflow: [],
-            focusInOverflow: false
+            after: .none
         ).collapsed(to: content)
         if held, index == 1 {
             item.held = .init(screenName: "Dell", originName: nil)

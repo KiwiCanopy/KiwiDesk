@@ -225,16 +225,14 @@ struct GlyphGapRenderTests {
                 spaceGlyph: .text("1", tinted: true),
                 apps: apps,
                 active: true,
-                overflow: [WindowID(901), WindowID(902)],
-                focusInOverflow: false
+                after: .init(windows: [WindowID(901), WindowID(902)])
             ),
             SpaceBarOverlay.Item(
                 space: SpaceID("2"),
                 spaceGlyph: .text("2", tinted: true),
                 apps: [],
                 active: false,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             ),
         ]
         let manager = SpaceBarManager()
@@ -308,8 +306,7 @@ struct GlyphGapPlanTests {
                 spaceGlyph: .text("\($0)", tinted: false),
                 apps: apps,
                 active: $0 == 1,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         }
         // An App Bar beside it, so the Space Bar's slot is its

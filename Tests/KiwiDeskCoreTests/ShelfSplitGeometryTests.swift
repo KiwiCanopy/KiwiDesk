@@ -87,8 +87,7 @@ struct ShelfSplitPlanTests {
                 spaceGlyph: .text("\($0)", tinted: false),
                 apps: [],
                 active: $0 == 1,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         }
     }

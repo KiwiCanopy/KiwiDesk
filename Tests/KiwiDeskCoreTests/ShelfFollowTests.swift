@@ -21,8 +21,7 @@ struct ShelfFollowTests {
                 spaceGlyph: item.spaceGlyph,
                 apps: item.apps,
                 active: index + 1 == active,
-                overflow: item.overflowWindows,
-                focusInOverflow: item.focusInOverflow
+                after: item.after
             )
         }
         bar = SpaceBarManager.Bar(

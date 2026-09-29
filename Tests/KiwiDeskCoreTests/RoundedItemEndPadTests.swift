@@ -82,8 +82,7 @@ struct RoundedItemEndPadTests {
                     : .symbol("envelope"),
                 apps: ["Finder", "Mail", "Claude"].map { app($0) },
                 active: index == 1,
-                overflow: [],
-                focusInOverflow: false
+                after: .none
             )
         }
     }
