@@ -17,7 +17,7 @@ editing here:
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the
   Accessibility-class `PostEvent` service alone, never
-  `ListenEvent` (tccd log, device build, 2026-09-28). Five
+  `ListenEvent` (tccd log, device build, 2026-09-28). Six
   obligations:
   - **One tap, scroll-only.** A second `tapCreate(`, or a mask
     widened past `.scrollWheel`, is where an Input Monitoring
@@ -30,6 +30,10 @@ editing here:
     decision is the pure `ScrollGestureRouter`'s, and consumers
     hear it on the main queue (`ScrollTapSeamTests` for the
     thread, `ScrollGestureRouterTests` for the decision).
+  - **A consumer's timing reads `ScrollGestureEvent.time`**, the
+    tap's clock the router stamps, never a main-actor clock,
+    which a busy switch compresses into a burst (#1519;
+    `ScrollGestureRouterTests` ▸ `stampsTheClock`).
   - **A plain scroll is never consumed**: `ScrollGestureSettings`
     drops an empty chord, the router never owns one whatever it
     is handed, and a chord matches exactly

@@ -2718,7 +2718,8 @@ space_bar.set_front_app_title_cap(25)
 
 **Does:** hides Spaces with no windows from the bar, except the
 Space you are currently on, which always stays. Hidden Spaces
-remain reachable by shortcut.
+remain reachable by shortcut and by the
+[Space step](#scroll-gestures).
 
 **Example:**
 
@@ -3327,7 +3328,8 @@ KiwiDesk.set_mouse_resize("snap_back")
 **Does:** when `true`, a focus change warps the mouse pointer to
 the center of the newly-focused window. The pointer never moves
 while a mouse button is held down or when it is already inside
-the focused window. While KiwiDesk performs its own z-order
+the focused window, nor for a [scroll gesture](#scroll-gestures).
+While KiwiDesk performs its own z-order
 maintenance raises the warp is held, and it fires once they
 settle, for the window focus finally landed on. When focus lands
 on a window in an inactive space (cmd+tab into a stashed window),
@@ -3387,8 +3389,11 @@ Spaces included. A swipe steps one Space, and so does a notch of a
 mouse wheel; a fast roll or a free-spinning wheel steps one for the
 whole burst, and each notch counts again once the wheel pauses
 between notches. It stops at the first and last Space rather than
-wrapping, where the focused window's border bumps toward the
-step, and the pointer does not move.
+wrapping, where the focused window's border, if the shown Space
+has one, bumps toward the step, and the pointer does not move.
+The direction follows
+[Natural scrolling](#scroll_gestureset_natural_scrolling), as
+the window step's does.
 
 The keys must be exactly the ones set: ⌃⌥⌘ + scroll is not
 ⌃⌥ + scroll. While they are held, KiwiDesk takes the scroll on
@@ -3464,8 +3469,8 @@ scroll_gesture.set_space_step("")   -- off
 **Expects:** a boolean, then optionally `"trackpad"` or
 `"mouse"` (default `true` for both).
 
-**Does:** on, a scroll gesture moves focus the way Natural
-scrolling moves content; off, the other way. Named, the input
+**Does:** on, a scroll gesture steps the way Natural scrolling
+moves content; off, the other way. Named, the input
 takes the value alone; left out, both do. A swipe on a trackpad
 or Magic Mouse reads the trackpad's value and a notched mouse
 wheel the mouse's, whatever macOS's Natural scrolling is set
@@ -3487,7 +3492,8 @@ scroll_gesture.set_natural_scrolling(false, "mouse")
 [step distance](#scroll_gestureset_step_distance) of travel
 after its first, on every layout; off, a swipe moves one window
 however long it is. A mouse wheel moves one window per notch
-either way.
+either way, as the section above qualifies. The Space step
+always steps one Space per swipe.
 
 **Example:**
 

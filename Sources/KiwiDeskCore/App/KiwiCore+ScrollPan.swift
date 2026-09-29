@@ -11,15 +11,8 @@ final class ScrollPanSession {
     var spaceAt: @MainActor (CGPoint, StateCoordinator) -> SpaceID? = {
         point,
         state in
-        display(at: point).flatMap(state.workspaces.activeSpace(on:))
-    }
-
-    /// The display whose whole screen holds a point (AX space) —
-    /// the one lookup both scroll gestures take (#1519).
-    static func display(at point: CGPoint) -> DisplayID? {
-        let cocoa = GeometryUtils.axPoint(point)
-        return NSScreen.screens.first { $0.frame.contains(cocoa) }?
-            .kiwiDisplay?.id
+        GeometryUtils.display(at: point)
+            .flatMap(state.workspaces.activeSpace(on:))
     }
 
     fileprivate var space: SpaceID?
@@ -59,17 +52,10 @@ extension KiwiCore {
         // NEXT window in, so a step runs against the delta's sign.
         let step = steps > 0 ? -1 : 1
         for _ in 0..<abs(steps) {
-            guard let space = state.workspaces[id] else { return }
-            let moved: Bool
-            switch space.mode {
-            case .scrolling: moved = stepScrollPan(by: step, space: id)
-            case .monocle: moved = stepMonocle(space, by: step)
-            default: moved = stepInOrder(space, by: step)
-            }
-            guard moved else {
-                bumpScrollPan(space: id, by: step)
-                return
-            }
+            // A step that lands on nothing has said so already.
+            guard let space = state.workspaces[id],
+                stepScrollPan(space, by: step)
+            else { return }
         }
     }
 
@@ -94,81 +80,67 @@ extension KiwiCore {
         session.space = id
     }
 
-    /// The dead-end cue on the Space's focus, toward the step:
-    /// along the row's own axis where the layout has one.
-    private func bumpScrollPan(space id: SpaceID, by step: Int) {
-        guard let space = state.workspaces[id],
-            let focused = state.focusAnchor(of: space)
-        else { return }
-        let horizontal: Bool
+    /// One window on `space`; false where it landed on nothing.
+    /// A row goes through the arrow keys' own `navigate` — row
+    /// step, wrap, float tier (#488), dead-end bump (#436) and
+    /// deferred raise alike — without warping the pointer.
+    private func stepScrollPan(_ space: Space, by step: Int) -> Bool {
+        let direction = Self.direction(
+            step,
+            horizontal: rowIsHorizontal(space)
+        )
+        switch space.mode {
+        case .scrolling, .monocle:
+            // A flip's owed focus lands first, as `execute` does
+            // ahead of every focused-window command (#1391).
+            runPendingMonocleFocus()
+            guard space.id == state.workspaces.activeSpace else {
+                return false
+            }
+            return navigate(
+                [.string(direction.rawValue)],
+                swapping: false,
+                warp: false
+            ).isSuccess
+        default:
+            return stepInOrder(space, toward: direction, by: step)
+        }
+    }
+
+    /// The axis a step on `space` runs along: the row's own where
+    /// the layout has one.
+    private func rowIsHorizontal(_ space: Space) -> Bool {
         switch space.mode {
         case .scrolling:
-            horizontal =
-                tiler.settings.resolvedScrolling(for: id)
+            tiler.settings.resolvedScrolling(for: space.id)
                 .orientation == .horizontal
         case .monocle:
-            horizontal =
-                tiler.settings.resolvedMonocle(for: id)
-                .orientation == .horizontal
-        default: horizontal = true
-        }
-        flashDeadEnd(
-            focused,
-            direction: Self.direction(step, horizontal: horizontal)
-        )
-    }
-
-    /// One window along the row, through the arrow keys' own step
-    /// (wrap, deferred raise and all), without warping the pointer.
-    /// False where it landed on nothing.
-    private func stepScrollPan(by step: Int, space id: SpaceID) -> Bool {
-        guard let space = state.workspaces[id],
-            let focused = state.focusAnchor(of: space)
-        else { return false }
-        let horizontal =
-            tiler.settings.resolvedScrolling(for: id)
-            .orientation == .horizontal
-        return scrollingStep(
-            Self.direction(step, horizontal: horizontal),
-            space: space,
-            focused: focused,
-            swapping: false,
-            warp: false
-        ) != nil
-    }
-
-    /// Lands a flip's owed focus first, as `execute` does ahead of
-    /// every focused-window command (#1391): two steps inside one
-    /// flip would otherwise both start from the old window.
-    private func stepMonocle(_ stale: Space, by step: Int) -> Bool {
-        runPendingMonocleFocus()
-        guard let space = state.workspaces[stale.id],
-            let focused = state.focusAnchor(of: space)
-        else { return false }
-        let horizontal =
             tiler.settings.resolvedMonocle(for: space.id)
-            .orientation == .horizontal
-        return monocleCycle(
-            Self.direction(step, horizontal: horizontal),
-            space: space,
-            focused: focused,
-            swapping: false,
-            warp: false
-        ) != nil
+                .orientation == .horizontal
+        default: true
+        }
     }
 
     /// Any other layout: the next or previous window in the
     /// Space's own order, floats included, wrapping at the ends. A
     /// native-fullscreen member is left out: it sits on a Desktop
     /// nobody shows, so the focus gate refuses it (#1345).
-    private func stepInOrder(_ space: Space, by step: Int) -> Bool {
+    private func stepInOrder(
+        _ space: Space,
+        toward direction: Direction,
+        by step: Int
+    ) -> Bool {
         let ring = state.effectiveMembers(of: space).filter {
             state.windows[$0]?.isFullscreen != true
         }
-        guard ring.count > 1,
-            let focused = state.focusAnchor(of: space),
-            let index = ring.firstIndex(of: focused)
-        else { return false }
+        guard let focused = state.focusAnchor(of: space) else {
+            return false
+        }
+        guard ring.count > 1, let index = ring.firstIndex(of: focused)
+        else {
+            flashDeadEnd(focused, direction: direction)
+            return false
+        }
         let next = (index + step + ring.count) % ring.count
         focusWindow(ring[next], warp: false)
         return true

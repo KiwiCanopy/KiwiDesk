@@ -55,7 +55,8 @@ struct ScrollPanLayoutTests {
                     input: .trackpad,
                     delta: CGVector(dx: kind == .changed ? dx : 0, dy: 0),
                     momentum: false,
-                    location: .zero
+                    location: .zero,
+                    time: 0
                 ),
                 session: session
             )

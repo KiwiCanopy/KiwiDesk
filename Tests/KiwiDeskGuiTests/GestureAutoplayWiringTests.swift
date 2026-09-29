@@ -55,7 +55,7 @@ struct GestureAutoplayWiringTests {
                 range: body.upperBound..<entries.endIndex
             )
         )
-        let plays = try #require(entries.range(of: "playsOnAppear:autoplay"))
+        let plays = try #require(entries.range(of: "playsOnAppear:$autoplay"))
         let second = try #require(
             entries.range(
                 of: "GestureEntry(",
@@ -95,26 +95,35 @@ struct GestureAutoplayWiringTests {
         #expect(!expand.contains("onToggle"))
     }
 
-    /// Per visit: armed by the first click open, off for a search
-    /// open or a second click.
+    /// Per visit: armed only inside the click hook, gated on the
+    /// visit's `played`, and spent by the entry that plays — so a
+    /// search open, a second click or a re-mount rests.
     @Test("the drawer plays once per visit, on the click")
     func oncePerVisit() throws {
         let drawer = try Self.squashed(
             "Settings/Components/Gestures/GesturesDrawer.swift"
         )
-        #expect(drawer.contains("@Stateprivatevarplayed=false"))
-        #expect(
-            drawer.contains(
-                "onToggle:{openinautoplay=open&&!playedifopen{played=true}}"
-            )
+        let hook = try #require(
+            SourceScan.declarationBody(after: "onToggle:", in: drawer)
         )
-        #expect(
-            drawer.contains(
-                "GesturesScrollEntries(model:model,autoplay:autoplay)"
-            )
-        )
-        // The declaration and the toggle: nothing else arms it.
+        // One arming site besides the declaration, inside the hook
+        // and read against `played`.
         #expect(drawer.components(separatedBy: "autoplay=").count == 3)
+        #expect(hook.contains("autoplay="))
+        #expect(hook.contains("!played"))
+        #expect(drawer.components(separatedBy: "played=true").count == 2)
+        #expect(hook.contains("played=true"))
+        #expect(drawer.contains("autoplay:$autoplay"))
+        // The entry spends the flag before it plays.
+        let entry = try Self.squashed(
+            "Settings/Components/Gestures/GestureEntry.swift"
+        )
+        let appear = try #require(
+            SourceScan.declarationBody(after: ".onAppear", in: entry)
+        )
+        let spent = try #require(appear.range(of: "playsOnAppear=false"))
+        let plays = try #require(appear.range(of: "autoplay()"))
+        #expect(spent.lowerBound < plays.lowerBound)
     }
 
     /// Reduce Motion: the run is refused before it starts, and the

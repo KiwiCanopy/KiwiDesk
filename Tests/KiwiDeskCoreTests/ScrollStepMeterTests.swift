@@ -184,4 +184,11 @@ struct ScrollStepMeterTests {
         #expect(wheel(&meter, at: 0.01) == 0)
         #expect(wheel(&meter, dy: 10, at: 0.02) == 1)
     }
+
+    /// A retune past the router's pause would re-arm the latch at
+    /// every burst boundary, so a spin would step once per pause.
+    @Test("the latch's quiet is shorter than a burst's pause")
+    func quietInsidePause() {
+        #expect(Self.quiet < ScrollGestureRouter.wheelPause)
+    }
 }

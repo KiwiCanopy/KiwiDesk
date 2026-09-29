@@ -22,8 +22,9 @@ struct GestureEntry<Picture: View, Control: View>: View {
     /// (#94), and what it is about for VoiceOver.
     let help: String?
     let helpSubject: String?
-    /// Plays the picture once as the entry appears, then rests.
-    let playsOnAppear: Bool
+    /// Plays the picture once as the entry appears while set, and
+    /// spends it, so a re-mount in the same open card rests.
+    @Binding var playsOnAppear: Bool
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -42,11 +43,11 @@ struct GestureEntry<Picture: View, Control: View>: View {
         off: Bool = false,
         help: String? = nil,
         helpSubject: String? = nil,
-        playsOnAppear: Bool = false,
+        playsOnAppear: Binding<Bool> = .constant(false),
         @ViewBuilder picture: @escaping (CGFloat) -> Picture,
         @ViewBuilder control: @escaping () -> Control
     ) {
-        self.playsOnAppear = playsOnAppear
+        self._playsOnAppear = playsOnAppear
         self.help = help
         self.helpSubject = helpSubject
         self.text = text
@@ -74,7 +75,9 @@ struct GestureEntry<Picture: View, Control: View>: View {
         .contentShape(Rectangle())
         .onHover(perform: hover)
         .onAppear {
-            if playsOnAppear { autoplay() }
+            guard playsOnAppear else { return }
+            playsOnAppear = false
+            autoplay()
         }
     }
 

@@ -11,8 +11,9 @@ import SwiftUI
 /// resolved values.
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
-    /// The first entry plays once as it appears (`GesturesDrawer`).
-    var autoplay = false
+    /// The first entry plays once as it appears, spending this
+    /// (`GesturesDrawer`).
+    @Binding var autoplay: Bool
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
 
@@ -26,16 +27,17 @@ struct GesturesScrollEntries: View {
             L(
                 "shortcuts.gestures.scroll.sentence",
                 "Hold these keys and scroll to move focus window by "
-                    + "window along a Scrolling row. On any other "
-                    + "Space, focus moves through its windows in "
-                    + "order instead."
+                    + "window along a %1$@ row. On any other Space, "
+                    + "focus moves through its windows in order "
+                    + "instead.",
+                L("layout.scrolling.name", "Scrolling")
             ),
             surface: .windows,
             settings: model.config.settings,
             pace: .steps,
             // Core's verdict, so a hand-edited lone ⌃ greys too.
             off: gestures.sanitized.pan.isEmpty,
-            playsOnAppear: autoplay
+            playsOnAppear: $autoplay
         ) {
             GesturePicture.ScrollStep(t: $0, chord: gestures.pan)
         } control: {
@@ -46,7 +48,7 @@ struct GesturesScrollEntries: View {
                         chord: $model.config.scrollGesture.pan,
                         other: gestures.spaceStep,
                         otherGesture: .step,
-                        goToOther: { reveal(Self.controls.scrollSpaceStep) }
+                        reveal: reveal
                     )
                     .searchAnchored(
                         SettingsCatalog.shortcuts.gestures.children
@@ -117,7 +119,7 @@ struct GesturesScrollEntries: View {
                     chord: $model.config.scrollGesture.spaceStep,
                     other: gestures.pan,
                     otherGesture: .pan,
-                    goToOther: { reveal(Self.controls.scrollPan) }
+                    reveal: reveal
                 )
                 .searchAnchored(
                     SettingsCatalog.shortcuts.gestures.children
@@ -127,9 +129,14 @@ struct GesturesScrollEntries: View {
         }
     }
 
-    /// Go to: the other recorder's row, through the one reveal
+    /// Go to: a gesture's recorder row, through the one reveal
     /// channel the diff rows take.
-    private func reveal(_ control: SettingsControl) {
+    private func reveal(_ consumer: ScrollGestures.Consumer) {
+        let control =
+            switch consumer {
+            case .pan: Self.controls.scrollPan
+            case .step: Self.controls.scrollSpaceStep
+            }
         model.nav.pendingReveal = SettingsAnchor(
             destination: .shortcuts,
             anchor: control.id

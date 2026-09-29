@@ -4,9 +4,12 @@ import Foundation
 /// Directional `focus` / `swap` navigation, split out of
 /// `KiwiCore+Commands` for file size.
 extension KiwiCore {
+    /// `warp: false` is a scroll gesture's (#1656): the pointer
+    /// stays where the hand holds it.
     func navigate(
         _ args: [JSONValue],
-        swapping: Bool
+        swapping: Bool,
+        warp: Bool = true
     ) -> CommandResponse {
         guard let raw = args.first?.stringValue,
             let direction = Direction(rawValue: raw)
@@ -50,7 +53,8 @@ extension KiwiCore {
                 direction,
                 space: space,
                 focused: focused,
-                swapping: swapping
+                swapping: swapping,
+                warp: warp
             )
         {
             return response
@@ -65,7 +69,8 @@ extension KiwiCore {
                 direction,
                 space: space,
                 focused: focused,
-                swapping: swapping
+                swapping: swapping,
+                warp: warp
             )
         {
             return response
@@ -211,7 +216,7 @@ extension KiwiCore {
                 scheduleZOrderRestore()
             }
         } else {
-            focusWindow(target, warp: true)
+            focusWindow(target, warp: warp)
         }
         return .ok()
     }

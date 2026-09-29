@@ -15,7 +15,8 @@ import SwiftUI
 struct GesturesDrawer: View {
     @ObservedObject var model: SettingsModel
     @State private var expanded = false
-    /// Per visit, like `expanded`: the first click open plays.
+    /// Per visit, like `expanded`: the first click open arms the
+    /// first entry's play, which spends it.
     @State private var played = false
     @State private var autoplay = false
 
@@ -38,7 +39,7 @@ struct GesturesDrawer: View {
                         "Scroll gestures — anywhere, holding a modifier"
                     )
                 )
-                GesturesScrollEntries(model: model, autoplay: autoplay)
+                GesturesScrollEntries(model: model, autoplay: $autoplay)
                 GestureGroupHeading(
                     title: L(
                         "shortcuts.gestures.group.windows",

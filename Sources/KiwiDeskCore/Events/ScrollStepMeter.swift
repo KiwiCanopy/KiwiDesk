@@ -11,6 +11,8 @@ import CoreGraphics
 public struct ScrollStepMeter: Sendable {
     /// The quiet that re-arms a latched wheel, in seconds; a
     /// provisional number until a device logs notch intervals.
+    /// Held below `ScrollGestureRouter.wheelPause`, which ends the
+    /// burst and so resets the latch.
     static let wheelQuiet = 0.12
 
     private let longSwipes: Bool

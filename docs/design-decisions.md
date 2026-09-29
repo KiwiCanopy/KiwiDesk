@@ -9669,6 +9669,7 @@ everything just slid. Fixed behavior, no setting: no peer WM
 ships a knob here, and if demand materializes it becomes a
 Lua-only setting later. `CloseFocusReturnTests` pins all of it.
 
+:::unreleased
 **The page is "Shortcuts & Gestures", and what the mouse does is
 explained at its top** (#1726, owner and ui-designer 2026-09-27/28).
 A new user never discovers a mouse control from a window of
@@ -9707,7 +9708,6 @@ is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
 while pointed at.
 
-:::unreleased
 When the user's own click opens the card, its first picture also
 plays once and rests (owner ruling 2026-09-29), and the
 difference from the rest of this page is the reader. The rule's
@@ -9812,7 +9812,7 @@ flick, not the hand, and a fast flick's glide runs far past any
 swipe, so counting it would race down the row. A wheel notch is one
 window either way, since a notch is already a discrete act — but
 a fast roll or a free-spinning wheel is one window for the whole
-burst: a notch closer than 120 ms to the previous one in the same
+burst: a notch too close behind the previous one in the same
 direction moves nothing, so notches clicked one at a time each
 count and a spin cannot race down the row (the Space step's
 paragraph below argues the number).
@@ -9857,8 +9857,8 @@ preference would guard a case that cannot arise. The refusal is
 what makes the warning unnecessary, not the ⌃⌥ default:
 allowing a one-modifier chord anywhere re-opens it.
 
-**The two scroll gestures take different chords, and ⌃⌥⌘ stays
-reserved for the Space step** (#1519, owner ruling 2026-09-29).
+**The two scroll gestures take different chords, and ⌃⌥⌘ is the
+Space step's** (#1519, owner ruling 2026-09-29).
 Both read either scroll axis — a Scrolling row can run
 vertically, and ⇧ is allowed on either — so no direction can
 tell a pan from a Space step, and one chord would reach only
@@ -9881,8 +9881,9 @@ aim at, and `hide_empty` is a display setting, which must not
 change what a gesture reaches — the Space landed on shows,
 because the bar always draws the current one. It stops at the
 first and last Space, as macOS's own Desktop swipe does — the
-shown Space's ring bumps there, as a row end does — and a wrap
-would only make an overshoot worse. There is no long-swipe
+shown Space's ring bumps there, as a row end does, and an empty
+Space, having no ring, stays still — and a wrap would only make
+an overshoot worse. There is no long-swipe
 option: a Space switch redraws the whole screen, so counting
 distance would repaint it several times for one hand.
 

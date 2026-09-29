@@ -138,8 +138,8 @@ struct GesturesScrollWiringTests {
         #expect(step.lowerBound < natural.lowerBound)
     }
 
-    /// Each recorder refuses the OTHER gesture's chord and its Go
-    /// to reveals that gesture's row, never its own.
+    /// Each recorder refuses the OTHER gesture's chord, and Go to
+    /// reveals the row of the gesture the refusal names.
     @Test("each recorder's Go to reveals the other row")
     func goToCrosses() throws {
         let group = Self.squash(
@@ -147,24 +147,28 @@ struct GesturesScrollWiringTests {
         )
         #expect(
             group.contains(
-                "other:gestures.spaceStep,otherGesture:.step,"
-                    + "goToOther:{reveal(Self.controls.scrollSpaceStep)}"
+                "other:gestures.spaceStep,otherGesture:.step,reveal:reveal"
             )
         )
         #expect(
             group.contains(
-                "other:gestures.pan,otherGesture:.pan,"
-                    + "goToOther:{reveal(Self.controls.scrollPan)}"
+                "other:gestures.pan,otherGesture:.pan,reveal:reveal"
             )
         )
-        let reveal = try #require(
-            SourceScan.declarationBody(
-                after: "private func reveal(",
-                in: try Self.source("GesturesScrollEntries.swift")
+        let reveal = Self.squash(
+            try #require(
+                SourceScan.declarationBody(
+                    after: "private func reveal(",
+                    in: try Self.source("GesturesScrollEntries.swift")
+                )
             )
         )
-        #expect(Self.squash(reveal).contains("model.nav.pendingReveal="))
-        #expect(Self.squash(reveal).contains("anchor:control.id"))
+        #expect(reveal.contains("case.pan:Self.controls.scrollPan"))
+        #expect(
+            reveal.contains("case.step:Self.controls.scrollSpaceStep")
+        )
+        #expect(reveal.contains("model.nav.pendingReveal="))
+        #expect(reveal.contains("anchor:control.id"))
         // The row the other Go to lands on is anchored there.
         #expect(
             group.contains(
@@ -178,19 +182,26 @@ struct GesturesScrollWiringTests {
     /// through `LinkedCaption` at the frame's slot.
     @Test("the other gesture's refusal draws Go to at its slot")
     func refusalLinks() throws {
-        let field = try Self.source("ScrollChordRecorderField.swift")
+        let field = try Self.source(
+            "ScrollChordRecorderField+Refusal.swift"
+        )
         let caption = Self.squash(
             try #require(
                 SourceScan.declarationBody(
-                    after: "private func refusalCaption(",
+                    after: "func refusalCaption(",
                     in: field
                 )
             )
         )
-        #expect(caption.contains("ifcase.otherGesture=refusal,letgoToOther"))
+        #expect(
+            caption.contains(
+                "ifcase.otherGesture(letholder)=refusal,letreveal"
+            )
+        )
         #expect(
             caption.contains("CrossReferenceRow.split(Self.frame(refusal))")
         )
-        #expect(caption.contains("navigate:goToOther"))
+        #expect(caption.contains("navigate:{reveal(holder)}"))
+        #expect(caption.contains("linkTitle:Self.goTo(holder)"))
     }
 }

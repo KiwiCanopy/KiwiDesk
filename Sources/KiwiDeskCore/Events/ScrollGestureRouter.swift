@@ -24,7 +24,8 @@ public struct ScrollGestureEvent: Equatable, Sendable {
     public var location: CGPoint
     /// When the tap read it, in `CFAbsoluteTime` seconds: the
     /// hand's own spacing, which a busy main actor would squash.
-    public var time: Double = 0
+    /// No default: an event built without it reads as a spin.
+    public var time: Double
 }
 
 /// Decides, per scroll event, whether a registered chord owns it
@@ -41,7 +42,9 @@ struct ScrollGestureRouter {
     /// A lift is followed by momentum within a frame or two; with
     /// none by then the gesture has ended.
     static let momentumGrace = 0.1
-    /// A wheel's notches of one burst arrive well inside this.
+    /// A wheel's notches of one burst arrive well inside this;
+    /// held above `ScrollStepMeter.wheelQuiet`, whose latch the
+    /// burst's end resets.
     static let wheelPause = 0.25
 
     private struct Owner {

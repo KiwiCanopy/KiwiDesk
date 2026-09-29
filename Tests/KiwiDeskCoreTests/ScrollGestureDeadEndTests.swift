@@ -62,7 +62,8 @@ struct ScrollGestureDeadEndTests {
                     input: .trackpad,
                     delta: CGVector(dx: kind == .changed ? dx : 0, dy: 0),
                     momentum: false,
-                    location: .zero
+                    location: .zero,
+                    time: 0
                 ),
                 session: session
             )
@@ -121,7 +122,8 @@ struct ScrollGestureDeadEndTests {
                     input: .trackpad,
                     delta: CGVector(dx: dx, dy: 0),
                     momentum: false,
-                    location: .zero
+                    location: .zero,
+                    time: 0
                 ),
                 session: session
             )
@@ -129,5 +131,37 @@ struct ScrollGestureDeadEndTests {
         // The first window moved; the next twenty had nowhere.
         #expect(core.activeSpace?.focused == WindowID(3))
         #expect(bumps().count == 1)
+    }
+
+    /// The arrow keys' own path: a floating focus on a row reaches
+    /// the tiled window beside it rather than bumping — the float
+    /// is in no row, which the row step alone read as a wall.
+    @Test(
+        "a floating focus steps as the arrow keys do",
+        arguments: ["scrolling", "monocle"]
+    )
+    func floatFocusFollowsTheKeys(mode: String) {
+        func setUp() -> (KiwiCore, ScrollPanSession, () -> [Bump]) {
+            let (core, session, bumps) = makeCore(mode, focus: WindowID(1))
+            let space = core.state.workspaces.space(of: WindowID(1))!
+            core.state.windows.setFloating(WindowID(3), true)
+            core.state.apply(
+                .windowMoved(
+                    WindowID(3),
+                    CGRect(x: 20, y: 400, width: 200, height: 200)
+                )
+            )
+            core.state.workspaces.focus(WindowID(3), in: space)
+            return (core, session, bumps)
+        }
+        let (keys, _, keyBumps) = setUp()
+        keys.execute("focus", args: [.string("right")])
+        let (gesture, session, bumps) = setUp()
+        swipe(gesture, session, dx: -80)
+        #expect(
+            gesture.activeSpace?.focused == keys.activeSpace?.focused
+        )
+        #expect(bumps().count == keyBumps().count)
+        #expect(gesture.activeSpace?.focused != WindowID(3))
     }
 }

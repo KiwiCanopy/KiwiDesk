@@ -8,7 +8,7 @@ final class ScrollSpaceStepSession {
     /// The display under a point (AX space). Live by default; a
     /// suite states its own.
     var displayAt: @MainActor (CGPoint) -> DisplayID? = {
-        ScrollPanSession.display(at: $0)
+        GeometryUtils.display(at: $0)
     }
 
     fileprivate var display: DisplayID?
@@ -55,7 +55,9 @@ extension KiwiCore {
     }
 
     /// The neighbour of the Space `display` shows, in that
-    /// screen's order — the Space Bar's.
+    /// screen's order — the Space Bar's, empty Spaces included
+    /// where `hide_empty` leaves them off the bar, which is a
+    /// display setting and never changes reach (#1519 ruling).
     private func stepSpace(on display: DisplayID, by step: Int) {
         let order = state.workspaces.spaces(on: display)
         guard let shown = state.workspaces.activeSpace(on: display),
