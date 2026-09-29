@@ -41,3 +41,24 @@ enum BarPlate {
             )
     }
 }
+
+extension BarPlate {
+    /// The span a run DRAWS, in the plate's coordinates (#1779):
+    /// the run less each end item's own content inset — `insets`
+    /// zero on a boxed shelf, where the box is what shows. What
+    /// the section divider centres between; zero for no run.
+    nonisolated static func content(
+        strip: CGRect,
+        runStart: CGFloat,
+        runTotal: CGFloat,
+        insets: ItemEnds,
+        horizontal: Bool
+    ) -> CGRect {
+        guard runTotal > 0 else { return .zero }
+        let start = runStart + insets.leading
+        let extent = max(runTotal - insets.total, 0)
+        return horizontal
+            ? CGRect(x: start, y: 0, width: extent, height: strip.height)
+            : CGRect(x: 0, y: start, width: strip.width, height: extent)
+    }
+}

@@ -37,8 +37,15 @@ extension SpaceBarItemView {
         let slots = appCount + discs
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
-        return pad * 2 + ends.total + cell + divider
+        return contentInset(ends: ends).total + cell + divider
             + CGFloat(slots) * cell + gaps
+    }
+
+    /// How far in from each end an item's content starts: `pad`
+    /// and the rounded-end clearance `ends` owes — the one reading
+    /// `layout()`, `autoLength` and the shelf divider share (#1779).
+    static func contentInset(ends: ItemEnds) -> ItemEnds {
+        ItemEnds(leading: pad + ends.leading, trailing: pad + ends.trailing)
     }
 
     override func layout() {
@@ -53,7 +60,7 @@ extension SpaceBarItemView {
         // glyph to center it, and the glyph fonts are set in
         // `restyle`.
         restyle()
-        var cursor = Self.pad + ends.leading
+        var cursor = Self.contentInset(ends: ends).leading
         place(identifierImage, at: cursor, cell: cell)
         place(
             identifierLabel,

@@ -116,6 +116,20 @@ extension SpaceBarOverlay {
                 fit: style.backgroundFit
             )
         self.plateFrame = plateFrame
+        contentFrame = BarPlate.content(
+            strip: strip,
+            runStart: pinFront ? 0 : runStart,
+            runTotal: pinFront ? axis : total,
+            insets: pinFront
+                ? .zero
+                : Self.contentInsets(
+                    items: items,
+                    depth: depth,
+                    look: style,
+                    frontFollows: frontApp != nil
+                ),
+            horizontal: horizontal
+        )
         let hosting = glassHosting(style)
         prepareGlassHosting(hosting, pinnedFront: pinFront)
         let itemFrames = layoutLayerDivider(

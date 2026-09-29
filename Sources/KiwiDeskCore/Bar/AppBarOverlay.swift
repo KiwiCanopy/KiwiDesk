@@ -34,6 +34,9 @@ public final class AppBarOverlay {
     /// The plate this section's run asks for, in `root`'s
     /// coordinates — the shelf unions it with the other section's.
     var plateFrame: CGRect = .zero
+    /// The span this section's run draws, in `root`'s coordinates —
+    /// what the shelf's section divider centres against (#1779).
+    var contentFrame: CGRect = .zero
     /// Fires after every render, so the shelf re-lays its plate.
     var onRendered: @MainActor () -> Void = {}
     var itemViews: [AppBarItemView] = []
@@ -224,6 +227,11 @@ public final class AppBarOverlay {
                 self?.dragEnded(view)
             }
         }
+        contentFrame = drawnContent(
+            frames: frames,
+            strip: strip,
+            horizontal: m.horizontal
+        )
         // Single dispatch for glass hosting mode (#407).
         BarMotion.runLayout {
             installGlassHosting(
