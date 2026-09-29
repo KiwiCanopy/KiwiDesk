@@ -12,7 +12,9 @@ public enum ProfileComposition {
         public let spaceModes: [SpaceID: LayoutMode]
         /// Screen per space (dense over `spaces`).
         public let assignment: [SpaceID: DisplayID]
-        public let settings: TilingSettings
+        /// Unpainted: the apply wears the shared look over it
+        /// (#1752), so the GUI never reads it raw.
+        let settings: TilingSettings
         /// The starter's title when composed from it (#1662).
         public let sourceTitle: StarterTitle?
     }
