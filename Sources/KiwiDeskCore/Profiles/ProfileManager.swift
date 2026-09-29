@@ -46,11 +46,9 @@ public final class ProfileManager {
     /// from, and what a Desktop switch asks for the declared
     /// Spaces instead of the disk (#1245).
     private(set) var active: ActiveProfile?
-    /// The live profile's saved layout modes as KiwiDesk last
-    /// adopted or wrote them — what a question about the live
-    /// profile's layouts reads instead of its file (#1245, #1518).
-    /// Tagged with the profile they are, so a copy an ender left
-    /// behind can never answer for another.
+    /// The live profile's saved layout modes as last adopted or
+    /// written (#1245, #1518), tagged so a stale copy never
+    /// answers for another profile.
     private var savedModesRecord:
         (profile: String, modes: [SpaceID: LayoutMode])?
 
@@ -144,8 +142,7 @@ public final class ProfileManager {
             try clearDormantDefaults(count: profile.monitorCount)
         }
         try write(profile)
-        active = ActiveProfile(profile)
-        savedModesRecord = (profile.name, profile.spaceModes)
+        adopt(profile)
         standard = nil
         isDirty = false
     }
@@ -292,8 +289,7 @@ public final class ProfileManager {
     /// `apply(profile:)`'s and no one else's — profiles.md ▸
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
-        active = ActiveProfile(profile)
-        savedModesRecord = (profile.name, profile.spaceModes)
+        adopt(profile)
         standard = nil
         isDirty = !fits
     }
@@ -307,6 +303,12 @@ public final class ProfileManager {
         active = nil
         self.standard = standard
         isDirty = true
+    }
+
+    /// The one place both adoption records are set.
+    private func adopt(_ profile: Profile) {
+        active = ActiveProfile(profile)
+        savedModesRecord = (profile.name, profile.spaceModes)
     }
 
     /// Resets adoption state for Reset All Settings (#634).

@@ -165,13 +165,32 @@ struct BarMenuRowsTests {
         let current = core.tiler.settings.spaceBarStyle.resolvedGlyphSpan
         #expect(spans.filter(\.checked).map(\.title) == ["\(current)"])
         var draft = TilingSettings()
-        core.onLiveProfileWritten = { edit in edit(&draft) }
+        var persisted = false
+        core.onLiveProfileWritten = { edit, written in
+            edit(&draft)
+            persisted = written
+        }
         let pick = current == 3 ? 4 : 3
         perform(spans[pick - SpaceBarStyle.glyphSpanRange.lowerBound])
         #expect(core.tiler.settings.spaceBarStyle.glyphSpan == pick)
         #expect(draft.spaceBarStyle.glyphSpan == pick)
+        #expect(persisted)
         let stored = try core.profiles.read(name: "Desk")
         #expect(stored.settings.spaceBarStyle.glyphSpan == pick)
+    }
+
+    /// With no profile live the pick lasts the session: the draft
+    /// is told no file took it.
+    @Test("a span picked with no profile live is session-only")
+    func spanWithoutProfileIsSession() {
+        LocalizationManager.shared.select("en")
+        let core = seededCore()
+        #expect(core.profiles.currentName == nil)
+        var told: [Bool] = []
+        core.onLiveProfileWritten = { _, persisted in told.append(persisted) }
+        core.setGlyphSpanFromBar(4)
+        #expect(core.tiler.settings.spaceBarStyle.glyphSpan == 4)
+        #expect(told == [false])
     }
 
     @Test("the divider's reset is greyed at the default")

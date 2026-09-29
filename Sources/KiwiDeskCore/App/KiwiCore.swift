@@ -319,7 +319,7 @@ public final class KiwiCore {
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
     /// Fired on every live-profile write from outside Settings.
-    public var onLiveProfileWritten: LiveProfileWrite = { _ in }
+    public var onLiveProfileWritten: LiveProfileWrite = { _, _ in }
 
     /// The UI-bridge verbs' GUI hooks (#330, #678 item 18) —
     /// declared and argued as a bundle in `KiwiCore+LuaAPI`,

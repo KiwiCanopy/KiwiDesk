@@ -1168,8 +1168,7 @@ and the tour owns its undo*.
 `KiwiCore.writeThroughLiveProfile` door** — the tour's look, a
 bar menu's row (#1518) — which writes the file non-adopting and
 then hands the SAME edit to an open draft through
-`onLiveProfileWritten` — whether or not a file took it, since
-with no profile live the change is the session's — never a
+`onLiveProfileWritten`, told whether a file took it — never a
 caller's own announcement
 (`ShelfPaintTests` ▸ `paintsAreAnnounced`, `BarMenuRowsTests` ▸
 `discSetsTheSpan`). The draft policy is ruled here, once
@@ -1178,7 +1177,12 @@ dirty one takes the edit on BOTH sides of its diff, so its next
 Save neither writes the old value back nor counts the change as
 the user's, and on a leaf the draft had itself staged the write,
 the newer act, wins (`BarMenuLandingTests`); a stored profile's
-draft is another file and takes nothing. A writer that paints
+draft is another file and takes nothing. An edit NO file took —
+no profile live, or the write failed — lasts the session, as the
+tour's click does: a dirty draft takes nothing of it, since
+taking it on both sides would call a session value saved
+(`BarMenuLandingTests` ▸ `sessionOnlyWriteLeavesTheDraft`,
+`BarMenuRowsTests` ▸ `spanWithoutProfileIsSession`). A writer that paints
 more than the leaves it names — the tour's whole look — refuses
 while a live-profile draft is dirty instead
 (`OnboardingLooksTests` ▸ `draftBlocks`).

@@ -93,8 +93,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     /// A write of the live profile from outside Settings — the
     /// tour's look (#1720), a bar menu's row (#1518).
-    func adoptLiveWrite(_ edit: (inout TilingSettings) -> Void) {
-        model.adoptLiveWrite(edit)
+    func adoptLiveWrite(
+        _ edit: (inout TilingSettings) -> Void,
+        persisted: Bool
+    ) {
+        model.adoptLiveWrite(edit, persisted: persisted)
     }
 
     /// Shows dashboard navigated to destination (#326).

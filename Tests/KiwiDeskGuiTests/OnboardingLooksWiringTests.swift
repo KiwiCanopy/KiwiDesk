@@ -40,9 +40,11 @@ struct OnboardingLooksWiringTests {
         let delegate = try source("AppDelegate.swift")
         #expect(
             delegate.contains(
-                "core.onLiveProfileWritten = { [weak self] edit in\n"
-                    + "            self?.dashboardIfCreated?"
-                    + ".adoptLiveWrite(edit)"
+                "core.onLiveProfileWritten = { [weak self] "
+                    + "edit, persisted in\n"
+                    + "            self?.dashboardIfCreated?.adoptLiveWrite(\n"
+                    + "                edit,\n"
+                    + "                persisted: persisted"
             )
         )
         let model = try source("Settings/SettingsModel+LiveWrite.swift")

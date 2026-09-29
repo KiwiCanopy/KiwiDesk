@@ -67,7 +67,10 @@ struct BarMenuLandingTests {
         let model = dirtyModel()
         #expect(model.isDirty)
         let before = model.draftChangeCount
-        model.adoptLiveWrite { $0.spaceBarStyle.glyphSpan = 7 }
+        model.adoptLiveWrite(
+            { $0.spaceBarStyle.glyphSpan = 7 },
+            persisted: true
+        )
         #expect(model.config.settings.spaceBarStyle.glyphSpan == 7)
         #expect(model.cleanConfig.settings.spaceBarStyle.glyphSpan == 7)
         #expect(model.isDirty)
@@ -81,7 +84,10 @@ struct BarMenuLandingTests {
         let model = dirtyModel()
         model.target = .storedProfile("Other")
         let span = model.config.settings.spaceBarStyle.glyphSpan
-        model.adoptLiveWrite { $0.spaceBarStyle.glyphSpan = span + 2 }
+        model.adoptLiveWrite(
+            { $0.spaceBarStyle.glyphSpan = span + 2 },
+            persisted: true
+        )
         #expect(model.config.settings.spaceBarStyle.glyphSpan == span)
     }
 
@@ -99,7 +105,22 @@ struct BarMenuLandingTests {
         model.suppressDirty = true
         model.config.settings.kiwishelf.minimum = loaded + 9
         model.suppressDirty = false
-        model.adoptLiveWrite { _ in }
+        model.adoptLiveWrite({ _ in }, persisted: true)
         #expect(model.config.settings.kiwishelf.minimum == loaded)
+    }
+
+    /// An edit no file took — no profile live, or a failed write —
+    /// lasts the session, as the tour's does: a dirty draft keeps
+    /// what it holds rather than calling the value saved.
+    @Test("a dirty draft takes nothing of a session-only write")
+    func sessionOnlyWriteLeavesTheDraft() {
+        let model = dirtyModel()
+        let span = model.config.settings.spaceBarStyle.glyphSpan
+        model.adoptLiveWrite(
+            { $0.spaceBarStyle.glyphSpan = span + 2 },
+            persisted: false
+        )
+        #expect(model.config.settings.spaceBarStyle.glyphSpan == span)
+        #expect(model.cleanConfig.settings.spaceBarStyle.glyphSpan == span)
     }
 }
