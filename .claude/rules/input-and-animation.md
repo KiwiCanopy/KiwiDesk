@@ -404,11 +404,24 @@ editing here:
   OPEN). Since #1088 the gate is read at the report's DELIVERY,
   after the off-main liveness read (the bullet above says why).
   `FocusReportProvenanceTests` drives the real branch and
-  `FocusReportEmitterCensusTests` pins the two emitters. Stated,
+  `FocusReportEmitterCensusTests` is the census of emitters. Stated,
   not held: an app that does activate is re-reported by
   `appActivated`'s own focused-window read, which is what closes
   the ordering race on a real cmd-tab — that read may name a lazy
   app's OLD window, and #465 then converges it.
+  **A pid LaunchServices cannot name is never an identity
+  (#1785).** A process an app starts as its own LaunchServices
+  child (Orion's second profile) is listed with pid -1 and its
+  activation is announced under its parent's pid, while the
+  WindowServer and AX know its real one. So a pid ≤ 0 is refused
+  at `syncObservation` and `attach` and never read as the active
+  app, the heal resolves a census pid the running-app list lacks
+  by that pid (`ProcessIdentity.appAt`, never the record's own
+  `processIdentifier`), an app with such a process takes its
+  activation focus from the family's front-most window after the
+  reorder rather than from the announced pid, and the gate counts
+  a sibling process of the active app as active
+  (`ProcessIdentityTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

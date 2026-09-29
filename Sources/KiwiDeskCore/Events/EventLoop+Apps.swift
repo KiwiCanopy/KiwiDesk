@@ -112,6 +112,11 @@ extension EventLoop {
 
     private func appTerminated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
+        // A child registration exits unnamed (#1785).
+        guard Self.isProcessID(pid) else {
+            retireExitedObservers()
+            return
+        }
         detach(pid: pid, restoreEnhancedUI: false)
         onEvent(.appTerminated(pid: pid))
     }
@@ -150,7 +155,8 @@ extension EventLoop {
     func appHideChanged(pid: pid_t, ref: AppRef) {
         // Ignored and prohibited apps have no observer; nothing
         // of theirs is tracked, so there is nothing to reconcile
-        // (mirrors `appActivated`'s guard).
+        // (mirrors `appActivated`'s guard). Nor has an unnamed
+        // pid (#1785): a child's hide is the heal's to settle.
         guard observers[pid] != nil else { return }
         reconcile(pid: pid, app: ref)
     }
@@ -176,6 +182,12 @@ extension EventLoop {
             for: RunningApp(app),
             scanWindowsAtAttach: false
         )
+        // An unnamed activation (#1785) leaves the gate with no
+        // reading, which fails open.
+        guard Self.isProcessID(pid) else {
+            lastActivePid = nil
+            return
+        }
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
         }
@@ -189,6 +201,13 @@ extension EventLoop {
         // Electron tree, other native Space) is known before
         // the managed-window guard below.
         reconcile(pid: pid, app: AppRef(app))
+        // One app, several processes: the announced pid may be a
+        // sibling's, so its focused window is not the answer.
+        let siblings = siblingProcesses(of: pid)
+        guard siblings.isEmpty else {
+            reportFrontWindow(of: siblings.union([pid]))
+            return
+        }
         // Clicking a window of another app only activates the
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the

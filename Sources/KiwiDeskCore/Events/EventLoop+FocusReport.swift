@@ -107,16 +107,21 @@ extension EventLoop {
 
     /// Whether `pid` is the app macOS activated last. Before any
     /// activation the frontmost reading stands in; with neither,
-    /// the report stands — fails OPEN by design (#1322).
+    /// the report stands — fails OPEN by design (#1322). A
+    /// sibling process of the active one counts: LaunchServices
+    /// announces a child's activation under its parent (#1785).
     func reportsFromActiveApp(_ pid: pid_t) -> Bool {
-        guard let active = lastActivePid ?? frontmostPID() else {
-            return true
+        guard let active = activeAppReading() else { return true }
+        return active == pid || areSiblings(active, pid)
+    }
+
+    private func activeAppReading() -> pid_t? {
+        (lastActivePid ?? frontmostPID()).flatMap {
+            Self.isProcessID($0) ? $0 : nil
         }
-        return active == pid
     }
 
     private func describeActiveApp() -> String {
-        (lastActivePid ?? frontmostPID()).map { "pid \($0)" }
-            ?? "unknown"
+        activeAppReading().map { "pid \($0)" } ?? "unknown"
     }
 }
