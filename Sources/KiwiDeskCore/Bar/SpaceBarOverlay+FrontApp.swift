@@ -76,11 +76,14 @@ extension SpaceBarOverlay {
         let cell = SpaceBarItemView.cell(
             contentDepth: style.contentDepth(forDepth: depth)
         )
-        let chip = style.hasBox || wantsBoxGlass(style)
-        let inset = chip ? pad : 0
+        let inset = chipEndPad(
+            style,
+            depth: depth,
+            horizontal: horizontal
+        )
         var extent =
             style.itemGap + BarDivider.sectionThickness
-            + style.itemGap + inset + cell + inset
+            + style.itemGap + inset.total + cell
         if horizontal {
             extent += pad
             let size = style.titleFontSize(forDepth: depth)
@@ -142,9 +145,29 @@ extension SpaceBarOverlay {
             thickness: BarDivider.sectionThickness,
             lengthShare: BarDivider.sectionLengthShare
         )
-        let chip = style.hasBox || wantsBoxGlass(style)
         return BarDivider.sectionThickness + style.itemGap
-            + (chip ? SpaceBarItemView.pad : 0)
+            + chipEndPad(style, depth: depth, horizontal: horizontal)
+            .leading
+    }
+
+    /// The front chip's end padding — an item's pad, plus the
+    /// rounded end's clearance where the app icon sits: leading
+    /// always, trailing only on a vertical bar, where no title
+    /// follows the icon (#1763, owner 2026-09-29) — or 0 where no
+    /// chip draws. The extent, the content's start, the title's
+    /// cap and the box all read it.
+    func chipEndPad(
+        _ style: SpaceBarLook,
+        depth: CGFloat,
+        horizontal: Bool
+    ) -> ItemEnds {
+        guard style.hasBox || wantsBoxGlass(style) else { return .zero }
+        let pad = SpaceBarItemView.pad
+        let clear = SpaceBarItemView.endClearance(look: style, depth: depth)
+        return ItemEnds(
+            leading: pad + clear,
+            trailing: pad + (horizontal ? 0 : clear)
+        )
     }
 
     /// Focused app glyph or icon layout with accessibility (#160, QA
@@ -245,11 +268,13 @@ extension SpaceBarOverlay {
         frontName.sizeToFit()
         let height = frontName.frame.height
         // Clamp to the viewport's remaining length so a long name
-        // ellipsizes instead of hard-clipping at the panel edge.
-        let available = max(
-            viewport - offset - SpaceBarItemView.pad,
-            0
+        // ellipsizes instead of hard-clipping at the panel edge; a
+        // chip's box runs its end pad past the name (#1763).
+        let trailing = max(
+            SpaceBarItemView.pad,
+            chipEndPad(style, depth: depth, horizontal: true).trailing
         )
+        let available = max(viewport - offset - trailing, 0)
         frontName.frame = CGRect(
             x: offset,
             y: BarTextGlyph.originY(

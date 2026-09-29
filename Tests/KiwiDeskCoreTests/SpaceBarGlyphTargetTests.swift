@@ -49,7 +49,19 @@ struct SpaceBarGlyphTargetTests {
             appCount: apps.count,
             overflow: overflow.count,
             contentDepth: Self.depth,
-            glyphGap: 0
+            glyphGap: 0,
+            ends: SpaceBarItemView.ends(
+                look: SpaceBarLook(),
+                depth: Self.depth,
+                first: false,
+                last: false,
+                leadsWithIcon: false,
+                endsInIcon: SpaceBarItemView.endsInIcon(
+                    appCount: apps.count,
+                    badged: false,
+                    horizontal: true
+                )
+            )
         )
         let view = SpaceBarItemView(
             frame: horizontal

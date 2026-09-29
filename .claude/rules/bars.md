@@ -160,6 +160,21 @@ twice, was a question the user answered twice. The argument is
   run's outer `pad` the one slack allowed where `item_gap` is
   below it. `ShelfNeedParityTests` holds both bars to it, both
   placements, a gap each side of the pad.
+- **Add at every item-length site the end inset its layout adds,
+  through the one home** (#1763): a rounded end's clearance is
+  `KiwiShelf.endClearance`, handed the item's own cross offset,
+  and which ends draw rounded is the one
+  `KiwiShelf.roundsItemEnds`, fed the run place the render flags
+  its views with (`runPlace`), never a second reading — so a
+  Space item's `autoLength`, the front-app chip's extent and its
+  title's cap, the App Bar's slot and the Settings preview's need
+  each add what their layout draws. `RoundedItemEndPadTests` ▸
+  `boxedItemMeasuresWhatItDraws` and `RoundedItemEndPadTests` ▸
+  `plateItemsPadOnlyTheRunEnds` hold the Space item,
+  `RoundedItemEndPadChipTests` the chip and the App Bar, and
+  `ShelfStripPreviewTests` ▸ `needCarriesPipClearance` the
+  preview; a new item type owes one of them a clause. The
+  vertical App Bar takes no inset, by the owner's ruling on #1763.
 - **Collapse a Space item once, in
   `SpaceBarOverlay.Item.collapsed(to:)`, applied by the item
   builder after the `hide_empty` verdict** (#1683) — never in a

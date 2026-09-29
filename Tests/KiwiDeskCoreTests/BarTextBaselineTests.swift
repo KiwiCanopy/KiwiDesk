@@ -71,7 +71,19 @@ struct BarTextBaselineTests {
         let length = SpaceBarItemView.autoLength(
             appCount: 0,
             contentDepth: depth,
-            glyphGap: 0
+            glyphGap: 0,
+            ends: SpaceBarItemView.ends(
+                look: style,
+                depth: depth,
+                first: false,
+                last: false,
+                leadsWithIcon: false,
+                endsInIcon: SpaceBarItemView.endsInIcon(
+                    appCount: 0,
+                    badged: false,
+                    horizontal: true
+                )
+            )
         )
         let view = SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: length, height: depth)

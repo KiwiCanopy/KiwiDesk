@@ -25,13 +25,19 @@ extension SpaceBarOverlay {
             return
         }
         let pad = SpaceBarItemView.pad
+        // Rounded ends pad the axis further (#1763).
+        let endPad = chipEndPad(
+            style,
+            depth: depth,
+            horizontal: horizontal
+        )
         let content: NSView = app.glyph != nil ? frontGlyph : frontIcon
         let end =
             horizontal
             ? (frontName.isHidden
                 ? content.frame.maxX : frontName.frame.maxX)
             : content.frame.maxY
-        let length = max(end - start, cell) + pad * 2
+        let length = max(end - start, cell) + endPad.total
         // The chip spans the strip like an item's box; padding
         // shrinks only the content in it (#1682).
         let cross = max(cell + pad * 2, depth)
@@ -39,14 +45,14 @@ extension SpaceBarOverlay {
         let rect =
             horizontal
             ? CGRect(
-                x: start - pad,
+                x: start - endPad.leading,
                 y: crossOrigin,
                 width: length,
                 height: cross
             )
             : CGRect(
                 x: crossOrigin,
-                y: start - pad,
+                y: start - endPad.leading,
                 width: cross,
                 height: length
             )

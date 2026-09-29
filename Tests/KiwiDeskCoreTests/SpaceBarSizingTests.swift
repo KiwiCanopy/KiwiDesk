@@ -18,7 +18,8 @@ struct SpaceBarSizingTests {
             SpaceBarItemView.autoLength(
                 appCount: 0,
                 contentDepth: 32,
-                glyphGap: 0
+                glyphGap: 0,
+                ends: .zero
             ) == CGFloat(8 + 24)
         )
     }
@@ -31,7 +32,8 @@ struct SpaceBarSizingTests {
             SpaceBarItemView.autoLength(
                 appCount: 2,
                 contentDepth: 32,
-                glyphGap: 0
+                glyphGap: 0,
+                ends: .zero
             ) == CGFloat(8 + 24 + 9 + 48)
         )
         // The overflow badge is one more slot, same divider.
@@ -40,7 +42,8 @@ struct SpaceBarSizingTests {
                 appCount: 2,
                 overflow: 3,
                 contentDepth: 32,
-                glyphGap: 0
+                glyphGap: 0,
+                ends: .zero
             ) == CGFloat(8 + 24 + 9 + 72)
         )
     }

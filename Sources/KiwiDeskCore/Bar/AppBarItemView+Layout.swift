@@ -42,9 +42,9 @@ extension AppBarItemView {
         let corner = style.resolvedCornerRadius(
             forThickness: crossThickness
         )
-        let inset =
-            max(0, corner - diameter / 2)
-            * (1 - 1 / 2.0.squareRoot())
+        let inset = KiwiShelf.cornerCut(
+            radius: corner - diameter / 2
+        )
         let maxX = max(0, bounds.width - diameter - inset)
         let maxY = max(0, bounds.height - diameter)
         badge.frame = CGRect(
@@ -59,6 +59,39 @@ extension AppBarItemView {
     nonisolated static let contentPadding: CGFloat = 4
     /// Slot leading/trailing inset (manual QA 2026-07-18).
     nonisolated static let edgePadding: CGFloat = 6
+
+    /// A horizontal slot's leading and trailing insets on a strip
+    /// `depth` deep, at its place in the run: `edgePadding` plus
+    /// the clearance of each end it draws rounded where the icon
+    /// sits — leading unless the content is title-only, trailing
+    /// only when no title follows it (#1763, owner 2026-09-29) —
+    /// the one reading the layout and the slot measurement share.
+    nonisolated static func endPadding(
+        _ look: AppBarLook,
+        depth: CGFloat,
+        first: Bool,
+        last: Bool
+    ) -> ItemEnds {
+        let side = max(
+            look.contentDepth(forDepth: depth) - contentPadding * 2,
+            0
+        )
+        let ends = look.shelf.itemEnds(
+            clearance: KiwiShelf.endClearance(
+                radius: look.resolvedCornerRadius(forThickness: depth),
+                crossOffset: (depth - side) / 2
+            ),
+            first: first,
+            last: last,
+            outlined: look.activeIndicator == .outline
+        )
+        return ItemEnds(
+            leading: edgePadding
+                + (look.content == .title ? 0 : ends.leading),
+            trailing: edgePadding
+                + (look.content.showsText ? 0 : ends.trailing)
+        )
+    }
 
     /// The group-count badge's side for a content side — the one
     /// derivation the layout and the slot measurement share.
@@ -83,7 +116,12 @@ extension AppBarItemView {
     /// owner 2026-07-20).
     private func layoutHorizontal() {
         let pad = Self.contentPadding
-        let edge = Self.edgePadding
+        let edge = Self.endPadding(
+            style,
+            depth: crossThickness,
+            first: isFirstInRun,
+            last: isLastInRun
+        )
         let font = style.shelf.textFont(ofSize: effectiveFontSize)
         label.font = font
         // Not `usesSingleLineMode`: it draws a tall face above its
@@ -108,7 +146,7 @@ extension AppBarItemView {
             : 0
         textSize.width = min(
             textSize.width,
-            bounds.width - side - spacing - edge * 2 - badgeReserve
+            bounds.width - side - spacing - edge.total - badgeReserve
         )
         if textSize.width < 8 {
             textSize.width = 0
@@ -119,10 +157,12 @@ extension AppBarItemView {
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2
             : 0
+        // Centred between the two ends' insets, which differ where
+        // only one end is drawn rounded (#1763).
         var x = max(
             (bounds.width - side - spacing - textSize.width
-                - badgeExtent) / 2,
-            showText ? edge : pad
+                - badgeExtent + edge.leading - edge.trailing) / 2,
+            showText ? edge.leading : pad
         )
         if !iconSlotHidden {
             layoutIconSlot(

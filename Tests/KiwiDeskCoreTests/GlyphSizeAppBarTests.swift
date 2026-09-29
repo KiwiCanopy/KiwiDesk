@@ -133,7 +133,14 @@ struct GlyphSizeAppBarTests {
             thickness: Self.depth,
             capAxis: 2000
         )
-        #expect(slot == iconSide + 2 * AppBarItemView.edgePadding)
+        // A lone item opens and closes its run: both ends.
+        let ends = AppBarItemView.endPadding(
+            look,
+            depth: Self.depth,
+            first: true,
+            last: true
+        )
+        #expect(slot == iconSide + ends.total)
         #expect(slot < Self.depth)
     }
 

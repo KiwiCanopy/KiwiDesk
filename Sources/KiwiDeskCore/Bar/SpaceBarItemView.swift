@@ -60,8 +60,13 @@ final class SpaceBarItemView: NSView {
     let boxBorder = ShelfBorder.make()
     /// Active mark corner clip (owner 2026-07-20).
     let accentClip = AppBarOverlay.FlippedView()
-    var isFirstInRun = false
-    var isLastInRun = false
+    /// The run's ends: they set the rounded ends' insets (#1763).
+    var isFirstInRun = false {
+        didSet { if oldValue != isFirstInRun { needsLayout = true } }
+    }
+    var isLastInRun = false {
+        didSet { if oldValue != isLastInRun { needsLayout = true } }
+    }
 
     private(set) var identity = Identity.space(SpaceID("1"))
     var space: SpaceID? { identity.space }
