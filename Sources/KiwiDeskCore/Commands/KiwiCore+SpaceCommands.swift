@@ -38,8 +38,7 @@ extension KiwiCore {
                 // now would fly the user back (#414) — the
                 // schedule-time exemption re-checked at fire.
                 !window.isSticky,
-                NSWorkspace.shared.frontmostApplication?
-                    .processIdentifier == window.pid,
+                EventLoop.frontmostProcess() == window.pid,
                 // An open quick-terminal-style panel makes AX
                 // report the app's main window as focused;
                 // following that report would enforce the main
@@ -54,7 +53,9 @@ extension KiwiCore {
                 let element = AXHelper.focusedWindow(
                     pid: window.pid
                 ),
-                AXHelper.windowID(of: element) == id,
+                AXHelper.windowID(of: element).map({
+                    self.eventLoop.hostOfShadow($0, pid: window.pid)
+                }) == id,
                 let space = self.state.workspaces.space(
                     of: id
                 ),

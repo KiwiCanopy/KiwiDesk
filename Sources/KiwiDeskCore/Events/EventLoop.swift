@@ -342,8 +342,9 @@ public final class EventLoop {
     /// callback re-enters the loop mid-test.
     var registersWorkspaceObservers = true
 
-    /// Pids LaunchServices cannot name (#1785).
+    /// Pids LaunchServices cannot name, and shadow windows (#1785).
     var processIdentity = ProcessIdentity()
+    var shadows = ShadowWindows()
 
     public init() {}
 }

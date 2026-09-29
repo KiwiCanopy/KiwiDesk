@@ -267,6 +267,7 @@ extension EventLoop {
         // budget and an unquieted gate.
         healQuiet[pid] = nil
         processIdentity.unlisted[pid] = nil
+        shadows.hosts[pid] = nil
         transientRetried[pid] = nil
         pendingRetrack.remove(pid)
         pendingRemovalRecheck.remove(pid)

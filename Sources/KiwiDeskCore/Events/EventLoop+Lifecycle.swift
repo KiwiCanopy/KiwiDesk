@@ -36,6 +36,7 @@ extension EventLoop {
         }
         observers = [:]
         processIdentity.unlisted = [:]
+        shadows.hosts = [:]
         elements = [:]
         enhancedUIBaselines = [:]
         manualAXApplied = []

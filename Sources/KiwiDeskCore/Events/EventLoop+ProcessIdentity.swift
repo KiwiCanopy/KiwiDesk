@@ -44,6 +44,21 @@ struct ProcessIdentity {
 }
 
 extension EventLoop {
+    /// The frontmost app's pid, the one frontmost chain (#292,
+    /// #1322). An app listed without a pid is named by the owner
+    /// of its front-most on-screen window, since its windows are
+    /// raised above every other app's while it is frontmost.
+    static func frontmostProcess() -> pid_t? {
+        guard let app = NSWorkspace.shared.frontmostApplication
+        else { return nil }
+        let pid = app.processIdentifier
+        guard !isProcessID(pid) else { return pid }
+        return AXHelper.onScreenNormalWindowsFrontToBack().first {
+            NSRunningApplication(processIdentifier: $0.pid)?
+                .bundleIdentifier == app.bundleIdentifier
+        }?.pid
+    }
+
     /// A pid LaunchServices could not name (-1, or any value
     /// ≤ 0) is never keyed on (#1785).
     nonisolated static func isProcessID(_ pid: pid_t) -> Bool {
@@ -127,7 +142,7 @@ extension EventLoop {
             else { return }
             let front = processIdentity.frontToBack().first {
                 family.contains($0.pid)
-            }
+            }.map { (id: hostOfShadow($0.id, pid: $0.pid), pid: $0.pid) }
             guard let front,
                 elements[front.pid]?[front.id] != nil
             else {

@@ -97,6 +97,11 @@ extension EventLoop {
         else {
             return
         }
+        if subrole == kAXStandardWindowSubrole,
+            isShadow(element, id: window.id, pid: pid)
+        {
+            return
+        }
         window.isFloating =
             shouldForceFloat(pid: pid, id: window.id)
             || FloatDetection.shouldFloat(

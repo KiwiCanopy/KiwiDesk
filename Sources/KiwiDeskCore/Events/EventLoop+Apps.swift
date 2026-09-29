@@ -202,8 +202,7 @@ extension EventLoop {
         // Electron tree, other native Space) is known before
         // the managed-window guard below.
         reconcile(pid: pid, app: app.ref)
-        // One app, several processes: the announced pid may be a
-        // sibling's, so its focused window is not the answer.
+        // Several processes: the announced pid may be a sibling's.
         let siblings = siblingProcesses(of: pid)
         guard siblings.isEmpty else {
             reportFrontWindow(of: siblings.union([pid]))
@@ -215,6 +214,7 @@ extension EventLoop {
         // cross-app focus change ourselves.
         if let element = AXHelper.focusedWindow(pid: pid),
             let id = AXHelper.windowID(of: element)
+                .map({ hostOfShadow($0, pid: pid) })
         {
             // Only managed windows: an ignored panel (issue
             // #21) or a not-yet-tracked window must not leak

@@ -23,12 +23,13 @@ extension EventLoop {
         // reconciling here catches missed destroy events.
         reconcile(pid: pid, app: app)
         guard
-            let id = windowID(
+            let reported = windowID(
                 of: element,
                 pid: pid,
                 arm: kAXFocusedWindowChangedNotification
             )
         else { return }
+        let id = hostOfShadow(reported, pid: pid)
         // Focus events carry only managed windows: the
         // reconcile above just settled tracking, so an
         // absent id is an ignored panel (issue #21) —

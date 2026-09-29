@@ -20,8 +20,7 @@ extension KiwiCore {
         // the OS frontmost app is KiwiDesk's focused managed
         // window.
         let frontmost: @MainActor () -> pid_t? = {
-            NSWorkspace.shared.frontmostApplication?
-                .processIdentifier
+            EventLoop.frontmostProcess()
         }
         frontmostPIDProvider = frontmost
         // The focus-report gate reads the same chain (#1322).
