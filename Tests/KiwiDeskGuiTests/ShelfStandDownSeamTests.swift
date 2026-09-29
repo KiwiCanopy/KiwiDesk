@@ -26,10 +26,16 @@ struct ShelfStandDownSeamTests {
                     encoding: .utf8
                 )
             )
+            // Whitespace out, so a call wrapped before `display:`
+            // still counts; the declaration is subtracted, since
+            // it reads the same once squeezed.
+            let squeezed = source.filter { !$0.isWhitespace }
+            func hits(_ needle: String) -> Int {
+                squeezed.components(separatedBy: needle).count - 1
+            }
             let count =
-                source.components(
-                    separatedBy: "currentSpaceIsUser(display:"
-                ).count - 1
+                hits("currentSpaceIsUser(display:")
+                - hits("funccurrentSpaceIsUser(display:")
             if count > 0 { homes[file] = count }
         }
         #expect(homes == ["App/KiwiCore+ScreenCovering.swift": 1])
