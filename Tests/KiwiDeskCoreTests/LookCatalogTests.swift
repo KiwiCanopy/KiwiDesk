@@ -122,7 +122,7 @@ struct LookCatalogTests {
     }
 
     /// A pairing no palette answers would fall back to the shipped
-    /// colours silently (`LookColorCarry`), so each must resolve —
+    /// colours silently (`AuthoredLook.colors(in:)`), so each must resolve —
     /// and a bundled look wears exactly its palette's colours
     /// (#1752).
     @Test("every bundled look wears a bundled palette's colours")

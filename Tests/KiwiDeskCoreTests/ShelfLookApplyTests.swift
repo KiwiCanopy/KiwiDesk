@@ -87,6 +87,23 @@ struct ShelfLookApplyTests {
         #expect(settings.appBarStyle.edge == .left)
     }
 
+    /// Colours compare by parsed value, the palette rule (#757):
+    /// a lower-case hex and its upper-case, opaque-alpha twin are
+    /// one colour.
+    @Test("a look's colours match by parsed value")
+    func coloursMatchByValue() {
+        var settings = TilingSettings()
+        settings.kiwishelf.fillColor = "#8DB354FF"
+        var colors = ColorPaletteKeys.extract(from: settings)
+        colors["kiwishelf.fill_color"] = "#8db354"
+        let named = ShelfLook(
+            name: "T",
+            style: LookKeys.extract(from: settings),
+            colors: colors
+        )
+        #expect(named.isApplied(to: settings))
+    }
+
     /// The tile's three marks (#1752): the shape live in its own
     /// colours, the shape live in others, the shape not live.
     @Test("match tells other colours from applied and none")

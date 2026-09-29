@@ -140,4 +140,26 @@ struct KeepColorsOfferTests {
             ) == nil
         )
     }
+
+    /// A Revert returns the colours to the snapshot as well, so the
+    /// verdict reads who wrote, never the colours.
+    @Test("only the tick's own write survives the draft going clean")
+    func cleanDraftRetiresUnlessTheTickWrote() throws {
+        let offer = try #require(
+            KeepColorsOffer.afterClicking(
+                look(fill: "#111111"),
+                over: custom(),
+                prior: nil,
+                palettes: []
+            )
+        )
+        #expect(
+            KeepColorsOffer.afterDraftCleaned(offer, tickWrote: true)
+                == offer
+        )
+        #expect(
+            KeepColorsOffer.afterDraftCleaned(offer, tickWrote: false)
+                == nil
+        )
+    }
 }

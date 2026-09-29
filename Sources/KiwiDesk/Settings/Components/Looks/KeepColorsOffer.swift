@@ -44,6 +44,17 @@ struct KeepColorsOffer: Equatable {
         Self.same(live, previous)
     }
 
+    /// The offer once the draft goes clean: a Save or a Revert ends
+    /// the visit it speaks for, unless the write that cleaned the
+    /// draft was the row's own tick — told by the write, never by
+    /// the colours, which a Revert returns to the snapshot as well.
+    static func afterDraftCleaned(
+        _ offer: KeepColorsOffer?,
+        tickWrote: Bool
+    ) -> KeepColorsOffer? {
+        tickWrote ? offer : nil
+    }
+
     /// Two complete colour maps giving the same colour everywhere.
     static func same(
         _ a: [String: String],

@@ -11,6 +11,8 @@ struct LooksShelf: View {
     /// stored preference, so the row offers only what this visit
     /// did (`KeepColorsOffer`).
     @State var keepColors: KeepColorsOffer?
+    /// Whether the row's own tick made the latest draft write.
+    @State var keepColorsWrote = false
     @FocusState var returningTile: String?
     /// Why the last save or import wrote nothing, until the next
     /// one succeeds.
@@ -41,10 +43,13 @@ struct LooksShelf: View {
             userGroup
         }
         .onAppear(perform: reload)
-        // A Save or a Revert ends the visit the row speaks for —
-        // unless its own tick just returned the draft to saved.
         .onChange(of: model.isDirty) { _, dirty in
-            if !dirty, !keepColorsTicked { keepColors = nil }
+            guard !dirty else { return }
+            keepColors = KeepColorsOffer.afterDraftCleaned(
+                keepColors,
+                tickWrote: keepColorsWrote
+            )
+            keepColorsWrote = false
         }
     }
 
@@ -169,6 +174,7 @@ struct LooksShelf: View {
     /// Paints `look`, its colors included, onto the draft,
     /// remembering colors no saved palette could bring back.
     func apply(_ look: ShelfLook) {
+        keepColorsWrote = false
         keepColors = KeepColorsOffer.afterClicking(
             look,
             over: model.config.settings,

@@ -11,13 +11,6 @@ extension LooksShelf {
         return keepColors.flatMap { $0.shows(live) ? $0 : nil }
     }
 
-    /// Whether the standing row is ticked over the draft.
-    var keepColorsTicked: Bool {
-        standingKeepColors?.isTicked(
-            ColorPaletteKeys.extract(from: model.config.settings)
-        ) ?? false
-    }
-
     @ViewBuilder var keepColorsRow: some View {
         if let offer = standingKeepColors {
             VStack(alignment: .leading, spacing: 2) {
@@ -52,6 +45,9 @@ extension LooksShelf {
                 let colors = on ? offer.previous : offer.look
                 ColorPalette(name: "", colors: colors)
                     .apply(to: &model.config.settings)
+                // `isDirty` is recomputed on the write, so this says
+                // whether the tick itself left the draft clean.
+                keepColorsWrote = !model.isDirty
             }
         )
     }
