@@ -15,10 +15,12 @@ extension KiwiCore {
         var drawn: SpaceBarStrip.Drawn
     }
 
-    /// Adjacent same-app runs in the space's flat array order
-    /// collapse into one glyph + count (the App Bar's grouping
-    /// model, without focused-inside expansion), so the span
-    /// counts app *groups*, not raw windows (#376). The drawn
+    /// While `group_adjacent_windows` is on, adjacent same-app
+    /// runs in the space's flat array order collapse into one
+    /// glyph + count (the App Bar's grouping model, without
+    /// focused-inside expansion), so the span counts app
+    /// *groups*; off, every window is its own glyph (#376,
+    /// #1725). The drawn
     /// groups are `SpaceBarStrip.window`, centred on the anchor
     /// group — or `held`, what a chip under the pointer drew,
     /// kept while the row still draws it (#1528 items 17, 21).
@@ -53,10 +55,13 @@ extension KiwiCore {
             return (id, member.appName, isSpecial)
         }
         let windows = pairs.map { $0.0 }
-        let groups = Self.adjacentRuns(
-            of: pairs.map { $0.1 },
-            specials: pairs.map { $0.2 }
-        ).map { Array(windows[$0]) }
+        let groups =
+            style.groupAdjacentWindows
+            ? Self.adjacentRuns(
+                of: pairs.map { $0.1 },
+                specials: pairs.map { $0.2 }
+            ).map { Array(windows[$0]) }
+            : windows.map { [$0] }
         let span = style.resolvedGlyphSpan
         let anchor = stripAnchors(of: space).lazy.compactMap { focus in
             groups.firstIndex { $0.contains(focus) }

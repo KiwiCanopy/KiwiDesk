@@ -50,6 +50,7 @@ public enum ConfigMigration {
         migratingShelfEdgeOntoBars,
         migratingRetiredGlyphCap,
         migratingProfileLookOwn,
+        migratingSpaceBarGrouping,
     ]
 
     /// Target format integer for `root`'s shape (#902, #938, #939,

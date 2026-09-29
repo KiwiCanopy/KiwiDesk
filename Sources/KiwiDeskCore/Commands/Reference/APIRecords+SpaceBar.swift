@@ -62,6 +62,11 @@ extension APIReference {
                 + "title the front-app segment shows.",
             .integer("characters")
         ),
+        "set_group_adjacent_windows": APIRecord(
+            "Collapses adjacent same-app windows in a Space item "
+                + "into one glyph with a count badge.",
+            .boolean("enabled")
+        ),
         "set_hide_empty": APIRecord(
             "Hides Spaces with no windows from the bar.",
             .boolean("enabled")

@@ -1434,6 +1434,8 @@
   "space_bar.glyph_gap.help": "Separación entre los glifos de aplicación dentro de un Espacio; con 0 quedan uno junto a otro.",
   "space_bar.glyph_span": "Glifos por Espacio",
   "space_bar.glyph_span.help": "Cuántos glifos de aplicación muestra un Espacio alrededor de su aplicación enfocada; el resto queda detrás de un +n a cada lado, y en cada extremo de la fila cabe un glifo más. Las ventanas adyacentes de la misma aplicación cuentan como un solo glifo.",
+  "space_bar.group_adjacent": "Agrupar ventanas adyacentes de la misma aplicación",
+  "space_bar.group_adjacent.help": "Combina las ventanas adyacentes de la misma aplicación en un espacio en un solo glifo con una insignia de recuento, en lugar de un glifo para cada una.",
   "space_bar.hide_empty": "Ocultar espacios vacíos",
   "space_bar.hide_empty.help": "Los espacios sin ventanas se ocultan de la barra, excepto el espacio en el que te encuentras. Usa un atajo para ir a un espacio oculto.",
   "space_bar.inactive_content": "Otros Espacios",

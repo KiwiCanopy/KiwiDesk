@@ -196,10 +196,12 @@ struct SpaceBarBadgeTests {
         let core = seededCore()
         core.state.apply(.windowCreated(window(3, app: "Mail")))
         core.state.workspaces.setMode(SpaceID("1"), .floating)
+        var grouped = SpaceBarLook()
+        grouped.groupAdjacentWindows = true
         let item = try #require(
             core.spaceBarItems(
                 display: display,
-                style: SpaceBarLook()
+                style: grouped
             ).first
         )
         #expect(item.apps.map(\.name) == ["Web", "Mail"])

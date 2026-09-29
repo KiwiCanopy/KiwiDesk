@@ -66,6 +66,7 @@ struct SpaceBarGlyphClickTests {
         cap: Int? = nil
     ) throws -> SpaceBarOverlay.Item {
         var look = SpaceBarLook()
+        look.groupAdjacentWindows = true
         if let cap { look.glyphSpan = cap }
         return try #require(
             core.spaceBarItems(display: display, style: look)

@@ -76,9 +76,16 @@ struct ProfileLookOwnMigrationTests {
         #expect(stampless(result) == stampless(expected))
     }
 
+    /// Without the stamp and the Space Bar grouping a pre-#1725
+    /// profile gains, both the envelope's rather than this step's.
     private func stampless(_ text: String) -> String {
         text.replacingOccurrences(
             of: #""format"\s*:\s*\d+"#,
+            with: "",
+            options: .regularExpression
+        )
+        .replacingOccurrences(
+            of: #""space_bar":\{"group_adjacent_windows":true\},?"#,
             with: "",
             options: .regularExpression
         )

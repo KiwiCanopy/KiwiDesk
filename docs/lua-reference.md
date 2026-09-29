@@ -2523,11 +2523,14 @@ scroll.set_app_bar_content("icon")  -- override for scrolling
 
 ## Space Bar
 
+:::unreleased
 The Space Bar (#293) lists, per display, that display's Spaces
 in profile order: each item shows the Space's identifier (its
 configured icon, else the plain digits of a numeric id or a
 two-letter monogram of a named one), a divider, then a glyph per
-window. Adjacent windows of the same app share one glyph with a
+window. With
+[`space_bar.set_group_adjacent_windows`](#space_barset_group_adjacent_windows)
+on, adjacent windows of the same app share one glyph with a
 count badge (non-adjacent duplicates stay separate); past the
 glyph span ([`space_bar.set_glyph_span`](#space_barset_glyph_span))
 the rest fold into a `+n` badge on each side, counting the hidden
@@ -2536,6 +2539,7 @@ a Space switches to it, and a group holding the focused window
 stays collapsed and takes the focused accent. The user guide's
 [Space Bar](user-guide.md#space-bar) section covers the badges,
 what a click on a glyph does and the drag-onto-a-Space gesture.
+:::
 
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
@@ -2587,9 +2591,9 @@ around its focused app — the Space's system focus while it is
 active, else the window it last focused. The rest sit behind a
 `+n` badge on each side, and at either end of the row the badge
 that side does not need becomes one more glyph, so the item keeps
-one length as the focus moves. Grouping runs first, so the span
-counts app *groups* (adjacent same-app windows share one glyph),
-while each `+n` counts its hidden *windows*. It limits glyphs per
+one length as the focus moves. The span counts glyphs — windows,
+or app *groups* while grouping is on — while each `+n` counts
+its hidden *windows*. It limits glyphs per
 Space only, not how many Spaces the bar shows. Replaces
 `set_glyph_cap`, which now fails naming it.
 
@@ -2731,6 +2735,24 @@ title.
 ```lua
 space_bar.set_front_app_title_cap(25)
 ```
+
+:::unreleased
+### space_bar.set_group_adjacent_windows
+
+**Expects:** boolean (default `false`; a profile saved before
+this setting existed is migrated to `true`).
+
+**Does:** collapses adjacent windows of one app in a Space item
+into one glyph with a count badge; clicking it opens a menu of
+its windows. Off, each window draws its own glyph and one click
+focuses it. `glyph_span` counts glyphs either way.
+
+**Example:**
+
+```lua
+space_bar.set_group_adjacent_windows(true)
+```
+:::
 
 ### space_bar.set_hide_empty
 

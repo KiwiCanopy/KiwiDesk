@@ -21,6 +21,12 @@ extension SettingsValueReadout {
                 n.activeIndicator,
                 AppBarOptions.activeIndicator
             )
+        case .spaceBarGroupAdjacent:
+            return spaceBarOnOffRow(
+                census,
+                o.groupAdjacentWindows,
+                n.groupAdjacentWindows
+            )
         case .spaceBarHideEmpty:
             return spaceBarOnOffRow(census, o.hideEmpty, n.hideEmpty)
         case .spaceBarShowFrontApp:

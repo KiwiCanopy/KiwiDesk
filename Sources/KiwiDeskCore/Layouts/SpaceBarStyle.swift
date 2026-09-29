@@ -17,6 +17,11 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Max app-group glyphs per Space item before "+n" badge (#376).
     /// Default 5.
     public var glyphSpan = 5
+    /// Whether adjacent windows of one app share a glyph and a
+    /// count badge (#1725); off draws one glyph per window. A
+    /// profile saved before the setting existed is migrated to
+    /// `true`, the grouping it always had.
+    public var groupAdjacentWindows = false
     /// Extra room (pt) between app glyph cells inside a Space
     /// item, and before its `+n` badge (#1689); 0 abuts them. A
     /// drawing reads `resolvedGlyphGap`.

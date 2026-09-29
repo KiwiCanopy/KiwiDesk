@@ -11649,23 +11649,25 @@ thumbnail's scale a few points draw as nothing, and a caption that
 names a fact the frame does not draw is the schematic rule's own
 defect (`LayoutSchematicCaptionTests`).
 
-**The Space Bar always groups; there is no knob.** (#293.)
-Adjacent same-app runs collapse into one glyph + count badge
-unconditionally — unlike the App Bar's `group_adjacent_windows`
-toggle. The glyph span depends on grouping running **first**: an
-ungrouped mode would burn the span on duplicates while conveying
-less. That ordering is the settled part; the span's *value* is a
-knob (`space_bar.set_glyph_span`, default 5, range 1–12, #376,
-#1528) — group first, then span, whatever the span is. A `+n`
-badge counts hidden **windows**, not slots — the same unit as the
-per-glyph count badges and the item's accessibility label.
-
 :::unreleased
-Nor would an ungrouped mode buy reach. A group glyph is a click
-target whose menu lists its windows (#1528), so each member is
-one pick away; every slot an ungrouped mode spent on a duplicate
-would push another app behind `+n`, whose menu costs the same
-pick and drops that app's glyph from the overview.
+**The Space Bar groups only on request.** (#293, #1725, owner
+ruling 2026-09-28.) `space_bar.set_group_adjacent_windows`, the
+App Bar's toggle's twin, collapses adjacent same-app runs into one
+glyph + count badge; off — the default — every window is its own
+glyph. Once every glyph became a click target (#1528), a grouped
+glyph costs a menu and a pick per window, where an ungrouped one
+is one click; that reach is the bar's job, so it wins the
+default. The price is the span: it counts glyphs, so ungrouped it
+counts windows and fills sooner, and the centred strip with its
+`+n` discs carries the rest. While grouping is on the order is
+settled — group first, then span, whatever the span's value
+(`space_bar.set_glyph_span`, default 5, range 1–12, #376, #1528).
+A `+n` badge counts hidden **windows**, not slots — the same unit
+as the per-glyph count badges and the item's accessibility label.
+
+A profile saved before the setting existed keeps grouping: its
+Space Bar always grouped, and an upgrade does not change what a
+user's bar draws (`SpaceBarGroupingMigrationTests`).
 :::
 
 :::unreleased

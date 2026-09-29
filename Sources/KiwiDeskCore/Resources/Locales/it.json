@@ -1434,6 +1434,8 @@
   "space_bar.glyph_gap.help": "Distanza tra i glifi di app all'interno di uno spazio; con 0 sono affiancati.",
   "space_bar.glyph_span": "Glifi per spazio",
   "space_bar.glyph_span.help": "Quanti glifi di app mostra uno spazio attorno alla sua app con il focus; i restanti stanno dietro un +n su ciascun lato, e a ciascuna estremità della fila entra un glifo in più. Le finestre adiacenti della stessa app contano come un solo glifo.",
+  "space_bar.group_adjacent": "Raggruppa le finestre adiacenti della stessa app",
+  "space_bar.group_adjacent.help": "Unisce le finestre vicine della stessa app in uno spazio in un solo glifo, contrassegnato da un badge con il conteggio, invece di un glifo per ciascuna.",
   "space_bar.hide_empty": "Nascondi spazi vuoti",
   "space_bar.hide_empty.help": "Gli spazi senza finestre vengono nascosti dalla barra, tranne quello in cui ti trovi. Usa una scorciatoia per passare a uno spazio nascosto.",
   "space_bar.inactive_content": "Altri spazi",

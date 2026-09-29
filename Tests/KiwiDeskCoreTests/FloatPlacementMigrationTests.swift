@@ -156,8 +156,9 @@ struct FloatPlacementMigrationTests {
     }
 
     /// The text with its format stamp removed: the stamp is the
-    /// envelope's to rewrite, not this step's — and so is the
-    /// `look: own` a pre-#1752 profile gains (#1752).
+    /// envelope's to rewrite, not this step's — and so are the
+    /// `look: own` a pre-#1752 profile gains (#1752) and the
+    /// Space Bar grouping a pre-#1725 one gains (#1725).
     private func stampless(_ text: String) -> String {
         text.replacingOccurrences(
             of: #""format"\s*:\s*\d+"#,
@@ -166,6 +167,11 @@ struct FloatPlacementMigrationTests {
         )
         .replacingOccurrences(
             of: #"\n?\s*"look"\s*:\s*"own","#,
+            with: "",
+            options: .regularExpression
+        )
+        .replacingOccurrences(
+            of: #""space_bar":\{"group_adjacent_windows":true\},?"#,
             with: "",
             options: .regularExpression
         )

@@ -51,6 +51,7 @@ public enum LookKeys {
         "space_bar.front_app_title_cap": functionality,
         "space_bar.show_front_app": functionality,
         "space_bar.hide_empty": functionality,
+        "space_bar.group_adjacent_windows": functionality,
         "space_bar.sticky_badge": functionality,
         "space_bar.spring_delay": functionality,
         "space_bar.item_label": functionality,

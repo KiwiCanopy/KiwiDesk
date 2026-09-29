@@ -64,6 +64,7 @@ struct SpaceBarCommandParityTests {
         .activeIndicator(.edgeMark),
         .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
+        .groupAdjacentWindows(true),
         .stickyBadge(false),
         .springDelay(1000),
         .focusedItemColor("#030303"),
@@ -133,7 +134,8 @@ struct SpaceBarCommandParityTests {
         for key: SpaceBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .enabled, .showFrontApp, .hideEmpty, .stickyBadge:
+        case .enabled, .showFrontApp, .hideEmpty, .stickyBadge,
+            .groupAdjacentWindows:
             return [.bool(true)]
         case .activeIndicator: return [.string("edge_mark")]
         case .edge: return [.string("left")]
