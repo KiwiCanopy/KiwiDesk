@@ -151,5 +151,27 @@ extension FullscreenStandDownTests {
         core.handle(.windowMoved(Self.show, screen))
 
         #expect(core.spaceBars.shownStrips.isEmpty)
+
+        // And back out: a move off the cover brings the shelf back.
+        core.handle(.windowMoved(Self.show, opening))
+        #expect(!core.spaceBars.shownStrips.isEmpty)
+    }
+
+    @Test("A resize onto the cover re-reads the shelf too")
+    func resizeCrossingReReadsTheShelf() throws {
+        let screen = try #require(screenFrame)
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        let core = try #require(
+            makeShelfCore(frame: screen.insetBy(dx: 8, dy: 5))
+        )
+        core.shelves.frontWindowFrames = { [screen] }
+        core.updateBars()
+        #expect(!core.spaceBars.shownStrips.isEmpty)
+
+        // A resize to the cover retiles nothing: the fit leaves a
+        // presenting float alone, so only the crossing re-reads.
+        core.handle(.windowResized(Self.show, screen))
+
+        #expect(core.spaceBars.shownStrips.isEmpty)
     }
 }

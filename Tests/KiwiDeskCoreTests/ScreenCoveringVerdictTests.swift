@@ -35,3 +35,19 @@ struct ScreenCoveringVerdictTests {
         #expect(!KiwiCore.covers(screen, .zero), "no screen, no cover")
     }
 }
+
+/// The two live reads the verdict takes are pinned by
+/// `makeTestCore` (#1787). Asked through the factory rather than
+/// read off its source: a host always has windows and a screen,
+/// so a pin dropped from BOTH twins — which the twins-identical
+/// clause cannot see — answers non-empty here.
+@Suite("Screen-covering seams are pinned (#1787)")
+@MainActor
+struct ScreenCoveringPinTests {
+    @Test("makeTestCore hands the verdict no host screen or window")
+    func factoryPinsBothReads() {
+        let core = makeTestCore()
+        #expect(core.shelves.frontWindowFrames().isEmpty)
+        #expect(core.shelves.screenFrames().isEmpty)
+    }
+}
