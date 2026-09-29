@@ -35,7 +35,7 @@ extension FullscreenStandDownTests {
         else { return nil }
         let core = makeCore()
         core.tiler.visibleBounds = { _ in screen.frame }
-        core.shelves.screenFrames = { [bounds] }
+        core.tiler.allScreenFrames = { [bounds] }
         core.state.apply(.displaysChanged([display]))
         core.state.apply(
             .windowCreated(

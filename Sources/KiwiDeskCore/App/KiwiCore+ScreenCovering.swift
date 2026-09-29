@@ -33,9 +33,9 @@ extension KiwiCore {
     }
 
     /// Whether `frame` (AX coordinates) covers any connected
-    /// screen whole, over the `screenFrames` seam.
+    /// screen whole, over the `allScreenFrames` seam.
     func coversAScreen(_ frame: CGRect) -> Bool {
-        shelves.screenFrames().contains { Self.covers(frame, $0) }
+        tiler.allScreenFrames().contains { Self.covers(frame, $0) }
     }
 
     /// Whether the shelf stands down on `display`: a native

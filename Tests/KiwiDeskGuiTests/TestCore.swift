@@ -101,7 +101,7 @@ func makeTestCore(
     // presentation verdict reads (#1787): live, they hand every
     // fixture the host desk.
     core.shelves.frontWindowFrames = { [] }
-    core.shelves.screenFrames = { [] }
+    core.tiler.allScreenFrames = { [] }
     // Same class, fifth time (#933): the own-key-window seam
     // defaults to a live `NSApplication.shared` read, so a
     // runner that happens to hold a key window would suppress

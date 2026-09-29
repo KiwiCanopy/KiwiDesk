@@ -37,7 +37,7 @@ struct PresentationGatherTests {
         let core = makeTestCore()
         core.tiler.visibleBounds = { _ in Self.bounds }
         core.tiler.allScreenBounds = { [Self.bounds] }
-        core.shelves.screenFrames = { pinsScreen ? [Self.screen] : [] }
+        core.tiler.allScreenFrames = { pinsScreen ? [Self.screen] : [] }
         core.tiler.settings.animations.onRelayout = false
         core.tiler.settings.spaceBarStyle.enabled = false
         core.tiler.settings.borderStyle.enabled = false

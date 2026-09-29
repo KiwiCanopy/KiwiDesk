@@ -38,9 +38,11 @@ struct ScreenCoveringVerdictTests {
 
 /// The two live reads the verdict takes are pinned by
 /// `makeTestCore` (#1787). Asked through the factory rather than
-/// read off its source: a host always has windows and a screen,
-/// so a pin dropped from BOTH twins — which the twins-identical
-/// clause cannot see — answers non-empty here.
+/// read off its source, so a pin dropped from BOTH twins — which
+/// the twins-identical clause cannot see — answers non-empty
+/// here: always for the screens, and for the window order on a
+/// host with a window open (a dev Mac; a headless runner may
+/// have none, and then that half is silent).
 @Suite("Screen-covering seams are pinned (#1787)")
 @MainActor
 struct ScreenCoveringPinTests {
@@ -48,6 +50,6 @@ struct ScreenCoveringPinTests {
     func factoryPinsBothReads() {
         let core = makeTestCore()
         #expect(core.shelves.frontWindowFrames().isEmpty)
-        #expect(core.shelves.screenFrames().isEmpty)
+        #expect(core.tiler.allScreenFrames().isEmpty)
     }
 }

@@ -4007,9 +4007,9 @@ screen too, and is read as presenting — left unfitted, and the
 shelf standing down while it is in front. Telling the two apart
 needs the window's AX subrole, which state does not carry; the
 cost is a bar hidden behind a window the user sized to cover it.
-The other float movers — the stash's park and restore, the
-strand recovery, an explicit placement verb — are not yet ruled
-against the verdict one at a time.
+Every other reader of a window is ruled against the verdict one
+verb at a time
+([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)).
 :::
 
 **A resize nobody asked for is corrected on its own event

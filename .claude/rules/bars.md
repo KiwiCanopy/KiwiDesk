@@ -157,10 +157,13 @@ twice, was a question the user answered twice. The argument is
   `KiwiCore.shelfStandsDown(on:)`**, read once per display in
   `updateBars()` for both bars — a native-fullscreen Space
   (#670) or a window filling that screen in FRONT (#1787) —
-  never a `currentSpaceIsUser(display:` read beside it, which
-  hides on the first and draws over a slide show.
-  `ShelfStandDownSeamTests` holds that read to the stand-down
-  alone; `FullscreenStandDownTests` ▸
+  never a user-space read beside it, which hides on the first
+  and draws over a slide show. The cold-start App Bar
+  (`appBarFallback`) is the one exception: it runs before any
+  display is published, with no display to ask about.
+  `ShelfStandDownSeamTests` holds the bar-building files to that,
+  its `allowed` map the one copy of who is exempt;
+  `FullscreenStandDownTests` ▸
   `presentationInFrontStandsShelfDown` holds both bars through
   it.
 - **Keep a bar's `naturalLength` equal to what its render
