@@ -2,14 +2,15 @@ import Foundation
 
 /// Retired verbs: #1517's, when the two bars moved onto one
 /// shelf, #1674's `set_float_nudge`, #1713's item padding and
-/// #1731's shelf edge, which each bar took back.
+/// #1731's shelf edge, which each bar took back, and #1528's App
+/// Bar content.
 /// No aliases (AGENTS.md §5): a retired name fails, and the
 /// failure names what replaces it — in Lua as a
 /// `ConfigIssue.Kind.retiredCall`, over IPC through
 /// `layoutCommand`.
 extension APIReference {
     /// Retired verb → its replacement, or nil where nothing
-    /// replaces it (the Space Bar's `item_size`).
+    /// replaces it — `retiredReasons` then says why.
     public static let retired: [String: String?] = {
         // The fields the migration moved onto the shelf — one
         // list, so a verb and its stored key retire together.
@@ -41,7 +42,6 @@ extension APIReference {
         ] {
             map[bar + "item_size"] = bar + "title_cap"
         }
-        map["space_bar.set_item_size"] = .some(nil)
         map["space_bar.set_title_cap"] =
             "space_bar.set_front_app_title_cap"
         map["set_float_nudge"] = "set_float_placement"
@@ -54,16 +54,36 @@ extension APIReference {
         map["drag.set_ghost_border_width"] = "border.set_width"
         map["drag.set_drop_zone_border_width"] = "border.set_width"
         map["drag.set_corner_radius"] = "border.set_corner_style"
+        for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()
+
+    /// Why a verb retired with no replacement, keyed by the verb —
+    /// the one list `retired` takes its nil entries from.
+    static let retiredReasons: [String: String] = {
+        var map = ["space_bar.set_item_size": itemFollowsContent]
+        // The App Bar always draws icon and title (#1528).
+        for verb in [
+            "app_bar.set_content", "monocle.set_app_bar_content",
+            "scroll.set_app_bar_content",
+        ] {
+            map[verb] = appBarDrawsBoth
+        }
+        return map
+    }()
+
+    private static let itemFollowsContent =
+        "a Space item's length follows its content"
+    private static let appBarDrawsBoth =
+        "the App Bar always draws each item's icon and title"
 
     /// The failure a retired verb returns, or nil if `command` is
     /// not retired. English, like every CLI/IPC error (#96).
     public static func retirement(of command: String) -> String? {
         guard let replacement = retired[command] else { return nil }
         guard let replacement else {
-            return "\(command) was retired: a Space item's"
-                + " length follows its content"
+            let why = retiredReasons[command] ?? "it has no replacement"
+            return "\(command) was retired: \(why)"
         }
         return "\(command) was retired — use \(replacement)"
     }

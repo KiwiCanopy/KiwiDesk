@@ -353,9 +353,9 @@ Obligations:
 ## A bar item's title is SHOWN on two channels: drawn and announced
 
 A `count == 1` item resolves its window title into `item.text`
-whatever the content style, and the item view builds its
-accessibility label from that text unconditionally — so an
-icon-only or vertical bar ANNOUNCES the title it does not draw,
+whatever the edge, and the item view builds its accessibility
+label from that text unconditionally — so a vertical bar, which
+draws icons alone (#1528), ANNOUNCES the title it does not draw,
 and **a title that is announced stale is as wrong as one drawn
 stale**. Any consumer reasoning "content draws no text ⇒ the
 title is not consumed" re-opens this defect; the class has now
@@ -366,14 +366,14 @@ round).
 Obligations:
 
 - A gate standing a title consumer down asks "does the title
-  reach EITHER channel", never `showsText` alone. The refresh
-  gates (`AppBarManager.showsTitle(of:)`,
+  reach EITHER channel", never "does it draw text" alone. The
+  refresh gates (`AppBarManager.showsTitle(of:)`,
   `SpaceBarManager.showsTitle(of:)`) are the worked cases —
-  `BarTitleRefreshTests` pins the arm under icon content, and
+  `BarTitleRefreshTests` pins the arm on a vertical bar, and
   `AppBarAccessibilityTests` /
   `BarTitleRefreshOutputTests` pin the announce channel and the
-  rebuilt text under `.icon`, so a downstream re-derivation of
-  the retired gate reds one of those three, not zero.
+  rebuilt text there, so a downstream re-derivation of the
+  retired gate reds one of those three, not zero.
 - The one place the two channels legitimately diverge is a
   collapsed group (`count > 1`): it draws AND announces its app
   name, never a member's title (`KiwiCore.barItemText`,
@@ -382,8 +382,8 @@ Obligations:
   `BarTitleRefreshTests` pins that at two group sizes.
 - Per-title-change cost is bounded by the refresh pipeline's own
   debounce (`KiwiCore+BarTitles`), never by consumers
-  pre-filtering on content — the old `showsText` gate was that
-  pre-filter, and it is what dropped the announced channel.
+  pre-filtering on what an item draws — the old content gate was
+  that pre-filter, and it is what dropped the announced channel.
 - **A hover title is read when it shows — through
   `SpaceBarGlyphActions.tooltip` on a Space Bar glyph,
   `AppBarItemActions.tooltip` on an App Bar item — and never

@@ -148,16 +148,4 @@ enum AppBarOptions {
     static func iconSourceTitle(_ source: BarAppIconSource) -> String {
         iconSource.first { $0.0 == source }?.1 ?? ""
     }
-
-    @MainActor
-    static var content: [(AppBarStyle.Content, String)] {
-        [
-            (.icon, L("app_bar.content.icon", "Icon")),
-            (.title, L("app_bar.content.title", "Title")),
-            (
-                .iconAndTitle,
-                L("app_bar.content.icon_and_title", "Icon & title")
-            ),
-        ]
-    }
 }

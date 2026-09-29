@@ -142,9 +142,8 @@ struct BarStripView: View {
     ) -> some View {
         if item.label != nil || item.glyph != nil {
             // Icon and name together when the item carries
-            // both — the App Bar's `icon_and_title` content;
-            // truncation only ever eats the name, the real
-            // bar's rule.
+            // both — a horizontal App Bar's item; truncation
+            // only ever eats the name, the real bar's rule.
             // Sizes come through the bar's OWN font ladder
             // (`BarSpec.fontSize`, resolved at the scene's
             // cross), so the Thickness slider moves the

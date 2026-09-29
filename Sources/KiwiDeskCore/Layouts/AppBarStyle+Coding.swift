@@ -12,7 +12,6 @@ extension AppBarStyle {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case edge
         case activeIndicator = "active_indicator"
-        case content
         case titleCap = "title_cap"
         case groupAdjacentWindows = "group_adjacent_windows"
     }
@@ -33,11 +32,6 @@ extension AppBarStyle {
                 ActiveIndicator.self,
                 forKey: .activeIndicator
             ) ?? defaults.activeIndicator
-        content =
-            try container.decodeIfPresent(
-                Content.self,
-                forKey: .content
-            ) ?? defaults.content
         titleCap =
             try container.decodeIfPresent(
                 Int.self,
