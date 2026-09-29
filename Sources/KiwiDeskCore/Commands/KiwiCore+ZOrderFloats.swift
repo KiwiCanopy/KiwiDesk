@@ -70,7 +70,11 @@ extension KiwiCore {
             guard let self,
                 generation == self.zOrderRaiseGeneration.value
             else { return }
-            if let focused, focused == self.activeSpace?.focused {
+            // The anchor, not `activeSpace?.focused`: a sticky
+            // traveler homed elsewhere is never that slot (#1727).
+            if let focused, let space = self.activeSpace,
+                focused == self.state.focusAnchor(of: space)
+            {
                 self.focusWindow(
                     focused,
                     refocusRetile: false,

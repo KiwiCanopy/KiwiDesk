@@ -49,12 +49,6 @@ extension KiwiCore {
             return
         }
         followSwitch(to: space, focusing: window)
-        // The float layer comes back above the tiled plane as on a
-        // chip click (#412), which `followSwitch` does not do yet
-        // for any caller (#1727).
-        if !floatLayerTargets().isEmpty {
-            raiseFloatsAndSticky(thenFocus: window)
-        }
     }
 
     func spaceBarMenuRows(
