@@ -69,15 +69,15 @@ struct SpaceBarGroupingTests {
     }
 
     @Test("the verb writes the setting")
-    func verbWritesTheSetting() {
-        let setting = SpaceBarCommandSetting.parse(
+    func verbWritesTheSetting() throws {
+        let setting = try SpaceBarCommandSetting.parse(
             field: "group_adjacent_windows",
             args: [.bool(true)]
-        )
-        guard case .success(.groupAdjacentWindows(true)) = setting
-        else {
-            Issue.record("parsed \(setting)")
-            return
-        }
+        ).get()
+        var style = SpaceBarStyle()
+        setting.apply(to: &style)
+        var expected = SpaceBarStyle()
+        expected.groupAdjacentWindows = true
+        #expect(style == expected)
     }
 }

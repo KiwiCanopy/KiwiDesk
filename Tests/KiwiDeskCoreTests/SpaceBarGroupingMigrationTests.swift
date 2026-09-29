@@ -90,6 +90,31 @@ struct SpaceBarGroupingMigrationTests {
         )
     }
 
+    /// A settings root with no Space Bar takes the whole object,
+    /// inserted in place: an exact match against the input with
+    /// the insert removed proves nothing else moved.
+    @Test("a settings root with no Space Bar gains one in place")
+    func missingSpaceBarIsInserted() throws {
+        let text = """
+            {
+                "settings": { "ratio": 0.40 },
+                "monitor_sets": {},
+                "format": 13
+            }
+            """
+        let out = try #require(
+            ConfigMigration.surgicallyFilledGrouping(text)
+        )
+        let after = String(decoding: out, as: UTF8.self)
+        let insert =
+            "\"space_bar\":{\"group_adjacent_windows\":true},"
+        #expect(after.replacingOccurrences(of: insert, with: "") == text)
+        let root = try #require(
+            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        )
+        #expect(try grouping(in: root["settings"]))
+    }
+
     @Test("an explicit choice is kept")
     func explicitValueKept() throws {
         var settings = try legacySettings()
