@@ -100,6 +100,7 @@
   "app_rules.titled.caption": "As janelas cujo título contém um padrão permanecem flutuantes.",
   "bar.menu.advanced_colors": "Cores avançadas…",
   "bar.menu.ax.nested": "%1$@: %2$@",
+  "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.looks": "Looks…",
   "bar.menu.reset_minimum": "Redefinir o mínimo da Space Bar",
   "bar.menu.shelf_settings": "Ajustes do KiwiShelf…",

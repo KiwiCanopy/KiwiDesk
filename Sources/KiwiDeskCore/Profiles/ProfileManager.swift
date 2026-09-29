@@ -49,8 +49,19 @@ public final class ProfileManager {
     /// The live profile's saved layout modes as KiwiDesk last
     /// adopted or wrote them — what a question about the live
     /// profile's layouts reads instead of its file (#1245, #1518).
-    /// Meaningful only while `currentName` is set.
-    private(set) var liveSpaceModes: [SpaceID: LayoutMode] = [:]
+    /// Tagged with the profile they are, so a copy an ender left
+    /// behind can never answer for another.
+    private var savedModesRecord:
+        (profile: String, modes: [SpaceID: LayoutMode])?
+
+    /// The live profile's saved layout modes; nil while none is
+    /// live.
+    var liveSpaceModes: [SpaceID: LayoutMode]? {
+        guard let name = currentName, let record = savedModesRecord,
+            record.profile == name
+        else { return nil }
+        return record.modes
+    }
     /// Built-in Standard currently resolving (nil if covered by saved
     /// profile).
     public var currentStandard: String? { standard?.name }
@@ -134,7 +145,7 @@ public final class ProfileManager {
         }
         try write(profile)
         active = ActiveProfile(profile)
-        liveSpaceModes = profile.spaceModes
+        savedModesRecord = (profile.name, profile.spaceModes)
         standard = nil
         isDirty = false
     }
@@ -189,6 +200,7 @@ public final class ProfileManager {
         try write(profile)
         if currentName == old {
             active = active?.renamed(to: new)
+            savedModesRecord = (new, profile.spaceModes)
         }
     }
 
@@ -281,7 +293,7 @@ public final class ProfileManager {
     /// "Whose arrangement is live" (#1249).
     func becameLive(_ profile: Profile, fits: Bool) {
         active = ActiveProfile(profile)
-        liveSpaceModes = profile.spaceModes
+        savedModesRecord = (profile.name, profile.spaceModes)
         standard = nil
         isDirty = !fits
     }
@@ -326,7 +338,7 @@ public final class ProfileManager {
             options: .atomic
         )
         if profile.name == currentName {
-            liveSpaceModes = profile.spaceModes
+            savedModesRecord = (profile.name, profile.spaceModes)
         }
     }
 

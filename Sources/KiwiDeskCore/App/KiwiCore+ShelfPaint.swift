@@ -108,7 +108,10 @@ extension KiwiCore {
     /// Settings takes — the tour's look (#1720), a bar menu's row
     /// (#1518): `edit` lands in the live profile's file,
     /// non-adopting, then reaches an open draft through
-    /// `onLiveProfileWritten`. Live settings are the caller's.
+    /// `onLiveProfileWritten` — announced whether or not a file
+    /// took it, since with no profile live the change is the
+    /// session's and the draft still describes it. Live settings
+    /// are the caller's.
     func writeThroughLiveProfile(_ edit: @escaping SettingsEdit) {
         if let name = profiles.currentName {
             writeStoredSettings(name, edit)
@@ -136,6 +139,6 @@ extension KiwiCore {
 /// An edit of the settings a write applies (#1518).
 public typealias SettingsEdit = (inout TilingSettings) -> Void
 
-/// What the GUI takes when the live profile's file is written from
-/// outside Settings: the edit that write applied.
+/// What the GUI takes when the live profile is written from outside
+/// Settings: the edit that write applied, file or session.
 public typealias LiveProfileWrite = @MainActor (@escaping SettingsEdit) -> Void

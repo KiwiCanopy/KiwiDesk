@@ -100,6 +100,7 @@
   "app_rules.titled.caption": "Le finestre il cui titolo contiene un modello restano fluttuanti.",
   "bar.menu.advanced_colors": "Colori avanzati…",
   "bar.menu.ax.nested": "%1$@: %2$@",
+  "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.looks": "Look…",
   "bar.menu.reset_minimum": "Ripristina il minimo della Space Bar",
   "bar.menu.shelf_settings": "Impostazioni di KiwiShelf…",

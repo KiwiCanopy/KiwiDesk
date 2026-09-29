@@ -87,10 +87,14 @@ enum BarMenu {
                 parent.map {
                     L("bar.menu.ax.nested", "%1$@: %2$@", $0, row.title)
                 } ?? row.title
-            let name =
+            let current =
                 row.checked
                 ? L("space_bar.item.ax.current", "%1$@, current", named)
                 : named
+            let name =
+                row.subtitle.map {
+                    L("bar.menu.ax.subtitled", "%1$@, %2$@", current, $0)
+                } ?? current
             switch row.kind {
             case .separator:
                 return []

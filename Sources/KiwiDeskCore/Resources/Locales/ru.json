@@ -100,6 +100,7 @@
   "app_rules.titled.caption": "Окна, заголовок которых содержит шаблон, остаются плавающими.",
   "bar.menu.advanced_colors": "Доп. цвета…",
   "bar.menu.ax.nested": "%1$@: %2$@",
+  "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.looks": "Облики…",
   "bar.menu.reset_minimum": "Сбросить минимум Space Bar",
   "bar.menu.shelf_settings": "Настройки KiwiShelf…",

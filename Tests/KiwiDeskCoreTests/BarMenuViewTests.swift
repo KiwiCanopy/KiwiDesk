@@ -90,7 +90,8 @@ struct BarMenuViewTests {
     }
 
     /// A glyph has no menu of its own yet (#1518's window rows come
-    /// later), so its click falls through to the chip under it.
+    /// later), so its click falls through to the chip under it —
+    /// and VoiceOver on it hears the chip's rows, the same ones.
     @Test("a glyph answers nothing, so its chip does")
     func glyphFallsThrough() throws {
         let (menus, overlay) = try drawn()
@@ -98,7 +99,10 @@ struct BarMenuViewTests {
         let chip = try #require(overlay.itemViews.first)
         let glyph = try #require(chip.glyphTargets.first)
         #expect(glyph.menu(for: rightClick) == nil)
-        #expect(glyph.accessibilityCustomActions() == nil)
+        #expect(
+            glyph.accessibilityCustomActions()?.map(\.name)
+                == ["\(BarHit.space(one))"]
+        )
     }
 
     @Test("VoiceOver's actions on a chip are its menu's rows")
@@ -174,5 +178,28 @@ struct BarMenuViewTests {
         let actions: [NSAccessibilityCustomAction]? =
             overlay.frontIcon.accessibilityCustomActions()
         #expect(actions?.map { $0.name } == ["empty"])
+        // A text glyph fronts the chip where the app has one.
+        var glyph = app(9)
+        glyph = SpaceBarItemView.App(
+            name: glyph.name,
+            icon: nil,
+            glyph: "A",
+            focused: false,
+            count: 1,
+            windows: glyph.windows
+        )
+        overlay.show(
+            items: overlay.lastShown?.items ?? [],
+            frontApp: glyph,
+            strip: CGRect(x: 0, y: 0, width: 800, height: 32),
+            style: style,
+            stateMarkColors: StateMarkColors(
+                sticky: "#ffffff",
+                floating: "#ffffff"
+            )
+        )
+        let spoken: [NSAccessibilityCustomAction]? =
+            overlay.frontGlyph.accessibilityCustomActions()
+        #expect(spoken?.map { $0.name } == ["empty"])
     }
 }

@@ -52,8 +52,7 @@ extension KiwiCore {
     public func savedModes(
         for spaces: [SpaceID]
     ) -> [SpaceID: LayoutMode] {
-        guard profiles.currentName != nil else { return [:] }
-        let stored = profiles.liveSpaceModes
+        guard let stored = profiles.liveSpaceModes else { return [:] }
         var modes: [SpaceID: LayoutMode] = [:]
         for space in spaces {
             modes[space] = stored[space] ?? .bsp

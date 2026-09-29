@@ -27,10 +27,12 @@ extension SpaceBarGlyphTarget {
         menuHit.flatMap { barContextMenus?.menu(for: $0) }
     }
 
+    /// A glyph speaks the chip's rows, the ones its right-click
+    /// falls through to.
     override func accessibilityCustomActions()
         -> [NSAccessibilityCustomAction]?
     {
-        menuHit.map { barContextMenus?.accessibilityActions(for: $0) ?? [] }
+        barContextMenus?.accessibilityActions(for: menuHit ?? .space(space))
     }
 }
 

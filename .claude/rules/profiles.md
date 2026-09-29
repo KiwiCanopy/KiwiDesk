@@ -1168,7 +1168,9 @@ and the tour owns its undo*.
 `KiwiCore.writeThroughLiveProfile` door** — the tour's look, a
 bar menu's row (#1518) — which writes the file non-adopting and
 then hands the SAME edit to an open draft through
-`onLiveProfileWritten`, never a caller's own announcement
+`onLiveProfileWritten` — whether or not a file took it, since
+with no profile live the change is the session's — never a
+caller's own announcement
 (`ShelfPaintTests` ▸ `paintsAreAnnounced`, `BarMenuRowsTests` ▸
 `discSetsTheSpan`). The draft policy is ruled here, once
 (`SettingsModel.adoptLiveWrite`): a clean live draft re-reads; a

@@ -100,6 +100,7 @@
   "app_rules.titled.caption": "Fenster, deren Titel das Muster enthält, bleiben schwebend.",
   "bar.menu.advanced_colors": "Erweiterte Farben…",
   "bar.menu.ax.nested": "%1$@: %2$@",
+  "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.looks": "Looks…",
   "bar.menu.reset_minimum": "Space-Bar-Minimum zurücksetzen",
   "bar.menu.shelf_settings": "KiwiShelf-Einstellungen…",

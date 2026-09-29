@@ -14,7 +14,11 @@ struct BarMenuTests {
             .submenu(
                 "Layout",
                 [
-                    .action("BSP", checked: true) { log("bsp") },
+                    .action(
+                        "BSP",
+                        checked: true,
+                        subtitle: "not saved to profile"
+                    ) { log("bsp") },
                     .action("Grid") { log("grid") },
                 ]
             ),
@@ -53,7 +57,10 @@ struct BarMenuTests {
         let actions = BarMenu.accessibilityActions(rows { fired.append($0) })
         #expect(
             actions.map(\.name)
-                == ["Layout: BSP, current", "Layout: Grid", "Looks…"]
+                == [
+                    "Layout: BSP, current, not saved to profile",
+                    "Layout: Grid", "Looks…",
+                ]
         )
         let looks = try #require(actions.last)
         #expect(looks.handler?() == true)

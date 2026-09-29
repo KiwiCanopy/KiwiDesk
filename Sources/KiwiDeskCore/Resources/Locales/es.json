@@ -100,6 +100,7 @@
   "app_rules.titled.caption": "Las ventanas cuyo título contenga un patrón permanecen flotantes.",
   "bar.menu.advanced_colors": "Colores avanzados…",
   "bar.menu.ax.nested": "%1$@: %2$@",
+  "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.looks": "Looks…",
   "bar.menu.reset_minimum": "Restablecer el mínimo de la Space Bar",
   "bar.menu.shelf_settings": "Ajustes de KiwiShelf…",

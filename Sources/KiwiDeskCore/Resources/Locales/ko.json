@@ -100,6 +100,7 @@
   "app_rules.titled.caption": "제목에 해당 패턴이 포함된 윈도우는 플로팅 상태로 유지됩니다.",
   "bar.menu.advanced_colors": "고급 색상…",
   "bar.menu.ax.nested": "%1$@: %2$@",
+  "bar.menu.ax.subtitled": "%1$@, %2$@",
   "bar.menu.looks": "디자인…",
   "bar.menu.reset_minimum": "Space Bar 최소 길이 재설정",
   "bar.menu.shelf_settings": "KiwiShelf 설정…",
