@@ -441,6 +441,44 @@ Obligations:
   showed no fade at all (`SpaceBarStripViewTests` ▸
   `laterPassKeepsTheWalk`).
 
+## A bar's right-click menu is one row list (#1518)
+
+A menu drawn one way for the pointer and another for VoiceOver
+offers two sets of rows, and a Settings row that opens a page
+rather than the row it names makes the user search again. So:
+
+- **Build a bar menu's rows in `KiwiCore.barMenuRows(_:)`, keyed
+  by a `BarHit`, and nowhere beside it.** The one
+  `BarContextMenus` instance (`ShelfManager`'s) turns them into
+  the `NSMenu` and into VoiceOver's named actions both, through
+  `BarMenu`, which turns auto-enabling off at every level and
+  states each row's enablement — greyed, never hidden (#802)
+  (`BarMenuTests`, `BarMenuRowsTests`). Every menu ends with the
+  shelf section.
+- **A view that answers a right-click overrides `menu(for:)` and
+  `accessibilityCustomActions()` with its own `BarHit`, and one
+  with nothing of its own answers nil**, so the click reaches the
+  section root under it (`BarMenuViewTests`). A manager or
+  overlay that builds bar views hands them the menu source, or
+  they answer nothing (`ShelfWiringSeamTests` ▸
+  `managersHandTheMenus`); a new right-clickable view owes
+  `BarMenuViewTests` a clause.
+- **A Settings row names its place as a `SettingsLanding` value,
+  and the GUI maps it** (`SettingsAnchor(landing:)`), landing on
+  the card or row as the search does — never a destination or a
+  sentence authored in Core (#96, `BarMenuLandingTests`).
+- **A row that writes a stored setting goes through its setter,
+  then into the live profile's file, then hands the same edit to
+  `barMenuHooks.settingsWritten`**, which an open draft takes on
+  both sides of its diff — or the draft's next Save writes the
+  old value back (the #1720 shape; `BarMenuRowsTests` ▸
+  `discSetsTheSpan`, `BarMenuLandingTests`). A session value — a
+  Layout pick, the divider's reset — takes the setter alone, as
+  its other doors do.
+- **The Layout rows' look is `LayoutModeRows.entries`**, which
+  the status item's Layout menu builds from too; each side hands
+  it its own words, so no sentence crosses the #96 seam.
+
 ## A per-display bar answers the SHOWN question, never the render one
 
 A bar is built per display, so a per-display value sits in easy

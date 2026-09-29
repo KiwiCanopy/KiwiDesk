@@ -58,7 +58,7 @@ enum SpaceBarWindowMenu {
     /// macOS 27 hides menu-item images unless the item asks
     /// (`preferredImageVisibility`); the SDK CI builds with lacks
     /// the symbol, so it is set through the runtime.
-    private static func showImage(_ item: NSMenuItem) {
+    static func showImage(_ item: NSMenuItem) {
         let visible = 1  // NSMenuItemImageVisibilityVisible
         guard
             item.responds(

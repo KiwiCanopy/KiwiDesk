@@ -80,6 +80,18 @@ struct GesturesShelfEntries: View {
         GestureRule()
         GestureEntry(
             L(
+                "shortcuts.gestures.context_menu",
+                "Right-click the KiwiShelf for a menu of what you "
+                    + "clicked: a Space's layout, how many glyphs a "
+                    + "Space shows, and the KiwiShelf's settings."
+            ),
+            surface: .shelf,
+            settings: settings,
+            pace: .steps
+        ) { GesturePicture.ContextMenu(t: $0) }
+        GestureRule()
+        GestureEntry(
+            L(
                 "shortcuts.gestures.app_bar",
                 "Drag an item along the App Bar to reorder its "
                     + "windows."

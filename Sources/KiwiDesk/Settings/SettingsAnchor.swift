@@ -43,6 +43,8 @@ struct SettingsAnchor: Hashable {
                 destination == .layoutDefaults
                 && LayoutMode.placementTabs.contains(mode)
             return renders ? surface : .main
+        case .space:
+            return destination == .spaces ? surface : .main
         }
     }
 }
@@ -52,4 +54,26 @@ struct SettingsAnchor: Hashable {
 enum SettingsSurface: Hashable {
     case main
     case layoutMode(LayoutMode)
+    /// One Space's card on Spaces (#1518).
+    case space(SpaceID)
+}
+
+extension SettingsAnchor {
+    /// Where a bar menu's Settings row lands (#1518): the page,
+    /// and the card or row on it, as the search would land.
+    init(landing: SettingsLanding) {
+        switch landing {
+        case .shelf:
+            self.init(
+                destination: .bars,
+                anchor: SettingsCatalog.bars.kiwishelfCard.id
+            )
+        case .looks:
+            self.init(destination: .looks)
+        case .advancedColors:
+            self.init(destination: .advancedColors)
+        case .space(let space):
+            self.init(destination: .spaces, surface: .space(space))
+        }
+    }
 }

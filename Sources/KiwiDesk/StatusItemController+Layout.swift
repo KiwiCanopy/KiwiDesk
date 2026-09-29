@@ -96,28 +96,32 @@ extension StatusItemController {
         scope: LayoutMenuTarget.Scope,
         subtitleWhenDrifted: Bool = true
     ) {
-        for mode in LayoutMode.allCases {
+        // The rows' look is the one Layout menu's (#1518): a Space
+        // chip's right-click draws the same entries.
+        let entries = LayoutModeRows.entries(
+            live: live,
+            drifted: drifted && subtitleWhenDrifted,
+            words: LayoutModeRows.Words(
+                name: { $0.displayName },
+                unsaved: L("menu.layout.unsaved", "not saved to profile")
+            )
+        )
+        for row in entries {
             let entry = NSMenuItem(
-                title: mode.displayName,
+                title: row.title,
                 action: #selector(setLayoutMode(_:)),
                 keyEquivalent: ""
             )
             entry.target = self
-            entry.image = symbol(mode.symbol)
+            entry.image = symbol(row.symbol)
             entry.representedObject = LayoutMenuTarget(
-                mode: mode,
+                mode: row.mode,
                 scope: scope
             )
             entry.isEnabled = true
-            let isCurrent = (mode == live)
-            entry.state = isCurrent ? .on : .off
-            if isCurrent, drifted, subtitleWhenDrifted {
-                if #available(macOS 14.4, *) {
-                    entry.subtitle = L(
-                        "menu.layout.unsaved",
-                        "not saved to profile"
-                    )
-                }
+            entry.state = row.checked ? .on : .off
+            if let subtitle = row.subtitle, #available(macOS 14.4, *) {
+                entry.subtitle = subtitle
             }
             menu.addItem(entry)
         }

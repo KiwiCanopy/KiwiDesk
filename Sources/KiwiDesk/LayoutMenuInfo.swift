@@ -52,8 +52,9 @@ struct LayoutMenuInfo {
     /// saying "not saved to profile" above a greyed row that
     /// would have saved it.
     var anyScreenHasDrifted: Bool {
-        activeSpaceHasDrifted
-            || screens.contains(where: \.hasDrifted)
+        LayoutModeRows.keepArmed(
+            drifts: [activeSpaceHasDrifted] + screens.map(\.hasDrifted)
+        )
     }
 
     /// Screens in desk reading order via `DeskOrder` (#752).

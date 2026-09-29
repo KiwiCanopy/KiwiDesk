@@ -138,6 +138,7 @@ extension SpaceBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             view.glyphActions = glyphActions
+            view.contextMenus = contextMenus
             view.configure(
                 identity: item.identity,
                 spaceGlyph: item.spaceGlyph,

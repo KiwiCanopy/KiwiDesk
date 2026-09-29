@@ -20,9 +20,9 @@ final class ShelfOverlay {
     }
 
     private(set) var panel: NSPanel?
-    let content = AppBarOverlay.FlippedView()
+    let content = BarMenuView()
     /// Holds both sections and the divider, above the plate.
-    let stripView = AppBarOverlay.FlippedView()
+    let stripView = BarMenuView()
     var solidPlate: NSView?
     var glassPlate: NSView?
     var glassTint: GlassBackdrop?
@@ -39,6 +39,15 @@ final class ShelfOverlay {
     /// divider was last painted for.
     var dividerHovered = false
     var dividerShelf: KiwiShelf?
+    /// The bars' context menus (#1518): the plate outside both
+    /// runs answers as empty bar space, the grip as the divider.
+    weak var contextMenus: BarContextMenus? {
+        didSet {
+            content.contextMenus = contextMenus
+            stripView.contextMenus = contextMenus
+            handle.contextMenus = contextMenus
+        }
+    }
 
     var isVisible: Bool { panel?.isVisible == true }
 

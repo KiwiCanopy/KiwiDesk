@@ -135,4 +135,35 @@ extension GesturePicture {
             }
         }
     }
+
+    /// Right-click a Space on the shelf: the press, then its menu
+    /// opens beneath it (#1518).
+    struct ContextMenu: View, Animatable {
+        var t: CGFloat
+        nonisolated var animatableData: CGFloat {
+            get { t }
+            set { t = newValue }
+        }
+        @Environment(\.schematicPalette) private var palette
+
+        var body: some View {
+            let ink = GestureInk(palette: palette)
+            ZStack(alignment: .topLeading) {
+                ink.shelf()
+                ink.item(CGRect(x: 4, y: 3, width: 44, height: 10))
+                ink.label("1", at: CGPoint(x: 8, y: 3))
+                ink.glyph(at: CGPoint(x: 26, y: 8), focused: true)
+                ink.glyph(at: CGPoint(x: 38, y: 8))
+                ink.item(CGRect(x: 52, y: 3, width: 32, height: 10))
+                ink.label("2", at: CGPoint(x: 56, y: 3))
+                ink.press(at: CGPoint(x: 12, y: 8), t)
+                ink.panel(
+                    CGRect(x: 10, y: 20, width: 74, height: 44),
+                    rows: 4
+                )
+                .opacity(gestureStage(t, 0.45, 0.6))
+                ink.pointer(at: CGPoint(x: 14, y: 10))
+            }
+        }
+    }
 }

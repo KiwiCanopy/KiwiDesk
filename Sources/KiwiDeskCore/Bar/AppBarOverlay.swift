@@ -41,6 +41,15 @@ public final class AppBarOverlay {
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
+    /// The bars' context menus (#1518), handed to every view here
+    /// that answers a right-click.
+    weak var contextMenus: BarContextMenus? {
+        didSet {
+            root.contextMenus = contextMenus
+            backCount.contextMenus = contextMenus
+            forwardCount.contextMenus = contextMenus
+        }
+    }
     /// Per-box Liquid Glass views for `boxed + liquid_glass`.
     var boxGlasses: [NSView] = []
     /// Solid backdrops behind per-box glass for tint refraction (#408).

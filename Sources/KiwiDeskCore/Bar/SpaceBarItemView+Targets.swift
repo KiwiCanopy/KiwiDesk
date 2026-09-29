@@ -33,7 +33,10 @@ extension SpaceBarItemView {
                 )
             }
         }
-        glyphTargets.forEach { $0.actions = glyphActions }
+        glyphTargets.forEach {
+            $0.actions = glyphActions
+            $0.contextMenus = contextMenus
+        }
         let shown = collapse == nil
         // Each disc lists its windows nearest the glyphs first, so
         // the leading one reads its side of the row backwards.
@@ -73,6 +76,7 @@ extension SpaceBarItemView {
             kept.accessibilityLabel() == label
         {
             kept.actions = glyphActions
+            kept.contextMenus = contextMenus
             return kept
         }
         current?.removeFromSuperview()
@@ -136,6 +140,7 @@ extension SpaceBarItemView {
             label: label
         )
         target.actions = glyphActions
+        target.contextMenus = contextMenus
         addSubview(target)
         return target
     }

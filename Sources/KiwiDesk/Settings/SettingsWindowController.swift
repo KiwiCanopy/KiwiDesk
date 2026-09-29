@@ -91,6 +91,18 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.refreshProfiles()
     }
 
+    /// Shows Settings where a bar menu's row lands (#1518): the
+    /// page, and the card or row on it, as the search would.
+    func show(landing: SettingsLanding) {
+        model.nav.pendingReveal = SettingsAnchor(landing: landing)
+        show()
+    }
+
+    /// A setting a bar menu wrote into the live profile (#1518).
+    func adoptLiveWrite(_ edit: (inout TilingSettings) -> Void) {
+        model.adoptLiveWrite(edit)
+    }
+
     /// Shows dashboard navigated to destination (#326).
     func show(navigatingTo destination: SettingsDestination) {
         model.nav.pendingReveal = SettingsAnchor(

@@ -110,6 +110,14 @@ struct CoreLocalizationBoundaryTests {
         // The shelf's overflow counts, a button each for VoiceOver
         // (#1517): before and after.
         "Bar/ShelfCountView.swift": 2,
+        // The bars' right-click menus (#1518), which Core draws:
+        // their rows, VoiceOver's name for a nested row, and the
+        // Layout menu's words under the keys Settings' own names
+        // use — the status item passes its words in, so none of
+        // these crosses into the GUI.
+        "App/KiwiCore+BarMenus.swift": 8,
+        "Bar/BarMenu.swift": 1,
+        "Bar/LayoutModeRows.swift": 8,
     ]
 
     /// `L(` preceded by an identifier character is a different

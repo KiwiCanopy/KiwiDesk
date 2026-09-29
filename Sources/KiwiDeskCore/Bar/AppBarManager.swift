@@ -62,6 +62,9 @@ public final class AppBarManager {
     /// source for anything that must sit clear of a bar (#242).
     private var shownBars: [Bar] = []
 
+    /// The shelf's context menus (#1518), set by Core at bootstrap.
+    weak var contextMenus: BarContextMenus?
+
     public init() {}
 
     /// Displays currently showing an app bar.
@@ -155,6 +158,7 @@ public final class AppBarManager {
         if let existing = overlays[display] { return existing }
         let overlay = AppBarOverlay()
         overlay.itemActions = itemActions
+        overlay.contextMenus = contextMenus
         overlay.onSelect = { [weak self] id in
             self?.onSelect(id)
         }

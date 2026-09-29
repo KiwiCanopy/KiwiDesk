@@ -109,7 +109,7 @@ extension KiwiCore {
 
     /// Non-adopting, like `overwriteProfile`: `current` and
     /// `dirty` stay as they were.
-    private func writeStoredSettings(
+    func writeStoredSettings(
         _ name: String,
         _ paint: (inout TilingSettings) -> Void
     ) {

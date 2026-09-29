@@ -210,4 +210,25 @@ struct ShelfWiringSeamTests {
             )
         )
     }
+
+    /// The shelf and App Bar overlays are built inside their
+    /// managers, which a Core test drives only through a whole
+    /// plan: each hands the one menu source to what it builds
+    /// (#1518), or its surfaces answer no right-click.
+    @Test("each manager hands its overlays the menu source")
+    func managersHandTheMenus() throws {
+        for (file, declaration) in [
+            ("Bar/ShelfManager.swift", "func relayout("),
+            ("Bar/AppBarManager.swift", "private func overlay("),
+            ("Bar/SpaceBarManager.swift", "private func overlay("),
+        ] {
+            let body = Self.squash(
+                try Self.body(of: declaration, in: file)
+            )
+            #expect(
+                body.contains("overlay.contextMenus=contextMenus"),
+                Comment(rawValue: file)
+            )
+        }
+    }
 }

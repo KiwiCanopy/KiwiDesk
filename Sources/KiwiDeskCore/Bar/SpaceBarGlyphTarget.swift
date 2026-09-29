@@ -47,6 +47,7 @@ final class SpaceBarGlyphTarget: NSView {
     let members: [WindowID]
     let kind: SpaceBarGlyphPick.Kind
     weak var actions: SpaceBarGlyphActions?
+    weak var contextMenus: BarContextMenus?
     private var tipTag: NSView.ToolTipTag?
 
     init(
