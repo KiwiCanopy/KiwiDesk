@@ -106,6 +106,8 @@ public final class SpaceBarOverlay {
             item.apps = []
             item.after = .none
             item.before = .none
+            // It draws no strip, so it has none to hold.
+            item.drawn = nil
             switch content {
             case .apps:
                 return self
@@ -239,6 +241,9 @@ public final class SpaceBarOverlay {
     }
 
     public func hide() {
+        // A chip hidden under the pointer ends its hold (#1528),
+        // though its Space may draw on another display's bar.
+        itemViews.forEach { $0.setPointerInside(false) }
         follow.reset()
         shownExpanded = nil
         shownIdentities = []

@@ -99,6 +99,34 @@ struct SpaceBarStripHoldTests {
         #expect(released == 1)
     }
 
+    /// A display's bar going away under the pointer ends the hold
+    /// even while its Space draws on another display — an unplug
+    /// moving an unpinned Space to the screen that stays.
+    @Test("a hidden bar under the pointer releases its hold")
+    func hiddenBarReleases() throws {
+        let manager = SpaceBarManager()
+        var released = 0
+        manager.onStripReleased = { released += 1 }
+        let other = DisplayID(8)
+        var second = bar([item(one)])
+        second = SpaceBarManager.Bar(
+            display: other,
+            items: second.items,
+            strip: second.strip,
+            style: second.style,
+            stateMarkColors: second.stateMarkColors
+        )
+        manager.sync([bar([item(two)]), second])
+        let chip = try #require(
+            manager.overlayForTesting(other)?.itemViews.first
+        )
+        chip.setPointerInside(true)
+        #expect(manager.heldStrip(of: one) != nil)
+        manager.sync([bar([item(two), item(one)])])
+        #expect(manager.heldStrip(of: one) == nil)
+        #expect(released == 1)
+    }
+
     /// Another chip's entry can arrive ahead of the first chip's
     /// exit; the replaced hold still asks for its re-centring.
     @Test("a hold replaced by another Space's releases")

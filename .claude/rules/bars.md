@@ -394,9 +394,11 @@ Obligations:
   moves it (#1528, `SpaceBarStripTests`,
   `SpaceBarCentredStripTests` ▸ `lengthIsFixed`). The centring
   anchor is WHICH app the strip shows, a question of its own:
-  the active Space's system focus, another Space's remembered
-  one — never the `+n` tint's reading, which stays gated on the
-  active Space below.
+  the active Space's system focus, falling back to its
+  remembered one where the system focus is no drawn group (a
+  transient overlay, a switch not yet reported), and another
+  Space's remembered one — never the `+n` tint's reading, which
+  stays gated on the active Space below.
 - **A strip under the pointer is held by `SpaceBarManager`
   alone** and released through its one `onStripReleased`, wired
   to an `updateBars()` DEFERRED on `DeferredTasks.Key
@@ -408,7 +410,8 @@ Obligations:
   chip stops drawing that Space, not only on the pointer's exit:
   item views are reused by index, so a slot handed another Space
   reports the old Space's exit from `configure`, and a view the
-  run drops reports it before it leaves; another Space's entry
+  run drops, or an overlay that hides, reports it before it
+  goes; another Space's entry
   replaces the hold AND releases it, since its exit may arrive
   second; and `sync` drops a hold on a Space no shown bar
   draws. A new way for a chip to stop drawing a Space owes the
