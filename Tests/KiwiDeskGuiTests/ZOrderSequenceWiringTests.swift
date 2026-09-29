@@ -21,8 +21,8 @@ import Testing
 ///   `raiseFloor`.** Its argument — that the floor excludes
 ///   the focused window because no quiet raise can beat the key
 ///   window — lives on that function with the measurement behind
-///   it. Inlining a floor here would be invisible: no test in
-///   either target calls `raiseFloatsAndSticky`.
+///   it. Inlining a floor here would be invisible: no unit
+///   test observes the floor the raise hands the sequence.
 ///
 /// A **presence** scan, so deleting the call reds. That is the
 /// polarity that works: a containment guard is inert when the
@@ -113,6 +113,20 @@ struct ZOrderSequenceWiringTests {
         // (guard-prover, 2026-08-02).
         #expect(source.contains("let raised = drain.run("))
         #expect(source.contains("keeping: raised"))
+    }
+
+    /// The AX focus-follow's deferred body reads the live
+    /// frontmost and AX, so no unit test reaches it; its landing
+    /// — and with it the #412 float raise — is pinned here as
+    /// the CALL (#1727). `FollowSwitchFloatRaiseTests` pins what
+    /// the landing does.
+    @Test("The AX focus-follow lands through landFocusFollow")
+    func focusFollowTakesTheLanding() throws {
+        let source = try body(
+            of: "scheduleFocusFollow",
+            in: "KiwiCore+SpaceCommands.swift"
+        )
+        #expect(source.contains("self.landFocusFollow(id, on: space)"))
     }
 
     /// The live restore's policy, which nothing else can see.

@@ -60,13 +60,22 @@ extension KiwiCore {
                 ),
                 space != self.state.workspaces.activeSpace
             else { return }
-            self.applyFocusedSpaceSwitch(to: space)
-            // The focus echo that triggered this follow found
-            // the window on an inactive space, where the warp
-            // guard skips; now that the space is forward the
-            // slot frames are real — warp here (#186).
-            self.warpMouseToFocused(id)
+            self.landFocusFollow(id, on: space)
         }
+    }
+
+    /// The AX focus-follow's landing on `space`: switch, warp,
+    /// and the #412 float raise `focusSpace` and `followSwitch`
+    /// pay too (#1727) — on every landing, a Space another
+    /// display already shows included, where it is harmless.
+    func landFocusFollow(_ id: WindowID, on space: SpaceID) {
+        applyFocusedSpaceSwitch(to: space)
+        // The focus echo that triggered this follow found
+        // the window on an inactive space, where the warp
+        // guard skips; now that the space is forward the
+        // slot frames are real — warp here (#186).
+        warpMouseToFocused(id)
+        raiseLandingFloats(thenFocus: id)
     }
 
     /// After a restart, land on the Space of the
