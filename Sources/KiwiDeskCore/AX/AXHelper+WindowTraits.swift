@@ -24,7 +24,8 @@ struct WindowTraits: Equatable {
         }
         return
             (hosts.first { sameFrame($0.frame, twin.frame) }
-            ?? hosts.first { sameSize($0.frame, twin.frame) })?.id
+            ?? hosts.first { sameSize($0.frame, twin.frame) }
+            ?? hosts.first)?.id
     }
 
     private static func sameSize(_ a: CGRect, _ b: CGRect) -> Bool {
