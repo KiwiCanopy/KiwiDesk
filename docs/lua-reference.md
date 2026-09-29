@@ -2718,7 +2718,8 @@ space_bar.set_front_app_title_cap(25)
 
 **Does:** hides Spaces with no windows from the bar, except the
 Space you are currently on, which always stays. Hidden Spaces
-remain reachable by shortcut.
+remain reachable by shortcut and by the
+[Space step](#scroll-gestures).
 
 **Example:**
 
@@ -3327,7 +3328,8 @@ KiwiDesk.set_mouse_resize("snap_back")
 **Does:** when `true`, a focus change warps the mouse pointer to
 the center of the newly-focused window. The pointer never moves
 while a mouse button is held down or when it is already inside
-the focused window. While KiwiDesk performs its own z-order
+the focused window, nor for a [scroll gesture](#scroll-gestures).
+While KiwiDesk performs its own z-order
 maintenance raises the warp is held, and it fires once they
 settle, for the window focus finally landed on. When focus lands
 on a window in an inactive space (cmd+tab into a stashed window),
@@ -3366,8 +3368,11 @@ does not move, even with `mouse.follows_focus` on.
   wrapping at the ends.
 
 A swipe on a trackpad or Magic Mouse moves one window, and a
-notch of a mouse wheel moves one; the glide after the fingers
-lift never counts. With
+notch of a mouse wheel moves one — a fast roll or a
+free-spinning wheel moves one for the whole burst, and each notch
+counts again once the wheel pauses between notches; the glide
+after the fingers lift never counts. Where there is no window to
+move to, the focused window's border bumps toward the step. With
 [long swipes](#scroll_gestureset_long_swipes) on, a swipe moves
 its first window as it starts and one more every
 [step distance](#scroll_gestureset_step_distance) of further
@@ -3375,6 +3380,20 @@ travel, which macOS's own Scrolling speed scales. The direction
 follows KiwiDesk's own
 [Natural scrolling](#scroll_gestureset_natural_scrolling), per
 input, whatever macOS's is set to.
+
+Hold **⌃⌥⌘** (the default;
+[`set_space_step`](#scroll_gestureset_space_step) changes it) and
+scroll to switch to the next or previous Space on the screen under
+the pointer, in that screen's Space order — the Space Bar's, empty
+Spaces included. A swipe steps one Space, and so does a notch of a
+mouse wheel; a fast roll or a free-spinning wheel steps one for the
+whole burst, and each notch counts again once the wheel pauses
+between notches. It stops at the first and last Space rather than
+wrapping, where the focused window's border, if the shown Space
+has one, bumps toward the step, and the pointer does not move.
+The direction follows
+[Natural scrolling](#scroll_gestureset_natural_scrolling), as
+the window step's does.
 
 The keys must be exactly the ones set: ⌃⌥⌘ + scroll is not
 ⌃⌥ + scroll. While they are held, KiwiDesk takes the scroll on
@@ -3391,8 +3410,8 @@ profile starts with. A profile file may carry a sparse
 single-modifier chord in either file turns that gesture off, a
 `space_step` equal to `pan` turns the Space step off, and a
 `step_distance` outside 10–1000 is clamped to the range. In the
-Settings app all but `space_step` are the **Scroll gestures**
-group under **Shortcuts & Gestures ▸ Mouse & trackpad**, where
+Settings app they are the **Scroll gestures** group under
+**Shortcuts & Gestures ▸ Mouse & trackpad**, where
 each row's **Applies to** checklist writes the base or chosen
 profiles' overrides.
 
@@ -3429,20 +3448,18 @@ scroll_gesture.set_pan("")   -- off
 :::unreleased
 **Expects:** modifiers, as for
 [`set_pan`](#scroll_gestureset_pan) (default
-`"control+option+command"`); `""` frees the chord.
+`"control+option+command"`); `""` turns the gesture off.
 
-**Does:** reserves a chord for stepping between Spaces, which is
-not built yet
-([#1519](https://github.com/KiwiCanopy/KiwiDesk/issues/1519)).
-No gesture reads it, so a scroll with these keys still reaches
-the window; `set_pan` cannot take it. It fails on the same
-chords `set_pan` does, with the pan's chord in place of its
-own.
+**Does:** sets the keys held with a scroll to step between the
+Spaces of the screen under the pointer. It fails on the same
+chords `set_pan` does, with the pan's chord in place of its own;
+`set_pan` cannot take this one.
 
 **Example:**
 
 ```lua
-scroll_gesture.set_space_step("")   -- free ⌃⌥⌘ for set_pan
+scroll_gesture.set_space_step("control+option+shift")
+scroll_gesture.set_space_step("")   -- off
 ```
 :::
 
@@ -3452,8 +3469,8 @@ scroll_gesture.set_space_step("")   -- free ⌃⌥⌘ for set_pan
 **Expects:** a boolean, then optionally `"trackpad"` or
 `"mouse"` (default `true` for both).
 
-**Does:** on, a scroll gesture moves focus the way Natural
-scrolling moves content; off, the other way. Named, the input
+**Does:** on, a scroll gesture steps the way Natural scrolling
+moves content; off, the other way. Named, the input
 takes the value alone; left out, both do. A swipe on a trackpad
 or Magic Mouse reads the trackpad's value and a notched mouse
 wheel the mouse's, whatever macOS's Natural scrolling is set
@@ -3475,7 +3492,8 @@ scroll_gesture.set_natural_scrolling(false, "mouse")
 [step distance](#scroll_gestureset_step_distance) of travel
 after its first, on every layout; off, a swipe moves one window
 however long it is. A mouse wheel moves one window per notch
-either way.
+either way, as the section above qualifies. The Space step
+always steps one Space per swipe.
 
 **Example:**
 

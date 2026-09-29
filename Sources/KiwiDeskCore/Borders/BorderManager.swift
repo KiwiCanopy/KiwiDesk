@@ -37,6 +37,12 @@ public final class BorderManager {
     var overlays: [WindowID: BorderOverlay] = [:]
     /// Transient rings spawned for dead-end bounces when borders are disabled.
     var bumpTransients: [WindowID: BorderOverlay] = [:]
+    #if DEBUG
+        /// Test-only: hears every dead-end cue asked for, ahead of
+        /// the runtime gate a test core never passes. Production
+        /// must not read it; it says nothing about a drawn bump.
+        var deadEndProbe: ((WindowID, Direction) -> Void)?
+    #endif
     var specs: [WindowID: Spec] = [:]
     var cornerRadii: [WindowID: CGFloat] = [:]
     /// Global draw order (#367).

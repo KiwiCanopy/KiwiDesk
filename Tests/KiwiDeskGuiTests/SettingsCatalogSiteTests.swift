@@ -91,7 +91,8 @@ struct SettingsCatalogSiteTests {
         // 115 since #1731: the Each bar drawer and its two rows.
         // 113 since #1741: Behavior's Cues and On quit cards left.
         // 118 since #1656: the drawer's five scroll-gesture rows.
-        #expect(names.count == 118)
+        // 119 since #1519: the Space step's recorder.
+        #expect(names.count == 119)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,

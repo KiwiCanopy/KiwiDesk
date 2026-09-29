@@ -62,8 +62,9 @@ struct MonocleFlipSeamTests {
         "KiwiCore+Execute.swift":
             "the execute wrapper, `dispatchCommand`'s one caller",
         "KiwiCore+ScrollPan.swift":
-            "the scroll step reaches `monocleCycle` without "
-            + "`execute` (#1656)",
+            "the scroll step reaches `navigate` without "
+            + "`execute`, whose #292 preflight would refuse the "
+            + "Space under the pointer (#1656)",
     ]
 
     /// A focused-window command lands the pending focus ahead

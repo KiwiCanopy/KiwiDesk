@@ -1,15 +1,19 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Mouse & trackpad ▸ Scroll gestures (#1656): the drawer's first
-/// group. The ⌃⌥ entry with its recorder and swipe length, then
-/// the two Natural scrolling rows every scroll gesture shares. Each
+/// Mouse & trackpad ▸ Scroll gestures (#1656, #1519): the drawer's
+/// first group. The ⌃⌥ entry with its recorder and swipe length,
+/// the ⌃⌥⌘ entry with its recorder, then the two Natural scrolling
+/// rows both gestures share. Each
 /// value carries the shortcut rows' "Applies to" checklist, every
 /// one ending on the pane's right edge, and every control starts
 /// on the sentence's column; the draft holds the header profile's
 /// resolved values.
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
+    /// The first entry plays once as it appears, spending this
+    /// (`GesturesDrawer`).
+    @Binding var autoplay: Bool
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
 
@@ -23,14 +27,17 @@ struct GesturesScrollEntries: View {
             L(
                 "shortcuts.gestures.scroll.sentence",
                 "Hold these keys and scroll to move focus window by "
-                    + "window along a Scrolling row. On any other "
-                    + "Space it steps through the windows instead."
+                    + "window along a %1$@ row. On any other Space, "
+                    + "focus moves through its windows in order "
+                    + "instead.",
+                L("layout.scrolling.name", "Scrolling")
             ),
             surface: .windows,
             settings: model.config.settings,
             pace: .steps,
             // Core's verdict, so a hand-edited lone ⌃ greys too.
-            off: gestures.sanitized.pan.isEmpty
+            off: gestures.sanitized.pan.isEmpty,
+            playsOnAppear: $autoplay
         ) {
             GesturePicture.ScrollStep(t: $0, chord: gestures.pan)
         } control: {
@@ -40,7 +47,8 @@ struct GesturesScrollEntries: View {
                         name: ScrollGestureWords.pan,
                         chord: $model.config.scrollGesture.pan,
                         other: gestures.spaceStep,
-                        otherGesture: .step
+                        otherGesture: .step,
+                        reveal: reveal
                     )
                     .searchAnchored(
                         SettingsCatalog.shortcuts.gestures.children
@@ -64,6 +72,8 @@ struct GesturesScrollEntries: View {
             }
         }
         GestureRule()
+        spaceStepEntry
+        GestureRule()
         naturalRow(
             .naturalTrackpad,
             ScrollGestureWords.trackpad,
@@ -79,6 +89,57 @@ struct GesturesScrollEntries: View {
         )
         .searchAnchored(
             SettingsCatalog.shortcuts.gestures.children.naturalMouse
+        )
+    }
+
+    private static var controls: GesturesControls {
+        SettingsCatalog.shortcuts.gestures.children
+    }
+
+    /// ⌃⌥⌘ + scroll (#1519): one Space per swipe or notch, so no
+    /// swipe-length rows.
+    private var spaceStepEntry: some View {
+        GestureEntry(
+            L(
+                "shortcuts.gestures.scroll.space_step_sentence",
+                "Hold these keys and scroll to switch to the next or "
+                    + "previous Space on the screen under the "
+                    + "pointer, one per swipe or wheel notch."
+            ),
+            surface: .windows,
+            settings: model.config.settings,
+            pace: .story,
+            off: gestures.sanitized.spaceStep.isEmpty
+        ) {
+            GesturePicture.SpaceStep(t: $0, chord: gestures.spaceStep)
+        } control: {
+            reachRow(.spaceStep) {
+                ScrollChordRecorderField(
+                    name: ScrollGestureWords.label(.spaceStep),
+                    chord: $model.config.scrollGesture.spaceStep,
+                    other: gestures.pan,
+                    otherGesture: .pan,
+                    reveal: reveal
+                )
+                .searchAnchored(
+                    SettingsCatalog.shortcuts.gestures.children
+                        .scrollSpaceStep
+                )
+            }
+        }
+    }
+
+    /// Go to: a gesture's recorder row, through the one reveal
+    /// channel the diff rows take.
+    private func reveal(_ consumer: ScrollGestures.Consumer) {
+        let control =
+            switch consumer {
+            case .pan: Self.controls.scrollPan
+            case .step: Self.controls.scrollSpaceStep
+            }
+        model.nav.pendingReveal = SettingsAnchor(
+            destination: .shortcuts,
+            anchor: control.id
         )
     }
 

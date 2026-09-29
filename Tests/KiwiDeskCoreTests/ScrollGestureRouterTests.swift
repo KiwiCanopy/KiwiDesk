@@ -263,6 +263,18 @@ struct ScrollGestureRouterTests {
         #expect(!glide.consume)
     }
 
+    /// The spin guard reads the hand's spacing off these stamps,
+    /// never the main actor's (#1519).
+    @Test("every event carries the tap's clock")
+    func stampsTheClock() {
+        var router = router()
+        let first = router.route(sample(Self.step, dy: -3), now: 4)
+        #expect(first.events.map(\.time) == [4, 4])
+        let next = router.route(sample(Self.step, dy: -3), now: 4.1)
+        #expect(next.events.map(\.time) == [4.1])
+        #expect(router.expire(now: 4.5).map(\.time) == [4.5])
+    }
+
     @Test("orphan momentum and changes pass")
     func orphansPass() {
         var router = router()

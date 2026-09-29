@@ -144,26 +144,52 @@ extension GeometryUtils {
         max(safeTop, reservedTop, barHeight)
     }
 
-    /// `pointer` in Cocoa screen coordinates. A pointer resting
-    /// ON the top edge reads `y == frame.maxY`, which
-    /// `CGRect.contains` excludes — so the containing screen is
-    /// preferred (a point on the seam between stacked screens is
-    /// the upper one's bottom row) and the inclusive-top match is
-    /// the fallback for the edge itself.
+    /// `pointer` in Cocoa screen coordinates, its screen picked
+    /// by `screenIndex(holding:in:)`.
     static func pointerInMenuBarStrip(
         _ pointer: CGPoint,
         screens: [MenuBarScreen]
     ) -> Bool {
-        let screen =
-            screens.first(where: { $0.frame.contains(pointer) })
-            ?? screens.first(where: {
-                $0.frame.minX <= pointer.x
-                    && pointer.x < $0.frame.maxX
-                    && $0.frame.minY <= pointer.y
-                    && pointer.y <= $0.frame.maxY
-            })
-        guard let screen else { return false }
+        guard
+            let index = screenIndex(
+                holding: pointer,
+                in: screens.map(\.frame)
+            )
+        else { return false }
+        let screen = screens[index]
         return pointer.y >= screen.frame.maxY - screen.band
+    }
+
+    /// Which of `frames` (Cocoa) holds `point`. A point resting
+    /// ON a top edge reads `y == frame.maxY`, which
+    /// `CGRect.contains` excludes — so the containing frame is
+    /// preferred (a point on the seam between stacked screens is
+    /// the upper one's bottom row) and the inclusive-top match is
+    /// the fallback for the edge itself.
+    static func screenIndex(
+        holding point: CGPoint,
+        in frames: [CGRect]
+    ) -> Int? {
+        frames.firstIndex(where: { $0.contains(point) })
+            ?? frames.firstIndex(where: {
+                $0.minX <= point.x && point.x < $0.maxX
+                    && $0.minY <= point.y && point.y <= $0.maxY
+            })
+    }
+
+    /// The display whose whole screen — menu bar and Dock strip
+    /// included — holds `point` (AX space); the scroll gestures'
+    /// one lookup (#1656, #1519).
+    @MainActor
+    static func display(at point: CGPoint) -> DisplayID? {
+        let screens = NSScreen.screens
+        guard
+            let index = screenIndex(
+                holding: axPoint(point),
+                in: screens.map(\.frame)
+            )
+        else { return nil }
+        return screens[index].kiwiDisplay?.id
     }
 
     /// Confines the origin so `frame` stays inside `visible`; an

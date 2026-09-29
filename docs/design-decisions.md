@@ -9669,6 +9669,7 @@ everything just slid. Fixed behavior, no setting: no peer WM
 ships a knob here, and if demand materializes it becomes a
 Lua-only setting later. `CloseFocusReturnTests` pins all of it.
 
+:::unreleased
 **The page is "Shortcuts & Gestures", and what the mouse does is
 explained at its top** (#1726, owner and ui-designer 2026-09-27/28).
 A new user never discovers a mouse control from a window of
@@ -9705,16 +9706,23 @@ video cannot follow the user's palette or appearance, cannot be
 localized, and goes stale on the next shelf redesign; the drawing
 is built from the same shapes as the rest of the window and rests
 on its key frame, which is all Reduce Motion ever shows. It plays
-only while pointed at, so the page never moves on its own.
+while pointed at.
 
-:::unreleased
-The rule's other exception, a layout thumbnail that is read
-rather than compared (▸ Navigation & saving), also plays once as
-it appears, and the difference is the reader. The tour and the
-preset preview are opened in order to be read, so a story
-playing there is the content arriving; this page is a reference
-consulted in the middle of something else, where a gesture
-playing unasked would be motion no one came for.
+When the user's own click opens the card, its first picture also
+plays once and rests (owner ruling 2026-09-29), and the
+difference from the rest of this page is the reader. The rule's
+other exception, a layout thumbnail that is read rather than
+compared (▸ Navigation & saving), plays once as it appears
+because the tour and the preset preview are opened in order to
+be read. Opening this card is the same kind of act — a request to
+read what is inside — so one picture playing is the content
+arriving, and it tells the user the pictures move. It stays one
+picture: the card is still a reference consulted in the middle of
+something else, and a column of gestures playing in turn would be
+motion no one came for. So it plays at most once per visit, only
+on the click — a search hit, Go to or a diff jump opens the card
+to reach one row, whose wash is the motion that answers them —
+and never under Reduce Motion.
 :::
 
 **An entry lands with its feature, and greys where its surface is
@@ -9752,7 +9760,11 @@ anything. Stepping goes through the arrow keys' own focus step
 instead, so the animation, the border, the deferred raise and
 `wrap_focus` are the keyboard's and cannot drift from them; a
 scroll gesture that grows a movement path of its own re-opens
-all three measurements. No step warps the pointer, on any
+all three measurements. It takes `navigate` but not `execute`,
+whose foreground preflight (#292) refuses a focused command while
+the frontmost app is not the anchor's: the gesture acts on the
+Space under the pointer, so its first step onto another screen
+would always be refused. No step warps the pointer, on any
 layout (owner ruling 2026-09-29).
 
 **A held chord always does something, on every layout** (#1656,
@@ -9773,12 +9785,15 @@ the rule that a press which does nothing always says why
 (▸ Layout and resize behavior, *A press writes forward, never
 across the store*) — while here there is nothing to refuse,
 since the flat window array gives every Space a well-defined
-next and previous window whatever its geometry. The one place a
-step still lands on nothing — a Scrolling or Monocle row's end
-with `wrap_focus` off, or a Space holding one window — stays
-wordless on purpose: the gesture repeats per notch and per
-swipe, and a cue on each would be noise over the hand's own
-evidence that the row did not move.
+next and previous window whatever its geometry. Where a step
+still lands on nothing — a Scrolling or Monocle row's end with
+`wrap_focus` off, or a Space holding one window — the ring takes
+the arrow keys' own dead-end bump toward the step (#436; owner
+ruling 2026-09-29), once per event and never a pill: the
+gesture should answer a wall the way the keys do, and a worded
+cue would repeat per notch and per swipe where a rubber-band
+simply restarts. A pill is for a refusal whose reason the user
+cannot see; a row end is on the screen.
 
 **One swipe moves one window by default, and long swipes are a
 tick box.** Counting by distance — a window per ~60 pt of finger
@@ -9799,7 +9814,12 @@ gesture's sensitivity apart from it. The glide after a lift
 never counts, on either setting — it is macOS extrapolating a
 flick, not the hand, and a fast flick's glide runs far past any
 swipe, so counting it would race down the row. A wheel notch is one
-window either way, since a notch is already a discrete act.
+window either way, since a notch is already a discrete act — but
+a fast roll or a free-spinning wheel is one window for the whole
+burst: a notch too close behind the previous one in the same
+direction moves nothing, so notches clicked one at a time each
+count and a spin cannot race down the row (the Space step's
+paragraph below argues the number).
 
 **The settings are stored like the shortcuts**: a base in
 `gui.json`, a sparse override per profile, and the **Applies to**
@@ -9841,8 +9861,8 @@ preference would guard a case that cannot arise. The refusal is
 what makes the warning unnecessary, not the ⌃⌥ default:
 allowing a one-modifier chord anywhere re-opens it.
 
-**The two scroll gestures take different chords, and ⌃⌥⌘ stays
-reserved for the Space step** (#1519, owner ruling 2026-09-29).
+**The two scroll gestures take different chords, and ⌃⌥⌘ is the
+Space step's** (#1519, owner ruling 2026-09-29).
 Both read either scroll axis — a Scrolling row can run
 vertically, and ⇧ is allowed on either — so no direction can
 tell a pan from a Space step, and one chord would reach only
@@ -9850,8 +9870,39 @@ whichever gesture comes first in the tap's order. The recorder and `set_pan`
 refuse the Space step's chord for that reason, and
 `set_space_step` refuses the pan's. Where a file still gives
 both the same chord, the pan keeps it and the Space step is
-off: the Space step is not built yet, so the pan is the only
-gesture a shared chord could reach.
+off: a file sharing one chord was written before the Space step
+existed, so it was written for the pan. The refusal under either
+recorder offers **Go to** and nothing else — the other gesture's
+row is where the user decides which of the two gives the keys
+up.
+
+**⌃⌥⌘ + scroll steps through the Space order of the screen under
+the pointer, one Space per swipe or notch** (#1519, owner and
+ui-designer rulings 2026-09-28/29). The order is the Space Bar's,
+empty Spaces included, and never the visit history #1655
+proposes: an order the user can see on the bar is one they can
+aim at, and `hide_empty` is a display setting, which must not
+change what a gesture reaches — the Space landed on shows,
+because the bar always draws the current one. It stops at the
+first and last Space, as macOS's own Desktop swipe does — the
+shown Space's ring bumps there, as a row end does, and an empty
+Space, having no ring, stays still — and a wrap would only make
+an overshoot worse. There is no long-swipe
+option: a Space switch redraws the whole screen, so counting
+distance would repaint it several times for one hand.
+
+**A wheel steps once per notch, and a spinning wheel once per
+spin, on both scroll gestures.** A free-spinning wheel reports a burst of notches after a
+single flick, and one per notch would carry it to the last
+Space. So a notch closer than 120 ms to the previous one in the
+same direction steps nothing, and the wheel re-arms after that
+quiet or when it turns the other way: notches clicked one at a
+time each step, while a fast roll or a spin steps once, which is
+what a trackpad's one-per-swipe already does. The rule reads the
+hand's spacing on the tap's own clock, never the main actor's,
+where a busy switch would squash deliberate notches into a
+burst. The number is provisional until a device logs notch
+intervals, and it lives on `ScrollStepMeter.wheelQuiet`.
 :::
 
 ### Overrides & appearance

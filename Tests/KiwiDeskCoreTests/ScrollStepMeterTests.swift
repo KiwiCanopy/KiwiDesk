@@ -13,7 +13,8 @@ struct ScrollStepMeterTests {
         dx: Double = 0,
         dy: Double = 0,
         input: ScrollGestureEvent.Input = .trackpad,
-        momentum: Bool = false
+        momentum: Bool = false,
+        time: Double = 0
     ) -> ScrollGestureEvent {
         ScrollGestureEvent(
             chord: [.control, .option],
@@ -21,7 +22,8 @@ struct ScrollStepMeterTests {
             input: input,
             delta: CGVector(dx: dx, dy: dy),
             momentum: momentum,
-            location: .zero
+            location: .zero,
+            time: time
         )
     }
 
@@ -109,8 +111,9 @@ struct ScrollStepMeterTests {
             _ = meter.feed(event(.began, input: .wheel))
             #expect(meter.feed(event(.changed, dy: 1, input: .wheel)) == 1)
             #expect(
-                meter.feed(event(.changed, dy: -stride * 5, input: .wheel))
-                    == -1
+                meter.feed(
+                    event(.changed, dy: -stride * 5, input: .wheel, time: 1)
+                ) == -1
             )
         }
     }
@@ -132,5 +135,60 @@ struct ScrollStepMeterTests {
             meter.feed(event(.changed, dx: stride / 2, dy: -stride))
                 == -1
         )
+    }
+
+    // MARK: - The spinning wheel (#1519)
+
+    private static let quiet = ScrollStepMeter.wheelQuiet
+
+    private func wheel(
+        _ meter: inout ScrollStepMeter,
+        dy: Double = -10,
+        at time: Double
+    ) -> Int {
+        meter.feed(event(.changed, dy: dy, input: .wheel, time: time))
+    }
+
+    @Test("a wheel steps each notch clicked one at a time")
+    func latchedHandPace() {
+        var meter = ScrollStepMeter(
+            longSwipes: false,
+            distance: 1
+        )
+        let steps = (0..<4).map {
+            wheel(&meter, at: Double($0) * Self.quiet)
+        }
+        #expect(steps == [-1, -1, -1, -1])
+    }
+
+    @Test("a wheel steps a spin once, and re-arms on quiet")
+    func latchedSpin() {
+        var meter = ScrollStepMeter(
+            longSwipes: false,
+            distance: 1
+        )
+        let spin = (0..<50).map {
+            wheel(&meter, at: Double($0) * Self.quiet / 5)
+        }
+        #expect(spin.reduce(0, +) == -1)
+        #expect(wheel(&meter, at: 50 * Self.quiet) == -1)
+    }
+
+    @Test("a wheel re-arms when it turns the other way")
+    func latchedTurn() {
+        var meter = ScrollStepMeter(
+            longSwipes: false,
+            distance: 1
+        )
+        #expect(wheel(&meter, at: 0) == -1)
+        #expect(wheel(&meter, at: 0.01) == 0)
+        #expect(wheel(&meter, dy: 10, at: 0.02) == 1)
+    }
+
+    /// A retune past the router's pause would re-arm the latch at
+    /// every burst boundary, so a spin would step once per pause.
+    @Test("the latch's quiet is shorter than a burst's pause")
+    func quietInsidePause() {
+        #expect(Self.quiet < ScrollGestureRouter.wheelPause)
     }
 }

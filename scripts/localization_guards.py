@@ -358,6 +358,10 @@ WITHHELD_ARGUMENTS = {
     "layout.schematic.scrolling.caption_center": "%1$@",
     "layout.schematic.scrolling.caption_center_cut": "%1$@",
     "layout.schematic.scrolling.caption_follow": "%2$@",
+    # The scroll recorders' refusals: their Go to link is left out
+    # of the announcement (`ScrollChordRecorderField.caption`).
+    "shortcuts.gestures.scroll.refused_pan": "%1$@",
+    "shortcuts.gestures.scroll.refused_step": "%1$@",
 }
 
 # What may follow a withheld argument and still read cleanly when

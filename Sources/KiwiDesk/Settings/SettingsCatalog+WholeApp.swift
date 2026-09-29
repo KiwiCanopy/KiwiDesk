@@ -113,6 +113,10 @@ struct GesturesControls: Sendable {
         "shortcuts.gestures.scroll.step_distance",
         "Travel per window"
     )
+    let scrollSpaceStep = SettingsControl(
+        "shortcuts.gestures.scroll.space_step",
+        "Step between Spaces"
+    )
     let naturalTrackpad = SettingsControl(
         "shortcuts.gestures.scroll.trackpad",
         "Trackpad"

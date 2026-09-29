@@ -6,13 +6,15 @@ import SwiftUI
 /// first row, the summary beside a chevron, the whole row one
 /// control. Shut, the card keeps that row, so it never shrinks to
 /// a bare heading; open, the entries follow it inside the card.
-/// Search opens it on a child hit, as a drawer does.
+/// Search opens it on a child hit, as a drawer does; `onToggle`
+/// hears only the user's own click on the disclosure, never that.
 struct SettingsCollapsibleSection<Content: View>: View {
     private let control: SettingsControl
     private let drawer: any AnySettingsDrawer
     private let modeGated: Bool
     private let summary: String
     @Binding private var isExpanded: Bool
+    private let onToggle: ((Bool) -> Void)?
     @ViewBuilder private let content: () -> Content
     @Environment(\.settingsRevealTarget)
     private var revealTarget
@@ -22,8 +24,10 @@ struct SettingsCollapsibleSection<Content: View>: View {
         isExpanded: Binding<Bool>,
         summary: String,
         modeGated: Bool = false,
+        onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
+        self.onToggle = onToggle
         self.control = drawer.control
         self.drawer = drawer
         self._isExpanded = isExpanded
@@ -37,7 +41,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
             // Not a heading: the section's title above is, and one
             // card lists once in the rotor.
             SettingsDisclosureButton(
-                isExpanded: $isExpanded,
+                isExpanded: clicked,
                 isHeading: false
             ) {
                 Text(summary)
@@ -56,6 +60,18 @@ struct SettingsCollapsibleSection<Content: View>: View {
             expand(revealing: target)
         }
         .onAppear { expand(revealing: revealTarget) }
+    }
+
+    /// The expansion as the disclosure writes it: told to
+    /// `onToggle` before it lands, so the content mounts knowing.
+    private var clicked: Binding<Bool> {
+        Binding(
+            get: { isExpanded },
+            set: { open in
+                onToggle?(open)
+                isExpanded = open
+            }
+        )
     }
 
     private func expand(revealing target: String?) {
