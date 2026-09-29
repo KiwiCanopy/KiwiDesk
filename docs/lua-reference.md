@@ -1826,6 +1826,18 @@ by default). With the Space Bar off, switching a Space between a
 layout that shows an App Bar and one that does not moves its
 windows by the strip.
 
+Both bars hide on a screen showing a native-fullscreen app and
+return with the Desktop.
+
+:::unreleased
+They also hide on a screen whose front window — one KiwiDesk
+manages — fills that whole screen, such as a slide show or a
+borderless-fullscreen game or player, and return when another
+window comes in front or that window stops filling the screen.
+KiwiDesk leaves such a window where its app put it and never
+moves it clear of the bars.
+:::
+
 :::unreleased
 Each bar sets its own edge —
 [`space_bar.set_edge`](#space_barset_edge) and
@@ -2528,8 +2540,7 @@ what a click on a glyph does and the drag-onto-a-Space gesture.
 The bar is layout-independent and sits on
 [KiwiShelf](#kiwishelf), which sets its thickness, margins,
 background, colours and app glyph style; every `space_bar.*`
-setting is global, with no per-layout override. While a native-fullscreen app holds the
-screen the bar hides; it returns with the Desktop.
+setting is global, with no per-layout override.
 
 ### space_bar.set_enabled
 

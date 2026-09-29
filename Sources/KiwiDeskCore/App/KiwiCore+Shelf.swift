@@ -47,8 +47,19 @@ extension KiwiCore {
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         for display in displays {
-            let app = appBarContent(on: display.id, settings: settings)
-            let items = spaceBarContent(on: display.id, style: look)
+            // A fullscreen space hosts the panels by construction
+            // (`.canJoinAllSpaces` + `.fullScreenAuxiliary`), so
+            // the stand-down (#670, and a presentation in front,
+            // #1787) gates here, read once for both bars: nil
+            // retires each overlay through its manager, keeping
+            // `shownStrips` consistent with the float clamp.
+            let down = shelfStandsDown(on: display.id)
+            let app =
+                down
+                ? nil : appBarContent(on: display.id, settings: settings)
+            let items =
+                down
+                ? nil : spaceBarContent(on: display.id, style: look)
             guard app != nil || items != nil,
                 let screen = screen(for: display.id)
             else { continue }
@@ -152,13 +163,6 @@ extension KiwiCore {
         settings: TilingSettings
     ) -> AppBarContent? {
         guard
-            // A fullscreen space hosts the panels by
-            // construction (`.canJoinAllSpaces` +
-            // `.fullScreenAuxiliary`), so the stand-down (#670)
-            // gates here: nil retires the overlay through the
-            // manager, keeping `shownStrips` consistent with
-            // `clampFloatsClearOfBars`.
-            NativeSpaces.currentSpaceIsUser(display: display),
             let id = state.workspaces.currentSpace(on: display),
             let space = state.workspaces[id]
         else { return nil }
@@ -196,10 +200,7 @@ extension KiwiCore {
         on display: DisplayID,
         style: SpaceBarLook
     ) -> [SpaceBarOverlay.Item]? {
-        // Same fullscreen-space stand-down as the App Bar (#670).
-        guard style.enabled,
-            NativeSpaces.currentSpaceIsUser(display: display)
-        else { return nil }
+        guard style.enabled else { return nil }
         var items = spaceBarItems(display: display, style: style)
         guard !items.isEmpty else { return nil }
         // After the emptiness guard: a layer never draws a bar
