@@ -214,8 +214,9 @@ KiwiDesk.move_to_space_and_follow(3)
 window id from [`get_state`](#get_state) after the space, and
 then move that window rather than the focused one:
 `KiwiDesk.move_to_space("mail", 4711)`. An id no managed window
-carries is refused. Moving a window that does not hold focus
-leaves the current Space's focus where it is.
+carries is refused. A window moved into the current Space takes
+focus there; one moved between other Spaces leaves the current
+Space's focus where it is.
 :::
 
 ### focus_desktop

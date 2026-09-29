@@ -61,8 +61,9 @@ extension KiwiCore {
         guard let spelled = value.stringValue else {
             return .refused(.fail("expected window id"))
         }
+        // `exactly:` refuses a fraction, a negative and the
+        // out-of-range alike.
         guard let number = value.numberValue,
-            number == number.rounded(),
             let raw = UInt32(exactly: number),
             state.windows[WindowID(raw)] != nil
         else {

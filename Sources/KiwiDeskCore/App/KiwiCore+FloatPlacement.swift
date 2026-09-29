@@ -33,16 +33,18 @@ extension KiwiCore {
     /// the frame is seeded as its pending capture, paid at the
     /// activation, as `placeEnteringFloat` does.
     func placeFloating(_ id: WindowID) {
-        guard let window = state.windows[id],
-            let target = floatPlacementTarget(for: id)
-        else { return }
+        guard let window = state.windows[id] else { return }
         if let space = floatPlacementSpace(of: id),
             !state.workspaces.visibleSpaces.contains(space)
         {
-            tiler.seedStash(id, frame: target)
-            tiler.forgetSizeBound(id)
+            if seedsPlacement(id),
+                let target = floatPlacementTarget(for: id)
+            {
+                seedPlacement(id, target)
+            }
             return
         }
+        guard let target = floatPlacementTarget(for: id) else { return }
         let base = currentFrame(of: id, fallback: window.frame)
         tiler.applyFrame(
             id,
@@ -65,18 +67,29 @@ extension KiwiCore {
     /// a sticky and a dragged window keep the re-anchor.
     func placeEnteringFloat(_ id: WindowID, wasFloat: Bool) -> Bool {
         guard !wasFloat,
-            let window = state.windows[id],
-            !window.isSticky,
-            // Its own macOS Space (#670): nothing parks it, so a
-            // seed would be re-delivered every retile.
-            !window.isFullscreen,
-            tiler.dragExemptWindow != id,
+            state.windows[id]?.isSticky == false,
+            seedsPlacement(id),
             isEffectiveFloatForPlacement(id),
             let target = floatPlacementTarget(for: id)
         else { return false }
+        seedPlacement(id, target)
+        return true
+    }
+
+    /// Whether `id` may take its placement as a pending capture —
+    /// asked before the target is read, which consumes the
+    /// remembered frame. Never a window in its own macOS Space
+    /// (#670): nothing parks it, so a seed would be re-delivered
+    /// every retile; never one a drag holds.
+    private func seedsPlacement(_ id: WindowID) -> Bool {
+        guard let window = state.windows[id] else { return false }
+        return !window.isFullscreen && tiler.dragExemptWindow != id
+    }
+
+    /// The one seeding of a placement, delivered by the restore.
+    private func seedPlacement(_ id: WindowID, _ target: CGRect) {
         tiler.seedStash(id, frame: target)
         tiler.forgetSizeBound(id)
-        return true
     }
 
     /// Where `id` floats on its placement space: its remembered

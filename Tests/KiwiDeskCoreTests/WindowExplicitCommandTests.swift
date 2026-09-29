@@ -148,6 +148,23 @@ struct WindowExplicitCommandTests {
         #expect(core.pendingMouseWarp == nil)
     }
 
+    /// "Move to Current Space" (#1518): the moved window is the
+    /// active Space's focus in state and on the ring alike.
+    @Test("a named move into the active Space focuses the window")
+    func namedMoveIntoActiveFocuses() {
+        let core = makeTwo()
+        core.execute("move_to_space", args: [.string("2"), .number(1)])
+        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(
+            core.execute(
+                "move_to_space",
+                args: [.string("1"), .number(1)]
+            ).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+    }
+
     @Test("without the argument the focused window is still the one")
     func focusedFallback() {
         let core = makeTwo()
