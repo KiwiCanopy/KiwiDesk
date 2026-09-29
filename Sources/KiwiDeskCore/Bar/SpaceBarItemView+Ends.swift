@@ -2,21 +2,40 @@ import AppKit
 
 /// A Space item's rounded ends (#1763): the clearance its glyph
 /// cell needs, at a rounded end (`KiwiShelf.roundsItemEnds`) where
-/// icon-like glyphs sit: the leading end behind a symbol
-/// identifier — a number's or a name's ink clears the curve on its
-/// own — and the trailing end of an item with apps, the `+N` disc
-/// counting as an icon so a strip scrolled between the two keeps
-/// its length (owner, 2026-09-29).
+/// an icon-like glyph sits — a symbol identifier, app glyphs or a
+/// `+N` disc, a corner badge on the identifier — never a text
+/// identifier alone (owner, 2026-09-29).
 extension SpaceBarItemView {
-    /// Whether the item's trailing run holds app glyphs — the one
-    /// reading the item and its measurement share.
-    static func endsInIcon(appCount: Int) -> Bool { appCount > 0 }
+    /// Whether the identifier cell carries a corner badge — a
+    /// collapse's count or the held mark, at its trailing top.
+    static func badgesIdentifier(collapsed: Bool, held: Bool) -> Bool {
+        collapsed || held
+    }
 
-    /// Whether the identifier draws an icon-like symbol rather than
-    /// text.
-    static func leadsWithIcon(_ glyph: SpaceGlyph) -> Bool {
+    /// Whether the trailing end holds an icon-like glyph: app
+    /// glyphs, or the identifier's corner badge on a horizontal
+    /// bar — the one reading the item and its measurement share.
+    static func endsInIcon(
+        appCount: Int,
+        badged: Bool,
+        horizontal: Bool
+    ) -> Bool {
+        appCount > 0 || (badged && horizontal)
+    }
+
+    /// Whether the leading end holds an icon-like glyph: a symbol
+    /// identifier, or its corner badge at the top of a vertical bar.
+    static func leadsWithIcon(
+        _ glyph: SpaceGlyph,
+        badged: Bool,
+        horizontal: Bool
+    ) -> Bool {
         if case .symbol = glyph { return true }
-        return false
+        return badged && !horizontal
+    }
+
+    private var badged: Bool {
+        Self.badgesIdentifier(collapsed: collapse != nil, held: held != nil)
     }
 
     /// The extra end padding this item's rounded ends owe.
@@ -26,8 +45,16 @@ extension SpaceBarItemView {
             depth: depth,
             first: isFirstInRun,
             last: isLastInRun,
-            leadsWithIcon: Self.leadsWithIcon(spaceGlyph),
-            endsInIcon: Self.endsInIcon(appCount: apps.count)
+            leadsWithIcon: Self.leadsWithIcon(
+                spaceGlyph,
+                badged: badged,
+                horizontal: style.edge.isHorizontal
+            ),
+            endsInIcon: Self.endsInIcon(
+                appCount: apps.count,
+                badged: badged,
+                horizontal: style.edge.isHorizontal
+            )
         )
     }
 

@@ -79,7 +79,9 @@ struct BarTextBaselineTests {
                 last: false,
                 leadsWithIcon: false,
                 endsInIcon: SpaceBarItemView.endsInIcon(
-                    appCount: 0
+                    appCount: 0,
+                    badged: false,
+                    horizontal: true
                 )
             )
         )

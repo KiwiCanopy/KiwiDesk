@@ -3,11 +3,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// An item paints round exactly the ends it pads (#1763): the
-/// layer's corner mask, hover fill included, and the end
-/// clearance read one predicate, so a middle item on a plate is
-/// square at both ends and a boxed one round at both.
-@Suite("Item corners follow the padded ends (#1763)", .serialized)
+/// An item paints round exactly the ends `roundsItemEnds` rounds
+/// (#1763) — its layer's corner mask, hover fill included — so a
+/// middle item on a plate is square at both ends and a boxed one
+/// round at both, whatever glyph sits at the end.
+@Suite("Item corners follow the rounded ends (#1763)", .serialized)
 @MainActor
 struct ItemCornerMaskTests {
     private typealias Fixture = RoundedItemEndPadTests
@@ -31,25 +31,32 @@ struct ItemCornerMaskTests {
         )
     }
 
-    @Test("A Space item rounds only the ends it pads")
-    func spaceItemRoundsWhatItPads() throws {
+    /// A number identifier's end takes no clearance yet still
+    /// draws round: the paint follows the ends, not the padding.
+    @Test("A Space item rounds exactly its drawn rounded ends")
+    func spaceItemRoundsItsEnds() throws {
         for boxed in [true, false] {
-            let look = Fixture.spaceLook(100, boxed: boxed)
-            let overlay = try Fixture.spaceBar(
-                look,
-                items: Fixture.items(3)
-            )
-            let views = Array(overlay.itemViews.prefix(3))
-            #expect(views.count == 3)
-            for (index, view) in views.enumerated() {
-                view.restyle()
-                let round = try Self.rounds(view.layer)
-                let clip = try Self.rounds(view.accentClip.layer)
-                let note = Comment(rawValue: "boxed \(boxed) #\(index)")
-                #expect(round.leading == (view.ends.leading > 0), note)
-                #expect(round.trailing == (view.ends.trailing > 0), note)
-                #expect(clip.leading == round.leading, note)
-                #expect(clip.trailing == round.trailing, note)
+            for numbered in [true, false] {
+                let look = Fixture.spaceLook(100, boxed: boxed)
+                let overlay = try Fixture.spaceBar(
+                    look,
+                    items: Fixture.items(3, numbered: numbered)
+                )
+                let views = Array(overlay.itemViews.prefix(3))
+                #expect(views.count == 3)
+                for (index, view) in views.enumerated() {
+                    view.restyle()
+                    let round = try Self.rounds(view.layer)
+                    let clip = try Self.rounds(view.accentClip.layer)
+                    let note = Comment(
+                        rawValue: "boxed \(boxed) numbered \(numbered) "
+                            + "#\(index)"
+                    )
+                    #expect(round.leading == (boxed || index == 0), note)
+                    #expect(round.trailing == (boxed || index == 2), note)
+                    #expect(clip.leading == round.leading, note)
+                    #expect(clip.trailing == round.trailing, note)
+                }
             }
         }
     }

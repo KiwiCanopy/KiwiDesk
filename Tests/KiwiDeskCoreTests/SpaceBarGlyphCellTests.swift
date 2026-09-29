@@ -87,7 +87,9 @@ struct SpaceBarGlyphCellTests {
                 last: false,
                 leadsWithIcon: false,
                 endsInIcon: SpaceBarItemView.endsInIcon(
-                    appCount: apps.count
+                    appCount: apps.count,
+                    badged: false,
+                    horizontal: true
                 )
             )
         )

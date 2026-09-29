@@ -1,9 +1,8 @@
 import QuartzCore
 
 /// The corners an item's layers round: exactly the ends
-/// `KiwiShelf.roundsItemEnds` rounds, so the paint and the end
-/// clearance read one answer and a square end is never painted
-/// round, hover included (#1763).
+/// `KiwiShelf.roundsItemEnds` rounds, so a square end is never
+/// painted round, hover included (#1763).
 enum ItemCornerMask {
     static func mask(
         shelf: KiwiShelf,

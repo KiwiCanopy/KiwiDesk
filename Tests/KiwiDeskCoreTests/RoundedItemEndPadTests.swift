@@ -214,28 +214,6 @@ struct RoundedItemEndPadTests {
         }
     }
 
-    /// A number's ink sits well inside its cell, so its end keeps
-    /// the plain pad; the app icons' end still clears the curve
-    /// (owner, 2026-09-29).
-    @Test("A number identifier's end takes no clearance")
-    func numberIdentifierTakesNone() throws {
-        let pad = SpaceBarItemView.pad
-        let look = Self.spaceLook(100)
-        let e = Self.clearance(look, depth: Self.depth)
-        #expect(e > 0)
-        let overlay = try Self.spaceBar(
-            look,
-            items: Self.items(1, numbered: true)
-        )
-        let view = try #require(overlay.itemViews.first)
-        #expect(view.ends == ItemEnds(leading: 0, trailing: e))
-        let cell = view.cellLength
-        let flat = pad * 2 + cell + (pad + 1 + pad) + 3 * cell
-        #expect(view.frame.width == flat + e)
-        let first = try #require(view.appViews.first).frame
-        #expect(abs(first.minX - (cell + pad + 1 + pad) - pad) <= 0.5)
-    }
-
     /// Where r·(1 − 1/√2) left the corner outside the end.
     @Test("At 80 pt and full roundness every glyph clears the ends")
     func thickBarGlyphsClearTheCurve() throws {

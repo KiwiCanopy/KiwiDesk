@@ -29,11 +29,16 @@ extension SpaceBarOverlay {
         let gap = look.itemGap
         let leadsWithLayer = leadsWithLayer(items)
         let content = look.contentDepth(forDepth: depth)
+        let horizontal = look.edge.isHorizontal
         return items.enumerated().map { index, item in
             let place = runPlace(
                 index: index,
                 count: items.count,
                 frontFollows: frontFollows
+            )
+            let badged = SpaceBarItemView.badgesIdentifier(
+                collapsed: item.collapse != nil,
+                held: item.held != nil
             )
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
@@ -46,10 +51,14 @@ extension SpaceBarOverlay {
                     first: place.first,
                     last: place.last,
                     leadsWithIcon: SpaceBarItemView.leadsWithIcon(
-                        item.spaceGlyph
+                        item.spaceGlyph,
+                        badged: badged,
+                        horizontal: horizontal
                     ),
                     endsInIcon: SpaceBarItemView.endsInIcon(
-                        appCount: item.apps.count
+                        appCount: item.apps.count,
+                        badged: badged,
+                        horizontal: horizontal
                     )
                 )
             )
