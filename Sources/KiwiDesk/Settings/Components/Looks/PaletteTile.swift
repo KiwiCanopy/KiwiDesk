@@ -6,6 +6,11 @@ struct PaletteTile<Plate: View>: View {
     let name: String
     var caption: String?
     var isApplied = false
+    /// A word trailing the name while applied — a look live in
+    /// other colors (#1752) — drawn only, `appliedSpoken` saying it.
+    var note: String?
+    /// What the checkmark announces in place of "Applied".
+    var appliedSpoken: String?
     var dashed = false
     /// Lines the caption wraps to, reserved so a row of tiles
     /// ends level.
@@ -47,7 +52,7 @@ struct PaletteTile<Plate: View>: View {
                 .foregroundStyle(SettingsTheme.ink)
                 .opacity(isApplied ? 1 : 0)
                 .accessibilityLabel(
-                    L("palettes.applied", "Applied")
+                    appliedSpoken ?? L("palettes.applied", "Applied")
                 )
                 .accessibilityHidden(!isApplied)
                 .frame(width: 10)
@@ -55,6 +60,14 @@ struct PaletteTile<Plate: View>: View {
                 .font(.caption)
                 .foregroundStyle(SettingsTheme.ink)
                 .lineLimit(1)
+                .layoutPriority(1)
+            if let note {
+                Text(note)
+                    .font(.caption2)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .lineLimit(1)
+                    .accessibilityHidden(true)
+            }
             Spacer(minLength: 0)
         }
     }

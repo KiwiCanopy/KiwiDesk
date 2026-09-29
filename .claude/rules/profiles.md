@@ -703,9 +703,10 @@ end on, and the import's filter to `ColorPaletteKeys.all` would
 drop an unshelved file's bar colours whole (`KiwiShelfPaletteMigrationTests`
 ▸ `libraryCrossesOnce`, ▸ `bundlePalettesCross`, ▸
 `sidecarImportShelves`). The next breaking palette change takes
-the same three answers or argues a different one — and a FOURTH
-since #1684, for the look sidecar (`LookExport`) carries a
-`ColorPalette` inline too.
+the same three answers or argues a different one — and since
+#1752 three more, because a look stores every colour path inline
+(`ShelfLook.colors`): `looks.json`, a bundle's `looks` and the
+`LookExport` sidecar.
 
 **The look library is the palette library's twin (#1684) and owes
 the same answers.** A breaking `ShelfLook` or `LookDocument`
@@ -714,11 +715,12 @@ change bumps `LookDocument.currentFormat` for `looks.json` AND
 and rules the markerless `LookExport` sidecar deliberately, as
 the palette sidecar above was. **And a look stores setting PATHS
 and their wire spellings as data** (`LookKeys`): renaming a key
-or value a look carries — any path in `LookKeys.all`, and a field
+or value a look carries — any path in `LookKeys.all`, since
+#1752 any colour path in `ColorPaletteKeys.all`, and a field
 inside a stored value such as `gap.global`'s `{outer, inner}`
 (#1739) — owes the `ConfigMigration` crossing a stored value
-owes (§5), reaching `looks.json` and a bundle's looks — since
-`ShelfLook.apply` and `LookStore`'s filter skip a path they do
+owes (§5), reaching every home of a stored look named above — since
+`ShelfLook.apply` and `ShelfLook.admitted` skip a path they do
 not know, an unmigrated rename drops the user's styling
 silently. `LookKeysCensusTests` reds the rename; the migration
 crossing is review's.

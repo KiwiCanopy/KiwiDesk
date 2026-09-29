@@ -71,7 +71,8 @@ twice, was a question the user answered twice. The argument is
   field is ruled for the looks (#1684)**: styling — how the same
   items look or where they sit — joins `LookKeys.all`,
   functionality or a field left alone joins `LookKeys.leftOut`
-  with its reason, a colour is the palette's; the owner's test
+  with its reason, a colour joins `ColorPaletteKeys`, which a
+  look carries whole (#1752); the owner's test
   and the argument are `docs/design-decisions.md` ▸ A look is
   KiwiShelf's styling. `LookKeysCensusTests` reds an unruled
   field of `KiwiShelf`, `SpaceBarStyle`, `AppBarStyle`,

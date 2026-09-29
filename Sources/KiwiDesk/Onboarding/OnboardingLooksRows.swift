@@ -2,14 +2,12 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The looks step's top row: every bundled look, drawn like the
-/// Settings look cards (#1684) with the look's own palette painted
-/// on, scrolled like the palette row so each caption keeps its
-/// width.
+/// Settings look cards (#1684) in the look's own colours (#1752),
+/// scrolled like the palette row so each caption keeps its width.
 struct OnboardingLookRow: View {
     let looks: [ShelfLook]
     let live: TilingSettings
     let spaceLabels: [SpaceGlyph]
-    let palette: (ShelfLook) -> ColorPalette?
     let pick: (ShelfLook) -> Void
 
     var body: some View {
@@ -27,7 +25,9 @@ struct OnboardingLookRow: View {
                     .padding(.bottom, 8)
                 }
                 .onAppear {
-                    let applied = looks.first { $0.isApplied(to: live) }
+                    let applied = looks.first {
+                        $0.match(live) != .none
+                    }
                     guard let applied else { return }
                     proxy.scrollTo(applied.name, anchor: .center)
                 }
@@ -37,10 +37,13 @@ struct OnboardingLookRow: View {
         .accessibilityLabel(L("looks.title", "Looks"))
     }
 
-    /// The styling alone marks a look; the colours are the row
-    /// below's (the Settings card's rule).
+    /// Core's one reading marks a look (`ShelfLook.match`), the
+    /// Settings card's rule: its shape live in other colours keeps
+    /// the mark and says so (#1752).
     private func tile(_ look: ShelfLook) -> some View {
-        let applied = look.isApplied(to: live)
+        let match = look.match(live)
+        let applied = match != .none
+        let other = match == .otherColors
         return Button {
             pick(look)
         } label: {
@@ -48,6 +51,13 @@ struct OnboardingLookRow: View {
                 name: look.name,
                 caption: LookDescriptions.caption(for: look.name),
                 isApplied: applied,
+                note: other
+                    ? L("looks.other_colors", "Other colors") : nil,
+                appliedSpoken: other
+                    ? L(
+                        "looks.applied_other_colors",
+                        "Applied, with other colors"
+                    ) : nil,
                 captionLines: 3
             ) {
                 LookPlate(settings: preview(look), spaceLabels: spaceLabels)
@@ -59,7 +69,7 @@ struct OnboardingLookRow: View {
     }
 
     private func preview(_ look: ShelfLook) -> TilingSettings {
-        KiwiCore.painted(live, look: look, palette: palette(look))
+        KiwiCore.painted(live, look: look, palette: nil)
     }
 }
 

@@ -41,7 +41,9 @@ struct LookCatalogTests {
     @Test("Glass resets the shape to the starter's")
     func glassIsTheReset() throws {
         let glass = try #require(look(LookCatalog.defaultName))
-        #expect(glass.palette == PaletteCatalog.defaultName)
+        #expect(
+            glass.colors == PaletteCatalog.defaultPalette().paintedColors
+        )
         let first = starter([Self.desktop])
         var settings = first
         try #require(look("Tiler")).apply(to: &settings)
@@ -91,12 +93,8 @@ struct LookCatalogTests {
         let glass = try #require(looks.first)
         #expect(glass.name == LookCatalog.defaultName)
         #expect(glass.isApplied(to: first))
-        let palette = PaletteCatalog.bundled().first {
-            $0.name == glass.palette
-        }
         #expect(
-            KiwiCore.painted(first, look: glass, palette: palette)
-                == first
+            KiwiCore.painted(first, look: glass, palette: nil) == first
         )
         for other in looks.dropFirst() {
             #expect(!other.isApplied(to: first), "\(other.name)")
@@ -123,14 +121,22 @@ struct LookCatalogTests {
         }
     }
 
-    @Test("every bundled look names a bundled palette")
-    func palettesExist() {
-        let names = Set(PaletteCatalog.bundled().map(\.name))
-        for look in bundled {
-            #expect(
-                look.palette.map(names.contains) == true,
-                "\(look.name) names a palette nobody ships"
+    /// A pairing no palette answers would fall back to the shipped
+    /// colours silently (`AuthoredLook.colors(in:)`), so each must resolve —
+    /// and a bundled look wears exactly its palette's colours
+    /// (#1752).
+    @Test("every bundled look wears a bundled palette's colours")
+    func palettesExist() throws {
+        let palettes = PaletteCatalog.bundled()
+        for authored in LookCatalog.authored() {
+            let palette = try #require(
+                palettes.first { $0.name == authored.palette },
+                "\(authored.name) names a palette nobody ships"
             )
+            let look = try #require(
+                bundled.first { $0.name == authored.name }
+            )
+            #expect(look.colors == palette.paintedColors, "\(look.name)")
         }
     }
 
@@ -192,13 +198,10 @@ struct LookCatalogTests {
         }
     }
 
-    /// Whether the look's palette paints a light plate.
+    /// Whether the look's colours paint a light plate.
     private func isLight(_ look: ShelfLook) -> Bool {
         var settings = TilingSettings()
-        let palette = PaletteCatalog.bundled().first {
-            $0.name == look.palette
-        }
-        palette?.apply(to: &settings)
+        look.apply(to: &settings)
         let hex = settings.kiwishelf.fillColor.dropFirst().prefix(6)
         let value = Int(hex, radix: 16) ?? 0
         let channels = [value >> 16, (value >> 8) & 0xFF, value & 0xFF]

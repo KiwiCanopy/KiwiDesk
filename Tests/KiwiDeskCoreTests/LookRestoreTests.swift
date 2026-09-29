@@ -15,8 +15,8 @@ struct LookRestoreTests {
     private func look(_ name: String) -> ShelfLook {
         ShelfLook(
             name: name,
-            palette: nil,
-            style: ["kiwishelf.thickness": .number(30)]
+            style: ["kiwishelf.thickness": .number(30)],
+            colors: [:]
         )
     }
 

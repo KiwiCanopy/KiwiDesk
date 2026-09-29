@@ -47,11 +47,11 @@ struct OnboardingLooksTests {
         }
         model.onPaintShelf = { look, palette in
             recorder.paints.append((look?.name, palette?.name))
-            if let look {
-                look.apply(to: &recorder.live, palette: palette)
-            } else {
-                palette?.apply(to: &recorder.live)
-            }
+            recorder.live = KiwiCore.painted(
+                recorder.live,
+                look: look,
+                palette: palette
+            )
         }
         model.onRestoreShelf = { _ in
             recorder.restores += 1
@@ -69,13 +69,16 @@ struct OnboardingLooksTests {
         try #require(core.allPalettes.first { $0.name == name })
     }
 
-    @Test("a look paints with the palette it names")
-    func lookCarriesItsPalette() throws {
-        let (model, recorder, _) = makeModel()
+    /// A look owns its colours (#1752), so a pick hands no palette
+    /// and still paints the look's paired one.
+    @Test("a look paints its own colours")
+    func lookCarriesItsColours() throws {
+        let (model, recorder, core) = makeModel()
         model.pickLook(try look("Taskbar"))
         #expect(recorder.paints.count == 1)
         #expect(recorder.paints.first?.0 == "Taskbar")
-        #expect(recorder.paints.first?.1 == "Slate")
+        #expect(recorder.paints.first?.1 == nil)
+        #expect(try palette(core, "Slate").isApplied(to: recorder.live))
     }
 
     @Test("a palette paints the colours alone")

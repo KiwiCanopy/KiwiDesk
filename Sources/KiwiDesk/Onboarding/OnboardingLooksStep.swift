@@ -30,8 +30,9 @@ struct OnboardingLooksStep: View {
                 "onboarding.looks.body",
                 "Pick a look and KiwiDesk changes as you click: "
                     + "the bars that show your Spaces and windows, "
-                    + "and the border around the focused window. "
-                    + "Then pick the colors."
+                    + "the border around the focused window, and "
+                    + "the colors of both. A palette below repaints "
+                    + "the look you pick."
             ),
             footnote: blocked ? blockedCaption : nil,
             hint: laterHint
@@ -56,7 +57,6 @@ struct OnboardingLooksStep: View {
                 looks: model.shelfLooks(),
                 live: live,
                 spaceLabels: model.spaceLabels(),
-                palette: model.palette(of:),
                 pick: pick
             )
             OnboardingPaletteRow(
