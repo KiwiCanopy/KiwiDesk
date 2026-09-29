@@ -19,6 +19,12 @@ struct BuiltInLookWearTests {
             "`drawnSettings` wears the handed look, pinned below"
     ]
 
+    /// A call of `settings(sizes:)`, implicit `self` and spacing
+    /// included.
+    private static var read: Regex<Substring> {
+        #/(?:^|[^A-Za-z0-9_])settings\(\s*sizes\s*:/#
+    }
+
     private static let settingsDir = root.appendingPathComponent(
         "Sources/KiwiDesk/Settings"
     )
@@ -36,7 +42,14 @@ struct BuiltInLookWearTests {
 
     @Test("the preset sheet draws a built-in wearing the shared look")
     @MainActor func theSheetWearsTheSharedLook() throws {
-        let layout = try #require(StandardProfiles.workflows.first)
+        // A preset the default look does not already wear, so a nil
+        // path that paints the default is seen too.
+        let plain = LookBody(of: TilingSettings())
+        let layout = try #require(
+            StandardProfiles.workflows.first {
+                !plain.isWorn(by: $0.settings(sizes: nil))
+            }
+        )
         let raw = layout.settings(sizes: nil)
         var painted = raw
         painted.kiwishelf.fillColor = "#0A0B0C"
@@ -91,7 +104,7 @@ struct BuiltInLookWearTests {
         var readers: Set<String> = []
         for file in files {
             let text = try SourceScan.strippedSource(at: file)
-            if text.occurrences(of: ".settings(sizes:") > 0 {
+            if text.firstMatch(of: Self.read) != nil {
                 readers.insert(file.lastPathComponent)
             }
         }
