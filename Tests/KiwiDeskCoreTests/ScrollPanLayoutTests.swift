@@ -67,10 +67,25 @@ struct ScrollPanLayoutTests {
         arguments: ["bsp", "stack", "grid"]
     )
     func otherLayoutsStep(mode: String) {
-        let (core, session) = makeCore(mode, focus: WindowID(4))
+        let (core, session) = makeCore(mode, focus: WindowID(2))
+        swipe(core, session, dx: -80)
+        #expect(core.activeSpace?.focused == WindowID(3))
+        swipe(core, session, dx: -80)
         swipe(core, session, dx: -80)
         #expect(core.activeSpace?.focused == WindowID(1))
         swipe(core, session, dx: 80)
+        #expect(core.activeSpace?.focused == WindowID(4))
+    }
+
+    /// A fullscreen member sits on a Desktop nobody shows, where
+    /// the focus gate refuses it: the step passes it by.
+    @Test("a fullscreen member is stepped past")
+    func fullscreenIsSkipped() {
+        let (core, session) = makeCore("bsp", focus: WindowID(2))
+        core.state.apply(
+            .windowFullscreenChanged(WindowID(3), isFullscreen: true)
+        )
+        swipe(core, session, dx: -80)
         #expect(core.activeSpace?.focused == WindowID(4))
     }
 
@@ -102,5 +117,23 @@ struct ScrollPanLayoutTests {
         swipe(core, session, dx: -80)
         #expect(core.activeSpace?.focused == WindowID(4))
         #expect(core.pendingMonocleFocus == nil)
+    }
+
+    /// The owed landing honours the warp the step recorded.
+    @Test("an owed landing warps only when its step did")
+    func owedLandingKeepsWarp() {
+        for warp in [false, true] {
+            let (core, _) = makeCore("monocle", focus: WindowID(2))
+            core.tiler.settings.mouse.followsFocus = true
+            var warps = 0
+            core.pointerWarp = { _ in warps += 1 }
+            core.pendingMonocleFocus = (
+                from: WindowID(2),
+                to: WindowID(3),
+                warp: warp
+            )
+            core.runPendingMonocleFocus()
+            #expect(warps == (warp ? 1 : 0))
+        }
     }
 }

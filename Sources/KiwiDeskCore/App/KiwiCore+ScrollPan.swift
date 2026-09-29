@@ -125,9 +125,13 @@ extension KiwiCore {
     }
 
     /// Any other layout: the next or previous window in the
-    /// Space's own order, floats included, wrapping at the ends.
+    /// Space's own order, floats included, wrapping at the ends. A
+    /// native-fullscreen member is left out: it sits on a Desktop
+    /// nobody shows, so the focus gate refuses it (#1345).
     private func stepInOrder(_ space: Space, by step: Int) {
-        let ring = state.effectiveMembers(of: space)
+        let ring = state.effectiveMembers(of: space).filter {
+            state.windows[$0]?.isFullscreen != true
+        }
         guard ring.count > 1,
             let focused = state.focusAnchor(of: space),
             let index = ring.firstIndex(of: focused)

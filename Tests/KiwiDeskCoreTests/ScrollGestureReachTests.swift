@@ -228,3 +228,41 @@ struct ScrollGestureReachTests {
         )
     }
 }
+
+/// A Lua-owned config's scroll base is what `init.lua` declares
+/// NOW: the load resets the inputs and configures once at its
+/// tail, so a verb deleted from the file stops holding (#1656).
+@Suite("Scroll gesture reload (#1656)", .serialized)
+@MainActor
+struct ScrollGestureReloadTests {
+    @Test("a reload drops a verb the file no longer declares")
+    func reloadDropsARemovedVerb() throws {
+        let core = makeTestCore(
+            configDirectory: FileManager.default.temporaryDirectory
+                .appendingPathComponent("kiwi-reload-\(UUID().uuidString)")
+        )
+        core.onLog = { _ in }
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
+        )
+        try "scroll_gesture.set_pan(\"command+shift\")\n".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        #expect(core.mouse.scroll.resolved.pan == [.command, .shift])
+        #expect(core.mouse.scroll.settings.chords[.pan] == [.command, .shift])
+        try "-- nothing\n".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        #expect(core.mouse.scroll.resolved.pan == [.control, .option])
+        #expect(
+            core.mouse.scroll.settings.chords[.pan] == [.control, .option]
+        )
+    }
+}

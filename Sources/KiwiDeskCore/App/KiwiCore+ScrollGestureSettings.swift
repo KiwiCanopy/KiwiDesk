@@ -122,7 +122,8 @@ extension KiwiCore {
             for other in others {
                 if let refusal = Self.scrollChordRefusal(
                     chord,
-                    other: other
+                    other: other,
+                    heldBy: pan ? .step : .pan
                 ) {
                     return .fail(refusal)
                 }
@@ -141,9 +142,10 @@ extension KiwiCore {
     /// The #1656 ruling's refusals, in CLI English.
     static func scrollChordRefusal(
         _ chord: ScrollChord,
-        other: ScrollChord
+        other: ScrollChord,
+        heldBy: ScrollGestures.Consumer
     ) -> String? {
-        switch ScrollChordRefusal.of(chord, other: other, heldBy: .pan) {
+        switch ScrollChordRefusal.of(chord, other: other, heldBy: heldBy) {
         case nil: return nil
         case .singleModifier: return "needs two or more modifiers"
         case .otherGesture:

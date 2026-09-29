@@ -116,29 +116,36 @@ struct ScrollGestureConfigureSeamTests {
     }
 
     /// The resolve's inputs and output are the home's to write:
-    /// the consumer reads `resolved`, so a stray write skips both
-    /// the override and `configure`.
+    /// the consumer reads `resolved`, so a stray write — whole or
+    /// to one sub-field — skips both the override and `configure`.
     @Test("the front's stored inputs are written in the home alone")
     func inputsAreTheHomes() throws {
         let fields = ["base", "profileOverride", "resolved"]
+        let names = Self.frontNames.sorted().joined(separator: "|")
         var writers: Set<String> = []
-        var homeWrites = 0
+        var homeWrites: [String: Int] = [:]
         for (name, text) in try coreFiles() {
             let source = String(text)
-            for front in Self.frontNames {
-                for field in fields {
-                    let needle = "\(front).\(field) ="
-                    let count =
-                        source.components(separatedBy: needle)
-                        .count - 1
-                    guard count > 0 else { continue }
-                    writers.insert(name)
-                    if name == Self.home { homeWrites += count }
-                }
+            for field in fields {
+                let pattern =
+                    "\\b(\(names))\\.\(field)(\\.\\w+)*\\s*=(?!=)"
+                let regex = try NSRegularExpression(pattern: pattern)
+                let hits = regex.numberOfMatches(
+                    in: source,
+                    range: NSRange(source.startIndex..., in: source)
+                )
+                guard hits > 0 else { continue }
+                writers.insert(name)
+                if name == Self.home { homeWrites[field, default: 0] += hits }
             }
         }
         #expect(writers == [Self.home])
-        // Floor, not the live count: the home writes all three.
-        #expect(homeWrites >= 3)
+        // Each field still has its home write — a floor per field.
+        for field in fields {
+            #expect(
+                homeWrites[field, default: 0] >= 1,
+                "the home no longer writes \(field)"
+            )
+        }
     }
 }

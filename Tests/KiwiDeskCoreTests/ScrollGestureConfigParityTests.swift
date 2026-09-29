@@ -75,6 +75,18 @@ struct ScrollGestureConfigParityTests {
             longSwipes: true,
             stepDistance: 120
         )
+        // Every field off its default, derived rather than
+        // trusted: a new field left default here is one unwatched.
+        let defaults = Mirror(reflecting: ScrollGestureBase.defaults)
+            .children.map { "\($0.value)" }
+        for (index, child) in Mirror(reflecting: edited).children
+            .enumerated()
+        {
+            #expect(
+                "\(child.value)" != defaults[index],
+                "\(child.label ?? "?") is left at its default"
+            )
+        }
         let coder = (JSONEncoder(), JSONDecoder())
         #expect(
             try coder.1.decode(
