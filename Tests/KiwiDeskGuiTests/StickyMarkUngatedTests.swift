@@ -157,21 +157,24 @@ struct StickyMarkUngatedTests {
             let packed = source.split(
                 whereSeparator: \.isWhitespace
             ).joined()
-            let after = packed.components(
-                separatedBy: "stickyStyle.mark="
-            )
-            let assigns = after.dropFirst().contains {
-                !$0.hasPrefix("=")
-            }
-            #expect(
-                !assigns,
-                Comment(
-                    rawValue:
-                        "\(file.lastPathComponent) assigns "
-                        + "stickyStyle.mark — the mark is the "
-                        + "user's setting, not a side effect"
+            // Both marks' switches (#1799).
+            for field in ["stickyStyle.mark", "floatingStyle.mark"] {
+                let after = packed.components(
+                    separatedBy: field + "="
                 )
-            )
+                let assigns = after.dropFirst().contains {
+                    !$0.hasPrefix("=")
+                }
+                #expect(
+                    !assigns,
+                    Comment(
+                        rawValue:
+                            "\(file.lastPathComponent) assigns "
+                            + "\(field) — the mark is the "
+                            + "user's setting, not a side effect"
+                    )
+                )
+            }
         }
     }
 

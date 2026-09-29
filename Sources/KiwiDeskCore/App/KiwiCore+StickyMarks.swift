@@ -19,7 +19,8 @@ extension KiwiCore {
 
     /// One spec per marked window, glyphs outermost first.
     func stickyMarkSpecs() -> [StickyMarkManager.Spec] {
-        let sticky = tiler.settings.stickyStyle
+        let stickyMark = tiler.settings.stickyStyle.mark
+        let stickyColor = tiler.settings.stickyStyle.color
         let floating = tiler.settings.floatingStyle
         let shown = floating.mark ? floatingMarkWindows() : []
         let glass = LiquidGlassGate.rendered(
@@ -27,12 +28,12 @@ extension KiwiCore {
         )
         return state.windows.all.compactMap { window in
             var glyphs: [StickyMarkManager.Glyph] = []
-            if sticky.mark, window.isSticky {
+            if stickyMark, window.isSticky {
                 glyphs.append(
                     .sticky(
                         StickyStyle.symbolName(for: window.stickyScope)
                             ?? StickyStyle.symbolName,
-                        color: sticky.color
+                        color: stickyColor
                     )
                 )
             }

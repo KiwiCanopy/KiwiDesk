@@ -38,6 +38,8 @@ struct SymbolClassifierSeamTests {
             "render-time net on a name `homeSpaceMark` classified",
         "Tests/KiwiDeskCoreTests/FloatingMarkTests.swift":
             "builds the floating glyph from a fixed name",
+        "Tests/KiwiDeskCoreTests/FloatingMarkOverlayTests.swift":
+            "builds the floating glyph from a fixed name",
         "Sources/KiwiDeskCore/Borders/SizeLimitOverlay.swift":
             "builds the refusal pill's image from `pillSymbol`",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":

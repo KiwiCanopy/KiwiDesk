@@ -66,6 +66,35 @@ struct FloatingMarkDriverTests {
         #expect(kinds(core, 2) == [.floating])
     }
 
+    @Test("An overlay or a fullscreen float wears no floating glyph")
+    func exclusions() {
+        let core = makeCore()
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 1,
+                    appName: "Launcher",
+                    isTransientOverlay: true
+                )
+            )
+        )
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(2),
+                    pid: 1,
+                    appName: "Player",
+                    isFullscreen: true
+                )
+            )
+        )
+        core.state.setFloating(WindowID(1), true)
+        core.state.setFloating(WindowID(2), true)
+        #expect(kinds(core, 1) == nil)
+        #expect(kinds(core, 2) == nil)
+    }
+
     @Test("A float on a hidden space wears no mark")
     func hiddenSpace() {
         let core = makeCore()
@@ -173,6 +202,29 @@ struct FloatingMarkPlateTests {
         #expect(narrow == 1)
         #expect(tiny == 1)
         #expect(StickyMarkPlate.fittingSlots(1, windowWidth: 400) == 1)
+        // The band edge, derived: two squares beside the traffic
+        // lights fit, a point less does not.
+        let both =
+            StickyMarkPlate.size * 2 + StickyMarkOverlay.inset * 2
+            + StickyMarkPlate.trafficLightClearance
+        #expect(StickyMarkPlate.fittingSlots(2, windowWidth: both) == 2)
+        #expect(
+            StickyMarkPlate.fittingSlots(2, windowWidth: both - 1) == 1
+        )
+    }
+
+    @Test("A stored floating.mark decodes")
+    func markDecodes() throws {
+        let off = try JSONDecoder().decode(
+            FloatingStyle.self,
+            from: Data(#"{"mark": false}"#.utf8)
+        )
+        #expect(!off.mark)
+        let absent = try JSONDecoder().decode(
+            FloatingStyle.self,
+            from: Data("{}".utf8)
+        )
+        #expect(absent.mark)
     }
 
     @Test("A second glyph widens the pill by one square")
