@@ -10,10 +10,13 @@ import Testing
 /// in `followSwitch` for every caller, not per call site (#1727).
 ///
 /// The raise is observed through the echo ledger its stamp
-/// writes (`zOrderRaiseEchoes`), synchronously at the raise. The
+/// writes (`zOrderRaiseEchoes`), synchronously at the raise. A
 /// float's element is the test process's own application, which
-/// raises on the main actor, so the sequence completes inline
-/// and touches no other process.
+/// raises on the main actor, so the sequence completes inline;
+/// `AXRaise` on an application element is unsupported
+/// (`kAXErrorActionUnsupported`, measured), so nothing moves. The
+/// traveler, whose hand-back takes the ACTIVATING raise, lives
+/// in a pid no process holds, so there is no app to activate.
 @Suite("A follow switch raises the float layer (#1727)", .serialized)
 @MainActor
 struct FollowSwitchFloatRaiseTests {
@@ -30,11 +33,12 @@ struct FollowSwitchFloatRaiseTests {
     private func window(
         _ id: UInt32,
         floating: Bool = false,
-        sticky: StickyScope = .none
+        sticky: StickyScope = .none,
+        pid: pid_t = Self.pid
     ) -> ManagedWindow {
         ManagedWindow(
             id: WindowID(id),
-            pid: Self.pid,
+            pid: pid,
             appName: "App",
             appBundleID: Self.bundle,
             title: "Title",
@@ -148,25 +152,24 @@ struct FollowSwitchFloatRaiseTests {
         expectRaised(core)
     }
 
-    /// Floating sticky traveler 50, homed on Space 2 and drawn on
+    /// Tiled sticky traveler 50, homed on Space 2 and drawn on
     /// Space 1, focused there; Space 1 holds float 4. Both have
-    /// elements.
-    private func seedTraveler(
-        _ core: KiwiCore,
-        floating: Bool
-    ) {
+    /// elements, the traveler's in a pid no process holds.
+    private func seedTraveler(_ core: KiwiCore) {
         seed(core)
+        let absent: pid_t = 424_242
         core.state.windows.upsert(
-            window(50, floating: floating, sticky: .global)
+            window(50, sticky: .global, pid: absent)
         )
         core.state.workspaces.add(WindowID(50), to: "2")
         core.state.workspaces.focus(WindowID(50), in: "2")
         core.state.windows.upsert(window(4, floating: true))
         core.state.workspaces.add(WindowID(4), to: "1")
-        for id in [4, 50] {
-            core.eventLoop.elements[Self.pid]?[WindowID(UInt32(id))] =
-                AXUIElementCreateApplication(Self.pid)
-        }
+        core.eventLoop.elements[Self.pid]?[WindowID(4)] =
+            AXUIElementCreateApplication(Self.pid)
+        core.eventLoop.elements[absent] = [
+            WindowID(50): AXUIElementCreateApplication(absent)
+        ]
         #expect(core.activeSpace?.focused == WindowID(1))
         #expect(core.focusedWindowID == WindowID(50))
     }
@@ -177,7 +180,7 @@ struct FollowSwitchFloatRaiseTests {
     @Test("The raise hands focus back to a sticky traveler")
     func travelerGetsFocusBack() {
         let core = makeCore()
-        seedTraveler(core, floating: true)
+        seedTraveler(core)
         core.selfRaiseStamps = [:]
         core.raiseFloatsAndSticky(thenFocus: WindowID(50))
         #expect(core.zOrderRaiseEchoes[WindowID(4)] != nil)
@@ -189,7 +192,7 @@ struct FollowSwitchFloatRaiseTests {
     @Test("A tiled traveler's focus re-raises the floats")
     func tiledTravelerFocusRaises() async throws {
         let core = makeCore()
-        seedTraveler(core, floating: false)
+        seedTraveler(core)
         core.raiseFloatsAbove(afterFocusing: WindowID(50))
         #expect(core.deferred.isScheduled(.floatRaise))
         // A generous hang-guard, never a deadline (#344).

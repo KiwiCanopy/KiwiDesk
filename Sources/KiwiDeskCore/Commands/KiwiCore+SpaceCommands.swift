@@ -64,9 +64,10 @@ extension KiwiCore {
         }
     }
 
-    /// The AX focus-follow's landing on `space`, a Space it
-    /// un-stashes: switch, warp, and the #412 float raise
-    /// `focusSpace` and `followSwitch` pay too (#1727).
+    /// The AX focus-follow's landing on `space`: switch, warp,
+    /// and the #412 float raise `focusSpace` and `followSwitch`
+    /// pay too (#1727) — on every landing, a Space another
+    /// display already shows included, where it is harmless.
     func landFocusFollow(_ id: WindowID, on space: SpaceID) {
         applyFocusedSpaceSwitch(to: space)
         // The focus echo that triggered this follow found
