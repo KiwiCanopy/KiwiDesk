@@ -22,8 +22,7 @@ public final class LookStore {
         fileURL = directory.appendingPathComponent("looks.json")
     }
 
-    /// Decodes the document, running `ConfigMigration` if needed,
-    /// then the #1752 colour carry, which a byte step cannot do.
+    /// Decodes the document, running `ConfigMigration` if needed.
     private func readDocument() throws -> LookDocument? {
         guard var data = try? Data(contentsOf: fileURL) else {
             return nil
@@ -32,9 +31,6 @@ public final class LookStore {
             data = migrated
             try? migrated.write(to: fileURL, options: .atomic)
         }
-        if LookColorCarry.isOwed(data) {
-            data = try carried(data)
-        }
         guard
             let doc = try? JSONDecoder().decode(
                 LookDocument.self,
@@ -42,23 +38,6 @@ public final class LookStore {
             )
         else { throw StoreError.unreadableLibrary }
         return doc
-    }
-
-    /// `data` with its colours carried in and written back. An
-    /// unreadable palette library stands the carry down, the old
-    /// file untouched: the names cannot be told from gone ones.
-    private func carried(_ data: Data) throws -> Data {
-        let palettes = PaletteStore(
-            directory: fileURL.deletingLastPathComponent()
-        )
-        guard let saved = try? palettes.libraryPalettes(),
-            let carried = LookColorCarry.carriedLibrary(
-                data,
-                palettes: palettes.builtins() + saved
-            )
-        else { throw StoreError.unreadableLibrary }
-        try? carried.write(to: fileURL, options: .atomic)
-        return carried
     }
 
     /// User looks for mutating paths (throws on an unreadable library).
@@ -137,40 +116,30 @@ public final class LookStore {
         try Self.encoder.encode(file).write(to: url)
     }
 
-    /// Imports a look file — one from before #1752 carried against
-    /// the palette it travelled with, then `palettes` — filtering
-    /// styling to `LookKeys` and colours to known palette paths.
-    public func importLook(
-        from url: URL,
-        palettes: [ColorPalette]
-    ) throws -> ShelfLook {
-        guard let data = try? Data(contentsOf: url) else {
-            throw StoreError.invalidFile
-        }
-        if let file = try? JSONDecoder().decode(
-            LookExport.self,
-            from: data
-        ) {
-            return Self.filtered(file.look)
-        }
-        guard
-            let look = LookColorCarry.importedLegacy(
-                data,
-                palettes: palettes
+    /// Imports a look file, filtering it (`filtered`).
+    public func importLook(from url: URL) throws -> ShelfLook {
+        guard let data = try? Data(contentsOf: url),
+            let file = try? JSONDecoder().decode(
+                LookExport.self,
+                from: data
             )
         else { throw StoreError.invalidFile }
-        return Self.filtered(look)
+        return Self.filtered(file.look)
     }
 
-    /// `look` with styling keys outside `LookKeys` and colours
-    /// outside `ColorPaletteKeys` dropped.
+    /// `look` as the library stores it — the one door an untrusted
+    /// look passes (import, restore): styling keys outside
+    /// `LookKeys` and colours outside `ColorPaletteKeys` dropped,
+    /// then the colours completed over the shipped ones, so every
+    /// stored look carries every colour path (`LookStoreTests`).
     static func filtered(_ look: ShelfLook) -> ShelfLook {
         let style = Set(LookKeys.all)
         let colors = Set(ColorPaletteKeys.all)
+        let known = look.colors.filter { colors.contains($0.key) }
         return ShelfLook(
             name: look.name,
             style: look.style.filter { style.contains($0.key) },
-            colors: look.colors.filter { colors.contains($0.key) }
+            colors: ColorPalette(name: "", colors: known).paintedColors
         )
     }
 

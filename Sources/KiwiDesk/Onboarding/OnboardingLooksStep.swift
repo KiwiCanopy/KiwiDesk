@@ -31,8 +31,8 @@ struct OnboardingLooksStep: View {
                 "Pick a look and KiwiDesk changes as you click: "
                     + "the bars that show your Spaces and windows, "
                     + "the border around the focused window, and "
-                    + "their colors. A palette below re-colors the "
-                    + "look you pick."
+                    + "the colors of both. A palette below repaints "
+                    + "the look you pick."
             ),
             footnote: blocked ? blockedCaption : nil,
             hint: laterHint

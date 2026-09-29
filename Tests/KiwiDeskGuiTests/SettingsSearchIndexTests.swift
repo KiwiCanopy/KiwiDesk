@@ -216,8 +216,10 @@ struct SettingsSearchIndexTests {
                 // anchor and stay anchor-less by ruling.
                 // 8: #1644's Sheen row, on every macOS; 13 since
                 // #1684: the look shelf's five labelled actions,
-                // anchor-less like the palette shelf's.
-                .looks: 13,
+                // anchor-less like the palette shelf's. 14 since
+                // #1752: "Keep previous colors" is labelled, where
+                // the "use its colors" row it replaced was not.
+                .looks: 14,
                 // 17 since #1517 (one shelf set); 18: #1679's border.
                 .advancedColors: 18,
                 // 6: `(action) presets.layouts` joined anchor-less

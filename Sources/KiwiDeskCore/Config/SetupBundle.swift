@@ -44,8 +44,7 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// refuses a bundle whose looks it would drop.
     /// 16 = each bar took its edge back from `kiwishelf` (#1731),
     /// on `[Profile]` alone.
-    /// 17 = a look owns its colours (#1752), on `looks` alone.
-    public static let currentFormat = 17
+    public static let currentFormat = 16
 
     public let format: Int
 

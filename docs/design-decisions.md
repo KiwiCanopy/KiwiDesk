@@ -6511,12 +6511,16 @@ Three obligations keep the write honest:
   replay over a built-in layout reaches this, and Settings already
   narrates that layout as unsaved.
 
-The step has no colours tick: a look click paints the look's
-shape and its own colours, and the palette row below then
-repaints the colours alone and keeps the shape
-(`ShelfPaintTests` ▸ `paletteKeepsTheShape`). The marks are read
-from the live settings on every render, so after hand-tuned
-colours nothing reads selected until a click.
+The step has no "Keep previous colors" row: its Revert already
+returns the colours the first click replaced, so a second way
+back would be the second path ruled out above. A look click
+paints the look's shape and its own colours, and the palette row
+below then repaints them and keeps the shape — the later pick
+wins (`ShelfPaintTests` ▸ `paletteKeepsTheShape`). The marks are
+read from the live settings on every render: after hand-tuned
+colours no palette reads selected until a click, while a look
+whose shape is still live keeps its mark and says "Other colors"
+(`ShelfLookApplyTests` ▸ `matchReadsShapeThenColours`).
 :::
 
 ### The Mac Checklist counts what macOS can confirm
@@ -11960,13 +11964,10 @@ drawn in it, and a look is what the shared appearance of #1752
 is made of, which has to be one whole thing. So a palette is a
 recipe painted INTO a look — the later pick wins — and a look
 saved from hand-tuned colours carries them without filing a
-palette. A look saved before this, which named one, takes that
-palette's colours once on its library's first read; a palette
-since deleted gives the shipped colours, the one answer the
-library, a backup and an exported file can all give alike, since
-only the running app knows the live ones
-(`LookColorCarryTests`, `LookColorBundleMigrationTests`). **A look carries styling,
-never functionality** (owner, 2026-09-27): a field is styling
+palette. Every stored look carries every colour path, the
+shipped colours completing a sparse one, so applying it leaves no
+earlier colour behind (`LookStoreTests`). **A look carries
+styling, never functionality** (owner, 2026-09-27): a field is styling
 if it changes how the same items look or where they sit, and
 functionality if it changes which items exist, what they show
 or say, or what they do — so App Bar content, Other Spaces and
@@ -12015,7 +12016,8 @@ offers them back, unticked, since a tick would make the click
 give something other than the tile it shows — computed from the
 draft, kept across a run of look clicks and gone once the colours
 move otherwise, so it never restores over the user's own edits
-(`KeepColorsOfferTests`). A look card draws its focus ring with the sheen
+(`KeepColorsOfferTests`). A look card draws its focus ring with
+the sheen
 (owner, 2026-09-28) — a deliberate exception to the palette
 thumbnail's rule of leaving a fact it cannot render undrawn at tile
 scale, paid for with a ring wide enough for the ramp to read. The

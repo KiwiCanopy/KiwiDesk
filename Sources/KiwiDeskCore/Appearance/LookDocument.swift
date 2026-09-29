@@ -5,15 +5,8 @@ import Foundation
 /// which also travels inside `SetupBundle` under the bundle's own
 /// format — the palette library's shape (#939, #945).
 struct LookDocument: Codable {
-    /// Format version of the looks.json schema. 2: a look owns
-    /// its colours (#1752), carried by `LookColorCarry` rather than
-    /// a `ConfigMigration` step.
-    static let currentFormat = 2
-
-    /// The format a byte-level step may stamp: the one below the
-    /// carry, which alone writes `currentFormat` — a blind stamp
-    /// would end the crossing with no colours.
-    static let stampFloor = 1
+    /// Format version of the looks.json schema.
+    static let currentFormat = 1
 
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()
@@ -66,8 +59,7 @@ struct LookDocument: Codable {
 /// An exported look (#1684): the look alone, which owns its
 /// colours (#1752), so the file carries everything another Mac
 /// needs. Bare, like the palette sidecar — a breaking `ShelfLook`
-/// change must rule this file deliberately; a file from before
-/// #1752 is read by `LookColorCarry.importedLegacy`.
+/// change must rule this file deliberately.
 public struct LookExport: Codable, Sendable, Equatable {
     public var look: ShelfLook
 

@@ -64,8 +64,27 @@ struct LookStoreTests {
         exported.colors["bogus"] = "#FFF"
         exported.style["app_bar.content"] = .string("icon")
         try store.export(LookExport(look: exported), to: url)
-        let back = try store.importLook(from: url, palettes: [])
-        #expect(back == look("A"))
+        let back = try store.importLook(from: url)
+        #expect(back.style == look("A").style)
+        #expect(back.colors["bogus"] == nil)
+        #expect(back.colors["kiwishelf.fill_color"] == "#112233")
+    }
+
+    /// A stored look carries every colour path (#1752), so a sparse
+    /// file cannot leave earlier colours behind when applied.
+    @Test("an imported look's colours are completed")
+    func importCompletesColours() throws {
+        let store = store()
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("look-\(UUID().uuidString).json")
+        try store.export(LookExport(look: look("A")), to: url)
+        let back = try store.importLook(from: url)
+        #expect(Set(back.colors.keys) == Set(ColorPaletteKeys.all))
+        #expect(
+            back.colors
+                == ColorPalette(name: "", colors: look("A").colors)
+                .paintedColors
+        )
     }
 
     @Test("a newer library refuses rather than reads empty")

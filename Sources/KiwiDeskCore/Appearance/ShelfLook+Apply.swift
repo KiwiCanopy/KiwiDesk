@@ -25,9 +25,11 @@ extension ShelfLook {
     /// unapplied until clicked, since the click would converge them.
     public func isApplied(to settings: TilingSettings) -> Bool {
         guard isStyleApplied(to: settings) else { return false }
-        var painted = settings
-        apply(to: &painted)
-        return painted == settings
+        // By parsed colour, the palette's rule: `#8db354` and
+        // `#8DB354FF` are one answer (`ColorPalette.sameColor`).
+        return colors.isEmpty
+            || ColorPalette(name: name, colors: colors)
+                .isApplied(to: settings)
     }
 
     /// How far this look is live in `settings` (#1752): the one

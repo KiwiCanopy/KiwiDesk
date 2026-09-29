@@ -41,9 +41,10 @@ struct LooksShelf: View {
             userGroup
         }
         .onAppear(perform: reload)
-        // A Save or a Revert ends the visit the row speaks for.
+        // A Save or a Revert ends the visit the row speaks for —
+        // unless its own tick just returned the draft to saved.
         .onChange(of: model.isDirty) { _, dirty in
-            if !dirty { keepColors = nil }
+            if !dirty, !keepColorsTicked { keepColors = nil }
         }
     }
 

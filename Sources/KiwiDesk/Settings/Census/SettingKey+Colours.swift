@@ -29,7 +29,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case paletteImport = "(action) palette.import"
     case paletteNeonGlowHint = "(link) palettes.neon_glow_hint"
     case lookApply = "(action) look.apply"
-    case lookUseColors = "(action) look.use_colors"
+    case lookKeepPreviousColors = "(action) look.keep_previous_colors"
     case lookSave = "(action) look.save"
     case lookImport = "(action) look.import"
     case lookRename = "(action) look.rename"
@@ -98,13 +98,14 @@ extension ColoursKey {
             return .row(.coloursAndMotion, .palettes, .showMore)
         case .lookApply, .lookSave, .lookImport:
             return .row(.coloursAndMotion, .looks, .atRest)
-        case .lookUseColors:
-            // Present only for the look a click just applied.
+        case .lookKeepPreviousColors:
+            // Present only while a look click replaced colours no
+            // saved palette brings back (`KeepColorsOffer`).
             return .row(
                 .coloursAndMotion,
                 .looks,
                 .atRest,
-                gate: .runtime(.lookJustApplied)
+                gate: .runtime(.lookReplacedUnsavedColors)
             )
         case .lookRename, .lookExport, .lookDelete:
             return .row(.coloursAndMotion, .looks, .showMore)
@@ -178,8 +179,10 @@ extension ColoursKey {
             return .text("palettes.import")
         case .paletteNeonGlowHint:
             return .text("palettes.neon_glow_hint")
-        case .lookApply, .lookUseColors:
+        case .lookApply:
             return .dynamic
+        case .lookKeepPreviousColors:
+            return .text("looks.keep_previous_colors")
         case .lookSave:
             return .text("looks.save_current")
         case .lookImport:

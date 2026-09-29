@@ -1,10 +1,10 @@
 import Foundation
 
 /// The look library's Core doors (#1684). A look owns its colours
-/// (#1752), so the libraries no longer reach into each other; a
-/// write still goes through here, never a store call at a GUI
-/// site, and refuses while either library is unreadable — the
-/// look library's carry reads the palettes.
+/// (#1752), so the look and palette libraries never reach into
+/// each other; a write still goes through here, never a store call
+/// at a GUI site, and a store refuses while its own file is
+/// unreadable.
 extension KiwiCore {
     /// The look library, built on demand — stateless like
     /// `paletteLibrary`, and public for the same one-owner reason.
@@ -20,44 +20,22 @@ extension KiwiCore {
         LookCatalog.bundled(sizes: starterSizes())
     }
 
-    /// Every palette a look may name, bundled first.
+    /// Every palette, bundled first.
     public var allPalettes: [ColorPalette] {
         paletteLibrary.builtins() + paletteLibrary.userPalettes()
     }
 
-    /// Renames a user palette; refuses while a library is
-    /// unreadable.
+    /// Renames a user palette; no look names one (#1752).
     public func renamePalette(from old: String, to new: String) throws {
-        try requireReadableLibraries()
         try paletteLibrary.rename(from: old, to: new)
     }
 
-    /// A saved palette that reproduces `settings`' colours, if any.
-    public func palette(reproducing settings: TilingSettings)
-        -> ColorPalette?
-    {
-        Self.palette(reproducing: settings, in: allPalettes)
-    }
-
-    /// The first of `palettes` reproducing `settings`' colours — the
-    /// pure half, which the Settings window hands its in-memory
-    /// copy of the library (#805) rather than reading the file.
-    public static func palette(
-        reproducing settings: TilingSettings,
-        in palettes: [ColorPalette]
-    ) -> ColorPalette? {
-        let live = ColorPaletteKeys.extract(from: settings)
-        return palettes.first { $0.reproduces(live) }
-    }
-
     /// Saves `settings`' styling and colours as look `name`.
-    /// Refuses while either library is unreadable.
     @discardableResult
     public func saveLook(
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
-        try requireReadableLibraries()
         let look = ShelfLook(
             name: name,
             style: LookKeys.extract(from: settings),
@@ -67,33 +45,19 @@ extension KiwiCore {
         return look
     }
 
-    /// Imports a look file under a free name — one from before
-    /// #1752 carried against the palette it travelled with, then
-    /// the palettes saved here.
+    /// Imports a look file under a free name.
     @discardableResult
     public func importLook(
         from url: URL,
         fallbackName: String
     ) throws -> ShelfLook {
-        try requireReadableLibraries()
-        var look = try lookLibrary.importLook(
-            from: url,
-            palettes: allPalettes
-        )
+        var look = try lookLibrary.importLook(from: url)
         let looks = lookLibrary
         look.name = Self.uniqueName(
             base: Self.named(look.name, else: fallbackName)
         ) { looks.isBuiltinName($0) || looks.hasUserLook($0) }
         try lookLibrary.save(look)
         return look
-    }
-
-    /// Throws while either library exists but will not decode — a
-    /// write across both must not land half, nor read an
-    /// unreadable library's names as free.
-    private func requireReadableLibraries() throws {
-        _ = try lookLibrary.libraryLooks()
-        _ = try paletteLibrary.libraryPalettes()
     }
 
     /// `name` trimmed, or `fallback` when nothing is left.

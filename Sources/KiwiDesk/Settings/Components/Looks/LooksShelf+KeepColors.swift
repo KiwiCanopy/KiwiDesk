@@ -11,6 +11,13 @@ extension LooksShelf {
         return keepColors.flatMap { $0.shows(live) ? $0 : nil }
     }
 
+    /// Whether the standing row is ticked over the draft.
+    var keepColorsTicked: Bool {
+        standingKeepColors?.isTicked(
+            ColorPaletteKeys.extract(from: model.config.settings)
+        ) ?? false
+    }
+
     @ViewBuilder var keepColorsRow: some View {
         if let offer = standingKeepColors {
             VStack(alignment: .leading, spacing: 2) {
@@ -22,7 +29,7 @@ extension LooksShelf {
                 Text(
                     L(
                         "looks.keep_previous_colors.caption",
-                        "They aren't saved as a palette."
+                        "These colors aren't saved as a palette."
                     )
                 )
                 .font(.caption)

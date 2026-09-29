@@ -21,12 +21,11 @@ public enum LookCatalog {
         let palettes = PaletteCatalog.bundled()
         return [glass]
             + authored().map { authored in
-                var look = LookColorCarry.carried(
-                    authored,
-                    palettes: palettes
+                ShelfLook(
+                    name: authored.name,
+                    style: glass.style.merging(authored.style) { $1 },
+                    colors: authored.colors(in: palettes)
                 )
-                look.style = glass.style.merging(look.style) { $1 }
-                return look
             }
     }
 
@@ -50,7 +49,7 @@ public enum LookCatalog {
 
     /// The authored differences from `Resources/Looks`, each
     /// naming its bundled palette.
-    static func authored() -> [PaletteNamedLook] {
+    static func authored() -> [AuthoredLook] {
         guard
             let url = Bundle.kiwiDeskCore.url(
                 forResource: "bundled",
@@ -59,10 +58,27 @@ public enum LookCatalog {
             ),
             let data = try? Data(contentsOf: url),
             let looks = try? JSONDecoder().decode(
-                [PaletteNamedLook].self,
+                [AuthoredLook].self,
                 from: data
             )
         else { return [] }
         return looks
+    }
+}
+
+/// A bundled look as `Resources/Looks` authors it: its styling
+/// differences and its paired palette by NAME, resolved at load so
+/// a palette retune reaches the look (#1752).
+struct AuthoredLook: Decodable {
+    let name: String
+    let palette: String
+    let style: [String: JSONValue]
+
+    /// The paired palette's colours over the shipped ones; a name
+    /// no bundled palette answers gives the shipped colours, which
+    /// `LookCatalogTests` ▸ `palettesExist` refuses to ship.
+    func colors(in palettes: [ColorPalette]) -> [String: String] {
+        let paired = palettes.first { $0.name == palette }
+        return (paired ?? PaletteCatalog.defaultPalette()).paintedColors
     }
 }

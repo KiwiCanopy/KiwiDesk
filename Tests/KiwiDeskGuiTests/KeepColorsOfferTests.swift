@@ -96,4 +96,48 @@ struct KeepColorsOfferTests {
         settings.borderStyle.focusedColor = "#FEDCBA"
         #expect(!offer.shows(colors(settings)))
     }
+
+    /// A retired offer is no run to continue: the next click
+    /// snapshots the colours the user has since made.
+    @Test("a click after a retirement snapshots afresh")
+    func retiredOfferStartsOver() throws {
+        var settings = custom()
+        let first = look(fill: "#111111")
+        let prior = KeepColorsOffer.afterClicking(
+            first,
+            over: settings,
+            prior: nil,
+            palettes: []
+        )
+        first.apply(to: &settings)
+        settings.borderStyle.focusedColor = "#FEDCBA"
+        let edited = colors(settings)
+        let next = try #require(
+            KeepColorsOffer.afterClicking(
+                look(fill: "#222222"),
+                over: settings,
+                prior: prior,
+                palettes: []
+            )
+        )
+        #expect(next.previous == edited)
+    }
+
+    @Test("a look that changes no colour offers nothing")
+    func sameColoursOfferNothing() {
+        let settings = custom()
+        let same = ShelfLook(
+            name: "Same",
+            style: [:],
+            colors: colors(settings)
+        )
+        #expect(
+            KeepColorsOffer.afterClicking(
+                same,
+                over: settings,
+                prior: nil,
+                palettes: []
+            ) == nil
+        )
+    }
 }

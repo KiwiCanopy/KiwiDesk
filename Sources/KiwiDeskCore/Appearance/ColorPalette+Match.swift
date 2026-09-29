@@ -60,6 +60,15 @@ extension ColorPalette {
         }
     }
 
+    /// The first of `palettes` reproducing the complete colour map
+    /// `colors` — a palette that brings those colours back.
+    public static func first(
+        reproducing colors: [String: String],
+        in palettes: [ColorPalette]
+    ) -> ColorPalette? {
+        palettes.first { $0.reproduces(colors) }
+    }
+
     /// Every colour path this palette gives, painted over the
     /// shipped colours — the complete map a look stores (#1752).
     public var paintedColors: [String: String] {

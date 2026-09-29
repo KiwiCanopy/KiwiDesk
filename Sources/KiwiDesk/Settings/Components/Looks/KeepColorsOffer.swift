@@ -27,7 +27,7 @@ struct KeepColorsOffer: Equatable {
         let previous =
             prior.flatMap { $0.shows(live) ? $0.previous : nil } ?? live
         guard !same(previous, look.colors),
-            !palettes.contains(where: { $0.reproduces(previous) })
+            ColorPalette.first(reproducing: previous, in: palettes) == nil
         else { return nil }
         return KeepColorsOffer(previous: previous, look: look.colors)
     }
