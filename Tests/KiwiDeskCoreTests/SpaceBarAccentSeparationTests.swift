@@ -195,6 +195,35 @@ struct SpaceBarAccentSeparationTests {
         #expect(ratio >= 4.5)
     }
 
+    /// The same 4.5:1 line over the bundled catalog (#1769): the
+    /// clause above reads only the struct default, so Sunset,
+    /// Monochrome and Ultraviolet each shipped a badge below it.
+    /// Like the accent sweep, a palette omitting either badge key
+    /// is a failure, never a skip.
+    @Test("Every bundled palette's badge ink is legible")
+    func everyBundledBadgeClearsContrast() {
+        #expect(!PaletteCatalog.authored().isEmpty)
+        for palette in PaletteCatalog.bundled() {
+            let name = palette.name
+            guard
+                let chip =
+                    palette.colors["kiwishelf.group_badge_color"],
+                let ink =
+                    palette.colors["kiwishelf.group_badge_text_color"],
+                let ratio = ColorVision.contrast(ink, chip)
+            else {
+                Issue.record("\(name) lacks a readable badge pair")
+                continue
+            }
+            #expect(
+                ratio >= 4.5,
+                Comment(
+                    rawValue: "\(name): \(ink) on \(chip) is \(ratio):1"
+                )
+            )
+        }
+    }
+
     @Test("The derived default palette carries the same pair")
     func derivedPaletteMatchesTheStruct() {
         // "Kiwi (Default)" is read from the struct defaults at
