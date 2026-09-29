@@ -75,7 +75,8 @@ struct ShelfNeedParityTests {
         let lengths = SpaceBarOverlay.itemLengths(
             items,
             depth: depth,
-            look: look
+            look: look,
+            frontFollows: false
         )
         let total = SpaceBarOverlay.runTotal(
             lengths: lengths,

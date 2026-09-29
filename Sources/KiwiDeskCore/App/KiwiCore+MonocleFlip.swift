@@ -13,15 +13,20 @@ import Foundation
 extension KiwiCore {
     /// `step` is the pressed direction for a directional step
     /// (`+1`/`-1`, a wrap included) and nil for a target named
-    /// outright, whose sign is array order.
-    func focusWithMonocleFlip(_ target: WindowID, step: Int?) {
+    /// outright, whose sign is array order. `warp: false` keeps
+    /// the pointer where it is — the scroll step's (#1656).
+    func focusWithMonocleFlip(
+        _ target: WindowID,
+        step: Int?,
+        warp: Bool = true
+    ) {
         // A play in flight: its focus lands here, ahead of the
         // anchor read — the App Bar click reaches this door
         // without passing `execute` — then the press lands at
         // once and the running card retargets.
         if monocleFlip.isPlaying {
             runPendingMonocleFocus()
-            focusWindow(target, warp: true)
+            focusWindow(target, warp: warp)
             monocleFlip.retarget(to: face(of: target))
             return
         }
@@ -31,7 +36,7 @@ extension KiwiCore {
                 step: step
             )
         else {
-            focusWindow(target, warp: true)
+            focusWindow(target, warp: warp)
             return
         }
         monocleFlip.play(
@@ -48,7 +53,7 @@ extension KiwiCore {
         // Written AFTER `play`, whose opening `end()` fires any
         // earlier landing — a debt recorded first would be
         // landed by it.
-        pendingMonocleFocus = (from: current, to: target)
+        pendingMonocleFocus = (from: current, to: target, warp: warp)
     }
 
     /// Lands the focus a playing flip owes, once: the ordinary
@@ -67,7 +72,7 @@ extension KiwiCore {
             state.workspaces.space(of: pending.to)
                 == state.workspaces.activeSpace
         else { return }
-        focusWindow(pending.to, warp: true)
+        focusWindow(pending.to, warp: pending.warp)
     }
 
     /// Ends a play in flight with its focus landed — the door's

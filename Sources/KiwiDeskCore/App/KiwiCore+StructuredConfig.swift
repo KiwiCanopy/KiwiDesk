@@ -34,6 +34,10 @@ extension KiwiCore {
             floatRules: profile?.floatRules,
             ignoreRules: profile?.ignoreRules
         )
+        applyScrollGestures(
+            base: config.scrollGesture,
+            profile: profile?.scrollGesture
+        )
         // Mint refs from the SAME interpreter that releases
         // them (`keys.lua`, see `KeybindingManager.reset`),
         // so mint and release cannot diverge.
@@ -60,7 +64,8 @@ extension KiwiCore {
         profileModes: KeyLayerOverride?,
         profileAppRules: AppRuleOverride?,
         profileFloatRules: RuleListOverride?,
-        profileIgnoreRules: RuleListOverride?
+        profileIgnoreRules: RuleListOverride?,
+        profileScrollGesture: ScrollGestureOverride?
     ) {
         var structured: GuiConfig?
         if isGuiManaged {
@@ -74,6 +79,12 @@ extension KiwiCore {
             appRules: profileAppRules,
             floatRules: profileFloatRules,
             ignoreRules: profileIgnoreRules
+        )
+        // Resolves over either owner: the sidecar's base, or the
+        // one `init.lua`'s verbs left in hand.
+        applyScrollGestures(
+            base: structured?.scrollGesture,
+            profile: profileScrollGesture
         )
         guard isGuiManaged else { return }
         guard let lua = keys.lua else { return }
@@ -159,6 +170,10 @@ extension KiwiCore {
             appRules: profile?.appRules,
             floatRules: profile?.floatRules,
             ignoreRules: profile?.ignoreRules
+        )
+        applyScrollGestures(
+            base: config.scrollGesture,
+            profile: profile?.scrollGesture
         )
         guard changed, let lua = keys.lua else { return }
         applyStructuredKeybindings(

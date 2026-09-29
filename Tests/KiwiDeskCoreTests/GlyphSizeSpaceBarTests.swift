@@ -100,7 +100,8 @@ struct GlyphSizeSpaceBarTests {
                 == SpaceBarItemView.autoLength(
                     appCount: 2,
                     contentDepth: Self.content,
-                    glyphGap: Self.look().resolvedGlyphGap
+                    glyphGap: Self.look().resolvedGlyphGap,
+                    ends: view.ends
                 )
         )
         for glyph in view.appViews {

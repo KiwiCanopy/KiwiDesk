@@ -238,6 +238,12 @@ public struct KiwiShelf: Sendable, Equatable {
     ) -> CGFloat {
         max(0, min(cornerRoundness, 100)) / 100 * (thickness / 2)
     }
+
+    /// What a circle of `radius` cuts off a square's corner along
+    /// one axis, r·(1 − 1/√2): where a disc hangs in a corner.
+    public static func cornerCut(radius: CGFloat) -> CGFloat {
+        max(radius, 0) * (1 - 1 / 2.0.squareRoot())
+    }
 }
 
 extension KiwiShelf: Codable {}

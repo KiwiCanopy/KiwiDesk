@@ -15,7 +15,12 @@ extension SpaceBarOverlay {
         let axis = horizontal ? strip.width : strip.height
         let gap = style.itemGap
         let leadsWithLayer = Self.leadsWithLayer(items)
-        let lengths = Self.itemLengths(items, depth: depth, look: style)
+        let lengths = Self.itemLengths(
+            items,
+            depth: depth,
+            look: style,
+            frontFollows: frontApp != nil
+        )
         let front = frontExtent(
             frontApp,
             depth: depth,
@@ -150,9 +155,13 @@ extension SpaceBarOverlay {
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
             }
-            view.isFirstInRun = index == 0
-            view.isLastInRun =
-                index == items.count - 1 && frontApp == nil
+            let place = Self.runPlace(
+                index: index,
+                count: items.count,
+                frontFollows: frontApp != nil
+            )
+            view.isFirstInRun = place.first
+            view.isLastInRun = place.last
         }
         renderFrontSegment(
             frontApp,

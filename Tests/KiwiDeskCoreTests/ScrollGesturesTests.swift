@@ -36,14 +36,16 @@ struct ScrollGesturesTests {
     private func settings(
         pan: ScrollChord? = ScrollGesturesTests.pan,
         step: ScrollChord? = ScrollGesturesTests.step,
-        natural: Bool = true
+        natural: Bool = true,
+        naturalMouse: Bool = true
     ) -> ScrollGestureSettings {
         var chords: [ScrollGestures.Consumer: ScrollChord] = [:]
         chords[.pan] = pan
         chords[.step] = step
         return ScrollGestureSettings(
             chords: chords,
-            naturalScrolling: natural
+            naturalTrackpad: natural,
+            naturalMouse: naturalMouse
         )
     }
 
@@ -223,6 +225,28 @@ struct ScrollGesturesTests {
                 .zero, CGVector(dx: 5, dy: 3), CGVector(dx: -5, dy: -3),
             ]
         )
+    }
+
+    @Test("each input takes its own Natural scrolling")
+    func naturalScrollingPerInput() {
+        let (gestures, _) = front()
+        var deltas: [CGFloat] = []
+        gestures.setHandler(.pan) { deltas.append($0.delta.dx) }
+        gestures.configure(settings(naturalMouse: false))
+        gestures.start()
+        var wheel = event(Self.pan, .began)
+        wheel.input = .wheel
+        gestures.receive([wheel])
+        wheel.kind = .changed
+        wheel.delta = CGVector(dx: 5, dy: 0)
+        gestures.receive([wheel])
+        var ended = wheel
+        ended.kind = .ended
+        ended.delta = .zero
+        gestures.receive([ended])
+        gestures.receive([event(Self.pan, .began)])
+        gestures.receive([event(Self.pan, .changed, dx: 5)])
+        #expect(deltas == [0, -5, 0, 0, 5])
     }
 
     @Test("what the tap routes reaches the consumer on the main queue")

@@ -37,6 +37,18 @@ enum SettingsSearchSynonyms {
         // are the alternate vocabulary that has to reach it.
         case .appRules(.appRules):
             return ["space", "pin"]
+        // What other tilers call ⌃⌥ + scroll (#1656): niri's
+        // column scroll, and the words a mouse user searches.
+        case .shortcuts(.scrollPan):
+            return ["pan", "swipe", "wheel", "modifier", "gesture"]
+        case .shortcuts(.scrollNaturalTrackpad),
+            .shortcuts(.scrollNaturalMouse):
+            // The rows are labelled by their input; the setting's
+            // own name is Apple's.
+            return [
+                "natural", "natural scrolling", "reverse", "invert",
+                "direction",
+            ]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]
         case .borders(.borderEnabled):

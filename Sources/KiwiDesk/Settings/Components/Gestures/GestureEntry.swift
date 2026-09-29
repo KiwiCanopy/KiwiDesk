@@ -13,6 +13,13 @@ struct GestureEntry<Picture: View, Control: View>: View {
     let surface: GestureSurface
     let settings: TilingSettings
     let pace: GesturePace
+    /// The gesture itself is off (a cleared chord) though its
+    /// surface is on: greyed the same way.
+    let off: Bool
+    /// The `?` after the sentence, which names the entry's control
+    /// (#94), and what it is about for VoiceOver.
+    let help: String?
+    let helpSubject: String?
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -24,13 +31,19 @@ struct GestureEntry<Picture: View, Control: View>: View {
         surface: GestureSurface,
         settings: TilingSettings,
         pace: GesturePace = .quick,
+        off: Bool = false,
+        help: String? = nil,
+        helpSubject: String? = nil,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture,
         @ViewBuilder control: @escaping () -> Control
     ) {
+        self.help = help
+        self.helpSubject = helpSubject
         self.text = text
         self.surface = surface
         self.settings = settings
         self.pace = pace
+        self.off = off
         self.picture = picture
         self.control = control
     }
@@ -44,9 +57,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
                 .id(hovering)
                 .accessibilityHidden(true)
                 .modifier(dim)
-            Text(text)
-                .fixedSize(horizontal: false, vertical: true)
-                .modifier(dim)
+            sentence
             control()
         }
         .padding(.vertical, 6)
@@ -57,7 +68,20 @@ struct GestureEntry<Picture: View, Control: View>: View {
     /// The grey an off surface puts on the picture and the
     /// sentence — never on the control, which stays live.
     private var dim: GreyOut {
-        GreyOut(active: surface.isOff(settings))
+        GreyOut(active: surface.isOff(settings) || off)
+    }
+
+    /// The sentence, and its `?` outside the grey: help stays
+    /// readable whatever the surface says.
+    private var sentence: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
+                .modifier(dim)
+            if let help {
+                HelpButton(explanation: help, subject: helpSubject)
+            }
+        }
     }
 
     /// Restarts the gesture from its first frame, then loops it:

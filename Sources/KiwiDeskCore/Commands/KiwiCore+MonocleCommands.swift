@@ -104,7 +104,8 @@ extension KiwiCore {
         _ direction: Direction,
         space: Space,
         focused: WindowID,
-        swapping: Bool
+        swapping: Bool,
+        warp: Bool = true
     ) -> CommandResponse? {
         // Resolve per-space (#149): a space with a vertical
         // orientation override renders vertically, so its focus
@@ -167,7 +168,7 @@ extension KiwiCore {
                 animated: tiler.settings.animations.onWindowSwap
             )
         } else {
-            focusWithMonocleFlip(target, step: step)
+            focusWithMonocleFlip(target, step: step, warp: warp)
         }
         return .ok()
     }

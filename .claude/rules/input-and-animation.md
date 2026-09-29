@@ -17,7 +17,7 @@ editing here:
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the
   Accessibility-class `PostEvent` service alone, never
-  `ListenEvent` (tccd log, device build, 2026-09-28). Four
+  `ListenEvent` (tccd log, device build, 2026-09-28). Five
   obligations:
   - **One tap, scroll-only.** A second `tapCreate(`, or a mask
     widened past `.scrollWheel`, is where an Input Monitoring
@@ -41,6 +41,19 @@ editing here:
     and no tap exists while no wired consumer has a chord, the
     live factory pinned inert in both `makeTestCore` twins
     (`ScrollGesturesTests`, `ScrollTapSeamTests`).
+  - **Resolve the settings in ONE home,
+    `KiwiCore.applyScrollGestures`, the one caller of the front's
+    door `ScrollGestures.adoptResolution`** (#1656): the global base with
+    the live profile's override on top, run through
+    `ScrollGestureBase.sanitized` — the verdict the Settings
+    entry reads too — since a hand-edited file reaches what the
+    recorder refuses. A path that changes either input reaches
+    the tap by calling it; the one deferred writer is the config
+    load's `resetInputs`, whose load configures at its tail. The
+    inputs stay `private(set)`, and a `ScrollGestureSettings` is
+    built only through `tapSettings`, read by the door alone, or
+    a path hands the tap a value that skipped the override
+    (`ScrollGestureConfigureSeamTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

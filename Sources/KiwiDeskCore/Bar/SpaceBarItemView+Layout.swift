@@ -23,18 +23,21 @@ extension SpaceBarItemView {
     /// Computes requested slot length for given app count and overflow badge.
     /// `glyphGap` is the style's `resolvedGlyphGap`, taken with
     /// no default so a caller cannot measure without it (#1689);
-    /// `contentDepth` is the shelf's for the strip (#1682).
+    /// `contentDepth` is the shelf's for the strip (#1682), and
+    /// `ends` the item's `ends(look:depth:first:last:)` (#1763).
     static func autoLength(
         appCount: Int,
         overflow: Int = 0,
         contentDepth: CGFloat,
-        glyphGap: CGFloat
+        glyphGap: CGFloat,
+        ends: ItemEnds
     ) -> CGFloat {
         let cell = cell(contentDepth: contentDepth)
         let slots = appCount + (overflow > 0 ? 1 : 0)
         let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
         let gaps = CGFloat(max(slots - 1, 0)) * glyphGap
-        return pad * 2 + cell + divider + CGFloat(slots) * cell + gaps
+        return pad * 2 + ends.total + cell + divider
+            + CGFloat(slots) * cell + gaps
     }
 
     override func layout() {
@@ -49,7 +52,7 @@ extension SpaceBarItemView {
         // glyph to center it, and the glyph fonts are set in
         // `restyle`.
         restyle()
-        var cursor = Self.pad
+        var cursor = Self.pad + ends.leading
         place(identifierImage, at: cursor, cell: cell)
         place(
             identifierLabel,

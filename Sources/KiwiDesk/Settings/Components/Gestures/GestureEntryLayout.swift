@@ -53,10 +53,14 @@ struct GestureEntryLayout: Layout {
             width: width,
             spacing: spacing
         )
-        let placed = min(ideal.width, inColumn ? column : width)
+        // In the column the control is offered all of it, so a row
+        // with a trailing column (an "Applies to") reaches the
+        // pane's edge; below the row it keeps its ideal width.
+        let offered = inColumn ? column : min(ideal.width, width)
         let control = subviews[2].sizeThatFits(
-            ProposedViewSize(width: placed, height: nil)
+            ProposedViewSize(width: offered, height: nil)
         )
+        let placed = min(control.width, offered)
         return Measure(
             plate: plate,
             sentence: sentence,

@@ -234,11 +234,12 @@ extension KiwiCore {
     /// so the tiled search fails and only the float tier (#488)
     /// can answer; pinned twins are all tiled, so the
     /// fall-through can never land on one.
-    private func scrollingStep(
+    func scrollingStep(
         _ direction: Direction,
         space: Space,
         focused: WindowID,
-        swapping: Bool
+        swapping: Bool,
+        warp: Bool = true
     ) -> CommandResponse? {
         let horizontal =
             tiler.settings.resolvedScrolling(for: space.id)
@@ -290,7 +291,9 @@ extension KiwiCore {
             // can land it in an overflowing edge pile (#150).
             scheduleScrollingZOrderRestoreIfOverflowing()
         } else {
-            focusWindow(target, warp: true)
+            // A scroll gesture passes false: a pointer moved
+            // mid-gesture would carry it off its own screen.
+            focusWindow(target, warp: warp)
         }
         return .ok()
     }

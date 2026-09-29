@@ -91,6 +91,19 @@ extension SettingsModel {
         return row
     }
 
+    /// The checklist of a scroll-gesture row, keyed by
+    /// `ScrollGestureField.rawValue` (#1656).
+    func scrollReach(_ field: String) -> RuleReachReading? {
+        guard let reach = encodedReach else { return nil }
+        return reading(
+            reach.scrollGestures,
+            field,
+            reach.unreadable,
+            picked: reachEdits.reach[.scroll]?[field],
+            ScrollGestureWords.value
+        )
+    }
+
     /// Who binds this row's combo to another action, per profile,
     /// read off the encoded table — the action ticking would take
     /// the key from.
@@ -192,6 +205,7 @@ extension SettingsModel {
         case .space: spaceReach(app)
         case .float: floatReach(app) { $0.joined(separator: ", ") }
         case .key: keyReach(app)
+        case .scroll: scrollReach(app)
         }
     }
 
@@ -285,6 +299,13 @@ extension SettingsModel {
             return RuleReachDraft.defaultReach(
                 of: key,
                 in: stored.keyLayers,
+                editing: editing,
+                isLoaded: reachIsLoaded
+            )
+        case .scroll:
+            return RuleReachDraft.defaultReach(
+                of: key,
+                in: stored.scrollGestures,
                 editing: editing,
                 isLoaded: reachIsLoaded
             )

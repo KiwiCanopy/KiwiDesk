@@ -121,7 +121,8 @@ struct BootWindowRuleReconcileTests {
             profileFloatRules: float.map {
                 RuleListOverride(rules: [$0: true])
             },
-            profileIgnoreRules: nil
+            profileIgnoreRules: nil,
+            profileScrollGesture: nil
         )
     }
 

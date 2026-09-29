@@ -67,6 +67,14 @@ extension SettingsModel {
         ) {
             $0.applyKey($1, value: $2, reach: $3, removal: $4, editing: $5)
         }
+        snapshot.scrollGestures = RuleReachDraft.encode(
+            snapshot.scrollGestures,
+            current: config.scrollGesture.fields,
+            editing: editing,
+            isLoaded: reachIsLoaded,
+            reach: reachEdits.reach[.scroll] ?? [:],
+            removal: [:]
+        )
         // The loaded page's gui.json layers, derived ONCE so the rule
         // write and the globals write read the same base.
         if reachIsLoaded {
@@ -96,6 +104,9 @@ extension SettingsModel {
             .sorted { $0.key < $1.key }
             .flatMap(\.value)
         config.layers = stored.storedKeyLayers(for: loaded)
+        config.scrollGesture = stored.storedScrollBase.writing(
+            stored.scrollGestures.resolved(for: loaded)
+        )
     }
 
     /// The draft as gui.json must hold it: on the live target the
@@ -114,6 +125,9 @@ extension SettingsModel {
             original: reach.storedFloatBase
         )
         sidecar.layers = reach.keyBase
+        sidecar.scrollGesture = reach.scrollGestures.scrollGestureBase(
+            original: reach.storedScrollBase
+        )
         return sidecar
     }
 
@@ -152,6 +166,7 @@ extension SettingsModel {
         suppressDirty = true
         cleanConfig.appRules = config.appRules
         cleanConfig.floatRules = config.floatRules
+        cleanConfig.scrollGesture = config.scrollGesture
         // Not the layers: a stored page's own shortcut diff is the
         // tiling write's, which is what failed.
         ruleReachStored = core.ruleReachSnapshot()
@@ -166,6 +181,7 @@ extension SettingsModel {
         config.appRules = cleanConfig.appRules
         config.floatRules = cleanConfig.floatRules
         config.layers = cleanConfig.layers
+        config.scrollGesture = cleanConfig.scrollGesture
         reachEdits = RuleReachEdits()
     }
 

@@ -77,6 +77,9 @@ extension SettingsDisclosureStyle where Accessory == EmptyView {
 /// the Reduce Motion gate, in one place so none of them forks.
 struct SettingsDisclosureButton<Label: View>: View {
     @Binding var isExpanded: Bool
+    /// A drawer's header is a heading; a row inside a titled
+    /// card (`SettingsCollapsibleSection`) is not.
+    var isHeading = true
     @ViewBuilder let label: () -> Label
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
@@ -98,6 +101,7 @@ struct SettingsDisclosureButton<Label: View>: View {
         .buttonStyle(.plain)
         .rowHoverHighlight(cornerRadius: 6, padding: 4)
         .accessibilityAddTraits(.isHeader)
+        .accessibilityRemoveTraits(isHeading ? [] : .isHeader)
         .accessibilityValue(
             isExpanded
                 ? L("settings.disclosure.ax_expanded", "expanded")

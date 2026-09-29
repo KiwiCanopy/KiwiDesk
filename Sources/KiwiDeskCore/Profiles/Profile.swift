@@ -62,6 +62,8 @@ public struct Profile: Codable, Sendable, Equatable {
     public var floatRules: RuleListOverride?
     /// Sparse additions/removals over global `ignore_rules`.
     public var ignoreRules: RuleListOverride?
+    /// Sparse scroll-gesture overrides (#1656).
+    public var scrollGesture: ScrollGestureOverride?
 
     /// Number of monitors covered by profile sets.
     public var monitorCount: Int {
@@ -94,6 +96,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case appRules = "app_rules"
         case floatRules = "float_rules"
         case ignoreRules = "ignore_rules"
+        case scrollGesture = "scroll_gesture"
     }
 
     public init(
@@ -112,7 +115,8 @@ public struct Profile: Codable, Sendable, Equatable {
         layers: KeyLayerOverride? = nil,
         appRules: AppRuleOverride? = nil,
         floatRules: RuleListOverride? = nil,
-        ignoreRules: RuleListOverride? = nil
+        ignoreRules: RuleListOverride? = nil,
+        scrollGesture: ScrollGestureOverride? = nil
     ) {
         self.format = format
         self.name = name
@@ -131,6 +135,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.appRules = appRules
         self.floatRules = floatRules
         self.ignoreRules = ignoreRules
+        self.scrollGesture = scrollGesture
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -236,6 +241,10 @@ public struct Profile: Codable, Sendable, Equatable {
         ignoreRules = try container.decodeIfPresent(
             RuleListOverride.self,
             forKey: .ignoreRules
+        )
+        scrollGesture = try container.decodeIfPresent(
+            ScrollGestureOverride.self,
+            forKey: .scrollGesture
         )
     }
 

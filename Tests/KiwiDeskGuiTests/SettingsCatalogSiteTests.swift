@@ -90,7 +90,8 @@ struct SettingsCatalogSiteTests {
         // two rows, less Behavior's Mouse card.
         // 115 since #1731: the Each bar drawer and its two rows.
         // 113 since #1741: Behavior's Cues and On quit cards left.
-        #expect(names.count == 113)
+        // 118 since #1656: the drawer's five scroll-gesture rows.
+        #expect(names.count == 118)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
