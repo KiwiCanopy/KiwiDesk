@@ -49,7 +49,7 @@ struct ShortcutsFamilyRowsTests {
         //  - the rows here that are not shortcuts at all — the
         //    Mouse & trackpad drawer's two mouse settings (#1726),
         //    whose census cases live in the Behaviour sub-enum,
-        //    and its scroll gestures (#1656) — controls the
+        //    and its scroll gestures (#1656, #1519) — controls the
         //    drawer's entries draw.
         let handDrawn: Set<SettingKey> = [
             .shortcuts(.layers),
@@ -63,6 +63,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.scrollPan),
             .shortcuts(.scrollLongSwipes),
             .shortcuts(.scrollStepDistance),
+            .shortcuts(.scrollSpaceStep),
             .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse),
         ]

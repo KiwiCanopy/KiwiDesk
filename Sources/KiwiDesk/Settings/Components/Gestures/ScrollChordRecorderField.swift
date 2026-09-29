@@ -6,9 +6,11 @@ import SwiftUI
 /// recorder's field and inline ×, recording modifiers alone — the
 /// largest set held commits when every key is released. A refused
 /// chord shows its reason under the field, is announced, and
-/// writes nothing; × is off. Needs the section's
-/// `RecorderCoordinator`, and never reads the layer name: a
-/// gesture chord belongs to no layer.
+/// writes nothing; × is off. The other gesture's chord offers Go
+/// to, which reveals that gesture's row (#1519 ruling;
+/// `+Refusal`). Needs the section's `RecorderCoordinator`, and
+/// never reads the layer name: a gesture chord belongs to no
+/// layer.
 struct ScrollChordRecorderField: View {
     /// VoiceOver's name for the field.
     let name: String
@@ -17,6 +19,9 @@ struct ScrollChordRecorderField: View {
     /// and that gesture, which the refusal names.
     let other: ScrollChord
     let otherGesture: ScrollGestures.Consumer
+    /// Reveals a gesture's recorder, handed `otherGesture`; the
+    /// refusal keeps its caption, so the link keeps the focus.
+    var reveal: ((ScrollGestures.Consumer) -> Void)?
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
     @State private var fieldID = UUID()
@@ -35,10 +40,7 @@ struct ScrollChordRecorderField: View {
                 clearButton
             }
             if let refusal {
-                Text(Self.caption(refusal))
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
+                refusalCaption(refusal)
             }
         }
         .onChange(of: coordinator.generation) { _, _ in
@@ -117,29 +119,6 @@ struct ScrollChordRecorderField: View {
                 + "⌘ Command, then let go — the keys you held "
                 + "together are recorded."
         )
-    }
-
-    /// The sentence under the field for a refused chord.
-    @MainActor static func caption(_ refusal: ScrollChordRefusal) -> String {
-        switch refusal {
-        case .singleModifier:
-            return L(
-                "shortcuts.gestures.scroll.refused_single",
-                "Hold two or more keys. With one key, scrolling is "
-                    + "already taken: ⌃ zooms the screen in macOS, "
-                    + "and ⇧, ⌥ or ⌘ do something in many apps."
-            )
-        case .otherGesture(.step):
-            return L(
-                "shortcuts.gestures.scroll.refused_step",
-                "These keys are reserved for stepping between Spaces."
-            )
-        case .otherGesture(.pan):
-            return L(
-                "shortcuts.gestures.scroll.refused_pan",
-                "These keys already move focus window by window."
-            )
-        }
     }
 
     // MARK: - Recording lifecycle

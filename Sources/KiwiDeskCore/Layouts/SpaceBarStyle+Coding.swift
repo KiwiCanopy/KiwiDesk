@@ -8,7 +8,7 @@ extension SpaceBarStyle {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case edge
-        case glyphCap = "glyph_cap"
+        case glyphSpan = "glyph_span"
         case glyphGap = "glyph_gap"
         case inactiveContent = "inactive_content"
         case itemLabel = "item_label"
@@ -38,11 +38,11 @@ extension SpaceBarStyle {
                 AppBarEdge.self,
                 forKey: .edge
             ) ?? defaults.edge
-        glyphCap =
+        glyphSpan =
             try container.decodeIfPresent(
                 Int.self,
-                forKey: .glyphCap
-            ) ?? defaults.glyphCap
+                forKey: .glyphSpan
+            ) ?? defaults.glyphSpan
         glyphGap = Self.clampGlyphGap(
             try container.decodeIfPresent(
                 CGFloat.self,

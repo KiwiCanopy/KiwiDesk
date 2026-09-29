@@ -22,11 +22,12 @@ extension KiwiCore {
                 guard let space = state.workspaces[id] else {
                     return nil
                 }
-                let (apps, overflow, focusHidden) = spaceBarApps(
+                let content = spaceBarApps(
                     in: space,
-                    style: style
+                    style: style,
+                    held: spaceBars.heldStrip(of: id)
                 )
-                if style.hideEmpty, apps.isEmpty,
+                if style.hideEmpty, content.apps.isEmpty,
                     id != current
                 {
                     return nil
@@ -38,17 +39,11 @@ extension KiwiCore {
                         mode: space.mode,
                         label: style.itemLabel
                     ),
-                    apps: apps,
+                    apps: content.apps,
                     active: id == current,
-                    overflow: overflow,
-                    // Only the active space carries the system
-                    // focus, and on a second screen `current` is
-                    // not it (#1214): an inactive space's
-                    // `focused` is just its own last-focused
-                    // window, so tinting the `+n` off it marks a
-                    // focus no glyph on that bar wears.
-                    focusInOverflow: id == activeSpace?.id
-                        && focusHidden
+                    before: content.before,
+                    after: content.after,
+                    drawn: content.drawn
                 )
                 item.held = state.heldSpaces[id].map {
                     SpaceBarItemView.Held(

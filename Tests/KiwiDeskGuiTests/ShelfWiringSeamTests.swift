@@ -138,7 +138,7 @@ struct ShelfWiringSeamTests {
     @Test("Bar items gate hover on owning the pointer")
     func itemsGateHover() throws {
         for file in [
-            "Bar/SpaceBarItemView.swift", "Bar/AppBarItemView.swift",
+            "Bar/SpaceBarItemView+Hover.swift", "Bar/AppBarItemView.swift",
         ] {
             let body = Self.squash(
                 try Self.body(of: "func refreshHover(", in: file)
@@ -188,5 +188,26 @@ struct ShelfWiringSeamTests {
                 Comment(rawValue: file)
             )
         }
+    }
+
+    /// A strip held under the pointer re-centres through the one
+    /// bar refresh when the hold ends, deferred out of the render
+    /// that ended it (#1528 item 21); the hold suite drives the
+    /// manager, which cannot see this wiring.
+    @Test("a released strip hold refreshes the bars")
+    func stripReleaseRefreshesTheBars() throws {
+        let wiring = Self.squash(
+            try Self.body(
+                of: "func wireSpaceBarGlyphs(",
+                in: "App/KiwiCore+SpaceBarClick.swift"
+            )
+        )
+        #expect(
+            wiring.contains(
+                "spaceBars.onStripReleased={[weakself]in"
+                    + "self?.deferred.schedule(.stripRecentre,after:.zero){"
+                    + "[weakself]inself?.updateBars()}}"
+            )
+        )
     }
 }

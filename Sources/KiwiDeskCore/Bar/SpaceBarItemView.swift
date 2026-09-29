@@ -40,13 +40,19 @@ final class SpaceBarItemView: NSView {
         return tf
     }()
     var appViews: [NSView] = []
+    /// Glyphs a strip walk carries under a disc, fading, until the
+    /// walk lands (#1528 item 21).
+    var leavingViews: [NSView] = []
     var badgeViews: [NSTextField] = []
     var stickyBadgeViews: [StateBadgeView] = []
     var floatingBadgeViews: [StateBadgeView] = []
     let overflowBadge = SpaceBarItemView.makeBadge()
-    /// Click targets over the glyphs and `+n` (#1528).
+    /// The leading `+n` disc, before the glyphs (#1528 item 17).
+    let leadingBadge = SpaceBarItemView.makeBadge()
+    /// Click targets over the glyphs and each `+n` (#1528).
     var glyphTargets: [SpaceBarGlyphTarget] = []
     var overflowTarget: SpaceBarGlyphTarget?
+    var leadingTarget: SpaceBarGlyphTarget?
     /// The target under the pointer, drawn like the focused glyph
     /// so a click target reads as one (#1528).
     var hoveredTarget: SpaceBarGlyphTarget?
@@ -75,16 +81,34 @@ final class SpaceBarItemView: NSView {
         tinted: true
     )
     private(set) var apps: [App] = []
-    private(set) var overflow = 0
-    /// The windows behind `+n`, which its menu lists (#1528).
-    private(set) var overflowWindows: [WindowID] = []
-    /// True if focused window is in overflow (#376).
-    private(set) var focusInOverflow = false
+    /// The `+n` discs before and after the glyphs (#1528, #376).
+    private(set) var before = SpaceBarStrip.Disc.none
+    private(set) var after = SpaceBarStrip.Disc.none
+    var overflow: Int { after.windows.count }
+    var overflowWindows: [WindowID] { after.windows }
+    var focusInOverflow: Bool { after.holdsFocus }
+    var overflowBefore: [WindowID] { before.windows }
+    var focusBefore: Bool { before.holdsFocus }
+    /// The groups drawn (#1528 item 21).
+    private(set) var drawn: SpaceBarStrip.Drawn?
+    /// The walk the next layout plays, when the strip moved under
+    /// a Space it kept (#1528 item 21).
+    var pendingWalk: SpaceBarStrip.Walk?
+    /// Whether the pointer rests on the chip — the hold's
+    /// reading, the active chip's too (#1528 item 21).
+    var pointerInside = false
+    /// Reports the pointer entering or leaving a Space chip with
+    /// the strip it drew; the manager holds that strip.
+    var onPointerInside: (SpaceID, SpaceBarStrip.Drawn?, Bool) -> Void = {
+        _,
+        _,
+        _ in
+    }
     private(set) var held: Held?
     /// What this item draws in place of its glyphs (#1683).
     private(set) var collapse: Collapse?
     private(set) var isActive = false
-    private(set) var isHovered = false
+    var isHovered = false
     /// Drag hover state (#372).
     var isDragHovered = false
     /// Spring sweep ring (#372).
@@ -109,6 +133,7 @@ final class SpaceBarItemView: NSView {
         addSubview(identifierLabel)
         addSubview(identifierDivider)
         addSubview(overflowBadge)
+        addSubview(leadingBadge)
         addSubview(heldBadge)
         addSubview(accentClip)
         accentClip.addSubview(accent)
@@ -144,69 +169,6 @@ final class SpaceBarItemView: NSView {
         onSelect(space)
     }
 
-    override func updateTrackingAreas() {
-        super.updateTrackingAreas()
-        trackingAreas.forEach(removeTrackingArea)
-        addTrackingArea(
-            NSTrackingArea(
-                rect: bounds,
-                options: [
-                    .mouseEnteredAndExited, .mouseMoved, .activeAlways,
-                ],
-                owner: self
-            )
-        )
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        refreshHover(event)
-    }
-
-    override func mouseMoved(with event: NSEvent) {
-        refreshHover(event)
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        guard isHovered || hoveredTarget != nil else { return }
-        isHovered = false
-        hoveredTarget = nil
-        restyle()
-    }
-
-    /// Hovered only while the pointer is on THIS view — a count
-    /// drawn over the faded end takes the pointer there (#1517);
-    /// the hover fill promises a click, and a layer item has none.
-    private func refreshHover(_ event: NSEvent) {
-        applyHover(
-            BarHoverHit.owns(self, event),
-            target: targetsForHover.first {
-                BarHoverHit.owns($0, event)
-            }
-        )
-    }
-
-    /// Re-reads the hover from where the pointer rests (#1665) —
-    /// the shelf's placement moves a chip without an exit event.
-    func syncHoverToPointer() {
-        applyHover(
-            BarHoverHit.ownsPointer(self),
-            target: targetsForHover.first(where: BarHoverHit.ownsPointer)
-        )
-    }
-
-    private func applyHover(
-        _ ownsPointer: Bool,
-        target: SpaceBarGlyphTarget?
-    ) {
-        let hovered = !isActive && space != nil && ownsPointer
-        guard hovered != isHovered || target !== hoveredTarget else {
-            return
-        }
-        isHovered = hovered
-        hoveredTarget = target
-        restyle()
-    }
-
     func configure(
         identity: Identity,
         spaceGlyph: SpaceGlyph,
@@ -215,32 +177,51 @@ final class SpaceBarItemView: NSView {
         horizontal: Bool,
         style: SpaceBarLook,
         stateMarkColors: StateMarkColors,
-        overflow: Int = 0,
-        overflowWindows: [WindowID] = [],
-        focusInOverflow: Bool = false,
+        before: SpaceBarStrip.Disc = .none,
+        after: SpaceBarStrip.Disc = .none,
+        drawn: SpaceBarStrip.Drawn? = nil,
         held: Held? = nil,
         collapse: Collapse? = nil
     ) {
+        let keepsSpace =
+            self.identity == identity && self.collapse == nil
+            && collapse == nil
+        let walk =
+            keepsSpace
+            ? SpaceBarStrip.Walk.between(
+                self.drawn,
+                leadingDisc: !self.before.windows.isEmpty,
+                drawn,
+                leadingDisc: !before.windows.isEmpty
+            ) : nil
+        // A render repeating the strip keeps what the last one
+        // started — a walk not yet laid out (a menu pick lays out
+        // late) and the glyphs still fading out (#1528 item 21).
+        let repeats = keepsSpace && walk == nil && self.drawn == drawn
+        if !repeats { pendingWalk = walk }
         if self.identity != identity {
             cancelSpringSweep()
             isDragHovered = false
             // A pointer resting on the Space this slot drew must
             // not leave its hover fill under the layer glyph.
             isHovered = false
+            // Nor its strip hold: the slot no longer draws that
+            // Space, so no exit would ever release it (#1528).
+            setPointerInside(false)
         }
         self.identity = identity
         self.spaceGlyph = spaceGlyph
         self.apps = apps
-        self.overflow = overflow
-        self.overflowWindows = overflowWindows
-        self.focusInOverflow = focusInOverflow
+        self.before = before
+        self.after = after
+        self.drawn = drawn
         self.held = held
         self.collapse = collapse
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
         self.stateMarkColors = stateMarkColors
-        syncAppViews()
+        syncAppViews(startsWalk: walk != nil, keepsLeaving: repeats)
         syncTargets()
         restyle()
         needsLayout = true
@@ -249,24 +230,35 @@ final class SpaceBarItemView: NSView {
         setAccessibilityLabel(axLabel)
     }
 
-    private func syncAppViews() {
-        appViews.forEach { $0.removeFromSuperview() }
+    private func syncAppViews(startsWalk: Bool, keepsLeaving: Bool) {
+        // A walk keeps the glyphs it carries off, so they fade
+        // under their disc rather than vanish (#1528 item 21).
+        let leaving =
+            startsWalk ? Self.leaving(appViews, walk: pendingWalk) : []
+        if !keepsLeaving {
+            leavingViews.forEach { $0.removeFromSuperview() }
+            leavingViews = leaving
+        }
+        appViews.filter { view in
+            !leaving.contains { $0 === view }
+        }.forEach { $0.removeFromSuperview() }
         badgeViews.forEach { $0.removeFromSuperview() }
         stickyBadgeViews.forEach { $0.removeFromSuperview() }
         floatingBadgeViews.forEach { $0.removeFromSuperview() }
         appViews = apps.map { app in
+            // Beneath the discs, which a walking glyph passes under.
             if app.glyph != nil {
                 let tf = NSTextField(labelWithString: "")
                 tf.alignment = .center
                 tf.setAccessibilityElement(false)
-                addSubview(tf)
+                addSubview(tf, positioned: .below, relativeTo: overflowBadge)
                 return tf
             }
             let iv = NSImageView()
             iv.image = app.icon
             iv.imageScaling = .scaleProportionallyUpOrDown
             iv.setAccessibilityElement(false)
-            addSubview(iv)
+            addSubview(iv, positioned: .below, relativeTo: overflowBadge)
             return iv
         }
         badgeViews = apps.map { _ in

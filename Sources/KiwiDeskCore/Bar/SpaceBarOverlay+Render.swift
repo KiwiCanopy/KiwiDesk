@@ -146,14 +146,17 @@ extension SpaceBarOverlay {
                 horizontal: horizontal,
                 style: style,
                 stateMarkColors: stateMarkColors,
-                overflow: item.overflow,
-                overflowWindows: item.overflowWindows,
-                focusInOverflow: item.focusInOverflow,
+                before: item.before,
+                after: item.after,
+                drawn: item.drawn,
                 held: item.held,
                 collapse: item.collapse
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
+            }
+            view.onPointerInside = { [weak self] space, drawn, inside in
+                self?.onStripHover(space, drawn, inside)
             }
             let place = Self.runPlace(
                 index: index,

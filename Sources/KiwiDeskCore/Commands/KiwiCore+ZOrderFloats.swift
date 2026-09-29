@@ -31,10 +31,7 @@ extension KiwiCore {
     func raiseFloatsAndSticky(
         thenFocus focused: WindowID?
     ) {
-        let pairs = floatLayerTargets().compactMap {
-            id -> (WindowID, AXUIElement)? in
-            eventLoop.element(for: id).map { (id, $0) }
-        }
+        let pairs = floatRaisePairs()
         guard !pairs.isEmpty else {
             if let focused {
                 focusWindow(
@@ -70,13 +67,33 @@ extension KiwiCore {
             guard let self,
                 generation == self.zOrderRaiseGeneration.value
             else { return }
-            if let focused, focused == self.activeSpace?.focused {
+            // The anchor, not `activeSpace?.focused`: a sticky
+            // traveler homed elsewhere is never that slot (#1727).
+            if let focused, focused == self.focusedWindowID {
                 self.focusWindow(
                     focused,
                     refocusRetile: false,
                     warp: false
                 )
             }
+        }
+    }
+
+    /// The #412 raise a Space LANDING owes once its own retile
+    /// placed the Space: the un-stashed floats come back above
+    /// the tiled plane and focus returns to `id`. A no-op when no
+    /// float target has an element — the caller has already
+    /// focused `id`, so the direct hand-off would focus it twice.
+    func raiseLandingFloats(thenFocus id: WindowID) {
+        guard !floatRaisePairs().isEmpty else { return }
+        raiseFloatsAndSticky(thenFocus: id)
+    }
+
+    /// The float-layer targets the raise can reach — those with an
+    /// element — read by the raise and by the landing's gate alike.
+    private func floatRaisePairs() -> [(WindowID, AXUIElement)] {
+        floatLayerTargets().compactMap { id in
+            eventLoop.element(for: id).map { (id, $0) }
         }
     }
 
@@ -99,7 +116,8 @@ extension KiwiCore {
     /// ends up over the float. The slot self-cancels on reschedule,
     /// so only the window focus finally settles on raises the floats,
     /// leaving exactly the focused tile above them. The body re-reads
-    /// `activeSpace?.focused` so a stale target no-ops.
+    /// the focus anchor (`focusedWindowID`) so a stale target
+    /// no-ops and a tiled-sticky traveler still counts (#1727).
     func raiseFloatsAbove(afterFocusing id: WindowID) {
         // Focusing a float returns without rescheduling, so a
         // `.floatRaise` still pending from a tile focus <50ms earlier
@@ -113,7 +131,7 @@ extension KiwiCore {
         else { return }
         deferred.schedule(.floatRaise, after: .milliseconds(50)) {
             [weak self] in
-            guard let self, id == self.activeSpace?.focused
+            guard let self, id == self.focusedWindowID
             else { return }
             self.raiseFloatsAndSticky(thenFocus: id)
         }

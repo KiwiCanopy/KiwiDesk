@@ -86,4 +86,76 @@ extension ConfigMigration {
             Range($0.range(at: 1), in: text).map { String(text[$0]) }
         }
     }
+
+    /// The textual rename of `retired` to `target`, standing down
+    /// where `target` is already present, the one case it cannot
+    /// do correctly (code-reviewer 2026-08-27): a textual rename
+    /// cannot see a sibling, and a node carrying both spellings
+    /// would become one key twice. The envelope's re-parse net
+    /// cannot catch that — `JSONSerialization` keeps the FIRST
+    /// occurrence and `.sortedKeys` puts the new key first, so the
+    /// duplicate decodes right and compares equal while Foundation
+    /// and `jq` read different values out of one file (measured,
+    /// both ways). The tree walk handles it.
+    static func surgicallyRenamingKey(
+        _ retired: String,
+        to target: String,
+        in text: String
+    ) -> Data? {
+        guard
+            text.range(
+                of: "\"\(target)\"\\s*:",
+                options: .regularExpression
+            ) == nil
+        else { return nil }
+        let out = text.replacingOccurrences(
+            of: "\"\(retired)\"(\\s*:)",
+            with: "\"\(target)\"$1",
+            options: .regularExpression
+        )
+        return out == text ? nil : out.data(using: .utf8)
+    }
+
+    /// The tree walk renaming `retired` to `target` at any depth;
+    /// a node already carrying `target` keeps it.
+    static func renamingKey(
+        _ retired: String,
+        to target: String,
+        in node: Any
+    ) -> (Any, Bool) {
+        if let dict = node as? [String: Any] {
+            var out: [String: Any] = [:]
+            var changed = false
+            for (key, value) in dict {
+                let (child, childChanged) = renamingKey(
+                    retired,
+                    to: target,
+                    in: value
+                )
+                if key == retired {
+                    if dict[target] == nil { out[target] = child }
+                    changed = true
+                    continue
+                }
+                out[key] = child
+                changed = changed || childChanged
+            }
+            return (out, changed)
+        }
+        if let array = node as? [Any] {
+            var out: [Any] = []
+            var changed = false
+            for value in array {
+                let (child, childChanged) = renamingKey(
+                    retired,
+                    to: target,
+                    in: value
+                )
+                out.append(child)
+                changed = changed || childChanged
+            }
+            return (out, changed)
+        }
+        return (node, false)
+    }
 }

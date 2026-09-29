@@ -43,6 +43,16 @@ enum ScrollGestureWords {
         }
     }
 
+    /// The row a gesture's chord is stored in.
+    static func field(
+        of consumer: ScrollGestures.Consumer
+    ) -> ScrollGestureField {
+        switch consumer {
+        case .pan: .pan
+        case .step: .spaceStep
+        }
+    }
+
     static var pan: String {
         L("shortcuts.gestures.scroll.pan", "Scroll through windows")
     }

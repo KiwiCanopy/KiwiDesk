@@ -248,12 +248,17 @@ restated `20...80` satisfies on the day it is written.
   than compared* carries why.
 - **A gesture picture is not a schematic.** A Mouse & trackpad
   entry on the Shortcuts & Gestures page teaches a gesture rather
-  than a rest state, so its picture may move — only while hovered,
-  resting on its key frame otherwise and always under Reduce
-  Motion, never a bundled clip, never autoplay, with the gate named
-  per call (`ReduceMotionGateTests`). Whether it actually moves is
-  a device check, since no headless suite sees an animation run
-  (#1726; `docs/design-decisions.md` ▸ Shortcuts carries why).
+  than a rest state, so its picture may move: while hovered, and
+  the card's first entry once when the user's own click opens the
+  card (owner ruling 2026-09-29) — at most once per visit, never
+  on a search, Go to or diff-jump expansion, never looped.
+  Otherwise it rests on its key frame, and always under Reduce
+  Motion, never a bundled clip, with the gate named per call
+  (`ReduceMotionGateTests`). `GestureAutoplayWiringTests` holds
+  the one entry that plays and the click as its only trigger.
+  Whether it actually moves is a device check, since no headless
+  suite sees an animation run (#1726; `docs/design-decisions.md`
+  ▸ Shortcuts carries why).
 - **A thumbnail drops a fact it has no room to render — by not
   drawing it, never by shrinking the frame around it**, and by
   skipping the drawing rather than leaving it to the frame's

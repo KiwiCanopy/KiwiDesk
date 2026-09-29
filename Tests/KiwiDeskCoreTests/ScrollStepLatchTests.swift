@@ -19,7 +19,8 @@ struct ScrollStepLatchTests {
             input: input,
             delta: CGVector(dx: dx, dy: dy),
             momentum: false,
-            location: .zero
+            location: .zero,
+            time: 0
         )
     }
 

@@ -77,8 +77,8 @@ extension SpaceBarCard {
                     .map { ($0.1, $0.0) },
                 help: itemLabelHelp
             )
-        case .spaceBarGlyphCap:
-            glyphCapRow
+        case .spaceBarGlyphSpan:
+            glyphSpanRow
         case .spaceBarGlyphGap:
             PtSlider(
                 label: L("space_bar.glyph_gap", "Glyph gap"),

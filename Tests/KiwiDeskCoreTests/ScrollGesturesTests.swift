@@ -61,7 +61,8 @@ struct ScrollGesturesTests {
             input: .trackpad,
             delta: CGVector(dx: dx, dy: dy),
             momentum: false,
-            location: CGPoint(x: 7, y: 9)
+            location: CGPoint(x: 7, y: 9),
+            time: 0
         )
     }
 

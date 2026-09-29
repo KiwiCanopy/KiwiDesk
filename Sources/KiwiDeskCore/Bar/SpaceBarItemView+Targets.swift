@@ -1,8 +1,8 @@
 import AppKit
 
 /// The item's click targets (#1528): one per app glyph and one on
-/// the `+n` badge. A click elsewhere on the chip keeps the Space
-/// switch in `mouseDown`.
+/// each side's `+n` disc. A click elsewhere on the chip keeps the
+/// Space switch in `mouseDown`.
 extension SpaceBarItemView {
     /// Rebuilt with the glyphs, but a target whose windows did not
     /// change is kept, so a render under a resting pointer does not
@@ -13,6 +13,8 @@ extension SpaceBarItemView {
             glyphTargets = []
             overflowTarget?.removeFromSuperview()
             overflowTarget = nil
+            leadingTarget?.removeFromSuperview()
+            leadingTarget = nil
             return
         }
         let kept =
@@ -32,33 +34,52 @@ extension SpaceBarItemView {
             }
         }
         glyphTargets.forEach { $0.actions = glyphActions }
-        syncOverflowTarget(space: space)
+        let shown = collapse == nil
+        // Each disc lists its windows nearest the glyphs first, so
+        // the leading one reads its side of the row backwards.
+        leadingTarget = discTarget(
+            leadingTarget,
+            space: space,
+            windows: shown ? overflowBefore.reversed() : [],
+            label: L(
+                "space_bar.overflow.before.ax",
+                "Earlier windows not shown: %1$d",
+                overflowBefore.count
+            )
+        )
+        overflowTarget = discTarget(
+            overflowTarget,
+            space: space,
+            windows: shown ? overflowWindows : [],
+            label: L(
+                "space_bar.overflow.after.ax",
+                "Later windows not shown: %1$d",
+                overflowWindows.count
+            )
+        )
     }
 
-    /// The `+n` target, kept like the glyphs' while its windows
-    /// hold, so a render does not re-insert it (#1315).
-    private func syncOverflowTarget(space: SpaceID) {
-        let wanted =
-            collapse == nil && !overflowWindows.isEmpty
-            ? overflowWindows : []
-        let label = L(
-            "space_bar.overflow.ax",
-            "Windows not shown: %1$d",
-            wanted.count
-        )
-        if let kept = overflowTarget, kept.space == space,
-            kept.members == wanted,
+    /// A `+n` disc's target, kept like the glyphs' while its
+    /// windows hold, so a render does not re-insert it (#1315);
+    /// nil when the side hides nothing.
+    private func discTarget(
+        _ current: SpaceBarGlyphTarget?,
+        space: SpaceID,
+        windows: [WindowID],
+        label: String
+    ) -> SpaceBarGlyphTarget? {
+        if let kept = current, kept.space == space,
+            kept.members == windows,
             kept.accessibilityLabel() == label
         {
             kept.actions = glyphActions
-            return
+            return kept
         }
-        overflowTarget?.removeFromSuperview()
-        overflowTarget = nil
-        guard !wanted.isEmpty else { return }
-        overflowTarget = makeTarget(
+        current?.removeFromSuperview()
+        guard !windows.isEmpty else { return nil }
+        return makeTarget(
             space: space,
-            windows: wanted,
+            windows: windows,
             kind: .overflow,
             label: label
         )
@@ -66,7 +87,8 @@ extension SpaceBarItemView {
 
     /// Every live target, the hover reading's candidates.
     var targetsForHover: [SpaceBarGlyphTarget] {
-        glyphTargets + [overflowTarget].compactMap { $0 }
+        [leadingTarget].compactMap { $0 } + glyphTargets
+            + [overflowTarget].compactMap { $0 }
     }
 
     /// Whether the glyph at `index` is the hovered target.

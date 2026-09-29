@@ -42,7 +42,7 @@ extension SpaceBarOverlay {
             )
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
-                overflow: item.overflow,
+                discs: item.discs,
                 contentDepth: content,
                 glyphGap: look.resolvedGlyphGap,
                 ends: SpaceBarItemView.ends(

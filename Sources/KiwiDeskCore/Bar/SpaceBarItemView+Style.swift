@@ -66,6 +66,13 @@ extension SpaceBarItemView {
             appFocused: focusInOverflow,
             lit: overflowTarget.map { $0 === hoveredTarget } ?? false
         )
+        leadingBadge.isHidden = collapse != nil || overflowBefore.isEmpty
+        leadingBadge.stringValue = "+\(overflowBefore.count)"
+        applyBadge(
+            leadingBadge,
+            appFocused: focusBefore,
+            lit: leadingTarget.map { $0 === hoveredTarget } ?? false
+        )
         styleStateBadges()
     }
 

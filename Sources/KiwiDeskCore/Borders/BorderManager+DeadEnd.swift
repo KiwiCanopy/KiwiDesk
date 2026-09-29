@@ -11,6 +11,9 @@ extension BorderManager {
         cornerStyle: BorderStyle.CornerStyle,
         reduceMotion: Bool
     ) {
+        #if DEBUG
+            deadEndProbe?(window, direction)
+        #endif
         guard privateRuntimeStarted, let screen = screen(for: frame)
         else { return }
 

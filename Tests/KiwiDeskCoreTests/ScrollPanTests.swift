@@ -50,7 +50,8 @@ struct ScrollPanTests {
         dx: Double = 0,
         dy: Double = 0,
         input: ScrollGestureEvent.Input = .trackpad,
-        momentum: Bool = false
+        momentum: Bool = false,
+        time: Double = 0
     ) -> ScrollGestureEvent {
         ScrollGestureEvent(
             chord: Self.pan,
@@ -58,7 +59,8 @@ struct ScrollPanTests {
             input: input,
             delta: CGVector(dx: dx, dy: dy),
             momentum: momentum,
-            location: .zero
+            location: .zero,
+            time: time
         )
     }
 
@@ -139,10 +141,30 @@ struct ScrollPanTests {
             session: session
         )
         core.handleScrollPan(
-            event(.changed, dy: -40, input: .wheel),
+            event(.changed, dy: -40, input: .wheel, time: 1),
             session: session
         )
         #expect(focused(core) == WindowID(5))
+    }
+
+    /// The meter's latch reaches ⌃⌥ too (#1519 ruling): a spin
+    /// moves one window, however long it runs.
+    @Test("a spinning wheel moves one window")
+    func spinMovesOne() {
+        let (core, _, session) = makeCore("scrolling", focus: WindowID(1))
+        core.handleScrollPan(event(.began, input: .wheel), session: session)
+        for tick in 0..<30 {
+            core.handleScrollPan(
+                event(
+                    .changed,
+                    dy: -10,
+                    input: .wheel,
+                    time: Double(tick) * 0.01
+                ),
+                session: session
+            )
+        }
+        #expect(focused(core) == WindowID(2))
     }
 
     @Test("a Monocle Space steps once per gesture")

@@ -85,7 +85,7 @@ struct AppSymbolNounTests {
         let rows = Self.glyphRows(english)
         // The derivation must find the rows #1690 swept, or a
         // reworded English empties the comparison silently.
-        #expect(rows.contains("space_bar.glyph_cap"))
+        #expect(rows.contains("space_bar.glyph_span"))
         #expect(rows.contains("kiwishelf.icon_source.label"))
         #expect(rows.count > 2)
         let locales = try Self.catalogNames()

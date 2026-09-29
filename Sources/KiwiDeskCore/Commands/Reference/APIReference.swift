@@ -142,7 +142,7 @@ public enum APIReference {
             "set_app_bar_group_adjacent_windows",
         ],
         "space_bar": [
-            "set_enabled", "set_edge", "set_glyph_cap", "set_glyph_gap",
+            "set_enabled", "set_edge", "set_glyph_span", "set_glyph_gap",
             "set_inactive_content", "set_item_label",
             "set_active_indicator",
             "set_active_dim_factor", "set_show_front_app",
