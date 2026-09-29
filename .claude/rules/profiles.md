@@ -1150,6 +1150,18 @@ which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
 profile never moves `currentName` (#1249).
 
+**The look checklist is that door's sibling, with the same
+obligations (#1752).** "Look applies to" reaches every profile it
+names, so a Save writes each switch through the one
+`KiwiCore.saveLookReach`: only a switch that changed is written,
+a profile going own freezes the look it wears into its file, the
+writes are non-adopting, and it runs before any `gui.json` write
+of the same Save (`LookReachTests`). A follower's look itself is
+the shared one, so a write of it lands in `gui.json` through the
+one `recordLookWrite` door (`SharedLookWriteTests`), and a
+reader of a stored profile's settings for use takes
+`resolvedSettings(of:)` rather than `profile.settings`.
+
 **The tour's shelf paint is a further write, and it is not Keep
 (#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
 to live AND the live profile's file; the file half reads the

@@ -129,6 +129,18 @@ extension KiwiCore {
         recordLookWrite(of: saved)
     }
 
+    /// The shared look's first value when a profile opts into it
+    /// before any crossing gave one: that profile's own look
+    /// (`saveLookReach`). A failed write leaves none.
+    func seedSharedLook(from settings: TilingSettings) {
+        sharedLookLedger.base = LookBody(of: settings)
+        guard persistSharedLook() else {
+            sharedLookLedger.base = nil
+            return
+        }
+        sharedLookLedger.owed = false
+    }
+
     /// The #634 reset, which discards `gui.json` itself.
     func resetSharedLook() {
         sharedLookLedger = SharedLookLedger()
