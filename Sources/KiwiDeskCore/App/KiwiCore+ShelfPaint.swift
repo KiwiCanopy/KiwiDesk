@@ -117,6 +117,7 @@ extension KiwiCore {
             var profile = try profiles.read(name: name)
             paint(&profile.settings)
             try profiles.write(profile)
+            recordLookWrite(of: profile)
             refreshConfigIssues()
         } catch {
             onLog("tour look: profile \(name) not written: \(error)")

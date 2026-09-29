@@ -185,7 +185,8 @@ extension KiwiCore {
                 liveSpaces.contains($0) ? $0 : nil
             },
             spaceModes: modes,
-            settings: tiler.settings
+            settings: tiler.settings,
+            look: liveLookReference
         )
     }
 
@@ -210,9 +211,9 @@ extension KiwiCore {
     ) throws -> [String] {
         guard var existing = try? profiles.read(name: name)
         else {
-            let released = try saveProfile(
-                buildProfile(name: name, modes: modes)
-            )
+            let built = buildProfile(name: name, modes: modes)
+            let released = try saveProfile(built)
+            recordLookWrite(of: built)
             refreshConfigIssues()
             if modes == nil { profiles.onCapturedLive(name) }
             return released
@@ -240,6 +241,7 @@ extension KiwiCore {
         existing.settings = fresh.settings
         existing.savedAt = .now
         let released = try saveProfile(existing)
+        recordLookWrite(of: existing)
         // Re-saving repairs an unreadable profile — clear its
         // issue without waiting for a config reload (#68).
         refreshConfigIssues()

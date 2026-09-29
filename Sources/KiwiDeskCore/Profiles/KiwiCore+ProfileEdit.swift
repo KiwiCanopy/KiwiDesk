@@ -80,6 +80,14 @@ extension KiwiCore {
         if copy.monitorCount > 0 {
             for set in copy.monitorSets { copy.release(set.monitors) }
         }
+        // A copy touches no global file, so a follower's copy whose
+        // look the draft changed keeps that look as its own rather
+        // than writing the shared one (#1752).
+        if copy.look == nil, let shared = sharedLook,
+            !shared.isWorn(by: copy.settings)
+        {
+            copy.look = .own
+        }
         try profiles.write(copy)
         return copy.name
     }

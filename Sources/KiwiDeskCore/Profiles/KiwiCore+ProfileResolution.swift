@@ -220,7 +220,7 @@ extension KiwiCore {
         recordLivePartitioning()
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
-        tiler.settings = composed.settings
+        tiler.settings = wearingSharedLook(composed.settings)
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
             clearSessionRatios { $0 = SessionRatios() }

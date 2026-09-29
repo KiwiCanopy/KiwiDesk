@@ -15,7 +15,7 @@ extension KiwiCore {
         _ config: inout GuiConfig,
         from profile: Profile
     ) {
-        config.settings = profile.settings
+        config.settings = resolvedSettings(of: profile)
         config.spaceModes = profile.spaceModes
         config.mainSpaces = Set(profile.mainSpaces)
         let live = liveFingerprints

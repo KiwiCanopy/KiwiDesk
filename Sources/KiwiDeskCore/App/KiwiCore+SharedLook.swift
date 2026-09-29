@@ -29,12 +29,48 @@ extension KiwiCore {
     /// over (`ShelfLook.admitted`). The one reading of a stored
     /// profile's look; a Lua-owned config reads the profile alone.
     public func resolvedSettings(of profile: Profile) -> TilingSettings {
-        guard profile.look == nil, let base = sharedLook else {
-            return profile.settings
+        profile.look == .own
+            ? profile.settings : wearingSharedLook(profile.settings)
+    }
+
+    /// `settings` with the shared look painted over — what a
+    /// follower and a built-in layout wear, a built-in having no
+    /// file to be own in (#1752).
+    func wearingSharedLook(_ settings: TilingSettings) -> TilingSettings {
+        guard let base = sharedLook else { return settings }
+        var worn = settings
+        base.named("").admitted.apply(to: &worn)
+        return worn
+    }
+
+    /// The live profile's switch, which a Keep or Save as of it
+    /// copies (#1752 ruling): nil for a built-in, which follows.
+    var liveLookReference: LookReference? {
+        profiles.currentName.flatMap { try? profiles.read(name: $0) }?
+            .look
+    }
+
+    /// The one door a write of a FOLLOWER's settings takes: its
+    /// look is the shared one, so that is where the write lands —
+    /// otherwise the next apply would paint the old shared look
+    /// over it. A Keep, a Save as, a stored-profile Settings Save
+    /// (`commitSharedLook`) and the tour's paint reach it; an own
+    /// profile's write is its own, and before the crossing there is
+    /// no shared look to write — the crossing alone seeds it
+    /// (`SharedLookWriteTests`).
+    func recordLookWrite(of profile: Profile) {
+        guard profile.look == nil, sharedLookLedger.base != nil,
+            isGuiManaged
+        else { return }
+        let written = LookBody(of: profile.settings)
+        guard written != sharedLookLedger.base else { return }
+        let before = sharedLookLedger
+        sharedLookLedger.base = written
+        sharedLookLedger.owed = false
+        guard persistSharedLook() else {
+            sharedLookLedger = before
+            return
         }
-        var settings = profile.settings
-        base.named("").admitted.apply(to: &settings)
-        return settings
     }
 
     /// Reads `gui.json` at a config load, beside the #1741
@@ -82,6 +118,15 @@ extension KiwiCore {
                 onLog("shared look: \(name) not rewritten: \(error)")
             }
         }
+    }
+
+    /// A stored-profile Settings Save's look half (#1752): the
+    /// edited profile follows, so the draft's look is the shared
+    /// one. Its own step, beside `overwriteProfile`, which writes
+    /// the profile file alone.
+    public func commitSharedLook(ofProfile name: String) {
+        guard let saved = try? profiles.read(name: name) else { return }
+        recordLookWrite(of: saved)
     }
 
     /// The #634 reset, which discards `gui.json` itself.
