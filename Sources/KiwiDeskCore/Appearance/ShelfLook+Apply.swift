@@ -20,7 +20,8 @@ extension ShelfLook {
     }
 
     /// True when a click would change nothing — computed, never
-    /// stored (the palette rule, #757). So a look saved from glass
+    /// stored (the palette rule, #757). Judges an ADMITTED look
+    /// (`admitted`), whose colours are complete. So a look saved from glass
     /// leaves that disagree, or under a per-layout indicator, reads
     /// unapplied until clicked, since the click would converge them.
     public func isApplied(to settings: TilingSettings) -> Bool {

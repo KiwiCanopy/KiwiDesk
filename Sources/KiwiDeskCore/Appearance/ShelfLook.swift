@@ -35,13 +35,14 @@ public struct ShelfLook: Sendable, Equatable, Codable {
 }
 
 extension ShelfLook {
-    /// This look as every reader takes it — a file's, a backup's,
-    /// an import (#1752): styling keys outside `LookKeys` and
-    /// colours outside `ColorPaletteKeys` dropped, then the colours
-    /// completed over the shipped ones, so a colour path added
-    /// since the look was saved never leaves an earlier colour
-    /// behind when it is applied (`LookStoreTests`). A reader of a
-    /// stored look takes this door.
+    /// A stored look made fit for use (#1752): styling keys outside
+    /// `LookKeys` and colours outside `ColorPaletteKeys` dropped,
+    /// then the colours completed over the shipped ones, so a
+    /// colour path added since the look was saved never leaves an
+    /// earlier colour behind when it is applied. A reader that
+    /// applies, draws or copies a stored look takes this door; a
+    /// rewrite of the store and a backup's export stay raw, so a
+    /// newer build's keys survive them (`LookStoreTests`).
     public var admitted: ShelfLook {
         let style = Set(LookKeys.all)
         let colors = Set(ColorPaletteKeys.all)

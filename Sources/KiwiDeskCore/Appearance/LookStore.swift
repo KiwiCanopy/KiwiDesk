@@ -42,8 +42,11 @@ public final class LookStore {
         return doc
     }
 
-    /// User looks for mutating paths (throws on an unreadable library).
-    public func libraryLooks() throws -> [ShelfLook] {
+    /// User looks RAW, for the store's own rewrites and a backup's
+    /// export (throws on an unreadable library): a newer build's
+    /// keys survive them (`LookStoreTests` ▸ `rewriteKeepsUnknownKeys`).
+    /// Core-only; a reader that uses a look takes `userLooks`.
+    func libraryLooks() throws -> [ShelfLook] {
         try readDocument()?.looks ?? []
     }
 

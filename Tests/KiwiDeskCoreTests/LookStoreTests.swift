@@ -81,6 +81,20 @@ struct LookStoreTests {
         #expect(back.colors["kiwishelf.fill_color"] == "#112233")
     }
 
+    /// A rewrite reads the library raw, so a key this build does
+    /// not know — a newer build's — survives another look's save.
+    @Test("a rewrite keeps a key this build does not know")
+    func rewriteKeepsUnknownKeys() throws {
+        let store = store()
+        var newer = look("Newer")
+        newer.style["kiwishelf.future_knob"] = .number(7)
+        try store.save(newer)
+        try store.save(look("Sibling"))
+        try store.rename(from: "Sibling", to: "Other")
+        let raw = try String(contentsOf: store.url, encoding: .utf8)
+        #expect(raw.contains("kiwishelf.future_knob"))
+    }
+
     /// A stored look carries every colour path (#1752), so a sparse
     /// file cannot leave earlier colours behind when applied.
     @Test("an imported look's colours are completed")
