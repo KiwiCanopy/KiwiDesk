@@ -38,7 +38,7 @@ struct ScrollGestureConfigTests {
         }
     }
 
-    @Test("the base encodes its three keys and round-trips")
+    @Test("the base encodes every key and round-trips")
     func baseShape() throws {
         let text = try json(ScrollGestureBase.defaults)
         #expect(

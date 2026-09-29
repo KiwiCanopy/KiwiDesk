@@ -67,9 +67,16 @@ struct GuiConfigParityTests {
         wide.refusalSound = true
         wide.quitGridTargetDepth = 3
         config.appWide = wide
-        config.scrollGesture.pan = [.command, .shift]
-        config.scrollGesture.naturalMouse = false
-        config.scrollGesture.stepDistance = 120
+        // Every field off its default: the base's coding is
+        // hand-listed, so a field left default is one unwatched.
+        config.scrollGesture = ScrollGestureBase(
+            pan: [.command, .shift],
+            spaceStep: [],
+            naturalTrackpad: false,
+            naturalMouse: false,
+            longSwipes: true,
+            stepDistance: 120
+        )
         config.layers = [
             KeyLayer(
                 name: "default",

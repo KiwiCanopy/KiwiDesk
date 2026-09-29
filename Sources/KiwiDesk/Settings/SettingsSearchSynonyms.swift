@@ -43,7 +43,12 @@ enum SettingsSearchSynonyms {
             return ["pan", "swipe", "wheel", "modifier", "gesture"]
         case .shortcuts(.scrollNaturalTrackpad),
             .shortcuts(.scrollNaturalMouse):
-            return ["reverse", "invert", "direction"]
+            // The rows are labelled by their input; the setting's
+            // own name is Apple's.
+            return [
+                "natural", "natural scrolling", "reverse", "invert",
+                "direction",
+            ]
         case .gaps(.outer): return ["margin", "padding"]
         case .gaps(.inner): return ["padding", "spacing"]
         case .borders(.borderEnabled):

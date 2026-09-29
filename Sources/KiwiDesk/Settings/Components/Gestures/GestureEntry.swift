@@ -13,6 +13,9 @@ struct GestureEntry<Picture: View, Control: View>: View {
     let surface: GestureSurface
     let settings: TilingSettings
     let pace: GesturePace
+    /// The gesture itself is off (a cleared chord) though its
+    /// surface is on: greyed the same way.
+    let off: Bool
     @ViewBuilder let picture: (CGFloat) -> Picture
     @ViewBuilder let control: () -> Control
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -24,6 +27,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
         surface: GestureSurface,
         settings: TilingSettings,
         pace: GesturePace = .quick,
+        off: Bool = false,
         @ViewBuilder picture: @escaping (CGFloat) -> Picture,
         @ViewBuilder control: @escaping () -> Control
     ) {
@@ -31,6 +35,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
         self.surface = surface
         self.settings = settings
         self.pace = pace
+        self.off = off
         self.picture = picture
         self.control = control
     }
@@ -57,7 +62,7 @@ struct GestureEntry<Picture: View, Control: View>: View {
     /// The grey an off surface puts on the picture and the
     /// sentence — never on the control, which stays live.
     private var dim: GreyOut {
-        GreyOut(active: surface.isOff(settings))
+        GreyOut(active: surface.isOff(settings) || off)
     }
 
     /// Restarts the gesture from its first frame, then loops it:

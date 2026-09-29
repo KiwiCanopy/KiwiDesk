@@ -179,11 +179,52 @@ struct ScrollGestureReachTests {
     @Test("refusals: one modifier alone, and the other gesture's chord")
     func refusals() {
         let step: ScrollChord = [.control, .option, .command]
-        #expect(ScrollChordRefusal.of([], other: step) == nil)
-        #expect(
-            ScrollChordRefusal.of([.control], other: step) == .singleModifier
+        func of(_ chord: ScrollChord) -> ScrollChordRefusal? {
+            ScrollChordRefusal.of(chord, other: step, heldBy: .step)
+        }
+        #expect(of([]) == nil)
+        #expect(of([.control]) == .singleModifier)
+        #expect(of(step) == .otherGesture(.step))
+        #expect(of([.control, .shift]) == nil)
+    }
+
+    /// A hand-edited file can reach what the recorder refuses:
+    /// the resolve turns a lone modifier off, keeps a shared
+    /// chord the pan's, and clamps the distance.
+    @Test("the resolve sanitises what a file hands it")
+    func resolveSanitises() {
+        let core = makeTestCore()
+        core.mouse.scroll.onLog = { _ in }
+        core.onLog = { _ in }
+        var base = ScrollGestureBase.defaults
+        base.pan = [.control]
+        base.stepDistance = 1
+        core.applyScrollGestures(base: base, profile: nil)
+        #expect(core.mouse.scroll.resolved.pan.isEmpty)
+        #expect(core.mouse.scroll.resolved.stepDistance == 10)
+        base.pan = [.control, .option]
+        base.spaceStep = [.control, .option]
+        core.applyScrollGestures(base: base, profile: nil)
+        #expect(core.mouse.scroll.resolved.pan == [.control, .option])
+        #expect(core.mouse.scroll.resolved.spaceStep.isEmpty)
+    }
+
+    /// The verb writes the base while the live profile resolves
+    /// over it, so a chord clashing with either is refused.
+    @Test("a verb's chord clears the other in base and profile")
+    func verbChecksBaseAndProfile() {
+        let core = makeTestCore()
+        core.applyScrollGestures(
+            base: .defaults,
+            profile: ScrollGestureOverride(pan: [.command, .shift])
         )
-        #expect(ScrollChordRefusal.of(step, other: step) == .otherGesture)
-        #expect(ScrollChordRefusal.of([.control, .shift], other: step) == nil)
+        let clash = core.execute(
+            "scroll_gesture.set_space_step",
+            args: [.string("control+option")]
+        )
+        #expect(!clash.isSuccess)
+        #expect(
+            core.mouse.scroll.base.spaceStep == [.control, .option, .command]
+        )
     }
 }

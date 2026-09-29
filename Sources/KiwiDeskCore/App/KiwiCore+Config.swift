@@ -155,6 +155,7 @@ extension KiwiCore {
             seedFirstRunStarterProfile()
         }
         retirePlaceholderSpace()
+        applyScrollGestures(profile: mouse.scroll.profileOverride)
         retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON
@@ -199,8 +200,9 @@ extension KiwiCore {
         globalAppRuleBase = [:]
         globalFloatRuleBase = []
         globalIgnoreRuleBase = []
-        // `init.lua`'s scroll_gesture verbs declare the base anew.
-        applyScrollGestures(base: .defaults, profile: nil)
+        // `init.lua`'s scroll_gesture verbs declare the base anew;
+        // the load's tail configures the tap once.
+        resetScrollGestureInputs()
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]

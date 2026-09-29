@@ -11,17 +11,19 @@ public enum ScrollInput: String, CaseIterable, Sendable {
 /// recorder each word it.
 public enum ScrollChordRefusal: Equatable, Sendable {
     case singleModifier
-    case otherGesture
+    /// The other gesture, named, already holds these keys.
+    case otherGesture(ScrollGestures.Consumer)
 
-    /// The refusal for `chord` beside the other gesture's; empty
-    /// (off) is always accepted.
+    /// The refusal for `chord` beside `other`, the chord the
+    /// gesture `heldBy` holds; empty (off) is always accepted.
     public static func of(
         _ chord: ScrollChord,
-        other: ScrollChord
+        other: ScrollChord,
+        heldBy: ScrollGestures.Consumer
     ) -> ScrollChordRefusal? {
         guard !chord.isEmpty else { return nil }
         if chord.rawValue.nonzeroBitCount < 2 { return .singleModifier }
-        if chord == other { return .otherGesture }
+        if chord == other { return .otherGesture(heldBy) }
         return nil
     }
 }

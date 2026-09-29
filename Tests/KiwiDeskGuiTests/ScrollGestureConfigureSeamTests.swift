@@ -83,4 +83,62 @@ struct ScrollGestureConfigureSeamTests {
         }
         #expect(calls == [Self.home])
     }
+
+    /// The receiver a `.configure(` call site is spelled on — the
+    /// identifier ending at the dot.
+    private static func receiver(
+        _ text: [Character],
+        before start: Int
+    ) -> String {
+        var i = start
+        while i > 0, text[i - 1].isLetter || text[i - 1].isNumber {
+            i -= 1
+        }
+        return String(text[i..<start])
+    }
+
+    /// A caller holding the front under any name the tree uses
+    /// for it: `mouse.scroll`, or a local `gestures`.
+    private static let frontNames: Set<String> = ["scroll", "gestures"]
+
+    @Test("only the home configures the front, whatever it passes")
+    func onlyTheHomeConfigures() throws {
+        var callers: [String] = []
+        for (name, text) in try coreFiles() {
+            for site in SourceScan.callSites(in: text, for: ".configure")
+            where Self.frontNames.contains(
+                Self.receiver(text, before: site.start)
+            ) {
+                callers.append(name)
+            }
+        }
+        #expect(callers == [Self.home])
+    }
+
+    /// The resolve's inputs and output are the home's to write:
+    /// the consumer reads `resolved`, so a stray write skips both
+    /// the override and `configure`.
+    @Test("the front's stored inputs are written in the home alone")
+    func inputsAreTheHomes() throws {
+        let fields = ["base", "profileOverride", "resolved"]
+        var writers: Set<String> = []
+        var homeWrites = 0
+        for (name, text) in try coreFiles() {
+            let source = String(text)
+            for front in Self.frontNames {
+                for field in fields {
+                    let needle = "\(front).\(field) ="
+                    let count =
+                        source.components(separatedBy: needle)
+                        .count - 1
+                    guard count > 0 else { continue }
+                    writers.insert(name)
+                    if name == Self.home { homeWrites += count }
+                }
+            }
+        }
+        #expect(writers == [Self.home])
+        // Floor, not the live count: the home writes all three.
+        #expect(homeWrites >= 3)
+    }
 }

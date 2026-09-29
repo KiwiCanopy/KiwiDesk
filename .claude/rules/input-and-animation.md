@@ -17,7 +17,7 @@ editing here:
   `ScrollGestureTap`, reached only through `MouseTracker.scroll`
   (#1656, #1519).** Its creation asks macOS for the
   Accessibility-class `PostEvent` service alone, never
-  `ListenEvent` (tccd log, device build, 2026-09-28). Four
+  `ListenEvent` (tccd log, device build, 2026-09-28). Five
   obligations:
   - **One tap, scroll-only.** A second `tapCreate(`, or a mask
     widened past `.scrollWheel`, is where an Input Monitoring
@@ -44,11 +44,14 @@ editing here:
   - **Resolve the settings in ONE home,
     `KiwiCore.applyScrollGestures`, the door's one caller**
     (#1656): the global base with the live profile's override on
-    top, reached by the config load, the profile apply, the
-    "Applies to" save's re-resolve and the `scroll_gesture.*`
-    verbs. Build no `ScrollGestureSettings` and read no
-    `tapSettings` anywhere else, or a path hands the tap a value
-    that skipped the override (`ScrollGestureConfigureSeamTests`).
+    top, sanitised once more there, since a hand-edited file
+    reaches what the recorder refuses. A path that changes
+    either input reaches the tap by calling it, and writes the
+    front's `base`, `profileOverride` or `resolved` nowhere
+    else; a `ScrollGestureSettings` is built only through
+    `tapSettings`, read in that home alone, or a path hands the
+    tap a value that skipped the override
+    (`ScrollGestureConfigureSeamTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

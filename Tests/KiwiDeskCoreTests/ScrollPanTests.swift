@@ -5,10 +5,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// ⌃⌥ + scroll (#1656, ruling 2026-09-29): on a Scrolling Space
-/// focus jumps window to window by distance, one wheel notch a
-/// window, the glide never counted; a Monocle Space steps once
-/// per gesture; any other layout does nothing.
+/// ⌃⌥ + scroll (#1656, rulings 2026-09-29): focus moves one
+/// window per swipe (more with long swipes) or per wheel notch, the
+/// glide never counted — along a Scrolling row, through a Monocle
+/// stack, and in array order on every other layout
+/// (`ScrollPanLayoutTests`).
 @Suite("Scroll pan gesture", .serialized)
 @MainActor
 struct ScrollPanTests {
@@ -155,17 +156,6 @@ struct ScrollPanTests {
         core.handleScrollPan(event(.ended), session: session)
         core.handleScrollPan(event(.began), session: session)
         core.handleScrollPan(event(.changed, dx: 40), session: session)
-        #expect(focused(core) == WindowID(3))
-    }
-
-    @Test("any other layout does nothing")
-    func otherLayoutsIgnore() {
-        let (core, _, session) = makeCore("bsp")
-        core.handleScrollPan(event(.began), session: session)
-        core.handleScrollPan(
-            event(.changed, dx: -5 * stride),
-            session: session
-        )
         #expect(focused(core) == WindowID(3))
     }
 

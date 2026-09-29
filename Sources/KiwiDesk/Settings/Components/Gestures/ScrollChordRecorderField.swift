@@ -1,18 +1,22 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
 /// A scroll gesture's modifier recorder (#1656): the shortcut
 /// recorder's field and inline ×, recording modifiers alone — the
 /// largest set held commits when every key is released. A refused
-/// chord shows its reason under the field and writes nothing; × is
-/// off. Needs the section's `RecorderCoordinator`, and never reads
-/// the layer name: a gesture chord belongs to no layer.
+/// chord shows its reason under the field, is announced, and
+/// writes nothing; × is off. Needs the section's
+/// `RecorderCoordinator`, and never reads the layer name: a
+/// gesture chord belongs to no layer.
 struct ScrollChordRecorderField: View {
     /// VoiceOver's name for the field.
     let name: String
     @Binding var chord: ScrollChord
-    /// The other gesture's chord, which this one may not take.
+    /// The other gesture's chord, which this one may not take,
+    /// and that gesture, which the refusal names.
     let other: ScrollChord
+    let otherGesture: ScrollGestures.Consumer
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
     @State private var fieldID = UUID()
@@ -48,7 +52,7 @@ struct ScrollChordRecorderField: View {
     private var recordButton: some View {
         Button(action: toggle) {
             Text(label)
-                .frame(minWidth: 72)
+                .frame(minWidth: 110)
                 .monospaced()
         }
         .buttonStyle(.bordered)
@@ -58,7 +62,7 @@ struct ScrollChordRecorderField: View {
         .modifier(RecorderButtonChrome(recording: recording))
         .help(Self.recordHelp)
         .accessibilityLabel(name)
-        .accessibilityValue(label)
+        .accessibilityValue(spokenValue)
     }
 
     private var clearButton: some View {
@@ -99,10 +103,17 @@ struct ScrollChordRecorderField: View {
             : ScrollChordGlyphs.text(chord)
     }
 
+    /// Drawn "Record" when empty, which is the button's action;
+    /// spoken as the state, off.
+    private var spokenValue: String {
+        guard !recording, chord.isEmpty else { return label }
+        return SettingsValueReadout.onOff(false)
+    }
+
     @MainActor private static var recordHelp: String {
         L(
             "shortcuts.gestures.scroll.help",
-            "Hold two or more of ⌃ Control, ⌥ Option, ⇧ Shift and "
+            "Hold two or more of ⌃ Control, ⌥ Option, ⇧ Shift, and "
                 + "⌘ Command, then let go — the keys you held "
                 + "together are recorded."
         )
@@ -114,14 +125,19 @@ struct ScrollChordRecorderField: View {
         case .singleModifier:
             return L(
                 "shortcuts.gestures.scroll.refused_single",
-                "Hold two or more keys: ⌃ + scroll is macOS Zoom's, "
-                    + "and ⌘ or ⌥ + scroll mean something in many "
-                    + "apps."
+                "Hold two or more keys. With one key, scrolling is "
+                    + "already taken: ⌃ zooms the screen in macOS, "
+                    + "and ⇧, ⌥ or ⌘ do something in many apps."
             )
-        case .otherGesture:
+        case .otherGesture(.step):
             return L(
-                "shortcuts.gestures.scroll.refused_other",
-                "These keys are kept for stepping between Spaces."
+                "shortcuts.gestures.scroll.refused_step",
+                "These keys are reserved for stepping between Spaces."
+            )
+        case .otherGesture(.pan):
+            return L(
+                "shortcuts.gestures.scroll.refused_pan",
+                "These keys already move focus window by window."
             )
         }
     }
@@ -173,12 +189,31 @@ struct ScrollChordRecorderField: View {
     }
 
     private func commit(_ recorded: ScrollChord) {
-        if let found = ScrollChordRefusal.of(recorded, other: other) {
+        if let found = ScrollChordRefusal.of(
+            recorded,
+            other: other,
+            heldBy: otherGesture
+        ) {
             refusal = found
             flash()
+            announce(Self.caption(found))
             return
         }
         chord = recorded
+    }
+
+    /// A refusal changes nothing the field shows, so VoiceOver is
+    /// told why.
+    private func announce(_ text: String) {
+        guard let window = NSApp.keyWindow else { return }
+        NSAccessibility.post(
+            element: window,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: text,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+            ]
+        )
     }
 
     private func flash() {

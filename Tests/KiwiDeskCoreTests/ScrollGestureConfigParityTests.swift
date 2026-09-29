@@ -33,9 +33,6 @@ struct ScrollGestureConfigParityTests {
             longSwipes: true,
             stepDistance: 120
         )
-        for (name, value) in zip(labels(base), labels(edited)) {
-            #expect(name == value)
-        }
         let over = ScrollGestureOverride.diff(base: base, edited: edited)
         #expect(
             Mirror(reflecting: over!).children.allSatisfy {
@@ -63,5 +60,36 @@ struct ScrollGestureConfigParityTests {
         #expect(base.writing(edited.fields) == edited)
         let over = ScrollGestureOverride.diff(base: base, edited: edited)
         #expect(over?.fields == edited.fields)
+    }
+
+    /// The sparse `Codable` is a hand-kept field list: every field
+    /// differs from its default, so a dropped encode or decode line
+    /// comes back as the default and reds here.
+    @Test("every field round-trips through JSON")
+    func everyFieldRoundTrips() throws {
+        let edited = ScrollGestureBase(
+            pan: [.command, .shift],
+            spaceStep: [],
+            naturalTrackpad: false,
+            naturalMouse: false,
+            longSwipes: true,
+            stepDistance: 120
+        )
+        let coder = (JSONEncoder(), JSONDecoder())
+        #expect(
+            try coder.1.decode(
+                ScrollGestureBase.self,
+                from: coder.0.encode(edited)
+            ) == edited
+        )
+        let over = try #require(
+            ScrollGestureOverride.diff(base: .defaults, edited: edited)
+        )
+        #expect(
+            try coder.1.decode(
+                ScrollGestureOverride.self,
+                from: coder.0.encode(over)
+            ) == over
+        )
     }
 }

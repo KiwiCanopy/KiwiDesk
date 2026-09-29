@@ -12,6 +12,10 @@ struct GesturesScrollWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let dir = "Sources/KiwiDesk/Settings/Components/Gestures/"
 
+    private static func squash(_ text: String) -> String {
+        text.split(whereSeparator: \.isWhitespace).joined()
+    }
+
     private static func source(_ file: String) throws -> String {
         SourceScan.stripComments(
             try String(
@@ -39,19 +43,37 @@ struct GesturesScrollWiringTests {
 
     @Test("a recorded chord is judged by Core's refusal before it lands")
     func recorderAsksCore() throws {
-        let field = try Self.source("ScrollChordRecorderField.swift")
-        let refusal = try #require(
-            field.range(of: "ScrollChordRefusal.of(recorded, other: other)")
+        let field = Self.squash(
+            try Self.source("ScrollChordRecorderField.swift")
         )
-        let write = try #require(field.range(of: "chord = recorded"))
+        let refusal = try #require(
+            field.range(of: "ScrollChordRefusal.of(recorded,")
+        )
+        let write = try #require(field.range(of: "chord=recorded"))
         #expect(refusal.lowerBound < write.lowerBound)
-        #expect(field.contains("mode: .modifiers"))
+        // The refused branch leaves before the write, not only
+        // ahead of it in the text.
+        let branch = try #require(
+            SourceScan.declarationBody(
+                after: "if let found = ScrollChordRefusal.of(",
+                in: try Self.source("ScrollChordRecorderField.swift")
+            )
+        )
+        #expect(branch.contains("return"))
+        #expect(field.contains("mode:.modifiers"))
     }
 
     @Test("the travel field greys, never hides, while the box is off")
     func travelGreys() throws {
         let group = try Self.source("GesturesScrollEntries.swift")
-        #expect(group.contains(".disabled(!gestures.longSwipes)"))
+        let row = try #require(
+            SourceScan.declarationBody(
+                after: "private var travelRow",
+                in: group
+            )
+        )
+        #expect(row.contains("StepperRow("))
+        #expect(row.contains(".disabled(!gestures.longSwipes)"))
         #expect(!group.contains("if gestures.longSwipes"))
     }
 
@@ -60,11 +82,23 @@ struct GesturesScrollWiringTests {
         let group = try Self.source("GesturesScrollEntries.swift")
         for field in [
             "reachRow(.pan)", "reachRow(.longSwipes)",
-            "reachRow(.stepDistance)", ".naturalTrackpad,",
-            ".naturalMouse,",
+            "reachRow(.stepDistance)",
         ] {
             #expect(group.contains(field), "\(field) has no column")
         }
+        // Both Natural rows, through the one row builder that
+        // itself carries the column.
+        #expect(
+            group.components(separatedBy: "\n        naturalRow(").count
+                == 3
+        )
+        let natural = try #require(
+            SourceScan.declarationBody(
+                after: "private func naturalRow(",
+                in: group
+            )
+        )
+        #expect(natural.contains("reachRow(field)"))
         #expect(group.contains("family: .scroll"))
     }
 }

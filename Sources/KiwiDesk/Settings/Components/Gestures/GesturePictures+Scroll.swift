@@ -19,7 +19,11 @@ extension GesturePicture {
 
         var body: some View {
             let ink = GestureInk(palette: palette)
-            let swipe = gestureEase(gestureStage(t, 0.1, 0.4))
+            // The hand swipes, then eases back after the pan, so
+            // the loop's last frame is its first.
+            let swipe =
+                gestureEase(gestureStage(t, 0.1, 0.4))
+                * (1 - gestureEase(gestureStage(t, 0.85, 1)))
             let focus = gestureStage(t, 0.4, 0.5)
             let pan = -50 * gestureEase(gestureStage(t, 0.5, 0.8))
             let keys = ScrollChordGlyphs.symbols(chord)
@@ -84,7 +88,7 @@ extension GestureInk {
             .frame(minWidth: 11, minHeight: 11)
             .background(
                 RoundedRectangle(cornerRadius: 2.5)
-                    .fill(held ? accent.opacity(0.22) : .clear)
+                    .fill(held ? accent.opacity(0.5) : .clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 2.5)

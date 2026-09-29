@@ -4,24 +4,32 @@ import SwiftUI
 /// Mouse & trackpad ▸ Scroll gestures (#1656): the drawer's first
 /// group. The ⌃⌥ entry with its recorder and swipe length, then
 /// the two Natural scrolling rows every scroll gesture shares. Each
-/// value carries the shortcut rows' "Applies to" checklist; the
-/// draft holds the header profile's resolved values.
+/// value carries the shortcut rows' "Applies to" checklist, every
+/// one ending on the pane's right edge, and every control starts
+/// on the sentence's column; the draft holds the header profile's
+/// resolved values.
 struct GesturesScrollEntries: View {
     @ObservedObject var model: SettingsModel
 
     private var gestures: ScrollGestureBase { model.config.scrollGesture }
+
+    /// Where the sentence column starts: the picture and the
+    /// layout's own gap.
+    private static var gutter: CGFloat { GesturePlate<EmptyView>.size.width }
+    private static let columnGap: CGFloat = GestureEntryLayout().spacing
 
     var body: some View {
         GestureEntry(
             L(
                 "shortcuts.gestures.scroll.sentence",
                 "Hold these keys and scroll to move focus window by "
-                    + "window along a Scrolling row. On a Monocle "
+                    + "window along a Scrolling row. On any other "
                     + "Space it steps through the windows instead."
             ),
             surface: .windows,
             settings: model.config.settings,
-            pace: .steps
+            pace: .steps,
+            off: gestures.pan.isEmpty
         ) {
             GesturePicture.ScrollStep(t: $0, chord: gestures.pan)
         } control: {
@@ -30,7 +38,8 @@ struct GesturesScrollEntries: View {
                     ScrollChordRecorderField(
                         name: ScrollGestureWords.pan,
                         chord: $model.config.scrollGesture.pan,
-                        other: gestures.spaceStep
+                        other: gestures.spaceStep,
+                        otherGesture: .step
                     )
                     .searchAnchored(
                         SettingsCatalog.shortcuts.gestures.children
@@ -49,19 +58,7 @@ struct GesturesScrollEntries: View {
                     )
                 }
                 reachRow(.stepDistance) {
-                    StepperRow(
-                        label: ScrollGestureWords.stepDistance,
-                        value: stepDistance,
-                        in: Self.stepDistanceRange,
-                        step: 10,
-                        suffix: L("border.fit_gaps.unit", "pt")
-                    )
-                    // Grey, don't hide: it acts once the box is ticked.
-                    .disabled(!gestures.longSwipes)
-                    .searchAnchored(
-                        SettingsCatalog.shortcuts.gestures.children
-                            .stepDistance
-                    )
+                    travelRow
                 }
             }
         }
@@ -84,6 +81,24 @@ struct GesturesScrollEntries: View {
         )
     }
 
+    /// Indented under the box it depends on, and greyed — never
+    /// hidden — while that box is off.
+    private var travelRow: some View {
+        StepperRow(
+            label: ScrollGestureWords.stepDistance,
+            value: stepDistance,
+            in: Self.stepDistanceRange,
+            step: 10,
+            suffix: L("shortcuts.gestures.scroll.points", "pt")
+        )
+        .fixedSize()
+        .disabled(!gestures.longSwipes)
+        .padding(.leading, 20)
+        .searchAnchored(
+            SettingsCatalog.shortcuts.gestures.children.stepDistance
+        )
+    }
+
     /// Core's bounds, as the stepper's whole points.
     static var stepDistanceRange: ClosedRange<Int> {
         let range = ScrollGestureBase.stepDistanceRange
@@ -97,16 +112,18 @@ struct GesturesScrollEntries: View {
         )
     }
 
-    /// Apple's own toggle under a row naming the input it reads.
+    /// Apple's own toggle, its input named in the picture's gutter
+    /// so both boxes start on the sentence's column.
     private func naturalRow(
         _ field: ScrollGestureField,
         _ input: String,
         _ isOn: Binding<Bool>
     ) -> some View {
-        reachRow(field) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text(input)
-                    .accessibilityHidden(true)
+        HStack(alignment: .firstTextBaseline, spacing: Self.columnGap) {
+            Text(input)
+                .frame(width: Self.gutter, alignment: .trailing)
+                .accessibilityHidden(true)
+            reachRow(field) {
                 Toggle(isOn: isOn) {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(ScrollGestureWords.natural)
@@ -124,6 +141,7 @@ struct GesturesScrollEntries: View {
                         ScrollGestureWords.natural
                     )
                 )
+                .accessibilityHint(ScrollGestureWords.naturalCaption)
             }
         }
         .padding(.vertical, 2)

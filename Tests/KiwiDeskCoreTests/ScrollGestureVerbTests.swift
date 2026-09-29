@@ -123,8 +123,10 @@ struct ScrollGestureVerbTests {
         )
     }
 
-    @Test("the other gesture's resolved chord is the one refused")
-    func refusalReadsTheResolvedOther() {
+    /// The verb writes the base and the live profile resolves over
+    /// it, so the other gesture's chord in EITHER is refused.
+    @Test("the other gesture's base and resolved chords are refused")
+    func refusalReadsBothOthers() {
         let core = makeTestCore()
         core.applyScrollGestures(
             base: .defaults,
@@ -137,9 +139,15 @@ struct ScrollGestureVerbTests {
             ).isSuccess
         )
         #expect(
-            core.execute(
+            !core.execute(
                 "scroll_gesture.set_pan",
                 args: [.string("control+option+command")]
+            ).isSuccess
+        )
+        #expect(
+            core.execute(
+                "scroll_gesture.set_pan",
+                args: [.string("command+option")]
             ).isSuccess
         )
     }

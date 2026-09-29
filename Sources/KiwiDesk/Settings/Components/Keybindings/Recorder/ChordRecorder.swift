@@ -205,12 +205,7 @@ final class ChordRecorder {
     static func modifierSymbols(
         _ flags: NSEvent.ModifierFlags
     ) -> String {
-        var symbols = ""
-        if flags.contains(.control) { symbols += "⌃" }
-        if flags.contains(.option) { symbols += "⌥" }
-        if flags.contains(.shift) { symbols += "⇧" }
-        if flags.contains(.command) { symbols += "⌘" }
-        return symbols
+        ScrollChordGlyphs.text(scrollChord(flags))
     }
 
     /// Suppresses trailing key-up events following recording completion.

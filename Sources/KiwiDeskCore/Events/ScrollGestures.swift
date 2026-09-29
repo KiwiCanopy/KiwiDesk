@@ -8,8 +8,8 @@ public struct ScrollGestureSettings: Equatable, Sendable {
     public private(set) var chords: [ScrollGestures.Consumer: ScrollChord]
     /// KiwiDesk's own Natural scrolling per input, independent
     /// of macOS's.
-    public var naturalTrackpad: Bool
-    public var naturalMouse: Bool
+    public let naturalTrackpad: Bool
+    public let naturalMouse: Bool
 
     public init(
         chords: [ScrollGestures.Consumer: ScrollChord] = [:],

@@ -5,7 +5,8 @@ import AppKit
 /// `wireScrollPan` installs, never by the core.
 @MainActor
 final class ScrollPanSession {
-    /// The Space shown on the screen under a point (AX space).
+    /// The Space shown on the screen under a point (AX space) —
+    /// the whole screen, menu bar and Dock strip included.
     /// Live by default; a suite states its own.
     var spaceAt: @MainActor (CGPoint, StateCoordinator) -> SpaceID? = {
         point,
@@ -13,7 +14,7 @@ final class ScrollPanSession {
         let cocoa = GeometryUtils.axPoint(point)
         guard
             let screen = NSScreen.screens.first(where: {
-                GeometryUtils.visibleFrame(of: $0).contains(cocoa)
+                $0.frame.contains(cocoa)
             }),
             let display = screen.kiwiDisplay?.id
         else { return nil }
@@ -26,10 +27,12 @@ final class ScrollPanSession {
     init() {}
 }
 
-/// ⌃⌥ + scroll (#1656): on a Scrolling or Monocle Space under the
-/// pointer, focus moves window to window — one per swipe or notch
-/// by default (`ScrollStepMeter`) — so a row pans with the ordinary
-/// focus animation and its border; elsewhere it does nothing.
+/// ⌃⌥ + scroll (#1656): on the Space under the pointer, focus
+/// moves window to window — one per swipe or notch by default
+/// (`ScrollStepMeter`). A Scrolling row pans with the ordinary
+/// focus animation, a Monocle stack flips, and every other layout
+/// steps through its windows in array order, so a held chord
+/// always does something (owner ruling 2026-09-29).
 extension KiwiCore {
     /// Wires the consumer; once, at bootstrap.
     func wireScrollPan() {
@@ -53,10 +56,11 @@ extension KiwiCore {
         // NEXT window in, so a step runs against the delta's sign.
         for _ in 0..<abs(steps) {
             guard let space = state.workspaces[id] else { return }
-            if space.mode == .scrolling {
-                stepScrollPan(by: steps > 0 ? -1 : 1, space: id)
-            } else {
-                stepMonocle(space, by: steps > 0 ? -1 : 1)
+            let step = steps > 0 ? -1 : 1
+            switch space.mode {
+            case .scrolling: stepScrollPan(by: step, space: id)
+            case .monocle: stepMonocle(space, by: step)
+            default: stepInOrder(space, by: step)
             }
         }
     }
@@ -74,8 +78,7 @@ extension KiwiCore {
             distance: resolved.stepDistance
         )
         guard let id = session.spaceAt(location, state),
-            let space = state.workspaces[id],
-            space.mode == .scrolling || space.mode == .monocle
+            state.workspaces[id] != nil
         else { return }
         if id != state.workspaces.activeSpace {
             applyFocusedSpaceSwitch(to: id)
@@ -101,10 +104,14 @@ extension KiwiCore {
         )
     }
 
-    private func stepMonocle(_ space: Space, by step: Int) {
-        guard let focused = state.focusAnchor(of: space) else {
-            return
-        }
+    /// Lands a flip's owed focus first, as `execute` does ahead of
+    /// every focused-window command (#1391): two steps inside one
+    /// flip would otherwise both start from the old window.
+    private func stepMonocle(_ stale: Space, by step: Int) {
+        runPendingMonocleFocus()
+        guard let space = state.workspaces[stale.id],
+            let focused = state.focusAnchor(of: space)
+        else { return }
         let horizontal =
             tiler.settings.resolvedMonocle(for: space.id)
             .orientation == .horizontal
@@ -112,8 +119,21 @@ extension KiwiCore {
             Self.direction(step, horizontal: horizontal),
             space: space,
             focused: focused,
-            swapping: false
+            swapping: false,
+            warp: false
         )
+    }
+
+    /// Any other layout: the next or previous window in the
+    /// Space's own order, floats included, wrapping at the ends.
+    private func stepInOrder(_ space: Space, by step: Int) {
+        let ring = state.effectiveMembers(of: space)
+        guard ring.count > 1,
+            let focused = state.focusAnchor(of: space),
+            let index = ring.firstIndex(of: focused)
+        else { return }
+        let next = (index + step + ring.count) % ring.count
+        focusWindow(ring[next], warp: false)
     }
 
     static func direction(_ step: Int, horizontal: Bool) -> Direction {

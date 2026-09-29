@@ -15,10 +15,49 @@ extension KiwiCore {
         let gestures = mouse.scroll
         if let base { gestures.base = base }
         gestures.profileOverride = profile
-        let resolved =
+        let resolved = sanitizedScrollGestures(
             profile?.resolved(onto: gestures.base) ?? gestures.base
+        )
         gestures.resolved = resolved
         gestures.configure(resolved.tapSettings)
+    }
+
+    /// A config load's reset: the inputs go back to the defaults
+    /// without configuring, since the load configures at its tail.
+    func resetScrollGestureInputs() {
+        mouse.scroll.base = .defaults
+        mouse.scroll.profileOverride = nil
+    }
+
+    /// The refusals the recorder and the verbs make at entry,
+    /// applied once more to the RESOLVED value, which a hand-edited
+    /// file or two cascade levels can still reach: a lone modifier
+    /// turns that gesture off, a shared chord stays the pan's (the
+    /// `Consumer` order), and the step distance is clamped.
+    private func sanitizedScrollGestures(
+        _ value: ScrollGestureBase
+    ) -> ScrollGestureBase {
+        var result = value
+        if ScrollChordRefusal.of(value.pan, other: [], heldBy: .step)
+            != nil
+        {
+            onLog("scroll_gesture: pan needs two modifiers; off")
+            result.pan = []
+        }
+        if ScrollChordRefusal.of(
+            value.spaceStep,
+            other: result.pan,
+            heldBy: .pan
+        ) != nil {
+            onLog("scroll_gesture: space_step refused; off")
+            result.spaceStep = []
+        }
+        let range = ScrollGestureBase.stepDistanceRange
+        result.stepDistance = min(
+            max(result.stepDistance, range.lowerBound),
+            range.upperBound
+        )
+        return result
     }
 
     /// `scroll_gesture.*`: writes the BASE, so a profile's own
@@ -74,11 +113,19 @@ extension KiwiCore {
             let resolved =
                 mouse.scroll.profileOverride?.resolved(onto: base)
                 ?? base
-            if let refusal = Self.scrollChordRefusal(
-                chord,
-                other: pan ? resolved.spaceStep : resolved.pan
-            ) {
-                return .fail(refusal)
+            // The base is written, and the live profile resolves
+            // over it: the chord must clear the other in both.
+            let others =
+                pan
+                ? [base.spaceStep, resolved.spaceStep]
+                : [base.pan, resolved.pan]
+            for other in others {
+                if let refusal = Self.scrollChordRefusal(
+                    chord,
+                    other: other
+                ) {
+                    return .fail(refusal)
+                }
             }
             if pan { base.pan = chord } else { base.spaceStep = chord }
         default:
@@ -96,7 +143,7 @@ extension KiwiCore {
         _ chord: ScrollChord,
         other: ScrollChord
     ) -> String? {
-        switch ScrollChordRefusal.of(chord, other: other) {
+        switch ScrollChordRefusal.of(chord, other: other, heldBy: .pan) {
         case nil: return nil
         case .singleModifier: return "needs two or more modifiers"
         case .otherGesture:
