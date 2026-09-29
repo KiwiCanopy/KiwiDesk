@@ -53,7 +53,8 @@ extension EventLoop {
         // below rather than reading the list twice (#672); one
         // the gate skips shows nothing, and is scanned by the
         // first pass that reaches it.
-        for app in runningApplications() {
+        let apps = isRunning ? liveApps() : runningApplications()
+        for app in apps {
             syncObservation(for: app, scanWindowsAtAttach: false)
         }
         // Before the census: `loadConfig` runs this pass ahead

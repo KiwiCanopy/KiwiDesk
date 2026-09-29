@@ -208,10 +208,7 @@ extension EventLoop {
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the
         // cross-app focus change ourselves.
-        if let element = AXHelper.focusedWindow(pid: pid),
-            let id = AXHelper.windowID(of: element)
-                .map({ hostOfShadow($0, pid: pid) })
-        {
+        if let id = focusedWindowID(pid: pid) {
             // Only managed windows: an ignored panel (issue
             // #21) or a not-yet-tracked window must not leak
             // a focus event with no state behind it. Surface

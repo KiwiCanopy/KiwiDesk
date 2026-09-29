@@ -147,6 +147,32 @@ editing AX code:
   takes the same shape: a needle anchored to `finishBoot`'s own
   closing brace, since the tail is not test-drivable but a call
   MOVED out of it heals nothing.
+- **Every pass that attaches apps reads `liveApps`, and a pid
+  ≤ 0 never attaches (#1785).** A process an app starts as its
+  own LaunchServices child is listed with pid -1 — even looked up
+  by its real pid — so the raw running-app list has no entry
+  that could adopt it, and an observer keyed on -1 names every
+  such process at once (device, 2026-09-29). `liveApps` adds each
+  window owner the list lacks, resolved by the WindowServer's
+  pid through `ProcessIdentity.appAt`, and `syncObservation` and
+  `attach` refuse an unnamed pid; a terminate announced without
+  a pid retires the observed processes that are gone
+  (`ProcessIdentityTests`, `ProcessIdentitySeamTests` ▸
+  `rawListHasItsReaders`).
+- **A shadow window never becomes a tile (#1785).** An empty,
+  button-less standard window at the size of a buttoned window
+  of its own process (Orion's "Orion Preview") is refused at
+  `track`, and a focus report naming it names that host. Two
+  obligations. **Never retire a tracked window as a shadow**: a
+  retirement runs the close path for a window nobody closed, and
+  a frameless app's main window read before its content lists
+  would be taken the moment the app opened a buttoned one — so a
+  lone candidate waits for the one-shot re-track instead, and is
+  tracked if still alone. **Read siblings only for an empty,
+  button-less window**, since `track` runs inside the boot
+  scan's budget: a window with a button or content pays one or
+  two reads (`ShadowWindowTests`, `ProcessIdentitySeamTests` ▸
+  `trackAsksTheVerdict`).
 - **A bulk pass asks the WindowServer before it asks AX
   (#1037).** `reconcileAll` — the Desktop-switch re-sync and the
   config reload's — reads one on-screen census and skips an

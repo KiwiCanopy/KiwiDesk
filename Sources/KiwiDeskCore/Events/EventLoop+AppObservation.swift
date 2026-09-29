@@ -266,9 +266,8 @@ extension EventLoop {
         // relaunch reusing the pid starts with a fresh retry
         // budget and an unquieted gate.
         healQuiet[pid] = nil
-        processIdentity.unlisted[pid] = nil
-        shadows.hosts[pid] = nil
-        shadows.suspects[pid] = nil
+        processIdentity.forget(pid: pid)
+        shadows.forget(pid: pid)
         transientRetried[pid] = nil
         pendingRetrack.remove(pid)
         pendingRemovalRecheck.remove(pid)

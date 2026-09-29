@@ -412,26 +412,18 @@ editing here:
   **A pid LaunchServices cannot name is never an identity
   (#1785).** A process an app starts as its own LaunchServices
   child (Orion's second profile) is listed with pid -1 and its
-  activation is announced under its parent's pid, while the
-  WindowServer and AX know its real one. So a pid ≤ 0 is refused
-  at `syncObservation` and `attach` and never read as the active
-  app, the heal resolves a census pid the running-app list lacks
-  by that pid (`ProcessIdentity.appAt`, never the record's own
-  `processIdentifier`), the frontmost chain names such an app by
-  its unlisted process, an activation of an app with such a
-  process reports no focus of its own — the announced pid's
-  windows are the ones in front at the announcement, so each
-  process's own report decides — and the gate counts a sibling
-  process of the active app as active (`ProcessIdentityTests`,
-  `ProcessIdentityWiringTests`). **A shadow window is never
-  tracked**: an empty, button-less standard window beside a
-  buttoned window of its own process (Orion's "Orion Preview"),
-  whose focus reports name that host — the buttoned sibling is
-  what keeps a frameless real window alone in its app a window,
-  never the frame, which a twin tiled before its host arrived
-  never matches again; a twin tracked first is re-asked when a
-  host is tracked, so the verdict does not depend on arrival
-  order (`ShadowWindowTests`).
+  activation announced under its parent's pid or none, while the
+  WindowServer and AX know its real one (device, 2026-09-29).
+  So a pid ≤ 0 is never read as the active app; a Core read of
+  the frontmost app takes the one `frontmostPIDProvider` chain,
+  never `frontmostApplication` beside it; an activation of an app
+  with such a process reports no focus of its own, since its
+  announced pid's focused window is the parent's even when the
+  user chose the child's; the gate and the #292 preflight count
+  a sibling process of the active app as the app; and every AX
+  focused-window read goes through `focusedWindowID(pid:)`,
+  which names a shadow's host (`ProcessIdentityTests`,
+  `ProcessIdentityWiringTests`, `ProcessIdentitySeamTests`).
 - **The spring integrator must stay inside its stability bound
   (#599).** `Spring.step` is semi-implicit Euler, which amplifies
   instead of damping once the step is large relative to the

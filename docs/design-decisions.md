@@ -6312,6 +6312,49 @@ Settings" — and it is a different word from its sibling
 `show_shortcuts` on purpose, one toggling a panel and the other
 opening a window.
 
+:::unreleased
+### A shadow window is judged by its buttoned sibling; a pid LaunchServices cannot name is no identity (#1785)
+
+**[Rationale]**
+
+**A shadow is an empty, button-less standard window at the size of
+a buttoned window of its own process** — Orion's "Orion Preview",
+which lists itself as focused and flickers in and out of the AX
+list. Tiled, it took a slot and traded focus with its host on
+every click. What separates it from a frameless real window (a
+terminal, an Electron app) is the buttoned sibling it mirrors: a
+real frameless window has none. It is never tracked rather than
+tracked and later retired, because retiring a tile runs the close
+path — a close-return raise, a `window_destroyed` — for a window
+nobody closed, and a verdict that could retire a tracked window
+would take a frameless app's main window the moment it opened a
+preferences pane. So an empty, button-less window with no host
+yet waits for the one-shot re-track before it may become a tile:
+a twin can list before its host does, and a real frameless window
+alone in its app is tracked on the retry. A cached verdict is
+re-asked on the same two cheap reads, so a window that gains
+content or a button becomes a window. The trade: an app whose
+genuinely empty, frameless window matches a buttoned sibling's
+size would lose that window's tile — no such app is known.
+
+**A pid LaunchServices cannot name is not an identity.** A process
+an app starts as its own LaunchServices child (Orion's second
+profile) is listed with pid -1 — even looked up by its real pid —
+and its activation is announced under the parent's pid or none,
+while the WindowServer and Accessibility know the real one
+(device, 2026-09-29). Keyed on -1, every such process is one; the
+announced pid names the parent while the user clicked the child.
+So every pass attaching apps adopts the WindowServer's owner pid
+through one `liveApps`, a pid ≤ 0 is never observed nor read as
+the active app, the frontmost pid is read through one chain that
+names such an app by its unlisted process, the focus gate and the
+#292 preflight count a sibling process of the active app as the
+app, and an activation of an app running as several processes
+reports no focus of its own — its announced pid's focused window
+is the parent's even when the child was chosen, while each
+process's own focus report names the right one.
+:::
+
 ### Where the app lives is taught inside the tour's own window
 
 **[Principle]**

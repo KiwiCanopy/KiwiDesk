@@ -70,22 +70,19 @@ extension KiwiCore {
     /// id to be tracked; the startup landing falls back to the
     /// session's remembered space for a not-yet-tracked id.
     func trustedFrontmostFocusedWindowID() -> WindowID? {
+        // One frontmost reading, pid and app alike (#1785).
         guard
-            let app = NSWorkspace.shared.frontmostApplication,
-            let pid = eventLoop.frontmostProcess(),
+            let pid = frontmostPIDProvider?(),
+            let app = eventLoop.processIdentity.appAt(pid),
             !FloatDetection.hasVisibleIgnoredPanel(
                 pid: pid,
-                bundleID: AppRef(app).bundleID,
+                bundleID: app.ref.bundleID,
                 isAccessory: EventLoop.classifiesAsOverlay(
                     pid: pid,
                     activationPolicy: app.activationPolicy
                 )
-            ),
-            let element = AXHelper.focusedWindow(pid: pid)
+            )
         else { return nil }
-        // #1785: a listed-without-pid app, and a shadow's host.
-        return AXHelper.windowID(of: element).map {
-            eventLoop.hostOfShadow($0, pid: pid)
-        }
+        return eventLoop.focusedWindowID(pid: pid)
     }
 }

@@ -147,7 +147,7 @@ extension KiwiCore {
         let spaces = NativeSpaces.allSpaces()
         guard let census = desktopMemory.readCensus(spaces) else { return }
         let refs = Dictionary(
-            eventLoop.runningApplications().map { ($0.pid, $0.ref) },
+            eventLoop.liveApps().map { ($0.pid, $0.ref) },
             uniquingKeysWith: { first, _ in first }
         )
         var seeded = 0

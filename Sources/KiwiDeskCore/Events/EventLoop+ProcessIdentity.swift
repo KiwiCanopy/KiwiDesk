@@ -1,18 +1,14 @@
 import AppKit
 
-/// Naming a window's process where LaunchServices cannot (#1785).
-/// A process an app starts as its own LaunchServices CHILD
-/// (Orion's second profile) is listed with pid -1 — even when
-/// looked up by its real pid — and its activations are announced
-/// under the PARENT's pid. The WindowServer and AX know the real
-/// pid, so a pid ≤ 0 is never an identity, and an app running as
-/// several processes takes its focus from each process's own
-/// report, never from the announced pid — whose windows are the
-/// ones in front at the announcement (device, 2026-09-29).
+/// Naming a window's process where LaunchServices cannot (#1785):
+/// a process an app starts as its own LaunchServices child
+/// (Orion's second profile) is listed with pid -1 and its
+/// activation announced under the parent's pid, while the
+/// WindowServer and AX know the real one.
 struct ProcessIdentity {
     /// The app running under a WindowServer pid, keyed by THAT
-    /// pid: a child registration's own `processIdentifier` reads
-    /// -1 whichever way it is looked up.
+    /// pid: a child's own `processIdentifier` reads -1 however it
+    /// is looked up.
     var appAt: @MainActor (pid_t) -> RunningApp? = { pid in
         NSRunningApplication(processIdentifier: pid).map {
             RunningApp(
@@ -23,15 +19,25 @@ struct ProcessIdentity {
         }
     }
 
-    /// The frontmost app as LaunchServices lists it — pid -1 for
-    /// a child registration.
+    /// The frontmost app as LaunchServices lists it.
     var frontmostApp: @MainActor () -> RunningApp? = {
         NSWorkspace.shared.frontmostApplication.map(RunningApp.init)
     }
 
-    /// Observed pids the running-app list does not carry, with
-    /// their bundle ids — the only processes a sibling can be.
-    var unlisted: [pid_t: String] = [:]
+    /// On-screen layer-0 windows, front to back.
+    var frontToBack: @MainActor () -> [(id: WindowID, pid: pid_t)] =
+        AXHelper.onScreenNormalWindowsFrontToBack
+
+    /// Pids the running-app list does not carry, with their bundle
+    /// ids — the only processes a sibling can be.
+    private(set) var unlisted: [pid_t: String] = [:]
+
+    mutating func record(_ app: RunningApp) {
+        unlisted[app.pid] = app.ref.bundleID
+    }
+
+    mutating func forget(pid: pid_t) { unlisted[pid] = nil }
+    mutating func forgetAll() { unlisted = [:] }
 }
 
 extension EventLoop {
@@ -50,7 +56,7 @@ extension EventLoop {
                 .keys
         )
         guard candidates.count > 1 else { return candidates.first }
-        return AXHelper.onScreenNormalWindowsFrontToBack().first {
+        return processIdentity.frontToBack().first {
             candidates.contains($0.pid)
         }?.pid
     }
@@ -61,23 +67,21 @@ extension EventLoop {
         pid > 0
     }
 
-    /// The heal's app source: every listed app with a real pid,
-    /// then each census pid the list lacks, resolved by that pid.
-    func appsBehind(
-        census: [pid_t: Set<WindowID>]
-    ) -> [RunningApp] {
+    /// Every running app a pass may attach (#1785): the listed
+    /// ones with a real pid, then each window owner the list lacks,
+    /// resolved by that pid. `owners` defaults to every pid owning
+    /// a layer-0 window on any Desktop; the heal hands its census.
+    func liveApps(owners: Set<pid_t>? = nil) -> [RunningApp] {
         let listed = runningApplications().filter {
             Self.isProcessID($0.pid)
         }
         let known = Set(listed.map(\.pid))
-        let unlisted = census.keys
+        let unlisted = (owners ?? visiblePIDs())
             .filter { Self.isProcessID($0) && !known.contains($0) }
             .sorted()
             .compactMap { processIdentity.appAt($0) }
-        for app in unlisted {
-            if let bundleID = app.ref.bundleID {
-                processIdentity.unlisted[app.pid] = bundleID
-            }
+        for app in unlisted where app.ref.bundleID != nil {
+            processIdentity.record(app)
         }
         return listed + unlisted
     }
@@ -92,6 +96,11 @@ extension EventLoop {
             onLog("app exit: pid \(pid) gone, unannounced — detached")
             detach(pid: pid, restoreEnhancedUI: false)
             onEvent(.appTerminated(pid: pid))
+        }
+        // An unlisted pid that never attached has no observer.
+        for pid in processIdentity.unlisted.keys
+        where processIdentity.appAt(pid) == nil {
+            processIdentity.forget(pid: pid)
         }
     }
 

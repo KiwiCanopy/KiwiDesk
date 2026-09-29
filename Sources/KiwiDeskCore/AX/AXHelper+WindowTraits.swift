@@ -9,14 +9,10 @@ struct WindowTraits: Equatable {
     let childCount: Int
     let frame: CGRect
 
-    /// An empty, button-less window beside a real window of the
-    /// same process — Orion's "Orion Preview" twin, which tracked
-    /// as a tile fought its host for the slot and the focus. The
-    /// buttoned sibling is what separates it from a frameless real
-    /// window alone in its app (a terminal, an Electron app). Not
-    /// the frame: a twin tracked before its host appeared is tiled
-    /// away from it, and would never match again (device,
-    /// 2026-09-29). Returns the host, the same-frame one first.
+    /// An empty, button-less window on the frame — or at the
+    /// size — of a buttoned window of its process: the host it
+    /// mirrors (#1785). A frameless real window alone in its app
+    /// has no such sibling.
     static func shadowHost(
         of twin: WindowTraits,
         among siblings: [WindowTraits]
@@ -28,13 +24,16 @@ struct WindowTraits: Equatable {
         }
         return
             (hosts.first { sameFrame($0.frame, twin.frame) }
-            ?? hosts.first)?.id
+            ?? hosts.first { sameSize($0.frame, twin.frame) })?.id
+    }
+
+    private static func sameSize(_ a: CGRect, _ b: CGRect) -> Bool {
+        abs(a.width - b.width) <= 2 && abs(a.height - b.height) <= 2
     }
 
     private static func sameFrame(_ a: CGRect, _ b: CGRect) -> Bool {
         abs(a.minX - b.minX) <= 2 && abs(a.minY - b.minY) <= 2
-            && abs(a.width - b.width) <= 2
-            && abs(a.height - b.height) <= 2
+            && sameSize(a, b)
     }
 }
 
@@ -57,19 +56,24 @@ extension AXHelper {
         }
     }
 
-    /// The shadow rule's reading of one window; nil without an id.
-    static func windowTraits(_ element: AXUIElement) -> WindowTraits? {
-        guard let id = windowID(of: element) else { return nil }
+    /// The window's AX child count; -1 when the read fails, which
+    /// the shadow rule never reads as empty.
+    static func childCount(_ element: AXUIElement) -> Int {
         var count: CFIndex = 0
-        let read = AXUIElementGetAttributeValueCount(
+        return AXUIElementGetAttributeValueCount(
             element,
             kAXChildrenAttribute as CFString,
             &count
-        )
+        ) == .success ? count : -1
+    }
+
+    /// The shadow rule's reading of one window; nil without an id.
+    static func windowTraits(_ element: AXUIElement) -> WindowTraits? {
+        guard let id = windowID(of: element) else { return nil }
         return WindowTraits(
             id: id,
             hasTitlebarButton: hasTitlebarButton(element),
-            childCount: read == .success ? count : -1,
+            childCount: childCount(element),
             frame: frame(of: element)
         )
     }

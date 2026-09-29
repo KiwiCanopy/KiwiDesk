@@ -98,7 +98,7 @@ extension EventLoop {
             return
         }
         if subrole == kAXStandardWindowSubrole,
-            isShadow(element, id: window.id, pid: pid)
+            shadowVerdict(element, id: window.id, pid: pid) != .window
         {
             return
         }
@@ -141,7 +141,6 @@ extension EventLoop {
             tabCarriers.insert(window.id)
         }
         onEvent(.windowCreated(window))
-        retireShadowSuspects(pid: pid)
     }
 
     /// Ids beyond this stop scheduling re-tracks for their app
@@ -162,18 +161,22 @@ extension EventLoop {
     /// when the queue was empty: later drops ride the already
     /// armed one-shot instead of pushing its deadline back with
     /// every reschedule.
-    func markTransientDrop(pid: pid_t, id: WindowID) {
+    /// Whether the re-track was queued — false once this window
+    /// or its app spent its retries.
+    @discardableResult
+    func markTransientDrop(pid: pid_t, id: WindowID) -> Bool {
         guard
             transientRetried[pid, default: []].count
                 < Self.transientRetryCap,
             transientRetried[pid, default: []]
                 .insert(id).inserted
-        else { return }
+        else { return false }
         let wasIdle = pendingRetrack.isEmpty
         pendingRetrack.insert(pid)
         if wasIdle {
             onTransientDrop()
         }
+        return true
     }
 
     /// Hands the pids owed a re-track to the scheduled task and

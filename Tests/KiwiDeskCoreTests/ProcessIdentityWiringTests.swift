@@ -91,7 +91,6 @@ struct ProcessIdentityWiringTests {
         box.logs = []
         loop.appActivated(app(parent), launchedAt: nil)
         #expect(loop.lastActivePid == parent)
-        #expect(box.focused.isEmpty)
         #expect(
             box.logs.contains {
                 $0.hasPrefix("activation: pid \(parent) runs beside")

@@ -34,7 +34,7 @@ extension EventLoop {
         guard isRunning else { return }
         let census = onScreenNormalWindowIDs()
         var quiet: [pid_t: Set<WindowID>] = [:]
-        for app in appsBehind(census: census) {
+        for app in liveApps(owners: Set(census.keys)) {
             let pid = app.pid
             guard let ids = census[pid], !ids.isEmpty
             else { continue }

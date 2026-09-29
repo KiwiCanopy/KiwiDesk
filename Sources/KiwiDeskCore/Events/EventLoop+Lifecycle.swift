@@ -35,11 +35,8 @@ extension EventLoop {
             writeEnhancedUI(pid, false)
         }
         observers = [:]
-        processIdentity.unlisted = [:]
-        shadows = ShadowWindows(
-            traits: shadows.traits,
-            hasTitlebarButton: shadows.hasTitlebarButton
-        )
+        processIdentity.forgetAll()
+        shadows.forgetAll()
         elements = [:]
         enhancedUIBaselines = [:]
         manualAXApplied = []

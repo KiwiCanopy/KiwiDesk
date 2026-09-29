@@ -38,7 +38,7 @@ extension KiwiCore {
                 // now would fly the user back (#414) — the
                 // schedule-time exemption re-checked at fire.
                 !window.isSticky,
-                self.eventLoop.frontmostProcess() == window.pid,
+                self.frontmostOwns(pid: window.pid),
                 // An open quick-terminal-style panel makes AX
                 // report the app's main window as focused;
                 // following that report would enforce the main
@@ -50,12 +50,7 @@ extension KiwiCore {
                     isAccessory: self.eventLoop
                         .classifiesAsOverlay(pid: window.pid)
                 ),
-                let element = AXHelper.focusedWindow(
-                    pid: window.pid
-                ),
-                AXHelper.windowID(of: element).map({
-                    self.eventLoop.hostOfShadow($0, pid: window.pid)
-                }) == id,
+                self.eventLoop.focusedWindowID(pid: window.pid) == id,
                 let space = self.state.workspaces.space(
                     of: id
                 ),
