@@ -68,6 +68,50 @@ struct SharedLookSeamTests {
         #expect(seed.contains("config.settings=resolvedSettings(of:profile)"))
     }
 
+    /// A stored profile's settings read raw — the one-expression
+    /// `profiles.read(name:).settings` shape — only where listed
+    /// with a reason; any other use-reader takes
+    /// `resolvedSettings(of:)`. Residue, stated: a read split
+    /// across two statements (`let p = read(…)` then `p.settings`)
+    /// is review's, since no pattern can tell a use from a rewrite.
+    @Test("raw stored-settings reads are listed")
+    func rawReadsAreListed() throws {
+        let allowed: [String: String] = [
+            // The tour's Revert baseline: a follower's copy is
+            // re-stamped at every landing (`landSharedLook`), so
+            // raw equals worn there.
+            "KiwiCore+ShelfPaint.swift": "tour baseline"
+        ]
+        let pattern = try Regex(#"read\(name:[^)]*\)\??\.settings"#)
+        var found: Set<String> = []
+        for file in try SourceScan.swiftSources(under: Self.root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            if source.contains(pattern) {
+                found.insert(file.lastPathComponent)
+            }
+        }
+        #expect(
+            found == Set(allowed.keys),
+            "a raw stored-settings read outside the list: \(found)"
+        )
+    }
+
+    /// A reload drops the staged ticks and re-reads the switches,
+    /// and the save pill lists the ticks it counts.
+    @Test("the draft's ticks are reset and listed")
+    func ticksAreResetAndListed() throws {
+        let reload = try squashed(
+            "KiwiDesk/Settings/SettingsModel+EditTarget.swift"
+        )
+        #expect(reload.contains("resetLookReach()"))
+        let panel = try squashed(
+            "KiwiDesk/Settings/SettingsDetailPanel.swift"
+        )
+        #expect(panel.contains("rows+=model.lookReachDiffRows()"))
+    }
+
     /// The prepare reads `gui.json` ahead of the settle, which may
     /// rewrite a profile file.
     @Test("the prepare precedes the settle")
@@ -97,6 +141,17 @@ struct SharedLookSeamTests {
                 "core.guiConfigStore.save("
             ),
         ]
+        // The live door applies the draft to the screen; the
+        // checklist's re-resolve must run before, or it paints the
+        // old shared look over the draft's edit.
+        let live = try squashed(
+            "KiwiDesk/Settings/SettingsModel+Profiles.swift"
+        )
+        let liveReach = try #require(live.range(of: "saveLookReach()"))
+        let apply = try #require(
+            live.range(of: "core.applyProfileScopedState(")
+        )
+        #expect(liveReach.lowerBound < apply.lowerBound)
         for (file, write) in doors {
             let body = try squashed(file)
             let reach = try #require(

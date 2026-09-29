@@ -85,7 +85,10 @@ struct LookReachTests {
     func unreachedIsNotRewritten() throws {
         let core = try crossedCore()
         let url = try core.profiles.fileURL(name: "Work")
-        let before = try Data(contentsOf: url)
+        // Non-canonical bytes that still decode: any rewrite, even
+        // one that encodes the same profile, changes them.
+        let before = try Data(contentsOf: url) + Data("\n\n".utf8)
+        try before.write(to: url)
         try core.saveLookReach(["Work": true])
         #expect(try Data(contentsOf: url) == before)
     }

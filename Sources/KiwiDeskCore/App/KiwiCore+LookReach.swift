@@ -37,7 +37,9 @@ extension KiwiCore {
             guard profile.look != look else { continue }
             if look == nil, sharedLook == nil, isGuiManaged {
                 // No shared look yet: this one's look seeds it, and
-                // the election settles every other profile.
+                // the election settles every other profile. Core
+                // only — Settings greys every box before a shared
+                // look exists, since every profile is own then.
                 crossWith(LookBody(of: profile.settings))
                 profile = try profiles.read(name: name)
                 guard profile.look != look else { continue }

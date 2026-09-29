@@ -100,14 +100,16 @@ extension SettingsModel {
             luaSource: luaSource,
             cleanLuaSource: cleanLuaSource
         ).editedSpaceModes
+        // The checklist first (#1752), ahead of the draft reaching
+        // the live screen: a profile it unticks keeps the look from
+        // BEFORE this Save's edits, its re-resolve cannot paint the
+        // old shared look over the draft's, and its writes precede
+        // every gui.json write of the Save.
+        saveLookReach()
         core.applyProfileScopedState(
             from: config,
             applyingModesFor: edited
         )
-        // The checklist first (#1752): a profile it unticks keeps
-        // the look from BEFORE this Save's edits, and its writes
-        // precede every gui.json write of the Save.
-        saveLookReach()
         var saved = true
         do {
             try core.persistProfile(
