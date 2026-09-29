@@ -91,6 +91,15 @@ extension KiwiCore {
         let spaces = SpaceID.deduplicated(
             state.workspaces.allSpaces.map(\.id)
         )
+        let base = config.layers[index].bindings
+        // More existing rows only shrink what is added, so the base
+        // alone answers "nothing to add" without reading a profile.
+        guard
+            !DefaultKeybindings.digitTopUp(
+                existing: base,
+                spaces: spaces
+            ).isEmpty
+        else { return }
         // The base is shared by every profile, so a row in it or
         // in ANY profile's override counts: a tombstoned base row
         // still holds its combo, and no profile's resolved layer
@@ -99,7 +108,7 @@ extension KiwiCore {
             $0.layers?.layers.first { $0.isDefault }?.bindings ?? []
         }
         let added = DefaultKeybindings.digitTopUp(
-            existing: config.layers[index].bindings + overrides,
+            existing: base + overrides,
             spaces: spaces
         )
         guard !added.isEmpty else { return }
