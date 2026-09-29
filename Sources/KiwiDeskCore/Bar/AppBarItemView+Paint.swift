@@ -29,6 +29,7 @@ extension AppBarItemView {
             forThickness: crossThickness
         )
         layer?.cornerRadius = radius
+        layer?.maskedCorners = maskedCorners
         accentClip.frame = bounds
         accentClip.layer?.masksToBounds = true
         accentClip.layer?.cornerRadius = radius
@@ -43,25 +44,14 @@ extension AppBarItemView {
         )
     }
 
-    /// Masked corners for item background rounding.
+    /// The corners this item rounds (`ItemCornerMask`, #1763).
     var maskedCorners: CACornerMask {
-        let all: CACornerMask = [
-            .layerMinXMinYCorner, .layerMaxXMinYCorner,
-            .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
-        ]
-        if style.hasBox { return all }
-        let leading: CACornerMask =
-            horizontal
-            ? [.layerMinXMinYCorner, .layerMinXMaxYCorner]
-            : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        let trailing: CACornerMask =
-            horizontal
-            ? [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
-            : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        var corners: CACornerMask = []
-        if isFirstInRun { corners.formUnion(leading) }
-        if isLastInRun { corners.formUnion(trailing) }
-        return corners
+        ItemCornerMask.mask(
+            shelf: style.shelf,
+            first: isFirstInRun,
+            last: isLastInRun,
+            horizontal: horizontal
+        )
     }
 
     var textColorHex: String {

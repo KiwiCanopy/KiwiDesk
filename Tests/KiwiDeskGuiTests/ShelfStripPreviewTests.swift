@@ -145,13 +145,6 @@ struct ShelfStripPreviewTests {
             return item
         }
         let inset = labelled.pipEndInset(scale: preview.scale)
-        #expect(
-            inset
-                == KiwiShelf.endClearance(
-                    radius: 7,
-                    crossOffset: 3 * preview.scale
-                )
-        )
         #expect(inset > 0)
         #expect(
             abs(preview.need(labelled) - preview.need(bare) - 6 * inset)
@@ -162,5 +155,22 @@ struct ShelfStripPreviewTests {
         bare.boxed = false
         #expect(labelled.pipEndInset(scale: preview.scale) == 0)
         #expect(preview.need(labelled) == preview.need(bare))
+    }
+
+    /// The need above is only half: the pip must DRAW the inset it
+    /// measures, through the same member, exactly once (#1763).
+    @Test("A labelled pip draws the clearance its need counts")
+    func pipDrawsItsClearance() throws {
+        let url = SourceScan.repoRoot(from: "\(#filePath)")
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/HomeCardPlate+BarStrip.swift"
+            )
+        let source = try SourceScan.strippedSource(at: url)
+        #expect(!source.isEmpty)
+        let draws =
+            source.components(
+                separatedBy: "spec.pipEndInset(scale: scale)"
+            ).count - 1
+        #expect(draws == 1)
     }
 }

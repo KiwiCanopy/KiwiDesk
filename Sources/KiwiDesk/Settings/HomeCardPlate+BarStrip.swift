@@ -236,7 +236,9 @@ extension HomeCardBarsTile.BarSpec {
     /// The along-axis inset a labelled pip owes each rounded end of
     /// its box (#1763) — drawn by `BarStripView`, measured by
     /// `ShelfStripPreview`'s need; the content sits `3 * scale` in
-    /// from the box's long edges. Only a boxed pip draws a box.
+    /// from the box's long edges. Only a boxed pip draws a box, so
+    /// the schematic pads boxed pips alone — no plate run ends, no
+    /// vertical App Bar exception.
     func pipEndInset(scale: CGFloat) -> CGFloat {
         guard boxed else { return 0 }
         return KiwiShelf.endClearance(

@@ -5,6 +5,7 @@ extension SpaceBarItemView {
     func restyle() {
         layer?.masksToBounds = false
         layer?.cornerRadius = cornerRadius
+        layer?.maskedCorners = maskedCorners
         layer?.backgroundColor = fillColor.cgColor
         accentClip.frame = bounds
         accentClip.layer?.masksToBounds = true
@@ -141,25 +142,14 @@ extension SpaceBarItemView {
         )
     }
 
-    /// Corner masking for accent clip (owner 2026-07-20).
+    /// The corners this item rounds (`ItemCornerMask`, #1763).
     private var maskedCorners: CACornerMask {
-        let all: CACornerMask = [
-            .layerMinXMinYCorner, .layerMaxXMinYCorner,
-            .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
-        ]
-        if style.hasBox { return all }
-        let leading: CACornerMask =
-            horizontal
-            ? [.layerMinXMinYCorner, .layerMinXMaxYCorner]
-            : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        let trailing: CACornerMask =
-            horizontal
-            ? [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
-            : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        var corners: CACornerMask = []
-        if isFirstInRun { corners.formUnion(leading) }
-        if isLastInRun { corners.formUnion(trailing) }
-        return corners
+        ItemCornerMask.mask(
+            shelf: style.shelf,
+            first: isFirstInRun,
+            last: isLastInRun,
+            horizontal: horizontal
+        )
     }
 
     private var fillColor: NSColor {
