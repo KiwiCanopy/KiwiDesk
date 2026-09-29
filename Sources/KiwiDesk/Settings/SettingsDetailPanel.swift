@@ -192,6 +192,7 @@ enum SettingsDiffRowSource {
             )
         }
         rows += model.reachDiffRows()
+        rows += model.lookReachDiffRows()
         if diff.luaChanged {
             rows.append(
                 SettingsDiffRow.note(

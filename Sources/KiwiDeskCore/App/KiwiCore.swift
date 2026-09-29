@@ -50,13 +50,8 @@ public final class KiwiCore {
     /// the generation that captured them.
     var keybindingRuntimeGeneration: UInt64 = 0
 
-    /// Global window-rule bases captured from the active config
-    /// owner before any profile sparse diff is applied. Required
-    /// for Lua-managed profiles: live state holds the effective
-    /// rules and therefore cannot serve as the next profile's base.
-    var globalAppRuleBase: [String: SpaceID] = [:]
-    var globalFloatRuleBase: [String] = []
-    var globalIgnoreRuleBase: [String] = []
+    /// The global window-rule bases (`GlobalRuleBase`).
+    var globalRuleBase = GlobalRuleBase()
     /// `loadConfig` installs several candidate rule states before
     /// the active native-Space binding is known. Suppress their AX
     /// reconciles and run one pass after the final profile wins.
@@ -280,6 +275,8 @@ public final class KiwiCore {
     var healedSpaces: [String: SpaceID] = [:]
     /// Settings no profile carries (#1741, `KiwiCore+AppWide`).
     var appWideLedger = AppWideLedger()
+    /// The shared look's state (#1752, `KiwiCore+SharedLook`).
+    var sharedLookLedger = SharedLookLedger()
     /// The live arrangement's explicit rehome target (#68) —
     /// adopted from the active profile, edited by the GUI, and
     /// captured back on save. nil falls back to the space

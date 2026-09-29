@@ -1150,6 +1150,28 @@ which re-reads the loaded profile's rules. Its profile writes
 stay non-adopting (`ProfileManager.write`), so reaching another
 profile never moves `currentName` (#1249).
 
+**The look checklist is that door's sibling, with the same
+obligations (#1752).** "Look applies to" reaches every profile it
+names, so a Save writes each switch through the one
+`KiwiCore.saveLookReach`: only a switch that changed is written,
+a profile going own freezes the look it wears into its file, the
+writes are non-adopting, and it runs before any `gui.json` write
+of the same Save (`LookReachTests`). A follower's look itself is
+the shared one, so a write of it lands in `gui.json` through the
+one `recordLookWrite` door (`SharedLookWriteTests`), and a
+reader of a stored profile's settings for use takes
+`resolvedSettings(of:)` rather than `profile.settings`
+(`SharedLookSeamTests`). Every change of the shared look after
+the crossing lands through the one `landSharedLook` — the
+crossing (`crossWith`) and a restore (`takeRestoredSharedLook`)
+being its only other writers — — `gui.json` first, then each
+follower's file copy re-stamped, then the live look re-resolved,
+never the whole profile re-applied (#1179) — so a write beside it
+leaves a copy or the screen stale (`SharedLookLandTests`). A
+restore takes the bundle's shared look through
+`takeRestoredSharedLook` ahead of its `gui.json` write, as #1741's
+app-wide values do.
+
 **The tour's shelf paint is a further write, and it is not Keep
 (#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through
 to live AND the live profile's file; the file half reads the
@@ -1171,7 +1193,10 @@ then hands the SAME edit to an open draft through
 `onLiveProfileWritten`, told whether a file took it — never a
 caller's own announcement
 (`ShelfPaintTests` ▸ `paintsAreAnnounced`, `BarMenuRowsTests` ▸
-`discSetsTheSpan`). The draft policy is ruled here, once
+`discSetsTheSpan`). A follower's look is the shared one, so a
+look the door writes for one lands there through
+`recordLookWrite`, which re-stamps the other followers' files too
+(#1752). The draft policy is ruled here, once
 (`SettingsModel.adoptLiveWrite`): a clean live draft re-reads; a
 dirty one takes the edit on BOTH sides of its diff, so its next
 Save neither writes the old value back nor counts the change as

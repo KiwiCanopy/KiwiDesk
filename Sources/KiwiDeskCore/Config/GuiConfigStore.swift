@@ -36,6 +36,10 @@ public struct GuiConfigStore {
     /// no write can end it with values it never adopted.
     public var liveAppWide: AppWideSettings?
 
+    /// The shared look (#1752), stamped the same way: nil while its
+    /// crossing is owed or the config is Lua-owned.
+    public var liveLook: LookBody?
+
     public init(directory: URL) {
         self.url = directory.appendingPathComponent("gui.json")
     }
@@ -68,6 +72,9 @@ public struct GuiConfigStore {
         }
         if let liveAppWide {
             config.appWide = liveAppWide
+        }
+        if let liveLook {
+            config.look = liveLook
         }
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),

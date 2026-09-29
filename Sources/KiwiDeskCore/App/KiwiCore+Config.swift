@@ -7,6 +7,7 @@ extension KiwiCore {
         // Before the settle, which may rewrite a profile file the
         // #1741 crossing still has to read.
         prepareAppWide()
+        prepareSharedLook()
         // #1530's one-time settle, owed from when the manager was
         // made — before any reader could stamp a file.
         if profiles.owesSetSettle {
@@ -202,9 +203,9 @@ extension KiwiCore {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
         eventLoop.ignoreRules = IgnoreRules([])
-        globalAppRuleBase = [:]
-        globalFloatRuleBase = []
-        globalIgnoreRuleBase = []
+        globalRuleBase.appRules = [:]
+        globalRuleBase.floatRules = []
+        globalRuleBase.ignoreRules = []
         // `init.lua`'s scroll_gesture verbs declare the base anew;
         // the load's tail configures the tap once.
         resetScrollGestureInputs()

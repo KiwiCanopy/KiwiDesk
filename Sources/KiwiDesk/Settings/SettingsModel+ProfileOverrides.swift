@@ -36,6 +36,9 @@ extension SettingsModel {
         // whole rather than committing the tiling alone.
         // Its own shortcut override is the diff `overwriteProfile`
         // takes below, against the base written here.
+        // The look checklist first (#1752): its writes precede the
+        // rule half's gui.json write.
+        guard saveLookReach() else { return }
         let rules = saveRuleReach()
         guard rules != .failed else {
             // A write that failed after others landed: re-read, so
@@ -65,6 +68,7 @@ extension SettingsModel {
             return
         }
         persistBindingsIfEdited()
+        core.commitSharedLook(ofProfile: name)
         core.reapplyIfInEffect(name)
         reload()
     }

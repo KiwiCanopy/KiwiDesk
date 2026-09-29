@@ -2,6 +2,11 @@
 enum ColorsRowOrder {
     // MARK: - Colours & Animations (the Simple area)
 
+    /// The Shared look card's one row (#1752).
+    static let sharedLookAtRest: [SettingKey] = [
+        .colours(.lookAppliesTo)
+    ]
+
     /// Context menu for user looks (#1684).
     static let looksContextMenu: [SettingKey] = [
         .colours(.lookRename),

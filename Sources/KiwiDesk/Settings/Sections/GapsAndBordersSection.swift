@@ -10,6 +10,7 @@ struct GapsAndBordersSection: View {
             // Mounted card composition pinned by
             // `GapsAndBordersGateWiringTests` (#754).
             VStack(alignment: .leading, spacing: 20) {
+                SharedLookPointer(model: model)
                 GapsEditor(model: model)
                 BordersCard(model: model)
                 FocusBorderEditor(model: model)

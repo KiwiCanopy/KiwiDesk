@@ -46,7 +46,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// on `[Profile]` alone.
     /// 17 = `space_bar.glyph_cap` became `glyph_span` (#1528),
     /// on `[Profile]` alone.
-    public static let currentFormat = 17
+    /// 18 = a profile states which look it wears, one from before
+    /// stamped `own` (#1752), on `[Profile]` alone.
+    public static let currentFormat = 18
 
     public let format: Int
 

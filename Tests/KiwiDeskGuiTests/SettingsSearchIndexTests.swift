@@ -218,8 +218,9 @@ struct SettingsSearchIndexTests {
                 // #1684: the look shelf's five labelled actions,
                 // anchor-less like the palette shelf's. 14 since
                 // #1752: "Keep previous colors" is labelled, where
-                // the "use its colors" row it replaced was not.
-                .looks: 14,
+                // the "use its colors" row it replaced was not. 15:
+                // the Shared look card's "Applies to" (#1752).
+                .looks: 15,
                 // 17 since #1517 (one shelf set); 18: #1679's border.
                 .advancedColors: 18,
                 // 6: `(action) presets.layouts` joined anchor-less

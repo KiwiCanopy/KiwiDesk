@@ -34,14 +34,16 @@ struct GuiConfigParityTests {
         // instead (`GuiConfigStore.liveDesktopSpaces`), which is
         // why no caller has to carry it. `appWide` (#1741) is
         // stamped the same way (`GuiConfigStore.liveAppWide`)
-        // and read by `applyStructuredConfig`.
+        // and read by `applyStructuredConfig`; so is the shared
+        // `look` (#1752, `GuiConfigStore.liveLook`), read by
+        // `prepareSharedLook`.
         #expect(
             fields == [
                 "format", "settings", "spaces", "spaceModes",
                 "appRules", "spacePins", "mainSpaces",
                 "fallbackSpace", "floatRules", "ignoreRules",
                 "profileBindings", "desktopSpaces", "layers",
-                "scrollGesture", "appWide",
+                "scrollGesture", "appWide", "look",
             ]
         )
     }
@@ -67,6 +69,9 @@ struct GuiConfigParityTests {
         wide.refusalSound = true
         wide.quitGridTargetDepth = 3
         config.appWide = wide
+        var shared = TilingSettings()
+        shared.kiwishelf.fillColor = "#123456"
+        config.look = LookBody(of: shared)
         // Every field off its default: the base's coding is
         // hand-listed, so a field left default is one unwatched.
         config.scrollGesture = ScrollGestureBase(
@@ -103,6 +108,7 @@ struct GuiConfigParityTests {
         #expect(back.desktopSpaces == config.desktopSpaces)
         #expect(back.layers == config.layers)
         #expect(back.appWide == config.appWide)
+        #expect(back.look == config.look)
         #expect(back.scrollGesture == config.scrollGesture)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.

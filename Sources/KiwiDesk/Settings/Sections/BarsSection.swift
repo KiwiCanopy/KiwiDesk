@@ -11,6 +11,7 @@ struct BarsSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                SharedLookPointer(model: model)
                 KiwiShelfCard(model: model)
                 SpaceBarCard(model: model)
                 AppBarCard(model: model)

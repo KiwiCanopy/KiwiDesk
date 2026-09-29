@@ -148,7 +148,12 @@ restore that skips a profile or a palette says so.
 
 :::unreleased
 Saved looks travel in a backup beside the palettes, and restore
-wherever they do; **Reset All Settings…** keeps them too.
+wherever they do; **Reset All Settings…** keeps them too. The
+shared look travels with the settings, and each profile keeps
+whether it uses it. Restoring a backup written before profiles
+could share a look gives every profile its own, then the first
+saved profile loaded lends the shared look to those wearing the
+same one.
 
 The alert sound and the windows per pile on quit travel in a
 backup. An older backup keeps them in its profiles instead, and
@@ -212,6 +217,11 @@ can't apply, and **`quit`** holds `grid_target_depth`, the
 windows per pile on quit, beside `layout`, how windows are
 spread on quit. The first two are set on **General**; `layout`
 is set from Lua (`quit.set_layout`).
+
+**`look`** holds the shared look: every color, the bars' styling,
+Liquid Glass, the focus border's shape and the global gaps, worn
+by every profile without its own. Settings writes it; choose
+which profiles use it in **Looks & Animations ▸ Shared look**.
 :::
 
 A `profile_bindings` entry names its profiles as a list,
@@ -263,6 +273,17 @@ keybindings runs on every reload.
 The alert sound when an action can't apply and the windows per
 pile on quit are global too: they sit in `gui.json`, and loading
 a profile never changes them.
+
+The look is shared unless a profile keeps its own. The shared
+look sits in `gui.json`; a profile with its own carries
+`"look": "own"` and keeps it in its JSON. **Looks & Animations ▸
+Shared look ▸ Applies to** ticks the profiles using the shared
+look. The profile you are editing cannot change its own box, so
+to give a profile its own look or share one, open a profile that
+uses the shared look and untick or tick it there; on a profile
+with its own look the list is greyed. A new profile shares the
+look if the profile it was saved from does. With a Lua-owned
+`init.lua` there is no shared look.
 :::
 
 The General section leaves the grid while you edit a stored
@@ -627,6 +648,13 @@ shares with the loaded profile ([Per-Profile Space
 Assignments](#per-profile-space-assignments)). **Save a copy…**
 while editing a stored profile duplicates it with your pending
 edits, without touching the running layout.
+
+:::unreleased
+The shared look is the other exception: saving a profile that
+uses it changes it at once wherever it is worn, the running
+layout included. A copy of such a profile whose look you changed
+keeps that look as its own.
+:::
 
 ### Saving
 

@@ -147,6 +147,11 @@ synonym:
   Code already says "look" for a bar's resolved drawing inputs
   (`SpaceBarLook`, `AppBarLook`, `LayoutAppBar.look(on:)`);
   that is a contributor-only sense and never reaches copy.
+- **shared look** — the one look in `gui.json` that every profile
+  without its own wears (#1752); the other is its **own look**.
+  Never the *global* look: *global* already names the value a
+  per-Space override falls back to ("Inheriting the global
+  value", `space_override.off.help`).
 - **item** — one entry in a bar (a window, a same-app group, a
   space). Its geometry is `item_gap`, and its length follows its
   content: give it no size knob of its own, since the App Bar's

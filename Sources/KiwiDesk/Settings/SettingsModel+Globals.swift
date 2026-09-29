@@ -59,6 +59,7 @@ extension SettingsModel {
             )
             seedSpaces = config.spaces
         }
+        saveLookReach()
         if saveRuleReach() == .failed { dropRuleHalf() }
         do {
             if core.lua == nil {

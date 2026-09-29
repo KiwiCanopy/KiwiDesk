@@ -34,6 +34,9 @@ extension KiwiCore {
             var profile = try profiles.read(name: name)
             edit(&profile.settings)
             try profiles.write(profile)
+            // A follower's look is the shared one (#1752); an edit
+            // that leaves the look alone lands nothing.
+            recordLookWrite(of: profile)
             refreshConfigIssues()
             return true
         } catch {

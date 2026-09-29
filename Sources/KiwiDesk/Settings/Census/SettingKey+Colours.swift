@@ -30,6 +30,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case paletteNeonGlowHint = "(link) palettes.neon_glow_hint"
     case lookApply = "(action) look.apply"
     case lookKeepPreviousColors = "(action) look.keep_previous_colors"
+    /// Which profiles follow the shared look (#1752).
+    case lookAppliesTo = "(action) look.applies_to"
     case lookSave = "(action) look.save"
     case lookImport = "(action) look.import"
     case lookRename = "(action) look.rename"
@@ -109,6 +111,8 @@ extension ColoursKey {
             )
         case .lookRename, .lookExport, .lookDelete:
             return .row(.coloursAndMotion, .looks, .showMore)
+        case .lookAppliesTo:
+            return .row(.coloursAndMotion, .sharedLook, .atRest)
         case .paletteNeonGlowHint:
             return .row(
                 .coloursAndMotion,
@@ -183,6 +187,8 @@ extension ColoursKey {
             return .dynamic
         case .lookKeepPreviousColors:
             return .text("looks.keep_previous_colors")
+        case .lookAppliesTo:
+            return .text("app_rules.reach")
         case .lookSave:
             return .text("looks.save_current")
         case .lookImport:

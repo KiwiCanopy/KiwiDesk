@@ -159,14 +159,15 @@ struct ColorsCensusRenderTests {
         #expect(!SettingRuntimeGate.liquidGlassUnavailable.greys)
     }
 
-    /// The area's render knows exactly its four containers; a
-    /// fifth would mount nowhere, so it must fail loud here rather
-    /// than ship an unreachable row.
-    @Test("Looks & Animations holds looks, palettes, glass, motion")
+    /// The area's render knows exactly its five containers — the
+    /// Shared look card first since #1752; another would mount
+    /// nowhere, so it must fail loud here rather than ship an
+    /// unreachable row.
+    @Test("Looks & Animations holds its five containers")
     func coloursAndMotionContainers() {
         #expect(
             containers(of: .coloursAndMotion)
-                == [.looks, .palettes, .glass, .motion]
+                == [.sharedLook, .looks, .palettes, .glass, .motion]
         )
     }
 
