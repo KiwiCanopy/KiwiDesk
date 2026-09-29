@@ -1640,6 +1640,29 @@ indistinguishable from "SkyLight unavailable" — and unavailable
 must keep the single-Desktop fallback fully alive, so a lookup
 miss always counts as a Desktop.
 
+:::unreleased
+**A presentation in front stands the shelf down the same way
+(#1787).** A window filling its whole screen — the float-region
+entry's verdict — is a slide show or a borderless-fullscreen
+game, and a bar painted over it is the defect native fullscreen
+already rules out, so both bars stand down on a screen whose
+FRONT window fills it, through the one `shelfStandsDown(on:)`.
+Front and not focused, because PowerPoint's presenter view keeps
+the focus on one screen while the show fills the other; a window
+is on the screen its midpoint is on, since the presenter view
+overscans a point into its neighbour. The WindowServer's order
+is read only while a tracked window fills that screen, so a desk
+without one pays nothing, and a move or resize crossing the
+verdict re-reads it, since an app may animate its show open past
+the focus report. Layout still reserves the strip — the
+reservation is the config's — so nothing tiled reflows as a show
+starts or ends. Residue, accepted: the order is re-read at an
+honored focus, a retile or a crossing, so a window of an app
+KiwiDesk ignores stepping in front of a show leaves the shelf
+down until the next of those, and a screen-filling window
+KiwiDesk does not track keeps the shelf drawn over it.
+:::
+
 "Without a destroy" is AppKit's transition, not every app's
 ([#1272](https://github.com/KiwiCanopy/KiwiDesk/issues/1272)).
 Zen — Firefox behind it — orders the real window out for the
@@ -3959,6 +3982,35 @@ the point rather than a simplification: one that tracked the
 ring's actual presence would shift the float every time it gained
 or lost focus. And it goes to zero with borders off, so nothing
 is reserved for chrome that is not on screen.
+
+:::unreleased
+*A window filling its whole screen is presenting, and the float
+nets leave it where its app put it (#1787).* A slide show, or a
+borderless-fullscreen game or player, draws over the menu bar,
+the Dock and the shelf on purpose — that is the point of it — so
+a fit pushing it clear of a strip, or a floating-mode entry
+laying it into the quit grid, breaks the thing the user just
+started, as either would break native fullscreen, which both
+already skip. The verdict is the frame alone: edge for edge with
+a whole screen, within 2 pt, over every screen's WHOLE frame —
+never larger, which is an oversized float the fit still owes.
+The fit's skip is load-bearing twice: its frame write also
+stamps the #1161 placement ledger, and in a Scrolling Space a
+live entry is the whole bounce verdict, so without the skip the
+show's own first focus reads as an app answering our placement
+and the distrust raises the editor back over the show.
+
+What the frame alone costs, accepted: a titled window normally
+stops at the menu bar, but with the menu bar set to auto-hide
+and no Dock on that screen a float maximised by Fill matches the
+screen too, and is read as presenting — left unfitted, and the
+shelf standing down while it is in front. Telling the two apart
+needs the window's AX subrole, which state does not carry; the
+cost is a bar hidden behind a window the user sized to cover it.
+Every other reader of a window is ruled against the verdict one
+verb at a time
+([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)).
+:::
 
 **A resize nobody asked for is corrected on its own event
 (#1358).** [Principle] macOS's title-bar double-click zoom, its
@@ -13291,6 +13343,22 @@ every save captures: a seed is the screen's own Space for the user
 to adopt, while a held Space belongs to an arrangement that is
 coming back. The badge and its "not saved" sentence stand in for a
 promote verb, which can come later if it is asked for.
+
+:::unreleased
+**The hold outranks the incoming profile's record**
+([#1728](https://github.com/KiwiCanopy/KiwiDesk/issues/1728)).
+The switch that holds a Space also runs #1230's restore for the
+profile coming in, and that profile has usually seen the gone
+screen's windows before, in Spaces of its own. Letting the restore
+move them would empty the held Space the same change just made,
+and it would retire — the write side of this is the paragraph
+above, which keeps a held Space out of that record: after a few dock cycles most windows are
+remembered somewhere, so the hold would keep only windows opened
+since. The restore therefore leaves a window in any held Space where
+it is, live or away and remembered there, and what was on one
+screen stays together and goes home together: the undock side of
+the rule, below, that everything inside a held Space goes back.
+:::
 
 **It goes home only into the arrangement it left.** On reconnect a
 held Space returns when its screen is back, the arrangement

@@ -20,7 +20,7 @@ public final class AppBarOverlay {
     }
 
     /// Cached inputs from last `show()` for manual arrow scrolling.
-    private struct RenderState {
+    struct RenderState {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
@@ -34,10 +34,20 @@ public final class AppBarOverlay {
     /// The plate this section's run asks for, in `root`'s
     /// coordinates — the shelf unions it with the other section's.
     var plateFrame: CGRect = .zero
+    /// The span this section's run draws, in `root`'s coordinates —
+    /// what the shelf's section divider centres against (#1779).
+    var contentFrame: CGRect = .zero
+    /// `contentFrame` in `itemRun`'s coordinates, which a scroll
+    /// moves by the run's origin.
+    var runContent: CGRect = .zero
     /// Fires after every render, so the shelf re-lays its plate.
     var onRendered: @MainActor () -> Void = {}
     var itemViews: [AppBarItemView] = []
     let itemContainer = FlippedView()
+    /// Holds the items and their glass inside the clipping
+    /// `itemContainer`; a scroll moves this one view, never each
+    /// item, so per-item glass redraws nothing per event.
+    let itemRun = FlippedView()
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -54,7 +64,10 @@ public final class AppBarOverlay {
     /// Follows the focused window unless a manual scroll holds.
     var follow = ShelfFollow<WindowID>()
     var lastMetrics: Metrics?
-    private var lastShown: RenderState?
+    /// The style the last render drew, gated once (#1374), which a
+    /// scroll re-reads rather than gating again.
+    var drawnStyle: AppBarLook?
+    private(set) var lastShown: RenderState?
 
     public init() {
         configureRoot()
@@ -115,6 +128,7 @@ public final class AppBarOverlay {
         // The one place the stored style becomes the drawn one
         // (#1374): glass stands down while transparency is reduced.
         let style = LiquidGlassGate.rendered(state.style)
+        drawnStyle = style
         let edge = style.edge
         syncItemViewCount(items.count)
         let m = metrics(
@@ -153,20 +167,26 @@ public final class AppBarOverlay {
                 height: m.viewport
             )
         itemContainer.frame = viewport
+        let runFrame = ShelfOverflow.runFrame(
+            in: itemContainer.bounds,
+            offset: scrollOffset,
+            horizontal: m.horizontal
+        )
         let frames = Self.frames(
             lengths: Array(
                 repeating: m.slot,
                 count: items.count
             ),
-            in: itemContainer.bounds,
+            in: CGRect(origin: .zero, size: runFrame.size),
             gap: m.gap,
             horizontal: m.horizontal,
-            alignment: m.alignment,
-            scrolledBy: scrollOffset
+            alignment: m.alignment
         )
         let runStart: CGFloat
         if let first = frames.first {
-            runStart = m.horizontal ? first.minX : first.minY
+            runStart =
+                m.horizontal
+                ? first.minX + runFrame.minX : first.minY + runFrame.minY
         } else {
             runStart = 0
         }
@@ -185,8 +205,9 @@ public final class AppBarOverlay {
         // only the ones the container hosts (#1730).
         if hosting != .boxGlass { teardownBoxGlasses() }
         BarMotion.runLayout {
+            BarMotion.setFrame(itemRun, to: runFrame, animated: true)
             for (index, view) in itemViews.enumerated()
-            where view.superview === itemContainer {
+            where view.superview === itemRun {
                 BarMotion.setFrame(
                     view,
                     to: frames[index],
@@ -224,6 +245,15 @@ public final class AppBarOverlay {
                 self?.dragEnded(view)
             }
         }
+        runContent = drawnContent(
+            frames: frames,
+            strip: strip,
+            horizontal: m.horizontal
+        )
+        contentFrame = runContent.offsetBy(
+            dx: runFrame.minX,
+            dy: runFrame.minY
+        )
         // Single dispatch for glass hosting mode (#407).
         BarMotion.runLayout {
             installGlassHosting(

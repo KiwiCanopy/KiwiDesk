@@ -937,6 +937,15 @@ screen's Spaces are held, not forwarded*. The obligations:
   arm only places Spaces and returns nothing, by ruling. A new
   door owes the call. The composed door and the no-apply arms
   have no clause.
+- **A switching apply's #1230 restore leaves every held Space's
+  members (#1728).** What a held Space holds — a member, else a
+  window remembered there that will come back — is answered once,
+  by `heldSpace(holding:)` in `KiwiCore+HeldSpaceReads.swift`,
+  which the restore and the retire both ask
+  (`HeldSpaceRestoreTests` ▸ `holdKeepsRememberedWindows`,
+  `HeldSpaceRestoreTests` ▸ `heldWindowsGoHomeTogether`). A new
+  path a switching apply runs that moves windows across Spaces
+  owes the same skip through that predicate, never a copy of it.
 - **Retire at the head of `retile()`.** `retireEmptiedHeldSpaces`
   runs there because a membership change retiles; a path that
   empties a held Space without a retile owes the call
@@ -1171,6 +1180,13 @@ leaves a copy or the screen stale (`SharedLookLandTests`). A
 restore takes the bundle's shared look through
 `takeRestoredSharedLook` ahead of its `gui.json` write, as #1741's
 app-wide values do.
+A built-in has no file to keep its own look in, so it always
+wears the shared one: a reader of `StandardLayout.settings(sizes:)`
+for use — the apply, or a picture of what it would apply — paints
+the shared look over it through the one `LookBody.worn(over:)` —
+the apply held by `SharedLookWriteTests` ▸
+`builtInWearsTheSharedLook`, the GUI by `BuiltInLookWearTests`,
+whose `allowed` map is the register of its readers.
 
 **The tour's shelf paint is a further write, and it is not Keep
 (#1720).** `KiwiCore.paintShelf` / `restoreShelf` write through

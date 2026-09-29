@@ -24,7 +24,8 @@ struct PresetsSection: View {
         .sheet(item: $previewRequest) { request in
             PresetPreviewSheet(
                 layout: request.layout,
-                liveSizes: request.liveSizes
+                liveSizes: request.liveSizes,
+                sharedLook: request.sharedLook
             ) { previewRequest = nil }
         }
     }

@@ -941,6 +941,13 @@ the caps print, not which key fires.
   minimized window. Add the same app twice to bind one shortcut
   per behaviour.
 
+:::unreleased
+A window that fills its whole screen — a slide show, a
+borderless-fullscreen game or player — is not held clear of the
+bars: it stays where its app put it, and both bars hide while it
+is in front ([limitations](accepted-limitations.md)).
+:::
+
 ### Import & Adopt
 
 If `init.lua` holds custom keybindings, **Import from

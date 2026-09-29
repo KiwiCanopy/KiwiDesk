@@ -110,7 +110,7 @@ extension SpaceBarOverlay {
         // detaches from the previous parent); a view already in
         // its host is left alone, so a steady render adds nothing
         // to a glass subtree (#1315).
-        let content = frontHost ?? itemContainer
+        let content = frontHost ?? itemRun
         for view in [
             frontBox, frontBorder, frontDivider, frontIcon, frontGlyph,
             frontName,
@@ -225,7 +225,7 @@ extension SpaceBarOverlay {
                 AppFont.font(size: size)
                 ?? .systemFont(ofSize: size)
             frontGlyph.textColor = accent
-            let host = frontGlyph.superview ?? itemContainer
+            let host = frontGlyph.superview ?? itemRun
             frontGlyph.frame = host.backingAlignedRect(
                 BarTextGlyph.frame(for: frontGlyph, in: frame),
                 options: .alignAllEdgesNearest

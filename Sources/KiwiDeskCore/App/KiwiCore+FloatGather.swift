@@ -53,8 +53,11 @@ extension KiwiCore {
         for id in space.windows {
             guard let window = state.windows[id],
                 // A fullscreen member lives on its own macOS
-                // Space (#670); the pointer owns a dragged one.
+                // Space (#670), a presenting one stays where its
+                // app put it (#1787); the pointer owns a dragged
+                // one.
                 !window.isFullscreen,
+                !coversAScreen(wouldBeFrame(of: window)),
                 id != tiler.dragExemptWindow
             else { continue }
             frames[id] = wouldBeFrame(of: window)

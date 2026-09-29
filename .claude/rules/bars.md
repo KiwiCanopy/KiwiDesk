@@ -153,6 +153,19 @@ twice, was a question the user answered twice. The argument is
   plan no longer gives it. `BarsRefreshSeamTests` holds both
   managers' `sync(` to `KiwiCore+Shelf.swift`, and
   `ShelfDriverTests` drives the pair through it.
+- **Stand a bar down through the one
+  `KiwiCore.shelfStandsDown(on:)`**, read once per display in
+  `updateBars()` for both bars — a native-fullscreen Space
+  (#670) or a window filling that screen in FRONT (#1787) —
+  never a user-space read beside it, which hides on the first
+  and draws over a slide show. The cold-start App Bar
+  (`appBarFallback`) is the one exception: it runs before any
+  display is published, with no display to ask about.
+  `ShelfStandDownSeamTests` holds the bar-building files to that,
+  its `allowed` map the one copy of who is exempt;
+  `FullscreenStandDownTests` ▸
+  `presentationInFrontStandsShelfDown` holds both bars through
+  it.
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:
@@ -214,9 +227,24 @@ render content into it (#1517). Obligations:
   BEHIND the section strip and never hosts a view, so the
   no-reparent obligation below holds for it by construction.
   `ShelfOverlayTests` holds the joined plate, ▸ `plateModes` Full
-  and Boxed, and ▸ `dividerInTheGutter` the divider; no suite
+  and Boxed, and ▸ `dividerInTheDrawnGap` the divider; no suite
   scans a bar overlay for a plate of its own, so a section growing
   one is review's.
+- **Centre the live shelf's section divider between what the two
+  sections DRAW, never on the slot gutter (#1779)**: each bar insets its
+  run and its items' content by its own amounts, so the gutter
+  middle reads off-centre. A bar reports its drawn span as
+  `contentFrame` — the item boxes on a boxed shelf, else the
+  content inside each end item — read from the same end-inset
+  readings its layout and measurement take
+  (`SpaceBarItemView.contentInset`, `AppBarItemView.horizontalPlacement`
+  and `verticalIconSquare`),
+  never a copy beside them; `ShelfManager` hands it on beside the
+  plate. `ShelfDividerCentringTests` ▸ `dividerHalvesTheDrawnGap`
+  measures the real bars' glyphs and boxes either side, in both
+  orders. The Settings shelf preview keeps `dividerMiddle`: its
+  runs are schematics padded alike at both ends, so its gutter IS
+  its drawn middle.
 - **Wire a section's `onRendered` in `ShelfManager.sync` alone,
   and place each section at the slot it drew into
   (`shownStrip`)**, never at a plan slot read beside it: a
@@ -301,6 +329,22 @@ Obligations:
 - **Scroll input maps to travel through `ShelfScrollInput`**,
   whose deltas arrive already corrected for natural scrolling
   and are never flipped again (`ShelfScrollInputTests`).
+- **A manual scroll moves the section's run view and never
+  renders.** A section hosts its run — items, per-item glass,
+  tints, the layer rule, an unpinned front segment — in one
+  `itemRun` whose frame carries the offset
+  (`ShelfOverflow.runFrame`), so its items keep their frames; a
+  wheel, trackpad, page or drag-autoscroll step goes through the
+  section's one scroll door (`moveRun`), which moves that view
+  and re-reads what a render derives from the offset. A render
+  per event re-framed every glass and stalled a fast scroll
+  under boxed Liquid Glass. Whatever a render derives from the
+  offset is re-read there to exactly a render's answer at that
+  offset, so a new offset-dependent piece joins the door — a
+  piece a render cuts at the viewport included, as the
+  scrolling front segment's name is (#1763).
+  `ShelfScrollRunTests` holds both bars to a render's answer and
+  to no render.
 - **Every `ShelfArrangement.arrange` caller hands it the Space
   section's floor from `ShelfArrangement.hardFloor`** — the live
   plan and the Settings preview alike. The argument is required,

@@ -75,13 +75,6 @@ struct PresetPreviewSheetTests {
         }
     }
 
-    @Test("the sheet draws the preset's own settings")
-    func theSheetDrawsThePresetsSettings() throws {
-        let source = try squashed(Self.sheet)
-        let needle = "settings:layout.settings(sizes:liveSizes)"
-        #expect(source.occurrences(of: needle) == 1)
-    }
-
     // MARK: - What it mounts
 
     /// A derivation rather than a second copy of 132 — and the

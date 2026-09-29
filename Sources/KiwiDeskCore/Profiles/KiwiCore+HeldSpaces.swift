@@ -221,9 +221,8 @@ extension KiwiCore {
             let space = state.workspaces[id]
             let holdsNothing =
                 withAwayMembers(space?.windows ?? [], of: id).isEmpty
-                && !state.rememberedSpaces.contains {
-                    $0.value.space == id
-                        && !state.closedDepartures.contains($0.key)
+                && !state.rememberedSpaces.keys.contains {
+                    heldSpace(holding: $0) == id
                 }
             guard holdsNothing else { continue }
             state.heldSpaces[id] = nil

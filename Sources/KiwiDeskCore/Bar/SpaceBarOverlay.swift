@@ -118,11 +118,20 @@ public final class SpaceBarOverlay {
     /// The plate this section's run asks for, in `root`'s
     /// coordinates — the shelf unions it with the other section's.
     var plateFrame: CGRect = .zero
+    /// The span this section's run draws, in `root`'s coordinates —
+    /// what the shelf's section divider centres against (#1779).
+    var contentFrame: CGRect = .zero
     /// Fires after every render, so the shelf re-lays its plate.
     var onRendered: @MainActor () -> Void = {}
     var itemViews: [SpaceBarItemView] = []
     /// Clipping item viewport (#385).
     let itemContainer = AppBarOverlay.FlippedView()
+    /// Holds the run — items, their glass, the layer rule and an
+    /// unpinned front segment — inside `itemContainer`; a scroll
+    /// moves this one view, never each item.
+    let itemRun = AppBarOverlay.FlippedView()
+    /// What a scroll re-reads without a render.
+    var scrollRun: ScrollRun?
     /// Hidden-entry counts on each fading end (#1517).
     let backCount = ShelfCountView(side: .before)
     let forwardCount = ShelfCountView(side: .after)
@@ -233,6 +242,7 @@ public final class SpaceBarOverlay {
         hitFrames = []
         scrollOffset = 0
         scrollGeom = nil
+        scrollRun = nil
         cancelDragAutoScroll()
         root.isHidden = true
         onRendered()

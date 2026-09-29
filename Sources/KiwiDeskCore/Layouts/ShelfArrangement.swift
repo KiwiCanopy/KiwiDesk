@@ -55,7 +55,8 @@ public struct ShelfArrangement: Equatable, Sendable {
     }
 
     /// The middle of the gap between two segments along an edge —
-    /// where the section divider sits, live and in the preview.
+    /// the preview's divider between slots, the live one between
+    /// what the sections draw (#1779).
     public static func gutterMiddle(
         _ a: ClosedRange<CGFloat>,
         _ b: ClosedRange<CGFloat>

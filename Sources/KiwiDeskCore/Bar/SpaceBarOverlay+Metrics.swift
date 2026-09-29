@@ -29,43 +29,62 @@ extension SpaceBarOverlay {
         let gap = look.itemGap
         let leadsWithLayer = leadsWithLayer(items)
         let content = look.contentDepth(forDepth: depth)
-        let horizontal = look.edge.isHorizontal
         return items.enumerated().map { index, item in
-            let place = runPlace(
-                index: index,
-                count: items.count,
-                frontFollows: frontFollows
-            )
-            let badged = SpaceBarItemView.badgesIdentifier(
-                collapsed: item.collapse != nil,
-                held: item.held != nil
-            )
             let length = SpaceBarItemView.autoLength(
                 appCount: item.apps.count,
                 discs: item.discs,
                 contentDepth: content,
                 glyphGap: look.resolvedGlyphGap,
-                ends: SpaceBarItemView.ends(
-                    look: look,
+                ends: itemEnds(
+                    items,
+                    index: index,
                     depth: depth,
-                    first: place.first,
-                    last: place.last,
-                    leadsWithIcon: SpaceBarItemView.leadsWithIcon(
-                        item.spaceGlyph,
-                        badged: badged,
-                        horizontal: horizontal
-                    ),
-                    endsInIcon: SpaceBarItemView.endsInIcon(
-                        appCount: item.apps.count,
-                        badged: badged,
-                        horizontal: horizontal
-                    )
+                    look: look,
+                    frontFollows: frontFollows
                 )
             )
             return index == 0 && leadsWithLayer
                 ? length + layerDividerExtent(gap: gap)
                 : length
         }
+    }
+
+    /// Item `index`'s rounded-end insets at its place in the run —
+    /// the one reading `itemLengths` and `contentInsets` share.
+    static func itemEnds(
+        _ items: [Item],
+        index: Int,
+        depth: CGFloat,
+        look: SpaceBarLook,
+        frontFollows: Bool
+    ) -> ItemEnds {
+        let item = items[index]
+        let horizontal = look.edge.isHorizontal
+        let place = runPlace(
+            index: index,
+            count: items.count,
+            frontFollows: frontFollows
+        )
+        let badged = SpaceBarItemView.badgesIdentifier(
+            collapsed: item.collapse != nil,
+            held: item.held != nil
+        )
+        return SpaceBarItemView.ends(
+            look: look,
+            depth: depth,
+            first: place.first,
+            last: place.last,
+            leadsWithIcon: SpaceBarItemView.leadsWithIcon(
+                item.spaceGlyph,
+                badged: badged,
+                horizontal: horizontal
+            ),
+            endsInIcon: SpaceBarItemView.endsInIcon(
+                appCount: item.apps.count,
+                badged: badged,
+                horizontal: horizontal
+            )
+        )
     }
 
     /// Whether item `index` of `count` opens or closes the run —
@@ -122,7 +141,9 @@ extension SpaceBarOverlay {
         return lengths.max() ?? 0
     }
 
-    /// Calculates item frames and front segment start coordinate.
+    /// Calculates item frames and front segment start coordinate,
+    /// in `itemRun` coordinates: an overflowing run starts at zero
+    /// and the run's frame carries the scroll.
     nonisolated static func runMetrics(
         lengths: [CGFloat],
         gap: CGFloat,
@@ -131,8 +152,7 @@ extension SpaceBarOverlay {
         viewport: CGFloat,
         horizontal: Bool,
         alignment: KiwiShelf.Alignment,
-        pad: CGFloat,
-        scrollOffset: CGFloat
+        pad: CGFloat
     ) -> RunMetrics {
         let total = runTotal(
             lengths: lengths,
@@ -142,7 +162,7 @@ extension SpaceBarOverlay {
         let cross = horizontal ? strip.height : strip.width
         var cursor =
             total > viewport
-            ? -scrollOffset
+            ? 0
             : contentStart(
                 total: total,
                 axis: viewport,

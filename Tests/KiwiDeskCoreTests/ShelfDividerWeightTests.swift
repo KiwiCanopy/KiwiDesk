@@ -84,12 +84,14 @@ struct ShelfDividerWeightTests {
                 .init(
                     view: NSView(),
                     slot: CGRect(x: 0, y: 0, width: 200, height: 30),
-                    plate: .zero
+                    plate: .zero,
+                    content: .zero
                 ),
                 .init(
                     view: NSView(),
                     slot: CGRect(x: 200, y: 0, width: 200, height: 30),
-                    plate: .zero
+                    plate: .zero,
+                    content: .zero
                 ),
             ]
         )
@@ -146,12 +148,14 @@ struct ShelfDividerWeightTests {
             .init(
                 view: NSView(),
                 slot: CGRect(x: 0, y: 0, width: 300, height: 30),
-                plate: .zero
+                plate: .zero,
+                content: .zero
             ),
             .init(
                 view: NSView(),
                 slot: CGRect(x: 300, y: 0, width: 700, height: 30),
-                plate: .zero
+                plate: .zero,
+                content: .zero
             ),
         ]
         overlay.show(
