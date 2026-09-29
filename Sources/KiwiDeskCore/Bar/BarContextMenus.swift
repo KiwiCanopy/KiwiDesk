@@ -9,7 +9,7 @@ enum BarHit: Equatable {
     case disc(SpaceID)
     /// An app glyph on a Space item: the windows it stands for,
     /// in row order.
-    case glyph(SpaceID, [WindowID])
+    case glyph([WindowID])
     /// An App Bar item: its window, or a collapsed group's.
     case appItem([WindowID])
     /// A section's overflow count.

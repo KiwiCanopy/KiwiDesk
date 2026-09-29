@@ -14,7 +14,9 @@ extension AppBarOverlay {
         /// Grouped window count shown as badge.
         public let count: Int
         /// The windows the item stands for — its own, or a
-        /// collapsed group's — which its menu names (#1518).
+        /// collapsed group's — which its menu names (#1518). The
+        /// render passes the group (`BarWindowMenuRowsTests`); the
+        /// default serves a one-window item.
         public let members: [WindowID]
         /// The title was cut at `title_cap` (Core's verdict, the
         /// hover title's half of "hides text", #1514).

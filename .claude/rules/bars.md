@@ -529,6 +529,15 @@ rather than the row it names makes the user search again. So:
   and the GUI maps it** (`SettingsAnchor(landing:)`), landing on
   the card or row as the search does — never a destination or a
   sentence authored in Core (#96, `BarMenuLandingTests`).
+- **A row that acts on a window acts through a public verb that
+  names it** — a `Commands/Reference` record taking a `.window`
+  argument, called through `execute` — never a menu-only path
+  into Core (owner ruling 2026-09-29 on #1518). A window row a
+  verb cannot yet express earns the argument first, the way
+  #1789 did for move and float; its refusal is the verb's own
+  `.fail`, cued as structure the GUI narrates. Nothing scans for
+  a menu-only path, so this is review's; `BarWindowMenuRowsTests`
+  drives the rows through their verbs.
 - **A row that writes a stored setting goes through its setter,
   then the one `writeThroughLiveProfile` door**, whose draft
   policy is [profiles.md](profiles.md)'s (`BarMenuRowsTests` ▸

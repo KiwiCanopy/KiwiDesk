@@ -25,7 +25,8 @@ extension KiwiCore {
 
     /// "Current Space" is the Space holding the system focus —
     /// `state.workspaces.activeSpace` — never `currentSpace(on:)`
-    /// of the chip's screen; greyed where the window already is.
+    /// of the chip's screen; greyed where the window already is,
+    /// and where the move's own sticky gate would refuse it.
     private func moveRow(_ windows: [WindowID]) -> BarMenuRow {
         let title = L("bar.menu.move_here", "Move to Current Space")
         let target = state.workspaces.activeSpace
@@ -35,7 +36,8 @@ extension KiwiCore {
             }
         )
         let movable = { (id: WindowID) in
-            target != nil && homes[id] != target
+            guard let target, homes[id] != target else { return false }
+            return self.stickyMoveBlock(id, to: target) == nil
         }
         let move = { [weak self] (id: WindowID) in
             guard let target else { return }
@@ -94,9 +96,9 @@ extension KiwiCore {
     /// Greyed for Finder, which macOS relaunches, and for KiwiDesk
     /// itself, whose Quit is the status item's.
     private func quitRow(_ app: ManagedWindow) -> BarMenuRow {
-        let own =
-            app.pid == ProcessInfo.processInfo.processIdentifier
-        let quits = !own && app.appBundleID != Self.finderBundleID
+        let quits =
+            !EventLoop.isOwnProcess(app.pid)
+            && app.appBundleID != Self.finderBundleID
         return .action(
             L("bar.menu.quit_app", "Quit %1$@", app.appName),
             enabled: quits
@@ -111,5 +113,4 @@ extension KiwiCore {
         return window.title.isEmpty ? window.appName : window.title
     }
 
-    static let finderBundleID = "com.apple.finder"
 }

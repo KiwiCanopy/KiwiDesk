@@ -18,7 +18,7 @@ extension KiwiCore {
         switch hit {
         case .space(let id): above = spaceChipRows(id)
         case .disc: above = [glyphSpanRow()]
-        case .glyph(_, let windows):
+        case .glyph(let windows):
             above = windowRows(windows, movable: true)
         case .appItem(let windows):
             above = windowRows(windows, movable: false)

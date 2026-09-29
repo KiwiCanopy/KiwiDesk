@@ -97,7 +97,7 @@ struct BarMenuViewTests {
         defer { withExtendedLifetime(menus) {} }
         let chip = try #require(overlay.itemViews.first)
         let glyph = try #require(chip.glyphTargets.first)
-        let hit = "\(BarHit.glyph(one, [WindowID(2)]))"
+        let hit = "\(BarHit.glyph([WindowID(2)]))"
         #expect(title(glyph.menu(for: rightClick)) == hit)
         #expect(glyph.accessibilityCustomActions()?.map(\.name) == [hit])
     }
@@ -187,7 +187,7 @@ struct BarMenuViewTests {
         let disc = try #require(chip.overflowTarget)
         #expect(
             title(glyph.controlClickMenu(click(.control)))
-                == "\(BarHit.glyph(one, [WindowID(2)]))"
+                == "\(BarHit.glyph([WindowID(2)]))"
         )
         #expect(
             title(disc.controlClickMenu(click(.control)))

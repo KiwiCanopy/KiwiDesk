@@ -62,7 +62,10 @@
 /// state would make every press write the same no-op, while the
 /// flag is the window's own intent that travels with it — whether
 /// it keeps floating once it leaves the Space or the Space leaves
-/// floating mode (`ToggleFloatingFlagTests`). Every other reader
+/// floating mode (`ToggleFloatingFlagTests`). The bar menus'
+/// Float/Tile row and its submenu ticks (#1518) stay on the flag
+/// for the same reason: they label what their verbs write. Every
+/// other reader
 /// is the flag's own
 /// identity, a net already routed here, or a "tiled member"
 /// question — the negation below — and

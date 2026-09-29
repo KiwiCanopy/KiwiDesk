@@ -21,7 +21,7 @@ extension SpaceBarItemView {
 extension SpaceBarGlyphTarget {
     /// A `+N` disc's, or an app glyph's window rows.
     var menuHit: BarHit {
-        kind == .overflow ? .disc(space) : .glyph(space, members)
+        kind == .overflow ? .disc(space) : .glyph(members)
     }
 
     override func menu(for event: NSEvent) -> NSMenu? {
