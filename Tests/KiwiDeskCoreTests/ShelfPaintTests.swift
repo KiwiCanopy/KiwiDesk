@@ -19,7 +19,7 @@ struct ShelfPaintTests {
     }
 
     private func look(_ name: String) throws -> ShelfLook {
-        try #require(LookCatalog.bundled().first { $0.name == name })
+        try #require(LookCatalog.bundled(sizes: []).first { $0.name == name })
     }
 
     private func palette(

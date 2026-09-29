@@ -12,6 +12,14 @@ extension KiwiCore {
         LookStore(directory: configDirectory)
     }
 
+    /// The bundled looks, Glass derived for the screens the
+    /// starter is sized from (`starterSizes`), so picking it on a
+    /// first run changes nothing (#1739) — the one door to
+    /// `LookCatalog.bundled` (`LookCatalogSeamTests`).
+    public var bundledLooks: [ShelfLook] {
+        LookCatalog.bundled(sizes: starterSizes())
+    }
+
     /// Every palette a look may name, bundled first.
     public var allPalettes: [ColorPalette] {
         paletteLibrary.builtins() + paletteLibrary.userPalettes()

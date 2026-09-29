@@ -51,8 +51,9 @@ struct PresetShapeTuningTests {
         )
     }
 
-    /// Minimalist declares gap 20 and a centred anchor; a laptop
-    /// tunes gaps to 6 and a 27" leaves the anchor at `follow`.
+    /// Minimalist declares gap 20 and a centred anchor; the shape
+    /// tuning keeps the shipped gap and a 27" leaves the anchor at
+    /// `follow`.
     @Test("a declared leaf wins over the shape tuning")
     func declaredLeafWins() throws {
         let minimalist = try preset("Minimalist")
@@ -62,12 +63,10 @@ struct PresetShapeTuningTests {
             minimalist.settings(sizes: [screen27]).scrolling.anchor
                 == .center
         )
-        // An undeclared gap is the screen's.
+        // An undeclared leaf is the shape tuning's: a laptop's
+        // Grid is one row.
         let developer = try preset("Developer")
-        #expect(
-            developer.settings(sizes: [laptop]).gapsGlobal
-                == StarterSetup.settings(sizes: [laptop]).gapsGlobal
-        )
+        #expect(developer.settings(sizes: [laptop]).grid.rows == 1)
     }
 
     /// The host is the screen the layout's FIRST space sits on in
@@ -87,8 +86,9 @@ struct PresetShapeTuningTests {
         #expect(settings.stack.masterCount == 2)
         #expect(settings.grid.columns == 2)
         #expect(settings.grid.rows == 1)
-        // Profile-wide leaves stay the main screen's.
-        #expect(settings.gapsGlobal == .uniform(6))
+        // Profile-wide leaves stay the main screen's: not the
+        // ultrawide's 420 pt floor.
+        #expect(settings.minWindowSize == TilingSettings().minWindowSize)
     }
 
     /// An undeclared Space on an ultrawide second screen takes

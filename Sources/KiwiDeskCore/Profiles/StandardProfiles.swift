@@ -103,7 +103,7 @@ public enum StandardProfiles {
         spaceModes: ["1": .stack, "2": .stack, "4": .monocle],
         spaceScreens: [:],
         isStandard: false,
-        tuning: .preset(PresetTuning(gap: 10))
+        tuning: .preset(PresetTuning())
     )
 
     // MARK: - 2 monitors (8 spaces, 1–4 main / 5–8 second)
@@ -173,7 +173,7 @@ public enum StandardProfiles {
                 secondaryRange(8...10, screen: 2)
             ) { first, _ in first },
         isStandard: false,
-        tuning: .preset(PresetTuning(gap: 10))
+        tuning: .preset(PresetTuning())
     )
 
     // MARK: - Helpers

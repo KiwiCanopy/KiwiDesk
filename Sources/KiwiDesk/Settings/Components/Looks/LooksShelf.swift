@@ -53,7 +53,7 @@ struct LooksShelf: View {
         VStack(alignment: .leading, spacing: 8) {
             groupHeader(L("looks.bundled", "Bundled"))
             LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
-                ForEach(store.builtins(), id: \.name) { look in
+                ForEach(model.core.bundledLooks, id: \.name) { look in
                     card(
                         look,
                         caption: LookDescriptions.caption(for: look.name)

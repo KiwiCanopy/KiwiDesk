@@ -23,7 +23,7 @@ extension KiwiCore {
     /// gates it on the same signal as the `gui.json` seed plus an
     /// empty profile list, so an existing setup is never touched.
     func seedFirstRunStarterProfile() {
-        let displays = firstRunDisplays()
+        let displays = starterDisplays()
         guard !displays.isEmpty else {
             onLog(
                 "first run: no displays detected; skipped the "

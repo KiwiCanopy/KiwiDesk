@@ -26,13 +26,18 @@ struct StarterTuningTests {
         // At 2560 pt a three-column grid gives 850 pt cells.
         #expect(settings.grid.columns == 2)
         #expect(settings.grid.rows == 2)
-        // A laptop tightens the gaps; its bars keep the one
-        // default (#1359, `BarThicknessDefaultTests`).
-        let small = StarterTuning.settings(
-            mainShape: .laptop,
-            hosts: [:]
-        )
-        #expect(small.gapsGlobal == .uniform(6))
+        // Every shape keeps the shipped gaps, which clear the
+        // default ring and so Glass's (#1739).
+        for shape in ScreenClass.allCases {
+            let tuned = StarterTuning.settings(
+                mainShape: shape,
+                hosts: [:]
+            )
+            #expect(
+                tuned.gapsGlobal == TilingSettings().gapsGlobal,
+                "\(shape)"
+            )
+        }
         // Everything that assumes width has to flip.
         let tall = StarterTuning.settings(
             mainShape: .pivoted,
